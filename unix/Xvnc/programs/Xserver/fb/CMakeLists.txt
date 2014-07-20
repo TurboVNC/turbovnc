@@ -1,22 +1,14 @@
-include_directories(../mi ../render)
-
-add_definitions(-DFB_OLD_GC -DFB_OLD_SCREEN)
-if((CPU_TYPE STREQUAL "x86_64" OR CPU_TYPE STREQUAL "i386") AND GCC34)
-	add_definitions(-mmmx -msse -Winline --param inline-unit-growth=10000
-		--param large-function-growth=10000 -DUSE_MMX)
-endif()
+include_directories(../mi ../render ../miext/damage)
 
 add_library(fb STATIC
+	fb24_32.c
 	fballpriv.c
 	fbarc.c
 	fbbits.c
 	fbblt.c
 	fbbltone.c
-	fbbstore.c
-	fbcmap.c
-	fbcompose.c
+	fbcmap_mi.c
 	fbcopy.c
-	fbedge.c
 	fbfill.c
 	fbfillrect.c
 	fbfillsp.c
@@ -26,6 +18,7 @@ add_library(fb STATIC
 	fbimage.c
 	fbline.c
 	fboverlay.c
+	fbpict.c
 	fbpixmap.c
 	fbpoint.c
 	fbpush.c
@@ -37,7 +30,4 @@ add_library(fb STATIC
 	fbtile.c
 	fbtrap.c
 	fbutil.c
-	fbwindow.c
-	fb24_32.c
-	fbpict.c
-	fbmmx.c)
+	fbwindow.c)

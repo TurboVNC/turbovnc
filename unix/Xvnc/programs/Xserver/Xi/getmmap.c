@@ -1,5 +1,3 @@
-/* $Xorg: getmmap.c,v 1.4 2001/02/09 02:04:34 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/getmmap.c,v 3.3 2001/12/14 19:58:57 dawes Exp $ */
 
 /********************************************************************
  *
@@ -53,15 +50,13 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS			/* for inputstr.h    */
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"			/* Request macro     */
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>     /* Request macro     */
 #include "exglobals.h"
 
 #include "getmmap.h"
@@ -74,15 +69,12 @@ SOFTWARE.
  */
 
 int
-SProcXGetDeviceModifierMapping(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXGetDeviceModifierMapping(ClientPtr client)
+{
     REQUEST(xGetDeviceModifierMappingReq);
-    swaps(&stuff->length, n);
-    return(ProcXGetDeviceModifierMapping(client));
-    }
+    swaps(&stuff->length);
+    return (ProcXGetDeviceModifierMapping(client));
+}
 
 /***********************************************************************
  *
@@ -91,47 +83,38 @@ SProcXGetDeviceModifierMapping(client)
  */
 
 int
-ProcXGetDeviceModifierMapping(client)
-    ClientPtr client;
-    {
-    CARD8				maxkeys;
-    DeviceIntPtr			dev;
-    xGetDeviceModifierMappingReply 	rep;
-    KeyClassPtr 			kp;
-    
+ProcXGetDeviceModifierMapping(ClientPtr client)
+{
+    DeviceIntPtr dev;
+    xGetDeviceModifierMappingReply rep;
+    KeyCode *modkeymap = NULL;
+    int ret, max_keys_per_mod;
+
     REQUEST(xGetDeviceModifierMappingReq);
     REQUEST_SIZE_MATCH(xGetDeviceModifierMappingReq);
 
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	SendErrorToClient (client, IReqCode, X_GetDeviceModifierMapping, 0, 
-		BadDevice);
-	return Success;
-	}
+    ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
+    if (ret != Success)
+        return ret;
 
-    kp = dev->key;
-    if (kp == NULL)
-	{
-	SendErrorToClient (client, IReqCode, X_GetDeviceModifierMapping, 0, 
-		BadMatch);
-	return Success;
-	}
-    maxkeys =  kp->maxKeysPerModifier;
+    ret = generate_modkeymap(client, dev, &modkeymap, &max_keys_per_mod);
+    if (ret != Success)
+        return ret;
 
     rep.repType = X_Reply;
     rep.RepType = X_GetDeviceModifierMapping;
-    rep.numKeyPerModifier = maxkeys;
+    rep.numKeyPerModifier = max_keys_per_mod;
     rep.sequenceNumber = client->sequence;
     /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
-    rep.length = 2*maxkeys;
+    rep.length = max_keys_per_mod << 1;
 
     WriteReplyToClient(client, sizeof(xGetDeviceModifierMappingReply), &rep);
+    WriteToClient(client, max_keys_per_mod * 8, (char *) modkeymap);
 
-    /* Reply with the (modified by DDX) map that SetModifierMapping passed in */
-    WriteToClient(client, 8*maxkeys, (char *)kp->modifierKeyMap);
+    free(modkeymap);
+
     return Success;
-    }
+}
 
 /***********************************************************************
  *
@@ -141,14 +124,10 @@ ProcXGetDeviceModifierMapping(client)
  */
 
 void
-SRepXGetDeviceModifierMapping (client, size, rep)
-    ClientPtr	client;
-    int		size;
-    xGetDeviceModifierMappingReply	*rep;
-    {
-    register char n;
-
-    swaps(&rep->sequenceNumber, n);
-    swapl(&rep->length, n);
-    WriteToClient(client, size, (char *)rep);
-    }
+SRepXGetDeviceModifierMapping(ClientPtr client, int size,
+                              xGetDeviceModifierMappingReply * rep)
+{
+    swaps(&rep->sequenceNumber);
+    swapl(&rep->length);
+    WriteToClient(client, size, (char *) rep);
+}

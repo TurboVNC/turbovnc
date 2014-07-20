@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/getdctl.h,v 3.2 2003/11/17 22:20:29 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,32 +23,22 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef GETDCTL_H
 #define GETDCTL_H 1
 
-int
-SProcXGetDeviceControl (
-	ClientPtr              /* client */
-	);
+int SProcXGetDeviceControl(ClientPtr    /* client */
+    );
 
-int
-ProcXGetDeviceControl (
-	ClientPtr              /* client */
-	);
+int ProcXGetDeviceControl(ClientPtr     /* client */
+    );
 
-void
-CopySwapDeviceResolution (
-	ClientPtr              /* client */,
-	ValuatorClassPtr       /* v */,
-	char *                 /* buf */,
-	int                    /* length */
-	);
+void SRepXGetDeviceControl(ClientPtr /* client */ ,
+                           int /* size */ ,
+                           xGetDeviceControlReply *     /* rep */
+    );
 
-void
-SRepXGetDeviceControl (
-	ClientPtr              /* client */,
-	int                    /* size */,
-	xGetDeviceControlReply * /* rep */
-	);
-
-#endif /* GETDCTL_H */
+#endif                          /* GETDCTL_H */

@@ -1,0 +1,360 @@
+commit d358d6290af3d9cedb7b6d7e16058370e4779508
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Oct 29 20:27:55 2010 -0700
+
+    compositeproto 0.4.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6eece824c1cb40bdfc1007b26ce765803d110712
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Oct 29 20:26:29 2010 -0700
+
+    Sun's copyrights now belong to Oracle
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 68ff97cd30c709439c088bfea2c33a4f9632ed38
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:00:30 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    autogen.sh is also not required in any GNU package.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 1a48a0d70e00fd11521e436864a8ec0705e58285
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jan 15 13:34:49 2010 -0800
+
+    Update Sun license notices to current X.Org standard form
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit e827d7b875a6b16e9e7208af3407cb96cd1e91ed
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jan 15 13:36:08 2010 -0800
+
+    Purge CVS/RCS $Id$ tags
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 843e916e15b117c1142ab78d35b9ea722bdc7a0b
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 11:47:44 2009 -0500
+
+    COPYING: add Copyright from SUN Microsystems
+    
+    The COPYING file contains all Copyright notices from source code.
+    Refer to composite.h.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit fdf8d73a27cd0cadae5a14e7a88870121ae113aa
+Author: Rémi Cardona <remi@gentoo.org>
+Date:   Thu Dec 17 08:32:20 2009 +0100
+
+    Use $(docdir) for compositeproto.txt install path
+    
+    Signed-off-by: Rémi Cardona <remi@gentoo.org>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@sun.com>
+    Reviewed-by: Dan Nicholson <dbn.lists@gmail.com>
+
+commit 5ecb066e04595d300a0faad0f95c859a709ff857
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 22 19:24:47 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit 330cbabbbf73b310b237e6745185f338d7d33998
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Nov 18 19:00:34 2009 -0500
+
+    INSTALL: file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+
+commit 260cc8eadd89b3fc9f59e505e34dcb5bc09018bd
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 20:25:50 2009 -0500
+
+    NEWS: remove empty file #24206
+
+commit 55f6f1eec2a0baca0f6c7738cc2e54e7098b3652
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 19:45:26 2009 -0500
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit ad60112eb2eacb50954bf9cd461b9e90d6f64a63
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:31:28 2009 -0500
+
+    Makefile.am: INSTALL file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+    Add INSTALL target
+
+commit 8a7c2c629635510a0728d5ab086b0f4b600b0e49
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:11:36 2009 -0500
+
+    configure.ac: deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit 00dc749894784dc6f1b749903ef872572f678c3c
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Nov 14 18:26:46 2009 -0500
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 39612a7153ac3e800c5dbb11a7f760c53797bf73
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Oct 2 18:59:54 2009 -0700
+
+    compositeproto 0.4.1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit ad173235db562b7f788ad82e5b4849c1519bd0b5
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Oct 2 18:57:51 2009 -0700
+
+    Migrate to xorg macros 1.3 & XORG_DEFAULT_OPTIONS
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit bbdc2ae4f4115332337460631911857cbadaf603
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Oct 2 18:52:44 2009 -0700
+
+    Add pointers to mailing list, git repo, and wiki to README
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 961dbcda7fcfd15a3e60bfb905f05286ba33508f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Jul 8 10:03:40 2009 -0400
+
+    compositeproto: use XORG_CHANGELOG macro to create ChangeLog. #22611
+    
+    Build break: Makefile.am: command not found: git-log
+    Adding the macro in configure.ac and use it in Makefile.am
+    Refer to: https://bugs.freedesktop.org/show_bug.cgi?id=22611
+    Tested: running autogen.sh, make and 'make dist'
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 2ffb32d61cbed1452d67abb2028ac13910550392
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 16:38:57 2007 -0500
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit 5ac473a9375fa43896e379da96d1955653960350
+Author: Jeremy C. Reed <reed@glacier.reedmedia.net>
+Date:   Thu Aug 16 11:28:30 2007 -0500
+
+    Temporarily define Pixmap (just like Window and Region). (From pkgsrc.)
+
+commit 25e8047e25652be388dc66d85c180dcc4ccea4f6
+Author: Keith Packard <keithp@neko.keithp.com>
+Date:   Tue Jul 3 14:11:10 2007 -0700
+
+    Bump version in configure.ac to 0.4
+
+commit 1838412121d0bac8ce443d362e75439d58a93a4d
+Author: Keith Packard <keithp@neko.keithp.com>
+Date:   Tue Jul 3 14:09:41 2007 -0700
+
+    Define new manual-redirect clipping semantics and bump version to 0.4.
+    
+    Manual-redirect windows no longer clip their parents, nor do they affect
+    expose event computation. This makes it possible to create application-level
+    composited windows which can be damaged by other window manipulations.
+    
+    This patch also removes the coordinate transformation stuff which was never
+    released.
+
+commit bca9592612d60142e3c624b90649475b561b8eda
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Apr 17 20:48:18 2007 -0700
+
+    Add *~ to .gitignore to skip emacs/patch droppings
+
+commit 6acacb52efd6f0927c9b82fe864f17623e7dc8c2
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Apr 17 20:47:50 2007 -0700
+
+    Protocol spec nit cleanups
+    
+    Fix versioning from 0.3/0.4 merge
+    Update description of RedirectWindow to match names in protocol diagrams
+
+commit dd2133540f8dd0f0f66ecf24e01113184045af83
+Author: Eric Anholt <eric@anholt.net>
+Date:   Tue Jan 9 10:42:31 2007 -0800
+
+    Update protocol spec for 0.3 -> 0.4 rename and new 0.3 request.
+    
+    The original overlay window text was from Deron Johnson, but I moved it
+    around to be where I understand the pieces of the description were meant to go.
+
+commit ea2c1d120e58e3eb5f2d8eedb3c32b2cfa052366
+Author: Eric Anholt <eric@anholt.net>
+Date:   Tue Jan 9 09:46:31 2007 -0800
+
+    Move composite protocol description to the new canonical location/name.
+
+commit 34251361a60c9e0c0f3c51416985e067c2aa255a
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Tue Dec 5 12:39:15 2006 -0800
+
+    Have NameWindowPixmap return a Match error on unrealized windows.
+
+commit 5ecbf06cb7786009e8e1547f4bc2b0640599f655
+Author: root <root@explosivo.(none)>
+Date:   Tue Aug 15 14:30:32 2006 -0700
+
+    Correct the spelling of compositedocdir_DATA.  Otherwise automake complains.
+
+commit ba9ca99638fac157b126a2d9a3e57385bad32998
+Author: Deron <dj4236@chiru.it.sfbay.sun.com>
+Date:   Fri Mar 31 03:29:42 2006 -0800
+
+    Sync'd with modular proto/Composite (Version 0.3 definitions).
+    Also changed CTR definitions to Version 0.4 and increased the
+    request numbers to be above those of Version 0.3.
+
+commit 565c0bcc569f5ab9114314185316fe2129aa5a3e
+Author: Keith Packard <keithp@evo.keithp.com>
+Date:   Fri Feb 24 02:55:19 2006 +0100
+
+    Add coordinate transform redirect protocol bits
+
+commit 8e0790045d33525ec182afd3997014b46ef77b66
+Author: Keith Packard <keithp@evo.keithp.com>
+Date:   Fri Feb 24 02:06:13 2006 +0100
+
+    Clean up mistakes integrating xorg changes
+
+commit 1d43eaf21b32fef4aba8a58dee323344b7f48d16
+Author: Keith Packard <keithp@evo.keithp.com>
+Date:   Fri Feb 24 02:03:25 2006 +0100
+
+    Remove .cvsignore
+
+commit 694da3931be9bb03e23e4fbaf54d331c2202b2fc
+Author: Keith Packard <keithp@evo.keithp.com>
+Date:   Fri Feb 24 02:01:54 2006 +0100
+
+    Add .gitignore
+
+commit 369d28141b1b296abeb4365b5c57846d72faeb82
+Author: Keith Packard <keithp@evo.keithp.com>
+Date:   Fri Feb 24 02:01:10 2006 +0100
+
+    Paste Xorg changes on top of historical xlibs repository
+
+commit 7388d4f6dd9e0c71d79c33905135622be15ccd13
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Feb 20 18:41:15 2006 +0000
+
+    Update to include CTR
+
+commit 90d453e5ab0cd140e936c71c118e442f6f6563f7
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Mon Jan 3 05:16:04 2005 +0000
+
+    New autogen.sh from Thomas Fitzsimmons that works with srcdir != objdir.
+
+commit 734331f433e1d853aba942e17b3ed3efb0d972ab
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Jul 8 07:20:55 2004 +0000
+
+    Add NameWindowPixmap request. Bump protocol to 0.2
+
+commit 19bb2c38370f5ef9296d451970f93e570b5a8546
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Sun Jun 27 07:23:56 2004 +0000
+
+    Fix some apostrophe issues.
+
+commit 47c46ad42a57d1dc8f2cf2e9e5d8b1478e75cd3b
+Author: Jim Gettys <jg@freedesktop.org>
+Date:   Tue Feb 3 20:42:46 2004 +0000
+
+    Add author's information
+
+commit cad37f16480f8f3f51e5dd9d3b3314ec8f73cee9
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Thu Jan 15 03:42:08 2004 +0000
+
+    Tag release 2.0 for first freedesktop.org clientside release.
+
+commit 0acceb62100f3acb3a00615c51bfd8e3f57e3ff9
+Author: Carl Worth <cworth@cworth.org>
+Date:   Tue Nov 11 18:34:48 2003 +0000
+
+    Updated .cvsignore
+
+commit 35a9c80252b35720c1afc5dc53153228e2084b10
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sun Nov 9 07:07:21 2003 +0000
+
+    Note that Manual Subwindows mode disables background painting.
+
+commit 11105d870631fe5f858291fbf167f1da400d7fa9
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Nov 7 04:21:01 2003 +0000
+
+    Add update mode to Unredirect requests so clients can redirect multiple times (and then unredirect) Add CompositeNumberRequests Fix some typeos
+
+commit 0b7b69d3b678f584062ca352f60382325057d9f1
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 5 05:39:58 2003 +0000
+
+    Change name from Apportion to Composite Clarify that root cannot be redirected. Add more error values.
+
+commit 5113df7e49393afb5d9199f030b6f4e025a54039
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Oct 30 04:31:19 2003 +0000
+
+    autofoo Add protocol headers Use enum for update mode instead of bool
+
+commit 00b320e307a997677e74c73f9c856e7b08bc20e2
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Oct 29 23:48:40 2003 +0000
+
+    Define clipping while redirected
+
+commit 7cc591f9ffac4a01f7801d924beace89ed3460bb
+Author: Keith Packard <keithp@keithp.com>
+Date:   Tue Oct 28 20:43:27 2003 +0000
+
+    spelling mistake
+
+commit faa486b819f8b3088201923541a1c0a71efa249a
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Oct 24 23:05:41 2003 +0000
+
+    Initial revision

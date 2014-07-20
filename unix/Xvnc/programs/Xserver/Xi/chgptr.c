@@ -1,5 +1,3 @@
-/* $Xorg: chgptr.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/chgptr.c,v 3.7 2001/12/14 19:58:55 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,19 +50,16 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"
-#include "XIstubs.h"
-#include "windowstr.h"			/* window structure  */
-#include "scrnintstr.h"			/* screen structure  */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
+#include "XIstubs.h"
+#include "windowstr.h"          /* window structure  */
+#include "scrnintstr.h"         /* screen structure  */
 
 #include "dixevents.h"
 #include "exevents.h"
@@ -81,16 +75,13 @@ SOFTWARE.
  */
 
 int
-SProcXChangePointerDevice(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXChangePointerDevice(ClientPtr client)
+{
     REQUEST(xChangePointerDeviceReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xChangePointerDeviceReq);
-    return(ProcXChangePointerDevice(client));
-    }
+    return (ProcXChangePointerDevice(client));
+}
 
 /***********************************************************************
  *
@@ -99,160 +90,10 @@ SProcXChangePointerDevice(client)
  */
 
 int
-ProcXChangePointerDevice (client)
-    register ClientPtr client;
-    {
-    DeviceIntPtr 	xptr = inputInfo.pointer;
-    DeviceIntPtr 	dev;
-    ValuatorClassPtr 	v;
-    xChangePointerDeviceReply	rep;
-    changeDeviceNotify	ev;
-
-    REQUEST(xChangePointerDeviceReq);
+ProcXChangePointerDevice(ClientPtr client)
+{
+    /* REQUEST(xChangePointerDeviceReq); */
     REQUEST_SIZE_MATCH(xChangePointerDeviceReq);
 
-    rep.repType = X_Reply;
-    rep.RepType = X_ChangePointerDevice;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	rep.status = -1;
-	SendErrorToClient(client, IReqCode, X_ChangePointerDevice, 0, 
-	    BadDevice);
-	return Success;
-	}
-
-    v = dev->valuator;
-    if (v == NULL || v->numAxes < 2 || 
-	stuff->xaxis >= v->numAxes ||
-	stuff->yaxis >= v->numAxes)
-	{
-	rep.status = -1;
-	SendErrorToClient(client, IReqCode, X_ChangePointerDevice, 0, BadMatch);
-	return Success;
-	}
-
-    if (((dev->grab) && !SameClient(dev->grab, client)) ||
-        ((xptr->grab) && !SameClient(xptr->grab, client)))
-	rep.status = AlreadyGrabbed;
-    else if ((dev->sync.frozen &&
-	     dev->sync.other && !SameClient(dev->sync.other, client)) ||
-	     (xptr->sync.frozen &&
-	      xptr->sync.other && !SameClient(xptr->sync.other, client)))
-	rep.status = GrabFrozen;
-    else
-	{
-	if (ChangePointerDevice (
-	    xptr, dev, stuff->xaxis, stuff->yaxis) != Success)
-	    {
-	    SendErrorToClient(client, IReqCode, X_ChangePointerDevice, 0, 
-		BadDevice);
-	    return Success;
-	    }
-	if (dev->focus)
-	    DeleteFocusClassDeviceStruct(dev);
-	if (!dev->button)
-	    InitButtonClassDeviceStruct (dev, 0, NULL);
-	if (!dev->ptrfeed)
-	   InitPtrFeedbackClassDeviceStruct(dev, (PtrCtrlProcPtr)NoopDDA);
-	RegisterOtherDevice (xptr);
-	RegisterPointerDevice (dev);
-
-	ev.type = ChangeDeviceNotify;
-	ev.deviceid = stuff->deviceid;
-	ev.time = currentTime.milliseconds;
-	ev.request = NewPointer;
-
-	SendEventToAllWindows (dev, ChangeDeviceNotifyMask, (xEvent *)&ev, 1);
-	SendMappingNotify (MappingPointer, 0, 0, client);
-
-	rep.status = 0;
-	}
-
-    WriteReplyToClient (client, sizeof (xChangePointerDeviceReply), 
-	&rep);
-    return Success;
-    }
-
-void
-DeleteFocusClassDeviceStruct(dev)
-    DeviceIntPtr dev;
-    {
-    xfree(dev->focus->trace);
-    xfree(dev->focus);
-    dev->focus = NULL;
-    }
-
-/***********************************************************************
- *
- * Send an event to interested clients in all windows on all screens.
- *
- */
-
-void
-SendEventToAllWindows (dev, mask, ev, count)
-    DeviceIntPtr dev;
-    Mask mask;
-    xEvent *ev;
-    int count;
-    {
-    int i;
-    WindowPtr pWin, p1;
-
-    for (i=0; i<screenInfo.numScreens; i++)
-	{
-	pWin = WindowTable[i];
-	(void)DeliverEventsToWindow(pWin, ev, count, mask, NullGrab, dev->id);
-	p1 = pWin->firstChild;
-	FindInterestedChildren (dev, p1, mask, ev, count);
-	}
-    }
-
-/***********************************************************************
- *
- * Walk through the window tree, finding all clients that want to know
- * about the ChangeDeviceNotify Event.
- *
- */
-
-void
-FindInterestedChildren (dev, p1, mask, ev, count)
-    DeviceIntPtr	dev;
-    WindowPtr 		p1;
-    Mask		mask;
-    xEvent		*ev;
-    int			count;
-    {
-    WindowPtr p2;
-
-    while (p1)
-        {
-        p2 = p1->firstChild;
-	(void)DeliverEventsToWindow(p1, ev, count, mask, NullGrab, dev->id);
-	FindInterestedChildren (dev, p2, mask, ev, count);
-	p1 = p1->nextSib;
-        }
-    }
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XChangePointerDevice 
- * function, if the client and server have a different byte ordering.
- *
- */
-
-void
-SRepXChangePointerDevice (client, size, rep)
-    ClientPtr	client;
-    int		size;
-    xChangePointerDeviceReply	*rep;
-    {
-    register char n;
-
-    swaps(&rep->sequenceNumber, n);
-    swapl(&rep->length, n);
-    WriteToClient(client, size, (char *)rep);
-    }
+    return BadDevice;
+}

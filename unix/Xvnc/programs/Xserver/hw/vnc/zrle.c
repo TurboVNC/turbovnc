@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2002 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2003 Sun Microsystems, Inc.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -246,12 +246,12 @@ void rfbFreeZrleData(rfbClientPtr cl)
   cl->zrleData = NULL;
 
   if (cl->zrleBeforeBuf) {
-    xfree(cl->zrleBeforeBuf);
+    free(cl->zrleBeforeBuf);
   }
   cl->zrleBeforeBuf = NULL;
 
   if (cl->paletteHelper) {
-    xfree(cl->paletteHelper);
+    free(cl->paletteHelper);
   }
   cl->paletteHelper = NULL;
 }

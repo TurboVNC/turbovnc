@@ -1,16 +1,12 @@
-/* $XConsortium: Xtransint.h /main/25 1995/12/05 16:51:28 mor $ */
-/* $XFree86: xc/lib/xtrans/Xtransint.h,v 3.18.2.2 1997/07/19 04:59:16 dawes Exp $ */
 /*
 
-Copyright (c) 1993, 1994  X Consortium
+Copyright 1993, 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,19 +14,17 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
-*/
-
-/* Copyright (c) 1993, 1994 NCR Corporation - Dayton, Ohio, USA
+ * Copyright 1993, 1994 NCR Corporation - Dayton, Ohio, USA
  *
  * All Rights Reserved
  *
@@ -57,10 +51,10 @@ from the X Consortium.
 #define _XTRANSINT_H_
 
 /*
- * XTRANSDEBUG will enable the PRMSG() macros used in the X Transport 
- * Interface code. Each use of the PRMSG macro has a level associated with 
- * it. XTRANSDEBUG is defined to be a level. If the invocation level is =< 
- * the value of XTRANSDEBUG, then the message will be printed out to stderr. 
+ * XTRANSDEBUG will enable the PRMSG() macros used in the X Transport
+ * Interface code. Each use of the PRMSG macro has a level associated with
+ * it. XTRANSDEBUG is defined to be a level. If the invocation level is =<
+ * the value of XTRANSDEBUG, then the message will be printed out to stderr.
  * Recommended levels are:
  *
  *	XTRANSDEBUG=1	Error messages
@@ -74,113 +68,56 @@ from the X Consortium.
  * message.
  */
 
-#ifndef __EMX__
+#if !defined(XTRANSDEBUG) && defined(XTRANS_TRANSPORT_C)
 #  define XTRANSDEBUG 1
-#else
-#define XTRANSDEBUG 1
 #endif
 
 #ifdef WIN32
-#define _WILLWINSOCK_
+# define _WILLWINSOCK_
 #endif
 
 #include "Xtrans.h"
 
+#ifndef _X_UNUSED  /* Defined in Xfuncproto.h in xproto >= 7.0.22 */
+# define _X_UNUSED  /* */
+#endif
+
 #ifdef XTRANSDEBUG
-#include <stdio.h>
+# include <stdio.h>
 #endif /* XTRANSDEBUG */
 
 #include <errno.h>
-#ifdef X_NOT_STDC_ENV
-extern int  errno;		/* Internal system error number. */
-#endif
 
 #ifndef WIN32
-#ifndef MINIX
-#ifndef Lynx
-#include <sys/socket.h>
-#else
-#include <socket.h>
-#endif
-#endif
-#ifdef __EMX__
-#include <sys/ioctl.h>
-#endif
+#  include <sys/socket.h>
+# include <netinet/in.h>
+# include <arpa/inet.h>
 
 /*
  * Moved the setting of NEED_UTSNAME to this header file from Xtrans.c,
  * to avoid a race condition. JKJ (6/5/97)
  */
-#if (defined(_POSIX_SOURCE) && !defined(AIXV3)) || defined(hpux) || defined(USG) || defined(SVR4) || defined(SCO)
-#ifndef NEED_UTSNAME
-#define NEED_UTSNAME
-#endif
-#include <sys/utsname.h>
-#endif
 
-/*
- * makedepend screws up on #undef OPEN_MAX, so we define a new symbol
- */
+# if defined(_POSIX_SOURCE) || defined(USG) || defined(SVR4) || defined(__SVR4) || defined(__SCO__)
+#  ifndef NEED_UTSNAME
+#   define NEED_UTSNAME
+#  endif
+#  include <sys/utsname.h>
+# endif
 
-#ifndef TRANS_OPEN_MAX
-
-#ifndef X_NOT_POSIX
-#ifdef _POSIX_SOURCE
-#include <limits.h>
-#else
-#define _POSIX_SOURCE
-#include <limits.h>
-#undef _POSIX_SOURCE
-#endif
-#endif
-#ifndef OPEN_MAX
-#ifdef SVR4
-#define OPEN_MAX 256
-#else
-#include <sys/param.h>
-#ifndef OPEN_MAX
-#ifdef __OSF1__
-#define OPEN_MAX 256
-#else
-#ifdef NOFILE
-#define OPEN_MAX NOFILE
-#else
-#ifndef __EMX__
-#define OPEN_MAX NOFILES_MAX
-#else
-#define OPEN_MAX 256
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-
-#if OPEN_MAX > 256
-#define TRANS_OPEN_MAX 256
-#else
-#define TRANS_OPEN_MAX OPEN_MAX
-#endif
-
-#endif /* TRANS_OPEN_MAX */
-
-#ifdef __EMX__
-#define ESET(val)
-#else
-#define ESET(val) errno = val
-#endif
-#define EGET() errno
+#  define ESET(val) errno = val
+# define EGET() errno
 
 #else /* WIN32 */
 
-#define ESET(val) WSASetLastError(val)
-#define EGET() WSAGetLastError()
+# include <limits.h>	/* for USHRT_MAX */
+
+# define ESET(val) WSASetLastError(val)
+# define EGET() WSAGetLastError()
 
 #endif /* WIN32 */
 
-#ifndef NULL
-#define NULL 0
-#endif
+#include <stddef.h>
 
 #ifdef X11_t
 #define X_TCP_PORT	6000
@@ -207,31 +144,27 @@ struct _XtransConnInfo {
 
 
 typedef struct _Xtransport {
-    char	*TransName;
+    const char	*TransName;
     int		flags;
 
 #ifdef TRANS_CLIENT
 
     XtransConnInfo (*OpenCOTSClient)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
 	char *,			/* protocol */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_CLIENT */
 
 #ifdef TRANS_SERVER
-
+    const char **	nolisten;
     XtransConnInfo (*OpenCOTSServer)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
 	char *,			/* protocol */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_SERVER */
@@ -239,12 +172,10 @@ typedef struct _Xtransport {
 #ifdef TRANS_CLIENT
 
     XtransConnInfo (*OpenCLTSClient)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
 	char *,			/* protocol */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_CLIENT */
@@ -252,12 +183,10 @@ typedef struct _Xtransport {
 #ifdef TRANS_SERVER
 
     XtransConnInfo (*OpenCLTSServer)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
 	char *,			/* protocol */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_SERVER */
@@ -266,52 +195,43 @@ typedef struct _Xtransport {
 #ifdef TRANS_REOPEN
 
     XtransConnInfo (*ReopenCOTSServer)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
         char *			/* port */
-#endif
     );
 
     XtransConnInfo (*ReopenCLTSServer)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
         char *			/* port */
-#endif
     );
 
 #endif /* TRANS_REOPEN */
 
 
     int	(*SetOption)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	int,			/* option */
 	int			/* arg */
-#endif
     );
 
 #ifdef TRANS_SERVER
+/* Flags */
+# define ADDR_IN_USE_ALLOWED	1
 
     int	(*CreateListener)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
-	char *			/* port */
-#endif
+	char *,			/* port */
+	unsigned int		/* flags */
     );
 
     int	(*ResetListener)(
-#if NeedNestedPrototypes
 	XtransConnInfo		/* connection */
-#endif
     );
 
     XtransConnInfo (*Accept)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
         int *			/* status */
-#endif
     );
 
 #endif /* TRANS_SERVER */
@@ -319,70 +239,52 @@ typedef struct _Xtransport {
 #ifdef TRANS_CLIENT
 
     int	(*Connect)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_CLIENT */
 
     int	(*BytesReadable)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	BytesReadable_t *	/* pend */
-#endif
     );
 
     int	(*Read)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	char *,			/* buf */
 	int			/* size */
-#endif
     );
 
     int	(*Write)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	char *,			/* buf */
 	int			/* size */
-#endif
     );
 
     int	(*Readv)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	struct iovec *,		/* buf */
 	int			/* size */
-#endif
     );
 
     int	(*Writev)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	struct iovec *,		/* buf */
 	int			/* size */
-#endif
     );
 
     int	(*Disconnect)(
-#if NeedNestedPrototypes
 	XtransConnInfo		/* connection */
-#endif
     );
 
     int	(*Close)(
-#if NeedNestedPrototypes
 	XtransConnInfo		/* connection */
-#endif
     );
 
     int	(*CloseForCloning)(
-#if NeedNestedPrototypes
 	XtransConnInfo		/* connection */
-#endif
     );
 
 } Xtransport;
@@ -402,42 +304,52 @@ typedef struct _Xtransport_table {
 #define TRANS_LOCAL	(1<<1)	/* local transport */
 #define TRANS_DISABLED	(1<<2)	/* Don't open this one */
 #define TRANS_NOLISTEN  (1<<3)  /* Don't listen on this one */
+#define TRANS_NOUNLINK	(1<<4)	/* Don't unlink transport endpoints */
+#define TRANS_ABSTRACT	(1<<5)	/* Use abstract sockets if available */
+#define TRANS_NOXAUTH	(1<<6)	/* Don't verify authentication (because it's secure some other way at the OS layer) */
 
+/* Flags to preserve when setting others */
+#define TRANS_KEEPFLAGS	(TRANS_NOUNLINK|TRANS_ABSTRACT)
+
+#ifdef XTRANS_TRANSPORT_C /* only provide static function prototypes when
+			     building the transport.c file that has them in */
+
+#ifdef __clang__
+/* Not all clients make use of all provided statics */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
 
 /*
  * readv() and writev() don't exist or don't work correctly on some
  * systems, so they may be emulated.
  */
 
-#if defined(CRAY) || (defined(SYSV) && defined(i386) && !defined(SCO325)) || defined(WIN32) || defined(__sxg__) || defined(__EMX__)
+#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32)
 
 #define READV(ciptr, iov, iovcnt)	TRANS(ReadV)(ciptr, iov, iovcnt)
 
 static	int TRANS(ReadV)(
-#if NeedFunctionPrototypes
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* iov */
     int			/* iovcnt */
-#endif
 );
 
 #else
 
 #define READV(ciptr, iov, iovcnt)	readv(ciptr->fd, iov, iovcnt)
 
-#endif /* CRAY || (SYSV && i386) || WIN32 || __sxg__ || */
+#endif /* CRAY || (SYSV && __i386__) || WIN32 || __sxg__ || */
 
 
-#if defined(CRAY) || (defined(SYSV) && defined(i386) && !defined(SCO325)) || defined(WIN32) || defined(__sxg__) || defined(__EMX__)
+#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32)
 
 #define WRITEV(ciptr, iov, iovcnt)	TRANS(WriteV)(ciptr, iov, iovcnt)
 
 static int TRANS(WriteV)(
-#if NeedFunctionPrototypes
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* iov */
     int 		/* iovcnt */
-#endif
 );
 
 #else
@@ -448,64 +360,80 @@ static int TRANS(WriteV)(
 
 
 static int is_numeric (
-#if NeedFunctionPrototypes
-    char *		/* str */
-#endif
+    const char *	/* str */
 );
 
+#ifdef TRANS_SERVER
+static int trans_mkdir (
+    const char *,	/* path */
+    int			/* mode */
+);
+#endif
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 /*
  * Some XTRANSDEBUG stuff
  */
 
-#if defined(XTRANSDEBUG)
-/* add hack to the format string to avoid warnings about extra arguments
- * to fprintf.
+#ifdef XTRANSDEBUG
+#include <stdarg.h>
+
+/*
+ * The X server provides ErrorF() & VErrorF(), for other software that uses
+ * xtrans, we provide our own simple versions.
  */
-#ifdef XTRANSDEBUGTIMESTAMP
-#if defined(XSERV_t) && defined(TRANS_SERVER)
-/* Use ErrorF() for the X server */
-#define PRMSG(lvl,x,a,b,c)	if (lvl <= XTRANSDEBUG){ \
-			int hack= 0, saveerrno=errno; \
-                        struct timeval tp;\
-                        gettimeofday(&tp,0); \
-			ErrorF(__xtransname); \
-			ErrorF(x+hack,a,b,c); \
-                        ErrorF("timestamp (ms): %d\n",tp.tv_sec*1000+tp.tv_usec/1000); \
-			errno=saveerrno; \
-			} else ((void)0)
-#else
-#define PRMSG(lvl,x,a,b,c)	if (lvl <= XTRANSDEBUG){ \
-			int hack= 0, saveerrno=errno; \
-                        struct timeval tp;\
-                        gettimeofday(&tp,0); \
-			fprintf(stderr, __xtransname); fflush(stderr); \
-			fprintf(stderr, x+hack,a,b,c); fflush(stderr); \
-                        fprintf(stderr, "timestamp (ms): %d\n",tp.tv_sec*1000+tp.tv_usec/1000); \
-                        fflush(stderr); \
-			errno=saveerrno; \
-			} else ((void)0)
-#endif /* XSERV_t && TRANS_SERVER */
-#else /* XTRANSDEBUGTIMESTAMP */
-#if defined(XSERV_t) && defined(TRANS_SERVER)
-/* Use ErrorF() for the X server */
-#define PRMSG(lvl,x,a,b,c)	if (lvl <= XTRANSDEBUG){ \
-			int hack= 0, saveerrno=errno; \
-			ErrorF(__xtransname); \
-			ErrorF(x+hack,a,b,c); \
-			errno=saveerrno; \
-			} else ((void)0)
-#else
-#define PRMSG(lvl,x,a,b,c)	if (lvl <= XTRANSDEBUG){ \
-			int hack= 0, saveerrno=errno; \
-			fprintf(stderr, __xtransname); fflush(stderr); \
-			fprintf(stderr, x+hack,a,b,c); fflush(stderr); \
-			errno=saveerrno; \
-			} else ((void)0)
-#endif /* XSERV_t && TRANS_SERVER */
-#endif /* XTRANSDEBUGTIMESTAMP */
-#else
-#define PRMSG(lvl,x,a,b,c)	((void)0)
+# if defined(XSERV_t) && defined(TRANS_SERVER)
+#  include "os.h"
+# else
+static inline void _X_ATTRIBUTE_PRINTF(1, 0)
+VErrorF(const char *f, va_list args)
+{
+    vfprintf(stderr, f, args);
+    fflush(stderr);
+}
+
+static inline void  _X_ATTRIBUTE_PRINTF(1, 2)
+ErrorF(const char *f, ...)
+{
+    va_list args;
+
+    va_start(args, f);
+    VErrorF(f, args);
+    va_end(args);
+}
+# endif /* xserver */
 #endif /* XTRANSDEBUG */
+
+static inline void  _X_ATTRIBUTE_PRINTF(2, 3)
+prmsg(int lvl, const char *f, ...)
+{
+#ifdef XTRANSDEBUG
+    va_list args;
+
+    va_start(args, f);
+    if (lvl <= XTRANSDEBUG) {
+	int saveerrno = errno;
+
+	ErrorF("%s", __xtransname);
+	VErrorF(f, args);
+
+# ifdef XTRANSDEBUGTIMESTAMP
+	{
+	    struct timeval tp;
+	    gettimeofday(&tp, 0);
+	    ErrorF("timestamp (ms): %d\n",
+		   tp.tv_sec * 1000 + tp.tv_usec / 1000);
+	}
+# endif
+	errno = saveerrno;
+    }
+    va_end(args);
+#endif /* XTRANSDEBUG */
+}
+
+#endif /* XTRANS_TRANSPORT_C */
 
 #endif /* _XTRANSINT_H_ */

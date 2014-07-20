@@ -1,5 +1,3 @@
-/* $Xorg: ungrdev.c,v 1.4 2001/02/09 02:04:35 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/ungrdev.c,v 3.3 2001/12/14 19:58:59 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,15 +50,13 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "windowstr.h"			/* window structure  */
-#include "XIproto.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include "windowstr.h"          /* window structure  */
+#include <X11/extensions/XIproto.h>
 #include "exglobals.h"
 
 #include "ungrdev.h"
@@ -73,17 +68,14 @@ SOFTWARE.
  */
 
 int
-SProcXUngrabDevice(client)
-register ClientPtr client;
-    {
-    register char n;
-
+SProcXUngrabDevice(ClientPtr client)
+{
     REQUEST(xUngrabDeviceReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xUngrabDeviceReq);
-    swapl(&stuff->time, n);
-    return(ProcXUngrabDevice(client));
-    }
+    swapl(&stuff->time);
+    return (ProcXUngrabDevice(client));
+}
 
 /***********************************************************************
  *
@@ -92,28 +84,25 @@ register ClientPtr client;
  */
 
 int
-ProcXUngrabDevice(client)
-register ClientPtr client;
-    {
-    DeviceIntPtr 	dev;
-    GrabPtr 		grab;
-    TimeStamp 		time;
+ProcXUngrabDevice(ClientPtr client)
+{
+    DeviceIntPtr dev;
+    GrabPtr grab;
+    TimeStamp time;
+    int rc;
 
     REQUEST(xUngrabDeviceReq);
     REQUEST_SIZE_MATCH(xUngrabDeviceReq);
 
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDevice, 0, BadDevice);
-	return Success;
-	}
-    grab =  dev->grab;
+    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
+    if (rc != Success)
+        return rc;
+    grab = dev->deviceGrab.grab;
 
     time = ClientTimeToServerTime(stuff->time);
     if ((CompareTimeStamps(time, currentTime) != LATER) &&
-	(CompareTimeStamps(time, dev->grabTime) != EARLIER) &&
-	(grab) && SameClient(grab, client))
-	(*dev->DeactivateGrab)(dev);
+        (CompareTimeStamps(time, dev->deviceGrab.grabTime) != EARLIER) &&
+        (grab) && SameClient(grab, client) && grab->grabtype == XI)
+        (*dev->deviceGrab.DeactivateGrab) (dev);
     return Success;
-    }
+}

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C)2013, D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2013-2014 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -60,9 +60,15 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Author:  Jim Gettys, HP Labs, Hewlett-Packard, Inc.
  */
 
 #ifdef RANDR
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include "windowstr.h"
 #include "randrstr.h"
@@ -131,14 +137,10 @@ extern void InterframeOff(rfbClientPtr);
 
 static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
 {
-  WindowPtr pWin = WindowTable[pScreen->myNum];
+  WindowPtr pWin = pScreen->root;
   WindowPtr pChild;
   Bool WasViewable = (Bool)(pWin->viewable);
   Bool anyMarked = FALSE;
-  RegionPtr pOldClip = NULL, bsExposed;
-#ifdef DO_SAVE_UNDERS
-  Bool dosave = FALSE;
-#endif
   WindowPtr pLayerWin;
   BoxRec box;
 
@@ -186,11 +188,6 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
   ResizeChildrenWinSize (pWin, 0, 0, 0, 0);
 
   if (WasViewable) {
-    if (pWin->backStorage) {
-      pOldClip = REGION_CREATE(pScreen, NullBox, 1);
-      REGION_COPY(pScreen, pOldClip, &pWin->clipList);
-    }
-
     if (pWin->firstChild) {
       anyMarked |= (*pScreen->MarkOverlappedWindows)(pWin->firstChild,
                                                      pWin->firstChild,
@@ -200,44 +197,12 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
       anyMarked = TRUE;
     }
 
-#ifdef DO_SAVE_UNDERS
-    if (DO_SAVE_UNDERS(pWin)) {
-      dosave = (*pScreen->ChangeSaveUnder)(pLayerWin, pLayerWin);
-    }
-#endif /* DO_SAVE_UNDERS */
-
-    if (anyMarked)
+    if (anyMarked) {
       (*pScreen->ValidateTree)(pWin, NullWindow, VTOther);
-  }
-
-  if (pWin->backStorage && ((pWin->backingStore == Always) || WasViewable)) {
-    if (!WasViewable)
-      pOldClip = &pWin->clipList; /* a convenient empty region */
-    bsExposed = (*pScreen->TranslateBackingStore)(pWin, 0, 0, pOldClip,
-                                                  pWin->drawable.x,
-                                                  pWin->drawable.y);
-    if (WasViewable)
-      REGION_DESTROY(pScreen, pOldClip);
-    if (bsExposed) {
-      RegionPtr valExposed = NullRegion;
-
-      if (pWin->valdata)
-        valExposed = &pWin->valdata->after.exposed;
-      (*pScreen->WindowExposures)(pWin, valExposed, bsExposed);
-      if (valExposed)
-        REGION_EMPTY(pScreen, valExposed);
-      REGION_DESTROY(pScreen, bsExposed);
-    }
-  }
-  if (WasViewable) {
-    if (anyMarked)
       (*pScreen->HandleExposures)(pWin);
-#ifdef DO_SAVE_UNDERS
-    if (dosave)
-      (*pScreen->PostChangeSaveUnder)(pLayerWin, pLayerWin);
-#endif /* DO_SAVE_UNDERS */
-    if (anyMarked && pScreen->PostValidateTree)
-      (*pScreen->PostValidateTree)(pWin, NullWindow, VTOther);
+      if (pScreen->PostValidateTree)
+        (*pScreen->PostValidateTree)(pWin, NullWindow, VTOther);
+    }
   }
   if (pWin->realized)
     WindowsRestructured();
@@ -247,7 +212,7 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
 
 int mm(int dimension)
 {
-  int dpi = 75;
+  int dpi = 96;
   if (monitorResolution != 0) {
     dpi = monitorResolution;
   }
@@ -255,69 +220,124 @@ int mm(int dimension)
 }
 
 
-Bool vncRRGetInfo(ScreenPtr pScreen, Rotation *rotations)
+Bool vncRRSetModes(ScreenPtr pScreen, int w, int h)
 {
+  Bool found = FALSE;
   int i;
-  Bool setConfig = FALSE;
-  RRScreenSizePtr pSize;
+  rrScrPrivPtr rp = rrGetScrPriv(pScreen);
+  int numModes = sizeof(vncRRResolutions) / sizeof(Res);
+  int preferred = 0;
+  RRModePtr modes[numModes];
 
-  *rotations = RR_Rotate_0;
-  for (i = 0; i < pScreen->numDepths; i++) {
-    if (pScreen->allowedDepths[i].numVids) {
-      if (vncRRResolutions[0].w < 0 && vncRRResolutions[0].h < 0) {
-        vncRRResolutions[0].w = pScreen->width;
-        vncRRResolutions[0].h = pScreen->height;
-      }
-      pSize = RRRegisterSize(pScreen, pScreen->width, pScreen->height,
-                             pScreen->mmWidth, pScreen->mmHeight);
-      if (!pSize) return FALSE;
-      RRRegisterRate (pScreen, pSize, 60);
-      if (!setConfig) {
-        RRSetCurrentConfig (pScreen, RR_Rotate_0, 0, pSize);
-        setConfig = TRUE;
-      }
-    }
+  if (vncRRResolutions[0].w < 0 && vncRRResolutions[0].h < 0) {
+    vncRRResolutions[0].w = w;
+    vncRRResolutions[0].h = h;
   }
 
   for (i = 0; i < sizeof(vncRRResolutions) / sizeof(Res); i++) {
+    if (vncRRResolutions[i].w == w && vncRRResolutions[i].h == h) {
+      found = TRUE;
+      preferred = i;
+      break;
+    }
+  }
+
+  if (!found) {
+    vncRRResolutions[0].w = w;
+    vncRRResolutions[0].h = h;
+    preferred = 0;
+  }
+
+  for (i = 0; i < numModes; i++) {
     int w = vncRRResolutions[i].w, h = vncRRResolutions[i].h;
-    pSize = RRRegisterSize(pScreen, w, h, mm(w), mm(h));
-    if (!pSize) return FALSE;
-    RRRegisterRate (pScreen, pSize, 60);
+    xRRModeInfo	modeInfo;
+    char name[100];
+
+    memset(&modeInfo, 0, sizeof(modeInfo));
+    snprintf(name, 100, "%dx%d", w, h);
+
+    modeInfo.width = w;
+    modeInfo.height = h;
+    modeInfo.hTotal = w;
+    modeInfo.vTotal = h;
+    modeInfo.dotClock = ((CARD32)w * (CARD32)h * 60);
+    modeInfo.nameLength = strlen(name);
+    if ((modes[i] = RRModeGet(&modeInfo, name)) == NULL) return FALSE;
+  }
+
+  if (rp->numOutputs < 1) return FALSE;
+  for (i = 0; i < rp->numOutputs; i++) {
+    if (rp->outputs[i] == NULL) return FALSE;
+    if (!RROutputSetModes(rp->outputs[i], modes, numModes, preferred))
+      return FALSE;
+  }
+
+  if (rp->numCrtcs < 1) return FALSE;
+  for (i = 0; i < rp->numCrtcs; i++) {
+    if (rp->crtcs[i] == NULL) return FALSE;
+    if (!RRCrtcNotify(rp->crtcs[i], modes[preferred], 0, 0, RR_Rotate_0, NULL,
+                      1, &rp->outputs[i]))
+      return FALSE;
   }
 
   return TRUE;
 }
 
 
-Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
-                    RRScreenSizePtr pSize)
+Bool vncRRGetInfo(ScreenPtr pScreen, Rotation *rotations)
+{
+  return TRUE;
+}
+
+
+/* Called by X server */
+
+Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
+                        CARD32 mmWidth, CARD32 mmHeight)
 {
   rfbClientPtr cl;
   rfbScreenInfo newScreen = rfbScreen;
-  PixmapPtr rootPixmap = fbGetScreenPixmap(pScreen);
+  PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
   Bool ret = TRUE;
 
-  newScreen.width = pSize->width;
-  newScreen.height = pSize->height;
+  newScreen.width = width;
+  newScreen.height = height;
   newScreen.paddedWidthInBytes = PixmapBytePad(newScreen.width,
                                                newScreen.depth);
   newScreen.pfbMemory = NULL;
-  if (!rfbAllocateFramebufferMemory(&newScreen)) return FALSE;
+  if (!rfbAllocateFramebufferMemory(&newScreen)) {
+    rfbLog("ERROR: Could not allocate framebuffer memory\n");
+    return FALSE;
+  }
 
   xf86SetRootClip(pScreen, FALSE);
-  Xfree(rfbScreen.pfbMemory);
+
+  ret = pScreen->ModifyPixmapHeader(rootPixmap, newScreen.width,
+                                    newScreen.height, newScreen.depth,
+                                    newScreen.bitsPerPixel,
+                                    newScreen.paddedWidthInBytes,
+                                    newScreen.pfbMemory);
+  if (!ret) {
+    rfbLog("ERROR: Could not modify root pixmap size\n");
+    free(newScreen.pfbMemory);
+    xf86SetRootClip(pScreen, TRUE);
+    return ret;
+  }
+  free(rfbScreen.pfbMemory);
   rfbScreen = newScreen;
-  pScreen->width = pSize->width;
-  pScreen->height = pSize->height;
-  pScreen->mmWidth = pSize->mmWidth;
-  pScreen->mmHeight = pSize->mmHeight;
-  ret = pScreen->ModifyPixmapHeader(rootPixmap, rfbScreen.width,
-                                    rfbScreen.height, rfbScreen.depth,
-                                    rfbScreen.bitsPerPixel,
-                                    rfbScreen.paddedWidthInBytes,
-                                    rfbScreen.pfbMemory);
+  pScreen->width = width;
+  pScreen->height = height;
+  pScreen->mmWidth = mmWidth;
+  pScreen->mmHeight = mmHeight;
+
   xf86SetRootClip(pScreen, TRUE);
+
+  RRScreenSizeNotify(pScreen);
+
+  if (!vncRRSetModes(pScreen, width, height)) {
+    rfbLog("ERROR: Could not set screen modes\n");
+    return FALSE;
+  }
 
   rfbLog("New desktop size: %d x %d\n", pScreen->width, pScreen->height);
 
@@ -365,58 +385,48 @@ Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
 }
 
 
+Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
+                    RRScreenSizePtr pSize)
+{
+  return vncRRScreenSetSize(pScreen, pSize->width, pSize->height,
+                            pSize->mmWidth, pSize->mmHeight);
+}
+
+
 Bool vncRRInit(ScreenPtr pScreen)
 {
   rrScrPrivPtr rp;
+  RRCrtcPtr crtc;
+  RROutputPtr output;
 
   if (!RRScreenInit(pScreen)) return FALSE;
 
   rp = rrGetScrPriv(pScreen);
+
   rp->rrGetInfo = vncRRGetInfo;
   rp->rrSetConfig = vncRRSetConfig;
+  rp->rrScreenSetSize = vncRRScreenSetSize;
+
+  RRScreenSetSizeRange(pScreen, 32, 32, 32768, 32768);
+  if ((crtc = RRCrtcCreate(pScreen, NULL)) == NULL) return FALSE;
+  RRCrtcGammaSetSize(crtc, 256);
+  if ((output = RROutputCreate(pScreen, "TurboVNC", 8, NULL)) == NULL)
+    return FALSE;
+  RROutputSetCrtcs(output, &crtc, 1);
+  RROutputSetConnection(output, RR_Connected);
+
+  if (!vncRRSetModes(pScreen, pScreen->width, pScreen->height))
+    return FALSE;
+
   return TRUE;
 }
 
 
+/* Called by VNC */
+
 Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
 {
-  int i;  Bool found = FALSE, setConfig = FALSE;
-  RRScreenSizePtr pSize = NULL;
-
-  for (i = 0; i < sizeof(vncRRResolutions) / sizeof(Res); i++) {
-    if (vncRRResolutions[i].w == w && vncRRResolutions[i].h == h) {
-      found = TRUE;
-      break;
-    }
-  }
-  for (i = 0; i < pScreen->numDepths; i++) {
-    if (pScreen->allowedDepths[i].numVids) {
-      if (!found) {
-        int w0 = vncRRResolutions[0].w, h0 = vncRRResolutions[0].h;
-        // Resolution 0 always represents the "custom" VNC resolution
-        pSize = RRRegisterSize(pScreen, w0, h0, mm(w0), mm(h0));
-        if (!pSize) return FALSE;
-        pSize->width = vncRRResolutions[0].w = w;
-        pSize->height = vncRRResolutions[0].h = h;
-        pSize->mmWidth = mm(w);
-        pSize->mmHeight = mm(h);
-      } else {
-        pSize = RRRegisterSize(pScreen, w, h, mm(w), mm(h));
-        if (!pSize) return FALSE;
-      }
-      RRRegisterRate (pScreen, pSize, 60);
-
-      if (!setConfig) {
-        RRSetCurrentConfig (pScreen, RR_Rotate_0, 0, pSize);
-        setConfig = TRUE;
-      }
-    }
-  }
-
-  if (RRSetScreenConfig(pScreen, RR_Rotate_0, 0, pSize) != Success)
-    return FALSE;
-
-  return TRUE;
+  return vncRRScreenSetSize(pScreen, w, h, mm(w), mm(h));
 }
 
 #endif

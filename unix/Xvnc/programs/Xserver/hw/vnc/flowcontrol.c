@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -54,7 +54,7 @@ static void HandleRTTPong(rfbClientPtr, RTTInfo *);
 static void UpdateCongestion(rfbClientPtr);
 
 
-static CARD64 congestionCallback(OsTimerPtr timer, CARD64 time, pointer arg)
+static CARD32 congestionCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
     rfbClientPtr cl = (rfbClientPtr)arg;
     UpdateCongestion(cl);

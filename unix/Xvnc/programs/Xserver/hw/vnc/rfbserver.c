@@ -28,6 +28,10 @@
  *  USA.
  */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -39,8 +43,6 @@
 #include <arpa/inet.h>
 #include "windowstr.h"
 #include "rfb.h"
-#include "input.h"
-#include "mipointer.h"
 #include "sprite.h"
 
 char updateBuf[UPDATE_BUF_SIZE];
@@ -77,14 +79,26 @@ Bool rfbSendDesktopSize(rfbClientPtr cl);
 
 CARD32 rfbMaxIdleTimeout = 0;
 CARD32 rfbIdleTimeout = 0;
-OsTimerPtr idleTimer;
+static double idleTimeout = -1.0;
 
-CARD64
-idleTimeoutCallback(OsTimerPtr timer, CARD64 time, pointer arg)
+void
+IdleTimerSet(void)
 {
-    FatalError("TurboVNC server has been idle for %d seconds.  Exiting.\n",
-               rfbIdleTimeout);
-    return 0;
+    idleTimeout = gettime() + (double)rfbIdleTimeout;
+}
+
+void
+IdleTimerCancel(void)
+{
+    idleTimeout = -1.0;
+}
+
+void
+IdleTimerCheck(void)
+{
+    if (idleTimeout >= 0.0 && gettime() >= idleTimeout)
+        FatalError("TurboVNC server has been idle for %d seconds.  Exiting.\n",
+                   rfbIdleTimeout);
 }
 
 
@@ -112,8 +126,8 @@ double gettime(void)
 
 static Bool putImageOnly = TRUE, alrCopyRect = TRUE;
 
-CARD64
-alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
+CARD32
+alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
     RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave,
         ifRegionSave;
@@ -189,8 +203,8 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
 }
 
 
-static CARD64
-updateCallback(OsTimerPtr timer, CARD64 time, pointer arg)
+static CARD32
+updateCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
     rfbClientPtr cl = (rfbClientPtr)arg;
     rfbSendFramebufferUpdate(cl);
@@ -208,7 +222,7 @@ Bool
 InterframeOn(rfbClientPtr cl)
 {
     if (!cl->compareFB) {
-        if (!(cl->compareFB = (char *)xalloc(rfbScreen.paddedWidthInBytes *
+        if (!(cl->compareFB = (char *)malloc(rfbScreen.paddedWidthInBytes *
                                              rfbScreen.height))) {
             rfbLogPerror("InterframeOn: couldn't allocate comparison buffer");
             return FALSE;
@@ -227,7 +241,7 @@ void
 InterframeOff(rfbClientPtr cl)
 {
     if (cl->compareFB) {
-        xfree(cl->compareFB);
+        free(cl->compareFB);
         REGION_UNINIT(pScreen, &cl->ifRegion);
         rfbLog("Interframe comparison disabled\n");
     }
@@ -325,7 +339,7 @@ rfbNewClient(sock)
         fprintf(stderr, ")\n");
     }
 
-    cl = (rfbClientPtr)xalloc(sizeof(rfbClientRec));
+    cl = (rfbClientPtr)malloc(sizeof(rfbClientRec));
     if (cl == NULL) {
         rfbLog("rfbNewClient: out of memory");
         rfbCloseSock(cl->sock);
@@ -406,9 +420,8 @@ rfbNewClient(sock)
         REGION_INIT(pScreen, &cl->alrEligibleRegion, NullBox, 0);
     }
 
-    if (rfbIdleTimeout > 0) {
-        TimerCancel(idleTimer);
-    }
+    if (rfbIdleTimeout > 0)
+        IdleTimerCancel();
 
     cl->baseRTT = cl->minRTT = (unsigned)-1;
     gettimeofday(&cl->lastWrite, NULL);
@@ -497,16 +510,14 @@ rfbClientConnectionGone(sock)
     rfbFreeZrleData(cl);
 
     if (cl->cutText)
-        xfree(cl->cutText);
+        free(cl->cutText);
 
     InterframeOff(cl);
 
-    xfree(cl);
+    free(cl);
 
-    if (rfbClientHead == NULL && rfbIdleTimeout > 0) {
-        idleTimer = TimerSet(idleTimer, 0, rfbIdleTimeout * 1000,
-                             idleTimeoutCallback, NULL);
-    }
+    if (rfbClientHead == NULL && rfbIdleTimeout > 0)
+        IdleTimerSet();
 }
 
 
@@ -1169,7 +1180,7 @@ rfbProcessClientNormalMessage(cl)
         }
 
         if (!rfbViewOnly && !cl->viewOnly) {
-            KbdAddEvent(msg.ke.down, (KeySym)Swap32IfLE(msg.ke.key), cl);
+            KeyEvent((KeySym)Swap32IfLE(msg.ke.key), msg.ke.down);
         }
         return;
 
@@ -1226,7 +1237,7 @@ rfbProcessClientNormalMessage(cl)
         }
 
         if (msg.cct.length <= 0) return;
-        str = (char *)xalloc(msg.cct.length);
+        str = (char *)malloc(msg.cct.length);
         if (str == NULL) {
             rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText out of memory");
             rfbCloseSock(cl->sock);
@@ -1236,7 +1247,7 @@ rfbProcessClientNormalMessage(cl)
         if ((n = ReadExact(cl->sock, str, msg.cct.length)) <= 0) {
             if (n != 0)
                 rfbLogPerror("rfbProcessClientNormalMessage: read");
-            xfree(str);
+            free(str);
             rfbCloseSock(cl->sock);
             return;
         }
@@ -1247,7 +1258,7 @@ rfbProcessClientNormalMessage(cl)
             if (rfbSyncCutBuffer) rfbSetXCutText(str, msg.cct.length);
         }
 
-        xfree(str);
+        free(str);
         return;
 
     case rfbEnableContinuousUpdates:
@@ -1421,12 +1432,12 @@ rfbSendFramebufferUpdate(cl)
 
     if (cl->enableCursorShapeUpdates) {
         if (rfbScreen.cursorIsDrawn)
-            rfbSpriteRemoveCursor(pScreen);
+            rfbSpriteRemoveCursorAllDev(pScreen);
         if (!rfbScreen.cursorIsDrawn && cl->cursorWasChanged)
             sendCursorShape = TRUE;
     } else {
         if (!rfbScreen.cursorIsDrawn)
-            rfbSpriteRestoreCursor(pScreen);
+            rfbSpriteRestoreCursorAllDev(pScreen);
     }
 
     /*
@@ -1537,6 +1548,15 @@ rfbSendFramebufferUpdate(cl)
         REGION_INIT(pScreen, updateRegion,
                     REGION_EXTENTS(pScreen, &combinedUpdateRegion), 1);
         REGION_UNINIT(pScreen, &combinedUpdateRegion);
+    }
+
+    if (updateRegion->extents.x2 > pScreen->width ||
+        updateRegion->extents.y2 > pScreen->height) {
+        rfbLog("WARNING: Framebuffer update at %d,%d with dimensions %dx%d has been clipped to the screen boundaries\n",
+               updateRegion->extents.x1, updateRegion->extents.y1,
+               updateRegion->extents.x2 - updateRegion->extents.x1,
+               updateRegion->extents.y2 - updateRegion->extents.y1);
+        ClipToScreen(pScreen, updateRegion);
     }
 
     if (cl->compareFB) {
@@ -1798,7 +1818,7 @@ rfbSendFramebufferUpdate(cl)
                          &cl->alrEligibleRegion);
         REGION_EMPTY(pScreen, &cl->alrEligibleRegion);
         cl->alrTimer = TimerSet(cl->alrTimer, 0,
-            (CARD64)(rfbAutoLosslessRefresh * 1000.0), alrCallback, cl);
+            (CARD32)(rfbAutoLosslessRefresh * 1000.0), alrCallback, cl);
     }
 
     rfbUncorkSock(cl->sock);
@@ -1836,6 +1856,7 @@ rfbSendCopyRegion(cl, reg, dx, dy)
     int x, y, w, h;
     rfbFramebufferUpdateRectHeader rect;
     rfbCopyRect cr;
+    ScreenPtr pScreen = screenInfo.screens[0];
 
     nrects = REGION_NUM_RECTS(reg);
 
@@ -1870,6 +1891,13 @@ rfbSendCopyRegion(cl, reg, dx, dy)
         }
         REGION_UNINIT(pScreen, &tmpRegion);
     }
+
+    if (reg->extents.x2 > pScreen->width ||
+        reg->extents.y2 > pScreen->height)
+        rfbLog("WARNING: CopyRect dest at %d,%d with dimensions %dx%d exceeds screen boundaries\n",
+               reg->extents.x1, reg->extents.y1,
+               reg->extents.x2 - reg->extents.x1,
+               reg->extents.y2 - reg->extents.y1);
 
     while (nrects > 0) {
 
@@ -2178,7 +2206,7 @@ rfbSendServerCutText(char *str, int len)
         if (cl->cutTextLen == len && cl->cutText && !memcmp(cl->cutText, str, len))
             continue;
         if (cl->cutText)
-            xfree(cl->cutText);
+            free(cl->cutText);
         cl->cutText = strdup(str);
         cl->cutTextLen = len;
         sct.type = rfbServerCutText;
@@ -2311,7 +2339,7 @@ rfbProcessUDPInput(sock)
             return;
         }
         if (!rfbViewOnly) {
-            KbdAddEvent(msg.ke.down, (KeySym)Swap32IfLE(msg.ke.key), 0);
+            KeyEvent((KeySym)Swap32IfLE(msg.ke.key), msg.ke.down);
         }
         break;
 

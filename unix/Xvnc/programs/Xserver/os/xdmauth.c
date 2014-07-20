@@ -1,15 +1,12 @@
-/* $XConsortium: xdmauth.c,v 1.14 95/07/10 21:18:07 gildea Exp $ */
 /*
 
-Copyright (c) 1988  X Consortium
+Copyright 1988, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -17,15 +14,15 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
 
@@ -36,487 +33,453 @@ from the X Consortium.
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#include "X.h"
-#include "Xtrans.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <stdio.h>
+#include <X11/X.h>
+#define XSERV_t
+#define TRANS_SERVER
+#define TRANS_REOPEN
+#include <X11/Xtrans/Xtrans.h>
 #include "os.h"
 #include "osdep.h"
 #include "dixstruct.h"
-#include <time.h>
 
 #ifdef HASXDMAUTH
 
 static Bool authFromXDMCP;
 
 #ifdef XDMCP
-#include "Xmd.h"
+#include <X11/Xmd.h>
 #undef REQUEST
-#include "Xdmcp.h"
+#include <X11/Xdmcp.h>
 
 /* XDM-AUTHENTICATION-1 */
 
-static XdmAuthKeyRec	privateKey;
+static XdmAuthKeyRec privateKey;
 static char XdmAuthenticationName[] = "XDM-AUTHENTICATION-1";
+
 #define XdmAuthenticationNameLen (sizeof XdmAuthenticationName - 1)
-static XdmAuthKeyRec	rho;
+static XdmAuthKeyRec rho;
 
-static Bool XdmAuthenticationValidator (privateData, incomingData, packet_type)
-    ARRAY8Ptr	privateData, incomingData;
-    xdmOpCode	packet_type;
+static Bool
+XdmAuthenticationValidator(ARRAY8Ptr privateData, ARRAY8Ptr incomingData,
+                           xdmOpCode packet_type)
 {
-    XdmAuthKeyPtr	incoming;
+    XdmAuthKeyPtr incoming;
 
-    XdmcpUnwrap (incomingData->data, (unsigned char *)&privateKey,
-			      incomingData->data,incomingData->length);
-    switch (packet_type)
-    {
-    case ACCEPT:
-    	if (incomingData->length != 8)
-	    return FALSE;
-    	incoming = (XdmAuthKeyPtr) incomingData->data;
-    	XdmcpDecrementKey (incoming);
-    	return XdmcpCompareKeys (incoming, &rho);
-    default:
-    	return FALSE;
+    XdmcpUnwrap(incomingData->data, (unsigned char *) &privateKey,
+                incomingData->data, incomingData->length);
+    if (packet_type == ACCEPT) {
+        if (incomingData->length != 8)
+            return FALSE;
+        incoming = (XdmAuthKeyPtr) incomingData->data;
+        XdmcpDecrementKey(incoming);
+        return XdmcpCompareKeys(incoming, &rho);
     }
     return FALSE;
 }
 
 static Bool
-XdmAuthenticationGenerator (privateData, outgoingData, packet_type)
-    ARRAY8Ptr	privateData, outgoingData;
-    xdmOpCode	packet_type;
+XdmAuthenticationGenerator(ARRAY8Ptr privateData, ARRAY8Ptr outgoingData,
+                           xdmOpCode packet_type)
 {
     outgoingData->length = 0;
     outgoingData->data = 0;
-    switch (packet_type)
-    {
-    case REQUEST:
-	if (XdmcpAllocARRAY8 (outgoingData, 8))
-	    XdmcpWrap ((unsigned char *)&rho, (unsigned char *)&privateKey, outgoingData->data, 8);
-    default:
-    	return TRUE;
+    if (packet_type == REQUEST) {
+        if (XdmcpAllocARRAY8(outgoingData, 8))
+            XdmcpWrap((unsigned char *) &rho, (unsigned char *) &privateKey,
+                      outgoingData->data, 8);
     }
     return TRUE;
 }
 
 static Bool
-XdmAuthenticationAddAuth (name_len, name, data_len, data)
-    unsigned int  name_len, data_len;
-    char          *name, *data;
+XdmAuthenticationAddAuth(int name_len, const char *name,
+                         int data_len, char *data)
 {
-    Bool    ret;
-    XdmcpUnwrap ((unsigned char *)data, (unsigned char *)&privateKey, (unsigned char *)data, data_len);
+    Bool ret;
+
+    XdmcpUnwrap((unsigned char *) data, (unsigned char *) &privateKey,
+                (unsigned char *) data, data_len);
     authFromXDMCP = TRUE;
-    ret = AddAuthorization (name_len, name, data_len, data);
+    ret = AddAuthorization(name_len, name, data_len, data);
     authFromXDMCP = FALSE;
     return ret;
 }
-
 
 #define atox(c)	('0' <= c && c <= '9' ? c - '0' : \
 		 'a' <= c && c <= 'f' ? c - 'a' + 10 : \
 		 'A' <= c && c <= 'F' ? c - 'A' + 10 : -1)
 
 static int
-HexToBinary (in, out, len)
-    char    *out, *in;
-    int len;
+HexToBinary(const char *in, char *out, int len)
 {
-    int	    top, bottom;
+    int top, bottom;
 
-    while (len > 0)
-    {
-	top = atox(in[0]);
-	if (top == -1)
-	    return 0;
-	bottom = atox(in[1]);
-	if (bottom == -1)
-	    return 0;
-	*out++ = (top << 4) | bottom;
-	in += 2;
-	len -= 2;
+    while (len > 0) {
+        top = atox(in[0]);
+        if (top == -1)
+            return 0;
+        bottom = atox(in[1]);
+        if (bottom == -1)
+            return 0;
+        *out++ = (top << 4) | bottom;
+        in += 2;
+        len -= 2;
     }
     if (len)
-	return 0;
+        return 0;
     *out++ = '\0';
     return 1;
 }
 
 void
-XdmAuthenticationInit (cookie, cookie_len)
-    char    *cookie;
-    int	    cookie_len;
+XdmAuthenticationInit(const char *cookie, int cookie_len)
 {
-    bzero (privateKey.data, 8);
-    if (!strncmp (cookie, "0x", 2) || !strncmp (cookie, "0X", 2))
-    {
-	if (cookie_len > 2 + 2 * 8)
-	    cookie_len = 2 + 2 * 8;
-	HexToBinary (cookie + 2, (char *)privateKey.data, cookie_len - 2);
+    memset(privateKey.data, 0, 8);
+    if (!strncmp(cookie, "0x", 2) || !strncmp(cookie, "0X", 2)) {
+        if (cookie_len > 2 + 2 * 8)
+            cookie_len = 2 + 2 * 8;
+        HexToBinary(cookie + 2, (char *) privateKey.data, cookie_len - 2);
     }
-    else
-    {
-    	if (cookie_len > 7)
-	    cookie_len = 7;
-    	memmove (privateKey.data + 1, cookie, cookie_len);
+    else {
+        if (cookie_len > 7)
+            cookie_len = 7;
+        memmove(privateKey.data + 1, cookie, cookie_len);
     }
-    XdmcpGenerateKey (&rho);
-    XdmcpRegisterAuthentication (XdmAuthenticationName, XdmAuthenticationNameLen,
-				 (char *)&rho,
-				 sizeof (rho),
-				 XdmAuthenticationValidator,
-				 XdmAuthenticationGenerator,
-				 XdmAuthenticationAddAuth);
+    XdmcpGenerateKey(&rho);
+    XdmcpRegisterAuthentication(XdmAuthenticationName, XdmAuthenticationNameLen,
+                                (char *) &rho,
+                                sizeof(rho),
+                                (ValidatorFunc) XdmAuthenticationValidator,
+                                (GeneratorFunc) XdmAuthenticationGenerator,
+                                (AddAuthorFunc) XdmAuthenticationAddAuth);
 }
 
-#endif /* XDMCP */
+#endif                          /* XDMCP */
 
 /* XDM-AUTHORIZATION-1 */
 typedef struct _XdmAuthorization {
-    struct _XdmAuthorization	*next;
-    XdmAuthKeyRec		rho;
-    XdmAuthKeyRec		key;
-    XID				id;
+    struct _XdmAuthorization *next;
+    XdmAuthKeyRec rho;
+    XdmAuthKeyRec key;
+    XID id;
 } XdmAuthorizationRec, *XdmAuthorizationPtr;
 
 static XdmAuthorizationPtr xdmAuth;
 
 typedef struct _XdmClientAuth {
-    struct _XdmClientAuth   *next;
-    XdmAuthKeyRec	    rho;
-    char		    client[6];
-    long		    time;
+    struct _XdmClientAuth *next;
+    XdmAuthKeyRec rho;
+    char client[6];
+    long time;
 } XdmClientAuthRec, *XdmClientAuthPtr;
 
-static XdmClientAuthPtr    xdmClients;
-static long	    clockOffset;
-static Bool	    gotClock;
+static XdmClientAuthPtr xdmClients;
+static long clockOffset;
+static Bool gotClock;
 
 #define TwentyMinutes	(20 * 60)
 #define TwentyFiveMinutes (25 * 60)
 
 static Bool
-XdmClientAuthCompare (a, b)
-    XdmClientAuthPtr	a, b;
+XdmClientAuthCompare(const XdmClientAuthPtr a, const XdmClientAuthPtr b)
 {
-    int	i;
+    int i;
 
-    if (!XdmcpCompareKeys (&a->rho, &b->rho))
-	return FALSE;
+    if (!XdmcpCompareKeys(&a->rho, &b->rho))
+        return FALSE;
     for (i = 0; i < 6; i++)
-	if (a->client[i] != b->client[i])
-	    return FALSE;
+        if (a->client[i] != b->client[i])
+            return FALSE;
     return a->time == b->time;
 }
 
 static void
-XdmClientAuthDecode (plain, auth)
-    unsigned char	*plain;
-    XdmClientAuthPtr	auth;
+XdmClientAuthDecode(const unsigned char *plain, XdmClientAuthPtr auth)
 {
-    int	    i, j;
+    int i, j;
 
     j = 0;
-    for (i = 0; i < 8; i++)
-    {
-	auth->rho.data[i] = plain[j];
-	++j;
+    for (i = 0; i < 8; i++) {
+        auth->rho.data[i] = plain[j];
+        ++j;
     }
-    for (i = 0; i < 6; i++)
-    {
-	auth->client[i] = plain[j];
-	++j;
+    for (i = 0; i < 6; i++) {
+        auth->client[i] = plain[j];
+        ++j;
     }
     auth->time = 0;
-    for (i = 0; i < 4; i++)
-    {
-	auth->time |= plain[j] << ((3 - i) << 3);
-	j++;
+    for (i = 0; i < 4; i++) {
+        auth->time |= plain[j] << ((3 - i) << 3);
+        j++;
     }
 }
 
 static void
-XdmClientAuthTimeout (now)
-    long	now;
+XdmClientAuthTimeout(long now)
 {
-    XdmClientAuthPtr	client, next, prev;
+    XdmClientAuthPtr client, next, prev;
 
     prev = 0;
-    for (client = xdmClients; client; client=next)
-    {
-	next = client->next;
-	if (abs (now - client->time) > TwentyFiveMinutes)
-	{
-	    if (prev)
-		prev->next = next;
-	    else
-		xdmClients = next;
-	    xfree (client);
-	}
-	else
-	    prev = client;
+    for (client = xdmClients; client; client = next) {
+        next = client->next;
+        if (abs(now - client->time) > TwentyFiveMinutes) {
+            if (prev)
+                prev->next = next;
+            else
+                xdmClients = next;
+            free(client);
+        }
+        else
+            prev = client;
     }
 }
 
 static XdmClientAuthPtr
-XdmAuthorizationValidate (plain, length, rho, xclient, reason)
-    unsigned char	*plain;
-    int			length;
-    XdmAuthKeyPtr	rho;
-    ClientPtr		xclient;
-    char		**reason;
+XdmAuthorizationValidate(unsigned char *plain, int length,
+                         XdmAuthKeyPtr rho, ClientPtr xclient,
+                         const char **reason)
 {
-    XdmClientAuthPtr	client, existing;
-    long		now;
-    int			i;
+    XdmClientAuthPtr client, existing;
+    long now;
+    int i;
 
     if (length != (192 / 8)) {
-	if (reason)
-	    *reason = "Bad XDM authorization key length";
-	return NULL;
+        if (reason)
+            *reason = "Bad XDM authorization key length";
+        return NULL;
     }
-    client = (XdmClientAuthPtr) xalloc (sizeof (XdmClientAuthRec));
+    client = malloc(sizeof(XdmClientAuthRec));
     if (!client)
-	return NULL;
-    XdmClientAuthDecode (plain, client);
-    if (!XdmcpCompareKeys (&client->rho, rho))
-    {
-	xfree (client);
-	if (reason)
-	    *reason = "Invalid XDM-AUTHORIZATION-1 key value";
-	return NULL;
+        return NULL;
+    XdmClientAuthDecode(plain, client);
+    if (!XdmcpCompareKeys(&client->rho, rho)) {
+        free(client);
+        if (reason)
+            *reason = "Invalid XDM-AUTHORIZATION-1 key (failed key comparison)";
+        return NULL;
     }
     for (i = 18; i < 24; i++)
-	if (plain[i] != 0) {
-	    xfree (client);
-	    if (reason)
-		*reason = "Invalid XDM-AUTHORIZATION-1 key value";
-	    return NULL;
-	}
+        if (plain[i] != 0) {
+            free(client);
+            if (reason)
+                *reason = "Invalid XDM-AUTHORIZATION-1 key (failed NULL check)";
+            return NULL;
+        }
     if (xclient) {
-	int family, addr_len;
-	Xtransaddr *addr;
+        int family, addr_len;
+        Xtransaddr *addr;
 
-	if (_XSERVTransGetPeerAddr(((OsCommPtr)xclient->osPrivate)->trans_conn,
-				   &family, &addr_len, &addr) == 0
-	    && _XSERVTransConvertAddress(&family, &addr_len, &addr) == 0) {
-#ifdef TCPCONN
-	    if (family == FamilyInternet &&
-		memcmp((char *)addr, client->client, 4) != 0) {
-		xfree (client);
-		xfree (addr);
-		if (reason)
-		    *reason = "Invalid XDM-AUTHORIZATION-1 key value";
-		return NULL;
+        if (_XSERVTransGetPeerAddr(((OsCommPtr) xclient->osPrivate)->trans_conn,
+                                   &family, &addr_len, &addr) == 0
+            && _XSERVTransConvertAddress(&family, &addr_len, &addr) == 0) {
+#if defined(TCPCONN) || defined(STREAMSCONN)
+            if (family == FamilyInternet &&
+                memcmp((char *) addr, client->client, 4) != 0) {
+                free(client);
+                free(addr);
+                if (reason)
+                    *reason =
+                        "Invalid XDM-AUTHORIZATION-1 key (failed address comparison)";
+                return NULL;
 
-	    }
+            }
 #endif
-	    xfree (addr);
-	}
+            free(addr);
+        }
     }
     now = time(0);
-    if (!gotClock)
-    {
-	clockOffset = client->time - now;
-	gotClock = TRUE;
+    if (!gotClock) {
+        clockOffset = client->time - now;
+        gotClock = TRUE;
     }
     now += clockOffset;
-    XdmClientAuthTimeout (now);
-    if (abs (client->time - now) > TwentyMinutes)
-    {
-	xfree (client);
-	if (reason)
-	    *reason = "Excessive XDM-AUTHORIZATION-1 time offset";
-	return NULL;
+    XdmClientAuthTimeout(now);
+    if (abs(client->time - now) > TwentyMinutes) {
+        free(client);
+        if (reason)
+            *reason = "Excessive XDM-AUTHORIZATION-1 time offset";
+        return NULL;
     }
-    for (existing = xdmClients; existing; existing=existing->next)
-    {
-	if (XdmClientAuthCompare (existing, client))
-	{
-	    xfree (client);
-	    if (reason)
-		*reason = "XDM authorization key matches an existing client!";
-	    return NULL;
-	}
+    for (existing = xdmClients; existing; existing = existing->next) {
+        if (XdmClientAuthCompare(existing, client)) {
+            free(client);
+            if (reason)
+                *reason = "XDM authorization key matches an existing client!";
+            return NULL;
+        }
     }
     return client;
 }
 
 int
-XdmAddCookie (data_length, data, id)
-unsigned short	data_length;
-char	*data;
-XID	id;
+XdmAddCookie(unsigned short data_length, const char *data, XID id)
 {
-    XdmAuthorizationPtr	new;
-    unsigned char	*rho_bits, *key_bits;
+    XdmAuthorizationPtr new;
+    unsigned char *rho_bits, *key_bits;
 
-    switch (data_length)
-    {
-    case 16:		    /* auth from files is 16 bytes long */
-	if (authFromXDMCP)
-	{
-	    /* R5 xdm sent bogus authorization data in the accept packet,
-	     * but we can recover */
-	    rho_bits = rho.data;
-	    key_bits = (unsigned char *) data;
-	    key_bits[0] = '\0';
-	}
-	else
-	{
-	    rho_bits = (unsigned char *) data;
-	    key_bits = (unsigned char *) (data + 8);
-	}
-	break;
-    case 8:		    /* auth from XDMCP is 8 bytes long */
-	rho_bits = rho.data;
-	key_bits = (unsigned char *) data;
-	break;
+    switch (data_length) {
+    case 16:                   /* auth from files is 16 bytes long */
+#ifdef XDMCP
+        if (authFromXDMCP) {
+            /* R5 xdm sent bogus authorization data in the accept packet,
+             * but we can recover */
+            rho_bits = rho.data;
+            key_bits = (unsigned char *) data;
+            key_bits[0] = '\0';
+        }
+        else
+#endif
+        {
+            rho_bits = (unsigned char *) data;
+            key_bits = (unsigned char *) (data + 8);
+        }
+        break;
+#ifdef XDMCP
+    case 8:                    /* auth from XDMCP is 8 bytes long */
+        rho_bits = rho.data;
+        key_bits = (unsigned char *) data;
+        break;
+#endif
     default:
-	return 0;
+        return 0;
     }
     /* the first octet of the key must be zero */
     if (key_bits[0] != '\0')
-	return 0;
-    new = (XdmAuthorizationPtr) xalloc (sizeof (XdmAuthorizationRec));
+        return 0;
+    new = malloc(sizeof(XdmAuthorizationRec));
     if (!new)
-	return 0;
+        return 0;
     new->next = xdmAuth;
     xdmAuth = new;
-    memmove (new->key.data, key_bits, (int) 8);
-    memmove (new->rho.data, rho_bits, (int) 8);
+    memmove(new->key.data, key_bits, (int) 8);
+    memmove(new->rho.data, rho_bits, (int) 8);
     new->id = id;
     return 1;
 }
 
 XID
-XdmCheckCookie (cookie_length, cookie, xclient, reason)
-    unsigned short	cookie_length;
-    char	*cookie;
-    ClientPtr xclient;
-    char	**reason;
+XdmCheckCookie(unsigned short cookie_length, const char *cookie,
+               ClientPtr xclient, const char **reason)
 {
-    XdmAuthorizationPtr	auth;
-    XdmClientAuthPtr	client;
-    unsigned char	*plain;
+    XdmAuthorizationPtr auth;
+    XdmClientAuthPtr client;
+    unsigned char *plain;
 
     /* Auth packets must be a multiple of 8 bytes long */
     if (cookie_length & 7)
-	return (XID) -1;
-    plain = (unsigned char *) xalloc (cookie_length);
+        return (XID) -1;
+    plain = malloc(cookie_length);
     if (!plain)
-	return (XID) -1;
-    for (auth = xdmAuth; auth; auth=auth->next) {
-	XdmcpUnwrap ((unsigned char *)cookie, (unsigned char *)&auth->key, plain, cookie_length);
-	if ((client = XdmAuthorizationValidate (plain, cookie_length, &auth->rho, xclient, reason)) != NULL)
-	{
-	    client->next = xdmClients;
-	    xdmClients = client;
-	    xfree (plain);
-	    return auth->id;
-	}
+        return (XID) -1;
+    for (auth = xdmAuth; auth; auth = auth->next) {
+        XdmcpUnwrap((unsigned char *) cookie, (unsigned char *) &auth->key,
+                    plain, cookie_length);
+        if ((client =
+             XdmAuthorizationValidate(plain, cookie_length, &auth->rho, xclient,
+                                      reason)) != NULL) {
+            client->next = xdmClients;
+            xdmClients = client;
+            free(plain);
+            return auth->id;
+        }
     }
-    xfree (plain);
+    free(plain);
     return (XID) -1;
 }
 
 int
-XdmResetCookie ()
+XdmResetCookie(void)
 {
-    XdmAuthorizationPtr	auth, next_auth;
-    XdmClientAuthPtr	client, next_client;
+    XdmAuthorizationPtr auth, next_auth;
+    XdmClientAuthPtr client, next_client;
 
-    for (auth = xdmAuth; auth; auth=next_auth)
-    {
-	next_auth = auth->next;
-	xfree (auth);
+    for (auth = xdmAuth; auth; auth = next_auth) {
+        next_auth = auth->next;
+        free(auth);
     }
     xdmAuth = 0;
-    for (client = xdmClients; client; client=next_client)
-    {
-	next_client = client->next;
-	xfree (client);
+    for (client = xdmClients; client; client = next_client) {
+        next_client = client->next;
+        free(client);
     }
     xdmClients = (XdmClientAuthPtr) 0;
     return 1;
 }
 
 XID
-XdmToID (cookie_length, cookie)
-unsigned short	cookie_length;
-char	*cookie;
+XdmToID(unsigned short cookie_length, char *cookie)
 {
-    XdmAuthorizationPtr	auth;
-    XdmClientAuthPtr	client;
-    unsigned char	*plain;
+    XdmAuthorizationPtr auth;
+    XdmClientAuthPtr client;
+    unsigned char *plain;
 
-    plain = (unsigned char *) xalloc (cookie_length);
+    plain = malloc(cookie_length);
     if (!plain)
-	return (XID) -1;
-    for (auth = xdmAuth; auth; auth=auth->next) {
-	XdmcpUnwrap ((unsigned char *)cookie, (unsigned char *)&auth->key, plain, cookie_length);
-	if ((client = XdmAuthorizationValidate (plain, cookie_length, &auth->rho, NULL, NULL)) != NULL)
-	{
-	    xfree (client);
-	    xfree (cookie);
-	    return auth->id;
-	}
+        return (XID) -1;
+    for (auth = xdmAuth; auth; auth = auth->next) {
+        XdmcpUnwrap((unsigned char *) cookie, (unsigned char *) &auth->key,
+                    plain, cookie_length);
+        if ((client =
+             XdmAuthorizationValidate(plain, cookie_length, &auth->rho, NULL,
+                                      NULL)) != NULL) {
+            free(client);
+            free(cookie);
+            free(plain);
+            return auth->id;
+        }
     }
-    xfree (cookie);
+    free(cookie);
+    free(plain);
     return (XID) -1;
 }
 
 int
-XdmFromID (id, data_lenp, datap)
-XID id;
-unsigned short	*data_lenp;
-char	**datap;
+XdmFromID(XID id, unsigned short *data_lenp, char **datap)
 {
-    XdmAuthorizationPtr	auth;
+    XdmAuthorizationPtr auth;
 
-    for (auth = xdmAuth; auth; auth=auth->next) {
-	if (id == auth->id) {
-	    *data_lenp = 16;
-	    *datap = (char *) &auth->rho;
-	    return 1;
-	}
+    for (auth = xdmAuth; auth; auth = auth->next) {
+        if (id == auth->id) {
+            *data_lenp = 16;
+            *datap = (char *) &auth->rho;
+            return 1;
+        }
     }
     return 0;
 }
 
 int
-XdmRemoveCookie (data_length, data)
-unsigned short	data_length;
-char	*data;
+XdmRemoveCookie(unsigned short data_length, const char *data)
 {
-    XdmAuthorizationPtr	auth, prev;
-    XdmAuthKeyPtr	key_bits, rho_bits;
+    XdmAuthorizationPtr auth;
+    XdmAuthKeyPtr key_bits, rho_bits;
 
-    prev = 0;
-    switch (data_length)
-    {
+    switch (data_length) {
     case 16:
-	rho_bits = (XdmAuthKeyPtr) data;
-	key_bits = (XdmAuthKeyPtr) (data + 8);
-	break;
+        rho_bits = (XdmAuthKeyPtr) data;
+        key_bits = (XdmAuthKeyPtr) (data + 8);
+        break;
+#ifdef XDMCP
     case 8:
-	rho_bits = &rho;
-	key_bits = (XdmAuthKeyPtr) data;
-	break;
+        rho_bits = &rho;
+        key_bits = (XdmAuthKeyPtr) data;
+        break;
+#endif
     default:
-	return 0;
+        return 0;
     }
-    for (auth = xdmAuth; auth; auth=auth->next) {
-	if (XdmcpCompareKeys (rho_bits, &auth->rho) &&
-	    XdmcpCompareKeys (key_bits, &auth->key))
- 	{
-	    if (prev)
-		prev->next = auth->next;
-	    else
-		xdmAuth = auth->next;
-	    xfree (auth);
-	    return 1;
-	}
+    for (auth = xdmAuth; auth; auth = auth->next) {
+        if (XdmcpCompareKeys(rho_bits, &auth->rho) &&
+            XdmcpCompareKeys(key_bits, &auth->key)) {
+            xdmAuth = auth->next;
+            free(auth);
+            return 1;
+        }
     }
     return 0;
 }

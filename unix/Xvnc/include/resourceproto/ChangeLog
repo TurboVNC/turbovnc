@@ -1,0 +1,320 @@
+commit 4be619918d604cbf63994ebe8357b811b5bd2452
+Author: Erkki Seppälä <erkki.seppala@vincit.fi>
+Date:   Fri May 27 21:25:39 2011 -0700
+
+    Bumped version number: 1.1.1 => 1.2.0
+    
+    Signed-off-by: Erkki Seppälä <erkki.seppala@vincit.fi>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c4228d3189b1d12fa65e826ab356b2eee4f0548b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue May 24 15:01:42 2011 -0700
+
+    Distribute & install resproto.txt with the release
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b2629d78ae8acfbfc449f6b0e973716975d4e8d7
+Author: Erkki Seppälä <erkki.seppala@vincit.fi>
+Date:   Tue Nov 30 14:12:58 2010 +0200
+
+    Protocol records for XRes v1.2
+    
+    Incorporates comments from the list.
+    
+    Signed-off-by: Erkki Seppälä <erkki.seppala@vincit.fi>
+    Reviewed-by: Rami Ylimäki <rami.ylimaki@vincit.fi>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 1eb1d726921493db463b9b790bf25532fdc43287
+Author: Rami Ylimäki <rami.ylimaki@vincit.fi>
+Date:   Fri Dec 31 14:21:08 2010 +0200
+
+    Added protocol description for XRes v1.2
+    
+    Version 1.2 of XResource protocol adds two requests:
+    XResQueryClientIds and XResQueryResourceBytes. They can be used for
+    more exactly determining which resources are used by which clients.
+    
+    This patch incorporates comments from the mailing list.
+    
+    Acked-by: Gaetan Nadon <memsize@videotron.ca>
+    Reviewed-by: Erkki Seppälä <erkki.seppala@vincit.fi>
+    Signed-off-by: Rami Ylimäki <rami.ylimaki@vincit.fi>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 386946098f97b9137af3265b5608fdcf22c7d49a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Jan 6 22:16:55 2011 -0800
+
+    Add missing XFree86 copyright notice to COPYING
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 2cbf7d2ba3da72c2454d707e0109732c46a0c9d9
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Dec 8 22:19:47 2010 -0800
+
+    resourceproto 1.1.1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3389416e4c58b7e7ccad8d2bccb65f3e291ef43b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Dec 8 22:17:49 2010 -0800
+
+    config: replace deprecated AC_OUTPUT file list with AC_CONFIG_FILES
+    
+    Regroup AC statements under the Autoconf initialization section.
+    Regroup AM statements under the Automake initialization section.
+    Add missing AC_CONFIG_SRCDIR
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 0545a1f26d56ab329b69be76a27e2d4d9b0f88df
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:25:52 2010 -0400
+
+    config: update AC_PREREQ statement to 2.60
+    
+    Unrelated to the previous patches, the new value simply reflects
+    the reality that the minimum level for autoconf to configure
+    all x.org modules is 2.60 dated June 2006.
+    
+    ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.60.tar.gz
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit b5bb2e1707490805ea022f5110f229e5fbdc09e0
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:00:31 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 06fc8dd07770bb8b10323581419c2e53e9a3f3ef
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 22 19:24:48 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit 8c0d56bd432819c6ee23af52d93c3cd0d3331f00
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 11:13:30 2009 -0500
+
+    README: file created or updated #24206
+    
+    Contains a set of URLs to freedesktop.org.
+
+commit f98b754b0f5fea6162f4f5a0679dd35829440ce4
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 19:45:27 2009 -0500
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit 8184f9a6280de23d1cc140dd2ac9bc78625e434a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:31:29 2009 -0500
+
+    Makefile.am: INSTALL file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+    Add INSTALL target
+
+commit 406346c1a261127fae382a96010e7fb654115188
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:11:36 2009 -0500
+
+    configure.ac: deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit 2b0811c46f7aa76cdc14eb3516f3120e31cdaf73
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 13:55:25 2009 -0500
+
+    configure.ac: AM_MAINTAINER_MODE missing #24238
+    
+    This turns off maintainer mode build rules in tarballs.
+    Works in conjunction with autogen.sh --enable-maintainer-mode
+
+commit adb6c60a2f6705310d586fc4dfec97e41624915a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Nov 14 18:26:47 2009 -0500
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 11843ce15572214833063a26ac87a2fa6ab74bca
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Aug 25 16:13:15 2009 +1000
+
+    resourceproto 1.1.0
+
+commit 2388aa12158fca3d8c38ee59ecc5cf35eafa7d57
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Aug 25 16:29:38 2009 +1000
+
+    Remove RCS tags.
+
+commit 0a4fd7fc0cf0f56fbe112bd14725560adfa67b73
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Tue Jan 27 20:06:28 2009 -0200
+
+    Janitor: Correct make distcheck and dont distribute autogen.sh
+
+commit 40fded7637faa3548052cbf419d48ea081b1b5cb
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 16:39:06 2007 -0500
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit 2740cf052e07fef8808991863409829bab22f016
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Mon Sep 3 05:54:15 2007 -0400
+
+    Add *~ to .gitignore to skip patch/emacs droppings
+
+commit c24f19b61eb4a59b7a71f8aa238f3093d71b2fb2
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jul 14 18:56:31 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit 9268501218b3f4eb1b0ce13bfab9e9543adc01a1
+Author: Kevin E Martin <kem@kem.org>
+Date:   Thu Dec 15 00:24:38 2005 +0000
+
+    Update package version number for final X11R7 release candidate.
+
+commit 0002f2f7e13aeabd494b55be2280b060410a6e8a
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 19 02:48:15 2005 +0000
+
+    Update package version number for RC1 release.
+
+commit e09681a1043fbc48447033b78de2c87252507d1b
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Tue Aug 2 19:19:39 2005 +0000
+
+    Add basic .cvsignore files for proto modules.
+
+commit f6008b2e1f5051ab421abbe08614aac67847742e
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri Jul 29 21:22:56 2005 +0000
+
+    Various changes preparing packages for RC0:
+    - Verify and update package version numbers as needed
+    - Implement versioning scheme
+    - Change bug address to point to bugzilla bug entry form
+    - Disable loadable i18n in libX11 by default (use --enable-loadable-i18n to
+        reenable it)
+    - Fix makedepend to use pkgconfig and pass distcheck
+    - Update build script to build macros first
+    - Update modular Xorg version
+
+commit 79eb18feab7f1a9e07d97adb3be754b3c863d696
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Tue Jun 7 18:51:23 2005 +0000
+
+    - symlink.sh: Move XRes.h from proto/Resource to
+        lib/XRes/include/X11/extensions
+    - symlink.sh: Add XRes linking
+    - xc/lib/XRes/*.c: conditionally include config.h
+    - lib/XRes: add directories and build system.
+
+commit 53500326172c6277a698926f78e042f80f03bb2d
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sat May 21 04:18:30 2005 +0000
+
+    Set version to 1.0.
+
+commit f5f3a42ee3de80dfbb798727c77ad0454b70723e
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:22:40 2005 +0000
+
+    revert last change, didn't do right thing at all, sorry for the noise
+
+commit 5d91974af1155de1086434a36a6c1531a8d80d7b
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:10:19 2005 +0000
+
+    Require automake 1.7 in AM_INIT_AUTOMAKE
+
+commit d66e491cd3a75b7e88177b9857dd7079d11361fe
+Author: Josh Triplett <josh@speakeasy.net>
+Date:   Tue May 17 19:43:16 2005 +0000
+
+    Add COPYING file for Resource. Per the advice of Daniel Stone, Resource
+        falls under the generic XFree86 catch-all license (from before the
+        problematic license change).
+
+commit 7e6e21adc53035ddffba7bb29676b7f483956df8
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Mon May 9 18:20:06 2005 +0000
+
+    Change all the protonames from <extension>Ext to <extension>Proto.
+
+commit f7ef242967454e96ecc41751ed04b8ec434d17c8
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri May 6 01:46:31 2005 +0000
+
+    Initial build system files for proto module.
+
+commit e33c0b156299bb0d582b573ffe185699d6415b88
+Author: Egbert Eich <eich@suse.de>
+Date:   Fri Apr 23 18:43:06 2004 +0000
+
+    Merging XORG-CURRENT into trunk
+
+commit eeb54769c6aec119ae900ed41a1cd12d62c88aa9
+Author: Egbert Eich <eich@suse.de>
+Date:   Sun Mar 14 08:31:36 2004 +0000
+
+    Importing vendor version xf86-4_4_99_1 on Sun Mar 14 00:26:39 PST 2004
+
+commit 600d724bb28e8604eefa891daf2adefc38f6c03a
+Author: Egbert Eich <eich@suse.de>
+Date:   Wed Mar 3 12:10:54 2004 +0000
+
+    Importing vendor version xf86-4_4_0 on Wed Mar 3 04:09:24 PST 2004
+
+commit 17c656129e003eba2f71b644c335eabb96e3361a
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 13:35:11 2004 +0000
+
+    readding XFree86's cvs IDs
+
+commit d2ba0bfffba0903acdfd37973c0c11be3bbfec48
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 09:22:27 2004 +0000
+
+    Importing vendor version xf86-4_3_99_903 on Wed Feb 26 01:21:00 PST 2004
+
+commit 7d9398ff4706c144a8562f2272c89b67947c7e0d
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:42 2003 +0000
+
+    XFree86 4.3.0.1
+
+commit 258c66ae0da974c415026fcf4961b1ced793eaaf
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:42 2003 +0000
+
+    Initial revision

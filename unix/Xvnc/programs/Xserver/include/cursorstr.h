@@ -1,4 +1,3 @@
-/* $Xorg: cursorstr.h,v 1.4 2001/02/09 02:05:15 xorgcvs Exp $ */
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
@@ -23,7 +22,6 @@ Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
 in this Software without prior written authorization from The Open Group.
 
-
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
@@ -45,12 +43,12 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XFree86: xc/programs/Xserver/include/cursorstr.h,v 1.9 2003/01/12 02:44:27 dawes Exp $ */
 
 #ifndef CURSORSTRUCT_H
-#define CURSORSTRUCT_H 
+#define CURSORSTRUCT_H
 
 #include "cursor.h"
+#include "privates.h"
 /* 
  * device-independent cursor storage
  */
@@ -60,26 +58,41 @@ SOFTWARE.
  * bitmap format.
  */
 typedef struct _CursorBits {
-    unsigned char *source;			/* points to bits */
-    unsigned char *mask;			/* points to bits */
-    unsigned short width, height, xhot, yhot;	/* metrics */
-    int refcnt;					/* can be shared */
-    pointer devPriv[MAXSCREENS];		/* set by pScr->RealizeCursor*/
+    unsigned char *source;      /* points to bits */
+    unsigned char *mask;        /* points to bits */
+    Bool emptyMask;             /* all zeros mask */
+    unsigned short width, height, xhot, yhot;   /* metrics */
+    int refcnt;                 /* can be shared */
+    PrivateRec *devPrivates;    /* set by pScr->RealizeCursor */
 #ifdef ARGB_CURSOR
-    CARD32 *argb;				/* full-color alpha blended */
+    CARD32 *argb;               /* full-color alpha blended */
 #endif
 } CursorBits, *CursorBitsPtr;
 
+#define CURSOR_BITS_SIZE (sizeof(CursorBits) + dixPrivatesSize(PRIVATE_CURSOR_BITS))
+
 typedef struct _Cursor {
     CursorBitsPtr bits;
-    unsigned short foreRed, foreGreen, foreBlue; /* device-independent color */
-    unsigned short backRed, backGreen, backBlue; /* device-independent color */
+    unsigned short foreRed, foreGreen, foreBlue;        /* device-independent color */
+    unsigned short backRed, backGreen, backBlue;        /* device-independent color */
     int refcnt;
-    pointer devPriv[MAXSCREENS];		/* set by pScr->RealizeCursor*/
+    PrivateRec *devPrivates;    /* set by pScr->RealizeCursor */
+    XID id;
+#ifdef XFIXES
+    CARD32 serialNumber;
+    Atom name;
+#endif
 } CursorRec;
+
+#define CURSOR_REC_SIZE (sizeof(CursorRec) + dixPrivatesSize(PRIVATE_CURSOR))
 
 typedef struct _CursorMetric {
     unsigned short width, height, xhot, yhot;
 } CursorMetricRec;
 
-#endif /* CURSORSTRUCT_H */
+typedef struct {
+    int x, y;
+    ScreenPtr pScreen;
+} HotSpot;
+
+#endif                          /* CURSORSTRUCT_H */

@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/chgfctl.h,v 3.2 2003/11/17 22:20:29 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,71 +23,17 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef CHGFCTL_H
 #define CHGFCTL_H 1
 
-int
-SProcXChangeFeedbackControl(
-	ClientPtr              /* client */
-	);
+int SProcXChangeFeedbackControl(ClientPtr       /* client */
+    );
 
-int
-ProcXChangeFeedbackControl(
-	ClientPtr              /* client */
-	);
+int ProcXChangeFeedbackControl(ClientPtr        /* client */
+    );
 
-int
-ChangeKbdFeedback (
-	ClientPtr              /* client */,
-	DeviceIntPtr           /* dev */,
-	unsigned long          /* mask */,
-	KbdFeedbackPtr         /* k */,
-	xKbdFeedbackCtl *      /* f */
-	);
-
-int
-ChangePtrFeedback (
-	ClientPtr              /* client */,
-	DeviceIntPtr           /* dev */,
-	unsigned long          /* mask */,
-	PtrFeedbackPtr         /* p */,
-	xPtrFeedbackCtl *      /* f */
-	);
-
-int
-ChangeIntegerFeedback (
-	ClientPtr              /* client */,
-	DeviceIntPtr           /* dev */,
-	unsigned long          /* mask */,
-	IntegerFeedbackPtr     /* i */,
-	xIntegerFeedbackCtl *  /* f */
-	);
-
-int
-ChangeStringFeedback (
-	ClientPtr              /* client */,
-	DeviceIntPtr           /* dev */,
-	unsigned long          /* mask */,
-	StringFeedbackPtr      /* s */,
-	xStringFeedbackCtl *   /* f */
-	);
-
-int
-ChangeBellFeedback (
-	ClientPtr              /* client */,
-	DeviceIntPtr           /* dev */,
-	unsigned long          /* mask */,
-	BellFeedbackPtr        /* b */,
-	xBellFeedbackCtl *     /* f */
-	);
-
-int
-ChangeLedFeedback (
-	ClientPtr              /* client */,
-	DeviceIntPtr           /* dev */,
-	unsigned long          /* mask */,
-	LedFeedbackPtr         /* l */,
-	xLedFeedbackCtl *      /* f */
-	);
-
-#endif /* CHGFCTL_H */
+#endif                          /* CHGFCTL_H */

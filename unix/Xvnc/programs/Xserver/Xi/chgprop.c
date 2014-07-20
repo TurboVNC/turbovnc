@@ -1,5 +1,3 @@
-/* $Xorg: chgprop.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/chgprop.c,v 3.3 2001/12/14 19:58:55 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,16 +50,14 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"
-#include "XI.h"
-#include "XIproto.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 
 #include "exevents.h"
 #include "exglobals.h"
@@ -77,26 +72,18 @@ SOFTWARE.
  */
 
 int
-SProcXChangeDeviceDontPropagateList(client)
-    register ClientPtr client;
-    {
-    register char n;
-    register long *p;
-    register int i;
-
+SProcXChangeDeviceDontPropagateList(ClientPtr client)
+{
     REQUEST(xChangeDeviceDontPropagateListReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xChangeDeviceDontPropagateListReq);
-    swapl(&stuff->window, n);
-    swaps(&stuff->count, n);
-    p = (long *) &stuff[1];
-    for (i=0; i<stuff->count; i++)
-        {
-        swapl(p, n);
-	p++;
-        }
-    return(ProcXChangeDeviceDontPropagateList(client));
-    }
+    swapl(&stuff->window);
+    swaps(&stuff->count);
+    REQUEST_FIXED_SIZE(xChangeDeviceDontPropagateListReq,
+                       stuff->count * sizeof(CARD32));
+    SwapLongs((CARD32 *) (&stuff[1]), stuff->count);
+    return (ProcXChangeDeviceDontPropagateList(client));
+}
 
 /***********************************************************************
  *
@@ -105,66 +92,51 @@ SProcXChangeDeviceDontPropagateList(client)
  */
 
 int
-ProcXChangeDeviceDontPropagateList (client)
-    register ClientPtr client;
-    {
-    int			i;
-    WindowPtr		pWin;
-    struct 		tmask tmp[EMASKSIZE];
-    OtherInputMasks	*others;
+ProcXChangeDeviceDontPropagateList(ClientPtr client)
+{
+    int i, rc;
+    WindowPtr pWin;
+    struct tmask tmp[EMASKSIZE];
+    OtherInputMasks *others;
 
     REQUEST(xChangeDeviceDontPropagateListReq);
     REQUEST_AT_LEAST_SIZE(xChangeDeviceDontPropagateListReq);
 
-    if (stuff->length !=(sizeof(xChangeDeviceDontPropagateListReq)>>2) + 
-	stuff->count)
-	{
-	SendErrorToClient (client, IReqCode, X_ChangeDeviceDontPropagateList, 0,
-	    BadLength);
-	return Success;
-	}
+    if (stuff->length !=
+        bytes_to_int32(sizeof(xChangeDeviceDontPropagateListReq)) +
+        stuff->count)
+        return BadLength;
 
-    pWin = (WindowPtr) LookupWindow (stuff->window, client);
-    if (!pWin)
-        {
-	client->errorValue = stuff->window;
-	SendErrorToClient(client, IReqCode, X_ChangeDeviceDontPropagateList, 0, 
-		BadWindow);
-	return Success;
-        }
+    rc = dixLookupWindow(&pWin, stuff->window, client, DixSetAttrAccess);
+    if (rc != Success)
+        return rc;
 
-    if (stuff->mode != AddToList && stuff->mode != DeleteFromList)
-        {
-	client->errorValue = stuff->window;
-	SendErrorToClient(client, IReqCode, X_ChangeDeviceDontPropagateList, 0, 
-		BadMode);
-	return Success;
-        }
+    if (stuff->mode != AddToList && stuff->mode != DeleteFromList) {
+        client->errorValue = stuff->window;
+        return BadMode;
+    }
 
-    if (CreateMaskFromList (client, (XEventClass *)&stuff[1], 
-	stuff->count, tmp, NULL, X_ChangeDeviceDontPropagateList) != Success)
-	    return Success;
+    if ((rc = CreateMaskFromList(client, (XEventClass *) &stuff[1],
+                                 stuff->count, tmp, NULL,
+                                 X_ChangeDeviceDontPropagateList)) != Success)
+        return rc;
 
     others = wOtherInputMasks(pWin);
     if (!others && stuff->mode == DeleteFromList)
-	return Success;
-    for (i=0; i<EMASKSIZE; i++)
-	{
-	if (tmp[i].mask == 0)
-	    continue;
+        return Success;
+    for (i = 0; i < EMASKSIZE; i++) {
+        if (tmp[i].mask == 0)
+            continue;
 
-	if (stuff->mode == DeleteFromList)
-	    tmp[i].mask = (others->dontPropagateMask[i] & ~tmp[i].mask);
-	else if (others)
-	    tmp[i].mask |= others->dontPropagateMask[i];
+        if (stuff->mode == DeleteFromList)
+            tmp[i].mask = (others->dontPropagateMask[i] & ~tmp[i].mask);
+        else if (others)
+            tmp[i].mask |= others->dontPropagateMask[i];
 
-	if (DeviceEventSuppressForWindow (pWin,client,tmp[i].mask,i) != Success)
-	    {
-	    SendErrorToClient ( client, IReqCode, X_ChangeDeviceDontPropagateList, 0, 
-		BadClass);
-	    return Success;
-	    }
-	}
+        if (DeviceEventSuppressForWindow(pWin, client, tmp[i].mask, i) !=
+            Success)
+            return BadClass;
+    }
 
     return Success;
-    }
+}

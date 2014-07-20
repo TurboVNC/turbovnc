@@ -1,5 +1,3 @@
-/* $Xorg: sendexev.c,v 1.4 2001/02/09 02:04:34 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/sendexev.c,v 3.3 2001/12/14 19:58:58 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,24 +50,22 @@ SOFTWARE.
  *
  */
 
-#define EXTENSION_EVENT_BASE  64
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "windowstr.h"			/* Window      	     */
-#include "XI.h"
-#include "XIproto.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include "windowstr.h"          /* Window            */
+#include "extnsionst.h"         /* EventSwapPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "exevents.h"
 #include "exglobals.h"
 
 #include "grabdev.h"
 #include "sendexev.h"
 
-extern int 		lastEvent; 		/* Defined in extension.c */
+extern int lastEvent;           /* Defined in extension.c */
 
 /***********************************************************************
  *
@@ -79,99 +74,84 @@ extern int 		lastEvent; 		/* Defined in extension.c */
  */
 
 int
-SProcXSendExtensionEvent(client)
-    register ClientPtr client;
-    {
-    register char n;
-    register long *p;
-    register int i;
+SProcXSendExtensionEvent(ClientPtr client)
+{
+    CARD32 *p;
+    int i;
     xEvent eventT;
     xEvent *eventP;
     EventSwapPtr proc;
 
     REQUEST(xSendExtensionEventReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
-    swapl(&stuff->destination, n);
-    swaps(&stuff->count, n);
-    eventP = (xEvent *) &stuff[1];
-    for (i=0; i<stuff->num_events; i++,eventP++)
-        {
-	proc = EventSwapVector[eventP->u.u.type & 0177];
- 	if (proc == NotImplemented)   /* no swapping proc; invalid event type? */
-	    return (BadValue);
-	(*proc)(eventP, &eventT);
-	*eventP = eventT;
-	}
+    swapl(&stuff->destination);
+    swaps(&stuff->count);
 
-    p = (long *) (((xEvent *) &stuff[1]) + stuff->num_events);
-    for (i=0; i<stuff->count; i++)
-        {
-        swapl(p, n);
-	p++;
-        }
-    return(ProcXSendExtensionEvent(client));
+    if (stuff->length !=
+        bytes_to_int32(sizeof(xSendExtensionEventReq)) + stuff->count +
+        bytes_to_int32(stuff->num_events * sizeof(xEvent)))
+        return BadLength;
+
+    eventP = (xEvent *) &stuff[1];
+    for (i = 0; i < stuff->num_events; i++, eventP++) {
+        proc = EventSwapVector[eventP->u.u.type & 0177];
+        if (proc == NotImplemented)     /* no swapping proc; invalid event type? */
+            return BadValue;
+        (*proc) (eventP, &eventT);
+        *eventP = eventT;
     }
+
+    p = (CARD32 *) (((xEvent *) &stuff[1]) + stuff->num_events);
+    SwapLongs(p, stuff->count);
+    return (ProcXSendExtensionEvent(client));
+}
 
 /***********************************************************************
  *
- * Send an event to some client, as if it had come from an extension input 
+ * Send an event to some client, as if it had come from an extension input
  * device.
  *
  */
 
 int
-ProcXSendExtensionEvent (client)
-    register ClientPtr client;
-    {
-    int			ret;
-    DeviceIntPtr	dev;
-    xEvent		*first;
-    XEventClass		*list;
-    struct tmask	tmp[EMASKSIZE];
+ProcXSendExtensionEvent(ClientPtr client)
+{
+    int ret;
+    DeviceIntPtr dev;
+    xEvent *first;
+    XEventClass *list;
+    struct tmask tmp[EMASKSIZE];
 
     REQUEST(xSendExtensionEventReq);
     REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
 
-    if (stuff->length !=(sizeof(xSendExtensionEventReq)>>2) + stuff->count +
-	(stuff->num_events * (sizeof (xEvent) >> 2)))
-	{
-	SendErrorToClient (client, IReqCode, X_SendExtensionEvent, 0, 
-		BadLength);
-	return Success;
-	}
+    if (stuff->length !=
+        bytes_to_int32(sizeof(xSendExtensionEventReq)) + stuff->count +
+        (stuff->num_events * bytes_to_int32(sizeof(xEvent))))
+        return BadLength;
 
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_SendExtensionEvent, 0, 
-		BadDevice);
-	return Success;
-	}
+    ret = dixLookupDevice(&dev, stuff->deviceid, client, DixWriteAccess);
+    if (ret != Success)
+        return ret;
 
     /* The client's event type must be one defined by an extension. */
 
     first = ((xEvent *) &stuff[1]);
-    if ( ! ((EXTENSION_EVENT_BASE  <= first->u.u.type) &&
-	(first->u.u.type < lastEvent)) )
-	{
-	client->errorValue = first->u.u.type;
-	SendErrorToClient(client, IReqCode, X_SendExtensionEvent, 0, 
-		BadValue);
-	return Success;
-	}
+    if (!((EXTENSION_EVENT_BASE <= first->u.u.type) &&
+          (first->u.u.type < lastEvent))) {
+        client->errorValue = first->u.u.type;
+        return BadValue;
+    }
 
     list = (XEventClass *) (first + stuff->num_events);
-    if ((ret = CreateMaskFromList (client, list, stuff->count, tmp, dev, 
-	X_SendExtensionEvent)) != Success)
-	return Success;
+    if ((ret = CreateMaskFromList(client, list, stuff->count, tmp, dev,
+                                  X_SendExtensionEvent)) != Success)
+        return ret;
 
-    ret =  (SendEvent (client, dev, stuff->destination,
-	stuff->propagate, (xEvent *)&stuff[1], tmp[stuff->deviceid].mask, 
-	stuff->num_events));
+    ret = (SendEvent(client, dev, stuff->destination,
+                     stuff->propagate, (xEvent *) &stuff[1],
+                     tmp[stuff->deviceid].mask, stuff->num_events));
 
-    if (ret != Success)
-	SendErrorToClient(client, IReqCode, X_SendExtensionEvent, 0, ret);
-
-    return Success;
-    }
+    return ret;
+}

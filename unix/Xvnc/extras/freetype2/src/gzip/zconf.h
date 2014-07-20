@@ -3,7 +3,7 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-/* @(#) $Id: zconf.h,v 1.1.1.1 2004/02/05 19:16:48 alanh Exp $ */
+/* @(#) $Id$ */
 
 #ifndef _ZCONF_H
 #define _ZCONF_H
@@ -13,39 +13,39 @@
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
  */
 #ifdef Z_PREFIX
-#  define deflateInit_	z_deflateInit_
-#  define deflate	z_deflate
-#  define deflateEnd	z_deflateEnd
-#  define inflateInit_ 	z_inflateInit_
-#  define inflate	z_inflate
-#  define inflateEnd	z_inflateEnd
-#  define deflateInit2_	z_deflateInit2_
+#  define deflateInit_         z_deflateInit_
+#  define deflate              z_deflate
+#  define deflateEnd           z_deflateEnd
+#  define inflateInit_         z_inflateInit_
+#  define inflate              z_inflate
+#  define inflateEnd           z_inflateEnd
+#  define deflateInit2_        z_deflateInit2_
 #  define deflateSetDictionary z_deflateSetDictionary
-#  define deflateCopy	z_deflateCopy
-#  define deflateReset	z_deflateReset
-#  define deflateParams	z_deflateParams
-#  define inflateInit2_	z_inflateInit2_
+#  define deflateCopy          z_deflateCopy
+#  define deflateReset         z_deflateReset
+#  define deflateParams        z_deflateParams
+#  define inflateInit2_        z_inflateInit2_
 #  define inflateSetDictionary z_inflateSetDictionary
-#  define inflateSync	z_inflateSync
-#  define inflateSyncPoint z_inflateSyncPoint
-#  define inflateReset	z_inflateReset
-#  define compress	z_compress
-#  define compress2	z_compress2
-#  define uncompress	z_uncompress
-#  define adler32	z_adler32
-#  define crc32		z_crc32
-#  define get_crc_table z_get_crc_table
+#  define inflateSync          z_inflateSync
+#  define inflateSyncPoint     z_inflateSyncPoint
+#  define inflateReset         z_inflateReset
+#  define compress             z_compress
+#  define compress2            z_compress2
+#  define uncompress           z_uncompress
+#  define adler32              z_adler32
+#  define crc32                z_crc32
+#  define get_crc_table        z_get_crc_table
 
-#  define Byte		z_Byte
-#  define uInt		z_uInt
-#  define uLong		z_uLong
-#  define Bytef	        z_Bytef
-#  define charf		z_charf
-#  define intf		z_intf
-#  define uIntf		z_uIntf
-#  define uLongf	z_uLongf
-#  define voidpf	z_voidpf
-#  define voidp		z_voidp
+#  define Byte   z_Byte
+#  define uInt   z_uInt
+#  define uLong  z_uLong
+#  define Bytef  z_Bytef
+#  define charf  z_charf
+#  define intf   z_intf
+#  define uIntf  z_uIntf
+#  define uLongf z_uLongf
+#  define voidpf z_voidpf
+#  define voidp  z_voidp
 #endif
 
 #if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
@@ -59,6 +59,12 @@
 #if defined(__MSDOS__) && !defined(MSDOS)
 #  define MSDOS
 #endif
+
+/* WinCE doesn't have errno.h */
+#ifdef _WIN32_WCE
+#  define NO_ERRNO_H
+#endif
+
 
 /*
  * Compile with -DMAXSEG_64K if the alloc function cannot allocate more

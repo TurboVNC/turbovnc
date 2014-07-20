@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType PFR object methods (body).                                  */
 /*                                                                         */
-/*  Copyright 2002 by                                                      */
+/*  Copyright 2002-2008, 2010-2011, 2013 by                                */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -14,7 +14,7 @@
 /*  understand and accept it fully.                                        */
 /*                                                                         */
 /***************************************************************************/
-/* $XFree86: xc/extras/freetype2/src/pfr/pfrobjs.c,v 1.2 2003/10/22 17:26:30 tsi Exp $ */
+
 
 #include "pfrobjs.h"
 #include "pfrload.h"
@@ -23,6 +23,7 @@
 #include "pfrsbit.h"
 #include FT_OUTLINE_H
 #include FT_INTERNAL_DEBUG_H
+#include FT_TRUETYPE_IDS_H
 
 #include "pfrerror.h"
 
@@ -39,34 +40,44 @@
   /*************************************************************************/
 
   FT_LOCAL_DEF( void )
-  pfr_face_done( PFR_Face  face )
+  pfr_face_done( FT_Face  pfrface )     /* PFR_Face */
   {
-    FT_Memory   memory = face->root.driver->root.memory;
+    PFR_Face   face = (PFR_Face)pfrface;
+    FT_Memory  memory;
+
+
+    if ( !face )
+      return;
+
+    memory = pfrface->driver->root.memory;
 
     /* we don't want dangling pointers */
-    face->root.family_name = NULL;
-    face->root.style_name  = NULL;
+    pfrface->family_name = NULL;
+    pfrface->style_name  = NULL;
 
     /* finalize the physical font record */
     pfr_phy_font_done( &face->phy_font, FT_FACE_MEMORY( face ) );
 
     /* no need to finalize the logical font or the header */
-    FT_FREE( face->root.available_sizes );
+    FT_FREE( pfrface->available_sizes );
   }
 
 
   FT_LOCAL_DEF( FT_Error )
   pfr_face_init( FT_Stream      stream,
-                 PFR_Face       face,
+                 FT_Face        pfrface,
                  FT_Int         face_index,
                  FT_Int         num_params,
                  FT_Parameter*  params )
   {
+    PFR_Face  face = (PFR_Face)pfrface;
     FT_Error  error;
 
     FT_UNUSED( num_params );
     FT_UNUSED( params );
 
+
+    FT_TRACE2(( "PFR driver\n" ));
 
     /* load the header and check it */
     error = pfr_header_load( &face->header, stream );
@@ -75,8 +86,8 @@
 
     if ( !pfr_header_check( &face->header ) )
     {
-      FT_TRACE4(( "pfr_face_init: not a valid PFR font\n" ));
-      error = PFR_Err_Unknown_File_Format;
+      FT_TRACE2(( "  not a PFR font\n" ));
+      error = FT_THROW( Unknown_File_Format );
       goto Exit;
     }
 
@@ -91,16 +102,16 @@
       if ( error )
         goto Exit;
 
-      face->root.num_faces = num_faces;
+      pfrface->num_faces = num_faces;
     }
 
     if ( face_index < 0 )
       goto Exit;
 
-    if ( face_index >= face->root.num_faces )
+    if ( face_index >= pfrface->num_faces )
     {
       FT_ERROR(( "pfr_face_init: invalid face index\n" ));
-      error = PFR_Err_Invalid_Argument;
+      error = FT_THROW( Invalid_Argument );
       goto Exit;
     }
 
@@ -113,127 +124,155 @@
       goto Exit;
 
     /* now load the physical font descriptor */
-     error = pfr_phy_font_load( &face->phy_font, stream,
-                                 face->log_font.phys_offset,
-                                 face->log_font.phys_size );
-     if ( error )
-       goto Exit;
+    error = pfr_phy_font_load( &face->phy_font, stream,
+                               face->log_font.phys_offset,
+                               face->log_font.phys_size );
+    if ( error )
+      goto Exit;
 
-     /* now, set-up all root face fields */
-     {
-       FT_Face      root     = FT_FACE( face );
-       PFR_PhyFont  phy_font = &face->phy_font;
+    /* now set up all root face fields */
+    {
+      PFR_PhyFont  phy_font = &face->phy_font;
 
 
-       root->face_index = face_index;
-       root->num_glyphs = phy_font->num_chars;
-       root->face_flags = FT_FACE_FLAG_SCALABLE;
+      pfrface->face_index = face_index;
+      pfrface->num_glyphs = phy_font->num_chars + 1;
 
-       if ( (phy_font->flags & PFR_PHY_PROPORTIONAL) == 0 )
-         root->face_flags |= FT_FACE_FLAG_FIXED_WIDTH;
+      pfrface->face_flags |= FT_FACE_FLAG_SCALABLE;
 
-       if ( phy_font->flags & PFR_PHY_VERTICAL )
-         root->face_flags |= FT_FACE_FLAG_VERTICAL;
-       else
-         root->face_flags |= FT_FACE_FLAG_HORIZONTAL;
+      /* if all characters point to the same gps_offset 0, we */
+      /* assume that the font only contains bitmaps           */
+      {
+        FT_UInt  nn;
 
-       if ( phy_font->num_strikes > 0 )
-         root->face_flags |= FT_FACE_FLAG_FIXED_SIZES;
 
-       if ( phy_font->num_kern_pairs > 0 )
-         root->face_flags |= FT_FACE_FLAG_KERNING;
+        for ( nn = 0; nn < phy_font->num_chars; nn++ )
+          if ( phy_font->chars[nn].gps_offset != 0 )
+            break;
 
-      /* if no family name was found in the "undocumented" auxiliary
-       * data, use the font ID instead. This sucks but is better than
-       * nothing
+        if ( nn == phy_font->num_chars )
+        {
+          if ( phy_font->num_strikes > 0 )
+            pfrface->face_flags = 0;        /* not scalable */
+          else
+          {
+            FT_ERROR(( "pfr_face_init: font doesn't contain glyphs\n" ));
+            error = FT_THROW( Invalid_File_Format );
+            goto Exit;
+          }
+        }
+      }
+
+      if ( (phy_font->flags & PFR_PHY_PROPORTIONAL) == 0 )
+        pfrface->face_flags |= FT_FACE_FLAG_FIXED_WIDTH;
+
+      if ( phy_font->flags & PFR_PHY_VERTICAL )
+        pfrface->face_flags |= FT_FACE_FLAG_VERTICAL;
+      else
+        pfrface->face_flags |= FT_FACE_FLAG_HORIZONTAL;
+
+      if ( phy_font->num_strikes > 0 )
+        pfrface->face_flags |= FT_FACE_FLAG_FIXED_SIZES;
+
+      if ( phy_font->num_kern_pairs > 0 )
+        pfrface->face_flags |= FT_FACE_FLAG_KERNING;
+
+      /* If no family name was found in the "undocumented" auxiliary
+       * data, use the font ID instead.  This sucks but is better than
+       * nothing.
        */
-       root->family_name = phy_font->family_name;
-       if ( root->family_name == NULL )
-         root->family_name = phy_font->font_id;
+      pfrface->family_name = phy_font->family_name;
+      if ( pfrface->family_name == NULL )
+        pfrface->family_name = phy_font->font_id;
 
       /* note that the style name can be NULL in certain PFR fonts,
        * probably meaning "Regular"
        */
-       root->style_name  = phy_font->style_name;
+      pfrface->style_name = phy_font->style_name;
 
-       root->num_fixed_sizes = 0;
-       root->available_sizes = 0;
+      pfrface->num_fixed_sizes = 0;
+      pfrface->available_sizes = 0;
 
-       root->bbox         = phy_font->bbox;
-       root->units_per_EM = (FT_UShort)phy_font->outline_resolution;
-       root->ascender     = (FT_Short) phy_font->bbox.yMax;
-       root->descender    = (FT_Short) phy_font->bbox.yMin;
-       root->height       = (FT_Short)
-                              ( ( ( root->ascender - root->descender ) * 12 )
-                                / 10 );
+      pfrface->bbox         = phy_font->bbox;
+      pfrface->units_per_EM = (FT_UShort)phy_font->outline_resolution;
+      pfrface->ascender     = (FT_Short) phy_font->bbox.yMax;
+      pfrface->descender    = (FT_Short) phy_font->bbox.yMin;
 
-       if ( phy_font->num_strikes > 0 )
-       {
-         FT_UInt          n, count = phy_font->num_strikes;
-         FT_Bitmap_Size*  size;
-         PFR_Strike       strike;
-         FT_Memory        memory = root->stream->memory;
+      pfrface->height = (FT_Short)( ( pfrface->units_per_EM * 12 ) / 10 );
+      if ( pfrface->height < pfrface->ascender - pfrface->descender )
+        pfrface->height = (FT_Short)(pfrface->ascender - pfrface->descender);
 
-         if ( FT_NEW_ARRAY( root->available_sizes, count ) )
-           goto Exit;
-
-         size   = root->available_sizes;
-         strike = phy_font->strikes;
-         for ( n = 0; n < count; n++, size++, strike++ )
-         {
-           size->height = (FT_UShort) strike->y_ppm;
-           size->width  = (FT_UShort) strike->x_ppm;
-         }
-         root->num_fixed_sizes = count;
-       }
-
-       /* now compute maximum advance width */
-       if ( ( phy_font->flags & PFR_PHY_PROPORTIONAL ) == 0 )
-         root->max_advance_width = (FT_Short)phy_font->standard_advance;
-       else
-       {
-         FT_Int    max = 0;
-         FT_UInt   count = phy_font->num_chars;
-         PFR_Char  gchar = phy_font->chars;
+      if ( phy_font->num_strikes > 0 )
+      {
+        FT_UInt          n, count = phy_font->num_strikes;
+        FT_Bitmap_Size*  size;
+        PFR_Strike       strike;
+        FT_Memory        memory = pfrface->stream->memory;
 
 
-         for ( ; count > 0; count--, gchar++ )
-         {
-           if ( max < gchar->advance )
-             max = gchar->advance;
-         }
+        if ( FT_NEW_ARRAY( pfrface->available_sizes, count ) )
+          goto Exit;
 
-         root->max_advance_width = (FT_Short)max;
-       }
+        size   = pfrface->available_sizes;
+        strike = phy_font->strikes;
+        for ( n = 0; n < count; n++, size++, strike++ )
+        {
+          size->height = (FT_UShort)strike->y_ppm;
+          size->width  = (FT_UShort)strike->x_ppm;
+          size->size   = strike->y_ppm << 6;
+          size->x_ppem = strike->x_ppm << 6;
+          size->y_ppem = strike->y_ppm << 6;
+        }
+        pfrface->num_fixed_sizes = count;
+      }
 
-       root->max_advance_height = root->height;
+      /* now compute maximum advance width */
+      if ( ( phy_font->flags & PFR_PHY_PROPORTIONAL ) == 0 )
+        pfrface->max_advance_width = (FT_Short)phy_font->standard_advance;
+      else
+      {
+        FT_Int    max = 0;
+        FT_UInt   count = phy_font->num_chars;
+        PFR_Char  gchar = phy_font->chars;
 
-       root->underline_position  = (FT_Short)( - root->units_per_EM / 10 );
-       root->underline_thickness = (FT_Short)(   root->units_per_EM / 30 );
 
-       /* create charmap */
-       {
-         FT_CharMapRec  charmap;
+        for ( ; count > 0; count--, gchar++ )
+        {
+          if ( max < gchar->advance )
+            max = gchar->advance;
+        }
+
+        pfrface->max_advance_width = (FT_Short)max;
+      }
+
+      pfrface->max_advance_height = pfrface->height;
+
+      pfrface->underline_position  = (FT_Short)( -pfrface->units_per_EM / 10 );
+      pfrface->underline_thickness = (FT_Short)(  pfrface->units_per_EM / 30 );
+
+      /* create charmap */
+      {
+        FT_CharMapRec  charmap;
 
 
-         charmap.face        = root;
-         charmap.platform_id = 3;
-         charmap.encoding_id = 1;
-         charmap.encoding    = FT_ENCODING_UNICODE;
+        charmap.face        = pfrface;
+        charmap.platform_id = TT_PLATFORM_MICROSOFT;
+        charmap.encoding_id = TT_MS_ID_UNICODE_CS;
+        charmap.encoding    = FT_ENCODING_UNICODE;
 
-         FT_CMap_New( &pfr_cmap_class_rec, NULL, &charmap, NULL );
+        error = FT_CMap_New( &pfr_cmap_class_rec, NULL, &charmap, NULL );
 
 #if 0
-         /* Select default charmap */
-         if (root->num_charmaps)
-           root->charmap = root->charmaps[0];
+        /* Select default charmap */
+        if ( pfrface->num_charmaps )
+          pfrface->charmap = pfrface->charmaps[0];
 #endif
-       }
+      }
 
-       /* check whether we've loaded any kerning pairs */
-       if ( phy_font->num_kern_pairs )
-         root->face_flags |= FT_FACE_FLAG_KERNING;
-     }
+      /* check whether we've loaded any kerning pairs */
+      if ( phy_font->num_kern_pairs )
+        pfrface->face_flags |= FT_FACE_FLAG_KERNING;
+    }
 
   Exit:
     return error;
@@ -249,9 +288,11 @@
   /*************************************************************************/
 
   FT_LOCAL_DEF( FT_Error )
-  pfr_slot_init( PFR_Slot  slot )
+  pfr_slot_init( FT_GlyphSlot  pfrslot )        /* PFR_Slot */
   {
-    FT_GlyphLoader  loader = slot->root.internal->loader;
+    PFR_Slot        slot   = (PFR_Slot)pfrslot;
+    FT_GlyphLoader  loader = pfrslot->internal->loader;
+
 
     pfr_glyph_init( &slot->glyph, loader );
 
@@ -260,29 +301,40 @@
 
 
   FT_LOCAL_DEF( void )
-  pfr_slot_done( PFR_Slot  slot )
+  pfr_slot_done( FT_GlyphSlot  pfrslot )        /* PFR_Slot */
   {
+    PFR_Slot  slot = (PFR_Slot)pfrslot;
+
+
     pfr_glyph_done( &slot->glyph );
   }
 
 
   FT_LOCAL_DEF( FT_Error )
-  pfr_slot_load( PFR_Slot  slot,
-                 PFR_Size  size,
-                 FT_UInt   gindex,
-                 FT_Int32  load_flags )
+  pfr_slot_load( FT_GlyphSlot  pfrslot,         /* PFR_Slot */
+                 FT_Size       pfrsize,         /* PFR_Size */
+                 FT_UInt       gindex,
+                 FT_Int32      load_flags )
   {
+    PFR_Slot     slot    = (PFR_Slot)pfrslot;
+    PFR_Size     size    = (PFR_Size)pfrsize;
     FT_Error     error;
-    PFR_Face     face    = (PFR_Face)slot->root.face;
+    PFR_Face     face    = (PFR_Face)pfrslot->face;
     PFR_Char     gchar;
-    FT_Outline*  outline = &slot->root.outline;
+    FT_Outline*  outline = &pfrslot->outline;
     FT_ULong     gps_offset;
 
-    if (gindex > 0)
+
+    FT_TRACE1(( "pfr_slot_load: glyph index %d\n", gindex ));
+
+    if ( gindex > 0 )
       gindex--;
 
-    /* check that the glyph index is correct */
-    FT_ASSERT( gindex < face->phy_font.num_chars );
+    if ( !face || gindex >= face->phy_font.num_chars )
+    {
+      error = FT_THROW( Invalid_Argument );
+      goto Exit;
+    }
 
     /* try to load an embedded bitmap */
     if ( ( load_flags & ( FT_LOAD_NO_SCALE | FT_LOAD_NO_BITMAP ) ) == 0 )
@@ -294,12 +346,12 @@
 
     if ( load_flags & FT_LOAD_SBITS_ONLY )
     {
-      error = FT_Err_Invalid_Argument;
+      error = FT_THROW( Invalid_Argument );
       goto Exit;
     }
 
     gchar               = face->phy_font.chars + gindex;
-    slot->root.format   = FT_GLYPH_FORMAT_OUTLINE;
+    pfrslot->format     = FT_GLYPH_FORMAT_OUTLINE;
     outline->n_points   = 0;
     outline->n_contours = 0;
     gps_offset          = face->header.gps_section_offset;
@@ -311,7 +363,7 @@
     if ( !error )
     {
       FT_BBox            cbox;
-      FT_Glyph_Metrics*  metrics = &slot->root.metrics;
+      FT_Glyph_Metrics*  metrics = &pfrslot->metrics;
       FT_Pos             advance;
       FT_Int             em_metrics, em_outline;
       FT_Bool            scaling;
@@ -325,7 +377,7 @@
       outline->flags &= ~FT_OUTLINE_OWNER;
       outline->flags |= FT_OUTLINE_REVERSE_FILL;
 
-      if ( size && size->root.metrics.y_ppem < 24 )
+      if ( size && pfrsize->metrics.y_ppem < 24 )
         outline->flags |= FT_OUTLINE_HIGH_PRECISION;
 
       /* compute the advance vector */
@@ -344,19 +396,37 @@
       else
         metrics->horiAdvance = advance;
 
-      slot->root.linearHoriAdvance = metrics->horiAdvance;
-      slot->root.linearVertAdvance = metrics->vertAdvance;
+      pfrslot->linearHoriAdvance = metrics->horiAdvance;
+      pfrslot->linearVertAdvance = metrics->vertAdvance;
 
       /* make-up vertical metrics(?) */
       metrics->vertBearingX = 0;
       metrics->vertBearingY = 0;
 
+#if 0 /* some fonts seem to be broken here! */
+
+      /* Apply the font matrix, if any.                 */
+      /* TODO: Test existing fonts with unusual matrix  */
+      /* whether we have to adjust Units per EM.        */
+      {
+        FT_Matrix font_matrix;
+
+
+        font_matrix.xx = face->log_font.matrix[0] << 8;
+        font_matrix.yx = face->log_font.matrix[1] << 8;
+        font_matrix.xy = face->log_font.matrix[2] << 8;
+        font_matrix.yy = face->log_font.matrix[3] << 8;
+
+        FT_Outline_Transform( outline, &font_matrix );
+      }
+#endif
+
       /* scale when needed */
       if ( scaling )
       {
         FT_Int      n;
-        FT_Fixed    x_scale = size->root.metrics.x_scale;
-        FT_Fixed    y_scale = size->root.metrics.y_scale;
+        FT_Fixed    x_scale = pfrsize->metrics.x_scale;
+        FT_Fixed    y_scale = pfrsize->metrics.y_scale;
         FT_Vector*  vec     = outline->points;
 
 
@@ -395,79 +465,125 @@
   /*************************************************************************/
 
   FT_LOCAL_DEF( FT_Error )
-  pfr_face_get_kerning( PFR_Face    face,
+  pfr_face_get_kerning( FT_Face     pfrface,        /* PFR_Face */
                         FT_UInt     glyph1,
                         FT_UInt     glyph2,
                         FT_Vector*  kerning )
   {
-    FT_Error      error    = 0;
-    PFR_PhyFont   phy_font = &face->phy_font;
-    PFR_KernItem  item     = phy_font->kern_items;
-    FT_UInt32     idx      = PFR_KERN_INDEX( glyph1, glyph2 );
+    PFR_Face     face     = (PFR_Face)pfrface;
+    FT_Error     error    = FT_Err_Ok;
+    PFR_PhyFont  phy_font = &face->phy_font;
+    FT_UInt32    code1, code2, pair;
 
 
     kerning->x = 0;
     kerning->y = 0;
 
-    /* find the kerning item containing our pair */
-    while ( item )
+    if ( glyph1 > 0 )
+      glyph1--;
+
+    if ( glyph2 > 0 )
+      glyph2--;
+
+    /* convert glyph indices to character codes */
+    if ( glyph1 > phy_font->num_chars ||
+         glyph2 > phy_font->num_chars )
+      goto Exit;
+
+    code1 = phy_font->chars[glyph1].char_code;
+    code2 = phy_font->chars[glyph2].char_code;
+    pair  = PFR_KERN_INDEX( code1, code2 );
+
+    /* now search the list of kerning items */
     {
-      if ( item->pair1 <= idx && idx <= item->pair2 )
-        goto Found_Item;
-
-      item = item->next;
-    }
-
-    /* not found */
-    goto Exit;
-
-  Found_Item:
-    {
-      /* perform simply binary search within the item */
-      FT_UInt    min, mid, max;
-      FT_Stream  stream = face->root.stream;
-      FT_Byte*   p;
+      PFR_KernItem  item   = phy_font->kern_items;
+      FT_Stream     stream = pfrface->stream;
 
 
+      for ( ; item; item = item->next )
+      {
+        if ( pair >= item->pair1 && pair <= item->pair2 )
+          goto FoundPair;
+      }
+      goto Exit;
+
+    FoundPair: /* we found an item, now parse it and find the value if any */
       if ( FT_STREAM_SEEK( item->offset )                       ||
            FT_FRAME_ENTER( item->pair_count * item->pair_size ) )
         goto Exit;
 
-      min = 0;
-      max = item->pair_count;
-      while ( min < max )
       {
-        FT_UInt  char1, char2, charcode;
+        FT_UInt    count       = item->pair_count;
+        FT_UInt    size        = item->pair_size;
+        FT_UInt    power       = (FT_UInt)ft_highpow2( (FT_UInt32)count );
+        FT_UInt    probe       = power * size;
+        FT_UInt    extra       = count - power;
+        FT_Byte*   base        = stream->cursor;
+        FT_Bool    twobytes    = FT_BOOL( item->flags & 1 );
+        FT_Bool    twobyte_adj = FT_BOOL( item->flags & 2 );
+        FT_Byte*   p;
+        FT_UInt32  cpair;
 
 
-        mid = ( min + max ) >> 1;
-        p   = stream->cursor + mid*item->pair_size;
-
-        if ( item->flags & PFR_KERN_2BYTE_CHAR )
+        if ( extra > 0 )
         {
-          char1 = FT_NEXT_USHORT( p );
-          char2 = FT_NEXT_USHORT( p );
-        }
-        else
-        {
-          char1 = FT_NEXT_USHORT( p );
-          char2 = FT_NEXT_USHORT( p );
-        }
-        charcode = PFR_KERN_INDEX( char1, char2 );
+          p = base + extra * size;
 
-        if ( idx == charcode )
-        {
-          if ( item->flags & PFR_KERN_2BYTE_ADJ )
-            kerning->x = item->base_adj + FT_NEXT_SHORT( p );
+          if ( twobytes )
+            cpair = FT_NEXT_ULONG( p );
           else
-            kerning->x = item->base_adj + FT_NEXT_CHAR( p );
+            cpair = PFR_NEXT_KPAIR( p );
 
-          break;
+          if ( cpair == pair )
+            goto Found;
+
+          if ( cpair < pair )
+          {
+            if ( twobyte_adj )
+              p += 2;
+            else
+              p++;
+            base = p;
+          }
         }
-        if ( idx > charcode )
-          min = mid + 1;
+
+        while ( probe > size )
+        {
+          probe >>= 1;
+          p       = base + probe;
+
+          if ( twobytes )
+            cpair = FT_NEXT_ULONG( p );
+          else
+            cpair = PFR_NEXT_KPAIR( p );
+
+          if ( cpair == pair )
+            goto Found;
+
+          if ( cpair < pair )
+            base += probe;
+        }
+
+        p = base;
+
+        if ( twobytes )
+          cpair = FT_NEXT_ULONG( p );
         else
-          max = mid;
+          cpair = PFR_NEXT_KPAIR( p );
+
+        if ( cpair == pair )
+        {
+          FT_Int  value;
+
+
+        Found:
+          if ( twobyte_adj )
+            value = FT_PEEK_SHORT( p );
+          else
+            value = p[0];
+
+          kerning->x = item->base_adj + value;
+        }
       }
 
       FT_FRAME_EXIT();

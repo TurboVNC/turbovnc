@@ -1,5 +1,3 @@
-/* $Xorg: devbell.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/devbell.c,v 3.3 2001/12/14 19:58:55 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,15 +50,13 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "exglobals.h"
 
 #include "devbell.h"
@@ -74,15 +69,12 @@ SOFTWARE.
  */
 
 int
-SProcXDeviceBell(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXDeviceBell(ClientPtr client)
+{
     REQUEST(xDeviceBellReq);
-    swaps(&stuff->length, n);
-    return(ProcXDeviceBell(client));
-    }
+    swaps(&stuff->length);
+    return (ProcXDeviceBell(client));
+}
 
 /***********************************************************************
  *
@@ -91,13 +83,12 @@ SProcXDeviceBell(client)
  */
 
 int
-ProcXDeviceBell (client)
-    register ClientPtr client;
-    {
+ProcXDeviceBell(ClientPtr client)
+{
     DeviceIntPtr dev;
     KbdFeedbackPtr k;
     BellFeedbackPtr b;
-    int base;
+    int rc, base;
     int newpercent;
     CARD8 class;
     pointer ctrl;
@@ -106,64 +97,52 @@ ProcXDeviceBell (client)
     REQUEST(xDeviceBellReq);
     REQUEST_SIZE_MATCH(xDeviceBellReq);
 
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	client->errorValue = stuff->deviceid;
-	SendErrorToClient(client, IReqCode, X_DeviceBell, 0, BadDevice);
-	return Success;
-	}
+    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixBellAccess);
+    if (rc != Success) {
+        client->errorValue = stuff->deviceid;
+        return rc;
+    }
 
-    if (stuff->percent < -100 || stuff->percent > 100)
-	{
-	client->errorValue = stuff->percent;
-	SendErrorToClient(client, IReqCode, X_DeviceBell, 0, BadValue);
-	return Success;
-	}
-    if (stuff->feedbackclass == KbdFeedbackClass)
-	{
-	for (k=dev->kbdfeed; k; k=k->next)
-	    if (k->ctrl.id == stuff->feedbackid)
-		break;
-	if (!k)
-	    {
-	    client->errorValue = stuff->feedbackid;
-	    SendErrorToClient(client, IReqCode, X_DeviceBell, 0, BadValue);
-	    return Success;
-	    }
-	base = k->ctrl.bell;
-	proc = k->BellProc;
-	ctrl = (pointer) &(k->ctrl);
-	class = KbdFeedbackClass;
-	}
-    else if (stuff->feedbackclass == BellFeedbackClass)
-	{
-	for (b=dev->bell; b; b=b->next)
-	    if (b->ctrl.id == stuff->feedbackid)
-		break;
-	if (!b)
-	    {
-	    client->errorValue = stuff->feedbackid;
-	    SendErrorToClient(client, IReqCode, X_DeviceBell, 0, BadValue);
-	    return Success;
-	    }
-	base = b->ctrl.percent;
-	proc = b->BellProc;
-	ctrl = (pointer) &(b->ctrl);
-	class = BellFeedbackClass;
-	}
-    else
-	{
-	client->errorValue = stuff->feedbackclass;
-	SendErrorToClient(client, IReqCode, X_DeviceBell, 0, BadValue);
-	return Success;
-	}
+    if (stuff->percent < -100 || stuff->percent > 100) {
+        client->errorValue = stuff->percent;
+        return BadValue;
+    }
+    if (stuff->feedbackclass == KbdFeedbackClass) {
+        for (k = dev->kbdfeed; k; k = k->next)
+            if (k->ctrl.id == stuff->feedbackid)
+                break;
+        if (!k) {
+            client->errorValue = stuff->feedbackid;
+            return BadValue;
+        }
+        base = k->ctrl.bell;
+        proc = k->BellProc;
+        ctrl = (pointer) &(k->ctrl);
+        class = KbdFeedbackClass;
+    }
+    else if (stuff->feedbackclass == BellFeedbackClass) {
+        for (b = dev->bell; b; b = b->next)
+            if (b->ctrl.id == stuff->feedbackid)
+                break;
+        if (!b) {
+            client->errorValue = stuff->feedbackid;
+            return BadValue;
+        }
+        base = b->ctrl.percent;
+        proc = b->BellProc;
+        ctrl = (pointer) &(b->ctrl);
+        class = BellFeedbackClass;
+    }
+    else {
+        client->errorValue = stuff->feedbackclass;
+        return BadValue;
+    }
     newpercent = (base * stuff->percent) / 100;
     if (stuff->percent < 0)
         newpercent = base + newpercent;
     else
-    	newpercent = base - newpercent + stuff->percent;
-    (*proc)(newpercent, dev, ctrl, class);
+        newpercent = base - newpercent + stuff->percent;
+    (*proc) (newpercent, dev, ctrl, class);
 
     return Success;
-    }
+}

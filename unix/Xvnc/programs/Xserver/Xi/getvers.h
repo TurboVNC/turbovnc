@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/getvers.h,v 3.2 2003/11/17 22:20:29 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,24 +23,22 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef GETVERS_H
 #define GETVERS_H 1
 
-int
-SProcXGetExtensionVersion(
-	ClientPtr              /* client */
-	);
+int SProcXGetExtensionVersion(ClientPtr /* client */
+    );
 
-int
-ProcXGetExtensionVersion (
-	ClientPtr              /* client */
-	);
+int ProcXGetExtensionVersion(ClientPtr  /* client */
+    );
 
-void
-SRepXGetExtensionVersion (
-	ClientPtr              /* client */,
-	int                    /* size */,
-	xGetExtensionVersionReply * /* rep */
-	);
+void SRepXGetExtensionVersion(ClientPtr /* client */ ,
+                              int /* size */ ,
+                              xGetExtensionVersionReply *       /* rep */
+    );
 
-#endif /* GETVERS_H */
+#endif                          /* GETVERS_H */

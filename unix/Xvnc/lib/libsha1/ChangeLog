@@ -1,0 +1,16 @@
+* 0.3 (03.06.2010)
+
+- Added autogen.sh.
+- Added libsha1.pc.
+
+* 0.2 (20.10.2008)
+
+- Removed brg_* headers and cleaned up platform-dependent code.
+- Added small testsuite.
+- Fixed line endings.
+- sha1.h renamed to libsha1.h to avoid clashes with libmd.
+
+* 0.1 (25.09.2008)
+
+Initial version
+

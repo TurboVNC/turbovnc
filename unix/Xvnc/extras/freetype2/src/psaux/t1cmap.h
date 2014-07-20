@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    Type 1 character map support (specification).                        */
 /*                                                                         */
-/*  Copyright 2002 by                                                      */
+/*  Copyright 2002, 2003, 2006 by                                          */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -22,7 +22,6 @@
 #include <ft2build.h>
 #include FT_INTERNAL_OBJECTS_H
 #include FT_INTERNAL_TYPE1_TYPES_H
-#include FT_INTERNAL_POSTSCRIPT_NAMES_H
 
 FT_BEGIN_HEADER
 
@@ -40,23 +39,23 @@ FT_BEGIN_HEADER
 
   typedef struct  T1_CMapStdRec_
   {
-    FT_CMapRec                 cmap;
+    FT_CMapRec                cmap;
 
-    const FT_UShort*           code_to_sid;
-    PS_Adobe_Std_Strings_Func  sid_to_string;
+    const FT_UShort*          code_to_sid;
+    PS_Adobe_Std_StringsFunc  sid_to_string;
 
-    FT_UInt                    num_glyphs;
-    const char* const*         glyph_names;
-    
+    FT_UInt                   num_glyphs;
+    const char* const*        glyph_names;
+
   } T1_CMapStdRec;
 
 
   FT_CALLBACK_TABLE const FT_CMap_ClassRec
   t1_cmap_standard_class_rec;
-  
+
   FT_CALLBACK_TABLE const FT_CMap_ClassRec
   t1_cmap_expert_class_rec;
-  
+
 
   /*************************************************************************/
   /*************************************************************************/
@@ -67,20 +66,20 @@ FT_BEGIN_HEADER
   /*************************************************************************/
 
   typedef struct T1_CMapCustomRec_*  T1_CMapCustom;
-  
+
   typedef struct  T1_CMapCustomRec_
   {
     FT_CMapRec  cmap;
     FT_UInt     first;
     FT_UInt     count;
     FT_UShort*  indices;
-  
+
   } T1_CMapCustomRec;
 
 
   FT_CALLBACK_TABLE const FT_CMap_ClassRec
   t1_cmap_custom_class_rec;
-  
+
 
   /*************************************************************************/
   /*************************************************************************/
@@ -90,32 +89,14 @@ FT_BEGIN_HEADER
   /*************************************************************************/
   /*************************************************************************/
 
-  /* unicode (syntehtic) cmaps */
-  typedef struct T1_CMapUnicodeRec_*  T1_CMapUnicode;
-
-  typedef struct  T1_CMapUniPairRec_
-  {
-    FT_UInt32  unicode;
-    FT_UInt    gindex;
-  
-  } T1_CMapUniPairRec, *T1_CMapUniPair;
-
-
-  typedef struct  T1_CMapUnicodeRec_
-  {
-    FT_CMapRec      cmap;
-    FT_UInt         num_pairs;
-    T1_CMapUniPair  pairs;
-
-  } T1_CMapUnicodeRec;
-
+  /* unicode (synthetic) cmaps */
 
   FT_CALLBACK_TABLE const FT_CMap_ClassRec
   t1_cmap_unicode_class_rec;
 
  /* */
 
- 
+
 FT_END_HEADER
 
 #endif /* __T1CMAP_H__ */

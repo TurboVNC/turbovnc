@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/devbell.h,v 3.2 2003/11/17 22:20:29 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,17 +23,17 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef DEVBELL_H
 #define DEVBELL_H 1
 
-int
-SProcXDeviceBell (
-	ClientPtr              /* client */
-	);
+int SProcXDeviceBell(ClientPtr  /* client */
+    );
 
-int
-ProcXDeviceBell (
-	ClientPtr              /* client */
-	);
+int ProcXDeviceBell(ClientPtr   /* client */
+    );
 
-#endif /* DEVBELL_H */
+#endif                          /* DEVBELL_H */

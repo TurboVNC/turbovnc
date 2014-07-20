@@ -1,29 +1,18 @@
-set(HEADERS
-	DECkeysym.h
-	HPkeysym.h
-	Sunkeysym.h
-	X.h
-	XWDFile.h
-	Xalloca.h
-	Xatom.h
-	Xdefs.h
-	Xfuncproto.h
-	Xfuncs.h
-	Xmd.h
-	Xos.h
-	Xos_r.h
-	Xosdefs.h
-	Xpoll.h
-	Xproto.h
-	Xprotostr.h
-	Xthreads.h
-	ap_keysym.h
-	keysym.h
-	keysymdef.h)
-
-foreach(h ${HEADERS})
-	copy_X_header(${h} X11)
-endforeach()
-
-add_subdirectory(fonts)
-add_subdirectory(extensions)
+add_subdirectory(bigreqsproto)
+add_subdirectory(compositeproto)
+add_subdirectory(damageproto)
+add_subdirectory(fixesproto)
+add_subdirectory(fontsproto)
+add_subdirectory(inputproto)
+add_subdirectory(kbproto)
+add_subdirectory(libX11)
+add_subdirectory(libxkbfile)
+add_subdirectory(randrproto)
+add_subdirectory(renderproto)
+add_subdirectory(resourceproto)
+add_subdirectory(scrnsaverproto)
+add_subdirectory(videoproto)
+add_subdirectory(xcmiscproto)
+add_subdirectory(xextproto)
+add_subdirectory(xf86bigfontproto)
+add_subdirectory(xproto)

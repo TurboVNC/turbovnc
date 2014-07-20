@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/dix/dixutils.c,v 3.13 2003/01/12 02:44:26 dawes Exp $ */
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
@@ -22,7 +21,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
 in this Software without prior written authorization from The Open Group.
-
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -82,22 +80,21 @@ Author:  Adobe Systems Incorporated
 
 */
 
-/* $Xorg: dixutils.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
-
-#include "X.h"
-#include "Xmd.h"
+#include <X11/X.h>
+#include <X11/Xmd.h>
 #include "misc.h"
 #include "windowstr.h"
 #include "dixstruct.h"
 #include "pixmapstr.h"
+#include "gcstruct.h"
 #include "scrnintstr.h"
 #define  XK_LATIN1
-#include "keysymdef.h"
-#ifdef XCSECURITY
-#define _SECURITY_SERVER
-#include "extensions/security.h"
-#endif
+#include <X11/keysymdef.h>
+#include "xace.h"
 
 /*
  * CompareTimeStamps returns -1, 0, or +1 depending on if the first
@@ -105,17 +102,16 @@ Author:  Adobe Systems Incorporated
  */
 
 int
-CompareTimeStamps(a, b)
-    TimeStamp a, b;
+CompareTimeStamps(TimeStamp a, TimeStamp b)
 {
     if (a.months < b.months)
-	return EARLIER;
+        return EARLIER;
     if (a.months > b.months)
-	return LATER;
+        return LATER;
     if (a.milliseconds < b.milliseconds)
-	return EARLIER;
+        return EARLIER;
     if (a.milliseconds > b.milliseconds)
-	return LATER;
+        return LATER;
     return SAMETIME;
 }
 
@@ -125,23 +121,21 @@ CompareTimeStamps(a, b)
 
 #define HALFMONTH ((unsigned long) 1<<31)
 TimeStamp
-ClientTimeToServerTime(c)
-     CARD32 c;
+ClientTimeToServerTime(CARD32 c)
 {
     TimeStamp ts;
+
     if (c == CurrentTime)
-	return currentTime;
+        return currentTime;
     ts.months = currentTime.months;
     ts.milliseconds = c;
-    if (c > currentTime.milliseconds)
-    {
-	if (((unsigned long) c - currentTime.milliseconds) > HALFMONTH)
-	    ts.months -= 1;
+    if (c > currentTime.milliseconds) {
+        if (((unsigned long) c - currentTime.milliseconds) > HALFMONTH)
+            ts.months -= 1;
     }
-    else if (c < currentTime.milliseconds)
-    {
-	if (((unsigned long)currentTime.milliseconds - c) > HALFMONTH)
-	    ts.months += 1;
+    else if (c < currentTime.milliseconds) {
+        if (((unsigned long) currentTime.milliseconds - c) > HALFMONTH)
+            ts.months += 1;
     }
     return ts;
 }
@@ -154,266 +148,204 @@ ClientTimeToServerTime(c)
  */
 
 static unsigned char
-ISOLatin1ToLower (unsigned char source)
+ISOLatin1ToLower(unsigned char source)
 {
-    unsigned char   dest;
+    unsigned char dest;
+
     if ((source >= XK_A) && (source <= XK_Z))
-       dest = source + (XK_a - XK_A);
+        dest = source + (XK_a - XK_A);
     else if ((source >= XK_Agrave) && (source <= XK_Odiaeresis))
-       dest = source + (XK_agrave - XK_Agrave);
+        dest = source + (XK_agrave - XK_Agrave);
     else if ((source >= XK_Ooblique) && (source <= XK_Thorn))
-       dest = source + (XK_oslash - XK_Ooblique);
+        dest = source + (XK_oslash - XK_Ooblique);
     else
-       dest = source;
+        dest = source;
     return dest;
 }
 
-
-void
-CopyISOLatin1Lowered(unsigned char *dest, unsigned char *source, int length)
-{
-    register int i;
-
-    for (i = 0; i < length; i++, source++, dest++)
-	*dest = ISOLatin1ToLower (*source);
-    *dest = '\0';
-}
-
 int
-CompareISOLatin1Lowered(unsigned char *s1, int s1len, 
-			unsigned char *s2, int s2len)
+CompareISOLatin1Lowered(const unsigned char *s1, int s1len,
+                        const unsigned char *s2, int s2len)
 {
-    unsigned char   c1, c2;
-    
-    for (;;) 
-    {
-	/* note -- compare against zero so that -1 ignores len */
-	c1 = s1len-- ? *s1++ : '\0';
-	c2 = s2len-- ? *s2++ : '\0';
-	if (!c1 || 
-	    (c1 != c2 && 
-	     (c1 = ISOLatin1ToLower (c1)) != (c2 = ISOLatin1ToLower (c2))))
-	    break;
+    unsigned char c1, c2;
+
+    for (;;) {
+        /* note -- compare against zero so that -1 ignores len */
+        c1 = s1len-- ? *s1++ : '\0';
+        c2 = s2len-- ? *s2++ : '\0';
+        if (!c1 ||
+            (c1 != c2 &&
+             (c1 = ISOLatin1ToLower(c1)) != (c2 = ISOLatin1ToLower(c2))))
+            break;
     }
     return (int) c1 - (int) c2;
 }
 
-#ifdef XCSECURITY
-
-/* SecurityLookupWindow and SecurityLookupDrawable:
- * Look up the window/drawable taking into account the client doing
- * the lookup and the type of access desired.  Return the window/drawable
- * if it exists and the client is allowed access, else return NULL.
- * Most Proc* functions should be calling these instead of
- * LookupWindow and LookupDrawable, which do no access checks.
+/*
+ * dixLookupWindow and dixLookupDrawable:
+ * Look up the window/drawable taking into account the client doing the
+ * lookup, the type of drawable desired, and the type of access desired.
+ * Return Success with *pDraw set if the window/drawable exists and the client
+ * is allowed access, else return an error code with *pDraw set to NULL.  The
+ * access mask values are defined in resource.h.  The type mask values are
+ * defined in pixmap.h, with zero equivalent to M_DRAWABLE.
  */
-
-WindowPtr
-SecurityLookupWindow(rid, client, access_mode)
-    XID rid;
-    ClientPtr client;
-    Mask access_mode;
+int
+dixLookupDrawable(DrawablePtr *pDraw, XID id, ClientPtr client,
+                  Mask type, Mask access)
 {
-    WindowPtr	pWin;
+    DrawablePtr pTmp;
+    int rc;
 
-    client->errorValue = rid;
-    if(rid == INVALID)
-	return NULL;
-    if (client->trustLevel != XSecurityClientTrusted)
-	return (WindowPtr)SecurityLookupIDByType(client, rid, RT_WINDOW, access_mode);
-    if (client->lastDrawableID == rid)
-    {
-        if (client->lastDrawable->type == DRAWABLE_WINDOW)
-            return ((WindowPtr) client->lastDrawable);
-        return (WindowPtr) NULL;
-    }
-    pWin = (WindowPtr)SecurityLookupIDByType(client, rid, RT_WINDOW, access_mode);
-    if (pWin && pWin->drawable.type == DRAWABLE_WINDOW) {
-	client->lastDrawable = (DrawablePtr) pWin;
-	client->lastDrawableID = rid;
-	client->lastGCID = INVALID;
-	client->lastGC = (GCPtr)NULL;
-    }
-    return pWin;
+    *pDraw = NULL;
+
+    rc = dixLookupResourceByClass((pointer *) &pTmp, id, RC_DRAWABLE, client,
+                                  access);
+
+    if (rc != Success)
+        client->errorValue = id;
+
+    if (rc == BadValue)
+        return BadDrawable;
+    if (rc != Success)
+        return rc;
+    if (!((1 << pTmp->type) & (type ? type : M_DRAWABLE)))
+        return BadMatch;
+
+    *pDraw = pTmp;
+    return Success;
 }
-
-
-pointer
-SecurityLookupDrawable(rid, client, access_mode)
-    XID rid;
-    ClientPtr client;
-    Mask access_mode;
-{
-    register DrawablePtr pDraw;
-
-    if(rid == INVALID)
-	return (pointer) NULL;
-    if (client->trustLevel != XSecurityClientTrusted)
-	return (DrawablePtr)SecurityLookupIDByClass(client, rid, RC_DRAWABLE,
-						    access_mode);
-    if (client->lastDrawableID == rid)
-	return ((pointer) client->lastDrawable);
-    pDraw = (DrawablePtr)SecurityLookupIDByClass(client, rid, RC_DRAWABLE,
-						 access_mode);
-    if (pDraw && (pDraw->type != UNDRAWABLE_WINDOW))
-        return (pointer)pDraw;		
-    return (pointer)NULL;
-}
-
-/* We can't replace the LookupWindow and LookupDrawable functions with
- * macros because of compatibility with loadable servers.
- */
-
-WindowPtr
-LookupWindow(rid, client)
-    XID rid;
-    ClientPtr client;
-{
-    return SecurityLookupWindow(rid, client, SecurityUnknownAccess);
-}
-
-pointer
-LookupDrawable(rid, client)
-    XID rid;
-    ClientPtr client;
-{
-    return SecurityLookupDrawable(rid, client, SecurityUnknownAccess);
-}
-
-#else /* not XCSECURITY */
-
-WindowPtr
-LookupWindow(rid, client)
-    XID rid;
-    ClientPtr client;
-{
-    WindowPtr	pWin;
-
-    client->errorValue = rid;
-    if(rid == INVALID)
-	return NULL;
-    if (client->lastDrawableID == rid)
-    {
-        if (client->lastDrawable->type == DRAWABLE_WINDOW)
-            return ((WindowPtr) client->lastDrawable);
-        return (WindowPtr) NULL;
-    }
-    pWin = (WindowPtr)LookupIDByType(rid, RT_WINDOW);
-    if (pWin && pWin->drawable.type == DRAWABLE_WINDOW) {
-	client->lastDrawable = (DrawablePtr) pWin;
-	client->lastDrawableID = rid;
-	client->lastGCID = INVALID;
-	client->lastGC = (GCPtr)NULL;
-    }
-    return pWin;
-}
-
-
-pointer
-LookupDrawable(rid, client)
-    XID rid;
-    ClientPtr client;
-{
-    register DrawablePtr pDraw;
-
-    if(rid == INVALID)
-	return (pointer) NULL;
-    if (client->lastDrawableID == rid)
-	return ((pointer) client->lastDrawable);
-    pDraw = (DrawablePtr)LookupIDByClass(rid, RC_DRAWABLE);
-    if (pDraw && (pDraw->type != UNDRAWABLE_WINDOW))
-        return (pointer)pDraw;		
-    return (pointer)NULL;
-}
-
-#endif /* XCSECURITY */
-
-ClientPtr
-LookupClient(rid, client)
-    XID rid;
-    ClientPtr client;
-{
-    pointer pRes = (pointer)SecurityLookupIDByClass(client, rid, RC_ANY,
-						    SecurityReadAccess);
-    int clientIndex = CLIENT_ID(rid);
-
-    if (clientIndex && pRes && clients[clientIndex] && !(rid & SERVER_BIT))
-    {
-	return clients[clientIndex];
-    }
-    return (ClientPtr)NULL;
-}
-
 
 int
-AlterSaveSetForClient(client, pWin, mode)
-    ClientPtr client;
-    WindowPtr pWin;
-    unsigned mode;
+dixLookupWindow(WindowPtr *pWin, XID id, ClientPtr client, Mask access)
+{
+    int rc;
+
+    rc = dixLookupDrawable((DrawablePtr *) pWin, id, client, M_WINDOW, access);
+    /* dixLookupDrawable returns BadMatch iff id is a valid Drawable
+       but is not a Window. Users of dixLookupWindow expect a BadWindow
+       error in this case; they don't care that it's a valid non-Window XID */
+    if (rc == BadMatch)
+        rc = BadWindow;
+    /* Similarly, users of dixLookupWindow don't want BadDrawable. */
+    if (rc == BadDrawable)
+        rc = BadWindow;
+    return rc;
+}
+
+int
+dixLookupGC(GCPtr *pGC, XID id, ClientPtr client, Mask access)
+{
+    return dixLookupResourceByType((pointer *) pGC, id, RT_GC, client, access);
+}
+
+int
+dixLookupFontable(FontPtr *pFont, XID id, ClientPtr client, Mask access)
+{
+    int rc;
+    GC *pGC;
+
+    client->errorValue = id;    /* EITHER font or gc */
+    rc = dixLookupResourceByType((pointer *) pFont, id, RT_FONT, client,
+                                 access);
+    if (rc != BadFont)
+        return rc;
+    rc = dixLookupResourceByType((pointer *) &pGC, id, RT_GC, client, access);
+    if (rc == BadGC)
+        return BadFont;
+    if (rc == Success)
+        *pFont = pGC->font;
+    return rc;
+}
+
+int
+dixLookupClient(ClientPtr *pClient, XID rid, ClientPtr client, Mask access)
+{
+    pointer pRes;
+    int rc = BadValue, clientIndex = CLIENT_ID(rid);
+
+    if (!clientIndex || !clients[clientIndex] || (rid & SERVER_BIT))
+        goto bad;
+
+    rc = dixLookupResourceByClass(&pRes, rid, RC_ANY, client, DixGetAttrAccess);
+    if (rc != Success)
+        goto bad;
+
+    rc = XaceHook(XACE_CLIENT_ACCESS, client, clients[clientIndex], access);
+    if (rc != Success)
+        goto bad;
+
+    *pClient = clients[clientIndex];
+    return Success;
+ bad:
+    if (client)
+        client->errorValue = rid;
+    *pClient = NULL;
+    return rc;
+}
+
+int
+AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
+                      Bool toRoot, Bool map)
 {
     int numnow;
-    pointer *pTmp = NULL;
+    SaveSetElt *pTmp = NULL;
     int j;
 
     numnow = client->numSaved;
     j = 0;
-    if (numnow)
-    {
-	pTmp = client->saveSet;
-	while ((j < numnow) && (pTmp[j] != (pointer)pWin))
-	    j++;
+    if (numnow) {
+        pTmp = client->saveSet;
+        while ((j < numnow) && (SaveSetWindow(pTmp[j]) != (pointer) pWin))
+            j++;
     }
-    if (mode == SetModeInsert)
-    {
-	if (j < numnow)         /* duplicate */
-	   return(Success);
-	numnow++;
-	pTmp = (pointer *)xrealloc(client->saveSet, sizeof(pointer) * numnow);
-	if (!pTmp)
-	    return(BadAlloc);
-	client->saveSet = pTmp;
-       	client->numSaved = numnow;
-	client->saveSet[numnow - 1] = (pointer)pWin;
-	return(Success);
+    if (mode == SetModeInsert) {
+        if (j < numnow)         /* duplicate */
+            return Success;
+        numnow++;
+        pTmp = (SaveSetElt *) realloc(client->saveSet, sizeof(*pTmp) * numnow);
+        if (!pTmp)
+            return BadAlloc;
+        client->saveSet = pTmp;
+        client->numSaved = numnow;
+        SaveSetAssignWindow(client->saveSet[numnow - 1], pWin);
+        SaveSetAssignToRoot(client->saveSet[numnow - 1], toRoot);
+        SaveSetAssignMap(client->saveSet[numnow - 1], map);
+        return Success;
     }
-    else if ((mode == SetModeDelete) && (j < numnow))
-    {
-	while (j < numnow-1)
-	{
-           pTmp[j] = pTmp[j+1];
-	   j++;
-	}
-	numnow--;
-        if (numnow)
-	{
-    	    pTmp = (pointer *)xrealloc(client->saveSet,
-				       sizeof(pointer) * numnow);
-	    if (pTmp)
-		client->saveSet = pTmp;
-	}
-        else
-        {
-            xfree(client->saveSet);
-	    client->saveSet = (pointer *)NULL;
-	}
-	client->numSaved = numnow;
-	return(Success);
+    else if ((mode == SetModeDelete) && (j < numnow)) {
+        while (j < numnow - 1) {
+            pTmp[j] = pTmp[j + 1];
+            j++;
+        }
+        numnow--;
+        if (numnow) {
+            pTmp =
+                (SaveSetElt *) realloc(client->saveSet, sizeof(*pTmp) * numnow);
+            if (pTmp)
+                client->saveSet = pTmp;
+        }
+        else {
+            free(client->saveSet);
+            client->saveSet = (SaveSetElt *) NULL;
+        }
+        client->numSaved = numnow;
+        return Success;
     }
-    return(Success);
+    return Success;
 }
 
 void
-DeleteWindowFromAnySaveSet(pWin)
-    WindowPtr pWin;
+DeleteWindowFromAnySaveSet(WindowPtr pWin)
 {
-    register int i;
-    register ClientPtr client;
-    
-    for (i = 0; i< currentMaxClients; i++)
-    {    
-	client = clients[i];
-	if (client && client->numSaved)
-	    (void)AlterSaveSetForClient(client, pWin, SetModeDelete);
+    int i;
+    ClientPtr client;
+
+    for (i = 0; i < currentMaxClients; i++) {
+        client = clients[i];
+        if (client && client->numSaved)
+            (void) AlterSaveSetForClient(client, pWin, SetModeDelete, FALSE,
+                                         TRUE);
     }
 }
 
@@ -423,12 +355,7 @@ DeleteWindowFromAnySaveSet(pWin)
  * procedure to call than to check if there's a procedure 
  */
 void
-NoopDDA(
-#undef NeedVarargsPrototypes
-#if NeedVarargsPrototypes
-    void* f, ...
-#endif
-)
+NoopDDA(void)
 {
 }
 
@@ -436,98 +363,99 @@ typedef struct _BlockHandler {
     BlockHandlerProcPtr BlockHandler;
     WakeupHandlerProcPtr WakeupHandler;
     pointer blockData;
-    Bool    deleted;
+    Bool deleted;
 } BlockHandlerRec, *BlockHandlerPtr;
 
-static BlockHandlerPtr	handlers;
-static int		numHandlers;
-static int		sizeHandlers;
-static Bool		inHandler;
-static Bool		handlerDeleted;
+static BlockHandlerPtr handlers;
+static int numHandlers;
+static int sizeHandlers;
+static Bool inHandler;
+static Bool handlerDeleted;
 
-/* called from the OS layer */
+/**
+ * 
+ *  \param pTimeout   DIX doesn't want to know how OS represents time
+ *  \param pReadMask  nor how it represents the det of descriptors
+ */
 void
-BlockHandler(pTimeout, pReadmask)
-pointer	pTimeout;	/* DIX doesn't want to know how OS represents time */
-pointer pReadmask;	/* nor how it represents the set of descriptors */
+BlockHandler(pointer pTimeout, pointer pReadmask)
 {
-    register int i, j;
-    
+    int i, j;
+
     ++inHandler;
     for (i = 0; i < screenInfo.numScreens; i++)
-	(* screenInfo.screens[i]->BlockHandler)(i, 
-				screenInfo.screens[i]->blockData,
-				pTimeout, pReadmask);
+        (*screenInfo.screens[i]->BlockHandler) (i,
+                                                screenInfo.screens[i]->
+                                                blockData, pTimeout, pReadmask);
     for (i = 0; i < numHandlers; i++)
-	(*handlers[i].BlockHandler) (handlers[i].blockData,
-				     pTimeout, pReadmask);
-    if (handlerDeleted)
-    {
-	for (i = 0; i < numHandlers;)
-	    if (handlers[i].deleted)
-	    {
-	    	for (j = i; j < numHandlers - 1; j++)
-		    handlers[j] = handlers[j+1];
-	    	numHandlers--;
-	    }
-	    else
-		i++;
-	handlerDeleted = FALSE;
+        if (!handlers[i].deleted)
+            (*handlers[i].BlockHandler) (handlers[i].blockData,
+                                         pTimeout, pReadmask);
+    if (handlerDeleted) {
+        for (i = 0; i < numHandlers;)
+            if (handlers[i].deleted) {
+                for (j = i; j < numHandlers - 1; j++)
+                    handlers[j] = handlers[j + 1];
+                numHandlers--;
+            }
+            else
+                i++;
+        handlerDeleted = FALSE;
     }
     --inHandler;
 }
 
+/**
+ *
+ *  \param result    32 bits of undefined result from the wait
+ *  \param pReadmask the resulting descriptor mask
+ */
 void
-WakeupHandler(result, pReadmask)
-int	result;	/* 32 bits of undefined result from the wait */
-pointer pReadmask;	/* the resulting descriptor mask */
+WakeupHandler(int result, pointer pReadmask)
 {
-    register int i, j;
+    int i, j;
 
     ++inHandler;
     for (i = numHandlers - 1; i >= 0; i--)
-	(*handlers[i].WakeupHandler) (handlers[i].blockData,
-				      result, pReadmask);
+        if (!handlers[i].deleted)
+            (*handlers[i].WakeupHandler) (handlers[i].blockData,
+                                          result, pReadmask);
     for (i = 0; i < screenInfo.numScreens; i++)
-	(* screenInfo.screens[i]->WakeupHandler)(i, 
-				screenInfo.screens[i]->wakeupData,
-				result, pReadmask);
-    if (handlerDeleted)
-    {
-	for (i = 0; i < numHandlers;)
-	    if (handlers[i].deleted)
-	    {
-	    	for (j = i; j < numHandlers - 1; j++)
-		    handlers[j] = handlers[j+1];
-	    	numHandlers--;
-	    }
-	    else
-		i++;
-	handlerDeleted = FALSE;
+        (*screenInfo.screens[i]->WakeupHandler) (i,
+                                                 screenInfo.screens[i]->
+                                                 wakeupData, result, pReadmask);
+    if (handlerDeleted) {
+        for (i = 0; i < numHandlers;)
+            if (handlers[i].deleted) {
+                for (j = i; j < numHandlers - 1; j++)
+                    handlers[j] = handlers[j + 1];
+                numHandlers--;
+            }
+            else
+                i++;
+        handlerDeleted = FALSE;
     }
     --inHandler;
 }
 
-/* Reentrant with BlockHandler and WakeupHandler, except wakeup won't
+/**
+ * Reentrant with BlockHandler and WakeupHandler, except wakeup won't
  * get called until next time
  */
-
 Bool
-RegisterBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
-    BlockHandlerProcPtr blockHandler;
-    WakeupHandlerProcPtr wakeupHandler;
-    pointer blockData;
+RegisterBlockAndWakeupHandlers(BlockHandlerProcPtr blockHandler,
+                               WakeupHandlerProcPtr wakeupHandler,
+                               pointer blockData)
 {
     BlockHandlerPtr new;
 
-    if (numHandlers >= sizeHandlers)
-    {
-    	new = (BlockHandlerPtr) xrealloc (handlers, (numHandlers + 1) *
-				      	  sizeof (BlockHandlerRec));
-    	if (!new)
-	    return FALSE;
-    	handlers = new;
-	sizeHandlers = numHandlers + 1;
+    if (numHandlers >= sizeHandlers) {
+        new = (BlockHandlerPtr) realloc(handlers, (numHandlers + 1) *
+                                        sizeof(BlockHandlerRec));
+        if (!new)
+            return FALSE;
+        handlers = new;
+        sizeHandlers = numHandlers + 1;
     }
     handlers[numHandlers].BlockHandler = blockHandler;
     handlers[numHandlers].WakeupHandler = wakeupHandler;
@@ -538,37 +466,33 @@ RegisterBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
 }
 
 void
-RemoveBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
-    BlockHandlerProcPtr blockHandler;
-    WakeupHandlerProcPtr wakeupHandler;
-    pointer blockData;
+RemoveBlockAndWakeupHandlers(BlockHandlerProcPtr blockHandler,
+                             WakeupHandlerProcPtr wakeupHandler,
+                             pointer blockData)
 {
-    int	    i;
+    int i;
 
     for (i = 0; i < numHandlers; i++)
-	if (handlers[i].BlockHandler == blockHandler &&
-	    handlers[i].WakeupHandler == wakeupHandler &&
-	    handlers[i].blockData == blockData)
-	{
-	    if (inHandler)
-	    {
-		handlerDeleted = TRUE;
-		handlers[i].deleted = TRUE;
-	    }
-	    else
-	    {
-	    	for (; i < numHandlers - 1; i++)
-		    handlers[i] = handlers[i+1];
-	    	numHandlers--;
-	    }
-	    break;
-	}
+        if (handlers[i].BlockHandler == blockHandler &&
+            handlers[i].WakeupHandler == wakeupHandler &&
+            handlers[i].blockData == blockData) {
+            if (inHandler) {
+                handlerDeleted = TRUE;
+                handlers[i].deleted = TRUE;
+            }
+            else {
+                for (; i < numHandlers - 1; i++)
+                    handlers[i] = handlers[i + 1];
+                numHandlers--;
+            }
+            break;
+        }
 }
 
 void
-InitBlockAndWakeupHandlers ()
+InitBlockAndWakeupHandlers(void)
 {
-    xfree (handlers);
+    free(handlers);
     handlers = (BlockHandlerPtr) 0;
     numHandlers = 0;
     sizeHandlers = 0;
@@ -579,13 +503,13 @@ InitBlockAndWakeupHandlers ()
  * sleeps for input.
  */
 
-WorkQueuePtr		workQueue;
-static WorkQueuePtr	*workQueueLast = &workQueue;
+WorkQueuePtr workQueue;
+static WorkQueuePtr *workQueueLast = &workQueue;
 
 void
-ProcessWorkQueue()
+ProcessWorkQueue(void)
 {
-    WorkQueuePtr    q, *p;
+    WorkQueuePtr q, *p;
 
     p = &workQueue;
     /*
@@ -594,68 +518,49 @@ ProcessWorkQueue()
      * they will be called again.  This must be reentrant with
      * QueueWorkProc.
      */
-    while ((q = *p))
-    {
-	if ((*q->function) (q->client, q->closure))
-	{
-	    /* remove q from the list */
-	    *p = q->next;    /* don't fetch until after func called */
-	    xfree (q);
-	}
-	else
-	{
-	    p = &q->next;    /* don't fetch until after func called */
-	}
+    while ((q = *p)) {
+        if ((*q->function) (q->client, q->closure)) {
+            /* remove q from the list */
+            *p = q->next;       /* don't fetch until after func called */
+            free(q);
+        }
+        else {
+            p = &q->next;       /* don't fetch until after func called */
+        }
     }
     workQueueLast = p;
 }
 
 void
-ProcessWorkQueueZombies()
+ProcessWorkQueueZombies(void)
 {
-    WorkQueuePtr    q, *p;
+    WorkQueuePtr q, *p;
 
     p = &workQueue;
-    while ((q = *p))
-    {
-	if (q->client && q->client->clientGone)
-	{
-	    (void) (*q->function) (q->client, q->closure);
-	    /* remove q from the list */
-	    *p = q->next;    /* don't fetch until after func called */
-	    xfree (q);
-	}
-	else
-	{
-	    p = &q->next;    /* don't fetch until after func called */
-	}
+    while ((q = *p)) {
+        if (q->client && q->client->clientGone) {
+            (void) (*q->function) (q->client, q->closure);
+            /* remove q from the list */
+            *p = q->next;       /* don't fetch until after func called */
+            free(q);
+        }
+        else {
+            p = &q->next;       /* don't fetch until after func called */
+        }
     }
     workQueueLast = p;
 }
 
 Bool
-#if NeedFunctionPrototypes
-QueueWorkProc (
-    Bool	(*function)(
-#if NeedNestedPrototypes
-		ClientPtr	/* pClient */,
-		pointer		/* closure */
-#endif
-		),
-    ClientPtr	client,
-    pointer	closure)
-#else
-QueueWorkProc (function, client, closure)
-    Bool	(*function)();
-    ClientPtr	client;
-    pointer	closure;
-#endif
+QueueWorkProc(Bool (*function)
+              (ClientPtr /* pClient */ , pointer /* closure */ ),
+              ClientPtr client, pointer closure)
 {
-    WorkQueuePtr    q;
+    WorkQueuePtr q;
 
-    q = (WorkQueuePtr) xalloc (sizeof *q);
+    q = malloc(sizeof *q);
     if (!q)
-	return FALSE;
+        return FALSE;
     q->function = function;
     q->client = client;
     q->closure = closure;
@@ -674,27 +579,24 @@ QueueWorkProc (function, client, closure)
  */
 
 typedef struct _SleepQueue {
-    struct _SleepQueue	*next;
-    ClientPtr		client;
-    ClientSleepProcPtr  function;
-    pointer		closure;
+    struct _SleepQueue *next;
+    ClientPtr client;
+    ClientSleepProcPtr function;
+    pointer closure;
 } SleepQueueRec, *SleepQueuePtr;
 
-static SleepQueuePtr	sleepQueue = NULL;
+static SleepQueuePtr sleepQueue = NULL;
 
 Bool
-ClientSleep (client, function, closure)
-    ClientPtr	client;
-    ClientSleepProcPtr function;
-    pointer	closure;
+ClientSleep(ClientPtr client, ClientSleepProcPtr function, pointer closure)
 {
-    SleepQueuePtr   q;
+    SleepQueuePtr q;
 
-    q = (SleepQueuePtr) xalloc (sizeof *q);
+    q = malloc(sizeof *q);
     if (!q)
-	return FALSE;
+        return FALSE;
 
-    IgnoreClient (client);
+    IgnoreClient(client);
     q->next = sleepQueue;
     q->client = client;
     q->function = function;
@@ -704,51 +606,49 @@ ClientSleep (client, function, closure)
 }
 
 Bool
-ClientSignal (client)
-    ClientPtr	client;
+ClientSignal(ClientPtr client)
 {
-    SleepQueuePtr   q;
+    SleepQueuePtr q;
 
     for (q = sleepQueue; q; q = q->next)
-	if (q->client == client)
-	{
-	    return QueueWorkProc (q->function, q->client, q->closure);
-	}
+        if (q->client == client) {
+            return QueueWorkProc(q->function, q->client, q->closure);
+        }
     return FALSE;
 }
 
 void
-ClientWakeup (client)
-    ClientPtr	client;
+ClientWakeup(ClientPtr client)
 {
-    SleepQueuePtr   q, *prev;
+    SleepQueuePtr q, *prev;
 
     prev = &sleepQueue;
-    while ( (q = *prev) )
-    {
-	if (q->client == client)
-	{
-	    *prev = q->next;
-	    xfree (q);
-	    if (client->clientGone)
-		CloseDownClient(client);
-	    else
-		AttendClient (client);
-	    break;
-	}
-	prev = &q->next;
+    while ((q = *prev)) {
+        if (q->client == client) {
+            *prev = q->next;
+            free(q);
+            if (client->clientGone)
+                /* Oops -- new zombie cleanup code ensures this only
+                 * happens from inside CloseDownClient; don't want to
+                 * recurse here...
+                 */
+                /* CloseDownClient(client) */ ;
+            else
+                AttendClient(client);
+            break;
+        }
+        prev = &q->next;
     }
 }
 
 Bool
-ClientIsAsleep (client)
-    ClientPtr	client;
+ClientIsAsleep(ClientPtr client)
 {
-    SleepQueuePtr   q;
+    SleepQueuePtr q;
 
     for (q = sleepQueue; q; q = q->next)
-	if (q->client == client)
-	    return TRUE;
+        if (q->client == client)
+            return TRUE;
     return FALSE;
 }
 
@@ -761,24 +661,14 @@ ClientIsAsleep (client)
 static int numCallbackListsToCleanup = 0;
 static CallbackListPtr **listsToCleanup = NULL;
 
-static Bool 
-#if NeedFunctionPrototypes
-_AddCallback(
-    CallbackListPtr *pcbl,
-    CallbackProcPtr callback,
-    pointer         data)
-#else
-_AddCallback(pcbl, callback, data)
-    CallbackListPtr *pcbl;
-    CallbackProcPtr callback;
-    pointer         data;
-#endif
+static Bool
+_AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
 {
-    CallbackPtr     cbr;
+    CallbackPtr cbr;
 
-    cbr = (CallbackPtr) xalloc(sizeof(CallbackRec));
+    cbr = malloc(sizeof(CallbackRec));
     if (!cbr)
-	return FALSE;
+        return FALSE;
     cbr->proc = callback;
     cbr->data = data;
     cbr->next = (*pcbl)->list;
@@ -787,245 +677,182 @@ _AddCallback(pcbl, callback, data)
     return TRUE;
 }
 
-static Bool 
-#if NeedFunctionPrototypes
-_DeleteCallback(
-    CallbackListPtr *pcbl,
-    CallbackProcPtr callback,
-    pointer         data)
-#else
-_DeleteCallback(pcbl, callback, data)
-    CallbackListPtr *pcbl;
-    CallbackProcPtr callback;
-    pointer         data;
-#endif
+static Bool
+_DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
 {
     CallbackListPtr cbl = *pcbl;
-    CallbackPtr     cbr, pcbr;
+    CallbackPtr cbr, pcbr;
 
-    for (pcbr = NULL, cbr = cbl->list;
-	 cbr != NULL;
-	 pcbr = cbr, cbr = cbr->next)
-    {
-	if ((cbr->proc == callback) && (cbr->data == data))
-	    break;
+    for (pcbr = NULL, cbr = cbl->list; cbr != NULL; pcbr = cbr, cbr = cbr->next) {
+        if ((cbr->proc == callback) && (cbr->data == data))
+            break;
     }
-    if (cbr != NULL)
-    {
-	if (cbl->inCallback)
-	{
-	    ++(cbl->numDeleted);
-	    cbr->deleted = TRUE;
-	}
-	else
-	{
-	    if (pcbr == NULL)
-		cbl->list = cbr->next;
-	    else
-		pcbr->next = cbr->next;
-	    xfree(cbr);
-	}
-	return TRUE;
+    if (cbr != NULL) {
+        if (cbl->inCallback) {
+            ++(cbl->numDeleted);
+            cbr->deleted = TRUE;
+        }
+        else {
+            if (pcbr == NULL)
+                cbl->list = cbr->next;
+            else
+                pcbr->next = cbr->next;
+            free(cbr);
+        }
+        return TRUE;
     }
     return FALSE;
 }
 
-static void 
-#if NeedFunctionPrototypes
-_CallCallbacks(
-    CallbackListPtr    *pcbl,
-    pointer	    call_data)
-#else
-_CallCallbacks(pcbl, call_data)
-    CallbackListPtr    *pcbl;
-    pointer	    call_data;
-#endif
+void
+_CallCallbacks(CallbackListPtr *pcbl, pointer call_data)
 {
     CallbackListPtr cbl = *pcbl;
-    CallbackPtr     cbr, pcbr;
+    CallbackPtr cbr, pcbr;
 
     ++(cbl->inCallback);
-    for (cbr = cbl->list; cbr != NULL; cbr = cbr->next)
-    {
-	(*(cbr->proc)) (pcbl, cbr->data, call_data);
+    for (cbr = cbl->list; cbr != NULL; cbr = cbr->next) {
+        (*(cbr->proc)) (pcbl, cbr->data, call_data);
     }
     --(cbl->inCallback);
 
-    if (cbl->inCallback) return;
+    if (cbl->inCallback)
+        return;
 
     /* Was the entire list marked for deletion? */
 
-    if (cbl->deleted)
-    {
-	DeleteCallbackList(pcbl);
-	return;
+    if (cbl->deleted) {
+        DeleteCallbackList(pcbl);
+        return;
     }
 
     /* Were some individual callbacks on the list marked for deletion?
      * If so, do the deletions.
      */
 
-    if (cbl->numDeleted)
-    {
-	for (pcbr = NULL, cbr = cbl->list; (cbr != NULL) && cbl->numDeleted; )
-	{
-	    if (cbr->deleted)
-	    {
-		if (pcbr)
-		{
-		    cbr = cbr->next;
-		    xfree(pcbr->next);
-		    pcbr->next = cbr;
-		} else
-		{
-		    cbr = cbr->next;
-		    xfree(cbl->list);
-		    cbl->list = cbr;
-		}
-		cbl->numDeleted--;
-	    }
-	    else /* this one wasn't deleted */
-	    {
-		pcbr = cbr;
-		cbr = cbr->next;
-	    }
-	}
+    if (cbl->numDeleted) {
+        for (pcbr = NULL, cbr = cbl->list; (cbr != NULL) && cbl->numDeleted;) {
+            if (cbr->deleted) {
+                if (pcbr) {
+                    cbr = cbr->next;
+                    free(pcbr->next);
+                    pcbr->next = cbr;
+                }
+                else {
+                    cbr = cbr->next;
+                    free(cbl->list);
+                    cbl->list = cbr;
+                }
+                cbl->numDeleted--;
+            }
+            else {              /* this one wasn't deleted */
+
+                pcbr = cbr;
+                cbr = cbr->next;
+            }
+        }
     }
 }
 
 static void
-#if NeedFunctionPrototypes
-_DeleteCallbackList(
-    CallbackListPtr    *pcbl)
-#else
-_DeleteCallbackList(pcbl)
-    CallbackListPtr    *pcbl;
-#endif
+_DeleteCallbackList(CallbackListPtr *pcbl)
 {
     CallbackListPtr cbl = *pcbl;
-    CallbackPtr     cbr, nextcbr;
+    CallbackPtr cbr, nextcbr;
     int i;
 
-    if (cbl->inCallback)
-    {
-	cbl->deleted = TRUE;
-	return;
+    if (cbl->inCallback) {
+        cbl->deleted = TRUE;
+        return;
     }
 
-    for (i = 0; i < numCallbackListsToCleanup; i++)
-    {
-	if ((listsToCleanup[i] = pcbl) != 0)
-	{
-	    listsToCleanup[i] = NULL;
-	    break;
-	}
+    for (i = 0; i < numCallbackListsToCleanup; i++) {
+        if (listsToCleanup[i] == pcbl) {
+            listsToCleanup[i] = NULL;
+            break;
+        }
     }
 
-    for (cbr = cbl->list; cbr != NULL; cbr = nextcbr)
-    {
-	nextcbr = cbr->next;
-	xfree(cbr);
+    for (cbr = cbl->list; cbr != NULL; cbr = nextcbr) {
+        nextcbr = cbr->next;
+        free(cbr);
     }
-    xfree(cbl);
+    free(cbl);
     *pcbl = NULL;
 }
 
-static CallbackFuncsRec default_cbfuncs =
+static Bool
+CreateCallbackList(CallbackListPtr *pcbl)
 {
-    _AddCallback,
-    _DeleteCallback,
-    _CallCallbacks,
-    _DeleteCallbackList
-};
-
-/* ===== Public Procedures ===== */
-
-Bool
-CreateCallbackList(pcbl, cbfuncs)
-    CallbackListPtr  *pcbl;
-    CallbackFuncsPtr cbfuncs;
-{
-    CallbackListPtr  cbl;
+    CallbackListPtr cbl;
     int i;
 
-    if (!pcbl) return FALSE;
-    cbl = (CallbackListPtr) xalloc(sizeof(CallbackListRec));
-    if (!cbl) return FALSE;
-    cbl->funcs = cbfuncs ? *cbfuncs : default_cbfuncs;
+    if (!pcbl)
+        return FALSE;
+    cbl = malloc(sizeof(CallbackListRec));
+    if (!cbl)
+        return FALSE;
     cbl->inCallback = 0;
     cbl->deleted = FALSE;
     cbl->numDeleted = 0;
     cbl->list = NULL;
     *pcbl = cbl;
 
-    for (i = 0; i < numCallbackListsToCleanup; i++)
-    {
-	if (!listsToCleanup[i])
-	{
-	    listsToCleanup[i] = pcbl;
-	    return TRUE;
-	}    
+    for (i = 0; i < numCallbackListsToCleanup; i++) {
+        if (!listsToCleanup[i]) {
+            listsToCleanup[i] = pcbl;
+            return TRUE;
+        }
     }
 
-    listsToCleanup = (CallbackListPtr **)xnfrealloc(listsToCleanup,
-		sizeof(CallbackListPtr *) * (numCallbackListsToCleanup+1));
+    listsToCleanup = (CallbackListPtr **) xnfrealloc(listsToCleanup,
+                                                     sizeof(CallbackListPtr *) *
+                                                     (numCallbackListsToCleanup
+                                                      + 1));
     listsToCleanup[numCallbackListsToCleanup] = pcbl;
     numCallbackListsToCleanup++;
     return TRUE;
 }
 
-Bool 
-AddCallback(pcbl, callback, data)
-    CallbackListPtr *pcbl;
-    CallbackProcPtr callback;
-    pointer         data;
+/* ===== Public Procedures ===== */
+
+Bool
+AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
 {
-    if (!pcbl) return FALSE;
-    if (!*pcbl)
-    {	/* list hasn't been created yet; go create it */
-	if (!CreateCallbackList(pcbl, (CallbackFuncsPtr)NULL))
-	    return FALSE;
+    if (!pcbl)
+        return FALSE;
+    if (!*pcbl) {               /* list hasn't been created yet; go create it */
+        if (!CreateCallbackList(pcbl))
+            return FALSE;
     }
-    return ((*(*pcbl)->funcs.AddCallback) (pcbl, callback, data));
+    return _AddCallback(pcbl, callback, data);
 }
 
-Bool 
-DeleteCallback(pcbl, callback, data)
-    CallbackListPtr *pcbl;
-    CallbackProcPtr callback;
-    pointer         data;
+Bool
+DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
 {
-    if (!pcbl || !*pcbl) return FALSE;
-    return ((*(*pcbl)->funcs.DeleteCallback) (pcbl, callback, data));
-}
-
-void 
-CallCallbacks(pcbl, call_data)
-    CallbackListPtr    *pcbl;
-    pointer	    call_data;
-{
-    if (!pcbl || !*pcbl) return;
-    (*(*pcbl)->funcs.CallCallbacks) (pcbl, call_data);
+    if (!pcbl || !*pcbl)
+        return FALSE;
+    return _DeleteCallback(pcbl, callback, data);
 }
 
 void
-DeleteCallbackList(pcbl)
-    CallbackListPtr    *pcbl;
+DeleteCallbackList(CallbackListPtr *pcbl)
 {
-    if (!pcbl || !*pcbl) return;
-    (*(*pcbl)->funcs.DeleteCallbackList) (pcbl);
+    if (!pcbl || !*pcbl)
+        return;
+    _DeleteCallbackList(pcbl);
 }
 
-void 
-InitCallbackManager()
+void
+InitCallbackManager(void)
 {
     int i;
 
-    for (i = 0; i < numCallbackListsToCleanup; i++)
-    {
-	DeleteCallbackList(listsToCleanup[i]);
+    for (i = 0; i < numCallbackListsToCleanup; i++) {
+        DeleteCallbackList(listsToCleanup[i]);
     }
-    if (listsToCleanup) xfree(listsToCleanup);
+    free(listsToCleanup);
 
     numCallbackListsToCleanup = 0;
     listsToCleanup = NULL;

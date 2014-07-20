@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType auxiliary PostScript module implementation (body).          */
 /*                                                                         */
-/*  Copyright 2000-2001, 2002 by                                           */
+/*  Copyright 2000-2001, 2002, 2003, 2006 by                               */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -21,6 +21,10 @@
 #include "psobjs.h"
 #include "t1decode.h"
 #include "t1cmap.h"
+
+#ifndef T1_CONFIG_OPTION_NO_AFM
+#include "afmparse.h"
+#endif
 
 
   FT_CALLBACK_TABLE_DEF
@@ -39,9 +43,10 @@
     ps_parser_init,
     ps_parser_done,
     ps_parser_skip_spaces,
-    ps_parser_skip_alpha,
+    ps_parser_skip_PS_token,
     ps_parser_to_int,
     ps_parser_to_fixed,
+    ps_parser_to_bytes,
     ps_parser_to_coord_array,
     ps_parser_to_fixed_array,
     ps_parser_to_token,
@@ -74,6 +79,17 @@
   };
 
 
+#ifndef T1_CONFIG_OPTION_NO_AFM
+  FT_CALLBACK_TABLE_DEF
+  const AFM_Parser_FuncsRec  afm_parser_funcs =
+  {
+    afm_parser_init,
+    afm_parser_done,
+    afm_parser_parse
+  };
+#endif
+
+
   FT_CALLBACK_TABLE_DEF
   const T1_CMap_ClassesRec  t1_cmap_classes =
   {
@@ -91,10 +107,15 @@
     &ps_parser_funcs,
     &t1_builder_funcs,
     &t1_decoder_funcs,
-
     t1_decrypt,
-    
+
     (const T1_CMap_ClassesRec*) &t1_cmap_classes,
+
+#ifndef T1_CONFIG_OPTION_NO_AFM
+    &afm_parser_funcs,
+#else
+    0,
+#endif
   };
 
 
@@ -102,9 +123,9 @@
   const FT_Module_Class  psaux_module_class =
   {
     0,
-    sizeof( FT_ModuleRec ),
+    sizeof ( FT_ModuleRec ),
     "psaux",
-    0x10000L,
+    0x20000L,
     0x20000L,
 
     &psaux_interface,  /* module-specific interface */

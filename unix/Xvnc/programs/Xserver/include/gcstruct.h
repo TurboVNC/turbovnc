@@ -1,14 +1,12 @@
-/* $XConsortium: gcstruct.h,v 5.10 94/04/17 20:25:45 dpw Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -52,68 +49,42 @@ SOFTWARE.
 
 #include "gc.h"
 
-#include "miscstruct.h"
+#include "regionstr.h"
 #include "region.h"
 #include "pixmap.h"
 #include "screenint.h"
-#include "Xprotostr.h"
+#include "privates.h"
+#include <X11/Xprotostr.h>
+
+#define GCAllBits ((1 << (GCLastBit + 1)) - 1)
 
 /*
  * functions which modify the state of the GC
  */
 
 typedef struct _GCFuncs {
-    void	(* ValidateGC)(
-#if NeedNestedPrototypes
-		GCPtr /*pGC*/,
-		unsigned long /*stateChanges*/,
-		DrawablePtr /*pDrawable*/
-#endif
-);
+    void (*ValidateGC) (GCPtr /*pGC */ ,
+                        unsigned long /*stateChanges */ ,
+                        DrawablePtr /*pDrawable */ );
 
-    void	(* ChangeGC)(
-#if NeedNestedPrototypes
-		GCPtr /*pGC*/,
-		unsigned long /*mask*/
-#endif
-);
+    void (*ChangeGC) (GCPtr /*pGC */ ,
+                      unsigned long /*mask */ );
 
-    void	(* CopyGC)(
-#if NeedNestedPrototypes
-		GCPtr /*pGCSrc*/,
-		unsigned long /*mask*/,
-		GCPtr /*pGCDst*/
-#endif
-);
+    void (*CopyGC) (GCPtr /*pGCSrc */ ,
+                    unsigned long /*mask */ ,
+                    GCPtr /*pGCDst */ );
 
-    void	(* DestroyGC)(
-#if NeedNestedPrototypes
-		GCPtr /*pGC*/
-#endif
-);
+    void (*DestroyGC) (GCPtr /*pGC */ );
 
-    void	(* ChangeClip)(
-#if NeedNestedPrototypes
-		GCPtr /*pGC*/,
-		int /*type*/,
-		pointer /*pvalue*/,
-		int /*nrects*/
-#endif
-);
+    void (*ChangeClip) (GCPtr /*pGC */ ,
+                        int /*type */ ,
+                        pointer /*pvalue */ ,
+                        int /*nrects */ );
 
-    void	(* DestroyClip)(
-#if NeedNestedPrototypes
-		GCPtr /*pGC*/
-#endif
-);
+    void (*DestroyClip) (GCPtr /*pGC */ );
 
-    void	(* CopyClip)(
-#if NeedNestedPrototypes
-		GCPtr /*pgcDst*/,
-		GCPtr /*pgcSrc*/
-#endif
-);
-    DevUnion	devPrivate;
+    void (*CopyClip) (GCPtr /*pgcDst */ ,
+                      GCPtr /*pgcSrc */ );
 } GCFuncs;
 
 /*
@@ -121,277 +92,201 @@ typedef struct _GCFuncs {
  */
 
 typedef struct _GCOps {
-    void	(* FillSpans)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*nInit*/,
-		DDXPointPtr /*pptInit*/,
-		int * /*pwidthInit*/,
-		int /*fSorted*/
-#endif
-);
+    void (*FillSpans) (DrawablePtr /*pDrawable */ ,
+                       GCPtr /*pGC */ ,
+                       int /*nInit */ ,
+                       DDXPointPtr /*pptInit */ ,
+                       int * /*pwidthInit */ ,
+                       int /*fSorted */ );
 
-    void	(* SetSpans)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		char * /*psrc*/,
-		DDXPointPtr /*ppt*/,
-		int * /*pwidth*/,
-		int /*nspans*/,
-		int /*fSorted*/
-#endif
-);
+    void (*SetSpans) (DrawablePtr /*pDrawable */ ,
+                      GCPtr /*pGC */ ,
+                      char * /*psrc */ ,
+                      DDXPointPtr /*ppt */ ,
+                      int * /*pwidth */ ,
+                      int /*nspans */ ,
+                      int /*fSorted */ );
 
-    void	(* PutImage)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*depth*/,
-		int /*x*/,
-		int /*y*/,
-		int /*w*/,
-		int /*h*/,
-		int /*leftPad*/,
-		int /*format*/,
-		char * /*pBits*/
-#endif
-);
+    void (*PutImage) (DrawablePtr /*pDrawable */ ,
+                      GCPtr /*pGC */ ,
+                      int /*depth */ ,
+                      int /*x */ ,
+                      int /*y */ ,
+                      int /*w */ ,
+                      int /*h */ ,
+                      int /*leftPad */ ,
+                      int /*format */ ,
+                      char * /*pBits */ );
 
-    RegionPtr	(* CopyArea)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pSrc*/,
-		DrawablePtr /*pDst*/,
-		GCPtr /*pGC*/,
-		int /*srcx*/,
-		int /*srcy*/,
-		int /*w*/,
-		int /*h*/,
-		int /*dstx*/,
-		int /*dsty*/
-#endif
-);
+    RegionPtr (*CopyArea) (DrawablePtr /*pSrc */ ,
+                           DrawablePtr /*pDst */ ,
+                           GCPtr /*pGC */ ,
+                           int /*srcx */ ,
+                           int /*srcy */ ,
+                           int /*w */ ,
+                           int /*h */ ,
+                           int /*dstx */ ,
+                           int /*dsty */ );
 
-    RegionPtr	(* CopyPlane)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pSrcDrawable*/,
-		DrawablePtr /*pDstDrawable*/,
-		GCPtr /*pGC*/,
-		int /*srcx*/,
-		int /*srcy*/,
-		int /*width*/,
-		int /*height*/,
-		int /*dstx*/,
-		int /*dsty*/,
-		unsigned long /*bitPlane*/
-#endif
-);
-    void	(* PolyPoint)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*mode*/,
-		int /*npt*/,
-		DDXPointPtr /*pptInit*/
-#endif
-);
+    RegionPtr (*CopyPlane) (DrawablePtr /*pSrcDrawable */ ,
+                            DrawablePtr /*pDstDrawable */ ,
+                            GCPtr /*pGC */ ,
+                            int /*srcx */ ,
+                            int /*srcy */ ,
+                            int /*width */ ,
+                            int /*height */ ,
+                            int /*dstx */ ,
+                            int /*dsty */ ,
+                            unsigned long /*bitPlane */ );
+    void (*PolyPoint) (DrawablePtr /*pDrawable */ ,
+                       GCPtr /*pGC */ ,
+                       int /*mode */ ,
+                       int /*npt */ ,
+                       DDXPointPtr /*pptInit */ );
 
-    void	(* Polylines)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*mode*/,
-		int /*npt*/,
-		DDXPointPtr /*pptInit*/
-#endif
-);
+    void (*Polylines) (DrawablePtr /*pDrawable */ ,
+                       GCPtr /*pGC */ ,
+                       int /*mode */ ,
+                       int /*npt */ ,
+                       DDXPointPtr /*pptInit */ );
 
-    void	(* PolySegment)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*nseg*/,
-		xSegment * /*pSegs*/
-#endif
-);
+    void (*PolySegment) (DrawablePtr /*pDrawable */ ,
+                         GCPtr /*pGC */ ,
+                         int /*nseg */ ,
+                         xSegment * /*pSegs */ );
 
-    void	(* PolyRectangle)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*nrects*/,
-		xRectangle * /*pRects*/
-#endif
-);
+    void (*PolyRectangle) (DrawablePtr /*pDrawable */ ,
+                           GCPtr /*pGC */ ,
+                           int /*nrects */ ,
+                           xRectangle * /*pRects */ );
 
-    void	(* PolyArc)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*narcs*/,
-		xArc * /*parcs*/
-#endif
-);
+    void (*PolyArc) (DrawablePtr /*pDrawable */ ,
+                     GCPtr /*pGC */ ,
+                     int /*narcs */ ,
+                     xArc * /*parcs */ );
 
-    void	(* FillPolygon)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*shape*/,
-		int /*mode*/,
-		int /*count*/,
-		DDXPointPtr /*pPts*/
-#endif
-);
+    void (*FillPolygon) (DrawablePtr /*pDrawable */ ,
+                         GCPtr /*pGC */ ,
+                         int /*shape */ ,
+                         int /*mode */ ,
+                         int /*count */ ,
+                         DDXPointPtr /*pPts */ );
 
-    void	(* PolyFillRect)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*nrectFill*/,
-		xRectangle * /*prectInit*/
-#endif
-);
+    void (*PolyFillRect) (DrawablePtr /*pDrawable */ ,
+                          GCPtr /*pGC */ ,
+                          int /*nrectFill */ ,
+                          xRectangle * /*prectInit */ );
 
-    void	(* PolyFillArc)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*narcs*/,
-		xArc * /*parcs*/
-#endif
-);
+    void (*PolyFillArc) (DrawablePtr /*pDrawable */ ,
+                         GCPtr /*pGC */ ,
+                         int /*narcs */ ,
+                         xArc * /*parcs */ );
 
-    int		(* PolyText8)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*x*/,
-		int /*y*/,
-		int /*count*/,
-		char * /*chars*/
-#endif
-);
+    int (*PolyText8) (DrawablePtr /*pDrawable */ ,
+                      GCPtr /*pGC */ ,
+                      int /*x */ ,
+                      int /*y */ ,
+                      int /*count */ ,
+                      char * /*chars */ );
 
-    int		(* PolyText16)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*x*/,
-		int /*y*/,
-		int /*count*/,
-		unsigned short * /*chars*/
-#endif
-);
+    int (*PolyText16) (DrawablePtr /*pDrawable */ ,
+                       GCPtr /*pGC */ ,
+                       int /*x */ ,
+                       int /*y */ ,
+                       int /*count */ ,
+                       unsigned short * /*chars */ );
 
-    void	(* ImageText8)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*x*/,
-		int /*y*/,
-		int /*count*/,
-		char * /*chars*/
-#endif
-);
+    void (*ImageText8) (DrawablePtr /*pDrawable */ ,
+                        GCPtr /*pGC */ ,
+                        int /*x */ ,
+                        int /*y */ ,
+                        int /*count */ ,
+                        char * /*chars */ );
 
-    void	(* ImageText16)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*x*/,
-		int /*y*/,
-		int /*count*/,
-		unsigned short * /*chars*/
-#endif
-);
+    void (*ImageText16) (DrawablePtr /*pDrawable */ ,
+                         GCPtr /*pGC */ ,
+                         int /*x */ ,
+                         int /*y */ ,
+                         int /*count */ ,
+                         unsigned short * /*chars */ );
 
-    void	(* ImageGlyphBlt)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*x*/,
-		int /*y*/,
-		unsigned int /*nglyph*/,
-		CharInfoPtr * /*ppci*/,
-		pointer /*pglyphBase*/
-#endif
-);
+    void (*ImageGlyphBlt) (DrawablePtr /*pDrawable */ ,
+                           GCPtr /*pGC */ ,
+                           int /*x */ ,
+                           int /*y */ ,
+                           unsigned int /*nglyph */ ,
+                           CharInfoPtr * /*ppci */ ,
+                           pointer /*pglyphBase */ );
 
-    void	(* PolyGlyphBlt)(
-#if NeedNestedPrototypes
-		DrawablePtr /*pDrawable*/,
-		GCPtr /*pGC*/,
-		int /*x*/,
-		int /*y*/,
-		unsigned int /*nglyph*/,
-		CharInfoPtr * /*ppci*/,
-		pointer /*pglyphBase*/
-#endif
-);
+    void (*PolyGlyphBlt) (DrawablePtr /*pDrawable */ ,
+                          GCPtr /*pGC */ ,
+                          int /*x */ ,
+                          int /*y */ ,
+                          unsigned int /*nglyph */ ,
+                          CharInfoPtr * /*ppci */ ,
+                          pointer /*pglyphBase */ );
 
-    void	(* PushPixels)(
-#if NeedNestedPrototypes
-		GCPtr /*pGC*/,
-		PixmapPtr /*pBitMap*/,
-		DrawablePtr /*pDst*/,
-		int /*w*/,
-		int /*h*/,
-		int /*x*/,
-		int /*y*/
-#endif
-);
-
-#ifdef NEED_LINEHELPER
-    void	(* LineHelper)();
-#endif
-
-    DevUnion	devPrivate;
+    void (*PushPixels) (GCPtr /*pGC */ ,
+                        PixmapPtr /*pBitMap */ ,
+                        DrawablePtr /*pDst */ ,
+                        int /*w */ ,
+                        int /*h */ ,
+                        int /*x */ ,
+                        int /*y */ );
 } GCOps;
 
 /* there is padding in the bit fields because the Sun compiler doesn't
  * force alignment to 32-bit boundaries.  losers.
  */
 typedef struct _GC {
-    ScreenPtr		pScreen;		
-    unsigned char	depth;    
-    unsigned char	alu;
-    unsigned short	lineWidth;          
-    unsigned short	dashOffset;
-    unsigned short	numInDashList;
-    unsigned char	*dash;
-    unsigned int	lineStyle : 2;
-    unsigned int	capStyle : 2;
-    unsigned int	joinStyle : 2;
-    unsigned int	fillStyle : 2;
-    unsigned int	fillRule : 1;
-    unsigned int 	arcMode : 1;
-    unsigned int	subWindowMode : 1;
-    unsigned int	graphicsExposures : 1;
-    unsigned int	clientClipType : 2; /* CT_<kind> */
-    unsigned int	miTranslate:1; /* should mi things translate? */
-    unsigned int	tileIsPixel:1; /* tile is solid pixel */
-    unsigned int	unused:16; /* see comment above */
-    unsigned long	planemask;
-    unsigned long	fgPixel;
-    unsigned long	bgPixel;
+    ScreenPtr pScreen;
+    unsigned char depth;
+    unsigned char alu;
+    unsigned short lineWidth;
+    unsigned short dashOffset;
+    unsigned short numInDashList;
+    unsigned char *dash;
+    unsigned int lineStyle:2;
+    unsigned int capStyle:2;
+    unsigned int joinStyle:2;
+    unsigned int fillStyle:2;
+    unsigned int fillRule:1;
+    unsigned int arcMode:1;
+    unsigned int subWindowMode:1;
+    unsigned int graphicsExposures:1;
+    unsigned int clientClipType:2;      /* CT_<kind> */
+    unsigned int miTranslate:1; /* should mi things translate? */
+    unsigned int tileIsPixel:1; /* tile is solid pixel */
+    unsigned int fExpose:1;     /* Call exposure handling */
+    unsigned int freeCompClip:1;        /* Free composite clip */
+    unsigned int scratch_inuse:1;       /* is this GC in a pool for reuse? */
+    unsigned int unused:13;     /* see comment above */
+    unsigned long planemask;
+    unsigned long fgPixel;
+    unsigned long bgPixel;
     /*
      * alas -- both tile and stipple must be here as they
      * are independently specifiable
      */
-    PixUnion		tile;
-    PixmapPtr		stipple;
-    DDXPointRec		patOrg;		/* origin for (tile, stipple) */
-    struct _Font	*font;
-    DDXPointRec		clipOrg;
-    DDXPointRec		lastWinOrg;	/* position of window last validated */
-    pointer		clientClip;
-    unsigned long	stateChanges;	/* masked with GC_<kind> */
-    unsigned long       serialNumber;
-    GCFuncs		*funcs;
-    GCOps		*ops;
-    DevUnion		*devPrivates;
+    PixUnion tile;
+    PixmapPtr stipple;
+    DDXPointRec patOrg;         /* origin for (tile, stipple) */
+    struct _Font *font;
+    DDXPointRec clipOrg;
+    pointer clientClip;
+    unsigned long stateChanges; /* masked with GC_<kind> */
+    unsigned long serialNumber;
+    GCFuncs *funcs;
+    GCOps *ops;
+    PrivateRec *devPrivates;
+    /*
+     * The following were moved here from private storage to allow device-
+     * independent access to them from screen wrappers.
+     * --- 1997.11.03  Marc Aurele La France (tsi@xfree86.org)
+     */
+    PixmapPtr pRotatedPixmap;   /* tile/stipple rotated for alignment */
+    RegionPtr pCompositeClip;
+    /* fExpose & freeCompClip defined above */
 } GC;
 
-#endif /* GCSTRUCT_H */
+#endif                          /* GCSTRUCT_H */

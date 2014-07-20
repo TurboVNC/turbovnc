@@ -1,13 +1,12 @@
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -46,11 +44,14 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $XConsortium: atom.c,v 1.30 94/04/17 20:26:16 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/dix/atom.c,v 3.0 1996/04/15 11:19:31 dawes Exp $ */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
-#include "X.h"
-#include "Xatom.h"
+#include <X11/X.h>
+#include <X11/Xatom.h>
+#include <stdio.h>
+#include <string.h>
 #include "misc.h"
 #include "resource.h"
 #include "dix.h"
@@ -58,157 +59,152 @@ SOFTWARE.
 #define InitialTableSize 100
 
 typedef struct _Node {
-    struct _Node   *left,   *right;
+    struct _Node *left, *right;
     Atom a;
     unsigned int fingerPrint;
-    char   *string;
+    const char *string;
 } NodeRec, *NodePtr;
 
 static Atom lastAtom = None;
-static NodePtr atomRoot = (NodePtr)NULL;
+static NodePtr atomRoot = NULL;
 static unsigned long tableLength;
 static NodePtr *nodeTable;
 
-Atom 
-MakeAtom(string, len, makeit)
-    char *string;
-    unsigned len;
-    Bool makeit;
+void FreeAtom(NodePtr patom);
+
+Atom
+MakeAtom(const char *string, unsigned len, Bool makeit)
 {
-    register    NodePtr * np;
+    NodePtr *np;
     unsigned i;
-    int     comp;
-    register unsigned int   fp = 0;
+    int comp;
+    unsigned int fp = 0;
 
     np = &atomRoot;
-    for (i = 0; i < (len+1)/2; i++)
-    {
-	fp = fp * 27 + string[i];
-	fp = fp * 27 + string[len - 1 - i];
+    for (i = 0; i < (len + 1) / 2; i++) {
+        fp = fp * 27 + string[i];
+        fp = fp * 27 + string[len - 1 - i];
     }
-    while (*np != (NodePtr) NULL)
-    {
-	if (fp < (*np)->fingerPrint)
-	    np = &((*np)->left);
-	else if (fp > (*np)->fingerPrint)
-	    np = &((*np)->right);
-	else
-	{			       /* now start testing the strings */
-	    comp = strncmp(string, (*np)->string, (int)len);
-	    if ((comp < 0) || ((comp == 0) && (len < strlen((*np)->string))))
-		np = &((*np)->left);
-	    else if (comp > 0)
-		np = &((*np)->right);
-	    else
-		return(*np)->a;
-	    }
+    while (*np != NULL) {
+        if (fp < (*np)->fingerPrint)
+            np = &((*np)->left);
+        else if (fp > (*np)->fingerPrint)
+            np = &((*np)->right);
+        else {                  /* now start testing the strings */
+            comp = strncmp(string, (*np)->string, (int) len);
+            if ((comp < 0) || ((comp == 0) && (len < strlen((*np)->string))))
+                np = &((*np)->left);
+            else if (comp > 0)
+                np = &((*np)->right);
+            else
+                return (*np)->a;
+        }
     }
-    if (makeit)
-    {
-	register NodePtr nd;
+    if (makeit) {
+        NodePtr nd;
 
-	nd = (NodePtr) xalloc(sizeof(NodeRec));
-	if (!nd)
-	    return BAD_RESOURCE;
-	if (lastAtom < XA_LAST_PREDEFINED)
-	{
-	    nd->string = string;
-	}
-	else
-	{
-	    nd->string = (char *) xalloc(len + 1);
-	    if (!nd->string) {
-		xfree(nd);
-		return BAD_RESOURCE;
-	    }
-	    strncpy(nd->string, string, (int)len);
-	    nd->string[len] = 0;
-	}
-	if ((lastAtom + 1) >= tableLength) {
-	    NodePtr *table;
+        nd = malloc(sizeof(NodeRec));
+        if (!nd)
+            return BAD_RESOURCE;
+        if (lastAtom < XA_LAST_PREDEFINED) {
+            nd->string = string;
+        }
+        else {
+            nd->string = strndup(string, len);
+            if (!nd->string) {
+                free(nd);
+                return BAD_RESOURCE;
+            }
+        }
+        if ((lastAtom + 1) >= tableLength) {
+            NodePtr *table;
 
-	    table = (NodePtr *) xrealloc(nodeTable,
-					 tableLength * (2 * sizeof(NodePtr)));
-	    if (!table) {
-		if (nd->string != string)
-		    xfree(nd->string);
-		xfree(nd);
-		return BAD_RESOURCE;
-	    }
-	    tableLength <<= 1;
-	    nodeTable = table;
-	}
-	*np = nd;
-	nd->left = nd->right = (NodePtr) NULL;
-	nd->fingerPrint = fp;
-	nd->a = (++lastAtom);
-	*(nodeTable+lastAtom) = nd;
-	return nd->a;
+            table = realloc(nodeTable, tableLength * (2 * sizeof(NodePtr)));
+            if (!table) {
+                if (nd->string != string) {
+                    /* nd->string has been strdup'ed */
+                    free((char *) nd->string);
+                }
+                free(nd);
+                return BAD_RESOURCE;
+            }
+            tableLength <<= 1;
+            nodeTable = table;
+        }
+        *np = nd;
+        nd->left = nd->right = NULL;
+        nd->fingerPrint = fp;
+        nd->a = ++lastAtom;
+        nodeTable[lastAtom] = nd;
+        return nd->a;
     }
     else
-	return None;
+        return None;
 }
 
 Bool
-ValidAtom(atom)
-    Atom atom;
+ValidAtom(Atom atom)
 {
     return (atom != None) && (atom <= lastAtom);
 }
 
-char *
-NameForAtom(atom)
-    Atom atom;
+const char *
+NameForAtom(Atom atom)
 {
     NodePtr node;
-    if (atom > lastAtom) return 0;
-    if ((node = nodeTable[atom]) == (NodePtr)NULL) return 0;
+
+    if (atom > lastAtom)
+        return 0;
+    if ((node = nodeTable[atom]) == NULL)
+        return 0;
     return node->string;
 }
 
 void
-AtomError()
+AtomError(void)
 {
     FatalError("initializing atoms");
 }
 
 void
-FreeAtom(patom)
-    NodePtr patom;
+FreeAtom(NodePtr patom)
 {
-    if(patom->left)
-	FreeAtom(patom->left);
-    if(patom->right)
-	FreeAtom(patom->right);
-    if (patom->a > XA_LAST_PREDEFINED)
-	xfree(patom->string);
-    xfree(patom);
+    if (patom->left)
+        FreeAtom(patom->left);
+    if (patom->right)
+        FreeAtom(patom->right);
+    if (patom->a > XA_LAST_PREDEFINED) {
+        /*
+         * All strings above XA_LAST_PREDEFINED are strdup'ed, so it's safe to
+         * cast here
+         */
+        free((char *) patom->string);
+    }
+    free(patom);
 }
 
 void
-FreeAllAtoms()
+FreeAllAtoms(void)
 {
-    if(atomRoot == (NodePtr)NULL)
-	return;
+    if (atomRoot == NULL)
+        return;
     FreeAtom(atomRoot);
-    atomRoot = (NodePtr)NULL;
-    xfree(nodeTable);
-    nodeTable = (NodePtr *)NULL;
+    atomRoot = NULL;
+    free(nodeTable);
+    nodeTable = NULL;
     lastAtom = None;
 }
 
 void
-InitAtoms()
+InitAtoms(void)
 {
     FreeAllAtoms();
     tableLength = InitialTableSize;
-    nodeTable = (NodePtr *)xalloc(InitialTableSize*sizeof(NodePtr));
+    nodeTable = malloc(InitialTableSize * sizeof(NodePtr));
     if (!nodeTable)
-	AtomError();
-    nodeTable[None] = (NodePtr)NULL;
+        AtomError();
+    nodeTable[None] = NULL;
     MakePredeclaredAtoms();
     if (lastAtom != XA_LAST_PREDEFINED)
-	AtomError ();
+        AtomError();
 }
-
-    

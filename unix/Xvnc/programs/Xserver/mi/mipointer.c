@@ -1,20 +1,12 @@
 /*
- * mipointer.c
- */
 
-/* $XConsortium: mipointer.c,v 5.24 94/04/17 20:27:39 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/mi/mipointer.c,v 3.1 1996/03/10 12:12:44 dawes Exp $ */
+Copyright 1989, 1998  The Open Group
 
-/*
-
-Copyright (c) 1989  X Consortium
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -22,82 +14,122 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 */
 
-# define NEED_EVENTS
-# include   "X.h"
-# include   "Xmd.h"
-# include   "Xproto.h"
-# include   "misc.h"
-# include   "windowstr.h"
-# include   "pixmapstr.h"
-# include   "mi.h"
-# include   "scrnintstr.h"
-# include   "mipointrst.h"
-# include   "cursorstr.h"
-# include   "dixstruct.h"
-
-static int  miPointerScreenIndex;
-static unsigned long miPointerGeneration = 0;
-
-#define GetScreenPrivate(s) ((miPointerScreenPtr) ((s)->devPrivates[miPointerScreenIndex].ptr))
-#define SetupScreen(s)	miPointerScreenPtr  pScreenPriv = GetScreenPrivate(s)
-
-/*
- * until more than one pointer device exists.
+/**
+ * @file
+ * This file contains functions to move the pointer on the screen and/or
+ * restrict its movement. These functions are divided into two sets:
+ * Screen-specific functions that are used as function pointers from other
+ * parts of the server (and end up heavily wrapped by e.g. animcur and
+ * xfixes):
+ *      miPointerConstrainCursor
+ *      miPointerCursorLimits
+ *      miPointerDisplayCursor
+ *      miPointerRealizeCursor
+ *      miPointerUnrealizeCursor
+ *      miPointerSetCursorPosition
+ *      miRecolorCursor
+ *      miPointerDeviceInitialize
+ *      miPointerDeviceCleanup
+ * If wrapped, these are the last element in the wrapping chain. They may
+ * call into sprite-specific code through further function pointers though.
+ *
+ * The second type of functions are those that are directly called by the
+ * DIX, DDX and some drivers.
  */
 
-static miPointerRec miPointer;
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
-static Bool miPointerRealizeCursor (),	    miPointerUnrealizeCursor ();
-static Bool miPointerDisplayCursor ();
-static void miPointerConstrainCursor (),    miPointerPointerNonInterestBox();
-static void miPointerCursorLimits ();
-static Bool miPointerSetCursorPosition ();
+#include   <X11/X.h>
+#include   <X11/Xmd.h>
+#include   <X11/Xproto.h>
+#include   "misc.h"
+#include   "windowstr.h"
+#include   "pixmapstr.h"
+#include   "mi.h"
+#include   "scrnintstr.h"
+#include   "mipointrst.h"
+#include   "cursorstr.h"
+#include   "dixstruct.h"
+#include   "inputstr.h"
+#include   "inpututils.h"
+#include   "eventstr.h"
 
-static Bool miPointerCloseScreen();
+DevPrivateKeyRec miPointerScreenKeyRec;
 
-static void miPointerMove ();
+#define GetScreenPrivate(s) ((miPointerScreenPtr) \
+    dixLookupPrivate(&(s)->devPrivates, miPointerScreenKey))
+#define SetupScreen(s)	miPointerScreenPtr  pScreenPriv = GetScreenPrivate(s)
+
+DevPrivateKeyRec miPointerPrivKeyRec;
+
+#define MIPOINTER(dev) \
+    (IsFloating(dev) ? \
+        (miPointerPtr)dixLookupPrivate(&(dev)->devPrivates, miPointerPrivKey): \
+        (miPointerPtr)dixLookupPrivate(&(GetMaster(dev, MASTER_POINTER))->devPrivates, miPointerPrivKey))
+
+static Bool miPointerRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+                                   CursorPtr pCursor);
+static Bool miPointerUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+                                     CursorPtr pCursor);
+static Bool miPointerDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+                                   CursorPtr pCursor);
+static void miPointerConstrainCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+                                     BoxPtr pBox);
+static void miPointerCursorLimits(DeviceIntPtr pDev, ScreenPtr pScreen,
+                                  CursorPtr pCursor, BoxPtr pHotBox,
+                                  BoxPtr pTopLeftBox);
+static Bool miPointerSetCursorPosition(DeviceIntPtr pDev, ScreenPtr pScreen,
+                                       int x, int y, Bool generateEvent);
+static Bool miPointerCloseScreen(int index, ScreenPtr pScreen);
+static void miPointerMove(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y);
+static Bool miPointerDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen);
+static void miPointerDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen);
+static void miPointerMoveNoEvent(DeviceIntPtr pDev, ScreenPtr pScreen, int x,
+                                 int y);
+
+static InternalEvent *events;   /* for WarpPointer MotionNotifies */
 
 Bool
-miPointerInitialize (pScreen, spriteFuncs, screenFuncs, waitForUpdate)
-    ScreenPtr		    pScreen;
-    miPointerSpriteFuncPtr  spriteFuncs;
-    miPointerScreenFuncPtr  screenFuncs;
-    Bool		    waitForUpdate;
+miPointerInitialize(ScreenPtr pScreen,
+                    miPointerSpriteFuncPtr spriteFuncs,
+                    miPointerScreenFuncPtr screenFuncs, Bool waitForUpdate)
 {
-    miPointerScreenPtr	pScreenPriv;
+    miPointerScreenPtr pScreenPriv;
 
-    if (miPointerGeneration != serverGeneration)
-    {
-	miPointerScreenIndex = AllocateScreenPrivateIndex();
-	if (miPointerScreenIndex < 0)
-	    return FALSE;
-	miPointerGeneration = serverGeneration;
-    }
-    pScreenPriv = (miPointerScreenPtr) xalloc (sizeof (miPointerScreenRec));
+    if (!dixRegisterPrivateKey(&miPointerScreenKeyRec, PRIVATE_SCREEN, 0))
+        return FALSE;
+
+    if (!dixRegisterPrivateKey(&miPointerPrivKeyRec, PRIVATE_DEVICE, 0))
+        return FALSE;
+
+    pScreenPriv = malloc(sizeof(miPointerScreenRec));
     if (!pScreenPriv)
-	return FALSE;
+        return FALSE;
     pScreenPriv->spriteFuncs = spriteFuncs;
     pScreenPriv->screenFuncs = screenFuncs;
     /*
      * check for uninitialized methods
      */
     if (!screenFuncs->EnqueueEvent)
-	screenFuncs->EnqueueEvent = mieqEnqueue;
+        screenFuncs->EnqueueEvent = mieqEnqueue;
     if (!screenFuncs->NewEventScreen)
-	screenFuncs->NewEventScreen = mieqSwitchScreen;
+        screenFuncs->NewEventScreen = mieqSwitchScreen;
     pScreenPriv->waitForUpdate = waitForUpdate;
+    pScreenPriv->showTransparent = FALSE;
     pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = miPointerCloseScreen;
-    pScreen->devPrivates[miPointerScreenIndex].ptr = (pointer) pScreenPriv;
+    dixSetPrivate(&pScreen->devPrivates, miPointerScreenKey, pScreenPriv);
     /*
      * set up screen cursor method table
      */
@@ -108,38 +140,28 @@ miPointerInitialize (pScreen, spriteFuncs, screenFuncs, waitForUpdate)
     pScreen->UnrealizeCursor = miPointerUnrealizeCursor;
     pScreen->SetCursorPosition = miPointerSetCursorPosition;
     pScreen->RecolorCursor = miRecolorCursor;
-    pScreen->PointerNonInterestBox = miPointerPointerNonInterestBox;
-    /*
-     * set up the pointer object
-     */
-    miPointer.pScreen = NULL;
-    miPointer.pSpriteScreen = NULL;
-    miPointer.pCursor = NULL;
-    miPointer.pSpriteCursor = NULL;
-    miPointer.limits.x1 = 0;
-    miPointer.limits.x2 = 32767;
-    miPointer.limits.y1 = 0;
-    miPointer.limits.y2 = 32767;
-    miPointer.confined = FALSE;
-    miPointer.x = 0;
-    miPointer.y = 0;
-    miPointer.history_start = miPointer.history_end = 0;
+    pScreen->DeviceCursorInitialize = miPointerDeviceInitialize;
+    pScreen->DeviceCursorCleanup = miPointerDeviceCleanup;
+
+    events = NULL;
     return TRUE;
 }
 
+/**
+ * Destroy screen-specific information.
+ *
+ * @param index Screen index of the screen in screenInfo.screens[]
+ * @param pScreen The actual screen pointer
+ */
 static Bool
-miPointerCloseScreen (index, pScreen)
-    int		index;
-    ScreenPtr	pScreen;
+miPointerCloseScreen(int index, ScreenPtr pScreen)
 {
     SetupScreen(pScreen);
 
-    if (pScreen == miPointer.pScreen)
-	miPointer.pScreen = 0;
-    if (pScreen == miPointer.pSpriteScreen)
-	miPointer.pSpriteScreen = 0;
     pScreen->CloseScreen = pScreenPriv->CloseScreen;
-    xfree ((pointer) pScreenPriv);
+    free((pointer) pScreenPriv);
+    FreeEventList(events, GetMaximumEventsNum());
+    events = NULL;
     return (*pScreen->CloseScreen) (index, pScreen);
 }
 
@@ -148,363 +170,539 @@ miPointerCloseScreen (index, pScreen)
  */
 
 static Bool
-miPointerRealizeCursor (pScreen, pCursor)
-    ScreenPtr	pScreen;
-    CursorPtr	pCursor;
+miPointerRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
     SetupScreen(pScreen);
-
-    return (*pScreenPriv->spriteFuncs->RealizeCursor) (pScreen, pCursor);
+    return (*pScreenPriv->spriteFuncs->RealizeCursor) (pDev, pScreen, pCursor);
 }
 
 static Bool
-miPointerUnrealizeCursor (pScreen, pCursor)
-    ScreenPtr	pScreen;
-    CursorPtr	pCursor;
+miPointerUnrealizeCursor(DeviceIntPtr pDev,
+                         ScreenPtr pScreen, CursorPtr pCursor)
 {
     SetupScreen(pScreen);
-
-    return (*pScreenPriv->spriteFuncs->UnrealizeCursor) (pScreen, pCursor);
+    return (*pScreenPriv->spriteFuncs->UnrealizeCursor) (pDev, pScreen,
+                                                         pCursor);
 }
 
 static Bool
-miPointerDisplayCursor (pScreen, pCursor)
-    ScreenPtr	pScreen;
-    CursorPtr	pCursor;
+miPointerDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    miPointer.pCursor = pCursor;
-    miPointer.pScreen = pScreen;
-    miPointerUpdate ();
+    miPointerPtr pPointer;
+
+    /* return for keyboards */
+    if (!IsPointerDevice(pDev))
+        return FALSE;
+
+    pPointer = MIPOINTER(pDev);
+
+    pPointer->pCursor = pCursor;
+    pPointer->pScreen = pScreen;
+    miPointerUpdateSprite(pDev);
     return TRUE;
 }
 
+/**
+ * Set up the constraints for the given device. This function does not
+ * actually constrain the cursor but merely copies the given box to the
+ * internal constraint storage.
+ *
+ * @param pDev The device to constrain to the box
+ * @param pBox The rectangle to constrain the cursor to
+ * @param pScreen Used for copying screen confinement
+ */
 static void
-miPointerConstrainCursor (pScreen, pBox)
-    ScreenPtr	pScreen;
-    BoxPtr	pBox;
+miPointerConstrainCursor(DeviceIntPtr pDev, ScreenPtr pScreen, BoxPtr pBox)
 {
-    miPointer.limits = *pBox;
-    miPointer.confined = PointerConfinedToScreen();
+    miPointerPtr pPointer;
+
+    pPointer = MIPOINTER(pDev);
+
+    pPointer->limits = *pBox;
+    pPointer->confined = PointerConfinedToScreen(pDev);
 }
 
-/*ARGSUSED*/
+/**
+ * Should calculate the box for the given cursor, based on screen and the
+ * confinement given. But we assume that whatever box is passed in is valid
+ * anyway.
+ *
+ * @param pDev The device to calculate the cursor limits for
+ * @param pScreen The screen the confinement happens on
+ * @param pCursor The screen the confinement happens on
+ * @param pHotBox The confinement box for the cursor
+ * @param[out] pTopLeftBox The new confinement box, always *pHotBox.
+ */
 static void
-miPointerPointerNonInterestBox (pScreen, pBox)
-    ScreenPtr	pScreen;
-    BoxPtr	pBox;
-{
-    /* until DIX uses this, this will remain a stub */
-}
-
-/*ARGSUSED*/
-static void
-miPointerCursorLimits(pScreen, pCursor, pHotBox, pTopLeftBox)
-    ScreenPtr	pScreen;
-    CursorPtr	pCursor;
-    BoxPtr	pHotBox;
-    BoxPtr	pTopLeftBox;
+miPointerCursorLimits(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor,
+                      BoxPtr pHotBox, BoxPtr pTopLeftBox)
 {
     *pTopLeftBox = *pHotBox;
 }
 
-static Bool GenerateEvent;
-
+/**
+ * Set the device's cursor position to the x/y position on the given screen.
+ * Generates and event if required.
+ *
+ * This function is called from:
+ *    - sprite init code to place onto initial position
+ *    - the various WarpPointer implementations (core, XI, Xinerama, dmx,…)
+ *    - during the cursor update path in CheckMotion
+ *    - in the Xinerama part of NewCurrentScreen
+ *    - when a RandR/RandR1.2 mode was applied (it may have moved the pointer, so
+ *      it's set back to the original pos)
+ *
+ * @param pDev The device to move
+ * @param pScreen The screen the device is on
+ * @param x The x coordinate in per-screen coordinates
+ * @param y The y coordinate in per-screen coordinates
+ * @param generateEvent True if the pointer movement should generate an
+ * event.
+ *
+ * @return TRUE in all cases
+ */
 static Bool
-miPointerSetCursorPosition(pScreen, x, y, generateEvent)
-    ScreenPtr pScreen;
-    int       x, y;
-    Bool      generateEvent;
+miPointerSetCursorPosition(DeviceIntPtr pDev, ScreenPtr pScreen,
+                           int x, int y, Bool generateEvent)
 {
-    SetupScreen (pScreen);
+    SetupScreen(pScreen);
+    miPointerPtr pPointer = MIPOINTER(pDev);
 
-    GenerateEvent = generateEvent;
+    pPointer->generateEvent = generateEvent;
+
+    if (pScreen->ConstrainCursorHarder)
+        pScreen->ConstrainCursorHarder(pDev, pScreen, Absolute, &x, &y);
+
     /* device dependent - must pend signal and call miPointerWarpCursor */
-    (*pScreenPriv->screenFuncs->WarpCursor) (pScreen, x, y);
+    (*pScreenPriv->screenFuncs->WarpCursor) (pDev, pScreen, x, y);
     if (!generateEvent)
-	miPointerUpdate();
+        miPointerUpdateSprite(pDev);
     return TRUE;
 }
 
-/* Once signals are ignored, the WarpCursor function can call this */
-
-void
-miPointerWarpCursor (pScreen, x, y)
-    ScreenPtr	pScreen;
-    int		x, y;
-{
-    SetupScreen (pScreen);
-
-    if (miPointer.pScreen != pScreen)
-	(*pScreenPriv->screenFuncs->NewEventScreen) (pScreen, TRUE);
-
-    if (GenerateEvent)
-    {
-	miPointerMove (pScreen, x, y, GetTimeInMillis()); 
-    }
-    else
-    {
-	/* everything from miPointerMove except the event and history */
-
-    	if (!pScreenPriv->waitForUpdate && pScreen == miPointer.pSpriteScreen)
-    	{
-	    miPointer.devx = x;
-	    miPointer.devy = y;
-	    (*pScreenPriv->spriteFuncs->MoveCursor) (pScreen, x, y);
-    	}
-	miPointer.x = x;
-	miPointer.y = y;
-	miPointer.pScreen = pScreen;
-    }
-}
-
-/*
- * Pointer/CursorDisplay interface routines
- */
-
-int
-miPointerGetMotionBufferSize ()
-{
-    return MOTION_SIZE;
-}
-
-int
-miPointerGetMotionEvents (pPtr, coords, start, stop, pScreen)
-    DeviceIntPtr    pPtr;
-    xTimecoord	    *coords;
-    unsigned long   start, stop;
-    ScreenPtr	    pScreen;
-{
-    int		    i;
-    int		    count = 0;
-    miHistoryPtr    h;
-
-    for (i = miPointer.history_start; i != miPointer.history_end;)
-    {
-	h = &miPointer.history[i];
-	if (h->event.time >= stop)
-	    break;
-	if (h->event.time >= start)
-	{
-	    *coords++ = h->event;
-	    count++;
-	}
-	if (++i == MOTION_SIZE) i = 0;
-    }
-    return count;
-}
-
-    
-/*
- * miPointerUpdate
+/**
+ * Set up sprite information for the device.
+ * This function will be called once for each device after it is initialized
+ * in the DIX.
  *
- * Syncronize the sprite with the cursor - called from ProcessInputEvents
+ * @param pDev The newly created device
+ * @param pScreen The initial sprite scree.
+ */
+static Bool
+miPointerDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
+{
+    miPointerPtr pPointer;
+
+    SetupScreen(pScreen);
+
+    pPointer = malloc(sizeof(miPointerRec));
+    if (!pPointer)
+        return FALSE;
+
+    pPointer->pScreen = NULL;
+    pPointer->pSpriteScreen = NULL;
+    pPointer->pCursor = NULL;
+    pPointer->pSpriteCursor = NULL;
+    pPointer->limits.x1 = 0;
+    pPointer->limits.x2 = 32767;
+    pPointer->limits.y1 = 0;
+    pPointer->limits.y2 = 32767;
+    pPointer->confined = FALSE;
+    pPointer->x = 0;
+    pPointer->y = 0;
+    pPointer->generateEvent = FALSE;
+
+    if (!((*pScreenPriv->spriteFuncs->DeviceCursorInitialize) (pDev, pScreen))) {
+        free(pPointer);
+        return FALSE;
+    }
+
+    dixSetPrivate(&pDev->devPrivates, miPointerPrivKey, pPointer);
+    return TRUE;
+}
+
+/**
+ * Clean up after device.
+ * This function will be called once before the device is freed in the DIX
+ *
+ * @param pDev The device to be removed from the server
+ * @param pScreen Current screen of the device
+ */
+static void
+miPointerDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
+{
+    SetupScreen(pScreen);
+
+    if (!IsMaster(pDev) && !IsFloating(pDev))
+        return;
+
+    (*pScreenPriv->spriteFuncs->DeviceCursorCleanup) (pDev, pScreen);
+    free(dixLookupPrivate(&pDev->devPrivates, miPointerPrivKey));
+    dixSetPrivate(&pDev->devPrivates, miPointerPrivKey, NULL);
+}
+
+/**
+ * Warp the pointer to the given position on the given screen. May generate
+ * an event, depending on whether we're coming from miPointerSetPosition.
+ *
+ * Once signals are ignored, the WarpCursor function can call this
+ *
+ * @param pDev The device to warp
+ * @param pScreen Screen to warp on
+ * @param x The x coordinate in per-screen coordinates
+ * @param y The y coordinate in per-screen coordinates
  */
 
 void
-miPointerUpdate ()
+miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
 {
-    ScreenPtr		pScreen;
-    miPointerScreenPtr	pScreenPriv;
-    int			x, y, devx, devy;
+    miPointerPtr pPointer;
+    BOOL changedScreen = FALSE;
 
-    pScreen = miPointer.pScreen;
-    x = miPointer.x;
-    y = miPointer.y;
-    devx = miPointer.devx;
-    devy = miPointer.devy;
+    SetupScreen(pScreen);
+    pPointer = MIPOINTER(pDev);
+
+    if (pPointer->pScreen != pScreen) {
+        (*pScreenPriv->screenFuncs->NewEventScreen) (pDev, pScreen, TRUE);
+        changedScreen = TRUE;
+    }
+
+    if (pPointer->generateEvent)
+        miPointerMove(pDev, pScreen, x, y);
+    else
+        miPointerMoveNoEvent(pDev, pScreen, x, y);
+
+    /* Don't call USFS if we use Xinerama, otherwise the root window is
+     * updated to the second screen, and we never receive any events.
+     * (FDO bug #18668) */
+    if (changedScreen
+#ifdef PANORAMIX
+        && noPanoramiXExtension
+#endif
+        )
+        UpdateSpriteForScreen(pDev, pScreen);
+}
+
+/**
+ * Syncronize the sprite with the cursor.
+ *
+ * @param pDev The device to sync
+ */
+void
+miPointerUpdateSprite(DeviceIntPtr pDev)
+{
+    ScreenPtr pScreen;
+    miPointerScreenPtr pScreenPriv;
+    CursorPtr pCursor;
+    int x, y, devx, devy;
+    miPointerPtr pPointer;
+
+    if (!pDev || !pDev->coreEvents)
+        return;
+
+    pPointer = MIPOINTER(pDev);
+
+    if (!pPointer)
+        return;
+
+    pScreen = pPointer->pScreen;
     if (!pScreen)
-	return;
-    pScreenPriv = GetScreenPrivate (pScreen);
+        return;
+
+    x = pPointer->x;
+    y = pPointer->y;
+    devx = pPointer->devx;
+    devy = pPointer->devy;
+
+    pScreenPriv = GetScreenPrivate(pScreen);
     /*
      * if the cursor has switched screens, disable the sprite
      * on the old screen
      */
-    if (pScreen != miPointer.pSpriteScreen)
-    {
-	if (miPointer.pSpriteScreen)
-	{
-	    miPointerScreenPtr  pOldPriv;
-    	
-	    pOldPriv = GetScreenPrivate (miPointer.pSpriteScreen);
-	    if (miPointer.pCursor)
-	    {
-	    	(*pOldPriv->spriteFuncs->SetCursor)
-			    	(miPointer.pSpriteScreen, NullCursor, 0, 0);
-	    }
-	    (*pOldPriv->screenFuncs->CrossScreen) (miPointer.pSpriteScreen, FALSE);
-	}
-	(*pScreenPriv->screenFuncs->CrossScreen) (pScreen, TRUE);
-	(*pScreenPriv->spriteFuncs->SetCursor)
-				(pScreen, miPointer.pCursor, x, y);
-	miPointer.devx = x;
-	miPointer.devy = y;
-	miPointer.pSpriteCursor = miPointer.pCursor;
-	miPointer.pSpriteScreen = pScreen;
+    if (pScreen != pPointer->pSpriteScreen) {
+        if (pPointer->pSpriteScreen) {
+            miPointerScreenPtr pOldPriv;
+
+            pOldPriv = GetScreenPrivate(pPointer->pSpriteScreen);
+            if (pPointer->pCursor) {
+                (*pOldPriv->spriteFuncs->SetCursor)
+                    (pDev, pPointer->pSpriteScreen, NullCursor, 0, 0);
+            }
+            (*pOldPriv->screenFuncs->CrossScreen) (pPointer->pSpriteScreen,
+                                                   FALSE);
+        }
+        (*pScreenPriv->screenFuncs->CrossScreen) (pScreen, TRUE);
+        (*pScreenPriv->spriteFuncs->SetCursor)
+            (pDev, pScreen, pPointer->pCursor, x, y);
+        pPointer->devx = x;
+        pPointer->devy = y;
+        pPointer->pSpriteCursor = pPointer->pCursor;
+        pPointer->pSpriteScreen = pScreen;
     }
     /*
      * if the cursor has changed, display the new one
      */
-    else if (miPointer.pCursor != miPointer.pSpriteCursor)
-    {
-	(*pScreenPriv->spriteFuncs->SetCursor) 
-	    (pScreen, miPointer.pCursor, x, y);
-	miPointer.devx = x;
-	miPointer.devy = y;
-	miPointer.pSpriteCursor = miPointer.pCursor;
+    else if (pPointer->pCursor != pPointer->pSpriteCursor) {
+        pCursor = pPointer->pCursor;
+        if (!pCursor ||
+            (pCursor->bits->emptyMask && !pScreenPriv->showTransparent))
+            pCursor = NullCursor;
+        (*pScreenPriv->spriteFuncs->SetCursor) (pDev, pScreen, pCursor, x, y);
+
+        pPointer->devx = x;
+        pPointer->devy = y;
+        pPointer->pSpriteCursor = pPointer->pCursor;
     }
-    else if (x != devx || y != devy)
-    {
-	miPointer.devx = x;
-	miPointer.devy = y;
-	(*pScreenPriv->spriteFuncs->MoveCursor) (pScreen, x, y);
+    else if (x != devx || y != devy) {
+        pPointer->devx = x;
+        pPointer->devy = y;
+        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask)
+            (*pScreenPriv->spriteFuncs->MoveCursor) (pDev, pScreen, x, y);
     }
 }
 
-/*
- * miPointerDeltaCursor.  The pointer has moved dx,dy from it's previous
- * position.
+/**
+ * Set the device to the coordinates on the given screen.
+ *
+ * @param pDev The device to move
+ * @param screen_no Index of the screen to move to
+ * @param x The x coordinate in per-screen coordinates
+ * @param y The y coordinate in per-screen coordinates
  */
-
 void
-miPointerDeltaCursor (dx, dy, time)
-    int		    dx, dy;
-    unsigned long   time;
+miPointerSetScreen(DeviceIntPtr pDev, int screen_no, int x, int y)
 {
-    miPointerAbsoluteCursor (miPointer.x + dx, miPointer.y + dy, time);
+    miPointerScreenPtr pScreenPriv;
+    ScreenPtr pScreen;
+    miPointerPtr pPointer;
+
+    pPointer = MIPOINTER(pDev);
+
+    pScreen = screenInfo.screens[screen_no];
+    pScreenPriv = GetScreenPrivate(pScreen);
+    (*pScreenPriv->screenFuncs->NewEventScreen) (pDev, pScreen, FALSE);
+    NewCurrentScreen(pDev, pScreen, x, y);
+
+    pPointer->limits.x2 = pScreen->width;
+    pPointer->limits.y2 = pScreen->height;
 }
 
-/*
- * miPointerAbsoluteCursor.  The pointer has moved to x,y
+/**
+ * @return The current screen of the VCP
  */
-
-void
-miPointerAbsoluteCursor (x, y, time)
-    int		    x, y;
-    unsigned long   time;
+ScreenPtr
+miPointerCurrentScreen(void)
 {
-    miPointerScreenPtr	pScreenPriv;
-    ScreenPtr		pScreen;
-    ScreenPtr		newScreen;
-
-    pScreen = miPointer.pScreen;
-    if (!pScreen)
-	return;	    /* called before ready */
-    if (x < 0 || x >= pScreen->width || y < 0 || y >= pScreen->height)
-    {
-	pScreenPriv = GetScreenPrivate (pScreen);
-	if (!miPointer.confined)
-	{
-	    newScreen = pScreen;
-	    (*pScreenPriv->screenFuncs->CursorOffScreen) (&newScreen, &x, &y);
-	    if (newScreen != pScreen)
-	    {
-		pScreen = newScreen;
-		(*pScreenPriv->screenFuncs->NewEventScreen) (pScreen, FALSE);
-		pScreenPriv = GetScreenPrivate (pScreen);
-	    	/* Smash the confine to the new screen */
-	    	miPointer.limits.x2 = pScreen->width;
-	    	miPointer.limits.y2 = pScreen->height;
-	    }
-	}
-    }
-    /*
-     * constrain the hot-spot to the current
-     * limits
-     */
-    if (x < miPointer.limits.x1)
-	x = miPointer.limits.x1;
-    if (x >= miPointer.limits.x2)
-	x = miPointer.limits.x2 - 1;
-    if (y < miPointer.limits.y1)
-	y = miPointer.limits.y1;
-    if (y >= miPointer.limits.y2)
-	y = miPointer.limits.y2 - 1;
-    if (miPointer.x == x && miPointer.y == y && miPointer.pScreen == pScreen)
-	return;
-    miPointerMove (pScreen, x, y, time);
+    return miPointerGetScreen(inputInfo.pointer);
 }
 
-void
-miPointerPosition (x, y)
-    int	    *x, *y;
+/**
+ * @return The current screen of the given device or NULL.
+ */
+ScreenPtr
+miPointerGetScreen(DeviceIntPtr pDev)
 {
-    *x = miPointer.x;
-    *y = miPointer.y;
+    miPointerPtr pPointer = MIPOINTER(pDev);
+
+    return (pPointer) ? pPointer->pScreen : NULL;
 }
 
-/*
- * miPointerMove.  The pointer has moved to x,y on current screen
- */
-
-static void
-miPointerMove (pScreen, x, y, time)
-    ScreenPtr	    pScreen;
-    int		    x, y;
-    unsigned long   time;
+/* Controls whether the cursor image should be updated immediately when
+   moved (FALSE) or if something else will be responsible for updating
+   it later (TRUE).  Returns current setting.
+   Caller is responsible for calling OsBlockSignal first.
+*/
+Bool
+miPointerSetWaitForUpdate(ScreenPtr pScreen, Bool wait)
 {
     SetupScreen(pScreen);
-    xEvent		xE;
-    miHistoryPtr	history;
-    int			prev, end, start;
+    Bool prevWait = pScreenPriv->waitForUpdate;
 
-    if (!pScreenPriv->waitForUpdate && pScreen == miPointer.pSpriteScreen)
-    {
-	miPointer.devx = x;
-	miPointer.devy = y;
-	(*pScreenPriv->spriteFuncs->MoveCursor) (pScreen, x, y);
-    }
-    miPointer.x = x;
-    miPointer.y = y;
-    miPointer.pScreen = pScreen;
-
-    xE.u.u.type = MotionNotify;
-    xE.u.keyButtonPointer.rootX = x;
-    xE.u.keyButtonPointer.rootY = y;
-    xE.u.keyButtonPointer.time = time;
-    (*pScreenPriv->screenFuncs->EnqueueEvent) (&xE);
-
-    end = miPointer.history_end;
-    start = miPointer.history_start;
-    prev = end - 1;
-    if (end == 0)
-	prev = MOTION_SIZE - 1;
-    history = &miPointer.history[prev];
-    if (end == start || history->event.time != time)
-    {
-    	history = &miPointer.history[end];
-    	if (++end == MOTION_SIZE) 
-	    end = 0;
-    	if (end == start)
-    	{
-	    start = end + 1;
-	    if (start == MOTION_SIZE)
-	    	start = 0;
-	    miPointer.history_start = start;
-    	}
-    	miPointer.history_end = end;
-    }
-    history->event.x = x;
-    history->event.y = y;
-    history->event.time = time;
-    history->pScreen = pScreen;
+    pScreenPriv->waitForUpdate = wait;
+    return prevWait;
 }
 
-void
-_miRegisterPointerDevice (pScreen, pDevice)
-    ScreenPtr	pScreen;
-    DeviceIntPtr pDevice;
+/* Move the pointer on the current screen,  and update the sprite. */
+static void
+miPointerMoveNoEvent(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
 {
-    miPointer.pPointer = (DevicePtr)pDevice;
+    miPointerPtr pPointer;
+
+    SetupScreen(pScreen);
+
+    pPointer = MIPOINTER(pDev);
+
+    /* Hack: We mustn't call into ->MoveCursor for anything but the
+     * VCP, as this may cause a non-HW rendered cursor to be rendered during
+     * SIGIO. This again leads to allocs during SIGIO which leads to SIGABRT.
+     */
+    if (GetMaster(pDev, MASTER_POINTER) == inputInfo.pointer
+        &&!pScreenPriv->waitForUpdate && pScreen == pPointer->pSpriteScreen) {
+        pPointer->devx = x;
+        pPointer->devy = y;
+        if (pPointer->pCursor && !pPointer->pCursor->bits->emptyMask)
+            (*pScreenPriv->spriteFuncs->MoveCursor) (pDev, pScreen, x, y);
+    }
+
+    pPointer->x = x;
+    pPointer->y = y;
+    pPointer->pScreen = pScreen;
 }
 
-/* obsolete: for binary compatibility */
-#ifdef miRegisterPointerDevice
-#undef miRegisterPointerDevice
-void
-miRegisterPointerDevice (pScreen, pDevice)
-    ScreenPtr	pScreen;
-    DevicePtr pDevice;
+/**
+ * Set the devices' cursor position to the given x/y position.
+ *
+ * This function is called during the pointer update path in
+ * GetPointerEvents and friends (and the same in the xwin DDX).
+ *
+ * The coordinates provided are always absolute. The parameter mode whether
+ * it was relative or absolute movement that landed us at those coordinates.
+ *
+ * @param pDev The device to move
+ * @param mode Movement mode (Absolute or Relative)
+ * @param[in,out] screenx The x coordinate in desktop coordinates
+ * @param[in,out] screeny The y coordinate in desktop coordinates
+ */
+ScreenPtr
+miPointerSetPosition(DeviceIntPtr pDev, int mode, double *screenx,
+                     double *screeny)
 {
-    miPointer.pPointer = pDevice;
+    miPointerScreenPtr pScreenPriv;
+    ScreenPtr pScreen;
+    ScreenPtr newScreen;
+    int x, y;
+    Bool switch_screen = FALSE;
+
+    miPointerPtr pPointer;
+
+    if (!pDev || !pDev->coreEvents)
+        return NULL;
+
+    pPointer = MIPOINTER(pDev);
+    pScreen = pPointer->pScreen;
+    if (!pScreen)
+        return NULL;            /* called before ready */
+
+    x = trunc(*screenx);
+    y = trunc(*screeny);
+
+    switch_screen = !point_on_screen(pScreen, x, y);
+
+    /* Switch to per-screen coordinates for CursorOffScreen and
+     * Pointer->limits */
+    x -= pScreen->x;
+    y -= pScreen->y;
+
+    if (switch_screen) {
+        pScreenPriv = GetScreenPrivate(pScreen);
+        if (!pPointer->confined) {
+            newScreen = pScreen;
+            (*pScreenPriv->screenFuncs->CursorOffScreen) (&newScreen, &x, &y);
+            if (newScreen != pScreen) {
+                pScreen = newScreen;
+                (*pScreenPriv->screenFuncs->NewEventScreen) (pDev, pScreen,
+                                                             FALSE);
+                /* Smash the confine to the new screen */
+                pPointer->limits.x2 = pScreen->width;
+                pPointer->limits.y2 = pScreen->height;
+            }
+        }
+    }
+    /* Constrain the sprite to the current limits. */
+    if (x < pPointer->limits.x1)
+        x = pPointer->limits.x1;
+    if (x >= pPointer->limits.x2)
+        x = pPointer->limits.x2 - 1;
+    if (y < pPointer->limits.y1)
+        y = pPointer->limits.y1;
+    if (y >= pPointer->limits.y2)
+        y = pPointer->limits.y2 - 1;
+
+    if (pScreen->ConstrainCursorHarder)
+        pScreen->ConstrainCursorHarder(pDev, pScreen, mode, &x, &y);
+
+    if (pPointer->x != x || pPointer->y != y || pPointer->pScreen != pScreen)
+        miPointerMoveNoEvent(pDev, pScreen, x, y);
+
+    /* Convert to desktop coordinates again */
+    x += pScreen->x;
+    y += pScreen->y;
+
+    /* In the event we actually change screen or we get confined, we just
+     * drop the float component on the floor
+     * FIXME: only drop remainder for ConstrainCursorHarder, not for screen
+     * crossings */
+    if (x != trunc(*screenx))
+        *screenx = x;
+    if (y != trunc(*screeny))
+        *screeny = y;
+
+    return pScreen;
 }
-#endif /* miRegisterPointerDevice */
+
+/**
+ * Get the current position of the device in desktop coordinates.
+ *
+ * @param x Return value for the current x coordinate in desktop coordiates.
+ * @param y Return value for the current y coordinate in desktop coordiates.
+ */
+void
+miPointerGetPosition(DeviceIntPtr pDev, int *x, int *y)
+{
+    *x = MIPOINTER(pDev)->x;
+    *y = MIPOINTER(pDev)->y;
+}
+
+#ifdef XQUARTZ
+#include <pthread.h>
+void darwinEvents_lock(void);
+void darwinEvents_unlock(void);
+#endif
+
+/**
+ * Move the device's pointer to the x/y coordinates on the given screen.
+ * This function generates and enqueues pointer events.
+ *
+ * @param pDev The device to move
+ * @param pScreen The screen the device is on
+ * @param x The x coordinate in per-screen coordinates
+ * @param y The y coordinate in per-screen coordinates
+ */
+void
+miPointerMove(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
+{
+    int i, nevents;
+    int valuators[2];
+    ValuatorMask mask;
+
+    miPointerMoveNoEvent(pDev, pScreen, x, y);
+
+    /* generate motion notify */
+    valuators[0] = x;
+    valuators[1] = y;
+
+    if (!events) {
+        events = InitEventList(GetMaximumEventsNum());
+
+        if (!events) {
+            FatalError("Could not allocate event store.\n");
+            return;
+        }
+    }
+
+    valuator_mask_set_range(&mask, 0, 2, valuators);
+    nevents = GetPointerEvents(events, pDev, MotionNotify, 0,
+                               POINTER_SCREEN | POINTER_ABSOLUTE |
+                               POINTER_NORAW, &mask);
+
+    OsBlockSignals();
+#ifdef XQUARTZ
+    darwinEvents_lock();
+#endif
+    for (i = 0; i < nevents; i++)
+        mieqEnqueue(pDev, &events[i]);
+#ifdef XQUARTZ
+    darwinEvents_unlock();
+#endif
+    OsReleaseSignals();
+}

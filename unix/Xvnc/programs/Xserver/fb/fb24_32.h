@@ -1,6 +1,4 @@
 /*
- * $XFree86$
- *
  * Copyright © 2000 SuSE, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -31,23 +29,16 @@
 #define _FB24_32_H_
 
 Bool
-fb24_32FinishScreenInit(ScreenPtr    pScreen,
-			pointer      pbits,
-			int          xsize,
-			int          ysize,
-			int          dpix,
-			int          dpiy,
-			int          width,
-			int          bpp);
+
+fb24_32FinishScreenInit(ScreenPtr pScreen,
+                        pointer pbits,
+                        int xsize,
+                        int ysize, int dpix, int dpiy, int width, int bpp);
 
 Bool
-fb24_32ScreenInit(ScreenPtr  pScreen,
-		  pointer    pbits,
-		  int        xsize,
-		  int        ysize,
-		  int        dpix,
-		  int        dpiy,
-		  int        width,
-		  int        bpp);
+
+fb24_32ScreenInit(ScreenPtr pScreen,
+                  pointer pbits,
+                  int xsize, int ysize, int dpix, int dpiy, int width, int bpp);
 
 #endif

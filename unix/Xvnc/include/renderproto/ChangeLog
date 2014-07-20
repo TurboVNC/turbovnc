@@ -1,0 +1,467 @@
+commit 89289190032cb7f17a392ef0fe8237bdb54edcf6
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Aug 10 10:10:48 2010 -0400
+
+    Make recursive alpha maps undefined
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 6122aa1ed38adbdf65e3ac11cff60bf075e85c0d
+Author: Sami Farin <safari-ml-freedesktop-bugzilla-kv7oy2vp4mc4jvudr6vccb7oetrzzqe7fwnhahno@u.safari.iki.fi>
+Date:   Wed Sep 26 11:31:00 2007 -0700
+
+    Bug 12578 - renderproto-0.9.3: render.h does not compile
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=12578
+
+commit e44c308a0a268de2be2110c38a0a29d5b4101d10
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue May 11 10:45:09 2010 -0400
+
+    Clarify alpha-map loop prevention (#23581)
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 724feb119aa1906f6a7a2f62fccb1b76bb56857c
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:00:31 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 2c7bf7d8481706d208bdebf93568cb478762f080
+Author: Rémi Cardona <remi@gentoo.org>
+Date:   Thu Dec 17 08:41:27 2009 +0100
+
+    Use $(docdir) for renderproto.txt install path
+    
+    Signed-off-by: Rémi Cardona <remi@gentoo.org>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@sun.com>
+    Reviewed-by: Dan Nicholson <dbn.lists@gmail.com>
+
+commit 958987e56a304ff96cb1b4904c3b9b61015f985c
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 22 19:24:48 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit 8dd4c99017d64f66e7540501e165fc8738af7a7c
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 11:13:30 2009 -0500
+
+    README: file created or updated #24206
+    
+    Contains a set of URLs to freedesktop.org.
+
+commit 9dca7ab976c7f003f18c839a4fd9b095e1d4fcd9
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 19:45:27 2009 -0500
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit f3bdf8ad3179fd2e7e75bf7c6a8aa5023a2ac356
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:31:29 2009 -0500
+
+    Makefile.am: INSTALL file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+    Add INSTALL target
+
+commit 149cf98b2b9fb52c47742846509b2c08141c43b8
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:11:36 2009 -0500
+
+    configure.ac: deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit 253a7fb4c4a88437ca31285bf6448d73013d0d74
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 13:55:25 2009 -0500
+
+    configure.ac: AM_MAINTAINER_MODE missing #24238
+    
+    This turns off maintainer mode build rules in tarballs.
+    Works in conjunction with autogen.sh --enable-maintainer-mode
+
+commit 3396f4ca2df61e330dbcabd8e584e103f86449e5
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Nov 14 18:26:47 2009 -0500
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 2a336d0528e2f88a940d003edc6655a1d65e6bd7
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Mon Aug 24 11:42:17 2009 +1000
+
+    Update date/version on Render protocol spec to match last update (0.11)
+    
+    533e22db3088bb75e58b6d977ec82a13c4680b54 added blend modes and the bump to
+    0.11.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit d889aa6c766e2691e1a6a8189c730661023e4de4
+Author: Fredrik Höglund <fredrik@kde.org>
+Date:   Wed Jul 15 00:16:32 2009 +0200
+
+    Bump version to 0.11.
+
+commit 533e22db3088bb75e58b6d977ec82a13c4680b54
+Author: Fredrik Höglund <fredrik@kde.org>
+Date:   Wed Jul 15 00:16:08 2009 +0200
+
+    Add support for the PDF blend mode operators.
+
+commit 2c5e931d5e5b5af88bcf8aaed8b10d799fd47b1e
+Author: Søren Sandmann Pedersen <sandmann@redhat.com>
+Date:   Fri Jul 10 21:34:12 2009 -0400
+
+    Clarify behavior of IncludeInferior and GraphicsExposures.
+
+commit c4315b2a4704c88924e7a6bc444b5331caa64022
+Author: Søren Sandmann Pedersen <sandmann@redhat.com>
+Date:   Fri May 1 19:39:47 2009 -0400
+
+    Clarify semantics of clipping
+    
+    Source clips are applied on top of the transformed and repeated
+    window, because that way you can clip out an interesting shape of for
+    example a repeated gradient, and because this makes the implementation
+    simple and efficient.
+    
+    GraphicsExposures are never generated.
+    
+    The hierarchy clip is ignored for source and mask pictures. This is
+    because GraphicsExposures are not generated anyway, and because
+    implementing it correctly in the presense of filters and
+    transformations would be either inefficient or very complex.
+    
+    Also make it explicit that the dither argument is not used.
+
+commit 2428785895f352f15fb412a630289e44bb2e7cc3
+Author: Søren Sandmann Pedersen <sandmann@redhat.com>
+Date:   Fri May 1 17:39:47 2009 -0400
+
+    Delete reference to unimplemented ColorTriangles and ColorTrapezoids
+    requests.
+
+commit 64f589368eb0c3070656de283b29b7b0b8ccc10b
+Author: Søren Sandmann Pedersen <sandmann@redhat.com>
+Date:   Fri May 1 17:25:03 2009 -0400
+
+    Describe the four repeat options for pictures
+    
+    Previously there was a description of three repeat options
+    ("Transparent", "Nearest", "Normal") which did not actually exist in
+    the implementation.
+
+commit 802e941e5fee14214687795f857b6dfd1e163af0
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Tue Jan 27 20:06:28 2009 -0200
+
+    Janitor: Correct make distcheck and dont distribute autogen.sh
+
+commit 52fc0c528a2fcedc61070925213cb74f6ce45fb1
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 16:39:06 2007 -0500
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit 192cdc7530b8ff45d9bcea99dc07849ffbfa65b7
+Merge: 67b1244 9c561f5
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Mon Sep 3 06:17:59 2007 -0400
+
+    Merge branch 'master' of ssh://git.freedesktop.org/git/xorg/proto/renderproto
+
+commit 67b12440358eec012023d46e9150ca22c6fd47bf
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Mon Sep 3 05:54:14 2007 -0400
+
+    Add *~ to .gitignore to skip patch/emacs droppings
+
+commit 9c561f58b713aaecbc0ba3a6a8579094e57fdd20
+Author: Eric Anholt <eric@anholt.net>
+Date:   Fri Aug 31 14:50:09 2007 -0700
+
+    Bump version to 0.9.3.
+
+commit 030dd885476b70c9054b6e4b50dfdbab12e73716
+Author: Eric Anholt <eric@anholt.net>
+Date:   Fri Aug 31 14:28:03 2007 -0700
+
+    Bug #7364: Fix the typedefs of GlyphSet, Picture, and PictFormat to be XIDs.
+    
+    Without this, they would be 64-bit types on 64-bit X Servers, which
+    occasionally resulted in incorrect unpacking.
+
+commit 76a3e69e8e5a761533fc4c752bf907c2440ea6b2
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Wed Oct 11 13:13:16 2006 -0700
+
+    Typo fixes in Render protocol spec
+
+commit 42cd58192fa14dc792379896e9473f693b616d9f
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Wed Oct 11 13:08:51 2006 -0700
+
+    Update date/version on Render protocol spec to match last update (0.10)
+
+commit 04fc37cf7d28dee03e3e68b812ce843f5d1edb97
+Author: Eric Anholt <eric@anholt.net>
+Date:   Tue Jan 9 11:26:25 2007 -0800
+
+    Hook renderproto.txt up to build/install.
+    
+    The previous 12 commits represent a conversion of xlibs cvs to git, then usage
+    of git-format-patch <origin> protocol, munging of the path, and git-am.  The
+    remaining patches to the render protocol description from xorg-docs will
+    follow.
+
+commit 2a8d528ed739f4bc59b4b7e5054f44e378b4a89f
+Author: Lars Knoll <lars@trolltech.com>
+Date:   Fri Jul 1 08:17:51 2005 +0000
+
+    premultiplied colors for creation of solid fills.
+
+commit effea4687eec4922ab1975ea69d81fe9238a310a
+Author: Lars Knoll <lars@trolltech.com>
+Date:   Thu Jun 30 07:16:25 2005 +0000
+
+    smaller fixes to the protocol.
+
+commit 09eb1125f8edb2dcbdff55f3f330044d1f35f8bb
+Author: Lars Knoll <lars@trolltech.com>
+Date:   Wed Jun 29 11:52:07 2005 +0000
+
+    add support for Gradient and Solid Pictures
+    
+    bump render version to 0.10
+
+commit d3bc284d6c875118566504798aa3818617d377cd
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Jul 29 07:58:03 2004 +0000
+
+    2004-07-29 Keith Packard <keithp@keithp.com>
+    
+    	* configure.ac:
+    	* protocol:
+    	* render.h:
+    	* renderproto.h:
+    	Specify new AddTraps request.
+    	Change pixelization specification.
+
+commit 3a46f9178cbd722ed238587d4463a6d19d8f1044
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat May 3 19:20:00 2003 +0000
+
+    Add animated cursor request, bump to 0.8
+
+commit 1d46ed302a18da9d7fe4f08101b7e0fad5e0a909
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 27 05:36:25 2002 +0000
+
+    Fix FreePicture to note that non-XID references can keep pictures allocated
+
+commit 8c80ba46b689cdc66c3fdf6bfec3d025795f9c9e
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 6 22:47:49 2002 +0000
+
+    XRenderQueryPictIndexValues support (from Olivier Chapuis). Bump Render version to 0.7
+
+commit 02402ce6194c6205f172c35b276169cf2cf30a31
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Sep 26 02:56:48 2002 +0000
+
+    Add image transformation and sub-pixel ordering to Render
+
+commit 62a55ea66717bd056fde8d1bbf84275d7fa087e5
+Author: Marc Aurele La France <tsi@ualberta.edu>
+Date:   Fri Aug 23 15:12:36 2002 +0000
+
+    Grammar
+
+commit 465ae9a308001920f94d1f029e2bbb7f70c87d89
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Aug 23 05:48:25 2002 +0000
+
+    Add CreateCursor request to Render
+
+commit 6633f3924d6f224d02f48808b28981f9775f6e72
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon May 13 07:55:48 2002 +0000
+
+    Update spec to match current implementation.
+
+commit 7ff23a96aaafb598a413e2bd4c52da98dfb8da4a
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Dec 15 18:33:53 2000 +0000
+
+    Add Render protocol document
+
+commit 3237db592bb09dc89f8be918e2c59c6f9f59d8ea
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jul 14 18:56:29 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit 91f4e05915f5c0e6afe709a9904b955842e909fd
+Author: Kevin E Martin <kem@kem.org>
+Date:   Thu Dec 15 00:24:38 2005 +0000
+
+    Update package version number for final X11R7 release candidate.
+
+commit 0810eecdd6303d4967760beac1a38df5cf0feab7
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 19 02:48:15 2005 +0000
+
+    Update package version number for RC1 release.
+
+commit 8c450de3b74dd1dd4a28747d9b60bc51382b0f17
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Tue Aug 2 19:19:39 2005 +0000
+
+    Add basic .cvsignore files for proto modules.
+
+commit 2a63ef2ad78c8d4d89b275280b2d6f9f8d9a2c1f
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri Jul 29 21:22:56 2005 +0000
+
+    Various changes preparing packages for RC0:
+    - Verify and update package version numbers as needed
+    - Implement versioning scheme
+    - Change bug address to point to bugzilla bug entry form
+    - Disable loadable i18n in libX11 by default (use --enable-loadable-i18n to
+        reenable it)
+    - Fix makedepend to use pkgconfig and pass distcheck
+    - Update build script to build macros first
+    - Update modular Xorg version
+
+commit c3526e7ea51b7b70d14fb6ad97cc234221ac875a
+Author: Lars Knoll <lars@trolltech.com>
+Date:   Fri Jul 1 10:03:25 2005 +0000
+
+    Add support for gradients and solid fills to Render.
+
+commit c1a679f90a1b9e011060661dfdadd2960489ba95
+Author: Lars Knoll <lars@trolltech.com>
+Date:   Mon Jun 13 14:40:24 2005 +0000
+
+    add the convolution filter from xserver to xorg
+
+commit ce97141900f9cc5dc067d2067b5877901399c597
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sat May 21 04:16:58 2005 +0000
+
+    Set version to 0.9.
+
+commit 6622ff3f67edb4c537a9912e6eb56691a8cabea3
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:22:40 2005 +0000
+
+    revert last change, didn't do right thing at all, sorry for the noise
+
+commit 50a3f335f4da1b705326b87ecc7699fb9d5f042c
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:10:19 2005 +0000
+
+    Require automake 1.7 in AM_INIT_AUTOMAKE
+
+commit 511abcb0f3f948e62d14fc00856b342d915f1add
+Author: Josh Triplett <josh@speakeasy.net>
+Date:   Tue May 17 07:32:29 2005 +0000
+
+    Add COPYING file for Render.
+
+commit 9f1501a9c8ede82c0bf4e85d7c4dc5c404fec865
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Mon May 9 18:20:06 2005 +0000
+
+    Change all the protonames from <extension>Ext to <extension>Proto.
+
+commit 79256bd9ed1e7a1680e5fe660bee541648d80538
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri May 6 01:46:31 2005 +0000
+
+    Initial build system files for proto module.
+
+commit c5bf04b6c494b8af574f99b131fc1b8464a22c83
+Author: Markus Kuhn <Markus.Kuhn@cl.cam.ac.uk>
+Date:   Sat Dec 4 00:42:46 2004 +0000
+
+    Encoding of numerous files changed to UTF-8
+
+commit 06f5e62edcb2af058bf4720a4b08665decd67158
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Aug 6 23:42:10 2004 +0000
+
+    Add RenderAddTraps. Rewrite trapezoid rendering code.
+
+commit 713f778be0494a4f649922f2fa4cc24e36ddaf4b
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Sun Jul 4 20:30:58 2004 +0000
+
+    Bugzilla #635: Correct the definition of CPLastBit to account for
+        ComponentAlpha, which may fix behavior of the server's
+        SetPictureToDefaults.
+
+commit db4eac7ce2a2e20269f24a98470c9a3c5fa7fbef
+Author: Egbert Eich <eich@suse.de>
+Date:   Fri Apr 23 18:43:06 2004 +0000
+
+    Merging XORG-CURRENT into trunk
+
+commit 2b5b1ea58df1a9ab378c06f08ec26e44e2a03504
+Author: Egbert Eich <eich@suse.de>
+Date:   Sun Mar 14 08:31:36 2004 +0000
+
+    Importing vendor version xf86-4_4_99_1 on Sun Mar 14 00:26:39 PST 2004
+
+commit ca720bca788372a451ea66a017cb49d029db1e30
+Author: Egbert Eich <eich@suse.de>
+Date:   Wed Mar 3 12:10:54 2004 +0000
+
+    Importing vendor version xf86-4_4_0 on Wed Mar 3 04:09:24 PST 2004
+
+commit 400da1431cfa5a3a3ec2f160c9fabd6860c0ea6c
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 13:35:14 2004 +0000
+
+    readding XFree86's cvs IDs
+
+commit e6ad8e6d9eba014388fcaeedd426cd88ed6b4e89
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 09:22:28 2004 +0000
+
+    Importing vendor version xf86-4_3_99_903 on Wed Feb 26 01:21:00 PST 2004
+
+commit 1c17764c32d9187589f952cde9288eb3108cbceb
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    XFree86 4.3.0.1
+
+commit bb5a469bc6137857a3a057989c47a2c2dda68716
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    Initial revision

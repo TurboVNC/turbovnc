@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/closedev.h,v 3.2 2003/11/17 22:20:29 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,31 +23,17 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef CLOSEDEV_H
 #define CLOSEDEV_H 1
 
-int
-SProcXCloseDevice(
-	ClientPtr              /* client */
-	);
+int SProcXCloseDevice(ClientPtr /* client */
+    );
 
-int
-ProcXCloseDevice(
-	ClientPtr              /* client */
-	);
+int ProcXCloseDevice(ClientPtr  /* client */
+    );
 
-void
-DeleteEventsFromChildren(
-	DeviceIntPtr           /* dev */,
-	WindowPtr              /* p1 */,
-	ClientPtr              /* client */
-	);
-
-void
-DeleteDeviceEvents (
-	DeviceIntPtr           /* dev */,
-	WindowPtr              /* pWin */,
-	ClientPtr              /* client */
-	);
-
-#endif /* CLOSEDEV_H */
+#endif                          /* CLOSEDEV_H */

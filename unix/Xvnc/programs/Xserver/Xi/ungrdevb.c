@@ -1,5 +1,3 @@
-/* $Xorg: ungrdevb.c,v 1.4 2001/02/09 02:04:35 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/ungrdevb.c,v 3.4 2001/12/14 19:59:00 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,16 +50,14 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "windowstr.h"			/* window structure  */
-#include "XI.h"
-#include "XIproto.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include "windowstr.h"          /* window structure  */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "exglobals.h"
 #include "dixgrabs.h"
 
@@ -79,18 +74,15 @@ SOFTWARE.
  */
 
 int
-SProcXUngrabDeviceButton(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXUngrabDeviceButton(ClientPtr client)
+{
     REQUEST(xUngrabDeviceButtonReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xUngrabDeviceButtonReq);
-    swapl(&stuff->grabWindow, n);
-    swaps(&stuff->modifiers, n);
-    return(ProcXUngrabDeviceButton(client));
-    }
+    swapl(&stuff->grabWindow);
+    swaps(&stuff->modifiers);
+    return (ProcXUngrabDeviceButton(client));
+}
 
 /***********************************************************************
  *
@@ -99,76 +91,59 @@ SProcXUngrabDeviceButton(client)
  */
 
 int
-ProcXUngrabDeviceButton(client)
-    ClientPtr client;
-    {
-    DeviceIntPtr	dev;
-    DeviceIntPtr	mdev;
-    WindowPtr		pWin;
-    GrabRec		temporaryGrab;
+ProcXUngrabDeviceButton(ClientPtr client)
+{
+    DeviceIntPtr dev;
+    DeviceIntPtr mdev;
+    WindowPtr pWin;
+    GrabPtr temporaryGrab;
+    int rc;
 
     REQUEST(xUngrabDeviceButtonReq);
     REQUEST_SIZE_MATCH(xUngrabDeviceButtonReq);
 
-    dev = LookupDeviceIntRec (stuff->grabbed_device);
-    if (dev == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceButton, 0, 
-	    BadDevice);
-	return Success;
-	}
+    rc = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
+    if (rc != Success)
+        return rc;
     if (dev->button == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceButton, 0, 
-		BadMatch);
-	return Success;
-	}
+        return BadMatch;
 
-    if (stuff->modifier_device != UseXKeyboard)
-	{
-	mdev = LookupDeviceIntRec (stuff->modifier_device);
-	if (mdev == NULL)
-	    {
-	    SendErrorToClient(client, IReqCode, X_UngrabDeviceButton, 0, 
-	        BadDevice);
-	    return Success;
-	    }
-	if (mdev->key == NULL)
-	    {
-	    SendErrorToClient(client, IReqCode, X_UngrabDeviceButton, 0, 
-		BadMatch);
-	    return Success;
-	    }
-	}
+    if (stuff->modifier_device != UseXKeyboard) {
+        rc = dixLookupDevice(&mdev, stuff->modifier_device, client,
+                             DixReadAccess);
+        if (rc != Success)
+            return BadDevice;
+        if (mdev->key == NULL)
+            return BadMatch;
+    }
     else
-	mdev = (DeviceIntPtr) LookupKeyboardDevice();
+        mdev = PickKeyboard(client);
 
-    pWin = LookupWindow(stuff->grabWindow, client);
-    if (!pWin)
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceButton, 0, 
-	    BadWindow);
-	return Success;
-	}
+    rc = dixLookupWindow(&pWin, stuff->grabWindow, client, DixSetAttrAccess);
+    if (rc != Success)
+        return rc;
 
     if ((stuff->modifiers != AnyModifier) &&
-	(stuff->modifiers & ~AllModifiersMask))
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceButton, 0, 
-	    BadValue);
-	return Success;
-	}
+        (stuff->modifiers & ~AllModifiersMask))
+        return BadValue;
 
-    temporaryGrab.resource = client->clientAsMask;
-    temporaryGrab.device = dev;
-    temporaryGrab.window = pWin;
-    temporaryGrab.type = DeviceButtonPress;
-    temporaryGrab.modifierDevice = mdev;
-    temporaryGrab.modifiersDetail.exact = stuff->modifiers;
-    temporaryGrab.modifiersDetail.pMask = NULL;
-    temporaryGrab.detail.exact = stuff->button;
-    temporaryGrab.detail.pMask = NULL;
+    temporaryGrab = AllocGrab();
+    if (!temporaryGrab)
+        return BadAlloc;
 
-    DeletePassiveGrabFromList(&temporaryGrab);
+    temporaryGrab->resource = client->clientAsMask;
+    temporaryGrab->device = dev;
+    temporaryGrab->window = pWin;
+    temporaryGrab->type = DeviceButtonPress;
+    temporaryGrab->grabtype = XI;
+    temporaryGrab->modifierDevice = mdev;
+    temporaryGrab->modifiersDetail.exact = stuff->modifiers;
+    temporaryGrab->modifiersDetail.pMask = NULL;
+    temporaryGrab->detail.exact = stuff->button;
+    temporaryGrab->detail.pMask = NULL;
+
+    DeletePassiveGrabFromList(temporaryGrab);
+
+    FreeGrab(temporaryGrab);
     return Success;
-    }
+}

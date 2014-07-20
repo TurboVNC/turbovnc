@@ -1,4 +1,3 @@
-/* $Xorg: connection.c,v 1.6 2001/02/09 02:05:23 xorgcvs Exp $ */
 /***********************************************************
 
 Copyright 1987, 1989, 1998  The Open Group
@@ -23,7 +22,6 @@ Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
 in this Software without prior written authorization from The Open Group.
 
-
 Copyright 1987, 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XFree86: xc/programs/Xserver/os/connection.c,v 3.65 2003/10/30 21:21:10 herrb Exp $ */
 /*****************************************************************
  *  Stuff to create connections --- OS dependent
  *
@@ -63,138 +60,89 @@ SOFTWARE.
  *
  *****************************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #endif
-#include "X.h"
-#include "Xproto.h"
-#include <X11/Xtrans.h>
+#include <X11/X.h>
+#include <X11/Xproto.h>
+#define XSERV_t
+#define TRANS_SERVER
+#define TRANS_REOPEN
+#include <X11/Xtrans/Xtrans.h>
+#include <X11/Xtrans/Xtransint.h>
 #include <errno.h>
-#ifdef X_NOT_STDC_ENV
-extern int errno;
-#endif
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #ifndef WIN32
-#ifndef MINIX
-#ifndef Lynx
 #include <sys/socket.h>
-#else
-#include <socket.h>
-#endif
-#endif
-
-#ifdef hpux
-#include <sys/utsname.h>
-#include <sys/ioctl.h>
-#endif
-
-#ifdef AIXV3
-#include <sys/ioctl.h>
-#endif
-
-#ifdef MINIX
-#include <sys/nbio.h>
-
-#define select(n,r,w,x,t) nbio_select(n,r,w,x,t)
-#endif
-
-#ifdef __EMX__
-#define select(n,r,w,x,t) os2PseudoSelect(n,r,w,x,t)
-extern __const__ int _nfiles;
-#endif
 
 #if defined(TCPCONN) || defined(STREAMSCONN)
-# include <netinet/in.h>
-
-/*================================================================
-   BEGIN ORL VNC modification
-   include arpa/inet.h for inet_ntoa function prototype */
-
+#include <netinet/in.h>
 #include <arpa/inet.h>
-
-/* END ORL VNC modification
-================================================================*/
-
-# ifndef hpux
-#  ifdef apollo
-#   ifndef NO_TCP_H
-#    include <netinet/tcp.h>
-#   endif
-#  else
-#   ifdef CSRG_BASED
-#    include <sys/param.h>
-#   endif
-#    ifndef __EMX__
-#     include <netinet/tcp.h>
-#    endif
-#  endif
-# endif
+#ifdef apollo
+#ifndef NO_TCP_H
+#include <netinet/tcp.h>
 #endif
-
-#ifdef AMTCPCONN
-#include <server/ip/types.h>
-#include <server/ip/gen/in.h>
-#include <server/ip/gen/inet.h>
-#endif
-
-#if !defined(AMOEBA) && !defined(_MINIX) && !defined(__EMX__)
-#ifndef Lynx
-#include <sys/uio.h>
 #else
-#include <uio.h>
+#ifdef CSRG_BASED
+#include <sys/param.h>
 #endif
+#include <netinet/tcp.h>
 #endif
-#endif /* WIN32 */
-#include "misc.h"		/* for typedef of pointer */
-#include <X11/Xpoll.h>
+#include <arpa/inet.h>
+#endif
+
+#include <sys/uio.h>
+
+#endif                          /* WIN32 */
+#include "misc.h"               /* for typedef of pointer */
 #include "osdep.h"
+#include <X11/Xpoll.h>
 #include "opaque.h"
 #include "dixstruct.h"
-#ifdef XAPPGROUP
-#include "extensions/Xagsrv.h"
-#endif
-#ifdef XCSECURITY
-#define _SECURITY_SERVER
-#include "extensions/security.h"
-#endif
-#ifdef LBX
-#include "lbxserve.h"
-#endif
+#include "xace.h"
 
-#ifdef X_NOT_POSIX
-#define Pid_t int
-#else
 #define Pid_t pid_t
+
+#ifdef HAVE_GETPEERUCRED
+#include <ucred.h>
+#include <zone.h>
 #endif
 
-#ifdef DNETCONN
-#include <netdnet/dn.h>
-#endif /* DNETCONN */
+#ifdef XSERVER_DTRACE
+#include <sys/types.h>
+typedef const char *string;
 
-extern char *display;		/* The display number */
-int lastfdesc;			/* maximum file descriptor */
+#ifndef HAVE_GETPEERUCRED
+#define zoneid_t int
+#endif
+#include "../dix/Xserver-dtrace.h"
+#endif
 
-extern int ffsl(long);
+static int lastfdesc;           /* maximum file descriptor */
 
-fd_set WellKnownConnections;	/* Listener mask */
-fd_set EnabledDevices;		/* mask for input devices that are on */
-fd_set AllSockets;		/* select on this */
-fd_set AllClients;		/* available clients */
-fd_set LastSelectMask;		/* mask returned from last select call */
-fd_set ClientsWithInput;	/* clients with FULL requests in buffer */
-fd_set ClientsWriteBlocked;	/* clients who cannot receive output */
-fd_set OutputPending;		/* clients with reply/event data ready to go */
-int MaxClients = MAXSOCKS;
-Bool NewOutputPending;		/* not yet attempted to write some new output */
-Bool AnyClientsWriteBlocked;	/* true if some client blocked on write */
+fd_set WellKnownConnections;    /* Listener mask */
+fd_set EnabledDevices;          /* mask for input devices that are on */
+fd_set AllSockets;              /* select on this */
+fd_set AllClients;              /* available clients */
+fd_set LastSelectMask;          /* mask returned from last select call */
+fd_set ClientsWithInput;        /* clients with FULL requests in buffer */
+fd_set ClientsWriteBlocked;     /* clients who cannot receive output */
+fd_set OutputPending;           /* clients with reply/event data ready to go */
+int MaxClients = 0;
+Bool NewOutputPending;          /* not yet attempted to write some new output */
+Bool AnyClientsWriteBlocked;    /* true if some client blocked on write */
 
-Bool RunFromSmartParent;	/* send SIGUSR1 to parent process */
-Bool PartialNetwork;		/* continue even if unable to bind all addrs */
-char *protNoListen;             /* don't listen on this protocol */
+static Bool RunFromSmartParent; /* send SIGUSR1 to parent process */
+Bool RunFromSigStopParent;      /* send SIGSTOP to our own process; Upstart (or
+                                   equivalent) will send SIGCONT back. */
+Bool PartialNetwork;            /* continue even if unable to bind all addrs */
 static Pid_t ParentProcess;
 
 static Bool debug_conns = FALSE;
@@ -206,67 +154,211 @@ static fd_set SavedAllSockets;
 static fd_set SavedClientsWithInput;
 int GrabInProgress = 0;
 
-#ifndef WIN32
-int ConnectionTranslation[MAXSOCKS];
+#if !defined(WIN32)
+int *ConnectionTranslation = NULL;
 #else
-/* SPAM ALERT !!!
+/*
  * On NT fds are not between 0 and MAXSOCKS, they are unrelated, and there is
  * not even a known maximum value, so use something quite arbitrary for now.
- * This is clearly boggus and another form of storage which doesn't use the fd
- * as a direct index should really be implemented for NT.
+ * Do storage is a hash table of size 256. Collisions are handled in a linked
+ * list.
  */
-#define MAXFD 500
-int ConnectionTranslation[MAXFD];
-#endif
 
-XtransConnInfo 	*ListenTransConns = NULL;
-int	       	*ListenTransFds = NULL;
-int		ListenTransCount;
+#undef MAXSOCKS
+#define MAXSOCKS 500
+#undef MAXSELECT
+#define MAXSELECT 500
 
-extern int auditTrailLevel;
+struct _ct_node {
+    struct _ct_node *next;
+    int key;
+    int value;
+};
 
-static void ErrorConnMax(
-#if NeedFunctionPrototypes
-XtransConnInfo /* trans_conn */
-#endif
-);
+struct _ct_node *ct_head[256];
 
-#ifndef LBX
-static
-#endif
-void CloseDownFileDescriptor(
-#if NeedFunctionPrototypes
-#ifdef LBX
-    ClientPtr	client
-#else
-    register OsCommPtr /*oc*/
-#endif
-#endif
-);
-
-#ifdef LBX
-extern int LbxFlushClient();
-extern void LbxCloseClient();
-#endif /* LBX */
-
-static XtransConnInfo
-lookup_trans_conn (fd)
-    int fd;
+void
+InitConnectionTranslation(void)
 {
-    if (ListenTransFds)
-    {
-	int i;
-	for (i = 0; i < ListenTransCount; i++)
-	    if (ListenTransFds[i] == fd)
-		return ListenTransConns[i];
-    }
-
-    return (NULL);
+    memset(ct_head, 0, sizeof(ct_head));
 }
 
-#ifdef XDMCP
-void XdmcpOpenDisplay(), XdmcpInit(), XdmcpReset(), XdmcpCloseDisplay();
+int
+GetConnectionTranslation(int conn)
+{
+    struct _ct_node *node = ct_head[conn & 0xff];
+
+    while (node != NULL) {
+        if (node->key == conn)
+            return node->value;
+        node = node->next;
+    }
+    return 0;
+}
+
+void
+SetConnectionTranslation(int conn, int client)
+{
+    struct _ct_node **node = ct_head + (conn & 0xff);
+
+    if (client == 0) {          /* remove entry */
+        while (*node != NULL) {
+            if ((*node)->key == conn) {
+                struct _ct_node *temp = *node;
+
+                *node = (*node)->next;
+                free(temp);
+                return;
+            }
+            node = &((*node)->next);
+        }
+        return;
+    }
+    else {
+        while (*node != NULL) {
+            if ((*node)->key == conn) {
+                (*node)->value = client;
+                return;
+            }
+            node = &((*node)->next);
+        }
+        *node = malloc(sizeof(struct _ct_node));
+        (*node)->next = NULL;
+        (*node)->key = conn;
+        (*node)->value = client;
+        return;
+    }
+}
+
+void
+ClearConnectionTranslation(void)
+{
+    unsigned i;
+
+    for (i = 0; i < 256; i++) {
+        struct _ct_node *node = ct_head[i];
+
+        while (node != NULL) {
+            struct _ct_node *temp = node;
+
+            node = node->next;
+            free(temp);
+        }
+    }
+}
 #endif
+
+static XtransConnInfo *ListenTransConns = NULL;
+static int *ListenTransFds = NULL;
+static int ListenTransCount;
+
+static void ErrorConnMax(XtransConnInfo /* trans_conn */ );
+
+static XtransConnInfo
+lookup_trans_conn(int fd)
+{
+    if (ListenTransFds) {
+        int i;
+
+        for (i = 0; i < ListenTransCount; i++)
+            if (ListenTransFds[i] == fd)
+                return ListenTransConns[i];
+    }
+
+    return NULL;
+}
+
+/* Set MaxClients and lastfdesc, and allocate ConnectionTranslation */
+
+void
+InitConnectionLimits(void)
+{
+    lastfdesc = -1;
+
+#ifndef __CYGWIN__
+
+#if !defined(XNO_SYSCONF) && defined(_SC_OPEN_MAX)
+    lastfdesc = sysconf(_SC_OPEN_MAX) - 1;
+#endif
+
+#ifdef HAVE_GETDTABLESIZE
+    if (lastfdesc < 0)
+        lastfdesc = getdtablesize() - 1;
+#endif
+
+#ifdef _NFILE
+    if (lastfdesc < 0)
+        lastfdesc = _NFILE - 1;
+#endif
+
+#endif                          /* __CYGWIN__ */
+
+    /* This is the fallback */
+    if (lastfdesc < 0)
+        lastfdesc = MAXSOCKS;
+
+    if (lastfdesc > MAXSELECT)
+        lastfdesc = MAXSELECT;
+
+    if (lastfdesc > MAXCLIENTS) {
+        lastfdesc = MAXCLIENTS;
+        if (debug_conns)
+            ErrorF("REACHED MAXIMUM CLIENTS LIMIT %d\n", MAXCLIENTS);
+    }
+    MaxClients = lastfdesc;
+
+#ifdef DEBUG
+    ErrorF("InitConnectionLimits: MaxClients = %d\n", MaxClients);
+#endif
+
+#if !defined(WIN32)
+    if (!ConnectionTranslation)
+        ConnectionTranslation = (int *) xnfalloc(sizeof(int) * (lastfdesc + 1));
+#else
+    InitConnectionTranslation();
+#endif
+}
+
+/*
+ * If SIGUSR1 was set to SIG_IGN when the server started, assume that either
+ *
+ *  a- The parent process is ignoring SIGUSR1
+ *
+ * or
+ *
+ *  b- The parent process is expecting a SIGUSR1
+ *     when the server is ready to accept connections
+ *
+ * In the first case, the signal will be harmless, in the second case,
+ * the signal will be quite useful.
+ */
+static void
+InitParentProcess(void)
+{
+#if !defined(WIN32)
+    OsSigHandlerPtr handler;
+
+    handler = OsSignal(SIGUSR1, SIG_IGN);
+    if (handler == SIG_IGN)
+        RunFromSmartParent = TRUE;
+    OsSignal(SIGUSR1, handler);
+    ParentProcess = getppid();
+#endif
+}
+
+void
+NotifyParentProcess(void)
+{
+#if !defined(WIN32)
+    if (RunFromSmartParent) {
+        if (ParentProcess > 1) {
+            kill(ParentProcess, SIGUSR1);
+        }
+    }
+    if (RunFromSigStopParent)
+        raise(SIGSTOP);
+#endif
+}
 
 /*****************
  * CreateWellKnownSockets
@@ -274,256 +366,242 @@ void XdmcpOpenDisplay(), XdmcpInit(), XdmcpReset(), XdmcpCloseDisplay();
  *****************/
 
 void
-CreateWellKnownSockets()
+CreateWellKnownSockets(void)
 {
-    int		i;
-    int		partial;
-    char 	port[20];
+    int i;
+    int partial;
+    char port[20];
 
     FD_ZERO(&AllSockets);
     FD_ZERO(&AllClients);
     FD_ZERO(&LastSelectMask);
     FD_ZERO(&ClientsWithInput);
 
-#ifndef WIN32
-    for (i=0; i<MAXSOCKS; i++) ConnectionTranslation[i] = 0;
+#if !defined(WIN32)
+    for (i = 0; i < MaxClients; i++)
+        ConnectionTranslation[i] = 0;
 #else
-    for (i=0; i<MAXFD; i++) ConnectionTranslation[i] = 0;
-#endif
-#ifdef XNO_SYSCONF      /* should only be on FreeBSD 1.x and NetBSD 0.x */
-#undef _SC_OPEN_MAX
-#endif
-#ifndef __EMX__
-#ifdef _SC_OPEN_MAX
-    lastfdesc = sysconf(_SC_OPEN_MAX) - 1;
-#else
-#ifdef hpux /* || defined(__EMX__) ? */
-    lastfdesc = _NFILE - 1;
-#else
-    lastfdesc = getdtablesize() - 1;
-#endif
-#endif
-#else
-    lastfdesc = _nfiles - 1;
+    ClearConnectionTranslation();
 #endif
 
-    if (lastfdesc > MAXSOCKS)
-    {
-	lastfdesc = MAXSOCKS;
-	if (debug_conns)
-	    ErrorF( "GOT TO END OF SOCKETS %d\n", MAXSOCKS);
+    FD_ZERO(&WellKnownConnections);
+
+    snprintf(port, sizeof(port), "%d", atoi(display));
+
+    if ((_XSERVTransMakeAllCOTSServerListeners(port, &partial,
+                                               &ListenTransCount,
+                                               &ListenTransConns) >= 0) &&
+        (ListenTransCount >= 1)) {
+        if (!PartialNetwork && partial) {
+            FatalError("Failed to establish all listening sockets");
+        }
+        else {
+            ListenTransFds = malloc(ListenTransCount * sizeof(int));
+
+            for (i = 0; i < ListenTransCount; i++) {
+                int fd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
+
+                ListenTransFds[i] = fd;
+                FD_SET(fd, &WellKnownConnections);
+
+                if (!_XSERVTransIsLocal(ListenTransConns[i])) {
+                    DefineSelf(fd);
+                }
+            }
+        }
     }
 
-    FD_ZERO (&WellKnownConnections);
-
-    sprintf (port, "%d", atoi (display));
-
-    if (protNoListen)
-        if (_XSERVTransNoListen(protNoListen))
-        {
-	    FatalError ("Failed to disable listen for %s", protNoListen);
-	}
-    
-    if ((_XSERVTransMakeAllCOTSServerListeners (port, &partial,
-	&ListenTransCount, &ListenTransConns) >= 0) &&
-	(ListenTransCount >= 1))
-    {
-	if (!PartialNetwork && partial)
-	{
-	    FatalError ("Failed to establish all listening sockets");
-	}
-	else
-	{
-	    ListenTransFds = (int *) xalloc (ListenTransCount * sizeof (int));
-
-	    for (i = 0; i < ListenTransCount; i++)
-	    {
-		int fd = _XSERVTransGetConnectionNumber (ListenTransConns[i]);
-		
-		ListenTransFds[i] = fd;
-		FD_SET (fd, &WellKnownConnections);
-
-		if (!_XSERVTransIsLocal (ListenTransConns[i]))
-		{
-		    DefineSelf (fd);
-		}
-	    }
-	}
-    }
-
-    if (!XFD_ANYSET (&WellKnownConnections))
-        FatalError ("Cannot establish any listening sockets - Make sure an X server isn't already running");
-#ifndef WIN32
-    OsSignal (SIGPIPE, SIG_IGN);
-    OsSignal (SIGHUP, AutoResetServer);
+    if (!XFD_ANYSET(&WellKnownConnections))
+        FatalError
+            ("Cannot establish any listening sockets - Make sure an X server isn't already running");
+#if !defined(WIN32)
+    OsSignal(SIGPIPE, SIG_IGN);
+    OsSignal(SIGHUP, AutoResetServer);
 #endif
-    OsSignal (SIGINT, GiveUp);
-    OsSignal (SIGTERM, GiveUp);
-    XFD_COPYSET (&WellKnownConnections, &AllSockets);
+    OsSignal(SIGINT, GiveUp);
+    OsSignal(SIGTERM, GiveUp);
+    XFD_COPYSET(&WellKnownConnections, &AllSockets);
     ResetHosts(display);
-    /*
-     * Magic:  If SIGUSR1 was set to SIG_IGN when
-     * the server started, assume that either
-     *
-     *  a- The parent process is ignoring SIGUSR1
-     *
-     * or
-     *
-     *  b- The parent process is expecting a SIGUSR1
-     *     when the server is ready to accept connections
-     *
-     * In the first case, the signal will be harmless,
-     * in the second case, the signal will be quite
-     * useful
-     */
-#ifndef WIN32
-    if (OsSignal (SIGUSR1, SIG_IGN) == SIG_IGN)
-	RunFromSmartParent = TRUE;
-    ParentProcess = getppid ();
-    if (RunFromSmartParent) {
-	if (ParentProcess > 0) {
-	    kill (ParentProcess, SIGUSR1);
-	}
-    }
-#endif
+
+    InitParentProcess();
+
 #ifdef XDMCP
-    XdmcpInit ();
+    XdmcpInit();
 #endif
 }
 
 void
-ResetWellKnownSockets ()
+ResetWellKnownSockets(void)
 {
     int i;
 
     ResetOsBuffers();
 
-    for (i = 0; i < ListenTransCount; i++)
-    {
-	int status = _XSERVTransResetListener (ListenTransConns[i]);
+    for (i = 0; i < ListenTransCount; i++) {
+        int status = _XSERVTransResetListener(ListenTransConns[i]);
 
-	if (status != TRANS_RESET_NOOP)
-	{
-	    if (status == TRANS_RESET_FAILURE)
-	    {
-		/*
-		 * ListenTransConns[i] freed by xtrans.
-		 * Remove it from out list.
-		 */
+        if (status != TRANS_RESET_NOOP) {
+            if (status == TRANS_RESET_FAILURE) {
+                /*
+                 * ListenTransConns[i] freed by xtrans.
+                 * Remove it from out list.
+                 */
 
-		FD_CLR (ListenTransFds[i], &WellKnownConnections);
-		ListenTransFds[i] = ListenTransFds[ListenTransCount - 1];
-		ListenTransConns[i] = ListenTransConns[ListenTransCount - 1];
-		ListenTransCount -= 1;
-		i -= 1;
-	    }
-	    else if (status == TRANS_RESET_NEW_FD)
-	    {
-		/*
-		 * A new file descriptor was allocated (the old one was closed)
-		 */
+                FD_CLR(ListenTransFds[i], &WellKnownConnections);
+                ListenTransFds[i] = ListenTransFds[ListenTransCount - 1];
+                ListenTransConns[i] = ListenTransConns[ListenTransCount - 1];
+                ListenTransCount -= 1;
+                i -= 1;
+            }
+            else if (status == TRANS_RESET_NEW_FD) {
+                /*
+                 * A new file descriptor was allocated (the old one was closed)
+                 */
 
-		int newfd = _XSERVTransGetConnectionNumber (ListenTransConns[i]);
+                int newfd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
 
-		FD_CLR (ListenTransFds[i], &WellKnownConnections);
-		ListenTransFds[i] = newfd;
-		FD_SET(newfd, &WellKnownConnections);
-	    }
-	}
+                FD_CLR(ListenTransFds[i], &WellKnownConnections);
+                ListenTransFds[i] = newfd;
+                FD_SET(newfd, &WellKnownConnections);
+            }
+        }
     }
 
-    ResetAuthorization ();
+    ResetAuthorization();
     ResetHosts(display);
-    /*
-     * See above in CreateWellKnownSockets about SIGUSR1
-     */
-#ifndef WIN32
-    if (RunFromSmartParent) {
-	if (ParentProcess > 0) {
-	    kill (ParentProcess, SIGUSR1);
-	}
-    }
-#endif
     /*
      * restart XDMCP
      */
 #ifdef XDMCP
-    XdmcpReset ();
+    XdmcpReset();
 #endif
+}
+
+void
+CloseWellKnownConnections(void)
+{
+    int i;
+
+    for (i = 0; i < ListenTransCount; i++)
+        _XSERVTransClose(ListenTransConns[i]);
 }
 
 static void
-AuthAudit (client, letin, saddr, len, proto_n, auth_proto, auth_id)
-    ClientPtr client;
-    Bool letin;
-    struct sockaddr *saddr;
-    int len;
-    unsigned short proto_n;
-    char *auth_proto;
-    int auth_id;
+AuthAudit(ClientPtr client, Bool letin,
+          struct sockaddr *saddr, int len,
+          unsigned int proto_n, char *auth_proto, int auth_id)
 {
     char addr[128];
-    char *out = addr;
+    char client_uid_string[64];
+    LocalClientCredRec *lcc;
 
-    if (!((OsCommPtr)client->osPrivate)->trans_conn) {
-	strcpy(addr, "LBX proxy at ");
-	out += strlen(addr);
-    }
+#ifdef XSERVER_DTRACE
+    pid_t client_pid = -1;
+    zoneid_t client_zid = -1;
+#endif
+
     if (!len)
-        strcpy(out, "local host");
+        strlcpy(addr, "local host", sizeof(addr));
     else
-	switch (saddr->sa_family)
-	{
-	case AF_UNSPEC:
-#if defined(UNIXCONN) || defined(LOCALCONN) || defined(OS2PIPECONN)
-	case AF_UNIX:
+        switch (saddr->sa_family) {
+        case AF_UNSPEC:
+#if defined(UNIXCONN) || defined(LOCALCONN)
+        case AF_UNIX:
 #endif
-	    strcpy(out, "local host");
-	    break;
-#if defined(TCPCONN) || defined(STREAMSCONN) || defined(MNX_TCPCONN)
-	case AF_INET:
-	    sprintf(out, "IP %s port %d",
-		    inet_ntoa(((struct sockaddr_in *) saddr)->sin_addr),
-		    ntohs(((struct sockaddr_in *) saddr)->sin_port));
-	    break;
+            strlcpy(addr, "local host", sizeof(addr));
+            break;
+#if defined(TCPCONN) || defined(STREAMSCONN)
+        case AF_INET:
+            snprintf(addr, sizeof(addr), "IP %s",
+                     inet_ntoa(((struct sockaddr_in *) saddr)->sin_addr));
+            break;
+#if defined(IPv6) && defined(AF_INET6)
+        case AF_INET6:{
+            char ipaddr[INET6_ADDRSTRLEN];
+
+            inet_ntop(AF_INET6, &((struct sockaddr_in6 *) saddr)->sin6_addr,
+                      ipaddr, sizeof(ipaddr));
+            snprintf(addr, sizeof(addr), "IP %s", ipaddr);
+        }
+            break;
 #endif
-#ifdef DNETCONN
-	case AF_DECnet:
-	    sprintf(out, "DN %s",
-		    dnet_ntoa(&((struct sockaddr_dn *) saddr)->sdn_add));
-	    break;
 #endif
-#ifdef AMRPCCONN
-	case FamilyAmoeba:
-	    sprintf(addr, "AM %s", saddr);
-	    break;
+        default:
+            strlcpy(addr, "unknown address", sizeof(addr));
+        }
+
+    if (GetLocalClientCreds(client, &lcc) != -1) {
+        int slen;               /* length written to client_uid_string */
+
+        strcpy(client_uid_string, " ( ");
+        slen = 3;
+
+        if (lcc->fieldsSet & LCC_UID_SET) {
+            snprintf(client_uid_string + slen,
+                     sizeof(client_uid_string) - slen,
+                     "uid=%ld ", (long) lcc->euid);
+            slen = strlen(client_uid_string);
+        }
+
+        if (lcc->fieldsSet & LCC_GID_SET) {
+            snprintf(client_uid_string + slen,
+                     sizeof(client_uid_string) - slen,
+                     "gid=%ld ", (long) lcc->egid);
+            slen = strlen(client_uid_string);
+        }
+
+        if (lcc->fieldsSet & LCC_PID_SET) {
+#ifdef XSERVER_DTRACE
+            client_pid = lcc->pid;
 #endif
-#if defined(AMTCPCONN) && !(defined(TCPCONN) || defined(STREAMSCONN))
-	case AF_INET:
-	    sprintf(addr, "AMIP %s", inet_ntoa(*((ipaddr_t *) saddr)));
-	    break;
+            snprintf(client_uid_string + slen,
+                     sizeof(client_uid_string) - slen,
+                     "pid=%ld ", (long) lcc->pid);
+            slen = strlen(client_uid_string);
+        }
+
+        if (lcc->fieldsSet & LCC_ZID_SET) {
+#ifdef XSERVER_DTRACE
+            client_zid = lcc->zoneid;
 #endif
-	default:
-	    strcpy(out, "unknown address");
-	}
-    if (letin)
-	AuditF("client %d connected from %s\n", client->index, addr);
-    else
-	AuditF("client %d rejected from %s\n", client->index, addr);
-    if (proto_n)
-	AuditF("  Auth name: %.*s ID: %d\n", proto_n, auth_proto, auth_id);
+            snprintf(client_uid_string + slen,
+                     sizeof(client_uid_string) - slen,
+                     "zoneid=%ld ", (long) lcc->zoneid);
+            slen = strlen(client_uid_string);
+        }
+
+        snprintf(client_uid_string + slen, sizeof(client_uid_string) - slen,
+                 ")");
+        FreeLocalClientCreds(lcc);
+    }
+    else {
+        client_uid_string[0] = '\0';
+    }
+
+#ifdef XSERVER_DTRACE
+    XSERVER_CLIENT_AUTH(client->index, addr, client_pid, client_zid);
+#endif
+    if (auditTrailLevel > 1) {
+        if (proto_n)
+            AuditF("client %d %s from %s%s\n  Auth name: %.*s ID: %d\n",
+                   client->index, letin ? "connected" : "rejected", addr,
+                   client_uid_string, (int) proto_n, auth_proto, auth_id);
+        else
+            AuditF("client %d %s from %s%s\n",
+                   client->index, letin ? "connected" : "rejected", addr,
+                   client_uid_string);
+
+    }
 }
 
 XID
-AuthorizationIDOfClient(client)
-    ClientPtr client;
+AuthorizationIDOfClient(ClientPtr client)
 {
     if (client->osPrivate)
-	return ((OsCommPtr)client->osPrivate)->auth_id;
+        return ((OsCommPtr) client->osPrivate)->auth_id;
     else
-	return None;
+        return None;
 }
-
 
 /*****************************************************************
  * ClientAuthorized
@@ -544,92 +622,72 @@ AuthorizationIDOfClient(client)
  *
  *****************************************************************/
 
-char * 
-ClientAuthorized(client, proto_n, auth_proto, string_n, auth_string)
-    ClientPtr client;
-    char *auth_proto, *auth_string;
-    unsigned int proto_n, string_n;
+const char *
+ClientAuthorized(ClientPtr client,
+                 unsigned int proto_n, char *auth_proto,
+                 unsigned int string_n, char *auth_string)
 {
-    register OsCommPtr 	priv;
-    Xtransaddr		*from = NULL;
-    int 		family;
-    int			fromlen;
-    XID	 		auth_id;
-    char	 	*reason = NULL;
-    XtransConnInfo	trans_conn;
+    OsCommPtr priv;
+    Xtransaddr *from = NULL;
+    int family;
+    int fromlen;
+    XID auth_id;
+    const char *reason = NULL;
+    XtransConnInfo trans_conn;
 
-    auth_id = CheckAuthorization (proto_n, auth_proto,
-				  string_n, auth_string, client, &reason);
-
-    priv = (OsCommPtr)client->osPrivate;
+    priv = (OsCommPtr) client->osPrivate;
     trans_conn = priv->trans_conn;
-#ifdef LBX
-    if (!trans_conn) {
-	ClientPtr lbxpc = LbxProxyClient(priv->proxy);
-	trans_conn = ((OsCommPtr)lbxpc->osPrivate)->trans_conn;
-	if (auth_id == (XID) ~0L && !GetAccessControl())
-	    auth_id = ((OsCommPtr)lbxpc->osPrivate)->auth_id;
-#ifdef XCSECURITY
-	else if (auth_id != (XID) ~0L && !SecuritySameLevel(lbxpc, auth_id)) {
-	    auth_id = (XID) ~0L;
-	    reason = "Client trust level differs from that of LBX Proxy";
-	}
-#endif
-    }
-#endif
-    if (auth_id == (XID) ~0L)
-    {
-	if (
-#ifdef XCSECURITY	    
-	    (proto_n == 0 ||
-	    strncmp (auth_proto, XSecurityAuthorizationName, proto_n) != 0) &&
-#endif
-	    _XSERVTransGetPeerAddr (trans_conn,
-	        &family, &fromlen, &from) != -1)
-	{
-#ifdef AMRPCCONN
-	    /* Amoeba RPC connections are already checked by the capability. */
-	    if (family == FamilyAmoeba) {
-		auth_id = (XID) 0;
-	    }
-	    else
-#endif
-	    if (
-#ifdef LBX
-		!priv->trans_conn ||
-#endif
-		InvalidHost ((struct sockaddr *) from, fromlen))
-		AuthAudit(client, FALSE, (struct sockaddr *) from,
-			  fromlen, proto_n, auth_proto, auth_id);
-	    else
-	    {
-		auth_id = (XID) 0;
-		if (auditTrailLevel > 1)
-		    AuthAudit(client, TRUE,
-			(struct sockaddr *) from, fromlen,
-			proto_n, auth_proto, auth_id);
-	    }
 
-	    xfree ((char *) from);
-	}
-
-	if (auth_id == (XID) ~0L) {
-	    if (reason)
-		return reason;
-	    else
-		return "Client is not authorized to connect to Server";
-	}
+    /* Allow any client to connect without authorization on a launchd socket,
+       because it is securely created -- this prevents a race condition on launch */
+    if (trans_conn->flags & TRANS_NOXAUTH) {
+        auth_id = (XID) 0L;
     }
+    else {
+        auth_id =
+            CheckAuthorization(proto_n, auth_proto, string_n, auth_string,
+                               client, &reason);
+    }
+
+    if (auth_id == (XID) ~0L) {
+        if (_XSERVTransGetPeerAddr(trans_conn, &family, &fromlen, &from) != -1) {
+            if (InvalidHost((struct sockaddr *) from, fromlen, client))
+                AuthAudit(client, FALSE, (struct sockaddr *) from,
+                          fromlen, proto_n, auth_proto, auth_id);
+            else {
+                auth_id = (XID) 0;
+#ifdef XSERVER_DTRACE
+                if ((auditTrailLevel > 1) || XSERVER_CLIENT_AUTH_ENABLED())
+#else
+                if (auditTrailLevel > 1)
+#endif
+                    AuthAudit(client, TRUE,
+                              (struct sockaddr *) from, fromlen,
+                              proto_n, auth_proto, auth_id);
+            }
+
+            free(from);
+        }
+
+        if (auth_id == (XID) ~0L) {
+            if (reason)
+                return reason;
+            else
+                return "Client is not authorized to connect to Server";
+        }
+    }
+#ifdef XSERVER_DTRACE
+    else if ((auditTrailLevel > 1) || XSERVER_CLIENT_AUTH_ENABLED())
+#else
     else if (auditTrailLevel > 1)
+#endif
     {
-	if (_XSERVTransGetPeerAddr (trans_conn,
-	    &family, &fromlen, &from) != -1)
-	{
-	    AuthAudit(client, TRUE, (struct sockaddr *) from, fromlen,
-		      proto_n, auth_proto, auth_id);
+        if (_XSERVTransGetPeerAddr(trans_conn, &family, &fromlen, &from) != -1) {
+            AuthAudit(client, TRUE, (struct sockaddr *) from, fromlen,
+                      proto_n, auth_proto, auth_id);
 
-	    xfree ((char *) from);
-	}
+            free(from);
+        }
     }
     priv->auth_id = auth_id;
     priv->conn_time = 0;
@@ -637,125 +695,71 @@ ClientAuthorized(client, proto_n, auth_proto, string_n, auth_string)
 #ifdef XDMCP
     /* indicate to Xdmcp protocol that we've opened new client */
     XdmcpOpenDisplay(priv->fd);
-#endif /* XDMCP */
-#ifdef XAPPGROUP
-    if (ClientStateCallback)
-        XagCallClientStateChange (client);
-#endif
+#endif                          /* XDMCP */
+
+    XaceHook(XACE_AUTH_AVAIL, client, auth_id);
+
     /* At this point, if the client is authorized to change the access control
      * list, we should getpeername() information, and add the client to
      * the selfhosts list.  It's not really the host machine, but the
      * true purpose of the selfhosts list is to see who may change the
      * access control list.
      */
-    return((char *)NULL);
+    return ((char *) NULL);
 }
 
 static ClientPtr
-#ifdef LBX
-AllocNewConnection (trans_conn, fd, conn_time, Flush, Close, proxy)
-#else
-AllocNewConnection (trans_conn, fd, conn_time)
-#endif
-    XtransConnInfo trans_conn;
-    int	    fd;
-    CARD32  conn_time;
-#ifdef LBX
-    int     (*Flush)();
-    void    (*Close)();
-    LbxProxyPtr proxy;
-#endif
+AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
 {
-    OsCommPtr	oc;
-    ClientPtr	client;
-    
+    OsCommPtr oc;
+    ClientPtr client;
+
     if (
-#ifdef LBX
-	trans_conn &&
-#endif
 #ifndef WIN32
-	fd >= lastfdesc
+           fd >= lastfdesc
 #else
-	XFD_SETCOUNT(&AllClients) >= MaxClients
+           XFD_SETCOUNT(&AllClients) >= MaxClients
 #endif
-	)
-	return NullClient;
-    oc = (OsCommPtr)xalloc(sizeof(OsCommRec));
+        )
+        return NullClient;
+    oc = malloc(sizeof(OsCommRec));
     if (!oc)
-	return NullClient;
+        return NullClient;
     oc->trans_conn = trans_conn;
     oc->fd = fd;
-    oc->input = (ConnectionInputPtr)NULL;
-    oc->output = (ConnectionOutputPtr)NULL;
+    oc->input = (ConnectionInputPtr) NULL;
+    oc->output = (ConnectionOutputPtr) NULL;
     oc->auth_id = None;
     oc->conn_time = conn_time;
-#ifdef LBX
-    oc->proxy = proxy;
-    oc->Flush = Flush;
-    oc->Close = Close;
-    oc->largereq = (ConnectionInputPtr) NULL;
-#endif
-    if (!(client = NextAvailableClient((pointer)oc)))
-    {
-	xfree (oc);
-	return NullClient;
+    if (!(client = NextAvailableClient((pointer) oc))) {
+        free(oc);
+        return NullClient;
     }
-#ifdef LBX
-    if (trans_conn)
+    oc->local_client = ComputeLocalClient(client);
+#if !defined(WIN32)
+    ConnectionTranslation[fd] = client->index;
+#else
+    SetConnectionTranslation(fd, client->index);
 #endif
-    {
-	ConnectionTranslation[fd] = client->index;
-	if (GrabInProgress)
-	{
-	    FD_SET(fd, &SavedAllClients);
-	    FD_SET(fd, &SavedAllSockets);
-	}
-	else
-	{
-	    FD_SET(fd, &AllClients);
-	    FD_SET(fd, &AllSockets);
-	}
+    if (GrabInProgress) {
+        FD_SET(fd, &SavedAllClients);
+        FD_SET(fd, &SavedAllSockets);
     }
+    else {
+        FD_SET(fd, &AllClients);
+        FD_SET(fd, &AllSockets);
+    }
+
+#ifdef DEBUG
+    ErrorF("AllocNewConnection: client index = %d, socket fd = %d\n",
+           client->index, fd);
+#endif
+#ifdef XSERVER_DTRACE
+    XSERVER_CLIENT_CONNECT(client->index, fd);
+#endif
+
     return client;
 }
-
-#ifdef LBX
-
-int
-ClientConnectionNumber (client)
-    ClientPtr	client;
-{
-    OsCommPtr oc = (OsCommPtr) client->osPrivate;
-
-    return oc->fd;
-}
-
-ClientPtr
-AllocLbxClientConnection (client, proxy)
-    ClientPtr client;
-    LbxProxyPtr proxy;
-{
-    OsCommPtr oc = (OsCommPtr) client->osPrivate;
-
-    return AllocNewConnection ((XtransConnInfo)NULL, oc->fd, GetTimeInMillis(),
-			       LbxFlushClient, LbxCloseClient, proxy);
-}
-
-void
-LbxProxyConnection (client, proxy)
-    ClientPtr	client;
-    LbxProxyPtr proxy;
-{
-    OsCommPtr	oc = (OsCommPtr) client->osPrivate;
-
-    FlushClient(client, oc, (char *)NULL, 0);
-    oc->proxy = proxy;
-    oc->Flush = LbxFlushClient;
-    oc->Close = LbxCloseClient;
-    LbxPrimeInput(client, proxy);
-}
-
-#endif
 
 /*****************
  * EstablishNewConnections
@@ -764,93 +768,85 @@ LbxProxyConnection (client, proxy)
  *    and AllSockets.
  *****************/
 
-/*ARGSUSED*/
-Bool
-EstablishNewConnections(clientUnused, closure)
-    ClientPtr clientUnused;
-    pointer closure;
+ /*ARGSUSED*/ Bool
+EstablishNewConnections(ClientPtr clientUnused, pointer closure)
 {
-#ifndef WIN32
-    fd_mask readyconnections;     /* mask of listeners that are ready */
-#else
-    fd_set  readyconnections;     /* set of listeners that are ready */
-#endif
-    int curconn;                  /* fd of listener that's ready */
-    register int newconn;         /* fd of new client */
+    fd_set readyconnections;    /* set of listeners that are ready */
+    int curconn;                /* fd of listener that's ready */
+    register int newconn;       /* fd of new client */
     CARD32 connect_time;
     register int i;
     register ClientPtr client;
     register OsCommPtr oc;
     fd_set tmask;
 
-#ifndef AMOEBA
-    XFD_ANDSET (&tmask, (fd_set*)closure, &WellKnownConnections);
-#ifndef WIN32
-    readyconnections = tmask.fds_bits[0];
-    if (!readyconnections)
-	return TRUE;
-#else
+    XFD_ANDSET(&tmask, (fd_set *) closure, &WellKnownConnections);
     XFD_COPYSET(&tmask, &readyconnections);
     if (!XFD_ANYSET(&readyconnections))
-	return TRUE;
-#endif
+        return TRUE;
     connect_time = GetTimeInMillis();
     /* kill off stragglers */
-    for (i=1; i<currentMaxClients; i++)
-    {
-	if ((client = clients[i]))
-	{
-	    oc = (OsCommPtr)(client->osPrivate);
-	    if ((oc && (oc->conn_time != 0) &&
-		(connect_time - oc->conn_time) >= TimeOutValue) || 
-		(client->noClientException != Success && !client->clientGone))
-		CloseDownClient(client);     
-	}
+    for (i = 1; i < currentMaxClients; i++) {
+        if ((client = clients[i])) {
+            oc = (OsCommPtr) (client->osPrivate);
+            if ((oc && (oc->conn_time != 0) &&
+                 (connect_time - oc->conn_time) >= TimeOutValue) ||
+                (client->noClientException != Success && !client->clientGone))
+                CloseDownClient(client);
+        }
     }
-#else /* AMOEBA */
-    /* EstablishNewConnections is only called when there is one new
-     * connection waiting on the first transport.
-     */
-    readyconnections = 1;
-#endif /* AMOEBA */
 #ifndef WIN32
-    while (readyconnections) 
+    for (i = 0; i < howmany(XFD_SETSIZE, NFDBITS); i++) {
+        while (readyconnections.fds_bits[i])
 #else
-    for (i = 0; i < XFD_SETCOUNT(&readyconnections); i++) 
+    for (i = 0; i < XFD_SETCOUNT(&readyconnections); i++)
 #endif
     {
-	XtransConnInfo trans_conn, new_trans_conn;
-	int status;
+        XtransConnInfo trans_conn, new_trans_conn;
+        int status;
 
 #ifndef WIN32
-	curconn = ffsl(readyconnections) - 1;
-	readyconnections &= ~(((fd_mask)1) << curconn);
+        curconn = mffs(readyconnections.fds_bits[i]) - 1;
+        readyconnections.fds_bits[i] &= ~((fd_mask) 1 << curconn);
+        curconn += (i * (sizeof(fd_mask) * 8));
 #else
-	curconn = XFD_FD(&readyconnections, i);
+        curconn = XFD_FD(&readyconnections, i);
 #endif
 
-	if ((trans_conn = lookup_trans_conn (curconn)) == NULL)
-	    continue;
+        if ((trans_conn = lookup_trans_conn(curconn)) == NULL)
+            continue;
 
-	if ((new_trans_conn = _XSERVTransAccept (trans_conn, &status)) == NULL)
-	    continue;
+        if ((new_trans_conn = _XSERVTransAccept(trans_conn, &status)) == NULL)
+            continue;
 
-	newconn = _XSERVTransGetConnectionNumber (new_trans_conn);
+        newconn = _XSERVTransGetConnectionNumber(new_trans_conn);
 
-	_XSERVTransSetOption(new_trans_conn, TRANS_NONBLOCKING, 1);
+        if (newconn < lastfdesc) {
+            int clientid;
 
-	if (!AllocNewConnection (new_trans_conn, newconn, connect_time
-#ifdef LBX
-				 , StandardFlushClient,
-				 CloseDownFileDescriptor, (LbxProxyPtr)NULL
+#if !defined(WIN32)
+            clientid = ConnectionTranslation[newconn];
+#else
+            clientid = GetConnectionTranslation(newconn);
 #endif
-				))
-	{
-	    ErrorConnMax(new_trans_conn);
-	    _XSERVTransClose(new_trans_conn);
-	}
+            if (clientid && (client = clients[clientid]))
+                CloseDownClient(client);
+        }
+
+        _XSERVTransSetOption(new_trans_conn, TRANS_NONBLOCKING, 1);
+
+        if (trans_conn->flags & TRANS_NOXAUTH)
+            new_trans_conn->flags = new_trans_conn->flags | TRANS_NOXAUTH;
+
+        if (!AllocNewConnection(new_trans_conn, newconn, connect_time)) {
+            ErrorConnMax(new_trans_conn);
+            _XSERVTransClose(new_trans_conn);
+        }
     }
-    return TRUE;
+#ifndef WIN32
+}
+#endif
+return TRUE;
 }
 
 #define NOROOM "Maximum number of clients reached"
@@ -860,51 +856,48 @@ EstablishNewConnections(clientUnused, closure)
  *     Fail a connection due to lack of client or file descriptor space
  ************/
 
+#define BOTIMEOUT 200           /* in milliseconds */
+
 static void
-ErrorConnMax(trans_conn)
-XtransConnInfo trans_conn;
+ErrorConnMax(XtransConnInfo trans_conn)
 {
-    register int fd = _XSERVTransGetConnectionNumber (trans_conn);
+    int fd = _XSERVTransGetConnectionNumber(trans_conn);
     xConnSetupPrefix csp;
     char pad[3];
     struct iovec iov[3];
     char byteOrder = 0;
     int whichbyte = 1;
-#ifndef AMOEBA
     struct timeval waittime;
     fd_set mask;
 
     /* if these seems like a lot of trouble to go to, it probably is */
     waittime.tv_sec = BOTIMEOUT / MILLI_PER_SECOND;
     waittime.tv_usec = (BOTIMEOUT % MILLI_PER_SECOND) *
-		       (1000000 / MILLI_PER_SECOND);
+        (1000000 / MILLI_PER_SECOND);
     FD_ZERO(&mask);
     FD_SET(fd, &mask);
-    (void)Select(fd + 1, &mask, NULL, NULL, &waittime);
-#endif
+    (void) Select(fd + 1, &mask, NULL, NULL, &waittime);
     /* try to read the byte-order of the connection */
-    (void)_XSERVTransRead(trans_conn, &byteOrder, 1);
-    if ((byteOrder == 'l') || (byteOrder == 'B'))
-    {
-	csp.success = xFalse;
-	csp.lengthReason = sizeof(NOROOM) - 1;
-	csp.length = (sizeof(NOROOM) + 2) >> 2;
-	csp.majorVersion = X_PROTOCOL;
-	csp.minorVersion = X_PROTOCOL_REVISION;
-	if (((*(char *) &whichbyte) && (byteOrder == 'B')) ||
-	    (!(*(char *) &whichbyte) && (byteOrder == 'l')))
-	{
-	    swaps(&csp.majorVersion, whichbyte);
-	    swaps(&csp.minorVersion, whichbyte);
-	    swaps(&csp.length, whichbyte);
-	}
-	iov[0].iov_len = sz_xConnSetupPrefix;
-	iov[0].iov_base = (char *) &csp;
-	iov[1].iov_len = csp.lengthReason;
-	iov[1].iov_base = NOROOM;
-	iov[2].iov_len = (4 - (csp.lengthReason & 3)) & 3;
-	iov[2].iov_base = pad;
-	(void)_XSERVTransWritev(trans_conn, iov, 3);
+    (void) _XSERVTransRead(trans_conn, &byteOrder, 1);
+    if ((byteOrder == 'l') || (byteOrder == 'B')) {
+        csp.success = xFalse;
+        csp.lengthReason = sizeof(NOROOM) - 1;
+        csp.length = (sizeof(NOROOM) + 2) >> 2;
+        csp.majorVersion = X_PROTOCOL;
+        csp.minorVersion = X_PROTOCOL_REVISION;
+        if (((*(char *) &whichbyte) && (byteOrder == 'B')) ||
+            (!(*(char *) &whichbyte) && (byteOrder == 'l'))) {
+            swaps(&csp.majorVersion);
+            swaps(&csp.minorVersion);
+            swaps(&csp.length);
+        }
+        iov[0].iov_len = sz_xConnSetupPrefix;
+        iov[0].iov_base = (char *) &csp;
+        iov[1].iov_len = csp.lengthReason;
+        iov[1].iov_base = NOROOM;
+        iov[2].iov_len = (4 - (csp.lengthReason & 3)) & 3;
+        iov[2].iov_base = pad;
+        (void) _XSERVTransWritev(trans_conn, iov, 3);
     }
 }
 
@@ -913,51 +906,37 @@ XtransConnInfo trans_conn;
  *     Remove this file descriptor and it's I/O buffers, etc.
  ************/
 
-#ifdef LBX
-void
-CloseDownFileDescriptor(client)
-    ClientPtr	client;
-#else
 static void
-CloseDownFileDescriptor(oc)
-    register OsCommPtr oc;
-#endif
+CloseDownFileDescriptor(OsCommPtr oc)
 {
-#ifdef LBX
-    register OsCommPtr oc = (OsCommPtr) client->osPrivate;
-#endif
     int connection = oc->fd;
 
     if (oc->trans_conn) {
-	_XSERVTransDisconnect(oc->trans_conn);
-	_XSERVTransClose(oc->trans_conn);
+        _XSERVTransDisconnect(oc->trans_conn);
+        _XSERVTransClose(oc->trans_conn);
     }
-#ifdef LBX
+#ifndef WIN32
     ConnectionTranslation[connection] = 0;
 #else
-    FreeOsBuffers(oc);
+    SetConnectionTranslation(connection, 0);
 #endif
     FD_CLR(connection, &AllSockets);
     FD_CLR(connection, &AllClients);
     FD_CLR(connection, &ClientsWithInput);
     FD_CLR(connection, &GrabImperviousClients);
-    if (GrabInProgress)
-    {
-	FD_CLR(connection, &SavedAllSockets);
-	FD_CLR(connection, &SavedAllClients);
-	FD_CLR(connection, &SavedClientsWithInput);
+    if (GrabInProgress) {
+        FD_CLR(connection, &SavedAllSockets);
+        FD_CLR(connection, &SavedAllClients);
+        FD_CLR(connection, &SavedClientsWithInput);
     }
     FD_CLR(connection, &ClientsWriteBlocked);
     if (!XFD_ANYSET(&ClientsWriteBlocked))
-    	AnyClientsWriteBlocked = FALSE;
+        AnyClientsWriteBlocked = FALSE;
     FD_CLR(connection, &OutputPending);
-#ifndef LBX
-    xfree(oc);
-#endif
 }
 
 /*****************
- * CheckConections
+ * CheckConnections
  *    Some connection has died, go find which one and shut it down 
  *    The file descriptor has been closed, but is still in AllClients.
  *    If would truly be wonderful if select() would put the bogus
@@ -966,56 +945,56 @@ CloseDownFileDescriptor(oc)
  *****************/
 
 void
-CheckConnections()
+CheckConnections(void)
 {
 #ifndef WIN32
-    fd_mask		mask;
+    fd_mask mask;
 #endif
-    fd_set		tmask; 
-    register int	curclient, curoff;
-    int			i;
-    struct timeval	notime;
+    fd_set tmask;
+    int curclient, curoff;
+    int i;
+    struct timeval notime;
     int r;
+
 #ifdef WIN32
     fd_set savedAllClients;
 #endif
 
-#ifndef AMOEBA
     notime.tv_sec = 0;
     notime.tv_usec = 0;
 
 #ifndef WIN32
-    for (i=0; i<howmany(XFD_SETSIZE, NFDBITS); i++)
-    {
-	mask = AllClients.fds_bits[i];
-        while (mask)
-    	{
-	    curoff = ffsl(mask) - 1;
- 	    curclient = curoff + (8 * sizeof(fd_mask) * i);
+    for (i = 0; i < howmany(XFD_SETSIZE, NFDBITS); i++) {
+        mask = AllClients.fds_bits[i];
+        while (mask) {
+            curoff = mffs(mask) - 1;
+            curclient = curoff + (i * (sizeof(fd_mask) * 8));
             FD_ZERO(&tmask);
             FD_SET(curclient, &tmask);
-            r = Select (curclient + 1, &tmask, NULL, NULL, &notime);
-            
+            do {
+                r = Select(curclient + 1, &tmask, NULL, NULL, &notime);
+            } while (r < 0 && (errno == EINTR || errno == EAGAIN));
             if (r < 0)
-		CloseDownClient(clients[ConnectionTranslation[curclient]]);
-	    mask &= ~(((fd_mask)1) << curoff);
-	}
-    }	
+                if (ConnectionTranslation[curclient] > 0)
+                    CloseDownClient(clients[ConnectionTranslation[curclient]]);
+            mask &= ~((fd_mask) 1 << curoff);
+        }
+    }
 #else
     XFD_COPYSET(&AllClients, &savedAllClients);
-    for (i = 0; i < XFD_SETCOUNT(&savedAllClients); i++)
-    {
-	curclient = XFD_FD(&savedAllClients, i);
-	FD_ZERO(&tmask);
-	FD_SET(curclient, &tmask);
-	r = Select (curclient + 1, &tmask, NULL, NULL, &notime);
-	if (r < 0)
-	    CloseDownClient(clients[ConnectionTranslation[curclient]]);
-    }	
-#endif
+    for (i = 0; i < XFD_SETCOUNT(&savedAllClients); i++) {
+        curclient = XFD_FD(&savedAllClients, i);
+        FD_ZERO(&tmask);
+        FD_SET(curclient, &tmask);
+        do {
+            r = Select(curclient + 1, &tmask, NULL, NULL, &notime);
+        } while (r < 0 && (errno == EINTR || errno == EAGAIN));
+        if (r < 0)
+            if (GetConnectionTranslation(curclient) > 0)
+                CloseDownClient(clients[GetConnectionTranslation(curclient)]);
+    }
 #endif
 }
-
 
 /*****************
  * CloseDownConnection
@@ -1023,44 +1002,54 @@ CheckConnections()
  *****************/
 
 void
-CloseDownConnection(client)
-    ClientPtr client;
+CloseDownConnection(ClientPtr client)
 {
-    OsCommPtr oc = (OsCommPtr)client->osPrivate;
+    OsCommPtr oc = (OsCommPtr) client->osPrivate;
+
+    if (FlushCallback)
+        CallCallbacks(&FlushCallback, NULL);
 
     if (oc->output && oc->output->count)
-	FlushClient(client, oc, (char *)NULL, 0);
+        FlushClient(client, oc, (char *) NULL, 0);
 #ifdef XDMCP
     XdmcpCloseDisplay(oc->fd);
 #endif
-#ifndef LBX
     CloseDownFileDescriptor(oc);
-#else
-    (*oc->Close) (client);
     FreeOsBuffers(oc);
-    xfree(oc);
-#endif
-    client->osPrivate = (pointer)NULL;
+    free(client->osPrivate);
+    client->osPrivate = (pointer) NULL;
     if (auditTrailLevel > 1)
-	AuditF("client %d disconnected\n", client->index);
+        AuditF("client %d disconnected\n", client->index);
 }
 
+void
+AddGeneralSocket(int fd)
+{
+    FD_SET(fd, &AllSockets);
+    if (GrabInProgress)
+        FD_SET(fd, &SavedAllSockets);
+}
 
 void
-AddEnabledDevice(fd)
-    int fd;
+AddEnabledDevice(int fd)
 {
     FD_SET(fd, &EnabledDevices);
-    FD_SET(fd, &AllSockets);
+    AddGeneralSocket(fd);
 }
 
+void
+RemoveGeneralSocket(int fd)
+{
+    FD_CLR(fd, &AllSockets);
+    if (GrabInProgress)
+        FD_CLR(fd, &SavedAllSockets);
+}
 
 void
-RemoveEnabledDevice(fd)
-    int fd;
+RemoveEnabledDevice(int fd)
 {
     FD_CLR(fd, &EnabledDevices);
-    FD_CLR(fd, &AllSockets);
+    RemoveGeneralSocket(fd);
 }
 
 /*****************
@@ -1073,32 +1062,34 @@ RemoveEnabledDevice(fd)
  *    This routine is "undone" by ListenToAllClients()
  *****************/
 
-void
-OnlyListenToOneClient(client)
-    ClientPtr client;
+int
+OnlyListenToOneClient(ClientPtr client)
 {
-    OsCommPtr oc = (OsCommPtr)client->osPrivate;
-    int connection = oc->fd;
+    OsCommPtr oc = (OsCommPtr) client->osPrivate;
+    int rc, connection = oc->fd;
 
-    if (! GrabInProgress)
-    {
-	XFD_COPYSET(&ClientsWithInput, &SavedClientsWithInput);
-	XFD_ANDSET(&ClientsWithInput,
-		       &ClientsWithInput, &GrabImperviousClients);
-	if (FD_ISSET(connection, &SavedClientsWithInput))
-	{
-	    FD_CLR(connection, &SavedClientsWithInput);
-	    FD_SET(connection, &ClientsWithInput);
-	}
-	XFD_UNSET(&SavedClientsWithInput, &GrabImperviousClients);
-	XFD_COPYSET(&AllSockets, &SavedAllSockets);
-	XFD_COPYSET(&AllClients, &SavedAllClients);
-	XFD_UNSET(&AllSockets, &AllClients);
-	XFD_ANDSET(&AllClients, &AllClients, &GrabImperviousClients);
-	FD_SET(connection, &AllClients);
-	XFD_ORSET(&AllSockets, &AllSockets, &AllClients);
-	GrabInProgress = client->index;
+    rc = XaceHook(XACE_SERVER_ACCESS, client, DixGrabAccess);
+    if (rc != Success)
+        return rc;
+
+    if (!GrabInProgress) {
+        XFD_COPYSET(&ClientsWithInput, &SavedClientsWithInput);
+        XFD_ANDSET(&ClientsWithInput,
+                   &ClientsWithInput, &GrabImperviousClients);
+        if (FD_ISSET(connection, &SavedClientsWithInput)) {
+            FD_CLR(connection, &SavedClientsWithInput);
+            FD_SET(connection, &ClientsWithInput);
+        }
+        XFD_UNSET(&SavedClientsWithInput, &GrabImperviousClients);
+        XFD_COPYSET(&AllSockets, &SavedAllSockets);
+        XFD_COPYSET(&AllClients, &SavedAllClients);
+        XFD_UNSET(&AllSockets, &AllClients);
+        XFD_ANDSET(&AllClients, &AllClients, &GrabImperviousClients);
+        FD_SET(connection, &AllClients);
+        XFD_ORSET(&AllSockets, &AllSockets, &AllClients);
+        GrabInProgress = client->index;
     }
+    return rc;
 }
 
 /****************
@@ -1107,15 +1098,14 @@ OnlyListenToOneClient(client)
  ****************/
 
 void
-ListenToAllClients()
+ListenToAllClients(void)
 {
-    if (GrabInProgress)
-    {
-	XFD_ORSET(&AllSockets, &AllSockets, &SavedAllSockets);
-	XFD_ORSET(&AllClients, &AllClients, &SavedAllClients);
-	XFD_ORSET(&ClientsWithInput, &ClientsWithInput, &SavedClientsWithInput);
-	GrabInProgress = 0;
-    }	
+    if (GrabInProgress) {
+        XFD_ORSET(&AllSockets, &AllSockets, &SavedAllSockets);
+        XFD_ORSET(&AllClients, &AllClients, &SavedAllClients);
+        XFD_ORSET(&ClientsWithInput, &ClientsWithInput, &SavedClientsWithInput);
+        GrabInProgress = 0;
+    }
 }
 
 /****************
@@ -1125,42 +1115,34 @@ ListenToAllClients()
  ****************/
 
 void
-IgnoreClient (client)
-    ClientPtr	client;
+IgnoreClient(ClientPtr client)
 {
-    OsCommPtr oc = (OsCommPtr)client->osPrivate;
+    OsCommPtr oc = (OsCommPtr) client->osPrivate;
     int connection = oc->fd;
-#ifdef LBX
-    LbxClientPtr lbxClient = LbxClient(client);
-#endif
+
+    client->ignoreCount++;
+    if (client->ignoreCount > 1)
+        return;
 
     isItTimeToYield = TRUE;
-#ifdef LBX
-    if (lbxClient) {
-	lbxClient->ignored = TRUE;
-	return;
+    if (!GrabInProgress || FD_ISSET(connection, &AllClients)) {
+        if (FD_ISSET(connection, &ClientsWithInput))
+            FD_SET(connection, &IgnoredClientsWithInput);
+        else
+            FD_CLR(connection, &IgnoredClientsWithInput);
+        FD_CLR(connection, &ClientsWithInput);
+        FD_CLR(connection, &AllSockets);
+        FD_CLR(connection, &AllClients);
+        FD_CLR(connection, &LastSelectMask);
     }
-#endif
-    if (!GrabInProgress || FD_ISSET(connection, &AllClients))
-    {
-    	if (FD_ISSET (connection, &ClientsWithInput))
-	    FD_SET(connection, &IgnoredClientsWithInput);
-    	else
-	    FD_CLR(connection, &IgnoredClientsWithInput);
-    	FD_CLR(connection, &ClientsWithInput);
-    	FD_CLR(connection, &AllSockets);
-    	FD_CLR(connection, &AllClients);
-	FD_CLR(connection, &LastSelectMask);
-    }
-    else
-    {
-    	if (FD_ISSET (connection, &SavedClientsWithInput))
-	    FD_SET(connection, &IgnoredClientsWithInput);
-    	else
-	    FD_CLR(connection, &IgnoredClientsWithInput);
-	FD_CLR(connection, &SavedClientsWithInput);
-	FD_CLR(connection, &SavedAllSockets);
-	FD_CLR(connection, &SavedAllClients);
+    else {
+        if (FD_ISSET(connection, &SavedClientsWithInput))
+            FD_SET(connection, &IgnoredClientsWithInput);
+        else
+            FD_CLR(connection, &IgnoredClientsWithInput);
+        FD_CLR(connection, &SavedClientsWithInput);
+        FD_CLR(connection, &SavedAllSockets);
+        FD_CLR(connection, &SavedAllClients);
     }
 }
 
@@ -1170,143 +1152,132 @@ IgnoreClient (client)
  ****************/
 
 void
-AttendClient (client)
-    ClientPtr	client;
+AttendClient(ClientPtr client)
 {
-    OsCommPtr oc = (OsCommPtr)client->osPrivate;
+    OsCommPtr oc = (OsCommPtr) client->osPrivate;
     int connection = oc->fd;
-#ifdef LBX
-    LbxClientPtr lbxClient = LbxClient(client);
 
-    if (lbxClient) {
-	lbxClient->ignored = FALSE;
-	return;
-    }
-#endif
+    client->ignoreCount--;
+    if (client->ignoreCount)
+        return;
+
     if (!GrabInProgress || GrabInProgress == client->index ||
-	FD_ISSET(connection, &GrabImperviousClients))
-    {
-    	FD_SET(connection, &AllClients);
-    	FD_SET(connection, &AllSockets);
-	FD_SET(connection, &LastSelectMask);
-    	if (FD_ISSET (connection, &IgnoredClientsWithInput))
-	    FD_SET(connection, &ClientsWithInput);
+        FD_ISSET(connection, &GrabImperviousClients)) {
+        FD_SET(connection, &AllClients);
+        FD_SET(connection, &AllSockets);
+        FD_SET(connection, &LastSelectMask);
+        if (FD_ISSET(connection, &IgnoredClientsWithInput))
+            FD_SET(connection, &ClientsWithInput);
     }
-    else
-    {
-	FD_SET(connection, &SavedAllClients);
-	FD_SET(connection, &SavedAllSockets);
-	if (FD_ISSET(connection, &IgnoredClientsWithInput))
-	    FD_SET(connection, &SavedClientsWithInput);
+    else {
+        FD_SET(connection, &SavedAllClients);
+        FD_SET(connection, &SavedAllSockets);
+        if (FD_ISSET(connection, &IgnoredClientsWithInput))
+            FD_SET(connection, &SavedClientsWithInput);
     }
 }
 
 /* make client impervious to grabs; assume only executing client calls this */
 
 void
-MakeClientGrabImpervious(client)
-    ClientPtr client;
+MakeClientGrabImpervious(ClientPtr client)
 {
-    OsCommPtr oc = (OsCommPtr)client->osPrivate;
+    OsCommPtr oc = (OsCommPtr) client->osPrivate;
     int connection = oc->fd;
 
     FD_SET(connection, &GrabImperviousClients);
 
-    if (ServerGrabCallback)
-    {
-	ServerGrabInfoRec grabinfo;
-	grabinfo.client = client;
-	grabinfo.grabstate  = CLIENT_IMPERVIOUS;
-	CallCallbacks(&ServerGrabCallback, &grabinfo);
+    if (ServerGrabCallback) {
+        ServerGrabInfoRec grabinfo;
+
+        grabinfo.client = client;
+        grabinfo.grabstate = CLIENT_IMPERVIOUS;
+        CallCallbacks(&ServerGrabCallback, &grabinfo);
     }
 }
 
 /* make client pervious to grabs; assume only executing client calls this */
 
 void
-MakeClientGrabPervious(client)
-    ClientPtr client;
+MakeClientGrabPervious(ClientPtr client)
 {
-    OsCommPtr oc = (OsCommPtr)client->osPrivate;
+    OsCommPtr oc = (OsCommPtr) client->osPrivate;
     int connection = oc->fd;
 
     FD_CLR(connection, &GrabImperviousClients);
-    if (GrabInProgress && (GrabInProgress != client->index))
-    {
-	if (FD_ISSET(connection, &ClientsWithInput))
-	{
-	    FD_SET(connection, &SavedClientsWithInput);
-	    FD_CLR(connection, &ClientsWithInput);
-	}
-	FD_CLR(connection, &AllSockets);
-	FD_CLR(connection, &AllClients);
-	isItTimeToYield = TRUE;
+    if (GrabInProgress && (GrabInProgress != client->index)) {
+        if (FD_ISSET(connection, &ClientsWithInput)) {
+            FD_SET(connection, &SavedClientsWithInput);
+            FD_CLR(connection, &ClientsWithInput);
+        }
+        FD_CLR(connection, &AllSockets);
+        FD_CLR(connection, &AllClients);
+        isItTimeToYield = TRUE;
     }
 
-    if (ServerGrabCallback)
-    {
-	ServerGrabInfoRec grabinfo;
-	grabinfo.client = client;
-	grabinfo.grabstate  = CLIENT_PERVIOUS;
-	CallCallbacks(&ServerGrabCallback, &grabinfo);
+    if (ServerGrabCallback) {
+        ServerGrabInfoRec grabinfo;
+
+        grabinfo.client = client;
+        grabinfo.grabstate = CLIENT_PERVIOUS;
+        CallCallbacks(&ServerGrabCallback, &grabinfo);
     }
 }
 
-#ifdef AIXV3
-
-static fd_set pendingActiveClients;
-static BOOL reallyGrabbed;
-
-/****************
-* DontListenToAnybody:
-*   Don't listen to requests from any clients. Continue to handle new
-*   connections, but don't take any protocol requests from anybody.
-*   We have to take care if there is already a grab in progress, though.
-*   Undone by PayAttentionToClientsAgain. We also have to be careful
-*   not to accept any more input from the currently dispatched client.
-*   we do this be telling dispatch it is time to yield.
-
-*   We call this when the server loses access to the glass
-*   (user hot-keys away).  This looks like a grab by the 
-*   server itself, but gets a little tricky if there is already
-*   a grab in progress.
-******************/
-
+#ifdef XQUARTZ
+/* Add a fd (from launchd) to our listeners */
 void
-DontListenToAnybody()
+ListenOnOpenFD(int fd, int noxauth)
 {
-    if (!GrabInProgress)
-    {
-	XFD_COPYSET(&ClientsWithInput, &SavedClientsWithInput);
-	XFD_COPYSET(&AllSockets, &SavedAllSockets);
-	XFD_COPYSET(&AllClients, &SavedAllClients);
-	GrabInProgress = TRUE;
-	reallyGrabbed = FALSE;
-    }
-    else
-    {
-	XFD_COPYSET(&AllClients, &pendingActiveClients);
-	reallyGrabbed = TRUE;
-    }
-    FD_ZERO(&ClientsWithInput);
-    XFD_UNSET(&AllSockets, &AllClients);
-    FD_ZERO(&AllClients);
-    isItTimeToYield = TRUE;
-}
+    char port[256];
+    XtransConnInfo ciptr;
+    const char *display_env = getenv("DISPLAY");
 
-void
-PayAttentionToClientsAgain()
-{
-    if (reallyGrabbed)
-    {
-	XFD_ORSET(&AllSockets, &AllSockets, &pendingActiveClients);
-	XFD_ORSET(&AllClients, &AllClients, &pendingActiveClients);
+    if (display_env && (strncmp(display_env, "/tmp/launch", 11) == 0)) {
+        /* Make the path the launchd socket if our DISPLAY is set right */
+        strcpy(port, display_env);
     }
-    else
-    {
-	ListenToAllClients();
+    else {
+        /* Just some default so things don't break and die. */
+        snprintf(port, sizeof(port), ":%d", atoi(display));
     }
-    reallyGrabbed = FALSE;
+
+    /* Make our XtransConnInfo
+     * TRANS_SOCKET_LOCAL_INDEX = 5 from Xtrans.c
+     */
+    ciptr = _XSERVTransReopenCOTSServer(5, fd, port);
+    if (ciptr == NULL) {
+        ErrorF("Got NULL while trying to Reopen launchd port.\n");
+        return;
+    }
+
+    if (noxauth)
+        ciptr->flags = ciptr->flags | TRANS_NOXAUTH;
+
+    /* Allocate space to store it */
+    ListenTransFds =
+        (int *) realloc(ListenTransFds, (ListenTransCount + 1) * sizeof(int));
+    ListenTransConns =
+        (XtransConnInfo *) realloc(ListenTransConns,
+                                   (ListenTransCount +
+                                    1) * sizeof(XtransConnInfo));
+
+    /* Store it */
+    ListenTransConns[ListenTransCount] = ciptr;
+    ListenTransFds[ListenTransCount] = fd;
+
+    FD_SET(fd, &WellKnownConnections);
+    FD_SET(fd, &AllSockets);
+
+    /* Increment the count */
+    ListenTransCount++;
+
+    /* This *might* not be needed... /shrug */
+    ResetAuthorization();
+    ResetHosts(display);
+#ifdef XDMCP
+    XdmcpReset();
+#endif
 }
 
 #endif

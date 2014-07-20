@@ -2,7 +2,7 @@
 
     FreeType font driver for bdf fonts
 
-  Copyright (C) 2001, 2002 by
+  Copyright (C) 2001, 2002, 2003, 2004 by
   Francesco Zappa Nardelli
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,11 +36,15 @@ THE SOFTWARE.
 
 FT_BEGIN_HEADER
 
+#ifdef FT_CONFIG_OPTION_PIC
+#error "this module does not support PIC yet"
+#endif
+
 
   typedef struct  BDF_encoding_el_
   {
-    FT_ULong  enc;
-    FT_Short  glyph;
+    FT_ULong   enc;
+    FT_UShort  glyph;
 
   } BDF_encoding_el;
 
@@ -58,6 +62,8 @@ FT_BEGIN_HEADER
 
     FT_CharMap        charmap_handle;
     FT_CharMapRec     charmap;  /* a single charmap per face */
+
+    FT_UInt           default_glyph;
 
   } BDF_FaceRec, *BDF_Face;
 

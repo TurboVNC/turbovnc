@@ -1,13 +1,12 @@
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -46,19 +44,22 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $XConsortium: miglblt.c,v 5.9 94/04/17 20:27:37 dpw Exp $ */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
-#include	"X.h"
-#include	"Xmd.h"
-#include	"Xproto.h"
+#include	<X11/X.h>
+#include	<X11/Xmd.h>
+#include	<X11/Xproto.h>
 #include	"misc.h"
-#include	"fontstruct.h"
+#include	<X11/fonts/fontstruct.h>
 #include	"dixfontstr.h"
 #include	"gcstruct.h"
 #include	"windowstr.h"
 #include	"scrnintstr.h"
 #include	"pixmap.h"
 #include	"servermd.h"
+#include        "mi.h"
 
 /*
     machine-independent glyph blt.
@@ -79,144 +80,126 @@ with the sample server.
 */
 
 void
-miPolyGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
-    DrawablePtr pDrawable;
-    GC 		*pGC;
-    int 	x, y;
-    unsigned int nglyph;
-    CharInfoPtr *ppci;		/* array of character info */
-    unsigned char *pglyphBase;	/* start of array of glyphs */
+miPolyGlyphBlt(DrawablePtr pDrawable, GC * pGC, int x, int y, unsigned int nglyph, CharInfoPtr * ppci,  /* array of character info */
+               pointer pglyphBase       /* start of array of glyphs */
+    )
 {
     int width, height;
     PixmapPtr pPixmap;
-    int nbyLine;			/* bytes per line of padded pixmap */
+    int nbyLine;                /* bytes per line of padded pixmap */
     FontPtr pfont;
     GCPtr pGCtmp;
-    register int i;
-    register int j;
-    unsigned char *pbits;		/* buffer for PutImage */
-    register unsigned char *pb;		/* temp pointer into buffer */
-    register CharInfoPtr pci;		/* currect char info */
-    register unsigned char *pglyph;	/* pointer bits in glyph */
-    int gWidth, gHeight;		/* width and height of glyph */
-    register int nbyGlyphWidth;		/* bytes per scanline of glyph */
-    int nbyPadGlyph;			/* server padded line of glyph */
+    int i;
+    int j;
+    unsigned char *pbits;       /* buffer for PutImage */
+    unsigned char *pb;          /* temp pointer into buffer */
+    CharInfoPtr pci;            /* currect char info */
+    unsigned char *pglyph;      /* pointer bits in glyph */
+    int gWidth, gHeight;        /* width and height of glyph */
+    int nbyGlyphWidth;          /* bytes per scanline of glyph */
+    int nbyPadGlyph;            /* server padded line of glyph */
 
-    XID gcvals[3];
+    ChangeGCVal gcvals[3];
 
-    if (pGC->miTranslate)
-    {
-	x += pDrawable->x;
-	y += pDrawable->y;
+    if (pGC->miTranslate) {
+        x += pDrawable->x;
+        y += pDrawable->y;
     }
 
     pfont = pGC->font;
-    width = FONTMAXBOUNDS(pfont,rightSideBearing) - 
-	    FONTMINBOUNDS(pfont,leftSideBearing);
-    height = FONTMAXBOUNDS(pfont,ascent) +
-	     FONTMAXBOUNDS(pfont,descent);
+    width = FONTMAXBOUNDS(pfont, rightSideBearing) -
+        FONTMINBOUNDS(pfont, leftSideBearing);
+    height = FONTMAXBOUNDS(pfont, ascent) + FONTMAXBOUNDS(pfont, descent);
 
-    pPixmap = (*pDrawable->pScreen->CreatePixmap)(pDrawable->pScreen,
-						  width, height, 1);
+    pPixmap = (*pDrawable->pScreen->CreatePixmap) (pDrawable->pScreen,
+                                                   width, height, 1,
+                                                   CREATE_PIXMAP_USAGE_SCRATCH);
     if (!pPixmap)
-	return;
+        return;
 
     pGCtmp = GetScratchGC(1, pDrawable->pScreen);
-    if (!pGCtmp)
-    {
-	(*pDrawable->pScreen->DestroyPixmap)(pPixmap);
-	return;
-    }
-
-    gcvals[0] = GXcopy;
-    gcvals[1] = 1;
-    gcvals[2] = 0;
-
-    DoChangeGC(pGCtmp, GCFunction|GCForeground|GCBackground, gcvals, 0);
-
-    nbyLine = BitmapBytePad(width);
-    pbits = (unsigned char *)ALLOCATE_LOCAL(height*nbyLine);
-    if (!pbits)
-    {
-	(*pDrawable->pScreen->DestroyPixmap)(pPixmap);
-	FreeScratchGC(pGCtmp);
+    if (!pGCtmp) {
+        (*pDrawable->pScreen->DestroyPixmap) (pPixmap);
         return;
     }
-    while(nglyph--)
-    {
-	pci = *ppci++;
-	pglyph = FONTGLYPHBITS(pglyphBase, pci);
-	gWidth = GLYPHWIDTHPIXELS(pci);
-	gHeight = GLYPHHEIGHTPIXELS(pci);
-	if (gWidth && gHeight)
-	{
-	    nbyGlyphWidth = GLYPHWIDTHBYTESPADDED(pci);
-	    nbyPadGlyph = BitmapBytePad(gWidth);
 
-	    if (nbyGlyphWidth == nbyPadGlyph
-#if GLYPHPADBYTES != 4
-	        && (((int) pglyph) & 3) == 0
-#endif
-		)
-	    {
-		pb = pglyph;
-	    }
-	    else
-	    {
-		for (i=0, pb = pbits; i<gHeight; i++, pb = pbits+(i*nbyPadGlyph))
-		    for (j = 0; j < nbyGlyphWidth; j++)
-			*pb++ = *pglyph++;
-		pb = pbits;
-	    }
+    gcvals[0].val = GXcopy;
+    gcvals[1].val = 1;
+    gcvals[2].val = 0;
 
-	    if ((pGCtmp->serialNumber) != (pPixmap->drawable.serialNumber))
-		ValidateGC((DrawablePtr)pPixmap, pGCtmp);
-	    (*pGCtmp->ops->PutImage)((DrawablePtr)pPixmap, pGCtmp,
-				pPixmap->drawable.depth,
-				0, 0, gWidth, gHeight, 
-				0, XYBitmap, (char *)pb);
+    ChangeGC(NullClient, pGCtmp, GCFunction | GCForeground | GCBackground,
+             gcvals);
 
-	    if ((pGC->serialNumber) != (pDrawable->serialNumber))
-		ValidateGC(pDrawable, pGC);
-	    (*pGC->ops->PushPixels)(pGC, pPixmap, pDrawable,
-			       gWidth, gHeight,
-			       x + pci->metrics.leftSideBearing,
-			       y - pci->metrics.ascent);
-	}
-	x += pci->metrics.characterWidth;
+    nbyLine = BitmapBytePad(width);
+    pbits = malloc(height * nbyLine);
+    if (!pbits) {
+        (*pDrawable->pScreen->DestroyPixmap) (pPixmap);
+        FreeScratchGC(pGCtmp);
+        return;
     }
-    (*pDrawable->pScreen->DestroyPixmap)(pPixmap);
-    DEALLOCATE_LOCAL(pbits);
+    while (nglyph--) {
+        pci = *ppci++;
+        pglyph = FONTGLYPHBITS(pglyphBase, pci);
+        gWidth = GLYPHWIDTHPIXELS(pci);
+        gHeight = GLYPHHEIGHTPIXELS(pci);
+        if (gWidth && gHeight) {
+            nbyGlyphWidth = GLYPHWIDTHBYTESPADDED(pci);
+            nbyPadGlyph = BitmapBytePad(gWidth);
+
+            if (nbyGlyphWidth == nbyPadGlyph
+#if GLYPHPADBYTES != 4
+                && (((int) pglyph) & 3) == 0
+#endif
+                ) {
+                pb = pglyph;
+            }
+            else {
+                for (i = 0, pb = pbits; i < gHeight;
+                     i++, pb = pbits + (i * nbyPadGlyph))
+                    for (j = 0; j < nbyGlyphWidth; j++)
+                        *pb++ = *pglyph++;
+                pb = pbits;
+            }
+
+            if ((pGCtmp->serialNumber) != (pPixmap->drawable.serialNumber))
+                ValidateGC((DrawablePtr) pPixmap, pGCtmp);
+            (*pGCtmp->ops->PutImage) ((DrawablePtr) pPixmap, pGCtmp,
+                                      pPixmap->drawable.depth,
+                                      0, 0, gWidth, gHeight,
+                                      0, XYBitmap, (char *) pb);
+
+            (*pGC->ops->PushPixels) (pGC, pPixmap, pDrawable,
+                                     gWidth, gHeight,
+                                     x + pci->metrics.leftSideBearing,
+                                     y - pci->metrics.ascent);
+        }
+        x += pci->metrics.characterWidth;
+    }
+    (*pDrawable->pScreen->DestroyPixmap) (pPixmap);
+    free(pbits);
     FreeScratchGC(pGCtmp);
 }
 
-
 void
-miImageGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
-    DrawablePtr pDrawable;
-    GC 		*pGC;
-    int 	x, y;
-    unsigned int nglyph;
-    CharInfoPtr *ppci;		/* array of character info */
-    unsigned char *pglyphBase;	/* start of array of glyphs */
+miImageGlyphBlt(DrawablePtr pDrawable, GC * pGC, int x, int y, unsigned int nglyph, CharInfoPtr * ppci, /* array of character info */
+                pointer pglyphBase      /* start of array of glyphs */
+    )
 {
-    ExtentInfoRec info;		/* used by QueryGlyphExtents() */
-    XID gcvals[3];
+    ExtentInfoRec info;         /* used by QueryGlyphExtents() */
+    ChangeGCVal gcvals[3];
     int oldAlu, oldFS;
-    unsigned long	oldFG;
+    unsigned long oldFG;
     xRectangle backrect;
 
-    QueryGlyphExtents(pGC->font, ppci, (unsigned long)nglyph, &info);
+    QueryGlyphExtents(pGC->font, ppci, (unsigned long) nglyph, &info);
 
-    if (info.overallWidth >= 0)
-    {
-    	backrect.x = x;
-    	backrect.width = info.overallWidth;
+    if (info.overallWidth >= 0) {
+        backrect.x = x;
+        backrect.width = info.overallWidth;
     }
-    else
-    {
-	backrect.x = x + info.overallWidth;
-	backrect.width = -info.overallWidth;
+    else {
+        backrect.x = x + info.overallWidth;
+        backrect.width = -info.overallWidth;
     }
     backrect.y = y - FONTASCENT(pGC->font);
     backrect.height = FONTASCENT(pGC->font) + FONTDESCENT(pGC->font);
@@ -226,24 +209,24 @@ miImageGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
     oldFS = pGC->fillStyle;
 
     /* fill in the background */
-    gcvals[0] = GXcopy;
-    gcvals[1] = pGC->bgPixel;
-    gcvals[2] = FillSolid;
-    DoChangeGC(pGC, GCFunction|GCForeground|GCFillStyle, gcvals, 0);
+    gcvals[0].val = GXcopy;
+    gcvals[1].val = pGC->bgPixel;
+    gcvals[2].val = FillSolid;
+    ChangeGC(NullClient, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
     ValidateGC(pDrawable, pGC);
-    (*pGC->ops->PolyFillRect)(pDrawable, pGC, 1, &backrect);
+    (*pGC->ops->PolyFillRect) (pDrawable, pGC, 1, &backrect);
 
     /* put down the glyphs */
-    gcvals[0] = oldFG;
-    DoChangeGC(pGC, GCForeground, gcvals, 0);
+    gcvals[0].val = oldFG;
+    ChangeGC(NullClient, pGC, GCForeground, gcvals);
     ValidateGC(pDrawable, pGC);
-    (*pGC->ops->PolyGlyphBlt)(pDrawable, pGC, x, y, nglyph, ppci,
-			      (char *)pglyphBase);
+    (*pGC->ops->PolyGlyphBlt) (pDrawable, pGC, x, y, nglyph, ppci, pglyphBase);
 
     /* put all the toys away when done playing */
-    gcvals[0] = oldAlu;
-    gcvals[1] = oldFG;
-    gcvals[2] = oldFS;
-    DoChangeGC(pGC, GCFunction|GCForeground|GCFillStyle, gcvals, 0);
+    gcvals[0].val = oldAlu;
+    gcvals[1].val = oldFG;
+    gcvals[2].val = oldFS;
+    ChangeGC(NullClient, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
+    ValidateGC(pDrawable, pGC);
 
 }

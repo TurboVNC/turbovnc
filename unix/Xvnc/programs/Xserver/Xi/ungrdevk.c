@@ -1,5 +1,3 @@
-/* $Xorg: ungrdevk.c,v 1.4 2001/02/09 02:04:35 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/ungrdevk.c,v 3.4 2001/12/14 19:59:00 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,18 +50,18 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "windowstr.h"			/* window structure  */
-#include "XI.h"
-#include "XIproto.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include "windowstr.h"          /* window structure  */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "exglobals.h"
 #include "dixgrabs.h"
+#include "xkbsrv.h"
+#include "xkbstr.h"
 
 #include "ungrdevk.h"
 
@@ -79,18 +76,15 @@ SOFTWARE.
  */
 
 int
-SProcXUngrabDeviceKey(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXUngrabDeviceKey(ClientPtr client)
+{
     REQUEST(xUngrabDeviceKeyReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xUngrabDeviceKeyReq);
-    swapl(&stuff->grabWindow, n);
-    swaps(&stuff->modifiers, n);
-    return(ProcXUngrabDeviceKey(client));
-    }
+    swapl(&stuff->grabWindow);
+    swaps(&stuff->modifiers);
+    return (ProcXUngrabDeviceKey(client));
+}
 
 /***********************************************************************
  *
@@ -99,82 +93,63 @@ SProcXUngrabDeviceKey(client)
  */
 
 int
-ProcXUngrabDeviceKey(client)
-    ClientPtr client;
-    {
-    DeviceIntPtr	dev;
-    DeviceIntPtr	mdev;
-    WindowPtr 		pWin;
-    GrabRec 		temporaryGrab;
+ProcXUngrabDeviceKey(ClientPtr client)
+{
+    DeviceIntPtr dev;
+    DeviceIntPtr mdev;
+    WindowPtr pWin;
+    GrabPtr temporaryGrab;
+    int rc;
 
     REQUEST(xUngrabDeviceKeyReq);
     REQUEST_SIZE_MATCH(xUngrabDeviceKeyReq);
 
-    dev = LookupDeviceIntRec (stuff->grabbed_device);
-    if (dev == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceKey, 0, 
-	    BadDevice);
-	return Success;
-	}
+    rc = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
+    if (rc != Success)
+        return rc;
     if (dev->key == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceKey, 0, BadMatch);
-	return Success;
-	}
+        return BadMatch;
 
-    if (stuff->modifier_device != UseXKeyboard)
-	{
-	mdev = LookupDeviceIntRec (stuff->modifier_device);
-	if (mdev == NULL)
-	    {
-	    SendErrorToClient(client, IReqCode, X_UngrabDeviceKey, 0, 
-	        BadDevice);
-	    return Success;
-	    }
-	if (mdev->key == NULL)
-	    {
-	    SendErrorToClient(client, IReqCode, X_UngrabDeviceKey, 0, 
-		BadMatch);
-	    return Success;
-	    }
-	}
-    else
-	mdev = (DeviceIntPtr) LookupKeyboardDevice();
-
-    pWin = LookupWindow(stuff->grabWindow, client);
-    if (!pWin)
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceKey, 0, 
-	    BadWindow);
-	return Success;
-	}
-    if (((stuff->key > dev->key->curKeySyms.maxKeyCode) ||
-	 (stuff->key < dev->key->curKeySyms.minKeyCode))
-	&& (stuff->key != AnyKey))
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceKey, 0, 
-	    BadValue);
-	return Success;
-	}
-    if ((stuff->modifiers != AnyModifier) &&
-	(stuff->modifiers & ~AllModifiersMask))
-	{
-	SendErrorToClient(client, IReqCode, X_UngrabDeviceKey, 0, 
-	    BadValue);
-	return Success;
-	}
-
-    temporaryGrab.resource = client->clientAsMask;
-    temporaryGrab.device = dev;
-    temporaryGrab.window = pWin;
-    temporaryGrab.type  = DeviceKeyPress;
-    temporaryGrab.modifierDevice = mdev;
-    temporaryGrab.modifiersDetail.exact = stuff->modifiers;
-    temporaryGrab.modifiersDetail.pMask = NULL;
-    temporaryGrab.detail.exact = stuff->key;
-    temporaryGrab.detail.pMask = NULL;
-
-    DeletePassiveGrabFromList(&temporaryGrab);
-    return Success;
+    if (stuff->modifier_device != UseXKeyboard) {
+        rc = dixLookupDevice(&mdev, stuff->modifier_device, client,
+                             DixReadAccess);
+        if (rc != Success)
+            return BadDevice;
+        if (mdev->key == NULL)
+            return BadMatch;
     }
+    else
+        mdev = PickKeyboard(client);
+
+    rc = dixLookupWindow(&pWin, stuff->grabWindow, client, DixSetAttrAccess);
+    if (rc != Success)
+        return rc;
+
+    if (((stuff->key > dev->key->xkbInfo->desc->max_key_code) ||
+         (stuff->key < dev->key->xkbInfo->desc->min_key_code))
+        && (stuff->key != AnyKey))
+        return BadValue;
+
+    if ((stuff->modifiers != AnyModifier) &&
+        (stuff->modifiers & ~AllModifiersMask))
+        return BadValue;
+
+    temporaryGrab = AllocGrab();
+    if (!temporaryGrab)
+        return BadAlloc;
+
+    temporaryGrab->resource = client->clientAsMask;
+    temporaryGrab->device = dev;
+    temporaryGrab->window = pWin;
+    temporaryGrab->type = DeviceKeyPress;
+    temporaryGrab->grabtype = XI;
+    temporaryGrab->modifierDevice = mdev;
+    temporaryGrab->modifiersDetail.exact = stuff->modifiers;
+    temporaryGrab->modifiersDetail.pMask = NULL;
+    temporaryGrab->detail.exact = stuff->key;
+    temporaryGrab->detail.pMask = NULL;
+
+    DeletePassiveGrabFromList(temporaryGrab);
+    FreeGrab(temporaryGrab);
+    return Success;
+}

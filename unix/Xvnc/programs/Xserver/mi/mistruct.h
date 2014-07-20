@@ -1,14 +1,12 @@
-/* $XConsortium: mistruct.h,v 1.3 94/04/17 20:27:56 jim Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -46,19 +43,20 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+
 #ifndef MISTRUCT_H
 #define MISTRUCT_H
 
 #include "mi.h"
-#include "miscstruct.h"
+#include "regionstr.h"
 
 /* information about dashes */
 typedef struct _miDash {
-    DDXPointRec	pt;
-    int		e1, e2;	/* keep these, so we don't have to do it again */
-    int		e;	/* bresenham error term for this point on line */
-    int		which;
-    int		newLine;/* 0 if part of same original line as previous dash */
-    } miDashRec;
+    DDXPointRec pt;
+    int e1, e2;                 /* keep these, so we don't have to do it again */
+    int e;                      /* bresenham error term for this point on line */
+    int which;
+    int newLine;                /* 0 if part of same original line as previous dash */
+} miDashRec;
 
-#endif /* MISTRUCT_H */
+#endif                          /* MISTRUCT_H */

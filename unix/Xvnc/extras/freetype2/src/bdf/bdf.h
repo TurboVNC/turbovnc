@@ -1,6 +1,6 @@
 /*
  * Copyright 2000 Computing Research Labs, New Mexico State University
- * Copyright 2001, 2002 Francesco Zappa Nardelli
+ * Copyright 2001-2004, 2011 Francesco Zappa Nardelli
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -114,8 +114,8 @@ FT_BEGIN_HEADER
     union
     {
       char*          atom;
-      long           int32;
-      unsigned long  card32;
+      long           l;
+      unsigned long  ul;
 
     } value;             /* Value of the property.  */
 
@@ -159,9 +159,9 @@ FT_BEGIN_HEADER
 
   typedef struct  _hashnode_
   {
-    char*  key;
-    void*  data;
-  
+    const char*  key;
+    size_t       data;
+
   } _hashnode, *hashnode;
 
 
@@ -202,7 +202,7 @@ FT_BEGIN_HEADER
 
     unsigned short   monowidth;      /* Logical width for monowidth font.   */
 
-    long             default_glyph;  /* Encoding of the default glyph.      */
+    long             default_char;   /* Encoding of the default glyph.      */
 
     long             font_ascent;    /* Font ascent.                        */
     long             font_descent;   /* Font descent.                       */
@@ -226,8 +226,10 @@ FT_BEGIN_HEADER
 
     void*            internal;       /* Internal data for the font.         */
 
-    unsigned long    nmod[2048];     /* Bitmap indicating modified glyphs.  */
-    unsigned long    umod[2048];     /* Bitmap indicating modified          */
+    /* The size of the next two arrays must be in sync with the */
+    /* size of the `have' array in the `bdf_parse_t' structure. */
+    unsigned long    nmod[34816];    /* Bitmap indicating modified glyphs.  */
+    unsigned long    umod[34816];    /* Bitmap indicating modified          */
                                      /* unencoded glyphs.                   */
     unsigned short   modified;       /* Boolean indicating font modified.   */
     unsigned short   bpp;            /* Bits per pixel.                     */
@@ -283,7 +285,7 @@ FT_BEGIN_HEADER
 
   FT_LOCAL( bdf_property_t * )
   bdf_get_font_property( bdf_font_t*  font,
-                         char*        name );
+                         const char*  name );
 
 
 FT_END_HEADER

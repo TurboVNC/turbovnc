@@ -1,0 +1,12 @@
+/* version-config.h.in: not generated */
+
+#ifndef VERSION_CONFIG_H
+#define VERSION_CONFIG_H
+
+/* Vendor name */
+#define VENDOR_NAME "@VENDOR_NAME@"
+
+/* Vendor release */
+#define VENDOR_RELEASE @VENDOR_RELEASE@
+
+#endif /* VERSION_CONFIG_H */

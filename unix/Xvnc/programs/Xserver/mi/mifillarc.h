@@ -1,13 +1,12 @@
 /************************************************************
 
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,18 +14,18 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 ********************************************************/
 
-/* $XConsortium: mifillarc.h,v 5.9 95/01/11 16:19:24 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/mi/mifillarc.h,v 3.2 1995/01/28 16:15:53 dawes Exp $ */
+#ifndef __MIFILLARC_H__
+#define __MIFILLARC_H__
 
 #define FULLCIRCLE (360 * 64)
 
@@ -87,12 +86,12 @@ typedef struct _miFillArcD {
 #define miFillArcLower(slw) (((y + dy) != 0) && ((slw > 1) || (e != xk)))
 
 typedef struct _miSliceEdge {
-    int	    x;
-    int     stepx;
-    int	    deltax;
-    int	    e;
-    int	    dy;
-    int	    dx;
+    int x;
+    int stepx;
+    int deltax;
+    int e;
+    int dy;
+    int dx;
 } miSliceEdgeRec, *miSliceEdgePtr;
 
 typedef struct _miArcSlice {
@@ -176,50 +175,13 @@ typedef struct _miArcSlice {
 #define miFillInArcLower(slw) (((iny + dy) != 0) && \
 			       ((slw > 1) || (ine != inxk)))
 
-extern int miFreeArcCache(
-#if NeedFunctionPrototypes
-    pointer /*data*/,
-    XID /*id*/
-#endif
-);
+extern _X_EXPORT void miFillArcSetup(xArc * /*arc */ ,
+                                     miFillArcRec *     /*info */
+    );
 
-extern struct finalSpan *realAllocSpan(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern _X_EXPORT void miFillArcSliceSetup(xArc * /*arc */ ,
+                                          miArcSliceRec * /*slice */ ,
+                                          GCPtr /*pGC */
+    );
 
-extern void miFillArcSetup(
-#if NeedFunctionPrototypes
-    xArc * /*arc*/,
-    miFillArcRec * /*info*/
-#endif
-);
-
-extern void miFillArcDSetup(
-#if NeedFunctionPrototypes
-    xArc * /*arc*/,
-    miFillArcDRec * /*info*/
-#endif
-);
-
-extern void miEllipseAngleToSlope(
-#if NeedFunctionPrototypes
-    int /*angle*/,
-    int /*width*/,
-    int /*height*/,
-    int * /*dxp*/,
-    int * /*dyp*/,
-    double * /*d_dxp*/,
-    double * /*d_dyp*/
-#endif
-);
-
-extern void miFillArcSliceSetup(
-#if NeedFunctionPrototypes
-    xArc * /*arc*/,
-    miArcSliceRec * /*slice*/,
-    GCPtr /*pGC*/
-#endif
-);
-
+#endif                          /* __MIFILLARC_H__ */

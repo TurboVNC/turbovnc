@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/include/cursor.h,v 1.7 2003/04/27 21:31:04 herrb Exp $ */
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
@@ -23,7 +22,6 @@ Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
 in this Software without prior written authorization from The Open Group.
 
-
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
@@ -45,126 +43,90 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: cursor.h,v 1.4 2001/02/09 02:05:15 xorgcvs Exp $ */
+
 #ifndef CURSOR_H
-#define CURSOR_H 
+#define CURSOR_H
 
 #include "misc.h"
 #include "screenint.h"
 #include "window.h"
+#include "privates.h"
 
 #define NullCursor ((CursorPtr)NULL)
 
 /* Provide support for alpha composited cursors */
-#ifdef RENDER
 #define ARGB_CURSOR
-#endif
+
+struct _DeviceIntRec;
 
 typedef struct _Cursor *CursorPtr;
 typedef struct _CursorMetric *CursorMetricPtr;
 
-extern CursorPtr rootCursor;
+extern _X_EXPORT DevScreenPrivateKeyRec cursorScreenDevPriv;
 
-extern int FreeCursor(
-#if NeedFunctionPrototypes
-    pointer /*pCurs*/,
-    XID /*cid*/
-#endif
-);
+#define CursorScreenKey (&cursorScreenDevPriv)
 
-extern CursorPtr AllocCursor(
-#if NeedFunctionPrototypes
-    unsigned char* /*psrcbits*/,
-    unsigned char* /*pmaskbits*/,
-    CursorMetricPtr /*cm*/,
-    unsigned /*foreRed*/,
-    unsigned /*foreGreen*/,
-    unsigned /*foreBlue*/,
-    unsigned /*backRed*/,
-    unsigned /*backGreen*/,
-    unsigned /*backBlue*/
-#endif
-);
+extern _X_EXPORT CursorPtr rootCursor;
 
-extern CursorPtr AllocCursorARGB(
-    unsigned char* /*psrcbits*/,
-    unsigned char* /*pmaskbits*/,
-    CARD32* /*argb*/,
-    CursorMetricPtr /*cm*/,
-    unsigned /*foreRed*/,
-    unsigned /*foreGreen*/,
-    unsigned /*foreBlue*/,
-    unsigned /*backRed*/,
-    unsigned /*backGreen*/,
-    unsigned /*backBlue*/);
+extern _X_EXPORT int FreeCursor(pointer /*pCurs */ ,
+                                XID /*cid */ );
 
+extern _X_EXPORT int AllocARGBCursor(unsigned char * /*psrcbits */ ,
+                                     unsigned char * /*pmaskbits */ ,
+                                     CARD32 * /*argb */ ,
+                                     CursorMetricPtr /*cm */ ,
+                                     unsigned /*foreRed */ ,
+                                     unsigned /*foreGreen */ ,
+                                     unsigned /*foreBlue */ ,
+                                     unsigned /*backRed */ ,
+                                     unsigned /*backGreen */ ,
+                                     unsigned /*backBlue */ ,
+                                     CursorPtr * /*ppCurs */ ,
+                                     ClientPtr /*client */ ,
+                                     XID /*cid */ );
 
-extern int AllocGlyphCursor(
-#if NeedFunctionPrototypes
-    Font /*source*/,
-    unsigned int /*sourceChar*/,
-    Font /*mask*/,
-    unsigned int /*maskChar*/,
-    unsigned /*foreRed*/,
-    unsigned /*foreGreen*/,
-    unsigned /*foreBlue*/,
-    unsigned /*backRed*/,
-    unsigned /*backGreen*/,
-    unsigned /*backBlue*/,
-    CursorPtr* /*ppCurs*/,
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT int AllocGlyphCursor(Font /*source */ ,
+                                      unsigned int /*sourceChar */ ,
+                                      Font /*mask */ ,
+                                      unsigned int /*maskChar */ ,
+                                      unsigned /*foreRed */ ,
+                                      unsigned /*foreGreen */ ,
+                                      unsigned /*foreBlue */ ,
+                                      unsigned /*backRed */ ,
+                                      unsigned /*backGreen */ ,
+                                      unsigned /*backBlue */ ,
+                                      CursorPtr * /*ppCurs */ ,
+                                      ClientPtr /*client */ ,
+                                      XID /*cid */ );
 
-extern CursorPtr CreateRootCursor(
-#if NeedFunctionPrototypes
-    char* /*pfilename*/,
-    unsigned int /*glyph*/
-#endif
-);
+extern _X_EXPORT CursorPtr CreateRootCursor(char * /*pfilename */ ,
+                                            unsigned int /*glyph */ );
 
-extern int ServerBitsFromGlyph(
-#if NeedFunctionPrototypes
-    FontPtr /*pfont*/,
-    unsigned int /*ch*/,
-    register CursorMetricPtr /*cm*/,
-    unsigned char ** /*ppbits*/
-#endif
-);
+extern _X_EXPORT int ServerBitsFromGlyph(FontPtr /*pfont */ ,
+                                         unsigned int /*ch */ ,
+                                         CursorMetricPtr /*cm */ ,
+                                         unsigned char ** /*ppbits */ );
 
-extern Bool CursorMetricsFromGlyph(
-#if NeedFunctionPrototypes
-    FontPtr /*pfont*/,
-    unsigned /*ch*/,
-    CursorMetricPtr /*cm*/
-#endif
-);
+extern _X_EXPORT Bool CursorMetricsFromGlyph(FontPtr /*pfont */ ,
+                                             unsigned /*ch */ ,
+                                             CursorMetricPtr /*cm */ );
 
-extern void CheckCursorConfinement(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+extern _X_EXPORT void CheckCursorConfinement(WindowPtr /*pWin */ );
 
-extern void NewCurrentScreen(
-#if NeedFunctionPrototypes
-    ScreenPtr /*newScreen*/,
-    int /*x*/,
-    int /*y*/
-#endif
-);
+extern _X_EXPORT void NewCurrentScreen(struct _DeviceIntRec * /*pDev */ ,
+                                       ScreenPtr /*newScreen */ ,
+                                       int /*x */ ,
+                                       int /*y */ );
 
-extern Bool PointerConfinedToScreen(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern _X_EXPORT Bool PointerConfinedToScreen(struct _DeviceIntRec * /* pDev */
+                                              );
 
-extern void GetSpritePosition(
-#if NeedFunctionPrototypes
-    int * /*px*/,
-    int * /*py*/
-#endif
-);
+extern _X_EXPORT void GetSpritePosition(struct _DeviceIntRec * /* pDev */ ,
+                                        int * /*px */ ,
+                                        int * /*py */ );
 
-#endif /* CURSOR_H */
+#ifdef PANORAMIX
+extern _X_EXPORT int XineramaGetCursorScreen(struct _DeviceIntRec *pDev);
+#endif                          /* PANORAMIX */
+
+#endif                          /* CURSOR_H */

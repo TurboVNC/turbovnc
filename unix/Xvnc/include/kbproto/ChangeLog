@@ -1,0 +1,554 @@
+commit 391a1f6de6315fc0196d407d800597488315cccb
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Mar 22 20:43:02 2012 -0700
+
+    kbproto 1.0.6
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b0f7912512091ea58dfaf8dffb2a658a6afeb96d
+Author: Matt Dew <marcoz@osource.org>
+Date:   Mon Jan 16 15:38:49 2012 -0700
+
+    informaltable cleanup
+    
+    On certain tables, add top and bottom borders to table
+    header and a bottom border to the table. This matches
+    what those tables in the old pdfs looked like.
+    
+    the <?dbfo keep-together='always'> prevents tables from
+    splitting across pages. Useful for tiny tables.
+    
+    Converting the colwidth to a floating point,
+    IE, 1* -> 1.0* cleans up these build errors:
+    WARNING: table-layout="fixed" and column-width unspecified
+    => falling back to proportional-column-width(1)
+    
+    Signed-off-by: Matt Dew <marcoz@osource.org>
+
+commit cb49f95af605bd5019e194eeb656d8789d57756a
+Author: Matt Dew <marcoz@osource.org>
+Date:   Mon Oct 3 18:06:16 2011 -0600
+
+        1 - fix the capitolization of the ID attriutes to match either the
+            <title> or <funcdef> string it goes with.
+        2 - fix any <linkend>'s that were affected by 1.
+        3 - any <function> in the docs that has an actual funcdef,
+            will become an olink.
+    
+        Signed-off-by: Matt Dew <marcoz@osource.org>
+
+commit f1980f205e5bc417ad799aa8389ebdd807b7ca58
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 15:54:18 2011 -0400
+
+    specs: fix copyright markup
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 8ce1f616524c610463340922fdc529b4c7f6b26d
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Sep 12 16:54:45 2011 -0400
+
+    docs: use the &fullrelvers; entity to set X11 release information
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit acc3fe66be976f3b6f1716041104699aefc24c36
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Fri Sep 9 21:48:21 2011 -0400
+
+    xkbproto doc: remove empty revision history and set specs version
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f24b077892e037fb45b40a7fd055087dc5ce464a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Sep 8 20:00:00 2011 -0400
+
+    docbook.am: embed css styles inside the HTML HEAD element
+    
+    Rather than referring to the external xorg.css stylesheet, embed the content
+    of the file in the html output produced. This is accomplished by using
+    version 1.10 of xorg-xhtml.xsl.
+    
+    This makes the whole html docs tree much more relocatable.
+    In addition, it eliminates xorg.css as a runtime file which makes
+    xorg-sgml-doctools a build time only package.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit c707a202a497bf8cab6a89b5807269e0a4b51f3d
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 7 10:31:04 2011 -0400
+
+    docbook.am: global maintenance update - entities, images and olinking
+    
+    Adding support in libX11 for html chunking caused a reorg of docbook.am
+    as well as the xorg-sgml-doctools masterdb for olinking.
+    The parameter img.src.path is added for pdf images.
+    A searchpath to the root builddir is added for local entities, if present.
+    
+    The docbook.am makefile hides all the details and is identical for
+    all 22 modules having DocBook documentation. It is included by a thin
+    Makefile.am which requires no docbook knowledge.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 5a286420a2356d611929b700e5338ab4649d707f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Aug 23 20:37:08 2011 -0400
+
+    docbook pdf: add xsl parameter to locate images
+    
+    Unlike html, pdf/ps requires a full path name to find images,
+    but only needs it to make an internal copy of it at build time.
+    The image can later be removed and the image still shows up in the pdf doc.
+    This allows us to use the absolute builddir.
+    
+    This parameter must not be used for html which loads the image from disk
+    at user read time. The image is removed from builddir after build is done,
+    and we do not know where the image will be installed by the distro.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 8233aa66e9ae9bbc887a8004da8a7d692aabfa3b
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Jun 12 17:54:50 2011 -0400
+
+    Install xml versions of specs even if HAVE_XMLTO is false
+    
+    DocBook/XML input source is also a usefull output format that can be viewed
+    with an XML viewer or editor and by some O/S help system.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 3ccaaf460f1e130e919cf027b8d1ccfd75ad1150
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Jun 5 16:27:37 2011 -0400
+
+    Install target dbs alongside generated documents
+    
+    This matches a change in xorg-sgml-docs whereby the masterdb will look for
+    the target dbs into the same location as the generated documents.
+    
+    The target dbs are now installed alongside the generated documents.
+    Previously they are installed in $prefix/sgml/X11/dbs alongside masterdb which
+    has the potential of installing outside the package prefix and cause
+    distcheck to fail when user does not have write permission in this package.
+    
+    Requires XORG_CHECK_SGML_DOCTOOLS(1.8) which was released 2011-06-11
+
+commit a9cc5051ea8daf3b56964751db5bc5f257aa2c7e
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Feb 27 15:06:18 2011 -0500
+
+    Documentation: add Docbook external references support
+    
+    When writing technical documentation, it is often necessary to cross
+    reference to other information. When that other information is not in the
+    current document, additional support is needed, namely <olink>.
+    
+    A new feature with version 1.7 of xorg-sgml-doctools adds references to
+    other documents within or outside this package.
+    
+    This patch adds technical support for this feature but does not change
+    the content of the documentation as seen by the end user.
+    
+    Each book or article must generate a database containing the href
+    of sections that can be referred to from another document. This database
+    is installed in DATAROOTDIR/sgml/X11/dbs. There is a requirement that
+    the value of DATAROOTDIR for xorg-sgml-doctools and for the package
+    documentation is the same. This forms a virtual document tree.
+    
+    This database is consulted by other documents while they are being generated
+    in order to fulfill the missing information for linking.
+    Refer to the xorg-sgml-doctools for further technical information.
+    
+    Co-authored-by: Matt Dew <marcoz@osource.org>
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit b82c9b3f752c89d3328c0257d8a386024c9023ee
+Author: Matt Dew <marcoz@osource.org>
+Date:   Tue Mar 15 23:30:15 2011 -0600
+
+    Remove duplicate 'See see' text in docs - take 2
+
+commit c336374f3bf34ce875b29001548470f8d824141e
+Author: Matt Dew <marcoz@osource.org>
+Date:   Wed Mar 2 17:11:05 2011 -0700
+
+    Fix bad link anchors.
+    
+    Fix broken links in kxproto. The old links hardcoded the output
+    filename 'XKBproto.htm' and used anchors that didn't convert correctly.
+    The new anchors are strings that use the same convention as
+    other anchors in other docs.
+    
+    Fix links like:
+    <ulink url="XKBproto.htm#50332257_45660">Compute State Field</ulink>
+    to be:
+    <link linkend='computing_a_state_field_from_an_xkb_state'>Compute State Field</link>
+    
+    Signed-off-by: Matt Dew <marcoz@osource.org>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 72ae502f833db82fa3ceb0146332d6885d5b86fa
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 19 12:44:29 2011 -0800
+
+    specs:  Fix formatting of last item in KEYPAD key type list
+    
+    Reported-by: Jens Elkner
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 4adfcde42846d19ad49557880978247dc4ea2f0f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Dec 28 17:21:11 2010 -0500
+
+    specs: convert images from gif to svg format.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit fb71cc93f4e5931e166e98ea228760ef5934897f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Dec 20 00:10:13 2010 -0800
+
+    Add spec images to dist_spec_DATA for distribution & installation
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit ed89b140a1359dc97f420255813599954b5d334b
+Author: Matt Dew <matt@osource.org>
+Date:   Tue Nov 30 09:49:41 2010 -0500
+
+    specs: convert xkbproto from Framemaker to DocBook/XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 6080b1839d556899ad456e60c46a925fcc285cb5
+Author: Jesse Adkins <jesserayadkins@gmail.com>
+Date:   Tue Sep 28 13:30:04 2010 -0700
+
+    Purge cvs tags.
+    
+    Signed-off-by: Jesse Adkins <jesserayadkins@gmail.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f1a9902167607b32ce34adac4a62a07ac43a4041
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Aug 10 10:04:15 2010 -0400
+
+    kbproto 1.0.5
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 2306fcd4c511d41ae4b31b9cbd9f79cf69287730
+Author: Dirk Wallenstein <halsmit@t-online.de>
+Date:   Fri Feb 5 20:42:43 2010 +0100
+
+    Use the correct value for XkbAllAccessXEventsMask
+    
+    Signed-off-by: Dirk Wallenstein <halsmit@t-online.de>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 875e6f80e9ddcac010f6871214a92e4d50e8ee5e
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:25:52 2010 -0400
+
+    config: update AC_PREREQ statement to 2.60
+    
+    Unrelated to the previous patches, the new value simply reflects
+    the reality that the minimum level for autoconf to configure
+    all x.org modules is 2.60 dated June 2006.
+    
+    ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.60.tar.gz
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f6b32127be4c800f73bf68c6ac7d79c630cae1fa
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:00:31 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit cb489d131adb1d454e9f6196d7d766c0acde12e6
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 22 19:24:48 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit 9a83b903ba2586f16e770d4911c4d7e42957abb7
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 11:13:30 2009 -0500
+
+    README: file created or updated #24206
+    
+    Contains a set of URLs to freedesktop.org.
+
+commit 0a358e01f7fcb903077137c4d3ab51ce9eeabcce
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 19:45:27 2009 -0500
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit c8078878abaa2d2489a3778c89af043901582eac
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:31:28 2009 -0500
+
+    Makefile.am: INSTALL file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+    Add INSTALL target
+
+commit ab57a912460acb83302152bd91c6336d500bb9cd
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:11:36 2009 -0500
+
+    configure.ac: deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit 4ddefc3a86050e06056d79b78ae0a1be119c4131
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 13:55:25 2009 -0500
+
+    configure.ac: AM_MAINTAINER_MODE missing #24238
+    
+    This turns off maintainer mode build rules in tarballs.
+    Works in conjunction with autogen.sh --enable-maintainer-mode
+
+commit eb3d96018f4c2e20c23b837aa42f71ebb36661b1
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Nov 14 18:26:47 2009 -0500
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 4e3ccd5b2144005af1d5d2f9b96275a01156aec5
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Mon Oct 12 22:39:05 2009 -0700
+
+    kbproto 1.0.4
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 6472994ea38a8416214b5ce12a34437541e6d15e
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Mon Oct 12 22:38:03 2009 -0700
+
+    Migrate to xorg macros 1.3 & XORG_DEFAULT_OPTIONS
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 5273e7bc22cc7f11f2461ba1f5f30cbdecda1289
+Author: Jeremy Huddleston <jeremyhu@freedesktop.org>
+Date:   Mon Apr 6 17:54:12 2009 -0700
+
+    Made some defines typedefs for better compatability
+
+commit 3baa0be057f2bf2e2f0f049c0dded4a93c68819e
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Tue Jan 27 20:06:28 2009 -0200
+
+    Janitor: Correct make distcheck and dont distribute autogen.sh
+
+commit 0396fb99f96ff15e1000a6e4b5ccdca119319a8a
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 16:39:02 2007 -0500
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit 1a41bb4ff63d0fa27238be2af6a8b59941c0f7db
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Mon Sep 3 05:54:08 2007 -0400
+
+    Add *~ to .gitignore to skip patch/emacs droppings
+
+commit c4f5dac457e13d2cd5a1d8a1e28e56dd5d3be856
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Tue Jul 18 15:21:43 2006 -0400
+
+    Bump to 1.0.3.
+
+commit b23c0835504887f460deeac55b8be94d07336745
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Tue Jul 18 15:21:28 2006 -0400
+
+    unconditionally declare XFree86Private
+    This could probably be moved to generic DDX private.
+
+commit 85c889c725de1a0233c845c75ad62b39940b120a
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jul 14 18:56:20 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit d15dc14c2fb8996e1da9daaef748ff35f7844809
+Author: Kevin E Martin <kem@kem.org>
+Date:   Thu Dec 15 00:24:38 2005 +0000
+
+    Update package version number for final X11R7 release candidate.
+
+commit 9d625ab848eee9a7488e6ee3d4cfbeea5198f61b
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 19 02:48:14 2005 +0000
+
+    Update package version number for RC1 release.
+
+commit b9a70202a5d2edc2d62cbe2776635e994f07bb2d
+Author: Kristian Høgsberg <krh@redhat.com>
+Date:   Thu Sep 1 19:56:14 2005 +0000
+
+    Teach xkb how to optionally run xkbcomp from $bindir instead of
+        $datadir/xkb.
+
+commit ac13227d0007b6fac32af6281ae2e49f5e8fa90c
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Tue Aug 2 19:19:39 2005 +0000
+
+    Add basic .cvsignore files for proto modules.
+
+commit 81b6633f6509e0d8053a40cc9fe4025202991112
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri Jul 29 21:22:55 2005 +0000
+
+    Various changes preparing packages for RC0:
+    - Verify and update package version numbers as needed
+    - Implement versioning scheme
+    - Change bug address to point to bugzilla bug entry form
+    - Disable loadable i18n in libX11 by default (use --enable-loadable-i18n to
+        reenable it)
+    - Fix makedepend to use pkgconfig and pass distcheck
+    - Update build script to build macros first
+    - Update modular Xorg version
+
+commit 234e6351e159ec892c0f9878663819c32a88fabd
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Thu Jul 7 19:07:28 2005 +0000
+
+    More compiler warning fixes for missing prototypes:
+    Add prototype for XkbSetExtension()
+    Add #include <ctype.h> for isspace() & isdigit()
+    Add #include <grp.h> (for initgroups()) and remove extra *
+    Add prototype for xorgGetVersion()
+
+commit 4a9390f0bfc464967151b670179998d375e28d75
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Sun May 22 01:12:49 2005 +0000
+
+    Bugzilla #2800 <https://bugs.freedesktop.org/show_bug.cgi?id=2800> Xevie
+        extension crash with signal 11 on keyboard Bugzilla #1205
+        <https://bugs.freedesktop.org/show_bug.cgi?id=1205> Xevie client
+        receives two KeyPress events on consumed keys when XKB is enabled
+    Patch #2223 <https://bugs.freedesktop.org/attachment.cgi?id=2223> Fixes for
+        both of these and some other Xevie bugs (Derek Wang - Sun Microsystems)
+
+commit 3c68899e6798045e60d3c99900ab73825a612237
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sat May 21 04:12:09 2005 +0000
+
+    Set version to 1.0.
+
+commit d346d81559dc1c8ca0d52c98c667a1afec40ce71
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:22:39 2005 +0000
+
+    revert last change, didn't do right thing at all, sorry for the noise
+
+commit 6882836c45e5a5e1caef49aa33b6fc1db0b48e27
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:10:18 2005 +0000
+
+    Require automake 1.7 in AM_INIT_AUTOMAKE
+
+commit d4a17c55d88d4a373fb1ade20001be80c5a956db
+Author: Josh Triplett <josh@speakeasy.net>
+Date:   Mon May 16 03:53:47 2005 +0000
+
+    Add COPYING file for KB.
+
+commit 19bc22d68a990a2498934695f4d938519345a1b0
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Mon May 9 18:20:05 2005 +0000
+
+    Change all the protonames from <extension>Ext to <extension>Proto.
+
+commit aaef7b5591cfaaa08ca1d03b113e04dd726059a1
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri May 6 01:46:31 2005 +0000
+
+    Initial build system files for proto module.
+
+commit b5bacc5786658560870cc24975d29d582e9a335c
+Author: Egbert Eich <eich@suse.de>
+Date:   Fri Apr 23 18:43:06 2004 +0000
+
+    Merging XORG-CURRENT into trunk
+
+commit 50b5d3dd26018cec029d04413bc8deabb83a3845
+Author: Egbert Eich <eich@suse.de>
+Date:   Sun Mar 14 08:31:35 2004 +0000
+
+    Importing vendor version xf86-4_4_99_1 on Sun Mar 14 00:26:39 PST 2004
+
+commit f121988370dcc8b5dbdc5b77c49e3c2fb2558fb2
+Author: Egbert Eich <eich@suse.de>
+Date:   Wed Mar 3 12:10:54 2004 +0000
+
+    Importing vendor version xf86-4_4_0 on Wed Mar 3 04:09:24 PST 2004
+
+commit 85a3d5bced3a1907fe42bbd25b77b3d2e35b1935
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 13:35:11 2004 +0000
+
+    readding XFree86's cvs IDs
+
+commit 27095f92dfad92436113534f850098810d067fb0
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 09:22:27 2004 +0000
+
+    Importing vendor version xf86-4_3_99_903 on Wed Feb 26 01:21:00 PST 2004
+
+commit 532eebc568179adf69317855e2c3c9cf305ef81c
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Jan 29 08:07:56 2004 +0000
+
+    Importing vendor version xf86-012804-2330 on Thu Jan 29 00:06:33 PST 2004
+
+commit 66aafd71e17dbaeb0ba7fa4bf72f17e57d9022e5
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Tue Nov 25 19:28:02 2003 +0000
+
+    XFree86 4.3.99.16 Bring the tree up to date for the Cygwin folks
+
+commit bae998431a7285432eb5d1f519246e41832754d0
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:42 2003 +0000
+
+    XFree86 4.3.0.1
+
+commit 209ae2d4c9cd739e91f8c00184dc6f2f48e21100
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 15:54:35 2003 +0000
+
+    R6.6 is the Xorg base-line

@@ -6,6 +6,10 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
+ *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
+ *  Copyright (C) 2013 Pierre Ossman for Cendio AB.  All Rights Reserved.
+ *  Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,223 +27,46 @@
  *  USA.
  */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "X11/X.h"
-#define NEED_EVENTS
-#include "X11/Xproto.h"
-#include "inputstr.h"
-#include "mi.h"
-#include "mipointer.h"
-#define XK_CYRILLIC
+#include <X11/X.h>
 #include <X11/keysym.h>
-#include <Xatom.h>
+#include "inputstr.h"
+#include "inpututils.h"
+#include "mi.h"
 #include "rfb.h"
-
-extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
-
-#define KEY_IS_PRESSED(keycode) \
-    (kbdDevice->key->down[(keycode) >> 3] & (1 << ((keycode) & 7)))
+#include "input-xkb.h"
 
 
-static void XConvertCase(KeySym sym, KeySym *lower, KeySym *upper);
-
-static DeviceIntPtr kbdDevice;
+DeviceIntPtr kbdDevice = NULL;
+static DeviceIntPtr ptrDevice = NULL;
 
 /* If TRUE, then keys META == ALT as in the original AT&T version. */
 Bool compatibleKbd = FALSE;
 
+/* Avoid fake Shift presses for keys affected by NumLock */
+Bool avoidShiftNumLock = TRUE;
+Bool ignoreLockModifiers = FALSE;
+
 unsigned char ptrAcceleration = 50;
 
-#define MIN_KEY_CODE            8
-#define MAX_KEY_CODE            255
-#define NO_OF_KEYS              (MAX_KEY_CODE - MIN_KEY_CODE + 1)
-#define GLYPHS_PER_KEY          2
-
-static KeySym kbdMap[] = {
-
-    /* Modifiers */
-
-    XK_Control_L,       NoSymbol,
-#define CONTROL_L_KEY_CODE      MIN_KEY_CODE
-
-    XK_Control_R,       NoSymbol,
-#define CONTROL_R_KEY_CODE      (MIN_KEY_CODE + 1)
-
-    XK_Shift_L,         NoSymbol,
-#define SHIFT_L_KEY_CODE        (MIN_KEY_CODE + 2)
-
-    XK_Shift_R,         NoSymbol,
-#define SHIFT_R_KEY_CODE        (MIN_KEY_CODE + 3)
-
-    XK_Meta_L,          NoSymbol,
-#define META_L_KEY_CODE         (MIN_KEY_CODE + 4)
-
-    XK_Meta_R,          NoSymbol,
-#define META_R_KEY_CODE         (MIN_KEY_CODE + 5)
-
-    XK_Alt_L,           NoSymbol,
-#define ALT_L_KEY_CODE          (MIN_KEY_CODE + 6)
-
-    XK_Alt_R,           NoSymbol,
-#define ALT_R_KEY_CODE          (MIN_KEY_CODE + 7)
-
-    /* Standard US keyboard */
-
-    XK_space,           NoSymbol,
-    XK_0,               XK_parenright,
-    XK_1,               XK_exclam,
-    XK_2,               XK_at,
-    XK_3,               XK_numbersign,
-    XK_4,               XK_dollar,
-    XK_5,               XK_percent,
-    XK_6,               XK_asciicircum,
-    XK_7,               XK_ampersand,
-    XK_8,               XK_asterisk,
-    XK_9,               XK_parenleft,
-
-    XK_minus,           XK_underscore,
-    XK_equal,           XK_plus,
-    XK_bracketleft,     XK_braceleft,
-    XK_bracketright,    XK_braceright,
-    XK_semicolon,       XK_colon,
-    XK_apostrophe,      XK_quotedbl,
-    XK_grave,           XK_asciitilde,
-    XK_comma,           XK_less,
-    XK_period,          XK_greater,
-    XK_slash,           XK_question,
-    XK_backslash,       XK_bar,
-
-    XK_a,               XK_A,
-    XK_b,               XK_B,
-    XK_c,               XK_C,
-    XK_d,               XK_D,
-    XK_e,               XK_E,
-    XK_f,               XK_F,
-    XK_g,               XK_G,
-    XK_h,               XK_H,
-    XK_i,               XK_I,
-    XK_j,               XK_J,
-    XK_k,               XK_K,
-    XK_l,               XK_L,
-    XK_m,               XK_M,
-    XK_n,               XK_N,
-    XK_o,               XK_O,
-    XK_p,               XK_P,
-    XK_q,               XK_Q,
-    XK_r,               XK_R,
-    XK_s,               XK_S,
-    XK_t,               XK_T,
-    XK_u,               XK_U,
-    XK_v,               XK_V,
-    XK_w,               XK_W,
-    XK_x,               XK_X,
-    XK_y,               XK_Y,
-    XK_z,               XK_Z,
-
-    /* Other useful keys */
-
-    XK_BackSpace,       NoSymbol,
-    XK_Return,          NoSymbol,
-    XK_Tab,             NoSymbol,
-    XK_Escape,          NoSymbol,
-    XK_Delete,          NoSymbol,
-
-    XK_Home,            NoSymbol,
-    XK_End,             NoSymbol,
-    XK_Page_Up,         NoSymbol,
-    XK_Page_Down,       NoSymbol,
-    XK_Up,              NoSymbol,
-    XK_Down,            NoSymbol,
-    XK_Left,            NoSymbol,
-    XK_Right,           NoSymbol,
-
-    XK_F1,              NoSymbol,
-    XK_F2,              NoSymbol,
-    XK_F3,              NoSymbol,
-    XK_F4,              NoSymbol,
-    XK_F5,              NoSymbol,
-    XK_F6,              NoSymbol,
-    XK_F7,              NoSymbol,
-    XK_F8,              NoSymbol,
-    XK_F9,              NoSymbol,
-    XK_F10,             NoSymbol,
-    XK_F11,             NoSymbol,
-    XK_F12,             NoSymbol,
-
-    /* Plus blank ones which can be filled in using xmodmap */
-
-};
-
-#define N_PREDEFINED_KEYS (sizeof(kbdMap) / (sizeof(KeySym) * GLYPHS_PER_KEY))
+#define NoSymbol4 NoSymbol, NoSymbol, NoSymbol, NoSymbol,
+#define NoSymbol16 NoSymbol4 NoSymbol4 NoSymbol4 NoSymbol4
+#define NoSymbol64 NoSymbol16 NoSymbol16 NoSymbol16 NoSymbol16
+KeySym pressedKeys[256] = { NoSymbol64 NoSymbol64 NoSymbol64 NoSymbol64 };
 
 
 void
-PtrDeviceInit()
-{
-}
-
-
-void
-KbdDeviceInit(pDevice, pKeySyms, pModMap)
+KbdDeviceInit(pDevice)
     DeviceIntPtr pDevice;
-    KeySymsPtr pKeySyms;
-    CARD8 *pModMap;
 {
-    int i;
-
     kbdDevice = pDevice;
-
-    for (i = 0; i < MAP_LENGTH; i++)
-        pModMap[i] = NoSymbol;
-
-    pModMap[CONTROL_L_KEY_CODE] = ControlMask;
-    pModMap[CONTROL_R_KEY_CODE] = ControlMask;
-    pModMap[SHIFT_L_KEY_CODE] = ShiftMask;
-    pModMap[SHIFT_R_KEY_CODE] = ShiftMask;
-    if (compatibleKbd) {
-        pModMap[META_L_KEY_CODE] = Mod1Mask;
-        pModMap[META_R_KEY_CODE] = Mod1Mask;
-    } else {
-        pModMap[META_L_KEY_CODE] = Mod4Mask;
-        pModMap[META_R_KEY_CODE] = Mod4Mask;
-    }
-    pModMap[ALT_L_KEY_CODE] = Mod1Mask;
-    pModMap[ALT_R_KEY_CODE] = Mod1Mask;
-
-    pKeySyms->minKeyCode = MIN_KEY_CODE;
-    pKeySyms->maxKeyCode = MAX_KEY_CODE;
-    pKeySyms->mapWidth = GLYPHS_PER_KEY;
-
-    pKeySyms->map = (KeySym *)xalloc(sizeof(KeySym)
-                                     * MAP_LENGTH * GLYPHS_PER_KEY);
-
-    if (!pKeySyms->map) {
-        rfbLog("xalloc failed\n");
-        exit(1);
-    }
-
-    for (i = 0; i < MAP_LENGTH * GLYPHS_PER_KEY; i++)
-        pKeySyms->map[i] = NoSymbol;
-
-    for (i = 0; i < N_PREDEFINED_KEYS * GLYPHS_PER_KEY; i++) {
-        pKeySyms->map[i] = kbdMap[i];
-    }
-}
-
-
-
-void
-KbdDeviceOn()
-{
-}
-
-
-void
-KbdDeviceOff()
-{
 }
 
 
@@ -248,12 +75,7 @@ PtrDeviceOn(pDev)
     DeviceIntPtr pDev;
 {
     ptrAcceleration = (char)pDev->ptrfeed->ctrl.num;
-}
-
-
-void
-PtrDeviceOff()
-{
+    ptrDevice = pDev;
 }
 
 
@@ -273,178 +95,344 @@ PtrDeviceControl(dev, ctrl)
 }
 
 
-void
-KbdAddEvent(down, keySym, cl)
-    Bool down;
-    KeySym keySym;
-    rfbClientPtr cl;
+static inline void PressKey(DeviceIntPtr dev, int kc, Bool down,
+                            const char *msg)
 {
-    xEvent ev, fake;
-    KeySymsPtr keySyms = &kbdDevice->key->curKeySyms;
-    int i;
-    int keyCode = 0;
-    int freeIndex = -1;
-    unsigned long time;
-    Bool fakeShiftPress = FALSE;
-    Bool fakeShiftLRelease = FALSE;
-    Bool fakeShiftRRelease = FALSE;
-    Bool shiftMustBeReleased = FALSE;
-    Bool shiftMustBePressed = FALSE;
+  int action;
 
-    if (down) {
-        ev.u.u.type = KeyPress;
-    } else {
-        ev.u.u.type = KeyRelease;
-    }
+#ifdef DEBUG
+  if (msg != NULL)
+    rfbLog("PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
+#endif
 
-    /* First check if it's one of our predefined keys.  If so then we can make
-       some attempt at allowing an xmodmap inside a VNC desktop behave
-       something like you'd expect - e.g. if keys A & B are swapped over and
-       the VNC client sends an A, then map it to a B when generating the X
-       event.  We don't attempt to do this for keycodes which we make up on the
-       fly because it's too hard... */
-
-    for (i = 0; i < N_PREDEFINED_KEYS * GLYPHS_PER_KEY; i++) {
-        if (keySym == kbdMap[i]) {
-            keyCode = MIN_KEY_CODE + i / GLYPHS_PER_KEY;
-
-            if (kbdMap[(i/GLYPHS_PER_KEY) * GLYPHS_PER_KEY + 1] != NoSymbol) {
-
-                /* this keycode has more than one symbol associated with it,
-                   so shift state is important */
-
-                if ((i % GLYPHS_PER_KEY) == 0)
-                    shiftMustBeReleased = TRUE;
-                else
-                    shiftMustBePressed = TRUE;
-            }
-            break;
-        }
-    }
-
-    if (!keyCode) {
-
-        /* not one of our predefined keys - see if it's in the current keyboard
-           mapping (i.e. we've already allocated an extra keycode for it) */
-
-        if (keySyms->mapWidth < 2) {
-            rfbLog("KbdAddEvent: Sanity check failed - Keyboard mapping has "
-                   "less than 2 keysyms per keycode (KeySym 0x%x)\n", keySym);
-            return;
-        }
-
-        for (i = 0; i < NO_OF_KEYS * keySyms->mapWidth; i++) {
-            if (keySym == keySyms->map[i]) {
-                keyCode = MIN_KEY_CODE + i / keySyms->mapWidth;
-
-                if (keySyms->map[(i / keySyms->mapWidth)
-                                        * keySyms->mapWidth + 1] != NoSymbol) {
-
-                    /* this keycode has more than one symbol associated with
-                       it, so shift state is important */
-
-                    if ((i % keySyms->mapWidth) == 0)
-                        shiftMustBeReleased = TRUE;
-                    else
-                        shiftMustBePressed = TRUE;
-                }
-                break;
-            }
-            if ((freeIndex == -1) && (keySyms->map[i] == NoSymbol)
-                && (i % keySyms->mapWidth) == 0)
-            {
-                freeIndex = i;
-            }
-        }
-    }
-
-    if (!keyCode) {
-        KeySym lower, upper;
-
-        /* we don't have an existing keycode - make one up on the fly and add
-           it to the keyboard mapping.  Thanks to Vlad Harchev for pointing
-           out problems with non-ascii capitalisation. */
-
-        if (freeIndex == -1) {
-            rfbLog("KbdAddEvent: ignoring KeySym 0x%x - no free KeyCodes\n",
-                   keySym);
-            return;
-        }
-
-        keyCode = MIN_KEY_CODE + freeIndex / keySyms->mapWidth;
-
-        XConvertCase(keySym, &lower, &upper);
-
-        if (lower == upper) {
-            keySyms->map[freeIndex] = keySym;
-
-        } else {
-            keySyms->map[freeIndex] = lower;
-            keySyms->map[freeIndex + 1] = upper;
-
-            if (keySym == lower)
-                shiftMustBeReleased = TRUE;
-            else
-                shiftMustBePressed = TRUE;
-        }
-
-        SendMappingNotify(MappingKeyboard, keyCode, 1, serverClient);
-
-        rfbLog("KbdAddEvent: unknown KeySym 0x%x - allocating KeyCode %d\n",
-               keySym, keyCode);
-    }
-
-    time = GetTimeInMillis();
-
-    if (down) {
-        if (shiftMustBePressed && !(kbdDevice->key->state & ShiftMask)) {
-            fakeShiftPress = TRUE;
-            fake.u.u.type = KeyPress;
-            fake.u.u.detail = SHIFT_L_KEY_CODE;
-            fake.u.keyButtonPointer.time = time;
-            mieqEnqueue(&fake);
-        }
-        if (shiftMustBeReleased && (kbdDevice->key->state & ShiftMask)) {
-            if (KEY_IS_PRESSED(SHIFT_L_KEY_CODE)) {
-                fakeShiftLRelease = TRUE;
-                fake.u.u.type = KeyRelease;
-                fake.u.u.detail = SHIFT_L_KEY_CODE;
-                fake.u.keyButtonPointer.time = time;
-                mieqEnqueue(&fake);
-            }
-            if (KEY_IS_PRESSED(SHIFT_R_KEY_CODE)) {
-                fakeShiftRRelease = TRUE;
-                fake.u.u.type = KeyRelease;
-                fake.u.u.detail = SHIFT_R_KEY_CODE;
-                fake.u.keyButtonPointer.time = time;
-                mieqEnqueue(&fake);
-            }
-        }
-    }
-
-    ev.u.u.detail = keyCode;
-    ev.u.keyButtonPointer.time = time;
-    mieqEnqueue(&ev);
-
-    if (fakeShiftPress) {
-        fake.u.u.type = KeyRelease;
-        fake.u.u.detail = SHIFT_L_KEY_CODE;
-        fake.u.keyButtonPointer.time = time;
-        mieqEnqueue(&fake);
-    }
-    if (fakeShiftLRelease) {
-        fake.u.u.type = KeyPress;
-        fake.u.u.detail = SHIFT_L_KEY_CODE;
-        fake.u.keyButtonPointer.time = time;
-        mieqEnqueue(&fake);
-    }
-    if (fakeShiftRRelease) {
-        fake.u.u.type = KeyPress;
-        fake.u.u.detail = SHIFT_R_KEY_CODE;
-        fake.u.keyButtonPointer.time = time;
-        mieqEnqueue(&fake);
-    }
+  action = down ? KeyPress : KeyRelease;
+  QueueKeyboardEvents(dev, action, kc, NULL);
 }
+
+
+/* altKeysym is a table of alternative keysyms which have the same meaning. */
+
+static struct altKeysym_t {
+  KeySym a, b;
+} altKeysym[] = {
+  { XK_Shift_L,    XK_Shift_R },
+  { XK_Control_L,    XK_Control_R },
+  { XK_Meta_L,    XK_Meta_R },
+  { XK_Alt_L,    XK_Alt_R },
+  { XK_Super_L,    XK_Super_R },
+  { XK_Hyper_L,    XK_Hyper_R },
+  { XK_KP_Space,    XK_space },
+  { XK_KP_Tab,    XK_Tab },
+  { XK_KP_Enter,    XK_Return },
+  { XK_KP_F1,    XK_F1 },
+  { XK_KP_F2,    XK_F2 },
+  { XK_KP_F3,    XK_F3 },
+  { XK_KP_F4,    XK_F4 },
+  { XK_KP_Home,    XK_Home },
+  { XK_KP_Left,    XK_Left },
+  { XK_KP_Up,    XK_Up },
+  { XK_KP_Right,    XK_Right },
+  { XK_KP_Down,    XK_Down },
+  { XK_KP_Page_Up,  XK_Page_Up },
+  { XK_KP_Page_Down,  XK_Page_Down },
+  { XK_KP_End,    XK_End },
+  { XK_KP_Begin,    XK_Begin },
+  { XK_KP_Insert,    XK_Insert },
+  { XK_KP_Delete,    XK_Delete },
+  { XK_KP_Equal,    XK_equal },
+  { XK_KP_Multiply,  XK_asterisk },
+  { XK_KP_Add,    XK_plus },
+  { XK_KP_Separator,  XK_comma },
+  { XK_KP_Subtract,  XK_minus },
+  { XK_KP_Decimal,  XK_period },
+  { XK_KP_Divide,    XK_slash },
+  { XK_KP_0,    XK_0 },
+  { XK_KP_1,    XK_1 },
+  { XK_KP_2,    XK_2 },
+  { XK_KP_3,    XK_3 },
+  { XK_KP_4,    XK_4 },
+  { XK_KP_5,    XK_5 },
+  { XK_KP_6,    XK_6 },
+  { XK_KP_7,    XK_7 },
+  { XK_KP_8,    XK_8 },
+  { XK_KP_9,    XK_9 },
+  { XK_ISO_Level3_Shift,  XK_Mode_switch },
+};
+
+
+/*
+ * KeyEvent() - work out the best keycode corresponding to the keysym sent by
+ * the viewer. This is basically impossible in the general case, but we make
+ * a best effort by assuming that all useful keysyms can be reached using
+ * just the Shift and Level 3 (AltGr) modifiers. For core keyboards this is
+ * basically always TRUE, and should be TRUE for most sane, western XKB
+ * layouts.
+ *
+ * This code was borrowed from TigerVNC.
+ */
+
+void KeyEvent(CARD32 keysym, Bool down)
+{
+  int i;
+  unsigned state, new_state;
+  KeyCode keycode;
+
+  unsigned level_three_mask;
+  KeyCode shift_press = 0, level_three_press = 0;
+  KeyCode *shift_release = NULL, *level_three_release = NULL;
+
+  /*
+   * Release events must match the press event, so look up what
+   * keycode we sent for the press.
+   */
+  if (!down) {
+    for (i = 0; i < 256; i++) {
+      if (pressedKeys[i] == keysym) {
+        pressedKeys[i] = NoSymbol;
+        PressKey(kbdDevice, i, FALSE, "keycode");
+        mieqProcessInputEvents();
+        return;
+      }
+    }
+
+    /*
+     * This can happen quite often as we ignore some
+     * key presses.
+     */
+    #ifdef DEBUG
+    rfbLog("Unexpected release of keysym 0x%x\n", keysym);
+    #endif
+
+    return;
+  }
+
+  /*
+   * Since we are checking the current state to determine if we need
+   * to fake modifiers, we must make sure that everything put on the
+   * input queue is processed before we start. Otherwise, shift may be
+   * stuck down.
+   */
+  mieqProcessInputEvents();
+
+  state = GetKeyboardState();
+
+  keycode = KeysymToKeycode(keysym, state, &new_state);
+
+  /* Try some equivalent keysyms if we couldn't find a perfect match */
+  if (keycode == 0) {
+    for (i = 0; i < sizeof(altKeysym) / sizeof(altKeysym[0]); i++) {
+      KeySym altsym;
+
+      if (altKeysym[i].a == keysym)
+        altsym = altKeysym[i].b;
+      else if (altKeysym[i].b == keysym)
+        altsym = altKeysym[i].a;
+      else
+        continue;
+
+      keycode = KeysymToKeycode(altsym, state, &new_state);
+      if (keycode != 0)
+        break;
+    }
+  }
+
+  /* We don't have lock synchronisation... */
+  if (IsLockModifier(keycode, new_state) && ignoreLockModifiers) {
+    #ifdef DEBUG
+    rfbLog("Ignoring lock key (e.g. caps lock)\n");
+    #endif
+    return;
+  }
+
+  /* No matches. Will have to add a new entry... */
+  if (keycode == 0) {
+    keycode = AddKeysym(keysym, state);
+    if (keycode == 0) {
+      rfbLog("ERROR: Could not add new keysym 0x%x\n", keysym);
+      return;
+    }
+
+    rfbLog("Mapped unknown keysym 0x%x to keycode %d\n", keysym, keycode);
+
+    /*
+     * The state given to addKeysym() is just a hint and
+     * the actual result might still require some state
+     * changes.
+     */
+    keycode = KeysymToKeycode(keysym, state, &new_state);
+    if (keycode == 0) {
+      rfbLog("ERROR: Cannot generate keycode for newly-added keysym 0x%x\n",
+             keysym);
+      return;
+    }
+  }
+
+  /*
+   * X11 generally lets shift toggle the keys on the numeric pad
+   * the same way NumLock does. This is however not the case on
+   * other systems like Windows. As a result, some applications
+   * get confused when we do a fake shift to get the same effect
+   * that having NumLock active would produce.
+   *
+   * Until we have proper NumLock synchronisation (so we can
+   * avoid faking shift), we try to avoid the fake shifts if we
+   * can use an alternative keysym.
+   */
+  if (((state & ShiftMask) != (new_state & ShiftMask)) &&
+      avoidShiftNumLock && IsAffectedByNumLock(keycode)) {
+    KeyCode keycode2 = 0;
+    unsigned new_state2;
+
+    #ifdef DEBUG
+    rfbLog("Finding alternative to keysym 0x%x to avoid fake shift for numpad\n",
+           keysym);
+    #endif
+
+    for (i = 0; i < sizeof(altKeysym) / sizeof(altKeysym[0]); i++) {
+      KeySym altsym;
+
+      if (altKeysym[i].a == keysym)
+        altsym = altKeysym[i].b;
+      else if (altKeysym[i].b == keysym)
+        altsym = altKeysym[i].a;
+      else
+        continue;
+
+      keycode2 = KeysymToKeycode(altsym, state, &new_state2);
+      if (keycode2 == 0)
+        continue;
+
+      if (((state & ShiftMask) != (new_state2 & ShiftMask)) &&
+          IsAffectedByNumLock(keycode2))
+        continue;
+
+      break;
+    }
+
+    if (i == sizeof(altKeysym) / sizeof(altKeysym[0])) {
+      #ifdef DEBUG
+      rfbLog("No alternative keysym found\n");
+      #endif
+    } else {
+      keycode = keycode2;
+      new_state = new_state2;
+    }
+  }
+
+  /*
+   * "Shifted Tab" is a bit of a mess. Some systems have varying,
+   * special keysyms for this symbol. VNC mandates that clients
+   * should always send the plain XK_Tab keysym and the server
+   * should deduce the meaning based on current Shift state.
+   * To comply with this, we will find the keycode that sends
+   * XK_Tab, and make sure that Shift isn't cleared. This can
+   * possibly result in a different keysym than XK_Tab, but that
+   * is the desired behaviour.
+   *
+   * Note: We never get ISO_Left_Tab here because it's already
+   *       been translated in VNCSConnectionST.
+   */
+  if (keysym == XK_Tab && (state & ShiftMask))
+    new_state |= ShiftMask;
+
+  /*
+   * We need a bigger state change than just shift,
+   * so we need to know what the mask is for level 3 shifts.
+   */
+  if ((new_state & ~ShiftMask) != (state & ~ShiftMask))
+    level_three_mask = GetLevelThreeMask();
+  else
+    level_three_mask = 0;
+
+  shift_press = level_three_press = 0;
+
+  /* Need a fake press or release of shift? */
+  if (!(state & ShiftMask) && (new_state & ShiftMask)) {
+    shift_press = PressShift();
+    if (shift_press == 0) {
+      rfbLog("ERROR: Unable to find modifier key for Shift key press\n");
+      return;
+    }
+    PressKey(kbdDevice, shift_press, TRUE, "temp shift");
+  } else if ((state & ShiftMask) && !(new_state & ShiftMask)) {
+    int index = 0;
+    KeyCode *shift_release = ReleaseShift();
+    if (!shift_release) {
+      rfbLog("ERROR: Unable to find modifier key(s) for Shift key release\n");
+      return;
+    }
+    while (shift_release[index])
+      PressKey(kbdDevice, shift_release[index++], FALSE, "temp shift");
+    free(shift_release);
+  }
+
+  /* Need a fake press or release of level three shift? */
+  if (!(state & level_three_mask) && (new_state & level_three_mask)) {
+    level_three_press = PressLevelThree();
+    if (level_three_press == 0) {
+      rfbLog("ERROR: Unable to find modifier key for ISO_Level3_Shift/Mode_Switch key press\n");
+      return;
+    }
+    PressKey(kbdDevice, level_three_press, TRUE, "temp level 3 shift");
+  } else if ((state & level_three_mask) && !(new_state & level_three_mask)) {
+    int index = 0;
+    level_three_release = ReleaseLevelThree();
+    if (!level_three_release) {
+      rfbLog("ERROR: Unable to find modifier key(s) for ISO_Level3_Shift/Mode_Switch key release\n");
+      return;
+    }
+    while (level_three_release[index])
+      PressKey(kbdDevice, level_three_release[index++], FALSE,
+               "temp level 3 shift");
+  }
+
+  /* Now press the actual key */
+  PressKey(kbdDevice, keycode, TRUE, "keycode");
+
+  /* And store the mapping so that we can do a proper release later */
+  for (i = 0; i < 256; i++) {
+    if (i == keycode)
+      continue;
+    if (pressedKeys[i] == keysym) {
+      rfbLog("ERROR: Keysym 0x%x generated by both keys %d and %d\n", keysym,
+             i, keycode);
+      pressedKeys[i] = NoSymbol;
+    }
+  }
+
+  pressedKeys[keycode] = keysym;
+
+  /* Undo any fake level three shift */
+  if (level_three_press != 0)
+    PressKey(kbdDevice, level_three_press, FALSE, "temp level 3 shift");
+  else if (level_three_release) {
+    int index = 0;
+    while (level_three_release[index])
+      PressKey(kbdDevice, level_three_release[index++], TRUE,
+               "temp level 3 shift");
+    free(level_three_release);
+  }
+
+  /* Undo any fake shift */
+  if (shift_press != 0)
+    PressKey(kbdDevice, shift_press, FALSE, "temp shift");
+  else if (shift_release) {
+    int index = 0;
+    while (shift_release[index])
+      PressKey(kbdDevice, shift_release[index++], TRUE, "temp shift");
+    free(shift_release);
+  }
+
+  /*
+   * When faking a modifier we are putting a keycode (which can
+   * currently activate the desired modifier) on the input
+   * queue. A future modmap change can change the mapping so
+   * that this keycode means something else entirely. Guard
+   * against this by processing the queue now.
+   */
+  mieqProcessInputEvents();
+}
+
 
 void
 PtrAddEvent(buttonMask, x, y, cl)
@@ -453,154 +441,53 @@ PtrAddEvent(buttonMask, x, y, cl)
     int y;
     rfbClientPtr cl;
 {
-    xEvent ev;
     int i;
-    unsigned long time;
+    int valuators[2];
+    ValuatorMask mask;
     static int oldButtonMask = 0;
 
-    time = GetTimeInMillis();
+    if (!ptrDevice)
+        FatalError("Pointer device not initialized");
 
-    miPointerAbsoluteCursor(x, y, time);
+    valuators[0] = x;
+    valuators[1] = y;
+    valuator_mask_set_range(&mask, 0, 2, valuators);
+    QueuePointerEvents(ptrDevice, MotionNotify, 0, POINTER_ABSOLUTE, &mask);
 
     for (i = 0; i < 5; i++) {
         if ((buttonMask ^ oldButtonMask) & (1 << i)) {
             if (buttonMask & (1 << i)) {
-                ev.u.u.type = ButtonPress;
-                ev.u.u.detail = i + 1;
-                ev.u.keyButtonPointer.time = time;
-                mieqEnqueue(&ev);
+                valuator_mask_set_range(&mask, 0, 0, NULL);
+                QueuePointerEvents(ptrDevice, ButtonPress, i + 1,
+                                   POINTER_RELATIVE, &mask);
             } else {
-                ev.u.u.type = ButtonRelease;
-                ev.u.u.detail = i + 1;
-                ev.u.keyButtonPointer.time = time;
-                mieqEnqueue(&ev);
+                valuator_mask_set_range(&mask, 0, 0, NULL);
+                QueuePointerEvents(ptrDevice, ButtonRelease, i + 1,
+                                   POINTER_RELATIVE, &mask);
             }
         }
     }
 
     oldButtonMask = buttonMask;
+    mieqProcessInputEvents();
 }
 
 void
 KbdReleaseAllKeys()
 {
     int i, j;
-    xEvent ev;
-    unsigned long time = GetTimeInMillis();
+
+    if (!kbdDevice)
+        FatalError("Keyboard device not initialized");
 
     for (i = 0; i < DOWN_LENGTH; i++) {
         if (kbdDevice->key->down[i] != 0) {
             for (j = 0; j < 8; j++) {
                 if (kbdDevice->key->down[i] & (1 << j)) {
-                    ev.u.u.type = KeyRelease;
-                    ev.u.u.detail = (i << 3) | j;
-                    ev.u.keyButtonPointer.time = time;
-                    mieqEnqueue(&ev);
+                    QueueKeyboardEvents(kbdDevice, KeyRelease, (i << 3) | j,
+                                        NULL);
                 }
             }
         }
-    }
-}
-
-
-/* copied from Xlib source */
-
-static void XConvertCase(KeySym sym, KeySym *lower, KeySym *upper)
-{
-    *lower = sym;
-    *upper = sym;
-    switch(sym >> 8) {
-    case 0: /* Latin 1 */
-        if ((sym >= XK_A) && (sym <= XK_Z))
-            *lower += (XK_a - XK_A);
-        else if ((sym >= XK_a) && (sym <= XK_z))
-            *upper -= (XK_a - XK_A);
-        else if ((sym >= XK_Agrave) && (sym <= XK_Odiaeresis))
-            *lower += (XK_agrave - XK_Agrave);
-        else if ((sym >= XK_agrave) && (sym <= XK_odiaeresis))
-            *upper -= (XK_agrave - XK_Agrave);
-        else if ((sym >= XK_Ooblique) && (sym <= XK_Thorn))
-            *lower += (XK_oslash - XK_Ooblique);
-        else if ((sym >= XK_oslash) && (sym <= XK_thorn))
-            *upper -= (XK_oslash - XK_Ooblique);
-        break;
-    case 1: /* Latin 2 */
-        /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym == XK_Aogonek)
-            *lower = XK_aogonek;
-        else if (sym >= XK_Lstroke && sym <= XK_Sacute)
-            *lower += (XK_lstroke - XK_Lstroke);
-        else if (sym >= XK_Scaron && sym <= XK_Zacute)
-            *lower += (XK_scaron - XK_Scaron);
-        else if (sym >= XK_Zcaron && sym <= XK_Zabovedot)
-            *lower += (XK_zcaron - XK_Zcaron);
-        else if (sym == XK_aogonek)
-            *upper = XK_Aogonek;
-        else if (sym >= XK_lstroke && sym <= XK_sacute)
-            *upper -= (XK_lstroke - XK_Lstroke);
-        else if (sym >= XK_scaron && sym <= XK_zacute)
-            *upper -= (XK_scaron - XK_Scaron);
-        else if (sym >= XK_zcaron && sym <= XK_zabovedot)
-            *upper -= (XK_zcaron - XK_Zcaron);
-        else if (sym >= XK_Racute && sym <= XK_Tcedilla)
-            *lower += (XK_racute - XK_Racute);
-        else if (sym >= XK_racute && sym <= XK_tcedilla)
-            *upper -= (XK_racute - XK_Racute);
-        break;
-    case 2: /* Latin 3 */
-        /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym >= XK_Hstroke && sym <= XK_Hcircumflex)
-            *lower += (XK_hstroke - XK_Hstroke);
-        else if (sym >= XK_Gbreve && sym <= XK_Jcircumflex)
-            *lower += (XK_gbreve - XK_Gbreve);
-        else if (sym >= XK_hstroke && sym <= XK_hcircumflex)
-            *upper -= (XK_hstroke - XK_Hstroke);
-        else if (sym >= XK_gbreve && sym <= XK_jcircumflex)
-            *upper -= (XK_gbreve - XK_Gbreve);
-        else if (sym >= XK_Cabovedot && sym <= XK_Scircumflex)
-            *lower += (XK_cabovedot - XK_Cabovedot);
-        else if (sym >= XK_cabovedot && sym <= XK_scircumflex)
-            *upper -= (XK_cabovedot - XK_Cabovedot);
-        break;
-    case 3: /* Latin 4 */
-        /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym >= XK_Rcedilla && sym <= XK_Tslash)
-            *lower += (XK_rcedilla - XK_Rcedilla);
-        else if (sym >= XK_rcedilla && sym <= XK_tslash)
-            *upper -= (XK_rcedilla - XK_Rcedilla);
-        else if (sym == XK_ENG)
-            *lower = XK_eng;
-        else if (sym == XK_eng)
-            *upper = XK_ENG;
-        else if (sym >= XK_Amacron && sym <= XK_Umacron)
-            *lower += (XK_amacron - XK_Amacron);
-        else if (sym >= XK_amacron && sym <= XK_umacron)
-            *upper -= (XK_amacron - XK_Amacron);
-        break;
-    case 6: /* Cyrillic */
-        /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym >= XK_Serbian_DJE && sym <= XK_Serbian_DZE)
-            *lower -= (XK_Serbian_DJE - XK_Serbian_dje);
-        else if (sym >= XK_Serbian_dje && sym <= XK_Serbian_dze)
-            *upper += (XK_Serbian_DJE - XK_Serbian_dje);
-        else if (sym >= XK_Cyrillic_YU && sym <= XK_Cyrillic_HARDSIGN)
-            *lower -= (XK_Cyrillic_YU - XK_Cyrillic_yu);
-        else if (sym >= XK_Cyrillic_yu && sym <= XK_Cyrillic_hardsign)
-            *upper += (XK_Cyrillic_YU - XK_Cyrillic_yu);
-        break;
-    case 7: /* Greek */
-        /* Assume the KeySym is a legal value (ignore discontinuities) */
-        if (sym >= XK_Greek_ALPHAaccent && sym <= XK_Greek_OMEGAaccent)
-            *lower += (XK_Greek_alphaaccent - XK_Greek_ALPHAaccent);
-        else if (sym >= XK_Greek_alphaaccent && sym <= XK_Greek_omegaaccent &&
-                 sym != XK_Greek_iotaaccentdieresis &&
-                 sym != XK_Greek_upsilonaccentdieresis)
-            *upper -= (XK_Greek_alphaaccent - XK_Greek_ALPHAaccent);
-        else if (sym >= XK_Greek_ALPHA && sym <= XK_Greek_OMEGA)
-            *lower += (XK_Greek_alpha - XK_Greek_ALPHA);
-        else if (sym >= XK_Greek_alpha && sym <= XK_Greek_omega &&
-                 sym != XK_Greek_finalsmallsigma)
-            *upper -= (XK_Greek_alpha - XK_Greek_ALPHA);
-        break;
     }
 }

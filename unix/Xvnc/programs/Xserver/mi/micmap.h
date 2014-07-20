@@ -1,41 +1,43 @@
-/* $XFree86: xc/programs/Xserver/mi/micmap.h,v 1.7 2000/09/20 00:09:15 keithp Exp $ */
 
 #include "colormapst.h"
 
 #ifndef _MICMAP_H_
 #define _MICMAP_H_
 
-extern ColormapPtr miInstalledMaps[MAXSCREENS];
+#define GetInstalledmiColormap(s) \
+    ((ColormapPtr) dixLookupPrivate(&(s)->devPrivates, micmapScrPrivateKey))
+#define SetInstalledmiColormap(s,c) \
+    (dixSetPrivate(&(s)->devPrivates, micmapScrPrivateKey, c))
 
-typedef Bool (* miInitVisualsProcPtr)(VisualPtr *, DepthPtr *, int *, int *,
-					int *, VisualID *, unsigned long, int,
-					int);
+extern _X_EXPORT DevPrivateKeyRec micmapScrPrivateKeyRec;
 
-extern miInitVisualsProcPtr miInitVisualsProc;
-					
-int miListInstalledColormaps(ScreenPtr pScreen, Colormap *pmaps);
-void miInstallColormap(ColormapPtr pmap);
-void miUninstallColormap(ColormapPtr pmap);
+#define micmapScrPrivateKey (&micmapScrPrivateKeyRec)
 
-void miResolveColor(unsigned short *, unsigned short *, unsigned short *,
-			VisualPtr);
-Bool miInitializeColormap(ColormapPtr);
-int miExpandDirectColors(ColormapPtr, int, xColorItem *, xColorItem *);
-Bool miCreateDefColormap(ScreenPtr);
-void miClearVisualTypes(void);
-Bool miSetVisualTypes(int, int, int, int);
-Bool miSetPixmapDepths(void);
-Bool miSetVisualTypesAndMasks(int depth, int visuals, int bitsPerRGB, 
-			      int preferredCVC,
-			      Pixel redMask, Pixel greenMask, Pixel blueMask);
-int miGetDefaultVisualMask(int);
-Bool miInitVisuals(VisualPtr *, DepthPtr *, int *, int *, int *, VisualID *,
-			unsigned long, int, int);
-void miResetInitVisuals(void);
+typedef Bool (*miInitVisualsProcPtr) (VisualPtr *, DepthPtr *, int *, int *,
+                                      int *, VisualID *, unsigned long, int,
+                                      int);
 
-void miHookInitVisuals(void (**old)(miInitVisualsProcPtr *),
-		       void (*new)(miInitVisualsProcPtr *));
+extern _X_EXPORT int miListInstalledColormaps(ScreenPtr pScreen,
+                                              Colormap * pmaps);
+extern _X_EXPORT void miInstallColormap(ColormapPtr pmap);
+extern _X_EXPORT void miUninstallColormap(ColormapPtr pmap);
 
+extern _X_EXPORT void miResolveColor(unsigned short *, unsigned short *,
+                                     unsigned short *, VisualPtr);
+extern _X_EXPORT Bool miInitializeColormap(ColormapPtr);
+extern _X_EXPORT int miExpandDirectColors(ColormapPtr, int, xColorItem *,
+                                          xColorItem *);
+extern _X_EXPORT Bool miCreateDefColormap(ScreenPtr);
+extern _X_EXPORT void miClearVisualTypes(void);
+extern _X_EXPORT Bool miSetVisualTypes(int, int, int, int);
+extern _X_EXPORT Bool miSetPixmapDepths(void);
+extern _X_EXPORT Bool miSetVisualTypesAndMasks(int depth, int visuals,
+                                               int bitsPerRGB, int preferredCVC,
+                                               Pixel redMask, Pixel greenMask,
+                                               Pixel blueMask);
+extern _X_EXPORT int miGetDefaultVisualMask(int);
+extern _X_EXPORT Bool miInitVisuals(VisualPtr *, DepthPtr *, int *, int *,
+                                    int *, VisualID *, unsigned long, int, int);
 
 #define MAX_PSEUDO_DEPTH	10
 #define MIN_TRUE_DEPTH		6
@@ -46,7 +48,7 @@ void miHookInitVisuals(void (**old)(miInitVisualsProcPtr *),
 #define PseudoColorMask	(1 << PseudoColor)
 #define TrueColorMask	(1 << TrueColor)
 #define DirectColorMask	(1 << DirectColor)
-                
+
 #define ALL_VISUALS	(StaticGrayMask|\
 			 GrayScaleMask|\
 			 StaticColorMask|\
@@ -62,4 +64,4 @@ void miHookInitVisuals(void (**old)(miInitVisualsProcPtr *),
 			 StaticColorMask|\
 			 PseudoColorMask)
 
-#endif /* _MICMAP_H_ */
+#endif                          /* _MICMAP_H_ */

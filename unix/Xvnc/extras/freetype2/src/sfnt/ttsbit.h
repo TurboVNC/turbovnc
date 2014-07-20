@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    TrueType and OpenType embedded bitmap support (specification).       */
 /*                                                                         */
-/*  Copyright 1996-2001, 2002 by                                           */
+/*  Copyright 1996-2008, 2013 by                                           */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -28,18 +28,22 @@ FT_BEGIN_HEADER
 
 
   FT_LOCAL( FT_Error )
-  tt_face_load_sbit_strikes( TT_Face    face,
-                             FT_Stream  stream );
+  tt_face_load_sbit( TT_Face    face,
+                     FT_Stream  stream );
 
   FT_LOCAL( void )
-  tt_face_free_sbit_strikes( TT_Face  face );
+  tt_face_free_sbit( TT_Face  face );
 
 
   FT_LOCAL( FT_Error )
-  tt_face_set_sbit_strike( TT_Face    face,
-                           FT_Int     x_ppem,
-                           FT_Int     y_ppem,
-                           FT_ULong  *astrike_index );
+  tt_face_set_sbit_strike( TT_Face          face,
+                           FT_Size_Request  req,
+                           FT_ULong*        astrike_index );
+
+  FT_LOCAL( FT_Error )
+  tt_face_load_strike_metrics( TT_Face           face,
+                               FT_ULong          strike_index,
+                               FT_Size_Metrics*  metrics );
 
   FT_LOCAL( FT_Error )
   tt_face_load_sbit_image( TT_Face              face,

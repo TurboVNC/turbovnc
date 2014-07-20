@@ -1,5 +1,3 @@
-/* $Xorg: setmode.c,v 1.4 2001/02/09 02:04:35 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/setmode.c,v 3.3 2001/12/14 19:58:59 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,16 +50,14 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "XIstubs.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
 #include "exglobals.h"
 
 #include "setmode.h"
@@ -74,15 +69,12 @@ SOFTWARE.
  */
 
 int
-SProcXSetDeviceMode(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXSetDeviceMode(ClientPtr client)
+{
     REQUEST(xSetDeviceModeReq);
-    swaps(&stuff->length, n);
-    return(ProcXSetDeviceMode(client));
-    }
+    swaps(&stuff->length);
+    return (ProcXSetDeviceMode(client));
+}
 
 /***********************************************************************
  *
@@ -91,11 +83,11 @@ SProcXSetDeviceMode(client)
  */
 
 int
-ProcXSetDeviceMode(client)
-    register ClientPtr client;
-    {
+ProcXSetDeviceMode(ClientPtr client)
+{
     DeviceIntPtr dev;
-    xSetDeviceModeReply	rep;
+    xSetDeviceModeReply rep;
+    int rc;
 
     REQUEST(xSetDeviceModeReq);
     REQUEST_SIZE_MATCH(xSetDeviceModeReq);
@@ -105,33 +97,33 @@ ProcXSetDeviceMode(client)
     rep.length = 0;
     rep.sequenceNumber = client->sequence;
 
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	SendErrorToClient (client, IReqCode, X_SetDeviceMode, 0, BadDevice);
-	return Success;
-	}
+    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixSetAttrAccess);
+    if (rc != Success)
+        return rc;
     if (dev->valuator == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_SetDeviceMode, 0, BadMatch);
-	return Success;
-	}
-    if ((dev->grab) && !SameClient(dev->grab, client))
-	rep.status = AlreadyGrabbed;
+        return BadMatch;
+    if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client))
+        rep.status = AlreadyGrabbed;
     else
-	rep.status = SetDeviceMode (client, dev, stuff->mode);
+        rep.status = SetDeviceMode(client, dev, stuff->mode);
 
-    if (rep.status == Success) 
-  	dev->valuator->mode = stuff->mode;
-    else if (rep.status != AlreadyGrabbed)
-	{
-	SendErrorToClient(client, IReqCode, X_SetDeviceMode, 0, rep.status);
-        return Success;
-	}
-
-    WriteReplyToClient (client, sizeof (xSetDeviceModeReply), &rep);
-    return Success;
+    if (rep.status == Success)
+        valuator_set_mode(dev, VALUATOR_MODE_ALL_AXES, stuff->mode);
+    else if (rep.status != AlreadyGrabbed) {
+        switch (rep.status) {
+        case BadMatch:
+        case BadImplementation:
+        case BadAlloc:
+            break;
+        default:
+            rep.status = BadMode;
+        }
+        return rep.status;
     }
+
+    WriteReplyToClient(client, sizeof(xSetDeviceModeReply), &rep);
+    return Success;
+}
 
 /***********************************************************************
  *
@@ -141,14 +133,9 @@ ProcXSetDeviceMode(client)
  */
 
 void
-SRepXSetDeviceMode (client, size, rep)
-    ClientPtr	client;
-    int		size;
-    xSetDeviceModeReply	*rep;
-    {
-    register char n;
-
-    swaps(&rep->sequenceNumber, n);
-    swapl(&rep->length, n);
-    WriteToClient(client, size, (char *)rep);
-    }
+SRepXSetDeviceMode(ClientPtr client, int size, xSetDeviceModeReply * rep)
+{
+    swaps(&rep->sequenceNumber);
+    swapl(&rep->length);
+    WriteToClient(client, size, (char *) rep);
+}

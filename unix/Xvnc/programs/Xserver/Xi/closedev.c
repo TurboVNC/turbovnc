@@ -1,5 +1,3 @@
-/* $Xorg: closedev.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/closedev.c,v 3.4 2001/12/14 19:58:55 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,18 +50,16 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "windowstr.h"			/* window structure  */
-#include "scrnintstr.h"			/* screen structure  */
-#include "XI.h"
-#include "XIproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include "windowstr.h"          /* window structure  */
+#include "scrnintstr.h"         /* screen structure  */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "XIstubs.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
 #include "exglobals.h"
 
 #include "closedev.h"
@@ -76,83 +71,13 @@ SOFTWARE.
  */
 
 int
-SProcXCloseDevice(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXCloseDevice(ClientPtr client)
+{
     REQUEST(xCloseDeviceReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xCloseDeviceReq);
-    return(ProcXCloseDevice(client));
-    }
-
-/***********************************************************************
- *
- * This procedure closes an input device.
- *
- */
-
-int
-ProcXCloseDevice(client)
-    register ClientPtr client;
-    {
-    int			i;
-    WindowPtr 		pWin, p1;
-    DeviceIntPtr 	d;
-
-    REQUEST(xCloseDeviceReq);
-    REQUEST_SIZE_MATCH(xCloseDeviceReq);
-
-    d = LookupDeviceIntRec (stuff->deviceid);
-    if (d == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_CloseDevice, 0, BadDevice);
-        return Success;
-	}
-
-    if (d->grab && SameClient(d->grab, client))
-	(*d->DeactivateGrab)(d);		       /* release active grab */
-
-    /* Remove event selections from all windows for events from this device 
-       and selected by this client.
-       Delete passive grabs from all windows for this device.	   */
-
-    for (i=0; i<screenInfo.numScreens; i++)
-	{
-	pWin = WindowTable[i];
-        DeleteDeviceEvents (d, pWin, client);
-	p1 = pWin->firstChild;
-	DeleteEventsFromChildren (d, p1, client);
-	}
-
-    CloseInputDevice (d, client);
-    return Success;
-    }
-
-/***********************************************************************
- *
- * Walk througth the window tree, deleting event selections for this client
- * from this device from all windows.
- *
- */
-
-void
-DeleteEventsFromChildren(dev, p1, client)
-    DeviceIntPtr	dev;
-    WindowPtr 		p1;
-    ClientPtr		client;
-    {
-    WindowPtr p2;
-
-    while (p1)
-        {
-        p2 = p1->firstChild;
-	DeleteDeviceEvents (dev, p1, client);
-	DeleteEventsFromChildren(dev, p2, client);
-	p1 = p1->nextSib;
-        }
-    }
+    return (ProcXCloseDevice(client));
+}
 
 /***********************************************************************
  *
@@ -161,27 +86,79 @@ DeleteEventsFromChildren(dev, p1, client)
  *
  */
 
-void
-DeleteDeviceEvents (dev, pWin, client)
-    DeviceIntPtr	dev;
-    WindowPtr		pWin;
-    ClientPtr		client;
-    {
-    InputClientsPtr	others;
-    OtherInputMasks	*pOthers;
-    GrabPtr		grab, next;
+static void
+DeleteDeviceEvents(DeviceIntPtr dev, WindowPtr pWin, ClientPtr client)
+{
+    InputClientsPtr others;
+    OtherInputMasks *pOthers;
+    GrabPtr grab, next;
 
     if ((pOthers = wOtherInputMasks(pWin)) != 0)
-	for (others=pOthers->inputClients; others; 
-	    others = others->next)
-	    if (SameClient(others,client))
-		others->mask[dev->id] = NoEventMask;
+        for (others = pOthers->inputClients; others; others = others->next)
+            if (SameClient(others, client))
+                others->mask[dev->id] = NoEventMask;
 
-    for (grab = wPassiveGrabs(pWin); grab; grab=next)
-	{
-	next = grab->next;
-	if ((grab->device == dev) &&
-	    (client->clientAsMask == CLIENT_BITS(grab->resource)))
-		FreeResource (grab->resource, RT_NONE);
-	}
+    for (grab = wPassiveGrabs(pWin); grab; grab = next) {
+        next = grab->next;
+        if ((grab->device == dev) &&
+            (client->clientAsMask == CLIENT_BITS(grab->resource)))
+            FreeResource(grab->resource, RT_NONE);
     }
+}
+
+/***********************************************************************
+ *
+ * Walk througth the window tree, deleting event selections for this client
+ * from this device from all windows.
+ *
+ */
+
+static void
+DeleteEventsFromChildren(DeviceIntPtr dev, WindowPtr p1, ClientPtr client)
+{
+    WindowPtr p2;
+
+    while (p1) {
+        p2 = p1->firstChild;
+        DeleteDeviceEvents(dev, p1, client);
+        DeleteEventsFromChildren(dev, p2, client);
+        p1 = p1->nextSib;
+    }
+}
+
+/***********************************************************************
+ *
+ * This procedure closes an input device.
+ *
+ */
+
+int
+ProcXCloseDevice(ClientPtr client)
+{
+    int rc, i;
+    WindowPtr pWin, p1;
+    DeviceIntPtr d;
+
+    REQUEST(xCloseDeviceReq);
+    REQUEST_SIZE_MATCH(xCloseDeviceReq);
+
+    rc = dixLookupDevice(&d, stuff->deviceid, client, DixUseAccess);
+    if (rc != Success)
+        return rc;
+
+    if (d->deviceGrab.grab && SameClient(d->deviceGrab.grab, client))
+        (*d->deviceGrab.DeactivateGrab) (d);    /* release active grab */
+
+    /* Remove event selections from all windows for events from this device
+     * and selected by this client.
+     * Delete passive grabs from all windows for this device.      */
+
+    for (i = 0; i < screenInfo.numScreens; i++) {
+        pWin = screenInfo.screens[i]->root;
+        DeleteDeviceEvents(d, pWin, client);
+        p1 = pWin->firstChild;
+        DeleteEventsFromChildren(d, p1, client);
+    }
+
+    return Success;
+}

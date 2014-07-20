@@ -1,5 +1,6 @@
-/* Copyright (C) 2011, 2013 D. R. Commander.  All Rights Reserved.
- * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+/* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2011, 2013-2014 D. R. Commander.  All Rights Reserved.
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,10 +22,13 @@
  * vncExtInit.cc from the RealVNC code base
  */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include <stdio.h>
 #include <errno.h>
 
-#define NEED_EVENTS
 #include <X11/X.h>
 #include "misc.h"
 #include "extnsionst.h"
@@ -115,7 +119,7 @@ static void vncClientStateChange(CallbackListPtr *callbacks, pointer data, point
     for (cur = vncInputSelectHead; cur; cur = *nextPtr) {
       if (cur->client == client) {
         *nextPtr = cur->next;
-        xfree (cur);
+        free (cur);
         continue;
       }
       nextPtr = &cur->next;
@@ -127,7 +131,7 @@ void vncClientCutText(const char* str, int len)
 {
   VncInputSelect *cur;
   xVncExtClientCutTextNotifyEvent ev;
-  if (clientCutText) xfree (clientCutText);
+  if (clientCutText) free (clientCutText);
   clientCutText = (char *)malloc(len);
   if (!clientCutText)
     FatalError("vncClientCutText(): Memory allocation failure\n");
@@ -140,10 +144,9 @@ void vncClientCutText(const char* str, int len)
       ev.window = cur->window;
       ev.time = GetTimeInMillis();
       if (cur->client->swapped) {
-        int n;
-        swaps(&ev.sequenceNumber, n);
-        swapl(&ev.window, n);
-        swapl(&ev.time, n);
+        swaps(&ev.sequenceNumber);
+        swapl(&ev.window);
+        swapl(&ev.time);
       }
       WriteToClient(cur->client, sizeof(xVncExtClientCutTextNotifyEvent),
                     (char *)&ev);
@@ -162,10 +165,9 @@ static void SendSelectionChangeEvent(Atom selection)
       ev.window = cur->window;
       ev.selection = selection;
       if (cur->client->swapped) {
-        int n;
-        swaps(&ev.sequenceNumber, n);
-        swapl(&ev.window, n);
-        swapl(&ev.selection, n);
+        swaps(&ev.sequenceNumber);
+        swapl(&ev.window);
+        swapl(&ev.selection);
       }
       WriteToClient(cur->client, sizeof(xVncExtSelectionChangeNotifyEvent),
                     (char *)&ev);
@@ -178,30 +180,28 @@ static int ProcVncExtSetServerCutText(ClientPtr client)
   char *str;
   REQUEST(xVncExtSetServerCutTextReq);
   REQUEST_FIXED_SIZE(xVncExtSetServerCutTextReq, stuff->textLen);
-  str = (char *)xalloc(stuff->textLen + 1);
+  str = (char *)malloc(stuff->textLen + 1);
   if (!str)
     FatalError("ProcVncExtSetServerCutText(): Memory allocation failure\n");
   strncpy(str, (char*)&stuff[1], stuff->textLen);
   str[stuff->textLen] = 0;
   rfbSendServerCutText(str, stuff->textLen);
-  xfree (str);
+  free (str);
   return (client->noClientException);
 }
 
 static int SProcVncExtSetServerCutText(ClientPtr client)
 {
-  register char n;
   REQUEST(xVncExtSetServerCutTextReq);
-  swaps(&stuff->length, n);
+  swaps(&stuff->length);
   REQUEST_AT_LEAST_SIZE(xVncExtSetServerCutTextReq);
-  swapl(&stuff->textLen, n);
+  swapl(&stuff->textLen);
   return ProcVncExtSetServerCutText(client);
 }
 
 static int ProcVncExtGetClientCutText(ClientPtr client)
 {
   xVncExtGetClientCutTextReply rep;
-  int n;
 
   REQUEST(xVncExtGetClientCutTextReq);
   REQUEST_SIZE_MATCH(xVncExtGetClientCutTextReq);
@@ -211,9 +211,9 @@ static int ProcVncExtGetClientCutText(ClientPtr client)
   rep.sequenceNumber = client->sequence;
   rep.textLen = clientCutTextLen;
   if (client->swapped) {
-    swaps(&rep.sequenceNumber, n);
-    swapl(&rep.length, n);
-    swapl(&rep.textLen, n);
+    swaps(&rep.sequenceNumber);
+    swapl(&rep.length);
+    swapl(&rep.textLen);
   }
   WriteToClient(client, sizeof(xVncExtGetClientCutTextReply), (char *)&rep);
   if (clientCutText)
@@ -223,9 +223,8 @@ static int ProcVncExtGetClientCutText(ClientPtr client)
 
 static int SProcVncExtGetClientCutText(ClientPtr client)
 {
-  register char n;
   REQUEST(xVncExtGetClientCutTextReq);
-  swaps(&stuff->length, n);
+  swaps(&stuff->length);
   REQUEST_SIZE_MATCH(xVncExtGetClientCutTextReq);
   return ProcVncExtGetClientCutText(client);
 }
@@ -241,14 +240,14 @@ static int ProcVncExtSelectInput(ClientPtr client)
       cur->mask = stuff->mask;
       if (!cur->mask) {
         *nextPtr = cur->next;
-        xfree (cur);
+        free (cur);
       }
       break;
     }
     nextPtr = &cur->next;
   }
   if (!cur) {
-    cur = (VncInputSelect *)xalloc(sizeof(VncInputSelect));
+    cur = (VncInputSelect *)malloc(sizeof(VncInputSelect));
     if (!cur)
       FatalError("ProcVncExtSelectInput(): Memory allocation failure\n");
     cur->client = client;
@@ -262,12 +261,11 @@ static int ProcVncExtSelectInput(ClientPtr client)
 
 static int SProcVncExtSelectInput(ClientPtr client)
 {
-  register char n;
   REQUEST(xVncExtSelectInputReq);
-  swaps(&stuff->length, n);
+  swaps(&stuff->length);
   REQUEST_SIZE_MATCH(xVncExtSelectInputReq);
-  swapl(&stuff->window, n);
-  swapl(&stuff->mask, n);
+  swapl(&stuff->window);
+  swapl(&stuff->mask);
   return ProcVncExtSelectInput(client);
 }
 
@@ -276,7 +274,7 @@ static int ProcVncExtConnect(ClientPtr client)
   char *str;
   REQUEST(xVncExtConnectReq);
   REQUEST_FIXED_SIZE(xVncExtConnectReq, stuff->strLen);
-  str = (char *)xalloc(stuff->strLen + 1);
+  str = (char *)malloc(stuff->strLen + 1);
   if (!str)
     FatalError("ProcVncExtConnect(): Memory allocation failure\n");
   strncpy(str, (char*)&stuff[1], stuff->strLen);
@@ -310,20 +308,18 @@ static int ProcVncExtConnect(ClientPtr client)
   rep.length = 0;
   rep.sequenceNumber = client->sequence;
   if (client->swapped) {
-    int n;
-    swaps(&rep.sequenceNumber, n);
-    swapl(&rep.length, n);
+    swaps(&rep.sequenceNumber);
+    swapl(&rep.length);
   }
   WriteToClient(client, sizeof(xVncExtConnectReply), (char *)&rep);
-  xfree (str);
+  free (str);
   return (client->noClientException);
 }
 
 static int SProcVncExtConnect(ClientPtr client)
 {
   REQUEST(xVncExtConnectReq);
-  register char n;
-  swaps(&stuff->length, n);
+  swaps(&stuff->length);
   REQUEST_AT_LEAST_SIZE(xVncExtConnectReq);
   return ProcVncExtConnect(client);
 }

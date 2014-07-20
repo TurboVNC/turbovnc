@@ -1,14 +1,29 @@
 ===============================================================================
-1.3 pre-beta
+2.0 pre-beta
 ===============================================================================
 [1]
-Added a security option to the Java TurboVNC Viewer that, when enabled, will
-prevent the user from opening any new VNC connections from within the same
-viewer instance.  In listen mode, this will further cause the viewer to exit
-after the first connection is closed.
+The TurboVNC X server has been completely overhauled and is now based on the
+unmodified Xorg 7.7 code base.  This overhaul enables support for the X
+extensions needed by newer window managers (RANDR 1.2, Composite, XFIXES,
+Damage, etc.)  In addition, this overhaul includes the following fixes:
+-- The keyboard handler has been completely overhauled and now uses the
+XKEYBOARD extension.  This fixes key mapping issues that occurred when running
+TurboVNC with certain versions of Gnome (previously, it was necessary to set
+an environment variable in xstartup.turbovnc to work around those issues.)
+-- The correct colormaps are now used when the server is run with depth=8.
+-- The default DPI of the X server has been changed to 96, to match that of
+recent X.org releases and other VNC implementations.  This will make fonts
+appear larger than in previous TurboVNC releases.  Passing an argument of
+-dpi 75 to vncserver restores the old behavior.
+-- The Xvnc build system has been completely refactored and now uses CMake,
+just like the rest of TurboVNC.  This makes the build somewhat more intuitive
+(for instance, 'make xserver' is no longer necessary when building Xvnc), and
+it fixes various problems with cross-compiling.
 -------------------------------------------------------------------------------
 [2]
-Added a profiling feature to the Java TurboVNC Viewer.
+Added the ability to dynamically resize the remote desktop, either through the
+X RANDR extension on the server or remotely from a VNC client that supports the
+RFB desktop size extensions.
 -------------------------------------------------------------------------------
 [3]
 The X11 TurboVNC Viewer has been retired and replaced with the Java TurboVNC
@@ -18,11 +33,20 @@ packages, along with the libjpeg-turbo JNI libraries necessary to make it
 perform similarly to the native viewer.
 -------------------------------------------------------------------------------
 [4]
+Added a security option to the Java TurboVNC Viewer that, when enabled, will
+prevent the user from opening any new VNC connections from within the same
+viewer instance.  In listen mode, this will further cause the viewer to exit
+after the first connection is closed.
+-------------------------------------------------------------------------------
+[5]
+Added a profiling feature to the Java TurboVNC Viewer.
+-------------------------------------------------------------------------------
+[6]
 The libjpeg-turbo JNI libraries are now deployed with the Java TurboVNC Viewer
 on Windows, so it is no longer necessary to install the libjpeg-turbo SDK on
 Windows platforms in order to get accelerated JPEG decompression.
 -------------------------------------------------------------------------------
-[5]
+[7]
 Fixed a couple of cosmetic issues with the automatic lossless refresh feature:
 -- If the source of a CopyRect operation was affected by lossy compression
 (meaning that the destination of the operation will become lossy as well), then
@@ -32,31 +56,20 @@ setting the environment variable TVNC_ALRCOPYRECT to 0.
 all lossy regions of the display, even those that weren't drawn using a
 PutImage operation.  This has been fixed.
 -------------------------------------------------------------------------------
-[6]
+[8]
 The Java TurboVNC Viewer, when run as an applet, can now be displayed to an
 embedded frame in a web page rather than a dedicated window.  This restores a
 feature of the TurboVNC 1.1 Java viewer that was lost in 1.2.  Full-screen
 mode, scaling, and the toolbar do not work when the viewer is run as an
 embedded applet.
 -------------------------------------------------------------------------------
-[7]
+[9]
 vncconnect now uses the VNC X extension to establish a reverse connection,
 rather than setting a root window property on the VNC X server.  This makes
 TurboVNC's implementation of vncconnect compatible with RealVNC and TigerVNC
 servers, and the return status of vncconnect now reflects whether the reverse
 connection was successfully made.  vncconnect also now has a -disconnect
 option, which can be used to disconnect all listening viewers.
--------------------------------------------------------------------------------
-[8]
-Added the ability to dynamically resize the remote desktop, either through the
-X RANDR extension on the server or remotely from a VNC client that supports the
-RFB desktop size extensions.
--------------------------------------------------------------------------------
-[9]
-The Xvnc build system has been completely refactored and now uses CMake, just
-like the rest of TurboVNC.  This makes the build somewhat more intuitive (for
-instance, 'make xserver' is no longer necessary when building Xvnc), and it
-fixes various problems with cross-compiling.
 -------------------------------------------------------------------------------
 [10]
 The Mac packaging system has been reworked.  Packages are now built using
@@ -132,11 +145,6 @@ command line or launching another viewer instance.
 Fixed an issue in the vncserver script whereby the TurboVNC Server would give
 an "Unrecognized option" error and fail to launch if the server was built
 without the optional Java viewer.
--------------------------------------------------------------------------------
-[21]
-The default DPI of the X server has been changed to 96, to match that of recent
-X.org releases and other VNC implementations.  Passing an argument of -dpi 75
-to vncserver restores the old behavior.
 -------------------------------------------------------------------------------
 
 

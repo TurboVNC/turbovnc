@@ -1,7 +1,3 @@
-/* $XConsortium: selection.h,v 1.3 94/04/17 20:26:07 jim Exp $ */
-#ifndef SELECTION_H
-#define SELECTION_H 1
-
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
@@ -26,7 +22,6 @@ Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
 in this Software without prior written authorization from The Open Group.
 
-
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
@@ -49,9 +44,13 @@ SOFTWARE.
 
 ******************************************************************/
 
+#ifndef SELECTION_H
+#define SELECTION_H 1
+
 #include "dixstruct.h"
+#include "privates.h"
+
 /*
- *
  *  Selection data structures 
  */
 
@@ -61,14 +60,20 @@ typedef struct _Selection {
     Window window;
     WindowPtr pWin;
     ClientPtr client;
+    struct _Selection *next;
+    PrivateRec *devPrivates;
 } Selection;
-
 
 /*
  *  Selection API
  */
 
-extern CallbackListPtr SelectionCallback;
+extern _X_EXPORT int dixLookupSelection(Selection ** result, Atom name,
+                                        ClientPtr client, Mask access_mode);
+
+extern _X_EXPORT Selection *CurrentSelections;
+
+extern _X_EXPORT CallbackListPtr SelectionCallback;
 
 typedef enum {
     SelectionSetOwner,
@@ -77,11 +82,19 @@ typedef enum {
 } SelectionCallbackKind;
 
 typedef struct {
-    struct _Selection	    *selection;
-    ClientPtr		    client;
-    SelectionCallbackKind   kind;
+    struct _Selection *selection;
+    ClientPtr client;
+    SelectionCallbackKind kind;
 } SelectionInfoRec;
 
-#endif /* SELECTION_H */
+/*
+ *  Selection server internals
+ */
 
+extern _X_EXPORT void InitSelections(void);
 
+extern _X_EXPORT void DeleteWindowFromAnySelections(WindowPtr pWin);
+
+extern _X_EXPORT void DeleteClientFromAnySelections(ClientPtr client);
+
+#endif                          /* SELECTION_H */

@@ -1,0 +1,1162 @@
+commit dff1a34f49644b2ed9cfac321dce6d31aed868cf
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Mar 22 20:54:16 2012 -0700
+
+    xextproto 7.2.1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 38c6d386637eecc105f6e6b03ff10e6299bd0002
+Author: Matt Dew <marcoz@osource.org>
+Date:   Mon Jan 16 13:18:50 2012 -0700
+
+    informaltable cleanup
+    
+    On certain tables, add top and bottom borders to table
+    header and a bottom border to the table. This matches
+    what those tables in the old pdfs looked like.
+    
+    the <?dbfo keep-together='always'> prevents tables from
+    splitting across pages. Useful for tiny tables.
+    
+    Converting the colwidth to a floating point,
+    IE, 1* -> 1.0* cleans up these build errors:
+    WARNING: table-layout="fixed" and column-width unspecified
+    => falling back to proportional-column-width(1)
+    
+    Signed-off-by: Matt Dew <marcoz@osource.org>
+
+commit 618cea608d726c0aeb48960da7bedc2dd8b36bba
+Author: Matt Dew <marcoz@osource.org>
+Date:   Fri Sep 30 22:28:10 2011 -0600
+
+    #1 - fix the capitalization of the ID attriutes to
+         match either the <title> or <funcdef> string it goes with.
+    #2 - fix any <linkend>'s that were affected by #1
+    #3 - any <function> in the docs that has an actual funcdef,
+          will become an olink.
+    
+    Signed-off-by: Matt Dew <marcoz@osource.org>
+
+commit 8f35303d8d40a68deb8c4830e8946ea356b0577f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 19:35:12 2011 -0400
+
+    geproto spec: add missing copyright with the author's permission
+    
+    http://cgit.freedesktop.org/xorg/proto/xextproto/commit/geproto.txt
+    ?id=69356e4165f11f3ed4b377d29df038549191a91e
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 7c7f6b9e21cea649e833afa4402fd4848c97e047
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 15:44:59 2011 -0400
+
+    xtest spec: fix copyright markup
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit c43e9edc3bed977885ec69c8e3a7f106d778b931
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 15:42:18 2011 -0400
+
+    top-cup spec: remove orphan corpname markup
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit b72a529226cce698b3550a75ecedfea6585daccf
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 15:40:08 2011 -0400
+
+    sync spec: fix copyright markup for multiple authors
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit daf6658219cac1fb1bde12f9e827a7832162536a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 15:31:39 2011 -0400
+
+    shm spec: fix author affiliation and copyright text
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 7961ee6a9d2d398f0f05ca7058644c4894822910
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 15:24:12 2011 -0400
+
+    shape spec: fix author affiliation and copyright text
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 77f8d11c0d2e521b1dfbd27acfde381a4dcfb135
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 10:35:58 2011 -0400
+
+    security: fix X Consortium copyrigh legal text and minor markups
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit ac60c5c5081690e2984192a8aeed7790c8b98297
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 10:30:12 2011 -0400
+
+    multibuf spec: refactor copyright legal text for multi licensing
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 11529183d7294901074332e1369364fc0ed0cafa
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 10:20:31 2011 -0400
+
+    lbx: complete the authors name
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 414fdfca99ac0b787ce63777024fa306126f4505
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 10:12:06 2011 -0400
+
+    geproto: fix author's e-mail
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 91f892076e7fa842993aa2ce17eafd8c61fbe024
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 09:52:43 2011 -0400
+
+    evi spec: fix copyright and orphan markup
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit ff0477883d6015e00b5f323c697d2bdd7e746298
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 09:44:15 2011 -0400
+
+    dpms spec: fix author affiliation
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 40814443d5f73f340879719d945f6a8cfd2fb3fd
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 21 09:26:11 2011 -0400
+
+    dbe spec: fix author affiliation and copyright notices
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit b1f8a6d384b6866ce70c8289a727d25aa5de7dbf
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Sep 20 20:54:02 2011 -0400
+
+    appgrp: use <copyright> markup and minor titlepage fixes
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 08f39a5f52ef9e10ae7b32d9ae21d64f5eaef354
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 14 20:55:08 2011 -0400
+
+    sync: fix author name and authors affiliation
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 895d967d56711617ff59e2d2d60389609557072b
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Sep 12 11:23:00 2011 -0400
+
+    docs: use the &fullrelvers; entity to set X11 release information
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit a19f712304f9a606dd2f9d805d5292b37371b31d
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Sep 11 19:49:54 2011 -0400
+
+    docs: remove <productnumber> which is not used by default
+    
+    This element is not rendered by default on the title. A template
+    customization is required to display it.
+    X Window System does not have a product number.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 2ff4ebb7014d739744d30a873c90530bc4103927
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Fri Sep 9 21:03:36 2011 -0400
+
+    Use more appropriate docbook element to get "Edited by"
+    
+    The proper element to use is <editor>.
+    The <contrib> was a hack to insert text and showed up in the wrong location
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit a6b33943e6245da960d74dc7dd9a2dec40310fa2
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Sep 8 20:00:00 2011 -0400
+
+    docbook.am: embed css styles inside the HTML HEAD element
+    
+    Rather than referring to the external xorg.css stylesheet, embed the content
+    of the file in the html output produced. This is accomplished by using
+    version 1.10 of xorg-xhtml.xsl.
+    
+    This makes the whole html docs tree much more relocatable.
+    In addition, it eliminates xorg.css as a runtime file which makes
+    xorg-sgml-doctools a build time only package.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit e689b12b5d685deb7d226d116fbac21951d08968
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 7 10:31:04 2011 -0400
+
+    docbook.am: global maintenance update - entities, images and olinking
+    
+    Adding support in libX11 for html chunking caused a reorg of docbook.am
+    as well as the xorg-sgml-doctools masterdb for olinking.
+    The parameter img.src.path is added for pdf images.
+    A searchpath to the root builddir is added for local entities, if present.
+    
+    The docbook.am makefile hides all the details and is identical for
+    all 22 modules having DocBook documentation. It is included by a thin
+    Makefile.am which requires no docbook knowledge.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 84ddb52e2362953c2e646e85eb745c34c1c01e2a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Jun 12 17:54:50 2011 -0400
+
+    Install xml versions of specs even if HAVE_XMLTO is false
+    
+    DocBook/XML input source is also a usefull output format that can be viewed
+    with an XML viewer or editor and by some O/S help system.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 09dcc84b4cea1416d01a53b32875295adfb36ba4
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Jun 5 16:27:37 2011 -0400
+
+    Install target dbs alongside generated documents
+    
+    This matches a change in xorg-sgml-docs whereby the masterdb will look for
+    the target dbs into the same location as the generated documents.
+    
+    The target dbs are now installed alongside the generated documents.
+    Previously they are installed in $prefix/sgml/X11/dbs alongside masterdb which
+    has the potential of installing outside the package prefix and cause
+    distcheck to fail when user does not have write permission in this package.
+    
+    Requires XORG_CHECK_SGML_DOCTOOLS(1.8) which was released 2011-06-11
+
+commit 4f42558a78d3e14b611247249f3f300424f8ecd3
+Author: Matt Dew <marcoz@osource.org>
+Date:   Wed May 25 21:56:10 2011 -0600
+
+    Add id attributes to funcsynopsis to allow other docs to olink to them.
+    
+    Signed-off-by: Matt Dew <marcoz@osource.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 6dba94ecadfa4f58dd1b2ee0ceb39d4710900ac8
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Feb 27 15:06:18 2011 -0500
+
+    Documentation: add Docbook external references support
+    
+    When writing technical documentation, it is often necessary to cross
+    reference to other information. When that other information is not in the
+    current document, additional support is needed, namely <olink>.
+    
+    A new feature with version 1.7 of xorg-sgml-doctools adds references to
+    other documents within or outside this package.
+    
+    This patch adds technical support for this feature but does not change
+    the content of the documentation as seen by the end user.
+    
+    Each book or article must generate a database containing the href
+    of sections that can be referred to from another document. This database
+    is installed in DATAROOTDIR/sgml/X11/dbs. There is a requirement that
+    the value of DATAROOTDIR for xorg-sgml-doctools and for the package
+    documentation is the same. This forms a virtual document tree.
+    
+    This database is consulted by other documents while they are being generated
+    in order to fulfill the missing information for linking.
+    Refer to the xorg-sgml-doctools for further technical information.
+    
+    Co-authored-by: Matt Dew <marcoz@osource.org>
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit c593fd1000ceb83f0933361c5e7496d799233f7e
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Feb 26 23:57:48 2011 -0800
+
+    Version 7.2.0
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit a6a542841e85344115bbb6a1ba35c4f3487995e4
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Fri Feb 25 08:53:55 2011 -0500
+
+    Docbook: change the book id to match the xml file basename
+    
+    This is required for the up-coming external references support.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit d16788e87438015d3e121ffb046bc6a4ce01da89
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Fri Feb 25 08:51:47 2011 -0500
+
+    Docbook: change the book id to match the xml file basename
+    
+    This is required for the up-coming external references support.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 8c6cc9ddb5776a2b32d42a41d27b3df56e62c44f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Feb 24 20:44:00 2011 -0500
+
+    Docbook: change the book id to match the xml file basename
+    
+    Rename appgroup.xml as it conflicts with xorg-docs/specs/Xserver/appgroup.xml
+    This is required for the up-coming external references support.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 9df8b77604b7ea7132d32f65f2280720b91249c1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Dec 16 23:54:45 2010 -0800
+
+    specs: Fix section titles/nesting
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6aa72ae8e629e065f09a6b6c05504363806d76a3
+Author: Paulo Zanoni <pzanoni@mandriva.com>
+Date:   Tue Dec 14 16:23:56 2010 -0200
+
+    Use the same docbookx.dtd version (4.3) for all docs
+    
+    This way we don't need to require 4.1.2 and 4.5
+    The geproto xml was inconsistent, by the way.
+    
+    Signed-off-by: Paulo Zanoni <pzanoni@mandriva.com>
+    Reviewed-by:  Matt Dew <matt@osource.org>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 77c2b72d8df53e918b0fbff5425af82ac7f5693a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Dec 9 17:43:29 2010 -0800
+
+    specs/sync.xml: Fix minor typos in document title section
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b4e8a6fb63715442b4927d18d9cdd7ee78e50d00
+Author: James Jones <jajones@nvidia.com>
+Date:   Mon Nov 29 09:35:50 2010 -0800
+
+    Bump version to 7.1.99.0
+    
+    Use version 7.1.99.0 to mark the inclusion of
+    Fence Sync protocol support.
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6e696a0a4c9a115c7f080c2bdee3d8afc16b134f
+Author: James Jones <jajones@nvidia.com>
+Date:   Wed Feb 24 15:57:29 2010 -0800
+
+    Add protocol for XSyncAwaitFence()
+    
+    Add the fence sync object equivalent of
+    XSyncAwait()
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 220b824f20dc3dd0fd6eae6e2896fb63aefbf11a
+Author: James Jones <jajones@nvidia.com>
+Date:   Mon Feb 22 17:01:16 2010 -0800
+
+    Add XSyncQueryFence()
+    
+    Allows callers to query whether a given fence sync
+    object is currently triggered or not.
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d079ee210726d2407fa9c8cf99555daf2d96023a
+Author: James Jones <jajones@nvidia.com>
+Date:   Fri Feb 12 16:38:08 2010 -0800
+
+    Initial Fence Sync support
+    
+    Defines the protocol for creation and basic
+    management of binary state sync objects.
+    The following operations are defined:
+    
+     -Creation
+     -Destruction
+     -Trigger
+     -Reset
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 9ba2065b63ea0e61a17b8221ad454c02a1755373
+Author: James Jones <jajones@nvidia.com>
+Date:   Wed Aug 11 15:03:59 2010 -0700
+
+    Document changes in XSync version 3.1
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Pierre-Loup Griffais <pgriffais@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Robert Morell <rmorell@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit fd8a26edefc53b370c554a60c75ff32fc60b99c8
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 30 09:05:07 2010 -0500
+
+    specs: add low bandwith spec from xorg-docs
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 3102665110846af5c87792b221e1ef6a9dc1a0e2
+Author: Matt Dew <matt@osource.org>
+Date:   Mon Nov 29 16:29:44 2010 -0500
+
+    specs: add appgroup specs in DocBook/XML format
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f6ee80371c4bf9ebd99418a4328a351186ac0847
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 9 15:19:09 2010 -0500
+
+    config: HTML file generation: use the installed copy of xorg.css
+    
+    Currenlty the xorg.css file is copied in each location
+    where a DocBook/XML file resides. This produces about
+    70 copies in the $(docdir) install tree.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 6fbb74bfe75adc7cfd6d4bc642d7d4179a3db17d
+Author: Jesse Adkins <jesserayadkins@gmail.com>
+Date:   Tue Sep 28 13:30:04 2010 -0700
+
+    Purge cvs tags.
+    
+    Signed-off-by: Jesse Adkins <jesserayadkins@gmail.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 5508eec058c0ffbb180f3d98f8a02083d6de428b
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Sep 9 16:41:21 2010 -0400
+
+    Remove the appgroup specs which is the one for the server side.
+    
+    The spec for the protocol side is still in Framemaker format.
+    See doc/xorg-docs/specs/Xext/AppGroup.mif
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 5daf9cff36df7423f6247fc8174b8e6c9443ed07
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Aug 10 10:24:51 2010 -0400
+
+    xextproto 7.1.2
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 35741d9dc745532dc4af37cc07e256392e3880da
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Aug 3 11:03:49 2010 -0400
+
+    specs: convert protocol geproto.txt to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 260da6ca1dec9abde11c064d0aeac01f695a1596
+Author: Matt Dew <matt@osource.org>
+Date:   Mon Aug 2 15:10:04 2010 -0400
+
+    specs: convert protocol xtest.ms from xorg-docs to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 4240526710d837cf06502521ee58c6a4538c6c0e
+Author: Matt Dew <matt@osource.org>
+Date:   Mon Aug 2 13:43:32 2010 -0400
+
+    specs: convert protocol buffer.ms from xorg-docs to DocBook XML
+    
+    multibuf.xml
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit c86700c0c87de8d6ec7f085d06e9a48558bb5118
+Author: Matt Dew <matt@osource.org>
+Date:   Mon Aug 2 13:35:26 2010 -0400
+
+    specs: convert protocol evi.ms from xorg-docs to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f825b85bd8bde4b78c6e3d0b05b713e6f48a2ff5
+Author: Matt Dew <matt@osource.org>
+Date:   Mon Aug 2 13:28:07 2010 -0400
+
+    specs: convert protocol appgroup.ms from xorg-docs to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 99a5fde423a301167cb825edbf718de7af9f1158
+Author: Matt Dew <matt@osource.org>
+Date:   Mon Aug 2 13:21:31 2010 -0400
+
+    specs: convert protocol tog-cup.ms from xorg-docs to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit fc2c585ab9bfe0815a917c897e0b463bf04f8475
+Author: Matt Dew <matt@osource.org>
+Date:   Mon Aug 2 10:46:54 2010 -0400
+
+    specs: convert protocol dpms.ms specs from xorg-docs module to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 7c9b2197cbb0f787b6330243eb777f612251064d
+Author: Matt Dew <matt@osource.org>
+Date:   Mon Aug 2 10:40:47 2010 -0400
+
+    specs: convert protocol shm.ms specs from xorg-docs module to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit cf083a0d35da6665b2aebc6eea4f65009c32411b
+Author: Matt Dew <matt@osource.org>
+Date:   Sun Aug 1 20:41:48 2010 -0400
+
+    specs: convert protocol shape.ms specs from xorg-docs module to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 69996150256954ef71c45ee7727fea96e02f8db2
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Jun 30 13:39:21 2010 -0400
+
+    specs: move geproto.txt in the specs directory
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 3f1718e39c73475fb8384e61b6dc78f313d926f9
+Author: Matt Dew <matt@osource.org>
+Date:   Wed Jun 30 13:21:28 2010 -0400
+
+    specs: convert protocol .ms specs from xorg-docs module to DocBook XML
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit c4595fad1d79c0957d3f4dff6ef56d72ae8cc38d
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Tue Mar 30 09:54:26 2010 -0700
+
+    XGE: Don't reserve an extension event.
+    
+    The Generic Event Extension extension uses the "GenericEvent" core event type,
+    so it doesn't need to also reserve an extension event.
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 5f2cc1e2b99d45a612204a86583abb386907be04
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:25:52 2010 -0400
+
+    config: update AC_PREREQ statement to 2.60
+    
+    Unrelated to the previous patches, the new value simply reflects
+    the reality that the minimum level for autoconf to configure
+    all x.org modules is 2.60 dated June 2006.
+    
+    ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.60.tar.gz
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 21f7dc38add3bda551216a0fa6319d9f3f9af99a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:00:31 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 650615405c327398b5708787bc19198cbb864d20
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 17:51:29 2010 -0400
+
+    config: install and distribute geproto.txt
+    
+    It will now be installed in $docdir in addition
+    to being distributed in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 37f6affde561251df61c7011f9d1d83b006d2fbe
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 22 19:24:48 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit e9fa939ef8515bca5f8cde85a91b3ae0ae456de7
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 11:13:30 2009 -0500
+
+    README: file created or updated #24206
+    
+    Contains a set of URLs to freedesktop.org.
+
+commit 3690603986929a706acd76fc0b33132fe0178129
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 19:45:27 2009 -0500
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit e52cb6ef1baa65c1688b3160727214efae57b0e2
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:31:29 2009 -0500
+
+    Makefile.am: INSTALL file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+    Add INSTALL target
+
+commit bfaecf2a80ef1bcbfa6243fdb1bfc2e335f86a10
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:11:36 2009 -0500
+
+    configure.ac: deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit 182e739d8ff1f9bb8ddb8fcff8737dabde96c47f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 13:55:25 2009 -0500
+
+    configure.ac: AM_MAINTAINER_MODE missing #24238
+    
+    This turns off maintainer mode build rules in tarballs.
+    Works in conjunction with autogen.sh --enable-maintainer-mode
+
+commit 4b0b3afee88fdefaab2d9aa690dc5dc465964316
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Nov 14 18:26:47 2009 -0500
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 9d5e140111ef0e7e0c9d30d7e0acf8c43a248816
+Author: Keith Packard <keithp@keithp.com>
+Date:   Tue Nov 3 14:41:33 2009 -0800
+
+    Allow old servers to build with new headers
+    
+    This provides header compatibility back to X server version 1.6 at
+    least (that's all I tested).
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 987aeb9bd1915a655f31e250ee9c02d04927b150
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Aug 25 09:30:15 2009 +1000
+
+    xextproto 7.1.1
+
+commit 55a0bbdde9b27b8dbc6e75d41c51af3f92dea6e3
+Author: Eduard Bagrov <ebagrov@linuxtesting.org>
+Date:   Fri Aug 21 18:48:19 2009 +0200
+
+    Fix XSyncValueSubtract typo
+    
+    X.Org bug#23438 <http://bugs.freedesktop.org/show_bug.cgi?id=23438>
+    
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+
+commit 23ac4d5235862d51f0cfb080ad2118a9fb181673
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Aug 5 15:09:11 2009 +1000
+
+    xextproto 7.1.0
+
+commit 5ffa318ddb35308e3a87122bfb3944e3201532ba
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Aug 5 15:06:52 2009 +1000
+
+    lbxproto: remove debug macro and definition of lbxDebug.
+    
+    This should not be in the protocol headers.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 5a266968b1ced367df1a47dc9729313c85be0516
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Jul 22 20:26:35 2009 +1000
+
+    Bump to 7.0.99.3
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit d7ead7a591da851f6bb2efecdd35b63836df4ed0
+Author: Magnus Kessler <Magnus.Kessler@gmx.net>
+Date:   Wed Jul 22 09:37:38 2009 +0100
+
+    Rename xtest.h to xtestconst.h to avoid a collision with XTest.h on case-insensitive filesystems
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 2fd05eca7dd501c58b284d9cceb73d6146672b0a
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jul 21 13:35:58 2009 +1000
+
+    Bump to 7.0.99.2
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit a049c37f789f881fad09e60a061488cba2b4072e
+Author: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date:   Mon Jul 20 22:42:59 2009 +0100
+
+    Rename mitmisc.h to mitmiscconst.h to avoid a collision with MITMisc.h on case-insensitive filesystems
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 609c3b03fbed24f05d636d98dad9febc7226624c
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Jul 15 16:28:12 2009 +1000
+
+    Remove RCS tags.
+
+commit 6e9e47edf97a0bb504b4b65f5ef066f3d5e3d34b
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Jul 15 16:20:13 2009 +1000
+
+    Bump to 7.0.99.1
+
+commit ef8766e44c5cdd1e3ba7ebabf576e2de77f57a09
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:43:12 2009 +1000
+
+    xtestext1: split xtestext1.h header into xtestext1proto.h
+
+commit a1f0b58efce74176c71070818fa98c25021bb25e
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:36:22 2009 +1000
+
+    sync: remove sync.h library header, split into syncconst.h
+    
+    Rename syncstr.h to syncproto.h
+
+commit 35ec2669091197a4e5b3c56d79ea26ae87759b16
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:32:29 2009 +1000
+
+    shape: remove shape.h, split into shapeconst.h
+    
+    Rename shapestr.h to shapeproto.h
+
+commit 7cfdafd5ec565502a40e9e1f5b3edbb2be6aafbc
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:30:17 2009 +1000
+
+    security: remove security.h, split into secur.h
+    
+    Rename securstr.h to securproto.h
+
+commit 19f527b4abe17b58dd78ec988a11c8081166cf01
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:28:02 2009 +1000
+
+    multibuf: remove multibuf.h, split into multibufconst.h
+
+commit 4b7fff5309f3e51e17372e3eaf91ee01c00ffd08
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:19:04 2009 +1000
+
+    remove extutil.h, pure library header
+
+commit 0af7f152239a0f14fc85acd146845c784bb1cd6a
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:18:06 2009 +1000
+
+    dpms: remove dpms.h library header, split into dpmsconst.h
+
+commit ac0dfab3fe1ae9c9633696825636a4bcfa14dfd6
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:14:14 2009 +1000
+
+    Remove Xext.h and Xge.h - pure library headers.
+
+commit 413572e112e24aa7a28632e13a8aa15c9fdaa57e
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:10:01 2009 +1000
+
+    Xdbe: remove Xdbe.h library header, split into dbe.h
+    
+    Rename Xdbeproto to dbeproto.h
+
+commit d2574e8804a204653bda1786c1ece3437f7901a2
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 11:04:12 2009 +1000
+
+    Xcup: remove XCup.h library header, split into cup.h
+    
+    Rename Xcupstr.h to cupproto.h
+
+commit 38daa9d8d9d86f3b9df12dd5032959822b7c0a45
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 10:59:10 2009 +1000
+
+    Xag: remove Xag.h library header, split into Xagconst.h
+
+commit 8cb2568c4a7df1eb0482009bf9150912e98969e6
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 10:54:21 2009 +1000
+
+    XTest: remove XTest.h, split into xtest.h and xtestproto.h
+    
+    To avoid conflicts, xtest.h uses a XTEST_CONST_H include barrier.
+
+commit c63abdd1eb7bc1d8ae4e25073ef2f29d94991e2b
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 10:46:33 2009 +1000
+
+    XShm: remove XShm.h library header, split into shm.h, shmproto.h
+    
+    Removing Xlib function prototypes.
+    Move extension name to shm.h
+    Move protocol request opcodes to shmproto.h
+
+commit 0adb09e032e3bd56426620b19438be9c0c66dd54
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 10:43:32 2009 +1000
+
+    XLbx: remove XLbx library headers, split into lbx.h, lbxproto.h
+    
+    Remove Xlib function prototypes.
+    Move extension name into lbx.h, move protocol opcodes into lbxproto.h
+
+commit 727003b51844dd1bd41b668bedfa92d2bb7ef964
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 10:30:40 2009 +1000
+
+    XEVI: remove XEVI.h library header, split into EVIproto.h
+    
+    Remove Xlib function prototypes.
+    Move protocol opcodes to EVIproto.h
+    Move extension name from EVIproto.h into EVI.h
+
+commit 3770d4bd035e43c8e2228d45184d9d398fccb325
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 10:24:57 2009 +1000
+
+    MITMisc: remove MITMisc.h library header, split into mitmistproto.h
+    
+    Moving extension name from mitmiststr.h into mitmisc.h.
+    Removing Xlib function prototypes from mitmisc.h.
+    Moving protocol request opcodes into mitmiscproto.h
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 57d09e47d05fce0d6df4060b2eff9a8efcc25b2f
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed Jul 15 13:41:36 2009 -0400
+
+    Remove most LBX headers.
+    
+    XLbx.h and lbxstr.h are required for libXext to build, and we're not
+    allowed to remove API from that.
+
+commit 7629def0733b82687f2879095451d72e42e13db7
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Sat Mar 28 14:20:38 2009 -0400
+
+    C sucks: define XEventClass in terms of unsigned int, not CARD32.
+    
+    Apparently pulling in Xmd.h here breaks qt, since they both define an
+    INT32 type (and incompatible ones even, since Xmd's is unsigned long on
+    ILP32 because whoever wrote Xmd.h is a C novice).
+    
+    (Based on inputproto commit b5cbe2d93f6c0129b8f29da97778f6d1b15c38f9.
+    Patch submitted to xorg@ in <20090117121713.46bf3332@family.dyweni.com>.)
+
+commit ac98d8c559dc798f09e35d13f51cb1116c6378bb
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Thu Jan 29 16:22:20 2009 -0200
+
+    Bump to libXext Version 7.0.5.
+    
+      Add required change to correct #18038
+    (patch to avoid gcc warning in libXext)
+
+commit 8b5b82ec72dd6952d0664655715a0a47951454f4
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Tue Jan 27 20:06:28 2009 -0200
+
+    Janitor: Correct make distcheck and dont distribute autogen.sh
+
+commit fa652c6013a5d3ae8106814d97245fdbac3557ac
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Tue Dec 23 16:16:46 2008 +0100
+
+    Add geproto.txt to EXTRA_DIST
+
+commit bd7f3e16b5a5520f0abb8c481f23a19219d26c7f
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Tue Dec 23 15:45:13 2008 +0100
+
+    COPYING: add Peter Hutterer's license and copyright notice
+    
+    Taken from Xge.h
+
+commit e1773d8ad7d36535f856dcb308be9a1b0601c1fc
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Dec 18 10:10:42 2008 +1000
+
+    Bump to 7.0.4
+
+commit e7f0c4261c59da82da1c151dd1bd0d143a32906a
+Author: Peter Hutterer <peter.hutterer@redhat.com>
+Date:   Mon Dec 1 14:44:03 2008 +1000
+
+    Clean up XGE documentation.
+
+commit b0080664e432f8ee569ce099a536c0232dd64d3e
+Author: Peter Hutterer <peter.hutterer@redhat.com>
+Date:   Mon Dec 1 15:41:16 2008 +1000
+
+    geproto: remote trailing whitespaces.
+
+commit f7e5f23e37e62cc0a981d9b002b69d90b8a7daa9
+Author: Peter Hutterer <peter.hutterer@redhat.com>
+Date:   Fri Sep 26 14:54:19 2008 +0930
+
+    Xge.h: include Xmd.h for CARD8
+
+commit db08133016b421ef12c65db9c4a2819078f01b06
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Wed May 28 17:18:14 2008 +0930
+
+    Bump to 7.0.3.
+
+commit 801650f0d15b4497c63d056559ad98a8ca82f271
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Mon May 12 17:26:02 2008 +0930
+
+    Xge: replace copyrights with standard format from xserver COPYING.
+
+commit 9dc48efe2b3136756613ae00afd706f9a52d6f10
+Merge: 69356e4 a07a30f
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Mon May 12 17:22:14 2008 +0930
+
+    Merge branch 'master' into xge
+
+commit a07a30f9922e9768e2cf00cc2e479978242c58a8
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 16:39:10 2007 -0500
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit 087c2ccc7e348e530422a578059173c959aa5a78
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Mon Sep 3 05:54:25 2007 -0400
+
+    Add *~ to .gitignore to skip patch/emacs droppings
+
+commit 69356e4165f11f3ed4b377d29df038549191a91e
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Thu May 17 19:40:15 2007 +0930
+
+    Add XGE header files and protocol description.
+
+commit 88c24404b44def76a56f52a216a8cf2e0991c3e6
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jul 14 18:56:41 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit a63b4a9d7ebc5929ce9172b10743396cd36addb8
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Tue Jun 27 16:25:22 2006 +0000
+
+    Remove Xserver API for appgroup extension [Will break Xorg server builds
+        prior to 2006-06-21 / git commit
+    77c947b900faf34f425eef1549d8210c475e093b]
+
+commit 7bcd3400a8043dee6399680ddc6592747b30f599
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Wed Jun 21 21:20:22 2006 +0000
+
+    Remove Xserver API for security extension (#ifdef _SECURITY_SERVER) [Will
+        break Xorg server builds prior to 2006-06-20 / git commit
+        d44b2a0a57fb89741173c31676af0ccc822387dc]
+
+commit cb67dc36362b018f3a9faa5c4558ce99dbfb2334
+Author: Kevin E Martin <kem@kem.org>
+Date:   Thu Dec 15 00:24:39 2005 +0000
+
+    Update package version number for final X11R7 release candidate.
+
+commit 9f8dd222022cfafe3ca6467e02232af7d4d7934b
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 19 02:48:15 2005 +0000
+
+    Update package version number for RC1 release.
+
+commit cba4432f0d088517f2475881e93cf4dda96a7f94
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Tue Aug 2 19:19:40 2005 +0000
+
+    Add basic .cvsignore files for proto modules.
+
+commit 790de7da644c6f9114a715b99789253a9c79b0a5
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri Jul 29 21:22:57 2005 +0000
+
+    Various changes preparing packages for RC0:
+    - Verify and update package version numbers as needed
+    - Implement versioning scheme
+    - Change bug address to point to bugzilla bug entry form
+    - Disable loadable i18n in libX11 by default (use --enable-loadable-i18n to
+        reenable it)
+    - Fix makedepend to use pkgconfig and pass distcheck
+    - Update build script to build macros first
+    - Update modular Xorg version
+
+commit cf67142f46ec2f754f2b3347b21139b66b7167cf
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Fri Jun 10 04:01:14 2005 +0000
+
+    Bug #2799: Input shape. (Keith Packard)
+
+commit b855e49cf845cf814fa1d8a9abcd65cb14356644
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:22:40 2005 +0000
+
+    revert last change, didn't do right thing at all, sorry for the noise
+
+commit 1e1659043f908d2e648d0ee73f7f33f5fc79813b
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:10:19 2005 +0000
+
+    Require automake 1.7 in AM_INIT_AUTOMAKE
+
+commit 1d316d39381cf0981b2f9687cd2f0200c92961ea
+Author: Josh Triplett <josh@speakeasy.net>
+Date:   Wed May 18 08:09:13 2005 +0000
+
+    Add COPYING file for XExt. Note that there are several similar but
+        subtly-different licenses included; in particular, there are some
+        copyright holders with multiple slightly-different licenses included.
+
+commit f3c7759e6dc671ab6db160e739d00133e9996296
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Mon May 9 18:20:06 2005 +0000
+
+    Change all the protonames from <extension>Ext to <extension>Proto.
+
+commit 474a31667a8addb29a0f115790df2910400c4081
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri May 6 01:46:32 2005 +0000
+
+    Initial build system files for proto module.
+
+commit be09530f849ec00001fc0575816030b7a5dde05c
+Author: Roland Mainz <roland.mainz@nrubsig.org>
+Date:   Tue Dec 7 23:37:37 2004 +0000
+
+    //bugs.freedesktop.org/show_bug.cgi?id=830): Get DPMS header file
+        (include/extensions/dpms.h) working with C++ applications. Patch by
+        Kevin DeKorte <kdekorte@yahoo.com> and Roland Mainz
+        <roland.mainz@nrubsig.org>.
+
+commit da24110547ed45c08d707dbffb2972f043dbc1b1
+Author: Egbert Eich <eich@suse.de>
+Date:   Fri Apr 23 18:43:06 2004 +0000
+
+    Merging XORG-CURRENT into trunk
+
+commit 8fc2a0fd8ac1b777a35b01d65934ee100b304d20
+Author: Egbert Eich <eich@suse.de>
+Date:   Sun Mar 14 08:31:36 2004 +0000
+
+    Importing vendor version xf86-4_4_99_1 on Sun Mar 14 00:26:39 PST 2004
+
+commit e7af2a9e4c47a46b3a68a2efebb171dc7872c341
+Author: Egbert Eich <eich@suse.de>
+Date:   Wed Mar 3 12:10:54 2004 +0000
+
+    Importing vendor version xf86-4_4_0 on Wed Mar 3 04:09:24 PST 2004
+
+commit abb02cac08ca1d7d3a64b361df5d1be6f15c6440
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 13:35:14 2004 +0000
+
+    readding XFree86's cvs IDs
+
+commit c9d6200d559e57f4ca67291213cd282c7437c3c7
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 09:22:28 2004 +0000
+
+    Importing vendor version xf86-4_3_99_903 on Wed Feb 26 01:21:00 PST 2004
+
+commit 023a09fe640f876478157e5b4cd9cfec1452da4b
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Tue Nov 25 19:28:02 2003 +0000
+
+    XFree86 4.3.99.16 Bring the tree up to date for the Cygwin folks
+
+commit 343e78e15048e6a25791449bfc7566c07ccddf28
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    XFree86 4.3.0.1
+
+commit 9a41c9c6452753ac1911a585e59982e8e5186c6b
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 15:54:35 2003 +0000
+
+    R6.6 is the Xorg base-line

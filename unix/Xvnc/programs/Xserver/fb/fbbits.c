@@ -1,6 +1,4 @@
 /*
- * Id: fbbits.c,v 1.1 1999/11/02 03:54:45 keithp Exp $
- *
  * Copyright © 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -21,7 +19,6 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-/* $XFree86: xc/programs/Xserver/fb/fbbits.c,v 1.5 2000/02/17 14:16:22 dawes Exp $ */
 
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
@@ -92,7 +89,6 @@
 #undef BITS4
 #endif
 
-#ifdef FB_24BIT
 #define BRESSOLID   fbBresSolid24
 #define BRESDASH    fbBresDash24
 #define DOTS        fbDots24
@@ -104,14 +100,14 @@
 #define BITSUNIT    BYTE
 #define BITSMUL	    3
 
-#define FbDoTypeStore(b,t,x,s)	(*((t *) (b)) = (x) >> (s))
-#define FbDoTypeRRop(b,t,a,x,s) (*((t *) (b)) = FbDoRRop(*((t *) (b)),\
-							 (a) >> (s), \
-							 (x) >> (s)))
-#define FbDoTypeMaskRRop(b,t,a,x,m,s) (*((t *) (b)) = FbDoMaskRRop(*((t *) (b)),\
-								   (a) >> (s), \
-								   (x) >> (s), \
-								   (m) >> (s))
+#define FbDoTypeStore(b,t,x,s)	WRITE(((t *) (b)), (x) >> (s))
+#define FbDoTypeRRop(b,t,a,x,s) WRITE((t *) (b), FbDoRRop(READ((t *) (b)),\
+							  (a) >> (s), \
+							  (x) >> (s)))
+#define FbDoTypeMaskRRop(b,t,a,x,m,s) WRITE((t *) (b), FbDoMaskRRop(READ((t *) (b)),\
+								    (a) >> (s), \
+								    (x) >> (s), \
+								    (m) >> (s)))
 #if BITMAP_BIT_ORDER == LSBFirst
 #define BITSSTORE(b,x)	((unsigned long) (b) & 1 ? \
 			 (FbDoTypeStore (b, CARD8, x, 0), \
@@ -143,14 +139,13 @@
 #undef BITSMUL
 #undef BITSUNIT
 #undef BITS
-    
+
 #undef BRESSOLID
 #undef BRESDASH
 #undef DOTS
 #undef ARC
 #undef POLYLINE
 #undef POLYSEGMENT
-#endif /* FB_24BIT */
 
 #define BRESSOLID   fbBresSolid32
 #define BRESDASH    fbBresDash32

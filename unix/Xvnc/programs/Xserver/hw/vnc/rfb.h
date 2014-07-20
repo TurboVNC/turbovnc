@@ -1,7 +1,5 @@
 /*
  * rfb.h - header file for RFB DDX implementation.
- *
- * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
 /*
@@ -32,6 +30,10 @@
 #define __RFB_H__
 
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include "scrnintstr.h"
 #include "colormapst.h"
 #include "gcstruct.h"
@@ -46,6 +48,11 @@
 #ifdef RENDER
 #include "picturestr.h"
 #endif
+#ifdef RANDR
+#include "randrstr.h"
+#endif
+#include "mipointer.h"
+#include "input.h"
 
 /* It's a good idea to keep these values a bit greater than required. */
 #define MAX_ENCODINGS 18
@@ -121,14 +128,17 @@ typedef struct
 
     CloseScreenProcPtr                  CloseScreen;
     CreateGCProcPtr                     CreateGC;
-    PaintWindowBackgroundProcPtr        PaintWindowBackground;
-    PaintWindowBorderProcPtr            PaintWindowBorder;
     CopyWindowProcPtr                   CopyWindow;
     ClearToBackgroundProcPtr            ClearToBackground;
-    RestoreAreasProcPtr                 RestoreAreas;
 #ifdef RENDER
     CompositeProcPtr                    Composite;
+    GlyphsProcPtr                       Glyphs;
 #endif
+    InstallColormapProcPtr              InstallColormap;
+    UninstallColormapProcPtr            UninstallColormap;
+    ListInstalledColormapsProcPtr       ListInstalledColormaps;
+    StoreColorsProcPtr                  StoreColors;
+    SaveScreenProcPtr                   SaveScreen;
 
 } rfbScreenInfo, *rfbScreenInfoPtr;
 
@@ -459,7 +469,7 @@ extern char rfbThisHost[];
 extern Atom VNC_LAST_CLIENT_ID;
 
 extern rfbScreenInfo rfbScreen;
-extern int rfbGCIndex;
+extern DevPrivateKeyRec rfbGCKey;
 
 extern int inetdSock;
 extern struct in_addr interface;
@@ -482,10 +492,10 @@ extern Bool udpSockConnected;
 extern int rfbPort;
 extern int rfbListenSock;
 
-extern void rfbInitSockets();
-extern void rfbDisconnectUDPSock();
-extern void rfbCloseSock();
-extern void rfbCheckFds();
+extern void rfbInitSockets(void);
+extern void rfbDisconnectUDPSock(void);
+extern void rfbCloseSock(int);
+extern void rfbCheckFds(void);
 extern void rfbWaitForClient(int sock);
 extern int rfbConnect(char *host, int port);
 extern void rfbCorkSock(int sock);
@@ -516,6 +526,9 @@ extern void rfbStoreColors(ColormapPtr pmap, int ndef, xColorItem *pdefs);
 
 extern int rfbDeferUpdateTime;
 
+extern void ClipToScreen(ScreenPtr pScreen, RegionPtr pRegion);
+void PrintRegion(ScreenPtr pScreen, RegionPtr reg, const char *msg);
+
 #ifdef RENDER
 extern void
 rfbComposite(
@@ -532,6 +545,10 @@ rfbComposite(
     CARD16 width,
     CARD16 height
 );
+
+extern void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                      PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                      int nlists, GlyphListPtr lists, GlyphPtr * glyphs);
 #endif
 
 extern Bool rfbCloseScreen(int, ScreenPtr);
@@ -544,7 +561,7 @@ extern void rfbClearToBackground(WindowPtr, int x, int y, int w,
 extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
 
 /* dispcur.c */
-extern Bool rfbDCInitialize();
+extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
 
 
 /* cutpaste.c */
@@ -558,17 +575,13 @@ extern void rfbGotXCutText(char *str, int len);
 extern Bool compatibleKbd;
 extern unsigned char ptrAcceleration;
 
-extern void PtrDeviceInit();
-extern void PtrDeviceOn();
-extern void PtrDeviceOff();
-extern void PtrDeviceControl();
+extern void PtrDeviceOn(DeviceIntPtr);
+extern void PtrDeviceControl(DevicePtr, PtrCtrl *);
 extern void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl);
 
-extern void KbdDeviceInit();
-extern void KbdDeviceOn();
-extern void KbdDeviceOff();
-extern void KbdAddEvent(Bool down, KeySym keySym, rfbClientPtr cl);
-extern void KbdReleaseAllKeys();
+extern void KbdDeviceInit(DeviceIntPtr);
+extern void KeyEvent(KeySym keySym, Bool down);
+extern void KbdReleaseAllKeys(void);
 
 
 /* rfbserver.c */
@@ -590,8 +603,8 @@ extern rfbClientPtr pointerClient;
 
 extern CARD32 rfbMaxIdleTimeout;
 extern CARD32 rfbIdleTimeout;
-extern OsTimerPtr idleTimer;
-CARD64 idleTimeoutCallback(OsTimerPtr, CARD64, pointer);
+extern void IdleTimerSet();
+extern void IdleTimerCheck();
 
 extern Bool rfbAlwaysShared;
 extern Bool rfbNeverShared;
@@ -620,7 +633,7 @@ extern Bool rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w,
 extern Bool rfbSendUpdateBuf(rfbClientPtr cl);
 extern Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour,
                                        int nColours);
-extern void rfbSendBell();
+extern void rfbSendBell(void);
 extern void rfbSendServerCutText(char *str, int len);
 
 
@@ -638,8 +651,11 @@ extern Bool rfbSendRTTPing(rfbClientPtr cl);
 
 /* randr.c */
 
+#ifdef RANDR
 extern Bool ResizeDesktop(ScreenPtr pScreen, int w, int h);
-
+extern Bool vncRRInit(ScreenPtr);
+extern void vncRRDeinit(ScreenPtr);
+#endif
 
 /* vncextinit.c */
 
@@ -667,14 +683,14 @@ extern Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour,
 extern int httpPort;
 extern char *httpDir;
 
-extern void httpInitSockets();
-extern void httpCheckFds();
+extern void httpInitSockets(void);
+extern void httpCheckFds(void);
 
 
 
 /* auth.c */
 
-void rfbAuthInit();
+void rfbAuthInit(void);
 void rfbAuthProcessResponse(rfbClientPtr cl);
 extern char* rfbAuthConfigFile;
 

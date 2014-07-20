@@ -1,5 +1,3 @@
-/* $Xorg: getvers.c,v 1.4 2001/02/09 02:04:34 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/getvers.c,v 3.3 2001/12/14 19:58:57 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,20 +50,19 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
+#include "exevents.h"
 #include "exglobals.h"
 
 #include "getvers.h"
 
-XExtensionVersion	AllExtensionVersions[128];
+XExtensionVersion XIVersion;
 
 /***********************************************************************
  *
@@ -75,60 +71,46 @@ XExtensionVersion	AllExtensionVersions[128];
  */
 
 int
-SProcXGetExtensionVersion(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXGetExtensionVersion(ClientPtr client)
+{
     REQUEST(xGetExtensionVersionReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
-    swaps(&stuff->nbytes, n);
-    return(ProcXGetExtensionVersion(client));
-    }
+    swaps(&stuff->nbytes);
+    return (ProcXGetExtensionVersion(client));
+}
 
 /***********************************************************************
  *
- * This procedure lists the input devices available to the server.
+ * This procedure returns the major/minor version of the X Input extension.
  *
  */
 
 int
-ProcXGetExtensionVersion (client)
-    register ClientPtr client;
-    {
-    xGetExtensionVersionReply	rep;
+ProcXGetExtensionVersion(ClientPtr client)
+{
+    xGetExtensionVersionReply rep;
 
     REQUEST(xGetExtensionVersionReq);
     REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
 
-    if (stuff->length != (sizeof(xGetExtensionVersionReq) + 
-	stuff->nbytes + 3)>>2)
-	{
-	SendErrorToClient(client, IReqCode, X_GetExtensionVersion, 0, 
-		BadLength);
-	return Success;
-	}
+    if (stuff->length != bytes_to_int32(sizeof(xGetExtensionVersionReq) +
+                                        stuff->nbytes))
+        return BadLength;
 
+    memset(&rep, 0, sizeof(xGetExtensionVersionReply));
     rep.repType = X_Reply;
     rep.RepType = X_GetExtensionVersion;
     rep.length = 0;
     rep.sequenceNumber = client->sequence;
-    rep.major_version = 0;
-    rep.minor_version = 0;
-
     rep.present = TRUE;
-    if (rep.present)
-	{
-	rep.major_version = 
-	    AllExtensionVersions[IReqCode-128].major_version;
-	rep.minor_version = 
-	    AllExtensionVersions[IReqCode-128].minor_version;
-	}
-    WriteReplyToClient (client, sizeof (xGetExtensionVersionReply), &rep);
+    rep.major_version = XIVersion.major_version;
+    rep.minor_version = XIVersion.minor_version;
+
+    WriteReplyToClient(client, sizeof(xGetExtensionVersionReply), &rep);
 
     return Success;
-    }
+}
 
 /***********************************************************************
  *
@@ -138,16 +120,12 @@ ProcXGetExtensionVersion (client)
  */
 
 void
-SRepXGetExtensionVersion (client, size, rep)
-    ClientPtr	client;
-    int		size;
-    xGetExtensionVersionReply	*rep;
-    {
-    register char n;
-
-    swaps(&rep->sequenceNumber, n);
-    swapl(&rep->length, n);
-    swaps(&rep->major_version, n);
-    swaps(&rep->minor_version, n);
-    WriteToClient(client, size, (char *)rep);
-    }
+SRepXGetExtensionVersion(ClientPtr client, int size,
+                         xGetExtensionVersionReply * rep)
+{
+    swaps(&rep->sequenceNumber);
+    swapl(&rep->length);
+    swaps(&rep->major_version);
+    swaps(&rep->minor_version);
+    WriteToClient(client, size, (char *) rep);
+}

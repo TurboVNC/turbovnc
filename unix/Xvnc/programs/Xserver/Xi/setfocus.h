@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/setfocus.h,v 3.2 2003/11/17 22:20:29 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,17 +23,17 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef SETFOCUS_H
 #define SETFOCUS_H 1
 
-int
-SProcXSetDeviceFocus(
-	ClientPtr              /* client */
-	);
+int SProcXSetDeviceFocus(ClientPtr      /* client */
+    );
 
-int
-ProcXSetDeviceFocus(
-	ClientPtr              /* client */
-	);
+int ProcXSetDeviceFocus(ClientPtr       /* client */
+    );
 
-#endif /* SETFOCUS_H */
+#endif                          /* SETFOCUS_H */

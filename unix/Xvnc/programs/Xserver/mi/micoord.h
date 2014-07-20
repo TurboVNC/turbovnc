@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/mi/micoord.h,v 1.7 2003/10/29 22:57:48 tsi Exp $ */
 /*
  * Copyright (C) 2000 The XFree86 Project, Inc.  All Rights Reserved.
  *
@@ -44,13 +43,12 @@
  * forcing as to use div instead of shift.  Let's be explicit.
  */
 
-#if defined(mips) || defined(sgi) || \
+#if defined(mips) || \
     defined(sparc) || defined(__sparc64__) || \
     defined(__alpha) || defined(__alpha__) || \
-    defined(__i386__) || defined(i386) || \
-    defined(__ia64__) || defined(ia64) || \
+    defined(__i386__) || defined(__i386) || defined(__ia64__) || \
     defined(__s390x__) || defined(__s390__) || \
-    defined(__AMD64__) || defined(AMD64)
+    defined(__amd64__) || defined(amd64) || defined(__amd64)
 #define GetHighWord(x) (((int) (x)) >> 16)
 #else
 #define GetHighWord(x) (((int) (x)) / 65536)
@@ -68,4 +66,4 @@
 #define intToY(i)	(GetHighWord(i))
 #endif
 
-#endif /* _MICOORD_H_ */
+#endif                          /* _MICOORD_H_ */

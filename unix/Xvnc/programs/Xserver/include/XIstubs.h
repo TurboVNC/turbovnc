@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/include/XIstubs.h,v 3.1 1996/04/15 11:34:22 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -27,75 +26,21 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef XI_STUBS_H
 #define XI_STUBS_H 1
 
-int
-ChangeKeyboardDevice (
-#if NeedFunctionPrototypes
-	DeviceIntPtr           /* old_dev */,
-	DeviceIntPtr           /* new_dev */
-#endif
-	);
+extern _X_EXPORT int
+ SetDeviceMode(ClientPtr /* client */ ,
+               DeviceIntPtr /* dev */ ,
+               int /* mode */ );
 
-int
-ChangePointerDevice (
-#if NeedFunctionPrototypes
-	DeviceIntPtr           /* old_dev */,
-	DeviceIntPtr           /* new_dev */,
-	unsigned char          /* x */,
-	unsigned char          /* y */
-#endif
-	);
+extern _X_EXPORT int
+ SetDeviceValuators(ClientPtr /* client */ ,
+                    DeviceIntPtr /* dev */ ,
+                    int * /* valuators */ ,
+                    int /* first_valuator */ ,
+                    int /* num_valuators */ );
 
-void
-CloseInputDevice (
-#if NeedFunctionPrototypes
-	DeviceIntPtr           /* d */,
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int
+ ChangeDeviceControl(ClientPtr /* client */ ,
+                     DeviceIntPtr /* dev */ ,
+                     xDeviceCtl * /* control */ );
 
-void
-AddOtherInputDevices (
-#if NeedFunctionPrototypes
-	void
-#endif
-	);
-
-void
-OpenInputDevice (
-#if NeedFunctionPrototypes
-	DeviceIntPtr           /* dev */,
-	ClientPtr              /* client */,
-	int *                  /* status */
-#endif
-	);
-
-int
-SetDeviceMode (
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */,
-	DeviceIntPtr           /* dev */,
-	int                    /* mode */
-#endif
-	);
-
-int
-SetDeviceValuators (
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */,
-	DeviceIntPtr           /* dev */,
-	int *                  /* valuators */,
-	int                    /* first_valuator */,
-	int                    /* num_valuators */
-#endif
-	);
-
-int
-ChangeDeviceControl (
-#if NeedFunctionPrototypes
-	ClientPtr             /* client */,
-	DeviceIntPtr          /* dev */,
-	xDeviceCtl *          /* control */
-#endif
-	);
-
-#endif /* XI_STUBS_H */
+#endif                          /* XI_STUBS_H */

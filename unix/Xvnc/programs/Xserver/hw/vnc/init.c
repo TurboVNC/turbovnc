@@ -57,38 +57,30 @@ from the X Consortium.
 
 */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <unistd.h>
-#include <stdarg.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include "X11/X.h"
-#define NEED_EVENTS
-#include "X11/Xproto.h"
-#include "X11/Xos.h"
-#include "scrnintstr.h"
 #include "servermd.h"
 #include "fb.h"
-#include "mibstore.h"
-#include "colormapst.h"
-#include "gcstruct.h"
-#include "input.h"
-#include "mipointer.h"
 #include "dixstruct.h"
 #include "propertyst.h"
-#include <Xatom.h>
-#include <errno.h>
-#include <sys/param.h>
-#include "dix.h"
+#include "xserver-properties.h"
+#include "exevents.h"
+#include <X11/Xatom.h>
 #include "micmap.h"
-#include "globals.h"
+#include "eventstr.h"
 #include "rfb.h"
 #include <time.h>
 #include "tvnc_version.h"
+#include "input-xkb.h"
 
 #define RFB_DEFAULT_WIDTH  1024
 #define RFB_DEFAULT_HEIGHT 768
@@ -96,12 +88,8 @@ from the X Consortium.
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
 
-#ifdef RANDR
-extern Bool vncRRInit(ScreenPtr);
-#endif
-
 rfbScreenInfo rfbScreen;
-int rfbGCIndex;
+DevPrivateKeyRec rfbGCKey;
 
 static Bool initOutputCalled = FALSE;
 static Bool noCursor = FALSE;
@@ -120,9 +108,6 @@ Atom VNC_OTP;
 Atom VNC_ACL;
 #endif
 
-static HWEventQueueType alwaysCheckForInput[2] = { 0, 1 };
-static HWEventQueueType *mieqCheckForInput[2];
-
 static char primaryOrder[4] = "";
 static int redBits, greenBits, blueBits;
 
@@ -138,6 +123,9 @@ static Bool rfbCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y);
 static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
 static void rfbClientStateChange(CallbackListPtr *, pointer myData,
                                  pointer client);
+
+static void rfbBlockHandler(pointer data, OSTimePtr timeout, pointer readmask);
+static void rfbWakeupHandler(pointer data, int nfds, pointer readmask);
 
 static miPointerScreenFuncRec rfbPointerCursorFuncs = {
     rfbCursorOffScreen,
@@ -540,11 +528,6 @@ InitOutput(screenInfo, argc, argv)
     for (i = 0; i < numFormats; i++)
         screenInfo->formats[i] = formats[i];
 
-    rfbGCIndex = AllocateGCPrivateIndex();
-    if (rfbGCIndex < 0) {
-        FatalError("InitOutput: AllocateGCPrivateIndex failed\n");
-    }
-
     if (!AddCallback(&ClientStateCallback, rfbClientStateChange, NULL)) {
         rfbLog("InitOutput: AddCallback failed\n");
         return;
@@ -555,6 +538,8 @@ InitOutput(screenInfo, argc, argv)
     if (AddScreen(rfbScreenInit, argc, argv) == -1) {
         FatalError("Couldn't add screen");
     }
+
+    RegisterBlockAndWakeupHandlers(rfbBlockHandler, rfbWakeupHandler, 0);
 }
 
 
@@ -586,16 +571,32 @@ rfbScreenInit(index, pScreen, argc, argv)
     pbits = rfbAllocateFramebufferMemory(prfb);
     if (!pbits) return FALSE;
 
-    miClearVisualTypes();
-
-    if (defaultColorVisualClass == -1)
-        defaultColorVisualClass = TrueColor;
-
-    if (!miSetVisualTypes(prfb->depth, miGetDefaultVisualMask(prfb->depth), 8,
-                          defaultColorVisualClass) )
-        return FALSE;
-
     miSetPixmapDepths();
+
+    switch (prfb->depth) {
+    case 8:
+        miSetVisualTypesAndMasks(8, ((1 << StaticGray) | (1 << GrayScale) |
+                                 (1 << StaticColor) | (1 << PseudoColor) |
+                                 (1 << TrueColor) | (1 << DirectColor)),
+                                 8, PseudoColor, 0, 0, 0);
+        break;
+    case 16:
+        miSetVisualTypesAndMasks(16, ((1 << TrueColor) | (1 << DirectColor)),
+                                 8, TrueColor, 0xf800, 0x07e0, 0x001f);
+        break;
+    case 24:
+        miSetVisualTypesAndMasks(24, ((1 << TrueColor) | (1 << DirectColor)),
+                                 8, TrueColor, 0xff0000, 0x00ff00, 0x0000ff);
+        break;
+    case 32:
+        miSetVisualTypesAndMasks(32, ((1 << TrueColor) | (1 << DirectColor)),
+                                 8, TrueColor, 0xff000000, 0x00ff0000,
+                                 0x0000ff00);
+        break;
+    default:
+        rfbLog("Depth %d not supported\n", prfb->depth);
+        return FALSE;
+    }
 
     switch (prfb->bitsPerPixel)
     {
@@ -606,11 +607,7 @@ rfbScreenInit(index, pScreen, argc, argv)
     case 16:
         ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
                            dpix, dpiy, prfb->paddedWidthInBytes / 2, 16);
-        if (prfb->depth == 15) {
-            blueBits = 5; greenBits = 5; redBits = 5;
-        } else {
-            blueBits = 5; greenBits = 6; redBits = 5;
-        }
+        blueBits = 5; greenBits = 6; redBits = 5;
         break;
     case 32:
         ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
@@ -622,8 +619,6 @@ rfbScreenInit(index, pScreen, argc, argv)
     }
 
     if (!ret) return FALSE;
-
-    fbInitializeBackingStore(pScreen);
 
     if (prfb->bitsPerPixel > 8) {
         int xBits = prfb->bitsPerPixel - redBits - greenBits - blueBits;
@@ -669,8 +664,8 @@ rfbScreenInit(index, pScreen, argc, argv)
     if (prfb->bitsPerPixel > 4)
         fbPictureInit(pScreen, 0, 0);
 
-    if (!AllocateGCPrivate(pScreen, rfbGCIndex, sizeof(rfbGCRec))) {
-        FatalError("rfbScreenInit: AllocateGCPrivate failed\n");
+    if (!dixRegisterPrivateKey(&rfbGCKey, PRIVATE_GC, sizeof(rfbGCRec))) {
+        FatalError("rfbScreenInit: dixRegisterPrivateKey failed\n");
     }
 
     prfb->cursorIsDrawn = FALSE;
@@ -678,33 +673,35 @@ rfbScreenInit(index, pScreen, argc, argv)
 
     prfb->CloseScreen = pScreen->CloseScreen;
     prfb->CreateGC = pScreen->CreateGC;
-    prfb->PaintWindowBackground = pScreen->PaintWindowBackground;
-    prfb->PaintWindowBorder = pScreen->PaintWindowBorder;
     prfb->CopyWindow = pScreen->CopyWindow;
     prfb->ClearToBackground = pScreen->ClearToBackground;
-    prfb->RestoreAreas = pScreen->RestoreAreas;
 #ifdef RENDER
     ps = GetPictureScreenIfSet(pScreen);
-    if (ps)
+    if (ps) {
         prfb->Composite = ps->Composite;
+        prfb->Glyphs = ps->Glyphs;
+    }
 #endif
+    prfb->InstallColormap = pScreen->InstallColormap;
+    prfb->UninstallColormap = pScreen->UninstallColormap;
+    prfb->ListInstalledColormaps = pScreen->ListInstalledColormaps;
+    prfb->StoreColors = pScreen->StoreColors;
+    prfb->SaveScreen = pScreen->SaveScreen;
+
     pScreen->CloseScreen = rfbCloseScreen;
     pScreen->CreateGC = rfbCreateGC;
-    pScreen->PaintWindowBackground = rfbPaintWindowBackground;
-    pScreen->PaintWindowBorder = rfbPaintWindowBorder;
     pScreen->CopyWindow = rfbCopyWindow;
     pScreen->ClearToBackground = rfbClearToBackground;
-    pScreen->RestoreAreas = rfbRestoreAreas;
 #ifdef RENDER
-    if (ps)
+    if (ps) {
         ps->Composite = rfbComposite;
+        ps->Glyphs = rfbGlyphs;
+    }
 #endif
-
     pScreen->InstallColormap = rfbInstallColormap;
     pScreen->UninstallColormap = rfbUninstallColormap;
     pScreen->ListInstalledColormaps = rfbListInstalledColormaps;
     pScreen->StoreColors = rfbStoreColors;
-
     pScreen->SaveScreen = rfbAlwaysTrue;
 
     rfbDCInitialize(pScreen, &rfbPointerCursorFuncs);
@@ -745,7 +742,7 @@ rfbScreenInit(index, pScreen, argc, argv)
     ret = fbCreateDefColormap(pScreen);
 
 #ifdef RANDR
-    vncRRInit(pScreen);
+    if (!vncRRInit(pScreen)) return FALSE;
 #endif
 
     return ret;
@@ -765,15 +762,25 @@ InitInput(argc, argv)
     char *argv[];
 {
     DeviceIntPtr p, k;
-    k = AddInputDevice(rfbKeybdProc, TRUE);
-    p = AddInputDevice(rfbMouseProc, TRUE);
-    RegisterKeyboardDevice(k);
-    RegisterPointerDevice(p);
-    miRegisterPointerDevice(screenInfo.screens[0], p);
-    (void)mieqInit ((DevicePtr)k, (DevicePtr)p);
-    mieqCheckForInput[0] = checkForInput[0];
-    mieqCheckForInput[1] = checkForInput[1];
-    SetInputCheck(&alwaysCheckForInput[0], &alwaysCheckForInput[1]);
+    if (AllocDevicePair(serverClient, "TurboVNC", &p, &k, rfbMouseProc,
+                        rfbKeybdProc, FALSE) != Success)
+        FatalError("Could not initialize TurboVNC input devices\n");
+
+    if (ActivateDevice(p, TRUE) != Success ||
+        ActivateDevice(k, TRUE) != Success)
+        FatalError("Could not activate TurboVNC input devices\n");
+
+    if (!EnableDevice(p, TRUE) || !EnableDevice(k, TRUE))
+        FatalError("Could not enable TurboVNC input devices\n");
+
+    mieqInit();
+    mieqSetHandler(ET_KeyPress, vncXkbProcessDeviceEvent);
+    mieqSetHandler(ET_KeyRelease, vncXkbProcessDeviceEvent);
+}
+
+
+void CloseInput(void)
+{
 }
 
 
@@ -782,29 +789,21 @@ rfbKeybdProc(pDevice, onoff)
     DeviceIntPtr pDevice;
     int onoff;
 {
-    KeySymsRec          keySyms;
-    CARD8               modMap[MAP_LENGTH];
     DevicePtr pDev = (DevicePtr)pDevice;
 
     switch (onoff)
     {
     case DEVICE_INIT:
-        KbdDeviceInit(pDevice, &keySyms, modMap);
-        InitKeyboardDeviceStruct(pDev, &keySyms, modMap,
+        KbdDeviceInit(pDevice);
+        InitKeyboardDeviceStruct(pDevice, NULL,
                                  (BellProcPtr)rfbSendBell,
                                  (KbdCtrlProcPtr)NoopDDA);
-            break;
+        break;
     case DEVICE_ON:
         pDev->on = TRUE;
-        KbdDeviceOn();
         break;
     case DEVICE_OFF:
         pDev->on = FALSE;
-        KbdDeviceOff();
-        break;
-    case DEVICE_CLOSE:
-        if (pDev->on)
-            KbdDeviceOff();
         break;
     }
     return Success;
@@ -821,16 +820,29 @@ rfbMouseProc(pDevice, onoff)
     switch (onoff)
     {
     case DEVICE_INIT:
-        PtrDeviceInit();
+    {
+        Atom btn_labels[5], axes_labels[2];
+
         map[1] = 1;
         map[2] = 2;
         map[3] = 3;
         map[4] = 4;
         map[5] = 5;
-        InitPointerDeviceStruct(pDev, map, 5, miPointerGetMotionEvents,
-                                PtrDeviceControl,
-                                miPointerGetMotionBufferSize());
+
+        btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
+        btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
+        btn_labels[2] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_RIGHT);
+        btn_labels[3] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_UP);
+        btn_labels[4] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_DOWN);
+
+        axes_labels[0] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_X);
+        axes_labels[1] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_Y);
+
+        InitPointerDeviceStruct(pDev, map, 5, btn_labels,
+                                (PtrCtrlProcPtr)NoopDDA,
+                                GetMotionHistorySize(), 2, axes_labels);
         break;
+    }
 
     case DEVICE_ON:
         pDev->on = TRUE;
@@ -839,12 +851,6 @@ rfbMouseProc(pDevice, onoff)
 
     case DEVICE_OFF:
         pDev->on = FALSE;
-        PtrDeviceOff();
-        break;
-
-    case DEVICE_CLOSE:
-        if (pDev->on)
-            PtrDeviceOff();
         break;
     }
     return Success;
@@ -854,7 +860,7 @@ rfbMouseProc(pDevice, onoff)
 Bool
 LegalModifier(key, pDev)
     unsigned int key;
-    DevicePtr   pDev;
+    DeviceIntPtr pDev;
 {
     return TRUE;
 }
@@ -865,10 +871,20 @@ ProcessInputEvents()
 {
     rfbCheckFds();
     httpCheckFds();
-    if (*mieqCheckForInput[0] != *mieqCheckForInput[1]) {
-        mieqProcessInputEvents();
-        miPointerUpdate();
-    }
+    mieqProcessInputEvents();
+    IdleTimerCheck();
+}
+
+
+static void
+rfbBlockHandler(pointer data, OSTimePtr timeout, pointer readmask)
+{
+}
+
+static void
+rfbWakeupHandler(pointer data, int nfds, pointer readmask)
+{
+    ProcessInputEvents();
 }
 
 
@@ -923,13 +939,13 @@ rfbRootPropertyChange(PropertyPtr pProp)
         (pProp->type == XA_STRING) && (pProp->format == 8) &&
         rfbSyncCutBuffer) {
         char *str;
-        str = (char *)xalloc(pProp->size + 1);
+        str = (char *)malloc(pProp->size + 1);
         if (!str)
             FatalError("rfbRootPropertyChange(): Memory allocation failure\n");
         strncpy(str, pProp->data, pProp->size);
         str[pProp->size] = 0;
         rfbGotXCutText(str, pProp->size);
-        xfree(str);
+        free(str);
         return;
     }
 
@@ -938,7 +954,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         rfbClientPtr cl;
         char *colonPos;
         int port = 5500;
-        char *host = (char *)Xalloc(pProp->size + 1);
+        char *host = (char *)malloc(pProp->size + 1);
         memcpy(host, pProp->data, pProp->size);
         host[pProp->size] = 0;
         colonPos = strrchr(host, ':');
@@ -956,7 +972,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         (pProp->type == XA_STRING) && (pProp->format == 8)) {
         if (pProp->size == 0) {
             if (rfbAuthOTPValue != NULL) {
-                xfree(rfbAuthOTPValue);
+                free(rfbAuthOTPValue);
                 rfbAuthOTPValue = NULL;
                 rfbLog("One time password(s) disabled\n");
             }
@@ -964,10 +980,10 @@ rfbRootPropertyChange(PropertyPtr pProp)
         } else if ((pProp->size == MAXPWLEN) ||
                    (pProp->size == (MAXPWLEN * 2))) {
             if (rfbAuthOTPValue != NULL)
-                xfree(rfbAuthOTPValue);
+                free(rfbAuthOTPValue);
 
             rfbAuthOTPValueLen = pProp->size;
-            rfbAuthOTPValue = (char *) xalloc(pProp->size);
+            rfbAuthOTPValue = (char *) malloc(pProp->size);
             memcpy(rfbAuthOTPValue, pProp->data, pProp->size);
         }
 
@@ -984,14 +1000,14 @@ rfbRootPropertyChange(PropertyPtr pProp)
          * The first byte is a flag that selects revoke/add.
          * The remaining bytes are the name.
          */
-        char*           p = (char *) xalloc(pProp->size);
+        char*           p = (char *) malloc(pProp->size);
         const char*     n = (const char*) pProp->data;
 
         memcpy(p, &n[1], pProp->size - 1);
         p[pProp->size - 1] = '\0';
         if ((n[0] & 1) == 0) {
             rfbAuthRevokeUser(p);
-            xfree(p);
+            free(p);
 
         } else {
             rfbAuthAddUser(p, (n[0] & 0x10) ? TRUE : FALSE);
@@ -1030,7 +1046,7 @@ rfbAllocateFramebufferMemory(prfb)
 
     prfb->sizeInBytes = (prfb->paddedWidthInBytes * prfb->height);
 
-    prfb->pfbMemory = (char *)Xalloc(prfb->sizeInBytes);
+    prfb->pfbMemory = (char *)malloc(prfb->sizeInBytes);
 
     return prfb->pfbMemory;
 }
@@ -1061,10 +1077,11 @@ rfbClientStateChange(cbl, myData, clt)
 }
 
 void
-ddxGiveUp()
+ddxGiveUp(error)
+    enum ExitCode error;
 {
     ShutdownTightThreads();
-    Xfree(rfbScreen.pfbMemory);
+    free(rfbScreen.pfbMemory);
     if (initOutputCalled) {
         char unixSocketName[32];
         sprintf(unixSocketName, "/tmp/.X11-unix/X%s", display);
@@ -1073,9 +1090,19 @@ ddxGiveUp()
 }
 
 void
-AbortDDX()
+AbortDDX(error)
+    enum ExitCode error;
 {
-    ddxGiveUp();
+    ddxGiveUp(error);
+}
+
+void DDXRingBell(percent, pitch, duration)
+    int percent;
+    int pitch;
+    int duration;
+{
+    if (percent > 0)
+        rfbSendBell();
 }
 
 void
@@ -1089,27 +1116,14 @@ OsVendorInit()
         rfbLog("NOTICE: idle timeout set to %d seconds per system policy\n",
             rfbIdleTimeout);
     }
-    if (rfbIdleTimeout > 0) {
-        idleTimer = TimerSet(idleTimer, 0, rfbIdleTimeout * 1000,
-                             idleTimeoutCallback, NULL);
-    }
+    if (rfbIdleTimeout > 0)
+        IdleTimerSet();
 }
 
 void
 OsVendorFatalError()
 {
 }
-
-#ifdef DDXTIME /* from ServerOSDefines */
-CARD64
-GetTimeInMillis()
-{
-    struct timeval  tp;
-
-    X_GETTIMEOFDAY(&tp);
-    return(tp.tv_sec * 1000) + (tp.tv_usec / 1000);
-}
-#endif
 
 void
 ddxUseMsg()

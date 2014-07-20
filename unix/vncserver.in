@@ -60,6 +60,7 @@ $enableHTTP = 1;
 $skipxstartup = 0;
 $autoLosslessRefresh = 0.0;
 $deferUpdate = 1;
+$useVGL = 0;
 
 # Read configuration from the system-wide and user files if present.
 
@@ -75,9 +76,6 @@ $defaultXStartup
     = ("#!/bin/sh\n\n".
        "unset SESSION_MANAGER\n".
        "OS=`uname -s`\n".
-       "# Uncomment the following line if you experience keyboard mapping problems\n".
-       "# with Gnome.\n".
-       "#export XKL_XMODMAP_DISABLE=1\n".
        "if [ \$OS = 'Linux' ]; then\n".
        "  case \"\$WINDOWMANAGER\" in\n".
        "    \*gnome\*)\n".
@@ -171,7 +169,7 @@ if (-d "/etc/X11/fontpath.d") {
     $fontPath = "catalogue:/etc/X11/fontpath.d";
 }
 
-@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts', '/usr/share/fonts/X11/', '/usr/local/lib/X11/fonts');
+@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts', '/usr/share/fonts/X11', '/usr/local/lib/X11/fonts');
 if (! -l "/usr/lib/X11") {push(@fontpaths, '/usr/lib/X11/fonts');}
 if (! -l "/usr/X11") {push(@fontpaths, '/usr/X11/lib/X11/fonts');}
 if (! -l "/usr/openwin") {push(@fontpaths, '/usr/openwin/lib/X11/fonts');}
@@ -186,10 +184,15 @@ push(@fontpaths, '/usr/share/fonts/default');
              'Speedo',
              'Type1',
              'ghostscript',
-             'liberation');
+             'liberation',
+             'TTF',
+             'OTF');
 
 if (($fontPath eq "")) {
     foreach $_fpath (@fontpaths) {
+        if (-f "$_fpath/encodings/encodings.dir") {
+            $ENV{FONT_ENCODINGS_DIRECTORY}= "$_fpath/encodings";
+        }
         foreach $_ftype (@fonttypes) {
             if (-f "$_fpath/$_ftype/fonts.dir") {
                 if (! -l "$_fpath/$_ftype") {
@@ -211,20 +214,22 @@ if ($os eq "SunOS") {
     $defFontPath = "unix/:7100";
 }
 
-if (-f "/usr/lib/X11/rgb.txt") {
-    $colorPath = "/usr/lib/X11/rgb";
-} elsif (-f "/usr/X11/lib/X11/rgb.txt") {
-    $colorPath = "/usr/X11/lib/X11/rgb";
-} elsif (-f "/usr/share/X11/rgb.txt") {
-    $colorPath = "/usr/share/X11/rgb";
-} elsif (-f "/usr/openwin/lib/X11/rgb.txt") {
-    $colorPath = "/usr/openwin/lib/X11/rgb";
-} elsif (-f "/usr/X11R6/lib/X11/rgb.txt") {
-    $colorPath = "/usr/X11R6/lib/X11/rgb";
-} elsif (-f "/usr/share/X11/rgb.txt") {
-    $colorPath = "/usr/share/X11/rgb";
-} elsif (-f "/opt/X11/share/X11/rgb.txt") {
-    $colorPath = "/opt/X11/share/X11/rgb";
+if ($os eq "Darwin") {
+    $fontPath = "$fontPath,/Library/Fonts,/System/Library/Fonts";
+}
+
+@xkbdirs = ('/usr/X11R6/lib/X11/xkb', '/usr/local/share/X11/xkb', '/opt/X11/share/X11/xkb');
+foreach $_xkbdir (@xkbdirs) {
+  if (-d "$_xkbdir") {
+    $xkbdir = "$_xkbdir";
+  }
+}
+
+@xkbcompdirs = ('/usr/X11R6/bin', '/usr/X11/lib/X11/xkb', '/usr/local/bin', '/opt/X11/bin');
+foreach $_xkbcompdir (@xkbcompdirs) {
+  if (-x "$_xkbcompdir/xkbcomp") {
+    $xkbcompdir = "$_xkbcompdir";
+  }
 }
 
 # Check command line options
@@ -233,7 +238,7 @@ if (-f "/usr/lib/X11/rgb.txt") {
               "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
               "-novncauth",0,"-nootp",0,"-nopam",0,"-noauth",0,"-nohttp",0,
               "-nohttpd",0,"-rfbauth",1,"-noxstartup",0,"-xstartup",1,
-              "-log",1);
+              "-log",1,"-3dwm",0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -266,6 +271,9 @@ if ($opt{'-noxstartup'}) {
 }
 if ($opt{'-xstartup'}) {
     $xstartup = $opt{'-xstartup'};
+}
+if ($opt{'-3dwm'}) {
+    $useVGL = 1;
 }
 if ($opt{'-fp'}) {
     $fontPath = $opt{'-fp'};
@@ -413,7 +421,7 @@ if ($cookie eq "") {
 }
 
 system("$xauth -f $xauthorityFile add $host:$displayNumber . $cookie");
-system("$xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie"); 
+system("$xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie");
 if ($vncUserDirUnderTmp) {
     system("$xauth merge $xauthorityFile");
 }
@@ -433,10 +441,11 @@ $cmd .= " -rfbwait 120000";
 $cmd .= " $authType";
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
-$cmd .= " -co $colorPath" if ($colorPath);
 $cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
 #$cmd .= " -nolisten local" if ($os eq "SunOS");
 $cmd .= " -deferupdate $deferUpdate";
+$cmd .= " -xkbdir $xkbdir" if ($xkbdir);
+$cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir);
 
 foreach $arg (@ARGV) {
     $cmd .= " " . &quotedString($arg);
@@ -497,6 +506,9 @@ if (! $skipxstartup) {
     # Run the X startup script.
 
     warn "Starting applications specified in $xstartup\n";
+    if ($useVGL) {
+        warn "(Enabling experimental 3D window manager support)\n";
+    }
 }
 warn "Log file is $desktopLog\n\n";
 
@@ -515,13 +527,21 @@ system($exedir."tvncconfig >> " . &quotedString($desktopLog) . " 2>&1 &");
 
 if (! $skipxstartup) {
   if ($opt{'-fg'}) {
-    system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
+    if ($useVGL) {
+      system("vglrun +wm $xstartup >> " . &quotedString($desktopLog) . " 2>&1");
+    } else {
+      system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
+    }
     if (kill 0, `cat $pidFile`) {
         $opt{'-kill'} = ':'.$displayNumber;
         &Kill();
     }
   } else {
-    system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
+    if ($useVGL) {
+      system("vglrun +wm $xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
+    } else {
+      system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
+    }
   }
 }
 
@@ -575,7 +595,7 @@ sub GetDisplayNumber
             return $n+0; # Bruce Mah's workaround for bug in perl 5.005_02
         }
     }
-    
+
     die "$prog: no free display number on $host.\n";
 }
 
@@ -822,7 +842,7 @@ sub Kill
     } else {
         warn "Xvnc process ID $pid already killed\n";
         $opt{'-kill'} =~ s/://;
-    
+
         if (-e "/tmp/.X11-unix/X$opt{'-kill'}") {
             print "Xvnc did not appear to shut down cleanly.";
             print " Removing /tmp/.X11-unix/X$opt{'-kill'}\n";
@@ -997,7 +1017,6 @@ sub ReadConfiguration
        vncUserDir
        fontPath
        authType
-       colorPath
        generateOTP
        autoLosslessRefresh
        enableHTTP

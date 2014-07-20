@@ -20,17 +20,17 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: dixstruct.h /main/43 1996/12/15 21:25:06 rws $ */
-/* $XFree86: xc/programs/Xserver/include/dixstruct.h,v 3.8 1996/12/24 02:27:28 dawes Exp $ */
 
 #ifndef DIXSTRUCT_H
 #define DIXSTRUCT_H
 
+#include "client.h"
 #include "dix.h"
 #include "resource.h"
 #include "cursor.h"
 #include "gc.h"
 #include "pixmap.h"
+#include "privates.h"
 #include <X11/Xmd.h>
 
 /*
@@ -38,200 +38,158 @@ SOFTWARE.
  *      translation from client ids to server addresses.
  */
 
-#ifdef DEBUG
-#define MAX_REQUEST_LOG 100
-#endif
-
-extern CallbackListPtr ClientStateCallback;
+extern _X_EXPORT CallbackListPtr ClientStateCallback;
 
 typedef struct {
-    ClientPtr 		client;
-    xConnSetupPrefix 	*prefix; 
-    xConnSetup  	*setup;
+    ClientPtr client;
+    xConnSetupPrefix *prefix;
+    xConnSetup *setup;
 } NewClientInfoRec;
 
-typedef void (*ReplySwapPtr) (
-#if NeedNestedPrototypes
-		ClientPtr	/* pClient */,
-		int		/* size */,
-		void *		/* pbuf */
-#endif
-);
+typedef void (*ReplySwapPtr) (ClientPtr /* pClient */ ,
+                              int /* size */ ,
+                              void * /* pbuf */ );
 
-extern void ReplyNotSwappd (
-#if NeedNestedPrototypes
-		ClientPtr	/* pClient */,
-		int		/* size */,
-		void *		/* pbuf */
-#endif
-);
+extern _X_EXPORT void
+ReplyNotSwappd(ClientPtr /* pClient */ ,
+               int /* size */ ,
+               void * /* pbuf */ ) _X_NORETURN;
 
-typedef enum {ClientStateInitial,
-	      ClientStateAuthenticating,
-	      ClientStateRunning,
-	      ClientStateRetained,
-	      ClientStateGone,
-	      ClientStateCheckingSecurity,
-	      ClientStateCheckedSecurity} ClientState;
+typedef enum { ClientStateInitial,
+    /* 1 is unused now, was ClientStateAuthenticating */
+    ClientStateRunning = 2,
+    ClientStateRetained,
+    ClientStateGone
+} ClientState;
+
+#ifdef XFIXES
+typedef struct _saveSet {
+    struct _Window *windowPtr;
+    Bool toRoot;
+    Bool map;
+} SaveSetElt;
+#define SaveSetWindow(ss)   ((ss).windowPtr)
+#define SaveSetToRoot(ss)   ((ss).toRoot)
+#define SaveSetShouldMap(ss)	    ((ss).map)
+#define SaveSetAssignWindow(ss,w)   ((ss).windowPtr = (w))
+#define SaveSetAssignToRoot(ss,tr)  ((ss).toRoot = (tr))
+#define SaveSetAssignMap(ss,m)      ((ss).map = (m))
+#else
+typedef struct _Window *SaveSetElt;
+
+#define SaveSetWindow(ss)   (ss)
+#define SaveSetToRoot(ss)   FALSE
+#define SaveSetShouldMap(ss)	    TRUE
+#define SaveSetAssignWindow(ss,w)   ((ss) = (w))
+#define SaveSetAssignToRoot(ss,tr)
+#define SaveSetAssignMap(ss,m)
+#endif
 
 typedef struct _Client {
-    int         index;
-    Mask        clientAsMask;
-    pointer     requestBuffer;
-    pointer     osPrivate;	/* for OS layer, including scheduler */
-    Bool        swapped;
+    int index;
+    Mask clientAsMask;
+    pointer requestBuffer;
+    pointer osPrivate;          /* for OS layer, including scheduler */
+    Bool swapped;
     ReplySwapPtr pSwapReplyFunc;
-    XID         errorValue;
-    int         sequence;
-    int         closeDownMode;
-    int         clientGone;
-    int         noClientException;	/* this client died or needs to be
-					 * killed */
-    DrawablePtr lastDrawable;
-    Drawable    lastDrawableID;
-    GCPtr       lastGC;
-    GContext    lastGCID;
-    pointer    *saveSet;
-    int         numSaved;
-    pointer     screenPrivate[MAXSCREENS];
-    int         (**requestVector) (
-#if NeedNestedPrototypes
-		ClientPtr /* pClient */
-#endif
-);
-    CARD32	req_len;		/* length of current request */
-    Bool	big_requests;		/* supports large requests */
-    int		priority;
+    XID errorValue;
+    int sequence;
+    int closeDownMode;
+    int clientGone;
+    int noClientException;      /* this client died or needs to be
+                                 * killed */
+    int ignoreCount;            /* count for Attend/IgnoreClient */
+    SaveSetElt *saveSet;
+    int numSaved;
+    int (**requestVector) (ClientPtr /* pClient */ );
+    CARD32 req_len;             /* length of current request */
+    Bool big_requests;          /* supports large requests */
+    int priority;
     ClientState clientState;
-    DevUnion	*devPrivates;
-#ifdef XKB
-    unsigned short	xkbClientFlags;
-    unsigned short	mapNotifyMask;
-    unsigned short	newKeyboardNotifyMask;
-    unsigned short	vMajor,vMinor;
-    KeyCode		minKC,maxKC;
-#endif
+    PrivateRec *devPrivates;
+    unsigned short xkbClientFlags;
+    unsigned short mapNotifyMask;
+    unsigned short newKeyboardNotifyMask;
+    unsigned short vMajor, vMinor;
+    KeyCode minKC, maxKC;
 
-#ifdef DEBUG
-    unsigned char requestLog[MAX_REQUEST_LOG];
-    int         requestLogIndex;
-#endif
-#ifdef LBX
-    int		(*readRequest)(
-#if NeedNestedPrototypes
-	ClientPtr /*client*/
-#endif
-);
-#endif
     unsigned long replyBytesRemaining;
-#ifdef XCSECURITY
-    XID		authId;
-    unsigned int trustLevel;
-    pointer (* CheckAccess)(
-#if NeedNestedPrototypes
-	    ClientPtr /*pClient*/,
-	    XID /*id*/,
-	    RESTYPE /*classes*/,
-	    Mask /*access_mode*/,
-	    pointer /*resourceval*/
-#endif
-);
-#endif
-#ifdef XAPPGROUP
-    struct _AppGroupRec*	appgroup;
-#endif
-    struct _FontResolution * (*fontResFunc) (    /* no need for font.h */
-#if NeedNestedPrototypes
-		ClientPtr	/* pClient */,
-		int *		/* num */
-#endif
-);
-}           ClientRec;
+    int smart_priority;
+    long smart_start_tick;
+    long smart_stop_tick;
+    long smart_check_tick;
+
+    DeviceIntPtr clientPtr;
+    ClientIdPtr clientIds;
+    unsigned short majorOp, minorOp;
+} ClientRec;
+
+/*
+ * Scheduling interface
+ */
+extern _X_EXPORT long SmartScheduleTime;
+extern _X_EXPORT long SmartScheduleInterval;
+extern _X_EXPORT long SmartScheduleSlice;
+extern _X_EXPORT long SmartScheduleMaxSlice;
+extern _X_EXPORT Bool SmartScheduleDisable;
+extern _X_EXPORT void
+SmartScheduleStartTimer(void);
+extern _X_EXPORT void
+SmartScheduleStopTimer(void);
+
+#define SMART_MAX_PRIORITY  (20)
+#define SMART_MIN_PRIORITY  (-20)
+
+extern _X_EXPORT void
+SmartScheduleInit(void);
 
 /* This prototype is used pervasively in Xext, dix */
-#if NeedFunctionPrototypes
 #define DISPATCH_PROC(func) int func(ClientPtr /* client */)
-#else
-#define DISPATCH_PROC(func) int func(/* ClientPtr client */)
-#endif
 
 typedef struct _WorkQueue {
     struct _WorkQueue *next;
-    Bool        (*function) (
-#if NeedNestedPrototypes
-		ClientPtr	/* pClient */,
-		pointer		/* closure */
-#endif
-);
-    ClientPtr   client;
-    pointer     closure;
-}           WorkQueueRec;
+    Bool (*function) (ClientPtr /* pClient */ ,
+                      pointer   /* closure */
+        );
+    ClientPtr client;
+    pointer closure;
+} WorkQueueRec;
 
-extern TimeStamp currentTime;
-extern TimeStamp lastDeviceEventTime;
+extern _X_EXPORT TimeStamp currentTime;
+extern _X_EXPORT TimeStamp lastDeviceEventTime;
 
-extern int CompareTimeStamps(
-#if NeedFunctionPrototypes
-    TimeStamp /*a*/,
-    TimeStamp /*b*/
-#endif
-);
+extern _X_EXPORT int
+CompareTimeStamps(TimeStamp /*a */ ,
+                  TimeStamp /*b */ );
 
-extern TimeStamp ClientTimeToServerTime(
-#if NeedFunctionPrototypes
-    CARD32 /*c*/
-#endif
-);
+extern _X_EXPORT TimeStamp
+ClientTimeToServerTime(CARD32 /*c */ );
 
 typedef struct _CallbackRec {
-  CallbackProcPtr proc;
-  pointer data;
-  Bool deleted;
-  struct _CallbackRec *next;
+    CallbackProcPtr proc;
+    pointer data;
+    Bool deleted;
+    struct _CallbackRec *next;
 } CallbackRec, *CallbackPtr;
 
 typedef struct _CallbackList {
-  CallbackFuncsRec funcs;
-  int inCallback;
-  Bool deleted;
-  int numDeleted;
-  CallbackPtr list;
+    int inCallback;
+    Bool deleted;
+    int numDeleted;
+    CallbackPtr list;
 } CallbackListRec;
 
 /* proc vectors */
 
-extern int (* InitialVector[3]) (
-#if NeedNestedPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT int (*InitialVector[3]) (ClientPtr /*client */ );
 
-extern int (* ProcVector[256]) (
-#if NeedNestedPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT int (*ProcVector[256]) (ClientPtr /*client */ );
 
-extern int (* SwappedProcVector[256]) (
-#if NeedNestedPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT int (*SwappedProcVector[256]) (ClientPtr /*client */ );
 
-#ifdef K5AUTH
-extern int (*k5_Vector[256])() =
-#if NeedNestedPrototypes
-    ClientPtr /*client*/
-#endif
-);
-#endif
+extern _X_EXPORT ReplySwapPtr ReplySwapVector[256];
 
-extern void (* ReplySwapVector[256]) ();
+extern _X_EXPORT int
+ProcBadRequest(ClientPtr /*client */ );
 
-extern int ProcBadRequest(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/
-#endif
-);
-
-#endif				/* DIXSTRUCT_H */
+#endif                          /* DIXSTRUCT_H */

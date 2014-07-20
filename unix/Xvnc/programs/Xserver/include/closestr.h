@@ -1,4 +1,3 @@
-/* $Xorg: closestr.h,v 1.4 2001/02/09 02:05:14 xorgcvs Exp $ */
 /*
 
 Copyright 1991, 1998  The Open Group
@@ -26,14 +25,11 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
-/* $XFree86: xc/programs/Xserver/include/closestr.h,v 3.5 2003/11/17 22:20:43 dawes Exp $ */
-
 
 #ifndef CLOSESTR_H
 #define CLOSESTR_H
 
-#define	NEED_REPLIES
-#include "Xproto.h"
+#include <X11/Xproto.h>
 #include "closure.h"
 #include "dix.h"
 #include "misc.h"
@@ -44,120 +40,87 @@ from The Open Group.
 /* OpenFont */
 
 typedef struct _OFclosure {
-    ClientPtr   client;
-    short       current_fpe;
-    short       num_fpes;
+    ClientPtr client;
+    short current_fpe;
+    short num_fpes;
     FontPathElementPtr *fpe_list;
-    Mask        flags;
-    Bool        slept;
+    Mask flags;
 
 /* XXX -- get these from request buffer instead? */
-    char       *origFontName;
-    int		origFontNameLen;
-    XID         fontid;
-    char       *fontname;
-    int         fnamelen;
-    FontPtr	non_cachable_font;
-}           OFclosureRec;
+    char *origFontName;
+    int origFontNameLen;
+    XID fontid;
+    char *fontname;
+    int fnamelen;
+    FontPtr non_cachable_font;
+} OFclosureRec;
 
 /* ListFontsWithInfo */
 
 #define XLFDMAXFONTNAMELEN	256
 typedef struct _LFWIstate {
-    char	pattern[XLFDMAXFONTNAMELEN];
-    int		patlen;
-    int		current_fpe;
-    int		max_names;
-    Bool	list_started;
-    pointer	private;
+    char pattern[XLFDMAXFONTNAMELEN];
+    int patlen;
+    int current_fpe;
+    int max_names;
+    Bool list_started;
+    pointer private;
 } LFWIstateRec, *LFWIstatePtr;
 
 typedef struct _LFWIclosure {
-    ClientPtr		client;
-    int			num_fpes;
-    FontPathElementPtr	*fpe_list;
+    ClientPtr client;
+    int num_fpes;
+    FontPathElementPtr *fpe_list;
     xListFontsWithInfoReply *reply;
-    int			length;
-    LFWIstateRec	current;
-    LFWIstateRec	saved;
-    int			savedNumFonts;
-    Bool		haveSaved;
-    Bool		slept;
-    char		*savedName;
+    int length;
+    LFWIstateRec current;
+    LFWIstateRec saved;
+    int savedNumFonts;
+    Bool haveSaved;
+    char *savedName;
 } LFWIclosureRec;
 
 /* ListFonts */
 
 typedef struct _LFclosure {
-    ClientPtr   client;
-    int         num_fpes;
+    ClientPtr client;
+    int num_fpes;
     FontPathElementPtr *fpe_list;
     FontNamesPtr names;
     LFWIstateRec current;
     LFWIstateRec saved;
-    Bool        haveSaved;
-    Bool        slept;
-    char	*savedName;
-    int		savedNameLen;
-}	LFclosureRec;
+    Bool haveSaved;
+    char *savedName;
+    int savedNameLen;
+} LFclosureRec;
 
 /* PolyText */
 
-typedef
-    int			(* PolyTextPtr)(
-#if NeedNestedPrototypes
-			DrawablePtr /* pDraw */,
-			GCPtr /* pGC */,
-			int /* x */,
-			int /* y */,
-			int /* count */,
-			void * /* chars or shorts */
-#endif
-			);
-
 typedef struct _PTclosure {
-    ClientPtr		client;
-    DrawablePtr		pDraw;
-    GC			*pGC;
-    unsigned char	*pElt;
-    unsigned char	*endReq;
-    unsigned char	*data;
-    int			xorg;
-    int			yorg;
-    CARD8		reqType;
-    PolyTextPtr		polyText;
-    int			itemSize;
-    XID			did;
-    int			err;
-    Bool		slept;
+    ClientPtr client;
+    DrawablePtr pDraw;
+    GC *pGC;
+    unsigned char *pElt;
+    unsigned char *endReq;
+    unsigned char *data;
+    int xorg;
+    int yorg;
+    CARD8 reqType;
+    XID did;
+    int err;
 } PTclosureRec;
 
 /* ImageText */
 
-typedef
-    void		(* ImageTextPtr)(
-#if NeedNestedPrototypes
-			DrawablePtr /* pDraw */,
-			GCPtr /* pGC */,
-			int /* x */,
-			int /* y */,
-			int /* count */,
-			void * /* chars or shorts */
-#endif
-			);
-
 typedef struct _ITclosure {
-    ClientPtr		client;
-    DrawablePtr		pDraw;
-    GC			*pGC;
-    BYTE		nChars;
-    unsigned char	*data;
-    int			xorg;
-    int			yorg;
-    CARD8		reqType;
-    ImageTextPtr	imageText;
-    int			itemSize;
-    XID			did;
-    Bool		slept;
+    ClientPtr client;
+    DrawablePtr pDraw;
+    GC *pGC;
+    BYTE nChars;
+    unsigned char *data;
+    int xorg;
+    int yorg;
+    CARD8 reqType;
+    XID did;
 } ITclosureRec;
-#endif				/* CLOSESTR_H */
+#endif                          /* CLOSESTR_H */

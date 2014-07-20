@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    Postscript (Type1/Type2) hints recorder (specification).             */
 /*                                                                         */
-/*  Copyright 2001, 2002 by                                                */
+/*  Copyright 2001, 2002, 2003, 2006, 2008 by                              */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -22,7 +22,7 @@
   /*  font drivers to record the hints of a given character/glyph.          */
   /*                                                                        */
   /*  The hints are recorded in a unified format, and are later processed   */
-  /*  by the "optimizer" and "fitter" to adjust the outlines to the pixel   */
+  /*  by the `optimizer' and `fitter' to adjust the outlines to the pixel   */
   /*  grid.                                                                 */
   /*                                                                        */
   /**************************************************************************/
@@ -52,7 +52,7 @@ FT_BEGIN_HEADER
   typedef struct PS_HintRec_*  PS_Hint;
 
   /* hint types */
-  typedef enum
+  typedef enum  PS_Hint_Type_
   {
     PS_HINT_TYPE_1 = 1,
     PS_HINT_TYPE_2 = 2
@@ -61,7 +61,7 @@ FT_BEGIN_HEADER
 
 
   /* hint flags */
-  typedef enum
+  typedef enum  PS_Hint_Flags_
   {
     PS_HINT_FLAG_GHOST  = 1,
     PS_HINT_FLAG_BOTTOM = 2
@@ -123,10 +123,6 @@ FT_BEGIN_HEADER
     PS_Mask_TableRec  counters;
 
   } PS_DimensionRec, *PS_Dimension;
-
-
-  /* magic value used within PS_HintsRec */
-#define PS_HINTS_MAGIC  0x68696e74   /* "hint" */
 
 
   /* glyph hints descriptor                                */

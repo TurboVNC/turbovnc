@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/include/dixevents.h,v 3.2 1996/12/24 02:27:27 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -27,230 +26,62 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef DIXEVENTS_H
 #define DIXEVENTS_H
 
-extern Mask
-GetNextEventMask(
-#if NeedFunctionPrototypes
-	void
-#endif
-	);
+extern _X_EXPORT void SetCriticalEvent(int /* event */ );
 
-extern void
-SetCriticalEvent(
-#if NeedFunctionPrototypes
-	int                    /* event */
-#endif
-	);
+extern _X_EXPORT CursorPtr GetSpriteCursor(DeviceIntPtr /*pDev */ );
 
-extern void
-ConfineCursorToWindow(
-#if NeedFunctionPrototypes
-	WindowPtr              /* pWin */,
-	Bool                   /* generateEvents */,
-	Bool                   /* confineToScreen */
-#endif
-	);
+extern _X_EXPORT int ProcAllowEvents(ClientPtr /* client */ );
 
-extern CursorPtr
-GetSpriteCursor(
-#if NeedFunctionPrototypes
-	void
-#endif
-	);
+extern _X_EXPORT int MaybeDeliverEventsToClient(WindowPtr /* pWin */ ,
+                                                xEvent * /* pEvents */ ,
+                                                int /* count */ ,
+                                                Mask /* filter */ ,
+                                                ClientPtr /* dontClient */ );
 
-extern int
-ProcAllowEvents(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcWarpPointer(ClientPtr /* client */ );
 
-extern int
-TryClientEvents (
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */,
-	xEvent *               /* pEvents */,
-	int                    /* count */,
-	Mask                   /* mask */,
-	Mask                   /* filter */,
-	GrabPtr                /* grab */
-#endif
-	);
+extern _X_EXPORT int EventSelectForWindow(WindowPtr /* pWin */ ,
+                                          ClientPtr /* client */ ,
+                                          Mask /* mask */ );
 
-extern int
-MaybeDeliverEventsToClient(
-#if NeedFunctionPrototypes
-	WindowPtr              /* pWin */,
-	xEvent *               /* pEvents */,
-	int                    /* count */,
-	Mask                   /* filter */,
-	ClientPtr              /* dontClient */
-#endif
-	);
+extern _X_EXPORT int EventSuppressForWindow(WindowPtr /* pWin */ ,
+                                            ClientPtr /* client */ ,
+                                            Mask /* mask */ ,
+                                            Bool * /* checkOptional */ );
 
-extern void
-WindowsRestructured(
-#if NeedFunctionPrototypes
-	void
-#endif
-	);
+extern _X_EXPORT int ProcSetInputFocus(ClientPtr /* client */ );
 
-extern void
-NewCurrentScreen(
-#if NeedFunctionPrototypes
-	ScreenPtr              /* newScreen */,
-	int                    /* x */,
-	int                    /* y */
-#endif
-	);
+extern _X_EXPORT int ProcGetInputFocus(ClientPtr /* client */ );
 
-extern int
-ProcWarpPointer(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcGrabPointer(ClientPtr /* client */ );
 
-extern void
-#ifdef XKB
-CoreProcessKeyboardEvent (
-#else
-ProcessKeyboardEvent (
-#endif
-#if NeedFunctionPrototypes
-	xEvent *               /* xE */,
-	DeviceIntPtr           /* keybd */,
-	int                    /* count */
-#endif
-	);
+extern _X_EXPORT int ProcChangeActivePointerGrab(ClientPtr /* client */ );
 
-extern void
-#ifdef XKB
-CoreProcessPointerEvent (
-#else
-ProcessPointerEvent (
-#endif
-#if NeedFunctionPrototypes
-	xEvent *               /* xE */,
-	DeviceIntPtr           /* mouse */,
-	int                    /* count */
-#endif
-	);
+extern _X_EXPORT int ProcUngrabPointer(ClientPtr /* client */ );
 
-extern int
-EventSelectForWindow(
-#if NeedFunctionPrototypes
-	WindowPtr              /* pWin */,
-	ClientPtr              /* client */,
-	Mask                   /* mask */
-#endif
-	);
+extern _X_EXPORT int ProcGrabKeyboard(ClientPtr /* client */ );
 
-extern int
-EventSuppressForWindow(
-#if NeedFunctionPrototypes
-	WindowPtr              /* pWin */,
-	ClientPtr              /* client */,
-	Mask                   /* mask */,
-	Bool *                 /* checkOptional */
-#endif
-	);
+extern _X_EXPORT int ProcUngrabKeyboard(ClientPtr /* client */ );
 
-extern int
-ProcSetInputFocus(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcQueryPointer(ClientPtr /* client */ );
 
-extern int
-ProcGetInputFocus(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcSendEvent(ClientPtr /* client */ );
 
-extern int
-ProcGrabPointer(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcUngrabKey(ClientPtr /* client */ );
 
-extern int
-ProcChangeActivePointerGrab(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcGrabKey(ClientPtr /* client */ );
 
-extern int
-ProcUngrabPointer(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcGrabButton(ClientPtr /* client */ );
 
-extern int
-ProcGrabKeyboard(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcUngrabButton(ClientPtr /* client */ );
 
-extern int
-ProcUngrabKeyboard(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
+extern _X_EXPORT int ProcRecolorCursor(ClientPtr /* client */ );
 
-extern int
-ProcQueryPointer(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
+#ifdef PANORAMIX
+extern _X_EXPORT void PostSyntheticMotion(DeviceIntPtr pDev,
+                                          int x,
+                                          int y,
+                                          int screen, unsigned long time);
 #endif
-	);
 
-extern int
-ProcSendEvent(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
-
-extern int
-ProcUngrabKey(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
-
-extern int
-ProcGrabKey(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
-
-extern int
-ProcGrabButton(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
-
-extern int
-ProcUngrabButton(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
-
-extern int
-ProcRecolorCursor(
-#if NeedFunctionPrototypes
-	ClientPtr              /* client */
-#endif
-	);
-
-#endif /* DIXEVENTS_H */
+#endif                          /* DIXEVENTS_H */

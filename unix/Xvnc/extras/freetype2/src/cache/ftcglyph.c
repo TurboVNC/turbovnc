@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType Glyph Image (FT_Glyph) cache (body).                        */
 /*                                                                         */
-/*  Copyright 2000-2001 by                                                 */
+/*  Copyright 2000-2001, 2003, 2004, 2006, 2009, 2011 by                   */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -17,59 +17,82 @@
 
 
 #include <ft2build.h>
-#include FT_CACHE_H
-#include FT_CACHE_INTERNAL_GLYPH_H
-#include FT_ERRORS_H
-#include FT_LIST_H
 #include FT_INTERNAL_OBJECTS_H
-#include FT_INTERNAL_DEBUG_H
+#include FT_CACHE_H
+#include "ftcglyph.h"
+#include FT_ERRORS_H
 
+#include "ftccback.h"
 #include "ftcerror.h"
 
 
   /* create a new chunk node, setting its cache index and ref count */
-  FT_EXPORT_DEF( void )
-  ftc_glyph_node_init( FTC_GlyphNode     gnode,
-                       FT_UInt           gindex,
-                       FTC_GlyphFamily   gfam )
+  FT_LOCAL_DEF( void )
+  FTC_GNode_Init( FTC_GNode   gnode,
+                  FT_UInt     gindex,
+                  FTC_Family  family )
   {
-    FT_UInt  len;
-    FT_UInt  start = FTC_GLYPH_FAMILY_START( gfam, gindex );
-
-
-    gnode->item_start = (FT_UShort)start;
-
-    len = gfam->item_total - start;
-    if ( len > gfam->item_count )
-      len = gfam->item_count;
-
-    gnode->item_count = (FT_UShort)len;
-    gfam->family.num_nodes++;
+    gnode->family = family;
+    gnode->gindex = gindex;
+    family->num_nodes++;
   }
 
 
-  FT_EXPORT_DEF( void )
-  ftc_glyph_node_done( FTC_GlyphNode  gnode,
-                       FTC_Cache      cache )
+  FT_LOCAL_DEF( void )
+  FTC_GNode_UnselectFamily( FTC_GNode  gnode,
+                            FTC_Cache  cache )
+  {
+    FTC_Family  family = gnode->family;
+
+
+    gnode->family = NULL;
+    if ( family && --family->num_nodes == 0 )
+      FTC_FAMILY_FREE( family, cache );
+  }
+
+
+  FT_LOCAL_DEF( void )
+  FTC_GNode_Done( FTC_GNode  gnode,
+                  FTC_Cache  cache )
   {
     /* finalize the node */
-    gnode->item_count = 0;
-    gnode->item_start = 0;
+    gnode->gindex = 0;
 
-    ftc_node_done( FTC_NODE( gnode ), cache );
+    FTC_GNode_UnselectFamily( gnode, cache );
   }
 
 
-  FT_EXPORT_DEF( FT_Bool )
-  ftc_glyph_node_compare( FTC_GlyphNode   gnode,
-                          FTC_GlyphQuery  gquery )
+  FT_LOCAL_DEF( FT_Bool )
+  ftc_gnode_compare( FTC_Node    ftcgnode,
+                     FT_Pointer  ftcgquery,
+                     FTC_Cache   cache,
+                     FT_Bool*    list_changed )
   {
-    FT_UInt  start = (FT_UInt)gnode->item_start;
-    FT_UInt  count = (FT_UInt)gnode->item_count;
+    FTC_GNode   gnode  = (FTC_GNode)ftcgnode;
+    FTC_GQuery  gquery = (FTC_GQuery)ftcgquery;
+    FT_UNUSED( cache );
 
-    return FT_BOOL( (FT_UInt)( gquery->gindex - start ) < count );
+
+    if ( list_changed )
+      *list_changed = FALSE;
+    return FT_BOOL( gnode->family == gquery->family &&
+                    gnode->gindex == gquery->gindex );
   }
 
+
+#ifdef FTC_INLINE
+
+  FT_LOCAL_DEF( FT_Bool )
+  FTC_GNode_Compare( FTC_GNode   gnode,
+                     FTC_GQuery  gquery,
+                     FTC_Cache   cache,
+                     FT_Bool*    list_changed )
+  {
+    return ftc_gnode_compare( FTC_NODE( gnode ), gquery,
+                              cache, list_changed );
+  }
+
+#endif
 
   /*************************************************************************/
   /*************************************************************************/
@@ -79,37 +102,118 @@
   /*************************************************************************/
   /*************************************************************************/
 
-
-  FT_EXPORT_DEF( FT_Error )
-  ftc_glyph_family_init( FTC_GlyphFamily  gfam,
-                         FT_UInt32        hash,
-                         FT_UInt          item_count,
-                         FT_UInt          item_total,
-                         FTC_GlyphQuery   gquery,
-                         FTC_Cache        cache )
+  FT_LOCAL_DEF( void )
+  FTC_Family_Init( FTC_Family  family,
+                   FTC_Cache   cache )
   {
-    FT_Error  error;
+    FTC_GCacheClass  clazz = FTC_CACHE__GCACHE_CLASS( cache );
 
 
-    error = ftc_family_init( FTC_FAMILY( gfam ), FTC_QUERY( gquery ), cache );
+    family->clazz     = clazz->family_class;
+    family->num_nodes = 0;
+    family->cache     = cache;
+  }
+
+
+  FT_LOCAL_DEF( FT_Error )
+  ftc_gcache_init( FTC_Cache  ftccache )
+  {
+    FTC_GCache  cache = (FTC_GCache)ftccache;
+    FT_Error    error;
+
+
+    error = FTC_Cache_Init( FTC_CACHE( cache ) );
     if ( !error )
     {
-      gfam->hash       = hash;
-      gfam->item_total = item_total;
-      gfam->item_count = item_count;
-      
-      FTC_GLYPH_FAMILY_FOUND( gfam, gquery );
+      FTC_GCacheClass   clazz = (FTC_GCacheClass)FTC_CACHE( cache )->org_class;
+
+      FTC_MruList_Init( &cache->families,
+                        clazz->family_class,
+                        0,  /* no maximum here! */
+                        cache,
+                        FTC_CACHE( cache )->memory );
     }
 
     return error;
   }
 
 
-  FT_EXPORT_DEF( void )
-  ftc_glyph_family_done( FTC_GlyphFamily  gfam )
+#if 0
+
+  FT_LOCAL_DEF( FT_Error )
+  FTC_GCache_Init( FTC_GCache  cache )
   {
-    ftc_family_done( FTC_FAMILY( gfam ) );
+    return ftc_gcache_init( FTC_CACHE( cache ) );
   }
+
+#endif /* 0 */
+
+
+  FT_LOCAL_DEF( void )
+  ftc_gcache_done( FTC_Cache  ftccache )
+  {
+    FTC_GCache  cache = (FTC_GCache)ftccache;
+
+
+    FTC_Cache_Done( (FTC_Cache)cache );
+    FTC_MruList_Done( &cache->families );
+  }
+
+
+#if 0
+
+  FT_LOCAL_DEF( void )
+  FTC_GCache_Done( FTC_GCache  cache )
+  {
+    ftc_gcache_done( FTC_CACHE( cache ) );
+  }
+
+#endif /* 0 */
+
+
+  FT_LOCAL_DEF( FT_Error )
+  FTC_GCache_New( FTC_Manager       manager,
+                  FTC_GCacheClass   clazz,
+                  FTC_GCache       *acache )
+  {
+    return FTC_Manager_RegisterCache( manager, (FTC_CacheClass)clazz,
+                                      (FTC_Cache*)acache );
+  }
+
+
+#ifndef FTC_INLINE
+
+  FT_LOCAL_DEF( FT_Error )
+  FTC_GCache_Lookup( FTC_GCache   cache,
+                     FT_PtrDist   hash,
+                     FT_UInt      gindex,
+                     FTC_GQuery   query,
+                     FTC_Node    *anode )
+  {
+    FT_Error  error;
+
+
+    query->gindex = gindex;
+
+    FTC_MRULIST_LOOKUP( &cache->families, query, query->family, error );
+    if ( !error )
+    {
+      FTC_Family  family = query->family;
+
+
+      /* prevent the family from being destroyed too early when an        */
+      /* out-of-memory condition occurs during glyph node initialization. */
+      family->num_nodes++;
+
+      error = FTC_Cache_Lookup( FTC_CACHE( cache ), hash, query, anode );
+
+      if ( --family->num_nodes == 0 )
+        FTC_FAMILY_FREE( family, cache );
+    }
+    return error;
+  }
+
+#endif /* !FTC_INLINE */
 
 
 /* END */

@@ -1,14 +1,12 @@
-/* $XConsortium: resource.h /main/23 1996/10/30 11:18:23 rws $ */
 /***********************************************************
 
-Copyright (c) 1987, 1989  X Consortium
+Copyright 1987, 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987, 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -46,9 +43,11 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+
 #ifndef RESOURCE_H
 #define RESOURCE_H 1
 #include "misc.h"
+#include "dixaccess.h"
 
 /*****************************************************************
  * STUFF FOR RESOURCES 
@@ -56,7 +55,7 @@ SOFTWARE.
 
 /* classes for Resource routines */
 
-typedef unsigned long RESTYPE;
+typedef uint32_t RESTYPE;
 
 #define RC_VANILLA	((RESTYPE)0)
 #define RC_CACHED	((RESTYPE)1<<31)
@@ -72,9 +71,11 @@ typedef unsigned long RESTYPE;
 
 /* types for Resource routines */
 
-#define RT_WINDOW	((RESTYPE)1|RC_CACHED|RC_DRAWABLE)
-#define RT_PIXMAP	((RESTYPE)2|RC_CACHED|RC_DRAWABLE)
-#define RT_GC		((RESTYPE)3|RC_CACHED)
+#define RT_WINDOW	((RESTYPE)1|RC_DRAWABLE)
+#define RT_PIXMAP	((RESTYPE)2|RC_DRAWABLE)
+#define RT_GC		((RESTYPE)3)
+#undef RT_FONT
+#undef RT_CURSOR
 #define RT_FONT		((RESTYPE)4)
 #define RT_CURSOR	((RESTYPE)5)
 #define RT_COLORMAP	((RESTYPE)6)
@@ -85,14 +86,33 @@ typedef unsigned long RESTYPE;
 #define RT_NONE		((RESTYPE)0)
 
 /* bits and fields within a resource id */
-#define CLIENTOFFSET 22					/* client field */
-#define RESOURCE_ID_MASK	0x3FFFFF		/* low 22 bits */
-#define CLIENT_BITS(id) ((id) & 0x1fc00000)		/* hi 7 bits */
+#define RESOURCE_AND_CLIENT_COUNT   29  /* 29 bits for XIDs */
+#if MAXCLIENTS == 64
+#define RESOURCE_CLIENT_BITS	6
+#endif
+#if MAXCLIENTS == 128
+#define RESOURCE_CLIENT_BITS	7
+#endif
+#if MAXCLIENTS == 256
+#define RESOURCE_CLIENT_BITS	8
+#endif
+#if MAXCLIENTS == 512
+#define RESOURCE_CLIENT_BITS	9
+#endif
+/* client field offset */
+#define CLIENTOFFSET	    (RESOURCE_AND_CLIENT_COUNT - RESOURCE_CLIENT_BITS)
+/* resource field */
+#define RESOURCE_ID_MASK	((1 << CLIENTOFFSET) - 1)
+/* client field */
+#define RESOURCE_CLIENT_MASK	(((1 << RESOURCE_CLIENT_BITS) - 1) << CLIENTOFFSET)
+/* extract the client mask from an XID */
+#define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
+/* extract the client id from an XID */
 #define CLIENT_ID(id) ((int)(CLIENT_BITS(id) >> CLIENTOFFSET))
-#define SERVER_BIT		0x20000000		/* use illegal bit */
+#define SERVER_BIT		(Mask)0x40000000        /* use illegal bit */
 
 #ifdef INVALID
-#undef INVALID	/* needed on HP/UX */
+#undef INVALID                  /* needed on HP/UX */
 #endif
 
 /* Invalid resource id */
@@ -100,183 +120,115 @@ typedef unsigned long RESTYPE;
 
 #define BAD_RESOURCE 0xe0000000
 
-typedef int (*DeleteType)(
-#if NeedNestedPrototypes
-    pointer /*value*/,
-    XID /*id*/
+#define rClient(obj) (clients[CLIENT_ID((obj)->resource)])
+
+/* Resource state callback */
+extern _X_EXPORT CallbackListPtr ResourceStateCallback;
+
+typedef enum { ResourceStateAdding,
+    ResourceStateFreeing
+} ResourceState;
+
+typedef struct {
+    ResourceState state;
+    XID id;
+    RESTYPE type;
+    pointer value;
+} ResourceStateInfoRec;
+
+typedef int (*DeleteType) (pointer /*value */ ,
+                           XID /*id */ );
+
+typedef void (*FindResType) (pointer /*value */ ,
+                             XID /*id */ ,
+                             pointer /*cdata */ );
+
+typedef void (*FindAllRes) (pointer /*value */ ,
+                            XID /*id */ ,
+                            RESTYPE /*type */ ,
+                            pointer /*cdata */ );
+
+typedef Bool (*FindComplexResType) (pointer /*value */ ,
+                                    XID /*id */ ,
+                                    pointer /*cdata */ );
+
+extern _X_EXPORT RESTYPE CreateNewResourceType(DeleteType /*deleteFunc */ ,
+                                               const char * /*name */ );
+
+extern _X_EXPORT void SetResourceTypeErrorValue(RESTYPE /*type */ ,
+                                                int /*errorValue */ );
+
+extern _X_EXPORT RESTYPE CreateNewResourceClass(void);
+
+extern _X_EXPORT Bool InitClientResources(ClientPtr /*client */ );
+
+extern _X_EXPORT XID FakeClientID(int /*client */ );
+
+/* Quartz support on Mac OS X uses the CarbonCore
+   framework whose AddResource function conflicts here. */
+#ifdef __APPLE__
+#define AddResource Darwin_X_AddResource
 #endif
-);
+extern _X_EXPORT Bool AddResource(XID /*id */ ,
+                                  RESTYPE /*type */ ,
+                                  pointer /*value */ );
 
-typedef void (*FindResType)(
-#if NeedNestedPrototypes
-    pointer /*value*/,
-    XID /*id*/,
-    pointer /*cdata*/
-#endif
-);
+extern _X_EXPORT void FreeResource(XID /*id */ ,
+                                   RESTYPE /*skipDeleteFuncType */ );
 
-extern RESTYPE CreateNewResourceType(
-#if NeedFunctionPrototypes
-    DeleteType /*deleteFunc*/
-#endif
-);
+extern _X_EXPORT void FreeResourceByType(XID /*id */ ,
+                                         RESTYPE /*type */ ,
+                                         Bool /*skipFree */ );
 
-extern RESTYPE CreateNewResourceClass(
-#if NeedFunctionPrototypes
-void
-#endif
-);
+extern _X_EXPORT Bool ChangeResourceValue(XID /*id */ ,
+                                          RESTYPE /*rtype */ ,
+                                          pointer /*value */ );
 
-extern Bool InitClientResources(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT void FindClientResourcesByType(ClientPtr /*client */ ,
+                                                RESTYPE /*type */ ,
+                                                FindResType /*func */ ,
+                                                pointer /*cdata */ );
 
-extern XID FakeClientID(
-#if NeedFunctionPrototypes
-    int /*client*/
-#endif
-);
+extern _X_EXPORT void FindAllClientResources(ClientPtr /*client */ ,
+                                             FindAllRes /*func */ ,
+                                             pointer /*cdata */ );
 
-extern Bool AddResource(
-#if NeedFunctionPrototypes
-    XID /*id*/,
-    RESTYPE /*type*/,
-    pointer /*value*/
-#endif
-);
+extern _X_EXPORT void FreeClientNeverRetainResources(ClientPtr /*client */ );
 
-extern void FreeResource(
-#if NeedFunctionPrototypes
-    XID /*id*/,
-    RESTYPE /*skipDeleteFuncType*/
-#endif
-);
+extern _X_EXPORT void FreeClientResources(ClientPtr /*client */ );
 
-extern void FreeResourceByType(
-#if NeedFunctionPrototypes
-    XID /*id*/,
-    RESTYPE /*type*/,
-    Bool /*skipFree*/
-#endif
-);
+extern _X_EXPORT void FreeAllResources(void);
 
-extern Bool ChangeResourceValue(
-#if NeedFunctionPrototypes
-    XID /*id*/,
-    RESTYPE /*rtype*/,
-    pointer /*value*/
-#endif
-);
+extern _X_EXPORT Bool LegalNewID(XID /*id */ ,
+                                 ClientPtr /*client */ );
 
-extern void FindClientResourcesByType(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/,
-    RESTYPE /*type*/,
-    FindResType /*func*/,
-    pointer /*cdata*/
-#endif
-);
+extern _X_EXPORT pointer LookupClientResourceComplex(ClientPtr client,
+                                                     RESTYPE type,
+                                                     FindComplexResType func,
+                                                     pointer cdata);
 
-extern void FreeClientNeverRetainResources(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT int dixLookupResourceByType(pointer *result,
+                                             XID id,
+                                             RESTYPE rtype,
+                                             ClientPtr client,
+                                             Mask access_mode);
 
-extern void FreeClientResources(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT int dixLookupResourceByClass(pointer *result,
+                                              XID id,
+                                              RESTYPE rclass,
+                                              ClientPtr client,
+                                              Mask access_mode);
 
-extern void FreeAllResources(
-#if NeedFunctionPrototypes
-void
-#endif
-);
+extern _X_EXPORT void GetXIDRange(int /*client */ ,
+                                  Bool /*server */ ,
+                                  XID * /*minp */ ,
+                                  XID * /*maxp */ );
 
-extern Bool LegalNewID(
-#if NeedFunctionPrototypes
-    XID /*id*/,
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT unsigned int GetXIDList(ClientPtr /*client */ ,
+                                         unsigned int /*count */ ,
+                                         XID * /*pids */ );
 
-extern pointer LookupIDByType(
-#if NeedFunctionPrototypes
-    XID /*id*/,
-    RESTYPE /*rtype*/
-#endif
-);
+extern _X_EXPORT RESTYPE lastResourceType;
+extern _X_EXPORT RESTYPE TypeMask;
 
-extern pointer LookupIDByClass(
-#if NeedFunctionPrototypes
-    XID /*id*/,
-    RESTYPE /*classes*/
-#endif
-);
-
-/* These are the access modes that can be passed in the last parameter
- * to SecurityLookupIDByType/Class.  The Security extension doesn't
- * currently make much use of these; they're mainly provided as an
- * example of what you might need for discretionary access control.
- * You can or these values together to indicate multiple modes
- * simultaneously.
- */
-
-#define SecurityUnknownAccess	0	/* don't know intentions */
-#define SecurityReadAccess	(1<<0)	/* inspecting the object */
-#define SecurityWriteAccess	(1<<1)	/* changing the object */
-#define SecurityDestroyAccess	(1<<2)	/* destroying the object */
-
-#ifdef XCSECURITY
-
-extern pointer SecurityLookupIDByType(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/,
-    XID /*id*/,
-    RESTYPE /*rtype*/,
-    Mask /*access_mode*/
-#endif
-);
-
-extern pointer SecurityLookupIDByClass(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/,
-    XID /*id*/,
-    RESTYPE /*classes*/,
-    Mask /*access_mode*/
-#endif
-);
-
-#else /* not XCSECURITY */
-
-#define SecurityLookupIDByType(client, id, rtype, access_mode) \
-        LookupIDByType(id, rtype)
-
-#define SecurityLookupIDByClass(client, id, classes, access_mode) \
-        LookupIDByClass(id, classes)
-
-#endif /* XCSECURITY */
-
-extern void GetXIDRange(
-#if NeedFunctionPrototypes
-    int /*client*/,
-    Bool /*server*/,
-    XID * /*minp*/,
-    XID * /*maxp*/
-#endif
-);
-
-extern unsigned int GetXIDList(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/,
-    unsigned int /*count*/,
-    XID * /*pids*/
-#endif
-);
-
-#endif /* RESOURCE_H */
-
+#endif                          /* RESOURCE_H */

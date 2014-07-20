@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/sendexev.h,v 3.2 2003/11/17 22:20:29 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,17 +23,17 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef SENDEXEV_H
 #define SENDEXEV_H 1
 
-int
-SProcXSendExtensionEvent(
-	ClientPtr              /* client */
-	);
+int SProcXSendExtensionEvent(ClientPtr  /* client */
+    );
 
-int
-ProcXSendExtensionEvent(
-	ClientPtr              /* client */
-	);
+int ProcXSendExtensionEvent(ClientPtr   /* client */
+    );
 
-#endif /* SENDEXEV_H */
+#endif                          /* SENDEXEV_H */

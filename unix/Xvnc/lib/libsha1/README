@@ -1,0 +1,10 @@
+== libsha1 ==
+
+libsha1 is a tiny library providing SHA1 implementation, created for
+facilitating X server compilation on devices when larger libraries containing
+SHA1 implementations (OpenSSL, Mozilla NSS) are not needed.
+
+= Contacts =
+
+Web site: http://github.com/dottedmag/libsha1
+Mailing list: http://lists.dottedmag.net/mailman/listinfo/libsha1

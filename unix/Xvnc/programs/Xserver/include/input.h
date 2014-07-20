@@ -1,15 +1,12 @@
-/* $XConsortium: input.h /main/22 1996/09/25 00:50:39 dpw $ */
-/* $XFree86: xc/programs/Xserver/include/input.h,v 3.4 1996/12/23 07:09:28 dawes Exp $ */
 /************************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -47,22 +43,58 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
+
 #ifndef INPUT_H
 #define INPUT_H
 
 #include "misc.h"
 #include "screenint.h"
-#include "X11/Xmd.h"
-#include "X11/Xproto.h"
-#include "window.h"     /* for WindowPtr */
+#include <X11/Xmd.h>
+#include <X11/Xproto.h>
+#include <stdint.h>
+#include "window.h"             /* for WindowPtr */
+#include "xkbrules.h"
+#include "events.h"
+#include "list.h"
+#include <X11/extensions/XI2.h>
 
 #define DEVICE_INIT	0
 #define DEVICE_ON	1
 #define DEVICE_OFF	2
 #define DEVICE_CLOSE	3
 
+#define POINTER_RELATIVE	(1 << 1)
+#define POINTER_ABSOLUTE	(1 << 2)
+#define POINTER_ACCELERATE	(1 << 3)
+#define POINTER_SCREEN		(1 << 4)        /* Data in screen coordinates */
+#define POINTER_NORAW		(1 << 5)        /* Don't generate RawEvents */
+#define POINTER_EMULATED	(1 << 6)        /* Event was emulated from another event */
+
+/* GetTouchEvent flags */
+#define TOUCH_ACCEPT            (1 << 0)
+#define TOUCH_REJECT            (1 << 1)
+#define TOUCH_PENDING_END       (1 << 2)
+#define TOUCH_CLIENT_ID         (1 << 3)        /* touch ID is the client-visible id */
+#define TOUCH_REPLAYING         (1 << 4)        /* event is being replayed */
+#define TOUCH_POINTER_EMULATED  (1 << 5)        /* touch event may be pointer emulated */
+#define TOUCH_END               (1 << 6)        /* really end this touch now */
+
+/*int constants for pointer acceleration schemes*/
+#define PtrAccelNoOp            0
+#define PtrAccelPredictable     1
+#define PtrAccelLightweight     2
+#define PtrAccelDefault         PtrAccelPredictable
+
+#define MAX_VALUATORS 36
+/* Maximum number of valuators, divided by six, rounded up, to get number
+ * of events. */
+#define MAX_VALUATOR_EVENTS 6
+#define MAX_BUTTONS 256         /* completely arbitrarily chosen */
+
+#define NO_AXIS_LIMITS -1
+
 #define MAP_LENGTH	256
-#define DOWN_LENGTH	32	/* 256/8 => number of bytes to hold 256 bits */
+#define DOWN_LENGTH	32      /* 256/8 => number of bytes to hold 256 bits */
 #define NullGrab ((GrabPtr)NULL)
 #define PointerRootWin ((WindowPtr)PointerRoot)
 #define NoneWin ((WindowPtr)None)
@@ -78,458 +110,561 @@ SOFTWARE.
 #define RevertToFollowKeyboard	3
 #endif
 
+enum InputLevel {
+    CORE,
+    XI,
+    XI2,
+};
+
 typedef unsigned long Leds;
 typedef struct _OtherClients *OtherClientsPtr;
 typedef struct _InputClients *InputClientsPtr;
 typedef struct _DeviceIntRec *DeviceIntPtr;
+typedef struct _ValuatorClassRec *ValuatorClassPtr;
+typedef struct _ClassesRec *ClassesPtr;
+typedef struct _SpriteRec *SpritePtr;
+typedef struct _TouchClassRec *TouchClassPtr;
+typedef struct _TouchPointInfo *TouchPointInfoPtr;
+typedef struct _DDXTouchPointInfo *DDXTouchPointInfoPtr;
+typedef union _GrabMask GrabMask;
 
-typedef int (*DeviceProc)(
-#if NeedNestedPrototypes
-    DeviceIntPtr /*device*/,
-    int /*what*/
-#endif
-);
+typedef struct _ValuatorMask ValuatorMask;
 
-typedef void (*ProcessInputProc)(
-#if NeedNestedPrototypes
-    xEventPtr /*events*/,
-    DeviceIntPtr /*device*/,
-    int /*count*/
-#endif
-);
+/* The DIX stores incoming input events in this list */
+extern InternalEvent *InputEventList;
+
+typedef int (*DeviceProc) (DeviceIntPtr /*device */ ,
+                           int /*what */ );
+
+typedef void (*ProcessInputProc) (InternalEvent * /*event */ ,
+                                  DeviceIntPtr /*device */ );
+
+typedef Bool (*DeviceHandleProc) (DeviceIntPtr /*device */ ,
+                                  void *        /*data */
+    );
+
+typedef void (*DeviceUnwrapProc) (DeviceIntPtr /*device */ ,
+                                  DeviceHandleProc /*proc */ ,
+                                  void *        /*data */
+    );
+
+/* pointer acceleration handling */
+typedef void (*PointerAccelSchemeProc) (DeviceIntPtr /*device */ ,
+                                        ValuatorMask * /*valuators */ ,
+                                        CARD32 /*evtime */ );
+
+typedef void (*DeviceCallbackProc) (DeviceIntPtr /*pDev */ );
+
+struct _ValuatorAccelerationRec;
+typedef Bool (*PointerAccelSchemeInitProc) (DeviceIntPtr /*dev */ ,
+                                            struct _ValuatorAccelerationRec *
+                                            /*protoScheme */ );
 
 typedef struct _DeviceRec {
-    pointer	devicePrivate;
-    ProcessInputProc processInputProc;	/* current */
-    ProcessInputProc realInputProc;	/* deliver */
-    ProcessInputProc enqueueInputProc;	/* enqueue */
-    Bool	on;			/* used by DDX to keep state */
+    pointer devicePrivate;
+    ProcessInputProc processInputProc;  /* current */
+    ProcessInputProc realInputProc;     /* deliver */
+    ProcessInputProc enqueueInputProc;  /* enqueue */
+    Bool on;                    /* used by DDX to keep state */
 } DeviceRec, *DevicePtr;
 
 typedef struct {
-    int			click, bell, bell_pitch, bell_duration;
-    Bool		autoRepeat;
-    unsigned char	autoRepeats[32];
-    Leds		leds;
-    unsigned char	id;
+    int click, bell, bell_pitch, bell_duration;
+    Bool autoRepeat;
+    unsigned char autoRepeats[32];
+    Leds leds;
+    unsigned char id;
 } KeybdCtrl;
 
 typedef struct {
-    KeySym  *map;
-    KeyCode minKeyCode,
-	    maxKeyCode;
-    int     mapWidth;
+    KeySym *map;
+    KeyCode minKeyCode, maxKeyCode;
+    int mapWidth;
 } KeySymsRec, *KeySymsPtr;
 
 typedef struct {
-    int		num, den, threshold;
+    int num, den, threshold;
     unsigned char id;
 } PtrCtrl;
 
 typedef struct {
-    int         resolution, min_value, max_value;
-    int         integer_displayed;
+    int resolution, min_value, max_value;
+    int integer_displayed;
     unsigned char id;
 } IntegerCtrl;
 
 typedef struct {
-    int         max_symbols, num_symbols_supported;
-    int         num_symbols_displayed;
-    KeySym      *symbols_supported;
-    KeySym      *symbols_displayed;
+    int max_symbols, num_symbols_supported;
+    int num_symbols_displayed;
+    KeySym *symbols_supported;
+    KeySym *symbols_displayed;
     unsigned char id;
 } StringCtrl;
 
 typedef struct {
-    int         percent, pitch, duration;
+    int percent, pitch, duration;
     unsigned char id;
 } BellCtrl;
 
 typedef struct {
-    Leds        led_values;
-    Mask        led_mask;
+    Leds led_values;
+    Mask led_mask;
     unsigned char id;
 } LedCtrl;
 
-extern KeybdCtrl	defaultKeyboardControl;
-extern PtrCtrl		defaultPointerControl;
+extern _X_EXPORT KeybdCtrl defaultKeyboardControl;
+extern _X_EXPORT PtrCtrl defaultPointerControl;
 
-#undef  AddInputDevice
-extern DevicePtr AddInputDevice(
-#if NeedFunctionPrototypes
-    DeviceProc /*deviceProc*/,
-    Bool /*autoStart*/
-#endif
-);
+typedef struct _InputOption InputOption;
+typedef struct _XI2Mask XI2Mask;
 
-#define AddInputDevice(deviceProc, autoStart) \
-       _AddInputDevice(deviceProc, autoStart)
+typedef struct _InputAttributes {
+    char *product;
+    char *vendor;
+    char *device;
+    char *pnp_id;
+    char *usb_id;
+    char **tags;                /* null-terminated */
+    uint32_t flags;
+} InputAttributes;
 
-extern DeviceIntPtr _AddInputDevice(
-#if NeedFunctionPrototypes
-    DeviceProc /*deviceProc*/,
-    Bool /*autoStart*/
-#endif
-);
+#define ATTR_KEYBOARD (1<<0)
+#define ATTR_POINTER (1<<1)
+#define ATTR_JOYSTICK (1<<2)
+#define ATTR_TABLET (1<<3)
+#define ATTR_TOUCHPAD (1<<4)
+#define ATTR_TOUCHSCREEN (1<<5)
 
-extern Bool EnableDevice(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/
-#endif
-);
+/* Key/Button has been run through all input processing and events sent to clients. */
+#define KEY_PROCESSED 1
+#define BUTTON_PROCESSED 1
+/* Key/Button has not been fully processed, no events have been sent. */
+#define KEY_POSTED 2
+#define BUTTON_POSTED 2
 
-extern Bool DisableDevice(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/
-#endif
-);
+extern void set_key_down(DeviceIntPtr pDev, int key_code, int type);
+extern void set_key_up(DeviceIntPtr pDev, int key_code, int type);
+extern int key_is_down(DeviceIntPtr pDev, int key_code, int type);
+extern void set_button_down(DeviceIntPtr pDev, int button, int type);
+extern void set_button_up(DeviceIntPtr pDev, int button, int type);
+extern int button_is_down(DeviceIntPtr pDev, int button, int type);
 
-extern int InitAndStartDevices(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern void InitCoreDevices(void);
+extern void InitXTestDevices(void);
 
-extern void CloseDownDevices(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern _X_EXPORT DeviceIntPtr AddInputDevice(ClientPtr /*client */ ,
+                                             DeviceProc /*deviceProc */ ,
+                                             Bool /*autoStart */ );
 
-extern void RemoveDevice(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*dev*/
-#endif
-);
+extern _X_EXPORT Bool EnableDevice(DeviceIntPtr /*device */ ,
+                                   BOOL /* sendevent */ );
 
-extern int NumMotionEvents(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern _X_EXPORT Bool ActivateDevice(DeviceIntPtr /*device */ ,
+                                     BOOL /* sendevent */ );
 
-#undef  RegisterPointerDevice
-extern void RegisterPointerDevice(
-#if NeedFunctionPrototypes
-    DevicePtr /*device*/
-#endif
-);
+extern _X_EXPORT Bool DisableDevice(DeviceIntPtr /*device */ ,
+                                    BOOL /* sendevent */ );
 
-#define RegisterPointerDevice(device) \
-       _RegisterPointerDevice(device)
+extern int InitAndStartDevices(void);
 
-extern void _RegisterPointerDevice(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/
-#endif
-);
+extern void CloseDownDevices(void);
 
-#undef  RegisterKeyboardDevice
-extern void RegisterKeyboardDevice(
-#if NeedFunctionPrototypes
-    DevicePtr /*device*/
-#endif
-);
+extern void UndisplayDevices(void);
 
-#define RegisterKeyboardDevice(device) \
-       _RegisterKeyboardDevice(device)
+extern _X_EXPORT int RemoveDevice(DeviceIntPtr /*dev */ ,
+                                  BOOL /* sendevent */ );
 
-extern void _RegisterKeyboardDevice(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/
-#endif
-);
+extern _X_EXPORT int NumMotionEvents(void);
 
-extern DevicePtr LookupKeyboardDevice(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern _X_EXPORT int dixLookupDevice(DeviceIntPtr * /* dev */ ,
+                                     int /* id */ ,
+                                     ClientPtr /* client */ ,
+                                     Mask /* access_mode */ );
 
-extern DevicePtr LookupPointerDevice(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern _X_EXPORT void QueryMinMaxKeyCodes(KeyCode * /*minCode */ ,
+                                          KeyCode * /*maxCode */ );
 
-extern DevicePtr LookupDevice(
-#if NeedFunctionPrototypes
-    int /* id */
-#endif
-);
+extern _X_EXPORT Bool SetKeySymsMap(KeySymsPtr /*dst */ ,
+                                    KeySymsPtr /*src */ );
 
-extern void QueryMinMaxKeyCodes(
-#if NeedFunctionPrototypes
-    KeyCode* /*minCode*/,
-    KeyCode* /*maxCode*/
-#endif
-);
+extern _X_EXPORT Bool InitButtonClassDeviceStruct(DeviceIntPtr /*device */ ,
+                                                  int /*numButtons */ ,
+                                                  Atom * /* labels */ ,
+                                                  CARD8 * /*map */ );
 
-extern Bool SetKeySymsMap(
-#if NeedFunctionPrototypes
-    KeySymsPtr /*dst*/,
-    KeySymsPtr /*src*/
-#endif
-);
+extern _X_INTERNAL ValuatorClassPtr AllocValuatorClass(ValuatorClassPtr src,
+                                                       int numAxes);
 
-extern Bool InitKeyClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    KeySymsPtr /*pKeySyms*/,
-    CARD8 /*pModifiers*/[]
-#endif
-);
+extern _X_EXPORT Bool InitValuatorClassDeviceStruct(DeviceIntPtr /*device */ ,
+                                                    int /*numAxes */ ,
+                                                    Atom * /* labels */ ,
+                                                    int /*numMotionEvents */ ,
+                                                    int /*mode */ );
 
-extern Bool InitButtonClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    int /*numButtons*/,
-    CARD8* /*map*/
-#endif
-);
+extern _X_EXPORT Bool InitPointerAccelerationScheme(DeviceIntPtr /*dev */ ,
+                                                    int /*scheme */ );
 
-typedef int (*ValuatorMotionProcPtr)(
-#if NeedNestedPrototypes
-		DeviceIntPtr /*pdevice*/,
-		xTimecoord * /*coords*/,
-		unsigned long /*start*/,
-		unsigned long /*stop*/,
-		ScreenPtr /*pScreen*/
-#endif
-);
+extern _X_EXPORT Bool InitFocusClassDeviceStruct(DeviceIntPtr /*device */ );
 
-extern Bool InitValuatorClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    int /*numAxes*/,
-    ValuatorMotionProcPtr /* motionProc */,
-    int /*numMotionEvents*/,
-    int /*mode*/
-#endif
-);
+extern _X_EXPORT Bool InitTouchClassDeviceStruct(DeviceIntPtr /*device */ ,
+                                                 unsigned int /*max_touches */ ,
+                                                 unsigned int /*mode */ ,
+                                                 unsigned int /*numAxes */ );
 
-extern Bool InitFocusClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/
-#endif
-);
+typedef void (*BellProcPtr) (int /*percent */ ,
+                             DeviceIntPtr /*device */ ,
+                             pointer /*ctrl */ ,
+                             int);
 
-typedef void (*BellProcPtr)(
-#if NeedNestedPrototypes
-    int /*percent*/,
-    DeviceIntPtr /*device*/,
-    pointer /*ctrl*/,
-    int
-#endif
-);
+typedef void (*KbdCtrlProcPtr) (DeviceIntPtr /*device */ ,
+                                KeybdCtrl * /*ctrl */ );
 
-typedef void (*KbdCtrlProcPtr)(
-#if NeedNestedPrototypes
-    DeviceIntPtr /*device*/,
-    KeybdCtrl * /*ctrl*/
-#endif				     
-);
+typedef void (*PtrCtrlProcPtr) (DeviceIntPtr /*device */ ,
+                                PtrCtrl * /*ctrl */ );
 
-extern Bool InitKbdFeedbackClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    BellProcPtr /*bellProc*/,
-    KbdCtrlProcPtr /*controlProc*/
-#endif
-);
+extern _X_EXPORT Bool InitPtrFeedbackClassDeviceStruct(DeviceIntPtr /*device */
+                                                       ,
+                                                       PtrCtrlProcPtr
+                                                       /*controlProc */ );
 
-typedef void (*PtrCtrlProcPtr)(
-#if NeedNestedPrototypes
-    DeviceIntPtr /*device*/,
-    PtrCtrl * /*ctrl*/
-#endif				     
-);
+typedef void (*StringCtrlProcPtr) (DeviceIntPtr /*device */ ,
+                                   StringCtrl * /*ctrl */ );
 
-extern Bool InitPtrFeedbackClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    PtrCtrlProcPtr /*controlProc*/
-#endif
-);
+extern _X_EXPORT Bool InitStringFeedbackClassDeviceStruct(DeviceIntPtr
+                                                          /*device */ ,
+                                                          StringCtrlProcPtr
+                                                          /*controlProc */ ,
+                                                          int /*max_symbols */ ,
+                                                          int
+                                                          /*num_symbols_supported */
+                                                          ,
+                                                          KeySym * /*symbols */
+                                                          );
 
-typedef void (*StringCtrlProcPtr)(
-#if NeedNestedPrototypes
-    DeviceIntPtr /*device*/,
-    StringCtrl * /*ctrl*/
-#endif				     
-);
+typedef void (*BellCtrlProcPtr) (DeviceIntPtr /*device */ ,
+                                 BellCtrl * /*ctrl */ );
 
-extern Bool InitStringFeedbackClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    StringCtrlProcPtr /*controlProc*/,
-    int /*max_symbols*/,
-    int /*num_symbols_supported*/,
-    KeySym* /*symbols*/
-#endif
-);
+extern _X_EXPORT Bool InitBellFeedbackClassDeviceStruct(DeviceIntPtr /*device */
+                                                        ,
+                                                        BellProcPtr
+                                                        /*bellProc */ ,
+                                                        BellCtrlProcPtr
+                                                        /*controlProc */ );
 
-typedef void (*BellCtrlProcPtr)(
-#if NeedNestedPrototypes
-    DeviceIntPtr /*device*/,
-    BellCtrl * /*ctrl*/
-#endif				     
-);
+typedef void (*LedCtrlProcPtr) (DeviceIntPtr /*device */ ,
+                                LedCtrl * /*ctrl */ );
 
-extern Bool InitBellFeedbackClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    BellProcPtr /*bellProc*/,
-    BellCtrlProcPtr /*controlProc*/
-#endif
-);
+extern _X_EXPORT Bool InitLedFeedbackClassDeviceStruct(DeviceIntPtr /*device */
+                                                       ,
+                                                       LedCtrlProcPtr
+                                                       /*controlProc */ );
 
-typedef void (*LedCtrlProcPtr)(
-#if NeedNestedPrototypes
-    DeviceIntPtr /*device*/,
-    LedCtrl * /*ctrl*/
-#endif				     
-);
+typedef void (*IntegerCtrlProcPtr) (DeviceIntPtr /*device */ ,
+                                    IntegerCtrl * /*ctrl */ );
 
-extern Bool InitLedFeedbackClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    LedCtrlProcPtr /*controlProc*/
-#endif
-);
+extern _X_EXPORT Bool InitIntegerFeedbackClassDeviceStruct(DeviceIntPtr
+                                                           /*device */ ,
+                                                           IntegerCtrlProcPtr
+                                                           /*controlProc */ );
 
-typedef void (*IntegerCtrlProcPtr)(
-#if NeedNestedPrototypes
-    DeviceIntPtr /*device*/,
-    IntegerCtrl * /*ctrl*/
-#endif
-);
+extern _X_EXPORT Bool InitPointerDeviceStruct(DevicePtr /*device */ ,
+                                              CARD8 * /*map */ ,
+                                              int /*numButtons */ ,
+                                              Atom * /* btn_labels */ ,
+                                              PtrCtrlProcPtr /*controlProc */ ,
+                                              int /*numMotionEvents */ ,
+                                              int /*numAxes */ ,
+                                              Atom * /* axes_labels */ );
 
+extern _X_EXPORT Bool InitKeyboardDeviceStruct(DeviceIntPtr /*device */ ,
+                                               XkbRMLVOSet * /*rmlvo */ ,
+                                               BellProcPtr /*bellProc */ ,
+                                               KbdCtrlProcPtr /*controlProc */
+                                               );
 
-extern Bool InitIntegerFeedbackClassDeviceStruct(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    IntegerCtrlProcPtr /*controlProc*/
-#endif
-);
+extern int ApplyPointerMapping(DeviceIntPtr /* pDev */ ,
+                               CARD8 * /* map */ ,
+                               int /* len */ ,
+                               ClientPtr /* client */ );
 
-extern Bool InitPointerDeviceStruct(
-#if NeedFunctionPrototypes
-    DevicePtr /*device*/,
-    CARD8* /*map*/,
-    int /*numButtons*/,
-    ValuatorMotionProcPtr /*motionProc*/,
-    PtrCtrlProcPtr /*controlProc*/,
-    int /*numMotionEvents*/
-#endif
-);
+extern Bool BadDeviceMap(BYTE * /*buff */ ,
+                         int /*length */ ,
+                         unsigned /*low */ ,
+                         unsigned /*high */ ,
+                         XID * /*errval */ );
 
-extern Bool InitKeyboardDeviceStruct(
-#if NeedFunctionPrototypes
-    DevicePtr /*device*/,
-    KeySymsPtr /*pKeySyms*/,
-    CARD8 /*pModifiers*/[],
-    BellProcPtr /*bellProc*/,
-    KbdCtrlProcPtr /*controlProc*/
-#endif
-);
+extern void NoteLedState(DeviceIntPtr /*keybd */ ,
+                         int /*led */ ,
+                         Bool /*on */ );
 
-extern void SendMappingNotify(
-#if NeedFunctionPrototypes
-    unsigned int /*request*/,
-    unsigned int /*firstKeyCode*/,
-    unsigned int /*count*/,
-    ClientPtr	/* client */
-#endif
-);
+extern void MaybeStopHint(DeviceIntPtr /*device */ ,
+                          ClientPtr /*client */ );
 
-extern Bool BadDeviceMap(
-#if NeedFunctionPrototypes
-    BYTE* /*buff*/,
-    int /*length*/,
-    unsigned /*low*/,
-    unsigned /*high*/,
-    XID* /*errval*/
-#endif
-);
+extern void ProcessPointerEvent(InternalEvent * /* ev */ ,
+                                DeviceIntPtr /*mouse */ );
 
-extern Bool AllModifierKeysAreUp(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    CARD8* /*map1*/,
-    int /*per1*/,
-    CARD8* /*map2*/,
-    int /*per2*/
-#endif
-);
+extern void ProcessKeyboardEvent(InternalEvent * /*ev */ ,
+                                 DeviceIntPtr /*keybd */ );
 
-extern void NoteLedState(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*keybd*/,
-    int /*led*/,
-    Bool /*on*/
-#endif
-);
+extern Bool LegalModifier(unsigned int /*key */ ,
+                          DeviceIntPtr /*pDev */ );
 
-extern void MaybeStopHint(
-#if NeedFunctionPrototypes
-    DeviceIntPtr /*device*/,
-    ClientPtr /*client*/
-#endif
-);
+extern _X_EXPORT void ProcessInputEvents(void);
 
-extern void ProcessPointerEvent(
-#if NeedFunctionPrototypes
-    xEventPtr /*xE*/,
-    DeviceIntPtr /*mouse*/,
-    int /*count*/
-#endif
-);
+extern _X_EXPORT void InitInput(int /*argc */ ,
+                                char ** /*argv */ );
+extern _X_EXPORT void CloseInput(void);
 
-extern void ProcessKeyboardEvent(
-#if NeedFunctionPrototypes
-    xEventPtr /*xE*/,
-    DeviceIntPtr /*keybd*/,
-    int /*count*/
-#endif
-);
+extern _X_EXPORT int GetMaximumEventsNum(void);
 
-#ifdef XKB
-extern void CoreProcessPointerEvent(
-#if NeedFunctionPrototypes
-    xEventPtr /*xE*/,
-    DeviceIntPtr /*mouse*/,
-    int /*count*/
-#endif
-);
+extern _X_EXPORT InternalEvent *InitEventList(int num_events);
+extern _X_EXPORT void FreeEventList(InternalEvent *list, int num_events);
 
-extern void CoreProcessKeyboardEvent(
-#if NeedFunctionPrototypes
-    xEventPtr /*xE*/,
-    DeviceIntPtr /*keybd*/,
-    int /*count*/
-#endif
-);
-#endif
+extern void CreateClassesChangedEvent(InternalEvent *event,
+                                      DeviceIntPtr master,
+                                      DeviceIntPtr slave, int flags);
 
-extern Bool LegalModifier(
-#if NeedFunctionPrototypes
-    unsigned int /*key*/, 
-    DevicePtr /*pDev*/
-#endif
-);
+extern InternalEvent *UpdateFromMaster(InternalEvent *events,
+                                       DeviceIntPtr pDev,
+                                       int type, int *num_events);
 
-extern void ProcessInputEvents(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern _X_EXPORT int GetPointerEvents(InternalEvent *events,
+                                      DeviceIntPtr pDev,
+                                      int type,
+                                      int buttons,
+                                      int flags, const ValuatorMask *mask);
 
-extern void InitInput(
-#if NeedFunctionPrototypes
-    int  /*argc*/,
-    char ** /*argv*/
-#endif
-);
+extern _X_EXPORT void QueuePointerEvents(DeviceIntPtr pDev,
+                                         int type,
+                                         int buttons,
+                                         int flags, const ValuatorMask *mask);
 
-#endif /* INPUT_H */
+extern _X_EXPORT int GetKeyboardEvents(InternalEvent *events,
+                                       DeviceIntPtr pDev,
+                                       int type,
+                                       int key_code, const ValuatorMask *mask);
+
+extern _X_EXPORT void QueueKeyboardEvents(DeviceIntPtr pDev,
+                                          int type,
+                                          int key_code,
+                                          const ValuatorMask *mask);
+
+extern int GetTouchEvents(InternalEvent *events,
+                          DeviceIntPtr pDev,
+                          uint32_t ddx_touchid,
+                          uint16_t type,
+                          uint32_t flags, const ValuatorMask *mask);
+
+void QueueTouchEvents(DeviceIntPtr device,
+                      int type,
+                      uint32_t ddx_touchid,
+                      int flags, const ValuatorMask *mask);
+
+extern int GetTouchOwnershipEvents(InternalEvent *events,
+                                   DeviceIntPtr pDev,
+                                   TouchPointInfoPtr ti,
+                                   uint8_t mode, XID resource, uint32_t flags);
+
+extern _X_EXPORT int GetProximityEvents(InternalEvent *events,
+                                        DeviceIntPtr pDev,
+                                        int type, const ValuatorMask *mask);
+
+extern _X_EXPORT void QueueProximityEvents(DeviceIntPtr pDev,
+                                           int type, const ValuatorMask *mask);
+
+extern void PostSyntheticMotion(DeviceIntPtr pDev,
+                                int x, int y, int screen, unsigned long time);
+
+extern _X_EXPORT int GetMotionHistorySize(void);
+
+extern _X_EXPORT void AllocateMotionHistory(DeviceIntPtr pDev);
+
+extern _X_EXPORT int GetMotionHistory(DeviceIntPtr pDev,
+                                      xTimecoord ** buff,
+                                      unsigned long start,
+                                      unsigned long stop,
+                                      ScreenPtr pScreen, BOOL core);
+
+extern void ReleaseButtonsAndKeys(DeviceIntPtr dev);
+
+extern int AttachDevice(ClientPtr client,
+                        DeviceIntPtr slave, DeviceIntPtr master);
+
+extern _X_EXPORT DeviceIntPtr GetPairedDevice(DeviceIntPtr kbd);
+extern DeviceIntPtr GetMaster(DeviceIntPtr dev, int type);
+
+extern _X_EXPORT int AllocDevicePair(ClientPtr client,
+                                     const char *name,
+                                     DeviceIntPtr *ptr,
+                                     DeviceIntPtr *keybd,
+                                     DeviceProc ptr_proc,
+                                     DeviceProc keybd_proc, Bool master);
+extern void DeepCopyDeviceClasses(DeviceIntPtr from,
+                                  DeviceIntPtr to, DeviceChangedEvent *dce);
+
+/* Helper functions. */
+extern _X_EXPORT int generate_modkeymap(ClientPtr client, DeviceIntPtr dev,
+                                        KeyCode **modkeymap,
+                                        int *max_keys_per_mod);
+extern int change_modmap(ClientPtr client, DeviceIntPtr dev, KeyCode *map,
+                         int max_keys_per_mod);
+extern int AllocXTestDevice(ClientPtr client, const char *name,
+                            DeviceIntPtr *ptr, DeviceIntPtr *keybd,
+                            DeviceIntPtr master_ptr, DeviceIntPtr master_keybd);
+extern BOOL IsXTestDevice(DeviceIntPtr dev, DeviceIntPtr master);
+extern DeviceIntPtr GetXTestDevice(DeviceIntPtr master);
+extern void SendDevicePresenceEvent(int deviceid, int type);
+extern _X_EXPORT InputAttributes *DuplicateInputAttributes(InputAttributes *
+                                                           attrs);
+extern _X_EXPORT void FreeInputAttributes(InputAttributes * attrs);
+
+enum TouchListenerState {
+    LISTENER_AWAITING_BEGIN = 0,   /**< Waiting for a TouchBegin event */
+    LISTENER_AWAITING_OWNER,       /**< Waiting for a TouchOwnership event */
+    LISTENER_EARLY_ACCEPT,         /**< Waiting for ownership, has already
+                                        accepted */
+    LISTENER_IS_OWNER,             /**< Is the current owner, hasn't accepted */
+    LISTENER_HAS_ACCEPTED,         /**< Is the current owner, has accepted */
+    LISTENER_HAS_END,              /**< Has already received the end event */
+};
+
+enum TouchListenerType {
+    LISTENER_GRAB,
+    LISTENER_POINTER_GRAB,
+    LISTENER_REGULAR,
+    LISTENER_POINTER_REGULAR,
+};
+
+extern void TouchInitDDXTouchPoint(DeviceIntPtr dev,
+                                   DDXTouchPointInfoPtr ddxtouch);
+extern DDXTouchPointInfoPtr TouchBeginDDXTouch(DeviceIntPtr dev,
+                                               uint32_t ddx_id);
+extern void TouchEndDDXTouch(DeviceIntPtr dev, DDXTouchPointInfoPtr ti);
+extern DDXTouchPointInfoPtr TouchFindByDDXID(DeviceIntPtr dev,
+                                             uint32_t ddx_id, Bool create);
+extern Bool TouchInitTouchPoint(TouchClassPtr touch, ValuatorClassPtr v,
+                                int index);
+extern void TouchFreeTouchPoint(DeviceIntPtr dev, int index);
+extern TouchPointInfoPtr TouchBeginTouch(DeviceIntPtr dev, int sourceid,
+                                         uint32_t touchid,
+                                         Bool emulate_pointer);
+extern TouchPointInfoPtr TouchFindByClientID(DeviceIntPtr dev,
+                                             uint32_t client_id);
+extern void TouchEndTouch(DeviceIntPtr dev, TouchPointInfoPtr ti);
+extern Bool TouchEventHistoryAllocate(TouchPointInfoPtr ti);
+extern void TouchEventHistoryFree(TouchPointInfoPtr ti);
+extern void TouchEventHistoryPush(TouchPointInfoPtr ti, const DeviceEvent *ev);
+extern void TouchEventHistoryReplay(TouchPointInfoPtr ti, DeviceIntPtr dev,
+                                    XID resource);
+extern Bool TouchResourceIsOwner(TouchPointInfoPtr ti, XID resource);
+extern void TouchAddListener(TouchPointInfoPtr ti, XID resource,
+                             enum InputLevel level, enum TouchListenerType type,
+                             enum TouchListenerState state, WindowPtr window);
+extern Bool TouchRemoveListener(TouchPointInfoPtr ti, XID resource);
+extern void TouchSetupListeners(DeviceIntPtr dev, TouchPointInfoPtr ti,
+                                InternalEvent *ev);
+extern Bool TouchBuildSprite(DeviceIntPtr sourcedev, TouchPointInfoPtr ti,
+                             InternalEvent *ev);
+extern Bool TouchBuildDependentSpriteTrace(DeviceIntPtr dev, SpritePtr sprite);
+extern int TouchConvertToPointerEvent(const InternalEvent *ev,
+                                      InternalEvent *motion,
+                                      InternalEvent *button);
+extern int TouchGetPointerEventType(const InternalEvent *ev);
+extern void TouchRemovePointerGrab(DeviceIntPtr dev);
+extern void TouchListenerGone(XID resource);
+extern int TouchListenerAcceptReject(DeviceIntPtr dev, TouchPointInfoPtr ti,
+                                     int listener, int mode);
+extern int TouchAcceptReject(ClientPtr client, DeviceIntPtr dev, int mode,
+                             uint32_t touchid, Window grab_window, XID *error);
+
+/* misc event helpers */
+extern Mask GetEventMask(DeviceIntPtr dev, xEvent *ev, InputClientsPtr clients);
+extern Mask GetEventFilter(DeviceIntPtr dev, xEvent *event);
+extern Bool WindowXI2MaskIsset(DeviceIntPtr dev, WindowPtr win, xEvent *ev);
+extern int GetXI2MaskByte(XI2Mask *mask, DeviceIntPtr dev, int event_type);
+void FixUpEventFromWindow(SpritePtr pSprite,
+                          xEvent *xE,
+                          WindowPtr pWin, Window child, Bool calcChild);
+extern WindowPtr XYToWindow(SpritePtr pSprite, int x, int y);
+extern int EventIsDeliverable(DeviceIntPtr dev, int evtype, WindowPtr win);
+extern Bool ActivatePassiveGrab(DeviceIntPtr dev, GrabPtr grab,
+                                InternalEvent *ev, InternalEvent *real_event);
+/**
+ * Masks specifying the type of event to deliver for an InternalEvent; used
+ * by EventIsDeliverable.
+ * @defgroup EventIsDeliverable return flags
+ * @{
+ */
+#define EVENT_XI1_MASK                (1 << 0) /**< XI1.x event */
+#define EVENT_CORE_MASK               (1 << 1) /**< Core event */
+#define EVENT_DONT_PROPAGATE_MASK     (1 << 2) /**< DontPropagate mask set */
+#define EVENT_XI2_MASK                (1 << 3) /**< XI2 mask set on window */
+/* @} */
+
+enum EventDeliveryState {
+    EVENT_DELIVERED,     /**< Event has been delivered to a client  */
+    EVENT_NOT_DELIVERED, /**< Event was not delivered to any client */
+    EVENT_SKIP,          /**< Event can be discarded by the caller  */
+    EVENT_REJECTED,      /**< Event was rejected for delivery to the client */
+};
+
+/* Implemented by the DDX. */
+extern _X_EXPORT int NewInputDeviceRequest(InputOption *options,
+                                           InputAttributes * attrs,
+                                           DeviceIntPtr *dev);
+extern _X_EXPORT void DeleteInputDeviceRequest(DeviceIntPtr dev);
+
+extern _X_EXPORT void DDXRingBell(int volume, int pitch, int duration);
+
+#define VALUATOR_MODE_ALL_AXES -1
+extern _X_HIDDEN int valuator_get_mode(DeviceIntPtr dev, int axis);
+extern _X_HIDDEN void valuator_set_mode(DeviceIntPtr dev, int axis, int mode);
+
+/* Set to TRUE by default - os/utils.c sets it to FALSE on user request,
+   xfixes/cursor.c uses it to determine if the cursor is enabled */
+extern Bool EnableCursor;
+
+extern _X_EXPORT ValuatorMask *valuator_mask_new(int num_valuators);
+extern _X_EXPORT void valuator_mask_free(ValuatorMask **mask);
+extern _X_EXPORT void valuator_mask_set_range(ValuatorMask *mask,
+                                              int first_valuator,
+                                              int num_valuators,
+                                              const int *valuators);
+extern _X_EXPORT void valuator_mask_set(ValuatorMask *mask, int valuator,
+                                        int data);
+extern _X_EXPORT void valuator_mask_set_double(ValuatorMask *mask, int valuator,
+                                               double data);
+extern _X_EXPORT void valuator_mask_zero(ValuatorMask *mask);
+extern _X_EXPORT int valuator_mask_size(const ValuatorMask *mask);
+extern _X_EXPORT int valuator_mask_isset(const ValuatorMask *mask, int bit);
+extern _X_EXPORT void valuator_mask_unset(ValuatorMask *mask, int bit);
+extern _X_EXPORT int valuator_mask_num_valuators(const ValuatorMask *mask);
+extern _X_EXPORT void valuator_mask_copy(ValuatorMask *dest,
+                                         const ValuatorMask *src);
+extern _X_EXPORT int valuator_mask_get(const ValuatorMask *mask, int valnum);
+extern _X_EXPORT double valuator_mask_get_double(const ValuatorMask *mask,
+                                                 int valnum);
+extern _X_EXPORT Bool valuator_mask_fetch(const ValuatorMask *mask,
+                                          int valnum, int *val);
+extern _X_EXPORT Bool valuator_mask_fetch_double(const ValuatorMask *mask,
+                                                 int valnum, double *val);
+
+/* InputOption handling interface */
+extern _X_EXPORT InputOption *input_option_new(InputOption *list,
+                                               const char *key,
+                                               const char *value);
+extern _X_EXPORT void input_option_free_list(InputOption **opt);
+extern _X_EXPORT InputOption *input_option_free_element(InputOption *opt,
+                                                        const char *key);
+extern _X_EXPORT InputOption *input_option_find(InputOption *list,
+                                                const char *key);
+extern _X_EXPORT const char *input_option_get_key(const InputOption *opt);
+extern _X_EXPORT const char *input_option_get_value(const InputOption *opt);
+extern _X_EXPORT void input_option_set_key(InputOption *opt, const char *key);
+extern _X_EXPORT void input_option_set_value(InputOption *opt,
+                                             const char *value);
+
+extern _X_HIDDEN Bool point_on_screen(ScreenPtr pScreen, int x, int y);
+extern _X_HIDDEN void update_desktop_dimensions(void);
+
+#endif                          /* INPUT_H */

@@ -1,15 +1,12 @@
-/* $XConsortium: miscanfill.h,v 1.5 94/04/17 20:27:50 dpw Exp $ */
 /*
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -17,18 +14,21 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #ifndef SCANFILLINCLUDED
 #define SCANFILLINCLUDED
@@ -51,7 +51,6 @@ from the X Consortium.
  *     See the author for a derivation if needed.
  */
 
-
 /*
  *  In scan converting polygons, we want to choose those pixels
  *  which are inside the polygon.  Thus, we add .5 to the starting
@@ -118,7 +117,6 @@ from the X Consortium.
         } \
     } \
 }
-
 
 /*
  *     This structure contains all of the information needed
@@ -128,12 +126,11 @@ from the X Consortium.
  *     register declarations.
  */
 typedef struct {
-    int minor;         /* minor axis        */
-    int d;           /* decision variable */
-    int m, m1;       /* slope and slope+1 */
-    int incr1, incr2; /* error increments */
+    int minor;                  /* minor axis        */
+    int d;                      /* decision variable */
+    int m, m1;                  /* slope and slope+1 */
+    int incr1, incr2;           /* error increments */
 } BRESINFO;
-
 
 #define BRESINITPGONSTRUCT(dmaj, min1, min2, bres) \
 	BRESINITPGON(dmaj, min1, min2, bres.minor, bres.d, \
@@ -141,6 +138,5 @@ typedef struct {
 
 #define BRESINCRPGONSTRUCT(bres) \
         BRESINCRPGON(bres.d, bres.minor, bres.m, bres.m1, bres.incr1, bres.incr2)
-
 
 #endif

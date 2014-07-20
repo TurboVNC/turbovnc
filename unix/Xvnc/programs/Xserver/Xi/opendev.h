@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/opendev.h,v 3.2 2003/11/17 22:20:29 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,24 +23,22 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef OPENDEV_H
 #define OPENDEV_H 1
 
-int
-SProcXOpenDevice(
-	ClientPtr              /* client */
-	);
+int SProcXOpenDevice(ClientPtr  /* client */
+    );
 
-int
-ProcXOpenDevice(
-	ClientPtr              /* client */
-	);
+int ProcXOpenDevice(ClientPtr   /* client */
+    );
 
-void
-SRepXOpenDevice (
-	ClientPtr              /* client */,
-	int                    /* size */,
-	xOpenDeviceReply *     /* rep */
-	);
+void SRepXOpenDevice(ClientPtr /* client */ ,
+                     int /* size */ ,
+                     xOpenDeviceReply * /* rep */
+    );
 
-#endif /* OPENDEV_H */
+#endif                          /* OPENDEV_H */

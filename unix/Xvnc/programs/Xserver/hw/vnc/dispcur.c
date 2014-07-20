@@ -2,12 +2,10 @@
  * dispcur.c
  *
  * cursor display routines - based on midispcur.c
- *
- * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
 /*
- *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,14 +25,13 @@
 
 /*
 
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -42,174 +39,145 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 */
 
-#define NEED_EVENTS
-# include   "X.h"
-# include   "misc.h"
-# include   "input.h"
-# include   "cursorstr.h"
-# include   "windowstr.h"
-# include   "regionstr.h"
-# include   "dixstruct.h"
-# include   "scrnintstr.h"
-# include   "servermd.h"
-# include   "mipointer.h"
-# include   "sprite.h"
-# include   "gcstruct.h"
-
-extern WindowPtr    *WindowTable;
-#ifdef ARGB_CURSOR
-# include   "picturestr.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
 #endif
+
+#include   <X11/X.h>
+#include   "misc.h"
+#include   "input.h"
+#include   "cursorstr.h"
+#include   "windowstr.h"
+#include   "regionstr.h"
+#include   "dixstruct.h"
+#include   "scrnintstr.h"
+#include   "servermd.h"
+#include   "mipointer.h"
+#include   "sprite.h"
+#include   "gcstruct.h"
+
+#ifdef ARGB_CURSOR
+#include   "picturestr.h"
+#endif
+
+#include "inputstr.h"
+
+Bool rfbDCUnrealizeCursor(ScreenPtr pScreen, CursorPtr pCursor);
 
 /* per-screen private data */
+static DevPrivateKeyRec rfbDCScreenKeyRec;
 
-int     rfbDCScreenIndex = -1;
-static unsigned long rfbDCGeneration = 0;
+#define rfbDCScreenKey (&rfbDCScreenKeyRec)
+static DevScreenPrivateKeyRec rfbDCCursorBitsKeyRec;
 
-static Bool     rfbDCCloseScreen();
+#define rfbDCCursorBitsKey (&rfbDCCursorBitsKeyRec)
+static DevScreenPrivateKeyRec rfbDCDeviceKeyRec;
 
+#define rfbDCDeviceKey (&rfbDCDeviceKeyRec)
+
+static Bool rfbDCCloseScreen(int index, ScreenPtr pScreen);
+
+/* per device private data */
 typedef struct {
-    GCPtr           pSourceGC, pMaskGC;
-    GCPtr           pSaveGC, pRestoreGC;
-    GCPtr           pPixSourceGC, pPixMaskGC;
-    CloseScreenProcPtr CloseScreen;
-    PixmapPtr       pSave;
+    GCPtr pSourceGC, pMaskGC;
+    GCPtr pSaveGC, pRestoreGC;
+    PixmapPtr pSave;
 #ifdef ARGB_CURSOR
-    PicturePtr      pRootPicture;
-    PicturePtr      pTempPicture;
+    PicturePtr pRootPicture;
 #endif
+} rfbDCBufferRec, *rfbDCBufferPtr;
+
+#define rfbGetDCDevice(dev, screen) \
+ ((DevHasCursor(dev)) ? \
+  (rfbDCBufferPtr)dixLookupScreenPrivate(&dev->devPrivates, rfbDCDeviceKey, screen) : \
+  (rfbDCBufferPtr)dixLookupScreenPrivate(&GetMaster(dev, MASTER_POINTER)->devPrivates, rfbDCDeviceKey, screen))
+
+/*
+ * The core pointer buffer will point to the index of the virtual core pointer
+ * in the pCursorBuffers array.
+ */
+typedef struct {
+    CloseScreenProcPtr CloseScreen;
 } rfbDCScreenRec, *rfbDCScreenPtr;
+
+#define rfbGetDCScreen(s)	((rfbDCScreenPtr)(dixLookupPrivate(&(s)->devPrivates, rfbDCScreenKey)))
 
 /* per-cursor per-screen private data */
 typedef struct {
-    PixmapPtr           sourceBits;         /* source bits */
-    PixmapPtr           maskBits;           /* mask bits */
+    PixmapPtr sourceBits;       /* source bits */
+    PixmapPtr maskBits;         /* mask bits */
 #ifdef ARGB_CURSOR
-    PicturePtr          pPicture;
+    PicturePtr pPicture;
 #endif
 } rfbDCCursorRec, *rfbDCCursorPtr;
 
-/*
- * sprite/cursor method table
- */
-
-static Bool     rfbDCRealizeCursor(),       rfbDCUnrealizeCursor();
-static Bool     rfbDCPutUpCursor(),         rfbDCSaveUnderCursor();
-static Bool     rfbDCRestoreUnderCursor();
-
-static rfbSpriteCursorFuncRec rfbDCFuncs = {
-    rfbDCRealizeCursor,
-    rfbDCUnrealizeCursor,
-    rfbDCPutUpCursor,
-    rfbDCSaveUnderCursor,
-    rfbDCRestoreUnderCursor,
-};
-
 Bool
-rfbDCInitialize (pScreen, screenFuncs)
-    ScreenPtr               pScreen;
-    miPointerScreenFuncPtr  screenFuncs;
+rfbDCInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
 {
-    rfbDCScreenPtr   pScreenPriv;
+    rfbDCScreenPtr pScreenPriv;
 
-    if (rfbDCGeneration != serverGeneration)
-    {
-        rfbDCScreenIndex = AllocateScreenPrivateIndex ();
-        if (rfbDCScreenIndex < 0)
-            return FALSE;
-        rfbDCGeneration = serverGeneration;
-    }
-    pScreenPriv = (rfbDCScreenPtr) xalloc (sizeof (rfbDCScreenRec));
-    if (!pScreenPriv)
+    if (!dixRegisterPrivateKey(&rfbDCScreenKeyRec, PRIVATE_SCREEN, 0) ||
+        !dixRegisterScreenPrivateKey(&rfbDCCursorBitsKeyRec, pScreen,
+                                     PRIVATE_CURSOR_BITS, 0) ||
+        !dixRegisterScreenPrivateKey(&rfbDCDeviceKeyRec, pScreen, PRIVATE_DEVICE,
+                                     0))
         return FALSE;
 
-    /*
-     * initialize the entire private structure to zeros
-     */
-
-    pScreenPriv->pSourceGC =
-        pScreenPriv->pMaskGC =
-        pScreenPriv->pSaveGC =
-        pScreenPriv->pRestoreGC =
-        pScreenPriv->pPixSourceGC =
-        pScreenPriv->pPixMaskGC = NULL;
-#ifdef ARGB_CURSOR
-    pScreenPriv->pRootPicture = NULL;
-    pScreenPriv->pTempPicture = NULL;
-#endif
-
-    pScreenPriv->pSave = NULL;
+    pScreenPriv = malloc(sizeof(rfbDCScreenRec));
+    if (!pScreenPriv)
+        return FALSE;
 
     pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = rfbDCCloseScreen;
 
-    pScreen->devPrivates[rfbDCScreenIndex].ptr = (pointer) pScreenPriv;
+    dixSetPrivate(&pScreen->devPrivates, rfbDCScreenKey, pScreenPriv);
 
-    if (!rfbSpriteInitialize (pScreen, &rfbDCFuncs, screenFuncs))
-    {
-        xfree ((pointer) pScreenPriv);
+    if (!rfbSpriteInitialize(pScreen, screenFuncs)) {
+        free((pointer) pScreenPriv);
         return FALSE;
     }
     return TRUE;
 }
 
-#define tossGC(gc)  (gc ? FreeGC (gc, (GContext) 0) : 0)
-#define tossPix(pix)    (pix ? (*pScreen->DestroyPixmap) (pix) : TRUE)
-#define tossPict(pict)  (pict ? FreePicture (pict, 0) : 0)
-
 static Bool
-rfbDCCloseScreen (index, pScreen)
-    int         index;
-    ScreenPtr   pScreen;
+rfbDCCloseScreen(int index, ScreenPtr pScreen)
 {
-    rfbDCScreenPtr   pScreenPriv;
+    rfbDCScreenPtr pScreenPriv;
 
-    pScreenPriv = (rfbDCScreenPtr) pScreen->devPrivates[rfbDCScreenIndex].ptr;
+    pScreenPriv = (rfbDCScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
+                                                    rfbDCScreenKey);
     pScreen->CloseScreen = pScreenPriv->CloseScreen;
-    tossGC (pScreenPriv->pSourceGC);
-    tossGC (pScreenPriv->pMaskGC);
-    tossGC (pScreenPriv->pSaveGC);
-    tossGC (pScreenPriv->pRestoreGC);
-    tossGC (pScreenPriv->pPixSourceGC);
-    tossGC (pScreenPriv->pPixMaskGC);
-    tossPix (pScreenPriv->pSave);
-#ifdef ARGB_CURSOR
-    tossPict (pScreenPriv->pRootPicture);
-    tossPict (pScreenPriv->pTempPicture);
-#endif
-    xfree ((pointer) pScreenPriv);
+    free((pointer) pScreenPriv);
     return (*pScreen->CloseScreen) (index, pScreen);
 }
 
-static Bool
-rfbDCRealizeCursor (pScreen, pCursor)
-    ScreenPtr   pScreen;
-    CursorPtr   pCursor;
+Bool
+rfbDCRealizeCursor(ScreenPtr pScreen, CursorPtr pCursor)
 {
     if (pCursor->bits->refcnt <= 1)
-        pCursor->bits->devPriv[pScreen->myNum] = (pointer)NULL;
+        dixSetScreenPrivate(&pCursor->bits->devPrivates, rfbDCCursorBitsKey,
+                            pScreen, NULL);
     return TRUE;
 }
 
 #ifdef ARGB_CURSOR
-#define EnsurePicture(picture, draw, win)  \
-    (picture || rfbDCMakePicture(&picture, draw, win))
+#define EnsurePicture(picture,draw,win) (picture || rfbDCMakePicture(&picture,draw,win))
 
 static VisualPtr
-rfbDCGetWindowVisual (WindowPtr pWin)
+rfbDCGetWindowVisual(WindowPtr pWin)
 {
-    ScreenPtr       pScreen = pWin->drawable.pScreen;
-    VisualID        vid = wVisual (pWin);
-    int             i;
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+    VisualID vid = wVisual(pWin);
+    int i;
 
     for (i = 0; i < pScreen->numVisuals; i++)
         if (pScreen->visuals[i].vid == vid)
@@ -218,322 +186,410 @@ rfbDCGetWindowVisual (WindowPtr pWin)
 }
 
 static PicturePtr
-rfbDCMakePicture (PicturePtr *ppPicture, DrawablePtr pDraw, WindowPtr pWin)
+rfbDCMakePicture(PicturePtr * ppPicture, DrawablePtr pDraw, WindowPtr pWin)
 {
-    ScreenPtr       pScreen = pDraw->pScreen;
-    VisualPtr       pVisual;
-    PictFormatPtr   pFormat;
-    XID             subwindow_mode = IncludeInferiors;
-    PicturePtr      pPicture;
-    int             error;
+    ScreenPtr pScreen = pDraw->pScreen;
+    VisualPtr pVisual;
+    PictFormatPtr pFormat;
+    XID subwindow_mode = IncludeInferiors;
+    PicturePtr pPicture;
+    int error;
 
-    pVisual = rfbDCGetWindowVisual (pWin);
+    pVisual = rfbDCGetWindowVisual(pWin);
     if (!pVisual)
         return 0;
-    pFormat = PictureMatchVisual (pScreen, pDraw->depth, pVisual);
+    pFormat = PictureMatchVisual(pScreen, pDraw->depth, pVisual);
     if (!pFormat)
         return 0;
-    pPicture = CreatePicture (0, pDraw, pFormat,
-                              CPSubwindowMode, &subwindow_mode,
-                              serverClient, &error);
+    pPicture = CreatePicture(0, pDraw, pFormat,
+                             CPSubwindowMode, &subwindow_mode,
+                             serverClient, &error);
     *ppPicture = pPicture;
     return pPicture;
 }
 #endif
 
 static rfbDCCursorPtr
-rfbDCRealize (pScreen, pCursor)
-    ScreenPtr   pScreen;
-    CursorPtr   pCursor;
+rfbDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
 {
-    rfbDCCursorPtr   pPriv;
-    GCPtr           pGC;
-    XID             gcvals[3];
+    rfbDCCursorPtr pPriv;
+    GCPtr pGC;
+    ChangeGCVal gcvals;
 
-    pPriv = (rfbDCCursorPtr) xalloc (sizeof (rfbDCCursorRec));
+    pPriv = malloc(sizeof(rfbDCCursorRec));
     if (!pPriv)
-        return (rfbDCCursorPtr)NULL;
+        return NULL;
 #ifdef ARGB_CURSOR
-    if (pCursor->bits->argb)
-    {
-        PixmapPtr       pPixmap;
-        PictFormatPtr   pFormat;
-        int             error;
+    if (pCursor->bits->argb) {
+        PixmapPtr pPixmap;
+        PictFormatPtr pFormat;
+        int error;
 
-        pFormat = PictureMatchFormat (pScreen, 32, PICT_a8r8g8b8);
-        if (!pFormat)
-        {
-            xfree ((pointer) pPriv);
-            return (rfbDCCursorPtr)NULL;
+        pFormat = PictureMatchFormat(pScreen, 32, PICT_a8r8g8b8);
+        if (!pFormat) {
+            free((pointer) pPriv);
+            return NULL;
         }
 
         pPriv->sourceBits = 0;
         pPriv->maskBits = 0;
         pPixmap = (*pScreen->CreatePixmap) (pScreen, pCursor->bits->width,
-                                            pCursor->bits->height, 32);
-        if (!pPixmap)
-        {
-            xfree ((pointer) pPriv);
-            return (rfbDCCursorPtr)NULL;
+                                            pCursor->bits->height, 32,
+                                            CREATE_PIXMAP_USAGE_SCRATCH);
+        if (!pPixmap) {
+            free((pointer) pPriv);
+            return NULL;
         }
-        pGC = GetScratchGC (32, pScreen);
-        if (!pGC)
-        {
+        pGC = GetScratchGC(32, pScreen);
+        if (!pGC) {
             (*pScreen->DestroyPixmap) (pPixmap);
-            xfree ((pointer) pPriv);
-            return (rfbDCCursorPtr)NULL;
+            free((pointer) pPriv);
+            return NULL;
         }
-        ValidateGC (&pPixmap->drawable, pGC);
+        ValidateGC(&pPixmap->drawable, pGC);
         (*pGC->ops->PutImage) (&pPixmap->drawable, pGC, 32,
                                0, 0, pCursor->bits->width,
                                pCursor->bits->height,
                                0, ZPixmap, (char *) pCursor->bits->argb);
-        FreeScratchGC (pGC);
-        pPriv->pPicture = CreatePicture (0, &pPixmap->drawable,
+        FreeScratchGC(pGC);
+        pPriv->pPicture = CreatePicture(0, &pPixmap->drawable,
                                         pFormat, 0, 0, serverClient, &error);
         (*pScreen->DestroyPixmap) (pPixmap);
-        if (!pPriv->pPicture)
-        {
-            xfree ((pointer) pPriv);
-            return (rfbDCCursorPtr)NULL;
+        if (!pPriv->pPicture) {
+            free((pointer) pPriv);
+            return NULL;
         }
-        pCursor->bits->devPriv[pScreen->myNum] = (pointer) pPriv;
+        dixSetScreenPrivate(&pCursor->bits->devPrivates, rfbDCCursorBitsKey,
+                            pScreen, pPriv);
         return pPriv;
     }
     pPriv->pPicture = 0;
 #endif
-    pPriv->sourceBits = (*pScreen->CreatePixmap) (pScreen, pCursor->bits->width, pCursor->bits->height, 1);
-    if (!pPriv->sourceBits)
-    {
-        xfree ((pointer) pPriv);
-        return (rfbDCCursorPtr)NULL;
+    pPriv->sourceBits =
+        (*pScreen->CreatePixmap) (pScreen, pCursor->bits->width,
+                                  pCursor->bits->height, 1, 0);
+    if (!pPriv->sourceBits) {
+        free((pointer) pPriv);
+        return NULL;
     }
-    pPriv->maskBits =  (*pScreen->CreatePixmap) (pScreen, pCursor->bits->width, pCursor->bits->height, 1);
-    if (!pPriv->maskBits)
-    {
+    pPriv->maskBits =
+        (*pScreen->CreatePixmap) (pScreen, pCursor->bits->width,
+                                  pCursor->bits->height, 1, 0);
+    if (!pPriv->maskBits) {
         (*pScreen->DestroyPixmap) (pPriv->sourceBits);
-        xfree ((pointer) pPriv);
-        return (rfbDCCursorPtr)NULL;
+        free((pointer) pPriv);
+        return NULL;
     }
-    pCursor->bits->devPriv[pScreen->myNum] = (pointer) pPriv;
+    dixSetScreenPrivate(&pCursor->bits->devPrivates, rfbDCCursorBitsKey, pScreen,
+                        pPriv);
 
     /* create the two sets of bits, clipping as appropriate */
 
-    pGC = GetScratchGC (1, pScreen);
-    if (!pGC)
-    {
-        (void) rfbDCUnrealizeCursor (pScreen, pCursor);
-        return (rfbDCCursorPtr)NULL;
+    pGC = GetScratchGC(1, pScreen);
+    if (!pGC) {
+        (void) rfbDCUnrealizeCursor(pScreen, pCursor);
+        return NULL;
     }
 
-    ValidateGC ((DrawablePtr)pPriv->sourceBits, pGC);
-    (*pGC->ops->PutImage) ((DrawablePtr)pPriv->sourceBits, pGC, 1,
+    ValidateGC((DrawablePtr) pPriv->sourceBits, pGC);
+    (*pGC->ops->PutImage) ((DrawablePtr) pPriv->sourceBits, pGC, 1,
                            0, 0, pCursor->bits->width, pCursor->bits->height,
-                           0, XYPixmap, (char *)pCursor->bits->source);
-    gcvals[0] = GXand;
-    ChangeGC (pGC, GCFunction, gcvals);
-    ValidateGC ((DrawablePtr)pPriv->sourceBits, pGC);
-    (*pGC->ops->PutImage) ((DrawablePtr)pPriv->sourceBits, pGC, 1,
+                           0, XYPixmap, (char *) pCursor->bits->source);
+    gcvals.val = GXand;
+    ChangeGC(NullClient, pGC, GCFunction, &gcvals);
+    ValidateGC((DrawablePtr) pPriv->sourceBits, pGC);
+    (*pGC->ops->PutImage) ((DrawablePtr) pPriv->sourceBits, pGC, 1,
                            0, 0, pCursor->bits->width, pCursor->bits->height,
-                           0, XYPixmap, (char *)pCursor->bits->mask);
+                           0, XYPixmap, (char *) pCursor->bits->mask);
 
     /* mask bits -- pCursor->mask & ~pCursor->source */
-    gcvals[0] = GXcopy;
-    ChangeGC (pGC, GCFunction, gcvals);
-    ValidateGC ((DrawablePtr)pPriv->maskBits, pGC);
-    (*pGC->ops->PutImage) ((DrawablePtr)pPriv->maskBits, pGC, 1,
+    gcvals.val = GXcopy;
+    ChangeGC(NullClient, pGC, GCFunction, &gcvals);
+    ValidateGC((DrawablePtr) pPriv->maskBits, pGC);
+    (*pGC->ops->PutImage) ((DrawablePtr) pPriv->maskBits, pGC, 1,
                            0, 0, pCursor->bits->width, pCursor->bits->height,
-                           0, XYPixmap, (char *)pCursor->bits->mask);
-    gcvals[0] = GXandInverted;
-    ChangeGC (pGC, GCFunction, gcvals);
-    ValidateGC ((DrawablePtr)pPriv->maskBits, pGC);
-    (*pGC->ops->PutImage) ((DrawablePtr)pPriv->maskBits, pGC, 1,
+                           0, XYPixmap, (char *) pCursor->bits->mask);
+    gcvals.val = GXandInverted;
+    ChangeGC(NullClient, pGC, GCFunction, &gcvals);
+    ValidateGC((DrawablePtr) pPriv->maskBits, pGC);
+    (*pGC->ops->PutImage) ((DrawablePtr) pPriv->maskBits, pGC, 1,
                            0, 0, pCursor->bits->width, pCursor->bits->height,
-                           0, XYPixmap, (char *)pCursor->bits->source);
-    FreeScratchGC (pGC);
+                           0, XYPixmap, (char *) pCursor->bits->source);
+    FreeScratchGC(pGC);
     return pPriv;
 }
 
-static Bool
-rfbDCUnrealizeCursor (pScreen, pCursor)
-    ScreenPtr   pScreen;
-    CursorPtr   pCursor;
+Bool
+rfbDCUnrealizeCursor(ScreenPtr pScreen, CursorPtr pCursor)
 {
-    rfbDCCursorPtr   pPriv;
+    rfbDCCursorPtr pPriv;
 
-    pPriv = (rfbDCCursorPtr) pCursor->bits->devPriv[pScreen->myNum];
-    if (pPriv && (pCursor->bits->refcnt <= 1))
-    {
+    pPriv = (rfbDCCursorPtr) dixLookupScreenPrivate(&pCursor->bits->devPrivates,
+                                                    rfbDCCursorBitsKey, pScreen);
+    if (pPriv && (pCursor->bits->refcnt <= 1)) {
         if (pPriv->sourceBits)
             (*pScreen->DestroyPixmap) (pPriv->sourceBits);
         if (pPriv->maskBits)
             (*pScreen->DestroyPixmap) (pPriv->maskBits);
 #ifdef ARGB_CURSOR
         if (pPriv->pPicture)
-            FreePicture (pPriv->pPicture, 0);
+            FreePicture(pPriv->pPicture, 0);
 #endif
-        xfree ((pointer) pPriv);
-        pCursor->bits->devPriv[pScreen->myNum] = (pointer)NULL;
+        free((pointer) pPriv);
+        dixSetScreenPrivate(&pCursor->bits->devPrivates, rfbDCCursorBitsKey,
+                            pScreen, NULL);
     }
     return TRUE;
 }
 
 static void
-rfbDCPutBits (pDrawable, pPriv, sourceGC, maskGC, x, y, w, h, source, mask)
-    DrawablePtr     pDrawable;
-    GCPtr           sourceGC, maskGC;
-    int             x, y;
-    unsigned        w, h;
-    rfbDCCursorPtr   pPriv;
-    unsigned long   source, mask;
+rfbDCPutBits(DrawablePtr pDrawable,
+             rfbDCCursorPtr pPriv,
+             GCPtr sourceGC,
+             GCPtr maskGC,
+             int x_org,
+             int y_org,
+             unsigned w, unsigned h, unsigned long source, unsigned long mask)
 {
-    XID     gcvals[1];
+    ChangeGCVal gcval;
+    int x, y;
 
-    if (sourceGC->fgPixel != source)
-    {
-        gcvals[0] = source;
-        DoChangeGC (sourceGC, GCForeground, gcvals, 0);
+    if (sourceGC->fgPixel != source) {
+        gcval.val = source;
+        ChangeGC(NullClient, sourceGC, GCForeground, &gcval);
     }
     if (sourceGC->serialNumber != pDrawable->serialNumber)
-        ValidateGC (pDrawable, sourceGC);
-    (*sourceGC->ops->PushPixels) (sourceGC, pPriv->sourceBits, pDrawable, w, h, x, y);
-    if (maskGC->fgPixel != mask)
-    {
-        gcvals[0] = mask;
-        DoChangeGC (maskGC, GCForeground, gcvals, 0);
+        ValidateGC(pDrawable, sourceGC);
+
+    if (sourceGC->miTranslate) {
+        x = pDrawable->x + x_org;
+        y = pDrawable->y + y_org;
+    }
+    else {
+        x = x_org;
+        y = y_org;
+    }
+
+    (*sourceGC->ops->PushPixels) (sourceGC, pPriv->sourceBits, pDrawable, w, h,
+                                  x, y);
+    if (maskGC->fgPixel != mask) {
+        gcval.val = mask;
+        ChangeGC(NullClient, maskGC, GCForeground, &gcval);
     }
     if (maskGC->serialNumber != pDrawable->serialNumber)
-        ValidateGC (pDrawable, maskGC);
+        ValidateGC(pDrawable, maskGC);
+
+    if (maskGC->miTranslate) {
+        x = pDrawable->x + x_org;
+        y = pDrawable->y + y_org;
+    }
+    else {
+        x = x_org;
+        y = y_org;
+    }
+
     (*maskGC->ops->PushPixels) (maskGC, pPriv->maskBits, pDrawable, w, h, x, y);
 }
 
-#define EnsureGC(gc, win) (gc || rfbDCMakeGC(&gc, win))
-
 static GCPtr
-rfbDCMakeGC(ppGC, pWin)
-    GCPtr       *ppGC;
-    WindowPtr   pWin;
+rfbDCMakeGC(WindowPtr pWin)
 {
     GCPtr pGC;
-    int   status;
-    XID   gcvals[2];
+    int status;
+    XID gcvals[2];
 
     gcvals[0] = IncludeInferiors;
     gcvals[1] = FALSE;
-    pGC = CreateGC((DrawablePtr)pWin,
-                   GCSubwindowMode|GCGraphicsExposures, gcvals, &status);
-    if (pGC && pWin->drawable.pScreen->DrawGuarantee)
-        (*pWin->drawable.pScreen->DrawGuarantee) (pWin, pGC, GuaranteeVisBack);
-    *ppGC = pGC;
+    pGC = CreateGC((DrawablePtr) pWin,
+                   GCSubwindowMode | GCGraphicsExposures, gcvals, &status,
+                   (XID) 0, serverClient);
     return pGC;
 }
 
-static Bool
-rfbDCPutUpCursor (pScreen, pCursor, x, y, source, mask)
-    ScreenPtr       pScreen;
-    CursorPtr       pCursor;
-    int             x, y;
-    unsigned long   source, mask;
+Bool
+rfbDCPutUpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor,
+                 int x, int y, unsigned long source, unsigned long mask)
 {
-    rfbDCScreenPtr   pScreenPriv;
-    rfbDCCursorPtr   pPriv;
-    WindowPtr       pWin;
+    rfbDCCursorPtr pPriv;
+    rfbDCBufferPtr pBuffer;
+    WindowPtr pWin;
 
-    pPriv = (rfbDCCursorPtr) pCursor->bits->devPriv[pScreen->myNum];
-    if (!pPriv)
-    {
+    pPriv = (rfbDCCursorPtr) dixLookupScreenPrivate(&pCursor->bits->devPrivates,
+                                                    rfbDCCursorBitsKey, pScreen);
+    if (!pPriv) {
         pPriv = rfbDCRealize(pScreen, pCursor);
         if (!pPriv)
             return FALSE;
     }
-    pScreenPriv = (rfbDCScreenPtr) pScreen->devPrivates[rfbDCScreenIndex].ptr;
-    pWin = WindowTable[pScreen->myNum];
+
+    pWin = pScreen->root;
+    pBuffer = rfbGetDCDevice(pDev, pScreen);
+
 #ifdef ARGB_CURSOR
-    if (pPriv->pPicture)
-    {
-        if (!EnsurePicture(pScreenPriv->pRootPicture, &pWin->drawable, pWin))
+    if (pPriv->pPicture) {
+        if (!EnsurePicture(pBuffer->pRootPicture, &pWin->drawable, pWin))
             return FALSE;
-        CompositePicture (PictOpOver,
-                          pPriv->pPicture,
-                          NULL,
-                          pScreenPriv->pRootPicture,
-                          0, 0, 0, 0,
-                          x, y,
-                          pCursor->bits->width,
-                          pCursor->bits->height);
+        CompositePicture(PictOpOver,
+                         pPriv->pPicture,
+                         NULL,
+                         pBuffer->pRootPicture,
+                         0, 0, 0, 0,
+                         x, y, pCursor->bits->width, pCursor->bits->height);
     }
     else
 #endif
     {
-        if (!EnsureGC(pScreenPriv->pSourceGC, pWin))
-            return FALSE;
-        if (!EnsureGC(pScreenPriv->pMaskGC, pWin))
-        {
-            FreeGC (pScreenPriv->pSourceGC, (GContext) 0);
-            pScreenPriv->pSourceGC = 0;
-            return FALSE;
-        }
-        rfbDCPutBits ((DrawablePtr)pWin, pPriv,
-                     pScreenPriv->pSourceGC, pScreenPriv->pMaskGC,
-                     x, y, pCursor->bits->width, pCursor->bits->height,
-                     source, mask);
+        rfbDCPutBits((DrawablePtr) pWin, pPriv,
+                    pBuffer->pSourceGC, pBuffer->pMaskGC,
+                    x, y, pCursor->bits->width, pCursor->bits->height,
+                    source, mask);
     }
     return TRUE;
 }
 
-static Bool
-rfbDCSaveUnderCursor (pScreen, x, y, w, h)
-    ScreenPtr   pScreen;
-    int         x, y, w, h;
+Bool
+rfbDCSaveUnderCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+                     int x, int y, int w, int h)
 {
-    rfbDCScreenPtr   pScreenPriv;
-    PixmapPtr       pSave;
-    WindowPtr       pWin;
-    GCPtr           pGC;
+    rfbDCBufferPtr pBuffer;
+    PixmapPtr pSave;
+    WindowPtr pWin;
+    GCPtr pGC;
 
-    pScreenPriv = (rfbDCScreenPtr) pScreen->devPrivates[rfbDCScreenIndex].ptr;
-    pSave = pScreenPriv->pSave;
-    pWin = WindowTable[pScreen->myNum];
-    if (!pSave || pSave->drawable.width < w || pSave->drawable.height < h)
-    {
+    pBuffer = rfbGetDCDevice(pDev, pScreen);
+
+    pSave = pBuffer->pSave;
+    pWin = pScreen->root;
+    if (!pSave || pSave->drawable.width < w || pSave->drawable.height < h) {
         if (pSave)
             (*pScreen->DestroyPixmap) (pSave);
-        pScreenPriv->pSave = pSave =
-                (*pScreen->CreatePixmap) (pScreen, w, h, pScreen->rootDepth);
+        pBuffer->pSave = pSave =
+            (*pScreen->CreatePixmap) (pScreen, w, h, pScreen->rootDepth, 0);
         if (!pSave)
             return FALSE;
     }
-    if (!EnsureGC(pScreenPriv->pSaveGC, pWin))
-        return FALSE;
-    pGC = pScreenPriv->pSaveGC;
+
+    pGC = pBuffer->pSaveGC;
     if (pSave->drawable.serialNumber != pGC->serialNumber)
-        ValidateGC ((DrawablePtr) pSave, pGC);
+        ValidateGC((DrawablePtr) pSave, pGC);
     (*pGC->ops->CopyArea) ((DrawablePtr) pWin, (DrawablePtr) pSave, pGC,
-                            x, y, w, h, 0, 0);
+                           x, y, w, h, 0, 0);
     return TRUE;
 }
 
-static Bool
-rfbDCRestoreUnderCursor (pScreen, x, y, w, h)
-    ScreenPtr   pScreen;
-    int         x, y, w, h;
+Bool
+rfbDCRestoreUnderCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+                        int x, int y, int w, int h)
 {
-    rfbDCScreenPtr   pScreenPriv;
-    PixmapPtr       pSave;
-    WindowPtr       pWin;
-    GCPtr           pGC;
+    rfbDCBufferPtr pBuffer;
+    PixmapPtr pSave;
+    WindowPtr pWin;
+    GCPtr pGC;
 
-    pScreenPriv = (rfbDCScreenPtr) pScreen->devPrivates[rfbDCScreenIndex].ptr;
-    pSave = pScreenPriv->pSave;
-    pWin = WindowTable[pScreen->myNum];
+    pBuffer = rfbGetDCDevice(pDev, pScreen);
+    pSave = pBuffer->pSave;
+
+    pWin = pScreen->root;
     if (!pSave)
         return FALSE;
-    if (!EnsureGC(pScreenPriv->pRestoreGC, pWin))
-        return FALSE;
-    pGC = pScreenPriv->pRestoreGC;
+
+    pGC = pBuffer->pRestoreGC;
     if (pWin->drawable.serialNumber != pGC->serialNumber)
-        ValidateGC ((DrawablePtr) pWin, pGC);
+        ValidateGC((DrawablePtr) pWin, pGC);
     (*pGC->ops->CopyArea) ((DrawablePtr) pSave, (DrawablePtr) pWin, pGC,
-                            0, 0, w, h, x, y);
+                           0, 0, w, h, x, y);
     return TRUE;
+}
+
+Bool
+rfbDCDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
+{
+    rfbDCBufferPtr pBuffer;
+    WindowPtr pWin;
+    int i;
+
+    if (!DevHasCursor(pDev))
+        return TRUE;
+
+    for (i = 0; i < screenInfo.numScreens; i++) {
+        pScreen = screenInfo.screens[i];
+
+        pBuffer = calloc(1, sizeof(rfbDCBufferRec));
+        if (!pBuffer)
+            goto failure;
+
+        dixSetScreenPrivate(&pDev->devPrivates, rfbDCDeviceKey, pScreen,
+                            pBuffer);
+        pWin = pScreen->root;
+
+        pBuffer->pSourceGC = rfbDCMakeGC(pWin);
+        if (!pBuffer->pSourceGC)
+            goto failure;
+
+        pBuffer->pMaskGC = rfbDCMakeGC(pWin);
+        if (!pBuffer->pMaskGC)
+            goto failure;
+
+        pBuffer->pSaveGC = rfbDCMakeGC(pWin);
+        if (!pBuffer->pSaveGC)
+            goto failure;
+
+        pBuffer->pRestoreGC = rfbDCMakeGC(pWin);
+        if (!pBuffer->pRestoreGC)
+            goto failure;
+
+#ifdef ARGB_CURSOR
+        pBuffer->pRootPicture = NULL;
+#endif
+
+        /* (re)allocated lazily depending on the cursor size */
+        pBuffer->pSave = NULL;
+    }
+
+    return TRUE;
+
+ failure:
+
+    rfbDCDeviceCleanup(pDev, pScreen);
+
+    return FALSE;
+}
+
+void
+rfbDCDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
+{
+    rfbDCBufferPtr pBuffer;
+    int i;
+
+    if (DevHasCursor(pDev)) {
+        for (i = 0; i < screenInfo.numScreens; i++) {
+            pScreen = screenInfo.screens[i];
+
+            pBuffer = rfbGetDCDevice(pDev, pScreen);
+
+            if (pBuffer) {
+                if (pBuffer->pSourceGC)
+                    FreeGC(pBuffer->pSourceGC, (GContext) 0);
+                if (pBuffer->pMaskGC)
+                    FreeGC(pBuffer->pMaskGC, (GContext) 0);
+                if (pBuffer->pSaveGC)
+                    FreeGC(pBuffer->pSaveGC, (GContext) 0);
+                if (pBuffer->pRestoreGC)
+                    FreeGC(pBuffer->pRestoreGC, (GContext) 0);
+
+#ifdef ARGB_CURSOR
+                /* If a pRootPicture was allocated for a root window, it
+                 * is freed when that root window is destroyed, so don't
+                 * free it again here. */
+#endif
+
+                if (pBuffer->pSave)
+                    (*pScreen->DestroyPixmap) (pBuffer->pSave);
+
+                free(pBuffer);
+                dixSetScreenPrivate(&pDev->devPrivates, rfbDCDeviceKey, pScreen,
+                                    NULL);
+            }
+        }
+    }
 }

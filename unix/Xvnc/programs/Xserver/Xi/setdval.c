@@ -1,5 +1,3 @@
-/* $Xorg: setdval.c,v 1.4 2001/02/09 02:04:34 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/setdval.c,v 3.3 2001/12/14 19:58:59 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,16 +50,14 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "XIstubs.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
 #include "exglobals.h"
 
 #include "setdval.h"
@@ -74,15 +69,12 @@ SOFTWARE.
  */
 
 int
-SProcXSetDeviceValuators(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXSetDeviceValuators(ClientPtr client)
+{
     REQUEST(xSetDeviceValuatorsReq);
-    swaps(&stuff->length, n);
-    return(ProcXSetDeviceValuators(client));
-    }
+    swaps(&stuff->length);
+    return (ProcXSetDeviceValuators(client));
+}
 
 /***********************************************************************
  *
@@ -91,11 +83,11 @@ SProcXSetDeviceValuators(client)
  */
 
 int
-ProcXSetDeviceValuators(client)
-    register ClientPtr client;
-    {
+ProcXSetDeviceValuators(ClientPtr client)
+{
     DeviceIntPtr dev;
-    xSetDeviceValuatorsReply	rep;
+    xSetDeviceValuatorsReply rep;
+    int rc;
 
     REQUEST(xSetDeviceValuatorsReq);
     REQUEST_AT_LEAST_SIZE(xSetDeviceValuatorsReq);
@@ -106,48 +98,32 @@ ProcXSetDeviceValuators(client)
     rep.status = Success;
     rep.sequenceNumber = client->sequence;
 
-    if (stuff->length !=(sizeof(xSetDeviceValuatorsReq)>>2) + 
-	stuff->num_valuators)
-	{
-	SendErrorToClient (client, IReqCode, X_SetDeviceValuators, 0, 
-		BadLength);
-	return Success;
-	}
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	SendErrorToClient (client, IReqCode, X_SetDeviceValuators, 0, 
-	    BadDevice);
-	return Success;
-	}
+    if (stuff->length != bytes_to_int32(sizeof(xSetDeviceValuatorsReq)) +
+        stuff->num_valuators)
+        return BadLength;
+
+    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixSetAttrAccess);
+    if (rc != Success)
+        return rc;
     if (dev->valuator == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_SetDeviceValuators, 0, 
-		BadMatch);
-	return Success;
-	}
+        return BadMatch;
 
     if (stuff->first_valuator + stuff->num_valuators > dev->valuator->numAxes)
-	{
-	SendErrorToClient(client, IReqCode, X_SetDeviceValuators, 0, 
-		BadValue);
-	return Success;
-	}
+        return BadValue;
 
-    if ((dev->grab) && !SameClient(dev->grab, client))
-	rep.status = AlreadyGrabbed;
+    if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client))
+        rep.status = AlreadyGrabbed;
     else
-	rep.status = SetDeviceValuators (client, dev, (int *) &stuff[1],
-	    stuff->first_valuator, stuff->num_valuators);
+        rep.status = SetDeviceValuators(client, dev, (int *) &stuff[1],
+                                        stuff->first_valuator,
+                                        stuff->num_valuators);
 
     if (rep.status != Success && rep.status != AlreadyGrabbed)
-	SendErrorToClient(client, IReqCode, X_SetDeviceValuators, 0, 
-	    rep.status);
-    else
-	WriteReplyToClient (client, sizeof (xSetDeviceValuatorsReply), &rep);
+        return rep.status;
 
+    WriteReplyToClient(client, sizeof(xSetDeviceValuatorsReply), &rep);
     return Success;
-    }
+}
 
 /***********************************************************************
  *
@@ -157,14 +133,10 @@ ProcXSetDeviceValuators(client)
  */
 
 void
-SRepXSetDeviceValuators (client, size, rep)
-    ClientPtr	client;
-    int		size;
-    xSetDeviceValuatorsReply	*rep;
-    {
-    register char n;
-
-    swaps(&rep->sequenceNumber, n);
-    swapl(&rep->length, n);
-    WriteToClient(client, size, (char *)rep);
-    }
+SRepXSetDeviceValuators(ClientPtr client, int size,
+                        xSetDeviceValuatorsReply * rep)
+{
+    swaps(&rep->sequenceNumber);
+    swapl(&rep->length);
+    WriteToClient(client, size, (char *) rep);
+}

@@ -4,6 +4,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,17 +22,18 @@
  *  USA.
  */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include <stdio.h>
-#define NEED_EVENTS
-#include <X.h>
-#include <Xproto.h>
+#include <X11/X.h>
+#include <X11/Xproto.h>
 #include "rfb.h"
 #include "selection.h"
 #include "property.h"
-#include "input.h"
-#include <Xatom.h>
+#include <X11/Xatom.h>
 
-extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 extern Selection *CurrentSelections;
 extern int NumCurrentSelections;
 
@@ -48,8 +50,8 @@ void
 rfbSetXCutText(char *str, int len)
 {
     inSetXCutText = TRUE;
-    ChangeWindowProperty(WindowTable[0], XA_CUT_BUFFER0, XA_STRING,
-                         8, PropModeReplace, len,
+    ChangeWindowProperty(screenInfo.screens[0]->root, XA_CUT_BUFFER0,
+                         XA_STRING, 8, PropModeReplace, len,
                          (pointer)str, TRUE);
     inSetXCutText = FALSE;
 }

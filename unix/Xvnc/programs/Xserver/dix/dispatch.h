@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/dix/dispatch.h,v 3.1 1996/05/06 05:56:15 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -30,177 +29,117 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * extension.c, property.c. 
  */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef DISPATCH_H
 #define DISPATCH_H 1
 
-#ifdef LBX
-void IncrementClientCount(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-#endif
+int ProcAllocColor(ClientPtr /* client */ );
+int ProcAllocColorCells(ClientPtr /* client */ );
+int ProcAllocColorPlanes(ClientPtr /* client */ );
+int ProcAllocNamedColor(ClientPtr /* client */ );
+int ProcBell(ClientPtr /* client */ );
+int ProcChangeAccessControl(ClientPtr /* client */ );
+int ProcChangeCloseDownMode(ClientPtr /* client */ );
+int ProcChangeGC(ClientPtr /* client */ );
+int ProcChangeHosts(ClientPtr /* client */ );
+int ProcChangeKeyboardControl(ClientPtr /* client */ );
+int ProcChangeKeyboardMapping(ClientPtr /* client */ );
+int ProcChangePointerControl(ClientPtr /* client */ );
+int ProcChangeProperty(ClientPtr /* client */ );
+int ProcChangeSaveSet(ClientPtr /* client */ );
+int ProcChangeWindowAttributes(ClientPtr /* client */ );
+int ProcCirculateWindow(ClientPtr /* client */ );
+int ProcClearToBackground(ClientPtr /* client */ );
+int ProcCloseFont(ClientPtr /* client */ );
+int ProcConfigureWindow(ClientPtr /* client */ );
+int ProcConvertSelection(ClientPtr /* client */ );
+int ProcCopyArea(ClientPtr /* client */ );
+int ProcCopyColormapAndFree(ClientPtr /* client */ );
+int ProcCopyGC(ClientPtr /* client */ );
+int ProcCopyPlane(ClientPtr /* client */ );
+int ProcCreateColormap(ClientPtr /* client */ );
+int ProcCreateCursor(ClientPtr /* client */ );
+int ProcCreateGC(ClientPtr /* client */ );
+int ProcCreateGlyphCursor(ClientPtr /* client */ );
+int ProcCreatePixmap(ClientPtr /* client */ );
+int ProcCreateWindow(ClientPtr /* client */ );
+int ProcDeleteProperty(ClientPtr /* client */ );
+int ProcDestroySubwindows(ClientPtr /* client */ );
+int ProcDestroyWindow(ClientPtr /* client */ );
+int ProcEstablishConnection(ClientPtr /* client */ );
+int ProcFillPoly(ClientPtr /* client */ );
+int ProcForceScreenSaver(ClientPtr /* client */ );
+int ProcFreeColormap(ClientPtr /* client */ );
+int ProcFreeColors(ClientPtr /* client */ );
+int ProcFreeCursor(ClientPtr /* client */ );
+int ProcFreeGC(ClientPtr /* client */ );
+int ProcFreePixmap(ClientPtr /* client */ );
+int ProcGetAtomName(ClientPtr /* client */ );
+int ProcGetFontPath(ClientPtr /* client */ );
+int ProcGetGeometry(ClientPtr /* client */ );
+int ProcGetImage(ClientPtr /* client */ );
+int ProcGetKeyboardControl(ClientPtr /* client */ );
+int ProcGetKeyboardMapping(ClientPtr /* client */ );
+int ProcGetModifierMapping(ClientPtr /* client */ );
+int ProcGetMotionEvents(ClientPtr /* client */ );
+int ProcGetPointerControl(ClientPtr /* client */ );
+int ProcGetPointerMapping(ClientPtr /* client */ );
+int ProcGetProperty(ClientPtr /* client */ );
+int ProcGetScreenSaver(ClientPtr /* client */ );
+int ProcGetSelectionOwner(ClientPtr /* client */ );
+int ProcGetWindowAttributes(ClientPtr /* client */ );
+int ProcGrabServer(ClientPtr /* client */ );
+int ProcImageText16(ClientPtr /* client */ );
+int ProcImageText8(ClientPtr /* client */ );
+int ProcInitialConnection(ClientPtr /* client */ );
+int ProcInstallColormap(ClientPtr /* client */ );
+int ProcInternAtom(ClientPtr /* client */ );
+int ProcKillClient(ClientPtr /* client */ );
+int ProcListExtensions(ClientPtr /* client */ );
+int ProcListFonts(ClientPtr /* client */ );
+int ProcListFontsWithInfo(ClientPtr /* client */ );
+int ProcListHosts(ClientPtr /* client */ );
+int ProcListInstalledColormaps(ClientPtr /* client */ );
+int ProcListProperties(ClientPtr /* client */ );
+int ProcLookupColor(ClientPtr /* client */ );
+int ProcMapSubwindows(ClientPtr /* client */ );
+int ProcMapWindow(ClientPtr /* client */ );
+int ProcNoOperation(ClientPtr /* client */ );
+int ProcOpenFont(ClientPtr /* client */ );
+int ProcPolyArc(ClientPtr /* client */ );
+int ProcPolyFillArc(ClientPtr /* client */ );
+int ProcPolyFillRectangle(ClientPtr /* client */ );
+int ProcPolyLine(ClientPtr /* client */ );
+int ProcPolyPoint(ClientPtr /* client */ );
+int ProcPolyRectangle(ClientPtr /* client */ );
+int ProcPolySegment(ClientPtr /* client */ );
+int ProcPolyText(ClientPtr /* client */ );
+int ProcPutImage(ClientPtr /* client */ );
+int ProcQueryBestSize(ClientPtr /* client */ );
+int ProcQueryColors(ClientPtr /* client */ );
+int ProcQueryExtension(ClientPtr /* client */ );
+int ProcQueryFont(ClientPtr /* client */ );
+int ProcQueryKeymap(ClientPtr /* client */ );
+int ProcQueryTextExtents(ClientPtr /* client */ );
+int ProcQueryTree(ClientPtr /* client */ );
+int ProcReparentWindow(ClientPtr /* client */ );
+int ProcRotateProperties(ClientPtr /* client */ );
+int ProcSetClipRectangles(ClientPtr /* client */ );
+int ProcSetDashes(ClientPtr /* client */ );
+int ProcSetFontPath(ClientPtr /* client */ );
+int ProcSetModifierMapping(ClientPtr /* client */ );
+int ProcSetPointerMapping(ClientPtr /* client */ );
+int ProcSetScreenSaver(ClientPtr /* client */ );
+int ProcSetSelectionOwner(ClientPtr /* client */ );
+int ProcStoreColors(ClientPtr /* client */ );
+int ProcStoreNamedColor(ClientPtr /* client */ );
+int ProcTranslateCoords(ClientPtr /* client */ );
+int ProcUngrabServer(ClientPtr /* client */ );
+int ProcUninstallColormap(ClientPtr /* client */ );
+int ProcUnmapSubwindows(ClientPtr /* client */ );
+int ProcUnmapWindow(ClientPtr /* client */ );
 
-void CloseDownClient(
-#if NeedFunctionPrototypes
-    ClientPtr client
-#endif
-);
-
-void Dispatch(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-void InitProcVectors(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-ClientPtr NextAvailableClient(
-#if NeedFunctionPrototypes
-    pointer ospriv
-#endif
-);
-
-int SendConnSetup(
-#if NeedFunctionPrototypes
-    ClientPtr /* client */,
-    char * /* reason */
-#endif
-);
-
-void SetInputCheck(
-#if NeedFunctionPrototypes
-    HWEventQueuePtr /* c0 */,
-    HWEventQueuePtr /* c1 */
-#endif
-);
-
-DISPATCH_PROC(InitClientPrivates);
-DISPATCH_PROC(ProcAllocColor);
-DISPATCH_PROC(ProcAllocColorCells);
-DISPATCH_PROC(ProcAllocColorPlanes);
-DISPATCH_PROC(ProcAllocNamedColor);
-DISPATCH_PROC(ProcAllowEvents);
-DISPATCH_PROC(ProcBadRequest);
-DISPATCH_PROC(ProcBell);
-DISPATCH_PROC(ProcChangeAccessControl);
-DISPATCH_PROC(ProcChangeActivePointerGrab);
-DISPATCH_PROC(ProcChangeCloseDownMode);
-DISPATCH_PROC(ProcChangeGC);
-DISPATCH_PROC(ProcChangeHosts);
-DISPATCH_PROC(ProcChangeKeyboardControl);
-DISPATCH_PROC(ProcChangeKeyboardMapping);
-DISPATCH_PROC(ProcChangePointerControl);
-DISPATCH_PROC(ProcChangeProperty);
-DISPATCH_PROC(ProcChangeSaveSet);
-DISPATCH_PROC(ProcChangeWindowAttributes);
-DISPATCH_PROC(ProcCirculateWindow);
-DISPATCH_PROC(ProcClearToBackground);
-DISPATCH_PROC(ProcCloseFont);
-DISPATCH_PROC(ProcConfigureWindow);
-DISPATCH_PROC(ProcConvertSelection);
-DISPATCH_PROC(ProcCopyArea);
-DISPATCH_PROC(ProcCopyColormapAndFree);
-DISPATCH_PROC(ProcCopyGC);
-DISPATCH_PROC(ProcCopyPlane);
-DISPATCH_PROC(ProcCreateColormap);
-DISPATCH_PROC(ProcCreateCursor);
-DISPATCH_PROC(ProcCreateGC);
-DISPATCH_PROC(ProcCreateGlyphCursor);
-DISPATCH_PROC(ProcCreatePixmap);
-DISPATCH_PROC(ProcCreateWindow);
-DISPATCH_PROC(ProcDeleteProperty);
-DISPATCH_PROC(ProcDestroySubwindows);
-DISPATCH_PROC(ProcDestroyWindow);
-DISPATCH_PROC(ProcEstablishConnection);
-DISPATCH_PROC(ProcFillPoly);
-DISPATCH_PROC(ProcForceScreenSaver);
-DISPATCH_PROC(ProcFreeColormap);
-DISPATCH_PROC(ProcFreeColors);
-DISPATCH_PROC(ProcFreeCursor);
-DISPATCH_PROC(ProcFreeGC);
-DISPATCH_PROC(ProcFreePixmap);
-DISPATCH_PROC(ProcGetAtomName);
-DISPATCH_PROC(ProcGetFontPath);
-DISPATCH_PROC(ProcGetGeometry);
-DISPATCH_PROC(ProcGetImage);
-DISPATCH_PROC(ProcGetInputFocus);
-DISPATCH_PROC(ProcGetKeyboardControl);
-DISPATCH_PROC(ProcGetKeyboardMapping);
-DISPATCH_PROC(ProcGetModifierMapping);
-DISPATCH_PROC(ProcGetMotionEvents);
-DISPATCH_PROC(ProcGetPointerControl);
-DISPATCH_PROC(ProcGetPointerMapping);
-DISPATCH_PROC(ProcGetProperty);
-DISPATCH_PROC(ProcGetScreenSaver);
-DISPATCH_PROC(ProcGetSelectionOwner);
-DISPATCH_PROC(ProcGetWindowAttributes);
-DISPATCH_PROC(ProcGrabButton);
-DISPATCH_PROC(ProcGrabKey);
-DISPATCH_PROC(ProcGrabKeyboard);
-DISPATCH_PROC(ProcGrabPointer);
-DISPATCH_PROC(ProcGrabServer);
-DISPATCH_PROC(ProcImageText16);
-DISPATCH_PROC(ProcImageText8);
-DISPATCH_PROC(ProcInitialConnection);
-DISPATCH_PROC(ProcInstallColormap);
-DISPATCH_PROC(ProcInternAtom);
-DISPATCH_PROC(ProcKillClient);
-DISPATCH_PROC(ProcListExtensions);
-DISPATCH_PROC(ProcListFonts);
-DISPATCH_PROC(ProcListFontsWithInfo);
-DISPATCH_PROC(ProcListHosts);
-DISPATCH_PROC(ProcListInstalledColormaps);
-DISPATCH_PROC(ProcListProperties);
-DISPATCH_PROC(ProcLookupColor);
-DISPATCH_PROC(ProcMapSubwindows);
-DISPATCH_PROC(ProcMapWindow);
-DISPATCH_PROC(ProcNoOperation);
-DISPATCH_PROC(ProcOpenFont);
-DISPATCH_PROC(ProcPolyArc);
-DISPATCH_PROC(ProcPolyFillArc);
-DISPATCH_PROC(ProcPolyFillRectangle);
-DISPATCH_PROC(ProcPolyLine);
-DISPATCH_PROC(ProcPolyPoint);
-DISPATCH_PROC(ProcPolyRectangle);
-DISPATCH_PROC(ProcPolySegment);
-DISPATCH_PROC(ProcPolyText);
-DISPATCH_PROC(ProcPutImage);
-DISPATCH_PROC(ProcQueryBestSize);
-DISPATCH_PROC(ProcQueryColors);
-DISPATCH_PROC(ProcQueryExtension);
-DISPATCH_PROC(ProcQueryFont);
-DISPATCH_PROC(ProcQueryKeymap);
-DISPATCH_PROC(ProcQueryPointer);
-DISPATCH_PROC(ProcQueryTextExtents);
-DISPATCH_PROC(ProcQueryTree);
-DISPATCH_PROC(ProcRecolorCursor);
-DISPATCH_PROC(ProcReparentWindow);
-DISPATCH_PROC(ProcRotateProperties);
-DISPATCH_PROC(ProcSendEvent);
-DISPATCH_PROC(ProcSetClipRectangles);
-DISPATCH_PROC(ProcSetDashes);
-DISPATCH_PROC(ProcSetFontPath);
-DISPATCH_PROC(ProcSetInputFocus);
-DISPATCH_PROC(ProcSetModifierMapping);
-DISPATCH_PROC(ProcSetPointerMapping);
-DISPATCH_PROC(ProcSetScreenSaver);
-DISPATCH_PROC(ProcSetSelectionOwner);
-DISPATCH_PROC(ProcStoreColors);
-DISPATCH_PROC(ProcStoreNamedColor);
-DISPATCH_PROC(ProcTranslateCoords);
-DISPATCH_PROC(ProcUngrabButton);
-DISPATCH_PROC(ProcUngrabKey);
-DISPATCH_PROC(ProcUngrabKeyboard);
-DISPATCH_PROC(ProcUngrabPointer);
-DISPATCH_PROC(ProcUngrabServer);
-DISPATCH_PROC(ProcUninstallColormap);
-DISPATCH_PROC(ProcUnmapSubwindows);
-DISPATCH_PROC(ProcUnmapWindow);
-DISPATCH_PROC(ProcWarpPointer);
-
-#endif /* DISPATCH_H */
+#endif                          /* DISPATCH_H */

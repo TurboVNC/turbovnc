@@ -1,6 +1,4 @@
 /*
- * Id: fbrop.h,v 1.1 1999/11/02 03:54:45 keithp Exp $
- *
  * Copyright © 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -21,16 +19,15 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-/* $XFree86: xc/programs/Xserver/fb/fbrop.h,v 1.3 2000/02/14 19:20:30 dawes Exp $ */
 
 #ifndef _FBROP_H_
 #define _FBROP_H_
 
 typedef struct _mergeRopBits {
-    FbBits   ca1, cx1, ca2, cx2;
+    FbBits ca1, cx1, ca2, cx2;
 } FbMergeRopRec, *FbMergeRopPtr;
 
-extern const FbMergeRopRec	FbMergeRopBits[16];
+extern _X_EXPORT const FbMergeRopRec FbMergeRopBits[16];
 
 #define FbDeclareMergeRop() FbBits   _ca1, _cx1, _ca2, _cx2;
 #define FbDeclarePrebuiltMergeRop()	FbBits	_cca, _ccx;
@@ -98,21 +95,22 @@ extern const FbMergeRopRec	FbMergeRopBits[16];
  * Stippling operations; 
  */
 
-extern const FbBits	fbStipple16Bits[256];	/* half of table */
+extern _X_EXPORT const FbBits fbStipple16Bits[256];     /* half of table */
+
 #define FbStipple16Bits(b) \
     (fbStipple16Bits[(b)&0xff] | fbStipple16Bits[(b) >> 8] << FB_HALFUNIT)
-extern const FbBits	fbStipple8Bits[256];
-extern const FbBits	fbStipple4Bits[16];
-extern const FbBits	fbStipple2Bits[4];
-extern const FbBits	fbStipple1Bits[2];
-extern const FbBits	*const fbStippleTable[];
+extern _X_EXPORT const FbBits fbStipple8Bits[256];
+extern _X_EXPORT const FbBits fbStipple4Bits[16];
+extern _X_EXPORT const FbBits fbStipple2Bits[4];
+extern _X_EXPORT const FbBits fbStipple1Bits[2];
+extern _X_EXPORT const FbBits *const fbStippleTable[];
 
 #define FbStippleRRop(dst, b, fa, fx, ba, bx) \
     (FbDoRRop(dst, fa, fx) & b) | (FbDoRRop(dst, ba, bx) & ~b)
 
 #define FbStippleRRopMask(dst, b, fa, fx, ba, bx, m) \
     (FbDoMaskRRop(dst, fa, fx, m) & (b)) | (FbDoMaskRRop(dst, ba, bx, m) & ~(b))
-						       
+
 #define FbDoLeftMaskByteStippleRRop(dst, b, fa, fx, ba, bx, lb, l) { \
     FbBits  __xor = ((fx) & (b)) | ((bx) & ~(b)); \
     FbDoLeftMaskByteRRop(dst, lb, l, ((fa) & (b)) | ((ba) & ~(b)), __xor); \
@@ -124,7 +122,7 @@ extern const FbBits	*const fbStippleTable[];
 }
 
 #define FbOpaqueStipple(b, fg, bg) (((fg) & (b)) | ((bg) & ~(b)))
-    
+
 /*
  * Compute rop for using tile code for 1-bit dest stipples; modifies
  * existing rop to flip depending on pixel values

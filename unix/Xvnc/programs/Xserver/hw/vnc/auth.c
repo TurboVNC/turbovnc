@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012-2013 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2014 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -39,8 +39,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
-#include "windowstr.h"
 #include "rfb.h"
+#include "windowstr.h"
 
 
 char *rfbAuthPasswdFile = NULL;
@@ -108,7 +108,7 @@ Bool rfbAuthUserACL = FALSE;
 void
 rfbAuthAddUser(const char* name, Bool viewOnly)
 {
-    UserList* p = (UserList*) xalloc(sizeof(UserList));
+    UserList* p = (UserList*) malloc(sizeof(UserList));
 
     if (p == NULL) {
         FatalError("rfbAuthAddUser: out of memory");
@@ -133,8 +133,8 @@ rfbAuthRevokeUser(const char* name)
         p = *prev;
         if (!strcmp(p->name, name)) {
             *prev = p->next;
-            xfree(p->name);
-            xfree(p);
+            free((void *)p->name);
+            free(p);
             return;
         }
 
@@ -560,7 +560,7 @@ rfbAuthInit()
                 strerror(errno));
         }
 
-        n = (char*) xalloc(strlen(pbuf.pw_name));
+        n = (char*) malloc(strlen(pbuf.pw_name));
         if (n == NULL) {
             FatalError("AuthPAMUserPwdRspFunc: out of memory");
         }
@@ -1066,7 +1066,7 @@ rfbVncAuthProcessResponse(cl)
                                passwdViewOnly, response);
             if (ok) {
                 memset(rfbAuthOTPValue, 0, rfbAuthOTPValueLen);
-                xfree(rfbAuthOTPValue);
+                free(rfbAuthOTPValue);
                 rfbAuthOTPValue = NULL;
             }
         }
@@ -1216,8 +1216,8 @@ static OsTimerPtr timer = NULL;
  * setting a timer in rfbAuthConsiderBlocking().
  */
 
-static CARD64
-rfbAuthReenable(OsTimerPtr timer, CARD64 now, pointer arg)
+static CARD32
+rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
 {
     rfbAuthTooManyTries = FALSE;
     return 0;

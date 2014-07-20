@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    OpenType & CFF data/program tables loader (specification).           */
 /*                                                                         */
-/*  Copyright 1996-2001, 2002 by                                           */
+/*  Copyright 1996-2001, 2002, 2003, 2007, 2008, 2010 by                   */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -21,8 +21,7 @@
 
 
 #include <ft2build.h>
-#include FT_INTERNAL_CFF_TYPES_H
-#include FT_INTERNAL_POSTSCRIPT_NAMES_H
+#include "cfftypes.h"
 
 
 FT_BEGIN_HEADER
@@ -32,13 +31,12 @@ FT_BEGIN_HEADER
 
 
   FT_LOCAL( FT_String* )
-  cff_index_get_name( CFF_Index  idx,
-                      FT_UInt    element );
+  cff_index_get_string( CFF_Font  font,
+                        FT_UInt   element );
 
   FT_LOCAL( FT_String* )
-  cff_index_get_sid_string( CFF_Index        idx,
-                            FT_UInt          sid,
-                            PSNames_Service  psnames_interface );
+  cff_index_get_sid_string( CFF_Font  font,
+                            FT_UInt   sid );
 
 
   FT_LOCAL( FT_Error )
@@ -51,18 +49,29 @@ FT_BEGIN_HEADER
   cff_index_forget_element( CFF_Index  idx,
                             FT_Byte**  pbytes );
 
+  FT_LOCAL( FT_String* )
+  cff_index_get_name( CFF_Font  font,
+                      FT_UInt   element );
+
+
+  FT_LOCAL( FT_UInt )
+  cff_charset_cid_to_gindex( CFF_Charset  charset,
+                             FT_UInt      cid );
+
 
   FT_LOCAL( FT_Error )
-  cff_font_load( FT_Stream  stream,
+  cff_font_load( FT_Library library,
+                 FT_Stream  stream,
                  FT_Int     face_index,
-                 CFF_Font   font );
+                 CFF_Font   font,
+                 FT_Bool    pure_cff );
 
   FT_LOCAL( void )
   cff_font_done( CFF_Font  font );
 
 
   FT_LOCAL( FT_Byte )
-  cff_fd_select_get( CFF_FDSelect  select,
+  cff_fd_select_get( CFF_FDSelect  fdselect,
                      FT_UInt       glyph_index );
 
 

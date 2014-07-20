@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    OpenType Glyph Loader (specification).                               */
 /*                                                                         */
-/*  Copyright 1996-2001, 2002 by                                           */
+/*  Copyright 1996-2004, 2006-2009, 2013 by                                */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -28,8 +28,9 @@
 FT_BEGIN_HEADER
 
 
-#define CFF_MAX_OPERANDS     48
-#define CFF_MAX_SUBRS_CALLS  32
+#define CFF_MAX_OPERANDS        48
+#define CFF_MAX_SUBRS_CALLS     32
+#define CFF_MAX_TRANS_ELEMENTS  32
 
 
   /*************************************************************************/
@@ -53,12 +54,6 @@ FT_BEGIN_HEADER
   /*                                                                       */
   /*    current       :: The current glyph outline.                        */
   /*                                                                       */
-  /*    last          :: The last point position.                          */
-  /*                                                                       */
-  /*    scale_x       :: The horizontal scale (FUnits to sub-pixels).      */
-  /*                                                                       */
-  /*    scale_y       :: The vertical scale (FUnits to sub-pixels).        */
-  /*                                                                       */
   /*    pos_x         :: The horizontal translation (if composite glyph).  */
   /*                                                                       */
   /*    pos_y         :: The vertical translation (if composite glyph).    */
@@ -74,9 +69,6 @@ FT_BEGIN_HEADER
   /*    load_points   :: If this flag is not set, no points are loaded.    */
   /*                                                                       */
   /*    no_recurse    :: Set but not used.                                 */
-  /*                                                                       */
-  /*    error         :: An error code that is only used to report memory  */
-  /*                     allocation problems.                              */
   /*                                                                       */
   /*    metrics_only  :: A boolean indicating that we only want to compute */
   /*                     the metrics of a given glyph, not load all of its */
@@ -95,11 +87,6 @@ FT_BEGIN_HEADER
     FT_Outline*     base;
     FT_Outline*     current;
 
-    FT_Vector       last;
-
-    FT_Fixed        scale_x;
-    FT_Fixed        scale_y;
-
     FT_Pos          pos_x;
     FT_Pos          pos_y;
 
@@ -111,15 +98,47 @@ FT_BEGIN_HEADER
     FT_Bool         load_points;
     FT_Bool         no_recurse;
 
-    FT_Error        error;         /* only used for memory errors */
     FT_Bool         metrics_only;
-
-    FT_UInt32       hint_flags;
 
     void*           hints_funcs;    /* hinter-specific */
     void*           hints_globals;  /* hinter-specific */
 
   } CFF_Builder;
+
+
+  FT_LOCAL( FT_Error )
+  cff_check_points( CFF_Builder*  builder,
+                    FT_Int        count );
+
+  FT_LOCAL( void )
+  cff_builder_add_point( CFF_Builder*  builder,
+                         FT_Pos        x,
+                         FT_Pos        y,
+                         FT_Byte       flag );
+  FT_LOCAL( FT_Error )
+  cff_builder_add_point1( CFF_Builder*  builder,
+                          FT_Pos        x,
+                          FT_Pos        y );
+  FT_LOCAL( FT_Error )
+  cff_builder_start_point( CFF_Builder*  builder,
+                           FT_Pos        x,
+                           FT_Pos        y );
+  FT_LOCAL( void )
+  cff_builder_close_contour( CFF_Builder*  builder );
+
+
+  FT_LOCAL( FT_Int )
+  cff_lookup_glyph_by_stdcharcode( CFF_Font  cff,
+                                   FT_Int    charcode );
+  FT_LOCAL( FT_Error )
+  cff_get_glyph_data( TT_Face    face,
+                      FT_UInt    glyph_index,
+                      FT_Byte**  pointer,
+                      FT_ULong*  length );
+  FT_LOCAL( void )
+  cff_free_glyph_data( TT_Face    face,
+                       FT_Byte**  pointer,
+                       FT_ULong   length );
 
 
   /* execution context charstring zone */
@@ -152,9 +171,9 @@ FT_BEGIN_HEADER
     FT_Pos             nominal_width;
 
     FT_Bool            read_width;
+    FT_Bool            width_only;
     FT_Int             num_hints;
-    FT_Fixed*          buildchar;
-    FT_Int             len_buildchar;
+    FT_Fixed           buildchar[CFF_MAX_TRANS_ELEMENTS];
 
     FT_UInt            num_locals;
     FT_UInt            num_globals;
@@ -170,6 +189,10 @@ FT_BEGIN_HEADER
 
     FT_Render_Mode     hint_mode;
 
+    FT_Bool            seac;
+
+    CFF_SubFont        current_subfont; /* for current glyph_index */
+
   } CFF_Decoder;
 
 
@@ -181,8 +204,9 @@ FT_BEGIN_HEADER
                     FT_Bool         hinting,
                     FT_Render_Mode  hint_mode );
 
-  FT_LOCAL( void )
+  FT_LOCAL( FT_Error )
   cff_decoder_prepare( CFF_Decoder*  decoder,
+                       CFF_Size      size,
                        FT_UInt       glyph_index );
 
 #if 0  /* unused until we support pure CFF fonts */
@@ -194,15 +218,17 @@ FT_BEGIN_HEADER
 
 #endif /* 0 */
 
+#ifdef CFF_CONFIG_OPTION_OLD_ENGINE
   FT_LOCAL( FT_Error )
   cff_decoder_parse_charstrings( CFF_Decoder*  decoder,
                                  FT_Byte*      charstring_base,
                                  FT_ULong      charstring_len );
+#endif
 
   FT_LOCAL( FT_Error )
   cff_slot_load( CFF_GlyphSlot  glyph,
                  CFF_Size       size,
-                 FT_Int         glyph_index,
+                 FT_UInt        glyph_index,
                  FT_Int32       load_flags );
 
 

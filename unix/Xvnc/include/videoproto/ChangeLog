@@ -1,0 +1,285 @@
+commit 56a94402e9252879771ba42ee76990f132b56fca
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:00:31 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 72a31b1b758c42faef518081a1a1c436c26add4f
+Author: Rémi Cardona <remi@gentoo.org>
+Date:   Thu Dec 17 08:42:27 2009 +0100
+
+    require autoconf 2.60 because of $(docdir) use
+    
+    Signed-off-by: Rémi Cardona <remi@gentoo.org>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@sun.com>
+    Reviewed-by: Dan Nicholson <dbn.lists@gmail.com>
+
+commit 38602c56dcf24bf7dbddfbac89a35c15e3d3f885
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 22 19:24:48 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit 35734855fd913c7b743280346fc19471a39d88d4
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 11:13:30 2009 -0500
+
+    README: file created or updated #24206
+    
+    Contains a set of URLs to freedesktop.org.
+
+commit 86b3515e9ea8dc6252db0ed31642ef314656c9bf
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 19:45:27 2009 -0500
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit ad23568d0d5d0c1cdfc54bfdb752e398ab881639
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:31:29 2009 -0500
+
+    Makefile.am: INSTALL file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+    Add INSTALL target
+
+commit 40310f285cdac70865ff342f874e2bd21d36ef8d
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:11:36 2009 -0500
+
+    configure.ac: deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit 69311c693daf6797646bce9b1c62bba54fed9343
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 13:55:25 2009 -0500
+
+    configure.ac: AM_MAINTAINER_MODE missing #24238
+    
+    This turns off maintainer mode build rules in tarballs.
+    Works in conjunction with autogen.sh --enable-maintainer-mode
+
+commit a9fc831a64cab7c70aecee4f0f86ac01360e3d8f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Nov 14 18:26:47 2009 -0500
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 9190399907610486001f3676945958dbab4b837a
+Author: Luc Verhaegen <libv@skynet.be>
+Date:   Mon Oct 19 23:59:20 2009 +0200
+
+    vldXvMC.h: stop uselessly including XvMClib.h.
+    
+    Protocol header depending on client library header?
+    
+    Only clients which depend on this header but which did not bother to
+    include it directly will run into trouble, but the fix is trivial,
+    general and backwards compatible.
+    
+    Signed-off-by: Luc Verhaegen <libv@skynet.be>
+
+commit 56ea4c0c10bb23ae4b115b13c0052d1e808d2e75
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Sat Oct 10 16:35:12 2009 -0700
+
+    Move xv-protocol-v2.txt from xorg-docs to videoproto
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 20dc47bfb9e6627e8335c870a808fdab72e82061
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Aug 27 11:59:40 2009 +1000
+
+    videoproto 2.3.0
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit ed07cce6a0d54bf7ace0e672fe769a34fdac837a
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Aug 27 11:55:47 2009 +1000
+
+    Remove RCS tags
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit cca2a3f1230bf21a1b4e4c255406b852c5c030c3
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Tue Jan 27 20:06:28 2009 -0200
+
+    Janitor: Correct make distcheck and dont distribute autogen.sh
+
+commit 430e61ec31c975963a3495c81c360837584b0ef0
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 16:39:08 2007 -0500
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit 35cde03805a6e6c4665a42e5c1657a88624710e6
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Mon Sep 3 05:54:21 2007 -0400
+
+    Add *~ to .gitignore to skip patch/emacs droppings
+
+commit 82643400f8b91f5bb13313cac5954f3e13455379
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jul 14 18:56:36 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit 1d8409f8b92026cf82b3c0356993ca3a5f18a1d1
+Author: Kevin E Martin <kem@kem.org>
+Date:   Thu Dec 15 00:24:38 2005 +0000
+
+    Update package version number for final X11R7 release candidate.
+
+commit 7811bd17a495be2f42ffa66a399343ed2c54b7bd
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 19 02:48:15 2005 +0000
+
+    Update package version number for RC1 release.
+
+commit 8404664358642cd90952acf07957a57b678b54fe
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Tue Aug 2 19:19:39 2005 +0000
+
+    Add basic .cvsignore files for proto modules.
+
+commit 8a08c1ccf233d725e0a12fc87cb6807f6fbb6fb2
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri Jul 29 21:22:57 2005 +0000
+
+    Various changes preparing packages for RC0:
+    - Verify and update package version numbers as needed
+    - Implement versioning scheme
+    - Change bug address to point to bugzilla bug entry form
+    - Disable loadable i18n in libX11 by default (use --enable-loadable-i18n to
+        reenable it)
+    - Fix makedepend to use pkgconfig and pass distcheck
+    - Update build script to build macros first
+    - Update modular Xorg version
+
+commit d393967cb43b1050aa520e9fb738f2753f6a18b6
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Tue Jul 12 01:22:22 2005 +0000
+
+    Move Xvlib.h and XvMClib.h to the libs.
+
+commit bae658b5c8d091a2deef3251ce07c0dff29af2ac
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sat May 21 04:52:54 2005 +0000
+
+    Change version to 2.2 (Xv major version; XvMC is 1.1 still).
+
+commit 7f0c0e550f1e3641bc895061d2ff76a8336fa5e7
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:22:40 2005 +0000
+
+    revert last change, didn't do right thing at all, sorry for the noise
+
+commit 0662a3831996d2db4560c1e154db1a4995b70d14
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:10:19 2005 +0000
+
+    Require automake 1.7 in AM_INIT_AUTOMAKE
+
+commit ff5a5dcd5e2bef26deca4be2d4541e9627544c89
+Author: Josh Triplett <josh@speakeasy.net>
+Date:   Tue May 17 22:12:59 2005 +0000
+
+    Add COPYING file for Video.
+
+commit 47f7733ccc2a6deb8576b9d55a3a46c841a5560c
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Mon May 9 18:20:06 2005 +0000
+
+    Change all the protonames from <extension>Ext to <extension>Proto.
+
+commit 60df602bf6f92eaf8f24e5c37cfbfb258ce74a20
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri May 6 01:46:31 2005 +0000
+
+    Initial build system files for proto module.
+
+commit 4396c32c85286d4da6495b279cb3c8a380302334
+Author: Markus Kuhn <Markus.Kuhn@cl.cam.ac.uk>
+Date:   Sat Dec 4 00:42:46 2004 +0000
+
+    Encoding of numerous files changed to UTF-8
+
+commit e57cb44cb47b1a25bcc0cce0dbc19e95abdf4ada
+Author: Thomas Hellstrom <unichrome@shipmail.org>
+Date:   Sat Nov 13 11:09:23 2004 +0000
+
+    lib/XvMC/Imake
+    Added support for automatic loading of the correct hardware XvMC driver.
+        This involves a protocol extension of the XvMC protocol. The XvMC
+        revision number was bumped.
+
+commit 12ef8daf8c850ae41cf3991b6588796b678b8450
+Author: Thomas Hellstrom <unichrome@shipmail.org>
+Date:   Sun Sep 26 11:48:56 2004 +0000
+
+    Added the XvMC wrapper. First support for runtime loading of hardware-
+        specific XvMC libraries.
+
+commit 4be3434b1362478149787efad07ababa75e705f7
+Author: Egbert Eich <eich@suse.de>
+Date:   Fri Apr 23 18:43:06 2004 +0000
+
+    Merging XORG-CURRENT into trunk
+
+commit 7e4871d503f1cca137e85880617ed3d10cc7c326
+Author: Egbert Eich <eich@suse.de>
+Date:   Sun Mar 14 08:31:36 2004 +0000
+
+    Importing vendor version xf86-4_4_99_1 on Sun Mar 14 00:26:39 PST 2004
+
+commit a9dd3e1f6f6e284eb03ec3410ca4eb7d12a9b3c3
+Author: Egbert Eich <eich@suse.de>
+Date:   Wed Mar 3 12:10:54 2004 +0000
+
+    Importing vendor version xf86-4_4_0 on Wed Mar 3 04:09:24 PST 2004
+
+commit d5a90e9d4c1dedb73882a4b2283a4810afca67b2
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 13:35:11 2004 +0000
+
+    readding XFree86's cvs IDs
+
+commit 5d3d0504773db5861665e53a8f3fe880034e2d6c
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 09:22:28 2004 +0000
+
+    Importing vendor version xf86-4_3_99_903 on Wed Feb 26 01:21:00 PST 2004
+
+commit 46e734df3ce62bc32a4e755feb4c6352c9db408a
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    XFree86 4.3.0.1
+
+commit 787e2f945a39415baa117c6fbf9125af0130cf23
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    Initial revision

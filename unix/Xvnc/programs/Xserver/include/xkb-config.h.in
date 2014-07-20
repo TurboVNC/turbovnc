@@ -1,0 +1,29 @@
+/* xkb-config.h.in: not at all generated.                      -*- c -*-
+ * 
+ */
+
+#ifndef _XKB_CONFIG_H_
+#define _XKB_CONFIG_H_
+
+/* Default set of XKB rules. */
+#define XKB_DFLT_RULES "@XKB_DFLT_RULES@"
+
+/* Default XKB model. */
+#define XKB_DFLT_MODEL "@XKB_DFLT_MODEL@"
+
+/* Default XKB layout. */
+#define XKB_DFLT_LAYOUT "@XKB_DFLT_LAYOUT@"
+
+/* Default XKB variant. */
+#define XKB_DFLT_VARIANT "@XKB_DFLT_VARIANT@"
+
+/* Default XKB options. */
+#define XKB_DFLT_OPTIONS "@XKB_DFLT_OPTIONS@"
+
+/* Path to XKB definitions. */
+#define XKB_BASE_DIRECTORY "@XKB_BASE_DIRECTORY@"
+
+/* Path to xkbcomp. */
+#define XKB_BIN_DIRECTORY "@XKB_BIN_DIRECTORY@"
+
+#endif /* _XKB_CONFIG_H_ */

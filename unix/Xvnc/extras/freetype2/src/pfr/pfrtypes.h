@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType PFR data structures (specification only).                   */
 /*                                                                         */
-/*  Copyright 2002 by                                                      */
+/*  Copyright 2002, 2003, 2005, 2007 by                                    */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -196,26 +196,26 @@ FT_BEGIN_HEADER
   typedef struct  PFR_KernItemRec_
   {
     PFR_KernItem  next;
-    FT_UInt       pair_count;
+    FT_Byte       pair_count;
+    FT_Byte       flags;
+    FT_Short      base_adj;
     FT_UInt       pair_size;
-    FT_Int        base_adj;
-    FT_UInt       flags;
-    FT_UInt32     offset;
+    FT_Offset     offset;
     FT_UInt32     pair1;
     FT_UInt32     pair2;
 
   } PFR_KernItemRec;
 
-#define PFR_KERN_INDEX( g1, g2 ) \
-  ( ( (FT_UInt32)(g1) << 16 ) | (FT_UInt16)(g2) )
 
-  typedef struct  PFR_KernPairRec_
-  {
-    FT_UInt    glyph1;
-    FT_UInt    glyph2;
-    FT_Vector  kerning;
+#define PFR_KERN_INDEX( g1, g2 )                          \
+          ( ( (FT_UInt32)(g1) << 16 ) | (FT_UInt16)(g2) )
 
-  } PFR_KernPairRec, *PFR_KernPair;
+#define PFR_KERN_PAIR_INDEX( pair )                        \
+          PFR_KERN_INDEX( (pair)->glyph1, (pair)->glyph2 )
+
+#define PFR_NEXT_KPAIR( p )  ( p += 2,                              \
+                               ( (FT_UInt32)p[-2] << 16 ) | p[-1] )
+
 
   /************************************************************************/
 
@@ -230,7 +230,7 @@ FT_BEGIN_HEADER
     FT_BBox            bbox;
     FT_UInt            flags;
     FT_UInt            standard_advance;
-    
+
     FT_Int             ascent;   /* optional, bbox.yMax if not present */
     FT_Int             descent;  /* optional, bbox.yMin if not present */
     FT_Int             leading;  /* optional, 0 if not present         */
@@ -252,7 +252,7 @@ FT_BEGIN_HEADER
     FT_UInt            blue_scale;
 
     FT_UInt            num_chars;
-    FT_UInt32          chars_offset;
+    FT_Offset          chars_offset;
     PFR_Char           chars;
 
     FT_UInt            num_kern_pairs;
@@ -260,7 +260,7 @@ FT_BEGIN_HEADER
     PFR_KernItem*      kern_items_tail;
 
     /* not part of the spec, but used during load */
-    FT_UInt32          bct_offset;
+    FT_Long            bct_offset;
     FT_Byte*           cursor;
 
   } PFR_PhyFontRec, *PFR_PhyFont;
@@ -281,8 +281,8 @@ FT_BEGIN_HEADER
 
   typedef enum PFR_KernFlags_
   {
-    PFR_KERN_2BYTE_ADJ   = 0x01,
-    PFR_KERN_2BYTE_CHAR  = 0x02
+    PFR_KERN_2BYTE_CHAR  = 0x01,
+    PFR_KERN_2BYTE_ADJ   = 0x02
 
   } PFR_KernFlags;
 
@@ -335,8 +335,10 @@ FT_BEGIN_HEADER
   {
     FT_Byte           format;
 
+#if 0
     FT_UInt           num_x_control;
     FT_UInt           num_y_control;
+#endif
     FT_UInt           max_xy_control;
     FT_Pos*           x_control;
     FT_Pos*           y_control;

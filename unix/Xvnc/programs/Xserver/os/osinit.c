@@ -1,13 +1,12 @@
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -45,28 +43,30 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: osinit.c /main/45 1996/12/02 10:23:13 lehors $ */
-/* $XFree86: xc/programs/Xserver/os/osinit.c,v 3.12 1997/01/18 06:58:02 dawes Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include <stdio.h>
-#include "X.h"
+#include <X11/X.h>
 #include "os.h"
 #include "osdep.h"
-#include "Xos.h"
-
-#ifndef PATH_MAX
-#ifdef MAXPATHLEN
-#define PATH_MAX MAXPATHLEN
-#else
-#define PATH_MAX 1024
+#include <X11/Xos.h>
+#include <signal.h>
+#include <errno.h>
+#ifdef HAVE_DLFCN_H
+#include <dlfcn.h>
 #endif
-#endif
-
-#if !defined(SYSV) && !defined(AMOEBA) && !defined(_MINIX) && !defined(WIN32) && !defined(Lynx)
-#include <sys/resource.h>
+#ifdef HAVE_BACKTRACE
+#include <execinfo.h>
 #endif
 
-#if defined(AIXV3) || defined(HPUX_10)
+#include "misc.h"
+
+#include "dixstruct.h"
+
+#if !defined(SYSV) && !defined(WIN32)
 #include <sys/resource.h>
 #endif
 
@@ -75,6 +75,7 @@ SOFTWARE.
 #endif
 
 extern char *display;
+
 #ifdef RLIMIT_DATA
 int limitDataSpace = -1;
 #endif
@@ -85,125 +86,220 @@ int limitStackSpace = -1;
 int limitNoFile = -1;
 #endif
 
-Bool OsDelayInitColors = FALSE;
+static OsSigWrapperPtr OsSigWrapper = NULL;
 
-void
-OsInit()
+OsSigWrapperPtr
+OsRegisterSigWrapper(OsSigWrapperPtr newSigWrapper)
 {
-#ifndef AMOEBA
-    static Bool been_here = FALSE;
-    char fname[PATH_MAX];
+    OsSigWrapperPtr oldSigWrapper = OsSigWrapper;
 
-#ifdef macII
-    set42sig();
-#endif
+    OsSigWrapper = newSigWrapper;
 
-    if (!been_here) {
-#if !defined(MINIX) && !defined(SCO)
-	fclose(stdin);
-	fclose(stdout);
-#endif
-	/* hack test to decide where to log errors */
-	if (write (2, fname, 0)) 
-	{
-	    FILE *err;
-	    sprintf (fname, ADMPATH, display);
-	    /*
-	     * uses stdio to avoid os dependencies here,
-	     * a real os would use
- 	     *  open (fname, O_WRONLY|O_APPEND|O_CREAT, 0666)
-	     */
-	    if (!(err = fopen (fname, "a+")))
-		err = fopen ("/dev/null", "w");
-	    if (err && (fileno(err) != 2)) {
-		dup2 (fileno (err), 2);
-		fclose (err);
-	    }
-#if defined(SYSV) || defined(SVR4) || defined(MINIX) || defined(__EMX__) || defined(WIN32)
-	    {
-	    static char buf[BUFSIZ];
-	    setvbuf (stderr, buf, _IOLBF, BUFSIZ);
-	    }
+    return oldSigWrapper;
+}
+
+/*
+ * OsSigHandler --
+ *    Catch unexpected signals and exit or continue cleanly.
+ */
+static void
+#ifdef SA_SIGINFO
+OsSigHandler(int signo, siginfo_t * sip, void *unused)
 #else
-	    setlinebuf(stderr);
+OsSigHandler(int signo)
 #endif
-	}
+{
+#ifdef RTLD_DI_SETSIGNAL
+    const char *dlerr = dlerror();
 
-#ifndef X_NOT_POSIX
-	if (getpgrp () == 0)
-	    setpgid (0, 0);
-#else
-#if !defined(SYSV) && !defined(WIN32)
-	if (getpgrp (0) == 0)
-	    setpgrp (0, getpid ());
-#endif
-#endif
-
-#ifdef RLIMIT_DATA
-	if (limitDataSpace >= 0)
-	{
-	    struct rlimit	rlim;
-
-	    if (!getrlimit(RLIMIT_DATA, &rlim))
-	    {
-		if ((limitDataSpace > 0) && (limitDataSpace < rlim.rlim_max))
-		    rlim.rlim_cur = limitDataSpace;
-		else
-		    rlim.rlim_cur = rlim.rlim_max;
-		(void)setrlimit(RLIMIT_DATA, &rlim);
-	    }
-	}
-#endif
-#ifdef RLIMIT_STACK
-	if (limitStackSpace >= 0)
-	{
-	    struct rlimit	rlim;
-
-	    if (!getrlimit(RLIMIT_STACK, &rlim))
-	    {
-		if ((limitStackSpace > 0) && (limitStackSpace < rlim.rlim_max))
-		    rlim.rlim_cur = limitStackSpace;
-		else
-		    rlim.rlim_cur = rlim.rlim_max;
-		(void)setrlimit(RLIMIT_STACK, &rlim);
-	    }
-	}
-#endif
-#ifdef RLIMIT_NOFILE
-	if (limitNoFile >= 0)
-	{
-	    struct rlimit	rlim;
-
-	    if (!getrlimit(RLIMIT_NOFILE, &rlim))
-	    {
-		if ((limitNoFile > 0) && (limitNoFile < rlim.rlim_max))
-		    rlim.rlim_cur = limitNoFile;
-		else
-		    rlim.rlim_cur = rlim.rlim_max;
-		if (rlim.rlim_cur > MAXSOCKS)
-		    rlim.rlim_cur = MAXSOCKS;
-		(void)setrlimit(RLIMIT_NOFILE, &rlim);
-	    }
-	}
-#endif
-#ifdef SERVER_LOCK
-	LockServer();
-#endif
-	been_here = TRUE;
+    if (dlerr) {
+        LogMessage(X_ERROR, "Dynamic loader error: %s\n", dlerr);
     }
-#endif /* AMOEBA */
-    TimerInit();
-#ifdef DDXOSINIT
-    OsVendorInit();
+#endif                          /* RTLD_DI_SETSIGNAL */
+
+    if (OsSigWrapper != NULL) {
+        if (OsSigWrapper(signo) == 0) {
+            /* ddx handled signal and wants us to continue */
+            return;
+        }
+    }
+
+    /* log, cleanup, and abort */
+    xorg_backtrace();
+
+#ifdef SA_SIGINFO
+    if (sip->si_code == SI_USER) {
+        ErrorF("Recieved signal %d sent by process %ld, uid %ld\n",
+               signo, (long) sip->si_pid, (long) sip->si_uid);
+    }
+    else {
+        switch (signo) {
+        case SIGSEGV:
+        case SIGBUS:
+        case SIGILL:
+        case SIGFPE:
+            ErrorF("%s at address %p\n", strsignal(signo), sip->si_addr);
+        }
+    }
 #endif
-    OsInitAllocator();
-    if (!OsDelayInitColors) OsInitColors();
+
+    FatalError("Caught signal %d (%s). Server aborting\n",
+               signo, strsignal(signo));
 }
 
 void
-OsCleanup()
+OsInit(void)
 {
-#ifdef SERVER_LOCK
-    UnlockServer();
+    static Bool been_here = FALSE;
+    static const char *devnull = "/dev/null";
+    char fname[PATH_MAX];
+
+    if (!been_here) {
+        struct sigaction act, oact;
+        int i;
+
+        int siglist[] = { SIGSEGV, SIGQUIT, SIGILL, SIGFPE, SIGBUS,
+            SIGSYS,
+            SIGXCPU,
+            SIGXFSZ,
+#ifdef SIGEMT
+            SIGEMT,
 #endif
+            0 /* must be last */
+        };
+        sigemptyset(&act.sa_mask);
+#ifdef SA_SIGINFO
+        act.sa_sigaction = OsSigHandler;
+        act.sa_flags = SA_SIGINFO;
+#else
+        act.sa_handler = OsSigHandler;
+        act.sa_flags = 0;
+#endif
+        for (i = 0; siglist[i] != 0; i++) {
+            if (sigaction(siglist[i], &act, &oact)) {
+                ErrorF("failed to install signal handler for signal %d: %s\n",
+                       siglist[i], strerror(errno));
+            }
+        }
+#ifdef HAVE_BACKTRACE
+        /*
+         * initialize the backtracer, since the ctor calls dlopen(), which
+         * calls malloc(), which isn't signal-safe.
+         */
+        do {
+            void *array;
+
+            backtrace(&array, 1);
+        } while (0);
+#endif
+
+#ifdef RTLD_DI_SETSIGNAL
+        /* Tell runtime linker to send a signal we can catch instead of SIGKILL
+         * for failures to load libraries/modules at runtime so we can clean up
+         * after ourselves.
+         */
+        int failure_signal = SIGQUIT;
+
+        dlinfo(RTLD_SELF, RTLD_DI_SETSIGNAL, &failure_signal);
+#endif
+
+#if !defined(__CYGWIN__)
+        fclose(stdin);
+        fclose(stdout);
+#endif
+        /* 
+         * If a write of zero bytes to stderr returns non-zero, i.e. -1, 
+         * then writing to stderr failed, and we'll write somewhere else 
+         * instead. (Apparently this never happens in the Real World.)
+         */
+        if (write(2, fname, 0) == -1) {
+            FILE *err;
+
+            if (strlen(display) + strlen(ADMPATH) + 1 < sizeof fname)
+                snprintf(fname, sizeof(fname), ADMPATH, display);
+            else
+                strcpy(fname, devnull);
+            /*
+             * uses stdio to avoid os dependencies here,
+             * a real os would use
+             *  open (fname, O_WRONLY|O_APPEND|O_CREAT, 0666)
+             */
+            if (!(err = fopen(fname, "a+")))
+                err = fopen(devnull, "w");
+            if (err && (fileno(err) != 2)) {
+                dup2(fileno(err), 2);
+                fclose(err);
+            }
+#if defined(SYSV) || defined(SVR4) || defined(WIN32) || defined(__CYGWIN__)
+            {
+                static char buf[BUFSIZ];
+
+                setvbuf(stderr, buf, _IOLBF, BUFSIZ);
+            }
+#else
+            setlinebuf(stderr);
+#endif
+        }
+
+        if (getpgrp() == 0)
+            setpgid(0, 0);
+
+#ifdef RLIMIT_DATA
+        if (limitDataSpace >= 0) {
+            struct rlimit rlim;
+
+            if (!getrlimit(RLIMIT_DATA, &rlim)) {
+                if ((limitDataSpace > 0) && (limitDataSpace < rlim.rlim_max))
+                    rlim.rlim_cur = limitDataSpace;
+                else
+                    rlim.rlim_cur = rlim.rlim_max;
+                (void) setrlimit(RLIMIT_DATA, &rlim);
+            }
+        }
+#endif
+#ifdef RLIMIT_STACK
+        if (limitStackSpace >= 0) {
+            struct rlimit rlim;
+
+            if (!getrlimit(RLIMIT_STACK, &rlim)) {
+                if ((limitStackSpace > 0) && (limitStackSpace < rlim.rlim_max))
+                    rlim.rlim_cur = limitStackSpace;
+                else
+                    rlim.rlim_cur = rlim.rlim_max;
+                (void) setrlimit(RLIMIT_STACK, &rlim);
+            }
+        }
+#endif
+#ifdef RLIMIT_NOFILE
+        if (limitNoFile >= 0) {
+            struct rlimit rlim;
+
+            if (!getrlimit(RLIMIT_NOFILE, &rlim)) {
+                if ((limitNoFile > 0) && (limitNoFile < rlim.rlim_max))
+                    rlim.rlim_cur = limitNoFile;
+                else
+                    rlim.rlim_cur = rlim.rlim_max;
+                (void) setrlimit(RLIMIT_NOFILE, &rlim);
+            }
+        }
+#endif
+        LockServer();
+        been_here = TRUE;
+    }
+    TimerInit();
+    OsVendorInit();
+    /*
+     * No log file by default.  OsVendorInit() should call LogInit() with the
+     * log file name if logging to a file is desired.
+     */
+    LogInit(NULL, NULL);
+    SmartScheduleInit();
+}
+
+void
+OsCleanup(Bool terminating)
+{
+    if (terminating) {
+        UnlockServer();
+    }
 }

@@ -1,0 +1,57 @@
+/* dix-config.h.in: not at all generated.                      -*- c -*- */
+
+#ifndef _DIX_CONFIG_H_
+#define _DIX_CONFIG_H_
+
+/* Define to 1 if you have the `cbrt' function. */
+#cmakedefine HAVE_CBRT
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#cmakedefine HAVE_DLFCN_H
+
+/* Define to 1 if you have the `ffs' function. */
+#cmakedefine HAVE_FFS
+
+/* Define to 1 if you have the `getdtablesize' function. */
+#cmakedefine HAVE_GETDTABLESIZE
+
+/* Define to 1 if you have the `getifaddrs' function. */
+#cmakedefine HAVE_GETIFADDRS
+
+/* Define to 1 if you have the `getpeereid' function. */
+#cmakedefine HAVE_GETPEEREID
+
+/* Define to 1 if you have the `getpeerucred' function. */
+#cmakedefine HAVE_GETPEERUCRED
+
+/* Define to 1 if you have the `getzoneid' function. */
+#cmakedefine HAVE_GETZONEID
+
+/* Define to 1 if you have the <ieeefp.h> header file. */
+#cmakedefine HAVE_IEEEFP_H
+
+/* Define to 1 if you have the `shmctl64' function. */
+#cmakedefine HAVE_SHMCTL64
+
+/* Define to 1 if you have the `strcasecmp' function. */
+#cmakedefine HAVE_STRCASECMP
+
+/* Define to 1 if you have the `strcasestr' function. */
+#cmakedefine HAVE_STRCASESTR
+
+/* Define to 1 if you have the `strncasecmp' function. */
+#cmakedefine HAVE_STRNCASECMP
+
+/* Define to 1 if you have the `strlcpy' function. */
+#cmakedefine HAVE_STRLCPY
+
+/* Define to 1 if you have the `strndup' function. */
+#cmakedefine HAVE_STRNDUP
+
+/* Define to 1 if you have the `asprintf' function. */
+#cmakedefine HAVE_ASPRINTF
+
+/* Define to 1 if you have the `vasprintf' function. */
+#cmakedefine HAVE_VASPRINTF
+
+#endif /* _DIX_CONFIG_H_ */

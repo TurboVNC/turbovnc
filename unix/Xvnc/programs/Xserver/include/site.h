@@ -1,14 +1,12 @@
-/* $XConsortium: site.h /main/27 1996/12/09 17:52:19 kaleb $ */
 /************************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -54,7 +51,7 @@ SOFTWARE.
  * server executable.
  */
 #ifndef VENDOR_STRING
-#define VENDOR_STRING "X Consortium"
+#define VENDOR_STRING "The X.Org Foundation"
 #endif
 
 /*
@@ -63,7 +60,7 @@ SOFTWARE.
  * by the vendor.
  */
 #ifndef VENDOR_RELEASE
-#define VENDOR_RELEASE	6300
+#define VENDOR_RELEASE	6600
 #endif
 
 /*
@@ -75,10 +72,7 @@ SOFTWARE.
  * DO NOT CHANGE THESE VALUES OR THE DIX IMAKEFILE!
  */
 #ifndef COMPILEDDEFAULTFONTPATH
-#define COMPILEDDEFAULTFONTPATH	"/usr/lib/X11/fonts/misc/"
-#endif
-#ifndef RGB_DB
-#define RGB_DB			"/usr/lib/X11/rgb"
+#define COMPILEDDEFAULTFONTPATH	"/usr/share/fonts/X11/misc/"
 #endif
 
 /*
@@ -90,31 +84,20 @@ SOFTWARE.
 #ifndef COMPILEDDISPLAYCLASS
 #define COMPILEDDISPLAYCLASS	"MIT-unspecified"
 #endif
-#define DEFAULT_TIMEOUT		60	/* seconds */
+#define DEFAULT_TIMEOUT		60      /* seconds */
 #define DEFAULT_KEYBOARD_CLICK 	0
 #define DEFAULT_BELL		50
 #define DEFAULT_BELL_PITCH	400
 #define DEFAULT_BELL_DURATION	100
-#ifdef XKB
 #define DEFAULT_AUTOREPEAT	TRUE
-#else
-#define DEFAULT_AUTOREPEAT	FALSE
-#endif
-#ifdef hpux
 #define DEFAULT_AUTOREPEATS	{\
         0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,\
         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,\
         0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-#else
-#define DEFAULT_AUTOREPEATS	{\
-	0, 0, 0, 0, 0, 0, 0, 0,\
-	0, 0, 0, 0, 0, 0, 0, 0,\
-	0, 0, 0, 0, 0, 0, 0, 0,\
-	0, 0, 0, 0, 0, 0, 0, 0 }
-#endif
-#define DEFAULT_LEDS		0x0        /* all off */
-#define DEFAULT_LEDS_MASK	0xffffffff /* 32 */
+
+#define DEFAULT_LEDS		0x0     /* all off */
+#define DEFAULT_LEDS_MASK	0xffffffff      /* 32 */
 #define DEFAULT_INT_RESOLUTION		1000
 #define DEFAULT_INT_MIN_VALUE		0
 #define DEFAULT_INT_MAX_VALUE		100
@@ -128,11 +111,16 @@ SOFTWARE.
 #define DEFAULT_SCREEN_SAVER_INTERVAL (10 * (60 * 1000))
 #define DEFAULT_SCREEN_SAVER_BLANKING PreferBlanking
 #define DEFAULT_SCREEN_SAVER_EXPOSURES AllowExposures
-#ifndef NOLOGOHACK
-#define DEFAULT_LOGO_SCREEN_SAVER 1
-#endif
 #ifndef DEFAULT_ACCESS_CONTROL
 #define DEFAULT_ACCESS_CONTROL TRUE
 #endif
 
-#endif /* SITE_H */
+/* Default logging parameters. */
+#ifndef DEFAULT_LOG_VERBOSITY
+#define DEFAULT_LOG_VERBOSITY		0
+#endif
+#ifndef DEFAULT_LOG_FILE_VERBOSITY
+#define DEFAULT_LOG_FILE_VERBOSITY	3
+#endif
+
+#endif                          /* SITE_H */

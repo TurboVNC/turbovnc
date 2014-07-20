@@ -1,4 +1,3 @@
-/* $XConsortium: dixfontstr.h,v 1.15 94/04/17 20:25:39 dpw Exp $ */
 /***********************************************************
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -27,10 +26,9 @@ SOFTWARE.
 
 #include "servermd.h"
 #include "dixfont.h"
-#include "fontstruct.h"
+#include <X11/fonts/fontstruct.h>
 #include "closure.h"
-#define NEED_REPLIES
-#include "X11/Xproto.h" /* for xQueryFontReply */
+#include <X11/Xproto.h>         /* for xQueryFontReply */
 
 #define FONTCHARSET(font)	  (font)
 #define FONTMAXBOUNDS(font,field) (font)->info.maxbounds.field
@@ -87,9 +85,9 @@ SOFTWARE.
 #define	PADGLYPHWIDTHBYTES(w)		(((((w)+7)>>3)+3) & ~0x3)
 #endif
 
-#if GLYPHPADBYTES == 8 /* for a cray? */
+#if GLYPHPADBYTES == 8          /* for a cray? */
 #define	GLYPHWIDTHBYTESPADDED(pci)	((GLYPHWIDTHBYTES(pci)+7) & ~0x7)
 #define	PADGLYPHWIDTHBYTES(w)		(((((w)+7)>>3)+7) & ~0x7)
 #endif
 
-#endif				/* DIXFONTSTRUCT_H */
+#endif                          /* DIXFONTSTRUCT_H */

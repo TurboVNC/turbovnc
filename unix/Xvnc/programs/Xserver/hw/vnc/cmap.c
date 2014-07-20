@@ -4,6 +4,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,13 +52,27 @@ from the X Consortium.
 
 */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include <stdio.h>
 #include "scrnintstr.h"
 #include "resource.h"
 #include "colormapst.h"
 #include "rfb.h"
 
+#define SCREEN_PROLOGUE(scrn, field)            \
+    ScreenPtr pScreen = scrn;                   \
+    rfbScreenInfoPtr prfb = &rfbScreen;         \
+    pScreen->field = prfb->field;
+
+#define SCREEN_EPILOGUE(field, wrapper) \
+    pScreen->field = wrapper;
+
+
 ColormapPtr rfbInstalledColormap;
+
 
 int
 rfbListInstalledColormaps(pScreen, pmaps)
@@ -77,8 +92,13 @@ rfbInstallColormap(pmap)
 {
     ColormapPtr oldpmap = rfbInstalledColormap;
 
-    if (pmap != oldpmap) {
+    SCREEN_PROLOGUE (pmap->pScreen, InstallColormap);
 
+    (*pScreen->InstallColormap) (pmap);
+
+    SCREEN_EPILOGUE (InstallColormap, rfbInstallColormap);
+
+    if (pmap != oldpmap) {
         if (oldpmap != (ColormapPtr)None)
             WalkTree(pmap->pScreen, TellLostMap, (char *)&oldpmap->mid);
         /* Install pmap */
@@ -88,6 +108,7 @@ rfbInstallColormap(pmap)
         rfbSetClientColourMaps(0, 0);
     }
 }
+
 
 void
 rfbUninstallColormap(pmap)
@@ -99,9 +120,14 @@ rfbUninstallColormap(pmap)
     {
         if (pmap->mid != pmap->pScreen->defColormap)
         {
-            curpmap = (ColormapPtr) LookupIDByType(pmap->pScreen->defColormap,
-                                                   RT_COLORMAP);
-            (*pmap->pScreen->InstallColormap)(curpmap);
+            int ret;
+            pointer ptr;
+            ret = dixLookupResourceByType(&ptr, pmap->pScreen->defColormap,
+                                          RT_COLORMAP, serverClient,
+                                          DixUnknownAccess);
+            curpmap = (ColormapPtr) ptr;
+            if (ret == Success)
+                (*pmap->pScreen->InstallColormap)(curpmap);
         }
     }
 }
@@ -113,6 +139,7 @@ rfbUninstallColormap(pmap)
  * group them together into a single call to rfbSetClientColourMaps.
  */
 
+
 void
 rfbStoreColors(pmap, ndef, pdefs)
     ColormapPtr pmap;
@@ -122,6 +149,12 @@ rfbStoreColors(pmap, ndef, pdefs)
     int i;
     int first = -1;
     int n = 0;
+
+    SCREEN_PROLOGUE (pmap->pScreen, StoreColors);
+
+    (*pScreen->StoreColors) (pmap, ndef, pdefs);
+
+    SCREEN_EPILOGUE (StoreColors, rfbStoreColors);
 
     if (pmap == rfbInstalledColormap) {
         for (i = 0; i < ndef; i++) {

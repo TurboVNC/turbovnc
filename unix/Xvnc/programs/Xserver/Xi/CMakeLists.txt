@@ -1,8 +1,15 @@
+include_directories(../mi)
+
+# This code has a lot of type puns.  Disable strict aliasing just to be safe.
+if(CMAKE_COMPILER_IS_GNUCC)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+endif()
+
 add_library(Xi STATIC
 	allowev.c
-	chgkbd.c
 	chgdctl.c
 	chgfctl.c
+	chgkbd.c
 	chgkmap.c
 	chgprop.c
 	chgptr.c
@@ -10,30 +17,44 @@ add_library(Xi STATIC
 	devbell.c
 	exevents.c
 	extinit.c
+	getbmap.c
 	getdctl.c
 	getfctl.c
 	getfocus.c
-	getbmap.c
 	getkmap.c
 	getmmap.c
 	getprop.c
 	getselev.c
 	getvers.c
-	gtmotion.c
 	grabdev.c
 	grabdevb.c
 	grabdevk.c
+	gtmotion.c
 	listdev.c
 	opendev.c
 	queryst.c
 	selectev.c
 	sendexev.c
+	setbmap.c
 	setdval.c
 	setfocus.c
-	setmode.c
-	setbmap.c
 	setmmap.c
+	setmode.c
 	stubs.c
 	ungrdev.c
 	ungrdevb.c
-	ungrdevk.c)
+	ungrdevk.c
+	xiallowev.c
+	xichangecursor.c
+	xichangehierarchy.c
+	xigetclientpointer.c
+	xigrabdev.c
+	xipassivegrab.c
+	xiproperty.c
+	xiquerydevice.c
+	xiquerypointer.c
+	xiqueryversion.c
+	xiselectev.c
+	xisetclientpointer.c
+	xisetdevfocus.c
+	xiwarppointer.c)

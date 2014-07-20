@@ -1,5 +1,3 @@
-/* $Xorg: grabdevk.c,v 1.4 2001/02/09 02:04:34 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/grabdevk.c,v 3.3 2001/12/14 19:58:57 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,18 +50,17 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "windowstr.h"			/* window structure  */
-#include "XI.h"
-#include "XIproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include "windowstr.h"          /* window structure  */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "exevents.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
 #include "exglobals.h"
+#include "xace.h"
 
 #include "grabdev.h"
 #include "grabdevk.h"
@@ -76,27 +72,18 @@ SOFTWARE.
  */
 
 int
-SProcXGrabDeviceKey(client)
-    register ClientPtr client;
-    {
-    register char n;
-    register long *p;
-    register int i;
-
+SProcXGrabDeviceKey(ClientPtr client)
+{
     REQUEST(xGrabDeviceKeyReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceKeyReq);
-    swapl(&stuff->grabWindow, n);
-    swaps(&stuff->modifiers, n);
-    swaps(&stuff->event_count, n);
-    p = (long *) &stuff[1];
-    for (i=0; i<stuff->event_count; i++)
-        {
-        swapl(p, n);
-	p++;
-        }
-    return(ProcXGrabDeviceKey(client));
-    }
+    swapl(&stuff->grabWindow);
+    swaps(&stuff->modifiers);
+    swaps(&stuff->event_count);
+    REQUEST_FIXED_SIZE(xGrabDeviceKeyReq, stuff->event_count * sizeof(CARD32));
+    SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
+    return (ProcXGrabDeviceKey(client));
+}
 
 /***********************************************************************
  *
@@ -105,66 +92,59 @@ SProcXGrabDeviceKey(client)
  */
 
 int
-ProcXGrabDeviceKey(client)
-    ClientPtr client;
-    {
-    int			ret;
-    DeviceIntPtr 	dev;
-    DeviceIntPtr 	mdev;
-    XEventClass		*class;
-    struct tmask	tmp[EMASKSIZE];
+ProcXGrabDeviceKey(ClientPtr client)
+{
+    int ret;
+    DeviceIntPtr dev;
+    DeviceIntPtr mdev;
+    XEventClass *class;
+    struct tmask tmp[EMASKSIZE];
+    GrabParameters param;
+    GrabMask mask;
 
     REQUEST(xGrabDeviceKeyReq);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceKeyReq);
 
-    if (stuff->length !=(sizeof(xGrabDeviceKeyReq)>>2) + stuff->event_count)
-	{
-	SendErrorToClient (client, IReqCode, X_GrabDeviceKey, 0, BadLength);
-	return Success;
-	}
+    if (stuff->length !=
+        bytes_to_int32(sizeof(xGrabDeviceKeyReq)) + stuff->event_count)
+        return BadLength;
 
-    dev = LookupDeviceIntRec (stuff->grabbed_device);
-    if (dev == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_GrabDeviceKey, 0, 
-	    BadDevice);
-	return Success;
-	}
-
-    if (stuff->modifier_device != UseXKeyboard)
-	{
-	mdev = LookupDeviceIntRec (stuff->modifier_device);
-	if (mdev == NULL)
-	    {
-	    SendErrorToClient(client, IReqCode, X_GrabDeviceKey, 0, 
-	        BadDevice);
-	    return Success;
-	    }
-	if (mdev->key == NULL)
-	    {
-	    SendErrorToClient(client, IReqCode, X_GrabDeviceKey, 0, 
-		BadMatch);
-	    return Success;
-	    }
-	}
-    else
-	mdev = (DeviceIntPtr) LookupKeyboardDevice();
-
-    class = (XEventClass *) (&stuff[1]);	/* first word of values */
-
-    if ((ret = CreateMaskFromList (client, class, 
-	stuff->event_count, tmp, dev, X_GrabDeviceKey)) != Success)
-	    return Success;
-
-    ret = GrabKey(client, dev, stuff->this_device_mode, 
-	stuff->other_devices_mode, stuff->modifiers, mdev, stuff->key, 
-	stuff->grabWindow, stuff->ownerEvents, tmp[stuff->grabbed_device].mask);
-
+    ret = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
     if (ret != Success)
-        {
-	SendErrorToClient(client, IReqCode, X_GrabDeviceKey, 0, ret);
-        return Success;
-        }
+        return ret;
 
-    return Success;
+    if (stuff->modifier_device != UseXKeyboard) {
+        ret = dixLookupDevice(&mdev, stuff->modifier_device, client,
+                              DixUseAccess);
+        if (ret != Success)
+            return ret;
+        if (mdev->key == NULL)
+            return BadMatch;
     }
+    else {
+        mdev = PickKeyboard(client);
+        ret = XaceHook(XACE_DEVICE_ACCESS, client, mdev, DixUseAccess);
+        if (ret != Success)
+            return ret;
+    }
+
+    class = (XEventClass *) (&stuff[1]);        /* first word of values */
+
+    if ((ret = CreateMaskFromList(client, class,
+                                  stuff->event_count, tmp, dev,
+                                  X_GrabDeviceKey)) != Success)
+        return ret;
+
+    memset(&param, 0, sizeof(param));
+    param.grabtype = XI;
+    param.ownerEvents = stuff->ownerEvents;
+    param.this_device_mode = stuff->this_device_mode;
+    param.other_devices_mode = stuff->other_devices_mode;
+    param.grabWindow = stuff->grabWindow;
+    param.modifiers = stuff->modifiers;
+    mask.xi = tmp[stuff->grabbed_device].mask;
+
+    ret = GrabKey(client, dev, mdev, stuff->key, &param, XI, &mask);
+
+    return ret;
+}

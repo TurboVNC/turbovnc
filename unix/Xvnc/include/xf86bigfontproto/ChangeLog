@@ -1,0 +1,172 @@
+commit 059880bf0f9292b90a139d1eebe3bf18390d0a83
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Aug 26 15:25:15 2009 +1000
+
+    xf86bigfontproto 1.2.0
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit ba8d972415ab6b45aa1ba31eae8706f92d60c2af
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Aug 26 15:23:12 2009 +1000
+
+    Remove server-specific declarations.
+
+commit 606268163c99ca8996399a9f99d240ac8253c7f3
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Aug 26 14:59:47 2009 +1000
+
+    Remove RCS tags
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit d405a7201f4de2121530b67f7628f95d2e0467b1
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Aug 26 14:58:08 2009 +1000
+
+    Rename xf86bigfstr.h to xf86bigfproto.h for consistency with other modules.
+    
+    Leaving a stub xf86bigfstr.h in place to avoid clients breaking.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit b9f44fb9fdfdc623311774afdd0b7a819ba9ffec
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Tue Jan 27 20:06:28 2009 -0200
+
+    Janitor: Correct make distcheck and dont distribute autogen.sh
+
+commit 0c40374c853c83ecc0a74b4fc34cdc3140b1c3ca
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 16:39:11 2007 -0500
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit 505cd9e0c6d8e7d4ea916d3f1453bbeb7925c3a1
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Mon Sep 3 05:54:26 2007 -0400
+
+    Add *~ to .gitignore to skip patch/emacs droppings
+
+commit d1b1b7356e077dd238ecccb99cde406605284c2d
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jul 14 18:56:43 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit dc91454a65edc305e6181368cfb06775f9622158
+Author: Kevin E Martin <kem@kem.org>
+Date:   Thu Dec 15 00:24:39 2005 +0000
+
+    Update package version number for final X11R7 release candidate.
+
+commit bc637a1d3a5e4b0cc4094987ffc0afd719193979
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 19 02:48:16 2005 +0000
+
+    Update package version number for RC1 release.
+
+commit 238ef28dfd19be8f2937e5ed80c66a0844ec07a4
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Tue Aug 2 19:19:40 2005 +0000
+
+    Add basic .cvsignore files for proto modules.
+
+commit 39818ff31644cbd2029365f7ef5ea9555b8cb147
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri Jul 29 21:22:57 2005 +0000
+
+    Various changes preparing packages for RC0:
+    - Verify and update package version numbers as needed
+    - Implement versioning scheme
+    - Change bug address to point to bugzilla bug entry form
+    - Disable loadable i18n in libX11 by default (use --enable-loadable-i18n to
+        reenable it)
+    - Fix makedepend to use pkgconfig and pass distcheck
+    - Update build script to build macros first
+    - Update modular Xorg version
+
+commit 9626de7ff9aef3ab7652e5a7a5f967b7a1dd5307
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sun Jul 3 07:13:11 2005 +0000
+
+    Change include path to <X11/fonts/font.h>.
+
+commit b7d38e63461b3063362d0c5c9716c40e8b643e43
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sat May 21 04:54:25 2005 +0000
+
+    Set version to 1.1.
+
+commit 2547b35e1f21a90ade799f0545b4fb50f9753337
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:22:40 2005 +0000
+
+    revert last change, didn't do right thing at all, sorry for the noise
+
+commit 74f2a736c54d85c4c6d98134a74859e748ee5046
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:10:20 2005 +0000
+
+    Require automake 1.7 in AM_INIT_AUTOMAKE
+
+commit 760d1a6e003e73b17539ee0dffc260d9cd282fcb
+Author: Josh Triplett <josh@speakeasy.net>
+Date:   Wed May 18 07:38:46 2005 +0000
+
+    Add COPYING file for XF86BigFont; assumed to be under the XFree86 catch-all
+        license.
+
+commit 9f9835c828a2d8d51c099a829f7819a83f8a6f85
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Mon May 9 18:20:07 2005 +0000
+
+    Change all the protonames from <extension>Ext to <extension>Proto.
+
+commit 38587b109077cbe56b74f4324a6f9338b1a66df9
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri May 6 01:46:32 2005 +0000
+
+    Initial build system files for proto module.
+
+commit 3a1efe7f2752739fdc4a4eb3f947b95cdda32f5e
+Author: Egbert Eich <eich@suse.de>
+Date:   Fri Apr 23 18:43:06 2004 +0000
+
+    Merging XORG-CURRENT into trunk
+
+commit 5c59f9c5f6733894c39fc928892d0c81bc32ad6d
+Author: Egbert Eich <eich@suse.de>
+Date:   Sun Mar 14 08:31:36 2004 +0000
+
+    Importing vendor version xf86-4_4_99_1 on Sun Mar 14 00:26:39 PST 2004
+
+commit 304c9c7f8dc88530f7ebbb1a37517dad45f6c778
+Author: Egbert Eich <eich@suse.de>
+Date:   Wed Mar 3 12:10:54 2004 +0000
+
+    Importing vendor version xf86-4_4_0 on Wed Mar 3 04:09:24 PST 2004
+
+commit 76d42aac39d68c5ad128e3d22bfcab8b777890f8
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 13:35:14 2004 +0000
+
+    readding XFree86's cvs IDs
+
+commit b12d799f50028d9fb7e0e279230178ab2486d311
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 09:22:28 2004 +0000
+
+    Importing vendor version xf86-4_3_99_903 on Wed Feb 26 01:21:00 PST 2004
+
+commit 4cdaa2c0767d446c867da34d9acd7c5f2d1fae55
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    XFree86 4.3.0.1
+
+commit 408ada0589b76e0041f4c23ef92955b60ef215ef
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    Initial revision

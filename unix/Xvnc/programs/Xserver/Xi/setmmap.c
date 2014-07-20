@@ -1,5 +1,3 @@
-/* $Xorg: setmmap.c,v 1.4 2001/02/09 02:04:35 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/setmmap.c,v 3.3 2001/12/14 19:58:59 dawes Exp $ */
 
 /********************************************************************
  *
@@ -53,16 +50,15 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS			/* for inputstr.h    */
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XI2.h>
+#include <X11/extensions/XIproto.h>
 #include "exevents.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
 #include "exglobals.h"
 
 #include "setmmap.h"
@@ -75,15 +71,12 @@ SOFTWARE.
  */
 
 int
-SProcXSetDeviceModifierMapping(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXSetDeviceModifierMapping(ClientPtr client)
+{
     REQUEST(xSetDeviceModifierMappingReq);
-    swaps(&stuff->length, n);
-    return(ProcXSetDeviceModifierMapping(client));
-    }
+    swaps(&stuff->length);
+    return (ProcXSetDeviceModifierMapping(client));
+}
 
 /***********************************************************************
  *
@@ -92,51 +85,47 @@ SProcXSetDeviceModifierMapping(client)
  */
 
 int
-ProcXSetDeviceModifierMapping(client)
-    ClientPtr client;
-    {
-    int					ret;
-    xSetDeviceModifierMappingReply	rep;
-    DeviceIntPtr			dev;
-    KeyClassPtr 			kp;
-    
+ProcXSetDeviceModifierMapping(ClientPtr client)
+{
+    int ret;
+    xSetDeviceModifierMappingReply rep;
+    DeviceIntPtr dev;
+
     REQUEST(xSetDeviceModifierMappingReq);
     REQUEST_AT_LEAST_SIZE(xSetDeviceModifierMappingReq);
 
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	SendErrorToClient (client, IReqCode, X_SetDeviceModifierMapping, 0, 
-		BadDevice);
-	return Success;
-	}
+    if (stuff->length != bytes_to_int32(sizeof(xSetDeviceModifierMappingReq)) +
+        (stuff->numKeyPerModifier << 1))
+        return BadLength;
 
     rep.repType = X_Reply;
     rep.RepType = X_SetDeviceModifierMapping;
     rep.length = 0;
     rep.sequenceNumber = client->sequence;
 
-    ret = SetModifierMapping(client, dev, stuff->length,
-	(sizeof (xSetDeviceModifierMappingReq)>>2), stuff->numKeyPerModifier, 
-	(BYTE *)&stuff[1], &kp);
+    ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
+    if (ret != Success)
+        return ret;
 
-    if (ret==MappingSuccess || ret==MappingBusy || ret==MappingFailed)
-        {
-	rep.success = ret;
-	if (ret == MappingSuccess)
-            SendDeviceMappingNotify(MappingModifier, 0, 0, dev);
-        WriteReplyToClient(client, sizeof(xSetDeviceModifierMappingReply),&rep);
-        }
-    else
-	{
-	if (ret==-1)
-	    ret=BadValue;
-	SendErrorToClient (client, IReqCode, X_SetDeviceModifierMapping, 0,ret);
-	}
+    ret = change_modmap(client, dev, (KeyCode *) &stuff[1],
+                        stuff->numKeyPerModifier);
+    if (ret == Success)
+        ret = MappingSuccess;
 
+    if (ret == MappingSuccess || ret == MappingBusy || ret == MappingFailed) {
+        rep.success = ret;
+        WriteReplyToClient(client, sizeof(xSetDeviceModifierMappingReply),
+                           &rep);
+    }
+    else if (ret == -1) {
+        return BadValue;
+    }
+    else {
+        return ret;
+    }
 
     return Success;
-    }
+}
 
 /***********************************************************************
  *
@@ -146,15 +135,10 @@ ProcXSetDeviceModifierMapping(client)
  */
 
 void
-SRepXSetDeviceModifierMapping (client, size, rep)
-    ClientPtr	client;
-    int		size;
-    xSetDeviceModifierMappingReply	*rep;
-    {
-    register char n;
-
-    swaps(&rep->sequenceNumber, n);
-    swapl(&rep->length, n);
-    WriteToClient(client, size, (char *)rep);
-    }
-
+SRepXSetDeviceModifierMapping(ClientPtr client, int size,
+                              xSetDeviceModifierMappingReply * rep)
+{
+    swaps(&rep->sequenceNumber);
+    swapl(&rep->length);
+    WriteToClient(client, size, (char *) rep);
+}

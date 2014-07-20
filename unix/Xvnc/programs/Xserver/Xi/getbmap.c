@@ -1,5 +1,3 @@
-/* $Xorg: getbmap.c,v 1.4 2001/02/09 02:04:34 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/getbmap.c,v 3.3 2001/12/14 19:58:56 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,15 +50,13 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 #include "exglobals.h"
 
 #include "getbmap.h"
@@ -73,15 +68,12 @@ SOFTWARE.
  */
 
 int
-SProcXGetDeviceButtonMapping(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXGetDeviceButtonMapping(ClientPtr client)
+{
     REQUEST(xGetDeviceButtonMappingReq);
-    swaps(&stuff->length, n);
-    return(ProcXGetDeviceButtonMapping(client));
-    }
+    swaps(&stuff->length);
+    return (ProcXGetDeviceButtonMapping(client));
+}
 
 /***********************************************************************
  *
@@ -90,12 +82,12 @@ SProcXGetDeviceButtonMapping(client)
  */
 
 int
-ProcXGetDeviceButtonMapping (client)
-    register ClientPtr client;
-    {
-    DeviceIntPtr	dev;
-    xGetDeviceButtonMappingReply	rep;
-    ButtonClassPtr	b;
+ProcXGetDeviceButtonMapping(ClientPtr client)
+{
+    DeviceIntPtr dev;
+    xGetDeviceButtonMappingReply rep;
+    ButtonClassPtr b;
+    int rc;
 
     REQUEST(xGetDeviceButtonMappingReq);
     REQUEST_SIZE_MATCH(xGetDeviceButtonMappingReq);
@@ -106,28 +98,20 @@ ProcXGetDeviceButtonMapping (client)
     rep.length = 0;
     rep.sequenceNumber = client->sequence;
 
-    dev = LookupDeviceIntRec (stuff->deviceid);
-    if (dev == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_GetDeviceButtonMapping, 0, 
-		BadDevice);
-	return Success;
-	}
+    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
+    if (rc != Success)
+        return rc;
 
     b = dev->button;
     if (b == NULL)
-	{
-	SendErrorToClient(client, IReqCode, X_GetDeviceButtonMapping, 0, 
-		BadMatch);
-	return Success;
-	}
+        return BadMatch;
+
     rep.nElts = b->numButtons;
-    rep.length = (rep.nElts + (4-1))/4;
-    WriteReplyToClient (client, sizeof (xGetDeviceButtonMappingReply), &rep);
-    (void)WriteToClient(client, rep.nElts,
-			(char *)&b->map[1]);
+    rep.length = bytes_to_int32(rep.nElts);
+    WriteReplyToClient(client, sizeof(xGetDeviceButtonMappingReply), &rep);
+    (void) WriteToClient(client, rep.nElts, (char *) &b->map[1]);
     return Success;
-    }
+}
 
 /***********************************************************************
  *
@@ -137,14 +121,10 @@ ProcXGetDeviceButtonMapping (client)
  */
 
 void
-SRepXGetDeviceButtonMapping (client, size, rep)
-    ClientPtr	client;
-    int		size;
-    xGetDeviceButtonMappingReply	*rep;
-    {
-    register char n;
-
-    swaps(&rep->sequenceNumber, n);
-    swapl(&rep->length, n);
-    WriteToClient(client, size, (char *)rep);
-    }
+SRepXGetDeviceButtonMapping(ClientPtr client, int size,
+                            xGetDeviceButtonMappingReply * rep)
+{
+    swaps(&rep->sequenceNumber);
+    swapl(&rep->length);
+    WriteToClient(client, size, (char *) rep);
+}

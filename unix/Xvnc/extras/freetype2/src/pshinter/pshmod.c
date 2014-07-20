@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType PostScript hinter module implementation (body).             */
 /*                                                                         */
-/*  Copyright 2001, 2002 by                                                */
+/*  Copyright 2001, 2002, 2007, 2009, 2012 by                              */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -20,6 +20,7 @@
 #include FT_INTERNAL_OBJECTS_H
 #include "pshrec.h"
 #include "pshalgo.h"
+#include "pshpic.h"
 
 
   /* the Postscript Hinter module structure */
@@ -51,6 +52,7 @@
   ps_hinter_init( PS_Hinter_Module  module )
   {
     FT_Memory  memory = module->root.memory;
+    void*      ph     = &module->ps_hints;
 
 
     ps_hints_init( &module->ps_hints, memory );
@@ -58,10 +60,10 @@
     psh_globals_funcs_init( &module->globals_funcs );
 
     t1_hints_funcs_init( &module->t1_funcs );
-    module->t1_funcs.hints = (T1_Hints)&module->ps_hints;
+    module->t1_funcs.hints = (T1_Hints)ph;
 
     t2_hints_funcs_init( &module->t2_funcs );
-    module->t2_funcs.hints = (T2_Hints)&module->ps_hints;
+    module->t2_funcs.hints = (T2_Hints)ph;
 
     return 0;
   }
@@ -91,30 +93,27 @@
   }
 
 
-  static
-  const PSHinter_Interface  pshinter_interface =
-  {
+  FT_DEFINE_PSHINTER_INTERFACE(
+    pshinter_interface,
     pshinter_get_globals_funcs,
     pshinter_get_t1_funcs,
-    pshinter_get_t2_funcs
-  };
+    pshinter_get_t2_funcs )
 
 
-  FT_CALLBACK_TABLE_DEF
-  const FT_Module_Class  pshinter_module_class =
-  {
+  FT_DEFINE_MODULE(
+    pshinter_module_class,
+
     0,
     sizeof ( PS_Hinter_ModuleRec ),
     "pshinter",
     0x10000L,
     0x20000L,
 
-    &pshinter_interface,            /* module-specific interface */
+    &PSHINTER_INTERFACE_GET,              /* module-specific interface */
 
     (FT_Module_Constructor)ps_hinter_init,
     (FT_Module_Destructor) ps_hinter_done,
-    (FT_Module_Requester)  0        /* no additional interface for now */
-  };
+    (FT_Module_Requester)  NULL )   /* no additional interface for now */
 
 
 /* END */

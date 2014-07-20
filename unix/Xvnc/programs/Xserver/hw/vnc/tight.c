@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2012, 2014 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
@@ -325,7 +325,7 @@ InitThreads(void)
         for (i = 1; i < _nt; i++) {
             if (!tparam[i].updateBuf) {
                 tparam[i].updateBufSize = UPDATE_BUF_SIZE;
-                tparam[i].updateBuf = (char *)xalloc(tparam[i].updateBufSize);
+                tparam[i].updateBuf = (char *)malloc(tparam[i].updateBufSize);
             }
             pthread_mutex_init(&tparam[i].ready, NULL);
             pthread_mutex_lock(&tparam[i].ready);
@@ -360,9 +360,9 @@ ShutdownTightThreads(void)
         }
     }
     for (i = 0; i < _nt; i++) {
-        if (tparam[i].tightAfterBuf) xfree(tparam[i].tightAfterBuf);
-        if (tparam[i].tightBeforeBuf) xfree(tparam[i].tightBeforeBuf);
-        if (i != 0 && tparam[i].updateBuf) xfree(tparam[i].updateBuf);
+        if (tparam[i].tightAfterBuf) free(tparam[i].tightAfterBuf);
+        if (tparam[i].tightBeforeBuf) free(tparam[i].tightBeforeBuf);
+        if (i != 0 && tparam[i].updateBuf) free(tparam[i].updateBuf);
         if (tparam[i].j) tjDestroy(tparam[i].j);
         if (!REGION_NAR(&tparam[i].losslessRegion))
             REGION_UNINIT(pScreen, &tparam[i].losslessRegion);
@@ -403,7 +403,7 @@ CheckUpdateBuf(t, bytes)
     else {
         if ((*t->ublen) + bytes > t->updateBufSize) {
             t->updateBufSize += UPDATE_BUF_SIZE;
-            t->updateBuf = (char *)xrealloc(t->updateBuf, t->updateBufSize);
+            t->updateBuf = (char *)realloc(t->updateBuf, t->updateBufSize);
         }
     }
     return TRUE;
@@ -529,10 +529,10 @@ SendRectEncodingTight(t, x, y, w, h)
     if (t->tightBeforeBufSize < 4) {
         t->tightBeforeBufSize = 4;
         if (t->tightBeforeBuf == NULL)
-            t->tightBeforeBuf = (char *)xalloc(t->tightBeforeBufSize);
+            t->tightBeforeBuf = (char *)malloc(t->tightBeforeBufSize);
         else
-            t->tightBeforeBuf = (char *)xrealloc(t->tightBeforeBuf,
-                                                 t->tightBeforeBufSize);
+            t->tightBeforeBuf = (char *)realloc(t->tightBeforeBuf,
+                                                t->tightBeforeBufSize);
     }
 
     /* Calculate maximum number of rows in one non-solid rectangle. */
@@ -816,19 +816,19 @@ SendRectSimple(t, x, y, w, h)
     if (t->tightBeforeBufSize < maxBeforeSize) {
         t->tightBeforeBufSize = maxBeforeSize;
         if (t->tightBeforeBuf == NULL)
-            t->tightBeforeBuf = (char *)xalloc(t->tightBeforeBufSize);
+            t->tightBeforeBuf = (char *)malloc(t->tightBeforeBufSize);
         else
-            t->tightBeforeBuf = (char *)xrealloc(t->tightBeforeBuf,
-                                                 t->tightBeforeBufSize);
+            t->tightBeforeBuf = (char *)realloc(t->tightBeforeBuf,
+                                                t->tightBeforeBufSize);
     }
 
     if (t->tightAfterBufSize < maxAfterSize) {
         t->tightAfterBufSize = maxAfterSize;
         if (t->tightAfterBuf == NULL)
-            t->tightAfterBuf = (char *)xalloc(t->tightAfterBufSize);
+            t->tightAfterBuf = (char *)malloc(t->tightAfterBufSize);
         else
-            t->tightAfterBuf = (char *)xrealloc(t->tightAfterBuf,
-                                                t->tightAfterBufSize);
+            t->tightAfterBuf = (char *)realloc(t->tightAfterBuf,
+                                               t->tightAfterBufSize);
     }
 
     if (w > maxRectWidth || w * h > maxRectSize) {
@@ -1787,10 +1787,10 @@ SendJpegRect(t, x, y, w, h, quality)
 
     if (t->tightAfterBufSize < TJBUFSIZE(w, h)) {
         if (t->tightAfterBuf == NULL)
-            t->tightAfterBuf = (char *)xalloc(TJBUFSIZE(w, h));
+            t->tightAfterBuf = (char *)malloc(TJBUFSIZE(w, h));
         else
-            t->tightAfterBuf = (char *)xrealloc(t->tightAfterBuf,
-                                                TJBUFSIZE(w, h));
+            t->tightAfterBuf = (char *)realloc(t->tightAfterBuf,
+                                               TJBUFSIZE(w, h));
         if (!t->tightAfterBuf) {
             rfbLog("Memory allocation failure!\n");
             return 0;

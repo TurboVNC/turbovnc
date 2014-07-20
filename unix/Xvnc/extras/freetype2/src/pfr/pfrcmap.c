@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    FreeType PFR cmap handling (body).                                   */
 /*                                                                         */
-/*  Copyright 2002 by                                                      */
+/*  Copyright 2002, 2007, 2009, 2013 by                                    */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -16,34 +16,42 @@
 /***************************************************************************/
 
 
-#include "pfrcmap.h" 
-#include "pfrobjs.h"
+#include <ft2build.h>
 #include FT_INTERNAL_DEBUG_H
+#include "pfrcmap.h"
+#include "pfrobjs.h"
+
+#include "pfrerror.h"
 
 
   FT_CALLBACK_DEF( FT_Error )
   pfr_cmap_init( PFR_CMap  cmap )
   {
-    PFR_Face  face = (PFR_Face)FT_CMAP_FACE( cmap );
+    FT_Error  error = FT_Err_Ok;
+    PFR_Face  face  = (PFR_Face)FT_CMAP_FACE( cmap );
 
 
     cmap->num_chars = face->phy_font.num_chars;
     cmap->chars     = face->phy_font.chars;
-    
+
     /* just for safety, check that the character entries are correctly */
     /* sorted in increasing character code order                       */
     {
       FT_UInt  n;
-      
+
 
       for ( n = 1; n < cmap->num_chars; n++ )
       {
         if ( cmap->chars[n - 1].char_code >= cmap->chars[n].char_code )
-          FT_ASSERT( 0 );
+        {
+          error = FT_THROW( Invalid_Table );
+          goto Exit;
+        }
       }
     }
-    
-    return 0;
+
+  Exit:
+    return error;
   }
 
 
@@ -59,14 +67,16 @@
   pfr_cmap_char_index( PFR_CMap   cmap,
                        FT_UInt32  char_code )
   {
-    FT_UInt   min = 0;
-    FT_UInt   max = cmap->num_chars;
-    FT_UInt   mid;
-    PFR_Char  gchar;
+    FT_UInt  min = 0;
+    FT_UInt  max = cmap->num_chars;
 
 
     while ( min < max )
     {
+      PFR_Char  gchar;
+      FT_UInt   mid;
+
+
       mid   = min + ( max - min ) / 2;
       gchar = cmap->chars + mid;
 
@@ -82,7 +92,7 @@
   }
 
 
-  FT_CALLBACK_DEF( FT_UInt )
+  FT_CALLBACK_DEF( FT_UInt32 )
   pfr_cmap_char_next( PFR_CMap    cmap,
                       FT_UInt32  *pchar_code )
   {
@@ -151,7 +161,9 @@
     (FT_CMap_InitFunc)     pfr_cmap_init,
     (FT_CMap_DoneFunc)     pfr_cmap_done,
     (FT_CMap_CharIndexFunc)pfr_cmap_char_index,
-    (FT_CMap_CharNextFunc) pfr_cmap_char_next
+    (FT_CMap_CharNextFunc) pfr_cmap_char_next,
+
+    NULL, NULL, NULL, NULL, NULL
   };
 
 

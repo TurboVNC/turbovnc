@@ -1,14 +1,12 @@
-/* $XConsortium: scrnintstr.h /main/32 1996/09/28 17:14:32 rws $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -46,45 +43,51 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+
 #ifndef SCREENINTSTRUCT_H
 #define SCREENINTSTRUCT_H
 
 #include "screenint.h"
-#include "miscstruct.h"
-#include "region.h"
-#include "pixmap.h"
-#include "gc.h"
+#include "regionstr.h"
 #include "colormap.h"
 #include "cursor.h"
 #include "validate.h"
-#include "window.h"
-#include "X11/Xproto.h"
+#include <X11/Xproto.h>
 #include "dix.h"
+#include "privates.h"
 
 typedef struct _PixmapFormat {
-    unsigned char	depth;
-    unsigned char	bitsPerPixel;
-    unsigned char	scanlinePad;
-    } PixmapFormatRec;
-    
+    unsigned char depth;
+    unsigned char bitsPerPixel;
+    unsigned char scanlinePad;
+} PixmapFormatRec;
+
 typedef struct _Visual {
-    VisualID		vid;
-    short		class;
-    short		bitsPerRGBValue;
-    short		ColormapEntries;
-    short		nplanes;/* = log2 (ColormapEntries). This does not
-				 * imply that the screen has this many planes.
-				 * it may have more or fewer */
-    unsigned long	redMask, greenMask, blueMask;
-    int			offsetRed, offsetGreen, offsetBlue;
-  } VisualRec;
+    VisualID vid;
+    short class;
+    short bitsPerRGBValue;
+    short ColormapEntries;
+    short nplanes;              /* = log2 (ColormapEntries). This does not
+                                 * imply that the screen has this many planes.
+                                 * it may have more or fewer */
+    unsigned long redMask, greenMask, blueMask;
+    int offsetRed, offsetGreen, offsetBlue;
+} VisualRec;
 
 typedef struct _Depth {
-    unsigned char	depth;
-    short		numVids;
-    VisualID		*vids;    /* block of visual ids for this depth */
-  } DepthRec;
+    unsigned char depth;
+    short numVids;
+    VisualID *vids;             /* block of visual ids for this depth */
+} DepthRec;
 
+typedef struct _ScreenSaverStuff {
+    WindowPtr pWindow;
+    XID wid;
+    char blanked;
+    Bool (*ExternalScreenSaver) (ScreenPtr /*pScreen */ ,
+                                 int /*xstate */ ,
+                                 Bool /*force */ );
+} ScreenSaverStuffRec;
 
 /*
  *  There is a typedef for each screen function pointer so that code that
@@ -92,857 +95,419 @@ typedef struct _Depth {
  *  or as a local variable) can easily do so and retain full type checking.
  */
 
-typedef    Bool (* CloseScreenProcPtr)(
-#if NeedNestedPrototypes
-	int /*index*/,
-	ScreenPtr /*pScreen*/
-#endif
-);
-
-typedef    void (* QueryBestSizeProcPtr)(
-#if NeedNestedPrototypes
-	int /*class*/,
-	unsigned short * /*pwidth*/,
-	unsigned short * /*pheight*/,
-	ScreenPtr /*pScreen*/
-#endif
-);
-
-typedef    Bool (* SaveScreenProcPtr)(
-#if NeedNestedPrototypes
-	 ScreenPtr /*pScreen*/,
-	 int /*on*/
-#endif
-);
-
-typedef    void (* GetImageProcPtr)(
-#if NeedNestedPrototypes
-	DrawablePtr /*pDrawable*/,
-	int /*sx*/,
-	int /*sy*/,
-	int /*w*/,
-	int /*h*/,
-	unsigned int /*format*/,
-	unsigned long /*planeMask*/,
-	char * /*pdstLine*/
-#endif
-);
-
-typedef    void (* GetSpansProcPtr)(
-#if NeedNestedPrototypes
-	DrawablePtr /*pDrawable*/,
-	int /*wMax*/,
-	DDXPointPtr /*ppt*/,
-	int* /*pwidth*/,
-	int /*nspans*/,
-	char * /*pdstStart*/
-#endif
-);
-
-typedef    void (* PointerNonInterestBoxProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	BoxPtr /*pBox*/
-#endif
-);
-
-typedef    void (* SourceValidateProcPtr)(
-#if NeedNestedPrototypes
-	DrawablePtr /*pDrawable*/,
-	int /*x*/,
-	int /*y*/,
-	int /*width*/,
-	int /*height*/
-#endif
-);
-
-typedef    Bool (* CreateWindowProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/
-#endif
-);
-
-typedef    Bool (* DestroyWindowProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/
-#endif
-);
-
-typedef    Bool (* PositionWindowProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	int /*x*/,
-	int /*y*/
-#endif
-);
-
-typedef    Bool (* ChangeWindowAttributesProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	unsigned long /*mask*/
-#endif
-);
-
-typedef    Bool (* RealizeWindowProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/
-#endif
-);
-
-typedef    Bool (* UnrealizeWindowProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/
-#endif
-);
-
-typedef    int  (* ValidateTreeProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pParent*/,
-	WindowPtr /*pChild*/,
-	VTKind /*kind*/
-#endif
-);
-
-typedef    void (* PostValidateTreeProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pParent*/,
-	WindowPtr /*pChild*/,
-	VTKind /*kind*/
-#endif
-);
-
-typedef    void (* WindowExposuresProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	RegionPtr /*prgn*/,
-	RegionPtr /*other_exposed*/
-#endif
-);
-
-typedef    void (* PaintWindowBackgroundProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	RegionPtr /*pRegion*/,
-	int /*what*/
-#endif
-);
-
-typedef    void (* PaintWindowBorderProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	RegionPtr /*pRegion*/,
-	int /*what*/
-#endif
-);
-
-typedef    void (* CopyWindowProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	DDXPointRec /*ptOldOrg*/,
-	RegionPtr /*prgnSrc*/
-#endif
-);
-
-typedef    void (* ClearToBackgroundProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	int /*x*/,
-	int /*y*/,
-	int /*w*/,
-	int /*h*/,
-	Bool /*generateExposures*/
-#endif
-);
-
-typedef    void (* ClipNotifyProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	int /*dx*/,
-	int /*dy*/
-#endif
-);
-
-typedef    PixmapPtr (* CreatePixmapProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	int /*width*/,
-	int /*height*/,
-	int /*depth*/
-#endif
-);
-
-typedef    Bool (* DestroyPixmapProcPtr)(
-#if NeedNestedPrototypes
-	PixmapPtr /*pPixmap*/
-#endif
-);
-
-typedef    void (* SaveDoomedAreasProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	RegionPtr /*prgnSave*/,
-	int /*xorg*/,
-	int /*yorg*/
-#endif
-);
-
-typedef    RegionPtr (* RestoreAreasProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	RegionPtr /*prgnRestore*/
-#endif
-);
-
-typedef    void (* ExposeCopyProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pSrc*/,
-	DrawablePtr /*pDst*/,
-	GCPtr /*pGC*/,
-	RegionPtr /*prgnExposed*/,
-	int /*srcx*/,
-	int /*srcy*/,
-	int /*dstx*/,
-	int /*dsty*/,
-	unsigned long /*plane*/
-#endif
-);
-
-typedef    RegionPtr (* TranslateBackingStoreProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	int /*windx*/,
-	int /*windy*/,
-	RegionPtr /*oldClip*/,
-	int /*oldx*/,
-	int /*oldy*/
-#endif
-);
-
-typedef    RegionPtr (* ClearBackingStoreProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	int /*x*/,
-	int /*y*/,
-	int /*w*/,
-	int /*h*/,
-	Bool /*generateExposures*/
-#endif
-);
-
-typedef    void (* DrawGuaranteeProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWindow*/,
-	GCPtr /*pGC*/,
-	int /*guarantee*/
-#endif
-);
-    
-typedef    Bool (* RealizeFontProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	FontPtr /*pFont*/
-#endif
-);
-
-typedef    Bool (* UnrealizeFontProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	FontPtr /*pFont*/
-#endif
-);
-
-typedef    void (* ConstrainCursorProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	BoxPtr /*pBox*/
-#endif
-);
-
-typedef    void (* CursorLimitsProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	CursorPtr /*pCursor*/,
-	BoxPtr /*pHotBox*/,
-	BoxPtr /*pTopLeftBox*/
-#endif
-);
-
-typedef    Bool (* DisplayCursorProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	CursorPtr /*pCursor*/
-#endif
-);
-
-typedef    Bool (* RealizeCursorProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	CursorPtr /*pCursor*/
-#endif
-);
-
-typedef    Bool (* UnrealizeCursorProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	CursorPtr /*pCursor*/
-#endif
-);
-
-typedef    void (* RecolorCursorProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	CursorPtr /*pCursor*/,
-	Bool /*displayed*/
-#endif
-);
-
-typedef    Bool (* SetCursorPositionProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	int /*x*/,
-	int /*y*/,
-	Bool /*generateEvent*/
-#endif
-);
-
-typedef    Bool (* CreateGCProcPtr)(
-#if NeedNestedPrototypes
-	GCPtr /*pGC*/
-#endif
-);
-
-typedef    Bool (* CreateColormapProcPtr)(
-#if NeedNestedPrototypes
-	ColormapPtr /*pColormap*/
-#endif
-);
-
-typedef    void (* DestroyColormapProcPtr)(
-#if NeedNestedPrototypes
-	ColormapPtr /*pColormap*/
-#endif
-);
-
-typedef    void (* InstallColormapProcPtr)(
-#if NeedNestedPrototypes
-	ColormapPtr /*pColormap*/
-#endif
-);
-
-typedef    void (* UninstallColormapProcPtr)(
-#if NeedNestedPrototypes
-	ColormapPtr /*pColormap*/
-#endif
-);
-
-typedef    int (* ListInstalledColormapsProcPtr) (
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/,
-	XID* /*pmaps */
-#endif
-);
-
-typedef    void (* StoreColorsProcPtr)(
-#if NeedNestedPrototypes
-	ColormapPtr /*pColormap*/,
-	int /*ndef*/,
-	xColorItem * /*pdef*/
-#endif
-);
-
-typedef    void (* ResolveColorProcPtr)(
-#if NeedNestedPrototypes
-	unsigned short* /*pred*/,
-	unsigned short* /*pgreen*/,
-	unsigned short* /*pblue*/,
-	VisualPtr /*pVisual*/
-#endif
-);
-
-typedef    RegionPtr (* RegionCreateProcPtr)(
-#if NeedNestedPrototypes
-	BoxPtr /*rect*/,
-	int /*size*/
-#endif
-);
-
-typedef    void (* RegionInitProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/,
-	BoxPtr /*rect*/,
-	int /*size*/
-#endif
-);
-
-typedef    Bool (* RegionCopyProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*dst*/,
-	RegionPtr /*src*/
-#endif
-);
-
-typedef    void (* RegionDestroyProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/
-#endif
-);
-
-typedef    void (* RegionUninitProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/
-#endif
-);
-
-typedef    Bool (* IntersectProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*newReg*/,
-	RegionPtr /*reg1*/,
-	RegionPtr /*reg2*/
-#endif
-);
-
-typedef    Bool (* UnionProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*newReg*/,
-	RegionPtr /*reg1*/,
-	RegionPtr /*reg2*/
-#endif
-);
-
-typedef    Bool (* SubtractProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*regD*/,
-	RegionPtr /*regM*/,
-	RegionPtr /*regS*/
-#endif
-);
-
-typedef    Bool (* InverseProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*newReg*/,
-	RegionPtr /*reg1*/,
-	BoxPtr /*invRect*/
-#endif
-);
-
-typedef    void (* RegionResetProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/,
-	BoxPtr /*pBox*/
-#endif
-);
-
-typedef    void (* TranslateRegionProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/,
-	int /*x*/,
-	int /*y*/
-#endif
-);
-
-typedef    int (* RectInProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*region*/,
-	BoxPtr /*prect*/
-#endif
-);
-
-typedef    Bool (* PointInRegionProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/,
-	int /*x*/,
-	int /*y*/,
-	BoxPtr /*box*/
-#endif
-);
-
-typedef    Bool (* RegionNotEmptyProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/
-#endif
-);
-
-typedef    void (* RegionEmptyProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/
-#endif
-);
-
-typedef    Bool (* RegionBrokenProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/
-#endif
-);
-
-typedef    Bool (* RegionBreakProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/
-#endif
-);
-
-typedef    BoxPtr (* RegionExtentsProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*pReg*/
-#endif
-);
-
-typedef    Bool (* RegionAppendProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*dstrgn*/,
-	RegionPtr /*rgn*/
-#endif
-);
-
-typedef    Bool (* RegionValidateProcPtr)(
-#if NeedNestedPrototypes
-	RegionPtr /*badreg*/,
-	Bool* /*pOverlap*/
-#endif
-);
-
-typedef    RegionPtr (* BitmapToRegionProcPtr)(
-#if NeedNestedPrototypes
-	PixmapPtr /*pPix*/
-#endif
-);
-
-typedef    RegionPtr (* RectsToRegionProcPtr)(
-#if NeedNestedPrototypes
-	int /*nrects*/,
-	xRectangle* /*prect*/,
-	int /*ctype*/
-#endif
-);
-
-typedef    void (* SendGraphicsExposeProcPtr)(
-#if NeedNestedPrototypes
-	ClientPtr /*client*/,
-	RegionPtr /*pRgn*/,
-	XID /*drawable*/,
-	int /*major*/,
-	int /*minor*/
-#endif
-);
-
-typedef    void (* ScreenBlockHandlerProcPtr)(
-#if NeedNestedPrototypes
-	int /*screenNum*/,
-	pointer /*blockData*/,
-	pointer /*pTimeout*/,
-	pointer /*pReadmask*/
-#endif
-);
-
-typedef    void (* ScreenWakeupHandlerProcPtr)(
-#if NeedNestedPrototypes
-	 int /*screenNum*/,
-	 pointer /*wakeupData*/,
-	 unsigned long /*result*/,
-	 pointer /*pReadMask*/
-#endif
-);
-
-typedef    Bool (* CreateScreenResourcesProcPtr)(
-#if NeedNestedPrototypes
-	ScreenPtr /*pScreen*/
-#endif
-);
-
-typedef    Bool (* ModifyPixmapHeaderProcPtr)(
-#if NeedNestedPrototypes
-	PixmapPtr /*pPixmap*/,
-	int /*width*/,
-	int /*height*/,
-	int /*depth*/,
-	int /*bitsPerPixel*/,
-	int /*devKind*/,
-	pointer /*pPixData*/
-#endif
-);
-
-typedef    void (* MarkWindowProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWin*/
-#endif
-);
-
-typedef    Bool (* MarkOverlappedWindowsProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*parent*/,
-	WindowPtr /*firstChild*/,
-	WindowPtr * /*pLayerWin*/
-#endif
-);
-
-typedef    Bool (* ChangeSaveUnderProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pLayerWin*/,
-	WindowPtr /*firstChild*/
-#endif
-);
-
-typedef    void (* PostChangeSaveUnderProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pLayerWin*/,
-	WindowPtr /*firstChild*/
-#endif
-);
-
-typedef    void (* MoveWindowProcPtr)(
-#if NeedNestedPrototypes
-	WindowPtr /*pWin*/,
-	int /*x*/,
-	int /*y*/,
-	WindowPtr /*pSib*/,
-	VTKind /*kind*/
-#endif
-);
-
-typedef    void (* ResizeWindowProcPtr)(
-#if NeedNestedPrototypes
-    WindowPtr /*pWin*/,
-    int /*x*/,
-    int /*y*/, 
-    unsigned int /*w*/,
-    unsigned int /*h*/,
-    WindowPtr /*pSib*/
-#endif
-);
-
-typedef    WindowPtr (* GetLayerWindowProcPtr)(
-#if NeedNestedPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
-
-typedef    void (* HandleExposuresProcPtr)(
-#if NeedNestedPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
-
-typedef    void (* ReparentWindowProcPtr)(
-#if NeedNestedPrototypes
-    WindowPtr /*pWin*/,
-    WindowPtr /*pPriorParent*/
-#endif
-);
-
-#ifdef SHAPE
-typedef    void (* SetShapeProcPtr)(
-#if NeedFunctionPrototypes
-	WindowPtr /*pWin*/
-#endif
-);
-#endif /* SHAPE */
-
-typedef    void (* ChangeBorderWidthProcPtr)(
-#if NeedFunctionPrototypes
-	WindowPtr /*pWin*/,
-	unsigned int /*width*/
-#endif
-);
-
-typedef    void (* MarkUnrealizedWindowProcPtr)(
-#if NeedFunctionPrototypes
-	WindowPtr /*pChild*/,
-	WindowPtr /*pWin*/,
-	Bool /*fromConfigure*/
-#endif
-);
+typedef Bool (*CloseScreenProcPtr) (int /*index */ ,
+                                    ScreenPtr /*pScreen */ );
+
+typedef void (*QueryBestSizeProcPtr) (int /*class */ ,
+                                      unsigned short * /*pwidth */ ,
+                                      unsigned short * /*pheight */ ,
+                                      ScreenPtr /*pScreen */ );
+
+typedef Bool (*SaveScreenProcPtr) (ScreenPtr /*pScreen */ ,
+                                   int /*on */ );
+
+typedef void (*GetImageProcPtr) (DrawablePtr /*pDrawable */ ,
+                                 int /*sx */ ,
+                                 int /*sy */ ,
+                                 int /*w */ ,
+                                 int /*h */ ,
+                                 unsigned int /*format */ ,
+                                 unsigned long /*planeMask */ ,
+                                 char * /*pdstLine */ );
+
+typedef void (*GetSpansProcPtr) (DrawablePtr /*pDrawable */ ,
+                                 int /*wMax */ ,
+                                 DDXPointPtr /*ppt */ ,
+                                 int * /*pwidth */ ,
+                                 int /*nspans */ ,
+                                 char * /*pdstStart */ );
+
+typedef void (*SourceValidateProcPtr) (DrawablePtr /*pDrawable */ ,
+                                       int /*x */ ,
+                                       int /*y */ ,
+                                       int /*width */ ,
+                                       int /*height */ ,
+                                       unsigned int /*subWindowMode */ );
+
+typedef Bool (*CreateWindowProcPtr) (WindowPtr /*pWindow */ );
+
+typedef Bool (*DestroyWindowProcPtr) (WindowPtr /*pWindow */ );
+
+typedef Bool (*PositionWindowProcPtr) (WindowPtr /*pWindow */ ,
+                                       int /*x */ ,
+                                       int /*y */ );
+
+typedef Bool (*ChangeWindowAttributesProcPtr) (WindowPtr /*pWindow */ ,
+                                               unsigned long /*mask */ );
+
+typedef Bool (*RealizeWindowProcPtr) (WindowPtr /*pWindow */ );
+
+typedef Bool (*UnrealizeWindowProcPtr) (WindowPtr /*pWindow */ );
+
+typedef void (*RestackWindowProcPtr) (WindowPtr /*pWindow */ ,
+                                      WindowPtr /*pOldNextSib */ );
+
+typedef int (*ValidateTreeProcPtr) (WindowPtr /*pParent */ ,
+                                    WindowPtr /*pChild */ ,
+                                    VTKind /*kind */ );
+
+typedef void (*PostValidateTreeProcPtr) (WindowPtr /*pParent */ ,
+                                         WindowPtr /*pChild */ ,
+                                         VTKind /*kind */ );
+
+typedef void (*WindowExposuresProcPtr) (WindowPtr /*pWindow */ ,
+                                        RegionPtr /*prgn */ ,
+                                        RegionPtr /*other_exposed */ );
+
+typedef void (*CopyWindowProcPtr) (WindowPtr /*pWindow */ ,
+                                   DDXPointRec /*ptOldOrg */ ,
+                                   RegionPtr /*prgnSrc */ );
+
+typedef void (*ClearToBackgroundProcPtr) (WindowPtr /*pWindow */ ,
+                                          int /*x */ ,
+                                          int /*y */ ,
+                                          int /*w */ ,
+                                          int /*h */ ,
+                                          Bool /*generateExposures */ );
+
+typedef void (*ClipNotifyProcPtr) (WindowPtr /*pWindow */ ,
+                                   int /*dx */ ,
+                                   int /*dy */ );
+
+/* pixmap will exist only for the duration of the current rendering operation */
+#define CREATE_PIXMAP_USAGE_SCRATCH                     1
+/* pixmap will be the backing pixmap for a redirected window */
+#define CREATE_PIXMAP_USAGE_BACKING_PIXMAP              2
+/* pixmap will contain a glyph */
+#define CREATE_PIXMAP_USAGE_GLYPH_PICTURE               3
+
+typedef PixmapPtr (*CreatePixmapProcPtr) (ScreenPtr /*pScreen */ ,
+                                          int /*width */ ,
+                                          int /*height */ ,
+                                          int /*depth */ ,
+                                          unsigned /*usage_hint */ );
+
+typedef Bool (*DestroyPixmapProcPtr) (PixmapPtr /*pPixmap */ );
+
+typedef Bool (*RealizeFontProcPtr) (ScreenPtr /*pScreen */ ,
+                                    FontPtr /*pFont */ );
+
+typedef Bool (*UnrealizeFontProcPtr) (ScreenPtr /*pScreen */ ,
+                                      FontPtr /*pFont */ );
+
+typedef void (*ConstrainCursorProcPtr) (DeviceIntPtr /*pDev */ ,
+                                        ScreenPtr /*pScreen */ ,
+                                        BoxPtr /*pBox */ );
+
+typedef void (*CursorLimitsProcPtr) (DeviceIntPtr /* pDev */ ,
+                                     ScreenPtr /*pScreen */ ,
+                                     CursorPtr /*pCursor */ ,
+                                     BoxPtr /*pHotBox */ ,
+                                     BoxPtr /*pTopLeftBox */ );
+
+typedef Bool (*DisplayCursorProcPtr) (DeviceIntPtr /* pDev */ ,
+                                      ScreenPtr /*pScreen */ ,
+                                      CursorPtr /*pCursor */ );
+
+typedef Bool (*RealizeCursorProcPtr) (DeviceIntPtr /* pDev */ ,
+                                      ScreenPtr /*pScreen */ ,
+                                      CursorPtr /*pCursor */ );
+
+typedef Bool (*UnrealizeCursorProcPtr) (DeviceIntPtr /* pDev */ ,
+                                        ScreenPtr /*pScreen */ ,
+                                        CursorPtr /*pCursor */ );
+
+typedef void (*RecolorCursorProcPtr) (DeviceIntPtr /* pDev */ ,
+                                      ScreenPtr /*pScreen */ ,
+                                      CursorPtr /*pCursor */ ,
+                                      Bool /*displayed */ );
+
+typedef Bool (*SetCursorPositionProcPtr) (DeviceIntPtr /* pDev */ ,
+                                          ScreenPtr /*pScreen */ ,
+                                          int /*x */ ,
+                                          int /*y */ ,
+                                          Bool /*generateEvent */ );
+
+typedef Bool (*CreateGCProcPtr) (GCPtr /*pGC */ );
+
+typedef Bool (*CreateColormapProcPtr) (ColormapPtr /*pColormap */ );
+
+typedef void (*DestroyColormapProcPtr) (ColormapPtr /*pColormap */ );
+
+typedef void (*InstallColormapProcPtr) (ColormapPtr /*pColormap */ );
+
+typedef void (*UninstallColormapProcPtr) (ColormapPtr /*pColormap */ );
+
+typedef int (*ListInstalledColormapsProcPtr) (ScreenPtr /*pScreen */ ,
+                                              XID * /*pmaps */ );
+
+typedef void (*StoreColorsProcPtr) (ColormapPtr /*pColormap */ ,
+                                    int /*ndef */ ,
+                                    xColorItem * /*pdef */ );
+
+typedef void (*ResolveColorProcPtr) (unsigned short * /*pred */ ,
+                                     unsigned short * /*pgreen */ ,
+                                     unsigned short * /*pblue */ ,
+                                     VisualPtr /*pVisual */ );
+
+typedef RegionPtr (*BitmapToRegionProcPtr) (PixmapPtr /*pPix */ );
+
+typedef void (*SendGraphicsExposeProcPtr) (ClientPtr /*client */ ,
+                                           RegionPtr /*pRgn */ ,
+                                           XID /*drawable */ ,
+                                           int /*major */ ,
+                                           int /*minor */ );
+
+typedef void (*ScreenBlockHandlerProcPtr) (int /*screenNum */ ,
+                                           pointer /*blockData */ ,
+                                           pointer /*pTimeout */ ,
+                                           pointer /*pReadmask */ );
+
+typedef void (*ScreenWakeupHandlerProcPtr) (int /*screenNum */ ,
+                                            pointer /*wakeupData */ ,
+                                            unsigned long /*result */ ,
+                                            pointer /*pReadMask */ );
+
+typedef Bool (*CreateScreenResourcesProcPtr) (ScreenPtr /*pScreen */ );
+
+typedef Bool (*ModifyPixmapHeaderProcPtr) (PixmapPtr /*pPixmap */ ,
+                                           int /*width */ ,
+                                           int /*height */ ,
+                                           int /*depth */ ,
+                                           int /*bitsPerPixel */ ,
+                                           int /*devKind */ ,
+                                           pointer /*pPixData */ );
+
+typedef PixmapPtr (*GetWindowPixmapProcPtr) (WindowPtr /*pWin */ );
+
+typedef void (*SetWindowPixmapProcPtr) (WindowPtr /*pWin */ ,
+                                        PixmapPtr /*pPix */ );
+
+typedef PixmapPtr (*GetScreenPixmapProcPtr) (ScreenPtr /*pScreen */ );
+
+typedef void (*SetScreenPixmapProcPtr) (PixmapPtr /*pPix */ );
+
+typedef void (*MarkWindowProcPtr) (WindowPtr /*pWin */ );
+
+typedef Bool (*MarkOverlappedWindowsProcPtr) (WindowPtr /*parent */ ,
+                                              WindowPtr /*firstChild */ ,
+                                              WindowPtr * /*pLayerWin */ );
+
+typedef int (*ConfigNotifyProcPtr) (WindowPtr /*pWin */ ,
+                                    int /*x */ ,
+                                    int /*y */ ,
+                                    int /*w */ ,
+                                    int /*h */ ,
+                                    int /*bw */ ,
+                                    WindowPtr /*pSib */ );
+
+typedef void (*MoveWindowProcPtr) (WindowPtr /*pWin */ ,
+                                   int /*x */ ,
+                                   int /*y */ ,
+                                   WindowPtr /*pSib */ ,
+                                   VTKind /*kind */ );
+
+typedef void (*ResizeWindowProcPtr) (WindowPtr /*pWin */ ,
+                                     int /*x */ ,
+                                     int /*y */ ,
+                                     unsigned int /*w */ ,
+                                     unsigned int /*h */ ,
+                                     WindowPtr  /*pSib */
+    );
+
+typedef WindowPtr (*GetLayerWindowProcPtr) (WindowPtr   /*pWin */
+    );
+
+typedef void (*HandleExposuresProcPtr) (WindowPtr /*pWin */ );
+
+typedef void (*ReparentWindowProcPtr) (WindowPtr /*pWin */ ,
+                                       WindowPtr /*pPriorParent */ );
+
+typedef void (*SetShapeProcPtr) (WindowPtr /*pWin */ ,
+                                 int /* kind */ );
+
+typedef void (*ChangeBorderWidthProcPtr) (WindowPtr /*pWin */ ,
+                                          unsigned int /*width */ );
+
+typedef void (*MarkUnrealizedWindowProcPtr) (WindowPtr /*pChild */ ,
+                                             WindowPtr /*pWin */ ,
+                                             Bool /*fromConfigure */ );
+
+typedef Bool (*DeviceCursorInitializeProcPtr) (DeviceIntPtr /* pDev */ ,
+                                               ScreenPtr /* pScreen */ );
+
+typedef void (*DeviceCursorCleanupProcPtr) (DeviceIntPtr /* pDev */ ,
+                                            ScreenPtr /* pScreen */ );
+
+typedef void (*ConstrainCursorHarderProcPtr) (DeviceIntPtr, ScreenPtr, int,
+                                              int *, int *);
 
 typedef struct _Screen {
-    int			myNum;	/* index of this instance in Screens[] */
-    ATOM		id;
-    short		width, height;
-    short		mmWidth, mmHeight;
-    short		numDepths;
-    unsigned char      	rootDepth;
-    DepthPtr       	allowedDepths;
-    unsigned long      	rootVisual;
-    unsigned long	defColormap;
-    short		minInstalledCmaps, maxInstalledCmaps;
-    char                backingStoreSupport, saveUnderSupport;
-    unsigned long	whitePixel, blackPixel;
-    unsigned long	rgf;	/* array of flags; she's -- HUNGARIAN */
-    GCPtr		GCperDepth[MAXFORMATS+1];
-			/* next field is a stipple to use as default in
-			   a GC.  we don't build default tiles of all depths
-			   because they are likely to be of a color
-			   different from the default fg pixel, so
-			   we don't win anything by building
-			   a standard one.
-			*/
-    PixmapPtr		PixmapPerDepth[1];
-    pointer		devPrivate;
-    short       	numVisuals;
-    VisualPtr		visuals;
-    int			WindowPrivateLen;
-    unsigned		*WindowPrivateSizes;
-    unsigned		totalWindowSize;
-    int			GCPrivateLen;
-    unsigned		*GCPrivateSizes;
-    unsigned		totalGCSize;
+    int myNum;                  /* index of this instance in Screens[] */
+    ATOM id;
+    short x, y, width, height;
+    short mmWidth, mmHeight;
+    short numDepths;
+    unsigned char rootDepth;
+    DepthPtr allowedDepths;
+    unsigned long rootVisual;
+    unsigned long defColormap;
+    short minInstalledCmaps, maxInstalledCmaps;
+    char backingStoreSupport, saveUnderSupport;
+    unsigned long whitePixel, blackPixel;
+    GCPtr GCperDepth[MAXFORMATS + 1];
+    /* next field is a stipple to use as default in
+       a GC.  we don't build default tiles of all depths
+       because they are likely to be of a color
+       different from the default fg pixel, so
+       we don't win anything by building
+       a standard one.
+     */
+    PixmapPtr PixmapPerDepth[1];
+    pointer devPrivate;
+    short numVisuals;
+    VisualPtr visuals;
+    WindowPtr root;
+    ScreenSaverStuffRec screensaver;
 
     /* Random screen procedures */
 
-    CloseScreenProcPtr		CloseScreen;
-    QueryBestSizeProcPtr	QueryBestSize;
-    SaveScreenProcPtr		SaveScreen;
-    GetImageProcPtr		GetImage;
-    GetSpansProcPtr		GetSpans;
-    PointerNonInterestBoxProcPtr PointerNonInterestBox;
-    SourceValidateProcPtr	SourceValidate;
+    CloseScreenProcPtr CloseScreen;
+    QueryBestSizeProcPtr QueryBestSize;
+    SaveScreenProcPtr SaveScreen;
+    GetImageProcPtr GetImage;
+    GetSpansProcPtr GetSpans;
+    SourceValidateProcPtr SourceValidate;
 
     /* Window Procedures */
 
-    CreateWindowProcPtr		CreateWindow;
-    DestroyWindowProcPtr	DestroyWindow;
-    PositionWindowProcPtr	PositionWindow;
+    CreateWindowProcPtr CreateWindow;
+    DestroyWindowProcPtr DestroyWindow;
+    PositionWindowProcPtr PositionWindow;
     ChangeWindowAttributesProcPtr ChangeWindowAttributes;
-    RealizeWindowProcPtr	RealizeWindow;
-    UnrealizeWindowProcPtr	UnrealizeWindow;
-    ValidateTreeProcPtr		ValidateTree;
-    PostValidateTreeProcPtr	PostValidateTree;
-    WindowExposuresProcPtr	WindowExposures;
-    PaintWindowBackgroundProcPtr PaintWindowBackground;
-    PaintWindowBorderProcPtr	PaintWindowBorder;
-    CopyWindowProcPtr		CopyWindow;
-    ClearToBackgroundProcPtr	ClearToBackground;
-    ClipNotifyProcPtr		ClipNotify;
+    RealizeWindowProcPtr RealizeWindow;
+    UnrealizeWindowProcPtr UnrealizeWindow;
+    ValidateTreeProcPtr ValidateTree;
+    PostValidateTreeProcPtr PostValidateTree;
+    WindowExposuresProcPtr WindowExposures;
+    CopyWindowProcPtr CopyWindow;
+    ClearToBackgroundProcPtr ClearToBackground;
+    ClipNotifyProcPtr ClipNotify;
+    RestackWindowProcPtr RestackWindow;
 
     /* Pixmap procedures */
 
-    CreatePixmapProcPtr		CreatePixmap;
-    DestroyPixmapProcPtr	DestroyPixmap;
+    CreatePixmapProcPtr CreatePixmap;
+    DestroyPixmapProcPtr DestroyPixmap;
 
-    /* Backing store procedures */
-
-    SaveDoomedAreasProcPtr	SaveDoomedAreas;
-    RestoreAreasProcPtr		RestoreAreas;
-    ExposeCopyProcPtr		ExposeCopy;
-    TranslateBackingStoreProcPtr TranslateBackingStore;
-    ClearBackingStoreProcPtr	ClearBackingStore;
-    DrawGuaranteeProcPtr	DrawGuarantee;
-    
     /* Font procedures */
 
-    RealizeFontProcPtr		RealizeFont;
-    UnrealizeFontProcPtr	UnrealizeFont;
+    RealizeFontProcPtr RealizeFont;
+    UnrealizeFontProcPtr UnrealizeFont;
 
     /* Cursor Procedures */
 
-    ConstrainCursorProcPtr	ConstrainCursor;
-    CursorLimitsProcPtr		CursorLimits;
-    DisplayCursorProcPtr	DisplayCursor;
-    RealizeCursorProcPtr	RealizeCursor;
-    UnrealizeCursorProcPtr	UnrealizeCursor;
-    RecolorCursorProcPtr	RecolorCursor;
-    SetCursorPositionProcPtr	SetCursorPosition;
+    ConstrainCursorProcPtr ConstrainCursor;
+    ConstrainCursorHarderProcPtr ConstrainCursorHarder;
+    CursorLimitsProcPtr CursorLimits;
+    DisplayCursorProcPtr DisplayCursor;
+    RealizeCursorProcPtr RealizeCursor;
+    UnrealizeCursorProcPtr UnrealizeCursor;
+    RecolorCursorProcPtr RecolorCursor;
+    SetCursorPositionProcPtr SetCursorPosition;
 
     /* GC procedures */
 
-    CreateGCProcPtr		CreateGC;
+    CreateGCProcPtr CreateGC;
 
     /* Colormap procedures */
 
-    CreateColormapProcPtr	CreateColormap;
-    DestroyColormapProcPtr	DestroyColormap;
-    InstallColormapProcPtr	InstallColormap;
-    UninstallColormapProcPtr	UninstallColormap;
+    CreateColormapProcPtr CreateColormap;
+    DestroyColormapProcPtr DestroyColormap;
+    InstallColormapProcPtr InstallColormap;
+    UninstallColormapProcPtr UninstallColormap;
     ListInstalledColormapsProcPtr ListInstalledColormaps;
-    StoreColorsProcPtr		StoreColors;
-    ResolveColorProcPtr		ResolveColor;
+    StoreColorsProcPtr StoreColors;
+    ResolveColorProcPtr ResolveColor;
 
     /* Region procedures */
 
-    RegionCreateProcPtr		RegionCreate;
-    RegionInitProcPtr		RegionInit;
-    RegionCopyProcPtr		RegionCopy;
-    RegionDestroyProcPtr	RegionDestroy;
-    RegionUninitProcPtr		RegionUninit;
-    IntersectProcPtr		Intersect;
-    UnionProcPtr		Union;
-    SubtractProcPtr		Subtract;
-    InverseProcPtr		Inverse;
-    RegionResetProcPtr		RegionReset;
-    TranslateRegionProcPtr	TranslateRegion;
-    RectInProcPtr		RectIn;
-    PointInRegionProcPtr	PointInRegion;
-    RegionNotEmptyProcPtr	RegionNotEmpty;
-    RegionBrokenProcPtr		RegionBroken;
-    RegionBreakProcPtr		RegionBreak;
-    RegionEmptyProcPtr		RegionEmpty;
-    RegionExtentsProcPtr	RegionExtents;
-    RegionAppendProcPtr		RegionAppend;
-    RegionValidateProcPtr	RegionValidate;
-    BitmapToRegionProcPtr	BitmapToRegion;
-    RectsToRegionProcPtr	RectsToRegion;
-    SendGraphicsExposeProcPtr	SendGraphicsExpose;
+    BitmapToRegionProcPtr BitmapToRegion;
+    SendGraphicsExposeProcPtr SendGraphicsExpose;
 
     /* os layer procedures */
 
-    ScreenBlockHandlerProcPtr	BlockHandler;
-    ScreenWakeupHandlerProcPtr	WakeupHandler;
+    ScreenBlockHandlerProcPtr BlockHandler;
+    ScreenWakeupHandlerProcPtr WakeupHandler;
 
     pointer blockData;
     pointer wakeupData;
 
     /* anybody can get a piece of this array */
-    DevUnion	*devPrivates;
+    PrivateRec *devPrivates;
 
     CreateScreenResourcesProcPtr CreateScreenResources;
-    ModifyPixmapHeaderProcPtr	ModifyPixmapHeader;
+    ModifyPixmapHeaderProcPtr ModifyPixmapHeader;
 
-    PixmapPtr pScratchPixmap;		/* scratch pixmap "pool" */
+    GetWindowPixmapProcPtr GetWindowPixmap;
+    SetWindowPixmapProcPtr SetWindowPixmap;
+    GetScreenPixmapProcPtr GetScreenPixmap;
+    SetScreenPixmapProcPtr SetScreenPixmap;
 
-#ifdef PIXPRIV
-    int			PixmapPrivateLen;
-    unsigned		*PixmapPrivateSizes;
-    unsigned		totalPixmapSize;
-#endif
+    PixmapPtr pScratchPixmap;   /* scratch pixmap "pool" */
 
-    MarkWindowProcPtr		MarkWindow;
+    unsigned int totalPixmapSize;
+
+    MarkWindowProcPtr MarkWindow;
     MarkOverlappedWindowsProcPtr MarkOverlappedWindows;
-    ChangeSaveUnderProcPtr	ChangeSaveUnder;
-    PostChangeSaveUnderProcPtr	PostChangeSaveUnder;
-    MoveWindowProcPtr		MoveWindow;
-    ResizeWindowProcPtr		ResizeWindow;
-    GetLayerWindowProcPtr	GetLayerWindow;
-    HandleExposuresProcPtr	HandleExposures;
-    ReparentWindowProcPtr	ReparentWindow;
+    ConfigNotifyProcPtr ConfigNotify;
+    MoveWindowProcPtr MoveWindow;
+    ResizeWindowProcPtr ResizeWindow;
+    GetLayerWindowProcPtr GetLayerWindow;
+    HandleExposuresProcPtr HandleExposures;
+    ReparentWindowProcPtr ReparentWindow;
 
-#ifdef SHAPE
-    SetShapeProcPtr		SetShape;
-#endif /* SHAPE */
+    SetShapeProcPtr SetShape;
 
-    ChangeBorderWidthProcPtr	ChangeBorderWidth;
-    MarkUnrealizedWindowProcPtr	MarkUnrealizedWindow;
+    ChangeBorderWidthProcPtr ChangeBorderWidth;
+    MarkUnrealizedWindowProcPtr MarkUnrealizedWindow;
 
+    /* Device cursor procedures */
+    DeviceCursorInitializeProcPtr DeviceCursorInitialize;
+    DeviceCursorCleanupProcPtr DeviceCursorCleanup;
+
+    /* set it in driver side if X server can copy the framebuffer content.
+     * Meant to be used together with '-background none' option, avoiding
+     * malicious users to steal framebuffer's content if that would be the
+     * default */
+    Bool canDoBGNoneRoot;
 } ScreenRec;
 
+static inline RegionPtr
+BitmapToRegion(ScreenPtr _pScreen, PixmapPtr pPix)
+{
+    return (*(_pScreen)->BitmapToRegion) (pPix);        /* no mi version?! */
+}
+
 typedef struct _ScreenInfo {
-    int		imageByteOrder;
-    int		bitmapScanlineUnit;
-    int		bitmapScanlinePad;
-    int		bitmapBitOrder;
-    int		numPixmapFormats;
-    PixmapFormatRec
-		formats[MAXFORMATS];
-    int		arraySize;
-    int		numScreens;
-    ScreenPtr	screens[MAXSCREENS];
-    int		numVideoScreens;
+    int imageByteOrder;
+    int bitmapScanlineUnit;
+    int bitmapScanlinePad;
+    int bitmapBitOrder;
+    int numPixmapFormats;
+     PixmapFormatRec formats[MAXFORMATS];
+    int numScreens;
+    ScreenPtr screens[MAXSCREENS];
+    int x;                      /* origin */
+    int y;                      /* origin */
+    int width;                  /* total width of all screens together */
+    int height;                 /* total height of all screens together */
 } ScreenInfo;
 
-extern ScreenInfo screenInfo;
+extern _X_EXPORT ScreenInfo screenInfo;
 
-extern void InitOutput(
-#if NeedFunctionPrototypes
-    ScreenInfo 	* /*pScreenInfo*/,
-    int     	/*argc*/,
-    char    	** /*argv*/
-#endif
-);
+extern _X_EXPORT void InitOutput(ScreenInfo * /*pScreenInfo */ ,
+                                 int /*argc */ ,
+                                 char ** /*argv */ );
 
-#endif /* SCREENINTSTRUCT_H */
+#endif                          /* SCREENINTSTRUCT_H */

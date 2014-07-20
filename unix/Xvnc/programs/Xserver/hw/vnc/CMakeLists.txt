@@ -2,9 +2,8 @@ set(DEFAULT_TVNC_USEPAM 1)
 option(TVNC_USEPAM "Include PAM authentication support in the TurboVNC Server"
 	${DEFAULT_TVNC_USEPAM})
 
-include_directories(. ../../fb ../../mi ../../os ../../randr ../../render
-	${CMAKE_SOURCE_DIR}/common/rfb
-	${CMAKE_CURRENT_BINARY_DIR}/../../../../include)
+include_directories(. ../../fb ../../mi ../../miext/damage ../../os
+	../../randr ../../render ${CMAKE_SOURCE_DIR}/common/rfb)
 
 add_definitions(${ServerOSDefines})
 set(PAMSRC "")
@@ -14,31 +13,31 @@ if(TVNC_USEPAM)
 endif()
 
 add_library(vnc STATIC
-	init.c
-	sockets.c
-	kbdptr.c
-	cmap.c
-	draw.c
-	cutpaste.c
-	vncextinit.c
-	dispcur.c
-	sprite.c
-	rfbserver.c
-	translate.c
-	httpd.c
 	auth.c
-	rre.c
+	authpam.c
+	cmap.c
 	corre.c
-	stats.c
+	cursor.c
+	cutpaste.c
+	dispcur.c
+	draw.c
+	flowcontrol.c
 	hextile.c
-	zlib.c
+	httpd.c
+	init.c
+	input-xkb.c
+	kbdptr.c
+	randr.c
+	rfbserver.c
+	rre.c
+	sockets.c
+	sprite.c
+	stats.c
 	tight.c
+	translate.c
+	vncextinit.c
+	zlib.c
 	zrle.c
 	zrleoutstream.c
 	zrlepalettehelper.c
-	tight.c
-	cursor.c
-	xistubs.c
-	flowcontrol.c
-	randr.c
 	${PAMSRC})

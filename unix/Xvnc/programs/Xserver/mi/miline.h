@@ -1,15 +1,13 @@
-/* $XConsortium: miline.h /main/6 1996/08/12 21:51:09 dpw $ */
 
 /*
 
-Copyright (c) 1994  X Consortium
+Copyright 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,17 +15,20 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
 
 #ifndef MILINE_H
+
+#include "screenint.h"
+#include "privates.h"
 
 /*
  * Public definitions used for configuring basic pixelization aspects
@@ -76,12 +77,9 @@ in this Software without prior written authorization from the X Consortium.
  * Jack E. Bresenham, IEEE CG&A, May 1987.
  */
 
-extern void miSetZeroLineBias(
-#if NeedFunctionPrototypes
-    ScreenPtr /* pScreen */,
-    unsigned int /* bias */
-#endif
-);
+extern _X_EXPORT void miSetZeroLineBias(ScreenPtr /* pScreen */ ,
+                                        unsigned int    /* bias */
+    );
 
 /*
  * Private definitions needed for drawing thin (zero width) lines
@@ -102,8 +100,16 @@ extern void miSetZeroLineBias(
     if	    ( (_y) <  (_pbox)->y1) (_result) |= OUT_ABOVE; \
     else if ( (_y) >= (_pbox)->y2) (_result) |= OUT_BELOW;
 
+#define MIOUTCODES(outcode, x, y, xmin, ymin, xmax, ymax) \
+{\
+     if (x < xmin) outcode |= OUT_LEFT;\
+     if (x > xmax) outcode |= OUT_RIGHT;\
+     if (y < ymin) outcode |= OUT_ABOVE;\
+     if (y > ymax) outcode |= OUT_BELOW;\
+}
+
 #define SWAPINT(i, j) \
-{  register int _t = i;  i = j;  j = _t; }
+{  int _t = i;  i = j;  j = _t; }
 
 #define SWAPPT(i, j) \
 {  DDXPointRec _t; _t = i;  i = j; j = _t; }
@@ -113,9 +119,8 @@ extern void miSetZeroLineBias(
         t = y1;  y1 = y2;  y2 = t;\
 }
 
-#define miGetZeroLineBias(_pScreen) \
-    ((miZeroLineScreenIndex < 0) ? \
-     		0 : ((_pScreen)->devPrivates[miZeroLineScreenIndex].uval))
+#define miGetZeroLineBias(_pScreen) ((unsigned long) (unsigned long*)\
+    dixLookupPrivate(&(_pScreen)->devPrivates, miZeroLineScreenKey))
 
 #define CalcLineDeltas(_x1,_y1,_x2,_y2,_adx,_ady,_sx,_sy,_SX,_SY,_octant) \
     (_octant) = 0;				\
@@ -142,27 +147,26 @@ extern void miSetZeroLineBias(
 #define IsXDecreasingOctant(_octant)	((_octant) & XDECREASING)
 #define IsYDecreasingOctant(_octant)	((_octant) & YDECREASING)
 
-extern int miZeroLineScreenIndex;
+extern _X_EXPORT DevPrivateKeyRec miZeroLineScreenKeyRec;
 
-extern int miZeroClipLine(
-#if NeedFunctionPrototypes
-    int /*xmin*/,
-    int /*ymin*/,
-    int /*xmax*/,
-    int /*ymax*/,
-    int * /*new_x1*/,
-    int * /*new_y1*/,
-    int * /*new_x2*/,
-    int * /*new_y2*/,
-    unsigned int /*adx*/,
-    unsigned int /*ady*/,
-    int * /*pt1_clipped*/,
-    int * /*pt2_clipped*/,
-    int /*octant*/,
-    unsigned int /*bias*/,
-    int /*oc1*/,
-    int /*oc2*/
-#endif
-);
+#define miZeroLineScreenKey (&miZeroLineScreenKeyRec)
 
-#endif /* MILINE_H */
+extern _X_EXPORT int miZeroClipLine(int /*xmin */ ,
+                                    int /*ymin */ ,
+                                    int /*xmax */ ,
+                                    int /*ymax */ ,
+                                    int * /*new_x1 */ ,
+                                    int * /*new_y1 */ ,
+                                    int * /*new_x2 */ ,
+                                    int * /*new_y2 */ ,
+                                    unsigned int /*adx */ ,
+                                    unsigned int /*ady */ ,
+                                    int * /*pt1_clipped */ ,
+                                    int * /*pt2_clipped */ ,
+                                    int /*octant */ ,
+                                    unsigned int /*bias */ ,
+                                    int /*oc1 */ ,
+                                    int /*oc2 */
+    );
+
+#endif                          /* MILINE_H */

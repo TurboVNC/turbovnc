@@ -1,13 +1,12 @@
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -45,12 +43,17 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: mipolycon.c,v 5.1 94/04/17 20:27:43 keith Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include "gcstruct.h"
 #include "pixmap.h"
+#include "mi.h"
 #include "miscanfill.h"
 
-static int getPolyYBounds();
+static int getPolyYBounds(DDXPointPtr pts, int n, int *by, int *ty);
 
 /*
  *     convexpoly.c
@@ -68,24 +71,22 @@ static int getPolyYBounds();
  *     this code.
  */
 Bool
-miFillConvexPoly(dst, pgc, count, ptsIn)
-    DrawablePtr dst;
-    GCPtr	pgc;
-    int		count;                /* number of points        */
-    DDXPointPtr ptsIn;                /* the points              */
+miFillConvexPoly(DrawablePtr dst, GCPtr pgc, int count, /* number of points        */
+                 DDXPointPtr ptsIn      /* the points              */
+    )
 {
-    register int xl = 0, xr = 0;        /* x vals of left and right edges */
-    register int dl = 0, dr = 0;        /* decision variables             */
-    register int ml = 0, m1l = 0;       /* left edge slope and slope+1    */
-    int mr = 0, m1r = 0;                /* right edge slope and slope+1   */
-    int incr1l = 0, incr2l = 0;         /* left edge error increments     */
-    int incr1r = 0, incr2r = 0;         /* right edge error increments    */
+    int xl = 0, xr = 0;         /* x vals of left and right edges */
+    int dl = 0, dr = 0;         /* decision variables             */
+    int ml = 0, m1l = 0;        /* left edge slope and slope+1    */
+    int mr = 0, m1r = 0;        /* right edge slope and slope+1   */
+    int incr1l = 0, incr2l = 0; /* left edge error increments     */
+    int incr1r = 0, incr2r = 0; /* right edge error increments    */
     int dy;                     /* delta y                        */
     int y;                      /* current scanline               */
     int left, right;            /* indices to first endpoints     */
     int i;                      /* loop counter                   */
     int nextleft, nextright;    /* indices to second endpoints    */
-    DDXPointPtr ptsOut, FirstPoint; /* output buffer               */
+    DDXPointPtr ptsOut, FirstPoint;     /* output buffer               */
     int *width, *FirstWidth;    /* output buffer                  */
     int imin;                   /* index of smallest vertex (in y) */
     int ymin;                   /* y-extents of polygon            */
@@ -99,14 +100,13 @@ miFillConvexPoly(dst, pgc, count, ptsIn)
 
     dy = ymax - ymin + 1;
     if ((count < 3) || (dy < 0))
-	return(TRUE);
-    ptsOut = FirstPoint = (DDXPointPtr )ALLOCATE_LOCAL(sizeof(DDXPointRec)*dy);
-    width = FirstWidth = (int *)ALLOCATE_LOCAL(sizeof(int) * dy);
-    if(!FirstPoint || !FirstWidth)
-    {
-	if (FirstWidth) DEALLOCATE_LOCAL(FirstWidth);
-	if (FirstPoint) DEALLOCATE_LOCAL(FirstPoint);
-	return(FALSE);
+        return TRUE;
+    ptsOut = FirstPoint = malloc(sizeof(DDXPointRec) * dy);
+    width = FirstWidth = malloc(sizeof(int) * dy);
+    if (!FirstPoint || !FirstWidth) {
+        free(FirstWidth);
+        free(FirstPoint);
+        return FALSE;
     }
 
     nextleft = nextright = imin;
@@ -134,8 +134,8 @@ miFillConvexPoly(dst, pgc, count, ptsIn)
              *  now compute all of the random information
              *  needed to run the iterative algorithm.
              */
-            BRESINITPGON(ptsIn[nextleft].y-ptsIn[left].y,
-                         ptsIn[left].x,ptsIn[nextleft].x,
+            BRESINITPGON(ptsIn[nextleft].y - ptsIn[left].y,
+                         ptsIn[left].x, ptsIn[nextleft].x,
                          xl, dl, ml, m1l, incr1l, incr2l);
         }
 
@@ -151,14 +151,14 @@ miFillConvexPoly(dst, pgc, count, ptsIn)
              */
             nextright--;
             if (nextright < 0)
-                nextright = count-1;
+                nextright = count - 1;
 
             /*
              *  now compute all of the random information
              *  needed to run the iterative algorithm.
              */
-            BRESINITPGON(ptsIn[nextright].y-ptsIn[right].y,
-                         ptsIn[right].x,ptsIn[nextright].x,
+            BRESINITPGON(ptsIn[nextright].y - ptsIn[right].y,
+                         ptsIn[right].x, ptsIn[nextright].x,
                          xr, dr, mr, m1r, incr1r, incr2r);
         }
 
@@ -167,27 +167,23 @@ miFillConvexPoly(dst, pgc, count, ptsIn)
          *  a right edge as well as a left edge.
          */
         i = min(ptsIn[nextleft].y, ptsIn[nextright].y) - y;
-	/* in case we're called with non-convex polygon */
-	if(i < 0)
-        {
-	    DEALLOCATE_LOCAL(FirstWidth);
-	    DEALLOCATE_LOCAL(FirstPoint);
-	    return(TRUE);
-	}
-        while (i-- > 0) 
-        {
+        /* in case we're called with non-convex polygon */
+        if (i < 0) {
+            free(FirstWidth);
+            free(FirstPoint);
+            return TRUE;
+        }
+        while (i-- > 0) {
             ptsOut->y = y;
 
             /*
              *  reverse the edges if necessary
              */
-            if (xl < xr) 
-            {
+            if (xl < xr) {
                 *(width++) = xr - xl;
                 (ptsOut++)->x = xl;
             }
-            else 
-            {
+            else {
                 *(width++) = xl - xr;
                 (ptsOut++)->x = xr;
             }
@@ -197,31 +193,25 @@ miFillConvexPoly(dst, pgc, count, ptsIn)
             BRESINCRPGON(dl, xl, ml, m1l, incr1l, incr2l);
             BRESINCRPGON(dr, xr, mr, m1r, incr1r, incr2r);
         }
-    }  while (y != ymax);
+    } while (y != ymax);
 
     /*
      * Finally, fill the <remaining> spans
      */
-    (*pgc->ops->FillSpans)(dst, pgc, 
-		      ptsOut-FirstPoint,FirstPoint,FirstWidth,
-		      1);
-    DEALLOCATE_LOCAL(FirstWidth);
-    DEALLOCATE_LOCAL(FirstPoint);
-    return(TRUE);
+    (*pgc->ops->FillSpans) (dst, pgc,
+                            ptsOut - FirstPoint, FirstPoint, FirstWidth, 1);
+    free(FirstWidth);
+    free(FirstPoint);
+    return TRUE;
 }
-
 
 /*
  *     Find the index of the point with the smallest y.
  */
-static
-int
-getPolyYBounds(pts, n, by, ty)
-    DDXPointPtr pts;
-    int n;
-    int *by, *ty;
+static int
+getPolyYBounds(DDXPointPtr pts, int n, int *by, int *ty)
 {
-    register DDXPointPtr ptMin;
+    DDXPointPtr ptMin;
     int ymin, ymax;
     DDXPointPtr ptsStart = pts;
 
@@ -229,12 +219,11 @@ getPolyYBounds(pts, n, by, ty)
     ymin = ymax = (pts++)->y;
 
     while (--n > 0) {
-        if (pts->y < ymin)
-	{
+        if (pts->y < ymin) {
             ptMin = pts;
             ymin = pts->y;
         }
-	if(pts->y > ymax)
+        if (pts->y > ymax)
             ymax = pts->y;
 
         pts++;
@@ -242,5 +231,5 @@ getPolyYBounds(pts, n, by, ty)
 
     *by = ymin;
     *ty = ymax;
-    return(ptMin-ptsStart);
+    return ptMin - ptsStart;
 }

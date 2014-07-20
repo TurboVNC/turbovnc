@@ -1,0 +1,360 @@
+commit b8a682cc30499a751091c84efabb3012e02f47c5
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Mon Feb 28 09:53:30 2011 -0500
+
+    fixesproto 5.0
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 9760b4bdd1f9fdd6a33b9f876c4a835ed969aa84
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Mon Nov 15 17:09:31 2010 -0500
+
+    fixesproto v5: Pointer barriers
+    
+    v3: Review fixes:
+    - INT16 not CARD16 for coordinates
+    - BadDevice not BadMatch
+    
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 29324d36b3aa6697268c9b51522afcafc2244361
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Oct 29 21:01:26 2010 -0700
+
+    fixesproto 4.1.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d3dc092d123139bdb0db40fde42fc9a9f4ee6a9c
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Oct 29 20:59:41 2010 -0700
+
+    Sun's copyrights now belong to Oracle
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 66c8619be99d10de5969371ff6ccf08088bffdff
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:00:30 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f7cd767d6f1d1f42da3c4e50ea414fe9716ac240
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jan 15 13:29:22 2010 -0800
+
+    Update Sun license notices to current X.Org standard form
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit ef0cad8cf54d1a672983ffac213cdca99fa9151e
+Author: Rémi Cardona <remi@gentoo.org>
+Date:   Thu Dec 17 08:35:10 2009 +0100
+
+    Use $(docdir) for fixesproto.txt install path
+    
+    Signed-off-by: Rémi Cardona <remi@gentoo.org>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@sun.com>
+    Reviewed-by: Dan Nicholson <dbn.lists@gmail.com>
+
+commit 8b518027c4243101a7da00b3a9419d63ece1c782
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 22 19:24:48 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit 36ed341de07d5c4df48116c3fcdbb6b9a432e5fe
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 16:10:15 2009 -0500
+
+    INSTALL file is missing or incorrect #24206
+    
+    The file is copied from util-macros.
+    The copy in git is removed.
+
+commit 8c866c15f1898105d7ee09ad3d8ed38213e76338
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 11:10:10 2009 -0500
+
+    README: file created or updated #24206
+    
+    Contains a set of URLs to freedesktop.org.
+
+commit 7f1bfe8c784db325ae532f54823ef07767e0a5ad
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 20:28:56 2009 -0500
+
+    NEWS: remove empty file #24206
+
+commit e7f981e0994f748faada122f8592359e8cb42c85
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 19:45:26 2009 -0500
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit 2beee4825c0f1605988808c3bf9cd1347f6e3c02
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:31:28 2009 -0500
+
+    Makefile.am: INSTALL file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+    Add INSTALL target
+
+commit a76d9bcc9d07aa64cfcb31624702efb444ae5109
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:11:36 2009 -0500
+
+    configure.ac: deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit 3907b71be026b126565e3859239032c6f437185d
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Nov 14 18:26:46 2009 -0500
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 88cd481b5349fe4962ac609c8711a17d4323e42a
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Oct 6 12:13:58 2009 +1000
+
+    fixesproto 4.1.1
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit d76dd3834a9443ed2237fc26d6eff1cc429606b5
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Oct 6 12:16:30 2009 +1000
+
+    Remove RCS tags
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 9fe9e1abb2ff3c839a6049fea39adf6d753c09c3
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Oct 6 12:13:11 2009 +1000
+
+    Require macros 1.3 for XORG_DEFAULT_OPTIONS
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 39d4e91171de13d4b7079d4609e7930e32948d99
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Mon Oct 5 19:21:42 2009 -0700
+
+    Add README with pointers to mailing lists, bugzilla, & git
+    
+    Also correct INSTALL to list the right extension name
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 50921252322e05fea4f0f85c8ae8735b6df11860
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Jul 31 08:53:51 2009 +1000
+
+    Document behaviour of CursorNotifies with XI2 servers.
+    
+    CursorNotifies are only sent for the ClientPointer to avoid confusion in the
+    client.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit beebe5339ee97b36c3d5b2a5c2b2f140d03f2003
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Jul 31 08:21:14 2009 +1000
+
+    Hide/ShowCursor works on all master pointers in XI2.
+    
+    Servers supporting XI2 will hide all cursors when a client requests
+    HideCursor. This is arguably closest to the original intent of the request -
+    to not display a cursor above the given window.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 9a3f2e436481face8e79c80bffdfb3e00b48eeab
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Thu Jul 23 08:44:54 2009 -0400
+
+    fixesproto 4.1
+
+commit c7c9beab9a41d835008e1070c0ed8470293fe6ba
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Thu Jul 16 11:20:09 2009 +0100
+
+    fixesproto: adjust to split xext headers
+    
+    Protocol constants for shape were moved to shapeconst.h.
+    
+    Acked-By: Adam Jackson <ajax@redhat.com>
+
+commit a0aeb48945773d26f9a033a672eaf6f7917d0b83
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Tue Jan 27 20:08:44 2009 -0200
+
+    Janitor: Correct make distcheck and dont distribute autogen.sh
+
+commit 196061a586ed13189b68dec80c86c536ffc37ed7
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Sep 22 12:44:13 2008 -0700
+
+    ChangeSaveSet with map=Unmap means 'unmap', not 'don't remap'
+    
+    The semantics in the spec were conflicting, and the implementation did the
+    'don't remap' version which was not useful. The server implementation has
+    been fixed, this change clarifies the specification to match that design.
+
+commit 6415267d65f3f31d66abf70d029ff32783931262
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Thu Dec 14 13:34:10 2006 -0800
+
+    Typo fixes in XFixes protocol spec
+
+commit 2e9a7b2004d943eaf1be1778c94790528c573cb1
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Thu Dec 14 13:32:20 2006 -0800
+
+    Update XFixes protocol spec to match XFixes 4.0
+    
+    Add ExpandRegion, HideCursor & ShowCursor requests
+    Correct description of version numbering to match XFixes conventions
+
+commit 0afb1fdaa1ddad7c71dcf5318f3f022ccb3ebba2
+Author: Eric Anholt <eric@anholt.net>
+Date:   Tue Jan 9 09:43:50 2007 -0800
+
+    Move fixes protocol description to the new canonical location/name.
+
+commit 82b7ea2d5e89c4f26e5499015a62ab0a4d201639
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jul 14 18:56:12 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit a8369fcb8631fa943876753bc38b081f7daca324
+Author: Deron <dj4236@chiru.it.sfbay.sun.com>
+Date:   Fri Mar 31 03:33:01 2006 -0800
+
+    Merged with modular CVS (Version 4.0 definitions).
+
+commit 43de9d4e70b66eb6afb8d62ce1af6c100f5d7786
+Author: Keith Packard <keithp@evo.keithp.com>
+Date:   Fri Feb 24 02:23:27 2006 +0100
+
+    Import changes from Xorg repository
+
+commit ce5d32236723e984c1e1a3d43d9d252c20092afe
+Author: Keith Packard <keithp@evo.keithp.com>
+Date:   Fri Feb 24 02:19:49 2006 +0100
+
+    rename fixesext.pc.in to fixesproto.pc.in as per xorg
+
+commit 248dc20d2d95d9c9a64cf9c97608c407d09d576d
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Mon Jan 3 05:16:32 2005 +0000
+
+    New autogen.sh from Thomas Fitzsimmons that works with srcdir != objdir.
+
+commit 146473ec041bf2b7f550ca622ef5cb824f019146
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Jul 26 17:17:33 2004 +0000
+
+    Add XFixesExpandRegion
+
+commit 8d389eb1ebdd0d81435268bbb0699ec299030743
+Author: Jim Gettys <jg@freedesktop.org>
+Date:   Tue Feb 3 20:47:55 2004 +0000
+
+    Add AUTHORS.
+
+commit 1f062c689975e8d00e4a43da25c93538bec6324d
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Wed Jan 21 10:09:59 2004 +0000
+
+    wow, fixesext is really copping all the crap here
+
+commit 796c1d6b3f9b8efce0caffff8bb9d7743ec1eeeb
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Wed Jan 21 10:05:08 2004 +0000
+
+    Another pointless commit: remove that extra space.
+
+commit df551ca22d5deba241efe6eb9815e50453ba5081
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Wed Jan 21 09:54:42 2004 +0000
+
+    Test check-in; I just want to see how the script works.
+
+commit 3d6cd34420c0ca10b9ece245d74923074f2ca7a1
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sat Jan 17 03:58:52 2004 +0000
+
+    And bump the fixes extension to 2.0.1 as well; yay. Some minor changes over 2.0.
+
+commit b0afc5e6982ee6d3c525eb965e3c27aa729c591e
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Thu Jan 15 03:39:34 2004 +0000
+
+    Tag release 2.0 for first freedesktop.org clientside lib release.
+
+commit f92db7128c857b3925846a9c8519e9554a1c67e2
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Nov 22 00:44:32 2003 +0000
+
+    Eliminate offset arguments in combining operators, create separate CopyRegion and TranslateRegion requests.
+
+commit 804a9fda12f70e66feac5e45bc8293a7e436689b
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Nov 3 01:47:23 2003 +0000
+
+    Merge xfixes_2_branch back to head
+
+commit 0c9e4c7af3d366b99c98ba199bae92cf5873b388
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Oct 9 01:48:22 2003 +0000
+
+    Autofoo
+
+commit a7b519bf17ea3a421029a9eceed5392786fb5cc9
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Jan 15 02:54:56 2003 +0000
+
+    *** empty log message ***
+
+commit 9b26a30bca325759d0e4f92684c81a98404b51da
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sun Jan 12 02:44:25 2003 +0000
+
+    Finish removing XFIXES
+
+commit 698d42ea5e9a609fff1b566e0d6160b694d78700
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Nov 30 20:58:31 2002 +0000
+
+    Add XFIXES protocol document
+
+commit e01f7b2ac063d275c6d01a0e6fe58da6733fb880
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Nov 30 06:21:43 2002 +0000
+
+    Add XFIXES extension

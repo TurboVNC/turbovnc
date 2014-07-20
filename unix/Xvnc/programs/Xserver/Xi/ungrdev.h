@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/Xi/ungrdev.h,v 3.2 2003/11/17 22:20:30 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,17 +23,17 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef UNGRDEV_H
 #define UNGRDEV_H 1
 
-int
-SProcXUngrabDevice(
-	ClientPtr /* client */
-	);
+int SProcXUngrabDevice(ClientPtr        /* client */
+    );
 
-int
-ProcXUngrabDevice(
-	ClientPtr /* client */
-	);
+int ProcXUngrabDevice(ClientPtr /* client */
+    );
 
-#endif /* UNGRDEV_H */
+#endif                          /* UNGRDEV_H */

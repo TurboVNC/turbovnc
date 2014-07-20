@@ -1,14 +1,12 @@
-/* $XConsortium: screenint.h /main/6 1996/06/17 10:55:15 mor $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,14 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
-
+in this Software without prior written authorization from The Open Group.
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -46,7 +43,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XFree86: xc/programs/Xserver/include/screenint.h,v 1.2 1997/01/14 22:22:40 dawes Exp $ */
+
 #ifndef SCREENINT_H
 #define SCREENINT_H
 
@@ -54,118 +51,18 @@ SOFTWARE.
 
 typedef struct _PixmapFormat *PixmapFormatPtr;
 typedef struct _Visual *VisualPtr;
-typedef struct _Depth  *DepthPtr;
+typedef struct _Depth *DepthPtr;
 typedef struct _Screen *ScreenPtr;
 
-extern void ResetScreenPrivates(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern int AllocateScreenPrivateIndex(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern void ResetWindowPrivates(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern int AllocateWindowPrivateIndex(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern Bool AllocateWindowPrivate(
-#if NeedFunctionPrototypes
-    ScreenPtr /* pScreen */,
-    int /* index */,
-    unsigned /* amount */
-#endif
-);
-
-extern void ResetGCPrivates(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern int AllocateGCPrivateIndex(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern Bool AllocateGCPrivate(
-#if NeedFunctionPrototypes
-    ScreenPtr /* pScreen */,
-    int /* index */,
-    unsigned /* amount */
-#endif
-);
-
-extern int AddScreen(
-#if NeedFunctionPrototypes
-    Bool (* /*pfnInit*/)(
-#if NeedNestedPrototypes
-	int /*index*/,
-	ScreenPtr /*pScreen*/,
-	int /*argc*/,
-	char ** /*argv*/
-#endif
-    ),
-    int /*argc*/,
-    char** /*argv*/
-#endif
-);
-
-#ifdef PIXPRIV
-
-extern void ResetPixmapPrivates(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern int AllocatePixmapPrivateIndex(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern Bool AllocatePixmapPrivate(
-#if NeedFunctionPrototypes
-    ScreenPtr /* pScreen */,
-    int /* index */,
-    unsigned /* amount */
-#endif
-);
-
-#endif /* PIXPRIV */
-
-extern void ResetColormapPrivates(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
+extern _X_EXPORT int AddScreen(Bool (* /*pfnInit */ )(
+                                                         int /*index */ ,
+                                                         ScreenPtr /*pScreen */
+                                                         ,
+                                                         int /*argc */ ,
+                                                         char ** /*argv */ ),
+                               int /*argc */ ,
+                               char ** /*argv */ );
 
 typedef struct _ColormapRec *ColormapPtr;
-typedef int (*InitCmapPrivFunc)(
-#if NeedNestedPrototypes
-	ColormapPtr
-#endif
-);
 
-extern int AllocateColormapPrivateIndex(
-#if NeedFunctionPrototypes
-    InitCmapPrivFunc /* initPrivFunc */
-#endif
-);
-
-#endif /* SCREENINT_H */
+#endif                          /* SCREENINT_H */

@@ -38,6 +38,10 @@
  *  USA.
  */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -516,7 +520,7 @@ SkipExact(sock, len)
     char *tmpbuf = NULL;
     int bufLen = min(len, 65536), i, retval = 1;
 
-    tmpbuf = (char *)xalloc(bufLen);
+    tmpbuf = (char *)malloc(bufLen);
     if (tmpbuf == NULL) {
         rfbLogPerror("SkipExact: out of memory");
         return -1;

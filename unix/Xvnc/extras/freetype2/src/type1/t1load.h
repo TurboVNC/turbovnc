@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    Type 1 font loader (specification).                                  */
 /*                                                                         */
-/*  Copyright 1996-2001, 2002 by                                           */
+/*  Copyright 1996-2001, 2002, 2004, 2006, 2007 by                         */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -48,7 +48,16 @@ FT_BEGIN_HEADER
     PS_TableRec   subrs;
     FT_Bool       fontdata;
 
+    FT_UInt       keywords_encountered; /* T1_LOADER_ENCOUNTERED_XXX */
+
   } T1_LoaderRec, *T1_Loader;
+
+
+  /* treatment of some keywords differs depending on whether */
+  /* they precede or follow certain other keywords           */
+
+#define T1_PRIVATE                ( 1 << 0 )
+#define T1_FONTDIR_AFTER_PRIVATE  ( 1 << 1 )
 
 
   FT_LOCAL( FT_Error )
@@ -60,6 +69,10 @@ FT_BEGIN_HEADER
   T1_Get_Multi_Master( T1_Face           face,
                        FT_Multi_Master*  master );
 
+  FT_LOCAL_DEF( FT_Error )
+  T1_Get_MM_Var( T1_Face      face,
+                 FT_MM_Var*  *master );
+
   FT_LOCAL( FT_Error )
   T1_Set_MM_Blend( T1_Face    face,
                    FT_UInt    num_coords,
@@ -69,6 +82,11 @@ FT_BEGIN_HEADER
   T1_Set_MM_Design( T1_Face   face,
                     FT_UInt   num_coords,
                     FT_Long*  coords );
+
+  FT_LOCAL_DEF( FT_Error )
+  T1_Set_Var_Design( T1_Face    face,
+                     FT_UInt    num_coords,
+                     FT_Fixed*  coords );
 
   FT_LOCAL( void )
   T1_Done_Blend( T1_Face  face );

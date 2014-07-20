@@ -1,5 +1,3 @@
-/* $Xorg: setfocus.c,v 1.4 2001/02/09 02:04:34 xorgcvs Exp $ */
-
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -45,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/programs/Xserver/Xi/setfocus.c,v 3.3 2001/12/14 19:58:59 dawes Exp $ */
 
 /***********************************************************************
  *
@@ -53,19 +50,17 @@ SOFTWARE.
  *
  */
 
-#define	 NEED_EVENTS
-#define	 NEED_REPLIES
-#include "X.h"				/* for inputstr.h    */
-#include "Xproto.h"			/* Request macro     */
-#include "windowstr.h"			/* focus struct      */
-#include "inputstr.h"			/* DeviceIntPtr	     */
-#include "XI.h"
-#include "XIproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include "windowstr.h"          /* focus struct      */
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 
 #include "dixevents.h"
 
-#include "extnsionst.h"
-#include "extinit.h"			/* LookupDeviceIntRec */
 #include "exglobals.h"
 
 #include "setfocus.h"
@@ -77,18 +72,15 @@ SOFTWARE.
  */
 
 int
-SProcXSetDeviceFocus(client)
-    register ClientPtr client;
-    {
-    register char n;
-
+SProcXSetDeviceFocus(ClientPtr client)
+{
     REQUEST(xSetDeviceFocusReq);
-    swaps(&stuff->length, n);
+    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSetDeviceFocusReq);
-    swapl(&stuff->focus, n);
-    swapl(&stuff->time, n);
-    return(ProcXSetDeviceFocus(client));
-    }
+    swapl(&stuff->focus);
+    swapl(&stuff->time);
+    return (ProcXSetDeviceFocus(client));
+}
 
 /***********************************************************************
  *
@@ -97,26 +89,22 @@ SProcXSetDeviceFocus(client)
  */
 
 int
-ProcXSetDeviceFocus(client)
-    register ClientPtr client;
-    {
-    int				ret;
-    register DeviceIntPtr	dev;
+ProcXSetDeviceFocus(ClientPtr client)
+{
+    int ret;
+    DeviceIntPtr dev;
 
     REQUEST(xSetDeviceFocusReq);
     REQUEST_SIZE_MATCH(xSetDeviceFocusReq);
 
-    dev = LookupDeviceIntRec (stuff->device);
-    if (dev==NULL || !dev->focus)
-	{
-	SendErrorToClient(client, IReqCode, X_SetDeviceFocus, 0, BadDevice);
-	return Success;
-	}
-
-    ret = SetInputFocus (client, dev, stuff->focus, stuff->revertTo, 
-	stuff->time, TRUE);
+    ret = dixLookupDevice(&dev, stuff->device, client, DixSetFocusAccess);
     if (ret != Success)
-	SendErrorToClient(client, IReqCode, X_SetDeviceFocus, 0, ret);
+        return ret;
+    if (!dev->focus)
+        return BadDevice;
 
-    return Success;
-    }
+    ret = SetInputFocus(client, dev, stuff->focus, stuff->revertTo,
+                        stuff->time, TRUE);
+
+    return ret;
+}

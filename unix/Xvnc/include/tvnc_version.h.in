@@ -3,4 +3,3 @@
 #define __COPYRIGHT_YEAR "@COPYRIGHT_YEAR@"
 #define __COPYRIGHT      "@COPYRIGHT@"
 #define __URLTEXT        "@URLTEXT@"
-#define XVendorRelease @XVENDORRELEASE@

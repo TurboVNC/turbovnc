@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/include/dixgrabs.h,v 3.0 1996/04/15 11:34:27 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -27,53 +26,39 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef DIXGRABS_H
 #define DIXGRABS_H 1
 
-GrabPtr
-CreateGrab(
-#if NeedFunctionPrototypes
-	int /* client */,
-	DeviceIntPtr /* device */,
-	WindowPtr /* window */,
-	Mask /* eventMask */,
-	Bool /* ownerEvents */,
-	Bool /* keyboardMode */,
-	Bool /* pointerMode */,
-	DeviceIntPtr /* modDevice */,
-	unsigned short /* modifiers */,
-	int /* type */,
-	KeyCode /* keybut */,
-	WindowPtr /* confineTo */,
-	CursorPtr /* cursor */
-#endif
-	);
+struct _GrabParameters;
 
-int
-DeletePassiveGrab(
-#if NeedFunctionPrototypes
-	pointer /* value */,
-	XID /* id */
-#endif
-	);
+extern void PrintDeviceGrabInfo(DeviceIntPtr dev);
+extern void UngrabAllDevices(Bool kill_client);
 
-Bool
-GrabMatchesSecond(
-#if NeedFunctionPrototypes
-	GrabPtr /* pFirstGrab */,
-	GrabPtr /* pSecondGrab */
-#endif
-	);
+extern GrabPtr AllocGrab(void);
+extern void FreeGrab(GrabPtr grab);
+extern Bool CopyGrab(GrabPtr dst, const GrabPtr src);
 
-int
-AddPassiveGrabToList(
-#if NeedFunctionPrototypes
-	GrabPtr /* pGrab */
-#endif
-	);
+extern GrabPtr CreateGrab(int /* client */ ,
+                          DeviceIntPtr /* device */ ,
+                          DeviceIntPtr /* modDevice */ ,
+                          WindowPtr /* window */ ,
+                          enum InputLevel /* grabtype */ ,
+                          GrabMask * /* mask */ ,
+                          struct _GrabParameters * /* param */ ,
+                          int /* type */ ,
+                          KeyCode /* keybut */ ,
+                          WindowPtr /* confineTo */ ,
+                          CursorPtr /* cursor */ );
 
-Bool
-DeletePassiveGrabFromList(
-#if NeedFunctionPrototypes
-	GrabPtr /* pMinuendGrab */
-#endif
-	);
+extern _X_EXPORT int DeletePassiveGrab(pointer /* value */ ,
+                                       XID /* id */ );
 
-#endif /* DIXGRABS_H */
+extern _X_EXPORT Bool GrabMatchesSecond(GrabPtr /* pFirstGrab */ ,
+                                        GrabPtr /* pSecondGrab */ ,
+                                        Bool /*ignoreDevice */ );
+
+extern _X_EXPORT int AddPassiveGrabToList(ClientPtr /* client */ ,
+                                          GrabPtr /* pGrab */ );
+
+extern _X_EXPORT Bool DeletePassiveGrabFromList(GrabPtr /* pMinuendGrab */ );
+
+extern Bool GrabIsPointerGrab(GrabPtr grab);
+extern Bool GrabIsKeyboardGrab(GrabPtr grab);
+#endif                          /* DIXGRABS_H */
