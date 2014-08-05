@@ -352,6 +352,12 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
     if (sendevent)
         deliverPropertyNotifyEvent(pWin, PropertyNewValue, pProp->propertyName);
 
+    /* Addition for RFB X server */
+    if (pWin->parent == NullWindow) {
+        extern void rfbRootPropertyChange();
+        rfbRootPropertyChange(pProp);
+    }
+
     return Success;
 }
 
