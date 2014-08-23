@@ -59,6 +59,7 @@ CONFDIR=@TVNC_CONFDIR@
 if [ ! `uid` -eq 0 ]; then
 	SUDO=sudo
 fi
+
 umask 022
 rm -f $PACKAGE_NAME\_$DEBARCH.deb
 TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
