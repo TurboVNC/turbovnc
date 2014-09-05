@@ -190,12 +190,12 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
   fsm.workArea0 = fsm.workArea;
 
   if (m_opts.m_Span == SPAN_PRIMARY ||
+      !EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm) ||
       (m_opts.m_Span == SPAN_AUTO &&
        (scaledWidth <= primaryWidth ||
         WidthOf(fsm.screenArea) <= primaryWidth) &&
        (scaledHeight <= primaryHeight ||
-        HeightOf(fsm.screenArea) <= primaryHeight)) ||
-      !EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm)) {
+        HeightOf(fsm.screenArea) <= primaryHeight))) {
     workArea = fsm.workArea0;
     screenArea = fsm.screenArea0;
   } else {
