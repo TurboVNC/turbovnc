@@ -51,6 +51,10 @@ The default DPI of the X server has been changed to 96, to match that of recent
 X.org releases and other VNC implementations.  Passing an argument of -dpi 75
 to vncserver restores the old behavior.
 -------------------------------------------------------------------------------
+[8]
+Fixed a segfault in Xvnc that would occur whenever a viewer that was using ZRLE
+encoding disconnected.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
