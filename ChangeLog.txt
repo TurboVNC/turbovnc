@@ -151,6 +151,10 @@ Fixed a regression in the "automatic" spanning mode of the Windows TurboVNC
 Viewer introduced in TurboVNC 1.2.  Ever since that release, "automatic"
 spanning mode has been behaving just like "primary" mode.
 -------------------------------------------------------------------------------
+[22]
+Fixed a segfault in Xvnc that would occur whenever a viewer that was using ZRLE
+encoding disconnected.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

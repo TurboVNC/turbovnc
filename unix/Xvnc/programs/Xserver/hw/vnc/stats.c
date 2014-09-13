@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -26,9 +27,11 @@
 #include <stdlib.h>
 #include "rfb.h"
 
-static char* encNames[] = {
-    "raw", "copyRect", "RRE", "[encoding 3]", "CoRRE", "hextile",
-    "zlib", "tight", "[encoding 8]", "[encoding 9]"
+static char* encNames[MAX_ENCODINGS] = {
+    "Raw", "CopyRect", "RRE", "[Encoding 3]", "CoRRE", "Hextile", "Zlib",
+    "Tight", "[Encoding 8]", "[Encoding 9]", "[Encoding 10]", "[Encoding 11]",
+    "[Encoding 12]", "[Encoding 13]", "[Encoding 14]", "[Encoding 15]",
+    "ZRLE", "ZYWRLE"
 };
 
 
