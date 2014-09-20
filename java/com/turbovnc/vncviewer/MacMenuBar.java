@@ -88,9 +88,11 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     setupAppMenu();
 
     JMenu connMenu = new JMenu("Connection");
-    newConn = addMenuItem(connMenu, "New Connection...");
-    newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
-                                                  acceleratorMask));
+    if (!VncViewer.noNewConn.getValue()) {
+      newConn = addMenuItem(connMenu, "New Connection...");
+      newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+                                                    acceleratorMask));
+    }
     closeConn = addMenuItem(connMenu, "Close Connection");
     closeConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
                                                     acceleratorMask));
@@ -181,7 +183,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.refresh();
     } else if (actionMatch(ev, losslessRefresh)) {
       cc.losslessRefresh();
-    } else if (actionMatch(ev, newConn)) {
+    } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
     } else if (actionMatch(ev, closeConn)) {
       cc.close();

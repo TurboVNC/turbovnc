@@ -79,6 +79,12 @@ Added a profiling feature to the Java TurboVNC Viewer.
 The Java TurboVNC Viewer can now be used to connect to UltraVNC Repeater
 instances.  Refer to the documentation for the Via parameter for more details.
 -------------------------------------------------------------------------------
+[13]
+Added a security option to the Java TurboVNC Viewer that, when enabled, will
+prevent the user from opening any new VNC connections from within the same
+viewer instance.  In listen mode, this will further cause the viewer to exit
+after the first connection is closed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

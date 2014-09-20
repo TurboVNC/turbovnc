@@ -68,8 +68,11 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     addSeparator();
     clipboard = addMenuItem("Clipboard...");
     addSeparator();
-    newConn = addMenuItem("New Connection...   (Ctrl-Alt-Shift-N)", KeyEvent.VK_N);
-    addSeparator();
+    if (!VncViewer.noNewConn.getValue()) {
+      newConn = addMenuItem("New Connection...   (Ctrl-Alt-Shift-N)",
+                            KeyEvent.VK_N);
+      addSeparator();
+    }
     about = addMenuItem("About TurboVNC Viewer...", KeyEvent.VK_A);
     addSeparator();
     dismiss = addMenuItem("Dismiss Menu");
@@ -131,7 +134,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.refresh();
     } else if (actionMatch(ev, losslessRefresh)) {
       cc.losslessRefresh();
-    } else if (actionMatch(ev, newConn)) {
+    } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
     } else if (actionMatch(ev, options)) {
       cc.options.showDialog(cc.viewport);
