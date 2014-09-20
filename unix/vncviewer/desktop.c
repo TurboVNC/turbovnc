@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2013 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2013-2014 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -58,6 +58,17 @@ static XtResource desktopBackingStoreResources[] = {
     XtRImmediate, (XtPointer) Always,
   },
 };
+
+
+static KeySym KeycodeToKeysym(Display *dpy, KeyCode keycode)
+{
+	KeySym ks=NoSymbol, *keysyms;  int n=0;
+
+	keysyms=XGetKeyboardMapping(dpy, keycode, 1, &n);
+	if(n>=1 && keysyms) ks=keysyms[0];
+	XFree(keysyms);
+	return ks;
+}
 
 
 /*
@@ -194,7 +205,7 @@ static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
     case FocusOut:
       for (i = 0; i < 256; i++) {
         if (modifierPressed[i]) {
-          SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);
+          SendKeyEvent(KeycodeToKeysym(dpy, i), False);
           modifierPressed[i] = False;
         }
       }
@@ -204,7 +215,7 @@ static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
       if (ev->xcrossing.mode == NotifyNormal) {
         for (i = 0; i < 256; i++) {
           if (modifierPressed[i]) {
-            SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);
+            SendKeyEvent(KeycodeToKeysym(dpy, i), False);
             modifierPressed[i] = False;
           }
         }
@@ -405,7 +416,7 @@ void SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
       XLookupString(&ev->xkey, keyname, 256, &ks, NULL);
 
       if (IsModifierKey(ks)) {
-        ks = XKeycodeToKeysym(dpy, ev->xkey.keycode, 0);
+        ks = KeycodeToKeysym(dpy, ev->xkey.keycode);
         modifierPressed[ev->xkey.keycode] = (ev->type == KeyPress);
       }
 

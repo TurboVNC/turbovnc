@@ -751,7 +751,7 @@ void LoadConfigFile(char *filename)
 
 void GetArgsAndResources(int argc, char **argv)
 {
-  char *vncServerName, *colonPos;
+  char *vncServerName = NULL, *colonPos;
   int len, portOffset;
   int disp;
 
