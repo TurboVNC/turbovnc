@@ -72,6 +72,9 @@ setting the environment variable TVNC_ALRCOPYRECT to 0.
 all lossy regions of the display, even those that weren't drawn using a
 PutImage operation.  This has been fixed.
 -------------------------------------------------------------------------------
+[11]
+Added a profiling feature to the Java TurboVNC Viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
