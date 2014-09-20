@@ -1,16 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-if(UNIX)
-	set(CMAKE_INSTALL_PREFIX /opt/TurboVNC CACHE PATH
-		"Install path prefix, prepended onto install directories.")
-endif()
-
-project(turbovnc-java Java)
-set(VERSION 1.2.2)
-set(COPYRIGHT_YEAR "2000-2014")
-set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
-set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
-
 find_package(Java)
 
 set(DEFAULT_JAVACFLAGS "-source 1.5 -target 1.5 -Xlint:all,-serial,-cast,-unchecked,-rawtypes")
