@@ -55,6 +55,13 @@ to vncserver restores the old behavior.
 Fixed a segfault in Xvnc that would occur whenever a viewer that was using ZRLE
 encoding disconnected.
 -------------------------------------------------------------------------------
+[9]
+The Mac packaging system now uses pkgbuild and productbuild rather than
+PackageMaker (which is obsolete and no longer supported.)  This means that
+OS X 10.6 "Snow Leopard" or later must be used when packaging TurboVNC,
+although the packages produced can be installed on OS X 10.5 "Leopard" or
+later.  OS X 10.4 "Tiger" is no longer supported.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

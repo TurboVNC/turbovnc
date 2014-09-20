@@ -88,18 +88,13 @@ endif() # WIN32
 
 if(APPLE AND TVNC_BUILDJAVA)
 
-set(DEFAULT_PACKAGEMAKER_PATH /Developer/Applications/Utilities)
-set(PACKAGEMAKER_PATH ${DEFAULT_PACKAGEMAKER_PATH} CACHE PATH
-	"Directory containing PackageMaker.app (default: ${DEFAULT_PACKAGEMAKER_PATH})")
-
 string(REGEX REPLACE "/" ":" TVNC_MACPREFIX ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "^:" "" TVNC_MACPREFIX ${TVNC_MACPREFIX})
 
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
 configure_file(release/makemacapp.in pkgscripts/makemacapp)
-configure_file(release/Info.plist.in pkgscripts/Info.plist)
+configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
 configure_file(release/Info.plist.app.in pkgscripts/Info.plist.app)
-configure_file(release/Description.plist.in pkgscripts/Description.plist)
 configure_file(release/uninstall.in pkgscripts/uninstall)
 configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
 

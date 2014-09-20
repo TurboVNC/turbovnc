@@ -40,7 +40,7 @@
 	| Any Intel-based Mac \
 	|
 | O/S \
-	| OS X 10.4 ("Tiger") or later \
+	| OS X 10.5 ("Leopard") or later \
 	|
 | Other Software \
 	| Java 1.5 or later (Java 1.6 recommended) \

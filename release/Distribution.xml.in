@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+	<title>@CMAKE_PROJECT_NAME@</title>
+	<welcome file="Welcome.txt" />
+	<readme file="ReadMe.txt" />
+	<license file="License.rtf" />
+	<domains
+		enable_anywhere="false"
+		enable_currentUserHome="false"
+		enable_localSystem="true"
+	/>
+	<options customize="never" />
+	<choices-outline>
+		<line choice="default">
+			<line choice="com.virtualgl.@CMAKE_PROJECT_NAME_LC@"/>
+		</line>
+	</choices-outline>
+	<choice id="default"/>
+	<choice id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@" visible="false">
+		<pkg-ref id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@"/>
+	</choice>
+	<pkg-ref
+		id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@">@CMAKE_PROJECT_NAME@.pkg</pkg-ref>
+</installer-gui-script>
