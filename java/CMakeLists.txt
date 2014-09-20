@@ -149,6 +149,12 @@ add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png)
 
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-128.png
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${SRCDIR}/${CLASSPATH}/turbovnc-128.png
+		${BINDIR}/${CLASSPATH}/turbovnc-128.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-128.png)
+
 endif()
 
 string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
@@ -161,6 +167,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/toolbar.png
 		${BINDIR}/${CLASSPATH}/turbovnc.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
+		${BINDIR}/${CLASSPATH}/turbovnc-128.png
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
 		org/libjpegturbo/turbojpeg/TJ.class
@@ -182,6 +189,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		${CLASSPATH}/toolbar.png
 		${CLASSPATH}/turbovnc.png
 		${CLASSPATH}/turbovnc-sm.png
+		${CLASSPATH}/turbovnc-128.png
 	COMMAND ${CMAKE_COMMAND}
 	ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/VncViewer.jar
 		-P ${SRCDIR}/cmake/SignJar.cmake)

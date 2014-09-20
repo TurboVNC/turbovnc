@@ -176,6 +176,22 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       if (os.startsWith("mac os x")) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         enableFileHandler();
+
+        try {
+          Class appClass = Class.forName("com.apple.eawt.Application");
+          Method getApplication =
+            appClass.getMethod("getApplication", (Class[])null);
+          Object app = getApplication.invoke(appClass);
+          Class paramTypes[] = new Class[1];
+          paramTypes[0] = Image.class;
+          Method setDockIconImage =
+            appClass.getMethod("setDockIconImage", paramTypes);
+          ImageIcon dockIcon = 
+            new ImageIcon(VncViewer.class.getResource("turbovnc-128.png"));
+          setDockIconImage.invoke(app, dockIcon.getImage());
+        } catch (Exception e) {
+          vlog.debug("Could not set OS X dock icon: " + e.getMessage());
+        }
       }
 
       // Set the shared frame's icon, which will be inherited by any ownerless
