@@ -77,7 +77,7 @@ rectangles |
 
 | Environment Variable | ''TVNC_PROFILE = ''__''0 \| 1''__ |
 | Summary | Disable/enable profiling output |
-| Platforms | X11 |
+| Platforms | X11, Mac (Java) |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
