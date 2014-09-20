@@ -943,7 +943,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         "\n" +
       VncViewer.url,
       "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE,
-      VncViewer.logoIcon);
+      VncViewer.logoIcon128);
   }
 
   void showInfo() {

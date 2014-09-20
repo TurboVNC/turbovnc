@@ -61,6 +61,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   public static final ImageIcon logoIcon =
     new ImageIcon(VncViewer.class.getResource("turbovnc.png"));
   public static final Image logoImage = logoIcon.getImage();
+  public static final ImageIcon logoIcon128 =
+    new ImageIcon(VncViewer.class.getResource("turbovnc-128.png"));
 
   void setVersion() {
     if (version == null || build == null || copyrightYear == null ||
@@ -186,9 +188,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
           paramTypes[0] = Image.class;
           Method setDockIconImage =
             appClass.getMethod("setDockIconImage", paramTypes);
-          ImageIcon dockIcon = 
-            new ImageIcon(VncViewer.class.getResource("turbovnc-128.png"));
-          setDockIconImage.invoke(app, dockIcon.getImage());
+          setDockIconImage.invoke(app, logoIcon128.getImage());
         } catch (Exception e) {
           vlog.debug("Could not set OS X dock icon: " + e.getMessage());
         }
