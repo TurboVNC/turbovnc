@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import java.util.*;
 
 import com.turbovnc.network.*;
 import com.turbovnc.rdr.*;
+import com.turbovnc.vncviewer.*;
 
 public abstract class CConnection extends CMsgHandler {
 
@@ -79,6 +80,23 @@ public abstract class CConnection extends CMsgHandler {
 
     vlog.info("Server supports RFB protocol version " +
               cp.majorVersion + "." + cp.minorVersion);
+
+    // The UltraVNC Repeater sends a version number of 000:000, which
+    // indicates that it is waiting for either a VNC server name (Mode I) or
+    // a VNC server ID (Mode II).
+    if (cp.majorVersion == 0 && cp.minorVersion == 0) {
+      if (serverName == null)
+        throw new ErrorException("UltraVNC Repeater detected but VNC server name has not been specified");
+      vlog.info("Connecting to " + serverName + " via UltraVNC repeater");
+      os.writeBytes(serverName.getBytes(), 0,
+                    Math.min(serverName.length(), 250));
+      if(serverName.length() < 250) {
+        byte[] pad = new byte[250 - serverName.length()];
+        os.writeBytes(pad, 0, pad.length);
+      }
+      os.flush();
+      return;
+    }
 
     // The only official RFB protocol versions are currently 3.3, 3.7 and 3.8
     if (cp.beforeVersion(3, 3)) {

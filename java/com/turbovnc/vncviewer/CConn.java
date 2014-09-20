@@ -107,10 +107,19 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       String name = sock.getPeerEndpoint();
       vlog.info("Accepted connection from " + name);
     } else if (!benchmark) {
-      if (opts.serverName != null &&
+      String serverName = null;
+      int port = -1;
+
+      if (opts.via != null && opts.via.indexOf(':') >= 0 &&
           !VncViewer.alwaysShowConnectionDialog.getValue()) {
-        opts.port = Hostname.getPort(opts.serverName);
-        opts.serverName = Hostname.getHost(opts.serverName);
+        if (opts.serverName == null)
+          throw new ErrorException("The VNC server name must be specified when using the Via parameter");
+        port = Hostname.getPort(opts.via);
+        serverName = Hostname.getHost(opts.via);
+      } else if (opts.serverName != null &&
+                 !VncViewer.alwaysShowConnectionDialog.getValue()) {
+        port = opts.port = Hostname.getPort(opts.serverName);
+        serverName = opts.serverName = Hostname.getHost(opts.serverName);
       } else {
         ServerDialog dlg = new ServerDialog(options, opts, this);
         boolean ret = dlg.showDialog();
@@ -118,11 +127,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           close();
           return;
         }
+        port = opts.port;
+        serverName = opts.serverName;
       }
 
-      sock = new TcpSocket(opts.serverName, opts.port);
-      vlog.info("connected to host " + opts.serverName + " port " +
-                opts.port);
+      sock = new TcpSocket(serverName, port);
+      vlog.info("connected to host " + serverName + " port " + port);
     }
 
     if (benchmark) {
@@ -723,7 +733,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         if (s.x >= 0 && s.y >= 0 &&
             (primary == null ||
              (gc == gcList[0] && ((s.y < primary.y &&
-                                   s.x < primary.x + primary.width) || 
+                                   s.x < primary.x + primary.width) ||
                                   (s.x < primary.x &&
                                    s.y < primary.y + primary.height)))))
           primary = s;

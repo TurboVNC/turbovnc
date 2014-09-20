@@ -75,6 +75,10 @@ PutImage operation.  This has been fixed.
 [11]
 Added a profiling feature to the Java TurboVNC Viewer.
 -------------------------------------------------------------------------------
+[12]
+The Java TurboVNC Viewer can now be used to connect to UltraVNC Repeater
+instances.  Refer to the documentation for the Via parameter for more details.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
