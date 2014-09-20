@@ -992,6 +992,18 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   "by selecting \"Save connection info as...\" in the system menu of the Windows " +
   "TurboVNC Viewer.", null);
 
+  static IntParameter profileInt
+  = new IntParameter("ProfileInterval",
+  "TurboVNC includes an internal profiling system that can be used to display " +
+  "performance statistics about the connection, such as how many updates per second " +
+  "are being received and how much network bandwidth is being used.  Profiling " +
+  "is activated by selecting \"Performance Info...\" in the F8 menu, which pops " +
+  "up a dialog that displays the statistics.  Profiling can also be enabled on " +
+  "the console only by setting the environment variable TVNC_PROFILE to 1.  The " +
+  "ProfileInterval parameter specifies how often (in seconds) that the performance " +
+  "statistics are updated in the dialog or on the console.  The statistics are " +
+  "averaged over this interval.", 5);
+
   static BoolParameter clientRedirect
   = new BoolParameter("ClientRedirect", null, false);
 

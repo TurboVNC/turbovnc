@@ -98,6 +98,12 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     info = addMenuItem(connMenu, "Connection Info...");
     info.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
                                                acceleratorMask));
+    profile = new JCheckBoxMenuItem("Performance Info...");
+    profile.setSelected(cc.profileDialog.isVisible());
+    profile.addActionListener(this);
+    connMenu.add(profile);
+    profile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+                                                  acceleratorMask));
 
     connMenu.addSeparator();
     refresh = addMenuItem(connMenu, "Request Screen Refresh");
@@ -181,6 +187,12 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.close();
     } else if (actionMatch(ev, info)) {
       cc.showInfo();
+    } else if (actionMatch(ev, profile)) {
+      if (cc.profileDialog.isVisible())
+        cc.profileDialog.endDialog();
+      else
+        cc.profileDialog.showDialog(cc.viewport);
+      cc.toggleProfile();
     }
   }
 
@@ -188,10 +200,14 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     fullScreen.setSelected(cc.opts.fullScreen);
   }
 
+  void updateProfile() {
+    profile.setSelected(cc.profileDialog.isVisible());
+  }
+
   CConn cc;
   JMenuItem defaultSize;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
-  JMenuItem newConn, closeConn, info, showToolbar;
+  JMenuItem newConn, closeConn, info, profile, showToolbar;
   JCheckBoxMenuItem fullScreen;
   static LogWriter vlog = new LogWriter("MacMenuBar");
 }

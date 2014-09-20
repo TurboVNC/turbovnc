@@ -215,6 +215,11 @@ public class Viewport extends JFrame {
       macMenu.updateFullScreen();
   }
 
+  public void updateMacMenuProfile() {
+    if (macMenu != null)
+      macMenu.updateProfile();
+  }
+
   public void setChild(DesktopWindow child) {
     sp.getViewport().setView(child);
   }

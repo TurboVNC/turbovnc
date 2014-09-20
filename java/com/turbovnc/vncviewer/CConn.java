@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2014 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -85,6 +85,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
+    profileDialog = new ProfileDialog(this);
+    String env = System.getenv("TVNC_PROFILE");
+    if (env != null && env.equals("1"))
+      alwaysProfile = true;
     firstUpdate = true; pendingUpdate = false; continuousUpdates = false;
     forceNonincremental = true; supportsSyncFence = false;
 
@@ -353,6 +357,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   // next update can be sent out in parallel with us decoding the current
   // one.
   public void framebufferUpdateStart() {
+    tUpdateStart = getTime();
+    if (tStart < 0.) tStart = tUpdateStart;
+
     // Note: This might not be true if sync fences are supported
     pendingUpdate = false;
 
@@ -419,6 +426,88 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       cp.setPF(pendingPF);
       pendingPFChange = false;
     }
+
+    tUpdate += getTime() - tUpdateStart;
+    updates++;
+    tElapsed = getTime() - tStart;
+
+    if (tElapsed > (double)VncViewer.profileInt.getValue() && !benchmark) {
+      if (profileDialog.isVisible()) {
+        String str;
+        str = String.format("%.3f", (double)updates / tElapsed);
+        profileDialog.upsVal.setText(str);
+        str = String.format("%.3f", (double)sock.inStream().getBytesRead() /
+                            125000. / tElapsed);
+        profileDialog.tpVal.setText(str);
+
+        str = String.format("%.3f", sock.inStream().getReadTime() /
+                            (double)updates * 1000.);
+        profileDialog.tpuRecvVal.setText(str);
+        str = String.format("%.3f", tDecode / (double)updates * 1000.);
+        profileDialog.tpuDecodeVal.setText(str);
+        str = String.format("%.3f", tBlit / (double)updates * 1000.);
+        profileDialog.tpuBlitVal.setText(str);
+        str = String.format("%.3f", tUpdate / (double)updates * 1000.);
+        profileDialog.tpuTotalVal.setText(str);
+
+        str = String.format("%.3f", (double)decodePixels / 1000000.);
+        profileDialog.mpDecodeVal.setText(str);
+        str = String.format("%.3f", (double)blitPixels / 1000000.);
+        profileDialog.mpBlitVal.setText(str);
+
+        str = String.format("%.3f", (double)decodePixels / 1000000. / tDecode);
+        profileDialog.mpsDecodeVal.setText(str);
+        str = String.format("%.3f", (double)blitPixels / 1000000. / tBlit);
+        profileDialog.mpsBlitVal.setText(str);
+        str = String.format("%.3f", (double)decodePixels / 1000000. / tElapsed);
+        profileDialog.mpsTotalVal.setText(str);
+
+        str = String.format("%d", decodeRect);
+        profileDialog.rectDecodeVal.setText(str);
+        str = String.format("%d", blits);
+        profileDialog.rectBlitVal.setText(str);
+
+        str = String.format("%.0f", (double)decodePixels / (double)decodeRect);
+        profileDialog.pprDecodeVal.setText(str);
+        str = String.format("%.0f", (double)blitPixels / (double)blits);
+        profileDialog.pprBlitVal.setText(str);
+
+        str = String.format("%.0f", (double)decodeRect / (double)updates);
+        profileDialog.rpuDecodeVal.setText(str);
+      }
+      if (profileDialog.isVisible() || alwaysProfile) {
+        System.out.format("-------------------------------------------------------------------------------\n");
+        System.out.format("Total:   %.3f updates/sec,  %.3f Mpixels/sec,  %.3f Mbits/sec\n",
+                          (double)updates / tElapsed,
+                          (double)decodePixels / 1000000. / tElapsed,
+                          (double)sock.inStream().getBytesRead() / 125000. / tElapsed);
+        System.out.format("Decode:  %.3f Mpixels,  %.3f Mpixels/sec,  %d rect,\n",
+                          (double)decodePixels / 1000000.,
+                          (double)decodePixels / 1000000. / tDecode,
+                          decodeRect);
+        System.out.format("         %.0f pixels/rect,  %.0f rect/update\n",
+                          (double)decodePixels / (double)decodeRect,
+                          (double)decodeRect / (double)updates);
+        System.out.format("Blit:    %.3f Mpixels,  %.3f Mpixels/sec,  %d updates,\n",
+                          (double)blitPixels / 1000000.,
+                          (double)blitPixels / 1000000. / tBlit,
+                          blits);
+        System.out.format("         %.0f pixels/update\n",
+                          (double)blitPixels / (double)blits);
+        System.out.format("Time/update:  Recv = %.3f ms,  Decode = %.3f ms,  Blit = %.3f ms\n",
+                          sock.inStream().getReadTime() / (double)updates * 1000.,
+                          tDecode / (double)updates * 1000.,
+                          tBlit / (double)updates * 1000.);
+        System.out.format("              Total = %.3f ms  +  Overhead = %.3f ms\n",
+                          tUpdate / (double)updates * 1000.,
+                          (tElapsed - tUpdate) / (double)updates * 1000.);
+      }
+      tUpdate = tDecode = tBlit = 0.0;
+      sock.inStream().resetReadTime();
+      sock.inStream().resetBytesRead();
+      decodePixels = decodeRect = blitPixels = blits = updates = 0;
+      tStart = getTime();
+    }
   }
 
   // The rest of the callbacks are fairly self-explanatory...
@@ -438,16 +527,20 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void startDecodeTimer() {
-    if (benchmark) {
-      tDecodeStart = getTime();
+    tDecodeStart = getTime();
+    if (benchmark)
       tReadOld = viewer.benchFile.getReadTime();
-    }
+    else
+      tReadOld = sock.inStream().getReadTime();
   }
 
   public void stopDecodeTimer() {
+    double tRead = tReadOld;
     if (benchmark)
-      tDecode += getTime() - tDecodeStart -
-                 (viewer.benchFile.getReadTime() - tReadOld);
+      tRead = viewer.benchFile.getReadTime();
+    else
+      tRead = sock.inStream().getReadTime();
+    tDecode += getTime() - tDecodeStart - (tRead - tReadOld);
   }
 
   // We start timing on beginRect and stop timing on endRect, to
@@ -1240,6 +1333,11 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
+  public void toggleProfile() {
+    menu.profile.setSelected(profileDialog.isVisible());
+    viewport.updateMacMenuProfile();
+  }
+
   // writeClientCutText() is called from the clipboard dialog
   public void writeClientCutText(String str, int len) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
@@ -1798,6 +1896,11 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   public long decodePixels, decodeRect, blitPixels, blits;
   double tDecodeStart, tReadOld;
   boolean benchmark;
+
+  double tStart = -1.0, tElapsed, tUpdateStart, tUpdate;
+  long updates;
+  ProfileDialog profileDialog;
+  boolean alwaysProfile;
 
   static LogWriter vlog = new LogWriter("CConn");
 }
