@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2012 D. R. Commander
+ *  Copyright (C) 2010-2013 D. R. Commander
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -309,9 +309,7 @@ typedef struct rfbClientRec {
 
     Bool firstUpdate;
     OsTimerPtr alrTimer;
-    RegionRec lossyRegion;
-    Bool alrTrigger;
-    Bool putImageTrigger;
+    RegionRec lossyRegion, alrRegion, alrEligibleRegion;
 
     /* Interframe comparison */
     char *compareFB, *fb;

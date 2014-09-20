@@ -62,6 +62,16 @@ OS X 10.6 "Snow Leopard" or later must be used when packaging TurboVNC,
 although the packages produced can be installed on OS X 10.5 "Leopard" or
 later.  OS X 10.4 "Tiger" is no longer supported.
 -------------------------------------------------------------------------------
+[10]
+Fixed a couple of cosmetic issues with the automatic lossless refresh feature:
+-- If the source of a CopyRect operation was affected by lossy compression
+(meaning that the destination of the operation will become lossy as well), then
+the destination region is now ALR-eligible.  This can be overridden by
+setting the environment variable TVNC_ALRCOPYRECT to 0.
+-- Previously, if TVNC_ALRALL=0, a PutImage operation would trigger an ALR on
+all lossy regions of the display, even those that weren't drawn using a
+PutImage operation.  This has been fixed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

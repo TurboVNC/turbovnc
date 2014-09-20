@@ -4,8 +4,16 @@
 
 | Environment Variable | ''TVNC_ALRALL = ''__''0 \| 1''__ |
 | Summary | Disable/Enable automatic lossless refresh for regions that were \
-drawn using methods other than ''X[Shm]PutImage()'' |
+drawn using X11 functions other than ''X[Shm]PutImage()'' |
 | Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: See {ref prefix="Section ": ALR}
+
+| Environment Variable | ''TVNC_ALRCOPYRECT = ''__''0 \| 1''__ |
+| Summary | Disable/Enable automatic lossless refresh for regions that were \
+drawn using CopyRect |
+| Default Value | Enabled |
 #OPT: hiCol=first
 
 	Description :: See {ref prefix="Section ": ALR}

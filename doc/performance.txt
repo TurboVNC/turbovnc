@@ -237,37 +237,42 @@ enable the automatic lossless refresh (ALR) feature for the TurboVNC
 session.  ALR will monitor all of the VNC viewer connections, and if more than
 __''{timeout}''__ seconds have elapsed since the last framebuffer update was
 sent to a given viewer, then the TurboVNC Server will send to that viewer a
-mathematically lossless copy of any screen regions that have been affected by
-lossy compression.  You can also pass arguments of ''-alrqual'' and
-''-alrsamp'' to ''vncserver'' to specify that automatic lossless refreshes
-should be sent using JPEG instead (see the ''Xvnc'' man page for details.)
+mathematically lossless copy of any "ALR-eligible" screen regions that have
+been affected by lossy compression.  You can also pass arguments of
+''-alrqual'' and ''-alrsamp'' to ''vncserver'' to specify that automatic
+lossless refreshes should be sent using JPEG instead (see the ''Xvnc'' man page
+for details.)
 
 The ALR feature is designed mainly for use with interactive visualization
 applications.  The idea is that, on a low-bandwidth connection, low-quality
-JPEG can be used while the user is rotating/panning/zooming a 3D scene, but
-when the user stops manipulating the scene, then a fully lossless copy of the
-3D image is sent for them to study in detail.
+JPEG can be used while the 3D scene is rotated/panned/zoomed, but when the
+motion stops, a fully lossless copy of the 3D image is sent and can be studied
+in detail.
 
-The default ALR behavior is to monitor and send lossless copies of only the
-screen regions that were drawn using ''X[Shm]PutImage()''.  When used with
-VirtualGL, this means that ALRs will mainly be sent for just the 3D screen
-regions.  This should be fine for most 3D applications, since the 3D regions are
-the ones that are quality-critical.  The default ALR behavior also prevents
-what might best be called the "blinking cursor dilemma."  Certain ill-behaved
-window managers update a small region of the taskbar continuously, even though
-none of the pixels in that region have changed.  Also, certain programs have a
-blinking cursor that may update more frequently than the ALR timeout.  Since
-an ALR is triggered based on a period of inactivity relative to the last
-framebuffer update, these continuous updates prevent an ALR from ever being
-sent.  Fortunately, these ill-behaved window managers and blinking cursors
-do not typically use ''X[Shm]PutImage()'' to perform their updates,
-so the problem is effectively worked around by limiting the regions that are
-"eligible" for ALR to just the subset of regions that were drawn with the
-''X[Shm]PutImage()'' functions.
+The default is for any regions drawn with ''X[Shm]PutImage()'' to be
+ALR-eligible, as well as any regions drawn with CopyRect, if the source of the
+CopyRect operation was affected by lossy compression (CopyRect is an RFB
+encoding that allows the server to request that the viewer move a rectangle of
+pixels from one location to another.)  When used with VirtualGL, this means
+that ALRs will mainly be sent for just the 3D screen regions.  This should be
+fine for most 3D applications, since the 3D regions are the ones that are
+quality-critical.  The default ALR behavior also prevents what might best be
+called the "blinking cursor dilemma."  Certain ill-behaved window managers
+update a small region of the taskbar continuously, even though none of the
+pixels in that region have changed.  Also, certain programs have a blinking
+cursor that may update more frequently than the ALR timeout.  Since an ALR is
+triggered based on a period of inactivity relative to the last framebuffer
+update, these continuous updates prevent an ALR from ever being sent.
+Fortunately, these ill-behaved window managers and blinking cursors do not
+typically use ''X[Shm]PutImage()'' to perform their updates, so the problem is
+effectively worked around by limiting the ALR-eligible regions to just the
+subset of regions that were drawn with ''X[Shm]PutImage()'' and CopyRect.
 
 You can override the default ALR behavior, thus making all screen regions
 eligible for ALR, by setting the ''TVNC_ALRALL'' environment variable to ''1''
-on the TurboVNC server machine prior to starting a TurboVNC session.
+on the TurboVNC server machine prior to starting a TurboVNC session.  You can
+also set ''TVNC_ALRCOPYRECT'' to ''0'' to make CopyRect regions ALR-ineligible,
+which approximates the behavior of TurboVNC 1.2.1 and prior.
 
 ** Multithreading
 {anchor: Multithreading}
