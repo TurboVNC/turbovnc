@@ -1,6 +1,11 @@
 include_directories(../../../include ../../../include/extensions
 	../../../lib/Xau ../../../lib/Xdmcp ../render)
 
+# This code has some type puns.  Disable strict aliasing just to be safe.
+if(CMAKE_COMPILER_IS_GNUCC)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+endif()
+
 add_definitions(-DXSERV_t -DTRANS_SERVER -DUNIXCONN -DTCPCONN -DHASXDMAUTH
 	${ServerOSDefines} -DXDMCP ${EXT_DEFINES} -DUSE_RGB_TXT)
 if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")

@@ -1,3 +1,8 @@
+# This code has some type puns.  Disable strict aliasing just to be safe.
+if(CMAKE_COMPILER_IS_GNUCC)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
+endif()
+
 add_library(Xext STATIC
 	shape.c
 	shm.c
