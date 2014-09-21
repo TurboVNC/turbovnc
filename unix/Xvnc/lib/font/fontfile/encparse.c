@@ -32,7 +32,7 @@ THE SOFTWARE.
 #include <string.h>
 #include <stdio.h>
 
-#ifdef SCO325
+#if defined(SCO325) || defined(__APPLE__)
 #include <strings.h>
 #endif
 

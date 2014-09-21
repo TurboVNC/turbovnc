@@ -27,9 +27,9 @@ The Xvnc server will look in the authentication configuration file
 configuration directives.
 
 To enable PAM support (required for the "pam-userpwd" authentication
-method), "XvncAuthPAM" must be defined at compile time.  This is the default
-for Linux.  To enable or disable PAM support, #define XvncAuthPAM to YES or
-NO in the platform-specific config file under config/cf.
+method), the TVNC_USEPAM CMake variable must be enabled.  This is the default
+for Linux.  To enable or disable PAM support, pass -DTVNC_USEPAM=1 or
+-DTVNC_USEPAM=0 to cmake when configuring the build.
 
 The pam-userpwd authentication method requires the TurboVNC Viewer or another
 VNC viewer that can handle the Tight security type and the Unix Login

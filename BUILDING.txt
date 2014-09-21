@@ -31,8 +31,6 @@ All Systems
 Linux and other Un*x O/S's (except Mac)
 ---------------------------------------
 
--- rsync (if building the TurboVNC Server using an out-of-tree build)
-
 -- GCC
 
 -- X Intrinsics/Athena Widgets development kit
@@ -102,12 +100,13 @@ Build Procedure
 Un*x (including Mac)
 --------------------
 
-The following procedure will build the TurboVNC Viewer and (if the TurboVNC
-Server build is enabled) a handful of C applications that are used to interface
-with the TurboVNC Server.  On most 64-bit systems (Solaris being a notable
-exception), this will build a 64-bit version of TurboVNC.  See "Build Recipes"
-for specific instructions on how to build a 32-bit or 64-bit version of
-TurboVNC on systems that support both.
+The following procedure will build the TurboVNC Viewer.  Additionally, if the
+TurboVNC Server build is enabled (which is the default on Linux, Solaris, and
+FreeBSD), then this procedure will build the TurboVNC Server and a handful of
+C applications that are used to interface with it.  On most 64-bit systems
+(Solaris being a notable exception), this will build a 64-bit version of
+TurboVNC.  See "Build Recipes" for specific instructions on how to build a
+32-bit or 64-bit version of TurboVNC on systems that support both.
 
 On Mac, this builds the Java TurboVNC Viewer by default.  If you want to build
 the native (X11) TurboVNC Viewer instead, then pass
@@ -116,22 +115,6 @@ the native (X11) TurboVNC Viewer instead, then pass
   cd {build_directory}
   cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
   make
-
-On supported platforms (Linux, Solaris, and FreeBSD, at the moment), the
-TurboVNC Server (Xvnc) can then be built by executing:
-
-  make xserver
-
-You can also run:
-
-  make xserver-clean
-
-to clean the Xvnc build, or
-
-  make xserver-rebuild
-
-to do a minimal rebuild of Xvnc without re-configuring it.
-
 
 Visual C++ (Command Line)
 -------------------------

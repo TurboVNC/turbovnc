@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 #include <string.h>
 
-#ifdef SCO325
+#if defined(SCO325) || defined(__APPLE__)
 #include <strings.h>
 #endif
 

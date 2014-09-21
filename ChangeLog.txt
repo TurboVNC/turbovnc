@@ -85,6 +85,12 @@ prevent the user from opening any new VNC connections from within the same
 viewer instance.  In listen mode, this will further cause the viewer to exit
 after the first connection is closed.
 -------------------------------------------------------------------------------
+[14]
+The Xvnc build system has been completely refactored and now uses CMake, just
+like the rest of TurboVNC.  This makes the build somewhat more intuitive (for
+instance, 'make xserver' is no longer necessary when building Xvnc), and it
+fixes various problems with cross-compiling.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

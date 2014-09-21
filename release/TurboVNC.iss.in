@@ -43,8 +43,8 @@ Name: "javaviewer"; Description: "Java @CMAKE_PROJECT_NAME@ Viewer"; Types: full
 Name: "doc";    Description: "Documentation";   Types: full custom;
 
 [Files]
-Source: "@CMAKE_BINARY_DIR@\win\vncviewer\{#BUILDDIR}vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
-Source: "@CMAKE_BINARY_DIR@\win\putty\{#BUILDDIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 #ifdef JAVA
 Source: "@CMAKE_BINARY_DIR@\java\VncViewer.jar"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
 Source: "@CMAKE_SOURCE_DIR@\java\com\turbovnc\vncviewer\README.txt"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer

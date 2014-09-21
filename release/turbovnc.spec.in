@@ -53,7 +53,6 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->%build
 #-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DTVNC_BINDIR=%{bindir} -DTVNC_CONFDIR=%{confdir} -DTVNC_DOCDIR=%{docdir} -DTVNC_MANDIR=%{mandir} -DTVNC_BUILDJAVA=%{java} -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ .
 #-->make
-#-->make xserver
 
 %install
 rm -rf $RPM_BUILD_ROOT

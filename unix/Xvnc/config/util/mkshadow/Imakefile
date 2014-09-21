@@ -1,5 +1,0 @@
-XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:41:53 cpqbld Exp $
-           SRCS = mkshadow.c savedir.c wildmat.c
-           OBJS = mkshadow.o savedir.o wildmat.o
-
-ComplexProgramTarget(mkshadow)

@@ -36,41 +36,14 @@ endif()
 
 find_package(X11 REQUIRED)
 
-macro(lib_check libname)
-	if(NOT X11_${libname}_LIB)
-		message(FATAL_ERROR "lib${libname} not found.  Try setting X11_${libname}_LIB to the location of lib${libname}.so.")
-	endif()
-endmacro()
-
-lib_check(Xt)
-lib_check(Xcursor)
-if(NOT X11_Xaw_LIB)
-	find_library(X11_Xaw_LIB Xaw7 "")
-	if(NOT X11_Xaw_LIB)
-		find_library(X11_Xaw_LIB Xaw "")
-		lib_check(Xaw)
-	endif()
-endif()
-if(NOT X11_Xmu_LIB)
-	find_library(X11_Xmu_LIB Xmu "")
-	lib_check(Xmu)
-endif()
-
 message(STATUS "X11_X11_LIB = ${X11_X11_LIB}")
-message(STATUS "X11_Xmu_LIB = ${X11_Xmu_LIB}")
-message(STATUS "X11_Xt_LIB = ${X11_Xt_LIB}")
-message(STATUS "X11_Xaw_LIB = ${X11_Xaw_LIB}")
-message(STATUS "X11_Xcursor_LIB = ${X11_Xcursor_LIB}")
-
-# MIT-SHM should be available on all modern Un*x O/S's
-add_definitions("-DMITSHM")
 
 set(DEFAULT_TVNC_MANDIR ${CMAKE_INSTALL_PREFIX}/man)
 set(TVNC_MANDIR ${DEFAULT_TVNC_MANDIR} CACHE PATH
 	"Directory into which man pages should be installed (default: ${DEFAULT_TVNC_MANDIR})")
 message(STATUS "TVNC_MANDIR = ${TVNC_MANDIR}")
 
-include_directories(include ${CMAKE_SOURCE_DIR}/common/zlib)
+include_directories(include)
 
 
 #
@@ -79,7 +52,9 @@ include_directories(include ${CMAKE_SOURCE_DIR}/common/zlib)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
 add_subdirectory(libvncauth)
-add_subdirectory(vncviewer)
+if(TVNC_BUILDNATIVE)
+	add_subdirectory(vncviewer)
+endif()
 
 
 #
@@ -91,6 +66,7 @@ if(TVNC_BUILDSERVER)
 add_subdirectory(tvncconfig)
 add_subdirectory(vncconnect)
 add_subdirectory(vncpasswd)
+add_subdirectory(Xvnc)
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UC)
 
@@ -104,57 +80,15 @@ set(TVNC_CONFDIR ${DEFAULT_TVNC_CONFDIR} CACHE PATH
 	"Directory into which configuration files should be installed (default: ${DEFAULT_TVNC_CONFDIR})")
 message(STATUS "TVNC_CONFDIR = ${TVNC_CONFDIR}")
 
-configure_file(vncserver.in vncserver @ONLY)
+configure_file(vncserver.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver @ONLY)
 execute_process(COMMAND chmod +x vncserver
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-configure_file(Xvnc/config/cf/tvnc_version.h.in Xvnc/config/cf/tvnc_version.h)
-configure_file(Xvnc-configure.in Xvnc-configure)
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 configure_file(vncserver.init.in vncserver.init @ONLY)
 
-if(NOT "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-	add_custom_target(xserver-syncsource
-		COMMAND rsync -avC ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc
-			${CMAKE_CURRENT_BINARY_DIR}/)
-else()
-	add_custom_target(xserver-syncsource)
-endif()
-
-add_custom_target(xserver
-	COMMAND ${CMAKE_COMMAND} -E remove -f config/imake/imake config/imake/*.o
-		config/makedepend/makedepend config/makedepend/*.o config/util/lndir
-		config/util/*.o
-	COMMAND sh ${CMAKE_CURRENT_BINARY_DIR}/Xvnc-configure
-	COMMAND ${CMAKE_BUILD_TOOL} CC=${CMAKE_C_COMPILER}
-		CDEBUGFLAGS=${EFFECTIVE_C_FLAGS}
-		EXTRA_LDOPTIONS=${CMAKE_EXE_LINKER_FLAGS}
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
-	DEPENDS vncauth zlib xserver-syncsource
-	SOURCES Xvnc-configure Xvnc/config/cf/tvnc_version.h)
-
-add_custom_target(xserver-rebuild
-	COMMAND ${CMAKE_BUILD_TOOL} CC=${CMAKE_C_COMPILER}
-		CDEBUGFLAGS=${EFFECTIVE_C_FLAGS}
-		EXTRA_LDOPTIONS=${CMAKE_EXE_LINKER_FLAGS}
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
-	DEPENDS vncauth zlib xserver-syncsource)
-
-add_custom_target(xserver-clean
-	COMMAND ${CMAKE_BUILD_TOOL} CC=${CMAKE_C_COMPILER}
-		CDEBUGFLAGS=${EFFECTIVE_C_FLAGS}
-		EXTRA_LDOPTIONS=${CMAKE_EXE_LINKER_FLAGS} clean
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
-	DEPENDS xserver-syncsource)
-
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver
-	DESTINATION ${TVNC_BINDIR})
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Xvnc/programs/Xserver/Xvnc
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver
 	DESTINATION ${TVNC_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vncserver.man
 	DESTINATION ${TVNC_MANDIR}/man1 RENAME vncserver.1)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc/programs/Xserver/Xvnc.man
-	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xvnc.1)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc/programs/Xserver/Xserver.man
-	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xserver.1)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver.conf
 	DESTINATION ${TVNC_CONFDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-auth.conf
