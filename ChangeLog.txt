@@ -155,6 +155,28 @@ spanning mode has been behaving just like "primary" mode.
 Fixed a segfault in Xvnc that would occur whenever a viewer that was using ZRLE
 encoding disconnected.
 -------------------------------------------------------------------------------
+[23]
+The following improvements have been made to The TurboVNC Server init script:
+-- The script now looks for the tvncservers file under @TVNC_CONFDIR@/sysconfig
+   (where @TVNC_CONFDIR@ is the directory specified in the TVNC_CONFDIR CMake
+   variable) instead of under /etc/sysconfig.  This allows the script to work
+   properly when installed in an arbitrary directory.
+-- When invoked with the "start" argument, the script now attempts to start
+   only those TurboVNC sessions specified in the tvncservers file that have not
+   yet been started.  If all sessions in the tvncservers file have been
+   started, then the script does nothing.  To be consistent with other init
+   scripts, a success message is not printed/logged unless one or more TurboVNC
+   sessions is actually started successfully, and a failure message is not
+   printed/logged unless one or more TurboVNC sessions fails to start.
+-- When invoked with the "start" argument, the script will no longer abort if
+   a TurboVNC session fails to start.  It will attempt to start the other
+   sessions.
+-- When invoked with the "reload" argument", the script will now stop any
+   running TurboVNC sessions not specified in the tvncservers file and start
+   any sessions specified in the tvncservers file that aren't running.
+-- Fixed a bug whereby, if an error occurred when starting a TurboVNC session,
+   the error was not properly logged to the system error log.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
