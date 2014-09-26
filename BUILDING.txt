@@ -11,7 +11,8 @@ Build Requirements
 All Systems
 -----------
 
--- CMake (http://www.cmake.org) v2.8.4 or later
+-- CMake (http://www.cmake.org) v2.8.4 or later (v2.8.8 or later required if
+   building the TurboVNC Server)
 
 -- libjpeg-turbo SDK v1.0.0 or later (v1.3 or later required if building the
    Java viewer.)
@@ -101,20 +102,21 @@ Un*x (including Mac)
 --------------------
 
 The following procedure will build the TurboVNC Viewer.  Additionally, if the
-TurboVNC Server build is enabled (which is the default on Linux, Solaris, and
-FreeBSD), then this procedure will build the TurboVNC Server and a handful of
+TurboVNC Server build is enabled (which is the default unless building on
+OS X), then this procedure will build the TurboVNC Server and a handful of
 C applications that are used to interface with it.  On most 64-bit systems
 (Solaris being a notable exception), this will build a 64-bit version of
 TurboVNC.  See "Build Recipes" for specific instructions on how to build a
 32-bit or 64-bit version of TurboVNC on systems that support both.
 
-On Mac, this builds the Java TurboVNC Viewer by default.  If you want to build
+On OS X, this builds the Java TurboVNC Viewer by default.  If you want to build
 the native (X11) TurboVNC Viewer instead, then pass
 '-DTVNC_BUILDNATIVE=1 -DTVNC_BUILDJAVA=0' to CMake.
 
   cd {build_directory}
   cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
   make
+
 
 Visual C++ (Command Line)
 -------------------------
@@ -153,9 +155,8 @@ Adding -DTVNC_BUILDJAVA=1 to the CMake command line will build the Java
 TurboVNC Viewer, as well as include it when installing or packaging the native
 TurboVNC Viewer or the TurboVNC Server.  This is the default on Mac platforms.
 
-Additionally, you can build the Java TurboVNC Viewer without building the
-native code.  Simply use {source_directory}/java as the source directory for
-CMake.
+You can add -DTVNC_BUILDNATIVE=0 -DTVNC_BUILDSERVER=0 to the CMake command
+line to avoid building anything but the pure Java code.
 
 
 ===========
@@ -229,10 +230,9 @@ choosing.  To do this, add:
   -DCMAKE_INSTALL_PREFIX={install_directory}
 
 to the CMake command line.  Then, you can run 'make install' or 'nmake install'
-(or build the "install" target in the Visual Studio IDE) to build the TurboVNC
-Viewer and install TurboVNC.  Running 'make uninstall' or 'nmake uninstall' (or
-building the "uninstall" target in the Visual Studio IDE) will uninstall
-TurboVNC.
+(or build the "install" target in the Visual Studio IDE) to build and install
+TurboVNC.  Running 'make uninstall' or 'nmake uninstall' (or building the
+"uninstall" target in the Visual Studio IDE) will uninstall TurboVNC.
 
 If you don't specify CMAKE_INSTALL_PREFIX, then the default is
 c:\Program Files\TurboVNC on Windows and /opt/TurboVNC on Unix.
