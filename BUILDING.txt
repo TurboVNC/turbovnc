@@ -103,13 +103,12 @@ Un*x (not Mac)
 
 The following procedure will build the Java TurboVNC Viewer and some native/X11
 infrastructure to support running it as a standalone application.
-Additionally, if the TurboVNC Server build is enabled (which is the default on
-Linux, Solaris, and FreeBSD), then this procedure will build the TurboVNC
-Server and a handful of C applications that are used to interface with it.  On
-most 64-bit systems (Solaris being a notable exception), this will build a
-64-bit version of TurboVNC.  See "Build Recipes" for specific instructions on
-how to build a 32-bit or 64-bit version of TurboVNC on systems that support
-both.
+Additionally, if the TurboVNC Server build is enabled (which is the default),
+then this procedure will build the TurboVNC Server and a handful of C
+applications that are used to interface with it.  On most 64-bit systems
+(Solaris being a notable exception), this will build a 64-bit version of
+TurboVNC.  See "Build Recipes" for specific instructions on how to build a
+32-bit or 64-bit version of TurboVNC on systems that support both.
 
   cd {build_directory}
   cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
@@ -169,7 +168,7 @@ support running the Java TurboVNC Viewer as a standalone application.  You can,
 however, disable this by adding -DTVNC_BUILDNATIVE=0 to the CMake command
 line.  This will build only the Java classes without the native infrastructure.
 You can add -DTVNC_BUILDNATIVE=0 -DTVNC_BUILDSERVER=0 to the CMake command
-line to disable building anything but the pure Java code.
+line to avoid building anything but the pure Java code.
 
 
 ===========
