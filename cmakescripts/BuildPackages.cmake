@@ -8,7 +8,8 @@ string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 # Linux RPM and DEB
 #
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND
+	(TVNC_BUILDNATIVE OR TVNC_BUILDSERVER))
 
 set(RPMARCH ${CPU_TYPE})
 if(${CPU_TYPE} STREQUAL "x86_64")
@@ -25,6 +26,18 @@ endif()
 
 if(NOT TVNC_JAVADIR)
 	set(TVNC_JAVADIR ${CMAKE_INSTALL_PREFIX}/java)
+endif()
+
+if(TVNC_BUILDNATIVE)
+	set(TVNC_BUILDNATIVE 1)
+else()
+	set(TVNC_BUILDNATIVE 0)
+endif()
+
+if(TVNC_BUILDSERVER)
+	set(TVNC_BUILDSERVER 1)
+else()
+	set(TVNC_BUILDSERVER 0)
 endif()
 
 configure_file(release/makerpm.in pkgscripts/makerpm)

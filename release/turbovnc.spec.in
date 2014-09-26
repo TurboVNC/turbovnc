@@ -16,6 +16,12 @@
 # Whether or not to include the Java viewer
 %define java @TVNC_BUILDJAVA@
 
+# Whether or not to include the native infrastructure for the Java viewer
+%define native @TVNC_BUILDNATIVE@
+
+# Whether or not to include the server
+%define server @TVNC_BUILDSERVER@
+
 # Path under which the Java viewer should be installed
 %define javadir @TVNC_JAVADIR@
 
@@ -95,13 +101,16 @@ if [ ! "$TVNC_DOCDIR" = "%{docdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
 fi
 
+%if "%{server}" == "1"
 TVNC_CONFDIR=@TVNC_CONFDIR@
 if [ ! "$TVNC_CONFDIR" = "%{confdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_CONFDIR $RPM_BUILD_ROOT/%{confdir} $RPM_BUILD_ROOT/__tmpconf
 fi
+%endif
 
 #-->%endif
 
+%if "%{native}" == "1"
 mkdir -p %{buildroot}/usr/share/applications
 cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
@@ -112,10 +121,12 @@ Terminal=0
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
+%endif
 
 %clean
 rm -rf %{buildroot}
 
+%if "%{server}" == "1"
 %post
 if [ "$1" = 1 ]; then
   if [ -f /etc/redhat-release ]; then /sbin/chkconfig --add tvncserver; fi
@@ -131,13 +142,16 @@ fi
 if [ "$1" -ge "1" ]; then
   /etc/init.d/tvncserver condrestart >/dev/null 2>&1
 fi
+%endif
 
 %files
 %defattr(-,root,root)
-%attr(0755,root,root) %config %{confdir}/init.d/tvncserver
-%config(noreplace) %{confdir}/sysconfig/tvncservers
-%config(noreplace) %{confdir}/turbovncserver.conf
-%config(noreplace) %{confdir}/turbovncserver-auth.conf
+%if "%{server}" == "1"
+ %attr(0755,root,root) %config %{confdir}/init.d/tvncserver
+ %config(noreplace) %{confdir}/sysconfig/tvncservers
+ %config(noreplace) %{confdir}/turbovncserver.conf
+ %config(noreplace) %{confdir}/turbovncserver-auth.conf
+%endif
 
 %dir %{docdir}
 %doc %{docdir}/*
@@ -151,24 +165,32 @@ fi
 %endif
 
 %{prefix}/README.txt
-%{bindir}/vncviewer
-%config(noreplace) /usr/share/applications/tvncviewer.desktop
-%{mandir}/man1/vncviewer.1*
-%{bindir}/Xvnc
-%{bindir}/tvncconfig
-%{bindir}/vncserver
-%{bindir}/vncpasswd
-%{bindir}/vncconnect
+%if "%{native}" == "1"
+ %{bindir}/vncviewer
+ %config(noreplace) /usr/share/applications/tvncviewer.desktop
+ %{mandir}/man1/vncviewer.1*
+%endif
+%if "%{server}" == "1"
+ %{bindir}/Xvnc
+ %{bindir}/tvncconfig
+ %{bindir}/vncserver
+ %{bindir}/vncpasswd
+ %{bindir}/vncconnect
+%endif
 %if "%{java}" == "1"
- %{javadir}/index.vnc
- %{javadir}/favicon.ico
+ %if "%{server}" == "1"
+  %{javadir}/index.vnc
+  %{javadir}/favicon.ico
+ %endif
  %{javadir}/VncViewer.jar
  %{javadir}/README.txt
 %endif
-%{mandir}/man1/Xvnc.1*
-%{mandir}/man1/Xserver.1*
-%{mandir}/man1/vncserver.1*
-%{mandir}/man1/vncconnect.1*
-%{mandir}/man1/vncpasswd.1*
+%if "%{server}" == "1"
+ %{mandir}/man1/Xvnc.1*
+ %{mandir}/man1/Xserver.1*
+ %{mandir}/man1/vncserver.1*
+ %{mandir}/man1/vncconnect.1*
+ %{mandir}/man1/vncpasswd.1*
+%endif
 
 %changelog
