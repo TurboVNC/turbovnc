@@ -1,9 +1,5 @@
 set(HEADERS
-	DECkeysym.h
-	HPkeysym.h
-	Sunkeysym.h
 	X.h
-	XWDFile.h
 	Xalloca.h
 	Xatom.h
 	Xdefs.h
@@ -17,7 +13,6 @@ set(HEADERS
 	Xproto.h
 	Xprotostr.h
 	Xthreads.h
-	ap_keysym.h
 	keysym.h
 	keysymdef.h)
 

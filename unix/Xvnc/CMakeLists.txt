@@ -10,21 +10,10 @@ elseif(CPU_TYPE STREQUAL "arm")
 	add_definitions(-D__arm__ -D__arm32__)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_definitions(-Dlinux -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L
-		-D_XOPEN_SOURCE=500L -D_BSD_SOURCE -D_SVID_SOURCE)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-	add_definitions(-Dsun -DSVR4 -D__EXTENSIONS__ -D_POSIX_SOURCE)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	if(CPU_TYPE STREQUAL "i386" OR CPU_TYPE STREQUAL "x86_64")
 		add_definitions(-Di386)
 	endif()
-elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-	add_definitions(-DCSRG_BASED)
-elseif(APPLE)
-	# Emulate Linux
-	add_definitions(-Dlinux)
-else()
-	message(FATAL_ERROR "TurboVNC Server build not supported on this platform.")
 endif()
 
 add_definitions(-D_REENTRANT -DFUNCPROTO=15 -DNARROWPROTO)
@@ -32,6 +21,48 @@ add_definitions(-D_REENTRANT -DFUNCPROTO=15 -DNARROWPROTO)
 set(ServerExtraDefines -DSTATIC_COLOR -DAVOID_GLYPHBLT -DPIXPRIV)
 if(BITS EQUAL 64)
 	set(ServerExtraDefines ${ServerExtraDefines} -D_XSERVER64)
+endif()
+
+include(CheckCSourceCompiles)
+
+set(GLIBC_SOURCE "\n
+  #include <features.h>\n
+  #ifndef __GLIBC__\n
+  #error\n
+  #endif\n
+  int main(void) { return 0; }\n")
+
+check_c_source_compiles("${GLIBC_SOURCE}" FOUND_GLIBC)
+if(FOUND_GLIBC)
+	add_definitions(-D_GNU_SOURCE)
+endif()
+
+set(BSD44SOCKETS_SOURCE "\n
+  #include <sys/types.h>\n
+  #include <sys/socket.h>\n
+  #include <netinet/in.h>\n
+  int main(void) {\n
+    struct sockaddr_in sa;\n
+    return sa.sin_len;\n
+  }")
+check_c_source_compiles("${BSD44SOCKETS_SOURCE}" FOUND_BSD44SOCKETS)
+
+set(SVR4_SOURCE "\n
+  #if !defined(SVR4) && !defined(__svr4__) && !defined(__SVR4)\n
+  #error\n
+  #endif\n
+  int main(void) { return 0; }\n")
+check_c_source_compiles("${SVR4_SOURCE}" FOUND_SVR4)
+if(FOUND_SVR4)
+	add_definitions(-DSVR4)
+endif()
+
+if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+	message(STATUS "BSD-like system detected")
+	add_definitions(-DCSRG_BASED)
+elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
+	NOT CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	message(WARNING "TurboVNC Server build has not been tested on this platform.  Chaos may ensue.")
 endif()
 
 function(copy_X_header file dir)
