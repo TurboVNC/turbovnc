@@ -91,6 +91,11 @@ like the rest of TurboVNC.  This makes the build somewhat more intuitive (for
 instance, 'make xserver' is no longer necessary when building Xvnc), and it
 fixes various problems with cross-compiling.
 -------------------------------------------------------------------------------
+[15]
+Fixed a regression in the "automatic" spanning mode of the Windows TurboVNC
+Viewer introduced in TurboVNC 1.2.  Ever since that release, "automatic"
+spanning mode has been behaving just like "primary" mode.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
