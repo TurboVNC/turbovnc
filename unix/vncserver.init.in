@@ -36,7 +36,7 @@ fi
 
 unset VNCSERVERARGS
 VNCSERVERS=""
-[ -f /etc/sysconfig/tvncservers ] && . /etc/sysconfig/tvncservers
+[ -f @TVNC_CONFDIR@/sysconfig/tvncservers ] && . @TVNC_CONFDIR@/sysconfig/tvncservers
 
 LOCKDIR=/var/lock
 if [ -d /var/lock/subsys ]; then
