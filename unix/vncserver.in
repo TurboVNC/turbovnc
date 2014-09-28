@@ -171,7 +171,7 @@ if (-d "/etc/X11/fontpath.d") {
     $fontPath = "catalogue:/etc/X11/fontpath.d";
 }
 
-@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts', '/usr/share/fonts/X11/', '/usr/local/lib/X11/fonts');
+@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts', '/usr/share/fonts/X11', '/usr/local/lib/X11/fonts');
 if (! -l "/usr/lib/X11") {push(@fontpaths, '/usr/lib/X11/fonts');}
 if (! -l "/usr/X11") {push(@fontpaths, '/usr/X11/lib/X11/fonts');}
 if (! -l "/usr/openwin") {push(@fontpaths, '/usr/openwin/lib/X11/fonts');}
@@ -209,6 +209,10 @@ if ($os eq "SunOS") {
     $defFontPath = "inet/:7100";
 } else {
     $defFontPath = "unix/:7100";
+}
+
+if ($os eq "Darwin") {
+    $fontPath = "$fontPath,/Library/Fonts,/System/Library/Fonts";
 }
 
 if (-f "/usr/lib/X11/rgb.txt") {
@@ -413,7 +417,7 @@ if ($cookie eq "") {
 }
 
 system("$xauth -f $xauthorityFile add $host:$displayNumber . $cookie");
-system("$xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie"); 
+system("$xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie");
 if ($vncUserDirUnderTmp) {
     system("$xauth merge $xauthorityFile");
 }
@@ -575,7 +579,7 @@ sub GetDisplayNumber
             return $n+0; # Bruce Mah's workaround for bug in perl 5.005_02
         }
     }
-    
+
     die "$prog: no free display number on $host.\n";
 }
 
@@ -822,7 +826,7 @@ sub Kill
     } else {
         warn "Xvnc process ID $pid already killed\n";
         $opt{'-kill'} =~ s/://;
-    
+
         if (-e "/tmp/.X11-unix/X$opt{'-kill'}") {
             print "Xvnc did not appear to shut down cleanly.";
             print " Removing /tmp/.X11-unix/X$opt{'-kill'}\n";
