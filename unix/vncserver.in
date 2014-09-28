@@ -75,9 +75,8 @@ $defaultXStartup
     = ("#!/bin/sh\n\n".
        "unset SESSION_MANAGER\n".
        "OS=`uname -s`\n".
-       "# Uncomment the following line if you experience keyboard mapping problems\n".
-       "# with Gnome.\n".
-       "#export XKL_XMODMAP_DISABLE=1\n".
+       "# This fixes keyboard mapping problems with certain Gnome releases.\n".
+       "export XKL_XMODMAP_DISABLE=1\n".
        "if [ \$OS = 'Linux' ]; then\n".
        "  case \"\$WINDOWMANAGER\" in\n".
        "    \*gnome\*)\n".
