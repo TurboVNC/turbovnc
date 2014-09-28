@@ -190,7 +190,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
             appClass.getMethod("setDockIconImage", paramTypes);
           setDockIconImage.invoke(app, logoIcon128.getImage());
         } catch (Exception e) {
-          vlog.debug("Could not set OS X dock icon: " + e.getMessage());
+          vlog.debug("Could not set OS X dock icon:");
+          vlog.debug("  " + e.toString());
         }
       }
 
