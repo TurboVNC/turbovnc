@@ -16,15 +16,15 @@ set(CLASSPATH com/turbovnc/vncviewer)
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 
-if(MSVC) 	 
+if(MSVC)
 	if(NOT BUILD)
 		execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat"
 			OUTPUT_VARIABLE BUILD)
 	endif()
-	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javadate" 	 
-		OUTPUT_VARIABLE JAVA_DATE) 	 
-	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javatime" 	 
-		OUTPUT_VARIABLE JAVA_TIME) 	 
+	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javadate"
+		OUTPUT_VARIABLE JAVA_DATE)
+	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javatime"
+		OUTPUT_VARIABLE JAVA_TIME)
 else()
 	if(NOT BUILD)
 		execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
