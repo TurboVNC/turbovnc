@@ -107,7 +107,7 @@ string(REGEX REPLACE "^:" "" TVNC_MACPREFIX ${TVNC_MACPREFIX})
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
 configure_file(release/makemacapp.in pkgscripts/makemacapp)
 configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
-configure_file(release/Info.plist.app.in pkgscripts/Info.plist.app)
+configure_file(release/Info.plist.in pkgscripts/Info.plist)
 configure_file(release/uninstall.in pkgscripts/uninstall)
 configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
 

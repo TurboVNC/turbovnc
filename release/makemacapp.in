@@ -16,7 +16,7 @@ mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources/Java"
 mkdir -p "$APP/Contents/Resources/TurboJPEG"
 
-cp pkgscripts/Info.plist.app "$APP/Contents/Info.plist"
+cp pkgscripts/Info.plist "$APP/Contents/Info.plist"
 cp /System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub "$APP/Contents/MacOS/"
 echo "APPL????" >"$APP/Contents/PkgInfo"
 cp java/VncViewer.jar "$APP/Contents/Resources/Java/"
