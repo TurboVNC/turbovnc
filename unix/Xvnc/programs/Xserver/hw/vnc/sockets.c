@@ -20,7 +20,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -499,6 +499,38 @@ ReadExact(sock, buf, len)
     return 1;
 }
 
+
+
+/*
+ * SkipExact reads an exact number of bytes on a TCP socket into a temporary
+ * buffer and then discards them.  Returns 1 on success, 0 if the other end has
+ * closed, or -1 if an error occurred (errno is set to ETIMEDOUT if it timed
+ * out).
+ */
+
+int
+SkipExact(sock, len)
+    int sock;
+    int len;
+{
+    char *tmpbuf = NULL;
+    int bufLen = min(len, 65536), i, retval = 1;
+
+    tmpbuf = (char *)xalloc(bufLen);
+    if (tmpbuf == NULL) {
+        rfbLogPerror("SkipExact: out of memory");
+        return -1;
+    }
+
+    for (i = 0; i < len; i += bufLen) {
+        retval = ReadExact(sock, tmpbuf, min(bufLen, len - i));
+        if (retval <= 0) break;
+    }
+
+    free(tmpbuf);
+    return retval;
+}
+    
 
 
 /*

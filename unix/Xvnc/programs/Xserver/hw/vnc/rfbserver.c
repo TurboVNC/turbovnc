@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2013 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2014 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -1195,8 +1195,14 @@ rfbProcessClientNormalMessage(cl)
 
         msg.cct.length = Swap32IfLE(msg.cct.length);
         if (msg.cct.length > MAX_CUTTEXT_LEN) {
-            rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText length excessive");
-            rfbCloseSock(cl->sock);
+            rfbLog("Ignoring %d-byte clipboard update from client.  Max is %d bytes.\n",
+                   msg.cct.length, MAX_CUTTEXT_LEN);
+            if ((n = SkipExact(cl->sock, msg.cct.length)) <= 0) {
+                if (n != 0)
+                    rfbLogPerror("rfbProcessClientNormalMessage: read");
+                rfbCloseSock(cl->sock);
+                return;
+            }
             return;
         }
 

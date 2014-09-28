@@ -488,6 +488,7 @@ extern void rfbCorkSock(int sock);
 extern void rfbUncorkSock(int sock);
 
 extern int ReadExact(int sock, char *buf, int len);
+extern int SkipExact(int sock, int len);
 extern int WriteExact(int sock, char *buf, int len);
 extern int ListenOnTCPPort(int port);
 extern int ListenOnUDPPort(int port);
