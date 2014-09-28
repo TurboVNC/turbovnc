@@ -589,7 +589,7 @@ rfbScreenInit(index, pScreen, argc, argv)
     miClearVisualTypes();
 
     if (defaultColorVisualClass == -1)
-        defaultColorVisualClass = TrueColor;
+        defaultColorVisualClass = prfb->depth == 8 ? PseudoColor : TrueColor;
 
     if (!miSetVisualTypes(prfb->depth, miGetDefaultVisualMask(prfb->depth), 8,
                           defaultColorVisualClass) )
@@ -688,6 +688,9 @@ rfbScreenInit(index, pScreen, argc, argv)
     if (ps)
         prfb->Composite = ps->Composite;
 #endif
+    prfb->InstallColormap = pScreen->InstallColormap;
+    prfb->StoreColors = pScreen->StoreColors;
+
     pScreen->CloseScreen = rfbCloseScreen;
     pScreen->CreateGC = rfbCreateGC;
     pScreen->PaintWindowBackground = rfbPaintWindowBackground;
@@ -699,12 +702,10 @@ rfbScreenInit(index, pScreen, argc, argv)
     if (ps)
         ps->Composite = rfbComposite;
 #endif
-
     pScreen->InstallColormap = rfbInstallColormap;
     pScreen->UninstallColormap = rfbUninstallColormap;
     pScreen->ListInstalledColormaps = rfbListInstalledColormaps;
     pScreen->StoreColors = rfbStoreColors;
-
     pScreen->SaveScreen = rfbAlwaysTrue;
 
     rfbDCInitialize(pScreen, &rfbPointerCursorFuncs);

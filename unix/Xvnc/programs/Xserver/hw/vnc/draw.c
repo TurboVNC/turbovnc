@@ -11,7 +11,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010-2012 D. R. Commander
+ *  Copyright (C) 2010-2012, 2014 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -223,6 +223,8 @@ rfbCloseScreen (i, pScreen)
     pScreen->CopyWindow = prfb->CopyWindow;
     pScreen->ClearToBackground = prfb->ClearToBackground;
     pScreen->RestoreAreas = prfb->RestoreAreas;
+    pScreen->InstallColormap = prfb->InstallColormap;
+    pScreen->StoreColors = prfb->StoreColors;
 
     TRC((stderr, "Unwrapped screen functions\n"));
 
