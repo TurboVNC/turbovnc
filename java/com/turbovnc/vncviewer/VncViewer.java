@@ -241,6 +241,19 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       if (argv[i].length() == 0)
         continue;
 
+      // The following is primarily included so we can ensure that we're
+      // running either a 32-bit or a 64-bit JRE from the Windows .bat file
+      if (argv[i].equalsIgnoreCase("-reqarch")) {
+        if (++i < argv.length) {
+          if (!argv[i].equalsIgnoreCase(System.getProperty("os.arch"))) {
+            reportException(new WarningException("You must use a " +
+              argv[i] + " Java Runtime Environment with this version of TurboVNC."));
+            exit(1);
+          }
+        }
+        continue;
+      }
+
       if (argv[i].equalsIgnoreCase("-config")) {
         if (++i >= argv.length) usage();
         try {

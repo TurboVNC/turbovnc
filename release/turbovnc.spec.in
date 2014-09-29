@@ -16,7 +16,8 @@
 # Whether or not to include the Java viewer
 %define java @TVNC_BUILDJAVA@
 
-# Whether or not to include the native infrastructure for the Java viewer
+# Whether or not to include the native viewer and the native infrastructure
+# for the Java viewer
 %define native @TVNC_BUILDNATIVE@
 
 # Whether or not to include the server
@@ -121,6 +122,17 @@ Terminal=0
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
+%if "%{java}" == "1"
+cat > %{buildroot}/usr/share/applications/tvncviewer-java.desktop << EOF
+[Desktop Entry]
+Name=TurboVNC Viewer (Java)
+Comment=TurboVNC client application
+Exec=%{bindir}/vncviewer-java
+Terminal=0
+Type=Application
+Categories=Application;Utility;X-Red-Hat-Extra;
+EOF
+%endif
 %endif
 
 %clean
@@ -169,6 +181,13 @@ fi
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop
  %{mandir}/man1/vncviewer.1*
+ %if "%{java}" == "1"
+  %{bindir}/checkshmpixmaps
+  %{bindir}/vncviewer-java
+  %config(noreplace) /usr/share/applications/tvncviewer-java.desktop
+  %{mandir}/man1/vncviewer-java.1*
+  %{javadir}/libturbojpeg.so
+ %endif
 %endif
 %if "%{server}" == "1"
  %{bindir}/Xvnc

@@ -55,6 +55,7 @@ SRCDIR=@CMAKE_SOURCE_DIR@
 BINDIR=@TVNC_BINDIR@
 DOCDIR=@TVNC_DOCDIR@
 CONFDIR=@TVNC_CONFDIR@
+BUILDJAVA=@TVNC_BUILDJAVA@
 BUILDSERVER=@TVNC_BUILDSERVER@
 
 if [ ! `uid` -eq 0 ]; then
@@ -87,6 +88,17 @@ Terminal=0
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
+if [ "$BUILDJAVA" = "1" ]; then
+cat > $TMPDIR/usr/share/applications/tvncviewer-java.desktop <<EOF
+[Desktop Entry]
+Name=TurboVNC Viewer (Java)
+Comment=TurboVNC client application
+Exec=$BINDIR/vncviewer-java
+Terminal=0
+Type=Application
+Categories=Application;Utility;X-Red-Hat-Extra;
+EOF
+fi
 
 SIZE=`du -s $TMPDIR | cut -f1`
 cat pkgscripts/deb-control | sed s/{__SIZE}/$SIZE/g > $TMPDIR/DEBIAN/control

@@ -4,6 +4,25 @@
 string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 
 
+if(TVNC_BUILDJAVA)
+	set(TVNC_BUILDJAVA 1)
+else()
+	set(TVNC_BUILDJAVA 0)
+endif()
+
+if(TVNC_BUILDNATIVE)
+	set(TVNC_BUILDNATIVE 1)
+else()
+	set(TVNC_BUILDNATIVE 0)
+endif()
+
+if(TVNC_BUILDSERVER)
+	set(TVNC_BUILDSERVER 1)
+else()
+	set(TVNC_BUILDSERVER 0)
+endif()
+
+
 #
 # Linux RPM and DEB
 #
@@ -18,26 +37,8 @@ else()
 	set(DEBARCH ${CPU_TYPE})
 endif()
 
-if(TVNC_BUILDJAVA)
-	set(TVNC_BUILDJAVA 1)
-else()
-	set(TVNC_BUILDJAVA 0)
-endif()
-
 if(NOT TVNC_JAVADIR)
 	set(TVNC_JAVADIR ${CMAKE_INSTALL_PREFIX}/java)
-endif()
-
-if(TVNC_BUILDNATIVE)
-	set(TVNC_BUILDNATIVE 1)
-else()
-	set(TVNC_BUILDNATIVE 0)
-endif()
-
-if(TVNC_BUILDSERVER)
-	set(TVNC_BUILDSERVER 1)
-else()
-	set(TVNC_BUILDSERVER 0)
 endif()
 
 configure_file(release/makerpm.in pkgscripts/makerpm)

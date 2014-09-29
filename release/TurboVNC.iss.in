@@ -47,7 +47,10 @@ Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}vncviewer.exe"; DestDir: "{
 Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 #ifdef JAVA
 Source: "@CMAKE_BINARY_DIR@\java\VncViewer.jar"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
+Source: "@CMAKE_BINARY_DIR@\win\vncviewer-java\vncviewer-javaw.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
+Source: "@CMAKE_BINARY_DIR@\win\vncviewer-java\vncviewer-java.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
 Source: "@CMAKE_SOURCE_DIR@\java\com\turbovnc\vncviewer\README.txt"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
+Source: "@CMAKE_BINARY_DIR@\win\vncviewer-java\turbojpeg.dll"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
 #endif
 Source: "@CMAKE_SOURCE_DIR@\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
@@ -64,7 +67,7 @@ Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer";                      FileName: "{ap
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode)";        FileName: "{app}\vncviewer.exe"; Parameters: "-listen";          WorkingDir: "{app}";      Components: viewer;
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode - IPv6)"; FileName: "{app}\vncviewer.exe"; Parameters: "-listen -ipv6";    WorkingDir: "{app}";      Components: viewer;
 #ifdef JAVA
-Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer";                 FileName: "{app}\java\VncViewer.jar";                            WorkingDir: "{app}\java";
+Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer";                 FileName: "{app}\vncviewer-javaw.bat";                           WorkingDir: "{app}";      Flags: "runminimized"
 Name: "{group}\Documentation\Java @CMAKE_PROJECT_NAME@ Viewer README"; FileName: "write.exe";      Parameters: "README.txt";       WorkingDir: "{app}\java"; Flags: "useapppaths"
 #endif
 Name: "{group}\Uninstall @CMAKE_PROJECT_NAME@";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";

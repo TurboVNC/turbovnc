@@ -35,19 +35,36 @@ else()
 endif()
 string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
+set(USEC 0)
+
 if(APPLE)
 	set(DEFAULT_TVNC_BUILDJAVA 1)
-	set(DEFAULT_TVNC_BUILDNATIVE 0)
+elseif(UNIX)
+	set(DEFAULT_TVNC_BUILDJAVA 0)
+	set(DEFAULT_TVNC_BUILDNATIVE 1)
+	option(TVNC_BUILDNATIVE "Build X11 TurboVNC Viewer and (if TVNC_BUILDJAVA is enabled) native/X11 support applications and libraries for the Java TurboVNC Viewer"
+		${DEFAULT_TVNC_BUILDNATIVE})
 else()
 	set(DEFAULT_TVNC_BUILDJAVA 0)
 	set(DEFAULT_TVNC_BUILDNATIVE 1)
+	option(TVNC_BUILDNATIVE "Build native version of the TurboVNC Viewer"
+		${DEFAULT_TVNC_BUILDNATIVE})
 endif()
-option(TVNC_BUILDNATIVE "Build native version of the TurboVNC Viewer"
-	${DEFAULT_TVNC_BUILDNATIVE})
 option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer"
 	${DEFAULT_TVNC_BUILDJAVA})
 
-if(TVNC_BUILDNATIVE)
+set(DEFAULT_TVNC_BUILDSERVER 0)
+if(UNIX AND NOT APPLE AND NOT CYGWIN)
+	set(DEFAULT_TVNC_BUILDSERVER 1)
+endif()
+option(TVNC_BUILDSERVER "Build TurboVNC server components"
+	${DEFAULT_TVNC_BUILDSERVER})
+
+if(TVNC_BUILDNATIVE OR TVNC_BUILDSERVER)
+	set(USEC 1)
+endif()
+
+if(USEC)
 	enable_language(C)
 
 	if(NOT CMAKE_BUILD_TYPE)
@@ -88,7 +105,7 @@ message(STATUS "TVNC_BINDIR = ${TVNC_BINDIR}")
 message(STATUS "TVNC_DOCDIR = ${TVNC_DOCDIR}")
 
 # Detect CPU type and word size
-if(TVNC_BUILDNATIVE)
+if(USEC)
 	math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 	if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64"
 		OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "amd64"
@@ -103,7 +120,8 @@ if(TVNC_BUILDNATIVE)
 		string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} CPU_TYPE)
 	endif()
 	message(STATUS "${BITS}-bit build (${CPU_TYPE})")
-
+endif()
+if(TVNC_BUILDNATIVE OR TVNC_BUILDSERVER)
 	include(cmakescripts/FindTurboJPEG.cmake)
 endif()
 
@@ -112,24 +130,16 @@ endif()
 # Build
 #
 
-set(DEFAULT_TVNC_BUILDSERVER 0)
-if(UNIX AND NOT APPLE AND NOT CYGWIN)
-	set(DEFAULT_TVNC_BUILDSERVER 1)
-endif()
-option(TVNC_BUILDSERVER "Build TurboVNC server components"
-	${DEFAULT_TVNC_BUILDSERVER})
-
-if(TVNC_BUILDNATIVE)
-	if(WIN32)
-		add_subdirectory(win)
-	else()
-		add_subdirectory(unix)
-	endif()
-endif()
-add_subdirectory(doc)
 if(TVNC_BUILDJAVA)
 	add_subdirectory(java)
 endif()
+if(WIN32 AND TVNC_BUILDNATIVE)
+	add_subdirectory(win)
+endif()
+if(UNIX AND (TVNC_BUILDNATIVE OR TVNC_BUILDSERVER))
+	add_subdirectory(unix)
+endif()
+add_subdirectory(doc)
 
 
 #
@@ -143,6 +153,4 @@ configure_file("${CMAKE_SOURCE_DIR}/cmakescripts/cmake_uninstall.cmake.in"
 
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P cmake_uninstall.cmake)
 
-if(TVNC_BUILDNATIVE)
-	install(FILES README.txt DESTINATION .)
-endif()
+install(FILES README.txt DESTINATION .)

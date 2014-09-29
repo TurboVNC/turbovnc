@@ -1,0 +1,18 @@
+@echo off
+setlocal enableextensions
+if DEFINED JAVA_HOME goto defined
+
+set JAVAW=javaw
+goto start
+
+:defined
+set JAVA_HOME=%JAVA_HOME:"=%
+if "%JAVA_HOME%"=="" (
+	set JAVAW=javaw
+) else (
+	set JAVAW="%JAVA_HOME%\bin\javaw.exe"
+)
+set JAVAW=%JAVAW:"=%
+
+:start
+start /b "" "%JAVAW%" -server -Djava.library.path=java -jar java\VncViewer.jar -reqarch @REQARCH@ %*

@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+BINDIR=`dirname $0`
+$BINDIR/checkshmpixmaps
+if [ "$JAVA_HOME" = "" ]; then
+	JAVA=java
+else
+	JAVA="$JAVA_HOME/bin/java"
+fi
+TVNC_JAVADIR=@TVNC_JAVADIR@
+if [ -d $BINDIR/../java ]; then
+	TVNC_JAVADIR=$BINDIR/../java
+fi
+exec $JAVA -server -d@BITS@ -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}

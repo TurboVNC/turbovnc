@@ -54,6 +54,9 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
 add_subdirectory(libvncauth)
 if(TVNC_BUILDNATIVE)
 	add_subdirectory(vncviewer)
+	if(TVNC_BUILDJAVA AND NOT APPLE)
+		add_subdirectory(vncviewer-java)
+	endif()
 endif()
 
 

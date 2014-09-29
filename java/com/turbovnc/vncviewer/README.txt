@@ -36,8 +36,13 @@ available.
 NOTE: On Mac platforms, the Java TurboVNC Viewer is bundled as a self-contained
 app and can be launched by opening the "TurboVNC Viewer" app located in the
 "TurboVNC" Applications folder or by running /opt/TurboVNC/bin/vncviewer from a
-shell.  If using the Java TurboVNC Viewer in this manner, then the instructions
-below do not apply.  See the TurboVNC User's Guide for more information.
+Terminal window.  On Linux/Un*x platforms, the Java TurboVNC Viewer can be
+launched by running /opt/TurboVNC/bin/vncviewer-java from a command prompt.  On
+Windows platforms, the Java TurboVNC Viewer can be launched by selecting "Java
+TurboVNC Viewer" in the "TurboVNC" Start Menu group or by running
+c:\Program Files\TurboVNC\vncviewer-java.bat from a command prompt.  If using
+the Java TurboVNC Viewer in this manner, then the instructions below do not
+apply.  See the TurboVNC User's Guide for more information.
 
 
 Installation
@@ -135,14 +140,14 @@ This distribution contains Java DES software by Dave Zimmerman
     Permission to use, copy, modify, and distribute this software and its
     documentation for NON-COMMERCIAL or COMMERCIAL purposes and without fee
     is hereby granted, provided that this copyright notice is kept intact.
-    
+
     WIDGET WORKSHOP MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE
     SUITABILITY OF THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT
     NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
     PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WIDGET WORKSHOP SHALL NOT BE
     LIABLE FOR ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING,
     MODIFYING OR DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
-    
+
     THIS SOFTWARE IS NOT DESIGNED OR INTENDED FOR USE OR RESALE AS ON-LINE
     CONTROL EQUIPMENT IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE
     PERFORMANCE, SUCH AS IN THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT

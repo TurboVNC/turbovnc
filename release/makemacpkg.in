@@ -49,6 +49,7 @@ PREFIX=@CMAKE_INSTALL_PREFIX@
 BINDIR=@TVNC_BINDIR@
 DOCDIR=@TVNC_DOCDIR@
 JAVADIR=@TVNC_JAVADIR@
+BUILDNATIVE=@TVNC_BUILDNATIVE@
 
 if [ -f $PACKAGE_NAME-$VERSION.dmg ]; then
 	rm -f $PACKAGE_NAME-$VERSION.dmg
@@ -82,8 +83,12 @@ install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
 cp -RX "$PACKAGE_NAME Viewer.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 cp -RX "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
-echo "\"/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app/Contents/MacOS/JavaApplicationStub\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
-chmod 755 $PKGROOT$BINDIR/vncviewer
+VNCVIEWER=vncviewer
+if [ "$BUILDNATIVE" = "1" ]; then
+	VNCVIEWER=vncviewer-java
+fi
+echo "\"/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app/Contents/MacOS/JavaApplicationStub\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/$VNCVIEWER
+chmod 755 $PKGROOT$BINDIR/$VNCVIEWER
 
 mkdir $TMPDIR/dmg
 pkgbuild --root $PKGROOT --component-plist $SRCDIR/release/Package.plist \

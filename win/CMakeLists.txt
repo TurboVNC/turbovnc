@@ -37,6 +37,9 @@ add_definitions(-D__WIN32__ -U_MBCS -wd4996 -wd4482 -D_CRT_SECURE_NO_DEPRECATE)
 add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
 add_subdirectory(vncviewer)
 add_subdirectory(putty)
+if(TVNC_BUILDJAVA)
+	add_subdirectory(vncviewer-java)
+endif()
 
 install(FILES ../LICENSE.txt TurboVNC.url ../ChangeLog.txt
 	DESTINATION .)
