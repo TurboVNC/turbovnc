@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-09-20T15:32:02">
+<meta name="date" content="2014-09-29T03:28:55">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -209,7 +209,7 @@ License, v2</a><a name="idx004"></a>.</p>
 <h1 id="hd002"><a name="file002"></a>2&nbsp;Conventions Used in This Document</h1>
 
 <p>This document assumes that TurboVNC will be installed in the default 
-directory (<code>/opt/TurboVNC</code> on Un*x and Mac systems and 
+directory (<code>/opt/TurboVNC</code> on Linux/Un*x and Mac systems and 
 <code>c:\Program&nbsp;Files\TurboVNC</code> on Windows systems.)  If 
 your installation of TurboVNC resides in a different directory, then 
 adjust the instructions accordingly.</p>
@@ -570,9 +570,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 
 <h2 id="hd005004">5.4&nbsp;Installing TurboVNC from Source</h2>
 
-<p>If you are using a Un*x platform for which there is not a pre-built 
-TurboVNC binary package available, then log in as root, download the 
-TurboVNC source tarball 
+<p>If you are using a Linux/Un*x platform for which there is not a 
+pre-built TurboVNC binary package available, then log in as root, 
+download the TurboVNC source tarball 
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a class="remote" href="http://sourceforge.net/projects/turbovnc/files/">Files 
@@ -654,7 +654,7 @@ Windows XP), or select &ldquo;Uninstall TurboVNC&rdquo; in the
         In the new Command Prompt/terminal window, open a Secure Shell (SSH) 
         session into the TurboVNC server machine:
         <dl class="Description">
-            <dt class="Description-3 Description">Linux/Unix/Mac clients</dt>
+            <dt class="Description-3 Description">Linux/Un*x/Mac clients</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
 ssh&nbsp;{user}@{server}
@@ -722,7 +722,7 @@ ssh&nbsp;{user}@{server}
           <tr class="head ">
             <th class="head standard">Windows TurboVNC Viewer</th>
             <th class="head standard">X11 TurboVNC Viewer</th>
-            <th class="head standard">Mac TurboVNC Viewer</th>
+            <th class="head standard">Mac/Java TurboVNC Viewer</th>
           </tr>
           </thead>
           <tr class="standard">
@@ -733,9 +733,9 @@ ssh&nbsp;{user}@{server}
         </table>
         </div>
         
-        <br /> Enter the X display name (hostname/IP address and display number) 
-        of the TurboVNC session in the &ldquo;VNC server&rdquo; field, then 
-        click &ldquo;Connect&rdquo; (Windows/Mac) or press Enter (X11.)
+        <br /> Enter the X display name (hostname, or IP address, and display 
+        number) of the TurboVNC session in the &ldquo;VNC server&rdquo; field, 
+        then click &ldquo;Connect&rdquo; (Windows/Mac/Java) or press Enter (X11.)
     </li>
     <li class="Ordered-1 Ordered">
         Another dialog box appears, prompting for the password (if standard VNC 
@@ -748,7 +748,7 @@ ssh&nbsp;{user}@{server}
             <th class="head standard"></th>
             <th class="head standard">Windows TurboVNC Viewer</th>
             <th class="head standard">X11 TurboVNC Viewer</th>
-            <th class="head standard">Mac TurboVNC Viewer</th>
+            <th class="head standard">Mac/Java TurboVNC Viewer</th>
           </tr>
           </thead>
           <tr class="standard">
@@ -767,10 +767,10 @@ ssh&nbsp;{user}@{server}
         </div>
         
         <br /> Enter the VNC session password or the Unix username/password and 
-        click &ldquo;OK&rdquo; (Windows) or press Enter (X11/Mac.) <br /><br /> 
-        A TurboVNC desktop window should appear on your client machine.  This 
-        window contains a virtual desktop with which you can interact to launch 
-        X-Windows applications on the TurboVNC server machine.
+        click &ldquo;OK&rdquo; (Windows) or press Enter (X11/Mac/Java.) 
+        <br /><br /> A TurboVNC desktop window should appear on your client 
+        machine.  This window contains a virtual desktop with which you can 
+        interact to launch X-Windows applications on the TurboVNC server machine.
     </li>
 </ol>
 
@@ -823,8 +823,8 @@ session from a machine that does not have a native TurboVNC viewer
 installed (or a machine for which no native TurboVNC viewer is 
 available.)  The Java TurboVNC Viewer, when run as an applet, is 
 significantly slower than the native viewer on high-speed networks, but 
-on low-speed networks the Java viewer and native viewers have comparable 
-performance.</p>
+on low-speed networks, the Java applet and native viewers have 
+comparable performance.</p>
 
 <p>To use the Java TurboVNC Viewer in a web browser, point your web browser 
 to:</p>
@@ -855,7 +855,7 @@ machine, open a new SSH connection into the TurboVNC server machine
 using the following command line:</p>
 
 <dl class="Description">
-    <dt class="Description-1 Description">Linux/Unix/Mac clients</dt>
+    <dt class="Description-1 Description">Linux/Un*x/Mac clients</dt>
     <dd class="Description-1 Description">
 <pre class="verbatim">
 ssh&nbsp;-L&nbsp;{5900+n}:localhost:{5900+n}&nbsp;{user}@{server}
@@ -881,7 +881,7 @@ server <code>my_server</code> using user account <code>my_user</code>,
 you would type:</p>
 
 <dl class="Description">
-    <dt class="Description-1 Description">Linux/Unix/Mac clients</dt>
+    <dt class="Description-1 Description">Linux/Un*x/Mac clients</dt>
     <dd class="Description-1 Description">
 <pre class="verbatim">
 ssh&nbsp;-L&nbsp;5901:localhost:5901&nbsp;my_user@my_server
@@ -909,29 +909,33 @@ You can force PuTTY to use an IPv6 interface for the local end of the tunnel by 
 
 <h3 id="hd006004001">The <code>-via</code> and <code>-tunnel</code> Command-Line Options</h3>
 
-<p>If you are using the X11 and Mac TurboVNC Viewers, then you can simplify 
-the above by using the <code>-via</code> and <code>-tunnel</code> 
-command-line options to <code>vncviewer</code>.  For instance, running</p>
+<p>If you are using the X11 and Java/Mac TurboVNC Viewers, then you can 
+simplify the above by using the <code>-via</code> and 
+<code>-tunnel</code> command-line options.  For instance, running</p>
 
 <pre class="verbatim">
-/opt/TurboVNC/bin/vncviewer&nbsp;-via&nbsp;{user}@{server}&nbsp;localhost:{n}
+{vncviewer}&nbsp;-via&nbsp;{user}@{server}&nbsp;localhost:{n}
 </pre>
 
 <p>or</p>
 
 <pre class="verbatim">
-/opt/TurboVNC/bin/vncviewer&nbsp;-tunnel&nbsp;{user}@{server}
+{vncviewer}&nbsp;-tunnel&nbsp;{user}@{server}
 </pre>
 
 <p>is the equivalent of running</p>
 
 <pre class="verbatim">
 /usr/bin/ssh&nbsp;-L&nbsp;{fp}:localhost:{5900+n}&nbsp;{user}@{server}
-/opt/TurboVNC/bin/vncviewer&nbsp;localhost::{fp}
+{vncviewer}&nbsp;localhost::{fp}
 </pre>
 
 <p>where <em><code>{fp}</code></em> is a free TCP port on the client 
-machine (this is automatically determined by <code>vncviewer</code>.)</p>
+machine (this is automatically determined by the TurboVNC Viewer.)</p>
+
+<div class="important"><p class="important">
+In the above examples, <code>{vncviewer}</code> is the command used to launch the TurboVNC Viewer&ndash; <code>/opt/TurboVNC/bin/vncviewer</code> if running the X11 or Mac TurboVNC Viewer, <code>/opt/TurboVNC/bin/vncviewer-java</code> if running the Java TurboVNC Viewer on Linux/Un*x systems, or <code>c:\Program&nbsp;Files\TurboVNC\vncviewer-java.bat</code> if running the Java TurboVNC Viewer on Windows systems.
+</p></div>
 
 <p><code>-tunnel</code> can be used as a shortcut whenever the SSH and VNC 
 servers are the same machine.  <code>-via</code> is more flexible, since 
@@ -1009,15 +1013,20 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;vncviewer
         <code>vncviewer.exe&nbsp;/?</code> from a command prompt to get a full 
         list of supported command-line options and their descriptions.
     </dd>
-    <dt class="Description-1 Description">Mac TurboVNC Viewer</dt>
+    <dt class="Description-1 Description">Java/Mac TurboVNC Viewer</dt>
     <dd class="Description-1 Description">
         Run
 <pre class="verbatim">
-/opt/TurboVNC/bin/vncviewer&nbsp;-?
+{vncviewer}&nbsp;-?
 </pre>
 
         to display a full list of supported command-line options/parameters and 
-        their descriptions.
+        their descriptions, where <code>{vncviewer}</code> is the command used 
+        to launch the Java TurboVNC Viewer&ndash; 
+        <code>/opt/TurboVNC/bin/vncviewer</code> on Mac platforms, 
+        <code>/opt/TurboVNC/bin/vncviewer-java</code> on Linux/Un*x platforms, 
+        or <code>c:\Program&nbsp;Files\TurboVNC\vncviewer-java.bat</code> on 
+        Windows platforms.
     </dd>
 </dl>
 
@@ -1082,7 +1091,7 @@ TurboVNC compresses images:</p>
     </dd>
 </dl>
 
-<p>In the Windows and Mac/Java TurboVNC Viewers, these parameters can be 
+<p>In the Windows and Java/Mac TurboVNC Viewers, these parameters can be 
 adjusted by accessing the TurboVNC Viewer Options dialog box (click on 
 the &ldquo;Options&rdquo; button in the &ldquo;TurboVNC 
 Connection&rdquo; dialog box or, after connecting to the server, click 
@@ -1469,34 +1478,40 @@ as there are cores on the server machine, but you can set the
 it provides most of the same features as the native TurboVNC viewers.  
 It can also load libjpeg-turbo through JNI to accelerate JPEG decoding, 
 which gives the Java viewer similar performance to the native viewers in 
-most cases.  If you are using the Mac TurboVNC Viewer (which is just the 
-Java viewer packaged in a Mac app bundle), then libjpeg-turbo is 
-embedded in the app bundle, so no further action is needed to accelerate 
-it.  If you are using the Java TurboVNC Viewer on Windows or Linux, then 
-you will need to install one of the 
-<span class="remote"><a class="remote" href="http://www.sourceforge.net/projects/libjpeg-turbo/files">official 
-libjpeg-turbo packages</a></span><a name="idx0031"></a> (version 1.3.0 
-or later) in order to accelerate JPEG decoding.  Install the appropriate 
-version of libjpeg-turbo (32-bit or 64-bit) to match your JRE.  If you 
-are launching the Java TurboVNC Viewer from the command line, then it 
-will print a warning if it is unable to load libjpeg-turbo.  Otherwise, 
-if you are launching the viewer from an icon, you can verify whether 
-libjpeg-turbo has been loaded by opening the &ldquo;Connection 
-info&rdquo; dialog (after the connection to the server has been 
-established) and verifying that the &ldquo;JPEG decompression&rdquo; 
-field says &ldquo;Turbo&rdquo;.</p>
+most cases.   The TurboVNC Viewer on Mac platforms is simply the Java 
+TurboVNC Viewer packaged in such a way that it behaves like a native 
+viewer.  On Windows and Linux/Un*x, the Java TurboVNC Viewer is packaged 
+similarly, but it is included alongside the native TurboVNC Viewer, 
+giving users a choice between the two.  The Java TurboVNC Viewer 
+packaging includes the libjpeg-turbo JNI library, which is automatically 
+loaded when you launch the TurboVNC Viewer app on Mac, run the 
+<code>vncviewer-java</code> script on Linux/Un*x, run the 
+<code>vncviewer-java.bat</code> script on Windows, or launch &ldquo;Java 
+TurboVNC Viewer&rdquo; from the Windows Start Menu. Thus, if you are 
+running the Java TurboVNC Viewer in one of those ways, then no further 
+action is needed to accelerate it.</p>
+
+<p>If you suspect for whatever reason that JPEG decoding is not being 
+accelerated, then the easiest way to check is to open the 
+&ldquo;Connection Info&rdquo; dialog (after the connection to the server 
+has been established) and verify that the &ldquo;JPEG 
+decompression&rdquo; field says &ldquo;Turbo&rdquo;.  If you are 
+launching the Java TurboVNC Viewer from the command line, then it will 
+also print a warning if it is unable to load libjpeg-turbo.</p>
 
 
 
 <h3 id="hd007006002">Accelerating X11 Blitting</h3>
 
-<p>When running the Java TurboVNC Viewer on Un*x platforms, it is necessary 
-to enable MIT-SHM Pixmap support in order to achieve optimal blitting 
-(image drawing) performance.  MIT-SHM Pixmaps are not always enabled by 
-default on certain graphics cards (some nVidia cards, for instance), and 
-in such cases, it may be necessary to add an entry to <em>xorg.conf</em> 
-in order to enable them. You can verify whether X11 blitting is being 
-accelerated by running</p>
+<p>When running the Java TurboVNC Viewer on Linux/Un*x platforms, it is 
+necessary to enable MIT-SHM Pixmap support in order to achieve optimal 
+blitting (image drawing) performance.  MIT-SHM Pixmaps are not always 
+enabled by default on certain graphics cards (some nVidia cards, for 
+instance), and in such cases, it may be necessary to add an entry to 
+<em>xorg.conf</em> in order to enable them.  The 
+<code>vncviewer-java</code> script on Linux/Un*x platforms runs a helper 
+application to verify that MIT-SHM Pixmaps are available and working.  
+You can further verify that X11 blitting is being accelerated by running</p>
 
 <pre class="verbatim">
 java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;/opt/TurboVNC/java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
@@ -1529,8 +1544,10 @@ launching the Java TurboVNC Viewer is recommended.  This enables the
 adaptive compiler, which performs aggressive code optimizations and 
 actually learns how to better optimize a piece of code the more times it 
 encounters it.  Such optimizations greatly improve the decoding 
-performance for non-JPEG subrectangles.  If using the Mac TurboVNC 
-Viewer app, then the Server VM is automatically enabled.</p>
+performance for non-JPEG subrectangles.  If you are launching the Java 
+TurboVNC Viewer using the Mac app, the <code>vncviewer-java</code> or 
+<code>vncviewer-java.bat</code> scripts, or the Windows Start Menu 
+shortcut, then the Server VM is automatically enabled.</p>
 
 
 
@@ -1543,7 +1560,7 @@ Viewer environment without requiring the viewer to be installed on the
 client machine. This mechanism is preferred over deploying the viewer as 
 an applet, since JPEG decoding cannot be accelerated when the Java 
 TurboVNC Viewer is run as an applet.  See 
-<span class="remote"><a class="remote" href="http://www.TurboVNC.org/Documentation/JWS">http://www.TurboVNC.org/Documentation/JWS</a></span><a name="idx0032"></a> 
+<span class="remote"><a class="remote" href="http://www.TurboVNC.org/Documentation/JWS">http://www.TurboVNC.org/Documentation/JWS</a></span><a name="idx0031"></a> 
 for more details.</p>
 
 <p><br /></p>
@@ -1656,13 +1673,13 @@ Similarly, if the server prefers an authentication method that supports
 Unix login authentication, then the user can force the use of standard 
 VNC authentication by passing an argument of <code>-nounixlogin</code> 
 to <code>vncviewer</code>. Both of these command-line options work with 
-the Unix, Mac, and Windows versions of <code>vncviewer</code>.  When 
-using the Java/Mac TurboVNC Viewer, you can also accomplish the same 
-thing by unchecking &ldquo;Unix Login&rdquo; or &ldquo;Standard 
-VNC&rdquo; in the &ldquo;Security&rdquo; tab of the Options dialog.  
-When using the Java TurboVNC Viewer as an applet, you can accomplish the 
-same thing by setting the <code>User</code> or <code>NoUnixLogin</code> 
-parameters in <code>/opt/TurboVNC/java/index.vnc</code> on the server.</p>
+all versions of the TurboVNC Viewer.  When using the Java TurboVNC 
+Viewer, you can also accomplish the same thing by unchecking &ldquo;Unix 
+Login&rdquo; or &ldquo;Standard VNC&rdquo; in the &ldquo;Security&rdquo; 
+tab of the Options dialog.  When using the Java TurboVNC Viewer as an 
+applet, you can accomplish the same thing by setting the 
+<code>User</code> or <code>NoUnixLogin</code> parameters in 
+<code>/opt/TurboVNC/java/index.vnc</code> on the server.</p>
 
 <div class="important"><p class="important">
 Because of the way that the Windows TurboVNC Viewer caches settings for each connection, the <code>-user</code> and <code>-nounixlogin</code> options may not work properly unless you also specify the connection name on the command line (example:  <code>vncviewer&nbsp;-nounixlogin&nbsp;my_server:1</code>).
@@ -1913,7 +1930,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0033"></a>, 
+<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0032"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -2136,9 +2153,9 @@ from the TurboVNC Viewer GUI, but Hextile or ZRLE will be selected
 automatically when connecting to a RealVNC server.  Raw will be 
 automatically selected when connecting to a VNC server running on the 
 same machine as the viewer. Non-Tight encoding types, such as Hextile 
-and Raw, can also be manually selected from the <code>vncviewer</code> 
-command line.  In addition to Hextile, Raw, ZRLE, and RRE, the TurboVNC 
-Server also supports the CoRRE and Zlib legacy encoding types, for 
+and Raw, can also be manually selected from the TurboVNC Viewer command 
+line.  In addition to Hextile, Raw, ZRLE, and RRE, the TurboVNC Server 
+also supports the CoRRE and Zlib legacy encoding types, for 
 compatibility with older VNC viewers.</p>
 
 <p>All of the non-Tight encoding types have performance drawbacks.  Raw 
@@ -2148,7 +2165,9 @@ bandwidth.  Hextile uses very small tiles, which causes it to incur a
 large amount of computational overhead. It compresses too poorly to 
 perform well on slow links but uses too much CPU time to perform well on 
 fast links.  ZRLE improves upon this, but it is still too 
-computationally intense for fast networks.</p>
+computationally intense for fast networks.  The 
+<code>vncviewer-java</code> man page in the TurboVNC Linux packages has 
+some additional information about how Hextile, RRE, and ZRLE work.</p>
 
 <p><br /></p>
 
@@ -2373,7 +2392,7 @@ computationally intense for fast networks.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Platforms</td>
-    <td class="standard">X11, Mac (Java)</td>
+    <td class="standard">X11, Mac/Java</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>

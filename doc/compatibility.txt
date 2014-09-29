@@ -112,7 +112,7 @@ Viewer GUI, but Hextile or ZRLE will be selected automatically when
 connecting to a RealVNC server.  Raw will be automatically selected when
 connecting to a VNC server running on the same machine as the viewer.
 Non-Tight encoding types, such as Hextile and Raw, can also be manually
-selected from the ''vncviewer'' command line.  In addition to Hextile, Raw,
+selected from the TurboVNC Viewer command line.  In addition to Hextile, Raw,
 ZRLE, and RRE, the TurboVNC Server also supports the CoRRE and Zlib legacy
 encoding types, for compatibility with older VNC viewers.
 
@@ -122,4 +122,6 @@ take up an entire gigabit connection's worth of bandwidth.  Hextile uses very
 small tiles, which causes it to incur a large amount of computational overhead.
 It compresses too poorly to perform well on slow links but uses too much CPU
 time to perform well on fast links.  ZRLE improves upon this, but it is still
-too computationally intense for fast networks.
+too computationally intense for fast networks.  The ''vncviewer-java'' man page
+in the TurboVNC Linux packages has some additional information about how
+Hextile, RRE, and ZRLE work.

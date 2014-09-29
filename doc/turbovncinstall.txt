@@ -68,9 +68,9 @@ following error:
 
 ** Installing TurboVNC from Source
 
-If you are using a Un*x platform for which there is not a pre-built TurboVNC
-binary package available, then log in as root, download the TurboVNC source
-tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the
+If you are using a Linux/Un*x platform for which there is not a pre-built
+TurboVNC binary package available, then log in as root, download the TurboVNC
+source tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the
 [[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]],
 uncompress it, ''cd turbovnc-''__''{version}''__, and read ''BUILDING.txt''

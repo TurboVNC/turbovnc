@@ -45,7 +45,7 @@ images:
 		If JPEG compression is enabled, then zlib compression is always used with
 		non-JPEG subrectangles.
 
-In the Windows and Mac/Java TurboVNC Viewers, these parameters can be adjusted
+In the Windows and Java/Mac TurboVNC Viewers, these parameters can be adjusted
 by accessing the TurboVNC Viewer Options dialog box (click on the "Options"
 button in the "TurboVNC Connection" dialog box or, after connecting to the
 server, click on the Connection Options button in the toolbar.)  In the X11
@@ -302,30 +302,36 @@ set the ''TVNC_NTHREADS'' environment variable to override this.
 The Java TurboVNC Viewer can be used as a standalone app, in which case it
 provides most of the same features as the native TurboVNC viewers.  It can also
 load libjpeg-turbo through JNI to accelerate JPEG decoding, which gives the
-Java viewer similar performance to the native viewers in most
-cases.  If you are using the Mac TurboVNC Viewer (which is just the Java viewer
-packaged in a Mac app bundle), then libjpeg-turbo is embedded in the app
-bundle, so no further action is needed to accelerate it.  If you are using the
-Java TurboVNC Viewer on Windows or Linux, then you will need to install one of
-the [[http://www.sourceforge.net/projects/libjpeg-turbo/files][official libjpeg-turbo packages]]
-(version 1.3.0 or later) in order to accelerate JPEG decoding.  Install the
-appropriate version of libjpeg-turbo (32-bit or 64-bit) to match your JRE.  If
-you are launching the Java TurboVNC Viewer from the command line, then it will
-print a warning if it is unable to load libjpeg-turbo.  Otherwise, if you are
-launching the viewer from an icon, you can verify whether libjpeg-turbo has
-been loaded by opening the "Connection info" dialog (after the connection to
-the server has been established) and verifying that the "JPEG decompression"
-field says "Turbo".
+Java viewer similar performance to the native viewers in most cases.   The
+TurboVNC Viewer on Mac platforms is simply the Java TurboVNC Viewer packaged in
+such a way that it behaves like a native viewer.  On Windows and Linux/Un*x,
+the Java TurboVNC Viewer is packaged similarly, but it is included alongside
+the native TurboVNC Viewer, giving users a choice between the two.  The Java
+TurboVNC Viewer packaging includes the libjpeg-turbo JNI library, which is
+automatically loaded when you launch the TurboVNC Viewer app on Mac, run the
+''vncviewer-java'' script on Linux/Un*x, run the ''vncviewer-java.bat'' script
+on Windows, or launch "Java TurboVNC Viewer" from the Windows Start Menu.
+Thus, if you are running the Java TurboVNC Viewer in one of those ways, then no
+further action is needed to accelerate it.
+
+If you suspect for whatever reason that JPEG decoding is not being accelerated,
+then the easiest way to check is to open the "Connection Info" dialog (after
+the connection to the server has been established) and verify that the "JPEG
+decompression" field says "Turbo".  If you are launching the Java TurboVNC
+Viewer from the command line, then it will also print a warning if it is unable
+to load libjpeg-turbo.
 
 *** Accelerating X11 Blitting
 #OPT: noList! plain!
 
-When running the Java TurboVNC Viewer on Un*x platforms, it is necessary to
-enable MIT-SHM Pixmap support in order to achieve optimal blitting (image
+When running the Java TurboVNC Viewer on Linux/Un*x platforms, it is necessary
+to enable MIT-SHM Pixmap support in order to achieve optimal blitting (image
 drawing) performance.  MIT-SHM Pixmaps are not always enabled by default on
 certain graphics cards (some nVidia cards, for instance), and in such cases, it
-may be necessary to add an entry to __xorg.conf__ in order to enable them.
-You can verify whether X11 blitting is being accelerated by running
+may be necessary to add an entry to __xorg.conf__ in order to enable them.  The
+''vncviewer-java'' script on Linux/Un*x platforms runs a helper application to
+verify that MIT-SHM Pixmaps are available and working.  You can further verify
+that X11 blitting is being accelerated by running
 
 	#Verb: <<---
 	java -Dsun.java2d.trace=count -cp /opt/TurboVNC/java/VncViewer.jar com.turbovnc.vncviewer.ImageDrawTest
@@ -356,8 +362,10 @@ Passing an argument of ''-server'' to ''java'' when launching the Java TurboVNC
 Viewer is recommended.  This enables the adaptive compiler, which performs
 aggressive code optimizations and actually learns how to better optimize a
 piece of code the more times it encounters it.  Such optimizations greatly
-improve the decoding performance for non-JPEG subrectangles.  If using the Mac
-TurboVNC Viewer app, then the Server VM is automatically enabled.
+improve the decoding performance for non-JPEG subrectangles.  If you are
+launching the Java TurboVNC Viewer using the Mac app, the
+''vncviewer-java'' or ''vncviewer-java.bat'' scripts, or the Windows Start Menu
+shortcut, then the Server VM is automatically enabled.
 
 *** Java Web Start
 #OPT: noList! plain!
