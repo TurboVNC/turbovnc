@@ -146,13 +146,19 @@ fi
 
 %preun
 if [ "$1" = 0 ]; then
-  /etc/init.d/tvncserver stop >/dev/null 2>&1
-  if [ -f /etc/redhat-release ]; then /sbin/chkconfig --del tvncserver; fi
+  if [ -x /etc/init.d/tvncserver ]; then
+    /etc/init.d/tvncserver stop >/dev/null 2>&1
+  fi
+  if [ -f /etc/redhat-release -a -f /etc/init.d/tvncserver ]; then
+    /sbin/chkconfig --del tvncserver
+  fi
 fi
 
 %postun
 if [ "$1" -ge "1" ]; then
-  /etc/init.d/tvncserver condrestart >/dev/null 2>&1
+  if [ -x /etc/init.d/tvncserver ]; then
+    /etc/init.d/tvncserver condrestart >/dev/null 2>&1
+  fi
 fi
 %endif
 
