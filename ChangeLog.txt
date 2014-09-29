@@ -120,8 +120,8 @@ encoding disconnected.
 The following improvements have been made to The TurboVNC Server init script:
 -- The script now looks for the tvncservers file under @TVNC_CONFDIR@/sysconfig
    (where @TVNC_CONFDIR@ is the directory specified in the TVNC_CONFDIR CMake
-   variable) instead of under /etc/sysconfig.  This allows the script to work
-   properly when installed in an arbitrary directory.
+   variable) in addition to under /etc/sysconfig.  This allows the script to
+   work properly when installed in an arbitrary directory.
 -- When invoked with the "start" argument, the script now attempts to start
    only those TurboVNC sessions specified in the tvncservers file that have not
    yet been started.  If all sessions in the tvncservers file have been
