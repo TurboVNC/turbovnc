@@ -83,7 +83,6 @@ message(STATUS "TVNC_CONFDIR = ${TVNC_CONFDIR}")
 configure_file(vncserver.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver @ONLY)
 execute_process(COMMAND chmod +x vncserver
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-configure_file(vncserver.init.in vncserver.init @ONLY)
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver
 	DESTINATION ${TVNC_BINDIR})
@@ -93,9 +92,13 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver.conf
 	DESTINATION ${TVNC_CONFDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-auth.conf
 	DESTINATION ${TVNC_CONFDIR})
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver.init
-	DESTINATION ${TVNC_CONFDIR}/init.d RENAME tvncserver)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tvncservers
-	DESTINATION ${TVNC_CONFDIR}/sysconfig)
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	configure_file(vncserver.init.in vncserver.init @ONLY)
+	install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver.init
+		DESTINATION ${TVNC_CONFDIR}/init.d RENAME tvncserver)
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tvncservers
+		DESTINATION ${TVNC_CONFDIR}/sysconfig)
+endif()
 
 endif() # TVNC_BUILDSERVER
