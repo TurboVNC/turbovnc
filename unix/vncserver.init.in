@@ -59,8 +59,8 @@ start() {
         if [[ ! $_OUT =~ "A VNC server is already running" ]]; then
             RETVAL=$_RETVAL
             echo -n "${display} "
+            logger -p local7.notice "$_OUT"
         fi
-        logger -p local7.notice $_OUT
     done
     if [ "$RETVAL" != "NONE" ]; then
         if [ $REDHAT -eq 1 ]; then
@@ -84,7 +84,9 @@ stop() {
         unset BASH_ENV ENV
         _OUT=`echo ${display}; su ${display##*:} -c "@TVNC_BINDIR@/vncserver -kill :${display%%:*}" 2>&1`
         RETVAL=$?
-        logger -p local7.notice $_OUT
+        if [[ ! $_OUT =~ "You'll have to kill the Xvnc process manually" ]]; then
+            logger -p local7.notice "$_OUT"
+        fi
     done
     if [ $REDHAT -eq 1 ]; then
         [ "$RETVAL" -eq 0 ] && success $"vncserver shutdown" || \
