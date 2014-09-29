@@ -55,6 +55,7 @@ SRCDIR=@CMAKE_SOURCE_DIR@
 BINDIR=@TVNC_BINDIR@
 DOCDIR=@TVNC_DOCDIR@
 CONFDIR=@TVNC_CONFDIR@
+BUILDSERVER=@TVNC_BUILDSERVER@
 
 if [ ! `uid` -eq 0 ]; then
 	SUDO=sudo
@@ -70,8 +71,10 @@ make install DESTDIR=$TMPDIR
 if [ ! "$DOCDIR" = "/usr/share/doc/$PACKAGE_NAME-$VERSION" ]; then
 	safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION $TMPDIR/__tmpdoc
 fi
-if [ ! "$CONFDIR" = "/etc" ]; then
-	safedirmove $TMPDIR/$CONFDIR $TMPDIR/etc $TMPDIR/__tmpconf
+if [ "$BUILDSERVER" = "1" ]; then
+	if [ ! "$CONFDIR" = "/etc" ]; then
+		safedirmove $TMPDIR/$CONFDIR $TMPDIR/etc $TMPDIR/__tmpconf
+	fi
 fi
 
 mkdir -p $TMPDIR/usr/share/applications
