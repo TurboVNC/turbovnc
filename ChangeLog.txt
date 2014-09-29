@@ -2,6 +2,58 @@
 1.2.2
 ===============================================================================
 [1]
+The Xvnc build system has been completely refactored and now uses CMake, just
+like the rest of TurboVNC.  This makes the build somewhat more intuitive (for
+instance, 'make xserver' is no longer necessary when building Xvnc), and it
+fixes various problems with cross-compiling.
+-------------------------------------------------------------------------------
+[2]
+Xvnc can now be built and run successfully on OS X and PowerPC platforms.
+-------------------------------------------------------------------------------
+[3]
+The default DPI of the X server has been changed to 96, to match that of recent
+X.org releases and other VNC implementations.  This may make fonts appear
+larger than in previous TurboVNC releases.  Passing an argument of -dpi 75 to
+vncserver restores the old behavior.
+-------------------------------------------------------------------------------
+[4]
+When the server is run with a depth of 8, PseudoColor visuals now work properly
+(previously, the correct colormap was not always used.)  The server now uses
+a PseudoColor visual as the default for depth=8, which matches the behavior of
+other VNC solutions.
+-------------------------------------------------------------------------------
+[5]
+Added a security option to the Java TurboVNC Viewer that, when enabled, will
+prevent the user from opening any new VNC connections from within the same
+viewer instance.  In listen mode, this will further cause the viewer to exit
+after the first connection is closed.
+-------------------------------------------------------------------------------
+[6]
+Added a profiling feature to the Java TurboVNC Viewer.
+-------------------------------------------------------------------------------
+[7]
+The libjpeg-turbo JNI libraries are now deployed with the Java TurboVNC Viewer
+on Un*x and Windows, so it is no longer necessary to install the libjpeg-turbo
+SDK on those platforms in order to get accelerated JPEG decompression.
+-------------------------------------------------------------------------------
+[8]
+Fixed a couple of cosmetic issues with the automatic lossless refresh feature:
+-- If the source of a CopyRect operation was affected by lossy compression
+(meaning that the destination of the operation will become lossy as well), then
+the destination region is now ALR-eligible.  This can be overridden by
+setting the environment variable TVNC_ALRCOPYRECT to 0.
+-- Previously, if TVNC_ALRALL=0, a PutImage operation would trigger an ALR on
+all lossy regions of the display, even those that weren't drawn using a
+PutImage operation.  This has been fixed.
+-------------------------------------------------------------------------------
+[9]
+The Mac packaging system now uses pkgbuild and productbuild rather than
+PackageMaker (which is obsolete and no longer supported.)  This means that
+OS X 10.6 "Snow Leopard" or later must be used when packaging TurboVNC,
+although the packages produced can be installed on OS X 10.5 "Leopard" or
+later.  OS X 10.4 "Tiger" is no longer supported.
+-------------------------------------------------------------------------------
+[10]
 Fixed various usability issues related to the display of dialogs in the Java
 TurboVNC Viewer:
 -- The ability to control the Options dialog with the keyboard was lost after
@@ -18,83 +70,73 @@ TurboVNC Viewer:
    Clipboard dialogs would cause the viewer to temporarily exit full-screen
    mode.
 -------------------------------------------------------------------------------
-[2]
+[11]
 Fixed an issue in the Java TurboVNC Viewer whereby, when running as an applet,
 it would not read the applet parameters if an SSH connection error was
 encountered and the applet was reloaded in the browser.
 -------------------------------------------------------------------------------
-[3]
+[12]
 The AlwaysShowConnectionDialog parameter is now automatically disabled in the
 Java TurboVNC Viewer whenever SSH tunneling is enabled.  This prevents an issue
 whereby the "New TurboVNC Connection" dialog would pop up and display
 "localhost:{some random port}" after SSH authentication was completed, thus
 causing confusion.
 -------------------------------------------------------------------------------
-[4]
+[13]
 The Java TurboVNC Viewer was not displaying dialogs from its built-in SSH
 client, which caused the SSH client to fail if the server was not in the known
 hosts file.  This has been fixed.
 -------------------------------------------------------------------------------
-[5]
+[14]
+If the TurboVNC Server receives a clipboard update larger than 1 MB from a
+connected viewer, it will now ignore the update instead of disconnecting the
+viewer.
+-------------------------------------------------------------------------------
+[15]
+The Java TurboVNC Viewer can now be used to connect to UltraVNC Repeater
+instances.  Refer to the documentation for the Via parameter for more details.
+-------------------------------------------------------------------------------
+[16]
 Fixed an issue in the Java TurboVNC Viewer whereby, if a connection was
 established using SSH tunneling and another connection was then opened, the
 viewer would fail to exit after all of these connections were subsequently
 closed.
 -------------------------------------------------------------------------------
-[6]
+[17]
 Fixed an issue in the vncserver script whereby the TurboVNC Server would give
 an "Unrecognized option" error and fail to launch if the server was built
 without the optional Java viewer.
 -------------------------------------------------------------------------------
-[7]
-The default DPI of the X server has been changed to 96, to match that of recent
-X.org releases and other VNC implementations.  Passing an argument of -dpi 75
-to vncserver restores the old behavior.
--------------------------------------------------------------------------------
-[8]
-Fixed a segfault in Xvnc that would occur whenever a viewer that was using ZRLE
-encoding disconnected.
--------------------------------------------------------------------------------
-[9]
-The Mac packaging system now uses pkgbuild and productbuild rather than
-PackageMaker (which is obsolete and no longer supported.)  This means that
-OS X 10.6 "Snow Leopard" or later must be used when packaging TurboVNC,
-although the packages produced can be installed on OS X 10.5 "Leopard" or
-later.  OS X 10.4 "Tiger" is no longer supported.
--------------------------------------------------------------------------------
-[10]
-Fixed a couple of cosmetic issues with the automatic lossless refresh feature:
--- If the source of a CopyRect operation was affected by lossy compression
-(meaning that the destination of the operation will become lossy as well), then
-the destination region is now ALR-eligible.  This can be overridden by
-setting the environment variable TVNC_ALRCOPYRECT to 0.
--- Previously, if TVNC_ALRALL=0, a PutImage operation would trigger an ALR on
-all lossy regions of the display, even those that weren't drawn using a
-PutImage operation.  This has been fixed.
--------------------------------------------------------------------------------
-[11]
-Added a profiling feature to the Java TurboVNC Viewer.
--------------------------------------------------------------------------------
-[12]
-The Java TurboVNC Viewer can now be used to connect to UltraVNC Repeater
-instances.  Refer to the documentation for the Via parameter for more details.
--------------------------------------------------------------------------------
-[13]
-Added a security option to the Java TurboVNC Viewer that, when enabled, will
-prevent the user from opening any new VNC connections from within the same
-viewer instance.  In listen mode, this will further cause the viewer to exit
-after the first connection is closed.
--------------------------------------------------------------------------------
-[14]
-The Xvnc build system has been completely refactored and now uses CMake, just
-like the rest of TurboVNC.  This makes the build somewhat more intuitive (for
-instance, 'make xserver' is no longer necessary when building Xvnc), and it
-fixes various problems with cross-compiling.
--------------------------------------------------------------------------------
-[15]
+[18]
 Fixed a regression in the "automatic" spanning mode of the Windows TurboVNC
 Viewer introduced in TurboVNC 1.2.  Ever since that release, "automatic"
 spanning mode has been behaving just like "primary" mode.
+-------------------------------------------------------------------------------
+[19]
+Fixed a segfault in Xvnc that would occur whenever a viewer that was using ZRLE
+encoding disconnected.
+-------------------------------------------------------------------------------
+[20]
+The following improvements have been made to The TurboVNC Server init script:
+-- The script now looks for the tvncservers file under @TVNC_CONFDIR@/sysconfig
+   (where @TVNC_CONFDIR@ is the directory specified in the TVNC_CONFDIR CMake
+   variable) instead of under /etc/sysconfig.  This allows the script to work
+   properly when installed in an arbitrary directory.
+-- When invoked with the "start" argument, the script now attempts to start
+   only those TurboVNC sessions specified in the tvncservers file that have not
+   yet been started.  If all sessions in the tvncservers file have been
+   started, then the script does nothing.  To be consistent with other init
+   scripts, a success message is not printed/logged unless one or more TurboVNC
+   sessions is actually started successfully, and a failure message is not
+   printed/logged unless one or more TurboVNC sessions fails to start.
+-- When invoked with the "start" argument, the script will no longer abort if
+   a TurboVNC session fails to start.  It will attempt to start the other
+   sessions.
+-- When invoked with the "reload" argument", the script will now stop any
+   running TurboVNC sessions not specified in the tvncservers file and start
+   any sessions specified in the tvncservers file that aren't running.
+-- Fixed a bug whereby, if an error occurred when starting a TurboVNC session,
+   the error was not properly logged to the system error log.
 -------------------------------------------------------------------------------
 
 
