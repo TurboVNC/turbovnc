@@ -67,8 +67,8 @@ start() {
             [ "$RETVAL" -eq 0 ] && success $"vncserver startup" || \
                 failure $"vncserver start"
         else
-            [ "$RETVAL" -eq 0 ] && log_success_msg || \
-                log_failure_msg
+            [ "$RETVAL" -eq 0 ] && log_success_msg "[  OK  ]" || \
+                log_failure_msg "[FAILED]"
         fi
         [ "$RETVAL" -eq 0 ] && touch $LOCKDIR/tvncserver
     fi
@@ -92,8 +92,8 @@ stop() {
         [ "$RETVAL" -eq 0 ] && success $"vncserver shutdown" || \
             failure $"vncserver shutdown"
     else
-        [ "$RETVAL" -eq 0 ] && log_success_msg $"vncserver shutdown" || \
-            log_failure_msg $"vncserver shutdown"
+        [ "$RETVAL" -eq 0 ] && log_success_msg "[  OK  ]" || \
+            log_failure_msg "[FAILED]"
     fi
     echo
     [ "$RETVAL" -eq 0 ] && rm -f $LOCKDIR/tvncserver
