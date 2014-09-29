@@ -54,6 +54,10 @@ the listener to be shut down, for global options to be set for all
 connections, and for new forward connections to be made without using the
 command line or launching another viewer instance.
 -------------------------------------------------------------------------------
+[9]
+The default xstartup.turbovnc script that the TurboVNC Server creates will now
+properly launch the Gnome fallback window manager on Ubuntu 14.04.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
