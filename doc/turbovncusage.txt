@@ -11,7 +11,7 @@
 	#. In the new Command Prompt/terminal window, open a Secure Shell (SSH)
 		session into the TurboVNC server machine:
 
-		Linux/Unix/Mac clients :: {:}
+		Linux/Un*x/Mac clients :: {:}
 		#Verb: <<---
 		ssh {user}@{server}
 		---
@@ -44,7 +44,7 @@
 
 	#. On the client machine, start the TurboVNC Viewer.
 
-		Linux/Unix clients :: {:}
+		Linux/Un*x clients :: {:}
 		Open a new terminal/xterm and type
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncviewer
@@ -59,7 +59,7 @@
 
 	#. A small dialog box will appear.
 		{nl}{nl}
-		|| Windows TurboVNC Viewer || Linux/Unix/Mac (Java) TurboVNC Viewer ||
+		|| Windows TurboVNC Viewer || Linux/Un*x/Mac (Java) TurboVNC Viewer ||
 		| {img:newconn-win.png} | {img:newconn-java.png} |
 		{nl}
 		Enter the X display name (hostname, or IP address, and display number) of
@@ -69,12 +69,12 @@
 		VNC authentication is being used) or for the username and password (if
 		Unix login authentication is being used.)
 		{nl}{nl}
-		|| || Windows TurboVNC Viewer || Linux/Unix/Mac (Java) TurboVNC Viewer ||
+		|| || Windows TurboVNC Viewer || Linux/Un*x/Mac (Java) TurboVNC Viewer ||
 		| Standard VNC Authentication Dialog | {img:vncauth-win.png} | {img:vncauth-java.png} |
 		| Unix Login Authentication Dialog   | {img:unixauth-win.png} | {img:unixauth-java.png} |
 		{nl}
 		Enter the VNC session password or the Unix username/password and click
-		"OK" (Windows) or press Enter (Linux/Unix/Mac.)
+		"OK" (Windows) or press Enter (Linux/Un*x/Mac.)
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
 		window contains a virtual desktop with which you can interact to launch
@@ -147,7 +147,7 @@ you have started a TurboVNC session on the TurboVNC server machine, open a new
 SSH connection into the TurboVNC server machine using the following command
 line:
 
-	Linux/Unix/Mac clients :: {:}
+	Linux/Un*x/Mac clients :: {:}
 	#Verb: <<---
 	ssh -L {5900+n}:localhost:{5900+n} {user}@{server}
 	---
@@ -165,7 +165,7 @@ you want to connect.
 For instance, if you want to connect to display '':1'' on server ''my_server''
 using user account ''my_user'', you would type:
 
-	Linux/Unix/Mac clients :: {:}
+	Linux/Un*x/Mac clients :: {:}
 	#Verb: <<---
 	ssh -L 5901:localhost:5901 my_user@my_server
 	---
@@ -185,29 +185,34 @@ above example.)
 *** The ''-via'' and ''-tunnel'' Command-Line Options
 #OPT: noList! plain!
 
-If you are using the TurboVNC Viewer on Un*x or Mac systems, then you can
-simplify the above by using the ''-via'' and ''-tunnel'' command-line options
-to ''vncviewer''.  For instance, running
+If you are using the Java TurboVNC Viewer (which you are if you are using a
+Mac, Linux, or Un*x platform), then you can simplify the above by using the
+''-via'' and ''-tunnel'' command-line options.  For instance, running
 
 	#Verb: <<---
-	/opt/TurboVNC/bin/vncviewer -via {user}@{server} localhost:{n}
+	{vncviewer} -via {user}@{server} localhost:{n}
 	---
 
 or
 
 	#Verb: <<---
-	/opt/TurboVNC/bin/vncviewer -tunnel {user}@{server}
+	{vncviewer} -tunnel {user}@{server}
 	---
 
 is the equivalent of running
 
 	#Verb: <<---
 	/usr/bin/ssh -L {fp}:localhost:{5900+n} {user}@{server}
-	/opt/TurboVNC/bin/vncviewer localhost::{fp}
+	{vncviewer} localhost::{fp}
 	---
 
 where __''{fp}''__ is a free TCP port on the client machine (this is
-automatically determined by ''vncviewer''.)
+automatically determined by the TurboVNC Viewer.)
+
+	!!! In the above examples, ''{vncviewer}'' is the command used to launch the
+	TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Mac/Linux/Un*x
+	systems or ''c:\\Program Files\\TurboVNC\\vncviewer-java.bat'' if running
+	the Java TurboVNC Viewer on Windows systems.
 
 ''-tunnel'' can be used as a shortcut whenever the SSH and VNC servers are the
 same machine.  ''-via'' is more flexible, since it allows you to specify the
@@ -215,13 +220,13 @@ VNC server to which to connect.  The VNC server is specified from the point of
 view of the SSH server, which is why we used ''localhost'' in the above
 example.
 
-	!!! NOTE: In this release of TurboVNC, the TurboVNC Viewer for Un*x and Mac
-	platforms is actually the Java TurboVNC Viewer, which is packaged along with
-	the libjpeg-turbo JNI library and necessary glueware to make the viewer
-	behave and perform like a standalone native viewer.  Since the Java TurboVNC
-	Viewer contains an embedded SSH client, the ''-via'' and ''-tunnel''
-	parameters can also be used when the viewer is run as an applet or deployed
-	using Java Web Start.
+	!!! NOTE: In this release of TurboVNC, the TurboVNC Viewer for Linux/Un*x
+	and Mac platforms is actually the Java TurboVNC Viewer, which is packaged
+	along with the libjpeg-turbo JNI library and necessary glueware to make the
+	viewer behave and perform like a standalone native viewer.  Since the Java
+	TurboVNC Viewer contains an embedded SSH client, the ''-via'' and
+	''-tunnel'' parameters can also be used when the viewer is run as an applet
+	or deployed using Java Web Start.
 
 *** Forcing Secure Connections
 #OPT: noList! plain!
@@ -265,9 +270,16 @@ For more detailed instructions on the usage of TurboVNC:
 	run ''vncviewer.exe /?'' from a command prompt to get a full list of
 	supported command-line options and their descriptions.
 
-	Linux/Unix/Mac (Java) TurboVNC Viewer :: Run
+	Linux/Un*x/Mac (Java) TurboVNC Viewer :: Run
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncviewer -?
+	---
+	to display a full list of supported command-line options/parameters and
+	their descriptions.
+
+	Java TurboVNC Viewer on Windows :: Run
+	#Verb: <<---
+	c:\Program Files\TurboVNC\vncviewer-java.bat -?
 	---
 	to display a full list of supported command-line options/parameters and
 	their descriptions.

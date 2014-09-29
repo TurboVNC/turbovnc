@@ -39,7 +39,7 @@ add_subdirectory(util)
 add_subdirectory(vncviewer)
 add_subdirectory(putty)
 if(TVNC_BUILDJAVA)
-	add_subdirectory(vncviewer.java)
+	add_subdirectory(vncviewer-java)
 endif()
 
 install(FILES ../LICENSE.txt TurboVNC.url ../ChangeLog.txt

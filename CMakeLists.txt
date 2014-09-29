@@ -42,7 +42,7 @@ if(APPLE)
 elseif(UNIX)
 	set(DEFAULT_TVNC_BUILDJAVA 1)
 	set(DEFAULT_TVNC_BUILDNATIVE 1)
-	option(TVNC_BUILDNATIVE "Build native/X11 support applications and libraries for the TurboVNC Java Viewer"
+	option(TVNC_BUILDNATIVE "Build native/X11 support applications and libraries for the Java TurboVNC Viewer"
 		${DEFAULT_TVNC_BUILDNATIVE})
 else()
 	set(DEFAULT_TVNC_BUILDJAVA 0)

@@ -48,10 +48,10 @@ Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}putty.exe"; DestDir: "{app}
 Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}tcbench.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 #ifdef JAVA
 Source: "@CMAKE_BINARY_DIR@\java\VncViewer.jar"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
-Source: "@CMAKE_BINARY_DIR@\win\vncviewer.java\vncviewer-javaw.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
-Source: "@CMAKE_BINARY_DIR@\win\vncviewer.java\vncviewer-java.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
+Source: "@CMAKE_BINARY_DIR@\win\vncviewer-java\vncviewer-javaw.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
+Source: "@CMAKE_BINARY_DIR@\win\vncviewer-java\vncviewer-java.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
 Source: "@CMAKE_SOURCE_DIR@\java\com\turbovnc\vncviewer\README.txt"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
-Source: "@CMAKE_BINARY_DIR@\win\vncviewer.java\turbojpeg.dll"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
+Source: "@CMAKE_BINARY_DIR@\win\vncviewer-java\turbojpeg.dll"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
 #endif
 Source: "@CMAKE_SOURCE_DIR@\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion

@@ -255,7 +255,7 @@ You can override the default ALR behavior, thus making all screen regions
 eligible for ALR, by setting the ''TVNC_ALRALL'' environment variable to ''1''
 on the TurboVNC server machine prior to starting a TurboVNC session.  You can
 also set ''TVNC_ALRCOPYRECT'' to ''0'' to make CopyRect regions ALR-ineligible,
-which approximates the behavior of TurboVNC 1.2 and prior.
+which approximates the behavior of TurboVNC 1.2.1 and prior.
 
 ** Multithreading
 {anchor: Multithreading}
@@ -285,18 +285,17 @@ set the ''TVNC_NTHREADS'' environment variable to override this.
 The Java TurboVNC Viewer can be used as a standalone app, in which case it
 provides most of the same features as the native TurboVNC viewer.  It can also
 load libjpeg-turbo through JNI to accelerate JPEG decoding, which gives the
-Java viewer similar performance to the native viewer in most
-cases.  The TurboVNC Viewer on Mac and x86 Un*x platforms is simply the
-Java TurboVNC Viewer packaged in such a way that it behaves like a native
-viewer.  On Windows, the Java TurboVNC Viewer is packaged similarly, but it is
-included alongside the Windows (native) TurboVNC Viewer, giving users a choice
-between the two.  The Java TurboVNC Viewer packaging includes the libjpeg-turbo
-JNI library, which is automatically loaded when you launch the TurboVNC Viewer
-app on Mac, run the ''vncviewer'' script on Un*x, run the
-''vncviewer-java.bat'' script on Windows, or launch "Java TurboVNC
-Viewer" from the Windows Start Menu.  Thus, if you are running the Java
-TurboVNC Viewer in one of those ways, then no further action is needed to
-accelerate it.
+Java viewer similar performance to the native viewer in most cases.  The
+TurboVNC Viewer on Mac and Linux/Un*x platforms is simply the Java TurboVNC
+Viewer packaged in such a way that it behaves like a native viewer.  On
+Windows, the Java TurboVNC Viewer is packaged similarly, but it is included
+alongside the native TurboVNC Viewer, giving users a choice between the two.
+The Java TurboVNC Viewer packaging includes the libjpeg-turbo JNI library,
+which is automatically loaded when you launch the TurboVNC Viewer app on Mac,
+run the ''vncviewer'' script on Linux/Un*x, run the ''vncviewer-java.bat''
+script on Windows, or launch "Java TurboVNC Viewer" from the Windows Start
+Menu.  Thus, if you are running the Java TurboVNC Viewer in one of those ways,
+then no further action is needed to accelerate it.
 
 If you suspect for whatever reason that JPEG decoding is not being accelerated,
 then the easiest way to check is to open the "Connection Info" dialog (after
@@ -308,13 +307,13 @@ to load libjpeg-turbo.
 *** Accelerating X11 Blitting
 #OPT: noList! plain!
 
-When running the Java TurboVNC Viewer on Un*x platforms, it is necessary to
-enable MIT-SHM Pixmap support in order to achieve optimal blitting (image
+When running the Java TurboVNC Viewer on Linux/Un*x platforms, it is necessary
+to enable MIT-SHM Pixmap support in order to achieve optimal blitting (image
 drawing) performance.  MIT-SHM Pixmaps are not always enabled by default on
 certain graphics cards (some nVidia cards, for instance), and in such cases, it
 may be necessary to add an entry to __xorg.conf__ in order to enable them.  The
-''vncviewer'' script on Un*x platforms runs a helper application to verify
-that MIT-SHM Pixmaps are available and working.  You can further verify
+''vncviewer'' script on Linux/Un*x platforms runs a helper application to
+verify that MIT-SHM Pixmaps are available and working.  You can further verify
 that X11 blitting is being accelerated by running
 
 	#Verb: <<---
@@ -334,8 +333,8 @@ enabled.
 
 Even with accelerated X11 blitting, the Java TurboVNC Viewer may not be quite
 as fast on older, slower systems as the legacy X11 TurboVNC Viewer that shipped
-with TurboVNC 1.2 and prior.  This is because image drawing in Java 2D requires
-an extra memory copy that is not required when using raw X11 commands.
+with TurboVNC 1.2.x and prior.  This is because image drawing in Java 2D
+requires an extra memory copy that is not required when using raw X11 commands.
 However, on newer systems with fast memory access (particularly systems with a
 large L2 or L3 cache), this overhead should have a negligible impact on overall
 performance.
@@ -348,9 +347,9 @@ Viewer is recommended.  This enables the adaptive compiler, which performs
 aggressive code optimizations and actually learns how to better optimize a
 piece of code the more times it encounters it.  Such optimizations greatly
 improve the decoding performance for non-JPEG subrectangles.  If you are
-launching the Java TurboVNC Viewer using the Mac app, the ''vncviewer''
-script, or the Start Menu shortcut, then the Server VM is automatically
-enabled.
+launching the Java TurboVNC Viewer using the Mac app, the
+''vncviewer'' or''vncviewer-java.bat'' scripts, or the Windows Start Menu
+shortcut, then the Server VM is automatically enabled.
 
 *** Java Web Start
 #OPT: noList! plain!

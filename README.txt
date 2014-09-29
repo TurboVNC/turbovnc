@@ -66,10 +66,10 @@ The Windows version of TurboVNC contains the following programs:
 The Windows version of TurboVNC should work with Windows 2000 and later.
 
 
-Unix/Linux-Specific (not Mac)
+Linux/Un*x-Specific (not Mac)
 =============================
 
-The Unix/Linux version of TurboVNC contains the following programs:
+The Linux/Un*x version of TurboVNC contains the following programs:
 
   Xvnc - the TurboVNC Server.  Xvnc is both a VNC server and an X server with a
          "virtual" framebuffer.  You should normally use the vncserver script

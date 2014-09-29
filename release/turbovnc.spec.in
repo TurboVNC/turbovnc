@@ -126,6 +126,7 @@ EOF
 %clean
 rm -rf %{buildroot}
 
+%if "%{server}" == "1"
 %post
 if [ "$1" = 1 ]; then
   if [ -f /etc/redhat-release ]; then /sbin/chkconfig --add tvncserver; fi
@@ -141,6 +142,7 @@ fi
 if [ "$1" -ge "1" ]; then
   /etc/init.d/tvncserver condrestart >/dev/null 2>&1
 fi
+%endif
 
 %files
 %defattr(-,root,root)
