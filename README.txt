@@ -30,7 +30,7 @@ TurboVNC is
     Copyright (C) 2000-2009 TightVNC Group
     Copyright (C) 2010 University Corporation for Atmospheric Research
     Copyright (C) 2011 Pierre Ossman for Cendio AB
-    Copyright (C) 2009-2013 D. R. Commander
+    Copyright (C) 2009-2014 D. R. Commander
     All rights reserved.
 
 This software is distributed under the GNU General Public Licence as published
@@ -46,7 +46,7 @@ All Platforms
 
 All versions of TurboVNC contain the following programs:
 
-  vncviewer - the TurboVNC Viewer.  On Unix platforms (except Mac), this is an
+  vncviewer - the TurboVNC Viewer.  On Un*x platforms (except Mac), this is an
               X Windows application and requires an X Windows server.  On Mac
               platforms, it is a script that launches the Mac TurboVNC Viewer
               app, which is simply a packaged version of the Java TurboVNC
@@ -67,10 +67,10 @@ The Windows version of TurboVNC contains the following programs:
 The Windows version of TurboVNC should work with Windows 2000 and later.
 
 
-Unix/Linux-Specific (not Mac)
+Linux/Un*x-Specific (not Mac)
 =============================
 
-The Unix/Linux version of TurboVNC contains the following programs:
+The Linux/Un*x version of TurboVNC contains the following programs:
 
   Xvnc - the TurboVNC Server.  Xvnc is both a VNC server and an X server with a
          "virtual" framebuffer.  You should normally use the vncserver script
