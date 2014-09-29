@@ -75,9 +75,9 @@ start() {
     echo
 }
 
-stop() {
+shutdown() {
     echo -n $"Shutting down $prog: "
-    RETVAL=0
+    RETVAL=NONE
     for display in ${VNCSERVERS}
     do
         echo -n "${display} "
@@ -88,15 +88,50 @@ stop() {
             logger -p local7.notice "$_OUT"
         fi
     done
-    if [ $REDHAT -eq 1 ]; then
-        [ "$RETVAL" -eq 0 ] && success $"vncserver shutdown" || \
-            failure $"vncserver shutdown"
-    else
-        [ "$RETVAL" -eq 0 ] && log_success_msg "[  OK  ]" || \
-            log_failure_msg "[FAILED]"
+    if [ "$RETVAL" != "NONE" ]; then
+        if [ $REDHAT -eq 1 ]; then
+            [ "$RETVAL" -eq 0 ] && success $"vncserver shutdown" || \
+                failure $"vncserver shutdown"
+        else
+            [ "$RETVAL" -eq 0 ] && log_success_msg "[  OK  ]" || \
+                log_failure_msg "[FAILED]"
+        fi
     fi
     echo
-    [ "$RETVAL" -eq 0 ] && rm -f $LOCKDIR/tvncserver
+}
+
+stop() {
+    shutdown
+    if [ "$RETVAL" != "NONE" ]; then
+        [ "$RETVAL" -eq 0 ] && rm -f $LOCKDIR/tvncserver
+    fi
+}
+
+reload() {
+    # Walk the process list and shut down any TurboVNC sessions that aren't
+    # specified in the tvncservers file.
+    for active in `ps uh -C Xvnc | grep @TVNC_BINDIR@/Xvnc | awk '{ print $12,$16 }' | tr -d ':' | tr ' ' ':' | sed -e 's/(//' -e 's/)//'`
+    do
+        skip=
+        for display in ${VNCSERVERS}
+        do
+            if [[ $active == $display ]]; then
+                skip=1
+                break;
+             fi
+        done
+        if [[ ! -n $skip ]]; then
+             killlist+=("$active")
+        fi
+    done
+    VNCSERVERS_BAK=${VNCSERVERS}
+    VNCSERVERS=${killlist}
+    shutdown
+    VNCSERVERS=${VNCSERVERS_BAK}
+
+    # Start any TurboVNC sessions specified in the tvncservers file that
+    # haven't been started yet.
+    start
 }
 
 # See how we were called.
@@ -107,9 +142,12 @@ case "$1" in
     stop)
         stop
         ;;
-    restart|reload)
+    restart)
         stop
         start
+        ;;
+    reload)
+        reload
         ;;
     condrestart)
         if [ -f $LOCKDIR/tvncserver ]; then
@@ -121,7 +159,7 @@ case "$1" in
         status Xvnc
         ;;
     *)
-        echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+        echo $"Usage: $0 {start|stop|restart|reload|condrestart|status}"
         exit 1
 esac
 
