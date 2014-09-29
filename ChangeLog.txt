@@ -137,6 +137,8 @@ The following improvements have been made to The TurboVNC Server init script:
    any sessions specified in the tvncservers file that aren't running.
 -- Fixed a bug whereby, if an error occurred when starting a TurboVNC session,
    the error was not properly logged to the system error log.
+-- The script should now work on Red Hat Enterprise/CentOS 7 and recent Fedora
+   releases.
 -------------------------------------------------------------------------------
 
 

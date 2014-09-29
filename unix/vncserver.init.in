@@ -31,7 +31,7 @@ if [ $REDHAT -eq 1 ]; then
     . /etc/sysconfig/network
 
     # Check that networking is up.
-    [ ${NETWORKING} = "no" ] && exit 0
+    [ "${NETWORKING}" = "no" ] && exit 0
 fi
 
 unset VNCSERVERARGS
