@@ -42,6 +42,9 @@
 /* Define to 1 if you have the `strncasecmp' function. */
 #cmakedefine HAVE_STRNCASECMP
 
+/* Define to 1 if you have the `strlcat' function. */
+#cmakedefine HAVE_STRLCAT
+
 /* Define to 1 if you have the `strlcpy' function. */
 #cmakedefine HAVE_STRLCPY
 
