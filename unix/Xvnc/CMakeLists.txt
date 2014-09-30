@@ -8,6 +8,8 @@ elseif(CPU_TYPE STREQUAL "i386")
 	add_definitions(-D__i386__)
 elseif(CPU_TYPE STREQUAL "arm")
 	add_definitions(-D__arm__ -D__arm32__)
+elseif(CPU_TYPE STREQUAL "ppc")
+	add_definitions(-D__powerpc__)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
