@@ -228,6 +228,8 @@ if (-f "/usr/lib/X11/rgb.txt") {
     $colorPath = "/usr/share/X11/rgb";
 } elsif (-f "/opt/X11/share/X11/rgb.txt") {
     $colorPath = "/opt/X11/share/X11/rgb";
+} elsif (-f "/usr/X11/share/X11/rgb.txt") {
+    $colorPath = "/usr/X11/share/X11/rgb";
 }
 
 # Check command line options
