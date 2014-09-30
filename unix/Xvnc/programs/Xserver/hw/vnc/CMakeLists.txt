@@ -14,7 +14,6 @@ endif()
 
 add_library(vnc STATIC
 	auth.c
-	authpam.c
 	cmap.c
 	corre.c
 	cursor.c
