@@ -1029,10 +1029,10 @@ public class VncViewer extends javax.swing.JApplet
   = new BoolParameter("CompatibleGUI",
   "Normally, the TurboVNC Viewer GUI exposes only the settings that are " +
   "useful for TurboVNC servers.  Enabling this option will change the " +
-  "compression level and quality sliders such that they use a 0-9 scale, " +
-  "which is useful when connecting to other types of VNC servers.  This " +
-  "option is enabled automatically when using any encoding type other than " +
-  "Tight.", false);
+  "compression level slider such that it can be used to select any " +
+  "compression level from 0-9, which is useful when connecting to other " +
+  "types of VNC servers.  This option is enabled automatically when using " +
+  "any encoding type other than Tight.", false);
 
   static IntParameter colors
   = new IntParameter("Colors",

@@ -671,8 +671,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
   public void itemStateChanged(ItemEvent e) {
     Object s = e.getSource();
-    if (s instanceof JCheckBox && (JCheckBox)s == allowJpeg &&
-        !VncViewer.compatibleGUI.getValue()) {
+    if (s instanceof JCheckBox && (JCheckBox)s == allowJpeg) {
       if (allowJpeg.isSelected()) {
         jpegQualityLevel.setEnabled(true);
         jpegQualityLabel.setEnabled(true);
@@ -682,8 +681,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         subsamplingLabel.setEnabled(true);
         subsamplingLabelLo.setEnabled(true);
         subsamplingLabelHi.setEnabled(true);
-        compressionLevel.setMinimum(1);
-        compressionLevel.setMaximum(2);
+        if (compressionLevel.getMaximum() < 9) {
+          compressionLevel.setMinimum(1);
+          compressionLevel.setMaximum(2);
+        }
       } else {
         jpegQualityLevel.setEnabled(false);
         jpegQualityLabel.setEnabled(false);
@@ -693,8 +694,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         subsamplingLabel.setEnabled(false);
         subsamplingLabelLo.setEnabled(false);
         subsamplingLabelHi.setEnabled(false);
-        compressionLevel.setMinimum(0);
-        compressionLevel.setMaximum(1);
+        if (compressionLevel.getMaximum() < 9) {
+          compressionLevel.setMinimum(0);
+          compressionLevel.setMaximum(1);
+        }
       }
       setEncMethodComboBox();
     }
@@ -804,9 +807,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   }
 
   void setTightOptions(int encoding) {
-    if (encoding != Encodings.encodingTight ||
-        VncViewer.compatibleGUI.getValue()) {
-      allowJpeg.setEnabled(encoding == Encodings.encodingTight);
+    if (encoding != Encodings.encodingTight) {
+      allowJpeg.setEnabled(false);
       subsamplingLevel.setEnabled(false);
       subsamplingLabel.setEnabled(false);
       subsamplingLabelLo.setEnabled(false);
@@ -830,6 +832,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       encMethodComboBox.setSelectedItem(Encodings.encodingName(encoding));
       encMethodLabel.setText("Encoding type:");
       encMethodLabel.setEnabled(false);
+    }
+    if (encoding != Encodings.encodingTight ||
+        VncViewer.compatibleGUI.getValue()) {
+      compressionLevel.setMinimum(0);
       compressionLevel.setMaximum(9);
       compressionLevel.setEnabled(true);
       compressionLabel.setEnabled(true);

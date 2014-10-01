@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,8 +113,7 @@ abstract public class CMsgWriter {
     if (opts.compressLevel >= 0 && opts.compressLevel <= 9)
       encodings[nEncodings++] = Encodings.pseudoEncodingCompressLevel0
         + opts.compressLevel;
-    if (opts.allowJpeg && opts.preferredEncoding == Encodings.encodingTight &&
-        !com.turbovnc.vncviewer.VncViewer.compatibleGUI.getValue()) {
+    if (opts.allowJpeg && opts.preferredEncoding == Encodings.encodingTight) {
       int qualityLevel = opts.quality / 10;
       if (qualityLevel > 9) qualityLevel = 9;
       encodings[nEncodings++] = Encodings.pseudoEncodingQualityLevel0
@@ -125,9 +124,7 @@ abstract public class CMsgWriter {
         + opts.subsampling;
     } else if (opts.preferredEncoding != Encodings.encodingTight ||
                (lastEncoding >= 0 &&
-                lastEncoding != Encodings.encodingTight) ||
-               (com.turbovnc.vncviewer.VncViewer.compatibleGUI.getValue() &&
-                opts.allowJpeg)) {
+                lastEncoding != Encodings.encodingTight)) {
       int qualityLevel = opts.quality;
       if (qualityLevel > 9) qualityLevel = 9;
       encodings[nEncodings++] = Encodings.pseudoEncodingQualityLevel0
