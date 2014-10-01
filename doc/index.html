@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-09-29T03:58:48">
+<meta name="date" content="2014-10-01T14:56:39">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -486,7 +486,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
 <h3 id="hd005001002">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
-    <li value="1" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="1">
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a class="remote" href="http://sourceforge.net/projects/turbovnc/files/">Files 
@@ -508,7 +508,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         <span class="remote"><a class="remote" href="http://www.ubuntu.com">Ubuntu</a></span><a name="idx0022"></a> 
         6.06 or later.) <br />
     </li>
-    <li value="2" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue one of the following commands:
         <dl class="Description">
@@ -1081,13 +1081,26 @@ TurboVNC compresses images:</p>
          &ldquo;smooth&rdquo; image content, it may be difficult to detect any 
          difference between 1X, 2X, and 4X.
     </dd>
-    <dt class="Description-1 Description">Zlib compression level</dt>
+    <dt class="Description-1 Description">Compression level</dt>
     <dd class="Description-1 Description">
-         If zlib compression is enabled, then indexed color, mono, and 
-         raw-encoded subrectangles will be compressed using zlib prior to 
-         transmission.  This decreases network bandwidth usage at the expense of 
-         increased CPU usage. If JPEG compression is enabled, then zlib 
-         compression is always used with non-JPEG subrectangles.
+         In TurboVNC, the compression level specifies: 
+         <ol class="Ordered numeric"><li class="Ordered-0">
+            the level of zlib compression that will be used with indexed color, 
+            mono, and raw subrectangles
+        </li>
+        <li class="Ordered-0">
+            the &ldquo;palette threshold&rdquo; (the minimum number of colors 
+            that a 
+            subrectangle must have before it is encoded as JPEG or raw instead 
+            of 
+            indexed color)
+        </li>
+        <li class="Ordered-0">
+            whether or not <a href="#InterframeComparison">interframe 
+            comparison</a><a name="idx0029"></a> should be used
+        </li></ol> See Section 
+        <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
+        details.
     </dd>
 </dl>
 
@@ -1110,7 +1123,7 @@ options described above:</p>
     <th class="head standard">Allow JPEG</th>
     <th class="head standard">JPEG image quality</th>
     <th class="head standard">JPEG chrominance subsampling</th>
-    <th class="head standard">Zlib compression level</th>
+    <th class="head standard">Compression level</th>
     <th class="head standard">Notes</th>
   </tr>
   </thead>
@@ -1127,23 +1140,23 @@ options described above:</p>
     <td class="standard">Yes</td>
     <td class="standard">80</td>
     <td class="standard">2x</td>
-    <td class="standard">1</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces some minor, but generally not very noticeable, image compression artifacts.  All else being equal, this encoding method typically uses about twice the network bandwidth of the &ldquo;Tight + Low-Quality JPEG&rdquo; encoding method and about half the bandwidth of the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, making it appropriate for medium-speed networks such as 10 Megabit Ethernet.</td>
+    <td class="standard">6</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces some minor, but generally not very noticeable, image compression artifacts.  All else being equal, this encoding method typically uses about twice the network bandwidth of the &ldquo;Tight + Low-Quality JPEG&rdquo; encoding method and about half the bandwidth of the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, making it appropriate for medium-speed networks such as 10 Megabit Ethernet.  Interframe comparison is enabled with this encoding method (Compression Level 6 = Compression Level 1 + interframe comparison.)</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Tight + Low-Quality JPEG&rdquo;</td>
     <td class="standard">Yes</td>
     <td class="standard">30</td>
     <td class="standard">4x</td>
-    <td class="standard">1</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0029"></a>.</td>
+    <td class="standard">7</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0030"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
     <td class="standard">No</td>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
-    <td class="standard">None</td>
+    <td class="standard">0</td>
     <td class="standard">This encoding method uses indexed color subencoding for subrectangles that have a low number of unique colors, but it otherwise does not perform any image compression at all.  Lossless Tight is thus suitable only for gigabit and faster networks.  This encoding method uses significantly less CPU time than any of the JPEG-based encoding methods.  Lossless Tight requires an RFB protocol extension that is, as of this writing, only supported by the TurboVNC Viewer.</td>
   </tr>
   <tr class="standard">
@@ -1151,8 +1164,8 @@ options described above:</p>
     <td class="standard">No</td>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
-    <td class="standard">1</td>
-    <td class="standard">This encoding method uses indexed color subencoding for subrectangles that have a low number of unique colors and raw subencoding for subrectangles that have a high number of unique colors.  It compresses all subrectangles using zlib with zlib compression level 1.  For certain types of low-color workloads (CAD applications, in particular), this encoding method may use less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time than any of the JPEG-based encoding methods.</td>
+    <td class="standard">6</td>
+    <td class="standard">This encoding method uses indexed color subencoding for subrectangles that have a low number of unique colors and raw subencoding for subrectangles that have a high number of unique colors.  It compresses all subrectangles using zlib with zlib compression level 1.  For certain types of low-color workloads (CAD applications, in particular), this encoding method may use less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time than any of the JPEG-based encoding methods.  Interframe comparison is enabled with this encoding method (Compression Level 6 = Compression Level 1 + interframe comparison.)</td>
   </tr>
 </table>
 </div>
@@ -1199,13 +1212,14 @@ higher from the viewer (see below.)</p>
 <p><a name="AdvancedCompression"></a></p>
 
 <p>One of the underlying principles of TurboVNC&rsquo;s design is to expose 
-only the options that provide the best performance &ldquo;bang for the 
-buck.&rdquo;  Thus, the TurboVNC Viewer GUI does not normally provide 
-any way of requesting a compression level greater than 1.  Compression 
-Levels 2-9 can, however, be specified on the command line (or as a 
-parameter, if using the Java TurboVNC Viewer), and doing so will enable 
-an advanced mode in the TurboVNC Viewer GUI that allows any compression 
-level from 0 to 9 to be requested.</p>
+only the options that have proven to be useful (that is, the options 
+that have proven to have good performance tradeoffs.)  Thus, the 
+TurboVNC Viewer GUI will normally only allow you to select Compression 
+Levels 1-2 if JPEG subencoding is enabled (6-7 if interframe comparison 
+is also enabled) or Compression Levels 0-1 if JPEG subencoding is 
+disabled (5-6 if interframe comparison is enabled.)  Other compression 
+levels can, however, be specified on the command line (or as a 
+parameter, if using the Java TurboVNC Viewer.)</p>
 
 <p>When connecting to a TurboVNC server, requesting a particular 
 compression level has the following effect:</p>
@@ -1242,7 +1256,7 @@ compression level has the following effect:</p>
     <td class="standard">3</td>
     <td class="standard">96</td>
     <td class="standard">No</td>
-    <td class="standard">A higher palette threshold causes indexed color subencoding to be used more often than with CL 1, and indexed color subrectangles are compressed using a higher zlib compression level.  This can provide typically 20-40% better compression than CL 1 (with a commensurate increase in CPU usage) for workloads that have a low number of unique colors.  However, Compression Level 2 will increase the CPU usage for high-color workloads without providing significantly better compression.</td>
+    <td class="standard">A higher palette threshold causes indexed color subencoding to be used more often than with CL 1, and indexed color subrectangles are compressed using a higher zlib compression level.  This can provide typically 20-40% better compression than CL 1 (with a commensurate increase in CPU usage) for workloads that have a low number of unique colors.  However, Compression Level 2 can increase the CPU usage for some high-color workloads without providing significantly better compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">3-4</td>
@@ -1537,7 +1551,7 @@ Viewer environment without requiring the viewer to be installed on the
 client machine. This mechanism is preferred over deploying the viewer as 
 an applet, since JPEG decoding cannot be accelerated when the Java 
 TurboVNC Viewer is run as an applet.  See 
-<span class="remote"><a class="remote" href="http://www.TurboVNC.org/Documentation/JWS">http://www.TurboVNC.org/Documentation/JWS</a></span><a name="idx0030"></a> 
+<span class="remote"><a class="remote" href="http://www.TurboVNC.org/Documentation/JWS">http://www.TurboVNC.org/Documentation/JWS</a></span><a name="idx0031"></a> 
 for more details.</p>
 
 <p><br /></p>
@@ -1906,7 +1920,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0031"></a>, 
+<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0032"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -2042,7 +2056,7 @@ mixing TurboVNC with other VNC flavors.</p>
         allow the JPEG quality to be specified on the standard 1-100 scale and 
         allow the JPEG chrominance subsampling to be specified seperately. 
         TigerVNC 1.2 (and later) includes the same extensions on the server 
-        side, so the TigerVNC 1.2 Server will behave like the TurboVNC Server 
+        side, so the TigerVNC 1.2+ Server will behave like the TurboVNC Server 
         when a TurboVNC viewer is connected to it. <br /><br /> When a TurboVNC 
         viewer is connected to a TightVNC or TigerVNC 1.0/1.1 server, setting 
         the JPEG quality to N in the TurboVNC Viewer sets the JPEG quality level 
@@ -2058,18 +2072,21 @@ mixing TurboVNC with other VNC flavors.</p>
         <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        Although Compression Levels 2-9 cannot be set using the TurboVNC Viewer 
-        GUI, you can still specify these higher compression levels from the 
-        TurboVNC Viewer command line.  It should be noted, however, that our 
-        experiments have shown that compression levels higher than 5 are 
-        generally not useful in the TightVNC or TigerVNC Servers.  They increase 
-        CPU usage exponentially without providing any significant savings in 
-        bandwidth relative to Compression Level 5. <br /><br />
+        Normally, the TurboVNC Viewer GUI only allows you to select the 
+        compression levels that are useful for TurboVNC servers, but you can 
+        specify additional compression levels on the TurboVNC Viewer command 
+        line.  You can also pass an argument of <code>-compatiblegui</code> to 
+        the viewer to expose all 10 compression levels in the GUI, which is 
+        useful when connecting to non-TurboVNC servers.  It should be noted, 
+        however, that our experiments have shown that compression levels higher 
+        than 5 are generally not useful in the TightVNC or TigerVNC Servers.  
+        They increase CPU usage exponentially without providing any significant 
+        savings in bandwidth relative to Compression Level 5. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC supports an extension to Tight encoding that allows the server 
         to tell the viewer not to use zlib to decompress a particular 
-        subrectangle.  zlib introduces a tremendous amount of performance 
+        subrectangle.  Zlib introduces a tremendous amount of performance 
         overhead, even when zlib compression level 0 (no compression) is used.  
         Thus, when a TurboVNC viewer requests Compression Level 0 from the 
         TurboVNC Server, the TurboVNC Server bypasses zlib altogether.  TightVNC 
@@ -2079,16 +2096,12 @@ mixing TurboVNC with other VNC flavors.</p>
     </li>
     <li class="Itemize-1 Itemize asterisk">
         The TightVNC Server will use much more CPU time across the board than 
-        the TurboVNC Server, all else being equal.  TigerVNC 1.2 can be made to 
-        perform similarly to a single-threaded instance of TurboVNC, but this 
-        requires using non-default settings in TigerVNC.  The default TigerVNC 
-        settings are roughly equivalent to Compression Level 2 in TurboVNC, 
-        which will use significantly more CPU time than Compression Level 1.  
-        Additionally, TigerVNC does interframe comparison by default whenever 
-        Compression Level 2 or above is selected, and this increases CPU time 
-        even more.  Compression Level 1 should be used in TigerVNC in order to 
-        simulate the behavior of TurboVNC&rsquo;s &ldquo;Tight + JPEG&rdquo; 
-        encoding methods.
+        the TurboVNC Server, all else being equal.  When properly configured, 
+        the TigerVNC 1.2.x and 1.3.x servers can be made to perform similarly to 
+        a single-threaded instance of the TurboVNC Server.  With JPEG enabled, 
+        Compression Levels 1 and 2 in TigerVNC are roughly equivalent to the 
+        same compression levels in TurboVNC, except that TigerVNC enables 
+        interframe comparison automatically with Compression Level 2 and above.
     </li>
 </ul>
 
