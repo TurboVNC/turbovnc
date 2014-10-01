@@ -551,7 +551,7 @@ public class VncViewer extends javax.swing.JApplet
     options.allowJpeg.setSelected(opts.allowJpeg);
     options.subsamplingLevel.setValue(opts.getSubsamplingOrdinal());
     options.jpegQualityLevel.setValue(opts.quality);
-    options.compressionLevel.setValue(opts.compressLevel);
+    options.setCompressionLevel(opts.compressLevel);
 
     setTightOptions();
 
@@ -582,7 +582,7 @@ public class VncViewer extends javax.swing.JApplet
   public void getOptions() {
     opts.allowJpeg = options.allowJpeg.isSelected();
     opts.quality = options.jpegQualityLevel.getValue();
-    opts.compressLevel = options.compressionLevel.getValue();
+    opts.compressLevel = options.getCompressionLevel();
     opts.subsampling = options.getSubsamplingLevel();
     opts.sendLocalUsername = options.sendLocalUsername.isSelected();
     opts.viewOnly = options.viewOnly.isSelected();
@@ -1008,7 +1008,7 @@ public class VncViewer extends javax.swing.JApplet
   "using JPEG.  Higher compression levels have higher palette thresholds and " +
   "thus favor the use of indexed color subencoding, whereas lower compression " +
   "levels favor the use of JPEG.\n " +
-  "Compression Level 1 is always the default whenever JPEG is enabled, because " +
+  "Compression Level 1 is usually the default whenever JPEG is enabled, because " +
   "extensive experimentation has revealed little or no benefit to using higher " +
   "compression levels with most 3D and video workloads.  However, v1.1 and " +
   "later of the TurboVNC Server also supports Compression Level 2 when JPEG is " +
@@ -1024,6 +1024,15 @@ public class VncViewer extends javax.swing.JApplet
   "draws the same thing over and over again, but interframe comparison also " +
   "causes the TurboVNC Server to use more CPU time and much more memory.",
   1, 0, 9);
+
+  public static BoolParameter compatibleGUI
+  = new BoolParameter("CompatibleGUI",
+  "Normally, the TurboVNC Viewer GUI exposes only the settings that are " +
+  "useful for TurboVNC servers.  Enabling this option will change the " +
+  "compression level and quality sliders such that they use a 0-9 scale, " +
+  "which is useful when connecting to other types of VNC servers.  This " +
+  "option is enabled automatically when using any encoding type other than " +
+  "Tight.", false);
 
   static IntParameter colors
   = new IntParameter("Colors",

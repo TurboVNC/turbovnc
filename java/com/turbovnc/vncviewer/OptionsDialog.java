@@ -42,7 +42,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   OptionsDialogCallback cb;
   JTabbedPane tabPane;
   JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
-  JCheckBox allowJpeg;
+  JCheckBox allowJpeg, interframe;
   JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox, span;
   JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
@@ -121,10 +121,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       jpegQualityLevel.getValue());
 
     compressionLabelString =
-      new String("Zlib compression level: ");
+      new String("Compression level (see docs): ");
     compressionLabel = new JLabel();
     compressionLevel =
-      new JSlider(JSlider.HORIZONTAL, 0, 1, 1);
+      new JSlider(JSlider.HORIZONTAL, 0, 2, 1);
     compressionLevel.addChangeListener(this);
     compressionLevel.setMajorTickSpacing(1);
     compressionLevel.setSnapToTicks(true);
@@ -133,8 +133,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     compressionLabelLo = new JLabel("fast");
     compressionLabelHi = new JLabel("best");
     compressionLabel.setText(compressionLabelString +
-      (compressionLevel.getValue() == 0 ? "None" :
-        compressionLevel.getValue()));
+                             compressionLevel.getValue());
+
+    interframe = new JCheckBox("Interframe Comparison");
+    interframe.addItemListener(this);
 
     Dialog.addGBComponent(encMethodLabel, imagePanel,
                           0, 0, 3, 1, 2, 2, 0, 0,
@@ -211,6 +213,11 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.NONE,
                           GridBagConstraints.LINE_START,
                           new Insets(2, 2, 2, 2));
+    Dialog.addGBComponent(interframe, imagePanel,
+                          0, 9, 3, 1, 0, 2, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 0, 2, 2));
 
     Dialog.addGBComponent(imagePanel, encodingPanel,
                           0, 0, 1, GridBagConstraints.REMAINDER, 0, 0, 1, 1,
@@ -506,8 +513,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       subsamplingLabelTable.get(subsamplingLevel.getValue());
     UserPreferences.set("global", "Subsampling", subsamplingStr);
     UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
-    UserPreferences.set("global", "CompressLevel",
-                        compressionLevel.getValue());
+    UserPreferences.set("global", "CompressLevel", getCompressionLevel());
     UserPreferences.set("global", "ViewOnly", viewOnly.isSelected());
     UserPreferences.set("global", "RecvClipboard",
                         acceptClipboard.isSelected());
@@ -642,30 +648,31 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         allowJpeg.setSelected(true);
         subsamplingLevel.setValue(0);
         jpegQualityLevel.setValue(95);
-        compressionLevel.setValue(1);
+        setCompressionLevel(1);
       } else if (encMethod.equals("Tight + Medium-Quality JPEG")) {
         allowJpeg.setSelected(true);
         subsamplingLevel.setValue(1);
         jpegQualityLevel.setValue(80);
-        compressionLevel.setValue(1);
+        setCompressionLevel(6);
       } else if (encMethod.equals("Tight + Low-Quality JPEG (WAN)")) {
         allowJpeg.setSelected(true);
         subsamplingLevel.setValue(2);
         jpegQualityLevel.setValue(30);
-        compressionLevel.setValue(1);
+        setCompressionLevel(7);
       } else if (encMethod.equals("Lossless Tight (Gigabit)")) {
         allowJpeg.setSelected(false);
-        compressionLevel.setValue(0);
+        setCompressionLevel(0);
       } else if (encMethod.equals("Lossless Tight + Zlib (WAN)")) {
         allowJpeg.setSelected(false);
-        compressionLevel.setValue(1);
+        setCompressionLevel(6);
       }
     }
   }
 
   public void itemStateChanged(ItemEvent e) {
     Object s = e.getSource();
-    if (s instanceof JCheckBox && (JCheckBox)s == allowJpeg) {
+    if (s instanceof JCheckBox && (JCheckBox)s == allowJpeg &&
+        !VncViewer.compatibleGUI.getValue()) {
       if (allowJpeg.isSelected()) {
         jpegQualityLevel.setEnabled(true);
         jpegQualityLabel.setEnabled(true);
@@ -675,13 +682,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         subsamplingLabel.setEnabled(true);
         subsamplingLabelLo.setEnabled(true);
         subsamplingLabelHi.setEnabled(true);
-        if (compressionLevel.getMaximum() == 1) {
-          compressionLevel.setEnabled(false);
-          compressionLabel.setEnabled(false);
-          compressionLabelLo.setEnabled(false);
-          compressionLabelHi.setEnabled(false);
-          compressionLevel.setValue(1);
-        }
+        compressionLevel.setMinimum(1);
+        compressionLevel.setMaximum(2);
       } else {
         jpegQualityLevel.setEnabled(false);
         jpegQualityLabel.setEnabled(false);
@@ -691,12 +693,14 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         subsamplingLabel.setEnabled(false);
         subsamplingLabelLo.setEnabled(false);
         subsamplingLabelHi.setEnabled(false);
-        compressionLevel.setEnabled(true);
-        compressionLabel.setEnabled(true);
-        compressionLabelLo.setEnabled(true);
-        compressionLabelHi.setEnabled(true);
+        compressionLevel.setMinimum(0);
+        compressionLevel.setMaximum(1);
       }
       setEncMethodComboBox();
+    }
+    if (s instanceof JCheckBox && (JCheckBox)s == interframe) {
+      setEncMethodComboBox();
+      compressionLabel.setText(compressionLabelString + getCompressionLevel());
     }
     if (s instanceof JCheckBox && (JCheckBox)s == secVeNCrypt) {
       encNone.setEnabled(secVeNCrypt.isSelected());
@@ -720,41 +724,30 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
   private void setEncMethodComboBox() {
     if (!encMethodComboBox.isEnabled()) return;
-    if (subsamplingLevel.getValue() == 0 &&
-        compressionLevel.getValue() == 1 &&
+    int level = getCompressionLevel();
+    if (subsamplingLevel.getValue() == 0 && level == 1 &&
         jpegQualityLevel.getValue() == 95 && allowJpeg.isSelected()) {
-        encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
-        if (encMethodComboBox.getItemCount() > 5)
-          encMethodComboBox.removeItem("Custom");
-    } else if (subsamplingLevel.getValue() == 1 &&
-        compressionLevel.getValue() == 1 &&
-        jpegQualityLevel.getValue() == 80 && allowJpeg.isSelected()) {
-        encMethodComboBox.setSelectedItem("Tight + Medium-Quality JPEG");
-        if (encMethodComboBox.getItemCount() > 5)
-          encMethodComboBox.removeItem("Custom");
-    } else if (subsamplingLevel.getValue() == 2 &&
-        compressionLevel.getValue() == 1 &&
-        jpegQualityLevel.getValue() == 30 && allowJpeg.isSelected()) {
-        encMethodComboBox.setSelectedItem("Tight + Low-Quality JPEG (WAN)");
-        if (encMethodComboBox.getItemCount() > 5)
-          encMethodComboBox.removeItem("Custom");
-    } else if (!allowJpeg.isSelected()) {
-      switch (compressionLevel.getValue()) {
-      case 0:
-        encMethodComboBox.setSelectedItem("Lossless Tight (Gigabit)");
-        if (encMethodComboBox.getItemCount() > 5)
-          encMethodComboBox.removeItem("Custom");
-        break;
-      case 1:
-        encMethodComboBox.setSelectedItem("Lossless Tight + Zlib (WAN)");
-        if (encMethodComboBox.getItemCount() > 5)
-          encMethodComboBox.removeItem("Custom");
-        break;
-      default:
-        if (encMethodComboBox.getItemCount() <= 5)
-          encMethodComboBox.addItem("Custom");
-        encMethodComboBox.setSelectedItem("Custom");
-      }
+      encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
+      if (encMethodComboBox.getItemCount() > 5)
+        encMethodComboBox.removeItem("Custom");
+    } else if (subsamplingLevel.getValue() == 1 && level == 6 &&
+               jpegQualityLevel.getValue() == 80 && allowJpeg.isSelected()) {
+      encMethodComboBox.setSelectedItem("Tight + Medium-Quality JPEG");
+      if (encMethodComboBox.getItemCount() > 5)
+        encMethodComboBox.removeItem("Custom");
+    } else if (subsamplingLevel.getValue() == 2 && level == 7 &&
+               jpegQualityLevel.getValue() == 30 && allowJpeg.isSelected()) {
+      encMethodComboBox.setSelectedItem("Tight + Low-Quality JPEG (WAN)");
+      if (encMethodComboBox.getItemCount() > 5)
+        encMethodComboBox.removeItem("Custom");
+    } else if (level == 0 && !allowJpeg.isSelected()) {
+      encMethodComboBox.setSelectedItem("Lossless Tight (Gigabit)");
+      if (encMethodComboBox.getItemCount() > 5)
+        encMethodComboBox.removeItem("Custom");
+    } else if (level == 6 && !allowJpeg.isSelected()) {
+      encMethodComboBox.setSelectedItem("Lossless Tight + Zlib (WAN)");
+      if (encMethodComboBox.getItemCount() > 5)
+        encMethodComboBox.removeItem("Custom");
     } else {
       if (encMethodComboBox.getItemCount() <= 5)
         encMethodComboBox.addItem("Custom");
@@ -773,11 +766,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         jpegQualityLevel.getValue());
       setEncMethodComboBox();
     } else if (s instanceof JSlider && (JSlider)s == compressionLevel) {
-      int value = compressionLevel.getValue();
-      if (compressionLevel.getMaximum() == 1 && value == 0)
-        compressionLabel.setText(compressionLabelString + "None");
-      else
-        compressionLabel.setText(compressionLabelString + value);
+      compressionLabel.setText(compressionLabelString + getCompressionLevel());
       setEncMethodComboBox();
     }
   }
@@ -794,9 +783,30 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     return Options.SUBSAMP_NONE;
   }
 
+  public void setCompressionLevel(int level) {
+    boolean selectICE = false;
+    if (compressionLevel.getMaximum() < 9 &&
+        interframe.isEnabled()) {
+      if (level >= 5 && level <= 8) {
+        level -= 5;
+        selectICE = true;
+      }
+    }
+    compressionLevel.setValue(level);
+    interframe.setSelected(selectICE);
+  }
+
+  public int getCompressionLevel() {
+    int level = compressionLevel.getValue();
+    if (interframe.isEnabled() && interframe.isSelected() && level <= 3)
+      level += 5;
+    return level;
+  }
+
   void setTightOptions(int encoding) {
-    if (encoding != Encodings.encodingTight) {
-      allowJpeg.setEnabled(false);
+    if (encoding != Encodings.encodingTight ||
+        VncViewer.compatibleGUI.getValue()) {
+      allowJpeg.setEnabled(encoding == Encodings.encodingTight);
       subsamplingLevel.setEnabled(false);
       subsamplingLabel.setEnabled(false);
       subsamplingLabelLo.setEnabled(false);
@@ -820,17 +830,14 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       encMethodComboBox.setSelectedItem(Encodings.encodingName(encoding));
       encMethodLabel.setText("Encoding type:");
       encMethodLabel.setEnabled(false);
-    }
-    if (encoding != Encodings.encodingTight ||
-        VncViewer.compressLevel.getValue() > 1) {
       compressionLevel.setMaximum(9);
       compressionLevel.setEnabled(true);
       compressionLabel.setEnabled(true);
       compressionLabelLo.setEnabled(true);
       compressionLabelHi.setEnabled(true);
       compressionLabelString = new String("Compression level: ");
-      compressionLabel.setText(compressionLabelString +
-        compressionLevel.getValue());
+      compressionLabel.setText(compressionLabelString + getCompressionLevel());
+      interframe.setEnabled(false);
     }
   }
 

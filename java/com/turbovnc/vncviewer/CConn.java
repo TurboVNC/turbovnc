@@ -1084,7 +1084,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     options.allowJpeg.setSelected(opts.allowJpeg);
     options.subsamplingLevel.setValue(opts.getSubsamplingOrdinal());
     options.jpegQualityLevel.setValue(opts.quality);
-    options.compressionLevel.setValue(opts.compressLevel);
+    options.setCompressionLevel(opts.compressLevel);
 
     setTightOptions();
 
@@ -1141,9 +1141,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       encodingChange = true;
     opts.quality = options.jpegQualityLevel.getValue();
 
-    if (opts.compressLevel != options.compressionLevel.getValue())
+    if (opts.compressLevel != options.getCompressionLevel())
       encodingChange = true;
-    opts.compressLevel = options.compressionLevel.getValue();
+    opts.compressLevel = options.getCompressionLevel();
 
     if (opts.subsampling != options.getSubsamplingLevel())
       encodingChange = true;
