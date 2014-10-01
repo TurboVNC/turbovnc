@@ -1032,7 +1032,8 @@ public class VncViewer extends javax.swing.JApplet
   "compression level slider such that it can be used to select any " +
   "compression level from 0-9, which is useful when connecting to other " +
   "types of VNC servers.  This option is enabled automatically when using " +
-  "any encoding type other than Tight.", false);
+  "any encoding type other than Tight or when selecting a compression level " +
+  "that the GUI normally does not expose.", false);
 
   static IntParameter colors
   = new IntParameter("Colors",

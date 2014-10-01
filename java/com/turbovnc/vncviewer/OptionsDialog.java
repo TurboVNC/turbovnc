@@ -43,7 +43,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JTabbedPane tabPane;
   JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
   JCheckBox allowJpeg, interframe;
-  JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox, span;
+  JComboBox menuKey, scalingFactor, encMethodComboBox, span;
   JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
@@ -786,8 +786,24 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     return Options.SUBSAMP_NONE;
   }
 
+  boolean isTurboCompressionLevel(int level) {
+    if (allowJpeg.isSelected() &&
+        ((level >= 1 && level <= 2) || (level >= 6 && level <= 7)))
+      return true;
+    if (!allowJpeg.isSelected() &&
+        ((level >= 0 && level <= 1) || (level >= 5 && level <= 6)))
+      return true;
+    return false;
+  }
+
   public void setCompressionLevel(int level) {
     boolean selectICE = false;
+    if (!isTurboCompressionLevel(level)) {
+      compressionLevel.setMinimum(0);
+      compressionLevel.setMaximum(9);
+      compressionLabelString = new String("Compression level: ");
+      interframe.setEnabled(false);
+    }
     if (compressionLevel.getMaximum() < 9 &&
         interframe.isEnabled()) {
       if (level >= 5 && level <= 8) {
@@ -837,10 +853,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         VncViewer.compatibleGUI.getValue()) {
       compressionLevel.setMinimum(0);
       compressionLevel.setMaximum(9);
-      compressionLevel.setEnabled(true);
-      compressionLabel.setEnabled(true);
-      compressionLabelLo.setEnabled(true);
-      compressionLabelHi.setEnabled(true);
       compressionLabelString = new String("Compression level: ");
       compressionLabel.setText(compressionLabelString + getCompressionLevel());
       interframe.setEnabled(false);
