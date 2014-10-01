@@ -149,7 +149,9 @@ only allow you to select Compression Levels 1-2 if JPEG subencoding is enabled
 (6-7 if interframe comparison is also enabled) or Compression Levels 0-1 if
 JPEG subencoding is disabled (5-6 if interframe comparison is enabled.)  Other
 compression levels can, however, be specified on the command line (or as a
-parameter, if using the Java TurboVNC Viewer.)
+parameter, if using the Java TurboVNC Viewer), and doing so will enable a
+compatibility mode in the TurboVNC Viewer GUI that allows any compression level
+from 0 to 9 to be requested.
 
 When connecting to a TurboVNC server, requesting a particular compression level
 has the following effect:
