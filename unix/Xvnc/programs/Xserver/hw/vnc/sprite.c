@@ -896,6 +896,7 @@ rfbSpriteRemoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen)
     pCursorInfo = RFBSPRITE(pDev);
 
     rfbScreen.dontSendFramebufferUpdate = TRUE;
+
     rfbSpriteIsDown(pCursorInfo);
     rfbSpriteRegisterBlockHandler(pScreen, pScreenPriv);
     pCursorInfo->pCacheWin = NullWindow;
@@ -912,6 +913,7 @@ rfbSpriteRemoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen)
     }
     rfbSpriteEnableDamage(pScreen, pScreenPriv);
     DamageDrawInternal(pScreen, FALSE);
+
     rfbScreen.dontSendFramebufferUpdate = FALSE;
 }
 
@@ -1014,6 +1016,10 @@ rfbSpriteComputeSaved(DeviceIntPtr pDev, ScreenPtr pScreen)
     pCursorInfo = RFBSPRITE(pDev);
 
     pCursor = pCursorInfo->pCursor;
+
+    if (!pCursor)
+        return;
+
     x = pCursorInfo->x - (int) pCursor->bits->xhot;
     y = pCursorInfo->y - (int) pCursor->bits->yhot;
     w = pCursor->bits->width;
