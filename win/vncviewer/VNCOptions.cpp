@@ -1823,7 +1823,6 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
   int level =             read(RegKey, "compresslevel", -1);
   if (level != -1) {
     m_compressLevel = level;
-    if (m_compressLevel > 1) m_compressLevel = 1;
   }
 
   level =                 read(RegKey, "subsampling", -1);
