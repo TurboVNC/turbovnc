@@ -282,11 +282,11 @@ char *fallback_resources[] = {
 "*popup*button12.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualHigh()",
 
-"*popup*button13.label: Encoding method: Tight + Medium Quality JPEG",
+"*popup*button13.label: Encoding method: Tight + Medium-Quality JPEG",
 "*popup*button13.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualMed()",
 
-"*popup*button14.label: Encoding method: Tight + Low Quality JPEG (WAN)",
+"*popup*button14.label: Encoding method: Tight + Low-Quality JPEG (WAN)",
 "*popup*button14.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualLow()",
 

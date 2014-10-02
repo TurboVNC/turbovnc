@@ -88,7 +88,7 @@ Tvncviewer.translations:\
 *userPwdDialog*userField.fromHoriz: userLabel
 *userPwdDialog*userField.resize: width
 *userPwdDialog*userField.textSource.editType: edit
-*userPwdDialog*userField.textSource.string: 
+*userPwdDialog*userField.textSource.string:
 *userPwdDialog*userField.translations: #override\n\
   <Btn1Down>,<Btn1Up>: UserPwdSetFocus()\n\
   Ctrl<Key>O:    Nothing()\n\
@@ -114,7 +114,7 @@ Tvncviewer.translations:\
 *userPwdDialog*pwdField.resize: width
 *userPwdDialog*pwdField.textSink.echo: False
 *userPwdDialog*pwdField.textSource.editType: edit
-*userPwdDialog*pwdField.textSource.string: 
+*userPwdDialog*pwdField.textSource.string:
 *userPwdDialog*pwdField.translations: #override\n\
   <Btn1Down>,<Btn1Up>: UserPwdSetFocus()\n\
   Ctrl<Key>O:    Nothing()\n\
@@ -246,11 +246,11 @@ Tvncviewer.translations:\
 *popup*button12.translations: #override\n\
   <Btn1Down>,<Btn1Up>: QualHigh()
 
-*popup*button13.label: Encoding method: Tight + Medium Quality JPEG
+*popup*button13.label: Encoding method: Tight + Medium-Quality JPEG
 *popup*button13.translations: #override\n\
   <Btn1Down>,<Btn1Up>: QualMed()
 
-*popup*button14.label: Encoding method: Tight + Low Quality JPEG (WAN)
+*popup*button14.label: Encoding method: Tight + Low-Quality JPEG (WAN)
 *popup*button14.translations: #override\n\
   <Btn1Down>,<Btn1Up>: QualLow()
 

@@ -1229,7 +1229,7 @@ void QualHigh(Widget w, XEvent *e, String *s, Cardinal *c)
 
 
 /*
- * QualMed() is an action that enables the Tight + Medium Quality JPEG
+ * QualMed() is an action that enables the Tight + Medium-Quality JPEG
  * encoding method
  */
 
@@ -1245,7 +1245,7 @@ void QualMed(Widget w, XEvent *e, String *s, Cardinal *c)
 
 
 /*
- * QualLow() is an action that enables the Tight + Low Quality JPEG
+ * QualLow() is an action that enables the Tight + Low-Quality JPEG
  * encoding method
  */
 

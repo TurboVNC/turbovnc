@@ -108,8 +108,8 @@ following command-line switches can be used to specify the encoding method:
 
 ''-highqual'' = select the "Tight + Perceptually Lossless Quality JPEG"
 	encoding method {nl}
-''-medqual'' = select the "Tight + Medium Quality JPEG" encoding method {nl}
-''-lowqual'' = select the "Tight + Low Quality JPEG" encoding method {nl}
+''-medqual'' = select the "Tight + Medium-Quality JPEG" encoding method {nl}
+''-lowqual'' = select the "Tight + Low-Quality JPEG" encoding method {nl}
 ''-lossless'' = select the "Lossless Tight" encoding method {nl}
 ''-losslesswan'' = select the "Lossless Tight + Zlib" encoding method {nl}
 

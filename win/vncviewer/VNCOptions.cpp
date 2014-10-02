@@ -933,8 +933,8 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
 static COMBOSTRING rfbcombo[MAX_LEN_COMBO] = {
   "Tight + Perceptually Lossless JPEG (LAN)", rfbEncodingTight, true, TVNC_1X,
     95, 1,
-  "Tight + Medium Quality JPEG", rfbEncodingTight, true, TVNC_2X, 80, 1,
-  "Tight + Low Quality JPEG (WAN)", rfbEncodingTight, true, TVNC_4X, 30, 1,
+  "Tight + Medium-Quality JPEG", rfbEncodingTight, true, TVNC_2X, 80, 1,
+  "Tight + Low-Quality JPEG (WAN)", rfbEncodingTight, true, TVNC_4X, 30, 1,
   "Lossless Tight (Gigabit)", rfbEncodingTight, false, -1, -1, 0,
   "Lossless Tight + Zlib (WAN)", rfbEncodingTight, false, -1, -1, 1
 };
