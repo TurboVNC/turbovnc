@@ -181,11 +181,12 @@
 #define IDC_SUBSAMPLEVEL                32778
 #define IDC_ALLOW_JPEG                  32779
 #define ID_SESSION_SWAPMOUSE            32785
+#define IDC_INTERFRAME                  32786
 #define ID_CLOSEDAEMON                  40001
 #define ID_SHOWWINDOW                   40004
 #define ID_NEWCONN                      40006
 #define IDD_FILETRANSFER                40010
-#define IDS_NUMHELP                     33
+#define IDS_NUMHELP                     34
 #define IDS_HELP                        40101
 #define IDS_HELP2                       40102
 #define IDS_HELP3                       40103
@@ -219,6 +220,7 @@
 #define IDS_HELP31                      40131
 #define IDS_HELP32                      40132
 #define IDS_HELP33                      40133
+#define IDS_HELP34                      40134
 
 // Next default values for new objects
 //

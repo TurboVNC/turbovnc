@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2013 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2014 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -106,6 +106,7 @@ class VNCOptions
     int   m_scale_num, m_scale_den; // Numerator & denominator
     int   m_subsampLevel;
     int   m_compressLevel;
+    bool  m_compatibleGUI;
     bool  m_enableJpegCompression;
     int   m_jpegQualityLevel;
     bool  m_requestShapeUpdates;
@@ -159,13 +160,14 @@ class VNCOptions
 
   private:
     void BrowseLogFile();
-    void EnableCompress(HWND hwnd, bool enable);
     void EnableQuality(HWND hwnd, bool enable);
     void EnableSubsamp(HWND hwnd, bool enable);
     void EnableLog(HWND hwnd, bool enable);
     void SetSubsampSlider(HWND hwnd, int subsamp);
     void SetQualitySlider(HWND hwnd, int subsamp);
-    void SetCompressSlider(HWND hwnd, int subsamp);
+    bool IsTurboCompressLevel(HWND hwnd, int level);
+    void SetCompressLevel(HWND hwnd, int level);
+    int GetCompressLevel(HWND hwnd);
     void SetComboBox(HWND hwnd);
 
     // Just for temporary use
