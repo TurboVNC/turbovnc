@@ -936,7 +936,6 @@ rfbRootPropertyChange(PropertyPtr pProp)
 
     if (!rfbAuthDisableRevCon && (pProp->propertyName == VNC_CONNECT) &&
         (pProp->type == XA_STRING) && (pProp->format == 8)) {
-        rfbClientPtr cl;
         char *colonPos;
         int port = 5500;
         char *host = (char *)Xalloc(pProp->size + 1);
@@ -948,7 +947,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
             *colonPos = 0;
         }
 
-        cl = rfbReverseConnection(host, port);
+        rfbReverseConnection(host, port);
 
         free(host);
     }
