@@ -1116,11 +1116,12 @@ rfbClientConnFailed(cl, reason)
 {
     int headerLen, reasonLen;
     char buf[8];
+    CARD32 *buf32=(CARD32 *)buf;
 
     headerLen = (cl->protocol_minor_ver >= 7) ? 1 : 4;
     reasonLen = strlen(reason);
-    ((CARD32 *)buf)[0] = 0;
-    ((CARD32 *)buf)[1] = Swap32IfLE(reasonLen);
+    buf32[0] = 0;
+    buf32[1] = Swap32IfLE(reasonLen);
 
     if ( WriteExact(cl->sock, buf, headerLen) < 0 ||
          WriteExact(cl->sock, buf + 4, 4) < 0 ||
@@ -1144,13 +1145,14 @@ rfbClientAuthFailed(cl, reason)
 {
     int reasonLen;
     char buf[8];
+    CARD32 *buf32=(CARD32 *)buf;
 
     if (cl->protocol_minor_ver < 8)
         reason = NULL;          /* invalidate the pointer */
 
     reasonLen = (reason == NULL) ? 0 : strlen(reason);
-    ((CARD32 *)buf)[0] = Swap32IfLE(rfbAuthFailed);
-    ((CARD32 *)buf)[1] = Swap32IfLE(reasonLen);
+    buf32[0] = Swap32IfLE(rfbAuthFailed);
+    buf32[1] = Swap32IfLE(reasonLen);
 
     if (reasonLen == 0) {
         if (WriteExact(cl->sock, buf, 4) < 0) {
