@@ -194,6 +194,17 @@ CMake:
   LDFLAGS=-m64
 
 
+PowerPC Build on Intel Macs
+---------------------------
+
+Add
+
+  -DCMAKE_OSX_ARCHITECTURES=ppc
+
+to the CMake command line.  XCode 3.2.6 or earlier must be used, which
+necessitates building on OS X 10.6 or earlier.
+
+
 Compilers Other Than GCC
 ------------------------
 
