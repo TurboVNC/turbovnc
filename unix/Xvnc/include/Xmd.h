@@ -1,7 +1,7 @@
 /***********************************************************
 
 Copyright (c) 1987  X Consortium
-Copyright (c) 2012  D. R. Commander
+Copyright (c) 2012, 2014  D. R. Commander
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ SOFTWARE.
 #ifdef CRAY
 #define WORD64				/* 64-bit architecture */
 #endif
-#if defined(__alpha) || defined(__alpha__) || defined(__x86_64__)
+#if defined(__alpha) || defined(__alpha__) || defined(__x86_64__) || defined(__powerpc64__)
 #define LONG64				/* 32/64-bit architecture */
 #endif
 #ifdef __sgi
