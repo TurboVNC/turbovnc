@@ -283,8 +283,8 @@ static int ProcVncExtConnect(ClientPtr client)
   xVncExtConnectReply rep;
   rep.success = 0;
   if (stuff->strLen == 0) {
-    rfbClientPtr cl, prev;
-    for (prev = NULL, cl = rfbClientHead; cl; prev = cl, cl = cl->next) {
+    rfbClientPtr cl;
+    for (cl = rfbClientHead; cl; cl = cl->next) {
       if (cl->reverseConnection) {
         rfbCloseSock(cl->sock);
         rep.success = 1;

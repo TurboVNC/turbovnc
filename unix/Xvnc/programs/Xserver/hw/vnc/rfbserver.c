@@ -274,9 +274,7 @@ void
 rfbNewClientConnection(sock)
     int sock;
 {
-    rfbClientPtr cl;
-
-    cl = rfbNewClient(sock);
+    rfbNewClient(sock);
 }
 
 
