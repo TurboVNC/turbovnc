@@ -169,8 +169,8 @@ has the following effect:
 	subrectangles are compressed using a higher zlib compression level.  This \
 	can provide typically 20-40% better compression than CL 1 (with a \
 	commensurate increase in CPU usage) for workloads that have a low number of \
-	unique colors.  However, Compression Level 2 will increase the CPU usage \
-	for high-color workloads without providing significantly better \
+	unique colors.  However, Compression Level 2 can increase the CPU usage \
+	for some high-color workloads without providing significantly better \
 	compression. |
 | 3-4 | 3 | 96 | No | Same as Compression Level 2 (reserved for future expansion) |
 | 5-6 | 1 | 24 | Yes | Same as Compression Level 1, but with interframe \
