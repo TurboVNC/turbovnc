@@ -338,8 +338,6 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
       m_toolbar = false;
     } else if (SwitchMatch(args[j], "8bit")) {
       m_Use8Bit = true;
-    } else if (SwitchMatch(args[j], "no8bit")) {
-      m_Use8Bit = false;
     } else if (SwitchMatch(args[j], "singlebuffer")) {
       m_DoubleBuffer = false;
     } else if (SwitchMatch(args[j], "doublebuffer")) {
@@ -1785,12 +1783,19 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
     m_UseEnc[i] = read(RegKey, buf, m_UseEnc[i]) != 0;
   }
 
-  m_PreferredEncoding =   read(RegKey, "preferred_encoding",
-                               m_PreferredEncoding);
-  if (m_PreferredEncoding != rfbEncodingTight)
-    m_PreferredEncoding = rfbEncodingTight;
+// NOTE: We do not cache some of the options that aren't exposed in the GUI,
+// because this could lead to confusing behavior.  If a non-exposed option was
+// set from the command line and cached with the connection profile, then that
+// option would persist the next time the connection was opened, and if it
+// significantly changed the behavior of the viewer, then there would be no way
+// to change it back without restarting the viewer and manually resetting the
+// option from the command line.  In some cases, there would also be no way to
+// visually confirm that the option had been set.
 
-  m_restricted =          read(RegKey, "restricted", m_restricted) != 0;
+//m_PreferredEncoding =   read(RegKey, "preferred_encoding",
+//                             m_PreferredEncoding);
+
+//m_restricted =          read(RegKey, "restricted", m_restricted) != 0;
   m_ViewOnly =            read(RegKey, "viewonly", m_ViewOnly) != 0;
   m_FullScreen =          read(RegKey, "fullscreen", m_FullScreen) != 0;
   m_Span =                read(RegKey, "span", m_Span);
@@ -1810,15 +1815,15 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
   m_scale_num =           read(RegKey, "scale_num", m_scale_num);
   m_requestShapeUpdates = read(RegKey, "cursorshape", m_requestShapeUpdates) != 0;
   m_ignoreShapeUpdates =  read(RegKey, "noremotecursor", m_ignoreShapeUpdates) != 0;
-  m_noUnixLogin =         read(RegKey, "nounixlogin", m_noUnixLogin) != 0;
+//m_noUnixLogin =         read(RegKey, "nounixlogin", m_noUnixLogin) != 0;
 
-  char buf[256];
-  DWORD buflen = 255;
-  if (RegQueryValueEx(RegKey, (LPTSTR) "user", NULL, NULL, (LPBYTE) buf,
-                      &buflen) == ERROR_SUCCESS && buflen > 0) {
-    strncpy(m_user, buf, 255);
-    m_user[255] = '\0';
-  }
+//char buf[256];
+//DWORD buflen = 255;
+//if (RegQueryValueEx(RegKey, (LPTSTR) "user", NULL, NULL, (LPBYTE) buf,
+//                    &buflen) == ERROR_SUCCESS && buflen > 0) {
+//  strncpy(m_user, buf, 255);
+//  m_user[255] = '\0';
+//}
 
   int level =             read(RegKey, "compresslevel", -1);
   if (level != -1) {

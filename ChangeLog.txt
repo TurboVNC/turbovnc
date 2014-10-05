@@ -140,6 +140,18 @@ The following improvements have been made to The TurboVNC Server init script:
 -- The script should now work on Red Hat Enterprise/CentOS 7 and recent Fedora
    releases.
 -------------------------------------------------------------------------------
+[21]
+The "restricted", "nounixlogin", and "user" options in the Windows TurboVNC
+Viewer are no longer persistent from one session to the next.  Because those
+options can only be specified on the command line or in a connection info file,
+automatically restoring their previous values for subsequent connections to the
+same host and display number led to confusing behavior.  The viewer would apply
+the previous value of the option, thus changing the viewer's behavior, but
+there was no way to visually confirm why the behavior had been changed or to
+change it back (unless you knew the corresponding command-line counter-curse,
+but "restricted" actually didn't have one.  Oops.)  The "encoding" and "8bit"
+options have been non-persistent for quite some time, for this same reason.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

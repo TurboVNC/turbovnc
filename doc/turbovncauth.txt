@@ -86,11 +86,6 @@ Options dialog.  When using the Java TurboVNC Viewer as an applet, you can
 accomplish the same thing by setting the ''User'' or ''NoUnixLogin'' parameters
 in ''/opt/TurboVNC/java/index.vnc'' on the server.
 
-	!!! Because of the way that the Windows TurboVNC Viewer caches settings for
-	each connection, the ''-user'' and ''-nounixlogin'' options may not work
-	properly unless you also specify the connection name on the command line
-	(example:  ''vncviewer -nounixlogin my_server:1'').
-
 If the system administrator has not restricted any of the authentication
 methods on a system-wide basis, then the user can choose to disable some or
 all of them for a single TurboVNC session by passing command-line arguments to

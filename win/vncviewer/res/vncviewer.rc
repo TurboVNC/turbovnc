@@ -605,12 +605,10 @@ in the GUI.)\r\n\
 \r\n"
     IDS_HELP2
 "/8bit\r\n\
-/no8bit\r\n\
-Use/don't use 8-bit color to encode pixel data.  8-bit color may reduce network\r\n\
-bandwidth for certain types of workloads, but colors will be represented\r\n\
-inaccurately.  If 8-bit color is enabled along with Tight encoding, then JPEG\r\n\
-subencoding is automatically disabled and cannot be re-enabled without\r\n\
-restarting the viewer.\r\n\
+Use 8-bit color to encode pixel data.  8-bit color may reduce network bandwidth\r\n\
+for certain types of workloads, but colors will be represented inaccurately.\r\n\
+If 8-bit color is enabled along with Tight encoding, then JPEG subencoding is\r\n\
+automatically disabled and cannot be re-enabled without restarting the viewer.\r\n\
 \r\n"
     IDS_HELP3
 "/autopass\r\n\
