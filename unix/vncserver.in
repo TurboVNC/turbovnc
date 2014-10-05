@@ -135,7 +135,7 @@ $defaultXStartup
        "          fvwm2\n".
        "        } || {\n".
        "          which twm && {\n".
-       "            xrdb \$HOME/.Xresources\n".
+       "            if [ -f \$HOME/.Xresources ]; then xrdb \$HOME/.Xresources; fi\n".
        "            xsetroot -solid grey\n".
        "            xterm -geometry 80x24+10+10 -ls -title \"\$VNCDESKTOP Desktop\" &\n".
        "            twm\n".
