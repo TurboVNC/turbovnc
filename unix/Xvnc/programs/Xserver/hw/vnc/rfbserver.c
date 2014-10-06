@@ -1617,6 +1617,7 @@ rfbSendFramebufferUpdate(cl)
                             !RECT_IN_REGION(pScreen, &cl->ifRegion, &box)) {
                             REGION_UNION(pScreen, &idRegion, &idRegion,
                                          &tmpRegion);
+                            int pad = pitch - compareWidth * ps;
                             dstPtr = dstColPtr;
                             rows = compareHeight;
 
@@ -1624,6 +1625,7 @@ rfbSendFramebufferUpdate(cl)
                                 char *endOfRow = &dstPtr[compareWidth * ps];
                                 while (dstPtr < endOfRow)
                                     *dstPtr++ ^= 0xFF;
+                                dstPtr += pad;
                             }
                         }
                         REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion,
