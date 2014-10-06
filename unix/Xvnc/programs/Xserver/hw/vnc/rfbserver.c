@@ -61,6 +61,7 @@ double rfbAutoLosslessRefresh = 0.0;
 int rfbALRQualityLevel = -1;
 int rfbALRSubsampLevel = TVNC_1X;
 int rfbCombineRect = 100;
+int rfbICEBlockSize = 64;
 Bool rfbInterframeDebug = FALSE;
 
 static rfbClientPtr rfbNewClient(int sock);
@@ -396,6 +397,11 @@ rfbNewClient(sock)
 
     if ((env = getenv("TVNC_IFDEBUG")) != NULL && !strcmp(env, "1"))
         rfbInterframeDebug = TRUE;
+
+    if ((env = getenv("TVNC_ICEBLOCKSIZE")) != NULL) {
+        int iceBlockSize = atoi(env);
+        if (iceBlockSize > 0) rfbICEBlockSize = iceBlockSize;
+    }
 
     if ((env = getenv("TVNC_COMBINERECT")) != NULL) {
         int combine = atoi(env);
@@ -1565,47 +1571,73 @@ rfbSendFramebufferUpdate(cl)
             int x = REGION_RECTS(&_updateRegion)[i].x1;
             int y = REGION_RECTS(&_updateRegion)[i].y1;
             int w = REGION_RECTS(&_updateRegion)[i].x2 - x;
-            int h = REGION_RECTS(&_updateRegion)[i].y2 - y, rows;
+            int h = REGION_RECTS(&_updateRegion)[i].y2 - y;
             int pitch = rfbScreen.paddedWidthInBytes;
             int ps = rfbServerFormat.bitsPerPixel / 8;
             char *src = &rfbScreen.pfbMemory[y * pitch + x * ps];
             char *dst = &cl->compareFB[y * pitch + x * ps];
-            Bool different = FALSE;
-            rows = h;
-            while (rows--) {
-                if (cl->firstCompare || memcmp(src, dst, w * ps)) {
-                    memcpy(dst, src, w * ps);
-                    different = TRUE;
-                }
-                src += pitch;
-                dst += pitch;
-            }
-            if (different || rfbInterframeDebug) {
-                RegionRec tmpRegion;
-                REGION_INIT(pScreen, &tmpRegion,
-                            &REGION_RECTS(&_updateRegion)[i], 1);
-                if (!different && rfbInterframeDebug &&
-                    !RECT_IN_REGION(pScreen, &cl->ifRegion,
-                                    &REGION_RECTS(&_updateRegion)[i])) {
-                    int pad = pitch - w * ps;
-                    REGION_UNION(pScreen, &idRegion, &idRegion, &tmpRegion);
-                    dst = &cl->compareFB[y * pitch + x * ps];
-                    rows = h;
+            char *srcRowPtr, *dstRowPtr, *srcColPtr, *dstColPtr;
+            int row, col;
+
+            for (row = 0, srcRowPtr = src, dstRowPtr = dst;
+                 row < h;
+                 row += rfbICEBlockSize, srcRowPtr += pitch * rfbICEBlockSize,
+                     dstRowPtr += pitch * rfbICEBlockSize) {
+
+                for (col = 0, srcColPtr = srcRowPtr, dstColPtr = dstRowPtr;
+                     col < w;
+                     col += rfbICEBlockSize, srcColPtr += ps * rfbICEBlockSize,
+                         dstColPtr += ps * rfbICEBlockSize) {
+
+                    Bool different = FALSE;
+                    int compareWidth = min(rfbICEBlockSize, w - col);
+                    int compareHeight = min(rfbICEBlockSize, h - row);
+                    int rows = compareHeight;
+                    char *srcPtr = srcColPtr, *dstPtr = dstColPtr;
+
                     while (rows--) {
-                        char *endOfRow = &dst[w * ps];
-                        while (dst < endOfRow)
-                            *dst++ ^= 0xFF;
-                        dst += pad;
+                        if (cl->firstCompare ||
+                            memcmp(srcPtr, dstPtr, compareWidth * ps)) {
+                            memcpy(dstPtr, srcPtr, compareWidth * ps);
+                            different = TRUE;
+                        }
+                        srcPtr += pitch;
+                        dstPtr += pitch;
+                    }
+                    if (different || rfbInterframeDebug) {
+                        RegionRec tmpRegion;
+                        BoxRec box;
+                        box.x1 = x + col;
+                        box.y1 = y + row;
+                        box.x2 = box.x1 + compareWidth;
+                        box.y2 = box.y1 + compareHeight;
+
+                        REGION_INIT(pScreen, &tmpRegion, &box, 1);
+                        if (!different && rfbInterframeDebug &&
+                            !RECT_IN_REGION(pScreen, &cl->ifRegion, &box)) {
+                            REGION_UNION(pScreen, &idRegion, &idRegion,
+                                         &tmpRegion);
+                            dstPtr = dstColPtr;
+                            rows = compareHeight;
+
+                            while (rows--) {
+                                char *endOfRow = &dstPtr[compareWidth * ps];
+                                while (dstPtr < endOfRow)
+                                    *dstPtr++ ^= 0xFF;
+                            }
+                        }
+                        REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion,
+                                     &tmpRegion);
+                        REGION_UNINIT(pScreen, &tmpRegion);
+                    }
+                    if (!different && rfbProfile) {
+                        idmpixels += (double)(compareWidth * compareHeight) /
+                                     1000000.;
+                        if (!rfbInterframeDebug)
+                            mpixels += (double)(compareWidth * compareHeight) /
+                                       1000000.;
                     }
                 }
-                REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion,
-                             &tmpRegion);
-                REGION_UNINIT(pScreen, &tmpRegion);
-            }
-            if (!different && rfbProfile) {
-                idmpixels += (double)(w * h) / 1000000.;
-                if (!rfbInterframeDebug)
-                    mpixels += (double)(w * h) / 1000000.;
             }
         }
         REGION_UNINIT(pScreen, &_updateRegion);

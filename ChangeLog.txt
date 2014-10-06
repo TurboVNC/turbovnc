@@ -64,6 +64,13 @@ TurboVNC Viewer GUI.  Also, a new command-line option/parameter
 ("CompatibleGUI") can now be used to force the GUI to expose all 10 compression
 levels (useful when connecting to non-TurboVNC servers.)
 -------------------------------------------------------------------------------
+[11]
+The Interframe Comparison Engine (ICE) now compares large framebuffer update
+rectangles on a block-by-block basis, which prevents the entire rectangle from
+being sent if only a small portion of it has changed.  The default block size
+is 64x64 but can be changed using the TVNC_ICEBLOCKSIZE environment variable
+(for instance, TVNC_ICEBLOCKSIZE=128 would use 128x128 blocks.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
