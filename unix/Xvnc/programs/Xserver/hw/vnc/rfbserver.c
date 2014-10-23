@@ -395,7 +395,7 @@ rfbNewClient(sock)
     if ((env = getenv("TVNC_PROFILE")) != NULL && !strcmp(env, "1"))
         rfbProfile = TRUE;
 
-    if ((env = getenv("TVNC_IFDEBUG")) != NULL && !strcmp(env, "1"))
+    if ((env = getenv("TVNC_ICEDEBUG")) != NULL && !strcmp(env, "1"))
         rfbInterframeDebug = TRUE;
 
     if ((env = getenv("TVNC_ICEBLOCKSIZE")) != NULL) {
