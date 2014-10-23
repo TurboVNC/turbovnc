@@ -123,22 +123,29 @@ Certain ill-behaved applications can sometimes draw the same thing over and
 over again, and this can cause redundant framebuffer updates to be sent to the
 VNC viewer.  The TurboVNC Server can guard against this by maintaining a copy
 of the remote framebuffer for each connected viewer, comparing each new
-framebuffer update against the pixels in the framebuffer copy, and
-discarding any redundant updates before they are sent to the viewer.
+framebuffer update rectangle against the pixels in the framebuffer copy, and
+discarding any redundant rectangles before they are sent to the viewer.
 
-Enabling interframe comparison increases the memory usage of the TurboVNC
-Server by a factor of N, where N is the number of connected clients, and
-interframe comparison increases the server CPU usage by about 10-15% as well.
-Further, duplicate framebuffer updates are not typically a problem for 3D and
-video applications, and the effects of these duplicate updates, even when they
-exist, are not typically noticeable on high-speed networks.  Thus, interframe
-comparison is not enabled by default and should not generally be enabled except
-on low-bandwidth networks and with applications for which it can be shown to be
-beneficial.
+Interframe comparison has some tradeoffs associated with it.  Perhaps the most
+important of these is that it increases the memory usage of the TurboVNC Server
+by a factor of N, where N is the number of connected clients.  This can prove
+to be quite significant if the remote desktop size is relatively large.
 
-Interframe comparison can be enabled by either passing an argument of
-''-interframe'' to ''vncserver'' when starting a TurboVNC Server session or by
-requesting a compression level of 5 or higher from the viewer (see below.)
+2D applications are most often the ones that generate duplicate framebuffer
+updates, so using interframe comparison with such applications can
+significantly reduce the network usage and the server CPU usage (since fewer
+rectangles are actually being encoded.)  However, with 3D applications,
+interframe comparison increases server CPU usage without providing any
+significant reduction in network usage.  Furthermore, the effects of duplicate
+framebuffer updates are not typically noticeable on high-speed networks, but an
+increase in server CPU usage might be.
+
+For these reasons, interframe comparison is not enabled by default and should
+not generally be enabled except on low-bandwidth networks and with applications
+for which it can be shown to be beneficial.  Interframe comparison can be
+enabled by either passing an argument of ''-interframe'' to ''vncserver'' when
+starting a TurboVNC Server session or by requesting a compression level of 5 or
+higher from the viewer (see below.)
 
 ** Advanced Compression Options
 {anchor: AdvancedCompression}

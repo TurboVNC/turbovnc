@@ -47,7 +47,7 @@ rectangles |
 	Description :: If interframe comparison is enabled (see
 	{ref prefix="Section ": InterframeComparison}), then setting this environment
 	variable to 1 will cause the interframe comparison engine (ICE) to change the
-	color of duplicate updates without culling them from the update stream.  This
+	color of duplicate screen regions without culling them from the update stream.  This
 	allows you to easily see which applications are generating duplicate updates.
 
 | Environment Variable | ''TVNC_MT = ''__''0 \| 1''__ |
