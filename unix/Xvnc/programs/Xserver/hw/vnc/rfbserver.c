@@ -61,7 +61,7 @@ double rfbAutoLosslessRefresh = 0.0;
 int rfbALRQualityLevel = -1;
 int rfbALRSubsampLevel = TVNC_1X;
 int rfbCombineRect = 100;
-int rfbICEBlockSize = 64;
+int rfbICEBlockSize = 256;
 Bool rfbInterframeDebug = FALSE;
 
 static rfbClientPtr rfbNewClient(int sock);
@@ -400,7 +400,7 @@ rfbNewClient(sock)
 
     if ((env = getenv("TVNC_ICEBLOCKSIZE")) != NULL) {
         int iceBlockSize = atoi(env);
-        if (iceBlockSize > 0) rfbICEBlockSize = iceBlockSize;
+        if (iceBlockSize >= 0) rfbICEBlockSize = iceBlockSize;
     }
 
     if ((env = getenv("TVNC_COMBINERECT")) != NULL) {
@@ -1576,24 +1576,19 @@ rfbSendFramebufferUpdate(cl)
             int ps = rfbServerFormat.bitsPerPixel / 8;
             char *src = &rfbScreen.pfbMemory[y * pitch + x * ps];
             char *dst = &cl->compareFB[y * pitch + x * ps];
-            char *srcRowPtr, *dstRowPtr, *srcColPtr, *dstColPtr;
             int row, col;
+            int hBlockSize = rfbICEBlockSize == 0 ? w : rfbICEBlockSize;
+            int vBlockSize = rfbICEBlockSize == 0 ? h : rfbICEBlockSize;
 
-            for (row = 0, srcRowPtr = src, dstRowPtr = dst;
-                 row < h;
-                 row += rfbICEBlockSize, srcRowPtr += pitch * rfbICEBlockSize,
-                     dstRowPtr += pitch * rfbICEBlockSize) {
-
-                for (col = 0, srcColPtr = srcRowPtr, dstColPtr = dstRowPtr;
-                     col < w;
-                     col += rfbICEBlockSize, srcColPtr += ps * rfbICEBlockSize,
-                         dstColPtr += ps * rfbICEBlockSize) {
+            for (row = 0; row < h; row += vBlockSize) {
+                for (col = 0; col < w; col += hBlockSize) {
 
                     Bool different = FALSE;
-                    int compareWidth = min(rfbICEBlockSize, w - col);
-                    int compareHeight = min(rfbICEBlockSize, h - row);
+                    int compareWidth = min(hBlockSize, w - col);
+                    int compareHeight = min(vBlockSize, h - row);
                     int rows = compareHeight;
-                    char *srcPtr = srcColPtr, *dstPtr = dstColPtr;
+                    char *srcPtr = &src[row * pitch + col * ps];
+                    char *dstPtr = &dst[row * pitch + col * ps];
 
                     while (rows--) {
                         if (cl->firstCompare ||
@@ -1618,7 +1613,7 @@ rfbSendFramebufferUpdate(cl)
                             REGION_UNION(pScreen, &idRegion, &idRegion,
                                          &tmpRegion);
                             int pad = pitch - compareWidth * ps;
-                            dstPtr = dstColPtr;
+                            char *dstPtr = &dst[row * pitch + col * ps];
                             rows = compareHeight;
 
                             while (rows--) {
