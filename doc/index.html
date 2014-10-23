@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-10-05T03:47:40">
+<meta name="date" content="2014-10-22T21:35:05">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1185,22 +1185,38 @@ on the Connection Options button in the toolbar.)</p>
 and over again, and this can cause redundant framebuffer updates to be 
 sent to the VNC viewer.  The TurboVNC Server can guard against this by 
 maintaining a copy of the remote framebuffer for each connected viewer, 
-comparing each new framebuffer update against the pixels in the 
-framebuffer copy, and discarding any redundant updates before they are 
-sent to the viewer.</p>
+comparing each new framebuffer update rectangle against the pixels in 
+the framebuffer copy, and discarding any redundant portions of the 
+rectangle before they are sent to the viewer.</p>
 
-<p>Enabling interframe comparison increases the memory usage of the 
+<p>Interframe comparison has some tradeoffs associated with it.  Perhaps 
+the most important of these is that it increases the memory usage of the 
 TurboVNC Server by a factor of N, where N is the number of connected 
-clients, and interframe comparison increases the server CPU usage by 
-about 10-15% as well. Further, duplicate framebuffer updates are not 
-typically a problem for 3D and video applications, and the effects of 
-these duplicate updates, even when they exist, are not typically 
-noticeable on high-speed networks.  Thus, interframe comparison is not 
-enabled by default and should not generally be enabled except on 
-low-bandwidth networks and with applications for which it can be shown 
-to be beneficial.</p>
+clients.  This can prove to be quite significant if the remote desktop 
+size is relatively large.</p>
 
-<p>Interframe comparison can be enabled by either passing an argument of 
+<p>2D applications are most often the ones that generate duplicate 
+framebuffer updates, so using interframe comparison with such 
+applications can significantly reduce the network usage and the server 
+CPU usage (since fewer rectangles are actually being encoded.)  However, 
+with 3D applications, the benefits of interframe comparison are less 
+clear, since it is less common for those applications to generate 
+duplicate framebuffer updates.  Interframe comparison may benefit 
+certain classes of 3D applications, such as design applications that 
+render a model against a static background&ndash; particularly when the 
+model is not zoomed in enough to fill the entire window.  In real-world 
+tests, however, interframe comparison rarely reduces the network usage 
+for 3D applications by more than 5-10%.  Furthermore, with games and 
+other immersive applications that modify most of the pixels on the 
+screen each time a frame is rendered, interframe comparison can actually 
+increase both CPU usage and network usage.  Furthermore, the effects of 
+duplicate framebuffer updates are not typically noticeable on high-speed 
+networks, but an increase in server CPU usage might be.</p>
+
+<p>For these reasons, interframe comparison is not enabled by default and 
+should not generally be enabled except on low-bandwidth networks and 
+with applications for which it can be shown to be beneficial.  
+Interframe comparison can be enabled by either passing an argument of 
 <code>-interframe</code> to <code>vncserver</code> when starting a 
 TurboVNC Server session or by requesting a compression level of 5 or 
 higher from the viewer (see below.)</p>
@@ -2260,7 +2276,50 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_IFDEBUG&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>TVNC_ICEBLOCKSIZE&nbsp;=&nbsp;</code><em><code>{s}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Set the block size for the interframe comparison engine (ICE) to <em><code>{s}</code></em> x <em><code>{s}</code></em> pixels.  Setting <em><code>{s}</code></em> to 0 causes the ICE to compare full rectangles, as TurboVNC 1.2.x did.</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">256</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        If interframe comparison is enabled (see Section 
+        <a href="#InterframeComparison" class="ref">7.1</a>), then TurboVNC will 
+        compare each rectangle of each framebuffer update on a block-by-block 
+        basis and send only the blocks that have changed.  This prevents large 
+        rectangles from being re-transmitted if only a few pixels in the 
+        rectangle have changed.  Using smaller block sizes can decrease network 
+        usage if only a few pixels are changing between updates, but using 
+        smaller block sizes can also interfere with the Tight encoder&rsquo;s 
+        ability to efficiently split rectangles into subrectangles, thus 
+        increasing server CPU usage (and sometimes increasing network usage as 
+        well, which runs counter to the purpose of interframe comparison.)  
+        Setting the block size to 0 causes the ICE to compare full framebuffer 
+        update rectangles, as TurboVNC 1.2.x did. <br /><br /> The default block 
+        size of 256x256 was chosen based on extensive low-level experiments 
+        using the same set of RFB session captures that were used when designing 
+        the TurboVNC encoder.  For most of those datasets, 256x256 blocks 
+        produced the lowest network and CPU usage, but actual mileage may vary. 
+        There were rare cases in which using 64x64 blocks or full-rectangle 
+        comparison produced better network and CPU usage.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_ICEDEBUG&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2280,9 +2339,9 @@ about how Hextile, RRE, and ZRLE work.</p>
         If interframe comparison is enabled (see Section 
         <a href="#InterframeComparison" class="ref">7.1</a>), then setting this 
         environment variable to 1 will cause the interframe comparison engine 
-        (ICE) to change the color of duplicate updates without culling them from 
-        the update stream.  This allows you to easily see which applications are 
-        generating duplicate updates.
+        (ICE) to change the color of duplicate screen regions without culling 
+        them from the update stream.  This allows you to easily see which 
+        applications are generating duplicate updates.
     </dd>
 </dl>
 
