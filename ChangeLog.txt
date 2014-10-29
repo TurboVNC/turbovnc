@@ -56,7 +56,8 @@ command line or launching another viewer instance.
 -------------------------------------------------------------------------------
 [9]
 The default xstartup.turbovnc script that the TurboVNC Server creates will now
-properly launch the Gnome fallback window manager on Ubuntu 14.04.
+properly launch the Gnome fallback window manager on Ubuntu 14.04, if 3D
+window manager support is not activated.
 -------------------------------------------------------------------------------
 [10]
 Interframe comparison and Compression Level 2 can now be selected in the
