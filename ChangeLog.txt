@@ -43,29 +43,24 @@ packages-- one that works with Leopard and later and uses Apple's version of
 Java, and one that works with Lion and later and uses the Oracle Java plug-in.
 -------------------------------------------------------------------------------
 [7]
-Since VirtualGL no longer provides a native Windows client, the TCBench utility
-that was formerly included with that package is now included with the native
-Windows TurboVNC Viewer.
--------------------------------------------------------------------------------
-[8]
 When running in listen mode, the Java TurboVNC Viewer now displays a tray icon
 with a popup menu similar to that of the Windows native viewer.  This allows
 the listener to be shut down, for global options to be set for all
 connections, and for new forward connections to be made without using the
 command line or launching another viewer instance.
 -------------------------------------------------------------------------------
-[9]
+[8]
 The default xstartup.turbovnc script that the TurboVNC Server creates will now
 properly launch the Gnome fallback window manager on Ubuntu 14.04, if 3D
 window manager support is not activated.
 -------------------------------------------------------------------------------
-[10]
+[9]
 Interframe comparison and Compression Level 2 can now be selected in the
 TurboVNC Viewer GUI.  Also, a new command-line option/parameter
 ("CompatibleGUI") can now be used to force the GUI to expose all 10 compression
 levels (useful when connecting to non-TurboVNC servers.)
 -------------------------------------------------------------------------------
-[11]
+[10]
 The Interframe Comparison Engine (ICE) now compares large framebuffer update
 rectangles on a block-by-block basis, which prevents the entire rectangle from
 being sent if only a small portion of it has changed.  The default block size
