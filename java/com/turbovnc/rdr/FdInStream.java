@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012, 2014 Brian P. Hinz
  * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -231,6 +231,10 @@ public class FdInStream extends InStream {
 
   public void setFd(FileDescriptor fd_) {
     fd = fd_;
+  }
+
+  public int getBufSize() {
+    return bufSize;
   }
 
   private FileDescriptor fd;

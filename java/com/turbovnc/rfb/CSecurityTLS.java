@@ -3,7 +3,7 @@
  * Copyright (C) 2005 Martin Koegler
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2012, 2014 Brian P. Hinz
  * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import javax.swing.JOptionPane;
 
 import com.turbovnc.rdr.*;
@@ -94,11 +95,6 @@ public class CSecurityTLS extends CSecurity {
 
     try {
       manager = new SSLEngineManager(engine, is, os);
-    } catch(java.lang.Exception e) {
-      System.out.println(e.toString());
-    }
-
-    try {
       manager.doHandshake();
     } catch(java.lang.Exception e) {
       throw new SystemException(e.toString());
@@ -134,22 +130,27 @@ public class CSecurityTLS extends CSecurity {
                                  client.getServerPort());
     engine.setUseClientMode(true);
 
+    String[] supported = engine.getSupportedProtocols();
+    ArrayList<String> enabled = new ArrayList<String>();
+    for (int i = 0; i < supported.length; i++)
+      if (supported[i].matches("TLS.*"))
+        enabled.add(supported[i]);
+    engine.setEnabledProtocols(enabled.toArray(new String[0]));
+
     if (anon) {
-      String[] supported;
-      ArrayList<String> enabled = new ArrayList<String>();
-
       supported = engine.getSupportedCipherSuites();
-
+      enabled = new ArrayList<String>();
+      // prefer ECDH over DHE
+      for (int i = 0; i < supported.length; i++)
+        if (supported[i].matches("TLS_ECDH_anon.*"))
+          enabled.add(supported[i]);
       for (int i = 0; i < supported.length; i++)
         if (supported[i].matches("TLS_DH_anon.*"))
           enabled.add(supported[i]);
-
       engine.setEnabledCipherSuites(enabled.toArray(new String[0]));
     } else {
       engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
     }
-
-    engine.setEnabledProtocols(new String[]{"SSLv3", "TLSv1"});
   }
 
   class MyHandshakeListener implements HandshakeCompletedListener {

@@ -61,6 +61,11 @@ Furthermore, the "NoUnixLogin" parameter now disables the VeNCrypt
 "User" and "SendLocalUserName" parameters now disable any of the VeNCrypt
 security types that don't require a user name.
 -------------------------------------------------------------------------------
+[8]
+The Java TurboVNC Viewer now supports (and prefers) elliptic curve ciphers when
+using the Anonymous TLS security types.  Additionally, the Java TurboVNC Viewer
+now uses TLS v1.1+ by default instead of TLS v1.0.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
