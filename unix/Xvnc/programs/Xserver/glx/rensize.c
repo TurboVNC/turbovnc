@@ -224,6 +224,11 @@ __glXImageSize(GLenum format, GLenum type, GLenum target,
         case GL_ALPHA:
         case GL_LUMINANCE:
         case GL_INTENSITY:
+        case GL_RED_INTEGER_EXT:
+        case GL_GREEN_INTEGER_EXT:
+        case GL_BLUE_INTEGER_EXT:
+        case GL_ALPHA_INTEGER_EXT:
+        case GL_LUMINANCE_INTEGER_EXT:
             elementsPerGroup = 1;
             break;
         case GL_422_EXT:
@@ -234,14 +239,19 @@ __glXImageSize(GLenum format, GLenum type, GLenum target,
         case GL_DEPTH_STENCIL_MESA:
         case GL_YCBCR_MESA:
         case GL_LUMINANCE_ALPHA:
+        case GL_LUMINANCE_ALPHA_INTEGER_EXT:
             elementsPerGroup = 2;
             break;
         case GL_RGB:
         case GL_BGR:
+        case GL_RGB_INTEGER_EXT:
+        case GL_BGR_INTEGER_EXT:
             elementsPerGroup = 3;
             break;
         case GL_RGBA:
         case GL_BGRA:
+        case GL_RGBA_INTEGER_EXT:
+        case GL_BGRA_INTEGER_EXT:
         case GL_ABGR_EXT:
             elementsPerGroup = 4;
             break;
