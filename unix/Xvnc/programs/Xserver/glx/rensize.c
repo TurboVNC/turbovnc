@@ -44,7 +44,7 @@
    ((a & 0xff00U)<<8) | ((a & 0xffU)<<24))
 
 int
-__glXMap1dReqSize(const GLbyte * pc, Bool swap)
+__glXMap1dReqSize(const GLbyte * pc, Bool swap, int reqlen)
 {
     GLenum target;
     GLint order;
@@ -61,7 +61,7 @@ __glXMap1dReqSize(const GLbyte * pc, Bool swap)
 }
 
 int
-__glXMap1fReqSize(const GLbyte * pc, Bool swap)
+__glXMap1fReqSize(const GLbyte * pc, Bool swap, int reqlen)
 {
     GLenum target;
     GLint order;
@@ -86,7 +86,7 @@ Map2Size(int k, int majorOrder, int minorOrder)
 }
 
 int
-__glXMap2dReqSize(const GLbyte * pc, Bool swap)
+__glXMap2dReqSize(const GLbyte * pc, Bool swap, int reqlen)
 {
     GLenum target;
     GLint uorder, vorder;
@@ -103,7 +103,7 @@ __glXMap2dReqSize(const GLbyte * pc, Bool swap)
 }
 
 int
-__glXMap2fReqSize(const GLbyte * pc, Bool swap)
+__glXMap2fReqSize(const GLbyte * pc, Bool swap, int reqlen)
 {
     GLenum target;
     GLint uorder, vorder;
@@ -359,13 +359,14 @@ __glXTypeSize(GLenum enm)
 }
 
 int
-__glXDrawArraysReqSize(const GLbyte * pc, Bool swap)
+__glXDrawArraysReqSize(const GLbyte * pc, Bool swap, int reqlen)
 {
     __GLXdispatchDrawArraysHeader *hdr = (__GLXdispatchDrawArraysHeader *) pc;
     __GLXdispatchDrawArraysComponentHeader *compHeader;
     GLint numVertexes = hdr->numVertexes;
     GLint numComponents = hdr->numComponents;
     GLint arrayElementSize = 0;
+    GLint x, size;
     int i;
 
     if (swap) {
@@ -374,6 +375,13 @@ __glXDrawArraysReqSize(const GLbyte * pc, Bool swap)
     }
 
     pc += sizeof(__GLXdispatchDrawArraysHeader);
+    reqlen -= sizeof(__GLXdispatchDrawArraysHeader);
+
+    size = safe_mul(sizeof(__GLXdispatchDrawArraysComponentHeader),
+                    numComponents);
+    if (size < 0 || reqlen < 0 || reqlen < size)
+        return -1;
+
     compHeader = (__GLXdispatchDrawArraysComponentHeader *) pc;
 
     for (i = 0; i < numComponents; i++) {
@@ -417,17 +425,18 @@ __glXDrawArraysReqSize(const GLbyte * pc, Bool swap)
             return -1;
         }
 
-        arrayElementSize += __GLX_PAD(numVals * __glXTypeSize(datatype));
+        x = safe_pad(safe_mul(numVals, __glXTypeSize(datatype)));
+        if ((arrayElementSize = safe_add(arrayElementSize, x)) < 0)
+            return -1;
 
         pc += sizeof(__GLXdispatchDrawArraysComponentHeader);
     }
 
-    return ((numComponents * sizeof(__GLXdispatchDrawArraysComponentHeader)) +
-            (numVertexes * arrayElementSize));
+    return safe_add(size, safe_mul(numVertexes, arrayElementSize));
 }
 
 int
-__glXSeparableFilter2DReqSize(const GLbyte * pc, Bool swap)
+__glXSeparableFilter2DReqSize(const GLbyte * pc, Bool swap, int reqlen)
 {
     __GLXdispatchConvolutionFilterHeader *hdr =
         (__GLXdispatchConvolutionFilterHeader *) pc;
