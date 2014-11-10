@@ -81,8 +81,13 @@ __glXGetAnswerBuffer(__GLXclientState * cl, size_t required_size,
     const unsigned mask = alignment - 1;
 
     if (local_size < required_size) {
-        const size_t worst_case_size = required_size + alignment;
+        size_t worst_case_size;
         intptr_t temp_buf;
+
+        if (required_size < SIZE_MAX - alignment)
+            worst_case_size = required_size + alignment;
+        else
+            return NULL;
 
         if (cl->returnBufSize < worst_case_size) {
             void *temp = realloc(cl->returnBuf, worst_case_size);
