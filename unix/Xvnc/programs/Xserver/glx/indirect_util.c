@@ -78,7 +78,7 @@ __glXGetAnswerBuffer(__GLXclientState * cl, size_t required_size,
                      void *local_buffer, size_t local_size, unsigned alignment)
 {
     void *buffer = local_buffer;
-    const unsigned mask = alignment - 1;
+    const intptr_t mask = alignment - 1;
 
     if (local_size < required_size) {
         size_t worst_case_size;
