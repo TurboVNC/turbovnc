@@ -67,6 +67,10 @@ being sent if only a small portion of it has changed.  The default block size
 is 256x256 but can be changed using the TVNC_ICEBLOCKSIZE environment variable
 (for instance, TVNC_ICEBLOCKSIZE=128 would use 128x128 blocks.)
 -------------------------------------------------------------------------------
+[11]
+Fixed an issue whereby the Java TurboVNC Viewer would not enable the OS X Lion
+full-screen mode feature on OS X 10.10 "Yosemite".
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
