@@ -162,14 +162,12 @@ public class Viewport extends JFrame {
   void enableLionFS() {
     try {
       String version = System.getProperty("os.version");
-      int firstDot = version.indexOf('.');
-      int lastDot = version.lastIndexOf('.');
-      if (lastDot > firstDot && lastDot >= 0) {
-        version = version.substring(0, version.indexOf('.', firstDot + 1));
-      }
-      double v = Double.parseDouble(version);
-      if (v < 10.7)
-        throw new Exception("Operating system version is " + v);
+      String[] tokens = version.split("\\.");
+      int major = Integer.parseInt(tokens[0]), minor = 0;
+      if (tokens.length > 1)
+        minor = Integer.parseInt(tokens[1]);
+      if (major < 10 || (major == 10 && minor < 7))
+        throw new Exception("Operating system version is " + version);
 
       Class fsuClass = Class.forName("com.apple.eawt.FullScreenUtilities");
       Class argClasses[] = new Class[]{Window.class, Boolean.TYPE};
