@@ -53,12 +53,6 @@ endif()
 option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer"
 	${DEFAULT_TVNC_BUILDJAVA})
 
-if(UNIX AND TVNC_BUILDNATIVE)
-	# Doesn't make sense to build the support infrastructure for the Java viewer
-	# without also building the Java viewer.
-	set(TVNC_BUILDJAVA 1)
-endif()
-
 set(DEFAULT_TVNC_BUILDSERVER 0)
 if(UNIX AND NOT APPLE AND NOT CYGWIN)
 	set(DEFAULT_TVNC_BUILDSERVER 1)
