@@ -338,7 +338,7 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 	char        charName[100];
 	int         ignore;
 
-	if (sscanf((char *) line, "STARTCHAR %s", charName) != 1) {
+	if (sscanf((char *) line, "STARTCHAR %99s", charName) != 1) {
 	    bdfError("bad character name in BDF file\n");
 	    goto BAILOUT;	/* bottom of function, free and return error */
 	}
