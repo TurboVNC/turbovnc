@@ -1829,6 +1829,7 @@ fs_read_glyphs(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     FontInfoPtr		    pfi = &pfont->info;
     fsQueryXBitmaps16Reply  *rep;
     char		    *buf;
+    long		    bufleft; /* length of reply left to use */
     fsOffset32		    *ppbits;
     fsOffset32		    local_off;
     char		    *off_adr;
@@ -1858,9 +1859,33 @@ fs_read_glyphs(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     buf = (char *) rep;
     buf += SIZEOF (fsQueryXBitmaps16Reply);
 
+    bufleft = rep->length << 2;
+    bufleft -= SIZEOF (fsQueryXBitmaps16Reply);
+
+    if ((bufleft / SIZEOF (fsOffset32)) < rep->num_chars)
+    {
+#ifdef DEBUG
+	fprintf(stderr,
+		"fsQueryXBitmaps16: num_chars (%d) > bufleft (%ld) / %d\n",
+		rep->num_chars, bufleft, SIZEOF (fsOffset32));
+#endif
+	err = AllocError;
+	goto bail;
+    }
     ppbits = (fsOffset32 *) buf;
     buf += SIZEOF (fsOffset32) * (rep->num_chars);
+    bufleft -= SIZEOF (fsOffset32) * (rep->num_chars);
 
+    if (bufleft < rep->nbytes)
+    {
+#ifdef DEBUG
+	fprintf(stderr,
+		"fsQueryXBitmaps16: nbytes (%d) > bufleft (%ld)\n",
+		rep->nbytes, bufleft);
+#endif
+	err = AllocError;
+	goto bail;
+    }
     pbitmaps = (pointer ) buf;
 
     if (blockrec->type == FS_LOAD_GLYPHS)
@@ -1918,7 +1943,9 @@ fs_read_glyphs(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 	     */
 	    if (NONZEROMETRICS(&fsdata->encoding[minchar].metrics))
 	    {
-		if (local_off.length)
+		if (local_off.length &&
+		    (local_off.position < rep->nbytes) &&
+		    (local_off.length <= (rep->nbytes - local_off.position)))
 		{
 		    bits = allbits;
 		    allbits += local_off.length;
