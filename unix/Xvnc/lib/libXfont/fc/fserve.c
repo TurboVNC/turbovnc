@@ -92,6 +92,12 @@ in this Software without prior written authorization from The Open Group.
 			     (pci)->descent || \
 			     (pci)->characterWidth)
 
+/*
+ * SIZEOF(r) is in bytes, length fields in the protocol are in 32-bit words,
+ * so this converts for doing size comparisons.
+ */
+#define LENGTHOF(r)	(SIZEOF(r) >> 2)
+
 extern void ErrorF(const char *f, ...);
 
 static int fs_read_glyphs ( FontPathElementPtr fpe, FSBlockDataPtr blockrec );
@@ -207,9 +213,22 @@ _fs_add_rep_log (FSFpePtr conn, fsGenericReply *rep)
 		 rep->sequenceNumber,
 		 conn->reqbuffer[i].opcode);
 }
+
+#define _fs_reply_failed(rep, name, op) do {                            \
+    if (rep) {                                                          \
+        if (rep->type == FS_Error)                                      \
+            fprintf (stderr, "Error: %d Request: %s\n",                 \
+                     ((fsError *)rep)->request, #name);                 \
+        else                                                            \
+            fprintf (stderr, "Bad Length for %s Reply: %d %s %d\n",     \
+                     #name, rep->length, op, LENGTHOF(name));           \
+    }                                                                   \
+} while (0)
+
 #else
 #define _fs_add_req_log(conn,op)    ((conn)->current_seq++)
 #define _fs_add_rep_log(conn,rep)
+#define _fs_reply_failed(rep,name,op)
 #endif
 
 static Bool
@@ -683,13 +702,15 @@ fs_read_open_font(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     int			    ret;
 
     rep = (fsOpenBitmapFontReply *) fs_get_reply (conn, &ret);
-    if (!rep || rep->type == FS_Error)
+    if (!rep || rep->type == FS_Error ||
+	(rep->length != LENGTHOF(fsOpenBitmapFontReply)))
     {
 	if (ret == FSIO_BLOCK)
 	    return StillWorking;
 	if (rep)
 	    _fs_done_read (conn, rep->length << 2);
 	fs_cleanup_bfont (bfont);
+	_fs_reply_failed (rep, fsOpenBitmapFontReply, "!=");
 	return BadFontName;
     }
 
@@ -826,13 +847,15 @@ fs_read_query_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     int			ret;
 
     rep = (fsQueryXInfoReply *) fs_get_reply (conn, &ret);
-    if (!rep || rep->type == FS_Error)
+    if (!rep || rep->type == FS_Error ||
+	(rep->length < LENGTHOF(fsQueryXInfoReply)))
     {
 	if (ret == FSIO_BLOCK)
 	    return StillWorking;
 	if (rep)
 	    _fs_done_read (conn, rep->length << 2);
 	fs_cleanup_bfont (bfont);
+	_fs_reply_failed (rep, fsQueryXInfoReply, "<");
 	return BadFontName;
     }
 
@@ -989,13 +1012,15 @@ fs_read_extent_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     FontInfoRec		    *fi = &bfont->pfont->info;
 
     rep = (fsQueryXExtents16Reply *) fs_get_reply (conn, &ret);
-    if (!rep || rep->type == FS_Error)
+    if (!rep || rep->type == FS_Error ||
+	(rep->length < LENGTHOF(fsQueryXExtents16Reply)))
     {
 	if (ret == FSIO_BLOCK)
 	    return StillWorking;
 	if (rep)
 	    _fs_done_read (conn, rep->length << 2);
 	fs_cleanup_bfont (bfont);
+	_fs_reply_failed (rep, fsQueryXExtents16Reply, "<");
 	return BadFontName;
     }
 
@@ -1883,13 +1908,15 @@ fs_read_glyphs(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     unsigned long	    minchar, maxchar;
 
     rep = (fsQueryXBitmaps16Reply *) fs_get_reply (conn, &ret);
-    if (!rep || rep->type == FS_Error)
+    if (!rep || rep->type == FS_Error ||
+	(rep->length < LENGTHOF(fsQueryXBitmaps16Reply)))
     {
 	if (ret == FSIO_BLOCK)
 	    return StillWorking;
 	if (rep)
 	    _fs_done_read (conn, rep->length << 2);
 	err = AllocError;
+	_fs_reply_failed (rep, fsQueryXBitmaps16Reply, "<");
 	goto bail;
     }
 
@@ -2318,12 +2345,14 @@ fs_read_list(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     int			err;
 
     rep = (fsListFontsReply *) fs_get_reply (conn, &ret);
-    if (!rep || rep->type == FS_Error)
+    if (!rep || rep->type == FS_Error ||
+	(rep->length < LENGTHOF(fsListFontsReply)))
     {
 	if (ret == FSIO_BLOCK)
 	    return StillWorking;
 	if (rep)
 	    _fs_done_read (conn, rep->length << 2);
+	_fs_reply_failed (rep, fsListFontsReply, "<");
 	return AllocError;
     }
     data = (char *) rep + SIZEOF (fsListFontsReply);
@@ -2443,12 +2472,15 @@ fs_read_list_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     _fs_free_props (&binfo->info);
 
     rep = (fsListFontsWithXInfoReply *) fs_get_reply (conn, &ret);
-    if (!rep || rep->type == FS_Error)
+    if (!rep || rep->type == FS_Error ||
+	((rep->nameLength != 0) &&
+	 (rep->length < LENGTHOF(fsListFontsWithXInfoReply))))
     {
 	if (ret == FSIO_BLOCK)
 	    return StillWorking;
 	binfo->status = FS_LFWI_FINISHED;
 	err = AllocError;
+	_fs_reply_failed (rep, fsListFontsWithXInfoReply, "<");
 	goto done;
     }
     /*
