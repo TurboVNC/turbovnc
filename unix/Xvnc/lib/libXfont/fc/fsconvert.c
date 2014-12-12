@@ -721,7 +721,12 @@ fs_alloc_glyphs (FontPtr pFont, int size)
     FSGlyphPtr	glyphs;
     FSFontPtr	fsfont = (FSFontPtr) pFont->fontPrivate;
 
-    glyphs = malloc (sizeof (FSGlyphRec) + size);
+    if (size < (INT_MAX - sizeof (FSGlyphRec)))
+	glyphs = malloc (sizeof (FSGlyphRec) + size);
+    else
+	glyphs = NULL;
+    if (glyphs == NULL)
+	return NULL;
     glyphs->next = fsfont->glyphs;
     fsfont->glyphs = glyphs;
     return (pointer) (glyphs + 1);
