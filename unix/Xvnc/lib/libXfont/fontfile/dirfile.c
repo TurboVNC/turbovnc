@@ -42,6 +42,7 @@ in this Software without prior written authorization from The Open Group.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <limits.h>
 
 static Bool AddFileNameAliases ( FontDirectoryPtr dir );
 static int ReadFontAlias ( char *directory, Bool isFile,
@@ -374,6 +375,9 @@ lexAlias(FILE *file, char **lexToken)
 	    int         nsize;
 	    char       *nbuf;
 
+	    if (tokenSize >= (INT_MAX >> 2))
+		/* Stop before we overflow */
+		return EALLOC;
 	    nsize = tokenSize ? (tokenSize << 1) : 64;
 	    nbuf = realloc(tokenBuf, nsize);
 	    if (!nbuf)
