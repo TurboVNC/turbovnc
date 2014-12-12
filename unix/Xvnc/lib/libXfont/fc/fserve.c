@@ -816,6 +816,7 @@ fs_read_query_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     FSFpePtr		conn = (FSFpePtr) fpe->private;
     fsQueryXInfoReply	*rep;
     char		*buf;
+    long		bufleft; /* length of reply left to use */
     fsPropInfo		*pi;
     fsPropOffset	*po;
     pointer		pd;
@@ -845,6 +846,9 @@ fs_read_query_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     buf = (char *) rep;
     buf += SIZEOF(fsQueryXInfoReply);
 
+    bufleft = rep->length << 2;
+    bufleft -= SIZEOF(fsQueryXInfoReply);
+
     /* move the data over */
     fsUnpack_XFontInfoHeader(rep, pInfo);
 
@@ -852,17 +856,50 @@ fs_read_query_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     _fs_init_fontinfo(conn, pInfo);
 
     /* Compute offsets into the reply */
+    if (bufleft < SIZEOF(fsPropInfo))
+    {
+	ret = -1;
+#ifdef DEBUG
+	fprintf(stderr, "fsQueryXInfo: bufleft (%ld) < SIZEOF(fsPropInfo)\n",
+		bufleft);
+#endif
+	goto bail;
+    }
     pi = (fsPropInfo *) buf;
     buf += SIZEOF (fsPropInfo);
+    bufleft -= SIZEOF(fsPropInfo);
 
+    if ((bufleft / SIZEOF(fsPropOffset)) < pi->num_offsets)
+    {
+	ret = -1;
+#ifdef DEBUG
+	fprintf(stderr,
+		"fsQueryXInfo: bufleft (%ld) / SIZEOF(fsPropOffset) < %d\n",
+		bufleft, pi->num_offsets);
+#endif
+	goto bail;
+    }
     po = (fsPropOffset *) buf;
     buf += pi->num_offsets * SIZEOF(fsPropOffset);
+    bufleft -= pi->num_offsets * SIZEOF(fsPropOffset);
 
+    if (bufleft < pi->data_len)
+    {
+	ret = -1;
+#ifdef DEBUG
+	fprintf(stderr,
+		"fsQueryXInfo: bufleft (%ld) < data_len (%d)\n",
+		bufleft, pi->data_len);
+#endif
+	goto bail;
+    }
     pd = (pointer) buf;
     buf += pi->data_len;
+    bufleft -= pi->data_len;
 
     /* convert the properties and step over the reply */
     ret = _fs_convert_props(pi, po, pd, pInfo);
+  bail:
     _fs_done_read (conn, rep->length << 2);
 
     if (ret == -1)
