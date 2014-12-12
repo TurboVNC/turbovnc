@@ -70,6 +70,7 @@ in this Software without prior written authorization from The Open Group.
 #include	"fservestr.h"
 #include	<X11/fonts/fontutil.h>
 #include	<errno.h>
+#include	<limits.h>
 
 #include	<time.h>
 #define Time_t time_t
@@ -970,7 +971,16 @@ fs_read_extent_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 	numInfos *= 2;
 	haveInk = TRUE;
     }
-    ci = pCI = malloc(sizeof(CharInfoRec) * numInfos);
+    if (numInfos >= (INT_MAX / sizeof(CharInfoRec))) {
+#ifdef DEBUG
+	fprintf(stderr,
+		"fsQueryXExtents16: numInfos (%d) >= %ld\n",
+		numInfos, (INT_MAX / sizeof(CharInfoRec)));
+#endif
+	pCI = NULL;
+    }
+    else
+	pCI = malloc(sizeof(CharInfoRec) * numInfos);
 
     if (!pCI)
     {
