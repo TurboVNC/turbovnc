@@ -979,6 +979,16 @@ fs_read_extent_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 #endif
 	pCI = NULL;
     }
+    else if (numExtents > ((rep->length - LENGTHOF(fsQueryXExtents16Reply))
+			    / LENGTHOF(fsXCharInfo))) {
+#ifdef DEBUG
+	fprintf(stderr,
+		"fsQueryXExtents16: numExtents (%d) > (%d - %d) / %d\n",
+		numExtents, rep->length,
+		LENGTHOF(fsQueryXExtents16Reply), LENGTHOF(fsXCharInfo));
+#endif
+	pCI = NULL;
+    }
     else
 	pCI = malloc(sizeof(CharInfoRec) * numInfos);
 
