@@ -43,6 +43,7 @@
 #include "rfb.h"
 #include "input-xkb.h"
 
+Bool xkbDebug = FALSE;
 
 DeviceIntPtr kbdDevice = NULL;
 static DeviceIntPtr ptrDevice = NULL;
@@ -66,7 +67,13 @@ void
 KbdDeviceInit(pDevice)
     DeviceIntPtr pDevice;
 {
+    char *env;
+
     kbdDevice = pDevice;
+    if ((env = getenv("TVNC_XKBDEBUG")) != NULL && !strcmp(env, "1")) {
+      rfbLog("XKEYBOARD handler debugging messages enabled\n");
+      xkbDebug = TRUE;
+    }
 }
 
 
@@ -100,10 +107,8 @@ static inline void PressKey(DeviceIntPtr dev, int kc, Bool down,
 {
   int action;
 
-#ifdef DEBUG
-  if (msg != NULL)
+  if (msg != NULL && xkbDebug)
     rfbLog("PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
-#endif
 
   action = down ? KeyPress : KeyRelease;
   QueueKeyboardEvents(dev, action, kc, NULL);
@@ -199,9 +204,8 @@ void KeyEvent(CARD32 keysym, Bool down)
      * This can happen quite often as we ignore some
      * key presses.
      */
-    #ifdef DEBUG
-    rfbLog("Unexpected release of keysym 0x%x\n", keysym);
-    #endif
+    if (xkbDebug)
+      rfbLog("Unexpected release of keysym 0x%x\n", keysym);
 
     return;
   }
@@ -238,9 +242,8 @@ void KeyEvent(CARD32 keysym, Bool down)
 
   /* We don't have lock synchronisation... */
   if (IsLockModifier(keycode, new_state) && ignoreLockModifiers) {
-    #ifdef DEBUG
-    rfbLog("Ignoring lock key (e.g. caps lock)\n");
-    #endif
+    if (xkbDebug)
+      rfbLog("Ignoring lock key (e.g. caps lock)\n");
     return;
   }
 
@@ -283,10 +286,9 @@ void KeyEvent(CARD32 keysym, Bool down)
     KeyCode keycode2 = 0;
     unsigned new_state2;
 
-    #ifdef DEBUG
-    rfbLog("Finding alternative to keysym 0x%x to avoid fake shift for numpad\n",
-           keysym);
-    #endif
+    if (xkbDebug)
+      rfbLog("Finding alternative to keysym 0x%x to avoid fake shift for numpad\n",
+             keysym);
 
     for (i = 0; i < sizeof(altKeysym) / sizeof(altKeysym[0]); i++) {
       KeySym altsym;
@@ -310,9 +312,8 @@ void KeyEvent(CARD32 keysym, Bool down)
     }
 
     if (i == sizeof(altKeysym) / sizeof(altKeysym[0])) {
-      #ifdef DEBUG
-      rfbLog("No alternative keysym found\n");
-      #endif
+      if (xkbDebug)
+        rfbLog("No alternative keysym found\n");
     } else {
       keycode = keycode2;
       new_state = new_state2;
