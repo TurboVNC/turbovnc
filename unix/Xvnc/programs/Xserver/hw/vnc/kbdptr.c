@@ -54,6 +54,7 @@ Bool compatibleKbd = FALSE;
 /* Avoid fake Shift presses for keys affected by NumLock */
 Bool avoidShiftNumLock = TRUE;
 Bool ignoreLockModifiers = FALSE;
+Bool fakeShift = TRUE;
 
 unsigned char ptrAcceleration = 50;
 
@@ -73,6 +74,10 @@ KbdDeviceInit(pDevice)
     if ((env = getenv("TVNC_XKBDEBUG")) != NULL && !strcmp(env, "1")) {
       rfbLog("XKEYBOARD handler debugging messages enabled\n");
       xkbDebug = TRUE;
+    }
+    if ((env = getenv("TVNC_XKBFAKESHIFT")) != NULL && !strcmp(env, "0")) {
+      rfbLog("Disabling fake shift key event generation in XKEYBOARD handler\n");
+      fakeShift = FALSE;
     }
 }
 
@@ -348,14 +353,14 @@ void KeyEvent(CARD32 keysym, Bool down)
   shift_press = level_three_press = 0;
 
   /* Need a fake press or release of shift? */
-  if (!(state & ShiftMask) && (new_state & ShiftMask)) {
+  if (!(state & ShiftMask) && (new_state & ShiftMask) && fakeShift) {
     shift_press = PressShift();
     if (shift_press == 0) {
       rfbLog("ERROR: Unable to find modifier key for Shift key press\n");
       return;
     }
     PressKey(kbdDevice, shift_press, TRUE, "temp shift");
-  } else if ((state & ShiftMask) && !(new_state & ShiftMask)) {
+  } else if ((state & ShiftMask) && !(new_state & ShiftMask) && fakeShift) {
     int index = 0;
     KeyCode *shift_release = ReleaseShift();
     if (!shift_release) {
