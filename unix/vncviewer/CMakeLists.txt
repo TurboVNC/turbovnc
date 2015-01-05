@@ -18,6 +18,8 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncviewer
 
 install(FILES vncviewer.man DESTINATION ${TVNC_MANDIR}/man1 RENAME vncviewer.1)
 
+if(TVNC_BUILDJAVA)
+
 if(BITS EQUAL 64)
 	set(DEFAULT_TJPEG_JNILIBRARY /opt/libjpeg-turbo/lib64/libturbojpeg.so)
 else()
@@ -44,3 +46,5 @@ message(STATUS "TJPEG_JNILIBRARY = ${TJPEG_JNILIBRARY}")
 
 install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${TVNC_JAVADIR}
 	RENAME libturbojpeg.so)
+
+endif()
