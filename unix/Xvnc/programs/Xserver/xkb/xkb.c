@@ -4950,14 +4950,13 @@ static char *
 _GetCountedString(char **wire_inout, Bool swap)
 {
     char *wire, *str;
-    CARD16 len, *plen;
+    CARD16 len;
 
     wire = *wire_inout;
-    plen = (CARD16 *) wire;
+    len = *(CARD16 *) wire;
     if (swap) {
-        swaps(plen);
+        swaps(&len);
     }
-    len = *plen;
     str = malloc(len + 1);
     if (str) {
         memcpy(str, &wire[2], len);
@@ -4974,25 +4973,28 @@ _CheckSetDoodad(char **wire_inout,
 {
     char *wire;
     xkbDoodadWireDesc *dWire;
+    xkbAnyDoodadWireDesc any;
+    xkbTextDoodadWireDesc text;
     XkbDoodadPtr doodad;
 
     dWire = (xkbDoodadWireDesc *) (*wire_inout);
+    any = dWire->any;
     wire = (char *) &dWire[1];
     if (client->swapped) {
-        swapl(&dWire->any.name);
-        swaps(&dWire->any.top);
-        swaps(&dWire->any.left);
-        swaps(&dWire->any.angle);
+        swapl(&any.name);
+        swaps(&any.top);
+        swaps(&any.left);
+        swaps(&any.angle);
     }
     CHK_ATOM_ONLY(dWire->any.name);
-    doodad = XkbAddGeomDoodad(geom, section, dWire->any.name);
+    doodad = XkbAddGeomDoodad(geom, section, any.name);
     if (!doodad)
         return BadAlloc;
     doodad->any.type = dWire->any.type;
     doodad->any.priority = dWire->any.priority;
-    doodad->any.top = dWire->any.top;
-    doodad->any.left = dWire->any.left;
-    doodad->any.angle = dWire->any.angle;
+    doodad->any.top = any.top;
+    doodad->any.left = any.left;
+    doodad->any.angle = any.angle;
     switch (doodad->any.type) {
     case XkbOutlineDoodad:
     case XkbSolidDoodad:
@@ -5015,12 +5017,13 @@ _CheckSetDoodad(char **wire_inout,
                                               dWire->text.colorNdx);
             return BadMatch;
         }
+        text = dWire->text;
         if (client->swapped) {
-            swaps(&dWire->text.width);
-            swaps(&dWire->text.height);
+            swaps(&text.width);
+            swaps(&text.height);
         }
-        doodad->text.width = dWire->text.width;
-        doodad->text.height = dWire->text.height;
+        doodad->text.width = text.width;
+        doodad->text.height = text.height;
         doodad->text.color_ndx = dWire->text.colorNdx;
         doodad->text.text = _GetCountedString(&wire, client->swapped);
         doodad->text.font = _GetCountedString(&wire, client->swapped);
