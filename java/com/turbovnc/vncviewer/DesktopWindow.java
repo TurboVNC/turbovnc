@@ -160,7 +160,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     Dimension bestSize = tk.getBestCursorSize(cw, ch);
     Image srcImage = tk.createImage(cursorSrc);
     BufferedImage cursorImage =
-      new BufferedImage(bestSize.width, bestSize.height, 
+      new BufferedImage(bestSize.width, bestSize.height,
                         BufferedImage.TYPE_INT_ARGB);
     Graphics2D g2 = cursorImage.createGraphics();
     g2.setRenderingHint(RenderingHints.KEY_RENDERING,
@@ -410,8 +410,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // Mouse-Motion callback function
   private void mouseMotionCB(MouseEvent e) {
     if (!cc.opts.viewOnly &&
-        e.getX() >= cc.viewport.dx && 
-        e.getY() >= cc.viewport.dy && 
+        e.getX() >= cc.viewport.dx &&
+        e.getY() >= cc.viewport.dy &&
         e.getX() <= cc.viewport.dx + scaledWidth &&
         e.getY() <= cc.viewport.dy + scaledHeight)
       cc.writePointerEvent(e);
@@ -438,8 +438,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // Mouse callback function
   private void mouseCB(MouseEvent e) {
     if (!cc.opts.viewOnly && (e.getID() == MouseEvent.MOUSE_RELEASED ||
-        (e.getX() >= cc.viewport.dx && 
-         e.getY() >= cc.viewport.dy && 
+        (e.getX() >= cc.viewport.dx &&
+         e.getY() >= cc.viewport.dy &&
          e.getX() <= cc.viewport.dx + scaledWidth &&
          e.getY() <= cc.viewport.dy + scaledHeight)))
       cc.writePointerEvent(e);
