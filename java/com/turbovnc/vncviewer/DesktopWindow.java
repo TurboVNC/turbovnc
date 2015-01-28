@@ -74,7 +74,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     cursorBacking = new ManagedPixelBuffer();
     Dimension bestSize = tk.getBestCursorSize(16, 16);
     BufferedImage cursorImage =
-      new BufferedImage(bestSize.width, bestSize.height,
+     new BufferedImage(bestSize.width, bestSize.height,
                         BufferedImage.TYPE_INT_ARGB);
     noCursor = tk.createCustomCursor(cursorImage, new java.awt.Point(0, 0),
                                      "noCursor");
@@ -160,7 +160,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     Dimension bestSize = tk.getBestCursorSize(cw, ch);
     Image srcImage = tk.createImage(cursorSrc);
     BufferedImage cursorImage =
-      new BufferedImage(bestSize.width, bestSize.height, 
+      new BufferedImage(bestSize.width, bestSize.height,
                         BufferedImage.TYPE_INT_ARGB);
     Graphics2D g2 = cursorImage.createGraphics();
     g2.setRenderingHint(RenderingHints.KEY_RENDERING,
@@ -420,8 +420,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly &&
-        e.getX() >= x && 
-        e.getY() >= y && 
+        e.getX() >= x &&
+        e.getY() >= y &&
         e.getX() <= x + scaledWidth &&
         e.getY() <= y + scaledHeight)
       cc.writePointerEvent(e);
@@ -450,8 +450,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly && (e.getID() == MouseEvent.MOUSE_RELEASED ||
-        (e.getX() >= x && 
-         e.getY() >= y && 
+        (e.getX() >= x &&
+         e.getY() >= y &&
          e.getX() <= x + scaledWidth &&
          e.getY() <= y + scaledHeight)))
       cc.writePointerEvent(e);
