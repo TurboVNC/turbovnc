@@ -84,6 +84,9 @@ still going to be faster than with Java 1.7 or 1.8.  The Java TurboVNC Viewer
 will also now automatically use an alpha-enabled pixel format if it detects
 that Java2D OpenGL drawing is being selected on other platforms (by passing
 "-Dsun.java2d.opengl=true" on the command line.)
+
+The (undocumented) ForceAlpha parameter in the Java TurboVNC Viewer can be set
+or unset to override the default behavior described above.
 -------------------------------------------------------------------------------
 
 
