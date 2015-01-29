@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009 Pierre Ossman for Cendio AB
- * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -110,7 +110,8 @@ public class PixelFormat {
 
   public int pixelFromRGB(int red, int green, int blue, ColorModel cm) {
     if (is888()) {
-      return (red << redShift) | (green << greenShift) | (blue << blueShift);
+      return (red << redShift) | (green << greenShift) | (blue << blueShift) |
+             (0xff << 24);
     } else if (trueColour) {
       int r = (red   * redMax     + 127) / 255;
       int g = (green * greenMax   + 127) / 255;
@@ -154,10 +155,17 @@ public class PixelFormat {
         bshift = 24 - blueShift;
       }
 
-      while (pixels-- != 0)
-        dst[dstPtr++] = ((src[srcPtr++] & 0xff) << rshift) |
-                        ((src[srcPtr++] & 0xff) << gshift) |
-                        ((src[srcPtr++] & 0xff) << bshift);
+      if (alpha) {
+        while (pixels-- != 0)
+          dst[dstPtr++] = ((src[srcPtr++] & 0xff) << rshift) |
+                          ((src[srcPtr++] & 0xff) << gshift) |
+                          ((src[srcPtr++] & 0xff) << bshift) | (0xff << 24);
+      } else {
+        while (pixels-- != 0)
+          dst[dstPtr++] = ((src[srcPtr++] & 0xff) << rshift) |
+                          ((src[srcPtr++] & 0xff) << gshift) |
+                          ((src[srcPtr++] & 0xff) << bshift);
+      }
     } else {
       // Generic code
       int r, g, b;
@@ -197,14 +205,26 @@ public class PixelFormat {
       }
 
       int dstPad = stride - w;
-      while (h > 0) {
-        int dstEndOfRow = dstPtr + w;
-        while (dstPtr < dstEndOfRow)
-          dst[dstPtr++] = ((src[srcPtr++] & 0xff) << rshift) |
-                          ((src[srcPtr++] & 0xff) << gshift) |
-                          ((src[srcPtr++] & 0xff) << bshift);
-        dstPtr += dstPad;
-        h--;
+      if (alpha) {
+        while (h > 0) {
+          int dstEndOfRow = dstPtr + w;
+          while (dstPtr < dstEndOfRow)
+            dst[dstPtr++] = ((src[srcPtr++] & 0xff) << rshift) |
+                            ((src[srcPtr++] & 0xff) << gshift) |
+                            ((src[srcPtr++] & 0xff) << bshift) | (0xff << 24);
+          dstPtr += dstPad;
+          h--;
+        }
+      } else {
+        while (h > 0) {
+          int dstEndOfRow = dstPtr + w;
+          while (dstPtr < dstEndOfRow)
+            dst[dstPtr++] = ((src[srcPtr++] & 0xff) << rshift) |
+                            ((src[srcPtr++] & 0xff) << gshift) |
+                            ((src[srcPtr++] & 0xff) << bshift);
+          dstPtr += dstPad;
+          h--;
+        }
       }
     } else {
       // Generic code
@@ -292,8 +312,12 @@ public class PixelFormat {
         blueMax  == (1 << greenShift) - 1 &&
         greenMax == (1 << (redShift - greenShift)) - 1 &&
         redMax   == (1 << (depth - redShift)) - 1) {
-      s.append(" rgb" + (depth - redShift) + (redShift - greenShift) +
-               greenShift);
+      if (alpha)
+        s.append(" rgba" + (depth - redShift) + (redShift - greenShift) +
+                 greenShift + "8");
+      else
+        s.append(" rgb" + (depth - redShift) + (redShift - greenShift) +
+                 greenShift);
       return s.toString();
     }
 
@@ -301,8 +325,13 @@ public class PixelFormat {
         redMax   == (1 << greenShift) - 1 &&
         greenMax == (1 << (blueShift - greenShift)) - 1 &&
         blueMax  == (1 << (depth - blueShift)) - 1) {
-      s.append(" bgr" + (depth - blueShift) + (blueShift - greenShift) +
-               greenShift);
+      if (alpha)
+        s.append(" bgra" + (depth - blueShift) + (blueShift - greenShift) +
+                 greenShift + "8");
+      else
+        s.append(" bgr" + (depth - blueShift) + (blueShift - greenShift) +
+                 greenShift);
+
       return s.toString();
     }
 
@@ -321,4 +350,6 @@ public class PixelFormat {
   public int redShift;
   public int greenShift;
   public int blueShift;
+  public boolean alpha;
+  public boolean alphaPreMultiplied = true;
 }

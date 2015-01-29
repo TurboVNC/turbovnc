@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
- * Copyright (C) 2010, 2012-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2010, 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -127,10 +127,12 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     cursor.hotspot = hotspot;
 
     cursor.setSize(w, h);
-    cursor.setPF(getPF());
+    PixelFormat cursorPF = getPF();
+    cursorPF.alphaPreMultiplied = false;
+    cursor.setPF(cursorPF);
 
     cursorBacking.setSize(cursor.width(), cursor.height());
-    cursorBacking.setPF(getPF());
+    cursorBacking.setPF(cursorPF);
 
     cursor.data = (Object)(new int[cursor.width() * cursor.height()]);
     cursor.mask = new byte[cursor.maskLen()];
@@ -142,9 +144,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         int bit = 7 - x % 8;
         if ((mask[byte_] & (1 << bit)) > 0) {
           ((int[])cursor.data)[y * cursor.width() + x] = (0xff << 24) |
-            (im.cm.getRed(data[y * w + x]) << 16) |
-            (im.cm.getGreen(data[y * w + x]) << 8) |
-            (im.cm.getBlue(data[y * w + x]));
+            (cursor.cm.getRed(data[y * w + x]) << 16) |
+            (cursor.cm.getGreen(data[y * w + x]) << 8) |
+            (cursor.cm.getBlue(data[y * w + x]));
         }
       }
       System.arraycopy(mask, y * maskBytesPerRow, cursor.mask,

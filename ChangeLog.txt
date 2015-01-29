@@ -71,6 +71,20 @@ is 256x256 but can be changed using the TVNC_ICEBLOCKSIZE environment variable
 Fixed an issue whereby the Java TurboVNC Viewer would not enable the OS X Lion
 full-screen mode feature on OS X 10.10 "Yosemite".
 -------------------------------------------------------------------------------
+[12]
+Java 1.7 and 1.8 on Mac platforms no longer include a hardware-accelerated 2D
+blitting path, opting instead to use only OpenGL for blitting.  When using the
+default pixel format (BGRX), this is incredibly slow on some Macs, because the
+OpenGL blitter is having to set all of the alpha values to 255 (opaque.)  Thus,
+the Java TurboVNC Viewer will now automatically use an alpha-enabled pixel
+format (BGRA) for its back buffer if it detects that it is running on a Mac
+with Java 1.7 or 1.8.  This improves drawing performance by as much as 4-5x on
+certain Mac models, although the drawing performance with Apple Java 1.6 is
+still going to be faster than with Java 1.7 or 1.8.  The Java TurboVNC Viewer
+will also now automatically use an alpha-enabled pixel format if it detects
+that Java2D OpenGL drawing is being selected on other platforms (by passing
+"-Dsun.java2d.opengl=true" on the command line.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

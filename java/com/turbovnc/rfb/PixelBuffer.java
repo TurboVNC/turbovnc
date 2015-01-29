@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 package com.turbovnc.rfb;
 
 import java.awt.image.*;
+import java.awt.color.*;
 
 import com.turbovnc.rdr.ErrorException;
 
@@ -58,7 +59,13 @@ public class PixelBuffer {
       cm = new DirectColorModel(16, 0xF800, 0x07E0, 0x001F);
       break;
     case 24:
-      cm = new DirectColorModel(32, (0xff << 16), (0xff << 8), 0xff);
+      if (pf.alpha)
+        cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                                  32, (0xff << 16), (0xff << 8), 0xff,
+                                  (0xff << 24), pf.alphaPreMultiplied,
+                                  DataBuffer.TYPE_INT);
+      else
+        cm = new DirectColorModel(32, (0xff << 16), (0xff << 8), 0xff);
       break;
     case 32:
       cm = new DirectColorModel(32, (0xff << pf.redShift),

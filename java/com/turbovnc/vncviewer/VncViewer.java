@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2015 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -209,6 +209,28 @@ public class VncViewer extends javax.swing.JApplet
     }
   }
 
+  public static void setDefaultForceAlpha() {
+    // Java 1.7 and 1.8 do not include hardware-accelerated 2D blitting
+    // routines on Mac platforms.  They only support OpenGL blitting, and using
+    // TYPE_INT_ARGB_PRE BufferedImages with OpenGL blitting is much faster
+    // than using TYPE_INT_RGB BufferedImages on some Macs (about 4-5X as fast
+    // on certain models.)  Java 1.9 is supposed to re-introduce a 2D
+    // accelerated blitting path, which is why we're just doing this for
+    // 1.7-1.8 at the moment.
+    if (os.startsWith("mac os x")) {
+      int minorVersion =
+        Integer.parseInt(System.getProperty("java.version").split("\\.")[1]);
+      if (minorVersion >= 7 && minorVersion <= 8)
+        forceAlpha.setParam(true);
+    }
+    // TYPE_INT_ARGB_PRE images are also faster when using OpenGL blitting on
+    // other platforms, so attempt to detect that.
+    boolean useOpenGL =
+      Boolean.parseBoolean(System.getProperty("sun.java2d.opengl"));
+    if (useOpenGL)
+      forceAlpha.setParam(true);
+  }
+
   public static void main(String[] argv) {
     setLookAndFeel();
     VncViewer viewer = new VncViewer(argv);
@@ -236,6 +258,7 @@ public class VncViewer extends javax.swing.JApplet
     UserPreferences.load("global");
 
     setVersion();
+    setDefaultForceAlpha();
 
     // Override defaults with command-line options
     for (int i = 0; i < argv.length; i++) {
@@ -383,6 +406,7 @@ public class VncViewer extends javax.swing.JApplet
     applet = true;
     UserPreferences.load("global");
     setVersion();
+    setDefaultForceAlpha();
     setGlobalOptions();
   }
 
@@ -1048,6 +1072,14 @@ public class VncViewer extends javax.swing.JApplet
   "fast networks.)  The default is to use the native color depth of the display " +
   "on which the viewer is running, which is usually true color (8 bits per " +
   "component.)", -1);
+
+  // Force the BufferedImage used as VncViewer's back buffer to be of type
+  // TYPE_INT_ARGB_PRE.  This is generally faster when Java2D OpenGL blitting
+  // is enabled, because using an alpha-enabled image format prevents
+  // glDrawPixels() from having to set the alpha values itself (which causes it
+  // to revert to an unaccelerated path in some cases.)
+  static BoolParameter forceAlpha
+  = new BoolParameter("ForceAlpha", null, false);
 
   static BoolParameter cursorShape
   = new BoolParameter("CursorShape",
