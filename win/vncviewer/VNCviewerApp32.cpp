@@ -1,4 +1,4 @@
-//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2012, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -61,6 +61,72 @@ int VNCviewerApp32::NewConnection()
   int retries = 0, retval = 0;
   ClientConnection *pcc;
   ClientConnection *old_pcc;
+
+  if (m_options.m_benchFile != NULL) {
+    double tAvg = 0.0, tAvgDecode = 0.0, tAvgBlit = 0.0;
+
+    for (int i = 0; i < m_options.m_benchIter + m_options.m_benchWarmup; i++) {
+      double tStart = 0.0, tTotal;
+
+      try {
+        pcc = new ClientConnection(this);
+        if (i < m_options.m_benchWarmup)
+          vnclog.Print(-1, "Benchmark warmup run %d\n", i + 1);
+        else
+          vnclog.Print(-1, "Benchmark run %d:\n",
+                       i + 1 - m_options.m_benchWarmup);
+        tStart = getTime();
+        pcc->Run();
+        MSG msg;  BOOL ret;
+        while ((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
+          if (ret == -1) {
+            vnclog.Print(-1, "GetMessage() failed: %d\n", GetLastError());
+            break;
+          }
+          TranslateMessage(&msg);
+          DispatchMessage(&msg);
+          if (msg.message == WM_CLOSE) retval = (int)msg.wParam;
+        }
+        tTotal = getTime() - tStart - pcc->tRead;
+        if (i >= m_options.m_benchWarmup) {
+          vnclog.Print(-1, "%f s (Decode = %f, Blit = %f)\n",
+                       tTotal, pcc->tDecode, pcc->tBlit);
+          vnclog.Print(-1, "     Decode statistics:\n");
+          vnclog.Print(-1, "     %.3f Mpixels, %.3f Mpixels/sec, %d rect, %.0f pixels/rect,\n",
+                       (double)pcc->decodePixels / 1000000.,
+                       (double)pcc->decodePixels / 1000000. / pcc->tDecode,
+                       pcc->decodeRect,
+                       (double)pcc->decodePixels / (double)pcc->decodeRect);
+          vnclog.Print(-1, "       %.0f rects/update\n",
+                       (double)pcc->decodeRect / (double)pcc->updates);
+          vnclog.Print(-1, "     Blit statistics:\n");
+          vnclog.Print(-1, "     %.3f Mpixels, %.3f Mpixels/sec, %d rect, %.0f pixels/rect\n",
+                       (double)pcc->blitPixels / 1000000.,
+                       (double)pcc->blitPixels / 1000000. / pcc->tBlit,
+                       pcc->blitRect,
+                       (double)pcc->blitPixels / (double)pcc->blitRect);
+					vnclog.Print(-1, "Updates: %d\n", pcc->updates);
+          tAvg += tTotal;
+          tAvgDecode += pcc->tDecode;
+          tAvgBlit += pcc->tBlit;
+        }
+        fseek(m_options.m_benchFile, 0, SEEK_SET);
+        vnclog.Print(-1, "\n");
+      } catch (Exception &e) {
+        vnclog.Print(-1, "Exception: %s\n", e.m_info);
+        retval = 1;
+        break;
+      }
+    }
+
+    if (m_options.m_benchFile && m_options.m_benchIter > 1)
+      vnclog.Print(-1, "Average          :  %f s (Decode = %f, Blit = %f)\n",
+                   tAvg / (double)m_options.m_benchIter,
+                   tAvgDecode / (double)m_options.m_benchIter,
+                   tAvgBlit / (double)m_options.m_benchIter);
+
+    return retval;
+  }
 
   pcc = new ClientConnection(this);
   while (retries < MAX_AUTH_RETRIES) {

@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000, 2001 Constantin Kaplinsky. All Rights Reserved.
@@ -98,11 +98,14 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
       node->fillColor = fillColor;
     }
     else {
+      double tBlitStart;
+      if (m_opts.m_benchFile) tBlitStart = getTime();
       omni_mutex_lock l(m_bitmapdcMutex);
       ObjectSelector b(m_hBitmapDC, m_hBitmap);
       PaletteSelector p(m_hBitmapDC, m_hPalette);
       FillSolidRect(pfburh->r.x, pfburh->r.y, pfburh->r.w, pfburh->r.h,
                     fillColor);
+      if (m_opts.m_benchFile) tBlit += getTime() - tBlitStart;
     }
     return;
   }

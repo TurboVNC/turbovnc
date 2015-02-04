@@ -72,4 +72,14 @@ void FormatDisplay(int port, LPTSTR display, LPTSTR host);
 #define snprintf(str, n, format, ...)  \
   _snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
 
+__inline double getTime(void)
+{
+  LARGE_INTEGER frequency, time;
+  if (QueryPerformanceFrequency(&frequency) != 0) {
+    QueryPerformanceCounter(&time);
+    return (double)time.QuadPart / (double)frequency.QuadPart;
+  }
+  else return (double)GetTickCount() * 0.001;
+}
+
 #endif // VNCVIEWER_H__

@@ -1,3 +1,4 @@
+//  Copyright (C) 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -81,6 +82,7 @@ void WarningException::Report()
 #ifdef _MSC_VER
   _RPT1(_CRT_WARN, "Warning : %s\n", m_info);
 #endif
+  printf("WARNING: %s\n", m_info);
   MessageBox(NULL, m_info, "TurboVNC info",
              MB_OK| MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
 }
@@ -103,6 +105,7 @@ void ErrorException::Report()
 #ifdef _MSC_VER
   _RPT1(_CRT_WARN, "Warning : %s\n", m_info);
 #endif
+  printf("ERROR: %s\n", m_info);
   MessageBox(NULL, m_info, "TurboVNC info",
              MB_OK | MB_ICONSTOP | MB_SETFOREGROUND | MB_TOPMOST);
 }
@@ -126,6 +129,7 @@ void AuthException::Report()
 #ifdef _MSC_VER
   _RPT1(_CRT_WARN, "Warning : %s\n", m_info);
 #endif
+  printf("AUTHENTICATION FAILURE: %s\n", m_info);
   MessageBox(NULL, m_info, "TurboVNC authentication info",
              MB_OK| MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
 }

@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2013 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2013, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -185,6 +185,10 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   supportsFence = false;
   supportsSyncFence = false;
   pendingSyncFence = false;
+
+  tDecode = tBlit = tRead = 0.0;
+  decodePixels = blitPixels = 0;
+  decodeRect = blitRect = updates = 0;
 }
 
 
@@ -265,38 +269,42 @@ void ClientConnection::InitCapabilities()
 
 void ClientConnection::Run()
 {
-  // Get the host name and port if we haven't got it
-  if (m_port == -1) {
-    GetConnectDetails();
-  } else {
-    if (m_pApp->m_options.m_listening) {
-      m_opts.LoadOpt(m_opts.m_display, KEY_VNCVIEWER_HISTORY);
+  bool benchmark = (m_pApp->m_options.m_benchFile != NULL);
+
+  if (!benchmark) {
+    // Get the host name and port if we haven't got it
+    if (m_port == -1) {
+      GetConnectDetails();
+    } else {
+      if (m_pApp->m_options.m_listening) {
+        m_opts.LoadOpt(m_opts.m_display, KEY_VNCVIEWER_HISTORY);
+      }
     }
+
+    if (strlen((const char *) m_pApp->m_options.m_encPasswd) > 0) {
+      memcpy(m_encPasswd, m_pApp->m_options.m_encPasswd, 8);
+      memset(m_pApp->m_options.m_encPasswd, 0, 8);
+      m_passwdSet = true;
+    }
+
+    // Show the "Connecting..." dialog box
+    m_connDlg = new ConnectingDialog(m_pApp->m_instance, m_opts.m_display);
+
+    // Connect if we're not already connected
+    if (m_sock == INVALID_SOCKET)
+      Connect();
+
+    SetSocketOptions();
+
+    NegotiateProtocolVersion();
+
+    PerformAuthentication();
   }
-
-  if (strlen((const char *) m_pApp->m_options.m_encPasswd) > 0) {
-    memcpy(m_encPasswd, m_pApp->m_options.m_encPasswd, 8);
-    memset(m_pApp->m_options.m_encPasswd, 0, 8);
-    m_passwdSet = true;
-  }
-
-  // Show the "Connecting..." dialog box
-  m_connDlg = new ConnectingDialog(m_pApp->m_instance, m_opts.m_display);
-
-  // Connect if we're not already connected
-  if (m_sock == INVALID_SOCKET)
-    Connect();
-
-  SetSocketOptions();
-
-  NegotiateProtocolVersion();
-
-  PerformAuthentication();
 
   // Set up windows, etc.
   CreateDisplay();
 
-  SendClientInit();
+  if (!benchmark) SendClientInit();
   ReadServerInit();
 
   // Only for protocol version 3.7t
@@ -2358,10 +2366,10 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
       }
       return 0;
     case WM_REGIONUPDATED:
-      _this->DoBlit();
+      if (!_this->m_opts.m_benchFile) _this->DoBlit();
       return 0;
     case WM_PAINT:
-      _this->DoBlit();
+      if (!_this->m_opts.m_benchFile) _this->DoBlit();
       return 0;
     case WM_TIMER:
       if (wParam == _this->m_emulate3ButtonsTimer) {
@@ -2525,7 +2533,7 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
     }
 
     case WM_DRAWCLIPBOARD:
-      _this->ProcessLocalClipboardChange();
+      if (!_this->m_opts.m_benchFile) _this->ProcessLocalClipboardChange();
       return 0;
 
     case WM_CHANGECBCHAIN:
@@ -2684,6 +2692,8 @@ inline void ClientConnection::SubProcessPointerEvent(int x, int y,
 inline void ClientConnection::SendPointerEvent(int x, int y, int buttonMask)
 {
   rfbPointerEventMsg pe;
+
+  if (m_opts.m_benchFile) return;
 
   pe.type = rfbPointerEvent;
   pe.buttonMask = buttonMask;
@@ -2845,11 +2855,15 @@ void ClientConnection::SendClientCutText(char *str, size_t len)
 
 inline void ClientConnection::DoBlit()
 {
+  double tBlitStart;
+
   if (m_hBitmap == NULL) return;
   if (!m_running) return;
 
   // No other threads can use bitmap DC
   omni_mutex_lock l(m_bitmapdcMutex);
+
+  if (m_opts.m_benchFile) tBlitStart = getTime();
 
   PAINTSTRUCT ps;
   HDC hdc = BeginPaint(m_hwnd, &ps);
@@ -2914,6 +2928,13 @@ inline void ClientConnection::DoBlit()
   }
 
   EndPaint(m_hwnd, &ps);
+
+  if (m_opts.m_benchFile) {
+    tBlit += getTime() - tBlitStart;
+    blitPixels += (ps.rcPaint.right - ps.rcPaint.left) *
+                  (ps.rcPaint.bottom - ps.rcPaint.top);
+    blitRect++;
+  }
 }
 
 
@@ -2991,11 +3012,22 @@ void* ClientConnection::run_undetached(void* arg) {
 
       // Look at the type of the message, but leave it in the buffer
       CARD8 msgType;
-      {
+      if (m_opts.m_benchFile) {
+        omni_mutex_lock l(m_readMutex);  // we need this if we're not using ReadExact
+        size_t bytes = fread((char *)&msgType, 1, 1, m_opts.m_benchFile);
+        if (bytes == 0)
+          throw QuietException("End of session capture");
+        if (bytes < 0) {
+          vnclog.Print(3, "Error reading session capture: %d\n",
+                       GetLastError());
+          throw WarningException("Error reading session capture");
+        }
+        fseek(m_opts.m_benchFile, -1, SEEK_CUR);
+      } else {
         omni_mutex_lock l(m_readMutex);  // we need this if we're not using ReadExact
         int bytes = recv(m_sock, (char *)&msgType, 1, MSG_PEEK);
         if (bytes == 0) {
-                m_pFileTransfer->CloseUndoneFileTransfers();
+          m_pFileTransfer->CloseUndoneFileTransfers();
           vnclog.Print(0, "Connection closed\n");
           throw WarningException("Connection closed");
         }
@@ -3087,6 +3119,8 @@ inline void ClientConnection::SendFramebufferUpdateRequest(int x, int y,
     m_pendingEncodingChange = false;
   }
 
+  if (m_opts.m_benchFile) return;
+
   fur.type = rfbFramebufferUpdateRequest;
   fur.incremental = incremental ? 1 : 0;
   fur.x = Swap16IfLE(x);
@@ -3096,7 +3130,7 @@ inline void ClientConnection::SendFramebufferUpdateRequest(int x, int y,
 
   vnclog.Print(10, "Request %s update\n",
                incremental ? "incremental" : "full");
-               WriteExact((char *)&fur, sz_rfbFramebufferUpdateRequestMsg);
+  WriteExact((char *)&fur, sz_rfbFramebufferUpdateRequestMsg);
 }
 
 
@@ -3139,6 +3173,8 @@ void ClientConnection::ReadScreenUpdate()
 {
   static bool firstUpdate = true;
   rfbFramebufferUpdateMsg sut;
+  double tDecodeStart, tBlitStart, tReadOld, tBlitOld;
+
   ReadExact((char *)&sut, sz_rfbFramebufferUpdateMsg);
   sut.nRects = Swap16IfLE(sut.nRects);
   if (sut.nRects == 0) return;
@@ -3146,6 +3182,8 @@ void ClientConnection::ReadScreenUpdate()
   if (m_opts.m_DoubleBuffer) list = NULL;
 
   PostMessage(m_hwnd, WM_FBUPDATERECVD, 0, 0);
+
+  updates++;
 
   for (int i = 0; i < sut.nRects; i++) {
 
@@ -3159,6 +3197,8 @@ void ClientConnection::ReadScreenUpdate()
     surh.r.h = Swap16IfLE(surh.r.h);
 
     if (surh.encoding == rfbEncodingLastRect) {
+      if (m_opts.m_benchFile) tBlitStart = getTime();
+
       while (m_opts.m_DoubleBuffer && list != NULL) {
         rfbFramebufferUpdateRectHeader* r1;
         node = list;
@@ -3173,7 +3213,7 @@ void ClientConnection::ReadScreenUpdate()
             ObjectSelector b(m_hBitmapDC, m_hBitmap);
             PaletteSelector p(m_hBitmapDC, m_hPalette);
             FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
-              node->fillColor);
+                          node->fillColor);
           }
           RECT rect;
           SetRect(&rect, r1->r.x, r1->r.y,
@@ -3184,6 +3224,8 @@ void ClientConnection::ReadScreenUpdate()
         free(node);
       }
       SoftCursorUnlockScreen();
+
+      if (m_opts.m_benchFile) tBlit += getTime() - tBlitStart;
       break;
     }
     if (surh.encoding == rfbEncodingNewFBSize) {
@@ -3219,6 +3261,14 @@ void ClientConnection::ReadScreenUpdate()
       }
     }
 
+    if (m_opts.m_benchFile) {
+      tDecodeStart = getTime();
+      tReadOld = tRead;
+      tBlitOld = tBlit;
+      decodePixels += surh.r.w * surh.r.h;
+      decodeRect++;
+    }
+
     switch (surh.encoding) {
       case rfbEncodingRaw:
         SetLastEncoding(surh.encoding);
@@ -3241,13 +3291,19 @@ void ClientConnection::ReadScreenUpdate()
         break;
     }
 
+    if (m_opts.m_benchFile)
+      tDecode += getTime() - tDecodeStart - (tRead - tReadOld) -
+                 (tBlit - tBlitOld);
+
     // Tell the system to update a screen rectangle.  Note that
     // InvalidateScreenRect member function knows about scaling.
     if (!m_opts.m_DoubleBuffer || surh.encoding == rfbEncodingCopyRect) {
       RECT rect;
+      if (m_opts.m_benchFile) tBlitStart = getTime();
       SetRect(&rect, surh.r.x, surh.r.y,
               surh.r.x + surh.r.w, surh.r.y + surh.r.h);
       InvalidateScreenRect(&rect);
+      if (m_opts.m_benchFile) tBlit += getTime() - tBlitStart;
     }
 
     // Now we may discard "soft cursor locks".
@@ -3255,6 +3311,8 @@ void ClientConnection::ReadScreenUpdate()
   }
 
   if (m_opts.m_DoubleBuffer) {
+    if (m_opts.m_benchFile) tBlitStart = getTime();
+
     while (list != NULL) {
       rfbFramebufferUpdateRectHeader* r1;
       node = list;
@@ -3269,21 +3327,26 @@ void ClientConnection::ReadScreenUpdate()
           ObjectSelector b(m_hBitmapDC, m_hBitmap);
           PaletteSelector p(m_hBitmapDC, m_hPalette);
           FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
-          node->fillColor);
+                        node->fillColor);
         }
         RECT rect;
         SetRect(&rect, r1->r.x, r1->r.y,
-          r1->r.x + r1->r.w, r1->r.y + r1->r.h);
+                r1->r.x + r1->r.w, r1->r.y + r1->r.h);
         InvalidateScreenRect(&rect);
       }
       list = list->next;
       free(node);
     }
     SoftCursorUnlockScreen();
+
+    if (m_opts.m_benchFile) tBlit += getTime() - tBlitStart;
   }
 
-  // Inform the other thread that an update is needed.
-  PostMessage(m_hwnd, WM_REGIONUPDATED, NULL, NULL);
+  if (m_opts.m_benchFile)
+    DoBlit();
+  else
+    // Inform the other thread that an update is needed.
+    PostMessage(m_hwnd, WM_REGIONUPDATED, NULL, NULL);
 
   if (firstUpdate) {
     // We need fences in order to make extra update requests and continuous
@@ -3367,6 +3430,22 @@ void ClientConnection::ReadBell()
 
 void ClientConnection::ReadExact(char *inbuf, int wanted)
 {
+  if (m_opts.m_benchFile != NULL) {
+    double tReadStart = getTime();
+    if (fread(inbuf, wanted, 1, m_opts.m_benchFile) < 1) {
+      if (feof(m_opts.m_benchFile))
+        throw QuietException("End of session capture");
+      if (ferror(m_opts.m_benchFile)) {
+        int err = GetLastError();
+        vnclog.Print(1, "Error reading session capture: %d\n", err);
+        throw WarningException("ReadExact: Error reading session capture");
+      }
+      m_running = false;
+    }
+    tRead += getTime() - tReadStart;
+    return;
+  }
+
   if (m_sock == INVALID_SOCKET && m_bKillThread)
     throw QuietException("Connection closed.");
 
@@ -3407,7 +3486,7 @@ inline void ClientConnection::ReadString(char *buf, int length)
 
 inline void ClientConnection::WriteExact(char *buf, int bytes)
 {
-  if (bytes == 0 || m_sock == INVALID_SOCKET)
+  if (bytes == 0 || m_sock == INVALID_SOCKET || m_opts.m_benchFile)
     return;
 
   omni_mutex_lock l(m_writeMutex);

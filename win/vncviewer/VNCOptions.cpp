@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2014 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -106,6 +106,10 @@ VNCOptions::VNCOptions()
 
   m_autoPass = false;
 
+  m_benchFile = NULL;
+  m_benchWarmup = 0;
+  m_benchIter = 1;
+
   LoadGenOpt();
 
   m_hParent = 0;
@@ -176,6 +180,10 @@ VNCOptions& VNCOptions::operator = (VNCOptions& s)
   strcpy(m_user, s.m_user);
 
   m_autoPass              = s.m_autoPass;
+
+  m_benchFile             = s.m_benchFile;
+  m_benchWarmup           = s.m_benchWarmup;
+  m_benchIter             = s.m_benchIter;
 
   return *this;
 }
@@ -596,6 +604,37 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
       m_tunnel = true;
     } else if (SwitchMatch(args[j], "tunnel")) {
       m_tunnel = true;
+    } else if (SwitchMatch(args[j], "bench")) {
+      if (++j == i) {
+        ArgError("No session capture file specified");
+        continue;
+      }
+      if ((m_benchFile = fopen(args[j], "rb")) == NULL) {
+        ArgError("Could not open session capture");
+        continue;
+      }
+    } else if (SwitchMatch(args[j], "benchwarmup")) {
+      if (++j == i) {
+        ArgError("No benchmark warmup iterations specified");
+        continue;
+      }
+      int benchWarmup = -1;
+      if (sscanf(args[j], "%d", &benchWarmup) != 1 || benchWarmup < 0) {
+        ArgError("Invalid number of benchmark warmup iterations specified");
+        continue;
+      }
+      m_benchWarmup = benchWarmup;
+    } else if (SwitchMatch(args[j], "benchiter")) {
+      if (++j == i) {
+        ArgError("No benchmark iterations specified");
+        continue;
+      }
+      int benchIter = -1;
+      if (sscanf(args[j], "%d", &benchIter) != 1 || benchIter < 1) {
+        ArgError("Invalid number of benchmark iterations specified");
+        continue;
+      }
+      m_benchIter = benchIter;
     } else {
       if (strlen(args[j]) >= 4 &&
           !strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
@@ -625,6 +664,13 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
   FixScaling();
 
   m_scaling = (m_scale_num != 1 || m_scale_den != 1 || m_FitWindow);
+
+  if (m_benchFile != NULL) {
+    m_ViewOnly = true;
+    m_DisableClipboard = true;
+    m_connectionSpecified = false;
+    m_listening = false;
+  }
 
   // tidy up
   delete [] cmd;

@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -47,6 +47,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   } else if (!app.m_options.m_listening) {
     // This one will also read from a config file, if specified
     retval = app.NewConnection();
+  }
+
+  if (app.m_options.m_benchFile) {
+    fclose(app.m_options.m_benchFile);
+    return retval;
   }
 
   MSG msg;

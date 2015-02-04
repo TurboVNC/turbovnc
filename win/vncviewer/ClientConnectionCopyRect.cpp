@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2015 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -25,6 +26,8 @@
 void ClientConnection::ReadCopyRect(rfbFramebufferUpdateRectHeader *pfburh)
 {
   rfbCopyRect cr;
+  double tBlitStart;
+
   ReadExact((char *) &cr, sz_rfbCopyRect);
   cr.srcX = Swap16IfLE(cr.srcX);
   cr.srcY = Swap16IfLE(cr.srcY);
@@ -37,7 +40,11 @@ void ClientConnection::ReadCopyRect(rfbFramebufferUpdateRectHeader *pfburh)
   ObjectSelector b(m_hBitmapDC, m_hBitmap);
   PaletteSelector p(m_hBitmapDC, m_hPalette);
 
+  if (m_opts.m_benchFile) tBlitStart = getTime();
+
   if (!BitBlt(m_hBitmapDC, pfburh->r.x, pfburh->r.y, pfburh->r.w, pfburh->r.h,
               m_hBitmapDC, cr.srcX, cr.srcY, SRCCOPY))
     vnclog.Print(0, "Error in blit in ClientConnection::CopyRect\n");
+
+  if (m_opts.m_benchFile) tBlit += getTime() - tBlitStart;
 }

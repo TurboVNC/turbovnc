@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2014 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -138,6 +138,10 @@ class VNCOptions
 
     // for debugging purposes
     int   m_delay;
+
+    // Benchmark stuff
+    FILE  *m_benchFile;
+    int   m_benchWarmup, m_benchIter;
 
     INT_PTR DoDialog(bool running = false);
     BOOL RaiseDialog();

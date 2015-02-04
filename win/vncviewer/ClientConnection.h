@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012-2013 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012-2013, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -71,9 +71,15 @@ class ClientConnection : public omni_thread
     void CopyOptions(ClientConnection *source);
     int  LoadConnection(char *fname, bool sess);
     void UnloadConnection() { m_opts.m_configSpecified = false; }
+
     int m_port;
     char m_host[MAX_HOST_NAME_LEN];
     HWND m_hSess;
+
+    // Benchmark stuff
+    double tDecode, tBlit, tRead;
+    unsigned long long decodePixels, blitPixels;
+    unsigned long decodeRect, blitRect, updates;
 
   private:
     static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
