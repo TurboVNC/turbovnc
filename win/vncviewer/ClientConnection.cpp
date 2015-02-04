@@ -70,6 +70,8 @@ const rfbPixelFormat vnc8bitFormat =
   { 8, 8, 0, 1, 7, 7, 3, 0, 3, 6, 0, 0 };
 const rfbPixelFormat vnc16bitFormat =
   { 16, 16, 0, 1, 63, 31, 31, 0, 6, 11, 0, 0 };
+const rfbPixelFormat vnc24bitFormat =
+  { 32, 24, 0, 1, 255, 255, 255, 16, 8, 0, 0, 0 };
 
 
 
@@ -1726,7 +1728,7 @@ void ClientConnection::SetupPixelFormat()
   } else {
 
     // Normally we just use the sever's format suggestion
-    m_myFormat = m_si.format;
+    m_myFormat = m_opts.m_benchFile ? vnc24bitFormat : m_si.format;
 
     // It's silly requesting more bits than our current display has, but
     // in fact it doesn't usually amount to much on the network.
