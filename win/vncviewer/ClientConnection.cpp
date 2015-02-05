@@ -301,7 +301,8 @@ void ClientConnection::Run()
     NegotiateProtocolVersion();
 
     PerformAuthentication();
-  }
+  } else
+    m_tightVncProtocol = false;
 
   // Set up windows, etc.
   CreateDisplay();
