@@ -84,13 +84,20 @@ const rfbPixelFormat vnc24bitFormat =
 //  program thread.
 // *************************************************************************
 
-ClientConnection::ClientConnection(VNCviewerApp *pApp)
+#define BENCHMARKINIT  \
+  tDecode(pApp->tDecode), tBlit(pApp->tBlit), tRead(pApp->tRead),  \
+  decodePixels(pApp->decodePixels), blitPixels(pApp->blitPixels),  \
+  decodeRect(pApp->decodeRect), blits(pApp->blits), updates(pApp->updates)
+
+
+ClientConnection::ClientConnection(VNCviewerApp *pApp) : BENCHMARKINIT
 {
   Init(pApp);
 }
 
 
-ClientConnection::ClientConnection(VNCviewerApp *pApp, SOCKET sock)
+ClientConnection::ClientConnection(VNCviewerApp *pApp, SOCKET sock) :
+  BENCHMARKINIT
 {
   char hostname[NI_MAXHOST];
   Init(pApp);
@@ -115,7 +122,8 @@ ClientConnection::ClientConnection(VNCviewerApp *pApp, SOCKET sock)
 }
 
 
-ClientConnection::ClientConnection(VNCviewerApp *pApp, LPTSTR host, int port)
+ClientConnection::ClientConnection(VNCviewerApp *pApp, LPTSTR host, int port) :
+  BENCHMARKINIT
 {
   Init(pApp);
   strncpy(m_host, host, MAX_HOST_NAME_LEN);
@@ -190,7 +198,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 
   tDecode = tBlit = tRead = 0.0;
   decodePixels = blitPixels = 0;
-  decodeRect = blitRect = updates = 0;
+  decodeRect = blits = updates = 0;
 }
 
 
@@ -2936,7 +2944,7 @@ inline void ClientConnection::DoBlit()
     tBlit += getTime() - tBlitStart;
     blitPixels += (ps.rcPaint.right - ps.rcPaint.left) *
                   (ps.rcPaint.bottom - ps.rcPaint.top);
-    blitRect++;
+    blits++;
   }
 }
 

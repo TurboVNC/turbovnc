@@ -87,28 +87,25 @@ int VNCviewerApp32::NewConnection()
           DispatchMessage(&msg);
           if (msg.message == WM_CLOSE) retval = (int)msg.wParam;
         }
-        tTotal = getTime() - tStart - pcc->tRead;
+        tTotal = getTime() - tStart - tRead;
         if (i >= m_options.m_benchWarmup) {
           vnclog.Print(-1, "%f s (Decode = %f, Blit = %f)\n",
-                       tTotal, pcc->tDecode, pcc->tBlit);
+                       tTotal, tDecode, tBlit);
           vnclog.Print(-1, "     Decode statistics:\n");
           vnclog.Print(-1, "     %.3f Mpixels, %.3f Mpixels/sec, %d rect, %.0f pixels/rect,\n",
-                       (double)pcc->decodePixels / 1000000.,
-                       (double)pcc->decodePixels / 1000000. / pcc->tDecode,
-                       pcc->decodeRect,
-                       (double)pcc->decodePixels / (double)pcc->decodeRect);
+                       (double)decodePixels / 1000000.,
+                       (double)decodePixels / 1000000. / tDecode, decodeRect,
+                       (double)decodePixels / (double)decodeRect);
           vnclog.Print(-1, "       %.0f rects/update\n",
-                       (double)pcc->decodeRect / (double)pcc->updates);
+                       (double)decodeRect / (double)updates);
           vnclog.Print(-1, "     Blit statistics:\n");
           vnclog.Print(-1, "     %.3f Mpixels, %.3f Mpixels/sec, %d rect, %.0f pixels/rect\n",
-                       (double)pcc->blitPixels / 1000000.,
-                       (double)pcc->blitPixels / 1000000. / pcc->tBlit,
-                       pcc->blitRect,
-                       (double)pcc->blitPixels / (double)pcc->blitRect);
-					vnclog.Print(-1, "Updates: %d\n", pcc->updates);
+                       (double)blitPixels / 1000000.,
+                       (double)blitPixels / 1000000. / tBlit, blits,
+                       (double)blitPixels / (double)blits);
           tAvg += tTotal;
-          tAvgDecode += pcc->tDecode;
-          tAvgBlit += pcc->tBlit;
+          tAvgDecode += tDecode;
+          tAvgBlit += tBlit;
         }
         fseek(m_options.m_benchFile, 0, SEEK_SET);
         vnclog.Print(-1, "\n");

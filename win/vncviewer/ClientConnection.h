@@ -76,11 +76,6 @@ class ClientConnection : public omni_thread
     char m_host[MAX_HOST_NAME_LEN];
     HWND m_hSess;
 
-    // Benchmark stuff
-    double tDecode, tBlit, tRead;
-    unsigned long long decodePixels, blitPixels;
-    unsigned long decodeRect, blitRect, updates;
-
   private:
     static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
                                     LPARAM lParam);
@@ -397,6 +392,11 @@ class ClientConnection : public omni_thread
 
     // For double buffering
     UpdateList *list, *node, *tail;
+
+    // Benchmark stuff
+    double &tDecode, &tBlit, &tRead;
+    unsigned long long &decodePixels, &blitPixels;
+    unsigned long &decodeRect, &blits, &updates;
 };
 
 

@@ -1,6 +1,6 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
-//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2012, 2015 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -61,6 +61,13 @@ class VNCviewerApp
   private:
     ClientConnection *m_clilist[MAX_CONNECTIONS];
     omni_mutex m_clilistMutex;
+
+  protected:
+    // Benchmark stuff
+    double tDecode, tBlit, tRead;
+    unsigned long long decodePixels, blitPixels;
+    unsigned long decodeRect, blits, updates;
+    friend ClientConnection;
 };
 
 #endif // VNCVIEWERAPP_H__
