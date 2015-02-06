@@ -253,11 +253,11 @@ public class VncViewer extends javax.swing.JApplet
 
     forceAlpha = getBooleanProperty("turbovnc.forcealpha", defForceAlpha);
 
-    // Disable Direct3D Java2D blitting unless the user specifically requests
-    // it (by setting the sun.java2d.d3d property to true.)  GDI Java2D
+    // Disable Direct3D Java 2D blitting unless the user specifically requests
+    // it (by setting the sun.java2d.d3d property to true.)  GDI Java 2D
     // blitting is almost always faster than D3D, but D3D is normally the
     // default.  Note that this doesn't work with Java 1.6 and earlier, for
-    // unknown reasons.  Apparently it reads the Java2D system properties
+    // unknown reasons.  Apparently it reads the Java 2D system properties
     // before our code can influence them.
     if (os.startsWith("windows")) {
       String prop = System.getProperty("sun.java2d.d3d");

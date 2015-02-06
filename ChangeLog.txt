@@ -73,7 +73,7 @@ full-screen mode feature on OS X 10.10 "Yosemite".
 -------------------------------------------------------------------------------
 [12]
 Java 1.7 and 1.8 on Mac platforms no longer include a hardware-accelerated 2D
-blitter for Java2D, opting instead to use only OpenGL for image drawing.  When
+blitter for Java 2D, opting instead to use only OpenGL for image drawing.  When
 using the default pixel format (BGRX), this is incredibly slow on some Macs,
 because the OpenGL blitter is having to set all of the alpha values to 255
 (opaque.)  Thus, the Java TurboVNC Viewer will now automatically use an
@@ -82,7 +82,7 @@ running on a Mac with Java 1.7 or 1.8.  This improves drawing performance by as
 much as 4-5x on certain Mac models, although the drawing performance with Apple
 Java 1.6 is still going to be faster than with Java 1.7 or 1.8.  The Java
 TurboVNC Viewer will also now automatically use an alpha-enabled pixel format
-on non-Mac platforms if it detects that OpenGL Java2D blitting is being
+on non-Mac platforms if it detects that OpenGL Java 2D blitting is being
 selected (normally accomplished by setting the "sun.java2d.opengl" system
 property to "true".)
 
@@ -90,7 +90,7 @@ The "turbovnc.forcealpha" Java system property can be used to override the
 defualt behavior described above.
 -------------------------------------------------------------------------------
 [13]
-Normally, Java2D uses Direct3D by default for blitting (image drawing) on
+Normally, Java 2D uses Direct3D by default for blitting (image drawing) on
 Windows platforms, but GDI blitting is almost always faster (sometimes much
 faster.)  Thus, the Java TurboVNC Viewer now attempts to disable Direct3D
 blitting on Windows unless it is specifically requested (which can be

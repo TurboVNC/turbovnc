@@ -376,7 +376,7 @@ performance.
 *** Accelerating Windows Blitting
 #OPT: noList! plain!
 
-The default in Java2D on Windows platforms is to use Direct3D for blitting,
+The default in Java 2D on Windows platforms is to use Direct3D for blitting,
 but in the case of TurboVNC, using GDI blitting is almost always much faster.
 If you are using Java 1.7 or later, or if you are running the Java TurboVNC
 Viewer using the ''vncviewer-java.bat'' script or launching it using the

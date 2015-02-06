@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-02-06T00:40:56">
+<meta name="date" content="2015-02-06T17:26:31">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1551,7 +1551,7 @@ should have a negligible impact on overall performance.</p>
 
 <h3 id="hd007006003">Accelerating Windows Blitting</h3>
 
-<p>The default in Java2D on Windows platforms is to use Direct3D for 
+<p>The default in Java 2D on Windows platforms is to use Direct3D for 
 blitting, but in the case of TurboVNC, using GDI blitting is almost 
 always much faster. If you are using Java 1.7 or later, or if you are 
 running the Java TurboVNC Viewer using the 
@@ -2495,7 +2495,7 @@ about how Hextile, RRE, and ZRLE work.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">Enabled if using OpenGL Java2D blitting, disabled otherwise</td>
+    <td class="standard">Enabled if using OpenGL Java 2D blitting, disabled otherwise</td>
   </tr>
 </table>
 </div>
@@ -2507,14 +2507,14 @@ about how Hextile, RRE, and ZRLE work.</p>
         If this property is enabled, then the Java TurboVNC Viewer will use a 
         TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel) BufferedImage 
         as its back buffer instead of a TYPE_INT_RGB (BGRX) BufferedImage.  When 
-        using OpenGL blitting in Java2D (normally accomplished by passing an 
+        using OpenGL blitting in Java 2D (normally accomplished by passing an 
         argument of <code>-Dsun.java2d.opengl=true</code> to <code>java</code>), 
         it is generally faster to draw an alpha-enabled BufferedImage to the 
         screen, because otherwise glDrawPixels() has to set all of the alpha 
         values itself (which can cause it to revert to an unaccelerated code 
         path in some cases.)
         <div class="important"><p class="important">
-        NOTE: this property is enabled by default when using Java 1.7 or 1.8 on Mac platforms, because OpenGL Java2D blitting is the only option available. Java 1.9 is supposed to reintroduce an accelerated 2D blitter such as existed in Java 1.6 for OS X.
+        NOTE: this property is enabled by default when using Java 1.7 or 1.8 on Mac platforms, because OpenGL Java 2D blitting is the only option available. Java 1.9 is supposed to reintroduce an accelerated 2D blitter such as existed in Java 1.6 for OS X.
         </p></div>
     </dd>
 </dl>
