@@ -101,6 +101,25 @@ public class VncViewer extends javax.swing.JApplet
     return (double)System.nanoTime() / 1.0e9;
   }
 
+  public static final boolean getBooleanProperty(String key, boolean def) {
+    String prop = System.getProperty(key, def ? "True" : "False");
+    if (prop != null && prop.length() > 0) {
+      if (prop.equalsIgnoreCase("true") || prop.equalsIgnoreCase("yes"))
+        return true;
+      if (prop.equalsIgnoreCase("false") || prop.equalsIgnoreCase("no"))
+        return false;
+      int i = -1;
+      try {
+        i = Integer.parseInt(prop);
+      } catch (NumberFormatException e) {};
+      if (i == 1)
+        return true;
+      if (i == 0)
+        return false;
+    }
+    return def;
+  }
+
   public static final String os = System.getProperty("os.name").toLowerCase();
 
   // This allows the Mac app to handle .vnc files opened or dragged onto its
@@ -209,7 +228,7 @@ public class VncViewer extends javax.swing.JApplet
     }
   }
 
-  public static void setDefaultForceAlpha() {
+  public static void setBlitterDefaults() {
     // Java 1.7 and 1.8 do not include hardware-accelerated 2D blitting
     // routines on Mac platforms.  They only support OpenGL blitting, and using
     // TYPE_INT_ARGB_PRE BufferedImages with OpenGL blitting is much faster
@@ -217,18 +236,22 @@ public class VncViewer extends javax.swing.JApplet
     // on certain models.)  Java 1.9 is supposed to re-introduce a 2D
     // accelerated blitting path, which is why we're just doing this for
     // 1.7-1.8 at the moment.
+    boolean defForceAlpha = false;
+
     if (os.startsWith("mac os x")) {
       int minorVersion =
         Integer.parseInt(System.getProperty("java.version").split("\\.")[1]);
       if (minorVersion >= 7 && minorVersion <= 8)
-        forceAlpha.setParam(true);
+        defForceAlpha = true;
     }
     // TYPE_INT_ARGB_PRE images are also faster when using OpenGL blitting on
     // other platforms, so attempt to detect that.
     boolean useOpenGL =
       Boolean.parseBoolean(System.getProperty("sun.java2d.opengl"));
     if (useOpenGL)
-      forceAlpha.setParam(true);
+      defForceAlpha = true;
+
+    forceAlpha = getBooleanProperty("turbovnc.forcealpha", defForceAlpha);
   }
 
   public static void main(String[] argv) {
@@ -258,7 +281,7 @@ public class VncViewer extends javax.swing.JApplet
     UserPreferences.load("global");
 
     setVersion();
-    setDefaultForceAlpha();
+    setBlitterDefaults();
 
     // Override defaults with command-line options
     for (int i = 0; i < argv.length; i++) {
@@ -406,7 +429,7 @@ public class VncViewer extends javax.swing.JApplet
     applet = true;
     UserPreferences.load("global");
     setVersion();
-    setDefaultForceAlpha();
+    setBlitterDefaults();
     setGlobalOptions();
   }
 
@@ -1073,14 +1096,6 @@ public class VncViewer extends javax.swing.JApplet
   "on which the viewer is running, which is usually true color (8 bits per " +
   "component.)", -1);
 
-  // Force the BufferedImage used as VncViewer's back buffer to be of type
-  // TYPE_INT_ARGB_PRE.  This is generally faster when Java2D OpenGL blitting
-  // is enabled, because using an alpha-enabled image format prevents
-  // glDrawPixels() from having to set the alpha values itself (which causes it
-  // to revert to an unaccelerated path in some cases.)
-  static BoolParameter forceAlpha
-  = new BoolParameter("ForceAlpha", null, false);
-
   static BoolParameter cursorShape
   = new BoolParameter("CursorShape",
   "Normally, TurboVNC and compatible servers will send only changes to the " +
@@ -1245,6 +1260,7 @@ public class VncViewer extends javax.swing.JApplet
   int benchIter = 1;
   int benchWarmup = 0;
   static Options opts;
+  static boolean forceAlpha;
   OptionsDialog options;
   TrayMenu trayMenu;
   Thread listenThread;

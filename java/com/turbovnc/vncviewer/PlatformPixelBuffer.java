@@ -66,7 +66,7 @@ public abstract class PlatformPixelBuffer extends PixelBuffer {
         (depth > 8 ? redShift : 0),
         (depth > 8 ? greenShift : 0),
         (depth > 8 ? blueShift : 0));
-      if (pf.is888() && VncViewer.forceAlpha.getValue())
+      if (pf.is888() && VncViewer.forceAlpha)
         pf.alpha = true;
     } else {
       pf = new PixelFormat(8, 8, false, false, 7, 7, 3, 0, 3, 6);

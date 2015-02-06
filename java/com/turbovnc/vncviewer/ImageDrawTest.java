@@ -77,6 +77,8 @@ public class ImageDrawTest extends JFrame {
         im2.setPF(MEDIUM_COLOR_PF);
       else if (colors == 65536)
         im2.setPF(HIGH_COLOR_PF);
+
+      System.out.println("Pixel format: " + im1.getPF().print());
     }
 
     public Dimension getPreferredSize() {
@@ -169,7 +171,7 @@ public class ImageDrawTest extends JFrame {
   public static void main(String[] arg) {
     int colors = -1, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT;
 
-    VncViewer.setDefaultForceAlpha();
+    VncViewer.setBlitterDefaults();
 
     for (int i = 0; i < arg.length; i++) {
       if (arg[i].toLowerCase().startsWith("-c") && i < arg.length - 1) {
@@ -197,12 +199,6 @@ public class ImageDrawTest extends JFrame {
         } catch(NumberFormatException e) {};
         if (temp > 0)
           height = temp;
-      }
-      if (arg[i].toLowerCase().equals("-forcealpha")) {
-        VncViewer.forceAlpha.setParam(true);
-      }
-      if (arg[i].toLowerCase().equals("-noforcealpha")) {
-        VncViewer.forceAlpha.setParam(false);
       }
     }
     new ImageDrawTest(width, height, colors);

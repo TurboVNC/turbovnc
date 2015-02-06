@@ -73,20 +73,21 @@ full-screen mode feature on OS X 10.10 "Yosemite".
 -------------------------------------------------------------------------------
 [12]
 Java 1.7 and 1.8 on Mac platforms no longer include a hardware-accelerated 2D
-blitting path, opting instead to use only OpenGL for blitting.  When using the
-default pixel format (BGRX), this is incredibly slow on some Macs, because the
-OpenGL blitter is having to set all of the alpha values to 255 (opaque.)  Thus,
-the Java TurboVNC Viewer will now automatically use an alpha-enabled pixel
-format (BGRA) for its back buffer if it detects that it is running on a Mac
-with Java 1.7 or 1.8.  This improves drawing performance by as much as 4-5x on
-certain Mac models, although the drawing performance with Apple Java 1.6 is
-still going to be faster than with Java 1.7 or 1.8.  The Java TurboVNC Viewer
-will also now automatically use an alpha-enabled pixel format if it detects
-that Java2D OpenGL drawing is being selected on other platforms (by passing
-"-Dsun.java2d.opengl=true" on the command line.)
+blitter for Java2D, opting instead to use only OpenGL for image drawing.  When
+using the default pixel format (BGRX), this is incredibly slow on some Macs,
+because the OpenGL blitter is having to set all of the alpha values to 255
+(opaque.)  Thus, the Java TurboVNC Viewer will now automatically use an
+alpha-enabled pixel format (BGRA) for its back buffer if it detects that it is
+running on a Mac with Java 1.7 or 1.8.  This improves drawing performance by as
+much as 4-5x on certain Mac models, although the drawing performance with Apple
+Java 1.6 is still going to be faster than with Java 1.7 or 1.8.  The Java
+TurboVNC Viewer will also now automatically use an alpha-enabled pixel format
+on non-Mac platforms if it detects that OpenGL Java2D blitting is being
+selected (normally accomplished by setting the "sun.java2d.opengl" system
+property to "true".)
 
-The (undocumented) ForceAlpha parameter in the Java TurboVNC Viewer can be set
-or unset to override the default behavior described above.
+The "turbovnc.forcealpha" Java system property can be used to override the
+defualt behavior described above.
 -------------------------------------------------------------------------------
 
 
