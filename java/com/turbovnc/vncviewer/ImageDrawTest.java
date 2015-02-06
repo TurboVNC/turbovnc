@@ -168,10 +168,12 @@ public class ImageDrawTest extends JFrame {
     panel.display();
   }
 
+  static {
+    VncViewer.setBlitterDefaults();
+  }
+
   public static void main(String[] arg) {
     int colors = -1, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT;
-
-    VncViewer.setBlitterDefaults();
 
     for (int i = 0; i < arg.length; i++) {
       if (arg[i].toLowerCase().startsWith("-c") && i < arg.length - 1) {
