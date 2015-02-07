@@ -285,20 +285,22 @@ make dmg
   Create Macintosh package/disk image.  This requires pkgbuild and
   productbuild, which are installed by default on OS X 10.7 and later and which
   can be obtained by installing Xcode 3.2.6 (with the "Unix Development"
-  option) on OS X 10.6.  This command generates a Java app bundle that relies
-  on the Oracle Java 7 plugin, so packages built in this manner can only be
-  installed on OS X 10.7 and later.
+  option) on OS X 10.6.  This command generates a package containing a Java app
+  bundle that relies on Java for OS X, which was pre-installed with OS X 10.6
+  and prior (for later versions of OS X, Java for OS X can be obtained from
+  Apple Support.)  The "AppleJava" DMG built with this command can be
+  installed on OS X 10.5 and later, but since pkgbuild and productbuild are not
+  available on OS X 10.5, the package must be built on OS X 10.6 or later.
 
-make compatdmg
+make oracledmg
 
-  Create backward-compatible Macintosh package/disk image.  This requires
-  pkgbuild and productbuild, which are installed by default on OS X 10.7 and
-  later and which can be obtained by installing Xcode 3.2.6 (with the "Unix
-  Development" option) on OS X 10.6.  This command generates a Java app bundle
-  that relies on the Apple Java distribution, which was pre-installed with OS X
-  10.6 and prior.  Packages built in this manner can be installed on OS X 10.5
-  and later, but since pkgbuild and productbuild are not available on OS X
-  10.5, the packages must be built on OS X 10.6 or later.
+  Create Macintosh package/disk image.  This requires pkgbuild and
+  productbuild, which are installed by default on OS X 10.7 and later and which
+  can be obtained by installing Xcode 3.2.6 (with the "Unix Development"
+  option) on OS X 10.6.  This command generates a package containing a Java app
+  bundle that relies on the Oracle Java plugin.  The "OracleJava" DMG built
+  with this command can be installed on OS X 10.7 and later.  It will generally
+  not perform as well as the "AppleJava" package.
 
 
 =======

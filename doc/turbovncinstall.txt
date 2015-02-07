@@ -47,15 +47,19 @@ following error:
 ** Installing the TurboVNC Viewer on OS X
 
 	#. Download the TurboVNC Mac disk image
-		(''TurboVNC-''__''{version}''__''-Lion.dmg'' or
-		''TurboVNC-''__''{version}''__''-Leopard.dmg'') from the
+		(''TurboVNC-''__''{version}''__''-OracleJava.dmg'' or
+		''TurboVNC-''__''{version}''__''-AppleJava.dmg'') from the
 		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
-		!!! The "Leopard" package will work with OS X 10.5 or later.  It uses
+		!!! The "AppleJava" package will work with OS X 10.5 and later.  It uses
 		Apple's distribution of Java, which was pre-installed on versions of OS X
-		prior to 10.7.  The "Lion" package will work with OS X 10.7 or later.  It
-		uses the Oracle Java 7 plugin.
+		prior to 10.7 (but can be installed on later OS X versions by downloading
+		the "Java for OS X" package from Apple Support.)  The "OracleJava" package
+		will work with OS X 10.7 or later and uses the Oracle Java plugin.  It is
+		provided for compatibility, but it does not perform nearly as well as the
+		"AppleJava" package.  See {ref prefix="Section ": MacJavaPerf} for more
+		details.
 
 	#. Open the disk image, then open ''TurboVNC.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac TurboVNC Viewer.

@@ -114,6 +114,7 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 
 ** Java Client Settings
 
+{anchor: turbovnc.forcealpha}
 | Java System Property | ''turbovnc.forcealpha = ''__''0 \| 1''__ |
 | Summary | Disable/enable back buffer alpha channel |
 | Default Value | Enabled if using OpenGL Java 2D blitting, disabled otherwise |

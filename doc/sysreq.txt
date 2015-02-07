@@ -31,7 +31,7 @@
 	| {list type=ul: \
 			{item:For optimal performance, the X server should be configured to export \
 				True Color (24-bit or 32-bit) visuals.} \
-			{item:Java 1.5 or later (Java 1.6 recommended for best performance)}} \
+			{item:Java 1.5 or later (Java 1.6 or later recommended)}} \
 	|
 #OPT: hiCol=first
 
@@ -45,7 +45,8 @@
 	| OS X 10.5 ("Leopard") or later \
 	|
 | Other Software \
-	| Java 1.5 or later (Java 1.6 or later recommended) \
+	| Java 1.5 or later (Java 1.6 for OS X recommended-- see \
+		{ref prefix="Section ": MacJavaPerf} for more details.) \
 	|
 #OPT: hiCol=first
 
