@@ -101,6 +101,11 @@ pass -Dsun.java2d.d3d=false to java to ensure that Direct3D blitting is
 always disabled when the Java TurboVNC Viewer is run as a standalone
 application.
 -------------------------------------------------------------------------------
+[14]
+Fixed an issue in the Java TurboVNC Viewer whereby the toolbar would sometimes
+appear all black or be overwritten by the initial framebuffer update when
+running under Java 1.7 and later.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
