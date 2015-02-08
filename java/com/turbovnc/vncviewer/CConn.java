@@ -51,7 +51,7 @@ import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
 
 public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
-  OptionsDialogCallback, FdInStreamBlockCallback {
+  OptionsDialogCallback, FdInStreamBlockCallback, Runnable {
 
   public final PixelFormat getPreferredPF() { return fullColourPF; }
   static final PixelFormat VERY_LOW_COLOR_PF =
@@ -425,13 +425,21 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (!benchmark) requestNewUpdate();
   }
 
+  public void run() {
+    desktop.updateWindow();
+  }
+
   // framebufferUpdateEnd() is called at the end of an update.
   // For each rectangle, the FdInStream will have timed the speed
   // of the connection, allowing us to select format and encoding
   // appropriately, and then request another incremental update.
   public void framebufferUpdateEnd() {
 
-    desktop.updateWindow();
+    try {
+      SwingUtilities.invokeAndWait(this);
+    } catch (InterruptedException e) {
+    } catch (java.lang.reflect.InvocationTargetException e) {
+    }
 
     if (firstUpdate) {
       int width, height;
