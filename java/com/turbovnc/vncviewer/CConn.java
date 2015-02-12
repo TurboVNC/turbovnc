@@ -435,11 +435,15 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   // appropriately, and then request another incremental update.
   public void framebufferUpdateEnd() {
 
-    try {
-      SwingUtilities.invokeAndWait(this);
-    } catch (InterruptedException e) {
-    } catch (java.lang.reflect.InvocationTargetException e) {
-    }
+    if (newViewport > 0) {
+      try {
+        SwingUtilities.invokeAndWait(this);
+      } catch (InterruptedException e) {
+      } catch (java.lang.reflect.InvocationTargetException e) {
+      }
+      newViewport--;
+    } else
+      desktop.updateWindow();
 
     if (firstUpdate) {
       int width, height;
@@ -765,6 +769,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       viewport.toggleLionFS();
     }
     desktop.requestFocusInWindow();
+    newViewport = 2;
   }
 
   public Rectangle getSpannedSize(boolean fullScreen) {
@@ -1776,6 +1781,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   private boolean firstUpdate;
   private boolean pendingUpdate;
   private boolean continuousUpdates;
+  private int newViewport;
 
   private boolean forceNonincremental;
 
