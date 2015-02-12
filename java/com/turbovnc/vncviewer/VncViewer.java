@@ -229,19 +229,17 @@ public class VncViewer extends javax.swing.JApplet
   }
 
   public static void setBlitterDefaults() {
-    // Java 1.7 and 1.8 do not include hardware-accelerated 2D blitting
+    // Java 1.7 and later do not include hardware-accelerated 2D blitting
     // routines on Mac platforms.  They only support OpenGL blitting, and using
     // TYPE_INT_ARGB_PRE BufferedImages with OpenGL blitting is much faster
     // than using TYPE_INT_RGB BufferedImages on some Macs (about 4-5X as fast
-    // on certain models.)  Java 1.9 is supposed to re-introduce a 2D
-    // accelerated blitting path, which is why we're just doing this for
-    // 1.7-1.8 at the moment.
+    // on certain models.)
     boolean defForceAlpha = false;
 
     if (os.startsWith("mac os x")) {
       int minorVersion =
         Integer.parseInt(System.getProperty("java.version").split("\\.")[1]);
-      if (minorVersion >= 7 && minorVersion <= 8)
+      if (minorVersion >= 7)
         defForceAlpha = true;
     }
     // TYPE_INT_ARGB_PRE images are also faster when using OpenGL blitting on

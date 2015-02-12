@@ -129,10 +129,8 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	because otherwise glDrawPixels() has to set all of the alpha values itself
 	(which can cause it to revert to an unaccelerated code path in some cases.)
 
-	!!! NOTE: this property is enabled by default when using Java 1.7 or 1.8 on
+	!!! NOTE: this property is enabled by default when using Java 1.7 or later on
 	Mac platforms, because OpenGL Java 2D blitting is the only option available.
-	Java 1.9 is supposed to reintroduce an accelerated 2D blitter such as existed
-	in Java 1.6 for OS X.
 
 | Java System Property | ''turbovnc.turbojpeg = ''__''0 \| 1''__ |
 | Summary | Disable/enable JPEG acceleration |
