@@ -724,7 +724,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       w = desktop.scaledWidth;
       h = desktop.scaledHeight;
     } else if (opts.desktopSize == Options.SIZE_AUTO &&
-               cp.supportsSetDesktopSize) {
+               cp.supportsSetDesktopSize && !opts.fullScreen) {
       w = viewport.sp.getSize().width;
       h = viewport.sp.getSize().height;
     } else {
