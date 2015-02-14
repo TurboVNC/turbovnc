@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,11 @@ public class Options {
   public static final int SPAN_ALL = 1;
   public static final int SPAN_AUTO = 2;
 
+  public static final int NUMSIZEOPT = 3;
+  public static final int SIZE_NONE = 0;
+  public static final int SIZE_MANUAL = 1;
+  public static final int SIZE_AUTO = 2;
+
   public static final int NUMSUBSAMPOPT = 4;
   public static final int SUBSAMP_NONE = 0;
   public static final int SUBSAMP_4X = 1;
@@ -47,6 +52,9 @@ public class Options {
     fullScreen = old.fullScreen;
     span = old.span;
     scalingFactor = old.scalingFactor;
+    desktopSize = old.desktopSize;
+    desktopWidth = old.desktopWidth;
+    desktopHeight = old.desktopHeight;
     acceptClipboard = old.acceptClipboard;
     sendClipboard = old.sendClipboard;
     acceptBell = old.acceptBell;
@@ -115,6 +123,10 @@ public class Options {
     printOpt("fullScreen", fullScreen);
     printOpt("span", span);
     printOpt("scalingFactor", scalingFactor);
+    if (desktopSize == SIZE_MANUAL)
+      printOpt("desktopSize", desktopWidth + "x" + desktopHeight);
+    else
+      printOpt("desktopSize", desktopSize);
     printOpt("acceptClipboard", acceptClipboard);
     printOpt("sendClipboard", sendClipboard);
     printOpt("acceptBell", acceptBell);
@@ -142,6 +154,9 @@ public class Options {
   public boolean fullScreen;
   public int span;
   public int scalingFactor;
+  public int desktopSize;
+  public int desktopWidth;
+  public int desktopHeight;
   public boolean acceptClipboard;
   public boolean sendClipboard;
   public boolean acceptBell;

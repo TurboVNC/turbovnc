@@ -455,37 +455,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
 
       if (cp.supportsSetDesktopSize &&
-          VncViewer.desktopSize.getValueStr() != null &&
-          VncViewer.desktopSize.getValueStr().split("x").length == 2) {
-        width = Integer.parseInt(VncViewer.desktopSize.getValue().split("x")[0]);
-        height = Integer.parseInt(VncViewer.desktopSize.getValue().split("x")[1]);
-        ScreenSet layout;
-
-        layout = cp.screenLayout;
-
-        if (layout.numScreens() == 0)
-          layout.addScreen(new Screen());
-        else if (layout.numScreens() != 1) {
-
-          while (true) {
-            Iterator<Screen> iter = layout.screens.iterator();
-            Screen screen = (Screen)iter.next();
-
-            if (!iter.hasNext())
-              break;
-
-            layout.removeScreen(screen.id);
-          }
-        }
-
-        Screen screen0 = (Screen)layout.screens.iterator().next();
-        screen0.dimensions.tl.x = 0;
-        screen0.dimensions.tl.y = 0;
-        screen0.dimensions.br.x = width;
-        screen0.dimensions.br.y = height;
-
-        writer().writeSetDesktopSize(width, height, layout);
-      }
+          opts.desktopSize == Options.SIZE_MANUAL &&
+          opts.desktopWidth > 0 && opts.desktopHeight > 0)
+        sendDesktopSize(opts.desktopWidth, opts.desktopHeight);
 
       firstUpdate = false;
     }
@@ -579,6 +551,36 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       decodePixels = decodeRect = blitPixels = blits = updates = 0;
       tStart = getTime();
     }
+  }
+
+  public void sendDesktopSize(int width, int height) {
+    ScreenSet layout;
+
+    layout = cp.screenLayout;
+
+    if (layout.numScreens() == 0)
+      layout.addScreen(new Screen());
+    else if (layout.numScreens() != 1) {
+
+      while (true) {
+        Iterator<Screen> iter = layout.screens.iterator();
+        Screen screen = (Screen)iter.next();
+
+        if (!iter.hasNext())
+          break;
+
+        layout.removeScreen(screen.id);
+      }
+    }
+
+    Screen screen0 = (Screen)layout.screens.iterator().next();
+    screen0.dimensions.tl.x = 0;
+    screen0.dimensions.tl.y = 0;
+    screen0.dimensions.br.x = width;
+    screen0.dimensions.br.y = height;
+
+    pendingResize = true;
+    writer().writeSetDesktopSize(width, height, layout);
   }
 
   // The rest of the callbacks are fairly self-explanatory...
@@ -715,10 +717,19 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (VncViewer.embed.getValue()) {
       w = desktop.scaledWidth;
       h = desktop.scaledHeight;
+    } else if (opts.desktopSize == Options.SIZE_AUTO) {
+      w = viewport.sp.getSize().width;
+      h = viewport.sp.getSize().height;
     } else {
       w = desktop.width();
       h = desktop.height();
     }
+
+    if (pendingResize) {
+      desktop.resize();
+      pendingResize = false;
+    }
+
     if ((w == cp.width) && (h == cp.height))
       return;
 
@@ -784,7 +795,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     int sh = desktop.scaledHeight;
 
     if (opts.scalingFactor == Options.SCALE_AUTO ||
-        opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+        opts.scalingFactor == Options.SCALE_FIXEDRATIO ||
+        opts.desktopSize == Options.SIZE_AUTO) {
       sw = cp.width;
       sh = cp.height;
     }
@@ -881,11 +893,11 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       pack = false;
     }
 
-    if (w >= span.width) {
+    if (w >= span.width || opts.desktopSize == Options.SIZE_AUTO) {
       w = span.width;
       pack = false;
     }
-    if (h >= span.height) {
+    if (h >= span.height || opts.desktopSize == Options.SIZE_AUTO) {
       h = span.height;
       pack = false;
     }
@@ -1772,6 +1784,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   private boolean pendingPFChange;
   private PixelFormat pendingPF;
+  private boolean pendingResize;
 
   public int currentEncoding, lastServerEncoding;
 

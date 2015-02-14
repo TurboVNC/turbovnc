@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.lang.reflect.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
@@ -108,6 +110,22 @@ public class Viewport extends JFrame {
               if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
                 setSize(w, h);
             }
+          }
+        } else if (cc.opts.desktopSize == Options.SIZE_AUTO) {
+          if ((sp.getSize().width != cc.desktop.scaledWidth) ||
+              (sp.getSize().height != cc.desktop.scaledHeight)) {
+            cc.desktop.setScaledSize();
+            sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            sp.validate();
+            if (timer != null)
+              timer.cancel();
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+              public synchronized void run() {
+                cc.sendDesktopSize(sp.getSize().width, sp.getSize().height);
+              }
+            }, 500);
           }
         } else {
           sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -267,6 +285,7 @@ public class Viewport extends JFrame {
   public int dx, dy = 0;
   MacMenuBar macMenu;
   boolean canDoLionFS;
+  Timer timer;
   static LogWriter vlog = new LogWriter("Viewport");
 }
 
