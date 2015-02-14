@@ -111,7 +111,8 @@ public class Viewport extends JFrame {
                 setSize(w, h);
             }
           }
-        } else if (cc.opts.desktopSize == Options.SIZE_AUTO) {
+        } else if (cc.opts.desktopSize == Options.SIZE_AUTO &&
+                   cc.cp.supportsSetDesktopSize) {
           if ((sp.getSize().width != cc.desktop.scaledWidth) ||
               (sp.getSize().height != cc.desktop.scaledHeight)) {
             cc.desktop.setScaledSize();

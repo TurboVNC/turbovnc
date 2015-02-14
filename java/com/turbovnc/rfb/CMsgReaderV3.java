@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,6 +118,9 @@ public class CMsgReaderV3 extends CMsgReader {
         readClientRedirect(x, y, w, h);
         break;
       default:
+        /* If we get here and the server hasn't sent us an initial desktop
+           resize message, then it must not support desktop resizing. */
+        handler.checkDesktopResize();
         readRect(new Rect(x, y, x + w, y + h), encoding);
         break;
       }

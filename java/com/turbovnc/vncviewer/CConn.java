@@ -98,7 +98,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
-    cp.supportsSetDesktopSize = true;
     cp.supportsClientRedirect = VncViewer.clientRedirect.getValue();
     cp.supportsDesktopRename = true;
     initMenu();
@@ -390,6 +389,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
 
     resizeFramebuffer();
+  }
+
+  public void checkDesktopResize() {
+    if (!cp.supportsSetDesktopSize && opts.desktopSize == Options.SIZE_AUTO) {
+      vlog.info("Disabling automatic desktop resizing because the server doesn't support it.");
+      opts.desktopSize = Options.SIZE_NONE;
+    }
   }
 
   // clientRedirect() migrates the client to another host/port
@@ -717,7 +723,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (VncViewer.embed.getValue()) {
       w = desktop.scaledWidth;
       h = desktop.scaledHeight;
-    } else if (opts.desktopSize == Options.SIZE_AUTO) {
+    } else if (opts.desktopSize == Options.SIZE_AUTO &&
+               cp.supportsSetDesktopSize) {
       w = viewport.sp.getSize().width;
       h = viewport.sp.getSize().height;
     } else {
