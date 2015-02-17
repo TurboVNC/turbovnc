@@ -374,7 +374,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   // it is set initially).
   public void setDesktopSize(int w, int h) {
     super.setDesktopSize(w, h);
+    pendingServerResize = true;
     resizeFramebuffer();
+    pendingClientResize = false;
   }
 
   // setExtendedDesktopSize() is a more advanced version of setDesktopSize()
@@ -388,7 +390,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       return;
     }
 
+    pendingServerResize = true;
     resizeFramebuffer();
+    pendingClientResize = false;
   }
 
   public void checkDesktopResize() {
@@ -460,8 +464,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         writer().writeFence(
           fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
 
-      if (cp.supportsSetDesktopSize &&
-          opts.desktopSize == Options.SIZE_MANUAL &&
+      if (opts.desktopSize == Options.SIZE_MANUAL &&
           opts.desktopWidth > 0 && opts.desktopHeight > 0)
         sendDesktopSize(opts.desktopWidth, opts.desktopHeight);
 
@@ -564,6 +567,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     layout = cp.screenLayout;
 
+    if (!cp.supportsSetDesktopSize)
+      return;
+
     if (layout.numScreens() == 0)
       layout.addScreen(new Screen());
     else if (layout.numScreens() != 1) {
@@ -585,7 +591,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     screen0.dimensions.br.x = width;
     screen0.dimensions.br.y = height;
 
-    pendingResize = true;
     writer().writeSetDesktopSize(width, height, layout);
   }
 
@@ -711,8 +716,16 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   private void resizeFramebuffer() {
-    if (desktop == null)
+    if (desktop == null) {
+      pendingServerResize = false;
       return;
+    }
+
+    if (pendingClientResize) {
+      desktop.resize();
+      pendingServerResize = false;
+      return;
+    }
 
     if (continuousUpdates)
       writer().writeEnableContinuousUpdates(true, 0, 0, cp.width, cp.height);
@@ -723,22 +736,15 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (VncViewer.embed.getValue()) {
       w = desktop.scaledWidth;
       h = desktop.scaledHeight;
-    } else if (opts.desktopSize == Options.SIZE_AUTO &&
-               cp.supportsSetDesktopSize && !opts.fullScreen) {
-      w = viewport.sp.getSize().width;
-      h = viewport.sp.getSize().height;
     } else {
       w = desktop.width();
       h = desktop.height();
     }
 
-    if (pendingResize) {
-      desktop.resize();
-      pendingResize = false;
-    }
-
-    if ((w == cp.width) && (h == cp.height))
+    if ((w == cp.width) && (h == cp.height)) {
+      pendingServerResize = false;
       return;
+    }
 
     desktop.resize();
     if (VncViewer.embed.getValue()) {
@@ -769,6 +775,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         savedRect = viewport.getBounds();
       }
       viewport.dispose();
+      if (viewport.timer != null)
+        viewport.timer.cancel();
+      pendingServerResize = false;
     }
     viewport = new Viewport(this);
     if (opts.fullScreen && viewport.lionFSSupported()) {
@@ -872,7 +881,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (opts.span == Options.SPAN_PRIMARY ||
         (opts.span == Options.SPAN_AUTO &&
          (sw <= primary.width || span.width <= primary.width) &&
-         (sh <= primary.height || span.height <= primary.height)))
+         (sh <= primary.height || span.height <= primary.height)) ||
+        (opts.span == Options.SPAN_AUTO &&
+         opts.desktopSize == Options.SIZE_AUTO))
       span = primary;
     else if (equal && fullScreen)
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
@@ -884,7 +895,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   // Resize non-full-screen window based on the spanning option
-  public void sizeWindow() {
+  public void sizeWindow() { sizeWindow(true); }
+
+  public void sizeWindow(boolean manual) {
     boolean pack = true;
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
@@ -894,17 +907,30 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       return;
 
     if (opts.scalingFactor == Options.SCALE_AUTO ||
-        opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+        opts.scalingFactor == Options.SCALE_FIXEDRATIO ||
+        opts.desktopSize == Options.SIZE_AUTO) {
       w = cp.width;
       h = cp.height;
       pack = false;
     }
 
-    if (w >= span.width || opts.desktopSize == Options.SIZE_AUTO) {
+    if (opts.desktopSize == Options.SIZE_AUTO) {
+      if (manual) {
+        w = span.width;
+        h = span.height;
+        pack = false;
+      } else {
+        Dimension vpBorder = viewport.getBorderSize();
+        w += vpBorder.width;
+        h += vpBorder.height;
+      }
+    }
+
+    if (w >= span.width) {
       w = span.width;
       pack = false;
     }
-    if (h >= span.height || opts.desktopSize == Options.SIZE_AUTO) {
+    if (h >= span.height) {
       h = span.height;
       pack = false;
     }
@@ -933,7 +959,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         viewport.setGeometry(savedRect.x, savedRect.y, savedRect.width,
                              savedRect.height, false);
       } else {
-        sizeWindow();
+        sizeWindow(false);
       }
     }
   }
@@ -1791,7 +1817,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   private boolean pendingPFChange;
   private PixelFormat pendingPF;
-  private boolean pendingResize;
+  public boolean pendingServerResize, pendingClientResize;
 
   public int currentEncoding, lastServerEncoding;
 

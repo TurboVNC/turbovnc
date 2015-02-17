@@ -112,9 +112,13 @@ public class Viewport extends JFrame {
             }
           }
         } else if (cc.opts.desktopSize == Options.SIZE_AUTO &&
-                   cc.cp.supportsSetDesktopSize) {
-          if ((sp.getSize().width != cc.desktop.scaledWidth) ||
-              (sp.getSize().height != cc.desktop.scaledHeight)) {
+                   !cc.pendingServerResize) {
+          Dimension availableSize = cc.viewport.getAvailableSize();
+          if (availableSize.width < 1 || availableSize.height < 1)
+            // Viewport isn't fully baked yet
+            return;
+          if ((availableSize.width != cc.desktop.scaledWidth) ||
+              (availableSize.height != cc.desktop.scaledHeight)) {
             cc.desktop.setScaledSize();
             sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
@@ -123,8 +127,10 @@ public class Viewport extends JFrame {
               timer.cancel();
             timer = new Timer();
             timer.schedule(new TimerTask() {
-              public synchronized void run() {
-                cc.sendDesktopSize(sp.getSize().width, sp.getSize().height);
+              public void run() {
+                Dimension availableSize = cc.viewport.getAvailableSize();
+                cc.sendDesktopSize(availableSize.width, availableSize.height);
+                cc.pendingClientResize = true;
               }
             }, 500);
           }
@@ -148,8 +154,42 @@ public class Viewport extends JFrame {
           dx = dy = 0;
         }
         repaint();
+        cc.pendingServerResize = false;
       }
     });
+  }
+
+  public Dimension getAvailableSize() {
+    Dimension vpSize = getSize();
+    Insets vpInsets = getInsets();
+    int availableWidth = vpSize.width - vpInsets.left - vpInsets.right;
+    int availableHeight = vpSize.height - vpInsets.top - vpInsets.bottom;
+    if (tb.isVisible())
+      availableHeight -= tb.getHeight();
+    if (availableWidth < 0)
+      availableWidth = 0;
+    if (availableHeight < 0)
+      availableHeight = 0;
+    return new Dimension(availableWidth, availableHeight);
+  }
+
+  public Dimension getBorderSize() {
+    Dimension vpSize = getSize();
+    boolean tempVisible = false;
+    if (vpSize.width == 0 || vpSize.height == 0) {
+      if (!isVisible()) {
+        tempVisible = true;
+        setVisible(true);
+      }
+    }
+    Insets vpInsets = getInsets();
+    if (tb.isVisible())
+      vpInsets.top += tb.getHeight();
+    Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
+                                         vpInsets.top + vpInsets.bottom);
+    if (tempVisible)
+      setVisible(false);
+    return borderSize;
   }
 
   boolean lionFSSupported() { return canDoLionFS; }

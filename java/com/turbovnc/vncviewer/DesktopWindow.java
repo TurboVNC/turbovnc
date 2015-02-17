@@ -340,8 +340,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void setScaledSize() {
     if (cc.opts.scalingFactor != Options.SCALE_AUTO &&
         cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO &&
-        (cc.opts.desktopSize != Options.SIZE_AUTO ||
-         !cc.cp.supportsSetDesktopSize)) {
+        cc.opts.desktopSize != Options.SIZE_AUTO) {
       scaledWidth = (int)Math.floor((float)cc.cp.width *
                                     (float)cc.opts.scalingFactor / 100.0);
       scaledHeight = (int)Math.floor((float)cc.cp.height *
@@ -351,16 +350,11 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         scaledWidth = cc.cp.width;
         scaledHeight = cc.cp.height;
       } else {
-        Dimension vpSize = cc.viewport.getSize();
-        Insets vpInsets = cc.viewport.getInsets();
-        int availableHeight = vpSize.height - vpInsets.top - vpInsets.bottom;
-        if (cc.viewport.tb.isVisible())
-          availableHeight -= cc.viewport.tb.getHeight();
-        Dimension availableSize =
-          new Dimension(vpSize.width - vpInsets.left - vpInsets.right,
-                        availableHeight);
-        if (availableSize.width == 0 || availableSize.height == 0)
-          availableSize = new Dimension(cc.cp.width, cc.cp.height);
+        Dimension availableSize = cc.viewport.getAvailableSize();
+        if (availableSize.width == 0 || availableSize.height == 0) {
+          availableSize.width = cc.cp.width;
+          availableSize.height = cc.cp.height;
+        }
         if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
           float widthRatio = (float)availableSize.width / (float)cc.cp.width;
           float heightRatio = (float)availableSize.height / (float)cc.cp.height;
@@ -373,8 +367,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         }
       }
     }
-    if (cc.opts.desktopSize == Options.SIZE_AUTO &&
-        cc.cp.supportsSetDesktopSize) {
+    if (cc.opts.desktopSize == Options.SIZE_AUTO) {
       scaleWidthRatio = scaleHeightRatio = 1.0f;
     } else {
       scaleWidthRatio = (float)scaledWidth / (float)cc.cp.width;
