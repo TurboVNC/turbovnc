@@ -983,12 +983,6 @@ public class VncViewer extends javax.swing.JApplet
   "cannot fit on the primary monitor (Auto.)", "Auto",
   "Primary, All, Auto");
 
-  // On Mac systems, setting this parameter will force the use of the old
-  // (pre-Lion) full-screen mode, even if the viewer is running on OS X 10.7
-  // "Lion" or later.
-  static BoolParameter noLionFS
-  = new BoolParameter("NoLionFS", null, false);
-
   static BoolParameter showToolbar
   = new BoolParameter("Toolbar",
   "Show the toolbar by default.", true);

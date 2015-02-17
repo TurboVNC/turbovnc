@@ -132,6 +132,17 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	!!! NOTE: this property is enabled by default when using Java 1.7 or later on
 	Mac platforms, because OpenGL Java 2D blitting is the only option available.
 
+| Java System Property | ''turbovnc.lionfs = ''__''0 \| 1''__ |
+| Summary | Disable/enable the use of the OS X full-screen application feature |
+| Default Value | Enabled if running on OS X 10.7 or later |
+#OPT: hiCol=first
+
+	Description :: When running in full-screen mode, the Java TurboVNC Viewer
+	will normally try to take advantage of the full-screen application feature
+	provided by OS X 10.7 and later, if available.  Disabling this property will
+	force the viewer to use its own built-in cross-platform "pseudo-full-screen"
+	feature instead.  This is useful mainly for testing.
+
 | Java System Property | ''turbovnc.turbojpeg = ''__''0 \| 1''__ |
 | Summary | Disable/enable JPEG acceleration |
 | Default Value | Enabled if the libjpeg-turbo JNI library is available |
