@@ -24,8 +24,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.lang.reflect.*;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
@@ -77,17 +75,26 @@ public class Viewport extends JFrame {
     // as a non-full-screen viewport, so we tell showToolbar() to ignore the
     // full-screen state.
     showToolbar(cc.showToolbar, canDoLionFS);
+
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         sp.getViewport().getView().requestFocusInWindow();
       }
     });
+
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         cc.close();
       }
     });
+
     addComponentListener(new ComponentAdapter() {
+      public void componentShown(ComponentEvent e) {
+        synchronized (Viewport.this) {
+          Viewport.this.notify();
+        }
+      }
+
       public void componentResized(ComponentEvent e) {
         if (cc.opts.scalingFactor == Options.SCALE_AUTO ||
             cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -114,25 +121,26 @@ public class Viewport extends JFrame {
         } else if (cc.opts.desktopSize == Options.SIZE_AUTO &&
                    !cc.pendingServerResize) {
           Dimension availableSize = cc.viewport.getAvailableSize();
-          if (availableSize.width < 1 || availableSize.height < 1)
-            // Viewport isn't fully baked yet
-            return;
-          if ((availableSize.width != cc.desktop.scaledWidth) ||
-              (availableSize.height != cc.desktop.scaledHeight)) {
-            cc.desktop.setScaledSize();
+          if (availableSize.width >= 1 && availableSize.height >= 1 &&
+              (availableSize.width != cc.desktop.scaledWidth ||
+               availableSize.height != cc.desktop.scaledHeight)) {
             sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             sp.validate();
             if (timer != null)
-              timer.cancel();
-            timer = new Timer();
-            timer.schedule(new TimerTask() {
-              public void run() {
+              timer.stop();
+            ActionListener actionListener = new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
                 Dimension availableSize = cc.viewport.getAvailableSize();
-                cc.sendDesktopSize(availableSize.width, availableSize.height);
+                if (availableSize.width < 1 || availableSize.height < 1)
+                  throw new ErrorException("Unexpected zero-size component");
                 cc.pendingClientResize = true;
+                cc.sendDesktopSize(availableSize.width, availableSize.height);
               }
-            }, 500);
+            };
+            timer = new Timer(500, actionListener);
+            timer.setRepeats(false);
+            timer.start();
           }
         } else {
           sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -144,8 +152,9 @@ public class Viewport extends JFrame {
           cc.setCursor(cursor.width(), cursor.height(), cursor.hotspot,
                        (int[])cursor.data, cursor.mask);
         }
-        if ((sp.getSize().width > cc.desktop.scaledWidth) ||
-            (sp.getSize().height > cc.desktop.scaledHeight)) {
+        if (((sp.getSize().width > cc.desktop.scaledWidth) ||
+             (sp.getSize().height > cc.desktop.scaledHeight)) &&
+            cc.opts.desktopSize != Options.SIZE_AUTO) {
           dx = (sp.getSize().width <= cc.desktop.scaledWidth) ? 0 :
             (int)Math.floor((sp.getSize().width - cc.desktop.scaledWidth) / 2);
           dy = (sp.getSize().height <= cc.desktop.scaledHeight) ? 0 :
@@ -175,20 +184,19 @@ public class Viewport extends JFrame {
 
   public Dimension getBorderSize() {
     Dimension vpSize = getSize();
-    boolean tempVisible = false;
-    if (vpSize.width == 0 || vpSize.height == 0) {
-      if (!isVisible()) {
-        tempVisible = true;
-        setVisible(true);
-      }
+    if ((vpSize.width == 0 || vpSize.height == 0) && !isVisible()) {
+      setVisible(true);
+      try {
+        synchronized (this) {
+          wait();
+        }
+      } catch (InterruptedException e) {}
     }
     Insets vpInsets = getInsets();
     if (tb.isVisible())
       vpInsets.top += tb.getHeight();
     Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
                                          vpInsets.top + vpInsets.bottom);
-    if (tempVisible)
-      setVisible(false);
     return borderSize;
   }
 

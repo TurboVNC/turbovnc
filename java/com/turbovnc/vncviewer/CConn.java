@@ -168,8 +168,11 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   // deleteWindow() is called when the user closes the desktop or menu windows.
 
   void deleteWindow() {
-    if (viewport != null)
+    if (viewport != null) {
+      if (viewport.timer != null)
+        viewport.timer.stop();
       viewport.dispose();
+    }
     viewport = null;
   }
 
@@ -399,6 +402,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (!cp.supportsSetDesktopSize && opts.desktopSize == Options.SIZE_AUTO) {
       vlog.info("Disabling automatic desktop resizing because the server doesn't support it.");
       opts.desktopSize = Options.SIZE_NONE;
+      sizeWindow();
+      viewport.sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      viewport.sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+      viewport.sp.validate();
     }
   }
 
@@ -721,17 +728,19 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       return;
     }
 
-    if (pendingClientResize) {
-      desktop.resize();
-      pendingServerResize = false;
-      return;
-    }
-
     if (continuousUpdates)
       writer().writeEnableContinuousUpdates(true, 0, 0, cp.width, cp.height);
 
     if ((cp.width == 0) && (cp.height == 0))
       return;
+
+    if (pendingClientResize) {
+      desktop.setScaledSize();
+      desktop.resize();
+      pendingServerResize = false;
+      return;
+    }
+
     int w, h;
     if (VncViewer.embed.getValue()) {
       w = desktop.scaledWidth;
@@ -774,9 +783,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         viewport.setExtendedState(JFrame.NORMAL);
         savedRect = viewport.getBounds();
       }
-      viewport.dispose();
       if (viewport.timer != null)
-        viewport.timer.cancel();
+        viewport.timer.stop();
+      viewport.dispose();
       pendingServerResize = false;
     }
     viewport = new Viewport(this);
@@ -918,13 +927,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       if (manual) {
         w = span.width;
         h = span.height;
-        pack = false;
-      } else {
-        Dimension vpBorder = viewport.getBorderSize();
-        w += vpBorder.width;
-        h += vpBorder.height;
       }
     }
+
+    Dimension vpBorder = viewport.getBorderSize();
+    w += vpBorder.width;
+    h += vpBorder.height;
 
     if (w >= span.width) {
       w = span.width;
@@ -940,8 +948,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     int y = (span.height - h) / 2 + span.y;
     viewport.setGeometry(x, y, w, h, pack);
   }
-
-  private void reconfigureViewport() { reconfigureViewport(false); }
 
   private void reconfigureViewport(boolean restore) {
     desktop.setScaledSize();
