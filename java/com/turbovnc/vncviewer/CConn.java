@@ -377,7 +377,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   // it is set initially).
   public void setDesktopSize(int w, int h) {
     super.setDesktopSize(w, h);
-    pendingServerResize = true;
     resizeFramebuffer();
     pendingClientResize = false;
   }
@@ -393,20 +392,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       return;
     }
 
-    pendingServerResize = true;
     resizeFramebuffer();
     pendingClientResize = false;
-  }
-
-  public void checkDesktopResize() {
-    if (!cp.supportsSetDesktopSize && opts.desktopSize == Options.SIZE_AUTO) {
-      vlog.info("Disabling automatic desktop resizing because the server doesn't support it.");
-      opts.desktopSize = Options.SIZE_NONE;
-      sizeWindow();
-      viewport.sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-      viewport.sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-      viewport.sp.validate();
-    }
   }
 
   // clientRedirect() migrates the client to another host/port
@@ -471,9 +458,19 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         writer().writeFence(
           fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
 
+      if (!cp.supportsSetDesktopSize &&
+          opts.desktopSize == Options.SIZE_AUTO) {
+        vlog.info("Disabling automatic desktop resizing because the server doesn't support it.");
+        opts.desktopSize = Options.SIZE_NONE;
+      }
+
       if (opts.desktopSize == Options.SIZE_MANUAL &&
           opts.desktopWidth > 0 && opts.desktopHeight > 0)
         sendDesktopSize(opts.desktopWidth, opts.desktopHeight);
+      else if (opts.desktopSize == Options.SIZE_AUTO) {
+        Dimension availableSize = viewport.getAvailableSize();
+        sendDesktopSize(availableSize.width, availableSize.height);
+      }
 
       firstUpdate = false;
     }
@@ -723,10 +720,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   private void resizeFramebuffer() {
-    if (desktop == null) {
-      pendingServerResize = false;
+    if (desktop == null)
       return;
-    }
 
     if (continuousUpdates)
       writer().writeEnableContinuousUpdates(true, 0, 0, cp.width, cp.height);
@@ -737,7 +732,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (pendingClientResize) {
       desktop.setScaledSize();
       desktop.resize();
-      pendingServerResize = false;
       return;
     }
 
@@ -750,17 +744,66 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       h = desktop.height();
     }
 
-    if ((w == cp.width) && (h == cp.height)) {
-      pendingServerResize = false;
-      return;
+    if (desktop.im.width() != cp.width || desktop.im.height() != cp.height) {
+      desktop.setScaledSize();
+      desktop.resize();
     }
+
+    if ((w == cp.width) && (h == cp.height))
+      return;
 
     desktop.resize();
     if (VncViewer.embed.getValue()) {
       desktop.setScaledSize();
       setupEmbeddedFrame();
     } else {
-      recreateViewport();
+      // Normally, when automatic desktop resizing is enabled, the viewer will
+      // attempt to keep the remote desktop size synced with the local viewport
+      // size.  However, in full-screen mode, the viewport cannot change size.
+      // Thus, we cannot force the remote desktop size to always be equal to
+      // the viewport size in that case, because it would create an endless
+      // game of Ping Pong if two connected viewers both had automatic desktop
+      // resizing enabled, one of them entered full-screen mode, and the other
+      // (non-full-screen) viewer could not accommodate the new size.  In that
+      // case, we let the non-full-screen viewer win, and the full-screen
+      // viewer will display a full-screen viewport that is only partially
+      // used.  The following code thus sets a flag to temporarily disable the
+      // component resize handler, then it resizes the full-screen viewport
+      // accordingly.  We could conceivably use recreateViewport() here, but
+      // doing so causes the viewer to exit and then re-enter full-screen mode.
+      if (opts.fullScreen) {
+        pendingServerResize = true;
+        Rectangle span = getSpannedSize(!VncViewer.os.startsWith("mac os x") ||
+                                        viewport.lionFSSupported());
+        w = cp.width;
+        h = cp.height;
+        if (w >= span.width)
+          w = span.width;
+        if (h >= span.height)
+          h = span.height;
+        int x = (span.width - w) / 2 + span.x;
+        int y = (span.height - h) / 2 + span.y;
+        viewport.setGeometry(x, y, w, h, false);
+        desktop.scaledWidth = cp.width;
+        desktop.scaledHeight = cp.height;
+        if (desktop.scaledWidth > w || desktop.scaledHeight > h) {
+          viewport.sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          viewport.sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+          viewport.sp.validate();
+        }
+        // Wait for all resize events to be processed before re-enabling the
+        // component resize handler.
+        try {
+          SwingUtilities.invokeAndWait(new Runnable() {
+            public void run() {
+              CConn.this.pendingServerResize = false;
+            }
+          });
+        } catch (InterruptedException e) {
+        } catch (java.lang.reflect.InvocationTargetException e) {
+        }
+      } else
+        recreateViewport();
     }
   }
 
@@ -786,7 +829,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       if (viewport.timer != null)
         viewport.timer.stop();
       viewport.dispose();
-      pendingServerResize = false;
     }
     viewport = new Viewport(this);
     if (opts.fullScreen && viewport.lionFSSupported()) {
@@ -930,10 +972,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       }
     }
 
-    Dimension vpBorder = viewport.getBorderSize();
-    w += vpBorder.width;
-    h += vpBorder.height;
-
     if (w >= span.width) {
       w = span.width;
       pack = false;
@@ -947,6 +985,27 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
     viewport.setGeometry(x, y, w, h, pack);
+
+    // The viewport insets aren't defined until the viewport is visible, but
+    // making it visible before the first setGeometry() call causes some very
+    // odd behavior, such as the component size changing unpredictably.  Thus
+    // we have to adjust for the viewport insets after the fact.
+    Dimension vpBorder = viewport.getBorderSize();
+    if (vpBorder.width > 0 || vpBorder.height > 0) {
+      w += vpBorder.width;
+      h += vpBorder.height;
+      if (w >= span.width) {
+        w = span.width;
+        pack = false;
+      }
+      if (h >= span.height) {
+        h = span.height;
+        pack = false;
+      }
+      x = (span.width - w) / 2 + span.x;
+      y = (span.height - h) / 2 + span.y;
+      viewport.setGeometry(x, y, w, h, pack);
+    }
   }
 
   private void reconfigureViewport(boolean restore) {
@@ -1830,7 +1889,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   private boolean formatChange;
   private boolean encodingChange;
 
-  private boolean firstUpdate;
+  public boolean firstUpdate;
   private boolean pendingUpdate;
   private boolean continuousUpdates;
   private int newViewport;

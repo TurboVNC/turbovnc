@@ -89,12 +89,6 @@ public class Viewport extends JFrame {
     });
 
     addComponentListener(new ComponentAdapter() {
-      public void componentShown(ComponentEvent e) {
-        synchronized (Viewport.this) {
-          Viewport.this.notify();
-        }
-      }
-
       public void componentResized(ComponentEvent e) {
         if (cc.opts.scalingFactor == Options.SCALE_AUTO ||
             cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -119,7 +113,7 @@ public class Viewport extends JFrame {
             }
           }
         } else if (cc.opts.desktopSize == Options.SIZE_AUTO &&
-                   !cc.pendingServerResize) {
+                   !cc.firstUpdate && !cc.pendingServerResize) {
           Dimension availableSize = cc.viewport.getAvailableSize();
           if (availableSize.width >= 1 && availableSize.height >= 1 &&
               (availableSize.width != cc.desktop.scaledWidth ||
@@ -163,7 +157,6 @@ public class Viewport extends JFrame {
           dx = dy = 0;
         }
         repaint();
-        cc.pendingServerResize = false;
       }
     });
   }
@@ -183,15 +176,8 @@ public class Viewport extends JFrame {
   }
 
   public Dimension getBorderSize() {
-    Dimension vpSize = getSize();
-    if ((vpSize.width == 0 || vpSize.height == 0) && !isVisible()) {
+    if (!isVisible())
       setVisible(true);
-      try {
-        synchronized (this) {
-          wait();
-        }
-      } catch (InterruptedException e) {}
-    }
     Insets vpInsets = getInsets();
     if (tb.isVisible())
       vpInsets.top += tb.getHeight();
