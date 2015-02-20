@@ -468,8 +468,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           opts.desktopWidth > 0 && opts.desktopHeight > 0)
         sendDesktopSize(opts.desktopWidth, opts.desktopHeight);
       else if (opts.desktopSize == Options.SIZE_AUTO) {
-        Dimension availableSize = viewport.getAvailableSize();
-        sendDesktopSize(availableSize.width, availableSize.height);
+        if (VncViewer.embed.getValue())
+          sendDesktopSize(viewer.getSize().width, viewer.getSize().height);
+        else {
+          Dimension availableSize = viewport.getAvailableSize();
+          sendDesktopSize(availableSize.width, availableSize.height);
+        }
       }
 
       firstUpdate = false;
