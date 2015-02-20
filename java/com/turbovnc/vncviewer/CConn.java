@@ -771,7 +771,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       // component resize handler, then it resizes the full-screen viewport
       // accordingly.  We could conceivably use recreateViewport() here, but
       // doing so causes the viewer to exit and then re-enter full-screen mode.
-      if (opts.fullScreen) {
+      if (opts.fullScreen && opts.desktopSize == Options.SIZE_AUTO) {
         pendingServerResize = true;
         Rectangle span = getSpannedSize(!VncViewer.os.startsWith("mac os x") ||
                                         viewport.lionFSSupported());
