@@ -775,18 +775,11 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         pendingServerResize = true;
         Rectangle span = getSpannedSize(!VncViewer.os.startsWith("mac os x") ||
                                         viewport.lionFSSupported());
-        w = cp.width;
-        h = cp.height;
-        if (w >= span.width)
-          w = span.width;
-        if (h >= span.height)
-          h = span.height;
-        int x = (span.width - w) / 2 + span.x;
-        int y = (span.height - h) / 2 + span.y;
-        viewport.setGeometry(x, y, w, h, false);
+        viewport.setGeometry(span.x, span.y, span.width, span.height, false);
         desktop.scaledWidth = cp.width;
         desktop.scaledHeight = cp.height;
-        if (desktop.scaledWidth > w || desktop.scaledHeight > h) {
+        if (desktop.scaledWidth > span.width ||
+            desktop.scaledHeight > span.height) {
           viewport.sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
           viewport.sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
           viewport.sp.validate();
