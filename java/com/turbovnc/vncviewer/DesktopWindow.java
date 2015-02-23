@@ -74,7 +74,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     cursorBacking = new ManagedPixelBuffer();
     Dimension bestSize = tk.getBestCursorSize(16, 16);
     BufferedImage cursorImage =
-     new BufferedImage(bestSize.width, bestSize.height,
+      new BufferedImage(bestSize.width, bestSize.height,
                         BufferedImage.TYPE_INT_ARGB);
     noCursor = tk.createCustomCursor(cursorImage, new java.awt.Point(0, 0),
                                      "noCursor");
