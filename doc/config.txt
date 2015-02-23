@@ -84,3 +84,27 @@ rectangles |
 	Description :: If profiling output is enabled, then the TurboVNC Viewer will
 	continuously benchmark itself and periodically print the throughput of
 	various stages in its image pipeline to the console.
+
+** Java Client Settings
+
+| Java System Property | ''turbovnc.lionfs = ''__''0 \| 1''__ |
+| Summary | Disable/enable the use of the OS X full-screen application feature |
+| Default Value | Enabled if running on OS X 10.7 or later |
+#OPT: hiCol=first
+
+	Description :: When running in full-screen mode, the Java TurboVNC Viewer
+	will normally try to take advantage of the full-screen application feature
+	provided by OS X 10.7 and later, if available.  Disabling this property will
+	force the viewer to use its own built-in cross-platform "pseudo-full-screen"
+	feature instead.  This is useful mainly for testing.
+
+| Java System Property | ''turbovnc.turbojpeg = ''__''0 \| 1''__ |
+| Summary | Disable/enable JPEG acceleration |
+| Default Value | Enabled if the libjpeg-turbo JNI library is available |
+#OPT: hiCol=first
+
+	Description :: Normally, the Java TurboVNC Viewer will try to load the
+	libjpeg-turbo JNI library and use it to accelerate the decompression of
+	JPEG subrectangles.  If this property is disabled, then the viewer will
+	revert to using unaccelerated JPEG decompression.  This is useful mainly for
+	testing and benchmarking purposes.

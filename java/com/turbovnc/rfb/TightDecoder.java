@@ -1,6 +1,6 @@
 /* Copyright (C) 2000-2003 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2011-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2013, 2015 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
 package com.turbovnc.rfb;
 
 import com.turbovnc.rdr.*;
+import com.turbovnc.vncviewer.VncViewer;
 import java.awt.image.*;
 import java.util.Arrays;
 import java.awt.*;
@@ -55,8 +56,7 @@ public class TightDecoder extends Decoder {
       inflater[i] = new Inflater();
     try {
       tjd = new TJDecompressor();
-      String prop = System.getProperty("tvnc.turbojpeg");
-      if (prop != null && prop.startsWith("0")) {
+      if (!VncViewer.getBooleanProperty("turbovnc.turbojpeg", true)) {
         vlog.info("Disabling TurboJPEG");
         tjd = null;
       }

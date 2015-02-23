@@ -68,7 +68,7 @@ public class Viewport extends JFrame {
     if (VncViewer.os.startsWith("mac os x")) {
       macMenu = new MacMenuBar(cc);
       setJMenuBar(macMenu);
-      if (!VncViewer.noLionFS.getValue())
+      if (VncViewer.getBooleanProperty("turbovnc.lionfs", true))
         enableLionFS();
     }
     // NOTE: If Lion FS mode is enabled, then the viewport is only created once

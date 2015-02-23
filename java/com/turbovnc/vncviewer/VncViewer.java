@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2015 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -98,6 +98,25 @@ public class VncViewer extends java.applet.Applet implements Runnable {
 
   static final double getTime() {
     return (double)System.nanoTime() / 1.0e9;
+  }
+
+  public static final boolean getBooleanProperty(String key, boolean def) {
+    String prop = System.getProperty(key, def ? "True" : "False");
+    if (prop != null && prop.length() > 0) {
+      if (prop.equalsIgnoreCase("true") || prop.equalsIgnoreCase("yes"))
+        return true;
+      if (prop.equalsIgnoreCase("false") || prop.equalsIgnoreCase("no"))
+        return false;
+      int i = -1;
+      try {
+        i = Integer.parseInt(prop);
+      } catch (NumberFormatException e) {};
+      if (i == 1)
+        return true;
+      if (i == 0)
+        return false;
+    }
+    return def;
   }
 
   public static final String os = System.getProperty("os.name").toLowerCase();
@@ -757,12 +776,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   "only the primary monitor, or whether it should span all monitors only if it " +
   "cannot fit on the primary monitor (Auto.)", "Auto",
   "Primary, All, Auto");
-
-  // On Mac systems, setting this parameter will force the use of the old
-  // (pre-Lion) full-screen mode, even if the viewer is running on OS X 10.7
-  // "Lion" or later.
-  static BoolParameter noLionFS
-  = new BoolParameter("NoLionFS", null, false);
 
   static BoolParameter showToolbar
   = new BoolParameter("Toolbar",
