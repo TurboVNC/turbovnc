@@ -13,7 +13,7 @@ project(TurboVNC NONE)
 set(VERSION 1.2.80)
 set(RCVERSION 1,2,80,0)
 set(XVENDORRELEASE 10280000)
-set(COPYRIGHT_YEAR "1999-2014")
+set(COPYRIGHT_YEAR "1999-2015")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
 set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
 
