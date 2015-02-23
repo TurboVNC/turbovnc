@@ -6,9 +6,9 @@ Fixed an issue whereby the Java TurboVNC Viewer would not enable the OS X Lion
 full-screen mode feature on OS X 10.10 "Yosemite".
 -------------------------------------------------------------------------------
 [2]
-Fixed a regression in 1.2.2 that caused a non-fatal NullPointerException in the
-Java TurboVNC Viewer whenever the scaling factor was changed in the options
-dialog.
+Fixed a regression introduced in 1.2.2 that caused a non-fatal
+NullPointerException in the Java TurboVNC Viewer whenever the scaling factor
+was changed in the options dialog.
 -------------------------------------------------------------------------------
 [3]
 Fixed an issue in the Java TurboVNC Viewer whereby the toolbar would sometimes
