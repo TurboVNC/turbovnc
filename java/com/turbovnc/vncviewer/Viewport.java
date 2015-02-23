@@ -78,7 +78,8 @@ public class Viewport extends JFrame {
 
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
-        sp.getViewport().getView().requestFocusInWindow();
+        if (sp.getViewport().getView() != null)
+          sp.getViewport().getView().requestFocusInWindow();
       }
     });
 

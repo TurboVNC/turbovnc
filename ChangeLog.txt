@@ -113,6 +113,11 @@ Fixed an issue whereby the Java TurboVNC Viewer would unnecessarily add
 scrollbars to the viewer window if the remote desktop was exactly large enough
 to fit in the window without using scrollbars.
 -------------------------------------------------------------------------------
+[16]
+Fixed a regression introduced in 1.2.2 that caused a non-fatal
+NullPointerException in the Java TurboVNC Viewer whenever the scaling factor
+was changed in the options dialog.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
