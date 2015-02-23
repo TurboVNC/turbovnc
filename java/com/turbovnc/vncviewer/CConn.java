@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2015 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@ import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
 
 public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
-  OptionsDialogCallback, FdInStreamBlockCallback {
+  OptionsDialogCallback, FdInStreamBlockCallback, Runnable {
 
   public final PixelFormat getPreferredPF() { return fullColourPF; }
   static final PixelFormat VERY_LOW_COLOR_PF =
@@ -376,13 +376,25 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (!benchmark) requestNewUpdate();
   }
 
+  public void run() {
+    desktop.updateWindow();
+  }
+
   // framebufferUpdateEnd() is called at the end of an update.
   // For each rectangle, the FdInStream will have timed the speed
   // of the connection, allowing us to select format and encoding
   // appropriately, and then request another incremental update.
   public void framebufferUpdateEnd() {
 
-    desktop.updateWindow();
+    if (newViewport > 0) {
+      try {
+        SwingUtilities.invokeAndWait(this);
+      } catch (InterruptedException e) {
+      } catch (java.lang.reflect.InvocationTargetException e) {
+      }
+      newViewport--;
+    } else
+      desktop.updateWindow();
 
     if (firstUpdate) {
       int width, height;
@@ -691,6 +703,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       viewport.toggleLionFS();
     }
     desktop.requestFocusInWindow();
+    newViewport = 2;
   }
 
   public Rectangle getSpannedSize(boolean fullScreen) {
@@ -1894,6 +1907,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   private boolean firstUpdate;
   private boolean pendingUpdate;
   private boolean continuousUpdates;
+  private int newViewport;
 
   private boolean forceNonincremental;
 

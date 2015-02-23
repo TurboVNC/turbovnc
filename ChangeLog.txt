@@ -10,6 +10,11 @@ Fixed a regression in 1.2.2 that caused a non-fatal NullPointerException in the
 Java TurboVNC Viewer whenever the scaling factor was changed in the options
 dialog.
 -------------------------------------------------------------------------------
+[3]
+Fixed an issue in the Java TurboVNC Viewer whereby the toolbar would sometimes
+appear all black or be overwritten by the initial framebuffer update when
+running under Java 1.7 and later.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
