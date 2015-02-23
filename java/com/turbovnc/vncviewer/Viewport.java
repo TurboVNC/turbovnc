@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,8 @@ public class Viewport extends JFrame {
     showToolbar(cc.showToolbar, canDoLionFS);
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
-        sp.getViewport().getView().requestFocusInWindow();
+        if (sp.getViewport().getView() != null)
+          sp.getViewport().getView().requestFocusInWindow();
       }
     });
     addWindowListener(new WindowAdapter() {
