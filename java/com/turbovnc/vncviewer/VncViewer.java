@@ -636,6 +636,18 @@ public class VncViewer extends javax.swing.JApplet
     } else {
       options.scalingFactor.setSelectedItem(opts.scalingFactor + "%");
     }
+    if (opts.desktopSize.mode == Options.SIZE_AUTO) {
+      options.desktopSize.setSelectedItem("Auto");
+      options.scalingFactor.setEnabled(false);
+    } else if (opts.desktopSize.mode == Options.SIZE_SERVER) {
+      options.desktopSize.setSelectedItem("Server");
+      options.scalingFactor.setEnabled(!VncViewer.embed.getValue());
+    } else {
+      options.desktopSize.setSelectedItem(opts.desktopSize.width + "x" +
+                                          opts.desktopSize.height);
+      options.scalingFactor.setEnabled(!VncViewer.embed.getValue());
+    }
+
   }
 
   public void getOptions() {
@@ -650,8 +662,8 @@ public class VncViewer extends javax.swing.JApplet
     opts.acceptBell = options.acceptBell.isSelected();
     VncViewer.showToolbar.setParam(options.showToolbar.isSelected());
 
-    int oldScalingFactor = opts.scalingFactor;
     opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
+    opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
 
     int index = options.span.getSelectedIndex();
     if (index >= 0 && index < Options.NUMSPANOPT)
