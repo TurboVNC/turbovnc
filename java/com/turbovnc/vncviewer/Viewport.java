@@ -113,7 +113,7 @@ public class Viewport extends JFrame {
                 setSize(w, h);
             }
           }
-        } else if (cc.opts.desktopSize == Options.SIZE_AUTO &&
+        } else if (cc.opts.desktopSize.mode == Options.SIZE_AUTO &&
                    !cc.firstUpdate && !cc.pendingServerResize) {
           Dimension availableSize = cc.viewport.getAvailableSize();
           if (availableSize.width >= 1 && availableSize.height >= 1 &&
@@ -149,7 +149,7 @@ public class Viewport extends JFrame {
         }
         if (((sp.getSize().width > cc.desktop.scaledWidth) ||
              (sp.getSize().height > cc.desktop.scaledHeight)) &&
-            cc.opts.desktopSize != Options.SIZE_AUTO) {
+            cc.opts.desktopSize.mode != Options.SIZE_AUTO) {
           dx = (sp.getSize().width <= cc.desktop.scaledWidth) ? 0 :
             (int)Math.floor((sp.getSize().width - cc.desktop.scaledWidth) / 2);
           dy = (sp.getSize().height <= cc.desktop.scaledHeight) ? 0 :

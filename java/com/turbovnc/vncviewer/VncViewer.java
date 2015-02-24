@@ -667,6 +667,10 @@ public class VncViewer extends javax.swing.JApplet
     options = null;
   }
 
+  public boolean supportsSetDesktopSize() {
+    return true;
+  }
+
   public void killListener() {
     if (listenThread != null)
       listenThread.interrupt();
@@ -813,29 +817,17 @@ public class VncViewer extends javax.swing.JApplet
 
     opts.scalingFactor = Integer.parseInt(scalingFactor.getDefaultStr());
 
-    String size = desktopSize.getValue().toLowerCase();
-    if (size.startsWith("a"))
-      opts.desktopSize = Options.SIZE_AUTO;
-    else if (size.startsWith("n") || size.equals("0"))
-      opts.desktopSize = Options.SIZE_NONE;
-    else {
-      String array[] = size.split("x");
-      if (array.length <= 1)
-        throw new ErrorException("DesktopSize parameter is incorrect");
-      int width = Integer.parseInt(array[0]);
-      int height = Integer.parseInt(array[1]);
-      if (width < 1 || height < 1)
-        throw new ErrorException("DesktopSize parameter is incorrect");
-      opts.desktopSize = Options.SIZE_MANUAL;
-      opts.desktopWidth = width;
-      opts.desktopHeight = height;
-    }
+    Options.DesktopSize size =
+      Options.parseDesktopSize(desktopSize.getValue());
+    if (size == null)
+      throw new ErrorException("DesktopSize parameter is incorrect");
+    opts.desktopSize = size;
 
     opts.setScalingFactor(scalingFactor.getValue());
     if (opts.scalingFactor != 100 &&
-        opts.desktopSize == Options.SIZE_AUTO) {
+        opts.desktopSize.mode == Options.SIZE_AUTO) {
       vlog.info("Desktop scaling enabled.  Disabling automatic desktop resizing.");
-      opts.desktopSize = Options.SIZE_NONE;
+      opts.desktopSize.mode = Options.SIZE_SERVER;
     }
 
     opts.acceptClipboard = acceptClipboard.getValue();
@@ -1014,12 +1006,13 @@ public class VncViewer extends javax.swing.JApplet
 
   static StringParameter desktopSize
   = new StringParameter("DesktopSize",
-  "If the VNC server supports desktop resizing, then attempt to resize the " +
-  "remote desktop to the specified size (example: 1920x1200).  Setting this " +
-  "parameter to \"Auto\" causes the remote desktop to be resized to fit " +
-  "in the local window without using scrollbars (this is the default " +
-  "behavior.)  Setting this parameter to \"None\" or \"0\" disables remote " +
-  "desktop resizing.", "Auto", "WxH or Auto");
+  "If the VNC server supports remote desktop resizing, then attempt to " +
+  "resize the remote desktop to the specified size (example: 1920x1200)." +
+  "Setting this parameter to \"Auto\" causes the remote desktop to be " +
+  "resized to fit in the local window without using scrollbars (this is the " +
+  "default behavior.)  Setting this parameter to \"Server\" or \"0\" " +
+  "disables remote desktop resizing and uses the desktop size set by the " +
+  "server.", "Auto", "WxH, Auto, or Server");
 
   static BoolParameter acceptClipboard
   = new BoolParameter("RecvClipboard",

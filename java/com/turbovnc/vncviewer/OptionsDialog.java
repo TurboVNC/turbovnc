@@ -43,7 +43,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JTabbedPane tabPane;
   JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
   JCheckBox allowJpeg, interframe;
-  JComboBox menuKey, scalingFactor, encMethodComboBox, span;
+  JComboBox menuKey, scalingFactor, encMethodComboBox, span, desktopSize;
   JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
@@ -60,7 +60,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   String jpegQualityLabelString, subsamplingLabelString;
   String compressionLabelString;
   Hashtable<Integer, String> subsamplingLabelTable;
-  String oldScalingFactor;
+  String oldScalingFactor, oldDesktopSize;
 
   public OptionsDialog(OptionsDialogCallback cb_) {
     super(true);
@@ -256,6 +256,19 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       span.setEnabled(false);
     }
 
+    Object[] desktopSizeOptions = {
+      "Auto", "Server", "480x320", "640x360", "640x480", "800x480", "800x600",
+      "854x480", "960x540", "960x600", "960x640", "1024x640", "1024x768",
+      "1136x640", "1152x864", "1280x720", "1280x800", "1280x960", "1280x1024",
+      "1344x840", "1344x1008", "1360x768", "1366x768", "1400x1050", "1440x900",
+      "1600x900", "1600x1000", "1600x1200", "1680x1050", "1920x1080",
+      "1920x1200", "2048x1152", "2048x1536", "2560x1440", "2560x1600",
+      "2880x1800", "3200x1800" };
+    JLabel desktopSizeLabel = new JLabel("Remote desktop size:");
+    desktopSize = new JComboBox(desktopSizeOptions);
+    desktopSize.setEditable(true);
+    desktopSize.addItemListener(this);
+
     shared = new JCheckBox("Request shared session");
     shared.addItemListener(this);
     viewOnly = new JCheckBox("View Only (ignore mouse & keyboard)");
@@ -279,48 +292,58 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
+    Dialog.addGBComponent(desktopSizeLabel, connPanel,
+                          0, 1, 1, 1, 2, 2, 1, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 8, 0, 5));
+    Dialog.addGBComponent(desktopSize, connPanel,
+                          1, 1, 1, 1, 2, 2, 25, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 5, 0, 5));
     Dialog.addGBComponent(fullScreen, connPanel,
-                          0, 1, 2, 1, 2, 2, 1, 0,
+                          0, 2, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
     Dialog.addGBComponent(spanLabel, connPanel,
-                          0, 2, 1, 1, 2, 2, 1, 0,
+                          0, 3, 1, 1, 2, 2, 1, 0,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(8, 8, 0, 5));
     Dialog.addGBComponent(span, connPanel,
-                          1, 2, 1, 1, 2, 2, 25, 0,
+                          1, 3, 1, 1, 2, 2, 25, 0,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
     Dialog.addGBComponent(shared, connPanel,
-                          0, 3, 2, 1, 2, 2, 1, 0,
+                          0, 4, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
     Dialog.addGBComponent(viewOnly, connPanel,
-                          0, 4, 2, 1, 2, 2, 1, 0,
+                          0, 5, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
     Dialog.addGBComponent(cursorShape, connPanel,
-                          0, 5, 2, 1, 2, 2, 1, 0,
+                          0, 6, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
     Dialog.addGBComponent(acceptClipboard, connPanel,
-                          0, 6, 2, 1, 2, 2, 1, 0,
-                          GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.LINE_START,
-                          new Insets(4, 5, 0, 5));
-    Dialog.addGBComponent(sendClipboard, connPanel,
                           0, 7, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
+    Dialog.addGBComponent(sendClipboard, connPanel,
+                          0, 8, 2, 1, 2, 2, 1, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.LINE_START,
+                          new Insets(4, 5, 0, 5));
     Dialog.addGBComponent(acceptBell, connPanel,
-                          0, 8, 2, 1, 2, 2, 1, 1,
+                          0, 9, 2, 1, 2, 2, 1, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
@@ -507,6 +530,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   public void initDialog() {
     if (cb != null) cb.setOptions();
     oldScalingFactor = scalingFactor.getSelectedItem().toString();
+    oldDesktopSize = desktopSize.getSelectedItem().toString();
   }
 
   private void updatePreferences() {
@@ -536,6 +560,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       UserPreferences.set("global", "Scale", "FixedRatio");
     else
       UserPreferences.set("global", "Scale", sf);
+    UserPreferences.set("global", "DesktopSize",
+                        desktopSize.getSelectedItem().toString());
     UserPreferences.set("global", "secVeNCrypt", secVeNCrypt.isSelected());
     UserPreferences.set("global", "encNone", encNone.isSelected());
     UserPreferences.set("global", "encTLS", encTLS.isSelected());
@@ -736,6 +762,35 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         oldScalingFactor = newsf;
         if (!newsf.equals(newScalingFactor))
           scalingFactor.setSelectedItem(newsf);
+        if ((sf == Options.SCALE_AUTO || sf == Options.SCALE_FIXEDRATIO) &&
+          desktopSize.getSelectedItem().toString().equals("Auto"))
+          desktopSize.setSelectedItem("Server");
+        else
+          desktopSize.setEnabled(cb.supportsSetDesktopSize());
+      }
+    }
+    if (s instanceof JComboBox && (JComboBox)s == desktopSize) {
+      String newDesktopSize = desktopSize.getSelectedItem().toString();
+      Options.DesktopSize size = Options.parseDesktopSize(newDesktopSize);
+      if (size == null) {
+        vlog.error("Bogus desktop size");
+        desktopSize.setSelectedItem(oldDesktopSize);
+      } else {
+        String newsize;
+        if (size.mode == Options.SIZE_AUTO)
+          newsize = "Auto";
+        else if (size.mode == Options.SIZE_SERVER)
+          newsize = "Server";
+        else
+          newsize = size.width + "x" + size.height;
+        oldDesktopSize = newsize;
+        if (!newsize.equals(newDesktopSize))
+          desktopSize.setSelectedItem(newsize);
+        if (size.mode == Options.SIZE_AUTO) {
+          scalingFactor.setEnabled(false);
+          scalingFactor.setSelectedItem("100%");
+        } else
+          scalingFactor.setEnabled(!VncViewer.embed.getValue());
       }
     }
   }

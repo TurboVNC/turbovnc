@@ -340,7 +340,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void setScaledSize() {
     if (cc.opts.scalingFactor != Options.SCALE_AUTO &&
         cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO &&
-        cc.opts.desktopSize != Options.SIZE_AUTO) {
+        cc.opts.desktopSize.mode != Options.SIZE_AUTO) {
       scaledWidth = (int)Math.floor((float)cc.cp.width *
                                     (float)cc.opts.scalingFactor / 100.0);
       scaledHeight = (int)Math.floor((float)cc.cp.height *
@@ -367,7 +367,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         }
       }
     }
-    if (cc.opts.desktopSize == Options.SIZE_AUTO) {
+    if (cc.opts.desktopSize.mode == Options.SIZE_AUTO) {
       scaleWidthRatio = scaleHeightRatio = 1.0f;
     } else {
       scaleWidthRatio = (float)scaledWidth / (float)cc.cp.width;

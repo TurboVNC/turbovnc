@@ -29,7 +29,7 @@ public class Options {
   public static final int SPAN_AUTO = 2;
 
   public static final int NUMSIZEOPT = 3;
-  public static final int SIZE_NONE = 0;
+  public static final int SIZE_SERVER = 0;
   public static final int SIZE_MANUAL = 1;
   public static final int SIZE_AUTO = 2;
 
@@ -52,9 +52,8 @@ public class Options {
     fullScreen = old.fullScreen;
     span = old.span;
     scalingFactor = old.scalingFactor;
-    desktopSize = old.desktopSize;
-    desktopWidth = old.desktopWidth;
-    desktopHeight = old.desktopHeight;
+    desktopSize = new DesktopSize(old.desktopSize.mode, old.desktopSize.width,
+                                  old.desktopSize.height);
     acceptClipboard = old.acceptClipboard;
     sendClipboard = old.sendClipboard;
     acceptBell = old.acceptBell;
@@ -98,6 +97,30 @@ public class Options {
       scalingFactor = sf;
   }
 
+  public static DesktopSize parseDesktopSize(String sizeString) {
+    if (sizeString.toLowerCase().startsWith("a"))
+      return new DesktopSize(SIZE_AUTO, 0, 0);
+    else if (sizeString.toLowerCase().startsWith("s") ||
+             sizeString.equals("0"))
+      return new DesktopSize(SIZE_SERVER, 0, 0);
+    else {
+      String array[] = sizeString.replaceAll("[^\\dx]", "").split("x");
+      if (array.length <= 1)
+        return null;
+      int width = Integer.parseInt(array[0]);
+      int height = Integer.parseInt(array[1]);
+      if (width < 1 || height < 1)
+        return null;
+      return new DesktopSize(SIZE_MANUAL, width, height);
+    }
+  }
+
+  public void setDesktopSize(String sizeString) {
+    DesktopSize size = parseDesktopSize(sizeString);
+    if (size != null)
+      desktopSize = size;
+  }
+
   public int getSubsamplingOrdinal() {
     switch (subsampling) {
       case SUBSAMP_2X:
@@ -130,10 +153,10 @@ public class Options {
     printOpt("fullScreen", fullScreen);
     printOpt("span", span);
     printOpt("scalingFactor", scalingFactor);
-    if (desktopSize == SIZE_MANUAL)
-      printOpt("desktopSize", desktopWidth + "x" + desktopHeight);
+    if (desktopSize.mode == SIZE_MANUAL)
+      printOpt("desktopSize", desktopSize.width + "x" + desktopSize.height);
     else
-      printOpt("desktopSize", desktopSize);
+      printOpt("desktopSize", desktopSize.mode);
     printOpt("acceptClipboard", acceptClipboard);
     printOpt("sendClipboard", sendClipboard);
     printOpt("acceptBell", acceptBell);
@@ -154,6 +177,24 @@ public class Options {
     printOpt("sshUser", sshUser);
   }
 
+  public static class DesktopSize {
+    public DesktopSize() {};
+
+    public DesktopSize(int mode, int width, int height) {
+      this.mode = mode;
+      this.width = width;
+      this.height = height;
+    }
+
+    public boolean isEqual(DesktopSize size) {
+      return size.mode == mode && size.width == width && size.height == height;
+    }
+
+    public int mode;
+    public int width;
+    public int height;
+  }
+
   public String serverName;
   public int port;
   public boolean shared;
@@ -161,9 +202,7 @@ public class Options {
   public boolean fullScreen;
   public int span;
   public int scalingFactor;
-  public int desktopSize;
-  public int desktopWidth;
-  public int desktopHeight;
+  public DesktopSize desktopSize = new DesktopSize();
   public boolean acceptClipboard;
   public boolean sendClipboard;
   public boolean acceptBell;

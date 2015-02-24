@@ -458,16 +458,17 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         writer().writeFence(
           fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
 
-      if (!cp.supportsSetDesktopSize &&
-          opts.desktopSize == Options.SIZE_AUTO) {
-        vlog.info("Disabling automatic desktop resizing because the server doesn't support it.");
-        opts.desktopSize = Options.SIZE_NONE;
+      if (!cp.supportsSetDesktopSize) {
+        if (opts.desktopSize.mode == Options.SIZE_AUTO)
+          vlog.info("Disabling automatic desktop resizing because the server doesn't support it.");
+        if (opts.desktopSize.mode == Options.SIZE_MANUAL)
+          vlog.info("Ignoring desktop resize request because the server doesn't support it.");
+        opts.desktopSize.mode = Options.SIZE_SERVER;
       }
 
-      if (opts.desktopSize == Options.SIZE_MANUAL &&
-          opts.desktopWidth > 0 && opts.desktopHeight > 0)
-        sendDesktopSize(opts.desktopWidth, opts.desktopHeight);
-      else if (opts.desktopSize == Options.SIZE_AUTO) {
+      if (opts.desktopSize.mode == Options.SIZE_MANUAL)
+        sendDesktopSize(opts.desktopSize.width, opts.desktopSize.height);
+      else if (opts.desktopSize.mode == Options.SIZE_AUTO) {
         if (VncViewer.embed.getValue())
           sendDesktopSize(viewer.getSize().width, viewer.getSize().height);
         else {
@@ -775,7 +776,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       // component resize handler, then it resizes the full-screen viewport
       // accordingly.  We could conceivably use recreateViewport() here, but
       // doing so causes the viewer to exit and then re-enter full-screen mode.
-      if (opts.fullScreen && opts.desktopSize == Options.SIZE_AUTO) {
+      if (opts.fullScreen && opts.desktopSize.mode == Options.SIZE_AUTO) {
         pendingServerResize = true;
         Rectangle span = getSpannedSize(!VncViewer.os.startsWith("mac os x") ||
                                         viewport.lionFSSupported());
@@ -860,7 +861,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     if (opts.scalingFactor == Options.SCALE_AUTO ||
         opts.scalingFactor == Options.SCALE_FIXEDRATIO ||
-        opts.desktopSize == Options.SIZE_AUTO) {
+        opts.desktopSize.mode == Options.SIZE_AUTO) {
       sw = cp.width;
       sh = cp.height;
     }
@@ -931,7 +932,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
          (sw <= primary.width || span.width <= primary.width) &&
          (sh <= primary.height || span.height <= primary.height)) ||
         (opts.span == Options.SPAN_AUTO &&
-         opts.desktopSize == Options.SIZE_AUTO))
+         opts.desktopSize.mode == Options.SIZE_AUTO))
       span = primary;
     else if (equal && fullScreen)
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
@@ -956,13 +957,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     if (opts.scalingFactor == Options.SCALE_AUTO ||
         opts.scalingFactor == Options.SCALE_FIXEDRATIO ||
-        opts.desktopSize == Options.SIZE_AUTO) {
+        opts.desktopSize.mode == Options.SIZE_AUTO) {
       w = cp.width;
       h = cp.height;
       pack = false;
     }
 
-    if (opts.desktopSize == Options.SIZE_AUTO) {
+    if (opts.desktopSize.mode == Options.SIZE_AUTO) {
       if (manual) {
         w = span.width;
         h = span.height;
@@ -1241,6 +1242,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     options.cursorShape.setSelected(opts.cursorShape);
     options.acceptBell.setSelected(opts.acceptBell);
     options.showToolbar.setSelected(VncViewer.showToolbar.getValue());
+    options.desktopSize.setEnabled(cp.supportsSetDesktopSize || firstUpdate);
     if (opts.scalingFactor == Options.SCALE_AUTO) {
       options.scalingFactor.setSelectedItem("Auto");
     } else if (opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -1249,6 +1251,17 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       options.scalingFactor.setSelectedItem(opts.scalingFactor + "%");
       if (desktop != null)
         desktop.setScaledSize();
+    }
+    if (opts.desktopSize.mode == Options.SIZE_AUTO) {
+      options.desktopSize.setSelectedItem("Auto");
+      options.scalingFactor.setEnabled(false);
+    } else if (opts.desktopSize.mode == Options.SIZE_SERVER) {
+      options.desktopSize.setSelectedItem("Server");
+      options.scalingFactor.setEnabled(!VncViewer.embed.getValue());
+    } else {
+      options.desktopSize.setSelectedItem(opts.desktopSize.width + "x" +
+                                          opts.desktopSize.height);
+      options.scalingFactor.setEnabled(!VncViewer.embed.getValue());
     }
   }
 
@@ -1285,6 +1298,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (desktop != null && opts.scalingFactor != oldScalingFactor)
       recreate = true;
 
+    Options.DesktopSize oldDesktopSize = opts.desktopSize;
+    opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
+    if (desktop != null && !opts.desktopSize.isEqual(oldDesktopSize)) {
+      recreate = true;
+      firstUpdate = true;
+    }
+
     int index = options.span.getSelectedIndex();
     if (index >= 0 && index < Options.NUMSPANOPT)
       opts.span = index;
@@ -1312,6 +1332,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       toggleFullScreen();
     else if (recreate)
       recreateViewport();
+  }
+
+  public boolean supportsSetDesktopSize() {
+    return cp.supportsSetDesktopSize || firstUpdate;
   }
 
   public void toggleToolbar() {
