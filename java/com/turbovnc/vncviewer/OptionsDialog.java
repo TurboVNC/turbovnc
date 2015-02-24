@@ -512,20 +512,14 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
     UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
     UserPreferences.set("global", "Toolbar", showToolbar.isSelected());
-    String scaleString = scalingFactor.getSelectedItem().toString();
-    if (scaleString.equalsIgnoreCase("Auto")) {
+    int sf =
+      Options.parseScalingFactor(scalingFactor.getSelectedItem().toString());
+    if (sf == Options.SCALE_AUTO)
       UserPreferences.set("global", "Scale", "Auto");
-    } else if (scaleString.equalsIgnoreCase("Fixed Aspect Ratio")) {
+    else if (sf == Options.SCALE_FIXEDRATIO)
       UserPreferences.set("global", "Scale", "FixedRatio");
-    } else {
-      scaleString = scaleString.replaceAll("[^\\d]", "");
-      int sf = -1;
-      try {
-        sf = Integer.parseInt(scaleString);
-      } catch(NumberFormatException e) {};
-      if (sf >= 1 && sf <= 1000)
-        UserPreferences.set("global", "Scale", Integer.toString(sf));
-    }
+    else
+      UserPreferences.set("global", "Scale", sf);
     UserPreferences.set("global", "secVeNCrypt", secVeNCrypt.isSelected());
     UserPreferences.set("global", "encNone", encNone.isSelected());
     UserPreferences.set("global", "encTLS", encTLS.isSelected());
