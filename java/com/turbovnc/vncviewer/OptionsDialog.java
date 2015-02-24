@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   String jpegQualityLabelString, subsamplingLabelString;
   String compressionLabelString;
   Hashtable<Integer, String> subsamplingLabelTable;
+  String oldScalingFactor;
 
   public OptionsDialog(OptionsDialogCallback cb_) {
     super(true);
@@ -505,6 +506,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
   public void initDialog() {
     if (cb != null) cb.setOptions();
+    oldScalingFactor = scalingFactor.getSelectedItem().toString();
   }
 
   private void updatePreferences() {
@@ -722,6 +724,25 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         (secIdent.isSelected() && secIdent.isEnabled()) ||
         (secPlain.isSelected() && secPlain.isEnabled()) ||
         (secUnixLogin.isSelected() && secUnixLogin.isEnabled()));
+    }
+    if (s instanceof JComboBox && (JComboBox)s == scalingFactor) {
+      String newScalingFactor = scalingFactor.getSelectedItem().toString();
+      int sf = Options.parseScalingFactor(newScalingFactor);
+      if (sf == 0) {
+        vlog.error("Bogus scaling factor");
+        scalingFactor.setSelectedItem(oldScalingFactor);
+      } else {
+        String newsf;
+        if (sf == Options.SCALE_AUTO)
+          newsf = "Auto";
+        else if (sf == Options.SCALE_FIXEDRATIO)
+          newsf = "Fixed Aspect Ratio";
+        else
+          newsf = sf + "%";
+        oldScalingFactor = newsf;
+        if (!newsf.equals(newScalingFactor))
+          scalingFactor.setSelectedItem(newsf);
+      }
     }
   }
 

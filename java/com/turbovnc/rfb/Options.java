@@ -74,11 +74,11 @@ public class Options {
     if (old.sshUser != null) sshUser = new String(old.sshUser);
   }
 
-  public void setScalingFactor(String scaleString) {
+  public static int parseScalingFactor(String scaleString) {
     if (scaleString.toLowerCase().startsWith("a"))
-      scalingFactor = SCALE_AUTO;
+      return SCALE_AUTO;
     else if (scaleString.toLowerCase().startsWith("f"))
-      scalingFactor = SCALE_FIXEDRATIO;
+      return SCALE_FIXEDRATIO;
     else {
       scaleString = scaleString.replaceAll("[^\\d]", "");
       int sf = -1;
@@ -86,9 +86,16 @@ public class Options {
         sf = Integer.parseInt(scaleString);
       } catch(NumberFormatException e) {};
       if (sf >= 1 && sf <= 1000) {
-        scalingFactor = sf;
+        return sf;
       }
     }
+    return 0;
+  }
+
+  public void setScalingFactor(String scaleString) {
+    int sf = parseScalingFactor(scaleString);
+    if (sf != 0)
+      scalingFactor = sf;
   }
 
   public int getSubsamplingOrdinal() {
