@@ -15,6 +15,11 @@ Fixed an issue in the Java TurboVNC Viewer whereby the toolbar would sometimes
 appear all black or be overwritten by the initial framebuffer update when
 running under Java 1.7 and later.
 -------------------------------------------------------------------------------
+[4]
+Fixed an issue whereby the Java TurboVNC Viewer would unnecessarily add
+scrollbars to the viewer window if the remote desktop was exactly large enough
+to fit in the window without using scrollbars.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

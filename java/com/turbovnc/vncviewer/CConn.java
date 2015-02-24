@@ -827,6 +827,27 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
     viewport.setGeometry(x, y, w, h, pack);
+
+    // The viewport insets aren't defined until the viewport is visible, but
+    // making it visible before the first setGeometry() call causes some very
+    // odd behavior, such as the component size changing unpredictably.  Thus
+    // we have to adjust for the viewport insets after the fact.
+    Dimension vpBorder = viewport.getBorderSize();
+    if (vpBorder.width > 0 || vpBorder.height > 0) {
+      w += vpBorder.width;
+      h += vpBorder.height;
+      if (w >= span.width) {
+        w = span.width;
+        pack = false;
+      }
+      if (h >= span.height) {
+        h = span.height;
+        pack = false;
+      }
+      x = (span.width - w) / 2 + span.x;
+      y = (span.height - h) / 2 + span.y;
+      viewport.setGeometry(x, y, w, h, pack);
+    }
   }
 
   private void reconfigureViewport() { reconfigureViewport(false); }

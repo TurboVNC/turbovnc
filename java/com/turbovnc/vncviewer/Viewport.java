@@ -75,17 +75,20 @@ public class Viewport extends JFrame {
     // as a non-full-screen viewport, so we tell showToolbar() to ignore the
     // full-screen state.
     showToolbar(cc.showToolbar, canDoLionFS);
+
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         if (sp.getViewport().getView() != null)
           sp.getViewport().getView().requestFocusInWindow();
       }
     });
+
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         cc.close();
       }
     });
+
     addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         if (cc.opts.scalingFactor == Options.SCALE_AUTO ||
@@ -132,6 +135,17 @@ public class Viewport extends JFrame {
         repaint();
       }
     });
+  }
+
+  public Dimension getBorderSize() {
+    if (!isVisible())
+      setVisible(true);
+    Insets vpInsets = getInsets();
+    if (tb.isVisible())
+      vpInsets.top += tb.getHeight();
+    Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
+                                         vpInsets.top + vpInsets.bottom);
+    return borderSize;
   }
 
   boolean lionFSSupported() { return canDoLionFS; }
