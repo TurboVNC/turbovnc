@@ -829,11 +829,15 @@ public class VncViewer extends javax.swing.JApplet
 
     opts.scalingFactor = Integer.parseInt(scalingFactor.getDefaultStr());
 
-    Options.DesktopSize size =
-      Options.parseDesktopSize(desktopSize.getValue());
-    if (size == null)
-      throw new ErrorException("DesktopSize parameter is incorrect");
-    opts.desktopSize = size;
+    if (benchFile != null)
+      opts.desktopSize.mode = Options.SIZE_SERVER;
+    else {
+      Options.DesktopSize size =
+        Options.parseDesktopSize(desktopSize.getValue());
+      if (size == null)
+        throw new ErrorException("DesktopSize parameter is incorrect");
+      opts.desktopSize = size;
+    }
 
     opts.setScalingFactor(scalingFactor.getValue());
     if (opts.scalingFactor != 100 &&
