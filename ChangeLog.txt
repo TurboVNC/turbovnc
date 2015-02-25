@@ -118,6 +118,13 @@ Fixed a regression introduced in 1.2.2 that caused a non-fatal
 NullPointerException in the Java TurboVNC Viewer whenever the scaling factor
 was changed in the options dialog.
 -------------------------------------------------------------------------------
+[17]
+Since the Java TurboVNC Viewer already has its own double buffering mechanism,
+it now disables double buffering in Java 2D.  The primary advantage of this is
+that MIT-SHM pixmap support is no longer required on Un*x platforms in order to
+achieve optimal performance.  This also makes the viewer faster on some
+systems.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

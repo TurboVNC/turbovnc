@@ -45,6 +45,7 @@ public class ImageDrawTest extends JFrame {
   public class MyPanel extends JPanel {
 
     public MyPanel(int w, int h, int colors) {
+      setOpaque(true);
       GraphicsEnvironment ge =
         GraphicsEnvironment.getLocalGraphicsEnvironment();
       GraphicsDevice gd = ge.getDefaultScreenDevice();
@@ -120,6 +121,7 @@ public class ImageDrawTest extends JFrame {
       g2.drawImage((iter % 2 == 0 ? im2.getImage() : im1.getImage()), 0, 0,
                    null);
       g2.dispose();
+      RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
     }
 
     public void display() {
@@ -135,6 +137,7 @@ public class ImageDrawTest extends JFrame {
       initImage(im2, width, height, 1);
       t0 = getTime();
       while (true) {
+        RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         paintImmediately(0, 0, width, height);
         iter++;
         t1 = getTime();
