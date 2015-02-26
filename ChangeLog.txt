@@ -20,6 +20,10 @@ Fixed an issue whereby the Java TurboVNC Viewer would unnecessarily add
 scrollbars to the viewer window if the remote desktop was exactly large enough
 to fit in the window without using scrollbars.
 -------------------------------------------------------------------------------
+[5]
+Fixed an issue whereby the /grabkeyboard, /scale, and /span command-line
+parameters to the Windows TurboVNC Viewer could not be specified in uppercase.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
