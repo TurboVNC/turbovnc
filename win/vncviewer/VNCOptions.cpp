@@ -332,13 +332,13 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No monitor spanning mode specified");
         continue;
       }
-      if (_toupper(args[j][0]) == 'P') {
+      if (toupper(args[j][0]) == 'P') {
         m_Span = SPAN_PRIMARY;
-      } else if (_toupper(args[j][0]) == 'A' &&
-             _toupper(args[j][1]) == 'L') {
+      } else if (toupper(args[j][0]) == 'A' &&
+                 toupper(args[j][1]) == 'L') {
         m_Span = SPAN_ALL;
-      } else if (_toupper(args[j][0]) == 'A' &&
-             _toupper(args[j][1]) == 'U') {
+      } else if (toupper(args[j][0]) == 'A' &&
+                 toupper(args[j][1]) == 'U') {
         m_Span = SPAN_AUTO;
       } else {
         ArgError("Invalid monitor spanning mode specified");
@@ -393,7 +393,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No keyboard grab mode specified");
         continue;
       }
-      switch (_toupper(args[j][0])) {
+      switch (toupper(args[j][0])) {
         case 'A':  m_GrabKeyboard = TVNC_ALWAYS;  break;
         case 'M':  m_GrabKeyboard = TVNC_MANUAL;  break;
         case 'F':  m_GrabKeyboard = TVNC_FS;  break;
@@ -419,7 +419,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No scaling factor specified");
         continue;
       }
-      if (_toupper(args[j][0]) == 'F') {
+      if (toupper(args[j][0]) == 'F') {
         m_FitWindow = true;
       } else {
         m_FitWindow = false;
