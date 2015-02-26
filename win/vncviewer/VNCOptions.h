@@ -34,6 +34,8 @@
 #define SMALLCURSOR 3
 #define MAX_LEN_COMBO 5
 
+#define MAX_SCALING_FACTOR 1000
+
 #define SPAN_OPTS 3
 enum { SPAN_PRIMARY = 0, SPAN_ALL, SPAN_AUTO };
 
@@ -104,6 +106,7 @@ class VNCOptions
     bool  m_scaling;
     bool  m_FitWindow;
     int   m_scale_num, m_scale_den; // Numerator & denominator
+    char  m_oldScalingFactor[20];
     int   m_subsampLevel;
     int   m_compressLevel;
     bool  m_enableJpegCompression;
@@ -156,6 +159,8 @@ class VNCOptions
     static void Register();
     HWND m_hPageConnection, m_hPageGeneral, m_hTab, m_hParent, m_hWindow;
     void FixScaling();
+    static bool ParseScalingFactor(char *scaleString, bool &fitWindow,
+                                   int &scale_num, int &scale_den);
 
   private:
     void BrowseLogFile();

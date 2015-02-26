@@ -24,6 +24,9 @@ to fit in the window without using scrollbars.
 Fixed an issue whereby the /grabkeyboard, /scale, and /span command-line
 parameters to the Windows TurboVNC Viewer could not be specified in uppercase.
 -------------------------------------------------------------------------------
+[6]
+The Windows TurboVNC Viewer now supports scaling factors > 200.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

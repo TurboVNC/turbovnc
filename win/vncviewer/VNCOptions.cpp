@@ -223,6 +223,26 @@ void VNCOptions::FixScaling()
 }
 
 
+bool VNCOptions::ParseScalingFactor(char *scaleString, bool &fitWindow,
+                                    int &scale_num, int &scale_den)
+{
+  if (toupper(scaleString[0]) == 'F') {
+    fitWindow = true;
+    scale_num = scale_den = 100;
+    return true;
+  } else {
+    long sf = strtol(scaleString, NULL, 10);
+    if (sf >= 1 && sf <= MAX_SCALING_FACTOR) {
+      fitWindow = false;
+      scale_num = sf;
+      scale_den = 100;
+      return true;
+    }
+  }
+  return false;
+}
+
+
 void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
 {
   // Copy the command line - we don't know what might happen to the original
@@ -409,16 +429,15 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No scaling factor specified");
         continue;
       }
-      if (toupper(args[j][0]) == 'F') {
-        m_FitWindow = true;
+      bool fitWindow;
+      int scale_num, scale_den;
+      if (ParseScalingFactor(args[j], fitWindow, scale_num, scale_den)) {
+        m_FitWindow = fitWindow;
+        m_scale_num = scale_num;
+        m_scale_den = scale_den;
       } else {
-        m_FitWindow = false;
-        int numscales = sscanf(args[j], "%d", &m_scale_num);
-        if (numscales < 1) {
-          ArgError("Invalid scaling specified");
-          continue;
-        }
-        m_scale_den = 100;
+        ArgError("Invalid scaling factor specified");
+        continue;
       }
     } else if (SwitchMatch(args[j], "emulate3timeout")) {
       if (++j == i) {
@@ -1020,19 +1039,22 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 
       HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
       SendMessage(hViewOnly, BM_SETCHECK, _this->m_ViewOnly, 0);
-      char scalecombo[9][19] = {
-        "25", "50", "75", "90", "100", "125", "150", "200",
-        "Fixed Aspect Ratio"
+
+      char scalecombo[14][19] = {
+        "Fixed Aspect Ratio", "50", "75", "95", "100", "105", "125", "150",
+        "175", "200", "250", "300", "350", "400"
       };
       HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
-      for (i = 0; i <= 8; i++)
+      for (i = 0; i <= 13; i++)
         SendMessage(hScalEdit, CB_INSERTSTRING, (WPARAM)i,
               (LPARAM)(int FAR*)scalecombo[i]);
       if (_this->m_FitWindow) {
         SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Fixed Aspect Ratio");
       } else
         SetDlgItemInt(hwnd, IDC_SCALE_EDIT,
-                      ((_this->m_scale_num*100) / _this->m_scale_den), FALSE);
+                      ((_this->m_scale_num * 100) / _this->m_scale_den),
+                      FALSE);
+      GetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor, 20);
 
       HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
       SendMessage(hFullScreen, BM_SETCHECK, _this->m_FullScreen, 0);
@@ -1113,8 +1135,22 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
         case IDC_SCALE_EDIT:
           switch (HIWORD(wParam)) {
             case CBN_KILLFOCUS:
-              Lim(hwnd, IDC_SCALE_EDIT, 1, 200);
-              return 0;
+              char newScalingFactor[20];
+              GetDlgItemText(hwnd, IDC_SCALE_EDIT, newScalingFactor, 20);
+              bool fitWindow;
+              int scale_num, scale_den;
+              if (!ParseScalingFactor(newScalingFactor, fitWindow, scale_num,
+                                      scale_den)) {
+                SetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor);
+              } else {
+                if (fitWindow)
+                  SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Fixed Aspect Ratio");
+                else
+                  SetDlgItemInt(hwnd, IDC_SCALE_EDIT,
+                                ((scale_num * 100) / scale_den), FALSE);
+                GetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor,
+                               20);
+              }
           }
           return 0;
 
