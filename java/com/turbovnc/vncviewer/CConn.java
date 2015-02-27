@@ -152,15 +152,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     state_ = RFBSTATE_INITIALISATION;
   }
 
-  public void refreshFramebuffer() {
-    forceNonincremental = true;
-
-    // Without fences, we cannot safely trigger an update request directly
-    // but must wait for the next update to arrive.
-    if (supportsSyncFence)
-      requestNewUpdate();
-  }
-
   public boolean showMsgBox(int flags, String title, String text) {
     //StringBuffer titleText = new StringBuffer("VNC Viewer: "+title);
     return true;
