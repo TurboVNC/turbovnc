@@ -391,6 +391,8 @@ public class VncViewer extends javax.swing.JApplet
 
     setGlobalOptions();
 
+    embed.setParam(false);
+
     if ((opts.via != null && opts.via.indexOf(':') < 0) || opts.tunnel) {
       alwaysShowConnectionDialog.setParam(false);
       if (opts.serverName == null)
