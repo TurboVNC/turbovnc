@@ -1,5 +1,5 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,6 +77,8 @@ public class ImageDrawTest extends JFrame {
         im2.setPF(MEDIUM_COLOR_PF);
       else if (colors == 65536)
         im2.setPF(HIGH_COLOR_PF);
+
+      System.out.println("Pixel format: " + im1.getPF().print());
     }
 
     public Dimension getPreferredSize() {
@@ -90,10 +92,11 @@ public class ImageDrawTest extends JFrame {
       Object data_ = im.getRawPixelsRW(stride);
 
       if (pf.is888() && data_ instanceof int[]) {
-        int[] data = (int[])data_;
+       int[] data = (int[])data_;
         for (j = 0; j < h; j++) {
           for (i = 0; i < w; i++) {
-            data[j * stride[0] + i] = ((i + offset) % 256) << pf.redShift;
+            data[j * stride[0] + i] = 0xff << 24;
+            data[j * stride[0] + i] |= ((i + offset) % 256) << pf.redShift;
             data[j * stride[0] + i] |= ((j + offset) % 256) << pf.greenShift;
             data[j * stride[0] + i] |= ((i + j + offset) % 256) << pf.blueShift;
           }
@@ -167,6 +170,8 @@ public class ImageDrawTest extends JFrame {
 
   public static void main(String[] arg) {
     int colors = -1, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT;
+
+    VncViewer.setBlitterDefaults();
 
     for (int i = 0; i < arg.length; i++) {
       if (arg[i].toLowerCase().startsWith("-c") && i < arg.length - 1) {

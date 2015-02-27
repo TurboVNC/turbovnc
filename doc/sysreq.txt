@@ -43,7 +43,10 @@
 	| OS X 10.5 ("Leopard") or later \
 	|
 | Other Software \
-	| Java 1.5 or later (Java 1.6 or later recommended) \
+	| Java for OS X required when using the standalone TurboVNC Viewer app \
+		(Java for OS X was pre-installed on versions of OS X prior to 10.7 but \
+		can be installed on later OS X versions by downloading the package from \
+		Apple Support.) \
 	|
 #OPT: hiCol=first
 

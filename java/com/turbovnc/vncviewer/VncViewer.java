@@ -227,6 +227,30 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     }
   }
 
+  public static void setBlitterDefaults() {
+    // Java 1.7 and later do not include hardware-accelerated 2D blitting
+    // routines on Mac platforms.  They only support OpenGL blitting, and using
+    // TYPE_INT_ARGB_PRE BufferedImages with OpenGL blitting is much faster
+    // than using TYPE_INT_RGB BufferedImages on some Macs (about 4-5X as fast
+    // on certain models.)
+    boolean defForceAlpha = false;
+
+    if (os.startsWith("mac os x")) {
+      int minorVersion =
+        Integer.parseInt(System.getProperty("java.version").split("\\.")[1]);
+      if (minorVersion >= 7)
+        defForceAlpha = true;
+    }
+    // TYPE_INT_ARGB_PRE images are also faster when using OpenGL blitting on
+    // other platforms, so attempt to detect that.
+    boolean useOpenGL =
+      Boolean.parseBoolean(System.getProperty("sun.java2d.opengl"));
+    if (useOpenGL)
+      defForceAlpha = true;
+
+    forceAlpha = getBooleanProperty("turbovnc.forcealpha", defForceAlpha);
+  }
+
   public static void main(String[] argv) {
     setLookAndFeel();
     VncViewer viewer = new VncViewer(argv);
@@ -254,6 +278,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     UserPreferences.load("global");
 
     setVersion();
+    setBlitterDefaults();
 
     // Override defaults with command-line options
     for (int i = 0; i < argv.length; i++) {
@@ -401,6 +426,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     applet = true;
     UserPreferences.load("global");
     setVersion();
+    setBlitterDefaults();
     setGlobalOptions();
   }
 
@@ -1075,4 +1101,5 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   int benchIter = 1;
   int benchWarmup = 0;
   Options opts;
+  static boolean forceAlpha;
 }

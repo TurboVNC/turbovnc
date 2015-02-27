@@ -27,6 +27,25 @@ parameters to the Windows TurboVNC Viewer could not be specified in uppercase.
 [6]
 The Windows TurboVNC Viewer now supports scaling factors > 200.
 -------------------------------------------------------------------------------
+[7]
+Java 1.7 and later on Mac platforms no longer include a hardware-accelerated 2D
+blitter for Java 2D, opting instead to use only OpenGL for image drawing.  When
+using the default pixel format (BGRX), this is incredibly slow on some Macs,
+because the OpenGL blitter is having to set all of the alpha values to 255
+(opaque.)  Thus, the Java TurboVNC Viewer will now automatically use an
+alpha-enabled pixel format (BGRA) for its back buffer if it detects that it is
+running on a Mac with Java 1.7 or later (which will generally be the case when
+the viewer is deployed as an applet or using Java Web Start.)  This improves
+drawing performance by as much as 4-5x on certain Mac models, although the
+drawing performance with Apple Java 1.6 is still going to be faster than with
+Java 1.7 or later.  The Java TurboVNC Viewer will also now automatically use an
+alpha-enabled pixel format on non-Mac platforms if it detects that OpenGL Java
+2D blitting is being selected (normally accomplished by setting the
+"sun.java2d.opengl" system property to "true".)
+
+The "turbovnc.forcealpha" Java system property can be used to override the
+default behavior described above (refer to User's Guide.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

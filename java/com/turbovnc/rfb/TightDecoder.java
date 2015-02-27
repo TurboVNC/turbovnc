@@ -181,7 +181,7 @@ public class TightDecoder extends Decoder {
         is.readBytes(bytebuf, 0, 3);
         int pix = (bytebuf[0] & 0xff) << serverpf.redShift |
                   (bytebuf[1] & 0xff) << serverpf.greenShift |
-                  (bytebuf[2] & 0xff) << serverpf.blueShift;
+                  (bytebuf[2] & 0xff) << serverpf.blueShift | (0xff << 24);
         while (h > 0) {
           Arrays.fill((int[])buf, ptr, ptr + w, pix);
           ptr += stride[0];

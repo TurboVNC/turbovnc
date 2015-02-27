@@ -301,9 +301,9 @@ to ''1'' on the server prior to starting ''vncserver''.  The default behavior
 is to use as many threads as there are cores on the server machine, but you can
 set the ''TVNC_NTHREADS'' environment variable to override this.
 
-** Accelerating the Java TurboVNC Viewer
+** Maximizing the Performance of the Java TurboVNC Viewer
 
-*** Accelerating JPEG Decoding
+*** Accelerated JPEG Decoding
 #OPT: noList! plain!
 
 The Java TurboVNC Viewer can be used as a standalone app, in which case it
@@ -328,7 +328,7 @@ decompression" field says "Turbo".  If you are launching the Java TurboVNC
 Viewer from the command line, then it will also print a warning if it is unable
 to load libjpeg-turbo.
 
-*** Accelerating X11 Blitting
+*** X11 Blitting Performance
 #OPT: noList! plain!
 
 When running the Java TurboVNC Viewer on Linux/Un*x platforms, it is necessary
@@ -361,6 +361,24 @@ image drawing in Java 2D requires an extra memory copy that is not required
 when using raw X11 commands.  However, on newer systems with fast memory access
 (particularly systems with a large L2 or L3 cache), this overhead should have a
 negligible impact on overall performance.
+
+*** Mac Blitting Performance
+#OPT: noList! plain!
+
+Java 1.6 for OS X included a Quartz-accelerated Java 2D blitter that performed
+quite well with the Java TurboVNC Viewer.  Unfortunately, however, since Apple
+stopped producing their own Java implementation, that feature went away-- it
+never made it into Oracle Java 1.7 or later.  The only blitting option in Java
+1.7 and later, as of this writing, is OpenGL, and although the Java TurboVNC
+Viewer attempts to maximize performance with OpenGL Java 2D blitting as much
+as possible (see the description of the [[#turbovnc.forcealpha]] system
+property for more details), the performance still cannot match that of the
+Quartz blitter in Java 1.6 for OS X.
+
+The standalone TurboVNC Viewer package for OS X requires Java for OS X, so it
+will perform optimally, but Oracle Java 1.7 or later is typically used on OS X
+10.7 and later when launching the Java TurboVNC Viewer as an applet or using
+Java Web Start.
 
 *** Using the Server VM
 #OPT: noList! plain!

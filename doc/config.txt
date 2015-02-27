@@ -87,6 +87,24 @@ rectangles |
 
 ** Java Client Settings
 
+{anchor: turbovnc.forcealpha}
+| Java System Property | ''turbovnc.forcealpha = ''__''0 \| 1''__ |
+| Summary | Disable/enable back buffer alpha channel |
+| Default Value | Enabled if using OpenGL Java 2D blitting, disabled otherwise |
+#OPT: hiCol=first
+
+	Description :: If this property is enabled, then the Java TurboVNC Viewer
+	will use a TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel)
+	BufferedImage as its back buffer instead of a TYPE_INT_RGB (BGRX)
+	BufferedImage.  When using OpenGL blitting in Java 2D (normally accomplished
+	by passing an argument of ''-Dsun.java2d.opengl=true'' to ''java''), it is
+	generally faster to draw an alpha-enabled BufferedImage to the screen,
+	because otherwise glDrawPixels() has to set all of the alpha values itself
+	(which can cause it to revert to an unaccelerated code path in some cases.)
+
+	!!! NOTE: this property is enabled by default when using Java 1.7 or later on
+	Mac platforms, because OpenGL Java 2D blitting is the only option available.
+
 | Java System Property | ''turbovnc.lionfs = ''__''0 \| 1''__ |
 | Summary | Disable/enable the use of the OS X full-screen application feature |
 | Default Value | Enabled if running on OS X 10.7 or later |

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,6 +66,8 @@ public abstract class PlatformPixelBuffer extends PixelBuffer {
         (depth > 8 ? redShift : 0),
         (depth > 8 ? greenShift : 0),
         (depth > 8 ? blueShift : 0));
+      if (pf.is888() && VncViewer.forceAlpha)
+        pf.alpha = true;
     } else {
       pf = new PixelFormat(8, 8, false, false, 7, 7, 3, 0, 3, 6);
     }

@@ -645,6 +645,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       PixelFormat pf = new PixelFormat();
 
       pf.read(memStream);
+      if (pf.is888() && VncViewer.forceAlpha)
+        pf.alpha = true;
 
       desktop.setServerPF(pf);
       cp.setPF(pf);

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-02-26T21:08:26">
+<meta name="date" content="2015-02-26T22:14:21">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -120,8 +120,8 @@
                 <a class="toc" href="#hd007005">7.5 Multithreading</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd007006">7.6 Accelerating the Java TurboVNC 
-                Viewer</a>
+                <a class="toc" href="#hd007006">7.6 Maximizing the Performance of the 
+                Java TurboVNC Viewer</a>
             </li>
         </ul>
     </li>
@@ -422,7 +422,7 @@ other VNC distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard">Java 1.5 or later (Java 1.6 or later recommended)</td>
+    <td class="standard">Java for OS X required when using the standalone TurboVNC Viewer app (Java for OS X was pre-installed on versions of OS X prior to 10.7 but can be installed on later OS X versions by downloading the package from Apple Support.)</td>
   </tr>
 </table>
 </div>
@@ -1601,10 +1601,10 @@ as there are cores on the server machine, but you can set the
 
 
 
-<h2 id="hd007006">7.6&nbsp;Accelerating the Java TurboVNC Viewer</h2>
+<h2 id="hd007006">7.6&nbsp;Maximizing the Performance of the Java TurboVNC Viewer</h2>
 
 
-<h3 id="hd007006001">Accelerating JPEG Decoding</h3>
+<h3 id="hd007006001">Accelerated JPEG Decoding</h3>
 
 <p>The Java TurboVNC Viewer can be used as a standalone app, in which case 
 it provides most of the same features as the native TurboVNC viewers.  
@@ -1633,7 +1633,7 @@ also print a warning if it is unable to load libjpeg-turbo.</p>
 
 
 
-<h3 id="hd007006002">Accelerating X11 Blitting</h3>
+<h3 id="hd007006002">X11 Blitting Performance</h3>
 
 <p>When running the Java TurboVNC Viewer on Linux/Un*x platforms, it is 
 necessary to enable MIT-SHM Pixmap support in order to achieve optimal 
@@ -1669,7 +1669,28 @@ performance.</p>
 
 
 
-<h3 id="hd007006003">Using the Server VM</h3>
+<h3 id="hd007006003">Mac Blitting Performance</h3>
+
+<p>Java 1.6 for OS X included a Quartz-accelerated Java 2D blitter that 
+performed quite well with the Java TurboVNC Viewer.  Unfortunately, 
+however, since Apple stopped producing their own Java implementation, 
+that feature went away&ndash; it never made it into Oracle Java 1.7 or 
+later.  The only blitting option in Java 1.7 and later, as of this 
+writing, is OpenGL, and although the Java TurboVNC Viewer attempts to 
+maximize performance with OpenGL Java 2D blitting as much as possible 
+(see the description of the 
+<a href="#turbovnc.forcealpha">turbovnc.forcealpha</a><a name="idx0033"></a> 
+system property for more details), the performance still cannot match 
+that of the Quartz blitter in Java 1.6 for OS X.</p>
+
+<p>The standalone TurboVNC Viewer package for OS X requires Java for OS X, 
+so it will perform optimally, but Oracle Java 1.7 or later is typically 
+used on OS X 10.7 and later when launching the Java TurboVNC Viewer as 
+an applet or using Java Web Start.</p>
+
+
+
+<h3 id="hd007006004">Using the Server VM</h3>
 
 <p>Passing an argument of <code>-server</code> to <code>java</code> when 
 launching the Java TurboVNC Viewer is recommended.  This enables the 
@@ -1683,7 +1704,7 @@ shortcut, then the Server VM is automatically enabled.</p>
 
 
 
-<h3 id="hd007006004">Java Web Start</h3>
+<h3 id="hd007006005">Java Web Start</h3>
 
 <p>Java Web Start can be used to deploy the Java TurboVNC Viewer and the 
 associated libjpeg-turbo JNI libraries from a web server.  Deploying the 
@@ -1692,7 +1713,7 @@ Viewer environment without requiring the viewer to be installed on the
 client machine. This mechanism is preferred over deploying the viewer as 
 an applet, since JPEG decoding cannot be accelerated when the Java 
 TurboVNC Viewer is run as an applet.  See 
-<span class="remote"><a class="remote" href="http://www.TurboVNC.org/Documentation/JWS">http://www.TurboVNC.org/Documentation/JWS</a></span><a name="idx0033"></a> 
+<span class="remote"><a class="remote" href="http://www.TurboVNC.org/Documentation/JWS">http://www.TurboVNC.org/Documentation/JWS</a></span><a name="idx0034"></a> 
 for more details.</p>
 
 <p><br /></p>
@@ -2058,7 +2079,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0034"></a>, 
+<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0035"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -2540,6 +2561,44 @@ some additional information about how Hextile, RRE, and ZRLE work.</p>
 
 
 <h2 id="hd0011003">11.3&nbsp;Java Client Settings</h2>
+
+<p><a name="turbovnc.forcealpha"></a></p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.forcealpha&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable back buffer alpha channel</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Enabled if using OpenGL Java 2D blitting, disabled otherwise</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        If this property is enabled, then the Java TurboVNC Viewer will use a 
+        TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel) BufferedImage 
+        as its back buffer instead of a TYPE_INT_RGB (BGRX) BufferedImage.  When 
+        using OpenGL blitting in Java 2D (normally accomplished by passing an 
+        argument of <code>-Dsun.java2d.opengl=true</code> to <code>java</code>), 
+        it is generally faster to draw an alpha-enabled BufferedImage to the 
+        screen, because otherwise glDrawPixels() has to set all of the alpha 
+        values itself (which can cause it to revert to an unaccelerated code 
+        path in some cases.)
+        <div class="important"><p class="important">
+        NOTE: this property is enabled by default when using Java 1.7 or later on Mac platforms, because OpenGL Java 2D blitting is the only option available.
+        </p></div>
+    </dd>
+</dl>
 
 <div class="table">
 <table class="standard">
