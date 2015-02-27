@@ -363,10 +363,12 @@ as possible (see the description of the [[#turbovnc.forcealpha]] system
 property for more details), the performance still cannot match that of the
 Quartz blitter in Java 1.6 for OS X.
 
-The standalone TurboVNC Viewer package for OS X requires Java for OS X, so it
-will perform optimally, but Oracle Java 1.7 or later is typically used on OS X
-10.7 and later when launching the Java TurboVNC Viewer as an applet or using
-Java Web Start.
+The standalone TurboVNC Viewer app for OS X requires Java for OS X, so it will
+perform optimally, but Oracle Java 1.7 or later is typically used on OS X 10.7
+and later when launching the Java TurboVNC Viewer as an applet or using Java
+Web Start.  Thus, the viewer will perform less optimally when launched in that
+manner.  There is unfortunately nothing that can be done about this at the
+moment.
 
 *** Using the Server VM
 #OPT: noList! plain!
