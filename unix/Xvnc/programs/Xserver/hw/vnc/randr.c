@@ -1,5 +1,5 @@
 /*
- *  Copyright (C)2013-2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2013-2015 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -299,6 +299,14 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   rfbScreenInfo newScreen = rfbScreen;
   PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
   Bool ret = TRUE;
+
+  for (cl = rfbClientHead; cl; cl = cl->next) {
+    if (!cl->enableDesktopSize && !cl->enableExtDesktopSize) {
+      rfbLog("ERROR: Not resizing desktop because one or more clients doesn't support it.\n");
+      vncRRSetModes(pScreen, pScreen->width, pScreen->height);
+      return FALSE;
+    }
+  }
 
   newScreen.width = width;
   newScreen.height = height;
