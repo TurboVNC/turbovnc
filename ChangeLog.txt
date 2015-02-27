@@ -62,6 +62,14 @@ application.
 Improved the Tight decoding performance in the Windows TurboVNC Viewer by
 5-15%.
 -------------------------------------------------------------------------------
+[10]
+Since the Java TurboVNC Viewer already has its own double buffering mechanism,
+it now disables double buffering in Java 2D.  The primary advantage of this is
+that MIT-SHM pixmap support is no longer required on Un*x platforms in order to
+achieve optimal performance.  This also makes the viewer faster on some
+systems.  On Windows, the Java viewer is now as fast as or faster than the
+native viewer as a result of this change and [8].
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

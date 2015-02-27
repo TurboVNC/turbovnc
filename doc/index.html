@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-02-26T22:49:24">
+<meta name="date" content="2015-02-26T23:22:59">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1633,39 +1633,30 @@ also print a warning if it is unable to load libjpeg-turbo.</p>
 
 
 
-<h3 id="hd007006002">X11 Blitting Performance</h3>
+<h3 id="hd007006002">Windows Blitting Performance</h3>
 
-<p>When running the Java TurboVNC Viewer on Linux/Un*x platforms, it is 
-necessary to enable MIT-SHM Pixmap support in order to achieve optimal 
-blitting (image drawing) performance.  MIT-SHM Pixmaps are not always 
-enabled by default on certain graphics cards (some nVidia cards, for 
-instance), and in such cases, it may be necessary to add an entry to 
-<em>xorg.conf</em> in order to enable them.  The 
-<code>vncviewer-java</code> script on Linux/Un*x platforms runs a helper 
-application to verify that MIT-SHM Pixmaps are available and working.  
-You can further verify that X11 blitting is being accelerated by running</p>
+<p>The default in Java 2D on Windows platforms is to use Direct3D for 
+blitting (image drawing), but in the case of TurboVNC, using GDI 
+blitting is almost always much faster.  If you are using Java 1.7 or 
+later, or if you are running the Java TurboVNC Viewer using the 
+<code>vncviewer-java.bat</code> script or launching it using the Windows 
+Start Menu shortcut, then Direct3D blitting will be disabled by default, 
+and no further action is necessary.  Otherwise, you should consider 
+setting the <code>sun.java2d.d3d</code> system property to 
+<code>false</code> (for instance, by passing 
+<code>-Dsun.java2d.d3d=false</code> as an argument to 
+<code>java</code>.) You can use the ImageDrawTest benchmark to verify 
+whether Direct3D blitting is enabled or disabled.  To do this, execute 
+the following command:</p>
 
 <pre class="verbatim">
-java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;/opt/TurboVNC/java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
+java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;&quot;c:\Program&nbsp;Files\TurboVNC\Java\VncViewer.jar&quot;&nbsp;com.turbovnc.vncviewer.ImageDrawTest
 </pre>
 
 <p>Let the benchmark run for 15 or 20 seconds, then abort it with CTRL-C.  
-If you notice in the Java 2D trace output that there are no calls to 
-<code>sun.java2d.x11.X11PMBlitLoops::Blit()</code>, then blitting is not 
-being accelerated, and the most likely reason is that MIT-SHM Pixmaps 
-are not enabled.</p>
-
-<div class="important"><p class="important">
-Sometimes the benchmark will report that the graphics device supports H/W acceleration even when it doesn&rsquo;t.  This is due to a bug in Java 2D.  Thus, looking at the trace output is the only reliable way to determine whether or not X11 blitting is being accelerated.
-</p></div>
-
-<p>Even with accelerated X11 blitting, the Java TurboVNC Viewer may not be 
-quite as fast as the X11 TurboVNC Viewer on older, slower systems.  This 
-is because image drawing in Java 2D requires an extra memory copy that 
-is not required when using raw X11 commands.  However, on newer systems 
-with fast memory access (particularly systems with a large L2 or L3 
-cache), this overhead should have a negligible impact on overall 
-performance.</p>
+Looking at the Java 2D trace output will reveal which underlying API 
+(such as Windows GDI, OpenGL, Direct3D, etc.) is being used to draw the 
+images.</p>
 
 
 
@@ -1690,24 +1681,7 @@ an applet or using Java Web Start.</p>
 
 
 
-<h3 id="hd007006004">Windows Blitting Performance</h3>
-
-<p>The default in Java 2D on Windows platforms is to use Direct3D for 
-blitting, but in the case of TurboVNC, using GDI blitting is almost 
-always much faster. If you are using Java 1.7 or later, or if you are 
-running the Java TurboVNC Viewer using the 
-<code>vncviewer-java.bat</code> script or launching it using the Windows 
-Start Menu shortcut, then Direct3D blitting will be disabled by default, 
-and no further action is necessary.  Otherwise, you should consider 
-setting the <code>sun.java2d.d3d</code> system property to 
-<code>false</code> (for instance, by passing 
-<code>-Dsun.java2d.d3d=false</code> as an argument to 
-<code>java</code>.)  You can use the ImageDrawTest benchmark (see above) 
-to verify whether Direct3D blitting is enabled or disabled.</p>
-
-
-
-<h3 id="hd007006005">Using the Server VM</h3>
+<h3 id="hd007006004">Using the Server VM</h3>
 
 <p>Passing an argument of <code>-server</code> to <code>java</code> when 
 launching the Java TurboVNC Viewer is recommended.  This enables the 
@@ -1721,7 +1695,7 @@ shortcut, then the Server VM is automatically enabled.</p>
 
 
 
-<h3 id="hd007006006">Java Web Start</h3>
+<h3 id="hd007006005">Java Web Start</h3>
 
 <p>Java Web Start can be used to deploy the Java TurboVNC Viewer and the 
 associated libjpeg-turbo JNI libraries from a web server.  Deploying the 

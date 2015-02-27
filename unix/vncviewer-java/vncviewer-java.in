@@ -2,7 +2,6 @@
 set -e
 
 BINDIR=`dirname $0`
-$BINDIR/checkshmpixmaps
 if [ "$JAVA_HOME" = "" ]; then
 	JAVA=java
 else

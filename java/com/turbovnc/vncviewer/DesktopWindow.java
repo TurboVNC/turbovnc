@@ -55,7 +55,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
                        CConn cc_) {
     cc = cc_;
     setSize(width, height);
-    setOpaque(false);
+    setOpaque(true);
     GraphicsEnvironment ge =
       GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice gd = ge.getDefaultScreenDevice();
@@ -243,10 +243,16 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           width = scaledWidth + cc.viewport.dx - x;
         if (y + height > scaledHeight + cc.viewport.dy)
           height = scaledHeight + cc.viewport.dy - y;
+        // We don't actually need Java 2D to double-buffer the viewport,
+        // because we're taking care of that ourselves.  This improves
+        // performance on a lot of systems and allows the viewer to achieve
+        // optimal performance under X11 without requiring MIT-SHM pixmaps.
+        RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         paintImmediately(x, y, width, height);
       } else {
         int x = (cc.viewport.dx > 0) ? cc.viewport.dx + r.tl.x : r.tl.x;
         int y = (cc.viewport.dy > 0) ? cc.viewport.dy + r.tl.y : r.tl.y;
+        RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         paintImmediately(x, y, r.width(), r.height());
       }
       damage.clear();
@@ -379,6 +385,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       g2.drawImage(im.getImage(), 0, 0, null);
     }
     g2.dispose();
+    RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
   }
 
   String oldContents = "";
