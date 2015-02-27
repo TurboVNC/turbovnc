@@ -145,6 +145,11 @@ achieve optimal performance.  This also makes the viewer faster on some
 systems.  On Windows, the Java viewer is now as fast as or faster than the
 native viewer as a result of this change and [8].
 -------------------------------------------------------------------------------
+[11]
+By default, the embedded HTTP server in the TurboVNC Server will now serve up a
+JNLP (Java Web Start) file for the session instead of an applet.  You can add
+/applet to the URL to instruct the HTTP server to serve up an applet instead.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

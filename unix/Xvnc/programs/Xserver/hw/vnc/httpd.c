@@ -54,11 +54,13 @@
     "<HEAD><TITLE>File Not Found</TITLE></HEAD>\n" \
     "<BODY><H1>File Not Found</H1></BODY>\n"
 
-#define OK_STR "HTTP/1.0 200 OK\r\n\r\n"
+#define OK_STR "HTTP/1.0 200 OK\r\n"
+#define CONTENT_STR "Content-Type: application/x-java-jnlp-file\r\n\r\n"
 
 static void httpProcessInput();
 static Bool compareAndSkip(char **ptr, const char *str);
-static Bool parseParams(const char *request, char *result, int max_bytes);
+static Bool parseParams(const char *request, char *result, int max_bytes,
+                        Bool jnlp);
 static Bool validateString(char *str);
 
 int httpPort = 0;
@@ -207,12 +209,13 @@ httpProcessInput()
     socklen_t addrlen = sizeof(addr);
     char addrStr[INET6_ADDRSTRLEN];
     char fullFname[512];
-    char params[1024];
+    char params[1024], jnlpParams[1024];
     char *ptr;
     char *fname;
     int maxFnameLen;
     int fd;
     Bool performSubstitutions = FALSE;
+    Bool jnlp = FALSE;
     char str[256];
     struct passwd *user;
 
@@ -300,20 +303,36 @@ httpProcessInput()
     ptr = strchr(fname, '?');
     if (ptr != NULL) {
         *ptr = '\0';
-        if (!parseParams(&ptr[1], params, sizeof(params))) {
+        if (!parseParams(&ptr[1], params, sizeof(params), FALSE)) {
             params[0] = '\0';
+            rfbLog("httpd: bad parameters in the URL\n");
+        }
+        if (!parseParams(&ptr[1], jnlpParams, sizeof(jnlpParams), TRUE)) {
+            jnlpParams[0] = '\0';
             rfbLog("httpd: bad parameters in the URL\n");
         }
     }
 
-    /* If we were asked for '/', actually read the file index.vnc */
+    /* If we were asked for '/', actually read the file VncViewer.jnlp */
 
     if (strcmp(fname, "/") == 0) {
+        strcpy(fname, "/VncViewer.jnlp");
+        rfbLog("httpd: defaulting to '%s'\n", fname + 1);
+    }
+
+    /* If we were asked for '/applet', actually read the file index.vnc */
+
+    if (strcmp(fname, "/applet") == 0) {
         strcpy(fname, "/index.vnc");
         rfbLog("httpd: defaulting to '%s'\n", fname + 1);
     }
 
-    /* Substitutions are performed on files ending .vnc */
+    /* Substitutions are performed on files ending in .vnc or .jnlp */
+
+    if (strlen(fname) >= 5 && strcmp(&fname[strlen(fname)-5], ".jnlp") == 0) {
+        performSubstitutions = TRUE;
+        jnlp = TRUE;
+    }
 
     if (strlen(fname) >= 4 && strcmp(&fname[strlen(fname)-4], ".vnc") == 0) {
         performSubstitutions = TRUE;
@@ -329,6 +348,11 @@ httpProcessInput()
     }
 
     WriteExact(httpSock, OK_STR, strlen(OK_STR));
+    if (jnlp) {
+      WriteExact(httpSock, CONTENT_STR, strlen(CONTENT_STR));
+    } else {
+      WriteExact(httpSock, "\r\n", 2);
+    }
 
     while (1) {
         int n = read(fd, buf, BUF_SIZE-1);
@@ -383,6 +407,11 @@ httpProcessInput()
                     sprintf(str, "%d", rfbPort);
                     WriteExact(httpSock, str, strlen(str));
 
+                } else if (compareAndSkip(&ptr, "$HTTPPORT")) {
+
+                    sprintf(str, "%d", httpPort);
+                    WriteExact(httpSock, str, strlen(str));
+
                 } else if (compareAndSkip(&ptr, "$DESKTOP")) {
 
                     WriteExact(httpSock, desktopName, strlen(desktopName));
@@ -390,6 +419,11 @@ httpProcessInput()
                 } else if (compareAndSkip(&ptr, "$DISPLAY")) {
 
                     sprintf(str, "%s:%s", rfbThisHost, display);
+                    WriteExact(httpSock, str, strlen(str));
+
+                } else if (compareAndSkip(&ptr, "$SERVER")) {
+
+                    sprintf(str, "%s", rfbThisHost);
                     WriteExact(httpSock, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$USER")) {
@@ -403,8 +437,14 @@ httpProcessInput()
 
                 } else if (compareAndSkip(&ptr, "$PARAMS")) {
 
-                    if (params[0] != '\0')
-                        WriteExact(httpSock, params, strlen(params));
+                    if (jnlp) {
+                        if (jnlpParams[0] != '\0')
+                            WriteExact(httpSock, jnlpParams,
+                                       strlen(jnlpParams));
+                    } else {
+                        if (params[0] != '\0')
+                            WriteExact(httpSock, params, strlen(params));
+                    }
 
                 } else {
                     if (!compareAndSkip(&ptr, "$$"))
@@ -451,7 +491,7 @@ compareAndSkip(char **ptr, const char *str)
  */
 
 static Bool
-parseParams(const char *request, char *result, int max_bytes)
+parseParams(const char *request, char *result, int max_bytes, Bool jnlp)
 {
     char param_request[128];
     char param_formatted[196];
@@ -500,9 +540,14 @@ parseParams(const char *request, char *result, int max_bytes)
             }
 
             /* Prepare HTML-formatted representation of the name=value pair */
-            len = snprintf(param_formatted, sizeof(param_formatted),
-                          "<PARAM NAME=\"%s\" VALUE=\"%s\">\n",
-                          param_request, value_str);
+            if (jnlp)
+                len = snprintf(param_formatted, sizeof(param_formatted),
+                              "<argument>%s=%s</argument>\n",
+                              param_request, value_str);
+            else
+                len = snprintf(param_formatted, sizeof(param_formatted),
+                              "<PARAM NAME=\"%s\" VALUE=\"%s\">\n",
+                              param_request, value_str);
             if ((len >= sizeof(param_formatted)) ||
                 (cur_bytes + len + 1 > max_bytes)) {
                 return FALSE;

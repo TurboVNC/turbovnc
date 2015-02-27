@@ -159,6 +159,11 @@ add_custom_command(OUTPUT ${BINDIR}/index.vnc
 		${SRCDIR}/${CLASSPATH}/index.vnc ${BINDIR}/index.vnc
 	DEPENDS ${SRCDIR}/${CLASSPATH}/index.vnc)
 
+add_custom_command(OUTPUT ${BINDIR}/VncViewer.jnlp
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${SRCDIR}/${CLASSPATH}/VncViewer.jnlp ${BINDIR}/VncViewer.jnlp
+	DEPENDS ${SRCDIR}/${CLASSPATH}/VncViewer.jnlp)
+
 add_custom_command(OUTPUT ${BINDIR}/favicon.ico
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/favicon.ico ${BINDIR}/favicon.ico
@@ -176,6 +181,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
 		${BINDIR}/index.vnc
+		${BINDIR}/VncViewer.jnlp
 		${BINDIR}/favicon.ico
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
@@ -209,5 +215,7 @@ install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${TVNC_JAVADIR})
 install(FILES ${SRCDIR}/${CLASSPATH}/README.txt DESTINATION ${TVNC_JAVADIR})
 if(TVNC_BUILDSERVER)
 	install(FILES ${SRCDIR}/${CLASSPATH}/index.vnc DESTINATION ${TVNC_JAVADIR})
+	install(FILES ${SRCDIR}/${CLASSPATH}/VncViewer.jnlp DESTINATION
+		${TVNC_JAVADIR})
 	install(FILES ${SRCDIR}/${CLASSPATH}/favicon.ico DESTINATION ${TVNC_JAVADIR})
 endif()
