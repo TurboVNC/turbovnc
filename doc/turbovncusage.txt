@@ -119,11 +119,12 @@ the following command:
 When a TurboVNC session is created, it automatically launches a miniature web
 server that serves up the Java TurboVNC Viewer as an applet.  The Java TurboVNC
 Viewer can be used to connect to the TurboVNC session from a machine that does
-not have a native TurboVNC viewer installed (or a machine for which no native
-TurboVNC viewer is available.)  The Java TurboVNC Viewer, when run as an
-applet, is significantly slower than the native viewer on high-speed networks,
-but on low-speed networks, the Java applet and native viewers have comparable
-performance.
+not have the TurboVNC Viewer installed locally.  The Java TurboVNC Viewer, when
+run as an applet, can use the libjpeg-turbo JNI library to accelerate JPEG
+decoding, if the library is available on the client machine (the "official"
+libjpeg-turbo binary packages supply this library, although if you're going to
+go to the trouble of installing libjpeg-turbo, it begs the question of why you
+wouldn't just install the standalone TurboVNC Viewer instead.)
 
 To use the Java TurboVNC Viewer in a web browser, point your web browser to:
 
@@ -138,6 +139,115 @@ If the TurboVNC session is occupying X display ''my_server:1'', then point your
 web browser to:
 
 ''http://my_server:5801''
+
+You can add applet parameters to the URL using the following format:
+
+''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}?''__''{param1}''__''=''__''{value1}''__''&''__''{param2}''__''=''__''{value2}''__
+
+Example:
+
+''http://my_server:5801?quality=80&samp=2x&tunnel=1''
+
+will run the applet in the browser window and tunnel the VNC connection through
+SSH.
+
+	!!! NOTE: As of Java 7 Update 51, self-signed JARs (which includes
+	''VncViewer.jar'' in the official TurboVNC binary packages) are not allowed
+	to run in the Java browser plug-in by default.  To work around this, you will
+	need to add ''http://{turbovnc_server}:{http_port}'' (for example,
+	''http://my_server:5801'') to Java's Exception Site List, which can be found
+	under the "Security" tab in the Java Control Panel.  If you have your own
+	code signing certificate, then you can re-sign the JAR using your certificate
+	to eliminate this requirement.
+
+** Deploying the Java TurboVNC Viewer Using Java Web Start
+
+Accessing the Java TurboVNC Viewer applet through TurboVNC's built-in HTTP
+server, as described above, is a quick & dirty means of running the TurboVNC
+Viewer on machines that don't already have a VNC viewer installed (for
+instance, for the purposes of collaboration with colleagues who don't normally
+use TurboVNC.)  However, the tightening of security restrictions in recent Java
+releases arguably makes this approach more dirty than quick.
+
+Java Web Start provides a more robust mechanism for zero-install deployments of
+the Java TurboVNC Viewer in multi-user environments.  When deployed using JWS,
+the Java TurboVNC Viewer provides all of the advantages of a standalone native
+viewer, including native levels of performance.
+
+For the purposes of this guide, it is assumed that the reader has some
+knowledge of web server administration.
+
+	* Download ''libjpeg-turbo-{version}-jws.zip'' from libjpeg-turbo 1.3.0 or
+		later (available at [[http://sourceforge.net/projects/libjpeg-turbo/files]].)
+		{nl}{nl}
+
+	* Unzip the archive into a directory on your web server.
+		{nl}{nl}
+
+	* Copy the Java TurboVNC Viewer JAR file (''VncViewer.jar'') to that same
+		directory.
+		{nl}{nl}
+
+	* Obtain a code signing certificate from a trusted certificate authority and
+		use ''jarsigner'' to sign all of the JARs (including ''VncViewer.jar'')
+		with this certificate.  The specifics of this are left as an exercise for
+		the reader.
+		{nl}{nl}
+
+	* Create a file called ''TurboVNC.jnlp'' in the same directory as
+		''VncViewer.jar'', and give it the following contents:
+
+		#Verb: <<---
+		<?xml version="1.0" encoding="utf-8"?>
+		<jnlp codebase="{turbovnc_url}">
+		  <information>
+		    <title>TurboVNC Viewer</title>
+		    <vendor>The VirtualGL Project</vendor>
+		  </information>
+
+		  <resources>
+		    <j2se version="1.6+" java-vm-args="-server -Dsun.java2d.d3d=false"/>
+		    <jar href="VncViewer.jar"/>
+		  </resources>
+
+		  <security>
+		    <all-permissions/>
+		  </security>
+
+		  <resources os="Mac OS X">
+		    <nativelib href="ljtosx.jar"/>
+		  </resources>
+
+		  <resources os="Windows" arch="x86">
+		    <nativelib href="ljtwin32.jar"/>
+		  </resources>
+
+		  <resources os="Windows" arch="amd64">
+		    <nativelib href="ljtwin64.jar"/>
+		  </resources>
+
+		  <resources os="Linux" arch="i386">
+		    <nativelib href="ljtlinux32.jar"/>
+		  </resources>
+
+		  <resources os="Linux" arch="amd64">
+		    <nativelib href="ljtlinux64.jar"/>
+		  </resources>
+
+		  <application-desc main-class="com.turbovnc.vncviewer.VncViewer"/>
+		</jnlp>
+		---
+
+		!!! NOTE:  ''{turbovnc_url}'' should be the absolute URL of the TurboVNC
+		Viewer directory on the web server, e.g. ''http://my_server/turbovnc''.
+
+		This is just a minimal example.  Refer to the
+		[[http://docs.oracle.com/javase/6/docs/technotes/guides/javaws/][Java Web Start documentation]]
+		for additional fields that you might want to add.
+		{nl}{nl}
+
+	* You should now be able to access ''{turbovnc_url}/TurboVNC.jnlp'' in your
+		browser to launch the Java TurboVNC Viewer with full performance.
 
 ** Securing a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}

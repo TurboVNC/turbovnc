@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
@@ -375,7 +375,7 @@ httpProcessInput()
 
                 } else if (compareAndSkip(&ptr, "$APPLETHEIGHT")) {
 
-                    sprintf(str, "%d", rfbScreen.height + 32);
+                    sprintf(str, "%d", rfbScreen.height + 22);
                     WriteExact(httpSock, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$PORT")) {
@@ -472,6 +472,7 @@ parseParams(const char *request, char *result, int max_bytes)
                 return FALSE;
             }
             strcpy(param_request, tail);
+            len = strlen(tail);
         } else {
             len = delim_ptr - tail;
             if (len >= sizeof(param_request)) {
