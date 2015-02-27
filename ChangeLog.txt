@@ -58,6 +58,10 @@ pass -Dsun.java2d.d3d=false to java to ensure that Direct3D blitting is
 always disabled when the Java TurboVNC Viewer is run as a standalone
 application.
 -------------------------------------------------------------------------------
+[9]
+Improved the Tight decoding performance in the Windows TurboVNC Viewer by
+5-15%.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

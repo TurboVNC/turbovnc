@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000, 2001 Constantin Kaplinsky. All Rights Reserved.
@@ -312,8 +312,6 @@ int ClientConnection::InitFilterPalette(int rw, int rh)
       m_tightPalette[i] = ((CARD32)p[0] << drs) |
                           ((CARD32)p[1] << dgs) |
                           ((CARD32)p[2] << dbs);
-
-    m_tightCurrentFilter = &ClientConnection::FilterPalette24;
   } else {
     CheckBufferSize(m_tightRectColors * (m_myFormat.bitsPerPixel / 8));
     ReadExact(m_netbuf, m_tightRectColors * (m_myFormat.bitsPerPixel / 8));
@@ -364,38 +362,48 @@ int ClientConnection::InitFilterPalette(int rw, int rh)
                                                                               \
 void ClientConnection::FilterCopy##bpp(int srcx, int srcy, int numRows)       \
 {                                                                             \
-  CARD32 *dst =                                                               \
+  CARD32 *dstPtr =                                                            \
     (CARD32 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];           \
-  int dstw = fb.pitch / fbx_ps[fb.format];                                    \
-  CARD##bpp *p = (CARD##bpp *)m_netbuf;                                       \
+  CARD##bpp *srcPtr = (CARD##bpp *)m_netbuf;                                  \
+  int stride = fb.pitch / fbx_ps[fb.format];                                  \
+  int dstPad = stride - m_tightRectWidth;                                     \
                                                                               \
   SETUP_COLOR_SHORTCUTS;                                                      \
   CARD32 drs = fbx_roffset[fb.format] * 8;                                    \
   CARD32 dgs = fbx_goffset[fb.format] * 8;                                    \
   CARD32 dbs = fbx_boffset[fb.format] * 8;                                    \
                                                                               \
-  int x;                                                                      \
   if (rm == 0xFF && gm == 0xFF && bm == 0xFF && bpp == 32) {                  \
     if (rs == drs && gs == dgs && bs == dbs) {                                \
-      for (int y = 0; y < numRows; y++, p += m_tightRectWidth)                \
-        memcpy(&dst[y * dstw], (char *)p, m_tightRectWidth * bpp / 8);        \
+      while (numRows-- > 0) {                                                 \
+        memcpy(dstPtr, srcPtr, m_tightRectWidth * bpp / 8);                   \
+        dstPtr += stride;                                                     \
+        srcPtr += m_tightRectWidth;                                           \
+      }                                                                       \
     }                                                                         \
     else {                                                                    \
-      for (int y = 0; y < numRows; y++) {                                     \
-        for (x = 0; x < m_tightRectWidth; x++, p++)                           \
-          dst[y * dstw + x] = ((((CARD32)(*p) >> rs) & rm) << drs) |          \
-                              ((((CARD32)(*p) >> gs) & gm) << dgs) |          \
-                              ((((CARD32)(*p) >> bs) & bm) << dbs);           \
+      while (numRows-- > 0) {                                                 \
+        CARD32 *dstEndOfRow = dstPtr + m_tightRectWidth;                      \
+        while (dstPtr < dstEndOfRow) {                                        \
+          *dstPtr++ = ((((CARD32)(*srcPtr) >> rs) & rm) << drs) |             \
+                      ((((CARD32)(*srcPtr) >> gs) & gm) << dgs) |             \
+                      ((((CARD32)(*srcPtr) >> bs) & bm) << dbs);              \
+          srcPtr++;                                                           \
+        }                                                                     \
+        dstPtr += dstPad;                                                     \
       }                                                                       \
     }                                                                         \
   }                                                                           \
   else {                                                                      \
-    for (int y = 0; y < numRows; y++) {                                       \
-      for (x = 0; x < m_tightRectWidth; x++, p++)                             \
-        dst[y * dstw + x] =                                                   \
-          (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs) |                 \
-          (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs) |                 \
-          (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);                  \
+    while (numRows-- > 0) {                                                   \
+      CARD32 *dstEndOfRow = dstPtr + m_tightRectWidth;                        \
+      while (dstPtr < dstEndOfRow) {                                          \
+        *dstPtr++ = (((((CARD32)(*srcPtr) >> rs) & rm) * 255 / rm) << drs) |  \
+                    (((((CARD32)(*srcPtr) >> gs) & gm) * 255 / gm) << dgs) |  \
+                    (((((CARD32)(*srcPtr) >> bs) & bm) * 255 / bm) << dbs);   \
+        srcPtr++;                                                             \
+      }                                                                       \
+      dstPtr += dstPad;                                                       \
     }                                                                         \
   }                                                                           \
 }
@@ -407,26 +415,22 @@ DEFINE_TIGHT_FILTER_COPY(32)
 
 void ClientConnection::FilterCopy24(int srcx, int srcy, int numRows)
 {
-  int dstps = fbx_ps[fb.format];
-  CARD8 *dst = (CARD8 *)&fb.bits[srcy * fb.pitch + srcx * dstps];
-  CARD8 *src = (CARD8 *)m_netbuf;
-  CARD8 *srcptr, *dstptr, *srcptr2, *dstptr2;
-  int srcpitch = m_tightRectWidth * 3;
+  CARD32 *dstPtr =
+    (CARD32 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];
+  CARD8 *srcPtr = (CARD8 *)m_netbuf;
+  int dstPad = fb.pitch / fbx_ps[fb.format] - m_tightRectWidth;
 
-  int rindex = fbx_roffset[fb.format];
-  int gindex = fbx_goffset[fb.format];
-  int bindex = fbx_boffset[fb.format];
+  CARD32 drs = fbx_roffset[fb.format] * 8;
+  CARD32 dgs = fbx_goffset[fb.format] * 8;
+  CARD32 dbs = fbx_boffset[fb.format] * 8;
 
-  for (srcptr = src, dstptr = dst; srcptr < &src[numRows * srcpitch] &&
-       dstptr < &dst[numRows * fb.pitch]; srcptr += srcpitch,
-       dstptr += fb.pitch) {
-    for (srcptr2 = srcptr, dstptr2 = dstptr; srcptr2 < &srcptr[srcpitch] &&
-         dstptr2 < &dstptr[m_tightRectWidth * dstps]; srcptr2 += 3,
-         dstptr2 += dstps) {
-      dstptr2[rindex] = srcptr2[0];
-      dstptr2[gindex] = srcptr2[1];
-      dstptr2[bindex] = srcptr2[2];
+  while (numRows-- > 0) {
+    CARD32 *dstEndOfRow = dstPtr + m_tightRectWidth;
+    while (dstPtr < dstEndOfRow) {
+      *dstPtr++ = (srcPtr[0] << drs) | (srcPtr[1] << dgs) | (srcPtr[2] << dbs);
+      srcPtr += 3;
     }
+    dstPtr += dstPad;
   }
 }
 
@@ -546,54 +550,43 @@ void ClientConnection::FilterGradient24 (int srcx, int srcy, int numRows)
 
 void ClientConnection::FilterPalette(int srcx, int srcy, int numRows)
 {
-  int x, y, b, w;
-  CARD8 *src = (CARD8 *)m_netbuf;
-  CARD32 *dst = (CARD32 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];
-  int dstw = fb.pitch / fbx_ps[fb.format];
+  CARD8 *srcPtr = (CARD8 *)m_netbuf;
+  CARD32 *dstPtr = (CARD32 *)&fb.bits[srcy * fb.pitch +
+                                      srcx * fbx_ps[fb.format]];
+  int dstPad = fb.pitch / fbx_ps[fb.format] - m_tightRectWidth;
 
   if (m_tightRectColors == 2) {
-    w = (m_tightRectWidth + 7) / 8;
-    for (y = 0; y < numRows; y++) {
-      for (x = 0; x < m_tightRectWidth / 8; x++) {
-        for (b = 7; b >= 0; b--)
-          dst[y * dstw + x * 8 + 7 - b] =
-            m_tightPalette[src[y * w + x] >> b & 1];
+    int remainder = m_tightRectWidth % 8;
+    int w8 = m_tightRectWidth - remainder;
+    while (numRows-- > 0) {
+      CARD32 *dstEndOfRow = dstPtr + w8;
+      while (dstPtr < dstEndOfRow) {
+        CARD8 bits = *srcPtr++;
+        *dstPtr++ = m_tightPalette[bits >> 7 & 1];
+        *dstPtr++ = m_tightPalette[bits >> 6 & 1];
+        *dstPtr++ = m_tightPalette[bits >> 5 & 1];
+        *dstPtr++ = m_tightPalette[bits >> 4 & 1];
+        *dstPtr++ = m_tightPalette[bits >> 3 & 1];
+        *dstPtr++ = m_tightPalette[bits >> 2 & 1];
+        *dstPtr++ = m_tightPalette[bits >> 1 & 1];
+        *dstPtr++ = m_tightPalette[bits & 1];
       }
-      for (b = 7; b >= 8 - m_tightRectWidth % 8; b--) {
-        dst[y * dstw + x * 8 + 7 - b] =
-          m_tightPalette[src[y * w + x] >> b & 1];
+      if (remainder != 0) {
+        CARD8 bits = *srcPtr++;
+        for (int b = 7; b >= 8 - remainder; b--) {
+          *dstPtr++ = m_tightPalette[bits >> b & 1];
+        }
       }
+      dstPtr += dstPad;
     }
   } else {
-    for (y = 0; y < numRows; y++)
-      for (x = 0; x < m_tightRectWidth; x++)
-        dst[y * dstw + x] = m_tightPalette[(int)src[y * m_tightRectWidth + x]];
-  }
-}
-
-
-void ClientConnection::FilterPalette24 (int srcx, int srcy, int numRows)
-{
-  int x, y, b, w, dstps = fbx_ps[fb.format];
-  CARD8 *src = (CARD8 *)m_netbuf;
-  CARD8 *dst = (CARD8 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];
-
-  if (m_tightRectColors == 2) {
-    w = (m_tightRectWidth + 7) / 8;
-    for (y = 0; y < numRows; y++) {
-      for (x = 0; x < m_tightRectWidth / 8; x++)
-        for (b = 7; b >= 0; b--)
-          memcpy(&dst[y * fb.pitch + (x * 8 + 7 - b) * dstps],
-                 &m_tightPalette[src[y * w + x] >> b & 1], 3);
-      for (b = 7; b >= 8 - m_tightRectWidth % 8; b--)
-        memcpy(&dst[y * fb.pitch + (x * 8 + 7 - b) * dstps],
-               &m_tightPalette[src[y * w + x] >> b & 1], 3);
+    while (numRows-- > 0) {
+      CARD32 *dstEndOfRow = dstPtr + m_tightRectWidth;
+      while (dstPtr < dstEndOfRow) {
+        *dstPtr++ = m_tightPalette[*srcPtr++];
+      }
+      dstPtr += dstPad;
     }
-  } else {
-    for (y = 0; y < numRows; y++)
-      for (x = 0; x < m_tightRectWidth; x++)
-        memcpy(&dst[y * fb.pitch + x * dstps],
-               &m_tightPalette[(int)src[y * m_tightRectWidth + x]], 3);
   }
 }
 

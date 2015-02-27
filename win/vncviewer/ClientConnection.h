@@ -190,7 +190,6 @@ class ClientConnection : public omni_thread
     void FilterGradient24 (int srcx, int srcy, int numRows);
     void FilterGradient32 (int srcx, int srcy, int numRows);
     void FilterPalette (int srcx, int srcy, int numRows);
-    void FilterPalette24 (int srcx, int srcy, int numRows);
     void DecompressJpegRect(int x, int y, int w, int h);
 
     bool zlibDecompress(unsigned char *from_buf, unsigned char *to_buf,
