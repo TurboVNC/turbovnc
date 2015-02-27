@@ -210,7 +210,8 @@ int gcd(int a, int b)
 
 void VNCOptions::FixScaling()
 {
-  if (m_scale_num < 1 || m_scale_den < 1) {
+  if (m_scale_num < 1 || m_scale_den < 1 ||
+      m_scale_num * 100 / m_scale_den > MAX_SCALING_FACTOR) {
     MessageBox(NULL, "Invalid scale factor - resetting to normal scale",
                "Argument error", MB_OK | MB_TOPMOST | MB_ICONWARNING);
     m_scale_num = 1;
@@ -231,6 +232,10 @@ bool VNCOptions::ParseScalingFactor(char *scaleString, bool &fitWindow,
     scale_num = scale_den = 100;
     return true;
   } else {
+    for (int i = 0; i < strlen(scaleString); i++) {
+      if (scaleString[i] < '0' || scaleString[i] > '9')
+        scaleString[i] = ' ';
+    }
     long sf = strtol(scaleString, NULL, 10);
     if (sf >= 1 && sf <= MAX_SCALING_FACTOR) {
       fitWindow = false;
