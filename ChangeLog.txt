@@ -47,7 +47,7 @@ The "turbovnc.forcealpha" Java system property can be used to override the
 default behavior described above (refer to User's Guide.)
 -------------------------------------------------------------------------------
 [8]
-Normally, Java2D uses Direct3D by default for blitting (image drawing) on
+Normally, Java 2D uses Direct3D by default for blitting (image drawing) on
 Windows platforms, but GDI blitting is almost always faster (sometimes much
 faster.)  Thus, the Java TurboVNC Viewer now attempts to disable Direct3D
 blitting on Windows unless it is specifically requested (which can be
