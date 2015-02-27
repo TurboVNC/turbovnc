@@ -15,4 +15,4 @@ if "%JAVA_HOME%"=="" (
 set JAVAW=%JAVAW:"=%
 
 :start
-start /b "" "%JAVAW%" -server -Djava.library.path=java -jar java\VncViewer.jar -reqarch @REQARCH@ %*
+start /b "" "%JAVAW%" -server -Dsun.java2d.d3d=false -Djava.library.path=java -jar java\VncViewer.jar -reqarch @REQARCH@ %*

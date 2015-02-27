@@ -46,6 +46,18 @@ alpha-enabled pixel format on non-Mac platforms if it detects that OpenGL Java
 The "turbovnc.forcealpha" Java system property can be used to override the
 default behavior described above (refer to User's Guide.)
 -------------------------------------------------------------------------------
+[8]
+Normally, Java2D uses Direct3D by default for blitting (image drawing) on
+Windows platforms, but GDI blitting is almost always faster (sometimes much
+faster.)  Thus, the Java TurboVNC Viewer now attempts to disable Direct3D
+blitting on Windows unless it is specifically requested (which can be
+accomplished by setting the "sun.java2d.d3d" system property to "true".)
+Because Direct3D blitting can't be disabled programmatically under Java 1.6 and
+earlier, the vncviewer-java.bat script and the Windows start menu shortcut now
+pass -Dsun.java2d.d3d=false to java to ensure that Direct3D blitting is
+always disabled when the Java TurboVNC Viewer is run as a standalone
+application.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
