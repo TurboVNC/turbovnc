@@ -165,6 +165,7 @@ class ClientConnection : public omni_thread
     void ReadZlibRect(rfbFramebufferUpdateRectHeader *pfburh);
 
     void ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh);
+    void ReadExtendedDesktopSize(rfbFramebufferUpdateRectHeader *pfburh);
 
     void InitSetPixels(void);
     setPixelsFunc setPixels;
@@ -260,6 +261,9 @@ class ClientConnection : public omni_thread
                                                        int y, int w, int h);
     void SendFence(CARD32 flags, unsigned len, const char *data);
     void ReadFence(void);
+
+    // Desktop resizing
+    bool supportsSetDesktopSize;
 
     // ClientConnectionTunnel.cpp
     void SetupSSHTunnel(void);

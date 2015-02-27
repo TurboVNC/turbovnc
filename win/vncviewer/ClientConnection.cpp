@@ -1,4 +1,5 @@
 //  Copyright (C) 2009-2013, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright 2009 Pierre Ossman for Cendio AB
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -48,6 +49,8 @@ extern "C" {
 #include "vncauth.h"
 #include "d3des.h"
 }
+#include "ScreenSet.h"
+#include "screenTypes.h"
 
 #define INITIALNETBUFSIZE 4096
 #define MAX_ENCODINGS 20
@@ -195,6 +198,8 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   supportsFence = false;
   supportsSyncFence = false;
   pendingSyncFence = false;
+
+  supportsSetDesktopSize = false;
 
   tDecode = tBlit = tRead = 0.0;
   decodePixels = blitPixels = 0;
@@ -1875,6 +1880,7 @@ void ClientConnection::SetFormatAndEncodings()
   // Notify the server that we support LastRect and NewFBSize encodings
   encs[se->nEncodings++] = Swap32IfLE(rfbEncodingLastRect);
   encs[se->nEncodings++] = Swap32IfLE(rfbEncodingNewFBSize);
+  encs[se->nEncodings++] = Swap32IfLE(rfbEncodingExtendedDesktopSize);
   if (m_opts.m_CU) {
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingContinuousUpdates);
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingFence);
@@ -3239,8 +3245,14 @@ void ClientConnection::ReadScreenUpdate()
       if (m_opts.m_benchFile) tBlit += getTime() - tBlitStart;
       break;
     }
+
     if (surh.encoding == rfbEncodingNewFBSize) {
       ReadNewFBSize(&surh);
+      break;
+    }
+
+    if (surh.encoding == rfbEncodingExtendedDesktopSize) {
+      ReadExtendedDesktopSize(&surh);
       break;
     }
 
@@ -3652,6 +3664,47 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
 
   SizeWindow(false);
   RealiseFullScreenMode(true);
+}
+
+
+void ClientConnection::ReadExtendedDesktopSize(
+  rfbFramebufferUpdateRectHeader *pfburh)
+{
+  typedef struct { unsigned char screens, pad[3]; } screens;
+  screens s;
+  unsigned int i;
+  ScreenSet layout;
+
+  ReadExact((char *)&s, sizeof(s));
+
+  for (i = 0; i < s.screens; i++) {
+    rfbScreenDesc screen;
+    ReadExact((char *)&screen, sizeof(screen));
+
+    screen.id = Swap32IfLE(screen.id);
+    screen.x = Swap16IfLE(screen.x);
+    screen.y = Swap16IfLE(screen.y);
+    screen.w = Swap16IfLE(screen.w);
+    screen.h = Swap16IfLE(screen.h);
+    screen.flags = Swap32IfLE(screen.flags);
+
+    layout.add_screen(Screen(screen.id, screen.x, screen.y, screen.w, screen.h,
+                             screen.flags));
+  }
+
+  int reason = pfburh->r.x, result = pfburh->r.y;
+
+  if ((reason == (signed)reasonClient) && (result != (signed)resultSuccess)) {
+    vnclog.Print(-1, "ReadExtendedDesktopSize failed: %d\n", result);
+    return;
+  }
+
+  if (!layout.validate(pfburh->r.w, pfburh->r.h))
+    vnclog.Print(-1, "Server sent us an invalid screen layout\n");
+
+  supportsSetDesktopSize = true;
+
+  ReadNewFBSize(pfburh);
 }
 
 
