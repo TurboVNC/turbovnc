@@ -30,7 +30,7 @@ $USER's $DESKTOP desktop ($DISPLAY)
      you to adjust connection parameters prior to connecting, or even to
      connect to a completely different server.) -->
 <param name=AlwaysShowConnectionDialog value="0">
-<param name=java_version value="1.6+">
+<param name=java_version value="1.5+">
 <!-- Improve performance -->
 <param name=java_arguments value="-server -Dsun.java2d.d3d=false">
 <!-- Any additional parameters passed in the URL, e.g.:
