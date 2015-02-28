@@ -310,7 +310,22 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     cp.setPF(pendingPF);
     pendingPFChange = false;
 
-    recreateViewport();
+    try {
+      SwingUtilities.invokeAndWait(new Runnable() {
+        public void run() {
+          recreateViewport();
+        }
+      });
+    } catch (InterruptedException e) {
+    } catch (java.lang.reflect.InvocationTargetException e) {
+      Throwable cause = e.getCause();
+      if (cause instanceof ErrorException)
+        throw (ErrorException)cause;
+      if (cause instanceof WarningException)
+        throw (WarningException)cause;
+      else
+        throw new SystemException(e.toString());
+    }
   }
 
   // setDesktopSize() is called when the desktop size changes (including when
@@ -382,6 +397,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         SwingUtilities.invokeAndWait(this);
       } catch (InterruptedException e) {
       } catch (java.lang.reflect.InvocationTargetException e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof ErrorException)
+          throw (ErrorException)cause;
+        if (cause instanceof WarningException)
+          throw (WarningException)cause;
+        else
+          throw new SystemException(e.toString());
       }
       newViewport--;
     } else
@@ -653,11 +675,31 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     if ((cp.width == 0) && (cp.height == 0))
       return;
-    if ((desktop.width() == cp.width) && (desktop.height() == cp.height))
-      return;
 
-    desktop.resize();
-    recreateViewport();
+    if ((desktop.width() == cp.width) && (desktop.height() == cp.height) &&
+        (desktop.im.width() == cp.width) &&
+        (desktop.im.height() == cp.height)) {
+      desktop.setScaledSize();
+      return;
+    }
+
+    try {
+      SwingUtilities.invokeAndWait(new Runnable() {
+        public void run() {
+          desktop.resize();
+          reconfigureViewport(false);
+        }
+      });
+    } catch (InterruptedException e) {
+    } catch (java.lang.reflect.InvocationTargetException e) {
+      Throwable cause = e.getCause();
+      if (cause instanceof ErrorException)
+        throw (ErrorException)cause;
+      if (cause instanceof WarningException)
+        throw (WarningException)cause;
+      else
+        throw new SystemException(e.toString());
+    }
   }
 
   // recreateViewport() recreates our top-level window.  This seems to be
@@ -670,7 +712,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   private void recreateViewport() { recreateViewport(false); }
 
   private void recreateViewport(boolean restore) {
-    boolean fullScreen = opts.fullScreen;
     if (viewport != null) {
       if (opts.fullScreen) {
         savedState = viewport.getExtendedState();
@@ -680,26 +721,23 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       viewport.dispose();
     }
     viewport = new Viewport(this);
-    if (opts.fullScreen && viewport.lionFSSupported()) {
-      // If we get here, it means that the viewer was started in Lion
-      // full-screen mode, so we need to create the viewport as if full-screen
-      // mode was disabled.
-      opts.fullScreen = false;
-    }
-    viewport.setUndecorated(opts.fullScreen);
+    // When in Lion full-screen mode, we need to create the viewport as if
+    // full-screen mode was disabled.
+    boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
+    viewport.setUndecorated(fullScreen);
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
-    if (fullScreen && viewport.lionFSSupported()) {
-      opts.fullScreen = fullScreen;
+    if (opts.fullScreen && viewport.lionFSSupported())
       viewport.toggleLionFS();
-    }
     desktop.requestFocusInWindow();
-    newViewport = 2;
   }
 
-  public Rectangle getSpannedSize(boolean fullScreen) {
+  public Rectangle getSpannedSize() {
+    boolean fullScreen = opts.fullScreen &&
+                         (!VncViewer.os.startsWith("mac os x") ||
+                          viewport.lionFSSupported());
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
     Rectangle primary = null, s0 = null;
@@ -793,33 +831,31 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   // Resize non-full-screen window based on the spanning option
   public void sizeWindow() {
-    boolean pack = true;
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
-    Rectangle span = getSpannedSize(false);
-
-    if (opts.fullScreen) return;
-
-    if (opts.scalingFactor == Options.SCALE_AUTO ||
-        opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+    Rectangle span = getSpannedSize();
+    if ((opts.scalingFactor == Options.SCALE_AUTO ||
+         opts.scalingFactor == Options.SCALE_FIXEDRATIO) && !opts.fullScreen) {
       w = cp.width;
       h = cp.height;
-      pack = false;
     }
 
-    if (w >= span.width) {
+    if (w >= span.width)
       w = span.width;
-      pack = false;
-    }
-    if (h >= span.height) {
+    if (h >= span.height)
       h = span.height;
-      pack = false;
-    }
 
     viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
-    viewport.setGeometry(x, y, w, h, pack);
+    if (opts.fullScreen) {
+      viewport.setGeometry(span.x, span.y, span.width, span.height);
+      viewport.dx = x - span.x;
+      viewport.dy = y - span.y;
+      return;
+    }
+
+    viewport.dx = viewport.dy = 0;
 
     // The viewport insets aren't defined until the viewport is visible, but
     // making it visible before the first setGeometry() call causes some very
@@ -829,41 +865,29 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (vpBorder.width > 0 || vpBorder.height > 0) {
       w += vpBorder.width;
       h += vpBorder.height;
-      if (w >= span.width) {
+      if (w >= span.width)
         w = span.width;
-        pack = false;
-      }
-      if (h >= span.height) {
+      if (h >= span.height)
         h = span.height;
-        pack = false;
-      }
       x = (span.width - w) / 2 + span.x;
       y = (span.height - h) / 2 + span.y;
-      viewport.setGeometry(x, y, w, h, pack);
     }
+    viewport.setGeometry(x, y, w, h);
   }
 
-  private void reconfigureViewport() { reconfigureViewport(false); }
-
   private void reconfigureViewport(boolean restore) {
+    boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
     desktop.setScaledSize();
-    if (opts.fullScreen) {
-      // NOTE: We have to use the work area on OS X, because there is no way
-      // to hide the menu bar in full-screen mode.
-      Rectangle span = getSpannedSize(!VncViewer.os.startsWith("mac os x"));
-      viewport.setExtendedState(JFrame.NORMAL);
-      viewport.setGeometry(span.x, span.y, span.width,
-                           span.height, false);
+    if (!fullScreen && savedRect.width > 0 && savedRect.height > 0 &&
+        restore) {
+      if (savedState >= 0)
+        viewport.setExtendedState(savedState);
+      viewport.setGeometry(savedRect.x, savedRect.y, savedRect.width,
+                           savedRect.height);
     } else {
-      if (savedRect.width > 0 && savedRect.height > 0 && restore) {
-        if (savedState >= 0)
-          viewport.setExtendedState(savedState);
-        viewport.setGeometry(savedRect.x, savedRect.y, savedRect.width,
-                             savedRect.height, false);
-      } else {
-        sizeWindow();
-      }
+      sizeWindow();
     }
+    newViewport = 2;
   }
 
   // requestNewUpdate() requests an update from the server, having set the
