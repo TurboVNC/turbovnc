@@ -116,6 +116,19 @@ rectangles |
 	force the viewer to use its own built-in cross-platform "pseudo-full-screen"
 	feature instead.  This is useful mainly for testing.
 
+| Java System Property | ''turbovnc.swingdb = ''__''0 \| 1''__ |
+| Summary | Disable/enable Swing double buffering |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: The Java TurboVNC Viewer has its own double buffering
+	mechanism, so it normally disables the double buffering mechanism in Swing
+	and Java 2D in order to increase performance.  This also allows the viewer to
+	achieve optimal performance under X11 without requiring MIT-SHM pixmap
+	support.  Although the viewer has been thoroughly tested, the
+	''turbovnc.swingdb'' system property is provided as a fallback in case issues
+	are discovered when running it under a specific version of Java.
+
 | Java System Property | ''turbovnc.turbojpeg = ''__''0 \| 1''__ |
 | Summary | Disable/enable JPEG acceleration |
 | Default Value | Enabled if the libjpeg-turbo JNI library is available |

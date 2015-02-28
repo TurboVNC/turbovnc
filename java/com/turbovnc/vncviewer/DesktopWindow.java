@@ -55,7 +55,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
                        CConn cc_) {
     cc = cc_;
     setSize(width, height);
-    setOpaque(true);
+    swingDB = VncViewer.getBooleanProperty("turbovnc.swingdb", false);
+    setOpaque(!swingDB);
     GraphicsEnvironment ge =
       GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice gd = ge.getDefaultScreenDevice();
@@ -247,12 +248,14 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         // because we're taking care of that ourselves.  This improves
         // performance on a lot of systems and allows the viewer to achieve
         // optimal performance under X11 without requiring MIT-SHM pixmaps.
-        RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
+        if (!swingDB)
+          RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         paintImmediately(x, y, width, height);
       } else {
         int x = (cc.viewport.dx > 0) ? cc.viewport.dx + r.tl.x : r.tl.x;
         int y = (cc.viewport.dy > 0) ? cc.viewport.dy + r.tl.y : r.tl.y;
-        RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
+        if (!swingDB)
+          RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         paintImmediately(x, y, r.width(), r.height());
       }
       damage.clear();
@@ -385,7 +388,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       g2.drawImage(im.getImage(), 0, 0, null);
     }
     g2.dispose();
-    RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
+    if (!swingDB)
+      RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
   }
 
   String oldContents = "";
@@ -650,6 +654,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   int cursorBackingX, cursorBackingY;
   java.awt.Cursor softCursor, noCursor;
   static Toolkit tk = Toolkit.getDefaultToolkit();
+  boolean swingDB;
 
   public int scaledWidth = 0, scaledHeight = 0;
   float scaleWidthRatio, scaleHeightRatio;

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-02-26T23:48:51">
+<meta name="date" content="2015-02-28T03:45:59">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2620,6 +2620,38 @@ some additional information about how Hextile, RRE, and ZRLE work.</p>
         the viewer to use its own built-in cross-platform 
         &ldquo;pseudo-full-screen&rdquo; feature instead.  This is useful mainly 
         for testing.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.swingdb&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable Swing double buffering</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        The Java TurboVNC Viewer has its own double buffering mechanism, so it 
+        normally disables the double buffering mechanism in Swing and Java 2D in 
+        order to increase performance.  This also allows the viewer to achieve 
+        optimal performance under X11 without requiring MIT-SHM pixmap support.  
+        Although the viewer has been thoroughly tested, the 
+        <code>turbovnc.swingdb</code> system property is provided as a fallback 
+        in case issues are discovered when running it under a specific version 
+        of Java.
     </dd>
 </dl>
 
