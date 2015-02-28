@@ -68,7 +68,24 @@ it now disables double buffering in Java 2D.  The primary advantage of this is
 that MIT-SHM pixmap support is no longer required on Un*x platforms in order to
 achieve optimal performance.  This also makes the viewer faster on some
 systems.  On Windows, the Java viewer is now as fast as or faster than the
-native viewer as a result of this change and [8].
+native viewer as a result of this change and [8].  You can set the
+turbovnc.swingdb system property to false to restore the old behavior.
+-------------------------------------------------------------------------------
+[11]
+Fixed multiple issues in the Java TurboVNC Viewer related to full-screen mode
+and desktop resizing and the interaction thereof.
+-- When in full-screen mode, the viewer would sometimes abort with "Destination
+buffer is not large enough" if the remote desktop size was increased.
+-- When in full-screen mode, the viewer would sometimes exit full-screen mode
+without re-entering it if the remote desktop size was changed.  This was
+particularly known to be a problem when using full-screen mode on OS X 10.7 or
+later.
+-- Fixed a couple of other timing-related issues (race conditions) that could
+sometimes occur when resizing the window or entering/exiting full-screen mode.
+These issues would cause non-fatal exceptions or other unexpected behavior.
+-- When resizing the window to the default size, the viewer would sometimes
+leave a border around the remote desktop if the remote desktop size was less
+than the local desktop size.
 -------------------------------------------------------------------------------
 
 
