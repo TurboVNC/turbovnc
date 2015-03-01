@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
- * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2011, 2015 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -21,6 +21,8 @@
 
 package com.turbovnc.rfb;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import com.turbovnc.rdr.*;
 
 abstract public class CMsgWriter {
@@ -174,12 +176,9 @@ abstract public class CMsgWriter {
     startMsg(MsgTypes.msgTypeClientCutText);
     os.pad(3);
     os.writeU32(len);
-    try {
-      byte[] utf8str = str.getBytes("UTF8");
-      os.writeBytes(utf8str, 0, len);
-    } catch (java.io.UnsupportedEncodingException e) {
-      e.printStackTrace();
-    }
+    Charset latin1 = Charset.forName("ISO-8859-1");
+    ByteBuffer bytes = latin1.encode(str);
+    os.writeBytes(bytes.array(), 0, len);
     endMsg();
   }
 

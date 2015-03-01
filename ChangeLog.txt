@@ -88,6 +88,12 @@ restored.
 The Java TurboVNC Viewer now supports the BGR555 pixel format, which is
 reported to be necessary when connecting to some embedded devices.
 -------------------------------------------------------------------------------
+[12]
+The Java TurboVNC Viewer now encodes the clipboard as ISO-8859-1 when sending
+it to the server, instead of UTF-8.  The RFB spec requires that the clipboard
+be encoded as ISO-8859-1, so it is possible that attempting to encode it as
+UTF-8 was causing problems with certain applications.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
