@@ -852,6 +852,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       viewport.setGeometry(span.x, span.y, span.width, span.height);
       viewport.dx = x - span.x;
       viewport.dy = y - span.y;
+      desktop.repaintBackground = true;
       return;
     }
 

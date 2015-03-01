@@ -378,6 +378,10 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   public void paintComponent(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
+    if (repaintBackground && !swingDB) {
+      super.paintComponent(g);
+      repaintBackground = false;
+    }
     if (cc.viewport.dx > 0 || cc.viewport.dy > 0)
       g2.translate(cc.viewport.dx, cc.viewport.dy);
     if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
@@ -654,7 +658,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   int cursorBackingX, cursorBackingY;
   java.awt.Cursor softCursor, noCursor;
   static Toolkit tk = Toolkit.getDefaultToolkit();
-  boolean swingDB;
+  boolean swingDB, repaintBackground;
 
   public int scaledWidth = 0, scaledHeight = 0;
   float scaleWidthRatio, scaleHeightRatio;
