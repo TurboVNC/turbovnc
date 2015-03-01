@@ -86,6 +86,8 @@ These issues would cause non-fatal exceptions or other unexpected behavior.
 -- When resizing the window to the default size, the viewer would sometimes
 leave a border around the remote desktop if the remote desktop size was less
 than the local desktop size.
+-- The viewer window will now be automatically resized when the span mode is
+changed.
 -------------------------------------------------------------------------------
 [12]
 The Java TurboVNC Viewer will no longer attempt to send a desktop resize
