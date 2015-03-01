@@ -1289,8 +1289,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     int index = options.span.getSelectedIndex();
     if (index >= 0 && index < Options.NUMSPANOPT)
       opts.span = index;
-    if (desktop != null && opts.span != oldSpan)
-      reconfigure = true;
+    if (desktop != null && opts.span != oldSpan) {
+      if (opts.fullScreen && !viewport.lionFSSupported())
+        recreate = true;
+      else
+        reconfigure = true;
+    }
 
     clipboardDialog.setSendingEnabled(opts.sendClipboard);
     VncViewer.menuKey.setParam(
