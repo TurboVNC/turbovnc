@@ -129,8 +129,7 @@ public class Viewport extends JFrame {
                 Dimension availableSize = cc.viewport.getAvailableSize();
                 if (availableSize.width < 1 || availableSize.height < 1)
                   throw new ErrorException("Unexpected zero-size component");
-                cc.pendingClientResize = true;
-                cc.sendDesktopSize(availableSize.width, availableSize.height);
+                cc.sendDesktopSize(availableSize.width, availableSize.height, true);
               }
             };
             timer = new Timer(500, actionListener);
@@ -144,8 +143,11 @@ public class Viewport extends JFrame {
         }
         if (cc.desktop.cursor != null) {
           Cursor cursor = cc.desktop.cursor;
-          cc.setCursor(cursor.width(), cursor.height(), cursor.hotspot,
-                       (int[])cursor.data, cursor.mask);
+          if (cursor.hotspot != null)
+            // hotspot will be null until the first cursor update is received
+            // from the server.
+            cc.setCursor(cursor.width(), cursor.height(), cursor.hotspot,
+                         (int[])cursor.data, cursor.mask);
         }
         if (((sp.getSize().width > cc.desktop.scaledWidth) ||
              (sp.getSize().height > cc.desktop.scaledHeight)) &&
@@ -177,6 +179,7 @@ public class Viewport extends JFrame {
   }
 
   public Dimension getBorderSize() {
+    // The viewport insets aren't defined until the viewport is visible
     if (!isVisible())
       setVisible(true);
     Insets vpInsets = getInsets();
@@ -204,8 +207,7 @@ public class Viewport extends JFrame {
         updateMacMenuFS();
         showToolbar(cc.showToolbar);
       } else if (method.getName().equals("windowEnteredFullScreen")) {
-        Rectangle span = cc.getSpannedSize(true);
-        setGeometry(span.x, span.y, span.width, span.height, false);
+        cc.sizeWindow();
       }
       return null;
     }
@@ -276,15 +278,10 @@ public class Viewport extends JFrame {
     sp.getViewport().setView(child);
   }
 
-  public void setGeometry(int x, int y, int w, int h, boolean pack) {
-    if (pack) {
-      pack();
-      vlog.debug("Set geometry to " + x + ", " + y + " (pack)");
-    } else {
-      setSize(w, h);
-      vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
-    }
+  public void setGeometry(int x, int y, int w, int h) {
+    setSize(w, h);
     setLocation(x, y);
+    vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
   }
 
   public void showToolbar(boolean show) { showToolbar(show, false); }
