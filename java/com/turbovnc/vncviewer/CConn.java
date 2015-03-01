@@ -846,7 +846,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (h >= span.height)
       h = span.height;
 
-    viewport.setExtendedState(JFrame.NORMAL);
+    if (viewport.getExtendedState() != JFrame.ICONIFIED)
+      viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
     if (fullScreen) {
