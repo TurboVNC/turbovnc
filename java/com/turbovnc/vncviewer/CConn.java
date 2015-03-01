@@ -98,7 +98,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
-    cp.supportsSetDesktopSize = true;
     cp.supportsClientRedirect = VncViewer.clientRedirect.getValue();
     cp.supportsDesktopRename = true;
     initMenu();

@@ -87,6 +87,12 @@ These issues would cause non-fatal exceptions or other unexpected behavior.
 leave a border around the remote desktop if the remote desktop size was less
 than the local desktop size.
 -------------------------------------------------------------------------------
+[12]
+The Java TurboVNC Viewer will no longer attempt to send a desktop resize
+message to servers that don't support it.  This fixes a "Broken pipe" error
+that occurred when the -desktopsize parameter was used when connecting to the
+TurboVNC 1.2.x Server (or earlier versions.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
