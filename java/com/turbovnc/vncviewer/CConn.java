@@ -1257,7 +1257,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void getOptions() {
-    boolean recreate = false;
+    boolean recreate = false, reconfigure = false;
 
     if (opts.allowJpeg != options.allowJpeg.isSelected())
       encodingChange = true;
@@ -1296,9 +1296,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       firstUpdate = true;
     }
 
+    int oldSpan = opts.span;
     int index = options.span.getSelectedIndex();
     if (index >= 0 && index < Options.NUMSPANOPT)
       opts.span = index;
+    if (desktop != null && opts.span != oldSpan)
+      reconfigure = true;
 
     clipboardDialog.setSendingEnabled(opts.sendClipboard);
     VncViewer.menuKey.setParam(
@@ -1323,6 +1326,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       toggleFullScreen();
     else if (recreate)
       recreateViewport();
+    else if (reconfigure)
+      reconfigureViewport(false);
   }
 
   public boolean supportsSetDesktopSize() {

@@ -149,6 +149,8 @@ native viewer as a result of this change and [8].
 By default, the embedded HTTP server in the TurboVNC Server will now serve up a
 JNLP (Java Web Start) file for the session instead of an applet.  You can add
 /applet to the URL to instruct the HTTP server to serve up an applet instead.
+-- The viewer window will now be automatically resized when the span mode is
+changed.
 -------------------------------------------------------------------------------
 
 
