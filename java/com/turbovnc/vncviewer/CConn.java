@@ -830,11 +830,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   // Resize non-full-screen window based on the spanning option
   public void sizeWindow() {
+    boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
     Rectangle span = getSpannedSize();
+
     if ((opts.scalingFactor == Options.SCALE_AUTO ||
-         opts.scalingFactor == Options.SCALE_FIXEDRATIO) && !opts.fullScreen) {
+         opts.scalingFactor == Options.SCALE_FIXEDRATIO) && !fullScreen) {
       w = cp.width;
       h = cp.height;
     }
@@ -847,7 +849,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
-    if (opts.fullScreen) {
+    if (fullScreen) {
       viewport.setGeometry(span.x, span.y, span.width, span.height);
       viewport.dx = x - span.x;
       viewport.dy = y - span.y;
