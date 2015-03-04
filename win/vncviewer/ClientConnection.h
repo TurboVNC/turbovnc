@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012-2013 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012-2013, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -144,7 +144,8 @@ class ClientConnection : public omni_thread
 
     void ReadScreenUpdate();
     void Update(RECT *pRect);
-    void SizeWindow(bool centered, bool initial = false);
+    void SizeWindow(bool centered, bool resizeFullScreen = false);
+    void PositionWindow(RECT &fullwinrect, bool centered);
     void PositionChildWindow();
     bool ScrollScreen(int dx, int dy);
     void UpdateScrollbars();

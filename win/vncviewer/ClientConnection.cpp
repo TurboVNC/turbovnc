@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2013 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2013, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -1450,17 +1450,9 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 }
 
 
-void ClientConnection::SizeWindow(bool centered, bool initial)
+void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen)
 {
-  if (InFullScreenMode() && !initial) return;
-
-  // Find how large the desktop work area is
-  RECT screenArea, workrect;
-  GetFullScreenMetrics(screenArea, workrect);
-  int workwidth = workrect.right -  workrect.left;
-  int workheight = workrect.bottom - workrect.top;
-  vnclog.Print(2, "Screen work area is %d x %d\n",
-               workwidth, workheight);
+  if (InFullScreenMode() && !resizeFullScreen) return;
 
   RECT fullwinrect;
 
@@ -1472,6 +1464,26 @@ void ClientConnection::SizeWindow(bool centered, bool initial)
     SetRect(&fullwinrect, 0, 0,
             m_si.framebufferWidth, m_si.framebufferHeight);
   }
+
+  PositionWindow(fullwinrect, centered);
+  PositionChildWindow();
+  if (m_opts.m_FitWindow && !InFullScreenMode()) {
+    RECT clirect;
+    SetRect(&clirect, 0, 0, m_cliwidth, m_cliheight);
+    PositionWindow(clirect, centered);
+  }
+}
+
+
+void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered)
+{
+  // Find how large the desktop work area is
+  RECT screenArea, workrect;
+  GetFullScreenMetrics(screenArea, workrect);
+  int workwidth = workrect.right - workrect.left;
+  int workheight = workrect.bottom - workrect.top;
+  vnclog.Print(2, "Screen work area is %d x %d\n",
+               workwidth, workheight);
 
   AdjustWindowRectEx(&fullwinrect, GetWindowLong(m_hwnd, GWL_STYLE),
                      FALSE, GetWindowLong(m_hwnd, GWL_EXSTYLE));
@@ -1493,7 +1505,7 @@ void ClientConnection::SizeWindow(bool centered, bool initial)
     fullwinrect.bottom = fullwinrect.bottom + rtb.bottom - rtb.top - 3;
   }
 
-  m_winwidth  = min(fullwinrect.right - fullwinrect.left,  workwidth);
+  m_winwidth  = min(fullwinrect.right - fullwinrect.left, workwidth);
   m_winheight = min(fullwinrect.bottom - fullwinrect.top, workheight);
   if ((fullwinrect.right - fullwinrect.left > workwidth) &&
       (workheight - m_winheight >= 16)) {
@@ -1511,6 +1523,8 @@ void ClientConnection::SizeWindow(bool centered, bool initial)
   if (centered) {
     x = (workwidth - m_winwidth) / 2;
     y = (workheight - m_winheight) / 2;
+    if (winplace.showCmd != SW_SHOWMINIMIZED)
+      winplace.showCmd = SW_SHOWNORMAL;
   } else {
     // Try to preserve current position if possible
     GetWindowPlacement(m_hwnd1, &winplace);
@@ -1535,7 +1549,6 @@ void ClientConnection::SizeWindow(bool centered, bool initial)
   winplace.rcNormalPosition.bottom = y + m_winheight;
   SetWindowPlacement(m_hwnd1, &winplace);
   SetForegroundWindow(m_hwnd1);
-  PositionChildWindow();
 }
 
 
@@ -1610,7 +1623,6 @@ void ClientConnection::PositionChildWindow()
       m_fullwinheight = fullwinrect.bottom - fullwinrect.top;
     }
   }
-
 
   int x, y;
   if (parentwidth  > m_fullwinwidth) {
@@ -2118,9 +2130,9 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
         }
         case IDC_OPTIONBUTTON:
         {
-          if (SetForegroundWindow(_this->m_opts.m_hParent) != 0) return 0;
           int prev_scale_num = _this->m_opts.m_scale_num;
           int prev_scale_den = _this->m_opts.m_scale_den;
+          int prev_span = _this->m_opts.m_Span;
           bool prev_FullScreen = _this->m_opts.m_FullScreen;
 
           COND_UNGRAB_KEYBOARD
@@ -2131,9 +2143,11 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
               _this->PositionChildWindow();
             } else {
               if (prev_scale_num != _this->m_opts.m_scale_num ||
-                prev_scale_den != _this->m_opts.m_scale_den) {
-                // Resize the window if scaling factors were changed
-                _this->SizeWindow(false);
+                prev_scale_den != _this->m_opts.m_scale_den ||
+                prev_span != _this->m_opts.m_Span) {
+                // Resize the window if scaling factors or spanning mode
+                // were changed
+                _this->SizeWindow(true, true);
                 InvalidateRect(_this->m_hwnd, NULL, FALSE);
               }
             }
@@ -2148,6 +2162,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
                                   KEY_VNCVIEWER_HISTORY);
           _this->EnableFullControlOptions();
           _this->SetWindowTitle();
+          if (SetForegroundWindow(_this->m_opts.m_hParent) != 0) return 0;
           COND_REGRAB_KEYBOARD
           return 0;
         }
@@ -2192,7 +2207,6 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
         case ID_DEFAULT_WINDOW_SIZE:
           // Reset window geometry to default (taking into account spanning
           // option)
-          ShowWindow(_this->m_hwnd1, SW_NORMAL);
           _this->SizeWindow(true);
           return 0;
         case ID_REQUEST_REFRESH:
@@ -3560,7 +3574,7 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
 
   CreateLocalFramebuffer();
 
-  SizeWindow(false);
+  SizeWindow(true, true);
   RealiseFullScreenMode(true);
 }
 
