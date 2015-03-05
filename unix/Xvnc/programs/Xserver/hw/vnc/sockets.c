@@ -20,7 +20,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -469,7 +469,9 @@ ReadExact(sock, buf, len)
     struct timeval tv;
 
     while (len > 0) {
-        n = read(sock, buf, len);
+        do {
+          n = read(sock, buf, len);
+        } while (n < 0 && errno == EINTR);
 
         if (n > 0) {
 
@@ -489,7 +491,9 @@ ReadExact(sock, buf, len)
             FD_SET(sock, &fds);
             tv.tv_sec = rfbMaxClientWait / 1000;
             tv.tv_usec = (rfbMaxClientWait % 1000) * 1000;
-            n = select(sock + 1, &fds, NULL, NULL, &tv);
+            do {
+              n = select(sock + 1, &fds, NULL, NULL, &tv);
+            } while (n < 0 && errno == EINTR);
             if (n < 0) {
                 rfbLogPerror("ReadExact: select");
                 return n;
@@ -557,7 +561,9 @@ WriteExact(sock, buf, len)
 
 
     while (len > 0) {
-        n = write(sock, buf, len);
+        do {
+          n = write(sock, buf, len);
+        } while (n < 0 && errno == EINTR);
 
         if (n > 0) {
 
@@ -584,7 +590,9 @@ WriteExact(sock, buf, len)
             FD_SET(sock, &fds);
             tv.tv_sec = 5;
             tv.tv_usec = 0;
-            n = select(sock + 1, NULL, &fds, NULL, &tv);
+            do {
+              n = select(sock + 1, NULL, &fds, NULL, &tv);
+            } while (n < 0 && errno == EINTR);
             if (n < 0) {
                 rfbLogPerror("WriteExact: select");
                 return n;
