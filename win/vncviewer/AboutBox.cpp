@@ -55,7 +55,7 @@ static LRESULT CALLBACK HelpDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam,
   switch (iMsg) {
     case WM_INITDIALOG:
     {
-      char buf [8192];
+      char buf[8192];
       buf[0] = 0;
       for (int i = 0; i < IDS_NUMHELP; i++) {
         if (strlen(buf) < 8191)

@@ -254,10 +254,8 @@ class ClientConnection : public omni_thread
     bool supportsSyncFence;
     bool pendingSyncFence;
 
-    void ClientConnection::HandleFence(CARD32 flags, unsigned len,
-                                       const char *data);
-    void ClientConnection::SendEnableContinuousUpdates(bool enable, int x,
-                                                       int y, int w, int h);
+    void HandleFence(CARD32 flags, unsigned len, const char *data);
+    void SendEnableContinuousUpdates(bool enable, int x, int y, int w, int h);
     void SendFence(CARD32 flags, unsigned len, const char *data);
     void ReadFence(void);
 
