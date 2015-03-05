@@ -49,7 +49,6 @@ extern "C" {
 #include "vncauth.h"
 #include "d3des.h"
 }
-#include "ScreenSet.h"
 #include "screenTypes.h"
 
 #define INITIALNETBUFSIZE 4096
@@ -199,7 +198,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   supportsSyncFence = false;
   pendingSyncFence = false;
 
-  supportsSetDesktopSize = false;
+  m_supportsSetDesktopSize = false;
 
   tDecode = tBlit = tRead = 0.0;
   decodePixels = blitPixels = 0;
@@ -3267,7 +3266,7 @@ void ClientConnection::ReadScreenUpdate()
 
     if (surh.encoding == rfbEncodingExtendedDesktopSize) {
       ReadExtendedDesktopSize(&surh);
-      break;
+      continue;
     }
 
     if (surh.encoding == rfbEncodingXCursor ||
@@ -3390,6 +3389,19 @@ void ClientConnection::ReadScreenUpdate()
     // updates "safe".  See HandleFence() for the next step.
     if (supportsFence)
       SendFence(rfbFenceFlagRequest | rfbFenceFlagSyncNext, 0, NULL);
+
+    if (!m_supportsSetDesktopSize) {
+//      if (m_opts.m_desktopSize.mode == SIZE_AUTO)
+//        vnclog.Print(-1, "Disabling automatic desktop resizing because the server doesn't support it.\n");
+      if (m_opts.m_desktopSize.mode == SIZE_MANUAL)
+        vnclog.Print(-1, "Ignoring desktop resize request because the server doesn't support it.\n");
+      m_opts.m_desktopSize.mode = SIZE_SERVER;
+    }
+
+    if (m_opts.m_desktopSize.mode == SIZE_MANUAL)
+      SendDesktopSize(m_opts.m_desktopSize.width, m_opts.m_desktopSize.height);
+//    else if (m_opts.m_desktopSize.mode == SIZE_AUTO)
+//      SendDesktopSize(m_cliwidth, m_cliheight);
 
     firstUpdate = false;
   }
@@ -3671,8 +3683,17 @@ void ClientConnection::InvalidateScreenRect(const RECT *pRect) {
 
 void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
 {
+  if (pfburh->r.w == 0 || pfburh->r.h == 0) {
+    vnclog.Print(-1, "Ignoring invalid desktop size from server\n");
+    return;
+  }
+
   m_si.framebufferWidth = pfburh->r.w;
   m_si.framebufferHeight = pfburh->r.h;
+
+  if (continuousUpdates)
+    SendEnableContinuousUpdates(TRUE, 0, 0, m_si.framebufferWidth,
+                                m_si.framebufferHeight);
 
   CreateLocalFramebuffer();
 
@@ -3684,16 +3705,15 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
 void ClientConnection::ReadExtendedDesktopSize(
   rfbFramebufferUpdateRectHeader *pfburh)
 {
-  typedef struct { unsigned char screens, pad[3]; } screens;
-  screens s;
+  struct { unsigned char numScreens, pad[3]; } s;
   unsigned int i;
   ScreenSet layout;
 
   ReadExact((char *)&s, sizeof(s));
 
-  for (i = 0; i < s.screens; i++) {
+  for (i = 0; i < s.numScreens; i++) {
     rfbScreenDesc screen;
-    ReadExact((char *)&screen, sizeof(screen));
+    ReadExact((char *)&screen, sz_rfbScreenDesc);
 
     screen.id = Swap32IfLE(screen.id);
     screen.x = Swap16IfLE(screen.x);
@@ -3716,9 +3736,60 @@ void ClientConnection::ReadExtendedDesktopSize(
   if (!layout.validate(pfburh->r.w, pfburh->r.h))
     vnclog.Print(-1, "Server sent us an invalid screen layout\n");
 
-  supportsSetDesktopSize = true;
+  m_supportsSetDesktopSize = true;
+  m_screenLayout = layout;
 
   ReadNewFBSize(pfburh);
+}
+
+
+void ClientConnection::SendDesktopSize(int width, int height)
+{
+  ScreenSet::iterator iter;
+  ScreenSet layout;
+
+  if (!m_supportsSetDesktopSize)
+    return;
+
+  layout = m_screenLayout;
+
+  if (layout.num_screens() == 0)
+    layout.add_screen(Screen());
+  else if (layout.num_screens() != 1) {
+
+    while (true) {
+      iter = layout.begin();
+      ++iter;
+
+      if (iter == layout.end())
+        break;
+
+      layout.remove_screen(iter->id);
+    }
+  }
+
+  layout.begin()->dimensions.left = 0;
+  layout.begin()->dimensions.top = 0;
+  layout.begin()->dimensions.right = width;
+  layout.begin()->dimensions.bottom = height;
+
+  rfbSetDesktopSizeMsg msg;
+  msg.type = rfbSetDesktopSize;
+  msg.w = Swap16IfLE(width);
+  msg.h = Swap16IfLE(height);
+  msg.numScreens = layout.num_screens();
+  WriteExact((char *)&msg, sz_rfbSetDesktopSizeMsg);
+
+  for (iter = layout.begin(); iter != layout.end(); ++iter) {
+    rfbScreenDesc screen;
+    screen.id = Swap32IfLE(iter->id);
+    screen.x = Swap16IfLE(iter->dimensions.left);
+    screen.y = Swap16IfLE(iter->dimensions.top);
+    screen.w = Swap16IfLE(iter->dimensions.right);
+    screen.h = Swap16IfLE(iter->dimensions.bottom);
+    screen.flags = Swap32IfLE(iter->flags);
+    WriteExact((char *)&screen, sz_rfbScreenDesc);
+  }
 }
 
 

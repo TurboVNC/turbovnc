@@ -186,7 +186,7 @@
 #define ID_SHOWWINDOW                   40004
 #define ID_NEWCONN                      40006
 #define IDD_FILETRANSFER                40010
-#define IDS_NUMHELP                     34
+#define IDS_NUMHELP                     35
 #define IDS_HELP                        40101
 #define IDS_HELP2                       40102
 #define IDS_HELP3                       40103
@@ -221,6 +221,7 @@
 #define IDS_HELP32                      40132
 #define IDS_HELP33                      40133
 #define IDS_HELP34                      40134
+#define IDS_HELP35                      40135
 
 // Next default values for new objects
 //

@@ -67,6 +67,7 @@ VNCOptions::VNCOptions()
   m_scaling = false;
   m_scale_num = 100;
   m_scale_den = 100;
+//  m_desktopSize.set(SIZE_AUTO, 0, 0);
 
   m_display[0] = '\0';
   m_host[0] = '\0';
@@ -141,6 +142,7 @@ VNCOptions& VNCOptions::operator = (VNCOptions& s)
   m_FitWindow             = s.m_FitWindow;
   m_scale_num             = s.m_scale_num;
   m_scale_den             = s.m_scale_den;
+  m_desktopSize           = s.m_desktopSize;
   m_localCursor           = s.m_localCursor;
   m_toolbar               = s.m_toolbar;
   strcpy(m_display, s.m_display);
@@ -251,6 +253,34 @@ bool VNCOptions::ParseScalingFactor(char *scaleString, bool &fitWindow,
       fitWindow = false;
       scale_num = sf;
       scale_den = 100;
+      return true;
+    }
+  }
+  return false;
+}
+
+
+bool VNCOptions::ParseDesktopSize(char *sizeString, DesktopSize &size)
+{
+/*  if (toupper(sizeString[0]) == 'A') {
+    size.set(SIZE_AUTO, 0, 0);
+    return true;
+  } else*/ if (toupper(sizeString[0] == 'S' || !strcmp(sizeString, "0"))) {
+    size.set(SIZE_SERVER, 0, 0);
+    return true;
+  } else {
+    for (int i = 0; i < strlen(sizeString); i++) {
+      if ((sizeString[i] < '0' || sizeString[i] > '9') && sizeString[i] != 'x')
+        sizeString[i] = ' ';
+    }
+    long width, height;
+    char *ptr = strchr(sizeString, 'x');
+    if (!ptr || ptr == sizeString || strlen(ptr) < 2)
+      return false;
+    width = strtol(sizeString, NULL, 10);
+    height = strtol(ptr + 1, NULL, 10);
+    if (width >= 1 && height >= 1) {
+      size.set(SIZE_MANUAL, width, height);
       return true;
     }
   }
@@ -452,6 +482,18 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         m_scale_den = scale_den;
       } else {
         ArgError("Invalid scaling factor specified");
+        continue;
+      }
+    } else if (SwitchMatch(args[j], "desktopsize")) {
+      if (++j == i) {
+        ArgError("No desktop size specified");
+        continue;
+      }
+      DesktopSize size;
+      if (ParseDesktopSize(args[j], size)) {
+        m_desktopSize = size;
+      } else {
+        ArgError("Invalid desktop size specified");
         continue;
       }
     } else if (SwitchMatch(args[j], "emulate3timeout")) {
@@ -744,6 +786,9 @@ void VNCOptions::Save(char *fname)
   saveInt("fitwindow",          m_FitWindow,           fname);
   saveInt("scale_den",          m_scale_den,           fname);
   saveInt("scale_num",          m_scale_num,           fname);
+  saveInt("resizemode",         m_desktopSize.mode,    fname);
+  saveInt("desktopwidth",       m_desktopSize.width,   fname);
+  saveInt("desktopheight",      m_desktopSize.height,  fname);
   saveInt("cursorshape",        m_requestShapeUpdates, fname);
   saveInt("noremotecursor",     m_ignoreShapeUpdates,  fname);
   saveInt("compresslevel",      m_compressLevel,       fname);
@@ -785,6 +830,9 @@ void VNCOptions::Load(char *fname)
   m_FitWindow =           readInt("fitwindow", m_FitWindow, fname) != 0;
   m_scale_den =           readInt("scale_den", m_scale_den, fname);
   m_scale_num =           readInt("scale_num", m_scale_num, fname);
+  m_desktopSize.mode =    readInt("resizemode", m_desktopSize.mode, fname);
+  m_desktopSize.width =   readInt("desktopwidth", m_desktopSize.width, fname);
+  m_desktopSize.height =  readInt("desktopheight", m_desktopSize.height, fname);
   m_requestShapeUpdates = readInt("cursorshape", m_requestShapeUpdates, fname) != 0;
   m_ignoreShapeUpdates =  readInt("noremotecursor", m_ignoreShapeUpdates, fname) != 0;
 
@@ -1951,6 +1999,9 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
   m_FitWindow =           read(RegKey, "fitwindow", m_FitWindow) != 0;
   m_scale_den =           read(RegKey, "scale_den", m_scale_den);
   m_scale_num =           read(RegKey, "scale_num", m_scale_num);
+  m_desktopSize.mode =    read(RegKey, "resizemode", m_desktopSize.mode);
+  m_desktopSize.width =   read(RegKey, "desktopwidth", m_desktopSize.width);
+  m_desktopSize.height =  read(RegKey, "desktopheight", m_desktopSize.height);
   m_requestShapeUpdates = read(RegKey, "cursorshape", m_requestShapeUpdates) != 0;
   m_ignoreShapeUpdates =  read(RegKey, "noremotecursor", m_ignoreShapeUpdates) != 0;
 //m_noUnixLogin =         read(RegKey, "nounixlogin", m_noUnixLogin) != 0;
@@ -2035,6 +2086,9 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
   save(RegKey, "fitwindow", m_FitWindow);
   save(RegKey, "scale_den", m_scale_den);
   save(RegKey, "scale_num", m_scale_num);
+  save(RegKey, "resizemode", m_desktopSize.mode);
+  save(RegKey, "desktopwidth", m_desktopSize.width);
+  save(RegKey, "desktopheight", m_desktopSize.height);
   save(RegKey, "cursorshape", m_requestShapeUpdates);
   save(RegKey, "noremotecursor", m_ignoreShapeUpdates);
   save(RegKey, "compresslevel", m_compressLevel);

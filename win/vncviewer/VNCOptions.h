@@ -52,6 +52,21 @@ struct COMBOSTRING {
 };
 
 
+#define SIZE_SERVER 0
+#define SIZE_MANUAL 1
+#define SIZE_AUTO   2
+
+typedef struct {
+  void set(int mode_, int width_, int height_) {
+    mode = mode_;  width = width_;  height = height_;
+  }
+
+  int mode;
+  int width;
+  int height;
+} DesktopSize;
+
+
 class VNCOptions
 {
   public:
@@ -114,6 +129,7 @@ class VNCOptions
     int   m_jpegQualityLevel;
     bool  m_requestShapeUpdates;
     bool  m_ignoreShapeUpdates;
+    DesktopSize m_desktopSize;
 
     // Keyboard can be specified on command line as 8-digit hex
     char m_kbdname[9];
@@ -179,6 +195,7 @@ class VNCOptions
 
     static bool ParseScalingFactor(char *scaleString, bool &fitWindow,
                                    int &scale_num, int &scale_den);
+    static bool ParseDesktopSize(char *sizeString, DesktopSize &size);
 
     // Just for temporary use
     bool m_running;

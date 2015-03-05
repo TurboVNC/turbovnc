@@ -37,6 +37,7 @@
 #include "zlib/zlib.h"
 #include "turbojpeg.h"
 #include "fbx.h"
+#include "ScreenSet.h"
 
 #define SETTINGS_KEY_NAME "Software\\TurboVNC\\VNCviewer\\Settings"
 #define MAX_HOST_NAME_LEN 250
@@ -167,6 +168,7 @@ class ClientConnection : public omni_thread
 
     void ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh);
     void ReadExtendedDesktopSize(rfbFramebufferUpdateRectHeader *pfburh);
+    void SendDesktopSize(int width, int height);
 
     void InitSetPixels(void);
     setPixelsFunc setPixels;
@@ -260,9 +262,6 @@ class ClientConnection : public omni_thread
     void SendEnableContinuousUpdates(bool enable, int x, int y, int w, int h);
     void SendFence(CARD32 flags, unsigned len, const char *data);
     void ReadFence(void);
-
-    // Desktop resizing
-    bool supportsSetDesktopSize;
 
     // ClientConnectionTunnel.cpp
     void SetupSSHTunnel(void);
@@ -366,6 +365,10 @@ class ClientConnection : public omni_thread
     // The size of a window needed to hold entire screen without scrollbars
     int m_fullwinwidth, m_fullwinheight;
     int m_winwidth, m_winheight;
+
+    // Desktop resizing
+    bool m_supportsSetDesktopSize;
+    ScreenSet m_screenLayout;
 
     // Dormant basically means minimized;  updates will not be requested
     // while dormant.

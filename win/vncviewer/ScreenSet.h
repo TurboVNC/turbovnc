@@ -28,6 +28,11 @@
 #include <list>
 #include <set>
 
+#ifndef snprintf
+#define snprintf(str, n, format, ...)  \
+  _snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
+#endif
+
 // Screen
 //
 // Represents a single RFB virtual screen, which includes
