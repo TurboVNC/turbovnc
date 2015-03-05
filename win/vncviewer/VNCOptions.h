@@ -164,8 +164,6 @@ class VNCOptions
     static void Register();
     HWND m_hPageConnection, m_hPageGeneral, m_hTab, m_hParent, m_hWindow;
     void FixScaling();
-    static bool ParseScalingFactor(char *scaleString, bool &fitWindow,
-                                   int &scale_num, int &scale_den);
 
   private:
     void BrowseLogFile();
@@ -178,6 +176,9 @@ class VNCOptions
     void SetCompressLevel(HWND hwnd, int level);
     int GetCompressLevel(HWND hwnd);
     void SetComboBox(HWND hwnd);
+
+    static bool ParseScalingFactor(char *scaleString, bool &fitWindow,
+                                   int &scale_num, int &scale_den);
 
     // Just for temporary use
     bool m_running;
