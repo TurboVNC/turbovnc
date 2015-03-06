@@ -1,8 +1,6 @@
-JZlib 0.0.* were released under the GNU LGPL license.  Later, we have switched 
-over to a BSD-style license. 
-
-------------------------------------------------------------------------------
-Copyright (c) 2000-2011 ymnk, JCraft,Inc. All rights reserved.
+/* -*-mode:java; c-basic-offset:2; -*- */
+/*
+Copyright (c) 2011 ymnk, JCraft,Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -27,3 +25,20 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+/*
+ * This program is based on zlib-1.1.3, so all credit should go authors
+ * Jean-loup Gailly(jloup@gzip.org) and Mark Adler(madler@alumni.caltech.edu)
+ * and contributors of zlib.
+ */
+
+package com.jcraft.jzlib;
+
+public class GZIPException extends java.io.IOException {
+  public GZIPException() {
+    super();
+  }
+  public GZIPException(String s) {
+    super(s);
+  }
+}
