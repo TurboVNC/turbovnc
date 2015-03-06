@@ -161,14 +161,13 @@ connection through SSH.
 will run the viewer as a JWS app, tunnel the VNC connection through SSH, and
 enable Medium-Quality JPEG.
 
-	!!! NOTE: As of Java 7 Update 51, self-signed JARs (which includes
-	''VncViewer.jar'' in the official TurboVNC binary packages) are not allowed
-	to run in the Java browser plug-in or JWS by default.  To work around this,
-	you will need to add ''http://{turbovnc_server}:{http_port}'' (for example,
-	''http://my_server:5801'') to Java's Exception Site List, which can be found
-	under the "Security" tab in the Java Control Panel.  If you have your own
-	code signing certificate, then you can re-sign the JAR using your certificate
-	to eliminate this requirement.
+	!!! NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in
+	the Java browser plug-in or JWS by default.  This is not an issue if you are
+	using the official TurboVNC binary packages, but if you are building a
+	self-signed version of the Java TurboVNC Viewer for development purposes,
+	then you will need to add ''http://{turbovnc_server}:{http_port}''
+	(for example, ''http://my_server:5801'') to Java's Exception Site List, which
+	can be found under the "Security" tab in the Java Control Panel.
 
 	!!! NOTE: On some newer OS X systems, downloading a JNLP file may result
 	in an error: "xxxxxxxx.jnlp can't be opened because it it from an
