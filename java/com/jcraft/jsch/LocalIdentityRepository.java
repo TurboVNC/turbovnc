@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2012 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2012-2014 ymnk, JCraft,Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -73,6 +73,10 @@ class LocalIdentityRepository implements IdentityRepository {
     catch(JSchException e){
       return false;
     }
+  }
+
+  synchronized void remove(Identity identity) {
+    identities.removeElement(identity);
   }
 
   public synchronized boolean remove(byte[] blob) {

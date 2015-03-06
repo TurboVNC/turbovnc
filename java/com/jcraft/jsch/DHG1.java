@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2002-2012 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2002-2014 ymnk, JCraft,Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -173,7 +173,7 @@ System.err.println("");
       */
 
       dh.setF(f);
-      K=dh.getK();
+      K=normalize(dh.getK());
 
       //The hash H is computed as the HASH hash of the concatenation of the
       //following:

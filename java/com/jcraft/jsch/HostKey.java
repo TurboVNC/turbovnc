@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2002-2012 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2002-2014 ymnk, JCraft,Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -38,15 +38,24 @@ public class HostKey{
   public static final int SSHRSA=2;
   static final int UNKNOWN=3;
 
+  protected String marker;
   protected String host;
   protected int type;
   protected byte[] key;
+  protected String comment;
 
   public HostKey(String host, byte[] key) throws JSchException {
     this(host, GUESS, key);
   }
 
   public HostKey(String host, int type, byte[] key) throws JSchException {
+    this(host, type, key, null);
+  }
+  public HostKey(String host, int type, byte[] key, String comment) throws JSchException {
+    this("", host, type, key, comment);
+  }
+  public HostKey(String marker, String host, int type, byte[] key, String comment) throws JSchException {
+    this.marker=marker;
     this.host=host; 
     if(type==GUESS){
       if(key[8]=='d'){ this.type=SSHDSS; }
@@ -57,6 +66,7 @@ public class HostKey{
       this.type=type; 
     }
     this.key=key;
+    this.comment=comment;
   }
 
   public String getHost(){ return host; }
@@ -77,6 +87,8 @@ public class HostKey{
     catch(Exception e){ System.err.println("getFingerPrint: "+e); }
     return Util.getFingerPrint(hash, key);
   }
+  public String getComment(){ return comment; }
+  public String getMarker(){ return marker; }
 
   boolean isMatched(String _host){
     return isIncluded(_host);

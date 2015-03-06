@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2002-2012 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2002-2014 ymnk, JCraft,Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -36,7 +36,7 @@ public class JSch{
   /**
    * The version number.
    */
-  public static final String VERSION  = "0.1.48";
+  public static final String VERSION  = "0.1.51";
 
   static java.util.Hashtable config=new java.util.Hashtable();
   static{
@@ -48,8 +48,8 @@ public class JSch{
     config.put("cipher.c2s",
                "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-cbc,aes256-cbc");
 
-    config.put("mac.s2c", "hmac-md5,hmac-sha1,hmac-sha1-96,hmac-md5-96");
-    config.put("mac.c2s", "hmac-md5,hmac-sha1,hmac-sha1-96,hmac-md5-96");
+    config.put("mac.s2c", "hmac-md5,hmac-sha1,hmac-sha2-256,hmac-sha1-96,hmac-md5-96");
+    config.put("mac.c2s", "hmac-md5,hmac-sha1,hmac-sha2-256,hmac-sha1-96,hmac-md5-96");
     config.put("compression.s2c", "none");
     config.put("compression.c2s", "none");
 
@@ -64,15 +64,22 @@ public class JSch{
 	                        "com.jcraft.jsch.DHG1");
     config.put("diffie-hellman-group14-sha1", 
 	                        "com.jcraft.jsch.DHG14");
+    config.put("diffie-hellman-group-exchange-sha256", 
+               "com.jcraft.jsch.DHGEX256"); // avaibale since JDK1.4.2.
 
     config.put("dh",            "com.jcraft.jsch.jce.DH");
     config.put("3des-cbc",      "com.jcraft.jsch.jce.TripleDESCBC");
     config.put("blowfish-cbc",  "com.jcraft.jsch.jce.BlowfishCBC");
     config.put("hmac-sha1",     "com.jcraft.jsch.jce.HMACSHA1");
     config.put("hmac-sha1-96",  "com.jcraft.jsch.jce.HMACSHA196");
+    config.put("hmac-sha2-256",  "com.jcraft.jsch.jce.HMACSHA256");
+    // The "hmac-sha2-512" will require the key-length 2048 for DH,
+    // but Sun's JCE has not allowed to use such a long key.
+    //config.put("hmac-sha2-512",  "com.jcraft.jsch.jce.HMACSHA512");
     config.put("hmac-md5",      "com.jcraft.jsch.jce.HMACMD5");
     config.put("hmac-md5-96",   "com.jcraft.jsch.jce.HMACMD596");
     config.put("sha-1",         "com.jcraft.jsch.jce.SHA1");
+    config.put("sha-256",         "com.jcraft.jsch.jce.SHA256");
     config.put("md5",           "com.jcraft.jsch.jce.MD5");
     config.put("signature.dss", "com.jcraft.jsch.jce.SignatureDSA");
     config.put("signature.rsa", "com.jcraft.jsch.jce.SignatureRSA");
@@ -104,6 +111,8 @@ public class JSch{
     config.put("zlib",             "com.jcraft.jsch.jcraft.Compression");
     config.put("zlib@openssh.com", "com.jcraft.jsch.jcraft.Compression");
 
+    config.put("pbkdf", "com.jcraft.jsch.jce.PBKDF");
+
     config.put("StrictHostKeyChecking",  "ask");
     config.put("HashKnownHosts",  "no");
 
@@ -113,6 +122,7 @@ public class JSch{
     config.put("CheckKexes", "diffie-hellman-group14-sha1");
 
     config.put("MaxAuthTries", "6");
+    config.put("ClearAllForwardings", "no");
   }
 
   private java.util.Vector sessionPool = new java.util.Vector();
@@ -121,6 +131,8 @@ public class JSch{
     new LocalIdentityRepository(this);
 
   private IdentityRepository identityRepository = defaultIdentityRepository;
+
+  private ConfigRepository configRepository = null;
 
   /**
    * Sets the <code>identityRepository</code>, which will be referred
@@ -140,8 +152,16 @@ public class JSch{
     }
   }
 
-  synchronized IdentityRepository getIdentityRepository(){
+  public synchronized IdentityRepository getIdentityRepository(){
     return this.identityRepository;
+  }
+
+  public ConfigRepository getConfigRepository() {
+    return this.configRepository;
+  }
+
+  public void setConfigRepository(ConfigRepository configRepository) {
+    this.configRepository = configRepository;
   }
 
   private HostKeyRepository known_hosts=null;
@@ -153,7 +173,9 @@ public class JSch{
   static Logger logger=DEVNULL;
 
   public JSch(){
-
+    /*
+    // The JCE of Sun's Java5 on Mac OS X has the resource leak bug
+    // in calculating HMAC, so we need to use our own implementations.
     try{
       String osname=(String)(System.getProperties().get("os.name"));
       if(osname!=null && osname.equals("Mac OS X")){
@@ -165,7 +187,29 @@ public class JSch{
     }
     catch(Exception e){
     }
+    */
+  }
 
+  /**
+   * Instantiates the <code>Session</code> object with
+   * <code>host</code>.  The user name and port number will be retrieved from
+   * ConfigRepository.  If user name is not given,
+   * the system property "user.name" will be referred. 
+   *
+   * @param host hostname
+   *
+   * @throws JSchException
+   *         if <code>username</code> or <code>host</code> are invalid.
+   *
+   * @return the instance of <code>Session</code> class.
+   *
+   * @see #getSession(String username, String host, int port)
+   * @see com.jcraft.jsch.Session
+   * @see com.jcraft.jsch.ConfigRepository
+   */
+  public Session getSession(String host)
+     throws JSchException {
+    return getSession(null, host, 22);
   }
 
   /**
@@ -199,7 +243,7 @@ public class JSch{
    *
    * @param username user name
    * @param host hostname
-   * @param post port number
+   * @param port port number
    *
    * @throws JSchException
    *         if <code>username</code> or <code>host</code> are invalid.
@@ -210,16 +254,10 @@ public class JSch{
    * @see com.jcraft.jsch.Session
    */
   public Session getSession(String username, String host, int port) throws JSchException {
-    if(username==null){
-      throw new JSchException("username must not be null.");
-    }
     if(host==null){
       throw new JSchException("host must not be null.");
     }
-    Session s=new Session(this); 
-    s.setUserName(username);
-    s.setHost(host);
-    s.setPort(port);
+    Session s = new Session(this, username, host, port); 
     return s;
   }
 
@@ -418,8 +456,16 @@ public class JSch{
     if(identityRepository instanceof LocalIdentityRepository){
       ((LocalIdentityRepository)identityRepository).add(identity);
     }
+    else if(identity instanceof IdentityFile && !identity.isEncrypted()) {
+      identityRepository.add(((IdentityFile)identity).getKeyPair().forSSHAgent());
+    }
     else {
-      // TODO
+      synchronized(this){
+        if(!(identityRepository instanceof IdentityRepository.Wrapper)){
+          setIdentityRepository(new IdentityRepository.Wrapper(identityRepository));
+        }
+      }
+      ((IdentityRepository.Wrapper)identityRepository).add(identity);
     }
   }
 
@@ -433,8 +479,11 @@ public class JSch{
       Identity identity=(Identity)(identities.elementAt(i));
       if(!identity.getName().equals(name))
         continue;
-      identityRepository.remove(identity.getPublicKeyBlob());
-      break;
+      if(identityRepository instanceof LocalIdentityRepository){
+        ((LocalIdentityRepository)identityRepository).remove(identity);
+      }
+      else
+        identityRepository.remove(identity.getPublicKeyBlob());
     }
   }
 

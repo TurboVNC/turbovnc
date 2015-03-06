@@ -72,6 +72,7 @@ Features
 * envrironment variable passing.
 * remote exec.
 * generating DSA and RSA key pairs.
+* supporting private keys in OpenSSL(traditional SSLeay) and PKCS#8 format.
 * SSH File Transfer Protocol(version 0, 1, 2, 3)
 * partial authentication
 * packet compression: zlib, zlib@openssh.com

@@ -75,39 +75,44 @@ set(JSCH_CLASSNAMES
 	Session
 	UserAuth
 	UserAuthKeyboardInteractive
+	UserAuthNone
 	UserAuthPassword
 	UserAuthPublicKey
-	UserAuthNone
 	jce/AES128CBC
-	jce/AES192CTR
-	jce/ARCFOUR128
-	jce/BlowfishCBC
-	jce/HMACMD5
-	jce/KeyPairGenDSA
-	jce/Random
-	jce/SignatureRSA
 	jce/AES128CTR
-	jce/AES256CBC
-	jce/ARCFOUR256
-	jce/DH
-	jce/HMACSHA196
-	jce/KeyPairGenRSA
-	jce/SHA1
-	jce/TripleDESCBC
 	jce/AES192CBC
+	jce/AES192CTR
+	jce/AES256CBC
 	jce/AES256CTR
 	jce/ARCFOUR
+	jce/ARCFOUR128
+	jce/ARCFOUR256
+	jce/BlowfishCBC
+	jce/DH
+	jce/HMAC
+	jce/HMACMD5
 	jce/HMACMD596
 	jce/HMACSHA1
+	jce/HMACSHA196
+	jce/HMACSHA256
+	jce/HMACSHA512
+	jce/KeyPairGenDSA
+	jce/KeyPairGenRSA
 	jce/MD5
+	jce/PBKDF
+	jce/Random
+	jce/SHA1
+	jce/SHA256
 	jce/SignatureDSA
+	jce/SignatureRSA
+	jce/TripleDESCBC
 	jce/TripleDESCTR
 	jcraft/Compression
 	jcraft/HMAC
-	jcraft/HMACMD596
 	jcraft/HMACMD5
-	jcraft/HMACSHA196
-	jcraft/HMACSHA1)
+	jcraft/HMACMD596
+	jcraft/HMACSHA1
+	jcraft/HMACSHA196)
 
 foreach(class ${JSCH_CLASSNAMES})
 	set(JAVA_SOURCES ${JAVA_SOURCES} com/jcraft/jsch/${class}.java)
