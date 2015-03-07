@@ -109,16 +109,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       String serverName = null;
       int port = -1;
 
-      if (opts.via != null && opts.via.indexOf(':') >= 0 &&
+      if (opts.serverName != null &&
           !VncViewer.alwaysShowConnectionDialog.getValue()) {
-        if (opts.serverName == null)
-          throw new ErrorException("The VNC server name must be specified when using the Via parameter");
-        port = Hostname.getPort(opts.via);
-        serverName = Hostname.getHost(opts.via);
-      } else if (opts.serverName != null &&
-                 !VncViewer.alwaysShowConnectionDialog.getValue()) {
-        port = opts.port = Hostname.getPort(opts.serverName);
-        serverName = opts.serverName = Hostname.getHost(opts.serverName);
+        if (opts.via == null || opts.via.indexOf(':') < 0) {
+          port = opts.port = Hostname.getPort(opts.serverName);
+          serverName = opts.serverName = Hostname.getHost(opts.serverName);
+        }
       } else {
         ServerDialog dlg = new ServerDialog(options, opts, this);
         boolean ret = dlg.showDialog();
@@ -130,6 +126,20 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         serverName = opts.serverName;
       }
 
+      if (opts.via != null && opts.via.indexOf(':') >= 0) {
+        port = Hostname.getPort(opts.via);
+        serverName = Hostname.getHost(opts.via);
+      } else if (opts.via != null || opts.tunnel) {
+        try {
+          Tunnel.createTunnel(opts);
+          port = Hostname.getPort(opts.serverName);
+          serverName = Hostname.getHost(opts.serverName);
+        } catch(Exception e) {
+          throw new ErrorException("Could not create SSH tunnel:\n" +
+                                   e.getMessage());
+        }
+      }
+      
       sock = new TcpSocket(serverName, port);
       vlog.info("connected to host " + serverName + " port " + port);
     }
@@ -1226,11 +1236,19 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       options.secUnixLogin.setEnabled(false);
       options.secPlain.setEnabled(false);
       options.sendLocalUsername.setEnabled(false);
+      options.gateway.setEnabled(false);
+      options.sshUser.setEnabled(false);
+      options.tunnel.setEnabled(false);
     } else {
       options.shared.setSelected(opts.shared);
       options.sendLocalUsername.setSelected(opts.sendLocalUsername);
       options.secUnixLogin.setSelected(!opts.noUnixLogin);
       options.setSecurityOptions();
+      if (opts.via != null)
+        options.gateway.setText(opts.via);
+      if (opts.sshUser != null)
+        options.sshUser.setText(opts.sshUser);
+      options.tunnel.setSelected(opts.tunnel);
     }
 
     options.fullScreen.setSelected(opts.fullScreen);
@@ -1328,8 +1346,14 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     checkEncodings();
 
-    if (state() != RFBSTATE_NORMAL)
+    if (state() != RFBSTATE_NORMAL) {
       options.getSecurityOptions();
+      String gateway = options.gateway.getText();
+      opts.via = (gateway.isEmpty() ? null : gateway);
+      String sshUser = options.sshUser.getText();
+      opts.sshUser = (sshUser.isEmpty() ? null : sshUser);
+      opts.tunnel = options.tunnel.isSelected();
+    }
 
     if (options.fullScreen.isSelected() != opts.fullScreen)
       toggleFullScreen();

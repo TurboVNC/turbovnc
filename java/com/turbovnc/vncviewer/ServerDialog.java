@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,8 +198,12 @@ class ServerDialog extends Dialog implements ActionListener {
     }
 
     // set params
-    opts.serverName = Hostname.getHost(serverName);
-    opts.port = Hostname.getPort(serverName);
+    if (opts.via != null && opts.via.indexOf(':') >= 0) {
+      opts.serverName = serverName;
+    } else {
+      opts.serverName = Hostname.getHost(serverName);
+      opts.port = Hostname.getPort(serverName);
+    }
 
     // Update the history list
     String valueStr = UserPreferences.get("ServerDialog", "history");

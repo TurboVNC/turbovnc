@@ -49,7 +49,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
   JCheckBox secVeNCrypt, encNone, encTLS, encX509;
   JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent,
-    sendLocalUsername;
+    sendLocalUsername, tunnel;
+  JTextField sshUser, gateway;
   JButton okButton, cancelButton;
   JButton ca, crl;
   JButton defSaveButton, defClearButton;
@@ -461,6 +462,42 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     secVeNCrypt = new JCheckBox("Extended encryption and authentication (VeNCrypt)");
     secVeNCrypt.addItemListener(this);
+
+    JPanel gatewayPanel = new JPanel(new GridBagLayout());
+    gatewayPanel.setBorder(BorderFactory.createTitledBorder("Gateway (SSH server or UltraVNC Repeater):"));
+    gateway = new JTextField();
+    JLabel gatewayLabel = new JLabel("Host:");
+    sshUser = new JTextField();
+    JLabel sshUserLabel = new JLabel("SSH user:");
+    tunnel = new JCheckBox("Use VNC server as gateway:");
+    tunnel.addItemListener(this);
+
+    Dialog.addGBComponent(sshUserLabel, gatewayPanel,
+                          0, 0, 1, 1, 2, 2, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 8, 0, 2));
+    Dialog.addGBComponent(sshUser, gatewayPanel,
+                          1, 0, 1, 1, 2, 2, 0.7, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 2, 0, 2));
+    Dialog.addGBComponent(gatewayLabel, gatewayPanel,
+                          2, 0, 1, 1, 2, 2, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 2, 0, 2));
+    Dialog.addGBComponent(gateway, gatewayPanel,
+                          3, 0, 1, 1, 2, 2, 1, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 2, 0, 5));
+    Dialog.addGBComponent(tunnel, gatewayPanel,
+                          0, 1, 4, 1, 2, 2, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 5, 0, 5));
+
     Dialog.addGBComponent(secVeNCrypt, secPanel,
                           0, 0, 1, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
@@ -477,8 +514,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(2, 10, 2, 5));
     Dialog.addGBComponent(authPanel, secPanel,
-                          0, 3, 1, 1, 2, 2, 1, 1,
+                          0, 3, 1, 1, 2, 2, 1, 0,
                           GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(2, 10, 2, 5));
+    Dialog.addGBComponent(gatewayPanel, secPanel,
+                          0, 4, 1, 1, 2, 2, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(2, 10, 2, 5));
 
@@ -579,6 +621,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     if (!CSecurityTLS.x509crl.isDefault)
       UserPreferences.set("global", "x509crl",
                           CSecurityTLS.x509crl.getValue());
+    if (!sshUser.getText().isEmpty())
+      UserPreferences.set("global", "via", sshUser.getText() + "@" +
+                          gateway.getText());
+    else
+      UserPreferences.set("global", "via", gateway.getText());
+    UserPreferences.set("global", "tunnel", tunnel.isSelected());
 
     // Options with no GUI equivalent
     UserPreferences.set("global", "AlwaysShowConnectionDialog",
@@ -793,6 +841,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
           scalingFactor.setEnabled(!VncViewer.embed.getValue());
       }
     }
+    if (s instanceof JCheckBox && (JCheckBox)s == tunnel)
+      gateway.setEnabled(!tunnel.isSelected());
   }
 
   private void setEncMethodComboBox() {

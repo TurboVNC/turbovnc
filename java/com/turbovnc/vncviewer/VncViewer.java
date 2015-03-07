@@ -392,20 +392,6 @@ public class VncViewer extends javax.swing.JApplet
     setGlobalOptions();
 
     embed.setParam(false);
-
-    if ((opts.via != null && opts.via.indexOf(':') < 0) || opts.tunnel) {
-      alwaysShowConnectionDialog.setParam(false);
-      if (opts.serverName == null)
-        usage();
-      try {
-        Tunnel.createTunnel(opts);
-      } catch(Exception e) {
-        reportException(new WarningException("Could not create SSH tunnel:\n" +
-                                             e.getMessage()));
-        exit(1);
-      }
-    }
-
   }
 
   public static void usage() {
@@ -495,19 +481,6 @@ public class VncViewer extends javax.swing.JApplet
         LogWriter.setLogParams(str);
       setGlobalOptions();
       host = opts.serverName;
-      if (((opts.via != null && opts.via.indexOf(':') < 0) || opts.tunnel)
-          && opts.serverName != null) {
-        alwaysShowConnectionDialog.setParam(false);
-        try {
-          Tunnel.createTunnel(opts);
-        } catch(Exception e) {
-          reportException(new WarningException("Could not create SSH tunnel:\n" +
-                                               e.getMessage()));
-          exit(1);
-          return;
-        }
-        host = null;
-      }
     } else if (!applet)
       host = opts.serverName;
     if (host != null && host.indexOf(':') < 0 &&
