@@ -196,6 +196,11 @@ the remote desktop size changes.
 vncconnect can now be used to connect a TurboVNC Server session to an instance
 of the UltraVNC Repeater in Mode II.
 -------------------------------------------------------------------------------
+[15]
+The Via and Tunnel parameters in the Java TurboVNC Viewer (which allow
+specifying an SSH or UltraVNC Repeater gateway through which the VNC connection
+should be tunneled) can now be configured using the Options dialog.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

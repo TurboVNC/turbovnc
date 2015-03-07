@@ -464,12 +464,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     secVeNCrypt.addItemListener(this);
 
     JPanel gatewayPanel = new JPanel(new GridBagLayout());
-    gatewayPanel.setBorder(BorderFactory.createTitledBorder("Gateway (SSH server or UltraVNC Repeater):"));
+    gatewayPanel.setBorder(BorderFactory.createTitledBorder("Gateway (SSH server or UltraVNC Repeater)"));
     gateway = new JTextField();
     JLabel gatewayLabel = new JLabel("Host:");
     sshUser = new JTextField();
     JLabel sshUserLabel = new JLabel("SSH user:");
-    tunnel = new JCheckBox("Use VNC server as gateway:");
+    tunnel = new JCheckBox("Use VNC server as gateway");
     tunnel.addItemListener(this);
 
     Dialog.addGBComponent(sshUserLabel, gatewayPanel,

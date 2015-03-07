@@ -622,6 +622,9 @@ public class VncViewer extends javax.swing.JApplet
       options.scalingFactor.setEnabled(!VncViewer.embed.getValue());
     }
 
+    options.gateway.setEnabled(false);
+    options.sshUser.setEnabled(false);
+    options.tunnel.setEnabled(false);
   }
 
   public void getOptions() {
