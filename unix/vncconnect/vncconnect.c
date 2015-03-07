@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2013, 2015 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,10 @@ static void usage()
                   "               connect to a listening viewer (for instance, :1).  If this is\n"
                   "               not specified, then the value of the DISPLAY environment\n"
                   "               variable is used.\n");
-  fprintf(stderr, "-disconnect = disconnect all listening viewers\n\n");
+  fprintf(stderr, "-id <id> = specify the ID number of the VNC server session, if connecting to an\n"
+                  "           instance of the UltraVNC Repeater in Mode II.\n");
+  fprintf(stderr, "-disconnect = disconnect all listening viewers from the specified VNC server\n"
+                  "              session.\n\n");
   exit(1);
 }
 
@@ -44,7 +47,7 @@ static void usage()
 int main(int argc, char **argv)
 {
   char *displayname = NULL;
-  Display *dpy;
+  Display *dpy;  int id = -1;
   int i, disconnect = 0, status = 0;
 
   programName = argv[0];
@@ -58,6 +61,15 @@ int main(int argc, char **argv)
       displayname = argv[i];
     } else if (!strncmp(argv[i], "-disc", 5)) {
       disconnect = 1;
+    } else if (!strncmp(argv[i], "-id", 3)) {
+      int _id = -1;      
+      if (++i >= argc) usage();
+      _id = atoi(argv[i]);
+      if (_id <= 0) {
+        fprintf(stderr, "ERROR: ID must be greater than 0.\n");
+        exit(1);
+      }
+      id = _id;
     }
     else usage();
   }
@@ -77,7 +89,13 @@ int main(int argc, char **argv)
       status = 1;
     }
   } else {
-    if (!XVncExtConnect(dpy, argv[i])) {
+    char temps[256];
+    if (id >= 0) {
+      strncpy(temps, argv[i], 255);
+      temps[255] = 0;
+      snprintf(&temps[strlen(temps)], 255 - strlen(temps), "#%d", id);
+    }
+    if (!XVncExtConnect(dpy, id >= 0 ? temps : argv[i])) {
       fprintf(stderr, "Reverse connection to %s failed\n", argv[i]);
       status = 1;
     }

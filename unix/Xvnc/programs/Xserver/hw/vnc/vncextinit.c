@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011, 2013-2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011, 2013-2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -291,7 +291,7 @@ static int ProcVncExtConnect(ClientPtr client)
       }
     }
   } else {
-    int port = 5500, i;
+    int port = 5500, id = -1, i;
     for (i = 0; i < stuff->strLen; i++) {
       if (str[i] == ':') {
         port = atoi(&str[i+1]);
@@ -299,7 +299,14 @@ static int ProcVncExtConnect(ClientPtr client)
         break;
       }
     }
-    if (!rfbReverseConnection(str, port))
+    for (i = 0; i < stuff->strLen; i++) {
+      if (str[i] == '#') {
+        id = atoi(&str[i+1]);
+        str[i] = 0;
+        break;
+      }
+    }
+    if (!rfbReverseConnection(str, port, id))
       rfbLog("Could not initiate reverse connection to %s:%d\n", str, port);
     else rep.success = 1;
   }

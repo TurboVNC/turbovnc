@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2015 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -285,9 +285,10 @@ rfbNewClientConnection(sock)
  */
 
 rfbClientPtr
-rfbReverseConnection(host, port)
+rfbReverseConnection(host, port, id)
     char *host;
     int port;
+    int id;
 {
     int sock;
     rfbClientPtr cl;
@@ -299,6 +300,18 @@ rfbReverseConnection(host, port)
 
     if ((sock = rfbConnect(host, port)) < 0)
         return (rfbClientPtr)NULL;
+
+    if (id > 0) {
+      char temps[250];
+      memset(temps, 0, 250);
+      snprintf(temps, 250, "ID:%d", id);
+      rfbLog("UltraVNC Repeater Mode II ID is %d\n", id);
+      if (WriteExact(sock, temps, 250) < 0) {
+        rfbLogPerror("rfbReverseConnection: write");
+        rfbCloseSock(sock);
+        return NULL;
+      }
+    }
 
     cl = rfbNewClient(sock);
 

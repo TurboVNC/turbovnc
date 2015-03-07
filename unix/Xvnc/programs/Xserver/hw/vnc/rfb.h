@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2014 D. R. Commander
+ *  Copyright (C) 2010-2015 D. R. Commander
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -622,7 +622,7 @@ extern int rfbInterframe;
         (r).extents.x2 - (r).extents.x1, (r).extents.y2 - (r).extents.y1)
 
 extern void rfbNewClientConnection(int sock);
-extern rfbClientPtr rfbReverseConnection(char *host, int port);
+extern rfbClientPtr rfbReverseConnection(char *host, int port, int id);
 extern void rfbClientConnectionGone(int sock);
 extern void rfbProcessClientMessage(int sock);
 extern void rfbNewUDPConnection(int sock);

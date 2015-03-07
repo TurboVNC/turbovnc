@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2015 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -962,7 +962,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
             *colonPos = 0;
         }
 
-        rfbReverseConnection(host, port);
+        rfbReverseConnection(host, port, -1);
 
         free(host);
     }

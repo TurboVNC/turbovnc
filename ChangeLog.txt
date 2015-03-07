@@ -192,6 +192,10 @@ size.
 size/position whenever the span mode or scaling factor is changed, or whenever
 the remote desktop size changes.
 -------------------------------------------------------------------------------
+[14]
+vncconnect can now be used to connect a TurboVNC Server session to an instance
+of the UltraVNC Repeater in Mode II.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
