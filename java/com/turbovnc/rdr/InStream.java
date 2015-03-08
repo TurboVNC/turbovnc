@@ -288,22 +288,26 @@ public abstract class InStream {
       if (bigEndian) {
         while (h > 0) {
           int endOfRow = ptr + w;
-          while (ptr < endOfRow)
+          while (ptr < endOfRow) {
             ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
                                   (pixels[srcPtr++] & 0xff) << 16 |
                                   (pixels[srcPtr++] & 0xff) << 8 |
-                                  (pixels[srcPtr++] & 0xff);
+                                  0x000000ff;
+            srcPtr++;
+          }
           ptr += pad;
           h--;
         }
       } else {
         while (h > 0) {
           int endOfRow = ptr + w;
-          while (ptr < endOfRow)
+          while (ptr < endOfRow) {
             ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
                                   (pixels[srcPtr++] & 0xff) << 8 |
                                   (pixels[srcPtr++] & 0xff) << 16 |
-                                  (pixels[srcPtr++] & 0xff) << 24;
+                                  0xff000000;
+            srcPtr++;
+          }
           ptr += pad;
           h--;
         }
