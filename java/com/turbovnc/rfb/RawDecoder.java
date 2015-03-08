@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,22 +24,12 @@ public class RawDecoder extends Decoder {
   public RawDecoder(CMsgReader reader_) { reader = reader_; }
 
   public void readRect(Rect r, CMsgHandler handler) {
-    int x = r.tl.x;
-    int y = r.tl.y;
-    int w = r.width();
-    int h = r.height();
-    int[] imageBuf = new int[w * h];
-    int nPixels = imageBuf.length;
-    int bytesPerRow = w * (reader.bpp() / 8);
-    while (h > 0) {
-      int nRows = nPixels / w;
-      if (nRows > h) nRows = h;
-      reader.getInStream().readPixels(imageBuf, nPixels, (reader.bpp() / 8),
-                                      handler.cp.pf().bigEndian);
-      handler.imageRect(new Rect(x, y, x + w, y + nRows), imageBuf);
-      h -= nRows;
-      y += nRows;
-    }
+    int[] stride = { r.width() };
+    Object buf = handler.getRawPixelsRW(stride);
+
+    reader.getInStream().readPixels(buf, stride[0], r, (reader.bpp() / 8),
+                                    handler.cp.pf().bigEndian);
+    handler.releaseRawPixels(r);
   }
 
   CMsgReader reader;

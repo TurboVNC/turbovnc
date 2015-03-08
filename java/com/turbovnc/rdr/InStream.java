@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
 /* Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 package com.turbovnc.rdr;
 
 import com.turbovnc.network.*;
+import com.turbovnc.rfb.*;
 
 public abstract class InStream {
 
@@ -216,6 +217,100 @@ public abstract class InStream {
           srcPtr += bytesPerPixel;
         }
       }
+    }
+  }
+
+
+  public final void readPixels(Object buf, int stride, Rect r,
+                               int bytesPerPixel, boolean bigEndian) {
+    int w = r.width(), h = r.height();
+    int nbytes = w * h * bytesPerPixel;
+    int ptr = r.tl.y * stride + r.tl.x, srcPtr = 0;
+    byte[] pixels = new byte[nbytes];
+    int pad = stride - w;
+
+    readBytes(pixels, 0, nbytes);
+
+    if (bytesPerPixel == 1 && buf instanceof byte[]) {
+      while (h > 0) {
+        System.arraycopy(pixels, srcPtr, (byte[])buf, ptr, w);
+        ptr += stride;
+        srcPtr += w;
+        h--;
+      }
+    } else if (bytesPerPixel == 2 && buf instanceof short[]) {
+      if (bigEndian) {
+        while (h > 0) {
+          int endOfRow = ptr + w;
+          while (ptr < endOfRow) {
+            ((short[])buf)[ptr] = (short)((pixels[srcPtr++] & 0xff) << 8);
+            ((short[])buf)[ptr++] |= (pixels[srcPtr++] & 0xff);
+          }
+          ptr += pad;
+          h--;
+        }
+      } else {
+        while (h > 0) {
+          int endOfRow = ptr + w;
+          while (ptr < endOfRow) {
+            ((short[])buf)[ptr] = (short)(pixels[srcPtr++] & 0xff);
+            ((short[])buf)[ptr++] |= (pixels[srcPtr++] & 0xff) << 8;
+          }
+          ptr += pad;
+          h--;
+        }
+      }
+    } else if (bytesPerPixel == 3 && buf instanceof int[]) {
+      if (bigEndian) {
+        while (h > 0) {
+          int endOfRow = ptr + w;
+          while (ptr < endOfRow)
+            ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                  (pixels[srcPtr++] & 0xff) << 16 |
+                                  (pixels[srcPtr++] & 0xff) << 8 |
+                                  0x000000ff;
+          ptr += pad;
+          h--;
+        }
+      } else {
+        while (h > 0) {
+          int endOfRow = ptr + w;
+          while (ptr < endOfRow)
+            ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
+                                  (pixels[srcPtr++] & 0xff) << 8 |
+                                  (pixels[srcPtr++] & 0xff) << 16 |
+                                  0xff000000;
+          ptr += pad;
+          h--;
+        }
+      }
+    } else if (bytesPerPixel == 4 && buf instanceof int[]) {
+      if (bigEndian) {
+        while (h > 0) {
+          int endOfRow = ptr + w;
+          while (ptr < endOfRow)
+            ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                  (pixels[srcPtr++] & 0xff) << 16 |
+                                  (pixels[srcPtr++] & 0xff) << 8 |
+                                  (pixels[srcPtr++] & 0xff);
+          ptr += pad;
+          h--;
+        }
+      } else {
+        while (h > 0) {
+          int endOfRow = ptr + w;
+          while (ptr < endOfRow)
+            ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
+                                  (pixels[srcPtr++] & 0xff) << 8 |
+                                  (pixels[srcPtr++] & 0xff) << 16 |
+                                  (pixels[srcPtr++] & 0xff) << 24;
+          ptr += pad;
+          h--;
+        }
+      }
+    } else {
+      // We should never get here
+      throw new ErrorException("Unsupported pixel format");
     }
   }
 
