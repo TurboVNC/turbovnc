@@ -243,7 +243,7 @@ add_custom_command(OUTPUT VncViewer.jar
 add_custom_target(java ALL DEPENDS VncViewer.jar)
 
 if(TVNC_INCLUDEJNIJARS)
-	set(DEFAULT_TJPEG_JNIJARPATH $ENV{HOME}/libjpeg-turbo-jni)
+	set(DEFAULT_TJPEG_JNIJARPATH /opt/libjpeg-turbo-jni)
 	set(TJPEG_JNIJARPATH ${DEFAULT_TJPEG_JNIJARPATH} CACHE PATH
 		"Directory containing TurboJPEG JNI JARs (default: ${DEFAULT_TJPEG_JNIJARPATH})")
 	set(JNI_JAR_FILES ljtlinux32.jar ljtlinux64.jar ljtosx.jar ljtwin32.jar
