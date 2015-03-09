@@ -300,6 +300,7 @@ httpProcessInput()
     /* Extract parameters from the URL string if necessary */
 
     params[0] = '\0';
+    jnlpParams[0] = '\0';
     ptr = strchr(fname, '?');
     if (ptr != NULL) {
         *ptr = '\0';
