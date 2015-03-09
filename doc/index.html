@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-03-09T05:18:16">
+<meta name="date" content="2015-03-09T06:59:09">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -238,13 +238,13 @@ was originally a fork of
 1.3.x, and on the surface, the X server and Windows viewer still behave 
 similarly to their parents.  However, the current version of TurboVNC 
 contains a much more modern X server code base (based on X.org 7.7) and 
-a variety of other features and fixes, including a high-performance Java 
-viewer.  TurboVNC compresses 3D and video workloads significantly better 
-than the &ldquo;tightest&rdquo; compression mode in TightVNC 1.3.x while 
-using only typically 15-20% of the CPU time of the latter.  Using 
-non-default settings, TurboVNC can also match the best compression 
-ratios produced by TightVNC 1.3.x for 2D workloads (see Section 
-<a href="#AdvancedCompression" class="ref">7.2</a>.)</p>
+a variety of other features and fixes, including a high-performance 
+zero-install Java viewer.  TurboVNC compresses 3D and video workloads 
+significantly better than the &ldquo;tightest&rdquo; compression mode in 
+TightVNC 1.3.x while using only typically 15-20% of the CPU time of the 
+latter.  Using non-default settings, TurboVNC can also match the best 
+compression ratios produced by TightVNC 1.3.x for 2D workloads (see 
+Section <a href="#AdvancedCompression" class="ref">7.2</a>.)</p>
 
 <p>All VNC implementations, including TurboVNC, use the RFB (remote 
 framebuffer) protocol to send &ldquo;framebuffer updates&rdquo; from the 
@@ -334,9 +334,16 @@ include:</p>
         user stops interacting with the application for a certain period of time.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        High-performance Java viewer, deployable using Java Web Start.  By 
-        calling libjpeg-turbo through JNI, the Java TurboVNC Viewer achieves 
-        similar levels of performance to the native TurboVNC Viewer.
+        High-performance zero-install Java viewer, which can be launched via 
+        Java Web Start using TurboVNC&rsquo;s built-in web server or deployed on 
+        a dedicated web server.  By calling libjpeg-turbo through JNI, the Java 
+        TurboVNC Viewer achieves similar levels of performance to the native 
+        TurboVNC Viewer, and its performance is generally equal to or better 
+        than that of the TigerVNC native viewers.
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        The TurboVNC Server and Java TurboVNC Viewer can be used with an 
+        instance of the UltraVNC Repeater in Mode I or II.
     </li>
 </ul>
 
@@ -493,7 +500,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
 <h3 id="hd005001002">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered" value="1">
+    <li value="1" class="Ordered-1 Ordered">
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a class="remote" href="http://sourceforge.net/projects/turbovnc/files/">Files 
@@ -515,7 +522,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         <span class="remote"><a class="remote" href="http://www.ubuntu.com">Ubuntu</a></span><a name="idx0022"></a> 
         8.04 or later.) <br />
     </li>
-    <li class="Ordered-1 Ordered" value="2">
+    <li value="2" class="Ordered-1 Ordered">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue one of the following commands:
         <dl class="Description">
@@ -1058,13 +1065,18 @@ TurboVNC Viewer and point it to
 You can force PuTTY to use an IPv6 interface for the local end of the tunnel by replacing <code>-L</code> with <code>-L6</code> in the above command line.
 </p></div>
 
+<div class="important"><p class="important">
+For LAN connections and other high-speed networks, tunneling the TurboVNC connection through PuTTY will reduce performance by as much as 20-40%.  For wide-area networks, however, there is no performance penalty for using SSH tunneling with TurboVNC.
+</p></div>
+
 
 <h3 id="hd006005001">The <code>-via</code> and <code>-tunnel</code> Command-Line Options</h3>
 
 <p>If you are using the Java TurboVNC Viewer (which you are if you are 
 using a Mac, Linux, or Un*x platform), then you can simplify the above 
 by using the <code>-via</code> and <code>-tunnel</code> command-line 
-options.  For instance, running</p>
+options, or the equivalent GUI options (located under the 
+&ldquo;Security&rdquo; tab in the Options dialog.)  For instance, running</p>
 
 <pre class="verbatim">
 {vncviewer}&nbsp;-via&nbsp;{user}@{server}&nbsp;localhost:{n}
@@ -1119,15 +1131,6 @@ TurboVNC Server session. If the <code>no-reverse-connections</code>
 directive is set in the TurboVNC authentication configuration file, then 
 that has the effect of enabling the <code>-noreverse</code> option for 
 all new TurboVNC sessions that are started on the machine.</p>
-
-
-
-<h3 id="hd006005003">Performance Notes</h3>
-
-<p>For LAN connections and other high-speed networks, tunneling the 
-TurboVNC connection through SSH will reduce performance by as much as 
-20-40%.  For wide-area networks, however, there is no performance 
-penalty for using SSH tunneling with TurboVNC.</p>
 
 
 
@@ -1720,20 +1723,6 @@ TurboVNC Viewer using the Mac app, the <code>vncviewer</code>
 or<code>vncviewer-java.bat</code> scripts, or the Windows Start Menu 
 shortcut, then the Server VM is automatically enabled.</p>
 
-
-
-<h3 id="hd007006005">Java Web Start</h3>
-
-<p>Java Web Start can be used to deploy the Java TurboVNC Viewer and the 
-associated libjpeg-turbo JNI libraries from a web server.  Deploying the 
-viewer using JWS provides a fully functional and performant TurboVNC 
-Viewer environment without requiring the viewer to be installed on the 
-client machine. This mechanism is preferred over deploying the viewer as 
-an applet, since JPEG decoding cannot be accelerated when the Java 
-TurboVNC Viewer is run as an applet.  See 
-<span class="remote"><a class="remote" href="http://www.TurboVNC.org/Documentation/JWS">http://www.TurboVNC.org/Documentation/JWS</a></span><a name="idx0036"></a> 
-for more details.</p>
-
 <p><br /></p>
 
 <hr class="break" />
@@ -1953,8 +1942,12 @@ embedded VGL Transport.</p>
         deployment complexity for Windows clients.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        Any web browser or mobile device can be used as a TurboVNC client (with 
-        reduced performance.)
+        Zero-install high-performance Java viewer can be launched from any 
+        machine that has Java and a web browser installed.
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        Any mobile device can be used as a TurboVNC client (with reduced 
+        performance.)
     </li>
 </ul>
 
@@ -2096,7 +2089,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0037"></a>, 
+<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0036"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -2317,19 +2310,19 @@ mixing TurboVNC with other VNC flavors.</p>
 are compatible with RealVNC.  The Java TurboVNC Viewer additionally 
 supports ZRLE and RRE.  None of these encoding types can be selected 
 from the TurboVNC Viewer GUI, but Hextile or ZRLE will be selected 
-automatically when connecting to a RealVNC server.  Raw will be 
-automatically selected when connecting to a VNC server running on the 
-same machine as the viewer.  Non-Tight encoding types, such as Hextile 
-and Raw, can also be manually selected from the TurboVNC Viewer command 
-line.  In addition to Hextile, Raw, ZRLE, and RRE, the TurboVNC Server 
-also supports the CoRRE and Zlib legacy encoding types, for 
-compatibility with older VNC viewers.</p>
+automatically when connecting to a RealVNC server.  Non-Tight encoding 
+types, such as Hextile and Raw, can also be manually selected from the 
+TurboVNC Viewer command line.  In addition to Hextile, Raw, ZRLE, and 
+RRE, the TurboVNC Server also supports the CoRRE and Zlib legacy 
+encoding types, for compatibility with older VNC viewers.</p>
 
 <p>All of the non-Tight encoding types have performance drawbacks.  Raw 
 encoding requires gigabit in order to achieve decent performance, and it 
 can easily take up an entire gigabit connection&rsquo;s worth of 
-bandwidth.  Hextile uses very small tiles, which causes it to incur a 
-large amount of computational overhead. It compresses too poorly to 
+bandwidth (it also doesn&rsquo;t perform particularly well with the Java 
+TurboVNC Viewer, because of the need to convert the pixels from bytes to 
+ints in Java.)  Hextile uses very small tiles, which causes it to incur 
+a large amount of computational overhead.  It compresses too poorly to 
 perform well on slow links but uses too much CPU time to perform well on 
 fast links.  ZRLE improves upon this, but it is still too 
 computationally intense for fast networks.  The <code>vncviewer</code> 
