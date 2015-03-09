@@ -63,6 +63,18 @@ if(APPLE)
 		"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
 endif()
 
+if(UNIX AND TVNC_BUILDSERVER)
+	set(DEFAULT_TVNC_INCLUDEJNIJARS 0)
+	option(TVNC_INCLUDEJNIJARS "Include TurboJPEG JNI JARs for common platforms when installing/packaging TurboVNC, sign the JARs using the same certificate as VncViewer.jar, and make them available through Java Web Start when using the built-in HTTP server."
+		${DEFAULT_TVNC_INCLUDEJNIJARS})
+endif()
+
+if(TVNC_INCLUDEJNIJARS)
+	set(JNLPFILE VncViewer-jnijars.jnlp)
+else()
+	set(JNLPFILE VncViewer.jnlp)
+endif()
+
 set(JAVA_SOURCES "")
 set(JAVA_CLASSES "")
 
@@ -174,8 +186,8 @@ add_custom_command(OUTPUT ${BINDIR}/index.vnc
 
 add_custom_command(OUTPUT ${BINDIR}/VncViewer.jnlp
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/VncViewer.jnlp ${BINDIR}/VncViewer.jnlp
-	DEPENDS ${SRCDIR}/${CLASSPATH}/VncViewer.jnlp)
+		${SRCDIR}/${CLASSPATH}/${JNLPFILE} ${BINDIR}/VncViewer.jnlp
+	DEPENDS ${SRCDIR}/${CLASSPATH}/${JNLPFILE})
 
 add_custom_command(OUTPUT ${BINDIR}/favicon.ico
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -230,11 +242,35 @@ add_custom_command(OUTPUT VncViewer.jar
 
 add_custom_target(java ALL DEPENDS VncViewer.jar)
 
+if(TVNC_INCLUDEJNIJARS)
+	set(DEFAULT_TJPEG_JNIJARPATH $ENV{HOME}/libjpeg-turbo-jni)
+	set(TJPEG_JNIJARPATH ${DEFAULT_TJPEG_JNIJARPATH} CACHE PATH
+		"Directory containing TurboJPEG JNI JARs (default: ${DEFAULT_TJPEG_JNIJARPATH})")
+	set(JNI_JAR_FILES ljtlinux32.jar ljtlinux64.jar ljtosx.jar ljtwin32.jar
+		ljtwin64.jar)
+	foreach(jarfile ${JNI_JAR_FILES})
+		add_custom_command(OUTPUT ${jarfile}
+			COMMAND ${CMAKE_COMMAND}
+			ARGS -E copy_if_different ${TJPEG_JNIJARPATH}/${jarfile} ${jarfile}
+			COMMAND ${CMAKE_COMMAND}
+			ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/${jarfile}
+				-DJAVA_KEYSTORE=${JAVA_KEYSTORE}
+				-DJAVA_KEYSTORE_TYPE=${JAVA_KEYSTORE_TYPE}
+				-DJAVA_KEYSTORE_PASS=${JAVA_KEYSTORE_PASS}
+				-DJAVA_KEY_ALIAS=${JAVA_KEY_ALIAS}
+				-DJAVA_KEY_PASS=${JAVA_KEY_PASS}
+				-DJAVA_TSA_URL=${JAVA_TSA_URL}
+				-P ${SRCDIR}/cmake/SignJar.cmake)
+		install(FILES ${BINDIR}/${jarfile} DESTINATION ${TVNC_JAVADIR})
+	endforeach()
+	add_custom_target(jnijars ALL DEPENDS ${JNI_JAR_FILES})
+endif()
+
 install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${TVNC_JAVADIR})
 install(FILES ${SRCDIR}/${CLASSPATH}/README.txt DESTINATION ${TVNC_JAVADIR})
 if(TVNC_BUILDSERVER)
 	install(FILES ${SRCDIR}/${CLASSPATH}/index.vnc DESTINATION ${TVNC_JAVADIR})
-	install(FILES ${SRCDIR}/${CLASSPATH}/VncViewer.jnlp DESTINATION
-		${TVNC_JAVADIR})
+	install(FILES ${SRCDIR}/${CLASSPATH}/${JNLPFILE} DESTINATION
+		${TVNC_JAVADIR} RENAME VncViewer.jnlp)
 	install(FILES ${SRCDIR}/${CLASSPATH}/favicon.ico DESTINATION ${TVNC_JAVADIR})
 endif()

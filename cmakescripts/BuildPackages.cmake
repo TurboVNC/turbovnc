@@ -40,6 +40,12 @@ else()
 	set(TVNC_BUILDSERVER 0)
 endif()
 
+if(TVNC_INCLUDEJNIJARS)
+	set(TVNC_INCLUDEJNIJARS 1)
+else()
+	set(TVNC_INCLUDEJNIJARS 0)
+endif()
+
 configure_file(release/makerpm.in pkgscripts/makerpm)
 configure_file(release/${CMAKE_PROJECT_NAME_LC}.spec.in
 	pkgscripts/${CMAKE_PROJECT_NAME_LC}.spec @ONLY)

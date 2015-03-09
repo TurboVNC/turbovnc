@@ -75,6 +75,11 @@ is 256x256 but can be changed using the TVNC_ICEBLOCKSIZE environment variable
 By default, the embedded HTTP server in the TurboVNC Server will now serve up a
 JNLP (Java Web Start) file for the session instead of an applet.  You can add
 /applet to the URL to instruct the HTTP server to serve up an applet instead.
+The official TurboVNC packages for Linux also include the native JAR files
+necessary to deliver the libjpeg-turbo JNI library to Windows, Linux, and OS X
+clients (when using Java Web Start.)  All JAR files in the official TurboVNC
+packages for Linux are signed using an official code signing certificate, to
+comply with applet/JWS security requirements in Java 7u51 and later.
 -------------------------------------------------------------------------------
 
 

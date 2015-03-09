@@ -1,0 +1,58 @@
+<!--
+     VncViewer.jnlp - default Java Web Start file for the Java TurboVNC Viewer,
+     to be used with Xvnc.  On any file ending in .jnlp, the HTTP server
+     embedded in Xvnc will substitute the following variables when preceded by
+     a dollar sign:
+
+     USER - the user account under which the VNC server session is running
+     DESKTOP - the VNC session name
+     DISPLAY - hostname:display_number of the VNC server session
+     APPLETWIDTH, WIDTH - the width of the remote desktop
+     HEIGHT - the height of the remote desktop
+     APPLETHEIGHT - the height of the remote desktop + the viewer toolbar
+     PORT - TCP port on which the VNC server is listening (e.g. 5901)
+
+     Use two dollar signs ($$) to get a dollar sign in the generated JNLP file.
+-->
+
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp codebase="http://$SERVER:$HTTPPORT">
+  <information>
+    <title>TurboVNC Viewer</title>
+    <vendor>The VirtualGL Project</vendor>
+  </information>
+
+  <resources>
+    <j2se version="1.6+" java-vm-args="-server -Dsun.java2d.d3d=false" />
+    <jar href="VncViewer.jar" main="true"/>
+  </resources>
+
+  <resources os="Mac OS X">
+    <nativelib href="ljtosx.jar"/>
+  </resources>
+
+  <resources os="Windows" arch="x86">
+    <nativelib href="ljtwin32.jar"/>
+  </resources>
+
+  <resources os="Windows" arch="amd64">
+    <nativelib href="ljtwin64.jar"/>
+  </resources>
+
+  <resources os="Linux" arch="i386">
+    <nativelib href="ljtlinux32.jar"/>
+  </resources>
+
+  <resources os="Linux" arch="amd64">
+    <nativelib href="ljtlinux64.jar"/>
+  </resources>
+
+  <security>
+    <all-permissions/>
+  </security>
+
+  <application-desc main-class="com.turbovnc.vncviewer.VncViewer">
+    <argument>$DISPLAY</argument>
+    $PARAMS
+  </application-desc>
+</jnlp>

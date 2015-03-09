@@ -25,6 +25,15 @@
 # Path under which the Java viewer should be installed
 %define javadir @TVNC_JAVADIR@
 
+# Whether or not to include the TurboJPEG JNI JAR files (used when launching
+# the Java TurboVNC Viewer via Java Web Start)
+%define jnijars @TVNC_INCLUDEJNIJARS@
+
+# Directory in which TurboJPEG JNI JARs can be found
+%if "%{jnijars}" == "1"
+ %define jnijardir @TJPEG_JNIJARPATH@
+%endif
+
 # When building from a source RPM, these variables can be passed to rpmbuild in
 # order to sign the JAR file using an official code signing certificate:
 #   java_keystore = value of CMake JAVA_KEYSTORE variable
@@ -86,7 +95,10 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->%if %{?java_tsa_url:1}%{!?java_tsa_url:0}
 #-->  JAVA_TSA_URL_ARG="-DJAVA_TSA_URL=%{java_tsa_url}"
 #-->%endif
-#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DTVNC_BINDIR=%{bindir} -DTVNC_CONFDIR=%{confdir} -DTVNC_DOCDIR=%{docdir} -DTVNC_MANDIR=%{mandir} -DTVNC_BUILDJAVA=%{java} -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG .
+#-->%if "%{jnijars}" == "1"
+#-->  JNIJARS_ARGS="-DTVNC_INCLUDEJNIJARS=1 -DTVNC_JNIJARPATH=%{jnijarpath}"
+#-->%endif
+#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DTVNC_BINDIR=%{bindir} -DTVNC_CONFDIR=%{confdir} -DTVNC_DOCDIR=%{docdir} -DTVNC_MANDIR=%{mandir} -DTVNC_BUILDJAVA=%{java} $JNIJARS_ARGS -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG .
 #-->make
 
 %install
@@ -221,6 +233,13 @@ fi
  %endif
  %{javadir}/VncViewer.jar
  %{javadir}/README.txt
+ %if "%{jnijars}" == "1"
+  %{javadir}/ljtlinux32.jar
+  %{javadir}/ljtlinux64.jar
+  %{javadir}/ljtosx.jar
+  %{javadir}/ljtwin32.jar
+  %{javadir}/ljtwin64.jar
+ %endif
 %endif
 %if "%{server}" == "1"
  %{mandir}/man1/Xvnc.1*
