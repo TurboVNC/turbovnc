@@ -19,15 +19,6 @@
  * USA.
  */
 
-//
-// VncViewer - the VNC viewer applet.  It can also be run from the
-// command-line, when it behaves as much as possibly like the windows and unix
-// viewers.
-//
-// Unfortunately, because of the way Java classes are loaded on demand, only
-// configuration parameters defined in this file can be set from the command
-// line or in applet parameters.
-
 package com.turbovnc.vncviewer;
 
 import java.awt.*;
@@ -290,7 +281,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   public VncViewer(String[] argv) {
     applet = false;
 
-    // load user preferences
     UserPreferences.load("global");
 
     setVersion();
@@ -432,8 +422,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     System.err.println(url);
     System.err.print(usage);
     Configuration.listParams(80);
-    // Technically, we shouldn't use System.exit here but if there is a parameter
-    // error then the problem is in the index/html file anyway.
     System.exit(1);
   }
 

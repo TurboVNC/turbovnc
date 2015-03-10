@@ -18,14 +18,12 @@
  * USA.
  */
 
-//
-// This Dialog class implements a pop-up dialog.  This is needed because
-// apparently you can't use the standard AWT Dialog from within an applet.  The
-// dialog can be made visible by calling its showDialog() method.  Dialogs can
-// be modal or non-modal.  For a modal dialog box, the showDialog() method must
-// be called from a thread other than the GUI thread, and it only returns when
-// the dialog box has been dismissed.  For a non-modal dialog box, the
-// showDialog() method returns immediately.
+// This Dialog class implements a pop-up dialog.  The dialog can be made
+// visible by calling its showDialog() method.  Dialogs can be modal or
+// non-modal.  For a modal dialog box, the showDialog() method must be called
+// from a thread other than the GUI thread, and it only returns when the dialog
+// box has been dismissed.  For a non-modal dialog box, the showDialog() method
+// returns immediately.
 
 package com.turbovnc.vncviewer;
 

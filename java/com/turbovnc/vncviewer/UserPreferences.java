@@ -17,10 +17,6 @@
  * USA.
  */
 
-//
-// For storing user preferences not specified as configuration parameters.
-//
-
 package com.turbovnc.vncviewer;
 
 import java.util.prefs.Preferences;

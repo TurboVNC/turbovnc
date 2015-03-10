@@ -19,12 +19,11 @@
  * USA.
  */
 
-//
 // CConn
 //
-// Methods on CConn are called from both the GUI thread and the thread which
-// processes incoming RFB messages ("the RFB thread").  This means we need to
-// be careful with synchronization here.
+// Methods in CConn are called from both the Swing Event Dispatch Thread (EDT)
+// and the thread that processes incoming RFB messages ("the RFB thread").
+// This means that we need to be careful with synchronization here.
 //
 // Any access to writer() must not only be synchronized, but we must also make
 // sure that the connection is in RFBSTATE_NORMAL.  We are guaranteed this for
@@ -50,7 +49,7 @@ import com.turbovnc.rfb.Point;
 import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
 
-public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
+public class CConn extends CConnection implements UserPasswdGetter,
   OptionsDialogCallback, FdInStreamBlockCallback, Runnable {
 
   public final PixelFormat getPreferredPF() { return fullColourPF; }
@@ -68,9 +67,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     return (double)System.nanoTime() / 1.0e9;
   }
 
-  ////////////////////////////////////////////////////////////////////
-  // The following methods are all called from the RFB thread
-
+  // RFB thread
   public CConn(VncViewer viewer_, Socket sock_) {
     sock = sock_;  viewer = viewer_;
     benchmark = viewer.benchFile != null;
@@ -94,13 +91,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     setShared(opts.shared);
     upg = this;
-    msg = this;
 
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
     cp.supportsClientRedirect = VncViewer.clientRedirect.getValue();
     cp.supportsDesktopRename = true;
-    initMenu();
+    menu = new F8Menu(this);
 
     if (sock != null) {
       String name = sock.getPeerEndpoint();
@@ -145,26 +141,23 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
+  // RFB thread
   public void reset() {
     if (reader_ != null)
       reader_.reset();
     state_ = RFBSTATE_INITIALISATION;
   }
 
-  public boolean showMsgBox(int flags, String title, String text) {
-    //StringBuffer titleText = new StringBuffer("VNC Viewer: "+title);
-    return true;
-  }
-
-  // deleteWindow() is called when the user closes the desktop or menu windows.
-
+  // EDT: deleteWindow() is called when the user closes the window or selects
+  // "Close Connection" from the F8 menu.
   void deleteWindow() {
     if (viewport != null)
       viewport.dispose();
     viewport = null;
   }
 
-  // blockCallback() is called when reading from the socket would block.
+  // RFB thread: blockCallback() is called when reading from the socket would
+  // block.
   public void blockCallback() {
     try {
       synchronized(this) {
@@ -175,9 +168,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
-  // getUserPasswd() is called by the CSecurity object when it needs us to read
-  // a password from the user.
-
+  // RFB thread: getUserPasswd() is called by the CSecurity object when it
+  // needs us to read a password from the user.
   public final boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
     String title = ((user == null ? "Standard VNC Authentication" :
                                     "Unix Login Authentication") +
@@ -268,9 +260,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   // CConnection callback methods
 
-  // serverInit() is called when the serverInit message has been received.  At
-  // this point we create the desktop window and display it.  We also tell the
-  // server the pixel format and encodings to use and request the first update.
+  // RFB thread: serverInit() is called when the serverInit message has been
+  // received.  At this point, we create the desktop window and display it.  We
+  // also tell the server which pixel format and encodings to use and request
+  // the first update.
   public void serverInit() {
     super.serverInit();
 
@@ -279,8 +272,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     desktop = new DesktopWindow(cp.width, cp.height, serverPF, this);
     fullColourPF = desktop.getPreferredPF();
 
-    // Force a switch to the format and encoding we'd like
-    formatChange = true; encodingChange = true;
+    // Force a switch to our preferred format and encoding.
+    formatChange = true;  encodingChange = true;
 
     // And kick off the update cycle
     if (!benchmark)
@@ -302,8 +295,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       pendingPFChange = true;
     }
 
-    // This initial update request is a bit of a corner case, so we need
-    // to help out setting the correct format here.
+    // This initial update request is a bit of a corner case, so we need to
+    // help by setting the correct format here.
     assert(pendingPFChange);
     desktop.setServerPF(pendingPF);
     cp.setPF(pendingPF);
@@ -327,14 +320,15 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
-  // setDesktopSize() is called when the desktop size changes (including when
-  // it is set initially).
+  // RFB thread: setDesktopSize() is called when the desktop size changes
+  // (including when it is set initially.)
   public void setDesktopSize(int w, int h) {
     super.setDesktopSize(w, h);
     resizeFramebuffer();
   }
 
-  // setExtendedDesktopSize() is a more advanced version of setDesktopSize()
+  // RFB thread: setExtendedDesktopSize() is a more advanced version of
+  // setDesktopSize().
   public void setExtendedDesktopSize(int reason, int result, int w, int h,
                                      ScreenSet layout) {
     super.setExtendedDesktopSize(reason, result, w, h, layout);
@@ -348,7 +342,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     resizeFramebuffer();
   }
 
-  // clientRedirect() migrates the client to another host/port
+  // RFB thread: clientRedirect() migrates the client to another host/port.
   public void clientRedirect(int port, String host,
                              String x509subject) {
     sock.close();
@@ -358,7 +352,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     VncViewer.newViewer(viewer, sock, true);
   }
 
-  // setName() is called when the desktop name changes
+  // RFB thread: setName() is called when the desktop name changes.
   public void setName(String name) {
     super.setName(name);
 
@@ -367,15 +361,14 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
-  // framebufferUpdateStart() is called at the beginning of an update.
-  // Here we try to send out a new framebuffer update request so that the
-  // next update can be sent out in parallel with us decoding the current
-  // one.
+  // RFB thread: framebufferUpdateStart() is called at the beginning of an
+  // update.  Here we try to send out a new framebuffer update request so that
+  // the next update can be sent while we decode the current one.
   public void framebufferUpdateStart() {
     tUpdateStart = getTime();
     if (tStart < 0.) tStart = tUpdateStart;
 
-    // Note: This might not be true if sync fences are supported
+    // Note: This might not be true if sync fences are supported.
     pendingUpdate = false;
 
     if (!benchmark) requestNewUpdate();
@@ -385,10 +378,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     desktop.updateWindow();
   }
 
-  // framebufferUpdateEnd() is called at the end of an update.
-  // For each rectangle, the FdInStream will have timed the speed
-  // of the connection, allowing us to select format and encoding
-  // appropriately, and then request another incremental update.
+  // RFB thread
   public void framebufferUpdateEnd() {
 
     if (newViewport > 0) {
@@ -411,8 +401,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (firstUpdate) {
       int width, height;
 
-      // We need fences to make extra update requests and continuous
-      // updates "safe". See fence() for the next step.
+      // We need fences to make extra update requests and continuous updates
+      // "safe".  See fence() for the next step.
       if (cp.supportsFence)
         writer().writeFence(
           fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
@@ -453,8 +443,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       firstUpdate = false;
     }
 
-    // A format change has been scheduled and we are now past the update
-    // with the old format. Time to active the new one.
+    // A format change has been scheduled, and we have finished decoding and
+    // displaying the last framebuffer update that used the old format, so
+    // activate the new format.
     if (pendingPFChange) {
       desktop.setServerPF(pendingPF);
       cp.setPF(pendingPF);
@@ -544,7 +535,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
-  // The rest of the callbacks are fairly self-explanatory...
+  // The rest of the callbacks are fairly self-explanatory.  These are all
+  // called from the RFB thread.
 
   public void setColourMapEntries(int firstColour, int nColours, int[] rgbs) {
     desktop.setColourMapEntries(firstColour, nColours, rgbs);
@@ -577,9 +569,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     tDecode += getTime() - tDecodeStart - (tRead - tReadOld);
   }
 
-  // We start timing on beginRect and stop timing on endRect, to
-  // avoid skewing the bandwidth estimation as a result of the server
-  // being slow or the network having high latency
   public void beginRect(Rect r, int encoding) {
     if (!benchmark)
       sock.inStream().startTiming();
@@ -620,6 +609,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     desktop.releaseRawPixels(r);
   }
 
+  // EDT
   public void setCursor(int width, int height, Point hotspot,
                         int[] data, byte[] mask) {
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0))
@@ -627,13 +617,15 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     desktop.setCursor(width, height, hotspot, data, mask);
   }
 
+  // RFB thread
   public void fence(int flags, int len, byte[] data) {
     // can't call super.super.fence(flags, len, data);
     cp.supportsFence = true;
 
     if ((flags & fenceTypes.fenceFlagRequest) != 0) {
-      // We handle everything synchronously so we trivially honor these modes
-      flags = flags & (fenceTypes.fenceFlagBlockBefore | fenceTypes.fenceFlagBlockAfter);
+      // We handle everything synchronously, so we trivially honor these modes.
+      flags = flags & (fenceTypes.fenceFlagBlockBefore |
+                       fenceTypes.fenceFlagBlockAfter);
 
       writer().writeFence(flags, len, data);
       return;
@@ -665,6 +657,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
+  // RFB thread
   private void resizeFramebuffer() {
     if (desktop == null)
       return;
@@ -701,9 +694,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
-  // recreateViewport() recreates our top-level window.  This seems to be
-  // better than attempting to resize the existing window, at least with
-  // various X window managers.
+  // EDT: recreateViewport() recreates our top-level window.
 
   static Rectangle savedRect = new Rectangle(-1, -1, 0, 0);
   static int savedState = -1;
@@ -733,6 +724,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     desktop.requestFocusInWindow();
   }
 
+  // EDT
   public Rectangle getSpannedSize() {
     boolean fullScreen = opts.fullScreen &&
                          (!VncViewer.os.startsWith("mac os x") ||
@@ -828,7 +820,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     return span;
   }
 
-  // Resize non-full-screen window based on the spanning option
+  // EDT: Resize window based on the spanning option
   public void sizeWindow() {
     boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
     int w = desktop.scaledWidth;
@@ -874,6 +866,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     viewport.setGeometry(x, y, w, h);
   }
 
+  // EDT
   private void reconfigureViewport(boolean restore) {
     boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
     desktop.setScaledSize();
@@ -889,13 +882,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     newViewport = 2;
   }
 
-  // requestNewUpdate() requests an update from the server, having set the
-  // format and encoding appropriately.
+  // RFB thread: requestNewUpdate() requests an update from the server, having
+  // set the format and encoding appropriately.
   private void requestNewUpdate() {
     if (formatChange) {
       PixelFormat pf;
 
-      /* Catch incorrect requestNewUpdate calls */
+      // Catch incorrect requestNewUpdate calls
       assert(!pendingUpdate || supportsSyncFence);
 
       if (opts.colors < 0) {
@@ -913,19 +906,20 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       }
 
       if (supportsSyncFence) {
-        // We let the fence carry the pixel format and switch once we
-        // get the response back. That way we will be synchronised with
-        // when the server switches.
+        // We let the fence carry the pixel format change and make the switch
+        // once we get the response back.  That way, we will be synchronised
+        // with the format change on the server end.
         MemOutStream memStream = new MemOutStream();
 
         pf.write(memStream);
 
-        writer().writeFence(fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext,
-                            memStream.length(), (byte[])memStream.data());
+        writer().writeFence(fenceTypes.fenceFlagRequest |
+                            fenceTypes.fenceFlagSyncNext, memStream.length(),
+                            (byte[])memStream.data());
       } else {
-        // New requests are sent out at the start of processing the last
-        // one, so we cannot switch our internal format right now (doing so
-        // would mean misdecoding the current update).
+        // New update requests are sent out before processing the last update,
+        // so we cannot switch our internal format right now (doing so would
+        // mean incorrectly decoding the current update.)
         pendingPFChange = true;
         pendingPF = pf;
       }
@@ -950,7 +944,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
 
   ////////////////////////////////////////////////////////////////////
-  // The following methods are all called from the GUI thread
+  // The following methods are all called from the EDT.
 
   // close() shuts down the socket, thus waking up the RFB thread.
   public void close() {
@@ -961,11 +955,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   // Menu callbacks.  These are guaranteed only to be called after serverInit()
-  // has been called, since the menu is only accessible from the DesktopWindow
-
-  private void initMenu() {
-    menu = new F8Menu(this);
-  }
+  // has been called, since the menu is only accessible from the DesktopWindow.
 
   void showMenu(int x, int y) {
     String os = System.getProperty("os.name");
@@ -1053,12 +1043,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
 
-  // OptionsDialogCallback.  setOptions() sets the options dialog's checkboxes
-  // etc to reflect our flags.  getOptions() sets our flags according to the
-  // options dialog's checkboxes.  They are both called from the GUI thread.
-  // Some of the flags are also accessed by the RFB thread.  I believe that
-  // reading and writing boolean and int values in java is atomic, so there is
-  // no need for synchronization.
+  // OptionsDialogCallback.  setOptions() and getOptions() are both called from
+  // the EDT.
 
   public boolean isUnixLoginSelected() {
     return options.secUnixLogin.isSelected();
@@ -1382,6 +1368,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       reconfigureViewport(false);
   }
 
+  // EDT
   public void toggleToolbar() {
     if (viewport == null || opts.fullScreen)
       return;
@@ -1391,6 +1378,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     menu.showToolbar.setSelected(showToolbar);
   }
 
+  // EDT
   public void toggleFullScreen() {
     opts.fullScreen = !opts.fullScreen;
     menu.fullScreen.setSelected(opts.fullScreen);
@@ -1403,18 +1391,20 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
+  // EDT
   public void toggleProfile() {
     menu.profile.setSelected(profileDialog.isVisible());
     viewport.updateMacMenuProfile();
   }
 
-  // writeClientCutText() is called from the clipboard dialog
+  // EDT: writeClientCutText() is called from the clipboard dialog.
   public void writeClientCutText(String str, int len) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
     writer().writeClientCutText(str, len);
   }
 
+  // EDT
   public void writeKeyEvent(int keysym, boolean down) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
@@ -1465,6 +1455,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
+  // EDT
   public void writeKeyEvent(KeyEvent ev) {
     int keysym = 0, keycode, key, location;
     int lFakeModifiers = 0, rFakeModifiers = 0;
@@ -1603,9 +1594,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         break;
       default:
         // On Windows, pressing AltGr has the same effect as pressing LCtrl +
-        // RAlt, so we have to send fake key release events for those
-        // modifiers (and any other Ctrl and Alt modifiers that are pressed),
-        // then the key event for the modified key, then fake key press events
+        // RAlt, so we have to send fake key release events for those modifiers
+        // (and any other Ctrl and Alt modifiers that are pressed), then send
+        // the key event for the modified key, then send fake key press events
         // for the same modifiers.
         if ((rmodifiers & Event.ALT_MASK) != 0 &&
             (lmodifiers & Event.CTRL_MASK) != 0 &&
@@ -1618,13 +1609,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
               // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
               (key >= 27 && key <= 29 && ev.isShiftDown()))
             key += 96;
-          // For CTRL-SHIFT-<letter>, send capital <letter> to emulate behavior
-          // of Linux.  For CTRL-@, send @.  For CTRL-_, send _.  For CTRL-^,
-          // send ^.
+          // For CTRL-SHIFT-<letter>, send capital <letter> to emulate the
+          // behavior of Linux.  For CTRL-@, send @.  For CTRL-_, send _.
+          // For CTRL-^, send ^.
           else if (key < 32)
             key += 64;
           // Windows and Mac sometimes return CHAR_UNDEFINED with CTRL-SHIFT
-          // combinations, so best we can do is send the key code if it is
+          // combinations, so the best we can do is send the key code if it is
           // a valid ASCII symbol.
           else if (key == KeyEvent.CHAR_UNDEFINED && keycode >= 0 &&
                    keycode <= 127)
@@ -1635,7 +1626,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           // the ASCII key will be the same as if Alt had not been pressed.  On
           // OS X, however, the Alt/Option keys act like AltGr keys, so if
           // Alt + an ASCII key is pressed, the key code is the ASCII key
-          // symbol but the key char is the code for the alternate graphics
+          // symbol, but the key char is the code for the alternate graphics
           // symbol.
           if (keycode >= 32 && keycode <= 126)
             key = keycode;
@@ -1779,6 +1770,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
 
+  // EDT
   public void writePointerEvent(MouseEvent ev) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
@@ -1829,6 +1821,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
 
+  // EDT
   public void writeWheelEvent(MouseWheelEvent ev) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
@@ -1860,6 +1853,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
 
+  // EDT
   synchronized void releaseModifiers() {
     if ((lmodifiers & Event.SHIFT_MASK) != 0)
       writeKeyEvent(Keysyms.Shift_L, false);
@@ -1888,7 +1882,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
 
   ////////////////////////////////////////////////////////////////////
-  // The following methods are called from both RFB and GUI threads
+  // The following methods are called from both the RFB thread and EDT.
 
   // checkEncodings() sends a setEncodings message if one is needed.
   private void checkEncodings() {
@@ -1902,27 +1896,16 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
   }
 
-  // the following never change so need no synchronization:
-
-
-  // viewer object is only ever accessed by the GUI thread so needs no
-  // synchronization (except for one test in DesktopWindow - see comment
-  // there).
+  // The following need no synchronization:
   VncViewer viewer;
-
-  // access to desktop by different threads is specified in DesktopWindow
-
-  // the following need no synchronization:
-
   public static UserPasswdGetter upg;
-  public UserMsgBox msg;
 
-  // shuttingDown is set by the GUI thread and only ever tested by the RFB
-  // thread after the window has been destroyed.
+  // shuttingDown is set in the EDT and is only ever tested by the RFB thread
+  // after the window has been destroyed.
   boolean shuttingDown = false;
 
-  // All menu, options, about and info stuff is done in the GUI thread (apart
-  // from when constructed).
+  // All menu, options, about and info stuff is done in the EDT (apart from
+  // initial construction.)
   F8Menu menu;
   OptionsDialog options;
 
@@ -1931,8 +1914,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   Options opts;
 
-  // the following are only ever accessed by the GUI thread:
-  int buttonMask;
+  int buttonMask;  // EDT only
 
   private Socket sock;
 

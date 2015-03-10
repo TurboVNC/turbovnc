@@ -20,13 +20,9 @@
  * USA.
  */
 
-//
-// DesktopWindow is an AWT Canvas representing a VNC desktop.
-//
-// Methods on DesktopWindow are called from both the GUI thread and the thread
-// which processes incoming RFB messages ("the RFB thread").  This means we
-// need to be careful with synchronization here.
-//
+// Methods in DesktopWindow are called from both the Swing Event Dispatch
+// Thread (EDT) and the thread that processes incoming RFB messages ("the RFB
+// thread").  This means that we need to be careful with synchronization here.
 
 package com.turbovnc.vncviewer;
 import java.awt.*;
@@ -48,9 +44,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     return (double)System.nanoTime() / 1.0e9;
   }
 
-  ////////////////////////////////////////////////////////////////////
-  // The following methods are all called from the RFB thread
-
+  // RFB thread
   public DesktopWindow(int width, int height, PixelFormat serverPF,
                        CConn cc_) {
     cc = cc_;
@@ -98,6 +92,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     setFocusable(true);
   }
 
+  // RFB thread
   public int width() {
     return getWidth();
   }
@@ -108,13 +103,12 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   public final PixelFormat getPF() { return im.getPF(); }
 
+  // EDT
   public void setViewport(Viewport viewport) {
     viewport.setChild(this);
   }
 
-  // Methods called from the RFB thread - these need to be synchronized
-  // wherever they access data shared with the GUI thread.
-
+  // EDT
   public void setCursor(int w, int h, Point hotspot,
                         int[] data, byte[] mask) {
     if (!cc.opts.cursorShape)
@@ -197,6 +191,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     return;
   }
 
+  // RFB thread
   public void setServerPF(PixelFormat pf) {
     im.setPF(pf);
   }
@@ -205,11 +200,11 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     return im.getNativePF();
   }
 
-  // setColourMapEntries() changes some of the entries in the colourmap.
-  // Unfortunately these messages are often sent one at a time, so we delay the
-  // settings taking effect unless the whole colourmap has changed.  This is
-  // because getting java to recalculate its internal translation table and
-  // redraw the screen is expensive.
+  // RFB thread: setColourMapEntries() changes some of the entries in the
+  // colourmap.  Unfortunately these messages are often sent one at a time, so
+  // we prevent the settings from taking effect until the whole colourmap has
+  // changed.  This is because making Java recalculate its internal translation
+  // table and redraw the screen is expensive.
 
   public synchronized void setColourMapEntries(int firstColour, int nColours,
                                                int[] rgbs) {
@@ -225,6 +220,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   }
 
   // Update the actual window with the changed parts of the framebuffer.
+  // This is called from the EDT for the first couple of updates following
+  // a viewport size change but otherwise from the RFB thread (for performance
+  // reasons.)
   public void updateWindow() {
     double tBlitStart = getTime();
     Rect r = damage;
@@ -264,7 +262,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     cc.blits += 1;
   }
 
-  // resize() is called when the desktop has changed size
+  // resize() is called when the desktop has changed size.  See
+  // CConn.resizeFramebuffer().
   public void resize() {
     int w = cc.cp.width;
     int h = cc.cp.height;
@@ -273,6 +272,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     im.resize(w, h);
   }
 
+  // RFB thread
   public final void fillRect(int x, int y, int w, int h, int pix) {
     if (overlapsCursor(x, y, w, h)) hideLocalCursor();
     im.fillRect(x, y, w, h, pix);
@@ -306,7 +306,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     damageRect(r.tl.x, r.tl.y, r.width(), r.height());
   }
 
-  // mutex MUST be held when overlapsCursor() is called
+  // mutex MUST be held when overlapsCursor() is called.
   final boolean overlapsCursor(int x, int y, int w, int h) {
     return (x < cursorBackingX + cursorBacking.width() &&
             y < cursorBackingY + cursorBacking.height() &&
@@ -315,16 +315,14 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
 
   ////////////////////////////////////////////////////////////////////
-  // The following methods are all called from the GUI thread
+  // The following methods are all called from the EDT.
 
   void resetLocalCursor() {
     hideLocalCursor();
     cursorAvailable = false;
   }
 
-  //
-  // Callback methods to determine geometry of our Component.
-  //
+  // Callback methods to determine the geometry of our Component.
 
   public Dimension getPreferredSize() {
     return new Dimension(scaledWidth, scaledHeight);
@@ -338,6 +336,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     return new Dimension(scaledWidth, scaledHeight);
   }
 
+  // Mostly called from the EDT, except for a couple of instances in
+  // CConn.resizeFramebuffer().
   public void setScaledSize() {
     if (cc.opts.scalingFactor != Options.SCALE_AUTO &&
         cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
@@ -376,6 +376,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     scaleHeightRatio = (float)scaledHeight / (float)cc.cp.height;
   }
 
+  // EDT 
   public void paintComponent(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     if (repaintBackground && !swingDB) {
@@ -398,6 +399,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   String oldContents = "";
 
+  // RFB thread
   public synchronized void checkClipboard() {
     SecurityManager sm = System.getSecurityManager();
     try {
@@ -424,7 +426,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
   }
 
-  // Mouse-Motion callback function
+  // EDT: Mouse motion callback function
   private void mouseMotionCB(MouseEvent e) {
     if (!cc.opts.viewOnly &&
         e.getX() >= cc.viewport.dx &&
@@ -432,9 +434,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         e.getX() <= cc.viewport.dx + scaledWidth &&
         e.getY() <= cc.viewport.dy + scaledHeight)
       cc.writePointerEvent(e);
-    // - If local cursor rendering is enabled then use it
+    // If local cursor rendering is enabled, then use it.
     if (cursorAvailable) {
-      // - Render the cursor!
+      // Render the cursor
       if (e.getX() != cursorPosX || e.getY() != cursorPosY) {
         hideLocalCursor();
         if (e.getX() >= 0 && e.getX() < im.width() &&
@@ -452,7 +454,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void mouseDragged(MouseEvent e) { mouseMotionCB(e); }
   public void mouseMoved(MouseEvent e) { mouseMotionCB(e); }
 
-  // Mouse callback function
+  // EDT: Mouse callback function
   private void mouseCB(MouseEvent e) {
     if (!cc.opts.viewOnly && (e.getID() == MouseEvent.MOUSE_RELEASED ||
         (e.getX() >= cc.viewport.dx &&
@@ -469,7 +471,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void mouseEntered(MouseEvent e) {}
   public void mouseExited(MouseEvent e) {}
 
-  // MouseWheel callback function
+  // EDT: Mouse wheel callback function
   private void mouseWheelCB(MouseWheelEvent e) {
     if (!cc.opts.viewOnly)
       cc.writeWheelEvent(e);
@@ -479,16 +481,16 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     mouseWheelCB(e);
   }
 
-  // Handle the key-typed event.
+  // EDT: Handle the key typed event.
   public void keyTyped(KeyEvent e) {}
 
-  // Handle the key-released event.
+  // EDT: Handle the key released event.
   public void keyReleased(KeyEvent e) {
     if (!cc.opts.viewOnly)
       cc.writeKeyEvent(e);
   }
 
-  // Handle the key-pressed event.
+  // EDT: Handle the key pressed event.
   public void keyPressed(KeyEvent e) {
     if (e.getKeyCode() == MenuKey.getMenuKeyCode()) {
       int sx = (scaleWidthRatio == 1.00) ?
@@ -570,8 +572,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       cc.writeKeyEvent(e);
   }
 
-  ////////////////////////////////////////////////////////////////////
-  // The following methods are called from both RFB and GUI threads
+  /////////////////////////////////////////////////////////////////////////////
+  // The following methods are called from both the EDT and the RFB thread.
 
   // Note that mutex MUST be held when hideLocalCursor() and showLocalCursor()
   // are called.
@@ -579,7 +581,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   private synchronized void hideLocalCursor() {
     if (!cc.opts.cursorShape)
       setCursor(noCursor);
-    // - Blit the cursor backing store over the cursor
+    // Blit the cursor backing store over the cursor.
     if (cursorVisible) {
       cursorVisible = false;
       im.imageRect(cursorBackingX, cursorBackingY, cursorBacking.width(),
@@ -621,6 +623,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
   }
 
+  // RFB thread
   void damageRect(int x, int y, int w, int h) {
     if (damage.isEmpty()) {
       damage.setXYWH(x, y, w, h);
@@ -633,7 +636,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
   }
 
-  // run() is executed by the setColourMapEntriesTimerThread - it sleeps for
+  // run() is executed by the setColourMapEntriesTimerThread.  It sleeps for
   // 100ms before actually updating the colourmap.
   public synchronized void run() {
     try {
@@ -643,10 +646,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     setColourMapEntriesTimerThread = null;
   }
 
-  // access to cc by different threads is specified in CConn
   CConn cc;
 
-  // access to the following must be synchronized:
+  // Access to the following must be synchronized:
   PlatformPixelBuffer im;
   Thread setColourMapEntriesTimerThread;
 
@@ -663,8 +665,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public int scaledWidth = 0, scaledHeight = 0;
   float scaleWidthRatio, scaleHeightRatio;
 
-  // the following are only ever accessed by the GUI thread:
-  int lastX, lastY;
+  int lastX, lastY;  // EDT only
   Rect damage = new Rect();
 
   static LogWriter vlog = new LogWriter("DesktopWindow");
