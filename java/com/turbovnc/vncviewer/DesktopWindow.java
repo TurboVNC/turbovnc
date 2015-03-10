@@ -401,7 +401,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public synchronized void checkClipboard() {
     SecurityManager sm = System.getSecurityManager();
     try {
-      if (sm != null) sm.checkSystemClipboardAccess();
+      if (sm != null) sm.checkPermission(new AWTPermission("accessClipboard"));
       Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
       if (cb != null && cc.opts.sendClipboard) {
         Transferable t = cb.getContents(null);
