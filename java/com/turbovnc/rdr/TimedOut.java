@@ -20,8 +20,8 @@
 
 package com.turbovnc.rdr;
 
-public class ErrorException extends RuntimeException {
-  public ErrorException(String s) {
-    super(s);
+class TimedOut extends ErrorException {
+  public TimedOut() {
+    super("Timed out");
   }
 }
