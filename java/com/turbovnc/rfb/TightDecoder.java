@@ -55,8 +55,9 @@ public class TightDecoder extends Decoder {
     for (int i = 0; i < 4; i++)
       inflater[i] = new Inflater();
     try {
-      tjd = new TJDecompressor();
-      if (!VncViewer.getBooleanProperty("turbovnc.turbojpeg", true)) {
+      if (VncViewer.getBooleanProperty("turbovnc.turbojpeg", true))
+        tjd = new TJDecompressor();
+      else {
         vlog.info("Disabling TurboJPEG");
         tjd = null;
       }
