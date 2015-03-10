@@ -27,6 +27,7 @@
     <jar href="VncViewer.jar" main="true"/>
   </resources>
 
+@TVNCJNIOPENCOMMENT@
   <resources os="Mac OS X">
     <nativelib href="ljtosx.jar"/>
   </resources>
@@ -46,6 +47,7 @@
   <resources os="Linux" arch="amd64">
     <nativelib href="ljtlinux64.jar"/>
   </resources>
+@TVNCJNICLOSECOMMENT@
 
   <security>
     <all-permissions/>

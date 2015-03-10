@@ -69,12 +69,6 @@ if(UNIX AND TVNC_BUILDSERVER)
 		${DEFAULT_TVNC_INCLUDEJNIJARS})
 endif()
 
-if(TVNC_INCLUDEJNIJARS)
-	set(JNLPFILE VncViewer-jnijars.jnlp)
-else()
-	set(JNLPFILE VncViewer.jnlp)
-endif()
-
 set(JAVA_SOURCES "")
 set(JAVA_CLASSES "")
 
@@ -179,20 +173,28 @@ add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-128.png
 
 endif()
 
+if(TVNC_BUILDSERVER)
+
 add_custom_command(OUTPUT ${BINDIR}/index.vnc
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/index.vnc ${BINDIR}/index.vnc
 	DEPENDS ${SRCDIR}/${CLASSPATH}/index.vnc)
 
-add_custom_command(OUTPUT ${BINDIR}/VncViewer.jnlp
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/${JNLPFILE} ${BINDIR}/VncViewer.jnlp
-	DEPENDS ${SRCDIR}/${CLASSPATH}/${JNLPFILE})
+set(TVNCJNIOPENCOMMENT "<!--")
+set(TVNCJNICLOSECOMMENT "-->")
+if(TVNC_INCLUDEJNIJARS)
+	set(TVNCJNIOPENCOMMENT "")
+	set(TVNCJNICLOSECOMMENT "")
+endif()
+configure_file(${SRCDIR}/${CLASSPATH}/VncViewer.jnlp.in
+	${BINDIR}/VncViewer.jnlp)
 
 add_custom_command(OUTPUT ${BINDIR}/favicon.ico
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/favicon.ico ${BINDIR}/favicon.ico
 	DEPENDS ${SRCDIR}/${CLASSPATH}/favicon.ico)
+
+endif()
 
 string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
@@ -242,7 +244,7 @@ add_custom_command(OUTPUT VncViewer.jar
 
 add_custom_target(java ALL DEPENDS VncViewer.jar)
 
-if(TVNC_INCLUDEJNIJARS)
+if(TVNC_BUILDSERVER AND TVNC_INCLUDEJNIJARS)
 	set(DEFAULT_TJPEG_JNIJARPATH /opt/libjpeg-turbo-jni)
 	set(TJPEG_JNIJARPATH ${DEFAULT_TJPEG_JNIJARPATH} CACHE PATH
 		"Directory containing TurboJPEG JNI JARs (default: ${DEFAULT_TJPEG_JNIJARPATH})")
@@ -270,7 +272,6 @@ install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${TVNC_JAVADIR})
 install(FILES ${SRCDIR}/${CLASSPATH}/README.txt DESTINATION ${TVNC_JAVADIR})
 if(TVNC_BUILDSERVER)
 	install(FILES ${SRCDIR}/${CLASSPATH}/index.vnc DESTINATION ${TVNC_JAVADIR})
-	install(FILES ${SRCDIR}/${CLASSPATH}/${JNLPFILE} DESTINATION
-		${TVNC_JAVADIR} RENAME VncViewer.jnlp)
+	install(FILES ${BINDIR}/VncViewer.jnlp DESTINATION ${TVNC_JAVADIR})
 	install(FILES ${SRCDIR}/${CLASSPATH}/favicon.ico DESTINATION ${TVNC_JAVADIR})
 endif()

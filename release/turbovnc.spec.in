@@ -30,9 +30,7 @@
 %define jnijars @TVNC_INCLUDEJNIJARS@
 
 # Directory in which the TurboJPEG JNI JARs can be found
-%if "%{jnijars}" == "1"
- %define jnijardir @TJPEG_JNIJARPATH@
-%endif
+%define jnijardir @TJPEG_JNIJARPATH@
 
 # When building from a source RPM, these variables can be passed to rpmbuild in
 # order to sign the JAR file(s) using an official code signing certificate:
@@ -231,16 +229,16 @@ fi
   %{javadir}/index.vnc
   %{javadir}/VncViewer.jnlp
   %{javadir}/favicon.ico
+  %if "%{jnijars}" == "1"
+   %{javadir}/ljtlinux32.jar
+   %{javadir}/ljtlinux64.jar
+   %{javadir}/ljtosx.jar
+   %{javadir}/ljtwin32.jar
+   %{javadir}/ljtwin64.jar
+  %endif
  %endif
  %{javadir}/VncViewer.jar
  %{javadir}/README.txt
- %if "%{jnijars}" == "1"
-  %{javadir}/ljtlinux32.jar
-  %{javadir}/ljtlinux64.jar
-  %{javadir}/ljtosx.jar
-  %{javadir}/ljtwin32.jar
-  %{javadir}/ljtwin64.jar
- %endif
 %endif
 %if "%{server}" == "1"
  %{mandir}/man1/Xvnc.1*
