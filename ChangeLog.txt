@@ -112,6 +112,12 @@ size.
 size/position whenever the span mode or scaling factor is changed, or whenever
 the remote desktop size changes.
 -------------------------------------------------------------------------------
+[14]
+On Un*x/X11 platforms, the Java TurboVNC Viewer will now send and set the
+PRIMARY clipboard selection by default (thus enabling middle mouse button
+copy/paste between the server and the client.)  This can be disabled by setting
+the "turbovnc.primary" system property to false.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

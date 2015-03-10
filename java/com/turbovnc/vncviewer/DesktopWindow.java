@@ -404,7 +404,11 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     SecurityManager sm = System.getSecurityManager();
     try {
       if (sm != null) sm.checkPermission(new AWTPermission("accessClipboard"));
-      Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+      Clipboard cb = null;
+      if (VncViewer.getBooleanProperty("turbovnc.primary", true))
+        cb = Toolkit.getDefaultToolkit().getSystemSelection();
+      if (cb == null)
+        cb = Toolkit.getDefaultToolkit().getSystemClipboard();
       if (cb != null && cc.opts.sendClipboard) {
         Transferable t = cb.getContents(null);
         if ((t != null) && t.isDataFlavorSupported(DataFlavor.stringFlavor)) {

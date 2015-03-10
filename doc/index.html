@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-02-28T03:45:59">
+<meta name="date" content="2015-03-10T14:57:28">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -486,7 +486,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
 <h3 id="hd005001002">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered" value="1">
+    <li value="1" class="Ordered-1 Ordered">
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
@@ -508,7 +508,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0023"></a> 
         8.04 or later.) <br />
     </li>
-    <li class="Ordered-1 Ordered" value="2">
+    <li value="2" class="Ordered-1 Ordered">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue one of the following commands:
         <dl class="Description">
@@ -2620,6 +2620,47 @@ some additional information about how Hextile, RRE, and ZRLE work.</p>
         the viewer to use its own built-in cross-platform 
         &ldquo;pseudo-full-screen&rdquo; feature instead.  This is useful mainly 
         for testing.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.primary&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable the use of the X11 PRIMARY clipboard selection</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Enabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        X11 has two ways of copying/pasting text.  When text is selected in most 
+        X11 applications, it is copied to the PRIMARY selection, and it can be 
+        pasted by pressing the middle mouse button.  When text is explicitly 
+        copied using a &ldquo;Copy&rdquo; menu option or a hotkey (such as 
+        CTRL-C), it is copied to the CLIPBOARD selection, and it can only be 
+        pasted by explicitly selecting a &ldquo;Paste&rdquo; menu option or 
+        pressing a hotkey (such as CTRL-V.) Normally, on X11 platforms, the 
+        TurboVNC Viewer transfers the PRIMARY selection from client to server 
+        and, when receiving a clipboard update from the server, it sets both the 
+        PRIMARY and CLIPBOARD selections with the server&rsquo;s clipboard 
+        contents.  Disabling this property will cause only the the CLIPBOARD 
+        selection to be transferred from client to server (in other words, the 
+        clipboard will not be transferred unless you explicitly copy something 
+        by using a menu option or hotkey), and clipboard changes from the server 
+        will only affect the client&rsquo;s CLIPBOARD selection (in other words, 
+        you will have to explicitly paste the server&rsquo;s clipboard contents 
+        by using a menu option or hotkey on the client.)
     </dd>
 </dl>
 

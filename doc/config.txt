@@ -116,6 +116,28 @@ rectangles |
 	force the viewer to use its own built-in cross-platform "pseudo-full-screen"
 	feature instead.  This is useful mainly for testing.
 
+| Java System Property | ''turbovnc.primary = ''__''0 \| 1''__ |
+| Summary | Disable/enable the use of the X11 PRIMARY clipboard selection |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: X11 has two ways of copying/pasting text.  When text is
+	selected in most X11 applications, it is copied to the PRIMARY selection,
+	and it can be pasted by pressing the middle mouse button.  When text is
+	explicitly copied using a "Copy" menu option or a hotkey (such as CTRL-C), it
+	is copied to the CLIPBOARD selection, and it can only be pasted by explicitly
+	selecting a "Paste" menu option or pressing a hotkey (such as CTRL-V.)
+	Normally, on X11 platforms, the TurboVNC Viewer transfers the PRIMARY
+	selection from client to server and, when receiving a clipboard update from
+	the server, it sets both the PRIMARY and CLIPBOARD selections with the
+	server's clipboard contents.  Disabling this property will cause only the
+	the CLIPBOARD selection to be transferred from client to server (in other
+	words, the clipboard will not be transferred unless you explicitly copy
+	something by using a menu option or hotkey), and clipboard changes from the
+	server will only affect the client's CLIPBOARD selection (in other words, you
+	will have to explicitly paste the server's clipboard contents by using a menu
+	option or hotkey on the client.)
+
 | Java System Property | ''turbovnc.swingdb = ''__''0 \| 1''__ |
 | Summary | Disable/enable Swing double buffering |
 | Default Value | Disabled |
