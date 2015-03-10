@@ -81,6 +81,15 @@ clients (when using Java Web Start.)  All JAR files in the official TurboVNC
 packages for Linux are signed using an official code signing certificate, to
 comply with applet/JWS security requirements in Java 7u51 and later.
 -------------------------------------------------------------------------------
+[12]
+On Un*x/X11 platforms, a small JNI library (turbovnchelper) is now deployed
+alongside the Java TurboVNC Viewer in order to work around full-screen mode
+deficiencies in Java (specifically, under certain window managers, the taskbars
+would appear on top of the full-screen window.)  Because the turbovnchelper
+library depends on libjawt.so, it is unfortunately not easy to deploy it using
+Java Web Start, so it is currently only used when the viewer is launched as a
+standalone application (using the vncviewer script.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

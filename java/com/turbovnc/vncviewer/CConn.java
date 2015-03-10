@@ -857,6 +857,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
+    if (VncViewer.isX11())
+      viewport.x11FullScreenHelper(fullScreen);
     if (opts.fullScreen && viewport.lionFSSupported())
       viewport.toggleLionFS();
     desktop.requestFocusInWindow();
@@ -949,7 +951,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
          (sw <= primary.width || span.width <= primary.width) &&
          (sh <= primary.height || span.height <= primary.height)) ||
         (opts.span == Options.SPAN_AUTO &&
-         opts.desktopSize.mode == Options.SIZE_AUTO))
+         opts.desktopSize.mode == Options.SIZE_AUTO) ||
+        VncViewer.isX11())
+        // ^^ Multi-screen spanning doesn't even pretend to work under X11.
       span = primary;
     else if (equal && fullScreen)
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
@@ -1134,7 +1138,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       "Security method:  " + Security.secTypeName(csecurity.getType()) +
         " [" + csecurity.description() + "]\n" +
       "JPEG decompression:  " +
-        (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated"),
+        (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
+      (VncViewer.isX11() ? "\nTurboVNC Helper:  " +
+        (Viewport.isHelperAvailable() ? "Loaded" : "Not found") : ""),
       JOptionPane.PLAIN_MESSAGE);
     JDialog dlg = pane.createDialog(viewport, "VNC connection info");
     if (VncViewer.embed.getValue())

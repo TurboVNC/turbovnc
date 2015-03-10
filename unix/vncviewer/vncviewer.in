@@ -11,4 +11,32 @@ TVNC_JAVADIR=@TVNC_JAVADIR@
 if [ -d $BINDIR/../java ]; then
 	TVNC_JAVADIR=$BINDIR/../java
 fi
+
+# Attempt to figure out where libjawt.so lives
+ARCH=`uname -m`
+if [ "$ARCH" = "x86_64" ]; then
+	ARCH=amd64
+fi
+if [ "$JAVA_HOME" != "" ]; then
+	JAWT_PATH=$JAVA_HOME/lib/$ARCH
+else
+	# This should work with Java 7 and later.
+	JAWT_PATH=`java -XshowSettings:properties -version 2>&1 | grep sun.boot.library.path | sed s/.*=\ //g`
+	if [ "$JAWT_PATH" = "" ]; then
+		# Maybe we're using Java 6 or earlier.  Try some common paths.
+		for dir in /usr/lib/jvm/jre /usr/java/default /usr/java/latest; do
+			if [ -f $dir/lib/$ARCH/libjawt.so ]; then
+				JAWT_PATH=$dir/lib/$ARCH
+				break
+			fi
+		done
+	fi
+fi
+
+if [ ! -f "$JAWT_PATH/libjawt.so" ]; then
+	echo WARNING: Could not find libjawt.so.  Full-screen mode may not work properly.
+else
+	echo libjawt.so path: $JAWT_PATH
+	export LD_LIBRARY_PATH=$JAWT_PATH:$LD_LIBRARY_PATH
+fi
 exec $JAVA -server -d@BITS@ -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}

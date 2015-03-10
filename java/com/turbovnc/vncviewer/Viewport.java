@@ -311,6 +311,39 @@ public class Viewport extends JFrame {
     }
   }
 
+  public static boolean isHelperAvailable() {
+    if (!triedHelperInit) {
+      try {
+        System.loadLibrary("turbovnchelper");
+        helperAvailable = true;
+      } catch(java.lang.UnsatisfiedLinkError e) {
+        vlog.info("WARNING: Could not find TurboVNC Helper JNI library.  If it is in a");
+        vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
+        vlog.info("  to the Java command line to specify its location.");
+        vlog.info("  Full-screen mode may not work correctly.");
+      } catch(java.lang.Exception e) {
+        vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
+        vlog.info("  " + e.getMessage());
+        vlog.info("  Full-screen mode may not work correctly.");
+      }
+    }
+    triedHelperInit = true;
+    return helperAvailable;
+  }
+
+  public void x11FullScreenHelper(boolean on) {
+    if (isHelperAvailable()) {
+      try {
+        x11FullScreen(on);
+      } catch(java.lang.UnsatisfiedLinkError e) {
+        vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper JNI library.");
+        vlog.info("  Full-screen mode may not work correctly.");
+        helperAvailable = false;
+      }
+    }
+  }
+
+  private native void x11FullScreen(boolean on);
 
   CConn cc;
   JScrollPane sp;
@@ -318,7 +351,7 @@ public class Viewport extends JFrame {
   public int dx, dy = 0;
   MacMenuBar macMenu;
   boolean canDoLionFS;
+  static boolean triedHelperInit, helperAvailable;
   Timer timer;
   static LogWriter vlog = new LogWriter("Viewport");
 }
-

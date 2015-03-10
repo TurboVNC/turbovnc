@@ -113,6 +113,10 @@ public class VncViewer extends javax.swing.JApplet
 
   public static final String os = System.getProperty("os.name").toLowerCase();
 
+  public static boolean isX11() {
+    return !os.startsWith("mac os x") && !os.startsWith("windows");
+  }
+
   // This allows the Mac app to handle .vnc files opened or dragged onto its
   // icon from the Finder.
 

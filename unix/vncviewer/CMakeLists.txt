@@ -47,4 +47,11 @@ message(STATUS "TJPEG_JNILIBRARY = ${TJPEG_JNILIBRARY}")
 install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${TVNC_JAVADIR}
 	RENAME libturbojpeg.so)
 
+include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+add_library(turbovnchelper SHARED turbovnchelper.c)
+set_target_properties(turbovnchelper PROPERTIES LINK_FLAGS "-z defs")
+target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${JAVA_AWT_LIBRARY})
+
+install(TARGETS turbovnchelper DESTINATION ${TVNC_JAVADIR})
+
 endif()
