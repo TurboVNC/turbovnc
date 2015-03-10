@@ -333,8 +333,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
         throw (ErrorException)cause;
       if (cause instanceof WarningException)
         throw (WarningException)cause;
-      else
-        throw new SystemException(e.toString());
+      else if (cause != null)
+        throw new SystemException(cause.toString());
     }
   }
 
@@ -454,8 +454,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
           throw (ErrorException)cause;
         if (cause instanceof WarningException)
           throw (WarningException)cause;
-        else
-          throw new SystemException(e.toString());
+        else if (cause != null)
+          throw new SystemException(cause.toString());
       }
       newViewport--;
     } else
@@ -823,8 +823,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
         throw (ErrorException)cause;
       if (cause instanceof WarningException)
         throw (WarningException)cause;
-      else
-        throw new SystemException(e.toString());
+      else if (cause != null)
+        throw new SystemException(cause.toString());
     }
   }
 
