@@ -82,6 +82,15 @@ packages for Linux are signed using an official code signing certificate, to
 comply with applet/JWS security requirements in Java 7u51 and later.
 -------------------------------------------------------------------------------
 [12]
+vncconnect can now be used to connect a TurboVNC Server session to an instance
+of the UltraVNC Repeater in Mode II.
+-------------------------------------------------------------------------------
+[13]
+The Via and Tunnel parameters in the Java TurboVNC Viewer (which allow
+specifying an SSH or UltraVNC Repeater gateway through which the VNC connection
+should be tunneled) can now be configured using the Options dialog.
+-------------------------------------------------------------------------------
+[14]
 On Un*x/X11 platforms, a small JNI library (turbovnchelper) is now deployed
 alongside the Java TurboVNC Viewer in order to work around full-screen mode
 deficiencies in Java (specifically, under certain window managers, the taskbars
@@ -205,15 +214,6 @@ size.
 -- The viewer window will now be automatically resized to the default
 size/position whenever the span mode or scaling factor is changed, or whenever
 the remote desktop size changes.
--------------------------------------------------------------------------------
-[14]
-vncconnect can now be used to connect a TurboVNC Server session to an instance
-of the UltraVNC Repeater in Mode II.
--------------------------------------------------------------------------------
-[15]
-The Via and Tunnel parameters in the Java TurboVNC Viewer (which allow
-specifying an SSH or UltraVNC Repeater gateway through which the VNC connection
-should be tunneled) can now be configured using the Options dialog.
 -------------------------------------------------------------------------------
 
 
