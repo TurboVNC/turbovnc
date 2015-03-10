@@ -91,6 +91,17 @@ class ClipboardDialog extends Dialog implements ActionListener {
           vlog.debug(e.toString());
         }
       }
+      if (VncViewer.getBooleanProperty("turbovnc.primary", true)) {
+        cb = Toolkit.getDefaultToolkit().getSystemSelection();
+        if (cb != null) {
+          StringSelection ss = new StringSelection(str);
+          try {
+            cb.setContents(ss, ss);
+          } catch(Exception e) {
+            vlog.debug(e.toString());
+          }
+        }
+      }
     } catch(SecurityException e) {
       System.err.println("Cannot access the system clipboard");
     }
