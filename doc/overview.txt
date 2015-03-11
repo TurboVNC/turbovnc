@@ -81,9 +81,14 @@ In addition to high performance, other notable features of TurboVNC include:
 		a lossless refresh automatically if the user stops interacting with the
 		application for a certain period of time.
 
-	* High-performance Java viewer, deployable using Java Web Start.  By calling
-		libjpeg-turbo through JNI, the Java TurboVNC Viewer achieves similar levels
-		of performance to the native TurboVNC Viewer.
+	* High-performance Java viewer, which can be launched via Java Web Start.  By
+		calling libjpeg-turbo through JNI, the Java TurboVNC Viewer achieves
+		similar levels of performance to the native TurboVNC viewers, and
+		its performance is generally equal to or better than that of the TigerVNC
+		native viewers.
+
+	* The Java TurboVNC Viewer can be used with an instance of the UltraVNC
+		Repeater in Mode I or II.
 
 TurboVNC, when used with VirtualGL, provides a highly performant and robust
 solution for remotely displaying 3D applications over all types of networks.

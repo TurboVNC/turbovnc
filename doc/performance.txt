@@ -381,14 +381,3 @@ improve the decoding performance for non-JPEG subrectangles.  If you are
 launching the Java TurboVNC Viewer using the Mac app, the
 ''vncviewer-java'' or ''vncviewer-java.bat'' scripts, or the Windows Start Menu
 shortcut, then the Server VM is automatically enabled.
-
-*** Java Web Start
-#OPT: noList! plain!
-
-Java Web Start can be used to deploy the Java TurboVNC Viewer and the
-associated libjpeg-turbo JNI libraries from a web server.  Deploying the viewer
-using JWS provides a fully functional and performant TurboVNC Viewer
-environment without requiring the viewer to be installed on the client machine.
-This mechanism is preferred over deploying the viewer as an applet, since JPEG
-decoding cannot be accelerated when the Java TurboVNC Viewer is run as an
-applet.  See [[http://www.TurboVNC.org/Documentation/JWS]] for more details.

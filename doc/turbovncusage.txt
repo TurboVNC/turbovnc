@@ -294,6 +294,9 @@ above example.)
 	!!! You can force PuTTY to use an IPv6 interface for the local end of the
 	tunnel by replacing ''-L'' with ''-L6'' in the above command line.
 
+	!!! For LAN connections and other high-speed networks, tunneling the TurboVNC
+	connection through PuTTY will reduce performance by as much as 20%.
+
 *** The ''-via'' and ''-tunnel'' Command-Line Options
 #OPT: noList! plain!
 
@@ -358,14 +361,6 @@ If the ''no-reverse-connections'' directive is set in the TurboVNC
 authentication configuration file, then that has the effect of enabling the
 ''-noreverse'' option for all new TurboVNC sessions that are started on
 the machine.
-
-*** Performance Notes
-#OPT: noList! plain!
-
-For LAN connections and other high-speed networks, tunneling the TurboVNC
-connection through SSH will reduce performance by as much as 20-40%.  For
-wide-area networks, however, there is no performance penalty for using SSH
-tunneling with TurboVNC.
 
 ** Further Reading
 
