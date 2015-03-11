@@ -17,6 +17,7 @@
  */
 
 #include <string.h>
+#include <dlfcn.h>
 #include "jawt_md.h"
 #include "com_turbovnc_vncviewer_Viewport.h"
 
@@ -58,11 +59,14 @@ static void netwm_fullscreen(Display *dpy, Window win, int state)
 #define _throw(msg) {  \
   jclass _exccls=(*env)->FindClass(env, "java/lang/Exception");  \
   if(!_exccls) goto bailout;  \
-  printf("msg=%s\n", msg);  \
   (*env)->ThrowNew(env, _exccls, msg);  \
-  printf("thrown msg=%s\n", msg);  \
   goto bailout;  \
 }
+
+typedef jboolean JNICALL (*__JAWT_GetAWT_type)(JNIEnv* env, JAWT* awt);
+static __JAWT_GetAWT_type __JAWT_GetAWT = NULL;
+
+static void *handle = NULL;
 
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   (JNIEnv *env, jobject obj, jboolean on)
@@ -73,7 +77,14 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   JAWT_X11DrawingSurfaceInfo *x11dsi = NULL;
 
   awt.version = JAWT_VERSION_1_3;
-  if(JAWT_GetAWT(env, &awt) == JNI_FALSE)
+  if (!handle) {
+    if ((handle = dlopen("libjawt.so", RTLD_LAZY)) == NULL)
+      _throw(dlerror());
+    if ((__JAWT_GetAWT = dlsym(handle, "JAWT_GetAWT")) == NULL)
+      _throw(dlerror());
+  }
+
+  if(__JAWT_GetAWT(env, &awt) == JNI_FALSE)
     _throw("Could not initialize AWT native interface");
 
   if((ds = awt.GetDrawingSurface(env, obj)) == NULL)

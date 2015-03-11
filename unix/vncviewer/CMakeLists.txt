@@ -44,13 +44,15 @@ endif()
 
 message(STATUS "TJPEG_JNILIBRARY = ${TJPEG_JNILIBRARY}")
 
+find_package(JNI REQUIRED)
+
 install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${TVNC_JAVADIR}
 	RENAME libturbojpeg.so)
 
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 add_library(turbovnchelper SHARED turbovnchelper.c)
 set_target_properties(turbovnchelper PROPERTIES LINK_FLAGS "-z defs")
-target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${JAVA_AWT_LIBRARY})
+target_link_libraries(turbovnchelper ${X11_LIBRARIES} dl)
 
 install(TARGETS turbovnchelper DESTINATION ${TVNC_JAVADIR})
 
