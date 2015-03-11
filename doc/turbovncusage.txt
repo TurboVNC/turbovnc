@@ -315,9 +315,7 @@ above example.)
 	tunnel by replacing ''-L'' with ''-L6'' in the above command line.
 
 	!!! For LAN connections and other high-speed networks, tunneling the TurboVNC
-	connection through PuTTY will reduce performance by as much as 20-40%.  For
-	wide-area networks, however, there is no performance penalty for using SSH
-	tunneling with TurboVNC.
+	connection through PuTTY will reduce performance by as much as 20%.
 
 *** The ''-via'' and ''-tunnel'' Command-Line Options
 #OPT: noList! plain!
