@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-03-11T11:35:48">
+<meta name="date" content="2015-03-11T15:15:01">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -492,7 +492,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
 <h3 id="hd005001002">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered" value="1">
+    <li value="1" class="Ordered-1 Ordered">
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a class="remote" href="http://sourceforge.net/projects/turbovnc/files/">Files 
@@ -514,7 +514,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         <span class="remote"><a class="remote" href="http://www.ubuntu.com">Ubuntu</a></span><a name="idx0023"></a> 
         8.04 or later.) <br />
     </li>
-    <li class="Ordered-1 Ordered" value="2">
+    <li value="2" class="Ordered-1 Ordered">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue one of the following commands:
         <dl class="Description">
@@ -1077,12 +1077,16 @@ it allows you to specify the VNC server to which to connect.  The VNC
 server is specified from the point of view of the SSH server, which is 
 why we used <code>localhost</code> in the above example.</p>
 
-<p>With the X11 TurboVNC Viewer, the command used to establish the SSH 
-tunnel is configurable by way of environment variables.  See the 
-<code>vncviewer</code> man page for more details.</p>
+<p>The command used to establish the SSH tunnel is configurable by way of 
+environment variables.  See Section 
+<a href="#VNC_VIA_CMD" class="ref">11.2</a> for more details.</p>
 
 <div class="important"><p class="important">
-NOTE: Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>-via</code> and <code>-tunnel</code> parameters can also be used when the viewer is run as an applet or deployed using Java Web Start.
+Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>via</code> and <code>tunnel</code> parameters can also be used when the viewer is run as an applet or deployed using Java Web Start.
+</p></div>
+
+<div class="important"><p class="important">
+The Windows TurboVNC Viewer contains experimental support for the <code>-via</code> and <code>-tunnel</code> command-line options.  Currently, the use of these requires Cygwin OpenSSH, since it is the only version of SSH on Windows that supports detaching the SSH process once the tunnel has been established. When using these options, a console window pops up and remains for the duration of the VNC connection.
 </p></div>
 
 
@@ -2542,6 +2546,89 @@ some additional information about how Hextile, RRE, and ZRLE work.</p>
     </dd>
 </dl>
 
+<p><a name="VNC_VIA_CMD"></a></p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VNC_VIA_CMD</code>, <code>VNC_TUNNEL_CMD</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">SSH command-line templates for use with the <code>via</code> and <code>tunnel</code> options (respectively)</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">See below</td>
+  </tr>
+</table>
+</div>
+
+
+<p>When the <code>-via</code> option (or the <code>via</code> parameter in 
+the Java viewer, along with the <code>extssh</code> parameter) is used, 
+the TurboVNC Viewer reads the <code>VNC_VIA_CMD</code> environment 
+variable (the Java viewer can also read this information from the 
+<code>turbovnc.via</code> system property), expands patterns beginning 
+with the &ldquo;%&rdquo; character, and uses the resulting command line 
+to establish the secure tunnel to the VNC gateway.  If 
+<code>VNC_VIA_CMD</code> is not set, then this command line defaults to 
+<code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
+(or 
+<code>c:\cygwin\bin\ssh.exe&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
+if using the Windows native viewer.)</p>
+
+<p>When the <code>-tunnel</code> option (or the <code>tunnel</code> 
+parameter in the Java viewer, along with the <code>extssh</code> 
+parameter) is used, the TurboVNC Viewer reads the 
+<code>VNC_TUNNEL_CMD</code> environment variable (the Java viewer can 
+also read this information from the <code>turbovnc.tunnel</code> system 
+property), expands patterns beginning with the &ldquo;%&rdquo; 
+character, and uses the resulting command line to establish the secure 
+tunnel to the VNC server.  If <code>VNC_TUNNEL_CMD</code> is not set, 
+then this command line defaults to 
+<code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
+(or 
+<code>c:\cygwin\bin\ssh.exe&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
+if using the Windows native viewer.)</p>
+
+<p>The following patterns are recognized in the <code>VNC_VIA_CMD</code> 
+and <code>VNC_TUNNEL_CMD</code> environment variables (note that 
+<code>%H</code>, <code>%L</code> and <code>%R</code> must be present in 
+the command template, and <code>%G</code> must also be present if using 
+the <code>-via</code> option):</p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="standard"><code>%%</code></td>
+    <td class="standard">A literal &ldquo;%&rdquo;</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard"><code>%G</code></td>
+    <td class="standard">gateway machine name</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard"><code>%H</code></td>
+    <td class="standard">remote VNC machine name (if using the <code>-via</code> option, then this is specified from the point of view of the gateway)</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard"><code>%L</code></td>
+    <td class="standard">local TCP port number</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard"><code>%R</code></td>
+    <td class="standard">remote TCP port number</td>
+  </tr>
+</table>
+</div>
+
+
 
 
 <h2 id="hd0011003">11.3&nbsp;Java Client Settings</h2>
@@ -2691,6 +2778,30 @@ some additional information about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.tunnel</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">SSH command-line template for use with the <code>Tunnel</code> and <code>ExtSSH</code> parameters</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        A more Java-friendly way of specifying the command line to use when 
+        establishing a secure tunnel with the <code>Tunnel</code> and 
+        <code>ExtSSH</code> parameters.  See the <code>VNC_TUNNEL_CMD</code> 
+        environment variable above for more details.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
     <td class="standard"><code>turbovnc.turbojpeg&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
   </tr>
   <tr class="standard">
@@ -2713,6 +2824,30 @@ some additional information about how Hextile, RRE, and ZRLE work.</p>
         subrectangles.  If this property is disabled, then the viewer will 
         revert to using unaccelerated JPEG decompression.  This is useful mainly 
         for testing and benchmarking purposes.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.via</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">SSH command-line template for use with the <code>Via</code> and <code>ExtSSH</code> parameters</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        A more Java-friendly way of specifying the command line to use when 
+        establishing a secure tunnel with the <code>Via</code> and 
+        <code>ExtSSH</code> parameters.  See the <code>VNC_VIA_CMD</code> 
+        environment variable above for more details.
     </dd>
 </dl>
 

@@ -118,6 +118,12 @@ PRIMARY clipboard selection by default (thus enabling middle mouse button
 copy/paste between the server and the client.)  This can be disabled by setting
 the "turbovnc.primary" system property to false.
 -------------------------------------------------------------------------------
+[15]
+The Java TurboVNC Viewer can now optionally use an external SSH client when
+the "ExtSSH" parameter is set to 1.  The full SSH command line can also be
+specified using the VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables, as
+with the native viewers.  See the TurboVNC User's Guide for more details.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

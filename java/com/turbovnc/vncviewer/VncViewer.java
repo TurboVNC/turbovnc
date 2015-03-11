@@ -720,6 +720,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       }
     }
     opts.tunnel = tunnel.getValue();
+    opts.extSSH = extSSH.getValue();
+
     String s = vncServerName.getValue();
     if (s != null) {
       int atIndex = s.indexOf('@');
@@ -1048,30 +1050,43 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   "<user>@ to indicate that user name <user> (default = local user name) " +
   "should be used when authenticating with the SSH server.", false);
 
+  static BoolParameter extSSH
+  = new BoolParameter("ExtSSH",
+  "Use an external SSH client on Un*x systems instead of the built-in SSH " +
+  "client.  The external client defaults to /usr/bin/ssh, but you can use " +
+  "the VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables or the " +
+  "turbovnc.via and turbovnc.tunnel system properties to specify the exact " +
+  "command line to use when creating the tunnel.  If one of those " +
+  "environment variables or system properties is set, then an external SSH " +
+  "client is automatically used.  See the TurboVNC User's Guide for more " +
+  "details.", false);
+
   static IntParameter sshPort
   = new IntParameter("SSHPort",
-  "When using the Via or Tunnel options, this parameter specifies the TCP " +
-  "port on which the SSH server is listening.", 22);
+  "When using the Via or Tunnel options with the built-in SSH client, this " +
+  "parameter specifies the TCP port on which the SSH server is " +
+  "listening.", 22);
 
   static StringParameter sshKey
   = new StringParameter("SSHKey",
-  "When using the Via or Tunnel options, this parameter specifies the text " +
-  "of the SSH private key to use when authenticating with the SSH server.  " +
-  "You can use \\n within the string to specify a new line.", null);
+  "When using the Via or Tunnel options with the built-in SSH client, this " +
+  "parameter specifies the text of the SSH private key to use when " +
+  "authenticating with the SSH server.  You can use \\n within the string " +
+  "to specify a new line.", null);
 
   static StringParameter sshKeyFile
   = new StringParameter("SSHKeyFile",
-  "When using the Via or Tunnel options, this parameter specifies a file " +
-  "that contains an SSH private key (or keys) to use when authenticating " +
-  "with the SSH server.  If not specified, then the built-in SSH client will " +
-  "attempt to read private keys from ~/.ssh/id_dsa and ~/.ssh/id_rsa.  It " +
-  "will fall back to asking for an SSH password if private key " +
-  "authentication fails.", null);
+  "When using the Via or Tunnel options with the built-in SSH client, this " +
+  "parameter specifies a file that contains an SSH private key (or keys) to " +
+  "use when authenticating with the SSH server.  If not specified, then the " +
+  "built-in SSH client will attempt to read private keys from ~/.ssh/id_dsa " +
+  "and ~/.ssh/id_rsa.  It will fall back to asking for an SSH password if " +
+  "private key authentication fails.", null);
 
   static StringParameter sshKeyPass
   = new StringParameter("SSHKeyPass",
-  "When using the Via or Tunnel options, this parameter specifies the " +
-  "passphrase for the SSH key.", null);
+  "When using the Via or Tunnel options with the built-in SSH client, this " +
+  "parameter specifies the passphrase for the SSH key.", null);
 
   static StringParameter config
   = new StringParameter("Config",

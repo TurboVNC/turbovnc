@@ -335,13 +335,20 @@ VNC server to which to connect.  The VNC server is specified from the point of
 view of the SSH server, which is why we used ''localhost'' in the above
 example.
 
-With the X11 TurboVNC Viewer, the command used to establish the SSH tunnel is
-configurable by way of environment variables.  See the ''vncviewer'' man page
-for more details.
+The command used to establish the SSH tunnel is configurable by way of
+environment variables.  See {ref prefix="Section ": VNC_VIA_CMD} for more
+details.
 
-	!!! NOTE: Since the Java TurboVNC Viewer contains an embedded SSH client,
-	the ''-via'' and ''-tunnel'' parameters can also be used when the viewer
-	is run as an applet or deployed using Java Web Start.
+	!!! Since the Java TurboVNC Viewer contains an embedded SSH client, the
+	''via'' and ''tunnel'' parameters can also be used when the viewer is run
+	as an applet or deployed using Java Web Start.
+
+	!!! The Windows TurboVNC Viewer contains experimental support for the
+	''-via'' and ''-tunnel'' command-line options.  Currently, the use of these
+	requires Cygwin OpenSSH, since it is the only version of SSH on Windows that
+	supports detaching the SSH process once the tunnel has been established.
+	When using these options, a console window pops up and remains for the
+	duration of the VNC connection.
 
 *** Forcing Secure Connections
 #OPT: noList! plain!

@@ -1,6 +1,7 @@
-/*
+/*  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2012 Brian P. Hinz.  All Rights Reserved.
- *  Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,8 +37,6 @@ import com.jcraft.jsch.Session;
 
 public class Tunnel {
 
-  private static final Integer SERVER_PORT_OFFSET = 5900;
-
   public static void createTunnel(Options opts) throws Exception {
     int localPort;
     int remotePort;
@@ -61,6 +60,30 @@ public class Tunnel {
     else
       remotePort = Hostname.getPort(opts.serverName);
 
+    String pattern = null;
+    if (opts.tunnel) {
+      pattern = System.getProperty("turbovnc.tunnel");
+      if (pattern == null)
+        pattern = System.getenv("VNC_TUNNEL_CMD");
+    } else {
+      pattern = System.getProperty("turbovnc.via");
+      if (pattern == null)
+        pattern = System.getenv("VNC_VIA_CMD");
+    }
+
+    if (opts.extSSH || (pattern != null && pattern.length() > 0))
+      createTunnelExt(gatewayHost, remoteHost, remotePort, localPort, pattern,
+                      opts);
+    else
+      createTunnelJSch(gatewayHost, remoteHost, remotePort, localPort, opts);
+    opts.serverName = "localhost::" + localPort;
+  }
+  
+  /* Create a tunnel using the builtin JSch SSH client */
+
+  private static void createTunnelJSch(String gatewayHost, String remoteHost,
+                                       int remotePort, int localPort,
+                                       Options opts) throws Exception {
     JSch jsch = new JSch();
     String homeDir = new String("");
     try {
@@ -141,7 +164,71 @@ public class Tunnel {
     vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
                ":" + remotePort + " (relative to gateway)");
     session.setPortForwardingL(localPort, remoteHost, remotePort);
-    opts.serverName = "localhost::" + localPort;
+  }
+
+  /* Create a tunnel using an external SSH client.  This supports the same
+     VNC_TUNNEL_CMD and VNC_VIA_CMD environment variables as the native viewers
+     do. */
+
+  private static final String DEFAULT_SSH_CMD = "/usr/bin/ssh";
+  private static final String DEFAULT_TUNNEL_CMD
+    = DEFAULT_SSH_CMD + " -f -L %L:localhost:%R %H sleep 20";
+  private static final String DEFAULT_VIA_CMD
+    = DEFAULT_SSH_CMD + " -f -L %L:%H:%R %G sleep 20";
+
+  public static void createTunnelExt(String gatewayHost, String remoteHost,
+                                     int remotePort, int localPort,
+                                     String pattern, Options opts)
+                                     throws Exception {
+    if (pattern == null || pattern.length() < 1)
+      pattern = (opts.tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
+    String command = fillCmdPattern(pattern, gatewayHost, remoteHost,
+                                    remotePort, localPort, opts.tunnel);
+
+    vlog.debug("SSH command line: " + command);
+    Process p = Runtime.getRuntime().exec(command);
+    if (p != null)
+      p.waitFor();
+  }
+
+  private static String fillCmdPattern(String pattern, String gatewayHost,
+                                       String remoteHost, int remotePort,
+                                       int localPort, boolean tunnel) {
+    int i, j;
+    boolean H_found = false, G_found = false, R_found = false, L_found = false;
+    String command = "";
+
+    for (i = 0; i < pattern.length(); i++) {
+      if (pattern.charAt(i) == '%') {
+        switch (pattern.charAt(++i)) {
+          case 'H':
+            command += (tunnel ? gatewayHost : remoteHost);
+            H_found = true;
+            continue;
+          case 'G':
+            command += gatewayHost;
+            G_found = true;
+            continue;
+          case 'R':
+            command += remotePort;
+            R_found = true;
+            continue;
+          case 'L':
+            command += localPort;
+            L_found = true;
+            continue;
+        }
+      }
+      command += pattern.charAt(i);
+    }
+
+    if (!H_found || !R_found || !L_found)
+      throw new ErrorException("%H, %R or %L absent in tunneling command template.");
+
+    if (!tunnel && !G_found)
+      throw new ErrorException("%G pattern absent in tunneling command template.");
+
+    return command;
   }
 
   static LogWriter vlog = new LogWriter("Tunnel");

@@ -85,6 +85,47 @@ rectangles |
 	continuously benchmark itself and periodically print the throughput of
 	various stages in its image pipeline to the console.
 
+{anchor: VNC_VIA_CMD}
+| Environment Variable | ''VNC_VIA_CMD'', ''VNC_TUNNEL_CMD'' |
+| Summary | SSH command-line templates for use with the ''via'' and \
+	''tunnel'' options (respectively) |
+| Platforms | All |
+| Default Value | See below |
+#OPT: hiCol=first
+
+When the ''-via'' option (or the ''via'' parameter in the Java viewer, along
+with the ''extssh'' parameter) is used, the TurboVNC Viewer reads the
+''VNC_VIA_CMD'' environment variable (the Java viewer can also read this
+information from the ''turbovnc.via'' system property), expands patterns
+beginning with the "%" character, and uses the resulting command line to
+establish the secure tunnel to the VNC gateway.  If ''VNC_VIA_CMD'' is not set,
+then this command line defaults to ''/usr/bin/ssh -f -L %L:%H:%R %G sleep 20''
+(or ''c:\\cygwin\\bin\\ssh.exe -f -L %L:%H:%R %G sleep 20'' if using the
+Windows native viewer.)
+
+When the ''-tunnel'' option (or the ''tunnel'' parameter in the Java viewer,
+along with the ''extssh'' parameter) is used, the TurboVNC Viewer reads the
+''VNC_TUNNEL_CMD'' environment variable (the Java viewer can also read this
+information from the ''turbovnc.tunnel'' system property), expands patterns
+beginning with the "%" character, and uses the resulting command line to
+establish the secure tunnel to the VNC server.  If ''VNC_TUNNEL_CMD'' is not
+set, then this command line defaults to
+''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20'' (or
+''c:\\cygwin\\bin\\ssh.exe -f -L %L:localhost:%R %H sleep 20'' if using the
+Windows native viewer.)
+
+The following patterns are recognized in the ''VNC_VIA_CMD'' and
+''VNC_TUNNEL_CMD'' environment variables (note that ''%H'', ''%L'' and ''%R''
+must be present in the command template, and ''%G'' must also be present if
+using the ''-via'' option):
+
+| ''%%'' | A literal "%" |
+| ''%G'' | gateway machine name |
+| ''%H'' | remote VNC machine name (if using the ''-via'' option, then this \
+	is specified from the point of view of the gateway) |
+| ''%L'' | local TCP port number |
+| ''%R'' | remote TCP port number |
+
 ** Java Client Settings
 
 {anchor: turbovnc.forcealpha}
@@ -151,6 +192,16 @@ rectangles |
 	''turbovnc.swingdb'' system property is provided as a fallback in case issues
 	are discovered when running it under a specific version of Java.
 
+| Java System Property | ''turbovnc.tunnel'' |
+| Summary | SSH command-line template for use with the ''Tunnel'' and \
+	''ExtSSH'' parameters |
+#OPT: hiCol=first
+
+	Description :: A more Java-friendly way of specifying the command line to use
+	when establishing a secure tunnel with the ''Tunnel'' and ''ExtSSH''
+	parameters.  See the ''VNC_TUNNEL_CMD'' environment variable above for more
+	details.
+
 | Java System Property | ''turbovnc.turbojpeg = ''__''0 \| 1''__ |
 | Summary | Disable/enable JPEG acceleration |
 | Default Value | Enabled if the libjpeg-turbo JNI library is available |
@@ -161,3 +212,13 @@ rectangles |
 	JPEG subrectangles.  If this property is disabled, then the viewer will
 	revert to using unaccelerated JPEG decompression.  This is useful mainly for
 	testing and benchmarking purposes.
+
+| Java System Property | ''turbovnc.via'' |
+| Summary | SSH command-line template for use with the ''Via'' and \
+	''ExtSSH'' parameters |
+#OPT: hiCol=first
+
+	Description :: A more Java-friendly way of specifying the command line to use
+	when establishing a secure tunnel with the ''Via'' and ''ExtSSH''
+	parameters.  See the ''VNC_VIA_CMD'' environment variable above for more
+	details.
