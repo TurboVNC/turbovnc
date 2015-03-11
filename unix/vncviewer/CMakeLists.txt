@@ -51,8 +51,15 @@ install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${TVNC_JAVADIR}
 
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 add_library(turbovnchelper SHARED turbovnchelper.c)
-set_target_properties(turbovnchelper PROPERTIES LINK_FLAGS "-z defs")
-target_link_libraries(turbovnchelper ${X11_LIBRARIES} dl)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	set_target_properties(turbovnchelper PROPERTIES LINK_FLAGS "-lc -z defs")
+else()
+	set_target_properties(turbovnchelper PROPERTIES LINK_FLAGS "-z defs")
+endif()
+if(NOT CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+	set(LIBDL dl)
+endif()
+target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${LIBDL})
 
 install(TARGETS turbovnchelper DESTINATION ${TVNC_JAVADIR})
 

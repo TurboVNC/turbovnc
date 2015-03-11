@@ -52,6 +52,7 @@ if [ "$JAWT_PATH" = "" ]; then
 	echo WARNING: Could not find libjawt.so.  Full-screen mode may not work properly.
 else
 	echo libjawt.so path: $JAWT_PATH
-	export LD_LIBRARY_PATH=$JAWT_PATH:$LD_LIBRARY_PATH
+	LD_LIBRARY_PATH=$JAWT_PATH:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH
 fi
 exec $JAVA -server -d@BITS@ -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
