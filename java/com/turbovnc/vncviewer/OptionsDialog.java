@@ -237,15 +237,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     scalingFactor = new JComboBox(scalingFactors);
     scalingFactor.setEditable(true);
     scalingFactor.addItemListener(this);
-    if (VncViewer.embed.getValue()) {
+    if (VncViewer.embed.getValue())
       scalingFactor.setEnabled(false);
-    }
 
     fullScreen = new JCheckBox("Full-screen mode");
     fullScreen.addItemListener(this);
-    if (VncViewer.embed.getValue()) {
+    if (VncViewer.embed.getValue())
       fullScreen.setEnabled(false);
-    }
 
     Object[] spanOptions = {
       "Primary monitor only", "All monitors", "Automatic" };
@@ -354,6 +352,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     showToolbar = new JCheckBox("Show toolbar by default");
     showToolbar.addItemListener(this);
+    if (VncViewer.embed.getValue())
+      showToolbar.setEnabled(false);
 
     JLabel menuKeyLabel = new JLabel("Menu Key:");
     String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()];
