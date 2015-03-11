@@ -1,5 +1,14 @@
 include(CheckCSourceCompiles)
 
+include_directories(${X11_INCLUDE_DIR})
+
+add_executable(checkshmpixmaps
+	checkshmpixmaps.c)
+
+target_link_libraries(checkshmpixmaps ${X11_LIBRARIES})
+
+install(TARGETS checkshmpixmaps DESTINATION ${TVNC_BINDIR})
+
 configure_file(vncviewer-java.in vncviewer-java @ONLY)
 execute_process(COMMAND chmod +x vncviewer-java
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
