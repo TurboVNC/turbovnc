@@ -15,6 +15,9 @@ editors) while still providing excellent performance for other types of
 applications.  TurboVNC, in combination with VirtualGL, provides a complete
 solution for remotely displaying 3D applications with interactive performance.
 
+Refer to the TurboVNC User's Guide and man pages for a more thorough
+description of the components that make up TurboVNC.
+
 
 Legal
 =====
@@ -39,57 +42,6 @@ under which this software is made available.  TurboVNC also contains code from
 other sources.  See the Acknowledgements section below, and the individual
 source files, for details of the conditions under which they are made
 available.
-
-
-All Platforms
-=============
-
-All versions of TurboVNC contain the following programs:
-
-  vncviewer - the TurboVNC Viewer.  On Un*x platforms (except Mac), this is an
-              X Windows application and requires an X Windows server.  On Mac
-              platforms, it is a script that launches the Mac TurboVNC Viewer
-              app, which is simply a packaged version of the Java TurboVNC
-              Viewer and the libjpeg-turbo JNI library.
-
-              vncviewer connects to a VNC server and allows you to interact
-              with the remote desktop being displayed by the VNC server.
-
-
-Windows-Specific
-================
-
-The Windows version of TurboVNC contains the following programs:
-
-    putty - an open-source SSH client, which is bundled with vncviewer to
-            simplify making secure connections to TurboVNC servers
-
-The Windows version of TurboVNC should work with Windows 2000 and later.
-
-
-Linux/Un*x-Specific (not Mac)
-=============================
-
-The Linux/Un*x version of TurboVNC contains the following programs:
-
-  Xvnc - the TurboVNC Server.  Xvnc is both a VNC server and an X server with a
-         "virtual" framebuffer.  You should normally use the vncserver script
-         to start Xvnc.
-
-  vncserver - a wrapper script that makes starting Xvnc more convenient.
-              vncserver requires Perl.
-
-  vncpasswd - a program that allows you to configure the access credentials for
-              your TurboVNC server sessions.
-
-  vncconnect - Normally, vncviewer connects to Xvnc, but you can use this
-               program to initiate a "reverse connection", whereby Xvnc
-               connects to an instance of vncviewer that has been started in
-               "listen mode."
-
-  tvncconfig - a helper program that runs in the VNC server session and
-               handles the transfer of clipboard data between the TurboVNC
-               Server and X applications.
 
 
 ACKNOWLEDGEMENTS

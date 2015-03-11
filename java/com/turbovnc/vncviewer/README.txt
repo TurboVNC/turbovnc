@@ -33,24 +33,33 @@ the individual files for details of the conditions under which they are made
 available.
 
 
-NOTE: On Mac platforms, the Java TurboVNC Viewer is bundled as a self-contained
-app and can be launched by opening the "TurboVNC Viewer" app located in the
-"TurboVNC" Applications folder or by running /opt/TurboVNC/bin/vncviewer from a
-Terminal window.  On Linux/Un*x platforms, the Java TurboVNC Viewer can be
-launched by running /opt/TurboVNC/bin/vncviewer-java from a command prompt.  On
-Windows platforms, the Java TurboVNC Viewer can be launched by selecting "Java
-TurboVNC Viewer" in the "TurboVNC" Start Menu group or by running
-c:\Program Files\TurboVNC\vncviewer-java.bat from a command prompt.  If using
-the Java TurboVNC Viewer in this manner, then the instructions below do not
-apply.  See the TurboVNC User's Guide for more information.
-
-
 Installation
 ============
 
 There are three basic ways to use the Java TurboVNC Viewer:
 
-  1. Running the applet as part of a TurboVNC Server installation.
+  1. Running the viewer as a standalone application.
+
+     On Mac platforms, the Java TurboVNC Viewer is bundled as a self-contained
+     app and can be launched by opening the "TurboVNC Viewer" app located in
+     the "TurboVNC" Applications folder or by running
+     /opt/TurboVNC/bin/vncviewer from a Terminal window.  On Linux/Un*x
+     platforms, the Java TurboVNC Viewer can be launched by running
+     /opt/TurboVNC/bin/vncviewer-java from a command prompt.  On Windows
+     platforms, the Java TurboVNC Viewer can be launched by selecting "Java
+     TurboVNC Viewer" in the "TurboVNC" Start Menu group or by running
+     c:\Program Files\TurboVNC\vncviewer-java.bat from a command prompt.
+     See the TurboVNC User's Guide for more information.
+
+     The Java TurboVNC Viewer can also be launched directly on the command line
+     using the "java" command (useful for developers):
+
+         java -jar VncViewer.jar [parameters]
+
+     Add an argument of -? to the above command line to print a list of
+     optional parameters supported by the viewer.
+
+  2. Running the viewer as an applet using the TurboVNC Server.
 
      The TurboVNC Server includes a small built-in HTTP server that can serve
      the Java TurboVNC Viewer to web clients.  This enables easy access to the
@@ -65,32 +74,13 @@ There are three basic ways to use the Java TurboVNC Viewer:
      the Java TurboVNC Viewer by simply copying a new JAR file into this
      directory.
 
-  2. Running the applet from a standalone web server.
+  3. Running the viewer from a standalone web server.
 
      Another possibility for using the Java TurboVNC Viewer is to install it
-     under a fully-functional HTTP server, such as Apache or IIS.  Due to Java
-     security restrictions, the applet must be signed in order for it to
-     connect to a VNC server running on a different machine from the HTTP
-     server.
-
-     One can install the Java TurboVNC Viewer by simply copying the .jar file
-     into a directory that is under the control of the HTTP server.  Also, an
-     HTML page should be created to act as a the base document for the Java
-     TurboVNC Viewer applet (see the "Parameters" section below for example
-     HTML code.)
-
-  3. Running the viewer as a standalone application.
-
-     Finally, the Java TurboVNC Viewer can be executed locally on the client
-     machine, but this method requires installation of either a JRE (Java
-     Runtime Environment) or a JDK (Java Development Kit).  If VncViewer.jar is
-     in the current directory, then the Java TurboVNC Viewer can be launched
-     with the following command line:
-
-         java -jar VncViewer.jar [parameters]
-
-     Add an argument of -? to the above command line to print a list of
-     optional parameters supported by VncViewer.
+     under a fully-functional HTTP server, such as Apache.  Using Java Web
+     Start, the native libjpeg-turbo JNI JARs can be deployed along with the
+     viewer, creating a zero-install feature-rich VNC viewer solution with
+     optimal performance.  See the TurboVNC User's Guide for more information.
 
 
 Parameters
@@ -99,7 +89,7 @@ Parameters
 The Java TurboVNC Viewer accepts a number of optional parameters, allowing you
 to customize its behavior.
 
-Parameters can be specified in one of the two ways, depending on how the Java
+Parameters can be specified in one of the three ways, depending on how the Java
 TurboVNC Viewer is used:
 
   1. When the Java TurboVNC Viewer is run as an applet (embedded within an HTML
@@ -112,7 +102,15 @@ TurboVNC Viewer is used:
        <PARAM NAME="Scale" VALUE=50>
      </APPLET>
 
-  2. When run as a standalone application, the Java TurboVNC Viewer reads
+  2. When the Java TurboVNC Viewer is launched via Java Web Start, parameters
+     should be specified in <argument> tags in the JNLP file.  Example:
+
+     <application-desc main-class="com.turbovnc.vncviewer.VncViewer">
+       <argument>Port=5901</argument>
+       <argument>Scale=50</argument>
+     </application-desc>
+
+  3. When run as a standalone application, the Java TurboVNC Viewer reads
      parameters from the command line.  Example:
 
      java -jar VncViewer.jar Port=5901 Scale=50
@@ -122,7 +120,8 @@ TurboVNC Viewer is used:
      java -jar VncViewer.jar -port 5901 -scale 50
 
 Both parameter names and their values are case-insensitive.  The only
-exception is the "Password" parameter, as VNC passwords are case-sensitive.
+exception is the value passed to the "Password" parameter, as VNC passwords are
+case-sensitive.
 
 For a complete list of parameters and their descriptions, execute:
 
