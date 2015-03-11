@@ -70,6 +70,7 @@ public class Options {
     sendLocalUsername = old.sendLocalUsername;
     if (old.via != null) via = new String(old.via);
     tunnel = old.tunnel;
+    extSSH = old.extSSH;
     if (old.sshUser != null) sshUser = new String(old.sshUser);
   }
 
@@ -174,6 +175,7 @@ public class Options {
     printOpt("sendLocalUsername", sendLocalUsername);
     printOpt("via", via);
     printOpt("tunnel", tunnel);
+    printOpt("extSSH", extSSH);
     printOpt("sshUser", sshUser);
   }
 
@@ -220,5 +222,6 @@ public class Options {
   public boolean sendLocalUsername;
   public String via;
   public boolean tunnel;
+  public boolean extSSH;
   public String sshUser;
 }
