@@ -151,28 +151,26 @@ Example:
 will run the applet in the browser window and tunnel the VNC connection through
 SSH.
 
-	!!! NOTE: As of Java 7 Update 51, self-signed JARs (which includes
-	''VncViewer.jar'' in the official TurboVNC binary packages) are not allowed
-	to run in the Java browser plug-in by default.  To work around this, you will
-	need to add ''http://{turbovnc_server}:{http_port}'' (for example,
-	''http://my_server:5801'') to Java's Exception Site List, which can be found
-	under the "Security" tab in the Java Control Panel.  If you have your own
-	code signing certificate, then you can re-sign the JAR using your certificate
-	to eliminate this requirement.
+	!!! NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in
+	the Java browser plug-in or JWS by default.  This is not an issue if you are
+	using the official TurboVNC binary packages, but if you are building a
+	self-signed version of the Java TurboVNC Viewer for development purposes,
+	then you will need to add ''http://{turbovnc_server}:{http_port}''
+	(for example, ''http://my_server:5801'') to Java's Exception Site List, which
+	can be found under the "Security" tab in the Java Control Panel.
 
 ** Deploying the Java TurboVNC Viewer Using Java Web Start
 
-Accessing the Java TurboVNC Viewer applet through TurboVNC's built-in HTTP
-server, as described above, is a quick & dirty means of running the TurboVNC
-Viewer on machines that don't already have a VNC viewer installed (for
-instance, for the purposes of collaboration with colleagues who don't normally
-use TurboVNC.)  However, the tightening of security restrictions in recent Java
-releases arguably makes this approach more dirty than quick.
+Accessing the Java TurboVNC Viewer through TurboVNC's built-in HTTP server, as
+described above, is a quick and easy way of running the TurboVNC Viewer on
+machines that don't already have a VNC viewer installed (for instance, for the
+purpose of collaborating with colleagues who don't normally use TurboVNC.)
 
-Java Web Start provides a more robust mechanism for zero-install deployments of
-the Java TurboVNC Viewer in multi-user environments.  When deployed using JWS,
-the Java TurboVNC Viewer provides all of the advantages of a standalone native
-viewer, including native levels of performance.
+To set up a large-scale zero-install deployment of the Java TurboVNC Viewer,
+it is desirable to serve up the JAR files from a dedicated web server.  When
+deployed using JWS, the Java TurboVNC Viewer provides all of the advantages of
+a standalone native viewer, including native levels of performance on most
+platforms (see [[#MacJavaPerf][notes regarding performance on Mac platforms]].)
 
 For the purposes of this guide, it is assumed that the reader has some
 knowledge of web server administration.
@@ -195,7 +193,7 @@ knowledge of web server administration.
 		{nl}{nl}
 
 	* Create a file called ''TurboVNC.jnlp'' in the same directory as
-		''VncViewer.jar'', and give it the following contents:
+		''VncViewer.jar'' on the web server, and give it the following contents:
 
 		#Verb: <<---
 		<?xml version="1.0" encoding="utf-8"?>
@@ -238,7 +236,7 @@ knowledge of web server administration.
 		</jnlp>
 		---
 
-		!!! NOTE:  ''{turbovnc_url}'' should be the absolute URL of the TurboVNC
+		!!! NOTE: ''{turbovnc_url}'' should be the absolute URL of the TurboVNC
 		Viewer directory on the web server, e.g. ''http://my_server/turbovnc''.
 
 		This is just a minimal example.  Refer to the

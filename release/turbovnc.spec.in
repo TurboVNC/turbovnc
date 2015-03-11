@@ -26,6 +26,17 @@
 # Path under which the Java viewer should be installed
 %define javadir @TVNC_JAVADIR@
 
+# When building from a source RPM, these variables can be passed to rpmbuild in
+# order to sign the JAR file using an official code signing certificate:
+#   java_keystore = value of CMake JAVA_KEYSTORE variable
+#   java_keystore_pass = value of CMake JAVA_KEYSTORE_PASS variable
+#   java_keystore_type = value of CMake JAVA_KEYSTORE_TYPE variable
+#   java_key_alias = value of CMake JAVA_KEY_ALIAS variable
+#   java_key_pass = value of CMake JAVA_KEY_PASS variable
+#   java_tsa_url = value of CMake JAVA_TSA_URL variable
+# The CMake variables in question are documented in java/CMakeLists.txt in the
+# TurboVNC source.
+
 Summary:   A highly-optimized version of VNC that can be used with performance-critical applications
 Name:      @CMAKE_PROJECT_NAME_LC@
 Version:   @VERSION@
@@ -58,7 +69,25 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->%setup -q
 
 #-->%build
-#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DTVNC_BINDIR=%{bindir} -DTVNC_CONFDIR=%{confdir} -DTVNC_DOCDIR=%{docdir} -DTVNC_MANDIR=%{mandir} -DTVNC_BUILDJAVA=%{java} -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ .
+#-->%if "%{java_keystore}" != ""
+#-->  JAVA_KEYSTORE_ARG="-DJAVA_KEYSTORE=%{java_keystore}"
+#-->%endif
+#-->%if "%{java_keystore_pass}" != ""
+#-->  JAVA_KEYSTORE_PASS_ARG="-DJAVA_KEYSTORE_PASS=%{java_keystore_pass}"
+#-->%endif
+#-->%if "%{java_keystore_type}" != ""
+#-->  JAVA_KEYSTORE_TYPE_ARG="-DJAVA_KEYSTORE_TYPE=%{java_keystore_type}"
+#-->%endif
+#-->%if "%{java_key_alias}" != ""
+#-->  JAVA_KEY_ALIAS_ARG="-DJAVA_KEY_ALIAS=%{java_key_alias}"
+#-->%endif
+#-->%if "%{java_key_pass}" != ""
+#-->  JAVA_KEY_PASS_ARG="-DJAVA_KEY_PASS=%{java_key_pass}"
+#-->%endif
+#-->%if "%{java_tsa_url}" != ""
+#-->  JAVA_TSA_URL_ARG="-DJAVA_TSA_URL=%{java_tsa_url}"
+#-->%endif
+#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DTVNC_BINDIR=%{bindir} -DTVNC_CONFDIR=%{confdir} -DTVNC_DOCDIR=%{docdir} -DTVNC_MANDIR=%{mandir} -DTVNC_BUILDJAVA=%{java} -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG .
 #-->make
 
 %install

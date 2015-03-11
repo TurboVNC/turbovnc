@@ -16,6 +16,14 @@ set(CLASSPATH com/turbovnc/vncviewer)
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 
+set(JAVA_KEYSTORE "" CACHE FILEPATH "URL or pathname of the Java keystore (Default: ~/.keystore)")
+set(DEFAULT_JAVA_KEYSTORE_TYPE "jks")
+set(JAVA_KEYSTORE_TYPE ${DEFAULT_JAVA_KEYSTORE_TYPE} CACHE STRING "Java keystore type (Default: ${DEFAULT_JAVA_KEYSTORE_TYPE})")
+set(JAVA_KEYSTORE_PASS "" CACHE STRING "Java keystore password (plain-text.)  Add a prefix of env: to specify an environment variable from which to read the password, or a prefix of file: to specify a file from which to read the password.")
+set(JAVA_KEY_ALIAS "" CACHE STRING "Alias for the signing certificate's entry in the Java keystore.  Leave this blank to sign the JAR file using a self-signed certificate.")
+set(JAVA_KEY_PASS "" CACHE STRING "Password for the signing certificate's entry in the Java keystore (plain-text.)  Add a prefix of env: to specify an environment variable from which to read the password, or a prefix of file: to specify a file from which to read the password.")
+set(JAVA_TSA_URL "" CACHE STRING "URL of Timestamp Authority (TSA)")
+
 if(MSVC)
 	if(NOT BUILD)
 		execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat"
@@ -201,6 +209,12 @@ add_custom_command(OUTPUT VncViewer.jar
 		${CLASSPATH}/turbovnc-128.png
 	COMMAND ${CMAKE_COMMAND}
 	ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/VncViewer.jar
+		-DJAVA_KEYSTORE=${JAVA_KEYSTORE}
+		-DJAVA_KEYSTORE_TYPE=${JAVA_KEYSTORE_TYPE}
+		-DJAVA_KEYSTORE_PASS=${JAVA_KEYSTORE_PASS}
+		-DJAVA_KEY_ALIAS=${JAVA_KEY_ALIAS}
+		-DJAVA_KEY_PASS=${JAVA_KEY_PASS}
+		-DJAVA_TSA_URL=${JAVA_TSA_URL}
 		-P ${SRCDIR}/cmake/SignJar.cmake)
 
 add_custom_target(java ALL DEPENDS VncViewer.jar)
