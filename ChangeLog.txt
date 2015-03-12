@@ -124,6 +124,11 @@ the "ExtSSH" parameter is set to 1.  The full SSH command line can also be
 specified using the VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables, as
 with the native viewers.  See the TurboVNC User's Guide for more details.
 -------------------------------------------------------------------------------
+[16]
+All JAR files in the official TurboVNC packages for Linux are signed using an
+official code signing certificate, to comply with applet/JWS security
+requirements in Java 7u51 and later.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
