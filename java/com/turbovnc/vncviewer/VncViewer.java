@@ -959,8 +959,10 @@ public class VncViewer extends javax.swing.JApplet
   = new StringParameter("Span",
   "This option specifies whether the viewer window should span all monitors, " +
   "only the primary monitor, or whether it should span all monitors only if it " +
-  "cannot fit on the primary monitor (Auto.)", "Auto",
-  "Primary, All, Auto");
+  "cannot fit on the primary monitor (Auto.)  When using automatic desktop " +
+  "resizing, Auto has the same effect as Primary.  Due to general issues " +
+  "with spanning windows across multiple monitors in X11, this option is " +
+  "not available on Un*x/X11 platforms.", "Primary, All, Auto");
 
   static BoolParameter showToolbar
   = new BoolParameter("Toolbar",

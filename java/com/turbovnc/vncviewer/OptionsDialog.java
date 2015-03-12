@@ -250,7 +250,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     JLabel spanLabel = new JLabel("Span mode:");
     span = new JComboBox(spanOptions);
     span.addItemListener(this);
-    if (VncViewer.embed.getValue()) {
+    if (VncViewer.embed.getValue() || VncViewer.isX11()) {
       spanLabel.setEnabled(false);
       span.setEnabled(false);
     }
