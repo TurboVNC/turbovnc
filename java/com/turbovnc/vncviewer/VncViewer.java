@@ -942,7 +942,8 @@ public class VncViewer extends javax.swing.JApplet
   "Always exit after the first connection closes, and do not allow new " +
   "connections to be made without restarting the viewer.  This is useful in " +
   "portal environments that need to control when and how the viewer is " +
-  "launched.", false);
+  "launched.  This option also disables the \"Close Connection\" option in " +
+  "the F8 menu and the \"Disconnect\" button in the toolbar.", false);
 
   static BoolParameter fullScreen
   = new BoolParameter("FullScreen",

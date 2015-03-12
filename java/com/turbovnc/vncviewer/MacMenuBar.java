@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,11 +92,11 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       newConn = addMenuItem(connMenu, "New Connection...");
       newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
                                                     acceleratorMask));
+      closeConn = addMenuItem(connMenu, "Close Connection");
+      closeConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                                                      acceleratorMask));
+      connMenu.addSeparator();
     }
-    closeConn = addMenuItem(connMenu, "Close Connection");
-    closeConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
-                                                    acceleratorMask));
-    connMenu.addSeparator();
     info = addMenuItem(connMenu, "Connection Info...");
     info.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
                                                acceleratorMask));
@@ -185,7 +185,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.losslessRefresh();
     } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
-    } else if (actionMatch(ev, closeConn)) {
+    } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, closeConn)) {
       cc.close();
     } else if (actionMatch(ev, info)) {
       cc.showInfo();
