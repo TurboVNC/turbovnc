@@ -963,7 +963,7 @@ public class VncViewer extends javax.swing.JApplet
   "cannot fit on the primary monitor (Auto.)  When using automatic desktop " +
   "resizing, Auto has the same effect as Primary.  Due to general issues " +
   "with spanning windows across multiple monitors in X11, this option is " +
-  "not available on Un*x/X11 platforms.", "Primary, All, Auto");
+  "not available on Un*x/X11 platforms.", "Auto", "Primary, All, Auto");
 
   static BoolParameter showToolbar
   = new BoolParameter("Toolbar",
