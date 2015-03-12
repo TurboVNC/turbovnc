@@ -77,9 +77,7 @@ JNLP (Java Web Start) file for the session instead of an applet.  You can add
 /applet to the URL to instruct the HTTP server to serve up an applet instead.
 The official TurboVNC packages for Linux also include the native JAR files
 necessary to deliver the libjpeg-turbo JNI library to Windows, Linux, and OS X
-clients (when using Java Web Start.)  All JAR files in the official TurboVNC
-packages for Linux are signed using an official code signing certificate, to
-comply with applet/JWS security requirements in Java 7u51 and later.
+clients (when using Java Web Start.)
 -------------------------------------------------------------------------------
 [12]
 vncconnect can now be used to connect a TurboVNC Server session to an instance
@@ -98,6 +96,12 @@ would appear on top of the full-screen window.)  Because the turbovnchelper
 library depends on libjawt.so, it is unfortunately not easy to deploy it using
 Java Web Start, so it is currently only used when the viewer is launched as a
 standalone application (using the vncviewer script.)
+-------------------------------------------------------------------------------
+[15]
+The NoNewConn parameter in the Java TurboVNC Viewer will now disable the
+"Close Connection" option in the F8 menu and the "Disconnect" button in the
+toolbar as well (useful for web portals, particularly when using the new
+embedded applet mode.)
 -------------------------------------------------------------------------------
 
 
@@ -226,6 +230,11 @@ The Java TurboVNC Viewer can now optionally use an external SSH client when
 the "ExtSSH" parameter is set to 1.  The full SSH command line can also be
 specified using the VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables, as
 with the native viewers.  See the TurboVNC User's Guide for more details.
+-------------------------------------------------------------------------------
+[16]
+All JAR files in the official TurboVNC packages for Linux are signed using an
+official code signing certificate, to comply with applet/JWS security
+requirements in Java 7u51 and later.
 -------------------------------------------------------------------------------
 
 
