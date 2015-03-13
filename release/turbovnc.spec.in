@@ -69,22 +69,22 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->%setup -q
 
 #-->%build
-#-->%if "%{java_keystore}" != ""
+#-->%if %{?java_keystore:1}%{!?java_keystore:0}
 #-->  JAVA_KEYSTORE_ARG="-DJAVA_KEYSTORE=%{java_keystore}"
 #-->%endif
-#-->%if "%{java_keystore_pass}" != ""
+#-->%if %{?java_keystore_pass:1}%{!?java_keystore_pass:0}
 #-->  JAVA_KEYSTORE_PASS_ARG="-DJAVA_KEYSTORE_PASS=%{java_keystore_pass}"
 #-->%endif
-#-->%if "%{java_keystore_type}" != ""
+#-->%if %{?java_keystore_type:1}%{!?java_keystore_type:0}
 #-->  JAVA_KEYSTORE_TYPE_ARG="-DJAVA_KEYSTORE_TYPE=%{java_keystore_type}"
 #-->%endif
-#-->%if "%{java_key_alias}" != ""
+#-->%if %{?java_key_alias:1}%{!?java_key_alias:0}
 #-->  JAVA_KEY_ALIAS_ARG="-DJAVA_KEY_ALIAS=%{java_key_alias}"
 #-->%endif
-#-->%if "%{java_key_pass}" != ""
+#-->%if %{?java_key_pass:1}%{!?java_key_pass:0}
 #-->  JAVA_KEY_PASS_ARG="-DJAVA_KEY_PASS=%{java_key_pass}"
 #-->%endif
-#-->%if "%{java_tsa_url}" != ""
+#-->%if %{?java_tsa_url:1}%{!?java_tsa_url:0}
 #-->  JAVA_TSA_URL_ARG="-DJAVA_TSA_URL=%{java_tsa_url}"
 #-->%endif
 #-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DTVNC_BINDIR=%{bindir} -DTVNC_CONFDIR=%{confdir} -DTVNC_DOCDIR=%{docdir} -DTVNC_MANDIR=%{mandir} -DTVNC_BUILDJAVA=%{java} -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG .
