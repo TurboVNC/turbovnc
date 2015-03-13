@@ -15,4 +15,4 @@ if "%JAVA_HOME%"=="" (
 set JAVA=%JAVA:"=%
 
 :start
-"%JAVA%" -server -Dsun.java2d.d3d=false -Djava.library.path=java -jar java\VncViewer.jar -reqarch @REQARCH@ %*
+"%JAVA%" -server -Dsun.java2d.d3d=false -Djava.library.path="%~d0%~p0java" -jar "%~d0%~p0java\VncViewer.jar" -reqarch @REQARCH@ %*
