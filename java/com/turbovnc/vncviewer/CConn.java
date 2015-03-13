@@ -50,7 +50,7 @@ import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
 
 public class CConn extends CConnection implements UserPasswdGetter,
-  OptionsDialogCallback, FdInStreamBlockCallback, Runnable {
+  OptionsDialogCallback, FdInStreamBlockCallback {
 
   public final PixelFormat getPreferredPF() { return fullColourPF; }
   static final PixelFormat VERY_LOW_COLOR_PF =
@@ -374,29 +374,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (!benchmark) requestNewUpdate();
   }
 
-  public void run() {
-    desktop.updateWindow();
-  }
-
   // RFB thread
   public void framebufferUpdateEnd() {
 
-    if (newViewport > 0) {
-      try {
-        SwingUtilities.invokeAndWait(this);
-      } catch (InterruptedException e) {
-      } catch (java.lang.reflect.InvocationTargetException e) {
-        Throwable cause = e.getCause();
-        if (cause instanceof ErrorException)
-          throw (ErrorException)cause;
-        if (cause instanceof WarningException)
-          throw (WarningException)cause;
-        else if (cause != null)
-          throw new SystemException(cause.toString());
-      }
-      newViewport--;
-    } else
-      desktop.updateWindow();
+    desktop.updateWindow();
 
     if (firstUpdate) {
       int width, height;
@@ -846,7 +827,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
       viewport.setGeometry(span.x, span.y, span.width, span.height);
       viewport.dx = x - span.x;
       viewport.dy = y - span.y;
-      desktop.repaintBackground = true;
       return;
     }
 
@@ -879,7 +859,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
     } else {
       sizeWindow();
     }
-    newViewport = 2;
   }
 
   // RFB thread: requestNewUpdate() requests an update from the server, having
@@ -1935,7 +1914,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
   private boolean firstUpdate;
   private boolean pendingUpdate;
   private boolean continuousUpdates;
-  private int newViewport;
 
   private boolean forceNonincremental;
 

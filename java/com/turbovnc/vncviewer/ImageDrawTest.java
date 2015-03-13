@@ -119,6 +119,9 @@ public class ImageDrawTest extends JFrame {
 
     public void paintComponent(Graphics g) {
       Graphics2D g2 = (Graphics2D) g;
+      if (!swingDB &&
+          RepaintManager.currentManager(this).isDoubleBufferingEnabled())
+        super.paintComponent(g);
       g2.drawImage((iter % 2 == 0 ? im2.getImage() : im1.getImage()), 0, 0,
                    null);
       g2.dispose();

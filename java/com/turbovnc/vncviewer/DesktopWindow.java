@@ -219,10 +219,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
   }
 
-  // Update the actual window with the changed parts of the framebuffer.
-  // This is called from the EDT for the first couple of updates following
-  // a viewport size change but otherwise from the RFB thread (for performance
-  // reasons.)
+  // RFB thread: Update the actual window with the changed parts of the
+  // framebuffer.
   public void updateWindow() {
     double tBlitStart = getTime();
     Rect r = damage;
@@ -248,13 +246,19 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         // optimal performance under X11 without requiring MIT-SHM pixmaps.
         if (!swingDB)
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
-        paintImmediately(x, y, width, height);
+        if (cc.viewer.benchFile != null)
+          paintImmediately(x, y, r.width(), r.height());
+        else
+          repaint(x, y, r.width(), r.height());
       } else {
         int x = (cc.viewport.dx > 0) ? cc.viewport.dx + r.tl.x : r.tl.x;
         int y = (cc.viewport.dy > 0) ? cc.viewport.dy + r.tl.y : r.tl.y;
         if (!swingDB)
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
-        paintImmediately(x, y, r.width(), r.height());
+        if (cc.viewer.benchFile != null)
+          paintImmediately(x, y, r.width(), r.height());
+        else
+          repaint(x, y, r.width(), r.height());
       }
       damage.clear();
     }
@@ -379,10 +383,11 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // EDT 
   public void paintComponent(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    if (repaintBackground && !swingDB) {
+    if (!swingDB &&
+        RepaintManager.currentManager(this).isDoubleBufferingEnabled())
+      // If double buffering is enabled, then this must be a system-triggered
+      // repaint, so we need to repaint all of the parent components.
       super.paintComponent(g);
-      repaintBackground = false;
-    }
     if (cc.viewport.dx > 0 || cc.viewport.dy > 0)
       g2.translate(cc.viewport.dx, cc.viewport.dy);
     if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
@@ -664,7 +669,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   int cursorBackingX, cursorBackingY;
   java.awt.Cursor softCursor, noCursor;
   static Toolkit tk = Toolkit.getDefaultToolkit();
-  boolean swingDB, repaintBackground;
+  boolean swingDB;
 
   public int scaledWidth = 0, scaledHeight = 0;
   float scaleWidthRatio, scaleHeightRatio;
