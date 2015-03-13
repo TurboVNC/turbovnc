@@ -78,7 +78,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     formatChange = false; encodingChange = false;
     currentEncoding = opts.preferredEncoding;
-    showToolbar = VncViewer.showToolbar.getValue();
+    showToolbar = VncViewer.showToolbar.getValue() && !benchmark;
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
