@@ -128,6 +128,30 @@ using the ''-via'' option):
 
 ** Java Client Settings
 
+Java system properties are normally specified as command-line arguments to the
+Java executable.  For example:
+
+	#Verb: <<---
+	java -Dmy.system.property={value} -jar MyClass.jar
+	---
+
+However, since TurboVNC hides the Java command line inside of its startup
+scripts (or inside of an application bundle on OS X), the easiest way to
+set these properties is by using the ''JAVA_TOOL_OPTIONS'' environment
+variable, which allows you to specify Java command-line arguments even if
+you don't have access to the command line.  For instance, on Linux you could
+execute:
+
+	#Verb: <<---
+	JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0 /opt/TurboVNC/bin/vncviewer-java
+	---
+
+to start the TurboVNC Viewer without JPEG acceleration.
+
+Refer to the default ''index.vnc'' and ''TurboVNC.jnlp'' files installed with
+the TurboVNC Server for an example of how to specify Java command-line
+arguments in an applet or Java Web Start environment.
+
 {anchor: turbovnc.forcealpha}
 | Java System Property | ''turbovnc.forcealpha = ''__''0 \| 1''__ |
 | Summary | Disable/enable back buffer alpha channel |
