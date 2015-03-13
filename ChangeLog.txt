@@ -129,6 +129,11 @@ All JAR files in the official TurboVNC packages for Linux are signed using an
 official code signing certificate, to comply with applet/JWS security
 requirements in Java 7u51 and later.
 -------------------------------------------------------------------------------
+[17]
+The vncviewer-java.bat and vncviewer-javaw.bat scripts, which are used to
+launch the Java TurboVNC Viewer on Windows systems, did not work unless
+the current directory was the TurboVNC install directory.  This has been fixed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
