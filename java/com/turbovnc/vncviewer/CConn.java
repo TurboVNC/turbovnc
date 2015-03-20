@@ -1599,15 +1599,21 @@ public class CConn extends CConnection implements UserPasswdGetter,
           else if (key == KeyEvent.CHAR_UNDEFINED && keycode >= 0 &&
                    keycode <= 127)
             key = keycode;
-        } else if ((lmodifiers & Event.ALT_MASK) != 0) {
-          // This is mainly for the benefit of OS X.  Un*x and Windows servers
-          // expect that, if Alt + an ASCII key is pressed, the key event for
-          // the ASCII key will be the same as if Alt had not been pressed.  On
-          // OS X, however, the Alt/Option keys act like AltGr keys, so if
-          // Alt + an ASCII key is pressed, the key code is the ASCII key
-          // symbol, but the key char is the code for the alternate graphics
-          // symbol.
-          if (keycode >= 32 && keycode <= 126)
+        } else if ((lmodifiers & Event.ALT_MASK) != 0 &&
+                   VncViewer.os.startsWith("mac os x") && key > 127) {
+          // Un*x and Windows servers expect that, if Alt + an ASCII key is
+          // pressed, the key event for the ASCII key will be the same as if
+          // Alt had not been pressed.  On OS X, however, the Alt/Option keys
+          // act like AltGr keys, so if Alt + an ASCII key is pressed, the key
+          // code is the ASCII key symbol, but the key char is the code for the
+          // alternate graphics symbol.
+          if (keycode >= 65 && keycode <= 90 &&
+              (lmodifiers & Event.SHIFT_MASK) == 0 &&
+              (rmodifiers & Event.SHIFT_MASK) == 0)
+            key = keycode + 32;
+          else if (keycode == KeyEvent.VK_QUOTE)
+            key = '\'';
+          else if (keycode >= 32 && keycode <= 126)
             key = keycode;
         }
         keysym = UnicodeToKeysym.translate(key);

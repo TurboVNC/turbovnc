@@ -134,6 +134,11 @@ The vncviewer-java.bat and vncviewer-javaw.bat scripts, which are used to
 launch the Java TurboVNC Viewer on Windows systems, did not work unless
 the current directory was the TurboVNC install directory.  This has been fixed.
 -------------------------------------------------------------------------------
+[18]
+Sending Alt+{letter} key sequences to the server (for instance, to pop up one
+of the menus in an application) did not work properly when using the Java
+TurboVNC Viewer.  This has been fixed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
