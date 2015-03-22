@@ -247,9 +247,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         if (!swingDB)
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         if (cc.viewer.benchFile != null)
-          paintImmediately(x, y, r.width(), r.height());
+          paintImmediately(x, y, width, height);
         else
-          repaint(x, y, r.width(), r.height());
+          repaint(x, y, width, height);
       } else {
         int x = (cc.viewport.dx > 0) ? cc.viewport.dx + r.tl.x : r.tl.x;
         int y = (cc.viewport.dy > 0) ? cc.viewport.dy + r.tl.y : r.tl.y;
