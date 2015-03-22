@@ -388,6 +388,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void setDesktopSize(int w, int h) {
     super.setDesktopSize(w, h);
     resizeFramebuffer();
+    if (opts.desktopSize.mode == Options.SIZE_MANUAL) {
+      opts.desktopSize.width = w;
+      opts.desktopSize.height = h;
+    }
   }
 
   // RFB thread: setExtendedDesktopSize() is a more advanced version of
@@ -403,6 +407,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     resizeFramebuffer();
+    if (opts.desktopSize.mode == Options.SIZE_MANUAL) {
+      opts.desktopSize.width = w;
+      opts.desktopSize.height = h;
+    }
   }
 
   // RFB thread: clientRedirect() migrates the client to another host/port.
