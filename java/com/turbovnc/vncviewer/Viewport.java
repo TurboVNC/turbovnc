@@ -181,6 +181,8 @@ public class Viewport extends JFrame {
   }
 
   public Dimension getBorderSize() {
+    if (cc.opts.fullScreen)
+      return new Dimension(0, 0);
     Insets vpInsets = VncViewer.insets;
     Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
                                          vpInsets.top + vpInsets.bottom);
