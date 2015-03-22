@@ -878,7 +878,7 @@ public class VncViewer extends javax.swing.JApplet
     opts.sendLocalUsername = sendLocalUsername.getValue();
 
     String v = via.getValue();
-    if (v != null) {
+    if (v != null && !v.isEmpty()) {
       int atIndex = v.indexOf('@');
       if (atIndex >= 0) {
         opts.via = v.substring(atIndex + 1);
