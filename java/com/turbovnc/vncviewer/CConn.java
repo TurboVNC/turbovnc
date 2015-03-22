@@ -819,7 +819,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (h >= span.height)
       h = span.height;
 
-    if (viewport.getExtendedState() != JFrame.ICONIFIED)
+    if (viewport.getExtendedState() != JFrame.ICONIFIED &&
+        !VncViewer.os.startsWith("mac os x"))
       viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;

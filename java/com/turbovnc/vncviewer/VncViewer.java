@@ -212,6 +212,23 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       if (owner instanceof Frame && owner != null)
         ((Frame)owner).setIconImage(frameImage);
       dlg.dispose();
+
+      // To make a short story long:
+      // -- Swing can't determine the proper inset values for a JFrame until it
+      //    is visible.
+      // -- We need to know the inset values in order to initially size the
+      //    JFrame properly.
+      // -- Making the JFrame visible prior to sizing it causes issues on OS X
+      //    (clicking the Maximize gadget reduces the window to nothing.)
+      // -- On Linux, the inset values sometimes change by 1 pixel upon
+      //    subsequent calls to getInsets().
+      // Thus, we have to compute the insets globally using a dummy JFrame.
+      // Dear Swing, eff ewe.
+      JFrame frame = new JFrame();
+      frame.setVisible(true);
+      insets = frame.getInsets();
+      frame.setVisible(false);
+      frame.dispose();
     } catch(Exception e) {
       vlog.error("Could not set look & feel:");
       vlog.error("  " + e.toString());
@@ -1119,4 +1136,5 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   int benchWarmup = 0;
   Options opts;
   static boolean forceAlpha;
+  static Insets insets;
 }

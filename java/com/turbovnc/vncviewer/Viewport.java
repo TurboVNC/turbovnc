@@ -103,10 +103,10 @@ public class Viewport extends JFrame {
                 !cc.opts.fullScreen) {
               sp.setSize(new Dimension(cc.desktop.scaledWidth,
                                        cc.desktop.scaledHeight));
-              int w = cc.desktop.scaledWidth + getInsets().left +
-                      getInsets().right;
-              int h = cc.desktop.scaledHeight + getInsets().top +
-                      getInsets().bottom;
+              int w = cc.desktop.scaledWidth + VncViewer.insets.left +
+                      VncViewer.insets.right;
+              int h = cc.desktop.scaledHeight + VncViewer.insets.top +
+                      VncViewer.insets.bottom;
               if (tb.isVisible())
                 h += tb.getHeight();
               if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
@@ -141,14 +141,13 @@ public class Viewport extends JFrame {
   }
 
   public Dimension getBorderSize() {
-    // The viewport insets aren't defined until the viewport is visible
-    if (!isVisible())
-      setVisible(true);
-    Insets vpInsets = getInsets();
-    if (tb.isVisible())
-      vpInsets.top += tb.getHeight();
+    if (cc.opts.fullScreen)
+      return new Dimension(0, 0);
+    Insets vpInsets = VncViewer.insets;
     Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
                                          vpInsets.top + vpInsets.bottom);
+    if (cc.showToolbar)
+      borderSize.height += 22;
     return borderSize;
   }
 
