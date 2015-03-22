@@ -103,10 +103,10 @@ public class Viewport extends JFrame {
                 !cc.opts.fullScreen) {
               sp.setSize(new Dimension(cc.desktop.scaledWidth,
                                        cc.desktop.scaledHeight));
-              int w = cc.desktop.scaledWidth + getInsets().left +
-                      getInsets().right;
-              int h = cc.desktop.scaledHeight + getInsets().top +
-                      getInsets().bottom;
+              int w = cc.desktop.scaledWidth + VncViewer.insets.left +
+                      VncViewer.insets.right;
+              int h = cc.desktop.scaledHeight + VncViewer.insets.top +
+                      VncViewer.insets.bottom;
               if (tb.isVisible())
                 h += tb.getHeight();
               if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
@@ -165,28 +165,27 @@ public class Viewport extends JFrame {
   }
 
   public Dimension getAvailableSize() {
-    Dimension vpSize = getSize();
-    Insets vpInsets = getInsets();
-    int availableWidth = vpSize.width - vpInsets.left - vpInsets.right;
-    int availableHeight = vpSize.height - vpInsets.top - vpInsets.bottom;
+    Dimension availableSize = getSize();
+    if (!cc.opts.fullScreen) {
+      Insets vpInsets = VncViewer.insets;
+      availableSize.width -= vpInsets.left + vpInsets.right;
+      availableSize.height -= vpInsets.top + vpInsets.bottom;
+    }
     if (tb.isVisible())
-      availableHeight -= tb.getHeight();
-    if (availableWidth < 0)
-      availableWidth = 0;
-    if (availableHeight < 0)
-      availableHeight = 0;
-    return new Dimension(availableWidth, availableHeight);
+      availableSize.height -= tb.getHeight();
+    if (availableSize.width < 0)
+      availableSize.width = 0;
+    if (availableSize.height < 0)
+      availableSize.height = 0;
+    return availableSize;
   }
 
   public Dimension getBorderSize() {
-    // The viewport insets aren't defined until the viewport is visible
-    if (!isVisible())
-      setVisible(true);
-    Insets vpInsets = getInsets();
-    if (tb.isVisible())
-      vpInsets.top += tb.getHeight();
+    Insets vpInsets = VncViewer.insets;
     Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
                                          vpInsets.top + vpInsets.bottom);
+    if (cc.showToolbar)
+      borderSize.height += 22;
     return borderSize;
   }
 
