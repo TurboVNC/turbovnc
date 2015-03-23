@@ -218,6 +218,14 @@ public class VncViewer extends javax.swing.JApplet
         ((Frame)owner).setIconImage(frameImage);
       dlg.dispose();
 
+    } catch(Exception e) {
+      vlog.error("Could not set look & feel:");
+      vlog.error("  " + e.toString());
+    }
+  }
+
+  static void setGlobalInsets() {
+    try {
       // To make a short story long:
       // -- Swing can't determine the proper inset values for a JFrame until it
       //    is visible.
@@ -237,11 +245,10 @@ public class VncViewer extends javax.swing.JApplet
         frame.dispose();
       }
     } catch(Exception e) {
-      vlog.error("Could not set look & feel:");
+      vlog.error("Could not set insets:");
       vlog.error("  " + e.toString());
     }
   }
-
   public static void setBlitterDefaults() {
     // Java 1.7 and later do not include hardware-accelerated 2D blitting
     // routines on Mac platforms.  They only support OpenGL blitting, and using
@@ -906,6 +913,8 @@ public class VncViewer extends javax.swing.JApplet
                                            e.getMessage()));
       exit(1);
     }
+
+    setGlobalInsets();
   }
 
   static StringParameter vncServerName
