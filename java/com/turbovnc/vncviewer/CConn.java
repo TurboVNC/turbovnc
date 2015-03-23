@@ -369,6 +369,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     sp.getViewport().setView(desktop);
     viewer.getContentPane().removeAll();
+    if (showToolbar) {
+      Toolbar tb = new Toolbar(this);
+      viewer.add(tb, BorderLayout.PAGE_START);
+    }
     viewer.add(sp);
     viewer.addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
@@ -380,6 +384,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
     });
     viewer.validate();
+    viewer.repaint();
     desktop.requestFocus();
   }
 
@@ -470,9 +475,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (opts.desktopSize.mode == Options.SIZE_MANUAL)
         sendDesktopSize(opts.desktopSize.width, opts.desktopSize.height);
       else if (opts.desktopSize.mode == Options.SIZE_AUTO) {
-        if (VncViewer.embed.getValue())
-          sendDesktopSize(viewer.getSize().width, viewer.getSize().height);
-        else {
+        if (VncViewer.embed.getValue()) {
+          Dimension size = viewer.getSize();
+          if (showToolbar)
+            size.height -= 22;
+          sendDesktopSize(size.width, size.height);
+        } else {
           Dimension availableSize = viewport.getAvailableSize();
           sendDesktopSize(availableSize.width, availableSize.height);
         }
@@ -957,6 +965,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void sizeWindow() { sizeWindow(true); }
 
   public void sizeWindow(boolean manual) {
+    if (VncViewer.embed.getValue())
+      return;
     boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
@@ -1340,6 +1350,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (options.fullScreen.isSelected() != opts.fullScreen)
       toggleFullScreen();
+    else if ((recreate || reconfigure) && VncViewer.embed.getValue())
+      setupEmbeddedFrame();
     else if (recreate)
       recreateViewport();
     else if (reconfigure)
@@ -1352,11 +1364,21 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void toggleToolbar() {
-    if (viewport == null || opts.fullScreen || VncViewer.embed.getValue())
+    if (opts.fullScreen)
       return;
     showToolbar = !showToolbar;
-    recreateViewport();
-    viewport.showToolbar(showToolbar);
+    if (viewport != null && !VncViewer.embed.getValue()) {
+      recreateViewport();
+      viewport.showToolbar(showToolbar);
+    } else {
+      setupEmbeddedFrame();
+      if (opts.desktopSize.mode == Options.SIZE_AUTO) {
+        Dimension size = viewer.getSize();
+        if (showToolbar)
+          size.height -= 22;
+        sendDesktopSize(size.width, size.height);
+      }
+    }
     menu.showToolbar.setSelected(showToolbar);
   }
 

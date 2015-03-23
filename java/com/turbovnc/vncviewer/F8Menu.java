@@ -57,13 +57,13 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       fullScreen.addActionListener(this);
       add(fullScreen);
       defaultSize = addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
-      showToolbar = new JCheckBoxMenuItem("Show Toolbar   (Ctrl-Alt-Shift-T)");
-      showToolbar.setMnemonic(KeyEvent.VK_T);
-      showToolbar.setSelected(cc.showToolbar);
-      showToolbar.addActionListener(this);
-      add(showToolbar);
-      addSeparator();
     }
+    showToolbar = new JCheckBoxMenuItem("Show Toolbar   (Ctrl-Alt-Shift-T)");
+    showToolbar.setMnemonic(KeyEvent.VK_T);
+    showToolbar.setSelected(cc.showToolbar);
+    showToolbar.addActionListener(this);
+    add(showToolbar);
+    addSeparator();
     f8 = addMenuItem("Send " + KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
     KeyStroke ks = KeyStroke.getKeyStroke(MenuKey.getMenuKeyCode(), 0);
     f8.setAccelerator(ks);

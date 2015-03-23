@@ -485,7 +485,6 @@ public class VncViewer extends javax.swing.JApplet
         fullScreen.setParam(false);
         noNewConn.setParam(true);
         scalingFactor.setParam("100");
-        showToolbar.setParam(false);
       }
       String str = getParameter("LogLevel");
       if (str != null)
@@ -993,7 +992,7 @@ public class VncViewer extends javax.swing.JApplet
   "If the TurboVNC Viewer is being run as an applet, display its output to " +
   "an embedded frame in the browser window rather than to a dedicated " +
   "window.  This also has the effect of setting FullScreen=0, " +
-  "Toolbar=0, NoNewConn=1, and Scale=100.", false);
+  "NoNewConn=1, and Scale=100.", false);
 
   static StringParameter menuKey
   = new StringParameter("MenuKey",

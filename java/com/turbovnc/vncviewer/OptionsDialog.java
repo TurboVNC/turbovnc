@@ -352,8 +352,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     showToolbar = new JCheckBox("Show toolbar by default");
     showToolbar.addItemListener(this);
-    if (VncViewer.embed.getValue())
-      showToolbar.setEnabled(false);
 
     JLabel menuKeyLabel = new JLabel("Menu Key:");
     String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()];
