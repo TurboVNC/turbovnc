@@ -9,9 +9,9 @@ target_link_libraries(checkshmpixmaps ${X11_LIBRARIES})
 
 install(TARGETS checkshmpixmaps DESTINATION ${TVNC_BINDIR})
 
-configure_file(vncviewer.in vncviewer @ONLY)
+configure_file(vncviewer.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer @ONLY)
 execute_process(COMMAND chmod +x vncviewer
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncviewer
 	DESTINATION ${TVNC_BINDIR})
@@ -56,6 +56,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 else()
 	set_target_properties(turbovnchelper PROPERTIES LINK_FLAGS "-z defs")
 endif()
+set_target_properties(turbovnchelper PROPERTIES
+	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
 if(NOT CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	set(LIBDL dl)
 endif()
