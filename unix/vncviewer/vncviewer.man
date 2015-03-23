@@ -145,11 +145,6 @@ active.  Passing an argument of \fB-grabkeyboard\fR \fImanual\fR will prevent
 vncviewer from automatically grabbing the keyboard.  The keyboard can always
 be manually grabbed and ungrabbed by pressing Ctrl-Alt-Shift-G or selecting
 "Grab Keyboard" from the F8 menu.
-
-NOTE:  This option does nothing on Mac systems.  Grabbing the keyboard does not
-work properly with Mac X servers, and it is also not as important a feature on
-that platform, since special keystrokes like Alt-Tab, etc. are not intercepted
-by the client's window manager.
 .TP
 \fB\-doublebuffer\fR (default) / \fB\-singlebuffer\fR
 The TurboVNC Viewer's default behavior is to wait until all rectangles in a
