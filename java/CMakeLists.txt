@@ -149,23 +149,17 @@ configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
 if(NOT "${SRCDIR}" STREQUAL "${BINDIR}")
 
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/toolbar.png
+add_custom_target(javaicons ALL
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/toolbar.png ${BINDIR}/${CLASSPATH}/toolbar.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/toolbar.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/toolbar.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/turbovnc.png ${BINDIR}/${CLASSPATH}/turbovnc.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-sm.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-128.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/turbovnc-128.png
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
@@ -175,7 +169,7 @@ endif()
 
 if(TVNC_BUILDSERVER)
 
-add_custom_command(OUTPUT ${BINDIR}/index.vnc
+add_custom_target(index.vnc ALL
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/index.vnc ${BINDIR}/index.vnc
 	DEPENDS ${SRCDIR}/${CLASSPATH}/index.vnc)
@@ -189,7 +183,7 @@ endif()
 configure_file(${SRCDIR}/${CLASSPATH}/VncViewer.jnlp.in
 	${BINDIR}/VncViewer.jnlp)
 
-add_custom_command(OUTPUT ${BINDIR}/favicon.ico
+add_custom_target(favicon.ico ALL
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/favicon.ico ${BINDIR}/favicon.ico
 	DEPENDS ${SRCDIR}/${CLASSPATH}/favicon.ico)
@@ -207,9 +201,6 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/turbovnc.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
-		${BINDIR}/index.vnc
-		${BINDIR}/VncViewer.jnlp
-		${BINDIR}/favicon.ico
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
 		org/libjpegturbo/turbojpeg/TJ.class
