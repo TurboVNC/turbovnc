@@ -987,6 +987,9 @@ public class VncViewer extends javax.swing.JApplet
   "Ignore all keyboard and mouse events in the viewer window and do not pass " +
   "these events to the VNC server.", false);
 
+  static BoolParameter viewOnlyControl
+  = new BoolParameter("ViewOnlyControl", null, true);
+
   static StringParameter grabKeyboard
   = new StringParameter("GrabKeyboard",
   isX11() ? "When the keyboard is grabbed, special key sequences (such as " +

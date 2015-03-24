@@ -272,6 +272,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     shared.addItemListener(this);
     viewOnly = new JCheckBox("View Only (ignore mouse & keyboard)");
     viewOnly.addItemListener(this);
+    viewOnly.setEnabled(VncViewer.viewOnlyControl.getValue());
     cursorShape = new JCheckBox("Render cursor locally (enable remote cursor shape updates)");
     cursorShape.addItemListener(this);
     acceptClipboard = new JCheckBox("Accept clipboard from server");
