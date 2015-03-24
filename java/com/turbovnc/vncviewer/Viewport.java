@@ -373,7 +373,7 @@ public class Viewport extends JFrame {
       try {
         if (cc.keyboardGrabbed == on && !force)
           return;
-        grabKeyboard(on);
+        grabKeyboard(on, VncViewer.grabPointer.getValue());
         cc.keyboardGrabbed = on;
         cc.menu.grabKeyboard.setSelected(cc.keyboardGrabbed);
       } catch(java.lang.UnsatisfiedLinkError e) {
@@ -389,7 +389,7 @@ public class Viewport extends JFrame {
   }
 
   private native void x11FullScreen(boolean on);
-  private native void grabKeyboard(boolean on);
+  private native void grabKeyboard(boolean on, boolean pointer);
 
   CConn cc;
   JScrollPane sp;

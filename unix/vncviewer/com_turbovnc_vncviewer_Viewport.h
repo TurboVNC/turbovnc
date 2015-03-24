@@ -21,7 +21,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
  * Signature: (Z)V
  */
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
-  (JNIEnv *, jobject, jboolean);
+  (JNIEnv *, jobject, jboolean, jboolean);
 
 #ifdef __cplusplus
 }

@@ -115,7 +115,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
 }
 
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
-  (JNIEnv *env, jobject obj, jboolean on)
+  (JNIEnv *env, jobject obj, jboolean on, jboolean pointer)
 {
   JAWT awt;
   JAWT_DrawingSurface *ds = NULL;
@@ -162,7 +162,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
              practice, sometimes a race condition occurs with Swing.  It is
              unclear why, since everything should be happening in the EDT. */
           if (count == 0)
-            _throw("Could not grab keyboard: window not visible");      
+            _throw("Could not grab keyboard: window not viewable");      
           usleep(100000);
           count--;
           continue;
@@ -170,11 +170,32 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
           _throw("Could not grab keyboard: keyboard frozen by another application");
       }
     }
-    printf("TurboVNC Helper: Grabbed keyboard for window 0x%.8lx\n",
-           x11dsi->drawable);
+
+    if (pointer) {
+      ret = XGrabPointer(x11dsi->display, x11dsi->drawable, True,
+                         ButtonPressMask | ButtonReleaseMask |
+                         ButtonMotionMask | PointerMotionMask, GrabModeAsync,
+                         GrabModeAsync, None, None, CurrentTime);
+      switch (ret) {
+        case AlreadyGrabbed:
+          _throw("Could not grab pointer: already grabbed by another application");      
+        case GrabInvalidTime:
+          _throw("Could not grab pointer: invalid time");
+        case GrabNotViewable:
+          _throw("Could not grab pointer: window not viewable");      
+        case GrabFrozen:
+          _throw("Could not grab pointer: pointer frozen by another application");
+      }
+    }
+
+    printf("TurboVNC Helper: Grabbed keyboard%s for window 0x%.8lx\n",
+           pointer? " & pointer" : "", x11dsi->drawable);
   } else {
     XUngrabKeyboard(x11dsi->display, CurrentTime);
-    printf("TurboVNC Helper: Ungrabbed keyboard\n");
+    if (pointer)
+      XUngrabPointer(x11dsi->display, CurrentTime);
+    printf("TurboVNC Helper: Ungrabbed keyboard%s\n",
+           pointer ? " & pointer" : "");
   }
   XSync(x11dsi->display, False);
 

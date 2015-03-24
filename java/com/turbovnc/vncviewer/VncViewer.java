@@ -988,6 +988,17 @@ public class VncViewer extends javax.swing.JApplet
   "grabbing mode, the F8 menu option and hotkey can always be used to " +
   "grab or ungrab the keyboard." : null, "FS", "Always, FS, Manual");
 
+  static BoolParameter grabPointer
+  = new BoolParameter("GrabPointer",
+  isX11() ? "If this option is enabled, then the pointer will be grabbed " +
+  "whenever the keyboard is grabbed.  This allows certain keyboard + " +
+  "pointer sequences, such as Alt-{drag}, to be passed to the server.  The " +
+  "downside, however, is that grabbing the pointer prevents any interaction " +
+  "with the local window manager whatsoever (for instance, the window can " +
+  "no longer be maximized or closed, and you cannot switch to other running " +
+  "applications.)  Thus, this option is primarily useful in conjunction " +
+  "with GrabKeyboard=FS." : null, true);
+
   static BoolParameter noNewConn
   = new BoolParameter("NoNewConn",
   "Always exit after the first connection closes, and do not allow new " +

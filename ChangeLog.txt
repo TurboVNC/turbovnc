@@ -106,8 +106,10 @@ embedded applet mode.)
 [16]
 On Un*x/X11 platforms, the Java TurboVNC Viewer can now grab the keyboard when
 run as a standalone application.  This allows special key sequences, such as
-Alt-Tab, to be sent to the server.  This feature requires the afore-mentioned
-TurboVNC Helper library.
+Alt-Tab, to be sent to the server.  The pointer can also be optionally grabbed,
+which allows special keyboard + pointer sequences (such as Alt-{drag}), to be
+sent to the server as well.  This feature requires the afore-mentioned TurboVNC
+Helper library. 
 -------------------------------------------------------------------------------
 
 
