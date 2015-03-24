@@ -1713,13 +1713,13 @@ void ClientConnection::CreateLocalFramebuffer()
   ObjectSelector b(m_hBitmapDC, m_hBitmap);
   PaletteSelector p(m_hBitmapDC, m_hPalette);
 
-  // Put a "please wait" message up initially
-  RECT rect;
-  SetRect(&rect, 0, 0, m_si.framebufferWidth, m_si.framebufferHeight);
-  COLORREF bgcol = RGB(0xcc, 0xcc, 0xcc);
-  FillSolidRect(&rect, bgcol);
-
   if (!bitmapExisted) {
+    // Put a "please wait" message up initially
+    RECT rect;
+    SetRect(&rect, 0, 0, m_si.framebufferWidth, m_si.framebufferHeight);
+    COLORREF bgcol = RGB(0xcc, 0xcc, 0xcc);
+    FillSolidRect(&rect, bgcol);
+
     COLORREF oldbgcol  = SetBkColor(m_hBitmapDC, bgcol);
     COLORREF oldtxtcol = SetTextColor(m_hBitmapDC, RGB(0, 0, 64));
     rect.right = m_si.framebufferWidth / 2;
