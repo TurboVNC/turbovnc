@@ -149,17 +149,23 @@ configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
 if(NOT "${SRCDIR}" STREQUAL "${BINDIR}")
 
-add_custom_target(javaicons ALL
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/toolbar.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/toolbar.png ${BINDIR}/${CLASSPATH}/toolbar.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/toolbar.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/toolbar.png)
+
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/turbovnc.png ${BINDIR}/${CLASSPATH}/turbovnc.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.png)
+
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png)
+
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-128.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/turbovnc-128.png
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
