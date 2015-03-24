@@ -30,7 +30,9 @@
 %define jnijars @TVNC_INCLUDEJNIJARS@
 
 # Directory in which the TurboJPEG JNI JARs can be found
+%if "${jnijars}" == "1"
 %define jnijardir @TJPEG_JNIJARPATH@
+%endif
 
 # When building from a source RPM, these variables can be passed to rpmbuild in
 # order to sign the JAR file(s) using an official code signing certificate:
