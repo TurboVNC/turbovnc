@@ -111,6 +111,10 @@ which allows special keyboard + pointer sequences (such as Alt-{drag}), to be
 sent to the server as well.  This feature requires the afore-mentioned TurboVNC
 Helper library. 
 -------------------------------------------------------------------------------
+[17]
+The Java TurboVNC Viewer will now offer an option to reconnect if the
+connection fails for any reason.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

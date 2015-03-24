@@ -529,6 +529,9 @@ public class VncViewer extends javax.swing.JApplet
   }
 
   void reportException(Exception e) {
+    reportException(e, false);
+  }
+  void reportException(Exception e, boolean reconnect) {
     String title, msg = e.getMessage();
     int msgType = JOptionPane.ERROR_MESSAGE;
     if (e instanceof WarningException) {
@@ -562,10 +565,20 @@ public class VncViewer extends javax.swing.JApplet
       validate();
       repaint();
     } else {
-      JOptionPane pane = new JOptionPane(msg, msgType);
+      JOptionPane pane;
+      Object[] options = { UIManager.getString("OptionPane.yesButtonText"),
+                           UIManager.getString("OptionPane.noButtonText") };
+      if (reconnect)
+        pane = new JOptionPane(msg + "\nReconnect?", msgType,
+                               JOptionPane.YES_NO_OPTION, null, options,
+                               options[1]);
+      else
+        pane = new JOptionPane(msg, msgType);
       JDialog dlg = pane.createDialog(null, title);
       dlg.setAlwaysOnTop(true);
       dlg.setVisible(true);
+      if (reconnect && pane.getValue() == options[0])
+        start();
     }
   }
 
@@ -781,7 +794,8 @@ public class VncViewer extends javax.swing.JApplet
         }
       } catch(Exception e) {
         if (cc == null || !cc.shuttingDown) {
-          reportException(e);
+          reportException(e, cc != null &&
+                          cc.state() == CConnection.RFBSTATE_NORMAL);
           exitStatus = 1;
           if (cc != null) cc.deleteWindow();
         } else if (cc.shuttingDown && embed.getValue()) {
