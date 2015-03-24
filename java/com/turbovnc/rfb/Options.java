@@ -33,6 +33,11 @@ public class Options {
   public static final int SIZE_MANUAL = 1;
   public static final int SIZE_AUTO = 2;
 
+  public static final int NUMGRABOPT = 3;
+  public static final int GRAB_FS = 0;
+  public static final int GRAB_ALWAYS = 1;
+  public static final int GRAB_MANUAL = 2;
+
   public static final int NUMSUBSAMPOPT = 4;
   public static final int SUBSAMP_NONE = 0;
   public static final int SUBSAMP_4X = 1;
@@ -49,6 +54,7 @@ public class Options {
     port = old.port;
     shared = old.shared;
     viewOnly = old.viewOnly;
+    grabKeyboard = old.grabKeyboard;
     fullScreen = old.fullScreen;
     span = old.span;
     scalingFactor = old.scalingFactor;
@@ -151,6 +157,7 @@ public class Options {
     printOpt("port", port);
     printOpt("shared", shared);
     printOpt("viewOnly", viewOnly);
+    printOpt("grabKeyboard", grabKeyboard);
     printOpt("fullScreen", fullScreen);
     printOpt("span", span);
     printOpt("scalingFactor", scalingFactor);
@@ -201,6 +208,7 @@ public class Options {
   public int port;
   public boolean shared;
   public boolean viewOnly;
+  public int grabKeyboard;
   public boolean fullScreen;
   public int span;
   public int scalingFactor;

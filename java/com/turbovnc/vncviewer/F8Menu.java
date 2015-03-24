@@ -23,6 +23,7 @@ package com.turbovnc.vncviewer;
 import java.awt.Cursor;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.*;
 
 import com.turbovnc.rfb.*;
 
@@ -64,6 +65,13 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     showToolbar.addActionListener(this);
     add(showToolbar);
     addSeparator();
+    if (VncViewer.isX11() && !VncViewer.embed.getValue()) {
+      grabKeyboard = new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
+      grabKeyboard.setMnemonic(KeyEvent.VK_G);
+      grabKeyboard.setSelected(cc.keyboardGrabbed);
+      grabKeyboard.addActionListener(this);
+      add(grabKeyboard);
+    }
     f8 = addMenuItem("Send " + KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
     KeyStroke ks = KeyStroke.getKeyStroke(MenuKey.getMenuKeyCode(), 0);
     f8.setAccelerator(ks);
@@ -81,6 +89,16 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     addSeparator();
     dismiss = addMenuItem("Dismiss Menu");
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+    if (VncViewer.isX11())
+      addPopupMenuListener(new PopupMenuListener() {
+        public void popupMenuCanceled(PopupMenuEvent e) {
+          if (cc.keyboardGrabbed)
+            cc.viewport.grabKeyboardHelper(true, true);
+        }
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
+      });
   }
 
   JMenuItem addMenuItem(String str, int mnemonic) {
@@ -119,11 +137,15 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       showToolbar.setSelected(cc.showToolbar);
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
+      firePopupMenuCanceled();
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
+    } else if (actionMatch(ev, grabKeyboard)) {
+      cc.toggleKeyboardGrab();
     } else if (actionMatch(ev, f8)) {
       cc.writeKeyEvent(MenuKey.getMenuKeySym(), true);
       cc.writeKeyEvent(MenuKey.getMenuKeySym(), false);
+      firePopupMenuCanceled();
     } else if (actionMatch(ev, ctrlAltDel)) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Alt_L, true);
@@ -131,15 +153,19 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.writeKeyEvent(Keysyms.Delete, false);
       cc.writeKeyEvent(Keysyms.Alt_L, false);
       cc.writeKeyEvent(Keysyms.Control_L, false);
+      firePopupMenuCanceled();
     } else if (actionMatch(ev, ctrlEsc)) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Escape, true);
       cc.writeKeyEvent(Keysyms.Escape, false);
       cc.writeKeyEvent(Keysyms.Control_L, false);
+      firePopupMenuCanceled();
     } else if (actionMatch(ev, refresh)) {
       cc.refresh();
+      firePopupMenuCanceled();
     } else if (actionMatch(ev, losslessRefresh)) {
       cc.losslessRefresh();
+      firePopupMenuCanceled();
     } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
     } else if (actionMatch(ev, options)) {
@@ -164,7 +190,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, options, info, profile, about, dismiss;
   static JMenuItem f8;
-  JCheckBoxMenuItem fullScreen, showToolbar;
+  JCheckBoxMenuItem fullScreen, showToolbar, grabKeyboard;
 
   static LogWriter vlog = new LogWriter("F8Menu");
 }

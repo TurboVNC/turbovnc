@@ -814,6 +814,15 @@ public class VncViewer extends javax.swing.JApplet
     opts.viewOnly = viewOnly.getValue();
     opts.fullScreen = fullScreen.getValue();
 
+    if (isX11()) {
+      if (grabKeyboard.getValue().toLowerCase().startsWith("f"))
+        opts.grabKeyboard = Options.GRAB_FS;
+      else if (grabKeyboard.getValue().toLowerCase().startsWith("a"))
+        opts.grabKeyboard = Options.GRAB_ALWAYS;
+      else if (grabKeyboard.getValue().toLowerCase().startsWith("m"))
+        opts.grabKeyboard = Options.GRAB_MANUAL;
+    }
+
     if (span.getValue().toLowerCase().startsWith("p"))
       opts.span = Options.SPAN_PRIMARY;
     else if (span.getValue().toLowerCase().startsWith("al"))
@@ -963,6 +972,21 @@ public class VncViewer extends javax.swing.JApplet
   = new BoolParameter("ViewOnly",
   "Ignore all keyboard and mouse events in the viewer window and do not pass " +
   "these events to the VNC server.", false);
+
+  static StringParameter grabKeyboard
+  = new StringParameter("GrabKeyboard",
+  isX11() ? "When the keyboard is grabbed, special key sequences (such as " +
+  "Alt-Tab) that are used to switch windows and perform other window " +
+  "management functions are passed to the VNC server instead of being " +
+  "handled by the local window manager.  The default is to grab the " +
+  "keyboard when switching to full-screen mode and ungrab it when exiting " +
+  "full-screen mode.  Setting this parameter to \"Always\" grabs the " +
+  "keyboard when the viewer starts up and does not automatically ungrab it. " +
+  "When this parameter is set to \"Manual\", the keyboard is only grabbed " +
+  "or ungrabbed when the \"Grab Keyboard\" option is selected in the F8 " +
+  "menu, or when the Ctrl-Alt-Shift-G hotkey is pressed.  Regardless of the " +
+  "grabbing mode, the F8 menu option and hotkey can always be used to " +
+  "grab or ungrab the keyboard." : null, "FS", "Always, FS, Manual");
 
   static BoolParameter noNewConn
   = new BoolParameter("NoNewConn",

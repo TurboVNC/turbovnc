@@ -113,3 +113,76 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
     awt.FreeDrawingSurface(ds);
   }
 }
+
+JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
+  (JNIEnv *env, jobject obj, jboolean on)
+{
+  JAWT awt;
+  JAWT_DrawingSurface *ds = NULL;
+  JAWT_DrawingSurfaceInfo *dsi = NULL;
+  JAWT_X11DrawingSurfaceInfo *x11dsi = NULL;
+  int ret;  XWindowAttributes xwa;
+
+  awt.version = JAWT_VERSION_1_3;
+  if (!handle) {
+    if ((handle = dlopen("libjawt.so", RTLD_LAZY)) == NULL)
+      _throw(dlerror());
+    if ((__JAWT_GetAWT = dlsym(handle, "JAWT_GetAWT")) == NULL)
+      _throw(dlerror());
+  }
+
+  if(__JAWT_GetAWT(env, &awt) == JNI_FALSE)
+    _throw("Could not initialize AWT native interface");
+
+  if((ds = awt.GetDrawingSurface(env, obj)) == NULL)
+    _throw("Could not get drawing surface");
+
+  if((ds->Lock(ds) & JAWT_LOCK_ERROR) != 0)
+    _throw("Could not lock surface");
+
+  if((dsi = ds->GetDrawingSurfaceInfo(ds)) == NULL)
+    _throw("Could not get drawing surface info");
+
+  if((x11dsi = (JAWT_X11DrawingSurfaceInfo*)dsi->platformInfo) == NULL)
+    _throw("Could not get X11 drawing surface info");
+
+  XSync(x11dsi->display, False);
+  if (on) {
+    int count = 5;
+    while ((ret = XGrabKeyboard(x11dsi->display, x11dsi->drawable, True,
+                                GrabModeAsync, GrabModeAsync, CurrentTime))
+           != GrabSuccess) {
+      switch (ret) {
+        case AlreadyGrabbed:
+          _throw("Could not grab keyboard: already grabbed by another application");      
+        case GrabInvalidTime:
+          _throw("Could not grab keyboard: invalid time");
+        case GrabNotViewable:
+          /* The window should theoretically be viewable by now, but in
+             practice, sometimes a race condition occurs with Swing.  It is
+             unclear why, since everything should be happening in the EDT. */
+          if (count == 0)
+            _throw("Could not grab keyboard: window not visible");      
+          usleep(100000);
+          count--;
+          continue;
+        case GrabFrozen:
+          _throw("Could not grab keyboard: keyboard frozen by another application");
+      }
+    }
+    printf("TurboVNC Helper: Grabbed keyboard for window 0x%.8lx\n",
+           x11dsi->drawable);
+  } else {
+    XUngrabKeyboard(x11dsi->display, CurrentTime);
+    printf("TurboVNC Helper: Ungrabbed keyboard\n");
+  }
+  XSync(x11dsi->display, False);
+
+  bailout:
+  if(ds)
+  {
+    if(dsi) ds->FreeDrawingSurfaceInfo(dsi);
+    ds->Unlock(ds);
+    awt.FreeDrawingSurface(ds);
+  }
+}

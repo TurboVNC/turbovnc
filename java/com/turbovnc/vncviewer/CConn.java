@@ -833,6 +833,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   private void recreateViewport() { recreateViewport(false); }
 
   private void recreateViewport(boolean restore) {
+    boolean keyboardTempUngrabbed = false;
     if (VncViewer.embed.getValue())
       return;
     if (viewport != null) {
@@ -843,6 +844,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
       if (viewport.timer != null)
         viewport.timer.stop();
+      if (VncViewer.isX11() && keyboardGrabbed) {
+        viewport.grabKeyboardHelper(false);
+        if (opts.grabKeyboard == Options.GRAB_MANUAL)
+          keyboardTempUngrabbed = true;
+      }
       viewport.dispose();
     }
     viewport = new Viewport(this);
@@ -859,6 +865,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (opts.fullScreen && viewport.lionFSSupported())
       viewport.toggleLionFS();
     desktop.requestFocusInWindow();
+    if (VncViewer.isX11()) {
+      if (opts.grabKeyboard == Options.GRAB_ALWAYS ||
+          (opts.grabKeyboard == Options.GRAB_MANUAL && keyboardTempUngrabbed) ||
+          (opts.grabKeyboard == Options.GRAB_FS && fullScreen))
+        viewport.grabKeyboardHelper(true);
+    }
   }
 
   // EDT
@@ -1395,6 +1407,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
         viewport.toggleLionFS();
       }
     }
+  }
+
+  // EDT
+  public void toggleKeyboardGrab() {
+    if (VncViewer.embed.getValue() || !VncViewer.isX11())
+      return;
+    if (viewport != null)
+      viewport.grabKeyboardHelper(!keyboardGrabbed);
   }
 
   // EDT
@@ -1958,6 +1978,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   int lmodifiers, rmodifiers;
   Viewport viewport;
   boolean showToolbar;
+  boolean keyboardGrabbed;
 
   public double tDecode, tBlit;
   public long decodePixels, decodeRect, blitPixels, blits;

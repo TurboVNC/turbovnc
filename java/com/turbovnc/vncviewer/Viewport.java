@@ -80,6 +80,18 @@ public class Viewport extends JFrame {
       public void windowGainedFocus(WindowEvent e) {
         if (sp.getViewport().getView() != null)
           sp.getViewport().getView().requestFocusInWindow();
+        if (isVisible() && keyboardTempUngrabbed) {
+          System.out.println("Keyboard focus regained. Re-grabbing keyboard.");
+          grabKeyboardHelper(true);
+          keyboardTempUngrabbed = false;
+        }
+      }
+      public void windowLostFocus(WindowEvent e) {
+        if (cc.keyboardGrabbed && isVisible()) {
+          vlog.info("Keyboard focus lost. Temporarily ungrabbing keyboard.");
+          grabKeyboardHelper(false);
+          keyboardTempUngrabbed = true;
+        }
       }
     });
 
@@ -322,10 +334,14 @@ public class Viewport extends JFrame {
         vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
         vlog.info("  to the Java command line to specify its location.");
         vlog.info("  Full-screen mode may not work correctly.");
+        if (VncViewer.isX11())
+          vlog.info("  Keyboard grabbing will be disabled.");
       } catch(java.lang.Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
         vlog.info("  Full-screen mode may not work correctly.");
+        if (VncViewer.isX11())
+          vlog.info("  Keyboard grabbing will be disabled.");
       }
     }
     triedHelperInit = true;
@@ -344,12 +360,36 @@ public class Viewport extends JFrame {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
         vlog.info("  Full-screen mode may not work correctly.");
+      }
+    }
+  }
+
+  public void grabKeyboardHelper(boolean on) {
+    grabKeyboardHelper(on, false);
+  }
+
+  public void grabKeyboardHelper(boolean on, boolean force) {
+    if (isHelperAvailable()) {
+      try {
+        if (cc.keyboardGrabbed == on && !force)
+          return;
+        grabKeyboard(on);
+        cc.keyboardGrabbed = on;
+        cc.menu.grabKeyboard.setSelected(cc.keyboardGrabbed);
+      } catch(java.lang.UnsatisfiedLinkError e) {
+        vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper.");
+        vlog.info("  Keyboard grabbing will be disabled.");
         helperAvailable = false;
+      } catch(java.lang.Exception e) {
+        vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper:");
+        vlog.info("  " + e.toString());
+        vlog.info("  Keyboard grabbing may not work correctly.");
       }
     }
   }
 
   private native void x11FullScreen(boolean on);
+  private native void grabKeyboard(boolean on);
 
   CConn cc;
   JScrollPane sp;
@@ -357,6 +397,7 @@ public class Viewport extends JFrame {
   public int dx, dy = 0;
   MacMenuBar macMenu;
   boolean canDoLionFS;
+  boolean keyboardTempUngrabbed;
   static boolean triedHelperInit, helperAvailable;
   Timer timer;
   static LogWriter vlog = new LogWriter("Viewport");

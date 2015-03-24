@@ -103,6 +103,12 @@ The NoNewConn parameter in the Java TurboVNC Viewer will now disable the
 toolbar as well (useful for web portals, particularly when using the new
 embedded applet mode.)
 -------------------------------------------------------------------------------
+[16]
+On Un*x/X11 platforms, the Java TurboVNC Viewer can now grab the keyboard when
+run as a standalone application.  This allows special key sequences, such as
+Alt-Tab, to be sent to the server.  This feature requires the afore-mentioned
+TurboVNC Helper library.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
