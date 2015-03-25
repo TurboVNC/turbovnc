@@ -84,6 +84,7 @@ static int maxFd = 0;
 
 extern unsigned long long sendBytes;
 
+
 /*
  * Convenience function to return a string from either an IPv4 or an IPv6
  * address
@@ -312,8 +313,7 @@ rfbCheckFds()
  */
 
 void
-rfbCorkSock(sock)
-    int sock;
+rfbCorkSock(int sock)
 {
     static int alreadywarned = 0;
 #ifdef TCP_CORK
@@ -339,8 +339,7 @@ rfbCorkSock(sock)
  */
 
 void
-rfbUncorkSock(sock)
-    int sock;
+rfbUncorkSock(int sock)
 {
 #ifdef TCP_CORK
     static int alreadywarned = 0;
@@ -364,8 +363,7 @@ rfbDisconnectUDPSock()
 
 
 void
-rfbCloseSock(sock)
-    int sock;
+rfbCloseSock(int sock)
 {
     close(sock);
     RemoveEnabledDevice(sock);
@@ -383,8 +381,7 @@ rfbCloseSock(sock)
  */
 
 void
-rfbWaitForClient(sock)
-    int sock;
+rfbWaitForClient(int sock)
 {
     int n;
     fd_set fds;
@@ -413,9 +410,7 @@ rfbWaitForClient(sock)
  */
 
 int
-rfbConnect(host, port)
-    char *host;
-    int port;
+rfbConnect(char *host, int port)
 {
     int sock;
     int one = 1;
@@ -450,8 +445,6 @@ rfbConnect(host, port)
 }
 
 
-
-
 /*
  * ReadExact reads an exact number of bytes on a TCP socket.  Returns 1 if
  * those bytes have been read, 0 if the other end has closed, or -1 if an error
@@ -459,10 +452,7 @@ rfbConnect(host, port)
  */
 
 int
-ReadExact(sock, buf, len)
-    int sock;
-    char *buf;
-    int len;
+ReadExact(int sock, char *buf, int len)
 {
     int n;
     fd_set fds;
@@ -508,7 +498,6 @@ ReadExact(sock, buf, len)
 }
 
 
-
 /*
  * SkipExact reads an exact number of bytes on a TCP socket into a temporary
  * buffer and then discards them.  Returns 1 on success, 0 if the other end has
@@ -517,9 +506,7 @@ ReadExact(sock, buf, len)
  */
 
 int
-SkipExact(sock, len)
-    int sock;
-    int len;
+SkipExact(int sock, int len)
 {
     char *tmpbuf = NULL;
     int bufLen = min(len, 65536), i, retval = 1;
@@ -540,7 +527,6 @@ SkipExact(sock, len)
 }
 
 
-
 /*
  * WriteExact writes an exact number of bytes on a TCP socket.  Returns 1 if
  * those bytes have been written, or -1 if an error occurred (errno is set to
@@ -548,10 +534,7 @@ SkipExact(sock, len)
  */
 
 int
-WriteExact(sock, buf, len)
-    int sock;
-    char *buf;
-    int len;
+WriteExact(int sock, char *buf, int len)
 {
     int n, bytesWritten = 0;
     fd_set fds;
@@ -621,8 +604,7 @@ WriteExact(sock, buf, len)
 
 
 int
-ListenOnTCPPort(port)
-    int port;
+ListenOnTCPPort(int port)
 {
     struct sockaddr_storage addr;
     struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
@@ -673,9 +655,7 @@ ListenOnTCPPort(port)
 
 
 int
-ConnectToTcpAddr(host, port)
-    char *host;
-    int port;
+ConnectToTcpAddr(char *host, int port)
 {
     char portname[10];
     int sock;
@@ -688,7 +668,8 @@ ConnectToTcpAddr(host, port)
     if (getaddrinfo(host, portname, &hints, &addr) != 0)
         return -1;
 
-    if ((sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol)) < 0) {
+    if ((sock = socket(addr->ai_family, addr->ai_socktype,
+                       addr->ai_protocol)) < 0) {
         freeaddrinfo(addr);
         return -1;
     }
@@ -705,8 +686,7 @@ ConnectToTcpAddr(host, port)
 
 
 int
-ListenOnUDPPort(port)
-    int port;
+ListenOnUDPPort(int port)
 {
     struct sockaddr_storage addr;
     struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;

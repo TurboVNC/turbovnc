@@ -52,29 +52,31 @@ static void rfbSendAuthCaps(rfbClientPtr cl);
 
 static void rfbVncAuthSendChallenge(rfbClientPtr cl);
 
-#define AUTH_DEFAULT_CONF_FILE        "/etc/turbovncserver-auth.conf"
+#define AUTH_DEFAULT_CONF_FILE "/etc/turbovncserver-auth.conf"
 #ifdef XVNC_AuthPAM
 #define AUTH_DEFAULT_PAM_SERVICE_NAME "turbovnc"
 #endif
 
 #define MAX_USER_LEN 64
-#define MAX_PWD_LEN  64
+#define MAX_PWD_LEN 64
 
-char* rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
-Bool  rfbAuthDisableRevCon = FALSE;
-Bool  rfbAuthDisableCBSend = FALSE;
-Bool  rfbAuthDisableCBRecv = FALSE;
+char *rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
+Bool rfbAuthDisableRevCon = FALSE;
+Bool rfbAuthDisableCBSend = FALSE;
+Bool rfbAuthDisableCBRecv = FALSE;
 
 static int nAuthMethodsEnabled = 0;
-static int preferenceLimit = 1; /* Force once through the loop in rfbSendAuthCaps */
+static int preferenceLimit = 1; /* Force one iteration of the loop in
+                                   rfbSendAuthCaps() */
 
-Bool  rfbOptNoauth = FALSE;
-Bool  rfbOptOtpauth = FALSE;
-Bool  rfbOptPamauth = FALSE;
-Bool  rfbOptRfbauth = FALSE;
+Bool rfbOptNoauth = FALSE;
+Bool rfbOptOtpauth = FALSE;
+Bool rfbOptPamauth = FALSE;
+Bool rfbOptRfbauth = FALSE;
 
-char* rfbAuthOTPValue = NULL;
-int   rfbAuthOTPValueLen = 0;
+char *rfbAuthOTPValue = NULL;
+int rfbAuthOTPValueLen = 0;
+
 
 static void
 AuthNoneStartFunc(rfbClientPtr cl)
@@ -87,28 +89,30 @@ AuthNoneRspFunc(rfbClientPtr cl)
 {
 }
 
+
 #ifdef XVNC_AuthPAM
 
 #include <pwd.h>
 
-Bool rfbPAMAuthenticate(const char* svc, const char* host, const char* user,
-                        const char* pwd, const char** emsg);
+Bool rfbPAMAuthenticate(const char *svc, const char *host, const char *user,
+                        const char *pwd, const char **emsg);
 
-static char* pamServiceName = AUTH_DEFAULT_PAM_SERVICE_NAME;
+static char *pamServiceName = AUTH_DEFAULT_PAM_SERVICE_NAME;
 
 typedef struct UserList {
-    struct UserList* next;
-    const char*      name;
-    Bool             viewOnly;
+    struct UserList *next;
+    const char *name;
+    Bool viewOnly;
 } UserList;
 
-static UserList* userACL = NULL;
+static UserList *userACL = NULL;
 Bool rfbAuthUserACL = FALSE;
 
+
 void
-rfbAuthAddUser(const char* name, Bool viewOnly)
+rfbAuthAddUser(const char *name, Bool viewOnly)
 {
-    UserList* p = (UserList*) malloc(sizeof(UserList));
+    UserList *p = (UserList *)malloc(sizeof(UserList));
 
     if (p == NULL) {
         FatalError("rfbAuthAddUser: out of memory");
@@ -122,11 +126,12 @@ rfbAuthAddUser(const char* name, Bool viewOnly)
     userACL = p;
 }
 
+
 void
-rfbAuthRevokeUser(const char* name)
+rfbAuthRevokeUser(const char *name)
 {
-    UserList** prev = &userACL;
-    UserList*  p;
+    UserList **prev = &userACL;
+    UserList *p;
 
     rfbLog("Removing user '%s' from ACL\n", name);
     while (*prev != NULL) {
@@ -142,37 +147,37 @@ rfbAuthRevokeUser(const char* name)
     }
 }
 
+
 static void
 AuthPAMUserPwdStartFunc(rfbClientPtr cl)
 {
     cl->state = RFB_AUTHENTICATION;
 }
 
+
 static void
 AuthPAMUserPwdRspFunc(rfbClientPtr cl)
 {
-    CARD32      userLen;
-    CARD32      pwdLen;
-    char        userBuf[MAX_USER_LEN + 1];
-    char        pwdBuf[MAX_PWD_LEN + 1];
-    int         n;
-    const char* emsg;
+    CARD32 userLen;
+    CARD32 pwdLen;
+    char userBuf[MAX_USER_LEN + 1];
+    char pwdBuf[MAX_PWD_LEN + 1];
+    int n;
+    const char *emsg;
 
-    n = ReadExact(cl->sock, (char*) &userLen, sizeof(userLen));
+    n = ReadExact(cl->sock, (char *)&userLen, sizeof(userLen));
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("AuthPAMUserPwdRspFunc: read error");
-
         rfbCloseSock(cl->sock);
         return;
     }
 
     userLen = Swap32IfLE(userLen);
-    n = ReadExact(cl->sock, (char*) &pwdLen, sizeof(pwdLen));
+    n = ReadExact(cl->sock, (char *)&pwdLen, sizeof(pwdLen));
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("AuthPAMUserPwdRspFunc: read error");
-
         rfbCloseSock(cl->sock);
         return;
     }
@@ -188,7 +193,6 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("AuthPAMUserPwdRspFunc: error reading user name");
-
         rfbCloseSock(cl->sock);
         return;
     }
@@ -198,14 +202,13 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("AuthPAMUserPwdRspFunc: error reading password");
-
         rfbCloseSock(cl->sock);
         return;
     }
 
     pwdBuf[pwdLen] = '\0';
     if (rfbAuthUserACL) {
-        UserList* p = userACL;
+        UserList *p = userACL;
 
         if (p == NULL)
             rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix login authentication.\n");
@@ -213,7 +216,6 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
         while (p != NULL) {
             if (!strcmp(p->name, userBuf))
                 break;
-
             p = p->next;
         }
 
@@ -229,50 +231,54 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
 
     if (rfbPAMAuthenticate(pamServiceName, cl->host, userBuf, pwdBuf, &emsg)) {
         rfbClientAuthSucceeded(cl, rfbAuthUnixLogin);
-
     } else {
-        rfbClientAuthFailed(cl, (char*)emsg);
+        rfbClientAuthFailed(cl, (char *)emsg);
     }
 }
+
 #endif
 
+
 typedef struct {
-    const char* name;
-    int         protocolMinorVer;
-    Bool        advertise;
-    CARD8       securityType;
+    const char *name;
+    int protocolMinorVer;
+    Bool advertise;
+    CARD8 securityType;
 } SecTypeData;
 
 static SecTypeData secTypeNone    = { "none",    3, TRUE, rfbSecTypeNone };
 static SecTypeData secTypeVncauth = { "vncauth", 3, TRUE, rfbSecTypeVncAuth };
 static SecTypeData secTypeTight   = { "tight",   7, TRUE, rfbSecTypeTight };
 
-static SecTypeData* secTypes[] = {
+static SecTypeData *secTypes[] = {
     &secTypeNone, &secTypeVncauth, &secTypeTight, NULL
 };
 
 typedef void (*AuthFunc)(rfbClientPtr cl);
 
 typedef struct {
-    int      authType;
-    CARD8    vendorSignature[4];
-    CARD8    nameSignature[8];
+    int authType;
+    CARD8 vendorSignature[4];
+    CARD8 nameSignature[8];
     AuthFunc startFunc;
     AuthFunc rspFunc;
 } AuthCapData;
 
-static AuthCapData  authCapNone      = { rfbAuthNone, rfbStandardVendor, sig_rfbAuthNone,
-                                         AuthNoneStartFunc, AuthNoneRspFunc};
+static AuthCapData authCapNone =
+    { rfbAuthNone, rfbStandardVendor, sig_rfbAuthNone,
+      AuthNoneStartFunc, AuthNoneRspFunc };
 
-static AuthCapData  authCapVncauth   = { rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
-                                         rfbVncAuthSendChallenge, rfbVncAuthProcessResponse};
+static AuthCapData authCapVncauth =
+    { rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
+      rfbVncAuthSendChallenge, rfbVncAuthProcessResponse };
 
 #ifdef XVNC_AuthPAM
-static AuthCapData  authCapUnixLogin = { rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
-                                         AuthPAMUserPwdStartFunc, AuthPAMUserPwdRspFunc};
+static AuthCapData authCapUnixLogin =
+    { rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
+      AuthPAMUserPwdStartFunc, AuthPAMUserPwdRspFunc };
 #endif
 
-static AuthCapData* authCaps[] = {
+static AuthCapData *authCaps[] = {
     &authCapNone, &authCapVncauth,
 #ifdef XVNC_AuthPAM
     &authCapUnixLogin,
@@ -281,47 +287,51 @@ static AuthCapData* authCaps[] = {
 };
 
 typedef struct {
-    const char*  name;
-    Bool         enabled;
-    Bool         permitted;
-    int          preference;
-    Bool*        optionSet;
-    const char*  optionName;
-    Bool         requiredData;
-    SecTypeData* secType;
-    AuthCapData* authCap;
+    const char *name;
+    Bool enabled;
+    Bool permitted;
+    int preference;
+    Bool *optionSet;
+    const char *optionName;
+    Bool requiredData;
+    SecTypeData *secType;
+    AuthCapData *authCap;
 } AuthMethodData;
 
 /*
- * Set the permitted member to TRUE if you want that method to be available by
- * default.  The value of the permitted-auth-methods config file option will
- * take precedence over the defaults compiled in.
+ * Set the "permitted" member to TRUE if you want the auth method to be
+ * available by default.  The value of the "permitted-auth-methods" config file
+ * option will take precedence over the defaults below.
  *
- * We permit the no authentication method by default for backwards
- * compatibility, and only enable it when either explicitly told to do
- * so or if it is permitted and no other auth methods were passed on
- * the command line.
+ * We permit the rfbAuthNone auth method by default for backward compatibility
+ * and only enable it when either explicitly told to do so or if it is
+ * permitted and no other auth methods were specified on the command line.
  */
 static AuthMethodData authMethods[] = {
-    { "none", FALSE, TRUE, -1, &rfbOptNoauth, "", FALSE, &secTypeNone, &authCapNone},
+    { "none", FALSE, TRUE, -1, &rfbOptNoauth, "", FALSE,
+      &secTypeNone, &authCapNone },
 
-    { "vnc", FALSE, TRUE, -1, &rfbOptRfbauth, "-rfbauth", TRUE, &secTypeVncauth, &authCapVncauth},
+    { "vnc", FALSE, TRUE, -1, &rfbOptRfbauth, "-rfbauth", TRUE,
+      &secTypeVncauth, &authCapVncauth },
 
-    { "otp", FALSE, TRUE, -1, &rfbOptOtpauth, "-otpauth", TRUE, &secTypeVncauth, &authCapVncauth},
+    { "otp", FALSE, TRUE, -1, &rfbOptOtpauth, "-otpauth", TRUE,
+      &secTypeVncauth, &authCapVncauth },
 
 #ifdef XVNC_AuthPAM
-    { "pam-userpwd", FALSE, TRUE, -1, &rfbOptPamauth, "-pamauth", TRUE, &secTypeTight, &authCapUnixLogin},
+    { "pam-userpwd", FALSE, TRUE, -1, &rfbOptPamauth, "-pamauth", TRUE,
+      &secTypeTight, &authCapUnixLogin },
 #endif
 
     { NULL }
 };
 
+
 static void
-setMethods(char* buf)
+setMethods(char *buf)
 {
-    char*           saveptr;
-    char*           p;
-    AuthMethodData* a;
+    char *saveptr;
+    char *p;
+    AuthMethodData *a;
 
     preferenceLimit = 0;
     for (a = authMethods; a->name != NULL; a++) {
@@ -351,15 +361,16 @@ setMethods(char* buf)
     }
 }
 
+
 static void
-ReadConfigFile()
+ReadConfigFile(void)
 {
-    FILE*           fp;
-    char            buf[256], buf2[256];
-    int             line;
-    int             len;
-    int             n, i, j;
-    struct stat     sb;
+    FILE *fp;
+    char buf[256], buf2[256];
+    int line;
+    int len;
+    int n, i, j;
+    struct stat sb;
 
     if ((fp = fopen(rfbAuthConfigFile, "r")) == NULL)
         return;
@@ -475,11 +486,12 @@ ReadConfigFile()
     fclose(fp);
 }
 
+
 void
 rfbAuthInit()
 {
-    AuthMethodData* a;
-    int             nSelected = 0;
+    AuthMethodData *a;
+    int nSelected = 0;
 
     ReadConfigFile();
 
@@ -511,7 +523,8 @@ rfbAuthInit()
     }
 
     if (nSelected == 0) {
-        /* No auth method was selected, see if we should enable the no authentication method */
+        /* No auth method was selected.  See if we should enable the
+           rfbAuthNone authentication method. */
         for (a = authMethods; a->name != NULL; a++) {
             if (!a->requiredData) {
                 if (a->permitted) {
@@ -541,7 +554,7 @@ rfbAuthInit()
 
         FatalError("ERROR: no authentication methods enabled!\n");
     } else {
-        /* Do not advertise rfbAuthNone if any other auth method is enabled. */
+        /* Do not advertise rfbAuthNone if any other auth method is enabled */
         for (a = authMethods; a->name != NULL; a++) {
             if (a->enabled && strcmp(a->name, "none"))
                 secTypeNone.advertise = FALSE;
@@ -550,17 +563,17 @@ rfbAuthInit()
 
 #ifdef XVNC_AuthPAM
     if (rfbOptPamauth && rfbAuthUserACL) {
-        struct passwd  pbuf;
-        struct passwd* pw;
-        char           buf[256];
-        char*          n;
+        struct passwd pbuf;
+        struct passwd *pw;
+        char buf[256];
+        char *n;
 
         if (getpwuid_r(getuid(), &pbuf, buf, sizeof(buf), &pw) != 0) {
             FatalError("AuthPAMUserPwdRspFunc: limit-user enabled and getpwuid_r failed: %s",
                 strerror(errno));
         }
 
-        n = (char*) malloc(strlen(pbuf.pw_name));
+        n = (char *)malloc(strlen(pbuf.pw_name));
         if (n == NULL) {
             FatalError("AuthPAMUserPwdRspFunc: out of memory");
         }
@@ -570,11 +583,12 @@ rfbAuthInit()
 #endif
 }
 
+
 void
 rfbAuthProcessResponse(rfbClientPtr cl)
 {
-    AuthCapData** p;
-    AuthCapData*  c;
+    AuthCapData **p;
+    AuthCapData *c;
 
     for (p = authCaps; *p != NULL; p++) {
         c = *p;
@@ -590,18 +604,17 @@ rfbAuthProcessResponse(rfbClientPtr cl)
 
 
 /*
- * rfbAuthNewClient is called right after negotiating the protocol
- * version. Depending on the protocol version, we send either a code
- * for authentication scheme to be used (protocol 3.3), or a list of
- * possible "security types" (protocol 3.7 and above).
+ * rfbAuthNewClient is called right after negotiating the protocol version.
+ * Depending on the protocol version, we send either a code for the
+ * authentication scheme to be used (protocol 3.3) or a list of possible
+ * "security types" (protocol 3.7 and above.)
  */
 
 void
-rfbAuthNewClient(cl)
-    rfbClientPtr cl;
+rfbAuthNewClient(rfbClientPtr cl)
 {
-    SecTypeData** p;
-    SecTypeData*  s;
+    SecTypeData **p;
+    SecTypeData *s;
 
     if (rfbAuthIsBlocked()) {
         rfbLog("Too many authentication failures - client rejected\n");
@@ -614,7 +627,7 @@ rfbAuthNewClient(cl)
         return;
     }
 
-    /* Make sure we use only RFB 3.3 compatible security types */
+    /* Make sure we use only RFB 3.3-compatible security types */
     for (p = secTypes; *p != NULL; p++) {
         s = *p;
         if (s->advertise && (s->protocolMinorVer < 7))
@@ -633,17 +646,14 @@ rfbAuthNewClient(cl)
 
 
 /*
- * Tell the client what security type will be used (protocol 3.3).
+ * Tell the client which security type will be used (protocol 3.3)
  */
 
 static void
-rfbSendSecurityType(cl, securityType)
-    rfbClientPtr cl;
-    int securityType;
+rfbSendSecurityType(rfbClientPtr cl, int securityType)
 {
     CARD32 value32;
 
-    /* Send the value. */
     value32 = Swap32IfLE(securityType);
     if (WriteExact(cl->sock, (char *)&value32, 4) < 0) {
         rfbLogPerror("rfbSendSecurityType: write");
@@ -651,18 +661,16 @@ rfbSendSecurityType(cl, securityType)
         return;
     }
 
-    /* Decide what to do next. */
     switch (securityType) {
     case rfbSecTypeNone:
-        /* Dispatch client input to rfbProcessClientInitMessage. */
+        /* Dispatch client input to rfbProcessClientInitMessage() */
         cl->state = RFB_INITIALISATION;
         break;
     case rfbSecTypeVncAuth:
-        /* Begin the standard VNC authentication procedure. */
+        /* Begin the standard VNC authentication procedure */
         rfbVncAuthSendChallenge(cl);
         break;
     default:
-        /* Impossible case (hopefully). */
         rfbLogPerror("rfbSendSecurityType: assertion failed");
         rfbCloseSock(cl->sock);
     }
@@ -670,20 +678,20 @@ rfbSendSecurityType(cl, securityType)
 
 
 /*
- * Advertise our supported security types (protocol 3.7 and above).
+ * Advertise our supported security types (protocol 3.7 and above)
  */
 
 static void
 rfbSendSecurityTypeList(rfbClientPtr cl)
 {
-    int             n;
-    SecTypeData**   p;
-    SecTypeData*    s;
-    Bool            tightAdvertised = FALSE;
+    int n;
+    SecTypeData **p;
+    SecTypeData *s;
+    Bool tightAdvertised = FALSE;
 
     n = 0;
     for (p = secTypes; *p != NULL; p++) {
-        if (n >  MAX_SECURITY_TYPES) {
+        if (n > MAX_SECURITY_TYPES) {
             FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
         }
 
@@ -697,8 +705,9 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
 
     if (!tightAdvertised) {
         /*
-         * Make sure to advertise the Tight security type to allow the compatible
-         * client to enable other the other non-auth Tight extensions.
+         * Make sure to advertise the Tight security type, in order to allow
+         * TightVNC-compatible clients to enable other (non-auth) Tight
+         * extensions.
          */
         if (n > MAX_SECURITY_TYPES) {
             FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
@@ -710,31 +719,29 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
 
     cl->securityTypes[0] = (CARD8)n;
 
-    /* Send the list. */
+    /* Send the list */
     if (WriteExact(cl->sock, (char *)cl->securityTypes, n + 1) < 0) {
         rfbLogPerror("rfbSendSecurityTypeList: write");
         rfbCloseSock(cl->sock);
         return;
     }
 
-    /* Dispatch client input to rfbProcessClientSecurityType. */
+    /* Dispatch client input to rfbProcessClientSecurityType() */
     cl->state = RFB_SECURITY_TYPE;
 }
 
 
 /*
- * Read the security type chosen by the client (protocol 3.7 and
- * above).
+ * Read the security type chosen by the client (protocol 3.7 and above)
  */
 
 void
-rfbProcessClientSecurityType(cl)
-    rfbClientPtr cl;
+rfbProcessClientSecurityType(rfbClientPtr cl)
 {
     int n, count, i;
     CARD8 chosenType;
 
-    /* Read the security type. */
+    /* Read the security type */
     n = ReadExact(cl->sock, (char *)&chosenType, 1);
     if (n <= 0) {
         if (n == 0)
@@ -745,7 +752,7 @@ rfbProcessClientSecurityType(cl)
         return;
     }
 
-    /* Make sure it was present in the list sent by the server. */
+    /* Make sure it was present in the list sent by the server */
     count = (int)cl->securityTypes[0];
     for (i = 1; i <= count; i++) {
         if (chosenType == cl->securityTypes[i])
@@ -759,44 +766,40 @@ rfbProcessClientSecurityType(cl)
     }
 
     cl->selectedAuthType = chosenType;
-    /* Now go to the proper authentication procedure. */
     switch (chosenType) {
     case rfbSecTypeNone:
-        /* No authentication needed. */
+        /* No authentication needed */
         rfbClientAuthSucceeded(cl, rfbAuthNone);
         break;
     case rfbSecTypeVncAuth:
-        /* Begin the standard VNC authentication procedure. */
+        /* Begin the standard VNC authentication procedure */
         rfbVncAuthSendChallenge(cl);
         break;
     case rfbSecTypeTight:
-        /* We are lucky: the viewer supports TightVNC extensions. */
+        /* The viewer supports TightVNC extensions */
         rfbLog("Enabling TightVNC protocol extensions\n");
-        /* Switch to the protocol 3.7t/3.8t. */
+        /* Switch to protocol 3.7t/3.8t */
         cl->protocol_tightvnc = TRUE;
-        /* Advertise our tunneling capabilities. */
+        /* Advertise our tunneling capabilities */
         rfbSendTunnelingCaps(cl);
         break;
     default:
-        /* Impossible case (hopefully). */
-        rfbLog("rfbProcessClientSecurityType: "
-               "unknown authentication scheme\n");
+        rfbLog("rfbProcessClientSecurityType: unknown authentication scheme\n");
         rfbCloseSock(cl->sock);
         break;
-    }
+   }
 }
 
 
 /*
- * Send the list of our tunneling capabilities (protocol 3.7t/3.8t).
+ * Send the list of our tunneling capabilities (protocol 3.7t/3.8t)
  */
 
 static void
-rfbSendTunnelingCaps(cl)
-    rfbClientPtr cl;
+rfbSendTunnelingCaps(rfbClientPtr cl)
 {
     rfbTunnelingCapsMsg caps;
-    CARD32 nTypes = 0;          /* we don't support tunneling yet */
+    CARD32 nTypes = 0;          /* We don't support tunneling yet */
 
     caps.nTunnelTypes = Swap32IfLE(nTypes);
     if (WriteExact(cl->sock, (char *)&caps, sz_rfbTunnelingCapsMsg) < 0) {
@@ -806,7 +809,7 @@ rfbSendTunnelingCaps(cl)
     }
 
     if (nTypes) {
-        /* Dispatch client input to rfbProcessClientTunnelingType(). */
+        /* Dispatch client input to rfbProcessClientTunnelingType() */
         cl->state = RFB_TUNNELING_TYPE;
     } else {
         rfbSendAuthCaps(cl);
@@ -815,14 +818,14 @@ rfbSendTunnelingCaps(cl)
 
 
 /*
- * Read tunneling type requested by the client (protocol 3.7t/3.8t).
- * NOTE: Currently, we don't support tunneling, and this function
- *       can never be called.
+ * Read tunneling type requested by the client (protocol 3.7t/3.8t)
+ *
+ * NOTE: Currently we don't support tunneling, and this function can never be
+ * called.
  */
 
 void
-rfbProcessClientTunnelingType(cl)
-    rfbClientPtr cl;
+rfbProcessClientTunnelingType(rfbClientPtr cl)
 {
     /* If we were called, then something's really wrong. */
     rfbLog("rfbProcessClientTunnelingType: not implemented\n");
@@ -833,34 +836,34 @@ rfbProcessClientTunnelingType(cl)
 
 /*
  * Send the list of our authentication capabilities to the client
- * (protocol 3.7t/3.8t).
+ * (protocol 3.7t/3.8t)
  */
 
 static void
-rfbSendAuthCaps(cl)
-    rfbClientPtr cl;
+rfbSendAuthCaps(rfbClientPtr cl)
 {
     rfbAuthenticationCapsMsg caps;
     rfbCapabilityInfo caplist[MAX_AUTH_CAPS];
     int count = 0;
 
-    int                j;
-    AuthMethodData*    a;
-    AuthCapData*       c;
-    rfbCapabilityInfo* pcap;
+    int j;
+    AuthMethodData *a;
+    AuthCapData *c;
+    rfbCapabilityInfo *pcap;
 
     if (!cl->reverseConnection) {
         int i;
 
         /*
-         * When no ordering preference was set by permitted-auth-methods, the default
-         * value of preferenceLimit (1) will cause us to execute the outer loop once.
-         * In this case, the a->preference members will all be the default value (-1)
-         * and we skip the ordering testing.
+         * When no preference order was set using "permitted-auth-methods", the
+         * default value of preferenceLimit (1) will cause us to execute the
+         * outer loop once.  In this case, the a->preference members will all
+         * be the default value (-1), and we skip the order testing.
          */
         for (i = 0; i < preferenceLimit; i++) {
             for (a = authMethods; a->name != NULL; a++) {
-                if (((a->preference != -1) && (i != a->preference)) || !a->enabled)
+                if (((a->preference != -1) && (i != a->preference)) ||
+                    !a->enabled)
                     continue;
 
                 c = a->authCap;
@@ -882,8 +885,10 @@ rfbSendAuthCaps(cl)
 
                 pcap = &caplist[count];
                 pcap->code = Swap32IfLE(c->authType);
-                memcpy(pcap->vendorSignature, c->vendorSignature, sz_rfbCapabilityInfoVendor);
-                memcpy(pcap->nameSignature, c->nameSignature, sz_rfbCapabilityInfoName);
+                memcpy(pcap->vendorSignature, c->vendorSignature,
+                       sz_rfbCapabilityInfoVendor);
+                memcpy(pcap->nameSignature, c->nameSignature,
+                       sz_rfbCapabilityInfoName);
                 cl->authCaps[count] = c->authType;
                 count++;
             }
@@ -904,15 +909,15 @@ rfbSendAuthCaps(cl)
 
     if (count) {
         if (WriteExact(cl->sock, (char *)&caplist[0],
-                       count * sz_rfbCapabilityInfo) < 0) {
+                       count *sz_rfbCapabilityInfo) < 0) {
             rfbLogPerror("rfbSendAuthCaps: write");
             rfbCloseSock(cl->sock);
             return;
         }
-        /* Dispatch client input to rfbProcessClientAuthType. */
+        /* Dispatch client input to rfbProcessClientAuthType() */
         cl->state = RFB_AUTH_TYPE;
     } else {
-        /* No authentication needed. */
+        /* No authentication needed */
         rfbClientAuthSucceeded(cl, rfbAuthNone);
         cl->state = RFB_INITIALISATION;
     }
@@ -920,19 +925,18 @@ rfbSendAuthCaps(cl)
 
 
 /*
- * Read client's preferred authentication type (protocol 3.7t/3.8t).
+ * Read client's preferred authentication type (protocol 3.7t/3.8t)
  */
 
 void
-rfbProcessClientAuthType(cl)
-    rfbClientPtr cl;
+rfbProcessClientAuthType(rfbClientPtr cl)
 {
-    CARD32        auth_type;
-    int           n, i;
-    AuthCapData** p;
-    AuthCapData*  c;
+    CARD32 auth_type;
+    int n, i;
+    AuthCapData **p;
+    AuthCapData *c;
 
-    /* Read authentication type selected by the client. */
+    /* Read authentication type selected by the client */
     n = ReadExact(cl->sock, (char *)&auth_type, sizeof(auth_type));
     if (n <= 0) {
         if (n == 0)
@@ -944,7 +948,7 @@ rfbProcessClientAuthType(cl)
     }
     auth_type = Swap32IfLE(auth_type);
 
-    /* Make sure it was present in the list sent by the server. */
+    /* Make sure it was present in the list sent by the server */
     for (i = 0; i < cl->nAuthCaps; i++) {
         if (auth_type == cl->authCaps[i])
             break;
@@ -971,12 +975,11 @@ rfbProcessClientAuthType(cl)
 
 
 /*
- * Send the authentication challenge.
+ * Send the authentication challenge
  */
 
 static void
-rfbVncAuthSendChallenge(cl)
-    rfbClientPtr cl;
+rfbVncAuthSendChallenge(rfbClientPtr cl)
 {
     vncRandomBytes(cl->authChallenge);
     if (WriteExact(cl->sock, (char *)cl->authChallenge, CHALLENGESIZE) < 0) {
@@ -985,15 +988,16 @@ rfbVncAuthSendChallenge(cl)
         return;
     }
 
-    /* Dispatch client input to rfbVncAuthProcessResponse. */
+    /* Dispatch client input to rfbVncAuthProcessResponse() */
     cl->state = RFB_AUTHENTICATION;
 }
 
+
 static Bool
-CheckResponse(rfbClientPtr cl, int numPasswords, char* passwdFullControl,
-        char* passwdViewOnly, CARD8* response)
+CheckResponse(rfbClientPtr cl, int numPasswords, char *passwdFullControl,
+              char *passwdViewOnly, CARD8 *response)
 {
-    Bool  ok = FALSE;
+    Bool ok = FALSE;
     CARD8 encryptedChallenge1[CHALLENGESIZE];
     CARD8 encryptedChallenge2[CHALLENGESIZE];
 
@@ -1001,9 +1005,9 @@ CheckResponse(rfbClientPtr cl, int numPasswords, char* passwdFullControl,
     vncEncryptBytes(encryptedChallenge1, passwdFullControl);
     memcpy(encryptedChallenge2, cl->authChallenge, CHALLENGESIZE);
     vncEncryptBytes(encryptedChallenge2, (numPasswords == 2) ?
-        passwdViewOnly : passwdFullControl);
+                    passwdViewOnly : passwdFullControl);
 
-    /* Lose the passwords from memory */
+    /* Delete the passwords from memory */
     memset(passwdFullControl, 0, MAXPWLEN + 1);
     memset(passwdViewOnly, 0, MAXPWLEN + 1);
 
@@ -1021,14 +1025,14 @@ CheckResponse(rfbClientPtr cl, int numPasswords, char* passwdFullControl,
     return(ok);
 }
 
+
 /*
  * rfbVncAuthProcessResponse is called when the client sends its
  * authentication response.
  */
 
 void
-rfbVncAuthProcessResponse(cl)
-    rfbClientPtr cl;
+rfbVncAuthProcessResponse(rfbClientPtr cl)
 {
     char passwdFullControl[MAXPWLEN + 1] = "\0";
     char passwdViewOnly[MAXPWLEN + 1] = "\0";
@@ -1086,7 +1090,8 @@ rfbVncAuthProcessResponse(cl)
             }
         }
 
-        ok = CheckResponse(cl, numPasswords, passwdFullControl, passwdViewOnly, response);
+        ok = CheckResponse(cl, numPasswords, passwdFullControl, passwdViewOnly,
+                           response);
     }
 
     if (ok) {
@@ -1096,7 +1101,7 @@ rfbVncAuthProcessResponse(cl)
         rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",
                cl->host);
         if (rfbAuthConsiderBlocking()) {
-            rfbClientAuthFailed(cl, "Authentication failed, too many tries");
+            rfbClientAuthFailed(cl, "Authentication failed.  Too many tries");
         } else {
             rfbClientAuthFailed(cl, "Authentication failed");
         }
@@ -1105,27 +1110,25 @@ rfbVncAuthProcessResponse(cl)
 
 
 /*
- * rfbClientConnFailed is called when a client connection has failed
- * before the authentication stage.
+ * rfbClientConnFailed is called when a client connection has failed before
+ * the authentication stage.
  */
 
 void
-rfbClientConnFailed(cl, reason)
-    rfbClientPtr cl;
-    char *reason;
+rfbClientConnFailed(rfbClientPtr cl, char *reason)
 {
     int headerLen, reasonLen;
     char buf[8];
-    CARD32 *buf32=(CARD32 *)buf;
+    CARD32 *buf32 = (CARD32 *)buf;
 
     headerLen = (cl->protocol_minor_ver >= 7) ? 1 : 4;
     reasonLen = strlen(reason);
     buf32[0] = 0;
     buf32[1] = Swap32IfLE(reasonLen);
 
-    if ( WriteExact(cl->sock, buf, headerLen) < 0 ||
-         WriteExact(cl->sock, buf + 4, 4) < 0 ||
-         WriteExact(cl->sock, reason, reasonLen) < 0 ) {
+    if (WriteExact(cl->sock, buf, headerLen) < 0 ||
+        WriteExact(cl->sock, buf + 4, 4) < 0 ||
+        WriteExact(cl->sock, reason, reasonLen) < 0) {
         rfbLogPerror("rfbClientConnFailed: write");
     }
 
@@ -1134,14 +1137,12 @@ rfbClientConnFailed(cl, reason)
 
 
 /*
- * rfbClientAuthFailed is called on authentication failure. Sending a
- * reason string is defined in the RFB protocol 3.8 and above.
+ * rfbClientAuthFailed is called on authentication failure.  Sending a reason
+ * string is defined in RFB 3.8 and above.
  */
 
 void
-rfbClientAuthFailed(cl, reason)
-    rfbClientPtr cl;
-    char *reason;
+rfbClientAuthFailed(rfbClientPtr cl, char *reason)
 {
     int reasonLen;
     char buf[8];
@@ -1159,8 +1160,8 @@ rfbClientAuthFailed(cl, reason)
             rfbLogPerror("rfbClientAuthFailed: write");
         }
     } else {
-        if ( WriteExact(cl->sock, buf, 8) < 0 ||
-             WriteExact(cl->sock, reason, reasonLen) < 0 ) {
+        if (WriteExact(cl->sock, buf, 8) < 0 ||
+            WriteExact(cl->sock, reason, reasonLen) < 0) {
             rfbLogPerror("rfbClientAuthFailed: write");
         }
     }
@@ -1170,17 +1171,14 @@ rfbClientAuthFailed(cl, reason)
 
 
 /*
- * rfbClientAuthSucceeded is called on successful authentication.
- * It just sends rfbAuthOK and dispatches client input to
- * rfbProcessClientInitMessage(). However, rfbAuthOK message is
- * not sent if authentication was not required and the protocol
- * version is 3.7 or lower.
+ * rfbClientAuthSucceeded is called on successful authentication.  It just
+ * sends rfbAuthOK and dispatches client input to
+ * rfbProcessClientInitMessage().  However, the rfbAuthOK message is not sent
+ * if authentication was not required and the protocol version is 3.7 or lower.
  */
 
 void
-rfbClientAuthSucceeded(cl, authType)
-    rfbClientPtr cl;
-    CARD32 authType;
+rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType)
 {
     CARD32 authResult;
 
@@ -1193,29 +1191,31 @@ rfbClientAuthSucceeded(cl, authType)
         }
     }
 
-    /* Dispatch client input to rfbProcessClientInitMessage(). */
+    /* Dispatch client input to rfbProcessClientInitMessage() */
     cl->state = RFB_INITIALISATION;
 }
 
 
 /*********************************************************************
  * Functions to prevent too many successive authentication failures.
- * FIXME: This should be performed separately per each client IP.
+ *
+ * FIXME: This should be performed separately for each client.
  */
 
 /* Maximum authentication failures before blocking connections */
 #define MAX_AUTH_TRIES 5
 
-/* Delay in ms, doubles for each failure over MAX_AUTH_TRIES */
+/* Delay in ms.  This doubles for each failure over MAX_AUTH_TRIES. */
 #define AUTH_TOO_MANY_BASE_DELAY 10 * 1000
 
 static int rfbAuthTries = 0;
 static Bool rfbAuthTooManyTries = FALSE;
 static OsTimerPtr timer = NULL;
 
+
 /*
- * This function should not be called directly, it is called by
- * setting a timer in rfbAuthConsiderBlocking().
+ * This function should not be called directly.  It is called by setting a
+ * timer in rfbAuthConsiderBlocking().
  */
 
 static CARD32
@@ -1225,9 +1225,10 @@ rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
     return 0;
 }
 
+
 /*
- * This function should be called after each authentication failure.
- * The return value will be true if there was too many failures.
+ * This function should be called after each authentication failure.  The
+ * return value will be true if there were too many failures.
  */
 
 Bool
@@ -1249,11 +1250,12 @@ rfbAuthConsiderBlocking(void)
     return FALSE;
 }
 
+
 /*
- * This function should be called after successful authentication.
- * It resets the counter of authentication failures. Note that it's
- * not necessary to clear the rfbAuthTooManyTries flag as it will be
- * reset by the timer function.
+ * This function should be called after a successful authentication.  It
+ * resets the counter of authentication failures.  Note that it's not necessary
+ * to clear the rfbAuthTooManyTries flag, as it will be reset by the timer
+ * function.
  */
 
 void
@@ -1262,10 +1264,11 @@ rfbAuthUnblock(void)
     rfbAuthTries = 0;
 }
 
+
 /*
- * This function should be called before authentication process.
- * The return value will be true if there was too many authentication
- * failures, and the server should not allow another try.
+ * This function should be called before authentication.  The return value will
+ * be true if there were too many authentication failures, and the server
+ * should not allow another try.
  */
 
 Bool
@@ -1273,4 +1276,3 @@ rfbAuthIsBlocked(void)
 {
     return rfbAuthTooManyTries;
 }
-

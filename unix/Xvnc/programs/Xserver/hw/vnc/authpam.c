@@ -40,18 +40,18 @@
 #  define MESSAGE_ARG_TYPE const struct pam_message**
 #endif
 
-static const char* password;
+static const char *password;
 
 static int
-conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response** resp,
-     void* appdata_ptr)
+conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
+     void *appdata_ptr)
 {
-    const struct pam_message* m;
-    struct pam_response*      rp;
-    struct pam_response*      responses;
-    int                       i;
-    int                       pamRet = PAM_SUCCESS;
-    int                       len;
+    const struct pam_message *m;
+    struct pam_response *rp;
+    struct pam_response *responses;
+    int i;
+    int pamRet = PAM_SUCCESS;
+    int len;
 
     *resp = NULL;
     if (num_msg != 1) {
@@ -59,8 +59,8 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response** resp,
         return(PAM_SERVICE_ERR);
     }
 
-    if ((responses = (struct pam_response*) malloc(sizeof(struct pam_response)
-        * num_msg)) == NULL) {
+    if ((responses = (struct pam_response *)malloc(sizeof(struct pam_response) *
+                                                   num_msg)) == NULL) {
         rfbLogPerror("PAMAuthenticate: conv malloc");
         return(PAM_BUF_ERR);
     }
@@ -87,7 +87,7 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response** resp,
         case PAM_PROMPT_ECHO_OFF:
         case PAM_PROMPT_ECHO_ON:
             len = strlen(password) + 1;
-            if ((rp->resp = (char*) malloc(len)) == NULL) {
+            if ((rp->resp = (char *)malloc(len)) == NULL) {
                 rfbLogPerror("PAMAuthenticate: conv malloc");
                 pamRet = PAM_BUF_ERR;
                 break;
@@ -121,14 +121,15 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response** resp,
     return(pamRet);
 }
 
+
 Bool
-rfbPAMAuthenticate(const char* svc, const char* host, const char* user,
-                   const char* pwd, const char** emsg)
+rfbPAMAuthenticate(const char *svc, const char *host, const char *user,
+                   const char *pwd, const char **emsg)
 {
-    pam_handle_t*    pamHandle;
-    struct pam_conv    pamConv;
-    int        r;
-    int        authStatus;
+    pam_handle_t *pamHandle;
+    struct pam_conv pamConv;
+    int r;
+    int authStatus;
 
     *emsg = "Failure encountered while initializing the authentication library";
     password = pwd;
@@ -141,7 +142,7 @@ rfbPAMAuthenticate(const char* svc, const char* host, const char* user,
 
     if ((r = pam_set_item(pamHandle, PAM_RHOST, host)) != PAM_SUCCESS) {
         rfbLog("PAMAuthenticate: pam_set_item PAM_RHOST: %s\n",
-            pam_strerror(pamHandle, r));
+               pam_strerror(pamHandle, r));
         return(FALSE);
     }
 
@@ -166,7 +167,7 @@ rfbPAMAuthenticate(const char* svc, const char* host, const char* user,
         break;
 
     case PAM_AUTHINFO_UNAVAIL:
-        *emsg = "Can not authenticate at this time, try again later";
+        *emsg = "Cannot authenticate at this time.  Try again later.";
         break;
 
     default:

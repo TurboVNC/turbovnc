@@ -272,8 +272,7 @@ static int JPEG_SUBSAMP[10] = {
  */
 
 void
-rfbNewClientConnection(sock)
-    int sock;
+rfbNewClientConnection(int sock)
 {
     rfbNewClient(sock);
 }
@@ -285,10 +284,7 @@ rfbNewClientConnection(sock)
  */
 
 rfbClientPtr
-rfbReverseConnection(host, port, id)
-    char *host;
-    int port;
-    int id;
+rfbReverseConnection(char *host, int port, int id)
 {
     int sock;
     rfbClientPtr cl;
@@ -329,8 +325,7 @@ rfbReverseConnection(host, port, id)
  */
 
 static rfbClientPtr
-rfbNewClient(sock)
-    int sock;
+rfbNewClient(int sock)
 {
     rfbProtocolVersionMsg pv;
     rfbClientPtr cl;
@@ -462,8 +457,7 @@ rfbNewClient(sock)
  */
 
 void
-rfbClientConnectionGone(sock)
-    int sock;
+rfbClientConnectionGone(int sock)
 {
     rfbClientPtr cl, prev;
     int i;
@@ -543,8 +537,7 @@ rfbClientConnectionGone(sock)
  */
 
 void
-rfbProcessClientMessage(sock)
-    int sock;
+rfbProcessClientMessage(int sock)
 {
     rfbClientPtr cl, cl2;
 
@@ -612,8 +605,7 @@ rfbProcessClientMessage(sock)
  */
 
 static void
-rfbProcessClientProtocolVersion(cl)
-    rfbClientPtr cl;
+rfbProcessClientProtocolVersion(rfbClientPtr cl)
 {
     rfbProtocolVersionMsg pv;
     int n, major, minor;
@@ -668,8 +660,7 @@ rfbProcessClientProtocolVersion(cl)
  */
 
 static void
-rfbProcessClientInitMessage(cl)
-    rfbClientPtr cl;
+rfbProcessClientInitMessage(rfbClientPtr cl)
 {
     rfbClientInitMsg ci;
     char buf[256];
@@ -752,8 +743,7 @@ rfbProcessClientInitMessage(cl)
 #define N_ENC_CAPS  16
 
 void
-rfbSendInteractionCaps(cl)
-    rfbClientPtr cl;
+rfbSendInteractionCaps(rfbClientPtr cl)
 {
     rfbInteractionCapsMsg intr_caps;
     rfbCapabilityInfo enc_list[N_ENC_CAPS];
@@ -840,8 +830,7 @@ rfbSendInteractionCaps(cl)
  */
 
 static void
-rfbProcessClientNormalMessage(cl)
-    rfbClientPtr cl;
+rfbProcessClientNormalMessage(rfbClientPtr cl)
 {
     int n;
     rfbClientToServerMsg msg;
@@ -1398,15 +1387,13 @@ rfbProcessClientNormalMessage(cl)
 }
 
 
-
 /*
  * rfbSendFramebufferUpdate - send the currently pending framebuffer update to
  * the RFB client.
  */
 
 Bool
-rfbSendFramebufferUpdate(cl)
-    rfbClientPtr cl;
+rfbSendFramebufferUpdate(rfbClientPtr cl)
 {
     ScreenPtr pScreen = screenInfo.screens[0];
     int i;
@@ -1878,7 +1865,6 @@ rfbSendFramebufferUpdate(cl)
 }
 
 
-
 /*
  * Send the copy region as a string of CopyRect encoded rectangles.
  * The only slightly tricky thing is that we should send the messages in
@@ -1887,10 +1873,7 @@ rfbSendFramebufferUpdate(cl)
  */
 
 static Bool
-rfbSendCopyRegion(cl, reg, dx, dy)
-    rfbClientPtr cl;
-    RegionPtr reg;
-    int dx, dy;
+rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
 {
     int nrects, nrectsInBand, x_inc, y_inc, thisRect, firstInNextBand;
     int x, y, w, h;
@@ -2026,9 +2009,7 @@ rfbSendCopyRegion(cl, reg, dx, dy)
  */
 
 Bool
-rfbSendRectEncodingRaw(cl, x, y, w, h)
-    rfbClientPtr cl;
-    int x, y, w, h;
+rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
 {
     rfbFramebufferUpdateRectHeader rect;
     int nlines;
@@ -2098,8 +2079,7 @@ rfbSendRectEncodingRaw(cl, x, y, w, h)
  */
 
 static Bool
-rfbSendLastRectMarker(cl)
-    rfbClientPtr cl;
+rfbSendLastRectMarker(rfbClientPtr cl)
 {
     rfbFramebufferUpdateRectHeader rect;
 
@@ -2131,8 +2111,7 @@ rfbSendLastRectMarker(cl)
  */
 
 Bool
-rfbSendUpdateBuf(cl)
-    rfbClientPtr cl;
+rfbSendUpdateBuf(rfbClientPtr cl)
 {
     /*
     int i;
@@ -2153,17 +2132,13 @@ rfbSendUpdateBuf(cl)
 }
 
 
-
 /*
  * rfbSendSetColourMapEntries sends a SetColourMapEntries message to the
  * client, using values from the currently installed colormap.
  */
 
 Bool
-rfbSendSetColourMapEntries(cl, firstColour, nColours)
-    rfbClientPtr cl;
-    int firstColour;
-    int nColours;
+rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour, int nColours)
 {
     char buf[sz_rfbSetColourMapEntriesMsg + 256 * 3 * 2];
     rfbSetColourMapEntriesMsg *scme = (rfbSetColourMapEntriesMsg *)buf;
@@ -2329,8 +2304,6 @@ rfbSendDesktopSize(rfbClientPtr cl)
 }
 
 
-
-
 /*****************************************************************************
  *
  * UDP can be used for keyboard and pointer events when the underlying
@@ -2340,8 +2313,7 @@ rfbSendDesktopSize(rfbClientPtr cl)
  */
 
 void
-rfbNewUDPConnection(sock)
-    int sock;
+rfbNewUDPConnection(int sock)
 {
     if (write(sock, &ptrAcceleration, 1) < 0) {
         rfbLogPerror("rfbNewUDPConnection: write");
@@ -2356,8 +2328,7 @@ rfbNewUDPConnection(sock)
  */
 
 void
-rfbProcessUDPInput(sock)
-    int sock;
+rfbProcessUDPInput(int sock)
 {
     int n;
     rfbClientToServerMsg msg;

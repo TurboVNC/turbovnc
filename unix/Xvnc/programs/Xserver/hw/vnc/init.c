@@ -99,12 +99,10 @@ char rfbThisHost[256];
 
 Atom VNC_LAST_CLIENT_ID;
 Atom VNC_CONNECT;
-
 Atom VNC_OTP;
 
 #ifdef XVNC_AuthPAM
 #define MAXUSERLEN 63
-
 Atom VNC_ACL;
 #endif
 
@@ -133,11 +131,10 @@ static miPointerScreenFuncRec rfbPointerCursorFuncs = {
     miPointerWarpCursor
 };
 
-
 int inetdSock = -1;
 static char inetdDisplayNumStr[10];
 
-/* Interface address to bind to. */
+/* Interface address to bind to */
 struct in_addr interface;
 struct in6_addr interface6;
 int family = -1;
@@ -147,7 +144,7 @@ static void
 PrintVersion(void)
 {
     fprintf(stderr, "TurboVNC Server (Xvnc) %d-bit v"__VERSION" (build "__BUILD")\n",
-        (int)sizeof(size_t)*8);
+            (int)sizeof(size_t) * 8);
     fprintf(stderr, "Copyright (C) "__COPYRIGHT_YEAR" "__COPYRIGHT"\n");
     fprintf(stderr, __URLTEXT"\n\n");
 }
@@ -159,27 +156,24 @@ PrintVersion(void)
  */
 
 int
-ddxProcessArgument (argc, argv, i)
-    int argc;
-    char *argv[];
-    int i;
+ddxProcessArgument(int argc, char *argv[], int i)
 {
     static Bool firstTime = TRUE;
 
     if (firstTime) {
-        rfbScreen.width  = RFB_DEFAULT_WIDTH;
+        rfbScreen.width = RFB_DEFAULT_WIDTH;
         rfbScreen.height = RFB_DEFAULT_HEIGHT;
-        rfbScreen.depth  = RFB_DEFAULT_DEPTH;
+        rfbScreen.depth = RFB_DEFAULT_DEPTH;
         rfbScreen.blackPixel = RFB_DEFAULT_BLACKPIXEL;
         rfbScreen.whitePixel = RFB_DEFAULT_WHITEPIXEL;
         rfbScreen.pfbMemory = NULL;
         gethostname(rfbThisHost, 255);
-        interface.s_addr = htonl (INADDR_ANY);
+        interface.s_addr = htonl(INADDR_ANY);
         interface6 = in6addr_any;
         firstTime = FALSE;
     }
 
-    if (strcasecmp (argv[i], "-geometry") == 0) {   /* -geometry WxH */
+    if (strcasecmp(argv[i], "-geometry") == 0) {    /* -geometry WxH */
         if (i + 1 >= argc) UseMsg();
         if (sscanf(argv[i + 1], "%dx%d",
                    &rfbScreen.width, &rfbScreen.height) != 2) {
@@ -189,13 +183,13 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
-    if (strcasecmp (argv[i], "-depth") == 0) {      /* -depth D */
+    if (strcasecmp(argv[i], "-depth") == 0) {       /* -depth D */
         if (i + 1 >= argc) UseMsg();
         rfbScreen.depth = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcasecmp (argv[i], "-pixelformat") == 0) {
+    if (strcasecmp(argv[i], "-pixelformat") == 0) {
         if (i + 1 >= argc) UseMsg();
         if (sscanf(argv[i + 1], "%3s%1d%1d%1d", primaryOrder,
                    &redBits, &greenBits, &blueBits) < 4) {
@@ -215,13 +209,13 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
-    if (strcasecmp (argv[i], "-blackpixel") == 0) { /* -blackpixel n */
+    if (strcasecmp(argv[i], "-blackpixel") == 0) {  /* -blackpixel n */
         if (i + 1 >= argc) UseMsg();
         rfbScreen.blackPixel = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcasecmp (argv[i], "-whitepixel") == 0) { /* -whitepixel n */
+    if (strcasecmp(argv[i], "-whitepixel") == 0) {  /* -whitepixel n */
         if (i + 1 >= argc) UseMsg();
         rfbScreen.whitePixel = atoi(argv[i + 1]);
         return 2;
@@ -332,12 +326,17 @@ ddxProcessArgument (argc, argv, i)
 
     if (strcasecmp(argv[i], "-alrsamp") == 0) {
         if (i + 1 >= argc) UseMsg();
-        switch(toupper(argv[i + 1][0])) {
-            case 'G': case '0':  rfbALRSubsampLevel = TVNC_GRAY;  break;
-            case '1':  rfbALRSubsampLevel = TVNC_1X;  break;
-            case '2':  rfbALRSubsampLevel = TVNC_2X;  break;
-            case '4':  rfbALRSubsampLevel = TVNC_4X;  break;
-            default:  UseMsg();
+        switch (toupper(argv[i + 1][0])) {
+        case 'G': case '0':
+            rfbALRSubsampLevel = TVNC_GRAY;  break;
+        case '1':
+            rfbALRSubsampLevel = TVNC_1X;  break;
+        case '2':
+            rfbALRSubsampLevel = TVNC_2X;  break;
+        case '4':
+            rfbALRSubsampLevel = TVNC_4X;  break;
+        default:
+            UseMsg();
         }
         return 2;
     }
@@ -385,7 +384,7 @@ ddxProcessArgument (argc, argv, i)
     }
 
     if (strcasecmp(argv[i], "-localhost") == 0) {
-        interface.s_addr = htonl (INADDR_LOOPBACK);
+        interface.s_addr = htonl(INADDR_LOOPBACK);
         interface6 = in6addr_loopback;
         return 1;
     }
@@ -401,9 +400,9 @@ ddxProcessArgument (argc, argv, i)
             UseMsg();
             return 2;
         }
-        if (interface.s_addr != htonl (INADDR_ANY) ||
+        if (interface.s_addr != htonl(INADDR_ANY) ||
             memcmp(&interface6, &in6addr_any, sizeof(interface6))) {
-            /* Already set (-localhost?). */
+            /* Already set (-localhost?) */
             return 2;
         }
         memset(&hints, 0, sizeof(hints));
@@ -440,7 +439,6 @@ ddxProcessArgument (argc, argv, i)
            stderr to go to the RFB client, so make the client socket 3 and
            close stderr.  OsInit() will redirect stderr logging to an
            appropriate log file or /dev/null if that doesn't work. */
-
         dup2(0, 3);
         inetdSock = 3;
         close(2);
@@ -475,14 +473,14 @@ ddxProcessArgument (argc, argv, i)
 /* Common pixmap formats */
 
 static PixmapFormatRec formats[MAXFORMATS] = {
-        { 1,    1,      BITMAP_SCANLINE_PAD },
-        { 4,    8,      BITMAP_SCANLINE_PAD },
-        { 8,    8,      BITMAP_SCANLINE_PAD },
-        { 15,   16,     BITMAP_SCANLINE_PAD },
-        { 16,   16,     BITMAP_SCANLINE_PAD },
-        { 24,   32,     BITMAP_SCANLINE_PAD },
+    { 1,  1,  BITMAP_SCANLINE_PAD },
+    { 4,  8,  BITMAP_SCANLINE_PAD },
+    { 8,  8,  BITMAP_SCANLINE_PAD },
+    { 15, 16, BITMAP_SCANLINE_PAD },
+    { 16, 16, BITMAP_SCANLINE_PAD },
+    { 24, 32, BITMAP_SCANLINE_PAD },
 #ifdef RENDER
-        { 32,   32,     BITMAP_SCANLINE_PAD },
+    { 32, 32, BITMAP_SCANLINE_PAD },
 #endif
 };
 #ifdef RENDER
@@ -491,11 +489,9 @@ static int numFormats = 7;
 static int numFormats = 6;
 #endif
 
+
 void
-InitOutput(screenInfo, argc, argv)
-    ScreenInfo *screenInfo;
-    int argc;
-    char **argv;
+InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 {
     int i;
     initOutputCalled = TRUE;
@@ -518,7 +514,7 @@ InitOutput(screenInfo, argc, argv)
     if (inetdSock == -1)
         httpInitSockets();
 
-    /* initialize pixmap formats */
+    /* Initialize pixmap formats */
 
     screenInfo->imageByteOrder = IMAGE_BYTE_ORDER;
     screenInfo->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
@@ -533,7 +529,7 @@ InitOutput(screenInfo, argc, argv)
         return;
     }
 
-    /* initialize screen */
+    /* Initialize screen */
 
     if (AddScreen(rfbScreenInit, argc, argv) == -1) {
         FatalError("Couldn't add screen");
@@ -544,11 +540,7 @@ InitOutput(screenInfo, argc, argv)
 
 
 static Bool
-rfbScreenInit(index, pScreen, argc, argv)
-    int index;
-    ScreenPtr pScreen;
-    int argc;
-    char ** argv;
+rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
 {
     rfbScreenInfoPtr prfb = &rfbScreen;
     int dpix = 96, dpiy = 96;
@@ -731,11 +723,9 @@ rfbScreenInit(index, pScreen, argc, argv)
         rfbServerFormat.greenShift = vis->offsetGreen;
         rfbServerFormat.blueShift = vis->offsetBlue;
     } else {
-        rfbServerFormat.redMax
-            = rfbServerFormat.greenMax
+        rfbServerFormat.redMax = rfbServerFormat.greenMax
             = rfbServerFormat.blueMax = 0;
-        rfbServerFormat.redShift
-            = rfbServerFormat.greenShift
+        rfbServerFormat.redShift = rfbServerFormat.greenShift
             = rfbServerFormat.blueShift = 0;
     }
 
@@ -750,18 +740,16 @@ rfbScreenInit(index, pScreen, argc, argv)
 } /* end rfbScreenInit */
 
 
-
 /*
  * InitInput is also called every time the server resets.  It is called after
- * InitOutput so we can assume that rfbInitSockets has already been called.
+ * InitOutput, so we can assume that rfbInitSockets has already been called.
  */
 
 void
-InitInput(argc, argv)
-    int argc;
-    char *argv[];
+InitInput(int argc, char *argv[])
 {
     DeviceIntPtr p, k;
+
     if (AllocDevicePair(serverClient, "TurboVNC", &p, &k, rfbMouseProc,
                         rfbKeybdProc, FALSE) != Success)
         FatalError("Could not initialize TurboVNC input devices\n");
@@ -785,9 +773,7 @@ void CloseInput(void)
 
 
 static int
-rfbKeybdProc(pDevice, onoff)
-    DeviceIntPtr pDevice;
-    int onoff;
+rfbKeybdProc(DeviceIntPtr pDevice, int onoff)
 {
     DevicePtr pDev = (DevicePtr)pDevice;
 
@@ -795,8 +781,7 @@ rfbKeybdProc(pDevice, onoff)
     {
     case DEVICE_INIT:
         KbdDeviceInit(pDevice);
-        InitKeyboardDeviceStruct(pDevice, NULL,
-                                 (BellProcPtr)rfbSendBell,
+        InitKeyboardDeviceStruct(pDevice, NULL, (BellProcPtr)rfbSendBell,
                                  (KbdCtrlProcPtr)NoopDDA);
         break;
     case DEVICE_ON:
@@ -809,10 +794,9 @@ rfbKeybdProc(pDevice, onoff)
     return Success;
 }
 
+
 static int
-rfbMouseProc(pDevice, onoff)
-    DeviceIntPtr pDevice;
-    int onoff;
+rfbMouseProc(DeviceIntPtr pDevice, int onoff)
 {
     BYTE map[6];
     DevicePtr pDev = (DevicePtr)pDevice;
@@ -858,9 +842,7 @@ rfbMouseProc(pDevice, onoff)
 
 
 Bool
-LegalModifier(key, pDev)
-    unsigned int key;
-    DeviceIntPtr pDev;
+LegalModifier(unsigned int key, DeviceIntPtr pDev)
 {
     return TRUE;
 }
@@ -987,7 +969,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         }
 
         memset(pProp->data, 0, pProp->size);
-        /* delete the property? how? */
+        /* Delete the property?  How? */
     }
 
 #ifdef XVNC_AuthPAM
@@ -999,8 +981,8 @@ rfbRootPropertyChange(PropertyPtr pProp)
          * The first byte is a flag that selects revoke/add.
          * The remaining bytes are the name.
          */
-        char*           p = (char *) malloc(pProp->size);
-        const char*     n = (const char*) pProp->data;
+        char *p = (char *)malloc(pProp->size);
+        const char *n = (const char *)pProp->data;
 
         memcpy(p, &n[1], pProp->size - 1);
         p[pProp->size - 1] = '\0';
@@ -1013,15 +995,14 @@ rfbRootPropertyChange(PropertyPtr pProp)
         }
 
         memset(pProp->data, 0, pProp->size);
-        /* delete the property? how? */
+        /* Delete the property?  How? */
     }
 #endif
 }
 
 
 int
-rfbBitsPerPixel(depth)
-    int depth;
+rfbBitsPerPixel(int depth)
 {
     if (depth == 1) return 1;
     else if (depth <= 8) return 8;
@@ -1038,8 +1019,7 @@ rfbAlwaysTrue()
 
 
 char *
-rfbAllocateFramebufferMemory(prfb)
-    rfbScreenInfoPtr prfb;
+rfbAllocateFramebufferMemory(rfbScreenInfoPtr prfb)
 {
     if (prfb->pfbMemory) return prfb->pfbMemory; /* already done */
 
@@ -1052,32 +1032,27 @@ rfbAllocateFramebufferMemory(prfb)
 
 
 static Bool
-rfbCursorOffScreen (ppScreen, x, y)
-    ScreenPtr   *ppScreen;
-    int         *x, *y;
+rfbCursorOffScreen (ScreenPtr *ppScreen, int *x, int *y)
 {
     return FALSE;
 }
 
+
 static void
-rfbCrossScreen (pScreen, entering)
-    ScreenPtr   pScreen;
-    Bool        entering;
+rfbCrossScreen(ScreenPtr pScreen, Bool entering)
 {
 }
 
+
 static void
-rfbClientStateChange(cbl, myData, clt)
-    CallbackListPtr *cbl;
-    pointer myData;
-    pointer clt;
+rfbClientStateChange(CallbackListPtr *cbl, pointer myData, pointer clt)
 {
     dispatchException &= ~DE_RESET;     /* hack - force server not to reset */
 }
 
+
 void
-ddxGiveUp(error)
-    enum ExitCode error;
+ddxGiveUp(enum ExitCode error)
 {
     ShutdownTightThreads();
     free(rfbScreen.pfbMemory);
@@ -1088,21 +1063,20 @@ ddxGiveUp(error)
     }
 }
 
+
 void
-AbortDDX(error)
-    enum ExitCode error;
+AbortDDX(enum ExitCode error)
 {
     ddxGiveUp(error);
 }
 
-void DDXRingBell(percent, pitch, duration)
-    int percent;
-    int pitch;
-    int duration;
+
+void DDXRingBell(int percent, int pitch, int duration)
 {
     if (percent > 0)
         rfbSendBell();
 }
+
 
 void
 OsVendorInit()
@@ -1113,16 +1087,18 @@ OsVendorInit()
         rfbIdleTimeout == 0)) {
         rfbIdleTimeout = rfbMaxIdleTimeout;
         rfbLog("NOTICE: idle timeout set to %d seconds per system policy\n",
-            rfbIdleTimeout);
+               rfbIdleTimeout);
     }
     if (rfbIdleTimeout > 0)
         IdleTimerSet();
 }
 
+
 void
 OsVendorFatalError()
 {
 }
+
 
 void
 ddxUseMsg()
@@ -1168,8 +1144,9 @@ ddxUseMsg()
     exit(1);
 }
 
+
 /*
- * rfbLog prints a time-stamped message to the log file (stderr).
+ * rfbLog prints a time-stamped message to the log file (stderr.)
  */
 
 void rfbLog(char *format, ...)
@@ -1189,6 +1166,7 @@ void rfbLog(char *format, ...)
 
     va_end(args);
 }
+
 
 void rfbLogPerror(char *str)
 {
