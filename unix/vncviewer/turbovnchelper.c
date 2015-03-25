@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <dlfcn.h>
+#include <unistd.h>
 #include "jawt_md.h"
 #include "com_turbovnc_vncviewer_Viewport.h"
 
@@ -121,7 +122,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
   JAWT_DrawingSurface *ds = NULL;
   JAWT_DrawingSurfaceInfo *dsi = NULL;
   JAWT_X11DrawingSurfaceInfo *x11dsi = NULL;
-  int ret;  XWindowAttributes xwa;
+  int ret;
 
   awt.version = JAWT_VERSION_1_3;
   if (!handle) {
@@ -154,7 +155,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
            != GrabSuccess) {
       switch (ret) {
         case AlreadyGrabbed:
-          _throw("Could not grab keyboard: already grabbed by another application");      
+          _throw("Could not grab keyboard: already grabbed by another application");
         case GrabInvalidTime:
           _throw("Could not grab keyboard: invalid time");
         case GrabNotViewable:
@@ -162,7 +163,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
              practice, sometimes a race condition occurs with Swing.  It is
              unclear why, since everything should be happening in the EDT. */
           if (count == 0)
-            _throw("Could not grab keyboard: window not viewable");      
+            _throw("Could not grab keyboard: window not viewable");
           usleep(100000);
           count--;
           continue;
@@ -178,11 +179,11 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
                          GrabModeAsync, None, None, CurrentTime);
       switch (ret) {
         case AlreadyGrabbed:
-          _throw("Could not grab pointer: already grabbed by another application");      
+          _throw("Could not grab pointer: already grabbed by another application");
         case GrabInvalidTime:
           _throw("Could not grab pointer: invalid time");
         case GrabNotViewable:
-          _throw("Could not grab pointer: window not viewable");      
+          _throw("Could not grab pointer: window not viewable");
         case GrabFrozen:
           _throw("Could not grab pointer: pointer frozen by another application");
       }
