@@ -472,10 +472,9 @@ rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
         }
         for (i = 1; i < nt; i++) {
             if ((*tparam[i].ublen) > 0 &&
-                WriteExact(cl->sock, tparam[i].updateBuf,
-                           *tparam[i].ublen) < 0) {
+                WriteExact(cl, tparam[i].updateBuf, *tparam[i].ublen) < 0) {
                 rfbLogPerror("rfbSendRectEncodingTight: write");
-                rfbCloseSock(cl->sock);
+                rfbCloseClient(cl);
                 return FALSE;
             }
             (*tparam[i].ublen) = 0;

@@ -73,6 +73,7 @@ int httpSock = -1;
 
 static char buf[BUF_SIZE];
 static size_t buf_filled = 0;
+static rfbClientRec cl;
 
 
 /*
@@ -219,6 +220,8 @@ httpProcessInput()
     char str[256];
     struct passwd *user;
 
+    cl.sock = httpSock;
+
     user = getpwuid(getuid());
 
     if (strlen(httpDir) > 255) {
@@ -281,14 +284,14 @@ httpProcessInput()
 
     if (fname[0] != '/') {
         rfbLog("httpd: filename didn't begin with '/'\n");
-        WriteExact(httpSock, NOT_FOUND_STR, strlen(NOT_FOUND_STR));
+        WriteExact(&cl, NOT_FOUND_STR, strlen(NOT_FOUND_STR));
         httpCloseSock();
         return;
     }
 
     if (strchr(fname + 1, '/') != NULL) {
         rfbLog("httpd: asking for file in other directory\n");
-        WriteExact(httpSock, NOT_FOUND_STR, strlen(NOT_FOUND_STR));
+        WriteExact(&cl, NOT_FOUND_STR, strlen(NOT_FOUND_STR));
         httpCloseSock();
         return;
     }
@@ -343,16 +346,16 @@ httpProcessInput()
 
     if ((fd = open(fullFname, O_RDONLY)) < 0) {
         rfbLogPerror("httpProcessInput: open");
-        WriteExact(httpSock, NOT_FOUND_STR, strlen(NOT_FOUND_STR));
+        WriteExact(&cl, NOT_FOUND_STR, strlen(NOT_FOUND_STR));
         httpCloseSock();
         return;
     }
 
-    WriteExact(httpSock, OK_STR, strlen(OK_STR));
+    WriteExact(&cl, OK_STR, strlen(OK_STR));
     if (jnlp) {
-      WriteExact(httpSock, CONTENT_STR, strlen(CONTENT_STR));
+      WriteExact(&cl, CONTENT_STR, strlen(CONTENT_STR));
     } else {
-      WriteExact(httpSock, "\r\n", 2);
+      WriteExact(&cl, "\r\n", 2);
     }
 
     while (1) {
@@ -379,93 +382,93 @@ httpProcessInput()
             buf[n] = 0; /* make sure it's null-terminated */
 
             while ((dollar = strchr(ptr, '$'))) {
-                WriteExact(httpSock, ptr, (dollar - ptr));
+                WriteExact(&cl, ptr, (dollar - ptr));
 
                 ptr = dollar;
 
                 if (compareAndSkip(&ptr, "$WIDTH")) {
 
                     sprintf(str, "%d", rfbScreen.width);
-                    WriteExact(httpSock, str, strlen(str));
+                    WriteExact(&cl, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$HEIGHT")) {
 
                     sprintf(str, "%d", rfbScreen.height);
-                    WriteExact(httpSock, str, strlen(str));
+                    WriteExact(&cl, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$APPLETWIDTH")) {
 
                     sprintf(str, "%d", rfbScreen.width);
-                    WriteExact(httpSock, str, strlen(str));
+                    WriteExact(&cl, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$APPLETHEIGHT")) {
 
                     sprintf(str, "%d", rfbScreen.height + 22);
-                    WriteExact(httpSock, str, strlen(str));
+                    WriteExact(&cl, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$PORT")) {
 
                     sprintf(str, "%d", rfbPort);
-                    WriteExact(httpSock, str, strlen(str));
+                    WriteExact(&cl, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$HTTPPORT")) {
 
                     sprintf(str, "%d", httpPort);
-                    WriteExact(httpSock, str, strlen(str));
+                    WriteExact(&cl, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$DESKTOP")) {
 
-                    WriteExact(httpSock, desktopName, strlen(desktopName));
+                    WriteExact(&cl, desktopName, strlen(desktopName));
 
                 } else if (compareAndSkip(&ptr, "$DISPLAY")) {
 
                     sprintf(str, "%s:%s", rfbThisHost, display);
-                    WriteExact(httpSock, str, strlen(str));
+                    WriteExact(&cl, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$SERVER")) {
 
                     sprintf(str, "%s", rfbThisHost);
-                    WriteExact(httpSock, str, strlen(str));
+                    WriteExact(&cl, str, strlen(str));
 
                 } else if (compareAndSkip(&ptr, "$USER")) {
 
                     if (user) {
-                        WriteExact(httpSock, user->pw_name,
+                        WriteExact(&cl, user->pw_name,
                                    strlen(user->pw_name));
                     } else {
-                        WriteExact(httpSock, "?", 1);
+                        WriteExact(&cl, "?", 1);
                     }
 
                 } else if (compareAndSkip(&ptr, "$PARAMS")) {
 
                     if (jnlp) {
                         if (jnlpParams[0] != '\0')
-                            WriteExact(httpSock, jnlpParams,
+                            WriteExact(&cl, jnlpParams,
                                        strlen(jnlpParams));
                     } else {
                         if (params[0] != '\0')
-                            WriteExact(httpSock, params, strlen(params));
+                            WriteExact(&cl, params, strlen(params));
                     }
 
                 } else {
                     if (!compareAndSkip(&ptr, "$$"))
                         ptr++;
 
-                    if (WriteExact(httpSock, "$", 1) < 0) {
+                    if (WriteExact(&cl, "$", 1) < 0) {
                         close(fd);
                         httpCloseSock();
                         return;
                     }
                 }
             }
-            if (WriteExact(httpSock, ptr, (&buf[n] - ptr)) < 0)
+            if (WriteExact(&cl, ptr, (&buf[n] - ptr)) < 0)
                 break;
 
         } else {
 
             /* For files not ending .vnc, just write out the buffer */
 
-            if (WriteExact(httpSock, buf, n) < 0)
+            if (WriteExact(&cl, buf, n) < 0)
                 break;
         }
     }

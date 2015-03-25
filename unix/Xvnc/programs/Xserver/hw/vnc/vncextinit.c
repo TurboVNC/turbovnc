@@ -286,7 +286,7 @@ static int ProcVncExtConnect(ClientPtr client)
     rfbClientPtr cl;
     for (cl = rfbClientHead; cl; cl = cl->next) {
       if (cl->reverseConnection) {
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         rep.success = 1;
       }
     }

@@ -355,7 +355,7 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     InterframeOff(cl);
     if (reEnableInterframe) {
       if (!InterframeOn(cl)) {
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         ret = FALSE;
       }
     }

@@ -197,7 +197,7 @@ rfbSetTranslateFunction(cl)
     {
         rfbLog("%s: server bits per pixel not 8, 16 or 32\n",
                 "rfbSetTranslateFunction");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return FALSE;
     }
 
@@ -207,7 +207,7 @@ rfbSetTranslateFunction(cl)
     {
         rfbLog("%s: client bits per pixel not 8, 16 or 32\n",
                 "rfbSetTranslateFunction");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return FALSE;
     }
 
@@ -215,7 +215,7 @@ rfbSetTranslateFunction(cl)
         rfbLog("rfbSetTranslateFunction: server has colour map "
                 "but %d-bit - can only cope with 8-bit colour maps\n",
                 rfbServerFormat.bitsPerPixel);
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return FALSE;
     }
 
@@ -223,7 +223,7 @@ rfbSetTranslateFunction(cl)
         rfbLog("rfbSetTranslateFunction: client has colour map "
                 "but %d-bit - can only cope with 8-bit colour maps\n",
                 cl->format.bitsPerPixel);
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return FALSE;
     }
 
@@ -334,7 +334,7 @@ rfbSetClientColourMapBGR233(cl)
     if (cl->format.bitsPerPixel != 8) {
         rfbLog("%s: client not 8 bits per pixel\n",
                 "rfbSetClientColourMapBGR233");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return FALSE;
     }
 
@@ -359,9 +359,9 @@ rfbSetClientColourMapBGR233(cl)
 
     len += 256 * 3 * 2;
 
-    if (WriteExact(cl->sock, buf, len) < 0) {
+    if (WriteExact(cl, buf, len) < 0) {
         rfbLogPerror("rfbSetClientColourMapBGR233: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return FALSE;
     }
     return TRUE;

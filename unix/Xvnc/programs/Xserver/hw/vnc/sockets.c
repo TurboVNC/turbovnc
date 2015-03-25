@@ -4,7 +4,7 @@
  * This code should be independent of any changes in the RFB protocol.  It just
  * deals with the X server scheduling stuff, calling rfbNewClientConnection and
  * rfbProcessClientMessage to actually deal with the protocol.  If a socket
- * needs to be closed for any reason then rfbCloseSock should be called, and
+ * needs to be closed for any reason then rfbCloseClient should be called, and
  * this in turn will call rfbClientConnectionGone.  To make an active
  * connection out, call rfbConnect - note that this does _not_ call
  * rfbNewClientConnection.
@@ -368,40 +368,21 @@ rfbCloseSock(int sock)
     close(sock);
     RemoveEnabledDevice(sock);
     FD_CLR(sock, &allFds);
-    rfbClientConnectionGone(sock);
     if (sock == inetdSock)
         GiveUp(0);
 }
 
 
-/*
- * rfbWaitForClient can be called to wait for the RFB client to send us a
- * message.  When one is received it is processed by calling
- * rfbProcessClientMessage().
- */
-
 void
-rfbWaitForClient(int sock)
+rfbCloseClient(rfbClientPtr cl)
 {
-    int n;
-    fd_set fds;
-    struct timeval tv;
-
-    FD_ZERO(&fds);
-    FD_SET(sock, &fds);
-    tv.tv_sec = rfbMaxClientWait / 1000;
-    tv.tv_usec = (rfbMaxClientWait % 1000) * 1000;
-    n = select(sock + 1, &fds, NULL, NULL, &tv);
-    if (n < 0) {
-        rfbLogPerror("rfbWaitForClient: select");
-        exit(1);
-    }
-    if (n == 0) {
-        rfbCloseSock(sock);
-        return;
-    }
-
-    rfbProcessClientMessage(sock);
+    int sock = cl->sock;
+    close(sock);
+    RemoveEnabledDevice(sock);
+    FD_CLR(sock, &allFds);
+    rfbClientConnectionGone(cl);
+    if (sock == inetdSock)
+        GiveUp(0);
 }
 
 
@@ -452,11 +433,12 @@ rfbConnect(char *host, int port)
  */
 
 int
-ReadExact(int sock, char *buf, int len)
+ReadExact(rfbClientPtr cl, char *buf, int len)
 {
     int n;
     fd_set fds;
     struct timeval tv;
+    int sock = cl->sock;
 
     while (len > 0) {
         do {
@@ -506,7 +488,7 @@ ReadExact(int sock, char *buf, int len)
  */
 
 int
-SkipExact(int sock, int len)
+SkipExact(rfbClientPtr cl, int len)
 {
     char *tmpbuf = NULL;
     int bufLen = min(len, 65536), i, retval = 1;
@@ -518,7 +500,7 @@ SkipExact(int sock, int len)
     }
 
     for (i = 0; i < len; i += bufLen) {
-        retval = ReadExact(sock, tmpbuf, min(bufLen, len - i));
+        retval = ReadExact(cl, tmpbuf, min(bufLen, len - i));
         if (retval <= 0) break;
     }
 
@@ -534,14 +516,13 @@ SkipExact(int sock, int len)
  */
 
 int
-WriteExact(int sock, char *buf, int len)
+WriteExact(rfbClientPtr cl, char *buf, int len)
 {
     int n, bytesWritten = 0;
     fd_set fds;
     struct timeval tv;
     int totalTimeWaited = 0;
-    rfbClientPtr cl;
-
+    int sock = cl->sock;
 
     while (len > 0) {
         do {
@@ -592,12 +573,8 @@ WriteExact(int sock, char *buf, int len)
         }
     }
 
-    for (cl = rfbClientHead; cl; cl = cl->next) {
-        if (sock == cl->sock) {
-            gettimeofday(&cl->lastWrite, NULL);
-            cl->sockOffset += bytesWritten;
-        }
-    }
+    gettimeofday(&cl->lastWrite, NULL);
+    cl->sockOffset += bytesWritten;
 
     return 1;
 }

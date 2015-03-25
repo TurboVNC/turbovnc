@@ -165,44 +165,44 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
     int n;
     const char *emsg;
 
-    n = ReadExact(cl->sock, (char *)&userLen, sizeof(userLen));
+    n = ReadExact(cl, (char *)&userLen, sizeof(userLen));
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("AuthPAMUserPwdRspFunc: read error");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
     userLen = Swap32IfLE(userLen);
-    n = ReadExact(cl->sock, (char *)&pwdLen, sizeof(pwdLen));
+    n = ReadExact(cl, (char *)&pwdLen, sizeof(pwdLen));
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("AuthPAMUserPwdRspFunc: read error");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
     pwdLen = Swap32IfLE(pwdLen);
     if ((userLen > MAX_USER_LEN) || (pwdLen > MAX_PWD_LEN)) {
         rfbLogPerror("AuthPAMUserPwdRspFunc: excessively large user name or password in response");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
-    n = ReadExact(cl->sock, userBuf, userLen);
+    n = ReadExact(cl, userBuf, userLen);
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("AuthPAMUserPwdRspFunc: error reading user name");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
     userBuf[userLen] = '\0';
-    n = ReadExact(cl->sock, pwdBuf, pwdLen);
+    n = ReadExact(cl, pwdBuf, pwdLen);
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("AuthPAMUserPwdRspFunc: error reading password");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -599,7 +599,7 @@ rfbAuthProcessResponse(rfbClientPtr cl)
     }
 
     rfbLog("rfbAuthProcessResponse: authType assertion failed");
-    rfbCloseSock(cl->sock);
+    rfbCloseClient(cl);
 }
 
 
@@ -655,9 +655,9 @@ rfbSendSecurityType(rfbClientPtr cl, int securityType)
     CARD32 value32;
 
     value32 = Swap32IfLE(securityType);
-    if (WriteExact(cl->sock, (char *)&value32, 4) < 0) {
+    if (WriteExact(cl, (char *)&value32, 4) < 0) {
         rfbLogPerror("rfbSendSecurityType: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -672,7 +672,7 @@ rfbSendSecurityType(rfbClientPtr cl, int securityType)
         break;
     default:
         rfbLogPerror("rfbSendSecurityType: assertion failed");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
     }
 }
 
@@ -720,9 +720,9 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
     cl->securityTypes[0] = (CARD8)n;
 
     /* Send the list */
-    if (WriteExact(cl->sock, (char *)cl->securityTypes, n + 1) < 0) {
+    if (WriteExact(cl, (char *)cl->securityTypes, n + 1) < 0) {
         rfbLogPerror("rfbSendSecurityTypeList: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -742,13 +742,13 @@ rfbProcessClientSecurityType(rfbClientPtr cl)
     CARD8 chosenType;
 
     /* Read the security type */
-    n = ReadExact(cl->sock, (char *)&chosenType, 1);
+    n = ReadExact(cl, (char *)&chosenType, 1);
     if (n <= 0) {
         if (n == 0)
             rfbLog("rfbProcessClientSecurityType: client gone\n");
         else
             rfbLogPerror("rfbProcessClientSecurityType: read");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -761,7 +761,7 @@ rfbProcessClientSecurityType(rfbClientPtr cl)
     if (i > count) {
         rfbLog("rfbProcessClientSecurityType: "
                "wrong security type requested\n");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -785,7 +785,7 @@ rfbProcessClientSecurityType(rfbClientPtr cl)
         break;
     default:
         rfbLog("rfbProcessClientSecurityType: unknown authentication scheme\n");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         break;
    }
 }
@@ -802,9 +802,9 @@ rfbSendTunnelingCaps(rfbClientPtr cl)
     CARD32 nTypes = 0;          /* We don't support tunneling yet */
 
     caps.nTunnelTypes = Swap32IfLE(nTypes);
-    if (WriteExact(cl->sock, (char *)&caps, sz_rfbTunnelingCapsMsg) < 0) {
+    if (WriteExact(cl, (char *)&caps, sz_rfbTunnelingCapsMsg) < 0) {
         rfbLogPerror("rfbSendTunnelingCaps: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -829,7 +829,7 @@ rfbProcessClientTunnelingType(rfbClientPtr cl)
 {
     /* If we were called, then something's really wrong. */
     rfbLog("rfbProcessClientTunnelingType: not implemented\n");
-    rfbCloseSock(cl->sock);
+    rfbCloseClient(cl);
     return;
 }
 
@@ -901,17 +901,17 @@ rfbSendAuthCaps(rfbClientPtr cl)
 
     cl->nAuthCaps = count;
     caps.nAuthTypes = Swap32IfLE((CARD32)count);
-    if (WriteExact(cl->sock, (char *)&caps, sz_rfbAuthenticationCapsMsg) < 0) {
+    if (WriteExact(cl, (char *)&caps, sz_rfbAuthenticationCapsMsg) < 0) {
         rfbLogPerror("rfbSendAuthCaps: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
     if (count) {
-        if (WriteExact(cl->sock, (char *)&caplist[0],
+        if (WriteExact(cl, (char *)&caplist[0],
                        count *sz_rfbCapabilityInfo) < 0) {
             rfbLogPerror("rfbSendAuthCaps: write");
-            rfbCloseSock(cl->sock);
+            rfbCloseClient(cl);
             return;
         }
         /* Dispatch client input to rfbProcessClientAuthType() */
@@ -937,13 +937,13 @@ rfbProcessClientAuthType(rfbClientPtr cl)
     AuthCapData *c;
 
     /* Read authentication type selected by the client */
-    n = ReadExact(cl->sock, (char *)&auth_type, sizeof(auth_type));
+    n = ReadExact(cl, (char *)&auth_type, sizeof(auth_type));
     if (n <= 0) {
         if (n == 0)
             rfbLog("rfbProcessClientAuthType: client gone\n");
         else
             rfbLogPerror("rfbProcessClientAuthType: read");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
     auth_type = Swap32IfLE(auth_type);
@@ -956,7 +956,7 @@ rfbProcessClientAuthType(rfbClientPtr cl)
     if (i >= cl->nAuthCaps) {
         rfbLog("rfbProcessClientAuthType: "
                "wrong authentication type requested\n");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -970,7 +970,7 @@ rfbProcessClientAuthType(rfbClientPtr cl)
     }
 
     rfbLog("rfbProcessClientAuthType: unknown authentication scheme\n");
-    rfbCloseSock(cl->sock);
+    rfbCloseClient(cl);
 }
 
 
@@ -982,9 +982,9 @@ static void
 rfbVncAuthSendChallenge(rfbClientPtr cl)
 {
     vncRandomBytes(cl->authChallenge);
-    if (WriteExact(cl->sock, (char *)cl->authChallenge, CHALLENGESIZE) < 0) {
+    if (WriteExact(cl, (char *)cl->authChallenge, CHALLENGESIZE) < 0) {
         rfbLogPerror("rfbVncAuthSendChallenge: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -1041,11 +1041,11 @@ rfbVncAuthProcessResponse(rfbClientPtr cl)
     int n;
     CARD8 response[CHALLENGESIZE];
 
-    n = ReadExact(cl->sock, (char *)response, CHALLENGESIZE);
+    n = ReadExact(cl, (char *)response, CHALLENGESIZE);
     if (n <= 0) {
         if (n != 0)
             rfbLogPerror("rfbVncAuthProcessResponse: read");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 
@@ -1126,13 +1126,13 @@ rfbClientConnFailed(rfbClientPtr cl, char *reason)
     buf32[0] = 0;
     buf32[1] = Swap32IfLE(reasonLen);
 
-    if (WriteExact(cl->sock, buf, headerLen) < 0 ||
-        WriteExact(cl->sock, buf + 4, 4) < 0 ||
-        WriteExact(cl->sock, reason, reasonLen) < 0) {
+    if (WriteExact(cl, buf, headerLen) < 0 ||
+        WriteExact(cl, buf + 4, 4) < 0 ||
+        WriteExact(cl, reason, reasonLen) < 0) {
         rfbLogPerror("rfbClientConnFailed: write");
     }
 
-    rfbCloseSock(cl->sock);
+    rfbCloseClient(cl);
 }
 
 
@@ -1156,17 +1156,17 @@ rfbClientAuthFailed(rfbClientPtr cl, char *reason)
     buf32[1] = Swap32IfLE(reasonLen);
 
     if (reasonLen == 0) {
-        if (WriteExact(cl->sock, buf, 4) < 0) {
+        if (WriteExact(cl, buf, 4) < 0) {
             rfbLogPerror("rfbClientAuthFailed: write");
         }
     } else {
-        if (WriteExact(cl->sock, buf, 8) < 0 ||
-            WriteExact(cl->sock, reason, reasonLen) < 0) {
+        if (WriteExact(cl, buf, 8) < 0 ||
+            WriteExact(cl, reason, reasonLen) < 0) {
             rfbLogPerror("rfbClientAuthFailed: write");
         }
     }
 
-    rfbCloseSock(cl->sock);
+    rfbCloseClient(cl);
 }
 
 
@@ -1184,9 +1184,9 @@ rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType)
 
     if (cl->protocol_minor_ver >= 8 || authType == rfbAuthVNC) {
         authResult = Swap32IfLE(rfbAuthOK);
-        if (WriteExact(cl->sock, (char *)&authResult, 4) < 0) {
+        if (WriteExact(cl, (char *)&authResult, 4) < 0) {
             rfbLogPerror("rfbClientAuthSucceeded: write");
-            rfbCloseSock(cl->sock);
+            rfbCloseClient(cl);
             return;
         }
     }

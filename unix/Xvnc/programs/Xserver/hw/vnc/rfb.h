@@ -329,7 +329,7 @@ typedef struct rfbClientRec {
     Bool firstCompare;
     RegionRec ifRegion;
 
-    struct rfbClientRec *next;
+    struct rfbClientRec *prev, *next;
 
     char *cutText;
     int cutTextLen;
@@ -495,15 +495,15 @@ extern int rfbListenSock;
 extern void rfbInitSockets(void);
 extern void rfbDisconnectUDPSock(void);
 extern void rfbCloseSock(int);
+extern void rfbCloseClient(rfbClientPtr cl);
 extern void rfbCheckFds(void);
-extern void rfbWaitForClient(int sock);
 extern int rfbConnect(char *host, int port);
 extern void rfbCorkSock(int sock);
 extern void rfbUncorkSock(int sock);
 
-extern int ReadExact(int sock, char *buf, int len);
-extern int SkipExact(int sock, int len);
-extern int WriteExact(int sock, char *buf, int len);
+extern int ReadExact(rfbClientPtr cl, char *buf, int len);
+extern int SkipExact(rfbClientPtr cl, int len);
+extern int WriteExact(rfbClientPtr cl, char *buf, int len);
 extern int ListenOnTCPPort(int port);
 extern int ListenOnUDPPort(int port);
 extern int ConnectToTcpAddr(char *host, int port);
@@ -623,7 +623,7 @@ extern int rfbInterframe;
 
 extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port, int id);
-extern void rfbClientConnectionGone(int sock);
+extern void rfbClientConnectionGone(rfbClientPtr cl);
 extern void rfbProcessClientMessage(int sock);
 extern void rfbNewUDPConnection(int sock);
 extern void rfbProcessUDPInput(int sock);

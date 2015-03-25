@@ -287,15 +287,15 @@ Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
     f.flags = Swap32IfLE(flags);
     f.length = len;
 
-    if (WriteExact(cl->sock, (char *)&f, sz_rfbFenceMsg) < 0) {
+    if (WriteExact(cl, (char *)&f, sz_rfbFenceMsg) < 0) {
         rfbLogPerror("rfbSendFence: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return FALSE;
     }
 
-    if (WriteExact(cl->sock, (char *)data, len) < 0) {
+    if (WriteExact(cl, (char *)data, len) < 0) {
         rfbLogPerror("rfbSendFence: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return FALSE;
     }
     return TRUE;
@@ -366,9 +366,9 @@ void rfbSendEndOfCU(rfbClientPtr cl)
         return;
     }
 
-    if (WriteExact(cl->sock, &type, 1) < 0) {
+    if (WriteExact(cl, &type, 1) < 0) {
         rfbLogPerror("rfbSendEndOfCU: write");
-        rfbCloseSock(cl->sock);
+        rfbCloseClient(cl);
         return;
     }
 }
