@@ -199,6 +199,9 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   pendingSyncFence = false;
 
   m_supportsSetDesktopSize = false;
+  m_waitingOnResizeTimer = false;
+
+  m_firstUpdate = true;
 
   tDecode = tBlit = tRead = 0.0;
   decodePixels = blitPixels = 0;
@@ -1374,7 +1377,7 @@ void ClientConnection::ReadServerInit()
                m_si.framebufferWidth, m_si.framebufferHeight,
                m_si.format.depth);
 
-  SizeWindow(true, true);
+  SizeWindow(true, true, false);
 }
 
 
@@ -1473,13 +1476,18 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 }
 
 
-void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen)
+void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
+                                  bool manual)
 {
   if (InFullScreenMode() && !resizeFullScreen) return;
 
   RECT fullwinrect;
 
-  if (m_opts.m_scaling && !m_opts.m_FitWindow) {
+  if (m_opts.m_desktopSize.mode == SIZE_AUTO && manual) {
+    RECT screenArea, workrect;
+    GetFullScreenMetrics(screenArea, workrect);
+    fullwinrect = workrect;
+  } else if (m_opts.m_scaling && !m_opts.m_FitWindow) {
     SetRect(&fullwinrect, 0, 0,
             m_si.framebufferWidth * m_opts.m_scale_num / m_opts.m_scale_den,
             m_si.framebufferHeight * m_opts.m_scale_num / m_opts.m_scale_den);
@@ -1596,6 +1604,9 @@ void ClientConnection::PositionChildWindow()
     ShowWindow(m_hToolbar, SW_HIDE);
   }
 
+  m_autoResizeWidth = parentwidth;
+  m_autoResizeHeight = parentheight;
+
   SetWindowPos(m_hwndscroll, HWND_TOP, rparent.left - 1, rparent.top - 1,
                parentwidth + 2, parentheight + 2, SWP_SHOWWINDOW);
   if (!m_opts.m_FitWindow) {
@@ -1648,7 +1659,7 @@ void ClientConnection::PositionChildWindow()
   }
 
   int x, y;
-  if (parentwidth  > m_fullwinwidth) {
+  if (parentwidth > m_fullwinwidth) {
     x = (parentwidth - m_fullwinwidth) / 2;
   } else {
     x = rparent.left;
@@ -1688,6 +1699,12 @@ void ClientConnection::PositionChildWindow()
   else
     InvalidateRect(m_hwnd, NULL, FALSE);
   UpdateWindow(m_hwnd);
+
+  if (m_opts.m_desktopSize.mode == SIZE_AUTO && !m_firstUpdate &&
+      !m_pendingServerResize &&
+      (m_si.framebufferWidth != m_autoResizeWidth ||
+       m_si.framebufferHeight != m_autoResizeHeight))
+    m_resizeTimer = SetTimer(m_hwnd, IDT_RESIZETIMER, 500, NULL);
 }
 
 
@@ -2171,7 +2188,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
                 prev_span != _this->m_opts.m_Span) {
                 // Resize the window if scaling factors or spanning mode
                 // were changed
-                _this->SizeWindow(true, true);
+                _this->SizeWindow(true, true, false);
                 InvalidateRect(_this->m_hwnd, NULL, FALSE);
               }
             }
@@ -2231,7 +2248,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
         case ID_DEFAULT_WINDOW_SIZE:
           // Reset window geometry to default (taking into account spanning
           // option)
-          _this->SizeWindow(true);
+          _this->SizeWindow(true, false, true);
           return 0;
         case ID_REQUEST_REFRESH:
           _this->SendFullFramebufferUpdateRequest();
@@ -2350,6 +2367,11 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
         _this->m_waitingOnEmulateTimer = false;
       }
 
+      if (_this->m_waitingOnResizeTimer) {
+        KillTimer(_this->m_hwnd, _this->m_resizeTimer);
+        _this->m_waitingOnResizeTimer = false;
+      }
+
       _this->m_hwnd1 = 0;
       _this->m_hwnd = 0;
       _this->m_opts.m_hWindow = 0;
@@ -2408,6 +2430,12 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
                                       _this->m_emulateKeyFlags);
         KillTimer(hwnd, _this->m_emulate3ButtonsTimer);
         _this->m_waitingOnEmulateTimer = false;
+      }
+      if (wParam == _this->m_resizeTimer) {
+        _this->SendDesktopSize(_this->m_autoResizeWidth,
+                               _this->m_autoResizeHeight);
+        KillTimer(hwnd, _this->m_resizeTimer);
+        _this->m_waitingOnResizeTimer = false;
       }
       return 0;
     case WM_LBUTTONDOWN:
@@ -3201,7 +3229,6 @@ void ClientConnection::SendAppropriateFramebufferUpdateRequest()
 
 void ClientConnection::ReadScreenUpdate()
 {
-  static bool firstUpdate = true;
   rfbFramebufferUpdateMsg sut;
   double tDecodeStart, tBlitStart, tReadOld, tBlitOld;
 
@@ -3384,15 +3411,15 @@ void ClientConnection::ReadScreenUpdate()
     // Inform the other thread that an update is needed.
     PostMessage(m_hwnd, WM_REGIONUPDATED, NULL, NULL);
 
-  if (firstUpdate) {
+  if (m_firstUpdate) {
     // We need fences in order to make extra update requests and continuous
     // updates "safe".  See HandleFence() for the next step.
     if (supportsFence)
       SendFence(rfbFenceFlagRequest | rfbFenceFlagSyncNext, 0, NULL);
 
     if (!m_supportsSetDesktopSize) {
-//      if (m_opts.m_desktopSize.mode == SIZE_AUTO)
-//        vnclog.Print(-1, "Disabling automatic desktop resizing because the server doesn't support it.\n");
+      if (m_opts.m_desktopSize.mode == SIZE_AUTO)
+        vnclog.Print(-1, "Disabling automatic desktop resizing because the server doesn't support it.\n");
       if (m_opts.m_desktopSize.mode == SIZE_MANUAL)
         vnclog.Print(-1, "Ignoring desktop resize request because the server doesn't support it.\n");
       m_opts.m_desktopSize.mode = SIZE_SERVER;
@@ -3400,10 +3427,10 @@ void ClientConnection::ReadScreenUpdate()
 
     if (m_opts.m_desktopSize.mode == SIZE_MANUAL)
       SendDesktopSize(m_opts.m_desktopSize.width, m_opts.m_desktopSize.height);
-//    else if (m_opts.m_desktopSize.mode == SIZE_AUTO)
-//      SendDesktopSize(m_cliwidth, m_cliheight);
+    else if (m_opts.m_desktopSize.mode == SIZE_AUTO)
+      SendDesktopSize(m_cliwidth, m_cliheight);
 
-    firstUpdate = false;
+    m_firstUpdate = false;
   }
 }
 
@@ -3697,8 +3724,20 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
 
   CreateLocalFramebuffer();
 
-  SizeWindow(true, true);
+  bool centered = true;
+  if (m_opts.m_desktopSize.mode == SIZE_AUTO &&
+      m_autoResizeWidth == pfburh->r.w &&
+      m_autoResizeHeight == pfburh->r.h) {
+    centered = false;
+    m_autoResizeWidth = m_autoResizeHeight = 0;
+  }
+
+  if (InFullScreenMode())
+    m_pendingServerResize = true;
+  SizeWindow(centered, true, false);
   RealiseFullScreenMode(true);
+  if (InFullScreenMode())
+    m_pendingServerResize = false;
 }
 
 

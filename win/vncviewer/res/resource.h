@@ -36,6 +36,7 @@
 #define ID_CONN_SAVE_AS                 153
 #define IDC_NOCURSOR                    153
 #define IDR_VERSION2                    154
+#define IDT_RESIZETIMER                 155
 #define IDB_BITMAP1                     158
 #define ID_TOOLBAR                      159
 #define ID_DISCONNECT                   160

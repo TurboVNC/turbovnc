@@ -194,7 +194,9 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
        (scaledWidth <= primaryWidth ||
         WidthOf(fsm.screenArea) <= primaryWidth) &&
        (scaledHeight <= primaryHeight ||
-        HeightOf(fsm.screenArea) <= primaryHeight))) {
+        HeightOf(fsm.screenArea) <= primaryHeight)) ||
+      (m_opts.m_Span == SPAN_AUTO &&
+       m_opts.m_desktopSize.mode == SIZE_AUTO)) {
     workArea = fsm.workArea0;
     screenArea = fsm.screenArea0;
   } else {

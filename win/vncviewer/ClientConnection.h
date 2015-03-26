@@ -146,7 +146,8 @@ class ClientConnection : public omni_thread
 
     void ReadScreenUpdate();
     void Update(RECT *pRect);
-    void SizeWindow(bool centered, bool resizeFullScreen = false);
+    void SizeWindow(bool centered, bool resizeFullScreen = false,
+                    bool manual = false);
     void PositionWindow(RECT &fullwinrect, bool centered);
     void PositionChildWindow();
     bool ScrollScreen(int dx, int dy);
@@ -366,9 +367,14 @@ class ClientConnection : public omni_thread
     int m_fullwinwidth, m_fullwinheight;
     int m_winwidth, m_winheight;
 
+    bool m_firstUpdate;
+
     // Desktop resizing
-    bool m_supportsSetDesktopSize;
+    bool m_supportsSetDesktopSize, m_pendingServerResize;
     ScreenSet m_screenLayout;
+    bool m_waitingOnResizeTimer;
+    UINT_PTR m_resizeTimer;
+    int m_autoResizeWidth, m_autoResizeHeight;
 
     // Dormant basically means minimized;  updates will not be requested
     // while dormant.
