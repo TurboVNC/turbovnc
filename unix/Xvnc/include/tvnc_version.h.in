@@ -1,5 +1,5 @@
 #define __VERSION        "@VERSION@"
 #define __BUILD          "@BUILD@"
 #define __COPYRIGHT_YEAR "@COPYRIGHT_YEAR@"
-#define __COPYRIGHT      "@COPYRIGHT@"
+#define __COPYRIGHT_MSG  "@COPYRIGHT@"
 #define __URLTEXT        "@URLTEXT@"

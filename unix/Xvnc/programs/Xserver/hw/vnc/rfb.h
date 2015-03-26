@@ -382,9 +382,8 @@ typedef struct rfbClientRec {
 
 #define SAFE_REGION_INIT(pscreen, preg, rect, size)          \
 {                                                            \
-      if ( ( (rect) ) &&                                     \
-           ( ( (rect)->x2 == (rect)->x1 ) ||                 \
-             ( (rect)->y2 == (rect)->y1 ) ) ) {              \
+      if ( ( (rect)->x2 == (rect)->x1 ) ||                   \
+           ( (rect)->y2 == (rect)->y1 ) ) {                  \
           REGION_INIT( (pscreen), (preg), NullBox, 0 );      \
       } else {                                               \
           REGION_INIT( (pscreen), (preg), (rect), (size) );  \

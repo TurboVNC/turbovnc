@@ -145,7 +145,7 @@ PrintVersion(void)
 {
     fprintf(stderr, "TurboVNC Server (Xvnc) %d-bit v"__VERSION" (build "__BUILD")\n",
             (int)sizeof(size_t) * 8);
-    fprintf(stderr, "Copyright (C) "__COPYRIGHT_YEAR" "__COPYRIGHT"\n");
+    fprintf(stderr, "Copyright (C) "__COPYRIGHT_YEAR" "__COPYRIGHT_MSG"\n");
     fprintf(stderr, __URLTEXT"\n\n");
 }
 
@@ -1159,7 +1159,7 @@ void rfbLog(char *format, ...)
 
     time(&clock);
     strftime(buf, 255, "%d/%m/%Y %H:%M:%S ", localtime(&clock));
-    fprintf(stderr, buf);
+    fputs(buf, stderr);
 
     vfprintf(stderr, format, args);
     fflush(stderr);

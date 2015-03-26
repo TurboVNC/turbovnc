@@ -137,7 +137,7 @@ alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
         tightSubsampLevelSave;
     RegionRec tmpRegion;
 
-    SAFE_REGION_INIT(pScreen, &tmpRegion, NullBox, 0);
+    REGION_INIT(pScreen, &tmpRegion, NullBox, 0);
     if (putImageOnly && !cl->firstUpdate)
         REGION_INTERSECT(pScreen, &tmpRegion, &cl->alrRegion,
                          &cl->lossyRegion);
@@ -1899,7 +1899,7 @@ rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
     if (rfbAutoLosslessRefresh > 0.0 && alrCopyRect &&
         REGION_NOTEMPTY(pScreen, reg)) {
         RegionRec tmpRegion;
-        SAFE_REGION_INIT(pScreen, &tmpRegion, NullBox, 0);
+        REGION_INIT(pScreen, &tmpRegion, NullBox, 0);
         REGION_COPY(pScreen, &tmpRegion, reg);
         REGION_TRANSLATE(pScreen, &tmpRegion, -dx, -dy);
         REGION_INTERSECT(pScreen, &tmpRegion, &cl->lossyRegion, &tmpRegion);

@@ -504,7 +504,7 @@ static Bool
 SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
 {
     int nMaxRows;
-    CARD32 colorValue;
+    CARD32 colorValue = 0;
     int dx, dy, dw, dh;
     int x_best, y_best, w_best, h_best;
     char *fbptr;
@@ -1391,7 +1391,7 @@ FastFillPalette##bpp(t, data, w, pitch, h)                              \
     int w, pitch, h;                                                    \
 {                                                                       \
     CARD##bpp c0, c1, ci, mask, c0t, c1t, cit;                          \
-    int i, j, i2, j2, n0, n1, ni;                                       \
+    int i, j, i2 = 0, j2, n0, n1, ni;                                   \
     rfbClientPtr cl = t->cl;                                            \
                                                                         \
     if (cl->translateFn != rfbTranslateNone) {                          \
