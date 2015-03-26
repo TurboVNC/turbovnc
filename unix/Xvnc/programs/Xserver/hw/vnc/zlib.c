@@ -49,29 +49,28 @@ static int zlibAfterBufSize = 0;
 static char *zlibAfterBuf = NULL;
 static int zlibAfterBufLen;
 
+
 /*
  * rfbSendOneRectEncodingZlib - send a given rectangle using one Zlib
  *                              rectangle encoding.
  */
 
 Bool
-rfbSendOneRectEncodingZlib(cl, x, y, w, h)
-    rfbClientPtr cl;
-    int x, y, w, h;
+rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
 {
     rfbFramebufferUpdateRectHeader rect;
     rfbZlibHeader hdr;
     int deflateResult;
     int previousOut;
     int i;
-    char *fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y)
-           + (x * (rfbScreen.bitsPerPixel / 8)));
+    char *fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y) +
+                   (x * (rfbScreen.bitsPerPixel / 8)));
 
     int maxRawSize;
     int maxCompSize;
 
-    maxRawSize = (rfbScreen.width * rfbScreen.height
-                  * (cl->format.bitsPerPixel / 8));
+    maxRawSize = (rfbScreen.width * rfbScreen.height *
+                  (cl->format.bitsPerPixel / 8));
 
     if (zlibBeforeBufSize < maxRawSize) {
         zlibBeforeBufSize = maxRawSize;
@@ -177,8 +176,8 @@ rfbSendOneRectEncodingZlib(cl, x, y, w, h)
 
     /* Update statics */
     cl->rfbRectanglesSent[rfbEncodingZlib]++;
-    cl->rfbBytesSent[rfbEncodingZlib] += (sz_rfbFramebufferUpdateRectHeader
-                                         + sz_rfbZlibHeader + zlibAfterBufLen);
+    cl->rfbBytesSent[rfbEncodingZlib] += (sz_rfbFramebufferUpdateRectHeader +
+                                          sz_rfbZlibHeader + zlibAfterBufLen);
 
     if (ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbZlibHeader
         > UPDATE_BUF_SIZE)
@@ -232,12 +231,10 @@ rfbSendOneRectEncodingZlib(cl, x, y, w, h)
  */
 
 Bool
-rfbSendRectEncodingZlib(cl, x, y, w, h)
-    rfbClientPtr cl;
-    int x, y, w, h;
+rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
 {
-    int  maxLines;
-    int  linesRemaining;
+    int maxLines;
+    int linesRemaining;
     rfbRectangle partialRect;
 
     partialRect.x = x;
@@ -299,7 +296,4 @@ rfbSendRectEncodingZlib(cl, x, y, w, h)
     }
 
     return TRUE;
-
 }
-
-

@@ -489,6 +489,7 @@ compareAndSkip(char **ptr, const char *str)
     return FALSE;
 }
 
+
 /*
  * Parse the request tail after the '?' character, and format a sequence
  * of <param> tags for inclusion into an HTML page with embedded applet.
@@ -568,6 +569,7 @@ parseParams(const char *request, char *result, int max_bytes, Bool jnlp)
     }
     return TRUE;
 }
+
 
 /*
  * Check if the string consists only of alphanumeric characters, '+'

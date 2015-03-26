@@ -65,6 +65,7 @@ typedef struct _VncInputSelect {
 static int vncErrorBase = 0;
 static int vncEventBase = 0;
 
+
 void vncExtensionInit(void)
 {
   ExtensionEntry* extEntry;
@@ -98,9 +99,11 @@ void vncExtensionInit(void)
   }
 }
 
+
 static void vncResetProc(ExtensionEntry* extEntry)
 {
 }
+
 
 static void vncSelectionCallback(CallbackListPtr *callbacks, pointer data, pointer args)
 {
@@ -109,6 +112,7 @@ static void vncSelectionCallback(CallbackListPtr *callbacks, pointer data, point
 
   SendSelectionChangeEvent(selection->selection);
 }
+
 
 static void vncClientStateChange(CallbackListPtr *callbacks, pointer data, pointer p)
 {
@@ -126,6 +130,7 @@ static void vncClientStateChange(CallbackListPtr *callbacks, pointer data, point
     }
   }
 }
+
 
 void vncClientCutText(const char* str, int len)
 {
@@ -154,6 +159,7 @@ void vncClientCutText(const char* str, int len)
   }
 }
 
+
 static void SendSelectionChangeEvent(Atom selection)
 {
   VncInputSelect *cur;
@@ -175,6 +181,7 @@ static void SendSelectionChangeEvent(Atom selection)
   }
 }
 
+
 static int ProcVncExtSetServerCutText(ClientPtr client)
 {
   char *str;
@@ -190,6 +197,7 @@ static int ProcVncExtSetServerCutText(ClientPtr client)
   return (client->noClientException);
 }
 
+
 static int SProcVncExtSetServerCutText(ClientPtr client)
 {
   REQUEST(xVncExtSetServerCutTextReq);
@@ -198,6 +206,7 @@ static int SProcVncExtSetServerCutText(ClientPtr client)
   swapl(&stuff->textLen);
   return ProcVncExtSetServerCutText(client);
 }
+
 
 static int ProcVncExtGetClientCutText(ClientPtr client)
 {
@@ -221,6 +230,7 @@ static int ProcVncExtGetClientCutText(ClientPtr client)
   return (client->noClientException);
 }
 
+
 static int SProcVncExtGetClientCutText(ClientPtr client)
 {
   REQUEST(xVncExtGetClientCutTextReq);
@@ -228,6 +238,7 @@ static int SProcVncExtGetClientCutText(ClientPtr client)
   REQUEST_SIZE_MATCH(xVncExtGetClientCutTextReq);
   return ProcVncExtGetClientCutText(client);
 }
+
 
 static int ProcVncExtSelectInput(ClientPtr client)
 {
@@ -259,6 +270,7 @@ static int ProcVncExtSelectInput(ClientPtr client)
   return (client->noClientException);
 }
 
+
 static int SProcVncExtSelectInput(ClientPtr client)
 {
   REQUEST(xVncExtSelectInputReq);
@@ -268,6 +280,7 @@ static int SProcVncExtSelectInput(ClientPtr client)
   swapl(&stuff->mask);
   return ProcVncExtSelectInput(client);
 }
+
 
 static int ProcVncExtConnect(ClientPtr client)
 {
@@ -323,6 +336,7 @@ static int ProcVncExtConnect(ClientPtr client)
   return (client->noClientException);
 }
 
+
 static int SProcVncExtConnect(ClientPtr client)
 {
   REQUEST(xVncExtConnectReq);
@@ -330,6 +344,7 @@ static int SProcVncExtConnect(ClientPtr client)
   REQUEST_AT_LEAST_SIZE(xVncExtConnectReq);
   return ProcVncExtConnect(client);
 }
+
 
 static int ProcVncExtDispatch(ClientPtr client)
 {
@@ -347,6 +362,7 @@ static int ProcVncExtDispatch(ClientPtr client)
     return BadRequest;
   }
 }
+
 
 static int SProcVncExtDispatch(ClientPtr client)
 {

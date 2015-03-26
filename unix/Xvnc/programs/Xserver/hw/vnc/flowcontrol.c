@@ -192,7 +192,7 @@ Bool rfbSendRTTPing(rfbClientPtr cl)
        time we get the response back.  This allows us to reliably throttle
        back if the client or the network overloads. */
     if (!rfbSendFence(cl, rfbFenceFlagRequest | rfbFenceFlagBlockBefore,
-                      sizeof(RTTInfo), (const char*)&rttInfo))
+                      sizeof(RTTInfo), (const char *)&rttInfo))
         return FALSE;
 
     cl->pingCounter++;

@@ -45,8 +45,8 @@
 #define rfbInitOneRGBTableOUT CONCAT2E(rfbInitOneRGBTable, OUT)
 
 static void
-rfbInitOneRGBTableOUT (OUT_T *table, int inMax, int outMax, int outShift,
-                       int swap);
+rfbInitOneRGBTableOUT(OUT_T *table, int inMax, int outMax, int outShift,
+                      int swap);
 
 
 /*
@@ -55,8 +55,8 @@ rfbInitOneRGBTableOUT (OUT_T *table, int inMax, int outMax, int outShift,
  */
 
 static void
-rfbInitTrueColourSingleTableOUT (char **table, rfbPixelFormat *in,
-                                 rfbPixelFormat *out)
+rfbInitTrueColourSingleTableOUT(char **table, rfbPixelFormat *in,
+                                rfbPixelFormat *out)
 {
     int i;
     int inRed, inGreen, inBlue, outRed, outGreen, outBlue;
@@ -94,31 +94,32 @@ rfbInitTrueColourSingleTableOUT (char **table, rfbPixelFormat *in,
  */
 
 static void
-rfbInitTrueColourRGBTablesOUT (char **table, rfbPixelFormat *in,
-                               rfbPixelFormat *out)
+rfbInitTrueColourRGBTablesOUT(char **table, rfbPixelFormat *in,
+                              rfbPixelFormat *out)
 {
     OUT_T *redTable;
     OUT_T *greenTable;
     OUT_T *blueTable;
 
     if (*table) free(*table);
-    *table = (char *)malloc((in->redMax + in->greenMax + in->blueMax + 3)
-                            * sizeof(OUT_T));
+    *table = (char *)malloc((in->redMax + in->greenMax + in->blueMax + 3) *
+                            sizeof(OUT_T));
     redTable = (OUT_T *)*table;
     greenTable = redTable + in->redMax + 1;
     blueTable = greenTable + in->greenMax + 1;
 
-    rfbInitOneRGBTableOUT (redTable, in->redMax, out->redMax,
-                           out->redShift, (out->bigEndian != in->bigEndian));
-    rfbInitOneRGBTableOUT (greenTable, in->greenMax, out->greenMax,
-                           out->greenShift, (out->bigEndian != in->bigEndian));
-    rfbInitOneRGBTableOUT (blueTable, in->blueMax, out->blueMax,
-                           out->blueShift, (out->bigEndian != in->bigEndian));
+    rfbInitOneRGBTableOUT(redTable, in->redMax, out->redMax,
+                          out->redShift, (out->bigEndian != in->bigEndian));
+    rfbInitOneRGBTableOUT(greenTable, in->greenMax, out->greenMax,
+                          out->greenShift, (out->bigEndian != in->bigEndian));
+    rfbInitOneRGBTableOUT(blueTable, in->blueMax, out->blueMax,
+                          out->blueShift, (out->bigEndian != in->bigEndian));
 }
 
+
 static void
-rfbInitOneRGBTableOUT (OUT_T *table, int inMax, int outMax, int outShift,
-                       int swap)
+rfbInitOneRGBTableOUT(OUT_T *table, int inMax, int outMax, int outShift,
+                      int swap)
 {
     int i;
     int nEntries = inMax + 1;
@@ -132,6 +133,7 @@ rfbInitOneRGBTableOUT (OUT_T *table, int inMax, int outMax, int outShift,
 #endif
     }
 }
+
 
 #undef OUT_T
 #undef SwapOUT

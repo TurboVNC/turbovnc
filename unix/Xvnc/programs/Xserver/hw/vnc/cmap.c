@@ -75,9 +75,7 @@ ColormapPtr rfbInstalledColormap;
 
 
 int
-rfbListInstalledColormaps(pScreen, pmaps)
-    ScreenPtr   pScreen;
-    Colormap    *pmaps;
+rfbListInstalledColormaps(ScreenPtr pScreen, Colormap *pmaps)
 {
     /* By the time we are processing requests, we can guarantee that there
      * is always a colormap installed */
@@ -87,8 +85,7 @@ rfbListInstalledColormaps(pScreen, pmaps)
 
 
 void
-rfbInstallColormap(pmap)
-    ColormapPtr pmap;
+rfbInstallColormap(ColormapPtr pmap)
 {
     ColormapPtr oldpmap = rfbInstalledColormap;
 
@@ -111,8 +108,7 @@ rfbInstallColormap(pmap)
 
 
 void
-rfbUninstallColormap(pmap)
-    ColormapPtr pmap;
+rfbUninstallColormap(ColormapPtr pmap)
 {
     ColormapPtr curpmap = rfbInstalledColormap;
 
@@ -141,10 +137,7 @@ rfbUninstallColormap(pmap)
 
 
 void
-rfbStoreColors(pmap, ndef, pdefs)
-    ColormapPtr pmap;
-    int         ndef;
-    xColorItem  *pdefs;
+rfbStoreColors(ColormapPtr pmap, int ndef, xColorItem *pdefs)
 {
     int i;
     int first = -1;

@@ -55,6 +55,7 @@ rfbResetStats(rfbClientPtr cl)
     cl->rfbPointerEventsRcvd = 0;
 }
 
+
 void
 rfbPrintStats(rfbClientPtr cl)
 {
@@ -104,11 +105,11 @@ rfbPrintStats(rfbClientPtr cl)
     if ((totalBytesSent - cl->rfbBytesSent[rfbEncodingCopyRect]) != 0) {
         rfbLog("  raw equivalent %f Mbytes, compression ratio %f\n",
                 (double)cl->rfbRawBytesEquivalent / 1000000.,
-                (double)cl->rfbRawBytesEquivalent
-                / (double)(totalBytesSent -
-                           cl->rfbBytesSent[rfbEncodingCopyRect] -
-                           cl->rfbCursorShapeBytesSent -
-                           cl->rfbCursorPosBytesSent -
-                           cl->rfbLastRectBytesSent));
+                (double)cl->rfbRawBytesEquivalent /
+                (double)(totalBytesSent -
+                         cl->rfbBytesSent[rfbEncodingCopyRect] -
+                         cl->rfbCursorShapeBytesSent -
+                         cl->rfbCursorPosBytesSent -
+                         cl->rfbLastRectBytesSent));
     }
 }

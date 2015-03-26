@@ -65,26 +65,24 @@ KeySym pressedKeys[256] = { NoSymbol64 NoSymbol64 NoSymbol64 NoSymbol64 };
 
 
 void
-KbdDeviceInit(pDevice)
-    DeviceIntPtr pDevice;
+KbdDeviceInit(DeviceIntPtr pDevice)
 {
     char *env;
 
     kbdDevice = pDevice;
     if ((env = getenv("TVNC_XKBDEBUG")) != NULL && !strcmp(env, "1")) {
-      rfbLog("XKEYBOARD handler debugging messages enabled\n");
-      xkbDebug = TRUE;
+        rfbLog("XKEYBOARD handler debugging messages enabled\n");
+        xkbDebug = TRUE;
     }
     if ((env = getenv("TVNC_XKBFAKESHIFT")) != NULL && !strcmp(env, "0")) {
-      rfbLog("Disabling fake shift key event generation in XKEYBOARD handler\n");
-      fakeShift = FALSE;
+        rfbLog("Disabling fake shift key event generation in XKEYBOARD handler\n");
+        fakeShift = FALSE;
     }
 }
 
 
 void
-PtrDeviceOn(pDev)
-    DeviceIntPtr pDev;
+PtrDeviceOn(DeviceIntPtr pDev)
 {
     ptrAcceleration = (char)pDev->ptrfeed->ctrl.num;
     ptrDevice = pDev;
@@ -92,9 +90,7 @@ PtrDeviceOn(pDev)
 
 
 void
-PtrDeviceControl(dev, ctrl)
-    DevicePtr dev;
-    PtrCtrl *ctrl;
+PtrDeviceControl(DevicePtr dev, PtrCtrl *ctrl)
 {
     ptrAcceleration = (char)ctrl->num;
 
@@ -110,63 +106,63 @@ PtrDeviceControl(dev, ctrl)
 static inline void PressKey(DeviceIntPtr dev, int kc, Bool down,
                             const char *msg)
 {
-  int action;
+    int action;
 
-  if (msg != NULL && xkbDebug)
-    rfbLog("PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
+    if (msg != NULL && xkbDebug)
+        rfbLog("PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
 
-  action = down ? KeyPress : KeyRelease;
-  QueueKeyboardEvents(dev, action, kc, NULL);
+    action = down ? KeyPress : KeyRelease;
+    QueueKeyboardEvents(dev, action, kc, NULL);
 }
 
 
 /* altKeysym is a table of alternative keysyms which have the same meaning. */
 
 static struct altKeysym_t {
-  KeySym a, b;
+    KeySym a, b;
 } altKeysym[] = {
-  { XK_Shift_L,    XK_Shift_R },
-  { XK_Control_L,    XK_Control_R },
-  { XK_Meta_L,    XK_Meta_R },
-  { XK_Alt_L,    XK_Alt_R },
-  { XK_Super_L,    XK_Super_R },
-  { XK_Hyper_L,    XK_Hyper_R },
-  { XK_KP_Space,    XK_space },
-  { XK_KP_Tab,    XK_Tab },
-  { XK_KP_Enter,    XK_Return },
-  { XK_KP_F1,    XK_F1 },
-  { XK_KP_F2,    XK_F2 },
-  { XK_KP_F3,    XK_F3 },
-  { XK_KP_F4,    XK_F4 },
-  { XK_KP_Home,    XK_Home },
-  { XK_KP_Left,    XK_Left },
-  { XK_KP_Up,    XK_Up },
-  { XK_KP_Right,    XK_Right },
-  { XK_KP_Down,    XK_Down },
-  { XK_KP_Page_Up,  XK_Page_Up },
-  { XK_KP_Page_Down,  XK_Page_Down },
-  { XK_KP_End,    XK_End },
-  { XK_KP_Begin,    XK_Begin },
-  { XK_KP_Insert,    XK_Insert },
-  { XK_KP_Delete,    XK_Delete },
-  { XK_KP_Equal,    XK_equal },
-  { XK_KP_Multiply,  XK_asterisk },
-  { XK_KP_Add,    XK_plus },
-  { XK_KP_Separator,  XK_comma },
-  { XK_KP_Subtract,  XK_minus },
-  { XK_KP_Decimal,  XK_period },
-  { XK_KP_Divide,    XK_slash },
-  { XK_KP_0,    XK_0 },
-  { XK_KP_1,    XK_1 },
-  { XK_KP_2,    XK_2 },
-  { XK_KP_3,    XK_3 },
-  { XK_KP_4,    XK_4 },
-  { XK_KP_5,    XK_5 },
-  { XK_KP_6,    XK_6 },
-  { XK_KP_7,    XK_7 },
-  { XK_KP_8,    XK_8 },
-  { XK_KP_9,    XK_9 },
-  { XK_ISO_Level3_Shift,  XK_Mode_switch },
+    { XK_Shift_L, XK_Shift_R },
+    { XK_Control_L, XK_Control_R },
+    { XK_Meta_L, XK_Meta_R },
+    { XK_Alt_L, XK_Alt_R },
+    { XK_Super_L, XK_Super_R },
+    { XK_Hyper_L, XK_Hyper_R },
+    { XK_KP_Space, XK_space },
+    { XK_KP_Tab, XK_Tab },
+    { XK_KP_Enter, XK_Return },
+    { XK_KP_F1, XK_F1 },
+    { XK_KP_F2, XK_F2 },
+    { XK_KP_F3, XK_F3 },
+    { XK_KP_F4, XK_F4 },
+    { XK_KP_Home, XK_Home },
+    { XK_KP_Left, XK_Left },
+    { XK_KP_Up, XK_Up },
+    { XK_KP_Right, XK_Right },
+    { XK_KP_Down, XK_Down },
+    { XK_KP_Page_Up, XK_Page_Up },
+    { XK_KP_Page_Down, XK_Page_Down },
+    { XK_KP_End, XK_End },
+    { XK_KP_Begin, XK_Begin },
+    { XK_KP_Insert, XK_Insert },
+    { XK_KP_Delete, XK_Delete },
+    { XK_KP_Equal, XK_equal },
+    { XK_KP_Multiply, XK_asterisk },
+    { XK_KP_Add, XK_plus },
+    { XK_KP_Separator, XK_comma },
+    { XK_KP_Subtract, XK_minus },
+    { XK_KP_Decimal, XK_period },
+    { XK_KP_Divide, XK_slash },
+    { XK_KP_0, XK_0 },
+    { XK_KP_1, XK_1 },
+    { XK_KP_2, XK_2 },
+    { XK_KP_3, XK_3 },
+    { XK_KP_4, XK_4 },
+    { XK_KP_5, XK_5 },
+    { XK_KP_6, XK_6 },
+    { XK_KP_7, XK_7 },
+    { XK_KP_8, XK_8 },
+    { XK_KP_9, XK_9 },
+    { XK_ISO_Level3_Shift, XK_Mode_switch },
 };
 
 
@@ -441,11 +437,7 @@ void KeyEvent(CARD32 keysym, Bool down)
 
 
 void
-PtrAddEvent(buttonMask, x, y, cl)
-    int buttonMask;
-    int x;
-    int y;
-    rfbClientPtr cl;
+PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
 {
     int i;
     int valuators[2];
@@ -477,6 +469,7 @@ PtrAddEvent(buttonMask, x, y, cl)
     oldButtonMask = buttonMask;
     mieqProcessInputEvents();
 }
+
 
 void
 KbdReleaseAllKeys()

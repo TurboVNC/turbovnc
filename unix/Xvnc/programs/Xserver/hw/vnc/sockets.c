@@ -442,7 +442,7 @@ ReadExact(rfbClientPtr cl, char *buf, int len)
 
     while (len > 0) {
         do {
-          n = read(sock, buf, len);
+            n = read(sock, buf, len);
         } while (n < 0 && errno == EINTR);
 
         if (n > 0) {
@@ -464,7 +464,7 @@ ReadExact(rfbClientPtr cl, char *buf, int len)
             tv.tv_sec = rfbMaxClientWait / 1000;
             tv.tv_usec = (rfbMaxClientWait % 1000) * 1000;
             do {
-              n = select(sock + 1, &fds, NULL, NULL, &tv);
+                n = select(sock + 1, &fds, NULL, NULL, &tv);
             } while (n < 0 && errno == EINTR);
             if (n < 0) {
                 rfbLogPerror("ReadExact: select");
@@ -526,7 +526,7 @@ WriteExact(rfbClientPtr cl, char *buf, int len)
 
     while (len > 0) {
         do {
-          n = write(sock, buf, len);
+            n = write(sock, buf, len);
         } while (n < 0 && errno == EINTR);
 
         if (n > 0) {

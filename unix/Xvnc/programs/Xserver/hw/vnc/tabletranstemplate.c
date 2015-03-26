@@ -44,17 +44,18 @@
 #define rfbTranslateWithRGBTablesINtoOUT  \
     CONCAT4E(rfbTranslateWithRGBTables, IN, to, OUT)
 
+
 /*
  * rfbTranslateWithSingleTableINtoOUT translates a rectangle of pixel data
  * using a single lookup table.
  */
 
 static void
-rfbTranslateWithSingleTableINtoOUT (char *table, rfbPixelFormat *in,
-                                    rfbPixelFormat *out,
-                                    char *iptr, char *optr,
-                                    int bytesBetweenInputLines,
-                                    int width, int height)
+rfbTranslateWithSingleTableINtoOUT(char *table, rfbPixelFormat *in,
+                                   rfbPixelFormat *out,
+                                   char *iptr, char *optr,
+                                   int bytesBetweenInputLines,
+                                   int width, int height)
 {
     IN_T *ip = (IN_T *)iptr;
     OUT_T *op = (OUT_T *)optr;
@@ -81,11 +82,11 @@ rfbTranslateWithSingleTableINtoOUT (char *table, rfbPixelFormat *in,
  */
 
 static void
-rfbTranslateWithRGBTablesINtoOUT (char *table, rfbPixelFormat *in,
-                                  rfbPixelFormat *out,
-                                  char *iptr, char *optr,
-                                  int bytesBetweenInputLines,
-                                  int width, int height)
+rfbTranslateWithRGBTablesINtoOUT(char *table, rfbPixelFormat *in,
+                                 rfbPixelFormat *out,
+                                 char *iptr, char *optr,
+                                 int bytesBetweenInputLines,
+                                 int width, int height)
 {
     IN_T *ip = (IN_T *)iptr;
     OUT_T *op = (OUT_T *)optr;
@@ -108,6 +109,7 @@ rfbTranslateWithRGBTablesINtoOUT (char *table, rfbPixelFormat *in,
         height--;
     }
 }
+
 
 #undef IN_T
 #undef OUT_T

@@ -181,8 +181,7 @@ rfbTranslateNone(char *table, rfbPixelFormat *in, rfbPixelFormat *out,
  */
 
 Bool
-rfbSetTranslateFunction(cl)
-    rfbClientPtr cl;
+rfbSetTranslateFunction(rfbClientPtr cl)
 {
     rfbLog("Pixel format for client %s:\n", cl->host);
     PrintPixelFormat(&cl->format);
@@ -322,8 +321,7 @@ rfbSetTranslateFunction(cl)
  */
 
 static Bool
-rfbSetClientColourMapBGR233(cl)
-    rfbClientPtr cl;
+rfbSetClientColourMapBGR233(rfbClientPtr cl)
 {
     char buf[sz_rfbSetColourMapEntriesMsg + 256 * 3 * 2];
     rfbSetColourMapEntriesMsg *scme = (rfbSetColourMapEntriesMsg *)buf;
@@ -375,10 +373,7 @@ rfbSetClientColourMapBGR233(cl)
  */
 
 Bool
-rfbSetClientColourMap(cl, firstColour, nColours)
-    rfbClientPtr cl;
-    int firstColour;
-    int nColours;
+rfbSetClientColourMap(rfbClientPtr cl, int firstColour, int nColours)
 {
     BoxRec box;
 
@@ -427,8 +422,7 @@ rfbSetClientColourMaps(firstColour, nColours)
 
 
 static void
-PrintPixelFormat(pf)
-    rfbPixelFormat *pf;
+PrintPixelFormat(rfbPixelFormat *pf)
 {
     if (pf->bitsPerPixel == 1) {
         rfbLog("  1 bpp, %s sig bit in each byte is leftmost on the screen.\n",
