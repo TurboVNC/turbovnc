@@ -405,8 +405,6 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
       m_Use8Bit = true;
     } else if (SwitchMatch(args[j], "singlebuffer")) {
       m_DoubleBuffer = false;
-    } else if (SwitchMatch(args[j], "doublebuffer")) {
-      m_DoubleBuffer = true;
     } else if (SwitchMatch(args[j], "shared")) {
       m_Shared = true;
     } else if (SwitchMatch(args[j], "noshared")) {
@@ -1129,9 +1127,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       HWND hDisableClip = GetDlgItem(hwnd, IDC_DISABLECLIPBOARD);
       SendMessage(hDisableClip, BM_SETCHECK, _this->m_DisableClipboard, 0);
 
-      HWND hDB = GetDlgItem(hwnd, IDC_DBCHECK);
-      SendMessage(hDB, BM_SETCHECK, _this->m_DoubleBuffer, 0);
-
       HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
       SendMessage(hShared, BM_SETCHECK, _this->m_Shared, 0);
       EnableWindow(hShared, !_this->m_running);
@@ -1258,19 +1253,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           }
           return 0;
 
-        case IDC_DBCHECK:
-          switch (HIWORD(wParam)) {
-            case BN_CLICKED:
-              HWND hDB = GetDlgItem(hwnd, IDC_DBCHECK);
-              if (SendMessage(hDB, BM_GETCHECK, 0, 0) != 0) {
-                SendMessage(hDB, BM_SETCHECK, FALSE, 0);
-              } else {
-                SendMessage(hDB, BM_SETCHECK, TRUE, 0);
-              }
-              _this->SetComboBox(hwnd);
-              return 0;
-          }
-          return 0;
         case ID_SESSION_SET_CRECT:
           switch (HIWORD(wParam)) {
             case BN_CLICKED:
@@ -1384,10 +1366,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           HWND hDisableClip = GetDlgItem(hwnd, IDC_DISABLECLIPBOARD);
           _this->m_DisableClipboard =
             (SendMessage(hDisableClip, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hDB = GetDlgItem(hwnd, IDC_DBCHECK);
-          _this->m_DoubleBuffer =
-            (SendMessage(hDB, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
           HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
           _this->m_Shared =
@@ -1988,7 +1966,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
   m_FSAltEnter =          read(RegKey, "fsaltenter", m_FSAltEnter) != 0;
   m_GrabKeyboard =        read(RegKey, "grabkeyboard", m_GrabKeyboard);
 //m_Use8Bit =             read(RegKey, "8bit", m_Use8Bit) != 0;
-  m_DoubleBuffer =        read(RegKey, "doublebuffer", m_DoubleBuffer) != 0;
+//m_DoubleBuffer =        read(RegKey, "doublebuffer", m_DoubleBuffer) != 0;
   m_Shared =              read(RegKey, "shared", m_Shared) != 0;
   m_SwapMouse =           read(RegKey, "swapmouse", m_SwapMouse) != 0;
   m_DeiconifyOnBell =     read(RegKey, "belldeiconify", m_DeiconifyOnBell) != 0;

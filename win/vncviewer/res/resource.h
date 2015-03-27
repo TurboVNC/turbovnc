@@ -59,7 +59,6 @@
 #define IDC_PASSWD_EDIT                 1009
 #define IDC_TAB                         1010
 #define IDC_OPTIONBUTTON                1012
-#define IDC_DBCHECK                     1013
 #define IDC_RAWRADIO                    1018
 #define IDC_CRECTRADIO                  1019
 #define IDC_RRERADIO                    1020

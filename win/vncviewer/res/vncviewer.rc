@@ -94,37 +94,36 @@ BEGIN
     CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,175,109,10
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,12,186,109,10
-    GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,80
+    GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,68
     LTEXT           "Scaling factor:",IDC_STATIC_SCALE,195,15,46,10,SS_CENTERIMAGE
     COMBOBOX        IDC_SCALE_EDIT,246,14,81,85,CBS_DROPDOWN |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     LTEXT           "%",IDC_STATIC_P,332,15,10,10,SS_CENTERIMAGE
-    CHECKBOX        "Double buffering",IDC_DBCHECK,195,29,145,10, WS_GROUP
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,41,145,10
-    LTEXT           "Span mode:",IDC_STATIC_SPAN,195,55,45,10,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,29,145,10
+    LTEXT           "Span mode:",IDC_STATIC_SPAN,195,43,45,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_SPAN,240,53,90,50,CBS_DROPDOWNLIST |
+    COMBOBOX        IDC_SPAN,240,41,90,50,CBS_DROPDOWNLIST |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,69,145,10
-    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,89,160,39
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,57,145,10
+    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,77,160,39
     CONTROL         "Emulate 3 buttons (with 2-button click)",
                     IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP |
-                    WS_TABSTOP,195,100,145,10
+                    WS_TABSTOP,195,88,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,112,145,10
-    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,132,160,49
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,100,145,10
+    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,120,160,49
     CONTROL         "Enable remote cursor shape updates",IDC_CSHAPE_ENABLE_RADIO,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,195,
-                    143,145,10
+                    131,145,10
     CONTROL         "Draw remote cursor on the server",
                     IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,195,
-                    155,145,10
+                    143,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON,195,167,145,10
+                    "Button",BS_AUTORADIOBUTTON,195,155,145,10
     CONTROL         "Request shared session",IDC_SHARED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,188,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,176,145,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -690,11 +689,6 @@ Equivalent of ""Globals-->Local cursor shape"" in the options dialog\r\n\
 Equivalent of ""Connection-->Display-->Desktop Size"" in the options dialog\r\n\
 \r\n"
     IDS_HELP12
-"/doublebuffer\r\n\
-/singlebuffer\r\n\
-Equivalent of ""Connection-->Display-->Double buffering"" in the options dialog\r\n\
-\r\n"
-    IDS_HELP13
 "/emulate3\r\n\
 /noemulate3\r\n\
 Equivalent of ""Connection-->Mouse-->Emulate 3 buttons (with 2-button click)""\r\n\
@@ -710,7 +704,7 @@ Maximum time period (in milliseconds) allowed between the left and right mouse\r
 button clicks in order for the chord to be interpreted as a middle mouse button\r\n\
 click (default: 100).\r\n\
 \r\n"
-    IDS_HELP14
+    IDS_HELP13
 "/encoding <encname>\r\n\
 Preferred encoding type to use (tight, hextile, or raw.  Default: tight.)  If\r\n\
 the server does not support the preferred encoding type, then the next best one\r\n\
@@ -718,17 +712,17 @@ will be chosen.  There should be no reason to use an encoding type other than\r\
 Tight when connecting to a TurboVNC server, but this option can be useful when\r\n\
 connecting to other types of VNC servers, such as RealVNC.\r\n\
 \r\n"
-    IDS_HELP15
+    IDS_HELP14
 "/fsaltenter\r\n\
 /nofsaltenter\r\n\
 Allow/disallow the Alt+Enter key sequence to activate/deactivate full-screen mode\r\n\
 \r\n"
-    IDS_HELP16
+    IDS_HELP15
 "/fullscreen\r\n\
 /nofullscreen\r\n\
 Equivalent of ""Connection-->Display-->Full-screen mode"" in the options dialog\r\n\
 \r\n"
-    IDS_HELP17
+    IDS_HELP16
 "/grabkeyboard fs | always | manual\r\n\
 Grabbing the keyboard ensures that all special keystrokes, such as Alt-Tab,\r\n\
 Ctrl-Esc, the Windows and Menu keys, etc. will be passed to the server rather\r\n\
@@ -739,38 +733,38 @@ application starts.  When ""manual"" is specified, then the keyboard is only\r\n
 grabbed when Ctrl-Alt-Shift-G is pressed or when ""Grab keyboard"" is selected\r\n\
 from the System Menu.\r\n\
 \r\n"
-    IDS_HELP18
+    IDS_HELP17
 "/ipv6\r\n\
 When used with /listen, this causes vncviewer to accept connections from\r\n\
 IPv6-enabled servers.  If your system supports IPv4-mapped IPv6 addresses,\r\n\
 then connections from IPv4 servers can also be accepted when this option is\r\n\
 enabled.\r\n\
 \r\n"
-    IDS_HELP19
+    IDS_HELP18
 "/jpeg\r\n\
 /nojpeg\r\n\
 Equivalent of ""Connection-->Encoding-->Allow JPEG compression"" in the options\r\n\
 dialog\r\n\
 \r\n"
-    IDS_HELP20
+    IDS_HELP19
 "/listen [<port>]\r\n\
 Equivalent of the ""Listen mode"" button in the new connection dialog and\r\n\
 ""Globals-->Listen mode-->Accept reverse VNC connections on TCP port"" in the\r\n\
 options dialog\r\n\
 \r\n"
-    IDS_HELP21
+    IDS_HELP20
 "/loglevel <n>\r\n\
 Equivalent of ""Globals-->Logging-->Verbosity level"" in the options dialog\r\n\
 \r\n\
 /logfile <filename>\r\n\
 Equivalent of ""Globals-->Logging-->Write log to a file"" in the options dialog\r\n\
 \r\n"
-    IDS_HELP22
+    IDS_HELP21
 "/notoolbar\r\n\
 Equivalent of ""Globals-->Interface options-->Show toolbars by default""\r\n\
 in the options dialog\r\n\
 \r\n"
-    IDS_HELP23
+    IDS_HELP22
 "/nounixlogin\r\n\
 When connecting to TightVNC/TurboVNC servers, this disables the use of Unix\r\n\
 login authentication.  This is useful if the server is configured to prefer an\r\n\
@@ -778,39 +772,49 @@ authentication method that supports Unix login authentication and you want to\r\
 override this preference for a particular connection (for instance, to use a\r\n\
 one-time password.)\r\n\
 \r\n"
-    IDS_HELP24
+    IDS_HELP23
 "/password <clear text password>\r\n\
 Bypass the authentication dialog and use the specified password\r\n\
 \r\n"
-    IDS_HELP25
+    IDS_HELP24
 "/quality <1-100>\r\n\
 Equivalent of ""Connection-->Encoding-->JPEG image quality"" in the options\r\n\
 dialog\r\n\
 \r\n"
-    IDS_HELP26
+    IDS_HELP25
 "/raiseonbeep\r\n\
 /noraiseonbeep\r\n\
 Equivalent of ""Connection-->Display-->Deiconify on remote Bell event"" in the\r\n\
 options dialog\r\n\
 \r\n"
-    IDS_HELP27
+    IDS_HELP26
 "/register\r\n\
 Register the TurboVNC Viewer as the default application for opening .vnc\r\n\
 files\r\n\
 \r\n"
-    IDS_HELP28
+    IDS_HELP27
 "/samp gray | 1X | 2X | 4X\r\n\
 Equivalent of ""Connection-->Encoding-->JPEG chrominance subsampling"" in the\r\n\
 options dialog\r\n\
 \r\n"
-    IDS_HELP29
+    IDS_HELP28
 "/scale <percentage> | fixedratio\r\n\
 Equivalent of ""Connection-->Display-->Scaling factor"" in the options dialog\r\n\
 \r\n"
-    IDS_HELP30
+    IDS_HELP29
 "/shared\r\n\
 /noshared\r\n\
 Equivalent of ""Connection-->Request shared session"" in the options dialog\r\n\
+\r\n"
+    IDS_HELP30
+"/singlebuffer\r\n\
+The TurboVNC Viewer's default behavior is to wait until all rectangles in a\r\n\
+framebuffer update have been received and decoded before it draws the\r\n\
+framebuffer update to the screen.  This is a form of double buffering, and\r\n\
+it reduces tearing artifacts when 3D or video applications switch frames.\r\n\
+Passing an argument of /singlebuffer to vncviewer will cause it to draw each\r\n\
+rectangle in the framebuffer update as it is received.  This may be desirable\r\n\
+on very slow connections.\r\n\
 \r\n"
     IDS_HELP31
 "/span primary | all | auto\r\n\
@@ -845,7 +849,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDC_TAB                 "Here you can choose whether to edit connection-specific options or global settings for the viewer."
     IDC_OPTIONBUTTON        "Edit connection-specific options for the specified VNC server or change the global configuration of the viewer."
-    IDC_DBCHECK             "If this option is checked, TurboVNC will wait until all rectangles in a framebuffer update have been received and decoded before it draws the framebuffer update to the screen.  This reduces tearing artifacts when 3D or video applications switch frames."
 END
 
 STRINGTABLE DISCARDABLE
