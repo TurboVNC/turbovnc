@@ -1506,7 +1506,8 @@ void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
 }
 
 
-void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered)
+void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered,
+                                      bool dimensionsOnly)
 {
   // Find how large the desktop work area is
   RECT screenArea, workrect;
@@ -1539,13 +1540,17 @@ void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered)
   m_winwidth  = min(fullwinrect.right - fullwinrect.left, workwidth);
   m_winheight = min(fullwinrect.bottom - fullwinrect.top, workheight);
   if ((fullwinrect.right - fullwinrect.left > workwidth) &&
-      (workheight - m_winheight >= 16)) {
+      (workheight - m_winheight >= 16) &&
+      m_opts.m_desktopSize.mode != SIZE_AUTO) {
     m_winheight = m_winheight + 16;
   }
   if ((fullwinrect.bottom - fullwinrect.top > workheight) &&
-      (workwidth - m_winwidth >= 16)) {
+      (workwidth - m_winwidth >= 16) &&
+      m_opts.m_desktopSize.mode != SIZE_AUTO) {
     m_winwidth = m_winwidth + 16;
   }
+
+  if (dimensionsOnly) return;
 
   int x, y;
   WINDOWPLACEMENT winplace;
@@ -3428,7 +3433,7 @@ void ClientConnection::ReadScreenUpdate()
     if (m_opts.m_desktopSize.mode == SIZE_MANUAL)
       SendDesktopSize(m_opts.m_desktopSize.width, m_opts.m_desktopSize.height);
     else if (m_opts.m_desktopSize.mode == SIZE_AUTO)
-      SendDesktopSize(m_cliwidth, m_cliheight);
+      SendDesktopSize(m_autoResizeWidth, m_autoResizeHeight);
 
     m_firstUpdate = false;
   }
@@ -3724,17 +3729,19 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
 
   CreateLocalFramebuffer();
 
-  bool centered = true;
   if (m_opts.m_desktopSize.mode == SIZE_AUTO &&
       m_autoResizeWidth == pfburh->r.w &&
       m_autoResizeHeight == pfburh->r.h) {
-    centered = false;
-    m_autoResizeWidth = m_autoResizeHeight = 0;
+    RECT fullwinrect;
+    SetRect(&fullwinrect, 0, 0, m_si.framebufferWidth, m_si.framebufferHeight);
+    PositionWindow(fullwinrect, false, true);
+    PositionChildWindow();
+    return;
   }
 
   if (InFullScreenMode())
     m_pendingServerResize = true;
-  SizeWindow(centered, true, false);
+  SizeWindow(true, true, false);
   RealiseFullScreenMode(true);
   if (InFullScreenMode())
     m_pendingServerResize = false;

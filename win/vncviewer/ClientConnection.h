@@ -148,7 +148,8 @@ class ClientConnection : public omni_thread
     void Update(RECT *pRect);
     void SizeWindow(bool centered, bool resizeFullScreen = false,
                     bool manual = false);
-    void PositionWindow(RECT &fullwinrect, bool centered);
+    void PositionWindow(RECT &fullwinrect, bool centered,
+                        bool dimensionsOnly = false);
     void PositionChildWindow();
     bool ScrollScreen(int dx, int dy);
     void UpdateScrollbars();
