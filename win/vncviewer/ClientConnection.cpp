@@ -1487,6 +1487,8 @@ void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
     RECT screenArea, workrect;
     GetFullScreenMetrics(screenArea, workrect);
     fullwinrect = workrect;
+    PositionWindow(fullwinrect, centered);
+    return;
   } else if (m_opts.m_scaling && !m_opts.m_FitWindow) {
     SetRect(&fullwinrect, 0, 0,
             m_si.framebufferWidth * m_opts.m_scale_num / m_opts.m_scale_den,
