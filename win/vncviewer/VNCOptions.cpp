@@ -233,6 +233,13 @@ void VNCOptions::FixScaling()
   int g = gcd(m_scale_num, m_scale_den);
   m_scale_num /= g;
   m_scale_den /= g;
+
+  if (m_desktopSize.mode == SIZE_AUTO &&
+      (m_scale_num != 1 || m_scale_den != 1 || m_FitWindow)) {
+    MessageBox(NULL, "Desktop scaling enabled.  Disabling automatic desktop resizing.",
+               "Argument error", MB_OK | MB_TOPMOST | MB_ICONWARNING);
+    m_desktopSize.mode = SIZE_SERVER;
+  }
 }
 
 
@@ -295,7 +302,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
 
   if (cmdlinelen == 0) return;
 
-  char CommLine[256] ;
+  char CommLine[256];
   int f = 0;
   strcpy(CommLine, szCmdLine);
 
