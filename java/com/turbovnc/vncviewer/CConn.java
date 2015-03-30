@@ -135,7 +135,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
                                    e.getMessage());
         }
       }
-      
+
       sock = new TcpSocket(serverName, port);
       vlog.info("connected to host " + serverName + " port " + port);
     }
@@ -393,7 +393,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void setDesktopSize(int w, int h) {
     super.setDesktopSize(w, h);
     resizeFramebuffer();
-    if (opts.desktopSize.mode == Options.SIZE_MANUAL) {
+    if (opts.desktopSize.mode == Options.SIZE_MANUAL && !firstUpdate) {
       opts.desktopSize.width = w;
       opts.desktopSize.height = h;
     }
@@ -412,7 +412,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     resizeFramebuffer();
-    if (opts.desktopSize.mode == Options.SIZE_MANUAL) {
+    if (opts.desktopSize.mode == Options.SIZE_MANUAL && !firstUpdate) {
       opts.desktopSize.width = w;
       opts.desktopSize.height = h;
     }
