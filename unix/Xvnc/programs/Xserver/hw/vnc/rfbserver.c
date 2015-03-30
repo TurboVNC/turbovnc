@@ -63,6 +63,7 @@ int rfbALRSubsampLevel = TVNC_1X;
 int rfbCombineRect = 100;
 int rfbICEBlockSize = 256;
 Bool rfbInterframeDebug = FALSE;
+int rfbMaxWidth = 0, rfbMaxHeight = 0;
 
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);

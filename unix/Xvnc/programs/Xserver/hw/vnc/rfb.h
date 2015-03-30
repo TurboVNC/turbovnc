@@ -605,6 +605,8 @@ extern CARD32 rfbIdleTimeout;
 extern void IdleTimerSet();
 extern void IdleTimerCheck();
 
+extern int rfbMaxWidth, rfbMaxHeight;
+
 extern Bool rfbAlwaysShared;
 extern Bool rfbNeverShared;
 extern Bool rfbDontDisconnect;

@@ -479,6 +479,25 @@ ReadConfigFile(void)
             continue;
         }
 
+        n = 17;
+        if (!strncmp(buf2, "max-desktop-size=", n)) {
+            int w = -1, h = -1;
+
+            if (buf2[n] == '\0') {
+                FatalError("ERROR in %s: max-desktop-size is empty!",
+                           rfbAuthConfigFile);
+            }
+
+            if (sscanf(&buf2[n], "%dx%d", &w, &h) < 2 || w <= 0 || h <= 0) {
+                FatalError("ERROR in %s: max-desktop-size value is incorrect.",
+                           rfbAuthConfigFile);
+            }
+
+            rfbMaxWidth = (CARD32)w;
+            rfbMaxHeight = (CARD32)h;
+            continue;
+        }
+
         if (buf2[0] != '#')
             rfbLog("WARNING: unrecognized auth config line '%s'\n", buf);
     }

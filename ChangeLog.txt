@@ -16,7 +16,10 @@ Added the ability to dynamically resize the remote desktop, either through the
 X RANDR extension on the server or remotely from a VNC client that supports the
 RFB desktop size extensions.  Both TurboVNC viewers now also include an
 "automatic desktop resize" feature that will resize the remote desktop so
-that it always fits exactly in the viewer window without using scrollbars.
+that it always fits exactly in the viewer window without using scrollbars.  A
+new "max-desktop-size" directive is provided in the TurboVNC authentication
+configuration file in order to allow a maximum desktop size to be specified for
+all TurboVNC sessions on a given server machine.
 -------------------------------------------------------------------------------
 [3]
 The X11 TurboVNC Viewer has been retired and replaced with the Java TurboVNC

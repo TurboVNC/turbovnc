@@ -6,7 +6,7 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
-.\" Copyright (C) 2010, 2012, 2014 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2015 D. R. Commander
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\"
 .\" You may distribute under the terms of the GNU General Public
@@ -388,6 +388,12 @@ TurboVNC session can remain idle (with no VNC viewer connections) before
 Xvnc automatically exits.  If this value is set to a number greater than 0,
 then all TurboVNC sessions on this machine will use this idle timeout value by
 default, and the user will only be allowed to override it with a lower value.
+.IP \fImax-desktop-size\fR=\fIwidth\fRx\fIheight\fR
+This specifies the maximum desktop size for all TurboVNC sessions running on
+this machine.  If a user attempts to start a session with a larger geometry
+than this or to use remote desktop resizing to increase the desktop size to a
+size larger than this, the desktop size will be clamped to
+\fIwidth\fRx\fIheight\fR.
 .IP \fIno-clipboard-send\fR
 This prevents any TurboVNC server sessions running on this machine from
 sending clipboard changes to their connected viewers.

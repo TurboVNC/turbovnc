@@ -300,6 +300,14 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
   Bool ret = TRUE;
 
+  if ((width > rfbMaxWidth && rfbMaxWidth > 0) ||
+      (height > rfbMaxHeight && rfbMaxHeight > 0)) {
+    width = min(width, rfbMaxWidth);
+    height = min(height, rfbMaxHeight);
+    rfbLog("NOTICE: desktop size clamped to %dx%d per system policy\n", width,
+           height);
+  }
+
   for (cl = rfbClientHead; cl; cl = cl->next) {
     if (!cl->enableDesktopSize && !cl->enableExtDesktopSize) {
       rfbLog("ERROR: Not resizing desktop because one or more clients doesn't support it.\n");
