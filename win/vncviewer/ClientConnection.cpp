@@ -2195,9 +2195,17 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
                 prev_scale_den != _this->m_opts.m_scale_den ||
                 prev_span != _this->m_opts.m_Span ||
                 prev_desktopSize != _this->m_opts.m_desktopSize) {
+                bool defaultSize = false;
+                if (prev_desktopSize.mode != SIZE_AUTO &&
+                    _this->m_opts.m_desktopSize.mode == SIZE_AUTO &&
+                    prev_FullScreen == true &&
+                    _this->m_opts.m_FullScreen == true)
+                  defaultSize = true;
                 // Resize the window if scaling factors or spanning mode or
                 // desktop size were changed
-                _this->SizeWindow(true, true, false);
+                _this->SizeWindow(true, true, defaultSize);
+                if (defaultSize)
+                  _this->RealiseFullScreenMode(true);
                 InvalidateRect(_this->m_hwnd, NULL, FALSE);
               }
             }
