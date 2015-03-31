@@ -1285,7 +1285,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void getOptions() {
-    boolean recreate = false, reconfigure = false;
+    boolean recreate = false, reconfigure = false, defaultSize = false;
 
     if (opts.allowJpeg != options.allowJpeg.isSelected())
       encodingChange = true;
@@ -1321,6 +1321,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
     opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
     if (desktop != null && !opts.desktopSize.isEqual(oldDesktopSize)) {
       reconfigure = true;
+      if (oldDesktopSize.mode != Options.SIZE_AUTO &&
+          opts.desktopSize.mode == Options.SIZE_AUTO &&
+          viewport.lionFSSupported() && opts.fullScreen &&
+          options.fullScreen.isSelected())
+        defaultSize = true;
       firstUpdate = true;
     }
 
@@ -1366,8 +1371,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
       setupEmbeddedFrame();
     else if (recreate)
       recreateViewport();
-    else if (reconfigure)
-      reconfigureViewport(false);
+    else if (reconfigure) {
+      if (defaultSize)
+        sizeWindow(true);
+      else
+        reconfigureViewport(false);
+    }
   }
 
   public boolean supportsSetDesktopSize() {
