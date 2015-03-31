@@ -68,7 +68,7 @@ $configFile = "/etc/turbovncserver.conf";
 ReadConfiguration();
 $configFile = "$ENV{HOME}/.vnc/turbovncserver.conf";
 ReadConfiguration();
-ReadAuthConfiguration("/etc/turbovncserver-auth.conf");
+ReadAuthConfiguration("/etc/turbovncserver-security.conf");
 
 # Done reading configuration.
 

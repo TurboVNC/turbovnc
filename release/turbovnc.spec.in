@@ -197,7 +197,7 @@ fi
  %attr(0755,root,root) %config %{confdir}/init.d/tvncserver
  %config(noreplace) %{confdir}/sysconfig/tvncservers
  %config(noreplace) %{confdir}/turbovncserver.conf
- %config(noreplace) %{confdir}/turbovncserver-auth.conf
+ %config(noreplace) %{confdir}/turbovncserver-security.conf
 %endif
 
 %dir %{docdir}

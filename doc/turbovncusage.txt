@@ -382,14 +382,14 @@ details.
 Passing an argument of ''-localhost'' to ''vncserver'' will force the TurboVNC
 Server session to accept inbound connections only from the server machine.
 This effectively forces SSH tunneling to be used for remote connections.  If
-the ''no-remote-connections'' directive is set in the TurboVNC authentication
+the ''no-remote-connections'' directive is set in the TurboVNC security
 configuration file, then that has the effect of enabling the ''-localhost''
 option for all new TurboVNC sessions that are started on the machine.
 
 Passing an argument of ''-noreverse'' to ''vncserver'' will disable the ability
 to make outbound (reverse) connections from the TurboVNC Server session.
 If the ''no-reverse-connections'' directive is set in the TurboVNC
-authentication configuration file, then that has the effect of enabling the
+security configuration file, then that has the effect of enabling the
 ''-noreverse'' option for all new TurboVNC sessions that are started on
 the machine.
 

@@ -90,7 +90,7 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vncserver.man
 	DESTINATION ${TVNC_MANDIR}/man1 RENAME vncserver.1)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver.conf
 	DESTINATION ${TVNC_CONFDIR})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-auth.conf
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-security.conf
 	DESTINATION ${TVNC_CONFDIR})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

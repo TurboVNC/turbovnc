@@ -22,9 +22,9 @@ methods to be selected at run time.  This code supports the standard "None" and
 "VNC" authentication methods as well as methods for using one-time passwords
 (OTP) and Pluggable Authentication Modules (PAM).
 
-The Xvnc server will look in the authentication configuration file
-(default "/etc/turbovncserver-auth.conf") at run time for authentication
-configuration directives.
+The Xvnc server will look in the security configuration file (default
+"/etc/turbovncserver-security.conf") at run time for security configuration
+directives.
 
 To enable PAM support (required for the "pam-userpwd" authentication
 method), the TVNC_USEPAM CMake variable must be enabled.  This is the default

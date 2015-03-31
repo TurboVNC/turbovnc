@@ -65,7 +65,7 @@ The default behavior of the TurboVNC Server is for all authentication methods
 to be enabled and for VNC password authentication and OTP to be preferred over
 PAM user/password authentication.  However, the system administrator can
 disable one or more of the authentication methods or set the preferred order of
-the authentication methods by editing the server's authentication configuration
+the authentication methods by editing the server's security configuration
 file.  See the ''Xvnc'' man page for more details.
 
 If the server allows multiple authentication methods that support multiple

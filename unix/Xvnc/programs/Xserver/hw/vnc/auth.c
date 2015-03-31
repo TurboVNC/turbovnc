@@ -52,7 +52,7 @@ static void rfbSendAuthCaps(rfbClientPtr cl);
 
 static void rfbVncAuthSendChallenge(rfbClientPtr cl);
 
-#define AUTH_DEFAULT_CONF_FILE "/etc/turbovncserver-auth.conf"
+#define AUTH_DEFAULT_CONF_FILE "/etc/turbovncserver-security.conf"
 #ifdef XVNC_AuthPAM
 #define AUTH_DEFAULT_PAM_SERVICE_NAME "turbovnc"
 #endif

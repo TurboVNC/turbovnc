@@ -126,6 +126,12 @@ mostly a legacy feature.  Double buffering can still be disabled via the
 /singlebuffer command-line switch or by specifying "doublebuffer=0" in a VNC
 connection file.
 -------------------------------------------------------------------------------
+[19]
+/etc/turbovncserver-auth.conf (the "authentication configuration file") has
+been renamed to /etc/turbovncserver-security.conf (the "security configuration
+file") to reflect the fact that it allows configuration of more than just
+authentication methods.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
