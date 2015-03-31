@@ -94,36 +94,40 @@ BEGIN
     CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,175,109,10
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,12,186,109,10
-    GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,68
+    GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,83
     LTEXT           "Scaling factor:",IDC_STATIC_SCALE,195,15,46,10,SS_CENTERIMAGE
     COMBOBOX        IDC_SCALE_EDIT,246,14,81,85,CBS_DROPDOWN |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     LTEXT           "%",IDC_STATIC_P,332,15,10,10,SS_CENTERIMAGE
-    CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,29,145,10
-    LTEXT           "Span mode:",IDC_STATIC_SPAN,195,43,45,10,
+    LTEXT           "Remote desktop size:",IDC_STATIC_DESKTOPSIZE,195,30,71,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_SPAN,240,41,90,50,CBS_DROPDOWNLIST |
+    COMBOBOX        IDC_DESKTOPSIZE_EDIT,271,29,66,85,CBS_DROPDOWN |
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,44,145,10
+    LTEXT           "Span mode:",IDC_STATIC_SPAN,195,58,45,10,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_SPAN,240,56,90,50,CBS_DROPDOWNLIST |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,57,145,10
-    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,77,160,39
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,72,145,10
+    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,92,160,39
     CONTROL         "Emulate 3 buttons (with 2-button click)",
                     IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP |
-                    WS_TABSTOP,195,88,145,10
+                    WS_TABSTOP,195,103,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,100,145,10
-    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,120,160,49
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,115,145,10
+    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,135,160,49
     CONTROL         "Enable remote cursor shape updates",IDC_CSHAPE_ENABLE_RADIO,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,195,
-                    131,145,10
+                    146,145,10
     CONTROL         "Draw remote cursor on the server",
                     IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,195,
-                    143,145,10
+                    158,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON,195,155,145,10
+                    "Button",BS_AUTORADIOBUTTON,195,170,145,10
     CONTROL         "Request shared session",IDC_SHARED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,176,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,191,145,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -882,6 +886,7 @@ BEGIN
     IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike some VNC flavors, TurboVNC uses shared sessions by default."
     IDC_ENCODING            "Choose one of these encoding methods based on the type of network you are using and your desired image quality and performance."
     IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote desktop by the specified percentage.  ""Fixed Aspect Ratio"" automatically scales the remote desktop image to the size of the viewer window, preserving the aspect ratio of the remote desktop."
+    IDC_DESKTOPSIZE_EDIT    "Resize the remote desktop to the specified size (example: 1920x1200), if the server supports it.  ""Auto"" resizes the remote desktop as needed to fit in the local window without using scrollbars.  ""Server"" disables remote desktop resizing."
     IDC_DOTCURSOR_RADIO     "Show local cursor position as a dot."
     IDC_NOCURSOR_RADIO      "Do not show local cursor position."
 END

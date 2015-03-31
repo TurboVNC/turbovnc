@@ -97,6 +97,7 @@
 #define IDC_SPIN3                       1062
 #define IDC_SPIN4                       1063
 #define IDC_ENCODING                    1065
+#define IDC_DESKTOPSIZE_EDIT            1068
 #define IDC_SCALE_EDIT                  1069
 #define IDC_DOTCURSOR_RADIO             1070
 #define IDC_NOCURSOR_RADIO              1071
@@ -130,6 +131,7 @@
 #define IDC_STATIC_P                    1104
 #define IDC_STATIC_SERVER               1105
 #define IDC_STATIC_LIST                 1106
+#define IDC_STATIC_DESKTOPSIZE          1107
 #define IDC_STATIC_LOG_LEVEL            1108
 #define IDC_STATIC_PORT                 1109
 #define IDC_STATIC_FORMAT               1110

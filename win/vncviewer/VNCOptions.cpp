@@ -1157,6 +1157,31 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
                       FALSE);
       GetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor, 20);
 
+      char sizecombo[37][10] = {
+        "Auto", "Server", "480x320", "640x360", "640x480", "800x480",
+        "800x600", "854x480", "960x540", "960x600", "960x640", "1024x640",
+        "1024x768", "1136x640", "1152x864", "1280x720", "1280x800", "1280x960",
+        "1280x1024", "1344x840", "1344x1008", "1360x768", "1366x768",
+        "1400x1050", "1440x900", "1600x900", "1600x1000", "1600x1200",
+        "1680x1050", "1920x1080", "1920x1200", "2048x1152", "2048x1536",
+        "2560x1440", "2560x1600", "2880x1800", "3200x1800"
+      };
+      HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
+      for (i = 0; i < 37; i++)
+        SendMessage(hSizeEdit, CB_INSERTSTRING, (WPARAM)i,
+              (LPARAM)(int FAR*)sizecombo[i]);
+      if (_this->m_desktopSize.mode == SIZE_AUTO)
+        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Auto");
+      else if (_this->m_desktopSize.mode == SIZE_SERVER)
+        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
+      else {
+        char temps[12];
+        snprintf(temps, 12, "%dx%d", _this->m_desktopSize.width,
+                 _this->m_desktopSize.height);
+        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
+      }
+      GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, _this->m_oldDesktopSize, 20);
+
       HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
       SendMessage(hFullScreen, BM_SETCHECK, _this->m_FullScreen, 0);
 
@@ -1260,6 +1285,32 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           }
           return 0;
 
+        case IDC_DESKTOPSIZE_EDIT:
+          switch (HIWORD(wParam)) {
+            case CBN_KILLFOCUS:
+              char newDesktopSize[20];
+              GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, newDesktopSize, 20);
+              DesktopSize desktopSize;
+              if (!ParseDesktopSize(newDesktopSize, desktopSize))
+                SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT,
+                               _this->m_oldDesktopSize);
+              else {
+                if (desktopSize.mode == SIZE_AUTO)
+                    SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Auto");
+                else if (desktopSize.mode == SIZE_SERVER)
+                    SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
+                else {
+                  char temps[12];
+                  snprintf(temps, 12, "%dx%d", desktopSize.width,
+                           desktopSize.height);
+                  SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
+                }
+                GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT,
+                               _this->m_oldDesktopSize, 20);
+              }
+          }
+          return 0;
+
         case ID_SESSION_SET_CRECT:
           switch (HIWORD(wParam)) {
             case BN_CLICKED:
@@ -1338,6 +1389,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           int i = (int)SendMessage(hListBox, CB_GETCURSEL, 0, 0);
           if (i < MAX_LEN_COMBO)
             _this->m_PreferredEncoding = rfbcombo[i].rfbEncoding;
+
           HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
           i = GetDlgItemInt(hwnd, IDC_SCALE_EDIT, NULL, FALSE);
           if (i > 0) {
@@ -1357,6 +1409,13 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
               _this->m_FitWindow = false;
             }
           }
+
+          HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
+          char buf[12];
+          GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, buf, 12);
+          DesktopSize desktopSize;
+          if (ParseDesktopSize(buf, desktopSize))
+            _this->m_desktopSize = desktopSize;
 
           HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
           _this->m_UseEnc[rfbEncodingCopyRect] =

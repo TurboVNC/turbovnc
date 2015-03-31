@@ -2182,6 +2182,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
           int prev_scale_den = _this->m_opts.m_scale_den;
           int prev_span = _this->m_opts.m_Span;
           bool prev_FullScreen = _this->m_opts.m_FullScreen;
+          DesktopSize prev_desktopSize = _this->m_opts.m_desktopSize;
 
           COND_UNGRAB_KEYBOARD
           if (_this->m_opts.DoDialog(true)) {
@@ -2192,13 +2193,16 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
             } else {
               if (prev_scale_num != _this->m_opts.m_scale_num ||
                 prev_scale_den != _this->m_opts.m_scale_den ||
-                prev_span != _this->m_opts.m_Span) {
-                // Resize the window if scaling factors or spanning mode
-                // were changed
+                prev_span != _this->m_opts.m_Span ||
+                prev_desktopSize != _this->m_opts.m_desktopSize) {
+                // Resize the window if scaling factors or spanning mode or
+                // desktop size were changed
                 _this->SizeWindow(true, true, false);
                 InvalidateRect(_this->m_hwnd, NULL, FALSE);
               }
             }
+            if (prev_desktopSize != _this->m_opts.m_desktopSize)
+              _this->m_firstUpdate = true;
             if (prev_FullScreen != _this->m_opts.m_FullScreen)
               _this->RealiseFullScreenMode(false);
           }
@@ -3747,6 +3751,11 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
   RealiseFullScreenMode(true);
   if (InFullScreenMode())
     m_pendingServerResize = false;
+
+  if (m_opts.m_desktopSize.mode == SIZE_MANUAL && !m_firstUpdate) {
+    m_opts.m_desktopSize.width = pfburh->r.w;
+    m_opts.m_desktopSize.height = pfburh->r.h;
+  }
 }
 
 

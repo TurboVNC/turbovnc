@@ -56,9 +56,13 @@ struct COMBOSTRING {
 #define SIZE_MANUAL 1
 #define SIZE_AUTO   2
 
-typedef struct {
+typedef struct _DesktopSize {
   void set(int mode_, int width_, int height_) {
     mode = mode_;  width = width_;  height = height_;
+  }
+
+  bool operator != (struct _DesktopSize& size) {
+    return mode != size.mode || width != size.width || height != size.height;
   }
 
   int mode;
@@ -130,6 +134,7 @@ class VNCOptions
     bool  m_requestShapeUpdates;
     bool  m_ignoreShapeUpdates;
     DesktopSize m_desktopSize;
+    char  m_oldDesktopSize[12];
 
     // Keyboard can be specified on command line as 8-digit hex
     char m_kbdname[9];
