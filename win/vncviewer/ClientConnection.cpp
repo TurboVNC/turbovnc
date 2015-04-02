@@ -470,49 +470,48 @@ void ClientConnection::CreateDisplay()
 
   // Add stuff to System menu
   HMENU hsysmenu = GetSystemMenu(m_hwnd1, FALSE);
+  bool save_item_flags = (m_serverInitiated) ? MF_GRAYED : 0;
+  AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, IDC_OPTIONBUTTON,
+             "&Options...\tCtrl-Alt-Shift-O");
+  AppendMenu(hsysmenu, MF_STRING, ID_CONN_ABOUT,
+             "Connection &info...\tCtrl-Alt-Shift-I");
+  AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_REFRESH,
+             "Request screen &refresh\tCtrl-Alt-Shift-R");
+  AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_LOSSLESS_REFRESH,
+             "Request &lossless refresh\tCtrl-Alt-Shift-L");
+  AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, ID_FULLSCREEN,
+             "&Full screen\tCtrl-Alt-Shift-F");
+  AppendMenu(hsysmenu, MF_STRING, ID_DEFAULT_WINDOW_SIZE,
+             "Default window si&ze/position\tCtrl-Alt-Shift-Z");
+  AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
+             "Show &toolbar\tCtrl-Alt-Shift-T");
+  AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_GRAB,
+             "&Grab keyboard\tCtrl-Alt-Shift-G");
   if (!m_opts.m_restricted) {
-    bool save_item_flags = (m_serverInitiated) ? MF_GRAYED : 0;
-    AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hsysmenu, MF_STRING, IDC_OPTIONBUTTON,
-               "&Options...\tCtrl-Alt-Shift-O");
-    AppendMenu(hsysmenu, MF_STRING, ID_CONN_ABOUT,
-               "Connection &info...\tCtrl-Alt-Shift-I");
-    AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_REFRESH,
-               "Request screen &refresh\tCtrl-Alt-Shift-R");
-    AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_LOSSLESS_REFRESH,
-               "Request &lossless refresh\tCtrl-Alt-Shift-L");
-    AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hsysmenu, MF_STRING, ID_FULLSCREEN,
-               "&Full screen\tCtrl-Alt-Shift-F");
-    AppendMenu(hsysmenu, MF_STRING, ID_DEFAULT_WINDOW_SIZE,
-               "Default window si&ze/position\tCtrl-Alt-Shift-Z");
-    AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
-               "Show &toolbar\tCtrl-Alt-Shift-T");
-    AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_GRAB,
-               "&Grab keyboard\tCtrl-Alt-Shift-G");
     AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLALTDEL,
                "Send Ctrl-Alt-&Del");
     AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLESC,
                "Send Ctrl-Esc");
-    if (m_opts.m_FSAltEnter)
-      AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTENTER,
-                 "Send Alt-Enter");
-    AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLDOWN,
-               "Ctrl key down");
-    AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTDOWN,
-               "Alt key down");
-    AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hsysmenu, MF_STRING | MF_GRAYED, IDD_FILETRANSFER,
-               "Transf&er files...\tCtrl-Alt-Shift-E");
-    AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hsysmenu, MF_STRING, ID_NEWCONN,
-               "&New connection...\tCtrl-Alt-Shift-N");
-    AppendMenu(hsysmenu, save_item_flags, ID_CONN_SAVE_AS,
-               "&Save connection info as...\tCtrl-Alt-Shift-S");
   }
-
+  if (m_opts.m_FSAltEnter)
+    AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTENTER,
+               "Send Alt-Enter");
+  AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLDOWN,
+             "Ctrl key down");
+  AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTDOWN,
+             "Alt key down");
+  AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING | MF_GRAYED, IDD_FILETRANSFER,
+             "Transf&er files...\tCtrl-Alt-Shift-E");
+  AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, ID_NEWCONN,
+             "&New connection...\tCtrl-Alt-Shift-N");
+  AppendMenu(hsysmenu, save_item_flags, ID_CONN_SAVE_AS,
+             "&Save connection info as...\tCtrl-Alt-Shift-S");
   AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
   AppendMenu(hsysmenu, MF_STRING, IDD_APP_ABOUT,
              "&About TurboVNC Viewer...");
@@ -589,15 +588,17 @@ HWND ClientConnection::CreateToolbar()
 
   but[i++].fsStyle  = TBSTYLE_SEP;
 
-  but[i].iBitmap    = 5;
-  but[i].idCommand  = ID_CONN_CTLALTDEL;
-  but[i].fsState    = TBSTATE_ENABLED;
-  but[i++].fsStyle  = TBSTYLE_BUTTON;
+  if (!m_opts.m_restricted) {
+    but[i].iBitmap    = 5;
+    but[i].idCommand  = ID_CONN_CTLALTDEL;
+    but[i].fsState    = TBSTATE_ENABLED;
+    but[i++].fsStyle  = TBSTYLE_BUTTON;
 
-  but[i].iBitmap    = 6;
-  but[i].idCommand  = ID_CONN_CTLESC;
-  but[i].fsState    = TBSTATE_ENABLED;
-  but[i++].fsStyle  = TBSTYLE_BUTTON;
+    but[i].iBitmap    = 6;
+    but[i].idCommand  = ID_CONN_CTLESC;
+    but[i].fsState    = TBSTATE_ENABLED;
+    but[i++].fsStyle  = TBSTYLE_BUTTON;
+  }
 
   but[i].iBitmap    = 7;
   but[i].idCommand  = ID_CONN_CTLDOWN;
