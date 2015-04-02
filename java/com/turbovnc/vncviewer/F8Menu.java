@@ -76,8 +76,10 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     f8 = addMenuItem("Send " + KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
     KeyStroke ks = KeyStroke.getKeyStroke(MenuKey.getMenuKeyCode(), 0);
     f8.setAccelerator(ks);
-    ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
-    ctrlEsc = addMenuItem("Send Ctrl-Esc");
+    if (!VncViewer.restricted.getValue()) {
+      ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
+      ctrlEsc = addMenuItem("Send Ctrl-Esc");
+    }
     addSeparator();
     clipboard = addMenuItem("Clipboard...");
     addSeparator();

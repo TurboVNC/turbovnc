@@ -131,9 +131,11 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
                                                       acceleratorMask));
     connMenu.addSeparator();
-    ctrlAltDel = addMenuItem(connMenu, "Send Ctrl-Alt-Del");
-    ctrlEsc = addMenuItem(connMenu, "Send Ctrl-Esc");
-    connMenu.addSeparator();
+    if (!VncViewer.restricted.getValue()) {
+      ctrlAltDel = addMenuItem(connMenu, "Send Ctrl-Alt-Del");
+      ctrlEsc = addMenuItem(connMenu, "Send Ctrl-Esc");
+      connMenu.addSeparator();
+    }
     clipboard = addMenuItem(connMenu, "Clipboard ...");
 
     add(connMenu);

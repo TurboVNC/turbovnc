@@ -987,8 +987,13 @@ public class VncViewer extends javax.swing.JApplet
   "Ignore all keyboard and mouse events in the viewer window and do not pass " +
   "these events to the VNC server.", false);
 
+  // Set to 0 to disable the view-only checkbox in the Options dialog
   static BoolParameter viewOnlyControl
   = new BoolParameter("ViewOnlyControl", null, true);
+
+  // Prevent the viewer from sending Ctrl-Alt-Del and Ctrl-Esc to the server
+  static BoolParameter restricted
+  = new BoolParameter("Restricted", null, false);
 
   static StringParameter grabKeyboard
   = new StringParameter("GrabKeyboard",

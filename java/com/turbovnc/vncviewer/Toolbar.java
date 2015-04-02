@@ -62,6 +62,8 @@ public class Toolbar extends JToolBar implements ActionListener {
         continue;
       if (i >= 9 && i <= 10 && VncViewer.noNewConn.getValue())
         continue;
+      if (i >= 5 && i <= 6 && VncViewer.restricted.getValue())
+        continue;
       ImageIcon icon =
         new ImageIcon(tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
       AbstractButton button;
