@@ -13,7 +13,7 @@ if [ -d $BINDIR/../java ]; then
 fi
 
 # Attempt to figure out where libjawt.so lives
-ARCH=`uname -m`
+ARCH=@CPU_TYPE@
 if [ "$ARCH" = "x86_64" ]; then
 	ARCH=amd64
 fi
