@@ -69,7 +69,7 @@ that MIT-SHM pixmap support is no longer required on Un*x platforms in order to
 achieve optimal performance.  This also makes the viewer faster on some
 systems.  On Windows, the Java viewer is now as fast as or faster than the
 native viewer as a result of this change and [8].  You can set the
-turbovnc.swingdb system property to false to restore the old behavior.
+turbovnc.swingdb system property to true to restore the old behavior.
 -------------------------------------------------------------------------------
 [11]
 Fixed multiple issues in the Java TurboVNC Viewer related to full-screen mode
