@@ -17,7 +17,7 @@ X RANDR extension on the server or remotely from a VNC client that supports the
 RFB desktop size extensions.  Both TurboVNC viewers now also include an
 "automatic desktop resize" feature that will resize the remote desktop so
 that it always fits exactly in the viewer window without using scrollbars.  A
-new "max-desktop-size" directive is provided in the TurboVNC authentication
+new "max-desktop-size" directive is provided in the TurboVNC security
 configuration file in order to allow a maximum desktop size to be specified for
 all TurboVNC sessions on a given server machine.
 -------------------------------------------------------------------------------
@@ -32,8 +32,7 @@ modern client machine.
 The Java TurboVNC Viewer, when run as an applet, can now be displayed to an
 embedded frame in a web page rather than a dedicated window.  This restores a
 feature of the TurboVNC 1.1 Java viewer that was lost in 1.2.  Full-screen
-mode, scaling, and the toolbar do not work when the viewer is run as an
-embedded applet.
+mode and scaling do not work when the viewer is run as an embedded applet.
 -------------------------------------------------------------------------------
 [5]
 vncconnect now uses the VNC X extension to establish a reverse connection,
@@ -205,7 +204,7 @@ that MIT-SHM pixmap support is no longer required on Un*x platforms in order to
 achieve optimal performance.  This also makes the viewer faster on some
 systems.  On Windows, the Java viewer is now as fast as or faster than the
 native viewer as a result of this change and [8].  You can set the
-turbovnc.swingdb system property to false to restore the old behavior.
+turbovnc.swingdb system property to true to restore the old behavior.
 -------------------------------------------------------------------------------
 [11]
 Fixed multiple issues in the Java TurboVNC Viewer related to full-screen mode
