@@ -93,6 +93,11 @@ httpInitSockets()
     if (!httpDir)
         return;
 
+    if (rfbAuthDisableHTTP) {
+       rfbLog("NOTICE: HTTP server disabled per system policy\n");
+       return;
+    }
+
     if (httpPort == 0) {
         httpPort = 5800 + atoi(display);
     }

@@ -704,6 +704,7 @@ extern int   rfbAuthOTPValueLen;
 extern Bool  rfbAuthDisableRevCon;
 extern Bool  rfbAuthDisableCBSend;
 extern Bool  rfbAuthDisableCBRecv;
+extern Bool  rfbAuthDisableHTTP;
 
 #ifdef XVNC_AuthPAM
 extern void rfbAuthAddUser(const char* name, Bool viewOnly);

@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012-2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2015 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -64,6 +64,7 @@ char *rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
 Bool rfbAuthDisableRevCon = FALSE;
 Bool rfbAuthDisableCBSend = FALSE;
 Bool rfbAuthDisableCBRecv = FALSE;
+Bool rfbAuthDisableHTTP   = FALSE;
 
 static int nAuthMethodsEnabled = 0;
 static int preferenceLimit = 1; /* Force one iteration of the loop in
@@ -426,6 +427,11 @@ ReadConfigFile(void)
 
         if (!strcmp(buf2, "no-clipboard-recv")) {
             rfbAuthDisableCBRecv = TRUE;
+            continue;
+        }
+
+        if (!strcmp(buf2, "no-httpd")) {
+            rfbAuthDisableHTTP = TRUE;
             continue;
         }
 
