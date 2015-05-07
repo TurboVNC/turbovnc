@@ -81,6 +81,10 @@ from the X Consortium.
 #include <time.h>
 #include "tvnc_version.h"
 #include "input-xkb.h"
+#define XSERV_t
+#define TRANS_SERVER
+#define TRANS_REOPEN
+#include <X11/Xtrans/Xtrans.h>
 
 #define RFB_DEFAULT_WIDTH  1024
 #define RFB_DEFAULT_HEIGHT 768
@@ -1083,6 +1087,11 @@ OsVendorInit()
 {
     PrintVersion();
     rfbAuthInit();
+    if (rfbAuthDisableX11TCP) {
+        if (_XSERVTransNoListen("tcp"))
+            FatalError("Failed to disable listen for tcp transport");
+    }
+
     if (rfbMaxIdleTimeout > 0 && (rfbIdleTimeout > rfbMaxIdleTimeout ||
         rfbIdleTimeout == 0)) {
         rfbIdleTimeout = rfbMaxIdleTimeout;

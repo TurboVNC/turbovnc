@@ -65,6 +65,7 @@ Bool rfbAuthDisableRevCon = FALSE;
 Bool rfbAuthDisableCBSend = FALSE;
 Bool rfbAuthDisableCBRecv = FALSE;
 Bool rfbAuthDisableHTTP   = FALSE;
+Bool rfbAuthDisableX11TCP = FALSE;
 
 static int nAuthMethodsEnabled = 0;
 static int preferenceLimit = 1; /* Force one iteration of the loop in
@@ -434,6 +435,12 @@ ReadConfigFile(void)
             rfbAuthDisableHTTP = TRUE;
             continue;
         }
+
+        if (!strcmp(buf2, "no-x11-tcp-connections")) {
+            rfbAuthDisableX11TCP = TRUE;
+            continue;
+        }
+
 
 #ifdef XVNC_AuthPAM
         if (!strcmp(buf2, "enable-user-acl")) {

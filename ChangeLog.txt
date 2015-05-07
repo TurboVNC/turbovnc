@@ -6,6 +6,12 @@ A new security configuration file directive (no-httpd) has been introduced in
 order to disable the built-in HTTP server in the TurboVNC Server on a
 system-wide basis.
 -------------------------------------------------------------------------------
+[2]
+A new security configuration file directive (no-x11-tcp-connections) has been
+introduced in order to disable X11 TCP connections to the TurboVNC Server on a
+system-wide basis.  This is the equivalent of passing "-nolisten tcp" to every
+instance of the TurboVNC X server running on a particular server machine.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
