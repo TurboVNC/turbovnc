@@ -95,6 +95,7 @@ httpInitSockets()
 
     if (rfbAuthDisableHTTP) {
        rfbLog("NOTICE: HTTP server disabled per system policy\n");
+       httpDir = NULL;
        return;
     }
 
