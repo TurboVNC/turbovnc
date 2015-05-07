@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
  * Copyright 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -160,6 +160,7 @@ public class Configuration {
     }
 
     int scaleNum = -1, scaleDenom = -1, fitWindow = -1;
+    int resizeMode = -1, desktopWidth = -1, desktopHeight = -1;
     for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
       String name = (String)i.nextElement();
 
@@ -198,6 +199,19 @@ public class Configuration {
         setParam("FullScreen", props.getProperty(name));
       } else if (name.equalsIgnoreCase("fsaltenter")) {
         setParam("FSAltEnter", props.getProperty(name));
+      } else if (name.equalsIgnoreCase("grabkeyboard")) {
+        int grabKeyboard = -1;
+        try {
+          grabKeyboard = Integer.parseInt(props.getProperty(name));
+        } catch(NumberFormatException e) {}
+        switch (grabKeyboard) {
+          case Options.GRAB_FS:
+            setParam("GrabKeyboard", "FS");  break;
+          case Options.GRAB_ALWAYS:
+            setParam("GrabKeyboard", "Always");  break;
+          case Options.GRAB_MANUAL:
+            setParam("GrabKeyboard", "Manual");  break;
+        }
       } else if (name.equalsIgnoreCase("span")) {
         int span = -1;
         try {
@@ -245,6 +259,24 @@ public class Configuration {
           temp = Integer.parseInt(props.getProperty(name));
         } catch(NumberFormatException e) {}
         if (temp >= 1) scaleDenom = temp;
+      } else if (name.equalsIgnoreCase("resizemode")) {
+        int temp = -1;
+        try {
+          temp = Integer.parseInt(props.getProperty(name));
+        } catch(NumberFormatException e) {}
+        if (temp >= 0) resizeMode = temp;
+      } else if (name.equalsIgnoreCase("desktopwidth")) {
+        int temp = -1;
+        try {
+          temp = Integer.parseInt(props.getProperty(name));
+        } catch(NumberFormatException e) {}
+        if (temp >= 1) desktopWidth = temp;
+      } else if (name.equalsIgnoreCase("desktopheight")) {
+        int temp = -1;
+        try {
+          temp = Integer.parseInt(props.getProperty(name));
+        } catch(NumberFormatException e) {}
+        if (temp >= 1) desktopHeight = temp;
       } else if (name.equalsIgnoreCase("cursorshape")) {
         setParam("CursorShape", props.getProperty(name));
       } else if (name.equalsIgnoreCase("compresslevel")) {
@@ -283,6 +315,17 @@ public class Configuration {
       setParam("Scale", Integer.toString(scalingFactor));
     } else if (fitWindow >= 1) {
       setParam("Scale", "FixedRatio");
+    }
+
+    switch (resizeMode) {
+      case Options.SIZE_SERVER:
+        setParam("DesktopSize", "Server");  break;
+      case Options.SIZE_MANUAL:
+        if (desktopWidth > 0 && desktopHeight > 0)
+          setParam("DesktopSize", desktopWidth + "x" + desktopHeight);
+        break;
+      case Options.SIZE_AUTO:
+        setParam("DesktopSize", "Auto");  break;
     }
   }
 

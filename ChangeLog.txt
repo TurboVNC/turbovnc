@@ -12,6 +12,12 @@ introduced in order to disable X11 TCP connections to the TurboVNC Server on a
 system-wide basis.  This is the equivalent of passing "-nolisten tcp" to every
 instance of the TurboVNC X server running on a particular server machine.
 -------------------------------------------------------------------------------
+[3]
+The Java TurboVNC Viewer now supports the "grabkeyboard", "resizemode",
+"desktopwidth", and "desktopheight" directives in .vnc configuration files.
+These directives were added to the Windows TurboVNC Viewer in 2.0 beta but were
+left out of the Java viewer due to an oversight.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
