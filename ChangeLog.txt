@@ -3,8 +3,8 @@
 ===============================================================================
 [1]
 A new security configuration file directive (no-httpd) has been introduced in
-order to allow the built-in HTTP server in the TurboVNC Server to be disabled
-on a system-wide basis.
+order to disable the built-in HTTP server in the TurboVNC Server on a
+system-wide basis.
 -------------------------------------------------------------------------------
 
 
