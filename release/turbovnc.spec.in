@@ -217,8 +217,10 @@ fi
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop
  %{mandir}/man1/vncviewer.1*
- %{javadir}/libturbojpeg.so
- %{javadir}/libturbovnchelper.so
+ %if "%{java}" == "1"
+  %{javadir}/libturbojpeg.so
+  %{javadir}/libturbovnchelper.so
+ %endif
 %endif
 %if "%{server}" == "1"
  %{bindir}/Xvnc
