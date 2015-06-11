@@ -54,12 +54,13 @@ following error:
 
 		!!! The "AppleJava" package will work with OS X 10.5 and later.  It uses
 		Apple's distribution of Java, which was pre-installed on versions of OS X
-		prior to 10.7 (but can be installed on later OS X versions by downloading
-		the "Java for OS X" package from Apple Support.)  The "OracleJava" package
-		will work with OS X 10.7 or later and uses the Oracle Java plugin.  It is
-		provided for compatibility, but it does not perform nearly as well as the
-		"AppleJava" package.  See {ref prefix="Section ": MacJavaPerf} for more
-		details.
+		prior to 10.7 (but which can be installed on later OS X versions by
+		downloading the "Java for OS X" package from Apple Support.)  The
+		"OracleJava" package will work with OS X 10.7 or later and uses the Oracle
+		Java plugin.  In order to achieve the best performance possible with the
+		TurboVNC Viewer, you should generally use Apple Java with older Macs and
+		Oracle Java with newer Macs.  See {ref prefix="Section ": MacJavaPerf} for
+		more details.
 
 	#. Open the disk image, then open ''TurboVNC.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac TurboVNC Viewer.

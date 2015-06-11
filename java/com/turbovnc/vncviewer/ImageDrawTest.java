@@ -122,8 +122,10 @@ public class ImageDrawTest extends JFrame {
       if (!swingDB &&
           RepaintManager.currentManager(this).isDoubleBufferingEnabled())
         super.paintComponent(g);
-      g2.drawImage((iter % 2 == 0 ? im2.getImage() : im1.getImage()), 0, 0,
-                   null);
+      Rectangle r = g.getClipBounds();
+      g2.drawImage((iter % 2 == 0 ? im2.getImage() : im1.getImage()), r.x,
+                   r.y, r.x + r.width, r.y + r.height, r.x, r.y, r.x + r.width,
+                   r.y + r.height, null);
       g2.dispose();
       if (!swingDB)
         RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);

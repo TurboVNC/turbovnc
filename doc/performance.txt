@@ -364,22 +364,38 @@ GDI, OpenGL, Direct3D, etc.) is being used to draw the images.
 #OPT: noList! plain!
 {anchor: MacJavaPerf}
 
-Java 6 for OS X included a Quartz-accelerated Java 2D blitter that performed
-quite well with the Java TurboVNC Viewer.  Unfortunately, however, since Apple
-stopped producing their own Java implementation, that feature went away-- it
-never made it into Oracle Java 7 or later.  The only blitting option in Java 7
-and later, as of this writing, is OpenGL, and although the Java TurboVNC Viewer
-attempts to maximize performance with OpenGL Java 2D blitting as much as
-possible (see the description of the [[#turbovnc.forcealpha]] system property
-for more details), the performance still cannot match that of the Quartz
-blitter in Java 6 for OS X.
+TurboVNC includes two standalone viewer packages for OS X:  one that uses
+Apple's distribution of Java 6 and one that uses the Oracle Java plugin (Java 7
+or later.)  The tradeoffs between the two are as follows:
 
-Although this version of TurboVNC provides an "OracleJava" package that allows
-the standalone TurboVNC Viewer app for OS X to be used with Oracle Java 7 or
-later, it is recommended that you use the "AppleJava" TurboVNC package along
-with Java 6 for OS X whenever possible, as this will provide much better
-performance.  Java for OS X can be obtained as a free download from Apple
-Support.
+Apple Java 6:
+
+	* Pre-installed on OS X 10.6 and earlier (can be installed on later OS X
+	releases by downloading the "Java for OS X" package from Apple Support)
+	* Includes a Quartz-accelerated Java 2D blitter that provides optimal
+	performance for TurboVNC on older Macs (those containing nVidia and Intel HD
+	Graphics GPUs, specifically)
+
+Oracle Java 7 and later:
+
+	* Requires OS X 10.7 or later
+	* Uses OpenGL for Java 2D blitting, which provides optimal performance for
+	TurboVNC on newer Macs (those containing Intel Iris GPUs, specifically--
+	Apple's Java 6 does not appear to include Java 2D hardware acceleration for
+	those GPUs)
+
+If you are unsure which package to use, then you can compare the performance
+of both of them using the ImageDrawTest benchmark:
+
+	#Verb: <<---
+	java -cp Applications/TurboVNC/TurboVNC\ Viewer.app/Contents/Resources/Java/VncViewer.jar com.turbovnc.vncviewer.ImageDrawTest
+	---
+
+	!!! NOTE: if you intend to use the desktop scaling feature in the Java
+	TurboVNC Viewer along with the Oracle Java plugin, then upgrade the plugin
+	to Java 8 Update 40 or later.  Java 8 Update 40 includes a fix for a severe
+	performance issue in the OpenGL Java 2D blitter that affected scaled
+	blitting.
 
 *** Using the Server VM
 #OPT: noList! plain!

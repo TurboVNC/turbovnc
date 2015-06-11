@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-06-10T20:51:29">
+<meta name="date" content="2015-06-10T20:56:33">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -435,7 +435,7 @@ other VNC distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard">Java 5 or later (Java 6 for OS X recommended&ndash; see Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details.)</td>
+    <td class="standard">Java 5 or later (see Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details)</td>
   </tr>
 </table>
 </div>
@@ -559,7 +559,7 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
         SourceForge project page</a></span><a name="idx0024"></a>.
         <div class="important"><p class="important">
-        The &ldquo;AppleJava&rdquo; package will work with OS X 10.5 and later.  It uses Apple&rsquo;s distribution of Java, which was pre-installed on versions of OS X prior to 10.7 (but can be installed on later OS X versions by downloading the &ldquo;Java for OS X&rdquo; package from Apple Support.)  The &ldquo;OracleJava&rdquo; package will work with OS X 10.7 or later and uses the Oracle Java plugin.  It is provided for compatibility, but it does not perform nearly as well as the &ldquo;AppleJava&rdquo; package.  See Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details.
+        The &ldquo;AppleJava&rdquo; package will work with OS X 10.5 and later.  It uses Apple&rsquo;s distribution of Java, which was pre-installed on versions of OS X prior to 10.7 (but which can be installed on later OS X versions by downloading the &ldquo;Java for OS X&rdquo; package from Apple Support.)  The &ldquo;OracleJava&rdquo; package will work with OS X 10.7 or later and uses the Oracle Java plugin.  In order to achieve the best performance possible with the TurboVNC Viewer, you should generally use Apple Java with older Macs and Oracle Java with newer Macs.  See Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details.
         </p></div>
     </li>
     <li class="Ordered-1 Ordered">
@@ -1697,24 +1697,50 @@ images.</p>
 
 <p><a name="MacJavaPerf"></a></p>
 
-<p>Java 6 for OS X included a Quartz-accelerated Java 2D blitter that 
-performed quite well with the Java TurboVNC Viewer.  Unfortunately, 
-however, since Apple stopped producing their own Java implementation, 
-that feature went away&ndash; it never made it into Oracle Java 7 or 
-later.  The only blitting option in Java 7 and later, as of this 
-writing, is OpenGL, and although the Java TurboVNC Viewer attempts to 
-maximize performance with OpenGL Java 2D blitting as much as possible 
-(see the description of the 
-<a href="#turbovnc.forcealpha">turbovnc.forcealpha</a><a name="idx0035"></a> 
-system property for more details), the performance still cannot match 
-that of the Quartz blitter in Java 6 for OS X.</p>
+<p>TurboVNC includes two standalone viewer packages for OS X:  one that 
+uses Apple&rsquo;s distribution of Java 6 and one that uses the Oracle 
+Java plugin (Java 7 or later.)  The tradeoffs between the two are as 
+follows:</p>
 
-<p>Although this version of TurboVNC provides an &ldquo;OracleJava&rdquo; 
-package that allows the standalone TurboVNC Viewer app for OS X to be 
-used with Oracle Java 7 or later, it is recommended that you use the 
-&ldquo;AppleJava&rdquo; TurboVNC package along with Java 6 for OS X 
-whenever possible, as this will provide much better performance.  Java 
-for OS X can be obtained as a free download from Apple Support.</p>
+<p>Apple Java 6:</p>
+
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        Pre-installed on OS X 10.6 and earlier (can be installed on later OS X 
+        releases by downloading the &ldquo;Java for OS X&rdquo; package from 
+        Apple Support)
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        Includes a Quartz-accelerated Java 2D blitter that provides optimal 
+        performance for TurboVNC on older Macs (those containing nVidia and 
+        Intel HD Graphics GPUs, specifically)
+    </li>
+</ul>
+
+<p>Oracle Java 7 and later:</p>
+
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        Requires OS X 10.7 or later
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        Uses OpenGL for Java 2D blitting, which provides optimal performance for 
+        TurboVNC on newer Macs (those containing Intel Iris GPUs, 
+        specifically&ndash; Apple&rsquo;s Java 6 does not appear to include Java 
+        2D hardware acceleration for those GPUs)
+    </li>
+</ul>
+
+<p>If you are unsure which package to use, then you can compare the 
+performance of both of them using the ImageDrawTest benchmark:</p>
+
+<pre class="verbatim">
+java&nbsp;-cp&nbsp;Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Resources/Java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
+</pre>
+
+<div class="important"><p class="important">
+NOTE: if you intend to use the desktop scaling feature in the Java TurboVNC Viewer along with the Oracle Java plugin, then upgrade the plugin to Java 8 Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance issue in the OpenGL Java 2D blitter that affected scaled blitting.
+</p></div>
 
 
 
@@ -2096,7 +2122,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0036"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0035"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>

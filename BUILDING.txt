@@ -299,8 +299,9 @@ make oracledmg
   can be obtained by installing Xcode 3.2.6 (with the "Unix Development"
   option) on OS X 10.6.  This command generates a package containing a Java app
   bundle that relies on the Oracle Java plugin.  The "OracleJava" DMG built
-  with this command can be installed on OS X 10.7 and later.  It will generally
-  not perform as well as the "AppleJava" package.
+  with this command can be installed on OS X 10.7 and later.  See the TurboVNC
+  User's Guide for information on the performance tradeoffs between Apple Java
+  and Oracle Java.
 
 
 =======

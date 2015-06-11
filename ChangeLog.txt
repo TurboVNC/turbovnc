@@ -25,6 +25,16 @@ manager support is not activated.  The Gnome Flashback session under Ubuntu
 15 cannot be made to work properly with TurboVNC, for unknown reasons, but Mate
 is a better solution anyhow.
 -------------------------------------------------------------------------------
+[5]
+The drawing performance of the Java TurboVNC Viewer when running under Oracle
+Java 7 and later on OS X has been dramatically improved (by 3-7x for 2D
+application workloads and 35-50% for 3D application workloads.)  When running
+the standalone TurboVNC Viewer, Apple Java will probably still perform better
+on Macs containing nVidia and Intel HD Graphics GPUs, but on Macs containing
+Intel Iris GPUs, Oracle Java is now the fastest solution (Java 2D is apparently
+not accelerated in Apple Java 6 on these newer GPUs.)  See the User's Guide
+for more details.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
