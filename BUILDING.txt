@@ -72,10 +72,10 @@ Windows
 Mac/Java
 --------
 
--- JDK 1.6 or later
-   * To build with Java 1.6, install the Java Developer Package from
+-- JDK 6 or OpenJDK 1.6 or later
+   * To build with Java 6, install the Java Developer Package from
      http://developer.apple.com/downloads (Apple ID required)
-   * To build with Java 1.7 or later, download the Oracle Java
+   * To build with Java 7 or later, download the Oracle Java
      Development Kit from http://www.java.com
 
 

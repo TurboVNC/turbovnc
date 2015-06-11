@@ -194,7 +194,7 @@ arguments in an applet or Java Web Start environment.
 	because otherwise glDrawPixels() has to set all of the alpha values itself
 	(which can cause it to revert to an unaccelerated code path in some cases.)
 
-	!!! NOTE: this property is enabled by default when using Java 1.7 or later on
+	!!! NOTE: this property is enabled by default when using Java 7 or later on
 	Mac platforms, because OpenGL Java 2D blitting is the only option available.
 
 | Java System Property | ''turbovnc.lionfs = ''__''0 \| 1''__ |
