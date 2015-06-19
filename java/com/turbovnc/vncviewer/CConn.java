@@ -1812,29 +1812,53 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
 
+  public static final int rfbButton1Mask = 1;
+  public static final int rfbButton2Mask = 2;
+  public static final int rfbButton3Mask = 4;
+  public static final int rfbButton4Mask = 8;
+  public static final int rfbButton5Mask = 16;
+
   // EDT
   public void writePointerEvent(MouseEvent ev) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
 
-    int modifiers = ev.getModifiers();
     switch (ev.getID()) {
     case MouseEvent.MOUSE_PRESSED:
-      if ((modifiers & MouseEvent.BUTTON1_MASK) != 0) buttonMask |= 1;
-      else if ((modifiers & MouseEvent.BUTTON2_MASK) != 0) buttonMask |= 2;
-      else if ((modifiers & MouseEvent.BUTTON3_MASK) != 0) buttonMask |= 4;
-      else {
-        // Java 1.1 doesn't set BUTTON1_MASK when the left button is pressed
-        // (fixed in 1.1.1-- see
-        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4029201)
-        buttonMask = 1;
+      switch(ev.getButton()) {
+      case 1:
+        buttonMask |= rfbButton1Mask;  break;
+      case 2:
+        buttonMask |= rfbButton2Mask;  break;
+      case 3:
+        buttonMask |= rfbButton3Mask;  break;
+      case 4:
+        buttonMask |= rfbButton4Mask;  break;
+      case 5:
+        buttonMask |= rfbButton5Mask;  break;
+      default:
+        return;
       }
+      vlog.debug("mouse PRESS, button " + ev.getButton() +
+                 ", coords " + ev.getX() + "," + ev.getY());
       break;
     case MouseEvent.MOUSE_RELEASED:
-      if ((modifiers & MouseEvent.BUTTON1_MASK) != 0) buttonMask &= ~1;
-      else if ((modifiers & MouseEvent.BUTTON2_MASK) != 0) buttonMask &= ~2;
-      else if ((modifiers & MouseEvent.BUTTON3_MASK) != 0) buttonMask &= ~4;
-      else return;
+      switch(ev.getButton()) {
+      case 1:
+        buttonMask &= ~rfbButton1Mask;  break;
+      case 2:
+        buttonMask &= ~rfbButton2Mask;  break;
+      case 3:
+        buttonMask &= ~rfbButton3Mask;  break;
+      case 4:
+        buttonMask &= ~rfbButton4Mask;  break;
+      case 5:
+        buttonMask &= ~rfbButton5Mask;  break;
+      default:
+        return;
+      }
+      vlog.debug("mouse release, button " + ev.getButton() +
+                 ", coords " + ev.getX() + "," + ev.getY());
       break;
     }
 

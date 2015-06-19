@@ -35,6 +35,14 @@ Intel Iris GPUs, Oracle Java is now the fastest solution (Java 2D is apparently
 not accelerated in Apple Java 6 on these newer GPUs.)  See the User's Guide
 for more details.
 -------------------------------------------------------------------------------
+[6]
+Both the Windows and Java TurboVNC viewers now properly process and deliver
+button press and release events from Buttons 4 and 5 on mice with extra
+buttons (Microsoft calls these "X buttons.")  You must be using Java 7 or later
+for this to work with the Java viewer.  This also fixes an issue whereby
+pressing one of the extra mouse buttons with the Java viewer could cause it
+to send a Button 1 press event without a corresponding release event.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
