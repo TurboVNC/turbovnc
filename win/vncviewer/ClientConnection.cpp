@@ -2464,8 +2464,6 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
     case WM_MBUTTONUP:
     case WM_RBUTTONDOWN:
     case WM_RBUTTONUP:
-    case WM_XBUTTONDOWN:
-    case WM_XBUTTONUP:
     case WM_MOUSEMOVE:
     case WM_MOUSEWHEEL:
     {
@@ -2744,9 +2742,9 @@ inline void ClientConnection::SubProcessPointerEvent(int x, int y,
             ((keyflags & MK_MBUTTON) ? rfbButton2Mask : 0) |
             ((keyflags & MK_RBUTTON) ? rfbButton3Mask : 0));
 
-  if ((short)HIWORD(keyflags) > 0 || (keyflags & MK_XBUTTON1))
+  if ((short)HIWORD(keyflags) > 0)
     mask |= rfbButton4Mask;
-  else if ((short)HIWORD(keyflags) < 0 || (keyflags & MK_XBUTTON2))
+  else if ((short)HIWORD(keyflags) < 0)
     mask |= rfbButton5Mask;
 
   try {
