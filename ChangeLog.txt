@@ -1,4 +1,16 @@
 ===============================================================================
+1.2.4
+===============================================================================
+[1]
+Fixed an issue whereby pressing any of the extra buttons on mice with more than
+3 buttons (Microsoft calls these "X buttons") would cause the Java TurboVNC
+Viewer to send a left button press event to the TurboVNC Server without sending
+a corresponding button release event.  The Java TurboVNC Viewer now ignores
+any X button events, since X11 doesn't support them.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 1.2.3
 ===============================================================================
 [1]
