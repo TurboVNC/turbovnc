@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-06-20T07:22:47">
+<meta name="date" content="2015-06-20T08:29:03">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1666,24 +1666,50 @@ images.</p>
 
 <h3 id="hd007006003">Mac Blitting Performance</h3>
 
-<p>Java 6 for OS X included a Quartz-accelerated Java 2D blitter that 
-performed quite well with the Java TurboVNC Viewer.  Unfortunately, 
-however, since Apple stopped producing their own Java implementation, 
-that feature went away&ndash; it never made it into Oracle Java 7 or 
-later.  The only blitting option in Java 7 and later, as of this 
-writing, is OpenGL, and although the Java TurboVNC Viewer attempts to 
-maximize performance with OpenGL Java 2D blitting as much as possible 
-(see the description of the 
-<a href="#turbovnc.forcealpha">turbovnc.forcealpha</a><a name="idx0034"></a> 
-system property for more details), the performance still cannot match 
-that of the Quartz blitter in Java 6 for OS X.</p>
+<p>The standalone TurboVNC Viewer app for OS X requires Apple&rsquo;s 
+distribution of Java (Java for OS X), but the Oracle Java plugin (Java 7 
+or later) is typically used on OS X 10.7 and later when launching the 
+Java TurboVNC Viewer as an applet or using Java Web Start.  The 
+tradeoffs between the two Java flavors are as follows:</p>
 
-<p>The standalone TurboVNC Viewer app for OS X requires Java for OS X, so 
-it will perform optimally, but Oracle Java 7 or later is typically used 
-on OS X 10.7 and later when launching the Java TurboVNC Viewer as an 
-applet or using Java Web Start.  Thus, the viewer will perform less 
-optimally when launched in that manner.  There is unfortunately nothing 
-that can be done about this at the moment.</p>
+<p>Java for OS X:</p>
+
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        Pre-installed on OS X 10.6 and earlier (can be installed on later OS X 
+        releases by downloading the Java for OS X package from Apple Support)
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        Includes a Quartz-accelerated Java 2D blitter that provides optimal 
+        performance for TurboVNC on older Macs (those containing nVidia and 
+        Intel HD Graphics GPUs, specifically)
+    </li>
+</ul>
+
+<p>Oracle Java 7 and later:</p>
+
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        Requires OS X 10.7 or later
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        Uses OpenGL for Java 2D blitting, which provides optimal performance for 
+        TurboVNC on newer Macs (those containing Intel Iris GPUs, 
+        specifically&ndash; Java for OS X does not appear to include Java 2D 
+        hardware acceleration for those GPUs)
+    </li>
+</ul>
+
+<p>If you are unsure which package to use, then you can compare the 
+performance of both of them using the ImageDrawTest benchmark:</p>
+
+<pre class="verbatim">
+java&nbsp;-cp&nbsp;/Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Resources/Java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
+</pre>
+
+<div class="important"><p class="important">
+NOTE: if you intend to use the desktop scaling feature in the Java TurboVNC Viewer along with the Oracle Java plugin, then upgrade the plugin to Java 8 Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance issue in the OpenGL Java 2D blitter that affected scaled blitting.
+</p></div>
 
 
 
@@ -2066,7 +2092,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0035"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0034"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>

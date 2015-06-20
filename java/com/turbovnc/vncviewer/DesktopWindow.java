@@ -380,7 +380,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     scaleHeightRatio = (float)scaledHeight / (float)cc.cp.height;
   }
 
-  // EDT 
+  // EDT
   public void paintComponent(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     if (!swingDB &&
@@ -395,7 +395,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
                           RenderingHints.VALUE_INTERPOLATION_BILINEAR);
       g2.drawImage(im.getImage(), 0, 0, scaledWidth, scaledHeight, null);
     } else {
-      g2.drawImage(im.getImage(), 0, 0, null);
+      Rectangle r = g.getClipBounds();
+      g2.drawImage(im.getImage(), r.x, r.y, r.x + r.width, r.y + r.height,
+                   r.x, r.y, r.x + r.width, r.y + r.height, null);
     }
     g2.dispose();
     if (!swingDB)
