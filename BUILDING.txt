@@ -71,7 +71,7 @@ Windows
 Mac/Java
 --------
 
--- JDK or OpenJDK 1.5 or later (1.6 or later recommended)
+-- JDK 5 or OpenJDK 1.5 or later (JDK 6/OpenJDK 1.6 or later recommended)
    * On OS X 10.5 and later, install the Java Developer Package, which can
      be downloaded from http://developer.apple.com/downloads (Apple ID
      required)
