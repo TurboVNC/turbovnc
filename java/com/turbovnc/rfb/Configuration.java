@@ -255,10 +255,10 @@ public class Configuration {
           subsampling = Integer.parseInt(props.getProperty(name));
         } catch(NumberFormatException e) {}
         switch (subsampling) {
-        case 0:  setParam("Subsampling", "1X");  break;
-        case 1:  setParam("Subsampling", "4X");  break;
-        case 2:  setParam("Subsampling", "2X");  break;
-        case 3:  setParam("Subsampling", "Gray");  break;
+          case Options.SUBSAMP_NONE:  setParam("Subsampling", "1X");  break;
+          case Options.SUBSAMP_4X:  setParam("Subsampling", "4X");  break;
+          case Options.SUBSAMP_2X:  setParam("Subsampling", "2X");  break;
+          case Options.SUBSAMP_GRAY:  setParam("Subsampling", "Gray");  break;
         }
       } else if (name.equalsIgnoreCase("quality")) {
         int quality = -2;
