@@ -364,14 +364,17 @@ GDI, OpenGL, Direct3D, etc.) is being used to draw the images.
 #OPT: noList! plain!
 {anchor: MacJavaPerf}
 
-TurboVNC includes two standalone viewer packages for OS X:  one that uses
-Apple's distribution of Java 6 and one that uses the Oracle Java plugin (Java 7
-or later.)  The tradeoffs between the two are as follows:
+The Oracle Java plugin (Java 7 or later) is used on OS X 10.7 and later when
+launching the Java TurboVNC Viewer as an applet or using Java Web Start.  When
+using TurboVNC as a standalone application, there are two packages provided:
+one that uses the afore-mentioned Oracle Java plugin and one that uses Apple's
+distribution of Java (Java for OS X.)  The tradeoffs between the two Java
+flavors are as follows:
 
-Apple Java 6:
+Java for OS X:
 
 	* Pre-installed on OS X 10.6 and earlier (can be installed on later OS X
-	releases by downloading the "Java for OS X" package from Apple Support)
+	releases by downloading the Java for OS X package from Apple Support)
 	* Includes a Quartz-accelerated Java 2D blitter that provides optimal
 	performance for TurboVNC on older Macs (those containing nVidia and Intel HD
 	Graphics GPUs, specifically)
@@ -381,14 +384,14 @@ Oracle Java 7 and later:
 	* Requires OS X 10.7 or later
 	* Uses OpenGL for Java 2D blitting, which provides optimal performance for
 	TurboVNC on newer Macs (those containing Intel Iris GPUs, specifically--
-	Apple's Java 6 does not appear to include Java 2D hardware acceleration for
+	Java for OS X does not appear to include Java 2D hardware acceleration for
 	those GPUs)
 
 If you are unsure which package to use, then you can compare the performance
 of both of them using the ImageDrawTest benchmark:
 
 	#Verb: <<---
-	java -cp Applications/TurboVNC/TurboVNC\ Viewer.app/Contents/Resources/Java/VncViewer.jar com.turbovnc.vncviewer.ImageDrawTest
+	java -cp /Applications/TurboVNC/TurboVNC\ Viewer.app/Contents/Resources/Java/VncViewer.jar com.turbovnc.vncviewer.ImageDrawTest
 	---
 
 	!!! NOTE: if you intend to use the desktop scaling feature in the Java

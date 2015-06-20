@@ -45,8 +45,8 @@
 	| OS X 10.5 ("Leopard") or later \
 	|
 | Other Software \
-	| Java 5 or later (see {ref prefix="Section ": MacJavaPerf} for more \
-		details) \
+	| Java for OS X or Oracle Java 8u40 or later (see \
+		{ref prefix="Section ": MacJavaPerf} for more details) \
 	|
 #OPT: hiCol=first
 

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-06-10T20:56:33">
+<meta name="date" content="2015-06-20T08:13:32">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -435,7 +435,7 @@ other VNC distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard">Java 5 or later (see Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details)</td>
+    <td class="standard">Java for OS X or Oracle Java 8u40 or later (see Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details)</td>
   </tr>
 </table>
 </div>
@@ -1697,18 +1697,19 @@ images.</p>
 
 <p><a name="MacJavaPerf"></a></p>
 
-<p>TurboVNC includes two standalone viewer packages for OS X:  one that 
-uses Apple&rsquo;s distribution of Java 6 and one that uses the Oracle 
-Java plugin (Java 7 or later.)  The tradeoffs between the two are as 
-follows:</p>
+<p>The Oracle Java plugin (Java 7 or later) is used on OS X 10.7 and later 
+when launching the Java TurboVNC Viewer as an applet or using Java Web 
+Start.  When using TurboVNC as a standalone application, there are two 
+packages provided: one that uses the afore-mentioned Oracle Java plugin 
+and one that uses Apple&rsquo;s distribution of Java (Java for OS X.)  
+The tradeoffs between the two Java flavors are as follows:</p>
 
-<p>Apple Java 6:</p>
+<p>Java for OS X:</p>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
         Pre-installed on OS X 10.6 and earlier (can be installed on later OS X 
-        releases by downloading the &ldquo;Java for OS X&rdquo; package from 
-        Apple Support)
+        releases by downloading the Java for OS X package from Apple Support)
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Includes a Quartz-accelerated Java 2D blitter that provides optimal 
@@ -1726,8 +1727,8 @@ follows:</p>
     <li class="Itemize-1 Itemize asterisk">
         Uses OpenGL for Java 2D blitting, which provides optimal performance for 
         TurboVNC on newer Macs (those containing Intel Iris GPUs, 
-        specifically&ndash; Apple&rsquo;s Java 6 does not appear to include Java 
-        2D hardware acceleration for those GPUs)
+        specifically&ndash; Java for OS X does not appear to include Java 2D 
+        hardware acceleration for those GPUs)
     </li>
 </ul>
 
@@ -1735,7 +1736,7 @@ follows:</p>
 performance of both of them using the ImageDrawTest benchmark:</p>
 
 <pre class="verbatim">
-java&nbsp;-cp&nbsp;Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Resources/Java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
+java&nbsp;-cp&nbsp;/Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Resources/Java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
 </pre>
 
 <div class="important"><p class="important">
