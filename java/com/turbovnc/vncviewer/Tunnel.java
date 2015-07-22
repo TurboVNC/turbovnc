@@ -182,8 +182,9 @@ public class Tunnel {
                                      throws Exception {
     if (pattern == null || pattern.length() < 1)
       pattern = (opts.tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
+
     String command = fillCmdPattern(pattern, gatewayHost, remoteHost,
-                                    remotePort, localPort, opts.tunnel);
+                                    remotePort, localPort, opts);
 
     vlog.debug("SSH command line: " + command);
     Process p = Runtime.getRuntime().exec(command);
@@ -193,16 +194,19 @@ public class Tunnel {
 
   private static String fillCmdPattern(String pattern, String gatewayHost,
                                        String remoteHost, int remotePort,
-                                       int localPort, boolean tunnel) {
+                                       int localPort, Options opts) {
     int i, j;
     boolean H_found = false, G_found = false, R_found = false, L_found = false;
     String command = "";
+
+    if (opts.sshUser != null)
+      gatewayHost = opts.sshUser + "@" + gatewayHost;
 
     for (i = 0; i < pattern.length(); i++) {
       if (pattern.charAt(i) == '%') {
         switch (pattern.charAt(++i)) {
           case 'H':
-            command += (tunnel ? gatewayHost : remoteHost);
+            command += (opts.tunnel ? gatewayHost : remoteHost);
             H_found = true;
             continue;
           case 'G':
@@ -225,7 +229,7 @@ public class Tunnel {
     if (!H_found || !R_found || !L_found)
       throw new ErrorException("%H, %R or %L absent in tunneling command template.");
 
-    if (!tunnel && !G_found)
+    if (!opts.tunnel && !G_found)
       throw new ErrorException("%G pattern absent in tunneling command template.");
 
     return command;
