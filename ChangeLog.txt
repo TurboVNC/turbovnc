@@ -1,4 +1,15 @@
 ===============================================================================
+2.0.1
+===============================================================================
+[1]
+When using an external SSH client with the Via or Tunnel parameters, the Java
+TurboVNC Viewer was not passing the SSH user name to the external SSH client,
+which caused SSH authentication to fail unless the remote and local user names
+were the same.  This has been fixed.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 2.0
 ===============================================================================
 [1]
