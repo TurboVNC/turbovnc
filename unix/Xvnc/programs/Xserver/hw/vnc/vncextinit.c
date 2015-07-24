@@ -212,7 +212,6 @@ static int ProcVncExtGetClientCutText(ClientPtr client)
 {
   xVncExtGetClientCutTextReply rep;
 
-  REQUEST(xVncExtGetClientCutTextReq);
   REQUEST_SIZE_MATCH(xVncExtGetClientCutTextReq);
 
   rep.type = X_Reply;
