@@ -1,7 +1,7 @@
 /* Copyright (C) 2009 TightVNC Team
  * Copyright (C) 2009 Red Hat, Inc.
  * Copyright 2013 Pierre Ossman for Cendio AB
- * Copyright 2014 D. R. Commander
+ * Copyright (C) 2014-2015 D. R. Commander
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,8 +52,9 @@ from The Open Group.
 #endif
 
 #include <stdio.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+#include <X11/X.h>
+#include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
 #include <X11/keysym.h>
 #include "xkbsrv.h"
 #include "xkbstr.h"
@@ -84,7 +85,7 @@ static Bool XkbTranslateKeyCode(register XkbDescPtr xkb, KeyCode key,
   if ((!XkbKeycodeInRange(xkb, key)) || (nKeyGroups == 0)) {
     if (keysym_rtrn != NULL)
       *keysym_rtrn = NoSymbol;
-    return False;
+    return FALSE;
   }
 
   syms = XkbKeySymsPtr(xkb, key);
