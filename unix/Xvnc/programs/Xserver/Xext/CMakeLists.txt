@@ -5,7 +5,7 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
 endif()
 
-add_library(Xext STATIC
+add_library(Xext-server STATIC
 	bigreq.c
 	dpms.c
 	dpmsstubs.c

@@ -1,7 +1,7 @@
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
-Copyright 2012  D. R. Commander
+Copyright 2012, 2015  D. R. Commander
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -153,6 +153,9 @@ extern Bool noSELinuxExtension;
 extern Bool noXvExtension;
 #endif
 extern Bool noGEExtension;
+#ifdef NVCONTROL
+extern Bool noNVCTRLExtension;
+#endif
 
 #ifndef XFree86LOADER
 #define INITARGS void
@@ -268,6 +271,9 @@ extern void CompositeExtensionInit(INITARGS);
 #endif
 extern void GEExtensionInit(INITARGS);
 extern void vncExtensionInit(INITARGS);
+#ifdef NVCONTROL
+extern void nvCtrlExtensionInit(INITARGS);
+#endif
 
 /* The following is only a small first step towards run-time
  * configurable extensions.
@@ -500,6 +506,10 @@ InitExtensions(int argc, char *argv[])
 #endif
 
     vncExtensionInit();
+#ifdef NVCONTROL
+    if (!noNVCTRLExtension)
+        nvCtrlExtensionInit();
+#endif
 }
 
 #else                           /* XFree86LOADER */

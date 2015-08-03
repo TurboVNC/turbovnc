@@ -6,6 +6,10 @@ add_definitions(-DCOMPOSITE -DDAMAGE -DDPMSExtension -DMITSHM -DRANDR -DRENDER
 	-DRES -DSCREENSAVER -DSHAPE -DXACE -DXCSECURITY -DXFIXES -DXF86BIGFONT
 	-DXINPUT -DXTEST -DXV)
 
+if(TVNC_NVCONTROL)
+add_definitions(-DNVCONTROL)
+endif()
+
 add_definitions(-DHAVE_DIX_CONFIG_H -DCLIENTIDS -DHAS_SHM -DPIXPRIV)
 
 if(BITS EQUAL 64)
@@ -106,9 +110,13 @@ set(EXTRA_LIB "")
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	set(EXTRA_LIB "-lsocket -lnsl")
 endif()
+if(TVNC_NVCONTROL)
+	set(EXTRA_LIB ${EXTRA_LIB} XNVCtrl)
+endif()
 target_link_libraries(Xvnc main dix vnc fb Xi composite mi damage damageext
-	randr render os Xext sync xfixes xkb Xau Xdmcp Xfont fontenc freetype2 pixman
-	sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m pthread ${PAM_LIB} ${EXTRA_LIB})
+	randr render os Xext-server sync xfixes xkb Xau Xdmcp Xfont fontenc freetype2
+	pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m pthread ${PAM_LIB}
+	${EXTRA_LIB})
 
 install(TARGETS Xvnc DESTINATION ${TVNC_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/Xserver.man

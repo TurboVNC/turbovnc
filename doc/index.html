@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-06-20T08:13:32">
+<meta name="date" content="2015-08-03T13:51:34">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -145,6 +145,9 @@
             <li class="Itemize-3 hd">
                 <a href="#hd009002" class="hd">9.2 Using TurboVNC When VirtualGL Is 
                 Running on a Different Machine</a>
+            </li>
+            <li class="Itemize-3 hd">
+                <a href="#hd009003" class="hd">9.3 NV-CONTROL Emulation</a>
             </li>
         </ul>
     </li>
@@ -2109,6 +2112,52 @@ TurboVNC server for this procedure to perform well.</p>
 
     </li>
 </ol>
+
+
+
+<h2 id="hd009003">9.3&nbsp;NV-CONTROL Emulation</h2>
+
+<p>This version of TurboVNC includes partial emulation of the NV-CONTROL 
+X11 extension provided by nVidia&rsquo;s proprietary Un*x drivers.  
+Certain 3D applications rely on this extension to query and set 
+low-level GPU properties, and unfortunately the library (libXNVCtrl) 
+used by applications to interact with the extension is static, making it 
+impossible to interpose using VirtualGL.</p>
+
+<p>Passing an argument of 
+<code>-nvcontrol&nbsp;</code><em><code>{display}</code></em> to 
+<code>vncserver</code> will set up a fake NV-CONTROL extension in the 
+TurboVNC session and will redirect all NV-CONTROL requests to 
+<em><code>{display}</code></em>.  <em><code>{display}</code></em> should 
+generally be the name of the 3D X server you plan to use with VirtualGL 
+(&ldquo;:0&rdquo;, for instance.)  The TurboVNC Server does not attempt 
+to open a connection to this display until an application uses the 
+NV-CONTROL extension.  If a connection to the 3D X server cannot be 
+opened, if the 3D X server does not have the NV-CONTROL extension, or if 
+other issues are encountered when attempting to redirect NV-CONTROL 
+requests, then a BadRequest X11 error will be returned to the 
+application, and the TurboVNC session log will display an error message 
+explaining why the request failed.  It is assumed that you have already 
+followed the procedure in the VirtualGL User&rsquo;s Guide to allow 
+access to the 3D X server.  If access to the 3D X server is restricted 
+to members of the vglusers group, then you may need to execute</p>
+
+<pre class="verbatim">
+xauth&nbsp;merge&nbsp;/etc/opt/VirtualGL/vgl_xauth_key
+</pre>
+
+<p>if you need to use the NV-CONTROL extension prior to invoking 
+<code>vglrun</code> for the first time.</p>
+
+<p>You can change the 3D X server for a particular TurboVNC session after 
+the session has been started.  For instance, if you want to redirect 
+both NV-CONTROL requests and OpenGL to a GPU attached to Screen 1 of 
+Display :0, you would execute</p>
+
+<pre class="verbatim">
+xprop&nbsp;-root&nbsp;-f&nbsp;VNC_NVCDISPLAY&nbsp;8s&nbsp;-set&nbsp;VNC_NVCDISPLAY&nbsp;:0.1
+vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
+</pre>
 
 <p><br /></p>
 

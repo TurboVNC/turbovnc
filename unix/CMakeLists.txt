@@ -61,8 +61,15 @@ endif()
 
 if(TVNC_BUILDSERVER)
 
+option(TVNC_NVCONTROL
+	"Include fake NV-CONTROL extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"
+	ON)
+
 add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
 add_subdirectory(libvncauth)
+if(TVNC_NVCONTROL)
+	add_subdirectory(libXNVCtrl)
+endif()
 add_subdirectory(tvncconfig)
 add_subdirectory(vncconnect)
 add_subdirectory(vncpasswd)

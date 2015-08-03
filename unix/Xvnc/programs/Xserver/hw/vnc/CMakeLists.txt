@@ -12,6 +12,12 @@ if(TVNC_USEPAM)
 	set(PAMSRC authpam.c)
 endif()
 
+set(NVCTRLSRC "")
+if(TVNC_NVCONTROL)
+	set(NVCTRLSRC nvctrlext.c)
+	include_directories(${CMAKE_SOURCE_DIR}/unix/libXNVCtrl)
+endif()
+
 add_library(vnc STATIC
 	auth.c
 	cmap.c
@@ -39,4 +45,5 @@ add_library(vnc STATIC
 	zrle.c
 	zrleoutstream.c
 	zrlepalettehelper.c
-	${PAMSRC})
+	${PAMSRC}
+	${NVCTRLSRC})

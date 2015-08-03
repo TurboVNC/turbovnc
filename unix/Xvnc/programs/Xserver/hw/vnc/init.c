@@ -104,6 +104,9 @@ char rfbThisHost[256];
 Atom VNC_LAST_CLIENT_ID;
 Atom VNC_CONNECT;
 Atom VNC_OTP;
+#ifdef NVCONTROL
+Atom VNC_NVCDISPLAY;
+#endif
 
 #ifdef XVNC_AuthPAM
 #define MAXUSERLEN 63
@@ -355,6 +358,15 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
+#ifdef NVCONTROL
+    if (strcasecmp(argv[i], "-nvcontrol") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        nvCtrlDisplay = strdup(argv[i + 1]);
+        noNVCTRLExtension = FALSE;
+        return 2;
+    }
+#endif
+
     if (strcasecmp(argv[i], "-economictranslate") == 0) {
         rfbEconomicTranslate = TRUE;
         return 1;
@@ -512,6 +524,11 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 
 #ifdef XVNC_AuthPAM
     VNC_ACL = MakeAtom("VNC_ACL", strlen("VNC_ACL"), TRUE);
+#endif
+
+#ifdef NVCONTROL
+    VNC_NVCDISPLAY = MakeAtom("VNC_NVCDISPLAY", strlen("VNC_NVCDISPLAY"),
+                              TRUE);
 #endif
 
     rfbInitSockets();
@@ -1002,6 +1019,20 @@ rfbRootPropertyChange(PropertyPtr pProp)
         /* Delete the property?  How? */
     }
 #endif
+
+#ifdef NVCONTROL
+    if ((pProp->propertyName == VNC_NVCDISPLAY) &&
+        (pProp->type == XA_STRING) && (pProp->format == 8) &&
+        (pProp->size > 1) && (pProp->size <= 1024)) {
+        if (nvCtrlDisplay)
+            free (nvCtrlDisplay);
+        nvCtrlDisplay = (char *) malloc(pProp->size + 1);
+        if (!nvCtrlDisplay)
+            FatalError("Memory allocation failure");
+        memcpy(nvCtrlDisplay, pProp->data, pProp->size);
+        nvCtrlDisplay[pProp->size] = '\0';
+    }
+#endif
 }
 
 
@@ -1144,6 +1175,10 @@ ddxUseMsg()
     ErrorF("                       seconds (S is floating point)\n");
     ErrorF("-interframe            always use interframe comparison\n");
     ErrorF("-nointerframe          never use interframe comparison\n");
+#ifdef NVCONTROL
+    ErrorF("-nvcontrol display     set up a virtual NV-CONTROL extension and redirect\n");
+    ErrorF("                       NV-CONTROL requests to the specified X display\n");
+#endif
     ErrorF("-economictranslate     less memory hungry translation\n");
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");

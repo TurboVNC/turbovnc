@@ -663,6 +663,12 @@ extern void vncRRDeinit(ScreenPtr);
 extern void vncClientCutText(const char* str, int len);
 
 
+/* nvctrlext.c */
+
+extern Bool noNVCTRLExtension;
+extern char *nvCtrlDisplay;
+
+
 /* translate.c */
 
 extern Bool rfbEconomicTranslate;
