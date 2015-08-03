@@ -1,4 +1,15 @@
 ===============================================================================
+2.1
+===============================================================================
+[1]
+The TurboVNC Server can now emulate a subset of the NV-CONTROL X11 extension,
+in order to support certain 3D applications that rely on this extension to
+query and set low-level nVidia GPU attributes.  See the User's Guide for more
+details.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 2.0.1
 ===============================================================================
 [1]
