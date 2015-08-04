@@ -38,6 +38,7 @@
 #include "nv_control.h"
 
 extern void rfbLog(char *format, ...);
+extern int rfbPort;
 static int ProcNVCTRLDispatch(ClientPtr client);
 static int SProcNVCTRLDispatch(ClientPtr client);
 
@@ -73,8 +74,18 @@ static inline void swap_float(float *ptr)
 #define X_INIT()  \
   XErrorHandler oldHandler = NULL;  \
   Display *dpy = NULL;  \
+  char *tmp = NULL;  \
   if (!nvCtrlDisplay)  \
     FatalError("NV-CONTROL ERROR:\nNo 3D X server specified\n");  \
+  if ((tmp = strchr(nvCtrlDisplay, ':')) != NULL) {  \
+    if (strlen(tmp) > 1) {  \
+      int displayNumber = atoi(tmp + 1);  \
+      if (displayNumber + 5900 == rfbPort) {  \
+        rfbLog("NV-CONTROL ERROR:\nCannot redirect NV-CONTROL requests to the same X display\n");  \
+        return BadRequest;  \
+      }  \
+    }  \
+  }  \
   if ((dpy = XOpenDisplay(nvCtrlDisplay)) == NULL) {  \
     rfbLog("NV-CONTROL X11 ERROR: Could not open X display %s\n",  \
            nvCtrlDisplay);  \
