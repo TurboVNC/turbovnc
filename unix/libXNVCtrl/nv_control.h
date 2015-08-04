@@ -341,7 +341,7 @@ typedef struct {
     INT32 attr_type B32;
     int64_t min_64;
     int64_t max_64;
-    CARD64 bits_64;
+    uint64_t bits_64;
     CARD32 perms B32;
     CARD32 pad1 B32;
 } xnvCtrlQueryValidAttributeValues64Reply;
