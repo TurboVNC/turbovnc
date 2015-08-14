@@ -9,7 +9,7 @@
  *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
  *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
  *  Copyright (C) 2013 Pierre Ossman for Cendio AB.  All Rights Reserved.
- *  Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014-2015 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -442,15 +442,21 @@ PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
     int i;
     int valuators[2];
     ValuatorMask mask;
-    static int oldButtonMask = 0;
+    static int oldButtonMask = 0, cursorPosX = -1, cursorPosY = -1;
 
     if (!ptrDevice)
         FatalError("Pointer device not initialized");
 
-    valuators[0] = x;
-    valuators[1] = y;
-    valuator_mask_set_range(&mask, 0, 2, valuators);
-    QueuePointerEvents(ptrDevice, MotionNotify, 0, POINTER_ABSOLUTE, &mask);
+    if (cursorPosX != x || cursorPosY != y) {
+        valuators[0] = x;
+        valuators[1] = y;
+        valuator_mask_set_range(&mask, 0, 2, valuators);
+        QueuePointerEvents(ptrDevice, MotionNotify, 0, POINTER_ABSOLUTE,
+                           &mask);
+
+        cursorPosX = x;
+        cursorPosY = y;
+    }
 
     for (i = 0; i < 5; i++) {
         if ((buttonMask ^ oldButtonMask) & (1 << i)) {

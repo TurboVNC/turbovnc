@@ -7,6 +7,14 @@ TurboVNC Viewer was not passing the SSH user name to the external SSH client,
 which caused SSH authentication to fail unless the remote and local user names
 were the same.  This has been fixed.
 -------------------------------------------------------------------------------
+[2]
+Fixed an issue whereby the TurboVNC X server was erroneously generating X11
+MotionNotify events every time a mouse button was pressed or released,
+regardless of whether the pointer had actually moved.  This caused problems
+with certain applications (for instance, in GNOME Terminal, text was selected
+when single-clicking on it rather than double-clicking or click-dragging on
+it.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
