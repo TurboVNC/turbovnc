@@ -15,6 +15,10 @@ with certain applications (for instance, in GNOME Terminal, text was selected
 when single-clicking on it rather than double-clicking or click-dragging on
 it.)
 -------------------------------------------------------------------------------
+[3]
+The "/desktopsize server" option now works properly with the Windows TurboVNC
+Viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
