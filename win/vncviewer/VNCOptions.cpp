@@ -272,7 +272,7 @@ bool VNCOptions::ParseDesktopSize(char *sizeString, DesktopSize &size)
   if (toupper(sizeString[0]) == 'A') {
     size.set(SIZE_AUTO, 0, 0);
     return true;
-  } else if (toupper(sizeString[0] == 'S' || !strcmp(sizeString, "0"))) {
+  } else if (toupper(sizeString[0]) == 'S' || !strcmp(sizeString, "0")) {
     size.set(SIZE_SERVER, 0, 0);
     return true;
   } else {
