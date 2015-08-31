@@ -125,47 +125,47 @@ public class CSecurityVeNCrypt extends CSecurity {
 
         } else
           return false;
-        }
+      }
 
-        /* make a choice and send it to the server, meanwhile set up the stack */
-        if (!haveChosenType) {
-          chosenType = Security.secTypeInvalid;
-          int i;
-          Iterator<Integer> j;
-          List<Integer> secTypes = new ArrayList<Integer>();
+      /* make a choice and send it to the server, meanwhile set up the stack */
+      if (!haveChosenType) {
+        chosenType = Security.secTypeInvalid;
+        int i;
+        Iterator<Integer> j;
+        List<Integer> secTypes = new ArrayList<Integer>();
 
-          secTypes = Security.getEnabledExtSecTypes();
+        secTypes = Security.getEnabledExtSecTypes();
 
-          /* Honor server's security type order */
-          for (i = 0; i < nAvailableTypes; i++) {
-            for (j = secTypes.iterator(); j.hasNext();) {
-              int refType = (Integer)j.next();
-              if (refType == availableTypes[i]) {
-                chosenType = refType;
-                break;
-              }
-            }
-
-            if (chosenType != Security.secTypeInvalid)
+        /* Honor server's security type order */
+        for (i = 0; i < nAvailableTypes; i++) {
+          for (j = secTypes.iterator(); j.hasNext();) {
+            int refType = (Integer)j.next();
+            if (refType == availableTypes[i]) {
+              chosenType = refType;
               break;
+            }
           }
 
-          vlog.debug("Choosing security type " +
-                     Security.secTypeName(chosenType) + " (" + chosenType +
-                     ")");
+          if (chosenType != Security.secTypeInvalid)
+            break;
+        }
 
-          /* Set up the stack according to the chosen type: */
-          if (chosenType == Security.secTypeInvalid ||
-              chosenType == Security.secTypeVeNCrypt)
-            throw new AuthFailureException("No valid VeNCrypt sub-type");
+        vlog.debug("Choosing security type " +
+                   Security.secTypeName(chosenType) + " (" + chosenType +
+                   ")");
 
-          csecurity = security.getCSecurity(chosenType);
+        /* Set up the stack according to the chosen type: */
+        if (chosenType == Security.secTypeInvalid ||
+            chosenType == Security.secTypeVeNCrypt)
+          throw new AuthFailureException("No valid VeNCrypt sub-type");
 
-          /* send chosen type to server */
-          os.writeU32(chosenType);
-          os.flush();
+        csecurity = security.getCSecurity(chosenType);
 
-          haveChosenType = true;
+        /* send chosen type to server */
+        os.writeU32(chosenType);
+        os.flush();
+
+        haveChosenType = true;
       }
     } else {
       /*
