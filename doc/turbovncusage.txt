@@ -65,9 +65,9 @@
 		Enter the X display name (hostname, or IP address, and display number) of
 		the TurboVNC session in the "VNC server" field, then click "Connect".
 
-	#. Another dialog box appears, prompting for the password (if standard
+	#. Another dialog box appears, prompting for the password (if Standard
 		VNC authentication is being used) or for the username and password (if
-		Unix login authentication is being used.)
+		Unix Login authentication is being used.)
 		{nl}{nl}
 		|| || Windows TurboVNC Viewer || Linux/Un*x/Mac (Java) TurboVNC Viewer ||
 		| Standard VNC Authentication Dialog | {img:vncauth-win.png} | {img:vncauth-java.png} |

@@ -213,7 +213,7 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
         UserList *p = userACL;
 
         if (p == NULL)
-            rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix login authentication.\n");
+            rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix Login authentication.\n");
 
         while (p != NULL) {
             if (!strcmp(p->name, userBuf))
@@ -699,7 +699,7 @@ rfbSendSecurityType(rfbClientPtr cl, int securityType)
         cl->state = RFB_INITIALISATION;
         break;
     case rfbSecTypeVncAuth:
-        /* Begin the standard VNC authentication procedure */
+        /* Begin the Standard VNC authentication procedure */
         rfbVncAuthSendChallenge(cl);
         break;
     default:
@@ -804,7 +804,7 @@ rfbProcessClientSecurityType(rfbClientPtr cl)
         rfbClientAuthSucceeded(cl, rfbAuthNone);
         break;
     case rfbSecTypeVncAuth:
-        /* Begin the standard VNC authentication procedure */
+        /* Begin the Standard VNC authentication procedure */
         rfbVncAuthSendChallenge(cl);
         break;
     case rfbSecTypeTight:

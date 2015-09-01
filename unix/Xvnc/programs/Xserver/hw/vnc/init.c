@@ -1157,9 +1157,9 @@ ddxUseMsg()
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
     ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
     ErrorF("-nocursor              don't display a cursor\n");
-    ErrorF("-rfbauth passwd-file   enable VNC password authentication\n");
-    ErrorF("-otpauth               enable one-time password (OTP) authentication\n");
-    ErrorF("-pamauth               enable PAM user/password authentication\n");
+    ErrorF("-rfbauth passwd-file   enable VNC Password authentication\n");
+    ErrorF("-otpauth               enable One-Time Password (OTP) authentication\n");
+    ErrorF("-pamauth               enable PAM User/Password authentication\n");
     ErrorF("-noreverse             disable reverse connections\n");
     ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");
     ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
