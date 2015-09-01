@@ -253,18 +253,18 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     if (strcasecmp(argv[i], "-rfbauth") == 0) {     /* -rfbauth passwd-file */
         if (i + 1 >= argc) UseMsg();
-        rfbOptRfbauth = TRUE;
+        rfbOptRfbAuth = TRUE;
         rfbAuthPasswdFile = argv[i + 1];
         return 2;
     }
 
     if (strcasecmp(argv[i], "-otpauth") == 0) {
-        rfbOptOtpauth = TRUE;
+        rfbOptOtpAuth = TRUE;
         return 1;
     }
 
     if (strcasecmp(argv[i], "-pamauth") == 0) {
-        rfbOptPamauth = TRUE;
+        rfbOptPamAuth = TRUE;
         return 1;
     }
 
@@ -519,7 +519,7 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
                                   strlen("VNC_LAST_CLIENT_ID"), TRUE);
     VNC_CONNECT = MakeAtom("VNC_CONNECT", strlen("VNC_CONNECT"), TRUE);
 
-    if (rfbOptOtpauth)
+    if (rfbOptOtpAuth)
         VNC_OTP = MakeAtom("VNC_OTP", strlen("VNC_OTP"), TRUE);
 
 #ifdef XVNC_AuthPAM
@@ -970,7 +970,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         free(host);
     }
 
-    if (rfbOptOtpauth && (pProp->propertyName == VNC_OTP) &&
+    if (rfbOptOtpAuth && (pProp->propertyName == VNC_OTP) &&
         (pProp->type == XA_STRING) && (pProp->format == 8)) {
         if (pProp->size == 0) {
             if (rfbAuthOTPValue != NULL) {

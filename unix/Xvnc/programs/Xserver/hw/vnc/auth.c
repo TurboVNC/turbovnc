@@ -71,10 +71,10 @@ static int nAuthMethodsEnabled = 0;
 static int preferenceLimit = 1; /* Force one iteration of the loop in
                                    rfbSendAuthCaps() */
 
-Bool rfbOptNoauth = FALSE;
-Bool rfbOptOtpauth = FALSE;
-Bool rfbOptPamauth = FALSE;
-Bool rfbOptRfbauth = FALSE;
+Bool rfbOptNoAuth = FALSE;
+Bool rfbOptOtpAuth = FALSE;
+Bool rfbOptPamAuth = FALSE;
+Bool rfbOptRfbAuth = FALSE;
 
 char *rfbAuthOTPValue = NULL;
 int rfbAuthOTPValueLen = 0;
@@ -249,11 +249,11 @@ typedef struct {
 } SecTypeData;
 
 static SecTypeData secTypeNone    = { "none",    3, TRUE, rfbSecTypeNone };
-static SecTypeData secTypeVncauth = { "vncauth", 3, TRUE, rfbSecTypeVncAuth };
+static SecTypeData secTypeVncAuth = { "vncauth", 3, TRUE, rfbSecTypeVncAuth };
 static SecTypeData secTypeTight   = { "tight",   7, TRUE, rfbSecTypeTight };
 
 static SecTypeData *secTypes[] = {
-    &secTypeNone, &secTypeVncauth, &secTypeTight, NULL
+    &secTypeNone, &secTypeVncAuth, &secTypeTight, NULL
 };
 
 typedef void (*AuthFunc)(rfbClientPtr cl);
@@ -270,7 +270,7 @@ static AuthCapData authCapNone =
     { rfbAuthNone, rfbStandardVendor, sig_rfbAuthNone,
       AuthNoneStartFunc, AuthNoneRspFunc };
 
-static AuthCapData authCapVncauth =
+static AuthCapData authCapVncAuth =
     { rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
       rfbVncAuthSendChallenge, rfbVncAuthProcessResponse };
 
@@ -281,7 +281,7 @@ static AuthCapData authCapUnixLogin =
 #endif
 
 static AuthCapData *authCaps[] = {
-    &authCapNone, &authCapVncauth,
+    &authCapNone, &authCapVncAuth,
 #ifdef XVNC_AuthPAM
     &authCapUnixLogin,
 #endif
@@ -310,17 +310,17 @@ typedef struct {
  * permitted and no other auth methods were specified on the command line.
  */
 static AuthMethodData authMethods[] = {
-    { "none", FALSE, TRUE, -1, &rfbOptNoauth, "", FALSE,
+    { "none", FALSE, TRUE, -1, &rfbOptNoAuth, "", FALSE,
       &secTypeNone, &authCapNone },
 
-    { "vnc", FALSE, TRUE, -1, &rfbOptRfbauth, "-rfbauth", TRUE,
-      &secTypeVncauth, &authCapVncauth },
+    { "vnc", FALSE, TRUE, -1, &rfbOptRfbAuth, "-rfbauth", TRUE,
+      &secTypeVncAuth, &authCapVncAuth },
 
-    { "otp", FALSE, TRUE, -1, &rfbOptOtpauth, "-otpauth", TRUE,
-      &secTypeVncauth, &authCapVncauth },
+    { "otp", FALSE, TRUE, -1, &rfbOptOtpAuth, "-otpauth", TRUE,
+      &secTypeVncAuth, &authCapVncAuth },
 
 #ifdef XVNC_AuthPAM
-    { "pam-userpwd", FALSE, TRUE, -1, &rfbOptPamauth, "-pamauth", TRUE,
+    { "pam-userpwd", FALSE, TRUE, -1, &rfbOptPamAuth, "-pamauth", TRUE,
       &secTypeTight, &authCapUnixLogin },
 #endif
 
@@ -574,7 +574,7 @@ rfbAuthInit()
     }
 
 #ifndef XVNC_AuthPAM
-    if (rfbOptPamauth)
+    if (rfbOptPamAuth)
         rfbLog("WARNING: PAM support is not compiled in.\n");
 #endif
 
@@ -594,7 +594,7 @@ rfbAuthInit()
     }
 
 #ifdef XVNC_AuthPAM
-    if (rfbOptPamauth && rfbAuthUserACL) {
+    if (rfbOptPamAuth && rfbAuthUserACL) {
         struct passwd pbuf;
         struct passwd *pw;
         char buf[256];
@@ -1082,7 +1082,7 @@ rfbVncAuthProcessResponse(rfbClientPtr cl)
     }
 
     ok = FALSE;
-    if (rfbOptOtpauth) {
+    if (rfbOptOtpAuth) {
         if (rfbAuthOTPValue == NULL) {
             if (nAuthMethodsEnabled == 1) {
                 rfbClientAuthFailed(cl, "The one-time password has not been set on the server");
@@ -1108,7 +1108,7 @@ rfbVncAuthProcessResponse(rfbClientPtr cl)
         }
     }
 
-    if ((ok == FALSE) && rfbOptRfbauth) {
+    if ((ok == FALSE) && rfbOptRfbAuth) {
         numPasswords = vncDecryptPasswdFromFile2(rfbAuthPasswdFile,
                                                  passwdFullControl,
                                                  passwdViewOnly);

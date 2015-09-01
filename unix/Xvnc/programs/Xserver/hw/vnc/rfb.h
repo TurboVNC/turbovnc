@@ -701,9 +701,9 @@ void rfbAuthInit(void);
 void rfbAuthProcessResponse(rfbClientPtr cl);
 extern char* rfbAuthConfigFile;
 
-extern Bool  rfbOptOtpauth;
-extern Bool  rfbOptPamauth;
-extern Bool  rfbOptRfbauth;
+extern Bool  rfbOptOtpAuth;
+extern Bool  rfbOptPamAuth;
+extern Bool  rfbOptRfbAuth;
 
 extern char* rfbAuthOTPValue;
 extern int   rfbAuthOTPValueLen;
