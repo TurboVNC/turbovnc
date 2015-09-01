@@ -435,7 +435,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     authPanel.setBorder(BorderFactory.createTitledBorder("Authentication Schemes"));
     secNone = addCheckbox("None", null, authPanel);
     secVnc = addCheckbox("Standard VNC", null, authPanel);
-    secUnixLogin = addJCheckBox("Unix login (TightVNC/TurboVNC)", null,
+    secUnixLogin = addJCheckBox("Unix Login (TightVNC/TurboVNC)", null,
                                 authPanel,
                                 new GridBagConstraints(0, 2, 1, 1, 1, 1,
                                   GridBagConstraints.LINE_START,

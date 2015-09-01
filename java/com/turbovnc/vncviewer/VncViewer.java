@@ -1228,22 +1228,22 @@ public class VncViewer extends javax.swing.JApplet
   "The user name to use for Unix Login authentication (TurboVNC and TightVNC " +
   "servers) or for Plain and Ident authentication (VeNCrypt-compatible " +
   "servers.)  If connecting to a TightVNC/TurboVNC server, this also forces " +
-  "Unix login authentication to be used, if an authentication method that " +
+  "Unix Login authentication to be used, if an authentication method that " +
   "supports it is enabled in the VNC server.", null);
 
   static BoolParameter noUnixLogin
   = new BoolParameter("NoUnixLogin",
   "When connecting to TightVNC/TurboVNC servers, this disables the use of " +
-  "Unix login authentication.  This is useful if the server is configured to " +
-  "prefer an authentication method that supports Unix login authentication and " +
+  "Unix Login authentication.  This is useful if the server is configured to " +
+  "prefer an authentication method that supports Unix Login authentication and " +
   "you want to override this preference for a particular connection (for " +
   "instance, to use a one-time password.)", false);
 
   static BoolParameter sendLocalUsername
   = new BoolParameter("SendLocalUsername",
   "Send the local user name when using user/password authentication schemes " +
-  "(Unix login, Plain, Ident) rather than prompting for it.  If connecting to " +
-  "a TightVNC/TurboVNC server, this also forces Unix login authentication to " +
+  "(Unix Login, Plain, Ident) rather than prompting for it.  If connecting to " +
+  "a TightVNC/TurboVNC server, this also forces Unix Login authentication to " +
   "be used, if an authentication method that supports it is enabled in the VNC " +
   "server.", false);
 

@@ -18,15 +18,16 @@ Xorg code, including only the features necessary to support Xvnc.
 Configurable Authentication
 ---------------------------
 This version of Xvnc incorporates code that allows different authentication
-methods to be selected at run time.  This code supports the standard "None" and
-"VNC" authentication methods as well as methods for using one-time passwords
-(OTP) and Pluggable Authentication Modules (PAM).
+methods to be selected at run time.  This code supports the standard
+"No Authentication" and "VNC Password" authentication methods as well as
+methods for using one-time passwords (OTP) and Pluggable Authentication Modules
+(PAM).
 
 The Xvnc server will look in the security configuration file (default
 "/etc/turbovncserver-security.conf") at run time for security configuration
 directives.
 
-To enable PAM support (required for the "pam-userpwd" authentication
+To enable PAM support (required for the "PAM User/Password" authentication
 method), the TVNC_USEPAM CMake variable must be enabled.  This is the default
 for Linux.  To enable or disable PAM support, pass -DTVNC_USEPAM=1 or
 -DTVNC_USEPAM=0 to cmake when configuring the build.

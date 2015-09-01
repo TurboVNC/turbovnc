@@ -7,13 +7,13 @@
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
-.\" Copyright (C) 2010 D. R. Commander
+.\" Copyright (C) 2010, 2015 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncpasswd 1 "July 2010" "" "TurboVNC"
+.TH vncpasswd 1 "August 2015" "" "TurboVNC"
 .SH NAME
 vncpasswd \- set passwords for VNC server
 .SH SYNOPSIS
@@ -67,7 +67,7 @@ currently enabled for a VNC server session.
 .br
 .SH USER ACCESS CONTROL LIST SUPPORT
 If the VNC server is configured to support a user access control list (ACL) for
-the PAM user/password authentication method, then \fBvncpasswd\fR
+the PAM User/Password authentication method, then \fBvncpasswd\fR
 can be used to add users to or remove users from the ACL.  Be careful not to
 remove yourself from the list, or you will not be able to connect again until
 you re-add yourself.
