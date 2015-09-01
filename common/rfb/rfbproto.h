@@ -785,7 +785,7 @@ typedef struct _rfbZlibHeader {
  *-- The "gradient" filter pre-processes pixel data with a simple algorithm
  * which converts each color component to a difference between a "predicted"
  * intensity and the actual intensity. Such a technique does not affect
- * uncompressed data size, but helps to compress photo-like images better. 
+ * uncompressed data size, but helps to compress photo-like images better.
  * Pseudo-code for converting intensities to differences is the following:
  *
  *   P[i,j] := V[i-1,j] + V[i,j-1] - V[i-1,j-1];
@@ -1005,7 +1005,7 @@ typedef struct _rfbFileDownloadDataMsg {
     CARD8 compressLevel;
     CARD16 realSize;
     CARD16 compressedSize;
-    /* Followed by File[copressedSize], 
+    /* Followed by File[compressedSize],
        but if (realSize = compressedSize = 0) followed by CARD32 modTime  */
 } rfbFileDownloadDataMsg;
 
@@ -1275,7 +1275,7 @@ typedef struct _rfbFileUploadDataMsg {
     CARD8 compressedLevel;
     CARD16 realSize;
     CARD16 compressedSize;
-    /* Followed by File[compressedSize], 
+    /* Followed by File[compressedSize],
        but if (realSize = compressedSize = 0) followed by CARD32 modTime  */
 } rfbFileUploadDataMsg;
 
