@@ -51,6 +51,7 @@ static void rfbSendTunnelingCaps(rfbClientPtr cl);
 static void rfbSendAuthCaps(rfbClientPtr cl);
 
 static void rfbVncAuthSendChallenge(rfbClientPtr cl);
+static void rfbVeNCryptAuthenticate(rfbClientPtr cl);
 
 #define AUTH_DEFAULT_CONF_FILE "/etc/turbovncserver-security.conf"
 #ifdef XVNC_AuthPAM
@@ -251,9 +252,11 @@ typedef struct {
 static SecTypeData secTypeNone    = { "none",    3, TRUE, rfbSecTypeNone };
 static SecTypeData secTypeVncAuth = { "vncauth", 3, TRUE, rfbSecTypeVncAuth };
 static SecTypeData secTypeTight   = { "tight",   7, TRUE, rfbSecTypeTight };
+static SecTypeData secTypeVeNCrypt =
+    { "vencrypt", 7, TRUE, rfbSecTypeVeNCrypt };
 
 static SecTypeData *secTypes[] = {
-    &secTypeNone, &secTypeVncAuth, &secTypeTight, NULL
+    &secTypeNone, &secTypeVncAuth, &secTypeVeNCrypt, &secTypeTight, NULL
 };
 
 typedef void (*AuthFunc)(rfbClientPtr cl);
@@ -274,6 +277,10 @@ static AuthCapData authCapVncAuth =
     { rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
       rfbVncAuthSendChallenge, rfbVncAuthProcessResponse };
 
+static AuthCapData authCapVeNCrypt =
+    { rfbAuthVeNCrypt, rfbVeNCryptVendor, sig_rfbAuthVeNCrypt,
+      rfbVeNCryptAuthenticate, AuthNoneRspFunc };
+
 #ifdef XVNC_AuthPAM
 static AuthCapData authCapUnixLogin =
     { rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
@@ -281,7 +288,7 @@ static AuthCapData authCapUnixLogin =
 #endif
 
 static AuthCapData *authCaps[] = {
-    &authCapNone, &authCapVncAuth,
+    &authCapNone, &authCapVncAuth, &authCapVeNCrypt,
 #ifdef XVNC_AuthPAM
     &authCapUnixLogin,
 #endif
@@ -298,6 +305,7 @@ typedef struct {
     Bool requiredData;
     SecTypeData *secType;
     AuthCapData *authCap;
+    int subType;
 } AuthMethodData;
 
 /*
@@ -311,17 +319,20 @@ typedef struct {
  */
 static AuthMethodData authMethods[] = {
     { "none", FALSE, TRUE, -1, &rfbOptNoAuth, "", FALSE,
-      &secTypeNone, &authCapNone },
+      &secTypeNone, &authCapNone, rfbSecTypeNone },
 
     { "vnc", FALSE, TRUE, -1, &rfbOptRfbAuth, "-rfbauth", TRUE,
-      &secTypeVncAuth, &authCapVncAuth },
+      &secTypeVncAuth, &authCapVncAuth, rfbSecTypeVncAuth },
 
     { "otp", FALSE, TRUE, -1, &rfbOptOtpAuth, "-otpauth", TRUE,
-      &secTypeVncAuth, &authCapVncAuth },
+      &secTypeVncAuth, &authCapVncAuth, rfbSecTypeVncAuth },
 
 #ifdef XVNC_AuthPAM
     { "pam-userpwd", FALSE, TRUE, -1, &rfbOptPamAuth, "-pamauth", TRUE,
-      &secTypeTight, &authCapUnixLogin },
+      &secTypeTight, &authCapUnixLogin, -1 },
+
+    { "pam-userpwd", FALSE, TRUE, -1, &rfbOptPamAuth, "-pamauth", TRUE,
+      &secTypeVeNCrypt, &authCapVeNCrypt, rfbVeNCryptPlain },
 #endif
 
     { NULL }
@@ -350,16 +361,15 @@ setMethods(char *buf)
             break;
 
         for (a = authMethods; a->name != NULL; a++) {
-            if (!strcmp(a->name, p))
-                break;
+            if (!strcmp(a->name, p)) {
+                a->permitted = TRUE;
+                a->preference = preferenceLimit++;
+            }
         }
 
-        if (a->name == NULL) {
+        if (preferenceLimit == 0) {
             FatalError("ERROR: Unknown auth method name '%s'\n", p);
         }
-
-        a->permitted = TRUE;
-        a->preference = preferenceLimit++;
     }
 }
 
@@ -763,6 +773,107 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
 }
 
 
+#define WRITE(data, size)  \
+    if (WriteExact(cl, (char *)data, size) <= 0) {  \
+        rfbLogPerror("rfbVeNCryptAuthenticate: write");  \
+        rfbCloseClient(cl);  \
+        return;  \
+    }
+
+#define READ(data, size)  \
+    if (ReadExact(cl, (char *)data, size) <= 0) {  \
+        rfbLogPerror("rfbVeNCryptAuthenticate: read");  \
+        rfbCloseClient(cl);  \
+        return;  \
+    }
+
+
+void
+rfbVeNCryptAuthenticate(rfbClientPtr cl)
+{
+    struct { CARD8 major, minor; } serverVersion = { 0, 2 },
+        clientVersion = { 0, 0 };
+    CARD8 reply, count = 0;
+    int i, j;
+    AuthMethodData *a;
+    CARD32 subTypes[MAX_VENCRYPT_SUBTYPES], chosenType = 0;
+
+    WRITE(&serverVersion.minor, 1);
+    WRITE(&serverVersion.major, 1);
+    READ(&clientVersion, 2);
+
+    if (clientVersion.major == 0 && clientVersion.minor < 2) {
+        reply = 0xFF;
+        WRITE(&reply, 1);
+        rfbCloseClient(cl);
+        return;
+    } else {
+        reply = 0;
+        WRITE(&reply, 1);
+    }
+
+    memset(subTypes, 0, sizeof(CARD32) * MAX_VENCRYPT_SUBTYPES);
+    for (i = 0; i < preferenceLimit; i++) {
+        for (a = authMethods; a->name != NULL; a++) {
+            if (((a->preference != -1) && (i != a->preference)) ||
+                !a->enabled || a->subType == -1)
+                continue;
+
+            /* Check whether we have already advertised this subtype */
+            for (j = 0; j < count; j++) {
+                if (subTypes[j] == a->subType)
+                    break;
+            }
+            if (j < count)
+                continue;
+
+            if (count > MAX_VENCRYPT_SUBTYPES) {
+                FatalError("rfbVeNCryptAuthenticate: # enabled subtypes > MAX_VENCRYPT_SUBTYPES\n");
+            }
+
+            subTypes[count++] = a->subType;
+        }
+    }
+
+    WRITE(&count, 1);
+    if (count > 0) {
+        for (i = 0; i < count; i++) {
+            CARD32 subType = Swap32IfLE(subTypes[i]);
+            WRITE(&subType, sizeof(CARD32));
+        }
+    }
+
+    READ(&chosenType, sizeof(CARD32));
+    chosenType = Swap32IfLE(chosenType);
+
+    for (i = 0; i < count; i++) {
+        if (chosenType == subTypes[i])
+            break;
+    }
+    rfbLog("Client requested VeNCrypt sub-type %d\n", chosenType);
+    if (chosenType == 0 || chosenType == rfbSecTypeVeNCrypt || i >= count) {
+        rfbLog("Requested VeNCrypt sub-type not supported\n");
+        rfbCloseClient(cl);
+        return;
+    }
+
+    cl->selectedAuthType = chosenType;
+    switch (chosenType) {
+    case rfbAuthNone:
+        rfbClientAuthSucceeded(cl, rfbAuthNone);
+        break;
+    case rfbAuthVNC:
+        rfbVncAuthSendChallenge(cl);
+        break;
+    case rfbVeNCryptPlain:
+        AuthPAMUserPwdRspFunc(cl);
+        break;
+    default:
+        FatalError("rfbVeNCryptAuthenticate: chosen type is invalid (this should never occur)");
+    }
+}
+
+
 /*
  * Read the security type chosen by the client (protocol 3.7 and above)
  */
@@ -814,6 +925,11 @@ rfbProcessClientSecurityType(rfbClientPtr cl)
         cl->protocol_tightvnc = TRUE;
         /* Advertise our tunneling capabilities */
         rfbSendTunnelingCaps(cl);
+        break;
+    case rfbSecTypeVeNCrypt:
+        /* The viewer supports VeNCrypt extensions */
+        rfbLog("Enabling VeNCrypt protocol extensions\n");
+        rfbVeNCryptAuthenticate(cl);
         break;
     default:
         rfbLog("rfbProcessClientSecurityType: unknown authentication scheme\n");
@@ -882,6 +998,7 @@ rfbSendAuthCaps(rfbClientPtr cl)
     AuthMethodData *a;
     AuthCapData *c;
     rfbCapabilityInfo *pcap;
+    char tempstr[9];
 
     if (!cl->reverseConnection) {
         int i;
@@ -922,6 +1039,8 @@ rfbSendAuthCaps(rfbClientPtr cl)
                 memcpy(pcap->nameSignature, c->nameSignature,
                        sz_rfbCapabilityInfoName);
                 cl->authCaps[count] = c->authType;
+                strncpy(tempstr, (char *)pcap->nameSignature, 8);
+                rfbLog("Advertising Tight auth cap '%s'\n", tempstr);
                 count++;
             }
         }

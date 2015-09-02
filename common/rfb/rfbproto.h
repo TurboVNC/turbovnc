@@ -1,5 +1,7 @@
 /*
- *  Copyright (C) 2009-2010, 2012-2013 D. R. Commander. All Rights Reserved.
+ *  Copyright (C) 2009-2010, 2012-2013, 2015 D. R. Commander.
+ *                                           All Rights Reserved.
+ *  Copyright (C) 2009 Vic Lee.  All Rights Reserved.
  *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -143,13 +145,15 @@ typedef struct _rfbCapabilityInfo {
 #define sz_rfbCapabilityInfo 16
 
 /*
- * Vendors known by TightVNC: standard VNC/RealVNC, TridiaVNC, and TightVNC.
+ * Vendors known by TurboVNC: standard VNC/RealVNC, TridiaVNC, TightVNC,
+ * TurboVNC, VeNCrypt
  */
 
 #define rfbStandardVendor "STDV"
 #define rfbTridiaVncVendor "TRDV"
 #define rfbTightVncVendor "TGHT"
 #define rfbTurboVncVendor "TRBO"
+#define rfbVeNCryptVendor "VENC"
 
 
 /*****************************************************************************
@@ -207,6 +211,16 @@ typedef char rfbProtocolVersionMsg[13];	/* allow extra byte for null */
 #define rfbSecTypeNone 1
 #define rfbSecTypeVncAuth 2
 #define rfbSecTypeTight 16
+#define rfbSecTypeVeNCrypt 19
+
+/* VeNCrypt security types */
+#define rfbVeNCryptPlain 256
+#define rfbVeNCryptTLSNone 257
+#define rfbVeNCryptTLSVnc 258
+#define rfbVeNCryptTLSPlain 259
+#define rfbVeNCryptX509None 260
+#define rfbVeNCryptX509Vnc 261
+#define rfbVeNCryptX509Plain 262
 
 
 /*-----------------------------------------------------------------------------
@@ -285,6 +299,10 @@ typedef struct _rfbAuthenticationCapsMsg {
 
 #define sig_rfbAuthUnixLogin "ULGNAUTH"
 #define sig_rfbAuthExternal "XTRNAUTH"
+
+/* VeNCrypt */
+#define rfbAuthVeNCrypt 19
+#define sig_rfbAuthVeNCrypt "VENCRYPT"
 
 
 /*-----------------------------------------------------------------------------
