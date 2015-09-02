@@ -30,6 +30,11 @@ it.)
 The "/desktopsize server" option now works properly with the Windows TurboVNC
 Viewer.
 -------------------------------------------------------------------------------
+[4]
+Fixed an issue that prevented VeNCrypt authentication from working in the
+Java TurboVNC Viewer when connecting to a server that supports both the
+TightVNC and VeNCrypt security extensions.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

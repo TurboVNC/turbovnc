@@ -1,5 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,12 @@ public class CSecurityTight extends CSecurity {
     InStream is = cc.getInStream();
     OutStream os = cc.getOutStream();
     List<Integer> supportedAuthTypes = new ArrayList<Integer>();
+
+    if (cs instanceof CSecurityVeNCrypt) {
+      // VeNCrypt has already been selected using the Tight security selector,
+      // so defer any further handshaking to the VeNCrypt handler.
+      return cs.processMsg(cc);
+    }
 
     int nTunnels = is.readU32();
 
