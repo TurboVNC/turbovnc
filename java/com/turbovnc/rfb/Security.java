@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,9 @@ public class Security {
   public static final int secTypeTLS       = 18;
   public static final int secTypeVeNCrypt  = 19;
 
+  /* Tight subtypes */
+  public static final int secTypeUnixLogin = 129;
+
   /* VeNCrypt subtypes */
   public static final int secTypePlain     = 256;
   public static final int secTypeTLSNone   = 257;
@@ -78,7 +81,13 @@ public class Security {
   public static final List<Integer> getEnabledSecTypes() {
     List<Integer> result = new ArrayList<Integer>();
 
-    result.add(secTypeVeNCrypt);
+    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
+      int refType = (Integer)i.next();
+      if (refType >= 0x100) {
+        result.add(secTypeVeNCrypt);
+        break;
+      }
+    }
     result.add(secTypeTight);
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
@@ -94,7 +103,21 @@ public class Security {
 
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
-      if (refType != secTypeVeNCrypt) /* Do not include VeNCrypt to avoid loops */
+      if (refType != secTypeVeNCrypt && refType != secTypeUnixLogin)
+        /* ^^ Do not include VeNCrypt to avoid loops */
+        result.add(refType);
+    }
+
+    return (result);
+  }
+
+  public static final List<Integer> getEnabledTightSecTypes() {
+    List<Integer> result = new ArrayList<Integer>();
+
+    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
+      int refType = (Integer)i.next();
+      if (refType < 0x100 && refType != secTypeVeNCrypt &&
+          refType != secTypeTight)
         result.add(refType);
     }
 
@@ -139,6 +162,9 @@ public class Security {
     //if (name.equalsIgnoreCase("TLS"))      return secTypeTLS;
     if (name.equalsIgnoreCase("VeNCrypt"))  return secTypeVeNCrypt;
 
+    /* Tight subtypes */
+    if (name.equalsIgnoreCase("UnixLogin")) return secTypeUnixLogin;
+
     /* VeNCrypt subtypes */
     if (name.equalsIgnoreCase("Plain"))     return secTypePlain;
     if (name.equalsIgnoreCase("Ident"))     return secTypeIdent;
@@ -166,6 +192,9 @@ public class Security {
     //case secTypeUltra:      return "Ultra";
     //case secTypeTLS:        return "TLS";
     case secTypeVeNCrypt:   return "VeNCrypt";
+
+    /* Tight subtypes */
+    case secTypeUnixLogin:  return "UnixLogin";
 
     /* VeNCrypt subtypes */
     case secTypePlain:      return "Plain";

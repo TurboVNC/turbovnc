@@ -634,7 +634,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "encX509", encX509.isSelected());
     UserPreferences.set("global", "secNone", secNone.isSelected());
     UserPreferences.set("global", "secVnc", secVnc.isSelected());
-    UserPreferences.set("global", "NoUnixLogin", !secUnixLogin.isSelected());
+    UserPreferences.set("global", "secUnixLogin", secUnixLogin.isSelected());
     UserPreferences.set("global", "secPlain", secPlain.isSelected());
     UserPreferences.set("global", "secIdent", secIdent.isSelected());
     UserPreferences.set("global", "SendLocalUsername",
@@ -1023,6 +1023,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       case Security.secTypeVncAuth:
         secVnc.setSelected(true);
         break;
+      case Security.secTypeUnixLogin:
+        secUnixLogin.setSelected(true);
+        break;
       }
     }
 
@@ -1117,6 +1120,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     Security.disableSecType(Security.secTypeX509Vnc);
     Security.disableSecType(Security.secTypeX509Plain);
     Security.disableSecType(Security.secTypeX509Ident);
+    Security.disableSecType(Security.secTypeUnixLogin);
 
     /* Process security types which don't use encryption */
     if (encNone.isSelected() || !secVeNCrypt.isSelected()) {
@@ -1164,6 +1168,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       if (secIdent.isSelected())
         Security.enableSecType(Security.secTypeX509Ident);
     }
+
+    if (secUnixLogin.isSelected())
+      Security.enableSecType(Security.secTypeUnixLogin);
   }
 
 }

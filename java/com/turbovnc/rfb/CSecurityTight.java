@@ -77,9 +77,7 @@ public class CSecurityTight extends CSecurity {
       byte[] s = new byte[8];
       is.readBytes(s, 0, 8);
       String signature = new String(s);
-      // FIXME:
-      // Add functions comparable to getEnabledSecTypes for checking
-      // Tight auth caps.
+
       switch (code) {
       case CODE_NOAUTH:
         if (!Security.getEnabledSecTypes().contains(Security.secTypeNone))
@@ -94,15 +92,10 @@ public class CSecurityTight extends CSecurity {
           supportedAuthTypes.add(code);
         break;
       case CODE_ULGNAUTH:
-        if (!((CConn)cc).isUnixLoginSelected())
+        if (!Security.getEnabledTightSecTypes().contains(Security.secTypeUnixLogin))
           break;
-
-        if (vendor.equals(VENDOR_TGHT) && signature.equals(SIG_ULGNAUTH)) {
-          if (((CConn)cc).isUnixLoginForced())
-            supportedAuthTypes.add(0, code);
-          else
-            supportedAuthTypes.add(code);
-        }
+        if (vendor.equals(VENDOR_TGHT) && signature.equals(SIG_ULGNAUTH))
+          supportedAuthTypes.add(code);
         break;
       case CODE_VENCRYPT:
         if (!Security.getEnabledSecTypes().contains(Security.secTypeVeNCrypt))
@@ -122,6 +115,10 @@ public class CSecurityTight extends CSecurity {
 
     for (Iterator<Integer> i = supportedAuthTypes.iterator(); i.hasNext();) {
       int authType = (Integer)i.next();
+      if (authType == CODE_ULGNAUTH || authType == CODE_NOAUTH ||
+          authType == CODE_VNCAUTH || authType == CODE_VENCRYPT)
+        vlog.debug("Choosing security type " + Security.secTypeName(authType) +
+                   "(" + authType + ")");
       switch (authType) {
       case CODE_ULGNAUTH:
         os.writeU32(CODE_ULGNAUTH);
@@ -171,7 +168,7 @@ public class CSecurityTight extends CSecurity {
   public String description() {
     if (cs != null)
       return cs.description();
-    return "Tight";
+    return "UnixLogin";
   }
 
   static LogWriter vlog = new LogWriter("Tight");

@@ -72,7 +72,6 @@ public class Options {
     cursorShape = old.cursorShape;
     continuousUpdates = old.continuousUpdates;
     if (old.user != null) user = new String(old.user);
-    noUnixLogin = old.noUnixLogin;
     sendLocalUsername = old.sendLocalUsername;
     if (old.via != null) via = new String(old.via);
     tunnel = old.tunnel;
@@ -178,7 +177,6 @@ public class Options {
     printOpt("cursorShape", cursorShape);
     printOpt("continuousUpdates", continuousUpdates);
     printOpt("user", user);
-    printOpt("noUnixLogin", noUnixLogin);
     printOpt("sendLocalUsername", sendLocalUsername);
     printOpt("via", via);
     printOpt("tunnel", tunnel);
@@ -226,7 +224,6 @@ public class Options {
   public boolean cursorShape;
   public boolean continuousUpdates;
   public String user;
-  public boolean noUnixLogin;
   public boolean sendLocalUsername;
   public String via;
   public boolean tunnel;
