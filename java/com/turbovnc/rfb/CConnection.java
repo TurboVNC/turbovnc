@@ -170,7 +170,7 @@ public abstract class CConnection extends CMsgHandler {
          * TurboVNC specific - use secTypeTight if the server supports it.
          */
         if (serverSecType == Security.secTypeTight)
-              secType = Security.secTypeTight;
+          secType = Security.secTypeTight;
 
         /*
          * Use the first type sent by server which matches client's type.
