@@ -98,6 +98,20 @@ public class CConn extends CConnection implements UserPasswdGetter,
     cp.supportsDesktopRename = true;
     menu = new F8Menu(this);
 
+    if (VncViewer.noUnixLogin.getValue()) {
+      Security.disableSecType(Security.secTypePlain);
+      Security.disableSecType(Security.secTypeTLSPlain);
+      Security.disableSecType(Security.secTypeX509Plain);
+      Security.disableSecType(Security.secTypeUnixLogin);
+    } else if (isUnixLoginForced()) {
+      Security.disableSecType(Security.secTypeVncAuth);
+      Security.disableSecType(Security.secTypeTLSVnc);
+      Security.disableSecType(Security.secTypeX509Vnc);
+      Security.disableSecType(Security.secTypeNone);
+      Security.disableSecType(Security.secTypeTLSNone);
+      Security.disableSecType(Security.secTypeX509None);
+    }
+
     if (sock != null) {
       String name = sock.getPeerEndpoint();
       vlog.info("Accepted connection from " + name);
@@ -1198,10 +1212,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // OptionsDialogCallback.  setOptions() and getOptions() are both called from
   // the EDT.
 
-  public boolean isUnixLoginSelected() {
-    return options.secUnixLogin.isSelected();
-  }
-
   public boolean isUnixLoginForced() {
     return (opts.user != null || opts.sendLocalUsername);
   }
@@ -1247,7 +1257,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
     } else {
       options.shared.setSelected(opts.shared);
       options.sendLocalUsername.setSelected(opts.sendLocalUsername);
-      options.secUnixLogin.setSelected(!opts.noUnixLogin);
       options.setSecurityOptions();
       if (opts.via != null)
         options.gateway.setText(opts.via);

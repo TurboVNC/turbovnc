@@ -625,7 +625,6 @@ public class VncViewer extends javax.swing.JApplet
 
     options.shared.setSelected(opts.shared);
     options.sendLocalUsername.setSelected(opts.sendLocalUsername);
-    options.secUnixLogin.setSelected(!opts.noUnixLogin);
     options.setSecurityOptions();
 
     options.fullScreen.setSelected(opts.fullScreen);
@@ -903,7 +902,6 @@ public class VncViewer extends javax.swing.JApplet
     opts.cursorShape = cursorShape.getValue();
     opts.continuousUpdates = continuousUpdates.getValue();
     if (user.getValue() != null) opts.user = new String(user.getValue());
-    opts.noUnixLogin = noUnixLogin.getValue();
     opts.sendLocalUsername = sendLocalUsername.getValue();
 
     String v = via.getValue();
@@ -1225,27 +1223,31 @@ public class VncViewer extends javax.swing.JApplet
 
   static StringParameter user
   = new StringParameter("User",
-  "The user name to use for Unix Login authentication (TurboVNC and TightVNC " +
+  "The user name to use for Unix Login authentication (TightVNC-compatible " +
   "servers) or for Plain and Ident authentication (VeNCrypt-compatible " +
-  "servers.)  If connecting to a TightVNC/TurboVNC server, this also forces " +
-  "Unix Login authentication to be used, if an authentication method that " +
-  "supports it is enabled in the VNC server.", null);
+  "servers.)  Specifying this option has the effect of removing any types " +
+  "from the SecurityTypes parameter except for \"Plain\" and \"Ident\" " +
+  "(and their encrypted derivatives) and \"UnixLogin\", thus allowing only " +
+  "authentication schemes that require a user name.", null);
 
   static BoolParameter noUnixLogin
   = new BoolParameter("NoUnixLogin",
-  "When connecting to TightVNC/TurboVNC servers, this disables the use of " +
-  "Unix Login authentication.  This is useful if the server is configured to " +
-  "prefer an authentication method that supports Unix Login authentication and " +
-  "you want to override this preference for a particular connection (for " +
-  "instance, to use a one-time password.)", false);
+  "This disables the use of Unix Login authentication when connecting to " +
+  "TightVNC-compatible servers and Plain authentication when connecting to " +
+  "VeNCrypt-compatible servers.  Setting this parameter has the effect of " +
+  "removing \"Plain\" (and its encrypted derivatives) and \"UnixLogin\" " +
+  "from the SecurityTypes parameter.  This is useful if the server is " +
+  "configured to prefer an authentication method that supports " +
+  "Unix Login/Plain authentication and you want to override that preference " +
+  "for a particular connection (for instance, to use a one-time password.)",
+  false);
 
   static BoolParameter sendLocalUsername
   = new BoolParameter("SendLocalUsername",
   "Send the local user name when using user/password authentication schemes " +
-  "(Unix Login, Plain, Ident) rather than prompting for it.  If connecting to " +
-  "a TightVNC/TurboVNC server, this also forces Unix Login authentication to " +
-  "be used, if an authentication method that supports it is enabled in the VNC " +
-  "server.", false);
+  "(Unix Login, Plain, Ident) rather than prompting for it.  As with the " +
+  "\"User\" parameter, setting this parameter has the effect of disabling " +
+  "any authentication schemes that don't require a user name.", false);
 
   static StringParameter passwordFile
   = new StringParameter("PasswordFile",

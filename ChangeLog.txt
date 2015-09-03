@@ -7,6 +7,15 @@ in order to support certain 3D applications that rely on this extension to
 query and set low-level nVidia GPU attributes.  See the User's Guide for more
 details.
 -------------------------------------------------------------------------------
+[2]
+The TightVNC/TurboVNC-specific "Unix Login" authentication scheme can now be
+enabled/disabled by using the Java TurboVNC Viewer's "SecurityTypes" parameter,
+similarly to other authentication schemes and VeNCrypt security types.
+Furthermore, the "NoUnixLogin" parameter now disables the VeNCrypt
+*Plain security types as well as the Unix Login security type, and the
+"User" and "SendLocalUserName" parameters now disable any of the VeNCrypt
+security types that don't require a user name.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

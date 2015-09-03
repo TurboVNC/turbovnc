@@ -1,5 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,6 +108,7 @@ public class UserPreferences {
     boolean secIdent = true, setSecIdent = false;
     boolean secNone = true, setSecNone = false;
     boolean secVnc = true, setSecVnc = false;
+    boolean secUnixLogin = true, setSecUnixLogin = false;
     try {
       Preferences node = root.node(nName);
       String[] keys = node.keys();
@@ -139,6 +140,9 @@ public class UserPreferences {
           } else if (key.equalsIgnoreCase("secVnc")) {
             setSecVnc = true;
             secVnc = node.getBoolean(key, true);
+          } else if (key.equalsIgnoreCase("secUnixLogin")) {
+            setSecUnixLogin = true;
+            secUnixLogin = node.getBoolean(key, true);
           } else if (!key.equalsIgnoreCase("x509ca")) {
             String valueStr = node.get(key, null);
             if (valueStr != null)
@@ -160,7 +164,8 @@ public class UserPreferences {
       vlog.error("  " + e.getMessage());
     }
     if ((setEncX509 || setEncTLS || setEncNone) &&
-        (setSecPlain || setSecIdent || setSecVnc || setSecNone)) {
+        (setSecPlain || setSecIdent || setSecVnc || setSecNone ||
+         setSecUnixLogin)) {
       Security.disableSecType(Security.secTypeNone);
       Security.disableSecType(Security.secTypeVncAuth);
       Security.disableSecType(Security.secTypePlain);
@@ -173,6 +178,7 @@ public class UserPreferences {
       Security.disableSecType(Security.secTypeX509Vnc);
       Security.disableSecType(Security.secTypeX509Plain);
       Security.disableSecType(Security.secTypeX509Ident);
+      Security.disableSecType(Security.secTypeUnixLogin);
     }
 
     if (setSecVeNCrypt) {
@@ -241,6 +247,11 @@ public class UserPreferences {
     if (setSecNone) {
       if (secNone) Security.enableSecType(Security.secTypeNone);
       else Security.disableSecType(Security.secTypeNone);
+      Security.setInUserPrefs = true;
+    }
+    if (setSecUnixLogin) {
+      if (secUnixLogin) Security.enableSecType(Security.secTypeUnixLogin);
+      else Security.disableSecType(Security.secTypeUnixLogin);
       Security.setInUserPrefs = true;
     }
   }
