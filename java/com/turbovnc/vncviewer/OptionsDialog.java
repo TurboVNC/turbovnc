@@ -52,7 +52,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     sendLocalUsername, tunnel;
   JTextField sshUser, gateway;
   JButton okButton, cancelButton;
-  JButton ca, crl;
+  JButton x509caButton, x509crlButton;
+  JTextField x509ca, x509crl;
   JButton defSaveButton, defClearButton;
   JLabel encMethodLabel;
   JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
@@ -415,21 +416,45 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                              new Insets(0, 0, 0, 60), 0, 0));
 
     JPanel x509Panel = new JPanel(new GridBagLayout());
-    x509Panel.setBorder(BorderFactory.createTitledBorder("X.509 certificates"));
-    ca = new JButton("Load CA certificate");
-    ca.addActionListener(this);
-    crl = new JButton("Load CRL certificate");
-    crl.addActionListener(this);
-    Dialog.addGBComponent(ca, x509Panel,
-                          0, 0, 1, 1, 2, 2, 1, 0,
+    x509Panel.setBorder(BorderFactory.createTitledBorder("X.509 Certificate Validation"));
+    x509ca = new JTextField("", 1);
+    JLabel x509caLabel = new JLabel("CA cert:");
+    x509caButton = new JButton("Load");
+    x509caButton.addActionListener(this);
+    x509crl = new JTextField("", 1);
+    JLabel x509crlLabel = new JLabel("CRL:");
+    x509crlButton = new JButton("Load");
+    x509crlButton.addActionListener(this);
+    Dialog.addGBComponent(x509caLabel, x509Panel,
+                          0, 0, 1, 1, 2, 2, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 8, 0, 2));
+    Dialog.addGBComponent(x509ca, x509Panel,
+                          1, 0, 1, 1, 2, 2, 0.7, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
-                          new Insets(2, 2, 2, 2));
-    Dialog.addGBComponent(crl, x509Panel,
-                          1, 0, 1, 1, 2, 2, 1, 0,
+                          new Insets(4, 2, 0, 2));
+    Dialog.addGBComponent(x509caButton, x509Panel,
+                          2, 0, 1, 1, 2, 2, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 2, 0, 2));
+    Dialog.addGBComponent(x509crlLabel, x509Panel,
+                          0, 1, 1, 1, 2, 2, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 8, 0, 2));
+    Dialog.addGBComponent(x509crl, x509Panel,
+                          1, 1, 1, 1, 2, 2, 0.7, 0,
                           GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.LINE_START,
-                          new Insets(2, 2, 2, 2));
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 2, 0, 2));
+    Dialog.addGBComponent(x509crlButton, x509Panel,
+                          2, 1, 1, 1, 2, 2, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 2, 0, 2));
 
     JPanel authPanel = new JPanel(new GridBagLayout());
     authPanel.setBorder(BorderFactory.createTitledBorder("Authentication Schemes"));
@@ -508,9 +533,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(0, 10, 2, 5));
     Dialog.addGBComponent(x509Panel, secPanel,
-                          0, 2, 1, 1, 2, 2, 1, 0,
-                          GridBagConstraints.NONE,
-                          GridBagConstraints.LINE_START,
+                          0, 2, 1, 1, 2, 2, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.FIRST_LINE_START,
                           new Insets(2, 10, 2, 5));
     Dialog.addGBComponent(authPanel, secPanel,
                           0, 3, 1, 1, 2, 2, 1, 0,
@@ -614,12 +639,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "secIdent", secIdent.isSelected());
     UserPreferences.set("global", "SendLocalUsername",
                         sendLocalUsername.isSelected());
-    if (!CSecurityTLS.x509ca.isDefault)
-      UserPreferences.set("global", "x509ca",
-                          CSecurityTLS.x509ca.getValue());
-    if (!CSecurityTLS.x509crl.isDefault)
-      UserPreferences.set("global", "x509crl",
-                          CSecurityTLS.x509crl.getValue());
+    UserPreferences.set("global", "x509ca", x509ca.getText());
+    UserPreferences.set("global", "x509crl", x509crl.getText());
     if (!sshUser.getText().isEmpty())
       UserPreferences.set("global", "via", sshUser.getText() + "@" +
                           gateway.getText());
@@ -689,26 +710,26 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       UserPreferences.save();
     } else if (s instanceof JButton && (JButton)s == defClearButton) {
       UserPreferences.clear();
-    } else if (s instanceof JButton && (JButton)s == ca) {
-      File file = new File(CSecurityTLS.x509ca.getValue());
+    } else if (s instanceof JButton && (JButton)s == x509caButton) {
+      File file = new File(x509ca.getText());
       JFileChooser fc = new JFileChooser(file.getParent());
       fc.setSelectedFile(file);
-      fc.setDialogTitle("Path to X509 CA certificate");
+      fc.setDialogTitle("Path to X.509 CA certificate");
       fc.setApproveButtonText("OK");
       fc.setFileHidingEnabled(false);
       int ret = fc.showOpenDialog(getJDialog());
       if (ret == JFileChooser.APPROVE_OPTION)
-        CSecurityTLS.x509ca.setParam(fc.getSelectedFile().toString());
-    } else if (s instanceof JButton && (JButton)s == crl) {
-      File file = new File(CSecurityTLS.x509crl.getValue());
+        x509ca.setText(fc.getSelectedFile().toString());
+    } else if (s instanceof JButton && (JButton)s == x509crlButton) {
+      File file = new File(x509crl.getText());
       JFileChooser fc = new JFileChooser(file.getParent());
       fc.setSelectedFile(file);
-      fc.setDialogTitle("Path to X509 CRL file");
+      fc.setDialogTitle("Path to X.509 Certificate Revocation List");
       fc.setApproveButtonText("OK");
       fc.setFileHidingEnabled(false);
       int ret = fc.showOpenDialog(getJDialog());
       if (ret == JFileChooser.APPROVE_OPTION)
-        CSecurityTLS.x509crl.setParam(fc.getSelectedFile().toString());
+        x509crl.setText(fc.getSelectedFile().toString());
     } else if (s instanceof JComboBox && (JComboBox)s == encMethodComboBox) {
       JComboBox cb = (JComboBox)e.getSource();
       String encMethod = (String)cb.getSelectedItem();
@@ -778,10 +799,18 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       encNone.setEnabled(secVeNCrypt.isSelected());
       encTLS.setEnabled(secVeNCrypt.isSelected());
       encX509.setEnabled(secVeNCrypt.isSelected());
-      ca.setEnabled(secVeNCrypt.isSelected());
-      crl.setEnabled(secVeNCrypt.isSelected());
+      x509ca.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
+      x509caButton.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
+      x509crl.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
+      x509crlButton.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
       secIdent.setEnabled(secVeNCrypt.isSelected());
       secPlain.setEnabled(secVeNCrypt.isSelected());
+    }
+    if (s instanceof JCheckBox && (JCheckBox)s == encX509) {
+      x509ca.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
+      x509caButton.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
+      x509crl.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
+      x509crlButton.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
     }
     if (s instanceof JCheckBox && (JCheckBox)s == secIdent ||
         s instanceof JCheckBox && (JCheckBox)s == secPlain ||
@@ -1063,10 +1092,14 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       encNone.setEnabled(false);
       encTLS.setEnabled(false);
       encX509.setEnabled(false);
-      ca.setEnabled(false);
-      crl.setEnabled(false);
       secIdent.setEnabled(false);
       secPlain.setEnabled(false);
+    }
+    if (!encX509.isSelected() || !secVeNCrypt.isSelected()) {
+      x509ca.setEnabled(false);
+      x509caButton.setEnabled(false);
+      x509crl.setEnabled(false);
+      x509crlButton.setEnabled(false);
     }
     sendLocalUsername.setEnabled(
       (secIdent.isSelected() && secIdent.isEnabled()) ||

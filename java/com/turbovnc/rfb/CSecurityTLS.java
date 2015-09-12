@@ -4,7 +4,7 @@
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,13 +40,6 @@ import com.turbovnc.network.*;
 import com.turbovnc.vncviewer.*;
 
 public class CSecurityTLS extends CSecurity {
-
-  public static StringParameter x509ca
-  = new StringParameter("x509ca",
-    "X509 CA certificate", FileUtils.getVncHomeDir() + "x509_ca.pem");
-  public static StringParameter x509crl
-  = new StringParameter("x509crl",
-    "X509 CRL file", FileUtils.getVncHomeDir() + "x509_crl.pem");
 
   private void initGlobal() {
     boolean globalInitDone = false;
@@ -177,19 +170,25 @@ public class CSecurityTLS extends CSecurity {
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
       try {
         ks.load(null, null);
-        File cacert = new File(x509ca.getValue());
+        File cacert = new File(SecurityClient.x509ca.getValue());
+        vlog.debug("Using X.509 CA certificate " +
+                   SecurityClient.x509ca.getValue());
         if (!cacert.exists() || !cacert.canRead())
           return;
-        InputStream caStream = new FileInputStream(x509ca.getValue());
+        InputStream caStream =
+          new FileInputStream(SecurityClient.x509ca.getValue());
         X509Certificate ca = (X509Certificate)cf.generateCertificate(caStream);
         ks.setCertificateEntry("CA", ca);
         PKIXBuilderParameters params =
           new PKIXBuilderParameters(ks, new X509CertSelector());
-        File crlcert = new File(x509crl.getValue());
+        File crlcert = new File(SecurityClient.x509crl.getValue());
         if (!crlcert.exists() || !crlcert.canRead()) {
+          vlog.debug("Not using X.509 CRL");
           params.setRevocationEnabled(false);
         } else {
-          InputStream crlStream = new FileInputStream(x509crl.getValue());
+          vlog.debug("Using X.509 CRL " + SecurityClient.x509crl.getValue());
+          InputStream crlStream =
+            new FileInputStream(SecurityClient.x509crl.getValue());
           Collection<? extends CRL> crls = cf.generateCRLs(crlStream);
           CertStoreParameters csp = new CollectionCertStoreParameters(crls);
           CertStore store = CertStore.getInstance("Collection", csp);

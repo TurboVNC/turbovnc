@@ -1243,8 +1243,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
       options.encNone.setEnabled(false);
       options.encTLS.setEnabled(false);
       options.encX509.setEnabled(false);
-      options.ca.setEnabled(false);
-      options.crl.setEnabled(false);
+      options.x509ca.setEnabled(false);
+      options.x509caButton.setEnabled(false);
+      options.x509crl.setEnabled(false);
+      options.x509crlButton.setEnabled(false);
       options.secIdent.setEnabled(false);
       options.secNone.setEnabled(false);
       options.secVnc.setEnabled(false);
@@ -1263,6 +1265,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (opts.sshUser != null)
         options.sshUser.setText(opts.sshUser);
       options.tunnel.setSelected(opts.tunnel);
+      if (SecurityClient.x509ca.getValue() != null)
+        options.x509ca.setText(SecurityClient.x509ca.getValue());
+      if (SecurityClient.x509crl.getValue() != null)
+        options.x509crl.setText(SecurityClient.x509crl.getValue());
     }
 
     options.fullScreen.setSelected(opts.fullScreen);
@@ -1372,6 +1378,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       String sshUser = options.sshUser.getText();
       opts.sshUser = (sshUser.isEmpty() ? null : sshUser);
       opts.tunnel = options.tunnel.isSelected();
+      SecurityClient.x509ca.setParam(options.x509ca.getText());
+      SecurityClient.x509crl.setParam(options.x509crl.getText());
     }
 
     if (options.fullScreen.isSelected() != opts.fullScreen)
