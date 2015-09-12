@@ -534,22 +534,11 @@ rfbClientConnectionGone(rfbClientPtr cl)
  */
 
 void
-rfbProcessClientMessage(int sock)
+rfbProcessClientMessage(rfbClientPtr cl)
 {
-    rfbClientPtr cl, cl2;
+    rfbClientPtr cl2;
 
-    for (cl = rfbClientHead; cl; cl = cl->next) {
-        if (sock == cl->sock)
-            break;
-    }
-
-    if (!cl) {
-        rfbLog("rfbProcessClientMessage: unknown socket %d\n", sock);
-        rfbCloseSock(sock);
-        return;
-    }
-
-    rfbCorkSock(sock);
+    rfbCorkSock(cl->sock);
 
     if (cl->pendingSyncFence) {
       cl->syncFence = TRUE;
@@ -569,6 +558,12 @@ rfbProcessClientMessage(int sock)
     case RFB_AUTH_TYPE:         /* protocol versions 3.7t, 3.8t */
         rfbProcessClientAuthType(cl);
         break;
+#if USETLS
+    case RFB_TLS_HANDSHAKE:
+        rfbAuthTLSHandshake(cl);
+        break;
+#endif
+
     case RFB_AUTHENTICATION:
         rfbAuthProcessResponse(cl);
         break;
@@ -592,7 +587,7 @@ rfbProcessClientMessage(int sock)
       cl->syncFence = FALSE;
     }
 
-    rfbUncorkSock(sock);
+    rfbUncorkSock(cl->sock);
 }
 
 

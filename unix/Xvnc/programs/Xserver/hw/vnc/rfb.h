@@ -160,6 +160,10 @@ typedef void (*rfbTranslateFnType)(char *table, rfbPixelFormat *in,
  * Per-client structure.
  */
 
+#if USETLS
+typedef struct _rfbSslCtx rfbSslCtx;
+#endif
+
 typedef struct rfbClientRec {
 
     int sock;
@@ -177,6 +181,9 @@ typedef struct rfbClientRec {
         RFB_TUNNELING_TYPE,     /* establishing tunneling (RFB v.3.7t) */
         RFB_AUTH_TYPE,          /* negotiating authentication (RFB v.3.7t) */
         RFB_AUTHENTICATION,     /* authenticating (VNC authentication) */
+#if USETLS
+        RFB_TLS_HANDSHAKE,      /* waiting for TLS handshake to complete */
+#endif
         RFB_INITIALISATION,     /* sending initialisation messages */
         RFB_NORMAL              /* normal protocol messages */
     } state;
@@ -359,6 +366,10 @@ typedef struct rfbClientRec {
     Bool pendingDesktopResize;
     int reason;
 
+#if USETLS
+    rfbSslCtx *sslctx;
+#endif
+
 } rfbClientRec, *rfbClientPtr;
 
 
@@ -477,6 +488,7 @@ extern struct in6_addr interface6;
 extern int family;
 
 extern int rfbBitsPerPixel(int depth);
+extern void vrfbLog(char *format, va_list args);
 extern void rfbLog(char *format, ...);
 extern void rfbLogPerror(char *str);
 
@@ -626,7 +638,7 @@ extern int rfbInterframe;
 extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port, int id);
 extern void rfbClientConnectionGone(rfbClientPtr cl);
-extern void rfbProcessClientMessage(int sock);
+extern void rfbProcessClientMessage(rfbClientPtr cl);
 extern void rfbNewUDPConnection(int sock);
 extern void rfbProcessUDPInput(int sock);
 extern Bool rfbSendFramebufferUpdate(rfbClientPtr cl);
@@ -700,11 +712,12 @@ extern void httpCheckFds(void);
 
 void rfbAuthInit(void);
 void rfbAuthProcessResponse(rfbClientPtr cl);
+void rfbAuthParseCommandLine(char *buf);
 extern char* rfbAuthConfigFile;
 
-extern Bool  rfbOptOtpAuth;
-extern Bool  rfbOptPamAuth;
-extern Bool  rfbOptRfbAuth;
+extern Bool  rfbOptOtpAuth(void);
+extern Bool  rfbOptPamAuth(void);
+extern Bool  rfbOptRfbAuth(void);
 
 extern char* rfbAuthOTPValue;
 extern int   rfbAuthOTPValueLen;
@@ -720,12 +733,19 @@ extern void rfbAuthRevokeUser(const char* name);
 #endif
 
 extern char *rfbAuthPasswdFile;
+#if USETLS
+extern char *rfbAuthX509Cert;
+extern char *rfbAuthX509Key;
+#endif
 
 extern void rfbAuthNewClient(rfbClientPtr cl);
 extern void rfbProcessClientSecurityType(rfbClientPtr cl);
 extern void rfbProcessClientTunnelingType(rfbClientPtr cl);
 extern void rfbProcessClientAuthType(rfbClientPtr cl);
 extern void rfbVncAuthProcessResponse(rfbClientPtr cl);
+#if USETLS
+extern void rfbAuthTLSHandshake(rfbClientPtr cl);
+#endif
 
 extern void rfbClientConnFailed(rfbClientPtr cl, char *reason);
 extern void rfbClientAuthFailed(rfbClientPtr cl, char *reason);
@@ -804,6 +824,22 @@ extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
 
 extern void rfbResetStats(rfbClientPtr cl);
 extern void rfbPrintStats(rfbClientPtr cl);
+
+
+#if USETLS
+
+/* rfbssl_*.c */
+
+rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon);
+int rfbssl_accept(rfbClientPtr cl);
+int rfbssl_pending(rfbClientPtr cl);
+int rfbssl_peek(rfbClientPtr cl, char *buf, int bufsize);
+int rfbssl_read(rfbClientPtr cl, char *buf, int bufsize);
+int rfbssl_write(rfbClientPtr cl, const char *buf, int bufsize);
+void rfbssl_destroy(rfbClientPtr cl);
+char *rfbssl_geterr(void);
+
+#endif
 
 
 #endif /* __RFB_H__ */

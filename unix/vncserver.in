@@ -54,7 +54,6 @@ $vncUserDir = "$ENV{HOME}/.vnc";
 $passwdFile = "$vncUserDir/passwd";
 $authTypeVNC = 1;
 $authTypeOTP = 1;
-$authTypePAM = 1;
 $generateOTP = 0;
 $enableHTTP = 1;
 $skipxstartup = 0;
@@ -245,9 +244,8 @@ foreach $_xkbcompdir (@xkbcompdirs) {
 
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
               "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
-              "-novncauth",0,"-nootp",0,"-nopam",0,"-noauth",0,"-nohttp",0,
-              "-nohttpd",0,"-rfbauth",1,"-noxstartup",0,"-xstartup",1,
-              "-log",1,"-3dwm",0);
+              "-securitytypes",1,"-nohttp",0,"-nohttpd",0,"-rfbauth",1,
+              "-noxstartup",0,"-xstartup",1,"-log",1,"-3dwm",0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -291,33 +289,25 @@ if ($opt{'-deferupdate'}) {
     $deferUpdate = $opt{'-deferupdate'};
 }
 $authTypeVNCPermitted = $authTypeVNC;
-if ($opt{'-novncauth'}) {
-    if ($authTypeVNC) {
-        $authTypeVNC = 0;
-    } else {
-        print ("VNC Password auth is not permitted on this system.  Ignoring -novncauth.\n");
+if ($opt{'-securitytypes'}) {
+  my $enableVNC = 0;
+  my $enableOTP = 0;
+  my $securityTypes = $opt{'-securitytypes'};
+  my $securityTypes =~ s/[\t\ \r\n]//g;
+  foreach $tok (split/[,=]/, $securityTypes) {
+    if (lc $tok eq 'otp' || lc $tok eq 'x509otp' || lc $tok eq 'tlsotp') {
+      $enableOTP = 1;
     }
-}
-if ($opt{'-nootp'}) {
-    if ($authTypeOTP) {
-        $authTypeOTP = 0;
-    } else {
-        print ("One-Time Password auth is not permitted on this system.  Ignoring -nootp.\n");
+    if (lc $tok eq 'vnc' || lc $tok eq 'x509vnc' || lc $tok eq 'tlsvnc') {
+      $enableVNC = 1;
     }
-}
-if ($opt{'-nopam'}) {
-    if ($authTypePAM) {
-        $authTypePAM = 0;
-    } else {
-        print ("PAM User/Password auth is not permitted on this system.  Ignoring -nopam.\n");
-    }
-}
-if ($opt{'-noauth'}) {
-    if ($authTypeVNC || $authTypeOTP || $authTypePAM) {
-        $authTypeVNC = $authTypeOTP = $authTypePAM = 0;
-    } else {
-        print ("Authentication is not permitted on this system.  Ignoring -noauth.\n");
-    }
+  }
+  if ($enableVNC == 0) {
+    $authTypeVNC = 0;
+  }
+  if ($enableOTP == 0) {
+    $authTypeOTP = 0;
+  }
 }
 if ($opt{'-rfbauth'}) {
     if ($authTypeVNC) {
@@ -333,14 +323,12 @@ if ($opt{'-rfbauth'}) {
 }
 if (($authType eq "")) {
     if ($authTypeVNC) {$authType .= "-rfbauth $passwdFile ";}
-    if ($authTypeOTP) {$authType .= "-otpauth ";}
-    if ($authTypePAM) {$authType .= "-pamauth ";}
 }
 if ($opt{'-otp'}) {
     $generateOTP = 1;
 }
 
-if ($generateOTP && index($authType, "-otpauth") < 0) {
+if ($generateOTP && $authTypeOTP == 0) {
     print ("One-Time Password authentication is not enabled.  Ignoring request to generate\n");
     print ("    initial OTP.\n");
     $generateOTP = 0;
@@ -448,6 +436,7 @@ $cmd .= " -depth $depth" if ($depth);
 $cmd .= " -pixelformat $pixelformat" if ($pixelformat);
 $cmd .= " -rfbwait 120000";
 $cmd .= " $authType";
+$cmd .= " -securitytypes $opt{'-securitytypes'}" if ($opt{'-securitytypes'});
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
@@ -777,10 +766,6 @@ sub Usage
         "        -fp <FONT-PATH>\n".
         "        -name <DESKTOP-NAME>\n".
         "        -nohttpd\n".
-        "        -novncauth\n".
-        "        -nootp\n".
-        "        -nopam\n".
-        "        -noauth\n".
         "        -otp\n".
         "        -fg\n".
         "        -noxstartup\n".
@@ -1051,7 +1036,6 @@ sub ReadAuthConfiguration ($)
   my $acf = shift;
   my $enableVNC = 0;
   my $enableOTP = 0;
-  my $enablePAM = 0;
   my $permissionsSet = 0;
 
   return unless (open(ACF, $acf));
@@ -1062,14 +1046,22 @@ sub ReadAuthConfiguration ($)
     if (@tokens[0] eq 'permitted-auth-methods') {
       $permissionsSet = 1;
       foreach $tok (split/[,=]/, $_) {
-        if ($tok eq 'otp') {
+        if (lc $tok eq 'otp') {
           $enableOTP = 1;
         }
-        if ($tok eq 'vnc') {
+        if (lc $tok eq 'vnc') {
           $enableVNC = 1;
         }
-        if ($tok eq 'pam-userpwd') {
-          $enablePAM = 1;
+      }
+    }
+    if (@tokens[0] eq 'permitted-security-types') {
+      $permissionsSet = 1;
+      foreach $tok (split/[,=]/, $_) {
+        if (lc $tok eq 'otp' || lc $tok eq 'x509otp' || lc $tok eq 'tlsotp') {
+          $enableOTP = 1;
+        }
+        if (lc $tok eq 'vnc' || lc $tok eq 'x509vnc' || lc $tok eq 'tlsvnc') {
+          $enableVNC = 1;
         }
       }
     }
@@ -1082,9 +1074,6 @@ sub ReadAuthConfiguration ($)
   }
   if ($enableOTP == 0) {
     $authTypeOTP = 0;
-  }
-  if ($enablePAM == 0) {
-    $authTypePAM = 0;
   }
 
   close(ACF);

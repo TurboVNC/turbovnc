@@ -19,8 +19,9 @@
  */
 
 /*
- *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2011 Gernot Tenchio
+ *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -195,6 +196,7 @@ rfbCheckFds()
     char buf[6];
     const int one = 1;
     int sock;
+    rfbClientPtr cl;
     static Bool inetdInitDone = FALSE;
 
     if (!inetdInitDone && inetdSock != -1) {
@@ -299,9 +301,22 @@ rfbCheckFds()
             return;
     }
 
-    for (sock = 0; sock <= maxFd; sock++) {
-        if (FD_ISSET(sock, &fds) && FD_ISSET(sock, &allFds)) {
-            rfbProcessClientMessage(sock);
+    for (cl = rfbClientHead; cl; cl = cl->next) {
+        if (FD_ISSET(cl->sock, &fds) && FD_ISSET(cl->sock, &allFds)) {
+#if USETLS
+            do {
+                rfbClientPtr cl2;
+                rfbProcessClientMessage(cl);
+                /* Make sure cl hasn't been freed */
+                for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+                    if (cl2 == cl)
+                        break;
+                }
+                if (cl2 == NULL) return;
+            } while (cl->sslctx && rfbssl_pending(cl) > 0);
+#else
+            rfbProcessClientMessage(cl);
+#endif
         }
     }
 }
@@ -377,6 +392,10 @@ void
 rfbCloseClient(rfbClientPtr cl)
 {
     int sock = cl->sock;
+#if USETLS
+    if (cl->sslctx)
+        rfbssl_destroy(cl);
+#endif
     close(sock);
     RemoveEnabledDevice(sock);
     FD_CLR(sock, &allFds);
@@ -442,6 +461,11 @@ ReadExact(rfbClientPtr cl, char *buf, int len)
 
     while (len > 0) {
         do {
+#if USETLS
+            if (cl->sslctx)
+                n = rfbssl_read(cl, buf, len);
+            else
+#endif
             n = read(sock, buf, len);
         } while (n < 0 && errno == EINTR);
 
@@ -459,6 +483,12 @@ ReadExact(rfbClientPtr cl, char *buf, int len)
                 return n;
             }
 
+#if USETLS
+            if (cl->sslctx) {
+                if (rfbssl_pending(cl))
+                    continue;
+            }
+#endif
             FD_ZERO(&fds);
             FD_SET(sock, &fds);
             tv.tv_sec = rfbMaxClientWait / 1000;
@@ -526,6 +556,11 @@ WriteExact(rfbClientPtr cl, char *buf, int len)
 
     while (len > 0) {
         do {
+#if USETLS
+            if (cl->sslctx)
+                n = rfbssl_write(cl, buf, len);
+            else
+#endif
             n = write(sock, buf, len);
         } while (n < 0 && errno == EINTR);
 

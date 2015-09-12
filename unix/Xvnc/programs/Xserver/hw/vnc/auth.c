@@ -72,13 +72,12 @@ static int nAuthMethodsEnabled = 0;
 static int preferenceLimit = 1; /* Force one iteration of the loop in
                                    rfbSendAuthCaps() */
 
-Bool rfbOptNoAuth = FALSE;
-Bool rfbOptOtpAuth = FALSE;
-Bool rfbOptPamAuth = FALSE;
-Bool rfbOptRfbAuth = FALSE;
-
 char *rfbAuthOTPValue = NULL;
 int rfbAuthOTPValueLen = 0;
+#if USETLS
+char *rfbAuthX509Cert = NULL;
+char *rfbAuthX509Key = NULL;
+#endif
 
 
 static void
@@ -300,8 +299,6 @@ typedef struct {
     Bool enabled;
     Bool permitted;
     int preference;
-    Bool *optionSet;
-    const char *optionName;
     Bool requiredData;
     SecTypeData *secType;
     AuthCapData *authCap;
@@ -310,37 +307,149 @@ typedef struct {
 
 /*
  * Set the "permitted" member to TRUE if you want the auth method to be
- * available by default.  The value of the "permitted-auth-methods" config file
- * option will take precedence over the defaults below.
+ * available by default.  The value of the "permitted-security-types" config
+ * file option will take precedence over the defaults below.
  *
  * We permit the rfbAuthNone auth method by default for backward compatibility
  * and only enable it when either explicitly told to do so or if it is
  * permitted and no other auth methods were specified on the command line.
  */
 static AuthMethodData authMethods[] = {
-    { "none", FALSE, TRUE, -1, &rfbOptNoAuth, "", FALSE,
-      &secTypeNone, &authCapNone, rfbSecTypeNone },
+#if USETLS
+    /* name         enabled  permitted  preference  requiredData */
+    {  "tlsnone",   FALSE,   TRUE,      -1,         FALSE,
+    /* secType           authCap            subType */
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSNone },
 
-    { "vnc", FALSE, TRUE, -1, &rfbOptRfbAuth, "-rfbauth", TRUE,
-      &secTypeVncAuth, &authCapVncAuth, rfbSecTypeVncAuth },
+    {  "tlsvnc",    TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSVnc },
 
-    { "otp", FALSE, TRUE, -1, &rfbOptOtpAuth, "-otpauth", TRUE,
-      &secTypeVncAuth, &authCapVncAuth, rfbSecTypeVncAuth },
+    {  "tlsotp",    TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSVnc },
 
 #ifdef XVNC_AuthPAM
-    { "pam-userpwd", FALSE, TRUE, -1, &rfbOptPamAuth, "-pamauth", TRUE,
-      &secTypeTight, &authCapUnixLogin, -1 },
+    {  "tlsplain",  TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSPlain },
+#endif
 
-    { "pam-userpwd", FALSE, TRUE, -1, &rfbOptPamAuth, "-pamauth", TRUE,
-      &secTypeVeNCrypt, &authCapVeNCrypt, rfbVeNCryptPlain },
+    {  "x509none",  FALSE,   TRUE,      -1,         FALSE,
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509None },
+
+    {  "x509vnc",   TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Vnc },
+
+    {  "x509otp",   TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Vnc },
+
+#ifdef XVNC_AuthPAM
+    {  "x509plain", TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Plain },
+#endif
+#endif
+
+    {  "none",      FALSE,   TRUE,      -1,         FALSE,
+       &secTypeNone,     &authCapNone,      rfbSecTypeNone },
+
+    {  "vnc",       TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVncAuth,  &authCapVncAuth,   rfbSecTypeVncAuth },
+
+    {  "otp",       TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVncAuth,  &authCapVncAuth,   rfbSecTypeVncAuth },
+
+#ifdef XVNC_AuthPAM
+    {  "unixlogin", TRUE,    TRUE,      -1,         TRUE,
+       &secTypeTight,    &authCapUnixLogin, -1 },
+
+    {  "plain",     TRUE,    TRUE,      -1,         TRUE,
+       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptPlain },
 #endif
 
     { NULL }
 };
 
 
+Bool
+rfbOptOtpAuth(void)
+{
+    AuthMethodData *a;
+
+    for (a = authMethods; a->name != NULL; a++) {
+        if (!strcmp(&a->name[strlen(a->name) - 3], "otp") &&
+            a->enabled)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+
+Bool
+rfbOptPamAuth(void)
+{
+    AuthMethodData *a;
+
+    for (a = authMethods; a->name != NULL; a++) {
+        if ((!strcmp(a->name, "unixlogin") ||
+             !strcmp(&a->name[strlen(a->name) - 5], "plain")) &&
+            a->enabled)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+
+Bool
+rfbOptRfbAuth(void)
+{
+    AuthMethodData *a;
+
+    for (a = authMethods; a->name != NULL; a++) {
+        if (!strcmp(&a->name[strlen(a->name) - 3], "vnc") &&
+            a->enabled)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+
+void
+rfbAuthParseCommandLine(char *securityTypes)
+{
+    char *p1 = securityTypes, *p2 = securityTypes;
+    AuthMethodData *a;
+
+    for (a = authMethods; a->name != NULL; a++)
+        a->enabled = FALSE;
+
+    do {
+        *p2 = *p1;
+        if (!isspace(*p2))
+            p2++;
+    } while (*p1++ != 0);
+
+    while (TRUE) {
+        p1 = strtok_r(securityTypes, ",", &p2);
+        securityTypes = NULL;
+        if (p1 == NULL)
+            break;
+
+        for (a = authMethods; a->name != NULL; a++) {
+            if (!strcasecmp(a->name, p1)) {
+                a->enabled = TRUE;
+                break;
+            }
+        }
+
+        if (a->name == NULL)
+            FatalError("ERROR: Unknown security type '%s'\n", p1);
+    }
+}
+
+
 static void
-setMethods(char *buf)
+setMethods(char *buf, Bool backwardCompatible)
 {
     char *saveptr;
     char *p;
@@ -349,7 +458,6 @@ setMethods(char *buf)
     preferenceLimit = 0;
     for (a = authMethods; a->name != NULL; a++) {
         a->permitted = FALSE;
-        a->enabled = FALSE;
         a->preference = -1;
         a->secType->advertise = FALSE;
     }
@@ -361,15 +469,20 @@ setMethods(char *buf)
             break;
 
         for (a = authMethods; a->name != NULL; a++) {
-            if (!strcmp(a->name, p)) {
-                a->permitted = TRUE;
-                a->preference = preferenceLimit++;
-            }
+            if (backwardCompatible && a->secType == &secTypeVeNCrypt)
+                continue;
+            if (!strcasecmp(a->name, p) ||
+                (backwardCompatible && !strcasecmp(a->name, "unixlogin") &&
+                 !strcasecmp(p, "pam-userpwd")))
+                break;
         }
 
-        if (preferenceLimit == 0) {
+        if (a->name == NULL) {
             FatalError("ERROR: Unknown auth method name '%s'\n", p);
         }
+
+        a->permitted = TRUE;
+        a->preference = preferenceLimit++;
     }
 }
 
@@ -473,6 +586,9 @@ ReadConfigFile(void)
         }
 #endif
 
+        /* permitted-auth-methods provides backward compatibility with TurboVNC
+           2.0.x and earlier.  It can only be used to enable non-VeNCrypt
+           security types. */
         n = 23;
         if (!strncmp(buf2, "permitted-auth-methods=", n)) {
             if (buf2[n] == '\0') {
@@ -480,7 +596,19 @@ ReadConfigFile(void)
                            rfbAuthConfigFile);
             }
 
-            setMethods(&buf2[n]);
+            setMethods(&buf2[n], TRUE);
+            continue;
+        }
+
+        /* permitted-security-types was introduced in TurboVNC 2.1. */
+        n = 25;
+        if (!strncmp(buf2, "permitted-security-types=", n)) {
+            if (buf2[n] == '\0') {
+                FatalError("ERROR in %s: permitted-security-types is empty!",
+                           rfbAuthConfigFile);
+            }
+
+            setMethods(&buf2[n], FALSE);
             continue;
         }
 
@@ -538,19 +666,14 @@ rfbAuthInit()
     ReadConfigFile();
 
     for (a = authMethods; a->name != NULL; a++) {
-        if (*(a->optionSet) == TRUE) {
+        if (a->enabled) {
             nSelected++;
             if (!a->permitted) {
-                if (a->optionName != NULL) {
-                    rfbLog("WARNING: authentication option '%s' is not permitted\n",
-                            a->optionName);
-                }
-
-                *(a->optionSet) = FALSE;
+                rfbLog("WARNING: security type '%s' is not permitted\n",
+                       a->name);
+                a->enabled = FALSE;
                 continue;
             }
-
-            a->enabled = TRUE;
         }
 
         if (a->enabled) {
@@ -584,7 +707,7 @@ rfbAuthInit()
     }
 
 #ifndef XVNC_AuthPAM
-    if (rfbOptPamAuth)
+    if (rfbOptPamAuth())
         rfbLog("WARNING: PAM support is not compiled in.\n");
 #endif
 
@@ -604,7 +727,7 @@ rfbAuthInit()
     }
 
 #ifdef XVNC_AuthPAM
-    if (rfbOptPamAuth && rfbAuthUserACL) {
+    if (rfbOptPamAuth() && rfbAuthUserACL) {
         struct passwd pbuf;
         struct passwd *pw;
         char buf[256];
@@ -726,23 +849,50 @@ rfbSendSecurityType(rfbClientPtr cl, int securityType)
 static void
 rfbSendSecurityTypeList(rfbClientPtr cl)
 {
-    int n;
-    SecTypeData **p;
+    int i, j, n;
+    AuthMethodData *a;
     SecTypeData *s;
     Bool tightAdvertised = FALSE;
 
+    /*
+     * When no preference order was set using "permitted-security-types", the
+     * default value of preferenceLimit (1) will cause us to execute the
+     * outer loop once.  In this case, the a->preference members will all
+     * be the default value (-1), and we skip the order testing.
+     */
     n = 0;
-    for (p = secTypes; *p != NULL; p++) {
-        if (n > MAX_SECURITY_TYPES) {
-            FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
+    for (i = 0; i < preferenceLimit; i++) {
+        for (a = authMethods; a->name != NULL; a++) {
+            if (((a->preference != -1) && (i != a->preference)) ||
+                !a->enabled)
+                continue;
+
+            s = a->secType;
+
+            /*
+             * Check whether we have already advertised this security type
+             */
+            for (j = 0; j < n; j++) {
+                if (cl->securityTypes[j + 1] == s->securityType)
+                    break;
+            }
+
+            if (j < n)
+                continue;
+
+            if (n > MAX_SECURITY_TYPES)
+                FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
+
+            if (s->advertise &&
+                (cl->protocol_minor_ver >= s->protocolMinorVer)) {
+                cl->securityTypes[++n] = s->securityType;
+                if (s->securityType == rfbSecTypeTight)
+                    tightAdvertised = TRUE;
+            }
         }
 
-        s = *p;
-        if (s->advertise && (cl->protocol_minor_ver >= s->protocolMinorVer)) {
-            cl->securityTypes[++n] = s->securityType;
-            if (s->securityType == rfbSecTypeTight)
-                tightAdvertised = TRUE;
-        }
+        if (n == 0)
+            FatalError("rfbSendSecurityTypeList: no security types enabled! This should not have happened!\n");
     }
 
     if (!tightAdvertised) {
@@ -787,6 +937,52 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
         return;  \
     }
 
+#if USETLS
+#define TLS_INIT(anon)  \
+    if ((ctx = rfbssl_init(cl, anon)) == NULL) {  \
+        reply = 0;  \
+        WRITE(&reply, 1);  \
+        rfbClientAuthFailed(cl, rfbssl_geterr());  \
+        return;  \
+    }  \
+    reply = 1;  \
+    WRITE(&reply, 1);  \
+    cl->sslctx = ctx;  \
+    if ((ret = rfbssl_accept(cl)) < 0) {  \
+        rfbCloseClient(cl);  \
+        return;  \
+    } else if (ret == 1) {  \
+        rfbLog("Deferring TLS handshake\n");  \
+        cl->state = RFB_TLS_HANDSHAKE;  \
+        return;  \
+    }
+
+
+void
+rfbAuthTLSHandshake(rfbClientPtr cl)
+{
+    int ret;
+
+    if ((ret = rfbssl_accept(cl)) < 0) {
+        rfbCloseClient(cl);
+        return;
+    } else if (ret == 1)
+        return;
+
+    switch (cl->selectedAuthType) {
+    case rfbAuthNone:
+        rfbClientAuthSucceeded(cl, rfbAuthNone);
+        break;
+    case rfbAuthVNC:
+        rfbVncAuthSendChallenge(cl);
+        break;
+    case rfbAuthUnixLogin:
+        AuthPAMUserPwdRspFunc(cl);
+        break;
+    }
+}
+#endif
+
 
 void
 rfbVeNCryptAuthenticate(rfbClientPtr cl)
@@ -797,6 +993,10 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
     int i, j;
     AuthMethodData *a;
     CARD32 subTypes[MAX_VENCRYPT_SUBTYPES], chosenType = 0;
+#if USETLS
+    rfbSslCtx *ctx;
+    int ret;
+#endif
 
     WRITE(&serverVersion.minor, 1);
     WRITE(&serverVersion.major, 1);
@@ -868,6 +1068,38 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
     case rfbVeNCryptPlain:
         AuthPAMUserPwdRspFunc(cl);
         break;
+#if USETLS
+    case rfbVeNCryptTLSNone:
+        cl->selectedAuthType = rfbAuthNone;
+        TLS_INIT(TRUE);
+        rfbClientAuthSucceeded(cl, rfbAuthNone);
+        break;
+    case rfbVeNCryptTLSVnc:
+        cl->selectedAuthType = rfbAuthVNC;
+        TLS_INIT(TRUE);
+        rfbVncAuthSendChallenge(cl);
+        break;
+    case rfbVeNCryptTLSPlain:
+        cl->selectedAuthType = rfbAuthUnixLogin;
+        TLS_INIT(TRUE);
+        AuthPAMUserPwdRspFunc(cl);
+        break;
+    case rfbVeNCryptX509None:
+        cl->selectedAuthType = rfbAuthNone;
+        TLS_INIT(FALSE);
+        rfbClientAuthSucceeded(cl, rfbAuthNone);
+        break;
+    case rfbVeNCryptX509Vnc:
+        cl->selectedAuthType = rfbAuthVNC;
+        TLS_INIT(FALSE);
+        rfbVncAuthSendChallenge(cl);
+        break;
+    case rfbVeNCryptX509Plain:
+        cl->selectedAuthType = rfbAuthUnixLogin;
+        TLS_INIT(FALSE);
+        AuthPAMUserPwdRspFunc(cl);
+        break;
+#endif
     default:
         FatalError("rfbVeNCryptAuthenticate: chosen type is invalid (this should never occur)");
     }
@@ -1004,10 +1236,10 @@ rfbSendAuthCaps(rfbClientPtr cl)
         int i;
 
         /*
-         * When no preference order was set using "permitted-auth-methods", the
-         * default value of preferenceLimit (1) will cause us to execute the
-         * outer loop once.  In this case, the a->preference members will all
-         * be the default value (-1), and we skip the order testing.
+         * When no preference order was set using "permitted-security-types",
+         * the default value of preferenceLimit (1) will cause us to execute
+         * the outer loop once.  In this case, the a->preference members will
+         * all be the default value (-1), and we skip the order testing.
          */
         for (i = 0; i < preferenceLimit; i++) {
             for (a = authMethods; a->name != NULL; a++) {
@@ -1201,7 +1433,7 @@ rfbVncAuthProcessResponse(rfbClientPtr cl)
     }
 
     ok = FALSE;
-    if (rfbOptOtpAuth) {
+    if (rfbOptOtpAuth()) {
         if (rfbAuthOTPValue == NULL) {
             if (nAuthMethodsEnabled == 1) {
                 rfbClientAuthFailed(cl, "The one-time password has not been set on the server");
@@ -1227,7 +1459,7 @@ rfbVncAuthProcessResponse(rfbClientPtr cl)
         }
     }
 
-    if ((ok == FALSE) && rfbOptRfbAuth) {
+    if ((ok == FALSE) && rfbOptRfbAuth()) {
         numPasswords = vncDecryptPasswdFromFile2(rfbAuthPasswdFile,
                                                  passwdFullControl,
                                                  passwdViewOnly);

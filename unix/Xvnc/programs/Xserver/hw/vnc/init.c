@@ -253,20 +253,29 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     if (strcasecmp(argv[i], "-rfbauth") == 0) {     /* -rfbauth passwd-file */
         if (i + 1 >= argc) UseMsg();
-        rfbOptRfbAuth = TRUE;
         rfbAuthPasswdFile = argv[i + 1];
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-otpauth") == 0) {
-        rfbOptOtpAuth = TRUE;
-        return 1;
+    if (strcasecmp(argv[i], "-securitytypes") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbAuthParseCommandLine(argv[i + 1]);
+        return 2;
     }
 
-    if (strcasecmp(argv[i], "-pamauth") == 0) {
-        rfbOptPamAuth = TRUE;
-        return 1;
+#if USETLS
+    if (strcasecmp(argv[i], "-x509cert") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbAuthX509Cert = argv[i + 1];
+        return 2;
     }
+
+    if (strcasecmp(argv[i], "-x509key") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbAuthX509Key = argv[i + 1];
+        return 2;
+    }
+#endif
 
     if (strcasecmp(argv[i], "-noreverse") == 0) {
         rfbAuthDisableRevCon = TRUE;
@@ -519,7 +528,7 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
                                   strlen("VNC_LAST_CLIENT_ID"), TRUE);
     VNC_CONNECT = MakeAtom("VNC_CONNECT", strlen("VNC_CONNECT"), TRUE);
 
-    if (rfbOptOtpAuth)
+    if (rfbOptOtpAuth())
         VNC_OTP = MakeAtom("VNC_OTP", strlen("VNC_OTP"), TRUE);
 
 #ifdef XVNC_AuthPAM
@@ -970,7 +979,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         free(host);
     }
 
-    if (rfbOptOtpAuth && (pProp->propertyName == VNC_OTP) &&
+    if (rfbOptOtpAuth() && (pProp->propertyName == VNC_OTP) &&
         (pProp->type == XA_STRING) && (pProp->format == 8)) {
         if (pProp->size == 0) {
             if (rfbAuthOTPValue != NULL) {
@@ -1157,9 +1166,13 @@ ddxUseMsg()
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
     ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
     ErrorF("-nocursor              don't display a cursor\n");
-    ErrorF("-rfbauth passwd-file   enable VNC Password authentication\n");
-    ErrorF("-otpauth               enable One-Time Password (OTP) authentication\n");
-    ErrorF("-pamauth               enable PAM User/Password authentication\n");
+    ErrorF("-rfbauth passwd-file   specify password file for VNC Password authentication\n");
+    ErrorF("-securitytypes types   list of security types that the server should support\n");
+    ErrorF("                       (one or more of:  tlsvnc, tlsotp, tlsplain, tlsnone,\n");
+    ErrorF("                       x509vnc, x509otp, x509plain, x509none, vnc, otp,\n");
+    ErrorF("                       unixlogin, plain, none.)  See docs.\n");
+    ErrorF("-x509cert file         specify filename of X.509 signed certificate\n");
+    ErrorF("-x509key file          specify filename of X.509 private key\n");
     ErrorF("-noreverse             disable reverse connections\n");
     ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");
     ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
@@ -1200,13 +1213,10 @@ ddxUseMsg()
  * rfbLog prints a time-stamped message to the log file (stderr.)
  */
 
-void rfbLog(char *format, ...)
+void vrfbLog(char *format, va_list args)
 {
-    va_list args;
     char buf[256];
     time_t clock;
-
-    va_start(args, format);
 
     time(&clock);
     strftime(buf, 255, "%d/%m/%Y %H:%M:%S ", localtime(&clock));
@@ -1214,7 +1224,15 @@ void rfbLog(char *format, ...)
 
     vfprintf(stderr, format, args);
     fflush(stderr);
+}
 
+
+void rfbLog(char *format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+    vrfbLog(format, args);
     va_end(args);
 }
 

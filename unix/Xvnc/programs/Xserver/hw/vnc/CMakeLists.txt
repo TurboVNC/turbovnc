@@ -18,6 +18,37 @@ if(TVNC_NVCONTROL)
 	include_directories(${CMAKE_SOURCE_DIR}/unix/libXNVCtrl)
 endif()
 
+set(TVNC_USETLS "OpenSSL" CACHE STRING
+	"Implement server-side TLS encryption using the specified library [Options: OpenSSL (default), GnuTLS, None]")
+set_property(CACHE TVNC_USETLS PROPERTY STRINGS OpenSSL GnuTLS None)
+string(TOLOWER "${TVNC_USETLS}" TVNC_USETLS)
+
+if(TVNC_USETLS STREQUAL "openssl")
+	include(FindOpenSSL)
+	if(NOT OPENSSL_FOUND)
+		message(STATUS "OpenSSL not found.  Disabling TLS encryption")
+		set(TVNC_USEOPENSSL 0)
+	else()
+		set(RFBSSLSRC rfbssl_openssl.c)
+		message(STATUS "Enabling TLS encryption using OpenSSL")
+		add_definitions(-DUSETLS)
+		include_directories(${OPENSSL_INCLUDE_DIR})
+	endif()
+elseif(TVNC_USETLS STREQUAL "gnutls")
+	include(FindGnuTLS)
+	if(NOT GNUTLS_FOUND)
+		message(STATUS "GnuTLS not found.  Disabling TLS encryption")
+		set(TVNC_USEGNUTLS 0)
+	else()
+		set(RFBSSLSRC rfbssl_gnutls.c)
+		message(STATUS "Enabling TLS encryption using GnuTLS")
+		add_definitions(-DUSETLS ${GNUTLS_DEFINITIONS})
+		include_directories(${GNUTLS_INCLUDE_DIR})
+	endif()
+else()
+	message(STATUS "Disabling TLS encryption")
+endif()
+
 add_library(vnc STATIC
 	auth.c
 	cmap.c
@@ -46,4 +77,11 @@ add_library(vnc STATIC
 	zrleoutstream.c
 	zrlepalettehelper.c
 	${PAMSRC}
-	${NVCTRLSRC})
+	${NVCTRLSRC}
+	${RFBSSLSRC})
+
+if(TVNC_USETLS STREQUAL "openssl")
+	target_link_libraries(vnc ${OPENSSL_LIBRARIES})
+elseif(TVNC_USETLS STREQUAL "gnutls")
+	target_link_libraries(vnc ${GNUTLS_LIBRARIES})
+endif()
