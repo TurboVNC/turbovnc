@@ -142,11 +142,11 @@ public class UserPreferences {
           } else if (!key.equalsIgnoreCase("x509ca")) {
             String valueStr = node.get(key, null);
             if (valueStr != null)
-              CSecurityTLS.x509ca.setParam(valueStr);
+              SecurityClient.x509ca.setParam(valueStr);
           } else if (!key.equalsIgnoreCase("x509crl")) {
             String valueStr = node.get(key, null);
             if (valueStr != null)
-              CSecurityTLS.x509crl.setParam(valueStr);
+              SecurityClient.x509crl.setParam(valueStr);
           } else
             continue;
         }

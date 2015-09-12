@@ -24,6 +24,11 @@ Fixed an issue that prevented VeNCrypt authentication from working in the
 Java TurboVNC Viewer when connecting to a server that supports both the
 TightVNC and VeNCrypt security extensions.
 -------------------------------------------------------------------------------
+[5]
+Improved the GUI for specifying the X.509 CA certificate and CRL in the Java
+viewer, and added new command-line/applet parameters ("X509CA" and "X509CRL")
+that can be used to specify these files without using the GUI.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

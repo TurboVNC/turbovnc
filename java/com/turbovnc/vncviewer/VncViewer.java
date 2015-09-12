@@ -655,6 +655,10 @@ public class VncViewer extends javax.swing.JApplet
     options.gateway.setEnabled(false);
     options.sshUser.setEnabled(false);
     options.tunnel.setEnabled(false);
+    if (SecurityClient.x509ca.getValue() != null)
+      options.x509ca.setText(SecurityClient.x509ca.getValue());
+    if (SecurityClient.x509crl.getValue() != null)
+      options.x509crl.setText(SecurityClient.x509crl.getValue());
   }
 
   public void getOptions() {
@@ -683,6 +687,8 @@ public class VncViewer extends javax.swing.JApplet
     opts.cursorShape = options.cursorShape.isSelected();
 
     options.getSecurityOptions();
+    SecurityClient.x509ca.setParam(options.x509ca.getText());
+    SecurityClient.x509crl.setParam(options.x509crl.getText());
     options = null;
   }
 

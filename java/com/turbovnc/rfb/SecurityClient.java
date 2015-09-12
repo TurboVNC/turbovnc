@@ -24,6 +24,8 @@ package com.turbovnc.rfb;
 import com.turbovnc.vncviewer.CConn;
 import com.turbovnc.rdr.ErrorException;
 
+import com.turbovnc.vncviewer.*;
+
 public class SecurityClient extends Security {
 
   public SecurityClient() { super(secTypes); }
@@ -88,4 +90,15 @@ public class SecurityClient extends Security {
   "matter, since the server's preferred order is always used.",
   "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VncAuth,Ident,Plain,None");
 
+  public static StringParameter x509ca
+  = new StringParameter("X509CA",
+  "X.509 Certificate Authority certificate to use with the X509* security " +
+  "types.  This is used to check the validity of the server's X.509 " +
+  "certificate.", FileUtils.getVncHomeDir() + "x509_ca.pem");
+
+  public static StringParameter x509crl
+  = new StringParameter("X509CRL",
+  "X.509 Certificate Revocation List to use with the X509* security types. " +
+  "This is used to check the validity of the server's X.509 " +
+  "certificate.", FileUtils.getVncHomeDir() + "x509_crl.pem");
 }
