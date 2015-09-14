@@ -763,7 +763,7 @@ rfbAuthProcessResponse(rfbClientPtr cl)
         }
     }
 
-    rfbLog("rfbAuthProcessResponse: authType assertion failed");
+    rfbLog("rfbAuthProcessResponse: authType assertion failed\n");
     rfbCloseClient(cl);
 }
 
