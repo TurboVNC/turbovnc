@@ -55,6 +55,9 @@ $passwdFile = "$vncUserDir/passwd";
 $authTypeVNC = 1;
 $authTypeOTP = 1;
 $generateOTP = 0;
+$x509CertFile = "$vncUserDir/x509_cert.pem";
+$x509KeyFile = "$vncUserDir/x509_private.pem";
+$encTypeX509 = 1;
 $enableHTTP = 1;
 $skipxstartup = 0;
 $autoLosslessRefresh = 0.0;
@@ -245,7 +248,8 @@ foreach $_xkbcompdir (@xkbcompdirs) {
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
               "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
               "-securitytypes",1,"-nohttp",0,"-nohttpd",0,"-rfbauth",1,
-              "-noxstartup",0,"-xstartup",1,"-log",1,"-3dwm",0,"-debug",0);
+              "-noxstartup",0,"-xstartup",1,"-log",1,"-3dwm",0,"-debug",0,
+              "-x509cert",1,"-x509key",1);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -292,17 +296,22 @@ if ($opt{'-debug'}) {
     $opt{'-fg'} = 1;
 }
 $authTypeVNCPermitted = $authTypeVNC;
+$encTypeX509Permitted = $encTypeX509;
 if ($opt{'-securitytypes'}) {
   my $enableVNC = 0;
   my $enableOTP = 0;
+  my $enableX509 = 0;
   my $securityTypes = $opt{'-securitytypes'};
-  my $securityTypes =~ s/[\t\ \r\n]//g;
+  $securityTypes =~ s/[\t\ \r\n]//g;
   foreach $tok (split/[,=]/, $securityTypes) {
-    if (lc $tok eq 'otp' || lc $tok eq 'x509otp' || lc $tok eq 'tlsotp') {
+    if (substr(lc $tok, -3) eq 'otp') {
       $enableOTP = 1;
     }
-    if (lc $tok eq 'vnc' || lc $tok eq 'x509vnc' || lc $tok eq 'tlsvnc') {
+    if (substr(lc $tok, -3) eq 'vnc') {
       $enableVNC = 1;
+    }
+    if (substr(lc $tok, 0, 4) eq 'x509') {
+      $enableX509 = 1;
     }
   }
   if ($enableVNC == 0) {
@@ -310,6 +319,9 @@ if ($opt{'-securitytypes'}) {
   }
   if ($enableOTP == 0) {
     $authTypeOTP = 0;
+  }
+  if ($enableX509 == 0) {
+    $encTypeX509 = 0;
   }
 }
 if ($opt{'-rfbauth'}) {
@@ -324,8 +336,29 @@ if ($opt{'-rfbauth'}) {
         }
     }
 }
-if (($authType eq "")) {
-    if ($authTypeVNC) {$authType .= "-rfbauth $passwdFile ";}
+if ($opt{'-x509cert'}) {
+    if ($encTypeX509) {
+        $x509CertFile = $opt{'-x509cert'};
+    }
+    else {
+        if ($encTypeX509Permitted) {
+            print ("X509 encryption is not enabled.  Ignoring -x509cert.\n");
+        } else {
+            print ("X509 encryption is not permitted on this system.  Ignoring -x509cert.\n");
+        }
+    }
+}
+if ($opt{'-x509key'}) {
+    if ($encTypeX509) {
+        $x509KeyFile = $opt{'-x509key'};
+    }
+    else {
+        if ($encTypeX509Permitted) {
+            print ("X509 encryption is not enabled.  Ignoring -x509key.\n");
+        } else {
+            print ("X509 encryption is not permitted on this system.  Ignoring -x509key.\n");
+        }
+    }
 }
 if ($opt{'-otp'}) {
     $generateOTP = 1;
@@ -352,8 +385,7 @@ if (!-d _ || !-o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
 }
 
 # Make sure the user has a password.
-if (index($authType, "-rfbauth") >= 0 &&
-    "$passwdFile" eq "$vncUserDir/passwd") {
+if ($authTypeVNC && "$passwdFile" eq "$vncUserDir/passwd") {
     ($z,$z,$mode) = lstat("$vncUserDir/passwd");
     if (-e _ && (!-f _ || !-o _)) {
         die "$prog: Wrong type or ownership on $vncUserDir/passwd.\n";
@@ -438,7 +470,9 @@ $cmd .= " -geometry $geometry" if ($geometry);
 $cmd .= " -depth $depth" if ($depth);
 $cmd .= " -pixelformat $pixelformat" if ($pixelformat);
 $cmd .= " -rfbwait 120000";
-$cmd .= " $authType";
+$cmd .= " -rfbauth $passwdFile" if ($authTypeVNC);
+$cmd .= " -x509cert $x509CertFile" if ($encTypeX509);
+$cmd .= " -x509key $x509KeyFile" if ($encTypeX509);
 $cmd .= " -securitytypes $opt{'-securitytypes'}" if ($opt{'-securitytypes'});
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
@@ -1041,6 +1075,7 @@ sub ReadAuthConfiguration ($)
   my $acf = shift;
   my $enableVNC = 0;
   my $enableOTP = 0;
+  my $enableX509 = 0;
   my $permissionsSet = 0;
 
   return unless (open(ACF, $acf));
@@ -1062,11 +1097,14 @@ sub ReadAuthConfiguration ($)
     if (@tokens[0] eq 'permitted-security-types') {
       $permissionsSet = 1;
       foreach $tok (split/[,=]/, $_) {
-        if (lc $tok eq 'otp' || lc $tok eq 'x509otp' || lc $tok eq 'tlsotp') {
+        if (substr(lc $tok, -3) eq 'otp') {
           $enableOTP = 1;
         }
-        if (lc $tok eq 'vnc' || lc $tok eq 'x509vnc' || lc $tok eq 'tlsvnc') {
+        if (substr(lc $tok, -3) eq 'vnc') {
           $enableVNC = 1;
+        }
+        if (substr(lc $tok, 0, 4) eq 'x509') {
+          $enableX509 = 1;
         }
       }
     }
@@ -1079,6 +1117,9 @@ sub ReadAuthConfiguration ($)
   }
   if ($enableOTP == 0) {
     $authTypeOTP = 0;
+  }
+  if ($enableX509 == 0) {
+    $encTypeX509 = 0;
   }
 
   close(ACF);
