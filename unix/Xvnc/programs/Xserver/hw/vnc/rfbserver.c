@@ -351,7 +351,7 @@ rfbNewClient(int sock)
 
     cl = (rfbClientPtr)malloc(sizeof(rfbClientRec));
     if (cl == NULL) {
-        rfbLog("rfbNewClient: out of memory");
+        rfbLog("rfbNewClient: out of memory\n");
         rfbCloseSock(sock);
         return NULL;
     }
