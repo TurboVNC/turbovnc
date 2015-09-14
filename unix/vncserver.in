@@ -245,7 +245,7 @@ foreach $_xkbcompdir (@xkbcompdirs) {
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
               "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
               "-securitytypes",1,"-nohttp",0,"-nohttpd",0,"-rfbauth",1,
-              "-noxstartup",0,"-xstartup",1,"-log",1,"-3dwm",0);
+              "-noxstartup",0,"-xstartup",1,"-log",1,"-3dwm",0,"-debug",0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -287,6 +287,9 @@ if ($opt{'-fp'}) {
 }
 if ($opt{'-deferupdate'}) {
     $deferUpdate = $opt{'-deferupdate'};
+}
+if ($opt{'-debug'}) {
+    $opt{'-fg'} = 1;
 }
 $authTypeVNCPermitted = $authTypeVNC;
 if ($opt{'-securitytypes'}) {
@@ -448,7 +451,9 @@ $cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir);
 foreach $arg (@ARGV) {
     $cmd .= " " . &quotedString($arg);
 }
-$cmd .= " >> " . &quotedString($desktopLog) . " 2>&1";
+if (!$opt{'-debug'}) {
+    $cmd .= " >> " . &quotedString($desktopLog) . " 2>&1";
+}
 
 # Run $cmd and record the process ID.
 
