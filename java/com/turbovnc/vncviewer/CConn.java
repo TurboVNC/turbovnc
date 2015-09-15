@@ -1145,7 +1145,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       "Last used encoding:  " + Encodings.encodingName(lastServerEncoding) +
         "\n" +
       "Protocol version:  " + cp.majorVersion + "." + cp.minorVersion + "\n" +
-      "Security method:  " + Security.secTypeName(csecurity.getType()) +
+      "Security type:  " + Security.secTypeName(csecurity.getType()) +
         " [" + csecurity.description() + "]\n" +
       "JPEG decompression:  " +
         (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
