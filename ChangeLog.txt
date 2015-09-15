@@ -29,6 +29,12 @@ Improved the GUI for specifying the X.509 CA certificate and CRL in the Java
 viewer, and added new command-line/applet parameters ("X509CA" and "X509CRL")
 that can be used to specify these files without using the GUI.
 -------------------------------------------------------------------------------
+[6]
+The Java viewer will now report an error if one of the security types specified
+in the SecurityTypes parameter is invalid.  This prevents hard-to-diagnose
+issues (such as authentication errors or the wrong security type being
+selected) if one of the security types is misspelled.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

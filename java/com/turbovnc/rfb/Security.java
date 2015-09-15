@@ -25,6 +25,7 @@
 
 package com.turbovnc.rfb;
 import java.util.*;
+import com.turbovnc.rdr.*;
 
 public class Security {
 
@@ -188,6 +189,9 @@ public class Security {
       int typeNum = secTypeNum(types[i]);
       if (typeNum != secTypeInvalid)
         result.add(typeNum);
+      else
+        throw new WarningException("Security type \'" + types[i] +
+                                   "\' is not valid");
     }
     return (result);
   }
