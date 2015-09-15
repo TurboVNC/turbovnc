@@ -83,7 +83,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       "Lossless Tight + Zlib (WAN)"};
     encMethodComboBox = new JComboBox(encMethod);
     encMethodComboBox.addActionListener(this);
-    allowJpeg = new JCheckBox("Allow JPEG Compression");
+    allowJpeg = new JCheckBox("Allow JPEG compression");
     allowJpeg.addItemListener(this);
 
     subsamplingLabelString =
@@ -138,7 +138,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     compressionLabel.setText(compressionLabelString +
                              compressionLevel.getValue());
 
-    interframe = new JCheckBox("Interframe Comparison");
+    interframe = new JCheckBox("Interframe comparison");
     interframe.addItemListener(this);
 
     Dialog.addGBComponent(encMethodLabel, imagePanel,
@@ -231,7 +231,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     // Connection tab
     connPanel = new JPanel(new GridBagLayout());
 
-    JLabel scalingFactorLabel = new JLabel("Scaling Factor:");
+    JLabel scalingFactorLabel = new JLabel("Scaling factor:");
     Object[] scalingFactors = {
       "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%",
       "125%", "150%", "175%", "200%", "250%", "300%", "350%", "400%" };
@@ -271,7 +271,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     shared = new JCheckBox("Request shared session");
     shared.addItemListener(this);
-    viewOnly = new JCheckBox("View Only (ignore mouse & keyboard)");
+    viewOnly = new JCheckBox("View only (ignore mouse & keyboard)");
     viewOnly.addItemListener(this);
     viewOnly.setEnabled(VncViewer.viewOnlyControl.getValue());
     cursorShape = new JCheckBox("Render cursor locally (enable remote cursor shape updates)");
@@ -355,7 +355,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     showToolbar = new JCheckBox("Show toolbar by default");
     showToolbar.addItemListener(this);
 
-    JLabel menuKeyLabel = new JLabel("Menu Key:");
+    JLabel menuKeyLabel = new JLabel("Menu key:");
     String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()];
     for (int i = 0; i < MenuKey.getMenuKeySymbolCount(); i++)
       menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
@@ -405,7 +405,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     secPanel = new JPanel(new GridBagLayout());
 
     JPanel encryptionPanel = new JPanel(new GridBagLayout());
-    encryptionPanel.setBorder(BorderFactory.createTitledBorder("Session Encryption"));
+    encryptionPanel.setBorder(BorderFactory.createTitledBorder("Session encryption"));
     encNone = addCheckbox("None", null, encryptionPanel);
     encTLS = addCheckbox("Anonymous TLS", null, encryptionPanel);
     encX509 = addJCheckBox("TLS with X.509 certificates", null,
@@ -416,7 +416,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                              new Insets(0, 0, 0, 60), 0, 0));
 
     JPanel x509Panel = new JPanel(new GridBagLayout());
-    x509Panel.setBorder(BorderFactory.createTitledBorder("X.509 Certificate Validation"));
+    x509Panel.setBorder(BorderFactory.createTitledBorder("X.509 certificate validation"));
     x509ca = new JTextField("", 1);
     JLabel x509caLabel = new JLabel("CA cert:");
     x509caButton = new JButton("Load");
@@ -457,7 +457,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           new Insets(4, 2, 0, 2));
 
     JPanel authPanel = new JPanel(new GridBagLayout());
-    authPanel.setBorder(BorderFactory.createTitledBorder("Authentication Schemes"));
+    authPanel.setBorder(BorderFactory.createTitledBorder("Authentication schemes"));
     secNone = addCheckbox("None", null, authPanel);
     secVnc = addCheckbox("Standard VNC", null, authPanel);
     secUnixLogin = addJCheckBox("Unix Login (TightVNC/TurboVNC)", null,
@@ -476,7 +476,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                               GridBagConstraints.LINE_START,
                               GridBagConstraints.NONE,
                               new Insets(0, 0, 0, 5), 0, 0));
-    sendLocalUsername = new JCheckBox("Send Local Username");
+    sendLocalUsername = new JCheckBox("Send local username");
     sendLocalUsername.addItemListener(this);
     Dialog.addGBComponent(sendLocalUsername, authPanel,
                           1, 3, 1, 2, 0, 0, 2, 1,
@@ -488,7 +488,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     secVeNCrypt.addItemListener(this);
 
     JPanel gatewayPanel = new JPanel(new GridBagLayout());
-    gatewayPanel.setBorder(BorderFactory.createTitledBorder("Gateway (SSH server or UltraVNC Repeater)"));
+    gatewayPanel.setBorder(BorderFactory.createTitledBorder("Gateway (SSH server or UltraVNC repeater)"));
     gateway = new JTextField("", 1);
     JLabel gatewayLabel = new JLabel("Host:");
     sshUser = new JTextField("", 1);
