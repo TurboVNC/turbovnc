@@ -57,6 +57,7 @@ $authTypeOTP = 1;
 $generateOTP = 0;
 $x509CertFile = "$vncUserDir/x509_cert.pem";
 $x509KeyFile = "$vncUserDir/x509_private.pem";
+$securityTypes = "";
 $encTypeX509 = 1;
 $enableHTTP = 1;
 $skipxstartup = 0;
@@ -298,12 +299,13 @@ if ($opt{'-debug'}) {
 $authTypeVNCPermitted = $authTypeVNC;
 $encTypeX509Permitted = $encTypeX509;
 if ($opt{'-securitytypes'}) {
+  $securityTypes = $opt{'-securitytypes'};
   my $enableVNC = 0;
   my $enableOTP = 0;
   my $enableX509 = 0;
-  my $securityTypes = $opt{'-securitytypes'};
-  $securityTypes =~ s/[\t\ \r\n]//g;
-  foreach $tok (split/[,=]/, $securityTypes) {
+  my $secTypes = $securityTypes;
+  $secTypes =~ s/[\t\ \r\n]//g;
+  foreach $tok (split/[,=]/, $secTypes) {
     if (substr(lc $tok, -3) eq 'otp') {
       $enableOTP = 1;
     }
@@ -473,7 +475,7 @@ $cmd .= " -rfbwait 120000";
 $cmd .= " -rfbauth $passwdFile" if ($authTypeVNC);
 $cmd .= " -x509cert $x509CertFile" if ($encTypeX509);
 $cmd .= " -x509key $x509KeyFile" if ($encTypeX509);
-$cmd .= " -securitytypes $opt{'-securitytypes'}" if ($opt{'-securitytypes'});
+$cmd .= " -securitytypes $securityTypes" if ($securityTypes);
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
@@ -1049,7 +1051,7 @@ sub ReadConfiguration
        vncClasses
        vncUserDir
        fontPath
-       authType
+       securityTypes
        generateOTP
        autoLosslessRefresh
        enableHTTP
