@@ -153,6 +153,7 @@ public class Security {
   public static int secTypeNum(String name) {
     if (name.equalsIgnoreCase("None"))      return secTypeNone;
     if (name.equalsIgnoreCase("VncAuth"))   return secTypeVncAuth;
+    if (name.equalsIgnoreCase("VNC"))       return secTypeVncAuth;
     if (name.equalsIgnoreCase("Tight"))     return secTypeTight;
     if (name.equalsIgnoreCase("RA2"))       return secTypeRA2;
     if (name.equalsIgnoreCase("RA2ne"))     return secTypeRA2ne;
