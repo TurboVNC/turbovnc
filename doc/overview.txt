@@ -70,6 +70,8 @@ In addition to high performance, other notable features of TurboVNC include:
 	* Authentication with one-time passwords or Unix login credentials.  Access
 		control lists can be used to share VNC sessions with only certain users.
 
+	* TLS encryption support (VeNCrypt-compatible)
+
 	* TurboVNC allows security/authentication policies to be set globally for a
 		particular server machine.
 

@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "August 2015" "" "TurboVNC"
+.TH Xvnc 1 "September 2015" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -23,7 +23,8 @@ Xvnc \- an X server providing VNC connectivity
 [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
-[\-rfbauth \fIpasswd-file\fR] [\-otpauth] [\-pamauth]
+[\-rfbauth \fIpasswd-file\fR] [\-securitytypes \fItype-list\fR]
+[\-x509cert \fIcert\fR] [\-x509key \fIkey\fR]
 [\-noreverse] [\-noclipboardsend] [\-noclipboardrecv]
 [\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-noflowcontrol]
@@ -82,28 +83,33 @@ Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
 Don't display a mouse pointer on the remote desktop.
 .TP
 \fB\-rfbauth\fR \fIpasswd-file\fR
-Enable the VNC Password authentication method and read the VNC password from
-the specified file.  The \fIpasswd-file\fR can be created using the
-\fBvncpasswd\fR(1) utility.  This argument has no effect if
-\fIpermitted-auth-methods\fR is specified in the security configuration
-file and "vnc" is not listed as a permitted method.
+Specify the password file to use with VNC Password authentication.
+\fIpasswd-file\fR can be created using the \fBvncpasswd\fR(1) utility.  This
+argument has no effect if \fIpermitted-security-types\fR is specified in the
+security configuration file and none of the VNC or OTP security types are
+listed as permitted security types.
 .TP
-\fB\-otpauth\fR
-Enable the One-Time Password (OTP) authentication method.  One-time passwords
-for full control or view-only access can be created using the
-\fBvncpasswd\fR(1) utility.  OTPs are discarded by Xvnc immediately after they
-are used, so an additional OTP must be generated before another user is allowed
-to connect using this method.  This argument has no effect if
-\fIpermitted-auth-methods\fR is specified in the security configuration
-file and "otp" is not listed as a permitted method.
+\fB-securitytypes\fR \fItype-list\fR
+\fItype-list\fR is a comma-separated list of security types that should be
+enabled for this Xvnc session.  Refer to the SECURITY OVERVIEW section below
+for a description of available security types.  Only security types that are
+permitted in the security configuration file will actually be enabled.  If
+\fItype-list\fR contains no permitted security types, then Xvnc will exit with
+an error.  If this argument is not specified, then Xvnc uses a default value of
+"TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin,
+Plain".  Security types are case-insensitive.
 .TP
-\fB\-pamauth\fR
-Enable the PAM User/Password authentication method, which supports the
-"Unix Login" authentication scheme.  Additional configuration is necessary
-to make this work (see the SECURITY CONFIGURATION FILE section for
-details.)  This argument has no effect if \fIpermitted-auth-methods\fR is
-specified in the security configuration file and "pam-userpwd" is not
-listed as a permitted method.
+\fB\-x509cert\fR \fIcert\fR
+Specify the X.509 signed certificate file (in PEM format) to use with X.509
+encryption.  This argument has no effect if \fIpermitted-security-types\fR is
+specified in the security configuration file and none of the X.509 security
+types are listed as permitted security types.
+.TP
+\fB\-x509key\fR \fIkey\fR
+Specify the X.509 private key file (in PEM format) to use with X.509
+encryption.  This argument has no effect if \fIpermitted-security-types\fR is
+specified in the security configuration file and none of the X.509 security
+types are listed as permitted security types.
 .TP
 \fB\-noreverse\fR
 Do not allow reverse VNC connections to be made from this Xvnc session.
@@ -259,106 +265,190 @@ network input/output to stdin/stdout.
 \fB\-compatiblekbd\fR
 Set META and ALT keys to the same X modifier flag, as in the original
 version of Xvnc by AT&T labs (this option is specific to TightVNC/TurboVNC.)
-.SH AUTHENTICATION OVERVIEW
-The Xvnc server supports the following methods for authenticating a VNC
-client connection:
-.IP \fBnone\fR
-No authentication required.  Starting Xvnc with no authentication command-line
-arguments sets the authentication method to "none".  If
-\fIpermitted-auth-methods\fR is specified in the security configuration
-file and "none" is not listed as a permitted method, then Xvnc exits with an
-error.
+.SH SECURITY EXTENSIONS
+The TurboVNC Server supports 13 security types, each of which specifies an
+authentication scheme (a technique used to transmit authentication credentials
+from a VNC viewer to the VNC server), an authentication method (a technique
+used by the VNC server to validate the authentication credentials), and an
+encryption method.
 
-This authentication method can be used with VNC clients that understand the
-RFB "None" security type or the "Tight" security type with the "None"
-authentication scheme.
-.IP \fBvnc\fR
-VNC Password authentication:  authenticate using a password set by the \fBvncpasswd\fR(1)
-utility.  This method is enabled with the \fB-rfbauth\fR command-line argument
-to Xvnc.  Additionally, if \fIpermitted-auth-methods\fR is specified in the
-security configuration file, then "vnc" must be listed as a permitted
-method.
+The authentication methods that the TurboVNC Server supports are as follows:
 
-This authentication method can be used with VNC clients that understand the RFB
-"VNC" security type or the "Tight" security type with the "VNC" authentication
-scheme.
-.IP \fBotp\fR
-One-Time Password (OTP) authentication: authenticate using an OTP generated by the
-\fBvncpasswd\fR(1) utility.  This method is enabled by passing a command-line
-argument of \fB-otpauth\fR to Xvnc.  Additionally, if
-\fIpermitted-auth-methods\fR is specified in the security configuration
-file, then "otp" must be listed as a permitted method.
+.IP \fBNone\fR
+No authentication.  Xvnc will not enable any security types that use this
+authentication method unless no other security types are enabled.  This
+authentication method should generally only be used in conjunction with SSH or
+another security mechanism that provides authentication outside of the
+context of Xvnc.
 
-This authentication method can be used with any VNC client that supports
-Standard VNC authentication.  OTP authentication is handy for sharing
-a VNC session with another person with whom you do not wish to share your
-VNC password.
-.IP \fBpam-userpwd\fR
-PAM User/Password authentication: authenticate using Pluggable Authentication
-Modules (PAM).
-This is typically used to authenticate against Unix login credentials, but it
+.IP \fBVNC\ Password\fR
+Authenticate using a VNC password file created by the \fBvncpasswd\fR(1)
+utility and specified with the \fB-rfbauth\fR command-line argument to Xvnc.
+This authentication method uses the Standard VNC authentication scheme to
+receive authentication credentials from a VNC viewer.  The Standard VNC
+authentication scheme encrypts the VNC password using 56-bit DES, which is a
+weak form of encryption.
+
+.IP \fBOne-Time\ Password\ (OTP)\fR
+Authenticate using an OTP generated by the \fBvncpasswd\fR(1) utility.  OTP
+authentication is handy for sharing a VNC session with another person with whom
+you do not wish to share your VNC password.  This authentication method uses
+the Standard VNC authentication scheme to receive authentication credentials
+from a VNC viewer.
+
+.IP \fBPAM\ User/Password\fR
+Authenticate using Pluggable Authentication Modules (PAM).  This authentication
+method is typically used to authenticate against Unix login credentials, but it
 can also be used to authenticate against any other user/password authentication
-credentials that can be accessed through PAM.  The PAM user/password
-authentication method is enabled by passing a command-line argument of
-\fB-pamauth\fR to Xvnc.  Additionally, if \fIpermitted-auth-methods\fR is
-specified in the security configuration file, then "pam-userpwd" must be
-listed as a permitted method.  Also, a valid PAM service configuration must
-have been created by the system administrator (see the SECURITY
-CONFIGURATION FILE section for details), and on some systems, it may be
-necessary to make the Xvnc binary setuid root.
+credentials that can be accessed through PAM.  A valid PAM service
+configuration must be created by the system administrator (see the SECURITY
+CONFIGURATION FILE section for details.)  On some systems, it may be
+necessary to make the Xvnc binary setuid root in order to authenticate against
+credentials other than those of the user running Xvnc.
 
-This authentication method can be used only with VNC clients that understand
-the RFB protocol "Tight" security type with the "Unix Login" authentication
-scheme.
+PAM User/Password authentication uses the TightVNC Unix Login or the VeNCrypt
+Plain authentication scheme to receive authentication credentials from a VNC
+viewer.  Since both of those authentication schemes transmit the password using
+plain text, it is strongly recommended that TLS or SSH encryption be enforced
+in the security configuration file if any security types using PAM
+User/Password authentication are permitted.
 .P
-The authentication method that will be selected when a VNC client connects
-depends on the following:
-.TP
-\fBCommand-line authentication options\fR
-The authentication options (\fB-rfbauth\fR, \fB-otpauth\fR and \fB-pamauth\fR)
-allow you to request that the VNC Password, OTP, and PAM User/Password
-authentication methods be enabled in Xvnc, respectively.  If none of these
-options is specified, then this is the equivalent of requesting that no
-authentication be used.
-.TP
-\fBThe \fIpermitted-auth-methods\fB directive\fR
-If the security configuration file exists, then the system administrator
-can use the \fIpermitted-auth-methods\fR directive in this file to specify the
-authentication methods that are allowed on the system.  An authentication
-method must be both requested, by way of the Xvnc command-line options, and
-permitted in order for it to be enabled.  If none of the authentication methods
-meet this criteria, then Xvnc exits with an error.  For instance, if
-"pam-userpwd" is the only permitted authentication method, then it is an error
-to start Xvnc without an argument of \fB-pamauth\fR.
 
-The \fIpermitted-auth-methods\fR directive also allows you to specify the order
-in which authentication schemes are advertised to VNC clients.  For
-instance, if "pam-userpwd" is listed first, then the TurboVNC Viewer will
+The security types that the TurboVNC Server supports are as follows:
+
+.IP \fBNone\fR
+No encryption and no authentication.
+
+This security type can be used with VNC viewers that understand the
+"None" RFB security type or the "Tight" RFB security type with the "None"
+authentication capability.
+
+.IP \fBTLSNone\fR
+Anonymous TLS (Transport Layer Security) encryption with no authentication.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type with the "TLSNone" VeNCrypt sub-type.
+
+.IP \fBX509None\fR
+TLS encryption with a specified X.509 certificate and no authentication.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type with the "X509None" VeNCrypt sub-type.
+
+.IP \fBVNC\fR
+VNC Password/Standard VNC authentication with no encryption.
+
+This security type can be used with VNC viewers that understand the "VNC" RFB
+security type or the "Tight" RFB security type with the "VNC" authentication
+capability.
+
+.IP \fBTLSVnc\fR
+Anonymous TLS encryption with VNC Password/Standard VNC authentication.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type with the "TLSVnc" VeNCrypt sub-type.
+
+.IP \fBX509Vnc\fR
+TLS encryption with a specified X.509 certificate and VNC password/Standard VNC
+authentication.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type with the "X509Vnc" VeNCrypt sub-type.
+
+.IP \fBOTP\fR
+One-Time Password authentication with no encryption.
+
+This security type can be used with VNC viewers that understand the "VNC" RFB
+security type or the "Tight" RFB security type with the "VNC" authentication
+capability.
+
+.IP \fBTLSOtp\fR
+Anonymous TLS encryption with One-Time Password/Standard VNC authentication.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type with the "TLSVnc" VeNCrypt sub-type.
+
+.IP \fBX509Otp\fR
+TLS encryption with a specified X.509 certificate and One-Time
+Password/Standard VNC authentication.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type with the "X509Vnc" VeNCrypt sub-type.
+
+.IP \fBPlain\fR
+PAM User/Password / Plain authentication with no encryption.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type and the "Plain" VeNCrypt sub-type.
+
+.IP \fBTLSPlain\fR
+Anonymous TLS encryption with PAM User/Password / Plain authentication.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type with the "TLSPlain" VeNCrypt sub-type.
+
+.IP \fBX509Plain\fR
+TLS encryption with a specified X.509 certificate and PAM User/Password / Plain
+authentication.
+
+This security type can be used with VNC viewers that understand the "VeNCrypt"
+RFB security type with the "X509Plain" VeNCrypt sub-type.
+
+.IP \fBUnixLogin\fR
+PAM User/Password / Unix Login authentication with no encryption.
+
+This security type can be used with VNC viewers that understand the "Tight" RFB
+security type with the "Unix Login" authentication capability.
+.P
+
+The security type that will be selected when a VNC viewer connects depends on
+the following:
+.TP
+\fBXvnc command-line options\fR
+The \fB-securitytypes\fR argument allows you to request that specific security
+types be enabled in Xvnc.
+.TP
+\fBThe \fIpermitted-security-types\fB directive\fR
+If the security configuration file exists, then the system administrator
+can use the \fIpermitted-security-types\fR directive in that file to specify
+the security types that are allowed on the system.  A security type must both
+be requested, by way of the \fB-securitytypes\fR argument (or in the default
+security types that Xvnc uses if that argument is not specified), and permitted
+in order for the security type to be enabled.  If none of the security types
+meet this criteria, then Xvnc exits with an error.  For instance, if "TLSVnc"
+is the only permitted security type, then it is an error to start Xvnc with
+\fB-securitytypes X509Vnc\fR.
+
+The \fIpermitted-security-types\fR directive also allows you to specify the
+order in which authentication schemes are advertised to VNC viewers.  For
+instance, if "UnixLogin" is listed first, then the TurboVNC Viewer will
 default to using Unix Login authentication when connecting to any TurboVNC
-sessions on this server.  Similarly, if "vnc" or "otp" is listed first, then
+sessions on this server.  Similarly, if "VNC" or "OTP" is listed first, then
 the TurboVNC Viewer will default to using Standard VNC authentication.
 
 If the security configuration file does not exist or
-\fIpermitted-auth-methods\fR is not specified, then Xvnc behaves as if
-\fIpermitted-auth-methods\fR was set to "vnc, otp, pam-userpwd, none".
+\fIpermitted-security-types\fR is not specified, then Xvnc behaves as if
+\fIpermitted-security-types\fR was set to "TLSVnc, TLSOtp, TLSPlain, TLSNone,
+X509Vnc, X509Otp, X509Plain, X509None, VNC, OTP, UnixLogin, Plain, None".
 .TP
 \fBThe negotiated RFB protocol version\fR
-This is determined by the VNC client's capabilities.  Older VNC clients that
-support RFB version 3.3 can only use the "none", "vnc" and "otp"
-authentication methods.  Newer clients that support RFB 3.7 or 3.8 with the
-Tight VNC security type extension can use the "pam-userpwd" authentication
-method, if the client has implemented it.
+This is determined by the VNC viewer's capabilities.  Older VNC viewers that
+support RFB version 3.3 can only use the "None", "VNC", or "OTP" security
+types.  Newer viewers that support RFB 3.7 or later with the Tight RFB security
+extension can use the "UnixLogin" security type, if the viewer has implemented
+it.  Viewers that support RFB 3.7 or later with the VeNCrypt RFB security
+extension can use the "TLS*", "X509*", and "Plain" security types, if the
+viewer has implemented them.
 
-Authentication will fail if a VNC client that doesn't support the Tight VNC
-security type extension connects to a TurboVNC server that only allows the
-"pam-userpwd" authentication method.
+Authentication will fail if a viewer that does not support or enable any of the
+TurboVNC Server's permitted security types attempts to connect.
 .TP
-\fBThe VNC client user interface\fR
-The VNC client's user interface may place additional restrictions on what
-authentication methods can be used.  For example, the TurboVNC Viewer has
+\fBThe VNC viewer user interface\fR
+The VNC viewer's user interface may place additional restrictions on which
+security types can be used.  For example, the TurboVNC Viewer has
 command-line options that allow you to force the use of the VNC or Unix
-Login authentication schemes, regardless of which the server advertises as
-the default.
+Login authentication schemes, regardless of which scheme the server advertises
+as the default.
 .P
 You can examine the Xvnc log file to see details of authentication
 processing, including the authentication methods, RFB protocol versions,
@@ -376,12 +466,13 @@ ignored on lines containing configuration directives.  The configuration
 directives are:
 
 .IP \fIenable-user-acl\fR
-If the "pam-userpwd" authentication method is used, then this directive enables
-the Xvnc server's internal user access control list (ACL) to further limit
-which users will be permitted to attempt PAM authentication.  Users can be
-added to or removed from this list using the \fBvncpasswd\fR(1) utility.  The
-user who started the Xvnc server will automatically be added to the access
+If the "PAM User/Password" authentication method is used, then this directive
+enables the Xvnc server's internal user access control list (ACL) to further
+limit which users will be permitted to attempt PAM authentication.  Users can
+be added to or removed from this list using the \fBvncpasswd\fR(1) utility.
+The user who started the Xvnc server will automatically be added to the access
 control list.
+
 .IP \fImax-idle-timeout\fR=\fItime\fR
 This specifies the maximum idle timeout (in seconds) for all TurboVNC sessions
 running on this machine.  The idle timeout is the amount of time that a
@@ -389,26 +480,32 @@ TurboVNC session can remain idle (with no VNC viewer connections) before
 Xvnc automatically exits.  If this value is set to a number greater than 0,
 then all TurboVNC sessions on this machine will use this idle timeout value by
 default, and the user will only be allowed to override it with a lower value.
+
 .IP \fImax-desktop-size\fR=\fIwidth\fRx\fIheight\fR
 This specifies the maximum desktop size for all TurboVNC sessions running on
 this machine.  If a user attempts to start a session with a larger geometry
 than this or to use remote desktop resizing to increase the desktop size to a
 size larger than this, the desktop size will be clamped to
 \fIwidth\fRx\fIheight\fR.
+
 .IP \fIno-clipboard-send\fR
 This prevents any TurboVNC server sessions running on this machine from
 sending clipboard changes to their connected viewers.
+
 .IP \fIno-clipboard-recv\fR
 This prevents any TurboVNC server sessions running on this machine from
 receiving clipboard changes from their connected viewers.
+
 .IP \fIno-reverse-connections\fR
 Do not allow reverse connections to be made from any TurboVNC server running on
 this machine.  This causes Xvnc to ignore requests from the
 \fBvncconnect\fR(1) utility.
+
 .IP \fIno-remote-connections\fR
 Do not allow inbound remote connections to be made to any TurboVNC server
 running on this machine.  Only connections from localhost can be made, which
 effectively forces the use of SSH tunneling to make inbound remote connections.
+
 .IP \fIpam-service-name\fR=\fIsvcname\fR
 Sets the service name to be used when Xvnc performs PAM authentication.  The
 default service name is \fIturbovnc\fR.  This typically corresponds to a file
@@ -416,30 +513,35 @@ in \fB/etc/pam.d\fR or to a token in \fB/etc/pam.conf\fR.  For instance, if
 your system has a file named \fB/etc/pam.d/passwd\fR, then copying this file to
 \fB/etc/pam.d/{svcname}\fR would cause the username and password sent by the
 VNC viewer to be validated against \fB/etc/passwd\fR.
-.IP \fIpermitted-auth-methods\fR=\fImethod\fR[,\fImethod\fR[...]]
-Defines the initial set of permitted authentication methods.  Multiple
-comma-separated methods may be specified.  Accepted values for \fImethod\fR
-are: \fInone\fR, \fIvnc\fR, \fIotp\fR, and \fIpam-userpwd\fR.  The order in
-which these methods are specified defines the order in which Xvnc will
-advertise the corresponding RFB security types and authentication schemes
-to the VNC client.  This ordering may affect which authentication scheme
-the VNC client chooses as its default.
+
+.IP \fIpermitted-security-types\fR=\fItype\fR[,\fItype\fR[...]]
+Defines the initial set of permitted security types.  Multiple comma-separated
+types may be specified.  Accepted values for \fItype\fR are:
+\fITLSVnc\fR, \fITLSOtp\fR, \fITLSPlain\fR, \fITLSNone\fR, \fIX509Vnc\fR,
+\fIX509Otp\fR, \fIX509Plain\fR, \fIX509None\fR, \fIVNC\fR, \fIOTP\fR,
+\fIUnixLogin\fR, \fIPlain\fR, and \fINone\fR.  Security types are
+case-insensitive.  The order in which these types are specified defines the
+order in which Xvnc will advertise the corresponding RFB security types and
+authentication schemes to the VNC viewer.  This ordering may affect which
+security type the VNC viewer chooses as its default.
+
 .SH SECURITY CONCERNS
 .P
-There are many security problems inherent in VNC.  Thus, it is
-recommended that you restrict network access to Xvnc servers from untrusted
-network addresses.  Probably the best way to secure an Xvnc server is to
-allow only loopback connections from the server machine (using the
-\fB\-localhost\fR option) and to use SSH tunneling for remote access
+Even when used with encryption, there are other security problems inherent in
+the design of VNC.  Thus, it is recommended that you restrict network access to
+Xvnc servers from untrusted network addresses.  Probably the best way to secure
+an Xvnc server is to allow only loopback connections from the server machine
+(using the \fB\-localhost\fR option or the \fIno-remote-connections\fR security
+configuration file directive) and to use SSH tunneling for remote access
 to the Xvnc server.  For details on using TurboVNC with SSH tunneling, see the
 TurboVNC User's Guide.
 .P
-It is incumbent upon the system administrator to ensure that an authentication
-method meets the security requirements for a particular site before it is
-permitted to be used.  In particular, caution should be exercised when using
-authentication methods that support the Unix Login authentication scheme.
-Unless SSH tunneling or another suitable encryption mechanism is enforced, then
-the use of Unix Login authentication will result in Unix passwords being sent
+It is incumbent upon the system administrator to ensure that a security type
+meets the security requirements for a particular site before it is permitted to
+be used.  In particular, caution should be exercised when using security types
+that support the Unix Login and Plain authentication schemes.  Unless SSH
+tunneling or another suitable encryption mechanism is enforced, then the use of
+these authentication schemes will result in Unix passwords being sent
 unencrypted over the network.
 .SH SEE ALSO
 \fBvncserver\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1),

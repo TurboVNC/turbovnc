@@ -181,6 +181,18 @@ NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
 NMake.)
 
 
+======================
+TLS Encryption Support
+======================
+
+The TurboVNC Server provides TLS encryption using either OpenSSL or GnuTLS.
+OpenSSL is the default because it generally performs the best, but it may be
+desirable to use GnuTLS under certain circumstances.  To do this, add
+"-DTVNC_USETLS=GnuTLS" to the CMake command line when configuring the TurboVNC
+Server.  Add "-DTVNC_USETLS=0" to the CMake command line to disable TLS
+encryption.
+
+
 =============
 Build Recipes
 =============

@@ -13,15 +13,15 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "August 2015" "" "TurboVNC"
+.TH vncserver 1 "September 2015" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
 \fBvncserver\fR
 [:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-fp \fIfont\-path\fR]
-[\-name \fIdesktop\-name\fR] [\-nohttpd] [\-novncauth] [\-nootp]
-[\-nopam] [\-noauth] [\-otp] [\-fg] [\-noxstartup]
+[\-name \fIdesktop\-name\fR] [\-nohttpd] [\-otp] [\-x509cert \fIcert\fR]
+[\-x509key \fIkey\fR] [\-fg] [\-noxstartup]
 [\-xstartup \fIscript\fR] [\fIXvnc\-options\fR...]
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
@@ -89,47 +89,22 @@ web server in Xvnc, which serves up the Java TurboVNC Viewer on a dedicated
 port.  Passing an argument of -nohttpd to \fBvncserver\fR tells it not to enable
 the embedded web server in Xvnc.
 .TP
-\fB\-novncauth\fR
-The default behavior of the \fBvncserver\fR script is to enable all of the
-supported authentication methods (VNC Password, One-Time Password, and PAM
-User/Password) in Xvnc.  Passing an argument of \-novncauth to \fBvncserver\fR
-tells it not to enable the VNC Password authentication method in Xvnc.  This
-argument has no effect if \fIpermitted-auth-methods\fR is specified in the
-authentication configuration file and "vnc" is not listed as a permitted
-method.
-.TP
-\fB\-nootp\fR
-The default behavior of the \fBvncserver\fR script is to enable all of the
-supported authentication methods (VNC Password, One-Time Password, and PAM
-User/Password) in Xvnc.  Passing an argument of \-nootp to \fBvncserver\fR
-tells it not to enable the One-Time Password authentication method in Xvnc.
-This argument has no effect if \fIpermitted-auth-methods\fR is specified in the
-authentication configuration file and "otp" is not listed as a permitted
-method.
-.TP
-\fB\-nopam\fR
-The default behavior of the \fBvncserver\fR script is to enable all of the
-supported authentication methods (VNC Password, One-Time Password, and PAM
-User/Password) in Xvnc.  Passing an argument of \-nopam to \fBvncserver\fR
-tells it not to enable the PAM User/Password authentication method in Xvnc.
-Disabling this authentication method will prevent viewers from using Unix Login
-authentication.  This command-line argument has no effect if
-\fIpermitted-auth-methods\fR is specified in the authentication configuration
-file and "pam-userpwd" is not listed as a permitted method.
-.TP
-\fB\-noauth\fR
-The default behavior of the \fBvncserver\fR script is to enable all of the
-supported authentication methods (VNC Password, One-Time Password, and PAM
-User/Password) in Xvnc.  Passing an argument of \-noauth to \fBvncserver\fR
-tells it to disable all forms of authentication in Xvnc.  If
-\fIpermitted-auth-methods\fR is specified in the authentication configuration
-file and "none" is not listed as a permitted method, then Xvnc exits with an
-error.
-.TP
 \fB\-otp\fR
 If the One-Time Password authentication method is enabled and permitted in
 Xvnc, then this generates an initial one-time password and prints it to the
 console prior to starting Xvnc.
+.TP
+\fB\-x509cert\fR \fIcert\fR
+Specify the X.509 signed certificate file (in PEM format) to use with X.509
+encryption.  If this argument is specified, then it is passed to Xvnc.
+Otherwise, the \fBvncserver\fR script passes a default value of
+$vncUserDir/x509_cert.pem to Xvnc.
+.TP
+\fB\-x509key\fR \fIkey\fR
+Specify the X.509 private key file (in PEM format) to use with X.509
+encryption.  If this argument is specified, then it is passed to Xvnc.
+Otherwise, the \fBvncserver\fR script passes a default value of
+$vncUserDir/x509_private.pem to Xvnc.
 .TP
 \fB\-fg\fR
 Runs Xvnc as a foreground process.  This has two effects: (1) The VNC server

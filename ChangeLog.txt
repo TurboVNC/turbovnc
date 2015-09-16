@@ -7,6 +7,12 @@ in order to support certain 3D applications that rely on this extension to
 query and set low-level nVidia GPU attributes.  See the User's Guide for more
 details.
 -------------------------------------------------------------------------------
+[2]
+The TurboVNC Server now provides full support for the VeNCrypt RFB extensions,
+including TLS-encrypted security types.  TLS encryption is provided by OpenSSL
+in the official binaries, but GnuTLS can be used instead when building the
+TurboVNC Server from source.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
