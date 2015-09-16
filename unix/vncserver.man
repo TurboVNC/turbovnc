@@ -113,7 +113,7 @@ user logs out of the window manager in the VNC session.  This may be necessary
 when launching TurboVNC from within certain grid computing environments.
 .TP
 \fB\-noxstartup\fR
-Do not run the ~/.vnc/xstartup.turbovnc script after launching Xvnc.  This
+Do not run the $vncUserDir/.vnc/xstartup.turbovnc script after launching Xvnc.  This
 option allows you to manually start a window manager in your TurboVNC session
 or to run a full-screen application without a window manager.
 .TP
@@ -126,7 +126,7 @@ TurboVNC session to terminate whenever the application exits.
 .TP
 \fB\-log\fR  \fIfile\fR
 Redirect the output of Xvnc to \fIfile\fR, rather than to
-~/.vnc/{hostname}{display}.log.
+$vncUserDir/.vnc/{hostname}{display}.log.
 .TP
 \fB\-kill\fR \fB:\fR\fIdisplay\fR
 Stops the VNC server that is currently running on the specified display.
