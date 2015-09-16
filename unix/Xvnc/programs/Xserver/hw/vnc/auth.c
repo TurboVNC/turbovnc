@@ -890,10 +890,10 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
                     tightAdvertised = TRUE;
             }
         }
-
-        if (n == 0)
-            FatalError("rfbSendSecurityTypeList: no security types enabled! This should not have happened!\n");
     }
+
+    if (n == 0)
+        FatalError("rfbSendSecurityTypeList: no security types enabled! This should not have happened!\n");
 
     if (!tightAdvertised) {
         /*
