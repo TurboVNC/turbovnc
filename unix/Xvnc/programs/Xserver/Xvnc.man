@@ -74,7 +74,7 @@ UDP port for keyboard/pointer data.
 .TP
 \fB\-rfbport\fR \fIport\fR
 TCP port that the server should use when listening for connections from normal
-VNC clients.
+VNC viewers.
 .TP
 \fB\-rfbwait\fR \fItime\fR
 Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
@@ -168,8 +168,8 @@ between mouse movement and application response, since the TCP buffers will be
 \fB\-alr\fR \fItime\fR
 Enable the automatic lossless refresh (ALR) feature for this Xvnc session and
 set the timeout to \fItime\fR seconds.  If ALR is enabled and no framebuffer
-updates have been sent to a given client in the past \fItime\fR seconds, and if
-"eligible" areas of the screen have been transmitted to that client using JPEG
+updates have been sent to a given viewer in the past \fItime\fR seconds, and if
+"eligible" areas of the screen have been transmitted to that viewer using JPEG
 since the last lossless refresh, then those areas of the screen are
 re-transmitted using mathematically lossless image compression (specifically,
 the Lossless Tight + Zlib encoding method.)
@@ -234,7 +234,7 @@ for TurboVNC sets this as the default, but you can modify the script
 if you want to change the behavior.
 .TP
 \fB\-viewonly\fR
-Don't accept keyboard and pointer events from clients.  All clients will
+Don't accept keyboard and pointer events from viewers.  All viewers will
 be able to see the desktop but won't be able to control it.
 .TP
 \fB\-localhost\fR
