@@ -79,7 +79,7 @@ public class SecurityClient extends Security {
   public static StringParameter secTypes
   = new StringParameter("SecurityTypes",
   "A comma-separated list of the security types that can be used, if the " +
-  "server supports them.  \"VncAuth\" and \"None\" are the standard VNC " +
+  "server supports them.  \"VNC\" and \"None\" are the standard VNC " +
   "password and no-password authentication schemes supported by all VNC " +
   "servers.  The 10 supported VeNCrypt security types (Plain, Ident, " +
   "TLSNone, TLSVnc, TLSPlain, TLSIdent, X509None, X509Vnc, X509Plain, and " +
@@ -93,7 +93,7 @@ public class SecurityClient extends Security {
   "encryption or SSH tunneling.  \"Ident\", which is designed for use by " +
   "VNC proxies, authenticates using only a user name.  The order of this " +
   "list does not matter, since the server's preferred order is always used.",
-  "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VncAuth,Ident,Plain,UnixLogin,None");
+  "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VNC,Ident,Plain,UnixLogin,None");
 
   public static StringParameter x509ca
   = new StringParameter("X509CA",
