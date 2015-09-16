@@ -1168,11 +1168,11 @@ ddxUseMsg()
     ErrorF("-nocursor              don't display a cursor\n");
     ErrorF("-rfbauth passwd-file   specify password file for VNC Password authentication\n");
     ErrorF("-securitytypes types   list of security types that the server should support\n");
-    ErrorF("                       (one or more of:  tlsvnc, tlsotp, tlsplain, tlsnone,\n");
-    ErrorF("                       x509vnc, x509otp, x509plain, x509none, vnc, otp,\n");
-    ErrorF("                       unixlogin, plain, none.)  See docs.\n");
+    rfbAuthListAvailableSecurityTypes();
+#if USETLS
     ErrorF("-x509cert file         specify filename of X.509 signed certificate\n");
     ErrorF("-x509key file          specify filename of X.509 private key\n");
+#endif
     ErrorF("-noreverse             disable reverse connections\n");
     ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");
     ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");

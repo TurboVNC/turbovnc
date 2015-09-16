@@ -713,6 +713,7 @@ extern void httpCheckFds(void);
 void rfbAuthInit(void);
 void rfbAuthProcessResponse(rfbClientPtr cl);
 void rfbAuthParseCommandLine(char *buf);
+void rfbAuthListAvailableSecurityTypes(void);
 extern char* rfbAuthConfigFile;
 
 extern Bool  rfbOptOtpAuth(void);

@@ -487,6 +487,28 @@ setMethods(char *buf, Bool backwardCompatible)
 }
 
 
+void
+rfbAuthListAvailableSecurityTypes(void)
+{
+    AuthMethodData *a;
+    int chars = 23;
+
+    ErrorF("                       Available security types (case-insensitive):\n");
+    ErrorF("                       ");
+    for (a = authMethods; a->name != NULL; a++) {
+        ErrorF("%s", a->name);  chars += strlen(a->name);
+        if ((a + 1)->name != NULL) {
+            ErrorF(", ");  chars += 2;
+            if (chars + strlen((a + 1)->name) > 77) {
+                ErrorF("\n                       ");
+                chars = 23;
+            }
+        }
+    }
+    ErrorF("\n");
+}
+
+
 static void
 ReadConfigFile(void)
 {
