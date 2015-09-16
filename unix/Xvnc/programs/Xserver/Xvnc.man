@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "August 2015" "" "TurboVNC"
+.TH Xvnc 1 "September 2015" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -73,7 +73,7 @@ UDP port for keyboard/pointer data.
 .TP
 \fB\-rfbport\fR \fIport\fR
 TCP port that the server should use when listening for connections from normal
-VNC clients.
+VNC viewers.
 .TP
 \fB\-rfbwait\fR \fItime\fR
 Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
@@ -162,8 +162,8 @@ between mouse movement and application response, since the TCP buffers will be
 \fB\-alr\fR \fItime\fR
 Enable the automatic lossless refresh (ALR) feature for this Xvnc session and
 set the timeout to \fItime\fR seconds.  If ALR is enabled and no framebuffer
-updates have been sent to a given client in the past \fItime\fR seconds, and if
-"eligible" areas of the screen have been transmitted to that client using JPEG
+updates have been sent to a given viewer in the past \fItime\fR seconds, and if
+"eligible" areas of the screen have been transmitted to that viewer using JPEG
 since the last lossless refresh, then those areas of the screen are
 re-transmitted using mathematically lossless image compression (specifically,
 the Lossless Tight + Zlib encoding method.)
@@ -228,7 +228,7 @@ for TurboVNC sets this as the default, but you can modify the script
 if you want to change the behavior.
 .TP
 \fB\-viewonly\fR
-Don't accept keyboard and pointer events from clients.  All clients will
+Don't accept keyboard and pointer events from viewers.  All viewers will
 be able to see the desktop but won't be able to control it.
 .TP
 \fB\-localhost\fR
@@ -261,7 +261,7 @@ Set META and ALT keys to the same X modifier flag, as in the original
 version of Xvnc by AT&T labs (this option is specific to TightVNC/TurboVNC.)
 .SH AUTHENTICATION OVERVIEW
 The Xvnc server supports the following methods for authenticating a VNC
-client connection:
+viewer connection:
 .IP \fBnone\fR
 No authentication required.  Starting Xvnc with no authentication command-line
 arguments sets the authentication method to "none".  If
@@ -269,7 +269,7 @@ arguments sets the authentication method to "none".  If
 file and "none" is not listed as a permitted method, then Xvnc exits with an
 error.
 
-This authentication method can be used with VNC clients that understand the
+This authentication method can be used with VNC viewers that understand the
 RFB "None" security type or the "Tight" security type with the "None"
 authentication scheme.
 .IP \fBvnc\fR
@@ -279,7 +279,7 @@ to Xvnc.  Additionally, if \fIpermitted-auth-methods\fR is specified in the
 security configuration file, then "vnc" must be listed as a permitted
 method.
 
-This authentication method can be used with VNC clients that understand the RFB
+This authentication method can be used with VNC viewers that understand the RFB
 "VNC" security type or the "Tight" security type with the "VNC" authentication
 scheme.
 .IP \fBotp\fR
@@ -289,7 +289,7 @@ argument of \fB-otpauth\fR to Xvnc.  Additionally, if
 \fIpermitted-auth-methods\fR is specified in the security configuration
 file, then "otp" must be listed as a permitted method.
 
-This authentication method can be used with any VNC client that supports
+This authentication method can be used with any VNC viewer that supports
 Standard VNC authentication.  OTP authentication is handy for sharing
 a VNC session with another person with whom you do not wish to share your
 VNC password.
@@ -307,11 +307,11 @@ have been created by the system administrator (see the SECURITY
 CONFIGURATION FILE section for details), and on some systems, it may be
 necessary to make the Xvnc binary setuid root.
 
-This authentication method can be used only with VNC clients that understand
+This authentication method can be used only with VNC viewers that understand
 the RFB protocol "Tight" security type with the "Unix Login" authentication
 scheme.
 .P
-The authentication method that will be selected when a VNC client connects
+The authentication method that will be selected when a VNC viewer connects
 depends on the following:
 .TP
 \fBCommand-line authentication options\fR
@@ -332,7 +332,7 @@ meet this criteria, then Xvnc exits with an error.  For instance, if
 to start Xvnc without an argument of \fB-pamauth\fR.
 
 The \fIpermitted-auth-methods\fR directive also allows you to specify the order
-in which authentication schemes are advertised to VNC clients.  For
+in which authentication schemes are advertised to VNC viewers.  For
 instance, if "pam-userpwd" is listed first, then the TurboVNC Viewer will
 default to using Unix Login authentication when connecting to any TurboVNC
 sessions on this server.  Similarly, if "vnc" or "otp" is listed first, then
@@ -343,18 +343,18 @@ If the security configuration file does not exist or
 \fIpermitted-auth-methods\fR was set to "vnc, otp, pam-userpwd, none".
 .TP
 \fBThe negotiated RFB protocol version\fR
-This is determined by the VNC client's capabilities.  Older VNC clients that
+This is determined by the VNC viewer's capabilities.  Older VNC viewers that
 support RFB version 3.3 can only use the "none", "vnc" and "otp"
-authentication methods.  Newer clients that support RFB 3.7 or 3.8 with the
+authentication methods.  Newer viewers that support RFB 3.7 or 3.8 with the
 Tight VNC security type extension can use the "pam-userpwd" authentication
-method, if the client has implemented it.
+method, if the viewer has implemented it.
 
-Authentication will fail if a VNC client that doesn't support the Tight VNC
+Authentication will fail if a VNC viewer that doesn't support the Tight VNC
 security type extension connects to a TurboVNC server that only allows the
 "pam-userpwd" authentication method.
 .TP
-\fBThe VNC client user interface\fR
-The VNC client's user interface may place additional restrictions on what
+\fBThe VNC viewer user interface\fR
+The VNC viewer's user interface may place additional restrictions on what
 authentication methods can be used.  For example, the TurboVNC Viewer has
 command-line options that allow you to force the use of the VNC or Unix
 Login authentication schemes, regardless of which the server advertises as
@@ -422,8 +422,8 @@ comma-separated methods may be specified.  Accepted values for \fImethod\fR
 are: \fInone\fR, \fIvnc\fR, \fIotp\fR, and \fIpam-userpwd\fR.  The order in
 which these methods are specified defines the order in which Xvnc will
 advertise the corresponding RFB security types and authentication schemes
-to the VNC client.  This ordering may affect which authentication scheme
-the VNC client chooses as its default.
+to the VNC viewer.  This ordering may affect which authentication scheme
+the VNC viewer chooses as its default.
 .SH SECURITY CONCERNS
 .P
 There are many security problems inherent in VNC.  Thus, it is
