@@ -976,9 +976,11 @@ rfbAuthTLSHandshake(rfbClientPtr cl)
     case rfbAuthVNC:
         rfbVncAuthSendChallenge(cl);
         break;
+#ifdef XVNC_AuthPAM
     case rfbAuthUnixLogin:
         AuthPAMUserPwdRspFunc(cl);
         break;
+#endif
     }
 }
 #endif
@@ -1065,9 +1067,11 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
     case rfbAuthVNC:
         rfbVncAuthSendChallenge(cl);
         break;
+#ifdef XVNC_AuthPAM
     case rfbVeNCryptPlain:
         AuthPAMUserPwdRspFunc(cl);
         break;
+#endif
 #if USETLS
     case rfbVeNCryptTLSNone:
         cl->selectedAuthType = rfbAuthNone;
@@ -1079,11 +1083,13 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
         TLS_INIT(TRUE);
         rfbVncAuthSendChallenge(cl);
         break;
+#ifdef XVNC_AuthPAM
     case rfbVeNCryptTLSPlain:
         cl->selectedAuthType = rfbAuthUnixLogin;
         TLS_INIT(TRUE);
         AuthPAMUserPwdRspFunc(cl);
         break;
+#endif
     case rfbVeNCryptX509None:
         cl->selectedAuthType = rfbAuthNone;
         TLS_INIT(FALSE);
@@ -1094,11 +1100,13 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
         TLS_INIT(FALSE);
         rfbVncAuthSendChallenge(cl);
         break;
+#ifdef XVNC_AuthPAM
     case rfbVeNCryptX509Plain:
         cl->selectedAuthType = rfbAuthUnixLogin;
         TLS_INIT(FALSE);
         AuthPAMUserPwdRspFunc(cl);
         break;
+#endif
 #endif
     default:
         FatalError("rfbVeNCryptAuthenticate: chosen type is invalid (this should never occur)");
