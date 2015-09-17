@@ -1302,6 +1302,7 @@ rfbSendAuthCaps(rfbClientPtr cl)
                        sz_rfbCapabilityInfoName);
                 cl->authCaps[count] = c->authType;
                 strncpy(tempstr, (char *)pcap->nameSignature, 8);
+                tempstr[8]=0;
                 rfbLog("Advertising Tight auth cap '%s'\n", tempstr);
                 count++;
             }
