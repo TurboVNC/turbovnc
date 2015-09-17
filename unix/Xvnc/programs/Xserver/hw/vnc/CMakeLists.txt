@@ -34,6 +34,12 @@ if(TVNC_USETLS STREQUAL "openssl")
 		add_definitions(-DUSETLS)
 		include_directories(${OPENSSL_INCLUDE_DIR})
 	endif()
+	set(DEFAULT_TVNC_DLOPENSSL 1)
+	option(TVNC_DLOPENSSL "Load OpenSSL using dlopen()/dlsym() instead of linking directly with it"
+		${DEFAULT_TVNC_DLOPENSSL})
+	if(TVNC_DLOPENSSL)
+		add_definitions(-DDLOPENSSL)
+	endif()
 elseif(TVNC_USETLS STREQUAL "gnutls")
 	include(FindGnuTLS)
 	if(NOT GNUTLS_FOUND)
@@ -80,7 +86,7 @@ add_library(vnc STATIC
 	${NVCTRLSRC}
 	${RFBSSLSRC})
 
-if(TVNC_USETLS STREQUAL "openssl")
+if(TVNC_USETLS STREQUAL "openssl" AND NOT TVNC_DLOPENSSL)
 	target_link_libraries(vnc ${OPENSSL_LIBRARIES})
 elseif(TVNC_USETLS STREQUAL "gnutls")
 	target_link_libraries(vnc ${GNUTLS_LIBRARIES})
