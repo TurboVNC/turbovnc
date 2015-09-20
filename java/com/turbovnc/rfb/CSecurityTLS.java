@@ -3,7 +3,7 @@
  * Copyright (C) 2005 Martin Koegler
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
- * Copyright (C) 2011-2012, 2014 Brian P. Hinz
+ * Copyright (C) 2011-2012, 2015 Brian P. Hinz
  * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -25,16 +25,25 @@
 package com.turbovnc.rfb;
 
 import javax.net.ssl.*;
-import java.security.*;
-import java.security.cert.*;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.MessageDigest;
+import java.security.cert.*;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import javax.swing.JOptionPane;
+import javax.xml.bind.DatatypeConverter;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
@@ -165,21 +174,43 @@ public class CSecurityTLS extends CSecurity {
     X509TrustManager tm;
 
     MyX509TrustManager() throws java.security.GeneralSecurityException {
-      TrustManagerFactory tmf =
-        TrustManagerFactory.getInstance("PKIX");
       KeyStore ks = KeyStore.getInstance("JKS");
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
       try {
         ks.load(null, null);
+        String a = TrustManagerFactory.getDefaultAlgorithm();
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(a);
+        tmf.init((KeyStore)null);
+        for (TrustManager m : tmf.getTrustManagers())
+          if (m instanceof X509TrustManager)
+            for (X509Certificate c :
+                 ((X509TrustManager)m).getAcceptedIssuers())
+              ks.setCertificateEntry(c.getSubjectX500Principal().getName(), c);
+        File castore = new File(FileUtils.getVncHomeDir() +
+                                "x509_savedcerts.pem");
+        if (castore.exists() && castore.canRead()) {
+          InputStream caStream = new MyFileInputStream(castore);
+          Collection<? extends Certificate> cacerts =
+            cf.generateCertificates(caStream);
+          for (Certificate cert : cacerts) {
+            String dn =
+              ((X509Certificate)cert).getSubjectX500Principal().getName();
+            ks.setCertificateEntry(dn, (X509Certificate)cert);
+          }
+        }
         File cacert = new File(SecurityClient.x509ca.getValue());
         vlog.debug("Using X.509 CA certificate " +
                    SecurityClient.x509ca.getValue());
-        if (!cacert.exists() || !cacert.canRead())
-          return;
-        InputStream caStream =
-          new FileInputStream(SecurityClient.x509ca.getValue());
-        X509Certificate ca = (X509Certificate)cf.generateCertificate(caStream);
-        ks.setCertificateEntry("CA", ca);
+        if (cacert.exists() && cacert.canRead()) {
+          InputStream caStream = new MyFileInputStream(cacert);
+          Collection<? extends Certificate> cacerts =
+            cf.generateCertificates(caStream);
+          for (Certificate cert : cacerts) {
+            String dn =
+              ((X509Certificate)cert).getSubjectX500Principal().getName();
+            ks.setCertificateEntry(dn, (X509Certificate)cert);
+          }
+        }
         PKIXBuilderParameters params =
           new PKIXBuilderParameters(ks, new X509CertSelector());
         File crlcert = new File(SecurityClient.x509crl.getValue());
@@ -196,13 +227,12 @@ public class CSecurityTLS extends CSecurity {
           params.addCertStore(store);
           params.setRevocationEnabled(true);
         }
+        tmf = TrustManagerFactory.getInstance("PKIX");
         tmf.init(new CertPathTrustManagerParameters(params));
-      } catch(java.io.FileNotFoundException e) {
-        vlog.error(e.toString());
-      } catch(java.io.IOException e) {
+        tm = (X509TrustManager)tmf.getTrustManagers()[0];
+      } catch (java.lang.Exception e) {
         vlog.error(e.toString());
       }
-      tm = (X509TrustManager)tmf.getTrustManagers()[0];
     }
 
     public void checkClientTrusted(X509Certificate[] chain, String authType)
@@ -212,25 +242,148 @@ public class CSecurityTLS extends CSecurity {
 
     public void checkServerTrusted(X509Certificate[] chain, String authType)
       throws CertificateException {
+      MessageDigest md = null;
       try {
+        md = MessageDigest.getInstance("SHA-1");
         tm.checkServerTrusted(chain, authType);
-      } catch(CertificateException e) {
-        Object[] answer = {"Proceed", "Exit"};
-        int ret = JOptionPane.showOptionDialog(null,
-          e.getCause().getLocalizedMessage() + "\n" +
-          "Continue connecting to this host?",
-          "Confirm certificate exception?",
-          JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
-          null, answer, answer[0]);
-        if (ret == JOptionPane.NO_OPTION)
-          System.exit(1);
-      } catch(java.lang.Exception e) {
-        throw new SystemException(e.toString());
+      } catch (CertificateException e) {
+        if (e.getCause() instanceof CertPathBuilderException) {
+          Object[] answer = { "YES", "NO" };
+          X509Certificate cert = chain[0];
+          md.update(cert.getEncoded());
+          String thumbprint =
+            DatatypeConverter.printHexBinary(md.digest());
+          thumbprint = thumbprint.replaceAll("..(?!$)", "$0 ");
+          int ret = JOptionPane.showOptionDialog(null,
+            "This certificate has been signed by an unknown authority\n" +
+            "\n" +
+            "  Subject: " + cert.getSubjectX500Principal().getName() + "\n" +
+            "  Issuer: " + cert.getIssuerX500Principal().getName() + "\n" +
+            "  Serial Number: " + cert.getSerialNumber() + "\n" +
+            "  Version: " + cert.getVersion() + "\n" +
+            "  Signature Algorithm: " + cert.getPublicKey().getAlgorithm() +
+            "\n" +
+            "  Not Valid Before: " + cert.getNotBefore() + "\n" +
+            "  Not Valid After: " + cert.getNotAfter() + "\n" +
+            "  SHA1 Fingerprint: " + thumbprint + "\n" + "\n" +
+            "Do you want to save it and continue?",
+            "Certificate Issuer Unknown",
+            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+            null, answer, answer[0]);
+          if (ret == JOptionPane.YES_OPTION) {
+            File vncDir = new File(FileUtils.getVncHomeDir());
+            if (!vncDir.exists() && !vncDir.mkdir()) {
+              vlog.info("Certificate save failed, unable to create ~/.vnc");
+              return;
+            }
+            Collection<? extends X509Certificate> cacerts = null;
+            String castore =
+              FileUtils.getVncHomeDir() + "x509_savedcerts.pem";
+            File caFile = new File(castore);
+            try {
+              caFile.createNewFile();
+            } catch (IOException ioe) {
+              vlog.error(ioe.getCause().getMessage());
+              return;
+            }
+            InputStream caStream = new MyFileInputStream(caFile);
+            CertificateFactory cf =
+              CertificateFactory.getInstance("X.509");
+            cacerts =
+              (Collection <? extends X509Certificate>)cf.generateCertificates(caStream);
+            for (int i = 0; i < chain.length; i++) {
+              if (cacerts == null || !cacerts.contains(chain[i])) {
+                byte[] der = chain[i].getEncoded();
+                String pem = DatatypeConverter.printBase64Binary(der);
+                pem = pem.replaceAll("(.{64})", "$1\n");
+                FileWriter fw = null;
+                try {
+                  fw = new FileWriter(castore, true);
+                  fw.write("-----BEGIN CERTIFICATE-----\n");
+                  fw.write(pem+"\n");
+                  fw.write("-----END CERTIFICATE-----\n");
+                } catch (IOException ioe) {
+                  throw new SystemException(ioe.getCause().getMessage());
+                } finally {
+                  try {
+                    if (fw != null)
+                      fw.close();
+                  } catch (IOException ioe2) {
+                    throw new SystemException(ioe2.getCause().getMessage());
+                  }
+                }
+              }
+            }
+          } else {
+            System.exit(1);
+          }
+        } else {
+          throw new SystemException(e.getCause().getMessage());
+        }
+      } catch (java.lang.Exception e) {
+        throw new SystemException(e.getCause().getMessage());
       }
     }
 
     public X509Certificate[] getAcceptedIssuers() {
       return tm.getAcceptedIssuers();
+    }
+
+    private class MyFileInputStream extends InputStream {
+      // Blank lines in a certificate file will cause Java 6 to throw a
+      // "DerInputStream.getLength(): lengthTag=127, too big" exception.
+      ByteBuffer buf;
+
+      public MyFileInputStream(String name) {
+        this(new File(name));
+      }
+
+      public MyFileInputStream(File file) {
+        StringBuffer sb = new StringBuffer();
+        BufferedReader reader = null;
+        try {
+          reader = new BufferedReader(new FileReader(file));
+          String l;
+          while ((l = reader.readLine()) != null) {
+            if (l.trim().length() > 0 )
+              sb.append(l + "\n");
+          }
+        } catch (java.lang.Exception e) {
+          throw new SystemException(e.toString());
+        } finally {
+          try {
+            if (reader != null)
+              reader.close();
+          } catch (IOException ioe) {
+            throw new SystemException(ioe.getCause().getMessage());
+          }
+        }
+        Charset utf8 = Charset.forName("UTF-8");
+        buf = ByteBuffer.wrap(sb.toString().getBytes(utf8));
+        buf.limit(buf.capacity());
+      }
+
+      @Override
+      public int read(byte[] b) throws IOException {
+        return this.read(b, 0, b.length);
+      }
+
+      @Override
+      public int read(byte[] b, int off, int len) throws IOException {
+        if (!buf.hasRemaining())
+          return -1;
+        len = Math.min(len, buf.remaining());
+        buf.get(b, off, len);
+        return len;
+      }
+
+
+      @Override
+      public int read() throws IOException {
+        if (!buf.hasRemaining())
+          return -1;
+        return buf.get() & 0xFF;
+      }
     }
   }
 

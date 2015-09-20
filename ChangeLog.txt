@@ -49,6 +49,17 @@ The Java TurboVNC Viewer now supports (and prefers) elliptic curve ciphers when
 using the Anonymous TLS security types.  Additionally, the Java TurboVNC Viewer
 now uses TLS v1.1+ by default instead of TLS v1.0.
 -------------------------------------------------------------------------------
+[9]
+Improvements to the handling of X.509 certificates in the Java TurboVNC Viewer:
+-- Fixed a NullPointerException that would occur when attempting to use one of
+the X.509 security types without specifying an X.509 certificate authority (CA)
+certificate.
+-- If the server's certificate is signed by an unknown CA, then the viewer will
+pop up a dialog that gives the user the option to trust the certificate for
+future connections.
+-- The viewer can now handle X.509 certificate files containing multiple
+concatenated certificates.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
