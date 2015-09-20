@@ -106,7 +106,10 @@ public class CSecurityTLS extends CSecurity {
       manager = new SSLEngineManager(engine, is, os);
       manager.doHandshake();
     } catch (java.lang.Exception e) {
-      throw new SystemException(e.toString());
+      if (e.getMessage().equals("X.509 certificate not trusted"))
+        throw new WarningException(e.getMessage());
+      else
+        throw new SystemException(e.toString());
     }
 
     //checkSession();
@@ -315,7 +318,7 @@ public class CSecurityTLS extends CSecurity {
               }
             }
           } else {
-            System.exit(1);
+            throw new WarningException("X.509 certificate not trusted");
           }
         } else {
           throw new SystemException(e.getCause().getMessage());
