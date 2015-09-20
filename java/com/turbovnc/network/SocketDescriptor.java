@@ -36,13 +36,13 @@ public class SocketDescriptor implements FileDescriptor {
       channel.configureBlocking(false);
       writeSelector = Selector.open();
       readSelector = Selector.open();
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new SystemException(e.toString());
     }
     try {
       channel.register(writeSelector, SelectionKey.OP_WRITE);
       channel.register(readSelector, SelectionKey.OP_READ);
-    } catch(java.nio.channels.ClosedChannelException e) {
+    } catch (java.nio.channels.ClosedChannelException e) {
       throw new SystemException(e.toString());
     }
   }
@@ -51,7 +51,7 @@ public class SocketDescriptor implements FileDescriptor {
     try {
       channel.socket().shutdownInput();
       channel.socket().shutdownOutput();
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new SystemException(e.toString());
     }
   }
@@ -59,7 +59,7 @@ public class SocketDescriptor implements FileDescriptor {
   public void close() {
     try {
       channel.close();
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new SystemException(e.toString());
     }
   }
@@ -79,7 +79,7 @@ public class SocketDescriptor implements FileDescriptor {
     ByteBuffer b = ByteBuffer.allocate(length);
     try {
       n = channel.read(b);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new WarningException("Read error: " + e.getMessage());
     }
     if (n <= 0)
@@ -98,7 +98,7 @@ public class SocketDescriptor implements FileDescriptor {
     b.flip();
     try {
       n = channel.write(b);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new ErrorException("Write error: " + e.getMessage());
     }
     b.clear();
@@ -128,7 +128,7 @@ public class SocketDescriptor implements FileDescriptor {
           break;
         }
       }
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new SystemException(e.toString());
     }
     return n;
@@ -138,7 +138,7 @@ public class SocketDescriptor implements FileDescriptor {
     int n = 0;
     try {
       n = channel.write(buf);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new ErrorException("Write error: " + e.getMessage());
     }
     return n;
@@ -148,7 +148,7 @@ public class SocketDescriptor implements FileDescriptor {
     long n = 0;
     try {
       n = channel.write(buf, offset, length);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new ErrorException("Write error: " + e.getMessage());
     }
     return n;
@@ -158,7 +158,7 @@ public class SocketDescriptor implements FileDescriptor {
     int n = 0;
     try {
       n = channel.read(buf);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new WarningException("Read error: " + e.getMessage());
     }
     return n;
@@ -168,7 +168,7 @@ public class SocketDescriptor implements FileDescriptor {
     long n = 0;
     try {
       n = channel.read(buf, offset, length);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new WarningException("Read error: " + e.getMessage());
     }
     return n;
@@ -197,7 +197,7 @@ public class SocketDescriptor implements FileDescriptor {
   public boolean connect(SocketAddress remote) {
     try {
       return channel.connect(remote);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new WarningException("Could not connect: " + e.getMessage());
     }
   }
@@ -205,7 +205,7 @@ public class SocketDescriptor implements FileDescriptor {
   public boolean finishConnect() {
     try {
       return channel.finishConnect();
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new WarningException("Could not connect: " + e.getMessage());
     }
   }
@@ -226,13 +226,13 @@ public class SocketDescriptor implements FileDescriptor {
       channel.configureBlocking(false);
       writeSelector = Selector.open();
       readSelector = Selector.open();
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new SystemException(e.toString());
     }
     try {
       channel.register(writeSelector, SelectionKey.OP_WRITE);
       channel.register(readSelector, SelectionKey.OP_READ);
-    } catch(java.nio.channels.ClosedChannelException e) {
+    } catch (java.nio.channels.ClosedChannelException e) {
       System.out.println(e.toString());
     }
   }

@@ -64,7 +64,7 @@ public class TcpSocket extends Socket {
 
     try {
       addr = java.net.InetAddress.getByName(host);
-    } catch(UnknownHostException e) {
+    } catch (UnknownHostException e) {
       throw new WarningException("Could not resolve hostname: " +
                                  e.getMessage());
     }
@@ -144,7 +144,7 @@ public class TcpSocket extends Socket {
   public static boolean enableNagles(SocketDescriptor sock, boolean enable) {
     try {
       sock.channel.socket().setTcpNoDelay(!enable);
-    } catch(java.net.SocketException e) {
+    } catch (java.net.SocketException e) {
       vlog.error("Could not " + (enable ? "enable" : "disable") +
                  " Nagle's algorithm: " + e.getMessage());
       return false;
@@ -172,7 +172,7 @@ public class TcpSocket extends Socket {
       sock = new java.net.ServerSocket(0);
       port = sock.getLocalPort();
       sock.close();
-    } catch(java.io.IOException e) {
+    } catch (java.io.IOException e) {
       throw new SystemException(e.toString());
     }
     return port;

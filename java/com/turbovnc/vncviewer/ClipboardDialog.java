@@ -87,7 +87,7 @@ class ClipboardDialog extends Dialog implements ActionListener {
         StringSelection ss = new StringSelection(str);
         try {
           cb.setContents(ss, ss);
-        } catch(Exception e) {
+        } catch (Exception e) {
           vlog.debug(e.toString());
         }
       }
@@ -97,12 +97,12 @@ class ClipboardDialog extends Dialog implements ActionListener {
           StringSelection ss = new StringSelection(str);
           try {
             cb.setContents(ss, ss);
-          } catch(Exception e) {
+          } catch (Exception e) {
             vlog.debug(e.toString());
           }
         }
       }
-    } catch(SecurityException e) {
+    } catch (SecurityException e) {
       System.err.println("Cannot access the system clipboard");
     }
   }

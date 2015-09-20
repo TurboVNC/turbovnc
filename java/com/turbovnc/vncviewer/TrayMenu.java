@@ -52,7 +52,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
       tray = SystemTray.getSystemTray();
       try {
         tray.add(trayIcon);
-      } catch(java.awt.AWTException e) {
+      } catch (java.awt.AWTException e) {
         vlog.error(e.toString());
       }
     }
@@ -69,7 +69,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
       Method setDockMenu =
         appClass.getMethod("setDockMenu", paramTypes);
       setDockMenu.invoke(app, menu);
-    } catch(Exception e) {
+    } catch (Exception e) {
       vlog.error("Could not modify dock menu:");
       vlog.error("  " + e.toString());
     }

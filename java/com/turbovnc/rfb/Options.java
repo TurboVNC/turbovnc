@@ -89,7 +89,7 @@ public class Options {
       int sf = -1;
       try {
         sf = Integer.parseInt(scaleString);
-      } catch(NumberFormatException e) {};
+      } catch (NumberFormatException e) {};
       if (sf >= 1 && sf <= 1000) {
         return sf;
       }
@@ -129,12 +129,12 @@ public class Options {
 
   public int getSubsamplingOrdinal() {
     switch (subsampling) {
-      case SUBSAMP_2X:
-        return 1;
-      case SUBSAMP_4X:
-        return 2;
-      case SUBSAMP_GRAY:
-        return 3;
+    case SUBSAMP_2X:
+      return 1;
+    case SUBSAMP_4X:
+      return 2;
+    case SUBSAMP_GRAY:
+      return 3;
     }
     return 0;
   }

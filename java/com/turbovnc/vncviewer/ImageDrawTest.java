@@ -192,7 +192,7 @@ public class ImageDrawTest extends JFrame {
         int temp = -1;
         try {
           temp = Integer.parseInt(arg[++i]);
-        } catch(NumberFormatException e) {};
+        } catch (NumberFormatException e) {};
         switch(temp) {
           case 8:  case 64:  case 256:  case 65536:
             colors = temp;
@@ -202,7 +202,7 @@ public class ImageDrawTest extends JFrame {
         int temp = -1;
         try {
           temp = Integer.parseInt(arg[++i]);
-        } catch(NumberFormatException e) {};
+        } catch (NumberFormatException e) {};
         if (temp > 0)
           width = temp;
       }
@@ -210,7 +210,7 @@ public class ImageDrawTest extends JFrame {
         int temp = -1;
         try {
           temp = Integer.parseInt(arg[++i]);
-        } catch(NumberFormatException e) {};
+        } catch (NumberFormatException e) {};
         if (temp > 0)
           height = temp;
       }

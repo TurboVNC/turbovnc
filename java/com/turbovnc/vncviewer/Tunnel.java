@@ -78,7 +78,7 @@ public class Tunnel {
       createTunnelJSch(gatewayHost, remoteHost, remotePort, localPort, opts);
     opts.serverName = "localhost::" + localPort;
   }
-  
+
   /* Create a tunnel using the builtin JSch SSH client */
 
   private static void createTunnelJSch(String gatewayHost, String remoteHost,
@@ -88,7 +88,7 @@ public class Tunnel {
     String homeDir = new String("");
     try {
       homeDir = System.getProperty("user.home");
-    } catch(java.security.AccessControlException e) {
+    } catch (java.security.AccessControlException e) {
       System.out.println("Cannot access user.home system property");
     }
 
@@ -145,7 +145,7 @@ public class Tunnel {
                                             false, user, false);
         session.setUserInfo(dlg);
         session.connect();
-      } catch(com.jcraft.jsch.JSchException e) {
+      } catch (com.jcraft.jsch.JSchException e) {
         System.out.println("Could not authenticate using SSH private key.  Falling back to user/password.");
         jsch.removeAllIdentity();
         session = null;

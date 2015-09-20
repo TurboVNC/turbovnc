@@ -43,11 +43,11 @@ public abstract class Decoder {
     return 0;
 */
     switch(encoding) {
-      case Encodings.encodingRaw:     return new RawDecoder(reader);
-      case Encodings.encodingRRE:     return new RREDecoder(reader);
-      case Encodings.encodingHextile: return new HextileDecoder(reader);
-      case Encodings.encodingTight:   return new TightDecoder(reader);
-      case Encodings.encodingZRLE:    return new ZRLEDecoder(reader);
+    case Encodings.encodingRaw:      return new RawDecoder(reader);
+    case Encodings.encodingRRE:      return new RREDecoder(reader);
+    case Encodings.encodingHextile:  return new HextileDecoder(reader);
+    case Encodings.encodingTight:    return new TightDecoder(reader);
+    case Encodings.encodingZRLE:     return new ZRLEDecoder(reader);
     }
     return null;
   }

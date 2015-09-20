@@ -87,7 +87,7 @@ public abstract class InStream {
     String utf8string = new String();
     try {
       utf8string = new String(str, "UTF8");
-    } catch(java.io.UnsupportedEncodingException e) {
+    } catch (java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
     }
     return utf8string;

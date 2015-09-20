@@ -53,7 +53,7 @@ public class ZlibInStream extends InStream {
     } finally {
       try {
         super.finalize();
-      } catch(Throwable e) {
+      } catch (Throwable e) {
         throw new SystemException(e.toString());
       }
     }

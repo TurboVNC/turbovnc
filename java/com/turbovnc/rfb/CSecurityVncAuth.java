@@ -43,7 +43,7 @@ public class CSecurityVncAuth extends CSecurity {
     byte[] utf8str = new byte[pwdLen];
     try {
       utf8str = passwd.toString().getBytes("UTF8");
-    } catch(java.io.UnsupportedEncodingException e) {
+    } catch (java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
     }
     for (int i = 0; i < 8; i++)
