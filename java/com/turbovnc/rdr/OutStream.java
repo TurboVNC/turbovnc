@@ -88,7 +88,7 @@ public abstract class OutStream {
     try {
       byte[] utf8str = str.getBytes("UTF8");
       writeBytes(utf8str, 0, len);
-    } catch(java.io.UnsupportedEncodingException e) {
+    } catch (java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
     }
   }

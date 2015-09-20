@@ -144,7 +144,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           Tunnel.createTunnel(opts);
           port = Hostname.getPort(opts.serverName);
           serverName = Hostname.getHost(opts.serverName);
-        } catch(Exception e) {
+        } catch (Exception e) {
           throw new ErrorException("Could not create SSH tunnel:\n" +
                                    e.getMessage());
         }
@@ -190,7 +190,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       synchronized(this) {
         wait(0, 50000);
       }
-    } catch(InterruptedException e) {
+    } catch (InterruptedException e) {
       throw new SystemException(e.toString());
     }
   }
@@ -214,7 +214,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         int temp = -1;
         try {
           temp = Integer.parseInt(passwordString.substring(c, c + 2), 16);
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (temp >= 0)
           encryptedPassword[c / 2] = (byte)temp;
         else break;
@@ -224,7 +224,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
       try {
         autoPass = in.readLine();
-      } catch(IOException e) {
+      } catch (IOException e) {
         throw new SystemException(e.toString());
       }
       VncViewer.autoPass.setParam("0");
@@ -241,14 +241,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
       InputStream fp = null;
       try {
         fp = new FileInputStream(passwordFileStr);
-      } catch(FileNotFoundException e) {
+      } catch (FileNotFoundException e) {
         throw new WarningException("Could not open password file");
       }
       byte[] obfPwd = new byte[256];
       try {
         fp.read(obfPwd);
         fp.close();
-      } catch(IOException e) {
+      } catch (IOException e) {
         throw new ErrorException("Could not read password file");
       }
       String plainPasswd = VncAuth.unobfuscatePasswd(obfPwd);

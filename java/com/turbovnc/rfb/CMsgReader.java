@@ -64,7 +64,7 @@ public abstract class CMsgReader {
     String str = new String();
     try {
       str = new String(buf, "UTF8");
-    } catch(java.io.UnsupportedEncodingException e) {
+    } catch (java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
     }
     handler.serverCutText(str, len);

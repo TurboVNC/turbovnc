@@ -329,14 +329,14 @@ public class Viewport extends JFrame {
       try {
         System.loadLibrary("turbovnchelper");
         helperAvailable = true;
-      } catch(java.lang.UnsatisfiedLinkError e) {
+      } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not find TurboVNC Helper JNI library.  If it is in a");
         vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
         vlog.info("  to the Java command line to specify its location.");
         vlog.info("  Full-screen mode may not work correctly.");
         if (VncViewer.isX11())
           vlog.info("  Keyboard grabbing will be disabled.");
-      } catch(java.lang.Exception e) {
+      } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
         vlog.info("  Full-screen mode may not work correctly.");
@@ -352,11 +352,11 @@ public class Viewport extends JFrame {
     if (isHelperAvailable()) {
       try {
         x11FullScreen(on);
-      } catch(java.lang.UnsatisfiedLinkError e) {
+      } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper.");
         vlog.info("  Full-screen mode may not work correctly.");
         helperAvailable = false;
-      } catch(java.lang.Exception e) {
+      } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
         vlog.info("  Full-screen mode may not work correctly.");
@@ -376,11 +376,11 @@ public class Viewport extends JFrame {
         grabKeyboard(on, VncViewer.grabPointer.getValue());
         cc.keyboardGrabbed = on;
         cc.menu.grabKeyboard.setSelected(cc.keyboardGrabbed);
-      } catch(java.lang.UnsatisfiedLinkError e) {
+      } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper.");
         vlog.info("  Keyboard grabbing will be disabled.");
         helperAvailable = false;
-      } catch(java.lang.Exception e) {
+      } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
         vlog.info("  Keyboard grabbing may not work correctly.");

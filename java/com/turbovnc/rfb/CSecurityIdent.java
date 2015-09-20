@@ -38,7 +38,7 @@ public class CSecurityIdent extends CSecurity {
     try {
       byte[] utf8str = username.toString().getBytes("UTF8");
       os.writeBytes(utf8str, 0, username.length());
-    } catch(java.io.UnsupportedEncodingException e) {
+    } catch (java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
     }
     os.flush();

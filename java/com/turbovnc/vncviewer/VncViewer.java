@@ -84,7 +84,7 @@ public class VncViewer extends javax.swing.JApplet
         url = attributes.getValue("URL");
         pkgDate = attributes.getValue("Package-Date");
         pkgTime = attributes.getValue("Package-Time");
-      } catch(IOException e) {}
+      } catch (IOException e) {}
     }
   }
 
@@ -139,7 +139,7 @@ public class VncViewer extends javax.swing.JApplet
               VncViewer viewer = new VncViewer(new String[]{});
               try {
                 Configuration.load(fName);
-              } catch(Exception e) {
+              } catch (Exception e) {
                 viewer.reportException(e);
                 return null;
               }
@@ -148,7 +148,7 @@ public class VncViewer extends javax.swing.JApplet
             }
           }
         }
-      } catch(Exception e) {
+      } catch (Exception e) {
         vlog.error("Invocation handler failed:");
         vlog.error("  " + e.toString());
       }
@@ -218,7 +218,7 @@ public class VncViewer extends javax.swing.JApplet
         ((Frame)owner).setIconImage(frameImage);
       dlg.dispose();
 
-    } catch(Exception e) {
+    } catch (Exception e) {
       vlog.error("Could not set look & feel:");
       vlog.error("  " + e.toString());
     }
@@ -244,7 +244,7 @@ public class VncViewer extends javax.swing.JApplet
         frame.setVisible(false);
         frame.dispose();
       }
-    } catch(Exception e) {
+    } catch (Exception e) {
       vlog.error("Could not set insets:");
       vlog.error("  " + e.toString());
     }
@@ -297,7 +297,7 @@ public class VncViewer extends javax.swing.JApplet
         if (fileName != null) {
           try {
             Configuration.load(fileName);
-          } catch(Exception e) {
+          } catch (Exception e) {
             viewer.reportException(e);
             return;
           }
@@ -338,7 +338,7 @@ public class VncViewer extends javax.swing.JApplet
         if (++i >= argv.length) usage();
         try {
           Configuration.load(argv[i]);
-        } catch(Exception e) {
+        } catch (Exception e) {
           reportException(e);
           exit(1);
         }
@@ -356,7 +356,7 @@ public class VncViewer extends javax.swing.JApplet
         if (i < argv.length - 1) {
           try {
             benchFile = new FileInStream(argv[++i]);
-          } catch(Exception e) {
+          } catch (Exception e) {
             reportException(new WarningException("Could not open session capture:\n" +
                                                  e.getMessage()));
             exit(1);
@@ -397,7 +397,7 @@ public class VncViewer extends javax.swing.JApplet
       if (argv[i].toLowerCase().endsWith(".vnc")) {
         try {
           Configuration.load(argv[i]);
-        } catch(Exception e) {
+        } catch (Exception e) {
           reportException(e);
           exit(1);
         }
@@ -717,7 +717,7 @@ public class VncViewer extends javax.swing.JApplet
       if (TrayMenu.isSupported()) {
         try {
           trayMenu = new TrayMenu(this);
-        } catch(Exception e) {
+        } catch (Exception e) {
           reportException(e);
           exit(1);
         }
@@ -725,7 +725,7 @@ public class VncViewer extends javax.swing.JApplet
       TcpListener listener = null;
       try {
         listener = new TcpListener(null, port);
-      } catch(Exception e) {
+      } catch (Exception e) {
         reportException(e);
         exit(1);
       }
@@ -763,7 +763,7 @@ public class VncViewer extends javax.swing.JApplet
           try {
             while (!cc.shuttingDown)
               cc.processMsg(true);
-          } catch(EndOfStream e) {}
+          } catch (EndOfStream e) {}
           tTotal = getTime() - tStart - benchFile.getReadTime();
           if (i >= benchWarmup) {
             System.out.format("%f s (Decode = %f, Blit = %f)\n", tTotal,
@@ -797,7 +797,7 @@ public class VncViewer extends javax.swing.JApplet
           while (!cc.shuttingDown)
             cc.processMsg(false);
         }
-      } catch(Exception e) {
+      } catch (Exception e) {
         if (cc == null || !cc.shuttingDown) {
           reportException(e, cc != null &&
                           cc.state() == CConnection.RFBSTATE_NORMAL);
@@ -935,7 +935,7 @@ public class VncViewer extends javax.swing.JApplet
     }
     vncServerName.setParam(null);
 
-    } catch(Exception e) {
+    } catch (Exception e) {
       reportException(new WarningException("Could not set global options:\n" +
                                            e.getMessage()));
       exit(1);

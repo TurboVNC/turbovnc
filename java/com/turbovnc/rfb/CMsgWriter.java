@@ -177,7 +177,7 @@ abstract public class CMsgWriter {
     try {
       byte[] utf8str = str.getBytes("UTF8");
       os.writeBytes(utf8str, 0, len);
-    } catch(java.io.UnsupportedEncodingException e) {
+    } catch (java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
     }
     endMsg();

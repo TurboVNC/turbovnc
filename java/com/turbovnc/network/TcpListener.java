@@ -48,7 +48,7 @@ public class TcpListener extends SocketListener  {
     try {
       channel = ServerSocketChannel.open();
       channel.configureBlocking(false);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new ErrorException("Could not create listening socket: " +
                                e.getMessage());
     }
@@ -64,13 +64,13 @@ public class TcpListener extends SocketListener  {
       } else {
         addr = InetAddress.getByName("0.0.0.0");
       }
-    } catch(UnknownHostException e) {
+    } catch (UnknownHostException e) {
       throw new ErrorException(e.getMessage());
     }
 
     try {
       channel.socket().bind(new InetSocketAddress(addr, port));
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new WarningException("Could not bind listening socket: " +
                                  e.getMessage());
     }
@@ -79,7 +79,7 @@ public class TcpListener extends SocketListener  {
     try {
       selector = Selector.open();
       channel.register(selector, SelectionKey.OP_ACCEPT);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new ErrorException("Could not enable listen mode for socket: " +
                                e.getMessage());
     }
@@ -96,7 +96,7 @@ public class TcpListener extends SocketListener  {
   public void shutdown() {
     try {
       channel.close();
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new ErrorException("Could not close listener: " +
                                e.getMessage());
     }
@@ -123,7 +123,7 @@ public class TcpListener extends SocketListener  {
         if (newSock == null)
           return null;
       }
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new ErrorException("Could not accept new connection: " +
                                e.getMessage());
     }
@@ -134,7 +134,7 @@ public class TcpListener extends SocketListener  {
     // Disable Nagle's algorithm, to reduce latency
     try {
       newSock.socket().setTcpNoDelay(true);
-    } catch(java.net.SocketException e) {
+    } catch (java.net.SocketException e) {
       throw new ErrorException("Could not disable Nagle's algorithm: " +
                                e.getMessage());
     }

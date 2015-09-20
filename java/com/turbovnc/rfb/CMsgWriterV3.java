@@ -29,7 +29,7 @@ public class CMsgWriterV3 extends CMsgWriter {
   public CMsgWriterV3(ConnParams cp_, OutStream os_) { super(cp_, os_); }
 
   synchronized public void writeClientInit(boolean shared) {
-    os.writeU8(shared?1:0);
+    os.writeU8(shared ? 1 : 0);
     endMsg();
   }
 
@@ -42,35 +42,33 @@ public class CMsgWriterV3 extends CMsgWriter {
   }
 
   synchronized public void writeSetDesktopSize(int width, int height,
-                                  ScreenSet layout)
-	{
-	  if (!cp.supportsSetDesktopSize)
-	    throw new ErrorException("Server does not support SetDesktopSize");
+                                               ScreenSet layout) {
+    if (!cp.supportsSetDesktopSize)
+      throw new ErrorException("Server does not support SetDesktopSize");
 
-	  startMsg(MsgTypes.msgTypeSetDesktopSize);
-	  os.pad(1);
+    startMsg(MsgTypes.msgTypeSetDesktopSize);
+    os.pad(1);
 
-	  os.writeU16(width);
-	  os.writeU16(height);
+    os.writeU16(width);
+    os.writeU16(height);
 
-	  os.writeU8(layout.numScreens());
-	  os.pad(1);
+    os.writeU8(layout.numScreens());
+    os.pad(1);
 
     for (Iterator<Screen> iter = layout.screens.iterator(); iter.hasNext(); ) {
       Screen refScreen = (Screen)iter.next();
-	    os.writeU32(refScreen.id);
-	    os.writeU16(refScreen.dimensions.tl.x);
-	    os.writeU16(refScreen.dimensions.tl.y);
-	    os.writeU16(refScreen.dimensions.width());
-	    os.writeU16(refScreen.dimensions.height());
-	    os.writeU32(refScreen.flags);
-	  }
+      os.writeU32(refScreen.id);
+      os.writeU16(refScreen.dimensions.tl.x);
+      os.writeU16(refScreen.dimensions.tl.y);
+      os.writeU16(refScreen.dimensions.width());
+      os.writeU16(refScreen.dimensions.height());
+      os.writeU32(refScreen.flags);
+    }
 
-	  endMsg();
-	}
+    endMsg();
+  }
 
-  synchronized public void writeFence(int flags, int len, byte[] data)
-  {
+  synchronized public void writeFence(int flags, int len, byte[] data) {
     if (!cp.supportsFence)
       throw new ErrorException("Server does not support fences");
     if (len > 64)
@@ -90,14 +88,14 @@ public class CMsgWriterV3 extends CMsgWriter {
   }
 
   synchronized public void writeEnableContinuousUpdates(boolean enable,
-                                           int x, int y, int w, int h)
-  {
+                                                        int x, int y,
+                                                        int w, int h) {
     if (!cp.supportsContinuousUpdates)
       throw new ErrorException("Server does not support continuous updates");
 
     startMsg(MsgTypes.msgTypeEnableContinuousUpdates);
 
-    os.writeU8((enable?1:0));
+    os.writeU8((enable ? 1 : 0));
 
     os.writeU16(x);
     os.writeU16(y);

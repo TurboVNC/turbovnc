@@ -429,13 +429,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
               oldContents = newContents;
               cc.clipboardDialog.setContents(newContents);
             }
-          } catch(Exception e) {
+          } catch (Exception e) {
             vlog.error("Error getting clipboard data:");
             vlog.error("  " + e.toString());
           }
         }
       }
-    } catch(SecurityException e) {
+    } catch (SecurityException e) {
       System.err.println("Cannot access the system clipboard");
     }
   }
@@ -665,7 +665,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public synchronized void run() {
     try {
       Thread.sleep(100);
-    } catch(InterruptedException e) {}
+    } catch (InterruptedException e) {}
     im.updateColourMap();
     setColourMapEntriesTimerThread = null;
   }

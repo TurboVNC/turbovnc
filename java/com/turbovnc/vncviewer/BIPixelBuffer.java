@@ -25,8 +25,9 @@ import java.awt.image.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rdr.ErrorException;
 
-public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
-{
+public class BIPixelBuffer extends PlatformPixelBuffer
+  implements ImageObserver {
+
   public BIPixelBuffer(int w, int h, CConn cc_, DesktopWindow desktop_) {
     super(w, h, cc_, desktop_);
     clip = new Rectangle();
@@ -102,7 +103,7 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
         tk.prepareImage(img, -1, -1, this);
         try {
           clip.wait(1000);
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
           throw new ErrorException("Error decoding JPEG data");
         }
       }

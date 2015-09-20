@@ -94,7 +94,7 @@ public class TLSInStream extends InStream {
 
     try {
       n = manager.read(buf, bufPtr, len);
-    } catch(java.io.IOException e) {
+    } catch (java.io.IOException e) {
       throw new ErrorException("TLS read error: " + e.getMessage());
     }
 

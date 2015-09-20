@@ -151,10 +151,10 @@ public class Configuration {
     Properties props = new Properties();
     try {
       props.load(new FileInputStream(filename));
-    } catch(java.security.AccessControlException e) {
+    } catch (java.security.AccessControlException e) {
       throw new WarningException("Cannot access connection info file:\n" +
                                  e.getMessage());
-    } catch(java.lang.Exception e) {
+    } catch (java.lang.Exception e) {
       throw new WarningException("Cannot open connection info file:\n" +
                                  e.getMessage());
     }
@@ -180,7 +180,7 @@ public class Configuration {
           int temp = -1;
           try {
             temp = Integer.parseInt(passwordString.substring(c, c + 2), 16);
-          } catch(NumberFormatException e) {}
+          } catch (NumberFormatException e) {}
           if (temp >= 0)
             encryptedPassword[c / 2] = (byte)temp;
           else break;
@@ -190,7 +190,7 @@ public class Configuration {
         int encoding = -1;
         try {
           encoding = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (encoding >= 0 && encoding <= Encodings.LASTENCODING)
           setParam("Encoding", Encodings.encodingName(encoding));
       } else if (name.equalsIgnoreCase("viewonly")) {
@@ -203,20 +203,20 @@ public class Configuration {
         int grabKeyboard = -1;
         try {
           grabKeyboard = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         switch (grabKeyboard) {
-          case Options.GRAB_FS:
-            setParam("GrabKeyboard", "FS");  break;
-          case Options.GRAB_ALWAYS:
-            setParam("GrabKeyboard", "Always");  break;
-          case Options.GRAB_MANUAL:
-            setParam("GrabKeyboard", "Manual");  break;
+        case Options.GRAB_FS:
+          setParam("GrabKeyboard", "FS");  break;
+        case Options.GRAB_ALWAYS:
+          setParam("GrabKeyboard", "Always");  break;
+        case Options.GRAB_MANUAL:
+          setParam("GrabKeyboard", "Manual");  break;
         }
       } else if (name.equalsIgnoreCase("span")) {
         int span = -1;
         try {
           span = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (span == 0) setParam("Span", "Primary");
         else if (span == 1) setParam("Span", "All");
         else if (span == 2) setParam("Span", "Auto");
@@ -224,7 +224,7 @@ public class Configuration {
         int _8bit = -1;
         try {
           _8bit = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (_8bit >= 1)
           setParam("Colors", "256");
         else if (_8bit == 0)
@@ -235,7 +235,7 @@ public class Configuration {
         int disableclipboard = -1;
         try {
           disableclipboard = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (disableclipboard >= 1) {
           setParam("RecvClipboard", "0");
           setParam("SendClipboard", "0");
@@ -246,36 +246,36 @@ public class Configuration {
       } else if (name.equalsIgnoreCase("fitwindow")) {
         try {
           fitWindow = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
       } else if (name.equalsIgnoreCase("scale_num")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (temp >= 1) scaleNum = temp;
       } else if (name.equalsIgnoreCase("scale_den")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (temp >= 1) scaleDenom = temp;
       } else if (name.equalsIgnoreCase("resizemode")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (temp >= 0) resizeMode = temp;
       } else if (name.equalsIgnoreCase("desktopwidth")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (temp >= 1) desktopWidth = temp;
       } else if (name.equalsIgnoreCase("desktopheight")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (temp >= 1) desktopHeight = temp;
       } else if (name.equalsIgnoreCase("cursorshape")) {
         setParam("CursorShape", props.getProperty(name));
@@ -285,18 +285,18 @@ public class Configuration {
         int subsampling = -1;
         try {
           subsampling = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         switch (subsampling) {
-          case Options.SUBSAMP_NONE:  setParam("Subsampling", "1X");  break;
-          case Options.SUBSAMP_4X:  setParam("Subsampling", "4X");  break;
-          case Options.SUBSAMP_2X:  setParam("Subsampling", "2X");  break;
-          case Options.SUBSAMP_GRAY:  setParam("Subsampling", "Gray");  break;
+        case Options.SUBSAMP_NONE:  setParam("Subsampling", "1X");  break;
+        case Options.SUBSAMP_4X:    setParam("Subsampling", "4X");  break;
+        case Options.SUBSAMP_2X:    setParam("Subsampling", "2X");  break;
+        case Options.SUBSAMP_GRAY:  setParam("Subsampling", "Gray");  break;
         }
       } else if (name.equalsIgnoreCase("quality")) {
         int quality = -2;
         try {
           quality = Integer.parseInt(props.getProperty(name));
-        } catch(NumberFormatException e) {}
+        } catch (NumberFormatException e) {}
         if (quality == -1) setParam("JPEG", "0");
         else if (quality >= 1 && quality <= 100) {
           setParam("Quality", props.getProperty(name));
@@ -318,14 +318,14 @@ public class Configuration {
     }
 
     switch (resizeMode) {
-      case Options.SIZE_SERVER:
-        setParam("DesktopSize", "Server");  break;
-      case Options.SIZE_MANUAL:
-        if (desktopWidth > 0 && desktopHeight > 0)
-          setParam("DesktopSize", desktopWidth + "x" + desktopHeight);
-        break;
-      case Options.SIZE_AUTO:
-        setParam("DesktopSize", "Auto");  break;
+    case Options.SIZE_SERVER:
+      setParam("DesktopSize", "Server");  break;
+    case Options.SIZE_MANUAL:
+      if (desktopWidth > 0 && desktopHeight > 0)
+        setParam("DesktopSize", desktopWidth + "x" + desktopHeight);
+      break;
+    case Options.SIZE_AUTO:
+      setParam("DesktopSize", "Auto");  break;
     }
   }
 

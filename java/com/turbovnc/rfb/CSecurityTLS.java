@@ -57,7 +57,7 @@ public class CSecurityTLS extends CSecurity {
     if (!globalInitDone) {
       try {
         ctx = SSLContext.getInstance("TLS");
-      } catch(NoSuchAlgorithmException e) {
+      } catch (NoSuchAlgorithmException e) {
         throw new ErrorException(e.getMessage());
       }
 
@@ -105,7 +105,7 @@ public class CSecurityTLS extends CSecurity {
     try {
       manager = new SSLEngineManager(engine, is, os);
       manager.doHandshake();
-    } catch(java.lang.Exception e) {
+    } catch (java.lang.Exception e) {
       throw new SystemException(e.toString());
     }
 
@@ -121,7 +121,7 @@ public class CSecurityTLS extends CSecurity {
     if (anon) {
       try {
         ctx.init(null, null, null);
-      } catch(KeyManagementException e) {
+      } catch (KeyManagementException e) {
         throw new AuthFailureException(e.getMessage());
       }
     } else {
@@ -130,7 +130,7 @@ public class CSecurityTLS extends CSecurity {
           new MyX509TrustManager()
         };
         ctx.init(null, myTM, null);
-      } catch(java.security.GeneralSecurityException e) {
+      } catch (java.security.GeneralSecurityException e) {
         throw new AuthFailureException(e.getMessage());
       }
     }

@@ -40,7 +40,7 @@ public class FileInStream extends InStream {
   public void reset() {
     try {
       fis.getChannel().position(0);
-    } catch(IOException e) {}
+    } catch (IOException e) {}
     ptr = end = offset = 0;
   }
 
@@ -61,7 +61,7 @@ public class FileInStream extends InStream {
       int n = 0;
       try {
         n = fis.read(b, end, BUFSIZE - end);
-      } catch(IOException e) {
+      } catch (IOException e) {
         throw new ErrorException("Read error: " + e.getMessage());
       }
       if (n < 1) {
