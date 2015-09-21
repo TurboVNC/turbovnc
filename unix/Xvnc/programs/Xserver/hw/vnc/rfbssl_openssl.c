@@ -37,18 +37,20 @@ static void rfbErr(char *format, ...);
 
 struct rfbcrypto_functions {
     void (*DH_free)(DH *);
-    DH *(*DH_new)(void);
-    int (*DH_check)(const DH *, int *);
     int (*DH_generate_key)(DH *);
-    int (*DH_generate_parameters_ex)(DH *, int, int, BN_GENCB *);
+    DH *(*DSA_dup_DH)(const DSA *);
+    void (*DSA_free)(DSA *);
+    int (*DSA_generate_parameters_ex)(DSA *, int, unsigned char *, int, int *,
+                                      unsigned long *, BN_GENCB *);
+    DSA *(*DSA_new)(void);
     unsigned long (*ERR_get_error)(void);
     char *(*ERR_error_string)(unsigned long, char *);
 };
 
 static struct rfbcrypto_functions crypto
 #ifndef DLOPENSSL
-    = { DH_free, DH_new, DH_check, DH_generate_key, DH_generate_parameters_ex,
-        ERR_get_error, ERR_error_string }
+    = { DH_free, DH_generate_key, DSA_dup_DH, DSA_free,
+        DSA_generate_parameters_ex, DSA_new, ERR_get_error, ERR_error_string }
 #endif
 ;
 
@@ -184,10 +186,11 @@ static int loadFunctions(void)
         }
 #endif
         LOADSYM(crypto, DH_free);
-        LOADSYM(crypto, DH_new);
-        LOADSYM(crypto, DH_check);
+        LOADSYM(crypto, DSA_dup_DH);
+        LOADSYM(crypto, DSA_free);
+        LOADSYM(crypto, DSA_generate_parameters_ex);
+        LOADSYM(crypto, DSA_new);
         LOADSYM(crypto, DH_generate_key);
-        LOADSYM(crypto, DH_generate_parameters_ex);
         LOADSYM(crypto, ERR_get_error);
         LOADSYM(crypto, ERR_error_string);
         rfbLog("Successfully loaded symbols from %s\n", libName);
@@ -233,6 +236,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     char *keyfile;
     struct rfbssl_ctx *ctx = NULL;
     DH *dh = NULL;
+    DSA *dsa = NULL;
 
 #ifdef DLOPENSSL
     if (loadFunctions() == -1)
@@ -258,22 +262,20 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
         goto bailout;
     }
     if (anon) {
-        int codes = 0;
-        if ((dh = crypto.DH_new()) == NULL) {
-            rfbssl_error("DH_new()");
+        if ((dsa = crypto.DSA_new()) == NULL) {
+            rfbssl_error("DSA_new()");
             goto bailout;
         }
-        if (!crypto.DH_generate_parameters_ex(dh, 512, DH_GENERATOR_2, 0)) {
-            rfbssl_error("DH_generate_parameters()");
+        if (!crypto.DSA_generate_parameters_ex(dsa, 1024, NULL, 0, NULL, NULL,
+                                               NULL)) {
+            rfbssl_error("DSA_generate_paramters_ex()");
             goto bailout;
         }
-        if (!crypto.DH_check(dh, &codes) || codes) {
-            if (codes)
-                rfbErr("DH_check() failed.  codes = 0x%.8x\n", codes);
-            else
-                rfbssl_error("DH_check()");
+        if (!(dh = crypto.DSA_dup_DH(dsa))) {
+            rfbssl_error("DSA_dup_DH()");
             goto bailout;
         }
+        crypto.DSA_free(dsa);  dsa = NULL;
         if (!crypto.DH_generate_key(dh)) {
             rfbssl_error("DH_generate_key()");
             goto bailout;
@@ -319,6 +321,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
 
     bailout:
     if (dh) crypto.DH_free(dh);
+    if (dsa) crypto.DSA_free(dsa);
     if (ctx) {
         if (ctx->ssl)
             ssl.SSL_free(ctx->ssl);
