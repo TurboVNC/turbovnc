@@ -128,7 +128,7 @@ viewer.
 
 Interframe comparison has some tradeoffs associated with it.  Perhaps the most
 important of these is that it increases the memory usage of the TurboVNC Server
-by a factor of N, where N is the number of connected clients.  This can prove
+by a factor of N, where N is the number of connected viewers.  This can prove
 to be quite significant if the remote desktop size is relatively large.
 
 2D applications are most often the ones that generate duplicate framebuffer

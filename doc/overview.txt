@@ -63,7 +63,7 @@ In addition to high performance, other notable features of TurboVNC include:
 
 	* Full support for IPv6
 
-	* Advanced flow control and continuous updates.  This allows clients
+	* Advanced flow control and continuous updates.  This allows viewers
 		to receive framebuffer updates without specifically requesting them, which
 		can improve performance dramatically on high-latency connections.
 
