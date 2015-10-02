@@ -147,7 +147,7 @@ Both of these command-line options work with all versions of the TurboVNC
 Viewer.  When using the Java TurboVNC Viewer, you can also accomplish the same
 thing by unchecking "Unix Login" or "Plain" or "Standard VNC" in the "Security"
 tab of the Options dialog or by limiting the available security types using the
-''SecurityTypes'' argument/parameter.
+''SecurityTypes'', ''User'', or ''NoUnixLogin'' arguments/parameters.
 
 If the system administrator has not restricted any of the server security types
 on a system-wide basis, then the user can choose to disable some or all of them
