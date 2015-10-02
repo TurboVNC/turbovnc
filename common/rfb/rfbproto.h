@@ -143,7 +143,7 @@ typedef struct _rfbCapabilityInfo {
 #define sz_rfbCapabilityInfo 16
 
 /*
- * Vendors known by TightVNC: standard VNC/RealVNC, TridiaVNC, and TightVNC.
+ * Vendors known by TurboVNC: standard VNC/RealVNC, TridiaVNC, and TightVNC.
  */
 
 #define rfbStandardVendor "STDV"

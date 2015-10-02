@@ -28,14 +28,9 @@ The Xvnc server will look in the security configuration file (default
 directives.
 
 To enable PAM support (required for the "PAM User/Password" authentication
-method), the TVNC_USEPAM CMake variable must be enabled.  This is the default
-for Linux.  To enable or disable PAM support, pass -DTVNC_USEPAM=1 or
--DTVNC_USEPAM=0 to cmake when configuring the build.
-
-The pam-userpwd authentication method requires the TurboVNC Viewer or another
-VNC viewer that can handle the Tight security type and the Unix Login
-authentication scheme.  You will also need to configure PAM as appropriate
-for your system.  The default PAM service name is "turbovnc".
+method), the TVNC_USEPAM CMake variable must be enabled (this is the default.)
+To disable PAM support, pass -DTVNC_USEPAM=0 to CMake when configuring the
+build.
 
 NOTE: interaction with PAM is limited to supplying a user name and password.
 The exchange of any additional information is not supported.
