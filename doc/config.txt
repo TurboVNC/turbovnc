@@ -100,7 +100,7 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	continuously benchmark itself and periodically print the throughput of
 	various stages in its image pipeline to the Xvnc log file.
 
-** Client Settings
+** Viewer Settings
 
 | Environment Variable | ''TVNC_PROFILE = ''__''0 \| 1''__ |
 | Summary | Disable/enable profiling output |
@@ -153,7 +153,7 @@ using the ''-via'' option):
 | ''%L'' | local TCP port number |
 | ''%R'' | remote TCP port number |
 
-** Java Client Settings
+** Java Viewer Settings
 
 Java system properties are normally specified as command-line arguments to the
 Java executable.  For example:
