@@ -100,7 +100,10 @@ endif()
 
 if(TVNC_USETLS STREQUAL "openssl")
 	if(TVNC_DLOPENSSL)
-		target_link_libraries(vnc dl)
+		if(NOT APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES
+			"(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+			target_link_libraries(vnc dl)
+		endif()
 	else()
 		target_link_libraries(vnc ${OPENSSL_LIBRARIES})
 	endif()
