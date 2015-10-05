@@ -40,3 +40,10 @@ add_library(vnc STATIC
 	zrleoutstream.c
 	zrlepalettehelper.c
 	${PAMSRC})
+
+# The VNC extension code has a lot of type puns.  Disable strict aliasing just
+# to be safe.
+if(CMAKE_COMPILER_IS_GNUCC)
+	set_source_files_properties(vncextinit.c PROPERTIES COMPILE_FLAGS
+		-fno-strict-aliasing)
+endif()
