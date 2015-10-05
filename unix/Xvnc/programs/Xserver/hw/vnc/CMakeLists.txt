@@ -20,7 +20,7 @@ if(TVNC_NVCONTROL)
 		set_source_files_properties(${NVCTRLSRC} PROPERTIES COMPILE_FLAGS
 			-fno-strict-aliasing)
 	endif()
-	include_directories(${CMAKE_SOURCE_DIR}/unix/libXNVCtrl)
+	include_directories(${CMAKE_SOURCE_DIR}/unix/libXNVCtrl ${X11_INCLUDE_DIR})
 endif()
 
 set(TVNC_USETLS "OpenSSL" CACHE STRING
