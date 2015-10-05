@@ -81,7 +81,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   if (!handle) {
     if ((handle = dlopen("libjawt.so", RTLD_LAZY)) == NULL)
       _throw(dlerror());
-    if ((__JAWT_GetAWT = dlsym(handle, "JAWT_GetAWT")) == NULL)
+    if ((__JAWT_GetAWT =
+         (__JAWT_GetAWT_type)dlsym(handle, "JAWT_GetAWT")) == NULL)
       _throw(dlerror());
   }
 
@@ -128,7 +129,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
   if (!handle) {
     if ((handle = dlopen("libjawt.so", RTLD_LAZY)) == NULL)
       _throw(dlerror());
-    if ((__JAWT_GetAWT = dlsym(handle, "JAWT_GetAWT")) == NULL)
+    if ((__JAWT_GetAWT =
+         (__JAWT_GetAWT_type)dlsym(handle, "JAWT_GetAWT")) == NULL)
       _throw(dlerror());
   }
 
