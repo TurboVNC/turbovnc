@@ -15,6 +15,11 @@ endif()
 set(NVCTRLSRC "")
 if(TVNC_NVCONTROL)
 	set(NVCTRLSRC nvctrlext.c)
+	# This code has a lot of type puns.  Disable strict aliasing just to be safe.
+	if(CMAKE_COMPILER_IS_GNUCC)
+		set_source_files_properties(${NVCTRLSRC} PROPERTIES COMPILE_FLAGS
+			-fno-strict-aliasing)
+	endif()
 	include_directories(${CMAKE_SOURCE_DIR}/unix/libXNVCtrl)
 endif()
 
@@ -85,6 +90,13 @@ add_library(vnc STATIC
 	${PAMSRC}
 	${NVCTRLSRC}
 	${RFBSSLSRC})
+
+# The VNC extension code has a lot of type puns.  Disable strict aliasing just
+# to be safe.
+if(CMAKE_COMPILER_IS_GNUCC)
+	set_source_files_properties(vncextinit.c PROPERTIES COMPILE_FLAGS
+		-fno-strict-aliasing)
+endif()
 
 if(TVNC_USETLS STREQUAL "openssl")
 	if(TVNC_DLOPENSSL)

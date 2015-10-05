@@ -321,6 +321,7 @@ static int SProcNVCTRLSetAttributeAndGetStatus(ClientPtr client)
 static int ProcNVCTRLQueryAttribute(ClientPtr client)
 {
   xnvCtrlQueryAttributeReply rep;
+  int value = 0;
   REQUEST(xnvCtrlQueryAttributeReq);
 
   X_INIT();
@@ -330,11 +331,12 @@ static int ProcNVCTRLQueryAttribute(ClientPtr client)
   rep.flags =
     XNVCTRLQueryTargetAttribute(dpy, stuff->target_type, stuff->target_id,
                                 stuff->display_mask, stuff->attribute,
-                                &rep.value);
+                                &value);
   X_DEINIT();
 
   rep.type = X_Reply;
   rep.length = 0;
+  rep.value = value;
   rep.sequenceNumber = client->sequence;
   if (client->swapped) {
     swaps(&rep.sequenceNumber);
