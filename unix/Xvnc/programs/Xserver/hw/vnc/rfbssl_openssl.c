@@ -89,8 +89,10 @@ static struct rfbssl_functions ssl
 
 static void *sslHandle = NULL, *cryptoHandle = NULL;
 
-#define MIN_LIB_REV 6
-#define MAX_LIB_REV 20
+#define SUFFIXES 19
+static const char *suffix[SUFFIXES] = { "0.9.8", "1.0.0", "1.0.1", "1.0.2",
+    "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18",
+    "19", "20" };
 
 #define LOADSYM(lib, sym) {  \
     dlerror();  \
@@ -124,13 +126,13 @@ static int loadFunctions(void)
             return -1;
         }
 #else
-        for (i = MIN_LIB_REV; i <= MAX_LIB_REV; i++) {
-            snprintf(libName, 80, "libssl.so.%d", i);
+        for (i = 0; i < SUFFIXES; i++) {
+            snprintf(libName, 80, "libssl.so.%s", suffix[i]);
             dlerror();  /* Clear error state */
             if ((sslHandle = dlopen(libName, RTLD_NOW)) != NULL)
                 break;
         }
-        if (i > MAX_LIB_REV) {
+        if (i >= SUFFIXES) {
             rfbErr("Could not load libssl\n");
             return -1;
         }
@@ -174,13 +176,13 @@ static int loadFunctions(void)
             return -1;
         }
 #else
-        for (i = MIN_LIB_REV; i <= MAX_LIB_REV; i++) {
-            snprintf(libName, 80, "libcrypto.so.%d", i);
+        for (i = 0; i < SUFFIXES; i++) {
+            snprintf(libName, 80, "libcrypto.so.%s", suffix[i]);
             dlerror();  /* Clear error state */
             if ((cryptoHandle = dlopen(libName, RTLD_NOW)) != NULL)
                 break;
         }
-        if (i > MAX_LIB_REV) {
+        if (i >= SUFFIXES) {
             rfbErr("Could not load libcrypto\n");
             return -1;
         }
