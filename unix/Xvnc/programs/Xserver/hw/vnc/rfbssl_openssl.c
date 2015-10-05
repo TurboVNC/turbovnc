@@ -35,16 +35,26 @@ static void rfbErr(char *format, ...);
 #define BUFSIZE 1024
 
 
+typedef void (*DH_free_type)(DH *);
+typedef int (*DH_generate_key_type)(DH *);
+typedef DH *(*DSA_dup_DH_type)(const DSA *);
+typedef void (*DSA_free_type)(DSA *);
+typedef int (*DSA_generate_parameters_ex_type)(DSA *, int, unsigned char *,
+                                               int, int *, unsigned long *,
+                                               BN_GENCB *);
+typedef DSA *(*DSA_new_type)(void);
+typedef unsigned long (*ERR_get_error_type)(void);
+typedef char *(*ERR_error_string_type)(unsigned long, char *);
+
 struct rfbcrypto_functions {
-    void (*DH_free)(DH *);
-    int (*DH_generate_key)(DH *);
-    DH *(*DSA_dup_DH)(const DSA *);
-    void (*DSA_free)(DSA *);
-    int (*DSA_generate_parameters_ex)(DSA *, int, unsigned char *, int, int *,
-                                      unsigned long *, BN_GENCB *);
-    DSA *(*DSA_new)(void);
-    unsigned long (*ERR_get_error)(void);
-    char *(*ERR_error_string)(unsigned long, char *);
+    DH_free_type DH_free;
+    DH_generate_key_type DH_generate_key;
+    DSA_dup_DH_type DSA_dup_DH;
+    DSA_free_type DSA_free;
+    DSA_generate_parameters_ex_type DSA_generate_parameters_ex;
+    DSA_new_type DSA_new;
+    ERR_get_error_type ERR_get_error;
+    ERR_error_string_type ERR_error_string;
 };
 
 static struct rfbcrypto_functions crypto
@@ -54,25 +64,44 @@ static struct rfbcrypto_functions crypto
 #endif
 ;
 
+typedef int (*SSL_accept_type)(SSL *);
+typedef int (*SSL_library_init_type)(void);
+typedef void (*SSL_load_error_strings_type)(void);
+typedef void (*SSL_free_type)(SSL *);
+typedef int (*SSL_get_error_type)(const SSL *, int);
+typedef SSL *(*SSL_new_type)(SSL_CTX *);
+typedef int (*SSL_pending_type)(const SSL *);
+typedef int (*SSL_read_type)(SSL *, void *, int);
+typedef int (*SSL_set_fd_type)(SSL *, int);
+typedef int (*SSL_shutdown_type)(SSL *);
+typedef int (*SSL_write_type)(SSL *, const void *, int);
+typedef long (*SSL_CTX_ctrl_type)(SSL_CTX *, int, long, void *);
+typedef void (*SSL_CTX_free_type)(SSL_CTX *);
+typedef SSL_CTX *(*SSL_CTX_new_type)(SSL_METHOD *);
+typedef int (*SSL_CTX_set_cipher_list_type)(SSL_CTX *, const char *);
+typedef int (*SSL_CTX_use_certificate_file_type)(SSL_CTX *, const char *, int);
+typedef int (*SSL_CTX_use_PrivateKey_file_type)(SSL_CTX *, const char *, int);
+typedef SSL_METHOD *(*TLSv1_server_method_type)(void);
+
 struct rfbssl_functions {
-    int (*SSL_accept)(SSL *);
-    int (*SSL_library_init)(void);
-    void (*SSL_load_error_strings)(void);
-    void (*SSL_free)(SSL *);
-    int (*SSL_get_error)(const SSL *, int);
-    SSL *(*SSL_new)(SSL_CTX *);
-    int (*SSL_pending)(const SSL *);
-    int (*SSL_read)(SSL *, void *, int);
-    int (*SSL_set_fd)(SSL *, int);
-    int (*SSL_shutdown)(SSL *);
-    int (*SSL_write)(SSL *, const void *, int);
-    long (*SSL_CTX_ctrl)(SSL_CTX *, int, long, void *);
-    void (*SSL_CTX_free)(SSL_CTX *);
-    SSL_CTX *(*SSL_CTX_new)(SSL_METHOD *);
-    int (*SSL_CTX_set_cipher_list)(SSL_CTX *, const char *);
-    int (*SSL_CTX_use_certificate_file)(SSL_CTX *, const char *, int);
-    int (*SSL_CTX_use_PrivateKey_file)(SSL_CTX *, const char *, int);
-    SSL_METHOD *(*TLSv1_server_method)(void);
+    SSL_accept_type SSL_accept;
+    SSL_library_init_type SSL_library_init;
+    SSL_load_error_strings_type SSL_load_error_strings;
+    SSL_free_type SSL_free;
+    SSL_get_error_type SSL_get_error;
+    SSL_new_type SSL_new;
+    SSL_pending_type SSL_pending;
+    SSL_read_type SSL_read;
+    SSL_set_fd_type SSL_set_fd;
+    SSL_shutdown_type SSL_shutdown;
+    SSL_write_type SSL_write;
+    SSL_CTX_ctrl_type SSL_CTX_ctrl;
+    SSL_CTX_free_type SSL_CTX_free;
+    SSL_CTX_new_type SSL_CTX_new;
+    SSL_CTX_set_cipher_list_type SSL_CTX_set_cipher_list;
+    SSL_CTX_use_certificate_file_type SSL_CTX_use_certificate_file;
+    SSL_CTX_use_PrivateKey_file_type SSL_CTX_use_PrivateKey_file;
+    TLSv1_server_method_type TLSv1_server_method;
 };
 
 static struct rfbssl_functions ssl
@@ -96,7 +125,7 @@ static const char *suffix[SUFFIXES] = { "0.9.8", "1.0.0", "1.0.1", "1.0.2",
 
 #define LOADSYM(lib, sym) {  \
     dlerror();  \
-    if((lib.sym = dlsym(lib##Handle, #sym)) == NULL) {  \
+    if((lib.sym = (sym##_type)dlsym(lib##Handle, #sym)) == NULL) {  \
         char *err = dlerror();  \
         if (err)  \
             rfbErr("Could not load symbol: %s\n", err); \
