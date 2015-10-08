@@ -27,6 +27,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+#ifdef HAVE_READLINK
 #include <X11/fonts/fntfilst.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -190,7 +192,7 @@ CatalogueRescan (FontPathElementPtr fpe, Bool forceScan)
 	subfpe->type = fpe->type;
 	subfpe->name_length = len;
 	subfpe->name = malloc (len + 1);
-	if (subfpe == NULL)
+	if (subfpe->name == NULL)
 	{
 	    free(subfpe);
 	    continue;
@@ -285,7 +287,6 @@ CatalogueOpenFont (pointer client, FontPathElementPtr fpe, Mask flags,
 {
     CataloguePtr cat = fpe->private;
     FontPathElementPtr subfpe;
-    FontDirectoryPtr dir;
     int i, status;
 
     CatalogueRescan (fpe, FALSE);
@@ -293,7 +294,6 @@ CatalogueOpenFont (pointer client, FontPathElementPtr fpe, Mask flags,
     for (i = 0; i < cat->fpeCount; i++)
     {
 	subfpe = cat->fpeList[i];
-	dir = subfpe->private;
 	status = FontFileOpenFont(client, subfpe, flags,
 				  name, namelen, format, fmask, id,
 				  pFont, aliasName, non_cachable_font);
@@ -319,7 +319,6 @@ CatalogueListFonts (pointer client, FontPathElementPtr fpe, char *pat,
 {
     CataloguePtr cat = fpe->private;
     FontPathElementPtr subfpe;
-    FontDirectoryPtr dir;
     int i;
 
     CatalogueRescan (fpe, FALSE);
@@ -327,17 +326,11 @@ CatalogueListFonts (pointer client, FontPathElementPtr fpe, char *pat,
     for (i = 0; i < cat->fpeCount; i++)
     {
 	subfpe = cat->fpeList[i];
-	dir = subfpe->private;
 	FontFileListFonts(client, subfpe, pat, len, max, names);
     }
 
     return Successful;
 }
-
-int
-FontFileStartListFonts(pointer client, FontPathElementPtr fpe,
-		       char *pat, int len, int max,
-		       pointer *privatep, int mark_aliases);
 
 typedef struct _LFWIData {
     pointer		*privates;
@@ -474,3 +467,5 @@ CatalogueRegisterLocalFpeFunctions (void)
 			 CatalogueListNextFontOrAlias,
 			 FontFileEmptyBitmapSource);
 }
+
+#endif /* HAVE_READLINK */

@@ -54,9 +54,6 @@ BuiltinInitFPE (FontPathElementPtr fpe)
 static int
 BuiltinResetFPE (FontPathElementPtr fpe)
 {
-    FontDirectoryPtr	dir;
-
-    dir = (FontDirectoryPtr) fpe->private;
     /* builtins can't change! */
     return Successful;
 }

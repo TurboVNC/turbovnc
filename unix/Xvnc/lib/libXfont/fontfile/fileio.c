@@ -36,6 +36,9 @@ in this Software without prior written authorization from The Open Group.
 #ifndef O_BINARY
 #define O_BINARY O_RDONLY
 #endif
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
 
 FontFilePtr
 FontFileOpen (const char *name)
@@ -44,7 +47,7 @@ FontFileOpen (const char *name)
     int		len;
     BufFilePtr	raw, cooked;
 
-    fd = open (name, O_BINARY);
+    fd = open (name, O_BINARY|O_CLOEXEC);
     if (fd < 0)
 	return 0;
     raw = BufFileOpenRead (fd);

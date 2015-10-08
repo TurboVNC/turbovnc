@@ -116,15 +116,6 @@ SPropRecValList_dump(SRefPropRecValList *refList);
 #define SPropContainer_value_str(contRecVal)\
   ((contRecVal)->uValue.dynStringValue)
 
-/******************************************************
-  Prototypes (xttmisc)
- */
-
-/* strdup clone */
-char * XttXstrdup(char const *str);
-#undef xstrdup
-#define xstrdup(s) XttXstrdup((char const*)s)
-
 #endif /* !def _XTTCAP_H_ */
 
 /* end of file */

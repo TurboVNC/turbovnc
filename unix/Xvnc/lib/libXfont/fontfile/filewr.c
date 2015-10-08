@@ -33,17 +33,19 @@ in this Software without prior written authorization from The Open Group.
 #endif
 #include <X11/fonts/fntfilio.h>
 #include <X11/Xos.h>
+#ifndef O_BINARY
+#define O_BINARY	0
+#endif
+#ifndef O_CLOEXEC
+#define O_CLOEXEC	0
+#endif
 
 FontFilePtr
 FontFileOpenWrite (const char *name)
 {
     int	fd;
 
-#if defined(WIN32) || defined(__CYGWIN__)
-    fd = open (name, O_CREAT|O_TRUNC|O_RDWR|O_BINARY, 0666);
-#else
-    fd = creat (name, 0666);
-#endif
+    fd = open (name, O_CREAT|O_TRUNC|O_RDWR|O_BINARY|O_CLOEXEC, 0666);
     if (fd < 0)
 	return 0;
     return (FontFilePtr) BufFileOpenWrite (fd);

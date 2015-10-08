@@ -57,6 +57,8 @@ FontFileRegisterFpeFunctions(void)
 #endif
 
     FontFileRegisterLocalFpeFunctions ();
+#ifdef HAVE_READLINK
     CatalogueRegisterLocalFpeFunctions ();
+#endif
 }
 

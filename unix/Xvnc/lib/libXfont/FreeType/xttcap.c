@@ -234,14 +234,13 @@ SPropRecValList_add_record(SDynPropRecValList *pThisList,
             {
                 char *p;
 
-                if (NULL == (p = malloc(strlen(strValue)+1))) {
+                if (NULL == (p = strdup(strValue))) {
                     fprintf(stderr,
                             "truetype font property : "
                             "cannot allocate memory.\n");
                     result = True;
                     goto quit;
                 }
-                strcpy(p, strValue);
                 SPropContainer_value_str(&tmpContainerE) = p;
             }
             break;
@@ -622,7 +621,6 @@ SPropRecValList_add_by_font_cap(SDynPropRecValList *pThisList,
                     int len = term-p-1;
                     char *value;
 
-                    len = term-p-1;
                     value=malloc(len+1);
                     memcpy(value, p+1, len);
                     value[len]='\0';
@@ -681,25 +679,5 @@ SPropRecValList_add_by_font_cap(SDynPropRecValList *pThisList,
   abort:
     return result;
 }
-
-
-/**************************************************************************
-  Functions (xttmisc)
- */
-
-/* strdup clone with using the allocator of X server */
-char *
-XttXstrdup(char const *str)
-{
-    char *result;
-
-    result = malloc(strlen(str)+1);
-
-    if (result)
-        strcpy(result, str);
-
-    return result;
-}
-
 
 /* end of file */

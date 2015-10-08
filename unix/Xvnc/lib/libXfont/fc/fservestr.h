@@ -139,12 +139,7 @@ typedef struct _fs_reconnect {
 } FSReconnectRec, *FSReconnectPtr;
 
 
-#if !defined(UNIXCPP) || defined(ANSICPP)
 #define fsCat(x,y) x##_##y
-#else
-#define fsCat(x,y) x/**/_/**/y
-#endif
-
 
 /* copy XCharInfo parts of a protocol reply into a xCharInfo */
 

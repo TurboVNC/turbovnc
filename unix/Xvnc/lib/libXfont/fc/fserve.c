@@ -1211,7 +1211,7 @@ fs_read_extent_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 }
 
 #ifdef DEBUG
-static char *fs_open_states[] = {
+static const char *fs_open_states[] = {
     "OPEN_REPLY  ",
     "INFO_REPLY  ",
     "EXTENT_REPLY",
@@ -1481,7 +1481,6 @@ fs_wakeup(FontPathElementPtr fpe, unsigned long *mask)
     {
 	FSBlockDataPtr	    blockrec;
 	FSBlockedFontPtr    bfont;
-	FSBlockedListPtr    blist;
 	static CARD32	    lastState;
 	static FSBlockDataPtr	lastBlock;
 
@@ -1505,7 +1504,6 @@ fs_wakeup(FontPathElementPtr fpe, unsigned long *mask)
 			 "<freed>");
 		break;
 	    case FS_LIST_FONTS:
-		blist = (FSBlockedListPtr) blockrec->data;
 		fprintf (stderr, "  Blocked list errcode %d sequence %d\n",
 			 blockrec->errcode, blockrec->sequenceNumber);
 		break;
@@ -2357,6 +2355,7 @@ fs_read_list(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     FSBlockedListPtr	blist = (FSBlockedListPtr) blockrec->data;
     fsListFontsReply	*rep;
     char		*data;
+    long		dataleft; /* length of reply left to use */
     int			length,
 			i,
 			ret;
@@ -2374,16 +2373,30 @@ fs_read_list(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 	return AllocError;
     }
     data = (char *) rep + SIZEOF (fsListFontsReply);
+    dataleft = (rep->length << 2) - SIZEOF (fsListFontsReply);
 
     err = Successful;
     /* copy data into FontPathRecord */
     for (i = 0; i < rep->nFonts; i++)
     {
+	if (dataleft < 1)
+	    break;
 	length = *(unsigned char *)data++;
+	dataleft--; /* used length byte */
+	if (length > dataleft) {
+#ifdef DEBUG
+	    fprintf(stderr,
+		    "fsListFonts: name length (%d) > dataleft (%ld)\n",
+		    length, dataleft);
+#endif
+	    err = BadFontName;
+	    break;
+	}
 	err = AddFontNamesName(blist->names, data, length);
 	if (err != Successful)
 	    break;
 	data += length;
+	dataleft -= length;
     }
     _fs_done_read (conn, rep->length << 2);
     return err;
@@ -3168,6 +3181,7 @@ _fs_send_cat_sync (FSFpePtr conn)
      * by a bogus catalogue
      */
     lcreq.reqType = FS_ListCatalogues;
+    lcreq.data = 0;
     lcreq.length = (SIZEOF(fsListCataloguesReq)) >> 2;
     lcreq.maxNames = 0;
     lcreq.nbytes = 0;
