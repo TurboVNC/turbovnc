@@ -1,3 +1,126 @@
+commit 0c09444d276fbf46a0e8b427a4f6a325d0625742
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 21 09:39:14 2015 -0700
+
+    libXdmcp 1.1.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 9f4cac7656b221ce2a8f97e7bd31e5e23126d001
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 17 10:37:09 2015 -0800
+
+    Add AC_USE_SYSTEM_EXTENSIONS to expose arc4random() interfaces in headers
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit fe8eab93e9bcdbe8bb8052434bb5e676e3a0ee8f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat May 31 21:39:32 2014 -0700
+
+    autogen.sh: Honor NOCONFIGURE=1
+    
+    See http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit da9a25b208035448867f97cd92f3aed4b5bc53a9
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat May 31 21:38:41 2014 -0700
+
+    configure: Drop AM_MAINTAINER_MODE
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 089081dca4ba3598c6f9bf401c029378943b5854
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat May 25 10:18:33 2013 -0700
+
+    Also reject requests to allocate negative sized amounts of memory
+    
+    Since the API is defined with size as a signed int, deal with it.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 2da1bcb656febdab9345f1fec31c974fd7b409bc
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri May 24 23:19:23 2013 -0700
+
+    Ensure ARRAYofARRAY8 pointers are initialized to NULL
+    
+    Use calloc for the array of pointers to ensure pointers are cleared out
+    so we don't try to free garbage if XdmcpDisposeARRAYofARRAY8 is called
+    before the caller sets them to valid pointers.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 787c4c79be18373f58aeaf2fe543f30fe3af2bd1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri May 24 22:58:41 2013 -0700
+
+    Ensure ARRAY* structs are zero'ed out when oversize values are passed
+    
+    Previous fix missed a case in which we returned failure, but didn't
+    fill in the data pointer & size values.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 9089ae455f9df222aa85bbbcb4526874c0d97099
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri May 24 22:24:55 2013 -0700
+
+    Add unit tests for Array allocation functions
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 66514a4af7eaa47e8718434356d7efce95e570cf
+Author: Matthieu Herrb <matthieu.herrb@laas.fr>
+Date:   Sun Aug 4 10:42:57 2013 +0200
+
+    Use arc4random when available to produce the XDM-AUTHENTICATION1 key
+    
+    arc4random() and associated functions can be found in libbsd on
+    GNU/Linux systems.
+    
+    Signed-off-by: Matthieu Herrb <matthieu.herrb@laas.fr>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 0b443c1b769b9c9a3b45b4252afe07e18b709ff4
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Apr 19 15:16:51 2013 -0700
+
+    Make XdmcpCopyARRAY8 call XdmcpAllocARRAY8 instead of replicating it
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 1222f974442f3d419664be4faca576f5f1457666
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Apr 2 00:07:54 2013 -0700
+
+    Ensure ARRAY* structs are zero'ed out when allocation fails
+    
+    In the past some callers forgot to either initialize themselves or to
+    check the return values, so could try to read or write to uninitialized
+    pointers - we set the pointer to NULL & the size to 0 to avoid that.
+    
+    Reported-by: Ilja Van Sprundel <ivansprundel@ioactive.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ca65a92405500393f09d34388edbbf6350e6c146
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Dec 26 23:39:58 2012 -0800
+
+    Remove unused TLI ("STREAMSCONN") code from libXdmcp
+    
+    Has never been converted to build in modular builds, so has been unusable
+    since X11R7.0 release in 2005.  All known platforms with TLI/XTI support
+    that X11R7 & later releases run on also have (and mostly prefer) BSD
+    socket support for their networking API.
+    
+    Mostly performed via "unifdef -USTREAMSCONN", followed by manual cleanup.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit 60aa228de59270fd1b6d838d80095ac00da53342
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Wed Mar 7 19:46:26 2012 -0800
