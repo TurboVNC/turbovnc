@@ -1,3 +1,123 @@
+commit de4f2307448583988a55a587cb6a3f43e4868378
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Apr 30 22:24:39 2015 -0700
+
+    libxkbfile 1.0.9
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 9fa04388dcbb5bf205319569f540a62c03754688
+Author: Jörg Sonnenberger <joerg@NetBSD.org>
+Date:   Wed Nov 26 14:33:38 2014 +0100
+
+    Remove unnecessary check.
+    
+    The vmods member of XkbNamesPtr is an array and thus never NULL.
+    
+    Signed-off-by: Thomas Klausner <wiz@NetBSD.org>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 8a2381c13aecfdb42d85967e060c8818b86119d2
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Nov 8 09:33:35 2014 -0800
+
+    Remove check to see if SEEK_SET is defined before using it
+    
+    Other references to SEEK_SET in this file are made without checking,
+    since they assume everyone has either reached C89 by now or will use
+    the fallback #define at the top of the file, so we can stop checking
+    here as well.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3b460259d0d21f9876cacd7e1f305d77b76724f7
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Oct 20 12:05:15 2013 -0700
+
+    Constify atom name argument to XkbInternAtom
+    
+    Matches XInternAtom, which it wraps, and quiets a bunch of const warnings
+    in xkbcomp.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Ran Benita <ran234@gmail.com>
+
+commit 390acfe5bb88cdab509b5eaae4041f265e969d2b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Oct 20 12:04:58 2013 -0700
+
+    Convert sprintf calls to snprintf
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Ran Benita <ran234@gmail.com>
+
+commit 455c2f3715456fd88c2741bd2028a9f0a702bb28
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Oct 20 01:11:21 2013 -0700
+
+    Don't dereference xkb pointer until after checking it for NULL
+    
+    Some compilers can perform mind-twistingly evil optimizations
+    if you check for NULL after using it, others just let you segv.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Ran Benita <ran234@gmail.com>
+
+commit 7544a9eb35d5850ae2e68d8cdab50f25ce7cd5d9
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Oct 20 01:01:37 2013 -0700
+
+    unifdef -UXKB_IN_SERVER
+    
+    Xserver has its own copy of this code now, so we don't need to keep
+    an unused copy in libxkbfile too.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Ran Benita <ran234@gmail.com>
+
+commit a945540e6eea9b9303c8f611412ecb58129180e7
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Oct 20 00:56:20 2013 -0700
+
+    Convert to X.Org standard indentation style
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7381c2f9013ef7784c78091fa671e652a62ca706
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jan 18 23:08:24 2013 -0800
+
+    Replace deprecated Automake INCLUDES variable with AM_CPPFLAGS
+    
+    Excerpt https://lists.gnu.org/archive/html/automake/2012-12/msg00038.html
+    
+      - Support for the long-deprecated INCLUDES variable will be removed
+        altogether in Automake 1.14.  The AM_CPPFLAGS variable should be
+        used instead.
+    
+    This variable was deprecated in Automake releases prior to 1.10, which is
+    the current minimum level required to build X.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 875d8f2504b62e4a536269e54f685eb8ff96df3a
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit c66aabd6b95f8e1fd3428f048c9847912eefe450
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:28:48 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
 commit 5e3da29093ff5d5b6b8805467a523d5cb7663965
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Wed Mar 7 20:37:20 2012 -0800

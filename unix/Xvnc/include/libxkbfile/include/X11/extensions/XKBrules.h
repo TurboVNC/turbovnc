@@ -178,7 +178,6 @@ extern void XkbRF_Free(
 #define	_XKB_RF_NAMES_PROP_ATOM		"_XKB_RULES_NAMES"
 #define	_XKB_RF_NAMES_PROP_MAXLEN	1024
 
-#ifndef XKB_IN_SERVER
 
 extern Bool XkbRF_GetNamesProp(
    Display *		/* dpy */,
@@ -192,7 +191,6 @@ extern Bool XkbRF_SetNamesProp(
    XkbRF_VarDefsPtr	/* var_defs */
 );
 
-#endif
 
 _XFUNCPROTOEND
 
