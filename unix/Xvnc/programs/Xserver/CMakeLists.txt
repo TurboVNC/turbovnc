@@ -17,7 +17,7 @@ if(BITS EQUAL 64)
 endif()
 
 set(VENDOR_NAME "The X.Org Foundation")
-set(VENDOR_RELEASE "11202000")
+set(VENDOR_RELEASE "11204000")
 configure_file(include/version-config.h.in include/version-config.h)
 
 include(CheckLibraryExists)

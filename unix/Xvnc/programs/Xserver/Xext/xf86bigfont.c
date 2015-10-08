@@ -551,7 +551,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                ? nUniqCharInfos * sizeof(xCharInfo)
                + (nCharInfos + 1) / 2 * 2 * sizeof(CARD16)
                : 0);
-        xXF86BigfontQueryFontReply *reply = malloc(rlength);
+        xXF86BigfontQueryFontReply *reply = calloc(1, rlength);
         char *p;
 
         if (!reply) {

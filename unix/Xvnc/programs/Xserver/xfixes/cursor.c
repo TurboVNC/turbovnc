@@ -380,7 +380,8 @@ ProcXFixesGetCursorImage(ClientPtr client)
     width = pCursor->bits->width;
     height = pCursor->bits->height;
     npixels = width * height;
-    rep = malloc(sizeof(xXFixesGetCursorImageReply) + npixels * sizeof(CARD32));
+    rep = calloc(sizeof(xXFixesGetCursorImageReply) + npixels * sizeof(CARD32),
+                 1);
     if (!rep)
         return BadAlloc;
 
@@ -529,8 +530,8 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     name = pCursor->name ? NameForAtom(pCursor->name) : "";
     nbytes = strlen(name);
     nbytesRound = pad_to_int32(nbytes);
-    rep = malloc(sizeof(xXFixesGetCursorImageAndNameReply) +
-                 npixels * sizeof(CARD32) + nbytesRound);
+    rep = calloc(sizeof(xXFixesGetCursorImageAndNameReply) +
+                 npixels * sizeof(CARD32) + nbytesRound, 1);
     if (!rep)
         return BadAlloc;
 

@@ -533,7 +533,7 @@ ProcRenderQueryPictIndexValues(ClientPtr client)
     num = pFormat->index.nvalues;
     rlength = (sizeof(xRenderQueryPictIndexValuesReply) +
                num * sizeof(xIndexValue));
-    reply = (xRenderQueryPictIndexValuesReply *) malloc(rlength);
+    reply = (xRenderQueryPictIndexValuesReply *) calloc(1, rlength);
     if (!reply)
         return BadAlloc;
 
@@ -1690,7 +1690,7 @@ ProcRenderQueryFilters(ClientPtr client)
     }
     len = ((nnames + 1) >> 1) + bytes_to_int32(nbytesName);
     total_bytes = sizeof(xRenderQueryFiltersReply) + (len << 2);
-    reply = (xRenderQueryFiltersReply *) malloc(total_bytes);
+    reply = (xRenderQueryFiltersReply *) calloc(1, total_bytes);
     if (!reply)
         return BadAlloc;
     aliases = (INT16 *) (reply + 1);

@@ -416,7 +416,7 @@ RRTellChanged(ScreenPtr pScreen)
     int i;
 
     if (pScrPriv->changed) {
-        UpdateCurrentTime();
+        UpdateCurrentTimeIf();
         if (pScrPriv->configChanged) {
             pScrPriv->lastConfigTime = currentTime;
             pScrPriv->configChanged = FALSE;
@@ -445,6 +445,9 @@ RRFirstOutput(ScreenPtr pScreen)
     rrScrPriv(pScreen);
     RROutputPtr output;
     int i, j;
+
+    if (!pScrPriv)
+        return NULL;
 
     if (pScrPriv->primaryOutput && pScrPriv->primaryOutput->crtc)
         return pScrPriv->primaryOutput;

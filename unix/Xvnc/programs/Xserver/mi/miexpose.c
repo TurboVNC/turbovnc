@@ -327,7 +327,7 @@ miSendGraphicsExpose(ClientPtr client, RegionPtr pRgn, XID drawable,
 
         numRects = RegionNumRects(pRgn);
         pBox = RegionRects(pRgn);
-        if (!(pEvent = malloc(numRects * sizeof(xEvent))))
+        if (!(pEvent = calloc(numRects, sizeof(xEvent))))
             return;
         pe = pEvent;
 

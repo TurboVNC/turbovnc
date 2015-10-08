@@ -426,6 +426,7 @@ ProcRRGetOutputInfo(ClientPtr client)
     pScrPriv = rrGetScrPriv(pScreen);
 
     rep.type = X_Reply;
+    rep.status = RRSetConfigSuccess;
     rep.sequenceNumber = client->sequence;
     rep.length = bytes_to_int32(OutputInfoExtra);
     rep.timestamp = pScrPriv->lastSetTime.milliseconds;
@@ -528,13 +529,13 @@ ProcRRSetOutputPrimary(ClientPtr client)
     RROutputPtr output = NULL;
     WindowPtr pWin;
     rrScrPrivPtr pScrPriv;
-    int rc;
+    int ret;
 
     REQUEST_SIZE_MATCH(xRRSetOutputPrimaryReq);
 
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
+    ret = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+    if (ret != Success)
+        return ret;
 
     if (stuff->output) {
         VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
@@ -546,7 +547,8 @@ ProcRRSetOutputPrimary(ClientPtr client)
     }
 
     pScrPriv = rrGetScrPriv(pWin->drawable.pScreen);
-    RRSetPrimaryOutput(pWin->drawable.pScreen, pScrPriv, output);
+    if (pScrPriv)
+        RRSetPrimaryOutput(pWin->drawable.pScreen, pScrPriv, output);
 
     return Success;
 }

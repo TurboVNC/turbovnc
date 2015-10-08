@@ -195,7 +195,7 @@ ProcRRGetScreenSizeRange(ClientPtr client)
     rrScrPrivPtr pScrPriv;
     int rc;
 
-    REQUEST_SIZE_MATCH(xRRGetScreenInfoReq);
+    REQUEST_SIZE_MATCH(xRRGetScreenSizeRangeReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -248,6 +248,9 @@ ProcRRSetScreenSize(ClientPtr client)
 
     pScreen = pWin->drawable.pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
+    if (!pScrPriv)
+        return BadMatch;
+
     if (stuff->width < pScrPriv->minWidth || pScrPriv->maxWidth < stuff->width) {
         client->errorValue = stuff->width;
         return BadValue;
@@ -682,6 +685,7 @@ ProcRRGetScreenInfo(ClientPtr client)
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.timestamp);
+        swapl(&rep.configTimestamp);
         swaps(&rep.rotation);
         swaps(&rep.nSizes);
         swaps(&rep.sizeID);

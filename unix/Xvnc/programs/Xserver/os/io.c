@@ -815,7 +815,11 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
     NewOutputPending = TRUE;
     FD_SET(oc->fd, &OutputPending);
     memmove((char *) oco->buf + oco->count, buf, count);
-    oco->count += count + padBytes;
+    oco->count += count;
+    if (padBytes) {
+        memset(oco->buf + oco->count, '\0', padBytes);
+        oco->count += padBytes;
+    }
     return count;
 }
 
