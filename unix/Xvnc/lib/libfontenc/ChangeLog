@@ -1,3 +1,154 @@
+commit 42f3a39c3085afd9ef904ae39102fd49bbc2e4a5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Apr 30 21:39:51 2015 -0700
+
+    libfontenc 1.1.3
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit de1843aaf76015c9d99416f3122d169fe331b849
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 17 19:37:28 2015 -0800
+
+    Initialize aliases array in parseEncodingFile()
+    
+    The static analyzer insisted there were code paths that entries in this
+    array could be read without them being initialized.  While I couldn't
+    see any way that would happen, this makes sure it can't and makes the
+    analyzer quiet.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c377d91157601df90936e49167ce28a548c9b740
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 17 19:18:41 2015 -0800
+
+    Reformat code to X.Org standard style
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8eefb5a18de41b693c00767458ee51f034201ebf
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 17 18:46:49 2015 -0800
+
+    Replace strcpy+strcat calls with snprintf calls
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a5221fc11307eb1230ae2643c6e423b0f7867fde
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 17 18:36:07 2015 -0800
+
+    Replace sprintf call with snprintf
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 0037a42107b952c9d903719615747e760e4e7247
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Dec 26 09:40:00 2013 -0800
+
+    Initialize both value1 & value2, not value1 twice
+    
+    Flagged by cppcheck 1.62:
+    [src/encparse.c:303] -> [src/encparse.c:303]: (performance, inconclusive)
+     Variable 'value1' is reassigned a value before the old one has been used
+     if variable is no semaphore variable.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3acba630d8b57084f7e92c15732408711ed5137a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Apr 25 20:52:11 2013 -0700
+
+    libfontenc 1.1.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 624508365ec3279bc74ce523d024533e062629e1
+Author: Nickolai Zeldovich <nickolai@csail.mit.edu>
+Date:   Sun Mar 3 23:57:34 2013 -0500
+
+    libfontenc: setCode(): fix realloc invocation
+    
+    This patch fixes two bugs in the realloc invocation in setCode(), which
+    most likely cause memory corruption when realloc is triggered:
+    
+    1. Pass *enc to realloc (which is the dynamically-allocated buffer),
+       instead of enc (which stores a pointer to the dynamically-allocated
+       buffer).
+    
+    2. Allocate enough memory for (*encsize) shorts, instead of (*encsize)
+       bytes; see the call to malloc just above the realloc call.
+    
+    Signed-off-by: Nickolai Zeldovich <nickolai@csail.mit.edu>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f5d1208172e965fdd7fae8927bd3e29b3cc3a975
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 19 08:23:09 2013 -0800
+
+    Replace deprecated Automake INCLUDES variable with AM_CPPFLAGS
+    
+    Excerpt https://lists.gnu.org/archive/html/automake/2012-12/msg00038.html
+    
+      - Support for the long-deprecated INCLUDES variable will be removed
+        altogether in Automake 1.14.  The AM_CPPFLAGS variable should be
+        used instead.
+    
+    This variable was deprecated in Automake releases prior to 1.10, which is
+    the current minimum level required to build X.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 0c3518df24192f18f15ce91c2868560a5973a3dc
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit edd325236d39b6ad130c82d90b04dcc3b153d8b2
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:28:48 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 7de846ed190b2564b0642de79918dd3804083b4e
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Tue Apr 24 16:01:35 2012 -0400
+
+    Fix ISO-8859-7 → ISO-10646 mapping.
+    
+    ISO-8859-7 code point 0xD2 is unassigned.
+    
+    ISO-10646 code point U+03A2, to which 0xD2 was mapping, also is unassigned.
+    
+    Reported by Norm Pierce.
+    
+    Signed-off-by: James Cloos <cloos@jhcloos.com>
+
+commit f7682533fa6de77d8bd6fa6480a0f5188e0e56d7
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Tue Apr 24 15:55:59 2012 -0400
+
+    Fix ISO-8859-6 → ISO-10646 mapping.
+    
+    ISO-8859-6 code point 0xC0 is unassigned.
+    
+    ISO-10646 code point U+0620, to which 0xC0 was mapping, has since been
+    assigned an unrelated character.
+    
+    Reported by Norm Pierce.
+    
+    Signed-off-by: James Cloos <cloos@jhcloos.com>
+
 commit 6012075d945e527866ef31b8796e04d6581071db
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Fri Mar 2 17:51:30 2012 -0800
