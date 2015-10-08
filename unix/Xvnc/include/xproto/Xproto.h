@@ -259,10 +259,13 @@ restoring the definitions in X.h.  */
 typedef CARD16 KeyButMask;
 
 /***************** 
-   connection setup structure.  This is followed by
-   numRoots xWindowRoot structs.
+   Connection setup structures.  See Chapter 8: Connection Setup
+   of the X Window System Protocol specification for details.
 *****************/
 
+/* Client initiates handshake with this data, followed by the strings
+ * for the auth protocol & data.
+ */
 typedef struct {
     CARD8	byteOrder;
     BYTE	pad;
@@ -272,6 +275,16 @@ typedef struct {
     CARD16	pad2 B16;
 } xConnClientPrefix;
 
+/* Server response to xConnClientPrefix.
+ *
+ * If success == Success, this is followed by xConnSetup and
+ * numRoots xWindowRoot structs.
+ *
+ * If success == Failure, this is followed by a reason string.
+ *
+ * The protocol also defines a case of success == Authenticate, but
+ * that doesn't seem to have ever been implemented by the X Consortium.
+ */
 typedef struct {
     CARD8          success;
     BYTE           lengthReason; /*num bytes in string following if failure */
@@ -625,13 +638,9 @@ typedef struct _xQueryFontReply {
     CARD16 sequenceNumber B16;
     CARD32 length B32;  /* definitely > 0, even if "nCharInfos" is 0 */
     xCharInfo minBounds; 
-#ifndef WORD64
     CARD32 walign1 B32;
-#endif
     xCharInfo maxBounds; 
-#ifndef WORD64
     CARD32 walign2 B32;
-#endif
     CARD16 minCharOrByte2 B16, maxCharOrByte2 B16;
     CARD16 defaultChar B16;
     CARD16 nFontProps B16;  /* followed by this many xFontProp structures */
@@ -674,13 +683,9 @@ typedef struct {
     CARD16 sequenceNumber B16;
     CARD32 length B32;  /* definitely > 0, even if "nameLength" is 0 */
     xCharInfo minBounds; 
-#ifndef WORD64
     CARD32 walign1 B32;
-#endif
     xCharInfo maxBounds; 
-#ifndef WORD64
     CARD32 walign2 B32;
-#endif
     CARD16 minCharOrByte2 B16, maxCharOrByte2 B16;
     CARD16 defaultChar B16;
     CARD16 nFontProps B16;  /* followed by this many xFontProp structures */
@@ -1447,12 +1452,7 @@ typedef struct {
     CARD16 length B16;
     Window destination B32;
     CARD32 eventMask B32;
-#ifdef WORD64
-    /* the structure should have been quad-aligned */
-    BYTE eventdata[SIZEOF(xEvent)];
-#else
     xEvent event;
-#endif /* WORD64 */
 } xSendEventReq;
 
 typedef struct {

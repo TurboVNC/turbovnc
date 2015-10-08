@@ -1,3 +1,328 @@
+commit d5524e2b8d811aa03ed19c6e8fb2ee4162ca2b23
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed Jul 1 11:35:13 2015 -0400
+
+    xproto 7.0.28
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 2c94cdb453bc641246cc8b9a876da9799bee1ce7
+Author: Olivier Fourdan <ofourdan@redhat.com>
+Date:   Fri May 29 18:16:34 2015 +0200
+
+    Increase the number of file descriptors
+    
+    To allow up to 512 clients, the number of file descriptors being
+    monitored need to be increased accordingly.
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+    Signed-off-by: Olivier Fourdan <ofourdan@redhat.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 2dc2c38fb530c717b1944c93a889e4deff61b7f9
+Author: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date:   Mon May 25 04:30:29 2015 -0700
+
+    darwin: Include strings.h
+    
+    https://trac.macports.org/ticket/47813
+    
+    Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+
+commit 70cf8acf06705097b009a488994b526832b0ef66
+Author: Thomas Klausner <wiz@NetBSD.org>
+Date:   Sun Jan 11 00:39:14 2015 +0100
+
+    Use C99 compliant definition of nonnull attribute.
+    
+    Fixes warning with clang.
+    
+    Signed-off-by: Thomas Klausner <wiz@NetBSD.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 303b137a55bb2d092b008439570a323c89a41d70
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Dec 30 21:15:09 2014 -0800
+
+    xproto 7.0.27
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ffd4a13042d24cb5c913207585191801a9a1603e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jul 18 17:08:25 2014 -0700
+
+    Use clang's __has_attribute to check for attribute support
+    
+    Hopefully other compilers will start adopting this so we don't have to
+    maintain ever growing matrixes of compiler/version checks for all the
+    attributes we use.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+
+commit 9b895b428576c4d6b4d43c77940c44604f9c1a2c
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Jul 15 13:51:02 2014 -0700
+
+    Do not suggest adding new keysyms to XF86keysym.h
+    
+    As noted in the comment in the file, X.Org controls the main X11 keysym
+    definitions, so adds new keysyms there, not in the XFree86 vendor space.
+    
+    Reported-by: Gioele Barabucci <gioele@svario.it>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Daniel Stone <daniels@collabora.com>
+
+commit 25f1134b4a2bd8018f153158cfc7c9ae255b5d6e
+Author: Michael Haubenwallner <michael.haubenwallner@ssi-schaefer.com>
+Date:   Wed Jun 25 18:08:22 2014 +0200
+
+    Bug #80528: make it build on AIX
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=80528
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 068fd2cb19b6c0434f63b427158506e2ec3c6206
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri May 9 19:23:58 2014 -0700
+
+    Enable use of __attribute__((deprecated)) with Solaris Studio 12.4 compiler
+    
+    Support for this attribute is added in the 12.4 beta release.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 03cbbf6c3e811c026c86e3a60d2f9af56606e155
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Mon Apr 14 15:36:00 2014 +0200
+
+    xproto 7.0.26
+    
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+
+commit d522ff998b77f0c8c39c4d3945f78d2221fe1209
+Author: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date:   Tue Dec 17 14:26:07 2013 +0000
+
+    Xpoll.h.in: Fix WIN32 check to trigger on MinGW only
+    
+    MinGW-w64 w32api-headers 3.0.0 define WIN32 in some places they didn't before,
+    which causes this check to turn on for Cygwin, which is not wanted.
+    
+    Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+    Reviewed-by: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+
+commit aee7e4de57349db186ca9d8c1312dc18590d3942
+Author: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+Date:   Wed Apr 3 13:55:16 2013 +0100
+
+    Xwindows.h: Wrap Windows 64-bit types as well for 64-bit build
+    
+    Signed-off-by: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+    Reviewed-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+
+commit e5e2ed5b115107d1b1d5248ac5c5dda67e71ea50
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Dec 28 11:11:00 2013 -0800
+
+    Add more comments on connection setup to Xproto.h
+    
+    Some of the bits I forget and have to dig out of the protocol spec
+    every few years when I need to know again.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 148d89f0b3a652acc54b1a21807ffd6d0e81e279
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sun Dec 15 08:27:09 2013 -0800
+
+    Replace 'pointer' with explicit 'void *'
+    
+    To get rid of the 'pointer' typedef, stop using it locally. That way,
+    when _XTYPEDEF_POINTER is defined before Xdefs.h is included, it won't
+    get defined and Xdefs.h will still compile.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3911ad9e8e8911c4b4a5d624e73b51667d0e3963
+Author: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+Date:   Thu Nov 21 20:20:22 2013 -0600
+
+    Xthreads.h: Declare _Xthread_init for WIN32
+    
+    This fixes the build of libXt on *-*-mingw* with -Werror=implicit.
+    
+    Signed-off-by: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a7fa86998c873ce7463d169b4bd423898ca2bae1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Nov 22 22:14:24 2013 -0800
+
+    xproto 7.0.25
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a8aa17cb63493b4b756587ddc884a9055dba14da
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Oct 26 09:42:05 2013 -0400
+
+    config: replace deprecated use of AC_OUTPUT with AC_CONFIG_FILES
+    
+    Fix Automake warning: AC_OUTPUT should be used without arguments.
+    www.gnu.org/software/autoconf/manual/autoconf.html#Configuration-Files
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit ed5a86761d96d4bdebda4f09071a49cbf4688d1b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Mar 1 20:05:12 2013 -0800
+
+    Remove WORD64, MUSTCOPY, and other CRAY leftovers
+    
+    Leaves behind several no-op macros for compatibility with existing
+    code that uses them.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6d4acb0e3a6568a8faaa651d4e3d32f917b9067b
+Author: Benno Schulenberg <bensberg@justemail.net>
+Date:   Sat Aug 31 17:00:34 2013 +0200
+
+    Additional dead keysyms to complete the German DIN T3 keyboard layout.
+    
+    Signed-off-by: Benno Schulenberg <bensberg@justemail.net>
+    Signed-off-by: James Cloos <cloos@jhcloos.com>
+
+commit 043ed78ce03febd113615f5920bc9dffaf7f0b16
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Apr 19 14:45:28 2013 -0700
+
+    Add _X_COLD attribute for branch prediction hints
+    
+    Unfortunately the Solaris Studio equivalent is a pragma taking the
+    function names as arguments, so doesn't translate cleanly into a
+    common macro form.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit d103af8068fb90494cbd6e1ff950850369bbf95f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Mar 29 16:20:49 2013 -0700
+
+    xproto 7.0.24
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f8c43d587e43fee2c22bd7b5f35a9d4dc8bdb580
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 3707c6e71c01758b0ac5b2c29c8600b6ff6b73ee
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:01:10 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit c0dd615fddb6fa487d1a914c6928f3843489725e
+Author: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+Date:   Mon Oct 22 02:52:44 2012 -0500
+
+    Adjust wrapping to work with MinGW-w64 headers
+    
+    Adjust <windows.h> wrapping to work with MinGW-w64 as well MinGW.org
+    headers, which define BOOL in a different way.
+    Add some more comments on what we doing here.
+    v2: Make similar changes to Xwinsock.h, used for MinGW but not Cygwin.
+    
+    Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+    Signed-off-by: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+    Reviewed-by: Colin Harrison <colin.harrison@virgin.net>
+
+commit c0d697ffddf14117541e7021c3b80b25c4536f6f
+Author: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+Date:   Mon Oct 15 02:16:46 2012 -0500
+
+    Do not use visibility attributes on MinGW
+    
+    Signed-off-by: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+    Reviewed-by: Colin Harrison <colin.harrison@virgin.net>
+    Tested-by: Colin Harrison <colin.harrison@virgin.net>
+
+commit c76d51423d6a6afe4f0c8fc6f863ba97d202184b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 26 14:36:50 2012 -0700
+
+    Bug 51009: _X_RESTRICT_KYWD fix for g++ 4.6 & later on Solaris
+    
+    g++ 4.6 & later on Solaris set the __STDC_VERSION__ define to indicate
+    C99 mode to expose C99/Unix03 functions in the system headers, even
+    though they don't recognize the C99 restrict keyword, as explained in
+    http://gcc.gnu.org/ml/gcc-patches/2010-05/msg01308.html
+    
+    Thus we avoid using the restrict keyword here if __cplusplus is also
+    defined, falling back to the __GNUC__ case using __restrict__ instead.
+    
+    Fixes https://bugs.freedesktop.org/show_bug.cgi?id=51009
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Tested-by: Jonathan Perkin
+
+commit f1b8b4dd5e798b7e91da95eca997ec7236fcbc27
+Author: James M Leddy <james.leddy@canonical.com>
+Date:   Wed May 9 12:45:01 2012 -0700
+
+    Add XF86XK_AudioMicMute
+    
+    Lenovo Thinkpad machines have a microphone mute in addition to the
+    standard audio output mute.
+    
+    Signed-off-by: James M. Leddy <james.leddy@canonical.com>
+    Signed-off-by: James Cloos <cloos@jhcloos.com>
+
+commit a06fa7fc98b66652df8bbc4734b5010d43744373
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Tue Dec 20 16:43:44 2011 +0300
+
+    Xmd.h: Treat __ILP32__ targets as LONG32 ones
+    
+    amd64-x32 ABI defines sizeof(long) == sizeof (void*) == 4
+    
+    Noticed on build failure of libXmu:
+      libXmu-1.1.0/work/libXmu-1.1.0/src/EditresCom.c: In function '_XEditresGetStringValues':
+      libXmu-1.1.0/work/libXmu-1.1.0/src/EditresCom.c:2198:6: error: duplicate case value
+      libXmu-1.1.0/work/libXmu-1.1.0/src/EditresCom.c:2194:6: error: previously used here
+    
+    More info about x32: https://sites.google.com/site/x32abi/
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+    Signed-off-by: James Cloos <cloos@jhcloos.com>
+
+commit a6651a8d812d224a9e74205bdefb7081f743af11
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue May 1 16:38:14 2012 -0400
+
+    config: replace obsolete AC_CONFIG_HEADER with with AC_CONFIG_HEADERS
+    
+    The former is an obsolete alias to the latter.
+    It may get removed in the future.
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
 commit 20202784b9700d973d5301f0cb3243eba99fc349
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Thu Mar 15 23:11:19 2012 -0700
