@@ -1150,7 +1150,7 @@ transform(struct pixman_f_transform *m, double *x, double *y)
 static void
 transformAbsolute(DeviceIntPtr dev, ValuatorMask *mask)
 {
-    double x, y, ox, oy;
+    double x = 0, y = 0, ox, oy;
 
     if (valuator_mask_isset(mask, 0))
         ox = x = valuator_mask_get_double(mask, 0);
