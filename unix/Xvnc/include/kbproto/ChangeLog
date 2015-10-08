@@ -1,3 +1,105 @@
+commit ec54606682aa395517bde1e01dd9bb8a1033e707
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Apr 30 22:43:41 2015 -0700
+
+    kbproto 1.0.7
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit fe38312ff65b87a03d21ac5d10618080da296145
+Author: wettstae@gmail.com <wettstae@gmail.com>
+Date:   Mon Mar 9 20:13:21 2015 +0100
+
+    kbproto: Fix typo in XkbSARedirectSetVMods
+    
+    An apparent copy/paste bug in the macro XkbSARedirectSetVMods, which breaks
+    using RedirectKey actions with virtual modifiers.
+    
+    Signed-off-by: Andreas Wettstein <wettstae@gmail.com>
+    Reviewed-by: Daniel Stone <daniels@collabora.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 5e40da736ffc87f5cafaaa67d745e20ef67a9f4a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Oct 26 09:42:05 2013 -0400
+
+    config: replace deprecated use of AC_OUTPUT with AC_CONFIG_FILES
+    
+    Fix Automake warning: AC_OUTPUT should be used without arguments.
+    www.gnu.org/software/autoconf/manual/autoconf.html#Configuration-Files
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 7cc231b806b1cf6c0c7a71efe335efad892860f0
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Aug 16 22:00:18 2013 -0700
+
+    Drop WORD64 (Cray) support
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 95ee49d90c28b15a3c3be54a233368fc69f3531a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Aug 16 21:55:27 2013 -0700
+
+    Add comments about sizes of dynamically allocated arrays
+    
+    Many arrays have sz_* or size_* fields to list the number of entries
+    allocated, and num_* fields to record the number of entries used.
+    
+    Others use num_* for the number allocated, or size based on max_key_code.
+    
+    And a few are just plain trying to mess with your head.  (I'm looking at
+    you XkbNamesRec & XkbKeyTypeRec.)
+    
+    It sure would have been nice if all the XKB authors could have picked
+    a single convention and stuck to it, but we're 20 years too late for
+    that now, so just document it so I can stop reverse engineering from
+    the code every time I need to see if we got a bounds check right or not.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit db07706cb268d5fe1bc38ef5c0a9f49309068b2c
+Author: Daniel Martin <consume.noise@gmail.com>
+Date:   Sun Jul 28 21:25:33 2013 +0200
+
+    specs: Change XkbSA_DfltBtnAbsolute to 4
+    
+    Adopt the value from XKB.h:
+        #define XkbSA_DfltBtnAbsolute (1L << 2)
+    
+    Found-by: Ran Benita <ran234@gmail.com>
+    Signed-off-by: Daniel Martin <consume.noise@gmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit a404bec53f6fff71fc7d47f41eca2ef488d16937
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 2 10:43:45 2013 -0800
+
+    Tell clang not to report -Wpadded warnings on public headers we can't fix
+    
+    Better to silence the compiler warning than break ABI.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f7022f5775350dce3348b7151845a32390e98791
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 50828064b114a26d35b5b75d45068755d0d260c3
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:01:10 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
 commit 391a1f6de6315fc0196d407d800597488315cccb
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Thu Mar 22 20:43:02 2012 -0700
