@@ -1,3 +1,99 @@
+commit 4d26102ace67377e88ba087e52ca894e0ffd2ebf
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jul 22 21:40:14 2013 -0700
+
+    videoproto 2.3.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 665f990f72b0518d7ea604affd935c6a2297058a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jul 22 21:36:29 2013 -0700
+
+    config: Add missing AC_CONFIG_SRCDIR
+    
+    Regroup AC statements under the Autoconf initialization section.
+    Regroup AM statements under the Automake initialization section.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 77d5c8d90e81139391a57710095784cde0476b9c
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Jun 27 22:14:36 2013 -0700
+
+    Trim trailing whitespace
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 1a96222d64cde75e20fd9bb7a717cf269c7e9a59
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jun 23 00:34:52 2013 -0700
+
+    Xvproto.h: fix xvQueryEncodingsReply to match actual wire protocol
+    
+    padl3 was declared as CARD32, which for proper alignment, got two
+    additional bytes of padding silently inserted before it.  Declaring
+    it as CARD16 aligns it properly after the CARD16 num_encodings.
+    
+    Fixes clang warning:
+    Xvproto.h:462:10: warning: padding struct 'struct _QueryEncodingsReply' with 2 bytes to align 'padl3' [-Wpadded]
+      CARD32 padl3 B32;
+             ^
+    This makes sizeof(xvQueryEncodingsReply) match the sz_xvQueryEncodingsReply
+    which is used in libXv & the X server for the size sent over the wire.
+    
+    Reported-by: Daniel Martin <consume.noise@gmail.com>
+    Reviewed-by: Julien Cristau <jcristau@debian.org>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d97051236bba088688681f348086feb733cbdd08
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Sun Jun 9 19:00:29 2013 +0200
+
+    Xvproto: fix xvEncodingInfo to match actual wire protocol
+    
+    The padding is *before* the rate field, so the rate is placed on a 32bit
+    boundary.  This change adds explicit padding between height and rate,
+    and removes extraneous padding after the rate field, which the server
+    never sent and xlib never read.
+    
+    This changes sizeof(xvEncodingInfo).  Hopefully that's not a big deal as
+    clients only see the Xlib structure XvEncodingInfo.
+    
+    Debian bug#657215
+    
+    Reported-by: Kevin Ryde <user42@zip.com.au>
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+    Reviewed-by: Daniel Martin <consume.noise@gmail.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit e42cf822e230cff5c6550ca2c050dfa27d2c9611
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit fa26f1cc56909b55bb7b2d31c56f66af48cad0af
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:01:10 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit b994209d8559a0d0802487ed53585404b398a707
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Aug 10 10:17:10 2010 -0400
+
+    videoproto 2.3.1
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
 commit 56a94402e9252879771ba42ee76990f132b56fca
 Author: Gaetan Nadon <memsize@videotron.ca>
 Date:   Sun Mar 28 19:00:31 2010 -0400

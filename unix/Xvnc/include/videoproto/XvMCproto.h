@@ -89,7 +89,7 @@ typedef struct {
   BYTE type;  /* X_Reply */
   BYTE padb1;
   CARD16 sequenceNumber B16;
-  CARD32 length B32;  
+  CARD32 length B32;
   CARD16 width_actual B16;
   CARD16 height_actual B16;
   CARD32 flags_return B32;
@@ -121,7 +121,7 @@ typedef struct {
   BYTE type;  /* X_Reply */
   BYTE padb1;
   CARD16 sequenceNumber B16;
-  CARD32 length B32;  
+  CARD32 length B32;
   CARD32 padl2 B32;
   CARD32 padl3 B32;
   CARD32 padl4 B32;
@@ -156,7 +156,7 @@ typedef struct {
   BYTE type;  /* X_Reply */
   BYTE padb1;
   CARD16 sequenceNumber B16;
-  CARD32 length B32; 
+  CARD32 length B32;
   CARD16 width_actual B16;
   CARD16 height_actual B16;
   CARD16 num_palette_entries B16;
@@ -213,8 +213,8 @@ typedef struct {
   BYTE type;  /* X_Reply */
   BYTE padb1;
   CARD16 sequenceNumber B16;
-  CARD32 length B32; 
-  CARD32 major B32; 
+  CARD32 length B32;
+  CARD32 major B32;
   CARD32 minor B32;
   CARD32 patchLevel B32;
   CARD32 nameLen B32;

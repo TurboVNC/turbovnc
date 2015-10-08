@@ -42,7 +42,7 @@
 #define XVMC_PREDICTION_FIELD           0x01
 #define XVMC_PREDICTION_FRAME           0x02
 #define XVMC_PREDICTION_DUAL_PRIME      0x03
-#define XVMC_PREDICTION_16x8            0x02 
+#define XVMC_PREDICTION_16x8            0x02
 #define XVMC_PREDICTION_4MV             0x04
 
 #define XVMC_SELECT_FIRST_FORWARD       0x01
@@ -68,11 +68,11 @@
 typedef struct {
    int surface_type_id;
    int chroma_format;
-   unsigned short max_width;       
-   unsigned short max_height;   
+   unsigned short max_width;
+   unsigned short max_height;
    unsigned short subpicture_max_width;
    unsigned short subpicture_max_height;
-   int mc_type;         
+   int mc_type;
    int flags;
 } XvMCSurfaceInfo;
 
@@ -118,7 +118,7 @@ typedef struct {
    unsigned short x;
    unsigned short y;
    unsigned char macroblock_type;
-   unsigned char motion_type;   
+   unsigned char motion_type;
    unsigned char motion_vertical_field_select;
    unsigned char dct_type;
    short PMV[2][2][2];
