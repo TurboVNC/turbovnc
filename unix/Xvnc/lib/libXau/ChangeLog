@@ -1,3 +1,163 @@
+commit 899790011304c4029e15abf410e49ce7cec17e0a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri May 24 15:04:00 2013 -0700
+
+    libXau 1.0.8
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f5a57d8a21a34d7084cce294e24c0422e02ef8ef
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 30 11:42:09 2013 -0700
+
+    Use remove() instead of unlink() to delete lock files
+    
+    In normal cases, no difference.  If someone has accidentally created
+    a directory with those names, this can save you from needing to fsck
+    to clean it up on some filesystems (like UFS).
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 4352cf9707df08d51ef891be156d475743d0a060
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 30 11:30:37 2013 -0700
+
+    Call memcmp() instead of defining our own equivalent
+    
+    Stops casting len parameters to int in callers so that this change
+    doesn't introduce warnings that we're taking unsigned values, casting
+    them to signed, then passing to a function that wants them unsigned.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 704beb71768cdaa2448da6edfa219b4a7bf862f1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 30 11:18:44 2013 -0700
+
+    Replace strcpy+strcat pairs with snprintf calls
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3038a87edce31ad2895431f7cfdc96a33fc70e02
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 30 10:59:06 2013 -0700
+
+    Check for configure's HAVE_UNISTD_H instead of X_NOT_POSIX
+    
+    Drops fallback prototype of sleep() for non-POSIX, non-Windows systems
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 325f5282bc1d93b72b0b05037245cf130970fa38
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 30 10:55:26 2013 -0700
+
+    Use configure check for pathconf instead of X_NOT_POSIX #define
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 1a8a1b2c68967b48c07b56142799b1020f017027
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit b1ace13d5864080f2101f2910cad706f800984de
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:28:48 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 8570d287396934f26224c76d48d7f17d87380e72
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 12 15:58:59 2013 -0800
+
+    Convert INCLUDES to AM_CPPFLAGS in preparation for automake-1.14 obsoletion
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 369d133ca19f938d123254dee5c88214512f82df
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jan 4 19:38:51 2013 -0800
+
+    unifdef -U__UNIXOS2__
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit e04364efccbb3bb4cfc5f4cb491ffa1faaaacbdb
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Dec 16 15:50:52 2012 -0800
+
+    Tell clang to shut up about the padding in struct xauth
+    
+    We can't clean it up without breaking ABI, so disable the warnings for it:
+    
+    ./include/X11/Xauth.h:33:19: warning: padding struct 'struct xauth' with 4 bytes to align 'address' [-Wpadded]
+        char            *address;
+                         ^
+    ./include/X11/Xauth.h:35:19: warning: padding struct 'struct xauth' with 6 bytes to align 'number' [-Wpadded]
+        char            *number;
+                         ^
+    ./include/X11/Xauth.h:37:19: warning: padding struct 'struct xauth' with 6 bytes to align 'name' [-Wpadded]
+        char            *name;
+                         ^
+    ./include/X11/Xauth.h:39:18: warning: padding struct 'struct xauth' with 6 bytes to align 'data' [-Wpadded]
+        char            *data;
+                         ^
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 4d43b4554f8e35bf8122ae9d2f1bbc0e56fe6d37
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Dec 16 15:40:30 2012 -0800
+
+    Clean up some clang warnings about sign conversion
+    
+    fread & fwrite are defined as taking size_t arguments (an unsigned type),
+    so stop casting their arguments to a signed int just to confuse things.
+    
+    Fixes warnings:
+    
+    AuFileName.c:69:59: warning: implicit conversion loses integer precision: 'unsigned long' to 'int' [-Wshorten-64-to-32]
+        size = strlen (name) + strlen(&slashDotXauthority[1]) + 2;
+             ~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+    
+    AuRead.c:58:44: warning: implicit conversion changes signedness: 'int' to 'size_t' (aka 'unsigned long') [-Wsign-conversion]
+            if (fread (data, (int) sizeof (char), (int) len, file) != len) {
+                ~~~~~                             ^~~~~~~~~
+    
+    AuWrite.c:49:46: warning: implicit conversion changes signedness: 'int' to 'size_t' (aka 'unsigned long') [-Wsign-conversion]
+        if (fwrite (string, (int) sizeof (char), (int) count, file) != count)
+            ~~~~~~                               ^~~~~~~~~~~
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit f2b24dd74614ce807cacf764c6eddd834feffc5a
+Author: Eric S. Raymond <esr@thyrsus.com>
+Date:   Thu Aug 23 11:12:39 2012 -0400
+
+    Remove a use of tab stops.
+
+commit 9daef33e32ba36c1f872691daeebbf98a73b4b25
+Author: Chase Douglas <chase.douglas@canonical.com>
+Date:   Fri Apr 20 14:16:07 2012 -0700
+
+    Free XauFileName() static buffer at exit
+    
+    XauFileName() may allocate and return a static buffer. The only
+    way to ensure it is freed is to deallocate it when the program exits.
+    
+    Signed-off-by: Chase Douglas <chase.douglas@canonical.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit 0e3061495f5da8a323db02e612c4f09688b7ade0
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Tue Mar 6 22:16:57 2012 -0800
