@@ -435,6 +435,21 @@ typedef struct _rfbInteractionCapsMsg {
 
 #define rfbEnableContinuousUpdates 150
 #define rfbEndOfContinuousUpdates 150
+
+#define rfbSetDesktopSize 251
+
+/* signatures for non-standard messages */
+#define sig_rfbFileListRequest "FTC_LSRQ"
+#define sig_rfbFileDownloadRequest "FTC_DNRQ"
+#define sig_rfbFileUploadRequest "FTC_UPRQ"
+#define sig_rfbFileUploadData "FTC_UPDT"
+#define sig_rfbFileDownloadCancel "FTC_DNCN"
+#define sig_rfbFileUploadFailed "FTC_UPFL"
+#define sig_rfbFileCreateDirRequest "FTC_FCDR"
+
+
+/* server -> client and client -> server */
+
 #define rfbFence 248
 
 /* fence flags */
@@ -447,16 +462,6 @@ typedef struct _rfbInteractionCapsMsg {
                                 rfbFenceFlagSyncNext | \
                                 rfbFenceFlagRequest)
 
-#define rfbSetDesktopSize 251
-
-/* signatures for non-standard messages */
-#define sig_rfbFileListRequest "FTC_LSRQ"
-#define sig_rfbFileDownloadRequest "FTC_DNRQ"
-#define sig_rfbFileUploadRequest "FTC_UPRQ"
-#define sig_rfbFileUploadData "FTC_UPDT"
-#define sig_rfbFileDownloadCancel "FTC_DNCN"
-#define sig_rfbFileUploadFailed "FTC_UPFL"
-#define sig_rfbFileCreateDirRequest "FTC_FCDR"
 
 /*****************************************************************************
  *
