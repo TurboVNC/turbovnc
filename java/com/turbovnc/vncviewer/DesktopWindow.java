@@ -409,7 +409,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   String oldContents = "";
 
-  // RFB thread
+  // EDT
   public synchronized void checkClipboard() {
     SecurityManager sm = System.getSecurityManager();
     try {
