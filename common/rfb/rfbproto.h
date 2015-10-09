@@ -78,46 +78,46 @@ typedef struct _rfbRectangle {
 
 typedef struct _rfbPixelFormat {
 
-    CARD8 bitsPerPixel;		/* 8,16,32 only */
+    CARD8 bitsPerPixel;         /* 8,16,32 only */
 
-    CARD8 depth;		/* 8 to 32 */
+    CARD8 depth;                /* 8 to 32 */
 
-    CARD8 bigEndian;		/* True if multi-byte pixels are interpreted
-				   as big endian, or if single-bit-per-pixel
-				   has most significant bit of the byte
-				   corresponding to first (leftmost) pixel. Of
-				   course this is meaningless for 8 bits/pix */
+    CARD8 bigEndian;            /* True if multi-byte pixels are interpreted
+                                   as big endian, or if single-bit-per-pixel
+                                   has most significant bit of the byte
+                                   corresponding to first (leftmost) pixel. Of
+                                   course this is meaningless for 8 bits/pix */
 
-    CARD8 trueColour;		/* If false then we need a "colour map" to
-				   convert pixels to RGB.  If true, xxxMax and
-				   xxxShift specify bits used for red, green
-				   and blue */
+    CARD8 trueColour;           /* If false then we need a "colour map" to
+                                   convert pixels to RGB.  If true, xxxMax and
+                                   xxxShift specify bits used for red, green
+                                   and blue */
 
     /* the following fields are only meaningful if trueColour is true */
 
-    CARD16 redMax;		/* maximum red value (= 2^n - 1 where n is the
-				   number of bits used for red). Note this
-				   value is always in big endian order. */
+    CARD16 redMax;              /* maximum red value (= 2^n - 1 where n is the
+                                   number of bits used for red). Note this
+                                   value is always in big endian order. */
 
-    CARD16 greenMax;		/* similar for green */
+    CARD16 greenMax;            /* similar for green */
 
-    CARD16 blueMax;		/* and blue */
+    CARD16 blueMax;             /* and blue */
 
-    CARD8 redShift;		/* number of shifts needed to get the red
-				   value in a pixel to the least significant
-				   bit. To find the red value from a given
-				   pixel, do the following:
-				   1) Swap pixel value according to bigEndian
-				      (e.g. if bigEndian is false and host byte
-				      order is big endian, then swap).
-				   2) Shift right by redShift.
-				   3) AND with redMax (in host byte order).
-				   4) You now have the red value between 0 and
-				      redMax. */
+    CARD8 redShift;             /* number of shifts needed to get the red
+                                   value in a pixel to the least significant
+                                   bit. To find the red value from a given
+                                   pixel, do the following:
+                                   1) Swap pixel value according to bigEndian
+                                      (e.g. if bigEndian is false and host byte
+                                      order is big endian, then swap).
+                                   2) Shift right by redShift.
+                                   3) AND with redMax (in host byte order).
+                                   4) You now have the red value between 0 and
+                                      redMax. */
 
-    CARD8 greenShift;		/* similar for green */
+    CARD8 greenShift;           /* similar for green */
 
-    CARD8 blueShift;		/* and blue */
+    CARD8 blueShift;            /* and blue */
 
     CARD8 pad1;
     CARD16 pad2;
@@ -134,9 +134,9 @@ typedef struct _rfbPixelFormat {
 
 typedef struct _rfbCapabilityInfo {
 
-    CARD32 code;		/* numeric identifier */
-    CARD8 vendorSignature[4];	/* vendor identification */
-    CARD8 nameSignature[8];	/* abbreviated option name */
+    CARD32 code;                /* numeric identifier */
+    CARD8 vendorSignature[4];   /* vendor identification */
+    CARD8 nameSignature[8];     /* abbreviated option name */
 
 } rfbCapabilityInfo;
 
@@ -189,7 +189,7 @@ typedef struct _rfbCapabilityInfo {
 
 #define rfbProtocolVersionFormat "RFB %03d.%03d\n"
 
-typedef char rfbProtocolVersionMsg[13];	/* allow extra byte for null */
+typedef char rfbProtocolVersionMsg[13]; /* allow extra byte for null */
 
 #define sz_rfbProtocolVersionMsg 12
 
@@ -347,7 +347,7 @@ typedef struct _rfbClientInitMsg {
 typedef struct _rfbServerInitMsg {
     CARD16 framebufferWidth;
     CARD16 framebufferHeight;
-    rfbPixelFormat format;	/* the server's preferred pixel format */
+    rfbPixelFormat format;      /* the server's preferred pixel format */
     CARD32 nameLength;
     /* followed by char name[nameLength] */
 } rfbServerInitMsg;
@@ -372,7 +372,7 @@ typedef struct _rfbInteractionCapsMsg {
     CARD16 nServerMessageTypes;
     CARD16 nClientMessageTypes;
     CARD16 nEncodingTypes;
-    CARD16 pad;			/* reserved, must be 0 */
+    CARD16 pad;                 /* reserved, must be 0 */
     /* followed by nServerMessageTypes * rfbCapabilityInfo structures */
     /* followed by nClientMessageTypes * rfbCapabilityInfo structures */
 } rfbInteractionCapsMsg;
@@ -436,7 +436,7 @@ typedef struct _rfbInteractionCapsMsg {
 /* client -> server */
 
 #define rfbSetPixelFormat 0
-#define rfbFixColourMapEntries 1	/* not currently supported */
+#define rfbFixColourMapEntries 1        /* not currently supported */
 #define rfbSetEncodings 2
 #define rfbFramebufferUpdateRequest 3
 #define rfbKeyEvent 4
@@ -590,7 +590,7 @@ typedef struct _rfbInteractionCapsMsg {
  */
 
 typedef struct _rfbFramebufferUpdateMsg {
-    CARD8 type;			/* always rfbFramebufferUpdate */
+    CARD8 type;                 /* always rfbFramebufferUpdate */
     CARD8 pad;
     CARD16 nRects;
     /* followed by nRects rectangles */
@@ -608,7 +608,7 @@ typedef struct _rfbFramebufferUpdateMsg {
 
 typedef struct _rfbFramebufferUpdateRectHeader {
     rfbRectangle r;
-    CARD32 encoding;		/* one of the encoding types rfbEncoding... */
+    CARD32 encoding;            /* one of the encoding types rfbEncoding... */
 } rfbFramebufferUpdateRectHeader;
 
 #define sz_rfbFramebufferUpdateRectHeader (sz_rfbRectangle + 4)
@@ -704,11 +704,11 @@ typedef struct _rfbCoRRERectangle {
  * the two bytes.
  */
 
-#define rfbHextileRaw			(1 << 0)
-#define rfbHextileBackgroundSpecified	(1 << 1)
-#define rfbHextileForegroundSpecified	(1 << 2)
-#define rfbHextileAnySubrects		(1 << 3)
-#define rfbHextileSubrectsColoured	(1 << 4)
+#define rfbHextileRaw                   (1 << 0)
+#define rfbHextileBackgroundSpecified   (1 << 1)
+#define rfbHextileForegroundSpecified   (1 << 2)
+#define rfbHextileAnySubrects           (1 << 3)
+#define rfbHextileSubrectsColoured      (1 << 4)
 
 #define rfbHextilePackXY(x,y) (((x) << 4) | (y))
 #define rfbHextilePackWH(w,h) ((((w)-1) << 4) | ((h)-1))
@@ -884,8 +884,8 @@ typedef struct _rfbZlibHeader {
  * values, if they are also set.
  */
 
-#define rfbHextileZlibRaw		(1 << 5)
-#define rfbHextileZlibHex		(1 << 6)
+#define rfbHextileZlibRaw               (1 << 5)
+#define rfbHextileZlibHex               (1 << 6)
 
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -958,7 +958,7 @@ typedef struct {
  */
 
 typedef struct _rfbSetColourMapEntriesMsg {
-    CARD8 type;			/* always rfbSetColourMapEntries */
+    CARD8 type;                 /* always rfbSetColourMapEntries */
     CARD8 pad;
     CARD16 firstColour;
     CARD16 nColours;
@@ -977,7 +977,7 @@ typedef struct _rfbSetColourMapEntriesMsg {
  */
 
 typedef struct _rfbBellMsg {
-    CARD8 type;			/* always rfbBell */
+    CARD8 type;                 /* always rfbBell */
 } rfbBellMsg;
 
 #define sz_rfbBellMsg 1
@@ -989,7 +989,7 @@ typedef struct _rfbBellMsg {
  */
 
 typedef struct _rfbServerCutTextMsg {
-    CARD8 type;			/* always rfbServerCutText */
+    CARD8 type;                 /* always rfbServerCutText */
     CARD8 pad1;
     CARD16 pad2;
     CARD32 length;
@@ -1061,7 +1061,7 @@ typedef struct _rfbFileDownloadFailedMsg {
  */
 
 typedef struct _rfbFenceMsg {
-    CARD8 type;			/* always rfbFence */
+    CARD8 type;                 /* always rfbFence */
     CARD8 pad[3];
     CARD32 flags;
     CARD8 length;
@@ -1102,7 +1102,7 @@ typedef union _rfbServerToClientMsg {
  */
 
 typedef struct _rfbSetPixelFormatMsg {
-    CARD8 type;			/* always rfbSetPixelFormat */
+    CARD8 type;                 /* always rfbSetPixelFormat */
     CARD8 pad1;
     CARD16 pad2;
     rfbPixelFormat format;
@@ -1119,7 +1119,7 @@ typedef struct _rfbSetPixelFormatMsg {
  */
 
 typedef struct _rfbFixColourMapEntriesMsg {
-    CARD8 type;			/* always rfbFixColourMapEntries */
+    CARD8 type;                 /* always rfbFixColourMapEntries */
     CARD8 pad;
     CARD16 firstColour;
     CARD16 nColours;
@@ -1139,7 +1139,7 @@ typedef struct _rfbFixColourMapEntriesMsg {
  */
 
 typedef struct _rfbSetEncodingsMsg {
-    CARD8 type;			/* always rfbSetEncodings */
+    CARD8 type;                 /* always rfbSetEncodings */
     CARD8 pad;
     CARD16 nEncodings;
     /* followed by nEncodings * CARD32 encoding types */
@@ -1155,7 +1155,7 @@ typedef struct _rfbSetEncodingsMsg {
  */
 
 typedef struct _rfbFramebufferUpdateRequestMsg {
-    CARD8 type;			/* always rfbFramebufferUpdateRequest */
+    CARD8 type;                 /* always rfbFramebufferUpdateRequest */
     CARD8 incremental;
     CARD16 x;
     CARD16 y;
@@ -1173,35 +1173,35 @@ typedef struct _rfbFramebufferUpdateRequestMsg {
  * For most ordinary keys, the keysym is the same as the corresponding ASCII
  * value.  Other common keys are:
  *
- * BackSpace		0xff08
- * Tab			0xff09
- * Return or Enter	0xff0d
- * Escape		0xff1b
- * Insert		0xff63
- * Delete		0xffff
- * Home			0xff50
- * End			0xff57
- * Page Up		0xff55
- * Page Down		0xff56
- * Left			0xff51
- * Up			0xff52
- * Right		0xff53
- * Down			0xff54
- * F1			0xffbe
- * F2			0xffbf
- * ...			...
- * F12			0xffc9
- * Shift		0xffe1
- * Control		0xffe3
- * Meta			0xffe7
- * Alt			0xffe9
+ * BackSpace            0xff08
+ * Tab                  0xff09
+ * Return or Enter      0xff0d
+ * Escape               0xff1b
+ * Insert               0xff63
+ * Delete               0xffff
+ * Home                 0xff50
+ * End                  0xff57
+ * Page Up              0xff55
+ * Page Down            0xff56
+ * Left                 0xff51
+ * Up                   0xff52
+ * Right                0xff53
+ * Down                 0xff54
+ * F1                   0xffbe
+ * F2                   0xffbf
+ * ...                  ...
+ * F12                  0xffc9
+ * Shift                0xffe1
+ * Control              0xffe3
+ * Meta                 0xffe7
+ * Alt                  0xffe9
  */
 
 typedef struct _rfbKeyEventMsg {
-    CARD8 type;			/* always rfbKeyEvent */
-    CARD8 down;			/* true if down (press), false if up */
+    CARD8 type;                 /* always rfbKeyEvent */
+    CARD8 down;                 /* true if down (press), false if up */
     CARD16 pad;
-    CARD32 key;			/* key is specified as an X keysym */
+    CARD32 key;                 /* key is specified as an X keysym */
 } rfbKeyEventMsg;
 
 #define sz_rfbKeyEventMsg 8
@@ -1212,8 +1212,8 @@ typedef struct _rfbKeyEventMsg {
  */
 
 typedef struct _rfbPointerEventMsg {
-    CARD8 type;			/* always rfbPointerEvent */
-    CARD8 buttonMask;		/* bits 0-7 are buttons 1-8, 0=up, 1=down */
+    CARD8 type;                 /* always rfbPointerEvent */
+    CARD8 buttonMask;           /* bits 0-7 are buttons 1-8, 0=up, 1=down */
     CARD16 x;
     CARD16 y;
 } rfbPointerEventMsg;
@@ -1233,7 +1233,7 @@ typedef struct _rfbPointerEventMsg {
  */
 
 typedef struct _rfbClientCutTextMsg {
-    CARD8 type;			/* always rfbClientCutText */
+    CARD8 type;                 /* always rfbClientCutText */
     CARD8 pad1;
     CARD16 pad2;
     CARD32 length;
@@ -1343,7 +1343,7 @@ typedef struct _rfbFileCreateDirRequestMsg {
  */
 
 typedef struct _rfbEnableContinuousUpdatesMsg {
-    CARD8 type;			/* always rfbEnableContinuousUpdates */
+    CARD8 type;                 /* always rfbEnableContinuousUpdates */
     CARD8 enable;
     CARD16 x;
     CARD16 y;
@@ -1369,7 +1369,7 @@ typedef struct _rfbScreenDesc {
 #define sz_rfbScreenDesc 16
 
 typedef struct _rfbSetDesktopSizeMsg {
-    CARD8 type;			/* always rfbSetDesktopSize */
+    CARD8 type;                 /* always rfbSetDesktopSize */
     CARD8 pad1;
     CARD16 w;
     CARD16 h;
