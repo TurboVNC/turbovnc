@@ -18,10 +18,18 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
 /*
  * Class:     com_turbovnc_vncviewer_Viewport
  * Method:    grabKeyboard
- * Signature: (Z)V
+ * Signature: (ZZ)V
  */
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
   (JNIEnv *, jobject, jboolean, jboolean);
+
+/*
+ * Class:     com_turbovnc_vncviewer_Viewport
+ * Method:    extInputEventLoop
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
+  (JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

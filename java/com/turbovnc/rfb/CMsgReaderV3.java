@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,6 +85,8 @@ public class CMsgReaderV3 extends CMsgReader {
         readFence();  break;
       case MsgTypes.msgTypeEndOfContinuousUpdates:
         readEndOfContinuousUpdates();  break;
+      case MsgTypes.msgTypeGII:
+        readGII();  break;
       default:
         vlog.error("Unknown message type " + type);
         throw new ErrorException("Unknown message type " + type);
@@ -190,6 +192,53 @@ public class CMsgReaderV3 extends CMsgReader {
 
   void readEndOfContinuousUpdates() {
     handler.endOfContinuousUpdates();
+  }
+
+  void readGII() {
+    int endianAndSubType = is.readU8();
+    int endian = endianAndSubType & giiTypes.giiBE;
+    int subType = endianAndSubType & ~giiTypes.giiBE;
+
+    if (endian != giiTypes.giiBE) {
+      vlog.error("ERROR: don't know how to handle little endian GII messages");
+      is.skip(6);
+      return;
+    }
+
+    int length = is.readU16();
+    if (length != 4) {
+      vlog.error("ERROR: improperly formatted GII server message");
+      is.skip(4);
+      return;
+    }
+
+    switch (subType) {
+
+    case giiTypes.giiVersion:
+      int maximumVersion = is.readU16();
+      int minimumVersion = is.readU16();
+      if (maximumVersion < 1 || minimumVersion > 1) {
+        vlog.error("ERROR: GII version mismatch");
+        return;
+      }
+      if (minimumVersion != maximumVersion)
+        vlog.debug("Server supports GII versions " + minimumVersion + " - " +
+                   maximumVersion);
+      else
+        vlog.debug("Server supports GII version " + minimumVersion);
+      handler.enableGII();
+      break;
+
+    case giiTypes.giiDeviceCreate:
+      int deviceOrigin = is.readU32();
+      if (deviceOrigin == 0) {
+        vlog.error("ERROR: Could not create GII device");
+        return;
+      }
+      handler.giiDeviceCreated(deviceOrigin);
+      break;
+
+    }
   }
 
   void readClientRedirect(int x, int y, int w, int h) {

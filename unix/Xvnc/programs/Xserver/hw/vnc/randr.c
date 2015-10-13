@@ -349,6 +349,7 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   xf86SetRootClip(pScreen, TRUE);
 
   RRScreenSizeNotify(pScreen);
+  update_desktop_dimensions();
 
   if (!vncRRSetModes(pScreen, width, height)) {
     rfbLog("ERROR: Could not set screen modes\n");

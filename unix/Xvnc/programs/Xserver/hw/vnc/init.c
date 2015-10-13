@@ -81,6 +81,7 @@ from the X Consortium.
 #include <time.h>
 #include "tvnc_version.h"
 #include "input-xkb.h"
+#include "xkbsrv.h"
 #define XSERV_t
 #define TRANS_SERVER
 #define TRANS_REOPEN
@@ -120,6 +121,7 @@ static Bool rfbScreenInit(int index, ScreenPtr pScreen, int argc,
                           char **argv);
 static int rfbKeybdProc(DeviceIntPtr pDevice, int onoff);
 static int rfbMouseProc(DeviceIntPtr pDevice, int onoff);
+static int rfbExtInputProc(DeviceIntPtr pDevice, int onoff);
 static Bool CheckDisplayNumber(int n);
 
 static Bool rfbAlwaysTrue();
@@ -805,6 +807,120 @@ InitInput(int argc, char *argv[])
 }
 
 
+Bool
+AddExtInputDevice(rfbDevInfo *dev)
+{
+    int i;
+    Atom btn_labels[MAX_BUTTONS], axes_labels[MAX_VALUATORS];
+    BYTE map[MAX_BUTTONS + 1];
+    DeviceIntPtr devtmp;
+
+    for (devtmp = inputInfo.devices; devtmp; devtmp = devtmp->next) {
+        if (!strcmp(devtmp->name, dev->name)) {
+            rfbLog("Device \'%s\' already exists\n", dev->name);
+            dev->pDev = devtmp;
+            return TRUE;
+        }
+    }
+
+    if ((dev->pDev = AddInputDevice(serverClient, rfbExtInputProc, TRUE))
+        == NULL) {
+        rfbLog("ERROR: Could not add extended input device\n");
+        goto bailout;
+    }
+
+    if (asprintf(&dev->pDev->name, dev->name) < 0) {
+        rfbLogPerror("ERROR: Could not initialize extended input device\n");
+        goto bailout;
+    }
+    dev->pDev->public.processInputProc = ProcessOtherEvent;
+    dev->pDev->public.realInputProc = ProcessOtherEvent;
+    XkbSetExtension(dev->pDev, ProcessPointerEvent);
+    dev->pDev->deviceGrab.ActivateGrab = ActivatePointerGrab;
+    dev->pDev->deviceGrab.DeactivateGrab = DeactivatePointerGrab;
+    dev->pDev->coreEvents = TRUE;
+    dev->pDev->spriteInfo->spriteOwner = TRUE;
+    dev->pDev->lastSlave = NULL;
+    dev->pDev->last.slave = NULL;
+    dev->pDev->type = SLAVE;
+
+    for (i = 0; i < dev->numButtons; i++) {
+        char name[11];
+        map[i + 1] = i + 1;
+        snprintf(name, 11, "Button %d", i + 1);
+        btn_labels[i] = MakeAtom(name, strlen(name), TRUE);
+    }
+
+    for (i = 0; i < dev->numValuators; i++) {
+        char *name = (char *)dev->valuators[i].longName;
+        axes_labels[i] = MakeAtom(name, strlen(name), TRUE);
+    }
+    InitPointerDeviceStruct((DevicePtr)dev->pDev, map, dev->numButtons,
+                            btn_labels, (PtrCtrlProcPtr)NoopDDA,
+                            GetMotionHistorySize(), dev->numValuators,
+                            axes_labels);
+    InitPointerAccelerationScheme(dev->pDev, PtrAccelNoOp);
+    for (i = 0; i < dev->numValuators; i++) {
+        int res = dev->valuators[i].siDiv;
+        InitValuatorAxisStruct(dev->pDev, i, axes_labels[i],
+                               dev->valuators[i].rangeMin,
+                               dev->valuators[i].rangeMax,
+                               res, res, res, dev->mode);
+    }
+    if (ActivateDevice(dev->pDev, TRUE) != Success) {
+        rfbLog("ERROR: Could not activate extended input device\n");
+        goto bailout;
+    }
+    if (!EnableDevice(dev->pDev, TRUE)) {
+        rfbLog("ERROR: Could not enable extended input device\n");
+        goto bailout;
+    }
+
+    return TRUE;
+
+    bailout:
+    if (dev->pDev) {
+        RemoveDevice(dev->pDev, FALSE);
+        dev->pDev = NULL;
+        if (dev->pDev->name) {
+            free(dev->pDev->name);
+            dev->pDev->name = NULL;
+        }
+    }
+    return FALSE;
+}
+
+
+void
+RemoveExtInputDevice(rfbClientPtr cl, int index)
+{
+    rfbClientPtr cl2;
+    int i;
+    Bool canDelete = TRUE;
+
+    if (index < 0 || index >= cl->numDevices)
+        return;
+
+    for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+        if (cl2 == cl)
+            continue;
+        for (i = 0; i < cl2->numDevices; i++) {
+            if (!strcmp(cl2->devices[i].name, cl->devices[index].name))
+                canDelete = FALSE;
+        }
+    }
+    if (canDelete) {
+        rfbLog("Device \'%s\' no longer used by any clients.  Deleting.\n",
+               cl->devices[index].name);
+        RemoveDevice(cl->devices[index].pDev, FALSE);
+        for (i = index; i < cl->numDevices - 1; i++)
+            memcpy(&cl->devices[i], &cl->devices[i + 1], sizeof(rfbDevInfo));
+        if (cl->numDevices > 0)
+            cl->numDevices--;
+    }
+}
+
+
 void CloseInput(void)
 {
 }
@@ -869,6 +985,28 @@ rfbMouseProc(DeviceIntPtr pDevice, int onoff)
     case DEVICE_ON:
         pDev->on = TRUE;
         PtrDeviceOn(pDevice);
+        break;
+
+    case DEVICE_OFF:
+        pDev->on = FALSE;
+        break;
+    }
+    return Success;
+}
+
+
+int
+rfbExtInputProc(DeviceIntPtr pDevice, int onoff)
+{
+    DevicePtr pDev = (DevicePtr)pDevice;
+
+    switch (onoff)
+    {
+    case DEVICE_INIT:
+        break;
+
+    case DEVICE_ON:
+        pDev->on = TRUE;
         break;
 
     case DEVICE_OFF:

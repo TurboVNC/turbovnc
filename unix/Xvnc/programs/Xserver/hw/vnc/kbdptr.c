@@ -436,13 +436,16 @@ void KeyEvent(CARD32 keysym, Bool down)
 }
 
 
+static int cursorPosX = -1, cursorPosY = -1;
+
+
 void
 PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
 {
     int i;
     int valuators[2];
     ValuatorMask mask;
-    static int oldButtonMask = 0, cursorPosX = -1, cursorPosY = -1;
+    static int oldButtonMask = 0;
 
     if (!ptrDevice)
         FatalError("Pointer device not initialized");
@@ -473,6 +476,24 @@ PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
     }
 
     oldButtonMask = buttonMask;
+    mieqProcessInputEvents();
+}
+
+
+void
+ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
+{
+    ValuatorMask mask;
+
+    if (!dev)
+        FatalError("ExtInputDeviceAddEvent(): Invalid argument");
+
+    valuator_mask_set_range(&mask, dev->valFirst, dev->valCount,
+                            dev->valCount > 0 ? &dev->values[dev->valFirst] :
+                            NULL);
+    QueuePointerEvents(dev->pDev, type, buttons,
+                       dev->mode == Absolute && dev->valCount > 0 ?
+                       POINTER_ABSOLUTE : POINTER_RELATIVE, &mask);
     mieqProcessInputEvents();
 }
 

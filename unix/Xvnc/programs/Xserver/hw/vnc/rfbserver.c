@@ -45,6 +45,8 @@
 #include "rfb.h"
 #include "sprite.h"
 
+/* #define GII_DEBUG */
+
 char updateBuf[UPDATE_BUF_SIZE];
 int ublen;
 
@@ -523,6 +525,10 @@ rfbClientConnectionGone(rfbClientPtr cl)
 
     InterframeOff(cl);
 
+    i = cl->numDevices;
+    while (i-- > 0)
+        RemoveExtInputDevice(cl, 0);
+
     free(cl);
 
     if (rfbClientHead == NULL && rfbIdleTimeout > 0)
@@ -733,7 +739,7 @@ rfbProcessClientInitMessage(rfbClientPtr cl)
 /* Update these constants on changing capability lists below! */
 #define N_SMSG_CAPS  0
 #define N_CMSG_CAPS  0
-#define N_ENC_CAPS  16
+#define N_ENC_CAPS  17
 
 void
 rfbSendInteractionCaps(rfbClientPtr cl)
@@ -796,6 +802,7 @@ rfbSendInteractionCaps(rfbClientPtr cl)
     SetCapInfo(&enc_list[i++],  rfbEncodingRichCursor,     rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingPointerPos,     rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingLastRect,       rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbGIIServer,              rfbGIIVendor);
     if (i != N_ENC_CAPS) {
         rfbLog("rfbSendInteractionCaps: assertion failed, i != N_ENC_CAPS\n");
         rfbCloseClient(cl);
@@ -822,6 +829,22 @@ rfbSendInteractionCaps(rfbClientPtr cl)
  * protocol message.
  */
 
+#define READ(addr, numBytes)  \
+    if ((n = ReadExact(cl, addr, numBytes)) <= 0) {  \
+        if (n != 0)  \
+            rfbLogPerror("rfbProcessClientNormalMessage: read");  \
+        rfbCloseClient(cl);  \
+        return;  \
+    }
+
+#define SKIP(numBytes)  \
+    if ((n = SkipExact(cl, numBytes)) <= 0) {  \
+        if (n != 0)  \
+            rfbLogPerror("rfbProcessClientNormalMessage: skip");  \
+        rfbCloseClient(cl);  \
+        return;  \
+    }
+
 static void
 rfbProcessClientNormalMessage(rfbClientPtr cl)
 {
@@ -829,24 +852,13 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
     rfbClientToServerMsg msg;
     char *str;
 
-    if ((n = ReadExact(cl, (char *)&msg, 1)) <= 0) {
-        if (n != 0)
-            rfbLogPerror("rfbProcessClientNormalMessage: read");
-        rfbCloseClient(cl);
-        return;
-    }
+    READ((char *)&msg, 1)
 
     switch (msg.type) {
 
     case rfbSetPixelFormat:
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbSetPixelFormatMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbSetPixelFormatMsg - 1)
 
         cl->format.bitsPerPixel = msg.spf.format.bitsPerPixel;
         cl->format.depth = msg.spf.format.depth;
@@ -866,13 +878,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
 
 
     case rfbFixColourMapEntries:
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbFixColourMapEntriesMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbFixColourMapEntriesMsg - 1)
         rfbLog("rfbProcessClientNormalMessage: %s",
                 "FixColourMapEntries unsupported\n");
         rfbCloseClient(cl);
@@ -885,15 +891,10 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         CARD32 enc;
         Bool firstFence = !cl->enableFence;
         Bool firstCU = !cl->enableCU;
+        Bool firstGII = !cl->enableGII;
         Bool logTightCompressLevel = FALSE;
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbSetEncodingsMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbSetEncodingsMsg - 1)
 
         msg.se.nEncodings = Swap16IfLE(msg.se.nEncodings);
 
@@ -908,12 +909,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         cl->imageQualityLevel = -1;
 
         for (i = 0; i < msg.se.nEncodings; i++) {
-            if ((n = ReadExact(cl, (char *)&enc, 4)) <= 0) {
-                if (n != 0)
-                    rfbLogPerror("rfbProcessClientNormalMessage: read");
-                rfbCloseClient(cl);
-                return;
-            }
+            READ((char *)&enc, 4)
             enc = Swap32IfLE(enc);
 
             switch (enc) {
@@ -1040,6 +1036,12 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
                     cl->enableExtDesktopSize = TRUE;
                 }
                 break;
+            case rfbEncodingGII:
+                if (!cl->enableGII) {
+                    rfbLog("Enabling GII extension for client %s\n", cl->host);
+                    cl->enableGII = TRUE;
+                }
+                break;
             default:
                 if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
                      enc <= (CARD32)rfbEncodingCompressLevel9 ) {
@@ -1109,6 +1111,24 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         if (cl->enableCU && cl->enableFence && firstCU)
             rfbSendEndOfCU(cl);
 
+        if (cl->enableGII && firstGII) {
+            /* Send GII server version message to all clients */
+            rfbGIIServerVersionMsg msg;
+
+            msg.type = rfbGIIServer;
+            /* We always send as big endian to make things easier on the Java
+               viewer. */
+            msg.endianAndSubType = rfbGIIVersion | rfbGIIBE;
+            msg.length = Swap16IfLE(sz_rfbGIIServerVersionMsg - 4);
+            msg.maximumVersion = msg.minimumVersion = Swap16IfLE(1);
+
+            if (WriteExact(cl, (char *)&msg, sz_rfbGIIServerVersionMsg) < 0) {
+                rfbLogPerror("rfbProcessClientNormalMessage: write");
+                rfbCloseClient(cl);
+                return;
+            }
+        }
+
         return;
     }
 
@@ -1118,13 +1138,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         RegionRec tmpRegion;
         BoxRec box;
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbFramebufferUpdateRequestMsg-1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbFramebufferUpdateRequestMsg - 1)
 
         box.x1 = Swap16IfLE(msg.fur.x);
         box.y1 = Swap16IfLE(msg.fur.y);
@@ -1170,13 +1184,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
 
         cl->rfbKeyEventsRcvd++;
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbKeyEventMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbKeyEventMsg - 1)
 
         if (!rfbViewOnly && !cl->viewOnly) {
             KeyEvent((KeySym)Swap32IfLE(msg.ke.key), msg.ke.down);
@@ -1188,13 +1196,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
 
         cl->rfbPointerEventsRcvd++;
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbPointerEventMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbPointerEventMsg - 1)
 
         if (pointerClient && (pointerClient != cl))
             return;
@@ -1216,13 +1218,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
     {
         int ignoredBytes = 0;
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbClientCutTextMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbClientCutTextMsg - 1)
 
         msg.cct.length = Swap32IfLE(msg.cct.length);
         if (msg.cct.length > rfbMaxClipboard) {
@@ -1272,13 +1268,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
     {
         BoxRec box;
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbEnableContinuousUpdatesMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbEnableContinuousUpdatesMsg - 1)
 
         if (!cl->enableFence || !cl->enableCU) {
             rfbLog("Ignoring request to enable continuous updates because the client does not\n");
@@ -1309,22 +1299,11 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         CARD32 flags;
         char data[64];
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbFenceMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbFenceMsg - 1)
 
         flags = Swap32IfLE(msg.f.flags);
 
-        if ((n = ReadExact(cl, data, msg.f.length)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(data, msg.f.length)
 
         if (msg.f.length > sizeof(data))
             rfbLog("Ignoring fence.  Payload of %d bytes is too large.\n",
@@ -1341,27 +1320,14 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         ScreenPtr pScreen = screenInfo.screens[0];
         rfbClientPtr cl2;
 
-        if ((n = ReadExact(cl, ((char *)&msg) + 1,
-                           sz_rfbSetDesktopSizeMsg - 1)) <= 0) {
-            if (n != 0)
-                rfbLogPerror("rfbProcessClientNormalMessage: read");
-            rfbCloseClient(cl);
-            return;
-        }
+        READ(((char *)&msg) + 1, sz_rfbSetDesktopSizeMsg - 1)
 
         numScreens = msg.sds.numScreens;
         w = Swap16IfLE(msg.sds.w);
         h = Swap16IfLE(msg.sds.h);
 
         for (i = 0; i < numScreens; i++) {
-
-            if ((n = ReadExact(cl, (char *)&screen,
-                               sizeof(rfbScreenDesc))) <= 0) {
-                if (n != 0)
-                    rfbLogPerror("rfbProcessClientNormalMessage: read");
-                rfbCloseClient(cl);
-                return;
-            }
+            READ((char *)&screen, sizeof(rfbScreenDesc))
         }
 
         if (w > 0 && h > 0 && (pScreen->width != w || pScreen->height != h)) {
@@ -1376,6 +1342,324 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         }
         return;
     }
+
+    case rfbGIIClient:
+    {
+        CARD8 endianAndSubType, littleEndian, subType;
+
+        READ((char *)&endianAndSubType, 1);
+        littleEndian = (endianAndSubType & rfbGIIBE) ? 0 : 1;
+        subType = endianAndSubType & ~rfbGIIBE;
+
+        switch (subType) {
+
+        case rfbGIIVersion:
+
+            READ((char *)&msg.giicv.length, sz_rfbGIIClientVersionMsg - 2);
+            if (littleEndian != *(const char *)&rfbEndianTest) {
+                msg.giicv.length = Swap16(msg.giicv.length);
+                msg.giicv.version = Swap16(msg.giicv.version);
+            }
+            if (msg.giicv.length != sz_rfbGIIClientVersionMsg - 4 ||
+                msg.giicv.version < 1) {
+                rfbLog("ERROR: Malformed GII client version message\n");
+                rfbCloseClient(cl);
+                return;
+            }
+            rfbLog("Client supports GII version %d\n", msg.giicv.version);
+            break;
+
+        case rfbGIIDeviceCreate:
+        {
+            int i;
+            rfbDevInfo dev;
+            rfbGIIDeviceCreatedMsg dcmsg;
+
+            memset(&dev, 0, sizeof(dev));
+            dcmsg.deviceOrigin = 0;
+
+            READ((char *)&msg.giidc.length, sz_rfbGIIDeviceCreateMsg - 2);
+            if (littleEndian != *(const char *)&rfbEndianTest) {
+                msg.giidc.length = Swap16(msg.giidc.length);
+                msg.giidc.vendorID = Swap32(msg.giidc.vendorID);
+                msg.giidc.productID = Swap32(msg.giidc.productID);
+                msg.giidc.canGenerate = Swap32(msg.giidc.canGenerate);
+                msg.giidc.numRegisters = Swap32(msg.giidc.numRegisters);
+                msg.giidc.numValuators = Swap32(msg.giidc.numValuators);
+                msg.giidc.numButtons = Swap32(msg.giidc.numButtons);
+            }
+
+            rfbLog("GII Device Create: %s\n", msg.giidc.deviceName);
+#ifdef GII_DEBUG
+            rfbLog("    Vendor ID: %d\n", msg.giidc.vendorID);
+            rfbLog("    Product ID: %d\n", msg.giidc.productID);
+            rfbLog("    Event mask: %.8x\n", msg.giidc.canGenerate);
+            rfbLog("    Registers: %d\n", msg.giidc.numRegisters);
+            rfbLog("    Valuators: %d\n", msg.giidc.numValuators);
+            rfbLog("    Buttons: %d\n", msg.giidc.numButtons);
+#endif
+
+            if (msg.giidc.length != sz_rfbGIIDeviceCreateMsg - 4 +
+                msg.giidc.numValuators * sz_rfbGIIValuator) {
+                rfbLog("ERROR: Malformed GII device create message\n");
+                rfbCloseClient(cl);
+                return;
+            }
+
+            if (msg.giidc.numButtons > MAX_BUTTONS) {
+                rfbLog("GII device create ERROR: %d buttons exceeds max of %d\n",
+                       msg.giidc.numButtons, MAX_BUTTONS);
+                SKIP(msg.giidc.numValuators * sz_rfbGIIValuator);
+                goto sendMessage;
+            }
+            if (msg.giidc.numValuators > MAX_VALUATORS) {
+                rfbLog("GII device create ERROR: %d valuators exceeds max of %d\n",
+                       msg.giidc.numValuators, MAX_VALUATORS);
+                SKIP(msg.giidc.numValuators * sz_rfbGIIValuator);
+                goto sendMessage;
+            }
+
+            memcpy(&dev.name, msg.giidc.deviceName, 32);
+            dev.numButtons = msg.giidc.numButtons;
+            dev.numValuators = msg.giidc.numValuators;
+            dev.eventMask = msg.giidc.canGenerate;
+
+            for (i = 0; i < dev.numValuators; i++) {
+                rfbGIIValuator *v = &dev.valuators[i];
+                READ((char *)v, sz_rfbGIIValuator);
+                if (littleEndian != *(const char *)&rfbEndianTest) {
+                    v->index = Swap32(v->index);
+                    v->rangeMin = Swap32((CARD32)v->rangeMin);
+                    v->rangeCenter = Swap32((CARD32)v->rangeCenter);
+                    v->rangeMax = Swap32((CARD32)v->rangeMax);
+                    v->siUnit = Swap32(v->siUnit);
+                    v->siAdd = Swap32((CARD32)v->siAdd);
+                    v->siMul = Swap32((CARD32)v->siMul);
+                    v->siDiv = Swap32((CARD32)v->siDiv);
+                    v->siShift = Swap32((CARD32)v->siShift);
+                }
+
+#ifdef GII_DEBUG
+                rfbLog("    Valuator: %s (%s)\n", v->longName, v->shortName);
+                rfbLog("        Index: %d\n", v->index);
+                rfbLog("        Range: min = %d, center = %d, max = %d\n",
+                       v->rangeMin, v->rangeCenter, v->rangeMax);
+                rfbLog("        SI unit: %d\n", v->siUnit);
+                rfbLog("        SI add: %d\n", v->siAdd);
+                rfbLog("        SI multiply: %d\n", v->siMul);
+                rfbLog("        SI divide: %d\n", v->siDiv);
+                rfbLog("        SI shift: %d\n", v->siShift);
+#endif
+            }
+
+            for (i = 0; i < cl->numDevices; i++) {
+                if (!strcmp(dev.name, cl->devices[i].name)) {
+                    rfbLog("Device \'%s\' already exists with GII device ID %d\n",
+                           dev.name, i + 1);
+                    dcmsg.deviceOrigin = Swap32IfLE(i + 1);
+                    goto sendMessage;
+                }
+            }
+
+            if (AddExtInputDevice(&dev)) {
+                memcpy(&cl->devices[cl->numDevices], &dev, sizeof(dev));
+                cl->numDevices++;
+                dcmsg.deviceOrigin = Swap32IfLE(cl->numDevices);
+            }
+            rfbLog("GII device ID = %d\n", cl->numDevices);
+
+            sendMessage:
+            /* Send back a GII device created message */
+            dcmsg.type = rfbGIIServer;
+            /* We always send as big endian to make things easier on the Java
+               viewer. */
+            dcmsg.endianAndSubType = rfbGIIDeviceCreate | rfbGIIBE;
+            dcmsg.length = Swap16IfLE(sz_rfbGIIDeviceCreatedMsg - 4);
+
+            if (WriteExact(cl, (char *)&dcmsg,
+                           sz_rfbGIIDeviceCreatedMsg) < 0) {
+                rfbLogPerror("rfbProcessClientNormalMessage: write");
+                rfbCloseClient(cl);
+                return;
+            }
+
+            break;
+        }
+
+        case rfbGIIDeviceDestroy:
+
+            READ((char *)&msg.giidd.length, sz_rfbGIIDeviceDestroyMsg - 2);
+            if (littleEndian != *(const char *)&rfbEndianTest) {
+                msg.giidd.length = Swap16(msg.giidd.length);
+                msg.giidd.deviceOrigin = Swap32(msg.giidd.deviceOrigin);
+            }
+            if (msg.giidd.length != sz_rfbGIIDeviceDestroyMsg - 4) {
+                rfbLog("ERROR: Malformed GII device create message\n");
+                rfbCloseClient(cl);
+                return;
+            }
+
+            RemoveExtInputDevice(cl, msg.giidd.deviceOrigin - 1);
+
+            break;
+
+        case rfbGIIEvent:
+        {
+            CARD16 length;
+
+            READ((char *)&length, sizeof(CARD16));
+            if (littleEndian != *(const char *)&rfbEndianTest)
+                length = Swap16(length);
+
+            while (length > 0) {
+                CARD8 eventSize, eventType;
+
+                READ((char *)&eventSize, 1);
+                READ((char *)&eventType, 1);
+
+                switch (eventType) {
+
+                case rfbGIIButtonPress:
+                case rfbGIIButtonRelease:
+                {
+                    rfbGIIButtonEvent b;
+                    rfbDevInfo *dev;
+
+                    READ((char *)&b.pad, sz_rfbGIIButtonEvent - 2);
+                    if (littleEndian != *(const char *)&rfbEndianTest) {
+                        b.deviceOrigin = Swap32(b.deviceOrigin);
+                        b.buttonNumber = Swap32(b.buttonNumber);
+                    }
+                    if (eventSize != sz_rfbGIIButtonEvent ||
+                        b.deviceOrigin <= 0 || b.buttonNumber < 1) {
+                        rfbLog("ERROR: Malformed GII button event\n");
+                        rfbCloseClient(cl);
+                        return;
+                    }
+                    length -= eventSize;
+                    if (b.deviceOrigin < 1 ||
+                        b.deviceOrigin > cl->numDevices) {
+                        rfbLog("ERROR: GII button event from non-existent device %d\n",
+                               b.deviceOrigin);
+                        rfbCloseClient(cl);
+                        break;
+                    }
+                    dev = &cl->devices[b.deviceOrigin - 1];
+                    if ((eventType == rfbGIIButtonPress &&
+                         (dev->eventMask & rfbGIIButtonPressMask) == 0) ||
+                        (eventType == rfbGIIButtonRelease &&
+                         (dev->eventMask & rfbGIIButtonReleaseMask) == 0)) {
+                        rfbLog("ERROR: Device %d can't generate GII button events\n",
+                               b.deviceOrigin);
+                        rfbCloseClient(cl);
+                        break;
+                    }
+                    if (b.buttonNumber > dev->numButtons) {
+                        rfbLog("ERROR: GII button %d event for device %d exceeds button count (%d)\n",
+                               b.buttonNumber, b.deviceOrigin,
+                               dev->numButtons);
+                        rfbCloseClient(cl);
+                        break;
+                    }
+#ifdef GII_DEBUG
+                    rfbLog("Device %d button %d %s\n", b.deviceOrigin,
+                           b.buttonNumber,
+                           eventType == rfbGIIButtonPress ?
+                           "PRESS" : "release");
+                    fflush(stderr);
+#endif
+                    ExtInputAddEvent(dev, eventType == rfbGIIButtonPress ?
+                                     ButtonPress : ButtonRelease,
+                                     b.buttonNumber);
+                    break;
+                }
+
+                case rfbGIIValuatorRelative:
+                case rfbGIIValuatorAbsolute:
+                {
+                    rfbGIIValuatorEvent v;
+                    int i;
+                    rfbDevInfo *dev;
+
+                    READ((char *)&v.pad, sz_rfbGIIValuatorEvent - 2);
+                    if (littleEndian != *(const char *)&rfbEndianTest) {
+                        v.deviceOrigin = Swap32(v.deviceOrigin);
+                        v.first = Swap32(v.first);
+                        v.count = Swap32(v.count);
+                    }
+                    if (eventSize != sz_rfbGIIValuatorEvent +
+                        sizeof(int) * v.count) {
+                        rfbLog("ERROR: Malformed GII valuator event\n");
+                        rfbCloseClient(cl);
+                        return;
+                    }
+                    length -= eventSize;
+                    if (v.deviceOrigin < 1 ||
+                        v.deviceOrigin > cl->numDevices) {
+                        rfbLog("ERROR: GII valuator event from non-existent device %d\n",
+                               v.deviceOrigin);
+                        rfbCloseClient(cl);
+                        break;
+                    }
+                    dev = &cl->devices[v.deviceOrigin - 1];
+                    if ((eventType == rfbGIIValuatorRelative &&
+                         (dev->eventMask & rfbGIIValuatorRelativeMask) == 0) ||
+                        (eventType == rfbGIIValuatorAbsolute &&
+                         (dev->eventMask & rfbGIIValuatorAbsoluteMask) == 0)) {
+                        rfbLog("ERROR: Device %d cannot generate GII valuator events\n",
+                               v.deviceOrigin);
+                        rfbCloseClient(cl);
+                        break;
+                    }
+                    if (v.first + v.count > dev->numValuators) {
+                        rfbLog("ERROR: GII valuator event for device %d exceeds valuator count (%d)\n",
+                               v.deviceOrigin, dev->numValuators);
+                        rfbCloseClient(cl);
+                        break;
+                    }
+#ifdef GII_DEBUG
+                    rfbLog("Device %d Valuator %s first=%d count=%d:\n",
+                           v.deviceOrigin,
+                           eventType == rfbGIIValuatorRelative ? "rel" : "ABS",
+                           v.first, v.count);
+#endif
+                    for (i = v.first; i < v.first + v.count; i++) {
+                        READ((char *)&dev->values[i], sizeof(int));
+                        if (littleEndian != *(const char *)&rfbEndianTest)
+                            dev->values[i] = Swap32((CARD32)dev->values[i]);
+#ifdef GII_DEBUG
+                        fprintf(stderr, "v[%d]=%d ", i, dev->values[i]);
+#endif
+                    }
+#ifdef GII_DEBUG
+                    fprintf(stderr, "\n");
+#endif
+                    if (v.count > 0) {
+                        dev->valFirst = v.first;
+                        dev->valCount = v.count;
+                        dev->mode = eventType == rfbGIIValuatorAbsolute ?
+                                    Absolute : Relative;
+                        ExtInputAddEvent(dev, MotionNotify, 0);
+                    }
+                    break;
+                }
+                default:
+                    rfbLog("ERROR: This server cannot handle GII event type %d\n",
+                           eventType);
+                    rfbCloseClient(cl);
+                    return;
+                }  /* switch (eventType) */
+            }  /* while (length > 0) */
+            if (length < 0) {
+                rfbLog("ERROR: Malformed GII event message\n");
+                rfbCloseClient(cl);
+                return;
+            }
+            break;
+        }  /* rfbGIIEvent */
+        }  /* switch (subType) */
+        return;
+    }  /* rfbGIIClient */
 
     default:
 

@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,6 +91,16 @@ public abstract class OutStream {
       writeBytes(utf8str, 0, len);
     } catch (java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
+    }
+  }
+
+  public final void writePaddedString(String str, int len) {
+    if (str.length() >= len - 1) {
+      writeBytes(str.getBytes(), 0, len - 1);
+      writeU8(0);
+    } else {
+      writeBytes(str.getBytes(), 0, str.length());
+      writeBytes(new byte[len - str.length()], 0, len - str.length());
     }
   }
 

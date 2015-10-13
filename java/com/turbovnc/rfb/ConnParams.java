@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -34,6 +34,7 @@ public class ConnParams {
     supportsSetDesktopSize = false;  supportsFence = false;
     supportsContinuousUpdates = false;
     supportsClientRedirect = false;
+    supportsGII = false;
     name_ = null;  nEncodings_ = 0;  encodings_ = null;
     verStrPos = 0;
     screenLayout = new ScreenSet();
@@ -122,6 +123,7 @@ public class ConnParams {
   public boolean supportsFence;
   public boolean supportsContinuousUpdates;
   public boolean supportsLastRect;
+  public boolean supportsGII;
 
   public boolean supportsSetDesktopSize;
 

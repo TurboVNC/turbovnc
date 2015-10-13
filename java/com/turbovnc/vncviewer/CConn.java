@@ -762,6 +762,85 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   // RFB thread
+  public void enableGII() {
+    cp.supportsGII = true;
+    if (viewport != null && !benchmark) {
+      vlog.info("Enabling GII");
+      writer().writeGIIVersion();
+      viewport.extInputHelper();
+    }
+  }
+
+  // RFB thread
+  public void giiDeviceCreated(int deviceOrigin) {
+    if (viewport != null && !benchmark)
+      viewport.assignInputDevice(deviceOrigin);
+  }
+
+  // Helper thread
+  public void giiDeviceCreate(ExtInputDevice dev) {
+    if (viewport != null && !benchmark)
+      writer().writeGIIDeviceCreate(dev);
+  }
+
+  // Helper thread
+  public void giiSendEvent(ExtInputDevice dev, ExtInputEvent e) {
+    if (viewport == null || benchmark)
+      return;
+
+    if (cp.width != desktop.scaledWidth ||
+        cp.height != desktop.scaledHeight) {
+      int sx = (desktop.scaleWidthRatio == 1.00) ?
+        e.x : (int)Math.floor(e.x / desktop.scaleWidthRatio);
+      int sy = (desktop.scaleHeightRatio == 1.00) ?
+        e.y : (int)Math.floor(e.y / desktop.scaleHeightRatio);
+      e.x += sx - e.x;  e.y += sy - e.y;
+      System.out.format("sx,sy = %d,%d\n", sx, sy);
+    }
+    if (viewport.dx > 0 || viewport.dy > 0) {
+      int dx = (int)Math.floor(viewport.dx / desktop.scaleWidthRatio);
+      int dy = (int)Math.floor(viewport.dy / desktop.scaleHeightRatio);
+      e.x -= dx;  e.y -= dy;
+      System.out.format("dx,dy = %d,%d\n", dx, dy);
+    }
+    if (viewport.tb.isVisible())
+      e.y -= viewport.tb.getHeight();
+    java.awt.Point spOffset = viewport.sp.getViewport().getViewPosition();
+    e.x += spOffset.x;  e.y += spOffset.y;
+
+    // Here's where things get dicey.  We assume valuators 0 and 1 are X and
+    // Y, which means we need to translate them so they will make sense
+    // relative to the remote desktop.
+    if (dev.valuators.size() > 0) {
+      for (int i = e.firstValuator; i < e.firstValuator + e.numValuators;
+           i++) {
+        ExtInputDevice.Valuator v =
+          (ExtInputDevice.Valuator)dev.valuators.get(i);
+        if (i == 0) {
+          e.valuators[i] = (int)((double)e.x / (double)cp.width *
+                                 ((double)v.rangeMax - (double)v.rangeMin) +
+                                 (double)v.rangeMin + 0.5);
+          if (e.valuators[i] > v.rangeMax)
+            e.valuators[i] = v.rangeMax;
+          else if (e.valuators[i] < v.rangeMin)
+            e.valuators[i] = v.rangeMin;
+        } else if (i == 1) {
+          e.valuators[i] = (int)((double)e.y / (double)cp.height *
+                                 ((double)v.rangeMax - (double)v.rangeMin) +
+                                 (double)v.rangeMin + 0.5);
+          if (e.valuators[i] > v.rangeMax)
+            e.valuators[i] = v.rangeMax;
+          else if (e.valuators[i] < v.rangeMin)
+            e.valuators[i] = v.rangeMin;
+        }
+      }
+    }
+
+    e.print();
+    writer().writeGIIEvent(dev, e);
+  }
+
+  // RFB thread
   private void resizeFramebuffer() {
     if (desktop == null)
       return;
@@ -888,6 +967,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           (opts.grabKeyboard == Options.GRAB_MANUAL && keyboardTempUngrabbed) ||
           (opts.grabKeyboard == Options.GRAB_FS && fullScreen))
         viewport.grabKeyboardHelper(true);
+      viewport.extInputHelper();
     }
   }
 

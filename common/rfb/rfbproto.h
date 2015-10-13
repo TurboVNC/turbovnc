@@ -154,6 +154,7 @@ typedef struct _rfbCapabilityInfo {
 #define rfbTightVncVendor "TGHT"
 #define rfbTurboVncVendor "TRBO"
 #define rfbVeNCryptVendor "VENC"
+#define rfbGIIVendor      "GGI_"
 
 
 /*****************************************************************************
@@ -426,11 +427,14 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbFileUploadCancel 132
 #define rfbFileDownloadFailed 133
 
+#define rfbGIIServer 253
+
 /* signatures for non-standard messages */
 #define sig_rfbFileListData "FTS_LSDT"
 #define sig_rfbFileDownloadData "FTS_DNDT"
 #define sig_rfbFileUploadCancel "FTS_UPCN"
 #define sig_rfbFileDownloadFailed "FTS_DNFL"
+#define sig_rfbGIIServer "GII_SERV"
 
 
 /* client -> server */
@@ -456,6 +460,8 @@ typedef struct _rfbInteractionCapsMsg {
 
 #define rfbSetDesktopSize 251
 
+#define rfbGIIClient 253
+
 /* signatures for non-standard messages */
 #define sig_rfbFileListRequest "FTC_LSRQ"
 #define sig_rfbFileDownloadRequest "FTC_DNRQ"
@@ -464,6 +470,7 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbFileDownloadCancel "FTC_DNCN"
 #define sig_rfbFileUploadFailed "FTC_UPFL"
 #define sig_rfbFileCreateDirRequest "FTC_FCDR"
+#define sig_rfbGIIClient "GII_CLNT"
 
 
 /* server -> client and client -> server */
@@ -479,6 +486,16 @@ typedef struct _rfbInteractionCapsMsg {
                                 rfbFenceFlagBlockAfter | \
                                 rfbFenceFlagSyncNext | \
                                 rfbFenceFlagRequest)
+
+
+/* GII sub-types */
+
+#define rfbGIIEvent 0
+#define rfbGIIVersion 1
+#define rfbGIIDeviceCreate 2
+#define rfbGIIDeviceDestroy 3
+
+#define rfbGIIBE 128
 
 
 /*****************************************************************************
@@ -567,6 +584,8 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbEncodingQualityLevel8   0xFFFFFFE8
 #define rfbEncodingQualityLevel9   0xFFFFFFE9
 
+#define rfbEncodingGII             0xFFFFFECF
+
 /* signatures for "fake" encoding types */
 #define sig_rfbEncodingCompressLevel0  "COMPRLVL"
 #define sig_rfbEncodingXCursor         "X11CURSR"
@@ -577,6 +596,7 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbEncodingFineQualityLevel0 "FINEQLVL"
 #define sig_rfbEncodingSubsamp1X       "SSAMPLVL"
 #define sig_rfbEncodingQualityLevel0   "JPEGQLVL"
+#define sig_rfbEncodingGII             "GII_____"
 
 /*****************************************************************************
  *
@@ -1076,6 +1096,33 @@ typedef struct _rfbFenceMsg {
 #define sz_rfbFenceMsg 9
 
 /*-----------------------------------------------------------------------------
+ * GII Server Version
+ */
+
+typedef struct _rfbGIIServerVersionMsg {
+    CARD8 type;                 /* always rfbGIIServer */
+    CARD8 endianAndSubType;     /* rfbGIIVersion | (rfbGIIBE or 0) */
+    CARD16 length;              /* sz_rfbGIIServerVersionMsg - 4 */
+    CARD16 maximumVersion;      /* 1 */
+    CARD16 minimumVersion;      /* 1 */
+} rfbGIIServerVersionMsg;
+
+#define sz_rfbGIIServerVersionMsg 8
+
+/*-----------------------------------------------------------------------------
+ * GII Device Creation Response
+ */
+
+typedef struct _rfbGIIDeviceCreatedMsg {
+    CARD8 type;                 /* always rfbGIIServer */
+    CARD8 endianAndSubType;     /* rfbGIIDeviceCreate | (rfbGIIBE or 0) */
+    CARD16 length;              /* sz_rfbGIIDeviceCreatedMsg - 4 */
+    CARD32 deviceOrigin;
+} rfbGIIDeviceCreatedMsg;
+
+#define sz_rfbGIIDeviceCreatedMsg 8
+
+/*-----------------------------------------------------------------------------
  * Union of all server->client messages.
  */
 
@@ -1090,6 +1137,8 @@ typedef union _rfbServerToClientMsg {
     rfbFileUploadCancelMsg fuc;
     rfbFileDownloadFailedMsg fdf;
     rfbFenceMsg f;
+    rfbGIIServerVersionMsg giisv;
+    rfbGIIDeviceCreatedMsg giidc;
 } rfbServerToClientMsg;
 
 
@@ -1386,6 +1435,177 @@ typedef struct _rfbSetDesktopSizeMsg {
 #define sz_rfbSetDesktopSizeMsg 8
 
 /*-----------------------------------------------------------------------------
+ * GII Client Version
+ */
+
+typedef struct _rfbGIIClientVersionMsg {
+    CARD8 type;                 /* always rfbGIIClient */
+    CARD8 endianAndSubType;     /* rfbGIIVersion | (rfbGIIBE or 0) */
+    CARD16 length;              /* sz_rfbGIIClientVersionMsg - 4 */
+    CARD16 version;
+} rfbGIIClientVersionMsg;
+
+#define sz_rfbGIIClientVersionMsg 6
+
+/*-----------------------------------------------------------------------------
+ * GII Device Creation
+ */
+
+#define rfbGIIUnitUnknown          0
+#define rfbGIIUnitTime             1
+#define rfbGIIUnitFreq             2
+#define rfbGIIUnitLength           3
+#define rfbGIIUnitVelocity         4
+#define rfbGIIUnitAccel            5
+#define rfbGIIUnitAngle            6
+#define rfbGIIUnitAngularVelocity  7
+#define rfbGIIUnitAngularAccel     8
+#define rfbGIIUnitArea             9
+#define rfbGIIUnitVolume           10
+#define rfbGIIUnitMass             11
+#define rfbGIIUnitForce            12
+#define rfbGIIUnitPressure         13
+#define rfbGIIUnitTorque           14
+#define rfbGIIUnitEnergy           15
+#define rfbGIIUnitPower            16
+#define rfbGIIUnitTemp             17
+#define rfbGIIUnitCurrent          18
+#define rfbGIIUnitVoltage          19
+#define rfbGIIUnitResistance       20
+#define rfbGIIUnitCapacity         21
+#define rfbGIIUnitInductivity      22
+
+typedef struct _rfbGIIValuator {
+    CARD32 index;
+    CARD8 longName[75];         /* Must be NULL-terminated */
+    CARD8 shortName[5];         /* Must be NULL-terminated */
+    INT32 rangeMin;
+    INT32 rangeCenter;
+    INT32 rangeMax;
+    CARD32 siUnit;
+    INT32 siAdd;
+    INT32 siMul;
+    INT32 siDiv;
+    INT32 siShift;
+} rfbGIIValuator;
+
+#define sz_rfbGIIValuator 116
+
+#define rfbGIIKeyPressMask         0x00000020
+#define rfbGIIKeyReleaseMask       0x00000040
+#define rfbGIIKeyRepeatMask        0x00000080
+#define rfbGIIMoveRelativeMask     0x00000100
+#define rfbGIIMoveAbsoluteMask     0x00000200
+#define rfbGIIButtonPressMask      0x00000400
+#define rfbGIIButtonReleaseMask    0x00000800
+#define rfbGIIValuatorRelativeMask 0x00001000
+#define rfbGIIValuatorAbsoluteMask 0x00002000
+
+typedef struct _rfbGIIDeviceCreateMsg {
+    CARD8 type;                 /* always rfbGIIClient */
+    CARD8 endianAndSubType;     /* rfbGIIDeviceCreate | (rfbGIIBE or 0) */
+    CARD16 length;              /* sz_rfbGIIDeviceCreateMsg - 4
+                                   + numValuators * sz_rfbGIIValuator */
+    CARD8 deviceName[32];       /* Must be NULL-terminated */
+    CARD32 vendorID;
+    CARD32 productID;
+    CARD32 canGenerate;
+    CARD32 numRegisters;
+    CARD32 numValuators;
+    CARD32 numButtons;
+    /* Followed by rfbGIIValuator valuators[numValuators] */
+} rfbGIIDeviceCreateMsg;
+
+#define sz_rfbGIIDeviceCreateMsg 60
+
+/*-----------------------------------------------------------------------------
+ * GII Device Destruction
+ */
+
+typedef struct _rfbGIIDeviceDestroyMsg {
+    CARD8 type;                 /* always rfbGIIClient */
+    CARD8 endianAndSubType;     /* rfbGIIDeviceDestroy | (rfbGIIBE or 0) */
+    CARD16 length;              /* sz_rfbGIIDeviceDestroyMsg - 4 */
+    CARD32 deviceOrigin;
+} rfbGIIDeviceDestroyMsg;
+
+#define sz_rfbGIIDeviceDestroyMsg 8
+
+/*-----------------------------------------------------------------------------
+ * GII Event
+ */
+
+#define rfbGIIKeyPress         5
+#define rfbGIIKeyRelease       6
+#define rfbGIIKeyRepeat        7
+#define rfbGIIMoveRelative     8
+#define rfbGIIMoveAbsolute     9
+#define rfbGIIButtonPress      10
+#define rfbGIIButtonRelease    11
+#define rfbGIIValuatorRelative 12
+#define rfbGIIValuatorAbsolute 13
+
+typedef struct _rfbGIIKeyEvent {
+    CARD8 eventSize;            /* always sz_rfbGIIKeyEvent */
+    CARD8 eventType;            /* rfbGIIKeyPress, rfbGIIKeyRelease, or
+                                   rfbGIIKeyRepeat */
+    CARD16 pad;
+    CARD32 deviceOrigin;
+    CARD32 modifiers;
+    CARD32 symbol;
+    CARD32 label;
+    CARD32 button;
+} rfbGIIKeyEvent;
+
+#define sz_rfbGIIKeyEvent 24
+
+typedef struct _rfbGIIMoveEvent {
+    CARD8 eventSize;            /* always sz_rfbGIIPointerMoveEvent */
+    CARD8 eventType;            /* rfbGIIMoveRelative or rfbGIIMoveAbsolute */
+    CARD16 pad;
+    CARD32 deviceOrigin;
+    INT32 x;
+    INT32 y;
+    INT32 z;
+    INT32 wheel;
+} rfbGIIMoveEvent;
+
+#define sz_rfbGIIMoveEvent 24
+
+typedef struct _rfbGIIButtonEvent {
+    CARD8 eventSize;            /* always sz_rfbGIIButtonEvent */
+    CARD8 eventType;            /* rfbGIIButtonPress or rfbGIIButtonRelease */
+    CARD16 pad;
+    CARD32 deviceOrigin;
+    CARD32 buttonNumber;
+} rfbGIIButtonEvent;
+
+#define sz_rfbGIIButtonEvent 12
+
+typedef struct _rfbGIIValuatorEvent {
+    CARD8 eventSize;            /* sz_rfbGIIValuatorEvent + count * 4 */
+    CARD8 eventType;            /* rfbGIIValuatorRelative or
+                                   rfbGIIValuatorAbsolute */
+    CARD16 pad;
+    CARD32 deviceOrigin;
+    CARD32 first;
+    CARD32 count;
+    /* Followed by INT32 values[count] */
+} rfbGIIValuatorEvent;
+
+#define sz_rfbGIIValuatorEvent 16
+
+typedef struct _rfbGIIEventMsg {
+    CARD8 type;                 /* always rfbGII */
+    CARD8 endianAndSubType;     /* rfbGIIEvent | (rfbGIIBE or 0) */
+    CARD16 length;
+    /* Followed by any number of rfbGII*Event structures, totaling length
+       bytes */
+} rfbGIIEventMsg;
+
+#define sz_rfbGIIEventMsg 4
+
+/*-----------------------------------------------------------------------------
  * Union of all client->server messages.
  */
 
@@ -1408,4 +1628,8 @@ typedef union _rfbClientToServerMsg {
     rfbEnableContinuousUpdatesMsg ecu;
     rfbFenceMsg f;
     rfbSetDesktopSizeMsg sds;
+    rfbGIIClientVersionMsg giicv;
+    rfbGIIDeviceCreateMsg giidc;
+    rfbGIIDeviceDestroyMsg giidd;
+    rfbGIIEventMsg giie;
 } rfbClientToServerMsg;

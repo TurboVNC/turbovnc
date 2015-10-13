@@ -157,6 +157,24 @@ typedef void (*rfbTranslateFnType)(char *table, rfbPixelFormat *in,
 
 
 /*
+ * Extended input device structure.
+ */
+
+typedef struct
+{
+    char name[32];
+    int numButtons;
+    int numValuators;
+    int mode;
+    CARD32 eventMask;
+    DeviceIntPtr pDev;
+    rfbGIIValuator valuators[MAX_VALUATORS];
+    int values[MAX_VALUATORS];
+    CARD32 valFirst, valCount;
+} rfbDevInfo, *rfbDevInfoPtr;
+
+
+/*
  * Per-client structure.
  */
 
@@ -322,6 +340,7 @@ typedef struct rfbClientRec {
     Bool enableDesktopSize;        /* client supports desktop size extension */
     Bool enableExtDesktopSize;     /* client supports extended desktop size
                                       extension */
+    Bool enableGII;                /* client supports GII extension */
     Bool useRichCursorEncoding;    /* rfbEncodingRichCursor is preferred */
     Bool cursorWasChanged;         /* cursor shape update should be sent */
     Bool cursorWasMoved;           /* cursor position update should be sent */
@@ -369,6 +388,10 @@ typedef struct rfbClientRec {
 #if USETLS
     rfbSslCtx *sslctx;
 #endif
+
+    /* Extended input device support */
+    rfbDevInfo devices[MAXDEVICES];
+    int numDevices;
 
 } rfbClientRec, *rfbClientPtr;
 
@@ -492,6 +515,9 @@ extern void vrfbLog(char *format, va_list args);
 extern void rfbLog(char *format, ...);
 extern void rfbLogPerror(char *str);
 
+extern Bool AddExtInputDevice(rfbDevInfo *dev);
+extern void RemoveExtInputDevice(rfbClientPtr cl, int index);
+
 
 /* sockets.c */
 
@@ -590,6 +616,7 @@ extern unsigned char ptrAcceleration;
 extern void PtrDeviceOn(DeviceIntPtr);
 extern void PtrDeviceControl(DevicePtr, PtrCtrl *);
 extern void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl);
+extern void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons);
 
 extern void KbdDeviceInit(DeviceIntPtr);
 extern void KeyEvent(KeySym keySym, Bool down);

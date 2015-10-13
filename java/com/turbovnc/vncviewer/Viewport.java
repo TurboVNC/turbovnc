@@ -24,12 +24,15 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.lang.reflect.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
 
-public class Viewport extends JFrame {
+public class Viewport extends JFrame implements Runnable {
 
   public Viewport(CConn cc_) {
     cc = cc_;
@@ -335,13 +338,13 @@ public class Viewport extends JFrame {
         vlog.info("  to the Java command line to specify its location.");
         vlog.info("  Full-screen mode may not work correctly.");
         if (VncViewer.isX11())
-          vlog.info("  Keyboard grabbing will be disabled.");
+          vlog.info("  Keyboard grabbing and extended input device support will be disabled.");
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
         vlog.info("  Full-screen mode may not work correctly.");
         if (VncViewer.isX11())
-          vlog.info("  Keyboard grabbing will be disabled.");
+          vlog.info("  Keyboard grabbing and extended input device support will be disabled.");
       }
     }
     triedHelperInit = true;
@@ -388,8 +391,89 @@ public class Viewport extends JFrame {
     }
   }
 
+  public void extInputHelper() {
+    if (isHelperAvailable() && cc.cp.supportsGII) {
+      if (thread == null) {
+        thread = new Thread(this);
+        thread.start();
+      }
+    }
+  }
+
+  public void run() {
+    try {
+      threadRunning = true;
+      extInputEventLoop();
+    } catch (java.lang.UnsatisfiedLinkError e) {
+      vlog.info("WARNING: Could not invoke extInputEventLoop() from TurboVNC Helper.");
+      vlog.info("  Extended input device support will be disabled.");
+      helperAvailable = false;
+    } catch (java.lang.Exception e) {
+      vlog.info("WARNING: Could not invoke extInputEventLoop() from TurboVNC Helper:");
+      vlog.info("  " + e.toString());
+      vlog.info("  Extended input device support may not work correctly.");
+      thread = null;
+    }
+  }
+
+  synchronized void addInputDevice(ExtInputDevice dev) {
+    if (devices == null)
+      devices = new ArrayList<ExtInputDevice>();
+    devices.add(dev);
+    dev.print();
+    cc.giiDeviceCreate(dev);
+  }
+
+  synchronized void assignInputDevice(int deviceOrigin) {
+    if (devices == null) {
+      vlog.eidebug("Attempted to assign GII device ID " + deviceOrigin +
+                   " to non-existent device");
+      return;
+    }
+    for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
+      ExtInputDevice dev = (ExtInputDevice)i.next();
+      if (dev.remoteID == 0) {
+        dev.remoteID = deviceOrigin;
+        vlog.info("Successfully created device " + deviceOrigin + " ("
+                  + dev.name + ")");
+        break;
+      }
+    }
+  }
+
+  synchronized void sendInputEvent(ExtInputEvent e) {
+    if (devices == null) {
+      vlog.error("ERROR: Attempted to send extended input event when no devices exist");
+      return;
+    }
+    for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
+      ExtInputDevice dev = (ExtInputDevice)i.next();
+      if (e.deviceID == dev.id && dev.remoteID != 0) {
+        if (dev.absolute && e.type == giiTypes.giiValuatorRelative)
+          e.type = giiTypes.giiValuatorAbsolute;
+        cc.giiSendEvent(dev, e);
+      }
+    }
+  }
+
   private native void x11FullScreen(boolean on);
   private native void grabKeyboard(boolean on, boolean pointer);
+  private native void extInputEventLoop();
+
+  @Override
+  public void dispose() {
+    super.dispose();
+    if (thread != null) {
+      threadRunning = false;
+      try {
+        thread.join();
+      } catch (InterruptedException e) {
+        vlog.error("InterruptedException while joining thread: " +
+                   e.getMessage());
+      }
+      thread = null;
+    }
+  }
 
   CConn cc;
   JScrollPane sp;
@@ -400,5 +484,10 @@ public class Viewport extends JFrame {
   boolean keyboardTempUngrabbed;
   static boolean triedHelperInit, helperAvailable;
   Timer timer;
+  Thread thread;
+  boolean threadRunning;
+  private long x11win;
+  ArrayList<ExtInputDevice> devices;
+
   static LogWriter vlog = new LogWriter("Viewport");
 }

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -36,6 +36,7 @@ public class Encodings {
   public static final int pseudoEncodingXCursor = -240;
   public static final int pseudoEncodingCursor = -239;
   public static final int pseudoEncodingDesktopSize = -223;
+  public static final int pseudoEncodingGII = -305;
   public static final int pseudoEncodingExtendedDesktopSize = -308;
   public static final int pseudoEncodingDesktopName = -307;
   public static final int pseudoEncodingClientRedirect = -311;
