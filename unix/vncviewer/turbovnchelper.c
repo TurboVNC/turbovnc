@@ -22,6 +22,7 @@
 #include "jawt_md.h"
 #include "com_turbovnc_vncviewer_Viewport.h"
 
+
 /*
  * These functions are borrowed from OpenSUSE.  They give the window manager a
  * hint that the window is full-screen so the taskbar won't appear on top
@@ -57,9 +58,10 @@ static void netwm_fullscreen(Display *dpy, Window win, int state)
   netwm_set_state(dpy, win, op, _NET_WM_STATE_FULLSCREEN);
 }
 
+
 #define _throw(msg) {  \
   jclass _exccls=(*env)->FindClass(env, "java/lang/Exception");  \
-  if(!_exccls) goto bailout;  \
+  if (!_exccls) goto bailout;  \
   (*env)->ThrowNew(env, _exccls, msg);  \
   goto bailout;  \
 }
@@ -68,6 +70,7 @@ typedef jboolean JNICALL (*__JAWT_GetAWT_type)(JNIEnv* env, JAWT* awt);
 static __JAWT_GetAWT_type __JAWT_GetAWT = NULL;
 
 static void *handle = NULL;
+
 
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   (JNIEnv *env, jobject obj, jboolean on)
@@ -86,19 +89,19 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
       _throw(dlerror());
   }
 
-  if(__JAWT_GetAWT(env, &awt) == JNI_FALSE)
+  if (__JAWT_GetAWT(env, &awt) == JNI_FALSE)
     _throw("Could not initialize AWT native interface");
 
-  if((ds = awt.GetDrawingSurface(env, obj)) == NULL)
+  if ((ds = awt.GetDrawingSurface(env, obj)) == NULL)
     _throw("Could not get drawing surface");
 
-  if((ds->Lock(ds) & JAWT_LOCK_ERROR) != 0)
+  if ((ds->Lock(ds) & JAWT_LOCK_ERROR) != 0)
     _throw("Could not lock surface");
 
-  if((dsi = ds->GetDrawingSurfaceInfo(ds)) == NULL)
+  if ((dsi = ds->GetDrawingSurfaceInfo(ds)) == NULL)
     _throw("Could not get drawing surface info");
 
-  if((x11dsi = (JAWT_X11DrawingSurfaceInfo*)dsi->platformInfo) == NULL)
+  if ((x11dsi = (JAWT_X11DrawingSurfaceInfo*)dsi->platformInfo) == NULL)
     _throw("Could not get X11 drawing surface info");
 
   netwm_fullscreen(x11dsi->display, x11dsi->drawable, on);
@@ -108,13 +111,13 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
          on ? "Enabling" : "Disabling", x11dsi->drawable);
 
   bailout:
-  if(ds)
-  {
-    if(dsi) ds->FreeDrawingSurfaceInfo(dsi);
+  if (ds) {
+    if (dsi) ds->FreeDrawingSurfaceInfo(dsi);
     ds->Unlock(ds);
     awt.FreeDrawingSurface(ds);
   }
 }
+
 
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
   (JNIEnv *env, jobject obj, jboolean on, jboolean pointer)
@@ -134,19 +137,19 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
       _throw(dlerror());
   }
 
-  if(__JAWT_GetAWT(env, &awt) == JNI_FALSE)
+  if (__JAWT_GetAWT(env, &awt) == JNI_FALSE)
     _throw("Could not initialize AWT native interface");
 
-  if((ds = awt.GetDrawingSurface(env, obj)) == NULL)
+  if ((ds = awt.GetDrawingSurface(env, obj)) == NULL)
     _throw("Could not get drawing surface");
 
-  if((ds->Lock(ds) & JAWT_LOCK_ERROR) != 0)
+  if ((ds->Lock(ds) & JAWT_LOCK_ERROR) != 0)
     _throw("Could not lock surface");
 
-  if((dsi = ds->GetDrawingSurfaceInfo(ds)) == NULL)
+  if ((dsi = ds->GetDrawingSurfaceInfo(ds)) == NULL)
     _throw("Could not get drawing surface info");
 
-  if((x11dsi = (JAWT_X11DrawingSurfaceInfo*)dsi->platformInfo) == NULL)
+  if ((x11dsi = (JAWT_X11DrawingSurfaceInfo*)dsi->platformInfo) == NULL)
     _throw("Could not get X11 drawing surface info");
 
   XSync(x11dsi->display, False);
@@ -203,9 +206,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
   XSync(x11dsi->display, False);
 
   bailout:
-  if(ds)
-  {
-    if(dsi) ds->FreeDrawingSurfaceInfo(dsi);
+  if (ds) {
+    if (dsi) ds->FreeDrawingSurfaceInfo(dsi);
     ds->Unlock(ds);
     awt.FreeDrawingSurface(ds);
   }
