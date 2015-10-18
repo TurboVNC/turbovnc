@@ -76,6 +76,8 @@ pop up a dialog that gives the user the option to trust the certificate for
 future connections.
 -- The viewer can now handle X.509 certificate files containing multiple
 concatenated certificates.
+-- The viewer now performs hostname verification using either the X.509 v3
+subjectAltName (SAN) extension or, if SAN is not present, the subject CN field.
 -------------------------------------------------------------------------------
 
 
