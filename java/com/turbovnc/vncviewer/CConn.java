@@ -910,7 +910,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     Toolkit tk = Toolkit.getDefaultToolkit();
 
-    int i = 0;
+    int i = 0, maxArea = 0;
     for (GraphicsDevice gs : gsList) {
       GraphicsConfiguration[] gcList = gs.getConfigurations();
       for (GraphicsConfiguration gc : gcList) {
@@ -935,6 +935,18 @@ public class CConn extends CConnection implements UserPasswdGetter,
                                   (s.x < primary.x &&
                                    s.y < primary.y + primary.height)))))
           primary = s;
+        if (VncViewer.currentMonitorIsPrimary.getValue() && viewport != null) {
+          Rectangle vpRect = viewport.getBounds();
+          if (opts.fullScreen && savedRect.x >= 0 && savedRect.y >= 0 &&
+              savedRect.width > 0 && savedRect.height > 0)
+            vpRect = savedRect;
+          vpRect = s.intersection(vpRect);
+          int area = vpRect.isEmpty() ? 0 : vpRect.width * vpRect.height;
+          if (area > maxArea) {
+            maxArea = area;
+            primary = s;
+          }
+        }
         if (gc == gcList[0])
           vlog.debug("Screen " + i++ + (fullScreen ? " FS " : " work ") +
                      "area: " + s.x + ", " + s.y + " " + s.width + " x " +

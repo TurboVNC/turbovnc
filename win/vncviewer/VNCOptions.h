@@ -109,6 +109,7 @@ class VNCOptions
     bool  m_ViewOnly;
     bool  m_FullScreen;
     int   m_Span;
+    bool  m_CurrentMonitorIsPrimary;
     bool  m_Use8Bit;
     bool  m_DoubleBuffer;
     int   m_PreferredEncoding;

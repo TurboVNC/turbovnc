@@ -717,16 +717,23 @@ Tight when connecting to a TurboVNC server, but this option can be useful when\r
 connecting to other types of VNC servers, such as RealVNC.\r\n\
 \r\n"
     IDS_HELP14
+"/firstmonitorisprimary\r\n\
+For the purposes of spanning, the default is for the monitor that contains the\r\n\
+largest number of pixels from the viewer window to be treated as the primary\r\n\
+monitor.  This option causes the left-most and top-most monitor to be treated\r\n\
+as the primary monitor (as was the case in prior versions of TurboVNC.)\r\n\
+\r\n"
+    IDS_HELP15
 "/fsaltenter\r\n\
 /nofsaltenter\r\n\
 Allow/disallow the Alt+Enter key sequence to activate/deactivate full-screen mode\r\n\
 \r\n"
-    IDS_HELP15
+    IDS_HELP16
 "/fullscreen\r\n\
 /nofullscreen\r\n\
 Equivalent of ""Connection-->Display-->Full-screen mode"" in the options dialog\r\n\
 \r\n"
-    IDS_HELP16
+    IDS_HELP17
 "/grabkeyboard fs | always | manual\r\n\
 Grabbing the keyboard ensures that all special keystrokes, such as Alt-Tab,\r\n\
 Ctrl-Esc, the Windows and Menu keys, etc. will be passed to the server rather\r\n\
@@ -737,38 +744,38 @@ application starts.  When ""manual"" is specified, then the keyboard is only\r\n
 grabbed when Ctrl-Alt-Shift-G is pressed or when ""Grab keyboard"" is selected\r\n\
 from the System Menu.\r\n\
 \r\n"
-    IDS_HELP17
+    IDS_HELP18
 "/ipv6\r\n\
 When used with /listen, this causes vncviewer to accept connections from\r\n\
 IPv6-enabled servers.  If your system supports IPv4-mapped IPv6 addresses,\r\n\
 then connections from IPv4 servers can also be accepted when this option is\r\n\
 enabled.\r\n\
 \r\n"
-    IDS_HELP18
+    IDS_HELP19
 "/jpeg\r\n\
 /nojpeg\r\n\
 Equivalent of ""Connection-->Encoding-->Allow JPEG compression"" in the options\r\n\
 dialog\r\n\
 \r\n"
-    IDS_HELP19
+    IDS_HELP20
 "/listen [<port>]\r\n\
 Equivalent of the ""Listen mode"" button in the new connection dialog and\r\n\
 ""Globals-->Listen mode-->Accept reverse VNC connections on TCP port"" in the\r\n\
 options dialog\r\n\
 \r\n"
-    IDS_HELP20
+    IDS_HELP21
 "/loglevel <n>\r\n\
 Equivalent of ""Globals-->Logging-->Verbosity level"" in the options dialog\r\n\
 \r\n\
 /logfile <filename>\r\n\
 Equivalent of ""Globals-->Logging-->Write log to a file"" in the options dialog\r\n\
 \r\n"
-    IDS_HELP21
+    IDS_HELP22
 "/notoolbar\r\n\
 Equivalent of ""Globals-->Interface options-->Show toolbars by default""\r\n\
 in the options dialog\r\n\
 \r\n"
-    IDS_HELP22
+    IDS_HELP23
 "/nounixlogin\r\n\
 When connecting to TightVNC/TurboVNC servers, this disables the use of Unix\r\n\
 login authentication.  This is useful if the server is configured to prefer an\r\n\
@@ -776,41 +783,41 @@ authentication method that supports Unix login authentication and you want to\r\
 override this preference for a particular connection (for instance, to use a\r\n\
 one-time password.)\r\n\
 \r\n"
-    IDS_HELP23
+    IDS_HELP24
 "/password <clear text password>\r\n\
 Bypass the authentication dialog and use the specified password\r\n\
 \r\n"
-    IDS_HELP24
+    IDS_HELP25
 "/quality <1-100>\r\n\
 Equivalent of ""Connection-->Encoding-->JPEG image quality"" in the options\r\n\
 dialog\r\n\
 \r\n"
-    IDS_HELP25
+    IDS_HELP26
 "/raiseonbeep\r\n\
 /noraiseonbeep\r\n\
 Equivalent of ""Connection-->Display-->Deiconify on remote Bell event"" in the\r\n\
 options dialog\r\n\
 \r\n"
-    IDS_HELP26
+    IDS_HELP27
 "/register\r\n\
 Register the TurboVNC Viewer as the default application for opening .vnc\r\n\
 files\r\n\
 \r\n"
-    IDS_HELP27
+    IDS_HELP28
 "/samp gray | 1X | 2X | 4X\r\n\
 Equivalent of ""Connection-->Encoding-->JPEG chrominance subsampling"" in the\r\n\
 options dialog\r\n\
 \r\n"
-    IDS_HELP28
+    IDS_HELP29
 "/scale <percentage> | fixedratio\r\n\
 Equivalent of ""Connection-->Display-->Scaling factor"" in the options dialog\r\n\
 \r\n"
-    IDS_HELP29
+    IDS_HELP30
 "/shared\r\n\
 /noshared\r\n\
 Equivalent of ""Connection-->Request shared session"" in the options dialog\r\n\
 \r\n"
-    IDS_HELP30
+    IDS_HELP31
 "/singlebuffer\r\n\
 The TurboVNC Viewer's default behavior is to wait until all rectangles in a\r\n\
 framebuffer update have been received and decoded before it draws the\r\n\
@@ -820,28 +827,28 @@ Passing an argument of /singlebuffer to vncviewer will cause it to draw each\r\n
 rectangle in the framebuffer update as it is received.  This may be desirable\r\n\
 on very slow connections.\r\n\
 \r\n"
-    IDS_HELP31
+    IDS_HELP32
 "/span primary | all | auto\r\n\
 Equivalent of ""Connection-->Display-->Span mode"" in the options dialog\r\n\
 \r\n"
-    IDS_HELP32
+    IDS_HELP33
 "/swapmouse\r\n\
 Equivalent of ""Connection-->Mouse-->Swap mouse button 2 and 3"" in the options\r\n\
 dialog\r\n\
 \r\n"
-    IDS_HELP33
+    IDS_HELP34
 "/user <user name>\r\n\
 Specify user name for Unix login authentication.  This will force Unix login\r\n\
 authentication to be used, if an authentication method that supports it is\r\n\
 enabled in the VNC server.\r\n\
 \r\n"
-    IDS_HELP34
+    IDS_HELP35
 "/viewonly\r\n\
 /fullcontrol\r\n\
 Equivalent of ""Connection-->Restrictions-->View only (inputs ignored)"" in the\r\n\
 options dialog\r\n\
 \r\n"
-    IDS_HELP35
+    IDS_HELP36
 "/help\r\n\
 /?\r\n\
 Display this screen\r\n\

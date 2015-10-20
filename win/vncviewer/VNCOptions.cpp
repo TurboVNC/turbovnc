@@ -45,6 +45,7 @@ VNCOptions::VNCOptions()
   m_ViewOnly = false;
   m_FullScreen = false;
   m_Span = SPAN_AUTO;
+  m_CurrentMonitorIsPrimary = true;
   m_FSAltEnter = false;
   m_GrabKeyboard = TVNC_FS;
   m_toolbar = true;
@@ -125,6 +126,7 @@ VNCOptions& VNCOptions::operator = (VNCOptions& s)
   m_ViewOnly              = s.m_ViewOnly;
   m_FullScreen            = s.m_FullScreen;
   m_Span                  = s.m_Span;
+  m_CurrentMonitorIsPrimary = s.m_CurrentMonitorIsPrimary;
   m_FSAltEnter            = s.m_FSAltEnter;
   m_GrabKeyboard          = s.m_GrabKeyboard;
   m_Use8Bit               = s.m_Use8Bit;
@@ -448,6 +450,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
       m_FSAltEnter = true;
     } else if (SwitchMatch(args[j], "nofsaltenter")) {
       m_FSAltEnter = false;
+    } else if (SwitchMatch(args[j], "firstmonitorisprimary")) {
+      m_CurrentMonitorIsPrimary = false;
     } else if (SwitchMatch(args[j], "grabkeyboard")) {
       if (++j == i) {
         ArgError("No keyboard grab mode specified");
