@@ -44,6 +44,28 @@ following error:
 		dpkg -i turbovnc*.deb
 		---
 
+*** Installing TurboVNC for a Single User
+#OPT: noList! plain!
+
+Download the appropriate binary package, as above, then execute the following
+commands:
+
+	RPM-based systems :: {:}
+	#Verb <<---
+	mkdir ~/turbovnc
+	cd ~/turbovnc
+	rpm2cpio {full path of turbovnc*.rpm} | cpio -idv
+	---
+
+	Debian-based systems :: {:}
+	#Verb <<---
+	dpkg-deb --extract {full path of turbovnc*.deb} ~/turbovnc
+	---
+
+Add __~/turbovnc__ to any paths specified in this document.  Note that the
+TurboVNC security configuration file will not work when TurboVNC is installed
+in this manner.
+
 ** Installing the TurboVNC Viewer on OS X
 
 	#. Download the TurboVNC Mac disk image
