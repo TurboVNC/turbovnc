@@ -206,6 +206,8 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   tDecode = tBlit = tRead = 0.0;
   decodePixels = blitPixels = 0;
   decodeRect = blits = updates = 0;
+
+  savedRect.left = savedRect.top = savedRect.right = savedRect.bottom = -1;
 }
 
 
@@ -1560,8 +1562,8 @@ void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered,
   winplace.length = sizeof(WINDOWPLACEMENT);
   GetWindowPlacement(m_hwnd1, &winplace);
   if (centered) {
-    x = (workwidth - m_winwidth) / 2;
-    y = (workheight - m_winheight) / 2;
+    x = (workwidth - m_winwidth) / 2 + workrect.left;
+    y = (workheight - m_winheight) / 2 + workrect.top;
     if (winplace.showCmd != SW_SHOWMINIMIZED)
       winplace.showCmd = SW_SHOWNORMAL;
   } else {

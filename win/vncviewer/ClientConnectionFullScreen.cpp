@@ -52,7 +52,6 @@ void ClientConnection::SetFullScreenMode(bool enable, bool suppressPrompt)
 void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 {
   LONG style = GetWindowLong(m_hwnd1, GWL_STYLE);
-  static RECT savedRect = {-1, -1, -1, -1};
   if (m_opts.m_FullScreen) {
     if (!suppressPrompt && !pApp->m_options.m_skipprompt) {
       MessageBox(m_hwnd1,
@@ -115,8 +114,9 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 #define HeightOf(rect) ((rect).bottom - (rect).top)
 
 typedef struct _FSMetrics {
-  RECT screenArea, workArea, screenArea0, workArea0;
+  RECT screenArea, workArea, screenArea0, workArea0, winRect;
   bool equal;
+  int maxArea;
 } FSMetrics;
 
 
@@ -166,6 +166,19 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
     fsm->workArea.bottom = min(mi.rcWork.bottom, fsm->workArea.bottom);
   }
 
+  if (fsm->winRect.left >= 0 && fsm->winRect.right >= 0 &&
+      fsm->winRect.top >= 0 && fsm->winRect.bottom >= 0) {
+    RECT vpRect;
+    IntersectRect(&vpRect, &fsm->winRect, &mi.rcMonitor);
+    int area = IsRectEmpty(&vpRect) ? 0 :
+               (vpRect.right - vpRect.left) * (vpRect.bottom - vpRect.top);
+    if (area > fsm->maxArea) {
+      fsm->maxArea = area;
+      fsm->workArea0 = mi.rcWork;
+      fsm->screenArea0 = mi.rcMonitor;
+    }
+  }
+
   return TRUE;
 }
 
@@ -187,9 +200,21 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
   fsm.screenArea0 = fsm.screenArea;
   SystemParametersInfo(SPI_GETWORKAREA, 0, &fsm.workArea, 0);
   fsm.workArea0 = fsm.workArea;
+  fsm.maxArea = 0;
 
-  if (m_opts.m_Span == SPAN_PRIMARY ||
-      !EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm) ||
+  if (m_opts.m_CurrentMonitorIsPrimary) {
+    GetWindowRect(m_hwnd1, &fsm.winRect);
+    if (m_opts.m_FullScreen && savedRect.left >= 0 && savedRect.top >= 0 &&
+        savedRect.right >= 0 && savedRect.bottom >= 0)
+      fsm.winRect = savedRect;
+  } else {
+    fsm.winRect.left = fsm.winRect.right = -1;
+    fsm.winRect.top = fsm.winRect.bottom = -1;
+  }
+
+  BOOL ret = EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm);
+
+  if (m_opts.m_Span == SPAN_PRIMARY || !ret ||
       (m_opts.m_Span == SPAN_AUTO &&
        (scaledWidth <= primaryWidth ||
         WidthOf(fsm.screenArea) <= primaryWidth) &&

@@ -368,6 +368,8 @@ class ClientConnection : public omni_thread
     int m_fullwinwidth, m_fullwinheight;
     int m_winwidth, m_winheight;
 
+    RECT savedRect;
+
     bool m_firstUpdate;
 
     // Desktop resizing

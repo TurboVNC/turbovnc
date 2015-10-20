@@ -1053,6 +1053,14 @@ public class VncViewer extends javax.swing.JApplet
   "with spanning windows across multiple monitors in X11, this option is " +
   "not available on Un*x/X11 platforms.", "Auto", "Primary, All, Auto");
 
+  static BoolParameter currentMonitorIsPrimary
+  = new BoolParameter("CurrentMonitorIsPrimary",
+  "If this option is enabled, then the monitor that contains the largest " +
+  "number of pixels from the viewer window will be treated as the primary " +
+  "monitor for the purposes of spanning.  Otherwise, the left-most and " +
+  "top-most monitor will always be the primary monitor (as was the case in " +
+  "prior versions of TurboVNC.)", true);
+
   static BoolParameter showToolbar
   = new BoolParameter("Toolbar",
   "Show the toolbar by default.", true);
