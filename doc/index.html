@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-10-02T17:46:22">
+<meta name="date" content="2015-10-20T03:13:25">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -565,6 +565,36 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         </dl>
     </li>
 </ol>
+
+
+
+<h3 id="hd005001003">Installing TurboVNC for a Single User</h3>
+
+<p>Download the appropriate binary package, as above, then execute the 
+following commands:</p>
+
+<dl class="Description">
+    <dt class="Description-1 Description">RPM-based systems</dt>
+    <dd class="Description-1 Description">
+<pre class="verbatim">
+mkdir&nbsp;~/turbovnc
+cd&nbsp;~/turbovnc
+rpm2cpio&nbsp;{full&nbsp;path&nbsp;of&nbsp;turbovnc*.rpm}&nbsp;|&nbsp;cpio&nbsp;-idv
+</pre>
+
+    </dd>
+    <dt class="Description-1 Description">Debian-based systems</dt>
+    <dd class="Description-1 Description">
+<pre class="verbatim">
+dpkg-deb&nbsp;--extract&nbsp;{full&nbsp;path&nbsp;of&nbsp;turbovnc*.deb}&nbsp;~/turbovnc
+</pre>
+
+    </dd>
+</dl>
+
+<p>Add <em>~/turbovnc</em> to any paths specified in this document.  Note 
+that the TurboVNC security configuration file will not work when 
+TurboVNC is installed in this manner.</p>
 
 
 
