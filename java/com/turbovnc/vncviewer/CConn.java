@@ -942,8 +942,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           primary = s;
         if (VncViewer.currentMonitorIsPrimary.getValue() && viewport != null) {
           Rectangle vpRect = viewport.getBounds();
-          if (opts.fullScreen && savedRect.x >= 0 && savedRect.y >= 0 &&
-              savedRect.width > 0 && savedRect.height > 0)
+          if (opts.fullScreen && savedRect.width > 0 && savedRect.height > 0)
             vpRect = savedRect;
           vpRect = s.intersection(vpRect);
           int area = vpRect.isEmpty() ? 0 : vpRect.width * vpRect.height;
