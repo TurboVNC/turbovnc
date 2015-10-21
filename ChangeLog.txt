@@ -111,6 +111,10 @@ it to the server, instead of UTF-8.  The RFB spec requires that the clipboard
 be encoded as ISO-8859-1, so it is possible that attempting to encode it as
 UTF-8 was causing problems with certain applications.
 -------------------------------------------------------------------------------
+[13]
+The TurboVNC Server now allows the maximum clipboard transfer size to be
+specified, by way of a new Xvnc argument (-maxclipboard).
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

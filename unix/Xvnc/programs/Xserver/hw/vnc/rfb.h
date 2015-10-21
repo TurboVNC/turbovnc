@@ -630,6 +630,7 @@ extern double rfbAutoLosslessRefresh;
 extern int rfbALRQualityLevel;
 extern int rfbALRSubsampLevel;
 extern int rfbInterframe;
+extern int rfbMaxClipboard;
 
 #define debugregion(r, m) \
     rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1, \

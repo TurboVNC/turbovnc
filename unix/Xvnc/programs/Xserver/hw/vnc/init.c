@@ -297,6 +297,12 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
+    if (strcasecmp(argv[i], "-maxclipboard") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbMaxClipboard = atoi(argv[i + 1]);
+        return 2;
+    }
+
     if (strcasecmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
         if (i + 1 >= argc) UseMsg();
         rfbIdleTimeout = atoi(argv[i + 1]);
@@ -765,6 +771,8 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
     if (!vncRRInit(pScreen)) return FALSE;
 #endif
 
+    rfbLog("Maximum clipboard transfer size: %d bytes\n", rfbMaxClipboard);
+
     return ret;
 
 } /* end rfbScreenInit */
@@ -1178,6 +1186,8 @@ ddxUseMsg()
     ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
     ErrorF("-nocutbuffersync       disable clipboard synchronization for applications\n");
     ErrorF("                       that use the (obsolete) X cut buffer\n");
+    ErrorF("-maxclipboard B        set max. clipboard transfer size to B bytes\n");
+    ErrorF("                       (default: %d)\n", rfbMaxClipboard);
     ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
     ErrorF("-httpd dir             serve files from the specified directory using HTTP\n");
     ErrorF("-httpport port         port for HTTP server\n");

@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "September 2015" "" "TurboVNC"
+.TH Xvnc 1 "October 2015" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -26,6 +26,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-rfbauth \fIpasswd-file\fR] [\-securitytypes \fItype-list\fR]
 [\-x509cert \fIcert\fR] [\-x509key \fIkey\fR]
 [\-noreverse] [\-noclipboardsend] [\-noclipboardrecv]
+[\-maxclipboard \fIbytes\fR]
 [\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-noflowcontrol]
 [\-alr \fItime\fR]
@@ -132,6 +133,9 @@ viewer whenever the latter changes.  This option can be set for all
 TurboVNC sessions on this system by using the \fIno-clipboard-recv\fR
 directive in the security configuration file.  See the SECURITY
 CONFIGURATION FILE section for more details.
+.TP
+\fB-maxclipboard\fR \fIbytes\fR
+Set the maximum clipboard transfer size to \fIbytes\fR.
 .TP
 \fB\-idletimeout\fR \fItime\fR
 Time, in seconds, which the TurboVNC Server can sit idle (with no VNC viewer
