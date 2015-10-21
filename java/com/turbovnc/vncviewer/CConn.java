@@ -915,6 +915,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     Toolkit tk = Toolkit.getDefaultToolkit();
 
     int i = 0, maxArea = 0;
+    boolean primaryIsCurrent = false;
     for (GraphicsDevice gs : gsList) {
       GraphicsConfiguration[] gcList = gs.getConfigurations();
       for (GraphicsConfiguration gc : gcList) {
@@ -932,7 +933,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           tLeft = s.x;  tTop = s.y;
           tRight = s.x + s.width;  tBottom = s.y + s.height;
         }
-        if (s.x >= 0 && s.y >= 0 &&
+        if (s.x >= 0 && s.y >= 0 && !primaryIsCurrent &&
             (primary == null ||
              (gc == gcList[0] && ((s.y < primary.y &&
                                    s.x < primary.x + primary.width) ||
@@ -949,6 +950,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           if (area > maxArea) {
             maxArea = area;
             primary = s;
+            primaryIsCurrent = true;
           }
         }
         if (gc == gcList[0])
