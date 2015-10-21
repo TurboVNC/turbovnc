@@ -36,7 +36,7 @@ public class PixelBuffer {
   }
 
   public void setPF(PixelFormat pf) {
-    if (!(pf.bpp == 32) && !(pf.bpp == 16) && !(pf.bpp == 8))
+    if (!(pf.bpp == 32) && !(pf.bpp == 16) && !(pf.bpp == 15) && !(pf.bpp == 8))
       throw new ErrorException("setPF() called with incorrect pixel format (bpp = " +
                                pf.bpp + ")");
     format = pf;
@@ -54,6 +54,9 @@ public class PixelBuffer {
       else
         cm = new IndexColorModel(8, 256, new byte[256], new byte[256],
                                  new byte[256]);
+      break;
+    case 15:
+      cm = new DirectColorModel(15, 0x7C00, 0x03E0, 0x001F);
       break;
     case 16:
       cm = new DirectColorModel(16, 0xF800, 0x07E0, 0x001F);
