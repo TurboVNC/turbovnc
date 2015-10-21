@@ -900,7 +900,7 @@ public class VncViewer extends javax.swing.JApplet
 
     opts.colors = -1;
     switch (colors.getValue()) {
-      case 8:  case 64:  case 256:  case 65536:
+      case 8:  case 64:  case 256:  case 32768:  case 65536:
         opts.colors = colors.getValue();
         break;
     }
@@ -1209,12 +1209,13 @@ public class VncViewer extends javax.swing.JApplet
   "The color depth to use for the viewer's window.  Specifying 8 will use a " +
   "BGR111 pixel format (1 bit for each red, green, and blue component.) " +
   "Specifying 64 will use a BGR222 pixel format, specifying 256 will use a " +
-  "BGR233 pixel format, and specifying 65536 will use a BGR565 pixel format. " +
-  "Lowering the color depth can significantly reduce bandwidth when using " +
-  "encoding types other than Tight or when using Tight encoding without JPEG. " +
-  "However, colors will not be represented accurately, and CPU usage will " +
-  "increase substantially (causing a corresponding decrease in performance on " +
-  "fast networks.)  The default is to use the native color depth of the display " +
+  "BGR233 pixel format, specifying 32768 will use a BGR555 pixel format, " +
+  "and specifying 65536 will use a BGR565 pixel format.  Lowering the color " +
+  "depth can significantly reduce bandwidth when using encoding types other " +
+  "than Tight or when using Tight encoding without JPEG.  However, colors " +
+  "will not be represented accurately, and CPU usage will increase " +
+  "substantially (causing a corresponding decrease in performance on fast " +
+  "networks.)  The default is to use the native color depth of the display " +
   "on which the viewer is running, which is usually true color (8 bits per " +
   "component.)", -1);
 

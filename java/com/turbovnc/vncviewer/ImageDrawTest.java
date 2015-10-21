@@ -36,6 +36,8 @@ public class ImageDrawTest extends JFrame {
     new PixelFormat(8, 6, false, true, 3, 3, 3, 4, 2, 0);
   static final PixelFormat MEDIUM_COLOR_PF =
     new PixelFormat(8, 8, false, true, 7, 7, 3, 5, 2, 0);
+  static final PixelFormat MEDIUMHIGH_COLOR_PF =
+    new PixelFormat(16, 15, false, true, 31, 31, 31, 10, 5, 0);
   static final PixelFormat HIGH_COLOR_PF =
     new PixelFormat(16, 16, false, true, 31, 63, 31, 11, 5, 0);
 
@@ -68,6 +70,8 @@ public class ImageDrawTest extends JFrame {
         im1.setPF(LOW_COLOR_PF);
       else if (colors == 256)
         im1.setPF(MEDIUM_COLOR_PF);
+      else if (colors == 32768)
+        im1.setPF(MEDIUMHIGH_COLOR_PF);
       else if (colors == 65536)
         im1.setPF(HIGH_COLOR_PF);
       im2 = new BIPixelBuffer(width, height, null, null);
@@ -77,6 +81,8 @@ public class ImageDrawTest extends JFrame {
         im2.setPF(LOW_COLOR_PF);
       else if (colors == 256)
         im2.setPF(MEDIUM_COLOR_PF);
+      else if (colors == 32768)
+        im2.setPF(MEDIUMHIGH_COLOR_PF);
       else if (colors == 65536)
         im2.setPF(HIGH_COLOR_PF);
 
@@ -194,7 +200,7 @@ public class ImageDrawTest extends JFrame {
           temp = Integer.parseInt(arg[++i]);
         } catch (NumberFormatException e) {};
         switch(temp) {
-          case 8:  case 64:  case 256:  case 65536:
+          case 8:  case 64:  case 256:  case 32768:  case 65536:
             colors = temp;
         }
       }

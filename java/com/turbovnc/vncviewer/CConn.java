@@ -59,6 +59,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     new PixelFormat(8, 6, false, true, 3, 3, 3, 4, 2, 0);
   static final PixelFormat MEDIUM_COLOR_PF =
     new PixelFormat(8, 8, false, true, 7, 7, 3, 5, 2, 0);
+  static final PixelFormat MEDIUMHIGH_COLOR_PF =
+    new PixelFormat(16, 15, false, true, 31, 31, 31, 10, 5, 0);
   static final PixelFormat HIGH_COLOR_PF =
     new PixelFormat(16, 16, false, true, 31, 63, 31, 11, 5, 0);
   static final int SUPER_MASK = 1<<16;
@@ -315,6 +317,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
           pendingPF = LOW_COLOR_PF;
         } else if (opts.colors == 256) {
           pendingPF = MEDIUM_COLOR_PF;
+        } else if (opts.colors == 32768) {
+          pendingPF = MEDIUMHIGH_COLOR_PF;
         } else {
           pendingPF = HIGH_COLOR_PF;
         }
@@ -1087,6 +1091,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
           pf = LOW_COLOR_PF;
         } else if (opts.colors == 256) {
           pf = MEDIUM_COLOR_PF;
+        } else if (opts.colors == 32768) {
+          pf = MEDIUMHIGH_COLOR_PF;
         } else {
           pf = HIGH_COLOR_PF;
         }

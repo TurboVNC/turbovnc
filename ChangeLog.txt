@@ -84,6 +84,10 @@ Both viewers contain a new command-line option/parameter that allows the
 previous behavior (always treating the left/top monitor as the primary) to be
 restored.
 -------------------------------------------------------------------------------
+[11]
+The Java TurboVNC Viewer now supports the BGR555 pixel format, which is
+reported to be necessary when connecting to some embedded devices.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
