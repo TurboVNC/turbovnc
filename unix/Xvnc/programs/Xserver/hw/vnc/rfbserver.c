@@ -64,6 +64,7 @@ int rfbCombineRect = 100;
 int rfbICEBlockSize = 256;
 Bool rfbInterframeDebug = FALSE;
 int rfbMaxWidth = 0, rfbMaxHeight = 0;
+int rfbMaxClipboard = MAX_CUTTEXT_LEN;
 
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
@@ -1227,9 +1228,9 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         }
 
         msg.cct.length = Swap32IfLE(msg.cct.length);
-        if (msg.cct.length > MAX_CUTTEXT_LEN) {
+        if (msg.cct.length > rfbMaxClipboard) {
             rfbLog("Ignoring %d-byte clipboard update from client.  Max is %d bytes.\n",
-                   msg.cct.length, MAX_CUTTEXT_LEN);
+                   msg.cct.length, rfbMaxClipboard);
             if ((n = SkipExact(cl, msg.cct.length)) <= 0) {
                 if (n != 0)
                     rfbLogPerror("rfbProcessClientNormalMessage: read");
