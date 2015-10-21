@@ -166,8 +166,8 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
     fsm->workArea.bottom = min(mi.rcWork.bottom, fsm->workArea.bottom);
   }
 
-  if (fsm->winRect.left >= 0 && fsm->winRect.right >= 0 &&
-      fsm->winRect.top >= 0 && fsm->winRect.bottom >= 0) {
+  if (fsm->winRect.right - fsm->winRect.left > 0 &&
+      fsm->winRect.bottom - fsm->winRect.top > 0) {
     RECT vpRect;
     IntersectRect(&vpRect, &fsm->winRect, &mi.rcMonitor);
     int area = IsRectEmpty(&vpRect) ? 0 :
@@ -204,8 +204,8 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
 
   if (m_opts.m_CurrentMonitorIsPrimary) {
     GetWindowRect(m_hwnd1, &fsm.winRect);
-    if (m_opts.m_FullScreen && savedRect.left >= 0 && savedRect.top >= 0 &&
-        savedRect.right >= 0 && savedRect.bottom >= 0)
+    if (m_opts.m_FullScreen && savedRect.bottom - savedRect.top > 0 &&
+        savedRect.right - savedRect.left > 0)
       fsm.winRect = savedRect;
   } else {
     fsm.winRect.left = fsm.winRect.right = -1;
