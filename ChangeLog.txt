@@ -179,6 +179,12 @@ after the following sequence of events occurred:
 This might have affected other systems and applications as well, particularly
 full-screen applications that grab the keyboard/mouse.
 -------------------------------------------------------------------------------
+[22]
+Fixed an issue in the Java TurboVNC Viewer whereby the viewer, when using the
+"server" (manual) remote desktop resizing mode, would unnecessarily display two
+scrollbars if one of the remote desktop dimensions was too large for the local
+display but the other dimension wasn't.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
