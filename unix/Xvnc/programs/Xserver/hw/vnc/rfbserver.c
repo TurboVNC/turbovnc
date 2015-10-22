@@ -1218,6 +1218,8 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
 
 
     case rfbClientCutText:
+    {
+        int ignoredBytes = 0;
 
         if ((n = ReadExact(cl, ((char *)&msg) + 1,
                            sz_rfbClientCutTextMsg - 1)) <= 0) {
@@ -1229,15 +1231,10 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
 
         msg.cct.length = Swap32IfLE(msg.cct.length);
         if (msg.cct.length > rfbMaxClipboard) {
-            rfbLog("Ignoring %d-byte clipboard update from client.  Max is %d bytes.\n",
+            rfbLog("Truncating %d-byte clipboard update to %d bytes.\n",
                    msg.cct.length, rfbMaxClipboard);
-            if ((n = SkipExact(cl, msg.cct.length)) <= 0) {
-                if (n != 0)
-                    rfbLogPerror("rfbProcessClientNormalMessage: read");
-                rfbCloseClient(cl);
-                return;
-            }
-            return;
+            ignoredBytes = msg.cct.length - rfbMaxClipboard;
+            msg.cct.length = rfbMaxClipboard;
         }
 
         if (msg.cct.length <= 0) return;
@@ -1256,6 +1253,16 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
             return;
         }
 
+        if (ignoredBytes > 0) {
+            if ((n = SkipExact(cl, ignoredBytes)) <= 0) {
+                if (n != 0)
+                    rfbLogPerror("rfbProcessClientNormalMessage: read");
+                free(str);
+                rfbCloseClient(cl);
+                return;
+            }
+        }
+
         /* NOTE: We do not accept cut text from a view-only client */
         if (!rfbViewOnly && !cl->viewOnly && !rfbAuthDisableCBRecv) {
             vncClientCutText(str, msg.cct.length);
@@ -1264,6 +1271,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
 
         free(str);
         return;
+    }
 
     case rfbEnableContinuousUpdates:
     {
