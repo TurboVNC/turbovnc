@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2014-2015 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -66,15 +66,16 @@ class ClipboardDialog extends Dialog implements ActionListener {
     dlg.setMinimumSize(dlg.getSize());
   }
 
-  public void initDialog() {
-    textArea.setText(current);
-    textArea.selectAll();
+  public boolean compareContentsTo(String str) {
+    return str.equals(textArea.getText());
   }
 
   public void setContents(String str) {
-    current = str;
     textArea.setText(str);
-    textArea.selectAll();
+  }
+
+  public String getContents() {
+    return textArea.getText();
   }
 
   public void serverCutText(String str, int len) {
@@ -86,9 +87,9 @@ class ClipboardDialog extends Dialog implements ActionListener {
       if (cb != null) {
         StringSelection ss = new StringSelection(str);
         try {
-          cb.setContents(ss, ss);
+          cb.setContents(ss, null);
         } catch (Exception e) {
-          vlog.debug(e.toString());
+          vlog.debug(e.getMessage());
         }
       }
       if (VncViewer.getBooleanProperty("turbovnc.primary", true)) {
@@ -96,14 +97,14 @@ class ClipboardDialog extends Dialog implements ActionListener {
         if (cb != null) {
           StringSelection ss = new StringSelection(str);
           try {
-            cb.setContents(ss, ss);
+            cb.setContents(ss, null);
           } catch (Exception e) {
-            vlog.debug(e.toString());
+            vlog.debug(e.getMessage());
           }
         }
       }
     } catch (SecurityException e) {
-      System.err.println("Cannot access the system clipboard");
+      vlog.error("Cannot access the system clipboard: " + e.getMessage());
     }
   }
 
@@ -114,11 +115,9 @@ class ClipboardDialog extends Dialog implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == clearButton) {
-      current = "";
-      textArea.setText(current);
+      textArea.setText(new String(""));
     } else if (s instanceof JButton && (JButton)s == sendButton) {
-      current = textArea.getText();
-      cc.writeClientCutText(current, current.length());
+      cc.writeClientCutText(textArea.getText(), textArea.getText().length());
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       endDialog();
@@ -126,7 +125,6 @@ class ClipboardDialog extends Dialog implements ActionListener {
   }
 
   CConn cc;
-  String current;
   JPanel pt, pb;
   JTextArea textArea;
   JButton clearButton, sendButton, cancelButton;

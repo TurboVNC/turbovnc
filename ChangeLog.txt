@@ -95,8 +95,9 @@ be encoded as ISO-8859-1, so it is possible that attempting to encode it as
 UTF-8 was causing problems with certain applications.
 -------------------------------------------------------------------------------
 [13]
-The TurboVNC Server now allows the maximum clipboard transfer size to be
-specified, by way of a new Xvnc argument (-maxclipboard).
+The TurboVNC Server and Java TurboVNC Viewer now allow the maximum clipboard
+transfer size to be specified, by way of a new Xvnc argument (-maxclipboard)
+and a new viewer parameter (MaxClipboard).
 -------------------------------------------------------------------------------
 
 
