@@ -118,10 +118,12 @@ static struct rfbssl_functions ssl
 
 static void *sslHandle = NULL, *cryptoHandle = NULL;
 
+#ifndef __APPLE__
 #define SUFFIXES 19
 static const char *suffix[SUFFIXES] = { "0.9.8", "1.0.0", "1.0.1", "1.0.2",
     "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18",
     "19", "20" };
+#endif
 
 #define LOADSYM(lib, sym) {  \
     dlerror();  \
