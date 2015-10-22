@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2016 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,10 +164,12 @@ public class Viewport extends JFrame {
         if (((sp.getSize().width > cc.desktop.scaledWidth) ||
              (sp.getSize().height > cc.desktop.scaledHeight)) &&
             cc.opts.desktopSize.mode != Options.SIZE_AUTO) {
-          dx = (sp.getSize().width <= cc.desktop.scaledWidth) ? 0 :
-            (int)Math.floor((sp.getSize().width - cc.desktop.scaledWidth) / 2);
-          dy = (sp.getSize().height <= cc.desktop.scaledHeight) ? 0 :
-            (int)Math.floor((sp.getSize().height - cc.desktop.scaledHeight) / 2);
+          int w = sp.getSize().width - adjustWidth;
+          int h = sp.getSize().height - adjustHeight;
+          dx = (w <= cc.desktop.scaledWidth) ? 0 :
+            (int)Math.floor((w - cc.desktop.scaledWidth) / 2);
+          dy = (h <= cc.desktop.scaledHeight) ? 0 :
+            (int)Math.floor((h - cc.desktop.scaledHeight) / 2);
         } else {
           dx = dy = 0;
         }
@@ -391,7 +393,7 @@ public class Viewport extends JFrame {
   CConn cc;
   JScrollPane sp;
   public Toolbar tb;
-  public int dx, dy = 0;
+  public int dx, dy = 0, adjustWidth, adjustHeight;
   MacMenuBar macMenu;
   boolean canDoLionFS;
   boolean keyboardTempUngrabbed;

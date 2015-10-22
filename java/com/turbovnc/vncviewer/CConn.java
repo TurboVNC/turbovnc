@@ -1044,6 +1044,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     viewport.dx = viewport.dy = 0;
+    viewport.adjustWidth = viewport.adjustHeight = 0;
 
     Dimension vpBorder = viewport.getBorderSize();
     if (vpBorder.width > 0 || vpBorder.height > 0) {
@@ -1056,6 +1057,25 @@ public class CConn extends CConnection implements UserPasswdGetter,
       x = (span.width - w) / 2 + span.x;
       y = (span.height - h) / 2 + span.y;
     }
+
+    // Attempt to prevent cases in which the presence of one scrollbar will
+    // unnecessarily cause the other scrollbar to appear
+    if (opts.desktopSize.mode != Options.SIZE_AUTO &&
+        opts.scalingFactor != Options.SCALE_FIXEDRATIO &&
+        opts.scalingFactor != Options.SCALE_AUTO) {
+      int clientw = w - vpBorder.width, clienth = h - vpBorder.height;
+      int sbWidth = UIManager.getInt("ScrollBar.width");
+      if (desktop.scaledWidth > clientw && h + sbWidth <= span.height) {
+        h += sbWidth;
+        y = (span.height - h) / 2 + span.y;
+        viewport.adjustHeight = sbWidth;
+      } else if (desktop.scaledHeight > clienth && w + sbWidth <= span.width) {
+        w += sbWidth;
+        x = (span.width - w) / 2 + span.x;
+        viewport.adjustWidth = sbWidth;
+      }
+    }
+
     viewport.setGeometry(x, y, w, h);
   }
 
