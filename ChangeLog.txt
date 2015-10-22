@@ -116,6 +116,10 @@ The TurboVNC Server and Java TurboVNC Viewer now allow the maximum clipboard
 transfer size to be specified, by way of a new Xvnc argument (-maxclipboard)
 and a new viewer parameter (MaxClipboard).
 -------------------------------------------------------------------------------
+[14]
+The TurboVNC Server now truncates clipboard updates larger than the max.
+clipboard size instead of ignoring them.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
