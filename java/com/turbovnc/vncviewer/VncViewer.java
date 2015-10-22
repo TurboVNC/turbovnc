@@ -1110,6 +1110,11 @@ public class VncViewer extends javax.swing.JApplet
   "Synchronize the TurboVNC session clipboard with the local clipboard " +
   "whenever the latter changes.", true);
 
+  static IntParameter maxClipboard
+  = new IntParameter("MaxClipboard",
+  "Maximum permitted length of an outgoing clipboard update (in bytes)",
+  1048576);
+
   static BoolParameter acceptBell
   = new BoolParameter("AcceptBell",
   "Produce a system beep when a \"bell\" event is received from the server.",
