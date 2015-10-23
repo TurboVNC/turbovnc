@@ -101,9 +101,10 @@ full-screen mode would result in a black screen.  This bug fix allows Primary
 spanning to work properly with Spaces, but note that no other spanning mode
 will work properly unless the Spaces feature is disabled.
 
-Both viewers contain a new command-line option/parameter that allows the
-previous behavior (always treating the left/top monitor as the primary) to be
-restored.
+Both viewers contain a new command-line option/parameter
+(-firstmonitorisprimary for the Windows viewer, CurrentMonitorIsPrimary=0 for
+the Java viewer) that allows the previous behavior (always treating the
+left/top monitor as the primary) to be restored.
 -------------------------------------------------------------------------------
 [11]
 The Java TurboVNC Viewer now supports the BGR555 pixel format, which is
@@ -116,13 +117,17 @@ be encoded as ISO-8859-1, so it is possible that attempting to encode it as
 UTF-8 was causing problems with certain applications.
 -------------------------------------------------------------------------------
 [13]
-The TurboVNC Server and Java TurboVNC Viewer now allow the maximum clipboard
-transfer size to be specified, by way of a new Xvnc argument (-maxclipboard)
-and a new viewer parameter (MaxClipboard).
+The TurboVNC Server now allows the maximum clipboard transfer size to be
+specified, by way of a new Xvnc argument (-maxclipboard).  Previously the limit
+was hard-coded to 1 MB.  Furthermore, the TurboVNC Server now truncates
+clipboard updates larger than the max. clipboard size instead of ignoring them.
 -------------------------------------------------------------------------------
 [14]
-The TurboVNC Server now truncates clipboard updates larger than the max.
-clipboard size instead of ignoring them.
+The Java TurboVNC Viewer now allows the maximum clipboard transfer size to be
+specified, by way of a new parameter (MaxClipboard).  The Java TurboVNC Viewer
+now also truncates any clipboard transfers greater than MaxClipboard (which is
+set to 1 MB by default.)  This prevents the viewer from sending clipboard data
+to the server that will ultimately be discarded.
 -------------------------------------------------------------------------------
 
 
