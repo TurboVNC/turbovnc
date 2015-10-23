@@ -11,7 +11,11 @@ details.
 The TurboVNC Server now provides full support for the VeNCrypt RFB extensions,
 including TLS-encrypted security types.  TLS encryption is provided by OpenSSL
 in the official binaries, but GnuTLS can be used instead when building the
-TurboVNC Server from source.
+TurboVNC Server from source.  Note that when using the Java TurboVNC Viewer,
+you must use 2.0.1 or later when connecting to a TurboVNC 2.1 server.  Older
+versions of the Java TurboVNC Viewer had a bug that caused them to lock up when
+connecting to a server that supports both the Tight and VeNCrypt security
+extensions.
 -------------------------------------------------------------------------------
 
 
