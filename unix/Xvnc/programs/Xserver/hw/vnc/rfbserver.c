@@ -100,8 +100,8 @@ void
 IdleTimerCheck(void)
 {
     if (idleTimeout >= 0.0 && gettime() >= idleTimeout)
-        FatalError("TurboVNC server has been idle for %d seconds.  Exiting.\n",
-                   rfbIdleTimeout);
+        FatalError("TurboVNC server has been idle for %u seconds.  Exiting.\n",
+                   (unsigned int)rfbIdleTimeout);
 }
 
 
