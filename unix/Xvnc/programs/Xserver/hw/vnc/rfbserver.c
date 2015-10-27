@@ -2247,7 +2247,7 @@ rfbSendServerCutText(char *str, int len)
 
 
 /*
- * rfbSendDesktopResize sends a DesktopSize message to all the clients.
+ * rfbSendDesktopResize sends a DesktopSize message to a specific client.
  */
 
 Bool
