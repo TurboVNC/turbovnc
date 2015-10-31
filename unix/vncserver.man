@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "September 2015" "" "TurboVNC"
+.TH vncserver 1 "October 2015" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
@@ -21,7 +21,7 @@ vncserver \- a wrapper to launch an X server for VNC.
 [:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-fp \fIfont\-path\fR]
 [\-name \fIdesktop\-name\fR] [\-nohttpd] [\-otp] [\-x509cert \fIcert\fR]
-[\-x509key \fIkey\fR] [\-fg] [\-noxstartup]
+[\-x509key \fIkey\fR] [\-fg] [\-autokill] [\-noxstartup]
 [\-xstartup \fIscript\fR] [\fIXvnc\-options\fR...]
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
@@ -111,6 +111,11 @@ Runs Xvnc as a foreground process.  This has two effects: (1) The VNC server
 can be aborted with CTRL-C, and (2) the VNC server will exit as soon as the
 user logs out of the window manager in the VNC session.  This may be necessary
 when launching TurboVNC from within certain grid computing environments.
+.TP
+\fB\-autokill\fR
+Automatically kill the VNC server when the startup script exits (which, in most
+cases, means that the VNC server will be killed automatically whenever the user
+logs out of the window manager running in the VNC session.)
 .TP
 \fB\-noxstartup\fR
 Do not run the $vncUserDir/.vnc/xstartup.turbovnc script after launching Xvnc.  This

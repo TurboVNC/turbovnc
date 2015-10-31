@@ -17,6 +17,14 @@ versions of the Java TurboVNC Viewer had a bug that caused them to lock up when
 connecting to a server that supports both the Tight and VeNCrypt security
 extensions.
 -------------------------------------------------------------------------------
+[3]
+TurboVNC's vncserver script now supports the -autokill option from TigerVNC,
+which causes the server to be killed automatically whenever the startup script
+finishes (which will usually happen as the result of logging out of the window
+manager running in the TurboVNC session.)  It was possible to accomplish the
+same thing in earlier versions of TurboVNC by running
+'/opt/TurboVNC/bin/vncserver -fg </dev/null &', but this is more intuitive.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
