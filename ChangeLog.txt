@@ -1,4 +1,17 @@
 ===============================================================================
+2.0.2
+===============================================================================
+[1]
+The default xstartup.turbovnc script that the TurboVNC Server creates now
+includes 'unset DBUS_SESSION_BUS_ADDRESS'.  This fixes an issue whereby
+starting the TurboVNC Server from within an existing GNOME 2 (verified with
+GNOME 2.28.x and later) or MATE session would cause the GNOME/MATE session
+running in TurboVNC to fail with an error dialog: "Could not acquire name on
+session bus".
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 2.0.1
 ===============================================================================
 [1]
