@@ -146,7 +146,7 @@ left out of the Java viewer due to an oversight.
 [4]
 The default xstartup.turbovnc script that the TurboVNC Server creates will now
 launch the Mate desktop on Ubuntu 15, if it is installed and if 3D window
-manager support is not activated.  The Gnome Flashback session under Ubuntu
+manager support is not activated.  The GNOME Flashback session under Ubuntu
 15 cannot be made to work properly with TurboVNC, for unknown reasons, but Mate
 is a better solution anyhow.
 -------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ unmodified Xorg 7.7 code base.  This overhaul enables support for the X
 extensions needed by newer window managers (RANDR 1.2, Composite, XFIXES,
 Damage, etc.)  In addition, the keyboard handler has been completely overhauled
 and now uses the XKEYBOARD extension.  This fixes key mapping issues that
-occurred when running TurboVNC with certain versions of Gnome (previously, it
+occurred when running TurboVNC with certain versions of GNOME (previously, it
 was necessary to set an environment variable in xstartup.turbovnc to work
 around those issues.)
 -------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ command line or launching another viewer instance.
 -------------------------------------------------------------------------------
 [8]
 The default xstartup.turbovnc script that the TurboVNC Server creates will now
-properly launch the Gnome fallback window manager on Ubuntu 14.04, if 3D
+properly launch the GNOME fallback window manager on Ubuntu 14.04, if 3D
 window manager support is not activated.
 -------------------------------------------------------------------------------
 [9]
@@ -515,7 +515,7 @@ TurboVNC Viewer:
    not showing up in the task switcher, so accidentally clicking away from one
    of those dialogs would send it to the back of the window stack, and Alt-Tab
    could not be used to recover it.
--- When running in full-screen mode on Linux/Gnome, popping up the Options or
+-- When running in full-screen mode on Linux/GNOME, popping up the Options or
    Clipboard dialogs would cause the viewer to temporarily exit full-screen
    mode.
 -------------------------------------------------------------------------------
@@ -799,7 +799,7 @@ possibly other new Linux distros.)
 -------------------------------------------------------------------------------
 [18]
 The default xstartup.turbovnc script that the TurboVNC Server creates will now
-use the Gnome fallback window manager on Ubuntu 12.10 and later, assuming that
+use the GNOME fallback window manager on Ubuntu 12.10 and later, assuming that
 the "gnome-session-fallback" package is installed.  TurboVNC cannot use Unity
 3D (yet), and Unity 2D was removed in Ubuntu 12.10 and later.
 -------------------------------------------------------------------------------
@@ -1142,7 +1142,7 @@ re-architecture.
 -------------------------------------------------------------------------------
 [20]
 The TurboVNC Server now includes a non-functional implementation of the X Input
-extension, primarily to avoid crashes in recent versions of Gnome that aren't
+extension, primarily to avoid crashes in recent versions of GNOME that aren't
 smart enough to check for that extension's existence before using it.
 -------------------------------------------------------------------------------
 [21]
@@ -1454,7 +1454,7 @@ match that of "modern" windowing systems, in which the left mouse button is
 used to scroll in both directions.
 -------------------------------------------------------------------------------
 [14]
-Fixed an issue whereby Gnome would fail to start on SuSE 10 machines if CSh
+Fixed an issue whereby GNOME would fail to start on SuSE 10 machines if CSh
 was the default shell.  The issue was that /opt/gnome/bin was not being added
 to the PATH by /etc/csh.cshrc.  This was worked around by adding it to the
 PATH in ~/.vnc/xstartup.turbovnc.
@@ -1612,12 +1612,12 @@ apparently a vestigial feature.
 Modified Windows build to embed a proper version number in TurboVNC.exe.
 -------------------------------------------------------------------------------
 [5]
-Changed the fallback logic in the default ~/.vnc/xstartup file so that Gnome is
+Changed the fallback logic in the default ~/.vnc/xstartup file so that GNOME is
 used as the window manager on Solaris if it is available and if
 ~/.dt/sessions/lastsession doesn't exist.  Otherwise, CDE is used.
 -------------------------------------------------------------------------------
 [6]
-Fixed an issue whereby Gnome would fail to start in TurboVNC if TurboVNC was
+Fixed an issue whereby GNOME would fail to start in TurboVNC if TurboVNC was
 launched from within another X session.
 -------------------------------------------------------------------------------
 
@@ -1633,7 +1633,7 @@ Now using a single RPM to support multiple Linux distributions.
 -------------------------------------------------------------------------------
 [3]
 Fixed a couple of issues in the fallback logic of the default ~/.vnc/xstartup
-script.  It should now properly run fvwm2 or twm if KDE, CDE, or Gnome are not
+script.  It should now properly run fvwm2 or twm if KDE, CDE, or GNOME are not
 available.
 -------------------------------------------------------------------------------
 [4]
