@@ -891,6 +891,9 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
 
             s = a->secType;
 
+            if (n > MAX_SECURITY_TYPES)
+                FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
+
             /*
              * Check whether we have already advertised this security type
              */
@@ -901,9 +904,6 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
 
             if (j < n)
                 continue;
-
-            if (n > MAX_SECURITY_TYPES)
-                FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
 
             if (s->advertise &&
                 (cl->protocol_minor_ver >= s->protocolMinorVer)) {
@@ -1043,6 +1043,10 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
                 !a->enabled || a->subType == -1)
                 continue;
 
+            if (count > MAX_VENCRYPT_SUBTYPES) {
+                FatalError("rfbVeNCryptAuthenticate: # enabled subtypes > MAX_VENCRYPT_SUBTYPES\n");
+            }
+
             /* Check whether we have already advertised this subtype */
             for (j = 0; j < count; j++) {
                 if (subTypes[j] == a->subType)
@@ -1050,10 +1054,6 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
             }
             if (j < count)
                 continue;
-
-            if (count > MAX_VENCRYPT_SUBTYPES) {
-                FatalError("rfbVeNCryptAuthenticate: # enabled subtypes > MAX_VENCRYPT_SUBTYPES\n");
-            }
 
             subTypes[count++] = a->subType;
         }
@@ -1278,6 +1278,11 @@ rfbSendAuthCaps(rfbClientPtr cl)
                     continue;
 
                 c = a->authCap;
+
+                if (count > MAX_AUTH_CAPS) {
+                    FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS\n");
+                }
+
                 /*
                  * Check to see if we have already advertised this auth cap.
                  * VNC password and OTP both use the VNC authentication cap.
@@ -1289,10 +1294,6 @@ rfbSendAuthCaps(rfbClientPtr cl)
 
                 if (j < count)
                     continue;
-
-                if (count > MAX_AUTH_CAPS) {
-                    FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS\n");
-                }
 
                 pcap = &caplist[count];
                 pcap->code = Swap32IfLE(c->authType);
