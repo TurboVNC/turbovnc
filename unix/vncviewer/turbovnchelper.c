@@ -303,7 +303,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
     XFree(type);
 
     bailif0(eidcls =
-      (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputDevice"));
+            (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputDevice"));
     bailif0(extInputDevice = (*env)->AllocObject(env, eidcls));
 
     SET_STRING(eidcls, extInputDevice, name, devInfo[i].name);
@@ -329,7 +329,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
           jclass valcls;
 
           bailif0(valcls = (*env)->FindClass(env,
-            "com/turbovnc/rfb/ExtInputDevice$Valuator"));
+                  "com/turbovnc/rfb/ExtInputDevice$Valuator"));
 
           if (v->mode == Absolute)
             canGenerate |= rfbGIIValuatorAbsoluteMask;
@@ -356,7 +356,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
             SET_INT(valcls, valuator, siDiv, a->resolution);
 
             bailif0(mid = (*env)->GetMethodID(env, eidcls, "addValuator",
-              "(Lcom/turbovnc/rfb/ExtInputDevice$Valuator;)V"));
+                    "(Lcom/turbovnc/rfb/ExtInputDevice$Valuator;)V"));
             (*env)->CallVoidMethod(env, extInputDevice, mid, valuator);
           }
           break;
@@ -386,7 +386,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
     XCloseDevice(dpy, device);  device=NULL;
 
     bailif0(mid = (*env)->GetMethodID(env, cls, "addInputDevice",
-      "(Lcom/turbovnc/rfb/ExtInputDevice;)V"));
+            "(Lcom/turbovnc/rfb/ExtInputDevice;)V"));
     (*env)->CallVoidMethod(env, obj, mid, extInputDevice);
   }
 
@@ -416,11 +416,11 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
         jclass eventcls;  jobject event, jvaluators;
         jint valuators[6];
 
-        bailif0(eventcls = (*env)->FindClass(env,
-          "com/turbovnc/rfb/ExtInputEvent"));
+        bailif0(eventcls =
+                (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputEvent"));
         bailif0(mid = (*env)->GetMethodID(env, eventcls, "<init>", "()V"));
         bailif0(event = (*env)->NewObject(env, eventcls, mid));
-        SET_INT(eventcls, event, type, 13);
+        SET_INT(eventcls, event, type, rfbGIIValuatorRelative);
         SET_LONG(eventcls, event, deviceID, motion->deviceid);
         SET_LONG(eventcls, event, buttonMask, motion->state);
         SET_INT(eventcls, event, numValuators, motion->axes_count);
@@ -429,15 +429,15 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
         SET_INT(eventcls, event, y, motion->y);
 
         bailif0(fid = (*env)->GetFieldID(env, eventcls, "valuators", "[I"));
-        bailif0(jvaluators = (jintArray)(*env)->GetObjectField(env, event,
-          fid));
+        bailif0(jvaluators =
+                (jintArray)(*env)->GetObjectField(env, event, fid));
         for (i = 0; i < motion->axes_count; i++)
           valuators[i] = motion->axis_data[i];
         (*env)->SetIntArrayRegion(env, jvaluators, 0, motion->axes_count,
           valuators);
 
         bailif0(mid = (*env)->GetMethodID(env, cls, "sendInputEvent",
-          "(Lcom/turbovnc/rfb/ExtInputEvent;)V"));
+                "(Lcom/turbovnc/rfb/ExtInputEvent;)V"));
         (*env)->CallVoidMethod(env, obj, mid, event);
 
       } else if (e.type == buttonPressType || e.type == buttonReleaseType) {
@@ -446,19 +446,20 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
         jclass eventcls;  jobject event, jvaluators;
         jint valuators[6];
 
-        bailif0(eventcls = (*env)->FindClass(env,
-          "com/turbovnc/rfb/ExtInputEvent"));
+        bailif0(eventcls =
+                (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputEvent"));
         bailif0(mid = (*env)->GetMethodID(env, eventcls, "<init>", "()V"));
         bailif0(event = (*env)->NewObject(env, eventcls, mid));
-        SET_INT(eventcls, event, type, e.type == buttonPressType ? 10 : 11);
+        SET_INT(eventcls, event, type, e.type == buttonPressType ?
+                rfbGIIButtonPress : rfbGIIButtonRelease);
         SET_LONG(eventcls, event, deviceID, button->deviceid);
         SET_LONG(eventcls, event, buttonMask, button->state);
         SET_INT(eventcls, event, numValuators, button->axes_count);
         SET_INT(eventcls, event, firstValuator, button->first_axis);
         SET_INT(eventcls, event, buttonNumber, button->button);
         bailif0(fid = (*env)->GetFieldID(env, eventcls, "valuators", "[I"));
-        bailif0(jvaluators = (jintArray)(*env)->GetObjectField(env, event,
-          fid));
+        bailif0(jvaluators =
+                (jintArray)(*env)->GetObjectField(env, event, fid));
         for (i = 0; i < button->axes_count; i++)
           valuators[i] = button->axis_data[i];
         (*env)->SetIntArrayRegion(env, jvaluators, 0, button->axes_count,

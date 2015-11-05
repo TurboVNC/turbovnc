@@ -36,11 +36,11 @@ session bus".
 [5]
 The TurboVNC Server and the Java TurboVNC Viewer (when the latter is run in
 standalone mode on Un*x/Linux machines, using the TurboVNC Helper library) now
-support a remote X Input interface whereby extended input devices (such as
+support a remote X Input interface whereby extended pointer devices (such as
 drawing tablets) on the client are cloned in the TurboVNC server session, and
 the events from these devices (including pressure, tilt, etc.) are passed from
 viewer to server.  This was specifically designed for Wacom tablets but may
-work with other X Input devices as well.
+work with other extended pointer devices as well.
 -------------------------------------------------------------------------------
 
 

@@ -1423,6 +1423,8 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
             dev.numButtons = msg.giidc.numButtons;
             dev.numValuators = msg.giidc.numValuators;
             dev.eventMask = msg.giidc.canGenerate;
+            dev.mode = (dev.eventMask & rfbGIIValuatorAbsoluteMask) ?
+                       Absolute : Relative;
 
             for (i = 0; i < dev.numValuators; i++) {
                 rfbGIIValuator *v = &dev.valuators[i];
