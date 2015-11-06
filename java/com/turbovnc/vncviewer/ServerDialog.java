@@ -140,7 +140,9 @@ class ServerDialog extends Dialog implements ActionListener {
     dlg.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         if (VncViewer.nViewers == 1) {
-          cc.viewer.exit(1);
+        	if(cc.viewer instanceof VncViewer){
+        		((VncViewer)cc.viewer).exit(1);
+        	}
         } else {
           ret = false;
           endDialog();
@@ -172,7 +174,9 @@ class ServerDialog extends Dialog implements ActionListener {
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       if (VncViewer.nViewers == 1)
-        cc.viewer.exit(1);
+      	if(cc.viewer instanceof VncViewer){
+    		((VncViewer)cc.viewer).exit(1);
+    	}
       ret = false;
       endDialog();
     } else if (s instanceof JButton && (JButton)s == optionsButton) {
@@ -192,7 +196,9 @@ class ServerDialog extends Dialog implements ActionListener {
     if (serverName == null || serverName.equals("")) {
       vlog.error("No server name specified!");
       if (VncViewer.nViewers == 1)
-        cc.viewer.exit(1);
+      	if(cc.viewer instanceof VncViewer){
+    		((VncViewer)cc.viewer).exit(1);
+    	}
       ret = false;
       endDialog();
     }

@@ -70,9 +70,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   // RFB thread
-  public CConn(VncViewer viewer_, Socket sock_) {
+  public CConn(Container viewer_, Socket sock_) {
     sock = sock_;  viewer = viewer_;
-    benchmark = viewer.benchFile != null;
+    if(viewer_ instanceof VncViewer){
+    	benchFile = ((VncViewer)viewer).benchFile;
+    	benchmark = benchFile != null;
+    }else{
+    	benchmark = false;
+    }
     pendingPFChange = false;
     lastServerEncoding = -1;
 
@@ -158,7 +163,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (benchmark) {
       state_ = RFBSTATE_INITIALISATION;
-      reader_ = new CMsgReaderV3(this, viewer.benchFile);
+      reader_ = new CMsgReaderV3(this, benchFile);
     } else {
       sock.inStream().setBlockCallback(this);
       setServerName(opts.serverName);
@@ -386,7 +391,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
     sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     sp.getViewport().setView(desktop);
-    viewer.getContentPane().removeAll();
+    
+    if(viewer instanceof JRootPane){
+    	((JRootPane)viewer).getContentPane().removeAll();
+    }else{
+    	viewer.removeAll();
+    }
+    
     if (showToolbar) {
       Toolbar tb = new Toolbar(this);
       viewer.add(tb, BorderLayout.PAGE_START);
@@ -439,11 +450,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // RFB thread: clientRedirect() migrates the client to another host/port.
   public void clientRedirect(int port, String host,
                              String x509subject) {
-    sock.close();
-    setServerPort(port);
-    sock = new TcpSocket(host, port);
-    vlog.info("Redirected to " + host + ":" + port);
-    VncViewer.newViewer(viewer, sock, true);
+	  //TODO not really sure what to do here
+	  if(viewer instanceof VncViewer){
+		    sock.close();
+		    setServerPort(port);
+		    sock = new TcpSocket(host, port);
+		    vlog.info("Redirected to " + host + ":" + port);
+		    VncViewer.newViewer(((VncViewer)viewer), sock, true);
+	  }
   }
 
   // RFB thread: setName() is called when the desktop name changes.
@@ -659,7 +673,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void startDecodeTimer() {
     tDecodeStart = getTime();
     if (benchmark)
-      tReadOld = viewer.benchFile.getReadTime();
+      tReadOld = benchFile.getReadTime();
     else
       tReadOld = sock.inStream().getReadTime();
   }
@@ -667,7 +681,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void stopDecodeTimer() {
     double tRead = tReadOld;
     if (benchmark)
-      tRead = viewer.benchFile.getReadTime();
+      tRead = benchFile.getReadTime();
     else
       tRead = sock.inStream().getReadTime();
     tDecode += getTime() - tDecodeStart - (tRead - tReadOld);
@@ -956,7 +970,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
-      viewport.setVisible(true);
+    	if(viewer instanceof VncViewer){
+    		viewport.setVisible(true);
+    	}
     if (VncViewer.isX11())
       viewport.x11FullScreenHelper(fullScreen);
     if (opts.fullScreen && viewport.lionFSSupported())
@@ -2076,7 +2092,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   // The following need no synchronization:
-  VncViewer viewer;
+  FileInStream benchFile;
+  Container viewer;
   public static UserPasswdGetter upg;
 
   // shuttingDown is set in the EDT and is only ever tested by the RFB thread

@@ -186,7 +186,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     } else if (actionMatch(ev, losslessRefresh)) {
       cc.losslessRefresh();
     } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
-      VncViewer.newViewer(cc.viewer);
+    	if(cc.viewer instanceof VncViewer){
+    		VncViewer.newViewer((VncViewer)cc.viewer);
+    	}
     } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, closeConn)) {
       cc.close();
     } else if (actionMatch(ev, info)) {

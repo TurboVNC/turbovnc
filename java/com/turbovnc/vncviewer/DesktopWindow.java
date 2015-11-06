@@ -84,7 +84,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     addKeyListener(this);
     addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
-        if (cc.viewer.benchFile == null) checkClipboard();
+        if (cc.benchFile == null) checkClipboard();
       }
       public void focusLost(FocusEvent e) {
         cc.releaseModifiers();
@@ -250,7 +250,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         // optimal performance under X11 without requiring MIT-SHM pixmaps.
         if (!swingDB)
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
-        if (cc.viewer.benchFile != null)
+        if (cc.benchFile != null)
           paintImmediately(x, y, width, height);
         else
           repaint(x, y, width, height);
@@ -265,7 +265,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         }
         if (!swingDB)
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
-        if (cc.viewer.benchFile != null)
+        if (cc.benchFile != null)
           paintImmediately(x, y, r.width(), r.height());
         else
           repaint(x, y, r.width(), r.height());
@@ -543,7 +543,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           cc.losslessRefresh();
           return;
         case KeyEvent.VK_N:
-          VncViewer.newViewer(cc.viewer);
+        	if(cc.viewer instanceof VncViewer){
+        		VncViewer.newViewer((VncViewer)cc.viewer);
+        	}
           return;
         case KeyEvent.VK_O:
           cc.options.showDialog(cc.viewport);

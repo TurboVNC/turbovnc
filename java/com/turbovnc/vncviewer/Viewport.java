@@ -67,7 +67,14 @@ public class Viewport extends JFrame implements Runnable {
     }
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
-    getContentPane().add(sp);
+    
+    if(cc.viewer instanceof VncViewer){
+    	getContentPane().add(sp);
+    }else{
+    	cc.viewer.add(sp);
+    	cc.viewer.revalidate();
+    }
+    
     if (VncViewer.os.startsWith("mac os x")) {
       macMenu = new MacMenuBar(cc);
       setJMenuBar(macMenu);

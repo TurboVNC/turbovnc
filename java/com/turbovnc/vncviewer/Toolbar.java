@@ -146,7 +146,9 @@ public class Toolbar extends JToolBar implements ActionListener {
         cc.writeKeyEvent(Keysyms.Control_L, false);
       }
     } else if (((AbstractButton)s).getName() == buttons[9]) {
-      VncViewer.newViewer(cc.viewer);
+    	if(cc.viewer instanceof VncViewer){
+    		VncViewer.newViewer((VncViewer)cc.viewer);
+    	}
     } else if (((AbstractButton)s).getName() == buttons[10]) {
       cc.close();
     }

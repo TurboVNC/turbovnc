@@ -170,7 +170,9 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.losslessRefresh();
       firePopupMenuCanceled();
     } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
-      VncViewer.newViewer(cc.viewer);
+    	if(cc.viewer instanceof VncViewer){
+    		VncViewer.newViewer((VncViewer)cc.viewer);
+    	}
     } else if (actionMatch(ev, options)) {
       cc.options.showDialog(cc.viewport);
     } else if (actionMatch(ev, info)) {
