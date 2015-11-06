@@ -313,9 +313,11 @@ public class VncViewer extends javax.swing.JApplet
 	  this(argv, null);
   }
   
-  private Container component;
+  private Container component = this;
   public VncViewer(String [] argv, Container component) {
-	this.component = component;
+    if(component != null){
+      this.component = component;
+    }
     applet = false;
 
     UserPreferences.load("global");
@@ -759,11 +761,7 @@ public class VncViewer extends javax.swing.JApplet
 
       try {
         if (cc == null){
-        	if(component == null){
-        		cc = new CConn(this, sock);
-        	}else{
         		cc = new CConn(component, sock);
-        	}
         }
         if (benchFile != null) {
           if (i < benchWarmup)

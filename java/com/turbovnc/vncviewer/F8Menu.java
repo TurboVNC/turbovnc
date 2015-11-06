@@ -142,7 +142,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.sizeWindow();
       firePopupMenuCanceled();
     } else if (actionMatch(ev, clipboard)) {
-      cc.clipboardDialog.showDialog(cc.viewport);
+      cc.clipboardDialog.showDialog(cc.viewport.frame);
     } else if (actionMatch(ev, grabKeyboard)) {
       cc.toggleKeyboardGrab();
     } else if (actionMatch(ev, f8)) {
@@ -174,14 +174,14 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     		VncViewer.newViewer((VncViewer)cc.viewer);
     	}
     } else if (actionMatch(ev, options)) {
-      cc.options.showDialog(cc.viewport);
+      cc.options.showDialog(cc.viewport.frame);
     } else if (actionMatch(ev, info)) {
       cc.showInfo();
     } else if (actionMatch(ev, profile)) {
       if (cc.profileDialog.isVisible())
         cc.profileDialog.endDialog();
       else
-        cc.profileDialog.showDialog(cc.viewport);
+        cc.profileDialog.showDialog(cc.viewport.frame);
       cc.toggleProfile();
      } else if (actionMatch(ev, about)) {
       cc.showAbout();

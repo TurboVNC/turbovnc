@@ -548,13 +548,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         	}
           return;
         case KeyEvent.VK_O:
-          cc.options.showDialog(cc.viewport);
+          cc.options.showDialog(cc.viewport.frame);
           return;
         case KeyEvent.VK_P:
           if (cc.profileDialog.isVisible())
             cc.profileDialog.endDialog();
           else
-            cc.profileDialog.showDialog(cc.viewport);
+            cc.profileDialog.showDialog(cc.viewport.frame);
           cc.toggleProfile();
           return;
         case KeyEvent.VK_R:

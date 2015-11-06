@@ -108,7 +108,7 @@ public class Toolbar extends JToolBar implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (((AbstractButton)s).getName() == buttons[0]) {
-      cc.options.showDialog(cc.viewport);
+      cc.options.showDialog(cc.viewport.frame);
     } else if (((AbstractButton)s).getName() == buttons[1]) {
       cc.showInfo();
     } else if (((AbstractButton)s).getName() == buttons[2]) {

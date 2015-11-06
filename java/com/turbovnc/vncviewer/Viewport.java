@@ -23,6 +23,7 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
 import java.lang.reflect.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -32,14 +33,35 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
 
-public class Viewport extends JFrame implements Runnable {
+public class Viewport implements Runnable {
 
+  private JComponent content = new JPanel(new BorderLayout());
+  JFrame frame;
+  boolean useFrame;
+  
+  public Container getContainer(){
+    if(frame != null){
+      return frame;
+    }
+    
+    return content;
+  }
+  
   public Viewport(CConn cc_) {
+    this(cc_, true);
+  }
+  
+  public Viewport(CConn cc_, boolean useFrame) {
     cc = cc_;
+
+    if(useFrame){
+      frame = new JFrame();
+      frame.setIconImage(VncViewer.frameImage);
+    }
+    
     updateTitle();
-    setFocusable(false);
-    setFocusTraversalKeysEnabled(false);
-    setIconImage(VncViewer.frameImage);
+    getContainer().setFocusable(false);
+    getContainer().setFocusTraversalKeysEnabled(false);
     UIManager.getDefaults().put("ScrollPane.ancestorInputMap",
       new UIDefaults.LazyInputMap(new Object[]{}));
     sp = new JScrollPane();
@@ -66,18 +88,16 @@ public class Viewport extends JFrame implements Runnable {
              "scrollRight");
     }
     tb = new Toolbar(cc);
-    add(tb, BorderLayout.PAGE_START);
+    getContainer().add(tb, BorderLayout.PAGE_START);
     
-    if(cc.viewer instanceof VncViewer){
-    	getContentPane().add(sp);
-    }else{
-    	cc.viewer.add(sp);
-    	cc.viewer.revalidate();
+    getContainer().add(sp, BorderLayout.CENTER);
+    if(useFrame){
+      frame.getContentPane().add(getContainer());
     }
     
-    if (VncViewer.os.startsWith("mac os x")) {
+    if (VncViewer.os.startsWith("mac os x") && useFrame) {
       macMenu = new MacMenuBar(cc);
-      setJMenuBar(macMenu);
+      frame.setJMenuBar(macMenu);
       if (VncViewer.getBooleanProperty("turbovnc.lionfs", true))
         enableLionFS();
     }
@@ -86,32 +106,34 @@ public class Viewport extends JFrame implements Runnable {
     // full-screen state.
     showToolbar(cc.showToolbar, canDoLionFS);
 
-    addWindowFocusListener(new WindowAdapter() {
-      public void windowGainedFocus(WindowEvent e) {
-        if (sp.getViewport().getView() != null)
-          sp.getViewport().getView().requestFocusInWindow();
-        if (isVisible() && keyboardTempUngrabbed) {
-          System.out.println("Keyboard focus regained. Re-grabbing keyboard.");
-          grabKeyboardHelper(true);
-          keyboardTempUngrabbed = false;
+    if(useFrame){
+      frame.addWindowFocusListener(new WindowAdapter() {
+        public void windowGainedFocus(WindowEvent e) {
+          if (sp.getViewport().getView() != null)
+            sp.getViewport().getView().requestFocusInWindow();
+          if (getContainer().isVisible() && keyboardTempUngrabbed) {
+            System.out.println("Keyboard focus regained. Re-grabbing keyboard.");
+            grabKeyboardHelper(true);
+            keyboardTempUngrabbed = false;
+          }
         }
-      }
-      public void windowLostFocus(WindowEvent e) {
-        if (cc.keyboardGrabbed && isVisible()) {
-          vlog.info("Keyboard focus lost. Temporarily ungrabbing keyboard.");
-          grabKeyboardHelper(false);
-          keyboardTempUngrabbed = true;
+        public void windowLostFocus(WindowEvent e) {
+          if (cc.keyboardGrabbed && getContainer().isVisible()) {
+            vlog.info("Keyboard focus lost. Temporarily ungrabbing keyboard.");
+            grabKeyboardHelper(false);
+            keyboardTempUngrabbed = true;
+          }
         }
-      }
-    });
+      });
 
-    addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) {
-        cc.close();
-      }
-    });
+      frame.addWindowListener(new WindowAdapter() {
+        public void windowClosing(WindowEvent e) {
+          cc.close();
+        }
+      });
+    }
 
-    addComponentListener(new ComponentAdapter() {
+    getContainer().addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
         if (cc.opts.scalingFactor == Options.SCALE_AUTO ||
             cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -132,7 +154,7 @@ public class Viewport extends JFrame implements Runnable {
               if (tb.isVisible())
                 h += tb.getHeight();
               if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
-                setSize(w, h);
+                getContainer().setSize(w, h);
             }
           }
         } else if (cc.opts.desktopSize.mode == Options.SIZE_AUTO &&
@@ -181,13 +203,27 @@ public class Viewport extends JFrame implements Runnable {
         } else {
           dx = dy = 0;
         }
-        repaint();
+        getContainer().repaint();
       }
     });
   }
 
+  public int getExtendedState() {
+    if(frame != null){
+      return frame.getExtendedState();
+    }
+    
+    return JFrame.NORMAL;
+  }
+  
+  public void setExtendedState(int state){
+    if(frame != null){
+      frame.setExtendedState(state);
+    }
+  }
+  
   public Dimension getAvailableSize() {
-    Dimension availableSize = getSize();
+    Dimension availableSize = getContainer().getSize();
     if (!cc.opts.fullScreen) {
       Insets vpInsets = VncViewer.insets;
       availableSize.width -= vpInsets.left + vpInsets.right;
@@ -302,8 +338,8 @@ public class Viewport extends JFrame implements Runnable {
   }
 
   public void setGeometry(int x, int y, int w, int h) {
-    setSize(w, h);
-    setLocation(x, y);
+    getContainer().setSize(w, h);
+    getContainer().setLocation(x, y);
     vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
   }
 
@@ -314,23 +350,27 @@ public class Viewport extends JFrame implements Runnable {
   }
 
   public void updateTitle() {
+    if(frame == null){
+      return;
+    }
+    
     int enc = cc.lastServerEncoding;
     if (enc < 0) enc = cc.currentEncoding;
     if (enc == Encodings.encodingTight) {
       if (cc.opts.allowJpeg) {
         String[] subsampStr = { "1X", "4X", "2X", "Gray" };
-        setTitle(cc.cp.name() + " [Tight + JPEG " +
+        frame.setTitle(cc.cp.name() + " [Tight + JPEG " +
                  subsampStr[cc.opts.subsampling] + " Q" + cc.opts.quality +
                  (cc.opts.compressLevel > 1 ? " + CL " + cc.opts.compressLevel : "") +
                  "]");
       } else {
-        setTitle(cc.cp.name() + " [Lossless Tight" +
+        frame.setTitle(cc.cp.name() + " [Lossless Tight" +
                  (cc.opts.compressLevel == 1 ? " + Zlib" : "") +
                  (cc.opts.compressLevel > 1 ? " + CL " + cc.opts.compressLevel : "") +
                  "]");
       }
     } else {
-      setTitle(cc.cp.name() + " [" + Encodings.encodingName(enc) + "]");
+      frame.setTitle(cc.cp.name() + " [" + Encodings.encodingName(enc) + "]");
     }
   }
 
@@ -467,9 +507,10 @@ public class Viewport extends JFrame implements Runnable {
   private native void grabKeyboard(boolean on, boolean pointer);
   private native void extInputEventLoop();
 
-  @Override
   public void dispose() {
-    super.dispose();
+    if(frame != null){
+      frame.dispose();
+    }
     if (thread != null) {
       threadRunning = false;
       try {

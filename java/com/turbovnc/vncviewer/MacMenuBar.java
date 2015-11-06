@@ -42,7 +42,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       if (method.getName().equals("handleAbout")) {
         cc.showAbout();
       } else if (method.getName().equals("handlePreferences")) {
-        cc.options.showDialog(cc.viewport);
+        cc.options.showDialog(cc.viewport.frame);
       }
       return null;
     }
@@ -168,7 +168,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.toggleToolbar();
       showToolbar.setSelected(cc.showToolbar);
     } else if (actionMatch(ev, clipboard)) {
-      cc.clipboardDialog.showDialog(cc.viewport);
+      cc.clipboardDialog.showDialog(cc.viewport.frame);
     } else if (actionMatch(ev, ctrlAltDel) && !cc.opts.viewOnly) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Alt_L, true);
@@ -197,7 +197,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       if (cc.profileDialog.isVisible())
         cc.profileDialog.endDialog();
       else
-        cc.profileDialog.showDialog(cc.viewport);
+        cc.profileDialog.showDialog(cc.viewport.frame);
       cc.toggleProfile();
     }
   }

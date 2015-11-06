@@ -357,7 +357,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (cause instanceof WarningException)
         throw (WarningException)cause;
       else if (cause != null)
-        throw new SystemException(cause.toString());
+        cause.printStackTrace();
+//        throw new SystemException(cause.toString());
     }
   }
 
@@ -464,8 +465,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void setName(String name) {
     super.setName(name);
 
-    if (viewport != null) {
-      viewport.setTitle(name + " - TurboVNC");
+    if (viewport != null && viewport.frame != null) {
+      viewport.frame.setTitle(name + " - TurboVNC");
     }
   }
 
@@ -951,7 +952,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (opts.fullScreen) {
         savedState = viewport.getExtendedState();
         viewport.setExtendedState(JFrame.NORMAL);
-        savedRect = viewport.getBounds();
+        savedRect = viewport.getContainer().getBounds();
       }
       if (viewport.timer != null)
         viewport.timer.stop();
@@ -962,17 +963,25 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
       viewport.dispose();
     }
-    viewport = new Viewport(this);
+    
+    boolean useFrame = viewer instanceof VncViewer;
+    viewport = new Viewport(this, useFrame);
+    if(!useFrame){
+      viewer.add(viewport.getContainer());
+      viewer.revalidate();
+    }
+    
+    
     // When in Lion full-screen mode, we need to create the viewport as if
     // full-screen mode was disabled.
     boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
-    viewport.setUndecorated(fullScreen);
+    if(viewport.frame != null){
+      viewport.frame.setUndecorated(fullScreen);
+    }
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
-    	if(viewer instanceof VncViewer){
-    		viewport.setVisible(true);
-    	}
+    		viewport.getContainer().setVisible(true);
     if (VncViewer.isX11())
       viewport.x11FullScreenHelper(fullScreen);
     if (opts.fullScreen && viewport.lionFSSupported())
@@ -1037,7 +1046,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
                                    s.y < primary.y + primary.height)))))
           primary = s;
         if (VncViewer.currentMonitorIsPrimary.getValue() && viewport != null) {
-          Rectangle vpRect = viewport.getBounds();
+          Rectangle vpRect = viewport.getContainer().getBounds();
           if (opts.fullScreen && savedRect.width > 0 && savedRect.height > 0)
             vpRect = savedRect;
           vpRect = s.intersection(vpRect);
@@ -1259,7 +1268,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   void showAbout() {
-    VncViewer.showAbout(viewport);
+    VncViewer.showAbout(viewport.getContainer());
   }
 
   void showInfo() {
@@ -1281,7 +1290,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       (VncViewer.isX11() ? "\nTurboVNC Helper:  " +
         (Viewport.isHelperAvailable() ? "Loaded" : "Not found") : ""),
       JOptionPane.PLAIN_MESSAGE);
-    JDialog dlg = pane.createDialog(viewport, "VNC connection info");
+    JDialog dlg = pane.createDialog(viewport.frame, "VNC connection info");
     if (VncViewer.embed.getValue())
       dlg.setAlwaysOnTop(true);
     dlg.setVisible(true);
