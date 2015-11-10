@@ -351,8 +351,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
             SET_INT(valcls, valuator, rangeCenter,
                     (a->min_value + a->max_value) / 2);
             SET_INT(valcls, valuator, rangeMax, a->max_value);
-            SET_INT(valcls, valuator, siUnit, 3);
-                                           /* ^^ rfbGIIUnitLength, in meters */
+            SET_INT(valcls, valuator, siUnit, rfbGIIUnitLength);
             SET_INT(valcls, valuator, siDiv, a->resolution);
 
             bailif0(mid = (*env)->GetMethodID(env, eidcls, "addValuator",
