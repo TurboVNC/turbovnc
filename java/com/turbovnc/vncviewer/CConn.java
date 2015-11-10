@@ -817,7 +817,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         ExtInputDevice.Valuator v =
           (ExtInputDevice.Valuator)dev.valuators.get(i);
         if (i == 0) {
-          e.valuators[i] = (int)((double)e.x / (double)cp.width *
+          e.valuators[i] = (int)((double)e.x / (double)(cp.width - 1) *
                                  ((double)v.rangeMax - (double)v.rangeMin) +
                                  (double)v.rangeMin + 0.5);
           if (e.valuators[i] > v.rangeMax)
@@ -825,13 +825,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
           else if (e.valuators[i] < v.rangeMin)
             e.valuators[i] = v.rangeMin;
         } else if (i == 1) {
-          e.valuators[i] = (int)((double)e.y / (double)cp.height *
-                                 ((double)v.rangeMax - (double)v.rangeMin) +
-                                 (double)v.rangeMin + 0.5);
-          if (e.valuators[i] > v.rangeMax)
-            e.valuators[i] = v.rangeMax;
-          else if (e.valuators[i] < v.rangeMin)
-            e.valuators[i] = v.rangeMin;
+          e.valuators[i - e.firstValuator] =
+            (int)((double)e.y / (double)(cp.height - 1) *
+                  ((double)v.rangeMax - (double)v.rangeMin) +
+                  (double)v.rangeMin + 0.5);
+          if (e.valuators[i - e.firstValuator] > v.rangeMax)
+            e.valuators[i - e.firstValuator] = v.rangeMax;
+          else if (e.valuators[i - e.firstValuator] < v.rangeMin)
+            e.valuators[i - e.firstValuator] = v.rangeMin;
         }
       }
     }
