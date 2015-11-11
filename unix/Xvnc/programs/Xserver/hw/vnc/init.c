@@ -384,6 +384,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
 #endif
 
+    if (strcasecmp(argv[i], "-virtualtablet") == 0) {
+        rfbVirtualTablet = TRUE;
+        return 1;
+    }
+
     if (strcasecmp(argv[i], "-economictranslate") == 0) {
         rfbEconomicTranslate = TRUE;
         return 1;
@@ -781,6 +786,44 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
 
 
 /*
+ * These values are appropriate for Wacom tablets.  Unknown if they will work
+ * for anything else.
+ */
+
+rfbDevInfo virtualTabletStylus =
+    { "TurboVNC virtual tablet stylus", 16, 6, Absolute, 0, NULL,
+      {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
+         0, 1, 200000, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 9843, 19685, rfbGIIUnitLength,
+         0, 1, 200000, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
+         0, 1, 1, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_TILT_X, "3", -64, 0, 63, rfbGIIUnitLength,
+         0, 1, 57, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_TILT_Y, "4", -64, 0, 63, rfbGIIUnitLength,
+         0, 1, 57, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_WHEEL, "5", -900, 0, 899, rfbGIIUnitLength,
+         0, 1, 1, 0 }}
+    };
+
+rfbDevInfo virtualTabletEraser =
+    { "TurboVNC virtual tablet eraser", 16, 6, Absolute, 0, NULL,
+      {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
+         0, 1, 200000, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 9843, 19685, rfbGIIUnitLength,
+         0, 1, 200000, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
+         0, 1, 1, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_TILT_X, "3", -64, 0, 63, rfbGIIUnitLength,
+         0, 1, 57, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_TILT_Y, "4", -64, 0, 63, rfbGIIUnitLength,
+         0, 1, 57, 0 },
+       { 0, "None", "5", 0, 0, 1, rfbGIIUnitLength,
+         0, 1, 1, 0 }}
+    };
+
+
+/*
  * InitInput is also called every time the server resets.  It is called after
  * InitOutput, so we can assume that rfbInitSockets has already been called.
  */
@@ -804,6 +847,13 @@ InitInput(int argc, char *argv[])
     mieqInit();
     mieqSetHandler(ET_KeyPress, vncXkbProcessDeviceEvent);
     mieqSetHandler(ET_KeyRelease, vncXkbProcessDeviceEvent);
+
+    if (rfbVirtualTablet) {
+        if (!AddExtInputDevice(&virtualTabletStylus))
+            FatalError("Could not create TurboVNC virtual tablet stylus device");
+        if (!AddExtInputDevice(&virtualTabletEraser))
+            FatalError("Could not create TurboVNC virtual tablet eraser device");
+    }
 }
 
 
@@ -912,7 +962,8 @@ RemoveExtInputDevice(rfbClientPtr cl, int index)
     if (canDelete) {
         rfbLog("Device \'%s\' no longer used by any clients.  Deleting.\n",
                cl->devices[index].name);
-        RemoveDevice(cl->devices[index].pDev, FALSE);
+        if (cl->devices[index].pDev)
+            RemoveDevice(cl->devices[index].pDev, FALSE);
         for (i = index; i < cl->numDevices - 1; i++)
             memcpy(&cl->devices[i], &cl->devices[i + 1], sizeof(rfbDevInfo));
         if (cl->numDevices > 0)

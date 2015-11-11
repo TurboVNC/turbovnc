@@ -504,6 +504,8 @@ extern Atom VNC_LAST_CLIENT_ID;
 
 extern rfbScreenInfo rfbScreen;
 extern DevPrivateKeyRec rfbGCKey;
+extern rfbDevInfo virtualTabletStylus;
+extern rfbDevInfo virtualTabletEraser;
 
 extern int inetdSock;
 extern struct in_addr interface;
@@ -658,6 +660,7 @@ extern int rfbALRQualityLevel;
 extern int rfbALRSubsampLevel;
 extern int rfbInterframe;
 extern int rfbMaxClipboard;
+extern Bool rfbVirtualTablet;
 
 #define debugregion(r, m) \
     rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1, \

@@ -67,6 +67,7 @@ int rfbICEBlockSize = 256;
 Bool rfbInterframeDebug = FALSE;
 int rfbMaxWidth = 0, rfbMaxHeight = 0;
 int rfbMaxClipboard = MAX_CUTTEXT_LEN;
+Bool rfbVirtualTablet = FALSE;
 
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
@@ -1463,7 +1464,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
                 }
             }
 
-            if (AddExtInputDevice(&dev)) {
+            if (rfbVirtualTablet || AddExtInputDevice(&dev)) {
                 memcpy(&cl->devices[cl->numDevices], &dev, sizeof(dev));
                 cl->numDevices++;
                 dcmsg.deviceOrigin = Swap32IfLE(cl->numDevices);

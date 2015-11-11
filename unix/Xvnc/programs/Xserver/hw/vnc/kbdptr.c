@@ -480,6 +480,27 @@ PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
 }
 
 
+char *stristr(const char *s1, const char *s2)
+{
+    char *str1, *str2, *ret;
+    int i;
+
+    if (!s1 || !s2 || strlen(s1) < 1 || strlen(s2) < 1)
+        return NULL;
+
+    str1 = strdup(s1);
+    for(i = 0; i < strlen(str1); i++)
+        str1[i] = tolower(str1[i]);
+    str2 = strdup(s2);
+    for(i = 0; i < strlen(str2); i++)
+        str2[i] = tolower(str2[i]);
+
+    ret = strstr(str1, str2);
+    free(str1);  free(str2);
+    return ret;
+}
+
+
 void
 ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 {
@@ -488,12 +509,41 @@ ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
     if (!dev)
         FatalError("ExtInputDeviceAddEvent(): Invalid argument");
 
-    valuator_mask_set_range(&mask, dev->valFirst, dev->valCount,
-                            dev->valCount > 0 ? &dev->values[dev->valFirst] :
-                            NULL);
-    QueuePointerEvents(dev->pDev, type, buttons,
-                       dev->mode == Absolute && dev->valCount > 0 ?
-                       POINTER_ABSOLUTE : POINTER_RELATIVE, &mask);
+    if (rfbVirtualTablet) {
+        int i;
+        rfbDevInfoPtr vtDev = stristr(dev->name, "eraser") ?
+                              &virtualTabletEraser : &virtualTabletStylus;
+
+        if (dev->valFirst >= vtDev->numValuators ||
+            buttons > vtDev->numButtons)
+            return;
+
+        vtDev->valFirst = dev->valFirst;
+        vtDev->valCount = min(dev->valCount,
+                              vtDev->numValuators - vtDev->valFirst);
+
+        for (i = vtDev->valFirst; i < vtDev->valFirst + vtDev->valCount; i++)
+				{
+            vtDev->values[i] = (int)roundl(
+                (double)(dev->values[i] - dev->valuators[i].rangeMin) /
+                    (double)(dev->valuators[i].rangeMax -
+                             dev->valuators[i].rangeMin) *
+                (double)(vtDev->valuators[i].rangeMax -
+                         vtDev->valuators[i].rangeMin) +
+                (double)vtDev->valuators[i].rangeMin);
+        }
+        dev = vtDev;
+    }
+
+    if (dev->valCount > 0) {
+        valuator_mask_set_range(&mask, 0, dev->numValuators, dev->values);
+        QueuePointerEvents(dev->pDev, type, buttons,
+                           dev->mode == Absolute ? POINTER_ABSOLUTE :
+                           POINTER_RELATIVE, &mask);
+    } else {
+        valuator_mask_set_range(&mask, 0, 0, NULL);
+        QueuePointerEvents(dev->pDev, type, buttons, POINTER_RELATIVE, &mask);
+    }
     mieqProcessInputEvents();
 }
 
