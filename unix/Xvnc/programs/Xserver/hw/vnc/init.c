@@ -1424,6 +1424,10 @@ ddxUseMsg()
     ErrorF("-nvcontrol display     set up a virtual NV-CONTROL extension and redirect\n");
     ErrorF("                       NV-CONTROL requests to the specified X display\n");
 #endif
+    ErrorF("-virtualtablet         set up virtual stylus and eraser devices for this\n");
+    ErrorF("                       session, to emulate a Wacom tablet, and map all\n");
+    ErrorF("                       extended input events from all viewers to these devices\n");
+    ErrorF("                       (see man page)\n");
     ErrorF("-economictranslate     less memory hungry translation\n");
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");

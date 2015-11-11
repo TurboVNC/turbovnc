@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "October 2015" "" "TurboVNC"
+.TH Xvnc 1 "November 2015" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -31,7 +31,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-noflowcontrol]
 [\-alr \fItime\fR]
 [\-alrqual \fIlevel\fR] [\-alrsamp \fI1X | 2X | 4X | gray\fR]
-[\-interframe] [\-nointerframe]
+[\-interframe] [\-nointerframe] [\-virtualtablet]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
@@ -215,6 +215,38 @@ feature be used only when needed.
 \fB\-nointerframe\fR
 Specifying this option will disable interframe comparison, regardless of the
 compression level that was requested by the viewer.
+.TP
+\fB\-virtualtablet\fR
+TurboVNC can handle extended input devices in one of two ways:
+
+\fBRemote\ X\ Input\ Mode\fR (default)
+
+X Input devices are created in the TurboVNC X server only when a viewer
+requests their creation.  For instance, the TurboVNC Un*x/Linux Viewer sends
+information about client-side X Input extended pointer devices to the server,
+and the server makes copies of those devices.  The viewer then sends extended
+input events from the client-side devices to the server, where they are mapped
+to the respective copies of the client-side devices.  If another viewer
+attempts to create a remote X Input device with the same name, then the
+existing server-side device is shared with the new viewer.  The server-side
+devices are deleted automatically when all viewers that use them have
+disconnected.  This is the most flexible way of handling extended input
+devices, because it allows any generic X Input pointer device (spaceballs,
+tablets, etc.) on the client machine to be used by the server.
+
+\fBVirtual\ Tablet\ Mode\fR (enabled with this command-line option)
+
+In Virtual Tablet Mode, the TurboVNC Server creates a virtual stylus and eraser
+device designed to emulate a Wacom tablet, and it maps all extended input
+events from all viewers to these devices (generally, any event from a
+client-side eraser device is mapped to the virtual eraser, and all other events
+are mapped to the virtual stylus.)  This mode is less generic than Remote X
+Input Mode, and it probably will not work with devices other than tablets
+(perhaps not even with non-Wacom tablets.)  Virtual Tablet mode is useful when
+running specific applications from xstartup.turbovnc, rather than a window
+manager.  Because applications usually check for the presence of X Input
+devices at startup, by the time the first viewer connects and requests that the
+client-side devices be cloned, it is too late.
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.

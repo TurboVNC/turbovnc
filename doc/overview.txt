@@ -95,6 +95,8 @@ In addition to high performance, other notable features of TurboVNC include:
 	* The TurboVNC Server and Java TurboVNC Viewer can be used with an instance
 		of the UltraVNC Repeater in Mode I or II.
 
+	* Remote extended input device support
+
 TurboVNC, when used with VirtualGL, provides a highly performant and robust
 solution for remotely displaying 3D applications over all types of networks.
 
