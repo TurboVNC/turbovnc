@@ -24,6 +24,7 @@
 #include "com_turbovnc_vncviewer_Viewport.h"
 #include <X11/Xmd.h>
 #include "rfbproto.h"
+#include "turbovnc_devtypes.h"
 
 #ifndef IsXExtensionPointer
 #define IsXExtensionPointer 4
@@ -289,7 +290,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
   for (i = 0; i < nDevices; i++) {
     char *type;
     XAnyClassPtr classInfo = devInfo[i].inputclassinfo;
-    CARD32 canGenerate = 0;
+    CARD32 canGenerate = 0, productID = 0;
 
     if (devInfo[i].use != IsXExtensionPointer)
       continue;
@@ -300,6 +301,18 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
       XFree(type);
       continue;
     }
+    /* TurboVNC-specific:  we use productID to represent the device type, so
+       we can recreate it on the server */
+    if (!strcmp(type, "CURSOR"))
+      productID = rfbGIIDevTypeCursor;
+    else if (!strcmp(type, "STYLUS"))
+      productID = rfbGIIDevTypeStylus;
+    else if (!strcmp(type, "ERASER"))
+      productID = rfbGIIDevTypeEraser;
+    else if (!strcmp(type, "TOUCH"))
+      productID = rfbGIIDevTypeTouch;
+    else if (!strcmp(type, "PAD"))
+      productID = rfbGIIDevTypePad;
     XFree(type);
 
     bailif0(eidcls =
@@ -308,7 +321,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
 
     SET_STRING(eidcls, extInputDevice, name, devInfo[i].name);
     SET_LONG(eidcls, extInputDevice, vendorID, 4242);
-    SET_LONG(eidcls, extInputDevice, productID, 4242);
+    SET_LONG(eidcls, extInputDevice, productID, productID);
     SET_LONG(eidcls, extInputDevice, id, devInfo[i].id);
 
     for (ci = 0; ci < devInfo[i].num_classes; ci++) {

@@ -148,6 +148,8 @@ struct in_addr interface;
 struct in6_addr interface6;
 int family = -1;
 
+extern char *stristr(const char *s1, const char *s2);
+
 
 static void
 PrintVersion(void)
@@ -791,7 +793,8 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
  */
 
 rfbDevInfo virtualTabletStylus =
-    { "TurboVNC virtual tablet stylus", 16, 6, Absolute, 0, NULL,
+    { "TurboVNC virtual tablet stylus", 16, 6, Absolute, 0,
+      rfbGIIDevTypeStylus, NULL,
       {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
          0, 1, 200000, 0 },
        { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 9843, 19685, rfbGIIUnitLength,
@@ -807,7 +810,8 @@ rfbDevInfo virtualTabletStylus =
     };
 
 rfbDevInfo virtualTabletEraser =
-    { "TurboVNC virtual tablet eraser", 16, 6, Absolute, 0, NULL,
+    { "TurboVNC virtual tablet eraser", 16, 6, Absolute, 0,
+      rfbGIIDevTypeEraser, NULL,
       {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
          0, 1, 200000, 0 },
        { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 9843, 19685, rfbGIIUnitLength,
@@ -893,6 +897,35 @@ AddExtInputDevice(rfbDevInfo *dev)
     dev->pDev->lastSlave = NULL;
     dev->pDev->last.slave = NULL;
     dev->pDev->type = SLAVE;
+    switch (dev->productID) {
+    case rfbGIIDevTypeCursor:
+        dev->pDev->xinput_type = XA_CURSOR;
+        break;
+    case rfbGIIDevTypeStylus:
+        dev->pDev->xinput_type = MakeAtom("STYLUS", strlen("STYLUS"), 1);
+        break;
+    case rfbGIIDevTypeEraser:
+        dev->pDev->xinput_type = MakeAtom("ERASER", strlen("ERASER"), 1);
+        break;
+    case rfbGIIDevTypeTouch:
+        dev->pDev->xinput_type = MakeAtom("TOUCH", strlen("TOUCH"), 1);
+        break;
+    case rfbGIIDevTypePad:
+        dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
+        break;
+    default:
+        if (stristr(dev->name, "cursor"))
+            dev->pDev->xinput_type = XA_CURSOR;
+        else if (stristr(dev->name, "stylus"))
+            dev->pDev->xinput_type = MakeAtom("STYLUS", strlen("STYLUS"), 1);
+        else if (stristr(dev->name, "eraser"))
+            dev->pDev->xinput_type = MakeAtom("ERASER", strlen("ERASER"), 1);
+        else if (stristr(dev->name, "touch"))
+            dev->pDev->xinput_type = MakeAtom("TOUCH", strlen("TOUCH"), 1);
+        else if (stristr(dev->name, "pad"))
+            dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
+        break;
+    }
 
     for (i = 0; i < dev->numButtons; i++) {
         char name[11];

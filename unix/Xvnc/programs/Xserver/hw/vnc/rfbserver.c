@@ -1426,6 +1426,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
             dev.eventMask = msg.giidc.canGenerate;
             dev.mode = (dev.eventMask & rfbGIIValuatorAbsoluteMask) ?
                        Absolute : Relative;
+            dev.productID = msg.giidc.productID;
 
             for (i = 0; i < dev.numValuators; i++) {
                 rfbGIIValuator *v = &dev.valuators[i];

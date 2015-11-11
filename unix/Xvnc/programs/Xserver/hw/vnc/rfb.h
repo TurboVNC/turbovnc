@@ -39,6 +39,7 @@
 #include "gcstruct.h"
 #include "osdep.h"
 #include <rfbproto.h>
+#include <turbovnc_devtypes.h>
 #include <vncauth.h>
 #include <zlib.h>
 #include <stdarg.h>
@@ -167,6 +168,7 @@ typedef struct
     int numValuators;
     int mode;
     CARD32 eventMask;
+    CARD32 productID;
     DeviceIntPtr pDev;
     rfbGIIValuator valuators[MAX_VALUATORS];
     int values[MAX_VALUATORS];

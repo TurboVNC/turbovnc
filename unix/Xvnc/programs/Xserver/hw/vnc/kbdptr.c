@@ -511,7 +511,8 @@ ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 
     if (rfbVirtualTablet) {
         int i;
-        rfbDevInfoPtr vtDev = stristr(dev->name, "eraser") ?
+        rfbDevInfoPtr vtDev = stristr(dev->name, "eraser") ||
+                              dev->productID == rfbGIIDevTypeEraser ?
                               &virtualTabletEraser : &virtualTabletStylus;
 
         if (dev->valFirst >= vtDev->numValuators ||
