@@ -448,6 +448,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly &&
+        (!VncViewer.isX11() ||
+         !cc.viewport.processExtInputEventHelper(cc.viewport.motionType)) &&
         e.getX() >= x &&
         e.getY() >= y &&
         e.getX() <= x + scaledWidth &&
@@ -474,20 +476,27 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void mouseMoved(MouseEvent e) { mouseMotionCB(e); }
 
   // EDT: Mouse callback function
-  private void mouseCB(MouseEvent e) {
+  private void mouseCB(MouseEvent e, int type) {
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
-    if (!cc.opts.viewOnly && (e.getID() == MouseEvent.MOUSE_RELEASED ||
-        (e.getX() >= x &&
-         e.getY() >= y &&
-         e.getX() <= x + scaledWidth &&
-         e.getY() <= y + scaledHeight)))
+    if (!cc.opts.viewOnly &&
+        (!VncViewer.isX11() ||
+         !cc.viewport.processExtInputEventHelper(type)) &&
+        (e.getID() == MouseEvent.MOUSE_RELEASED ||
+         (e.getX() >= x &&
+          e.getY() >= y &&
+          e.getX() <= x + scaledWidth &&
+          e.getY() <= y + scaledHeight)))
       cc.writePointerEvent(e);
     lastX = e.getX();
     lastY = e.getY();
   }
-  public void mouseReleased(MouseEvent e) { mouseCB(e); }
-  public void mousePressed(MouseEvent e) { mouseCB(e); }
+  public void mouseReleased(MouseEvent e) {
+    mouseCB(e, cc.viewport.buttonReleaseType);
+  }
+  public void mousePressed(MouseEvent e) {
+    mouseCB(e, cc.viewport.buttonPressType);
+  }
   public void mouseClicked(MouseEvent e) {}
   public void mouseEntered(MouseEvent e) {
     if (VncViewer.embed.getValue())
@@ -497,7 +506,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // EDT: Mouse wheel callback function
   private void mouseWheelCB(MouseWheelEvent e) {
-    if (!cc.opts.viewOnly)
+    if (!cc.opts.viewOnly &&
+        (!VncViewer.isX11() ||
+         !cc.viewport.processExtInputEventHelper(cc.viewport.motionType)))
       cc.writeWheelEvent(e);
   }
 

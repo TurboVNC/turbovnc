@@ -767,7 +767,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (viewport != null && !benchmark) {
       vlog.info("Enabling GII");
       writer().writeGIIVersion();
-      viewport.extInputHelper();
+      if (VncViewer.isX11())
+        viewport.setupExtInputHelper();
     }
   }
 
@@ -968,7 +969,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           (opts.grabKeyboard == Options.GRAB_MANUAL && keyboardTempUngrabbed) ||
           (opts.grabKeyboard == Options.GRAB_FS && fullScreen))
         viewport.grabKeyboardHelper(true);
-      viewport.extInputHelper();
+      viewport.setupExtInputHelper();
     }
   }
 

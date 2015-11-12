@@ -25,10 +25,26 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
 
 /*
  * Class:     com_turbovnc_vncviewer_Viewport
- * Method:    extInputEventLoop
+ * Method:    setupExtInput
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_extInputEventLoop
+JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_turbovnc_vncviewer_Viewport
+ * Method:    processExtInputEvent
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputEvent
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     com_turbovnc_vncviewer_Viewport
+ * Method:    cleanupExtInput
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

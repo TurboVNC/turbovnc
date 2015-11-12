@@ -32,7 +32,7 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
 
-public class Viewport extends JFrame implements Runnable {
+public class Viewport extends JFrame {
 
   public Viewport(CConn cc_) {
     cc = cc_;
@@ -391,32 +391,38 @@ public class Viewport extends JFrame implements Runnable {
     }
   }
 
-  public void extInputHelper() {
-    if (isHelperAvailable() && cc.cp.supportsGII) {
-      if (thread == null) {
-        thread = new Thread(this);
-        thread.start();
+  public void setupExtInputHelper() {
+    if (isHelperAvailable() && cc.cp.supportsGII && x11dpy == 0) {
+      try {
+        setupExtInput();
+      } catch (java.lang.UnsatisfiedLinkError e) {
+        vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper.");
+        vlog.info("  Extended input device support will be disabled.");
+        helperAvailable = false;
+      } catch (java.lang.Exception e) {
+        vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper:");
+        vlog.info("  " + e.toString());
+        vlog.info("  Extended input device support may not work correctly.");
       }
     }
   }
 
-  public void run() {
-    try {
-      threadRunning = true;
-      extInputEventLoop();
-    } catch (java.lang.UnsatisfiedLinkError e) {
-      vlog.info("WARNING: Could not invoke extInputEventLoop() from TurboVNC Helper.");
-      vlog.info("  Extended input device support will be disabled.");
-      helperAvailable = false;
-    } catch (java.lang.Exception e) {
-      vlog.info("WARNING: Could not invoke extInputEventLoop() from TurboVNC Helper:");
-      vlog.info("  " + e.toString());
-      vlog.info("  Extended input device support may not work correctly.");
-      thread = null;
+  public void cleanupExtInputHelper() {
+    if (isHelperAvailable() && x11dpy != 0) {
+      try {
+        cleanupExtInput();
+      } catch (java.lang.UnsatisfiedLinkError e) {
+        vlog.info("WARNING: Could not invoke cleanupExtInput() from TurboVNC Helper.");
+        vlog.info("  Extended input device support will be disabled.");
+        helperAvailable = false;
+      } catch (java.lang.Exception e) {
+        vlog.info("WARNING: Could not invoke cleanupExtInput() from TurboVNC Helper:");
+        vlog.info("  " + e.toString());
+      }
     }
   }
 
-  synchronized void addInputDevice(ExtInputDevice dev) {
+  void addInputDevice(ExtInputDevice dev) {
     if (devices == null)
       devices = new ArrayList<ExtInputDevice>();
     devices.add(dev);
@@ -424,7 +430,7 @@ public class Viewport extends JFrame implements Runnable {
     cc.giiDeviceCreate(dev);
   }
 
-  synchronized void assignInputDevice(int deviceOrigin) {
+  void assignInputDevice(int deviceOrigin) {
     if (devices == null) {
       vlog.eidebug("Attempted to assign GII device ID " + deviceOrigin +
                    " to non-existent device");
@@ -441,38 +447,50 @@ public class Viewport extends JFrame implements Runnable {
     }
   }
 
-  synchronized void sendInputEvent(ExtInputEvent e) {
-    if (devices == null) {
-      vlog.error("ERROR: Attempted to send extended input event when no devices exist");
-      return;
-    }
-    for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
-      ExtInputDevice dev = (ExtInputDevice)i.next();
-      if (e.deviceID == dev.id && dev.remoteID != 0) {
-        if (dev.absolute && e.type == giiTypes.giiValuatorRelative)
-          e.type = giiTypes.giiValuatorAbsolute;
-        cc.giiSendEvent(dev, e);
+  boolean processExtInputEventHelper(int type) {
+    boolean retval = false;
+    if (isHelperAvailable() && cc.cp.supportsGII) {
+      boolean isExtEvent = false;
+      try {
+        isExtEvent = processExtInputEvent(type);
+      } catch (java.lang.UnsatisfiedLinkError e) {
+        vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper.");
+        vlog.info("  Extended input device support will be disabled.");
+        helperAvailable = false;
+      } catch (java.lang.Exception e) {
+        vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper:");
+        vlog.info("  " + e.toString());
+        vlog.info("  Extended input device support may not work correctly.");
+      }
+      if (!isExtEvent)
+        return false;
+      if (devices == null) {
+        vlog.error("ERROR: Attempted to send extended input event when no GII devices exist");
+        return false;
+      }
+      for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
+        ExtInputDevice dev = (ExtInputDevice)i.next();
+        if (lastEvent.deviceID == dev.id && dev.remoteID != 0) {
+          if (dev.absolute && lastEvent.type == giiTypes.giiValuatorRelative)
+            lastEvent.type = giiTypes.giiValuatorAbsolute;
+          cc.giiSendEvent(dev, lastEvent);
+          retval = true;
+        }
       }
     }
+    return retval;
   }
 
   private native void x11FullScreen(boolean on);
   private native void grabKeyboard(boolean on, boolean pointer);
-  private native void extInputEventLoop();
+  private native void setupExtInput();
+  private native boolean processExtInputEvent(int type);
+  private native void cleanupExtInput();
 
   @Override
   public void dispose() {
     super.dispose();
-    if (thread != null) {
-      threadRunning = false;
-      try {
-        thread.join();
-      } catch (InterruptedException e) {
-        vlog.error("InterruptedException while joining thread: " +
-                   e.getMessage());
-      }
-      thread = null;
-    }
+    cleanupExtInputHelper();
   }
 
   CConn cc;
@@ -484,10 +502,10 @@ public class Viewport extends JFrame implements Runnable {
   boolean keyboardTempUngrabbed;
   static boolean triedHelperInit, helperAvailable;
   Timer timer;
-  Thread thread;
-  boolean threadRunning;
-  private long x11win;
+  private long x11dpy, x11win;
+  public int buttonPressType, buttonReleaseType, motionType;
   ArrayList<ExtInputDevice> devices;
+  ExtInputEvent lastEvent = new ExtInputEvent();
 
   static LogWriter vlog = new LogWriter("Viewport");
 }
