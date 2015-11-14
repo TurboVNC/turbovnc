@@ -792,6 +792,23 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
  * for anything else.
  */
 
+rfbDevInfo virtualTabletTouch =
+    { "TurboVNC virtual tablet touch", 16, 6, Absolute, 0,
+      rfbGIIDevTypeTouch, NULL,
+      {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 2048, 4096, rfbGIIUnitLength,
+         0, 1, 26000, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 2048, 4096, rfbGIIUnitLength,
+         0, 1, 41000, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
+         0, 1, 1, 0 },
+       { 0, "None", "3", 0, 0, 1, rfbGIIUnitLength,
+         0, 1, 1, 0 },
+       { 0, "None", "4", 0, 0, 1, rfbGIIUnitLength,
+         0, 1, 1, 0 },
+       { 0, "None", "5", 0, 0, 1, rfbGIIUnitLength,
+         0, 1, 1, 0 }}
+    };
+
 rfbDevInfo virtualTabletStylus =
     { "TurboVNC virtual tablet stylus", 16, 6, Absolute, 0,
       rfbGIIDevTypeStylus, NULL,
@@ -826,6 +843,23 @@ rfbDevInfo virtualTabletEraser =
          0, 1, 1, 0 }}
     };
 
+rfbDevInfo virtualTabletPad =
+    { "TurboVNC virtual tablet pad", 16, 6, Absolute, 0,
+      rfbGIIDevTypePad, NULL,
+      {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 0, 0, rfbGIIUnitLength,
+         0, 1, 0, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 0, 0, rfbGIIUnitLength,
+         0, 1, 0, 0 },
+       { 0, "None", "2", 0, 0, 1, rfbGIIUnitLength,
+         0, 1, 1, 0 },
+       { 0, "None", "3", 0, 0, 1, rfbGIIUnitLength,
+         0, 1, 1, 0 },
+       { 0, "None", "4", 0, 0, 1, rfbGIIUnitLength,
+         0, 1, 1, 0 },
+       { 0, AXIS_LABEL_PROP_ABS_WHEEL, "5", 0, 36, 71, rfbGIIUnitLength,
+         0, 1, 1, 0 }}
+    };
+
 
 /*
  * InitInput is also called every time the server resets.  It is called after
@@ -853,10 +887,14 @@ InitInput(int argc, char *argv[])
     mieqSetHandler(ET_KeyRelease, vncXkbProcessDeviceEvent);
 
     if (rfbVirtualTablet) {
+        if (!AddExtInputDevice(&virtualTabletTouch))
+            FatalError("Could not create TurboVNC virtual tablet touch device");
         if (!AddExtInputDevice(&virtualTabletStylus))
             FatalError("Could not create TurboVNC virtual tablet stylus device");
         if (!AddExtInputDevice(&virtualTabletEraser))
             FatalError("Could not create TurboVNC virtual tablet eraser device");
+        if (!AddExtInputDevice(&virtualTabletPad))
+            FatalError("Could not create TurboVNC virtual tablet pad device");
     }
 }
 

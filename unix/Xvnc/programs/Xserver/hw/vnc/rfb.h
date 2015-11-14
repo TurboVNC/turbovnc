@@ -506,8 +506,10 @@ extern Atom VNC_LAST_CLIENT_ID;
 
 extern rfbScreenInfo rfbScreen;
 extern DevPrivateKeyRec rfbGCKey;
+extern rfbDevInfo virtualTabletTouch;
 extern rfbDevInfo virtualTabletStylus;
 extern rfbDevInfo virtualTabletEraser;
+extern rfbDevInfo virtualTabletPad;
 
 extern int inetdSock;
 extern struct in_addr interface;

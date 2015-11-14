@@ -236,17 +236,18 @@ tablets, etc.) on the client machine to be used by the server.
 
 \fBVirtual\ Tablet\ Mode\fR (enabled with this command-line option)
 
-In Virtual Tablet Mode, the TurboVNC Server creates a virtual stylus and eraser
-device designed to emulate a Wacom tablet, and it maps all extended input
-events from all viewers to these devices (generally, any event from a
-client-side eraser device is mapped to the virtual eraser, and all other events
-are mapped to the virtual stylus.)  This mode is less generic than Remote X
-Input Mode, and it probably will not work with devices other than tablets
-(perhaps not even with non-Wacom tablets.)  Virtual Tablet mode is useful when
-running specific applications from xstartup.turbovnc, rather than a window
-manager.  Because applications usually check for the presence of X Input
-devices at startup, by the time the first viewer connects and requests that the
-client-side devices be cloned, it is too late.
+In Virtual Tablet Mode, the TurboVNC Server creates virtual stylus, eraser,
+touch, and pad devices designed to emulate a Wacom tablet, and it maps all
+extended input events from all viewers to these devices (events from
+client-side stylus, eraser, touch, and pad devices are mapped to the
+corresponding virtual device on the server, and other events are ignored.) This
+mode is less generic than Remote X Input Mode, and it probably will not work
+with devices other than tablets (perhaps not even with non-Wacom tablets.)
+Virtual Tablet mode is useful when running specific applications from
+xstartup.turbovnc, rather than a window manager.  Because applications usually
+check for the presence of X Input devices at startup, by the time the first
+viewer connects and requests that the client-side devices be cloned, it is too
+late.
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.

@@ -511,9 +511,33 @@ ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 
     if (rfbVirtualTablet) {
         int i;
-        rfbDevInfoPtr vtDev = stristr(dev->name, "eraser") ||
-                              dev->productID == rfbGIIDevTypeEraser ?
-                              &virtualTabletEraser : &virtualTabletStylus;
+        rfbDevInfoPtr vtDev;
+
+        switch (dev->productID) {
+        case rfbGIIDevTypeStylus:
+            vtDev = &virtualTabletStylus;
+            break;
+        case rfbGIIDevTypeEraser:
+            vtDev = &virtualTabletEraser;
+            break;
+        case rfbGIIDevTypeTouch:
+            vtDev = &virtualTabletTouch;
+            break;
+        case rfbGIIDevTypePad:
+            vtDev = &virtualTabletPad;
+            break;
+        default:
+            if (stristr(dev->name, "stylus"))
+                vtDev = &virtualTabletStylus;
+            else if (stristr(dev->name, "eraser"))
+                vtDev = &virtualTabletEraser;
+            else if (stristr(dev->name, "touch"))
+                vtDev = &virtualTabletTouch;
+            else if (stristr(dev->name, "pad"))
+                vtDev = &virtualTabletPad;
+            else
+                return;
+        }
 
         if (dev->valFirst >= vtDev->numValuators ||
             buttons > vtDev->numButtons)
