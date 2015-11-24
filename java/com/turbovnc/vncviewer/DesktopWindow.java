@@ -448,7 +448,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly &&
-        (!VncViewer.isX11() ||
+        (!VncViewer.osEID() ||
          !cc.viewport.processExtInputEventHelper(cc.viewport.motionType)) &&
         e.getX() >= x &&
         e.getY() >= y &&
@@ -480,7 +480,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly &&
-        (!VncViewer.isX11() ||
+        (!VncViewer.osEID() ||
          !cc.viewport.processExtInputEventHelper(type)) &&
         (e.getID() == MouseEvent.MOUSE_RELEASED ||
          (e.getX() >= x &&
@@ -507,7 +507,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // EDT: Mouse wheel callback function
   private void mouseWheelCB(MouseWheelEvent e) {
     if (!cc.opts.viewOnly &&
-        (!VncViewer.isX11() ||
+        (!VncViewer.osEID() ||
          !cc.viewport.processExtInputEventHelper(cc.viewport.motionType)))
       cc.writeWheelEvent(e);
   }

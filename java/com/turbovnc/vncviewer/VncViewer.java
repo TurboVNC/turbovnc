@@ -117,6 +117,14 @@ public class VncViewer extends javax.swing.JApplet
     return !os.startsWith("mac os x") && !os.startsWith("windows");
   }
 
+  public static boolean osEID() {
+    return !os.startsWith("mac os x") && !os.startsWith("windows");
+  }
+
+  public static boolean osGrab() {
+    return !os.startsWith("mac os x");
+  }
+
   // This allows the Mac app to handle .vnc files opened or dragged onto its
   // icon from the Finder.
 
@@ -833,7 +841,7 @@ public class VncViewer extends javax.swing.JApplet
     opts.viewOnly = viewOnly.getValue();
     opts.fullScreen = fullScreen.getValue();
 
-    if (isX11()) {
+    if (osGrab()) {
       if (grabKeyboard.getValue().toLowerCase().startsWith("f"))
         opts.grabKeyboard = Options.GRAB_FS;
       else if (grabKeyboard.getValue().toLowerCase().startsWith("a"))
@@ -1001,7 +1009,7 @@ public class VncViewer extends javax.swing.JApplet
 
   static StringParameter grabKeyboard
   = new StringParameter("GrabKeyboard",
-  isX11() ? "When the keyboard is grabbed, special key sequences (such as " +
+  osGrab() ? "When the keyboard is grabbed, special key sequences (such as " +
   "Alt-Tab) that are used to switch windows and perform other window " +
   "management functions are passed to the VNC server instead of being " +
   "handled by the local window manager.  The default is to grab the " +

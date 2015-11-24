@@ -1,18 +1,38 @@
 @echo off
-setlocal enableextensions
-if DEFINED JAVA_HOME goto defined
+setlocal enableextensions enabledelayedexpansion
+if DEFINED JAVA_HOME goto java_home_defined
 
 set JAVAW=javaw
-goto start
+goto java_home_undefined
 
-:defined
+:java_home_defined
 set JAVA_HOME=%JAVA_HOME:"=%
 if "%JAVA_HOME%"=="" (
 	set JAVAW=javaw
 ) else (
-	set JAVAW="%JAVA_HOME%\bin\javaw.exe"
+	set JAVAW=%JAVA_HOME%\bin\javaw.exe
+	set JAWT_PATH=%JAVA_HOME%\bin
 )
-set JAVAW=%JAVAW:"=%
+if DEFINED JAWT_PATH goto jawt_path_defined
+
+:java_home_undefined
+rem This should work with Java 7 and later.
+for /f "delims== tokens=2,3*" %%i in ('"%JAVA% -XshowSettings:properties -version 2>&1 | findstr sun.boot.library.path"') do set _TMP=?%%i
+set _TMP2=%_TMP:? =%
+if EXIST "%_TMP2%\jawt.dll" set JAWT_PATH=%_TMP2%
+if DEFINED JAWT_PATH goto jawt_path_defined
+
+rem Maybe we're using Java 6?
+if EXIST "c:\Program Files\Java\jre6\bin\jawt.dll" set JAWT_PATH=c:\Program Files\Java\jre6\bin
+if DEFINED JAWT_PATH goto jawt_path_defined
+
+echo WARNING: Could not find jawt.dll.  Some features may not work properly.
+goto start
+
+:jawt_path_defined
+set PATH=%JAWT_PATH%;%PATH%
+echo jawt.dll path: %JAWT_PATH%
+goto start
 
 :start
 start /b "" "%JAVAW%" -server -Dsun.java2d.d3d=false -Djava.library.path="%~d0%~p0java" -jar "%~d0%~p0java\VncViewer.jar" -reqarch @REQARCH@ %*

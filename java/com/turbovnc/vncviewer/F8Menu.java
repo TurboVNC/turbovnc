@@ -65,7 +65,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     showToolbar.addActionListener(this);
     add(showToolbar);
     addSeparator();
-    if (VncViewer.isX11() && !VncViewer.embed.getValue() &&
+    if (VncViewer.osGrab() && !VncViewer.embed.getValue() &&
         Viewport.isHelperAvailable()) {
       grabKeyboard = new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
       grabKeyboard.setMnemonic(KeyEvent.VK_G);
@@ -93,7 +93,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     dismiss = addMenuItem("Dismiss Menu");
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
-    if (VncViewer.isX11())
+    if (VncViewer.osGrab())
       addPopupMenuListener(new PopupMenuListener() {
         public void popupMenuCanceled(PopupMenuEvent e) {
           if (cc.keyboardGrabbed)

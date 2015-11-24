@@ -337,14 +337,19 @@ public class Viewport extends JFrame {
         vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
         vlog.info("  to the Java command line to specify its location.");
         vlog.info("  Full-screen mode may not work correctly.");
-        if (VncViewer.isX11())
+        if (VncViewer.osEID())
           vlog.info("  Keyboard grabbing and extended input device support will be disabled.");
+        else if (VncViewer.osGrab())
+          vlog.info("  Keyboard grabbing will be disabled.");
+
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
         vlog.info("  Full-screen mode may not work correctly.");
-        if (VncViewer.isX11())
+        if (VncViewer.osEID())
           vlog.info("  Keyboard grabbing and extended input device support will be disabled.");
+        else if (VncViewer.osGrab())
+          vlog.info("  Keyboard grabbing will be disabled.");
       }
     }
     triedHelperInit = true;

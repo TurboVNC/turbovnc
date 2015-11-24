@@ -42,6 +42,10 @@ the events from these devices (including pressure, tilt, etc.) are passed from
 viewer to server.  This was specifically designed for Wacom tablets but should
 work with other extended pointer devices as well.
 -------------------------------------------------------------------------------
+[6]
+Keyboard grabbing has been implemented in the Java TurboVNC Viewer for Windows,
+thus allowing special keystrokes (such as Alt-Tab) to be sent to the server.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

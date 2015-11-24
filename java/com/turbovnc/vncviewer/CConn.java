@@ -767,7 +767,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (viewport != null && !benchmark) {
       vlog.info("Enabling GII");
       writer().writeGIIVersion();
-      if (VncViewer.isX11())
+      if (VncViewer.osEID())
         viewport.setupExtInputHelper();
     }
   }
@@ -943,7 +943,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
       if (viewport.timer != null)
         viewport.timer.stop();
-      if (VncViewer.isX11() && keyboardGrabbed) {
+      if (VncViewer.osGrab() && keyboardGrabbed) {
         viewport.grabKeyboardHelper(false);
         if (opts.grabKeyboard == Options.GRAB_MANUAL)
           keyboardTempUngrabbed = true;
@@ -964,13 +964,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (opts.fullScreen && viewport.lionFSSupported())
       viewport.toggleLionFS();
     desktop.requestFocusInWindow();
-    if (VncViewer.isX11()) {
+    if (VncViewer.osGrab()) {
       if (opts.grabKeyboard == Options.GRAB_ALWAYS ||
           (opts.grabKeyboard == Options.GRAB_MANUAL && keyboardTempUngrabbed) ||
           (opts.grabKeyboard == Options.GRAB_FS && fullScreen))
         viewport.grabKeyboardHelper(true);
-      viewport.setupExtInputHelper();
     }
+    if (VncViewer.osEID())
+      viewport.setupExtInputHelper();
   }
 
   // EDT
@@ -1264,7 +1265,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         " [" + csecurity.description() + "]\n" +
       "JPEG decompression:  " +
         (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
-      (VncViewer.isX11() ? "\nTurboVNC Helper:  " +
+      (VncViewer.osGrab() ? "\nTurboVNC Helper:  " +
         (Viewport.isHelperAvailable() ? "Loaded" : "Not found") : ""),
       JOptionPane.PLAIN_MESSAGE);
     JDialog dlg = pane.createDialog(viewport, "VNC connection info");
@@ -1538,7 +1539,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void toggleKeyboardGrab() {
-    if (VncViewer.embed.getValue() || !VncViewer.isX11())
+    if (VncViewer.embed.getValue() || !VncViewer.osGrab())
       return;
     if (viewport != null)
       viewport.grabKeyboardHelper(!keyboardGrabbed);
