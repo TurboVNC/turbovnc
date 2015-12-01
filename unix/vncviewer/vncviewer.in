@@ -49,7 +49,7 @@ if [ "$JAWT_PATH" = "" ]; then
 fi
 
 if [ "$JAWT_PATH" = "" ]; then
-	echo WARNING: Could not find libjawt.so.  Full-screen mode may not work properly.
+	echo WARNING: Could not find libjawt.so.  Some features may not work properly.
 else
 	echo libjawt.so path: $JAWT_PATH
 	LD_LIBRARY_PATH=$JAWT_PATH:$LD_LIBRARY_PATH
