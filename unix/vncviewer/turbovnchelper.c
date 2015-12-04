@@ -355,7 +355,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
             SET_INT(valcls, valuator, index, ai);
             snprintf(longName, 75, "Valuator %d", ai);
             SET_STRING(valcls, valuator, longName, longName);
-            snprintf(shortName, 75, "%d", ai);
+            snprintf(shortName, 5, "%d", ai);
             SET_STRING(valcls, valuator, shortName, shortName);
             SET_INT(valcls, valuator, rangeMin, a->min_value);
             SET_INT(valcls, valuator, rangeCenter,
