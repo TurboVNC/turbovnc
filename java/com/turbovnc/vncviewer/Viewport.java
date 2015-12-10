@@ -495,7 +495,8 @@ public class Viewport extends JFrame {
   @Override
   public void dispose() {
     super.dispose();
-    cleanupExtInputHelper();
+    if (VncViewer.osEID())
+      cleanupExtInputHelper();
   }
 
   CConn cc;
