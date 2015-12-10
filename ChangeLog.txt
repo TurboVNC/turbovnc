@@ -9,6 +9,17 @@ GNOME 2.28.x and later) or MATE session would cause the GNOME/MATE session
 running in TurboVNC to fail with an error dialog: "Could not acquire name on
 session bus".
 -------------------------------------------------------------------------------
+[2]
+Fixed an issue whereby the TurboVNC Server would not properly handle Caps Lock
+when using the TurboVNC Viewer on OS X.  X11 generates both a key press and a
+key release event when Caps Lock is toggled, but OS X generates a key press
+when Caps Lock is toggled on and a key release when it is toggled off.  This
+was causing the Caps Lock state to become decoupled between client and server.
+The solution was to do what TigerVNC does and ignore Caps Lock (and other lock
+modifiers) on the server side, thus allowing the client to handle Caps Lock.
+If for some reason this causes problems, then the old behavior can be recovered
+by setting TVNC_XKBIGNORELOCK=0 prior to launching the TurboVNC Server.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
