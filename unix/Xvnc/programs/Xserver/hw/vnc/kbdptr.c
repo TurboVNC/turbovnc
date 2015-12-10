@@ -53,7 +53,7 @@ Bool compatibleKbd = FALSE;
 
 /* Avoid fake Shift presses for keys affected by NumLock */
 Bool avoidShiftNumLock = TRUE;
-Bool ignoreLockModifiers = FALSE;
+Bool ignoreLockModifiers = TRUE;
 Bool fakeShift = TRUE;
 
 unsigned char ptrAcceleration = 50;
@@ -77,6 +77,10 @@ KbdDeviceInit(DeviceIntPtr pDevice)
     if ((env = getenv("TVNC_XKBFAKESHIFT")) != NULL && !strcmp(env, "0")) {
         rfbLog("Disabling fake shift key event generation in XKEYBOARD handler\n");
         fakeShift = FALSE;
+    }
+    if ((env = getenv("TVNC_XKBIGNORELOCK")) != NULL && !strcmp(env, "0")) {
+        rfbLog("Allowing Caps Lock and other lock modifiers in XKEYBOARD handler\n");
+        ignoreLockModifiers = FALSE;
     }
 }
 
@@ -365,18 +369,19 @@ void KeyEvent(CARD32 keysym, Bool down)
     }
     while (shift_release[index])
       PressKey(kbdDevice, shift_release[index++], FALSE, "temp shift");
-    free(shift_release);
   }
 
   /* Need a fake press or release of level three shift? */
-  if (!(state & level_three_mask) && (new_state & level_three_mask)) {
+  if (!(state & level_three_mask) && (new_state & level_three_mask) &&
+      fakeShift) {
     level_three_press = PressLevelThree();
     if (level_three_press == 0) {
       rfbLog("ERROR: Unable to find modifier key for ISO_Level3_Shift/Mode_Switch key press\n");
       return;
     }
     PressKey(kbdDevice, level_three_press, TRUE, "temp level 3 shift");
-  } else if ((state & level_three_mask) && !(new_state & level_three_mask)) {
+  } else if ((state & level_three_mask) && !(new_state & level_three_mask) &&
+             fakeShift) {
     int index = 0;
     level_three_release = ReleaseLevelThree();
     if (!level_three_release) {

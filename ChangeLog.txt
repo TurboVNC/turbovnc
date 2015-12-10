@@ -46,6 +46,17 @@ work with other extended pointer devices as well.
 Keyboard grabbing has been implemented in the Java TurboVNC Viewer for Windows,
 thus allowing special keystrokes (such as Alt-Tab) to be sent to the server.
 -------------------------------------------------------------------------------
+[7]
+Fixed an issue whereby the TurboVNC Server would not properly handle Caps Lock
+when using the TurboVNC Viewer on OS X.  X11 generates both a key press and a
+key release event when Caps Lock is toggled, but OS X generates a key press
+when Caps Lock is toggled on and a key release when it is toggled off.  This
+was causing the Caps Lock state to become decoupled between client and server.
+The solution was to do what TigerVNC does and ignore Caps Lock (and other lock
+modifiers) on the server side, thus allowing the client to handle Caps Lock.
+If for some reason this causes problems, then the old behavior can be recovered
+by setting TVNC_XKBIGNORELOCK=0 prior to launching the TurboVNC Server.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
