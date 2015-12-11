@@ -84,7 +84,7 @@ public class Viewport extends JFrame {
         if (sp.getViewport().getView() != null)
           sp.getViewport().getView().requestFocusInWindow();
         if (isVisible() && keyboardTempUngrabbed) {
-          System.out.println("Keyboard focus regained. Re-grabbing keyboard.");
+          vlog.info("Keyboard focus regained. Re-grabbing keyboard.");
           grabKeyboardHelper(true);
           keyboardTempUngrabbed = false;
         }
