@@ -789,25 +789,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (viewport == null || benchmark)
       return;
 
-    if (cp.width != desktop.scaledWidth ||
-        cp.height != desktop.scaledHeight) {
-      int sx = (desktop.scaleWidthRatio == 1.00) ?
-        e.x : (int)Math.floor(e.x / desktop.scaleWidthRatio);
-      int sy = (desktop.scaleHeightRatio == 1.00) ?
-        e.y : (int)Math.floor(e.y / desktop.scaleHeightRatio);
-      e.x += sx - e.x;  e.y += sy - e.y;
-      System.out.format("sx,sy = %d,%d\n", sx, sy);
-    }
-    if (viewport.dx > 0 || viewport.dy > 0) {
-      int dx = (int)Math.floor(viewport.dx / desktop.scaleWidthRatio);
-      int dy = (int)Math.floor(viewport.dy / desktop.scaleHeightRatio);
-      e.x -= dx;  e.y -= dy;
-      System.out.format("dx,dy = %d,%d\n", dx, dy);
-    }
-    if (viewport.tb.isVisible())
-      e.y -= viewport.tb.getHeight();
+    Rectangle screenArea = getMaxSpannedSize();
     java.awt.Point spOffset = viewport.sp.getViewport().getViewPosition();
-    e.x += spOffset.x;  e.y += spOffset.y;
+    java.awt.Point winOffset = viewport.sp.getLocationOnScreen();
 
     // Here's where things get dicey.  We assume valuators 0 and 1 are X and
     // Y, which means we need to translate them so they will make sense
@@ -818,17 +802,37 @@ public class CConn extends CConnection implements UserPasswdGetter,
         ExtInputDevice.Valuator v =
           (ExtInputDevice.Valuator)dev.valuators.get(i);
         if (i == 0) {
-          e.valuators[i] = (int)((double)e.x / (double)(cp.width - 1) *
-                                 ((double)v.rangeMax - (double)v.rangeMin) +
+          double x = (double)(e.valuators[i] - v.rangeMin) /
+                     (double)(v.rangeMax - v.rangeMin) *
+                     (double)(screenArea.width - 1) - (double)winOffset.x;
+          if (viewport.dx > 0)
+            x -= (double)viewport.dx;
+          x += spOffset.x;
+          if (cp.width != desktop.scaledWidth) {
+            x = (desktop.scaleWidthRatio == 1.00) ? x :
+                x / desktop.scaleWidthRatio;
+          }
+          e.valuators[i] = (int)(x / (double)(cp.width - 1) *
+                                 (double)(v.rangeMax - v.rangeMin) +
                                  (double)v.rangeMin + 0.5);
           if (e.valuators[i] > v.rangeMax)
             e.valuators[i] = v.rangeMax;
           else if (e.valuators[i] < v.rangeMin)
             e.valuators[i] = v.rangeMin;
         } else if (i == 1) {
+          double y = (double)(e.valuators[i - e.firstValuator] - v.rangeMin) /
+                     (double)(v.rangeMax - v.rangeMin) *
+                     (double)(screenArea.height - 1) - (double)winOffset.y;
+          if (viewport.dy > 0)
+            y -= (double)viewport.dy;
+          y += spOffset.y;
+          if (cp.height != desktop.scaledHeight) {
+            y = (desktop.scaleHeightRatio == 1.00) ? y :
+                y / desktop.scaleHeightRatio;
+          }
           e.valuators[i - e.firstValuator] =
-            (int)((double)e.y / (double)(cp.height - 1) *
-                  ((double)v.rangeMax - (double)v.rangeMin) +
+            (int)((double)y / (double)(cp.height - 1) *
+                  (double)(v.rangeMax - v.rangeMin) +
                   (double)v.rangeMin + 0.5);
           if (e.valuators[i - e.firstValuator] > v.rangeMax)
             e.valuators[i - e.firstValuator] = v.rangeMax;
@@ -973,6 +977,61 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (VncViewer.osEID())
       viewport.setupExtInputHelper();
   }
+
+  public Rectangle getMaxSpannedSize() {
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gsList = ge.getScreenDevices();
+    Rectangle s0 = null;
+    Rectangle span = new Rectangle(-1, -1, 0, 0);
+    int tLeft = 0, tTop = 0, tRight = 0, tBottom = 0;
+    boolean equal = true;
+
+    for (GraphicsDevice gs : gsList) {
+      GraphicsConfiguration[] gcList = gs.getConfigurations();
+      for (GraphicsConfiguration gc : gcList) {
+        Rectangle s = gc.getBounds();
+        if (s0 == null) {
+          s0 = s;
+          span.setBounds(s);
+          tLeft = s.x;  tTop = s.y;
+          tRight = s.x + s.width;  tBottom = s.y + s.height;
+        }
+
+        tLeft = Math.min(tLeft, s.x);
+        tRight = Math.max(tRight, s.x + s.width);
+        tTop = Math.min(tTop, s.y);
+        tBottom = Math.max(tBottom, s.y + s.height);
+
+        // If any monitors aren't equal in resolution to and evenly offset from
+        // the primary, then we can't use the simple path.
+        if (s.width != s0.width ||
+            s.height != s0.height ||
+            (Math.abs(s.y - s0.y) % s0.height) != 0 ||
+            (Math.abs(s.x - s0.x) % s0.width) != 0)
+            equal = false;
+
+        // If the screen areas of the primary monitor and this monitor overlap
+        // vertically, then allow the full-screen window to extend horizontally
+        // to this monitor, and constrain it vertically, if necessary, to fit
+        // within this monitor's dimensions.
+        if (Math.min(s.y + s.height, s0.y + s0.height) -
+            Math.max(s.y, s0.y) > 0) {
+          int right = Math.max(s.x + s.width, span.x + span.width);
+          int bottom = Math.min(s.y + s.height, span.y + span.height);
+          span.x = Math.min(s.x, span.x);
+          span.y = Math.max(s.y, span.y);
+          span.width = right - span.x;
+          span.height = bottom - span.y;
+        }
+      }
+    }
+
+    if (equal)
+      span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
+
+    return span;
+  }
+
 
   // EDT
   public Rectangle getSpannedSize() {

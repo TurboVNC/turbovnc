@@ -26,7 +26,6 @@ public class ExtInputEvent {
   public int numValuators;
   public int firstValuator;
   public int[] valuators = new int[6];
-  public int x, y;
 
   public void print() {
     vlog.eidebug("EVENT:");
@@ -35,8 +34,6 @@ public class ExtInputEvent {
     vlog.eidebug("  buttonMask = " + buttonMask);
     if (type == giiTypes.giiButtonPress || type == giiTypes.giiButtonRelease)
       vlog.eidebug("  buttonNumber = " + buttonNumber);
-    else
-      vlog.eidebug("  x, y = " + x + "," + y);
     vlog.eidebug("  firstValuator = " + firstValuator);
     for (int i = 0; i < numValuators; i++)
       vlog.eidebug("    Valuator " + (i + firstValuator) + " = " +

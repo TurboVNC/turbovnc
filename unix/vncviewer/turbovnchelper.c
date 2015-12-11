@@ -467,8 +467,6 @@ JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputE
       SET_LONG(eventcls, event, buttonMask, motion->state);
       SET_INT(eventcls, event, numValuators, motion->axes_count);
       SET_INT(eventcls, event, firstValuator, motion->first_axis);
-      SET_INT(eventcls, event, x, motion->x);
-      SET_INT(eventcls, event, y, motion->y);
 
       bailif0(fid = (*env)->GetFieldID(env, eventcls, "valuators", "[I"));
       bailif0(jvaluators =
