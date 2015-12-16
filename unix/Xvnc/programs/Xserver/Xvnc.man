@@ -24,7 +24,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
 [\-rfbauth \fIpasswd-file\fR] [\-securitytypes \fItype-list\fR]
-[\-x509cert \fIcert\fR] [\-x509key \fIkey\fR]
+[\-x509cert \fIcert\fR] [\-x509key \fIkey\fR] [\-pamsession]
 [\-noreverse] [\-noclipboardsend] [\-noclipboardrecv]
 [\-maxclipboard \fIbytes\fR]
 [\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
@@ -111,6 +111,17 @@ Specify the X.509 private key file (in PEM format) to use with X.509
 encryption.  This argument has no effect if \fIpermitted-security-types\fR is
 specified in the security configuration file and none of the X.509 security
 types are listed as permitted security types.
+.TP
+\fB\-pamsession\fR
+Create a new PAM session for each viewer that authenticates using the
+username/password of the user who owns the TurboVNC session, and leave the PAM
+session open until the viewer disconnects.  When using Kerberos, this causes
+pam_krb5 to create a Kerberos ticket for the TurboVNC session, which can be
+reused within the session to provide access to other services.
+
+This option can be disabled for all TurboVNC sessions on this system by using
+the \fIno-pam-sessions\fR directive in the security configuration file.  See
+the SECURITY CONFIGURATION FILE section for more details.
 .TP
 \fB\-noreverse\fR
 Do not allow reverse VNC connections to be made from this Xvnc session.
@@ -553,6 +564,10 @@ machine.
 .IP \fIno-x11-tcp-connections\fR
 Do not allow X11 TCP connections to any TurboVNC server started on this
 machine.
+
+.IP \fIno-pam-sessions\fR
+Do not allow PAM sessions to be created for any TurboVNC servers started on
+this machine.
 
 .IP \fIpam-service-name\fR=\fIsvcname\fR
 Sets the service name to be used when Xvnc performs PAM authentication.  The

@@ -5,6 +5,7 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
+ *  Copyright (C) 2015 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,11 +27,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#if defined(DARWIN)
-#include <pam/pam_appl.h>
-#else
-#include <security/pam_appl.h>
-#endif
+#include <pwd.h>
 
 #include "rfb.h"
 
@@ -39,6 +36,9 @@
 #else
 #  define MESSAGE_ARG_TYPE const struct pam_message**
 #endif
+
+Bool rfbAuthPAMSession = FALSE;
+Bool rfbAuthDisablePAMSession = FALSE;
 
 static const char *password;
 
@@ -123,13 +123,17 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
 
 
 Bool
-rfbPAMAuthenticate(const char *svc, const char *host, const char *user,
+rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
                    const char *pwd, const char **emsg)
 {
     pam_handle_t *pamHandle;
     struct pam_conv pamConv;
     int r;
     int authStatus;
+    struct passwd *pw = getpwuid(geteuid());
+    Bool pamSession = rfbAuthPAMSession && !cl->viewOnly &&
+                      !rfbAuthDisablePAMSession && pw &&
+                      !strcmp(user, pw->pw_name);
 
     *emsg = "Failure encountered while initializing the authentication library";
     password = pwd;
@@ -140,7 +144,7 @@ rfbPAMAuthenticate(const char *svc, const char *host, const char *user,
         return(FALSE);
     }
 
-    if ((r = pam_set_item(pamHandle, PAM_RHOST, host)) != PAM_SUCCESS) {
+    if ((r = pam_set_item(pamHandle, PAM_RHOST, cl->host)) != PAM_SUCCESS) {
         rfbLog("PAMAuthenticate: pam_set_item PAM_RHOST: %s\n",
                pam_strerror(pamHandle, r));
         return(FALSE);
@@ -148,12 +152,23 @@ rfbPAMAuthenticate(const char *svc, const char *host, const char *user,
 
     if ((authStatus = pam_authenticate(pamHandle, PAM_DISALLOW_NULL_AUTHTOK))
         != PAM_SUCCESS) {
-        rfbLog("PAMAuthenticate: %s\n", pam_strerror(pamHandle, authStatus));
+        rfbLog("PAMAuthenticate: pam_authenticate: %s\n",
+               pam_strerror(pamHandle, authStatus));
+    } else if (pamSession) {
+        if ((authStatus = pam_open_session(pamHandle, 0)) != PAM_SUCCESS) {
+            rfbLog("PAMAuthenticate: pam_open_session: %s\n",
+                   pam_strerror(pamHandle, authStatus));
+        }
+        rfbLog("Opened PAM session for client %s\n", cl->host);
     }
 
-    if ((r = pam_end(pamHandle, authStatus)) != PAM_SUCCESS) {
-        rfbLog("PAMAuthenticate: pam_end: %s\n", pam_strerror(pamHandle, r));
-    }
+    if (authStatus != PAM_SUCCESS || !pamSession) {
+        if ((r = pam_end(pamHandle, authStatus)) != PAM_SUCCESS) {
+            rfbLog("PAMAuthenticate: pam_end: %s\n",
+                   pam_strerror(pamHandle, r));
+        }
+    } else
+        cl->pamHandle = pamHandle;
 
     switch (authStatus) {
     case PAM_SUCCESS:
@@ -166,6 +181,10 @@ rfbPAMAuthenticate(const char *svc, const char *host, const char *user,
         *emsg = "Authentication failed";
         break;
 
+    case PAM_SESSION_ERR:
+        *emsg = "Could not open PAM session on server";
+        break;
+
     case PAM_AUTHINFO_UNAVAIL:
         *emsg = "Cannot authenticate at this time.  Try again later.";
         break;
@@ -176,4 +195,22 @@ rfbPAMAuthenticate(const char *svc, const char *host, const char *user,
     }
 
     return(FALSE);
+}
+
+
+void rfbPAMEnd(rfbClientPtr cl)
+{
+    int r;
+
+    if (cl->pamHandle) {
+        if ((r = pam_close_session(cl->pamHandle, 0)) != PAM_SUCCESS) {
+            rfbLog("PAMEnd: pam_close_session: %s\n",
+                   pam_strerror(cl->pamHandle, r));
+        }
+        if ((r = pam_end(cl->pamHandle, PAM_SUCCESS)) != PAM_SUCCESS) {
+            rfbLog("PAMEnd: pam_end: %s\n", pam_strerror(cl->pamHandle, r));
+        }
+        rfbLog("Closed PAM session for client %s\n", cl->host);
+        cl->pamHandle = 0;
+    }
 }

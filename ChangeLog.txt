@@ -57,6 +57,14 @@ modifiers) on the server side, thus allowing the client to handle Caps Lock.
 If for some reason this causes problems, then the old behavior can be recovered
 by setting TVNC_XKBIGNORELOCK=0 prior to launching the TurboVNC Server.
 -------------------------------------------------------------------------------
+[8]
+Added a new option to Xvnc (-pamsession) that will open a PAM session for every
+viewer that authenticates using the username/password of the user who owns the
+TurboVNC session and will leave that PAM session open until the viewer
+disconnects.  This feature was specifically implemented in order to allow
+Kerberos tickets created by PAM to be reused within the TurboVNC session, but
+the feature may benefit other use cases as well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2015 D. R. Commander
+ *  Copyright (C) 2010-2015 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -54,6 +54,13 @@
 #endif
 #include "mipointer.h"
 #include "input.h"
+#ifdef XVNC_AuthPAM
+#if defined(DARWIN)
+#include <pam/pam_appl.h>
+#else
+#include <security/pam_appl.h>
+#endif
+#endif
 
 /* It's a good idea to keep these values a bit greater than required. */
 #define MAX_ENCODINGS 18
@@ -238,6 +245,10 @@ typedef struct rfbClientRec {
     /* The following member is only used during VNC authentication */
 
     CARD8 authChallenge[CHALLENGESIZE];
+
+#ifdef XVNC_AuthPAM
+    pam_handle_t *pamHandle;
+#endif
 
     /* The following members represent the update needed to get the client's
        framebuffer from its present state to the current state of our
@@ -791,6 +802,16 @@ extern void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType);
 extern Bool rfbAuthConsiderBlocking(void);
 extern void rfbAuthUnblock(void);
 extern Bool rfbAuthIsBlocked(void);
+
+
+/* authpam.c */
+
+#ifdef XVNC_AuthPAM
+extern void rfbPAMEnd(rfbClientPtr cl);
+
+extern Bool rfbAuthPAMSession;
+extern Bool rfbAuthDisablePAMSession;
+#endif
 
 
 /* rre.c */

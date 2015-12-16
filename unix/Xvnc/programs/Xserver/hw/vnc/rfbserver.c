@@ -483,6 +483,9 @@ rfbClientConnectionGone(rfbClientPtr cl)
     TimerFree(cl->updateTimer);
     TimerFree(cl->congestionTimer);
 
+#ifdef XVNC_AuthPAM
+    rfbPAMEnd(cl);
+#endif
     if (cl->login != NULL) {
         rfbLog("Client %s (%s) gone\n", cl->login, cl->host);
         free(cl->login);

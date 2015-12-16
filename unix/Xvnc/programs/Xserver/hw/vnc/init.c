@@ -281,6 +281,13 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
 #endif
 
+#ifdef XVNC_AuthPAM
+    if (strcasecmp(argv[i], "-pamsession") == 0) {
+        rfbAuthPAMSession = TRUE;
+        return 1;
+    }
+#endif
+
     if (strcasecmp(argv[i], "-noreverse") == 0) {
         rfbAuthDisableRevCon = TRUE;
         return 1;
@@ -1366,6 +1373,11 @@ rfbClientStateChange(CallbackListPtr *cbl, pointer myData, pointer clt)
 void
 ddxGiveUp(enum ExitCode error)
 {
+    rfbClientPtr cl;
+#ifdef XVNC_AuthPAM
+    for (cl = rfbClientHead; cl; cl = cl->next)
+        rfbPAMEnd(cl);
+#endif
     ShutdownTightThreads();
     free(rfbScreen.pfbMemory);
     if (initOutputCalled) {
@@ -1415,6 +1427,12 @@ OsVendorInit()
         rfbLog("NOTICE: desktop size clamped to %dx%d per system policy\n",
                rfbScreen.width, rfbScreen.height);
     }
+#ifdef XVNC_AuthPAM
+    if (rfbAuthDisablePAMSession && rfbAuthPAMSession) {
+        rfbLog("NOTICE: PAM sessions disabled per system policy\n");
+        rfbAuthPAMSession = FALSE;
+    }
+#endif
 }
 
 
@@ -1440,6 +1458,12 @@ ddxUseMsg()
 #if USETLS
     ErrorF("-x509cert file         specify filename of X.509 signed certificate\n");
     ErrorF("-x509key file          specify filename of X.509 private key\n");
+#endif
+#ifdef XVNC_AuthPAM
+    ErrorF("-pamsession            create a new PAM session for each viewer that\n");
+    ErrorF("                       authenticates using the username/password of the user\n");
+    ErrorF("                       who owns the TurboVNC session, and leave the PAM session\n");
+    ErrorF("                       open until the viewer disconnects\n");
 #endif
     ErrorF("-noreverse             disable reverse connections\n");
     ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");

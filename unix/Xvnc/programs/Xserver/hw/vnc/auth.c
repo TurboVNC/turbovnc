@@ -96,7 +96,7 @@ AuthNoneRspFunc(rfbClientPtr cl)
 
 #include <pwd.h>
 
-Bool rfbPAMAuthenticate(const char *svc, const char *host, const char *user,
+Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
                         const char *pwd, const char **emsg);
 
 static char *pamServiceName = AUTH_DEFAULT_PAM_SERVICE_NAME;
@@ -231,7 +231,7 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
         cl->viewOnly = p->viewOnly;
     }
 
-    if (rfbPAMAuthenticate(pamServiceName, cl->host, userBuf, pwdBuf, &emsg)) {
+    if (rfbPAMAuthenticate(cl, pamServiceName, userBuf, pwdBuf, &emsg)) {
         rfbClientAuthSucceeded(cl, rfbAuthUnixLogin);
     } else {
         rfbClientAuthFailed(cl, (char *)emsg);
@@ -586,8 +586,12 @@ ReadConfigFile(void)
             continue;
         }
 
-
 #ifdef XVNC_AuthPAM
+        if (!strcmp(buf2, "no-pam-sessions")) {
+            rfbAuthDisablePAMSession = TRUE;
+            continue;
+        }
+
         if (!strcmp(buf2, "enable-user-acl")) {
             rfbAuthUserACL = TRUE;
             continue;
