@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "October 2015" "" "TurboVNC"
+.TH Xvnc 1 "December 2015" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -392,35 +392,35 @@ control list.
 
 .IP \fImax-idle-timeout\fR=\fItime\fR
 This specifies the maximum idle timeout (in seconds) for all TurboVNC sessions
-running on this machine.  The idle timeout is the amount of time that a
+started on this machine.  The idle timeout is the amount of time that a
 TurboVNC session can remain idle (with no VNC viewer connections) before
 Xvnc automatically exits.  If this value is set to a number greater than 0,
 then all TurboVNC sessions on this machine will use this idle timeout value by
 default, and the user will only be allowed to override it with a lower value.
 
 .IP \fImax-desktop-size\fR=\fIwidth\fRx\fIheight\fR
-This specifies the maximum desktop size for all TurboVNC sessions running on
+This specifies the maximum desktop size for all TurboVNC sessions started on
 this machine.  If a user attempts to start a session with a larger geometry
 than this or to use remote desktop resizing to increase the desktop size to a
 size larger than this, the desktop size will be clamped to
 \fIwidth\fRx\fIheight\fR.
 
 .IP \fIno-clipboard-send\fR
-This prevents any TurboVNC server sessions running on this machine from
+This prevents any TurboVNC server sessions started on this machine from
 sending clipboard changes to their connected viewers.
 
 .IP \fIno-clipboard-recv\fR
-This prevents any TurboVNC server sessions running on this machine from
+This prevents any TurboVNC server sessions started on this machine from
 receiving clipboard changes from their connected viewers.
 
 .IP \fIno-reverse-connections\fR
-Do not allow reverse connections to be made from any TurboVNC server running on
+Do not allow reverse connections to be made from any TurboVNC server started on
 this machine.  This causes Xvnc to ignore requests from the
 \fBvncconnect\fR(1) utility.
 
 .IP \fIno-remote-connections\fR
 Do not allow inbound remote connections to be made to any TurboVNC server
-running on this machine.  Only connections from localhost can be made, which
+started on this machine.  Only connections from localhost can be made, which
 effectively forces the use of SSH tunneling to make inbound remote connections.
 
 .IP \fIpam-service-name\fR=\fIsvcname\fR
