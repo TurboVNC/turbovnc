@@ -1,4 +1,5 @@
 //  Copyright (C) 2010, 2012, 2015-2016 D. R. Commander. All Rights Reserved.
+//  Copyright 2005 Alexandre Julliard
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -30,6 +31,7 @@
 Log vnclog;
 VNCHelp help;
 HotKeys hotkeys;
+bool console = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    PSTR szCmdLine, int iCmdShow)
@@ -80,6 +82,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   vnclog.Print(3, "Exiting\n");
 
   return retval;
+}
+
+
+// Borrowed from WINE
+int main(int argc, char **argv)
+{
+  console = true;
+  STARTUPINFOA info;
+  char *cmdline = GetCommandLineA();
+  int bcount = 0;
+  BOOL in_quotes = FALSE;
+
+  while (*cmdline) {
+    if ((*cmdline == '\t' || *cmdline == ' ') && !in_quotes) break;
+    else if (*cmdline == '\\') bcount++;
+    else if (*cmdline == '\"') {
+      if (!(bcount & 1)) in_quotes = !in_quotes;
+      bcount = 0;
+    }
+    else bcount = 0;
+    cmdline++;
+  }
+  while (*cmdline == '\t' || *cmdline == ' ') cmdline++;
+
+  GetStartupInfoA( &info );
+  if (!(info.dwFlags & STARTF_USESHOWWINDOW)) info.wShowWindow = SW_SHOWNORMAL;
+  return WinMain( GetModuleHandleA(0), 0, cmdline, info.wShowWindow );
 }
 
 

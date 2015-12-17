@@ -12,7 +12,7 @@ endif()
 
 configure_file(res/resdefs.h.in res/resdefs.h)
 
-add_executable(vncviewer WIN32
+set(VNCVIEWER_SOURCES
 	AboutBox.cpp
 	BuildTime.cpp
 	CapsContainer.cpp
@@ -50,7 +50,19 @@ add_executable(vncviewer WIN32
 	omnithread/nt.cpp
 	res/vncviewer.rc)
 
-target_link_libraries(vncviewer zlib ${TJPEG_LIBRARY} fbx
-	ws2_32.lib winmm.lib htmlhelp.lib comctl32.lib)
+add_executable(vncviewer WIN32 ${VNCVIEWER_SOURCES})
+option(TVNC_WINCONSOLE
+	"Build Win32 console version of the TurboVNC Viewer (useful for debugging)"
+	0)
+if(TVNC_WINCONSOLE)
+	add_executable(cvncviewer ${VNCVIEWER_SOURCES})
+endif()
+
+target_link_libraries(vncviewer zlib ${TJPEG_LIBRARY} fbx ws2_32.lib winmm.lib
+	htmlhelp.lib comctl32.lib)
+if(TVNC_WINCONSOLE)
+	target_link_libraries(cvncviewer zlib ${TJPEG_LIBRARY} fbx ws2_32.lib
+		winmm.lib htmlhelp.lib comctl32.lib)
+endif()
 
 install(TARGETS vncviewer DESTINATION ${TVNC_BINDIR})
