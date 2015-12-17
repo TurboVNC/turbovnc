@@ -69,6 +69,10 @@ disconnects.  This feature was specifically implemented in order to allow
 Kerberos tickets created by PAM to be reused within the TurboVNC session, but
 the feature may benefit other use cases as well.
 -------------------------------------------------------------------------------
+[9]
+Added a new parameter to the Java TurboVNC Viewer (NoReconnect) that can
+optionally be used to revert the behavior introduced in 2.0 beta1[17].
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
