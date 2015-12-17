@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2015 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -24,6 +25,7 @@
 
 
 VNCviewerApp *pApp;
+extern bool console;
 
 
 VNCviewerApp::VNCviewerApp(HINSTANCE hInstance, LPTSTR szCmdLine)
@@ -36,6 +38,8 @@ VNCviewerApp::VNCviewerApp(HINSTANCE hInstance, LPTSTR szCmdLine)
 
   // Logging info
   vnclog.SetLevel(m_options.m_logLevel);
+  if (console)
+    vnclog.SetMode(Log::ToConsole);
   if (m_options.m_logToConsole) {
     vnclog.SetMode(Log::ToConsole | Log::ToDebug);
   }
