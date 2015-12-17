@@ -41,6 +41,10 @@ drawing tablets) on the client are cloned in the TurboVNC server session, and
 the events from these devices (including pressure, tilt, etc.) are passed from
 viewer to server.  This was specifically designed for Wacom tablets but should
 work with other extended pointer devices as well.
+
+Additionally, the Windows TurboVNC Viewer provides specific support for Wacom
+drawing tablets by interfacing between the Wacom drivers for Windows and the
+afore-mentioned remote X Input interface.
 -------------------------------------------------------------------------------
 [6]
 Keyboard grabbing has been implemented in the Java TurboVNC Viewer for Windows,

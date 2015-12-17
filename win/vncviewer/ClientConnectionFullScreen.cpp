@@ -110,9 +110,6 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 }
 
 
-#define WidthOf(rect) ((rect).right - (rect).left)
-#define HeightOf(rect) ((rect).bottom - (rect).top)
-
 typedef struct _FSMetrics {
   RECT screenArea, workArea, screenArea0, workArea0, winRect;
   bool equal;
@@ -183,7 +180,8 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
 }
 
 
-void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
+void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
+                                            int spanMode)
 {
   FSMetrics fsm;
   int primaryWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -214,13 +212,13 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
 
   BOOL ret = EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm);
 
-  if (m_opts.m_Span == SPAN_PRIMARY || !ret ||
-      (m_opts.m_Span == SPAN_AUTO &&
+  if (spanMode == SPAN_PRIMARY || !ret ||
+      (spanMode == SPAN_AUTO &&
        (scaledWidth <= primaryWidth ||
         WidthOf(fsm.screenArea) <= primaryWidth) &&
        (scaledHeight <= primaryHeight ||
         HeightOf(fsm.screenArea) <= primaryHeight)) ||
-      (m_opts.m_Span == SPAN_AUTO &&
+      (spanMode == SPAN_AUTO &&
        m_opts.m_desktopSize.mode == SIZE_AUTO)) {
     workArea = fsm.workArea0;
     screenArea = fsm.screenArea0;

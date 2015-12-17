@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2015 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -60,7 +61,9 @@ class Log
         bool append = false);
 
     inline void Print(int level, LPTSTR format, ...) {
-      if (level > m_level) return;
+      if (level >= 100) {
+        if (level / 100 > m_giiLevel) return;
+      } else if (level > m_level) return;
       va_list ap;
       va_start(ap, format);
       ReallyPrint(format, ap);
@@ -83,7 +86,7 @@ class Log
     void ReallyPrint(LPTSTR format, va_list ap);
     void CloseFile();
     bool m_tofile, m_todebug, m_toconsole;
-    int m_level;
+    int m_level, m_giiLevel;
     HANDLE hlogfile;
 };
 

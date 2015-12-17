@@ -57,6 +57,7 @@ class VNCviewerApp
 
     VNCOptions m_options;
     HINSTANCE  m_instance;
+    bool m_wacom;
 
   private:
     ClientConnection *m_clilist[MAX_CONNECTIONS];

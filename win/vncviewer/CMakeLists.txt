@@ -23,6 +23,7 @@ set(VNCVIEWER_SOURCES
 	ClientConnectionFile.cpp
 	ClientConnectionFlowControl.cpp
 	ClientConnectionFullScreen.cpp
+	ClientConnectionGII.cpp
 	ClientConnectionHextile.cpp
 	ClientConnectionRaw.cpp
 	ClientConnectionTight.cpp
@@ -47,6 +48,7 @@ set(VNCVIEWER_SOURCES
 	VNCviewerApp.cpp
 	VNCviewerApp32.cpp
 	omnithread/nt.cpp
+	wintab/Utils.c
 	res/vncviewer.rc)
 
 add_executable(vncviewer WIN32 ${VNCVIEWER_SOURCES})

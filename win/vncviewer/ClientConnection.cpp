@@ -208,6 +208,9 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   decodeRect = blits = updates = 0;
 
   savedRect.left = savedRect.top = savedRect.right = savedRect.bottom = -1;
+
+  m_hctx = 0;
+  m_wacomButtonMask = 0;
 }
 
 
@@ -536,6 +539,31 @@ void ClientConnection::CreateDisplay()
   ShowWindow(m_hwnd, SW_HIDE);
   if (m_opts.m_GrabKeyboard == TVNC_ALWAYS)
     GrabKeyboard();
+  if (m_pApp->m_wacom) {
+    LOGCONTEXT lc;
+    AXIS axisX, axisY;
+    HCTX hctx;
+
+    gpWTInfoA(WTI_DEFCONTEXT, 0, &lc);
+    lc.lcOptions |= CXO_MESSAGES | CXO_SYSTEM;
+    lc.lcPktData = PACKETDATA;
+    lc.lcPktMode = PACKETMODE;
+    lc.lcMoveMask = PACKETDATA;
+    lc.lcBtnUpMask = lc.lcBtnDnMask;
+
+    gpWTInfoA(WTI_DEVICES, DVC_X, &axisX);
+    gpWTInfoA(WTI_DEVICES, DVC_Y, &axisY);
+    lc.lcInOrgX = 0;
+    lc.lcInOrgY = 0;
+    lc.lcInExtX = axisX.axMax;
+    lc.lcInExtY = axisY.axMax;
+
+    hctx = gpWTOpenA(m_hwnd, &lc, TRUE);
+    if (!hctx)
+      vnclog.Print(-1, "Could not open tablet context\n");
+    else
+      m_hctx = hctx;
+  }
 
   SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR) this);
   SetWindowLongPtr(m_hwnd, GWLP_WNDPROC, (LONG_PTR)ClientConnection::WndProc);
@@ -1923,6 +1951,7 @@ void ClientConnection::SetFormatAndEncodings()
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingContinuousUpdates);
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingFence);
   }
+  encs[se->nEncodings++] = Swap32IfLE(rfbEncodingGII);
 
   len = sz_rfbSetEncodingsMsg + se->nEncodings * 4;
 
@@ -2085,7 +2114,13 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
     (ClientConnection *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
   switch (iMsg) {
-
+    case WM_ACTIVATE:
+      if (_this->m_hctx) {
+        gpWTEnable(_this->m_hctx, LOWORD(wParam));
+        if (LOWORD(wParam))
+          gpWTOverlap(_this->m_hctx, TRUE);
+      }
+      return 0;
     case WM_NOTIFY:
     {
       LPTOOLTIPTEXT TTStr = (LPTOOLTIPTEXT)lParam;
@@ -2377,6 +2412,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
       DestroyWindow(hwnd);
       return 0;
     case WM_DESTROY:
+    {
       // Remove us from the clipboard viewer chain
       BOOL res = ChangeClipboardChain(_this->m_hwnd, _this->m_hwndNextViewer);
       if (_this->m_serverInitiated)
@@ -2398,6 +2434,11 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
       _this->m_hwnd = 0;
       _this->m_opts.m_hWindow = 0;
 
+      if (_this->m_hctx) {
+        gpWTClose(_this->m_hctx);
+        _this->m_hctx = 0;
+      }
+
       // We are currently in the main thread.
       // The worker thread should be about to finish if
       // it hasn't already. Wait for it.
@@ -2408,6 +2449,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
         // The thread probably hasn't been started yet,
       }
       return 0;
+    }
   }
   return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
@@ -2631,6 +2673,49 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
       return 0;
     }
 
+    case WT_PACKET:
+    {
+      PACKET pkt;
+      if(gpWTPacket((HCTX)lParam, (UINT)wParam, &pkt)) {
+        ExtInputEvent e;
+
+        if (pkt.pkChanged & PK_X || pkt.pkChanged & PK_Y ||
+            pkt.pkChanged & PK_NORMAL_PRESSURE ||
+            pkt.pkChanged & PK_ORIENTATION) {
+          e.type = rfbGIIValuatorAbsolute;
+          e.deviceID = pkt.pkCursor;
+          e.numValuators = 5;
+          _this->TranslateWacomCoords(hwnd, pkt.pkX, pkt.pkY, e.valuators[0],
+                                      e.valuators[1]);
+          e.valuators[2] = pkt.pkNormalPressure;
+          _this->ConvertWacomTilt(pkt.pkOrientation, e.valuators[3],
+                                  e.valuators[4]);
+          _this->SendGIIEvent(pkt.pkCursor, e);
+        }
+
+
+        if (_this->m_wacomButtonMask != pkt.pkButtons &&
+            pkt.pkChanged & PK_BUTTONS) {
+          int maxButtons = 0;
+          gpWTInfoA(WTI_CURSORS + pkt.pkCursor, CSR_BUTTONS, &maxButtons);
+          for (int button = 0; button < maxButtons; button++) {
+            if (pkt.pkButtons & (1 << button) &&
+                !(_this->m_wacomButtonMask & (1 << button))) {
+              e.type = rfbGIIButtonPress;
+              e.buttonNumber = button + 1;
+              _this->SendGIIEvent(pkt.pkCursor, e);
+            } else if (!(pkt.pkButtons & (1 << button)) &&
+                       _this->m_wacomButtonMask & (1 << button)) {
+              e.type = rfbGIIButtonRelease;
+              e.buttonNumber = button + 1;
+              _this->SendGIIEvent(pkt.pkCursor, e);
+            }
+          }
+          _this->m_wacomButtonMask = pkt.pkButtons;
+        }
+      }
+      return 0;
+    }
   }
 
   return DefWindowProc(hwnd, iMsg, wParam, lParam);
@@ -3155,6 +3240,9 @@ void* ClientConnection::run_undetached(void* arg) {
           supportsCU = true;
           break;
         }
+        case rfbGIIServer:
+          ReadGII();
+          break;
 
         default:
           vnclog.Print(3, "Unknown message type x%02x\n", msgType);

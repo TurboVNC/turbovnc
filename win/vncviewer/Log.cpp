@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2015 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -67,7 +67,8 @@ void Log::SetMode(int mode)
 
 void Log::SetLevel(int level)
 {
-  m_level = level;
+  m_level = level % 100;
+  m_giiLevel = level / 100;
 }
 
 

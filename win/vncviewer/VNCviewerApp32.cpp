@@ -23,12 +23,17 @@
 #include "vncviewer.h"
 #include "Exception.h"
 #include "LowLevelHook.h"
+#include "wintab/Utils.h"
+
+
+char *gpszProgramName = "vncviewer";
 
 
 VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
   VNCviewerApp(hInstance, szCmdLine)
 {
   m_pdaemon = NULL;
+  m_wacom = false;
 
   // Load a requested keyboard layout
   if (m_options.m_kbdSpecified) {
@@ -50,6 +55,22 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
 
   RegisterSounds();
   LowLevelHook::Initialize(hInstance);
+
+  if (!LoadWintab()) {
+    vnclog.Print(-1, "WinTab library not available\n");
+    return;
+  }
+  if (!gpWTInfoA(0, 0, NULL)) {
+    vnclog.Print(-1, "WinTab services not available\n");
+    return;
+  }
+  char name[256];
+  if (!gpWTInfoA(WTI_DEVICES, DVC_NAME, name) ||
+      strncmp(name, "WACOM", 5)) {
+    vnclog.Print(-1, "Wacom tablet not installed\n");
+    return;
+  }
+  m_wacom = true;
 }
 
 
@@ -291,4 +312,5 @@ VNCviewerApp32::~VNCviewerApp32()
   // We don't need to clean up pcc if the thread has been joined.
   if (m_pdaemon != NULL) delete m_pdaemon;
   LowLevelHook::Release();
+  UnloadWintab();
 }

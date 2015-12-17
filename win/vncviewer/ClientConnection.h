@@ -38,11 +38,24 @@
 #include "turbojpeg.h"
 #include "fbx.h"
 #include "ScreenSet.h"
+#include "ExtInputDevice.h"
+#include "ExtInputEvent.h"
+extern "C" {
+#include "wintab/Utils.h"
+#define PACKETDATA (PK_CURSOR | PK_X | PK_Y | PK_NORMAL_PRESSURE | \
+  PK_ORIENTATION | PK_BUTTONS | PK_CHANGED)
+#define PACKETMODE 0
+#include "wintab/pktdef.h"
+}
 
 #define SETTINGS_KEY_NAME "Software\\TurboVNC\\VNCviewer\\Settings"
 #define MAX_HOST_NAME_LEN 250
 
 #define TIGHT_ZLIB_BUFFER_SIZE 512
+
+
+#define WidthOf(rect) ((rect).right - (rect).left)
+#define HeightOf(rect) ((rect).bottom - (rect).top)
 
 
 class ClientConnection;
@@ -235,7 +248,12 @@ class ClientConnection : public omni_thread
     void SetFullScreenMode(bool enable, bool suppressPrompt = false);
     bool InFullScreenMode();
     void RealiseFullScreenMode(bool suppressPrompt);
-    void GetFullScreenMetrics(RECT &screenArea, RECT &workArea);
+    void GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
+                              int spanMode);
+    void GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
+    {
+      GetFullScreenMetrics(screenArea, workArea, m_opts.m_Span);
+    }
     bool BumpScroll(int x, int y);
 
     // ClientConnectionClipboard.cpp
@@ -264,6 +282,23 @@ class ClientConnection : public omni_thread
     void SendEnableContinuousUpdates(bool enable, int x, int y, int w, int h);
     void SendFence(CARD32 flags, unsigned len, const char *data);
     void ReadFence(void);
+
+    // Extended input device stuff
+    bool supportsGII;
+    std::list<ExtInputDevice> devices;
+    HCTX m_hctx;
+    DWORD m_wacomButtonMask;
+
+    void ReadGII(void);
+    void SendGIIVersion(void);
+    void SendGIIDeviceCreate(ExtInputDevice &dev);
+    void SendGIIEvent(UINT deviceID, ExtInputEvent &e);
+    void AddInputDevice(ExtInputDevice &dev);
+    void AssignInputDevice(int deviceOrigin);
+    void CreateWacomGIIDevices(void);
+    void TranslateWacomCoords(HWND hwnd, int localX, int localY, int &remoteX,
+                              int &remoteY);
+    void ConvertWacomTilt(ORIENTATION orient, int &tiltX, int &tiltY);
 
     // ClientConnectionTunnel.cpp
     void SetupSSHTunnel(void);
