@@ -81,6 +81,7 @@ if(TVNC_BUILDJAVA)
 	set(INST_DEPENDS ${INST_DEPENDS} java)
 	if(TVNC_BUILDNATIVE)
 		set(INST_DEFS ${INST_DEFS} "-DTURBOVNCHELPER")
+		set(INST_DEPENDS ${INST_DEPENDS} turbovnchelper)
 	endif()
 endif()
 
