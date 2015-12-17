@@ -10,6 +10,9 @@ subsequently fail to accelerate JPEG decompression.  TJException is a new class
 in libjpeg-turbo 1.5, and due to an oversight, VncViewer.jar was not including
 it.
 
+2. Added a new parameter to the Java TurboVNC Viewer (`NoReconnect`) that can
+optionally be used to revert the behavior introduced in 2.0 beta1[17].
+
 
 2.0.2
 =====

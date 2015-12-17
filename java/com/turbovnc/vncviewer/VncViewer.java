@@ -805,7 +805,8 @@ public class VncViewer extends javax.swing.JApplet
       } catch (Exception e) {
         if (cc == null || !cc.shuttingDown) {
           reportException(e, cc != null &&
-                          cc.state() == CConnection.RFBSTATE_NORMAL);
+                          cc.state() == CConnection.RFBSTATE_NORMAL &&
+                          !VncViewer.noReconnect.getValue());
           exitStatus = 1;
           if (cc != null) cc.deleteWindow();
         } else if (cc.shuttingDown && embed.getValue()) {
@@ -1003,6 +1004,12 @@ public class VncViewer extends javax.swing.JApplet
   // Prevent the viewer from sending Ctrl-Alt-Del and Ctrl-Esc to the server
   static BoolParameter restricted
   = new BoolParameter("Restricted", null, false);
+
+  static BoolParameter noReconnect
+  = new BoolParameter("NoReconnect",
+  "Normally, if the viewer is disconnected from the server unexpectedly, " +
+  "the viewer will ask whether you want to reconnect.  Setting this option " +
+  "disables that behavior.", false);
 
   static StringParameter grabKeyboard
   = new StringParameter("GrabKeyboard",
