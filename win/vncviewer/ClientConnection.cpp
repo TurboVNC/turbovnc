@@ -545,7 +545,7 @@ void ClientConnection::CreateDisplay()
     HCTX hctx;
 
     gpWTInfoA(WTI_DEFCONTEXT, 0, &lc);
-    lc.lcOptions |= CXO_MESSAGES | CXO_SYSTEM;
+    lc.lcOptions |= CXO_MESSAGES;
     lc.lcPktData = PACKETDATA;
     lc.lcPktMode = PACKETMODE;
     lc.lcMoveMask = PACKETDATA;
