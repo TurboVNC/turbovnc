@@ -1,6 +1,6 @@
 include_directories(include stubs ../libfontenc/include)
 
-add_definitions(-DHAVE_CONFIG_H)
+add_definitions(-DHAVE_CONFIG_H -DHAVE_READLINK)
 
 if(APPLE)
 	add_definitions(-DNO_WEAK_SYMBOLS)
