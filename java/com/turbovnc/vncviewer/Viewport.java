@@ -91,9 +91,6 @@ public class Viewport implements Runnable {
     getContainer().add(tb, BorderLayout.PAGE_START);
     
     getContainer().add(sp, BorderLayout.CENTER);
-    if(useFrame){
-      frame.getContentPane().add(getContainer());
-    }
     
     if (VncViewer.os.startsWith("mac os x") && useFrame) {
       macMenu = new MacMenuBar(cc);
