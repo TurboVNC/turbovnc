@@ -311,13 +311,10 @@ public class Viewport extends JFrame {
         String[] subsampStr = { "1X", "4X", "2X", "Gray" };
         setTitle(cc.cp.name() + " [Tight + JPEG " +
                  subsampStr[cc.opts.subsampling] + " Q" + cc.opts.quality +
-                 (cc.opts.compressLevel > 1 ? " + CL " + cc.opts.compressLevel : "") +
-                 "]");
+                 " + CL " + cc.opts.compressLevel + "]");
       } else {
         setTitle(cc.cp.name() + " [Lossless Tight" +
-                 (cc.opts.compressLevel == 1 ? " + Zlib" : "") +
-                 (cc.opts.compressLevel > 1 ? " + CL " + cc.opts.compressLevel : "") +
-                 "]");
+                 " + CL " + cc.opts.compressLevel + "]");
       }
     } else {
       setTitle(cc.cp.name() + " [" + Encodings.encodingName(enc) + "]");
