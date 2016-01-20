@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2016 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -406,6 +406,10 @@ typedef struct rfbClientRec {
     rfbDevInfo devices[MAXDEVICES];
     int numDevices;
 
+    /* Session capture */
+    int captureFD;
+    Bool captureEnable;
+
 } rfbClientRec, *rfbClientPtr;
 
 
@@ -676,6 +680,8 @@ extern int rfbALRSubsampLevel;
 extern int rfbInterframe;
 extern int rfbMaxClipboard;
 extern Bool rfbVirtualTablet;
+
+extern char *captureFile;
 
 #define debugregion(r, m) \
     rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1, \

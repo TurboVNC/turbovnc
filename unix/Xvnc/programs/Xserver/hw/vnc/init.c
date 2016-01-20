@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2016 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -382,6 +382,12 @@ ddxProcessArgument(int argc, char *argv[], int i)
     if (strcasecmp(argv[i], "-nointerframe") == 0) {
         rfbInterframe = 0;
         return 1;
+    }
+
+    if (strcasecmp(argv[i], "-capture") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        captureFile = strdup(argv[i + 1]);
+        return 2;
     }
 
 #ifdef NVCONTROL
@@ -1482,6 +1488,8 @@ ddxUseMsg()
     ErrorF("                       seconds (S is floating point)\n");
     ErrorF("-interframe            always use interframe comparison\n");
     ErrorF("-nointerframe          never use interframe comparison\n");
+    ErrorF("-capture F             capture the data sent to the first connected viewer to\n");
+    ErrorF("                       a file (F).\n");
 #ifdef NVCONTROL
     ErrorF("-nvcontrol display     set up a virtual NV-CONTROL extension and redirect\n");
     ErrorF("                       NV-CONTROL requests to the specified X display\n");

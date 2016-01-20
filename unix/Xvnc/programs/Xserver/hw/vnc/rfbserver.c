@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2016 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -77,6 +77,20 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 Bool rfbSendDesktopSize(rfbClientPtr cl);
+
+
+/*
+ * Session capture
+ */
+
+char *captureFile = NULL;
+
+static void
+WriteCapture(int captureFD, char *buf, int len)
+{
+    if (write(captureFD, buf, len) < len)
+        rfbLogPerror("WriteCapture: Could not write to capture file");
+}
 
 
 /*
@@ -362,6 +376,16 @@ rfbNewClient(int sock)
 
     memset(cl, 0, sizeof(rfbClientRec));
 
+    if (rfbClientHead == NULL && captureFile) {
+      cl->captureFD = open(captureFile, O_CREAT | O_EXCL | O_WRONLY,
+                           S_IRUSR | S_IWUSR);
+      if (cl->captureFD < 0)
+        rfbLogPerror("Could not open capture file");
+      else
+        rfbLog("Opened capture file %s\n", captureFile);
+    } else
+      cl->captureFD = -1;
+
     cl->sock = sock;
     getpeername(sock, (struct sockaddr *)&addr, &addrlen);
     cl->host = strdup(sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
@@ -532,6 +556,9 @@ rfbClientConnectionGone(rfbClientPtr cl)
     i = cl->numDevices;
     while (i-- > 0)
         RemoveExtInputDevice(cl, 0);
+
+    if (cl->captureFD >= 0)
+      close(cl->captureFD);
 
     free(cl);
 
@@ -2004,6 +2031,8 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
     }
     ublen = sz_rfbFramebufferUpdateMsg;
 
+    cl->captureEnable = TRUE;
+
     if (sendCursorShape) {
         cl->cursorWasChanged = FALSE;
         if (!rfbSendCursorShape(cl, pScreen))
@@ -2100,6 +2129,8 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
 
     if (!rfbSendUpdateBuf(cl))
         goto abort;
+
+    cl->captureEnable = FALSE;
 
     if (!rfbSendRTTPing(cl))
         goto abort;
@@ -2419,6 +2450,9 @@ rfbSendUpdateBuf(rfbClientPtr cl)
         return FALSE;
     }
 
+    if (cl->captureEnable && cl->captureFD >= 0 && ublen > 0)
+        WriteCapture(cl->captureFD, updateBuf, ublen);
+
     ublen = 0;
     return TRUE;
 }
@@ -2466,6 +2500,10 @@ rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour, int nColours)
         rfbCloseClient(cl);
         return FALSE;
     }
+
+    if (cl->captureFD >= 0)
+        WriteCapture(cl->captureFD, buf, len);
+
     return TRUE;
 }
 
@@ -2489,6 +2527,8 @@ rfbSendBell()
             rfbLogPerror("rfbSendBell: write");
             rfbCloseClient(cl);
         }
+        if (cl->captureFD >= 0)
+            WriteCapture(cl->captureFD, (char *)&b, sz_rfbBellMsg);
     }
 }
 
@@ -2528,6 +2568,8 @@ rfbSendServerCutText(char *str, int len)
             rfbLogPerror("rfbSendServerCutText: write");
             rfbCloseClient(cl);
         }
+        if (cl->captureFD >= 0)
+            WriteCapture(cl->captureFD, str, len);
     }
 }
 
