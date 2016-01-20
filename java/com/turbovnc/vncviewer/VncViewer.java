@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2016 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -913,6 +913,7 @@ public class VncViewer extends javax.swing.JApplet
 
     opts.cursorShape = cursorShape.getValue();
     opts.continuousUpdates = continuousUpdates.getValue();
+    opts.copyRect = copyRect.getValue();
     if (user.getValue() != null) opts.user = new String(user.getValue());
     opts.sendLocalUsername = sendLocalUsername.getValue();
 
@@ -1250,6 +1251,9 @@ public class VncViewer extends javax.swing.JApplet
 
   static BoolParameter continuousUpdates
   = new BoolParameter("CU", null, true);
+
+  static BoolParameter copyRect
+  = new BoolParameter("CopyRect", null, true);
 
   static StringParameter secTypes = SecurityClient.secTypes;
 
