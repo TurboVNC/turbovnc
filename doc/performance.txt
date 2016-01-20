@@ -120,8 +120,11 @@ toolbar.)
 
 Certain ill-behaved applications can sometimes draw the same thing over and
 over again, and this can cause redundant framebuffer updates to be sent to the
-VNC viewer.  The TurboVNC Server can guard against this by maintaining a copy
-of the remote framebuffer for each connected viewer, comparing each new
+VNC viewer.  Additionally, modern GUI toolkits often use image-based drawing
+methods (the X Rendering Extension, for instance), which can result in an
+entire window being redrawn, even if only a few pixels in the window have
+changed.  The TurboVNC Server can guard against this by maintaining a copy of
+the remote framebuffer for each connected viewer, comparing each new
 framebuffer update rectangle against the pixels in the framebuffer copy, and
 discarding any redundant portions of the rectangle before they are sent to the
 viewer.
@@ -149,11 +152,11 @@ updates are not typically noticeable on high-speed networks, but an increase in
 server CPU usage might be.
 
 For these reasons, interframe comparison is not enabled by default and should
-not generally be enabled except on low-bandwidth networks and with applications
-for which it can be shown to be beneficial.  Interframe comparison can be
-enabled by either passing an argument of ''-interframe'' to ''vncserver'' when
-starting a TurboVNC Server session or by requesting a compression level of 5 or
-higher from the viewer (see below.)
+not generally be enabled except on bandwidth-constrained networks and with
+applications for which it can be shown to be beneficial.  Interframe comparison
+can be enabled by either passing an argument of ''-interframe'' to
+''vncserver'' when starting a TurboVNC Server session or by requesting a
+compression level of 5 or higher from the viewer (see below.)
 
 ** Advanced Compression Options
 {anchor: AdvancedCompression}

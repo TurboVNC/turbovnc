@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2015-11-11T12:35:00">
+<meta name="date" content="2016-01-20T05:29:11">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1395,11 +1395,14 @@ on the Connection Options button in the toolbar.)</p>
 
 <p>Certain ill-behaved applications can sometimes draw the same thing over 
 and over again, and this can cause redundant framebuffer updates to be 
-sent to the VNC viewer.  The TurboVNC Server can guard against this by 
-maintaining a copy of the remote framebuffer for each connected viewer, 
-comparing each new framebuffer update rectangle against the pixels in 
-the framebuffer copy, and discarding any redundant portions of the 
-rectangle before they are sent to the viewer.</p>
+sent to the VNC viewer.  Additionally, modern GUI toolkits often use 
+image-based drawing methods (the X Rendering Extension, for instance), 
+which can result in an entire window being redrawn, even if only a few 
+pixels in the window have changed.  The TurboVNC Server can guard 
+against this by maintaining a copy of the remote framebuffer for each 
+connected viewer, comparing each new framebuffer update rectangle 
+against the pixels in the framebuffer copy, and discarding any redundant 
+portions of the rectangle before they are sent to the viewer.</p>
 
 <p>Interframe comparison has some tradeoffs associated with it.  Perhaps 
 the most important of these is that it increases the memory usage of the 
@@ -1426,8 +1429,8 @@ duplicate framebuffer updates are not typically noticeable on high-speed
 networks, but an increase in server CPU usage might be.</p>
 
 <p>For these reasons, interframe comparison is not enabled by default and 
-should not generally be enabled except on low-bandwidth networks and 
-with applications for which it can be shown to be beneficial.  
+should not generally be enabled except on bandwidth-constrained networks 
+and with applications for which it can be shown to be beneficial.  
 Interframe comparison can be enabled by either passing an argument of 
 <code>-interframe</code> to <code>vncserver</code> when starting a 
 TurboVNC Server session or by requesting a compression level of 5 or 
