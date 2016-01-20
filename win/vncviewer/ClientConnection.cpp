@@ -1438,16 +1438,12 @@ void ClientConnection::SetWindowTitle()
     char zlibstr[80];
     zlibstr[0] = 0;
     if (!m_opts.m_enableJpegCompression) {
-      if (m_opts.m_compressLevel == 1)
-        snprintf(zlibstr, 80, " + Zlib");
-      if (m_opts.m_compressLevel > 1)
-        snprintf(zlibstr, 80, " + CL %d", m_opts.m_compressLevel);
+      snprintf(zlibstr, 80, " + CL %d", m_opts.m_compressLevel);
       snprintf(&title[strlen(title)], len - strlen(title),
                "[Lossless Tight%s]", zlibstr);
     }
     else {
-      if (m_opts.m_compressLevel > 1)
-        snprintf(zlibstr, 80, " + CL %d", m_opts.m_compressLevel);
+      snprintf(zlibstr, 80, " + CL %d", m_opts.m_compressLevel);
       snprintf(&title[strlen(title)], len - strlen(title),
                "[Tight + JPEG %s Q%d%s]", sampopt2str[m_opts.m_subsampLevel],
                m_opts.m_jpegQualityLevel, zlibstr);
