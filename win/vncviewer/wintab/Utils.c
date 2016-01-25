@@ -74,7 +74,7 @@ BOOL LoadWintab( void )
 	{
 		DWORD err = GetLastError();
 		WACOM_TRACE("LoadLibrary error: %i\n", err);
-		ShowError("Could not load Wintab32.dll");
+//		ShowError("Could not load Wintab32.dll");
 		return FALSE;
 	}
 
