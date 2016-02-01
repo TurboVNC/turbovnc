@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2016 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,24 @@ package com.turbovnc.rfb;
 public class Keysyms {
 
   public static final int ISO_Level3_Shift = 0xFE03;
+
+  public static final int Dead_Grave = 0xFE50;
+  public static final int Dead_Acute = 0xFE51;
+  public static final int Dead_Circumflex = 0xFE52;
+  public static final int Dead_Tilde = 0xFE53;
+  public static final int Dead_Macron = 0xFE54;
+  public static final int Dead_Breve = 0xFE55;
+  public static final int Dead_AboveDot = 0xFE56;
+  public static final int Dead_Diaeresis = 0xFE57;
+  public static final int Dead_AboveRing = 0xFE58;
+  public static final int Dead_DoubleAcute = 0xFE59;
+  public static final int Dead_Caron = 0xFE5A;
+  public static final int Dead_Cedilla = 0xFE5B;
+  public static final int Dead_Ogonek = 0xFE5C;
+  public static final int Dead_Iota = 0xFE5D;
+  public static final int Dead_Voiced_Sound = 0xFE5E;
+  public static final int Dead_Semivoiced_Sound = 0xFE5F;
+
   public static final int BackSpace = 0xFF08;
   public static final int Tab = 0xFF09;
   public static final int Linefeed = 0xFF0A;

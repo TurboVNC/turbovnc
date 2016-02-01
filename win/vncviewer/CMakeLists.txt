@@ -36,6 +36,7 @@ set(VNCVIEWER_SOURCES
 	FileTransferItemInfo.cpp
 	HotKeys.cpp
 	KeyMap.cpp
+	keysym2ucs.c
 	Log.cpp
 	LoginAuthDialog.cpp
 	LowLevelHook.cpp

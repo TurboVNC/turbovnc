@@ -1,5 +1,6 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2013 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2013, 2016 D. R. Commander. All Rights Reserved.
+//  Copyright 2014 Pierre Ossman <ossman@cendio.se> for Cendio AB
 //
 //  This file is part of the VNC system.
 //
@@ -26,6 +27,7 @@
 #include "stdhdrs.h"
 #include "KeyMap.h"
 #include "vncviewer.h"
+#include "keysym2ucs.h"
 
 
 typedef struct vncKeymapping_struct {
@@ -151,10 +153,10 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
   kas.releaseModifiers = 0;
 
   bool extended = ((keyData & 0x1000000) != 0);
-  vnclog.Print(8, " keyData %04x ", keyData);
+  vnclog.Print(8, "VK %.2x (%.8x)", virtkey, keyData);
 
   if (extended) {
-    vnclog.Print(8, " (extended) ");
+    vnclog.Print(8, " [ext]");
     switch (virtkey) {
       case VK_MENU :
         virtkey = VK_RMENU;  break;
@@ -207,105 +209,93 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
     if ((key == XK_Alt_L || key == XK_Alt_R) &&
         GetKeyState(VK_SCROLL)) {
       if (key == XK_Alt_L)
-        kas.keycodes[numkeys-1] = XK_Meta_L;
+        kas.keycodes[numkeys - 1] = XK_Meta_L;
       else
-        kas.keycodes[numkeys-1] = XK_Meta_R;
+        kas.keycodes[numkeys - 1] = XK_Meta_R;
     }
-    vnclog.Print(8, "keymap gives %u (%x) ", key, key);
+    vnclog.Print(8, ": keymap gives %.4x", key);
 
   } else {
     // not found in table
-    vnclog.Print(8, "not in special keymap, ");
+    vnclog.Print(8, ": not in keymap");
 
     // Try a simple conversion to ASCII, using the current keyboard mapping
     GetKeyboardState(keystate);
 
-    int ret = ToAscii(virtkey, 0, keystate, (WORD *) buf, 0);
-
     // If Left Ctrl & Alt are both pressed and ToAscii() gives a valid keysym.
     // (This is for AltGr on international keyboards (= LCtrl-Alt).
     // e.g. Ctrl-Alt-Q gives @ on German keyboards.)
-    if (((keystate[VK_MENU] & 0x80) != 0) &&
-        ((keystate[VK_CONTROL] & 0x80) != 0)) {
+    if (((keystate[VK_RMENU] & 0x80) != 0) &&
+        ((keystate[VK_LCONTROL] & 0x80) != 0)) {
 
-      // If the key means anything in this keyboard layout
-      if ((ret >= 1) && (((*buf >= 32) && (*buf <= 126)) ||
-                         ((*buf >= 160) && (*buf <= 255)))) {
+      // Windows doesn't have a proper AltGr key event.  It instead handles
+      // AltGr with fake left Ctrl and right Alt key events.  Xvnc will
+      // automatically insert an AltGr (ISO Level 3 Shift) event if necessary
+      // (if it receives a key symbol that could not have been generated any
+      // other way), and unfortunately X11 doesn't generally like the sequence
+      // Ctrl + Alt + AltGr.  Thus, for Windows viewers, we have to temporarily
+      // release Ctrl and Alt, then process the AltGr-modified symbol, then
+      // press Ctrl and Alt again.
 
-        // Release the modifiers, then the keystroke, then press the modifiers.
-        // We don't release Right Ctrl; this allows German users to use it for
-        // doing Ctrl-@ etc.
+      if (GetKeyState(VK_LCONTROL) & 0x8000)
+        kas.releaseModifiers |= KEYMAP_LCONTROL;
+      if (GetKeyState(VK_RMENU) & 0x8000)
+        kas.releaseModifiers |= KEYMAP_RALT;
 
-        if (GetKeyState(VK_LCONTROL) & 0x8000)
-          kas.releaseModifiers |= KEYMAP_LCONTROL;
-        if (GetKeyState(VK_LMENU) & 0x8000)
-          kas.releaseModifiers |= KEYMAP_LALT;
-        if (GetKeyState(VK_RMENU) & 0x8000)
-          kas.releaseModifiers |= KEYMAP_RALT;
-
-        // This is for Windows '95, and possibly other systems.  The above
-        // GetKeyState() calls don't work in '95 - they always return 0.
-        // But if we're at this point in the code, we know that Ctrl and Alt
-        // are pressed, so let's release all Ctrl and Alt keys if we haven't
-        // registered them as already having been released.
-        if (kas.releaseModifiers == 0)
-          kas.releaseModifiers = KEYMAP_LCONTROL | KEYMAP_LALT | KEYMAP_RALT;
-
-        vnclog.Print(8, "Ctrl-Alt pressed: ToAscii (without modifiers) returns %d byte(s): ",
-                     ret);
-        for (int i = 0; i < ret; i++) {
-          kas.keycodes[numkeys++] = *(buf + i);
-          vnclog.Print(8, "%02x (%c) ", *(buf + i) , *(buf + i));
-        }
-        vnclog.Print(8, "\n");
-      }
-    }
-
-    // If not a Ctrl-Alt key
-    if (numkeys == 0) {
-
+      // This is for Windows '95, and possibly other systems.  The above
+      // GetKeyState() calls don't work in '95 - they always return 0.
+      // But if we're at this point in the code, we know that left Ctrl and
+      // right Alt are pressed, so let's release those keys if we haven't
+      // registered them as already having been released.
+      if (kas.releaseModifiers == 0)
+        kas.releaseModifiers = KEYMAP_LCONTROL | KEYMAP_RALT;
+    } else {
       // There are no keysyms corresponding to control characters, e.g. Ctrl-F.
       // The server already knows whether the Ctrl key is pressed, so we are
       // interested in the key that would be sent if the Ctrl key were not
       // pressed.
       keystate[VK_CONTROL] = keystate[VK_LCONTROL] = keystate[VK_RCONTROL] = 0;
+    }
 
-      int ret = ToAscii(virtkey, 0, keystate, (WORD *) buf, 0);
-      if (ret < 0) {
-        switch (*buf) {
-          case '`' :
-            kas.keycodes[numkeys++] = XK_dead_grave;  break;
-          case '\'' :
-            kas.keycodes[numkeys++] = XK_dead_acute;  break;
-          case '~' :
-            kas.keycodes[numkeys++] = XK_dead_tilde;  break;
-          case '^':
-            kas.keycodes[numkeys++] = XK_dead_circumflex;  break;
-          case 168:
-            // dead_tilde / dead_diaeresis
-            if ((GetKeyState(VK_CONTROL) & 0x8000) &&
-                (GetKeyState(VK_MENU) & 0x8000)) {
-              // AltGr is pressed
-              kas.keycodes[numkeys++] = XK_dead_tilde;
-            } else {
-              kas.keycodes[numkeys++] = XK_dead_diaeresis;
-            }
-            break;
-        }
+    int ret = ToUnicode(virtkey, 0, keystate, buf, 10, 0);
+
+    if (ret == 0) {
+      // Most Ctrl+Alt combinations will fail to produce a symbol, so
+      // try it again with Ctrl unconditionally disabled.
+      keystate[VK_CONTROL] = keystate[VK_LCONTROL] = keystate[VK_RCONTROL] = 0;
+      ret = ToUnicode(virtkey, 0, keystate, buf, 10, 0);
+    }
+
+    unsigned keysym = ucs2keysym(buf[0]);
+
+    if (ret == 1 && keysym != 0) {
+      // If the key means anything in this keyboard layout
+      if (((keystate[VK_RMENU] & 0x80) != 0) &&
+          ((keystate[VK_LCONTROL] & 0x80) != 0))
+        vnclog.Print(8, "\n  Ctrl-Alt:  UCS->KS (w/o mods):  ");
+      else
+        vnclog.Print(8, "\n  UCS->KS (w/o ctrl):  ");
+      kas.keycodes[numkeys++] = keysym;
+      vnclog.Print(8, " %.2x->%.2x", buf[0], keysym);
+    }
+
+    if (ret < 0 || ret > 1) {
+      // NOTE: For some reason, TigerVNC never gets a return value > 1 from
+      // ToUnicode(), but we do, even though we're using basically the same
+      // keyboard handling logic.  Not sure why.
+      WCHAR dead_char = buf[0];
+      while (ret < 0) {
+        // Need to clear out the state that the dead key has caused.
+        // This is the recommended method by Microsoft's engineers:
+        // http://blogs.msdn.com/b/michkap/archive/2007/10/27/5717859.aspx
+        ret = ToUnicode(virtkey, 0, keystate, buf, 10, 0);
       }
-      // If this works, and it's a regular printable character, we just send
-      // that
-      if (ret >= 1) {
-        vnclog.Print(8, "ToAscii (without ctrl) returns %d byte(s): ",
-                     ret);
-        for (int i = 0; i < ret; i++) {
-          kas.keycodes[numkeys++] = *(buf + i);
-          vnclog.Print(8, "%02x (%c) ", *(buf + i) , *(buf + i));
-        }
-      }
+      kas.keycodes[numkeys++] = ucs2keysym(ucs2combining(dead_char));
+      vnclog.Print(8, " %.2x->%.2x", dead_char, kas.keycodes[numkeys - 1]);
     }
   }
 
+  vnclog.Print(8, "\n");
   kas.keycodes[numkeys] = VoidKeyCode;
   return kas;
 };

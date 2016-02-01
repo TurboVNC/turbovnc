@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2016 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -58,7 +59,7 @@ class KeyMap {
     KeyActionSpec PCtoX(UINT virtkey, DWORD keyData);
   private:
     // CARD32 keymap[256];
-    unsigned char buf[4]; // lots of space for now
+    WCHAR buf[10]; // lots of space for now
     BYTE keystate[256];
 };
 

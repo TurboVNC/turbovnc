@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2016 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -1623,6 +1623,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
     try {
+      vlog.debug("writeKeyEvent " + String.format("0x%04x", keysym) + " " +
+                 (down ? "PRESS" : "release"));
       writer().writeKeyEvent(keysym, down);
     } catch (Exception e) {
       if (!shuttingDown) {
@@ -1851,7 +1853,58 @@ public class CConn extends CConnection implements UserPasswdGetter,
           else if (keycode >= 32 && keycode <= 126)
             key = keycode;
         }
-        keysym = UnicodeToKeysym.translate(key);
+        switch (keycode) {
+        case KeyEvent.VK_DEAD_ABOVEDOT:
+          keysym = Keysyms.Dead_AboveDot;
+          break;
+        case KeyEvent.VK_DEAD_ABOVERING:
+          keysym = Keysyms.Dead_AboveRing;
+          break;
+        case KeyEvent.VK_DEAD_ACUTE:
+          keysym = Keysyms.Dead_Acute;
+          break;
+        case KeyEvent.VK_DEAD_BREVE:
+          keysym = Keysyms.Dead_Breve;
+          break;
+        case KeyEvent.VK_DEAD_CARON:
+          keysym = Keysyms.Dead_Caron;
+          break;
+        case KeyEvent.VK_DEAD_CEDILLA:
+          keysym = Keysyms.Dead_Cedilla;
+          break;
+        case KeyEvent.VK_DEAD_CIRCUMFLEX:
+          keysym = Keysyms.Dead_Circumflex;
+          break;
+        case KeyEvent.VK_DEAD_DIAERESIS:
+          keysym = Keysyms.Dead_Diaeresis;
+          break;
+        case KeyEvent.VK_DEAD_DOUBLEACUTE:
+          keysym = Keysyms.Dead_DoubleAcute;
+          break;
+        case KeyEvent.VK_DEAD_GRAVE:
+          keysym = Keysyms.Dead_Grave;
+          break;
+        case KeyEvent.VK_DEAD_IOTA:
+          keysym = Keysyms.Dead_Iota;
+          break;
+        case KeyEvent.VK_DEAD_MACRON:
+          keysym = Keysyms.Dead_Macron;
+          break;
+        case KeyEvent.VK_DEAD_OGONEK:
+          keysym = Keysyms.Dead_Ogonek;
+          break;
+        case KeyEvent.VK_DEAD_SEMIVOICED_SOUND:
+          keysym = Keysyms.Dead_Semivoiced_Sound;
+          break;
+        case KeyEvent.VK_DEAD_TILDE:
+          keysym = Keysyms.Dead_Tilde;
+          break;
+        case KeyEvent.VK_DEAD_VOICED_SOUND:
+          keysym = Keysyms.Dead_Voiced_Sound;
+          break;
+        default:
+          keysym = UnicodeToKeysym.translate(key);
+        }
         if (keysym == -1)
           return;
       }
