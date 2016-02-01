@@ -40,6 +40,20 @@ however, then the old behavior of the Java TurboVNC Viewer can be restored by
 passing -Dsun.awt.nopixfmt=0 to java or adding "-Dsun.awt.nopixfmt=0" to the
 JAVA_TOOL_OPTIONS environment variable.
 -------------------------------------------------------------------------------
+[4]
+"Dead" keys, which are used to add accents and other diacritics to subsequent
+alphabetic keystrokes, should now work properly when using the Windows TurboVNC
+Viewer.  Additionally, certain AltGr-modified symbols (such as the Euro sign on
+European keyboards) did not previously work with the Windows TurboVNC Viewer.
+That has been fixed.
+
+Furthermore, dead keys should now mostly work when using the Java TurboVNC
+Viewer on Windows under Java 8 and later.  Due to irregularities in how Java
+translates dead keys into events on other platforms (for instance, on OS X,
+Java uses a different key code for the press and release events of a particular
+dead key, and on Linux, Java only communicates release events for dead keys),
+dead key support on non-Windows platforms is still incomplete.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

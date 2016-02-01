@@ -35,6 +35,7 @@ add_executable(vncviewer WIN32
 	FileTransferItemInfo.cpp
 	HotKeys.cpp
 	KeyMap.cpp
+	keysym2ucs.c
 	Log.cpp
 	LoginAuthDialog.cpp
 	LowLevelHook.cpp
