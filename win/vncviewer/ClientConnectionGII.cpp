@@ -17,6 +17,7 @@
 
 #include "vncviewer.h"
 #include "Exception.h"
+#include <math.h>
 #include <rfb/turbovnc_devtypes.h>
 
 
