@@ -87,6 +87,26 @@ Java uses a different key code for the press and release events of a particular
 dead key, and on Linux, Java only communicates release events for dead keys),
 dead key support on non-Windows platforms is still incomplete.
 -------------------------------------------------------------------------------
+[11]
+Worked around an issue whereby the Java TurboVNC Viewer on Windows, when
+running under Java 7 and later, would take an inordinate amount of time to
+create the viewer window after connecting to a VNC server.  This slowdown was
+due to a slow Win32 system call-- DescribePixelFormat()-- which is used in the
+implementation of GraphicsDevice.getConfigurations() in Windows JVMs.  This
+system call also forces the DirectDraw DLL to be loaded, which is unnecessary
+(TurboVNC explicitly disables DirectDraw blitting for performance reasons.)
+
+The Java TurboVNC Viewer now automatically sets the sun.awt.nopixfmt system
+property to "true", which should significantly speed up the creation of the
+viewer window, particularly on multi-screen clients, by avoiding the slow
+DescribePixelFormat() system call.  This causes Java 2D to always use the
+default pixel format for the display, but since the TurboVNC Viewer will always
+try to use GDI blitting (as opposed to OpenGL or DirectDraw blitting), the
+default pixel format should always work.  If for some reason it doesn't,
+however, then the old behavior of the Java TurboVNC Viewer can be restored by
+passing -Dsun.awt.nopixfmt=0 to java or adding "-Dsun.awt.nopixfmt=0" to the
+JAVA_TOOL_OPTIONS environment variable.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
