@@ -282,6 +282,11 @@ public class VncViewer extends javax.swing.JApplet
       String prop = System.getProperty("sun.java2d.d3d");
       if (prop == null || prop.length() < 1 || !Boolean.parseBoolean(prop))
         System.setProperty("sun.java2d.d3d", "false");
+      prop = System.getProperty("sun.awt.nopixfmt");
+      if (prop == null || prop.length() < 1 || Boolean.parseBoolean(prop))
+        System.setProperty("sun.awt.nopixfmt", "true");
+      else
+        System.clearProperty("sun.awt.nopixfmt");
     }
   }
 
