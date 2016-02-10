@@ -68,13 +68,6 @@ add_subdirectory(vncconnect)
 add_subdirectory(vncpasswd)
 add_subdirectory(Xvnc)
 
-string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UC)
-
-set(EFFECTIVE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE_UC}}")
-
-message(STATUS "Compiler flags = ${EFFECTIVE_C_FLAGS}")
-message(STATUS "Linker flags = ${CMAKE_EXE_LINKER_FLAGS}")
-
 set(DEFAULT_TVNC_CONFDIR ${CMAKE_INSTALL_PREFIX}/etc)
 set(TVNC_CONFDIR ${DEFAULT_TVNC_CONFDIR} CACHE PATH
 	"Directory into which configuration files should be installed (default: ${DEFAULT_TVNC_CONFDIR})")
