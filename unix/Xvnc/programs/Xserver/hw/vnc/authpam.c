@@ -5,6 +5,7 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
+ *  Copyright (C) 2016 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +27,10 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#if defined(DARWIN)
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#endif
+#if defined(__APPLE__) && defined(MAC_OS_X_VERSION_MAX_ALLOWED) && MAC_OS_X_VERSION_MAX_ALLOWED < 1060
 #include <pam/pam_appl.h>
 #else
 #include <security/pam_appl.h>
