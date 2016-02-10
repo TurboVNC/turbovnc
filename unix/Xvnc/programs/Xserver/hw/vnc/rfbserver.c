@@ -1571,6 +1571,11 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
                         rfbCloseClient(cl);
                         return;
                     }
+                    if (eventSize > length) {
+                        rfbLog("ERROR: Malformed GII event message\n");
+                        rfbCloseClient(cl);
+                        break;
+                    }
                     length -= eventSize;
                     if (b.deviceOrigin < 1 ||
                         b.deviceOrigin > cl->numDevices) {
@@ -1627,6 +1632,11 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
                         rfbLog("ERROR: Malformed GII valuator event\n");
                         rfbCloseClient(cl);
                         return;
+                    }
+                    if (eventSize > length) {
+                        rfbLog("ERROR: Malformed GII event message\n");
+                        rfbCloseClient(cl);
+                        break;
                     }
                     length -= eventSize;
                     if (v.deviceOrigin < 1 ||
@@ -1685,7 +1695,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
                     return;
                 }  /* switch (eventType) */
             }  /* while (length > 0) */
-            if (length < 0) {
+            if (length != 0) {
                 rfbLog("ERROR: Malformed GII event message\n");
                 rfbCloseClient(cl);
                 return;
