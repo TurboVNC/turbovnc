@@ -55,7 +55,10 @@
 #include "mipointer.h"
 #include "input.h"
 #ifdef XVNC_AuthPAM
-#if defined(DARWIN)
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#endif
+#if defined(__APPLE__) && defined(MAC_OS_X_VERSION_MAX_ALLOWED) && MAC_OS_X_VERSION_MAX_ALLOWED < 1060
 #include <pam/pam_appl.h>
 #else
 #include <security/pam_appl.h>
