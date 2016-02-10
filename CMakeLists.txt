@@ -20,24 +20,6 @@ set(COPYRIGHT_YEAR "1999-2015")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
 set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
 
-if(UNIX)
-	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
-	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
-elseif(WIN32 AND NOT MINGW)
-	execute_process(COMMAND "wmic.exe" "os" "get" "LocalDateTime" OUTPUT_VARIABLE
-		BUILD)
-	string(REGEX REPLACE "[^0-9]" "" BUILD "${BUILD}")
-	if (BUILD STREQUAL "")
-		execute_process(COMMAND "cmd.exe" "/C" "DATE" "/T" OUTPUT_VARIABLE BUILD)
-		string(REGEX REPLACE ".*[ ]([0-9]*)[/.]([0-9]*)[/.]([0-9]*).*" "\\3\\2\\1" BUILD "${BUILD}")
-	else()
-		string(SUBSTRING "${BUILD}" 0 8 BUILD)
-	endif()
-else()
-	message(FATAL_ERROR "Platform not supported.")
-endif()
-string(REGEX REPLACE "\n" "" BUILD ${BUILD})
-
 set(USEC 0)
 
 if(APPLE)
@@ -76,13 +58,6 @@ if(USEC)
 
 	message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
-	# This only works if building from the command line.  There is currently no
-	# way to set a variable's value based on the build type when using the MSVC
-	# IDE.
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(BUILD "${BUILD}d")
-	endif()
-
 	string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UC)
 
 	set(EFFECTIVE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE_UC}}")
@@ -95,6 +70,33 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+if(UNIX)
+	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
+	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
+elseif(WIN32 AND NOT MINGW)
+	execute_process(COMMAND "wmic.exe" "os" "get" "LocalDateTime" OUTPUT_VARIABLE
+		BUILD)
+	string(REGEX REPLACE "[^0-9]" "" BUILD "${BUILD}")
+	if (BUILD STREQUAL "")
+		execute_process(COMMAND "cmd.exe" "/C" "DATE" "/T" OUTPUT_VARIABLE BUILD)
+		string(REGEX REPLACE ".*[ ]([0-9]*)[/.]([0-9]*)[/.]([0-9]*).*" "\\3\\2\\1" BUILD "${BUILD}")
+	else()
+		string(SUBSTRING "${BUILD}" 0 8 BUILD)
+	endif()
+else()
+	message(FATAL_ERROR "Platform not supported.")
+endif()
+string(REGEX REPLACE "\n" "" BUILD ${BUILD})
+
+if(USEC)
+	# This only works if building from the command line.  There is currently no
+	# way to set a variable's value based on the build type when using the MSVC
+	# IDE.
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set(BUILD "${BUILD}d")
+	endif()
+endif()
 
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 
