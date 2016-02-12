@@ -45,6 +45,14 @@ message(STATUS "TVNC_MANDIR = ${TVNC_MANDIR}")
 
 include_directories(include)
 
+string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UC)
+
+set(EFFECTIVE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE_UC}}")
+message(STATUS "Compiler flags = ${EFFECTIVE_C_FLAGS}")
+
+set(EFFECTIVE_LD_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_${CMAKE_BUILD_TYPE_UC}}")
+message(STATUS "Linker flags = ${EFFECTIVE_LD_FLAGS}")
+
 
 #
 # Viewer build
