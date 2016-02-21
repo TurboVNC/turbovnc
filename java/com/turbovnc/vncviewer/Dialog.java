@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2014, 2016 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,12 @@ class Dialog {
       throw new ErrorException("Unknown window type");
     }
 
+    setIcon();
+
+    populateDialog(dlg);
+    if (title != null)
+      dlg.setTitle(title);
+
     if (w != null) {
       dlg.setLocationRelativeTo(w);
     } else {
@@ -74,12 +80,6 @@ class Dialog {
       int y = (dpySize.height - mySize.height) / 2;
       dlg.setLocation(x, y);
     }
-
-    setIcon();
-
-    populateDialog(dlg);
-    if (title != null)
-      dlg.setTitle(title);
 
     Window owner = dlg.getOwner();
     if (owner instanceof java.awt.Dialog) {
