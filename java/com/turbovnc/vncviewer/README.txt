@@ -10,27 +10,9 @@ most notable of these features is the ability to use the libjpeg-turbo library
 when run as a standalone application, similar levels of performance to the
 native TurboVNC Viewer.
 
-The Java TurboVNC Viewer is:
-
-        Copyright (C) 2000-2003 Constantin Kaplinsky
-        Copyright (C) 2004 Red Hat, Inc.
-        Copyright (C) 2004-2005 Cendio AB
-        Copyright (C) 2002-2005 RealVNC Ltd.
-        Copyright (C) 2005-2006 Martin Koegler
-        Copyright (C) 2006 OCCAM Financial Technology
-        Copyright (C) 2009-2011 Pierre Ossman for Cendio AB
-        Copyright (C) 2010-2012 TigerVNC Team
-        Copyright (C) 2010 m-privacy GmbH
-        Copyright (C) 2011-2013 Brian P. Hinz
-        Copyright (C) 2011-2015 D. R. Commander
-        All rights reserved.
-
-This software is distributed under the GNU General Public Licence as
-published by the Free Software Foundation.  See the file LICENSE.txt for the
-conditions under which this software is made available.  TurboVNC also
-contains code from other sources.  See the Acknowledgements section below and
-the individual files for details of the conditions under which they are made
-available.
+The Java TurboVNC Viewer also contains code from other sources.  See the
+Acknowledgements section below and the individual files for details of the
+conditions under which they are made available.
 
 
 Installation
