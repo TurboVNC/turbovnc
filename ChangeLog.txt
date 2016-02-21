@@ -107,6 +107,10 @@ however, then the old behavior of the Java TurboVNC Viewer can be restored by
 passing -Dsun.awt.nopixfmt=0 to java or adding "-Dsun.awt.nopixfmt=0" to the
 JAVA_TOOL_OPTIONS environment variable.
 -------------------------------------------------------------------------------
+[12]
+Fixed an issue in the Java TurboVNC Viewer whereby the Options, Clipboard, and
+Profiling dialogs were not centered relative to the viewer window.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
