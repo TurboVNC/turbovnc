@@ -111,6 +111,11 @@ JAVA_TOOL_OPTIONS environment variable.
 Fixed an issue in the Java TurboVNC Viewer whereby the Options, Clipboard, and
 Profiling dialogs were not centered relative to the viewer window.
 -------------------------------------------------------------------------------
+[13]
+The controls in the Options dialog of the Windows (native) TurboVNC Viewer have
+been re-organized into two tabs ("Encoding" and "Connection"), which makes the
+layout of that dialog more similar to that of the Java viewer's Options dialog.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

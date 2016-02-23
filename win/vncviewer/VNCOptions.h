@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -176,6 +176,8 @@ class VNCOptions
 
     static BOOL CALLBACK DlgProc(HWND hwndDlg, UINT uMsg,
                                  WPARAM wParam, LPARAM lParam);
+    static BOOL CALLBACK DlgProcEncOptions(HWND hwnd, UINT uMsg,
+                                           WPARAM wParam, LPARAM lParam);
     static BOOL CALLBACK DlgProcConnOptions(HWND hwnd, UINT uMsg,
                                             WPARAM wParam, LPARAM lParam);
     static BOOL CALLBACK DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
@@ -184,7 +186,8 @@ class VNCOptions
     // Register() makes this viewer the default application for opening .vnc
     // files
     static void Register();
-    HWND m_hPageConnection, m_hPageGeneral, m_hTab, m_hParent, m_hWindow;
+    HWND m_hPageEncoding, m_hPageConnection, m_hPageGlobal, m_hTab, m_hParent,
+      m_hWindow;
     void FixScaling();
 
   private:

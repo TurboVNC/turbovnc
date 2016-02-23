@@ -57,7 +57,7 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,77,61,50,14
 END
 
-IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 350, 207
+IDD_OPT_ENC_TAB DIALOG DISCARDABLE  0, 0, 335, 179
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
@@ -90,44 +90,50 @@ BEGIN
                     12,133,109,10,WS_GROUP | WS_TABSTOP
     CHECKBOX        "Interframe comparison",IDC_INTERFRAME,
                     12,145,109,10,WS_GROUP | WS_TABSTOP
-    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,4,163,173,38
-    CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,175,109,10
-    CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,12,186,109,10
-    GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,83
-    LTEXT           "Scaling factor:",IDC_STATIC_SCALE,195,15,46,10,SS_CENTERIMAGE
-    COMBOBOX        IDC_SCALE_EDIT,246,14,81,85,CBS_DROPDOWN |
+END
+
+IDD_OPT_CONN_TAB DIALOG DISCARDABLE  0, 0, 335, 179
+STYLE DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg"
+BEGIN
+    GROUPBOX        "Display",IDC_STATIC_DISPLAY,4,4,160,83
+    LTEXT           "Scaling factor:",IDC_STATIC_SCALE,13,15,46,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_SCALE_EDIT,64,14,81,85,CBS_DROPDOWN |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "%",IDC_STATIC_P,332,15,10,10,SS_CENTERIMAGE
-    LTEXT           "Remote desktop size:",IDC_STATIC_DESKTOPSIZE,195,30,71,10,
+    LTEXT           "%",IDC_STATIC_P,150,15,10,10,SS_CENTERIMAGE
+    LTEXT           "Remote desktop size:",IDC_STATIC_DESKTOPSIZE,13,30,71,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_DESKTOPSIZE_EDIT,271,29,66,85,CBS_DROPDOWN |
+    COMBOBOX        IDC_DESKTOPSIZE_EDIT,89,29,66,85,CBS_DROPDOWN |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,44,145,10
-    LTEXT           "Span mode:",IDC_STATIC_SPAN,195,58,45,10,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,44,145,10
+    LTEXT           "Span mode:",IDC_STATIC_SPAN,13,58,45,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_SPAN,240,56,90,50,CBS_DROPDOWNLIST |
+    COMBOBOX        IDC_SPAN,58,56,90,50,CBS_DROPDOWNLIST |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,72,145,10
-    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,92,160,39
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,72,145,10
+    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,4,92,160,49
+    CONTROL         "Enable remote cursor shape updates",IDC_CSHAPE_ENABLE_RADIO,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,13,
+                    103,145,10
+    CONTROL         "Draw remote cursor on the server",
+                    IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,13,
+                    115,145,10
+    CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,13,127,145,10
+    GROUPBOX        "Input",IDC_STATIC_MOUSE,171,4,160,51
+    CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,180,15,109,10
     CONTROL         "Emulate 3 buttons (with 2-button click)",
                     IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP |
-                    WS_TABSTOP,195,103,145,10
+                    WS_TABSTOP,180,27,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,115,145,10
-    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,135,160,49
-    CONTROL         "Enable remote cursor shape updates",IDC_CSHAPE_ENABLE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,195,
-                    146,145,10
-    CONTROL         "Draw remote cursor on the server",
-                    IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,195,
-                    158,145,10
-    CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON,195,170,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,39,145,10
+    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,171,60,160,39
     CONTROL         "Request shared session",IDC_SHARED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,191,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,70,145,10
+    CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,82,109,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -223,7 +229,7 @@ BEGIN
     LTEXT           "[build time unknown]",IDC_BUILDTIME,122,20,190,9
 END
 
-IDD_GENERAL_OPTION DIALOG DISCARDABLE  0, 0, 300, 179
+IDD_OPT_GLOBAL_TAB DIALOG DISCARDABLE  0, 0, 335, 179
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
@@ -278,15 +284,15 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PARENT DIALOGEX 0, 0, 366, 252
+IDD_PARENT DIALOGEX 0, 0, 351, 224
 STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
 CAPTION "TurboVNC Viewer Options"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    PUSHBUTTON      "&OK",IDOK,256,234,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,311,234,50,14
-    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,356,225
+    PUSHBUTTON      "&OK",IDOK,241,206,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,296,206,50,14
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,341,197
 END
 
 IDD_CONNECTING_DIALOG DIALOG DISCARDABLE  0, 0, 210, 61
@@ -323,27 +329,20 @@ BEGIN
         HORZGUIDE, 47
     END
 
-    IDD_OPTIONDIALOG, DIALOG
+    IDD_OPT_ENC_TAB, DIALOG
     BEGIN
         LEFTMARGIN, 4
-        RIGHTMARGIN, 296
-        VERTGUIDE, 12
-        VERTGUIDE, 25
-        VERTGUIDE, 121
-        VERTGUIDE, 127
-        VERTGUIDE, 136
-        VERTGUIDE, 145
-        VERTGUIDE, 290
+        RIGHTMARGIN, 331
         TOPMARGIN, 4
         BOTTOMMARGIN, 175
-        HORZGUIDE, 20
-        HORZGUIDE, 34
-        HORZGUIDE, 46
-        HORZGUIDE, 60
-        HORZGUIDE, 73
-        HORZGUIDE, 99
-        HORZGUIDE, 112
-        HORZGUIDE, 165
+    END
+
+    IDD_OPT_CONN_TAB, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 331
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 175
     END
 
     IDD_FTBROWSE_DLG, DIALOG
@@ -400,23 +399,12 @@ BEGIN
         BOTTOMMARGIN, 119
     END
 
-    IDD_GENERAL_OPTION, DIALOG
+    IDD_OPT_GLOBAL_TAB, DIALOG
     BEGIN
         LEFTMARGIN, 4
-        RIGHTMARGIN, 296
-        VERTGUIDE, 12
-        VERTGUIDE, 24
-        VERTGUIDE, 88
-        VERTGUIDE, 92
-        VERTGUIDE, 164
-        VERTGUIDE, 171
-        VERTGUIDE, 189
-        VERTGUIDE, 288
+        RIGHTMARGIN, 331
         TOPMARGIN, 4
         BOTTOMMARGIN, 175
-        HORZGUIDE, 21
-        HORZGUIDE, 35
-        HORZGUIDE, 51
     END
 
     IDD_HELP, DIALOG
@@ -565,12 +553,15 @@ BEGIN
     0
 END
 
-IDD_OPTIONDIALOG DLGINIT
+IDD_OPT_ENC_TAB DLGINIT
 BEGIN
     IDC_ENCODING, 0x403, 1, 0
 "\000"
-    IDC_SCALE_EDIT, 0x403, 1, 0
-"\000"
+    0
+END
+
+IDD_OPT_CONN_TAB DLGINIT
+BEGIN
     IDC_SCALE_EDIT, 0x403, 1, 0
 "\000"
     0
@@ -637,7 +628,7 @@ compression level that the GUI normally does not expose.\r\n\
     IDS_HELP6
 "/compresslevel <n>\r\n\
 When set to 0 or 1, this is the equivalent of\r\n\
-""Connection-->Encoding-->Zlib compression level"" in the options dialog.  When\r\n\
+""Encoding-->Zlib compression level"" in the options dialog.  When\r\n\
 set to 2 through 9, this requests higher compression levels from the server, if\r\n\
 it supports them.  When Tight encoding is used, higher compression levels specify\r\n\
 both higher levels of zlib compression as well as the use of encoding methods\r\n\
@@ -666,7 +657,7 @@ Open a console that displays logging information in real time\r\n\
     IDS_HELP9
 "/copyrect\r\n\
 /nocopyrect\r\n\
-Equivalent of ""Connection-->Encoding-->Allow CopyRect encoding"" in the options\r\n\
+Equivalent of ""Encoding-->Allow CopyRect encoding"" in the options\r\n\
 dialog\r\n\
 \r\n"
     IDS_HELP10
@@ -686,7 +677,7 @@ options dialog\r\n\
 /smalldotcursor\r\n\
 /normalcursor\r\n\
 /nocursor\r\n\
-Equivalent of ""Globals-->Local cursor shape"" in the options dialog\r\n\
+Equivalent of ""Global-->Local cursor shape"" in the options dialog\r\n\
 \r\n"
     IDS_HELP11
 "/desktopsize <w>x<h> | auto | server\r\n\
@@ -754,25 +745,25 @@ enabled.\r\n\
     IDS_HELP19
 "/jpeg\r\n\
 /nojpeg\r\n\
-Equivalent of ""Connection-->Encoding-->Allow JPEG compression"" in the options\r\n\
+Equivalent of ""Encoding-->Allow JPEG compression"" in the options\r\n\
 dialog\r\n\
 \r\n"
     IDS_HELP20
 "/listen [<port>]\r\n\
 Equivalent of the ""Listen mode"" button in the new connection dialog and\r\n\
-""Globals-->Listen mode-->Accept reverse VNC connections on TCP port"" in the\r\n\
+""Global-->Listen mode-->Accept reverse VNC connections on TCP port"" in the\r\n\
 options dialog\r\n\
 \r\n"
     IDS_HELP21
 "/loglevel <n>\r\n\
-Equivalent of ""Globals-->Logging-->Verbosity level"" in the options dialog\r\n\
+Equivalent of ""Global-->Logging-->Verbosity level"" in the options dialog\r\n\
 \r\n\
 /logfile <filename>\r\n\
-Equivalent of ""Globals-->Logging-->Write log to a file"" in the options dialog\r\n\
+Equivalent of ""Global-->Logging-->Write log to a file"" in the options dialog\r\n\
 \r\n"
     IDS_HELP22
 "/notoolbar\r\n\
-Equivalent of ""Globals-->Interface options-->Show toolbars by default""\r\n\
+Equivalent of ""Global-->Interface options-->Show toolbars by default""\r\n\
 in the options dialog\r\n\
 \r\n"
     IDS_HELP23
@@ -789,7 +780,7 @@ Bypass the authentication dialog and use the specified password\r\n\
 \r\n"
     IDS_HELP25
 "/quality <1-100>\r\n\
-Equivalent of ""Connection-->Encoding-->JPEG image quality"" in the options\r\n\
+Equivalent of ""Encoding-->JPEG image quality"" in the options\r\n\
 dialog\r\n\
 \r\n"
     IDS_HELP26
@@ -805,7 +796,7 @@ files\r\n\
 \r\n"
     IDS_HELP28
 "/samp gray | 1X | 2X | 4X\r\n\
-Equivalent of ""Connection-->Encoding-->JPEG chrominance subsampling"" in the\r\n\
+Equivalent of ""Encoding-->JPEG chrominance subsampling"" in the\r\n\
 options dialog\r\n\
 \r\n"
     IDS_HELP29

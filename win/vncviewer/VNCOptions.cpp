@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -968,19 +968,26 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
 
       TCITEM item;
       item.mask = TCIF_TEXT;
-      item.pszText="Connection";
+      item.pszText = "Encoding";
       TabCtrl_InsertItem(_this->m_hTab, 0, &item);
-      item.pszText = "Globals";
+      item.pszText = "Connection";
       TabCtrl_InsertItem(_this->m_hTab, 1, &item);
+      item.pszText = "Global";
+      TabCtrl_InsertItem(_this->m_hTab, 2, &item);
+
+      _this->m_hPageEncoding =
+        CreateDialogParam(pApp->m_instance, MAKEINTRESOURCE(IDD_OPT_ENC_TAB),
+                          hwndDlg, (DLGPROC)_this->DlgProcEncOptions,
+                          (LONG)_this);
 
       _this->m_hPageConnection =
-        CreateDialogParam(pApp->m_instance, MAKEINTRESOURCE(IDD_OPTIONDIALOG),
+        CreateDialogParam(pApp->m_instance, MAKEINTRESOURCE(IDD_OPT_CONN_TAB),
                           hwndDlg, (DLGPROC)_this->DlgProcConnOptions,
                           (LONG)_this);
 
-      _this->m_hPageGeneral =
+      _this->m_hPageGlobal =
          CreateDialogParam(pApp->m_instance,
-                           MAKEINTRESOURCE(IDD_GENERAL_OPTION), hwndDlg,
+                           MAKEINTRESOURCE(IDD_OPT_GLOBAL_TAB), hwndDlg,
                            (DLGPROC)_this->DlgProcGlobalOptions, (LONG)_this);
 
       // Position child dialogs to fit the Tab control's display area
@@ -988,9 +995,11 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
       GetWindowRect(_this->m_hTab, &rc);
       MapWindowPoints(NULL, hwndDlg, (POINT *)&rc, 2);
       TabCtrl_AdjustRect(_this->m_hTab, FALSE, &rc);
-      SetWindowPos(_this->m_hPageConnection, HWND_TOP, rc.left, rc.top,
+      SetWindowPos(_this->m_hPageEncoding, HWND_TOP, rc.left, rc.top,
                    rc.right - rc.left, rc.bottom - rc.top, SWP_SHOWWINDOW);
-      SetWindowPos(_this->m_hPageGeneral, HWND_TOP, rc.left, rc.top,
+      SetWindowPos(_this->m_hPageConnection, HWND_TOP, rc.left, rc.top,
+                   rc.right - rc.left, rc.bottom - rc.top, SWP_HIDEWINDOW);
+      SetWindowPos(_this->m_hPageGlobal, HWND_TOP, rc.left, rc.top,
                    rc.right - rc.left, rc.bottom - rc.top, SWP_HIDEWINDOW);
 
       return TRUE;
@@ -1004,8 +1013,9 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
       switch (LOWORD(wParam)) {
         case IDOK:
           SetFocus(GetDlgItem(hwndDlg, IDOK));
+          SendMessage(_this->m_hPageEncoding, WM_COMMAND, IDC_OK, 0);
           SendMessage(_this->m_hPageConnection, WM_COMMAND, IDC_OK, 0);
-          SendMessage(_this->m_hPageGeneral, WM_COMMAND, IDC_OK, 0);
+          SendMessage(_this->m_hPageGlobal, WM_COMMAND, IDC_OK, 0);
           EndDialog(hwndDlg, TRUE);
           return TRUE;
         case IDCANCEL:
@@ -1024,12 +1034,16 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
               int i = TabCtrl_GetCurFocus(_this->m_hTab);
               switch (i) {
                 case 0:
+                  ShowWindow(_this->m_hPageEncoding, SW_SHOW);
+                  SetFocus(_this->m_hPageEncoding);
+                  return 0;
+                case 1:
                   ShowWindow(_this->m_hPageConnection, SW_SHOW);
                   SetFocus(_this->m_hPageConnection);
                   return 0;
-                case 1:
-                  ShowWindow(_this->m_hPageGeneral, SW_SHOW);
-                  SetFocus(_this->m_hPageGeneral);
+                case 2:
+                  ShowWindow(_this->m_hPageGlobal, SW_SHOW);
+                  SetFocus(_this->m_hPageGlobal);
                   return 0;
               }
               return 0;
@@ -1041,10 +1055,13 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
               int i = TabCtrl_GetCurFocus(_this->m_hTab);
               switch (i) {
               case 0:
-                ShowWindow(_this->m_hPageConnection, SW_HIDE);
+                ShowWindow(_this->m_hPageEncoding, SW_HIDE);
                 break;
               case 1:
-                ShowWindow(_this->m_hPageGeneral, SW_HIDE);
+                ShowWindow(_this->m_hPageConnection, SW_HIDE);
+                break;
+              case 2:
+                ShowWindow(_this->m_hPageGlobal, SW_HIDE);
                 break;
               }
               return 0;
@@ -1090,8 +1107,8 @@ static const char *encodingString[17] = {
 };
 
 
-BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
-                                             WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
+                                            WPARAM wParam, LPARAM lParam)
 {
   // This is a static method, so we don't know which instantiation we're
   // dealing with.  But we can get a pseudo-this from the parameter to
@@ -1128,81 +1145,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
       SendMessage(hCopyRect, BM_SETCHECK, _this->m_UseEnc[rfbEncodingCopyRect],
                   0);
-
-      HWND hSwap = GetDlgItem(hwnd, ID_SESSION_SWAPMOUSE);
-      SendMessage(hSwap, BM_SETCHECK, _this->m_SwapMouse, 0);
-
-      HWND hDeiconify = GetDlgItem(hwnd, IDC_BELLDEICONIFY);
-      SendMessage(hDeiconify, BM_SETCHECK, _this->m_DeiconifyOnBell, 0);
-
-      HWND hDisableClip = GetDlgItem(hwnd, IDC_DISABLECLIPBOARD);
-      SendMessage(hDisableClip, BM_SETCHECK, _this->m_DisableClipboard, 0);
-
-      HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
-      SendMessage(hShared, BM_SETCHECK, _this->m_Shared, 0);
-      EnableWindow(hShared, !_this->m_running);
-
-      HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
-      SendMessage(hViewOnly, BM_SETCHECK, _this->m_ViewOnly, 0);
-
-      char scalecombo[14][19] = {
-        "Fixed Aspect Ratio", "50", "75", "95", "100", "105", "125", "150",
-        "175", "200", "250", "300", "350", "400"
-      };
-      HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
-      for (i = 0; i <= 13; i++)
-        SendMessage(hScalEdit, CB_INSERTSTRING, (WPARAM)i,
-              (LPARAM)(int FAR*)scalecombo[i]);
-      if (_this->m_FitWindow) {
-        SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Fixed Aspect Ratio");
-      } else
-        SetDlgItemInt(hwnd, IDC_SCALE_EDIT,
-                      ((_this->m_scale_num * 100) / _this->m_scale_den),
-                      FALSE);
-      GetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor, 20);
-
-      char sizecombo[37][10] = {
-        "Auto", "Server", "480x320", "640x360", "640x480", "800x480",
-        "800x600", "854x480", "960x540", "960x600", "960x640", "1024x640",
-        "1024x768", "1136x640", "1152x864", "1280x720", "1280x800", "1280x960",
-        "1280x1024", "1344x840", "1344x1008", "1360x768", "1366x768",
-        "1400x1050", "1440x900", "1600x900", "1600x1000", "1600x1200",
-        "1680x1050", "1920x1080", "1920x1200", "2048x1152", "2048x1536",
-        "2560x1440", "2560x1600", "2880x1800", "3200x1800"
-      };
-      HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
-      for (i = 0; i < 37; i++)
-        SendMessage(hSizeEdit, CB_INSERTSTRING, (WPARAM)i,
-              (LPARAM)(int FAR*)sizecombo[i]);
-      if (_this->m_desktopSize.mode == SIZE_AUTO)
-        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Auto");
-      else if (_this->m_desktopSize.mode == SIZE_SERVER)
-        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
-      else {
-        char temps[12];
-        snprintf(temps, 12, "%dx%d", _this->m_desktopSize.width,
-                 _this->m_desktopSize.height);
-        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
-      }
-      GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, _this->m_oldDesktopSize, 20);
-
-      HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
-      SendMessage(hFullScreen, BM_SETCHECK, _this->m_FullScreen, 0);
-
-      HWND hSpan = GetDlgItem(hwnd, IDC_SPAN);
-      char spancombo[SPAN_OPTS][21] = {
-        "Primary monitor only", "All monitors", "Automatic"
-      };
-      for (i = 0; i < SPAN_OPTS; i++)
-        SendMessage(hSpan, CB_INSERTSTRING, (WPARAM)i,
-              (LPARAM)(int FAR*)spancombo[i]);
-      SendMessage(hSpan, CB_SETCURSEL, (WPARAM)_this->m_Span, 0);
-
-      HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
-      SendMessage(hEmulate, BM_SETCHECK, _this->m_Emul3Buttons, 0);
-
-      EnableWindow(hSwap, !_this->m_ViewOnly);
-      EnableWindow(hEmulate, !_this->m_ViewOnly);
 
       HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);
       SendMessage(hAllowJpeg, BM_SETCHECK, _this->m_enableJpegCompression, 0);
@@ -1248,15 +1190,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       _this->EnableQuality(hwnd, encoding != rfbEncodingTight ||
         (encoding == rfbEncodingTight && _this->m_enableJpegCompression));
 
-      HWND hRemoteCursor;
-      if (_this->m_requestShapeUpdates && !_this->m_ignoreShapeUpdates)
-        hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_ENABLE_RADIO);
-      else if (_this->m_requestShapeUpdates)
-        hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_IGNORE_RADIO);
-      else
-        hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_DISABLE_RADIO);
-      SendMessage(hRemoteCursor, BM_SETCHECK, true, 0);
-
       if (encoding != rfbEncodingTight)
         SendMessage(hListBox, CB_SETCURSEL, MAX_LEN_COMBO, 0);
       else
@@ -1267,54 +1200,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 
     case WM_COMMAND:
       switch (LOWORD(wParam)) {
-        case IDC_SCALE_EDIT:
-          switch (HIWORD(wParam)) {
-            case CBN_KILLFOCUS:
-              char newScalingFactor[20];
-              GetDlgItemText(hwnd, IDC_SCALE_EDIT, newScalingFactor, 20);
-              bool fitWindow;
-              int scale_num, scale_den;
-              if (!ParseScalingFactor(newScalingFactor, fitWindow, scale_num,
-                                      scale_den)) {
-                SetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor);
-              } else {
-                if (fitWindow)
-                  SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Fixed Aspect Ratio");
-                else
-                  SetDlgItemInt(hwnd, IDC_SCALE_EDIT,
-                                ((scale_num * 100) / scale_den), FALSE);
-                GetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor,
-                               20);
-              }
-          }
-          return 0;
-
-        case IDC_DESKTOPSIZE_EDIT:
-          switch (HIWORD(wParam)) {
-            case CBN_KILLFOCUS:
-              char newDesktopSize[20];
-              GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, newDesktopSize, 20);
-              DesktopSize desktopSize;
-              if (!ParseDesktopSize(newDesktopSize, desktopSize))
-                SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT,
-                               _this->m_oldDesktopSize);
-              else {
-                if (desktopSize.mode == SIZE_AUTO)
-                    SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Auto");
-                else if (desktopSize.mode == SIZE_SERVER)
-                    SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
-                else {
-                  char temps[12];
-                  snprintf(temps, 12, "%dx%d", desktopSize.width,
-                           desktopSize.height);
-                  SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
-                }
-                GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT,
-                               _this->m_oldDesktopSize, 20);
-              }
-          }
-          return 0;
-
         case ID_SESSION_SET_CRECT:
           switch (HIWORD(wParam)) {
             case BN_CLICKED:
@@ -1369,24 +1254,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
                             _this->GetCompressLevel(hwnd), FALSE);
           }
           return 0;
-        case IDC_VIEWONLY:
-          switch (HIWORD(wParam)) {
-            case BN_CLICKED:
-              HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
-              HWND hSwap = GetDlgItem(hwnd, ID_SESSION_SWAPMOUSE);
-              HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
-              if (SendMessage(hViewOnly, BM_GETCHECK, 0, 0) == 0) {
-                EnableWindow(hSwap, FALSE);
-                EnableWindow(hEmulate, FALSE);
-                SendMessage(hViewOnly, BM_SETCHECK, TRUE, 0);
-              } else {
-                EnableWindow(hSwap, TRUE);
-                EnableWindow(hEmulate, TRUE);
-                SendMessage(hViewOnly, BM_SETCHECK, FALSE, 0);
-              }
-              return 0;
-          }
-          return 0;
         case IDC_OK:
         {
           HWND hListBox = GetDlgItem(hwnd, IDC_ENCODING);
@@ -1394,69 +1261,9 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           if (i < MAX_LEN_COMBO)
             _this->m_PreferredEncoding = rfbcombo[i].rfbEncoding;
 
-          HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
-          i = GetDlgItemInt(hwnd, IDC_SCALE_EDIT, NULL, FALSE);
-          if (i > 0) {
-            _this->m_scale_num = i;
-            _this->m_scale_den = 100;
-            _this->FixScaling();
-            _this->m_FitWindow = false;
-            _this->m_scaling = (_this->m_scale_num > 1) ||
-                               (_this->m_scale_den > 1);
-          } else {
-            char buf[20];
-            GetDlgItemText(hwnd, IDC_SCALE_EDIT, buf, 20);
-            if (strcmp(buf, "Fixed Aspect Ratio") == 0) {
-              _this->m_FitWindow = true;
-              _this->m_scaling = true;
-            } else {
-              _this->m_FitWindow = false;
-            }
-          }
-
-          HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
-          char buf[12];
-          GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, buf, 12);
-          DesktopSize desktopSize;
-          if (ParseDesktopSize(buf, desktopSize))
-            _this->m_desktopSize = desktopSize;
-
           HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
           _this->m_UseEnc[rfbEncodingCopyRect] =
             (SendMessage(hCopyRect, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hSwap = GetDlgItem(hwnd, ID_SESSION_SWAPMOUSE);
-          _this->m_SwapMouse =
-            (SendMessage(hSwap, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hDeiconify = GetDlgItem(hwnd, IDC_BELLDEICONIFY);
-          _this->m_DeiconifyOnBell =
-            (SendMessage(hDeiconify, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hDisableClip = GetDlgItem(hwnd, IDC_DISABLECLIPBOARD);
-          _this->m_DisableClipboard =
-            (SendMessage(hDisableClip, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
-          _this->m_Shared =
-            (SendMessage(hShared, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
-          _this->m_ViewOnly =
-            (SendMessage(hViewOnly, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
-          _this->m_FullScreen =
-            (SendMessage(hFullScreen, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hSpan = GetDlgItem(hwnd, IDC_SPAN);
-          i = (int)SendMessage(hSpan, CB_GETCURSEL, 0, 0);
-          if (i >= 0 && i < SPAN_OPTS)
-            _this->m_Span = i;
-
-          HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
-          _this->m_Emul3Buttons =
-            (SendMessage(hEmulate, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
           _this->m_compressLevel = _this->GetCompressLevel(hwnd);
 
@@ -1472,18 +1279,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           _this->m_jpegQualityLevel =
             (int)SendMessage(hQualityLevel, TBM_GETPOS, 0, 0);
 
-          _this->m_requestShapeUpdates = false;
-          _this->m_ignoreShapeUpdates = false;
-          HWND hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_ENABLE_RADIO);
-          if (SendMessage(hRemoteCursor, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-            _this->m_requestShapeUpdates = true;
-          } else {
-            hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_IGNORE_RADIO);
-            if (SendMessage(hRemoteCursor, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-              _this->m_requestShapeUpdates = true;
-              _this->m_ignoreShapeUpdates = true;
-            }
-          }
           return 0;
         }
         case IDC_ENCODING:
@@ -1558,6 +1353,265 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       _this->SetComboBox(hwnd);
       return 0;
     }
+
+    case WM_HELP:
+      help.Popup(lParam);
+      return 0;
+
+  }
+  return 0;
+}
+
+
+BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
+                                             WPARAM wParam, LPARAM lParam)
+{
+  // This is a static method, so we don't know which instantiation we're
+  // dealing with.  But we can get a pseudo-this from the parameter to
+  // WM_INITDIALOG, which we therafter store with the window and retrieve
+  // as follows:
+  VNCOptions *_this = (VNCOptions *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+
+  switch (uMsg) {
+
+    case WM_INITDIALOG:
+    {
+      SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
+      VNCOptions *_this = (VNCOptions *) lParam;
+
+      // Initialise the controls
+      HWND hSwap = GetDlgItem(hwnd, ID_SESSION_SWAPMOUSE);
+      SendMessage(hSwap, BM_SETCHECK, _this->m_SwapMouse, 0);
+
+      HWND hDeiconify = GetDlgItem(hwnd, IDC_BELLDEICONIFY);
+      SendMessage(hDeiconify, BM_SETCHECK, _this->m_DeiconifyOnBell, 0);
+
+      HWND hDisableClip = GetDlgItem(hwnd, IDC_DISABLECLIPBOARD);
+      SendMessage(hDisableClip, BM_SETCHECK, _this->m_DisableClipboard, 0);
+
+      HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
+      SendMessage(hShared, BM_SETCHECK, _this->m_Shared, 0);
+      EnableWindow(hShared, !_this->m_running);
+
+      HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
+      SendMessage(hViewOnly, BM_SETCHECK, _this->m_ViewOnly, 0);
+
+      char scalecombo[14][19] = {
+        "Fixed Aspect Ratio", "50", "75", "95", "100", "105", "125", "150",
+        "175", "200", "250", "300", "350", "400"
+      };
+      HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
+      int i;
+      for (i = 0; i <= 13; i++)
+        SendMessage(hScalEdit, CB_INSERTSTRING, (WPARAM)i,
+              (LPARAM)(int FAR*)scalecombo[i]);
+      if (_this->m_FitWindow) {
+        SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Fixed Aspect Ratio");
+      } else
+        SetDlgItemInt(hwnd, IDC_SCALE_EDIT,
+                      ((_this->m_scale_num * 100) / _this->m_scale_den),
+                      FALSE);
+      GetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor, 20);
+
+      char sizecombo[37][10] = {
+        "Auto", "Server", "480x320", "640x360", "640x480", "800x480",
+        "800x600", "854x480", "960x540", "960x600", "960x640", "1024x640",
+        "1024x768", "1136x640", "1152x864", "1280x720", "1280x800", "1280x960",
+        "1280x1024", "1344x840", "1344x1008", "1360x768", "1366x768",
+        "1400x1050", "1440x900", "1600x900", "1600x1000", "1600x1200",
+        "1680x1050", "1920x1080", "1920x1200", "2048x1152", "2048x1536",
+        "2560x1440", "2560x1600", "2880x1800", "3200x1800"
+      };
+      HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
+      for (i = 0; i < 37; i++)
+        SendMessage(hSizeEdit, CB_INSERTSTRING, (WPARAM)i,
+              (LPARAM)(int FAR*)sizecombo[i]);
+      if (_this->m_desktopSize.mode == SIZE_AUTO)
+        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Auto");
+      else if (_this->m_desktopSize.mode == SIZE_SERVER)
+        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
+      else {
+        char temps[12];
+        snprintf(temps, 12, "%dx%d", _this->m_desktopSize.width,
+                 _this->m_desktopSize.height);
+        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
+      }
+      GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, _this->m_oldDesktopSize, 20);
+
+      HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
+      SendMessage(hFullScreen, BM_SETCHECK, _this->m_FullScreen, 0);
+
+      HWND hSpan = GetDlgItem(hwnd, IDC_SPAN);
+      char spancombo[SPAN_OPTS][21] = {
+        "Primary monitor only", "All monitors", "Automatic"
+      };
+      for (i = 0; i < SPAN_OPTS; i++)
+        SendMessage(hSpan, CB_INSERTSTRING, (WPARAM)i,
+              (LPARAM)(int FAR*)spancombo[i]);
+      SendMessage(hSpan, CB_SETCURSEL, (WPARAM)_this->m_Span, 0);
+
+      HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
+      SendMessage(hEmulate, BM_SETCHECK, _this->m_Emul3Buttons, 0);
+
+      EnableWindow(hSwap, !_this->m_ViewOnly);
+      EnableWindow(hEmulate, !_this->m_ViewOnly);
+
+      HWND hRemoteCursor;
+      if (_this->m_requestShapeUpdates && !_this->m_ignoreShapeUpdates)
+        hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_ENABLE_RADIO);
+      else if (_this->m_requestShapeUpdates)
+        hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_IGNORE_RADIO);
+      else
+        hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_DISABLE_RADIO);
+      SendMessage(hRemoteCursor, BM_SETCHECK, true, 0);
+
+      return TRUE;
+    }
+
+    case WM_COMMAND:
+      switch (LOWORD(wParam)) {
+        case IDC_SCALE_EDIT:
+          switch (HIWORD(wParam)) {
+            case CBN_KILLFOCUS:
+              char newScalingFactor[20];
+              GetDlgItemText(hwnd, IDC_SCALE_EDIT, newScalingFactor, 20);
+              bool fitWindow;
+              int scale_num, scale_den;
+              if (!ParseScalingFactor(newScalingFactor, fitWindow, scale_num,
+                                      scale_den)) {
+                SetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor);
+              } else {
+                if (fitWindow)
+                  SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Fixed Aspect Ratio");
+                else
+                  SetDlgItemInt(hwnd, IDC_SCALE_EDIT,
+                                ((scale_num * 100) / scale_den), FALSE);
+                GetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor,
+                               20);
+              }
+          }
+          return 0;
+        case IDC_DESKTOPSIZE_EDIT:
+          switch (HIWORD(wParam)) {
+            case CBN_KILLFOCUS:
+              char newDesktopSize[20];
+              GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, newDesktopSize, 20);
+              DesktopSize desktopSize;
+              if (!ParseDesktopSize(newDesktopSize, desktopSize))
+                SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT,
+                               _this->m_oldDesktopSize);
+              else {
+                if (desktopSize.mode == SIZE_AUTO)
+                    SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Auto");
+                else if (desktopSize.mode == SIZE_SERVER)
+                    SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
+                else {
+                  char temps[12];
+                  snprintf(temps, 12, "%dx%d", desktopSize.width,
+                           desktopSize.height);
+                  SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
+                }
+                GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT,
+                               _this->m_oldDesktopSize, 20);
+              }
+          }
+          return 0;
+        case IDC_VIEWONLY:
+          switch (HIWORD(wParam)) {
+            case BN_CLICKED:
+              HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
+              HWND hSwap = GetDlgItem(hwnd, ID_SESSION_SWAPMOUSE);
+              HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
+              if (SendMessage(hViewOnly, BM_GETCHECK, 0, 0) == 0) {
+                EnableWindow(hSwap, FALSE);
+                EnableWindow(hEmulate, FALSE);
+                SendMessage(hViewOnly, BM_SETCHECK, TRUE, 0);
+              } else {
+                EnableWindow(hSwap, TRUE);
+                EnableWindow(hEmulate, TRUE);
+                SendMessage(hViewOnly, BM_SETCHECK, FALSE, 0);
+              }
+              return 0;
+          }
+          return 0;
+        case IDC_OK:
+        {
+          HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
+          int i = GetDlgItemInt(hwnd, IDC_SCALE_EDIT, NULL, FALSE);
+          if (i > 0) {
+            _this->m_scale_num = i;
+            _this->m_scale_den = 100;
+            _this->FixScaling();
+            _this->m_FitWindow = false;
+            _this->m_scaling = (_this->m_scale_num > 1) ||
+                               (_this->m_scale_den > 1);
+          } else {
+            char buf[20];
+            GetDlgItemText(hwnd, IDC_SCALE_EDIT, buf, 20);
+            if (strcmp(buf, "Fixed Aspect Ratio") == 0) {
+              _this->m_FitWindow = true;
+              _this->m_scaling = true;
+            } else {
+              _this->m_FitWindow = false;
+            }
+          }
+
+          HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
+          char buf[12];
+          GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, buf, 12);
+          DesktopSize desktopSize;
+          if (ParseDesktopSize(buf, desktopSize))
+            _this->m_desktopSize = desktopSize;
+
+          HWND hSwap = GetDlgItem(hwnd, ID_SESSION_SWAPMOUSE);
+          _this->m_SwapMouse =
+            (SendMessage(hSwap, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          HWND hDeiconify = GetDlgItem(hwnd, IDC_BELLDEICONIFY);
+          _this->m_DeiconifyOnBell =
+            (SendMessage(hDeiconify, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          HWND hDisableClip = GetDlgItem(hwnd, IDC_DISABLECLIPBOARD);
+          _this->m_DisableClipboard =
+            (SendMessage(hDisableClip, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
+          _this->m_Shared =
+            (SendMessage(hShared, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
+          _this->m_ViewOnly =
+            (SendMessage(hViewOnly, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
+          _this->m_FullScreen =
+            (SendMessage(hFullScreen, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          HWND hSpan = GetDlgItem(hwnd, IDC_SPAN);
+          i = (int)SendMessage(hSpan, CB_GETCURSEL, 0, 0);
+          if (i >= 0 && i < SPAN_OPTS)
+            _this->m_Span = i;
+
+          HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
+          _this->m_Emul3Buttons =
+            (SendMessage(hEmulate, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          _this->m_requestShapeUpdates = false;
+          _this->m_ignoreShapeUpdates = false;
+          HWND hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_ENABLE_RADIO);
+          if (SendMessage(hRemoteCursor, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+            _this->m_requestShapeUpdates = true;
+          } else {
+            hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_IGNORE_RADIO);
+            if (SendMessage(hRemoteCursor, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+              _this->m_requestShapeUpdates = true;
+              _this->m_ignoreShapeUpdates = true;
+            }
+          }
+          return 0;
+        }
+      }
+      return 0;
 
     case WM_HELP:
       help.Popup(lParam);

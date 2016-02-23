@@ -13,7 +13,7 @@
 #define ID_CONN_CTLUP                   105
 #define IDB_VNCBITMAP                   106
 #define ID_CONN_ALTDOWN                 106
-#define IDD_GENERAL_OPTION              106
+#define IDD_OPT_GLOBAL_TAB              106
 #define ID_CONN_ALTUP                   107
 #define IDD_PARENT                      107
 #define IDB_VNC32                       108
@@ -31,7 +31,7 @@
 #define IDD_SERVINFO_DLG                137
 #define IDD_AUTH_DIALOG                 138
 #define IDD_LOGIN_AUTH_DIALOG           139
-#define IDD_OPTIONDIALOG                151
+#define IDD_OPT_ENC_TAB                 151
 #define IDT_EMULATE3BUTTONSTIMER        152
 #define ID_CONN_SAVE_AS                 153
 #define IDC_NOCURSOR                    153
@@ -48,6 +48,7 @@
 #define IDI_FILERELOAD                  241
 #define IDC_SMALLDOT                    244
 #define IDD_CONNECTING_DIALOG           245
+#define IDD_OPT_CONN_TAB                246
 #define ID_CONN_SENDKEYDOWN             300
 #define ID_CONN_SENDKEYUP               301
 #define IDC_HOSTNAME_EDIT               1000
@@ -230,9 +231,9 @@
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        246
-#define _APS_NEXT_COMMAND_VALUE         40011
-#define _APS_NEXT_CONTROL_VALUE         1150
-#define _APS_NEXT_SYMED_VALUE           244
+#define _APS_NEXT_RESOURCE_VALUE        247
+#define _APS_NEXT_COMMAND_VALUE         40137
+#define _APS_NEXT_CONTROL_VALUE         1153
+#define _APS_NEXT_SYMED_VALUE           247
 #endif
 #endif
