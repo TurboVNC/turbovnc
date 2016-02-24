@@ -13,6 +13,11 @@ it.
 2. Added a new parameter to the Java TurboVNC Viewer (`NoReconnect`) that can
 optionally be used to revert the behavior introduced in 2.0 beta1[17].
 
+3. Added a `-poll` option to tvncconfig, which works identically to the
+`-poll` option in RealVNC's (and TigerVNC's) vncconfig program.  This causes
+tvncconfig to poll for changes to the clipboard at a specified interval rather
+than waiting for the X server to inform it of the changes.
+
 
 2.0.2
 =====

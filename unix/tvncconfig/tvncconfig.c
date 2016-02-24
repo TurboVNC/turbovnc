@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011, 2016 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -35,6 +35,10 @@
 #include <X11/Xutil.h>
 #include "vncExt.h"
 
+#ifndef max
+ #define max(a,b) ((a)>(b)? (a):(b))
+#endif
+
 
 char* programName = "tvncconfig";
 Display* dpy;
@@ -49,6 +53,8 @@ char* selection[2] = {0, 0};
 int selectionLen[2] = {0, 0};
 int debug = 0;
 int syncPrimary = 1;
+int pollTime = 0;
+struct timeval dueTime;
 
 inline const char *selectionName(Atom sel) {
   if (sel == xaCLIPBOARD) return "CLIPBOARD";
@@ -87,6 +93,71 @@ void debugprint(const char *format, ...)
   vfprintf(stderr, format, arglist);
   fprintf(stderr, "\n");
   va_end(arglist);
+}
+
+
+// Millisecond timeout processing helper functions
+
+inline static struct timeval addMillis(struct timeval inTime, int millis) {
+  int secs = millis / 1000;
+  millis = millis % 1000;
+  inTime.tv_sec += secs;
+  inTime.tv_usec += millis * 1000;
+  if (inTime.tv_usec >= 1000000) {
+    inTime.tv_sec++;
+    inTime.tv_usec -= 1000000;
+  }
+  return inTime;
+}
+
+inline static int diffTimeMillis(struct timeval later,
+                                 struct timeval earlier) {
+  return ((later.tv_sec - earlier.tv_sec) * 1000) +
+          ((later.tv_usec - earlier.tv_usec) / 1000);
+}
+
+int isBefore(struct timeval other) {
+  return (dueTime.tv_sec < other.tv_sec) ||
+    ((dueTime.tv_sec == other.tv_sec) &&
+     (dueTime.tv_usec < other.tv_usec));
+}
+
+int getNextTimeout(void) {
+  struct timeval now;
+  int toWait;
+  gettimeofday(&now, 0);
+  toWait = max(1, diffTimeMillis(dueTime, now));
+  if (toWait > pollTime) {
+    if (toWait - pollTime < 1000) {
+      debugprint("gettimeofday() is broken...");
+      return toWait;
+    }
+    // Time has jumped backward! (it's just a jump to the left...)
+    debugprint("Time has moved backward!");
+    dueTime = now;
+    toWait = 1;
+  }
+  return toWait;
+}
+
+int checkTimeout(void) {
+  struct timeval now;
+  gettimeofday(&now, 0);
+  while (isBefore(now)) {
+    if (syncPrimary && selectionOwner(XA_PRIMARY) != win)
+      XConvertSelection(dpy, XA_PRIMARY, XA_STRING,
+                        XA_PRIMARY, win, CurrentTime);
+    if (selectionOwner(xaCLIPBOARD) != win)
+      XConvertSelection(dpy, xaCLIPBOARD, XA_STRING,
+                        xaCLIPBOARD, win, CurrentTime);
+    dueTime = addMillis(dueTime, pollTime);
+    if (isBefore(now)) {
+      // Time has jumped forward! (and a skip to the right...)
+      debugprint("Time has moved forward!");
+      dueTime = addMillis(now, pollTime);
+    }
+  }
+  return getNextTimeout();
 }
 
 
@@ -236,7 +307,9 @@ void usage(char *progName)
   fprintf(stderr, "-display <d> = Handle clipboard for X display <d>\n");
   fprintf(stderr, "               (default: read from DISPLAY environment variable)\n");
   fprintf(stderr, "-debug = Print debugging output\n");
-  fprintf(stderr, "-noprimary = Do not sync PRIMARY selection with client machine's clipboard\n\n");
+  fprintf(stderr, "-noprimary = Do not sync PRIMARY selection with client machine's clipboard\n");
+  fprintf(stderr, "-poll <t> = Poll for clipboard changes every <t> milliseconds (default is\n");
+  fprintf(stderr, "            to wait for those changes to be reported by way of X events)\n\n");
   exit(1);
 }
 
@@ -251,6 +324,13 @@ int main(int argc, char** argv)
     }
     else if (!strncasecmp(argv[i], "-de", 3)) debug = 1;
     else if (!strncasecmp(argv[i], "-n", 2)) syncPrimary = 0;
+    else if (!strncasecmp(argv[i], "-p", 2)) {
+      if (i < argc - 1) {
+        int tmp;
+        if (sscanf(argv[++i], "%d", &tmp) == 1 && tmp > 0)
+          pollTime = tmp;
+      } else usage(argv[0]);
+    }
     else if (!strncasecmp(argv[i], "-h", 2)) usage(argv[0]);
     else if (!strncasecmp(argv[i], "-?", 2)) usage(argv[0]);
   }
@@ -278,6 +358,12 @@ int main(int argc, char** argv)
   XConvertSelection(dpy, xaCLIPBOARD, XA_STRING,
                     xaCLIPBOARD, win, CurrentTime);
 
+  if (pollTime > 0) {
+    struct timeval now;
+    gettimeofday(&now, 0);
+    dueTime = addMillis(now, pollTime);
+  }
+
   while (1) {
     struct timeval tv;
     struct timeval* tvp = 0;
@@ -287,6 +373,16 @@ int main(int argc, char** argv)
       XEvent ev;
       XNextEvent(dpy, &ev);
       handleEvent(&ev);
+    }
+
+    // Process expired timers and get the time until the next one
+    if (pollTime > 0) {
+      int timeoutMs = checkTimeout();
+      if (timeoutMs) {
+        tv.tv_sec = timeoutMs / 1000;
+        tv.tv_usec = (timeoutMs % 1000) * 1000;
+        tvp = &tv;
+      }
     }
 
     // If there are X requests pending, then poll, don't wait!
