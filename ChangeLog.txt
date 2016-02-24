@@ -120,6 +120,12 @@ layout of that dialog more similar to that of the Java viewer's Options dialog.
 The keyboard/pointer grabbing feature can now be configured from the Options
 Dialog in both the Windows and Java TurboVNC Viewers.
 -------------------------------------------------------------------------------
+[15]
+Added a -poll option to tvncconfig, which works identically to the -poll option
+in RealVNC's (and TigerVNC's) vncconfig program.  This causes tvncconfig to
+poll for changes to the clipboard at a specified interval rather than waiting
+for the X server to inform it of the changes.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
