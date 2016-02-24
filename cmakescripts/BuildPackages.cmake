@@ -137,12 +137,13 @@ endif() # APPLE
 # Generic
 #
 
-configure_file(release/makesrctarball.in pkgscripts/makesrctarball)
-
-add_custom_target(srctarball sh pkgscripts/makesrctarball
-	SOURCES pkgscripts/makesrctarball)
-
 configure_file(release/makesrpm.in pkgscripts/makesrpm)
 
+add_custom_target(dist
+	COMMAND git archive --prefix=${CMAKE_PROJECT_NAME_LC}-${VERSION}/ HEAD |
+		gzip > ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME_LC}-${VERSION}.tar.gz
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 add_custom_target(srpm sh pkgscripts/makesrpm
-	SOURCES pkgscripts/makesrpm)
+	SOURCES pkgscripts/makesrpm
+	DEPENDS dist)
