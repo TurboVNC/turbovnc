@@ -122,18 +122,22 @@ BEGIN
                     115,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
                     "Button",BS_AUTORADIOBUTTON,13,127,145,10
-    GROUPBOX        "Input",IDC_STATIC_MOUSE,171,4,160,51
+    GROUPBOX        "Input",IDC_STATIC_MOUSE,171,4,160,67
     CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,180,15,109,10
+    LTEXT           "Keyboard grab mode:",IDC_STATIC_GRAB,180,29,70,10,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_GRAB,250,28,75,50,CBS_DROPDOWNLIST |
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Emulate 3 buttons (with 2-button click)",
                     IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP |
-                    WS_TABSTOP,180,27,145,10
+                    WS_TABSTOP,180,43,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,180,39,145,10
-    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,171,60,160,39
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,55,145,10
+    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,171,76,160,39
     CONTROL         "Request shared session",IDC_SHARED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,180,70,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,86,145,10
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,180,82,109,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,98,109,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196

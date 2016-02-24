@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2016 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -502,7 +502,7 @@ public class Viewport extends JFrame {
   public int dx, dy = 0;
   MacMenuBar macMenu;
   boolean canDoLionFS;
-  boolean keyboardTempUngrabbed;
+  public boolean keyboardTempUngrabbed;
   static boolean triedHelperInit, helperAvailable;
   Timer timer;
   private long x11dpy, x11win;

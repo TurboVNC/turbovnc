@@ -43,7 +43,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JTabbedPane tabPane;
   JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
   JCheckBox allowJpeg, interframe;
-  JComboBox menuKey, scalingFactor, encMethodComboBox, span, desktopSize;
+  JComboBox menuKey, scalingFactor, encMethodComboBox, span, desktopSize,
+    grabKeyboard;
   JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
@@ -350,6 +351,30 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
+
+    boolean enableGrab = VncViewer.osGrab() && Viewport.isHelperAvailable();
+
+    if (enableGrab) {
+      JLabel grabLabel;
+      if (VncViewer.grabPointer.getValue())
+        grabLabel = new JLabel("Keyboard/pointer grab mode:");
+      else
+        grabLabel = new JLabel("Keyboard grab mode:");
+      Object[] grabModes = { "Full-screen only", "Always", "Manual" };
+      grabKeyboard = new JComboBox(grabModes);
+      grabKeyboard.addItemListener(this);
+
+      Dialog.addGBComponent(grabLabel, inputPanel,
+                            0, 1, 1, 1, 2, 2, 1, 0,
+                            GridBagConstraints.NONE,
+                            GridBagConstraints.FIRST_LINE_START,
+                            new Insets(8, 8, 0, 5));
+      Dialog.addGBComponent(grabKeyboard, inputPanel,
+                            1, 1, 1, 1, 2, 2, 25, 0,
+                            GridBagConstraints.NONE,
+                            GridBagConstraints.FIRST_LINE_START,
+                            new Insets(4, 5, 0, 5));
+    }
 
     JPanel restrictionsPanel = new JPanel(new GridBagLayout());
     restrictionsPanel.setBorder(BorderFactory.createTitledBorder("Restrictions"));
@@ -667,6 +692,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     String menuKeyStr =
       MenuKey.getMenuKeySymbols()[menuKey.getSelectedIndex()].name;
     UserPreferences.set("global", "MenuKey", menuKeyStr);
+    if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
+      String grabStr = (String)grabKeyboard.getSelectedItem();
+      if (grabStr.equalsIgnoreCase("Full-screen only"))
+        grabStr = "FS";
+      UserPreferences.set("global", "GrabKeyboard", grabStr);
+    }
     UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
     UserPreferences.set("global", "Shared", shared.isSelected());
     UserPreferences.set("global", "CursorShape", cursorShape.isSelected());

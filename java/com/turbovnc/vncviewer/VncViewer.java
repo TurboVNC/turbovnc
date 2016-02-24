@@ -635,6 +635,8 @@ public class VncViewer extends javax.swing.JApplet
     options.acceptClipboard.setSelected(opts.acceptClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    if (VncViewer.osGrab() && Viewport.isHelperAvailable())
+      options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
     options.shared.setSelected(opts.shared);
     options.sendLocalUsername.setSelected(opts.sendLocalUsername);
@@ -694,6 +696,9 @@ public class VncViewer extends javax.swing.JApplet
 
     VncViewer.menuKey.setParam(
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
+
+    if (VncViewer.osGrab() && Viewport.isHelperAvailable())
+      opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
 
     opts.shared = options.shared.isSelected();
     opts.cursorShape = options.cursorShape.isSelected();

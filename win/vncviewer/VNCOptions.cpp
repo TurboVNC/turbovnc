@@ -1396,12 +1396,21 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
       SendMessage(hViewOnly, BM_SETCHECK, _this->m_ViewOnly, 0);
 
+      HWND hGrab = GetDlgItem(hwnd, IDC_GRAB);
+      char grabcombo[TVNC_GRABOPT][17] = {
+        "Full-screen only", "Always", "Manual"
+      };
+      int i;
+      for (i = 0; i < TVNC_GRABOPT; i++)
+        SendMessage(hGrab, CB_INSERTSTRING, (WPARAM)i,
+              (LPARAM)(int FAR*)grabcombo[i]);
+      SendMessage(hGrab, CB_SETCURSEL, (WPARAM)_this->m_GrabKeyboard, 0);
+
       char scalecombo[14][19] = {
         "Fixed Aspect Ratio", "50", "75", "95", "100", "105", "125", "150",
         "175", "200", "250", "300", "350", "400"
       };
       HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
-      int i;
       for (i = 0; i <= 13; i++)
         SendMessage(hScalEdit, CB_INSERTSTRING, (WPARAM)i,
               (LPARAM)(int FAR*)scalecombo[i]);
@@ -1582,6 +1591,11 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
           _this->m_ViewOnly =
             (SendMessage(hViewOnly, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          HWND hGrab = GetDlgItem(hwnd, IDC_GRAB);
+          i = (int)SendMessage(hGrab, CB_GETCURSEL, 0, 0);
+          if (i >= 0 && i < TVNC_GRABOPT)
+            _this->m_GrabKeyboard = i;
 
           HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
           _this->m_FullScreen =

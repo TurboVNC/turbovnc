@@ -1397,6 +1397,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     options.acceptClipboard.setSelected(opts.acceptClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    if (VncViewer.osGrab() && Viewport.isHelperAvailable())
+      options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
     if (state() == RFBSTATE_NORMAL) {
       options.shared.setEnabled(false);
@@ -1520,6 +1522,17 @@ public class CConn extends CConnection implements UserPasswdGetter,
     VncViewer.menuKey.setParam(
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
     menu.updateMenuKey(MenuKey.getMenuKeyCode());
+
+    if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
+      opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
+      if (viewport != null &&
+          (opts.grabKeyboard == Options.GRAB_ALWAYS &&
+           !viewport.keyboardTempUngrabbed) ||
+          (opts.grabKeyboard == Options.GRAB_FS &&
+           opts.fullScreen != viewport.keyboardTempUngrabbed)) {
+        viewport.keyboardTempUngrabbed = !viewport.keyboardTempUngrabbed;
+      }
+    }
 
     opts.shared = options.shared.isSelected();
     setShared(opts.shared);

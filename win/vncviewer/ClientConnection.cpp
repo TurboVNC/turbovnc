@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2013, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2013, 2015-2016 D. R. Commander. All Rights Reserved.
 //  Copyright 2009 Pierre Ossman for Cendio AB
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
@@ -2247,6 +2247,11 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
               _this->m_firstUpdate = true;
             if (prev_FullScreen != _this->m_opts.m_FullScreen)
               _this->RealiseFullScreenMode(false);
+
+            if ((_this->m_opts.m_GrabKeyboard == TVNC_ALWAYS && !regrab) ||
+                (_this->m_opts.m_GrabKeyboard == TVNC_FS &&
+                 (_this->m_opts.m_FullScreen != regrab)))
+              regrab = !regrab;
           }
 
           if (_this->m_serverInitiated)

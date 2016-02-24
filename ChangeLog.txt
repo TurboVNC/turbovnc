@@ -116,6 +116,10 @@ The controls in the Options dialog of the Windows (native) TurboVNC Viewer have
 been re-organized into two tabs ("Encoding" and "Connection"), which makes the
 layout of that dialog more similar to that of the Java viewer's Options dialog.
 -------------------------------------------------------------------------------
+[14]
+The keyboard/pointer grabbing feature can now be configured from the Options
+Dialog in both the Windows and Java TurboVNC Viewers.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
