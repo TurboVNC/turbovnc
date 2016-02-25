@@ -26,21 +26,26 @@ TurboVNC is
 
     Copyright (C) 2009-2016 D. R. Commander
     Copyright (C) 2011-2014 Brian P. Hinz
-    Copyright (C) 2009-2014 Pierre Ossman for Cendio AB
-    Copyright (C) 2011 Gernot Tenchio
-    Copyright (C) 2005-2011 Martin Koegler
     Copyright (C) 2010 University Corporation for Atmospheric Research
+    Copyright (C) 2004-2008 Sun Microsystems, Inc.
+    Copyright (C) 2004 Landmark Graphics Corporation
+
+TurboVNC contains code from libvncserver, RealVNC, TigerVNC, and TightVNC,
+which are
+
+    Copyright (C) 2011 Gernot Tenchio
     Copyright (C) 2010 TigerVNC Team
     Copyright (C) 2010 m-privacy GmbH
-    Copyright (C) 2000-2010 TightVNC Team
-    Copyright (C) 2004-2009 Red Hat, Inc.
-    Copyright (C) 2003-2008 Sun Microsystems, Inc.
+    Copyright (C) 2009-2014 Pierre Ossman for Cendio AB
     Copyright (C) 2006 OCCAM Financial Technology
-    Copyright (C) 2000-2006 Constantin Kaplinsky
+    Copyright (C) 2005-2011 Martin Koegler
+    Copyright (C) 2004-2009 Red Hat, Inc.
     Copyright (C) 2004-2005 Cendio AB
-    Copyright (C) 2002-2005 RealVNC Ltd.
-    Copyright (C) 2004 Landmark Graphics Corporation
+    Copyright (C) 2003 Sun Microsystems, Inc.
     Copyright (C) 2003 Dennis Syrovatsky
+    Copyright (C) 2002-2005 RealVNC Ltd.
+    Copyright (C) 2000-2010 TightVNC Team
+    Copyright (C) 2000-2006 Constantin Kaplinsky
     Copyright (C) 2000 Tridia Corp.
     Copyright (C) 1999 AT&T Laboratories Cambridge.
     All rights reserved.
