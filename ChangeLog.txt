@@ -58,6 +58,13 @@ dead key support on non-Windows platforms is still incomplete.
 Fixed an issue in the Java TurboVNC Viewer whereby the Options, Clipboard, and
 Profiling dialogs were not centered relative to the viewer window.
 -------------------------------------------------------------------------------
+[6]
+Fixed an issue in the TurboVNC Server (Xvnc) whereby, when running a
+compositing window manager such as Gnome 3, activity in off-screen windows
+(such as a scrolling xterm being displayed in a separate workspace) could
+interfere with the display of on-screen windows that occupied the same screen
+area as the off-screen windows.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

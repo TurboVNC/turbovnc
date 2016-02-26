@@ -12,7 +12,8 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2010-2012, 2014 D. R. Commander.  All Rights Reserved.
- *  Copyright (C) 2012-2013 Pierre Ossman for Cendio AB.  All Rights Reserved.
+ *  Copyright (C) 2012-2013, 2016 Pierre Ossman for Cendio AB.
+ *                                All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,6 +73,35 @@ in this Software without prior written authorization from the X Consortium.
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 
 int rfbDeferUpdateTime = 40; /* ms */
+
+
+static inline Bool is_visible(DrawablePtr drawable)
+{
+    PixmapPtr scrPixmap;
+
+    scrPixmap = drawable->pScreen->GetScreenPixmap(drawable->pScreen);
+
+    if (drawable->type == DRAWABLE_WINDOW) {
+        WindowPtr window;
+        PixmapPtr winPixmap;
+
+        window = (WindowPtr)drawable;
+        winPixmap = drawable->pScreen->GetWindowPixmap(window);
+
+        if (!window->viewable)
+            return FALSE;
+
+        if (winPixmap != scrPixmap)
+            return FALSE;
+
+        return TRUE;
+     }
+
+     if (drawable != &scrPixmap->drawable)
+         return FALSE;
+
+     return TRUE;
+}
 
 
 /****************************************************************************/
@@ -649,9 +679,7 @@ rfbCopyArea(DrawablePtr pSrc, DrawablePtr pDst, GCPtr pGC, int srcx, int srcy,
     REGION_INTERSECT(pDst->pScreen, &dstRegion, &dstRegion,
                      pGC->pCompositeClip);
 
-    if (((pSrc->type == DRAWABLE_WINDOW) &&
-        (pSrc->pScreen == pDst->pScreen)) ||
-         (pSrc == &pDst->pScreen->GetScreenPixmap(pDst->pScreen)->drawable)) {
+    if (is_visible(pSrc)) {
         box.x1 = srcx + pSrc->x;
         box.y1 = srcy + pSrc->y;
         box.x2 = box.x1 + w;
@@ -1599,8 +1627,7 @@ rfbComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
     BoxRec box;
     PictureScreenPtr ps = GetPictureScreen(pScreen);
 
-    if (pDst->pDrawable->type == DRAWABLE_WINDOW &&
-        ((WindowPtr)pDst->pDrawable)->viewable) {
+    if (is_visible(pDst->pDrawable)) {
         box.x1 = pDst->pDrawable->x + xDst;
         box.y1 = pDst->pDrawable->y + yDst;
         box.x2 = box.x1 + width;
@@ -1616,8 +1643,7 @@ rfbComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
                      xMask, yMask, xDst, yDst, width, height);
     ps->Composite = rfbComposite;
 
-    if (pDst->pDrawable->type == DRAWABLE_WINDOW &&
-        ((WindowPtr)pDst->pDrawable)->viewable) {
+    if (is_visible(pDst->pDrawable)) {
         SCHEDULE_FB_UPDATE(pScreen, prfb);
 
         REGION_UNINIT(pScreen, &tmpRegion);
@@ -1687,8 +1713,7 @@ void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
     RegionRec *tmpRegion = NULL;
     PictureScreenPtr ps = GetPictureScreen(pScreen);
 
-    if (pDst->pDrawable->type == DRAWABLE_WINDOW &&
-        ((WindowPtr) pDst->pDrawable)->viewable) {
+    if (is_visible(pDst->pDrawable)) {
         BoxRec fbBox;
         RegionRec fbRegion;
 
@@ -1715,8 +1740,7 @@ void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
     (*ps->Glyphs)(op, pSrc, pDst, maskFormat, xSrc, ySrc, nlists, lists, glyphs);
     ps->Glyphs = rfbGlyphs;
 
-    if (pDst->pDrawable->type == DRAWABLE_WINDOW &&
-        ((WindowPtr) pDst->pDrawable)->viewable) {
+    if (is_visible(pDst->pDrawable)) {
         SCHEDULE_FB_UPDATE(pScreen, prfb);
     }
 }

@@ -36,7 +36,7 @@ which are
     Copyright (C) 2011 Gernot Tenchio
     Copyright (C) 2010 TigerVNC Team
     Copyright (C) 2010 m-privacy GmbH
-    Copyright (C) 2009-2014 Pierre Ossman for Cendio AB
+    Copyright (C) 2009-2016 Pierre Ossman for Cendio AB
     Copyright (C) 2006 OCCAM Financial Technology
     Copyright (C) 2005-2011 Martin Koegler
     Copyright (C) 2004-2009 Red Hat, Inc.
