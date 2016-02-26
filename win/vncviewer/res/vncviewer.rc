@@ -750,6 +750,9 @@ When used with /listen, this causes vncviewer to accept connections from\r\n\
 IPv6-enabled servers.  If your system supports IPv4-mapped IPv6 addresses,\r\n\
 then connections from IPv4 servers can also be accepted when this option is\r\n\
 enabled.\r\n\
+\r\n\
+When used without /listen, this causes vncviewer to favor the IPv6 loopback\r\n\
+address when connecting to localhost.\r\n
 \r\n"
     IDS_HELP19
 "/jpeg\r\n\
