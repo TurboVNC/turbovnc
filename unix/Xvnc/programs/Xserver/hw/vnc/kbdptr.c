@@ -9,7 +9,7 @@
  *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
  *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
  *  Copyright (C) 2013 Pierre Ossman for Cendio AB.  All Rights Reserved.
- *  Copyright (C) 2014-2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014-2016 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <math.h>
 
 #include <X11/X.h>
 #include <X11/keysym.h>
@@ -554,7 +555,7 @@ ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 
         for (i = vtDev->valFirst; i < vtDev->valFirst + vtDev->valCount; i++)
 				{
-            vtDev->values[i] = (int)roundl(
+            vtDev->values[i] = (int)round(
                 (double)(dev->values[i] - dev->valuators[i].rangeMin) /
                     (double)(dev->valuators[i].rangeMax -
                              dev->valuators[i].rangeMin) *
