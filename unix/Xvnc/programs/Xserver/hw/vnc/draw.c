@@ -69,6 +69,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dixfontstr.h"
 #include "rfb.h"
 #include "fb.h"
+#include "misc.h"
 
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 
@@ -1623,17 +1624,26 @@ rfbComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
 {
     ScreenPtr pScreen = pDst->pDrawable->pScreen;
     rfbScreenInfoPtr prfb = &rfbScreen;
-    RegionRec tmpRegion;
+    RegionRec tmpRegion, fbRegion;
     BoxRec box;
     PictureScreenPtr ps = GetPictureScreen(pScreen);
 
     if (is_visible(pDst->pDrawable)) {
-        box.x1 = pDst->pDrawable->x + xDst;
-        box.y1 = pDst->pDrawable->y + yDst;
+        box.x1 = max(pDst->pDrawable->x + xDst, 0);
+        box.y1 = max(pDst->pDrawable->y + yDst, 0);
         box.x2 = box.x1 + width;
         box.y2 = box.y1 + height;
 
         REGION_INIT(pScreen, &tmpRegion, &box, 0);
+
+        box.x1 = 0;
+        box.y1 = 0;
+        box.x2 = pScreen->width;
+        box.y2 = pScreen->height;
+
+        REGION_INIT(pScreen, &fbRegion, &box, 0);
+
+        REGION_INTERSECT(pScreen, &tmpRegion, &tmpRegion, &fbRegion);
 
         ADD_TO_MODIFIED_REGION(pScreen, &tmpRegion);
     }
