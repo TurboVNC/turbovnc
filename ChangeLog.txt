@@ -133,6 +133,13 @@ compositing window manager such as Gnome 3, activity in off-screen windows
 interfere with the display of on-screen windows that occupied the same screen
 area as the off-screen windows.
 -------------------------------------------------------------------------------
+[17]
+The Windows TurboVNC Viewer will now resolve localhost to the IPv4 loopback
+address (127.0.0.1) by default unless the /ipv6 option is specified.  This
+makes its behavior more consistent with the Java viewer (NOTE: connecting to
+localhost on a Windows machine is an unusual case, but it can occur when using
+virtualization software that has a built-in VNC server.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

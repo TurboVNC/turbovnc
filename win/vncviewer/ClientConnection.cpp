@@ -865,6 +865,11 @@ void ClientConnection::Connect()
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
+  // Winsock will resolve localhost to ::1 if left to its own devices.  We
+  // force localhost to resolve to 127.0.0.1 instead, unless the /ipv6 option
+  // was specified.  This mimics the behavior of Java.
+  if (!stricmp(hostname, "localhost") && !m_opts.m_ipv6)
+    hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
   snprintf(portname, 10, "%d", m_port);
   if (strlen(hostname) < 1)
