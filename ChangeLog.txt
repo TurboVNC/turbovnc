@@ -126,6 +126,13 @@ in RealVNC's (and TigerVNC's) vncconfig program.  This causes tvncconfig to
 poll for changes to the clipboard at a specified interval rather than waiting
 for the X server to inform it of the changes.
 -------------------------------------------------------------------------------
+[16]
+Fixed an issue in the TurboVNC Server (Xvnc) whereby, when running a
+compositing window manager such as Gnome 3, activity in off-screen windows
+(such as a scrolling xterm being displayed in a separate workspace) could
+interfere with the display of on-screen windows that occupied the same screen
+area as the off-screen windows.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
