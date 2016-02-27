@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -356,10 +356,12 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
   for (j = 0; j < i; j++) {
     if (strlen(args[j]) < 4 ||
         strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
-      char phost[256];
-      if (ParseDisplay(args[j], phost, 255, &m_port) && f == 0 &&
+      char phost[256], pdisplay[256];
+      strncpy(pdisplay, args[j], 255);
+      pdisplay[255] = 0;
+      if (ParseDisplay(pdisplay, phost, 255, &m_port) && f == 0 &&
           strstr(args[j], "/") == NULL)
-        LoadOpt(args[j], KEY_VNCVIEWER_HISTORY);
+        LoadOpt(pdisplay, KEY_VNCVIEWER_HISTORY);
     }
   }
   bool hostGiven = false, portGiven = false;
@@ -723,13 +725,15 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
           m_configSpecified = true;
         }
       } else {
-        char phost[256];
-        if (!ParseDisplay(args[j], phost, 255, &m_port)) {
+        char phost[256], pdisplay[256];
+        strncpy(pdisplay, args[j], 255);
+        pdisplay[255] = 0;
+        if (!ParseDisplay(pdisplay, phost, 255, &m_port)) {
           ArgError("Invalid VNC server specified.");
           continue;
         } else {
           strcpy(m_host, phost);
-          strcpy(m_display, args[j]);
+          strcpy(m_display, pdisplay);
           m_connectionSpecified = true;
         }
       }
