@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012, 2015-2016 D. R. Commander. All Rights Reserved.
 //  Copyright 2005 Alexandre Julliard
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -151,14 +151,33 @@ bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
       return false;
 
   int tmp_port;
+  bool doubleColon = false;
   char *colonpos = strrchr(display, ':');
+  char *bracketpos = strrchr(display, ']');
 
-  while (colonpos > display && *(colonpos - 1) == ':')
+  if (bracketpos && colonpos < bracketpos)
+    colonpos = NULL;
+
+  while (colonpos > display && *(colonpos - 1) == ':') {
     colonpos--;
+    doubleColon = true;
+  }
+  if (doubleColon) {
+    // Check for preceding single colon, indicating an IPv6 address
+    for (char *p = colonpos - 1; p >= display; p--) {
+      if (*p == ':') {
+        if (p == display || *(p - 1) != ':')
+          colonpos = NULL;
+        break;
+      }
+    }
+  }
+
   if (colonpos == NULL) {
     // No colon -- use default port number
     tmp_port = RFB_PORT_OFFSET;
     strncpy(phost, display, MAX_HOST_NAME_LEN);
+    phost[MAX_HOST_NAME_LEN] = '\0';
   } else {
     strncpy(phost, display, colonpos - display);
     phost[colonpos - display] = '\0';
@@ -176,8 +195,8 @@ bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
   }
   *pport = tmp_port;
 
-  // FIXME: We should not overwrite display[] here.  Buffer overflow
-  // is possible.
+  if (strlen(phost) == 0)
+    sprintf(phost, "localhost");
 
   FormatDisplay(tmp_port, display, phost);
   return true;

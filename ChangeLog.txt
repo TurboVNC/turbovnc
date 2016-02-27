@@ -140,6 +140,23 @@ makes its behavior more consistent with the Java viewer (NOTE: connecting to
 localhost on a Windows machine is an unusual case, but it can occur when using
 virtualization software that has a built-in VNC server.)
 -------------------------------------------------------------------------------
+[18]
+Improved the parsing of display names in both TurboVNC viewers.  In particular,
+the Windows viewer now properly parses the following display name forms:
+
+-  :n  (same as localhost:n)
+-  ::port  (same as localhost::port)
+-  x:x:x::x:n  (abbreviated IPv6 address)
+-  x:x:x::x::port  (abbreviated IPv6 address)
+-  x:x:x:x:x:x:x:x:n  (full IPv6 address)
+-  [IPv6]:n  (IPv6 address in brackets)
+-  [IPv6]::port  (IPv6 address in brackets)
+
+Both viewers now properly parse the following display name forms:
+
+-  x:x:x::x  (abbreviated IPv6 address, same as x:x:x::x:0)
+-  [IPv6]  (IPv6 address in brackets, same as [IPv6]:0)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
