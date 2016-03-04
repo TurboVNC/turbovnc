@@ -157,6 +157,9 @@ Both viewers now properly parse the following display name forms:
 -  x:x:x::x  (abbreviated IPv6 address, same as x:x:x::x:0)
 -  [IPv6]  (IPv6 address in brackets, same as [IPv6]:0)
 -------------------------------------------------------------------------------
+[19]
+The Windows TurboVNC Viewer should now build with Visual C++ 2015.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

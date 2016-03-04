@@ -41,7 +41,7 @@ static char *getCmdPattern(bool tunnelOption)
     DWORD attrib = GetFileAttributes(DEFAULT_SSH_CMD);
     if (attrib == INVALID_FILE_ATTRIBUTES ||
         (attrib & FILE_ATTRIBUTE_DIRECTORY) != 0)
-      throw WarningException("SSH binary "DEFAULT_SSH_CMD" does not exist.");
+      throw WarningException("SSH binary " DEFAULT_SSH_CMD " does not exist.");
     pattern = tunnelOption ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD;
   }
 
