@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -52,7 +52,7 @@ INT_PTR SessionDialog::DoDialog()
 {
   return DialogBoxParam(pApp->m_instance,
                         MAKEINTRESOURCE(IDD_SESSION_DLG), NULL,
-                        (DLGPROC) SessDlgProc, (LONG) this);
+                        (DLGPROC) SessDlgProc, (LPARAM) this);
 }
 
 

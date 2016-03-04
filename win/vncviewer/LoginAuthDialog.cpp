@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -60,7 +60,7 @@ INT_PTR LoginAuthDialog::DoDialog()
 {
   return DialogBoxParam(pApp->m_instance,
                         MAKEINTRESOURCE(IDD_LOGIN_AUTH_DIALOG),
-                        NULL, (DLGPROC)DlgProc, (LONG)this);
+                        NULL, (DLGPROC)DlgProc, (LPARAM)this);
 }
 
 

@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 Dennis Syrovatsky. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -935,7 +935,7 @@ void FileTransfer::CreateFTBrowseDialog(BOOL status)
 {
   m_bServerBrowseRequest = status;
   DialogBoxParam(m_pApp->m_instance, MAKEINTRESOURCE(IDD_FTBROWSE_DLG),
-                 m_hwndFileTransfer, (DLGPROC) FTBrowseDlgProc, (LONG)this);
+                 m_hwndFileTransfer, (DLGPROC) FTBrowseDlgProc, (LPARAM)this);
 }
 
 

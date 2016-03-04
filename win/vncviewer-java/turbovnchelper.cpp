@@ -1,4 +1,4 @@
-/*  Copyright (C)2015 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2016 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -93,8 +93,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
       _throw("Could not get Win32 drawing surface info");
 
     LowLevelHook::Activate(w32dsi->hwnd);
-    printf("TurboVNC Helper: Grabbed keyboard for window 0x%.8lx\n",
-           w32dsi->hwnd);
+    printf("TurboVNC Helper: Grabbed keyboard for window 0x%.8llx\n",
+           (unsigned long long)w32dsi->hwnd);
   } else {
     LowLevelHook::Deactivate();
     printf("TurboVNC Helper: Ungrabbed keyboard\n");
