@@ -723,7 +723,7 @@ void FileTransfer::FileTransferDownload()
 
 void FileTransfer::CancelDownload(char *reason)
 {
-  SendFileDownloadCancelMessage((int)strlen(reason), reason);
+  SendFileDownloadCancelMessage((unsigned short)strlen(reason), reason);
   SetWindowText(m_hwndFTStatus, reason);
   CloseUndoneFileTransfers();
   EnableWindow(GetDlgItem(m_hwndFileTransfer, IDC_FTCANCEL), FALSE);

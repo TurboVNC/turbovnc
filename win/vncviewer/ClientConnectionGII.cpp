@@ -36,10 +36,10 @@ char *stristr(const char *s1, const char *s2)
     return NULL;
 
   str1 = strdup(s1);
-  for(i = 0; i < strlen(str1); i++)
+  for(i = 0; i < (int)strlen(str1); i++)
     str1[i] = tolower(str1[i]);
   str2 = strdup(s2);
-  for(i = 0; i < strlen(str2); i++)
+  for(i = 0; i < (int)strlen(str2); i++)
     str2[i] = tolower(str2[i]);
 
   ret = strstr(str1, str2);
@@ -181,7 +181,7 @@ void ClientConnection::SendGIIEvent(UINT deviceID, ExtInputEvent &e)
   }
 
   if ((e.type == rfbGIIValuatorRelative || e.type == rfbGIIValuatorAbsolute) &&
-      (e.firstValuator + e.numValuators > dev.valuators.size())) {
+      (e.firstValuator + e.numValuators > (int)dev.valuators.size())) {
     vnclog.Print(-1, "Valuator %d-%d event ignored.\n", e.firstValuator,
                  e.firstValuator + e.numValuators - 1);
     vnclog.Print(-1, "  Device %s has valuators 0-%d.", dev.name,

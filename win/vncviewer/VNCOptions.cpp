@@ -253,7 +253,7 @@ bool VNCOptions::ParseScalingFactor(char *scaleString, bool &fitWindow,
     scale_num = scale_den = 100;
     return true;
   } else {
-    for (int i = 0; i < strlen(scaleString); i++) {
+    for (int i = 0; i < (int)strlen(scaleString); i++) {
       if (scaleString[i] < '0' || scaleString[i] > '9')
         scaleString[i] = ' ';
     }
@@ -278,7 +278,7 @@ bool VNCOptions::ParseDesktopSize(char *sizeString, DesktopSize &size)
     size.set(SIZE_SERVER, 0, 0);
     return true;
   } else {
-    for (int i = 0; i < strlen(sizeString); i++) {
+    for (int i = 0; i < (int)strlen(sizeString); i++) {
       if ((sizeString[i] < '0' || sizeString[i] > '9') && sizeString[i] != 'x')
         sizeString[i] = ' ';
     }
