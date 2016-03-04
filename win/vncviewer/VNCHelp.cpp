@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
 //
 //  VNC is free software; you can redistribute it and/or modify
@@ -93,7 +93,7 @@ void VNCHelp::Popup(LPARAM lParam)
 
 BOOL VNCHelp::TranslateMsg(MSG *pmsg)
 {
-  return (HtmlHelp(NULL, NULL, HH_PRETRANSLATEMESSAGE, (DWORD)pmsg) != 0);
+  return (HtmlHelp(NULL, NULL, HH_PRETRANSLATEMESSAGE, (DWORD_PTR)pmsg) != 0);
 }
 
 

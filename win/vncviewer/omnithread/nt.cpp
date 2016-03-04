@@ -1,6 +1,7 @@
 //                              Package : omnithread
 // omnithread/nt.cc             Created : 6/95 tjr
 //
+//    Copyright (C) 2016 D. R. Commander. All Rights Reserved.
 //    Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //    This file is part of the omnithread library
@@ -347,7 +348,7 @@ omni_semaphore::omni_semaphore(unsigned int initial)
 }
 
 
-omni_semaphore::~omni_semaphore(void)
+omni_semaphore::~omni_semaphore(void) noexcept(false)
 {
   if (!CloseHandle(nt_sem)) {
     DB( cerr << "omni_semaphore::~omni_semaphore: CloseHandle error "
@@ -556,7 +557,7 @@ omni_thread::common_constructor(void* arg, priority_t pri, int det)
 // Destructor for omni_thread.
 //
 
-omni_thread::~omni_thread(void)
+omni_thread::~omni_thread(void) noexcept(false)
 {
     DB(cerr << "destructor called for thread " << id() << endl);
     if ((handle != NULL) && !CloseHandle(handle))

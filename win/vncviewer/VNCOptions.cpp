@@ -929,7 +929,7 @@ INT_PTR VNCOptions::DoDialog(bool running)
 {
   m_running = running;
   return DialogBoxParam(pApp->m_instance, MAKEINTRESOURCE(IDD_PARENT),
-                        NULL, (DLGPROC) DlgProc, (LONG) this);
+                        NULL, (DLGPROC) DlgProc, (LPARAM)this);
 }
 
 
@@ -980,12 +980,13 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
       _this->m_hPageConnection =
         CreateDialogParam(pApp->m_instance, MAKEINTRESOURCE(IDD_OPTIONDIALOG),
                           hwndDlg, (DLGPROC)_this->DlgProcConnOptions,
-                          (LONG)_this);
+                          (LPARAM)_this);
 
       _this->m_hPageGeneral =
          CreateDialogParam(pApp->m_instance,
                            MAKEINTRESOURCE(IDD_GENERAL_OPTION), hwndDlg,
-                           (DLGPROC)_this->DlgProcGlobalOptions, (LONG)_this);
+                           (DLGPROC)_this->DlgProcGlobalOptions,
+                           (LPARAM)_this);
 
       // Position child dialogs to fit the Tab control's display area
       RECT rc;
