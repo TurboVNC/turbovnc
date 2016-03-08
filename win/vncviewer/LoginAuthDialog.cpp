@@ -41,11 +41,11 @@ LoginAuthDialog::LoginAuthDialog(char *vnchost, char *title, char *username)
   m_username_disabled = (username == NULL);
 
   if (username == NULL || username[0] == '\0') {
-    m_username[0] = TEXT('\0');
+    m_username[0] = '\0';
   } else {
     STRCPY(m_username, username);
   }
-  m_passwd[0] = TEXT('\0');
+  m_passwd[0] = '\0';
   m_vnchost = (vnchost != NULL) ? vnchost : "[unknown]";
 }
 

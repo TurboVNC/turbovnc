@@ -184,11 +184,11 @@ bool ParseDisplay(LPTSTR display, int displaylen, LPTSTR phost, int hostlen,
     phost[colonpos - display] = '\0';
     if (colonpos[1] == ':') {
       // Two colons -- interpret as a port number
-      if (sscanf_s(colonpos + 2, TEXT("%d"), &tmp_port) != 1)
+      if (sscanf_s(colonpos + 2, "%d", &tmp_port) != 1)
         return false;
     } else {
       // One colon -- interpret as a display or port number
-      if (sscanf_s(colonpos + 1, TEXT("%d"), &tmp_port) != 1)
+      if (sscanf_s(colonpos + 1, "%d", &tmp_port) != 1)
         return false;
       if (tmp_port < 100)
         tmp_port += RFB_PORT_OFFSET;
@@ -209,8 +209,8 @@ void FormatDisplay(int port, LPTSTR display, int displaylen, LPTSTR host)
   if (port == 5900) {
     STRNCPY(display, host, displaylen);
   } else if (port > 5900 && port <= 5999) {
-    snprintf(display, displaylen, TEXT("%s:%d"), host, port - 5900);
+    snprintf(display, displaylen, "%s:%d", host, port - 5900);
   } else {
-    snprintf(display, displaylen, TEXT("%s::%d"), host, port);
+    snprintf(display, displaylen, "%s::%d", host, port);
   }
 }
