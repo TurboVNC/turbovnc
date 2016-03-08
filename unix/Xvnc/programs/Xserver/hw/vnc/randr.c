@@ -1,5 +1,5 @@
 /*
- *  Copyright (C)2013-2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2013-2016 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -368,6 +368,7 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
       }
     }
     cl->pendingDesktopResize = TRUE;
+    cl->deferredUpdateScheduled = FALSE;
     cl->reason = rfbEDSReasonServer;
     // Reset all of the regions, so the next FBU will behave as if it
     // was the first.

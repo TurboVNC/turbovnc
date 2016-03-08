@@ -92,6 +92,18 @@ Both viewers now properly parse the following display name forms:
 [9]
 The Windows TurboVNC Viewer should now build with Visual C++ 2015.
 -------------------------------------------------------------------------------
+[10]
+Fixed an issue whereby the TurboVNC Server, running on Linux Mint, would
+stop sending framebuffer updates and would incorrectly process input events
+after the following sequence of events occurred:
+
+-- the screen saver was activated while there were no viewers connected
+-- a new viewer connected
+-- the new viewer requested a remote desktop resize
+
+This might have affected other systems and applications as well, particularly
+full-screen applications that grab the keyboard/mouse.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
