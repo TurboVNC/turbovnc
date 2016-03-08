@@ -27,13 +27,13 @@
 #include "vncviewer.h"
 #include "LoginAuthDialog.h"
 #include "Exception.h"
+#include "safestr.h"
 
 
 LoginAuthDialog::LoginAuthDialog(char *vnchost, char *title, char *username)
 {
   if (title != NULL) {
-    strncpy(m_title, title, sizeof(m_title)-1);
-    m_title[sizeof(m_title)-1] = '\0';
+    STRCPY(m_title, title);
   } else {
     m_title[0] = '\0';
   }
@@ -43,8 +43,7 @@ LoginAuthDialog::LoginAuthDialog(char *vnchost, char *title, char *username)
   if (username == NULL || username[0] == '\0') {
     m_username[0] = TEXT('\0');
   } else {
-    strncpy(m_username, username, 255);
-    m_username[255] = TEXT('\0');
+    STRCPY(m_username, username);
   }
   m_passwd[0] = TEXT('\0');
   m_vnchost = (vnchost != NULL) ? vnchost : "[unknown]";

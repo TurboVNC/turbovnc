@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 Constantin Kaplinsky. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -48,7 +48,7 @@ void ConnDialogThread::Init(HINSTANCE hInst, const char *vnchost)
 {
   m_hInst = hInst;
   if (vnchost != NULL)
-    m_vnchost = strdup(vnchost);
+    m_vnchost = _strdup(vnchost);
   else
     m_vnchost = NULL;
 
@@ -83,7 +83,7 @@ void ConnDialogThread::SetStatus(const char *msg)
 {
   if (m_hwnd != NULL) {
     char buf[256];
-    sprintf(buf, "Status: %.240s.", msg);
+    SPRINTF(buf, "Status: %.240s.", msg);
     SetDlgItemText(m_hwnd, IDC_STATUS_STATIC, buf);
   }
 }
@@ -114,9 +114,9 @@ LRESULT CALLBACK ConnDialogThread::DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
       if (_this->m_vnchost != NULL) {
         char buf[256];
         if (_this->m_vnchost[0] != '\0')
-          sprintf(buf, "Connecting to %.200s ...", _this->m_vnchost);
+          SPRINTF(buf, "Connecting to %.200s ...", _this->m_vnchost);
         else
-          sprintf(buf, "Accepting reverse connection...");
+          SPRINTF(buf, "Accepting reverse connection...");
         SetDlgItemText(hwnd, IDC_CONNECTING_STATIC, buf);
       }
       SetForegroundWindow(hwnd);

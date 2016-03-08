@@ -85,7 +85,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
       int listIndex = 0;
       for (i = 0; i < maxEntries; i++) {
         char keyName[256];
-        itoa(i, keyName, 10);
+        _itoa_s(i, keyName, _countof(keyName), 10);
         char buf[256];
         int dwbuflen = 255;
         if (RegQueryValueEx(_this->m_hRegKey, keyName, NULL, NULL, (LPBYTE)buf,
@@ -148,6 +148,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
           buf[0] = '\0';
           if (_this->m_cc->LoadConnection(buf, true) != -1) {
             FormatDisplay(_this->m_cc->m_port, _this->m_pOpt->m_display,
+                          _countof(_this->m_pOpt->m_display),
                           _this->m_cc->m_host);
             SetDlgItemText(hwnd, IDC_HOSTNAME_EDIT, _this->m_pOpt->m_display);
           }
@@ -167,15 +168,16 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
           GetDlgItemText(hwnd, IDC_HOSTNAME_EDIT, display, 256);
           if (strlen(display) == 0)
             return TRUE;
-          if (!ParseDisplay(display, tmphost, 255, &_this->m_cc->m_port)) {
+          if (!ParseDisplay(display, _countof(display), tmphost,
+                            _countof(tmphost), &_this->m_cc->m_port)) {
             MessageBox(NULL,
                 "Invalid VNC server specified.\n\r"
                 "Server should be of the form host:display.",
                 "Connection setup", MB_OK | MB_ICONEXCLAMATION);
             return TRUE;
           } else {
-            strcpy(_this->m_cc->m_host, tmphost);
-            strcpy(_this->m_pOpt->m_display, display);
+            STRCPY(_this->m_cc->m_host, tmphost);
+            STRCPY(_this->m_pOpt->m_display, display);
           }
 
           _this->m_pOpt->CloseDialog();
@@ -199,7 +201,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
           char buf[256];
           int maxEntries = pApp->m_options.m_historyLimit;
           for (i = 0; i < maxEntries; i++) {
-            itoa(i, valname, 10);
+            _itoa_s(i, valname, _countof(valname), 10);
             dwbuflen = 255;
             if (RegQueryValueEx(_this->m_hRegKey, (LPTSTR)valname, NULL, NULL,
                 (LPBYTE)buf, (LPDWORD)&dwbuflen) != ERROR_SUCCESS)

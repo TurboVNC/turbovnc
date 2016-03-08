@@ -1,5 +1,5 @@
 /* Copyright 2009 Pierre Ossman for Cendio AB
- * Copyright (C)2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C)2015-2016 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,7 @@
 
 #include <list>
 #include <set>
-
-#ifndef snprintf
-#define snprintf(str, n, format, ...)  \
-  _snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
-#endif
+#include "safestr.h"
 
 // Screen
 //
@@ -115,18 +111,18 @@ struct ScreenSet {
   inline void print(char* str, size_t len) const {
     char buffer[128];
     std::list<Screen>::const_iterator iter;
-    snprintf(buffer, sizeof(buffer), "%d screen(s)\n", num_screens());
+    SPRINTF(buffer, "%d screen(s)\n", num_screens());
     str[0] = '\0';
-    strncat(str, buffer, len - 1 - strlen(str));
+    STRNCAT(str, buffer, len);
     for (iter = screens.begin(); iter != screens.end(); ++iter) {
-      snprintf(buffer, sizeof(buffer),
+      SPRINTF(buffer,
                "    %10d (0x%08x): %dx%d+%d+%d (flags 0x%08x)\n",
                (int)iter->id, (unsigned)iter->id,
                iter->dimensions.right - iter->dimensions.left,
                iter->dimensions.bottom - iter->dimensions.top,
                iter->dimensions.left, iter->dimensions.top,
                (unsigned)iter->flags);
-      strncat(str, buffer, len - 1 - strlen(str));
+      STRNCAT(str, buffer, len);
     }
   };
 

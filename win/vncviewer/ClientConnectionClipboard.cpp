@@ -1,5 +1,5 @@
+//  Copyright (C) 2012, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -55,7 +55,7 @@ void ClientConnection::ProcessLocalClipboardChange()
 
         char *contents = new char[strlen(lpstr) + 1];
         char *unixcontents = new char[strlen(lpstr) + 1];
-        strcpy(contents, lpstr);
+        STRNCPY(contents, lpstr, strlen(lpstr) + 1);
         GlobalUnlock(hglb);
         CloseClipboard();
 

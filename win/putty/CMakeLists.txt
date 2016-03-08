@@ -73,6 +73,8 @@ set_source_files_properties(${COMMON_SOURCES} ${PUTTY_SOURCES}
 
 configure_file(WINDOWS/resdefs.h.in WINDOWS/resdefs.h)
 
+add_definitions(-wd4996)
+
 add_executable(putty WIN32 ${PUTTY_SOURCES} ${COMMON_SOURCES}
 	WINDOWS/PUTTY.rc)
 target_link_libraries(putty comctl32 imm32 winmm)

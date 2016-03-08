@@ -1,3 +1,5 @@
+add_definitions(-wd4996)
+
 add_library(zlib STATIC
 	adler32.c
 	compress.c
