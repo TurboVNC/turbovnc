@@ -1,3 +1,4 @@
+//  Copyright (C) 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 Constantin Kaplinsky. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -18,6 +19,7 @@
 //  USA.
 
 #include "CapsContainer.h"
+#include "safestr.h"
 
 
 CapsContainer::CapsContainer(int maxCaps)
@@ -67,7 +69,7 @@ void CapsContainer::Add(const rfbCapabilityInfo *capinfo, const char *desc)
   char *desc_copy = NULL;
   if (desc != NULL) {
     desc_copy = new char[strlen(desc) + 1];
-    strcpy(desc_copy, desc);
+    STRNCPY(desc_copy, desc, strlen(desc) + 1);
   }
   descMap[capinfo->code] = desc_copy;
 }

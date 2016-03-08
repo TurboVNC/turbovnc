@@ -30,6 +30,7 @@
 extern "C" {
 #include "vncauth.h"
 }
+#include "safestr.h"
 
 
 VNCOptions::VNCOptions()
@@ -80,7 +81,7 @@ VNCOptions::VNCOptions()
   m_logLevel = 0;
   m_logToConsole = false;
   m_logToFile = false;
-  strcpy(m_logFilename ,"vncviewer.log");
+  STRCPY(m_logFilename, "vncviewer.log");
 
   m_delay = 0;
   m_connectionSpecified = false;
@@ -147,23 +148,23 @@ VNCOptions& VNCOptions::operator = (VNCOptions& s)
   m_desktopSize           = s.m_desktopSize;
   m_localCursor           = s.m_localCursor;
   m_toolbar               = s.m_toolbar;
-  strcpy(m_display, s.m_display);
-  strcpy(m_host, s.m_host);
+  STRCPY(m_display, s.m_display);
+  STRCPY(m_host, s.m_host);
   m_port                  = s.m_port;
   m_hWindow               = s.m_hWindow;
 
-  strcpy(m_kbdname, s.m_kbdname);
+  STRCPY(m_kbdname, s.m_kbdname);
   m_kbdSpecified          = s.m_kbdSpecified;
 
   m_logLevel              = s.m_logLevel;
   m_logToConsole          = s.m_logToConsole;
   m_logToFile             = s.m_logToFile;
-  strcpy(m_logFilename, s.m_logFilename);
+  STRCPY(m_logFilename, s.m_logFilename);
 
   m_delay                 = s.m_delay;
   m_connectionSpecified   = s.m_connectionSpecified;
   m_configSpecified       = s.m_configSpecified;
-  strcpy(m_configFilename, s.m_configFilename);
+  STRCPY(m_configFilename, s.m_configFilename);
 
   m_listening             = s.m_listening;
   m_listenPort            = s.m_listenPort;
@@ -171,7 +172,7 @@ VNCOptions& VNCOptions::operator = (VNCOptions& s)
   m_restricted            = s.m_restricted;
 
   m_tunnel                = s.m_tunnel;
-  strcpy(m_gatewayHost, s.m_gatewayHost);
+  STRCPY(m_gatewayHost, s.m_gatewayHost);
 
   m_subsampLevel          = s.m_subsampLevel;
   m_compressLevel         = s.m_compressLevel;
@@ -181,7 +182,7 @@ VNCOptions& VNCOptions::operator = (VNCOptions& s)
   m_requestShapeUpdates   = s.m_requestShapeUpdates;
   m_ignoreShapeUpdates    = s.m_ignoreShapeUpdates;
   m_noUnixLogin           = s.m_noUnixLogin;
-  strcpy(m_user, s.m_user);
+  STRCPY(m_user, s.m_user);
 
   m_autoPass              = s.m_autoPass;
 
@@ -202,7 +203,7 @@ VNCOptions::~VNCOptions()
 inline bool SwitchMatch(LPCTSTR arg, LPCTSTR swtch)
 {
   return (arg[0] == '-' || arg[0] == '/') &&
-          (stricmp(&arg[1], swtch) == 0);
+          (_stricmp(&arg[1], swtch) == 0);
 }
 
 
@@ -306,7 +307,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
 
   char CommLine[256];
   int f = 0;
-  strcpy(CommLine, szCmdLine);
+  STRCPY(CommLine, szCmdLine);
 
   if (strstr(CommLine, "/listen") != NULL ||
       strstr(CommLine, "-listen") != NULL) {
@@ -314,7 +315,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
     f = 1;
   }
   char *cmd = new char[cmdlinelen + 1];
-  strcpy(cmd, szCmdLine);
+  STRNCPY(cmd, szCmdLine, cmdlinelen + 1);
 
   // Count the number of spaces
   // This may be more than the number of arguments, but that doesn't matter.
@@ -355,12 +356,11 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
   int j;
   for (j = 0; j < i; j++) {
     if (strlen(args[j]) < 4 ||
-        strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
+        _strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
       char phost[256], pdisplay[256];
-      strncpy(pdisplay, args[j], 255);
-      pdisplay[255] = 0;
-      if (ParseDisplay(pdisplay, phost, 255, &m_port) && f == 0 &&
-          strstr(args[j], "/") == NULL)
+      STRCPY(pdisplay, args[j]);
+      if (ParseDisplay(pdisplay, _countof(pdisplay), phost, _countof(phost),
+                       &m_port) && f == 0 && strstr(args[j], "/") == NULL)
         LoadOpt(pdisplay, KEY_VNCVIEWER_HISTORY);
     }
   }
@@ -375,7 +375,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
     } else if (SwitchMatch(args[j], "listen")) {
       m_listening = true;
       if (j + 1 < i && args[j + 1][0] >= '0' && args[j + 1][0] <= '9') {
-        if (sscanf(args[j + 1], "%d", &m_listenPort) != 1) {
+        if (sscanf_s(args[j + 1], "%d", &m_listenPort) != 1) {
           ArgError("Invalid listen port specified");
           continue;
         }
@@ -512,7 +512,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No timeout specified");
         continue;
       }
-      if (sscanf(args[j], "%d", &m_Emul3Timeout) != 1) {
+      if (sscanf_s(args[j], "%d", &m_Emul3Timeout) != 1) {
         ArgError("Invalid timeout specified");
         continue;
       }
@@ -522,7 +522,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No fuzz specified");
         continue;
       }
-      if (sscanf(args[j], "%d", &m_Emul3Fuzz) != 1) {
+      if (sscanf_s(args[j], "%d", &m_Emul3Fuzz) != 1) {
         ArgError("Invalid fuzz specified");
         continue;
       }
@@ -539,7 +539,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No delay specified");
         continue;
       }
-      if (sscanf(args[j], "%d", &m_delay) != 1) {
+      if (sscanf_s(args[j], "%d", &m_delay) != 1) {
         ArgError("Invalid delay specified");
         continue;
       }
@@ -549,7 +549,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No loglevel specified");
         continue;
       }
-      if (sscanf(args[j], "%d", &m_logLevel) != 1) {
+      if (sscanf_s(args[j], "%d", &m_logLevel) != 1) {
         ArgError("Invalid loglevel specified");
         continue;
       }
@@ -561,7 +561,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No logfile specified");
         continue;
       }
-      if (sscanf(args[j], "%s", &m_logFilename) != 1) {
+      if (sscanf_s(args[j], "%s", &m_logFilename,
+                   (unsigned)_countof(m_logFilename)) != 1) {
         ArgError("Invalid logfile specified");
         continue;
       } else {
@@ -591,11 +592,11 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         continue;
       }
       int enc = -1;
-      if (stricmp(args[j], "raw") == 0) {
+      if (_stricmp(args[j], "raw") == 0) {
         enc = rfbEncodingRaw;
-      } else if (stricmp(args[j], "hextile") == 0) {
+      } else if (_stricmp(args[j], "hextile") == 0) {
         enc = rfbEncodingHextile;
-      } else if (stricmp(args[j], "tight") == 0) {
+      } else if (_stricmp(args[j], "tight") == 0) {
         enc = rfbEncodingTight;
       } else {
         ArgError("Invalid encoding specified");
@@ -611,7 +612,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         continue;
       }
       int level = -1;
-      if (sscanf(args[j], "%d", &level) != 1
+      if (sscanf_s(args[j], "%d", &level) != 1
         || level < 0 || level > 9) {
         ArgError("Invalid compression level specified");
         continue;
@@ -642,7 +643,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         continue;
       }
       int quality = -1;
-      if (sscanf(args[j], "%d", &quality) != 1 ||
+      if (sscanf_s(args[j], "%d", &quality) != 1 ||
           quality < 1 || quality > 100) {
         ArgError("Invalid image quality level specified");
         continue;
@@ -654,8 +655,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         continue;
       }
       char passwd[MAXPWLEN + 1];
-      strncpy(passwd, args[j], MAXPWLEN);
-      passwd[MAXPWLEN] = '\0';
+      STRCPY(passwd, args[j]);
       if (strlen(passwd) > 8) passwd[8] = '\0';
       vncEncryptPasswd(m_encPasswd, passwd);
       memset(passwd, 0, MAXPWLEN);
@@ -664,8 +664,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No username specified");
         continue;
       }
-      strncpy(m_user, args[j], 255);
-      m_user[255] = '\0';
+      STRCPY(m_user, args[j]);
       m_noUnixLogin = false;
     } else if (SwitchMatch(args[j], "autopass")) {
       m_autoPass = true;
@@ -677,7 +676,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No SSH host specified");
         continue;
       }
-      strncpy(m_gatewayHost, args[j], 255);
+      STRCPY(m_gatewayHost, args[j]);
       m_tunnel = true;
     } else if (SwitchMatch(args[j], "tunnel")) {
       m_tunnel = true;
@@ -686,7 +685,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         ArgError("No session capture file specified");
         continue;
       }
-      if ((m_benchFile = fopen(args[j], "rb")) == NULL) {
+      if (fopen_s(&m_benchFile, args[j], "rb") != 0 || m_benchFile == NULL) {
         ArgError("Could not open session capture");
         continue;
       }
@@ -696,7 +695,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         continue;
       }
       int benchWarmup = -1;
-      if (sscanf(args[j], "%d", &benchWarmup) != 1 || benchWarmup < 0) {
+      if (sscanf_s(args[j], "%d", &benchWarmup) != 1 || benchWarmup < 0) {
         ArgError("Invalid number of benchmark warmup iterations specified");
         continue;
       }
@@ -707,14 +706,14 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         continue;
       }
       int benchIter = -1;
-      if (sscanf(args[j], "%d", &benchIter) != 1 || benchIter < 1) {
+      if (sscanf_s(args[j], "%d", &benchIter) != 1 || benchIter < 1) {
         ArgError("Invalid number of benchmark iterations specified");
         continue;
       }
       m_benchIter = benchIter;
     } else {
       if (strlen(args[j]) >= 4 &&
-          !strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
+          !_strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
         // The GetPrivateProfile* stuff seems not to like some relative paths
         _fullpath(m_configFilename, args[j], _MAX_PATH);
         if (_access(m_configFilename, 04)) {
@@ -726,14 +725,14 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         }
       } else {
         char phost[256], pdisplay[256];
-        strncpy(pdisplay, args[j], 255);
-        pdisplay[255] = 0;
-        if (!ParseDisplay(pdisplay, phost, 255, &m_port)) {
+        STRCPY(pdisplay, args[j]);
+        if (!ParseDisplay(pdisplay, _countof(pdisplay), phost, _countof(phost),
+                          &m_port)) {
           ArgError("Invalid VNC server specified.");
           continue;
         } else {
-          strcpy(m_host, phost);
-          strcpy(m_display, pdisplay);
+          STRCPY(m_host, phost);
+          STRCPY(m_display, pdisplay);
           m_connectionSpecified = true;
         }
       }
@@ -760,7 +759,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
 void saveInt(char *name, int value, char *fname)
 {
   char buf[4];
-  sprintf(buf, "%d", value);
+  SPRINTF(buf, "%d", value);
   WritePrivateProfileString("options", name, buf, fname);
 }
 
@@ -775,7 +774,7 @@ void VNCOptions::Save(char *fname)
 {
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
     char buf[128];
-    sprintf(buf, "use_encoding_%d", i);
+    SPRINTF(buf, "use_encoding_%d", i);
     saveInt(buf, m_UseEnc[i], fname);
   }
   saveInt("preferred_encoding", m_PreferredEncoding,   fname);
@@ -818,7 +817,7 @@ void VNCOptions::Load(char *fname)
 {
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
     char buf[128];
-    sprintf(buf, "use_encoding_%d", i);
+    SPRINTF(buf, "use_encoding_%d", i);
     m_UseEnc[i] = readInt(buf, m_UseEnc[i], fname) != 0;
   }
 
@@ -869,10 +868,8 @@ void VNCOptions::Load(char *fname)
 
   char temps[256];
   if (GetPrivateProfileString("connection", "user", "", temps, 255,
-                              fname) != 0) {
-    strncpy(m_user, temps, 255);
-    m_user[255] = '\0';
-  }
+                              fname) != 0)
+    STRCPY(m_user, temps);
 }
 
 
@@ -901,12 +898,12 @@ void VNCOptions::Register()
     RegSetValue(hKey, NULL, REG_SZ, "VNCviewer Config File", 0);
 
     if (RegCreateKey(hKey, "DefaultIcon", &hKey2) == ERROR_SUCCESS) {
-      sprintf(keybuf, "%s,0", filename);
+      SPRINTF(keybuf, "%s,0", filename);
       RegSetValue(hKey2, NULL, REG_SZ, keybuf, 0);
       RegCloseKey(hKey2);
     }
     if (RegCreateKey(hKey, "Shell\\open\\command", &hKey2)  == ERROR_SUCCESS) {
-      sprintf(keybuf, "\"%s\" -config \"%%1\"", filename);
+      SPRINTF(keybuf, "\"%s\" -config \"%%1\"", filename);
       RegSetValue(hKey2, NULL, REG_SZ, keybuf, 0);
       RegCloseKey(hKey2);
     }
@@ -1446,7 +1443,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
         SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
       else {
         char temps[12];
-        snprintf(temps, 12, "%dx%d", _this->m_desktopSize.width,
+        SPRINTF(temps, "%dx%d", _this->m_desktopSize.width,
                  _this->m_desktopSize.height);
         SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
       }
@@ -1521,7 +1518,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
                     SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
                 else {
                   char temps[12];
-                  snprintf(temps, 12, "%dx%d", desktopSize.width,
+                  SPRINTF(temps, "%dx%d", desktopSize.width,
                            desktopSize.height);
                   SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
                 }
@@ -1958,7 +1955,7 @@ BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
             pApp->m_options.m_logLevel =
               GetDlgItemInt(hwnd, IDC_EDIT_LOG_LEVEL, NULL, FALSE);
             GetDlgItemText(hwnd, IDC_EDIT_LOG_FILE, buf, 80);
-            strcpy(pApp->m_options.m_logFilename, buf);
+            STRCPY(pApp->m_options.m_logFilename, buf);
 
             vnclog.SetLevel(pApp->m_options.m_logLevel);
             vnclog.SetFile(pApp->m_options.m_logFilename);
@@ -2079,14 +2076,14 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
   HKEY RegKey;
   char key[80];
 
-  strcpy(key, keyname);
-  strcat(key, "\\");
-  strcat(key, subkey);
+  STRCPY(key, keyname);
+  STRCAT(key, "\\");
+  STRCAT(key, subkey);
    RegOpenKeyEx(HKEY_CURRENT_USER, key, 0, KEY_ALL_ACCESS, &RegKey);
 
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
     char buf[128];
-    sprintf(buf, "use_encoding_%d", i);
+    SPRINTF(buf, "use_encoding_%d", i);
     m_UseEnc[i] = read(RegKey, buf, m_UseEnc[i]) != 0;
   }
 
@@ -2130,10 +2127,8 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 //char buf[256];
 //DWORD buflen = 255;
 //if (RegQueryValueEx(RegKey, (LPTSTR) "user", NULL, NULL, (LPBYTE) buf,
-//                    &buflen) == ERROR_SUCCESS && buflen > 0) {
-//  strncpy(m_user, buf, 255);
-//  m_user[255] = '\0';
-//}
+//                    &buflen) == ERROR_SUCCESS && buflen > 0)
+//  STRCPY(m_user, buf);
 
   int level =             read(RegKey, "compresslevel", -1);
   if (level != -1) {
@@ -2175,15 +2170,15 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
   HKEY RegKey;
   char key[80];
 
-  strcpy(key, keyname);
-  strcat(key, "\\");
-  strcat(key, subkey);
+  STRCPY(key, keyname);
+  STRCAT(key, "\\");
+  STRCAT(key, subkey);
   RegCreateKeyEx(HKEY_CURRENT_USER, key, 0, NULL, REG_OPTION_NON_VOLATILE,
                  KEY_ALL_ACCESS, NULL, &RegKey, &dispos);
 
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
     char buf[128];
-    sprintf(buf, "use_encoding_%d", i);
+    SPRINTF(buf, "use_encoding_%d", i);
     save(RegKey, buf, m_UseEnc[i]);
   }
 
@@ -2226,9 +2221,9 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 void VNCOptions::delkey(char subkey[256], char keyname[256])
 {
   char key[80];
-  strcpy(key, keyname);
-  strcat(key, "\\");
-  strcat(key, subkey);
+  STRCPY(key, keyname);
+  STRCAT(key, "\\");
+  STRCAT(key, subkey);
   RegDeleteKey(HKEY_CURRENT_USER, key);
 }
 
@@ -2283,7 +2278,7 @@ void VNCOptions::LoadGenOpt()
     buffersize = _MAX_PATH;
     if (RegQueryValueEx(hRegKey, "LogFileName", NULL, &valtype,
                         (LPBYTE) &buf, &buffersize) == ERROR_SUCCESS) {
-      strcpy(m_logFilename, buf);
+      STRCPY(m_logFilename, buf);
     }
     RegCloseKey(hRegKey);
   }
@@ -2306,7 +2301,7 @@ void VNCOptions::SaveGenOpt()
   RegSetValueEx(hRegKey, "LogLevel", NULL, REG_DWORD,
                 (CONST BYTE *)&m_logLevel, 4);
 
-  strcpy(buf, m_logFilename);
+  STRCPY(buf, m_logFilename);
   RegSetValueEx(hRegKey, "LogFileName", NULL, REG_SZ, (CONST BYTE *)buf,
                 (DWORD)(strlen(buf) + 1));
 
@@ -2360,7 +2355,7 @@ void VNCOptions::BrowseLogFile()
       case 0: // user cancelled
         break;
       case FNERR_INVALIDFILENAME:
-        strcpy(msg, "Invalid filename");
+        STRCPY(msg, "Invalid filename");
         MessageBox(m_hParent, msg, "Error log file", MB_ICONERROR | MB_OK);
         break;
       default:
@@ -2393,7 +2388,7 @@ void VNCOptions::setHistoryLimit(int newLimit)
     int numRead = 0;
     for (int i = 0; i < oldLimit; i++) {
       char valueName[16];
-      _sntprintf(valueName, 16, "%d", i);
+      SPRINTF(valueName, "%d", i);
       char valueData[256];
       memset(valueData, 0, 256 * sizeof(char));
       LPBYTE bufPtr = (LPBYTE)valueData;

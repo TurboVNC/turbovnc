@@ -1,4 +1,4 @@
-//  Copyright (C) 2012, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2012, 2015-2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -243,7 +243,7 @@ void VNCviewerApp32::ListenMode()
     m_pdaemon = new Daemon(m_options.m_listenPort, m_options.m_ipv6);
   } catch (WarningException &e) {
     char msg[1024];
-    sprintf(msg, "Error creating listening daemon:\n\r(%s)\n\r%s",
+    SPRINTF(msg, "Error creating listening daemon:\n\r(%s)\n\r%s",
             e.m_info, "Perhaps another VNCviewer is already running?");
     MessageBox(NULL, msg, "VNCviewer error", MB_OK | MB_ICONSTOP);
     exit(1);
@@ -261,7 +261,7 @@ void VNCviewerApp32::RegisterSounds()
   HKEY hBellKey;
   char keybuf[256];
 
-  sprintf(keybuf, "AppEvents\\EventLabels\\%s", BELL_LABEL);
+  SPRINTF(keybuf, "AppEvents\\EventLabels\\%s", BELL_LABEL);
   // First, create a label for it
   if (RegCreateKey(HKEY_CURRENT_USER, keybuf, &hBellKey) == ERROR_SUCCESS) {
     RegSetValue(hBellKey, NULL, REG_SZ, "Bell", 0);
@@ -270,19 +270,19 @@ void VNCviewerApp32::RegisterSounds()
     // Then put the detail in the app-specific area
     if (RegCreateKey(HKEY_CURRENT_USER, BELL_APPL_KEY_NAME, &hBellKey)
         == ERROR_SUCCESS) {
-      sprintf(keybuf, "%s\\%s", BELL_APPL_KEY_NAME, BELL_LABEL);
+      SPRINTF(keybuf, "%s\\%s", BELL_APPL_KEY_NAME, BELL_LABEL);
       RegCreateKey(HKEY_CURRENT_USER, keybuf, &hBellKey);
       RegSetValue(hBellKey, NULL, REG_SZ, "Bell", 0);
       RegCloseKey(hBellKey);
 
-      sprintf(keybuf, "%s\\%s\\.current", BELL_APPL_KEY_NAME, BELL_LABEL);
+      SPRINTF(keybuf, "%s\\%s\\.current", BELL_APPL_KEY_NAME, BELL_LABEL);
       if (RegOpenKey(HKEY_CURRENT_USER, keybuf, &hBellKey) != ERROR_SUCCESS) {
         RegCreateKey(HKEY_CURRENT_USER, keybuf, &hBellKey);
         RegSetValue(hBellKey, NULL, REG_SZ, "ding.wav", 0);
       }
       RegCloseKey(hBellKey);
 
-      sprintf(keybuf, "%s\\%s\\.default", BELL_APPL_KEY_NAME, BELL_LABEL);
+      SPRINTF(keybuf, "%s\\%s\\.default", BELL_APPL_KEY_NAME, BELL_LABEL);
       if (RegOpenKey(HKEY_CURRENT_USER, keybuf, &hBellKey) != ERROR_SUCCESS) {
         RegCreateKey(HKEY_CURRENT_USER, keybuf, &hBellKey);
         RegSetValue(hBellKey, NULL, REG_SZ, "ding.wav", 0);

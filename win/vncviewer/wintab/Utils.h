@@ -27,9 +27,6 @@
 //////////////////////////////////////////////////////////////////////////////
 #define WACOM_DEBUG
 
-// Ignore warnings about using unsafe string functions.
-#pragma warning( disable : 4996 )
-
 //////////////////////////////////////////////////////////////////////////////
 // Function pointers to Wintab functions exported from wintab32.dll.
 typedef UINT ( API * WTINFOA ) ( UINT, UINT, LPVOID );

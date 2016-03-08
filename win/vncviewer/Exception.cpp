@@ -1,4 +1,4 @@
-//  Copyright (C) 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2015-2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -21,13 +21,14 @@
 
 #include "stdhdrs.h"
 #include "Exception.h"
+#include "safestr.h"
 
 
 Exception::Exception(const char *info)
 {
   assert(info != NULL);
   m_info = new char[strlen(info) + 1];
-  strcpy(m_info, info);
+  STRNCPY(m_info, info, strlen(info) + 1);
 }
 
 

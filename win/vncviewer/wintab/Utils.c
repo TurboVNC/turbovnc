@@ -8,6 +8,7 @@
 
 	COPYRIGHT
 		Copyright (c) Wacom Company, Ltd. 2014 All Rights Reserved
+		Copyright (c) D. R. Commander 2016 All Rights Reserved
 		All rights reserved.
 
 		The text and information contained in this file may be freely used,
@@ -174,8 +175,8 @@ void WacomTrace( char *lpszFormat, ...)
 
 	va_start( args, lpszFormat );
 
-	nBytesWritten = _vsnprintf( szTraceMessage, sizeof( szTraceMessage ) - 1,
-		lpszFormat, args );
+	nBytesWritten = _vsnprintf_s( szTraceMessage, _countof( szTraceMessage ),
+		_TRUNCATE, lpszFormat, args );
 
 	if ( nBytesWritten > 0 )
 	{

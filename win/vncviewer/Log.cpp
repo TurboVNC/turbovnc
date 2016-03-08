@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2015-2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -110,11 +110,10 @@ void Log::CloseFile()
 void Log::ReallyPrint(LPTSTR format, va_list ap)
 {
   char line[LINE_BUFFER_SIZE];
-  _vsntprintf(line, sizeof(line) - 2 * sizeof(char), format, ap);
-  line[LINE_BUFFER_SIZE-2] = (char)'\0';
+  _vsntprintf_s(line, _countof(line), _TRUNCATE, format, ap);
+  line[LINE_BUFFER_SIZE - 2] = (char)'\0';
   int len = (int)strlen(line);
-  if (len > 0 && len <= sizeof(line) - 2 * sizeof(char) &&
-      line[len-1] == (char)'\n') {
+  if (len > 0 && len <= LINE_BUFFER_SIZE - 2 && line[len - 1] == (char)'\n') {
     // Replace trailing '\n' with MS-DOS style end-of-line.
     line[len - 1] = (char)'\r';
     line[len]     = (char)'\n';

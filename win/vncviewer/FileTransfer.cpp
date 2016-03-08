@@ -208,7 +208,7 @@ LRESULT CALLBACK FileTransfer::FileTransferDlgProc(HWND hwnd, UINT uMsg,
               MessageBox(hwnd, "Sorry but the server does not support uploading files.",
                          "Error", MB_OK | MB_ICONEXCLAMATION);
               char buf[MAX_PATH];
-              sprintf(buf, "File upload not supported by server");
+              SPRINTF(buf, "File upload not supported by server");
               SetWindowText(_this->m_hwndFTStatus, buf);
               return TRUE;
             }
@@ -219,7 +219,7 @@ LRESULT CALLBACK FileTransfer::FileTransferDlgProc(HWND hwnd, UINT uMsg,
               MessageBox(hwnd, "Sorry but the server does not support downloading files.",
                          "Error", MB_OK | MB_ICONEXCLAMATION);
               char buf[MAX_PATH];
-              sprintf(buf, "File download not supported by server");
+              SPRINTF(buf, "File download not supported by server");
               SetWindowText(_this->m_hwndFTStatus, buf);
               return TRUE;
             }
@@ -246,14 +246,14 @@ LRESULT CALLBACK FileTransfer::FileTransferDlgProc(HWND hwnd, UINT uMsg,
           if (_this->m_bUploadStarted &&
               !_this->m_clientconn->m_clientMsgCaps.IsEnabled(rfbFileUploadFailed)) {
             char buf[MAX_PATH];
-            sprintf(buf, "Sorry, but interrupting upload is not supported by the server");
+            SPRINTF(buf, "Sorry, but interrupting upload is not supported by the server");
             SetWindowText(_this->m_hwndFTStatus, buf);
             return TRUE;
           }
           if (_this->m_bDownloadStarted &&
               !_this->m_clientconn->m_clientMsgCaps.IsEnabled(rfbFileDownloadCancel)) {
             char buf[MAX_PATH];
-            sprintf(buf, "Sorry, but interrupting download is not supported by the server");
+            SPRINTF(buf, "Sorry, but interrupting download is not supported by the server");
             SetWindowText(_this->m_hwndFTStatus, buf);
             return TRUE;
           }
@@ -442,9 +442,9 @@ BOOL FileTransfer::SendFileDownloadRequest()
   }
   ListView_GetItemText(m_hwndFTServerList, m_currentDownloadIndex, 0,
                        m_ServerFilename, rfbMAX_PATH);
-  strcpy(m_ClientFilename, m_ServerFilename);
+  STRCPY(m_ClientFilename, m_ServerFilename);
   char buffer[rfbMAX_PATH + rfbMAX_PATH + rfbMAX_PATH];
-  sprintf(buffer, "Downloading: %s\\%s -> %s\\%s ...",
+  SPRINTF(buffer, "Downloading: %s\\%s -> %s\\%s ...",
           m_ServerPath, m_ServerFilename, m_ClientPath, m_ClientFilename);
   SetWindowText(m_hwndFTStatus, buffer);
   m_sizeDownloadFile = m_FTServerItemInfo.GetIntSizeAt(m_currentDownloadIndex);
@@ -452,7 +452,7 @@ BOOL FileTransfer::SendFileDownloadRequest()
   fdr.type = rfbFileDownloadRequest;
   fdr.compressedLevel = 0;
   fdr.position = Swap32IfLE(0);
-  sprintf(path, "%s\\%s", m_ServerPath, m_ServerFilename);
+  SPRINTF(path, "%s\\%s", m_ServerPath, m_ServerFilename);
   ConvertPath(path);
   int len = (int)strlen(path);
   fdr.fNameSize = Swap16IfLE(len);
@@ -519,8 +519,8 @@ void FileTransfer::FileTransferUpload()
     currentUploadIndex = index;
     ListView_GetItemText(m_hwndFTClientList, currentUploadIndex, 0,
                          m_ClientFilename, rfbMAX_PATH);
-    sprintf(path, "%s\\%s", m_ClientPath, m_ClientFilename);
-    strcpy(m_UploadFilename, path);
+    SPRINTF(path, "%s\\%s", m_ClientPath, m_ClientFilename);
+    STRCPY(m_UploadFilename, path);
     WIN32_FIND_DATA FindFileData;
     UINT savedErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
     HANDLE hFile = FindFirstFile(path, &FindFileData);
@@ -537,7 +537,7 @@ void FileTransfer::FileTransferUpload()
     } else {
       sz_rfbFileSize = FindFileData.nFileSizeLow;
       mTime = FiletimeToTime70(FindFileData.ftLastWriteTime);
-      strcpy(m_ServerFilename, FindFileData.cFileName);
+      STRCPY(m_ServerFilename, FindFileData.cFileName);
     }
     FindClose(hFile);
     if ((sz_rfbFileSize != 0) &&
@@ -553,10 +553,10 @@ void FileTransfer::FileTransferUpload()
       return;
     }
     char buffer[rfbMAX_PATH + rfbMAX_PATH + rfbMAX_PATH + rfbMAX_PATH + 20];
-    sprintf(buffer, "Uploading: %s\\%s -> %s\\%s ...",
+    SPRINTF(buffer, "Uploading: %s\\%s -> %s\\%s ...",
             m_ClientPath, m_ClientFilename, m_ServerPath, m_ServerFilename);
     SetWindowText(m_hwndFTStatus, buffer);
-    sprintf(path, "%s\\%s", m_ServerPath, m_ClientFilename);
+    SPRINTF(path, "%s\\%s", m_ServerPath, m_ClientFilename);
     ConvertPath(path);
     int pathLen = (int)strlen(path);
 
@@ -658,8 +658,8 @@ void FileTransfer::FileTransferDownload()
 
   if (m_bFirstFileDownloadMsg) {
     m_dwDownloadBlockSize = fdd.compressedSize;
-    sprintf(path, "%s\\%s", m_ClientPath, m_ServerFilename);
-    strcpy(m_DownloadFilename, path);
+    SPRINTF(path, "%s\\%s", m_ClientPath, m_ServerFilename);
+    STRCPY(m_DownloadFilename, path);
     m_hFiletoWrite = CreateFile(path, GENERIC_WRITE,
                                 FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
                                 CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN,
@@ -744,15 +744,15 @@ void FileTransfer::ShowClientItems(char *path)
     LengthDrivesString = GetLogicalDriveStrings(256, DrivesString);
     if ((LengthDrivesString == 0) || (LengthDrivesString > 256)) {
       BlockingFileTransferDialog(TRUE);
-      strcpy(m_ClientPathTmp, m_ClientPath);
+      STRCPY(m_ClientPathTmp, m_ClientPath);
       return;
     } else {
-      strcpy(m_ClientPath, m_ClientPathTmp);
+      STRCPY(m_ClientPath, m_ClientPathTmp);
       SetWindowText(m_hwndFTClientPath, m_ClientPath);
       for (int i = 0; i < 256; i++) {
         DriveName[0] = DrivesString[i];
         char txt[16];
-        strcpy(txt, m_FTClientItemInfo.folderText);
+        STRCPY(txt, m_FTClientItemInfo.folderText);
         m_FTClientItemInfo.Add(DriveName, txt, 0);
         DriveName[0] = '\0';
         i += 3;
@@ -767,20 +767,20 @@ void FileTransfer::ShowClientItems(char *path)
     HANDLE m_handle;
     int n = 0;
     WIN32_FIND_DATA m_FindFileData;
-    strcat(path, "\\*");
+    STRNCAT(path, "\\*", rfbMAX_PATH);
     UINT savedErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
     m_handle = FindFirstFile(path, &m_FindFileData);
     DWORD LastError = GetLastError();
     SetErrorMode(savedErrorMode);
     if (m_handle == INVALID_HANDLE_VALUE) {
       if (LastError != ERROR_SUCCESS && LastError != ERROR_FILE_NOT_FOUND) {
-        strcpy(m_ClientPathTmp, m_ClientPath);
+        STRCPY(m_ClientPathTmp, m_ClientPath);
         FindClose(m_handle);
         BlockingFileTransferDialog(TRUE);
         return;
       }
       path[strlen(path) - 2] = '\0';
-      strcpy(m_ClientPath, m_ClientPathTmp);
+      STRCPY(m_ClientPath, m_ClientPathTmp);
       SetWindowText(m_hwndFTClientPath, m_ClientPath);
       FindClose(m_handle);
       ListView_DeleteAllItems(m_hwndFTClientList);
@@ -794,14 +794,14 @@ void FileTransfer::ShowClientItems(char *path)
       if ((strcmp(m_FindFileData.cFileName, ".") != 0) &&
           (strcmp(m_FindFileData.cFileName, "..") != 0)) {
         if (!(m_FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-          sprintf(buffer, "%d", m_FindFileData.nFileSizeLow);
+          SPRINTF(buffer, "%d", m_FindFileData.nFileSizeLow);
           LARGE_INTEGER li;
           li.LowPart = m_FindFileData.ftLastWriteTime.dwLowDateTime;
           li.HighPart = m_FindFileData.ftLastWriteTime.dwHighDateTime;
           li.QuadPart = (li.QuadPart - 116444736000000000) / 10000000;
           m_FTClientItemInfo.Add(m_FindFileData.cFileName, buffer, li.LowPart);
         } else {
-          strcpy(buffer, m_FTClientItemInfo.folderText);
+          STRCPY(buffer, m_FTClientItemInfo.folderText);
           m_FTClientItemInfo.Add(m_FindFileData.cFileName, buffer, 0);
         }
       }
@@ -811,7 +811,7 @@ void FileTransfer::ShowClientItems(char *path)
     m_FTClientItemInfo.Sort();
     ShowListViewItems(m_hwndFTClientList, &m_FTClientItemInfo);
     path[strlen(path) - 2] = '\0';
-    strcpy(m_ClientPath, m_ClientPathTmp);
+    STRCPY(m_ClientPath, m_ClientPathTmp);
     SetWindowText(m_hwndFTClientPath, m_ClientPath);
   }
   BlockingFileTransferDialog(TRUE);
@@ -872,13 +872,13 @@ BOOL CALLBACK FileTransfer::FTBrowseDlgProc(HWND hwnd, UINT uMsg,
             return TRUE;
           }
           if (_this->m_bServerBrowseRequest) {
-            strcpy(_this->m_ServerPathTmp, path);
+            STRCPY(_this->m_ServerPathTmp, path);
             EndDialog(hwnd, TRUE);
             _this->m_bServerBrowseRequest = FALSE;
             _this->SendFileListRequestMessage(_this->m_ServerPathTmp, 0);
             return TRUE;
           } else {
-            strcpy(_this->m_ClientPathTmp, path);
+            STRCPY(_this->m_ClientPathTmp, path);
             EndDialog(hwnd, TRUE);
             _this->ShowClientItems(_this->m_ClientPathTmp);
           }
@@ -950,8 +950,8 @@ void FileTransfer::GetTVPath(HWND hwnd, HTREEITEM hTItem, char *path)
     _tvi.pszText = szText;
     _tvi.cchTextMax = rfbMAX_PATH;
     TreeView_GetItem(hwnd, &_tvi);
-    strcat(path, "\\");
-    strcat(path, _tvi.pszText);
+    STRNCAT(path, "\\", rfbMAX_PATH);
+    STRNCAT(path, _tvi.pszText, rfbMAX_PATH);
     hTItem = TreeView_GetParent(hwnd, hTItem);
   }
   while (hTItem != NULL);
@@ -963,8 +963,8 @@ void FileTransfer::GetTVPath(HWND hwnd, HTREEITEM hTItem, char *path)
   for (int i = (len - 1); i >= 0; i--) {
     if (path[i] == '\\') {
       StrInvert(path_tmp);
-      strcat(path_out, path_tmp);
-      strcat(path_out, "\\");
+      STRCAT(path_out, path_tmp);
+      STRCAT(path_out, "\\");
       path_tmp[0] = '\0';
       ii = 0;
     } else {
@@ -975,7 +975,7 @@ void FileTransfer::GetTVPath(HWND hwnd, HTREEITEM hTItem, char *path)
   }
   if (path_out[strlen(path_out) - 1] == '\\')
     path_out[strlen(path_out) - 1] = '\0';
-  strcpy(path, path_out);
+  STRNCPY(path, path_out, rfbMAX_PATH);
 }
 
 
@@ -986,7 +986,7 @@ void FileTransfer::StrInvert(char str[rfbMAX_PATH])
   str_out[0] = '\0';
   for (i = (len-1); i >= 0; i--) str_out[len - i - 1] = str[i];
   str_out[len] = '\0';
-  strcpy(str, str_out);
+  STRNCPY(str, str_out, rfbMAX_PATH);
 }
 
 
@@ -998,7 +998,7 @@ void FileTransfer::ShowTreeViewItems(HWND hwnd, LPNMTREEVIEW m_lParam)
   TVINSERTSTRUCT tvins;
   char path[rfbMAX_PATH];
   GetTVPath(GetDlgItem(hwnd, IDC_FTBROWSETREE), m_lParam->itemNew.hItem, path);
-  strcat(path, "\\*");
+  STRCAT(path, "\\*");
   while (TreeView_GetChild(GetDlgItem(hwnd, IDC_FTBROWSETREE),
                            m_lParam->itemNew.hItem) != NULL) {
     TreeView_DeleteItem(GetDlgItem(hwnd, IDC_FTBROWSETREE),
@@ -1074,7 +1074,7 @@ void FileTransfer::ShowServerItems()
   if (!m_bServerBrowseRequest) {
     if (fld.numFiles == 0) {
       BlockingFileTransferDialog(TRUE);
-      strcpy(m_ServerPath, m_ServerPathTmp);
+      STRCPY(m_ServerPath, m_ServerPathTmp);
       SetWindowText(m_hwndFTServerPath, m_ServerPath);
       ListView_DeleteAllItems(m_hwndFTServerList);
       delete [] pftSD;
@@ -1083,7 +1083,7 @@ void FileTransfer::ShowServerItems()
     } else {
       m_FTServerItemInfo.Free();
       ListView_DeleteAllItems(m_hwndFTServerList);
-      strcpy(m_ServerPath, m_ServerPathTmp);
+      STRCPY(m_ServerPath, m_ServerPathTmp);
       SetWindowText(m_hwndFTServerPath, m_ServerPath);
       CreateServerItemInfoList(&m_FTServerItemInfo, pftSD, fld.numFiles,
                                pFilenames, fld.dataSize);
@@ -1128,7 +1128,7 @@ void FileTransfer::SendFileListRequestMessage(char *filename,
                                               unsigned char flags)
 {
   char _filename[rfbMAX_PATH];
-  strcpy(_filename, filename);
+  STRCPY(_filename, filename);
   int len = (int)strlen(_filename);
   if (_filename[len - 1] == '\\') _filename[len - 1] = '\0';
   ConvertPath(_filename);
@@ -1147,15 +1147,15 @@ void FileTransfer::ProcessListViewDBLCLK(HWND hwnd, char *Path, char *PathTmp,
 {
   SendMessage(m_hwndFTProgress, PBM_SETPOS, 0, 0);
   SetWindowText(m_hwndFTStatus, "");
-  strcpy(PathTmp, Path);
+  STRNCPY(PathTmp, Path, rfbMAX_PATH);
   char buffer[rfbMAX_PATH];
   char buffer_tmp[16];
   ListView_GetItemText(hwnd, iItem, 0, buffer, rfbMAX_PATH);
   ListView_GetItemText(hwnd, iItem, 1, buffer_tmp, 16);
   if (strcmp(buffer_tmp, m_FTClientItemInfo.folderText) == 0) {
     BlockingFileTransferDialog(FALSE);
-    if (strlen(PathTmp) >= 2) strcat(PathTmp, "\\");
-    strcat(PathTmp, buffer);
+    if (strlen(PathTmp) >= 2) STRNCAT(PathTmp, "\\", rfbMAX_PATH);
+    STRNCAT(PathTmp, buffer, rfbMAX_PATH);
     if (hwnd == m_hwndFTClientList) ShowClientItems(PathTmp);
     if (hwnd == m_hwndFTServerList) SendFileListRequestMessage(PathTmp, 0);
   }
@@ -1166,7 +1166,10 @@ void FileTransfer::ConvertPath(char *path)
 {
   int len = (int)strlen(path);
   if (len >= rfbMAX_PATH) return;
-  if (strcmp(path, "") == 0) {strcpy(path, "/"); return;}
+  if (strcmp(path, "") == 0) {
+    STRNCPY(path, "/", rfbMAX_PATH);
+    return;
+  }
   for (int i = (len - 1); i >= 0; i--) {
     if (path[i] == '\\') path[i] = '/';
     path[i + 1] = path[i];
@@ -1227,9 +1230,9 @@ void FileTransfer::CreateServerItemInfoList(FileTransferItemInfo *pftii,
     ftsd[i].size = Swap32IfLE(ftsd[i].size);
     ftsd[i].data = Swap32IfLE(ftsd[i].data);
     if (ftsd[i].size == -1) {
-      strcpy(buf, FileTransferItemInfo::folderText);
+      STRCPY(buf, FileTransferItemInfo::folderText);
     } else {
-      sprintf(buf, "%d", ftsd[i].size);
+      SPRINTF(buf, "%d", ftsd[i].size);
     }
     pftii->Add(pfnames + pos, buf, ftsd[i].data);
     pos += (int)strlen(pfnames + pos) + 1;
@@ -1306,7 +1309,7 @@ void FileTransfer::ReadUploadCancel()
   // Report error (only once per upload)
   if (m_bReportUploadCancel) {
     char *errmsg = new char[128 + len];
-    sprintf(errmsg, "Upload failed: %s", reason);
+    snprintf(errmsg, 128 + len, "Upload failed: %s", reason);
     MessageBox(m_hwndFileTransfer, errmsg, "Upload Failed",
                MB_ICONEXCLAMATION | MB_OK);
     SetWindowText(m_hwndFTStatus, errmsg);
@@ -1341,7 +1344,7 @@ void FileTransfer::ReadDownloadFailed()
   // Report error
   if (downloadActive) {
     char *errmsg = new char[128 + len];
-    sprintf(errmsg, "Download failed: %s", reason);
+    snprintf(errmsg, 128 + len, "Download failed: %s", reason);
     MessageBox(m_hwndFileTransfer, errmsg, "Download Failed",
                MB_ICONEXCLAMATION | MB_OK);
     SetWindowText(m_hwndFTStatus, errmsg);

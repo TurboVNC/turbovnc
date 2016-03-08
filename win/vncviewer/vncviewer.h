@@ -1,6 +1,6 @@
-//  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2012, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005 Sun Microsystems, Inc. All Rights Reserved.
-//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -63,14 +63,10 @@ void CenterWindow(HWND hwnd);
 
 // Convert "host:display" into host and port
 // Returns true if valid.
-bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *port);
-void FormatDisplay(int port, LPTSTR display, LPTSTR host);
+bool ParseDisplay(LPTSTR display, int displaylen, LPTSTR phost, int hostlen,
+                  int *port);
+void FormatDisplay(int port, LPTSTR display, int displaylen, LPTSTR host);
 
-
-// _snprintf() doesn't always terminate the string, so we use _snprintf_s()
-// instead and define a macro that works like the Unix version.
-#define snprintf(str, n, format, ...)  \
-  _snprintf_s(str, n, _TRUNCATE, format, __VA_ARGS__)
 
 __inline double getTime(void)
 {

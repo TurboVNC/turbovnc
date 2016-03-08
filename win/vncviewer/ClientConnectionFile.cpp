@@ -1,3 +1,4 @@
+//  Copyright (C) 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -64,13 +65,13 @@ void ClientConnection::SaveConnection()
     memcpy(fname, m_host, ptr - m_host);
     fname[ptr - m_host] = '\0';
   } else {
-    sprintf(fname, "%.24s", m_host);
+    SPRINTF(fname, "%.24s", m_host);
   }
   // Append the port number, if it's not the default port
   if (PORT_TO_DISPLAY(m_port) != 0)
-    sprintf(&fname[strlen(fname)], "-%d", m_port);
+    snprintf(&fname[strlen(fname)], _MAX_PATH - strlen(fname), "-%d", m_port);
   // Finally, append the .vnc suffix (NOTE: there will be no buffer overrun)
-  strcat(fname, ".vnc");
+  STRCAT(fname, ".vnc");
 
   ofn.hwndOwner = m_hwnd;
   ofn.lpstrFile = fname;
@@ -83,7 +84,7 @@ void ClientConnection::SaveConnection()
       case 0: // user cancelled
         break;
       case FNERR_INVALIDFILENAME:
-        strcpy(msg, "Invalid filename");
+        STRCPY(msg, "Invalid filename");
         MessageBox(m_hwnd, msg, "Error saving file", MB_ICONERROR | MB_OK);
         break;
       default:
@@ -95,7 +96,7 @@ void ClientConnection::SaveConnection()
   vnclog.Print(1, "Saving to %s\n", fname);
   int ret = WritePrivateProfileString("connection", "host", m_host, fname);
   char buf[32];
-  sprintf(buf, "%d", m_port);
+  SPRINTF(buf, "%d", m_port);
   WritePrivateProfileString("connection", "port", buf, fname);
   buf[0] = '\0';
   if (m_authScheme == rfbAuthVNC) {
@@ -107,7 +108,8 @@ void ClientConnection::SaveConnection()
       MB_YESNO | MB_ICONWARNING) == IDYES)
     {
       for (int i = 0; i < MAXPWLEN; i++)
-        sprintf(buf+i*2, "%02x", (unsigned int) m_encPasswd[i]);
+        snprintf(buf + i * 2, 32 - i * 2, "%02x",
+                 (unsigned int)m_encPasswd[i]);
       WritePrivateProfileString("connection", "password", buf, fname);
     }
   }
@@ -143,7 +145,7 @@ int ClientConnection::LoadConnection(char *fname, bool sess)
                "Config file error", MB_ICONERROR | MB_OK);
     return -1;
   }
-  FormatDisplay(m_port, m_opts.m_display, m_host);
+  FormatDisplay(m_port, m_opts.m_display, _countof(m_opts.m_display), m_host);
 
   char buf[1026];
   m_passwdSet = false;
@@ -151,7 +153,7 @@ int ClientConnection::LoadConnection(char *fname, bool sess)
                               fname) > 0) {
     for (int i = 0; i < MAXPWLEN; i++)  {
       int x = 0;
-      sscanf(buf+i*2, "%2x", &x);
+      sscanf_s(buf + i * 2, "%2x", &x);
       m_encPasswd[i] = (unsigned char) x;
     }
     m_passwdSet = true;

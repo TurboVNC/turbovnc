@@ -48,7 +48,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
   if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),  \
                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), message,  \
                      256, NULL))  \
-    strncpy(message, "Error in FormatMessage()", 256);  \
+    strncpy_s(message, _countof(message), "Error in FormatMessage()",  \
+              _TRUNCATE);  \
   _throw(message);  \
 }
 

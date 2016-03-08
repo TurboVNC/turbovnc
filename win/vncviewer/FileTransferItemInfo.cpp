@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 Dennis Syrovatsky. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -23,6 +23,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "windows.h"
+#include "safestr.h"
 
 const char FileTransferItemInfo::folderText[] = "<Folder>";
 
@@ -30,14 +31,14 @@ const char FileTransferItemInfo::folderText[] = "<Folder>";
 int CompareFTItemInfo(const void *F, const void *S)
 {
   if (strcmp(((FTITEMINFO *)F)->Size, ((FTITEMINFO *)S)->Size) == 0) {
-    return stricmp(((FTITEMINFO *)F)->Name, ((FTITEMINFO *)S)->Name);
+    return _stricmp(((FTITEMINFO *)F)->Name, ((FTITEMINFO *)S)->Name);
   } else {
     if (strcmp(((FTITEMINFO *)F)->Size, FileTransferItemInfo::folderText) == 0)
       return -1;
     if (strcmp(((FTITEMINFO *)S)->Size, FileTransferItemInfo::folderText) == 0)
       return 1;
     else
-      return stricmp(((FTITEMINFO *)F)->Name, ((FTITEMINFO *)S)->Name);
+      return _stricmp(((FTITEMINFO *)F)->Name, ((FTITEMINFO *)S)->Name);
   }
   return 0;
 }
@@ -61,8 +62,8 @@ void FileTransferItemInfo::Add(char *Name, char *Size, unsigned int Data)
   FTITEMINFO *pTemporary = new FTITEMINFO[m_NumEntries + 1];
   if (m_NumEntries != 0)
     memcpy(pTemporary, m_pEntries, m_NumEntries * sizeof(FTITEMINFO));
-  strcpy(pTemporary[m_NumEntries].Name, Name);
-  strcpy(pTemporary[m_NumEntries].Size, Size);
+  STRCPY(pTemporary[m_NumEntries].Name, Name);
+  STRCPY(pTemporary[m_NumEntries].Size, Size);
   pTemporary[m_NumEntries].Data = Data;
   if (m_pEntries != NULL) {
     delete [] m_pEntries;

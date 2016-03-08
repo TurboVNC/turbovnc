@@ -1,4 +1,4 @@
-//  Copyright (C) 2013 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2013, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 //
@@ -36,7 +36,9 @@ static char *getCmdPattern(bool tunnelOption)
 {
   char *pattern;
 
+#pragma warning(disable: 4996)
   pattern = getenv(tunnelOption ? "VNC_TUNNEL_CMD" : "VNC_VIA_CMD");
+#pragma warning(default: 4996)
   if (pattern == NULL) {
     DWORD attrib = GetFileAttributes(DEFAULT_SSH_CMD);
     if (attrib == INVALID_FILE_ATTRIBUTES ||
@@ -96,22 +98,22 @@ static void fillCmdPattern(char *result, char *pattern,
     if (pattern[i] == '%') {
       switch (pattern[++i]) {
         case 'H':
-          strncpy(&result[j], remoteHost, 1024 - j);
+          STRNCPY(&result[j], remoteHost, 1024 - j);
           j += (int)strlen(remoteHost) - 1;
           H_found = true;
           continue;
         case 'G':
-          strncpy(&result[j], gatewayHost, 1024 - j);
+          STRNCPY(&result[j], gatewayHost, 1024 - j);
           j += (int)strlen(gatewayHost) - 1;
           G_found = true;
           continue;
         case 'R':
-          strncpy(&result[j], remotePort, 1024 - j);
+          STRNCPY(&result[j], remotePort, 1024 - j);
           j += (int)strlen(remotePort) - 1;
           R_found = true;
           continue;
         case 'L':
-          strncpy(&result[j], localPort, 1024 - j);
+          STRNCPY(&result[j], localPort, 1024 - j);
           j += (int)strlen(localPort) - 1;
           L_found = true;
           continue;
@@ -153,14 +155,14 @@ void ClientConnection::SetupSSHTunnel(void)
   if (localPort == 0)
     throw WarningException("Could not find free TCP port");
 
-  snprintf(localPortStr, 8, "%d", localPort);
-  snprintf(remotePortStr, 8, "%d", m_port);
+  SPRINTF(localPortStr, "%d", localPort);
+  SPRINTF(remotePortStr, "%d", m_port);
 
   fillCmdPattern(cmd, pattern, m_opts.m_gatewayHost, m_host, remotePortStr,
                  localPortStr, tunnelOption);
 
   m_port = localPort;
-  snprintf(m_host, MAX_HOST_NAME_LEN, "localhost");
+  SPRINTF(m_host, "localhost");
 
   if (system(cmd) != 0)
 		throw WarningException("Could not start SSH client to create tunnel");

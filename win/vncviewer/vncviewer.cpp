@@ -145,9 +145,10 @@ void CenterWindow(HWND hwnd)
 // be invalid, so false is returned.  If the function returns true, then it
 // also replaces the display[] string with its canonical representation.
 
-bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
+bool ParseDisplay(LPTSTR display, int displaylen, LPTSTR phost, int hostlen,
+                  int *pport)
 {
-  if (hostlen < (int)strlen(display))
+  if (hostlen - 1 < (int)strlen(display))
       return false;
 
   int tmp_port;
@@ -176,18 +177,18 @@ bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
   if (colonpos == NULL) {
     // No colon -- use default port number
     tmp_port = RFB_PORT_OFFSET;
-    strncpy(phost, display, MAX_HOST_NAME_LEN);
+    STRNCPY(phost, display, hostlen);
     phost[MAX_HOST_NAME_LEN] = '\0';
   } else {
-    strncpy(phost, display, colonpos - display);
+    STRNCPY(phost, display, hostlen);
     phost[colonpos - display] = '\0';
     if (colonpos[1] == ':') {
       // Two colons -- interpret as a port number
-      if (sscanf(colonpos + 2, TEXT("%d"), &tmp_port) != 1)
+      if (sscanf_s(colonpos + 2, TEXT("%d"), &tmp_port) != 1)
         return false;
     } else {
       // One colon -- interpret as a display or port number
-      if (sscanf(colonpos + 1, TEXT("%d"), &tmp_port) != 1)
+      if (sscanf_s(colonpos + 1, TEXT("%d"), &tmp_port) != 1)
         return false;
       if (tmp_port < 100)
         tmp_port += RFB_PORT_OFFSET;
@@ -196,20 +197,20 @@ bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
   *pport = tmp_port;
 
   if (strlen(phost) == 0)
-    sprintf(phost, "localhost");
+    STRNCPY(phost, "localhost", hostlen);
 
-  FormatDisplay(tmp_port, display, phost);
+  FormatDisplay(tmp_port, display, displaylen, phost);
   return true;
 }
 
 
-void FormatDisplay(int port, LPTSTR display, LPTSTR host)
+void FormatDisplay(int port, LPTSTR display, int displaylen, LPTSTR host)
 {
   if (port == 5900) {
-    strcpy(display, host);
+    STRNCPY(display, host, displaylen);
   } else if (port > 5900 && port <= 5999) {
-    sprintf(display, TEXT("%s:%d"), host, port - 5900);
+    snprintf(display, displaylen, TEXT("%s:%d"), host, port - 5900);
   } else {
-    sprintf(display, TEXT("%s::%d"), host, port);
+    snprintf(display, displaylen, TEXT("%s::%d"), host, port);
   }
 }

@@ -1,4 +1,4 @@
-//  Copyright (C) 2015 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2015-2016 D. R. Commander.  All Rights Reserved.
 //
 //  This is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ char *stristr(const char *s1, const char *s2)
   if (!s1 || !s2 || strlen(s1) < 1 || strlen(s2) < 1)
     return NULL;
 
-  str1 = strdup(s1);
+  str1 = _strdup(s1);
   for(i = 0; i < (int)strlen(str1); i++)
     str1[i] = tolower(str1[i]);
-  str2 = strdup(s2);
+  str2 = _strdup(s2);
   for(i = 0; i < (int)strlen(str2); i++)
     str2[i] = tolower(str2[i]);
 
@@ -127,7 +127,7 @@ void ClientConnection::SendGIIDeviceCreate(ExtInputDevice &dev)
   giidc.endianAndSubType = rfbGIIDeviceCreate | rfbGIIBE;
   giidc.length = Swap16IfLE(sz_rfbGIIDeviceCreateMsg - 4 +
                             dev.valuators.size() * sz_rfbGIIValuator);
-  strncpy((char *)giidc.deviceName, dev.name, 32);
+  STRNCPY((char *)giidc.deviceName, dev.name, 32);
   giidc.vendorID = Swap32IfLE(dev.vendorID);
   giidc.productID = Swap32IfLE(dev.productID);
   giidc.canGenerate = Swap32IfLE(dev.canGenerate);
@@ -324,7 +324,7 @@ void ClientConnection::CreateWacomGIIDevices(void)
                ++nErasers);
     } else continue;
 
-    strncpy(dev.name, curName, 32);
+    STRCPY(dev.name, curName);
     dev.vendorID = 4242;
     dev.id = i;
 

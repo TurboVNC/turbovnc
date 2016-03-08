@@ -50,6 +50,7 @@ extern "C" {
 #include "d3des.h"
 }
 #include "screenTypes.h"
+#include "safestr.h"
 
 #define INITIALNETBUFSIZE 4096
 #define MAX_ENCODINGS 20
@@ -111,14 +112,14 @@ ClientConnection::ClientConnection(VNCviewerApp *pApp, SOCKET sock) :
       &sasize) != SOCKET_ERROR &&
       getnameinfo((struct sockaddr *)&svraddr, sasize, hostname,
                   NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == 0) {
-    _sntprintf(m_host, 256, "%s", hostname);
+    SPRINTF(m_host, "%s", hostname);
     m_host[255] = 0;
     if (svraddr.ss_family == AF_INET6)
       m_port = ((sockaddr_in6 *)&svraddr)->sin6_port;
     else
       m_port = ((sockaddr_in *)&svraddr)->sin_port;
   } else {
-    strcpy(m_host, "(unknown)");
+    STRCPY(m_host, "(unknown)");
     m_port = 0;
   };
 }
@@ -128,7 +129,7 @@ ClientConnection::ClientConnection(VNCviewerApp *pApp, LPTSTR host, int port) :
   BENCHMARKINIT
 {
   Init(pApp);
-  strncpy(m_host, host, MAX_HOST_NAME_LEN);
+  STRCPY(m_host, host);
   m_port = port;
 }
 
@@ -715,7 +716,7 @@ void ClientConnection::SaveConnectionHistory()
   int numRead = 0;
   for (i = 0; i < maxEntries; i++) {
     char valueName[16];
-    _sntprintf(valueName, 16, "%d", i);
+    SPRINTF(valueName, "%d", i);
     LPBYTE bufPtr = (LPBYTE)connList[numRead];
     DWORD bufSize = (entryBufferSize - 1) * sizeof(char);
     LONG err = RegQueryValueEx(hKey, valueName, 0, 0, bufPtr, &bufSize);
@@ -738,7 +739,7 @@ void ClientConnection::SaveConnectionHistory()
   for (i = 0; i < numRead && numWritten < maxEntries; i++) {
     if (strcmp(connList[i], m_opts.m_display) != 0) {
       char keyName[16];
-      _sntprintf(keyName, 16, "%d", numWritten);
+      SPRINTF(keyName, "%d", numWritten);
       LPBYTE bufPtr = (LPBYTE)connList[i];
       DWORD bufSize = (DWORD)((strlen(connList[i]) + 1) * sizeof(char));
       RegSetValueEx(hKey, keyName, 0, REG_SZ, bufPtr, bufSize);
@@ -868,15 +869,15 @@ void ClientConnection::Connect()
   // Winsock will resolve localhost to ::1 if left to its own devices.  We
   // force localhost to resolve to 127.0.0.1 instead, unless the /ipv6 option
   // was specified.  This mimics the behavior of Java.
-  if (!stricmp(hostname, "localhost") && !m_opts.m_ipv6)
+  if (!_stricmp(hostname, "localhost") && !m_opts.m_ipv6)
     hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
-  snprintf(portname, 10, "%d", m_port);
+  SPRINTF(portname, "%d", m_port);
   if (strlen(hostname) < 1)
     hostname = NULL;
   if (getaddrinfo(hostname, portname, &hints, &addr) != 0) {
     char msg[512];
-    sprintf(msg, "Failed to get server address (%s).\n"
+    SPRINTF(msg, "Failed to get server address (%s).\n"
             "Did you type the host name correctly?", m_host);
     throw WarningException(msg);
   }
@@ -891,7 +892,7 @@ void ClientConnection::Connect()
   res = connect(m_sock, addr->ai_addr, (int)addr->ai_addrlen);
   if (res == SOCKET_ERROR) {
     char msg[512];
-    sprintf(msg, "Failed to connect to server (%.255s)", m_opts.m_display);
+    SPRINTF(msg, "Failed to connect to server (%.255s)", m_opts.m_display);
     freeaddrinfo(addr);
     throw WarningException(msg);
   }
@@ -925,7 +926,8 @@ void ClientConnection::NegotiateProtocolVersion()
     m_connDlg->SetStatus("Server protocol version received");
 
   int majorVersion, minorVersion;
-  if (sscanf(pv, rfbProtocolVersionFormat, &majorVersion, &minorVersion) != 2) {
+  if (sscanf_s(pv, rfbProtocolVersionFormat, &majorVersion, &minorVersion)
+      != 2) {
     throw WarningException("Invalid protocol");
   }
   vnclog.Print(0, "RFB server supports protocol version 3.%d\n",
@@ -941,7 +943,7 @@ void ClientConnection::NegotiateProtocolVersion()
 
   m_tightVncProtocol = false;
 
-  sprintf(pv, rfbProtocolVersionFormat, 3, m_minorVersion);
+  SPRINTF(pv, rfbProtocolVersionFormat, 3, m_minorVersion);
 
   WriteExact(pv, sz_rfbProtocolVersionMsg);
 
@@ -1237,7 +1239,7 @@ void ClientConnection::Authenticate(CARD32 authScheme)
       errorMsg = "Authentication failure, too many tries";
       break;
     default:
-      snprintf(m_netbuf, 256, "Unknown authentication result (%d)",
+      snprintf(m_netbuf, m_netbufsize, "Unknown authentication result (%d)",
                (int)authResult);
       errorMsg = m_netbuf;
       break;
@@ -1289,13 +1291,12 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
   // Was the password already specified in a config file?
   else if (m_passwdSet) {
     char *pw = vncDecryptPasswd(m_encPasswd);
-    strcpy(passwd, pw);
+    STRCPY(passwd, pw);
     free(pw);
   } else {
     LoginAuthDialog ad(m_opts.m_display, "Standard VNC Authentication");
     ad.DoDialog();
-    strncpy(passwd, ad.m_passwd, MAXPWLEN);
-    passwd[MAXPWLEN]= '\0';
+    STRCPY(passwd, ad.m_passwd);
     if (strlen(passwd) == 0) {
       snprintf(errBuf, errBufSize, "Empty password");
       return false;
@@ -1325,10 +1326,8 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
   CARD32 t;
 
   char passwd[256] = "\0", user[256] = "\0";
-  if (strlen(m_opts.m_user) > 0) {
-    strncpy(user, m_opts.m_user, 255);
-    user[255] = '\0';
-  }
+  if (strlen(m_opts.m_user) > 0)
+    STRCPY(user, m_opts.m_user);
 
   if (strlen(user) > 0 && m_opts.m_autoPass) {
     char *cstatus = fgets(passwd, sizeof(passwd), stdin);
@@ -1343,17 +1342,14 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
   } else {
     LoginAuthDialog ad(m_opts.m_display, "Unix Login Authentication", user);
     ad.DoDialog();
-    strncpy(user, ad.m_username, 255);
-    user[255] = '\0';
+    STRCPY(user, ad.m_username);
     if (strlen(user) == 0) {
       snprintf(errBuf, errBufSize, "Empty user name");
       return false;
     }
-    strncpy(m_opts.m_user, user, 255);
-    m_opts.m_user[255] = '\0';
+    STRCPY(m_opts.m_user, user);
 
-    strncpy(passwd, ad.m_passwd, 255);
-    passwd[255] = '\0';
+    STRCPY(passwd, ad.m_passwd);
     if (strlen(passwd) == 0) {
       snprintf(errBuf, errBufSize, "Empty password");
       return false;
@@ -1443,12 +1439,12 @@ void ClientConnection::SetWindowTitle()
     char zlibstr[80];
     zlibstr[0] = 0;
     if (!m_opts.m_enableJpegCompression) {
-      snprintf(zlibstr, 80, " + CL %d", m_opts.m_compressLevel);
+      SPRINTF(zlibstr, " + CL %d", m_opts.m_compressLevel);
       snprintf(&title[strlen(title)], len - strlen(title),
                "[Lossless Tight%s]", zlibstr);
     }
     else {
-      snprintf(zlibstr, 80, " + CL %d", m_opts.m_compressLevel);
+      SPRINTF(zlibstr, " + CL %d", m_opts.m_compressLevel);
       snprintf(&title[strlen(title)], len - strlen(title),
                "[Tight + JPEG %s Q%d%s]", sampopt2str[m_opts.m_subsampLevel],
                m_opts.m_jpegQualityLevel, zlibstr);
@@ -2475,16 +2471,18 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
   // dealing with.  But we've stored a 'pseudo-this' in the window data.
   ClientConnection *_this =
     (ClientConnection *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  char *env = NULL;  static int x = 100, y = 100;
+  char *env = NULL;  size_t envlen;  static int x = 100, y = 100;
 
   switch (iMsg) {
     case WM_FBUPDATERECVD:
       _this->SendAppropriateFramebufferUpdateRequest();
-      if ((env = getenv("TVNC_FAKEMOUSE")) != NULL && !strcmp(env, "1"))
-      {
-        _this->SendPointerEvent(x, y, rfbButton1Mask | rfbButton3Mask);
-        if (x == 100) x = 101;  else x = 100;
-        if (y == 100) y = 101;  else y = 100;
+      if (_dupenv_s(&env, &envlen, "TVNC_FAKEMOUSE") == 0 && env != NULL) {
+        if (!strcmp(env, "1")) {
+          _this->SendPointerEvent(x, y, rfbButton1Mask | rfbButton3Mask);
+          if (x == 100) x = 101;  else x = 100;
+          if (y == 100) y = 101;  else y = 100;
+        }
+        free(env);
       }
       return 0;
     case WM_REGIONUPDATED:
@@ -3143,7 +3141,7 @@ void ClientConnection::ShowConnInfo()
   char buf[2048];
   char kbdname[9];
   GetKeyboardLayoutName(kbdname);
-  sprintf(buf,
+  SPRINTF(buf,
           "Connected to:  %s\n\r"
           "Host:  %s  port:  %d\n\r\n\r"
           "Desktop geometry:  %d x %d x %d\n\r"
