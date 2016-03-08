@@ -373,8 +373,9 @@ details.
 	''-via'' and ''-tunnel'' command-line options.  Currently, the use of these
 	requires Cygwin OpenSSH, since it is the only version of SSH on Windows that
 	supports detaching the SSH process once the tunnel has been established.
-	When using these options, a console window pops up and remains for the
-	duration of the VNC connection.
+	When using these options, it is recommended that you use the console version
+	of the Windows TurboVNC Viewer (cvncviewer.exe).  Otherwise, a new console
+	window will pop up and remain for the duration of the VNC connection.
 
 *** Forcing Secure Connections
 #OPT: noList! plain!

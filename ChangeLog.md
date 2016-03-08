@@ -18,6 +18,12 @@ optionally be used to revert the behavior introduced in 2.0 beta1[17].
 tvncconfig to poll for changes to the clipboard at a specified interval rather
 than waiting for the X server to inform it of the changes.
 
+4. The Windows TurboVNC Viewer package now includes a console version of the
+viewer (cvncviewer.exe), which is useful when debugging or when using the
+`-via` and `-tunnel` options.  This version of the viewer is built by default
+when building TurboVNC on Windows, but it can be disabled by setting the
+`TVNC_WINCONSOLE` CMake variable to `0`.
+
 
 2.0.2
 =====

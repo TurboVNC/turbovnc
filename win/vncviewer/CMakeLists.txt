@@ -53,7 +53,7 @@ set(VNCVIEWER_SOURCES
 add_executable(vncviewer WIN32 ${VNCVIEWER_SOURCES})
 option(TVNC_WINCONSOLE
 	"Build Win32 console version of the TurboVNC Viewer (useful for debugging)"
-	0)
+	1)
 if(TVNC_WINCONSOLE)
 	add_executable(cvncviewer ${VNCVIEWER_SOURCES})
 endif()
