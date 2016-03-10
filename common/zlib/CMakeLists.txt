@@ -1,4 +1,6 @@
-add_definitions(-wd4996)
+if(WIN32)
+	add_definitions(-wd4996)
+endif()
 
 add_library(zlib STATIC
 	adler32.c
