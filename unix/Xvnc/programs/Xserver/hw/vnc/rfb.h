@@ -705,6 +705,9 @@ extern Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour,
 extern void rfbSendBell(void);
 extern void rfbSendServerCutText(char *str, int len);
 
+extern void rfbBlockUpdates(void);
+extern void rfbUnblockUpdates(void);
+
 
 /* flowcontrol.c */
 

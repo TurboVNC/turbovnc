@@ -300,6 +300,8 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
   Bool ret = TRUE;
 
+  rfbBlockUpdates();
+
   if ((width > rfbMaxWidth && rfbMaxWidth > 0) ||
       (height > rfbMaxHeight && rfbMaxHeight > 0)) {
     width = min(width, rfbMaxWidth);
@@ -312,6 +314,7 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     if (!cl->enableDesktopSize && !cl->enableExtDesktopSize) {
       rfbLog("ERROR: Not resizing desktop because one or more clients doesn't support it.\n");
       vncRRSetModes(pScreen, pScreen->width, pScreen->height);
+      rfbUnblockUpdates();
       return FALSE;
     }
   }
@@ -323,6 +326,7 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   newScreen.pfbMemory = NULL;
   if (!rfbAllocateFramebufferMemory(&newScreen)) {
     rfbLog("ERROR: Could not allocate framebuffer memory\n");
+    rfbUnblockUpdates();
     return FALSE;
   }
 
@@ -337,6 +341,7 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     rfbLog("ERROR: Could not modify root pixmap size\n");
     free(newScreen.pfbMemory);
     xf86SetRootClip(pScreen, TRUE);
+    rfbUnblockUpdates();
     return ret;
   }
   free(rfbScreen.pfbMemory);
@@ -353,6 +358,7 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
 
   if (!vncRRSetModes(pScreen, width, height)) {
     rfbLog("ERROR: Could not set screen modes\n");
+    rfbUnblockUpdates();
     return FALSE;
   }
 
@@ -399,6 +405,7 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     REGION_UNINIT(pScreen, &tmpRegion);
   }
 
+  rfbUnblockUpdates();
   return ret;
 }
 

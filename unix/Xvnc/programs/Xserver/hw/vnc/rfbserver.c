@@ -81,6 +81,32 @@ Bool rfbSendDesktopSize(rfbClientPtr cl);
 
 
 /*
+ * Block/unblock updates
+ */
+
+static int rfbBlockCounter = 0;
+
+void
+rfbBlockUpdates(void)
+{
+    rfbBlockCounter++;
+}
+
+void
+rfbUnblockUpdates(void)
+{
+    rfbClientPtr cl;
+
+    rfbBlockCounter--;
+
+    if (rfbBlockCounter == 0) {
+        for (cl = rfbClientHead; cl; cl = cl->next)
+            rfbSendFramebufferUpdate(cl);
+    }
+}
+
+
+/*
  * Session capture
  */
 
@@ -1735,6 +1761,9 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
     Bool sendCursorShape = FALSE;
     Bool sendCursorPos = FALSE;
     double tUpdateStart = 0.0;
+
+    if (rfbBlockCounter > 0)
+        return TRUE;
 
     TimerCancel(cl->updateTimer);
 
