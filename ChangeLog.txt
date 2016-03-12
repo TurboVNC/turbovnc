@@ -10,12 +10,12 @@ details.
 [2]
 The TurboVNC Server now provides full support for the VeNCrypt RFB extensions,
 including TLS-encrypted security types.  TLS encryption is provided by OpenSSL
-in the official binaries, but GnuTLS can be used instead when building the
-TurboVNC Server from source.  Note that when using the Java TurboVNC Viewer,
-you must use 2.0.1 or later when connecting to a TurboVNC 2.1 server.  Older
-versions of the Java TurboVNC Viewer had a bug that caused them to lock up when
-connecting to a server that supports both the Tight and VeNCrypt security
-extensions.
+in the official TurboVNC binaries, but GnuTLS can be used instead when building
+the TurboVNC Server from source.  Note that when using the Java TurboVNC
+Viewer, you must use 2.0.1 or later when connecting to a TurboVNC 2.1 server.
+Older versions of the Java TurboVNC Viewer had a bug that caused them to lock
+up when connecting to a server that supports both the Tight and VeNCrypt
+security extensions.
 -------------------------------------------------------------------------------
 [3]
 TurboVNC's vncserver script now supports the -autokill option from TigerVNC,
@@ -98,7 +98,8 @@ was causing the Caps Lock state to become decoupled between client and server.
 The solution was to do what TigerVNC does and ignore Caps Lock (and other lock
 modifiers) on the server side, thus allowing the client to handle Caps Lock.
 If for some reason this causes problems, then the old behavior can be recovered
-by setting TVNC_XKBIGNORELOCK=0 prior to launching the TurboVNC Server.
+by setting the TVNC_XKBIGNORELOCK environment variable to 0 prior to launching
+the TurboVNC Server.
 -------------------------------------------------------------------------------
 [3]
 Worked around an issue whereby the Java TurboVNC Viewer on Windows, when
