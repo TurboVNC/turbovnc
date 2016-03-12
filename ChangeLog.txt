@@ -18,7 +18,8 @@ was causing the Caps Lock state to become decoupled between client and server.
 The solution was to do what TigerVNC does and ignore Caps Lock (and other lock
 modifiers) on the server side, thus allowing the client to handle Caps Lock.
 If for some reason this causes problems, then the old behavior can be recovered
-by setting TVNC_XKBIGNORELOCK=0 prior to launching the TurboVNC Server.
+by setting the TVNC_XKBIGNORELOCK environment variable to 0 prior to launching
+the TurboVNC Server.
 -------------------------------------------------------------------------------
 [3]
 Worked around an issue whereby the Java TurboVNC Viewer on Windows, when
