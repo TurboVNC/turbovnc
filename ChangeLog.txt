@@ -26,14 +26,6 @@ same thing in earlier versions of TurboVNC by running
 '/opt/TurboVNC/bin/vncserver -fg </dev/null &', but this is more intuitive.
 -------------------------------------------------------------------------------
 [4]
-The default xstartup.turbovnc script that the TurboVNC Server creates now
-includes 'unset DBUS_SESSION_BUS_ADDRESS'.  This fixes an issue whereby
-starting the TurboVNC Server from within an existing GNOME 2 (verified with
-GNOME 2.28.x and later) or MATE session would cause the GNOME/MATE session
-running in TurboVNC to fail with an error dialog: "Could not acquire name on
-session bus".
--------------------------------------------------------------------------------
-[5]
 The TurboVNC Server and the Java TurboVNC Viewer (when the latter is run in
 standalone mode on Un*x/Linux machines, using the TurboVNC Helper library) now
 support a remote X Input interface whereby extended pointer devices (such as
@@ -46,11 +38,58 @@ Additionally, the Windows TurboVNC Viewer provides specific support for Wacom
 drawing tablets by interfacing between the Wacom drivers for Windows and the
 afore-mentioned remote X Input interface.
 -------------------------------------------------------------------------------
-[6]
+[5]
 Keyboard grabbing has been implemented in the Java TurboVNC Viewer for Windows,
 thus allowing special keystrokes (such as Alt-Tab) to be sent to the server.
 -------------------------------------------------------------------------------
+[6]
+Added a new option to Xvnc (-pamsession) that will open a PAM session for every
+viewer that authenticates using the username/password of the user who owns the
+TurboVNC session and will leave that PAM session open until the viewer
+disconnects.  This feature was specifically implemented in order to allow
+Kerberos tickets created by PAM to be reused within the TurboVNC session, but
+the feature may benefit other use cases as well.
+-------------------------------------------------------------------------------
 [7]
+Added a new parameter to the Java TurboVNC Viewer (NoReconnect) that can
+optionally be used to revert the behavior introduced in 2.0 beta1[17].
+-------------------------------------------------------------------------------
+[8]
+The controls in the Options dialog of the Windows (native) TurboVNC Viewer have
+been re-organized into two tabs ("Encoding" and "Connection"), which makes the
+layout of that dialog more similar to that of the Java viewer's Options dialog.
+-------------------------------------------------------------------------------
+[9]
+The keyboard/pointer grabbing feature can now be configured from the Options
+Dialog in both the Windows and Java TurboVNC Viewers.
+-------------------------------------------------------------------------------
+[10]
+Added a -poll option to tvncconfig, which works identically to the -poll option
+in RealVNC's (and TigerVNC's) vncconfig program.  This causes tvncconfig to
+poll for changes to the clipboard at a specified interval rather than waiting
+for the X server to inform it of the changes.
+-------------------------------------------------------------------------------
+[11]
+The Windows TurboVNC Viewer package now includes a console version of the
+viewer (cvncviewer.exe), which is useful when debugging or when using the -via
+and -tunnel options.  This version of the viewer is built by default when
+building TurboVNC on Windows, but it can be disabled by setting the
+TVNC_WINCONSOLE CMake variable to 0.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+2.0.2
+===============================================================================
+[1]
+The default xstartup.turbovnc script that the TurboVNC Server creates now
+includes 'unset DBUS_SESSION_BUS_ADDRESS'.  This fixes an issue whereby
+starting the TurboVNC Server from within an existing GNOME 2 (verified with
+GNOME 2.28.x and later) or MATE session would cause the GNOME/MATE session
+running in TurboVNC to fail with an error dialog: "Could not acquire name on
+session bus".
+-------------------------------------------------------------------------------
+[2]
 Fixed an issue whereby the TurboVNC Server would not properly handle Caps Lock
 when using the TurboVNC Viewer on OS X.  X11 generates both a key press and a
 key release event when Caps Lock is toggled, but OS X generates a key press
@@ -61,33 +100,7 @@ modifiers) on the server side, thus allowing the client to handle Caps Lock.
 If for some reason this causes problems, then the old behavior can be recovered
 by setting TVNC_XKBIGNORELOCK=0 prior to launching the TurboVNC Server.
 -------------------------------------------------------------------------------
-[8]
-Added a new option to Xvnc (-pamsession) that will open a PAM session for every
-viewer that authenticates using the username/password of the user who owns the
-TurboVNC session and will leave that PAM session open until the viewer
-disconnects.  This feature was specifically implemented in order to allow
-Kerberos tickets created by PAM to be reused within the TurboVNC session, but
-the feature may benefit other use cases as well.
--------------------------------------------------------------------------------
-[9]
-Added a new parameter to the Java TurboVNC Viewer (NoReconnect) that can
-optionally be used to revert the behavior introduced in 2.0 beta1[17].
--------------------------------------------------------------------------------
-[10]
-"Dead" keys, which are used to add accents and other diacritics to subsequent
-alphabetic keystrokes, should now work properly when using the Windows TurboVNC
-Viewer.  Additionally, certain AltGr-modified symbols (such as the Euro sign on
-European keyboards) did not previously work with the Windows TurboVNC Viewer.
-That has been fixed.
-
-Furthermore, dead keys should now mostly work when using the Java TurboVNC
-Viewer on Windows under Java 8 and later.  Due to irregularities in how Java
-translates dead keys into events on other platforms (for instance, on OS X,
-Java uses a different key code for the press and release events of a particular
-dead key, and on Linux, Java only communicates release events for dead keys),
-dead key support on non-Windows platforms is still incomplete.
--------------------------------------------------------------------------------
-[11]
+[3]
 Worked around an issue whereby the Java TurboVNC Viewer on Windows, when
 running under Java 7 and later, would take an inordinate amount of time to
 create the viewer window after connecting to a VNC server.  This slowdown was
@@ -107,40 +120,39 @@ however, then the old behavior of the Java TurboVNC Viewer can be restored by
 passing -Dsun.awt.nopixfmt=0 to java or adding "-Dsun.awt.nopixfmt=0" to the
 JAVA_TOOL_OPTIONS environment variable.
 -------------------------------------------------------------------------------
-[12]
+[4]
+"Dead" keys, which are used to add accents and other diacritics to subsequent
+alphabetic keystrokes, should now work properly when using the Windows TurboVNC
+Viewer.  Additionally, certain AltGr-modified symbols (such as the Euro sign on
+European keyboards) did not previously work with the Windows TurboVNC Viewer.
+That has been fixed.
+
+Furthermore, dead keys should now mostly work when using the Java TurboVNC
+Viewer on Windows under Java 8 and later.  Due to irregularities in how Java
+translates dead keys into events on other platforms (for instance, on OS X,
+Java uses a different key code for the press and release events of a particular
+dead key, and on Linux, Java only communicates release events for dead keys),
+dead key support on non-Windows platforms is still incomplete.
+-------------------------------------------------------------------------------
+[5]
 Fixed an issue in the Java TurboVNC Viewer whereby the Options, Clipboard, and
 Profiling dialogs were not centered relative to the viewer window.
 -------------------------------------------------------------------------------
-[13]
-The controls in the Options dialog of the Windows (native) TurboVNC Viewer have
-been re-organized into two tabs ("Encoding" and "Connection"), which makes the
-layout of that dialog more similar to that of the Java viewer's Options dialog.
--------------------------------------------------------------------------------
-[14]
-The keyboard/pointer grabbing feature can now be configured from the Options
-Dialog in both the Windows and Java TurboVNC Viewers.
--------------------------------------------------------------------------------
-[15]
-Added a -poll option to tvncconfig, which works identically to the -poll option
-in RealVNC's (and TigerVNC's) vncconfig program.  This causes tvncconfig to
-poll for changes to the clipboard at a specified interval rather than waiting
-for the X server to inform it of the changes.
--------------------------------------------------------------------------------
-[16]
+[6]
 Fixed an issue in the TurboVNC Server (Xvnc) whereby, when running a
 compositing window manager such as Gnome 3, activity in off-screen windows
 (such as a scrolling xterm being displayed in a separate workspace) could
 interfere with the display of on-screen windows that occupied the same screen
 area as the off-screen windows.
 -------------------------------------------------------------------------------
-[17]
+[7]
 The Windows TurboVNC Viewer will now resolve localhost to the IPv4 loopback
 address (127.0.0.1) by default unless the /ipv6 option is specified.  This
 makes its behavior more consistent with the Java viewer (NOTE: connecting to
 localhost on a Windows machine is an unusual case, but it can occur when using
 virtualization software that has a built-in VNC server.)
 -------------------------------------------------------------------------------
-[18]
+[8]
 Improved the parsing of display names in both TurboVNC viewers.  In particular,
 the Windows viewer now properly parses the following display name forms:
 
@@ -157,17 +169,10 @@ Both viewers now properly parse the following display name forms:
 -  x:x:x::x  (abbreviated IPv6 address, same as x:x:x::x:0)
 -  [IPv6]  (IPv6 address in brackets, same as [IPv6]:0)
 -------------------------------------------------------------------------------
-[19]
+[9]
 The Windows TurboVNC Viewer should now build with Visual C++ 2015.
 -------------------------------------------------------------------------------
-[20]
-The Windows TurboVNC Viewer package now includes a console version of the
-viewer (cvncviewer.exe), which is useful when debugging or when using the -via
-and -tunnel options.  This version of the viewer is built by default when
-building TurboVNC on Windows, but it can be disabled by setting the
-TVNC_WINCONSOLE CMake variable to 0.
--------------------------------------------------------------------------------
-[21]
+[10]
 Fixed an issue in the Java TurboVNC Viewer whereby the viewer, when using the
 "server" (manual) remote desktop resizing mode, would unnecessarily display two
 scrollbars if one of the remote desktop dimensions was too large for the local
