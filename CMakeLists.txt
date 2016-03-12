@@ -16,7 +16,7 @@ endif()
 project(TurboVNC NONE)
 set(VERSION 2.0.2)
 set(RCVERSION 2,0,2,0)
-set(COPYRIGHT_YEAR "1999-2015")
+set(COPYRIGHT_YEAR "1999-2016")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
 set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
 
