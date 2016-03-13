@@ -50,5 +50,5 @@ if(TVNC_BUILDJAVA)
 	add_subdirectory(vncviewer-java)
 endif()
 
-install(FILES ../LICENSE.txt TurboVNC.url ../ChangeLog.txt
+install(FILES ../LICENSE.txt TurboVNC.url ../ChangeLog.md
 	DESTINATION .)
