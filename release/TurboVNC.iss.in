@@ -59,7 +59,7 @@ Source: "@CMAKE_BINARY_DIR@\java\turbovnchelper.dll"; DestDir: "{app}\java"; Fla
 #endif
 #endif
 Source: "@CMAKE_SOURCE_DIR@\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "@CMAKE_SOURCE_DIR@\ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_SOURCE_DIR@\ChangeLog.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\README.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\win\TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\doc\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
@@ -82,7 +82,7 @@ Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ README";        FileName: "wri
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc";  Components: doc;
 Name: "{group}\Documentation\Licensing Terms";                    FileName: "write.exe";           Parameters: "LICENSE.txt";      WorkingDir: "{app}\doc";  Flags: "useapppaths"
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Web Site";      FileName: "{app}\TurboVNC.url"
-Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Change Log";    FileName: "write.exe";           Parameters: "ChangeLog.txt";    WorkingDir: "{app}";      Flags: "useapppaths"
+Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Change Log";    FileName: "write.exe";           Parameters: "ChangeLog.md";    WorkingDir: "{app}";      Flags: "useapppaths"
 
 [Tasks]
 Name: associate; Description: "&Associate .vnc files with @CMAKE_PROJECT_NAME@ Viewer"; GroupDescription: "File associations:"; Components: viewer
