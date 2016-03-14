@@ -1339,8 +1339,8 @@ servers, particularly Solaris/x86 servers.
 
 7. When running in OpenSolaris, the default xstartup.turbovnc file did not
 launch JDS, since the JDS launch script is in a different location on that
-platform. This resulted in a TurboVNC session that had no window manager.  This
-has been fixed.
+platform.  This resulted in a TurboVNC session that had no window manager.
+This has been fixed.
 
 8. Increased TCP send buffer size to 64k in the Windows TurboVNC Server.  This
 should improve performance significantly.
