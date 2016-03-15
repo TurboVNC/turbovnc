@@ -1,3 +1,16 @@
+2.0.91 (2.1 beta2)
+==================
+
+### Significant changes relative to 2.1 beta1:
+
+1. Fixed an issue in the Java TurboVNC Viewer whereby, when built against
+libjpeg-turbo 1.5 or later, it would generate the following error:
+`Class not found: org/libjpegturbo/turbojpeg/TJException` at run time and
+subsequently fail to accelerate JPEG decompression.  TJException is a new class
+in libjpeg-turbo 1.5, and due to an oversight, VncViewer.jar was not including
+it.
+
+
 2.0.90 (2.1 beta1)
 ==================
 
