@@ -209,9 +209,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
-		org/libjpegturbo/turbojpeg/TJ.class
-		org/libjpegturbo/turbojpeg/TJDecompressor.class
-		org/libjpegturbo/turbojpeg/TJLoader.class
+		org/libjpegturbo/turbojpeg
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS cfm VncViewer.jar
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
