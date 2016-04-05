@@ -30,6 +30,13 @@ server.  Older versions of the Java TurboVNC Viewer had a bug that caused them
 to lock up when connecting to a server that supports both the Tight and
 VeNCrypt security extensions.
 
+    Backward compatibility note:  because of the addition of this feature, it
+was necessary to remove the `-noauth`, `-novncauth`, `-nootp`, and `-nopam`
+parameters to vncserver, because these parameters could not be emulated
+exactly using the new VeNCrypt security type selection mechanism.  Please use
+the new `-securitytypes` parameter instead (see the Xvnc man page for more
+details.)
+
 3. TurboVNC's vncserver script now supports the `-autokill` option from
 TigerVNC, which causes the server to be killed automatically whenever the
 startup script finishes (which will usually happen as the result of logging out
