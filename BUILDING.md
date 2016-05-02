@@ -8,8 +8,7 @@ Build Requirements
 
 ### All Systems
 
-- [CMake](http://www.cmake.org) v2.8.4 or later (v2.8.8 or later required if
-  building the TurboVNC Server)
+- [CMake](http://www.cmake.org) v2.8.11 or later
 
 - libjpeg-turbo SDK v1.0.0 or later (v1.3.1 or later required if building the
   Java viewer.)

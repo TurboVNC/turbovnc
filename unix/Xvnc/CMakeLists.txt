@@ -1,7 +1,3 @@
-# 2.8.8 introduced the "OBJECT" library target, which is used quite a bit in
-# the Xvnc build.
-cmake_minimum_required(VERSION 2.8.8)
-
 include(CheckCSourceCompiles)
 
 set(GLIBC_SOURCE "\n
