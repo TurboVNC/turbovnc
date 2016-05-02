@@ -2,7 +2,7 @@
 # Setup
 #
 
-cmake_minimum_required(VERSION 2.8.4)
+cmake_minimum_required(VERSION 2.8.11)
 # Shut up CMake 3.1 and later
 if(POLICY CMP0053)
   cmake_policy(SET CMP0053 OLD)
@@ -63,23 +63,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-if(UNIX)
-	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
-	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
-elseif(WIN32 AND NOT MINGW)
-	execute_process(COMMAND "wmic.exe" "os" "get" "LocalDateTime" OUTPUT_VARIABLE
-		BUILD)
-	string(REGEX REPLACE "[^0-9]" "" BUILD "${BUILD}")
-	if (BUILD STREQUAL "")
-		execute_process(COMMAND "cmd.exe" "/C" "DATE" "/T" OUTPUT_VARIABLE BUILD)
-		string(REGEX REPLACE ".*[ ]([0-9]*)[/.]([0-9]*)[/.]([0-9]*).*" "\\3\\2\\1" BUILD "${BUILD}")
-	else()
-		string(SUBSTRING "${BUILD}" 0 8 BUILD)
-	endif()
+if(UNIX OR (WIN32 AND NOT MINGW))
+	string(TIMESTAMP BUILD "%Y%m%d")
 else()
 	message(FATAL_ERROR "Platform not supported.")
 endif()
-string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
 if(USEC)
 	# This only works if building from the command line.  There is currently no

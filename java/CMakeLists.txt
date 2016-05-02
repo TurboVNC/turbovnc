@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
 find_package(Java)
 
 set(DEFAULT_JAVACFLAGS "-source 1.5 -target 1.5 -Xlint:all,-serial,-cast,-unchecked,-rawtypes")
@@ -24,25 +22,8 @@ set(JAVA_KEY_ALIAS "" CACHE STRING "Alias for the signing certificate's entry in
 set(JAVA_KEY_PASS "" CACHE STRING "Password for the signing certificate's entry in the Java keystore (plain-text.)  Add a prefix of env: to specify an environment variable from which to read the password, or a prefix of file: to specify a file from which to read the password.")
 set(JAVA_TSA_URL "" CACHE STRING "URL of Timestamp Authority (TSA)")
 
-if(MSVC)
-	if(NOT BUILD)
-		execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat"
-			OUTPUT_VARIABLE BUILD)
-	endif()
-	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javadate"
-		OUTPUT_VARIABLE JAVA_DATE)
-	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javatime"
-		OUTPUT_VARIABLE JAVA_TIME)
-else()
-	if(NOT BUILD)
-		execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
-	endif()
-	execute_process(COMMAND "date" "+%b %d %Y" OUTPUT_VARIABLE JAVA_DATE)
-	execute_process(COMMAND "date" "+%H:%M:%S" OUTPUT_VARIABLE JAVA_TIME)
-endif()
-string(REGEX REPLACE "\n" "" JAVA_DATE ${JAVA_DATE})
-string(REGEX REPLACE "\n" "" JAVA_TIME ${JAVA_TIME})
-string(REGEX REPLACE "\n" "" BUILD ${BUILD})
+string(TIMESTAMP JAVA_DATE "%Y-%m-%d")
+string(TIMESTAMP JAVA_TIME "%H:%M:%S")
 
 if(WIN32)
 	set(DEFAULT_TJPEG_JAR c:\\libjpeg-turbo\\classes\\turbojpeg.jar)
