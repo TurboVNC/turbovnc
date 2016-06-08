@@ -1,3 +1,15 @@
+2.1
+===
+
+### Significant changes relative to 2.1 beta2:
+
+1. Added a new parameter to the Java TurboVNC Viewer (`LocalUsernameLC`) which,
+when enabled along with the `SendLocalUsername` parameter, will cause the local
+user name to be sent to the server in lowercase.  This can be useful for
+Windows clients, since Windows allows mixed-case user names but Un*x machines
+generally don't.
+
+
 2.0.91 (2.1 beta2)
 ==================
 

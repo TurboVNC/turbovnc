@@ -266,6 +266,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       String userName = opts.user;
       if (opts.sendLocalUsername) {
         userName = (String)System.getProperties().get("user.name");
+        if (VncViewer.localUsernameLC.getValue())
+          userName = userName.toLowerCase();
         if (passwd == null)
           return true;
       }

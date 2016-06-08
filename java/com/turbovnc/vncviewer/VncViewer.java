@@ -1298,6 +1298,13 @@ public class VncViewer extends javax.swing.JApplet
   "\"User\" parameter, setting this parameter has the effect of disabling " +
   "any authentication schemes that don't require a user name.", false);
 
+  static BoolParameter localUsernameLC
+  = new BoolParameter("LocalUsernameLC",
+  "When the SendLocalUsername option is enabled, enabling this option will " +
+  "cause the local user name to be sent in lowercase, which may be useful " +
+  "when using the viewer on Windows machines (Windows allows mixed-case " +
+  "user names, whereas Un*x generally doesn't.)", false);
+
   static StringParameter passwordFile
   = new StringParameter("PasswordFile",
   "Password file from which to read the password for Standard VNC " +
