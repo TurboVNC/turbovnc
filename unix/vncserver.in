@@ -682,6 +682,14 @@ sub CheckDisplayNumber
     }
     close(S);
 
+    if (open(SOCKS, "</proc/net/unix")) {
+        if (grep{/\s@?\/tmp\/\.X11-unix\/X$n$/} <SOCKS>) {
+            close(SOCKS);
+            return 0;
+        }
+        close(SOCKS);
+    }
+
     if (-e "/tmp/.X$n-lock") {
         warn "\nWarning: $host:$n is taken because of /tmp/.X$n-lock\n";
         warn "Remove this file if there is no X server $host:$n\n";
