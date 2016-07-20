@@ -682,12 +682,12 @@ sub CheckDisplayNumber
     }
     close(S);
 
-    if (open(SOCKS, "</proc/net/unix")) {
-        if (grep{/\s@?\/tmp\/\.X11-unix\/X$n$/} <SOCKS>) {
-            close(SOCKS);
+    if (open(S, "</proc/net/unix")) {
+        if (grep{/\s@?\/tmp\/\.X11-unix\/X$n$/} <S>) {
+            close(S);
             return 0;
         }
-        close(SOCKS);
+        close(S);
     }
 
     if (-e "/tmp/.X$n-lock") {
