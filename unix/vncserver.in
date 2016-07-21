@@ -639,9 +639,7 @@ sub CheckGeometryAndDepth
 
 
 #
-# GetDisplayNumber gets the lowest available display number.  A display number
-# n is taken if something is listening on the VNC server port (5900+n) or the
-# X server port (6000+n).
+# GetDisplayNumber gets the lowest available display number.
 #
 
 sub GetDisplayNumber
@@ -657,9 +655,13 @@ sub GetDisplayNumber
 
 
 #
-# CheckDisplayNumber checks if the given display number is available.  A
-# display number n is taken if something is listening on the VNC server port
-# (5900+n) or the X server port (6000+n).
+# CheckDisplayNumber checks if the given display number is available.
+# A display number $n is taken if any of the following is true:
+# * something is listening on the VNC server port (5900+$n)
+# * something is listening on the X server port (6000+$n)
+# * the socket /tmp/.X11-unix/X$n is in use
+# * (on Linux) the abstract socket with name \0/tmp/.X11-unix/X$n is in use
+# * the lock file /tmp/.X$n-lock exists
 #
 
 sub CheckDisplayNumber
@@ -682,22 +684,24 @@ sub CheckDisplayNumber
     }
     close(S);
 
-    if (open(S, "</proc/net/unix")) {
-        if (grep{/\s@?\/tmp\/\.X11-unix\/X$n$/} <S>) {
+    socket(S, $AF_UNIX, $SOCK_STREAM, 0) || die "$prog: socket failed: $!\n";
+    unless (bind(S, pack_sockaddr_un("/tmp/.X11-unix/X$n"))) {
+        close(S);
+        return 0;
+    }
+    close(S);
+
+    if ($os eq "Linux") {
+        socket(S, $AF_UNIX, $SOCK_STREAM, 0) || die "$prog: socket failed: $!\n";
+        unless (bind(S, pack_sockaddr_un("\0/tmp/.X11-unix/X$n"))) {
             close(S);
             return 0;
-        }
-        close(S);
+	}
+	close(S);
     }
 
     if (-e "/tmp/.X$n-lock") {
         warn "\nWarning: $host:$n is taken because of /tmp/.X$n-lock\n";
-        warn "Remove this file if there is no X server $host:$n\n";
-        return 0;
-    }
-
-    if (-e "/tmp/.X11-unix/X$n") {
-        warn "\nWarning: $host:$n is taken because of /tmp/.X11-unix/X$n\n";
         warn "Remove this file if there is no X server $host:$n\n";
         return 0;
     }
@@ -1038,9 +1042,9 @@ sub SanityCheck
     # Find socket constants. 'use Socket' is a perl5-ism, so we wrap it in an
     # eval, and if it fails we try 'require "sys/socket.ph"'.  If this fails,
     # we just guess at the values.  If you find perl moaning here, just
-    # hard-code the values of AF_INET and SOCK_STREAM.  You can find these out
-    # for your platform by looking in /usr/include/sys/socket.h and related
-    # files.
+    # hard-code the values of AF_UNIX, AF_INET and SOCK_STREAM.  You can find
+    # these out for your platform by looking in /usr/include/sys/socket.h and
+    # related files.
     #
 
     chop($os = `uname`);
@@ -1051,17 +1055,21 @@ sub SanityCheck
         eval 'require "sys/socket.ph"';
         if ($@) {
             if (($os eq "SunOS") && ($osrev !~ /^4/)) {
+                $AF_UNIX = 1;
                 $AF_INET = 2;
                 $SOCK_STREAM = 2;
             } else {
+                $AF_UNIX = 1;
                 $AF_INET = 2;
                 $SOCK_STREAM = 1;
             }
         } else {
+            $AF_UNIX = &AF_UNIX;
             $AF_INET = &AF_INET;
             $SOCK_STREAM = &SOCK_STREAM;
         }
     } else {
+        $AF_UNIX = &AF_UNIX;
         $AF_INET = &AF_INET;
         $SOCK_STREAM = &SOCK_STREAM;
     }
