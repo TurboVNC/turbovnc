@@ -24,6 +24,14 @@ viewer (cvncviewer.exe), which is useful when debugging or when using the
 when building TurboVNC on Windows, but it can be disabled by setting the
 `TVNC_WINCONSOLE` CMake variable to `0`.
 
+5. Fixed a regression introduced in 2.0 beta1[1] whereby connecting to the
+TurboVNC Server with cursor shape updates (client-side cursor rendering)
+enabled and continuous updates disabled (or with a viewer, such as the TurboVNC
+1.1 Viewer, that doesn't support continuous updates) would cause the server and
+viewer to get into an infinite ping-pong loop whenever the cursor shape
+changed, thus consuming an inordinate amount of CPU and network resources until
+the next non-cursor-related framebuffer update was sent.
+
 
 2.0.2
 =====

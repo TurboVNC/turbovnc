@@ -11,7 +11,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010-2012, 2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2012, 2014, 2016 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2012-2013, 2016 Pierre Ossman for Cendio AB.
  *                                All Rights Reserved.
  *
@@ -122,8 +122,11 @@ static inline Bool is_visible(DrawablePtr drawable)
       BoxRec *box = REGION_EXTENTS(pScreen, reg);                             \
       if ((box->x2 - box->x1) * (box->y2 - box->y1) != 0)                     \
           for (cl = rfbClientHead; cl; cl = cl->next) {                       \
-              REGION_UNION((pScreen), &cl->modifiedRegion,                    \
-                           &cl->modifiedRegion, reg);                         \
+              if (!prfb->dontSendFramebufferUpdate ||                         \
+                  !cl->enableCursorShapeUpdates) {                            \
+                  REGION_UNION((pScreen), &cl->modifiedRegion,                \
+                               &cl->modifiedRegion, reg);                     \
+              }                                                               \
           }                                                                   \
   }
 
@@ -136,8 +139,11 @@ static inline Bool is_visible(DrawablePtr drawable)
       BoxRec *box = REGION_EXTENTS(pScreen, reg);                             \
       if ((box->x2 - box->x1) * (box->y2 - box->y1) != 0)                     \
           for (cl = rfbClientHead; cl; cl = cl->next) {                       \
-              REGION_UNION((pScreen), &cl->alrEligibleRegion,                 \
-                           &cl->alrEligibleRegion, reg);                      \
+              if (!prfb->dontSendFramebufferUpdate ||                         \
+                  !cl->enableCursorShapeUpdates) {                            \
+                  REGION_UNION((pScreen), &cl->alrEligibleRegion,             \
+                               &cl->alrEligibleRegion, reg);                  \
+              }                                                               \
           }                                                                   \
   }
 
@@ -344,7 +350,9 @@ rfbCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr pOldRegion)
             REGION_INIT(pScreen, &srcRegion, NullBox, 0);
             REGION_COPY(pScreen, &srcRegion, pOldRegion);
 
-            rfbCopyRegion(pScreen, cl, &srcRegion, &dstRegion, dx, dy);
+            if (!prfb->dontSendFramebufferUpdate ||
+                !cl->enableCursorShapeUpdates)
+                rfbCopyRegion(pScreen, cl, &srcRegion, &dstRegion, dx, dy);
 
             REGION_UNINIT(pSrc->pScreen, &srcRegion);
 
@@ -695,9 +703,11 @@ rfbCopyArea(DrawablePtr pSrc, DrawablePtr pDst, GCPtr pGC, int srcx, int srcy,
                                      &((WindowPtr)pSrc)->clipList);
                 }
 
-                rfbCopyRegion(pSrc->pScreen, cl, &srcRegion, &dstRegion,
-                              dstx + pDst->x - srcx - pSrc->x,
-                              dsty + pDst->y - srcy - pSrc->y);
+                if (!prfb->dontSendFramebufferUpdate ||
+                    !cl->enableCursorShapeUpdates)
+                    rfbCopyRegion(pSrc->pScreen, cl, &srcRegion, &dstRegion,
+                                  dstx + pDst->x - srcx - pSrc->x,
+                                  dsty + pDst->y - srcy - pSrc->y);
 
                 REGION_UNINIT(pSrc->pScreen, &srcRegion);
 
