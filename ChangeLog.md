@@ -9,6 +9,14 @@ user name to be sent to the server in lowercase.  This can be useful for
 Windows clients, since Windows allows mixed-case user names but Un*x machines
 generally don't.
 
+2. Fixed a regression introduced in 2.0 beta1[1] whereby connecting to the
+TurboVNC Server with cursor shape updates (client-side cursor rendering)
+enabled and continuous updates disabled (or with a viewer, such as the TurboVNC
+1.1 Viewer, that doesn't support continuous updates) would cause the server and
+viewer to get into an infinite ping-pong loop whenever the cursor shape
+changed, thus consuming an inordinate amount of CPU and network resources until
+the next non-cursor-related framebuffer update was sent.
+
 
 2.0.91 (2.1 beta2)
 ==================
