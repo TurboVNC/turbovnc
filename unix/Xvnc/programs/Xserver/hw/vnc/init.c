@@ -99,6 +99,7 @@ DevPrivateKeyRec rfbGCKey;
 static Bool initOutputCalled = FALSE;
 static Bool noCursor = FALSE;
 char *desktopName = "x11";
+int traceLevel = 0;
 
 char rfbThisHost[256];
 
@@ -1523,9 +1524,12 @@ void vrfbLog(char *format, va_list args)
 {
     char buf[256];
     time_t clock;
+    int i;
 
     time(&clock);
     strftime(buf, 255, "%d/%m/%Y %H:%M:%S ", localtime(&clock));
+    for(i = 0; i < traceLevel; i++)
+        snprintf(&buf[strlen(buf)], 256 - strlen(buf), "  ");
     fputs(buf, stderr);
 
     vfprintf(stderr, format, args);

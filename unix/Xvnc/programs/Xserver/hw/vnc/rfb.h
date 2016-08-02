@@ -516,6 +516,23 @@ static const int rfbEndianTest = 1;
     }
 
 
+/*
+ * These can be used to add tracing information anywhere within the code
+ */
+
+extern int traceLevel;
+
+#define OPENTRACE(message) {  \
+  rfbLog("+ %s %s\n", __FUNCTION__, message);  \
+  traceLevel++;  \
+}
+
+#define CLOSETRACE(message) {  \
+  traceLevel--;  \
+  rfbLog("- %s %s\n", __FUNCTION__, message);  \
+}
+
+
 /* init.c */
 
 extern char *desktopName;
