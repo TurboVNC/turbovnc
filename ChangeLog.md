@@ -6,6 +6,10 @@
 1. Added a system menu option and hotkey (CTRL-ALT-SHIFT-V) that can be used to
 quickly toggle view-only mode on and off.
 
+2. Added system menu options and hotkeys that can be used to zoom in and out
+(increase or decrease the scaling factor) or reset the view to 100% when
+desktop scaling is enabled.
+
 
 2.1
 ===

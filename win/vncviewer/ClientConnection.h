@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012-2013, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012-2013, 2015-2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -167,6 +167,7 @@ class ClientConnection : public omni_thread
     bool ScrollScreen(int dx, int dy);
     void UpdateScrollbars();
     void EnableFullControlOptions();
+    void EnableZoomOptions();
     void EnableAction(int id, bool enable);
 
     void InvalidateScreenRect(const RECT *pRect);

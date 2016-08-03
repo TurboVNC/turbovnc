@@ -351,13 +351,16 @@ void ClientConnection::Run()
 
   EnableFullControlOptions();
 
+  EnableZoomOptions();
+
   CreateLocalFramebuffer();
 
   SetupPixelFormat();
 
   m_pendingEncodingChange = true;
 
-  hotkeys.Init(m_opts.m_FSAltEnter);
+  hotkeys.Init(m_opts.m_FSAltEnter, m_opts.m_desktopSize.mode != SIZE_AUTO &&
+                                    !m_opts.m_FitWindow);
 
   // This starts the worker thread.
   // The rest of the processing continues in run_undetached.
@@ -492,6 +495,12 @@ void ClientConnection::CreateDisplay()
              "&Full screen\tCtrl-Alt-Shift-F");
   AppendMenu(hsysmenu, MF_STRING, ID_DEFAULT_WINDOW_SIZE,
              "Default window si&ze/position\tCtrl-Alt-Shift-Z");
+  AppendMenu(hsysmenu, MF_STRING, ID_ZOOM_IN,
+             "Zoom in\tCtrl-Alt-Shift +");
+  AppendMenu(hsysmenu, MF_STRING, ID_ZOOM_OUT,
+             "Zoom out\tCtrl-Alt-Shift -");
+  AppendMenu(hsysmenu, MF_STRING, ID_ZOOM_100,
+             "Zoom 100%\tCtrl-Alt-Shift-0");
   AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
              "Show &toolbar\tCtrl-Alt-Shift-T");
   AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
@@ -785,6 +794,20 @@ void ClientConnection::EnableFullControlOptions()
     EnableAction(ID_CONN_ALTDOWN, true);
     EnableAction(ID_CONN_CTLESC, true);
     EnableAction(ID_CONN_ALTENTER, true);
+  }
+}
+
+
+void ClientConnection::EnableZoomOptions()
+{
+  if (m_opts.m_desktopSize.mode == SIZE_AUTO || m_opts.m_FitWindow) {
+    EnableAction(ID_ZOOM_IN, false);
+    EnableAction(ID_ZOOM_OUT, false);
+    EnableAction(ID_ZOOM_100, false);
+  } else {
+    EnableAction(ID_ZOOM_IN, true);
+    EnableAction(ID_ZOOM_OUT, true);
+    EnableAction(ID_ZOOM_100, true);
   }
 }
 
@@ -1466,6 +1489,12 @@ void ClientConnection::SetWindowTitle()
       snprintf(&title[strlen(title)], len - strlen(title), "[%s]",
                encStr[enc]);
     }
+  }
+  if (m_opts.m_scaling) {
+    int sf = (m_opts.m_scale_num * 100) / m_opts.m_scale_den;
+    if (sf != 100)
+      snprintf(&title[strlen(title)], len - strlen(title), " - %d%%",
+               (m_opts.m_scale_num * 100) / m_opts.m_scale_den);
   }
   SetWindowText(m_hwnd1, title);
   delete [] title;
@@ -2267,6 +2296,10 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
             _this->m_opts.SaveOpt(_this->m_opts.m_display,
                                   KEY_VNCVIEWER_HISTORY);
           _this->EnableFullControlOptions();
+          _this->EnableZoomOptions();
+           hotkeys.Init(_this->m_opts.m_FSAltEnter,
+                        _this->m_opts.m_desktopSize.mode != SIZE_AUTO &&
+                        !_this->m_opts.m_FitWindow);
           _this->SetWindowTitle();
           if (SetForegroundWindow(_this->m_opts.m_hParent) != 0) return 0;
           COND_REGRAB_KEYBOARD
@@ -2317,6 +2350,55 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
                         MF_BYCOMMAND | (_this->m_opts.m_ViewOnly ?
                                         MF_CHECKED : MF_UNCHECKED));
           _this->EnableFullControlOptions();
+          return 0;
+        case ID_ZOOM_IN:
+          if (_this->m_opts.m_desktopSize.mode != SIZE_AUTO &&
+              !_this->m_opts.m_FitWindow) {
+            int sf = (_this->m_opts.m_scale_num * 100) /
+                     _this->m_opts.m_scale_den;
+            if (sf < 100)
+              sf = ((sf / 10) + 1) * 10;
+            else if (sf >= 100 && sf <= 200)
+              sf = ((sf / 25) + 1) * 25;
+            else
+              sf = ((sf / 50) + 1) * 50;
+            if (sf > 400) sf = 400;
+            _this->m_opts.m_scale_num = sf;
+            _this->m_opts.m_scale_den = 100;
+            _this->m_opts.m_scaling = (sf != 100);
+            _this->SizeWindow(true, true, false);
+            _this->SetWindowTitle();
+            InvalidateRect(_this->m_hwnd, NULL, FALSE);
+          }
+          return 0;
+        case ID_ZOOM_OUT:
+          if (_this->m_opts.m_desktopSize.mode != SIZE_AUTO &&
+              !_this->m_opts.m_FitWindow) {
+            int sf = (_this->m_opts.m_scale_num * 100) /
+                     _this->m_opts.m_scale_den;
+            if (sf <= 100)
+              sf = ((sf / 10) - 1) * 10;
+            else if (sf >= 100 && sf <= 200)
+              sf = ((sf / 25) - 1) * 25;
+            else
+              sf = ((sf / 50) - 1) * 50;
+            if (sf < 10) sf = 10;
+            _this->m_opts.m_scale_num = sf;
+            _this->m_opts.m_scale_den = 100;
+            _this->m_opts.m_scaling = (sf != 100);
+            _this->SizeWindow(true, true, false);
+            _this->SetWindowTitle();
+            InvalidateRect(_this->m_hwnd, NULL, FALSE);
+          }
+          return 0;
+        case ID_ZOOM_100:
+          if (_this->m_opts.m_scaling) {
+            _this->m_opts.m_scale_num = 100;
+            _this->m_opts.m_scale_den = 100;
+            _this->SizeWindow(true, true, false);
+            _this->SetWindowTitle();
+            InvalidateRect(_this->m_hwnd, NULL, FALSE);
+          }
           return 0;
         case ID_DEFAULT_WINDOW_SIZE:
           // Reset window geometry to default (taking into account spanning
