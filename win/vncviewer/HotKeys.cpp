@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
 //
 //  VNC is free software; you can redistribute it and/or modify
@@ -69,6 +69,10 @@ void HotKeys::Init(bool FSAltEnter)
   accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
   accel[i].key = 0x54;  // "T"
   accel[i++].cmd = ID_TOOLBAR;
+
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x56;  // "V"
+  accel[i++].cmd = ID_TOGGLE_VIEWONLY;
 
   accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
   accel[i].key = 0x45;  // "E"

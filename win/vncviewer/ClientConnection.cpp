@@ -495,6 +495,8 @@ void ClientConnection::CreateDisplay()
   AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
              "Show &toolbar\tCtrl-Alt-Shift-T");
   AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_VIEWONLY,
+             "&View only\tCtrl-Alt-Shift-V");
   AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_GRAB,
              "&Grab keyboard\tCtrl-Alt-Shift-G");
   if (!m_opts.m_restricted) {
@@ -572,6 +574,10 @@ void ClientConnection::CreateDisplay()
   if (pApp->m_options.m_toolbar)
     CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
           ID_TOOLBAR, MF_BYCOMMAND | MF_CHECKED);
+  CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_VIEWONLY,
+                MF_BYCOMMAND | (pApp->m_options.m_ViewOnly ?
+                                MF_CHECKED : MF_UNCHECKED));
+
   SaveConnectionHistory();
   // record which client created this window
 
@@ -2303,6 +2309,14 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
             _this->UngrabKeyboard();
           else
             _this->GrabKeyboard();
+          return 0;
+        case ID_TOGGLE_VIEWONLY:
+          _this->m_opts.m_ViewOnly = !_this->m_opts.m_ViewOnly;
+          CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
+                        ID_TOGGLE_VIEWONLY,
+                        MF_BYCOMMAND | (_this->m_opts.m_ViewOnly ?
+                                        MF_CHECKED : MF_UNCHECKED));
+          _this->EnableFullControlOptions();
           return 0;
         case ID_DEFAULT_WINDOW_SIZE:
           // Reset window geometry to default (taking into account spanning

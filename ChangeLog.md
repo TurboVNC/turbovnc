@@ -1,3 +1,12 @@
+2.2 pre-beta
+============
+
+### Significant changes relative to 2.1:
+
+1. Added a system menu option and hotkey (CTRL-ALT-SHIFT-V) that can be used to
+quickly toggle view-only mode on and off.
+
+
 2.1
 ===
 
