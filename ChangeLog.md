@@ -17,6 +17,10 @@ viewer to get into an infinite ping-pong loop whenever the cursor shape
 changed, thus consuming an inordinate amount of CPU and network resources until
 the next non-cursor-related framebuffer update was sent.
 
+3. Fixed several serious visual artifacts with server-side cursor rendering
+(regression introduced in 2.0 beta1[1].)  Server-side cursor rendering is not
+generally the default in TurboVNC, but it is useful for collaboration purposes.
+
 
 2.0.91 (2.1 beta2)
 ==================
