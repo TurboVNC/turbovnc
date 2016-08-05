@@ -522,6 +522,9 @@ void ClientConnection::CreateDisplay()
   AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTDOWN,
              "Alt key down");
   AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_CLIPBOARD,
+             "&Clipboard transfer\tCtrl-Alt-Shift-C");
+  AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
   AppendMenu(hsysmenu, MF_STRING | MF_GRAYED, IDD_FILETRANSFER,
              "Transf&er files...\tCtrl-Alt-Shift-E");
   AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
@@ -586,6 +589,9 @@ void ClientConnection::CreateDisplay()
   CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_VIEWONLY,
                 MF_BYCOMMAND | (pApp->m_options.m_ViewOnly ?
                                 MF_CHECKED : MF_UNCHECKED));
+  CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_CLIPBOARD,
+                MF_BYCOMMAND | (pApp->m_options.m_DisableClipboard ?
+                                MF_UNCHECKED : MF_CHECKED));
 
   SaveConnectionHistory();
   // record which client created this window
@@ -2350,6 +2356,13 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
                         MF_BYCOMMAND | (_this->m_opts.m_ViewOnly ?
                                         MF_CHECKED : MF_UNCHECKED));
           _this->EnableFullControlOptions();
+          return 0;
+        case ID_TOGGLE_CLIPBOARD:
+          _this->m_opts.m_DisableClipboard = !_this->m_opts.m_DisableClipboard;
+          CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
+                        ID_TOGGLE_CLIPBOARD,
+                        MF_BYCOMMAND | (_this->m_opts.m_DisableClipboard ?
+                                        MF_UNCHECKED : MF_CHECKED));
           return 0;
         case ID_ZOOM_IN:
           if (_this->m_opts.m_desktopSize.mode != SIZE_AUTO &&

@@ -30,7 +30,7 @@ HotKeys::HotKeys()
 
 void HotKeys::Init(bool FSAltEnter, bool zoom)
 {
-  const int MAX_ACCELS = 16;
+  const int MAX_ACCELS = 20;
   ACCEL accel[MAX_ACCELS];
   int i = 0;
 
@@ -73,6 +73,10 @@ void HotKeys::Init(bool FSAltEnter, bool zoom)
   accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
   accel[i].key = 0x56;  // "V"
   accel[i++].cmd = ID_TOGGLE_VIEWONLY;
+
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x43;  // "C"
+  accel[i++].cmd = ID_TOGGLE_CLIPBOARD;
 
   accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
   accel[i].key = 0x45;  // "E"
