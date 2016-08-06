@@ -21,6 +21,10 @@ the next non-cursor-related framebuffer update was sent.
 (regression introduced in 2.0 beta1[1].)  Server-side cursor rendering is not
 generally the default in TurboVNC, but it is useful for collaboration purposes.
 
+4. The default xstartup.turbovnc script that the TurboVNC Server creates now
+includes an optional recipe (commented out by default) to work around a bug in
+GNOME 3 whereby the pointer disappears when mousing over the top bar.
+
 
 2.0.91 (2.1 beta2)
 ==================
