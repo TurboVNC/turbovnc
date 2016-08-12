@@ -40,6 +40,10 @@ generally the default in TurboVNC, but it is useful for collaboration purposes.
 includes an optional recipe (commented out by default) to work around a bug in
 GNOME 3 whereby the pointer disappears when mousing over the top bar.
 
+8. Fixed an issue in the Java TurboVNC Viewer whereby, when the remote desktop
+size was changed in the Options dialog, the new desktop size request was not
+sent to the server until the next framebuffer update was received.
+
 
 2.0.2
 =====
