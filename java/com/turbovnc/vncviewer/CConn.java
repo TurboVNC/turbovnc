@@ -1520,13 +1520,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
     Options.DesktopSize oldDesktopSize = opts.desktopSize;
     opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
     if (desktop != null && !opts.desktopSize.isEqual(oldDesktopSize)) {
-      reconfigure = true;
       if (oldDesktopSize.mode != Options.SIZE_AUTO &&
           opts.desktopSize.mode == Options.SIZE_AUTO &&
           viewport.lionFSSupported() && opts.fullScreen &&
           options.fullScreen.isSelected())
         defaultSize = true;
-      firstUpdate = true;
+      if (opts.desktopSize.mode != Options.SIZE_SERVER) {
+        reconfigure = true;
+        firstUpdate = true;
+      }
     }
 
     int oldSpan = opts.span;
@@ -1589,6 +1591,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
         sizeWindow(true);
       else
         reconfigureViewport(false);
+    }
+    // Force a framebuffer update if we're initiating a manual or auto remote
+    // desktop resize.  Otherwise, it won't occur until the mouse is moved or
+    // something changes on the server (manual) or until the window is resized
+    // (auto.)
+    if (firstUpdate) {
+      forceNonincremental = true;
+      requestNewUpdate();
     }
   }
 
