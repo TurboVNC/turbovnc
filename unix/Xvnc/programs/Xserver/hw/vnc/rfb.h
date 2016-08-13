@@ -123,6 +123,7 @@ typedef struct
     Bool cursorIsDrawn;             /* TRUE if the cursor is currently drawn */
     Bool dontSendFramebufferUpdate; /* TRUE while removing or drawing the
                                        cursor */
+    Bool blockUpdates;              /* TRUE while resizing the screen */
 
     /* wrapped screen functions */
 
@@ -356,7 +357,7 @@ typedef struct rfbClientRec {
     struct timeval lastWrite;
 
     Bool pendingDesktopResize;
-    int reason;
+    int reason, result;
 
 } rfbClientRec, *rfbClientPtr;
 
@@ -671,7 +672,7 @@ extern Bool rfbSendRTTPing(rfbClientPtr cl);
 /* randr.c */
 
 #ifdef RANDR
-extern Bool ResizeDesktop(ScreenPtr pScreen, int w, int h);
+extern Bool ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h);
 extern Bool vncRRInit(ScreenPtr);
 extern void vncRRDeinit(ScreenPtr);
 #endif

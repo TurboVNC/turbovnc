@@ -152,7 +152,7 @@ static inline Bool is_visible(DrawablePtr drawable)
    ready for it.  */
 
 #define SCHEDULE_FB_UPDATE(pScreen, prfb)                               \
-  if (!prfb->dontSendFramebufferUpdate) {                               \
+  if (!prfb->dontSendFramebufferUpdate && !prfb->blockUpdates) {        \
       rfbClientPtr cl, nextCl;                                          \
       for (cl = rfbClientHead; cl; cl = nextCl) {                       \
           nextCl = cl->next;                                            \
