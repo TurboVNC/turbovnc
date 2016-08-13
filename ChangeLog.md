@@ -29,6 +29,13 @@ GNOME 3 whereby the pointer disappears when mousing over the top bar.
 size was changed in the Options dialog, the new desktop size request was not
 sent to the server until the next framebuffer update was received.
 
+6. Fixed an issue in the TurboVNC Server's implementation of the X RANDR
+extension that was causing viewer-initiated remote desktop resizes to fail or
+otherwise behave incorrectly with GNOME 3.
+
+7. The TurboVNC Server now ignores remote desktop resize requests from viewers
+that authenticated with view-only credentials.
+
 
 2.0.91 (2.1 beta2)
 ==================
