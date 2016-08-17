@@ -830,6 +830,8 @@ sub Usage
         "        -nohttpd\n".
         "        -otp\n".
         "        -fg\n".
+        "        -x509cert <CERT-FILE>\n".
+        "        -x509key <KEY-FILE>\n".
         "        -autokill\n".
         "        -noxstartup\n".
         "        -xstartup <SCRIPT>\n".
