@@ -41,6 +41,10 @@ not exposed until 2.1 beta1[4]) whereby the TurboVNC Server, when built without
 TLS encryption, would sometimes segfault when a viewer disconnected.  Oddly,
 this was not reproducible except on older platforms, such as RHEL 4.
 
+9. Fixed a regression introduced in 2.1 beta1[2] whereby the TurboVNC Server,
+when built without TLS encryption, would fail to launch via the vncserver
+script and display the following error: `Unrecognized option: -x509cert`.
+
 
 2.0.91 (2.1 beta2)
 ==================
