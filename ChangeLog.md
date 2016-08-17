@@ -36,6 +36,11 @@ otherwise behave incorrectly with GNOME 3.
 7. The TurboVNC Server now ignores remote desktop resize requests from viewers
 that authenticated with view-only credentials.
 
+8. Fixed a regression introduced by 2.1 beta1[2] (but, for reasons unexplained,
+not exposed until 2.1 beta1[4]) whereby the TurboVNC Server, when built without
+TLS encryption, would sometimes segfault when a viewer disconnected.  Oddly,
+this was not reproducible except on older platforms, such as RHEL 4.
+
 
 2.0.91 (2.1 beta2)
 ==================

@@ -303,9 +303,9 @@ rfbCheckFds()
 
     for (cl = rfbClientHead; cl; cl = cl->next) {
         if (FD_ISSET(cl->sock, &fds) && FD_ISSET(cl->sock, &allFds)) {
+            rfbClientPtr cl2;
 #if USETLS
             do {
-                rfbClientPtr cl2;
                 rfbProcessClientMessage(cl);
                 /* Make sure cl hasn't been freed */
                 for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
@@ -316,6 +316,11 @@ rfbCheckFds()
             } while (cl->sslctx && rfbssl_pending(cl) > 0);
 #else
             rfbProcessClientMessage(cl);
+            for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+                if (cl2 == cl)
+                    break;
+            }
+            if (cl2 == NULL) return;
 #endif
         }
     }
