@@ -479,10 +479,11 @@ if ($vncUserDirUnderTmp) {
 
 if (defined($ENV{XDG_RUNTIME_DIR})) {
   $vncXDGDir = "$vncUserDir/xdg-$host:$displayNumber";
-  unless (-e "$vncXDGDir") {
-    unless (mkdir("$vncXDGDir", 0700)) {
-      die "$prog: Could not create $vncXDGDir.\n";
-    }
+  if (-d "$vncXDGDir") {
+    remove_tree("$vncXDGDir")
+  }
+  unless (mkdir("$vncXDGDir", 0700)) {
+    die "$prog: Could not create $vncXDGDir.\n";
   }
   $ENV{XDG_RUNTIME_DIR}= "$vncXDGDir";
 }
