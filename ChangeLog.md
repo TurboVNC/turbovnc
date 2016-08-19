@@ -26,8 +26,8 @@ would become unresponsive to input if a viewer connected while the MATE
 screensaver was active.
 
 4. The default xstartup.turbovnc script that the TurboVNC Server creates now
-includes an optional recipe (commented out by default) to work around a bug in
-GNOME 3 whereby the pointer disappears when mousing over the top bar.
+includes a workaround for a bug in GNOME 3 whereby the pointer disappears when
+mousing over the top bar.
 
 5. Fixed an issue in the Java TurboVNC Viewer whereby, when the remote desktop
 size was changed in the Options dialog, the new desktop size request was not
