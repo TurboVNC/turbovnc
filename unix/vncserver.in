@@ -28,6 +28,8 @@
 # vncserver - wrapper script to start an X VNC server.
 #
 
+use File::Path qw( remove_tree );
+
 # First make sure we're operating in a sane environment.
 
 $exedir = "";
@@ -471,6 +473,20 @@ system("$xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie");
 if ($vncUserDirUnderTmp) {
     system("$xauth merge $xauthorityFile");
 }
+
+# Create a temporary XDG run-time directory.  This works around GNOME 3 issues,
+# such as the screensaver activating immediately when the VNC session starts.
+
+if (defined($ENV{XDG_RUNTIME_DIR})) {
+  $vncXDGDir = "$vncUserDir/xdg-$host:$displayNumber";
+  unless (-e "$vncXDGDir") {
+    unless (mkdir("$vncXDGDir", 0700)) {
+      die "$prog: Could not create $vncXDGDir.\n";
+    }
+  }
+  $ENV{XDG_RUNTIME_DIR}= "$vncXDGDir";
+}
+
 
 # Now start the X VNC Server
 
@@ -917,6 +933,12 @@ sub Kill
     }
 
     unlink $pidFile;
+
+    # Clean up XDG run-time directory
+    if (-d "$vncUserDir/xdg-$host$opt{'-kill'}") {
+      remove_tree("$vncUserDir/xdg-$host$opt{'-kill'}")
+    }
+
     exit;
 }
 
