@@ -28,7 +28,7 @@
 # vncserver - wrapper script to start an X VNC server.
 #
 
-use File::Path qw( remove_tree );
+use File::Path qw( rmtree );
 
 # First make sure we're operating in a sane environment.
 
@@ -480,7 +480,7 @@ if ($vncUserDirUnderTmp) {
 if (defined($ENV{XDG_RUNTIME_DIR})) {
   $vncXDGDir = "$vncUserDir/xdg-$host:$displayNumber";
   if (-d "$vncXDGDir") {
-    remove_tree("$vncXDGDir")
+    rmtree("$vncXDGDir");
   }
   unless (mkdir("$vncXDGDir", 0700)) {
     die "$prog: Could not create $vncXDGDir.\n";
@@ -937,7 +937,7 @@ sub Kill
 
     # Clean up XDG run-time directory
     if (-d "$vncUserDir/xdg-$host$opt{'-kill'}") {
-      remove_tree("$vncUserDir/xdg-$host$opt{'-kill'}")
+      rmtree("$vncUserDir/xdg-$host$opt{'-kill'}");
     }
 
     exit;
