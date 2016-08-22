@@ -22,7 +22,7 @@
  */
 
 /*
- *  vncpasswd:  A standalone program that gets and verifies a password, 
+ *  vncpasswd:  A standalone program that gets and verifies a password,
  *              encrypts it, and stores it to a file.  Optionally, it does
  *              the same for a second (view-only) password.  Always ignore
  *              anything after 8 characters, since this is what Solaris
@@ -494,7 +494,7 @@ static int read_password(char *result)
 
 
 /*
- * Ask a password, check its length and ask to confirm it once more. 
+ * Ask a password, check its length and ask to confirm it once more.
  * Return 1 on success, 0 on error.  On success, the password will be
  * stored in the specified 9-byte buffer.
  */
@@ -504,16 +504,16 @@ static int ask_password(char *result)
   char *passwd;
   char passwd_copy[9];
 
-  while (1) {  
+  while (1) {
     passwd = getpass("Password: ");
     if (!passwd) {
       fprintf(stderr, "Can't get password: not a tty?\n");
       return 0;
-    }   
+    }
     if (strlen(passwd) < 6) {
       fprintf(stderr, "Password too short\n");
       return 0;
-    }   
+    }
     if (strlen(passwd) > 8) {
       memset(passwd + 8, 0, strlen(passwd) - 8);
       fprintf(stderr, "Warning: password truncated to the length of 8.\n");
