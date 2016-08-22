@@ -329,7 +329,7 @@ Bool XNVCTRLSetTargetAttributeAndGetStatus (
     }
     UnlockDisplay (dpy);
     SyncHandle ();
-    
+
     success = rep.flags;
     return success;
 }
@@ -572,7 +572,7 @@ static Bool XNVCTRLQueryValidTargetAttributeValues32 (
     int target_type,
     int target_id,
     unsigned int display_mask,
-    unsigned int attribute,                                 
+    unsigned int attribute,
     NVCTRLAttributeValidValuesRec *values
 ){
     xnvCtrlQueryValidAttributeValuesReply rep;
@@ -1185,7 +1185,7 @@ static Bool wire_to_event (Display *dpy, XEvent *host, xEvent *wire)
     XNVCtrlBinaryEventTarget *reTargetBinary;
 
     XNVCTRLCheckExtension (dpy, info, False);
-    
+
     switch ((wire->u.u.type & 0x7F) - info->codes->first_event) {
     case ATTRIBUTE_CHANGED_EVENT:
         re = (XNVCtrlEvent *) host;
