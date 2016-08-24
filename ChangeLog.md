@@ -50,6 +50,28 @@ as RHEL 4.
 when built without TLS encryption, would fail to launch via the vncserver
 script and display the following error: `Unrecognized option: -x509cert`.
 
+11. Fixed an issue with the TurboVNC Server's 3D window manager feature that
+was known to affect Red Hat- and Ubuntu-compatible systems (and may have
+affected others as well.)  When running vncserver with the `-3dwm` option, the
+window manager would behave as if VirtualGL was not active (thus causing the WM
+to crash, if it required OpenGL.)  The underlying cause of this was code
+executed from within /etc/X11/xinit/xinitrc that launches the WM using
+ssh-agent if the `SSH_AGENT_PID` (Red Hat) or `SSH_AUTH_SOCK` (Ubuntu)
+environment variable is unset.  ssh-agent clobbers the `LD_PRELOAD` environment
+variable, so in order to make it work properly with VirtualGL, vglrun has to be
+launched by ssh-agent, not vice versa.
+
+    The default xstartup.turbovnc script that the TurboVNC Server creates now
+launches the window manager in VirtualGL and launches VirtualGL in ssh-agent if
+3D window manager support is enabled and there is no existing ssh-agent
+session.  Furthermore, the `-3dwm` option to vncserver now simply sets the
+`TVNC_3DWM` environment variable to `1` rather than invoking VirtualGL
+directly.  The default xstartup.turbovnc script launches the WM in VirtualGL if
+that environment variable is set, using a second environment variable
+(`TVNC_VGLRUN`, which can be overridden by the user) to specify the VirtualGL
+command line.  However, users can craft their own xstartup.turbovnc scripts
+that handle the `TVNC_3DWM` environment variable differently, if desired.
+
 
 2.0.91 (2.1 beta2)
 ==================

@@ -98,41 +98,52 @@ $defaultXStartup
        "      ;;\n".
        "  esac\n".
        "fi\n".
-       "if [ \"\$VGL_ISACTIVE\" = \"\" -a -f /usr/bin/mate-session ]; then\n".
-       "  DESKTOP_SESSION=mate; export DESKTOP_SESSION\n".
-       "  STARTUP=\"/usr/bin/mate-session\"; export STARTUP\n".
-       "elif [ \"\$VGL_ISACTIVE\" = \"\" -a -f /usr/bin/gnome-session ]; then\n".
-       "  for SESSION in \"gnome-fallback\" \"ubuntu-2d\" \"2d-gnome\"; do\n".
-       "    if [ -f /usr/share/gnome-session/sessions/\$SESSION.session ]; then\n".
-       "      DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
-       "      GDMSESSION=\$SESSION; export GDMSESSION\n".
-       "      SESSIONTYPE=gnome-session; export SESSIONTYPE\n".
-       "      XDG_CURRENT_DESKTOP=\$SESSION; export XDG_CURRENT_DESKTOP\n".
-       "      STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\"; export STARTUP\n".
-       "      # Ubuntu 14 runs gnome-session-check-accelerated, even though the\n".
-       "      # gnome-fallback session doesn't need OpenGL, so we set an atom to make\n".
-       "      # gnome-session-check-accelerated think it has already been run.\n".
-       "      xprop -root -f _GNOME_SESSION_ACCELERATED 32c -set _GNOME_SESSION_ACCELERATED 1\n".
-       "    fi\n".
-       "  done\n".
+       "\n".
+       "if [ \"\$TVNC_3DWM\" = \"1\" ]; then\n".
+       "  if [ -z \"\$SSH_AGENT_PID\" -a -x /usr/bin/ssh-agent ]; then\n".
+       "    TVNC_SSHAGENT=/usr/bin/ssh-agent\n".
+       "  fi\n".
+       "  if [ -z \"\$TVNC_VGLRUN\" ]; then\n".
+       "    TVNC_VGLRUN=\"vglrun +wm\"\n".
+       "  fi\n".
+       "else\n".
+       "  if [ -f /usr/bin/mate-session ]; then\n".
+       "    DESKTOP_SESSION=mate; export DESKTOP_SESSION\n".
+       "    STARTUP=\"/usr/bin/mate-session\"; export STARTUP\n".
+       "  elif [ -f /usr/bin/gnome-session ]; then\n".
+       "    for SESSION in \"gnome-fallback\" \"ubuntu-2d\" \"2d-gnome\"; do\n".
+       "      if [ -f /usr/share/gnome-session/sessions/\$SESSION.session ]; then\n".
+       "        DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
+       "        GDMSESSION=\$SESSION; export GDMSESSION\n".
+       "        SESSIONTYPE=gnome-session; export SESSIONTYPE\n".
+       "        XDG_CURRENT_DESKTOP=\$SESSION; export XDG_CURRENT_DESKTOP\n".
+       "        STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\"; export STARTUP\n".
+       "        # Ubuntu 14 runs gnome-session-check-accelerated, even though the\n".
+       "        # gnome-fallback session doesn't need OpenGL, so we set an atom to make\n".
+       "        # gnome-session-check-accelerated think it has already been run.\n".
+       "        xprop -root -f _GNOME_SESSION_ACCELERATED 32c -set _GNOME_SESSION_ACCELERATED 1\n".
+       "      fi\n".
+       "    done\n".
+       "  fi\n".
        "fi\n".
+       "\n".
        "if [ -x /etc/X11/xinit/xinitrc ]; then\n".
-       "  exec /etc/X11/xinit/xinitrc\n".
+       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN /etc/X11/xinit/xinitrc\n".
        "fi\n".
        "if [ -f /etc/X11/xinit/xinitrc ]; then\n".
-       "  exec sh /etc/X11/xinit/xinitrc\n".
+       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN sh /etc/X11/xinit/xinitrc\n".
        "fi\n".
        "if [ -x \$HOME/.xinitrc ]; then\n".
-       "  exec \$HOME/.xinitrc\n".
+       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN \$HOME/.xinitrc\n".
        "fi\n".
        "if [ -f \$HOME/.xinitrc ]; then\n".
-       "  exec sh \$HOME/.xinitrc\n".
+       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN sh \$HOME/.xinitrc\n".
        "fi\n".
        "if [ -x /usr/local/lib/X11/xinit/xinitrc ]; then\n".
-       "  exec /usr/local/lib/X11/xinit/xinitrc\n".
+       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN /usr/local/lib/X11/xinit/xinitrc\n".
        "fi\n".
        "if [ -f /usr/local/lib/X11/xinit/xinitrc ]; then\n".
-       "  exec sh /usr/local/lib/X11/xinit/xinitrc\n".
+       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN sh /usr/local/lib/X11/xinit/xinitrc\n".
        "fi\n".
        "if [ \$OS = 'SunOS' -a -f \$HOME/.dt/sessions/lastsession ]; then\n".
        "  if [ -x `cat \$HOME/.dt/sessions/lastsession` ]; then\n".
@@ -559,7 +570,8 @@ if (! $skipxstartup) {
 
     warn "Starting applications specified in $xstartup\n";
     if ($useVGL) {
-        warn "(Enabling experimental 3D window manager support)\n";
+        warn "(Enabling 3D window manager support)\n";
+        $ENV{TVNC_3DWM}= "1";
     }
 }
 warn "Log file is $desktopLog\n\n";
@@ -579,30 +591,17 @@ system($exedir."tvncconfig >> " . &quotedString($desktopLog) . " 2>&1 &");
 
 if (! $skipxstartup) {
   if ($opt{'-fg'}) {
-    if ($useVGL) {
-      system("vglrun +wm $xstartup >> " . &quotedString($desktopLog) . " 2>&1");
-    } else {
-      system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
-    }
+    system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
     if (kill 0, `cat $pidFile`) {
         $opt{'-kill'} = ':'.$displayNumber;
         &Kill();
     }
   } else {
     if ($autokill) {
-      if ($useVGL) {
-        system("(vglrun +wm $xstartup; $0 -kill :$displayNumber) >> "
-               . &quotedString($desktopLog) . " 2>&1 &");
-      } else {
-        system("($xstartup; $0 -kill :$displayNumber) >> "
-               . &quotedString($desktopLog) . " 2>&1 &");
-      }
+      system("($xstartup; $0 -kill :$displayNumber) >> "
+             . &quotedString($desktopLog) . " 2>&1 &");
     } else {
-      if ($useVGL) {
-        system("vglrun +wm $xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
-      } else {
-        system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
-      }
+      system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
     }
   }
 }
