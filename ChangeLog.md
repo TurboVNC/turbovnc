@@ -77,6 +77,11 @@ that environment variable is set, using a second environment variable
 command line.  However, users can craft their own xstartup.turbovnc scripts
 that handle the `TVNC_3DWM` environment variable differently, if desired.
 
+13. The default xstartup.turbovnc script that the TurboVNC Server creates will
+now properly launch the GNOME Flashback (Metacity) window manager on Ubuntu
+16.04, if 3D window manager support is not activated.  This eliminates the need
+to install MATE on that platform.
+
 
 2.0.2
 =====

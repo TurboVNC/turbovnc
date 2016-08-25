@@ -119,6 +119,16 @@ $defaultXStartup
        "        xprop -root -f _GNOME_SESSION_ACCELERATED 32c -set _GNOME_SESSION_ACCELERATED 1\n".
        "      fi\n".
        "    done\n".
+       "    # Launch GNOME 2D (Metacity) session under Ubuntu 16\n".
+       "    if [ -f /usr/share/gnome-session/sessions/gnome-flashback-metacity.session ]; then\n".
+       "      SESSION=gnome-flashback-metacity\n".
+       "      DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
+       "      GDMSESSION=\$SESSION; export GDMSESSION\n".
+       "      SESSIONTYPE=gnome-session; export SESSIONTYPE\n".
+       "      XDG_CURRENT_DESKTOP=\"GNOME-Flashback:Unity\"; export XDG_CURRENT_DESKTOP\n".
+       "      XDG_SESSION_DESKTOP=\$SESSION; export XDG_SESSION_DESKTOP\n".
+       "      STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\ --disable-acceleration-check\"; export STARTUP\n".
+       "    fi\n".
        "  fi\n".
        "fi\n".
        "\n".
