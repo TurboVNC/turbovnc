@@ -3,7 +3,7 @@
 
 ### Significant changes relative to 2.1 beta2:
 
-1. Added a new parameter to the Java TurboVNC Viewer (`LocalUsernameLC`) which,
+1. Added a new parameter to the Java TurboVNC Viewer (`LocalUsernameLC`) that,
 when enabled along with the `SendLocalUsername` parameter, will cause the local
 user name to be sent to the server in lowercase.  This can be useful for
 Windows clients, since Windows allows mixed-case user names but Un*x machines
@@ -14,42 +14,43 @@ TurboVNC Server with cursor shape updates (client-side cursor rendering)
 enabled and continuous updates disabled (or with a viewer, such as the TurboVNC
 1.1 Viewer, that doesn't support continuous updates) would cause the server and
 viewer to get into an infinite ping-pong loop whenever the cursor shape
-changed, thus consuming an inordinate amount of CPU and network resources until
-the next non-cursor-related framebuffer update was sent.
+changed.  This infinite loop caused TurboVNC to consume an inordinate amount
+of CPU and network resources until the next non-cursor-related framebuffer
+update was sent.
 
 3. Fixed several serious visual artifacts with server-side cursor rendering
 (regression introduced in 2.0 beta1[1].)  Server-side cursor rendering is not
 generally the default in TurboVNC, but it is useful for collaboration purposes.
 
-   The fix for this issue also fixed another issue whereby the TurboVNC Server
-would become unresponsive to input if a viewer connected while the MATE
-screensaver was active.
+4. Fixed an issue whereby the TurboVNC Server would become unresponsive to
+input if a viewer connected while the MATE screensaver was active.
 
-4. The default xstartup.turbovnc script that the TurboVNC Server creates now
+5. The default xstartup.turbovnc script that the TurboVNC Server creates now
 includes a workaround for a bug in GNOME 3 whereby the pointer disappears when
 mousing over the top bar.
 
-5. Fixed an issue in the Java TurboVNC Viewer whereby, when the remote desktop
+6. Fixed an issue in the Java TurboVNC Viewer whereby, when the remote desktop
 size was changed in the Options dialog, the new desktop size request was not
 sent to the server until the next framebuffer update was received.
 
-6. Fixed an issue in the TurboVNC Server's implementation of the X RANDR
+7. Fixed an issue in the TurboVNC Server's implementation of the X RANDR
 extension that was causing viewer-initiated remote desktop resizes to fail or
 otherwise behave incorrectly with GNOME 3.
 
-7. The TurboVNC Server now ignores remote desktop resize requests from viewers
+8. The TurboVNC Server now ignores remote desktop resize requests from viewers
 that authenticated with view-only credentials.
 
-8. Fixed a regression introduced by 2.1 beta1[2] (but, for reasons unexplained,
-not exposed until 2.1 beta1[4]) whereby the TurboVNC Server, when built without
-TLS encryption, would sometimes segfault when a viewer disconnected.  Oddly,
-this was not reproducible except on older platforms, such as RHEL 4.
+9. Fixed a regression introduced by 2.1 beta1\[2\] (but, for reasons
+unexplained, not exposed until 2.1 beta1[4]) whereby the TurboVNC Server, when
+built without TLS encryption, would sometimes segfault when a viewer
+disconnected.  Oddly, this was not reproducible except on older platforms, such
+as RHEL 4.
 
-9. Fixed a regression introduced in 2.1 beta1[2] whereby the TurboVNC Server,
+10. Fixed a regression introduced in 2.1 beta1[2] whereby the TurboVNC Server,
 when built without TLS encryption, would fail to launch via the vncserver
 script and display the following error: `Unrecognized option: -x509cert`.
 
-10. The vncserver script now maintains a per-session XDG run-time directory,
+11. The vncserver script now maintains a per-session XDG run-time directory,
 which works around issues in GNOME 3 (such as gnome-shell crashing or the
 screensaver activating immediately when the TurboVNC session starts.)
 
