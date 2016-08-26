@@ -29,30 +29,30 @@ TurboVNC Server with cursor shape updates (client-side cursor rendering)
 enabled and continuous updates disabled (or with a viewer, such as the TurboVNC
 1.1 Viewer, that doesn't support continuous updates) would cause the server and
 viewer to get into an infinite ping-pong loop whenever the cursor shape
-changed, thus consuming an inordinate amount of CPU and network resources until
-the next non-cursor-related framebuffer update was sent.
+changed.  This infinite loop caused TurboVNC to consume an inordinate amount
+of CPU and network resources until the next non-cursor-related framebuffer
+update was sent.
 
 6. Fixed several serious visual artifacts with server-side cursor rendering
 (regression introduced in 2.0 beta1[1].)  Server-side cursor rendering is not
 generally the default in TurboVNC, but it is useful for collaboration purposes.
 
-   The fix for this issue also fixed another issue whereby the TurboVNC Server
-would become unresponsive to input if a viewer connected while the MATE
-screensaver was active.
+7. Fixed an issue whereby the TurboVNC Server would become unresponsive to
+input if a viewer connected while the MATE screensaver was active.
 
-7. The default xstartup.turbovnc script that the TurboVNC Server creates now
+8. The default xstartup.turbovnc script that the TurboVNC Server creates now
 includes a workaround for a bug in GNOME 3 whereby the pointer disappears when
 mousing over the top bar.
 
-8. Fixed an issue in the Java TurboVNC Viewer whereby, when the remote desktop
+9. Fixed an issue in the Java TurboVNC Viewer whereby, when the remote desktop
 size was changed in the Options dialog, the new desktop size request was not
 sent to the server until the next framebuffer update was received.
 
-9. Fixed an issue in the TurboVNC Server's implementation of the X RANDR
+10. Fixed an issue in the TurboVNC Server's implementation of the X RANDR
 extension that was causing viewer-initiated remote desktop resizes to fail or
 otherwise behave incorrectly with GNOME 3.
 
-10. The TurboVNC Server now ignores remote desktop resize requests from viewers
+11. The TurboVNC Server now ignores remote desktop resize requests from viewers
 that authenticated with view-only credentials.
 
 
