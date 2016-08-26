@@ -50,10 +50,6 @@ as RHEL 4.
 when built without TLS encryption, would fail to launch via the vncserver
 script and display the following error: `Unrecognized option: -x509cert`.
 
-11. The vncserver script now maintains a per-session XDG run-time directory,
-which works around issues in GNOME 3 (such as gnome-shell crashing or the
-screensaver activating immediately when the TurboVNC session starts.)
-
 
 2.0.91 (2.1 beta2)
 ==================
