@@ -106,6 +106,20 @@ $defaultXStartup
        "  if [ -z \"\$TVNC_VGLRUN\" ]; then\n".
        "    TVNC_VGLRUN=\"vglrun +wm\"\n".
        "  fi\n".
+       "  # This is necessary to make Unity work on Ubuntu 16, and on Ubuntu 14, it\n".
+       "  # ensures that the proper compiz profile is set up.  Otherwise, if you forget\n".
+       "  # to specify -3dwm, compiz will automatically disable its OpenGL plugin,\n".
+       "  # requiring you to reset the compiz plugin state before Unity will work\n".
+       "  # again.\n".
+       "  if [ -f /usr/share/gnome-session/sessions/ubuntu.session ]; then\n".
+       "    SESSION=ubuntu\n".
+       "    DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
+       "    GDMSESSION=\$SESSION; export GDMSESSION\n".
+       "    SESSIONTYPE=gnome-session; export SESSIONTYPE\n".
+       "    XDG_CURRENT_DESKTOP=Unity; export XDG_CURRENT_DESKTOP\n".
+       "    XDG_SESSION_TYPE=x11; export XDG_SESSION_TYPE\n".
+       "    STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\"; export STARTUP\n".
+       "  fi\n".
        "else\n".
        "  if [ -f /usr/bin/mate-session ]; then\n".
        "    DESKTOP_SESSION=mate; export DESKTOP_SESSION\n".
