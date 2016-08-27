@@ -82,6 +82,17 @@ now properly launch the GNOME Flashback (Metacity) window manager on Ubuntu
 16.04, if 3D window manager support is not activated.  This eliminates the need
 to install MATE on that platform.
 
+14. The default xtartup.turbovnc script that the TurboVNC Server creates now
+contains a fix for an issue whereby Unity 7.2 on Ubuntu 14 would automatically
+disable the compiz OpenGL plugin if the window manager was launched in a
+broken OpenGL environment (such as if the user forgot to specify `-3dwm`.)
+Symptomatically, this issue caused the menus and launcher to disappear, leaving
+only a blank desktop.  When launching Unity, the xstartup.turbovnc script now
+attempts to create an environment similar to the one created by GDM or LightDM.
+
+    This fix also allows Unity 7.4 under Ubuntu 16.04 to run in TurboVNC, if
+3D window manager support is enabled.
+
 
 2.0.2
 =====
