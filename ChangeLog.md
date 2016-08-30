@@ -94,6 +94,10 @@ OS X 10.10 "Yosemite" and later.  Hence, the "OracleJava" suffix has been
 removed from that package.  The "AppleJava" TurboVNC package is still provided,
 but it should only be used on OS X 10.9 and earlier.
 
+15. Fixed a regression introduced in 2.1 beta1[2] whereby Xvnc would segfault
+if the `-rfbauth` argument was not specified and a client attempted to
+authenticate using a VNC password.
+
 
 2.0.91 (2.1 beta2)
 ==================
