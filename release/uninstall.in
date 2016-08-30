@@ -1,5 +1,5 @@
 # Copyright (C)2009 Sun Microsystems, Inc.
-# Copyright (C)2010, 2012 D. R. Commander
+# Copyright (C)2010, 2012, 2016 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -48,6 +48,7 @@ cd $PWD
 echo Removing directories ...
 rmdir $PREFIX/bin 2>&1 || RETCODE=-1
 if [ -d $PREFIX/lib ]; then rmdir $PREFIX/lib 2>&1 || RETCODE=-1; fi
+if [ -d $PREFIX/etc ]; then rmdir $PREFIX/etc 2>&1 || RETCODE=-1; fi
 if [ -f $PREFIX/man/man1/vncviewer.1 ]; then
 	rm $PREFIX/man/man1/vncviewer.1 2>&1 || RETCODE=-1;
 fi
