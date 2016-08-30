@@ -68,21 +68,35 @@ in this manner.
 
 ** Installing the TurboVNC Viewer on OS X
 
+	OS X 10.10 "Yosemite" and later :: {:}
+
 	#. Download the TurboVNC Mac disk image
-		(''TurboVNC-''__''{version}''__''-OracleJava.dmg'' or
-		''TurboVNC-''__''{version}''__''-AppleJava.dmg'') from the
+		(''TurboVNC-''__''{version}''__''.dmg'') from the
 		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
-		!!! The "AppleJava" package will work with OS X 10.5 and later.  It uses
-		Apple's distribution of Java, which was pre-installed on versions of OS X
-		prior to 10.7 (but which can be installed on later OS X versions by
-		downloading the "Java for OS X" package from Apple Support.)  The
-		"OracleJava" package will work with OS X 10.7 or later and uses the Oracle
-		Java plugin.  In order to achieve the best performance possible with the
-		TurboVNC Viewer, you should generally use Apple Java with older Macs and
-		Oracle Java with newer Macs.  See {ref prefix="Section ": MacJavaPerf} for
-		more details.
+		!!! This package requires [[http://www.java.com][Oracle Java]].
+
+		!!! This package can also be used on OS X 10.7-10.9, but the "AppleJava"
+		package (see below) will likely perform better on such systems.  See
+		{ref prefix="Section ": MacJavaPerf} for more details.
+
+	#. Open the disk image, then open ''TurboVNC.pkg'' inside the
+		disk image.  Follow the instructions to install the Mac TurboVNC Viewer.
+
+	OS X 10.9 "Mavericks" and earlier :: {:}
+
+	#. Download the TurboVNC Mac disk image
+		(''TurboVNC-''__''{version}''__''-AppleJava.dmg'') from the
+		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
+		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
+
+		!!! This package requires Java for OS X, which was pre-installed on
+		versions of OS X prior to 10.7 (but which can be installed on later OS X
+		versions by downloading the
+		[[https://support.apple.com/kb/DL1572][Java for OS X package]] from Apple
+		Support.)  It should not be used on OS X 10.10 and later.  See
+		{ref prefix="Section ": MacJavaPerf} for more details.
 
 	#. Open the disk image, then open ''TurboVNC.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac TurboVNC Viewer.

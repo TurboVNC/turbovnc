@@ -41,12 +41,12 @@ safedirmove ()
 	return 0
 }
 
-FLAVOR=AppleJava
-LAUNCHER=JavaApplicationStub
+SUFFIX=
+LAUNCHER="@CMAKE_PROJECT_NAME@ Viewer"
 if [ $# -gt 0 ]; then
-	if [ "$1" = "oracle" ]; then
-		FLAVOR=OracleJava
-		LAUNCHER="@CMAKE_PROJECT_NAME@ Viewer"
+	if [ "$1" = "compat" ]; then
+		SUFFIX=-AppleJava
+		LAUNCHER=JavaApplicationStub
 	fi
 fi
 
@@ -59,8 +59,8 @@ BINDIR=@TVNC_BINDIR@
 DOCDIR=@TVNC_DOCDIR@
 JAVADIR=@TVNC_JAVADIR@
 
-if [ -f $PACKAGE_NAME-$VERSION.dmg ]; then
-	rm -f $PACKAGE_NAME-$VERSION.dmg
+if [ -f $PACKAGE_NAME-$VERSION$SUFFIX.dmg ]; then
+	rm -f $PACKAGE_NAME-$VERSION$SUFFIX.dmg
 fi
 
 umask 022
@@ -80,13 +80,13 @@ safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR
 
 mkdir -p $TMPDIR/pkg/
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
-cp pkgscripts/Distribution-$FLAVOR.xml $TMPDIR/pkg/Distribution.xml
+cp pkgscripts/Distribution$SUFFIX.xml $TMPDIR/pkg/Distribution.xml
 mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
 mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
-if [ "$FLAVOR" = "OracleJava" ]; then
-	sh pkgscripts/makemacapp oracle
+if [ "$SUFFIX" = "-AppleJava" ]; then
+	sh pkgscripts/makemacapp compat
 else
 	sh pkgscripts/makemacapp
 fi
@@ -95,7 +95,7 @@ install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
 echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
 osacompile -t APPL -a i386 -o "$TMPDIR/$PACKAGE_NAME Viewer (Listen Mode).app" $TMPDIR/listenmode.applescript
-cp -RX "$PACKAGE_NAME Viewer-$FLAVOR.app" "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app"
+cp -RX "$PACKAGE_NAME Viewer$SUFFIX.app" "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app"
 cp -RX "$TMPDIR/$PACKAGE_NAME Viewer (Listen Mode).app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 cp -RX "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 echo "\"/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app/Contents/MacOS/$LAUNCHER\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
@@ -109,7 +109,7 @@ productbuild --distribution $TMPDIR/pkg/Distribution.xml --package-path \
 	$TMPDIR/pkg/ --resources $TMPDIR/pkg/ $TMPDIR/dmg/$PACKAGE_NAME.pkg
 mv "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/dmg/
 hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
-	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PACKAGE_NAME-$VERSION-$FLAVOR.dmg
-cp $TMPDIR/$PACKAGE_NAME-$VERSION-$FLAVOR.dmg .
+	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PACKAGE_NAME-$VERSION$SUFFIX.dmg
+cp $TMPDIR/$PACKAGE_NAME-$VERSION$SUFFIX.dmg .
 
 exit

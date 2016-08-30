@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2016-03-07T19:21:56">
+<meta name="date" content="2016-08-29T21:04:14">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -457,11 +457,11 @@ other VNC distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">O/S</td>
-    <td class="standard">OS X 10.5 (&ldquo;Leopard&rdquo;) or later</td>
+    <td class="standard">OS X 10.5 &ldquo;Leopard&rdquo; or later (OS X 10.7 &ldquo;Lion&rdquo; or later recommended)</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard">Java for OS X or Oracle Java 8u40 or later (see Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details)</td>
+    <td class="standard"><span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0015"></a> 8u40 or later, or <span class="remote"><a href="https://support.apple.com/kb/DL1572" class="remote">Java for OS X</a></span><a name="idx0016"></a> (see Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details)</td>
   </tr>
 </table>
 </div>
@@ -529,22 +529,22 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0015"></a> of the 
+        area</a></span><a name="idx0017"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0016"></a>. Packages are 
+        SourceForge project page</a></span><a name="idx0018"></a>. Packages are 
         provided for RPM-based and Debian-based Linux distributions that contain 
         GLIBC 2.5 or later (including 
-        <span class="remote"><a href="http://fedoraproject.org" class="remote">Fedora</a></span><a name="idx0017"></a> 
+        <span class="remote"><a href="http://fedoraproject.org" class="remote">Fedora</a></span><a name="idx0019"></a> 
         6 or later, 
         <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux" class="remote">Red 
         Hat Enterprise 
-        Linux</a></span><a name="idx0018"></a>/<span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0019"></a> 
+        Linux</a></span><a name="idx0020"></a>/<span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0021"></a> 
         5 or later, 
-        <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0020"></a> 
+        <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0022"></a> 
         Linux 
-        Enterprise/<span class="remote"><a href="http://www.opensuse.org" class="remote">openSUSE</a></span><a name="idx0021"></a> 
+        Enterprise/<span class="remote"><a href="http://www.opensuse.org" class="remote">openSUSE</a></span><a name="idx0023"></a> 
         11 or later, and 
-        <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0022"></a> 
+        <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0024"></a> 
         8.04 or later.) <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
@@ -603,19 +603,48 @@ TurboVNC is installed in this manner.</p>
 
 <h2 id="hd005002">5.2&nbsp;Installing the TurboVNC Viewer on OS X</h2>
 
+<dl class="Description">
+    <dt class="Description-1 Description">OS X 10.10 &ldquo;Yosemite&rdquo; and later</dt>
+    <dd class="Description-1 Description">
+    </dd>
+</dl>
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the TurboVNC Mac disk image 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-OracleJava.dmg</code> 
-        or 
-        <code>TurboVNC-</code><em><code>{version}</code></em><code>-AppleJava.dmg</code>) 
+        (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0023"></a> of the 
+        area</a></span><a name="idx0025"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0024"></a>.
+        SourceForge project page</a></span><a name="idx0026"></a>.
         <div class="important"><p class="important">
-        The &ldquo;AppleJava&rdquo; package will work with OS X 10.5 and later.  It uses Apple&rsquo;s distribution of Java, which was pre-installed on versions of OS X prior to 10.7 (but which can be installed on later OS X versions by downloading the &ldquo;Java for OS X&rdquo; package from Apple Support.)  The &ldquo;OracleJava&rdquo; package will work with OS X 10.7 or later and uses the Oracle Java plugin.  In order to achieve the best performance possible with the TurboVNC Viewer, you should generally use Apple Java with older Macs and Oracle Java with newer Macs.  See Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details.
+        This package requires <span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0027"></a>.
+        </p></div>
+        <div class="important"><p class="important">
+        This package can also be used on OS X 10.7-10.9, but the &ldquo;AppleJava&rdquo; package (see below) will likely perform better on such systems.  See Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details.
+        </p></div>
+    </li>
+    <li class="Ordered-1 Ordered">
+        Open the disk image, then open <code>TurboVNC.pkg</code> inside the disk 
+        image.  Follow the instructions to install the Mac TurboVNC Viewer.
+    </li>
+</ol>
+<dl class="Description">
+    <dt class="Description-1 Description">OS X 10.9 &ldquo;Mavericks&rdquo; and earlier</dt>
+    <dd class="Description-1 Description">
+    </dd>
+</dl>
+<ol class="Ordered numeric">
+    <li class="Ordered-1 Ordered">
+        Download the TurboVNC Mac disk image 
+        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-AppleJava.dmg</code>) 
+        from the 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
+        area</a></span><a name="idx0028"></a> of the 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
+        SourceForge project page</a></span><a name="idx0029"></a>.
+        <div class="important"><p class="important">
+        This package requires Java for OS X, which was pre-installed on versions of OS X prior to 10.7 (but which can be installed on later OS X versions by downloading the <span class="remote"><a href="https://support.apple.com/kb/DL1572" class="remote">Java for OS X package</a></span><a name="idx0030"></a> from Apple Support.)  It should not be used on OS X 10.10 and later.  See Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details.
         </p></div>
     </li>
     <li class="Ordered-1 Ordered">
@@ -636,9 +665,9 @@ TurboVNC is installed in this manner.</p>
         <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0025"></a> of the 
+        area</a></span><a name="idx0031"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0026"></a>.
+        SourceForge project page</a></span><a name="idx0032"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -657,9 +686,9 @@ download the TurboVNC source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-area</a></span><a name="idx0027"></a> of the 
+area</a></span><a name="idx0033"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-SourceForge project page</a></span><a name="idx0028"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0034"></a>, uncompress 
 it, <code>cd&nbsp;turbovnc-</code><em><code>{version}</code></em>, and 
 read <code>BUILDING.txt</code> for further instructions on how to build 
 TurboVNC from source.</p>
@@ -905,7 +934,7 @@ JNI library for Linux, OS X, or Windows clients when launching the
 TurboVNC Viewer using Java Web Start.  If using the Java TurboVNC Viewer 
 as an applet, then you can install 
 <span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
-of the official libjpeg-turbo packages</a></span><a name="idx0029"></a> 
+of the official libjpeg-turbo packages</a></span><a name="idx0035"></a> 
 on the client machine to accelerate JPEG decoding.</p>
 
 <p>To use the Java TurboVNC Viewer in a web browser, point your web browser 
@@ -968,7 +997,7 @@ Viewer, it is desirable to serve up the JAR files from a dedicated web
 server.  When deployed using JWS, the Java TurboVNC Viewer provides all 
 of the advantages of a standalone native viewer, including native levels 
 of performance on most platforms (see <a href="#MacJavaPerf">notes 
-regarding performance on Mac platforms</a><a name="idx0030"></a>.)</p>
+regarding performance on Mac platforms</a><a name="idx0036"></a>.)</p>
 
 <p>For the purposes of this guide, it is assumed that the reader has some 
 knowledge of web server administration.</p>
@@ -984,7 +1013,7 @@ knowledge of web server administration.</p>
         packages for Linux, or you can download 
         <code>libjpeg-turbo-{version}-jws.zip</code> from libjpeg-turbo 1.3.0 or 
         later (available at 
-        <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files" class="remote">http://sourceforge.net/projects/libjpeg-turbo/files</a></span><a name="idx0031"></a>.)  
+        <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files" class="remote">http://sourceforge.net/projects/libjpeg-turbo/files</a></span><a name="idx0037"></a>.)  
         Note that only the JARs included in the official TurboVNC packages are 
         signed using an official code signing certificate. <br /><br />
     </li>
@@ -1045,7 +1074,7 @@ knowledge of web server administration.</p>
         </p></div>
         This is just a minimal example.  Refer to the 
         <span class="remote"><a href="http://docs.oracle.com/javase/6/docs/technotes/guides/javaws/" class="remote">Java 
-        Web Start documentation</a></span><a name="idx0032"></a> for additional 
+        Web Start documentation</a></span><a name="idx0038"></a> for additional 
         fields that you might want to add. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1309,7 +1338,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0033"></a> should be used
+            comparison</a><a name="idx0039"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1361,7 +1390,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0034"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0040"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1756,38 +1785,51 @@ images.</p>
 
 <p><a name="MacJavaPerf"></a></p>
 
-<p>The Oracle Java plugin (Java 7 or later) is used on OS X 10.7 and later 
-when launching the Java TurboVNC Viewer as an applet or using Java Web 
-Start.  When using TurboVNC as a standalone application, there are two 
-packages provided: one that uses the afore-mentioned Oracle Java plugin 
-and one that uses Apple&rsquo;s distribution of Java (Java for OS X.)  
-The tradeoffs between the two Java flavors are as follows:</p>
+<p>When using the TurboVNC Viewer as a standalone application (as opposed 
+to with Java Web Start), there are two packages provided:</p>
 
-<p>Java for OS X:</p>
+<p><code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>:</p>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
-        Pre-installed on OS X 10.6 and earlier (can be installed on later OS X 
-        releases by downloading the Java for OS X package from Apple Support)
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Includes a Quartz-accelerated Java 2D blitter that provides optimal 
-        performance for TurboVNC on older Macs (those containing nVidia and 
-        Intel HD Graphics GPUs, specifically)
-    </li>
-</ul>
-
-<p>Oracle Java 7 and later:</p>
-
-<ul class="Itemize">
-    <li class="Itemize-1 Itemize asterisk">
-        Requires OS X 10.7 or later
+        Requires 
+        <span class="remote"><a href="http://www.java.com" class="remote">Oracle 
+        Java</a></span><a name="idx0041"></a>, which requires OS X 10.7 
+        &ldquo;Lion&rdquo; or later
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Uses OpenGL for Java 2D blitting, which provides optimal performance for 
-        TurboVNC on newer Macs (those containing Intel Iris GPUs, 
-        specifically&ndash; Java for OS X does not appear to include Java 2D 
-        hardware acceleration for those GPUs)
+        TurboVNC on OS X 10.10 &ldquo;Yosemite&rdquo; and later
+    </li>
+</ul>
+
+<p><code>TurboVNC-</code><em><code>{version}</code></em><code>-AppleJava.dmg</code>:</p>
+
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        Requires Apple&rsquo;s (deprecated) distribution of Java (Java for OS X)
+        <ul class="Itemize">
+            <li class="Itemize-3 Itemize asterisk">
+                Java for OS X is pre-installed on OS X 10.6 and earlier and can be 
+                installed on later OS X releases by downloading the 
+                <span class="remote"><a href="https://support.apple.com/kb/DL1572" class="remote">Java 
+                for OS X package</a></span><a name="idx0042"></a> from Apple Support.
+            </li>
+        </ul>
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        Uses a Quartz-accelerated Java 2D blitter that provides optimal 
+        performance for TurboVNC on OS X 10.9 &ldquo;Mavericks&rdquo; and earlier
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        Should not be used on OS X 10.10 &ldquo;Yosemite&rdquo; and later
+        <ul class="Itemize">
+            <li class="Itemize-3 Itemize asterisk">
+                Doing so may result in visual anomalies and extremely slow performance, 
+                since Java for OS X does not enable its Quartz-accelerated Java 2D 
+                blitter on Yosemite and later.
+            </li>
+        </ul>
     </li>
 </ul>
 
@@ -1799,7 +1841,7 @@ java&nbsp;-cp&nbsp;/Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Res
 </pre>
 
 <div class="important"><p class="important">
-NOTE: if you intend to use the desktop scaling feature in the Java TurboVNC Viewer along with the Oracle Java plugin, then upgrade the plugin to Java 8 Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance issue in the OpenGL Java 2D blitter that affected scaled blitting.
+NOTE: if you intend to use the desktop scaling feature in the Java TurboVNC Viewer along with Oracle Java, then upgrade Oracle Java to Java 8 Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance issue in the OpenGL Java 2D blitter that affected scaled blitting.
 </p></div>
 
 
@@ -2420,7 +2462,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0035"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0043"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>

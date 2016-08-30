@@ -5,17 +5,17 @@ set -e
 
 SRCDIR=@CMAKE_SOURCE_DIR@
 
-FLAVOR=AppleJava
-LAUNCHER=/System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub
+SUFFIX=
+LAUNCHER=$SRCDIR/release/JavaAppLauncher/JavaAppLauncher
 if [ $# -gt 0 ]; then
-	if [ "$1" = "oracle" ]; then
-		FLAVOR=OracleJava
-		LAUNCHER=$SRCDIR/release/JavaAppLauncher/JavaAppLauncher
+	if [ "$1" = "compat" ]; then
+		SUFFIX=-AppleJava
+		LAUNCHER=/System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub
 	fi
 fi
 
 umask 022
-APP="@CMAKE_PROJECT_NAME@ Viewer-$FLAVOR.app"
+APP="@CMAKE_PROJECT_NAME@ Viewer$SUFFIX.app"
 
 if [ -d "$APP" ]; then
 	rm -rf "$APP"
@@ -25,8 +25,8 @@ mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources/Java"
 mkdir -p "$APP/Contents/Resources/TurboJPEG"
 
-cp pkgscripts/Info-$FLAVOR.plist "$APP/Contents/Info.plist"
-if [ "$FLAVOR" = "AppleJava" ]; then
+cp pkgscripts/Info$SUFFIX.plist "$APP/Contents/Info.plist"
+if [ "$SUFFIX" = "-AppleJava" ]; then
   cp $LAUNCHER "$APP/Contents/MacOS/"
 else
   cp $LAUNCHER "$APP/Contents/MacOS/@CMAKE_PROJECT_NAME@ Viewer"

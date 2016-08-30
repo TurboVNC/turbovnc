@@ -42,10 +42,11 @@
 	| Any Intel-based Mac \
 	|
 | O/S \
-	| OS X 10.5 ("Leopard") or later \
+	| OS X 10.5 "Leopard" or later (OS X 10.7 "Lion" or later recommended) \
 	|
 | Other Software \
-	| Java for OS X or Oracle Java 8u40 or later (see \
+	| [[http://www.java.com][Oracle Java]] 8u40 or later, or \
+		[[https://support.apple.com/kb/DL1572][Java for OS X]] (see \
 		{ref prefix="Section ": MacJavaPerf} for more details) \
 	|
 #OPT: hiCol=first

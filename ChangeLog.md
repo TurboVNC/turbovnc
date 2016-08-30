@@ -88,6 +88,12 @@ attempts to create an environment similar to the one created by GDM or LightDM.
     This fix also allows Unity 7.4 under Ubuntu 16.04 to run in TurboVNC, if
 3D window manager support is enabled.
 
+14. The "OracleJava" TurboVNC package is now the default Mac package, since
+Oracle Java performs much better than Apple's (deprecated) Java distribution on
+OS X 10.10 "Yosemite" and later.  Hence, the "OracleJava" suffix has been
+removed from that package.  The "AppleJava" TurboVNC package is still provided,
+but it should only be used on OS X 10.9 and earlier.
+
 
 2.0.91 (2.1 beta2)
 ==================

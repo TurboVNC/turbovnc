@@ -121,21 +121,19 @@ string(REGEX REPLACE "^:" "" TVNC_MACPREFIX ${TVNC_MACPREFIX})
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
 configure_file(release/makemacapp.in pkgscripts/makemacapp)
 set(MINOSVER 10.7)
-configure_file(release/Distribution.xml.in
-	pkgscripts/Distribution-OracleJava.xml)
+configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
 set(MINOSVER 10.5)
 configure_file(release/Distribution.xml.in
 	pkgscripts/Distribution-AppleJava.xml)
+configure_file(release/Info.plist.in pkgscripts/Info.plist)
 configure_file(release/Info-AppleJava.plist.in
 	pkgscripts/Info-AppleJava.plist)
-configure_file(release/Info-OracleJava.plist.in
-	pkgscripts/Info-OracleJava.plist)
 configure_file(release/uninstall.in pkgscripts/uninstall)
 configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
 
 add_custom_target(dmg sh pkgscripts/makemacpkg
 	SOURCES pkgscripts/makemacpkg)
-add_custom_target(oracledmg sh pkgscripts/makemacpkg oracle
+add_custom_target(compatdmg sh pkgscripts/makemacpkg compat
 	SOURCES pkgscripts/makemacpkg)
 
 endif() # APPLE
