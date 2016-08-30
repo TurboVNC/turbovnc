@@ -820,6 +820,7 @@ sub Usage
         "        -fg\n".
         "        -noxstartup\n".
         "        -xstartup <SCRIPT>\n".
+        "        -3dwm\n".
         "        -log <FILE>\n".
         "\n".
         "See vncserver and Xvnc manual pages for more information.\n");
