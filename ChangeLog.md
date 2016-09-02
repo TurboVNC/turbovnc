@@ -98,6 +98,10 @@ but it should only be used on OS X 10.9 and earlier.
 if the `-rfbauth` argument was not specified and a client attempted to
 authenticate using a VNC password.
 
+16. Dead keys should now fully work when using Java 8 or later on Windows and
+OS X.  They still do not work properly when using Java 6 or Linux, due to bugs
+in Java.
+
 
 2.0.91 (2.1 beta2)
 ==================
