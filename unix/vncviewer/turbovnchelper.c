@@ -1,4 +1,4 @@
-/*  Copyright (C)2015 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2016 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -294,7 +294,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
     if (devInfo[i].type == None)
       continue;
     type = XGetAtomName(dpy, devInfo[i].type);
-    if (!strcmp(type, "MOUSE"))  {
+    if (!strcmp(type, "MOUSE") || !strcmp(type, "KEYBOARD"))  {
       XFree(type);
       continue;
     }
@@ -311,6 +311,17 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
     else if (!strcmp(type, "PAD"))
       productID = rfbGIIDevTypePad;
     XFree(type);
+
+    /* FIXME: Relative valuators aren't supported (yet) */
+    for (ci = 0; ci < devInfo[i].num_classes; ci++) {
+      if (classInfo->class == ValuatorClass &&
+          ((XValuatorInfoPtr)classInfo)->mode == Relative)
+        break;
+      classInfo = (XAnyClassPtr)((char *)classInfo + classInfo->length);
+    }
+    if (ci < devInfo[i].num_classes)
+      continue;
+    classInfo = devInfo[i].inputclassinfo;
 
     bailif0(eidcls =
             (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputDevice"));

@@ -116,6 +116,19 @@ then the key was released in another window, the key would similarly continue
 to appear pressed from the point of view of applications running in the
 TurboVNC Server session.
 
+18. Fixed a regression in the standalone Linux TurboVNC Viewer caused by
+2.1 beta1[4] (remote X Input support) whereby some X Input devices other than
+extended pointer devices (such as keyboards, regular mice, and webcams) were
+mistakenly being cloned onto the TurboVNC Server, thus causing erratic pointer
+behavior and other issues.  Some devices (even some keyboards) seem to report
+that they are extended pointer devices when in fact they aren't.  The TurboVNC
+Helper is now more discriminating and does not allow any X Input device whose
+type Atom is "MOUSE" or "KEYBOARD", or any device with relative valuators, to
+be cloned onto the server.  The server now also rejects any attempt by the
+viewer to create an extended input device with relative valuators, since those
+don't currently work.  Wacom tablets and other extended pointer devices with
+absolute valuators should still work fine.
+
 
 2.0.91 (2.1 beta2)
 ==================

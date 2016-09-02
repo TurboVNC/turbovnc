@@ -1451,6 +1451,12 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
                        Absolute : Relative;
             dev.productID = msg.giidc.productID;
 
+            if (dev.mode == Relative) {
+                rfbLog("GII device create ERROR: relative valuators not supported (yet)\n");
+                SKIP(msg.giidc.numValuators * sz_rfbGIIValuator);
+                goto sendMessage;
+            }
+
             for (i = 0; i < dev.numValuators; i++) {
                 rfbGIIValuator *v = &dev.valuators[i];
                 READ((char *)v, sz_rfbGIIValuator);
