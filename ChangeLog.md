@@ -99,6 +99,10 @@ OS X 10.10 "Yosemite" and later.  Hence, the "OracleJava" suffix has been
 removed from that package.  The "AppleJava" TurboVNC package is still provided,
 but it should only be used on OS X 10.9 and earlier.
 
+16. Dead keys should now fully work when using Java 8 or later on Windows and
+OS X.  They still do not work properly when using Java 6 or Linux, due to bugs
+in Java.
+
 
 2.0.2
 =====
