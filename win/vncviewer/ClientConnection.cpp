@@ -765,7 +765,7 @@ void ClientConnection::SaveConnectionHistory()
 void ClientConnection::EnableFullControlOptions()
 {
   if (m_opts.m_ViewOnly) {
-    SwitchOffKey();
+    SwitchOffKeys();
     EnableAction(IDD_FILETRANSFER, false);
     EnableAction(ID_CONN_CTLALTDEL, false);
     EnableAction(ID_CONN_CTLDOWN, false);
@@ -799,7 +799,7 @@ void ClientConnection::EnableAction(int id, bool enable)
 }
 
 
-void ClientConnection::SwitchOffKey()
+void ClientConnection::SwitchOffKeys()
 {
   CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
                 ID_CONN_ALTDOWN, MF_BYCOMMAND | MF_UNCHECKED);
@@ -809,12 +809,18 @@ void ClientConnection::SwitchOffKey()
               (LPARAM)MAKELONG(TBSTATE_ENABLED, 0));
   SendMessage(m_hToolbar, TB_SETSTATE, (WPARAM)ID_CONN_ALTDOWN,
               (LPARAM)MAKELONG(TBSTATE_ENABLED, 0));
-  SendKeyEvent(XK_Alt_L,     false);
-  SendKeyEvent(XK_Control_L, false);
-  SendKeyEvent(XK_Shift_L,   false);
-  SendKeyEvent(XK_Alt_R,     false);
-  SendKeyEvent(XK_Control_R, false);
-  SendKeyEvent(XK_Shift_R,   false);
+
+  for (std::map<UINT, KeyActionSpec>::iterator iter = pressedKeys.begin();
+       iter != pressedKeys.end(); ++iter) {
+    KeyActionSpec syms = iter->second;
+
+    for (int i = 0; syms.keycodes[i] != XK_VoidSymbol && i < MaxKeysPerKey;
+         i++) {
+      SendKeyEvent(syms.keycodes[i], false);
+      vnclog.Print(4, "Sent keysym %04x (release)\n", syms.keycodes[i]);
+    }
+  }
+  pressedKeys.clear();
 }
 
 
@@ -2403,7 +2409,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
       break;
     case WM_KILLFOCUS:
       if (_this->m_opts.m_ViewOnly) return 0;
-      _this->SwitchOffKey();
+      _this->SwitchOffKeys();
       return 0;
     case WM_SIZE:
       _this->PositionChildWindow();
@@ -2922,30 +2928,50 @@ inline void ClientConnection::ProcessKeyEvent(int virtkey, DWORD keyData)
 #endif
 
   try {
+
+    if (!down) {
+      std::map<UINT, KeyActionSpec>::iterator iter =
+        pressedKeys.find(virtkey);
+
+      if (iter == pressedKeys.end()) {
+        vnclog.Print(4, "Unexpected release of key code %d\n", virtkey);
+        return;
+      }
+
+      KeyActionSpec syms = iter->second;
+      for (int i = 0; syms.keycodes[i] != XK_VoidSymbol && i < MaxKeysPerKey;
+           i++) {
+        SendKeyEvent(syms.keycodes[i], false);
+        vnclog.Print(4, "Sent keysym %04x (release)\n", syms.keycodes[i]);
+      }
+      pressedKeys.erase(iter);
+      return;
+    }
+
     KeyActionSpec kas = m_keymap.PCtoX(virtkey, keyData);
 
     if (kas.releaseModifiers & KEYMAP_LCONTROL) {
       SendKeyEvent(XK_Control_L, false);
-      vnclog.Print(5, "fake L Ctrl raised\n");
+      vnclog.Print(5, "fake L Ctrl released\n");
     }
     if (kas.releaseModifiers & KEYMAP_LALT) {
       SendKeyEvent(XK_Alt_L, false);
-      vnclog.Print(5, "fake L Alt raised\n");
+      vnclog.Print(5, "fake L Alt released\n");
     }
     if (kas.releaseModifiers & KEYMAP_RCONTROL) {
       SendKeyEvent(XK_Control_R, false);
-      vnclog.Print(5, "fake R Ctrl raised\n");
+      vnclog.Print(5, "fake R Ctrl released\n");
     }
     if (kas.releaseModifiers & KEYMAP_RALT) {
       SendKeyEvent(XK_Alt_R, false);
-      vnclog.Print(5, "fake R Alt raised\n");
+      vnclog.Print(5, "fake R Alt released\n");
     }
 
+    pressedKeys[virtkey] = kas;
     for (int i = 0; kas.keycodes[i] != XK_VoidSymbol && i < MaxKeysPerKey;
          i++) {
-      SendKeyEvent(kas.keycodes[i], down);
-      vnclog.Print(4, "Sent keysym %04x (%s)\n",
-        kas.keycodes[i], down ? "press" : "release");
+      SendKeyEvent(kas.keycodes[i], true);
+      vnclog.Print(4, "Sent keysym %04x (press)\n", kas.keycodes[i]);
     }
 
     if (kas.releaseModifiers & KEYMAP_RALT) {

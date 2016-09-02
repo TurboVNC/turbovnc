@@ -102,6 +102,20 @@ authenticate using a VNC password.
 OS X.  They still do not work properly when using Java 6 or Linux, due to bugs
 in Java.
 
+17. Fixed two issues in the TurboVNC Viewer related to keyboard handling:
+
+     - An issue whereby, when pressing Shift or AltGr, then pressing a
+"printable" (alphanumeric or symbol) key, then releasing the keys in the same
+order, the viewer would compute and send a different key symbol for the release
+event than it did for the press event (because the key was no longer modified.)
+This would confuse the XKEYBOARD handler in the server, which would ignore the
+release event, thus causing the printable key to appear pressed from the point
+of view of applications running in the TurboVNC Server session.
+     - An issue whereby, when a key was pressed, the viewer window lost focus,
+then the key was released in another window, the key would similarly continue
+to appear pressed from the point of view of applications running in the
+TurboVNC Server session.
+
 
 2.0.91 (2.1 beta2)
 ==================

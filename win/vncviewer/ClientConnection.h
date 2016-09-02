@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012-2013, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012-2013, 2015-2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -47,6 +47,8 @@ extern "C" {
 #define PACKETMODE 0
 #include "wintab/pktdef.h"
 }
+
+#include <map>
 
 #define SETTINGS_KEY_NAME "Software\\TurboVNC\\VNCviewer\\Settings"
 #define MAX_HOST_NAME_LEN 250
@@ -152,7 +154,7 @@ class ClientConnection : public omni_thread
     void SendPointerEvent(int x, int y, int buttonMask);
     void ProcessKeyEvent(int virtkey, DWORD keyData);
     void SendKeyEvent(CARD32 key, bool down);
-    void SwitchOffKey();
+    void SwitchOffKeys();
     void GrabKeyboard();
     void UngrabKeyboard();
     bool isKeyboardGrabbed();
@@ -364,6 +366,7 @@ class ClientConnection : public omni_thread
 
     // Keyboard mapper
     KeyMap m_keymap;
+    std::map<UINT, KeyActionSpec> pressedKeys;
 
     // RFB settings
     VNCOptions m_opts;
