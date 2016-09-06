@@ -246,10 +246,32 @@ public class VncViewer extends javax.swing.JApplet
       // Thus, we have to compute the insets globally using a dummy JFrame.
       // Dear Swing, eff ewe.
       if (!embed.getValue()) {
-        JFrame frame = new JFrame();
-        frame.setVisible(true);
-        insets = frame.getInsets();
-        frame.setVisible(false);
+        final JFrame frame = new JFrame();
+        // Under certain Linux WM's, the insets aren't valid until
+        // componentResized() is called (see above.)
+        if (isX11()) {
+          frame.addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+              synchronized(frame) {
+                if (frame.isVisible() && frame.getExtendedState() == JFrame.NORMAL) {
+                  insets = frame.getInsets();
+                  frame.notifyAll();
+                }
+              }
+            }
+          });
+          frame.setExtendedState(JFrame.NORMAL);
+          frame.setVisible(true);
+          synchronized(frame) {
+            while (insets == null)
+              frame.wait();
+          }
+          frame.setVisible(false);
+        } else {
+          frame.setVisible(true);
+          insets = frame.getInsets();
+          frame.setVisible(false);
+        }
         frame.dispose();
       }
     } catch (Exception e) {

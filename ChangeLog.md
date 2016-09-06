@@ -129,6 +129,10 @@ viewer to create an extended input device with relative valuators, since those
 don't currently work.  Wacom tablets and other extended pointer devices with
 absolute valuators should still work fine.
 
+19. Worked around an issue in Java that was causing scrollbars to be
+unnecessarily displayed in the Linux/Java TurboVNC Viewer when it was used
+under GNOME 3 with automatic desktop resizing enabled.
+
 
 2.0.91 (2.1 beta2)
 ==================
