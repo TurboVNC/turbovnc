@@ -117,6 +117,10 @@ then the key was released in another window, the key would similarly continue
 to appear pressed from the point of view of applications running in the
 TurboVNC Server session.
 
+18. Worked around an issue in Java that was causing scrollbars to be
+unnecessarily displayed in the Linux/Java TurboVNC Viewer when it was used
+under GNOME 3 with automatic desktop resizing enabled.
+
 
 2.0.2
 =====
