@@ -1852,6 +1852,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       case KeyEvent.VK_F11:          keysym = Keysyms.F11;  break;
       case KeyEvent.VK_F12:          keysym = Keysyms.F12;  break;
       case KeyEvent.VK_F13:          keysym = Keysyms.F13;  break;
+      case KeyEvent.VK_HELP:         keysym = Keysyms.Help;  break;
+      case KeyEvent.VK_UNDO:         keysym = Keysyms.Undo;  break;
+      case KeyEvent.VK_AGAIN:        keysym = Keysyms.Redo;  break;
       case KeyEvent.VK_PRINTSCREEN:  keysym = Keysyms.Print;  break;
       case KeyEvent.VK_PAUSE:
         if (ev.isControlDown())
