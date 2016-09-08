@@ -133,6 +133,9 @@ absolute valuators should still work fine.
 unnecessarily displayed in the Linux/Java TurboVNC Viewer when it was used
 under GNOME 3 with automatic desktop resizing enabled.
 
+20. The Windows TurboVNC Viewer will now pass keystrokes from Microsoft
+extended keys to the VNC server when the keyboard is grabbed.
+
 
 2.0.91 (2.1 beta2)
 ==================
