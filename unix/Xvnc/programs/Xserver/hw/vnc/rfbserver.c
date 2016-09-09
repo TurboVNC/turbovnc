@@ -1414,6 +1414,8 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
 
     if (cl->syncFence) return TRUE;
 
+    if (cl->state != RFB_NORMAL) return TRUE;
+
     if (rfbProfile) {
         tUpdateStart = gettime();
         if (tStart < 0.) tStart = tUpdateStart;
