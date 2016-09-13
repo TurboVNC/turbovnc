@@ -1440,7 +1440,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     // desktop resize.  Otherwise, it won't occur until the mouse is moved or
     // something changes on the server (manual) or until the window is resized
     // (auto.)
-    if (firstUpdate) {
+    if (firstUpdate && state() == RFBSTATE_NORMAL) {
       forceNonincremental = true;
       requestNewUpdate();
     }
