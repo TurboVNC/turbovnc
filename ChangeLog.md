@@ -136,6 +136,12 @@ under GNOME 3 with automatic desktop resizing enabled.
 20. The Windows TurboVNC Viewer will now pass keystrokes from Microsoft
 extended keys to the VNC server when the keyboard is grabbed.
 
+21. Fixed a regression introduced in 2.1 beta1[9] whereby the Linux TurboVNC
+Viewer and the Windows Java TurboVNC Viewer would throw a NullPointerException
+if the options were changed in the Options dialog prior to connecting to a VNC
+server.  This issue occurred only in the standalone viewers, not when using
+Java Web Start.
+
 
 2.0.91 (2.1 beta2)
 ==================

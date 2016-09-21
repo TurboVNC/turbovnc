@@ -1551,10 +1551,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
       if (viewport != null &&
-          (opts.grabKeyboard == Options.GRAB_ALWAYS &&
+          ((opts.grabKeyboard == Options.GRAB_ALWAYS &&
            !viewport.keyboardTempUngrabbed) ||
           (opts.grabKeyboard == Options.GRAB_FS &&
-           opts.fullScreen != viewport.keyboardTempUngrabbed)) {
+           opts.fullScreen != viewport.keyboardTempUngrabbed))) {
         viewport.keyboardTempUngrabbed = !viewport.keyboardTempUngrabbed;
       }
     }
