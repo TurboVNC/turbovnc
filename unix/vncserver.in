@@ -689,6 +689,7 @@ sub CheckDisplayNumber
         close(S);
         return 0;
     }
+    unlink("/tmp/.X11-unix/X$n");
     close(S);
 
     if ($os eq "Linux") {
