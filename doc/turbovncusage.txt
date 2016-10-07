@@ -370,12 +370,16 @@ details.
 	or deployed using Java Web Start.
 
 	!!! The Windows TurboVNC Viewer contains experimental support for the
-	''-via'' and ''-tunnel'' command-line options.  Currently, the use of these
-	requires Cygwin OpenSSH, since it is the only version of SSH on Windows that
-	supports detaching the SSH process once the tunnel has been established.
-	When using these options, it is recommended that you use the console version
-	of the Windows TurboVNC Viewer (cvncviewer.exe).  Otherwise, a new console
-	window will pop up and remain for the duration of the VNC connection.
+	''-via'' and ''-tunnel'' command-line options.  Currently the use of these
+	requires Cygwin or MSYS2, since those are the only known Windows SSH
+	implementations that support detaching the SSH process once the tunnel has
+	been established.  When using ''-via'' or ''-tunnel'', it is recommended that
+	you use the console version of the Windows TurboVNC Viewer (cvncviewer.exe)
+	rather than vncviewer.exe.  Otherwise, a new console window will pop up and
+	remain for the duration of the VNC connection.  If using MSYS2, or if your
+	Cygwin installation resides in a directory other than ''c:\\cygwin'', then
+	set the ''VNC_VIA_CMD'' and ''VNC_TUNNEL_CMD'' environment variables
+	appropriately (refer to {ref prefix="Section ": VNC_VIA_CMD}.)
 
 *** Forcing Secure Connections
 #OPT: noList! plain!
