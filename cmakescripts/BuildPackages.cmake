@@ -153,3 +153,8 @@ add_custom_target(dist
 add_custom_target(srpm sh pkgscripts/makesrpm
 	SOURCES pkgscripts/makesrpm
 	DEPENDS dist)
+
+configure_file(release/maketarball.in pkgscripts/maketarball)
+
+add_custom_target(tarball sh pkgscripts/maketarball
+	SOURCES pkgscripts/maketarball)
