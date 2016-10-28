@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
      VncViewer.jnlp - default Java Web Start file for the Java TurboVNC Viewer,
      to be used with Xvnc.  On any file ending in .jnlp, the HTTP server
@@ -15,7 +16,6 @@
      Use two dollar signs ($$) to get a dollar sign in the generated JNLP file.
 -->
 
-<?xml version="1.0" encoding="utf-8"?>
 <jnlp codebase="http://$SERVER:$HTTPPORT">
   <information>
     <title>TurboVNC Viewer</title>
