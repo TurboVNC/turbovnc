@@ -28,7 +28,7 @@
 
 #if defined __cplusplus
 extern "C" {
-#endif 
+#endif
 
 /*
  *  XNVCTRLQueryExtension -
@@ -151,7 +151,7 @@ void XNVCTRLSetTargetAttribute (
  *  XNVCTRLSetAttributeAndGetStatus -
  *
  * Same as XNVCTRLSetAttribute().
- * In addition, XNVCTRLSetAttributeAndGetStatus() returns 
+ * In addition, XNVCTRLSetAttributeAndGetStatus() returns
  * True if the operation succeeds, False otherwise.
  *
  */
@@ -169,7 +169,7 @@ Bool XNVCTRLSetAttributeAndGetStatus (
  *  XNVCTRLSetTargetAttributeAndGetStatus -
  *
  * Same as XNVCTRLSetTargetAttribute().
- * In addition, XNVCTRLSetTargetAttributeAndGetStatus() returns 
+ * In addition, XNVCTRLSetTargetAttributeAndGetStatus() returns
  * True if the operation succeeds, False otherwise.
  *
  */
@@ -374,7 +374,7 @@ Bool XNVCTRLQueryValidAttributeValues (
     Display *dpy,
     int screen,
     unsigned int display_mask,
-    unsigned int attribute,                                 
+    unsigned int attribute,
     NVCTRLAttributeValidValuesRec *values
 );
 
@@ -393,7 +393,7 @@ Bool XNVCTRLQueryValidTargetAttributeValues (
     int target_type,
     int target_id,
     unsigned int display_mask,
-    unsigned int attribute,                                 
+    unsigned int attribute,
     NVCTRLAttributeValidValuesRec *values
 );
 
@@ -857,6 +857,6 @@ typedef union {
 
 #if defined __cplusplus
 } /* extern "C" */
-#endif 
+#endif
 
 #endif /* __NVCTRLLIB_H */

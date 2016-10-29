@@ -435,15 +435,15 @@ typedef struct {
     FLOAT32 cscMatrix_cb_r F32;
     FLOAT32 cscMatrix_cb_g F32;
     FLOAT32 cscMatrix_cb_b F32;
-    
+
     FLOAT32 cscOffset_y  F32;
     FLOAT32 cscOffset_cr F32;
     FLOAT32 cscOffset_cb F32;
-    
+
     FLOAT32 cscScale_y  F32;
     FLOAT32 cscScale_cr F32;
     FLOAT32 cscScale_cb F32;
-    
+
 } xnvCtrlSetGvoColorConversionReq;
 #define sz_xnvCtrlSetGvoColorConversionReq 68
 

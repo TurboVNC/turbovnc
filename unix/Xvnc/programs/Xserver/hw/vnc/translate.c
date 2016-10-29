@@ -26,7 +26,7 @@
 #include "rfb.h"
 
 static void PrintPixelFormat(rfbPixelFormat *pf);
-static Bool rfbSetClientColourMapBGR233();
+static Bool rfbSetClientColourMapBGR233(rfbClientPtr cl);
 
 Bool rfbEconomicTranslate = FALSE;
 

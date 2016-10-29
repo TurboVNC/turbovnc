@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2016 D. R. Commander.  All Rights Reserved.
- * Copyright (C) 2011-2013, 2015 Brian P. Hinz
+ * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,6 +90,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       alwaysProfile = true;
     firstUpdate = true; pendingUpdate = false; continuousUpdates = false;
     forceNonincremental = true; supportsSyncFence = false;
+    pressedKeys = new HashMap<Integer, Integer>();
 
     setShared(opts.shared);
     upg = this;
@@ -400,7 +401,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           desktop.requestFocus();
       }
       public void focusLost(FocusEvent e) {
-        releaseModifiers();
+        releasePressedKeys();
       }
     });
     viewer.validate();
@@ -1520,13 +1521,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
     Options.DesktopSize oldDesktopSize = opts.desktopSize;
     opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
     if (desktop != null && !opts.desktopSize.isEqual(oldDesktopSize)) {
-      reconfigure = true;
       if (oldDesktopSize.mode != Options.SIZE_AUTO &&
           opts.desktopSize.mode == Options.SIZE_AUTO &&
           viewport.lionFSSupported() && opts.fullScreen &&
           options.fullScreen.isSelected())
         defaultSize = true;
-      firstUpdate = true;
+      if (opts.desktopSize.mode != Options.SIZE_SERVER) {
+        reconfigure = true;
+        firstUpdate = true;
+      }
     }
 
     int oldSpan = opts.span;
@@ -1548,10 +1551,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
       if (viewport != null &&
-          (opts.grabKeyboard == Options.GRAB_ALWAYS &&
+          ((opts.grabKeyboard == Options.GRAB_ALWAYS &&
            !viewport.keyboardTempUngrabbed) ||
           (opts.grabKeyboard == Options.GRAB_FS &&
-           opts.fullScreen != viewport.keyboardTempUngrabbed)) {
+           opts.fullScreen != viewport.keyboardTempUngrabbed))) {
         viewport.keyboardTempUngrabbed = !viewport.keyboardTempUngrabbed;
       }
     }
@@ -1589,6 +1592,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
         sizeWindow(true);
       else
         reconfigureViewport(false);
+    }
+    // Force a framebuffer update if we're initiating a manual or auto remote
+    // desktop resize.  Otherwise, it won't occur until the mouse is moved or
+    // something changes on the server (manual) or until the window is resized
+    // (auto.)
+    if (firstUpdate && state() == RFBSTATE_NORMAL) {
+      forceNonincremental = true;
+      requestNewUpdate();
     }
   }
 
@@ -1658,8 +1669,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
     try {
-      vlog.debug("writeKeyEvent " + String.format("0x%04x", keysym) + " " +
-                 (down ? "PRESS" : "release"));
       writer().writeKeyEvent(keysym, down);
     } catch (Exception e) {
       if (!shuttingDown) {
@@ -1670,28 +1679,28 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   // KeyEvent.getKeyModifiersText() is unfortunately broken on some platforms.
-  String getKeyModifiersText(int lmodifiers, int rmodifiers) {
+  String getKeyModifiersText() {
     String str = "";
-    if ((lmodifiers & Event.SHIFT_MASK) != 0)
-      str += "LShift ";
-    if ((rmodifiers & Event.SHIFT_MASK) != 0)
-      str += "RShift ";
-    if ((lmodifiers & Event.CTRL_MASK) != 0)
-      str += "LCtrl ";
-    if ((rmodifiers & Event.CTRL_MASK) != 0)
-      str += "RCtrl ";
-    if ((lmodifiers & Event.ALT_MASK) != 0)
-      str += "LAlt ";
-    if ((rmodifiers & Event.ALT_MASK) != 0)
-      str += "RAlt ";
-    if ((lmodifiers & Event.META_MASK) != 0)
-      str += "LMeta ";
-    if ((rmodifiers & Event.META_MASK) != 0)
-      str += "RMeta ";
-    if ((lmodifiers & SUPER_MASK) != 0)
-      str += "LSuper ";
-    if ((rmodifiers & SUPER_MASK) != 0)
-      str += "RSuper ";
+    if (pressedKeys.containsValue(Keysyms.Shift_L))
+      str += " LShift";
+    if (pressedKeys.containsValue(Keysyms.Shift_R))
+      str += " RShift";
+    if (pressedKeys.containsValue(Keysyms.Control_L))
+      str += " LCtrl";
+    if (pressedKeys.containsValue(Keysyms.Control_R))
+      str += " RCtrl";
+    if (pressedKeys.containsValue(Keysyms.Alt_L))
+      str += " LAlt";
+    if (pressedKeys.containsValue(Keysyms.Alt_R))
+      str += " RAlt";
+    if (pressedKeys.containsValue(Keysyms.Meta_L))
+      str += " LMeta";
+    if (pressedKeys.containsValue(Keysyms.Meta_R))
+      str += " RMeta";
+    if (pressedKeys.containsValue(Keysyms.Super_L))
+      str += " LSuper";
+    if (pressedKeys.containsValue(Keysyms.Super_R))
+      str += " RSuper";
     return str;
   }
 
@@ -1708,8 +1717,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void writeKeyEvent(KeyEvent ev) {
-    int keysym = 0, keycode, key, location;
-    int lFakeModifiers = 0, rFakeModifiers = 0;
+    int keysym = -1, keycode, key, location;
+    boolean winAltGr = false;
+    String debugStr;
 
     if (shuttingDown || benchmark)
       return;
@@ -1720,14 +1730,40 @@ public class CConn extends CConnection implements UserPasswdGetter,
     key = ev.getKeyChar();
     location = ev.getKeyLocation();
 
-    vlog.debug((ev.isActionKey() ? "action " : "") + "key " +
-                 (down ? "PRESS" : "release") +
-               ", code " + KeyEvent.getKeyText(keycode) + " (" + keycode + ")" +
-               ", loc " + getLocationText(location) +
-               ", char " +
-                 (key >= 32 && key <= 126 ? "'" + (char)key + "'" : key) +
-               " " + getKeyModifiersText(lmodifiers, rmodifiers) +
-               (ev.isAltGraphDown() ? "AltGr":""));
+    debugStr = ((ev.isActionKey() ? "action " : "") + "key " +
+                  (down ? "PRESS" : "release") +
+                ", code " + KeyEvent.getKeyText(keycode) + " (" + keycode + ")" +
+                ", loc " + getLocationText(location) +
+                ", char " +
+                  (key >= 32 && key <= 126 ? "'" + (char)key + "'" : key) +
+                getKeyModifiersText() + (ev.isAltGraphDown() ? " AltGr" : ""));
+
+    // If neither the key code nor key char is defined, then there's really
+    // nothing we can do with this.  The fn key on OS X fires events like this
+    // when pressed but does not fire a corresponding release event.
+    if (keycode == 0 && ev.getKeyChar() == KeyEvent.CHAR_UNDEFINED) {
+      debugStr += " IGNORED";
+      vlog.debug(debugStr);
+      return;
+    }
+
+    if (!down) {
+      Integer sym = pressedKeys.get(keycode);
+
+      if (sym == null) {
+        // Note that dead keys will raise this sort of error falsely
+        // See https://bugs.openjdk.java.net/browse/JDK-6534883
+        debugStr += " UNEXPECTED/IGNORED";
+        vlog.debug(debugStr);
+        return;
+      }
+
+      writeKeyEvent(sym, false);
+      pressedKeys.remove(keycode);
+      debugStr += String.format(" => 0x%04x", sym);
+      vlog.debug(debugStr);
+      return;
+    }
 
     if (!ev.isActionKey()) {
       if (keycode >= KeyEvent.VK_0 && keycode <= KeyEvent.VK_9 &&
@@ -1769,79 +1805,35 @@ public class CConn extends CConnection implements UserPasswdGetter,
         else
           keysym = Keysyms.Clear;  break;
       case KeyEvent.VK_CONTROL:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
           keysym = Keysyms.Control_R;
-          if (down)
-            rmodifiers |= Event.CTRL_MASK;
-          else
-            rmodifiers &= ~Event.CTRL_MASK;
-        } else {
-          keysym = Keysyms.Control_L;
-          if (down)
-            lmodifiers |= Event.CTRL_MASK;
-          else
-            lmodifiers &= ~Event.CTRL_MASK;
-        }  break;
+        else
+          keysym = Keysyms.Control_L;  break;
       case KeyEvent.VK_ALT:
         if (location == KeyEvent.KEY_LOCATION_RIGHT) {
           // Mac has no AltGr key, but the Option/Alt keys serve the same
           // purpose.  Thus, we allow RAlt to be used as AltGr and LAlt to be
           // used as a regular Alt key.
-          if (VncViewer.os.startsWith("mac os x")) {
+          if (VncViewer.os.startsWith("mac os x"))
             keysym = Keysyms.ISO_Level3_Shift;
-            if (down)
-              lmodifiers |= KeyEvent.ALT_GRAPH_MASK;
-            else
-              lmodifiers &= ~KeyEvent.ALT_GRAPH_MASK;
-          } else {
+          else
             keysym = Keysyms.Alt_R;
-            if (down)
-              rmodifiers |= Event.ALT_MASK;
-            else
-              rmodifiers &= ~Event.ALT_MASK;
-          }
         } else {
           keysym = Keysyms.Alt_L;
-          if (down)
-            lmodifiers |= Event.ALT_MASK;
-          else
-            lmodifiers &= ~Event.ALT_MASK;
         }
         break;
       case KeyEvent.VK_SHIFT:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
           keysym = Keysyms.Shift_R;
-          if (down)
-            rmodifiers |= Event.SHIFT_MASK;
-          else
-            rmodifiers &= ~Event.SHIFT_MASK;
-        } else {
-          keysym = Keysyms.Shift_L;
-          if (down)
-            lmodifiers |= Event.SHIFT_MASK;
-          else
-            lmodifiers &= ~Event.SHIFT_MASK;
-        }  break;
+        else
+          keysym = Keysyms.Shift_L;  break;
       case KeyEvent.VK_META:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
           keysym = Keysyms.Super_R;
-          if (down)
-            rmodifiers |= SUPER_MASK;
-          else
-            rmodifiers &= ~SUPER_MASK;
-        } else {
-          keysym = Keysyms.Super_L;
-          if (down)
-            lmodifiers |= SUPER_MASK;
-          else
-            lmodifiers &= ~SUPER_MASK;
-        }  break;
+        else
+          keysym = Keysyms.Super_L;  break;
       case KeyEvent.VK_ALT_GRAPH:
         keysym = Keysyms.ISO_Level3_Shift;
-        if (down)
-          lmodifiers |= KeyEvent.ALT_GRAPH_MASK;
-        else
-          lmodifiers &= ~KeyEvent.ALT_GRAPH_MASK;
         break;
       default:
         // On Windows, pressing AltGr has the same effect as pressing LCtrl +
@@ -1849,11 +1841,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
         // (and any other Ctrl and Alt modifiers that are pressed), then send
         // the key event for the modified key, then send fake key press events
         // for the same modifiers.
-        if ((rmodifiers & Event.ALT_MASK) != 0 &&
-            (lmodifiers & Event.CTRL_MASK) != 0 &&
+        if (pressedKeys.containsValue(Keysyms.Alt_R) &&
+            pressedKeys.containsValue(Keysyms.Control_L) &&
             VncViewer.os.startsWith("windows")) {
-          rFakeModifiers = rmodifiers & (Event.ALT_MASK | Event.CTRL_MASK);
-          lFakeModifiers = lmodifiers & (Event.ALT_MASK | Event.CTRL_MASK);
+          winAltGr = true;
         } else if (ev.isControlDown()) {
           // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.
           if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
@@ -1871,7 +1862,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           else if (key == KeyEvent.CHAR_UNDEFINED && keycode >= 0 &&
                    keycode <= 127)
             key = keycode;
-        } else if ((lmodifiers & Event.ALT_MASK) != 0 &&
+        } else if (pressedKeys.containsValue(Keysyms.Alt_L) &&
                    VncViewer.os.startsWith("mac os x") && key > 127) {
           // Un*x and Windows servers expect that, if Alt + an ASCII key is
           // pressed, the key event for the ASCII key will be the same as if
@@ -1880,8 +1871,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
           // code is the ASCII key symbol, but the key char is the code for the
           // alternate graphics symbol.
           if (keycode >= 65 && keycode <= 90 &&
-              (lmodifiers & Event.SHIFT_MASK) == 0 &&
-              (rmodifiers & Event.SHIFT_MASK) == 0)
+              !pressedKeys.containsValue(Keysyms.Shift_L) &&
+              !pressedKeys.containsValue(Keysyms.Shift_R))
             key = keycode + 32;
           else if (keycode == KeyEvent.VK_QUOTE)
             key = '\'';
@@ -1890,58 +1881,77 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
         switch (keycode) {
         case KeyEvent.VK_DEAD_ABOVEDOT:
-          keysym = Keysyms.Dead_AboveDot;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_AboveDot;
           break;
         case KeyEvent.VK_DEAD_ABOVERING:
-          keysym = Keysyms.Dead_AboveRing;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_AboveRing;
           break;
         case KeyEvent.VK_DEAD_ACUTE:
-          keysym = Keysyms.Dead_Acute;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Acute;
           break;
         case KeyEvent.VK_DEAD_BREVE:
-          keysym = Keysyms.Dead_Breve;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Breve;
           break;
         case KeyEvent.VK_DEAD_CARON:
-          keysym = Keysyms.Dead_Caron;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Caron;
           break;
         case KeyEvent.VK_DEAD_CEDILLA:
-          keysym = Keysyms.Dead_Cedilla;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Cedilla;
           break;
         case KeyEvent.VK_DEAD_CIRCUMFLEX:
-          keysym = Keysyms.Dead_Circumflex;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Circumflex;
           break;
         case KeyEvent.VK_DEAD_DIAERESIS:
-          keysym = Keysyms.Dead_Diaeresis;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Diaeresis;
           break;
         case KeyEvent.VK_DEAD_DOUBLEACUTE:
-          keysym = Keysyms.Dead_DoubleAcute;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_DoubleAcute;
           break;
         case KeyEvent.VK_DEAD_GRAVE:
-          keysym = Keysyms.Dead_Grave;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Grave;
           break;
         case KeyEvent.VK_DEAD_IOTA:
-          keysym = Keysyms.Dead_Iota;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Iota;
           break;
         case KeyEvent.VK_DEAD_MACRON:
-          keysym = Keysyms.Dead_Macron;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Macron;
           break;
         case KeyEvent.VK_DEAD_OGONEK:
-          keysym = Keysyms.Dead_Ogonek;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Ogonek;
           break;
         case KeyEvent.VK_DEAD_SEMIVOICED_SOUND:
-          keysym = Keysyms.Dead_Semivoiced_Sound;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Semivoiced_Sound;
           break;
         case KeyEvent.VK_DEAD_TILDE:
-          keysym = Keysyms.Dead_Tilde;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Tilde;
           break;
         case KeyEvent.VK_DEAD_VOICED_SOUND:
-          keysym = Keysyms.Dead_Voiced_Sound;
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+            keysym = Keysyms.Dead_Voiced_Sound;
           break;
         default:
-          keysym = UnicodeToKeysym.translate(key);
+          keysym = UnicodeToKeysym.ucs2keysym(key);
         }
-        if (keysym == -1)
+        if (keysym == -1) {
+          debugStr += " NO KEYSYM";
+          vlog.debug(debugStr);
           return;
+        }
       }
     } else {
       // KEY_ACTION
@@ -1999,6 +2009,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       case KeyEvent.VK_F11:          keysym = Keysyms.F11;  break;
       case KeyEvent.VK_F12:          keysym = Keysyms.F12;  break;
       case KeyEvent.VK_F13:          keysym = Keysyms.F13;  break;
+      case KeyEvent.VK_HELP:         keysym = Keysyms.Help;  break;
+      case KeyEvent.VK_UNDO:         keysym = Keysyms.Undo;  break;
+      case KeyEvent.VK_AGAIN:        keysym = Keysyms.Redo;  break;
       case KeyEvent.VK_PRINTSCREEN:  keysym = Keysyms.Print;  break;
       case KeyEvent.VK_PAUSE:
         if (ev.isControlDown())
@@ -2017,19 +2030,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
       case KeyEvent.VK_KP_UP:        keysym = Keysyms.KP_Up;  break;
       case KeyEvent.VK_NUM_LOCK:     keysym = Keysyms.Num_Lock;  break;
       case KeyEvent.VK_WINDOWS:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
           keysym = Keysyms.Super_R;
-          if (down)
-            rmodifiers |= SUPER_MASK;
-          else
-            rmodifiers &= ~SUPER_MASK;
-        } else {
-          keysym = Keysyms.Super_L;
-          if (down)
-            lmodifiers |= SUPER_MASK;
-          else
-            lmodifiers &= ~SUPER_MASK;
-        }  break;
+        else
+          keysym = Keysyms.Super_L;  break;
       case KeyEvent.VK_CONTEXT_MENU: keysym = Keysyms.Menu;  break;
       case KeyEvent.VK_SCROLL_LOCK:  keysym = Keysyms.Scroll_Lock;  break;
       case KeyEvent.VK_CAPS_LOCK:    keysym = Keysyms.Caps_Lock;  break;
@@ -2038,42 +2042,52 @@ public class CConn extends CConnection implements UserPasswdGetter,
           keysym = Keysyms.KP_Begin;
         else
           keysym = Keysyms.Begin;  break;
-      default: return;
+      default:
+        debugStr += " NO KEYSYM";
+        vlog.debug(debugStr);
+        return;
       }
     }
 
-    if ((lFakeModifiers & Event.CTRL_MASK) != 0) {
-      vlog.debug("Fake L Ctrl raised");
-      writeKeyEvent(Keysyms.Control_L, false);
+    if (winAltGr) {
+      if (pressedKeys.containsValue(Keysyms.Control_L)) {
+        vlog.debug("Fake L Ctrl released");
+        writeKeyEvent(Keysyms.Control_L, false);
+      }
+      if (pressedKeys.containsValue(Keysyms.Alt_L)) {
+        vlog.debug("Fake L Alt released");
+        writeKeyEvent(Keysyms.Alt_L, false);
+      }
+      if (pressedKeys.containsValue(Keysyms.Control_R)) {
+        vlog.debug("Fake R Ctrl released");
+        writeKeyEvent(Keysyms.Control_R, false);
+      }
+      if (pressedKeys.containsValue(Keysyms.Alt_R)) {
+        vlog.debug("Fake R Alt released");
+        writeKeyEvent(Keysyms.Alt_R, false);
+      }
     }
-    if ((lFakeModifiers & Event.ALT_MASK) != 0) {
-      vlog.debug("Fake L Alt raised");
-      writeKeyEvent(Keysyms.Alt_L, false);
-    }
-    if ((rFakeModifiers & Event.CTRL_MASK) != 0) {
-      vlog.debug("Fake R Ctrl raised");
-      writeKeyEvent(Keysyms.Control_R, false);
-    }
-    if ((rFakeModifiers & Event.ALT_MASK) != 0) {
-      vlog.debug("Fake R Alt raised");
-      writeKeyEvent(Keysyms.Alt_R, false);
-    }
+    debugStr += String.format(" => 0x%04x", keysym);
+    vlog.debug(debugStr);
+    pressedKeys.put(keycode, keysym);
     writeKeyEvent(keysym, down);
-    if ((lFakeModifiers & Event.CTRL_MASK) != 0) {
-      vlog.debug("Fake L Ctrl pressed");
-      writeKeyEvent(Keysyms.Control_L, true);
-    }
-    if ((lFakeModifiers & Event.ALT_MASK) != 0) {
-      vlog.debug("Fake L Alt pressed");
-      writeKeyEvent(Keysyms.Alt_L, true);
-    }
-    if ((rFakeModifiers & Event.CTRL_MASK) != 0) {
-      vlog.debug("Fake R Ctrl pressed");
-      writeKeyEvent(Keysyms.Control_R, true);
-    }
-    if ((rFakeModifiers & Event.ALT_MASK) != 0) {
-      vlog.debug("Fake R Alt pressed");
-      writeKeyEvent(Keysyms.Alt_R, true);
+    if (winAltGr) {
+      if (pressedKeys.containsValue(Keysyms.Control_L)) {
+        vlog.debug("Fake L Ctrl pressed");
+        writeKeyEvent(Keysyms.Control_L, true);
+      }
+      if (pressedKeys.containsValue(Keysyms.Alt_L)) {
+        vlog.debug("Fake L Alt pressed");
+        writeKeyEvent(Keysyms.Alt_L, true);
+      }
+      if (pressedKeys.containsValue(Keysyms.Control_R)) {
+        vlog.debug("Fake R Ctrl pressed");
+        writeKeyEvent(Keysyms.Control_R, true);
+      }
+      if (pressedKeys.containsValue(Keysyms.Alt_R)) {
+        vlog.debug("Fake R Alt pressed");
+        writeKeyEvent(Keysyms.Alt_R, true);
+      }
     }
   }
 
@@ -2178,30 +2192,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
 
   // EDT
-  synchronized void releaseModifiers() {
-    if ((lmodifiers & Event.SHIFT_MASK) != 0)
-      writeKeyEvent(Keysyms.Shift_L, false);
-    if ((rmodifiers & Event.SHIFT_MASK) != 0)
-      writeKeyEvent(Keysyms.Shift_R, false);
-    if ((lmodifiers & Event.CTRL_MASK) != 0)
-      writeKeyEvent(Keysyms.Control_L, false);
-    if ((rmodifiers & Event.CTRL_MASK) != 0)
-      writeKeyEvent(Keysyms.Control_R, false);
-    if ((lmodifiers & Event.ALT_MASK) != 0)
-      writeKeyEvent(Keysyms.Alt_L, false);
-    if ((rmodifiers & Event.ALT_MASK) != 0)
-      writeKeyEvent(Keysyms.Alt_R, false);
-    if ((lmodifiers & Event.META_MASK) != 0)
-      writeKeyEvent(Keysyms.Meta_L, false);
-    if ((rmodifiers & Event.META_MASK) != 0)
-      writeKeyEvent(Keysyms.Meta_R, false);
-    if ((lmodifiers & KeyEvent.ALT_GRAPH_MASK) != 0)
-      writeKeyEvent(Keysyms.ISO_Level3_Shift, false);
-    if ((lmodifiers & SUPER_MASK) != 0)
-      writeKeyEvent(Keysyms.Super_L, false);
-    if ((rmodifiers & SUPER_MASK) != 0)
-      writeKeyEvent(Keysyms.Super_R, false);
-    lmodifiers = rmodifiers = 0;
+  synchronized void releasePressedKeys() {
+    for (Map.Entry<Integer, Integer> entry : pressedKeys.entrySet()) {
+      vlog.debug(String.format("Lost focus.  Releasing key symbol 0x%04x",
+                 entry.getValue()));
+      writeKeyEvent(entry.getValue(), false);
+    }
+    pressedKeys.clear();
   }
 
 
@@ -2271,7 +2268,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   private boolean supportsSyncFence;
 
-  int lmodifiers, rmodifiers;
+  private HashMap<Integer, Integer> pressedKeys;
   Viewport viewport;
   boolean showToolbar;
   boolean keyboardGrabbed;

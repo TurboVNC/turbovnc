@@ -64,10 +64,10 @@ Build Requirements
 ### Mac/Java
 
 - JDK 6 or later
+  * To build with Java 7 or later (recommended), download the Oracle Java
+    Development Kit from <http://www.java.com>
   * To build with Java 6, install the Java Developer Package from
     <http://developer.apple.com/tools/xcode> (Apple ID required)
-  * To build with Java 7 or later, download the Oracle Java
-    Development Kit from <http://www.java.com>
 
 
 Out-of-Tree Builds
@@ -272,6 +272,14 @@ Unix
 `make dmg`
 
   Create Macintosh package/disk image.  This requires pkgbuild and
+  productbuild, which are installed by default on OS X 10.7 and later.  This
+  command generates a package containing a Java app bundle that relies on
+  Oracle Java.  The DMG built with this command can be installed on OS X 10.7
+  and later.
+
+`make compatdmg`
+
+  Create Macintosh package/disk image.  This requires pkgbuild and
   productbuild, which are installed by default on OS X 10.7 and later and which
   can be obtained by installing Xcode 3.2.6 (with the "Unix Development"
   option) on OS X 10.6.  This command generates a package containing a Java app
@@ -280,18 +288,9 @@ Unix
   Apple Support.)  The "AppleJava" DMG built with this command can be
   installed on OS X 10.5 and later, but since pkgbuild and productbuild are not
   available on OS X 10.5, the package must be built on OS X 10.6 or later.
-
-`make oracledmg`
-
-  Create Macintosh package/disk image.  This requires pkgbuild and
-  productbuild, which are installed by default on OS X 10.7 and later and which
-  can be obtained by installing Xcode 3.2.6 (with the "Unix Development"
-  option) on OS X 10.6.  This command generates a package containing a Java app
-  bundle that relies on the Oracle Java plugin.  The "OracleJava" DMG built
-  with this command can be installed on OS X 10.7 and later.  See the TurboVNC
-  User's Guide for information on the performance tradeoffs between Apple Java
-  and Oracle Java.
-
+  Referring to the TurboVNC User's Guide, Java for OS X may perform better than
+  Oracle Java on older Macintosh systems, but it should not be used on OS X
+  10.10 "Yosemite" or later.
 
 Windows
 -------

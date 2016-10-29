@@ -456,6 +456,8 @@ rfbNewClient(int sock)
        a desktop resize message from the server, so we give it one with the
        first FBU. */
     cl->pendingDesktopResize = TRUE;
+    cl->reason = rfbEDSReasonServer;
+    cl->result = rfbEDSResultSuccess;
 
     if (rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
@@ -1350,7 +1352,6 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         int w = 0, h = 0, numScreens = 0, i;
         rfbScreenDesc screen;
         ScreenPtr pScreen = screenInfo.screens[0];
-        rfbClientPtr cl2;
 
         READ(((char *)&msg) + 1, sz_rfbSetDesktopSizeMsg - 1)
 
@@ -1362,16 +1363,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
             READ((char *)&screen, sizeof(rfbScreenDesc))
         }
 
-        if (w > 0 && h > 0 && (pScreen->width != w || pScreen->height != h)) {
-            if (!ResizeDesktop(pScreen, w, h))
-                return;
-            for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
-                if (cl2 == cl)
-                    cl->reason = rfbEDSReasonClient;
-                else
-                    cl->reason = rfbEDSReasonOtherClient;
-            }
-        }
+        ResizeDesktop(pScreen, cl, w, h);
         return;
     }
 
@@ -1458,6 +1450,12 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
             dev.mode = (dev.eventMask & rfbGIIValuatorAbsoluteMask) ?
                        Absolute : Relative;
             dev.productID = msg.giidc.productID;
+
+            if (dev.mode == Relative) {
+                rfbLog("GII device create ERROR: relative valuators not supported (yet)\n");
+                SKIP(msg.giidc.numValuators * sz_rfbGIIValuator);
+                goto sendMessage;
+            }
 
             for (i = 0; i < dev.numValuators; i++) {
                 rfbGIIValuator *v = &dev.valuators[i];
@@ -1745,6 +1743,8 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
      */
 
     if (cl->syncFence) return TRUE;
+
+    if (cl->state != RFB_NORMAL) return TRUE;
 
     if (rfbProfile) {
         tUpdateStart = gettime();
@@ -2583,7 +2583,7 @@ rfbSendServerCutText(char *str, int len)
 
 
 /*
- * rfbSendDesktopResize sends a DesktopSize message to a specific client.
+ * rfbSendDesktopSize sends a DesktopSize message to a specific client.
  */
 
 Bool
@@ -2593,6 +2593,9 @@ rfbSendDesktopSize(rfbClientPtr cl)
     rfbFramebufferUpdateMsg fu;
 
     if (!cl->enableDesktopSize && !cl->enableExtDesktopSize)
+        return TRUE;
+    /* Error messages can only be sent with the EDS extension */
+    if (!cl->enableExtDesktopSize && cl->result != rfbEDSResultSuccess)
         return TRUE;
 
     fu.type = rfbFramebufferUpdate;
@@ -2609,7 +2612,7 @@ rfbSendDesktopSize(rfbClientPtr cl)
            enable remote desktop resize. */
         rh.encoding = Swap32IfLE(rfbEncodingExtendedDesktopSize);
         rh.r.x = Swap16IfLE(cl->reason);
-        rh.r.y = Swap16IfLE(rfbEDSResultSuccess);
+        rh.r.y = Swap16IfLE(cl->result);
     } else {
         rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
         rh.r.x = rh.r.y = 0;

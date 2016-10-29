@@ -83,7 +83,7 @@ typedef struct _Res
   int w, h;
 } Res;
 
-Res vncRRResolutions[] = {
+static Res vncRRResolutions[] = {
   {  -1,   -1},  /* Original resolution of the VNC server          */
   {3200, 1800},  /* WQXGA+  16:9                                   */
   {2880, 1800},  /*          8:5 (Mac)                             */
@@ -210,7 +210,7 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
 }
 
 
-int mm(int dimension)
+static int mm(int dimension)
 {
   int dpi = 96;
   if (monitorResolution != 0) {
@@ -220,7 +220,7 @@ int mm(int dimension)
 }
 
 
-Bool vncRRSetModes(ScreenPtr pScreen, int w, int h)
+static Bool vncSetModes(ScreenPtr pScreen, int w, int h)
 {
   Bool found = FALSE;
   int i;
@@ -268,7 +268,7 @@ Bool vncRRSetModes(ScreenPtr pScreen, int w, int h)
   if (rp->numOutputs < 1) return FALSE;
   for (i = 0; i < rp->numOutputs; i++) {
     if (rp->outputs[i] == NULL) return FALSE;
-    if (!RROutputSetModes(rp->outputs[i], modes, numModes, preferred))
+    if (!RROutputSetModes(rp->outputs[i], modes, numModes, 1))
       return FALSE;
   }
 
@@ -276,7 +276,7 @@ Bool vncRRSetModes(ScreenPtr pScreen, int w, int h)
   for (i = 0; i < rp->numCrtcs; i++) {
     if (rp->crtcs[i] == NULL) return FALSE;
     if (!RRCrtcNotify(rp->crtcs[i], modes[preferred], 0, 0, RR_Rotate_0, NULL,
-                      1, &rp->outputs[i]))
+                      rp->numOutputs, rp->outputs))
       return FALSE;
   }
 
@@ -284,7 +284,7 @@ Bool vncRRSetModes(ScreenPtr pScreen, int w, int h)
 }
 
 
-Bool vncRRGetInfo(ScreenPtr pScreen, Rotation *rotations)
+static Bool vncRRGetInfo(ScreenPtr pScreen, Rotation *rotations)
 {
   return TRUE;
 }
@@ -292,13 +292,13 @@ Bool vncRRGetInfo(ScreenPtr pScreen, Rotation *rotations)
 
 /* Called by X server */
 
-Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
-                        CARD32 mmWidth, CARD32 mmHeight)
+static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
+                            CARD32 mmWidth, CARD32 mmHeight)
 {
   rfbClientPtr cl;
   rfbScreenInfo newScreen = rfbScreen;
   PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
-  Bool ret = TRUE;
+  int ret = rfbEDSResultSuccess;
 
   if ((width > rfbMaxWidth && rfbMaxWidth > 0) ||
       (height > rfbMaxHeight && rfbMaxHeight > 0)) {
@@ -311,8 +311,8 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   for (cl = rfbClientHead; cl; cl = cl->next) {
     if (!cl->enableDesktopSize && !cl->enableExtDesktopSize) {
       rfbLog("ERROR: Not resizing desktop because one or more clients doesn't support it.\n");
-      vncRRSetModes(pScreen, pScreen->width, pScreen->height);
-      return FALSE;
+      vncSetModes(pScreen, pScreen->width, pScreen->height);
+      return rfbEDSResultProhibited;
     }
   }
 
@@ -323,21 +323,22 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   newScreen.pfbMemory = NULL;
   if (!rfbAllocateFramebufferMemory(&newScreen)) {
     rfbLog("ERROR: Could not allocate framebuffer memory\n");
-    return FALSE;
+    return rfbEDSResultNoResources;
   }
 
+  rfbScreen.blockUpdates = TRUE;
   xf86SetRootClip(pScreen, FALSE);
 
-  ret = pScreen->ModifyPixmapHeader(rootPixmap, newScreen.width,
-                                    newScreen.height, newScreen.depth,
-                                    newScreen.bitsPerPixel,
-                                    newScreen.paddedWidthInBytes,
-                                    newScreen.pfbMemory);
-  if (!ret) {
+  if (!pScreen->ModifyPixmapHeader(rootPixmap, newScreen.width,
+                                   newScreen.height, newScreen.depth,
+                                   newScreen.bitsPerPixel,
+                                   newScreen.paddedWidthInBytes,
+                                   newScreen.pfbMemory)) {
     rfbLog("ERROR: Could not modify root pixmap size\n");
     free(newScreen.pfbMemory);
     xf86SetRootClip(pScreen, TRUE);
-    return ret;
+    rfbScreen.blockUpdates = FALSE;
+    return rfbEDSResultInvalid;
   }
   free(rfbScreen.pfbMemory);
   rfbScreen = newScreen;
@@ -351,12 +352,15 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   RRScreenSizeNotify(pScreen);
   update_desktop_dimensions();
 
-  if (!vncRRSetModes(pScreen, width, height)) {
+  if (!vncSetModes(pScreen, width, height)) {
     rfbLog("ERROR: Could not set screen modes\n");
-    return FALSE;
+    rfbScreen.blockUpdates = FALSE;
+    return rfbEDSResultInvalid;
   }
 
   rfbLog("New desktop size: %d x %d\n", pScreen->width, pScreen->height);
+
+  rfbScreen.blockUpdates = FALSE;
 
   for (cl = rfbClientHead; cl; cl = cl->next) {
     RegionRec tmpRegion;  BoxRec box;
@@ -365,14 +369,13 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     if (reEnableInterframe) {
       if (!InterframeOn(cl)) {
         rfbCloseClient(cl);
-        ret = FALSE;
+        ret = rfbEDSResultInvalid;
+        continue;
       }
     }
-    cl->pendingDesktopResize = TRUE;
     cl->deferredUpdateScheduled = FALSE;
-    cl->reason = rfbEDSReasonServer;
-    // Reset all of the regions, so the next FBU will behave as if it
-    // was the first.
+    /* Reset all of the regions, so the next FBU will behave as if it
+       was the first. */
     box.x1 = box.y1 = 0;
     box.x2 = pScreen->width;  box.y2 = pScreen->height;
     SAFE_REGION_INIT(pScreen, &tmpRegion, &box, 0);
@@ -403,11 +406,41 @@ Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
 }
 
 
-Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
-                    RRScreenSizePtr pSize)
+static Bool rfbSendDesktopSizeAll(rfbClientPtr reqClient, int reason)
 {
-  return vncRRScreenSetSize(pScreen, pSize->width, pSize->height,
-                            pSize->mmWidth, pSize->mmHeight);
+  rfbClientPtr cl;
+
+  for (cl = rfbClientHead; cl; cl = cl->next) {
+    cl->pendingDesktopResize = TRUE;
+    if (cl != reqClient && reason == rfbEDSReasonClient)
+      cl->reason = rfbEDSReasonOtherClient;
+    else
+      cl->reason = reason;
+    cl->result = rfbEDSResultSuccess;
+    if (!rfbSendFramebufferUpdate(cl))
+      return FALSE;
+  }
+
+  return TRUE;
+}
+
+
+static Bool vncRRCrtcSet(ScreenPtr pScreen, RRCrtcPtr crtc, RRModePtr mode,
+                         int x, int y, Rotation rotation, int numOutputs,
+                         RROutputPtr *outputs)
+{
+  return TRUE;
+}
+
+
+static Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
+                               CARD32 mmWidth, CARD32 mmHeight)
+{
+  int result = vncScreenSetSize(pScreen, width, height, mmWidth, mmHeight);
+  if (result == rfbEDSResultSuccess)
+    return rfbSendDesktopSizeAll(NULL, rfbEDSReasonServer);
+  else
+    return FALSE;
 }
 
 
@@ -422,7 +455,7 @@ Bool vncRRInit(ScreenPtr pScreen)
   rp = rrGetScrPriv(pScreen);
 
   rp->rrGetInfo = vncRRGetInfo;
-  rp->rrSetConfig = vncRRSetConfig;
+  rp->rrCrtcSet = vncRRCrtcSet;
   rp->rrScreenSetSize = vncRRScreenSetSize;
 
   RRScreenSetSizeRange(pScreen, 32, 32, 32768, 32768);
@@ -433,7 +466,7 @@ Bool vncRRInit(ScreenPtr pScreen)
   RROutputSetCrtcs(output, &crtc, 1);
   RROutputSetConnection(output, RR_Connected);
 
-  if (!vncRRSetModes(pScreen, pScreen->width, pScreen->height))
+  if (!vncSetModes(pScreen, pScreen->width, pScreen->height))
     return FALSE;
 
   return TRUE;
@@ -442,9 +475,51 @@ Bool vncRRInit(ScreenPtr pScreen)
 
 /* Called by VNC */
 
-Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
+Bool ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h)
 {
-  return vncRRScreenSetSize(pScreen, w, h, mm(w), mm(h));
+  rfbClientPtr cl2;
+  int result = rfbEDSResultSuccess;
+  rrScrPrivPtr rp = rrGetScrPriv(pScreen);
+
+  if (w < 1 || h < 1) {
+    rfbLog("ERROR: Not resizing desktop because requested dimensions %d x %d are invalid.\n",
+           w, h);
+    result = rfbEDSResultInvalid;
+    goto error;
+  }
+
+  if (cl->viewOnly) {
+    rfbLog("NOTICE: Ignoring remote desktop resize request from a view-only client.\n");
+    result = rfbEDSResultProhibited;
+    goto error;
+  }
+
+  if (pScreen->width != w || pScreen->height != h) {
+    result = vncScreenSetSize(pScreen, w, h, mm(w), mm(h));
+    /* We have to do this to simulate an RandR-generated screen resize.
+       Otherwise the RandR events may not be delivered properly to X
+       clients. */
+    if (result == rfbEDSResultSuccess)
+      rp->lastSetTime = currentTime;
+  }
+
+  if (result == rfbEDSResultSuccess)
+    return rfbSendDesktopSizeAll(cl, rfbEDSReasonClient);
+
+  error:
+  /* Send back the error only to the requesting client.  This loop is
+     necessary because the client may have been shut down as a result of an
+     error in vncScreenSetSize(). */
+  for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+    if (cl2 == cl) {
+      cl2->pendingDesktopResize = TRUE;
+      cl2->reason = rfbEDSReasonClient;
+      cl2->result = result;
+      rfbSendFramebufferUpdate(cl2);
+      break;
+    }
+  }
+  return FALSE;
 }
 
 #endif

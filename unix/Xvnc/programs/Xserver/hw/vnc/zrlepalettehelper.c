@@ -53,7 +53,7 @@ int zrlePaletteHelperLookup(zrlePaletteHelper *helper, zrle_U32 pix)
   int i = ZRLE_HASH(pix);
 
   assert(helper->size <= ZRLE_PALETTE_MAX_SIZE);
-  
+
   while (helper->index[i] != 255 && helper->key[i] != pix)
     i++;
   if (helper->index[i] != 255) return helper->index[i];

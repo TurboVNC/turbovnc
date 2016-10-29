@@ -7,13 +7,13 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2006 Sun Microsystems, Inc.
-.\" Copyright (C) 2010-2013, 2015 D. R. Commander
+.\" Copyright (C) 2010-2013, 2015-2016 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "October 2015" "" "TurboVNC"
+.TH vncserver 1 "August 2016" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
@@ -22,7 +22,7 @@ vncserver \- a wrapper to launch an X server for VNC.
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-fp \fIfont\-path\fR]
 [\-name \fIdesktop\-name\fR] [\-nohttpd] [\-otp] [\-x509cert \fIcert\fR]
 [\-x509key \fIkey\fR] [\-fg] [\-autokill] [\-noxstartup]
-[\-xstartup \fIscript\fR] [\fIXvnc\-options\fR...]
+[\-xstartup \fIscript\fR] [\-3dwm] [\fIXvnc\-options\fR...]
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
 .TP
@@ -128,6 +128,17 @@ Xvnc.  This is useful in conjunction with the \fB-fg\fR option, since it
 allows for running a full-screen application (such as a game or a
 virtualization solution) in TurboVNC without a window manager and causes the
 TurboVNC session to terminate whenever the application exits.
+.TP
+\fB\-3dwm\fR
+This sets an environment variable (\fBTVNC_3DWM\fR) to 1, and the default
+xstartup.turbovnc script that \fBvncserver\fR creates will launch the window
+manager using VirtualGL if that environment variable is set.  More
+specifically, if \fBTVNC_3DWM\fR is set, then the xstartup.turbovnc script will
+launch the window manager using a command specified in another environment
+variable (\fBTVNC_VGLRUN\fR.)  The default value of \fBTVNC_VGLRUN\fR is
+"vglrun +wm", but users can override that environment variable in order to pass
+additional arguments to vglrun, to specify the full path of vglrun, or to use
+another command to launch the window manager.
 .TP
 \fB\-log\fR  \fIfile\fR
 Redirect the output of Xvnc to \fIfile\fR, rather than to

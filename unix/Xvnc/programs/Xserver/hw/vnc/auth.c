@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012-2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2016 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -1496,6 +1496,11 @@ rfbVncAuthProcessResponse(rfbClientPtr cl)
     }
 
     if ((ok == FALSE) && rfbOptRfbAuth()) {
+        if (!rfbAuthPasswdFile) {
+            rfbClientAuthFailed(cl, "No VNC password file specified on the server (did you forget -rfbauth?)");
+            return;
+        }
+
         numPasswords = vncDecryptPasswdFromFile2(rfbAuthPasswdFile,
                                                  passwdFullControl,
                                                  passwdViewOnly);

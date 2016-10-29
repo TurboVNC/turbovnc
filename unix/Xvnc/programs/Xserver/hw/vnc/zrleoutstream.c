@@ -106,7 +106,7 @@ Bool zrleOutStreamFlush(zrleOutStream *os)
 {
   os->zs.next_in = os->in.start;
   os->zs.avail_in = ZRLE_BUFFER_LENGTH (&os->in);
-  
+
 #ifdef ZRLE_DEBUG
   rfbLog("zrleOutStreamFlush: avail_in %d\n", os->zs.avail_in);
 #endif
@@ -127,7 +127,7 @@ Bool zrleOutStreamFlush(zrleOutStream *os)
 #ifdef ZRLE_DEBUG
       rfbLog("zrleOutStreamFlush: calling deflate, avail_in %d, avail_out %d\n",
 	     os->zs.avail_in, os->zs.avail_out);
-#endif 
+#endif
 
       if ((ret = deflate(&os->zs, Z_SYNC_FLUSH)) != Z_OK) {
 	rfbLog("zrleOutStreamFlush: deflate failed with error code %d\n", ret);
@@ -144,7 +144,7 @@ Bool zrleOutStreamFlush(zrleOutStream *os)
   }
 
   os->in.ptr = os->in.start;
- 
+
   return TRUE;
 }
 

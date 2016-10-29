@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.cpp from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2016 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 // server.
 
 #include "LowLevelHook.h"
+#include "XF86keysym.h"
 
 
 HWND LowLevelHook::g_hwndVNCViewer = NULL;
@@ -156,12 +157,45 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
           xkey = XK_Super_R;  break;
         case VK_APPS:
           xkey = XK_Menu;  break;
+        case VK_BROWSER_HOME:
+          xkey = XF86XK_HomePage;  break;
+        case VK_BROWSER_SEARCH:
+          xkey = XF86XK_Search;  break;
+        case VK_LAUNCH_MAIL:
+          xkey = XF86XK_Mail;  break;
+        case VK_VOLUME_MUTE:
+          xkey = XF86XK_AudioMute;  break;
+        case VK_VOLUME_DOWN:
+          xkey = XF86XK_AudioLowerVolume;  break;
+        case VK_VOLUME_UP:
+          xkey = XF86XK_AudioRaiseVolume;  break;
+        case VK_MEDIA_PLAY_PAUSE:
+          xkey = XF86XK_AudioPlay;  break;
+        case VK_LAUNCH_APP2:
+          xkey = XF86XK_Calculator;  break;
+        case VK_BROWSER_FAVORITES:
+          xkey = XF86XK_Favorites;  break;
+        case VK_BROWSER_BACK:
+          xkey = XF86XK_Back;  break;
+        case VK_BROWSER_FORWARD:
+          xkey = XF86XK_Forward;  break;
       }
 
       switch (pkbdllhook->vkCode) {
         case VK_LWIN:
         case VK_RWIN:
         case VK_APPS:
+        case VK_BROWSER_HOME:
+        case VK_BROWSER_SEARCH:
+        case VK_LAUNCH_MAIL:
+        case VK_VOLUME_MUTE:
+        case VK_VOLUME_DOWN:
+        case VK_VOLUME_UP:
+        case VK_MEDIA_PLAY_PAUSE:
+        case VK_LAUNCH_APP2:
+        case VK_BROWSER_FAVORITES:
+        case VK_BROWSER_BACK:
+        case VK_BROWSER_FORWARD:
           PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND,
                       fKeyDown? ID_CONN_SENDKEYDOWN : ID_CONN_SENDKEYUP, xkey);
           fHandled = TRUE;
