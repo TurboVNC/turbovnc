@@ -1,0 +1,127 @@
+language: c
+
+env:
+  global:
+    - LJT_VERSION=1.5.1
+    - LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION
+    - LJT_LINUX_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
+    - LJT_OSX_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
+    - LJT_WINDOWS_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
+    - LJT_GPG_KEY="http://pgp.mit.edu/pks/lookup?op=get\&search=0x85C7044E033FDE16"
+
+matrix:
+  include:
+    - os: linux
+      env: BUILD_OFFICIAL=1
+      sudo: required
+      services:
+        - docker
+    - os: osx
+      env: BUILD_OFFICIAL=1
+      osx_image: xcode7.2
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=RelWithDebInfo -DTVNC_USEPAM=0 -DTVNC_USETLS=0"
+      sudo: required
+      addons:
+        apt:
+          packages:
+            - libxi-dev
+
+before_install:
+  - if [ "${BUILD_OFFICIAL:-}" != "" ]; then
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+        docker pull dcommander/buildvnc &&
+        mkdir ~/libjpeg-turbo-jni &&
+        pushd ~/libjpeg-turbo-jni &&
+        wget --no-check-certificate $LJT_LINUX_JNI -O libjpeg-turbo-jws.zip &&
+        unzip libjpeg-turbo-jws.zip &&
+        rm libjpeg-turbo-jws.zip &&
+        if [ "$LJT_OSX_JNI" != "$LJT_LINUX_JNI" ]; then
+          wget --no-check-certificate $LJT_OSX_JNI -O libjpeg-turbo-jws.zip &&
+          unzip libjpeg-turbo-jws.zip &&
+          rm libjpeg-turbo-jws.zip;
+        fi &&
+        if [ "$LJT_WINDOWS_JNI" != "$LJT_LINUX_JNI" ]; then
+          wget --no-check-certificate $LJT_WINDOWS_JNI -O libjpeg-turbo-jws.zip &&
+          unzip libjpeg-turbo-jws.zip &&
+          rm libjpeg-turbo-jws.zip;
+        fi &&
+        popd;
+      elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        brew install md5sha1sum cmake;
+      fi &&
+      git clone --depth=1 https://github.com/turbovnc/buildscripts.git ~/src/buildscripts &&
+      openssl aes-256-cbc -K $encrypted_c6f652756c51_key -iv $encrypted_c6f652756c51_iv -in ci/keys.enc -out ci/keys -d &&
+      tar xf ci/keys &&
+      rm ci/keys &&
+      mv ci/gpgsign ~/src/buildscripts &&
+      gpg --import ci/sign_vnc &&
+      rm ci/sign_vnc;
+    fi
+  - if [ "${BUILD_OFFICIAL:-}" == "" -a "$TRAVIS_OS_NAME" = "linux" ]; then
+      pushd ~ &&
+      wget --no-check-certificate $LJT_URL/libjpeg-turbo-official_$LJT_VERSION\_amd64.deb $LJT_URL/libjpeg-turbo-official32_$LJT_VERSION\_amd64.deb &&
+      sudo dpkg -i *.deb &&
+      popd;
+    fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      pushd ~ &&
+      wget --no-check-certificate $LJT_URL/libjpeg-turbo-$LJT_VERSION.dmg &&
+      hdid libjpeg-turbo-$LJT_VERSION.dmg &&
+      sudo installer -pkg /Volumes/libjpeg-turbo-$LJT_VERSION/libjpeg-turbo.pkg -target / &&
+      hdiutil detach /Volumes/libjpeg-turbo-$LJT_VERSION &&
+      popd;
+    fi
+
+script:
+  - if [ "${BUILD_OFFICIAL:-}" != "" ]; then
+      mkdir -p ~/src/vnc.nightly &&
+      if [ -f .git/shallow ]; then
+        mv .git/shallow .git/shallow.bak;
+      fi &&
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+        docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-jni:/opt/libjpeg-turbo-jni -t dcommander/buildvnc:latest bash -c "rpm --import $LJT_GPG_KEY && wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm && rpm -K *.rpm && rpm -i *.rpm && rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvnc -r file:///root/src/turbovnc $TRAVIS_BRANCH -v" &&
+        sudo chown -R travis:travis ~/src/vnc.nightly;
+      else
+        ~/src/buildscripts/buildvnc -r file://$TRAVIS_BUILD_DIR $TRAVIS_BRANCH -v;
+      fi &&
+      mv ~/src/vnc.nightly/latest/log-$TRAVIS_OS_NAME.txt ~/src/vnc.nightly/latest/files/ &&
+      if [ -f .git/shallow.bak ]; then
+        mv .git/shallow.bak .git/shallow;
+      fi
+    fi
+  - if [ "${BUILD_OFFICIAL:-}" == "" ]; then
+      mkdir build &&
+      pushd build &&
+      cmake -G"Unix Makefiles" ${CMAKE_FLAGS} .. &&
+      make -j &&
+      popd;
+    fi
+
+deploy:
+  - provider: s3
+    bucket: turbovnc-pr
+    access_key_id:
+      secure: G+x3WRY/nWPntRjmWr+PMW9G3QhGI0X79E9FC41XxkSzbBMVAOoxdC6TDmN1wiyajhZbKj5cjBBvbB43Jy2MagyhOTMZ3o6Gz3PRPkCJrqmT+qtoKmYtASNqirATFKSPRumsT3zGqbScvC0hIA/YY0I7DTq0sRYrhfo1IitlwR/vtb0j3NmxfBOqi84+tD1s7qVU9ibzg6MD0TAseIO7wRxgm22Wx3ekNjjc6PBlkgORam5Vx0AYoaDeXnUNm4dJWHAgcenPzKz2qEdw5Vkaot+YjXHdIf72pV+mkahtjInIeHgcyr7uUW89w2WNIAKZ8VdSoh+oKyb6PGYXG7dsHhFb1lYcZXERR/CjB9MlLlMsV6/4NFGJOknKSRYTh8J5ijg2uV/dkaMK0V/9bUgv+sG9qxvW0FlQNCteCUFSTsspY4oNvRXrVnQhXj6qb0vFV5L7OGlE8Y9c/UMskcfeDGxMVRMldm2RwYj1KS3mkAecSGSTAYEEKTEH6E980ZmIFsHe4u1yZB8eiIFibCdoRdZuCdTBnXC9cN4aUqg5WSz8lMS3v130rc260p3UEbU5Z/q2ettJ5f2PKhTyuexZFJ+cjmDf4CgcZv1EEUC+G2yuybydy/zNXVOgeD4XrPnDbcA3p8KCdVk1wr8g/0vvyGjGeazWfoEGGy4CdtTHudc=
+    secret_access_key:
+      secure: 6odGWpddG2WBa1cZ7nlTnCX3lv0Xlq/tNQo005dFA7ySLyal3qNId2fdXpTStNmYjfXx7kXj62wl094hJ5hzxD/dEyY+x83VpaFJ7bYNfz/pWGNWw/SIDrvkjdn+sPApgBUter710eO3kE77QIUjrnVPXEdurIN5Gsue45XDFSOmf/TBDDBKi0FlyoWj687GJyxZSNRSMpEW29EzXU45kj78sEsPE96eo7cNZ5aIsvV+bpWEritiuGZdzfixOzpHI/ypmm7Hctyz2JOMyMSR0VIbf43zCeEQf4UBN0yz0RtB+bBVtwjWo+0Rt0hLQjsxlFri5ox67NwWe3k9yC2hLCWpQdVvVyqM6C1wVjA5RcSMQJQU2/Z34y+F84AdwgM6Zh0KD9TROVjjg6bAGYkVTtWqTXLheglM5lrxJzn1wuaKom029VDkyhDe8J881EkuA0miECyR0g98ZyyCN/HoDlg8D17ixRSYqNkfmZQmiSHOlmPVGkP7/ElQWW6yEe1u7elq/v2i3OtjG3I+LLiNGwFy9reyq132dhmoiR9eLK0ppqoqFb4eP01FgqnS5avaZnFDUi+RVRERTZ1JazxR12vY8DFtUDaFiYszkD29Lp4pG3L9me0COodU2mp7Lg6+zmNt0VLMd5XcKlngFXeFRApIqmTlH83WZ04jyMaYa+E=
+    acl: public_read
+    local-dir: $HOME/src/vnc.nightly/latest/files
+    upload-dir: $TRAVIS_BRANCH/$TRAVIS_OS_NAME
+    on:
+      branch: master
+      condition: -n "$BUILD_OFFICIAL"
+  - provider: s3
+    bucket: turbovnc-pr
+    access_key_id:
+      secure: G+x3WRY/nWPntRjmWr+PMW9G3QhGI0X79E9FC41XxkSzbBMVAOoxdC6TDmN1wiyajhZbKj5cjBBvbB43Jy2MagyhOTMZ3o6Gz3PRPkCJrqmT+qtoKmYtASNqirATFKSPRumsT3zGqbScvC0hIA/YY0I7DTq0sRYrhfo1IitlwR/vtb0j3NmxfBOqi84+tD1s7qVU9ibzg6MD0TAseIO7wRxgm22Wx3ekNjjc6PBlkgORam5Vx0AYoaDeXnUNm4dJWHAgcenPzKz2qEdw5Vkaot+YjXHdIf72pV+mkahtjInIeHgcyr7uUW89w2WNIAKZ8VdSoh+oKyb6PGYXG7dsHhFb1lYcZXERR/CjB9MlLlMsV6/4NFGJOknKSRYTh8J5ijg2uV/dkaMK0V/9bUgv+sG9qxvW0FlQNCteCUFSTsspY4oNvRXrVnQhXj6qb0vFV5L7OGlE8Y9c/UMskcfeDGxMVRMldm2RwYj1KS3mkAecSGSTAYEEKTEH6E980ZmIFsHe4u1yZB8eiIFibCdoRdZuCdTBnXC9cN4aUqg5WSz8lMS3v130rc260p3UEbU5Z/q2ettJ5f2PKhTyuexZFJ+cjmDf4CgcZv1EEUC+G2yuybydy/zNXVOgeD4XrPnDbcA3p8KCdVk1wr8g/0vvyGjGeazWfoEGGy4CdtTHudc=
+    secret_access_key:
+      secure: 6odGWpddG2WBa1cZ7nlTnCX3lv0Xlq/tNQo005dFA7ySLyal3qNId2fdXpTStNmYjfXx7kXj62wl094hJ5hzxD/dEyY+x83VpaFJ7bYNfz/pWGNWw/SIDrvkjdn+sPApgBUter710eO3kE77QIUjrnVPXEdurIN5Gsue45XDFSOmf/TBDDBKi0FlyoWj687GJyxZSNRSMpEW29EzXU45kj78sEsPE96eo7cNZ5aIsvV+bpWEritiuGZdzfixOzpHI/ypmm7Hctyz2JOMyMSR0VIbf43zCeEQf4UBN0yz0RtB+bBVtwjWo+0Rt0hLQjsxlFri5ox67NwWe3k9yC2hLCWpQdVvVyqM6C1wVjA5RcSMQJQU2/Z34y+F84AdwgM6Zh0KD9TROVjjg6bAGYkVTtWqTXLheglM5lrxJzn1wuaKom029VDkyhDe8J881EkuA0miECyR0g98ZyyCN/HoDlg8D17ixRSYqNkfmZQmiSHOlmPVGkP7/ElQWW6yEe1u7elq/v2i3OtjG3I+LLiNGwFy9reyq132dhmoiR9eLK0ppqoqFb4eP01FgqnS5avaZnFDUi+RVRERTZ1JazxR12vY8DFtUDaFiYszkD29Lp4pG3L9me0COodU2mp7Lg6+zmNt0VLMd5XcKlngFXeFRApIqmTlH83WZ04jyMaYa+E=
+    acl: public_read
+    local-dir: $HOME/src/vnc.nightly/latest/files
+    upload-dir: $TRAVIS_BRANCH/$TRAVIS_OS_NAME
+    on:
+      branch: dev
+      condition: -n "$BUILD_OFFICIAL"

@@ -1,0 +1,54 @@
+environment:
+  LJT_VERSION: 1.5.1
+  LJT_64BIT_SDK: https://sourceforge.net/projects/libjpeg-turbo/files/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc64.exe
+  LJT_32BIT_SDK: https://sourceforge.net/projects/libjpeg-turbo/files/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc.exe
+
+install:
+  - cmd: >-
+      mkdir c:\installers
+
+      mkdir c:\temp
+
+      choco install -y InnoSetup
+
+      curl -fSL -o c:\installers\libjpeg-turbo-vc64.exe %LJT_64BIT_SDK%
+
+      c:\installers\libjpeg-turbo-vc64.exe /S
+
+      curl -fSL -o c:\installers\libjpeg-turbo-vc.exe %LJT_32BIT_SDK%
+
+      c:\installers\libjpeg-turbo-vc.exe /S
+
+      set INCLUDE=c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include;c:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include
+
+      set LIB=c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib\amd64;c:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\lib\x64
+
+      set PATH=c:\Program Files (x86)\Inno Setup 5;c:\msys64\usr\bin;c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64;c:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE;c:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\bin\x64;c:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\bin;%PATH%
+
+      set MSYSTEM=MINGW32
+
+      git clone --depth=1 https://github.com/TurboVNC/buildscripts.git c:/buildscripts
+
+build_script:
+  - cmd: >-
+      bash c:/buildscripts/buildvnc -r file://%CD:\=/% -b /c/vnc.nightly %APPVEYOR_REPO_BRANCH% -v
+
+      move c:\vnc.nightly\files\*.tar.gz .
+
+      move c:\vnc.nightly\files\*.exe .
+
+      move c:\vnc.nightly\log-windows.txt .
+
+artifacts:
+  - path: '*.tar.gz'
+    name: Source tarball
+
+  - path: '*.exe'
+    name: TurboVNC Viewer
+
+  - path: 'log-windows.txt'
+    name: Build log
+
+test: off
+
+deploy: off
