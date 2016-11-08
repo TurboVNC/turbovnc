@@ -968,7 +968,7 @@ sub ParseOptions
 
     arg: while (defined($arg = shift(@ARGV))) {
         foreach $opt (@opts) {
-            if ($arg eq $opt) {
+            if (lc $arg eq $opt) {
                 push(@optArgs, $arg);
                 if ($valFollows{$opt}) {
                     if (@ARGV == 0) {
