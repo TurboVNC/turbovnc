@@ -18,6 +18,10 @@ require a VNC password file.  The init.d script now invokes vncserver with a
 new argument (`-quiet`) that causes vncserver to fail if a VNC password file is
 required but does not exist.
 
+4. The Java TurboVNC Viewer now supports the rfbTLS security descriptor used by
+Vino.  This should allow the viewer to connect to encrypted Vino sessions using
+either the TLSVnc or TLSNone security types.
+
 
 2.1
 ===

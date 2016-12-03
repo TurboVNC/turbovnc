@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2016 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ public class SecurityClient extends Security {
     case Security.secTypeNone: return (new CSecurityNone());
     case Security.secTypeVncAuth: return (new CSecurityVncAuth());
     case Security.secTypeTight: return (new CSecurityTight(this));
+    case Security.secTypeTLS: return (new CSecurityRFBTLS(this));
     case Security.secTypeVeNCrypt: return (new CSecurityVeNCrypt(this));
     case Security.secTypePlain: return (new CSecurityPlain());
     case Security.secTypeIdent: return (new CSecurityIdent());
