@@ -64,18 +64,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 if(UNIX OR (WIN32 AND NOT MINGW))
-	string(TIMESTAMP BUILD "%Y%m%d")
+	string(TIMESTAMP DEFAULT_BUILD "%Y%m%d")
+	set(BUILD ${DEFAULT_BUILD} CACHE STRING "Build string (default: ${DEFAULT_BUILD})")
 else()
 	message(FATAL_ERROR "Platform not supported.")
-endif()
-
-if(USEC)
-	# This only works if building from the command line.  There is currently no
-	# way to set a variable's value based on the build type when using the MSVC
-	# IDE.
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(BUILD "${BUILD}d")
-	endif()
 endif()
 
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
