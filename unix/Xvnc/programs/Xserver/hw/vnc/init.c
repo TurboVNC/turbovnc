@@ -505,6 +505,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
+    if (strcasecmp(argv[i], "-verbose") == 0) {
+        LogSetParameter(XLOG_VERBOSITY, 1);
+        return 1;
+    }
+
     if (strcasecmp(argv[i], "-version") == 0) {
         PrintVersion();
         exit(0);
@@ -1512,6 +1517,7 @@ ddxUseMsg()
     ErrorF("-inetd                 Xvnc is launched by inetd\n");
     ErrorF("-compatiblekbd         set META key = ALT key as in the original VNC\n");
     ErrorF("-version               report Xvnc version on stderr\n");
+    ErrorF("-verbose               print all X.org errors, warnings, and messages\n");
     exit(1);
 }
 
