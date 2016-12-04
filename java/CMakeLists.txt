@@ -188,11 +188,12 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/turbovnc.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
+		${TJPEG_JAR}
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
 		org/libjpegturbo/turbojpeg
 	COMMAND ${JAVA_ARCHIVE}
-	ARGS cfm VncViewer.jar
+	ARGS cfm VncViewer-unsigned.jar
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
 		${CLASSPATH}/timestamp
 		${CLASSPATH}/*.class
@@ -209,14 +210,18 @@ add_custom_command(OUTPUT VncViewer.jar
 		${CLASSPATH}/turbovnc-sm.png
 		${CLASSPATH}/turbovnc-128.png
 	COMMAND ${CMAKE_COMMAND}
-	ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/VncViewer.jar
+	ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/VncViewer-unsigned.jar
 		-DJAVA_KEYSTORE=${JAVA_KEYSTORE}
 		-DJAVA_KEYSTORE_TYPE=${JAVA_KEYSTORE_TYPE}
 		-DJAVA_KEYSTORE_PASS=${JAVA_KEYSTORE_PASS}
 		-DJAVA_KEY_ALIAS=${JAVA_KEY_ALIAS}
 		-DJAVA_KEY_PASS=${JAVA_KEY_PASS}
 		-DJAVA_TSA_URL=${JAVA_TSA_URL}
-		-P ${SRCDIR}/cmake/SignJar.cmake)
+		-P ${SRCDIR}/cmake/SignJar.cmake
+	COMMAND ${CMAKE_COMMAND}
+	ARGS -E copy_if_different VncViewer-unsigned.jar VncViewer.jar
+	COMMAND ${CMAKE_COMMAND}
+	ARGS -E remove VncViewer-unsigned.jar)
 
 add_custom_target(java ALL DEPENDS VncViewer.jar)
 
