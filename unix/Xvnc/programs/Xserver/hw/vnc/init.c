@@ -405,6 +405,13 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
+    if (strcasecmp(argv[i], "-dridir") == 0) {
+        extern char *dri_driver_path;
+        if (i + 1 >= argc) UseMsg();
+        dri_driver_path = strdup(argv[i + 1]);
+        return 2;
+    }
+
     if (strcasecmp(argv[i], "-economictranslate") == 0) {
         rfbEconomicTranslate = TRUE;
         return 1;
@@ -1500,6 +1507,7 @@ ddxUseMsg()
     ErrorF("-nvcontrol display     set up a virtual NV-CONTROL extension and redirect\n");
     ErrorF("                       NV-CONTROL requests to the specified X display\n");
 #endif
+    ErrorF("-dridir dir            specify directory containing the swrast Mesa driver\n");
     ErrorF("-virtualtablet         set up virtual stylus and eraser devices for this\n");
     ErrorF("                       session, to emulate a Wacom tablet, and map all\n");
     ErrorF("                       extended input events from all viewers to these devices\n");

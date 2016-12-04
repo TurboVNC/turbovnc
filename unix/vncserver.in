@@ -66,6 +66,7 @@ $deferUpdate = 1;
 $useVGL = 0;
 $autokill = 0;
 $pamSession = 0;
+$bits = @BITS@;
 
 # Read configuration from the system-wide and user files if present.
 
@@ -285,6 +286,18 @@ foreach $_xkbdir (@xkbdirs) {
 foreach $_xkbcompdir (@xkbcompdirs) {
   if (-x "$_xkbcompdir/xkbcomp") {
     $xkbcompdir = "$_xkbcompdir";
+  }
+}
+
+if ($bits eq "64") {
+  @dridirs = ('/usr/lib64/dri', '/usr/lib/dri', '/usr/lib/x86_64-linux-gnu/dri');
+} else {
+  @dridirs = ('/usr/lib/dri', '/usr/lib32/dri', '/usr/lib/i386-linux-gnu/dri');
+}
+foreach $_dridir (@dridirs) {
+  if (-f "$_dridir/swrast_dri.so") {
+    $dridir = "$_dridir";
+    last;
   }
 }
 
@@ -536,6 +549,7 @@ $cmd .= " -deferupdate $deferUpdate";
 $cmd .= " -xkbdir $xkbdir" if ($xkbdir);
 $cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir);
 $cmd .= " -pamsession" if ($pamSession);
+$cmd .= " -dridir $dridir" if ($dridir);
 
 foreach $arg (@ARGV) {
     $cmd .= " " . &quotedString($arg);

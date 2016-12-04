@@ -2,9 +2,9 @@ include_directories(include Xext ../../lib/pixman
 	${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Enable extensions
-add_definitions(-DCOMPOSITE -DDAMAGE -DDPMSExtension -DMITSHM -DRANDR -DRENDER
-	-DRES -DSCREENSAVER -DSHAPE -DXACE -DXCSECURITY -DXFIXES -DXF86BIGFONT
-	-DXINPUT -DXTEST -DXV)
+add_definitions(-DCOMPOSITE -DDAMAGE -DDPMSExtension -DGLXEXT -DMITSHM -DRANDR
+	-DRENDER -DRES -DSCREENSAVER -DSHAPE -DXACE -DXCSECURITY -DXFIXES
+	-DXF86BIGFONT -DXINPUT -DXTEST -DXV)
 
 if(TVNC_NVCONTROL)
 add_definitions(-DNVCONTROL)
@@ -92,6 +92,7 @@ add_subdirectory(composite)
 add_subdirectory(damageext)
 add_subdirectory(dix)
 add_subdirectory(fb)
+add_subdirectory(glx)
 add_subdirectory(mi)
 add_subdirectory(miext)
 add_subdirectory(os)
@@ -114,9 +115,9 @@ if(TVNC_NVCONTROL)
 	set(EXTRA_LIB ${EXTRA_LIB} XNVCtrl)
 endif()
 target_link_libraries(Xvnc main dix vnc fb Xi composite mi damage damageext
-	randr render os Xext-server sync xfixes xkb Xau Xdmcp Xfont fontenc freetype2
-	pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m pthread ${PAM_LIB}
-	${EXTRA_LIB})
+	glx randr render os Xext-server sync xfixes xkb Xau Xdmcp Xfont fontenc
+	freetype2 pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m pthread
+	${PAM_LIB} ${EXTRA_LIB})
 
 install(TARGETS Xvnc DESTINATION ${TVNC_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/Xserver.man

@@ -10,6 +10,14 @@ quickly toggle view-only mode on and off.
 (increase or decrease the scaling factor) or reset the view to 100% when
 desktop scaling is enabled.
 
+3. The TurboVNC Server now includes a GLX extension that uses the swrast DRI
+driver installed on the system to perform unaccelerated OpenGL rendering.
+Using VirtualGL for OpenGL rendering will still be much faster and more
+compatible, but this feature allows the TurboVNC Server to be used for casual
+OpenGL rendering if VirtualGL is not installed.  Passing `-extension GLX` to
+vncserver disables the extension.  Note that your system must have Mesa 8.x or
+later installed in order for the swrast DRI driver to be available.
+
 
 2.1.1
 =====
