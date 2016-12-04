@@ -58,7 +58,7 @@ start() {
         unset BASH_ENV ENV
         DISP="${display%%:*}"
         export VNCUSERARGS="${VNCSERVERARGS[${DISP}]}"
-        _OUT=`echo ${display}; su ${display##*:} -c "cd ~${display##*:} && [ -f .vnc/passwd ] && @TVNC_BINDIR@/vncserver :${display%%:*} ${VNCUSERARGS}" 2>&1`
+        _OUT=`echo ${display}; su ${display##*:} -c "cd ~${display##*:} && @TVNC_BINDIR@/vncserver :${display%%:*} -quiet ${VNCUSERARGS}" 2>&1`
         _RETVAL=$?
         if [[ ! $_OUT =~ "A VNC server is already running" ]]; then
             RETVAL=$_RETVAL

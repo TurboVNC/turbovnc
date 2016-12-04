@@ -294,7 +294,7 @@ foreach $_xkbcompdir (@xkbcompdirs) {
               "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
               "-securitytypes",1,"-nohttp",0,"-nohttpd",0,"-rfbauth",1,
               "-noxstartup",0,"-xstartup",1,"-log",1,"-3dwm",0,"-debug",0,
-              "-x509cert",1,"-x509key",1,"-autokill",0);
+              "-x509cert",1,"-x509key",1,"-autokill",0,"-quiet",0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -441,10 +441,15 @@ if ($authTypeVNC && "$passwdFile" eq "$vncUserDir/passwd") {
     }
 
     if (!-e _ || ($mode & 077) != 0) {
-        warn "\nYou will require a password to access your desktops.\n\n";
-        system($exedir."vncpasswd $vncUserDir/passwd");
-        if (($? & 0xFF00) != 0) {
+        if ($opt{'-quiet'}) {
+            warn "$vncUserDir/passwd does not exist.  Run vncpasswd to create passwd file.\n";
             exit 1;
+        } else {
+            warn "\nYou will require a password to access your desktops.\n\n";
+            system($exedir."vncpasswd $vncUserDir/passwd");
+            if (($? & 0xFF00) != 0) {
+                exit 1;
+            }
         }
     }
 }
@@ -968,7 +973,7 @@ sub ParseOptions
 
     arg: while (defined($arg = shift(@ARGV))) {
         foreach $opt (@opts) {
-            if ($arg eq $opt) {
+            if (lc $arg eq $opt) {
                 push(@optArgs, $arg);
                 if ($valFollows{$opt}) {
                     if (@ARGV == 0) {
