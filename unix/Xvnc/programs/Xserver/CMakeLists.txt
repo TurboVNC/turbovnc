@@ -118,6 +118,10 @@ target_link_libraries(Xvnc main dix vnc fb Xi composite mi damage damageext
 	glx randr render os Xext-server sync xfixes xkb Xau Xdmcp Xfont fontenc
 	freetype2 pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m pthread
 	${PAM_LIB} ${EXTRA_LIB})
+if(NOT APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES
+	"(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+	target_link_libraries(Xvnc dl)
+endif()
 
 install(TARGETS Xvnc DESTINATION ${TVNC_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/Xserver.man
