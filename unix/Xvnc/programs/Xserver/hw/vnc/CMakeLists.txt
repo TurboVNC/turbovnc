@@ -91,9 +91,13 @@ add_library(vnc STATIC
 	${NVCTRLSRC}
 	${RFBSSLSRC})
 
-# The VNC extension code has a lot of type puns.  Disable strict aliasing just
-# to be safe.
+# These files have a lot of type puns.  Disable strict aliasing just to be
+# safe.
 if(CMAKE_COMPILER_IS_GNUCC)
+	set_source_files_properties(init.c PROPERTIES COMPILE_FLAGS
+		-fno-strict-aliasing)
+	set_source_files_properties(sockets.c PROPERTIES COMPILE_FLAGS
+		-fno-strict-aliasing)
 	set_source_files_properties(vncextinit.c PROPERTIES COMPILE_FLAGS
 		-fno-strict-aliasing)
 endif()
