@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleGetInfoString</key>
-	<string>@VERSION@, The VirtualGL Project</string>
+	<string>@VERSION@, @PKGVENDOR@</string>
 	<key>CFBundleName</key>
 	<string>@CMAKE_PROJECT_NAME@ Viewer</string>
 	<key>CFBundleIdentifier</key>

@@ -12,7 +12,7 @@
 		<key>BundleOverwriteAction</key>
 		<string>upgrade</string>
 		<key>RootRelativeBundlePath</key>
-		<string>Applications/TurboVNC/TurboVNC Viewer.app</string>
+		<string>Applications/@CMAKE_PROJECT_NAME@/@CMAKE_PROJECT_NAME@ Viewer.app</string>
 	</dict>
 </array>
 </plist>

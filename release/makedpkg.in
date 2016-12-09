@@ -47,14 +47,13 @@ safedirmove ()
 	return 0
 }
 
-PACKAGE_NAME=@CMAKE_PROJECT_NAME_LC@
+PKGNAME=@PKGNAME@
 VERSION=@VERSION@
-BUILD=@BUILD@
 DEBARCH=@DEBARCH@
 SRCDIR=@CMAKE_SOURCE_DIR@
-BINDIR=@TVNC_BINDIR@
-DOCDIR=@TVNC_DOCDIR@
-CONFDIR=@TVNC_CONFDIR@
+BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
+DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
+SYSCONFDIR=@CMAKE_INSTALL_FULL_SYSCONFDIR@
 BUILDSERVER=@TVNC_BUILDSERVER@
 
 if [ ! `uid` -eq 0 ]; then
@@ -62,26 +61,26 @@ if [ ! `uid` -eq 0 ]; then
 fi
 
 umask 022
-rm -f $PACKAGE_NAME\_$DEBARCH.deb
-TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
+rm -f $PKGNAME\_$DEBARCH.deb
+TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
 mkdir $TMPDIR/DEBIAN
 
 make install DESTDIR=$TMPDIR
 
-if [ ! "$DOCDIR" = "/usr/share/doc/$PACKAGE_NAME-$VERSION" ]; then
-	safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION $TMPDIR/__tmpdoc
+if [ ! "$DOCDIR" = "/usr/share/doc/$PKGNAME-$VERSION" ]; then
+	safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$PKGNAME-$VERSION $TMPDIR/__tmpdoc
 fi
 if [ "$BUILDSERVER" = "1" ]; then
-	if [ ! "$CONFDIR" = "/etc" ]; then
-		safedirmove $TMPDIR/$CONFDIR $TMPDIR/etc $TMPDIR/__tmpconf
+	if [ ! "$SYSCONFDIR" = "/etc" ]; then
+		safedirmove $TMPDIR/$SYSCONFDIR $TMPDIR/etc $TMPDIR/__tmpconf
 	fi
 fi
 
 mkdir -p $TMPDIR/usr/share/applications
 cat > $TMPDIR/usr/share/applications/tvncviewer.desktop <<EOF
 [Desktop Entry]
-Name=TurboVNC Viewer
-Comment=TurboVNC client application
+Name=@CMAKE_PROJECT_NAME@ Viewer
+Comment=@CMAKE_PROJECT_NAME@ client application
 Exec=$BINDIR/vncviewer
 Terminal=0
 Type=Application
@@ -92,6 +91,6 @@ SIZE=`du -s $TMPDIR | cut -f1`
 cat pkgscripts/deb-control | sed s/{__SIZE}/$SIZE/g > $TMPDIR/DEBIAN/control
 
 $SUDO chown -Rh root:root $TMPDIR/*
-dpkg -b $TMPDIR $PACKAGE_NAME\_$VERSION\_$DEBARCH.deb
+dpkg -b $TMPDIR $PKGNAME\_$VERSION\_$DEBARCH.deb
 
 exit

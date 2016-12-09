@@ -7,7 +7,7 @@ if [ "$JAVA_HOME" = "" ]; then
 else
 	JAVA="$JAVA_HOME/bin/java"
 fi
-TVNC_JAVADIR=@TVNC_JAVADIR@
+TVNC_JAVADIR=@CMAKE_INSTALL_FULL_JAVADIR@
 if [ -d $BINDIR/../java ]; then
 	TVNC_JAVADIR=$BINDIR/../java
 fi

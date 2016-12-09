@@ -2,16 +2,16 @@
 %define prefix @CMAKE_INSTALL_PREFIX@
 
 # Path under which executables and scripts should be installed
-%define bindir @TVNC_BINDIR@
+%define bindir @CMAKE_INSTALL_FULL_BINDIR@
 
 # Path under which configuration files should be installed
-%define confdir %{_sysconfdir}
+%define sysconfdir %{_sysconfdir}
 
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
 
 # Path under which man pages should be installed
-%define mandir @TVNC_MANDIR@
+%define mandir @CMAKE_INSTALL_FULL_MANDIR@
 
 # Whether or not to include the Java viewer
 %define java @TVNC_BUILDJAVA@
@@ -23,7 +23,7 @@
 %define server @TVNC_BUILDSERVER@
 
 # Path under which the Java viewer should be installed
-%define javadir @TVNC_JAVADIR@
+%define javadir @CMAKE_INSTALL_FULL_JAVADIR@
 
 # Whether or not to include the TurboJPEG JNI JAR files (used when launching
 # the Java TurboVNC Viewer via Java Web Start)
@@ -46,11 +46,12 @@
 # TurboVNC source.
 
 Summary:   A highly-optimized version of VNC that can be used with performance-critical applications
-Name:      @CMAKE_PROJECT_NAME_LC@
+Name:      @PKGNAME@
 Version:   @VERSION@
 Release:   @BUILD@
-URL:       http://www.TurboVNC.org
-#-->Source0: http://prdownloads.sourceforge.net/turbovnc/%{name}-%{version}.tar.gz
+Vendor:    @PKGVENDOR@
+URL:       @PKGURL@
+#-->Source0: http://prdownloads.sourceforge.net/@CMAKE_PROJECT_NAME_LC@/@CMAKE_PROJECT_NAME_LC@-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
@@ -74,7 +75,7 @@ applications.  TurboVNC, in combination with VirtualGL, provides a complete
 solution for remotely displaying 3D applications with interactive performance.
 
 #-->%prep
-#-->%setup -q
+#-->%setup -q -n @CMAKE_PROJECT_NAME_LC@-%{version}
 
 #-->%build
 #-->%if %{?java_keystore:1}%{!?java_keystore:0}
@@ -98,7 +99,17 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->%if "%{jnijars}" == "1"
 #-->  JNIJARS_ARGS="-DTVNC_INCLUDEJNIJARS=1 -DTJPEG_JNIJARPATH=%{jnijardir}"
 #-->%endif
-#-->cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=%{prefix} -DTVNC_BINDIR=%{bindir} -DTVNC_CONFDIR=%{confdir} -DTVNC_DOCDIR=%{docdir} -DTVNC_MANDIR=%{mandir} -DTVNC_BUILDJAVA=%{java} $JNIJARS_ARGS -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG .
+#-->cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ \
+#-->  -DBUILD=%{release} -DCMAKE_INSTALL_BINDIR=%{bindir} \
+#-->  -DCMAKE_INSTALL_DOCDIR=%{docdir} -DCMAKE_INSTALL_JAVADIR=%{javadir} \
+#-->  -DCMAKE_INSTALL_MANDIR=%{mandir} -DCMAKE_INSTALL_PREFIX=%{prefix} \
+#-->  -DCMAKE_INSTALL_SYSCONFDIR=%{sysconfdir} \
+#-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
+#-->  $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG \
+#-->  $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG \
+#-->  -DTVNC_BUILDJAVA=%{java} -DTVNC_BUILDNATIVE=%{native} \
+#-->  -DTVNC_BUILDSERVER=%{server} \
+#-->  $JNIJARS_ARGS .
 #-->make
 
 %install
@@ -137,15 +148,15 @@ safedirmove ()
 	return 0
 }
 
-TVNC_DOCDIR=@TVNC_DOCDIR@
+TVNC_DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 if [ ! "$TVNC_DOCDIR" = "%{docdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
 fi
 
 %if "%{server}" == "1"
-TVNC_CONFDIR=@TVNC_CONFDIR@
-if [ ! "$TVNC_CONFDIR" = "%{confdir}" ]; then
-	safedirmove $RPM_BUILD_ROOT/$TVNC_CONFDIR $RPM_BUILD_ROOT/%{confdir} $RPM_BUILD_ROOT/__tmpconf
+TVNC_SYSCONFDIR=@CMAKE_INSTALL_FULL_SYSCONFDIR@
+if [ ! "$TVNC_SYSCONFDIR" = "%{sysconfdir}" ]; then
+	safedirmove $RPM_BUILD_ROOT/$TVNC_SYSCONFDIR $RPM_BUILD_ROOT/%{sysconfdir} $RPM_BUILD_ROOT/__tmpconf
 fi
 %endif
 
@@ -155,8 +166,8 @@ fi
 mkdir -p %{buildroot}/usr/share/applications
 cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
-Name=TurboVNC Viewer
-Comment=TurboVNC client application
+Name=@CMAKE_PROJECT_NAME@ Viewer
+Comment=@CMAKE_PROJECT_NAME@ client application
 Exec=%{bindir}/vncviewer
 Terminal=0
 Type=Application
@@ -194,10 +205,10 @@ fi
 %files
 %defattr(-,root,root)
 %if "%{server}" == "1"
- %attr(0755,root,root) %config %{confdir}/init.d/tvncserver
- %config(noreplace) %{confdir}/sysconfig/tvncservers
- %config(noreplace) %{confdir}/turbovncserver.conf
- %config(noreplace) %{confdir}/turbovncserver-security.conf
+ %attr(0755,root,root) %config %{sysconfdir}/init.d/tvncserver
+ %config(noreplace) %{sysconfdir}/sysconfig/tvncservers
+ %config(noreplace) %{sysconfdir}/turbovncserver.conf
+ %config(noreplace) %{sysconfdir}/turbovncserver-security.conf
 %endif
 
 %dir %{docdir}
@@ -211,7 +222,11 @@ fi
  %dir %{javadir}
 %endif
 
-%{prefix}/README.txt
+%if "%{prefix}" == "@CMAKE_INSTALL_DEFAULT_PREFIX@"
+  %{prefix}/README.txt
+%else
+  %{docdir}/README.txt
+%endif
 %if "%{native}" == "1"
  %{bindir}/checkshmpixmaps
  %{bindir}/vncviewer

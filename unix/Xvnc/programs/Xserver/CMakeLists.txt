@@ -118,8 +118,8 @@ target_link_libraries(Xvnc main dix vnc fb Xi composite mi damage damageext
 	pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m pthread ${PAM_LIB}
 	${EXTRA_LIB})
 
-install(TARGETS Xvnc DESTINATION ${TVNC_BINDIR})
+install(TARGETS Xvnc DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/Xserver.man
-	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xserver.1)
+	DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 RENAME Xserver.1)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc.man
-	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xvnc.1)
+	DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 RENAME Xvnc.1)

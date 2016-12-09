@@ -42,7 +42,8 @@ safedirmove ()
 }
 
 SUFFIX=
-LAUNCHER="@CMAKE_PROJECT_NAME@ Viewer"
+VIEWER="@CMAKE_PROJECT_NAME@ Viewer"
+LAUNCHER="$VIEWER"
 if [ $# -gt 0 ]; then
 	if [ "$1" = "compat" ]; then
 		SUFFIX=-AppleJava
@@ -50,21 +51,22 @@ if [ $# -gt 0 ]; then
 	fi
 fi
 
-PACKAGE_NAME=@CMAKE_PROJECT_NAME@
+PKGNAME=@PKGNAME@
+PROJECT=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
 SRCDIR=@CMAKE_SOURCE_DIR@
 PREFIX=@CMAKE_INSTALL_PREFIX@
-BINDIR=@TVNC_BINDIR@
-DOCDIR=@TVNC_DOCDIR@
-JAVADIR=@TVNC_JAVADIR@
+BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
+DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
+JAVADIR=@CMAKE_INSTALL_FULL_JAVADIR@
 
-if [ -f $PACKAGE_NAME-$VERSION$SUFFIX.dmg ]; then
-	rm -f $PACKAGE_NAME-$VERSION$SUFFIX.dmg
+if [ -f $PKGNAME-$VERSION$SUFFIX.dmg ]; then
+	rm -f $PKGNAME-$VERSION$SUFFIX.dmg
 fi
 
 umask 022
-TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
+TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
 PKGROOT=$TMPDIR/pkg/Package_Root
 mkdir -p $PKGROOT
 
@@ -76,7 +78,7 @@ if [ -d $PKGROOT$JAVADIR ]; then
 fi
 
 mkdir -p $PKGROOT/Library/Documentation
-safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR/__tmpdoc
+safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tmpdoc
 
 mkdir -p $TMPDIR/pkg/
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
@@ -84,32 +86,32 @@ cp pkgscripts/Distribution$SUFFIX.xml $TMPDIR/pkg/Distribution.xml
 mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
-mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
+mkdir -p "$PKGROOT/Applications/$PROJECT"
 if [ "$SUFFIX" = "-AppleJava" ]; then
 	sh pkgscripts/makemacapp compat
 else
 	sh pkgscripts/makemacapp
 fi
-ln -fs /Library/Documentation/$PACKAGE_NAME/index.html "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME User's Guide.html"
+ln -fs /Library/Documentation/$PKGNAME/index.html "$PKGROOT/Applications/$PROJECT/$PROJECT User's Guide.html"
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
+osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
-osacompile -t APPL -a i386 -o "$TMPDIR/$PACKAGE_NAME Viewer (Listen Mode).app" $TMPDIR/listenmode.applescript
-cp -RX "$PACKAGE_NAME Viewer$SUFFIX.app" "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app"
-cp -RX "$TMPDIR/$PACKAGE_NAME Viewer (Listen Mode).app" "$PKGROOT/Applications/$PACKAGE_NAME/"
-cp -RX "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
-echo "\"/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app/Contents/MacOS/$LAUNCHER\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
+osacompile -t APPL -a i386 -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
+cp -RX "$VIEWER$SUFFIX.app" "$PKGROOT/Applications/$PROJECT/$VIEWER.app"
+cp -RX "$TMPDIR/$VIEWER (Listen Mode).app" "$PKGROOT/Applications/$PROJECT/"
+cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
+echo "\"/Applications/$PROJECT/$VIEWER.app/Contents/MacOS/$LAUNCHER\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
 chmod 755 $PKGROOT$BINDIR/vncviewer
 
 mkdir $TMPDIR/dmg
-pkgbuild --root $PKGROOT --component-plist $SRCDIR/release/Package.plist \
-	--version $VERSION.$BUILD --identifier com.virtualgl.turbovnc \
-	$TMPDIR/pkg/$PACKAGE_NAME.pkg
+pkgbuild --root $PKGROOT --component-plist pkgscripts/Package.plist \
+	--version $VERSION.$BUILD --identifier @PKGID@ \
+	$TMPDIR/pkg/$PKGNAME.pkg
 productbuild --distribution $TMPDIR/pkg/Distribution.xml --package-path \
-	$TMPDIR/pkg/ --resources $TMPDIR/pkg/ $TMPDIR/dmg/$PACKAGE_NAME.pkg
-mv "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/dmg/
-hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
-	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PACKAGE_NAME-$VERSION$SUFFIX.dmg
-cp $TMPDIR/$PACKAGE_NAME-$VERSION$SUFFIX.dmg .
+	$TMPDIR/pkg/ --resources $TMPDIR/pkg/ $TMPDIR/dmg/$PKGNAME.pkg
+mv "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/dmg/
+hdiutil create -fs HFS+ -volname $PKGNAME-$VERSION \
+	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION$SUFFIX.dmg
+cp $TMPDIR/$PKGNAME-$VERSION$SUFFIX.dmg .
 
 exit

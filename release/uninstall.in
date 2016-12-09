@@ -13,87 +13,82 @@
 
 #!/bin/sh
 
-error()
-{
-	echo $1
-	exit -1
-}
-
 if [ ! "`id -u`" = "0" ]; then
-	error "This command must be run as root"
+	echo "ERROR: This script must be executed as root"
+	exit -1
 fi
 
-PKGNAME=@CMAKE_PROJECT_NAME@
-PREFIX=@CMAKE_INSTALL_PREFIX@
-MACPKGNAME=com.virtualgl.@CMAKE_PROJECT_NAME_LC@
-RCPT=/Library/Receipts/$PKGNAME.pkg
+PKGNAME=@PKGNAME@
+PROJECT=@CMAKE_PROJECT_NAME@
+PKGID=@PKGID@
+RECEIPT=/Library/Receipts/$PKGNAME.pkg
 
 LSBOM=
-if [ -d $RCPT ]; then
-	LSBOM='lsbom -s -f -l '$RCPT'/Contents/Archive.bom'
+if [ -d $RECEIPT ]; then
+	LSBOM='lsbom -s -f -l '$RECEIPT'/Contents/Archive.bom'
 else
-	LSBOM='pkgutil --files '$MACPKGNAME
+	LSBOM='pkgutil --files '$PKGID
 fi
 
-echo Removing files ...
-$LSBOM >/dev/null || error "Could not list package contents"
-RETCODE=0
-PWD=`pwd`
-cd /
-$LSBOM | while read line; do
-	if [ ! -d "$line" ]; then rm "$line" 2>&1 || RETCODE=-1; fi
+mylsbom()
+{
+	$LSBOM || (echo "ERROR: Could not list package contents"; exit -1)
+}
+
+echo Removing package files ...
+EXITSTATUS=0
+pushd /
+mylsbom | while read file; do
+	if [ ! -d "$file" ]; then rm "$file" 2>&1 || EXITSTATUS=-1; fi
 done
-cd $PWD
+popd
 
-echo Removing directories ...
-rmdir $PREFIX/bin 2>&1 || RETCODE=-1
-if [ -d $PREFIX/lib ]; then rmdir $PREFIX/lib 2>&1 || RETCODE=-1; fi
-if [ -d $PREFIX/etc ]; then rmdir $PREFIX/etc 2>&1 || RETCODE=-1; fi
-if [ -f $PREFIX/man/man1/vncviewer.1 ]; then
-	rm $PREFIX/man/man1/vncviewer.1 2>&1 || RETCODE=-1;
+echo Removing package directories ...
+PREFIX=@CMAKE_INSTALL_PREFIX@
+BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
+JAVADIR=@CMAKE_INSTALL_FULL_JAVADIR@
+MANDIR=@CMAKE_INSTALL_FULL_MANDIR@
+SYSCONFDIR=@CMAKE_INSTALL_FULL_SYSCONFDIR@
+
+if [ -d $BINDIR ]; then
+	rmdir $BINDIR 2>&1 || EXITSTATUS=-1
 fi
-if [ -d $PREFIX/man/man1 ]; then rmdir $PREFIX/man/man1 2>&1 || RETCODE=-1; fi
-if [ -d $PREFIX/man ]; then rmdir $PREFIX/man 2>&1 || RETCODE=-1; fi
-if [ -d $PREFIX/java ]; then rmdir $PREFIX/java 2>&1 || RETCODE=-1; fi
-rmdir $PREFIX 2>&1 || RETCODE=-1
+if [ -d $SYSCONFDIR ]; then
+	rmdir $SYSCONFDIR 2>&1 || EXITSTATUS=-1
+fi
+if [ -d $MANDIR/man1 ]; then
+	rmdir $MANDIR/man1 2>&1 || EXITSTATUS=-1
+fi
+if [ -d $MANDIR ]; then
+	rmdir $MANDIR 2>&1 || EXITSTATUS=-1
+fi
+if [ -d $JAVADIR ]; then
+	rmdir $JAVADIR 2>&1 || EXITSTATUS=-1
+fi
+rmdir $PREFIX 2>&1 || EXITSTATUS=-1
 if [ -d /Library/Documentation/$PKGNAME ]; then
-	rm -rf /Library/Documentation/$PKGNAME 2>&1 || RETCODE=-1
+	rm -rf /Library/Documentation/$PKGNAME 2>&1 || EXITSTATUS=-1
 fi
-if [ -h /Applications/$PKGNAME/Documentation ]; then
-	rm /Applications/$PKGNAME/Documentation 2>&1 || RETCODE=-1
+if [ -h /Applications/$PROJECT/Documentation ]; then
+	rm /Applications/$PROJECT/Documentation 2>&1 || EXITSTATUS=-1
 fi
-if [ -d "/Applications/$PKGNAME/$PKGNAME Viewer.app" ]; then
-	rm -rf "/Applications/$PKGNAME/$PKGNAME Viewer.app" 2>&1 || RETCODE=-1
+if [ -d "/Applications/$PROJECT/$PROJECT Viewer.app" ]; then
+	rm -rf "/Applications/$PROJECT/$PROJECT Viewer.app" 2>&1 || EXITSTATUS=-1
 fi
-if [ -d "/Applications/$PKGNAME/$PKGNAME Viewer (Listen Mode).app" ]; then
-	rm -rf "/Applications/$PKGNAME/$PKGNAME Viewer (Listen Mode).app" 2>&1 || RETCODE=-1
+if [ -d "/Applications/$PROJECT/$PROJECT Viewer (Listen Mode).app" ]; then
+	rm -rf "/Applications/$PROJECT/$PROJECT Viewer (Listen Mode).app" 2>&1 || EXITSTATUS=-1
 fi
-if [ -d "/Applications/$PKGNAME/Uninstall $PKGNAME.app" ]; then
-	rm -rf "/Applications/$PKGNAME/Uninstall $PKGNAME.app" 2>&1 || RETCODE=-1
+if [ -d "/Applications/$PROJECT/Uninstall $PROJECT.app" ]; then
+	rm -rf "/Applications/$PROJECT/Uninstall $PROJECT.app" 2>&1 || EXITSTATUS=-1
 fi
-rmdir /Applications/$PKGNAME 2>&1 || RETCODE=-1
+rmdir /Applications/$PROJECT 2>&1 || EXITSTATUS=-1
 
-if [ -d $RCPT ]; then
-	echo Removing package receipt $RCPT ...
-	rm -r $RCPT 2>&1 || RETCODE=-1
+if [ -d $RECEIPT ]; then
+	echo Removing package receipt ...
+	rm -r $RECEIPT 2>&1 || EXITSTATUS=-1
 else
-	echo Forgetting package $MACPKGNAME
-	pkgutil --forget $MACPKGNAME
+	echo Forgetting package $PKGID ...
+	pkgutil --forget $PKGID
 fi
 
-for RCPT in /Library/Receipts/$PKGNAME-*.pkg; do
-	if [ -d $RCPT ]; then
-		echo Attempting to remove old package `basename $RCPT` ...
-		lsbom -s -f -l $RCPT/Contents/Archive.bom 2>/dev/null 1>/dev/null || continue
-		PWD=`pwd`
-		cd /
-		lsbom -s -f -l $RCPT/Contents/Archive.bom | while read line; do
-			rm "$line" 2>/dev/null 1>/dev/null
-		done
-		rmdir /Library/Documentation/`basename $RCPT .pkg` 2>/dev/null 1>/dev/null
-		cd $PWD
-		rm -r $RCPT 2>/dev/null 1>/dev/null
-	fi
-done
-
-exit $RETCODE
+exit $EXITSTATUS

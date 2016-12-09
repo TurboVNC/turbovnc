@@ -40,7 +40,7 @@ if($slashndx>=0) {
 # it can't find them there, it looks in the directory specified by
 # $vncClasses.
 
-$vncClasses = "@TVNC_JAVADIR@";
+$vncClasses = "@CMAKE_INSTALL_FULL_JAVADIR@";
 
 $xauth = "xauth";
 

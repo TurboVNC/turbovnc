@@ -38,8 +38,8 @@ unset VNCSERVERARGS
 VNCSERVERS=""
 if [ -f /etc/sysconfig/tvncservers ]; then
     . /etc/sysconfig/tvncservers
-elif [ -f @TVNC_CONFDIR@/sysconfig/tvncservers ]; then
-    . @TVNC_CONFDIR@/sysconfig/tvncservers ]
+elif [ -f @CMAKE_INSTALL_FULL_SYSCONFDIR@/sysconfig/tvncservers ]; then
+    . @CMAKE_INSTALL_FULL_SYSCONFDIR@/sysconfig/tvncservers ]
 fi
 
 LOCKDIR=/var/lock
@@ -58,7 +58,7 @@ start() {
         unset BASH_ENV ENV
         DISP="${display%%:*}"
         export VNCUSERARGS="${VNCSERVERARGS[${DISP}]}"
-        _OUT=`echo ${display}; su ${display##*:} -c "cd ~${display##*:} && @TVNC_BINDIR@/vncserver :${display%%:*} -quiet ${VNCUSERARGS}" 2>&1`
+        _OUT=`echo ${display}; su ${display##*:} -c "cd ~${display##*:} && @CMAKE_INSTALL_FULL_BINDIR@/vncserver :${display%%:*} -quiet ${VNCUSERARGS}" 2>&1`
         _RETVAL=$?
         if [[ ! $_OUT =~ "A VNC server is already running" ]]; then
             RETVAL=$_RETVAL
@@ -86,7 +86,7 @@ shutdown() {
     do
         echo -n "${display} "
         unset BASH_ENV ENV
-        _OUT=`echo ${display}; su ${display##*:} -c "@TVNC_BINDIR@/vncserver -kill :${display%%:*}" 2>&1`
+        _OUT=`echo ${display}; su ${display##*:} -c "@CMAKE_INSTALL_FULL_BINDIR@/vncserver -kill :${display%%:*}" 2>&1`
         RETVAL=$?
         if [[ ! $_OUT =~ "You'll have to kill the Xvnc process manually" ]]; then
             logger -p local7.notice "$_OUT"
@@ -114,7 +114,7 @@ stop() {
 reload() {
     # Walk the process list and shut down any TurboVNC sessions that aren't
     # specified in the tvncservers file.
-    for active in `ps uh -C Xvnc | grep @TVNC_BINDIR@/Xvnc | awk '{ print $12,$16 }' | tr -d ':' | tr ' ' ':' | sed -e 's/(//' -e 's/)//'`
+    for active in `ps uh -C Xvnc | grep @CMAKE_INSTALL_FULL_BINDIR@/Xvnc | awk '{ print $12,$16 }' | tr -d ':' | tr ' ' ':' | sed -e 's/(//' -e 's/)//'`
     do
         skip=
         for display in ${VNCSERVERS}
