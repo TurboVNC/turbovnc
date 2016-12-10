@@ -22,8 +22,12 @@ set(JAVA_KEY_ALIAS "" CACHE STRING "Alias for the signing certificate's entry in
 set(JAVA_KEY_PASS "" CACHE STRING "Password for the signing certificate's entry in the Java keystore (plain-text.)  Add a prefix of env: to specify an environment variable from which to read the password, or a prefix of file: to specify a file from which to read the password.")
 set(JAVA_TSA_URL "" CACHE STRING "URL of Timestamp Authority (TSA)")
 
-string(TIMESTAMP JAVA_DATE "%Y-%m-%d")
-string(TIMESTAMP JAVA_TIME "%H:%M:%S")
+string(TIMESTAMP DEFAULT_JAVA_DATE "%Y-%m-%d")
+set(JAVA_DATE ${DEFAULT_JAVA_DATE} CACHE STRING "Java date stamp")
+mark_as_advanced(JAVA_DATE)
+string(TIMESTAMP DEFAULT_JAVA_TIME "%H:%M:%S")
+set(JAVA_TIME ${DEFAULT_JAVA_TIME} CACHE STRING "Java time stamp")
+mark_as_advanced(JAVA_TIME)
 
 if(WIN32)
 	set(DEFAULT_TJPEG_JAR c:\\libjpeg-turbo\\classes\\turbojpeg.jar)
