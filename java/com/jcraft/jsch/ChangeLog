@@ -1,11 +1,75 @@
 ChangeLog of JSch
 ====================================================================
-Last modified: Tue Mar 18 07:43:12 UTC 2014
+Last modified: Tue Aug 30 06:47:52 UTC 2016
+
+
+Changes since version 0.1.53:
+- bugfix: fixed CVS-2016-5725
+          Refer to following links,
+            http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=2016-5725
+            https://github.com/tintinweb/pub/tree/master/pocs/cve-2016-5725
+          Thanks a lot for tintinweb's contributions.
+- bugfix: sftp-put may send the garbage data in some rare case.
+- bugfix: fixed a deadlock bug in KnownHosts#getHostKey().
+- bugfix: SftpProgressMonitor#init() was not invoked in sftp-put
+          by using the output-stream.
+- change: KnownHosts#setKnownHosts() should accept the non-existing file.
+- change: excluding the user interaction time from the timeout value.
+- change: addressing SFTP slow file transfer speed with Titan FTP.
+- change: updating copyright messages; 2015 -> 2016
+
+
+Changes since version 0.1.52:
+- bugfix: the rekey initiated by the remote may crash the session.
+- change: Logjam: use ecdh-sha2-nistp* if available,
+          ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,
+          diffie-hellman-group14-sha1,
+          diffie-hellman-group-exchange-sha256,
+          diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1
+- change: Logjam: diffie-hellman-group-exchange-sha256 and
+          diffie-hellman-group-exchange-sha1 will use 2048-bit key on
+          Java8's SunJCE, thanks to JDK-6521495 and JDK-7044060.
+- change: key words for OpenSSH's config file should be case-insensitive.
+- change: there should be the host name in "WARNING: REMOTE HOST
+          IDENTIFICATION HAS CHANGED" message.
+
+
+Changes since version 0.1.51:
+- bugfix: resource leak: duplicate keys in LocalIdentityRepository.
+- feature: added the support for SSH ECC defined in RFC5656,
+           ecdsa-sha2-nistp256,
+           ecdsa-sha2-nistp384,
+           ecdsa-sha2-nistp521,
+           ecdh-sha2-nistp256,
+           ecdh-sha2-nistp384,
+           ecdh-sha2-nistp521
+           This functionality requires Java7 or later.
+- feature: added the support for server host keys in
+           ecdsa-sha2-nistp256,
+           ecdsa-sha2-nistp384,
+           ecdsa-sha2-nistp521
+- feature: generating key-pairs in
+           ecdh-sha2-nistp256,
+           ecdh-sha2-nistp384,
+           ecdh-sha2-nistp521
+- change: aes192-ctr, aes256-ctr and
+          diffie-hellman-group-exchange-sha256 have been enabled
+          by the default.
+- change: key exchange methods, ecdh-sha2-nistp256,
+          ecdh-sha2-nistp384 and ecdh-sha2-nistp521 have been enabled
+          by the default.
+- change: the support for host keys in ecdsa-sha2-nistp256,
+          ecdsa-sha2-nistp384 and ecdsa-sha2-nistp521 have been enabled
+          by the default.
+- change: 'examples/KeyGen.java' demonstrates how to generate
+          ecdsa-sha2-* key-pairs.
+- change: updating copyright messages; 2014 -> 2015
+- TODO: The ECC support is not functional on Java6 with BouncyCastle.
 
 
 Changes since version 0.1.50:
 - bugfix: reproducibility of "verify: false".   FIXED.
-          Hundreds of thousands connections had caused that exception.
+          Hundreds of thousands of connections had caused that exception.
 - bugfix: resource leaks at the failure of making local port forwarding. FIXED.
 - bugfix: NPE in connecting to the non-standard TCP port.  FIXED.
           This problem had appeared if a host-key does not exist in

@@ -58,6 +58,9 @@ set(JAVA_CLASSES "")
 
 set(JSCH_CLASSNAMES
 	CipherNone
+	DHEC256
+	DHEC384
+	DHEC521
 	DHG1
 	DHG14
 	DHGEX
@@ -78,6 +81,10 @@ set(JSCH_CLASSNAMES
 	jce/ARCFOUR256
 	jce/BlowfishCBC
 	jce/DH
+	jce/ECDH256
+	jce/ECDH384
+	jce/ECDH521
+	jce/ECDHN
 	jce/HMACMD5
 	jce/HMACMD596
 	jce/HMACSHA1
@@ -85,13 +92,17 @@ set(JSCH_CLASSNAMES
 	jce/HMACSHA256
 	jce/HMACSHA512
 	jce/KeyPairGenDSA
+	jce/KeyPairGenECDSA
 	jce/KeyPairGenRSA
 	jce/MD5
 	jce/PBKDF
 	jce/Random
 	jce/SHA1
 	jce/SHA256
+	jce/SHA384
+	jce/SHA512
 	jce/SignatureDSA
+	jce/SignatureECDSA
 	jce/SignatureRSA
 	jce/TripleDESCBC
 	jce/TripleDESCTR
