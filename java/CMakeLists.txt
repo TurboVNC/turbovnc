@@ -53,14 +53,16 @@ endif()
 set(JAVA_SOURCES "")
 set(JAVA_CLASSES "")
 
+# We have to explicitly specify some of the JSch classes because it dynamically
+# loads them.
+
 set(JSCH_CLASSNAMES
-	DH
+	CipherNone
 	DHG1
 	DHG14
 	DHGEX
-	JSch
-	Session
-	UserAuth
+	DHGEX256
+	UserAuthGSSAPIWithMIC
 	UserAuthKeyboardInteractive
 	UserAuthNone
 	UserAuthPassword
@@ -76,7 +78,6 @@ set(JSCH_CLASSNAMES
 	jce/ARCFOUR256
 	jce/BlowfishCBC
 	jce/DH
-	jce/HMAC
 	jce/HMACMD5
 	jce/HMACMD596
 	jce/HMACSHA1
@@ -95,11 +96,11 @@ set(JSCH_CLASSNAMES
 	jce/TripleDESCBC
 	jce/TripleDESCTR
 	jcraft/Compression
-	jcraft/HMAC
 	jcraft/HMACMD5
 	jcraft/HMACMD596
 	jcraft/HMACSHA1
-	jcraft/HMACSHA196)
+	jcraft/HMACSHA196
+	jgss/GSSContextKrb5)
 
 foreach(class ${JSCH_CLASSNAMES})
 	set(JAVA_SOURCES ${JAVA_SOURCES} com/jcraft/jsch/${class}.java)
@@ -201,6 +202,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/turbovnc/rdr/*.class
 		com/turbovnc/network/*.class
 		com/jcraft/jzlib/*.class
+		com/jcraft/jsch/jgss/*.class
 		com/jcraft/jsch/jcraft/*.class
 		com/jcraft/jsch/jce/*.class
 		com/jcraft/jsch/*.class
