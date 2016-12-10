@@ -519,7 +519,6 @@ $cmd .= " -dpi $dpi" if ($dpi);
 $cmd .= " -desktop " . &quotedString($desktopName);
 $cmd .= " -httpd $vncClasses" if ($enableHTTP && $vncClasses);
 $cmd .= " -auth $xauthorityFile";
-$cmd .= " -dontdisconnect";
 $cmd .= " -geometry $geometry" if ($geometry);
 $cmd .= " -depth $depth" if ($depth);
 $cmd .= " -pixelformat $pixelformat" if ($pixelformat);

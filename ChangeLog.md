@@ -22,6 +22,15 @@ required but does not exist.
 Vino.  This should allow the viewer to connect to encrypted Vino sessions using
 either the TLSVnc or TLSNone security types.
 
+5. The default behavior of the TurboVNC Server is to refuse new non-shared
+connections if a viewer is already connected.  Previously, the server
+accomplished this by hard-coding the `-dontdisconnect` argument to Xvnc inside
+of the vncserver wrapper script.  This release of TurboVNC instead makes
+`-dontdisconnect` the default in Xvnc and introduces a new Xvnc argument
+(`-disconnect`) to reverse the behavior.  This new option allows TurboVNC to
+mimic the behavior of other VNC implementations that disconnect existing
+viewers when a new non-shared connection is established.
+
 
 2.1
 ===
