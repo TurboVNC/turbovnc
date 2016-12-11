@@ -24,13 +24,13 @@
 	<options customize="never" />
 	<choices-outline>
 		<line choice="default">
-			<line choice="com.virtualgl.@CMAKE_PROJECT_NAME_LC@"/>
+			<line choice="@PKGID@"/>
 		</line>
 	</choices-outline>
 	<choice id="default"/>
-	<choice id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@" visible="false">
-		<pkg-ref id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@"/>
+	<choice id="@PKGID@" visible="false">
+		<pkg-ref id="@PKGID@"/>
 	</choice>
 	<pkg-ref auth="root"
-		id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@">@CMAKE_PROJECT_NAME@.pkg</pkg-ref>
+		id="@PKGID@">@PKGNAME@.pkg</pkg-ref>
 </installer-gui-script>

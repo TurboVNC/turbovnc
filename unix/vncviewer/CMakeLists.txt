@@ -7,16 +7,17 @@ add_executable(checkshmpixmaps
 
 target_link_libraries(checkshmpixmaps ${X11_LIBRARIES})
 
-install(TARGETS checkshmpixmaps DESTINATION ${TVNC_BINDIR})
+install(TARGETS checkshmpixmaps DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 configure_file(vncviewer.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer @ONLY)
 execute_process(COMMAND chmod +x vncviewer
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
-	DESTINATION ${TVNC_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(FILES vncviewer.man DESTINATION ${TVNC_MANDIR}/man1 RENAME vncviewer.1)
+install(FILES vncviewer.man DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+	RENAME vncviewer.1)
 
 if(TVNC_BUILDJAVA)
 
@@ -46,7 +47,7 @@ message(STATUS "TJPEG_JNILIBRARY = ${TJPEG_JNILIBRARY}")
 
 find_package(JNI REQUIRED)
 
-install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${TVNC_JAVADIR}
+install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${CMAKE_INSTALL_JAVADIR}
 	RENAME libturbojpeg.so)
 
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}
@@ -64,6 +65,6 @@ if(NOT CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 endif()
 target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${X11_Xi_LIB} ${LIBDL})
 
-install(TARGETS turbovnchelper DESTINATION ${TVNC_JAVADIR})
+install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
 endif()

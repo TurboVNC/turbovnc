@@ -18,7 +18,7 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	endif()
 endif()
 
-if("${CMAKE_C_COMPILER_ID}" MATCHES SunPro)
+if(CMAKE_C_COMPILER_ID MATCHES SunPro)
 	# Use the maximum optimization level for release builds
 	foreach(var CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO)
 		if(${var} MATCHES "-xO3")
@@ -30,18 +30,13 @@ if("${CMAKE_C_COMPILER_ID}" MATCHES SunPro)
 	endforeach()
 endif()
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
 endif()
 
 find_package(X11 REQUIRED)
 
 message(STATUS "X11_X11_LIB = ${X11_X11_LIB}")
-
-set(DEFAULT_TVNC_MANDIR ${CMAKE_INSTALL_PREFIX}/man)
-set(TVNC_MANDIR ${DEFAULT_TVNC_MANDIR} CACHE PATH
-	"Directory into which man pages should be installed (default: ${DEFAULT_TVNC_MANDIR})")
-message(STATUS "TVNC_MANDIR = ${TVNC_MANDIR}")
 
 include_directories(include)
 
@@ -54,18 +49,18 @@ set(EFFECTIVE_LD_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_${CMA
 message(STATUS "Linker flags = ${EFFECTIVE_LD_FLAGS}")
 
 
-#
-# Viewer build
-#
+###############################################################################
+# VIEWER BUILD
+###############################################################################
 
 if(TVNC_BUILDNATIVE)
 	add_subdirectory(vncviewer)
 endif()
 
 
-#
-# Server build
-#
+###############################################################################
+# SERVER BUILD
+###############################################################################
 
 if(TVNC_BUILDSERVER)
 
@@ -83,11 +78,6 @@ add_subdirectory(vncconnect)
 add_subdirectory(vncpasswd)
 add_subdirectory(Xvnc)
 
-set(DEFAULT_TVNC_CONFDIR ${CMAKE_INSTALL_PREFIX}/etc)
-set(TVNC_CONFDIR ${DEFAULT_TVNC_CONFDIR} CACHE PATH
-	"Directory into which configuration files should be installed (default: ${DEFAULT_TVNC_CONFDIR})")
-message(STATUS "TVNC_CONFDIR = ${TVNC_CONFDIR}")
-
 string(TOLOWER "${TVNC_USETLS}" USETLS)
 if(USETLS AND NOT USETLS STREQUAL "none")
 	set(USETLS 1)
@@ -100,20 +90,20 @@ execute_process(COMMAND chmod +x vncserver
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver
-	DESTINATION ${TVNC_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vncserver.man
-	DESTINATION ${TVNC_MANDIR}/man1 RENAME vncserver.1)
+	DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 RENAME vncserver.1)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver.conf
-	DESTINATION ${TVNC_CONFDIR})
+	DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-security.conf
-	DESTINATION ${TVNC_CONFDIR})
+	DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR})
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	configure_file(vncserver.init.in vncserver.init @ONLY)
 	install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver.init
-		DESTINATION ${TVNC_CONFDIR}/init.d RENAME tvncserver)
+		DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/init.d RENAME tvncserver)
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tvncservers
-		DESTINATION ${TVNC_CONFDIR}/sysconfig)
+		DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/sysconfig)
 endif()
 
 endif() # TVNC_BUILDSERVER

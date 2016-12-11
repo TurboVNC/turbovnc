@@ -19,7 +19,7 @@
  */
 
 /*
- *  Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2016 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -397,9 +397,12 @@ void
 rfbCloseClient(rfbClientPtr cl)
 {
     int sock = cl->sock;
+
 #if USETLS
-    if (cl->sslctx)
+    if (cl->sslctx) {
+        shutdown(sock, SHUT_RDWR);
         rfbssl_destroy(cl);
+    }
 #endif
     close(sock);
     RemoveEnabledDevice(sock);

@@ -10,9 +10,9 @@ configure_file(vncviewer-javaw.bat.in ${CMAKE_BINARY_DIR}/vncviewer-javaw.bat
 	@ONLY)
 
 install(PROGRAMS ${CMAKE_BINARY_DIR}/vncviewer-java.bat
-	DESTINATION ${TVNC_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(PROGRAMS ${CMAKE_BINARY_DIR}/vncviewer-javaw.bat
-	DESTINATION ${TVNC_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(BITS EQUAL 64)
 	set(DEFAULT_TJPEG_JNILIBRARY "c:\\libjpeg-turbo64\\bin\\turbojpeg.dll")
@@ -34,7 +34,7 @@ file(COPY ${TJPEG_JNILIBRARY} DESTINATION ${CMAKE_BINARY_DIR}/java)
 
 message(STATUS "TJPEG_JNILIBRARY = ${TJPEG_JNILIBRARY}")
 
-install(PROGRAMS ${TJPEG_JNILIBRARY} DESTINATION ${TVNC_JAVADIR}
+install(PROGRAMS ${TJPEG_JNILIBRARY} DESTINATION ${CMAKE_INSTALL_JAVADIR}
 	RENAME turbojpeg.dll)
 
 if(TVNC_BUILDNATIVE)
@@ -55,6 +55,6 @@ set_target_properties(turbovnchelper PROPERTIES
 
 target_link_libraries(turbovnchelper)
 
-install(TARGETS turbovnchelper DESTINATION ${TVNC_JAVADIR})
+install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
 endif()

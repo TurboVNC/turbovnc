@@ -1,57 +1,56 @@
 # This file is included from the top-level CMakeLists.txt.  We just store it
 # here to avoid cluttering up that file.
 
-string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
+if(UNIX AND NOT APPLE)
+	set(DEFAULT_PKGNAME ${CMAKE_PROJECT_NAME_LC})
+else()
+	set(DEFAULT_PKGNAME ${CMAKE_PROJECT_NAME})
+endif()
+set(PKGNAME ${DEFAULT_PKGNAME} CACHE STRING
+	"Distribution package name (default: ${DEFAULT_PKGNAME})")
+set(PKGVENDOR "The VirtualGL Project" CACHE STRING
+	"Vendor name to be included in distribution package descriptions (default: The VirtualGL Project)")
+set(PKGURL "http://www.${CMAKE_PROJECT_NAME}.org" CACHE STRING
+	"URL of project web site to be included in distribution package descriptions (default: http://www.${CMAKE_PROJECT_NAME}.org)")
+set(PKGEMAIL "information@${CMAKE_PROJECT_NAME}.org" CACHE STRING
+	"E-mail of project maintainer to be included in distribution package descriptions (default: information@${CMAKE_PROJECT_NAME}.org")
+string(TOLOWER ${PKGNAME} PKGNAME_LC)
+set(PKGID "com.virtualgl.${PKGNAME_LC}" CACHE STRING
+	"Globally unique package identifier (reverse DNS notation) (default: com.virtualgl.${PKGNAME_LC})")
 
 
-#
+###############################################################################
 # Linux RPM and DEB
-#
+###############################################################################
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
 	(TVNC_BUILDNATIVE OR TVNC_BUILDSERVER))
 
-set(RPMARCH ${CPU_TYPE})
-if(${CPU_TYPE} STREQUAL "x86_64")
+set(RPMARCH ${CMAKE_SYSTEM_PROCESSOR})
+if(CPU_TYPE STREQUAL "x86_64")
 	set(DEBARCH amd64)
-else()
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armv7*")
+	set(DEBARCH armhf)
+elseif(CPU_TYPE STREQUAL "arm64")
 	set(DEBARCH ${CPU_TYPE})
-endif()
-
-if(TVNC_BUILDJAVA)
-	set(TVNC_BUILDJAVA 1)
+elseif(CPU_TYPE STREQUAL "arm")
+	set(DEBARCH armel)
 else()
-	set(TVNC_BUILDJAVA 0)
+	set(DEBARCH ${CMAKE_SYSTEM_PROCESSOR})
 endif()
-
-if(NOT TVNC_JAVADIR)
-	set(TVNC_JAVADIR ${CMAKE_INSTALL_PREFIX}/java)
-endif()
-
-if(TVNC_BUILDNATIVE)
-	set(TVNC_BUILDNATIVE 1)
-else()
-	set(TVNC_BUILDNATIVE 0)
-endif()
-
-if(TVNC_BUILDSERVER)
-	set(TVNC_BUILDSERVER 1)
-else()
-	set(TVNC_BUILDSERVER 0)
-endif()
-
-if(TVNC_INCLUDEJNIJARS)
-	set(TVNC_INCLUDEJNIJARS 1)
-else()
-	set(TVNC_INCLUDEJNIJARS 0)
-endif()
+message(STATUS "RPM architecture = ${RPMARCH}, DEB architecture = ${DEBARCH}")
 
 configure_file(release/makerpm.in pkgscripts/makerpm)
-configure_file(release/${CMAKE_PROJECT_NAME_LC}.spec.in
-	pkgscripts/${CMAKE_PROJECT_NAME_LC}.spec @ONLY)
+configure_file(release/rpm.spec.in pkgscripts/rpm.spec @ONLY)
 
 add_custom_target(rpm sh pkgscripts/makerpm
 	SOURCES pkgscripts/makerpm)
+
+configure_file(release/makesrpm.in pkgscripts/makesrpm)
+
+add_custom_target(srpm sh pkgscripts/makesrpm
+	SOURCES pkgscripts/makesrpm
+	DEPENDS dist)
 
 configure_file(release/makedpkg.in pkgscripts/makedpkg)
 configure_file(release/deb-control.in pkgscripts/deb-control)
@@ -62,9 +61,9 @@ add_custom_target(deb sh pkgscripts/makedpkg
 endif() # Linux
 
 
-#
+###############################################################################
 # Windows installer (NullSoft Installer)
-#
+###############################################################################
 
 if(WIN32)
 
@@ -97,26 +96,25 @@ else()
 	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=")
 endif()
 
-configure_file(release/@CMAKE_PROJECT_NAME@.iss.in
-	pkgscripts/@CMAKE_PROJECT_NAME@.iss)
+configure_file(release/installer.iss.in pkgscripts/installer.iss)
 
 add_custom_target(installer
-	iscc -o${INSTALLERDIR} ${INST_DEFS} -F${INST_NAME}
-		pkgscripts/@CMAKE_PROJECT_NAME@.iss
+	iscc -o${INSTALLERDIR} ${INST_DEFS} -F${INST_NAME} pkgscripts/installer.iss
 	DEPENDS ${INST_DEPENDS}
-	SOURCES pkgscripts/@CMAKE_PROJECT_NAME@.iss)
+	SOURCES pkgscripts/installer.iss)
 
 endif() # WIN32
 
 
-#
+###############################################################################
 # Mac DMG
-#
+###############################################################################
 
 if(APPLE AND TVNC_BUILDJAVA)
 
-string(REGEX REPLACE "/" ":" TVNC_MACPREFIX ${CMAKE_INSTALL_PREFIX})
-string(REGEX REPLACE "^:" "" TVNC_MACPREFIX ${TVNC_MACPREFIX})
+string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
+string(REGEX REPLACE "^:" "" CMAKE_INSTALL_MACPREFIX
+	${CMAKE_INSTALL_MACPREFIX})
 
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
 configure_file(release/makemacapp.in pkgscripts/makemacapp)
@@ -128,6 +126,7 @@ configure_file(release/Distribution.xml.in
 configure_file(release/Info.plist.in pkgscripts/Info.plist)
 configure_file(release/Info-AppleJava.plist.in
 	pkgscripts/Info-AppleJava.plist)
+configure_file(release/Package.plist.in pkgscripts/Package.plist)
 configure_file(release/uninstall.in pkgscripts/uninstall)
 configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
 
@@ -139,20 +138,14 @@ add_custom_target(compatdmg sh pkgscripts/makemacpkg compat
 endif() # APPLE
 
 
-#
+###############################################################################
 # Generic
-#
-
-configure_file(release/makesrpm.in pkgscripts/makesrpm)
+###############################################################################
 
 add_custom_target(dist
 	COMMAND git archive --prefix=${CMAKE_PROJECT_NAME_LC}-${VERSION}/ HEAD |
 		gzip > ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME_LC}-${VERSION}.tar.gz
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-add_custom_target(srpm sh pkgscripts/makesrpm
-	SOURCES pkgscripts/makesrpm
-	DEPENDS dist)
 
 configure_file(release/maketarball.in pkgscripts/maketarball)
 

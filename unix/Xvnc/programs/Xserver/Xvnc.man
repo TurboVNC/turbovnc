@@ -6,14 +6,14 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
-.\" Copyright (C) 2010, 2012, 2014-2015 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2016 D. R. Commander
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "December 2015" "" "TurboVNC"
+.TH Xvnc 1 "December 2016" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -33,7 +33,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-alrqual \fIlevel\fR] [\-alrsamp \fI1X | 2X | 4X | gray\fR]
 [\-interframe] [\-nointerframe] [\-virtualtablet]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
-[\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
+[\-nevershared] [\-disconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
 [\fIX-options\fR...]
 .SH DESCRIPTION
@@ -275,11 +275,9 @@ is already occupied.
 Never treat new connections as shared.  Do not allow simultaneous user
 connections to the same VNC session.
 .TP
-\fB\-dontdisconnect\fR
-Don't disconnect existing users when a new non-shared connection is
-established.  Instead, refuse the new connection.  The vncserver script
-for TurboVNC sets this as the default, but you can modify the script
-if you want to change the behavior.
+\fB\-disconnect\fR
+Disconnect existing users when a new non-shared connection is established,
+rather than refusing the new connection.
 .TP
 \fB\-viewonly\fR
 Don't accept keyboard and pointer events from viewers.  All viewers will

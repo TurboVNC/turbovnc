@@ -433,6 +433,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
+    if (strcasecmp(argv[i], "-disconnect") == 0) {
+        rfbDontDisconnect = FALSE;
+        return 1;
+    }
+
     if (strcasecmp(argv[i], "-dontdisconnect") == 0) {
         rfbDontDisconnect = TRUE;
         return 1;
@@ -1516,8 +1521,9 @@ ddxUseMsg()
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");
     ErrorF("-nevershared           never treat new clients as shared\n");
-    ErrorF("-dontdisconnect        don't disconnect existing clients when a new non-shared\n"
-           "                       connection comes in (refuse new connection instead)\n");
+    ErrorF("-disconnect            disconnect existing clients when a new non-shared\n"
+           "                       connection comes in, rather than refusing the new\n"
+           "                       connection\n");
     ErrorF("-viewonly              only let clients view the remote desktop\n");
     ErrorF("-localhost             only allow connections from localhost\n");
     ErrorF("-interface ipaddr      only bind to specified interface address\n");

@@ -15,7 +15,8 @@ onexit()
 	fi
 }
 
-PKGNAME=@CMAKE_PROJECT_NAME_LC@
+PKGNAME=@PKGNAME@
+PROJECT=@CMAKE_PROJECT_NAME_LC@
 VERSION=@VERSION@
 BUILD=@BUILD@
 
@@ -32,16 +33,16 @@ mkdir -p $TMPDIR/BUILD
 mkdir -p $TMPDIR/SOURCES
 mkdir -p $TMPDIR/SPECS
 
-if [ ! -f $PKGNAME-$VERSION.tar.gz ]; then
-	echo "ERROR: $PKGNAME-$VERSION.tar.gz does not exist."
+if [ ! -f $PROJECT-$VERSION.tar.gz ]; then
+	echo "ERROR: $PROJECT-$VERSION.tar.gz does not exist."
 fi
 
-cp $PKGNAME-$VERSION.tar.gz $TMPDIR/SOURCES/$PKGNAME-$VERSION.tar.gz
+cp $PROJECT-$VERSION.tar.gz $TMPDIR/SOURCES/$PROJECT-$VERSION.tar.gz
 
-cat pkgscripts/@CMAKE_PROJECT_NAME_LC@.spec | sed s/%{_blddir}/%{_tmppath}/g \
-	| sed s/#--\>//g > $TMPDIR/SPECS/@CMAKE_PROJECT_NAME_LC@.spec
+cat pkgscripts/rpm.spec | sed s/%{_blddir}/%{_tmppath}/g \
+	| sed s/#--\>//g > $TMPDIR/SPECS/$PKGNAME.spec
 
-rpmbuild -bs --define "_topdir $TMPDIR" $TMPDIR/SPECS/@CMAKE_PROJECT_NAME_LC@.spec
+rpmbuild -bs --define "_topdir $TMPDIR" $TMPDIR/SPECS/$PKGNAME.spec
 mv $TMPDIR/SRPMS/$PKGNAME-$VERSION-$BUILD.src.rpm $PKGNAME-$VERSION.src.rpm
 
 exit

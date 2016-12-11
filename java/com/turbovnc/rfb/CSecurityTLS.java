@@ -4,7 +4,7 @@
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012, 2015 Brian P. Hinz
- * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2016 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,6 +84,10 @@ public class CSecurityTLS extends CSecurity {
 // add a finalizer method that calls shutdown
 
   public boolean processMsg(CConnection cc) {
+    return processMsg(cc, true);
+  }
+
+  protected boolean processMsg(CConnection cc, boolean readResponse) {
     is = (FdInStream)cc.getInStream();
     os = (FdOutStream)cc.getOutStream();
     client = cc;
@@ -91,18 +95,20 @@ public class CSecurityTLS extends CSecurity {
     initGlobal();
 
     if (manager == null) {
-      if (!is.checkNoWait(1))
-        return false;
+      if (readResponse) {
+        if (!is.checkNoWait(1))
+          return false;
 
-      if (is.readU8() == 0) {
-        int result = is.readU32();
-        String reason;
-        if (result == Security.secResultFailed ||
-            result == Security.secResultTooMany)
-          reason = is.readString();
-        else
-          reason = new String("Authentication failure (protocol error)");
-        throw new AuthFailureException(reason);
+        if (is.readU8() == 0) {
+          int result = is.readU32();
+          String reason;
+          if (result == Security.secResultFailed ||
+              result == Security.secResultTooMany)
+            reason = is.readString();
+          else
+            reason = new String("Authentication failure (protocol error)");
+          throw new AuthFailureException(reason);
+        }
       }
 
       setParam();
@@ -431,11 +437,11 @@ public class CSecurityTLS extends CSecurity {
     }
   }
 
-  public final int getType() {
+  public int getType() {
     return anon ? Security.secTypeTLSNone : Security.secTypeX509None;
   }
 
-  public final String description() {
+  public String description() {
     return anon ? "TLSNone" : "X509None";
   }
 

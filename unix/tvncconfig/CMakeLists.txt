@@ -4,4 +4,4 @@ add_executable(tvncconfig tvncconfig.c vncExt.c)
 
 target_link_libraries(tvncconfig ${X11_LIBRARIES})
 
-install(TARGETS tvncconfig DESTINATION ${TVNC_BINDIR})
+install(TARGETS tvncconfig DESTINATION ${CMAKE_INSTALL_BINDIR})

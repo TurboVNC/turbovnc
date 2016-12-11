@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2016 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,9 +89,10 @@ public class Security {
       }
     }
     result.add(secTypeTight);
+    result.add(secTypeTLS);
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
-      if (refType < 0x100 && refType != secTypeTight)
+      if (refType < 0x100 && refType != secTypeTight && refType != secTypeTLS)
         result.add(refType);
     }
 
@@ -117,7 +118,7 @@ public class Security {
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
       if (refType < 0x100 && refType != secTypeVeNCrypt &&
-          refType != secTypeTight)
+          refType != secTypeTight && refType != secTypeTLS)
         result.add(refType);
     }
 
@@ -142,6 +143,8 @@ public class Security {
      return true;
     if (secType == secTypeTight)
      return true;
+    if (secType == secTypeTLS)
+     return true;
 
     return false;
   }
@@ -160,7 +163,7 @@ public class Security {
     if (name.equalsIgnoreCase("SSPI"))      return secTypeSSPI;
     if (name.equalsIgnoreCase("SSPIne"))    return secTypeSSPIne;
     //if (name.equalsIgnoreCase("ultra"))    return secTypeUltra;
-    //if (name.equalsIgnoreCase("TLS"))      return secTypeTLS;
+    if (name.equalsIgnoreCase("TLS"))       return secTypeTLS;
     if (name.equalsIgnoreCase("VeNCrypt"))  return secTypeVeNCrypt;
 
     /* Tight subtypes */
@@ -191,7 +194,7 @@ public class Security {
     case secTypeSSPI:       return "SSPI";
     case secTypeSSPIne:     return "SSPIne";
     //case secTypeUltra:      return "Ultra";
-    //case secTypeTLS:        return "TLS";
+    case secTypeTLS:        return "TLS";
     case secTypeVeNCrypt:   return "VeNCrypt";
 
     /* Tight subtypes */

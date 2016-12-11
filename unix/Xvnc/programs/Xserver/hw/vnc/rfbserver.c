@@ -56,7 +56,7 @@ rfbClientPtr pointerClient = NULL;  /* Mutex for pointer events */
 
 Bool rfbAlwaysShared = FALSE;
 Bool rfbNeverShared = FALSE;
-Bool rfbDontDisconnect = FALSE;
+Bool rfbDontDisconnect = TRUE;
 Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
 Bool rfbSyncCutBuffer = TRUE;
 Bool rfbCongestionControl = TRUE;

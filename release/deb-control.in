@@ -1,11 +1,11 @@
-Package: @CMAKE_PROJECT_NAME_LC@
+Package: @PKGNAME@
 Version: @VERSION@-@BUILD@
 Section: misc
 Priority: optional
 Architecture: @DEBARCH@
 Essential: no
-Maintainer: The VirtualGL Project <information@TurboVNC.org>
-Homepage: http://www.TurboVNC.org
+Maintainer: @PKGVENDOR@ <@PKGEMAIL@>
+Homepage: @PKGURL@
 Installed-Size: {__SIZE}
 Description: A highly-optimized version of VNC that can be used with performance-critical applications
  Virtual Network Computing (VNC) is a remote display system that allows you to
