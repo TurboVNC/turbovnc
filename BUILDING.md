@@ -15,7 +15,7 @@ Build Requirements
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
   * The TurboVNC build system will search for the TurboJPEG header and
-    library under /opt/libjpeg-turbo on Unix or c:\libjpeg-turbo[64] on
+    library under **/opt/libjpeg-turbo** on Unix or **c:\libjpeg-turbo[64]** on
     Windows, but you can override this by setting the `TJPEG_INCLUDE_DIR` CMake
     variable to the directory containing turbojpeg.h and the `TJPEG_LIBRARY`
     CMake variable to either the full path of the TurboJPEG library against
@@ -73,9 +73,9 @@ Build Requirements
 Out-of-Tree Builds
 ------------------
 
-Binary objects, libraries, and executables are generated in the same directory
-from which CMake was executed (the "binary directory"), and this directory need
-not necessarily be the same as the TurboVNC source directory.  You can create
+Binary objects, libraries, and executables are generated in the directory from
+which CMake is executed (the "binary directory"), and this directory need not
+necessarily be the same as the TurboVNC source directory.  You can create
 multiple independent binary directories, in which different versions of
 TurboVNC can be built from the same source tree using different compilers or
 settings.  In the sections below, *{build_directory}* refers to the binary
@@ -99,7 +99,7 @@ TurboVNC.  See "Build Recipes" for specific instructions on how to build a
 32-bit or 64-bit version of TurboVNC on systems that support both.
 
     cd {build_directory}
-    cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
+    cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
     make
 
 
@@ -108,18 +108,18 @@ TurboVNC.  See "Build Recipes" for specific instructions on how to build a
 The following procedure will build the Java TurboVNC Viewer.
 
     cd {build_directory}
-    cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
+    cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
     make
 
 
 ### Visual C++ (Command Line)
 
     cd {build_directory}
-    cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
+    cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
     nmake
 
 This will build either a 32-bit or a 64-bit version of TurboVNC, depending on
-which version of cl.exe is in the PATH.
+which version of **cl.exe** is in the `PATH`.
 
 
 ### Visual C++ (IDE)
@@ -129,13 +129,13 @@ Choose the appropriate CMake generator option for your version of Visual Studio
 instance:
 
     cd {build_directory}
-    cmake -G "Visual Studio 10" [additional CMake flags] {source_directory}
+    cmake -G"Visual Studio 10" [additional CMake flags] {source_directory}
 
-NOTE:  Add "Win64" to the generator name (e.g. "Visual Studio 10 Win64") to
-build a 64-bit version of TurboVNC.  Recent versions of CMake no longer
-document that.
+NOTE: Add "Win64" to the generator name (for example, "Visual Studio 10 Win64")
+to build a 64-bit version of TurboVNC.  A separate build directory must be
+used for 32-bit and 64-bit builds.
 
-You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
+You can then open **ALL_BUILD.vcproj** in Visual Studio and build one of the
 configurations in that project ("Debug", "Release", etc.) to generate a full
 build of TurboVNC.
 
@@ -201,17 +201,7 @@ CMake:
     LDFLAGS=-m64
 
 
-### PowerPC Build on Intel Macs
-
-Add
-
-    -DCMAKE_OSX_ARCHITECTURES=ppc
-
-to the CMake command line.  XCode 3.2.6 or earlier must be used, which
-necessitates building on OS X 10.6 or earlier.
-
-
-### Compilers Other Than GCC
+### Other Compilers
 
 On Un*x systems, prior to running CMake, you can set the `CC` environment
 variable to the command used to invoke the C compiler.
@@ -229,68 +219,105 @@ or
 
     cmake-gui {source_directory}
 
-after initially configuring the build.  CCMake is a text-based interactive
-version of CMake, and CMake-GUI is a GUI version.  Both will display all
-variables that are relevant to the TurboVNC build, their current values, and a
-help string describing what they do.
+from the build directory after initially configuring the build.  CCMake is a
+text-based interactive version of CMake, and CMake-GUI is a GUI version.  Both
+will display all variables that are relevant to the TurboVNC build, their
+current values, and a help string describing what they do.
 
 
 Installing TurboVNC
 ===================
 
-You can use the build system to install TurboVNC into a directory of your
-choosing.  To do this, add:
+You can use the build system to install TurboVNC (as opposed to creating an
+installer package.)  To do this, run `make install` or `nmake install` (or
+build the "install" target in the Visual Studio IDE.)  Running `make uninstall`
+or `nmake uninstall` (or building the "uninstall" target in the Visual Studio
+IDE) will uninstall TurboVNC.
 
-    -DCMAKE_INSTALL_PREFIX={install_directory}
+The `CMAKE_INSTALL_PREFIX` CMake variable can be modified in order to install
+TurboVNC into a directory of your choosing.  If you don't specify
+`CMAKE_INSTALL_PREFIX`, then the default is:
 
-to the CMake command line.  Then, you can run `make install` or `nmake install`
-(or build the "install" target in the Visual Studio IDE) to build and install
-TurboVNC.  Running `make uninstall` or `nmake uninstall` (or building the
-"uninstall" target in the Visual Studio IDE) will uninstall TurboVNC.
+**c:\Program Files\TurboVNC**<br>
+Windows
 
-If you don't specify `CMAKE_INSTALL_PREFIX`, then the default is
-`c:\Program Files\TurboVNC` on Windows and `/opt/TurboVNC` on Unix.
+**c:\Program Files (x86)\TurboVNC**<br>
+32-bit build on 64-bit Windows
+
+**/opt/TurboVNC**<br>
+Un*x
+
+The default value of `CMAKE_INSTALL_PREFIX` causes the TurboVNC files to be
+installed with a directory structure resembling that of the official TurboVNC
+binary packages.  Changing the value of `CMAKE_INSTALL_PREFIX` (for instance,
+to **/usr/local**) causes the TurboVNC files to be installed with a directory
+structure that conforms to GNU standards.
+
+The `CMAKE_INSTALL_BINDIR`, `CMAKE_INSTALL_DATAROOTDIR`,
+`CMAKE_INSTALL_DOCDIR`, `CMAKE_INSTALL_JAVADIR`, `CMAKE_INSTALL_MANDIR`, and
+`CMAKE_INSTALL_SYSCONFDIR` CMake variables allow a finer degree of control over
+where specific files in the TurboVNC distribution should be installed.  These
+directory variables can either be specified as absolute paths or as paths
+relative to `CMAKE_INSTALL_PREFIX` (for instance, setting
+`CMAKE_INSTALL_DOCDIR` to **doc** would cause the documentation to be installed
+in **${CMAKE\_INSTALL\_PREFIX}/doc**.)  If a directory variable contains the
+name of another directory variable in angle brackets, then its final value will
+depend on the final value of that other variable.  For instance, the default
+value of `CMAKE_INSTALL_MANDIR` is **\<CMAKE\_INSTALL\_DATAROOTDIR\>/man**.
+
+NOTE: If setting one of these directory variables to a relative path using the
+CMake command line, you must specify that the variable is of type `PATH`.
+For example:
+
+    cmake -G"{generator type}" -DCMAKE_INSTALL_JAVADIR:PATH=java {source_directory}
+
+Otherwise, CMake will assume that the path is relative to the build directory
+rather than the install directory.
 
 
-Creating Release Packages
-=========================
+Creating Distribution Packages
+==============================
 
-The following commands can be used to create various types of release packages:
+The following commands can be used to create various types of distribution
+packages:
 
 
-Unix
-----
+Linux
+-----
 
-`make rpm`
+    make rpm
 
-  Create Red Hat-style binary RPM package.  Requires RPM v4 or later.
+Create Red Hat-style binary RPM package.  Requires RPM v4 or later.
 
-`make deb`
+    make deb
 
-  Create Debian-style binary package.  Requires dpkg.
+Create Debian-style binary package.  Requires dpkg.
 
-`make dmg`
 
-  Create Macintosh package/disk image.  This requires pkgbuild and
-  productbuild, which are installed by default on OS X 10.7 and later.  This
-  command generates a package containing a Java app bundle that relies on
-  Oracle Java.  The DMG built with this command can be installed on OS X 10.7
-  and later.
+Mac
+---
 
-`make compatdmg`
+    make dmg
 
-  Create Macintosh package/disk image.  This requires pkgbuild and
-  productbuild, which are installed by default on OS X 10.7 and later and which
-  can be obtained by installing Xcode 3.2.6 (with the "Unix Development"
-  option) on OS X 10.6.  This command generates a package containing a Java app
-  bundle that relies on Java for OS X, which was pre-installed with OS X 10.6
-  and prior (for later versions of OS X, Java for OS X can be obtained from
-  Apple Support.)  The "AppleJava" DMG built with this command can be
-  installed on OS X 10.5 and later, but since pkgbuild and productbuild are not
-  available on OS X 10.5, the package must be built on OS X 10.6 or later.
-  Referring to the TurboVNC User's Guide, Java for OS X may perform better than
-  Oracle Java on older Macintosh systems, but it should not be used on OS X
-  10.10 "Yosemite" or later.
+Create Mac package/disk image.  This requires pkgbuild and productbuild, which
+are installed by default on OS X 10.7 and later.  This command generates a
+package containing a Java app bundle that relies on Oracle Java.  The DMG built
+with this command can be installed on OS X 10.7 and later.
+
+    make compatdmg
+
+Create Mac package/disk image.  This requires pkgbuild and productbuild, which
+are installed by default on OS X 10.7 and later and which can be obtained by
+installing Xcode 3.2.6 (with the "Unix Development" option) on OS X 10.6.  This
+command generates a package containing a Java app bundle that relies on Java
+for OS X, which was pre-installed with OS X 10.6 and prior (for later versions
+of OS X, Java for OS X can be obtained from Apple Support.)  The "AppleJava"
+DMG built with this command can be installed on OS X 10.5 and later, but since
+pkgbuild and productbuild are not available on OS X 10.5, the package must be
+built on OS X 10.6 or later.  Referring to the TurboVNC User's Guide, Java for
+OS X may perform better than Oracle Java on older Mac systems, but it should
+not be used on OS X 10.10 "Yosemite" or later.
+
 
 Windows
 -------
@@ -300,7 +327,7 @@ If using NMake:
     cd {build_directory}
     nmake installer
 
-If using the Visual Studio IDE, build the "installer" project.
+If using the Visual Studio IDE, build the "installer" target.
 
 The installer package (TurboVNC[64]-{version}.exe) will be located under
 *{build_directory}*.  If building using the Visual Studio IDE, then the
@@ -310,4 +337,4 @@ configuration you built (such as *{build_directory}*\Debug\ or
 
 Building a Windows installer requires
 [Inno Setup](http://www.jrsoftware.org/isinfo.php).
-iscc.exe should be in your PATH.
+iscc.exe should be in your `PATH`.
