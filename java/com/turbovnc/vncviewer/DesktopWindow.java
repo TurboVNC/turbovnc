@@ -113,7 +113,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // EDT
   public void setCursor(int w, int h, Point hotspot,
                         int[] data, byte[] mask) {
-    if (!cc.opts.cursorShape)
+    if (!cc.opts.cursorShape || VncViewer.localCursor.getValue())
       return;
 
     hideLocalCursor();
@@ -617,6 +617,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // are called.
 
   private synchronized void hideLocalCursor() {
+    if (VncViewer.localCursor.getValue())
+      return;
     if (!cc.opts.cursorShape)
       setCursor(noCursor);
     // Blit the cursor backing store over the cursor.
@@ -628,6 +630,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   }
 
   private synchronized void showLocalCursor() {
+    if (VncViewer.localCursor.getValue())
+      return;
     if (cursorAvailable && !cursorVisible) {
       if (!im.getPF().equal(cursor.getPF()) ||
           cursor.width() == 0 || cursor.height() == 0) {

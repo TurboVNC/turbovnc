@@ -31,6 +31,14 @@ of the vncserver wrapper script.  This release of TurboVNC instead makes
 mimic the behavior of other VNC implementations that disconnect existing
 viewers when a new non-shared connection is established.
 
+6. Added a new parameter to the Java TurboVNC Viewer (`LocalCursor`) that, when
+enabled, causes cursor shape updates to be ignored and the local cursor to
+always be displayed.  This mimics the behavior of the Windows TurboVNC Viewer
+when "Local cursor shape" is set to "Normal arrow" and "Mouse cursor" is set to
+"Don't show remote cursor".  This option is useful when connecting to broken
+VNC server implementations that do not properly support server-side cursor
+rendering or cursor shape updates.
+
 
 2.1
 ===
