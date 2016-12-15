@@ -2528,8 +2528,8 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
       SetFocus(hwnd);
 
       POINT coords;
-      coords.x = LOWORD(lParam);
-      coords.y = HIWORD(lParam);
+      coords.x = (LONG)(short)LOWORD(lParam);
+      coords.y = (LONG)(short)HIWORD(lParam);
 
       if (iMsg == WM_MOUSEWHEEL) {
         // Convert coordinates to position in our client area.

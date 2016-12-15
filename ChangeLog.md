@@ -39,6 +39,10 @@ when "Local cursor shape" is set to "Normal arrow" and "Mouse cursor" is set to
 VNC server implementations that do not properly support server-side cursor
 rendering or cursor shape updates.
 
+7. Fixed an issue in the Windows TurboVNC Viewer whereby the mouse scroll wheel
+would stop working if the viewer was moved to a monitor above or to the left of
+the Windows "main"/"primary" display.
+
 
 2.1
 ===
