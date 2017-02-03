@@ -1952,7 +1952,7 @@ ProcPutImage(ClientPtr client)
     tmpImage = (char *) &stuff[1];
     lengthProto = length;
 
-    if (lengthProto >= (INT32_MAX / stuff->height))
+    if (stuff->height != 0 && lengthProto >= (INT32_MAX / stuff->height))
         return BadLength;
 
     if ((bytes_to_int32(lengthProto * stuff->height) +

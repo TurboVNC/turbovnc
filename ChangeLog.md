@@ -43,6 +43,11 @@ rendering or cursor shape updates.
 would stop working if the viewer was moved to a monitor above or to the left of
 the Windows "main"/"primary" display.
 
+8. Fixed an issue whereby zero-height PutImage requests (issued by XCB) would
+crash the TurboVNC X server.  This was known to affect certain Qt5 applications
+running under Debian Stretch but may have also affected other applications and
+platforms.
+
 
 2.1
 ===
