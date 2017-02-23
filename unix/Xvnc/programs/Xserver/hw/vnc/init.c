@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2016 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -1497,6 +1497,10 @@ ddxUseMsg()
     ErrorF("                       or not the client is ready to receive them\n");
     ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
     ErrorF("                       seconds (S is floating point)\n");
+    ErrorF("-alrqual Q             send automatic lossless refresh as a JPEG image with\n");
+    ErrorF("                       quality Q, rather than as a mathematically lossless image\n");
+    ErrorF("-alrsamp S             specify chroma subsampling factor for automatic lossless\n");
+    ErrorF("                       refresh JPEG images (S = 1x, 2x, 4x, or gray)\n");
     ErrorF("-interframe            always use interframe comparison\n");
     ErrorF("-nointerframe          never use interframe comparison\n");
     ErrorF("-capture F             capture the data sent to the first connected viewer to\n");
