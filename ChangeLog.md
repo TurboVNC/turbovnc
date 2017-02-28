@@ -503,9 +503,9 @@ These directives were added to the Windows TurboVNC Viewer in 2.0 beta but were
 left out of the Java viewer due to an oversight.
 
 4. The default xstartup.turbovnc script that the TurboVNC Server creates will
-now launch the Mate desktop on Ubuntu 15, if it is installed and if 3D window
+now launch the MATE desktop on Ubuntu 15, if it is installed and if 3D window
 manager support is not activated.  The GNOME Flashback session under Ubuntu 15
-cannot be made to work properly with TurboVNC, for unknown reasons, but Mate is
+cannot be made to work properly with TurboVNC, for unknown reasons, but MATE is
 a better solution anyhow.
 
 5. The drawing performance of the Java TurboVNC Viewer when running under
