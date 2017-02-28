@@ -512,10 +512,10 @@ a better solution anyhow.
 Oracle Java 7 and later on OS X has been dramatically improved (by 3-7x for 2D
 application workloads and 35-50% for 3D application workloads.)  When running
 the standalone TurboVNC Viewer, Apple Java will probably still perform better
-on Macs containing nVidia and Intel HD Graphics GPUs, but on Macs containing
-Intel Iris GPUs, Oracle Java is now the fastest solution (Java 2D is apparently
-not accelerated in Apple Java 6 on these newer GPUs.)  See the User's Guide for
-more details.
+on Macs running OS X 10.9 "Mavericks" and earlier, but on Macs running OS X
+10.10 "Yosemite" and later, Oracle Java is now the fastest solution (Java 2D is
+apparently not accelerated in Apple Java 6 on these more recent OS X
+releases.)  See the User's Guide for more details.
 
 6. Fixed an issue whereby pressing any of the extra buttons on mice with more
 than 3 buttons (Microsoft calls these "X buttons") would cause the Java
