@@ -305,14 +305,16 @@ The scalability of this algorithm is nearly linear when used with demanding 3D
 or video applications that fill most of the screen.  However, whether or not
 multithreading improves the overall performance of TurboVNC depends largely on
 the performance of the viewer and the network.  If either the viewer or the
-network is the primary performance bottleneck, then multithreading the server
-will not help.  It will almost certainly have no effect on networks slower than
-100 Megabit Ethernet or when using the Java TurboVNC Viewer as an applet.
+network is the primary performance bottleneck, then enabling multithreading in
+the server will not help.  Multithreading is also not currently implemented
+with non-Tight encoding types.
 
 To enable server-side multithreading, set the ''TVNC_MT'' environment variable
-to ''1'' on the server prior to starting ''vncserver''.  The default behavior
-is to use as many threads as there are cores on the server machine, but you can
-set the ''TVNC_NTHREADS'' environment variable to override this.
+to ''1'' on the server prior to starting ''vncserver'', or pass an argument of
+''-mt'' to ''vncserver''.  The default behavior is to use as many threads as
+there are cores on the server machine (up to a maximum of 4), but you can set
+the ''TVNC_NTHREADS'' environment variable or pass an argument of ''-nthreads''
+to ''vncserver'' to override this.
 
 ** Maximizing the Performance of the Java TurboVNC Viewer
 

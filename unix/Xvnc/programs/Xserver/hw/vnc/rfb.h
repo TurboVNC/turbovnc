@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2016 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -74,6 +74,10 @@
 
 /* Protect ourself against a denial of service */
 #define MAX_CUTTEXT_LEN (1 * 1024 * 1024)
+
+/* Maximum number of threads to use for multithreaded encoding, regardless of
+   the CPU count */
+#define MAX_ENCODING_THREADS 8
 
 extern char *display;
 
@@ -701,6 +705,10 @@ extern int rfbALRSubsampLevel;
 extern int rfbInterframe;
 extern int rfbMaxClipboard;
 extern Bool rfbVirtualTablet;
+
+/* Multithreading params specified on the command line or in the environment */
+extern Bool rfbMT;
+extern int rfbNumThreads;
 
 extern char *captureFile;
 

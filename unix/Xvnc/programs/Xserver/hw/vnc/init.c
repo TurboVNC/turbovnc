@@ -515,6 +515,19 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
+    if (strcasecmp(argv[i], "-mt") == 0) {
+        rfbMT = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-nthreads") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbNumThreads = atoi(argv[i + 1]);
+        if (rfbNumThreads < 1 || rfbNumThreads > MAX_ENCODING_THREADS)
+            UseMsg();
+        return 2;
+    }
+
     if (strcasecmp(argv[i], "-version") == 0) {
         PrintVersion();
         exit(0);
@@ -1528,6 +1541,10 @@ ddxUseMsg()
     ErrorF("-compatiblekbd         set META key = ALT key as in the original VNC\n");
     ErrorF("-version               report Xvnc version on stderr\n");
     ErrorF("-verbose               print all X.org errors, warnings, and messages\n");
+    ErrorF("-mt                    enable multithreaded encoding\n");
+    ErrorF("-nthreads N            specify number of threads (1 <= N <= %d) to use with\n",
+           MAX_ENCODING_THREADS);
+    ErrorF("                       multithreaded encoding (default: 1 per CPU core, max. 4)\n");
     exit(1);
 }
 

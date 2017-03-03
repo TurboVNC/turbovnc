@@ -100,6 +100,10 @@ TurboVNC with other VNC flavors.
 		the framebuffer updates with no zlib compression, and the TightVNC and
 		TigerVNC viewers don't support this.
 		{nl}{nl}
+		A similar issue occurs when using more than four encoding threads on the
+		server.  Since the Tight encoding type is limited to four zlib streams,
+		any encoding threads beyond the first four cannot use zlib compression.
+		{nl}{nl}
 
 	* Refer to {ref prefix="Section ": AdvancedCompression} for a description of
 		how the TurboVNC Server responds to requests for Compression Levels 0-9.

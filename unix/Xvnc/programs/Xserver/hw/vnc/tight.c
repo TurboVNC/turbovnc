@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2012, 2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2012, 2014, 2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
@@ -122,11 +122,8 @@ typedef struct PALETTE_s {
 
 /* Globals for multi-threading */
 
-#define TVNC_MAXTHREADS 8
-
 static Bool threadInit = FALSE;
-static int _nt;
-static pthread_t thnd[TVNC_MAXTHREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
+static pthread_t thnd[MAX_ENCODING_THREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 typedef struct _threadparam {
     rfbClientPtr cl;
@@ -148,7 +145,7 @@ typedef struct _threadparam {
     RegionRec lossyRegion, losslessRegion;
 } threadparam;
 
-static threadparam tparam[TVNC_MAXTHREADS];
+static threadparam tparam[MAX_ENCODING_THREADS];
 
 
 /* Prototypes for static functions. */
@@ -207,7 +204,6 @@ static Bool SendRectEncodingTight(threadparam *t, int x, int y, int w, int h);
 
 static void *TightThreadFunc(void *param);
 static Bool CheckUpdateBuf(threadparam *t, int bytes);
-static int nthreads(void);
 
 
 /*
@@ -287,39 +283,23 @@ rfbTightCompressLevel(rfbClientPtr cl)
 }
 
 
-static int
-nthreads(void)
-{
-    char *mtenv = getenv("TVNC_MT");
-    char *ntenv = getenv("TVNC_NTHREADS");
-    int np = sysconf(_SC_NPROCESSORS_CONF), nt = 0;
-    if (!mtenv || strlen(mtenv) < 1 || strcmp(mtenv, "1"))
-        return 1;
-    if (np == -1) np = 1;
-    np = min(np, TVNC_MAXTHREADS);
-    if (ntenv && strlen(ntenv) > 0) nt = atoi(ntenv);
-    if (nt >= 1 && nt <= np) return nt;
-    else return np;
-}
-
 static void
 InitThreads(void)
 {
     int err = 0, i;
     if (threadInit) return;
 
-    _nt = nthreads();
-    memset(tparam, 0, sizeof(threadparam) * TVNC_MAXTHREADS);
+    memset(tparam, 0, sizeof(threadparam) * MAX_ENCODING_THREADS);
     tparam[0].ublen = &ublen;
     tparam[0].updateBuf = updateBuf;
-    for (i = 1; i < TVNC_MAXTHREADS; i++) {
+    for (i = 1; i < MAX_ENCODING_THREADS; i++) {
         tparam[i].ublen = &tparam[i]._ublen;
         tparam[i].id = i;
     }
-    rfbLog("Using %d thread%s for Tight encoding\n", _nt,
-           _nt == 1 ? "" : "s");
-    if (_nt > 1) {
-        for (i = 1; i < _nt; i++) {
+    rfbLog("Using %d thread%s for Tight encoding\n", rfbNumThreads,
+           rfbNumThreads == 1 ? "" : "s");
+    if (rfbNumThreads > 1) {
+        for (i = 1; i < rfbNumThreads; i++) {
             if (!tparam[i].updateBuf) {
                 tparam[i].updateBufSize = UPDATE_BUF_SIZE;
                 tparam[i].updateBuf = (char *)malloc(tparam[i].updateBufSize);
@@ -344,8 +324,8 @@ ShutdownTightThreads(void)
 {
     int i;
     if (!threadInit) return;
-    if (_nt > 1) {
-        for (i = 1; i < _nt; i++) {
+    if (rfbNumThreads > 1) {
+        for (i = 1; i < rfbNumThreads; i++) {
             if (thnd[i]) {
                 tparam[i].deadyet = TRUE;
                 pthread_mutex_unlock(&tparam[i].ready);
@@ -356,7 +336,7 @@ ShutdownTightThreads(void)
             }
         }
     }
-    for (i = 0; i < _nt; i++) {
+    for (i = 0; i < rfbNumThreads; i++) {
         if (tparam[i].tightAfterBuf) free(tparam[i].tightAfterBuf);
         if (tparam[i].tightBeforeBuf) free(tparam[i].tightBeforeBuf);
         if (i != 0 && tparam[i].updateBuf) free(tparam[i].updateBuf);
@@ -426,7 +406,7 @@ rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
         usePixelFormat24 = FALSE;
     }
 
-    nt = min(_nt, w * h / tightConf[compressLevel].maxRectSize);
+    nt = min(rfbNumThreads, w * h / tightConf[compressLevel].maxRectSize);
     if (nt < 1) nt = 1;
 
     for (i = 0; i < nt; i++) {

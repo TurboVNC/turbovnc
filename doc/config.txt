@@ -84,9 +84,11 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 
 	Description :: See {ref prefix="Section ": Multithreading}
 
-| Environment Variable | ''VGL_NTHREADS = ''__''{n}''__ |
-| Summary | Use __''{n}''__ threads to perform image encoding |
-| Default Value | __''{n}''__ = the number of CPU cores in the system |
+| Environment Variable | ''TVNC_NTHREADS = ''__''{n}''__ |
+| Summary | Use __''{n}''__ threads (1 <\= __''{n}''__ <\= 8) to perform image \
+	encoding |
+| Default Value | __''{n}''__ = the number of CPU cores in the system, up to \
+	a maximum of 4 |
 #OPT: hiCol=first
 
 	Description :: See {ref prefix="Section ": Multithreading}

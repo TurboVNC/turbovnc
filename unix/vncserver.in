@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  Copyright (C) 2009-2016 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2009-2017 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
@@ -66,6 +66,8 @@ $deferUpdate = 1;
 $useVGL = 0;
 $autokill = 0;
 $pamSession = 0;
+$multiThread = 0;
+$numThreads = 0;
 
 # Read configuration from the system-wide and user files if present.
 
@@ -535,6 +537,8 @@ $cmd .= " -deferupdate $deferUpdate";
 $cmd .= " -xkbdir $xkbdir" if ($xkbdir);
 $cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir);
 $cmd .= " -pamsession" if ($pamSession);
+$cmd .= " -mt" if ($multiThread);
+$cmd .= " -nthreads $numThreads" if ($numThreads);
 
 foreach $arg (@ARGV) {
     $cmd .= " " . &quotedString($arg);
@@ -1111,6 +1115,8 @@ sub ReadConfiguration
        enableHTTP
        autokill
        pamSession
+       multiThread
+       numThreads
       );
 
   if (open CONF, "<$configFile") {
