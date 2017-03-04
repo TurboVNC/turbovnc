@@ -19,6 +19,33 @@ vncserver disables the extension.  Note that your system must have Mesa 8.x or
 later installed in order for the swrast DRI driver to be available.
 
 
+2.1.2
+=====
+
+### Significant changes relative to 2.1.1:
+
+1. Improved the usability of multithreaded Tight encoding in the TurboVNC
+Server:
+
+    - The `TVNC_MT` and `TVNC_NTHREADS` environment variables now have
+corresponding Xvnc command-line options (`-mt` and `-nthreads`), which makes it
+easy to enable multithreaded Tight encoding in TurboVNC Server instances
+spawned by init.d/systemd.
+
+    - The turbovncserver.conf file, which is parsed by the vncserver script,
+now includes two new variables (`$multiThread` and `$numThreads`) that can be
+used to configure multithreading on a system-wide basis or for all TurboVNC
+sessions started under a particular user account.
+
+    - Previously, if multithreaded Tight encoding was enabled, the Tight
+encoder would use as many threads as there were CPU cores on the server, up to
+a maximum of 8.  However, because of limitations in the Tight encoding type,
+using more than 4 threads requires the rfbTightNoZlib extension, which is only
+supported by the TurboVNC Viewer.  To avoid confusion, the TurboVNC Server will
+no longer use more than 4 threads (regardless of the number of CPU cores)
+unless the thread count is explicitly specified.
+
+
 2.1.1
 =====
 
@@ -51,6 +78,23 @@ of the vncserver wrapper script.  This release of TurboVNC instead makes
 (`-disconnect`) to reverse the behavior.  This new option allows TurboVNC to
 mimic the behavior of other VNC implementations that disconnect existing
 viewers when a new non-shared connection is established.
+
+6. Added a new parameter to the Java TurboVNC Viewer (`LocalCursor`) that, when
+enabled, causes cursor shape updates to be ignored and the local cursor to
+always be displayed.  This mimics the behavior of the Windows TurboVNC Viewer
+when "Local cursor shape" is set to "Normal arrow" and "Mouse cursor" is set to
+"Don't show remote cursor".  This option is useful when connecting to broken
+VNC server implementations that do not properly support server-side cursor
+rendering or cursor shape updates.
+
+7. Fixed an issue in the Windows TurboVNC Viewer whereby the mouse scroll wheel
+would stop working if the viewer was moved to a monitor above or to the left of
+the Windows "main"/"primary" display.
+
+8. Fixed an issue whereby zero-height PutImage requests (issued by XCB) would
+crash the TurboVNC X server.  This was known to affect certain Qt5 applications
+running under Debian Stretch but may have also affected other applications and
+platforms.
 
 
 2.1
@@ -507,19 +551,19 @@ These directives were added to the Windows TurboVNC Viewer in 2.0 beta but were
 left out of the Java viewer due to an oversight.
 
 4. The default xstartup.turbovnc script that the TurboVNC Server creates will
-now launch the Mate desktop on Ubuntu 15, if it is installed and if 3D window
+now launch the MATE desktop on Ubuntu 15, if it is installed and if 3D window
 manager support is not activated.  The GNOME Flashback session under Ubuntu 15
-cannot be made to work properly with TurboVNC, for unknown reasons, but Mate is
+cannot be made to work properly with TurboVNC, for unknown reasons, but MATE is
 a better solution anyhow.
 
 5. The drawing performance of the Java TurboVNC Viewer when running under
 Oracle Java 7 and later on OS X has been dramatically improved (by 3-7x for 2D
 application workloads and 35-50% for 3D application workloads.)  When running
 the standalone TurboVNC Viewer, Apple Java will probably still perform better
-on Macs containing nVidia and Intel HD Graphics GPUs, but on Macs containing
-Intel Iris GPUs, Oracle Java is now the fastest solution (Java 2D is apparently
-not accelerated in Apple Java 6 on these newer GPUs.)  See the User's Guide for
-more details.
+on Macs running OS X 10.9 "Mavericks" and earlier, but on Macs running OS X
+10.10 "Yosemite" and later, Oracle Java is now the fastest solution (Java 2D is
+apparently not accelerated in Apple Java 6 on these more recent OS X
+releases.)  See the User's Guide for more details.
 
 6. Fixed an issue whereby pressing any of the extra buttons on mice with more
 than 3 buttons (Microsoft calls these "X buttons") would cause the Java

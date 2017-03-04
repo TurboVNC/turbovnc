@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2016-10-28T17:56:47">
+<meta name="date" content="2017-03-03T16:57:20">
 <meta name="generator" content="deplate.rb 0.8.5">
-<title>User&rsquo;s Guide for TurboVNC 2.1.1</title>
+<title>User&rsquo;s Guide for TurboVNC 2.1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Conventions Used in This Document">
@@ -23,7 +23,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for TurboVNC 2.1.1</p>
+<p class="title">User&rsquo;s Guide for TurboVNC 2.1.2</p>
 </div>
 <div id="hd">
 <div id="hdBlock" class="hd">
@@ -1710,15 +1710,18 @@ used with demanding 3D or video applications that fill most of the
 screen.  However, whether or not multithreading improves the overall 
 performance of TurboVNC depends largely on the performance of the viewer 
 and the network.  If either the viewer or the network is the primary 
-performance bottleneck, then multithreading the server will not help.  
-It will almost certainly have no effect on networks slower than 100 
-Megabit Ethernet or when using the Java TurboVNC Viewer as an applet.</p>
+performance bottleneck, then enabling multithreading in the server will 
+not help.  Multithreading is also not currently implemented with 
+non-Tight encoding types.</p>
 
 <p>To enable server-side multithreading, set the <code>TVNC_MT</code> 
 environment variable to <code>1</code> on the server prior to starting 
+<code>vncserver</code>, or pass an argument of <code>-mt</code> to 
 <code>vncserver</code>.  The default behavior is to use as many threads 
-as there are cores on the server machine, but you can set the 
-<code>TVNC_NTHREADS</code> environment variable to override this.</p>
+as there are cores on the server machine (up to a maximum of 4), but you 
+can set the <code>TVNC_NTHREADS</code> environment variable or pass an 
+argument of <code>-nthreads</code> to <code>vncserver</code> to override 
+this.</p>
 
 
 
@@ -2666,7 +2669,11 @@ mixing TurboVNC with other VNC flavors.</p>
         to 0 in the viewer will cause the connection to abort with a &ldquo;bad 
         subencoding value&rdquo; error.  This is because the TurboVNC Server is 
         attempting to send the framebuffer updates with no zlib compression, and 
-        the TightVNC and TigerVNC viewers don&rsquo;t support this. <br /><br />
+        the TightVNC and TigerVNC viewers don&rsquo;t support this. <br /><br /> 
+        A similar issue occurs when using more than four encoding threads on the 
+        server.  Since the Tight encoding type is limited to four zlib streams, 
+        any encoding threads beyond the first four cannot use zlib compression. 
+        <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Refer to Section <a href="#AdvancedCompression" class="ref">7.2</a> for 
@@ -2904,15 +2911,15 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VGL_NTHREADS&nbsp;=&nbsp;</code><em><code>{n}</code></em></td>
+    <td class="standard"><code>TVNC_NTHREADS&nbsp;=&nbsp;</code><em><code>{n}</code></em></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Use <em><code>{n}</code></em> threads to perform image encoding</td>
+    <td class="standard">Use <em><code>{n}</code></em> threads (1 &lt;= <em><code>{n}</code></em> &lt;= 8) to perform image encoding</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard"><em><code>{n}</code></em> = the number of CPU cores in the system</td>
+    <td class="standard"><em><code>{n}</code></em> = the number of CPU cores in the system, up to a maximum of 4</td>
   </tr>
 </table>
 </div>

@@ -1284,6 +1284,17 @@ public class VncViewer extends javax.swing.JApplet
   "advantageous with shared sessions, since it will allow you to see the " +
   "cursor movements of other connected users.", true);
 
+  static BoolParameter localCursor
+  = new BoolParameter("LocalCursor",
+  "The default behavior of the TurboVNC Viewer is to hide the local cursor " +
+  "and show only the remote cursor, which can be rendered either by the " +
+  "VNC server or on the client, depending on the value of the CursorShape " +
+  "option.  However, certain (broken) VNC server implementations do not " +
+  "support either method of remote cursor rendering, so this option is " +
+  "provided as a workaround for connecting to such servers.  If this option " +
+  "is enabled, then any cursor shape updates from the server are ignored, " +
+  "and the local cursor is always displayed.", false);
+
   static BoolParameter continuousUpdates
   = new BoolParameter("CU", null, true);
 

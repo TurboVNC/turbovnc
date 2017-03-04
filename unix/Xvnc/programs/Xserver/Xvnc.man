@@ -6,14 +6,14 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
-.\" Copyright (C) 2010, 2012, 2014-2016 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2017 D. R. Commander
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "December 2016" "" "TurboVNC"
+.TH Xvnc 1 "March 2017" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -35,6 +35,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-disconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
+[\-mt] [\-nthreads \fIthread-count\fR]
 [\fIX-options\fR...]
 .SH DESCRIPTION
 \fBXvnc\fR is a VNC (Virtual Network Computing) server for Unix and Linux
@@ -311,6 +312,16 @@ network input/output to stdin/stdout.
 \fB\-compatiblekbd\fR
 Set META and ALT keys to the same X modifier flag, as in the original
 version of Xvnc by AT&T labs (this option is specific to TightVNC/TurboVNC.)
+.TP
+\fB\-mt\fR
+Enable multithreaded Tight encoding
+.TP
+\fB\-nthreads\fR \fIthread-count\fR
+Specify the number of threads to use with multithreaded Tight encoding.  The
+default is to use one thread per CPU core, up to a maximum of 4 (because using
+more than 4 encoding threads breaks compatibility with viewers other than the
+TurboVNC Viewer.)  The server will not allow the thread count to exceed 8, nor
+to exceed the number of CPU cores.
 .SH SECURITY EXTENSIONS
 The TurboVNC Server supports 13 security types, each of which specifies an
 authentication scheme (a technique used to transmit authentication credentials

@@ -1,4 +1,4 @@
-//  Copyright (C) 2013, 2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2013, 2016-2017 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 //
@@ -129,10 +129,10 @@ static void fillCmdPattern(char *result, char *pattern,
     throw WarningException("Tunneling command is too long.");
 
   if (!H_found || !R_found || !L_found)
-    throw WarningException("%%H, %%R, or %%L absent in tunneling command.");
+    throw WarningException("%H, %R, or %L absent in tunneling command.");
 
   if (!tunnelOption && !G_found)
-    throw WarningException("%%G pattern absent in tunneling command.");
+    throw WarningException("%G pattern absent in tunneling command.");
 
   result[j] = '\0';
 }

@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2016 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -69,6 +69,8 @@ Bool rfbInterframeDebug = FALSE;
 int rfbMaxWidth = 0, rfbMaxHeight = 0;
 int rfbMaxClipboard = MAX_CUTTEXT_LEN;
 Bool rfbVirtualTablet = FALSE;
+Bool rfbMT = FALSE;
+int rfbNumThreads = 0;
 
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
@@ -356,6 +358,7 @@ rfbNewClient(int sock)
     socklen_t addrlen = sizeof(struct sockaddr_storage);
     char addrStr[INET6_ADDRSTRLEN];
     char *env = NULL;
+    int np = sysconf(_SC_NPROCESSORS_CONF);
 
     if (rfbClientHead == NULL) {
         /* no other clients - make sure we don't think any keys are pressed */
@@ -467,6 +470,29 @@ rfbNewClient(int sock)
             alrCopyRect = FALSE;
         REGION_INIT(pScreen, &cl->alrRegion, NullBox, 0);
         REGION_INIT(pScreen, &cl->alrEligibleRegion, NullBox, 0);
+    }
+
+    if ((env = getenv("TVNC_MT")) != NULL && !strcmp(env, "1"))
+        rfbMT = TRUE;
+
+    if ((env = getenv("TVNC_NTHREADS")) != NULL && strlen(env) >= 1) {
+        int temp = atoi(env);
+        if (temp >= 1 && temp <= MAX_ENCODING_THREADS)
+            rfbNumThreads = temp;
+        else
+            rfbLog("WARNING: Invalid value of TVNC_NTHREADS (%s) ignored\n",
+                   env);
+    }
+
+    if (np == -1 && rfbMT) {
+        rfbLog("WARNING: Could not determine CPU count.  Multithreaded encoding disabled.\n");
+        rfbMT = FALSE;
+    }
+    if (!rfbMT) rfbNumThreads = 1;
+    else if (rfbNumThreads < 1) rfbNumThreads = min(np, 4);
+    if (rfbNumThreads > np) {
+        rfbLog("NOTICE: Encoding thread count has been clamped to CPU count\n");
+        rfbNumThreads = np;
     }
 
     if (rfbIdleTimeout > 0)
