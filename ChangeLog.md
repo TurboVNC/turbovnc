@@ -24,6 +24,10 @@ supported by the TurboVNC Viewer.  To avoid confusion, the TurboVNC Server will
 no longer use more than 4 threads (regardless of the number of CPU cores)
 unless the thread count is explicitly specified.
 
+2. Fixed an issue in the console version of the Windows TurboVNC Viewer
+(cvncviewer.exe) whereby the console output of the viewer could not be
+redirected to a file.
+
 
 2.1.1
 =====
