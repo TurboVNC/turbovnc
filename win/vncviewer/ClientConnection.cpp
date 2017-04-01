@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2013, 2015-2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2013, 2015-2017 D. R. Commander. All Rights Reserved.
 //  Copyright 2009 Pierre Ossman for Cendio AB
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
@@ -3297,7 +3297,10 @@ void* ClientConnection::run_undetached(void* arg) {
   } catch (QuietException &e) {
     m_running = false;
     e.Report();
-    PostMessage(m_hwnd1, WM_CLOSE, 1, 0);
+    if (!strcmp(e.m_info, "End of session capture"))
+      PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
+    else
+      PostMessage(m_hwnd1, WM_CLOSE, 1, 0);
   }
   return this;
 }
