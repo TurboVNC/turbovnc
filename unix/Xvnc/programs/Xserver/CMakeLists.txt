@@ -116,7 +116,7 @@ endif()
 target_link_libraries(Xvnc main dix vnc fb Xi composite mi damage damageext
 	randr render os Xext-server sync xfixes xkb Xau Xdmcp Xfont fontenc freetype2
 	pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m pthread ${PAM_LIB}
-	${EXTRA_LIB})
+	${EXTRA_LIB} dl)
 
 install(TARGETS Xvnc DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/Xserver.man
