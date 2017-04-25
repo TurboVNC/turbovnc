@@ -1417,6 +1417,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     setTightOptions();
 
     options.viewOnly.setSelected(opts.viewOnly);
+    options.reverseScroll.setSelected(opts.reverseScroll);
     options.acceptClipboard.setSelected(opts.acceptClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
@@ -1508,6 +1509,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (opts.viewOnly != options.viewOnly.isSelected() && showToolbar)
       recreate = true;
     opts.viewOnly = options.viewOnly.isSelected();
+    opts.reverseScroll = options.reverseScroll.isSelected();
     opts.acceptClipboard = options.acceptClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
@@ -2165,10 +2167,18 @@ public class CConn extends CConnection implements UserPasswdGetter,
       return;
     int x, y, wheelMask;
     int clicks = ev.getWheelRotation();
-    if (clicks < 0) {
-      wheelMask = buttonMask | rfbButton4Mask;
+    if (opts.reverseScroll) {
+      if (clicks < 0) {
+        wheelMask = buttonMask | rfbButton4Mask;
+      } else {
+        wheelMask = buttonMask | rfbButton5Mask;
+      }
     } else {
-      wheelMask = buttonMask | rfbButton5Mask;
+      if (clicks < 0) {
+        wheelMask = buttonMask | rfbButton5Mask;
+      } else {
+        wheelMask = buttonMask | rfbButton4Mask;
+      }
     }
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       int dx = (int)Math.floor(viewport.dx / desktop.scaleWidthRatio);

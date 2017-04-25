@@ -46,7 +46,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JComboBox menuKey, scalingFactor, encMethodComboBox, span, desktopSize,
     grabKeyboard;
   JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
-  JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
+  JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell, reverseScroll;
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
   JCheckBox secVeNCrypt, encNone, encTLS, encX509;
   JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent,
@@ -352,6 +352,15 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
 
+    reverseScroll = new JCheckBox("Reverse scrolling");
+    reverseScroll.addItemListener(this);
+    Dialog.addGBComponent(reverseScroll, inputPanel,
+                          0, 1, 2, 1, 2, 2, 1, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.LINE_START,
+                          new Insets(4, 5, 0, 5));
+
+
     boolean enableGrab = VncViewer.osGrab() && Viewport.isHelperAvailable();
 
     if (enableGrab) {
@@ -365,12 +374,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       grabKeyboard.addItemListener(this);
 
       Dialog.addGBComponent(grabLabel, inputPanel,
-                            0, 1, 1, 1, 2, 2, 1, 0,
+                            0, 2, 1, 1, 2, 2, 1, 0,
                             GridBagConstraints.NONE,
                             GridBagConstraints.FIRST_LINE_START,
                             new Insets(8, 8, 0, 5));
       Dialog.addGBComponent(grabKeyboard, inputPanel,
-                            1, 1, 1, 1, 2, 2, 25, 0,
+                            1, 2, 1, 1, 2, 2, 25, 0,
                             GridBagConstraints.NONE,
                             GridBagConstraints.FIRST_LINE_START,
                             new Insets(4, 5, 0, 5));
@@ -686,6 +695,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
     UserPreferences.set("global", "CompressLevel", getCompressionLevel());
     UserPreferences.set("global", "ViewOnly", viewOnly.isSelected());
+    UserPreferences.set("global", "ReverseScroll", reverseScroll.isSelected());
     UserPreferences.set("global", "RecvClipboard",
                         acceptClipboard.isSelected());
     UserPreferences.set("global", "SendClipboard", sendClipboard.isSelected());
