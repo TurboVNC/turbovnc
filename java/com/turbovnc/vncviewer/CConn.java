@@ -2168,18 +2168,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
     int x, y, wheelMask;
     int clicks = ev.getWheelRotation();
     if (opts.reverseScroll) {
-      if (clicks < 0) {
-        wheelMask = buttonMask | rfbButton4Mask;
-      } else {
-        wheelMask = buttonMask | rfbButton5Mask;
-      }
-    } else {
-      if (clicks < 0) {
-        wheelMask = buttonMask | rfbButton5Mask;
-      } else {
-        wheelMask = buttonMask | rfbButton4Mask;
-      }
+      clicks = -clicks;
     }
+    if (clicks < 0) {
+      wheelMask = buttonMask | rfbButton4Mask;
+    } else {
+      wheelMask = buttonMask | rfbButton5Mask;
+    }
+
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       int dx = (int)Math.floor(viewport.dx / desktop.scaleWidthRatio);
       int dy = (int)Math.floor(viewport.dy / desktop.scaleHeightRatio);

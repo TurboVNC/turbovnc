@@ -195,6 +195,8 @@ public class Configuration {
           setParam("Encoding", Encodings.encodingName(encoding));
       } else if (name.equalsIgnoreCase("viewonly")) {
         setParam("ViewOnly", props.getProperty(name));
+      } else if (name.equalsIgnoreCase("reversescroll")) {
+        setParam("ReverseScroll", props.getProperty(name));
       } else if (name.equalsIgnoreCase("fullscreen")) {
         setParam("FullScreen", props.getProperty(name));
       } else if (name.equalsIgnoreCase("fsaltenter")) {

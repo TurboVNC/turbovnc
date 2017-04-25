@@ -654,6 +654,7 @@ public class VncViewer extends javax.swing.JApplet
     setTightOptions();
 
     options.viewOnly.setSelected(opts.viewOnly);
+    options.reverseScroll.setSelected(opts.reverseScroll);
     options.acceptClipboard.setSelected(opts.acceptClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
@@ -704,6 +705,7 @@ public class VncViewer extends javax.swing.JApplet
     opts.subsampling = options.getSubsamplingLevel();
     opts.sendLocalUsername = options.sendLocalUsername.isSelected();
     opts.viewOnly = options.viewOnly.isSelected();
+    opts.reverseScroll = options.reverseScroll.isSelected();
     opts.acceptClipboard = options.acceptClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
@@ -872,6 +874,7 @@ public class VncViewer extends javax.swing.JApplet
 
     opts.shared = shared.getValue();
     opts.viewOnly = viewOnly.getValue();
+    opts.reverseScroll = reverseScroll.getValue();
     opts.fullScreen = fullScreen.getValue();
 
     if (osGrab()) {
@@ -1032,6 +1035,10 @@ public class VncViewer extends javax.swing.JApplet
   = new BoolParameter("ViewOnly",
   "Ignore all keyboard and mouse events in the viewer window and do not pass " +
   "these events to the VNC server.", false);
+
+  static BoolParameter reverseScroll
+  = new BoolParameter("ReverseScroll",
+  "Reverse mouse scroll event direction.", false);
 
   // Set to 0 to disable the view-only checkbox in the Options dialog
   static BoolParameter viewOnlyControl
