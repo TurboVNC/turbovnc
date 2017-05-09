@@ -28,6 +28,10 @@ unless the thread count is explicitly specified.
 (cvncviewer.exe) whereby the console output of the viewer could not be
 redirected to a file.
 
+3. The Java/Mac/Un\*x TurboVNC Viewer now includes an option for reversing the
+direction of mouse scroll wheel events that are sent to the VNC server.  This
+is useful when connecting from clients that have "natural scrolling" enabled.
+
 
 2.1.1
 =====
