@@ -45,6 +45,20 @@ supported by the TurboVNC Viewer.  To avoid confusion, the TurboVNC Server will
 no longer use more than 4 threads (regardless of the number of CPU cores)
 unless the thread count is explicitly specified.
 
+2. Fixed an issue in the console version of the Windows TurboVNC Viewer
+(cvncviewer.exe) whereby the console output of the viewer could not be
+redirected to a file.
+
+3. The Java/Mac/Un\*x TurboVNC Viewer now includes an option for reversing the
+direction of mouse scroll wheel events that are sent to the VNC server.  This
+is useful when connecting from clients that have "natural scrolling" enabled.
+
+4. Fixed an issue whereby, under certain rare circumstances (for instance, if
+the Xvnc binary was setuid root), the TurboVNC Server would allow any user of
+the system (not just the session owner) to authenticate with a TurboVNC Server
+session using PAM User/Password Authentication, if the user ACL feature was
+disabled.
+
 
 2.1.1
 =====

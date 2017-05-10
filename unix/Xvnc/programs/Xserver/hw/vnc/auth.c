@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012-2016 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -229,6 +229,23 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
         }
 
         cl->viewOnly = p->viewOnly;
+    } else {
+        struct passwd pbuf;
+        struct passwd *pw;
+        char buf[256];
+
+        if (getpwuid_r(getuid(), &pbuf, buf, sizeof(buf), &pw) != 0) {
+            FatalError("AuthPAMUserPwdRspFunc: getpwuid_r failed: %s",
+                strerror(errno));
+        }
+
+        if (strcmp(pbuf.pw_name, userBuf)) {
+            rfbLog("User '%s' denied access (not the session owner)\n",
+                   userBuf);
+            rfbLog("  Enable user ACL to grant access to other users.\n");
+            rfbClientAuthFailed(cl, "User denied access");
+            return;
+        }
     }
 
     if (rfbPAMAuthenticate(cl, pamServiceName, userBuf, pwdBuf, &emsg)) {

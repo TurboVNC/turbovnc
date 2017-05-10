@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2015-2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2015-2017 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -25,6 +25,7 @@
 const int Log::ToDebug   =  1;
 const int Log::ToFile    =  2;
 const int Log::ToConsole =  4;
+const int Log::UseStdio  =  8;
 
 const static int LINE_BUFFER_SIZE = 1024;
 
@@ -35,6 +36,7 @@ Log::Log(int mode, int level, LPTSTR filename, bool append)
   m_todebug = false;
   m_toconsole = false;
   m_tofile = false;
+  m_usestdio = false;
   SetMode(mode);
   if (mode & ToFile)
     SetFile(filename, append);
@@ -55,8 +57,14 @@ void Log::SetMode(int mode)
     m_tofile = false;
   }
 
+  if (mode & UseStdio) {
+    m_usestdio = true;
+  } else {
+    m_usestdio = false;
+  }
+
   if (mode & ToConsole) {
-    if (!m_toconsole)
+    if (!m_toconsole && !m_usestdio)
       AllocConsole();
     m_toconsole = true;
   } else {
@@ -123,9 +131,13 @@ void Log::ReallyPrint(LPTSTR format, va_list ap)
   if (m_todebug) OutputDebugString(line);
 
   if (m_toconsole) {
-    DWORD byteswritten;
-    WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line,
-                 (DWORD)(strlen(line) * sizeof(char)), &byteswritten, NULL);
+    if (m_usestdio)
+      vprintf(format, ap);
+    else {
+      DWORD byteswritten;
+      WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line,
+                   (DWORD)(strlen(line) * sizeof(char)), &byteswritten, NULL);
+    }
   }
 
   if (m_tofile && (hlogfile != NULL)) {

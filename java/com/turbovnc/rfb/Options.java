@@ -54,6 +54,7 @@ public class Options {
     port = old.port;
     shared = old.shared;
     viewOnly = old.viewOnly;
+    reverseScroll = old.reverseScroll;
     grabKeyboard = old.grabKeyboard;
     fullScreen = old.fullScreen;
     span = old.span;
@@ -156,6 +157,7 @@ public class Options {
     printOpt("port", port);
     printOpt("shared", shared);
     printOpt("viewOnly", viewOnly);
+    printOpt("reverseScroll", reverseScroll);
     printOpt("grabKeyboard", grabKeyboard);
     printOpt("fullScreen", fullScreen);
     printOpt("span", span);
@@ -206,6 +208,7 @@ public class Options {
   public int port;
   public boolean shared;
   public boolean viewOnly;
+  public boolean reverseScroll;
   public int grabKeyboard;
   public boolean fullScreen;
   public int span;

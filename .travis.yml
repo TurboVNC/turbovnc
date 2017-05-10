@@ -50,7 +50,8 @@ before_install:
         fi &&
         popd;
       elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
-        brew install md5sha1sum gpg;
+        brew install md5sha1sum &&
+        ln -fs /usr/local/bin/gpg1 /usr/local/bin/gpg;
       fi &&
       git clone --depth=1 https://github.com/turbovnc/buildscripts.git ~/src/buildscripts &&
       openssl aes-256-cbc -K $encrypted_c6f652756c51_key -iv $encrypted_c6f652756c51_iv -in ci/keys.enc -out ci/keys -d &&

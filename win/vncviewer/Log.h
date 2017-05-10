@@ -1,5 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2015, 2017 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -47,6 +47,7 @@ class Log
     static const int ToDebug;
     static const int ToFile;
     static const int ToConsole;
+    static const int UseStdio;
 
     // Create a new log object.
     // Parameters as follows:
@@ -85,7 +86,7 @@ class Log
   private:
     void ReallyPrint(LPTSTR format, va_list ap);
     void CloseFile();
-    bool m_tofile, m_todebug, m_toconsole;
+    bool m_tofile, m_todebug, m_toconsole, m_usestdio;
     int m_level, m_giiLevel;
     HANDLE hlogfile;
 };
