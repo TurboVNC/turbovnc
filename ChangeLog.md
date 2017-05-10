@@ -32,6 +32,12 @@ redirected to a file.
 direction of mouse scroll wheel events that are sent to the VNC server.  This
 is useful when connecting from clients that have "natural scrolling" enabled.
 
+4. Fixed an issue whereby, under certain rare circumstances (for instance, if
+the Xvnc binary was setuid root), the TurboVNC Server would allow any user of
+the system (not just the session owner) to authenticate with a TurboVNC Server
+session using PAM User/Password Authentication, if the user ACL feature was
+disabled.
+
 
 2.1.1
 =====
