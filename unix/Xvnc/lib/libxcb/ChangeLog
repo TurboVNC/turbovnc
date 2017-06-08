@@ -1,3 +1,193 @@
+commit 7e0f166579672d71efd819c81f0c932b0acd542c
+Author: Daniel Stone <daniels@collabora.com>
+Date:   Wed Feb 28 01:26:55 2018 +0000
+
+    Release libxcb 1.13
+    
+    Signed-off-by: Daniel Stone <daniels@collabora.com>
+
+commit a3e9821bec08a69b355b46b0655562b9df61bb21
+Author: Daniel Stone <daniels@collabora.com>
+Date:   Wed Apr 26 17:55:54 2017 +0200
+
+    c_client: Add support for lists of FDs
+    
+    Matching xcbgen changes, add support having a ListType which contains
+    file descriptors. Use this to send a variable number of FDs to the
+    server, including when the list size is not fixed.
+    
+    Signed-off-by: Daniel Stone <daniels@collabora.com>
+
+commit c7aa4e682fdc7f0035f928af6eafd052e38cc15a
+Author: Daniel Stone <daniels@collabora.com>
+Date:   Wed Apr 26 17:54:01 2017 +0200
+
+    c_client: Don't serialise non-wire fields
+    
+    For when we have a variable-sized field followed by a fixed field, make
+    sure we do not serialise non-wire fields.
+    
+    Signed-off-by: Daniel Stone <daniels@collabora.com>
+
+commit d10194a321c3db851b3ede9a98cdc95e951943aa
+Author: Christian Linhart <chris@demorecorder.com>
+Date:   Sat Mar 11 22:03:34 2017 +0100
+
+    enable xinput by default
+    
+    Support for the xinput extension is complete now,
+    as far as I can tell.
+    
+    According to our discussion on the list, we enable it now.
+    
+    Signed-off-by: Christian Linhart <chris@demorecorder.com>
+
+commit fad81b63422105f9345215ab2716c4b804ec7986
+Author: David McFarland <corngood@gmail.com>
+Date:   Tue Apr 18 23:58:59 2017 -0300
+
+    read from connection when polling special events and replies
+    
+    Using the mesa vulkan driver, if you acquire an image from a
+    swapchain using a finite timeout (x11_acquire_next_image_poll_x11),
+    it will occasionally lock, calling xcb_poll_for_special_event in
+    a loop until the timeout expires.
+    
+    Call _xcb_in_read() once from the polling functions for special
+    events and replies, in the same way as xcb_poll_for_event.
+    
+    Signed-off-by: David McFarland <corngood@gmail.com>
+    Signed-off-by: Uli Schlachter <psychon@znc.in>
+
+commit f830eb93c9c38b2c6c7ea2971af3bc6a61e92277
+Author: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date:   Sun Mar 26 15:41:12 2017 +0200
+
+    Check strdup for NULL return value.
+    
+    _xcb_open does not check strdup's return value for NULL if launchd suport
+    was configured.
+    
+    Signed-off-by: Tobias Stoeckmann <tobias@stoeckmann.org>
+    Signed-off-by: Uli Schlachter <psychon@znc.in>
+
+commit ee9dfc9a7658e7fe75d27483bb5ed1ba4d1e2c86
+Author: Christian Linhart <chris@demorecorder.com>
+Date:   Wed Jan 25 10:21:05 2017 +0100
+
+    add support for eventstruct
+    
+    eventstruct allows to use events as part of requests.
+    This is, e.g., needed by xcb_input_send_extension_event.
+    
+    Signed-off-by: Christian Linhart <chris@demorecorder.com>
+
+commit 0c2c5d50f8670da3e7601feb6a29b53509513da5
+Author: Christian Linhart <chris@demorecorder.com>
+Date:   Fri Jan 20 20:14:57 2017 +0100
+
+    optionally build the GE extension
+    
+    xcb contains an xml-definition for the GenericEvent extension
+    but this extension was neither generated nor built.
+    
+    This patch enables optional building of the GenericEvent extension
+    with configure option --enable-ge
+    
+    By default, the GenericEvent extension is not built.
+    Normally this is not needed by application programs
+    because there is implicit support for the GE-extension
+    for the specific events built with this extension.
+    
+    But it may be useful for X-protocol analyzers and stuff like that.
+    
+    Signed-off-by: Christian Linhart <chris@demorecorder.com>
+
+commit 9bce1f72e329cb407b7a95589b9675a08129b65d
+Author: Christian Linhart <chris@demorecorder.com>
+Date:   Fri Jan 20 14:40:25 2017 +0100
+
+    move symbol lookup of sumof expr to the parser
+    
+    replace the complicated symboltable lookup for sumof expr
+    by accessing the lenfield of the expr-object.
+    
+    This requires the corresponding patch for xcb/proto
+    which sets the lenfield accordingly.
+    
+    This should be OK because for official releases we define
+    that dependency in the build system.
+    
+    For getting versions off the HEAD of the git repo, it should
+    be obvious that xcb/proto and xcb/libxcb have to be updated together.
+    
+    I have tested this patch and it generates exactly the same code
+    as before.
+    
+    Tested-by: Christian Linhart <chris@demorecorder.com>
+    Signed-off-by: Christian Linhart <chris@demorecorder.com>
+
+commit 65b298c7ca317d7e4316aa2b9e0499e13047c65c
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 6 12:26:21 2016 -0800
+
+    Correct @param "e" to "error" in xcb_poll_for_reply*()
+    
+    Found by clang -Wdocumentation:
+    
+    ./xcbext.h:271:11: warning: parameter 'e' not found in the function
+          declaration [-Wdocumentation]
+     * @param e Location to store errors in, or NULL. Ignored for un...
+              ^
+    ./xcbext.h:271:11: note: did you mean 'error'?
+     * @param e Location to store errors in, or NULL. Ignored for un...
+              ^
+              error
+    
+    ./xcbext.h:283:11: warning: parameter 'e' not found in the function
+          declaration [-Wdocumentation]
+     * @param e Location to store errors in, or NULL. Ignored for un...
+              ^
+    ./xcbext.h:283:11: note: did you mean 'error'?
+     * @param e Location to store errors in, or NULL. Ignored for un...
+              ^
+              error
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Uli Schlachter <psychon@znc.in>
+
+commit 32a9084546add979115a686f9a167e70b8967149
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 6 12:26:20 2016 -0800
+
+    Remove : from @param names in manually written headers
+    
+    Makes style match the @param names in autogenerated headers and makes
+    clang -Wdocumentation stop complaining about all of them:
+    
+    ./xcb.h:523:11: warning: parameter 'display:' not found in the function
+          declaration [-Wdocumentation]
+     * @param display: A pointer to the display number.
+              ^~~~~~~~
+    ./xcb.h:523:11: note: did you mean 'display'?
+     * @param display: A pointer to the display number.
+              ^~~~~~~~
+              display
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Uli Schlachter <psychon@znc.in>
+
+commit 8740a288ca468433141341347aa115b9544891d3
+Author: Thomas Klausner <wiz@NetBSD.org>
+Date:   Thu May 19 17:31:18 2016 +0200
+
+    Fix inconsistent use of tabs vs. space.
+    
+    Needed for at least python-3.5.x.
+    
+    Signed-off-by: Thomas Klausner <wiz@NetBSD.org>
+    Signed-off-by: Uli Schlachter <psychon@znc.in>
+
 commit d34785a34f28fa6a00f8ce00d87e3132ff0f6467
 Author: Uli Schlachter <psychon@znc.in>
 Date:   Sat May 14 10:36:54 2016 +0200
@@ -810,12 +1000,12 @@ Date:   Sun Nov 2 13:46:16 2014 +0100
     <struct name="SumofTest_FieldAccess">
        <field type="CARD32" name="len" />
        <list type="SumofTest_Element" name="mylist1">
-    	   <fieldref>len</fieldref>
+               <fieldref>len</fieldref>
        </list>
        <list type="CARD16" name="mylist2">
-    	<sumof ref="mylist1">
-    		<fieldref>bar</fieldref>
-    	</sumof>
+            <sumof ref="mylist1">
+                    <fieldref>bar</fieldref>
+            </sumof>
        </list>
     </struct>
     
@@ -873,10 +1063,10 @@ Date:   Sun Nov 2 13:45:40 2014 +0100
     <struct name="SumofTest">
        <field type="CARD32" name="len" />
        <list type="CARD16" name="mylist1">
-    	   <fieldref>len</fieldref>
+               <fieldref>len</fieldref>
        </list>
        <list type="CARD8" name="mylist2">
-    	   <sumof ref="mylist1"/>
+               <sumof ref="mylist1"/>
        </list>
     </struct>
     
@@ -1245,12 +1435,12 @@ Date:   Tue Aug 19 15:57:34 2014 +0200
     flexibility in the following forms:
     * a case value may appear in multiple case branches.
       for example:
-    	case C1 will be selected by values 1, 4, or 5
-    	case C2 will be selected by values 3, 4, or 7
+            case C1 will be selected by values 1, 4, or 5
+            case C2 will be selected by values 3, 4, or 7
     
     * mixing of bitcase and case is possible
-    	(this will usually make no sense but there may
-    	be protocol specs where this is needed)
+            (this will usually make no sense but there may
+            be protocol specs where this is needed)
     
     details of the impl:
     * replaced "is_bitcase" with "is_case_or_bitcase" in all places
@@ -1352,7 +1542,7 @@ Date:   Wed Mar 26 15:24:44 2014 -0400
     The implementation variable $sendfds leaked into the user interface.
     Testing the various user inputs:
       <nothing>                DRI3 is enabled     PASS
-      --enable-dri3		   DRI3 is enabled     PASS
+      --enable-dri3            DRI3 is enabled     PASS
       --enable-dri3=yes        DRI3 is enabled     PASS
       --enable-dri3=no         DRI3 is disabled    PASS
       --disable-dri3           DRI3 is disabled    PASS
@@ -2106,7 +2296,7 @@ Date:   Mon Nov 18 19:49:41 2013 +0100
     Signed-off-by: Uli Schlachter <psychon@znc.in>
     
     Conflicts:
-    	src/xcbint.h
+            src/xcbint.h
 
 commit c7c5b710f2cc0782412c9e159986c96b52aa0d02
 Author: Mark Kettenis <kettenis@openbsd.org>
@@ -3228,8 +3418,8 @@ Date:   Tue Apr 12 13:09:23 2011 -0700
     
     Conflicts:
     
-    	src/xcb.h
-    	src/xcb_in.c
+            src/xcb.h
+            src/xcb_in.c
     
     Signed-off-by: Jamey Sharp <jamey@minilop.net>
 
@@ -3715,8 +3905,8 @@ Date:   Tue Aug 31 18:33:36 2010 -0400
     Merge branch 'master' of git://github.com/topcat/xcb-win32
     
     Conflicts:
-    	src/xcb_conn.c
-    	src/xcb_util.c
+            src/xcb_conn.c
+            src/xcb_util.c
     
     Signed-off-by: Peter Harris <pharris@opentext.com>
 

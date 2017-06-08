@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PROJECT=xorg-server-1.19.5
-EXT=tar.gz
+PROJECT=xorg-server-1.19.6
+FILE=$PROJECT.tar.gz
 URL=https://www.x.org/releases/individual/xserver
 SRCDIR=`dirname $0`
 

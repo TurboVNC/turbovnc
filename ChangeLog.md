@@ -85,7 +85,7 @@ system property to `1`.
 (`xrandr`) or through the window manager's display configuration applet, to
 modify the server's screen layout.
 
-7. The TurboVNC Server is now based on xorg-xserver 1.19.5, which improves
+7. The TurboVNC Server is now based on xorg-xserver 1.19.6, which improves
 compatibility with newer window managers.
 
 8. By default, the TurboVNC Server will no longer listen on a TCP socket for

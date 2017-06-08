@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROJECT=bigreqsproto-1.1.2
+FILE=$PROJECT.tar.gz
+URL=https://www.x.org/releases/individual/proto
+SRCDIR=`dirname $0`
+
+. $SRCDIR/../../genpatch

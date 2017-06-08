@@ -30,8 +30,12 @@
  *   Kristian Høgsberg (krh@bitplanet.net)
  */
 
+#include <stdbool.h>
+
 #include "glapi.h"
 #include "glxclient.h"
+
+#include "util/debug.h"
 
 #ifndef GLX_USE_APPLEGL
 
@@ -371,7 +375,7 @@ indirect_create_context(struct glx_screen *psc,
       return NULL;
    }
    gc->client_state_private = state;
-   state->NoDrawArraysProtocol = (getenv("LIBGL_NO_DRAWARRAYS") != NULL);
+   state->NoDrawArraysProtocol = env_var_as_boolean("LIBGL_NO_DRAWARRAYS", false);
 
    /*
     ** Create a temporary buffer to hold GLX rendering commands.  The size

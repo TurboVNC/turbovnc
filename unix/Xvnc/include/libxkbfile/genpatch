@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROJECT=libxkbfile-1.0.9
+FILE=$PROJECT.tar.gz
+URL=https://www.x.org/releases/individual/lib
+SRCDIR=`dirname $0`
+
+. $SRCDIR/../../genpatch

@@ -1,4 +1,4 @@
-include_directories(. ../randr ../render)
+include_directories(. ../composite ../randr ../render)
 
 if(BITS EQUAL 64)
 	add_definitions(-D__GLX_ALIGN64)

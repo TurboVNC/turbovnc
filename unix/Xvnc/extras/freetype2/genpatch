@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROJECT=freetype-2.9.1
+FILE=$PROJECT.tar.gz
+URL=http://download.savannah.gnu.org/releases/freetype
+SRCDIR=`dirname $0`
+
+. $SRCDIR/../../genpatch | filterdiff -p1 -x freetype2/CMakeLists.txt >$SRCDIR/turbovnc.patch

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROJECT=libsha1-0.3
+FILE=0.3.tar.gz
+URL=https://github.com/dottedmag/libsha1/archive
+SRCDIR=`dirname $0`
+
+. $SRCDIR/../../genpatch

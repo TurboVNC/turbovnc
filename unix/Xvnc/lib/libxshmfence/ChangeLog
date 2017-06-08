@@ -1,3 +1,84 @@
+commit f38b2e73071ba516127f8f5ae47f48df58dc9d53
+Author: Matt Turner <mattst88@gmail.com>
+Date:   Mon Feb 26 09:26:06 2018 -0800
+
+    libxshmfence 1.3
+    
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+commit 30d946bc7b522ada9ec2fdbd502f9e36aae21bba
+Author: Michał Górny <mgorny@gentoo.org>
+Date:   Thu Feb 22 19:23:38 2018 +0100
+
+    Fix missing <limits.h> include for HAVE_UMTX branch of futex
+    
+    This fixes build on Gentoo/FreeBSD which failed due to undefined
+    'INT_MAX'.
+    
+    Signed-off-by: Michał Górny <mgorny@gentoo.org>
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+commit 517f21745c43883c1fd7128eeba3e2ae963cb779
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Mon Jan 29 14:36:04 2018 -0500
+
+    Revert "configure: Nerf a thing"
+    
+    Definitely didn't mean to push this.
+    
+    This reverts commit 1f194603cb927352c42798bead29c8ac3a680d02.
+
+commit 0b550a4e7acf02d3478602848f6afbfcbfb0d4b2
+Author: Ross Burton <ross.burton@intel.com>
+Date:   Mon Jan 29 16:24:36 2018 +0000
+
+    configure.ac: call AC_USE_SYSTEM_EXTENSIONS
+    
+    With glibc 2.27 memfd_create() is inside a _GNU_SOURCE guard, so call
+    AC_USE_SYSTEM_EXTENSIONS to get this defined.
+    
+    Signed-off-by: Ross Burton <ross.burton@intel.com>
+
+commit 1f194603cb927352c42798bead29c8ac3a680d02
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Thu Dec 14 14:31:17 2017 -0500
+
+    configure: Nerf a thing
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit db7966bee2ec46b835d0bb374f35ae631a0edbd1
+Author: Mihail Konev <k.mvc@ya.ru>
+Date:   Thu Jan 26 13:52:49 2017 +1000
+
+    autogen: add default patch prefix
+    
+    Signed-off-by: Mihail Konev <k.mvc@ya.ru>
+
+commit e242a02f650663f5d25915899126cd081f6c6083
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Mon Mar 9 12:00:52 2015 +0000
+
+    autogen.sh: use quoted string variables
+    
+    Place quotes around the $srcdir, $ORIGDIR and $0 variables to prevent
+    fall-outs, when they contain space.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit f290f3946105e76999f4107100a619f00b065141
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jan 24 10:32:07 2017 +1000
+
+    autogen.sh: use exec instead of waiting for configure to finish
+    
+    Syncs the invocation of configure with the one from the server.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
 commit fe2d6dbba6356ff275649017dd516f0270d79595
 Author: Keith Packard <keithp@keithp.com>
 Date:   Fri Jan 2 10:44:39 2015 -0800

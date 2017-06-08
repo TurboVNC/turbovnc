@@ -59,4 +59,5 @@ add_library(glx STATIC
 	src/glx/renderpix.c
 	src/glx/single2.c
 	src/glx/singlepix.c
-	src/glx/vertarr.c)
+	src/glx/vertarr.c
+	src/util/debug.c)

@@ -215,6 +215,7 @@ __glXdirectContextCreate(__GLXscreen * screen,
     if (context == NULL)
         return NULL;
 
+    context->config = modes;
     context->destroy = __glXdirectContextDestroy;
     context->loseCurrent = __glXdirectContextLoseCurrent;
 
@@ -631,7 +632,7 @@ DoMakeCurrent(__GLXclientState * cl,
         /*
          ** Flush the previous context if needed.
          */
-        Bool need_flush = GL_TRUE;
+        Bool need_flush = !prevglxc->isDirect;
 #ifdef GLX_CONTEXT_RELEASE_BEHAVIOR_ARB
         if (prevglxc->releaseBehavior == GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB)
             need_flush = GL_FALSE;
@@ -1030,13 +1031,14 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
         buf[p++] = modes->samples;
         buf[p++] = GLX_SAMPLE_BUFFERS_SGIS;
         buf[p++] = modes->sampleBuffers;
+        buf[p++] = GLX_VISUAL_SELECT_GROUP_SGIX;
+        buf[p++] = modes->visualSelectGroup;
         /* Add attribute only if its value is not default. */
         if (modes->sRGBCapable != GL_FALSE) {
             buf[p++] = GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT;
             buf[p++] = modes->sRGBCapable;
         }
-        /* Don't add visualSelectGroup (GLX_VISUAL_SELECT_GROUP_SGIX)?
-         * Pad the remaining place with zeroes, so that attributes count is constant. */
+        /* Pad with zeroes, so that attributes count is constant. */
         while (p < GLX_VIS_CONFIG_TOTAL) {
             buf[p++] = 0;
             buf[p++] = 0;
@@ -1720,7 +1722,7 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
     ClientPtr client = cl->client;
     __GLXcontext *ctx;
     xGLXQueryContextInfoEXTReply reply;
-    int nProps = 3;
+    int nProps = 5;
     int sendBuf[nProps * 2];
     int nReplyBytes;
     int err;
@@ -1742,6 +1744,10 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
     sendBuf[3] = (int) (ctx->config->visualID);
     sendBuf[4] = GLX_SCREEN_EXT;
     sendBuf[5] = (int) (ctx->pGlxScreen->pScreen->myNum);
+    sendBuf[6] = GLX_FBCONFIG_ID;
+    sendBuf[7] = (int) (ctx->config->fbconfigID);
+    sendBuf[8] = GLX_RENDER_TYPE;
+    sendBuf[9] = (int) (ctx->config->renderType);
 
     if (client->swapped) {
         __glXSwapQueryContextInfoEXTReply(client, &reply, sendBuf);

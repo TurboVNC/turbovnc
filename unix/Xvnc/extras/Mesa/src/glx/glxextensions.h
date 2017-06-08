@@ -43,14 +43,17 @@ enum
    ARB_fbconfig_float_bit,
    ARB_get_proc_address_bit,
    ARB_multisample_bit,
-   ATI_pixel_format_float_bit,
+   EXT_buffer_age_bit,
+   EXT_create_context_es2_profile_bit,
+   EXT_create_context_es_profile_bit,
+   EXT_fbconfig_packed_float_bit,
+   EXT_framebuffer_sRGB_bit,
+   EXT_import_context_bit,
+   EXT_texture_from_pixmap_bit,
    EXT_visual_info_bit,
    EXT_visual_rating_bit,
-   EXT_import_context_bit,
-   EXT_framebuffer_sRGB_bit,
-   EXT_fbconfig_packed_float_bit,
-   EXT_create_context_es_profile_bit,
-   EXT_create_context_es2_profile_bit,
+   ATI_pixel_format_float_bit,
+   INTEL_swap_event_bit,
    MESA_copy_sub_buffer_bit,
    MESA_depth_float_bit,
    MESA_multithread_makecurrent_bit,
@@ -60,18 +63,15 @@ enum
    NV_float_buffer_bit,
    OML_swap_method_bit,
    OML_sync_control_bit,
-   SGI_make_current_read_bit,
-   SGI_swap_control_bit,
-   SGI_video_sync_bit,
    SGIS_multisample_bit,
    SGIX_fbconfig_bit,
    SGIX_pbuffer_bit,
    SGIX_swap_barrier_bit,
    SGIX_swap_group_bit,
    SGIX_visual_select_group_bit,
-   EXT_texture_from_pixmap_bit,
-   INTEL_swap_event_bit,
-   EXT_buffer_age_bit,
+   SGI_make_current_read_bit,
+   SGI_swap_control_bit,
+   SGI_video_sync_bit,
 };
 
 /* From the GLX perspective, the ARB and EXT extensions are identical.  Use a
@@ -101,6 +101,7 @@ enum
    GL_ARB_texture_env_combine_bit,
    GL_ARB_texture_env_crossbar_bit,
    GL_ARB_texture_env_dot3_bit,
+   GL_ARB_texture_filter_anisotropic_bit,
    GL_ARB_texture_mirrored_repeat_bit,
    GL_ARB_texture_non_power_of_two_bit,
    GL_ARB_texture_rectangle_bit,
@@ -150,7 +151,6 @@ enum
    GL_EXT_texture_edge_clamp_bit,
    GL_EXT_texture_env_combine_bit,
    GL_EXT_texture_env_dot3_bit,
-   GL_EXT_texture_filter_anisotropic_bit,
    GL_EXT_texture_integer_bit,
    GL_EXT_texture_lod_bit,
    GL_EXT_texture_lod_bias_bit,
@@ -223,11 +223,10 @@ enum
 
    /* Alias extension bits.  These extensions exist in either vendor-specific
     * or EXT form and were later promoted to either EXT or ARB form.  In all
-    * cases, the meaning is *exactly* the same.  That's why
+    * cases, the meaning (to GLX) is *exactly* the same.  That's why
     * EXT_texture_env_combine is *NOT* an alias of ARB_texture_env_combine and
     * EXT_texture_env_dot3 is *NOT* an alias of ARB_texture_env_dot3.  Be
-    * careful!  When in doubt, src/mesa/main/extensions.c in the Mesa tree
-    * is a great reference.
+    * careful!  When in doubt, src/mesa/main/extensions.c is a great reference.
     */
 
    GL_ATI_blend_equation_separate_bit = GL_EXT_blend_equation_separate_bit,
@@ -235,6 +234,7 @@ enum
    GL_ATIX_texture_env_combine3_bit = GL_ATI_texture_env_combine3_bit,
    GL_EXT_point_parameters_bit = GL_ARB_point_parameters_bit,
    GL_EXT_texture_env_add_bit = GL_ARB_texture_env_add_bit,
+   GL_EXT_texture_filter_anisotropic_bit = GL_ARB_texture_filter_anisotropic_bit,
    GL_EXT_texture_rectangle_bit = GL_ARB_texture_rectangle_bit,
    GL_IBM_texture_mirrored_repeat_bit = GL_ARB_texture_mirrored_repeat_bit,
    GL_INGR_blend_func_separate_bit = GL_EXT_blend_func_separate_bit,

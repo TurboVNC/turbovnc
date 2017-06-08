@@ -29,6 +29,7 @@ add_library(freetype2 STATIC
 	src/base/ftgxval.c
 	src/base/ftlcdfil.c
 	src/base/ftmm.c
+	src/base/ftpsprop.c
 	src/base/ftotval.c
 	src/base/ftpatent.c
 	src/base/ftpfr.c

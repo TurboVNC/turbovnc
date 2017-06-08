@@ -22,10 +22,11 @@ SRCDIR=${SRCDIR##*/}
 
 pushd $TMPDIR >/dev/null 2>&1
 
->&2 echo Downloading $URL/$PROJECT.$EXT ...
-wget --quiet $URL/$PROJECT.$EXT
+>&2 echo Downloading $URL/$FILE ...
+wget --quiet $URL/$FILE
 >&2 echo Generating diff ...
-tar xfz $PROJECT.$EXT
-git diff --no-index --diff-filter=M $PROJECT $SRCDIR/
+tar xfz $FILE
+git diff --no-index --diff-filter=M $PROJECT $SRCDIR/ && \
+	>&2 echo NO DIFFERENCES || >&2 echo Patch generated
 
 popd >/dev/null 2>&1

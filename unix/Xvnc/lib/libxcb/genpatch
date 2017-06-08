@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PROJECT=libxcb-1.12
-EXT=tar.gz
+PROJECT=libxcb-1.13
+FILE=$PROJECT.tar.gz
 URL=https://www.x.org/releases/individual/xcb
 SRCDIR=`dirname $0`
 

@@ -43,6 +43,7 @@
 #ifdef GLX_USE_APPLEGL
 #include "apple/apple_glx_context.h"
 #include "apple/apple_glx.h"
+#include "util/debug.h"
 #else
 #include <sys/time.h>
 #ifdef XF86VIDMODE
@@ -1288,7 +1289,7 @@ glXChooseVisual(Display * dpy, int screen, int *attribList)
    }
 
 #ifdef GLX_USE_APPLEGL
-   if(visualList && getenv("LIBGL_DUMP_VISUALID")) {
+   if(visualList && env_var_as_boolean("LIBGL_DUMP_VISUALID", false)) {
       printf("visualid 0x%lx\n", visualList[0].visualid);
    }
 #endif
@@ -1403,15 +1404,9 @@ glXImportContextEXT(Display *dpy, GLXContextID contextID)
    xGLXQueryContextReply reply;
    CARD8 opcode;
    struct glx_context *ctx;
-
-   /* This GLX implementation knows about 5 different properties, so
-    * allow the server to send us one of each.
-    */
-   int propList[5 * 2], *pProp, nPropListBytes;
-   int numProps;
-   int i, renderType;
-   XID share;
-   struct glx_config *mode;
+   int i, renderType = GLX_RGBA_TYPE; /* By default, assume RGBA context */
+   XID share = None;
+   struct glx_config *mode = NULL;
    uint32_t fbconfigID = 0;
    uint32_t visualID = 0;
    uint32_t screen = 0;
@@ -1469,41 +1464,35 @@ glXImportContextEXT(Display *dpy, GLXContextID contextID)
       req->context = contextID;
    }
 
-   _XReply(dpy, (xReply *) & reply, 0, False);
+   if (_XReply(dpy, (xReply *) & reply, 0, False) &&
+       reply.n < (INT32_MAX / 2)) {
 
-   if (reply.n <= __GLX_MAX_CONTEXT_PROPS)
-      nPropListBytes = reply.n * 2 * sizeof propList[0];
-   else
-      nPropListBytes = 0;
-   _XRead(dpy, (char *) propList, nPropListBytes);
+      for (i = 0; i < reply.n * 2; i++) {
+         int prop[2];
+
+         _XRead(dpy, (char *)prop, sizeof(prop));
+         switch (prop[0]) {
+         case GLX_SCREEN:
+            screen = prop[1];
+            got_screen = True;
+            break;
+         case GLX_SHARE_CONTEXT_EXT:
+            share = prop[1];
+            break;
+         case GLX_VISUAL_ID_EXT:
+            visualID = prop[1];
+            break;
+         case GLX_FBCONFIG_ID:
+            fbconfigID = prop[1];
+            break;
+         case GLX_RENDER_TYPE:
+            renderType = prop[1];
+            break;
+         }
+      }
+   }
    UnlockDisplay(dpy);
    SyncHandle();
-
-   numProps = nPropListBytes / (2 * sizeof(propList[0]));
-   share = None;
-   mode = NULL;
-   renderType = GLX_RGBA_TYPE; /* By default, assume RGBA context */
-   pProp = propList;
-
-   for (i = 0, pProp = propList; i < numProps; i++, pProp += 2)
-      switch (pProp[0]) {
-      case GLX_SCREEN:
-	 screen = pProp[1];
-	 got_screen = True;
-	 break;
-      case GLX_SHARE_CONTEXT_EXT:
-	 share = pProp[1];
-	 break;
-      case GLX_VISUAL_ID_EXT:
-	 visualID = pProp[1];
-	 break;
-      case GLX_FBCONFIG_ID:
-	 fbconfigID = pProp[1];
-	 break;
-      case GLX_RENDER_TYPE:
-	 renderType = pProp[1];
-	 break;
-      }
 
    if (!got_screen)
       return NULL;

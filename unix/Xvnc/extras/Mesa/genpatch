@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PROJECT=mesa-17.2.7
-EXT=tar.gz
+PROJECT=mesa-17.3.9
+FILE=$PROJECT.tar.gz
 URL=https://mesa.freedesktop.org/archive
 SRCDIR=`dirname $0`
 

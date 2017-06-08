@@ -38,6 +38,8 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
+
 #include "glxclient.h"
 #include <X11/extensions/Xext.h>
 #include <X11/extensions/extutil.h>
@@ -46,6 +48,8 @@
 #include "apple/apple_visual.h"
 #endif
 #include "glxextensions.h"
+
+#include "util/debug.h"
 
 #include <X11/Xlib-xcb.h>
 #include <xcb/xcb.h>
@@ -524,7 +528,17 @@ __glXInitializeVisualConfigFromTags(struct glx_config * config, int count,
          config->visualSelectGroup = *bp++;
          break;
       case GLX_SWAP_METHOD_OML:
-         config->swapMethod = *bp++;
+         if (*bp == GLX_SWAP_UNDEFINED_OML ||
+             *bp == GLX_SWAP_COPY_OML ||
+             *bp == GLX_SWAP_EXCHANGE_OML) {
+            config->swapMethod = *bp++;
+         } else {
+            /* X servers with old HW drivers may return any value here, so
+             * assume GLX_SWAP_METHOD_UNDEFINED.
+             */
+            config->swapMethod = GLX_SWAP_UNDEFINED_OML;
+            bp++;
+         }
          break;
 #endif
       case GLX_SAMPLE_BUFFERS_SGIS:
@@ -567,7 +581,7 @@ __glXInitializeVisualConfigFromTags(struct glx_config * config, int count,
          i = count;
          break;
       default:
-         if(getenv("LIBGL_DIAGNOSTIC")) {
+         if(env_var_as_boolean("LIBGL_DIAGNOSTIC", false)) {
              long int tagvalue = *bp++;
              fprintf(stderr, "WARNING: unknown GLX tag from server: "
                      "tag 0x%lx value 0x%lx\n", tag, tagvalue);
@@ -893,8 +907,8 @@ __glXInitialize(Display * dpy)
    dpyPriv->glXDrawHash = __glxHashCreate();
 
 #if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
-   glx_direct = (getenv("LIBGL_ALWAYS_INDIRECT") == NULL);
-   glx_accel = (getenv("LIBGL_ALWAYS_SOFTWARE") == NULL);
+   glx_direct = !env_var_as_boolean("LIBGL_ALWAYS_INDIRECT", false);
+   glx_accel = !env_var_as_boolean("LIBGL_ALWAYS_SOFTWARE", false);
 
    dpyPriv->drawHash = __glxHashCreate();
 
@@ -906,7 +920,7 @@ __glXInitialize(Display * dpy)
 #if defined(GLX_USE_DRM)
    if (glx_direct && glx_accel) {
 #if defined(HAVE_DRI3)
-      if (!getenv("LIBGL_DRI3_DISABLE"))
+      if (!env_var_as_boolean("LIBGL_DRI3_DISABLE", false))
          dpyPriv->dri3Display = dri3_create_display(dpy);
 #endif /* HAVE_DRI3 */
       dpyPriv->dri2Display = dri2CreateDisplay(dpy);
