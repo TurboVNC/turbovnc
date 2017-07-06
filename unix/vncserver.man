@@ -7,22 +7,27 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2006 Sun Microsystems, Inc.
-.\" Copyright (C) 2010-2013, 2015-2016 D. R. Commander
+.\" Copyright (C) 2010-2013, 2015-2017 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "August 2016" "" "TurboVNC"
+.TH vncserver 1 "July 2017" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
+.nh
+.ad l
 \fBvncserver\fR
-[:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
-[\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-fp \fIfont\-path\fR]
-[\-name \fIdesktop\-name\fR] [\-nohttpd] [\-otp] [\-x509cert \fIcert\fR]
-[\-x509key \fIkey\fR] [\-fg] [\-autokill] [\-noxstartup]
-[\-xstartup \fIscript\fR] [\-3dwm] [\fIXvnc\-options\fR...]
+[:\fIdisplay\fR] [\-geometry\ \fIwidth\fRx\fIheight\fR] [\-depth\ \fIdepth\fR]
+[\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR] [\-fp\ \%\fIfont\-path\fR]
+[\-name\ \fIdesktop\-name\fR] [\-nohttpd] [\-otp] [\-x509cert\ \fIcert\fR]
+[\-x509key\ \fIkey\fR] [\-fg] [\-autokill] [\-noxstartup]
+[\-xstartup\ \fIscript\fR] [\-3dwm] [\-log\ \fIfile\fR]
+\%[\fIXvnc\-options\fR...]
+.ad
+.hy
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
 .TP
