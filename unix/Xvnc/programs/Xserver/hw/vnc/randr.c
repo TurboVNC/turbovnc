@@ -1,5 +1,6 @@
 /*
- *  Copyright (C)2013-2016 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2013-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright 2012-2013 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -220,6 +221,26 @@ static int mm(int dimension)
 }
 
 
+static Bool vncRRCrtcSet(ScreenPtr pScreen, RRCrtcPtr crtc, RRModePtr mode,
+                         int x, int y, Rotation rotation, int numOutputs,
+                         RROutputPtr *outputs)
+{
+  int i;
+
+  /*
+   * Some applications get confused by a connected output without a
+   * mode or CRTC, so we need to fiddle with the connection state as well.
+   */
+  for (i = 0; i < crtc->numOutputs; i++)
+    RROutputSetConnection(crtc->outputs[i], RR_Disconnected);
+
+  for (i = 0; i < numOutputs; i++)
+    RROutputSetConnection(outputs[i], mode ? RR_Connected : RR_Disconnected);
+
+  return RRCrtcNotify(crtc, mode, x, y, rotation, NULL, numOutputs, outputs);
+}
+
+
 static Bool vncSetModes(ScreenPtr pScreen, int w, int h)
 {
   Bool found = FALSE;
@@ -275,8 +296,8 @@ static Bool vncSetModes(ScreenPtr pScreen, int w, int h)
   if (rp->numCrtcs < 1) return FALSE;
   for (i = 0; i < rp->numCrtcs; i++) {
     if (rp->crtcs[i] == NULL) return FALSE;
-    if (!RRCrtcNotify(rp->crtcs[i], modes[preferred], 0, 0, RR_Rotate_0, NULL,
-                      rp->numOutputs, rp->outputs))
+    if (!vncRRCrtcSet(pScreen, rp->crtcs[i], modes[preferred], 0, 0,
+                      RR_Rotate_0, rp->numOutputs, rp->outputs))
       return FALSE;
   }
 
@@ -421,14 +442,6 @@ static Bool rfbSendDesktopSizeAll(rfbClientPtr reqClient, int reason)
       return FALSE;
   }
 
-  return TRUE;
-}
-
-
-static Bool vncRRCrtcSet(ScreenPtr pScreen, RRCrtcPtr crtc, RRModePtr mode,
-                         int x, int y, Rotation rotation, int numOutputs,
-                         RROutputPtr *outputs)
-{
   return TRUE;
 }
 

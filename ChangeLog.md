@@ -38,6 +38,10 @@ the system (not just the session owner) to authenticate with a TurboVNC Server
 session using PAM User/Password Authentication, if the user ACL feature was
 disabled.
 
+5. Fixed a BadMatch X11 error that occurred when attempting to resize the
+TurboVNC Server desktop to a smaller size using the X RandR 1.2 API (for
+instance, by executing `xrandr --output TurboVNC --mode {new_mode}`.)
+
 
 2.1.1
 =====
