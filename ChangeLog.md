@@ -52,6 +52,22 @@ grabbing was enabled, using Alt-Tab to select another window in the TurboVNC
 session sometimes caused the Tab key to become stuck in the pressed state on
 the server.
 
+12. Fixed multiple issues with the handling of X.509 certificates in the Java
+TurboVNC Viewer:
+
+     - Fixed an issue whereby the viewer would not save an untrusted
+certificate if a different certificate with the same Distinguished Name (DN)
+had already been saved.
+     - The viewer now throws an error if a certificate is not yet valid (i.e.
+if the start of its validity period is in the future), regardless of whether
+the certificate is trusted.
+     - The viewer now asks for confirmation from the user before accepting an
+expired certificate, regardless of whether the certificate is trusted.
+     - Fixed an issue whereby the viewer would not save an untrusted
+certificate if the saved certificates file already existed.
+     - The viewer no longer displays a confirmation dialog if hostname
+verification fails for a saved certificate.
+
 
 2.2.4
 =====
