@@ -96,32 +96,32 @@ IDD_OPT_CONN_TAB DIALOG DISCARDABLE  0, 0, 335, 179
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Display",IDC_STATIC_DISPLAY,4,4,160,83
+    GROUPBOX        "Display",IDC_STATIC_DISPLAY,4,4,160,97
     LTEXT           "Scaling factor:",IDC_STATIC_SCALE,13,15,46,10,SS_CENTERIMAGE
     COMBOBOX        IDC_SCALE_EDIT,64,14,81,85,CBS_DROPDOWN |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     LTEXT           "%",IDC_STATIC_P,150,15,10,10,SS_CENTERIMAGE
     LTEXT           "Remote desktop size:",IDC_STATIC_DESKTOPSIZE,13,30,71,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_DESKTOPSIZE_EDIT,89,29,66,85,CBS_DROPDOWN |
+    COMBOBOX        IDC_DESKTOPSIZE_EDIT,21,42,136,85,CBS_DROPDOWN |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,44,145,10
-    LTEXT           "Span mode:",IDC_STATIC_SPAN,13,58,45,10,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,58,145,10
+    LTEXT           "Span mode:",IDC_STATIC_SPAN,13,72,45,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_SPAN,58,56,90,50,CBS_DROPDOWNLIST |
+    COMBOBOX        IDC_SPAN,58,70,90,50,CBS_DROPDOWNLIST |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,72,145,10
-    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,4,92,160,49
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,86,145,10
+    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,4,106,160,49
     CONTROL         "Enable remote cursor shape updates",IDC_CSHAPE_ENABLE_RADIO,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,13,
-                    103,145,10
+                    117,145,10
     CONTROL         "Draw remote cursor on the server",
                     IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,13,
-                    115,145,10
+                    129,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON,13,127,145,10
+                    "Button",BS_AUTORADIOBUTTON,13,141,145,10
     GROUPBOX        "Input",IDC_STATIC_MOUSE,171,4,160,67
     CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,180,15,109,10
     LTEXT           "Keyboard grab mode:",IDC_STATIC_GRAB,180,29,70,10,
@@ -684,7 +684,8 @@ options dialog\r\n\
 Equivalent of ""Global-->Local cursor shape"" in the options dialog\r\n\
 \r\n"
     IDS_HELP11
-"/desktopsize <w>x<h> | auto | server\r\n\
+"/desktopsize <W>x<H> |\r\n\
+             <W0>x<H0>+<X0>+<Y0>[,<W1>x<H1>+<X1>+<Y1>,...] | auto | server\r\n\
 Equivalent of ""Connection-->Display-->Desktop Size"" in the options dialog\r\n\
 \r\n"
     IDS_HELP12
@@ -891,7 +892,7 @@ BEGIN
     IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike some VNC flavors, TurboVNC uses shared sessions by default."
     IDC_ENCODING            "Choose one of these encoding methods based on the type of network you are using and your desired image quality and performance."
     IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote desktop by the specified percentage.  ""Fixed Aspect Ratio"" automatically scales the remote desktop image to the size of the viewer window, preserving the aspect ratio of the remote desktop."
-    IDC_DESKTOPSIZE_EDIT    "Resize the remote desktop to the specified size (example: 1920x1200), if the server supports it.  ""Auto"" resizes the remote desktop as needed to fit in the local window without using scrollbars.  ""Server"" disables remote desktop resizing."
+    IDC_DESKTOPSIZE_EDIT    "Resize the remote desktop to the specified size/screen layout (example: 1920x1200 or 1920x1200+0+0,1920x1200+1920+0).  ""Auto"" resizes the desktop as needed to fit in the viewer window without using scrollbars.  ""Server"" disables remote desktop resizing."
     IDC_DOTCURSOR_RADIO     "Show local cursor position as a dot."
     IDC_NOCURSOR_RADIO      "Do not show local cursor position."
 END

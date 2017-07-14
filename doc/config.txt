@@ -114,6 +114,24 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	continuously benchmark itself and periodically print the throughput of
 	various stages in its image pipeline to the console.
 
+{anchor: TVNC_SINGLESCREEN}
+| Environment Variable | ''TVNC_SINGLESCREEN = ''__''0 \| 1''__ |
+| Summary | Disable/enable forcing a single-screen layout when using \
+	automatic desktop resizing |
+| Platforms | All |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: The default behavior of the TurboVNC Viewer, when automatic
+	desktop resizing is enabled, is to request a desktop size from the server
+	that will fit within the viewer window without using scrollbars, and (if
+	multi-screen spanning is enabled) to request a screen layout from the server
+	that will align the server's screen boundaries with the client's when the
+	viewer window is in its default position.  Setting this environment variable
+	to 1 will restore the automatic desktop resizing behavior of previous
+	versions of the TurboVNC Viewer, thus forcing the server to use a
+	single-screen layout even if it supports multi-screen layouts.
+
 {anchor: VNC_VIA_CMD}
 | Environment Variable | ''VNC_VIA_CMD'', ''VNC_TUNNEL_CMD'' |
 | Summary | SSH command-line templates for use with the ''via'' and \
@@ -231,6 +249,16 @@ Start environment.
 	server will only affect the client's CLIPBOARD selection (in other words, you
 	will have to explicitly paste the server's clipboard contents by using a menu
 	option or hotkey on the client.)
+
+| Java System Property | ''turbovnc.singlescreen = ''__''0 \| 1''__ |
+| Summary | Disable/enable forcing a single-screen layout when using \
+	automatic desktop resizing |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: A more Java-friendly way of disabling the multi-screen-aware
+	automatic desktop resize feature.  See the ''TVNC_SINGLESCREEN'' environment
+	variable above for more details.
 
 | Java System Property | ''turbovnc.swingdb = ''__''0 \| 1''__ |
 | Summary | Disable/enable Swing double buffering |

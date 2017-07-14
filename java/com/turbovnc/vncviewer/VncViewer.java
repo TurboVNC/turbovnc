@@ -619,8 +619,7 @@ public class VncViewer implements Runnable, ActionListener,
       options.desktopSize.setSelectedItem("Server");
       options.scalingFactor.setEnabled(true);
     } else {
-      options.desktopSize.setSelectedItem(opts.desktopSize.width + "x" +
-                                          opts.desktopSize.height);
+      options.desktopSize.setSelectedItem(opts.desktopSize.getString());
       options.scalingFactor.setEnabled(true);
     }
 
@@ -1141,12 +1140,17 @@ public class VncViewer implements Runnable, ActionListener,
   static StringParameter desktopSize
   = new StringParameter("DesktopSize",
   "If the VNC server supports remote desktop resizing, then attempt to " +
-  "resize the remote desktop to the specified size (example: 1920x1200).  " +
-  "Setting this parameter to \"Auto\" causes the remote desktop to be " +
-  "resized to fit in the local window without using scrollbars (this is the " +
-  "default behavior.)  Setting this parameter to \"Server\" or \"0\" " +
-  "disables remote desktop resizing and uses the desktop size set by the " +
-  "server.", "Auto", "WxH, Auto, or Server");
+  "resize the remote desktop to the specified size (example: 1920x1200) or " +
+  "reconfigure the server's virtual screens with a specified layout " +
+  "(example: 1920x1200+0+0,1920x1200+1920+0).  Setting this parameter to " +
+  "\"Auto\" causes the remote desktop to be resized to fit in the viewer " +
+  "window without using scrollbars, and it causes the server's virtual " +
+  "screens to be reconfigured such that their screen boundaries align with " +
+  "the client's screen boundaries when the viewer window is in its default " +
+  "position (this is the default behavior.)  Setting this parameter to " +
+  "\"Server\" or \"0\" disables remote desktop resizing and uses the " +
+  "desktop size and screen configuration set by the server.", "Auto",
+  "WxH, W0xH0+X0+Y0[,W1xH1+X1+Y1,...], Auto, or Server");
 
   static BoolParameter fsAltEnter
   = new BoolParameter("FSAltEnter",

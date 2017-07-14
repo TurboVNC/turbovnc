@@ -195,14 +195,14 @@ static void
 rfbSpriteIsUp(rfbCursorInfoPtr pDevCursor)
 {
     pDevCursor->isUp = TRUE;
-    rfbScreen.cursorIsDrawn = TRUE;
+    rfbFB.cursorIsDrawn = TRUE;
 }
 
 static void
 rfbSpriteIsDown(rfbCursorInfoPtr pDevCursor)
 {
     pDevCursor->isUp = FALSE;
-    rfbScreen.cursorIsDrawn = FALSE;
+    rfbFB.cursorIsDrawn = FALSE;
 }
 
 /*
@@ -298,8 +298,7 @@ rfbSpriteReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
         if (DevHasCursor(pDev)) {
             pCursorInfo = RFBSPRITE(pDev);
 
-            if (rfbScreen.cursorIsDrawn &&
-                pCursorInfo->pScreen == pScreen &&
+            if (rfbFB.cursorIsDrawn && pCursorInfo->pScreen == pScreen &&
                 RegionContainsRect(pRegion, &pCursorInfo->saved) != rgnOUT) {
                 SPRITE_DEBUG(("Damage remove\n"));
                 rfbSpriteRemoveCursor(pDev, pScreen);
@@ -431,7 +430,7 @@ rfbSpriteGetImage(DrawablePtr pDrawable, int sx, int sy, int w, int h,
         for (pDev = inputInfo.devices; pDev; pDev = pDev->next) {
             if (DevHasCursor(pDev)) {
                 pCursorInfo = RFBSPRITE(pDev);
-                if (rfbScreen.cursorIsDrawn && pCursorInfo->pScreen == pScreen &&
+                if (rfbFB.cursorIsDrawn && pCursorInfo->pScreen == pScreen &&
                     ORG_OVERLAP(&pCursorInfo->saved, pDrawable->x, pDrawable->y,
                                 sx, sy, w, h)) {
                     SPRITE_DEBUG(("GetImage remove\n"));
@@ -462,7 +461,7 @@ rfbSpriteGetSpans(DrawablePtr pDrawable, int wMax, DDXPointPtr ppt,
             if (DevHasCursor(pDev)) {
                 pCursorInfo = RFBSPRITE(pDev);
 
-                if (rfbScreen.cursorIsDrawn && pCursorInfo->pScreen == pScreen) {
+                if (rfbFB.cursorIsDrawn && pCursorInfo->pScreen == pScreen) {
                     DDXPointPtr pts;
                     int *widths;
                     int nPts;
@@ -505,7 +504,7 @@ rfbSpriteSourceValidate(DrawablePtr pDrawable, int x, int y, int width,
         for (pDev = inputInfo.devices; pDev; pDev = pDev->next) {
             if (DevHasCursor(pDev)) {
                 pCursorInfo = RFBSPRITE(pDev);
-                if (rfbScreen.cursorIsDrawn && pCursorInfo->pScreen == pScreen &&
+                if (rfbFB.cursorIsDrawn && pCursorInfo->pScreen == pScreen &&
                     ORG_OVERLAP(&pCursorInfo->saved, pDrawable->x, pDrawable->y,
                                 x, y, width, height)) {
                     SPRITE_DEBUG(("SourceValidate remove\n"));
@@ -538,7 +537,7 @@ rfbSpriteCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
             /*
              * Damage will take care of destination check
              */
-            if (rfbScreen.cursorIsDrawn && pCursorInfo->pScreen == pScreen &&
+            if (rfbFB.cursorIsDrawn && pCursorInfo->pScreen == pScreen &&
                 RegionContainsRect(prgnSrc, &pCursorInfo->saved) != rgnOUT) {
                 SPRITE_DEBUG(("CopyWindow remove\n"));
                 rfbSpriteRemoveCursor(pDev, pScreen);
@@ -563,7 +562,7 @@ rfbSpriteBlockHandler(int i, pointer blockData, pointer pTimeout,
     for (pDev = inputInfo.devices; pDev; pDev = pDev->next) {
         if (DevHasCursor(pDev)) {
             pCursorInfo = RFBSPRITE(pDev);
-            if (pCursorInfo && !rfbScreen.cursorIsDrawn
+            if (pCursorInfo && !rfbFB.cursorIsDrawn
                 && pCursorInfo->pScreen == pScreen && pCursorInfo->shouldBeUp) {
                 SPRITE_DEBUG(("BlockHandler save"));
                 rfbSpriteSaveUnderCursor(pDev, pScreen);
@@ -573,11 +572,11 @@ rfbSpriteBlockHandler(int i, pointer blockData, pointer pTimeout,
     for (pDev = inputInfo.devices; pDev; pDev = pDev->next) {
         if (DevHasCursor(pDev)) {
             pCursorInfo = RFBSPRITE(pDev);
-            if (pCursorInfo && !rfbScreen.cursorIsDrawn &&
+            if (pCursorInfo && !rfbFB.cursorIsDrawn &&
                 pCursorInfo->pScreen == pScreen && pCursorInfo->shouldBeUp) {
                 SPRITE_DEBUG(("BlockHandler restore\n"));
                 rfbSpriteRestoreCursor(pDev, pScreen);
-                if (!rfbScreen.cursorIsDrawn)
+                if (!rfbFB.cursorIsDrawn)
                     WorkToDo = TRUE;
             }
         }
@@ -615,7 +614,7 @@ rfbSpriteInstallColormap(ColormapPtr pMap)
             if (DevHasCursor(pDev)) {
                 pCursorInfo = RFBSPRITE(pDev);
                 pCursorInfo->checkPixels = TRUE;
-                if (rfbScreen.cursorIsDrawn && pCursorInfo->pScreen == pScreen)
+                if (rfbFB.cursorIsDrawn && pCursorInfo->pScreen == pScreen)
                     rfbSpriteRemoveCursor(pDev, pScreen);
             }
         }
@@ -685,7 +684,7 @@ rfbSpriteStoreColors(ColormapPtr pMap, int ndef, xColorItem * pdef)
                 if (DevHasCursor(pDev)) {
                     pCursorInfo = RFBSPRITE(pDev);
                     pCursorInfo->checkPixels = TRUE;
-                    if (rfbScreen.cursorIsDrawn && pCursorInfo->pScreen == pScreen)
+                    if (rfbFB.cursorIsDrawn && pCursorInfo->pScreen == pScreen)
                         rfbSpriteRemoveCursor(pDev, pScreen);
                 }
             }
@@ -774,7 +773,7 @@ rfbSpriteSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
         if (pPointer->shouldBeUp)
             --pScreenPriv->numberOfCursors;
         pPointer->shouldBeUp = FALSE;
-        if (rfbScreen.cursorIsDrawn)
+        if (rfbFB.cursorIsDrawn)
             rfbSpriteRemoveCursor(pDev, pScreen);
         if (pScreenPriv->numberOfCursors == 0)
             rfbSpriteDisableDamage(pScreen, pScreenPriv);
@@ -784,7 +783,7 @@ rfbSpriteSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
     if (!pPointer->shouldBeUp)
         pScreenPriv->numberOfCursors++;
     pPointer->shouldBeUp = TRUE;
-    if (!rfbScreen.cursorIsDrawn)
+    if (!rfbFB.cursorIsDrawn)
         rfbSpriteRegisterBlockHandler(pScreen, pScreenPriv);
     if (pPointer->x == x &&
         pPointer->y == y &&
@@ -798,13 +797,13 @@ rfbSpriteSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
         pPointer->pCursor = pCursor;
         rfbSpriteFindColors(pPointer, pScreen);
     }
-    if (rfbScreen.cursorIsDrawn) {
+    if (rfbFB.cursorIsDrawn) {
         /* TODO: reimplement flicker-free MoveCursor */
         SPRITE_DEBUG(("SetCursor remove %d\n", pDev->id));
         rfbSpriteRemoveCursor(pDev, pScreen);
     }
 
-    if (!rfbScreen.cursorIsDrawn && pPointer->pCursor) {
+    if (!rfbFB.cursorIsDrawn && pPointer->pCursor) {
         SPRITE_DEBUG(("SetCursor restore %d\n", pDev->id));
         rfbSpriteSaveUnderCursor(pDev, pScreen);
         rfbSpriteRestoreCursor(pDev, pScreen);
@@ -886,14 +885,14 @@ rfbSpriteRemoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen)
     rfbSpriteScreenPtr pScreenPriv;
     rfbCursorInfoPtr pCursorInfo;
 
-    if (!rfbScreen.cursorIsDrawn || IsFloating(pDev))
+    if (!rfbFB.cursorIsDrawn || IsFloating(pDev))
         return;
 
     DamageDrawInternal(pScreen, TRUE);
     pScreenPriv = GetSpriteScreen(pScreen);
     pCursorInfo = RFBSPRITE(pDev);
 
-    rfbScreen.dontSendFramebufferUpdate = TRUE;
+    rfbFB.dontSendFramebufferUpdate = TRUE;
 
     rfbSpriteIsDown(pCursorInfo);
     rfbSpriteRegisterBlockHandler(pScreen, pScreenPriv);
@@ -912,7 +911,7 @@ rfbSpriteRemoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen)
     rfbSpriteEnableDamage(pScreen, pScreenPriv);
     DamageDrawInternal(pScreen, FALSE);
 
-    rfbScreen.dontSendFramebufferUpdate = FALSE;
+    rfbFB.dontSendFramebufferUpdate = FALSE;
 }
 
 /*
@@ -972,10 +971,10 @@ rfbSpriteRestoreCursor(DeviceIntPtr pDev, ScreenPtr pScreen)
     rfbSpriteComputeSaved(pDev, pScreen);
     pCursor = pCursorInfo->pCursor;
 
-    if (rfbScreen.cursorIsDrawn || !pCursor)
+    if (rfbFB.cursorIsDrawn || !pCursor)
         return;
 
-    rfbScreen.dontSendFramebufferUpdate = TRUE;
+    rfbFB.dontSendFramebufferUpdate = TRUE;
 
     x = pCursorInfo->x - (int) pCursor->bits->xhot;
     y = pCursorInfo->y - (int) pCursor->bits->yhot;
@@ -993,7 +992,7 @@ rfbSpriteRestoreCursor(DeviceIntPtr pDev, ScreenPtr pScreen)
     rfbSpriteEnableDamage(pScreen, pScreenPriv);
     DamageDrawInternal(pScreen, FALSE);
 
-    rfbScreen.dontSendFramebufferUpdate = FALSE;
+    rfbFB.dontSendFramebufferUpdate = FALSE;
 }
 
 /*

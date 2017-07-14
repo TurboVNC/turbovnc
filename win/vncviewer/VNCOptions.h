@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2017 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include "ScreenSet.h"
+
 #define LASTENCODING rfbEncodingZlibHex
 
 #define NOCURSOR 0
@@ -35,6 +37,11 @@
 #define MAX_LEN_COMBO 5
 
 #define MAX_SCALING_FACTOR 1000
+
+// With a max. of 255 screens and a max. framebuffer size of 32767x32767,
+// desktop size strings can get quite large, but this should accommodate the
+// worst case.  Fortunately we're not running MS-DOS anymore.
+#define MAX_DS_STR 8192
 
 #define SPAN_OPTS 3
 enum { SPAN_PRIMARY = 0, SPAN_ALL, SPAN_AUTO };
@@ -56,19 +63,55 @@ struct COMBOSTRING {
 #define SIZE_MANUAL 1
 #define SIZE_AUTO   2
 
-typedef struct _DesktopSize {
+struct DesktopSize
+{
+  DesktopSize() : mode(0), width(0), height(0) {}
+
   void set(int mode_, int width_, int height_) {
     mode = mode_;  width = width_;  height = height_;
   }
 
-  bool operator != (struct _DesktopSize& size) {
-    return mode != size.mode || width != size.width || height != size.height;
+  void set(int mode_, int width_, int height_, ScreenSet &layout_) {
+    mode = mode_;  width = width_;  height = height_;
+    layout = layout_;
+  }
+
+  bool operator != (DesktopSize &size) {
+    return mode != size.mode || width != size.width ||
+           height != size.height || layout != size.layout;
+  }
+
+  void getString(char *buf, int buflen) {
+    if (mode == SIZE_AUTO) {
+      snprintf(buf, buflen, "Auto");
+      return;
+    } else if (mode == SIZE_SERVER) {
+      snprintf(buf, buflen, "Server");
+      return;
+    } else {
+      if (layout.num_screens() < 2) {
+        snprintf(buf, buflen, "%dx%d\n", width, height);
+        return;
+      } else {
+        buf[0] = '\0';
+        ScreenSet::const_iterator iter, finalIter = layout.end();
+
+        finalIter--;
+        for (iter = layout.begin(); iter != layout.end(); ++iter) {
+          snprintf(&buf[strlen(buf)], buflen - strlen(buf), "%dx%d+%d+%d%s",
+                   WidthOf(iter->dimensions), HeightOf(iter->dimensions),
+                   iter->dimensions.left, iter->dimensions.top,
+                   iter != finalIter ? "," : "");
+        }
+      }
+    }
   }
 
   int mode;
   int width;
   int height;
-} DesktopSize;
+  ScreenSet layout;
+};
 
 
 class VNCOptions
@@ -135,7 +178,7 @@ class VNCOptions
     bool  m_requestShapeUpdates;
     bool  m_ignoreShapeUpdates;
     DesktopSize m_desktopSize;
-    char  m_oldDesktopSize[12];
+    char  m_oldDesktopSize[MAX_DS_STR];
 
     // Keyboard can be specified on command line as 8-digit hex
     char m_kbdname[9];
@@ -210,6 +253,6 @@ class VNCOptions
     bool m_running;
 
     void setHistoryLimit(int newLimit);
-  };
+};
 
 #endif // VNCOPTIONS_H__

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-08-05T11:36:19">
+<meta name="date" content="2017-08-05T11:41:07">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2920,6 +2920,46 @@ about how Hextile, RRE, and ZRLE work.</p>
     </dd>
 </dl>
 
+<p><a name="TVNC_SINGLESCREEN"></a></p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_SINGLESCREEN&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable forcing a single-screen layout when using automatic desktop resizing</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        The default behavior of the TurboVNC Viewer, when automatic desktop 
+        resizing is enabled, is to request a desktop size from the server that 
+        will fit within the viewer window without using scrollbars, and (if 
+        multi-screen spanning is enabled) to request a screen layout from the 
+        server that will align the server&rsquo;s screen boundaries with the 
+        client&rsquo;s when the viewer window is in its default position.  
+        Setting this environment variable to 1 will restore the automatic 
+        desktop resizing behavior of previous versions of the TurboVNC Viewer, 
+        thus forcing the server to use a single-screen layout even if it 
+        supports multi-screen layouts.
+    </dd>
+</dl>
+
 <p><a name="VNC_VIA_CMD"></a></p>
 
 <div class="table">
@@ -3137,6 +3177,33 @@ arguments in a Java Web Start environment.</p>
         will only affect the client&rsquo;s CLIPBOARD selection (in other words, 
         you will have to explicitly paste the server&rsquo;s clipboard contents 
         by using a menu option or hotkey on the client.)
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.singlescreen&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable forcing a single-screen layout when using automatic desktop resizing</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        A more Java-friendly way of disabling the multi-screen-aware automatic 
+        desktop resize feature.  See the <code>TVNC_SINGLESCREEN</code> 
+        environment variable above for more details.
     </dd>
 </dl>
 

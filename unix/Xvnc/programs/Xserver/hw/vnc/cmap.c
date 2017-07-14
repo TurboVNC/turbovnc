@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014, 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ from the X Consortium.
 
 #define SCREEN_PROLOGUE(scrn, field)            \
     ScreenPtr pScreen = scrn;                   \
-    rfbScreenInfoPtr prfb = &rfbScreen;         \
+    rfbFBInfoPtr prfb = &rfbFB;                 \
     pScreen->field = prfb->field;
 
 #define SCREEN_EPILOGUE(field, wrapper) \

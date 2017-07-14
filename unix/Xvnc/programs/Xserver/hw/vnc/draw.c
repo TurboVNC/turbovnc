@@ -244,7 +244,7 @@ void ClipToScreen(ScreenPtr pScreen, RegionPtr pRegion)
 
 #define SCREEN_PROLOGUE(scrn, field)            \
     ScreenPtr pScreen = scrn;                   \
-    rfbScreenInfoPtr prfb = &rfbScreen;         \
+    rfbFBInfoPtr prfb = &rfbFB;                 \
     pScreen->field = prfb->field;
 
 #define SCREEN_EPILOGUE(field, wrapper) \
@@ -259,7 +259,7 @@ void ClipToScreen(ScreenPtr pScreen, RegionPtr pRegion)
 Bool
 rfbCloseScreen(int i, ScreenPtr pScreen)
 {
-    rfbScreenInfoPtr prfb = &rfbScreen;
+    rfbFBInfoPtr prfb = &rfbFB;
 #ifdef RENDER
     PictureScreenPtr    ps;
 #endif
@@ -540,7 +540,7 @@ rfbCopyClip(GCPtr pgcDst, GCPtr pgcSrc)
 /****************************************************************************/
 
 #define GC_OP_PROLOGUE(pDrawable, pGC) \
-    rfbScreenInfoPtr prfb = &rfbScreen; \
+    rfbFBInfoPtr prfb = &rfbFB; \
     rfbGCPtr pGCPrivate = (rfbGCPtr) dixLookupPrivate(&(pGC)->devPrivates, \
                                                       &rfbGCKey); \
     GCFuncs *oldFuncs = pGC->funcs; \
@@ -1613,7 +1613,7 @@ rfbComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
              INT16 yDst, CARD16 width, CARD16 height)
 {
     ScreenPtr pScreen = pDst->pDrawable->pScreen;
-    rfbScreenInfoPtr prfb = &rfbScreen;
+    rfbFBInfoPtr prfb = &rfbFB;
     RegionRec tmpRegion, fbRegion;
     BoxRec box;
     PictureScreenPtr ps = GetPictureScreen(pScreen);
@@ -1709,7 +1709,7 @@ void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
                GlyphListPtr lists, GlyphPtr *glyphs)
 {
     ScreenPtr pScreen = pDst->pDrawable->pScreen;
-    rfbScreenInfoPtr prfb = &rfbScreen;
+    rfbFBInfoPtr prfb = &rfbFB;
     RegionRec *tmpRegion = NULL;
     PictureScreenPtr ps = GetPictureScreen(pScreen);
 
@@ -1723,8 +1723,8 @@ void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
 
         fbBox.x1 = 0;
         fbBox.y1 = 0;
-        fbBox.x2 = rfbScreen.width;
-        fbBox.y2 = rfbScreen.height;
+        fbBox.x2 = rfbFB.width;
+        fbBox.y2 = rfbFB.height;
         REGION_INIT(pScreen, &fbRegion, &fbBox, 0);
 
         REGION_INTERSECT(pScreen, tmpRegion, tmpRegion, &fbRegion);

@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012-2013, 2015-2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012-2013, 2015-2017 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -54,10 +54,6 @@ extern "C" {
 #define MAX_HOST_NAME_LEN 250
 
 #define TIGHT_ZLIB_BUFFER_SIZE 512
-
-
-#define WidthOf(rect) ((rect).right - (rect).left)
-#define HeightOf(rect) ((rect).bottom - (rect).top)
 
 
 class ClientConnection;
@@ -163,6 +159,7 @@ class ClientConnection : public omni_thread
     void Update(RECT *pRect);
     void SizeWindow(bool centered, bool resizeFullScreen = false,
                     bool manual = false);
+    void GetActualClientRect(RECT *rect);
     void PositionWindow(RECT &fullwinrect, bool centered,
                         bool dimensionsOnly = false);
     void PositionChildWindow();
@@ -186,7 +183,9 @@ class ClientConnection : public omni_thread
 
     void ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh);
     void ReadExtendedDesktopSize(rfbFramebufferUpdateRectHeader *pfburh);
+    ScreenSet ComputeScreenLayout(int width, int height);
     void SendDesktopSize(int width, int height);
+    void SendDesktopSize(int width, int height, ScreenSet layout);
 
     void InitSetPixels(void);
     setPixelsFunc setPixels;
@@ -251,11 +250,11 @@ class ClientConnection : public omni_thread
     void SetFullScreenMode(bool enable, bool suppressPrompt = false);
     bool InFullScreenMode();
     void RealiseFullScreenMode(bool suppressPrompt);
-    void GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
-                              int spanMode);
+    ScreenSet GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
+                                   int spanMode, bool verbose);
     void GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
     {
-      GetFullScreenMetrics(screenArea, workArea, m_opts.m_Span);
+      GetFullScreenMetrics(screenArea, workArea, m_opts.m_Span, true);
     }
     bool BumpScroll(int x, int y);
 
@@ -414,6 +413,7 @@ class ClientConnection : public omni_thread
     // Desktop resizing
     bool m_supportsSetDesktopSize, m_pendingServerResize;
     ScreenSet m_screenLayout;
+    bool m_checkLayout;
     bool m_waitingOnResizeTimer;
     UINT_PTR m_resizeTimer;
     int m_autoResizeWidth, m_autoResizeHeight;

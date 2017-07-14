@@ -201,6 +201,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 
   m_supportsSetDesktopSize = false;
   m_waitingOnResizeTimer = false;
+  m_checkLayout = false;
 
   m_firstUpdate = true;
 
@@ -1554,13 +1555,35 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
                                   bool manual)
 {
-  RECT fullwinrect, screenArea, workArea;
+  RECT fullwinrect, screenArea, workArea, winrect;
 
   if (InFullScreenMode() && !resizeFullScreen) {
     if (manual) {
+      bool checkLayoutNow = false;
+
       GetFullScreenMetrics(screenArea, workArea);
+      if (m_opts.m_desktopSize.mode == SIZE_AUTO) {
+        GetWindowRect(m_hwnd1, &winrect);
+        // If the window size is unchanged, check whether we need to force a
+        // desktop resize message to inform the server of a new screen layout
+        if (WidthOf(screenArea) == WidthOf(winrect) &&
+            HeightOf(screenArea) == HeightOf(winrect)) {
+          if (!EqualRect(&screenArea, &winrect))
+            m_checkLayout = true;
+          else
+            // A WM_MOVE message is unlikely to be sent to the window, so we
+            // need to check the layout immediately.
+            checkLayoutNow = true;
+        }
+      }
       SetWindowPos(m_hwnd1, HWND_TOPMOST, screenArea.left, screenArea.top,
         WidthOf(screenArea), HeightOf(screenArea), SWP_NOSIZE);
+      if (checkLayoutNow) {
+        int w = WidthOf(screenArea), h = HeightOf(screenArea);
+        ScreenSet layout = ComputeScreenLayout(w, h);
+        if (w >= 1 && h >= 1 && layout != m_screenLayout)
+          SendDesktopSize(w, h, layout);
+      }
     }
     return;
   }
@@ -1568,6 +1591,12 @@ void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
   if (m_opts.m_desktopSize.mode == SIZE_AUTO && manual) {
     GetFullScreenMetrics(screenArea, workArea);
     fullwinrect = workArea;
+    GetWindowRect(m_hwnd1, &winrect);
+    // If the window size is unchanged, check whether we need to force a
+    // desktop resize message to inform the server of a new screen layout
+    if (WidthOf(fullwinrect) == WidthOf(winrect) &&
+        HeightOf(fullwinrect) == HeightOf(winrect))
+      m_checkLayout = true;
     PositionWindow(fullwinrect, centered);
     return;
   } else if (m_opts.m_scaling && !m_opts.m_FitWindow) {
@@ -1597,8 +1626,6 @@ void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered,
   GetFullScreenMetrics(screenArea, workrect);
   int workwidth = workrect.right - workrect.left;
   int workheight = workrect.bottom - workrect.top;
-  vnclog.Print(2, "Screen work area is %d x %d\n",
-               workwidth, workheight);
 
   AdjustWindowRectEx(&fullwinrect, GetWindowLong(m_hwnd, GWL_STYLE),
                      FALSE, GetWindowLong(m_hwnd, GWL_EXSTYLE));
@@ -1668,6 +1695,20 @@ void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered,
   winplace.rcNormalPosition.bottom = y + m_winheight;
   SetWindowPlacement(m_hwnd1, &winplace);
   SetForegroundWindow(m_hwnd1);
+}
+
+
+void ClientConnection::GetActualClientRect(RECT *rect)
+{
+  GetClientRect(m_hwnd1, rect);
+
+  if (GetMenuState(GetSystemMenu(m_hwnd1, FALSE),
+        ID_TOOLBAR, MF_BYCOMMAND) == MF_CHECKED) {
+    RECT rtb;
+    GetWindowRect(m_hToolbar, &rtb);
+    int rtbheight = HeightOf(rtb) - 3;
+    rect->top += rtbheight;
+  }
 }
 
 
@@ -2528,6 +2569,17 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
       return 0;
     case WM_SIZE:
       _this->PositionChildWindow();
+      return 0;
+    case WM_MOVE:
+      if (_this->m_checkLayout) {
+        RECT clientRect;
+        _this->GetActualClientRect(&clientRect);
+        int w = WidthOf(clientRect), h = HeightOf(clientRect);
+        ScreenSet layout = _this->ComputeScreenLayout(w, h);
+        _this->m_checkLayout = false;
+        if (w >= 1 && h >= 1 && layout != _this->m_screenLayout)
+          _this->SendDesktopSize(w, h, layout);
+      }
       return 0;
     case WM_CLOSE:
       // Close the worker thread as well
@@ -3999,11 +4051,6 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
   RealiseFullScreenMode(true);
   if (InFullScreenMode())
     m_pendingServerResize = false;
-
-  if (m_opts.m_desktopSize.mode == SIZE_MANUAL && !m_firstUpdate) {
-    m_opts.m_desktopSize.width = pfburh->r.w;
-    m_opts.m_desktopSize.height = pfburh->r.h;
-  }
 }
 
 
@@ -4031,6 +4078,8 @@ void ClientConnection::ReadExtendedDesktopSize(
                              screen.flags));
   }
 
+  layout.debugPrint("LAYOUT RECEIVED");
+
   int reason = pfburh->r.x, result = pfburh->r.y;
 
   if ((reason == (signed)reasonClient) && (result != (signed)resultSuccess)) {
@@ -4038,7 +4087,7 @@ void ClientConnection::ReadExtendedDesktopSize(
     return;
   }
 
-  if (!layout.validate(pfburh->r.w, pfburh->r.h))
+  if (!layout.validate(pfburh->r.w, pfburh->r.h, true))
     vnclog.Print(-1, "Server sent us an invalid screen layout\n");
 
   m_supportsSetDesktopSize = true;
@@ -4047,36 +4096,78 @@ void ClientConnection::ReadExtendedDesktopSize(
   ReadNewFBSize(pfburh);
 }
 
+ScreenSet ClientConnection::ComputeScreenLayout(int width, int height)
+{
+  ScreenSet layout;
+  char env[256];  size_t envlen;
+
+  if (getenv_s(&envlen, env, 256, "TVNC_SINGLESCREEN") == 0 &&
+      !strcmp(env, "1")) {
+    layout = m_screenLayout;
+
+    if (layout.num_screens() == 0)
+      layout.add_screen(Screen());
+    else if (layout.num_screens() != 1) {
+      ScreenSet::iterator iter;
+      while (true) {
+        iter = layout.begin();
+        ++iter;
+
+        if (iter == layout.end())
+          break;
+
+        layout.remove_screen(iter->id);
+      }
+    }
+
+    layout.begin()->dimensions.left = 0;
+    layout.begin()->dimensions.top = 0;
+    layout.begin()->dimensions.right = width;
+    layout.begin()->dimensions.bottom = height;
+  } else {
+    RECT workArea, screenArea;
+    layout = GetFullScreenMetrics(screenArea, workArea, m_opts.m_Span, false);
+    layout.assignIDs(m_screenLayout);
+  }
+
+  return layout;
+}
 
 void ClientConnection::SendDesktopSize(int width, int height)
 {
-  ScreenSet::iterator iter;
   ScreenSet layout;
 
   if (!m_supportsSetDesktopSize)
     return;
 
-  layout = m_screenLayout;
-
-  if (layout.num_screens() == 0)
-    layout.add_screen(Screen());
-  else if (layout.num_screens() != 1) {
-
-    while (true) {
-      iter = layout.begin();
-      ++iter;
-
-      if (iter == layout.end())
-        break;
-
-      layout.remove_screen(iter->id);
+  if (m_opts.m_desktopSize.mode == SIZE_AUTO) {
+    layout = ComputeScreenLayout(width, height);
+  } else {
+    if (m_opts.m_desktopSize.mode != SIZE_MANUAL ||
+        m_opts.m_desktopSize.layout.num_screens() < 1) {
+      vnclog.Print(-1, "ERROR: Unexpected desktop size configuration");
+      return;
     }
+    layout = m_opts.m_desktopSize.layout;
+    // Map client screens to server screen IDs in the server's preferred order.
+    // This allows us to control the server's screen order from the client.
+    layout.assignIDs(m_screenLayout);
   }
 
-  layout.begin()->dimensions.left = 0;
-  layout.begin()->dimensions.top = 0;
-  layout.begin()->dimensions.right = width;
-  layout.begin()->dimensions.bottom = height;
+  SendDesktopSize(width, height, layout);
+}
+
+void ClientConnection::SendDesktopSize(int width, int height, ScreenSet layout)
+{
+  ScreenSet::const_iterator iter;
+
+  if (!m_supportsSetDesktopSize)
+    return;
+
+  if (!layout.validate(width, height, true)) {
+    vnclog.Print(-1, "Invalid screen layout\n");
+    return;
+  }
 
   rfbSetDesktopSizeMsg msg;
   msg.type = rfbSetDesktopSize;
@@ -4091,11 +4182,13 @@ void ClientConnection::SendDesktopSize(int width, int height)
     screen.id = Swap32IfLE(iter->id);
     screen.x = Swap16IfLE(iter->dimensions.left);
     screen.y = Swap16IfLE(iter->dimensions.top);
-    screen.w = Swap16IfLE(iter->dimensions.right);
-    screen.h = Swap16IfLE(iter->dimensions.bottom);
+    screen.w = Swap16IfLE(WidthOf(iter->dimensions));
+    screen.h = Swap16IfLE(HeightOf(iter->dimensions));
     screen.flags = Swap32IfLE(iter->flags);
     WriteExact((char *)&screen, sz_rfbScreenDesc);
   }
+
+  layout.debugPrint("LAYOUT SENT");
 }
 
 

@@ -1,0 +1,326 @@
+commit 609550d777f2aa6ac0d31bf7c62699e97e8dc218
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Jan 5 20:18:46 2011 -0800
+
+    xineramaproto 1.2.1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f548ea433c5ede2a9a4b896832e622e66dc7455e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Jan 5 20:17:56 2011 -0800
+
+    config: Add missing AC_CONFIG_SRCDIR
+    
+    Regroup AC statements under the Autoconf initialization section.
+    Regroup AM statements under the Automake initialization section.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b4af6b510f3f3f877b6eca5c9b6f8b2b7650f912
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:25:52 2010 -0400
+
+    config: update AC_PREREQ statement to 2.60
+    
+    Unrelated to the previous patches, the new value simply reflects
+    the reality that the minimum level for autoconf to configure
+    all x.org modules is 2.60 dated June 2006.
+    
+    ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.60.tar.gz
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit bbf13fdf9259886403347c4fd6f127bed0af4426
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Mar 28 19:00:31 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 51e0e392e34e543fadb873a1a1e15c01f96cc538
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 22 19:24:48 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit 1987cb77a792145d1ada7037530b637ff0a7be58
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Nov 16 11:13:30 2009 -0500
+
+    README: file created or updated #24206
+    
+    Contains a set of URLs to freedesktop.org.
+
+commit 714187d975e09664b2b949287bc8b8c3cc802f33
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 19:45:27 2009 -0500
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit 5c15d5e22cdbb9ce16bc989729eabff2ee6ec6bd
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:31:29 2009 -0500
+
+    Makefile.am: INSTALL file is missing or incorrect #24206
+    
+    The standard GNU file on building/installing  tarball is copied
+    using the XORG_INSTALL macro contained in XORG_DEFAULT_OPTIONS
+    Add INSTALL target
+
+commit 832556b97daaba4a500b92484de878fb3d26b882
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 18:11:36 2009 -0500
+
+    configure.ac: deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit c4ab44362b2f6a919eb789e7f17df6a36db9a5c4
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Nov 15 13:55:25 2009 -0500
+
+    configure.ac: AM_MAINTAINER_MODE missing #24238
+    
+    This turns off maintainer mode build rules in tarballs.
+    Works in conjunction with autogen.sh --enable-maintainer-mode
+
+commit 832ad52e71bd0f7f78621d00de1a2e8e0837d323
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Nov 14 18:26:47 2009 -0500
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 216c573fa004c1b7ae2bd273a340127515e329a7
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Oct 1 20:41:09 2009 +1000
+
+    xineramaproto 1.2
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 489b2bf3698a3c4537ff1a473f9f080d8219cf07
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Oct 1 20:34:09 2009 +1000
+
+    Require macros 1.3 for XORG_DEFAULT_OPTIONS
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 419bcf5831b06a1ab9d01ef1188e53b1478e2860
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Aug 27 11:39:16 2009 +1000
+
+    xineramaproto 1.1.99.1
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 21477147613c28c968b5e1eb9d8aea7017dd399d
+Author: Benjamin Close <Benjamin.Close@clearchain.com>
+Date:   Fri Feb 13 14:46:11 2009 +1030
+
+    The major/minor protocol versions exist in the proto headers not the lib/libXinerma userspace headers
+    
+    Signed-off-by: Benjamin Close <Benjamin.Close@clearchain.com>
+    Acked-by: Daniel Stone <daniel@fooishbar.org>
+    Acked-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit b8b3878351a148e527df44ddf8886917f00d1a85
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Tue Jan 27 20:06:28 2009 -0200
+
+    Janitor: Correct make distcheck and dont distribute autogen.sh
+
+commit e28d33b35a0a795aec7e3174b42a0f317c15a827
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Mon May 19 22:40:07 2008 +0930
+
+    Remove panoramiXext.h and Xinerama.h. Xlib headers and don't belong here.
+    
+    For furture amendmends to these files please refer to
+    git://anongit.freedesktop.org/git/xorg/lib/libXinerama
+
+commit 47f0250dfcbc8edd3c0d0420f560e1316f5a444a
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Mon May 19 22:36:31 2008 +0930
+
+    Nuke RCS tags.
+
+commit 29a5de547f301b8b3af265d87889ba08ef3a5c8e
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 16:39:15 2007 -0500
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit b845eec55045df17af46fead628e4814af6c1945
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Mon Sep 3 05:54:33 2007 -0400
+
+    Add *~ to .gitignore to skip patch/emacs droppings
+
+commit edd1f8255923146a6d8723649baa0018a8ca8962
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Jul 14 18:56:52 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit 6f36b1384ae09505815d4867e2a26781c4335f4e
+Author: Kevin E Martin <kem@kem.org>
+Date:   Thu Dec 15 00:24:40 2005 +0000
+
+    Update package version number for final X11R7 release candidate.
+
+commit a4319de7154a6f150dc32e45effd552681e877bb
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 19 02:48:16 2005 +0000
+
+    Update package version number for RC1 release.
+
+commit 7244429847b2bbed9b785463ff9e7086c6b39a34
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Fri Aug 19 00:13:46 2005 +0000
+
+    More updates for Panoramix -> Xinerama rename
+
+commit aba421a2e74a326a0e4387d3173308735a6263fd
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Thu Aug 18 23:38:59 2005 +0000
+
+    Xinerama protocol module should be named Xinerama, not Panoramix
+
+commit 74337d4f81c9050cb69da8fb825ebe9411b36140
+Author: Eric Anholt <anholt@freebsd.org>
+Date:   Tue Aug 2 19:19:39 2005 +0000
+
+    Add basic .cvsignore files for proto modules.
+
+commit c39a81928f245fa204030249868a422b65fec5a5
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri Jul 29 21:22:56 2005 +0000
+
+    Various changes preparing packages for RC0:
+    - Verify and update package version numbers as needed
+    - Implement versioning scheme
+    - Change bug address to point to bugzilla bug entry form
+    - Disable loadable i18n in libX11 by default (use --enable-loadable-i18n to
+        reenable it)
+    - Fix makedepend to use pkgconfig and pass distcheck
+    - Update build script to build macros first
+    - Update modular Xorg version
+
+commit 51af7343cc12fec7d7d3e72efb613c9055aeeabc
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sat May 21 04:12:42 2005 +0000
+
+    Set version to 1.1.
+
+commit 501d5823392a3ef6004bca877cfb5e9b4c346fd5
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:22:39 2005 +0000
+
+    revert last change, didn't do right thing at all, sorry for the noise
+
+commit ead21add6c28dc2ade81a9b244dfe626f20f785f
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:10:18 2005 +0000
+
+    Require automake 1.7 in AM_INIT_AUTOMAKE
+
+commit ff3b1c8f0b2eaf1010e2a1043585ceb232ba3e53
+Author: Josh Triplett <josh@speakeasy.net>
+Date:   Mon May 16 08:24:15 2005 +0000
+
+    Add COPYING file for Panoramix.
+
+commit 2d1fbdb4b20e9c12cf7c6c1872d5fd888f39e390
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Mon May 9 18:20:05 2005 +0000
+
+    Change all the protonames from <extension>Ext to <extension>Proto.
+
+commit 2cc4bdad59cbb32cc4d363b437ee0c4fa44b148b
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri May 6 01:46:31 2005 +0000
+
+    Initial build system files for proto module.
+
+commit b4e223f81287cf3f448266d8c7ac2ff5bb72e7a3
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Wed Dec 1 19:03:46 2004 +0000
+
+    Include X11/Xlib.h in Xinerama.h, since it uses libX11 functions (#1897).
+
+commit 87a2015dff7b7dc2bef6cdc61bf1ff169eee45c1
+Author: Egbert Eich <eich@suse.de>
+Date:   Fri Apr 23 18:43:06 2004 +0000
+
+    Merging XORG-CURRENT into trunk
+
+commit 93a7f9f29ea2630838fb5bf5852f15e282699e41
+Author: Egbert Eich <eich@suse.de>
+Date:   Sun Mar 14 08:31:36 2004 +0000
+
+    Importing vendor version xf86-4_4_99_1 on Sun Mar 14 00:26:39 PST 2004
+
+commit c7345384f43565544530a301df0bdd8acddc4e9e
+Author: Egbert Eich <eich@suse.de>
+Date:   Wed Mar 3 12:10:54 2004 +0000
+
+    Importing vendor version xf86-4_4_0 on Wed Mar 3 04:09:24 PST 2004
+
+commit 2c683ef717bf72bd1529f5418202957dd5750add
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 13:35:14 2004 +0000
+
+    readding XFree86's cvs IDs
+
+commit 3a23f49e5e0bcf6ac098053f223d82c5c7345ce2
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 09:22:28 2004 +0000
+
+    Importing vendor version xf86-4_3_99_903 on Wed Feb 26 01:21:00 PST 2004
+
+commit 2ecaf6adfe8f312f320424a2d8e312316e71e142
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Dec 19 20:54:21 2003 +0000
+
+    XFree86 4.3.99.902 (RC 2)
+
+commit cefe7009c777de6c98a7b4c342a7ea4a1f18c9ac
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Tue Nov 25 19:28:02 2003 +0000
+
+    XFree86 4.3.99.16 Bring the tree up to date for the Cygwin folks
+
+commit 0280e9a705e5ef149124700131e826f4706318dd
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    XFree86 4.3.0.1
+
+commit 319abb7b20ca59f1ed311fd973650d281bd69229
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:43 2003 +0000
+
+    Initial revision
+
+commit 550293c1888fb7e0b820633c2ee2162e24ff19f5
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 15:54:35 2003 +0000
+
+    R6.6 is the Xorg base-line

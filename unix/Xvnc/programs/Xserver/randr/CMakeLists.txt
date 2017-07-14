@@ -1,5 +1,7 @@
 include_directories(../mi ../render)
 
+add_definitions(-DXINERAMA)
+
 # This code has a lot of type puns.  Disable strict aliasing just to be safe.
 if(CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
@@ -16,4 +18,5 @@ add_library(randr STATIC
 	rrproperty.c
 	rrscreen.c
 	rrsdispatch.c
-	rrtransform.c)
+	rrtransform.c
+	rrxinerama.c)

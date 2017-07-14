@@ -581,13 +581,12 @@ SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
                 if (!SendTightHeader(t, x_best, y_best, w_best, h_best))
                     return FALSE;
 
-                fbptr = (cl->fb +
-                         (rfbScreen.paddedWidthInBytes * y_best) +
-                         (x_best * (rfbScreen.bitsPerPixel / 8)));
+                fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y_best) +
+                         (x_best * (rfbFB.bitsPerPixel / 8)));
 
                 (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
                                    &cl->format, fbptr, t->tightBeforeBuf,
-                                   rfbScreen.paddedWidthInBytes, 1, 1);
+                                   rfbFB.paddedWidthInBytes, 1, 1);
 
                 if (!SendSolidRect(t))
                     return FALSE;
@@ -732,8 +731,7 @@ CheckSolidTile##bpp(cl, x, y, w, h, colorPtr, needSameColor)                  \
     CARD##bpp colorValue;                                                     \
     int dx, dy;                                                               \
                                                                               \
-    fbptr = (CARD##bpp *)                                                     \
-        &cl->fb[y * rfbScreen.paddedWidthInBytes + x * (bpp/8)];              \
+    fbptr = (CARD##bpp *)&cl->fb[y * rfbFB.paddedWidthInBytes + x * (bpp/8)]; \
                                                                               \
     colorValue = *fbptr;                                                      \
     if (needSameColor && (CARD32)colorValue != *colorPtr)                     \
@@ -744,7 +742,7 @@ CheckSolidTile##bpp(cl, x, y, w, h, colorPtr, needSameColor)                  \
             if (colorValue != fbptr[dx])                                      \
                 return FALSE;                                                 \
         }                                                                     \
-        fbptr = (CARD##bpp *)((CARD8 *)fbptr + rfbScreen.paddedWidthInBytes); \
+        fbptr = (CARD##bpp *)((CARD8 *)fbptr + rfbFB.paddedWidthInBytes);     \
     }                                                                         \
                                                                               \
     *colorPtr = (CARD32)colorValue;                                           \
@@ -829,11 +827,11 @@ SendSubrect(threadparam *t, int x, int y, int w, int h)
     if (!SendTightHeader(t, x, y, w, h))
         return FALSE;
 
-    fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y)
-             + (x * (rfbScreen.bitsPerPixel / 8)));
+    fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y)
+             + (x * (rfbFB.bitsPerPixel / 8)));
 
     if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1 &&
-        rfbScreen.bitsPerPixel > 8)
+        rfbFB.bitsPerPixel > 8)
         return SendJpegRect(t, x, y, w, h, qualityLevel);
 
     t->paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
@@ -855,23 +853,23 @@ SendSubrect(threadparam *t, int x, int y, int w, int h)
         switch (cl->format.bitsPerPixel) {
         case 16:
             FastFillPalette16(t, (CARD16 *)fbptr, w,
-                              rfbScreen.paddedWidthInBytes/2, h);
+                              rfbFB.paddedWidthInBytes/2, h);
             break;
         default:
             FastFillPalette32(t, (CARD32 *)fbptr, w,
-                              rfbScreen.paddedWidthInBytes/4, h);
+                              rfbFB.paddedWidthInBytes/4, h);
         }
 
         if (t->paletteNumColors != 0 || qualityLevel == -1) {
             (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
                                &cl->format, fbptr, t->tightBeforeBuf,
-                               rfbScreen.paddedWidthInBytes, w, h);
+                               rfbFB.paddedWidthInBytes, w, h);
         }
     }
     else {
         (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
                            &cl->format, fbptr, t->tightBeforeBuf,
-                           rfbScreen.paddedWidthInBytes, w, h);
+                           rfbFB.paddedWidthInBytes, w, h);
 
         switch (cl->format.bitsPerPixel) {
         case 8:
@@ -1731,8 +1729,7 @@ SendJpegRect(threadparam *t, int x, int y, int w, int h, int quality)
         int inRed, inGreen, inBlue, i, j;
 
         tmpbuf = (unsigned char *)rfbAlloc(w * h * 3);
-        srcptr = (CARD16 *)
-            &cl->fb[y * rfbScreen.paddedWidthInBytes + x * ps];
+        srcptr = (CARD16 *)&cl->fb[y * rfbFB.paddedWidthInBytes + x * ps];
         dst = tmpbuf;
         for (j = 0; j < h; j++) {
             CARD16 *srcptr2 = srcptr;
@@ -1755,7 +1752,7 @@ SendJpegRect(threadparam *t, int x, int y, int w, int h, int quality)
                     ((inBlue  * 255 + rfbServerFormat.blueMax / 2)
                      / rfbServerFormat.blueMax);
             }
-            srcptr += rfbScreen.paddedWidthInBytes / ps;
+            srcptr += rfbFB.paddedWidthInBytes / ps;
             dst += w * 3;
         }
         srcbuf = tmpbuf;
@@ -1767,8 +1764,8 @@ SendJpegRect(threadparam *t, int x, int y, int w, int h, int quality)
             flags |= TJ_BGR;
         if (rfbServerFormat.bigEndian) flags ^= TJ_BGR;
         srcbuf = (unsigned char *)
-            &cl->fb[y * rfbScreen.paddedWidthInBytes + x * ps];
-        pitch = rfbScreen.paddedWidthInBytes;
+            &cl->fb[y * rfbFB.paddedWidthInBytes + x * ps];
+        pitch = rfbFB.paddedWidthInBytes;
     }
 
     if (tjCompress(t->j, srcbuf, w, pitch, h, ps,

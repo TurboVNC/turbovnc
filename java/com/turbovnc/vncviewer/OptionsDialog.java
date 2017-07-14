@@ -266,16 +266,32 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     Object[] desktopSizeOptions = {
       "Auto", "Server", "480x320", "640x360", "640x480", "800x480", "800x600",
-      "854x480", "960x540", "960x600", "960x640", "1024x640", "1024x768",
-      "1136x640", "1152x864", "1280x720", "1280x800", "1280x960", "1280x1024",
-      "1344x840", "1344x1008", "1360x768", "1366x768", "1400x1050", "1440x900",
-      "1600x900", "1600x1000", "1600x1200", "1680x1050", "1920x1080",
-      "1920x1200", "2048x1152", "2048x1536", "2560x1440", "2560x1600",
-      "2880x1800", "3200x1800" };
+      "854x480", "960x540", "960x600", "960x640",
+      "1024x640", "1024x640+0+0,1024x640+1024+0",
+      "1024x768", "1136x640", "1152x864",
+      "1280x720", "1280x720+0+0,1280x720+1280+0",
+      "1280x800", "1280x800+0+0,1280x800+1280+0",
+      "1280x960", "1280x1024",
+      "1344x840", "1344x840+0+0,1344x840+1344+0",
+      "1344x1008", "1360x768",
+      "1366x768", "1366x768+0+0,1366x768+1366+0",
+      "1400x1050",
+      "1440x900", "1440x900+0+0,1440x900+1440+0",
+      "1600x900", "1600x900+0+0,1600x900+1600+0",
+      "1600x1000", "1600x1000+0+0,1600x1000+1600+0",
+      "1600x1200", "1680x1050",
+      "1920x1080", "1920x1080+0+0,1920x1080+1920+0",
+      "1920x1200", "1920x1200+0+0,1920x1200+1920+0",
+      "2048x1152", "2048x1536",
+      "2560x1440", "2560x1440+0+0,2560x1440+2560+0",
+      "2560x1600", "2560x1600+0+0,2560x1600+2560+0",
+      "2880x1800", "2880x1800+0+0,2880x1800+2880+0",
+      "3200x1800", "3200x1800+0+0,3200x1800+3200+0" };
     JLabel desktopSizeLabel = new JLabel("Remote desktop size:");
     desktopSize = new JComboBox(desktopSizeOptions);
     desktopSize.setEditable(true);
     desktopSize.addItemListener(this);
+    desktopSize.setMaximumSize(desktopSize.getPreferredSize());
 
     Dialog.addGBComponent(desktopSizeLabel, displayPanel,
                           0, 1, 1, 1, 2, 2, 1, 0,
@@ -966,13 +982,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         vlog.error("Bogus desktop size");
         desktopSize.setSelectedItem(oldDesktopSize);
       } else {
-        String newsize;
-        if (size.mode == Options.SIZE_AUTO)
-          newsize = "Auto";
-        else if (size.mode == Options.SIZE_SERVER)
-          newsize = "Server";
-        else
-          newsize = size.width + "x" + size.height;
+        String newsize = size.getString();
         oldDesktopSize = newsize;
         if (!newsize.equals(newDesktopSize))
           desktopSize.setSelectedItem(newsize);

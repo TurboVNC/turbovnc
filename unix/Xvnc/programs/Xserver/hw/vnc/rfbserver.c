@@ -245,13 +245,12 @@ Bool
 InterframeOn(rfbClientPtr cl)
 {
     if (!cl->compareFB) {
-        if (!(cl->compareFB = (char *)malloc(rfbScreen.paddedWidthInBytes *
-                                             rfbScreen.height))) {
+        if (!(cl->compareFB = (char *)malloc(rfbFB.paddedWidthInBytes *
+                                             rfbFB.height))) {
             rfbLogPerror("InterframeOn: couldn't allocate comparison buffer");
             return FALSE;
         }
-        memset(cl->compareFB, 0, rfbScreen.paddedWidthInBytes *
-               rfbScreen.height);
+        memset(cl->compareFB, 0, rfbFB.paddedWidthInBytes * rfbFB.height);
         REGION_INIT(pScreen, &cl->ifRegion, NullBox, 0);
         cl->firstCompare = TRUE;
         rfbLog("Interframe comparison enabled\n");
@@ -269,7 +268,7 @@ InterframeOff(rfbClientPtr cl)
         rfbLog("Interframe comparison disabled\n");
     }
     cl->compareFB = NULL;
-    cl->fb = rfbScreen.pfbMemory;
+    cl->fb = rfbFB.pfbMemory;
     return;
 }
 
@@ -397,8 +396,8 @@ rfbNewClient(int sock)
     REGION_INIT(pScreen, &cl->copyRegion, NullBox, 0);
 
     box.x1 = box.y1 = 0;
-    box.x2 = rfbScreen.width;
-    box.y2 = rfbScreen.height;
+    box.x2 = rfbFB.width;
+    box.y2 = rfbFB.height;
     REGION_INIT(pScreen, &cl->modifiedRegion, &box, 0);
 
     REGION_INIT(pScreen, &cl->requestedRegion, NullBox, 0);
@@ -729,8 +728,8 @@ rfbProcessClientInitMessage(rfbClientPtr cl)
         return;
     }
 
-    si->framebufferWidth = Swap16IfLE(rfbScreen.width);
-    si->framebufferHeight = Swap16IfLE(rfbScreen.height);
+    si->framebufferWidth = Swap16IfLE(rfbFB.width);
+    si->framebufferHeight = Swap16IfLE(rfbFB.height);
     si->format = rfbServerFormat;
     si->format.redMax = Swap16IfLE(si->format.redMax);
     si->format.greenMax = Swap16IfLE(si->format.greenMax);
@@ -1366,23 +1365,86 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
         return;
     }
 
+    #define EDSERROR(format, args...) {  \
+        if (!strlen(errMsg))  \
+            snprintf(errMsg, 256, "Desktop resize ERROR: "format"\n", args);  \
+        result = rfbEDSResultInvalid;  \
+    }
+
     case rfbSetDesktopSize:
     {
-        int w = 0, h = 0, numScreens = 0, i;
-        rfbScreenDesc screen;
+        int i;
+        struct xorg_list newScreens;
+        rfbClientPtr cl2;
+        int result = rfbEDSResultSuccess;
+        char errMsg[256] = "\0";
         ScreenPtr pScreen = screenInfo.screens[0];
 
         READ(((char *)&msg) + 1, sz_rfbSetDesktopSizeMsg - 1)
 
-        numScreens = msg.sds.numScreens;
-        w = Swap16IfLE(msg.sds.w);
-        h = Swap16IfLE(msg.sds.h);
+        if (msg.sds.numScreens < 1)
+            EDSERROR("Requested number of screens %d is invalid",
+                     msg.sds.numScreens);
 
-        for (i = 0; i < numScreens; i++) {
-            READ((char *)&screen, sizeof(rfbScreenDesc))
+        msg.sds.w = Swap16IfLE(msg.sds.w);
+        msg.sds.h = Swap16IfLE(msg.sds.h);
+        if (msg.sds.w < 1 || msg.sds.h < 1)
+            EDSERROR("Requested framebuffer dimensions %dx%d are invalid",
+                     msg.sds.w, msg.sds.h);
+
+        xorg_list_init(&newScreens);
+        for (i = 0; i < msg.sds.numScreens; i++) {
+            rfbScreenInfo *screen = rfbNewScreen(0, 0, 0, 0, 0, 0);
+
+            READ((char *)&screen->s, sizeof(rfbScreenDesc))
+            screen->s.id = Swap32IfLE(screen->s.id);
+            screen->s.x = Swap16IfLE(screen->s.x);
+            screen->s.y = Swap16IfLE(screen->s.y);
+            screen->s.w = Swap16IfLE(screen->s.w);
+            screen->s.h = Swap16IfLE(screen->s.h);
+            screen->s.flags = Swap32IfLE(screen->s.flags);
+            if (screen->s.w < 1 || screen->s.h < 1)
+                EDSERROR("Screen 0x%.8x requested dimensions %dx%d are invalid",
+                         screen->s.id, screen->s.w, screen->s.h);
+            if (screen->s.x >= msg.sds.w || screen->s.y >= msg.sds.h ||
+                screen->s.x + screen->s.w > msg.sds.w ||
+                screen->s.y + screen->s.h > msg.sds.h)
+                EDSERROR("Screen 0x%.8x requested geometry %dx%d+%d+%d exceeds requested framebuffer dimensions",
+                         screen->s.id, screen->s.w, screen->s.h, screen->s.x,
+                         screen->s.y);
+            if (rfbFindScreenID(&newScreens, screen->s.id)) {
+                EDSERROR("Screen 0x%.8x duplicate ID", screen->s.id);
+                free(screen);
+            } else
+                rfbAddScreen(&newScreens, screen);
         }
 
-        ResizeDesktop(pScreen, cl, w, h);
+        if (cl->viewOnly) {
+            rfbLog("NOTICE: Ignoring remote desktop resize request from a view-only client.\n");
+            result = rfbEDSResultProhibited;
+        } else if (result == rfbEDSResultSuccess) {
+            result = ResizeDesktop(pScreen, cl, msg.sds.w, msg.sds.h,
+                                   &newScreens);
+            if (result == rfbEDSResultSuccess)
+                return;
+        } else
+            rfbLog(errMsg);
+
+        rfbRemoveScreens(&newScreens);
+
+        /* Send back the error only to the requesting client.  This loop is
+           necessary because the client may have been shut down as a result of
+           an error in ResizeDesktop(). */
+        for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+            if (cl2 == cl) {
+                cl2->pendingDesktopResize = TRUE;
+                cl2->reason = rfbEDSReasonClient;
+                cl2->result = result;
+                rfbSendFramebufferUpdate(cl2);
+                break;
+            }
+        }
+
         return;
     }
 
@@ -1784,9 +1846,9 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
      */
 
     if (cl->enableCursorShapeUpdates) {
-        if (rfbScreen.cursorIsDrawn)
+        if (rfbFB.cursorIsDrawn)
             rfbSpriteRemoveCursorAllDev(pScreen);
-        if (!rfbScreen.cursorIsDrawn && cl->cursorWasChanged)
+        if (!rfbFB.cursorIsDrawn && cl->cursorWasChanged)
             sendCursorShape = TRUE;
     }
 
@@ -1918,9 +1980,9 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
             int y = REGION_RECTS(&_updateRegion)[i].y1;
             int w = REGION_RECTS(&_updateRegion)[i].x2 - x;
             int h = REGION_RECTS(&_updateRegion)[i].y2 - y;
-            int pitch = rfbScreen.paddedWidthInBytes;
+            int pitch = rfbFB.paddedWidthInBytes;
             int ps = rfbServerFormat.bitsPerPixel / 8;
-            char *src = &rfbScreen.pfbMemory[y * pitch + x * ps];
+            char *src = &rfbFB.pfbMemory[y * pitch + x * ps];
             char *dst = &cl->compareFB[y * pitch + x * ps];
             int row, col;
             int hBlockSize = rfbICEBlockSize == 0 ? w : rfbICEBlockSize;
@@ -2131,9 +2193,9 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
                 int y = REGION_RECTS(&idRegion)[i].y1;
                 int w = REGION_RECTS(&idRegion)[i].x2 - x;
                 int h = REGION_RECTS(&idRegion)[i].y2 - y, rows;
-                int pitch = rfbScreen.paddedWidthInBytes;
+                int pitch = rfbFB.paddedWidthInBytes;
                 int ps = rfbServerFormat.bitsPerPixel / 8;
-                char *src = &rfbScreen.pfbMemory[y * pitch + x * ps];
+                char *src = &rfbFB.pfbMemory[y * pitch + x * ps];
                 char *dst = &cl->compareFB[y * pitch + x * ps];
                 rows = h;
                 while (rows--) {
@@ -2304,16 +2366,16 @@ rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
             h = REGION_RECTS(reg)[thisRect].y2 - y;
 
             if (cl->compareFB) {
-                int pitch = rfbScreen.paddedWidthInBytes;
+                int pitch = rfbFB.paddedWidthInBytes;
                 int ps = rfbServerFormat.bitsPerPixel / 8, rows = h;
-                char *src = &rfbScreen.pfbMemory[y * pitch + x * ps];
+                char *src = &rfbFB.pfbMemory[y * pitch + x * ps];
                 char *dst = &cl->compareFB[y * pitch + x * ps];
                 while (rows--) {
                     memcpy(dst, src, w * ps);
                     src += pitch;
                     dst += pitch;
                 }
-                src = &rfbScreen.pfbMemory[(y - dy) * pitch + (x - dx) * ps];
+                src = &rfbFB.pfbMemory[(y - dy) * pitch + (x - dx) * ps];
                 dst = &cl->compareFB[(y - dy) * pitch + (x - dx) * ps];
                 rows = h;
                 while (rows--) {
@@ -2364,8 +2426,8 @@ rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
     rfbFramebufferUpdateRectHeader rect;
     int nlines;
     int bytesPerLine = w * (cl->format.bitsPerPixel / 8);
-    char *fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y)
-                   + (x * (rfbScreen.bitsPerPixel / 8)));
+    char *fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y)
+                   + (x * (rfbFB.bitsPerPixel / 8)));
 
     /* Flush the buffer to guarantee correct alignment for translateFn(). */
     if (ublen > 0) {
@@ -2395,7 +2457,7 @@ rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
 
         (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
                            &cl->format, fbptr, &updateBuf[ublen],
-                           rfbScreen.paddedWidthInBytes, w, nlines);
+                           rfbFB.paddedWidthInBytes, w, nlines);
 
         ublen += nlines * bytesPerLine;
         h -= nlines;
@@ -2408,7 +2470,7 @@ rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
         if (!rfbSendUpdateBuf(cl))
             return FALSE;
 
-        fbptr += (rfbScreen.paddedWidthInBytes * nlines);
+        fbptr += (rfbFB.paddedWidthInBytes * nlines);
 
         nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
         if (nlines == 0) {
@@ -2636,8 +2698,8 @@ rfbSendDesktopSize(rfbClientPtr cl)
         rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
         rh.r.x = rh.r.y = 0;
     }
-    rh.r.w = Swap16IfLE(rfbScreen.width);
-    rh.r.h = Swap16IfLE(rfbScreen.height);
+    rh.r.w = Swap16IfLE(rfbFB.width);
+    rh.r.h = Swap16IfLE(rfbFB.height);
     if (WriteExact(cl, (char *)&rh,
         sz_rfbFramebufferUpdateRectHeader) < 0) {
         rfbLogPerror("rfbSendDesktopSize: write");
@@ -2646,21 +2708,58 @@ rfbSendDesktopSize(rfbClientPtr cl)
     }
 
     if (cl->enableExtDesktopSize) {
-        char numScreens[4] = {1, 0, 0, 0};
-        rfbScreenDesc screen;
-        if (WriteExact(cl, numScreens, 4) < 0) {
+        CARD8 numScreens[4] = { 0, 0, 0, 0 };
+        rfbScreenInfo *iter;
+        BOOL fakeScreen = FALSE;
+
+        xorg_list_for_each_entry(iter, &rfbScreens, entry) {
+            if (iter->output->crtc && iter->output->crtc->mode)
+                numScreens[0]++;
+        }
+        if (numScreens[0] < 1) {
+          numScreens[0] = 1;
+          fakeScreen = TRUE;
+        }
+
+        if (WriteExact(cl, (char *)numScreens, 4) < 0) {
             rfbLogPerror("rfbSendDesktopSize: write");
             rfbCloseClient(cl);
             return FALSE;
         }
-        screen.id = screen.flags = 0;
-        screen.x = screen.y = 0;
-        screen.w = rh.r.w;
-        screen.h = rh.r.h;
-        if (WriteExact(cl, (char *)&screen, sz_rfbScreenDesc) < 0) {
-            rfbLogPerror("rfbSendDesktopSize: write");
-            rfbCloseClient(cl);
-            return FALSE;
+
+        if (fakeScreen) {
+            rfbScreenInfo screen = *xorg_list_first_entry(&rfbScreens,
+                                                          rfbScreenInfo,
+                                                          entry);
+            screen.s.id = Swap32IfLE(screen.s.id);
+            screen.s.x = screen.s.y = 0;
+            screen.s.w = Swap16IfLE(rfbFB.width);
+            screen.s.h = Swap16IfLE(rfbFB.height);
+            screen.s.flags = Swap32IfLE(screen.s.flags);
+            if (WriteExact(cl, (char *)&screen.s, sz_rfbScreenDesc) < 0) {
+                rfbLogPerror("rfbSendDesktopSize: write");
+                rfbCloseClient(cl);
+                return FALSE;
+            }
+        } else {
+            xorg_list_for_each_entry(iter, &rfbScreens, entry) {
+                rfbScreenInfo screen = *iter;
+
+                if (screen.output->crtc && screen.output->crtc->mode) {
+                    screen.s.id = Swap32IfLE(screen.s.id);
+                    screen.s.x = Swap16IfLE(screen.s.x);
+                    screen.s.y = Swap16IfLE(screen.s.y);
+                    screen.s.w = Swap16IfLE(screen.s.w);
+                    screen.s.h = Swap16IfLE(screen.s.h);
+                    screen.s.flags = Swap32IfLE(screen.s.flags);
+                    if (WriteExact(cl, (char *)&screen.s,
+                                   sz_rfbScreenDesc) < 0) {
+                        rfbLogPerror("rfbSendDesktopSize: write");
+                        rfbCloseClient(cl);
+                        return FALSE;
+                    }
+                }
+            }
         }
     }
 

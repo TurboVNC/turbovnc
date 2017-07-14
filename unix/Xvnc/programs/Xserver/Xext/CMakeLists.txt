@@ -1,4 +1,5 @@
-include_directories(../miext/sync ../mi ../Xi)
+include_directories(../composite ../damageext ../miext/damage ../miext/sync
+	../mi ../render ../Xi ../xfixes)
 
 # This code has a lot of type puns.  Disable strict aliasing just to be safe.
 if(CMAKE_COMPILER_IS_GNUCC)
@@ -10,6 +11,9 @@ add_library(Xext-server STATIC
 	dpms.c
 	dpmsstubs.c
 	geext.c
+	panoramiX.c
+	panoramiXprocs.c
+	panoramiXSwap.c
 	saver.c
 	security.c
 	shape.c

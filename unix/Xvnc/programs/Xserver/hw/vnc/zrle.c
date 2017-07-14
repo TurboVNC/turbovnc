@@ -31,12 +31,12 @@
 
 #define GET_IMAGE_INTO_BUF(tx,ty,tw,th,buf)                                \
 {  char *fbptr = (cl->fb                                                   \
-                 + (rfbScreen.paddedWidthInBytes * ty)                     \
-                 + (tx * (rfbScreen.bitsPerPixel / 8)));                   \
+                 + (rfbFB.paddedWidthInBytes * ty)                         \
+                 + (tx * (rfbFB.bitsPerPixel / 8)));                       \
                                                                            \
   (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,           \
                      &cl->format, fbptr, (char*)buf,                       \
-                     rfbScreen.paddedWidthInBytes, tw, th); }
+                     rfbFB.paddedWidthInBytes, tw, th); }
 
 #define EXTRA_ARGS , rfbClientPtr cl
 

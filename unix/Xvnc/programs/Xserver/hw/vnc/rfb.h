@@ -38,6 +38,7 @@
 #include "colormapst.h"
 #include "gcstruct.h"
 #include "osdep.h"
+#include "list.h"
 #include <rfbproto.h>
 #include <turbovnc_devtypes.h>
 #include <vncauth.h>
@@ -157,6 +158,21 @@ typedef struct
     StoreColorsProcPtr                  StoreColors;
     SaveScreenProcPtr                   SaveScreen;
 
+} rfbFBInfo, *rfbFBInfoPtr;
+
+
+typedef struct _Res
+{
+  int w, h;
+} Res;
+
+typedef struct
+{
+  RROutputPtr output;
+  Bool idAssigned;
+  Res prefRes;
+  rfbScreenDesc s;
+  struct xorg_list entry;
 } rfbScreenInfo, *rfbScreenInfoPtr;
 
 
@@ -427,7 +443,7 @@ typedef struct rfbClientRec {
  */
 
 #define FB_UPDATE_PENDING(cl)                                           \
-    ((!(cl)->enableCursorShapeUpdates && !rfbScreen.cursorIsDrawn) ||   \
+    ((!(cl)->enableCursorShapeUpdates && !rfbFB.cursorIsDrawn) ||       \
      ((cl)->enableCursorShapeUpdates && (cl)->cursorWasChanged) ||      \
      ((cl)->enableCursorPosUpdates && (cl)->cursorWasMoved) ||          \
      REGION_NOTEMPTY((pScreen), &(cl)->copyRegion) ||                   \
@@ -691,7 +707,7 @@ extern char *desktopName;
 extern char rfbThisHost[];
 extern Atom VNC_LAST_CLIENT_ID;
 
-extern rfbScreenInfo rfbScreen;
+extern rfbFBInfo rfbFB;
 extern DevPrivateKeyRec rfbGCKey;
 extern rfbDevInfo virtualTabletTouch;
 extern rfbDevInfo virtualTabletStylus;
@@ -740,10 +756,27 @@ extern char *nvCtrlDisplay;
 /* randr.c */
 
 #ifdef RANDR
-extern Bool ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h);
+extern int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
+                         struct xorg_list *newScreens);
 extern Bool vncRRInit(ScreenPtr);
 extern void vncRRDeinit(ScreenPtr);
 #endif
+
+
+/* rfbscreen.c */
+
+extern struct xorg_list rfbScreens;
+
+void rfbAddScreen(struct xorg_list *list, rfbScreenInfo *screen);
+void rfbClipScreens(struct xorg_list *list, int w, int h);
+void rfbDupeScreens(struct xorg_list *newList, struct xorg_list *list);
+rfbScreenInfo *rfbFindScreen(struct xorg_list *list, CARD16 x, CARD16 y,
+                             CARD16 w, CARD16 h);
+rfbScreenInfo *rfbFindScreenID(struct xorg_list *list, CARD32 id);
+rfbScreenInfo *rfbNewScreen(CARD32 id, CARD16 x, CARD16 y, CARD16 w, CARD16 h,
+                            CARD32 flags);
+void rfbRemoveScreen(rfbScreenInfo *screen);
+void rfbRemoveScreens(struct xorg_list *list);
 
 
 /* rfbserver.c */

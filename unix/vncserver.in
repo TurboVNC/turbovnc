@@ -663,24 +663,20 @@ exit;
 
 sub CheckGeometryAndDepth
 {
-    if ($geometry =~ /^(\d+)x(\d+)$/) {
-        $width = $1; $height = $2;
+    foreach $tok (split/[,]/, $geometry) {
+        $width = -1;  $height = -1;  $x = 0;  $y = 0;
+
+        if ($tok =~ /^(\d+)x(\d+)$/) {
+            $width = $1;  $height = $2;
+        } elsif ($tok =~ /^(\d+)x(\d+)\+(\d+)$/) {
+            $width = $1;  $height = $2;  $x = $3;
+        } elsif ($tok =~ /^(\d+)x(\d+)\+(\d+)\+(\d+)$/) {
+            $width = $1;  $height = $2;  $x = $3;  $y = $4;
+        }
 
         if (($width<1) || ($height<1)) {
-            die "$prog: geometry $geometry is invalid\n";
+            die "$prog: geometry $tok is invalid\n";
         }
-
-        while (($width % 4)!=0) {
-            $width = $width + 1;
-        }
-
-        while (($height % 2)!=0) {
-            $height = $height + 1;
-        }
-
-        $geometry = "${width}x$height";
-    } else {
-        die "$prog: geometry $geometry is invalid\n";
     }
 
     if (($depth < 8) || ($depth > 32)) {
@@ -868,7 +864,8 @@ sub Usage
         "\n".
         "<OPTIONS> are Xvnc options, or:\n".
         "\n".
-        "        -geometry <WIDTH>x<HEIGHT>\n".
+        "        -geometry <WIDTH>x<HEIGHT> or\n".
+        "        -geometry <W0>x<H0>+<X0>+<Y0>[,<W1>x<H1>+<X1>+<Y1>,...]\n".
         "        -depth <DEPTH>\n".
         "        -pixelformat rgb<NNN>\n".
         "        -pixelformat bgr<NNN>\n".

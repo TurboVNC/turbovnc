@@ -22,13 +22,14 @@ Xvnc \- an X server providing VNC connectivity
 .ad l
 \fBXvnc\fR
 [:\fIdisplay\fR]
-[\-geometry\ \fIwidth\fRx\fIheight\fR] [\-depth\ \fIdepth\fR]
-[\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport\ \fIport\fR]
-[\-rfbport\ \fIport\fR] [\-rfbwait\ \fItime\fR] [\-nocursor]
-[\-rfbauth\ \%\fIpasswd-file\fR] [\-securitytypes\ \%\fItype-list\fR]
-[\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-pamsession]
-[\-noreverse] [\-noclipboardsend] [\-noclipboardrecv]
-[\-maxclipboard\ \fIbytes\fR]
+[\-geometry\ \fIwidth\fRx\fIheight\fR]
+[\-geometry\ \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]]
+[\-depth\ \fIdepth\fR] [\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR]
+[\-udpinputport\ \fIport\fR] [\-rfbport\ \fIport\fR] [\-rfbwait\ \fItime\fR]
+[\-nocursor] [\-rfbauth\ \%\fIpasswd-file\fR]
+[\-securitytypes\ \%\fItype-list\fR] [\-x509cert\ \fIcert\fR]
+[\-x509key\ \fIkey\fR] [\-pamsession] [\-noreverse] [\-noclipboardsend]
+[\-noclipboardrecv] [\-maxclipboard\ \fIbytes\fR]
 [\-idletimeout\ \fItime\fR] [\-httpd\ \fIdir\fR]
 [\-httpport\ \fIport\fR] [\-deferupdate\ \fItime\fR] [\-noflowcontrol]
 [\-alr\ \fItime\fR]
@@ -64,7 +65,13 @@ the \fBXserver\fR(1) manual page.
 The VNC-specific options are as follows:
 .TP
 \fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
-Set width and height of the virtual X display.
+Set width and height of the virtual X display (single-screen.)
+.TP
+\fB\-geometry\fR \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]
+Set multi-screen geometry of the virtual X display.  Wi and Hi are the width
+and height of Screen i, and Xi and Yi specify the offset of Screen i relative
+to the origin.  The framebuffer width and height are determined by the bounding
+box of all screens.
 .TP
 \fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
 Specify the pixel format of the virtual X display.  Xvnc can use any pixel

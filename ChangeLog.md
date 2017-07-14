@@ -1,7 +1,7 @@
 2.2 pre-beta
 ============
 
-### Significant changes relative to 2.1:
+### Significant changes relative to 2.1.2:
 
 1. Added a system menu option and hotkey (CTRL-ALT-SHIFT-V) that can be used to
 quickly toggle view-only mode on and off.
@@ -47,6 +47,40 @@ in a web page, but this mode of operation had some known usability issues and
 was increasingly receiving little or no attention from the TurboVNC community.
 The applet feature will continue to be supported in TurboVNC 2.1.x on a
 break/fix basis.
+
+6. The TurboVNC Server now has full support for the Xinerama extension, which
+allows multiple virtual screens to be configured within the same remote
+desktop.  This provides better usability for multi-screen environments, since
+dialogs and maximized application windows are no longer split across screen
+boundaries.  The server's screen layout can be configured in the following
+ways:
+
+    -  Multi-screen geometry descriptors, in the format
+`W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]]`, are now accepted in these places:
+        * The TurboVNC Server's `-geometry` command-line argument and the
+`$geometry` variable in turbovncserver.conf (thus allowing the user to specify
+a screen layout for the initial framebuffer)
+        * The "Remote desktop size" combo box in the TurboVNC Viewer's Options
+dialog, the TurboVNC Viewer's `-desktopsize` command-line argument, and the
+`DesktopSize` parameter in the Java TurboVNC Viewer (thus allowing the user to
+remotely request a specific screen layout)
+        * A new .vnc connection info file directive (`desktopsize`) that can
+be used instead of the `resizemode`, `desktopwidth`, and `desktopheight`
+directives
+
+    - The automatic desktop resize feature in the TurboVNC Viewer is now
+multi-screen aware in both windowed and full-screen modes.  When the viewer
+window is resized or reset to its default position, the viewer will now compute
+and request a new server-side screen layout that matches not only the viewer
+window boundaries but also the client's screen boundaries and the position of
+the taskbar/menu bar on the client.  The single-screen automatic desktop
+resizing behavior of the TurboVNC 2.1.x viewer can be restored by setting the
+`TVNC_SINGLESCREEN` environment variable or the `turbovnc.singlescreen` Java
+system property to `1`.
+
+    - The X RandR extension can be used, either from the command line
+(`xrandr`) or through the window manager's display configuration applet, to
+modify the server's screen layout.
 
 
 2.1.2

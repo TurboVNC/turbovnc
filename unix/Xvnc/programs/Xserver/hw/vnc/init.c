@@ -63,6 +63,7 @@ from the X Consortium.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -93,7 +94,7 @@ from the X Consortium.
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
 
-rfbScreenInfo rfbScreen;
+rfbFBInfo rfbFB;
 DevPrivateKeyRec rfbGCKey;
 
 static Bool initOutputCalled = FALSE;
@@ -126,7 +127,7 @@ static int rfbExtInputProc(DeviceIntPtr pDevice, int onoff);
 static Bool CheckDisplayNumber(int n);
 
 static Bool rfbAlwaysTrue();
-char *rfbAllocateFramebufferMemory(rfbScreenInfoPtr prfb);
+char *rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb);
 static Bool rfbCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y);
 static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
 static void rfbClientStateChange(CallbackListPtr *, pointer myData,
@@ -173,31 +174,58 @@ ddxProcessArgument(int argc, char *argv[], int i)
     static Bool firstTime = TRUE;
 
     if (firstTime) {
-        rfbScreen.width = RFB_DEFAULT_WIDTH;
-        rfbScreen.height = RFB_DEFAULT_HEIGHT;
-        rfbScreen.depth = RFB_DEFAULT_DEPTH;
-        rfbScreen.blackPixel = RFB_DEFAULT_BLACKPIXEL;
-        rfbScreen.whitePixel = RFB_DEFAULT_WHITEPIXEL;
-        rfbScreen.pfbMemory = NULL;
+        rfbFB.width = RFB_DEFAULT_WIDTH;
+        rfbFB.height = RFB_DEFAULT_HEIGHT;
+        xorg_list_init(&rfbScreens);
+        rfbAddScreen(&rfbScreens, rfbNewScreen(0, 0, 0, rfbFB.width,
+                                               rfbFB.height, 0));
+        rfbFB.depth = RFB_DEFAULT_DEPTH;
+        rfbFB.blackPixel = RFB_DEFAULT_BLACKPIXEL;
+        rfbFB.whitePixel = RFB_DEFAULT_WHITEPIXEL;
+        rfbFB.pfbMemory = NULL;
         gethostname(rfbThisHost, 255);
         interface.s_addr = htonl(INADDR_ANY);
         interface6 = in6addr_any;
         firstTime = FALSE;
     }
 
-    if (strcasecmp(argv[i], "-geometry") == 0) {    /* -geometry WxH */
+    if (strcasecmp(argv[i], "-geometry") == 0) {
+        /* -geometry WxH or W0xH0+X0+Y0[,W1xH1+X1+Y1,...] */
+        char *str, *token;
+        int index = 0, w, h, x, y;
+        int r = INT_MIN, b = INT_MIN;
         if (i + 1 >= argc) UseMsg();
-        if (sscanf(argv[i + 1], "%dx%d",
-                   &rfbScreen.width, &rfbScreen.height) != 2) {
-            ErrorF("Invalid geometry %s\n", argv[i + 1]);
-            UseMsg();
+        str = argv[i + 1];
+        while ((token = strsep(&str, ",")) != NULL) {
+            x = y = 0;
+            if ((sscanf(token, "%dx%d+%d+%d", &w, &h, &x, &y) != 4 &&
+                 sscanf(token, "%dx%d", &w, &h) != 2) ||
+                x < 0 || y < 0 || w < 1 || h < 1)
+                FatalError("Invalid geometry %s\n", token);
+            if (rfbFindScreen(&rfbScreens, x, y, w, h))
+                continue;
+            if (index == 0) {
+                rfbScreenInfo *screen;
+                screen = xorg_list_first_entry(&rfbScreens, rfbScreenInfo,
+                                               entry);
+                screen->s.x = x;  screen->s.y = y;
+                screen->s.w = w;  screen->s.h = h;
+            } else
+                rfbAddScreen(&rfbScreens, rfbNewScreen(0, x, y, w, h, 0));
+            if (x + w > r) r = x + w;
+            if (y + h > b) b = y + h;
+            index++;
+            if (index > 255)
+                FatalError("Cannot create more than 255 screens\n");
         }
+        rfbFB.width = r;
+        rfbFB.height = b;
         return 2;
     }
 
     if (strcasecmp(argv[i], "-depth") == 0) {       /* -depth D */
         if (i + 1 >= argc) UseMsg();
-        rfbScreen.depth = atoi(argv[i + 1]);
+        rfbFB.depth = atoi(argv[i + 1]);
         return 2;
     }
 
@@ -223,13 +251,13 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     if (strcasecmp(argv[i], "-blackpixel") == 0) {  /* -blackpixel n */
         if (i + 1 >= argc) UseMsg();
-        rfbScreen.blackPixel = atoi(argv[i + 1]);
+        rfbFB.blackPixel = atoi(argv[i + 1]);
         return 2;
     }
 
     if (strcasecmp(argv[i], "-whitepixel") == 0) {  /* -whitepixel n */
         if (i + 1 >= argc) UseMsg();
-        rfbScreen.whitePixel = atoi(argv[i + 1]);
+        rfbFB.whitePixel = atoi(argv[i + 1]);
         return 2;
     }
 
@@ -631,7 +659,7 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 static Bool
 rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
 {
-    rfbScreenInfoPtr prfb = &rfbScreen;
+    rfbFBInfoPtr prfb = &rfbFB;
     int dpix = 96, dpiy = 96;
     int ret;
     char *pbits;
@@ -1371,7 +1399,7 @@ rfbAlwaysTrue()
 
 
 char *
-rfbAllocateFramebufferMemory(rfbScreenInfoPtr prfb)
+rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb)
 {
     if (prfb->pfbMemory) return prfb->pfbMemory; /* already done */
 
@@ -1412,7 +1440,7 @@ ddxGiveUp(enum ExitCode error)
         rfbPAMEnd(cl);
 #endif
     ShutdownTightThreads();
-    free(rfbScreen.pfbMemory);
+    free(rfbFB.pfbMemory);
     if (initOutputCalled) {
         char unixSocketName[32];
         sprintf(unixSocketName, "/tmp/.X11-unix/X%s", display);
@@ -1453,12 +1481,16 @@ OsVendorInit()
     }
     if (rfbIdleTimeout > 0)
         IdleTimerSet();
-    if (rfbScreen.width > rfbMaxWidth || rfbScreen.height > rfbMaxHeight) {
-        rfbScreen.width = min(rfbScreen.width, rfbMaxWidth);
-        rfbScreen.height = min(rfbScreen.height, rfbMaxHeight);
+    if (rfbFB.width > rfbMaxWidth || rfbFB.height > rfbMaxHeight) {
+        rfbFB.width = min(rfbFB.width, rfbMaxWidth);
+        rfbFB.height = min(rfbFB.height, rfbMaxHeight);
         rfbLog("NOTICE: desktop size clamped to %dx%d per system policy\n",
-               rfbScreen.width, rfbScreen.height);
+               rfbFB.width, rfbFB.height);
     }
+    rfbClipScreens(&rfbScreens, rfbFB.width, rfbFB.height);
+    if (xorg_list_is_empty(&rfbScreens))
+        FatalError("All screens are outside of the framebuffer (%dx%d)",
+                   rfbFB.width, rfbFB.height);
 #ifdef XVNC_AuthPAM
     if (rfbAuthDisablePAMSession && rfbAuthPAMSession) {
         rfbLog("NOTICE: PAM sessions disabled per system policy\n");
@@ -1477,7 +1509,9 @@ OsVendorFatalError()
 void
 ddxUseMsg()
 {
-    ErrorF("-geometry WxH          set framebuffer width & height\n");
+    ErrorF("-geometry WxH          set framebuffer width & height (single-screen)\n");
+    ErrorF("-geometry W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]\n");
+    ErrorF("                       set multi-screen geometry (see man page)\n");
     ErrorF("-depth D               set framebuffer depth\n");
     ErrorF("-pixelformat format    set pixel format (BGRnnn or RGBnnn)\n");
     ErrorF("-udpinputport port     UDP port for keyboard/pointer data\n");

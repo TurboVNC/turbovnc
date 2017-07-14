@@ -85,7 +85,7 @@ extern void SecurityExtensionInit(INITARGS);
 #endif
 
 #if 1
-extern void PanoramiXExtensionInit(int argc, char *argv[]);
+extern void PanoramiXExtensionInit(INITARGS);
 #endif
 
 #if 1

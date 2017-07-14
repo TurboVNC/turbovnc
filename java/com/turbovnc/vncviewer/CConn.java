@@ -439,10 +439,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
 
       if (opts.desktopSize.mode == Options.SIZE_MANUAL)
-        sendDesktopSize(opts.desktopSize.width, opts.desktopSize.height);
+        sendDesktopSize(opts.desktopSize.width, opts.desktopSize.height,
+                        false);
       else if (opts.desktopSize.mode == Options.SIZE_AUTO) {
         Dimension availableSize = viewport.getAvailableSize();
-        sendDesktopSize(availableSize.width, availableSize.height);
+        sendDesktopSize(availableSize.width, availableSize.height, false);
       }
 
       firstUpdate = false;
@@ -540,41 +541,123 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
-  public void sendDesktopSize(int width, int height) {
-    sendDesktopSize(width, height, false);
-  }
-
-  // RFB thread when sending initial desktop size, EDT when sending automatic
-  // desktop size (writer() is synchronized.)
-  public void sendDesktopSize(int width, int height, boolean automatic) {
+  public final ScreenSet computeScreenLayout(int width, int height) {
+    java.awt.Point vpPos = viewport.getContentPane().getLocationOnScreen();
+    Rectangle vpRect = viewport.getContentPane().getBounds();
     ScreenSet layout;
 
-    layout = cp.screenLayout;
+    String env = System.getenv("TVNC_SINGLESCREEN");
+    if (VncViewer.getBooleanProperty("turbovnc.singlescreen", false) ||
+        (env != null && env.equals("1"))) {
+      layout = cp.screenLayout;
+
+      if (layout.numScreens() == 0)
+        layout.addScreen(new Screen());
+      else if (layout.numScreens() != 1) {
+        int i = 0;
+
+        for (Iterator<Screen> iter = layout.screens.iterator();
+             iter.hasNext(); i++) {
+          Screen screen = (Screen)iter.next();
+          if (i > 0)
+            iter.remove();
+        }
+      }
+
+      Screen screen0 = (Screen)layout.screens.iterator().next();
+      screen0.dimensions.tl.x = 0;
+      screen0.dimensions.tl.y = 0;
+      screen0.dimensions.br.x = width;
+      screen0.dimensions.br.y = height;
+
+      return layout;
+    }
+
+    layout = new ScreenSet();
+
+    vpRect.x = vpPos.x;
+    vpRect.y = vpPos.y;
+    if (showToolbar && !opts.fullScreen) {
+      vpRect.y += 22;
+      vpRect.height -= 22;
+    }
+
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gsList = ge.getScreenDevices();
+    for (GraphicsDevice gs : gsList) {
+      GraphicsConfiguration[] gcList = gs.getConfigurations();
+      for (GraphicsConfiguration gc : gcList) {
+        Rectangle s = gc.getBounds();
+        if (gc == gcList[0]) {
+          Rectangle screenRect = s.intersection(vpRect);
+
+          if (screenRect.isEmpty() || screenRect.width < 1 ||
+              screenRect.height < 1)
+            continue;
+
+          screenRect.x -= vpRect.x;
+          screenRect.y -= vpRect.y;
+
+          Screen screen = new Screen(0, screenRect.x, screenRect.y,
+                                     screenRect.width, screenRect.height, 0);
+
+          // We map client screens to server screens in the server's preferred
+          // order (which, in the case of the TurboVNC Server, is always the
+          // order of RANDR outputs), so we send the "primary" screen (the
+          // screen containing 0, 0) first.  This ensures that the window
+          // manager taskbar on the server will follow the taskbar on the
+          // client.
+          if (s.contains(0, 0))
+            layout.addScreen0(screen);
+          else
+            layout.addScreen(screen);
+        }
+      }
+    }
+
+    layout.assignIDs(cp.screenLayout);
+
+    return layout;
+  }
+
+  // RFB thread when sending initial desktop size, EDT when sending desktop
+  // size from component listener (writer() is synchronized.)
+  public void sendDesktopSize(int width, int height, boolean fromListener) {
+    ScreenSet layout;
 
     if (!cp.supportsSetDesktopSize)
       return;
 
-    if (layout.numScreens() == 0)
-      layout.addScreen(new Screen());
-    else if (layout.numScreens() != 1) {
-      int i = 0;
-
-      for (Iterator<Screen> iter = layout.screens.iterator();
-           iter.hasNext(); i++) {
-        Screen screen = (Screen)iter.next();
-        if (i > 0)
-          iter.remove();
+    if (opts.desktopSize.mode == Options.SIZE_AUTO)
+      layout = computeScreenLayout(width, height);
+    else {
+      if (opts.desktopSize.mode != Options.SIZE_MANUAL ||
+          opts.desktopSize.layout == null) {
+        vlog.error("ERROR: Unexpected desktop size configuration");
+        return;
       }
+      layout = opts.desktopSize.layout;
+      // Map client screens to server screen IDs in the server's preferred
+      // order.  This allows us to control the server's screen order from the
+      // client.
+      layout.assignIDs(cp.screenLayout);
     }
 
-    Screen screen0 = (Screen)layout.screens.iterator().next();
-    screen0.dimensions.tl.x = 0;
-    screen0.dimensions.tl.y = 0;
-    screen0.dimensions.br.x = width;
-    screen0.dimensions.br.y = height;
+    sendDesktopSize(width, height, layout, fromListener);
+  }
+
+  public void sendDesktopSize(int width, int height, ScreenSet layout,
+                              boolean fromListener) {
+    if (!cp.supportsSetDesktopSize)
+      return;
+
+    if (!layout.validate(width, height, true)) {
+      vlog.error("Invalid screen layout");
+      return;
+    }
 
     writer().writeSetDesktopSize(width, height, layout);
-    if (automatic)
+    if (fromListener)
       pendingAutoResize.setXYWH(0, 0, width, height);
   }
 
@@ -1116,6 +1199,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
     Rectangle span = getSpannedSize();
+    Dimension vpSize;
 
     if ((opts.scalingFactor == Options.SCALE_AUTO ||
          opts.scalingFactor == Options.SCALE_FIXEDRATIO) &&
@@ -1140,9 +1224,32 @@ public class CConn extends CConnection implements UserPasswdGetter,
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
     if (fullScreenWindow) {
+      java.awt.Point vpPos = viewport.getLocation();
+      boolean checkLayoutNow = false;
+      vpSize = viewport.getSize();
+
+      // If the window size is unchanged, check whether we need to force a
+      // desktop resize message to inform the server of a new screen layout
+      if (opts.desktopSize.mode == Options.SIZE_AUTO && manual &&
+          span.width == vpSize.width && span.height == vpSize.height) {
+        if (vpPos.x != span.x || vpPos.y != span.y)
+          checkLayout = true;
+        else
+          // The component listener is unlikely to be called, so we need to
+          // check the layout immediately.
+          checkLayoutNow = true;
+      }
+
       viewport.setGeometry(span.x, span.y, span.width, span.height);
       viewport.dx = x - span.x;
       viewport.dy = y - span.y;
+
+      if (checkLayoutNow) {
+        ScreenSet layout = computeScreenLayout(span.width, span.height);
+        if (!layout.equals(cp.screenLayout))
+          sendDesktopSize(span.width, span.height, layout, false);
+      }
+
       return;
     }
 
@@ -1178,6 +1285,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
         viewport.adjustWidth = sbWidth;
       }
     }
+
+    vpSize = viewport.getSize();
+    // If the window size is unchanged, check whether we need to force a
+    // desktop resize message to inform the server of a new screen layout
+    if (opts.desktopSize.mode == Options.SIZE_AUTO && manual &&
+        w == vpSize.width && h == vpSize.height)
+      checkLayout = true;
 
     viewport.setGeometry(x, y, w, h);
   }
@@ -1429,17 +1543,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (desktop != null)
         desktop.setScaledSize();
     }
-    if (opts.desktopSize.mode == Options.SIZE_AUTO) {
-      options.desktopSize.setSelectedItem("Auto");
+    options.desktopSize.setSelectedItem(opts.desktopSize.getString());
+    if (opts.desktopSize.mode == Options.SIZE_AUTO)
       options.scalingFactor.setEnabled(false);
-    } else if (opts.desktopSize.mode == Options.SIZE_SERVER) {
-      options.desktopSize.setSelectedItem("Server");
+    else
       options.scalingFactor.setEnabled(true);
-    } else {
-      options.desktopSize.setSelectedItem(opts.desktopSize.width + "x" +
-                                          opts.desktopSize.height);
-      options.scalingFactor.setEnabled(true);
-    }
   }
 
   public void getOptions() {
@@ -1478,7 +1586,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     Options.DesktopSize oldDesktopSize = opts.desktopSize;
     opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
-    if (desktop != null && !opts.desktopSize.isEqual(oldDesktopSize)) {
+    if (desktop != null && !opts.desktopSize.equals(oldDesktopSize)) {
       if (oldDesktopSize.mode != Options.SIZE_AUTO &&
           opts.desktopSize.mode == Options.SIZE_AUTO &&
           viewport.lionFSSupported() && opts.fullScreen &&
@@ -2213,6 +2321,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public boolean firstUpdate;
   private boolean pendingUpdate;
   private boolean continuousUpdates;
+  public boolean checkLayout;
 
   private boolean forceNonincremental;
 

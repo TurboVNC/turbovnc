@@ -145,7 +145,8 @@ public class Viewport extends JFrame {
                 Dimension availableSize = cc.viewport.getAvailableSize();
                 if (availableSize.width < 1 || availableSize.height < 1)
                   throw new ErrorException("Unexpected zero-size component");
-                cc.sendDesktopSize(availableSize.width, availableSize.height, true);
+                cc.sendDesktopSize(availableSize.width, availableSize.height,
+                                   true);
               }
             };
             timer = new Timer(500, actionListener);
@@ -178,6 +179,19 @@ public class Viewport extends JFrame {
           dx = dy = 0;
         }
         repaint();
+      }
+
+      public void componentMoved(ComponentEvent e) {
+        if (cc.opts.desktopSize.mode == Options.SIZE_AUTO &&
+            !cc.firstUpdate && !cc.pendingServerResize && cc.checkLayout) {
+          Dimension availableSize = cc.viewport.getAvailableSize();
+          int w = availableSize.width, h = availableSize.height;
+          ScreenSet layout = cc.computeScreenLayout(w, h);
+          cc.checkLayout = false;
+
+          if (w >= 1 && h >= 1 && !layout.equals(cc.cp.screenLayout))
+            cc.sendDesktopSize(w, h, layout, true);
+        }
       }
     });
   }

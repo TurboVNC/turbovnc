@@ -6,7 +6,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -122,12 +122,12 @@ sendHextiles##bpp(rfbClientPtr cl, int rx, int ry, int rw, int rh)            \
                     return FALSE;                                             \
             }                                                                 \
                                                                               \
-            fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y) +            \
-                     (x * (rfbScreen.bitsPerPixel / 8)));                     \
+            fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y) +                \
+                     (x * (rfbFB.bitsPerPixel / 8)));                         \
                                                                               \
             (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,    \
                                &cl->format, fbptr, (char *)clientPixelData,   \
-                               rfbScreen.paddedWidthInBytes, w, h);           \
+                               rfbFB.paddedWidthInBytes, w, h);               \
                                                                               \
             startUblen = ublen;                                               \
             updateBuf[startUblen] = 0;                                        \
@@ -171,7 +171,7 @@ sendHextiles##bpp(rfbClientPtr cl, int rx, int ry, int rw, int rh)            \
                 (*cl->translateFn)(cl->translateLookupTable,                  \
                                    &rfbServerFormat, &cl->format, fbptr,      \
                                    (char *)clientPixelData,                   \
-                                   rfbScreen.paddedWidthInBytes, w, h);       \
+                                   rfbFB.paddedWidthInBytes, w, h);           \
                                                                               \
                 memcpy(&updateBuf[ublen], (char *)clientPixelData,            \
                        w * h * (bpp / 8));                                    \

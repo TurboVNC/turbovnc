@@ -60,10 +60,10 @@ rfbSendRectEncodingRRE(rfbClientPtr cl, int x, int y, int w, int h)
     rfbRREHeader hdr;
     int nSubrects;
     int i;
-    char *fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y) +
-                   (x * (rfbScreen.bitsPerPixel / 8)));
+    char *fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y) +
+                   (x * (rfbFB.bitsPerPixel / 8)));
 
-    int maxRawSize = (rfbScreen.width * rfbScreen.height *
+    int maxRawSize = (rfbFB.width * rfbFB.height *
                       (cl->format.bitsPerPixel / 8));
 
     if (rreBeforeBufSize < maxRawSize) {
@@ -84,7 +84,7 @@ rfbSendRectEncodingRRE(rfbClientPtr cl, int x, int y, int w, int h)
 
     (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
                        &cl->format, fbptr, rreBeforeBuf,
-                       rfbScreen.paddedWidthInBytes, w, h);
+                       rfbFB.paddedWidthInBytes, w, h);
 
     switch (cl->format.bitsPerPixel) {
     case 8:

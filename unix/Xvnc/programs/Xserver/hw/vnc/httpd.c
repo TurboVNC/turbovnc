@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2015, 2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.

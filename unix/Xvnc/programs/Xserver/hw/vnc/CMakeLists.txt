@@ -75,6 +75,7 @@ add_library(vnc STATIC
 	input-xkb.c
 	kbdptr.c
 	randr.c
+	rfbscreen.c
 	rfbserver.c
 	rre.c
 	sockets.c
