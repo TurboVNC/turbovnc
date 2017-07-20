@@ -45,6 +45,10 @@ instance, by executing `xrandr --output TurboVNC --mode {new_mode}`.)
 6. Fixed an issue whereby the TurboVNC Server could not be built using GnuTLS
 3.4.0 or later.
 
+7. The TurboVNC Server now supports the anonymous Elliptic Curve Diffie-Hellman
+(ECDH) key exchange algorithm when built using GnuTLS 3.0.0 and later.  The
+Java/Mac/Un\*x TurboVNC Viewer already supports ECDH.
+
 
 2.1.1
 =====

@@ -105,14 +105,18 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     }
     if (anon) {
 #if GNUTLS_VERSION_NUMBER < 0x030400
-        static const int priority[] = { GNUTLS_KX_ANON_DH, 0 };
+        static const int priority[] = { GNUTLS_KX_ANON_DH,
+#if GNUTLS_VERSION_NUMBER >= 0x030000
+                                        GNUTLS_KX_ANON_ECDH,
+#endif
+                                        0 };
         if ((ret = gnutls_kx_set_priority(ctx->session, priority)) !=
             GNUTLS_E_SUCCESS) {
             rfbssl_error("gnutls_kx_set_priority()", ret);
             goto bailout;
         }
 #else
-        static const char priority[] = "NORMAL:+ANON-DH", *err;
+        static const char priority[] = "NORMAL:+ANON-ECDH:+ANON-DH", *err;
         if ((ret = gnutls_priority_set_direct(ctx->session, priority, &err)) !=
             GNUTLS_E_SUCCESS) {
             rfbssl_error("gnutls_priority_set_direct()", ret);
