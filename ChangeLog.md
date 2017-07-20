@@ -42,6 +42,9 @@ disabled.
 TurboVNC Server desktop to a smaller size using the X RandR 1.2 API (for
 instance, by executing `xrandr --output TurboVNC --mode {new_mode}`.)
 
+6. Fixed an issue whereby the TurboVNC Server could not be built using GnuTLS
+3.4.0 or later.
+
 
 2.1.1
 =====
