@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2017 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -619,15 +619,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (layout.numScreens() == 0)
       layout.addScreen(new Screen());
     else if (layout.numScreens() != 1) {
+      int i = 0;
 
-      while (true) {
-        Iterator<Screen> iter = layout.screens.iterator();
+      for (Iterator<Screen> iter = layout.screens.iterator();
+           iter.hasNext(); i++) {
         Screen screen = (Screen)iter.next();
-
-        if (!iter.hasNext())
-          break;
-
-        layout.removeScreen(screen.id);
+        if (i > 0)
+          iter.remove();
       }
     }
 

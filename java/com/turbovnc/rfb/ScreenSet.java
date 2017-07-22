@@ -70,10 +70,11 @@ public class ScreenSet {
     return true;
   }
 
-  public final void debugPrint() {
+  public final void debugPrint(String msg) {
+    vlog.debug(msg + ":");
     for (Iterator<Screen> iter = screens.iterator(); iter.hasNext();) {
       Screen refScreen = (Screen)iter.next();
-      vlog.error("    " + refScreen.id + " (0x" +
+      vlog.debug("    " + refScreen.id + " (0x" +
                  Integer.toHexString(refScreen.id) + "): " +
                  refScreen.dimensions.width() + "x" +
                  refScreen.dimensions.height() + "+" +
