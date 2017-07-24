@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import java.util.Iterator;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
+import com.turbovnc.rfb.Point;
 
 public class Viewport extends JFrame {
 
@@ -300,6 +301,23 @@ public class Viewport extends JFrame {
     setSize(w, h);
     setLocation(x, y);
     vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
+    // For unknown reasons, setting the position with a non-zero X or Y doesn't
+    // work properly on OS X until the component is visible, so we store the
+    // new position and call setLocation() again once the component is made
+    // visible.
+    if (VncViewer.os.startsWith("mac os x") && !isVisible())
+      deferredPosition = new Point(x, y);
+  }
+
+  public void setVisible(boolean visible) {
+    boolean wasVisible = isVisible();
+
+    super.setVisible(visible);
+
+    if (!wasVisible && visible && deferredPosition != null) {
+      setLocation(deferredPosition.x, deferredPosition.y);
+      deferredPosition = null;
+    }
   }
 
   public void showToolbar(boolean show) { showToolbar(show, false); }
@@ -511,6 +529,7 @@ public class Viewport extends JFrame {
   public int buttonPressType, buttonReleaseType, motionType;
   ArrayList<ExtInputDevice> devices;
   ExtInputEvent lastEvent = new ExtInputEvent();
+  Point deferredPosition;
 
   static LogWriter vlog = new LogWriter("Viewport");
 }

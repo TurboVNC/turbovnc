@@ -49,6 +49,10 @@ instance, by executing `xrandr --output TurboVNC --mode {new_mode}`.)
 (ECDH) key exchange algorithm when built using GnuTLS 3.0.0 and later.  The
 Java/Mac/Un\*x TurboVNC Viewer already supports ECDH.
 
+8. Fixed an issue in the Mac (Java) TurboVNC Viewer whereby the initial
+non-full-screen window was positioned incorrectly if it spanned multiple
+screens.
+
 
 2.1.1
 =====
