@@ -57,6 +57,14 @@ screens.
 spanning did not work at all if the secondary display was to the left of the
 primary display.
 
+10. Multi-screen spanning now works with the Linux/Un\*x TurboVNC Viewer in
+full-screen mode, if the viewer is using the TurboVNC Helper library.  (Due to
+limitations in X11, it is still not possible to use multi-screen spanning with
+the Linux/Un\*x TurboVNC Viewer in windowed mode.)  Also, the Linux/Un\*x
+TurboVNC Viewer now falls back to Java's built-in full-screen window feature,
+thus allowing full-screen mode to work with single-screen (Primary) spanning
+even if the TurboVNC Helper library is not available.
+
 
 2.1.1
 =====

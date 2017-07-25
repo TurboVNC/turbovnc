@@ -1107,8 +1107,9 @@ public class VncViewer extends javax.swing.JApplet
   "only the primary monitor, or whether it should span all monitors only if it " +
   "cannot fit on the primary monitor (Auto.)  When using automatic desktop " +
   "resizing, Auto has the same effect as Primary.  Due to general issues " +
-  "with spanning windows across multiple monitors in X11, this option is " +
-  "not available on Un*x/X11 platforms.", "Auto", "Primary, All, Auto");
+  "with spanning windows across multiple monitors in X11, this option does " +
+  "not work on Un*x/X11 platforms except in full-screen mode, and it " +
+  "requires the TurboVNC Helper library.", "Auto", "Primary, All, Auto");
 
   static BoolParameter currentMonitorIsPrimary
   = new BoolParameter("CurrentMonitorIsPrimary",

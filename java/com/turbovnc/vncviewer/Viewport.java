@@ -353,19 +353,18 @@ public class Viewport extends JFrame {
         vlog.info("WARNING: Could not find TurboVNC Helper JNI library.  If it is in a");
         vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
         vlog.info("  to the Java command line to specify its location.");
-        vlog.info("  Full-screen mode may not work correctly.");
-        if (VncViewer.osEID())
-          vlog.info("  Keyboard grabbing and extended input device support will be disabled.");
-        else if (VncViewer.osGrab())
+        if (VncViewer.isX11()) {
+          vlog.info("  Multi-screen spanning, keyboard grabbing, and extended input device");
+          vlog.info("  support will be disabled.");
+        } else if (VncViewer.osGrab())
           vlog.info("  Keyboard grabbing will be disabled.");
-
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
-        vlog.info("  Full-screen mode may not work correctly.");
-        if (VncViewer.osEID())
-          vlog.info("  Keyboard grabbing and extended input device support will be disabled.");
-        else if (VncViewer.osGrab())
+        if (VncViewer.isX11()) {
+          vlog.info("  Multi-screen spanning, keyboard grabbing, and extended input device");
+          vlog.info("  support will be disabled.");
+        } else if (VncViewer.osGrab())
           vlog.info("  Keyboard grabbing will be disabled.");
       }
     }
@@ -377,16 +376,19 @@ public class Viewport extends JFrame {
     if (isHelperAvailable()) {
       try {
         x11FullScreen(on);
+        return;
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper.");
-        vlog.info("  Full-screen mode may not work correctly.");
+        vlog.info("  Multi-screen spanning may not work correctly.");
         helperAvailable = false;
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
-        vlog.info("  Full-screen mode may not work correctly.");
+        vlog.info("  Multi-screen spanning may not work correctly.");
       }
     }
+    if (cc.primaryGD != null)
+      cc.primaryGD.setFullScreenWindow(on ? this : null);
   }
 
   public void grabKeyboardHelper(boolean on) {
@@ -530,6 +532,7 @@ public class Viewport extends JFrame {
   ArrayList<ExtInputDevice> devices;
   ExtInputEvent lastEvent = new ExtInputEvent();
   Point deferredPosition;
+  int leftMon, rightMon, topMon, bottomMon;
 
   static LogWriter vlog = new LogWriter("Viewport");
 }

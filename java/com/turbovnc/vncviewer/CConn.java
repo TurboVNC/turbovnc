@@ -1045,7 +1045,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     Rectangle primary = null, s0 = null;
     Rectangle span = new Rectangle(-1, -1, 0, 0);
     Insets in = new Insets(0, 0, 0, 0);
-    int tLeft = 0, tTop = 0, tRight = 0, tBottom = 0;
+    int tLeft = Integer.MAX_VALUE, tTop = Integer.MAX_VALUE,
+      tRight = Integer.MIN_VALUE, tBottom = Integer.MIN_VALUE;
+    int primaryID = 0;
     boolean equal = true;
     int sw = desktop.scaledWidth;
     int sh = desktop.scaledHeight;
@@ -1082,8 +1084,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
              (gc == gcList[0] && ((s.y < primary.y &&
                                    s.x < primary.x + primary.width) ||
                                   (s.x < primary.x &&
-                                   s.y < primary.y + primary.height)))))
+                                   s.y < primary.y + primary.height))))) {
           primary = s;
+          primaryGD = gs;
+          primaryID = i;
+        }
         if (VncViewer.currentMonitorIsPrimary.getValue() && viewport != null) {
           Rectangle vpRect = viewport.getBounds();
           if (opts.fullScreen && savedRect.width > 0 && savedRect.height > 0)
@@ -1093,18 +1098,33 @@ public class CConn extends CConnection implements UserPasswdGetter,
           if (area > maxArea) {
             maxArea = area;
             primary = s;
+            primaryGD = gs;
+            primaryID = i;
             primaryIsCurrent = true;
           }
         }
+
+        if (s.x < tLeft) {
+          tLeft = s.x;
+          viewport.leftMon = i;
+        }
+        if (s.x + s.width > tRight) {
+          tRight = s.x + s.width;
+          viewport.rightMon = i;
+        }
+        if (s.y < tTop) {
+          tTop = s.y;
+          viewport.topMon = i;
+        }
+        if (s.y + s.height > tBottom) {
+          tBottom = s.y + s.height;
+          viewport.bottomMon = i;
+        }
+
         if (gc == gcList[0])
           vlog.debug("Screen " + i++ + (fullScreen ? " FS " : " work ") +
                      "area: " + s.x + ", " + s.y + " " + s.width + " x " +
                      s.height);
-
-        tLeft = Math.min(tLeft, s.x);
-        tRight = Math.max(tRight, s.x + s.width);
-        tTop = Math.min(tTop, s.y);
-        tBottom = Math.max(tBottom, s.y + s.height);
 
         // If any monitors aren't equal in resolution to and evenly offset from
         // the primary, then we can't use the simple path.
@@ -1137,10 +1157,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
          (sh <= primary.height || span.height <= primary.height)) ||
         (opts.span == Options.SPAN_AUTO &&
          opts.desktopSize.mode == Options.SIZE_AUTO) ||
-        VncViewer.isX11())
-        // ^^ Multi-screen spanning doesn't even pretend to work under X11.
+        (VncViewer.isX11() && (!fullScreen ||
+                               !Viewport.isHelperAvailable()))) {
+      // Multi-screen spanning doesn't even pretend to work under X11 except
+      // for full-screen windows, and even then, the appropriate WM hints must
+      // be set using C.
       span = primary;
-    else if (equal && fullScreen)
+      viewport.leftMon = viewport.rightMon = viewport.topMon =
+        viewport.bottomMon = primaryID;
+    } else if (equal && fullScreen)
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
 
     vlog.debug("Spanned " + (fullScreen ? "FS " : "work ") + "area: " +
@@ -2278,6 +2303,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   Viewport viewport;
   boolean showToolbar;
   boolean keyboardGrabbed;
+  GraphicsDevice primaryGD;
 
   public double tDecode, tBlit;
   public long decodePixels, decodeRect, blitPixels, blits;
