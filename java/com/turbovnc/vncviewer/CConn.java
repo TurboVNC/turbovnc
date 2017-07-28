@@ -1011,12 +1011,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
             (Math.abs(s.x - s0.x) % s0.width) != 0)
             equal = false;
 
-        // If the screen areas of the primary monitor and this monitor overlap
-        // vertically, then allow the full-screen window to extend horizontally
+        // If the screen area of this monitor overlaps vertically with the
+        // multi-screen span area, then allow the window to extend horizontally
         // to this monitor, and constrain it vertically, if necessary, to fit
         // within this monitor's dimensions.
-        if (Math.min(s.y + s.height, s0.y + s0.height) -
-            Math.max(s.y, s0.y) > 0) {
+        if (Math.min(s.y + s.height, span.y + span.height) -
+            Math.max(s.y, span.y) > 0 &&
+            (s.x + s.width == span.x || span.x + span.width == s.x)) {
           int right = Math.max(s.x + s.width, span.x + span.width);
           int bottom = Math.min(s.y + s.height, span.y + span.height);
           span.x = Math.min(s.x, span.x);
@@ -1113,12 +1114,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
             (Math.abs(s.x - s0.x) % s0.width) != 0)
             equal = false;
 
-        // If the screen areas of the primary monitor and this monitor overlap
-        // vertically, then allow the full-screen window to extend horizontally
+        // If the screen/work area of this monitor overlaps vertically with the
+        // multi-screen span area, then allow the window to extend horizontally
         // to this monitor, and constrain it vertically, if necessary, to fit
         // within this monitor's dimensions.
-        if (Math.min(s.y + s.height, s0.y + s0.height) -
-            Math.max(s.y, s0.y) > 0) {
+        if (Math.min(s.y + s.height, span.y + span.height) -
+            Math.max(s.y, span.y) > 0 &&
+            (s.x + s.width == span.x || span.x + span.width == s.x)) {
           int right = Math.max(s.x + s.width, span.x + span.width);
           int bottom = Math.min(s.y + s.height, span.y + span.height);
           span.x = Math.min(s.x, span.x);

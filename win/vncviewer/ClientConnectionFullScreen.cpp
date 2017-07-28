@@ -1,5 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2010-2012, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2012, 2015, 2017 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -137,26 +137,24 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
         WidthOf(fsm->screenArea0)) != 0)
     fsm->equal = 0;
 
-  // If the screen areas of the primary monitor and this monitor overlap
-  // vertically, then allow the full-screen window to extend horizontally to
-  // this monitor, and constrain it vertically, if necessary, to fit within
-  // this monitor's dimensions.
-  if (min(mi.rcMonitor.bottom, fsm->screenArea0.bottom) -
-      max(mi.rcMonitor.top, fsm->screenArea0.top) > 0) {
+  // If the screen area of this monitor overlaps vertically with the
+  // multi-screen area, then allow the full-screen window to extend
+  // horizontally to this monitor, and constrain it vertically, if necessary,
+  // to fit within this monitor's dimensions.
+  if (min(mi.rcMonitor.bottom, fsm->screenArea.bottom) -
+      max(mi.rcMonitor.top, fsm->screenArea.top) > 0) {
     fsm->screenArea.top = max(mi.rcMonitor.top, fsm->screenArea.top);
     fsm->screenArea.left = min(mi.rcMonitor.left, fsm->screenArea.left);
     fsm->screenArea.right = max(mi.rcMonitor.right, fsm->screenArea.right);
     fsm->screenArea.bottom = min(mi.rcMonitor.bottom, fsm->screenArea.bottom);
   }
 
-  // If the work areas of the primary monitor and this monitor overlap
-  // vertically, and if the top portion of the primary monitor intersects with
-  // this monitor's work area, then allow the non-full-screen window to extend
-  // horizontally to this monitor, and constrain it vertically, if necessary,
-  // to fit within this monitor's work area dimensions.
-  if (mi.rcWork.top <= 0 && mi.rcWork.left >= 0 &&
-      min(mi.rcWork.bottom, fsm->workArea0.bottom) -
-      max(mi.rcWork.top, fsm->workArea0.top) > 0) {
+  // If the work area of this monitor overlaps vertically with the multi-screen
+  // work area, then allow the non-full-screen window to extend horizontally to
+  // this monitor, and constrain it vertically, if necessary, to fit within
+  // this monitor's work area.
+  if (min(mi.rcWork.bottom, fsm->workArea.bottom) -
+      max(mi.rcWork.top, fsm->workArea.top) > 0) {
     fsm->workArea.top = max(mi.rcWork.top, fsm->workArea.top);
     fsm->workArea.left = min(mi.rcWork.left, fsm->workArea.left);
     fsm->workArea.right = max(mi.rcWork.right, fsm->workArea.right);

@@ -53,6 +53,10 @@ Java/Mac/Un\*x TurboVNC Viewer already supports ECDH.
 non-full-screen window was positioned incorrectly if it spanned multiple
 screens.
 
+9. Fixed an issue in the Windows (native) TurboVNC Viewer whereby multi-screen
+spanning did not work at all if the secondary display was to the left of the
+primary display.
+
 
 2.1.1
 =====
