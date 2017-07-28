@@ -99,6 +99,15 @@ public class Configuration {
         continue;
       }
       desc = desc.trim();
+      if (current instanceof HeaderParameter) {
+        System.out.println(desc);
+        for (int i = 0; i < desc.length(); i++)
+          System.out.print("-");
+        current = current.next;
+        System.out.print("\n\n");
+        continue;
+      }
+
       System.out.print("--> " + current.getName() + "\n    ");
       if (current.getValues() != null)
         System.out.print("Values: " + current.getValues() + " ");
