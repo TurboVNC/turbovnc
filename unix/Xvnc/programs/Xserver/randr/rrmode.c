@@ -1,5 +1,6 @@
 /*
  * Copyright © 2006 Keith Packard
+ * Copyright © 2017 D. R. Commander
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -66,6 +67,13 @@ RRModeCreate(xRRModeInfo * modeInfo, const char *name, ScreenPtr userScreen)
     RRModePtr mode, *newModes;
 
     if (!RRInit())
+        return NULL;
+
+    /*
+     * The screen structure uses a signed short to represent width and height,
+     * so activating a mode with width or height > 32767 can crash the server.
+     */
+    if (modeInfo->width > MAXSHORT || modeInfo->height > MAXSHORT)
         return NULL;
 
     mode = malloc(sizeof(RRModeRec) + modeInfo->nameLength + 1);

@@ -66,7 +66,7 @@ int rfbALRSubsampLevel = TVNC_1X;
 int rfbCombineRect = 100;
 int rfbICEBlockSize = 256;
 Bool rfbInterframeDebug = FALSE;
-int rfbMaxWidth = 0, rfbMaxHeight = 0;
+int rfbMaxWidth = MAXSHORT, rfbMaxHeight = MAXSHORT;
 int rfbMaxClipboard = MAX_CUTTEXT_LEN;
 Bool rfbVirtualTablet = FALSE;
 Bool rfbMT = FALSE;

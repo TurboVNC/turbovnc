@@ -65,6 +65,27 @@ TurboVNC Viewer now falls back to Java's built-in full-screen window feature,
 thus allowing full-screen mode to work with single-screen (Primary) spanning
 even if the TurboVNC Helper library is not available.
 
+11. The TurboVNC Server will now clamp the desktop dimensions to 32767x32767
+regardless of the `max-desktop-size` setting in the security configuration
+file.  This prevents two issues:
+
+    - The server would fail to send framebuffer updates and would continuously
+log messages of the form "WARNING: Framebuffer update at 0,0 with dimensions
+0x0 has been clipped to the screen boundaries" if the desktop width or height
+was set, by way of the `-geometry` command-line argument or a remote desktop
+resize request, to a value greater than 32767.
+    - The server would segfault if a mode with a width or height greater than
+32767 was configured and enabled using the X RandR extension.
+
+    Although TurboVNC can handle framebuffer dimensions larger than this, the
+underlying X.org screen structure uses a signed short to represent width and
+height, and thus values larger than 32767 overflow the data type and can
+sometimes be interpreted as negative numbers.
+
+12. Closed a loophole that allowed users to use X RandR functions to make the
+desktop larger than the dimensions allowed by the `max-desktop-size` setting in
+the security configuration file.
+
 
 2.1.1
 =====

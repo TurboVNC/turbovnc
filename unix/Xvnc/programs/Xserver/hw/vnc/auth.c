@@ -687,6 +687,8 @@ ReadConfigFile(void)
                            rfbAuthConfigFile);
             }
 
+            if (w == 0) w = MAXSHORT;
+            if (h == 0) h = MAXSHORT;
             rfbMaxWidth = (CARD32)w;
             rfbMaxHeight = (CARD32)h;
             continue;

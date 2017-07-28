@@ -1450,8 +1450,7 @@ OsVendorInit()
     }
     if (rfbIdleTimeout > 0)
         IdleTimerSet();
-    if ((rfbScreen.width > rfbMaxWidth && rfbMaxWidth > 0) ||
-        (rfbScreen.height > rfbMaxHeight && rfbMaxHeight > 0)) {
+    if (rfbScreen.width > rfbMaxWidth || rfbScreen.height > rfbMaxHeight) {
         rfbScreen.width = min(rfbScreen.width, rfbMaxWidth);
         rfbScreen.height = min(rfbScreen.height, rfbMaxHeight);
         rfbLog("NOTICE: desktop size clamped to %dx%d per system policy\n",

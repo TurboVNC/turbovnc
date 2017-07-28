@@ -321,8 +321,7 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
   int ret = rfbEDSResultSuccess;
 
-  if ((width > rfbMaxWidth && rfbMaxWidth > 0) ||
-      (height > rfbMaxHeight && rfbMaxHeight > 0)) {
+  if (width > rfbMaxWidth || height > rfbMaxHeight) {
     width = min(width, rfbMaxWidth);
     height = min(height, rfbMaxHeight);
     rfbLog("NOTICE: desktop size clamped to %dx%d per system policy\n", width,
@@ -471,7 +470,7 @@ Bool vncRRInit(ScreenPtr pScreen)
   rp->rrCrtcSet = vncRRCrtcSet;
   rp->rrScreenSetSize = vncRRScreenSetSize;
 
-  RRScreenSetSizeRange(pScreen, 32, 32, 32768, 32768);
+  RRScreenSetSizeRange(pScreen, 32, 32, rfbMaxWidth, rfbMaxHeight);
   if ((crtc = RRCrtcCreate(pScreen, NULL)) == NULL) return FALSE;
   RRCrtcGammaSetSize(crtc, 256);
   if ((output = RROutputCreate(pScreen, "TurboVNC", 8, NULL)) == NULL)
