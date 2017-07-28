@@ -10,12 +10,10 @@ Server:
 corresponding Xvnc command-line options (`-mt` and `-nthreads`), which makes it
 easy to enable multithreaded Tight encoding in TurboVNC Server instances
 spawned by init.d/systemd.
-
     - The turbovncserver.conf file, which is parsed by the vncserver script,
 now includes two new variables (`$multiThread` and `$numThreads`) that can be
 used to configure multithreading on a system-wide basis or for all TurboVNC
 sessions started under a particular user account.
-
     - Previously, if multithreaded Tight encoding was enabled, the Tight
 encoder would use as many threads as there were CPU cores on the server, up to
 a maximum of 8.  However, because of limitations in the Tight encoding type,
