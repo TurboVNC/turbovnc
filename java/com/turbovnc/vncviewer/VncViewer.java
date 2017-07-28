@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2017 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -470,11 +470,11 @@ public class VncViewer extends javax.swing.JApplet
                     "Parameter names and values are case-insensitive (except for the value of\n" +
                     "Password.)\n\n" +
                     "The parameters are:\n\n");
-    System.err.println("\nTurboVNC Viewer v" + version + " (build " + build +
+    System.out.println("\nTurboVNC Viewer v" + version + " (build " + build +
                        ") [JVM: " + System.getProperty("os.arch") + "]");
-    System.err.println("Copyright (C) " + copyrightYear + " " + copyright);
-    System.err.println(url);
-    System.err.print(usage);
+    System.out.println("Copyright (C) " + copyrightYear + " " + copyright);
+    System.out.println(url);
+    System.out.print(usage);
     Configuration.listParams(80);
     System.exit(1);
   }
@@ -572,10 +572,10 @@ public class VncViewer extends javax.swing.JApplet
     if (e instanceof WarningException) {
       msgType = JOptionPane.WARNING_MESSAGE;
       title = "TurboVNC Viewer";
-      System.out.println(msg);
+      System.err.println(msg);
     } else if (e instanceof ErrorException) {
       title = "TurboVNC Viewer : Error";
-      System.out.println(msg);
+      System.err.println(msg);
     } else {
       if (!(e instanceof SystemException))
         msg = e.toString();

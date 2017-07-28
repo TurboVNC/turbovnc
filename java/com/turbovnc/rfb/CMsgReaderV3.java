@@ -181,7 +181,7 @@ public class CMsgReaderV3 extends CMsgReader {
 
     len = is.readU8();
     if (len > data.length) {
-      System.out.println("Ignoring fence with too large payload\n");
+      System.err.println("Ignoring fence with too large payload\n");
       is.skip(len);
       return;
     }
