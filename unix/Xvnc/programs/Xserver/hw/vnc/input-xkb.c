@@ -1,7 +1,7 @@
 /* Copyright (C) 2009 TightVNC Team
  * Copyright (C) 2009 Red Hat, Inc.
  * Copyright 2013 Pierre Ossman for Cendio AB
- * Copyright (C) 2014-2015 D. R. Commander
+ * Copyright (C) 2014-2015, 2017 D. R. Commander
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,7 @@ from The Open Group.
 #include "scrnintstr.h"
 #include "mi.h"
 #include "input-xkb.h"
+#include "rfb.h"
 
 
 extern DeviceIntPtr kbdDevice;
@@ -338,8 +339,7 @@ KeyCode *ReleaseShift(void)
       continue;
 
     nKeys++;
-    keys = (KeyCode *)realloc(keys, sizeof(KeyCode) * (nKeys + 1));
-    if (!keys) return NULL;
+    keys = (KeyCode *)rfbRealloc(keys, sizeof(KeyCode) * (nKeys + 1));
     keys[nKeys - 1] = key;
     keys[nKeys] = 0;
   }
@@ -426,8 +426,7 @@ KeyCode *ReleaseLevelThree(void)
       continue;
 
     nKeys++;
-    keys = (KeyCode *)realloc(keys, sizeof(KeyCode) * (nKeys + 1));
-    if (!keys) return NULL;
+    keys = (KeyCode *)rfbRealloc(keys, sizeof(KeyCode) * (nKeys + 1));
     keys[nKeys - 1] = key;
     keys[nKeys] = 0;
   }

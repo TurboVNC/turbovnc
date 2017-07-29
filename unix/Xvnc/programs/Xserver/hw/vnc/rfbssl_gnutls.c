@@ -72,11 +72,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     static Bool globalInit = FALSE;
     int ret;
 
-    if ((ctx = malloc(sizeof(struct rfbssl_ctx))) == NULL) {
-        rfbErr("Out of memory");
-        goto bailout;
-    }
-    memset(ctx, 0, sizeof(struct rfbssl_ctx));
+    ctx = rfbAlloc0(sizeof(struct rfbssl_ctx));
     if (!globalInit) {
         if ((ret = gnutls_global_init()) != GNUTLS_E_SUCCESS) {
             rfbssl_error("gnutls_global_init()", ret);

@@ -711,6 +711,10 @@ extern void rfbLogPerror(char *str);
 extern Bool AddExtInputDevice(rfbDevInfo *dev);
 extern void RemoveExtInputDevice(rfbClientPtr cl, int index);
 
+extern void *rfbAlloc(size_t size);
+extern void *rfbAlloc0(size_t size);
+extern void *rfbRealloc(void *ptr, size_t size);
+
 
 /* kbdptr.c */
 

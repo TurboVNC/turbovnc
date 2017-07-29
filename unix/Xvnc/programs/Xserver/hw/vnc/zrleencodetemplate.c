@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2002 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2003 Sun Microsystems, Inc.
+ * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,7 +111,7 @@ static void ZRLE_ENCODE (int x, int y, int w, int h,
       GET_IMAGE_INTO_BUF(tx,ty,tw,th,buf);
 
       if (cl->paletteHelper == NULL) {
-          cl->paletteHelper = (void *) calloc(sizeof(zrlePaletteHelper), 1);
+          cl->paletteHelper = (void *) rfbAlloc0(sizeof(zrlePaletteHelper));
       }
 
       ZRLE_ENCODE_TILE((PIXEL_T*)buf, tw, th, os,

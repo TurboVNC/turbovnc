@@ -19,7 +19,7 @@
  */
 
 /*
- *  Copyright (C) 2012-2016 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -531,11 +531,7 @@ SkipExact(rfbClientPtr cl, int len)
     char *tmpbuf = NULL;
     int bufLen = min(len, 65536), i, retval = 1;
 
-    tmpbuf = (char *)malloc(bufLen);
-    if (tmpbuf == NULL) {
-        rfbLogPerror("SkipExact: out of memory");
-        return -1;
-    }
+    tmpbuf = (char *)rfbAlloc(bufLen);
 
     for (i = 0; i < len; i += bufLen) {
         retval = ReadExact(cl, tmpbuf, min(bufLen, len - i));

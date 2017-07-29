@@ -120,7 +120,7 @@ void
 IdleTimerCheck(void)
 {
     if (idleTimeout >= 0.0 && gettime() >= idleTimeout)
-        FatalError("TurboVNC server has been idle for %u seconds.  Exiting.\n",
+        FatalError("TurboVNC server has been idle for %u seconds.  Exiting.",
                    (unsigned int)rfbIdleTimeout);
 }
 
@@ -371,14 +371,7 @@ rfbNewClient(int sock)
         fprintf(stderr, ")\n");
     }
 
-    cl = (rfbClientPtr)malloc(sizeof(rfbClientRec));
-    if (cl == NULL) {
-        rfbLog("rfbNewClient: out of memory\n");
-        rfbCloseSock(sock);
-        return NULL;
-    }
-
-    memset(cl, 0, sizeof(rfbClientRec));
+    cl = (rfbClientPtr)rfbAlloc0(sizeof(rfbClientRec));
 
     if (rfbClientHead == NULL && captureFile) {
       cl->captureFD = open(captureFile, O_CREAT | O_EXCL | O_WRONLY,

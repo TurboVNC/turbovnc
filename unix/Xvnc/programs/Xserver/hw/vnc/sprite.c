@@ -6,7 +6,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2014, 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -330,9 +330,7 @@ rfbSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
         (&rfbSpriteDevPrivatesKeyRec, PRIVATE_DEVICE, sizeof(rfbCursorInfoRec)))
         return FALSE;
 
-    pScreenPriv = malloc(sizeof(rfbSpriteScreenRec));
-    if (!pScreenPriv)
-        return FALSE;
+    pScreenPriv = rfbAlloc(sizeof(rfbSpriteScreenRec));
 
     pScreenPriv->pDamage = DamageCreate(rfbSpriteReportDamage,
                                         NULL,

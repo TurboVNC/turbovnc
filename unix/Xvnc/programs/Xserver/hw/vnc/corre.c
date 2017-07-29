@@ -7,7 +7,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2014, 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -97,17 +97,17 @@ rfbSendSmallRectEncodingCoRRE(rfbClientPtr cl, int x, int y, int w, int h)
     if (rreBeforeBufSize < maxRawSize) {
         rreBeforeBufSize = maxRawSize;
         if (rreBeforeBuf == NULL)
-            rreBeforeBuf = (char *)malloc(rreBeforeBufSize);
+            rreBeforeBuf = (char *)rfbAlloc(rreBeforeBufSize);
         else
-            rreBeforeBuf = (char *)realloc(rreBeforeBuf, rreBeforeBufSize);
+            rreBeforeBuf = (char *)rfbRealloc(rreBeforeBuf, rreBeforeBufSize);
     }
 
     if (rreAfterBufSize < maxRawSize) {
         rreAfterBufSize = maxRawSize;
         if (rreAfterBuf == NULL)
-            rreAfterBuf = (char *)malloc(rreAfterBufSize);
+            rreAfterBuf = (char *)rfbAlloc(rreAfterBufSize);
         else
-            rreAfterBuf = (char *)realloc(rreAfterBuf, rreAfterBufSize);
+            rreAfterBuf = (char *)rfbRealloc(rreAfterBuf, rreAfterBufSize);
     }
 
     (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,

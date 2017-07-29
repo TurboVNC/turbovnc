@@ -13,6 +13,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,7 +52,7 @@ rfbInitColourMapSingleTableOUT(char **table, rfbPixelFormat *in,
     int nEntries = 1 << in->bitsPerPixel;
 
     if (*table) free(*table);
-    *table = (char *)malloc(nEntries * sizeof(OUT_T));
+    *table = (char *)rfbAlloc(nEntries * sizeof(OUT_T));
     t = (OUT_T *)*table;
 
     pent = (EntryPtr)&rfbInstalledColormap->red[0];

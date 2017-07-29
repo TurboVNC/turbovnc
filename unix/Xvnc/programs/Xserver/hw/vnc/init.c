@@ -739,7 +739,7 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
         fbPictureInit(pScreen, 0, 0);
 
     if (!dixRegisterPrivateKey(&rfbGCKey, PRIVATE_GC, sizeof(rfbGCRec))) {
-        FatalError("rfbScreenInit: dixRegisterPrivateKey failed\n");
+        FatalError("rfbScreenInit: dixRegisterPrivateKey failed");
     }
 
     prfb->cursorIsDrawn = FALSE;
@@ -910,14 +910,14 @@ InitInput(int argc, char *argv[])
 
     if (AllocDevicePair(serverClient, "TurboVNC", &p, &k, rfbMouseProc,
                         rfbKeybdProc, FALSE) != Success)
-        FatalError("Could not initialize TurboVNC input devices\n");
+        FatalError("Could not initialize TurboVNC input devices");
 
     if (ActivateDevice(p, TRUE) != Success ||
         ActivateDevice(k, TRUE) != Success)
-        FatalError("Could not activate TurboVNC input devices\n");
+        FatalError("Could not activate TurboVNC input devices");
 
     if (!EnableDevice(p, TRUE) || !EnableDevice(k, TRUE))
-        FatalError("Could not enable TurboVNC input devices\n");
+        FatalError("Could not enable TurboVNC input devices");
 
     mieqInit();
     mieqSetHandler(ET_KeyPress, vncXkbProcessDeviceEvent);
@@ -959,7 +959,7 @@ AddExtInputDevice(rfbDevInfo *dev)
     }
 
     if (asprintf(&dev->pDev->name, dev->name) < 0) {
-        rfbLogPerror("ERROR: Could not initialize extended input device\n");
+        rfbLogPerror("ERROR: Could not initialize extended input device");
         goto bailout;
     }
     dev->pDev->public.processInputProc = ProcessOtherEvent;
@@ -1256,9 +1256,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         (pProp->type == XA_STRING) && (pProp->format == 8) &&
         rfbSyncCutBuffer) {
         char *str;
-        str = (char *)malloc(pProp->size + 1);
-        if (!str)
-            FatalError("rfbRootPropertyChange(): Memory allocation failure\n");
+        str = (char *)rfbAlloc(pProp->size + 1);
         strncpy(str, pProp->data, pProp->size);
         str[pProp->size] = 0;
         rfbGotXCutText(str, pProp->size);
@@ -1270,7 +1268,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         (pProp->type == XA_STRING) && (pProp->format == 8)) {
         char *colonPos;
         int port = 5500;
-        char *host = (char *)malloc(pProp->size + 1);
+        char *host = (char *)rfbAlloc(pProp->size + 1);
         memcpy(host, pProp->data, pProp->size);
         host[pProp->size] = 0;
         colonPos = strrchr(host, ':');
@@ -1299,7 +1297,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
                 free(rfbAuthOTPValue);
 
             rfbAuthOTPValueLen = pProp->size;
-            rfbAuthOTPValue = (char *) malloc(pProp->size);
+            rfbAuthOTPValue = (char *)rfbAlloc(pProp->size);
             memcpy(rfbAuthOTPValue, pProp->data, pProp->size);
         }
 
@@ -1316,7 +1314,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
          * The first byte is a flag that selects revoke/add.
          * The remaining bytes are the name.
          */
-        char *p = (char *)malloc(pProp->size);
+        char *p = (char *)rfbAlloc(pProp->size);
         const char *n = (const char *)pProp->data;
 
         memcpy(p, &n[1], pProp->size - 1);
@@ -1340,9 +1338,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         (pProp->size > 1) && (pProp->size <= 1024)) {
         if (nvCtrlDisplay)
             free (nvCtrlDisplay);
-        nvCtrlDisplay = (char *) malloc(pProp->size + 1);
-        if (!nvCtrlDisplay)
-            FatalError("Memory allocation failure");
+        nvCtrlDisplay = (char *)rfbAlloc(pProp->size + 1);
         memcpy(nvCtrlDisplay, pProp->data, pProp->size);
         nvCtrlDisplay[pProp->size] = '\0';
     }
@@ -1583,4 +1579,35 @@ void rfbLogPerror(char *str)
 {
     rfbLog("");
     perror(str);
+}
+
+
+/*
+ * These functions wrap malloc() and realloc() and immediately abort the server
+ * if memory allocation fails.
+ */
+
+void *rfbAlloc(size_t size)
+{
+    void *mem = malloc(size);
+    if (!mem)
+        FatalError("Memory allocation failure");
+    return mem;
+}
+
+
+void *rfbAlloc0(size_t size)
+{
+    void *mem = rfbAlloc(size);
+    memset(mem, 0, size);
+    return mem;
+}
+
+
+void *rfbRealloc(void *ptr, size_t size)
+{
+    void *mem = realloc(ptr, size);
+    if (!mem)
+        FatalError("Memory allocation failure");
+    return mem;
 }
