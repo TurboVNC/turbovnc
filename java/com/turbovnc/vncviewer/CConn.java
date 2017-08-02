@@ -958,21 +958,21 @@ public class CConn extends CConnection implements UserPasswdGetter,
     viewport = new Viewport(this);
     // When in Lion full-screen mode, we need to create the viewport as if
     // full-screen mode was disabled.
-    boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
-    viewport.setUndecorated(fullScreen);
+    boolean fullScreenWindow = opts.fullScreen && !viewport.lionFSSupported();
+    viewport.setUndecorated(fullScreenWindow);
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
     if (VncViewer.isX11())
-      viewport.x11FullScreenHelper(fullScreen);
+      viewport.x11FullScreenHelper(opts.fullScreen);
     if (opts.fullScreen && viewport.lionFSSupported())
       viewport.toggleLionFS();
     desktop.requestFocusInWindow();
     if (VncViewer.osGrab()) {
       if (opts.grabKeyboard == Options.GRAB_ALWAYS ||
           (opts.grabKeyboard == Options.GRAB_MANUAL && keyboardTempUngrabbed) ||
-          (opts.grabKeyboard == Options.GRAB_FS && fullScreen))
+          (opts.grabKeyboard == Options.GRAB_FS && opts.fullScreen))
         viewport.grabKeyboardHelper(true);
     }
     if (VncViewer.osEID())
@@ -1037,9 +1037,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public Rectangle getSpannedSize() {
-    boolean fullScreen = opts.fullScreen &&
-                         (!VncViewer.os.startsWith("mac os x") ||
-                          viewport.lionFSSupported());
+    boolean fullScreenWindow = opts.fullScreen &&
+                               (!VncViewer.os.startsWith("mac os x") ||
+                                viewport.lionFSSupported());
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
     Rectangle primary = null, s0 = null;
@@ -1066,7 +1066,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       GraphicsConfiguration[] gcList = gs.getConfigurations();
       for (GraphicsConfiguration gc : gcList) {
         Rectangle s = gc.getBounds();
-        if (!fullScreen) {
+        if (!fullScreenWindow) {
           if (gc == gcList[0])
             in = tk.getScreenInsets(gc);
           s.setBounds(s.x + in.left, s.y + in.top,
@@ -1122,7 +1122,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
 
         if (gc == gcList[0])
-          vlog.debug("Screen " + i++ + (fullScreen ? " FS " : " work ") +
+          vlog.debug("Screen " + i++ + (fullScreenWindow ? " FS " : " work ") +
                      "area: " + s.x + ", " + s.y + " " + s.width + " x " +
                      s.height);
 
@@ -1151,24 +1151,31 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
     }
 
+    // Enable Primary spanning if explicitly selected, or ...
     if (opts.span == Options.SPAN_PRIMARY ||
+        // Automatic spanning + Manual or Server resizing is enabled and the
+        // server desktop fits on the primary monitor, or ...
         (opts.span == Options.SPAN_AUTO &&
+         opts.desktopSize.mode != Options.SIZE_AUTO &&
          (sw <= primary.width || span.width <= primary.width) &&
          (sh <= primary.height || span.height <= primary.height)) ||
+        // Automatic spanning + Auto resizing is enabled and we're in windowed
+        // mode, or ...
         (opts.span == Options.SPAN_AUTO &&
-         opts.desktopSize.mode == Options.SIZE_AUTO) ||
-        (VncViewer.isX11() && (!fullScreen ||
+         opts.desktopSize.mode == Options.SIZE_AUTO && !opts.fullScreen) ||
+        // We're using X11, and we're in windowed mode or the helper library
+        // isn't available (multi-screen spanning doesn't even pretend to work
+        // under X11 except for full-screen windows, and even then, the
+        // appropriate WM hints must be set using C.)
+        (VncViewer.isX11() && (!opts.fullScreen ||
                                !Viewport.isHelperAvailable()))) {
-      // Multi-screen spanning doesn't even pretend to work under X11 except
-      // for full-screen windows, and even then, the appropriate WM hints must
-      // be set using C.
       span = primary;
       viewport.leftMon = viewport.rightMon = viewport.topMon =
         viewport.bottomMon = primaryID;
-    } else if (equal && fullScreen)
+    } else if (equal && fullScreenWindow)
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
 
-    vlog.debug("Spanned " + (fullScreen ? "FS " : "work ") + "area: " +
+    vlog.debug("Spanned " + (fullScreenWindow ? "FS " : "work ") + "area: " +
                span.x + ", " + span.y + " " + span.width + " x " +
                span.height);
     return span;
@@ -1180,13 +1187,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void sizeWindow(boolean manual) {
     if (VncViewer.embed.getValue())
       return;
-    boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
+    boolean fullScreenWindow = opts.fullScreen && !viewport.lionFSSupported();
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
     Rectangle span = getSpannedSize();
 
     if ((opts.scalingFactor == Options.SCALE_AUTO ||
-         opts.scalingFactor == Options.SCALE_FIXEDRATIO) && !fullScreen) {
+         opts.scalingFactor == Options.SCALE_FIXEDRATIO) &&
+        !fullScreenWindow) {
       w = cp.width;
       h = cp.height;
     }
@@ -1206,7 +1214,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
-    if (fullScreen) {
+    if (fullScreenWindow) {
       viewport.setGeometry(span.x, span.y, span.width, span.height);
       viewport.dx = x - span.x;
       viewport.dy = y - span.y;
@@ -1251,9 +1259,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   private void reconfigureViewport(boolean restore) {
-    boolean fullScreen = opts.fullScreen && !viewport.lionFSSupported();
+    boolean fullScreenWindow = opts.fullScreen && !viewport.lionFSSupported();
     desktop.setScaledSize();
-    if (!fullScreen && savedRect.width > 0 && savedRect.height > 0 &&
+    if (!fullScreenWindow && savedRect.width > 0 && savedRect.height > 0 &&
         restore) {
       if (savedState >= 0)
         viewport.setExtendedState(savedState);

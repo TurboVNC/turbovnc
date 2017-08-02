@@ -1262,10 +1262,11 @@ public class VncViewer extends javax.swing.JApplet
   "This option specifies whether the viewer window should span all " +
   "monitors, only the primary monitor, or whether it should span all " +
   "monitors only if it cannot fit on the primary monitor (Auto.)  When " +
-  "using automatic desktop resizing, Auto has the same effect as Primary.  " +
-  "Due to general issues with spanning windows across multiple monitors in " +
-  "X11, this option does not work on Un*x/X11 platforms except in " +
-  "full-screen mode, and it requires the TurboVNC Helper library.", "Auto",
+  "using automatic desktop resizing, Auto has the same effect as Primary " +
+  "when in windowed mode and the same effect as All when in full-screen " +
+  "mode.  Due to general issues with spanning windows across multiple " +
+  "monitors in X11, this option does not work on Un*x/X11 platforms except " +
+  "in full-screen mode, and it requires the TurboVNC Helper library.", "Auto",
   "Primary, All, Auto");
 
   static BoolParameter showToolbar

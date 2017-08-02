@@ -84,6 +84,11 @@ sometimes be interpreted as negative numbers.
 desktop larger than the dimensions allowed by the `max-desktop-size` setting in
 the security configuration file.
 
+13. When automatic desktop resizing and automatic spanning are both enabled,
+the TurboVNC Viewer will now use single-screen spanning ("Primary monitor
+only") when in windowed mode and multi-screen spanning ("All monitors") when in
+full-screen mode.
+
 
 2.1.1
 =====

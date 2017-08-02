@@ -210,14 +210,20 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
 
   BOOL ret = EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm);
 
+  // Enable Primary spanning if explicitly selected, or enumerating the
+  // monitors fails, or ...
   if (spanMode == SPAN_PRIMARY || !ret ||
-      (spanMode == SPAN_AUTO &&
+      // Automatic spanning + Manual or Server resizing is enabled and the
+      // server desktop fits on the primary monitor, or ...
+      (spanMode == SPAN_AUTO && m_opts.m_desktopSize.mode != SIZE_AUTO &&
        (scaledWidth <= primaryWidth ||
         WidthOf(fsm.screenArea) <= primaryWidth) &&
        (scaledHeight <= primaryHeight ||
         HeightOf(fsm.screenArea) <= primaryHeight)) ||
+      // Automatic spanning + Auto resizing is enabled and we're in windowed
+      // mode
       (spanMode == SPAN_AUTO &&
-       m_opts.m_desktopSize.mode == SIZE_AUTO)) {
+       m_opts.m_desktopSize.mode == SIZE_AUTO && !m_opts.m_FullScreen)) {
     workArea = fsm.workArea0;
     screenArea = fsm.screenArea0;
   } else {
