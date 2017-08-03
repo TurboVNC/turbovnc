@@ -44,12 +44,6 @@ safedirmove ()
 SUFFIX=
 VIEWER="@CMAKE_PROJECT_NAME@ Viewer"
 LAUNCHER="$VIEWER"
-if [ $# -gt 0 ]; then
-	if [ "$1" = "compat" ]; then
-		SUFFIX=-AppleJava
-		LAUNCHER=JavaApplicationStub
-	fi
-fi
 
 PKGNAME=@PKGNAME@
 PROJECT=@CMAKE_PROJECT_NAME@
@@ -87,11 +81,7 @@ mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
 mkdir -p "$PKGROOT/Applications/$PROJECT"
-if [ "$SUFFIX" = "-AppleJava" ]; then
-	sh pkgscripts/makemacapp compat
-else
-	sh pkgscripts/makemacapp
-fi
+sh pkgscripts/makemacapp
 ln -fs /Library/Documentation/$PKGNAME/index.html "$PKGROOT/Applications/$PROJECT/$PROJECT User's Guide.html"
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript

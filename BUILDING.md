@@ -33,7 +33,7 @@ Build Requirements
 
 - PAM development kit [if building the TurboVNC Server]
 
-- JDK 6 or OpenJDK 1.6 or later [if building the TurboVNC Viewer]
+- JDK 8 or OpenJDK 1.7 or later [if building the TurboVNC Viewer]
   * For systems that do not provide a JDK, download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
 
@@ -63,11 +63,9 @@ Build Requirements
 
 ### Mac/Java
 
-- JDK 6 or later
-  * To build with Java 7 or later (recommended), download the
+- JDK 8 or later
+  * Download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
-  * To build with Java 6, install the Java Developer Package from
-    <http://developer.apple.com/tools/xcode> (Apple ID required)
 
 
 Out-of-Tree Builds
@@ -303,20 +301,6 @@ Create Mac package/disk image.  This requires pkgbuild and productbuild, which
 are installed by default on OS X 10.7 and later.  This command generates a
 package containing a Java app bundle that relies on Oracle Java.  The DMG built
 with this command can be installed on OS X 10.7 and later.
-
-    make compatdmg
-
-Create Mac package/disk image.  This requires pkgbuild and productbuild, which
-are installed by default on OS X 10.7 and later and which can be obtained by
-installing Xcode 3.2.6 (with the "Unix Development" option) on OS X 10.6.  This
-command generates a package containing a Java app bundle that relies on Java
-for OS X, which was pre-installed with OS X 10.6 and prior (for later versions
-of OS X, Java for OS X can be obtained from Apple Support.)  The "AppleJava"
-DMG built with this command can be installed on OS X 10.5 and later, but since
-pkgbuild and productbuild are not available on OS X 10.5, the package must be
-built on OS X 10.6 or later.  Referring to the TurboVNC User's Guide, Java for
-OS X may perform better than Oracle Java on older Mac systems, but it should
-not be used on OS X 10.10 "Yosemite" or later.
 
 
 Windows

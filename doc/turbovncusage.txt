@@ -209,7 +209,7 @@ To set up a large-scale zero-install deployment of the Java TurboVNC Viewer,
 it is desirable to serve up the JAR files from a dedicated web server.  When
 deployed using JWS, the Java TurboVNC Viewer provides all of the advantages of
 a standalone native viewer, including native levels of performance on most
-platforms (see [[#MacJavaPerf][notes regarding performance on Mac platforms]].)
+platforms.
 
 For the purposes of this guide, it is assumed that the reader has some
 knowledge of web server administration.
@@ -221,7 +221,7 @@ knowledge of web server administration.
 	* Copy the libjpeg-turbo JNI JAR files into that same directory.  You can
 		obtain these from one of the official TurboVNC 2.0 or later binary packages
 		for Linux, or you can download ''libjpeg-turbo-{version}-jws.zip'' from
-		libjpeg-turbo 1.3.0 or later (available at
+		libjpeg-turbo 1.4.0 or later (available at
 		[[http://sourceforge.net/projects/libjpeg-turbo/files]].)  Note that only
 		the JARs included in the official TurboVNC packages are signed using an
 		official code signing certificate.
@@ -253,27 +253,27 @@ knowledge of web server administration.
 		  </security>
 
 		  <resources os="Mac OS X">
-		    <j2se version="1.6+" java-vm-args="-server"/>
+		    <j2se version="1.8+" java-vm-args="-server"/>
 		    <nativelib href="ljtosx.jar"/>
 		  </resources>
 
 		  <resources os="Windows" arch="x86">
-		    <j2se version="1.6+" java-vm-args="-Dsun.java2d.d3d=false"/>
+		    <j2se version="1.8+" java-vm-args="-Dsun.java2d.d3d=false"/>
 		    <nativelib href="ljtwin32.jar"/>
 		  </resources>
 
 		  <resources os="Windows" arch="amd64">
-		    <j2se version="1.6+" java-vm-args="-Dsun.java2d.d3d=false"/>
+		    <j2se version="1.8+" java-vm-args="-Dsun.java2d.d3d=false"/>
 		    <nativelib href="ljtwin64.jar"/>
 		  </resources>
 
 		  <resources os="Linux" arch="i386">
-		    <j2se version="1.6+" java-vm-args="-server"/>
+		    <j2se version="1.8+" java-vm-args="-server"/>
 		    <nativelib href="ljtlinux32.jar"/>
 		  </resources>
 
 		  <resources os="Linux" arch="amd64">
-		    <j2se version="1.6+"/>
+		    <j2se version="1.8+"/>
 		    <nativelib href="ljtlinux64.jar"/>
 		  </resources>
 

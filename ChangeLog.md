@@ -18,6 +18,19 @@ OpenGL rendering if VirtualGL is not installed.  Passing `-extension GLX` to
 vncserver disables the extension.  Note that your system must have Mesa 8.x or
 later installed in order for the swrast DRI driver to be available.
 
+4. The Java/Mac/Un*x TurboVNC Viewer is no longer supported with Java 6 and
+earlier.  This increases the Mac system requirements to OS X 10.7 "Lion" or
+later.  Apple's obsolete Java for OS X is no longer supported, and the
+standalone "AppleJava" version of the TurboVNC Viewer is no longer provided.
+Java SE 6 ceased receiving public updates in 2013 and, as of this writing,
+critical bug fixes and security fixes for that platform are only available with
+an Oracle Extended Support contract.  Furthermore, Red Hat ceased supporting
+OpenJDK 6 in late 2016.  The TurboVNC Viewer JAR will continue to be built with
+`-source 1.6 -target 1.6`, but it will only be tested with Oracle Java SE
+releases that are currently receiving public updates and OpenJDK releases that
+are actively supported by Red Hat.  The 2.1.x version of the TurboVNC Viewer
+will continue to support Java 6 on a break/fix basis.
+
 
 2.1.2
 =====

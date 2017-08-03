@@ -201,7 +201,7 @@ arguments in an applet or Java Web Start environment.
 
 | Java System Property | ''turbovnc.lionfs = ''__''0 \| 1''__ |
 | Summary | Disable/enable the use of the OS X full-screen application feature |
-| Default Value | Enabled if running on OS X 10.7 or later |
+| Default Value | Enabled |
 #OPT: hiCol=first
 
 	Description :: When running in full-screen mode, the Java TurboVNC Viewer
