@@ -89,6 +89,13 @@ the TurboVNC Viewer will now use single-screen spanning ("Primary monitor
 only") when in windowed mode and multi-screen spanning ("All monitors") when in
 full-screen mode.
 
+14. Fixed an issue whereby the Java TurboVNC Viewer, when launched from the
+`vncviewer-java.bat` script, the Start Menu shortcut, or Java Web Start on
+Windows clients with a 32-bit JRE, would fail with "Error: missing 'server'
+JVM".  On Windows, the 32-bit JRE only provides the client VM, and the 64-bit
+JRE only provides the server VM, so specifying `-server` in the launch scripts
+was unnecessary.
+
 
 2.1.1
 =====

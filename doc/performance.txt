@@ -407,17 +407,3 @@ of both of them using the ImageDrawTest benchmark:
 	TurboVNC Viewer along with Oracle Java, then upgrade Oracle Java to Java 8
 	Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance
 	issue in the OpenGL Java 2D blitter that affected scaled blitting.
-
-*** Using the Server VM
-#OPT: noList! plain!
-
-Passing an argument of ''-server'' to ''java'' when launching the Java TurboVNC
-Viewer is recommended.  This enables the adaptive compiler, which performs
-aggressive code optimizations and actually learns how to better optimize a
-piece of code the more times it encounters it.  Such optimizations greatly
-improve the decoding performance for non-JPEG subrectangles.  If you are
-launching the Java TurboVNC Viewer using the Mac app, the ''vncviewer'' or
-''vncviewer-java.bat'' scripts, the Windows Start Menu shortcut, or Java Web
-Start (using the [[#JWS][recommended procedure]] or the
-[[#Zero_Install][TurboVNC Server's built-in web server]]), then the Server VM
-is automatically enabled.

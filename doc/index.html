@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-08-03T20:28:20">
+<meta name="date" content="2017-08-04T18:35:49">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1066,7 +1066,6 @@ knowledge of web server administration.</p>
 &nbsp;&nbsp;&lt;/information&gt;
 
 &nbsp;&nbsp;&lt;resources&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-server&nbsp;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;jar&nbsp;href=&quot;VncViewer.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
@@ -1075,22 +1074,27 @@ knowledge of web server administration.</p>
 &nbsp;&nbsp;&lt;/security&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Mac&nbsp;OS&nbsp;X&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtosx.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;x86&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtwin32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;amd64&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtwin64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;i386&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;amd64&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
@@ -1881,24 +1885,6 @@ java&nbsp;-cp&nbsp;/Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Res
 NOTE: if you intend to use the desktop scaling feature in the Java TurboVNC Viewer along with Oracle Java, then upgrade Oracle Java to Java 8 Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance issue in the OpenGL Java 2D blitter that affected scaled blitting.
 </p></div>
 
-
-
-<h3 id="hd007006004">Using the Server VM</h3>
-
-<p>Passing an argument of <code>-server</code> to <code>java</code> when 
-launching the Java TurboVNC Viewer is recommended.  This enables the 
-adaptive compiler, which performs aggressive code optimizations and 
-actually learns how to better optimize a piece of code the more times it 
-encounters it.  Such optimizations greatly improve the decoding 
-performance for non-JPEG subrectangles.  If you are launching the Java 
-TurboVNC Viewer using the Mac app, the <code>vncviewer</code> or 
-<code>vncviewer-java.bat</code> scripts, the Windows Start Menu 
-shortcut, or Java Web Start (using the <a href="#JWS">recommended 
-procedure</a><a name="idx0047"></a> or the 
-<a href="#Zero_Install">TurboVNC Server&rsquo;s built-in web 
-server</a><a name="idx0048"></a>), then the Server VM is automatically 
-enabled.</p>
-
 <p><br /></p>
 
 <hr class="break" />
@@ -2503,7 +2489,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0049"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0047"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
