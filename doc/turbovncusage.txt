@@ -131,23 +131,23 @@ the following command:
 	/opt/TurboVNC/bin/vncserver -list
 	---
 
-** Using TurboVNC in a Web Browser
+** Launching the TurboVNC Viewer from a Web Browser
+{anchor: Zero_Install}
 
-When a TurboVNC session is created, it automatically launches a miniature web
+When a TurboVNC session is created, it automatically starts a miniature web
 server that serves up the Java TurboVNC Viewer as either an applet or a Java
 Web Start app.  This allows you to easily connect to the TurboVNC session from
-a machine that does not have the TurboVNC Viewer installed locally.  The Java
-TurboVNC Viewer, when launched in this manner, can use the libjpeg-turbo JNI
-library to accelerate JPEG decoding, if the library is available on the client
-machine.  If one of the official TurboVNC binary packages is installed on the
-server, then it will automatically send the appropriate x86 or x86-64
-libjpeg-turbo JNI library for Linux, OS X, or Windows clients when launching
-the TurboVNC Viewer using Java Web Start.  If using the Java TurboVNC Viewer as
-an applet, then you can install
+a machine that does not have the TurboVNC Viewer installed locally.  If one of
+the official TurboVNC binary packages is installed on the server, then it will
+automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI library for
+Linux, OS X, or Windows clients when launching the TurboVNC Viewer using Java
+Web Start.  If using the Java TurboVNC Viewer as an applet, then you can
+install
 [[http://www.sourceforge.net/projects/libjpeg-turbo/files][one of the official libjpeg-turbo packages]]
 on the client machine to accelerate JPEG decoding.
 
-To use the Java TurboVNC Viewer in a web browser, point your web browser to:
+To launch the Java TurboVNC Viewer from a web browser, point your web browser
+to:
 
 ''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}''
 
@@ -198,6 +198,7 @@ enable Medium-Quality JPEG.
 	to allow applications downloaded from anywhere.
 
 ** Deploying the Java TurboVNC Viewer Using Java Web Start
+{anchor: JWS}
 
 Accessing the Java TurboVNC Viewer through TurboVNC's built-in HTTP server, as
 described above, is a quick and easy way of running the TurboVNC Viewer on
