@@ -16,6 +16,7 @@ set(JAVA_KEYSTORE_PASS "" CACHE STRING "Java keystore password (plain-text.)  Ad
 set(JAVA_KEY_ALIAS "" CACHE STRING "Alias for the signing certificate's entry in the Java keystore.  Leave this blank to sign the JAR file using a self-signed certificate.")
 set(JAVA_KEY_PASS "" CACHE STRING "Password for the signing certificate's entry in the Java keystore (plain-text.)  Add a prefix of env: to specify an environment variable from which to read the password, or a prefix of file: to specify a file from which to read the password.")
 set(JAVA_TSA_URL "" CACHE STRING "URL of Timestamp Authority (TSA)")
+set(JAVA_TSA_ALG "" CACHE STRING "Timestamp Authority (TSA) message digest algorithm")
 
 string(TIMESTAMP DEFAULT_JAVA_DATE "%Y-%m-%d")
 set(JAVA_DATE ${DEFAULT_JAVA_DATE} CACHE STRING "Java date stamp")
@@ -219,6 +220,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		-DJAVA_KEY_ALIAS=${JAVA_KEY_ALIAS}
 		-DJAVA_KEY_PASS=${JAVA_KEY_PASS}
 		-DJAVA_TSA_URL=${JAVA_TSA_URL}
+		-DJAVA_TSA_ALG=${JAVA_TSA_ALG}
 		-P ${SRCDIR}/cmake/SignJar.cmake
 	COMMAND ${CMAKE_COMMAND}
 	ARGS -E copy_if_different VncViewer-unsigned.jar VncViewer.jar
@@ -259,6 +261,7 @@ if(TVNC_BUILDSERVER AND TVNC_INCLUDEJNIJARS)
 				-DJAVA_KEY_ALIAS=${JAVA_KEY_ALIAS}
 				-DJAVA_KEY_PASS=${JAVA_KEY_PASS}
 				-DJAVA_TSA_URL=${JAVA_TSA_URL}
+				-DJAVA_TSA_ALG=${JAVA_TSA_ALG}
 				-P ${SRCDIR}/cmake/SignJar.cmake)
 		install(FILES ${BINDIR}/${jarfile} DESTINATION ${CMAKE_INSTALL_JAVADIR})
 	endforeach()

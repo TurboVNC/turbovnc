@@ -71,6 +71,11 @@ if(NOT JAVA_SELF_SIGNED AND JAVA_TSA_URL)
   set(ARGS ${ARGS} -tsa ${JAVA_TSA_URL})
 endif()
 
+if(JAVA_TSA_ALG)
+  message(STATUS "Using TSA message digest algorithm ${JAVA_TSA_ALG}")
+  set(ARGS ${ARGS} -tsadigestalg ${JAVA_TSA_ALG})
+endif()
+
 execute_process(COMMAND ${JARSIGNER} ${ARGS} ${JAR_FILE} ${JAVA_KEY_ALIAS}
   RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_VARIABLE ERROR)
 
