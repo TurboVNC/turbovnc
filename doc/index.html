@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-08-05T11:28:36">
+<meta name="date" content="2017-08-05T11:36:19">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -922,17 +922,15 @@ server machine, type the following command:</p>
 <p><a name="Zero_Install"></a></p>
 
 <p>When a TurboVNC session is created, it automatically starts a miniature 
-web server that serves up the Java TurboVNC Viewer as either an applet 
-or a Java Web Start app.  This allows you to easily connect to the 
-TurboVNC session from a machine that does not have the TurboVNC Viewer 
-installed locally.  If one of the official TurboVNC binary packages is 
-installed on the server, then it will automatically send the appropriate 
+web server that serves up the Java TurboVNC Viewer as a Java Web Start 
+app.  This allows you to easily connect to the TurboVNC session from a 
+machine that does not have the TurboVNC Viewer installed locally.  If 
+one of the official TurboVNC binary packages is installed on the server, 
+then the miniature web server will automatically send the appropriate 
 x86 or x86-64 libjpeg-turbo JNI library for Linux, OS X, or Windows 
-clients when launching the TurboVNC Viewer using Java Web Start.  If 
-using the Java TurboVNC Viewer as an applet, then you can install 
-<span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
-of the official libjpeg-turbo packages</a></span><a name="idx0033"></a> 
-on the client machine to accelerate JPEG decoding.</p>
+clients when launching the TurboVNC Viewer. This provides most of the 
+advantages of the standalone TurboVNC viewers, including native levels 
+of performance on popular client platforms.</p>
 
 <p>To launch the Java TurboVNC Viewer from a web browser, point your web 
 browser to:</p>
@@ -950,29 +948,21 @@ connect.</p>
 <p><code>http://my_server:5801</code></p>
 
 <p>This will download a JNLP file to your computer, which you can open in 
-Java Web Start.  Add <code>/applet</code> to the URL to launch the 
-viewer as a Java applet instead (as of this writing, browsers are 
-starting to do away with Java plugins, so running the viewer as an 
-applet is more of a legacy feature.)</p>
+Java Web Start.</p>
 
 <p>You can add viewer parameters to the URL using the following format:</p>
 
 <p><code>http://</code><em><code>{turbovnc_server}</code></em><code>:{5800+</code><em><code>n</code></em><code>}?</code><em><code>{param1}</code></em><code>=</code><em><code>{value1}</code></em><code>&amp;</code><em><code>{param2}</code></em><code>=</code><em><code>{value2}</code></em></p>
 
-<p>Examples:</p>
-
-<p><code>http://my_server:5801/applet?embed=1&amp;tunnel=1</code></p>
-
-<p>will run the viewer as an applet in the browser window and tunnel the 
-VNC connection through SSH.</p>
+<p>Example:</p>
 
 <p><code>http://my_server:5801?tunnel=1&amp;samp=2x&amp;quality=80</code></p>
 
-<p>will run the viewer as a JWS app, tunnel the VNC connection through SSH, 
-and enable Medium-Quality JPEG.</p>
+<p>will tunnel the VNC connection through SSH and enable Medium-Quality 
+JPEG.</p>
 
 <div class="important"><p class="important">
-NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in the Java browser plug-in or JWS by default.  This is not an issue if you are using the official TurboVNC binary packages, but if you are building a self-signed version of the Java TurboVNC Viewer for development purposes, then you will need to add <code>http://{turbovnc_server}:{http_port}</code> (for example, <code>http://my_server:5801</code>) to Java&rsquo;s Exception Site List, which can be found under the &ldquo;Security&rdquo; tab in the Java Control Panel.
+NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in Java Web Start by default.  This is not an issue if you are using the official TurboVNC binary packages, but if you are building a self-signed version of the Java TurboVNC Viewer for development purposes, then you will need to add <code>http://{turbovnc_server}:{http_port}</code> (for example, <code>http://my_server:5801</code>) to Java&rsquo;s Exception Site List, which can be found under the &ldquo;Security&rdquo; tab in the Java Control Panel.
 </p></div>
 
 <div class="important"><p class="important">
@@ -991,11 +981,8 @@ TurboVNC Viewer on machines that don&rsquo;t already have a VNC viewer
 installed (for instance, for the purpose of collaborating with 
 colleagues who don&rsquo;t normally use TurboVNC.)</p>
 
-<p>To set up a large-scale zero-install deployment of the Java TurboVNC 
-Viewer, it is desirable to serve up the JAR files from a dedicated web 
-server.  When deployed using JWS, the Java TurboVNC Viewer provides all 
-of the advantages of a standalone native viewer, including native levels 
-of performance on most platforms.</p>
+<p>To set up a large-scale deployment of the Java TurboVNC Viewer, however, 
+it is desirable to serve up the JAR files from a dedicated web server.</p>
 
 <p>For the purposes of this guide, it is assumed that the reader has some 
 knowledge of web server administration.</p>
@@ -1011,7 +998,7 @@ knowledge of web server administration.</p>
         packages for Linux, or you can download 
         <code>libjpeg-turbo-{version}-jws.zip</code> from libjpeg-turbo 1.4.0 or 
         later (available at 
-        <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files" class="remote">http://sourceforge.net/projects/libjpeg-turbo/files</a></span><a name="idx0034"></a>.)  
+        <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files" class="remote">http://sourceforge.net/projects/libjpeg-turbo/files</a></span><a name="idx0033"></a>.)  
         Note that only the JARs included in the official TurboVNC packages are 
         signed using an official code signing certificate. <br /><br />
     </li>
@@ -1076,7 +1063,7 @@ knowledge of web server administration.</p>
         </p></div>
         This is just a minimal example.  Refer to the 
         <span class="remote"><a href="http://docs.oracle.com/javase/6/docs/technotes/guides/javaws/" class="remote">Java 
-        Web Start documentation</a></span><a name="idx0035"></a> for additional 
+        Web Start documentation</a></span><a name="idx0034"></a> for additional 
         fields that you might want to add. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1199,7 +1186,7 @@ environment variables.  See Section
 <a href="#VNC_VIA_CMD" class="ref">11.2</a> for more details.</p>
 
 <div class="important"><p class="important">
-NOTE: In this release of TurboVNC, the TurboVNC Viewer for Linux/Un*x and Mac platforms is actually the Java TurboVNC Viewer, which is packaged along with the libjpeg-turbo JNI library and necessary glueware to make the viewer behave and perform like a standalone native viewer.  Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>via</code> and <code>tunnel</code> parameters can also be used when the viewer is run as an applet or deployed using Java Web Start.
+NOTE: In this release of TurboVNC, the TurboVNC Viewer for Linux/Un*x and Mac platforms is actually the Java TurboVNC Viewer, which is packaged along with the libjpeg-turbo JNI library and necessary glueware to make the viewer behave and perform like a standalone native viewer.  Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>via</code> and <code>tunnel</code> parameters can also be used when the viewer is deployed using Java Web Start.
 </p></div>
 
 <div class="important"><p class="important">
@@ -1340,7 +1327,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0036"></a> should be used
+            comparison</a><a name="idx0035"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1392,7 +1379,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0037"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0036"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1743,15 +1730,15 @@ the <code>vncviewer</code> script (Linux/Un*x), the
 <code>vncviewer-java.bat</code> script or the Start Menu shortcut 
 (Windows), or the standalone TurboVNC Viewer app (Mac).  If the viewer 
 is launched with Java Web Start using the <a href="#JWS">recommended 
-procedure</a><a name="idx0038"></a> or the 
+procedure</a><a name="idx0037"></a> or the 
 <a href="#Zero_Install">TurboVNC Server&rsquo;s built-in web 
-server</a><a name="idx0039"></a>, then the appropriate libjpeg-turbo JNI 
+server</a><a name="idx0038"></a>, then the appropriate libjpeg-turbo JNI 
 library will be downloaded along with it, assuming that the client 
 machine is running Windows, OS X, or Linux.  For other deployment 
 scenarios, the Java TurboVNC Viewer will find the libjpeg-turbo JNI 
 library if 
 <span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
-of the official libjpeg-turbo packages</a></span><a name="idx0040"></a> 
+of the official libjpeg-turbo packages</a></span><a name="idx0039"></a> 
 is installed on the client machine.</p>
 
 <p>If you suspect for whatever reason that JPEG decoding is not being 
@@ -2404,7 +2391,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0041"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0040"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -3040,10 +3027,9 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 
 <p>to start the TurboVNC Viewer without JPEG acceleration.</p>
 
-<p>Refer to the default <code>index.vnc</code> and 
-<code>VncViewer.jnlp</code> files installed with the TurboVNC Server for 
-an example of how to specify Java command-line arguments in an applet or 
-Java Web Start environment.</p>
+<p>Refer to the default <code>VncViewer.jnlp</code> file installed with the 
+TurboVNC Server for an example of how to specify Java command-line 
+arguments in a Java Web Start environment.</p>
 
 <p><a name="turbovnc.forcealpha"></a></p>
 

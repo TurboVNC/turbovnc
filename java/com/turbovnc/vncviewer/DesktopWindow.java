@@ -502,10 +502,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     mouseCB(e, cc.viewport.buttonPressType);
   }
   public void mouseClicked(MouseEvent e) {}
-  public void mouseEntered(MouseEvent e) {
-    if (VncViewer.embed.getValue())
-      requestFocus();
-  }
+  public void mouseEntered(MouseEvent e) {}
   public void mouseExited(MouseEvent e) {}
 
   // EDT: Mouse wheel callback function

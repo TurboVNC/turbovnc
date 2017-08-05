@@ -252,8 +252,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     scalingFactor = new JComboBox(scalingFactors);
     scalingFactor.setEditable(true);
     scalingFactor.addItemListener(this);
-    if (VncViewer.embed.getValue())
-      scalingFactor.setEnabled(false);
 
     Dialog.addGBComponent(scalingFactorLabel, displayPanel,
                           0, 0, 1, 1, 2, 2, 1, 0,
@@ -292,8 +290,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     fullScreen = new JCheckBox("Full-screen mode");
     fullScreen.addItemListener(this);
-    if (VncViewer.embed.getValue())
-      fullScreen.setEnabled(false);
 
     Dialog.addGBComponent(fullScreen, displayPanel,
                           0, 2, 2, 1, 2, 2, 1, 0,
@@ -310,8 +306,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       spanLabel = new JLabel("Span mode:");
     span = new JComboBox(spanOptions);
     span.addItemListener(this);
-    if (VncViewer.embed.getValue() ||
-        (VncViewer.isX11() && !Viewport.isHelperAvailable())) {
+    if (VncViewer.isX11() && !Viewport.isHelperAvailable()) {
       spanLabel.setEnabled(false);
       span.setEnabled(false);
     }
@@ -985,7 +980,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
           scalingFactor.setEnabled(false);
           scalingFactor.setSelectedItem("100%");
         } else
-          scalingFactor.setEnabled(!VncViewer.embed.getValue());
+          scalingFactor.setEnabled(true);
       }
     }
     if (s instanceof JCheckBox && (JCheckBox)s == tunnel)

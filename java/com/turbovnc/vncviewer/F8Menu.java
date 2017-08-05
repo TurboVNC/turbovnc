@@ -51,22 +51,19 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     losslessRefresh = addMenuItem("Request Lossless Refresh   (Ctrl-Alt-Shift-L)", KeyEvent.VK_L);
     losslessRefresh.setDisplayedMnemonicIndex(8);
     addSeparator();
-    if (!VncViewer.embed.getValue()) {
-      fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");
-      fullScreen.setMnemonic(KeyEvent.VK_F);
-      fullScreen.setSelected(cc.opts.fullScreen);
-      fullScreen.addActionListener(this);
-      add(fullScreen);
-      defaultSize = addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
-    }
+    fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");
+    fullScreen.setMnemonic(KeyEvent.VK_F);
+    fullScreen.setSelected(cc.opts.fullScreen);
+    fullScreen.addActionListener(this);
+    add(fullScreen);
+    defaultSize = addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
     showToolbar = new JCheckBoxMenuItem("Show Toolbar   (Ctrl-Alt-Shift-T)");
     showToolbar.setMnemonic(KeyEvent.VK_T);
     showToolbar.setSelected(cc.showToolbar);
     showToolbar.addActionListener(this);
     add(showToolbar);
     addSeparator();
-    if (VncViewer.osGrab() && !VncViewer.embed.getValue() &&
-        Viewport.isHelperAvailable()) {
+    if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       grabKeyboard = new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
       grabKeyboard.setMnemonic(KeyEvent.VK_G);
       grabKeyboard.setSelected(cc.keyboardGrabbed);

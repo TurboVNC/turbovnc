@@ -251,7 +251,6 @@ fi
 %endif
 %if "%{java}" == "1"
  %if "%{server}" == "1"
-  %{javadir}/index.vnc
   %{javadir}/VncViewer.jnlp
   %{javadir}/favicon.ico
   %if "%{jnijars}" == "1"

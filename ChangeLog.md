@@ -31,6 +31,23 @@ releases that are currently receiving public updates and OpenJDK releases that
 are actively supported by Red Hat.  The 2.1.x version of the TurboVNC Viewer
 will continue to support Java 6 on a break/fix basis.
 
+5. The ability to run the Java TurboVNC Viewer as an in-browser applet has been
+removed.  Most popular web browsers have already abandoned the NPAPI plugin
+standard around which the Java plugin was designed, because that plugin
+standard grants full access to the client machine.  However, such access is
+necessary in order to write a full-featured application (including a VNC
+viewer), and absent any other cross-browser plugin standard, it would be
+impossible for Oracle to make the Java plugin more secure without abandoning
+the write-once-run-anywhere nature of the Java language.  Thus, they have
+chosen not to include any kind of browser plugin in Java 9.  As of this
+writing, NPAPI support can only be obtained on most platforms by installing an
+older browser version.  The only advantage of using the TurboVNC Viewer as an
+applet, as opposed to with Java Web Start, was the ability to embed the viewer
+in a web page, but this mode of operation had some known usability issues and
+was increasingly receiving little or no attention from the TurboVNC community.
+The applet feature will continue to be supported in TurboVNC 2.1.x on a
+break/fix basis.
+
 
 2.1.2
 =====

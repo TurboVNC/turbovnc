@@ -142,16 +142,6 @@ public class Configuration {
     }
   }
 
-  public static void readAppletParams(java.applet.Applet applet) {
-    VoidParameter current = head;
-    while (current != null) {
-      String str = applet.getParameter(current.getName());
-      if (str != null)
-        current.setParam(str);
-      current = current.next;
-    }
-  }
-
   public static void load(String filename) {
     if (filename == null)
       return;
