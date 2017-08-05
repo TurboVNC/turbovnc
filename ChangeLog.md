@@ -96,6 +96,14 @@ JVM".  On Windows, the 32-bit JRE only provides the client VM, and the 64-bit
 JRE only provides the server VM, so specifying `-server` in the launch scripts
 was unnecessary.
 
+15. Worked around an issue whereby, when the TurboVNC Viewer was running on
+macOS 10.12 "Sierra", pressing and holding certain keys would cause the viewer
+to stop processing subsequent keystrokes if ApplePressAndHoldEnabled was set to
+true in the macOS user defaults (which it is by default in recent macOS
+releases.) It is still necessary to set ApplePressAndHoldEnabled to false,
+either in the global domain or the com.turbovnc.vncviewer.VncViewer domain, in
+order for key repeat to work with the TurboVNC Viewer.
+
 
 2.1.1
 =====
