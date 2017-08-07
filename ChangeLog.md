@@ -104,6 +104,9 @@ releases.) It is still necessary to set ApplePressAndHoldEnabled to false,
 either in the global domain or the com.turbovnc.vncviewer.VncViewer domain, in
 order for key repeat to work with the TurboVNC Viewer.
 
+16. The Java/Mac/Un*x TurboVNC Viewer now supports the `user` and
+`noremotecursor` directives in .vnc connection info files.
+
 
 2.1.1
 =====
@@ -605,7 +608,7 @@ on a system-wide basis.  This is the equivalent of passing `-nolisten tcp` to
 every instance of the TurboVNC X server running on a particular server machine.
 
 3. The Java TurboVNC Viewer now supports the `grabkeyboard`, `resizemode`,
-`desktopwidth`, and `desktopheight` directives in .vnc configuration files.
+`desktopwidth`, and `desktopheight` directives in .vnc connection info files.
 These directives were added to the Windows TurboVNC Viewer in 2.0 beta but were
 left out of the Java viewer due to an oversight.
 
@@ -1111,13 +1114,13 @@ known to cause issues with certain applications.
 "Preferences" options.  As is the case with most Mac applications, these
 options are now accessed from the application menu.
 
-2. Opening VNC viewer config (.vnc) files in the OS X Finder or dragging and
-dropping them onto the Mac TurboVNC Viewer icon now works properly.
-Additionally, if a connection is already open, dragging and dropping a .vnc
-file onto the Mac TurboVNC Viewer icon will now open a new connection.
+2. Opening VNC viewer connection info (.vnc) files in the OS X Finder or
+dragging and dropping them onto the Mac TurboVNC Viewer icon now works
+properly.  Additionally, if a connection is already open, dragging and dropping
+a .vnc file onto the Mac TurboVNC Viewer icon will now open a new connection.
 
-3. VNC viewer config (.vnc) files can now be opened in Windows by dragging and
-dropping them onto the Windows TurboVNC Viewer icon.
+3. VNC viewer connection info (.vnc) files can now be opened in Windows by
+dragging and dropping them onto the Windows TurboVNC Viewer icon.
 
 4. The Java TurboVNC Viewer can now be built and run with Java 5.
 Consequently, the Mac TurboVNC Viewer now works with the version of Java

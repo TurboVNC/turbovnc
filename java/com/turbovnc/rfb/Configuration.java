@@ -195,6 +195,8 @@ public class Configuration {
           else break;
         }
         setParam("Password", VncAuth.unobfuscatePasswd(encryptedPassword));
+      } else if (name.equalsIgnoreCase("user")) {
+        setParam("User", props.getProperty(name));
       } else if (name.equalsIgnoreCase("preferred_encoding")) {
         int encoding = -1;
         try {
@@ -202,6 +204,8 @@ public class Configuration {
         } catch (NumberFormatException e) {}
         if (encoding >= 0 && encoding <= Encodings.LASTENCODING)
           setParam("Encoding", Encodings.encodingName(encoding));
+      } else if (name.equalsIgnoreCase("restricted")) {
+        setParam("Restricted", props.getProperty(name));
       } else if (name.equalsIgnoreCase("viewonly")) {
         setParam("ViewOnly", props.getProperty(name));
       } else if (name.equalsIgnoreCase("reversescroll")) {
@@ -290,6 +294,8 @@ public class Configuration {
         if (temp >= 1) desktopHeight = temp;
       } else if (name.equalsIgnoreCase("cursorshape")) {
         setParam("CursorShape", props.getProperty(name));
+      } else if (name.equalsIgnoreCase("noremotecursor")) {
+        setParam("LocalCursor", props.getProperty(name));
       } else if (name.equalsIgnoreCase("compresslevel")) {
         setParam("CompressLevel", props.getProperty(name));
       } else if (name.equalsIgnoreCase("subsampling")) {
