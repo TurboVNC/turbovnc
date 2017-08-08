@@ -5,7 +5,7 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
- *  Copyright (C) 2015 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2015, 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,13 +59,9 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
         return(PAM_SERVICE_ERR);
     }
 
-    if ((responses = (struct pam_response *)malloc(sizeof(struct pam_response) *
-                                                   num_msg)) == NULL) {
-        rfbLogPerror("PAMAuthenticate: conv malloc");
-        return(PAM_BUF_ERR);
-    }
+    responses = (struct pam_response *)rfbAlloc0(sizeof(struct pam_response) *
+                                                 num_msg);
 
-    memset(responses, 0, sizeof(struct pam_response) * num_msg);
     rp = responses;
     for (i = 0; (i < num_msg) && (pamRet == PAM_SUCCESS); i++, rp++) {
         m = msg[i];
@@ -87,11 +83,7 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
         case PAM_PROMPT_ECHO_OFF:
         case PAM_PROMPT_ECHO_ON:
             len = strlen(password) + 1;
-            if ((rp->resp = (char *)malloc(len)) == NULL) {
-                rfbLogPerror("PAMAuthenticate: conv malloc");
-                pamRet = PAM_BUF_ERR;
-                break;
-            }
+            rp->resp = (char *)rfbAlloc(len);
 
             memcpy(rp->resp, password, len);
             break;

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -303,10 +303,15 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     Object[] spanOptions = {
       "Primary monitor only", "All monitors", "Automatic" };
-    JLabel spanLabel = new JLabel("Span mode:");
+    JLabel spanLabel;
+    if (VncViewer.isX11() && Viewport.isHelperAvailable())
+      spanLabel = new JLabel("Full-screen span mode:");
+    else
+      spanLabel = new JLabel("Span mode:");
     span = new JComboBox(spanOptions);
     span.addItemListener(this);
-    if (VncViewer.embed.getValue() || VncViewer.isX11()) {
+    if (VncViewer.embed.getValue() ||
+        (VncViewer.isX11() && !Viewport.isHelperAvailable())) {
       spanLabel.setEnabled(false);
       span.setEnabled(false);
     }
@@ -688,31 +693,40 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   }
 
   private void updatePreferences() {
-    UserPreferences.set("global", "JPEG", allowJpeg.isSelected());
-    String subsamplingStr =
-      subsamplingLabelTable.get(subsamplingLevel.getValue());
-    UserPreferences.set("global", "Subsampling", subsamplingStr);
-    UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
-    UserPreferences.set("global", "CompressLevel", getCompressionLevel());
-    UserPreferences.set("global", "ViewOnly", viewOnly.isSelected());
-    UserPreferences.set("global", "ReverseScroll", reverseScroll.isSelected());
+    // CONNECTION
+      // (no GUI equivalent)
+    UserPreferences.set("global", "AlwaysShowConnectionDialog",
+                        VncViewer.alwaysShowConnectionDialog.getValue());
     UserPreferences.set("global", "RecvClipboard",
                         acceptClipboard.isSelected());
     UserPreferences.set("global", "SendClipboard", sendClipboard.isSelected());
-    String menuKeyStr =
-      MenuKey.getMenuKeySymbols()[menuKey.getSelectedIndex()].name;
-    UserPreferences.set("global", "MenuKey", menuKeyStr);
+    UserPreferences.set("global", "Shared", shared.isSelected());
+
+    // INPUT
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       String grabStr = (String)grabKeyboard.getSelectedItem();
       if (grabStr.equalsIgnoreCase("Full-screen only"))
         grabStr = "FS";
       UserPreferences.set("global", "GrabKeyboard", grabStr);
     }
-    UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
-    UserPreferences.set("global", "Shared", shared.isSelected());
-    UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
+    String menuKeyStr =
+      MenuKey.getMenuKeySymbols()[menuKey.getSelectedIndex()].name;
+    UserPreferences.set("global", "MenuKey", menuKeyStr);
+    UserPreferences.set("global", "ReverseScroll", reverseScroll.isSelected());
+    UserPreferences.set("global", "ViewOnly", viewOnly.isSelected());
+
+    // DISPLAY
+      // (no GUI equivalent)
     UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
-    UserPreferences.set("global", "Toolbar", showToolbar.isSelected());
+    if (VncViewer.colors.getValue() != -1)
+      UserPreferences.set("global", "Colors", VncViewer.colors.getValue());
+    UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
+    UserPreferences.set("global", "DesktopSize",
+                        desktopSize.getSelectedItem().toString());
+      // (no GUI equivalent)
+    UserPreferences.set("global", "FSAltEnter",
+                        VncViewer.fsAltEnter.getValue());
+    UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
     int sf =
       Options.parseScalingFactor(scalingFactor.getSelectedItem().toString());
     if (sf == Options.SCALE_AUTO)
@@ -721,8 +735,28 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       UserPreferences.set("global", "Scale", "FixedRatio");
     else
       UserPreferences.set("global", "Scale", sf);
-    UserPreferences.set("global", "DesktopSize",
-                        desktopSize.getSelectedItem().toString());
+    String spanString = ((String)span.getSelectedItem()).toLowerCase();
+    if (spanString.startsWith("p"))
+      UserPreferences.set("global", "Span", "Primary");
+    else if (spanString.startsWith("al"))
+      UserPreferences.set("global", "Span", "All");
+    else
+      UserPreferences.set("global", "Span", "Auto");
+    UserPreferences.set("global", "Toolbar", showToolbar.isSelected());
+
+    // ENCODING
+    UserPreferences.set("global", "CompressLevel", getCompressionLevel());
+      // (no GUI equivalent)
+    if (VncViewer.preferredEncoding.getValue() != null)
+      UserPreferences.set("global", "Encoding",
+                          VncViewer.preferredEncoding.getValue());
+    UserPreferences.set("global", "JPEG", allowJpeg.isSelected());
+    UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
+    String subsamplingStr =
+      subsamplingLabelTable.get(subsamplingLevel.getValue());
+    UserPreferences.set("global", "Subsampling", subsamplingStr);
+
+    // SECURITY AND AUTHENTICATION
     UserPreferences.set("global", "secVeNCrypt", secVeNCrypt.isSelected());
     UserPreferences.set("global", "encNone", encNone.isSelected());
     UserPreferences.set("global", "encTLS", encTLS.isSelected());
@@ -732,27 +766,17 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "secUnixLogin", secUnixLogin.isSelected());
     UserPreferences.set("global", "secPlain", secPlain.isSelected());
     UserPreferences.set("global", "secIdent", secIdent.isSelected());
-    UserPreferences.set("global", "SendLocalUsername",
-                        sendLocalUsername.isSelected());
     UserPreferences.set("global", "x509ca", x509ca.getText());
     UserPreferences.set("global", "x509crl", x509crl.getText());
+
+    UserPreferences.set("global", "SendLocalUsername",
+                        sendLocalUsername.isSelected());
+    UserPreferences.set("global", "tunnel", tunnel.isSelected());
     if (!sshUser.getText().isEmpty())
       UserPreferences.set("global", "via", sshUser.getText() + "@" +
                           gateway.getText());
     else
       UserPreferences.set("global", "via", gateway.getText());
-    UserPreferences.set("global", "tunnel", tunnel.isSelected());
-
-    // Options with no GUI equivalent
-    UserPreferences.set("global", "AlwaysShowConnectionDialog",
-                        VncViewer.alwaysShowConnectionDialog.getValue());
-    UserPreferences.set("global", "FSAltEnter",
-                        VncViewer.fsAltEnter.getValue());
-    if (VncViewer.preferredEncoding.getValue() != null)
-      UserPreferences.set("global", "Encoding",
-                          VncViewer.preferredEncoding.getValue());
-    if (VncViewer.colors.getValue() != -1)
-      UserPreferences.set("global", "Colors", VncViewer.colors.getValue());
   }
 
   JRadioButton addRadioCheckbox(String str, ButtonGroup group, JPanel panel) {

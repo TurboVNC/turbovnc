@@ -177,7 +177,7 @@ execute:
 
 to start the TurboVNC Viewer without JPEG acceleration.
 
-Refer to the default ''index.vnc'' and ''TurboVNC.jnlp'' files installed with
+Refer to the default ''index.vnc'' and ''VncViewer.jnlp'' files installed with
 the TurboVNC Server for an example of how to specify Java command-line
 arguments in an applet or Java Web Start environment.
 

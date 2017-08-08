@@ -35,4 +35,4 @@ echo jawt.dll path: %JAWT_PATH%
 goto start
 
 :start
-"%JAVA%" -server -Dsun.java2d.d3d=false -Djava.library.path="%~d0%~p0java" -jar "%~d0%~p0java\VncViewer.jar" -reqarch @REQARCH@ %*
+"%JAVA%" -Dsun.java2d.d3d=false -Djava.library.path="%~d0%~p0java" -jar "%~d0%~p0java\VncViewer.jar" -reqarch @REQARCH@ %*

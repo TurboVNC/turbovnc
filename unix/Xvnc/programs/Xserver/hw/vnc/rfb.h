@@ -538,6 +538,153 @@ extern int traceLevel;
 }
 
 
+/* auth.c */
+
+void rfbAuthInit(void);
+void rfbAuthProcessResponse(rfbClientPtr cl);
+void rfbAuthParseCommandLine(char *buf);
+void rfbAuthListAvailableSecurityTypes(void);
+extern char* rfbAuthConfigFile;
+
+extern Bool  rfbOptOtpAuth(void);
+extern Bool  rfbOptPamAuth(void);
+extern Bool  rfbOptRfbAuth(void);
+
+extern char* rfbAuthOTPValue;
+extern int   rfbAuthOTPValueLen;
+extern Bool  rfbAuthDisableRevCon;
+extern Bool  rfbAuthDisableCBSend;
+extern Bool  rfbAuthDisableCBRecv;
+extern Bool  rfbAuthDisableHTTP;
+extern Bool  rfbAuthDisableX11TCP;
+
+#ifdef XVNC_AuthPAM
+extern void rfbAuthAddUser(const char* name, Bool viewOnly);
+extern void rfbAuthRevokeUser(const char* name);
+#endif
+
+extern char *rfbAuthPasswdFile;
+#if USETLS
+extern char *rfbAuthX509Cert;
+extern char *rfbAuthX509Key;
+#endif
+
+extern void rfbAuthNewClient(rfbClientPtr cl);
+extern void rfbProcessClientSecurityType(rfbClientPtr cl);
+extern void rfbProcessClientTunnelingType(rfbClientPtr cl);
+extern void rfbProcessClientAuthType(rfbClientPtr cl);
+extern void rfbVncAuthProcessResponse(rfbClientPtr cl);
+#if USETLS
+extern void rfbAuthTLSHandshake(rfbClientPtr cl);
+#endif
+
+extern void rfbClientConnFailed(rfbClientPtr cl, char *reason);
+extern void rfbClientAuthFailed(rfbClientPtr cl, char *reason);
+extern void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType);
+
+/* Functions to prevent too many successive authentication failures */
+extern Bool rfbAuthConsiderBlocking(void);
+extern void rfbAuthUnblock(void);
+extern Bool rfbAuthIsBlocked(void);
+
+
+/* authpam.c */
+
+#ifdef XVNC_AuthPAM
+extern void rfbPAMEnd(rfbClientPtr cl);
+
+extern Bool rfbAuthPAMSession;
+extern Bool rfbAuthDisablePAMSession;
+#endif
+
+
+/* cmap.c */
+
+extern ColormapPtr rfbInstalledColormap;
+
+extern int rfbListInstalledColormaps(ScreenPtr pScreen, Colormap *pmaps);
+extern void rfbInstallColormap(ColormapPtr pmap);
+extern void rfbUninstallColormap(ColormapPtr pmap);
+extern void rfbStoreColors(ColormapPtr pmap, int ndef, xColorItem *pdefs);
+
+
+/* corre.c */
+
+extern Bool rfbSendRectEncodingCoRRE(rfbClientPtr cl, int x, int y, int w,
+                                     int h);
+
+
+/* cursor.c */
+
+extern Bool rfbSendCursorShape(rfbClientPtr cl, ScreenPtr pScreen);
+extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
+
+
+/* cutpaste.c */
+
+extern void rfbSetXCutText(char *str, int len);
+extern void rfbGotXCutText(char *str, int len);
+
+
+/* dispcur.c */
+extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
+
+
+/* draw.c */
+
+extern int rfbDeferUpdateTime;
+
+extern void ClipToScreen(ScreenPtr pScreen, RegionPtr pRegion);
+void PrintRegion(ScreenPtr pScreen, RegionPtr reg, const char *msg);
+
+#ifdef RENDER
+extern void rfbComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask,
+                         PicturePtr pDst, INT16 xSrc, INT16 ySrc, INT16 xMask,
+                         INT16 yMask, INT16 xDst, INT16 yDst, CARD16 width,
+                         CARD16 height);
+
+extern void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                      PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                      int nlists, GlyphListPtr lists, GlyphPtr * glyphs);
+#endif
+
+extern Bool rfbCloseScreen(int, ScreenPtr);
+extern Bool rfbCreateGC(GCPtr);
+extern void rfbPaintWindowBackground(WindowPtr, RegionPtr, int what);
+extern void rfbPaintWindowBorder(WindowPtr, RegionPtr, int what);
+extern void rfbCopyWindow(WindowPtr, DDXPointRec, RegionPtr);
+extern void rfbClearToBackground(WindowPtr, int x, int y, int w,
+                                 int h, Bool generateExposures);
+extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
+
+
+/* flowcontrol.c */
+
+extern void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len,
+                        const char *data);
+extern void rfbInitFlowControl(rfbClientPtr cl);
+extern Bool rfbIsCongested(rfbClientPtr cl);
+extern void rfbSendEndOfCU(rfbClientPtr cl);
+extern Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
+                         const char *data);
+extern Bool rfbSendRTTPing(rfbClientPtr cl);
+
+
+/* hextile.c */
+
+extern Bool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
+                                       int h);
+
+
+/* httpd.c */
+
+extern int httpPort;
+extern char *httpDir;
+
+extern void httpInitSockets(void);
+extern void httpCheckFds(void);
+
+
 /* init.c */
 
 extern char *desktopName;
@@ -564,94 +711,9 @@ extern void rfbLogPerror(char *str);
 extern Bool AddExtInputDevice(rfbDevInfo *dev);
 extern void RemoveExtInputDevice(rfbClientPtr cl, int index);
 
-
-/* sockets.c */
-
-extern int rfbMaxClientWait;
-
-extern int udpPort;
-extern int udpSock;
-extern Bool udpSockConnected;
-
-extern int rfbPort;
-extern int rfbListenSock;
-
-extern void rfbInitSockets(void);
-extern void rfbDisconnectUDPSock(void);
-extern void rfbCloseSock(int);
-extern void rfbCloseClient(rfbClientPtr cl);
-extern void rfbCheckFds(void);
-extern int rfbConnect(char *host, int port);
-extern void rfbCorkSock(int sock);
-extern void rfbUncorkSock(int sock);
-
-extern int ReadExact(rfbClientPtr cl, char *buf, int len);
-extern int SkipExact(rfbClientPtr cl, int len);
-extern int WriteExact(rfbClientPtr cl, char *buf, int len);
-extern int ListenOnTCPPort(int port);
-extern int ListenOnUDPPort(int port);
-extern int ConnectToTcpAddr(char *host, int port);
-
-extern const char *sockaddr_string(struct sockaddr_storage *addr, char *buf,
-                                   int len);
-
-
-/* cmap.c */
-
-extern ColormapPtr rfbInstalledColormap;
-
-extern int rfbListInstalledColormaps(ScreenPtr pScreen, Colormap *pmaps);
-extern void rfbInstallColormap(ColormapPtr pmap);
-extern void rfbUninstallColormap(ColormapPtr pmap);
-extern void rfbStoreColors(ColormapPtr pmap, int ndef, xColorItem *pdefs);
-
-
-/* draw.c */
-
-extern int rfbDeferUpdateTime;
-
-extern void ClipToScreen(ScreenPtr pScreen, RegionPtr pRegion);
-void PrintRegion(ScreenPtr pScreen, RegionPtr reg, const char *msg);
-
-#ifdef RENDER
-extern void
-rfbComposite(
-    CARD8 op,
-    PicturePtr pSrc,
-    PicturePtr pMask,
-    PicturePtr pDst,
-    INT16 xSrc,
-    INT16 ySrc,
-    INT16 xMask,
-    INT16 yMask,
-    INT16 xDst,
-    INT16 yDst,
-    CARD16 width,
-    CARD16 height
-);
-
-extern void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
-                      PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
-                      int nlists, GlyphListPtr lists, GlyphPtr * glyphs);
-#endif
-
-extern Bool rfbCloseScreen(int, ScreenPtr);
-extern Bool rfbCreateGC(GCPtr);
-extern void rfbPaintWindowBackground(WindowPtr, RegionPtr, int what);
-extern void rfbPaintWindowBorder(WindowPtr, RegionPtr, int what);
-extern void rfbCopyWindow(WindowPtr, DDXPointRec, RegionPtr);
-extern void rfbClearToBackground(WindowPtr, int x, int y, int w,
-                                 int h, Bool generateExposures);
-extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
-
-/* dispcur.c */
-extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
-
-
-/* cutpaste.c */
-
-extern void rfbSetXCutText(char *str, int len);
-extern void rfbGotXCutText(char *str, int len);
+extern void *rfbAlloc(size_t size);
+extern void *rfbAlloc0(size_t size);
+extern void *rfbRealloc(void *ptr, size_t size);
 
 
 /* kbdptr.c */
@@ -667,6 +729,21 @@ extern void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons);
 extern void KbdDeviceInit(DeviceIntPtr);
 extern void KeyEvent(KeySym keySym, Bool down);
 extern void KbdReleaseAllKeys(void);
+
+
+/* nvctrlext.c */
+
+extern Bool noNVCTRLExtension;
+extern char *nvCtrlDisplay;
+
+
+/* randr.c */
+
+#ifdef RANDR
+extern Bool ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h);
+extern Bool vncRRInit(ScreenPtr);
+extern void vncRRDeinit(ScreenPtr);
+#endif
 
 
 /* rfbserver.c */
@@ -732,35 +809,78 @@ extern void rfbSendBell(void);
 extern void rfbSendServerCutText(char *str, int len);
 
 
-/* flowcontrol.c */
+#if USETLS
 
-extern void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len,
-                        const char *data);
-extern void rfbInitFlowControl(rfbClientPtr cl);
-extern Bool rfbIsCongested(rfbClientPtr cl);
-extern void rfbSendEndOfCU(rfbClientPtr cl);
-extern Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
-                         const char *data);
-extern Bool rfbSendRTTPing(rfbClientPtr cl);
+/* rfbssl_*.c */
 
+rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon);
+int rfbssl_accept(rfbClientPtr cl);
+int rfbssl_pending(rfbClientPtr cl);
+int rfbssl_peek(rfbClientPtr cl, char *buf, int bufsize);
+int rfbssl_read(rfbClientPtr cl, char *buf, int bufsize);
+int rfbssl_write(rfbClientPtr cl, const char *buf, int bufsize);
+void rfbssl_destroy(rfbClientPtr cl);
+char *rfbssl_geterr(void);
 
-/* randr.c */
-
-#ifdef RANDR
-extern Bool ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h);
-extern Bool vncRRInit(ScreenPtr);
-extern void vncRRDeinit(ScreenPtr);
 #endif
 
-/* vncextinit.c */
 
-extern void vncClientCutText(const char* str, int len);
+/* rre.c */
+
+extern Bool rfbSendRectEncodingRRE(rfbClientPtr cl, int x, int y, int w,
+                                   int h);
 
 
-/* nvctrlext.c */
+/* sockets.c */
 
-extern Bool noNVCTRLExtension;
-extern char *nvCtrlDisplay;
+extern int rfbMaxClientWait;
+
+extern int udpPort;
+extern int udpSock;
+extern Bool udpSockConnected;
+
+extern int rfbPort;
+extern int rfbListenSock;
+
+extern void rfbInitSockets(void);
+extern void rfbDisconnectUDPSock(void);
+extern void rfbCloseSock(int);
+extern void rfbCloseClient(rfbClientPtr cl);
+extern void rfbCheckFds(void);
+extern int rfbConnect(char *host, int port);
+extern void rfbCorkSock(int sock);
+extern void rfbUncorkSock(int sock);
+
+extern int ReadExact(rfbClientPtr cl, char *buf, int len);
+extern int SkipExact(rfbClientPtr cl, int len);
+extern int WriteExact(rfbClientPtr cl, char *buf, int len);
+extern int ListenOnTCPPort(int port);
+extern int ListenOnUDPPort(int port);
+extern int ConnectToTcpAddr(char *host, int port);
+
+extern const char *sockaddr_string(struct sockaddr_storage *addr, char *buf,
+                                   int len);
+
+
+/* stats.c */
+
+extern void rfbResetStats(rfbClientPtr cl);
+extern void rfbPrintStats(rfbClientPtr cl);
+
+
+/* tight.c */
+
+#define TVNC_SAMPOPT 4
+enum { TVNC_1X = 0, TVNC_4X, TVNC_2X, TVNC_GRAY };
+#define TIGHT_DEFAULT_COMPRESSION  1
+#define TIGHT_DEFAULT_SUBSAMP      TVNC_1X
+#define TIGHT_DEFAULT_QUALITY      95
+
+extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h);
+extern Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w,
+                                     int h);
+extern int rfbTightCompressLevel(rfbClientPtr cl);
+extern void ShutdownTightThreads(void);
 
 
 /* translate.c */
@@ -779,92 +899,9 @@ extern Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour,
                                   int nColours);
 
 
-/* httpd.c */
+/* vncextinit.c */
 
-extern int httpPort;
-extern char *httpDir;
-
-extern void httpInitSockets(void);
-extern void httpCheckFds(void);
-
-
-
-/* auth.c */
-
-void rfbAuthInit(void);
-void rfbAuthProcessResponse(rfbClientPtr cl);
-void rfbAuthParseCommandLine(char *buf);
-void rfbAuthListAvailableSecurityTypes(void);
-extern char* rfbAuthConfigFile;
-
-extern Bool  rfbOptOtpAuth(void);
-extern Bool  rfbOptPamAuth(void);
-extern Bool  rfbOptRfbAuth(void);
-
-extern char* rfbAuthOTPValue;
-extern int   rfbAuthOTPValueLen;
-extern Bool  rfbAuthDisableRevCon;
-extern Bool  rfbAuthDisableCBSend;
-extern Bool  rfbAuthDisableCBRecv;
-extern Bool  rfbAuthDisableHTTP;
-extern Bool  rfbAuthDisableX11TCP;
-
-#ifdef XVNC_AuthPAM
-extern void rfbAuthAddUser(const char* name, Bool viewOnly);
-extern void rfbAuthRevokeUser(const char* name);
-#endif
-
-extern char *rfbAuthPasswdFile;
-#if USETLS
-extern char *rfbAuthX509Cert;
-extern char *rfbAuthX509Key;
-#endif
-
-extern void rfbAuthNewClient(rfbClientPtr cl);
-extern void rfbProcessClientSecurityType(rfbClientPtr cl);
-extern void rfbProcessClientTunnelingType(rfbClientPtr cl);
-extern void rfbProcessClientAuthType(rfbClientPtr cl);
-extern void rfbVncAuthProcessResponse(rfbClientPtr cl);
-#if USETLS
-extern void rfbAuthTLSHandshake(rfbClientPtr cl);
-#endif
-
-extern void rfbClientConnFailed(rfbClientPtr cl, char *reason);
-extern void rfbClientAuthFailed(rfbClientPtr cl, char *reason);
-extern void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType);
-
-/* Functions to prevent too many successive authentication failures */
-extern Bool rfbAuthConsiderBlocking(void);
-extern void rfbAuthUnblock(void);
-extern Bool rfbAuthIsBlocked(void);
-
-
-/* authpam.c */
-
-#ifdef XVNC_AuthPAM
-extern void rfbPAMEnd(rfbClientPtr cl);
-
-extern Bool rfbAuthPAMSession;
-extern Bool rfbAuthDisablePAMSession;
-#endif
-
-
-/* rre.c */
-
-extern Bool rfbSendRectEncodingRRE(rfbClientPtr cl, int x, int y, int w,
-                                   int h);
-
-
-/* corre.c */
-
-extern Bool rfbSendRectEncodingCoRRE(rfbClientPtr cl, int x, int y, int w,
-                                     int h);
-
-
-/* hextile.c */
-
-extern Bool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
-                                       int h);
+extern void vncClientCutText(const char* str, int len);
 
 
 /* zlib.c */
@@ -889,49 +926,6 @@ extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 extern Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w,
                                     int h);
 void rfbFreeZrleData(rfbClientPtr cl);
-
-
-/* tight.c */
-
-#define TVNC_SAMPOPT 4
-enum { TVNC_1X = 0, TVNC_4X, TVNC_2X, TVNC_GRAY };
-#define TIGHT_DEFAULT_COMPRESSION  1
-#define TIGHT_DEFAULT_SUBSAMP      TVNC_1X
-#define TIGHT_DEFAULT_QUALITY      95
-
-extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h);
-extern Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w,
-                                     int h);
-extern int rfbTightCompressLevel(rfbClientPtr cl);
-extern void ShutdownTightThreads(void);
-
-
-/* cursor.c */
-
-extern Bool rfbSendCursorShape(rfbClientPtr cl, ScreenPtr pScreen);
-extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
-
-
-/* stats.c */
-
-extern void rfbResetStats(rfbClientPtr cl);
-extern void rfbPrintStats(rfbClientPtr cl);
-
-
-#if USETLS
-
-/* rfbssl_*.c */
-
-rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon);
-int rfbssl_accept(rfbClientPtr cl);
-int rfbssl_pending(rfbClientPtr cl);
-int rfbssl_peek(rfbClientPtr cl, char *buf, int bufsize);
-int rfbssl_read(rfbClientPtr cl, char *buf, int bufsize);
-int rfbssl_write(rfbClientPtr cl, const char *buf, int bufsize);
-void rfbssl_destroy(rfbClientPtr cl);
-char *rfbssl_geterr(void);
-
-#endif
 
 
 #endif /* __RFB_H__ */

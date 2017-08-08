@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 2011 Gernot Tenchio
- *  Copyright (C) 2015 D. R. Commander
+ *  Copyright (C) 2015, 2017 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -285,11 +285,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
       keyfile = rfbAuthX509Cert;
     }
 
-    if ((ctx = malloc(sizeof(struct rfbssl_ctx))) == NULL) {
-        rfbErr("Out of memory\n");
-        goto bailout;
-    }
-    memset(ctx, 0, sizeof(struct rfbssl_ctx));
+    ctx = rfbAlloc0(sizeof(struct rfbssl_ctx));
     if ((ctx->ssl_ctx = ssl.SSL_CTX_new(ssl.TLSv1_server_method())) == NULL) {
         rfbssl_error("SSL_CTX_new()");
         goto bailout;

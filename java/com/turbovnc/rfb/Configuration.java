@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015, 2017 D. R. Commander.  All Rights Reserved.
  * Copyright 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -99,12 +99,21 @@ public class Configuration {
         continue;
       }
       desc = desc.trim();
-      System.err.print("--> " + current.getName() + "\n    ");
+      if (current instanceof HeaderParameter) {
+        System.out.println(desc);
+        for (int i = 0; i < desc.length(); i++)
+          System.out.print("-");
+        current = current.next;
+        System.out.print("\n\n");
+        continue;
+      }
+
+      System.out.print("--> " + current.getName() + "\n    ");
       if (current.getValues() != null)
-        System.err.print("Values: " + current.getValues() + " ");
+        System.out.print("Values: " + current.getValues() + " ");
       if (current.getDefaultStr() != null)
-        System.err.print("(default = " + current.getDefaultStr() + ")\n");
-      System.err.print("\n   ");
+        System.out.print("(default = " + current.getDefaultStr() + ")\n");
+      System.out.print("\n   ");
 
       int column = 4;
       while (true) {
@@ -115,13 +124,13 @@ public class Configuration {
         else wordLen = desc.length();
 
         if (column + wordLen + 1 > width) {
-          System.err.print("\n   ");
+          System.out.print("\n   ");
           column = 4;
         }
-        System.err.format(" %" + wordLen + "s", desc.substring(0, wordLen));
+        System.out.format(" %" + wordLen + "s", desc.substring(0, wordLen));
         column += wordLen + 1;
         if (wordLen >= 1 && desc.charAt(wordLen - 1) == '\n') {
-          System.err.print("\n   ");
+          System.out.print("\n   ");
           column = 4;
         }
 
@@ -129,7 +138,7 @@ public class Configuration {
         desc = desc.substring(wordLen + 1);
       }
       current = current.next;
-      System.err.print("\n\n");
+      System.out.print("\n\n");
     }
   }
 
@@ -186,6 +195,8 @@ public class Configuration {
           else break;
         }
         setParam("Password", VncAuth.unobfuscatePasswd(encryptedPassword));
+      } else if (name.equalsIgnoreCase("user")) {
+        setParam("User", props.getProperty(name));
       } else if (name.equalsIgnoreCase("preferred_encoding")) {
         int encoding = -1;
         try {
@@ -193,6 +204,8 @@ public class Configuration {
         } catch (NumberFormatException e) {}
         if (encoding >= 0 && encoding <= Encodings.LASTENCODING)
           setParam("Encoding", Encodings.encodingName(encoding));
+      } else if (name.equalsIgnoreCase("restricted")) {
+        setParam("Restricted", props.getProperty(name));
       } else if (name.equalsIgnoreCase("viewonly")) {
         setParam("ViewOnly", props.getProperty(name));
       } else if (name.equalsIgnoreCase("reversescroll")) {
@@ -281,6 +294,8 @@ public class Configuration {
         if (temp >= 1) desktopHeight = temp;
       } else if (name.equalsIgnoreCase("cursorshape")) {
         setParam("CursorShape", props.getProperty(name));
+      } else if (name.equalsIgnoreCase("noremotecursor")) {
+        setParam("LocalCursor", props.getProperty(name));
       } else if (name.equalsIgnoreCase("compresslevel")) {
         setParam("CompressLevel", props.getProperty(name));
       } else if (name.equalsIgnoreCase("subsampling")) {

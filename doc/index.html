@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-05-08T13:48:00">
+<meta name="date" content="2017-08-05T11:05:47">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -91,7 +91,8 @@
                 Session</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006003" class="hd">6.3 Using TurboVNC in a Web Browser</a>
+                <a href="#hd006003" class="hd">6.3 Launching the TurboVNC Viewer from a 
+                Web Browser</a>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd006004" class="hd">6.4 Deploying the Java TurboVNC Viewer 
@@ -946,26 +947,25 @@ server machine, type the following command:</p>
 
 
 
-<h2 id="hd006003">6.3&nbsp;Using TurboVNC in a Web Browser</h2>
+<h2 id="hd006003">6.3&nbsp;Launching the TurboVNC Viewer from a Web Browser</h2>
 
-<p>When a TurboVNC session is created, it automatically launches a 
-miniature web server that serves up the Java TurboVNC Viewer as either 
-an applet or a Java Web Start app.  This allows you to easily connect to 
-the TurboVNC session from a machine that does not have the TurboVNC 
-Viewer installed locally.  The Java TurboVNC Viewer, when launched in 
-this manner, can use the libjpeg-turbo JNI library to accelerate JPEG 
-decoding, if the library is available on the client machine.  If one of 
-the official TurboVNC binary packages is installed on the server, then 
-it will automatically send the appropriate x86 or x86-64 libjpeg-turbo 
-JNI library for Linux, OS X, or Windows clients when launching the 
-TurboVNC Viewer using Java Web Start.  If using the Java TurboVNC Viewer 
-as an applet, then you can install 
+<p><a name="Zero_Install"></a></p>
+
+<p>When a TurboVNC session is created, it automatically starts a miniature 
+web server that serves up the Java TurboVNC Viewer as either an applet 
+or a Java Web Start app.  This allows you to easily connect to the 
+TurboVNC session from a machine that does not have the TurboVNC Viewer 
+installed locally.  If one of the official TurboVNC binary packages is 
+installed on the server, then it will automatically send the appropriate 
+x86 or x86-64 libjpeg-turbo JNI library for Linux, OS X, or Windows 
+clients when launching the TurboVNC Viewer using Java Web Start.  If 
+using the Java TurboVNC Viewer as an applet, then you can install 
 <span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
 of the official libjpeg-turbo packages</a></span><a name="idx0036"></a> 
 on the client machine to accelerate JPEG decoding.</p>
 
-<p>To use the Java TurboVNC Viewer in a web browser, point your web browser 
-to:</p>
+<p>To launch the Java TurboVNC Viewer from a web browser, point your web 
+browser to:</p>
 
 <p><code>http://</code><em><code>{turbovnc_server}</code></em><code>:{5800+</code><em><code>n</code></em><code>}</code></p>
 
@@ -1012,6 +1012,8 @@ NOTE: On some newer OS X systems, downloading a JNLP file may result in an error
 
 
 <h2 id="hd006004">6.4&nbsp;Deploying the Java TurboVNC Viewer Using Java Web Start</h2>
+
+<p><a name="JWS"></a></p>
 
 <p>Accessing the Java TurboVNC Viewer through TurboVNC&rsquo;s built-in 
 HTTP server, as described above, is a quick and easy way of running the 
@@ -1064,7 +1066,6 @@ knowledge of web server administration.</p>
 &nbsp;&nbsp;&lt;/information&gt;
 
 &nbsp;&nbsp;&lt;resources&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-server&nbsp;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;jar&nbsp;href=&quot;VncViewer.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
@@ -1073,22 +1074,27 @@ knowledge of web server administration.</p>
 &nbsp;&nbsp;&lt;/security&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Mac&nbsp;OS&nbsp;X&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtosx.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;x86&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtwin32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;amd64&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtwin64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;i386&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;amd64&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
@@ -1757,22 +1763,27 @@ this.</p>
 
 <h3 id="hd007006001">Accelerated JPEG Decoding</h3>
 
-<p>The Java TurboVNC Viewer can be used as a standalone app, in which case 
-it provides most of the same features as the native TurboVNC viewer.  It 
-can also load libjpeg-turbo through JNI to accelerate JPEG decoding, 
-which gives the Java viewer similar performance to the native viewer in 
-most cases.  The TurboVNC Viewer on Mac and Linux/Un*x platforms is 
-simply the Java TurboVNC Viewer packaged in such a way that it behaves 
-like a native viewer.  On Windows, the Java TurboVNC Viewer is packaged 
-similarly, but it is included alongside the native TurboVNC Viewer, 
-giving users a choice between the two. The Java TurboVNC Viewer 
-packaging includes the libjpeg-turbo JNI library, which is automatically 
-loaded when you launch the TurboVNC Viewer app on Mac, run the 
-<code>vncviewer</code> script on Linux/Un*x, run the 
-<code>vncviewer-java.bat</code> script on Windows, or launch &ldquo;Java 
-TurboVNC Viewer&rdquo; from the Windows Start Menu.  Thus, if you are 
-running the Java TurboVNC Viewer in one of those ways, then no further 
-action is needed to accelerate it.</p>
+<p>The Java TurboVNC Viewer can access libjpeg-turbo through JNI to 
+accelerate JPEG decoding, which gives the viewer similar performance to 
+the native viewer in most cases.  In fact, the TurboVNC Viewer on Mac 
+and Linux/Un*x platforms is simply the Java TurboVNC Viewer packaged in 
+such a way that it behaves like a native viewer.  The libjpeg-turbo JNI 
+library is bundled with the official TurboVNC packages and will 
+automatically be loaded if the Java TurboVNC Viewer is launched using 
+the <code>vncviewer</code> script (Linux/Un*x), the 
+<code>vncviewer-java.bat</code> script or the Start Menu shortcut 
+(Windows), or the standalone TurboVNC Viewer app (Mac).  If the viewer 
+is launched with Java Web Start using the <a href="#JWS">recommended 
+procedure</a><a name="idx0042"></a> or the 
+<a href="#Zero_Install">TurboVNC Server&rsquo;s built-in web 
+server</a><a name="idx0043"></a>, then the appropriate libjpeg-turbo JNI 
+library will be downloaded along with it, assuming that the client 
+machine is running Windows, OS X, or Linux.  For other deployment 
+scenarios, the Java TurboVNC Viewer will find the libjpeg-turbo JNI 
+library if 
+<span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
+of the official libjpeg-turbo packages</a></span><a name="idx0044"></a> 
+is installed on the client machine.</p>
 
 <p>If you suspect for whatever reason that JPEG decoding is not being 
 accelerated, then the easiest way to check is to open the 
@@ -1788,12 +1799,12 @@ also print a warning if it is unable to load libjpeg-turbo.</p>
 
 <p>The default in Java 2D on Windows platforms is to use Direct3D for 
 blitting, but in the case of TurboVNC, using GDI blitting is almost 
-always much faster. If you are using Java 7 or later, or if you are 
-running the Java TurboVNC Viewer using the 
-<code>vncviewer-java.bat</code> script or launching it using the Windows 
-Start Menu shortcut, then Direct3D blitting will be disabled by default, 
-and no further action is necessary.  Otherwise, you should consider 
-setting the <code>sun.java2d.d3d</code> system property to 
+always much faster. If you are using Java 7 or later, running the Java 
+TurboVNC Viewer using the <code>vncviewer-java.bat</code> script, 
+launching the viewer using the Windows Start Menu shortcut, or launching 
+the viewer using Java Web Start, then Direct3D blitting will be disabled 
+by default, and no further action is necessary.  Otherwise, you should 
+consider setting the <code>sun.java2d.d3d</code> system property to 
 <code>false</code> (for instance, by passing 
 <code>-Dsun.java2d.d3d=false</code> as an argument to 
 <code>java</code>.)  You can use the ImageDrawTest benchmark to verify 
@@ -1824,7 +1835,7 @@ to with Java Web Start), there are two packages provided:</p>
     <li class="Itemize-1 Itemize asterisk">
         Requires 
         <span class="remote"><a href="http://www.java.com" class="remote">Oracle 
-        Java</a></span><a name="idx0042"></a>, which requires OS X 10.7 
+        Java</a></span><a name="idx0045"></a>, which requires OS X 10.7 
         &ldquo;Lion&rdquo; or later
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1843,7 +1854,7 @@ to with Java Web Start), there are two packages provided:</p>
                 Java for OS X is pre-installed on OS X 10.6 and earlier and can be 
                 installed on later OS X releases by downloading the 
                 <span class="remote"><a href="https://support.apple.com/kb/DL1572" class="remote">Java 
-                for OS X package</a></span><a name="idx0043"></a> from Apple Support.
+                for OS X package</a></span><a name="idx0046"></a> from Apple Support.
             </li>
         </ul>
     </li>
@@ -1873,20 +1884,6 @@ java&nbsp;-cp&nbsp;/Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Res
 <div class="important"><p class="important">
 NOTE: if you intend to use the desktop scaling feature in the Java TurboVNC Viewer along with Oracle Java, then upgrade Oracle Java to Java 8 Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance issue in the OpenGL Java 2D blitter that affected scaled blitting.
 </p></div>
-
-
-
-<h3 id="hd007006004">Using the Server VM</h3>
-
-<p>Passing an argument of <code>-server</code> to <code>java</code> when 
-launching the Java TurboVNC Viewer is recommended.  This enables the 
-adaptive compiler, which performs aggressive code optimizations and 
-actually learns how to better optimize a piece of code the more times it 
-encounters it.  Such optimizations greatly improve the decoding 
-performance for non-JPEG subrectangles.  If you are launching the Java 
-TurboVNC Viewer using the Mac app, the <code>vncviewer</code> 
-or<code>vncviewer-java.bat</code> scripts, or the Windows Start Menu 
-shortcut, then the Server VM is automatically enabled.</p>
 
 <p><br /></p>
 
@@ -2492,7 +2489,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0044"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0047"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -3129,7 +3126,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <p>to start the TurboVNC Viewer without JPEG acceleration.</p>
 
 <p>Refer to the default <code>index.vnc</code> and 
-<code>TurboVNC.jnlp</code> files installed with the TurboVNC Server for 
+<code>VncViewer.jnlp</code> files installed with the TurboVNC Server for 
 an example of how to specify Java command-line arguments in an applet or 
 Java Web Start environment.</p>
 

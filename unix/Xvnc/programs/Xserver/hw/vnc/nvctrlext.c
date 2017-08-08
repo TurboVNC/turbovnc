@@ -76,7 +76,7 @@ static inline void swap_float(float *ptr)
   Display *dpy = NULL;  \
   char *tmp = NULL;  \
   if (!nvCtrlDisplay)  \
-    FatalError("NV-CONTROL ERROR:\nNo 3D X server specified\n");  \
+    FatalError("NV-CONTROL ERROR:\nNo 3D X server specified");  \
   if ((tmp = strchr(nvCtrlDisplay, ':')) != NULL) {  \
     if (strlen(tmp) > 1) {  \
       int displayNumber = atoi(tmp + 1);  \

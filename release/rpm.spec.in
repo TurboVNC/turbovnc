@@ -42,6 +42,7 @@
 #   java_key_alias = value of CMake JAVA_KEY_ALIAS variable
 #   java_key_pass = value of CMake JAVA_KEY_PASS variable
 #   java_tsa_url = value of CMake JAVA_TSA_URL variable
+#   java_tsa_alg = value of CMake JAVA_TSA_ALG variable
 # The CMake variables in question are documented in java/CMakeLists.txt in the
 # TurboVNC source.
 
@@ -96,6 +97,9 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->%if %{?java_tsa_url:1}%{!?java_tsa_url:0}
 #-->  JAVA_TSA_URL_ARG="-DJAVA_TSA_URL=%{java_tsa_url}"
 #-->%endif
+#-->%if %{?java_tsa_alg:1}%{!?java_tsa_alg:0}
+#-->  JAVA_TSA_ALG_ARG="-DJAVA_TSA_ALG=%{java_tsa_alg}"
+#-->%endif
 #-->%if "%{jnijars}" == "1"
 #-->  JNIJARS_ARGS="-DTVNC_INCLUDEJNIJARS=1 -DTJPEG_JNIJARPATH=%{jnijardir}"
 #-->%endif
@@ -107,6 +111,7 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
 #-->  $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG \
 #-->  $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG \
+#-->  $JAVA_TSA_ALG_ARG \
 #-->  -DTVNC_BUILDJAVA=%{java} -DTVNC_BUILDNATIVE=%{native} \
 #-->  -DTVNC_BUILDSERVER=%{server} \
 #-->  $JNIJARS_ARGS .

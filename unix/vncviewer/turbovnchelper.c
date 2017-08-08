@@ -1,4 +1,4 @@
-/*  Copyright (C)2015-2016 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -119,11 +119,41 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   if ((x11dsi = (JAWT_X11DrawingSurfaceInfo*)dsi->platformInfo) == NULL)
     _throw("Could not get X11 drawing surface info");
 
+  bailif0(cls = (*env)->GetObjectClass(env, obj));
+
   netwm_fullscreen(x11dsi->display, x11dsi->drawable, on);
+  if (on) {
+    XEvent e;
+    jint leftMon, rightMon, topMon, bottomMon;
+
+    bailif0(fid = (*env)->GetFieldID(env, cls, "leftMon", "I"));
+    leftMon = (*env)->GetIntField(env, obj, fid);
+    bailif0(fid = (*env)->GetFieldID(env, cls, "rightMon", "I"));
+    rightMon = (*env)->GetIntField(env, obj, fid);
+    bailif0(fid = (*env)->GetFieldID(env, cls, "topMon", "I"));
+    topMon = (*env)->GetIntField(env, obj, fid);
+    bailif0(fid = (*env)->GetFieldID(env, cls, "bottomMon", "I"));
+    bottomMon = (*env)->GetIntField(env, obj, fid);
+
+    memset(&e, 0, sizeof(e));
+    e.xclient.type = ClientMessage;
+    e.xclient.message_type = XInternAtom(x11dsi->display,
+                                         "_NET_WM_FULLSCREEN_MONITORS", False);
+    e.xclient.display = x11dsi->display;
+    e.xclient.window = x11dsi->drawable;
+    e.xclient.format = 32;
+    e.xclient.data.l[0] = topMon;
+    e.xclient.data.l[1] = bottomMon;
+    e.xclient.data.l[2] = leftMon;
+    e.xclient.data.l[3] = rightMon;
+    e.xclient.data.l[4] = 1;
+
+    XSendEvent(x11dsi->display, DefaultRootWindow(x11dsi->display), False,
+               SubstructureRedirectMask | SubstructureNotifyMask, &e);
+  }
   XSync(x11dsi->display, False);
 
-  if ((cls = (*env)->GetObjectClass(env, obj)) == NULL ||
-      (fid = (*env)->GetFieldID(env, cls, "x11win", "J")) == 0)
+  if ((fid = (*env)->GetFieldID(env, cls, "x11win", "J")) == 0)
     _throw("Could not store X window handle");
   (*env)->SetLongField(env, obj, fid, x11dsi->drawable);
 

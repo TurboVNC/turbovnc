@@ -31,12 +31,10 @@ Server:
 corresponding Xvnc command-line options (`-mt` and `-nthreads`), which makes it
 easy to enable multithreaded Tight encoding in TurboVNC Server instances
 spawned by init.d/systemd.
-
     - The turbovncserver.conf file, which is parsed by the vncserver script,
 now includes two new variables (`$multiThread` and `$numThreads`) that can be
 used to configure multithreading on a system-wide basis or for all TurboVNC
 sessions started under a particular user account.
-
     - Previously, if multithreaded Tight encoding was enabled, the Tight
 encoder would use as many threads as there were CPU cores on the server, up to
 a maximum of 8.  However, because of limitations in the Tight encoding type,
@@ -58,6 +56,77 @@ the Xvnc binary was setuid root), the TurboVNC Server would allow any user of
 the system (not just the session owner) to authenticate with a TurboVNC Server
 session using PAM User/Password Authentication, if the user ACL feature was
 disabled.
+
+5. Fixed a BadMatch X11 error that occurred when attempting to resize the
+TurboVNC Server desktop to a smaller size using the X RandR 1.2 API (for
+instance, by executing `xrandr --output TurboVNC --mode {new_mode}`.)
+
+6. Fixed an issue whereby the TurboVNC Server could not be built using GnuTLS
+3.4.0 or later.
+
+7. The TurboVNC Server now supports the anonymous Elliptic Curve Diffie-Hellman
+(ECDH) key exchange algorithm when built using GnuTLS 3.0.0 and later.  The
+Java/Mac/Un\*x TurboVNC Viewer already supports ECDH.
+
+8. Fixed an issue in the Mac (Java) TurboVNC Viewer whereby the initial
+non-full-screen window was positioned incorrectly if it spanned multiple
+screens.
+
+9. Fixed an issue in the Windows (native) TurboVNC Viewer whereby multi-screen
+spanning did not work at all if the secondary display was to the left of the
+primary display.
+
+10. Multi-screen spanning now works with the Linux/Un\*x TurboVNC Viewer in
+full-screen mode, if the viewer is using the TurboVNC Helper library.  (Due to
+limitations in X11, it is still not possible to use multi-screen spanning with
+the Linux/Un\*x TurboVNC Viewer in windowed mode.)  Also, the Linux/Un\*x
+TurboVNC Viewer now falls back to Java's built-in full-screen window feature,
+thus allowing full-screen mode to work with single-screen (Primary) spanning
+even if the TurboVNC Helper library is not available.
+
+11. The TurboVNC Server will now clamp the desktop dimensions to 32767x32767
+regardless of the `max-desktop-size` setting in the security configuration
+file.  This prevents two issues:
+
+    - The server would fail to send framebuffer updates and would continuously
+log messages of the form "WARNING: Framebuffer update at 0,0 with dimensions
+0x0 has been clipped to the screen boundaries" if the desktop width or height
+was set, by way of the `-geometry` command-line argument or a remote desktop
+resize request, to a value greater than 32767.
+    - The server would segfault if a mode with a width or height greater than
+32767 was configured and enabled using the X RandR extension.
+
+    Although TurboVNC can handle framebuffer dimensions larger than this, the
+underlying X.org screen structure uses a signed short to represent width and
+height, and thus values larger than 32767 overflow the data type and can
+sometimes be interpreted as negative numbers.
+
+12. Closed a loophole that allowed users to use X RandR functions to make the
+desktop larger than the dimensions allowed by the `max-desktop-size` setting in
+the security configuration file.
+
+13. When automatic desktop resizing and automatic spanning are both enabled,
+the TurboVNC Viewer will now use single-screen spanning ("Primary monitor
+only") when in windowed mode and multi-screen spanning ("All monitors") when in
+full-screen mode.
+
+14. Fixed an issue whereby the Java TurboVNC Viewer, when launched from the
+`vncviewer-java.bat` script, the Start Menu shortcut, or Java Web Start on
+Windows clients with a 32-bit JRE, would fail with "Error: missing 'server'
+JVM".  On Windows, the 32-bit JRE only provides the client VM, and the 64-bit
+JRE only provides the server VM, so specifying `-server` in the launch scripts
+was unnecessary.
+
+15. Worked around an issue whereby, when the TurboVNC Viewer was running on
+macOS 10.12 "Sierra", pressing and holding certain keys would cause the viewer
+to stop processing subsequent keystrokes if ApplePressAndHoldEnabled was set to
+true in the macOS user defaults (which it is by default in recent macOS
+releases.) It is still necessary to set ApplePressAndHoldEnabled to false,
+either in the global domain or the com.turbovnc.vncviewer.VncViewer domain, in
+order for key repeat to work with the TurboVNC Viewer.
+
+16. The Java/Mac/Un*x TurboVNC Viewer now supports the `user` and
+`noremotecursor` directives in .vnc connection info files.
 
 
 2.1.1
@@ -560,7 +629,7 @@ on a system-wide basis.  This is the equivalent of passing `-nolisten tcp` to
 every instance of the TurboVNC X server running on a particular server machine.
 
 3. The Java TurboVNC Viewer now supports the `grabkeyboard`, `resizemode`,
-`desktopwidth`, and `desktopheight` directives in .vnc configuration files.
+`desktopwidth`, and `desktopheight` directives in .vnc connection info files.
 These directives were added to the Windows TurboVNC Viewer in 2.0 beta but were
 left out of the Java viewer due to an oversight.
 
@@ -1066,13 +1135,13 @@ known to cause issues with certain applications.
 "Preferences" options.  As is the case with most Mac applications, these
 options are now accessed from the application menu.
 
-2. Opening VNC viewer config (.vnc) files in the OS X Finder or dragging and
-dropping them onto the Mac TurboVNC Viewer icon now works properly.
-Additionally, if a connection is already open, dragging and dropping a .vnc
-file onto the Mac TurboVNC Viewer icon will now open a new connection.
+2. Opening VNC viewer connection info (.vnc) files in the OS X Finder or
+dragging and dropping them onto the Mac TurboVNC Viewer icon now works
+properly.  Additionally, if a connection is already open, dragging and dropping
+a .vnc file onto the Mac TurboVNC Viewer icon will now open a new connection.
 
-3. VNC viewer config (.vnc) files can now be opened in Windows by dragging and
-dropping them onto the Windows TurboVNC Viewer icon.
+3. VNC viewer connection info (.vnc) files can now be opened in Windows by
+dragging and dropping them onto the Windows TurboVNC Viewer icon.
 
 4. The Java TurboVNC Viewer can now be built and run with Java 5.
 Consequently, the Mac TurboVNC Viewer now works with the version of Java

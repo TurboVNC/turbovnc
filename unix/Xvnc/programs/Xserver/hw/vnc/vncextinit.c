@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011, 2013-2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011, 2013-2015, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,11 +91,11 @@ void vncExtensionInit(void)
   rfbLog("VNC extension running!\n");
 
   if (!AddCallback(&ClientStateCallback, vncClientStateChange, 0)) {
-    FatalError("Add ClientStateCallback failed\n");
+    FatalError("Add ClientStateCallback failed");
   }
 
   if (!AddCallback(&SelectionCallback, vncSelectionCallback, 0)) {
-    FatalError("Add SelectionCallback failed\n");
+    FatalError("Add SelectionCallback failed");
   }
 }
 
@@ -137,9 +137,7 @@ void vncClientCutText(const char* str, int len)
   VncInputSelect *cur;
   xVncExtClientCutTextNotifyEvent ev;
   if (clientCutText) free (clientCutText);
-  clientCutText = (char *)malloc(len);
-  if (!clientCutText)
-    FatalError("vncClientCutText(): Memory allocation failure\n");
+  clientCutText = (char *)rfbAlloc(len);
   memcpy(clientCutText, str, len);
   clientCutTextLen = len;
   ev.type = vncEventBase + VncExtClientCutTextNotify;
@@ -187,9 +185,7 @@ static int ProcVncExtSetServerCutText(ClientPtr client)
   char *str;
   REQUEST(xVncExtSetServerCutTextReq);
   REQUEST_FIXED_SIZE(xVncExtSetServerCutTextReq, stuff->textLen);
-  str = (char *)malloc(stuff->textLen + 1);
-  if (!str)
-    FatalError("ProcVncExtSetServerCutText(): Memory allocation failure\n");
+  str = (char *)rfbAlloc(stuff->textLen + 1);
   strncpy(str, (char*)&stuff[1], stuff->textLen);
   str[stuff->textLen] = 0;
   rfbSendServerCutText(str, stuff->textLen);
@@ -257,9 +253,7 @@ static int ProcVncExtSelectInput(ClientPtr client)
     nextPtr = &cur->next;
   }
   if (!cur) {
-    cur = (VncInputSelect *)malloc(sizeof(VncInputSelect));
-    if (!cur)
-      FatalError("ProcVncExtSelectInput(): Memory allocation failure\n");
+    cur = (VncInputSelect *)rfbAlloc(sizeof(VncInputSelect));
     cur->client = client;
     cur->window = stuff->window;
     cur->mask = stuff->mask;
@@ -286,9 +280,7 @@ static int ProcVncExtConnect(ClientPtr client)
   char *str;
   REQUEST(xVncExtConnectReq);
   REQUEST_FIXED_SIZE(xVncExtConnectReq, stuff->strLen);
-  str = (char *)malloc(stuff->strLen + 1);
-  if (!str)
-    FatalError("ProcVncExtConnect(): Memory allocation failure\n");
+  str = (char *)rfbAlloc(stuff->strLen + 1);
   strncpy(str, (char*)&stuff[1], stuff->strLen);
   str[stuff->strLen] = 0;
 

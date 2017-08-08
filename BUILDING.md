@@ -34,8 +34,8 @@ Build Requirements
 - PAM development kit [if building the TurboVNC Server]
 
 - JDK 6 or OpenJDK 1.6 or later [if building the TurboVNC Viewer]
-  * For systems that do not provide a JDK, download the Oracle Java
-    Development Kit from <http://www.java.com>
+  * For systems that do not provide a JDK, download the
+    [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
 
 
 ### Windows
@@ -64,8 +64,8 @@ Build Requirements
 ### Mac/Java
 
 - JDK 6 or later
-  * To build with Java 7 or later (recommended), download the Oracle Java
-    Development Kit from <http://www.java.com>
+  * To build with Java 7 or later (recommended), download the
+    [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
   * To build with Java 6, install the Java Developer Package from
     <http://developer.apple.com/tools/xcode> (Apple ID required)
 

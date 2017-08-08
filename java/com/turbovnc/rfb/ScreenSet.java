@@ -1,5 +1,6 @@
 /* Copyright 2009 Pierre Ossman for Cendio AB
  * Copyright 2011 Brian P. Hinz
+ * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,15 +70,17 @@ public class ScreenSet {
     return true;
   }
 
-  public final void debugPrint() {
+  public final void debugPrint(String msg) {
+    vlog.debug(msg + ":");
     for (Iterator<Screen> iter = screens.iterator(); iter.hasNext();) {
       Screen refScreen = (Screen)iter.next();
-      vlog.error("    " + refScreen.id + " (0x" + refScreen.id + "): " +
+      vlog.debug("    " + refScreen.id + " (0x" +
+                 Integer.toHexString(refScreen.id) + "): " +
                  refScreen.dimensions.width() + "x" +
                  refScreen.dimensions.height() + "+" +
                  refScreen.dimensions.tl.x + "+" +
-                 refScreen.dimensions.tl.y + " (flags 0x" + refScreen.flags +
-                 ")");
+                 refScreen.dimensions.tl.y + " (flags 0x" +
+                 Integer.toHexString(refScreen.flags) + ")");
     }
   }
 

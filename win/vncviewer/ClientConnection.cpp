@@ -1554,14 +1554,20 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
                                   bool manual)
 {
-  if (InFullScreenMode() && !resizeFullScreen) return;
+  RECT fullwinrect, screenArea, workArea;
 
-  RECT fullwinrect;
+  if (InFullScreenMode() && !resizeFullScreen) {
+    if (manual) {
+      GetFullScreenMetrics(screenArea, workArea);
+      SetWindowPos(m_hwnd1, HWND_TOPMOST, screenArea.left, screenArea.top,
+        WidthOf(screenArea), HeightOf(screenArea), SWP_NOSIZE);
+    }
+    return;
+  }
 
   if (m_opts.m_desktopSize.mode == SIZE_AUTO && manual) {
-    RECT screenArea, workrect;
-    GetFullScreenMetrics(screenArea, workrect);
-    fullwinrect = workrect;
+    GetFullScreenMetrics(screenArea, workArea);
+    fullwinrect = workArea;
     PositionWindow(fullwinrect, centered);
     return;
   } else if (m_opts.m_scaling && !m_opts.m_FitWindow) {
@@ -3149,6 +3155,7 @@ void ClientConnection::SendClientCutText(char *str, size_t len)
 
   cct.type = rfbClientCutText;
   cct.length = Swap32IfLE(len);
+  omni_mutex_lock l(m_writeMutex);  // Ensure back-to-back writes are grouped
   WriteExact((char *)&cct, sz_rfbClientCutTextMsg);
   WriteExact(str, (int)len);
   vnclog.Print(6, "Sent %d bytes of clipboard\n", len);
@@ -4076,6 +4083,7 @@ void ClientConnection::SendDesktopSize(int width, int height)
   msg.w = Swap16IfLE(width);
   msg.h = Swap16IfLE(height);
   msg.numScreens = layout.num_screens();
+  omni_mutex_lock l(m_writeMutex);  // Ensure back-to-back writes are grouped
   WriteExact((char *)&msg, sz_rfbSetDesktopSizeMsg);
 
   for (iter = layout.begin(); iter != layout.end(); ++iter) {

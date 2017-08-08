@@ -13,30 +13,34 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "March 2017" "" "TurboVNC"
+.TH Xvnc 1 "July 2017" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
 .TP
+.nh
+.ad l
 \fBXvnc\fR
 [:\fIdisplay\fR]
-[\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
-[\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
-[\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
-[\-rfbauth \fIpasswd-file\fR] [\-securitytypes \fItype-list\fR]
-[\-x509cert \fIcert\fR] [\-x509key \fIkey\fR] [\-pamsession]
+[\-geometry\ \fIwidth\fRx\fIheight\fR] [\-depth\ \fIdepth\fR]
+[\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport\ \fIport\fR]
+[\-rfbport\ \fIport\fR] [\-rfbwait\ \fItime\fR] [\-nocursor]
+[\-rfbauth\ \%\fIpasswd-file\fR] [\-securitytypes\ \%\fItype-list\fR]
+[\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-pamsession]
 [\-noreverse] [\-noclipboardsend] [\-noclipboardrecv]
-[\-maxclipboard \fIbytes\fR]
-[\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
-[\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-noflowcontrol]
-[\-alr \fItime\fR]
-[\-alrqual \fIlevel\fR] [\-alrsamp \fI1X | 2X | 4X | gray\fR]
+[\-maxclipboard\ \fIbytes\fR]
+[\-idletimeout\ \fItime\fR] [\-httpd\ \fIdir\fR]
+[\-httpport\ \fIport\fR] [\-deferupdate\ \fItime\fR] [\-noflowcontrol]
+[\-alr\ \fItime\fR]
+[\-alrqual\ \fIlevel\fR] [\-alrsamp\ 1X|2X|4X|gray]
 [\-interframe] [\-nointerframe] [\-virtualtablet]
-[\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
+[\-economictranslate] [\-desktop\ \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-disconnect] [\-viewonly] [\-localhost]
-[\-interface ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
-[\-mt] [\-nthreads \fIthread-count\fR]
-[\fIX-options\fR...]
+[\-interface\ ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
+[\-mt] [\-nthreads\ \%\fIthread-count\fR]
+\%[\fIX-options\fR...]
+.ad
+.hy
 .SH DESCRIPTION
 \fBXvnc\fR is a VNC (Virtual Network Computing) server for Unix and Linux
 systems.  It acts like a normal X server, except that it sends its output
@@ -205,7 +209,7 @@ refresh, send a JPEG image with the specified JPEG quality (95 is a good
 choice, as this is the equivalent of the "Tight + Perceptually Lossless JPEG"
 preset.)
 .TP
-\fB\-alrsamp\fR \fI1X | 2X | 4X | gray\fR
+\fB\-alrsamp 1X\fR|\fB2X\fR|\fB4X\fR|\fBgray\fR
 Specify the level of chrominance subsampling to be used when sending an
 automatic lossless refresh (default: 1X.)  This has no effect unless
 \fI-alrqual\fR is also specified.

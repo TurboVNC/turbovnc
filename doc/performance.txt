@@ -321,20 +321,22 @@ to ''vncserver'' to override this.
 *** Accelerated JPEG Decoding
 #OPT: noList! plain!
 
-The Java TurboVNC Viewer can be used as a standalone app, in which case it
-provides most of the same features as the native TurboVNC viewer.  It can also
-load libjpeg-turbo through JNI to accelerate JPEG decoding, which gives the
-Java viewer similar performance to the native viewer in most cases.  The
-TurboVNC Viewer on Mac and Linux/Un*x platforms is simply the Java TurboVNC
-Viewer packaged in such a way that it behaves like a native viewer.  On
-Windows, the Java TurboVNC Viewer is packaged similarly, but it is included
-alongside the native TurboVNC Viewer, giving users a choice between the two.
-The Java TurboVNC Viewer packaging includes the libjpeg-turbo JNI library,
-which is automatically loaded when you launch the TurboVNC Viewer app on Mac,
-run the ''vncviewer'' script on Linux/Un*x, run the ''vncviewer-java.bat''
-script on Windows, or launch "Java TurboVNC Viewer" from the Windows Start
-Menu.  Thus, if you are running the Java TurboVNC Viewer in one of those ways,
-then no further action is needed to accelerate it.
+The Java TurboVNC Viewer can access libjpeg-turbo through JNI to accelerate
+JPEG decoding, which gives the viewer similar performance to the native viewer
+in most cases.  In fact, the TurboVNC Viewer on Mac and Linux/Un*x platforms is
+simply the Java TurboVNC Viewer packaged in such a way that it behaves like a
+native viewer.  The libjpeg-turbo JNI library is bundled with the official
+TurboVNC packages and will automatically be loaded if the Java TurboVNC Viewer
+is launched using the ''vncviewer'' script (Linux/Un*x), the
+''vncviewer-java.bat'' script or the Start Menu shortcut (Windows), or the
+standalone TurboVNC Viewer app (Mac).  If the viewer is launched with Java
+Web Start using the [[#JWS][recommended procedure]] or the
+[[#Zero_Install][TurboVNC Server's built-in web server]], then the appropriate
+libjpeg-turbo JNI library will be downloaded along with it, assuming that the
+client machine is running Windows, OS X, or Linux.  For other deployment
+scenarios, the Java TurboVNC Viewer will find the libjpeg-turbo JNI library if
+[[http://www.sourceforge.net/projects/libjpeg-turbo/files][one of the official libjpeg-turbo packages]]
+is installed on the client machine.
 
 If you suspect for whatever reason that JPEG decoding is not being accelerated,
 then the easiest way to check is to open the "Connection Info" dialog (after
@@ -348,9 +350,10 @@ to load libjpeg-turbo.
 
 The default in Java 2D on Windows platforms is to use Direct3D for blitting,
 but in the case of TurboVNC, using GDI blitting is almost always much faster.
-If you are using Java 7 or later, or if you are running the Java TurboVNC
-Viewer using the ''vncviewer-java.bat'' script or launching it using the
-Windows Start Menu shortcut, then Direct3D blitting will be disabled by
+If you are using Java 7 or later, running the Java TurboVNC Viewer using the
+''vncviewer-java.bat'' script, launching the viewer using the Windows Start
+Menu shortcut, or launching the viewer using Java Web Start, then Direct3D
+blitting will be disabled by
 default, and no further action is necessary.  Otherwise, you should consider
 setting the ''sun.java2d.d3d'' system property to ''false'' (for instance, by
 passing ''-Dsun.java2d.d3d=false'' as an argument to ''java''.)  You can use
@@ -404,15 +407,3 @@ of both of them using the ImageDrawTest benchmark:
 	TurboVNC Viewer along with Oracle Java, then upgrade Oracle Java to Java 8
 	Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance
 	issue in the OpenGL Java 2D blitter that affected scaled blitting.
-
-*** Using the Server VM
-#OPT: noList! plain!
-
-Passing an argument of ''-server'' to ''java'' when launching the Java TurboVNC
-Viewer is recommended.  This enables the adaptive compiler, which performs
-aggressive code optimizations and actually learns how to better optimize a
-piece of code the more times it encounters it.  Such optimizations greatly
-improve the decoding performance for non-JPEG subrectangles.  If you are
-launching the Java TurboVNC Viewer using the Mac app, the
-''vncviewer'' or''vncviewer-java.bat'' scripts, or the Windows Start Menu
-shortcut, then the Server VM is automatically enabled.

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2002 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2003 Sun Microsystems, Inc.
- * Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,8 +110,8 @@ Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
   char *zrleBeforeBuf;
 
   if (cl->zrleBeforeBuf == NULL) {
-    cl->zrleBeforeBuf = (char *) malloc(rfbZRLETileWidth * rfbZRLETileHeight *
-                                        4 + 4);
+    cl->zrleBeforeBuf = (char *) rfbAlloc(rfbZRLETileWidth *
+                                          rfbZRLETileHeight * 4 + 4);
   }
   zrleBeforeBuf = cl->zrleBeforeBuf;
 

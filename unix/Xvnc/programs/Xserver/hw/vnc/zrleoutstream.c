@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2002 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2003 Sun Microsystems, Inc.
+ * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +26,11 @@
 #define ZRLE_OUT_BUFFER_SIZE 1024
 #undef  ZRLE_DEBUG
 
-static Bool zrleBufferAlloc(zrleBuffer *buffer, int size)
+static void zrleBufferAlloc(zrleBuffer *buffer, int size)
 {
-  buffer->ptr = buffer->start = malloc(size);
-  if (buffer->start == NULL) {
-    buffer->end = NULL;
-    return FALSE;
-  }
+  buffer->ptr = buffer->start = rfbAlloc(size);
 
   buffer->end = buffer->start + size;
-
-  return TRUE;
 }
 
 static void zrleBufferFree(zrleBuffer *buffer)
@@ -45,42 +40,28 @@ static void zrleBufferFree(zrleBuffer *buffer)
   buffer->start = buffer->ptr = buffer->end = NULL;
 }
 
-static Bool zrleBufferGrow(zrleBuffer *buffer, int size)
+static void zrleBufferGrow(zrleBuffer *buffer, int size)
 {
   int offset;
 
   size  += buffer->end - buffer->start;
   offset = ZRLE_BUFFER_LENGTH (buffer);
 
-  buffer->start = realloc(buffer->start, size);
-  if (!buffer->start) {
-    return FALSE;
-  }
+  buffer->start = rfbRealloc(buffer->start, size);
 
   buffer->end = buffer->start + size;
   buffer->ptr = buffer->start + offset;
-
-  return TRUE;
 }
 
 zrleOutStream *zrleOutStreamNew(void)
 {
   zrleOutStream *os;
 
-  os = malloc(sizeof(zrleOutStream));
-  if (os == NULL)
-    return NULL;
+  os = rfbAlloc(sizeof(zrleOutStream));
 
-  if (!zrleBufferAlloc(&os->in, ZRLE_IN_BUFFER_SIZE)) {
-    free(os);
-    return NULL;
-  }
+  zrleBufferAlloc(&os->in, ZRLE_IN_BUFFER_SIZE);
 
-  if (!zrleBufferAlloc(&os->out, ZRLE_OUT_BUFFER_SIZE)) {
-    zrleBufferFree(&os->in);
-    free(os);
-    return NULL;
-  }
+  zrleBufferAlloc(&os->out, ZRLE_OUT_BUFFER_SIZE);
 
   os->zs.zalloc = Z_NULL;
   os->zs.zfree  = Z_NULL;
@@ -115,11 +96,8 @@ Bool zrleOutStreamFlush(zrleOutStream *os)
     do {
       int ret;
 
-      if (os->out.ptr >= os->out.end &&
-	  !zrleBufferGrow(&os->out, os->out.end - os->out.start)) {
-	rfbLog("zrleOutStreamFlush: failed to grow output buffer\n");
-	return FALSE;
-      }
+      if (os->out.ptr >= os->out.end)
+	zrleBufferGrow(&os->out, os->out.end - os->out.start);
 
       os->zs.next_out = os->out.ptr;
       os->zs.avail_out = os->out.end - os->out.ptr;
@@ -162,11 +140,8 @@ static int zrleOutStreamOverrun(zrleOutStream *os,
     do {
       int ret;
 
-      if (os->out.ptr >= os->out.end &&
-	  !zrleBufferGrow(&os->out, os->out.end - os->out.start)) {
-	rfbLog("zrleOutStreamOverrun: failed to grow output buffer\n");
-	return FALSE;
-      }
+      if (os->out.ptr >= os->out.end)
+	zrleBufferGrow(&os->out, os->out.end - os->out.start);
 
       os->zs.next_out = os->out.ptr;
       os->zs.avail_out = os->out.end - os->out.ptr;

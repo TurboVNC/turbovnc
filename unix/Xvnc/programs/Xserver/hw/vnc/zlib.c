@@ -7,7 +7,7 @@
 /*
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2014, 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -75,9 +75,10 @@ rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
     if (zlibBeforeBufSize < maxRawSize) {
         zlibBeforeBufSize = maxRawSize;
         if (zlibBeforeBuf == NULL)
-            zlibBeforeBuf = (char *)malloc(zlibBeforeBufSize);
+            zlibBeforeBuf = (char *)rfbAlloc(zlibBeforeBufSize);
         else
-            zlibBeforeBuf = (char *)realloc(zlibBeforeBuf, zlibBeforeBufSize);
+            zlibBeforeBuf = (char *)rfbRealloc(zlibBeforeBuf,
+                                               zlibBeforeBufSize);
     }
 
     /* zlib compression is not useful for very small data sets.
@@ -115,9 +116,9 @@ rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
     if (zlibAfterBufSize < maxCompSize) {
         zlibAfterBufSize = maxCompSize;
         if (zlibAfterBuf == NULL)
-            zlibAfterBuf = (char *)malloc(zlibAfterBufSize);
+            zlibAfterBuf = (char *)rfbAlloc(zlibAfterBufSize);
         else
-            zlibAfterBuf = (char *)realloc(zlibAfterBuf, zlibAfterBufSize);
+            zlibAfterBuf = (char *)rfbRealloc(zlibAfterBuf, zlibAfterBufSize);
     }
 
     /*

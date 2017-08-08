@@ -1,5 +1,5 @@
-/* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -233,7 +233,7 @@ public class SocketDescriptor implements FileDescriptor {
       channel.register(writeSelector, SelectionKey.OP_WRITE);
       channel.register(readSelector, SelectionKey.OP_READ);
     } catch (java.nio.channels.ClosedChannelException e) {
-      System.out.println(e.toString());
+      System.err.println(e.toString());
     }
   }
 

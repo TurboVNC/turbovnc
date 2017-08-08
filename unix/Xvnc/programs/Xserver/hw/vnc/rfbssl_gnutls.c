@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 2011 Gernot Tenchio
- *  Copyright (C) 2015 D. R. Commander
+ *  Copyright (C) 2015, 2017 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,11 +72,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     static Bool globalInit = FALSE;
     int ret;
 
-    if ((ctx = malloc(sizeof(struct rfbssl_ctx))) == NULL) {
-        rfbErr("Out of memory");
-        goto bailout;
-    }
-    memset(ctx, 0, sizeof(struct rfbssl_ctx));
+    ctx = rfbAlloc0(sizeof(struct rfbssl_ctx));
     if (!globalInit) {
         if ((ret = gnutls_global_init()) != GNUTLS_E_SUCCESS) {
             rfbssl_error("gnutls_global_init()", ret);
@@ -104,12 +100,25 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
         goto bailout;
     }
     if (anon) {
-        static const int priority[] = { GNUTLS_KX_ANON_DH, 0 };
+#if GNUTLS_VERSION_NUMBER < 0x030400
+        static const int priority[] = { GNUTLS_KX_ANON_DH,
+#if GNUTLS_VERSION_NUMBER >= 0x030000
+                                        GNUTLS_KX_ANON_ECDH,
+#endif
+                                        0 };
         if ((ret = gnutls_kx_set_priority(ctx->session, priority)) !=
             GNUTLS_E_SUCCESS) {
             rfbssl_error("gnutls_kx_set_priority()", ret);
             goto bailout;
         }
+#else
+        static const char priority[] = "NORMAL:+ANON-ECDH:+ANON-DH", *err;
+        if ((ret = gnutls_priority_set_direct(ctx->session, priority, &err)) !=
+            GNUTLS_E_SUCCESS) {
+            rfbssl_error("gnutls_priority_set_direct()", ret);
+            goto bailout;
+        }
+#endif
         if ((ret = gnutls_anon_allocate_server_credentials(&ctx->anon_cred)) !=
             GNUTLS_E_SUCCESS) {
             rfbssl_error("gnutls_anon_allocate_server_credentials()", ret);

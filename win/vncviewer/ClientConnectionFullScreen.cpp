@@ -1,5 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2010-2012, 2015 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2012, 2015, 2017 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -137,26 +137,24 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
         WidthOf(fsm->screenArea0)) != 0)
     fsm->equal = 0;
 
-  // If the screen areas of the primary monitor and this monitor overlap
-  // vertically, then allow the full-screen window to extend horizontally to
-  // this monitor, and constrain it vertically, if necessary, to fit within
-  // this monitor's dimensions.
-  if (min(mi.rcMonitor.bottom, fsm->screenArea0.bottom) -
-      max(mi.rcMonitor.top, fsm->screenArea0.top) > 0) {
+  // If the screen area of this monitor overlaps vertically with the
+  // multi-screen area, then allow the full-screen window to extend
+  // horizontally to this monitor, and constrain it vertically, if necessary,
+  // to fit within this monitor's dimensions.
+  if (min(mi.rcMonitor.bottom, fsm->screenArea.bottom) -
+      max(mi.rcMonitor.top, fsm->screenArea.top) > 0) {
     fsm->screenArea.top = max(mi.rcMonitor.top, fsm->screenArea.top);
     fsm->screenArea.left = min(mi.rcMonitor.left, fsm->screenArea.left);
     fsm->screenArea.right = max(mi.rcMonitor.right, fsm->screenArea.right);
     fsm->screenArea.bottom = min(mi.rcMonitor.bottom, fsm->screenArea.bottom);
   }
 
-  // If the work areas of the primary monitor and this monitor overlap
-  // vertically, and if the top portion of the primary monitor intersects with
-  // this monitor's work area, then allow the non-full-screen window to extend
-  // horizontally to this monitor, and constrain it vertically, if necessary,
-  // to fit within this monitor's work area dimensions.
-  if (mi.rcWork.top <= 0 && mi.rcWork.left >= 0 &&
-      min(mi.rcWork.bottom, fsm->workArea0.bottom) -
-      max(mi.rcWork.top, fsm->workArea0.top) > 0) {
+  // If the work area of this monitor overlaps vertically with the multi-screen
+  // work area, then allow the non-full-screen window to extend horizontally to
+  // this monitor, and constrain it vertically, if necessary, to fit within
+  // this monitor's work area.
+  if (min(mi.rcWork.bottom, fsm->workArea.bottom) -
+      max(mi.rcWork.top, fsm->workArea.top) > 0) {
     fsm->workArea.top = max(mi.rcWork.top, fsm->workArea.top);
     fsm->workArea.left = min(mi.rcWork.left, fsm->workArea.left);
     fsm->workArea.right = max(mi.rcWork.right, fsm->workArea.right);
@@ -212,14 +210,20 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
 
   BOOL ret = EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm);
 
+  // Enable Primary spanning if explicitly selected, or enumerating the
+  // monitors fails, or ...
   if (spanMode == SPAN_PRIMARY || !ret ||
-      (spanMode == SPAN_AUTO &&
+      // Automatic spanning + Manual or Server resizing is enabled and the
+      // server desktop fits on the primary monitor, or ...
+      (spanMode == SPAN_AUTO && m_opts.m_desktopSize.mode != SIZE_AUTO &&
        (scaledWidth <= primaryWidth ||
         WidthOf(fsm.screenArea) <= primaryWidth) &&
        (scaledHeight <= primaryHeight ||
         HeightOf(fsm.screenArea) <= primaryHeight)) ||
+      // Automatic spanning + Auto resizing is enabled and we're in windowed
+      // mode
       (spanMode == SPAN_AUTO &&
-       m_opts.m_desktopSize.mode == SIZE_AUTO)) {
+       m_opts.m_desktopSize.mode == SIZE_AUTO && !m_opts.m_FullScreen)) {
     workArea = fsm.workArea0;
     screenArea = fsm.screenArea0;
   } else {
@@ -230,8 +234,10 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
       // be extended horizontally.)
       screenArea.left = GetSystemMetrics(SM_XVIRTUALSCREEN);
       screenArea.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
-      screenArea.right = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-      screenArea.bottom = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+      screenArea.right = screenArea.left +
+                         GetSystemMetrics(SM_CXVIRTUALSCREEN);
+      screenArea.bottom = screenArea.top +
+                          GetSystemMetrics(SM_CYVIRTUALSCREEN);
     }
     else screenArea = fsm.screenArea;
     workArea = fsm.workArea;

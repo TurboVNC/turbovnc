@@ -15,6 +15,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,7 +65,7 @@ rfbInitTrueColourSingleTableOUT(char **table, rfbPixelFormat *in,
     int nEntries = 1 << in->bitsPerPixel;
 
     if (*table) free(*table);
-    *table = (char *)malloc(nEntries * sizeof(OUT_T));
+    *table = (char *)rfbAlloc(nEntries * sizeof(OUT_T));
     t = (OUT_T *)*table;
 
     for (i = 0; i < nEntries; i++) {
@@ -102,8 +103,8 @@ rfbInitTrueColourRGBTablesOUT(char **table, rfbPixelFormat *in,
     OUT_T *blueTable;
 
     if (*table) free(*table);
-    *table = (char *)malloc((in->redMax + in->greenMax + in->blueMax + 3) *
-                            sizeof(OUT_T));
+    *table = (char *)rfbAlloc((in->redMax + in->greenMax + in->blueMax + 3) *
+                              sizeof(OUT_T));
     redTable = (OUT_T *)*table;
     greenTable = redTable + in->redMax + 1;
     blueTable = greenTable + in->greenMax + 1;

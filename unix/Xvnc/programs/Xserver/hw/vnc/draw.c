@@ -11,7 +11,8 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010-2012, 2014, 2016 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2012, 2014, 2016-2017 D. R. Commander.
+ *                                           All Rights Reserved.
  *  Copyright (C) 2012-2013, 2016 Pierre Ossman for Cendio AB.
  *                                All Rights Reserved.
  *
@@ -870,10 +871,7 @@ rfbPolylines(DrawablePtr pDrawable, GCPtr pGC, int mode, int npt,
         if (npt == 1)
         {
             nlines = 1;
-            rects = (xRectangle *)malloc(sizeof(xRectangle));
-            if (!rects) {
-                FatalError("rfbPolylines: malloc failed\n");
-            }
+            rects = (xRectangle *)rfbAlloc(sizeof(xRectangle));
 
             rects[0].x = ppts[0].x - lw + pDrawable->x; /* being safe here */
             rects[0].y = ppts[0].y - lw + pDrawable->y;
@@ -883,10 +881,7 @@ rfbPolylines(DrawablePtr pDrawable, GCPtr pGC, int mode, int npt,
         else
         {
             nlines = npt - 1;
-            rects = (xRectangle *)malloc(nlines * sizeof(xRectangle));
-            if (!rects) {
-                FatalError("rfbPolylines: malloc failed\n");
-            }
+            rects = (xRectangle *)rfbAlloc(nlines * sizeof(xRectangle));
 
             /*
              * mitered joins can project quite a way from
@@ -971,10 +966,7 @@ rfbPolySegment(DrawablePtr pDrawable, GCPtr pGC, int nseg, xSegment *segs)
     TRC((stderr, "rfbPolySegment called\n"));
 
     if (nseg) {
-        rects = (xRectangle *)malloc(nseg * sizeof(xRectangle));
-        if (!rects) {
-            FatalError("rfbPolySegment: malloc failed\n");
-        }
+        rects = (xRectangle *)rfbAlloc(nseg * sizeof(xRectangle));
 
         lw = pGC->lineWidth;
         if (lw == 0)
@@ -1038,10 +1030,7 @@ rfbPolyRectangle(DrawablePtr pDrawable, GCPtr pGC, int nrects,
     TRC((stderr, "rfbPolyRectangle called\n"));
 
     if (nrects) {
-        regRects = (xRectangle *)malloc(nrects * 4 *sizeof(xRectangle));
-        if (!regRects) {
-            FatalError("rfbPolyRectangle: malloc failed\n");
-        }
+        regRects = (xRectangle *)rfbAlloc(nrects * 4 *sizeof(xRectangle));
 
         lw = pGC->lineWidth;
         if (lw == 0)
@@ -1111,10 +1100,7 @@ rfbPolyArc(DrawablePtr pDrawable, register GCPtr pGC, int narcs, xArc *arcs)
     TRC((stderr, "rfbPolyArc called\n"));
 
     if (narcs) {
-        rects = (xRectangle *)malloc(narcs * sizeof(xRectangle));
-        if (!rects) {
-            FatalError("rfbPolyArc: malloc failed\n");
-        }
+        rects = (xRectangle *)rfbAlloc(narcs * sizeof(xRectangle));
 
         lw = pGC->lineWidth;
         if (lw == 0)
@@ -1233,10 +1219,7 @@ rfbPolyFillRect(DrawablePtr pDrawable, GCPtr pGC, int nrects,
     TRC((stderr, "rfbPolyFillRect called\n"));
 
     if (nrects) {
-        regRects = (xRectangle *)malloc(nrects * sizeof(xRectangle));
-        if (!regRects) {
-            FatalError("rfbPolyFillRect: malloc failed\n");
-        }
+        regRects = (xRectangle *)rfbAlloc(nrects * sizeof(xRectangle));
 
         for (i = 0; i < nrects; i++) {
             regRects[i].x = rects[i].x + pDrawable->x;
@@ -1282,10 +1265,7 @@ rfbPolyFillArc(DrawablePtr pDrawable, GCPtr pGC, int narcs, xArc *arcs)
     TRC((stderr, "rfbPolyFillArc called\n"));
 
     if (narcs) {
-        rects = (xRectangle *)malloc(narcs * sizeof(xRectangle));
-        if (!rects) {
-            FatalError("rfbPolyFillArc: malloc failed\n");
-        }
+        rects = (xRectangle *)rfbAlloc(narcs * sizeof(xRectangle));
 
         lw = pGC->lineWidth;
         if (lw == 0)

@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014, 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -70,6 +70,7 @@ in this Software without prior written authorization from The Open Group.
 #endif
 
 #include "inputstr.h"
+#include "rfb.h"
 
 Bool rfbDCUnrealizeCursor(ScreenPtr pScreen, CursorPtr pCursor);
 
@@ -132,9 +133,7 @@ rfbDCInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
                                      0))
         return FALSE;
 
-    pScreenPriv = malloc(sizeof(rfbDCScreenRec));
-    if (!pScreenPriv)
-        return FALSE;
+    pScreenPriv = rfbAlloc(sizeof(rfbDCScreenRec));
 
     pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = rfbDCCloseScreen;
@@ -216,9 +215,7 @@ rfbDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
     GCPtr pGC;
     ChangeGCVal gcvals;
 
-    pPriv = malloc(sizeof(rfbDCCursorRec));
-    if (!pPriv)
-        return NULL;
+    pPriv = rfbAlloc(sizeof(rfbDCCursorRec));
 #ifdef ARGB_CURSOR
     if (pCursor->bits->argb) {
         PixmapPtr pPixmap;
@@ -514,9 +511,7 @@ rfbDCDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
     for (i = 0; i < screenInfo.numScreens; i++) {
         pScreen = screenInfo.screens[i];
 
-        pBuffer = calloc(1, sizeof(rfbDCBufferRec));
-        if (!pBuffer)
-            goto failure;
+        pBuffer = rfbAlloc0(sizeof(rfbDCBufferRec));
 
         dixSetScreenPrivate(&pDev->devPrivates, rfbDCDeviceKey, pScreen,
                             pBuffer);

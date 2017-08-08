@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import java.util.Iterator;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
+import com.turbovnc.rfb.Point;
 
 public class Viewport extends JFrame {
 
@@ -300,6 +301,23 @@ public class Viewport extends JFrame {
     setSize(w, h);
     setLocation(x, y);
     vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
+    // For unknown reasons, setting the position with a non-zero X or Y doesn't
+    // work properly on OS X until the component is visible, so we store the
+    // new position and call setLocation() again once the component is made
+    // visible.
+    if (VncViewer.os.startsWith("mac os x") && !isVisible())
+      deferredPosition = new Point(x, y);
+  }
+
+  public void setVisible(boolean visible) {
+    boolean wasVisible = isVisible();
+
+    super.setVisible(visible);
+
+    if (!wasVisible && visible && deferredPosition != null) {
+      setLocation(deferredPosition.x, deferredPosition.y);
+      deferredPosition = null;
+    }
   }
 
   public void showToolbar(boolean show) { showToolbar(show, false); }
@@ -335,19 +353,18 @@ public class Viewport extends JFrame {
         vlog.info("WARNING: Could not find TurboVNC Helper JNI library.  If it is in a");
         vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
         vlog.info("  to the Java command line to specify its location.");
-        vlog.info("  Full-screen mode may not work correctly.");
-        if (VncViewer.osEID())
-          vlog.info("  Keyboard grabbing and extended input device support will be disabled.");
-        else if (VncViewer.osGrab())
+        if (VncViewer.isX11()) {
+          vlog.info("  Multi-screen spanning, keyboard grabbing, and extended input device");
+          vlog.info("  support will be disabled.");
+        } else if (VncViewer.osGrab())
           vlog.info("  Keyboard grabbing will be disabled.");
-
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
-        vlog.info("  Full-screen mode may not work correctly.");
-        if (VncViewer.osEID())
-          vlog.info("  Keyboard grabbing and extended input device support will be disabled.");
-        else if (VncViewer.osGrab())
+        if (VncViewer.isX11()) {
+          vlog.info("  Multi-screen spanning, keyboard grabbing, and extended input device");
+          vlog.info("  support will be disabled.");
+        } else if (VncViewer.osGrab())
           vlog.info("  Keyboard grabbing will be disabled.");
       }
     }
@@ -359,16 +376,19 @@ public class Viewport extends JFrame {
     if (isHelperAvailable()) {
       try {
         x11FullScreen(on);
+        return;
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper.");
-        vlog.info("  Full-screen mode may not work correctly.");
+        vlog.info("  Multi-screen spanning may not work correctly.");
         helperAvailable = false;
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
-        vlog.info("  Full-screen mode may not work correctly.");
+        vlog.info("  Multi-screen spanning may not work correctly.");
       }
     }
+    if (cc.primaryGD != null)
+      cc.primaryGD.setFullScreenWindow(on ? this : null);
   }
 
   public void grabKeyboardHelper(boolean on) {
@@ -511,6 +531,8 @@ public class Viewport extends JFrame {
   public int buttonPressType, buttonReleaseType, motionType;
   ArrayList<ExtInputDevice> devices;
   ExtInputEvent lastEvent = new ExtInputEvent();
+  Point deferredPosition;
+  int leftMon, rightMon, topMon, bottomMon;
 
   static LogWriter vlog = new LogWriter("Viewport");
 }

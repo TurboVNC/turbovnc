@@ -302,7 +302,8 @@ InitThreads(void)
         for (i = 1; i < rfbNumThreads; i++) {
             if (!tparam[i].updateBuf) {
                 tparam[i].updateBufSize = UPDATE_BUF_SIZE;
-                tparam[i].updateBuf = (char *)malloc(tparam[i].updateBufSize);
+                tparam[i].updateBuf =
+                    (char *)rfbAlloc(tparam[i].updateBufSize);
             }
             pthread_mutex_init(&tparam[i].ready, NULL);
             pthread_mutex_lock(&tparam[i].ready);
@@ -377,7 +378,7 @@ CheckUpdateBuf(threadparam *t, int bytes)
     else {
         if ((*t->ublen) + bytes > t->updateBufSize) {
             t->updateBufSize += UPDATE_BUF_SIZE;
-            t->updateBuf = (char *)realloc(t->updateBuf, t->updateBufSize);
+            t->updateBuf = (char *)rfbRealloc(t->updateBuf, t->updateBufSize);
         }
     }
     return TRUE;
@@ -498,10 +499,10 @@ SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
     if (t->tightBeforeBufSize < 4) {
         t->tightBeforeBufSize = 4;
         if (t->tightBeforeBuf == NULL)
-            t->tightBeforeBuf = (char *)malloc(t->tightBeforeBufSize);
+            t->tightBeforeBuf = (char *)rfbAlloc(t->tightBeforeBufSize);
         else
-            t->tightBeforeBuf = (char *)realloc(t->tightBeforeBuf,
-                                                t->tightBeforeBufSize);
+            t->tightBeforeBuf = (char *)rfbRealloc(t->tightBeforeBuf,
+                                                   t->tightBeforeBufSize);
     }
 
     /* Calculate maximum number of rows in one non-solid rectangle. */
@@ -774,19 +775,19 @@ SendRectSimple(threadparam *t, int x, int y, int w, int h)
     if (t->tightBeforeBufSize < maxBeforeSize) {
         t->tightBeforeBufSize = maxBeforeSize;
         if (t->tightBeforeBuf == NULL)
-            t->tightBeforeBuf = (char *)malloc(t->tightBeforeBufSize);
+            t->tightBeforeBuf = (char *)rfbAlloc(t->tightBeforeBufSize);
         else
-            t->tightBeforeBuf = (char *)realloc(t->tightBeforeBuf,
-                                                t->tightBeforeBufSize);
+            t->tightBeforeBuf = (char *)rfbRealloc(t->tightBeforeBuf,
+                                                   t->tightBeforeBufSize);
     }
 
     if (t->tightAfterBufSize < maxAfterSize) {
         t->tightAfterBufSize = maxAfterSize;
         if (t->tightAfterBuf == NULL)
-            t->tightAfterBuf = (char *)malloc(t->tightAfterBufSize);
+            t->tightAfterBuf = (char *)rfbAlloc(t->tightAfterBufSize);
         else
-            t->tightAfterBuf = (char *)realloc(t->tightAfterBuf,
-                                               t->tightAfterBufSize);
+            t->tightAfterBuf = (char *)rfbRealloc(t->tightAfterBuf,
+                                                  t->tightAfterBufSize);
     }
 
     if (w > maxRectWidth || w * h > maxRectSize) {
@@ -1717,14 +1718,10 @@ SendJpegRect(threadparam *t, int x, int y, int w, int h, int quality)
 
     if (t->tightAfterBufSize < TJBUFSIZE(w, h)) {
         if (t->tightAfterBuf == NULL)
-            t->tightAfterBuf = (char *)malloc(TJBUFSIZE(w, h));
+            t->tightAfterBuf = (char *)rfbAlloc(TJBUFSIZE(w, h));
         else
-            t->tightAfterBuf = (char *)realloc(t->tightAfterBuf,
-                                               TJBUFSIZE(w, h));
-        if (!t->tightAfterBuf) {
-            rfbLog("Memory allocation failure!\n");
-            return 0;
-        }
+            t->tightAfterBuf = (char *)rfbRealloc(t->tightAfterBuf,
+                                                  TJBUFSIZE(w, h));
         t->tightAfterBufSize = TJBUFSIZE(w, h);
     }
 
@@ -1733,10 +1730,7 @@ SendJpegRect(threadparam *t, int x, int y, int w, int h, int quality)
         unsigned char *dst;
         int inRed, inGreen, inBlue, i, j;
 
-        if ((tmpbuf = (unsigned char *)malloc(w * h * 3)) == NULL) {
-            rfbLog("Memory allocation failure!\n");
-            return 0;
-        }
+        tmpbuf = (unsigned char *)rfbAlloc(w * h * 3);
         srcptr = (CARD16 *)
             &cl->fb[y * rfbScreen.paddedWidthInBytes + x * ps];
         dst = tmpbuf;

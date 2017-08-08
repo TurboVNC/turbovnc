@@ -1,7 +1,7 @@
 /*  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
+ *  Copyright (C) 2012-2015, 2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2012 Brian P. Hinz.  All Rights Reserved.
- *  Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ public class Tunnel {
     try {
       homeDir = System.getProperty("user.home");
     } catch (java.security.AccessControlException e) {
-      System.out.println("Cannot access user.home system property");
+      System.err.println("Cannot access user.home system property");
     }
 
     // NOTE: JSch does not support all ciphers.  User may be prompted to accept
@@ -146,7 +146,7 @@ public class Tunnel {
         session.setUserInfo(dlg);
         session.connect();
       } catch (com.jcraft.jsch.JSchException e) {
-        System.out.println("Could not authenticate using SSH private key.  Falling back to user/password.");
+        System.err.println("Could not authenticate using SSH private key.  Falling back to user/password.");
         jsch.removeAllIdentity();
         session = null;
       }

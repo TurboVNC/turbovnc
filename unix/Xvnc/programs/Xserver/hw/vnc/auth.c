@@ -114,11 +114,7 @@ Bool rfbAuthUserACL = FALSE;
 void
 rfbAuthAddUser(const char *name, Bool viewOnly)
 {
-    UserList *p = (UserList *)malloc(sizeof(UserList));
-
-    if (p == NULL) {
-        FatalError("rfbAuthAddUser: out of memory");
-    }
+    UserList *p = (UserList *)rfbAlloc(sizeof(UserList));
 
     rfbLog("Adding user '%s' to ACL with %s privileges\n", name,
            viewOnly ? " view-only" : "full control");
@@ -460,7 +456,7 @@ rfbAuthParseCommandLine(char *securityTypes)
         }
 
         if (a->name == NULL)
-            FatalError("ERROR: Unknown security type '%s'\n", p1);
+            FatalError("ERROR: Unknown security type '%s'", p1);
     }
 }
 
@@ -495,7 +491,7 @@ setMethods(char *buf, Bool backwardCompatible)
         }
 
         if (a->name == NULL) {
-            FatalError("ERROR: Unknown auth method name '%s'\n", p);
+            FatalError("ERROR: Unknown auth method name '%s'", p);
         }
 
         a->permitted = TRUE;
@@ -545,12 +541,12 @@ ReadConfigFile(void)
     }
 
     if ((sb.st_uid != 0) && (sb.st_uid != getuid())) {
-        FatalError("ERROR: %s must be owned by you or by root\n",
+        FatalError("ERROR: %s must be owned by you or by root",
                    rfbAuthConfigFile);
     }
 
     if (sb.st_mode & (S_IWGRP | S_IWOTH)) {
-        FatalError("ERROR: %s cannot have group or global write permissions\n",
+        FatalError("ERROR: %s cannot have group or global write permissions",
                    rfbAuthConfigFile);
     }
 
@@ -558,7 +554,7 @@ ReadConfigFile(void)
     for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
         len = strlen(buf) - 1;
         if (buf[len] != '\n' && strlen(buf) == 256) {
-            FatalError("ERROR in %s: line %d is too long!\n",
+            FatalError("ERROR in %s: line %d is too long!",
                        rfbAuthConfigFile, line + 1);
         }
 
@@ -687,6 +683,8 @@ ReadConfigFile(void)
                            rfbAuthConfigFile);
             }
 
+            if (w == 0) w = MAXSHORT;
+            if (h == 0) h = MAXSHORT;
             rfbMaxWidth = (CARD32)w;
             rfbMaxHeight = (CARD32)h;
             continue;
@@ -760,7 +758,7 @@ rfbAuthInit()
                 rfbLog("NOTICE: %s is a permitted auth method\n", a->name);
         }
 
-        FatalError("ERROR: no authentication methods enabled!\n");
+        FatalError("ERROR: no authentication methods enabled!");
     } else {
         /* Do not advertise rfbAuthNone if any other auth method is enabled */
         for (a = authMethods; a->name != NULL; a++) {
@@ -781,10 +779,7 @@ rfbAuthInit()
                 strerror(errno));
         }
 
-        n = (char *)malloc(strlen(pbuf.pw_name));
-        if (n == NULL) {
-            FatalError("AuthPAMUserPwdRspFunc: out of memory");
-        }
+        n = (char *)rfbAlloc(strlen(pbuf.pw_name));
         strcpy(n, pbuf.pw_name);
         rfbAuthAddUser(n, FALSE);
     }
@@ -913,7 +908,7 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
             s = a->secType;
 
             if (n > MAX_SECURITY_TYPES)
-                FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
+                FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES");
 
             /*
              * Check whether we have already advertised this security type
@@ -936,7 +931,7 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
     }
 
     if (n == 0)
-        FatalError("rfbSendSecurityTypeList: no security types enabled! This should not have happened!\n");
+        FatalError("rfbSendSecurityTypeList: no security types enabled! This should not have happened!");
 
     if (!tightAdvertised) {
         /*
@@ -945,7 +940,7 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
          * extensions.
          */
         if (n > MAX_SECURITY_TYPES) {
-            FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
+            FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES");
         }
 
         rfbLog("rfbSendSecurityTypeList: advertise sectype tight\n");
@@ -1065,7 +1060,7 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
                 continue;
 
             if (count > MAX_VENCRYPT_SUBTYPES) {
-                FatalError("rfbVeNCryptAuthenticate: # enabled subtypes > MAX_VENCRYPT_SUBTYPES\n");
+                FatalError("rfbVeNCryptAuthenticate: # enabled subtypes > MAX_VENCRYPT_SUBTYPES");
             }
 
             /* Check whether we have already advertised this subtype */
@@ -1301,7 +1296,7 @@ rfbSendAuthCaps(rfbClientPtr cl)
                 c = a->authCap;
 
                 if (count > MAX_AUTH_CAPS) {
-                    FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS\n");
+                    FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS");
                 }
 
                 /*
@@ -1331,7 +1326,7 @@ rfbSendAuthCaps(rfbClientPtr cl)
         }
 
         if (count == 0) {
-            FatalError("rfbSendAuthCaps: authentication required but no auth methods enabled! This should not have happened!\n");
+            FatalError("rfbSendAuthCaps: authentication required but no auth methods enabled! This should not have happened!");
         }
     }
 
