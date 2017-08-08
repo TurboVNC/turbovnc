@@ -234,8 +234,10 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
       // be extended horizontally.)
       screenArea.left = GetSystemMetrics(SM_XVIRTUALSCREEN);
       screenArea.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
-      screenArea.right = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-      screenArea.bottom = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+      screenArea.right = screenArea.left +
+                         GetSystemMetrics(SM_CXVIRTUALSCREEN);
+      screenArea.bottom = screenArea.top +
+                          GetSystemMetrics(SM_CYVIRTUALSCREEN);
     }
     else screenArea = fsm.screenArea;
     workArea = fsm.workArea;
