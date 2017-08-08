@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2016 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2015-2017 D. R. Commander.  All Rights Reserved.
 //
 //  This is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -135,6 +135,7 @@ void ClientConnection::SendGIIDeviceCreate(ExtInputDevice &dev)
   giidc.numValuators = Swap32IfLE(dev.valuators.size());
   giidc.numButtons = Swap32IfLE(dev.numButtons);
 
+  omni_mutex_lock l(m_writeMutex);  // Ensure back-to-back writes are grouped
   WriteExact((char *)&giidc, sz_rfbGIIDeviceCreateMsg);
 
   std::list<rfbGIIValuator>::const_iterator v;
