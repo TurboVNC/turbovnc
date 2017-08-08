@@ -1513,14 +1513,20 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
                                   bool manual)
 {
-  if (InFullScreenMode() && !resizeFullScreen) return;
+  RECT fullwinrect, screenArea, workArea;
 
-  RECT fullwinrect;
+  if (InFullScreenMode() && !resizeFullScreen) {
+    if (manual) {
+      GetFullScreenMetrics(screenArea, workArea);
+      SetWindowPos(m_hwnd1, HWND_TOPMOST, screenArea.left, screenArea.top,
+        WidthOf(screenArea), HeightOf(screenArea), SWP_NOSIZE);
+    }
+    return;
+  }
 
   if (m_opts.m_desktopSize.mode == SIZE_AUTO && manual) {
-    RECT screenArea, workrect;
-    GetFullScreenMetrics(screenArea, workrect);
-    fullwinrect = workrect;
+    GetFullScreenMetrics(screenArea, workArea);
+    fullwinrect = workArea;
     PositionWindow(fullwinrect, centered);
     return;
   } else if (m_opts.m_scaling && !m_opts.m_FitWindow) {
