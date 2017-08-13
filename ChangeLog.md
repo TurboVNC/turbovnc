@@ -107,6 +107,9 @@ order for key repeat to work with the TurboVNC Viewer.
 16. The Java/Mac/Un*x TurboVNC Viewer now supports the `user` and
 `noremotecursor` directives in .vnc connection info files.
 
+17. Fixed an issue that prevented the keyboard grabbing feature from working
+properly in the Java TurboVNC Viewer on 32-bit Windows systems.
+
 
 2.1.1
 =====

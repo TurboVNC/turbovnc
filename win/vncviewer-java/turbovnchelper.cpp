@@ -1,4 +1,4 @@
-/*  Copyright (C)2015-2016 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,7 +74,11 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
       if ((handle = LoadLibrary("jawt")) == NULL)
         _throww32();
       if ((__JAWT_GetAWT =
+#ifdef _WIN64
            (__JAWT_GetAWT_type)GetProcAddress(handle, "JAWT_GetAWT")) == NULL)
+#else
+           (__JAWT_GetAWT_type)GetProcAddress(handle, "_JAWT_GetAWT@8")) == NULL)
+#endif
         _throww32();
     }
 
