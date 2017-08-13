@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,6 +127,49 @@ public abstract class CMsgReader {
     is.readBytes(mask, 0, maskLen);
 
     handler.setCursor(width, height, hotspot, data, mask);
+  }
+
+  protected void readSetXCursor(int width, int height, Point hotspot)
+  {
+    byte r, g, b;
+    int x, y, n, bytesPerRow = ((width + 7) / 8), len = bytesPerRow * height;
+    byte[] data, mask;
+    int[] cursor, colors = new int[2];
+
+    if (width * height == 0)
+      return;
+
+    r = (byte)is.readU8();
+    g = (byte)is.readU8();
+    b = (byte)is.readU8();
+    colors[1] = handler.cp.pf().pixelFromRGB(r, g, b, null);
+
+    r = (byte)is.readU8();
+    g = (byte)is.readU8();
+    b = (byte)is.readU8();
+    colors[0] = handler.cp.pf().pixelFromRGB(r, g, b, null);
+
+    data = new byte[len];
+    mask = new byte[len];
+    cursor = new int[width * height];
+
+    is.readBytes(data, 0, len);
+    is.readBytes(mask, 0, len);
+
+    int i = 0;
+    for (y = 0; y < height; y++) {
+      for (x = 0; x < width / 8; x++) {
+        byte dataByte = data[y * bytesPerRow + x];
+        for (n = 7; n >= 0; n--)
+          cursor[i++] = colors[dataByte >> n & 1];
+      }
+      for (n = 7; n >= 8 - width % 8; n--) {
+        byte dataByte = data[y * bytesPerRow + x];
+        cursor[i++] = colors[dataByte >> n & 1];
+      }
+    }
+
+    handler.setCursor(width, height, hotspot, cursor, mask);
   }
 
   public int[] getImageBuf(int required) {
