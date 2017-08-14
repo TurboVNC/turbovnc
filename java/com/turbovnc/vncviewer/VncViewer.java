@@ -1176,7 +1176,7 @@ public class VncViewer extends javax.swing.JApplet
   "on which the viewer is running, which is usually true color (8 bits per " +
   "component.)", -1);
 
-  public static BoolParameter compatibleGUI
+  static BoolParameter compatibleGUI
   = new BoolParameter("CompatibleGUI",
   "Normally, the TurboVNC Viewer GUI exposes only the settings that are " +
   "useful for TurboVNC servers.  Enabling this option will change the " +
