@@ -1788,6 +1788,9 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
             rfbSpriteRemoveCursorAllDev(pScreen);
         if (!rfbScreen.cursorIsDrawn && cl->cursorWasChanged)
             sendCursorShape = TRUE;
+    } else {
+        if (!rfbScreen.cursorIsDrawn)
+            rfbSpriteRestoreCursorAllDev(pScreen);
     }
 
     /*

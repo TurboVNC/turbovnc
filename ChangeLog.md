@@ -110,6 +110,9 @@ order for key repeat to work with the TurboVNC Viewer.
 17. Fixed an issue that prevented the keyboard grabbing feature from working
 properly in the Java TurboVNC Viewer on 32-bit Windows systems.
 
+18. Fixed an issue whereby, when server-side cursor rendering was enabled, the
+cursor would flicker on and off as the mouse was dragged.
+
 
 2.1.1
 =====
