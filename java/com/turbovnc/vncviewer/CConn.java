@@ -714,7 +714,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     desktop.releaseRawPixels(r);
   }
 
-  // EDT
+  // RFB thread
   public void setCursor(int width, int height, Point hotspot,
                         int[] data, byte[] mask) {
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0))
