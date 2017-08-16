@@ -953,6 +953,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
         if (opts.grabKeyboard == Options.GRAB_MANUAL)
           keyboardTempUngrabbed = true;
       }
+      if (VncViewer.currentMonitorIsPrimary.getValue())
+        oldViewportBounds = viewport.getBounds();
       viewport.dispose();
     }
     viewport = new Viewport(this);
@@ -1090,7 +1092,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
           primaryID = i;
         }
         if (VncViewer.currentMonitorIsPrimary.getValue() && viewport != null) {
-          Rectangle vpRect = viewport.getBounds();
+          Rectangle vpRect = oldViewportBounds != null ? oldViewportBounds :
+                             viewport.getBounds();
           if (opts.fullScreen && savedRect.width > 0 && savedRect.height > 0)
             vpRect = savedRect;
           vpRect = s.intersection(vpRect);
@@ -1178,6 +1181,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     vlog.debug("Spanned " + (fullScreenWindow ? "FS " : "work ") + "area: " +
                span.x + ", " + span.y + " " + span.width + " x " +
                span.height);
+
+    oldViewportBounds = null;
+
     return span;
   }
 
@@ -2309,6 +2315,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   private HashMap<Integer, Integer> pressedKeys;
   Viewport viewport;
+  Rectangle oldViewportBounds;
   boolean showToolbar;
   boolean keyboardGrabbed;
   GraphicsDevice primaryGD;
