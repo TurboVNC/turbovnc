@@ -110,6 +110,9 @@ public class CMsgReaderV3 extends CMsgReader {
       case Encodings.pseudoEncodingDesktopName:
         readSetDesktopName(x, y, w, h);
         break;
+      case Encodings.pseudoEncodingXCursor:
+        readSetXCursor(w, h, new Point(x, y));
+        break;
       case Encodings.pseudoEncodingCursor:
         readSetCursor(w, h, new Point(x, y));
         break;

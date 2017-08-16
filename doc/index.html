@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-08-05T11:41:07">
+<meta name="date" content="2017-08-16T18:08:14">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1003,11 +1003,19 @@ knowledge of web server administration.</p>
         signed using an official code signing certificate. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        For large organizations, it is recommended that you obtain your own code 
-        signing certificate from a trusted certificate authority and use 
-        <code>jarsigner</code> to sign all of the JARs with this certificate.  
-        The specifics of this are left as an exercise for the reader. 
+        <em>OPTIONAL:</em> Copy the TurboVNC Helper JAR files into that same 
+        directory. You can obtain these from 
+        <code>turbovnc-{version}-jws.zip</code>, which is supplied with official 
+        releases of TurboVNC 2.1.2 and later (available at 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files" class="remote">http://sourceforge.net/projects/turbovnc/files</a></span><a name="idx0034"></a>.) 
         <br /><br />
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        <em>OPTIONAL:</em> For large organizations, it may be desirable to 
+        obtain your own code signing certificate from a trusted certificate 
+        authority and use <code>jarsigner</code> to sign all of the JARs with 
+        that certificate.  The specifics of this are left as an exercise for the 
+        reader. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Create a file called <code>TurboVNC.jnlp</code> in the same directory as 
@@ -1037,21 +1045,31 @@ knowledge of web server administration.</p>
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;x86&quot;&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtwin32.jar&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;for&nbsp;32-bit&nbsp;Windows&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-win32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;amd64&quot;&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtwin64.jar&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;for&nbsp;64-bit&nbsp;Windows&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-win64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;i386&quot;&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux32.jar&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;and&nbsp;multi-screen&nbsp;spanning&nbsp;for
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-linux32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;amd64&quot;&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux64.jar&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;and&nbsp;multi-screen&nbsp;spanning&nbsp;for
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-linux64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;application-desc&nbsp;main-class=&quot;com.turbovnc.vncviewer.VncViewer&quot;/&gt;
@@ -1061,9 +1079,12 @@ knowledge of web server administration.</p>
         <div class="important"><p class="important">
         NOTE: <code>{turbovnc_url}</code> should be the absolute URL of the TurboVNC Viewer directory on the web server, e.g. <code>http://my_server/turbovnc</code>.
         </p></div>
+        <div class="important"><p class="important">
+        NOTE: Leave out the lines referring to <code>tvnchelper-*.jar</code> if you have not installed the TurboVNC Helper JARs.
+        </p></div>
         This is just a minimal example.  Refer to the 
         <span class="remote"><a href="http://docs.oracle.com/javase/6/docs/technotes/guides/javaws/" class="remote">Java 
-        Web Start documentation</a></span><a name="idx0034"></a> for additional 
+        Web Start documentation</a></span><a name="idx0035"></a> for additional 
         fields that you might want to add. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1327,7 +1348,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0035"></a> should be used
+            comparison</a><a name="idx0036"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1379,7 +1400,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0036"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0037"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1730,15 +1751,15 @@ the <code>vncviewer</code> script (Linux/Un*x), the
 <code>vncviewer-java.bat</code> script or the Start Menu shortcut 
 (Windows), or the standalone TurboVNC Viewer app (Mac).  If the viewer 
 is launched with Java Web Start using the <a href="#JWS">recommended 
-procedure</a><a name="idx0037"></a> or the 
+procedure</a><a name="idx0038"></a> or the 
 <a href="#Zero_Install">TurboVNC Server&rsquo;s built-in web 
-server</a><a name="idx0038"></a>, then the appropriate libjpeg-turbo JNI 
+server</a><a name="idx0039"></a>, then the appropriate libjpeg-turbo JNI 
 library will be downloaded along with it, assuming that the client 
 machine is running Windows, OS X, or Linux.  For other deployment 
 scenarios, the Java TurboVNC Viewer will find the libjpeg-turbo JNI 
 library if 
 <span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
-of the official libjpeg-turbo packages</a></span><a name="idx0039"></a> 
+of the official libjpeg-turbo packages</a></span><a name="idx0040"></a> 
 is installed on the client machine.</p>
 
 <p>If you suspect for whatever reason that JPEG decoding is not being 
@@ -2391,7 +2412,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0040"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0041"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>

@@ -192,6 +192,18 @@ order for key repeat to work with the TurboVNC Viewer.
 16. The Java/Mac/Un*x TurboVNC Viewer now supports the `user` and
 `noremotecursor` directives in .vnc connection info files.
 
+17. Fixed an issue that prevented the keyboard grabbing feature from working
+properly in the Java TurboVNC Viewer on 32-bit Windows systems.
+
+18. Fixed an issue whereby, when server-side cursor rendering was enabled, the
+cursor would flicker on and off as the mouse was dragged.
+
+19. Fixed an issue whereby the Java/Mac/Un*x TurboVNC Viewer would, under
+certain circumstances (specifically, when receiving a desktop size update from
+the server with automatic desktop resizing enabled, toggling on/off the
+toolbar, or changing the scaling settings), always behave as if the
+`CurrentMonitorIsPrimary` parameter was disabled.
+
 
 2.1.1
 =====

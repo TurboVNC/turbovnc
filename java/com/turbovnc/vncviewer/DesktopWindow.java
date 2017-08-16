@@ -114,7 +114,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     viewport.setChild(this);
   }
 
-  // EDT
+  // RFB thread
   public void setCursor(int w, int h, Point hotspot,
                         int[] data, byte[] mask) {
     if (!cc.opts.cursorShape || VncViewer.localCursor.getValue())

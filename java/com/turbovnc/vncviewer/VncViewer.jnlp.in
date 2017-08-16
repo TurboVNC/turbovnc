@@ -32,21 +32,33 @@
   <resources os="Windows" arch="x86">
     <j2se version="1.6+" java-vm-args="-Dsun.java2d.d3d=false" />
     <nativelib href="ljtwin32.jar"/>
+    <!-- Uncomment if you have the TurboVNC Helper JAR for 32-bit Windows
+    <nativelib href="tvnchelper-win32.jar"/>
+    -->
   </resources>
 
   <resources os="Windows" arch="amd64">
     <j2se version="1.6+" java-vm-args="-Dsun.java2d.d3d=false" />
     <nativelib href="ljtwin64.jar"/>
+    <!-- Uncomment if you have the TurboVNC Helper JAR for 64-bit Windows
+    <nativelib href="tvnchelper-win64.jar"/>
+    -->
   </resources>
 
   <resources os="Linux" arch="i386">
     <j2se version="1.6+" java-vm-args="-server" />
     <nativelib href="ljtlinux32.jar"/>
+    <!-- Uncomment if you have the TurboVNC Helper JAR for 32-bit Linux
+    <nativelib href="tvnchelper-linux32.jar"/>
+    -->
   </resources>
 
   <resources os="Linux" arch="amd64">
     <j2se version="1.6+" />
     <nativelib href="ljtlinux64.jar"/>
+    <!-- Uncomment if you have the TurboVNC Helper JAR for 64-bit Linux
+    <nativelib href="tvnchelper-linux64.jar"/>
+    -->
   </resources>
 @TVNCJNICLOSECOMMENT@
 
