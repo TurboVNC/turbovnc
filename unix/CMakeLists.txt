@@ -1,21 +1,10 @@
-set(GCC34 0)
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	# Use the maximum optimization level for release builds
 	foreach(var CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO)
 		if(${var} MATCHES "-O2")
 			string(REGEX REPLACE "-O2" "-O3" ${var} "${${var}}")
 		endif()
 	endforeach()
-	execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
-		OUTPUT_VARIABLE GCC_VERSION)
-
-	# NOTE: Setting GCC34=1 enables MMX code in Xorg.  We can't enable it on
-	# Solaris because the version of GCC that ships with Solaris 10 doesn't put
-	# mmintrin.h in a sane place.
-	if((GCC_VERSION VERSION_GREATER 3.4 OR GCC_VERSION VERSION_EQUAL 3.4)
-		AND NOT CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-		set(GCC34 1)
-	endif()
 endif()
 
 if(CMAKE_C_COMPILER_ID MATCHES SunPro)
