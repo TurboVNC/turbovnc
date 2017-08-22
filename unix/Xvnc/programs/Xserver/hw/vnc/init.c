@@ -958,7 +958,7 @@ AddExtInputDevice(rfbDevInfo *dev)
         goto bailout;
     }
 
-    if (asprintf(&dev->pDev->name, dev->name) < 0) {
+    if (asprintf(&dev->pDev->name, "%s", dev->name) < 0) {
         rfbLogPerror("ERROR: Could not initialize extended input device");
         goto bailout;
     }
