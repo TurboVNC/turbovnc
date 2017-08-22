@@ -69,12 +69,14 @@ RRModeCreate(xRRModeInfo * modeInfo, const char *name, ScreenPtr userScreen)
     if (!RRInit())
         return NULL;
 
+#ifdef TURBOVNC
     /*
      * The screen structure uses a signed short to represent width and height,
      * so activating a mode with width or height > 32767 can crash the server.
      */
     if (modeInfo->width > MAXSHORT || modeInfo->height > MAXSHORT)
         return NULL;
+#endif
 
     mode = malloc(sizeof(RRModeRec) + modeInfo->nameLength + 1);
     if (!mode)

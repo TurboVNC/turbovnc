@@ -700,6 +700,7 @@ XkbProcessArguments(int argc, char *argv[], int i)
             return -1;
         }
     }
+#ifdef TURBOVNC
     else if (strncmp(argv[i], "-xkbcompdir", 11) == 0) {
         if (++i < argc) {
 #if !defined(WIN32) && !defined(__CYGWIN__)
@@ -722,6 +723,7 @@ XkbProcessArguments(int argc, char *argv[], int i)
             }
         }
     }
+#endif
     else if ((strncmp(argv[i], "-accessx", 8) == 0) ||
              (strncmp(argv[i], "+accessx", 8) == 0)) {
         int j = 1;

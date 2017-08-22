@@ -3976,7 +3976,7 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
     XkbDescRec *xkb;
     XkbNamesRec *names;
     CARD32 *tmp;
-    Atom bad = 0;
+    Atom bad = None;
 
     tmp = data;
     xkb = dev->key->xkbInfo->desc;
@@ -4285,7 +4285,7 @@ ProcXkbSetNames(ClientPtr client)
 {
     DeviceIntPtr dev;
     CARD32 *tmp;
-    Atom bad = 0;
+    Atom bad = None;
     int rc;
 
     REQUEST(xkbSetNamesReq);

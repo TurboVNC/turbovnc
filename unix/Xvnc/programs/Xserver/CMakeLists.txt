@@ -1,10 +1,10 @@
-include_directories(include Xext ../../lib/pixman
+include_directories(include Xext ../../lib/pixman/pixman
 	${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Enable extensions
 add_definitions(-DCOMPOSITE -DDAMAGE -DDPMSExtension -DMITSHM -DRANDR -DRENDER
 	-DRES -DSCREENSAVER -DSHAPE -DXACE -DXCSECURITY -DXFIXES -DXF86BIGFONT
-	-DXINPUT -DXTEST -DXV)
+	-DXINPUT -DXTEST -DXV -DTURBOVNC)
 
 if(TVNC_NVCONTROL)
 add_definitions(-DNVCONTROL)

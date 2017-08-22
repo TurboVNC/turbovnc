@@ -73,7 +73,9 @@ xorg_backtrace(void)
 #else                           /* not glibc or glibc < 2.1 */
 
 #if defined(sun) && defined(__SVR4)
-/* #define HAVE_PSTACK */
+#ifndef TURBOVNC
+#define HAVE_PSTACK
+#endif
 #endif
 
 #if defined(HAVE_WALKCONTEXT)   /* Solaris 9 & later */

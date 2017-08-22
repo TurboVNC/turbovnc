@@ -1,2 +1,7 @@
+copy_X_header(Xtrans.c X11/Xtrans)
 copy_X_header(Xtrans.h X11/Xtrans)
 copy_X_header(Xtransint.h X11/Xtrans)
+copy_X_header(Xtranslcl.c X11/Xtrans)
+copy_X_header(Xtranssock.c X11/Xtrans)
+copy_X_header(Xtransutil.c X11/Xtrans)
+copy_X_header(transport.c X11/Xtrans)

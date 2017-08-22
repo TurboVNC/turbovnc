@@ -54,5 +54,6 @@ configure_file(include/tvnc_version.h.in
 	programs/Xserver/include/tvnc_version.h)
 
 add_subdirectory(include)
+add_subdirectory(extras/freetype2)
 add_subdirectory(lib)
 add_subdirectory(programs/Xserver)
