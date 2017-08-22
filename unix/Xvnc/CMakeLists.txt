@@ -47,6 +47,13 @@ function(copy_X_header file dir)
 	file(COPY ${file} DESTINATION ${CMAKE_BINARY_DIR}/unix/Xvnc/X_include/${dir})
 endfunction()
 
+function(handle_type_puns)
+	# NOTE: For whatever reason, Clang doesn't need this
+	if(CMAKE_COMPILER_IS_GNUCC)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing" PARENT_SCOPE)
+	endif()
+endfunction()
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/X_include
 	${CMAKE_SOURCE_DIR}/common/zlib)
 

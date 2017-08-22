@@ -13,10 +13,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	set(RPCSRCS rpcauth.c)
 endif()
 
-# This code has a lot of type puns.  Disable strict aliasing just to be safe.
-if(CMAKE_COMPILER_IS_GNUCC)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-endif()
+handle_type_puns()
 
 set(STRSRCS "")
 if(NOT HAVE_STRCASECMP)
