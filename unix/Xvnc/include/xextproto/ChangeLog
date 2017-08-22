@@ -1,3 +1,59 @@
+commit 66afec3f49e8eb0d4c2e9af7088fc3116d4bafd7
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Dec 27 10:13:42 2013 -0800
+
+    Bump release to 7.3
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 3f355f138d6df57e067458a20f47307883048adb
+Author: Keith Packard <keithp@keithp.com>
+Date:   Tue Nov 5 16:03:40 2013 -0800
+
+    Bump version to 7.2.99.901 (7.3 RC1)
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit be1483563532b5dcaef6847c206d0a6f772c8bd4
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Jan 17 13:48:15 2013 -0800
+
+    Adds MIT-SHM AttachFd and CreateSegment requests
+    
+    Passes shared memory segments by file descriptor, AttachFd passes from
+    client to server, CreateSegment passes from server to client.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 18515392d35c1e07a5978876d4559012f5078f92
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Oct 26 09:42:05 2013 -0400
+
+    config: replace deprecated use of AC_OUTPUT with AC_CONFIG_FILES
+    
+    Fix Automake warning: AC_OUTPUT should be used without arguments.
+    www.gnu.org/software/autoconf/manual/autoconf.html#Configuration-Files
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f27fcc99d1cf935cc289933326f7d3baacd5107a
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit f672d845f39cc912aa1e0357fab05a86775a4b37
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:01:10 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
 commit dff1a34f49644b2ed9cfac321dce6d31aed868cf
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Thu Mar 22 20:54:16 2012 -0700

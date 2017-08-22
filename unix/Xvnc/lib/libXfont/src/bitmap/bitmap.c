@@ -63,8 +63,12 @@ bitmapGetGlyphs(FontPtr pFont, unsigned long count, unsigned char *chars,
 
     case Linear8Bit:
     case TwoD8Bit:
-	if (pFont->info.firstRow > 0)
+	if (pFont->info.firstRow > 0) {
+            if (pDefault)
+                while (count--)
+                    *glyphs++ = pDefault;
 	    break;
+        }
 	if (pFont->info.allExist && pDefault) {
 	    while (count--) {
 		c = (*chars++) - firstCol;

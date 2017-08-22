@@ -53,13 +53,12 @@ Equipment Corporation.
 #include "servermd.h"
 #include "resource.h"
 #include "picturestr.h"
-#ifdef XFIXES
 #include "xfixesint.h"
-#endif
+#include "damageextint.h"
 #ifdef COMPOSITE
 #include "compint.h"
 #endif
-#include "modinit.h"
+#include "extinit.h"
 #include "protocol-versions.h"
 
 #ifdef GLXPROXY
@@ -75,7 +74,7 @@ int PanoramiXPixWidth = 0;
 int PanoramiXPixHeight = 0;
 int PanoramiXNumScreens = 0;
 
-static RegionRec PanoramiXScreenRegion = { {0, 0, 0, 0}, NULL };
+_X_EXPORT RegionRec PanoramiXScreenRegion = { {0, 0, 0, 0}, NULL };
 
 static int PanoramiXNumDepths;
 static DepthPtr PanoramiXDepths;
@@ -119,7 +118,7 @@ static DevPrivateKeyRec PanoramiXScreenKeyRec;
 typedef struct {
     DDXPointRec clipOrg;
     DDXPointRec patOrg;
-    GCFuncs *wrapFuncs;
+    const GCFuncs *wrapFuncs;
 } PanoramiXGCRec, *PanoramiXGCPtr;
 
 typedef struct {
@@ -131,11 +130,11 @@ static void XineramaValidateGC(GCPtr, unsigned long, DrawablePtr);
 static void XineramaChangeGC(GCPtr, unsigned long);
 static void XineramaCopyGC(GCPtr, unsigned long, GCPtr);
 static void XineramaDestroyGC(GCPtr);
-static void XineramaChangeClip(GCPtr, int, pointer, int);
+static void XineramaChangeClip(GCPtr, int, void *, int);
 static void XineramaDestroyClip(GCPtr);
 static void XineramaCopyClip(GCPtr, GCPtr);
 
-static GCFuncs XineramaGCFuncs = {
+static const GCFuncs XineramaGCFuncs = {
     XineramaValidateGC, XineramaChangeGC, XineramaCopyGC, XineramaDestroyGC,
     XineramaChangeClip, XineramaDestroyClip, XineramaCopyClip
 };
@@ -150,7 +149,7 @@ static GCFuncs XineramaGCFuncs = {
     (pGC)->funcs = &XineramaGCFuncs;
 
 static Bool
-XineramaCloseScreen(int i, ScreenPtr pScreen)
+XineramaCloseScreen(ScreenPtr pScreen)
 {
     PanoramiXScreenPtr pScreenPriv = (PanoramiXScreenPtr)
         dixLookupPrivate(&pScreen->devPrivates, PanoramiXScreenKey);
@@ -161,9 +160,9 @@ XineramaCloseScreen(int i, ScreenPtr pScreen)
     if (pScreen->myNum == 0)
         RegionUninit(&PanoramiXScreenRegion);
 
-    free((pointer) pScreenPriv);
+    free(pScreenPriv);
 
-    return (*pScreen->CloseScreen) (i, pScreen);
+    return (*pScreen->CloseScreen) (pScreen);
 }
 
 static Bool
@@ -295,7 +294,7 @@ XineramaCopyGC(GCPtr pGCSrc, unsigned long mask, GCPtr pGCDst)
 }
 
 static void
-XineramaChangeClip(GCPtr pGC, int type, pointer pvalue, int nrects)
+XineramaChangeClip(GCPtr pGC, int type, void *pvalue, int nrects)
 {
     Xinerama_GC_FUNC_PROLOGUE(pGC);
     (*pGC->funcs->ChangeClip) (pGC, type, pvalue, nrects);
@@ -319,7 +318,7 @@ XineramaDestroyClip(GCPtr pGC)
 }
 
 int
-XineramaDeleteResource(pointer data, XID id)
+XineramaDeleteResource(void *data, XID id)
 {
     free(data);
     return 1;
@@ -331,7 +330,7 @@ typedef struct {
 } PanoramiXSearchData;
 
 static Bool
-XineramaFindIDByScrnum(pointer resource, XID id, pointer privdata)
+XineramaFindIDByScrnum(void *resource, XID id, void *privdata)
 {
     PanoramiXRes *res = (PanoramiXRes *) resource;
     PanoramiXSearchData *data = (PanoramiXSearchData *) privdata;
@@ -343,7 +342,7 @@ PanoramiXRes *
 PanoramiXFindIDByScrnum(RESTYPE type, XID id, int screen)
 {
     PanoramiXSearchData data;
-    pointer val;
+    void *val;
 
     if (!screen) {
         dixLookupResourceByType(&val, id, type, serverClient, DixReadAccess);
@@ -428,7 +427,7 @@ XineramaReinitData(void)
 
 /*
  *	PanoramiXExtensionInit():
- *		Called from InitExtensions in main().  
+ *		Called from InitExtensions in main().
  *		Register PanoramiXeen Extension
  *		Initialize global variables.
  */
@@ -583,22 +582,19 @@ PanoramiXExtensionInit(void)
     ProcVector[X_StoreNamedColor] = PanoramiXStoreNamedColor;
 
     PanoramiXRenderInit();
-#ifdef XFIXES
     PanoramiXFixesInit();
-#endif
+    PanoramiXDamageInit();
 #ifdef COMPOSITE
     PanoramiXCompositeInit();
 #endif
 
 }
 
-extern Bool CreateConnectionBlock(void);
-
 Bool
 PanoramiXCreateConnectionBlock(void)
 {
     int i, j, length;
-    Bool disableBackingStore = FALSE;
+    Bool disable_backing_store = FALSE;
     int old_width, old_height;
     float width_mult, height_mult;
     xWindowRoot *root;
@@ -624,10 +620,10 @@ PanoramiXCreateConnectionBlock(void)
         }
         if (pScreen->backingStoreSupport !=
             screenInfo.screens[0]->backingStoreSupport)
-            disableBackingStore = TRUE;
+            disable_backing_store = TRUE;
     }
 
-    if (disableBackingStore) {
+    if (disable_backing_store) {
         for (i = 0; i < screenInfo.numScreens; i++) {
             pScreen = screenInfo.screens[i];
             pScreen->backingStoreSupport = NotUseful;
@@ -695,9 +691,9 @@ PanoramiXCreateConnectionBlock(void)
     root->mmHeight *= height_mult;
 
     while (ConnectionCallbackList) {
-        pointer tmp;
+        void *tmp;
 
-        tmp = (pointer) ConnectionCallbackList;
+        tmp = (void *) ConnectionCallbackList;
         (*ConnectionCallbackList->func) ();
         ConnectionCallbackList = ConnectionCallbackList->next;
         free(tmp);
@@ -833,15 +829,15 @@ PanoramiXConsolidate(void)
     saver->type = XRT_WINDOW;
 
     FOR_NSCREENS(i) {
-        ScreenPtr pScreen = screenInfo.screens[i];
+        ScreenPtr scr = screenInfo.screens[i];
 
-        root->info[i].id = pScreen->root->drawable.id;
+        root->info[i].id = scr->root->drawable.id;
         root->u.win.class = InputOutput;
         root->u.win.root = TRUE;
-        saver->info[i].id = pScreen->screensaver.wid;
+        saver->info[i].id = scr->screensaver.wid;
         saver->u.win.class = InputOutput;
         saver->u.win.root = TRUE;
-        defmap->info[i].id = pScreen->defColormap;
+        defmap->info[i].id = scr->defColormap;
     }
 
     AddResource(root->info[0].id, XRT_WINDOW, root);
@@ -892,8 +888,10 @@ PanoramiXResetProc(ExtensionEntry * extEntry)
     int i;
 
     PanoramiXRenderReset();
-#ifdef XFIXES
     PanoramiXFixesReset();
+    PanoramiXDamageReset();
+#ifdef COMPOSITE
+    PanoramiXCompositeReset ();
 #endif
     screenInfo.numScreens = PanoramiXNumScreens;
     for (i = 256; i--;)
@@ -904,21 +902,22 @@ int
 ProcPanoramiXQueryVersion(ClientPtr client)
 {
     /* REQUEST(xPanoramiXQueryVersionReq); */
-    xPanoramiXQueryVersionReply rep;
+    xPanoramiXQueryVersionReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .majorVersion = SERVER_PANORAMIX_MAJOR_VERSION,
+        .minorVersion = SERVER_PANORAMIX_MINOR_VERSION
+    };
 
     REQUEST_SIZE_MATCH(xPanoramiXQueryVersionReq);
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.majorVersion = SERVER_PANORAMIX_MAJOR_VERSION;
-    rep.minorVersion = SERVER_PANORAMIX_MINOR_VERSION;
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.majorVersion);
         swaps(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xPanoramiXQueryVersionReply), (char *) &rep);
+    WriteToClient(client, sizeof(xPanoramiXQueryVersionReply), &rep);
     return Success;
 }
 
@@ -935,17 +934,19 @@ ProcPanoramiXGetState(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.state = !noPanoramiXExtension;
-    rep.window = stuff->window;
+    rep = (xPanoramiXGetStateReply) {
+        .type = X_Reply,
+        .state = !noPanoramiXExtension,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .window = stuff->window
+    };
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetStateReply), (char *) &rep);
+    WriteToClient(client, sizeof(xPanoramiXGetStateReply), &rep);
     return Success;
 
 }
@@ -963,17 +964,19 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.ScreenCount = PanoramiXNumScreens;
-    rep.window = stuff->window;
+    rep = (xPanoramiXGetScreenCountReply) {
+        .type = X_Reply,
+        .ScreenCount = PanoramiXNumScreens,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .window = stuff->window
+    };
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenCountReply), (char *) &rep);
+    WriteToClient(client, sizeof(xPanoramiXGetScreenCountReply), &rep);
     return Success;
 }
 
@@ -993,14 +996,16 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
+    rep = (xPanoramiXGetScreenSizeReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
     /* screen dimensions */
-    rep.width = screenInfo.screens[stuff->screen]->width;
-    rep.height = screenInfo.screens[stuff->screen]->height;
-    rep.window = stuff->window;
-    rep.screen = stuff->screen;
+        .width = screenInfo.screens[stuff->screen]->width,
+        .height = screenInfo.screens[stuff->screen]->height,
+        .window = stuff->window,
+        .screen = stuff->screen
+    };
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -1009,7 +1014,7 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
         swapl(&rep.window);
         swapl(&rep.screen);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenSizeReply), (char *) &rep);
+    WriteToClient(client, sizeof(xPanoramiXGetScreenSizeReply), &rep);
     return Success;
 }
 
@@ -1021,24 +1026,24 @@ ProcXineramaIsActive(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
+    rep = (xXineramaIsActiveReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
 #if 1
-    {
         /* The following hack fools clients into thinking that Xinerama
          * is disabled even though it is not. */
-        rep.state = !noPanoramiXExtension && !PanoramiXExtensionDisabledHack;
-    }
+        .state = !noPanoramiXExtension && !PanoramiXExtensionDisabledHack
 #else
-    rep.state = !noPanoramiXExtension;
+        .state = !noPanoramiXExtension;
 #endif
+    };
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.state);
     }
-    WriteToClient(client, sizeof(xXineramaIsActiveReply), (char *) &rep);
+    WriteToClient(client, sizeof(xXineramaIsActiveReply), &rep);
     return Success;
 }
 
@@ -1046,20 +1051,22 @@ int
 ProcXineramaQueryScreens(ClientPtr client)
 {
     /* REQUEST(xXineramaQueryScreensReq); */
-    xXineramaQueryScreensReply rep;
+    CARD32 number = (noPanoramiXExtension) ? 0 : PanoramiXNumScreens;
+    xXineramaQueryScreensReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = bytes_to_int32(number * sz_XineramaScreenInfo),
+        .number = number
+    };
 
     REQUEST_SIZE_MATCH(xXineramaQueryScreensReq);
 
-    rep.type = X_Reply;
-    rep.sequenceNumber = client->sequence;
-    rep.number = (noPanoramiXExtension) ? 0 : PanoramiXNumScreens;
-    rep.length = bytes_to_int32(rep.number * sz_XineramaScreenInfo);
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.number);
     }
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply), (char *) &rep);
+    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
 
     if (!noPanoramiXExtension) {
         xXineramaScreenInfo scratch;
@@ -1077,7 +1084,7 @@ ProcXineramaQueryScreens(ClientPtr client)
                 swaps(&scratch.width);
                 swaps(&scratch.height);
             }
-            WriteToClient(client, sz_XineramaScreenInfo, (char *) &scratch);
+            WriteToClient(client, sz_XineramaScreenInfo, &scratch);
         }
     }
 

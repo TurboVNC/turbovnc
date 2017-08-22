@@ -89,7 +89,7 @@ static DevPrivateKeyRec AnimCurScreenPrivateKeyRec;
 #define Unwrap(as,s,elt)    ((s)->elt = (as)->elt)
 
 static Bool
-AnimCurCloseScreen(int index, ScreenPtr pScreen)
+AnimCurCloseScreen(ScreenPtr pScreen)
 {
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
     Bool ret;
@@ -103,7 +103,7 @@ AnimCurCloseScreen(int index, ScreenPtr pScreen)
     Unwrap(as, pScreen, UnrealizeCursor);
     Unwrap(as, pScreen, RecolorCursor);
     SetAnimCurScreen(pScreen, 0);
-    ret = (*pScreen->CloseScreen) (index, pScreen);
+    ret = (*pScreen->CloseScreen) (pScreen);
     free(as);
     return ret;
 }
@@ -135,15 +135,15 @@ AnimCurCursorLimits(DeviceIntPtr pDev,
  */
 
 static void
-AnimCurScreenBlockHandler(int screenNum,
-                          pointer blockData,
-                          pointer pTimeout, pointer pReadmask)
+AnimCurScreenBlockHandler(ScreenPtr pScreen,
+                          void *pTimeout, void *pReadmask)
 {
-    ScreenPtr pScreen = screenInfo.screens[screenNum];
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
     DeviceIntPtr dev;
     Bool activeDevice = FALSE;
     CARD32 now = 0, soonest = ~0;       /* earliest time to wakeup again */
+
+    Unwrap(as, pScreen, BlockHandler);
 
     for (dev = inputInfo.devices; dev; dev = dev->next) {
         if (IsPointerDevice(dev) && pScreen == dev->spriteInfo->anim.pScreen) {
@@ -159,7 +159,7 @@ AnimCurScreenBlockHandler(int screenNum,
 
                 /*
                  * Not a simple Unwrap/Wrap as this
-                 * isn't called along the DisplayCursor 
+                 * isn't called along the DisplayCursor
                  * wrapper chain.
                  */
                 DisplayCursor = pScreen->DisplayCursor;
@@ -182,8 +182,7 @@ AnimCurScreenBlockHandler(int screenNum,
     if (activeDevice)
         AdjustWaitForDelay(pTimeout, soonest - now);
 
-    Unwrap(as, pScreen, BlockHandler);
-    (*pScreen->BlockHandler) (screenNum, blockData, pTimeout, pReadmask);
+    (*pScreen->BlockHandler) (pScreen, pTimeout, pReadmask);
     if (activeDevice)
         Wrap(as, pScreen, BlockHandler, AnimCurScreenBlockHandler);
     else
@@ -384,8 +383,7 @@ AnimCursorCreate(CursorPtr *cursors, CARD32 *deltas, int ncursor,
     ac->elts = (AnimCurElt *) (ac + 1);
 
     for (i = 0; i < ncursor; i++) {
-        cursors[i]->refcnt++;
-        ac->elts[i].pCursor = cursors[i];
+        ac->elts[i].pCursor = RefCursor(cursors[i]);
         ac->elts[i].delay = deltas[i];
     }
 

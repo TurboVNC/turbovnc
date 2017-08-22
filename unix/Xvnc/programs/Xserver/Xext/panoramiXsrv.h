@@ -11,6 +11,7 @@
 extern _X_EXPORT int PanoramiXNumScreens;
 extern _X_EXPORT int PanoramiXPixWidth;
 extern _X_EXPORT int PanoramiXPixHeight;
+extern _X_EXPORT RegionRec PanoramiXScreenRegion;
 
 extern _X_EXPORT VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
 extern _X_EXPORT void PanoramiXConsolidate(void);
@@ -18,7 +19,7 @@ extern _X_EXPORT Bool PanoramiXCreateConnectionBlock(void);
 extern _X_EXPORT PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
 extern _X_EXPORT Bool
 XineramaRegisterConnectionBlockCallback(void (*func) (void));
-extern _X_EXPORT int XineramaDeleteResource(pointer, XID);
+extern _X_EXPORT int XineramaDeleteResource(void *, XID);
 
 extern _X_EXPORT void XineramaReinitData(void);
 

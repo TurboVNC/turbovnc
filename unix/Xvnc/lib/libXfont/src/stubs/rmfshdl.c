@@ -12,4 +12,5 @@ remove_fs_handlers(FontPathElementPtr fpe,
                    BlockHandlerProcPtr blockHandler,
                    Bool all)
 {
+    OVERRIDE_SYMBOL(remove_fs_handlers, fpe, blockHandler, all);
 }

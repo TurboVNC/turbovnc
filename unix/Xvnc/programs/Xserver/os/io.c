@@ -26,13 +26,13 @@ Copyright 1987, 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -82,15 +82,37 @@ SOFTWARE.
 CallbackListPtr ReplyCallback;
 CallbackListPtr FlushCallback;
 
+typedef struct _connectionInput {
+    struct _connectionInput *next;
+    char *buffer;               /* contains current client input */
+    char *bufptr;               /* pointer to current start of data */
+    int bufcnt;                 /* count of bytes in buffer */
+    int lenLastReq;
+    int size;
+    unsigned int ignoreBytes;   /* bytes to ignore before the next request */
+} ConnectionInput;
+
+typedef struct _connectionOutput {
+    struct _connectionOutput *next;
+    unsigned char *buf;
+    int size;
+    int count;
+} ConnectionOutput;
+
 static ConnectionInputPtr AllocateInputBuffer(void);
 static ConnectionOutputPtr AllocateOutputBuffer(void);
 
-/* check for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
+/* If EAGAIN and EWOULDBLOCK are distinct errno values, then we check errno
+ * for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
  * systems are broken and return EWOULDBLOCK when they should return EAGAIN
  */
 #ifndef WIN32
-#define ETEST(err) (err == EAGAIN || err == EWOULDBLOCK)
-#else                           /* WIN32 The socket errorcodes differ from the normal errors */
+# if (EAGAIN != EWOULDBLOCK)
+#  define ETEST(err) (err == EAGAIN || err == EWOULDBLOCK)
+# else
+#  define ETEST(err) (err == EAGAIN)
+# endif
+#else   /* WIN32 The socket errorcodes differ from the normal errors */
 #define ETEST(err) (err == EAGAIN || err == WSAEWOULDBLOCK)
 #endif
 
@@ -189,6 +211,32 @@ YieldControlDeath(void)
     timesThisConnection = 0;
 }
 
+/* If an input buffer was empty, either free it if it is too big or link it
+ * into our list of free input buffers.  This means that different clients can
+ * share the same input buffer (at different times).  This was done to save
+ * memory.
+ */
+static void
+NextAvailableInput(OsCommPtr oc)
+{
+    if (AvailableInput) {
+        if (AvailableInput != oc) {
+            ConnectionInputPtr aci = AvailableInput->input;
+
+            if (aci->size > BUFWATERMARK) {
+                free(aci->buffer);
+                free(aci);
+            }
+            else {
+                aci->next = FreeInputs;
+                FreeInputs = aci;
+            }
+            AvailableInput->input = NULL;
+        }
+        AvailableInput = NULL;
+    }
+}
+
 int
 ReadRequestFromClient(ClientPtr client)
 {
@@ -201,28 +249,7 @@ ReadRequestFromClient(ClientPtr client)
     Bool need_header;
     Bool move_header;
 
-    /* If an input buffer was empty, either free it if it is too big
-     * or link it into our list of free input buffers.  This means that
-     * different clients can share the same input buffer (at different
-     * times).  This was done to save memory.
-     */
-
-    if (AvailableInput) {
-        if (AvailableInput != oc) {
-            register ConnectionInputPtr aci = AvailableInput->input;
-
-            if (aci->size > BUFWATERMARK) {
-                free(aci->buffer);
-                free(aci);
-            }
-            else {
-                aci->next = FreeInputs;
-                FreeInputs = aci;
-            }
-            AvailableInput->input = (ConnectionInputPtr) NULL;
-        }
-        AvailableInput = (OsCommPtr) NULL;
-    }
+    NextAvailableInput(oc);
 
     /* make sure we have an input buffer */
 
@@ -237,6 +264,14 @@ ReadRequestFromClient(ClientPtr client)
         oc->input = oci;
     }
 
+#if XTRANS_SEND_FDS
+    /* Discard any unused file descriptors */
+    while (client->req_fds > 0) {
+        int req_fd = ReadFdFromClient(client);
+        if (req_fd >= 0)
+            close(req_fd);
+    }
+#endif
     /* advance to start of next request */
 
     oci->bufptr += oci->lenLastReq;
@@ -413,7 +448,7 @@ ReadRequestFromClient(ClientPtr client)
      *  buffer beyond the request we're returning to the caller.
      *  If there is only a partial request, treat like buffer
      *  is empty so that select() will be called again and other clients
-     *  can get into the queue.   
+     *  can get into the queue.
      */
 
     gotnow -= needed;
@@ -451,7 +486,7 @@ ReadRequestFromClient(ClientPtr client)
         oci->lenLastReq -= (sizeof(xBigReq) - sizeof(xReq));
         client->req_len -= bytes_to_int32(sizeof(xBigReq) - sizeof(xReq));
     }
-    client->requestBuffer = (pointer) oci->bufptr;
+    client->requestBuffer = (void *) oci->bufptr;
 #ifdef DEBUG_COMMUNICATION
     {
         xReq *req = client->requestBuffer;
@@ -462,6 +497,31 @@ ReadRequestFromClient(ClientPtr client)
 #endif
     return needed;
 }
+
+#if XTRANS_SEND_FDS
+int
+ReadFdFromClient(ClientPtr client)
+{
+    int fd = -1;
+
+    if (client->req_fds > 0) {
+        OsCommPtr oc = (OsCommPtr) client->osPrivate;
+
+        --client->req_fds;
+        fd = _XSERVTransRecvFd(oc->trans_conn);
+    } else
+        LogMessage(X_ERROR, "Request asks for FD without setting req_fds\n");
+    return fd;
+}
+
+int
+WriteFdToClient(ClientPtr client, int fd, Bool do_close)
+{
+    OsCommPtr oc = (OsCommPtr) client->osPrivate;
+
+    return _XSERVTransSendFd(oc->trans_conn, fd, do_close);
+}
+#endif
 
 /*****************************************************************
  * InsertFakeRequest
@@ -477,22 +537,8 @@ InsertFakeRequest(ClientPtr client, char *data, int count)
     int fd = oc->fd;
     int gotnow, moveup;
 
-    if (AvailableInput) {
-        if (AvailableInput != oc) {
-            ConnectionInputPtr aci = AvailableInput->input;
+    NextAvailableInput(oc);
 
-            if (aci->size > BUFWATERMARK) {
-                free(aci->buffer);
-                free(aci);
-            }
-            else {
-                aci->next = FreeInputs;
-                FreeInputs = aci;
-            }
-            AvailableInput->input = (ConnectionInputPtr) NULL;
-        }
-        AvailableInput = (OsCommPtr) NULL;
-    }
     if (!oci) {
         if ((oci = FreeInputs))
             FreeInputs = oci->next;
@@ -577,8 +623,6 @@ ResetCurrentRequest(ClientPtr client)
             YieldControlNoInput(fd);
     }
 }
-
-static const int padlength[4] = { 0, 3, 2, 1 };
 
  /********************
  * FlushAllOutput()
@@ -757,7 +801,7 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
         oc->output = oco;
     }
 
-    padBytes = padlength[count & 3];
+    padBytes = padding_for_int32(count);
 
     if (ReplyCallback) {
         ReplyInfoRec replyinfo;
@@ -770,7 +814,7 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
             who->replyBytesRemaining -= count + padBytes;
             replyinfo.startOfReply = FALSE;
             replyinfo.bytesRemaining = who->replyBytesRemaining;
-            CallCallbacks((&ReplyCallback), (pointer) &replyinfo);
+            CallCallbacks((&ReplyCallback), (void *) &replyinfo);
         }
         else if (who->clientState == ClientStateRunning && buf[0] == X_Reply) { /* start of new reply */
             CARD32 replylen;
@@ -782,7 +826,7 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
             bytesleft = (replylen * 4) + SIZEOF(xReply) - count - padBytes;
             replyinfo.startOfReply = TRUE;
             replyinfo.bytesRemaining = who->replyBytesRemaining = bytesleft;
-            CallCallbacks((&ReplyCallback), (pointer) &replyinfo);
+            CallCallbacks((&ReplyCallback), (void *) &replyinfo);
         }
     }
 #ifdef DEBUG_COMMUNICATION
@@ -799,7 +843,7 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
         }
     }
 #endif
-    if (oco->count + count + padBytes > oco->size) {
+    if (oco->count == 0 || oco->count + count + padBytes > oco->size) {
         FD_CLR(oc->fd, &OutputPending);
         if (!XFD_ANYSET(&OutputPending)) {
             CriticalOutputPending = FALSE;
@@ -848,10 +892,13 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
     long todo;
 
     if (!oco)
-        return 0;
+	return 0;
     written = 0;
-    padsize = padlength[extraCount & 3];
+    padsize = padding_for_int32(extraCount);
     notWritten = oco->count + extraCount + padsize;
+    if (!notWritten)
+        return 0;
+
     todo = notWritten;
     while (notWritten) {
         long before = written;  /* amount of whole thing written */
@@ -924,10 +971,11 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
             }
 
             if (notWritten > oco->size) {
-                unsigned char *obuf;
+                unsigned char *obuf = NULL;
 
-                obuf = (unsigned char *) realloc(oco->buf,
-                                                 notWritten + BUFSIZE);
+                if (notWritten + BUFSIZE <= INT_MAX) {
+                    obuf = realloc(oco->buf, notWritten + BUFSIZE);
+                }
                 if (!obuf) {
                     _XSERVTransDisconnect(oc->trans_conn);
                     _XSERVTransClose(oc->trans_conn);
@@ -1045,6 +1093,7 @@ FreeOsBuffers(OsCommPtr oc)
             oci->bufptr = oci->buffer;
             oci->bufcnt = 0;
             oci->lenLastReq = 0;
+            oci->ignoreBytes = 0;
         }
     }
     if ((oco = oc->output)) {

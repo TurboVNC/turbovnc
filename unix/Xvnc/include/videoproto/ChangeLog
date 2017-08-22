@@ -1,3 +1,39 @@
+commit 65e74494e4d215e7bee64bafbcfa89088562cda4
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Fri Mar 11 13:17:56 2016 -0500
+
+    videoproto 2.3.3
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 723881f31d65353e80660e6d8cd9785e6ec1b430
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed Mar 9 09:33:48 2016 -0500
+
+    xv: Build left-shift constants from ints not longs
+    
+    We typically store these in ints in server, leading to warnings like:
+    
+    xwayland-glamor-xv.c: In function ‘xwl_glamor_xv_add_adaptors’:
+    xwayland-glamor-xv.c:339:16: warning: large integer implicitly truncated
+    to unsigned type [-Woverflow]
+         pa->type = XvWindowMask | XvInputMask | XvImageMask;;
+                    ^
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+    Reviewed-by: Olivier Fourdan <ofourdan@redhat.com>
+
+commit 384150812b93fef48109582bb53e9580f16f9602
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Oct 26 09:42:05 2013 -0400
+
+    config: replace deprecated use of AC_OUTPUT with AC_CONFIG_FILES
+    
+    Fix Automake warning: AC_OUTPUT should be used without arguments.
+    www.gnu.org/software/autoconf/manual/autoconf.html#Configuration-Files
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
 commit 4d26102ace67377e88ba087e52ca894e0ffd2ebf
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Mon Jul 22 21:40:14 2013 -0700

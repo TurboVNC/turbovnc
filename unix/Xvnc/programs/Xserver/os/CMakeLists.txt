@@ -1,7 +1,12 @@
 include_directories(../render ../../../lib/libsha1)
 
-add_definitions(-DUNIXCONN -DTCPCONN -DIPV6CONN -DHASXDMAUTH ${ServerOSDefines}
-	-DXDMCP -DHAVE_SHA1_IN_LIBSHA1)
+add_definitions(-DUNIXCONN -DTCPCONN -DHASXDMAUTH ${ServerOSDefines} -DXDMCP
+	-DHAVE_SHA1_IN_LIBSHA1)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	add_definitions(-DLOCALCONN)
+else()
+	add_definitions(-DHAVE_ABSTRACT_SOCKETS)
+endif()
 
 if(FOUND_BSD44SOCKETS)
 	add_definitions(-DBSD44SOCKETS)
@@ -37,6 +42,7 @@ add_library(os STATIC
 	access.c
 	auth.c
 	backtrace.c
+	busfault.c
 	client.c
 	connection.c
 	io.c

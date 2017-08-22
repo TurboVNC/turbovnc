@@ -11,7 +11,6 @@ add_library(xkb STATIC
 	ddxCtrls.c
 	ddxKillSrv.c
 	ddxLEDs.c
-	ddxList.c
 	ddxLoad.c
 	ddxPrivate.c
 	ddxVT.c

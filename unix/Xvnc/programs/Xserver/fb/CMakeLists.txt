@@ -1,4 +1,4 @@
-include_directories(../mi ../render ../miext/damage)
+include_directories(../mi ../render)
 
 add_library(fb STATIC
 	fb24_32.c
@@ -26,8 +26,6 @@ add_library(fb STATIC
 	fbseg.c
 	fbsetsp.c
 	fbsolid.c
-	fbstipple.c
-	fbtile.c
 	fbtrap.c
 	fbutil.c
 	fbwindow.c)

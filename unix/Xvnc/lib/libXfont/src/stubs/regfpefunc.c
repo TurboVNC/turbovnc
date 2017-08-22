@@ -24,5 +24,9 @@ RegisterFPEFunctions(NameCheckFunc name_func,
 		     NextLaFunc next_list_alias_func,
 		     SetPathFunc set_path_func)
 {
+    OVERRIDE_SYMBOL(RegisterFPEFunctions, name_func, init_func, free_func,
+                    reset_func, open_func, close_func, list_func, start_lfwi_func,
+                    next_lfwi_func, wakeup_func, client_died, load_glyphs,
+                    start_list_alias_func, next_list_alias_func, set_path_func);
     return 0;
 }

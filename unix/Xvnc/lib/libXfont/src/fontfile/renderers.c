@@ -40,7 +40,7 @@ static FontRenderersRec	renderers;
  * XXX Maybe should allow unregistering renders. For now, just clear the
  * list at each new generation.
  */
-extern unsigned long serverGeneration;
+extern unsigned long __GetServerGeneration(void);
 static unsigned long rendererGeneration = 0;
 
 Bool
@@ -55,8 +55,8 @@ FontFilePriorityRegisterRenderer (FontRendererPtr renderer, int priority)
     int		    i;
     struct _FontRenderersElement *new;
 
-    if (rendererGeneration != serverGeneration) {
-	rendererGeneration = serverGeneration;
+    if (rendererGeneration != __GetServerGeneration()) {
+	rendererGeneration = __GetServerGeneration();
 	renderers.number = 0;
 	if (renderers.renderers)
 	   free(renderers.renderers);

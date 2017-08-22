@@ -80,7 +80,7 @@
    the CPU count */
 #define MAX_ENCODING_THREADS 8
 
-extern char *display;
+extern const char *display;
 
 
 /*
@@ -472,8 +472,8 @@ typedef struct rfbClientRec {
  */
 
 typedef struct {
-    GCFuncs *wrapFuncs;
-    GCOps *wrapOps;
+    const GCFuncs *wrapFuncs;
+    const GCOps *wrapOps;
 } rfbGCRec, *rfbGCPtr;
 
 
@@ -664,7 +664,7 @@ extern void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
                       int nlists, GlyphListPtr lists, GlyphPtr * glyphs);
 #endif
 
-extern Bool rfbCloseScreen(int, ScreenPtr);
+extern Bool rfbCloseScreen(ScreenPtr);
 extern Bool rfbCreateGC(GCPtr);
 extern void rfbPaintWindowBackground(WindowPtr, RegionPtr, int what);
 extern void rfbPaintWindowBorder(WindowPtr, RegionPtr, int what);
@@ -899,6 +899,12 @@ extern const char *sockaddr_string(struct sockaddr_storage *addr, char *buf,
 
 extern void rfbResetStats(rfbClientPtr cl);
 extern void rfbPrintStats(rfbClientPtr cl);
+
+
+/* strsep.c */
+#ifndef HAVE_STRSEP
+char *strsep(char **stringp, const char *delim);
+#endif
 
 
 /* tight.c */

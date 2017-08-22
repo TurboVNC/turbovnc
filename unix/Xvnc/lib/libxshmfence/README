@@ -1,0 +1,36 @@
+libxshmfence - Shared memory 'SyncFence' synchronization primitive
+
+This library offers a CPU-based synchronization primitive compatible
+with the X SyncFence objects that can be shared between processes
+using file descriptor passing.
+
+There are two underlying implementations:
+
+ 1) On Linux, the library uses futexes
+
+ 2) On other systems, the library uses posix mutexes and condition
+    variables.
+
+All questions regarding this software should be directed at the
+Xorg mailing list:
+
+        http://lists.freedesktop.org/mailman/listinfo/xorg
+
+Please submit bug reports to the Xorg bugzilla:
+
+        https://bugs.freedesktop.org/enter_bug.cgi?product=xorg
+
+The master development code repository can be found at:
+
+        git://anongit.freedesktop.org/git/xorg/lib/libxshmfence
+
+        http://cgit.freedesktop.org/xorg/lib/libxshmfence
+
+For patch submission instructions, see:
+
+	http://www.x.org/wiki/Development/Documentation/SubmittingPatches
+
+For more information on the git code manager, see:
+
+        http://wiki.x.org/wiki/GitPage
+

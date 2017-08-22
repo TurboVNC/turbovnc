@@ -50,7 +50,7 @@ ISOLatin1ToLower(unsigned char source)
 }
 
 _X_HIDDEN void
-CopyISOLatin1Lowered(char *dest, char *source, int length)
+CopyISOLatin1Lowered(char *dest, const char *source, int length)
 {
     int i;
     for (i = 0; i < length; i++, source++, dest++)
@@ -69,7 +69,7 @@ static int FontFileOpenBitmapNCF (FontPathElementPtr fpe, FontPtr *pFont,
 				  FontPtr non_cachable_font);
 
 int
-FontFileNameCheck (char *name)
+FontFileNameCheck (const char *name)
 {
 #ifndef NCD
 #if defined(WIN32)
@@ -254,7 +254,7 @@ transfer_values_to_alias(char *entryname, int entrynamelength,
 /* ARGSUSED */
 int
 FontFileOpenFont (pointer client, FontPathElementPtr fpe, Mask flags,
-		  char *name, int namelen,
+		  const char *name, int namelen,
 		  fsBitmapFormat format, fsBitmapFormatMask fmask,
 		  XID id, FontPtr *pFont, char **aliasName,
 		  FontPtr non_cachable_font)
@@ -688,7 +688,7 @@ _FontFileAddScalableNames(FontNamesPtr names, FontNamesPtr scaleNames,
 /* ARGSUSED */
 static int
 _FontFileListFonts (pointer client, FontPathElementPtr fpe,
-		    char *pat, int len, int max, FontNamesPtr names,
+		    const char *pat, int len, int max, FontNamesPtr names,
 		    int mark_aliases)
 {
     FontDirectoryPtr	dir;
@@ -794,7 +794,7 @@ typedef struct _LFWIData {
 } LFWIDataRec, *LFWIDataPtr;
 
 int
-FontFileListFonts (pointer client, FontPathElementPtr fpe, char *pat,
+FontFileListFonts (pointer client, FontPathElementPtr fpe, const char *pat,
 		   int len, int max, FontNamesPtr names)
 {
     return _FontFileListFonts (client, fpe, pat, len, max, names, 0);
@@ -802,7 +802,7 @@ FontFileListFonts (pointer client, FontPathElementPtr fpe, char *pat,
 
 int
 FontFileStartListFonts(pointer client, FontPathElementPtr fpe,
-		       char *pat, int len, int max,
+		       const char *pat, int len, int max,
 		       pointer *privatep, int mark_aliases)
 {
     LFWIDataPtr	data;
@@ -833,7 +833,7 @@ FontFileStartListFonts(pointer client, FontPathElementPtr fpe,
 
 int
 FontFileStartListFontsWithInfo(pointer client, FontPathElementPtr fpe,
-			       char *pat, int len, int max,
+			       const char *pat, int len, int max,
 			       pointer *privatep)
 {
     return FontFileStartListFonts(client, fpe, pat, len, max, privatep, 0);
@@ -1067,7 +1067,7 @@ FontFileListNextFontWithInfo(pointer client, FontPathElementPtr fpe,
 
 int
 FontFileStartListFontsAndAliases(pointer client, FontPathElementPtr fpe,
-				 char *pat, int len, int max,
+				 const char *pat, int len, int max,
 				 pointer *privatep)
 {
     return FontFileStartListFonts(client, fpe, pat, len, max, privatep, 1);

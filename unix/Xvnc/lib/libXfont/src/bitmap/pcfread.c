@@ -487,7 +487,6 @@ pcfReadFont(FontPtr pFont, FontFilePtr file,
     for (i = 0; i < GLYPHPADOPTIONS; i++) {
 	bitmapSizes[i] = pcfGetINT32(file, format);
 	if (IS_EOF(file)) goto Bail;
-	if (bitmapSizes[i] < 0) goto Bail;
     }
 
     sizebitmaps = bitmapSizes[PCF_GLYPH_PAD_INDEX(format)];

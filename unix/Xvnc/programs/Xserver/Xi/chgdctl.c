@@ -113,7 +113,6 @@ ProcXChangeDeviceControl(ClientPtr client)
     AxisInfoPtr a;
     CARD32 *resolution;
     xDeviceEnableCtl *e;
-    devicePresenceNotify dpn;
 
     REQUEST(xChangeDeviceControlReq);
     REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
@@ -123,10 +122,19 @@ ProcXChangeDeviceControl(ClientPtr client)
     if (ret != Success)
         goto out;
 
-    rep.repType = X_Reply;
-    rep.RepType = X_ChangeDeviceControl;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
+    /* XTest devices are special, none of the below apply to them anyway */
+    if (IsXTestDevice(dev, NULL)) {
+        ret = BadMatch;
+        goto out;
+    }
+
+    rep = (xChangeDeviceControlReply) {
+        .repType = X_Reply,
+        .RepType = X_ChangeDeviceControl,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .status = Success,
+    };
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
@@ -189,7 +197,10 @@ ProcXChangeDeviceControl(ClientPtr client)
             goto out;
         }
 
-        status = ChangeDeviceControl(client, dev, (xDeviceCtl *) e);
+        if (IsXTestDevice(dev, NULL))
+            status = !Success;
+        else
+            status = ChangeDeviceControl(client, dev, (xDeviceCtl *) e);
 
         if (status == Success) {
             if (e->enable)
@@ -213,11 +224,13 @@ ProcXChangeDeviceControl(ClientPtr client)
 
  out:
     if (ret == Success) {
-        dpn.type = DevicePresenceNotify;
-        dpn.time = currentTime.milliseconds;
-        dpn.devchange = DeviceControlChanged;
-        dpn.deviceid = dev->id;
-        dpn.control = stuff->control;
+        devicePresenceNotify dpn = {
+            .type = DevicePresenceNotify,
+            .time = currentTime.milliseconds,
+            .devchange = DeviceControlChanged,
+            .deviceid = dev->id,
+            .control = stuff->control
+        };
         SendEventToAllWindows(dev, DevicePresenceNotifyMask,
                               (xEvent *) &dpn, 1);
 
@@ -240,5 +253,5 @@ SRepXChangeDeviceControl(ClientPtr client, int size,
 {
     swaps(&rep->sequenceNumber);
     swapl(&rep->length);
-    WriteToClient(client, size, (char *) rep);
+    WriteToClient(client, size, rep);
 }

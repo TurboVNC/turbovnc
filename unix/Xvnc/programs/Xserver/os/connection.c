@@ -26,13 +26,13 @@ Copyright 1987, 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -113,17 +113,11 @@ SOFTWARE.
 #ifdef HAVE_GETPEERUCRED
 #include <ucred.h>
 #include <zone.h>
-#endif
-
-#ifdef XSERVER_DTRACE
-#include <sys/types.h>
-typedef const char *string;
-
-#ifndef HAVE_GETPEERUCRED
+#else
 #define zoneid_t int
 #endif
-#include "../dix/Xserver-dtrace.h"
-#endif
+
+#include "probes.h"
 
 static int lastfdesc;           /* maximum file descriptor */
 
@@ -138,10 +132,12 @@ fd_set OutputPending;           /* clients with reply/event data ready to go */
 int MaxClients = 0;
 Bool NewOutputPending;          /* not yet attempted to write some new output */
 Bool AnyClientsWriteBlocked;    /* true if some client blocked on write */
+Bool NoListenAll;               /* Don't establish any listening sockets */
 
 static Bool RunFromSmartParent; /* send SIGUSR1 to parent process */
 Bool RunFromSigStopParent;      /* send SIGSTOP to our own process; Upstart (or
                                    equivalent) will send SIGCONT back. */
+static char dynamic_display[7]; /* display name */
 Bool PartialNetwork;            /* continue even if unable to bind all addrs */
 static Pid_t ParentProcess;
 
@@ -350,6 +346,14 @@ void
 NotifyParentProcess(void)
 {
 #if !defined(WIN32)
+    if (displayfd >= 0) {
+        if (write(displayfd, display, strlen(display)) != strlen(display))
+            FatalError("Cannot write display number to fd %d\n", displayfd);
+        if (write(displayfd, "\n", 1) != 1)
+            FatalError("Cannot write display number to fd %d\n", displayfd);
+        close(displayfd);
+        displayfd = -1;
+    }
     if (RunFromSmartParent) {
         if (ParentProcess > 1) {
             kill(ParentProcess, SIGUSR1);
@@ -358,6 +362,18 @@ NotifyParentProcess(void)
     if (RunFromSigStopParent)
         raise(SIGSTOP);
 #endif
+}
+
+static Bool
+TryCreateSocket(int num, int *partial)
+{
+    char port[20];
+
+    snprintf(port, sizeof(port), "%d", num);
+
+    return (_XSERVTransMakeAllCOTSServerListeners(port, partial,
+                                                  &ListenTransCount,
+                                                  &ListenTransConns) >= 0);
 }
 
 /*****************
@@ -370,7 +386,6 @@ CreateWellKnownSockets(void)
 {
     int i;
     int partial;
-    char port[20];
 
     FD_ZERO(&AllSockets);
     FD_ZERO(&AllClients);
@@ -386,34 +401,50 @@ CreateWellKnownSockets(void)
 
     FD_ZERO(&WellKnownConnections);
 
-    snprintf(port, sizeof(port), "%d", atoi(display));
+    /* display is initialized to "0" by main(). It is then set to the display
+     * number if specified on the command line. */
 
-    if ((_XSERVTransMakeAllCOTSServerListeners(port, &partial,
-                                               &ListenTransCount,
-                                               &ListenTransConns) >= 0) &&
-        (ListenTransCount >= 1)) {
-        if (!PartialNetwork && partial) {
-            FatalError("Failed to establish all listening sockets");
-        }
-        else {
-            ListenTransFds = malloc(ListenTransCount * sizeof(int));
-
-            for (i = 0; i < ListenTransCount; i++) {
-                int fd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
-
-                ListenTransFds[i] = fd;
-                FD_SET(fd, &WellKnownConnections);
-
-                if (!_XSERVTransIsLocal(ListenTransConns[i])) {
-                    DefineSelf(fd);
-                }
+    if (NoListenAll) {
+        ListenTransCount = 0;
+    }
+    else if ((displayfd < 0) || explicit_display) {
+        if (TryCreateSocket(atoi(display), &partial) &&
+            ListenTransCount >= 1)
+            if (!PartialNetwork && partial)
+                FatalError ("Failed to establish all listening sockets");
+    }
+    else { /* -displayfd and no explicit display number */
+        Bool found = 0;
+        for (i = 0; i < 65536 - X_TCP_PORT; i++) {
+            if (TryCreateSocket(i, &partial) && !partial) {
+                found = 1;
+                break;
             }
+            else
+                CloseWellKnownConnections();
         }
+        if (!found)
+            FatalError("Failed to find a socket to listen on");
+        snprintf(dynamic_display, sizeof(dynamic_display), "%d", i);
+        display = dynamic_display;
     }
 
-    if (!XFD_ANYSET(&WellKnownConnections))
+    ListenTransFds = malloc(ListenTransCount * sizeof (int));
+
+    for (i = 0; i < ListenTransCount; i++) {
+        int fd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
+
+        ListenTransFds[i] = fd;
+        FD_SET(fd, &WellKnownConnections);
+
+        if (!_XSERVTransIsLocal(ListenTransConns[i]))
+            DefineSelf (fd);
+    }
+
+    if (!XFD_ANYSET(&WellKnownConnections) && !NoListenAll)
         FatalError
             ("Cannot establish any listening sockets - Make sure an X server isn't already running");
+
 #if !defined(WIN32)
     OsSignal(SIGPIPE, SIG_IGN);
     OsSignal(SIGHUP, AutoResetServer);
@@ -482,8 +513,13 @@ CloseWellKnownConnections(void)
 {
     int i;
 
-    for (i = 0; i < ListenTransCount; i++)
-        _XSERVTransClose(ListenTransConns[i]);
+    for (i = 0; i < ListenTransCount; i++) {
+        if (ListenTransConns[i] != NULL) {
+            _XSERVTransClose(ListenTransConns[i]);
+            ListenTransConns[i] = NULL;
+        }
+    }
+    ListenTransCount = 0;
 }
 
 static void
@@ -611,8 +647,8 @@ AuthorizationIDOfClient(ClientPtr client)
  *                   CARD8	byteOrder;
  *                   BYTE	pad;
  *                   CARD16	majorVersion, minorVersion;
- *                   CARD16	nbytesAuthProto;    
- *                   CARD16	nbytesAuthString;   
+ *                   CARD16	nbytesAuthProto;
+ *                   CARD16	nbytesAuthString;
  *                 } xConnClientPrefix;
  *
  *     	It is hoped that eventually one protocol will be agreed upon.  In the
@@ -731,11 +767,11 @@ AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
     oc->output = (ConnectionOutputPtr) NULL;
     oc->auth_id = None;
     oc->conn_time = conn_time;
-    if (!(client = NextAvailableClient((pointer) oc))) {
+    if (!(client = NextAvailableClient((void *) oc))) {
         free(oc);
         return NullClient;
     }
-    oc->local_client = ComputeLocalClient(client);
+    client->local = ComputeLocalClient(client);
 #if !defined(WIN32)
     ConnectionTranslation[fd] = client->index;
 #else
@@ -769,7 +805,7 @@ AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
  *****************/
 
  /*ARGSUSED*/ Bool
-EstablishNewConnections(ClientPtr clientUnused, pointer closure)
+EstablishNewConnections(ClientPtr clientUnused, void *closure)
 {
     fd_set readyconnections;    /* set of listeners that are ready */
     int curconn;                /* fd of listener that's ready */
@@ -865,7 +901,7 @@ ErrorConnMax(XtransConnInfo trans_conn)
     xConnSetupPrefix csp;
     char pad[3] = { 0, 0, 0 };
     struct iovec iov[3];
-    char byteOrder = 0;
+    char order = 0;
     int whichbyte = 1;
     struct timeval waittime;
     fd_set mask;
@@ -878,15 +914,15 @@ ErrorConnMax(XtransConnInfo trans_conn)
     FD_SET(fd, &mask);
     (void) Select(fd + 1, &mask, NULL, NULL, &waittime);
     /* try to read the byte-order of the connection */
-    (void) _XSERVTransRead(trans_conn, &byteOrder, 1);
-    if ((byteOrder == 'l') || (byteOrder == 'B')) {
+    (void) _XSERVTransRead(trans_conn, &order, 1);
+    if (order == 'l' || order == 'B' || order == 'r' || order == 'R') {
         csp.success = xFalse;
         csp.lengthReason = sizeof(NOROOM) - 1;
         csp.length = (sizeof(NOROOM) + 2) >> 2;
         csp.majorVersion = X_PROTOCOL;
         csp.minorVersion = X_PROTOCOL_REVISION;
-        if (((*(char *) &whichbyte) && (byteOrder == 'B')) ||
-            (!(*(char *) &whichbyte) && (byteOrder == 'l'))) {
+	if (((*(char *) &whichbyte) && (order == 'B' || order == 'R')) ||
+	    (!(*(char *) &whichbyte) && (order == 'l' || order == 'r'))) {
             swaps(&csp.majorVersion);
             swaps(&csp.minorVersion);
             swaps(&csp.length);
@@ -894,7 +930,7 @@ ErrorConnMax(XtransConnInfo trans_conn)
         iov[0].iov_len = sz_xConnSetupPrefix;
         iov[0].iov_base = (char *) &csp;
         iov[1].iov_len = csp.lengthReason;
-        iov[1].iov_base = NOROOM;
+        iov[1].iov_base = (void *) NOROOM;
         iov[2].iov_len = (4 - (csp.lengthReason & 3)) & 3;
         iov[2].iov_base = pad;
         (void) _XSERVTransWritev(trans_conn, iov, 3);
@@ -937,7 +973,7 @@ CloseDownFileDescriptor(OsCommPtr oc)
 
 /*****************
  * CheckConnections
- *    Some connection has died, go find which one and shut it down 
+ *    Some connection has died, go find which one and shut it down
  *    The file descriptor has been closed, but is still in AllClients.
  *    If would truly be wonderful if select() would put the bogus
  *    file descriptors in the exception mask, but nooooo.  So we have
@@ -998,7 +1034,7 @@ CheckConnections(void)
 
 /*****************
  * CloseDownConnection
- *    Delete client from AllClients and free resources 
+ *    Delete client from AllClients and free resources
  *****************/
 
 void
@@ -1009,15 +1045,15 @@ CloseDownConnection(ClientPtr client)
     if (FlushCallback)
         CallCallbacks(&FlushCallback, NULL);
 
-    if (oc->output && oc->output->count)
-        FlushClient(client, oc, (char *) NULL, 0);
+    if (oc->output)
+	FlushClient(client, oc, (char *) NULL, 0);
 #ifdef XDMCP
     XdmcpCloseDisplay(oc->fd);
 #endif
     CloseDownFileDescriptor(oc);
     FreeOsBuffers(oc);
     free(client->osPrivate);
-    client->osPrivate = (pointer) NULL;
+    client->osPrivate = (void *) NULL;
     if (auditTrailLevel > 1)
         AuditF("client %d disconnected\n", client->index);
 }
@@ -1224,8 +1260,7 @@ MakeClientGrabPervious(ClientPtr client)
     }
 }
 
-#ifdef XQUARTZ
-/* Add a fd (from launchd) to our listeners */
+/* Add a fd (from launchd or similar) to our listeners */
 void
 ListenOnOpenFD(int fd, int noxauth)
 {
@@ -1247,7 +1282,7 @@ ListenOnOpenFD(int fd, int noxauth)
      */
     ciptr = _XSERVTransReopenCOTSServer(5, fd, port);
     if (ciptr == NULL) {
-        ErrorF("Got NULL while trying to Reopen launchd port.\n");
+        ErrorF("Got NULL while trying to Reopen listen port.\n");
         return;
     }
 
@@ -1271,13 +1306,31 @@ ListenOnOpenFD(int fd, int noxauth)
 
     /* Increment the count */
     ListenTransCount++;
-
-    /* This *might* not be needed... /shrug */
-    ResetAuthorization();
-    ResetHosts(display);
-#ifdef XDMCP
-    XdmcpReset();
-#endif
 }
 
-#endif
+/* based on TRANS(SocketUNIXAccept) (XtransConnInfo ciptr, int *status) */
+Bool
+AddClientOnOpenFD(int fd)
+{
+    XtransConnInfo ciptr;
+    CARD32 connect_time;
+    char port[20];
+
+    snprintf(port, sizeof(port), ":%d", atoi(display));
+    ciptr = _XSERVTransReopenCOTSServer(5, fd, port);
+    if (ciptr == NULL)
+        return FALSE;
+
+    _XSERVTransSetOption(ciptr, TRANS_NONBLOCKING, 1);
+    ciptr->flags |= TRANS_NOXAUTH;
+
+    connect_time = GetTimeInMillis();
+
+    if (!AllocNewConnection(ciptr, fd, connect_time)) {
+        ErrorConnMax(ciptr);
+        _XSERVTransClose(ciptr);
+        return FALSE;
+    }
+
+    return TRUE;
+}

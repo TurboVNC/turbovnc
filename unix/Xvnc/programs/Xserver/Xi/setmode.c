@@ -92,16 +92,22 @@ ProcXSetDeviceMode(ClientPtr client)
     REQUEST(xSetDeviceModeReq);
     REQUEST_SIZE_MATCH(xSetDeviceModeReq);
 
-    rep.repType = X_Reply;
-    rep.RepType = X_SetDeviceMode;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
+    rep = (xSetDeviceModeReply) {
+        .repType = X_Reply,
+        .RepType = X_SetDeviceMode,
+        .sequenceNumber = client->sequence,
+        .length = 0
+    };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
     if (dev->valuator == NULL)
         return BadMatch;
+
+    if (IsXTestDevice(dev, NULL))
+        return BadMatch;
+
     if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client))
         rep.status = AlreadyGrabbed;
     else
@@ -137,5 +143,5 @@ SRepXSetDeviceMode(ClientPtr client, int size, xSetDeviceModeReply * rep)
 {
     swaps(&rep->sequenceNumber);
     swapl(&rep->length);
-    WriteToClient(client, size, (char *) rep);
+    WriteToClient(client, size, rep);
 }

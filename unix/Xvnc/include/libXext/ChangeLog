@@ -1,0 +1,1835 @@
+commit efdcbb7634501e1117d422636a0a75d7ea84b16b
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jul 24 01:30:38 2014 +1000
+
+    libXext 1.3.3
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 11aad96bd689d54156064d2e81213dc827a689d1
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Mar 6 14:56:17 2014 -0800
+
+    Xge: remove warning messages about missing Xge extension event translations
+    
+    When mixing Xlib and xcb, it's quite possible for some events to be
+    received for xcb-only extensions, which will subsequently not be
+    translatable by the Xge WireToEvent/EventToWire hooks
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+
+commit dde40e03c10808b964dc1d6a7eb48156dd5ce4a2
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 8 20:09:46 2014 -0800
+
+    XeviGetVisualInfo: Free & clear *evi_return, not evi_return pointer
+    
+    evi_return is passed in as a pointer to a location into which
+    XeviGetVisualInfo is expected to write a pointer to the memory
+    it allocated for the returned structures.  If we're failing and
+    bailing out, we need to dispose of the pointer we set, not the
+    one passed into us (which the caller may have put on the stack
+    or allocated as part of a larger structure).
+    
+    Flagged by cppcheck 1.64:
+    [lib/libXext/src/XEVI.c:182] -> [lib/libXext/src/XEVI.c:186]:
+     (warning) Possible null pointer dereference: evi_return - otherwise it
+               is redundant to check it against null.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d5447c0156f556114dbf97d6064c0c7b0fcd5f70
+Author: Nathan Kidd <nkidd@opentext.com>
+Date:   Fri Jan 17 13:40:07 2014 +1000
+
+    Stricter event error checking
+    
+    A malicious X server claiming to not support GE but sending a GE would
+    SEGV the client  (always a NULL derefrence).  Possible since d1c93500.
+    
+    (Also guard the EventToWire case so it's harder to shoot yourself in the
+    foot.)
+    
+    Signed-off-by: Nathan Kidd <nkidd@opentext.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit bb24f2970f2e425f4df90c9b73d078ad15a73fbb
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Nov 7 16:31:16 2013 -0800
+
+    Remove fallback for _XEatDataWords, require libX11 1.6 for it
+    
+    _XEatDataWords was orignally introduced with the May 2013 security
+    patches, and in order to ease the process of delivering those,
+    fallback versions of _XEatDataWords were included in the X extension
+    library patches so they could be applied to older versions that didn't
+    have libX11 1.6 yet.   Now that we're past that hurdle, we can drop
+    the fallbacks and just require libX11 1.6 for building new versions
+    of the extension libraries.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7378d4bdbd33ed49ed6cfa5c4f73d7527982aab4
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jun 24 22:55:18 2013 -0700
+
+    Require ANSI C89 pre-processor, drop pre-C89 token pasting support
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 230a1dc356266afb206c98e47ee72e8fca0948e2
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jun 22 10:56:53 2013 -0700
+
+    Replace sprintf with snprintf when looking up extension error strings
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d8366afbb0d2e4fbb1e419b1187f490522270bea
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri May 31 14:34:58 2013 -0700
+
+    libXext 1.3.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit dfe6e1f3b8ede3d0bab7a5fa57f73513a09ec649
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 9 14:40:33 2013 -0800
+
+    integer overflow in XSyncListSystemCounters() [CVE-2013-1982 6/6]
+    
+    If the number of counters or amount of data reported by the server is
+    large enough that it overflows when multiplied by the size of the
+    appropriate struct, then memory corruption can occur when more bytes
+    are read from the X server than the size of the buffers we allocated
+    to hold them.
+    
+    V2: Make sure we don't walk past the end of the reply when converting
+    data from wire format to the structures returned to the caller.
+    
+    Reported-by: Ilja Van Sprundel <ivansprundel@ioactive.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6ecd96e8be3c33e2ffad6631cea4aa0a030d93c2
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 9 14:40:33 2013 -0800
+
+    integer overflow in XShapeGetRectangles() [CVE-2013-1982 5/6]
+    
+    If the number of rectangles reported by the server is large enough that
+    it overflows when multiplied by the size of the appropriate struct, then
+    memory corruption can occur when more bytes are read from the X server
+    than the size of the buffer we allocated to hold them.
+    
+    Reported-by: Ilja Van Sprundel <ivansprundel@ioactive.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 67ecdcf7e29de9fa78b421122620525ed2c7db88
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 9 14:40:33 2013 -0800
+
+    integer overflow in XeviGetVisualInfo() [CVE-2013-1982 4/6]
+    
+    If the number of visuals or conflicts reported by the server is large
+    enough that it overflows when multiplied by the size of the appropriate
+    struct, then memory corruption can occur when more bytes are read from
+    the X server than the size of the buffer we allocated to hold them.
+    
+    Reported-by: Ilja Van Sprundel <ivansprundel@ioactive.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 96d1da55a08c4cd52b763cb07bdce5cdcbec4da8
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 9 14:40:33 2013 -0800
+
+    several integer overflows in XdbeGetVisualInfo() [CVE-2013-1982 3/6]
+    
+    If the number of screens or visuals reported by the server is large enough
+    that it overflows when multiplied by the size of the appropriate struct,
+    then memory corruption can occur when more bytes are read from the X server
+    than the size of the buffer we allocated to hold them.
+    
+    Reported-by: Ilja Van Sprundel <ivansprundel@ioactive.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 082d70b19848059ba78c9d1c315114fb07e8c0ef
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 9 14:40:33 2013 -0800
+
+    integer overflow in XcupStoreColors() [CVE-2013-1982 2/6]
+    
+    If the computed number of entries is large enough that it overflows when
+    multiplied by the size of a xColorItem struct, or is treated as negative
+    when compared to the size of the stack allocated buffer, then memory
+    corruption can occur when more bytes are read from the X server than the
+    size of the buffer we allocated to hold them.
+    
+    The requirement to match the number of colors specified by the caller makes
+    this much harder to hit than the one in XcupGetReservedColormapEntries()
+    
+    Reported-by: Ilja Van Sprundel <ivansprundel@ioactive.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d05f27a6f74cb419ad5a437f2e4690b17e7faee5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 9 14:40:33 2013 -0800
+
+    integer overflow in XcupGetReservedColormapEntries() [CVE-2013-1982 1/6]
+    
+    If the computed number of entries is large enough that it overflows when
+    multiplied by the size of a xColorItem struct, or is treated as negative
+    when compared to the size of the stack allocated buffer, then memory
+    corruption can occur when more bytes are read from the X server than the
+    size of the buffer we allocated to hold them.
+    
+    Reported-by: Ilja Van Sprundel <ivansprundel@ioactive.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ca84a813716f9de691dc3f60390d83af4b5ae534
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Apr 13 09:32:12 2013 -0700
+
+    Use _XEatDataWords to avoid overflow of rep.length bit shifting
+    
+    rep.length is a CARD32, so rep.length << 2 could overflow in 32-bit builds
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8eee1236041d46a21faba32e0d27c26985267d89
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit dbf4b9ec4a8aa97b0c47d58ee158dd3aa8832af5
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:28:48 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 7081afc98643e3ef8a3ed711183c8fc8fef30cfa
+Author: Eric S. Raymond <esr@thyrsus.com>
+Date:   Thu Aug 23 13:34:16 2012 -0400
+
+    Replace presentationm-level requests with .RS/RE.
+    
+    This will assist translation to DocBook.
+    
+    Signed-off-by: Eric S. Raymond <esr@thyrsus.com>
+
+commit d618eac132fc9e13bbfb9e58e3375f015db2a179
+Author: Eric S. Raymond <esr@thyrsus.com>
+Date:   Thu Aug 23 13:25:27 2012 -0400
+
+    Replace various unsafe presentation-level requests with .RS/.RE and .EX/EE.
+    
+    These can be translated structurally into DocBook.
+
+commit e78e51359fd22b69e646167bc9d3f9b28a5c755f
+Author: Thomas Klausner <wiz@NetBSD.org>
+Date:   Wed Jul 18 23:40:18 2012 +0200
+
+    Avoid having macros expand code to be: ((f) ? (f)->m1 : NULL)->m2
+    
+    From Matthew R. Green <mrg@NetBSD.org>
+    
+    Signed-off-by: Thomas Klausner <wiz@NetBSD.org>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit ed8d50ba3a6f837d213ed7c39c2b63d33fc75a38
+Author: Chase Douglas <chase.douglas@canonical.com>
+Date:   Fri Apr 20 15:08:08 2012 -0700
+
+    Destroy generic event extension after last display is removed
+    
+    The extension record is currently leaked and never freed.
+    
+    Signed-off-by: Chase Douglas <chase.douglas@canonical.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit c6fc799a81334a223cf0e924cd9e7e94ba147835
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Mon Apr 23 14:59:51 2012 +1000
+
+    sync: fix copy/paste error in comment
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit e9c1e346c90e697d5d8f0e756ef8b6e3ed339e29
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Mar 7 19:54:50 2012 -0800
+
+    libXext 1.3.1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c0c2a0c7819c425f3df0992b6873a15c8ec27e01
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Sep 28 16:19:27 2011 -0700
+
+    Add const attributes to fix gcc -Wwrite-strings warnings
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a8f18777099ca5d61929bc37e4741457b6671e59
+Author: Matt Dew <marcoz@osource.org>
+Date:   Fri Oct 7 23:25:45 2011 -0600
+
+    more Cleanup of IDs and links in doc
+
+commit 3464d6eebfaaf015ea6b25a9a437192ddb1b02b0
+Author: Matt Dew <marcoz@osource.org>
+Date:   Tue Sep 20 22:06:05 2011 -0600
+
+    Fix id attributes capitolization
+    
+    #1 - fix the capitolization of the ID attriutes to match either
+         the <title> or <funcdef> string it goes with.
+    #2 - fix any <linkend>'s that were affected by #1
+    #3 - any <function> in the docs that has an actual funcdef, will
+         become an olink.
+    
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 17271b78c5d8d9864eda2476863543ba284bee2d
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Sep 20 19:01:41 2011 -0400
+
+    specs: regroup <author> <editor> <othercredit> under authorgroup
+    
+    Some elements are not displayed when outside authorgroup
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit a58e7d756111eafd4b75763692808198315f1c75
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Sep 20 10:18:22 2011 -0400
+
+    xtest1: adding legal text related to the X Consortium Copyright
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 276df4dd2de616617cb439df4367cbaa4f568a0a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Sep 20 10:07:06 2011 -0400
+
+    dpmslib: minor markup fix in legal text
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit ca39a358c35ea364c10fa7c16b6a584171d27600
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Sep 20 09:57:26 2011 -0400
+
+    synclib: refactor copyright legal text for multiple licensing
+    
+    One sentence added as per the xorg License doc.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 877e74e518ec74a07cb8998a3f517ab043cf76be
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Sep 19 17:26:02 2011 -0400
+
+    specs: add missing legal text information
+    
+    The reference being the xorg License doc.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit b46167511d429792086fb8e8cfea6f19b2fc9847
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Sep 16 22:18:56 2011 -0700
+
+    Strip trailing whitespace
+    
+    Performed with: find * -type f | xargs perl -i -p -e 's{[ \t]+$}{}'
+    git diff -w & git diff -b show no diffs from this change
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ead0cea593266b91f08d33a0c83170ba92d8ac7e
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Fri Sep 16 16:30:09 2011 -0400
+
+    dbelib: refactor docbook copyright markup
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit d01ff169e5a07cb0eda3a8fd1489abb964db7ede
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Sep 15 10:39:25 2011 -0400
+
+    synclib: fix authors and affiliations
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit d7d0ad299214c4cb0b8dac579ffb7a6722de2d7f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 14 17:40:14 2011 -0400
+
+    dbelib: fix typo in author's name
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 1a147b7a6d1842d02e40674353716e5c3eb3b432
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 14 17:27:09 2011 -0400
+
+    dpmslib: restore DEC copyright
+    
+    Somehow during docbook conversion the copyright was changed from DEC
+    to X Consortium. There are suprious instances of X Consortium
+    in many docs. The dpms protocol doc was intact.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit a41bfcd7aa93046a5e917ccd4af321d4a6703160
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 14 16:30:26 2011 -0400
+
+    docs: fix author affiliation
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit e493d8f2a6441ea7bd92bb9dc9681d0bd8cfb7dc
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 14 16:06:55 2011 -0400
+
+    docs: remove orphan affiliation
+    
+    Move releaseinfo elements together
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 0344dafef098d64a9be7bafc859c8c1f27b75942
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 14 16:03:45 2011 -0400
+
+    docs: fix author affiliation
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit a8248f0dbb84ab2530bd11f2c396b7fcd4b128f4
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Sep 12 16:54:45 2011 -0400
+
+    docs: use the &fullrelvers; entity to set X11 release information
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 426514bee44ccbb849b959c917a191545e7472fa
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Sep 11 19:49:54 2011 -0400
+
+    docs: remove <productnumber> which is not used by default
+    
+    This element is not rendered by default on the title. A template
+    customization is required to display it.
+    X Window System does not have a product number.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit aec3220c5ca4942fdb2ad40d3b460ddd90603428
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Sep 8 20:00:00 2011 -0400
+
+    docbook.am: embed css styles inside the HTML HEAD element
+    
+    Rather than referring to the external xorg.css stylesheet, embed the content
+    of the file in the html output produced. This is accomplished by using
+    version 1.10 of xorg-xhtml.xsl.
+    
+    This makes the whole html docs tree much more relocatable.
+    In addition, it eliminates xorg.css as a runtime file which makes
+    xorg-sgml-doctools a build time only package.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 23b5f7d36f850cef9a135290bec23099f33245d1
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Sep 7 10:31:04 2011 -0400
+
+    docbook.am: global maintenance update - entities, images and olinking
+    
+    Adding support in libX11 for html chunking caused a reorg of docbook.am
+    as well as the xorg-sgml-doctools masterdb for olinking.
+    The parameter img.src.path is added for pdf images.
+    A searchpath to the root builddir is added for local entities, if present.
+    
+    The docbook.am makefile hides all the details and is identical for
+    all 22 modules having DocBook documentation. It is included by a thin
+    Makefile.am which requires no docbook knowledge.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 1b9487304a4757478aa923174272dd4062af9735
+Author: Matt Dew <marcoz@osource.org>
+Date:   Wed Jul 13 12:32:49 2011 -0600
+
+    Add some links for quick referencing definitions.
+    
+    Signed-off-by: Matt Dew <marcoz@osource.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Acked-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit b6fc6e6a0784b747863ee9b586fb09a81340bea4
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Jun 5 16:27:36 2011 -0400
+
+    Install target dbs alongside generated documents
+    
+    This matches a change in xorg-sgml-docs whereby the masterdb will look for
+    the target dbs into the same location as the generated documents.
+    
+    The target dbs are now installed alongside the generated documents.
+    Previously they are installed in $prefix/sgml/X11/dbs alongside masterdb which
+    has the potential of installing outside the package prefix and cause
+    distcheck to fail when user does not have write permission in this package.
+    
+    Requires XORG_CHECK_SGML_DOCTOOLS(1.8) which was released 2011-06-11
+
+commit acc529ed1f1cff6c79d3b6f711ff64da97bb864c
+Author: Matt Dew <marcoz@osource.org>
+Date:   Wed May 25 23:49:37 2011 -0600
+
+    add id attributes to funcsynopsis to allow other docs to olink to them.
+    
+    Signed-off-by: Matt Dew <marcoz@osource.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 8451664d228852f7b57eb11a35be3328b6fff13a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri May 6 18:45:55 2011 -0700
+
+    Install xml versions of specs even if HAVE_XMLTO is false
+    
+    Moves HAVE_XMLTO check into docbook.am, more closely matches behaviour
+    from before docbook.am changes.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f9a140097dace149a2c6b6f72080edee24b068f4
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri May 6 16:41:36 2011 -0700
+
+    libXext 1.3.0
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit decc44349ba66eb82c2ed575e60e80c2c827633d
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jul 22 08:58:33 2010 +1000
+
+    Correct XShm return values.
+    
+    XShmAttach, XShmDetach, XShmPutImage do not return a Status but 0 or 1.
+    Though the man section for XShmAttach says "if all goes well, you will get a
+    non-zero status, back" this is counter to the usage of Status in Xlib
+    itself where 0 means Success and no-zero specifies the specific error.
+    
+    XShmPixmapFormat does not return a Status but the pixmap format or 0 on
+    failure.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit 84648fda0f78dc0249bba7338f23526807e1f1d8
+Author: Alistair Leslie-Hughes <leslie_alistair@hotmail.com>
+Date:   Tue Apr 5 20:02:52 2011 +1000
+
+    Add missing prototypes. #14723
+    
+    This patch is based off the work by
+    Paulo César Pereira de Andrade
+    
+    Fixes: https://bugs.freedesktop.org/show_bug.cgi?id=14723
+    
+    Signed-off-by: Alistair Leslie-Hughes <leslie_alistair@hotmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 71e9cc5f91b1afc9ba5dfd38fdba1c3463e2bb1d
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Feb 27 15:06:18 2011 -0500
+
+    Documentation: add Docbook external references support
+    
+    When writing technical documentation, it is often necessary to cross
+    reference to other information. When that other information is not in the
+    current document, additional support is needed, namely <olink>.
+    
+    A new feature with version 1.7 of xorg-sgml-doctools adds references to
+    other documents within or outside this package.
+    
+    This patch adds technical support for this feature but does not change
+    the content of the documentation as seen by the end user.
+    
+    Each book or article must generate a database containing the href
+    of sections that can be referred to from another document. This database
+    is installed in DATAROOTDIR/sgml/X11/dbs. There is a requirement that
+    the value of DATAROOTDIR for xorg-sgml-doctools and for the package
+    documentation is the same. This forms a virtual document tree.
+    
+    This database is consulted by other documents while they are being generated
+    in order to fulfill the missing information for linking.
+    Refer to the xorg-sgml-doctools for further technical information.
+    
+    Co-authored-by: Matt Dew <marcoz@osource.org>
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 700c7896b832d6e4fb0185f0d5382b01f94e7141
+Author: Alan Hourihane <alanh@vmware.com>
+Date:   Fri Feb 25 11:05:27 2011 +0000
+
+    Add _X_HIDDEN to xgeExtRegister to fix build problems on 64bit
+
+commit 45c1b21e9f3ae64d0c65562080df925e11c0859c
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Feb 2 11:43:41 2011 -0500
+
+    config: comment, minor upgrade, quote and layout configure.ac
+    
+    Group statements per section as per Autoconf standard layout
+    Quote statements where appropriate.
+    Autoconf recommends not using dnl instead of # for comments
+    
+    Use AC_CONFIG_FILES to replace the deprecated AC_OUTPUT with parameters.
+    Remove redundant AC_CANONICAL_HOST included in XORG_DEFAULT_OPTIONS
+    Remove redundant AC_SUBST(*_CFLAGS) and/or *_LIBS
+    No functional configuration changes
+    
+    This helps automated maintenance and release activities.
+    Details can be found in http://wiki.x.org/wiki/NewModuleGuidelines
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f9d755fc92661a6db6f9d11c4e13a8926be47a83
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Fri Jan 28 19:41:37 2011 -0500
+
+    config: replace deprecated AM_CONFIG_HEADER with AC_CONFIG_HEADERS
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 37ac4dffd8dd1648f4e34fe3a23bfa253f14e9f9
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Fri Jan 28 14:59:04 2011 -0500
+
+    config: remove unrequired AC_HEADER_STDC
+    
+    Autoconf says:
+    "This macro is obsolescent, as current systems have conforming
+    header files. New programs need not use this macro".
+
+commit 04052f422547265e0247a2f2f8eb9513a06cbcf3
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Jan 27 18:50:14 2011 -0500
+
+    config: remove AC_PROG_CC as it overrides AC_PROG_C_C99
+    
+    XORG_STRICT_OPTION from XORG_DEFAULT_OPTIONS calls
+    AC_PROG_C_C99. This sets gcc with -std=gnu99.
+    If AC_PROG_CC macro is called afterwards, it resets CC to gcc.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit e3c11721b45a4c845979ef3092b09f156b9e7ec7
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Dec 19 11:13:31 2010 -0800
+
+    Remove old .tex versions of dbelib & synclib specs now that we have .xml
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8b4b31da87c63332f53da75ac3dd4f9883163009
+Author: Paulo Zanoni <pzanoni@mandriva.com>
+Date:   Thu Dec 16 14:07:41 2010 -0200
+
+    Use docbookx.dtd version 4.3 for all docs
+    
+    Signed-off-by: Paulo Zanoni <pzanoni@mandriva.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 07ef12739bf158e31ead4b8241a4edfef2af9765
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Dec 16 23:02:38 2010 -0800
+
+    specs/xtest1.xml: Fix section titles/nesting
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b10caa0dfccfb0231723037b5646bebb21ca00f8
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Dec 16 22:57:30 2010 -0800
+
+    specs/synclib.xml: Fix title page/legal notice markup
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 99aaf69b91e9902103349d77dc36c34a088c3123
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Dec 16 22:50:06 2010 -0800
+
+    specs/shapelib.xml: Remove extra Glossary title
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 4c2d0c0c09b249e61313830ee4e237b7f0619b87
+Author: James Jones <jajones@nvidia.com>
+Date:   Fri Jun 25 16:23:05 2010 -0700
+
+    Add XSyncAwaitFence()
+    
+    Add the XSynceFence version of XSyncAwait().  Waits
+    for fence objects to reach the triggered state.
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 9e33a842c97d676afa21e4bb16fd3dd380b42f4f
+Author: James Jones <jajones@nvidia.com>
+Date:   Fri Jun 25 16:19:55 2010 -0700
+
+    Add XSyncQueryFence()
+    
+    Allows callers to query whether or not a given
+    fence sync object is currently triggered.
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 259a4c847ce2314bb6e1b050c93f58c3029eb67d
+Author: James Jones <jajones@nvidia.com>
+Date:   Fri Jun 25 16:18:03 2010 -0700
+
+    Initial Fence Sync Object support
+    
+    Allows creating and managing binary state sync
+    objects.  Currently they aren't useful because
+    there is not yet a way to wait for them or
+    query their state.  X fence objects are owned
+    by a screen.  As Aaron Plattner pointed out,
+    screens are identified by a drawable in X
+    protocol, so XSyncCreateFence() takes a drawable
+    to identify which screen to create the fence on.
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 010f35552cd5dc5c7004e765bb060b69d7f6a02f
+Author: James Jones <jajones@nvidia.com>
+Date:   Mon Nov 29 09:50:17 2010 -0800
+
+    Require xextproto >= 7.1.99
+    
+    Subsequent changes require fence sync
+    protocol support in the XSync extension,
+    which is only compete in version xextproto
+    7.1.99 and above.
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 53ba38c7901a029024d3b4598ef35c5d9e0f174d
+Author: James Jones <jajones@nvidia.com>
+Date:   Fri Aug 20 15:11:23 2010 -0700
+
+    Backwards compat for newer XSync + older servers
+    
+    Add infrastructure to make future builds of libXext that
+    support version of XSync 3.1 compatibile with X servers
+    exporting XSync version 3.0.  As part of this, don't handle
+    errors introduced by newer versions of the protocol than the
+    server supports.  Those error codes could be used by some
+    other extension.
+    
+    Signed-off-by: James Jones <jajones@nvidia.com>
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Acked-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d35e95fdf433a249d0293744d3e1ef6196422700
+Author: Matt Dew <matt@osource.org>
+Date:   Wed Dec 1 20:51:05 2010 -0500
+
+    specs: convert xtest ext1 from roff to DocBook/XML
+    
+    Previously located in xorg-docs/specs/Xext
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f739146c3e711c1757203b1a8d84b31b5b694200
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Nov 21 11:26:06 2010 -0800
+
+    Sun's copyrights belong to Oracle now
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f9c66b4418686efb4bee92f9dfc8eeba77df857f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 9 13:04:48 2010 -0500
+
+    config: HTML file generation: use the installed copy of xorg.css
+    
+    Currenlty the xorg.css file is copied in each location
+    where a DocBook/XML file resides. This produces about
+    70 copies in the $(docdir) install tree.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 3ddeb5328e1a5413e4800fb396ebab429153d1a1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Oct 27 23:06:51 2010 -0700
+
+    libXext 1.2.0
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 67e6f3d5d56a70c6f8288e9af141916c29307e2d
+Author: Jesse Adkins <jesserayadkins@gmail.com>
+Date:   Tue Sep 28 13:30:02 2010 -0700
+
+    Purge cvs tags.
+    
+    Signed-off-by: Jesse Adkins <jesserayadkins@gmail.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit e246505ef46f2850abf07ef50fa16865d15c53e1
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Aug 16 17:47:02 2010 -0400
+
+    man: list files to install only once
+    
+    Newer versions of autoconf detect that error.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 3593a22f82bc6aaf6fef47cacfbe4daa35438ee1
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Aug 16 14:13:54 2010 -0400
+
+    man: store shadow man pages in git rather than generating them
+    
+    Simplify the build process and the makefile.
+    
+    Local fix in CVS for bug 5628 is not required
+    as the problem has been fixed in
+    util-macros d9062e4077ebfd0985baf8418f3d0f111b9ddbba
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit ef3d8a5b240335623d5f4d554ea4694829fc8eaf
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Aug 16 13:47:46 2010 -0400
+
+    man: whitespace management
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 05fd8155ef8cf32606bf6966caa3a9c689d1149d
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Aug 16 13:41:24 2010 -0400
+
+    man: use "shadows" terminology to refer to linking man pages
+    
+    To be consistent with other libraries
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 076820b006853d7c36f37fcdd9c2391b83f37ed8
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Aug 5 19:32:34 2010 -0400
+
+    man: using the C preprocessor is not required for man pages.
+    
+    There were no special symbols needing cpp.
+    Everything can be handled by the default MAN_SUBSTS in util-macros.
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 34500310c8c4ec3a55078837bae15d644fbf24d0
+Author: Fernando Carrijo <fcarrijo@yahoo.com.br>
+Date:   Thu Jul 1 06:54:24 2010 -0300
+
+    Purge macros NEED_EVENTS and NEED_REPLIES
+    
+    Signed-off-by: Fernando Carrijo <fcarrijo@yahoo.com.br>
+    Acked-by: Tiago Vignatti <tiago.vignatti@nokia.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 23643bd1ce181650fff32a8192c816dfc31989d7
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Jun 27 14:21:24 2010 -0400
+
+    specs: add dbelib and synclib. Remove trailing spaces
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 7a945c21ebe87cd0b3e91159f83059f55ed40006
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Jun 26 14:29:04 2010 -0400
+
+    doc: replace groff input format with docbook xml format
+    
+    Initial version of docbook xml.
+    dbelib abd synclib are missing and will be added later.
+    Requires util-macros 1.10
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 0860348104536fc3a6e7daa44079b7a58cbfe4e5
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Jun 17 16:21:22 2010 -0400
+
+    specs: translate, format, process, install and distribute.
+    
+    Makefile copied from libXtst
+    Remains to do are the Tex files.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 675ca9abbc38f088b177a67501ab5eff1c9dcff5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jun 11 18:47:23 2010 -0700
+
+    Move specs for several extension API's from xorg-docs module
+    
+    Not formatted, translated or processed yet, just moved & added to EXTRA_DIST
+    Only moved those that had separate library/API docs from the protocol specs.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 72cc123fbf3b5186771529cd5d9d9af46470b1af
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jun 11 18:25:30 2010 -0700
+
+    Remove headers for functions found in liblbxutil
+    
+    As reported in https://bugs.freedesktop.org/show_bug.cgi?id=25880
+    they were already added to liblbxutil, but I missed removing them
+    from here, where they're not used.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ce440c7d68fa06763f8413859c25ae3a8a22c81b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Jun 3 17:19:30 2010 -0700
+
+    libXext 1.1.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 904f71cda5ef818b53171888efb6b0dd0f929565
+Author: Jamey Sharp <jamey@minilop.net>
+Date:   Fri Apr 9 17:30:06 2010 -0700
+
+    XAllocID must only be called with the Display lock held.
+    
+    This patch makes XdbeAllocateBackBufferName follow the same XID allocation
+    pattern used in other stubs.
+    
+    Signed-off-by: Jamey Sharp <jamey@minilop.net>
+
+commit b403e38d7d0994d223984c11f26f5b8749851522
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Apr 5 19:58:03 2010 -0400
+
+    config: update AC_PREREQ statement to 2.60
+    
+    Unrelated to the previous patches, the new value simply reflects
+    the reality that the minimum level for autoconf to configure
+    all x.org modules is 2.60 dated June 2006.
+    
+    ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.60.tar.gz
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 048e97e3948dd0caf886f3cb789899f63dc9d1bf
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Mar 29 14:53:48 2010 -0400
+
+    config: remove the pkgconfig pc.in file from EXTRA_DIST
+    
+    Automake always includes it in the tarball.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 658574bb531f342947f484f9903e30032afce070
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Fri Feb 5 13:58:33 2010 +0100
+
+    Revert "Don't smash the event_vec if num_events differs between lib and server."
+    
+    That commit created a single ext_handlers[] array to check for
+    non-overlapping extension events, but the event codes need to be
+    per-display, so checking them globally is wrong.
+    
+    This reverts commit 83fdb27df4ddc2fb088ddf2ec65f0db6b7c57287.
+    
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+    Cc: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 1ed7492638d6d6fb7c06da64017df6b7877d9780
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Thu Jan 14 20:36:51 2010 -0800
+
+    Update Sun license notices to current X.Org standard form
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 83fdb27df4ddc2fb088ddf2ec65f0db6b7c57287
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Nov 26 09:38:31 2009 +1000
+
+    Don't smash the event_vec if num_events differs between lib and server.
+    
+    If the library extension thinks there's more events to an extension than the
+    server actually has, the event_vec for the overlapping range can get
+    overwritten. This depends on the initialization order of the libraries.
+    
+    Reported-by: Nathan Kidd
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Julien Cristau <jcristau@debian.org>
+
+commit 9632775f2195e3448fcc402a3743f3368a8a1c9c
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Mon Nov 30 00:07:22 2009 +0100
+
+    Don't export xgeExtRegister
+    
+    Its only caller is XextAddDisplay()
+    
+    Acked-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+
+commit db2a28e540f9eb7cbfeffc771ce7cdf414231aa7
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Fri Nov 27 20:56:04 2009 -0500
+
+    Makefile.am: add ChangeLog and INSTALL on MAINTAINERCLEANFILES
+    
+    Now that the INSTALL file is generated.
+    Allows running make maintainer-clean.
+
+commit 6ede21305688873a34fcbd2b0d9f7480679f02ee
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Wed Oct 28 14:09:10 2009 -0400
+
+    INSTALL, NEWS, README or AUTHORS files are missing/incorrect #24206
+    
+    Add missing INSTALL file. Use standard GNU file on building tarball
+    README may have been updated
+    Remove AUTHORS file as it is empty and no content available yet.
+    Remove NEWS file as it is empty and no content available yet.
+
+commit 42aef4da8ab2b75bbfc3c27a430f43847ab5a0f6
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Oct 27 15:07:25 2009 -0400
+
+    Deploy the new XORG_DEFAULT_OPTIONS #24242
+    
+    This macro aggregate a number of existing macros that sets commmon
+    X.Org components configuration options. It shields the configuration file from
+    future changes.
+
+commit 28049a6d210913f8bf4b9d82382076718c9c3f1e
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Mon Oct 26 22:08:43 2009 -0400
+
+    Makefile.am: ChangeLog not required: EXTRA_DIST or *CLEANFILES #24432
+    
+    ChangeLog filename is known to Automake and requires no further
+    coding in the makefile.
+
+commit 49957bedce40cc706bdb71edc3e827212a4d586c
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Thu Oct 22 12:34:19 2009 -0400
+
+    .gitignore: use common defaults with custom section # 24239
+    
+    Using common defaults will reduce errors and maintenance.
+    Only the very small or inexistent custom section need periodic maintenance
+    when the structure of the component changes. Do not edit defaults.
+
+commit 28d16f8ce9dd6ed681e6bc149878002b093c976f
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Mon Nov 2 16:34:14 2009 -0800
+
+    Fix CFLAGS/CPPFLAGS so lint works properly
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 9f94bf9de7607c11ab82667a73a4160d705e355c
+Author: Keith Packard <keithp@keithp.com>
+Date:   Tue Nov 3 14:42:35 2009 -0800
+
+    Make library headers compatible with old server builds
+    
+    Old servers (1.6 and before) included the extension library headers
+    instead of using separate server header files. This patch makes the
+    library headers compatibile with the server by hiding the library
+    definitions from the server build.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit ed7bbe65222286828fa42f3c264ed5c4190fe58c
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Wed Oct 21 20:13:24 2009 -0700
+
+    libXext 1.1.1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 341bddfc6eddef77e57dd64a084b69fd24bba152
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Wed Oct 21 20:12:49 2009 -0700
+
+    Use $(AM_V_GEN) to silence makefile generation rules
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 38c351f2f49d44944958e9b4d003a74bd6d8d683
+Author: Jeremy Huddleston <jeremyhu@freedesktop.org>
+Date:   Wed Oct 21 12:47:25 2009 -0700
+
+    This is not a GNU project, so declare it foreign.
+    
+    On Wed, 2009-10-21 at 13:36 +1000, Peter Hutterer wrote:
+    > On Tue, Oct 20, 2009 at 08:23:55PM -0700, Jeremy Huddleston wrote:
+    > > I noticed an INSTALL file in xlsclients and libXvMC today, and it
+    > > was quite annoying to work around since 'autoreconf -fvi' replaces
+    > > it and git wants to commit it.  Should these files even be in git?
+    > > Can I nuke them for the betterment of humanity and since they get
+    > > created by autoreconf anyways?
+    >
+    > See https://bugs.freedesktop.org/show_bug.cgi?id=24206
+    
+    As an interim measure, replace AM_INIT_AUTOMAKE([dist-bzip2]) with
+    AM_INIT_AUTOMAKE([foreign dist-bzip2]). This will prevent the generation
+    of the INSTALL file. It is also part of the 24206 solution.
+    
+    Signed-off-by: Jeremy Huddleston <jeremyhu@freedesktop.org>
+
+commit 956fd30e1046e5779ac0b6c07ec4f0e87250869a
+Author: Jamey Sharp <jamey@minilop.net>
+Date:   Wed Oct 7 19:31:21 2009 -0700
+
+    XAllocID must only be called with the Display lock held.
+    
+    This patch makes XShmAttach follow the same XID allocation pattern used in
+    other stubs, such as XShmCreatePixmap.
+    
+    Reported-by: <fdsteve@ihug.co.nz>
+    Signed-off-by: Jamey Sharp <jamey@minilop.net>
+
+commit 927e3260bcf1ad020228e8f2dce0176269982b4f
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Oct 2 10:52:13 2009 +1000
+
+    libXext 1.1
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 003e2eb714c39984b3c054e0fc637cdb051dcdf3
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Oct 2 10:43:14 2009 +1000
+
+    Require macros 1.3 for XORG_DEFAULT_OPTIONS
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit e29cd70df7d5abdccb6b7ed973611044d02241d0
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jul 21 13:38:01 2009 +1000
+
+    Bump to 1.0.99.4
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit c3dc01ce05b26ec389eb2fbfc8633e3e0955572f
+Author: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date:   Mon Jul 20 22:49:15 2009 +0100
+
+    Rename mitmisc.h to mitmiscconst.h to avoid a collision with MITMisc.h on case-insensitive filesystems
+    
+    Requires xextproto 7.0.99.2
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit dbc6ca9306f0f683419aca737e0d98243475bc0d
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Mon Jul 20 13:19:04 2009 +1000
+
+    Remove XTest header, belongs to libXtst.
+    
+    All prototypes declared in XTest.h are defined in libXtst/src/XTest.c, not
+    here.
+    
+    This removes the circular dependency between libXi and libXext.
+    
+    Reported-by: Colin Guthrie
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 1d1860f31f673f9cf2efb6dc59fdcf8fe625736f
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Thu Jul 16 11:13:02 2009 +0100
+
+    Prevent shape.h being included in the server
+    
+    fixesproto includes shape.h, but doesn't want client side headers.  This
+    needs to be fixed there, but work around this in shape.h anyway so we
+    don't break older xfixesproto.h.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit dae2e0478eef5aa8a80288b417e1f8282dc0329c
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Jul 17 08:40:42 2009 +1000
+
+    Bump to 1.0.99.3
+
+commit 391b5844b13f5bc0f030a2ef8dd415f41f92f84c
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Thu Jul 16 17:25:51 2009 -0400
+
+    Fix DPMS/MBUF/SECURITY for new header names
+
+commit 02efa0486b7272e9e395d36774ee782f48bcb4ec
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jul 16 13:33:08 2009 +1000
+
+    Bump to 1.0.99.2
+
+commit 1772c991ec6370fcf1bad79b00a87a02c5b484cc
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 25 15:36:39 2009 +1000
+
+    Move libXext library headers from xextproto to libXext.
+    
+    All library headers (or parts thereof) from xextproto are moved to
+    include/X11/extensions/. Including build fixes to include and build with the
+    new header locations and names.
+    
+    Requires xextproto 7.0.99.1
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit d1f3bc77a48c8e42771579e3fdf3370b35d3209d
+Author: Paul TBBle Hampson <Paul.Hampson@Pobox.com>
+Date:   Sat Jun 6 05:23:08 2009 +1000
+
+    Remove dependancy on libXau
+    
+    No symbols from Xau appear to be being used in libXext
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit b2c2cbaca4bf7ae6d735a5d18a7732f3d73d77db
+Author: Paul TBBle Hampson <Paul.Hampson@Pobox.com>
+Date:   Sat Jun 6 05:22:12 2009 +1000
+
+    Don't export extra symbols
+    
+    Turns the following functions static
+    	_xgeFindDisplay
+    	_xgeCheckExtInit
+    	_xgeEventToWire
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit cad77b1d6d1a344f2cb31c16401076c003bb97dd
+Author: Imranullah Syed <freakabcd@gmail.com>
+Date:   Thu Feb 19 18:02:26 2009 +1000
+
+    Corrected order of arguments in man page for function: XShmCreateImage
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 8a91fc6f72206362f399b5e29bf3d5f44f4eb822
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Feb 10 07:45:32 2009 +1000
+
+    Silence "Generic Event Extension missing on display" warning.
+    
+    If we're already doing a check anyway, we don't need to print an extra
+    warning.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit befd39f6766ebd06294216be3fe9592f8cabb423
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Mon Feb 2 20:34:33 2009 -0800
+
+    Add README with pointers to mailing list, bugzilla & git repos
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@sun.com>
+
+commit 0fb431359306af0db78b3bc3055bed446be39fef
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Fri Jan 30 01:03:51 2009 -0200
+
+    Bump back to 1.0.99.1.
+    
+      The intermediate 1.0.5 was not mean't to be really required,
+    but was done to not cause problems for people doing builds
+    from tarballs.
+
+commit f7b69edc21b90a5b343115de55d6f1a98aeda5e2
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Thu Jan 29 20:38:22 2009 -0200
+
+    Xorg libXext Version 1.0.5.
+
+commit 52cf9c06819d94e178285d75de6434e98358b63d
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Thu Jan 29 17:02:46 2009 -0200
+
+    patch to avoid gcc warning in libXext
+    
+      Original patch author is Peter Breitenlohner <peb@mppmu.mpg.de>.
+      This closes bug #18038.
+
+commit a2e8bc500dfad18ab161b3a7be44cf6fa15f140f
+Author: Paulo Cesar Pereira de Andrade <pcpa@mandriva.com.br>
+Date:   Thu Jan 29 16:33:40 2009 -0200
+
+    Janitor: Correct make distcheck and compiler warnings.
+
+commit f467d17ae5a89aa1a2b8c7260334f41e8ee2d08c
+Author: Kim Woelders <kim@woelders.dk>
+Date:   Fri Oct 17 16:53:29 2008 -0400
+
+    Bug #17774: Allocate the right size in XSyncListSystemCounters.
+
+commit 49563f5d76637e2ca28fe0b91ce3114271c0955d
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Thu May 29 10:55:49 2008 +0930
+
+    Bump to 1.0.99.1
+
+commit 64edd246587adb59ac71031f72955fa5a73ac467
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Thu May 29 10:40:59 2008 +0930
+
+    Require xproto 7.0.13, xextproto 7.0.3 and xlib 1.1.99.1.
+
+commit 0721b2d71c40e877944aa22a3c57ed70225f508d
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Mon May 26 23:16:29 2008 +0930
+
+    Xge: Replace XExtensionVersion with XGEVersionRec.
+    
+    XExtensionVersion is defined in XInput.h, leading to a circular dependency.
+    Thanks to Jens Stroebel for pointing this out.
+
+commit 44d3a4d4016c58f8ac46843d0b2dd4ddb26e2fc9
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Tue May 13 11:23:59 2008 +0930
+
+    Xge: replace copyright with standard template from xserver, whitespace fixes.
+
+commit 7e0b3b9029d3d12c9edf961c1d9db4cdbf021f1d
+Merge: c4b0ae9 9884a41
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Mon May 12 18:04:09 2008 +0930
+
+    Merge branch 'master' into xge
+
+commit 9884a41dd0282ca3dd19db5bf3a11554ee7eee57
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Thu Feb 28 19:02:58 2008 -0800
+
+    Version bump: 1.0.4
+
+commit f6c7c70f312c8eb0883437c003ba78bb4abbabc3
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Dec 7 15:41:42 2007 -0800
+
+    Coverity #467: security_error_list has fewer than XSecurityNumberErrors entries
+    
+    Sometimes it's annoying that C silently merges adjacent strings without
+    warning you that you forgot a comma in your list of strings.
+
+commit 37fe15843fd892c529e554f24a937ed712ea129c
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Fri Dec 7 15:39:13 2007 -0800
+
+    Allow overriding the SOREV in configure.ac
+
+commit 285deb33da14fb5476b18cb1071b41070cf3ae99
+Author: James Cloos <cloos@jhcloos.com>
+Date:   Thu Dec 6 15:51:16 2007 -0500
+
+    Add missing PHONY line for automatic ChangeLog generation
+
+commit c4b0ae960d63f461d6e9efd64f70084f06a674b3
+Merge: d1c9350 249daf0
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Thu Dec 6 14:23:02 2007 +1030
+
+    Merge branch 'master' into xge
+
+commit 249daf0d8a044a97d053c957ab45445c159d31e4
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Wed Nov 28 17:29:28 2007 -0800
+
+    XeviGetVisualInfo: check for null pointer before writing to it, not after
+
+commit a7d211f6e3ded98c79e7be73253a51958d3e98db
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Nov 27 18:12:29 2007 -0800
+
+    include of config.h should not be inside #ifdef WIN32
+
+commit 1614ea1074d62f32f51032141b0c55250380ca17
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Nov 27 17:54:34 2007 -0800
+
+    Add hooks for checking code with lint/sparse/etc.
+
+commit 8a2bb8793eed1c7f690be5c00772b2a64b9632fd
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Nov 27 16:54:21 2007 -0800
+
+    Fix sparse warnings (type mismatches in function pointers, int as pointer)
+
+commit 781dbe7d723e9fe5a0e028dcb5a0fafeb59629e3
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Nov 27 16:11:49 2007 -0800
+
+    Add missing copyright/license notices to COPYING
+
+commit 39cb1caa381666ac79307d3d312992d4e22980d1
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Nov 27 16:03:14 2007 -0800
+
+    Fix incorrect comment delimiters in libXext man pages
+    
+    Similar to X.Org Bug #4312 <http://bugs.freedesktop.org/show_bug.cgi?id=4312>
+    Protect /* sequences from cpp pre-processor removal without transforming
+    to Unicode mathematical asterisk character, and fix incorrectly encoded
+    /* sequences in XShm.man.
+
+commit cca90a25678bf3c3269af1c0ac5493cfd4809727
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Nov 27 15:55:28 2007 -0800
+
+    Fix typos in source comments
+
+commit d1c93500e2f56b8aefda7133848c21f62572f5d5
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Tue Jun 26 11:46:10 2007 +0930
+
+    Don't call _xgeCheckExtInit() from _xgeWireToEvent(). It will cause a SIGABRT
+    when trying to get the display lock.
+
+commit 40d1cbaaf0fd12883c048288a62b0088286463f4
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Wed Jun 13 16:26:03 2007 +0930
+
+    Lock/Unlock in _xgeCheckExtInit(), and not in xgeGetExtensionVersion().
+    Otherwise we get a SIGABRT for displays that don't have XGE when we try to get
+    the disply lock.
+
+commit b125890386d5ebbc3811bc67e0a1ad469b0a10ed
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Wed May 30 11:07:25 2007 +0930
+
+    Remove useless line in XGE that didn't do anything except segfaulting.
+    
+    Thanks to Paulo Zanoni for spotting it.
+
+commit 850263ac9f772ab80f3e0680997f00e0c566f7d4
+Author: Peter Hutterer <peter@cs.unisa.edu.au>
+Date:   Tue May 15 17:00:07 2007 +0930
+
+    Add GenericEvent extension (XGE).
+    
+    Automatically register any extension at XGE and relay events to
+    the extension's event handlers.
+
+commit 8d8a6ac4012c2bd5bfd037e42f69f5b2b111433d
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Thu Jan 25 18:28:21 2007 -0800
+
+    Version bump: 1.0.3
+
+commit 6856538d6dec00795f492262eb4f730735eff8d1
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Thu Jan 25 18:23:14 2007 -0800
+
+    Replace static ChangeLog with dist-hook to generate from git log
+
+commit 5243b3f7d462a06ec245b28ed007d5b4c85651ee
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Oct 24 17:22:34 2006 -0700
+
+    Man page spelling/typo fixes
+
+commit 0bf51bc7ba7c0b6f2540503491b9ec104c1c22d1
+Merge: ee11d4d a82d7b9
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Oct 24 17:14:45 2006 -0700
+
+    Merge branch 'master' of git+ssh://git.freedesktop.org/git/xorg/lib/libXext
+
+commit ee11d4d2098dfcb711d1ca9825256bd4625e91bb
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Oct 24 17:14:32 2006 -0700
+
+    Add XShm.man and aliases to Makefile.am
+
+commit 50bb4abe86635c8bb26ad643d4402f109e03a7d0
+Author: Sam Lau <sam.lau@sun.com>
+Date:   Tue Oct 24 17:14:02 2006 -0700
+
+    Sun bug 4985712: man pages needed for MIT-SHM extension functions
+    
+    <http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=4985712>
+
+commit 6b50588e63ba02cb08a9465a1c30127f726c9ce2
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Tue Oct 24 17:11:48 2006 -0700
+
+    Add *~ to .gitignore to skip over emacs/patch backup files
+
+commit a82d7b9481ffb2dc62e490fb48e72219099d8b40
+Author: Adam Jackson <ajax@benzedrine.nwnk.net>
+Date:   Fri Oct 13 16:10:28 2006 -0400
+
+    Bump to 1.0.2
+
+commit 1faa250b670e735bc4a8674ca4fa9df66626fb33
+Author: David Nusinow <dnusinow@debian.org>
+Date:   Sat Aug 26 18:25:16 2006 +0000
+
+    Fix various manpages that didn't have their section generated from
+    __libmansuffix__.
+
+commit 9606f8ba35c568a5e9300bd9e3e2d217279c3d09
+Author: Alan Coopersmith <alan.coopersmith@sun.com>
+Date:   Thu Jul 13 14:58:53 2006 -0700
+
+    renamed: .cvsignore -> .gitignore
+
+commit 16889772a59ae778e1e8ec9c110d18c1acd38674
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu Apr 27 00:10:14 2006 +0000
+
+    Bump to 1.0.1
+
+commit 01e915b2775b78d461c873bac1b2787985196a5f
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Mon Apr 3 00:55:03 2006 +0000
+
+    Coverity #929: Additional defensive NULL check.
+
+commit 1225f28f6ef0712c9adf52edd8b1a3205bbc76b2
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Mon Apr 3 00:51:20 2006 +0000
+
+    Coverity #575: Plug a leak on the error path.
+
+commit bd0bcd84be01052d9d1ebd075f459113ac96e9de
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Sun Feb 12 18:19:21 2006 +0000
+
+    Bug #5628 <https://bugs.freedesktop.org/show_bug.cgi?id=5628> Shadow pages
+        not created correctly when MANDIR & MANSUFFIX don't match.
+
+commit 33b0f4398ee48a7ec57748573871a48793dd49d9
+Author: Kevin E Martin <kem@kem.org>
+Date:   Thu Dec 15 00:24:29 2005 +0000
+
+    Update package version number for final X11R7 release candidate.
+
+commit 9c6b36858dc722e8aa63afc6ad10e1378d81f9cb
+Author: Kevin E Martin <kem@kem.org>
+Date:   Tue Dec 6 22:48:43 2005 +0000
+
+    Change *man_SOURCES ==> *man_PRE to fix autotools warnings.
+
+commit d885a4e61b8571cf7fe2b226f203b18f16de5cc1
+Author: Kevin E Martin <kem@kem.org>
+Date:   Sat Dec 3 05:49:43 2005 +0000
+
+    Update package version number for X11R7 RC3 release.
+
+commit f472f2feebab449d9eddd920d4313c2f37c82c41
+Author: Kevin E Martin <kem@kem.org>
+Date:   Sat Dec 3 04:41:49 2005 +0000
+
+    Add check and cflags for malloc(0) returning NULL.
+
+commit a290a2dd0022398dd70acf965bc0d9a590a71a40
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Mon Nov 28 22:03:05 2005 +0000
+
+    Change *mandir targets to use new *_MAN_DIR variables set by xorg-macros.m4
+        update to fix bug #5167 (Linux prefers *.1x man pages in man1 subdir)
+
+commit 59ac6be6490072bd562d5f4447f01a5a080cf5f9
+Author: Kevin E Martin <kem@kem.org>
+Date:   Sat Nov 19 07:15:41 2005 +0000
+
+    Update pkgconfig files to separate library build-time dependencies from
+        application build-time dependencies, and update package deps to work
+        with separate build roots.
+
+commit d17efabf719888d7895e6cee7ff06d7ccb013676
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Nov 9 21:19:12 2005 +0000
+
+    Update package version number for X11R7 RC2 release.
+
+commit 81bbc01afbb1c5cfb466ced2d11930ed15c942aa
+Author: Kevin E Martin <kem@kem.org>
+Date:   Tue Nov 1 15:11:51 2005 +0000
+
+    Update pkgcheck dependencies to work with separate build roots.
+
+commit 954f6a876e909a80490934b44ffc7656bb16e87a
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 19 02:48:10 2005 +0000
+
+    Update package version number for RC1 release.
+
+commit 31dcfdc277cef24b62ca328df9d0e9556b86fff2
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Tue Oct 18 00:00:08 2005 +0000
+
+    Use @LIB_MAN_SUFFIX@ instead of $(LIB_MAN_SUFFIX) in macro substitutions to
+        work better with BSD make
+
+commit ba4c273726718bbb6e7aabb9607f08cf1ac0faeb
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Mon Oct 17 21:13:15 2005 +0000
+
+    Rename .shadows.DONE to shadows.DONE to avoid some make's thinking it's a
+        suffix rule (reported by Matthieu Herrb)
+
+commit 3482953f137322896027b1bfa3dae09064270ff0
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Thu Oct 13 04:25:46 2005 +0000
+
+    Add generated man pages to .cvsignores
+
+commit 3a57856605a30b29d770571d6c734a5560215aa6
+Author: Kevin E Martin <kem@kem.org>
+Date:   Wed Oct 12 14:04:00 2005 +0000
+
+    Add .shadows.DONE to CLEANFILES to pass distcheck
+
+commit 1c34ea842fdece6b1a8c8666c2e7fc2b803ffd89
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Tue Oct 11 23:05:30 2005 +0000
+
+    configure.ac Set up cpp pre-processing of man pages Add shadow man pages
+        for man pages that document multiple functions.
+
+commit 2751dbddbea70b8732081f0ad63b1b0d6791447c
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Sat Sep 24 00:59:00 2005 +0000
+
+    Fix function prototypes to match dpms.h
+
+commit 78c1c4533bcbe7f4af0d700e6b7442824048e0af
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Sat Jul 30 21:07:25 2005 +0000
+
+    Add prototypes of Xalloc/free functions.
+    Export ImUtil.h to match modular tree install.
+    Define SVR4 to 1 to avoid warning about redefining to different values.
+    Include missing headers to clear more compiler warnings.
+
+commit bc50fc0cb028ed21f919a55a2f6b82aad38d0e07
+Author: Kevin E Martin <kem@kem.org>
+Date:   Fri Jul 29 21:22:51 2005 +0000
+
+    Various changes preparing packages for RC0:
+    - Verify and update package version numbers as needed
+    - Implement versioning scheme
+    - Change bug address to point to bugzilla bug entry form
+    - Disable loadable i18n in libX11 by default (use --enable-loadable-i18n to
+        reenable it)
+    - Fix makedepend to use pkgconfig and pass distcheck
+    - Update build script to build macros first
+    - Update modular Xorg version
+
+commit beb3c2e2d2122198043034b789c5ea8857fb1c10
+Author: Kevin E Martin <kem@kem.org>
+Date:   Sat Jul 23 18:09:40 2005 +0000
+
+    Modify modular libs to use Xregion.h instead of region.h
+
+commit 5413d41389ce8dc1b93039b557385bf6e7477cf8
+Author: Kevin E Martin <kem@kem.org>
+Date:   Sat Jul 23 18:06:16 2005 +0000
+
+    lib/Xrender/Picture.c Change region.h to Xregion.h and modify internal
+        references to include <X11/Xregion.h>.
+
+commit df6e6114ddef0f7facd8417f1a78ceca25cf9cb6
+Author: Daniel Stone <daniel@fooishbar.org>
+Date:   Sat Jul 16 07:04:25 2005 +0000
+
+    Set Xext soversion to 6.4.0 per default.
+
+commit 4b8f4b7e6085a34d081a3c9057d34fa6f8030125
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Fri Jul 15 17:17:10 2005 +0000
+
+    Set .so versions correctly for Solaris and recent OpenBSD releases
+
+commit 4f16d4cf4ddac8709e0ab6612239287c9469c753
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Jul 9 06:17:03 2005 +0000
+
+    Add .cvsignore files Switch _la_CFLAGS for AM_CFLAGS to clean up directory
+
+commit 1533ef4bfd436df164979ff5e79491edbb086d94
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Tue Jun 28 23:32:40 2005 +0000
+
+    Add man pages for DPMS Extension calls in libXext. (Converted to man page
+        format by Sun doc teams based on DPMS specification docs.)
+
+commit 8d8d049eca980869cc1df5e48f992e8a8de2e49b
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Tue Jun 28 23:21:40 2005 +0000
+
+    Add man pages for DPMS Extension calls in libXext. (Converted to man page
+        format by Sun doc teams based on DPMS specification docs.)
+
+commit f4c9f37c88bf2e08d57abc2c1ecf31fb7223cb02
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Sun May 22 19:05:11 2005 +0000
+
+    Convert man pages to long file names in lib/X11, lib/Xt, & lib/Xext
+
+commit 1706d249d70a5045530ec9aee5ac9c51e00a7f93
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:22:32 2005 +0000
+
+    revert last change, didn't do right thing at all, sorry for the noise
+
+commit f8bdfbae1846ea01877cedd7ea836eaa289ecbe6
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Thu May 19 00:10:07 2005 +0000
+
+    Require automake 1.7 in AM_INIT_AUTOMAKE
+
+commit dc7cb253ba14b78ef0f863995bd0fc5a6a0ee017
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Wed May 18 18:52:39 2005 +0000
+
+    - Link Xext to /lib/Xext/src rather than /lib/Xext
+    - Conditionally include config.h in Xext source
+    - Remove unnecessary include of ImUtil.h from XShm.c
+
+commit 279e13a6a36bfeb3c8aa4272fdd6d4bcef9723a6
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Wed May 18 18:50:58 2005 +0000
+
+    Add man/Makefile.am and src/Makefile.am
+
+commit 3dde0d733cad58f01c3d667d7e6bc0dd6ca40608
+Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Date:   Wed May 18 18:50:23 2005 +0000
+
+    - Add build system for Xext
+
+commit d7dfac923b491ade943977e6949e40794bdc722f
+Author: Alexander Gottwald <alexander.gottwald@s1999.tu-chemnitz.de>
+Date:   Fri Feb 18 12:29:55 2005 +0000
+
+    Bugzilla #2570 (https://bugs.freedesktop.org/show_bug.cgi?id=2570)
+        attachment #1930 (https://bugs.freedesktop.org/attachment.cgi?id=1930):
+        fixes build of libXext on mingw
+
+commit f6ae96f7a0d7cd5f36536b030563369801a1faba
+Author: Alan Coopersmith <Alan.Coopersmith@sun.com>
+Date:   Sat Jan 22 05:12:08 2005 +0000
+
+    Add man pages for TOG-CUP extension functions. (Converted to man page
+        format by Sun based on TOG-CUP specification docs.)
+
+commit 989a1ba0ea890190988b86b4570376cd07ed49ea
+Author: Adam Jackson <ajax@nwnk.net>
+Date:   Fri Sep 24 03:46:28 2004 +0000
+
+    Bug #1434: Convert lib/Xext to ANSI function prototypes (Jeff Muizelaar).
+
+commit 6a810dfc8f3797a833539c3092bc585a25995192
+Author: Egbert Eich <eich@suse.de>
+Date:   Fri Apr 23 18:43:41 2004 +0000
+
+    Merging XORG-CURRENT into trunk
+
+commit b3efb5deb1d9450351760545960d6cea63425ebe
+Author: Egbert Eich <eich@suse.de>
+Date:   Sun Mar 14 08:32:07 2004 +0000
+
+    Importing vendor version xf86-4_4_99_1 on Sun Mar 14 00:26:39 PST 2004
+
+commit b0aeb370a60a2034a92957278e110fadbabfc042
+Author: Egbert Eich <eich@suse.de>
+Date:   Wed Mar 3 12:11:28 2004 +0000
+
+    Importing vendor version xf86-4_4_0 on Wed Mar 3 04:09:24 PST 2004
+
+commit 0e02a1b3add5b25b9668bc28136ca4ccca92ace8
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 13:35:33 2004 +0000
+
+    readding XFree86's cvs IDs
+
+commit 40996c108cd47b63e433f39b32435401fd429d7f
+Author: Egbert Eich <eich@suse.de>
+Date:   Thu Feb 26 09:22:42 2004 +0000
+
+    Importing vendor version xf86-4_3_99_903 on Wed Feb 26 01:21:00 PST 2004
+
+commit 1d27856035fac5f390ad1e475f4a7f9082792899
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Thu Dec 4 22:01:36 2003 +0000
+
+    XFree86 4.3.99.901 (RC 1)
+
+commit c0ca603fd38f805d5f53490ec6fb8b5e7f813954
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Tue Nov 25 19:28:09 2003 +0000
+
+    XFree86 4.3.99.16 Bring the tree up to date for the Cygwin folks
+
+commit 6b0dceb5b6027c98e478467576cf61aee1d87074
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 16:48:48 2003 +0000
+
+    XFree86 4.3.0.1
+
+commit 0d3d2607404af7f6e059fab64caea39dc34e391e
+Author: Kaleb Keithley <kaleb@freedesktop.org>
+Date:   Fri Nov 14 15:54:38 2003 +0000
+
+    R6.6 is the Xorg base-line

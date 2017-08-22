@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -64,6 +64,8 @@ SOFTWARE.
 #define REQUEST(type) \
 	type *stuff = (type *)client->requestBuffer
 
+#define ARRAY_SIZE(a)  (sizeof((a)) / sizeof((a)[0]))
+
 #define REQUEST_SIZE_MATCH(req)\
     if ((sizeof(req) >> 2) != client->req_len)\
          return(BadLength)
@@ -91,12 +93,12 @@ SOFTWARE.
 
 #define VALIDATE_DRAWABLE_AND_GC(drawID, pDraw, mode)\
     {\
-	int rc = dixLookupDrawable(&(pDraw), drawID, client, M_ANY, mode);\
-	if (rc != Success)\
-	    return rc;\
-	rc = dixLookupGC(&(pGC), stuff->gc, client, DixUseAccess);\
-	if (rc != Success)\
-	    return rc;\
+	int tmprc = dixLookupDrawable(&(pDraw), drawID, client, M_ANY, mode);\
+	if (tmprc != Success)\
+	    return tmprc;\
+	tmprc = dixLookupGC(&(pGC), stuff->gc, client, DixUseAccess);\
+	if (tmprc != Success)\
+	    return tmprc;\
 	if ((pGC->depth != pDraw->depth) || (pGC->pScreen != pDraw->pScreen))\
 	    return BadMatch;\
     }\
@@ -107,12 +109,12 @@ SOFTWARE.
    if ((pClient)->swapped) \
       (*ReplySwapVector[((xReq *)(pClient)->requestBuffer)->reqType]) \
            (pClient, (int)(size), pReply); \
-      else (void) WriteToClient(pClient, (int)(size), (char *)(pReply)); }
+   else WriteToClient(pClient, (int)(size), (pReply)); }
 
 #define WriteSwappedDataToClient(pClient, size, pbuf) \
    if ((pClient)->swapped) \
       (*(pClient)->pSwapReplyFunc)(pClient, (int)(size), pbuf); \
-   else (void) WriteToClient (pClient, (int)(size), (char *)(pbuf));
+   else WriteToClient(pClient, (int)(size), (pbuf));
 
 typedef struct _TimeStamp *TimeStampPtr;
 
@@ -150,14 +152,14 @@ extern _X_EXPORT void UpdateCurrentTime(void);
 
 extern _X_EXPORT void UpdateCurrentTimeIf(void);
 
-extern _X_EXPORT int dixDestroyPixmap(pointer /*value */ ,
-                                      XID /*pid */ );
+extern _X_EXPORT int dixDestroyPixmap(void *value,
+                                      XID pid);
 
-extern _X_EXPORT void InitClient(ClientPtr /*client */ ,
-                                 int /*i */ ,
-                                 pointer /*ospriv */ );
+extern _X_EXPORT void InitClient(ClientPtr client,
+                                 int i,
+                                 void *ospriv);
 
-extern _X_EXPORT ClientPtr NextAvailableClient(pointer /*ospriv */ );
+extern _X_EXPORT ClientPtr NextAvailableClient(void *ospriv);
 
 extern _X_EXPORT void SendErrorToClient(ClientPtr /*client */ ,
                                         unsigned int /*majorCode */ ,
@@ -206,11 +208,11 @@ extern _X_EXPORT int AlterSaveSetForClient(ClientPtr /*client */ ,
 
 extern _X_EXPORT void DeleteWindowFromAnySaveSet(WindowPtr /*pWin */ );
 
-extern _X_EXPORT void BlockHandler(pointer /*pTimeout */ ,
-                                   pointer /*pReadmask */ );
+extern _X_EXPORT void BlockHandler(void *pTimeout,
+                                   void *pReadmask);
 
-extern _X_EXPORT void WakeupHandler(int /*result */ ,
-                                    pointer /*pReadmask */ );
+extern _X_EXPORT void WakeupHandler(int result,
+                                    void *pReadmask);
 
 void
  EnableLimitedSchedulingLatency(void);
@@ -218,21 +220,17 @@ void
 void
  DisableLimitedSchedulingLatency(void);
 
-typedef void (*WakeupHandlerProcPtr) (pointer /* blockData */ ,
-                                      int /* result */ ,
-                                      pointer /* pReadmask */ );
+typedef void (*WakeupHandlerProcPtr) (void *blockData,
+                                      int result,
+                                      void *pReadmask);
 
-extern _X_EXPORT Bool RegisterBlockAndWakeupHandlers(BlockHandlerProcPtr
-                                                     /*blockHandler */ ,
-                                                     WakeupHandlerProcPtr
-                                                     /*wakeupHandler */ ,
-                                                     pointer /*blockData */ );
+extern _X_EXPORT Bool RegisterBlockAndWakeupHandlers(BlockHandlerProcPtr blockHandler,
+                                                     WakeupHandlerProcPtr wakeupHandler,
+                                                     void *blockData);
 
-extern _X_EXPORT void RemoveBlockAndWakeupHandlers(BlockHandlerProcPtr
-                                                   /*blockHandler */ ,
-                                                   WakeupHandlerProcPtr
-                                                   /*wakeupHandler */ ,
-                                                   pointer /*blockData */ );
+extern _X_EXPORT void RemoveBlockAndWakeupHandlers(BlockHandlerProcPtr blockHandler,
+                                                   WakeupHandlerProcPtr wakeupHandler,
+                                                   void *blockData);
 
 extern _X_EXPORT void InitBlockAndWakeupHandlers(void);
 
@@ -240,22 +238,17 @@ extern _X_EXPORT void ProcessWorkQueue(void);
 
 extern _X_EXPORT void ProcessWorkQueueZombies(void);
 
-extern _X_EXPORT Bool QueueWorkProc(Bool (* /*function */ )(
-                                                               ClientPtr
-                                                               /*clientUnused */
-                                                               ,
-                                                               pointer
-                                                               /*closure */ ),
-                                    ClientPtr /*client */ ,
-                                    pointer     /*closure */
-    );
+extern _X_EXPORT Bool QueueWorkProc(Bool (*function)(ClientPtr clientUnused,
+                                                     void *closure),
+                                    ClientPtr client,
+                                    void *closure);
 
-typedef Bool (*ClientSleepProcPtr) (ClientPtr /*client */ ,
-                                    pointer /*closure */ );
+typedef Bool (*ClientSleepProcPtr) (ClientPtr client,
+                                    void *closure);
 
-extern _X_EXPORT Bool ClientSleep(ClientPtr /*client */ ,
-                                  ClientSleepProcPtr /* function */ ,
-                                  pointer /*closure */ );
+extern _X_EXPORT Bool ClientSleep(ClientPtr client,
+                                  ClientSleepProcPtr function,
+                                  void *closure);
 
 #ifndef ___CLIENTSIGNAL_DEFINED___
 #define ___CLIENTSIGNAL_DEFINED___
@@ -265,6 +258,12 @@ extern _X_EXPORT Bool ClientSignal(ClientPtr /*client */ );
 extern _X_EXPORT void ClientWakeup(ClientPtr /*client */ );
 
 extern _X_EXPORT Bool ClientIsAsleep(ClientPtr /*client */ );
+
+extern _X_EXPORT void SendGraphicsExpose(ClientPtr /*client */ ,
+                                         RegionPtr /*pRgn */ ,
+                                         XID /*drawable */ ,
+                                         int /*major */ ,
+                                         int  /*minor */);
 
 /* atom.c */
 
@@ -292,7 +291,10 @@ extern _X_EXPORT void
 SetVendorRelease(int release);
 
 extern _X_EXPORT void
-SetVendorString(char *string);
+SetVendorString(const char *string);
+
+int
+dix_main(int argc, char *argv[], char *envp[]);
 
 /* events.c */
 
@@ -318,7 +320,19 @@ extern _X_EXPORT WindowPtr
 GetSpriteWindow(DeviceIntPtr pDev);
 
 extern _X_EXPORT void
-NoticeEventTime(InternalEvent *ev);
+NoticeTime(const DeviceIntPtr dev,
+           TimeStamp time);
+extern _X_EXPORT void
+NoticeEventTime(InternalEvent *ev,
+                DeviceIntPtr dev);
+extern _X_EXPORT TimeStamp
+LastEventTime(int deviceid);
+extern _X_EXPORT Bool
+LastEventTimeWasReset(int deviceid);
+extern _X_EXPORT void
+LastEventTimeToggleResetFlag(int deviceid, Bool state);
+extern _X_EXPORT void
+LastEventTimeToggleResetAll(Bool state);
 
 extern void
 EnqueueEvent(InternalEvent * /* ev */ ,
@@ -399,6 +413,8 @@ DeliverTouchEvents(DeviceIntPtr /* dev */ ,
 extern void
 InitializeSprite(DeviceIntPtr /* pDev */ ,
                  WindowPtr /* pWin */ );
+extern void
+FreeSprite(DeviceIntPtr pDev);
 
 extern void
 UpdateSpriteForScreen(DeviceIntPtr /* pDev */ ,
@@ -430,8 +446,8 @@ extern void
 RecalculateDeliverableEvents(WindowPtr /* pWin */ );
 
 extern _X_EXPORT int
-OtherClientGone(pointer /* value */ ,
-                XID /* id */ );
+OtherClientGone(void *value,
+                XID id);
 
 extern void
 DoFocusEvents(DeviceIntPtr /* dev */ ,
@@ -593,5 +609,7 @@ extern _X_HIDDEN int
 CorePointerProc(DeviceIntPtr dev, int what);
 extern _X_HIDDEN int
 CoreKeyboardProc(DeviceIntPtr dev, int what);
+
+extern _X_EXPORT void *lastGLContext;
 
 #endif                          /* DIX_H */

@@ -108,12 +108,13 @@ ProcXIQueryDevice(ClientPtr client)
         return BadAlloc;
     }
 
-    memset(&rep, 0, sizeof(xXIQueryDeviceReply));
-    rep.repType = X_Reply;
-    rep.RepType = X_XIQueryDevice;
-    rep.sequenceNumber = client->sequence;
-    rep.length = len / 4;
-    rep.num_devices = 0;
+    rep = (xXIQueryDeviceReply) {
+        .repType = X_Reply,
+        .RepType = X_XIQueryDevice,
+        .sequenceNumber = client->sequence,
+        .length = len / 4,
+        .num_devices = 0
+    };
 
     ptr = info;
     if (dev) {
@@ -163,7 +164,7 @@ SRepXIQueryDevice(ClientPtr client, int size, xXIQueryDeviceReply * rep)
 
     /* Device info is already swapped, see ProcXIQueryDevice */
 
-    WriteToClient(client, size, (char *) rep);
+    WriteToClient(client, size, rep);
 }
 
 /**
@@ -304,7 +305,7 @@ ListKeyInfo(DeviceIntPtr dev, xXIKeyInfo * info)
     info->length = sizeof(xXIKeyInfo) / 4 + info->num_keycodes;
     info->sourceid = dev->key->sourceid;
 
-    kc = (uint32_t *) & info[1];
+    kc = (uint32_t *) &info[1];
     for (i = xkb->min_key_code; i <= xkb->max_key_code; i++, kc++)
         *kc = i;
 
@@ -321,7 +322,7 @@ SwapKeyInfo(DeviceIntPtr dev, xXIKeyInfo * info)
     swaps(&info->length);
     swaps(&info->sourceid);
 
-    for (i = 0, key = (uint32_t *) & info[1]; i < info->num_keycodes;
+    for (i = 0, key = (uint32_t *) &info[1]; i < info->num_keycodes;
          i++, key++)
         swapl(key);
 

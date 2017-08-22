@@ -314,6 +314,19 @@ foreach $_dridir (@dridirs) {
   }
 }
 
+@registrydirs = ('/usr/lib/xorg');
+if ($bits eq "64") {
+  push(@registrydirs, '/usr/lib64/xorg');
+}
+push(@registrydirs, '/usr/local/lib/xorg');
+push(@registrydirs, '/opt/X11/lib/xorg');
+foreach $_registrydir (@registrydirs) {
+  if (-f "$_registrydir/protocol.txt") {
+    $registrydir = "$_registrydir";
+    last;
+  }
+}
+
 # Check command line options
 
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
@@ -556,12 +569,12 @@ $cmd .= " -securitytypes $securityTypes" if ($securityTypes);
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
-#$cmd .= " -nolisten local" if ($os eq "SunOS");
 $cmd .= " -deferupdate $deferUpdate";
 $cmd .= " -xkbdir $xkbdir" if ($xkbdir);
 $cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir);
 $cmd .= " -pamsession" if ($pamSession);
 $cmd .= " -dridir $dridir" if ($dridir);
+$cmd .= " -registrydir $registrydir" if ($registrydir);
 $cmd .= " -mt" if ($multiThread);
 $cmd .= " -nthreads $numThreads" if ($numThreads);
 

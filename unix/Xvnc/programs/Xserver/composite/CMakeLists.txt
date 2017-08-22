@@ -1,4 +1,4 @@
-include_directories(../damageext ../mi ../miext/damage ../render ../xfixes)
+include_directories(../Xi ../damageext ../mi  ../render ../xfixes)
 
 handle_type_puns()
 

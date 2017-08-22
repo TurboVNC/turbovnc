@@ -1,31 +1,32 @@
-include_directories(include Xext ../../lib/pixman/pixman
+include_directories(Xext include miext/damage present ../../lib/pixman/pixman
 	${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Enable extensions
-add_definitions(-DCOMPOSITE -DDAMAGE -DDPMSExtension -DGLXEXT -DMITSHM
-	-DPANORAMIX -DRANDR -DRENDER -DRES -DSCREENSAVER -DSHAPE -DXACE -DXCSECURITY
+add_definitions(-DCOMPOSITE -DDAMAGE -DDPMSExtension -DMITSHM -DPANORAMIX
+	-DPRESENT -DRANDR -DRENDER -DRES -DSCREENSAVER -DSHAPE -DXACE -DXCSECURITY
 	-DXFIXES -DXF86BIGFONT -DXINPUT -DXTEST -DXV -DTURBOVNC)
 
 if(TVNC_NVCONTROL)
-add_definitions(-DNVCONTROL)
+	add_definitions(-DNVCONTROL)
+endif()
+if(TVNC_GLX)
+	add_definitions(-DGLXEXT)
 endif()
 
-add_definitions(-DHAVE_DIX_CONFIG_H -DCLIENTIDS -DHAS_SHM -DPIXPRIV)
+add_definitions(-DHAVE_DIX_CONFIG_H -DCLIENTIDS -DHAS_SHM -DHAVE_XSHMFENCE)
 
 if(BITS EQUAL 64)
 	add_definitions(-D_XSERVER64)
 endif()
 
 set(VENDOR_NAME "The X.Org Foundation")
-set(VENDOR_RELEASE "11204000")
+set(VENDOR_RELEASE "11704000")
 configure_file(include/version-config.h.in include/version-config.h)
 
 include(CheckLibraryExists)
 check_library_exists(m cbrt "" HAVE_CBRT)
 include(CheckIncludeFiles)
 check_include_files(dlfcn.h HAVE_DLFCN_H)
-check_include_files(ieeefp.h HAVE_IEEEFP_H)
-include(CheckFunctionExists)
 check_function_exists(ffs HAVE_FFS)
 check_function_exists(getdtablesize HAVE_GETDTABLESIZE)
 check_function_exists(getifaddrs HAVE_GETIFADDRS)
@@ -41,6 +42,34 @@ check_function_exists(strlcpy HAVE_STRLCPY)
 check_function_exists(strndup HAVE_STRNDUP)
 check_function_exists(asprintf HAVE_ASPRINTF)
 check_function_exists(vasprintf HAVE_VASPRINTF)
+foreach(typeof typeof __typeof__)
+	check_c_source_compiles("int main() { int value = 0; ${typeof}(value) value2 = value; return value2; }"
+		TYPEOF_WORKS)
+	if(TYPEOF_WORKS)
+		set(HAVE_TYPEOF 1)
+		set(TYPEOF ${typeof})
+		break()
+	endif()
+endforeach()
+check_library_exists(rt clock_gettime "" HAVE_CLOCK_GETTIME)
+if(HAVE_CLOCK_GETTIME)
+	set(MONOTONIC_CLOCK_SOURCE "\n
+	  #include <time.h>\n
+	  int main(void) {\n
+	    struct timespec tp;\n
+	    return (clock_gettime(CLOCK_MONOTONIC, &tp) != 0);\n
+	  }")
+	check_c_source_compiles("${MONOTONIC_CLOCK_SOURCE}" HAVE_MONOTONIC_CLOCK)
+	if(HAVE_MONOTONIC_CLOCK)
+		add_definitions(-DMONOTONIC_CLOCK)
+	endif()
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	set(XTRANS_SEND_FDS 0)
+else()
+	set(XTRANS_SEND_FDS 1)
+endif()
 
 configure_file(include/dix-config.h.in include/dix-config.h)
 
@@ -92,10 +121,13 @@ add_subdirectory(composite)
 add_subdirectory(damageext)
 add_subdirectory(dix)
 add_subdirectory(fb)
-add_subdirectory(glx)
+if(TVNC_GLX)
+	add_subdirectory(glx)
+endif()
 add_subdirectory(mi)
 add_subdirectory(miext)
 add_subdirectory(os)
+add_subdirectory(present)
 add_subdirectory(randr)
 add_subdirectory(render)
 add_subdirectory(xfixes)
@@ -114,10 +146,17 @@ endif()
 if(TVNC_NVCONTROL)
 	set(EXTRA_LIB ${EXTRA_LIB} XNVCtrl)
 endif()
+if(TVNC_GLX)
+	set(EXTRA_LIB ${EXTRA_LIB} glx-server glx glapi xcbglx X11xcb
+		${X11_LIBRARIES})
+endif()
+if(HAVE_MONOTONIC_CLOCK)
+	set(EXTRA_LIB ${EXTRA_LIB} rt)
+endif()
 target_link_libraries(Xvnc main dix vnc fb Xi composite mi damage damageext
-	glx randr render os Xext-server sync xfixes xkb Xau Xdmcp Xfont fontenc
-	freetype2 pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m pthread
-	${PAM_LIB} ${EXTRA_LIB})
+	randr render os present Xext-server sync xfixes xkb Xau Xdmcp
+	Xfont fontenc freetype2 pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m
+	pthread ${PAM_LIB} ${EXTRA_LIB})
 if(NOT APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES
 	"(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	target_link_libraries(Xvnc dl)

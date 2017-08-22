@@ -57,11 +57,12 @@
 #define RANDR_13_INTERFACE 1    /* requires RANDR_12_INTERFACE */
 #define RANDR_GET_CRTC_INTERFACE 1
 
-#define RANDR_INTERFACE_VERSION 0x0103
+#define RANDR_INTERFACE_VERSION 0x0104
 
 typedef XID RRMode;
 typedef XID RROutput;
 typedef XID RRCrtc;
+typedef XID RRProvider;
 
 extern _X_EXPORT int RREventBase, RRErrorBase;
 
@@ -78,6 +79,7 @@ typedef struct _rrPropertyValue RRPropertyValueRec, *RRPropertyValuePtr;
 typedef struct _rrProperty RRPropertyRec, *RRPropertyPtr;
 typedef struct _rrCrtc RRCrtcRec, *RRCrtcPtr;
 typedef struct _rrOutput RROutputRec, *RROutputPtr;
+typedef struct _rrProvider RRProviderRec, *RRProviderPtr;
 
 struct _rrMode {
     int refcnt;
@@ -90,7 +92,7 @@ struct _rrPropertyValue {
     Atom type;                  /* ignored by server */
     short format;               /* format of data for swapping - 8,16,32 */
     long size;                  /* size of data in (format/8) bytes */
-    pointer data;               /* private to client */
+    void *data;                 /* private to client */
 };
 
 struct _rrProperty {
@@ -125,6 +127,8 @@ struct _rrCrtc {
     PictTransform transform;
     struct pict_f_transform f_transform;
     struct pict_f_transform f_inverse;
+
+    PixmapPtr scanout_pixmap;
 };
 
 struct _rrOutput {
@@ -150,6 +154,19 @@ struct _rrOutput {
     RRPropertyPtr properties;
     Bool pendingProperties;
     void *devPrivate;
+};
+
+struct _rrProvider {
+    RRProvider id;
+    ScreenPtr pScreen;
+    uint32_t capabilities;
+    char *name;
+    int nameLength;
+    RRPropertyPtr properties;
+    Bool pendingProperties;
+    Bool changed;
+    struct _rrProvider *offload_sink;
+    struct _rrProvider *output_source;
 };
 
 #if RANDR_12_INTERFACE
@@ -197,8 +214,27 @@ typedef Bool (*RRSetPanningProcPtr) (ScreenPtr pScrn,
 
 #endif                          /* RANDR_13_INTERFACE */
 
+typedef Bool (*RRProviderGetPropertyProcPtr) (ScreenPtr pScreen,
+                                            RRProviderPtr provider, Atom property);
+typedef Bool (*RRProviderSetPropertyProcPtr) (ScreenPtr pScreen,
+                                              RRProviderPtr provider,
+                                              Atom property,
+                                              RRPropertyValuePtr value);
+
 typedef Bool (*RRGetInfoProcPtr) (ScreenPtr pScreen, Rotation * rotations);
-typedef Bool (*RRCloseScreenProcPtr) (int i, ScreenPtr pscreen);
+typedef Bool (*RRCloseScreenProcPtr) (ScreenPtr pscreen);
+
+typedef Bool (*RRProviderSetOutputSourceProcPtr)(ScreenPtr pScreen,
+                                          RRProviderPtr provider,
+                                          RRProviderPtr output_source);
+
+typedef Bool (*RRProviderSetOffloadSinkProcPtr)(ScreenPtr pScreen,
+                                         RRProviderPtr provider,
+                                         RRProviderPtr offload_sink);
+
+
+typedef void (*RRProviderDestroyProcPtr)(ScreenPtr pScreen,
+                                         RRProviderPtr provider);
 
 /* These are for 1.0 compatibility */
 
@@ -223,6 +259,8 @@ typedef Bool (*RRSetConfigProcPtr) (ScreenPtr pScreen,
 
 #endif
 
+typedef Bool (*RRCrtcSetScanoutPixmapProcPtr)(RRCrtcPtr crtc, PixmapPtr pixmap);
+
 typedef struct _rrScrPriv {
     /*
      * 'public' part of the structure; DDXen fill this in
@@ -246,7 +284,13 @@ typedef struct _rrScrPriv {
     RRGetPanningProcPtr rrGetPanning;
     RRSetPanningProcPtr rrSetPanning;
 #endif
+    /* TODO #if RANDR_15_INTERFACE */
+    RRCrtcSetScanoutPixmapProcPtr rrCrtcSetScanoutPixmap;
 
+    RRProviderSetOutputSourceProcPtr rrProviderSetOutputSource;
+    RRProviderSetOffloadSinkProcPtr rrProviderSetOffloadSink;
+    RRProviderGetPropertyProcPtr rrProviderGetProperty;
+    RRProviderSetPropertyProcPtr rrProviderSetProperty;
     /*
      * Private part of the structure; not considered part of the ABI
      */
@@ -257,6 +301,7 @@ typedef struct _rrScrPriv {
     Bool changed;               /* some config changed */
     Bool configChanged;         /* configuration changed */
     Bool layoutChanged;         /* screen layout changed */
+    Bool resourcesChanged;      /* screen resources change */
 
     CARD16 minWidth, minHeight;
     CARD16 maxWidth, maxHeight;
@@ -288,6 +333,11 @@ typedef struct _rrScrPriv {
     int size;
 #endif
     Bool discontiguous;
+
+    RRProviderPtr provider;
+
+    RRProviderDestroyProcPtr rrProviderDestroy;
+
 } rrScrPrivRec, *rrScrPrivPtr;
 
 extern _X_EXPORT DevPrivateKeyRec rrPrivKeyRec;
@@ -331,11 +381,11 @@ extern _X_EXPORT RESTYPE RRClientType, RREventType;     /* resource types for ev
 extern _X_EXPORT DevPrivateKeyRec RRClientPrivateKeyRec;
 
 #define RRClientPrivateKey (&RRClientPrivateKeyRec)
-extern _X_EXPORT RESTYPE RRCrtcType, RRModeType, RROutputType;
+extern _X_EXPORT RESTYPE RRCrtcType, RRModeType, RROutputType, RRProviderType;
 
 #define VERIFY_RR_OUTPUT(id, ptr, a)\
     {\
-	int rc = dixLookupResourceByType((pointer *)&(ptr), id,\
+	int rc = dixLookupResourceByType((void **)&(ptr), id,\
 	                                 RROutputType, client, a);\
 	if (rc != Success) {\
 	    client->errorValue = id;\
@@ -345,7 +395,7 @@ extern _X_EXPORT RESTYPE RRCrtcType, RRModeType, RROutputType;
 
 #define VERIFY_RR_CRTC(id, ptr, a)\
     {\
-	int rc = dixLookupResourceByType((pointer *)&(ptr), id,\
+	int rc = dixLookupResourceByType((void **)&(ptr), id,\
 	                                 RRCrtcType, client, a);\
 	if (rc != Success) {\
 	    client->errorValue = id;\
@@ -355,7 +405,7 @@ extern _X_EXPORT RESTYPE RRCrtcType, RRModeType, RROutputType;
 
 #define VERIFY_RR_MODE(id, ptr, a)\
     {\
-	int rc = dixLookupResourceByType((pointer *)&(ptr), id,\
+	int rc = dixLookupResourceByType((void **)&(ptr), id,\
 	                                 RRModeType, client, a);\
 	if (rc != Success) {\
 	    client->errorValue = id;\
@@ -363,12 +413,18 @@ extern _X_EXPORT RESTYPE RRCrtcType, RRModeType, RROutputType;
 	}\
     }
 
+#define VERIFY_RR_PROVIDER(id, ptr, a)\
+    {\
+        int rc = dixLookupResourceByType((void **)&(ptr), id,\
+                                         RRProviderType, client, a);\
+        if (rc != Success) {\
+            client->errorValue = id;\
+            return rc;\
+        }\
+    }
+
 #define GetRRClient(pClient)    ((RRClientPtr)dixLookupPrivate(&(pClient)->devPrivates, RRClientPrivateKey))
 #define rrClientPriv(pClient)	RRClientPtr pRRClient = GetRRClient(pClient)
-
-/* Initialize the extension */
-extern _X_EXPORT void
- RRExtensionInit(void);
 
 #ifdef RANDR_12_INTERFACE
 /*
@@ -431,7 +487,14 @@ extern _X_EXPORT int
 extern _X_EXPORT void
  RRDeliverScreenEvent(ClientPtr client, WindowPtr pWin, ScreenPtr pScreen);
 
+extern _X_EXPORT void
+ RRResourcesChanged(ScreenPtr pScreen);
+
 /* randr.c */
+/* set a screen change on the primary screen */
+extern _X_EXPORT void
+RRSetChanged(ScreenPtr pScreen);
+
 /*
  * Send all pending events
  */
@@ -575,25 +638,6 @@ extern _X_EXPORT void
  RRCrtcGetScanoutSize(RRCrtcPtr crtc, int *width, int *height);
 
 /*
- * Compute the complete transformation matrix including
- * client-specified transform, rotation/reflection values and the crtc 
- * offset.
- *
- * Return TRUE if the resulting transform is not a simple translation.
- */
-extern _X_EXPORT Bool
-
-RRTransformCompute(int x,
-                   int y,
-                   int width,
-                   int height,
-                   Rotation rotation,
-                   RRTransformPtr rr_transform,
-                   PictTransformPtr transform,
-                   struct pict_f_transform *f_transform,
-                   struct pict_f_transform *f_inverse);
-
-/*
  * Return crtc transform
  */
 extern _X_EXPORT RRTransformPtr RRCrtcGetTransform(RRCrtcPtr crtc);
@@ -633,6 +677,15 @@ extern _X_EXPORT Bool
  */
 extern _X_EXPORT void
  RRCrtcInitErrorValue(void);
+
+/*
+ * Detach and free a scanout pixmap
+ */
+extern _X_EXPORT void
+ RRCrtcDetachScanoutPixmap(RRCrtcPtr crtc);
+
+extern _X_EXPORT Bool
+ RRReplaceScanoutPixmap(DrawablePtr pDrawable, PixmapPtr pPixmap, Bool enable);
 
 /*
  * Crtc dispatch
@@ -818,7 +871,7 @@ extern _X_EXPORT int
 
 RRChangeOutputProperty(RROutputPtr output, Atom property, Atom type,
                        int format, int mode, unsigned long len,
-                       pointer value, Bool sendevent, Bool pending);
+                       void *value, Bool sendevent, Bool pending);
 
 extern _X_EXPORT int
 
@@ -843,6 +896,85 @@ extern _X_EXPORT int
 extern _X_EXPORT int
  ProcRRDeleteOutputProperty(ClientPtr client);
 
+/* rrprovider.c */
+extern _X_EXPORT void
+RRProviderInitErrorValue(void);
+
+extern _X_EXPORT int
+ProcRRGetProviders(ClientPtr client);
+
+extern _X_EXPORT int
+ProcRRGetProviderInfo(ClientPtr client);
+
+extern _X_EXPORT int
+ProcRRSetProviderOutputSource(ClientPtr client);
+
+extern _X_EXPORT int
+ProcRRSetProviderOffloadSink(ClientPtr client);
+
+extern _X_EXPORT Bool
+RRProviderInit(void);
+
+extern _X_EXPORT RRProviderPtr
+RRProviderCreate(ScreenPtr pScreen, const char *name,
+                 int nameLength);
+
+extern _X_EXPORT void
+RRProviderDestroy (RRProviderPtr provider);
+
+extern _X_EXPORT void
+RRProviderSetCapabilities(RRProviderPtr provider, uint32_t capabilities);
+
+extern _X_EXPORT Bool
+RRProviderLookup(XID id, RRProviderPtr *provider_p);
+
+extern _X_EXPORT void
+RRDeliverProviderEvent(ClientPtr client, WindowPtr pWin, RRProviderPtr provider);
+
+/* rrproviderproperty.c */
+
+extern _X_EXPORT void
+ RRDeleteAllProviderProperties(RRProviderPtr provider);
+
+extern _X_EXPORT RRPropertyValuePtr
+ RRGetProviderProperty(RRProviderPtr provider, Atom property, Bool pending);
+
+extern _X_EXPORT RRPropertyPtr
+ RRQueryProviderProperty(RRProviderPtr provider, Atom property);
+
+extern _X_EXPORT void
+ RRDeleteProviderProperty(RRProviderPtr provider, Atom property);
+
+extern _X_EXPORT int
+RRChangeProviderProperty(RRProviderPtr provider, Atom property, Atom type,
+                       int format, int mode, unsigned long len,
+                       void *value, Bool sendevent, Bool pending);
+
+extern _X_EXPORT int
+ RRConfigureProviderProperty(RRProviderPtr provider, Atom property,
+                             Bool pending, Bool range, Bool immutable,
+                             int num_values, INT32 *values);
+
+extern _X_EXPORT Bool
+ RRPostProviderPendingProperties(RRProviderPtr provider);
+
+extern _X_EXPORT int
+ ProcRRGetProviderProperty(ClientPtr client);
+
+extern _X_EXPORT int
+ ProcRRListProviderProperties(ClientPtr client);
+
+extern _X_EXPORT int
+ ProcRRQueryProviderProperty(ClientPtr client);
+
+extern _X_EXPORT int
+ProcRRConfigureProviderProperty(ClientPtr client);
+
+extern _X_EXPORT int
+ProcRRChangeProviderProperty(ClientPtr client);
+
+extern _X_EXPORT int
+ ProcRRDeleteProviderProperty(ClientPtr client);
 /* rrxinerama.c */
 #ifdef XINERAMA
 extern _X_EXPORT void
@@ -852,17 +984,17 @@ extern _X_EXPORT void
 #endif                          /* _RANDRSTR_H_ */
 
 /*
- 
+
 randr extension implementation structure
 
 Query state:
     ProcRRGetScreenInfo/ProcRRGetScreenResources
 	RRGetInfo
- 
+
 	    • Request configuration from driver, either 1.0 or 1.2 style
 	    • These functions only record state changes, all
 	      other actions are pended until RRTellChanged is called
- 
+
 	    ->rrGetInfo
 	    1.0:
 		RRRegisterSize
@@ -877,15 +1009,15 @@ Query state:
 		RROutputSetSubpixelOrder
 		RROutputSetClones
 		RRCrtcNotify
- 
+
 	• Must delay scanning configuration until after ->rrGetInfo returns
 	  because some drivers will call SetCurrentConfig in the middle
 	  of the ->rrGetInfo operation.
- 
+
 	1.0:
 
 	    • Scan old configuration, mirror to new structures
- 
+
 	    RRScanOldConfig
 		RRCrtcCreate
 		RROutputCreate
@@ -895,16 +1027,16 @@ Query state:
 		RROldModeAdd	• This adds modes one-at-a-time
 		    RRModeGet
 		RRCrtcNotify
- 
+
 	• send events, reset pointer if necessary
- 
+
 	RRTellChanged
 	    WalkTree (sending events)
- 
+
 	    • when layout has changed:
 		RRPointerScreenConfigured
 		RRSendConfigNotify
- 
+
 Asynchronous state setting (1.2 only)
     When setting state asynchronously, the driver invokes the
     ->rrGetInfo function and then calls RRTellChanged to flush

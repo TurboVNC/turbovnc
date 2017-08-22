@@ -99,8 +99,10 @@ RRModeCreate(xRRModeInfo * modeInfo, const char *name, ScreenPtr userScreen)
     }
 
     mode->mode.id = FakeClientID(0);
-    if (!AddResource(mode->mode.id, RRModeType, (pointer) mode))
+    if (!AddResource(mode->mode.id, RRModeType, (void *) mode)) {
+        free(newModes);
         return NULL;
+    }
     modes = newModes;
     modes[num_modes++] = mode;
 
@@ -258,7 +260,7 @@ RRModeDestroy(RRModePtr mode)
 }
 
 static int
-RRModeDestroyResource(pointer value, XID pid)
+RRModeDestroyResource(void *value, XID pid)
 {
     RRModeDestroy((RRModePtr) value);
     return 1;
@@ -292,7 +294,7 @@ int
 ProcRRCreateMode(ClientPtr client)
 {
     REQUEST(xRRCreateModeReq);
-    xRRCreateModeReply rep = { 0 };
+    xRRCreateModeReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
     xRRModeInfo *modeInfo;
@@ -320,17 +322,18 @@ ProcRRCreateMode(ClientPtr client)
     if (!mode)
         return error;
 
-    rep.type = X_Reply;
-    rep.pad0 = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.length = 0;
-    rep.mode = mode->mode.id;
+    rep = (xRRCreateModeReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .mode = mode->mode.id
+	};
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.mode);
     }
-    WriteToClient(client, sizeof(xRRCreateModeReply), (char *) &rep);
+    WriteToClient(client, sizeof(xRRCreateModeReply), &rep);
     /* Drop out reference to this mode */
     RRModeDestroy(mode);
     return Success;

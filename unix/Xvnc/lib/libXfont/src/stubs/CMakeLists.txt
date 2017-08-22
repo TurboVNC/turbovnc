@@ -3,7 +3,6 @@ add_library(stubs OBJECT
 	csignal.c
 	delfntcid.c
 	errorf.c
-	fatalerror.c
 	findoldfnt.c
 	getcres.c
 	getdefptsize.c
@@ -14,4 +13,5 @@ add_library(stubs OBJECT
 	rmfshdl.c
 	servclient.c
 	setfntauth.c
-	stfntcfnt.c)
+	stfntcfnt.c
+	stubsinit.c)

@@ -1,4 +1,5 @@
 set(HEADERS
+	glxint.h
 	glxmd.h
 	glxproto.h
 	glxtokens.h)

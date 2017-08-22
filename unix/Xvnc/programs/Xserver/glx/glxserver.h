@@ -46,8 +46,8 @@
 #include <resource.h>
 #include <scrnintstr.h>
 
-#define GL_GLEXT_PROTOTYPES     /* we want prototypes */
 #include <GL/gl.h>
+#include <GL/glext.h>
 #include <GL/glxproto.h>
 
 /*
@@ -77,8 +77,6 @@ extern __GLXclientState *glxGetClient(ClientPtr pClient);
 
 /************************************************************************/
 
-void GlxExtensionInit(void);
-
 void GlxSetVisualConfigs(int nconfigs, void *configs, void **privates);
 
 void __glXScreenInitVisuals(__GLXscreen * screen);
@@ -86,7 +84,6 @@ void __glXScreenInitVisuals(__GLXscreen * screen);
 /*
 ** The last context used (from the server's persective) is cached.
 */
-extern __GLXcontext *__glXLastContext;
 extern __GLXcontext *__glXForceCurrent(__GLXclientState *, GLXContextTag,
                                        int *);
 
@@ -100,6 +97,7 @@ struct __GLXprovider {
     const char *name;
     __GLXprovider *next;
 };
+extern __GLXprovider __glXDRISWRastProvider;
 
 void GlxPushProvider(__GLXprovider * provider);
 
@@ -116,6 +114,20 @@ void __glXleaveServer(GLboolean rendering);
 
 void glxSuspendClients(void);
 void glxResumeClients(void);
+
+typedef void (*glx_func_ptr)(void);
+typedef glx_func_ptr (*glx_gpa_proc)(const char *);
+void __glXsetGetProcAddress(glx_gpa_proc get_proc_address);
+void *__glGetProcAddress(const char *);
+
+void
+__glXsendSwapEvent(__GLXdrawable *drawable, int type, CARD64 ust,
+                   CARD64 msc, CARD32 sbc);
+
+#if PRESENT
+void
+__glXregisterPresentCompleteNotify(void);
+#endif
 
 /*
 ** State kept per client.
@@ -145,8 +157,6 @@ struct __GLXclientStateRec {
     /* Back pointer to X client record */
     ClientPtr client;
 
-    int GLClientmajorVersion;
-    int GLClientminorVersion;
     char *GLClientextensions;
 };
 

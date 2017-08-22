@@ -145,9 +145,9 @@ xlfd_double_to_text(double value, char *buffer, int space_required)
     if (value == 0.0) exponent = 0;
 
     /* Figure out how many digits are significant */
-    while (p1 >= buffer && (!isdigit(*p1) || *p1 == '0')) p1--;
+    while (p1 >= buffer && (!isdigit((unsigned char)*p1) || *p1 == '0')) p1--;
     ndigits = 0;
-    while (p1 >= buffer) if (isdigit(*p1--)) ndigits++;
+    while (p1 >= buffer) if (isdigit((unsigned char)*p1--)) ndigits++;
 
     /* Figure out notation to use */
     if (exponent >= XLFD_NDIGITS || ndigits - exponent > XLFD_NDIGITS + 1)
@@ -278,7 +278,7 @@ GetMatrix(char *ptr, FontScalablePtr vals, int which)
 	matrix = vals->point_matrix;
     else return (char *)0;
 
-    while (isspace(*ptr)) ptr++;
+    while (isspace((unsigned char)*ptr)) ptr++;
     if (*ptr == '[')
     {
 	/* This is a matrix containing real numbers.  It would be nice
@@ -292,13 +292,13 @@ GetMatrix(char *ptr, FontScalablePtr vals, int which)
 	    (ptr = readreal(ptr, matrix + 2)) &&
 	    (ptr = readreal(ptr, matrix + 3)))
 	{
-	    while (isspace(*ptr)) ptr++;
+	    while (isspace((unsigned char)*ptr)) ptr++;
 	    if (*ptr != ']')
 		ptr = (char *)0;
 	    else
 	    {
 		ptr++;
-		while (isspace(*ptr)) ptr++;
+		while (isspace((unsigned char)*ptr)) ptr++;
 		if (*ptr == '-')
 		{
 		    if (which == POINTSIZE_MASK)

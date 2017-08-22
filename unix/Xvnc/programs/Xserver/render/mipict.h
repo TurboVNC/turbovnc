@@ -16,7 +16,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, SuSE, Inc.
@@ -57,7 +57,7 @@ extern _X_EXPORT void
  miDestroyPictureClip(PicturePtr pPicture);
 
 extern _X_EXPORT int
- miChangePictureClip(PicturePtr pPicture, int type, pointer value, int n);
+ miChangePictureClip(PicturePtr pPicture, int type, void *value, int n);
 
 extern _X_EXPORT void
  miChangePicture(PicturePtr pPicture, Mask mask);

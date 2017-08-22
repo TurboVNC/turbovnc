@@ -298,7 +298,7 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 	bdfError("invalid number of CHARS in BDF file\n");
 	return (FALSE);
     }
-    if (nchars > INT32_MAX / sizeof(CharInfoRec)) {
+    if (nchars > (signed) (INT32_MAX / sizeof(CharInfoRec))) {
 	bdfError("Couldn't allocate pCI (%d*%d)\n", nchars,
 		 (int) sizeof(CharInfoRec));
 	goto BAILOUT;
@@ -426,7 +426,7 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 	    goto BAILOUT;
 	}
 	/* xCharInfo metrics are stored as INT16 */
-	if ((wx < 0) || (wx > INT16_MAX)) {
+	if ((wx < INT16_MIN) || (wx > INT16_MAX)) {
 	    bdfError("character '%s' has out of range width, %d\n",
 		     charName, wx);
 	    goto BAILOUT;
@@ -631,7 +631,7 @@ bdfReadProperties(FontFilePtr file, FontPtr pFont, bdfFileState *pState)
     }
     if ((sscanf((char *) line, "STARTPROPERTIES %d", &nProps) != 1) ||
 	(nProps <= 0) ||
-	(nProps > ((INT32_MAX / sizeof(FontPropRec)) - BDF_GENPROPS))) {
+	(nProps > (signed) ((INT32_MAX / sizeof(FontPropRec)) - BDF_GENPROPS))) {
 	bdfError("bad 'STARTPROPERTIES'\n");
 	return (FALSE);
     }

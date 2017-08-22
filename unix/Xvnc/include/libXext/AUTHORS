@@ -1,0 +1,20 @@
+Extension	Authors/Affiliation
+---------	-------------------
+DPMS: 		Rob Lembree, Digital Equipment Corporation
+MITMisc: 	Bob Scheifler, MIT
+XAppgroup: 	Kaleb S. Keithley, X Consortium
+Xcup: 		Kaleb S, Keithley, The Open Group
+Xdbe: 		Ian Elliot, Hewlett-Packard, David Wiggens, X Consortium
+XEVI: 		Peter Daifuku, Silicon Graphics
+XLbx: 		D. Converse, J Fulton, C. Kantarjiev, D. Lemke, R. Mor,
+		Keith Packard, NCD (who now believes lbx should be nuked),
+		R. Tice, D. Tonogai
+XMultibuf: 	Jeffrey Friedberg, Larry Seiler, Jeff Vroom, Digital Equipment
+XSecurity: 	Dave Wiggens, X Consortium
+XShape: 	Jonathan Corbet, NCAR, Keith Packard, MIT X Consortium
+Xshm: 		Bob Scheifler and Keith Packard, MIT X Consortium
+XSync: 		Tim Glauert, Olivetti Research, DAve Carver, Jim Gettys,
+		Digital Equipment, Dave Wiggens, X Consortium
+XTestExt: 	Kieron Drake, UniSoft, Ltd.
+
+Our apologies if there are any mistakes in the above.

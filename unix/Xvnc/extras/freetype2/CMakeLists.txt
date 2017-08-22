@@ -1,15 +1,11 @@
 include_directories(include)
 
-include(CheckFunctionExists)
 check_function_exists(strerror HAVE_STRERROR)
 if(HAVE_STRERROR)
 	add_definitions(-DHAVE_STRERROR)
 endif()
 
 add_definitions(-DFT2_BUILD_LIBRARY)
-if(APPLE)
-	add_definitions(-DDARWIN_NO_CARBON)
-endif()
 
 add_library(freetype2 STATIC
 	src/base/ftsystem.c

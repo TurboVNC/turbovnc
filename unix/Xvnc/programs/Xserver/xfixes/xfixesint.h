@@ -71,11 +71,6 @@ typedef struct _XFixesClient {
 
 extern int (*ProcXFixesVector[XFixesNumberRequests]) (ClientPtr);
 
-/* Initialize extension at server startup time */
-
-void
- XFixesExtensionInit(void);
-
 /* Save set */
 int
  ProcXFixesChangeSaveSet(ClientPtr client);
@@ -296,8 +291,10 @@ int
  SProcXFixesDestroyPointerBarrier(ClientPtr client);
 
 /* Xinerama */
+#ifdef PANORAMIX
 extern int (*PanoramiXSaveXFixesVector[XFixesNumberRequests]) (ClientPtr);
 void PanoramiXFixesInit(void);
 void PanoramiXFixesReset(void);
+#endif
 
 #endif                          /* _XFIXESINT_H_ */

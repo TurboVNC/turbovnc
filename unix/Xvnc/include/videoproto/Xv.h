@@ -59,8 +59,8 @@ typedef XID XvEncodingID;
 #define XvInput          0
 #define XvOutput         1
 
-#define XvInputMask      (1L<<XvInput)
-#define XvOutputMask     (1L<<XvOutput)
+#define XvInputMask      (1<<XvInput)
+#define XvOutputMask     (1<<XvOutput)
 #define XvVideoMask	 0x00000004
 #define XvStillMask	 0x00000008
 #define XvImageMask	 0x00000010
@@ -100,13 +100,13 @@ typedef XID XvEncodingID;
 
 #define XvNumReasons (XvLastReason + 1)
 
-#define XvStartedMask     (1L<<XvStarted)
-#define XvStoppedMask     (1L<<XvStopped)
-#define XvBusyMask        (1L<<XvBusy)
-#define XvPreemptedMask   (1L<<XvPreempted)
-#define XvHardErrorMask   (1L<<XvHardError)
+#define XvStartedMask     (1<<XvStarted)
+#define XvStoppedMask     (1<<XvStopped)
+#define XvBusyMask        (1<<XvBusy)
+#define XvPreemptedMask   (1<<XvPreempted)
+#define XvHardErrorMask   (1<<XvHardError)
 
-#define XvAnyReasonMask   ((1L<<XvNumReasons) - 1)
+#define XvAnyReasonMask   ((1<<XvNumReasons) - 1)
 #define XvNoReasonMask    0
 
 /* Errors */

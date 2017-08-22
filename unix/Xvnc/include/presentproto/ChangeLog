@@ -1,0 +1,261 @@
+commit bfdc7e052302c79c5803ad95a73c9b63b350c40c
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Thu Jan 26 08:50:11 2017 +0100
+
+    Bump version to 1.1
+
+commit 6d760eb116b4efd92ddba902fb9cb52f72f81da7
+Author: Mihail Konev <k.mvc@ya.ru>
+Date:   Thu Jan 26 13:52:48 2017 +1000
+
+    autogen: add default patch prefix
+    
+    Signed-off-by: Mihail Konev <k.mvc@ya.ru>
+
+commit 3057bb8db057aaf13f87237f7fe78e5e2543c60a
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Mon Mar 9 12:00:52 2015 +0000
+
+    autogen.sh: use quoted string variables
+    
+    Place quotes around the $srcdir, $ORIGDIR and $0 variables to prevent
+    fall-outs, when they contain space.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 86d1674e1598ddae3c9fc7f54378f638f7ec0fe4
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jan 24 10:32:07 2017 +1000
+
+    autogen.sh: use exec instead of waiting for configure to finish
+    
+    Syncs the invocation of configure with the one from the server.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit d6d4548a9e972f1463d36a56989e319cef745b9b
+Author: Kenneth Graunke <kenneth@whitecape.org>
+Date:   Thu Jul 28 09:48:35 2016 -0700
+
+    Fix typo (modifiy -> modify)
+
+commit ef84007fc4a23d3897b4776906139de9d0698c2a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat May 31 21:38:41 2014 -0700
+
+    configure: Drop AM_MAINTAINER_MODE
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 24f3a56e541b0a9e6c6ee76081f441221a120ef9
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Jan 2 16:38:47 2014 -0800
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit e2763622941bc35db9a2dbf16e10bb830af07d67
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Dec 13 12:21:02 2013 -0800
+
+    Don't define 'redirect' stuff in header files
+    
+    Leave it all under #if PRESENT_FUTURE_VERSION for documentation
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit ff72e3fcfd48185c2e33d6eaa50b7ff100aaeabb
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Dec 13 12:11:00 2013 -0800
+
+    Move Redirect stuff to 'later version' sections
+    
+    This makes it clear that the Redirect event bits are not part of the
+    1.0 standard.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 8405ee4552565825d776e6a8963d33d9cd9cddf0
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed Dec 11 13:25:06 2013 -0500
+
+    Force Window and Pixmap to be CARD32 on the wire
+    
+    If you don't do this then the client libs on 64-bit machines see them as
+    XIDs, which are 64-bit wide (sigh), which ruins the wire encoding and
+    nothing works.
+    
+    Reviewed-by: Jasper St. Pierre <jstpierre@mecheye.net>
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 7c5aa106e36e915d7b094833fac8a27996c50b24
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Dec 13 11:52:57 2013 -0800
+
+    Fix spelling of James Jones' email address
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 2f75a7b9fde8fbff63a12eaf4d0a9bf38fe23a8d
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Sun Nov 24 14:02:49 2013 +0100
+
+    Fix wrong reference to DRI3 in the protocol spec
+    
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+
+commit bad9370af5f7c50541a4898b8ad10c9d0168dc14
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 5 09:06:57 2013 -0500
+
+    config: replace deprecated use of AC_OUTPUT with AC_CONFIG_FILES
+    
+    Fix Automake warning: AC_OUTPUT should be used without arguments.
+    www.gnu.org/software/autoconf/manual/autoconf.html#Configuration-Files
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 5eec069b69c94eed75586c1d98aedfd7031714b8
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 5 09:06:30 2013 -0500
+
+    Add the required README file.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit a359a2e9a220826c9e077f40332dba1392bd9313
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed Nov 6 12:32:10 2013 -0500
+
+    Add COPYING
+    
+    Text taken from the header files.
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 02393d26f052a3af15c72b0c4a4a31ca3353339d
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Fri Nov 1 14:04:12 2013 -0700
+
+    Copy the standard .gitignore from other proto packages
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 584d8b87e245e900a3a7ee448d51ba6f3c74ce2b
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Oct 31 17:38:27 2013 -0700
+
+    Update to version 1.0
+    
+    Add presentproto.h updates for current protocol.
+    Finish encoding specification.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 32f17e1d4411f784a9b76bad8288f7e657134732
+Author: Keith Packard <keithp@keithp.com>
+Date:   Tue Oct 29 10:42:33 2013 -0700
+
+    Clarify when pixmaps are assured of being idle
+    
+    Pixmaps will definitely be idle after the next PresentPixmap operation
+    completes; the original text was vague about whether it was the
+    execution of the request or the completion of the operation.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit b32994fac679ee53362d457e834dca539d5a1ff8
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Oct 19 20:48:04 2013 -0700
+
+    Clarify role and responsibility for client and server regarding fences
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 843b6a31180641504228c9603c8a771284a854d1
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Oct 19 20:47:58 2013 -0700
+
+    Add .gitignore
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 5d11236c1951d6f2618eb420702f20455f165a0b
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Oct 18 16:42:20 2013 -0700
+
+    PresentRegion->PresentPixmap, define options, add UST mode
+    
+    Changes the name of the PresentPixmap request from PresentRegion in
+    anticipation of future additions of non-pixmap sourced updates (YUV
+    images in particular).
+    
+    Adds definitions for all of the new PresentPixmap options.
+    
+    Adds PresentQueryCapabilities to provide applications the ability to
+    learn what the underlying hardware can support. One requirement for
+    any capability is that the X server must do something sensible even if
+    the client behaves as if a capability is supported when it is not.
+    
+    Adds IdleNotify events. As pixmaps can go idle in any order, it's
+    important for applications to know which pixmap to use next. We cannot
+    use fences as the fence itself may not be signaled for some time after
+    the X server has figured out which pixmap to idle.
+    
+    Note that the encoding and header files are not entirely up to date now.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit f15c4568f2b4e50e80bf5cf650bde13441bb0b72
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Jul 24 21:07:20 2013 -0700
+
+    Start reworking for present redirection.
+    
+    In PresentRegion, add the PresentNotify list, add explicit CRTC.
+    In PresentRedirectNotify, add CRTC and update_window values
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit ec9db7408ff742312677e40b0b9a0239a07ab43c
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Jul 15 10:55:48 2013 -0700
+
+    Remove SBC, use CompleteNotify for both Region and NotifyMSC
+    
+    SBC is entire a client-side notion, so remove it from the protocol.
+    No need to have two events with the same content, but we do need to
+    tell which request generated the event so stick a new field in some
+    spare bytes
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit f1950e6f10a61318f22083900602d9c920d00667
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Jul 13 02:40:11 2013 -0700
+
+    Add NotifyMSC. Add serial numbers to Complete and MSC events
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 5e7ebeb7e29be01b8046f30e93891180187e59c2
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Jul 12 11:14:46 2013 -0700
+
+    Document how target-msc, divisor and remainder work
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 921029e55ec3ff90d42905df258046e6f83fa4b6
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Jul 11 15:52:50 2013 -0700
+
+    Initial Present protocol specification
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>

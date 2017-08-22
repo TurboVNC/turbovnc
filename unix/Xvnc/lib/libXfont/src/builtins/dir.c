@@ -148,7 +148,7 @@ BuiltinAliasesRestore (BuiltinAliasPtr a_cur_tab,
 }
 
 int
-BuiltinReadDirectory (char *directory, FontDirectoryPtr *pdir)
+BuiltinReadDirectory (const char *directory, FontDirectoryPtr *pdir)
 {
     FontDirectoryPtr	dir;
     int			i;

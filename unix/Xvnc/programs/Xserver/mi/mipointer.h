@@ -71,13 +71,6 @@ typedef struct _miPointerScreenFuncRec {
                         int /* x */ ,
                         int     /* y */
         );
-    void (*EnqueueEvent) (DeviceIntPtr /* pDev */ ,
-                          InternalEvent *       /* event */
-        );
-    void (*NewEventScreen) (DeviceIntPtr /* pDev */ ,
-                            ScreenPtr /* pScr */ ,
-                            Bool        /* set_dequeue_screen */
-        );
 } miPointerScreenFuncRec, *miPointerScreenFuncPtr;
 
 extern _X_EXPORT Bool miDCInitialize(ScreenPtr /*pScreen */ ,
@@ -98,11 +91,6 @@ extern _X_EXPORT void miPointerWarpCursor(DeviceIntPtr /*pDev */ ,
                                           int   /*y */
     );
 
-/* Deprecated in favour of miPointerGetScreen. */
-extern _X_EXPORT ScreenPtr
-miPointerCurrentScreen(void
-) _X_DEPRECATED;
-
 extern _X_EXPORT ScreenPtr
 miPointerGetScreen(DeviceIntPtr pDev);
 extern _X_EXPORT void
@@ -115,7 +103,8 @@ miPointerGetPosition(DeviceIntPtr pDev, int *x, int *y);
 /* Moves the cursor to the specified position.  May clip the co-ordinates:
  * x and y are modified in-place. */
 extern _X_EXPORT ScreenPtr
-miPointerSetPosition(DeviceIntPtr pDev, int mode, double *x, double *y);
+miPointerSetPosition(DeviceIntPtr pDev, int mode, double *x, double *y,
+                     int *nevents, InternalEvent *events);
 
 extern _X_EXPORT void
 miPointerUpdateSprite(DeviceIntPtr pDev);

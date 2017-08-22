@@ -27,16 +27,18 @@
 #include "fb.h"
 
 Bool
-fbCloseScreen(int index, ScreenPtr pScreen)
+fbCloseScreen(ScreenPtr pScreen)
 {
     int d;
     DepthPtr depths = pScreen->allowedDepths;
 
+    fbDestroyGlyphCache();
     for (d = 0; d < pScreen->numDepths; d++)
         free(depths[d].vids);
     free(depths);
     free(pScreen->visuals);
-    free(pScreen->devPrivate);
+    if (pScreen->devPrivate)
+        FreePixmap((PixmapPtr)pScreen->devPrivate);
     return TRUE;
 }
 
@@ -85,17 +87,17 @@ _fbGetWindowPixmap(WindowPtr pWindow)
 void
 _fbSetWindowPixmap(WindowPtr pWindow, PixmapPtr pPixmap)
 {
-    dixSetPrivate(&pWindow->devPrivates, fbGetWinPrivateKey(), pPixmap);
+    dixSetPrivate(&pWindow->devPrivates, fbGetWinPrivateKey(pWindow), pPixmap);
 }
 
 Bool
-fbSetupScreen(ScreenPtr pScreen, pointer pbits, /* pointer to screen bitmap */
+fbSetupScreen(ScreenPtr pScreen, void *pbits, /* pointer to screen bitmap */
               int xsize,        /* in pixels */
               int ysize, int dpix,      /* dots per inch */
               int dpiy, int width,      /* pixel width of frame buffer */
               int bpp)
 {                               /* bits per pixel for screen */
-    if (!fbAllocatePrivates(pScreen, NULL))
+    if (!fbAllocatePrivates(pScreen))
         return FALSE;
     pScreen->defColormap = FakeClientID(0);
     /* let CreateDefColormap do whatever it wants for pixels */
@@ -108,8 +110,8 @@ fbSetupScreen(ScreenPtr pScreen, pointer pbits, /* pointer to screen bitmap */
     pScreen->DestroyWindow = fbDestroyWindow;
     pScreen->PositionWindow = fbPositionWindow;
     pScreen->ChangeWindowAttributes = fbChangeWindowAttributes;
-    pScreen->RealizeWindow = fbMapWindow;
-    pScreen->UnrealizeWindow = fbUnmapWindow;
+    pScreen->RealizeWindow = fbRealizeWindow;
+    pScreen->UnrealizeWindow = fbUnrealizeWindow;
     pScreen->CopyWindow = fbCopyWindow;
     pScreen->CreatePixmap = fbCreatePixmap;
     pScreen->DestroyPixmap = fbDestroyPixmap;
@@ -134,7 +136,7 @@ fbSetupScreen(ScreenPtr pScreen, pointer pbits, /* pointer to screen bitmap */
 #ifdef FB_ACCESS_WRAPPER
 Bool
 wfbFinishScreenInit(ScreenPtr pScreen,
-                    pointer pbits,
+                    void *pbits,
                     int xsize,
                     int ysize,
                     int dpix,
@@ -145,7 +147,7 @@ wfbFinishScreenInit(ScreenPtr pScreen,
 #else
 Bool
 fbFinishScreenInit(ScreenPtr pScreen,
-                   pointer pbits,
+                   void *pbits,
                    int xsize, int ysize, int dpix, int dpiy, int width, int bpp)
 #endif
 {
@@ -223,7 +225,7 @@ fbFinishScreenInit(ScreenPtr pScreen,
 #ifdef FB_ACCESS_WRAPPER
 Bool
 wfbScreenInit(ScreenPtr pScreen,
-              pointer pbits,
+              void *pbits,
               int xsize,
               int ysize,
               int dpix,
@@ -241,7 +243,7 @@ wfbScreenInit(ScreenPtr pScreen,
 #else
 Bool
 fbScreenInit(ScreenPtr pScreen,
-             pointer pbits,
+             void *pbits,
              int xsize, int ysize, int dpix, int dpiy, int width, int bpp)
 {
     if (!fbSetupScreen(pScreen, pbits, xsize, ysize, dpix, dpiy, width, bpp))

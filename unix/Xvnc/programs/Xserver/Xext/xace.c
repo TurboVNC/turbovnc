@@ -47,18 +47,18 @@ XaceHookDispatch(ClientPtr client, int major)
 
     if (major < 128) {
         /* Call the core dispatch hook */
-        XaceCoreDispatchRec rec = { client, Success /* default allow */  };
-        CallCallbacks(&XaceHooks[XACE_CORE_DISPATCH], &rec);
-        return rec.status;
+        XaceCoreDispatchRec drec = { client, Success /* default allow */  };
+        CallCallbacks(&XaceHooks[XACE_CORE_DISPATCH], &drec);
+        return drec.status;
     }
     else {
         /* Call the extension dispatch hook */
         ExtensionEntry *ext = GetExtensionEntry(major);
-        XaceExtAccessRec rec = { client, ext, DixUseAccess, Success };
+        XaceExtAccessRec erec = { client, ext, DixUseAccess, Success };
         if (ext)
-            CallCallbacks(&XaceHooks[XACE_EXT_DISPATCH], &rec);
+            CallCallbacks(&XaceHooks[XACE_EXT_DISPATCH], &erec);
         /* On error, pretend extension doesn't exist */
-        return (rec.status == Success) ? Success : BadRequest;
+        return (erec.status == Success) ? Success : BadRequest;
     }
 }
 
@@ -122,9 +122,9 @@ XaceHook(int hook, ...)
         u.res.client = va_arg(ap, ClientPtr);
         u.res.id = va_arg(ap, XID);
         u.res.rtype = va_arg(ap, RESTYPE);
-        u.res.res = va_arg(ap, pointer);
+        u.res.res = va_arg(ap, void *);
         u.res.ptype = va_arg(ap, RESTYPE);
-        u.res.parent = va_arg(ap, pointer);
+        u.res.parent = va_arg(ap, void *);
         u.res.access_mode = va_arg(ap, Mask);
 
         u.res.status = Success; /* default allow */
@@ -213,6 +213,21 @@ XaceHook(int hook, ...)
     return prv ? *prv : Success;
 }
 
+/* XaceHookIsSet
+ *
+ * Utility function to determine whether there are any callbacks listening on a
+ * particular XACE hook.
+ *
+ * Returns non-zero if there is a callback, zero otherwise.
+ */
+int
+XaceHookIsSet(int hook)
+{
+    if (hook < 0 || hook >= XACE_NUM_HOOKS)
+        return 0;
+    return XaceHooks[hook] != NULL;
+}
+
 /* XaceCensorImage
  *
  * Called after pScreen->GetImage to prevent pieces or trusted windows from
@@ -288,7 +303,7 @@ XaceCensorImage(ClientPtr client,
 
         pPix = GetScratchPixmapHeader(pDraw->pScreen, w, h,
                                       depth, bitsPerPixel,
-                                      widthBytesLine, (pointer) pBuf);
+                                      widthBytesLine, (void *) pBuf);
         if (!pPix) {
             failed = TRUE;
             goto failSafe;

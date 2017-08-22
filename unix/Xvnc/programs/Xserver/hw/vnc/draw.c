@@ -203,7 +203,7 @@ static void rfbPolyGlyphBlt();
 static void rfbPushPixels();
 
 
-static GCFuncs rfbGCFuncs = {
+static const GCFuncs rfbGCFuncs = {
     rfbValidateGC,
     rfbChangeGC,
     rfbCopyGC,
@@ -214,7 +214,7 @@ static GCFuncs rfbGCFuncs = {
 };
 
 
-static GCOps rfbGCOps = {
+static const GCOps rfbGCOps = {
     rfbFillSpans,       rfbSetSpans,    rfbPutImage,
     rfbCopyArea,        rfbCopyPlane,   rfbPolyPoint,
     rfbPolylines,       rfbPolySegment, rfbPolyRectangle,
@@ -257,7 +257,7 @@ void ClipToScreen(ScreenPtr pScreen, RegionPtr pRegion)
  */
 
 Bool
-rfbCloseScreen(int i, ScreenPtr pScreen)
+rfbCloseScreen(ScreenPtr pScreen)
 {
     rfbFBInfoPtr prfb = &rfbFB;
 #ifdef RENDER
@@ -283,7 +283,7 @@ rfbCloseScreen(int i, ScreenPtr pScreen)
 
     TRC((stderr, "Unwrapped screen functions\n"));
 
-    return (*pScreen->CloseScreen) (i, pScreen);
+    return (*pScreen->CloseScreen) (pScreen);
 }
 
 
@@ -543,7 +543,7 @@ rfbCopyClip(GCPtr pgcDst, GCPtr pgcSrc)
     rfbFBInfoPtr prfb = &rfbFB; \
     rfbGCPtr pGCPrivate = (rfbGCPtr) dixLookupPrivate(&(pGC)->devPrivates, \
                                                       &rfbGCKey); \
-    GCFuncs *oldFuncs = pGC->funcs; \
+    const GCFuncs *oldFuncs = pGC->funcs; \
     (pGC)->funcs = pGCPrivate->wrapFuncs; \
     (pGC)->ops = pGCPrivate->wrapOps;
 

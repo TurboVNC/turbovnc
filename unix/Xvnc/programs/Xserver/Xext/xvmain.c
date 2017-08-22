@@ -4,13 +4,13 @@ and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the names of Digital or MIT not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -23,11 +23,11 @@ SOFTWARE.
 ******************************************************************/
 
 /*
-** File: 
+** File:
 **
 **   xvmain.c --- Xv server extension main device independent module.
-**   
-** Author: 
+**
+** Author:
 **
 **   David Carver (Digital Workstation Engineering/Project Athena)
 **
@@ -58,7 +58,7 @@ SOFTWARE.
 **
 **   24.01.91 Carver
 **     - version 1.4 upgrade
-**       
+**
 ** Notes:
 **
 **   Port structures reference client structures in a two different
@@ -86,8 +86,9 @@ SOFTWARE.
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "gc.h"
+#include "gcstruct.h"
 #include "extnsionst.h"
+#include "extinit.h"
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"
@@ -129,16 +130,16 @@ static void WriteSwappedVideoNotifyEvent(xvEvent *, xvEvent *);
 static void WriteSwappedPortNotifyEvent(xvEvent *, xvEvent *);
 static Bool CreateResourceTypes(void);
 
-static Bool XvCloseScreen(int, ScreenPtr);
+static Bool XvCloseScreen(ScreenPtr);
 static Bool XvDestroyPixmap(PixmapPtr);
 static Bool XvDestroyWindow(WindowPtr);
 static void XvResetProc(ExtensionEntry *);
-static int XvdiDestroyGrab(pointer, XID);
-static int XvdiDestroyEncoding(pointer, XID);
-static int XvdiDestroyVideoNotify(pointer, XID);
-static int XvdiDestroyPortNotify(pointer, XID);
-static int XvdiDestroyVideoNotifyList(pointer, XID);
-static int XvdiDestroyPort(pointer, XID);
+static int XvdiDestroyGrab(void *, XID);
+static int XvdiDestroyEncoding(void *, XID);
+static int XvdiDestroyVideoNotify(void *, XID);
+static int XvdiDestroyPortNotify(void *, XID);
+static int XvdiDestroyVideoNotifyList(void *, XID);
+static int XvdiDestroyPort(void *, XID);
 static int XvdiSendVideoNotify(XvPortPtr, DrawablePtr, int);
 
 /*
@@ -155,8 +156,8 @@ XvExtensionInit(void)
     if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, 0))
         return;
 
-    /* LOOK TO SEE IF ANY SCREENS WERE INITIALIZED; IF NOT THEN
-       INIT GLOBAL VARIABLES SO THE EXTENSION CAN FUNCTION */
+    /* Look to see if any screens were initialized; if not then
+       init global variables so the extension can function */
     if (XvScreenGeneration != serverGeneration) {
         if (!CreateResourceTypes()) {
             ErrorF("XvExtensionInit: Unable to allocate resource types\n");
@@ -290,7 +291,7 @@ XvScreenInit(ScreenPtr pScreen)
 }
 
 static Bool
-XvCloseScreen(int ii, ScreenPtr pScreen)
+XvCloseScreen(ScreenPtr pScreen)
 {
 
     XvScreenPtr pxvs;
@@ -301,13 +302,11 @@ XvCloseScreen(int ii, ScreenPtr pScreen)
     pScreen->DestroyWindow = pxvs->DestroyWindow;
     pScreen->CloseScreen = pxvs->CloseScreen;
 
-    (*pxvs->ddCloseScreen) (ii, pScreen);
-
     free(pxvs);
 
     dixSetPrivate(&pScreen->devPrivates, XvScreenKey, NULL);
 
-    return (*pScreen->CloseScreen) (ii, pScreen);
+    return (*pScreen->CloseScreen) (pScreen);
 }
 
 static void
@@ -357,7 +356,7 @@ XvDestroyPixmap(PixmapPtr pPix)
             if (pp->pDraw == (DrawablePtr) pPix) {
                 XvdiSendVideoNotify(pp, pp->pDraw, XvPreempted);
 
-                (void) (*pp->pAdaptor->ddStopVideo) (NULL, pp, pp->pDraw);
+                (void) (*pp->pAdaptor->ddStopVideo) (pp, pp->pDraw);
 
                 pp->pDraw = NULL;
                 pp->client = NULL;
@@ -405,7 +404,7 @@ XvDestroyWindow(WindowPtr pWin)
             if (pp->pDraw == (DrawablePtr) pWin) {
                 XvdiSendVideoNotify(pp, pp->pDraw, XvPreempted);
 
-                (void) (*pp->pAdaptor->ddStopVideo) (NULL, pp, pp->pDraw);
+                (void) (*pp->pAdaptor->ddStopVideo) (pp, pp->pDraw);
 
                 pp->pDraw = NULL;
                 pp->client = NULL;
@@ -424,45 +423,21 @@ XvDestroyWindow(WindowPtr pWin)
 
 }
 
-/* The XvdiVideoStopped procedure is a hook for the device dependent layer.
-   It provides a way for the dd layer to inform the di layer that video has
-   stopped in a port for reasons that the di layer had no control over; note
-   that it doesn't call back into the dd layer */
-
-int
-XvdiVideoStopped(XvPortPtr pPort, int reason)
+static int
+XvdiDestroyPort(void *pPort, XID id)
 {
-
-    /* IF PORT ISN'T ACTIVE THEN WE'RE DONE */
-
-    if (!pPort->pDraw)
-        return Success;
-
-    XvdiSendVideoNotify(pPort, pPort->pDraw, reason);
-
-    pPort->pDraw = NULL;
-    pPort->client = NULL;
-    pPort->time = currentTime;
-
     return Success;
-
 }
 
 static int
-XvdiDestroyPort(pointer pPort, XID id)
-{
-    return (*((XvPortPtr) pPort)->pAdaptor->ddFreePort) (pPort);
-}
-
-static int
-XvdiDestroyGrab(pointer pGrab, XID id)
+XvdiDestroyGrab(void *pGrab, XID id)
 {
     ((XvGrabPtr) pGrab)->client = NULL;
     return Success;
 }
 
 static int
-XvdiDestroyVideoNotify(pointer pn, XID id)
+XvdiDestroyVideoNotify(void *pn, XID id)
 {
     /* JUST CLEAR OUT THE client POINTER FIELD */
 
@@ -471,7 +446,7 @@ XvdiDestroyVideoNotify(pointer pn, XID id)
 }
 
 static int
-XvdiDestroyPortNotify(pointer pn, XID id)
+XvdiDestroyPortNotify(void *pn, XID id)
 {
     /* JUST CLEAR OUT THE client POINTER FIELD */
 
@@ -480,7 +455,7 @@ XvdiDestroyPortNotify(pointer pn, XID id)
 }
 
 static int
-XvdiDestroyVideoNotifyList(pointer pn, XID id)
+XvdiDestroyVideoNotifyList(void *pn, XID id)
 {
     XvVideoNotifyPtr npn, cpn;
 
@@ -499,7 +474,7 @@ XvdiDestroyVideoNotifyList(pointer pn, XID id)
 }
 
 static int
-XvdiDestroyEncoding(pointer value, XID id)
+XvdiDestroyEncoding(void *value, XID id)
 {
     return Success;
 }
@@ -507,19 +482,20 @@ XvdiDestroyEncoding(pointer value, XID id)
 static int
 XvdiSendVideoNotify(XvPortPtr pPort, DrawablePtr pDraw, int reason)
 {
-    xvEvent event;
     XvVideoNotifyPtr pn;
 
-    dixLookupResourceByType((pointer *) &pn, pDraw->id, XvRTVideoNotifyList,
+    dixLookupResourceByType((void **) &pn, pDraw->id, XvRTVideoNotifyList,
                             serverClient, DixReadAccess);
 
     while (pn) {
+        xvEvent event = {
+            .u.videoNotify.reason = reason,
+            .u.videoNotify.time = currentTime.milliseconds,
+            .u.videoNotify.drawable = pDraw->id,
+            .u.videoNotify.port = pPort->id
+        };
         event.u.u.type = XvEventBase + XvVideoNotify;
-        event.u.videoNotify.time = currentTime.milliseconds;
-        event.u.videoNotify.drawable = pDraw->id;
-        event.u.videoNotify.port = pPort->id;
-        event.u.videoNotify.reason = reason;
-        WriteEventsToClient(pn->client, 1, (xEventPtr) & event);
+        WriteEventsToClient(pn->client, 1, (xEventPtr) &event);
         pn = pn->next;
     }
 
@@ -530,18 +506,19 @@ XvdiSendVideoNotify(XvPortPtr pPort, DrawablePtr pDraw, int reason)
 int
 XvdiSendPortNotify(XvPortPtr pPort, Atom attribute, INT32 value)
 {
-    xvEvent event;
     XvPortNotifyPtr pn;
 
     pn = pPort->pNotify;
 
     while (pn) {
+        xvEvent event = {
+            .u.portNotify.time = currentTime.milliseconds,
+            .u.portNotify.port = pPort->id,
+            .u.portNotify.attribute = attribute,
+            .u.portNotify.value = value
+        };
         event.u.u.type = XvEventBase + XvPortNotify;
-        event.u.portNotify.time = currentTime.milliseconds;
-        event.u.portNotify.port = pPort->id;
-        event.u.portNotify.attribute = attribute;
-        event.u.portNotify.value = value;
-        WriteEventsToClient(pn->client, 1, (xEventPtr) & event);
+        WriteEventsToClient(pn->client, 1, (xEventPtr) &event);
         pn = pn->next;
     }
 
@@ -589,7 +566,7 @@ XvdiPutVideo(ClientPtr client,
         XvdiSendVideoNotify(pPort, pPort->pDraw, XvPreempted);
     }
 
-    (void) (*pPort->pAdaptor->ddPutVideo) (client, pDraw, pPort, pGC,
+    (void) (*pPort->pAdaptor->ddPutVideo) (pDraw, pPort, pGC,
                                            vid_x, vid_y, vid_w, vid_h,
                                            drw_x, drw_y, drw_w, drw_h);
 
@@ -631,7 +608,7 @@ XvdiPutStill(ClientPtr client,
 
     pPort->time = currentTime;
 
-    status = (*pPort->pAdaptor->ddPutStill) (client, pDraw, pPort, pGC,
+    status = (*pPort->pAdaptor->ddPutStill) (pDraw, pPort, pGC,
                                              vid_x, vid_y, vid_w, vid_h,
                                              drw_x, drw_y, drw_w, drw_h);
 
@@ -667,7 +644,7 @@ XvdiPutImage(ClientPtr client,
 
     pPort->time = currentTime;
 
-    return (*pPort->pAdaptor->ddPutImage) (client, pDraw, pPort, pGC,
+    return (*pPort->pAdaptor->ddPutImage) (pDraw, pPort, pGC,
                                            src_x, src_y, src_w, src_h,
                                            drw_x, drw_y, drw_w, drw_h,
                                            image, data, sync, width, height);
@@ -706,7 +683,7 @@ XvdiGetVideo(ClientPtr client,
         XvdiSendVideoNotify(pPort, pPort->pDraw, XvPreempted);
     }
 
-    (void) (*pPort->pAdaptor->ddGetVideo) (client, pDraw, pPort, pGC,
+    (void) (*pPort->pAdaptor->ddGetVideo) (pDraw, pPort, pGC,
                                            vid_x, vid_y, vid_w, vid_h,
                                            drw_x, drw_y, drw_w, drw_h);
 
@@ -746,7 +723,7 @@ XvdiGetStill(ClientPtr client,
         return Success;
     }
 
-    status = (*pPort->pAdaptor->ddGetStill) (client, pDraw, pPort, pGC,
+    status = (*pPort->pAdaptor->ddGetStill) (pDraw, pPort, pGC,
                                              vid_x, vid_y, vid_w, vid_h,
                                              drw_x, drw_y, drw_w, drw_h);
 
@@ -840,7 +817,7 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
 
     /* FIND VideoNotify LIST */
 
-    rc = dixLookupResourceByType((pointer *) &pn, pDraw->id,
+    rc = dixLookupResourceByType((void **) &pn, pDraw->id,
                                  XvRTVideoNotifyList, client, DixWriteAccess);
     if (rc != Success && rc != BadValue)
         return rc;
@@ -938,7 +915,7 @@ XvdiSelectPortNotify(ClientPtr client, XvPortPtr pPort, BOOL onoff)
         return Success;
     }
 
-    /* DIDN'T FIND IT; SO REUSE LIST ELEMENT IF ONE IS FREE OTHERWISE 
+    /* DIDN'T FIND IT; SO REUSE LIST ELEMENT IF ONE IS FREE OTHERWISE
        CREATE A NEW ONE AND ADD IT TO THE BEGINNING OF THE LIST */
 
     if (!tpn) {
@@ -978,29 +955,7 @@ XvdiStopVideo(ClientPtr client, XvPortPtr pPort, DrawablePtr pDraw)
 
     XvdiSendVideoNotify(pPort, pDraw, XvStopped);
 
-    status = (*pPort->pAdaptor->ddStopVideo) (client, pPort, pDraw);
-
-    pPort->pDraw = NULL;
-    pPort->client = (ClientPtr) client;
-    pPort->time = currentTime;
-
-    return status;
-
-}
-
-int
-XvdiPreemptVideo(ClientPtr client, XvPortPtr pPort, DrawablePtr pDraw)
-{
-    int status;
-
-    /* IF PORT ISN'T ACTIVE THEN WE'RE DONE */
-
-    if (!pPort->pDraw || (pPort->pDraw != pDraw))
-        return Success;
-
-    XvdiSendVideoNotify(pPort, pPort->pDraw, XvPreempted);
-
-    status = (*pPort->pAdaptor->ddStopVideo) (client, pPort, pPort->pDraw);
+    status = (*pPort->pAdaptor->ddStopVideo) (pPort, pDraw);
 
     pPort->pDraw = NULL;
     pPort->client = (ClientPtr) client;
@@ -1043,7 +998,7 @@ XvdiSetPortAttribute(ClientPtr client,
     int status;
 
     status =
-        (*pPort->pAdaptor->ddSetPortAttribute) (client, pPort, attribute,
+        (*pPort->pAdaptor->ddSetPortAttribute) (pPort, attribute,
                                                 value);
     if (status == Success)
         XvdiSendPortNotify(pPort, attribute, value);
@@ -1057,7 +1012,7 @@ XvdiGetPortAttribute(ClientPtr client,
 {
 
     return
-        (*pPort->pAdaptor->ddGetPortAttribute) (client, pPort, attribute,
+        (*pPort->pAdaptor->ddGetPortAttribute) (pPort, attribute,
                                                 p_value);
 
 }
@@ -1087,4 +1042,78 @@ WriteSwappedPortNotifyEvent(xvEvent * from, xvEvent * to)
     cpswapl(from->u.portNotify.port, to->u.portNotify.port);
     cpswapl(from->u.portNotify.value, to->u.portNotify.value);
 
+}
+
+void
+XvFreeAdaptor(XvAdaptorPtr pAdaptor)
+{
+    int i;
+
+    free(pAdaptor->name);
+    pAdaptor->name = NULL;
+
+    if (pAdaptor->pEncodings) {
+        XvEncodingPtr pEncode = pAdaptor->pEncodings;
+
+        for (i = 0; i < pAdaptor->nEncodings; i++, pEncode++)
+            free(pEncode->name);
+        free(pAdaptor->pEncodings);
+        pAdaptor->pEncodings = NULL;
+    }
+
+    free(pAdaptor->pFormats);
+    pAdaptor->pFormats = NULL;
+
+    free(pAdaptor->pPorts);
+    pAdaptor->pPorts = NULL;
+
+    if (pAdaptor->pAttributes) {
+        XvAttributePtr pAttribute = pAdaptor->pAttributes;
+
+        for (i = 0; i < pAdaptor->nAttributes; i++, pAttribute++)
+            free(pAttribute->name);
+        free(pAdaptor->pAttributes);
+        pAdaptor->pAttributes = NULL;
+    }
+
+    free(pAdaptor->pImages);
+    pAdaptor->pImages = NULL;
+
+    free(pAdaptor->devPriv.ptr);
+    pAdaptor->devPriv.ptr = NULL;
+}
+
+void
+XvFillColorKey(DrawablePtr pDraw, CARD32 key, RegionPtr region)
+{
+    ScreenPtr pScreen = pDraw->pScreen;
+    ChangeGCVal pval[2];
+    BoxPtr pbox = RegionRects(region);
+    int i, nbox = RegionNumRects(region);
+    xRectangle *rects;
+    GCPtr gc;
+
+    gc = GetScratchGC(pDraw->depth, pScreen);
+    if (!gc)
+        return;
+
+    pval[0].val = key;
+    pval[1].val = IncludeInferiors;
+    (void) ChangeGC(NullClient, gc, GCForeground | GCSubwindowMode, pval);
+    ValidateGC(pDraw, gc);
+
+    rects = malloc(nbox * sizeof(xRectangle));
+    if (rects) {
+        for (i = 0; i < nbox; i++, pbox++) {
+            rects[i].x = pbox->x1 - pDraw->x;
+            rects[i].y = pbox->y1 - pDraw->y;
+            rects[i].width = pbox->x2 - pbox->x1;
+            rects[i].height = pbox->y2 - pbox->y1;
+        }
+
+        (*gc->ops->PolyFillRect) (pDraw, gc, nbox, rects);
+
+        free(rects);
+    }
+    FreeScratchGC(gc);
 }

@@ -70,6 +70,10 @@ from the X Consortium.
 #include <netinet/in.h>
 #include <netdb.h>
 #include "servermd.h"
+#ifdef GLXEXT
+#include "glx_extinit.h"
+#endif
+#include "extension.h"
 #include "fb.h"
 #include "dixstruct.h"
 #include "propertyst.h"
@@ -83,6 +87,7 @@ from the X Consortium.
 #include "tvnc_version.h"
 #include "input-xkb.h"
 #include "xkbsrv.h"
+#include "registry.h"
 #define XSERV_t
 #define TRANS_SERVER
 #define TRANS_REOPEN
@@ -119,8 +124,7 @@ Atom VNC_ACL;
 static char primaryOrder[4] = "";
 static int redBits, greenBits, blueBits;
 
-static Bool rfbScreenInit(int index, ScreenPtr pScreen, int argc,
-                          char **argv);
+static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv);
 static int rfbKeybdProc(DeviceIntPtr pDevice, int onoff);
 static int rfbMouseProc(DeviceIntPtr pDevice, int onoff);
 static int rfbExtInputProc(DeviceIntPtr pDevice, int onoff);
@@ -397,9 +401,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
 
     if (strcasecmp(argv[i], "-dridir") == 0) {
+#ifdef GLXEXT
         extern char *dri_driver_path;
         if (i + 1 >= argc) UseMsg();
         dri_driver_path = strdup(argv[i + 1]);
+#endif
         return 2;
     }
 
@@ -570,8 +576,17 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     /***** TurboVNC miscellaneous options *****/
 
+    if (strcasecmp(argv[i], "-registrydir") == 0) {
+#ifdef X_REGISTRY_REQUEST
+        extern char registry_path[PATH_MAX];
+        if (i + 1 >= argc) UseMsg();
+        snprintf(registry_path, PATH_MAX, "%s/protocol.txt", argv[i + 1]);
+#endif
+        return 2;
+    }
+
     if (strcasecmp(argv[i], "-verbose") == 0) {
-        LogSetParameter(XLOG_VERBOSITY, X_NOT_IMPLEMENTED);
+        LogSetParameter(XLOG_VERBOSITY, X_DEBUG);
         return 1;
     }
 
@@ -619,6 +634,13 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 {
     int i;
     initOutputCalled = TRUE;
+#ifdef GLXEXT
+    const ExtensionModule glxExtension =
+        { GlxExtensionInit, "GLX", &noGlxExtension };
+
+    if (serverGeneration == 1)
+        LoadExtensionList(&glxExtension, 1, TRUE);
+#endif
 
     rfbLog("Desktop name '%s' (%s:%s)\n", desktopName, rfbThisHost, display);
     rfbLog("Protocol versions supported: 3.3, 3.7, 3.8, 3.7t, 3.8t\n");
@@ -669,7 +691,7 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 
 
 static Bool
-rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
+rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
     rfbFBInfoPtr prfb = &rfbFB;
     int dpix = 96, dpiy = 96;
@@ -1513,7 +1535,7 @@ OsVendorInit()
 
 
 void
-OsVendorFatalError()
+OsVendorFatalError(const char *f, va_list args)
 {
 }
 
@@ -1609,6 +1631,7 @@ ddxUseMsg()
 
     ErrorF("\nTurboVNC miscellaneous options\n");
     ErrorF("==============================\n");
+    ErrorF("-registrydir dir       specify directory containing protocol.txt\n");
     ErrorF("-verbose               print all X.org errors, warnings, and messages\n");
     ErrorF("-version               report Xvnc version on stderr\n\n");
     exit(1);

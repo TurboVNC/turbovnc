@@ -6,19 +6,19 @@ software and its documentation for any purpose and without
 fee is hereby granted, provided that the above copyright
 notice appear in all copies and that both that copyright
 notice and this permission notice appear in supporting
-documentation, and that the name of Silicon Graphics not be 
-used in advertising or publicity pertaining to distribution 
+documentation, and that the name of Silicon Graphics not be
+used in advertising or publicity pertaining to distribution
 of the software without specific prior written permission.
-Silicon Graphics makes no representation about the suitability 
+Silicon Graphics makes no representation about the suitability
 of this software for any purpose. It is provided "as is"
 without any express or implied warranty.
 
-SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS 
-SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY 
+SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL SILICON
-GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL 
-DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, 
-DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE 
+GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
+DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
 OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION  WITH
 THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
@@ -113,7 +113,7 @@ _XkbDDXBeepInitAtoms(void)
 }
 
 static CARD32
-_XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, pointer arg)
+_XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, void *arg)
 {
     DeviceIntPtr dev = (DeviceIntPtr) arg;
     KbdFeedbackPtr feed;
@@ -300,11 +300,11 @@ _XkbDDXBeepExpire(OsTimerPtr timer, CARD32 now, pointer arg)
         ctrl->bell_duration = duration;
         ctrl->bell_pitch = pitch;
         if (xkbInfo->beepCount == 0) {
-            XkbHandleBell(0, 0, dev, ctrl->bell, (pointer) ctrl,
+            XkbHandleBell(0, 0, dev, ctrl->bell, (void *) ctrl,
                           KbdFeedbackClass, name, None, NULL);
         }
         else if (xkbInfo->desc->ctrls->enabled_ctrls & XkbAudibleBellMask) {
-            (*dev->kbdfeed->BellProc) (ctrl->bell, dev, (pointer) ctrl,
+            (*dev->kbdfeed->BellProc) (ctrl->bell, dev, (void *) ctrl,
                                        KbdFeedbackClass);
         }
         ctrl->bell_duration = oldDuration;
@@ -340,11 +340,11 @@ XkbDDXAccessXBeep(DeviceIntPtr dev, unsigned what, unsigned which)
 
     xkbInfo->beepType = what;
     xkbInfo->beepCount = 0;
-    next = _XkbDDXBeepExpire(NULL, 0, (pointer) dev);
+    next = _XkbDDXBeepExpire(NULL, 0, (void *) dev);
     if (next > 0) {
         xkbInfo->beepTimer = TimerSet(xkbInfo->beepTimer,
                                       0, next,
-                                      _XkbDDXBeepExpire, (pointer) dev);
+                                      _XkbDDXBeepExpire, (void *) dev);
     }
     return 1;
 }

@@ -16,7 +16,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, SuSE, Inc.
@@ -131,6 +131,12 @@ extern _X_EXPORT Bool
 extern _X_EXPORT GlyphSetPtr AllocateGlyphSet(int fdepth, PictFormatPtr format);
 
 extern _X_EXPORT int
- FreeGlyphSet(pointer value, XID gid);
+ FreeGlyphSet(void *value, XID gid);
+
+#define GLYPH_HAS_GLYPH_PICTURE_ACCESSOR 1 /* used for api compat */
+extern _X_EXPORT PicturePtr
+ GetGlyphPicture(GlyphPtr glyph, ScreenPtr pScreen);
+extern _X_EXPORT void
+ SetGlyphPicture(GlyphPtr glyph, ScreenPtr pScreen, PicturePtr picture);
 
 #endif                          /* _GLYPHSTR_H_ */

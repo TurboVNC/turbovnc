@@ -1,18 +1,18 @@
 /*
  * (C) Copyright IBM Corporation 2005
  * All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sub license,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the next
  * paragraph) shall be included in all copies or substantial portions of the
  * Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.  IN NO EVENT SHALL
@@ -39,10 +39,6 @@
 #include "glxserver.h"
 #include "glxbyteorder.h"
 #include "singlesize.h"
-#include "glapitable.h"
-#include "glapi.h"
-#include "glthread.h"
-#include "dispatch.h"
 #include "glxext.h"
 #include "indirect_table.h"
 #include "indirect_util.h"
@@ -57,8 +53,7 @@ __glGetBooleanv_variable_size(GLenum e)
     if (e == GL_COMPRESSED_TEXTURE_FORMATS) {
         GLint temp;
 
-        CALL_GetIntegerv(GET_DISPATCH(),
-                         (GL_NUM_COMPRESSED_TEXTURE_FORMATS, &temp));
+        glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &temp);
         return temp;
     }
     else {
@@ -143,10 +138,10 @@ __glXSendReply(ClientPtr client, const void *data, size_t elements,
      */
 
     (void) memcpy(&__glXReply.pad3, data, 8);
-    WriteToClient(client, sz_xGLXSingleReply, (char *) &__glXReply);
+    WriteToClient(client, sz_xGLXSingleReply, &__glXReply);
 
     if (reply_ints != 0) {
-        WriteToClient(client, reply_ints * 4, (char *) data);
+        WriteToClient(client, reply_ints * 4, data);
     }
 }
 
@@ -189,10 +184,10 @@ __glXSendReplySwap(ClientPtr client, const void *data, size_t elements,
      */
 
     (void) memcpy(&__glXReply.pad3, data, 8);
-    WriteToClient(client, sz_xGLXSingleReply, (char *) &__glXReply);
+    WriteToClient(client, sz_xGLXSingleReply, &__glXReply);
 
     if (reply_ints != 0) {
-        WriteToClient(client, reply_ints * 4, (char *) data);
+        WriteToClient(client, reply_ints * 4, data);
     }
 }
 
@@ -215,7 +210,7 @@ get_decode_index(const struct __glXDispatchInfo *dispatch_info, unsigned opcode)
         unsigned child_index;
 
         /* Calculate the slice of bits used by this node.
-         * 
+         *
          * If remaining_bits = 8 and tree[index] = 3, the mask of just the
          * remaining bits is 0x00ff and the mask for the remaining bits after
          * this node is 0x001f.  By taking 0x00ff & ~0x001f, we get 0x00e0.

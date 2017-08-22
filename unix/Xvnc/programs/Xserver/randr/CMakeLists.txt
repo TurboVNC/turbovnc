@@ -13,6 +13,8 @@ add_library(randr STATIC
 	rroutput.c
 	rrpointer.c
 	rrproperty.c
+	rrprovider.c
+	rrproviderproperty.c
 	rrscreen.c
 	rrsdispatch.c
 	rrtransform.c

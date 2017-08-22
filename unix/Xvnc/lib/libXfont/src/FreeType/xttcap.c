@@ -632,7 +632,7 @@ SPropRecValList_add_by_font_cap(SDynPropRecValList *pThisList,
                 }
                 break;
             }
-            if ( !isdigit(*p) )
+            if ( !isdigit((unsigned char)*p) )
                 break;
         }
     }

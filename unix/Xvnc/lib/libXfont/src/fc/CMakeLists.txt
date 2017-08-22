@@ -1,4 +1,11 @@
-add_definitions(-DUNIXCONN -DTCPCONN -DIPV6CONN)
+include_directories(../../../xtrans)
+
+add_definitions(-DUNIXCONN -DTCPCONN)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	add_definitions(-DLOCALCONN)
+else()
+	add_definitions(-DHAVE_ABSTRACT_SOCKETS)
+endif()
 
 if(FOUND_BSD44SOCKETS)
 	add_definitions(-DBSD44SOCKETS)

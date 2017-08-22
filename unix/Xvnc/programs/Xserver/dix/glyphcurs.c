@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -114,7 +114,7 @@ ServerBitsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm,
     /* fill the pixmap with 0 */
     gcval[0].val = GXcopy;
     gcval[1].val = 0;
-    gcval[2].ptr = (pointer) pfont;
+    gcval[2].ptr = (void *) pfont;
     ChangeGC(NullClient, pGC, GCFunction | GCForeground | GCFont, gcval);
     ValidateGC((DrawablePtr) ppix, pGC);
     (*pGC->ops->PolyFillRect) ((DrawablePtr) ppix, pGC, 1, &rect);

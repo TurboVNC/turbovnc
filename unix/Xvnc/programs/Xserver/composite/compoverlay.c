@@ -52,7 +52,7 @@
 #include "panoramiXsrv.h"
 #endif
 
-/* 
+/*
  * Delete the given overlay client list element from its screen list.
  */
 void
@@ -110,11 +110,11 @@ compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
     pOc->pNext = cs->pOverlayClients;
     cs->pOverlayClients = pOc;
 
-    /* 
+    /*
      * Create a resource for this element so it can be deleted
      * when the client goes away.
      */
-    if (!AddResource(pOc->resource, CompositeClientOverlayType, (pointer) pOc))
+    if (!AddResource(pOc->resource, CompositeClientOverlayType, (void *) pOc))
         return NULL;
 
     return pOc;
@@ -133,23 +133,26 @@ compCreateOverlayWindow(ScreenPtr pScreen)
     int result;
     int w = pScreen->width;
     int h = pScreen->height;
+    int x = 0, y = 0;
 
 #ifdef PANORAMIX
     if (!noPanoramiXExtension) {
+        x = -pScreen->x;
+        y = -pScreen->y;
         w = PanoramiXPixWidth;
         h = PanoramiXPixHeight;
     }
 #endif
 
     pWin = cs->pOverlayWin =
-        CreateWindow(cs->overlayWid, pRoot, 0, 0, w, h, 0,
+        CreateWindow(cs->overlayWid, pRoot, x, y, w, h, 0,
                      InputOutput, CWBackPixmap | CWOverrideRedirect, &attrs[0],
                      pRoot->drawable.depth,
                      serverClient, pScreen->rootVisual, &result);
     if (pWin == NULL)
         return FALSE;
 
-    if (!AddResource(pWin->drawable.id, RT_WINDOW, (pointer) pWin))
+    if (!AddResource(pWin->drawable.id, RT_WINDOW, (void *) pWin))
         return FALSE;
 
     MapWindow(pWin, serverClient);

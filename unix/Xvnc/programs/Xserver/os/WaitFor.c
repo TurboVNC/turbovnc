@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -72,6 +72,7 @@ SOFTWARE.
 #ifdef DPMSExtension
 #include "dpmsproc.h"
 #endif
+#include "busfault.h"
 
 #ifdef WIN32
 /* Error codes from windows sockets differ from fileio error codes  */
@@ -81,7 +82,7 @@ SOFTWARE.
 #define EINVAL WSAEINVAL
 #undef EBADF
 #define EBADF WSAENOTSOCK
-/* Windows select does not set errno. Use GetErrno as wrapper for 
+/* Windows select does not set errno. Use GetErrno as wrapper for
    WSAGetLastError */
 #define GetErrno WSAGetLastError
 #else
@@ -117,12 +118,12 @@ struct _OsTimerRec {
     CARD32 expires;
     CARD32 delta;
     OsTimerCallback callback;
-    pointer arg;
+    void *arg;
 };
 
-static void DoTimer(OsTimerPtr timer, CARD32 now, OsTimerPtr *prev);
+static void DoTimer(OsTimerPtr timer, CARD32 now, volatile OsTimerPtr *prev);
 static void CheckAllTimers(void);
-static OsTimerPtr timers = NULL;
+static volatile OsTimerPtr timers = NULL;
 
 /*****************
  * WaitForSomething:
@@ -157,12 +158,17 @@ WaitForSomething(int *pClientsReady)
     Bool someReady = FALSE;
 
     FD_ZERO(&clientsReadable);
+    FD_ZERO(&clientsWritable);
 
     if (nready)
         SmartScheduleStopTimer();
     nready = 0;
 
-    /* We need a while loop here to handle 
+#ifdef BUSFAULT
+    busfault_check();
+#endif
+
+    /* We need a while loop here to handle
        crashed connections and the screen saver timeout */
     while (1) {
         /* deal with any blocked jobs */
@@ -207,7 +213,7 @@ WaitForSomething(int *pClientsReady)
             XFD_COPYSET(&AllSockets, &LastSelectMask);
         }
 
-        BlockHandler((pointer) &wt, (pointer) &LastSelectMask);
+        BlockHandler((void *) &wt, (void *) &LastSelectMask);
         if (NewOutputPending)
             FlushAllOutput();
         /* keep this check close to select() call to minimize race */
@@ -221,7 +227,7 @@ WaitForSomething(int *pClientsReady)
             i = Select(MaxClients, &LastSelectMask, NULL, NULL, wt);
         }
         selecterr = GetErrno();
-        WakeupHandler(i, (pointer) &LastSelectMask);
+        WakeupHandler(i, (void *) &LastSelectMask);
         if (i <= 0) {           /* An error or timeout occurred */
             if (dispatchException)
                 return 0;
@@ -258,11 +264,14 @@ WaitForSomething(int *pClientsReady)
                 if ((int) (timers->expires - now) <= 0)
                     expired = 1;
 
-                while (timers && (int) (timers->expires - now) <= 0)
-                    DoTimer(timers, now, &timers);
+                if (expired) {
+                    OsBlockSignals();
+                    while (timers && (int) (timers->expires - now) <= 0)
+                        DoTimer(timers, now, &timers);
+                    OsReleaseSignals();
 
-                if (expired)
                     return 0;
+                }
             }
         }
         else {
@@ -276,11 +285,14 @@ WaitForSomething(int *pClientsReady)
                     if ((int) (timers->expires - now) <= 0)
                         expired = 1;
 
-                    while (timers && (int) (timers->expires - now) <= 0)
-                        DoTimer(timers, now, &timers);
+                    if (expired) {
+                        OsBlockSignals();
+                        while (timers && (int) (timers->expires - now) <= 0)
+                            DoTimer(timers, now, &timers);
+                        OsReleaseSignals();
 
-                    if (expired)
                         return 0;
+                    }
                 }
             }
             if (someReady)
@@ -298,7 +310,7 @@ WaitForSomething(int *pClientsReady)
             XFD_ANDSET(&tmp_set, &LastSelectMask, &WellKnownConnections);
             if (XFD_ANYSET(&tmp_set))
                 QueueWorkProc(EstablishNewConnections, NULL,
-                              (pointer) &LastSelectMask);
+                              (void *) &LastSelectMask);
 
             if (XFD_ANYSET(&devicesReadable) || XFD_ANYSET(&clientsReadable))
                 break;
@@ -338,14 +350,14 @@ WaitForSomething(int *pClientsReady)
              *  ready, they are all returned.  This means that an
              *  aggressive client could take over the server.
              *  This was not considered a big problem because
-             *  aggressive clients can hose the server in so many 
+             *  aggressive clients can hose the server in so many
              *  other ways :)
              */
             client_priority = clients[client_index]->priority;
             if (nready == 0 || client_priority > highest_priority) {
                 /*  Either we found the first client, or we found
                  *  a client whose priority is greater than all others
-                 *  that have been found so far.  Either way, we want 
+                 *  that have been found so far.  Either way, we want
                  *  to initialize the list of clients to contain just
                  *  this client.
                  */
@@ -353,7 +365,7 @@ WaitForSomething(int *pClientsReady)
                 highest_priority = client_priority;
                 nready = 1;
             }
-            /*  the following if makes sure that multiple same-priority 
+            /*  the following if makes sure that multiple same-priority
              *  clients get batched together
              */
             else if (client_priority == highest_priority) {
@@ -396,24 +408,25 @@ CheckAllTimers(void)
 }
 
 static void
-DoTimer(OsTimerPtr timer, CARD32 now, OsTimerPtr *prev)
+DoTimer(OsTimerPtr timer, CARD32 now, volatile OsTimerPtr *prev)
 {
     CARD32 newTime;
 
     OsBlockSignals();
     *prev = timer->next;
     timer->next = NULL;
+    OsReleaseSignals();
+
     newTime = (*timer->callback) (timer, now, timer->arg);
     if (newTime)
         TimerSet(timer, 0, newTime, timer->callback, timer->arg);
-    OsReleaseSignals();
 }
 
 OsTimerPtr
 TimerSet(OsTimerPtr timer, int flags, CARD32 millis,
-         OsTimerCallback func, pointer arg)
+         OsTimerCallback func, void *arg)
 {
-    register OsTimerPtr *prev;
+    volatile OsTimerPtr *prev;
     CARD32 now = GetTimeInMillis();
 
     if (!timer) {
@@ -465,7 +478,7 @@ Bool
 TimerForce(OsTimerPtr timer)
 {
     int rc = FALSE;
-    OsTimerPtr *prev;
+    volatile OsTimerPtr *prev;
 
     OsBlockSignals();
     for (prev = &timers; *prev; prev = &(*prev)->next) {
@@ -482,7 +495,7 @@ TimerForce(OsTimerPtr timer)
 void
 TimerCancel(OsTimerPtr timer)
 {
-    OsTimerPtr *prev;
+    volatile OsTimerPtr *prev;
 
     if (!timer)
         return;
@@ -510,8 +523,12 @@ TimerCheck(void)
 {
     CARD32 now = GetTimeInMillis();
 
-    while (timers && (int) (timers->expires - now) <= 0)
-        DoTimer(timers, now, &timers);
+    if (timers && (int) (timers->expires - now) <= 0) {
+        OsBlockSignals();
+        while (timers && (int) (timers->expires - now) <= 0)
+            DoTimer(timers, now, &timers);
+        OsReleaseSignals();
+    }
 }
 
 void
@@ -559,9 +576,9 @@ NextDPMSTimeout(INT32 timeout)
 #endif                          /* DPMSExtension */
 
 static CARD32
-ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, pointer arg)
+ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
 {
-    INT32 timeout = now - lastDeviceEventTime.milliseconds;
+    INT32 timeout = now - LastEventTime(XIAllDevices).milliseconds;
     CARD32 nextTimeout = 0;
 
 #ifdef DPMSExtension

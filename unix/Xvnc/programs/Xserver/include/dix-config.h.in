@@ -27,9 +27,6 @@
 /* Define to 1 if you have the `getzoneid' function. */
 #cmakedefine HAVE_GETZONEID
 
-/* Define to 1 if you have the <ieeefp.h> header file. */
-#cmakedefine HAVE_IEEEFP_H
-
 /* Define to 1 if you have the `shmctl64' function. */
 #cmakedefine HAVE_SHMCTL64
 
@@ -56,5 +53,20 @@
 
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine HAVE_VASPRINTF
+
+/* Define to 1 if typeof works with your compiler. */
+#cmakedefine HAVE_TYPEOF
+
+/* Define to __typeof__ if your compiler spells it that way. */
+#define typeof @TYPEOF@
+
+/* Use XTrans FD passing support */
+#define XTRANS_SEND_FDS @XTRANS_SEND_FDS@
+
+/* Wrap SIGBUS to catch MIT-SHM faults */
+#define BUSFAULT 1
+
+/* Listen on Unix socket */
+#define LISTEN_UNIX
 
 #endif /* _DIX_CONFIG_H_ */

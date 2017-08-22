@@ -16,6 +16,7 @@ add_library(pixman STATIC
 	pixman/pixman-edge-accessors.c
 	pixman/pixman-fast-path.c
 	pixman/pixman-general.c
+	pixman/pixman-glyph.c
 	pixman/pixman-gradient-walker.c
 	pixman/pixman-image.c
 	pixman/pixman-implementation.c

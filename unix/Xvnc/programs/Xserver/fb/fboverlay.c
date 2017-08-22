@@ -16,7 +16,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, SuSE, Inc.
@@ -63,7 +63,7 @@ fbOverlayCreateWindow(WindowPtr pWin)
     for (i = 0; i < pScrPriv->nlayers; i++) {
         pPixmap = pScrPriv->layer[i].u.run.pixmap;
         if (pWin->drawable.depth == pPixmap->drawable.depth) {
-            dixSetPrivate(&pWin->devPrivates, fbGetWinPrivateKey(), pPixmap);
+            dixSetPrivate(&pWin->devPrivates, fbGetWinPrivateKey(pWin), pPixmap);
             /*
              * Make sure layer keys are written correctly by
              * having non-root layers set to full while the
@@ -81,7 +81,7 @@ fbOverlayCreateWindow(WindowPtr pWin)
 }
 
 Bool
-fbOverlayCloseScreen(int iScreen, ScreenPtr pScreen)
+fbOverlayCloseScreen(ScreenPtr pScreen)
 {
     FbOverlayScrPrivPtr pScrPriv = fbOverlayGetScrPriv(pScreen);
     int i;
@@ -103,8 +103,8 @@ fbOverlayWindowLayer(WindowPtr pWin)
     int i;
 
     for (i = 0; i < pScrPriv->nlayers; i++)
-        if (dixLookupPrivate(&pWin->devPrivates, fbGetWinPrivateKey()) ==
-            (pointer) pScrPriv->layer[i].u.run.pixmap)
+        if (dixLookupPrivate(&pWin->devPrivates, fbGetWinPrivateKey(pWin)) ==
+            (void *) pScrPriv->layer[i].u.run.pixmap)
             return i;
     return 0;
 }
@@ -115,7 +115,7 @@ fbOverlayCreateScreenResources(ScreenPtr pScreen)
     int i;
     FbOverlayScrPrivPtr pScrPriv = fbOverlayGetScrPriv(pScreen);
     PixmapPtr pPixmap;
-    pointer pbits;
+    void *pbits;
     int width;
     int depth;
     BoxRec box;
@@ -240,18 +240,17 @@ fbOverlayCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
 }
 
 void
-fbOverlayWindowExposures(WindowPtr pWin,
-                         RegionPtr prgn, RegionPtr other_exposed)
+fbOverlayWindowExposures(WindowPtr pWin, RegionPtr prgn)
 {
     fbOverlayUpdateLayerRegion(pWin->drawable.pScreen,
                                fbOverlayWindowLayer(pWin), prgn);
-    miWindowExposures(pWin, prgn, other_exposed);
+    miWindowExposures(pWin, prgn);
 }
 
 Bool
 fbOverlaySetupScreen(ScreenPtr pScreen,
-                     pointer pbits1,
-                     pointer pbits2,
+                     void *pbits1,
+                     void *pbits2,
                      int xsize,
                      int ysize,
                      int dpix,
@@ -287,8 +286,8 @@ fb24_32OverlayCreateScreenResources(ScreenPtr pScreen)
 
 Bool
 fbOverlayFinishScreenInit(ScreenPtr pScreen,
-                          pointer pbits1,
-                          pointer pbits2,
+                          void *pbits1,
+                          void *pbits2,
                           int xsize,
                           int ysize,
                           int dpix,

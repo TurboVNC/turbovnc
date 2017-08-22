@@ -26,13 +26,13 @@ Copyright 1987, 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -174,19 +174,19 @@ ProcSetSelectionOwner(ClientPtr client)
     rc = dixLookupSelection(&pSel, stuff->selection, client, DixSetAttrAccess);
 
     if (rc == Success) {
-        xEvent event;
-
         /* If the timestamp in client's request is in the past relative
            to the time stamp indicating the last time the owner of the
-           selection was set, do not set the selection, just return 
+           selection was set, do not set the selection, just return
            success. */
         if (CompareTimeStamps(time, pSel->lastTimeChanged) == EARLIER)
             return Success;
         if (pSel->client && (!pWin || (pSel->client != client))) {
+            xEvent event = {
+                .u.selectionClear.time = time.milliseconds,
+                .u.selectionClear.window = pSel->window,
+                .u.selectionClear.atom = pSel->selection
+            };
             event.u.u.type = SelectionClear;
-            event.u.selectionClear.time = time.milliseconds;
-            event.u.selectionClear.window = pSel->window;
-            event.u.selectionClear.atom = pSel->selection;
             WriteEventsToClient(pSel->client, 1, &event);
         }
     }
@@ -238,10 +238,11 @@ ProcGetSelectionOwner(ClientPtr client)
         return BadAtom;
     }
 
-    memset(&reply, 0, sizeof(xGetSelectionOwnerReply));
-    reply.type = X_Reply;
-    reply.length = 0;
-    reply.sequenceNumber = client->sequence;
+    reply = (xGetSelectionOwnerReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+    };
 
     rc = dixLookupSelection(&pSel, stuff->id, client, DixGetAttrAccess);
     if (rc == Success)

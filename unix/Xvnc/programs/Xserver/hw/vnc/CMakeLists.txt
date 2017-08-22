@@ -2,8 +2,8 @@ set(DEFAULT_TVNC_USEPAM 1)
 option(TVNC_USEPAM "Include PAM authentication support in the TurboVNC Server"
 	${DEFAULT_TVNC_USEPAM})
 
-include_directories(. ../../fb ../../mi ../../miext/damage ../../os
-	../../randr ../../render ${CMAKE_SOURCE_DIR}/common/rfb)
+include_directories(. ../../fb ../../mi ../../os ../../randr ../../render
+	${CMAKE_SOURCE_DIR}/common/rfb)
 
 add_definitions(${ServerOSDefines})
 set(PAMSRC "")
@@ -60,6 +60,13 @@ else()
 	message(STATUS "Disabling TLS encryption")
 endif()
 
+check_function_exists(strsep HAVE_STRSEP)
+if(NOT HAVE_STRSEP)
+	set(STRSEPSRC strsep.c)
+else()
+	add_definitions(-DHAVE_STRSEP)
+endif()
+
 add_library(vnc STATIC
 	auth.c
 	cmap.c
@@ -81,6 +88,7 @@ add_library(vnc STATIC
 	sockets.c
 	sprite.c
 	stats.c
+	${STRSEPSRC}
 	tight.c
 	translate.c
 	vncextinit.c

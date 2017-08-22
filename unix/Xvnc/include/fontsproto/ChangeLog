@@ -1,3 +1,406 @@
+commit df8c05f7c0253a36589d96efa52938215eff9d4d
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Mon Apr 14 17:04:36 2014 +0200
+
+    fontsproto 2.1.3
+
+commit 8ba53a78bfc443a4ee8228b9c47f7e94118d7153
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Nov 15 21:47:31 2013 +0900
+
+    Allow paths and patterns to be const
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 7f951a3b8ad71211e34a52878a030d5df823c49e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 20 12:53:16 2014 -0800
+
+    spec: Make alignment of columns in Encoding section more consistent
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 73308e73ae972b1942778a52c386d4363cb15ec8
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Jan 15 00:20:52 2014 -0800
+
+    spec: use <parameter> markup for elements of requests & replies
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f4819101325f81614de56cd0ff6c53745c8175f1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Jan 14 23:44:59 2014 -0800
+
+    spec: Remove <!- .LP --> comments leftover from nroff migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 710892b2ad5e374252ded6080d5e00cee8c70cfc
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Jan 14 23:17:45 2014 -0800
+
+    spec: Make links to data types, requests, events & errors
+    
+    Extracted each set of section ids to file and converted to a perl script:
+    
+    next if m{^\d};  # skip over encoding section body lines
+    next if m{^[adfmnpv]   };  # skip over encoding section body lines
+    
+    s{<type>ACCESSCONTEXT</type>}{<link linkend="Data_Types:ACCESSCONTEXT">$&</link>}g;
+    [...]
+    s{<type>XFONTINFO</type>}{<link linkend="Data_Types:XFONTINFO">$&</link>}g;
+    
+    s{<type>LISTofACCESSCONTEXT</type>}{<link linkend="Data_Types:ACCESSCONTEXT">$&</link>}g;
+    [...]
+    s{<type>LISTofXFONTINFO</type>}{<link linkend="Data_Types:XFONTINFO">$&</link>}g;
+    
+    s{<function>NoOp</function>}{<link linkend="Requests:NoOp">$&</link>}g;
+    [...]
+    s{<function>CloseFont</function>}{<link linkend="Requests:CloseFont">$&</link>}g;
+    
+    s{<errorname>Request</errorname>}{<link linkend="Errors:Request">$&</link>}g;
+    [...]
+    s{<errorname>Extensions</errorname>}{<link linkend="Errors:Extensions">$&</link>}g;
+    
+    s{<function>KeepAlive</function>}{<link linkend="Events:KeepAlive">$&</link>}g;
+    [...]
+    s{<function>Extensions</function>}{<link linkend="Events:Extensions">$&</link>}g;
+    
+    s{<title><link linkend="[^"]+">(.*?)</link></title>}{<title>$1</title>}g;
+    s{<row><entry><link linkend="[^"]+"><type>(.*?)</type></link>}{<row><entry><type>$1</type>}g;
+    s{<row><entry morerows=([\d'"]+)><link linkend="[^"]+"><type>(.*?)</type></link>}{<row><entry morerows=$1><type>$2</type>}g;
+    s{<link linkend="([^"]+)"><emphasis role="bold"><link linkend="\1">(.*?)</link></emphasis></link>}{<link linkend="$1"><emphasis role="bold">$2</emphasis></link>}g;
+    
+    if ($_ =~ m{ id=['"]([^"]+)['"]}) { $sectionid = $1; }
+    s{<link linkend="$sectionid">(.*?)</link>}{$1}g;
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c7d49c240737afe938c59a9c7a75dbe1c754c82a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Jan 14 00:16:15 2014 -0800
+
+    spec: markup enumerated constant names with <constant>
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 01d7bd611758e671ccfd1fc032b5ad7131121d55
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 23:33:23 2014 -0800
+
+    spec: add enumerated constants to index
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 00dc587c4626304d4b258addc727bbd2670d3729
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 23:18:38 2014 -0800
+
+    spec: fixup quote characters
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit dc7c5001c6ebbfa75ddaa664c69ac2074257ff53
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 22:52:31 2014 -0800
+
+    spec: give footnotes ids for more stable links
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a87c92dbc5d8fd417e546f52c2c17b567577f669
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 21:08:00 2014 -0800
+
+    spec: Convert Data Types section to have a section per type, with tables
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8f3673266589cf534999b64e77aba553ebffa700
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 13 21:05:43 2014 -0800
+
+    spec: Finish replacing nroff .sp macros with <para> breaks
+    
+    Mostly just removes the <!-- .sp --> comments where they had already
+    been autoconverted.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ac94c9a5dd5a15ea7d1d632ad8a439c507fde244
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jan 12 17:10:48 2014 -0800
+
+    spec: markup data type names with <type>
+    
+    Automated replacement, followed by manual correction to <structfield>
+    when names refer to fields in given types/structs.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 2a55f651cc92b58c749ac7b03690a892e00c00bd
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jan 12 16:44:17 2014 -0800
+
+    spec: Use <superscript> for exponents
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 9b3937a0d22898efaa88712f8265fbe508730f89
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jan 12 16:37:39 2014 -0800
+
+    spec: Convert a bunch of AccessContext references from <function> to </type>
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 5b71d6320dee422017a7efdcdcb2bb2efd13cedc
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jan 12 16:17:19 2014 -0800
+
+    spec: Use tables for contents of Requests, Events & Errors
+    
+    Much more consistent layout than previous mix of
+    blockquotes & literallayouts
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f494b7d13777afc90a521905dd73a149b5b12c59
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 17:54:15 2014 -0800
+
+    spec: Use <personname> markup in Acknowledgements
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7cf85b0cddbd21fda83a70123a679a1a0a1e0946
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 17:22:04 2014 -0800
+
+    spec: make links from encoding section to definitions
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c4191141d3e957e92eafd0e1af69090cb710ff4d
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 16:22:54 2014 -0800
+
+    spec: Convert Errors chapter to have a section per request
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 067c12183e56c5373d70146e6fd16df121aa2d21
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 16:12:42 2014 -0800
+
+    spec: Convert Events chapter to have a section per request
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7ba1f9d1cc1a4be23f10f692d9c6457fe0a8e270
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 16:04:14 2014 -0800
+
+    spec: Convert Requests chapter to have a section per request
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3eb7472574b352bc584d21ca5eaae137a651c2e5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 15:21:21 2014 -0800
+
+    spec: Use <errorname> instead of <function> for error names
+    
+    Also markup some uses of errornames that were previously missed.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f3e02cc46a301cd428adf8015405bc3ba3e634ae
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 15:02:24 2014 -0800
+
+    spec: fix boundaries of <function> tags
+    
+    Conversion from nroff .BR "function" "otherstuff" style markup got
+    confused in a few places.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8dd500ace7c3ce5cddd39881180649ad4e54ffb1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 14:34:08 2014 -0800
+
+    spec: add autogenerated index
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ea1e8219aaa219b1f2206a6b3ae8ac128d82e58f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 14:31:32 2014 -0800
+
+    spec: Convert .IN comments to indexterm tags
+    
+    Performed with:
+    perl -i -p -e 's{\<\!-- \.IN "([^"]+)" "" "\@DEF\@" --\>}{<indexterm significance="preferred"><primary>$1</primary></indexterm>}' specs/fsproto.xml
+    perl -i -p -e 's{\<\!-- \.IN "([^"]+)" "([^"]+)" "\@DEF\@" --\>}{  <indexterm significance="preferred"><primary>$1</primary><secondary>$2</secondary></indexterm>}' specs/fsproto.xml
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 94a1c39d1ad8490d41574fb2d8c1a27f09645361
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 01:46:04 2014 -0800
+
+    spec: convert list of license models from itemizedlist to variablelist
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f00deaf27373ae9c4c1145bd192c5a54b33cbd13
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 01:18:01 2014 -0800
+
+    spec: add <acronym> markup
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ecc7f1c81610af77bceb1790fe9a73e04460f934
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 00:26:01 2014 -0800
+
+    spec: remove some extra quotes from nroff conversion
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 40fa6e3b925710c78948725e1605527a4dabe6db
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Jan 11 00:05:56 2014 -0800
+
+    spec: Use <figure> markup for figure labels
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 30d9203bd25641a4f82e671bae528d2c2a8ef30b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jan 10 23:54:41 2014 -0800
+
+    spec: add links to references to other sections
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8955b4ea5174cc602f5f3ea97599038fc136dbbc
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jan 10 23:52:40 2014 -0800
+
+    spec: change ids for encoding sections from *_2 to Encoding::*
+    
+    Easier for cross-reference linking, matches what x11proto uses
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c362dc235e1b893290623b28fe9eb9b50c8a270e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jan 10 23:34:48 2014 -0800
+
+    spec: fixup markup/formatting of the naming syntax section
+    
+    Use <replaceable> <literal> <optional> etc. tags instead of
+    &lt;&gt; "" and [] pairs.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 49a672925879db88da8bf3ea9ff6505524a53673
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jan 10 23:03:05 2014 -0800
+
+    spec: markup introduction of new terms with <firstterm>
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 66a3f8e82952980556471b98ab2fcaded440fc31
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jan 10 22:55:26 2014 -0800
+
+    spec: convert from article with sections to book with chapters
+    
+    Matches most other X.Org specs, and restores our chapter numbering
+    in output
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d0fb589de82488ac23f1c17a364c1a940255cac8
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Jan 10 22:47:45 2014 -0800
+
+    spec: fixup bibliography entries (correct authors, link to references)
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 66f98aff9a14d05359eec7b42a8903922754b9f7
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Jan 9 22:50:02 2014 -0800
+
+    spec: add olinks to X11 protocol & XLFD specs
+    
+    Also use <citetitle> to markup titles of other specs/docs.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 91dd8f639b2210467bb453644271de8ec38a6d09
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Jan 7 23:47:02 2014 -0800
+
+    spec: Replace ASCII => & -> arrows with Unicode ▶ & ◀
+    
+    Matches formatting used in core X11 & current extension specs
+    
+    This spec previously used => for server to client replies, like the
+    other specs, but also had -> for client responses to server data, so
+    the opposing direction arrows should make this distinction clearer.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 431a426623b2e46a0968d8fc631f36ec0cf7298f
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sun Jan 19 12:59:45 2014 -0800
+
+    Replace 'pointer' with the equivalent 'void *'.
+    
+    The pointer typedef is being removed because it causes so many
+    compiler warnings when -Wshadow is enabled.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit d84789dc33b8e8d284f2876b6067906183ac4253
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Oct 26 09:42:05 2013 -0400
+
+    config: replace deprecated use of AC_OUTPUT with AC_CONFIG_FILES
+    
+    Fix Automake warning: AC_OUTPUT should be used without arguments.
+    www.gnu.org/software/autoconf/manual/autoconf.html#Configuration-Files
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 81e4d4ec53f1f3848ff269fe476c3a1d35d93aef
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 4a7ca1bea4756665f27972cb82d8e13cdd8074b7
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:01:10 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
 commit 607784e2ad522b7dff32da82480acf6934dc4a23
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Thu Mar 22 20:40:21 2012 -0700

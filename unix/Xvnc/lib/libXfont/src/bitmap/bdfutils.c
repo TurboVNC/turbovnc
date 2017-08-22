@@ -207,11 +207,11 @@ bdfIsInteger(char *str)
     char        c;
 
     c = *str++;
-    if (!(isdigit(c) || c == '-' || c == '+'))
+    if (!(isdigit((unsigned char)c) || c == '-' || c == '+'))
 	return (FALSE);
 
     while ((c = *str++))
-	if (!isdigit(c))
+	if (!isdigit((unsigned char)c))
 	    return (FALSE);
 
     return (TRUE);

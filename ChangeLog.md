@@ -82,6 +82,16 @@ system property to `1`.
 (`xrandr`) or through the window manager's display configuration applet, to
 modify the server's screen layout.
 
+7. The TurboVNC Server is now based on xorg-xserver 1.17.4, which improves
+compatibility with newer window managers.
+
+8. By default, the TurboVNC Server will no longer listen on a TCP socket for
+X11 protocol connections from X11 applications.  This mimics the behavior of
+most modern X servers, which require X11 connections to be made using Unix
+domain sockets.  To restore the behavior of previous versions of TurboVNC, pass
+`-listen tcp` to vncserver (assuming that X11 TCP connections are not globally
+disabled in the TurboVNC Server's security configuration file.)
+
 
 2.1.2
 =====

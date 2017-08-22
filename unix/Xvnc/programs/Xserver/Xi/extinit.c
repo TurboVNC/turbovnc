@@ -49,8 +49,6 @@ SOFTWARE.
  *  Dispatch routines and initialization routines for the X input extension.
  *
  */
-#define ARRAY_SIZE(_a)        (sizeof((_a)) / sizeof((_a)[0]))
-
 #define	 NUMTYPES 15
 
 #ifdef HAVE_DIX_CONFIG_H
@@ -124,6 +122,7 @@ SOFTWARE.
 #include "xiqueryversion.h"
 #include "xisetclientpointer.h"
 #include "xiwarppointer.h"
+#include "xibarriers.h"
 
 /* Masks for XI events have to be aligned with core event (partially anyway).
  * If DeviceButtonMotionMask is != ButtonMotionMask, event delivery
@@ -150,10 +149,8 @@ const Mask ChangeDeviceNotifyMask = (1L << 16);
 const Mask DeviceButtonGrabMask = (1L << 17);
 const Mask DeviceOwnerGrabButtonMask = (1L << 17);
 const Mask DevicePresenceNotifyMask = (1L << 18);
-const Mask DeviceEnterWindowMask = (1L << 18);
-const Mask DeviceLeaveWindowMask = (1L << 19);
-const Mask DevicePropertyNotifyMask = (1L << 20);
-const Mask XIAllMasks = (1L << 21) - 1;
+const Mask DevicePropertyNotifyMask = (1L << 19);
+const Mask XIAllMasks = (1L << 20) - 1;
 
 int ExtEventIndex;
 Mask ExtExclusiveMasks[EMASKSIZE];
@@ -255,7 +252,8 @@ static int (*ProcIVector[]) (ClientPtr) = {
         ProcXIChangeProperty,   /* 57 */
         ProcXIDeleteProperty,   /* 58 */
         ProcXIGetProperty,      /* 59 */
-        ProcXIGetSelectedEvents /* 60 */
+        ProcXIGetSelectedEvents, /* 60 */
+        ProcXIBarrierReleasePointer /* 61 */
 };
 
 /* For swapped clients */
@@ -320,7 +318,8 @@ static int (*SProcIVector[]) (ClientPtr) = {
         SProcXIChangeProperty,  /* 57 */
         SProcXIDeleteProperty,  /* 58 */
         SProcXIGetProperty,     /* 59 */
-        SProcXIGetSelectedEvents        /* 60 */
+        SProcXIGetSelectedEvents,       /* 60 */
+        SProcXIBarrierReleasePointer /* 61 */
 };
 
 /*****************************************************************
@@ -382,7 +381,7 @@ DevPrivateKeyRec XIClientPrivateKeyRec;
  */
 
 static void
-XIClientCallback(CallbackListPtr *list, pointer closure, pointer data)
+XIClientCallback(CallbackListPtr *list, void *closure, void *data)
 {
     NewClientInfoRec *clientinfo = (NewClientInfoRec *) data;
     ClientPtr pClient = clientinfo->client;
@@ -438,8 +437,9 @@ SProcIDispatch(ClientPtr client)
 
 static void
 SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
-                                        /* All we look at is the type field */
-{                               /* This is common to all replies    */
+{
+    /* All we look at is the type field */
+    /* This is common to all replies    */
     if (rep->RepType == X_GetExtensionVersion)
         SRepXGetExtensionVersion(client, len,
                                  (xGetExtensionVersionReply *) rep);
@@ -649,7 +649,7 @@ SDeviceChangedEvent(xXIDeviceChangedEvent * from, xXIDeviceChangedEvent * to)
     *to = *from;
     memcpy(&to[1], &from[1], from->length * 4);
 
-    any = (xXIAnyInfo *) & to[1];
+    any = (xXIAnyInfo *) &to[1];
     for (i = 0; i < to->num_classes; i++) {
         int length = any->length;
 
@@ -657,7 +657,7 @@ SDeviceChangedEvent(xXIDeviceChangedEvent * from, xXIDeviceChangedEvent * to)
         case KeyClass:
         {
             xXIKeyInfo *ki = (xXIKeyInfo *) any;
-            uint32_t *key = (uint32_t *) & ki[1];
+            uint32_t *key = (uint32_t *) &ki[1];
 
             for (j = 0; j < ki->num_keycodes; j++, key++)
                 swapl(key);
@@ -768,7 +768,7 @@ SDeviceHierarchyEvent(xXIHierarchyEvent * from, xXIHierarchyEvent * to)
     swapl(&to->flags);
     swaps(&to->num_info);
 
-    info = (xXIHierarchyInfo *) & to[1];
+    info = (xXIHierarchyInfo *) &to[1];
     for (i = 0; i < from->num_info; i++) {
         swaps(&info->deviceid);
         swaps(&info->attachment);
@@ -842,6 +842,32 @@ STouchOwnershipEvent(xXITouchOwnershipEvent * from, xXITouchOwnershipEvent * to)
     swapl(&to->child);
 }
 
+static void
+SBarrierEvent(xXIBarrierEvent * from,
+              xXIBarrierEvent * to) {
+
+    *to = *from;
+
+    swaps(&to->sequenceNumber);
+    swapl(&to->length);
+    swaps(&to->evtype);
+    swapl(&to->time);
+    swaps(&to->deviceid);
+    swaps(&to->sourceid);
+    swapl(&to->event);
+    swapl(&to->root);
+    swapl(&to->root_x);
+    swapl(&to->root_y);
+
+    swapl(&to->dx.integral);
+    swapl(&to->dx.frac);
+    swapl(&to->dy.integral);
+    swapl(&to->dy.frac);
+    swapl(&to->dtime);
+    swapl(&to->barrier);
+    swapl(&to->eventid);
+}
+
 /** Event swapping function for XI2 events. */
 void
 XI2EventSwap(xGenericEvent *from, xGenericEvent *to)
@@ -887,6 +913,11 @@ XI2EventSwap(xGenericEvent *from, xGenericEvent *to)
     case XI_RawTouchUpdate:
     case XI_RawTouchEnd:
         SRawEvent((xXIRawEvent *) from, (xXIRawEvent *) to);
+        break;
+    case XI_BarrierHit:
+    case XI_BarrierLeave:
+        SBarrierEvent((xXIBarrierEvent *) from,
+                      (xXIBarrierEvent *) to);
         break;
     default:
         ErrorF("[Xi] Unknown event type to swap. This is a bug.\n");
@@ -1137,6 +1168,11 @@ IResetProc(ExtensionEntry * unused)
     EventSwapVector[DevicePresenceNotify] = NotImplemented;
     EventSwapVector[DevicePropertyNotify] = NotImplemented;
     RestoreExtensionEvents();
+
+    free(xi_all_devices.name);
+    free(xi_all_master_devices.name);
+
+    XIBarrierReset();
 }
 
 /***********************************************************************
@@ -1263,6 +1299,9 @@ XInputExtensionInit(void)
     if (!AddCallback(&ClientStateCallback, XIClientCallback, 0))
         FatalError("Failed to add callback to XI.\n");
 
+    if (!XIBarrierInit())
+        FatalError("Could not initialize barriers.\n");
+
     extEntry = AddExtension(INAME, IEVENTS, IERRORS, ProcIDispatch,
                             SProcIDispatch, IResetProc, StandardMinorOpcode);
     if (extEntry) {
@@ -1298,9 +1337,9 @@ XInputExtensionInit(void)
         memset(&xi_all_devices, 0, sizeof(xi_all_devices));
         memset(&xi_all_master_devices, 0, sizeof(xi_all_master_devices));
         xi_all_devices.id = XIAllDevices;
-        xi_all_devices.name = "XIAllDevices";
+        xi_all_devices.name = strdup("XIAllDevices");
         xi_all_master_devices.id = XIAllMasterDevices;
-        xi_all_master_devices.name = "XIAllMasterDevices";
+        xi_all_master_devices.name = strdup("XIAllMasterDevices");
 
         inputInfo.all_devices = &xi_all_devices;
         inputInfo.all_master_devices = &xi_all_master_devices;

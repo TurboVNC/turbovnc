@@ -54,15 +54,6 @@ int error_code;
   ((char *)ptr)[index_a] = ((char *)ptr)[index_b];  \
   ((char *)ptr)[index_b] = temp;  \
 
-static inline void swap_uint64(uint64_t *ptr)
-{
-  char temp;
-  SWAP(0, 7)
-  SWAP(1, 6)
-  SWAP(2, 5)
-  SWAP(3, 4)
-}
-
 static inline void swap_float(float *ptr)
 {
   char temp;

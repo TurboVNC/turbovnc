@@ -90,7 +90,7 @@ BuiltinClose (BufFilePtr f, int unused)
 
 
 FontFilePtr
-BuiltinFileOpen (char *name)
+BuiltinFileOpen (const char *name)
 {
     int		    i;
     BuiltinIOPtr    io;

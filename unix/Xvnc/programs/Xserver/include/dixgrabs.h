@@ -31,7 +31,7 @@ struct _GrabParameters;
 extern void PrintDeviceGrabInfo(DeviceIntPtr dev);
 extern void UngrabAllDevices(Bool kill_client);
 
-extern GrabPtr AllocGrab(void);
+extern GrabPtr AllocGrab(const GrabPtr src);
 extern void FreeGrab(GrabPtr grab);
 extern Bool CopyGrab(GrabPtr dst, const GrabPtr src);
 
@@ -47,8 +47,8 @@ extern GrabPtr CreateGrab(int /* client */ ,
                           WindowPtr /* confineTo */ ,
                           CursorPtr /* cursor */ );
 
-extern _X_EXPORT int DeletePassiveGrab(pointer /* value */ ,
-                                       XID /* id */ );
+extern _X_EXPORT int DeletePassiveGrab(void *value,
+                                       XID id);
 
 extern _X_EXPORT Bool GrabMatchesSecond(GrabPtr /* pFirstGrab */ ,
                                         GrabPtr /* pSecondGrab */ ,

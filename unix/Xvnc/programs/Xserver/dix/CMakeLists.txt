@@ -1,4 +1,4 @@
-include_directories(../Xi ../composite ../damageext ../mi ../miext/damage
+include_directories(../Xi ../composite ../damageext ../mi	../miext/sync
 	../render ../xfixes)
 
 add_definitions(-DRGB_DB=\"/usr/share/X11/rgb\"
@@ -6,8 +6,18 @@ add_definitions(-DRGB_DB=\"/usr/share/X11/rgb\"
 
 handle_type_puns()
 
+if(BITS EQUAL 64)
+	set(DEFAULT_SERVER_MISC_CONFIG_PATH "/usr/lib64/xorg")
+else()
+	set(DEFAULT_SERVER_MISC_CONFIG_PATH "/usr/lib/xorg")
+endif()
+set(SERVER_MISC_CONFIG_PATH ${DEFAULT_SERVER_MISC_CONFIG_PATH} CACHE PATH
+	"Path to miscellaneous server config files (default: ${DEFAULT_SERVER_MISC_CONFIG_PATH})")
+message(STATUS "SERVER_MISC_CONFIG_PATH = ${SERVER_MISC_CONFIG_PATH}")
+add_definitions(-DSERVER_MISC_CONFIG_PATH=\"${SERVER_MISC_CONFIG_PATH}\")
+
 add_library(main STATIC
-	main.c)
+	stubmain.c)
 
 add_library(dix STATIC
 	atom.c
@@ -29,6 +39,7 @@ add_library(dix STATIC
 	grabs.c
 	initatoms.c
 	inpututils.c
+	main.c
 	pixmap.c
 	privates.c
 	property.c

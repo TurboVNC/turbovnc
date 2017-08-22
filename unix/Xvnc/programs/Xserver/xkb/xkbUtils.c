@@ -6,19 +6,19 @@ software and its documentation for any purpose and without
 fee is hereby granted, provided that the above copyright
 notice appear in all copies and that both that copyright
 notice and this permission notice appear in supporting
-documentation, and that the name of Silicon Graphics not be 
-used in advertising or publicity pertaining to distribution 
+documentation, and that the name of Silicon Graphics not be
+used in advertising or publicity pertaining to distribution
 of the software without specific prior written permission.
-Silicon Graphics makes no representation about the suitability 
+Silicon Graphics makes no representation about the suitability
 of this software for any purpose. It is provided "as is"
 without any express or implied warranty.
 
-SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS 
-SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY 
+SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL SILICON
-GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL 
-DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, 
-DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE 
+GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
+DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
 OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION  WITH
 THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
@@ -642,6 +642,7 @@ XkbComputeCompatState(XkbSrvInfoPtr xkbi)
     CARD16 grp_mask;
     XkbStatePtr state = &xkbi->state;
     XkbCompatMapPtr map;
+    XkbControlsPtr ctrls;
 
     if (!state || !xkbi->desc || !xkbi->desc->ctrls || !xkbi->desc->compat)
         return;
@@ -650,9 +651,14 @@ XkbComputeCompatState(XkbSrvInfoPtr xkbi)
     grp_mask = map->groups[state->group].mask;
     state->compat_state = state->mods | grp_mask;
     state->compat_lookup_mods = state->lookup_mods | grp_mask;
+    ctrls= xkbi->desc->ctrls;
 
-    if (xkbi->desc->ctrls->enabled_ctrls & XkbIgnoreGroupLockMask)
-        grp_mask = map->groups[state->base_group].mask;
+    if (ctrls->enabled_ctrls & XkbIgnoreGroupLockMask) {
+	unsigned char grp = state->base_group+state->latched_group;
+	if (grp >= ctrls->num_groups)
+	    grp = XkbAdjustGroup(XkbCharToInt(grp), ctrls);
+        grp_mask = map->groups[grp].mask;
+    }
     state->compat_grab_mods = state->grab_mods | grp_mask;
     return;
 }
@@ -1993,32 +1999,38 @@ XkbCopyKeymap(XkbDescPtr dst, XkbDescPtr src)
 }
 
 Bool
-XkbCopyDeviceKeymap(DeviceIntPtr dst, DeviceIntPtr src)
+XkbDeviceApplyKeymap(DeviceIntPtr dst, XkbDescPtr desc)
 {
     xkbNewKeyboardNotify nkn;
     Bool ret;
 
-    if (!dst->key || !src->key)
+    if (!dst->key || !desc)
         return FALSE;
 
     memset(&nkn, 0, sizeof(xkbNewKeyboardNotify));
     nkn.oldMinKeyCode = dst->key->xkbInfo->desc->min_key_code;
     nkn.oldMaxKeyCode = dst->key->xkbInfo->desc->max_key_code;
     nkn.deviceID = dst->id;
-    nkn.oldDeviceID = dst->id;  /* maybe src->id? */
-    nkn.minKeyCode = src->key->xkbInfo->desc->min_key_code;
-    nkn.maxKeyCode = src->key->xkbInfo->desc->max_key_code;
+    nkn.oldDeviceID = dst->id;
+    nkn.minKeyCode = desc->min_key_code;
+    nkn.maxKeyCode = desc->max_key_code;
     nkn.requestMajor = XkbReqCode;
     nkn.requestMinor = X_kbSetMap;      /* Near enough's good enough. */
     nkn.changed = XkbNKN_KeycodesMask;
-    if (src->key->xkbInfo->desc->geom)
+    if (desc->geom)
         nkn.changed |= XkbNKN_GeometryMask;
 
-    ret = XkbCopyKeymap(dst->key->xkbInfo->desc, src->key->xkbInfo->desc);
+    ret = XkbCopyKeymap(dst->key->xkbInfo->desc, desc);
     if (ret)
         XkbSendNewKeyboardNotify(dst, &nkn);
 
     return ret;
+}
+
+Bool
+XkbCopyDeviceKeymap(DeviceIntPtr dst, DeviceIntPtr src)
+{
+    return XkbDeviceApplyKeymap(dst, src->key->xkbInfo->desc);
 }
 
 int
@@ -2083,4 +2095,27 @@ XkbMergeLockedPtrBtns(DeviceIntPtr master)
 
         xkbi->lockedPtrButtons |= d->key->xkbInfo->lockedPtrButtons;
     }
+}
+
+void
+XkbCopyControls(XkbDescPtr dst, XkbDescPtr src)
+{
+    int i, nG, nTG;
+
+    if (!dst || !src)
+        return;
+
+    *dst->ctrls = *src->ctrls;
+
+    for (nG = nTG = 0, i = dst->min_key_code; i <= dst->max_key_code; i++) {
+        nG = XkbKeyNumGroups(dst, i);
+        if (nG >= XkbNumKbdGroups) {
+            nTG = XkbNumKbdGroups;
+            break;
+        }
+        if (nG > nTG) {
+            nTG = nG;
+        }
+    }
+    dst->ctrls->num_groups = nTG;
 }

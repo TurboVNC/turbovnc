@@ -2,10 +2,6 @@ include_directories(include src/stubs ../libfontenc/include)
 
 add_definitions(-DHAVE_CONFIG_H -DHAVE_READLINK)
 
-if(APPLE)
-	add_definitions(-DNO_WEAK_SYMBOLS)
-endif()
-
 add_subdirectory(src/FreeType)
 add_subdirectory(src/bitmap)
 add_subdirectory(src/builtins)

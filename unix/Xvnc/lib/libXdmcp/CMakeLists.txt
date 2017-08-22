@@ -1,6 +1,5 @@
 copy_X_header(include/X11/Xdmcp.h X11)
 
-include(CheckFunctionExists)
 check_function_exists(srand48 HAVE_SRAND48)
 if(HAVE_SRAND48)
 	add_definitions(-DHAVE_SRAND48)

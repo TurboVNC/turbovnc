@@ -1,4 +1,5 @@
 include(CheckCSourceCompiles)
+include(CheckFunctionExists)
 
 set(GLIBC_SOURCE "\n
   #include <features.h>\n
@@ -60,7 +61,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/X_include
 configure_file(include/tvnc_version.h.in
 	programs/Xserver/include/tvnc_version.h)
 
+option(TVNC_GLX
+	"Include GLX extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"
+	ON)
+report_option(TVNC_GLX "GLX extension")
+
 add_subdirectory(include)
 add_subdirectory(extras/freetype2)
+if(TVNC_GLX)
+	add_subdirectory(extras/Mesa)
+endif()
 add_subdirectory(lib)
 add_subdirectory(programs/Xserver)

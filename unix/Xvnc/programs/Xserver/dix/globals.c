@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -112,9 +112,9 @@ int defaultScreenSaverAllowExposures = DEFAULT_SCREEN_SAVER_EXPOSURES;
 Bool screenSaverSuspended = FALSE;
 #endif
 
-char *defaultFontPath = COMPILEDDEFAULTFONTPATH;
-char *defaultTextFont = COMPILEDDEFAULTFONT;
-char *defaultCursorFont = COMPILEDCURSORFONT;
+const char *defaultFontPath = COMPILEDDEFAULTFONTPATH;
+const char *defaultTextFont = COMPILEDDEFAULTFONT;
+const char *defaultCursorFont = COMPILEDCURSORFONT;
 FontPtr defaultFont;            /* not declared in dix.h to avoid including font.h in
                                    every compilation of dix code */
 CursorPtr rootCursor;
@@ -122,12 +122,13 @@ Bool party_like_its_1989 = FALSE;
 Bool whiteRoot = FALSE;
 
 TimeStamp currentTime;
-TimeStamp lastDeviceEventTime;
 
 int defaultColorVisualClass = -1;
 int monitorResolution = 0;
 
-char *display;
+const char *display;
+int displayfd = -1;
+Bool explicit_display = FALSE;
 char *ConnectionInfo;
 
 CARD32 TimeOutValue = DEFAULT_TIMEOUT * MILLI_PER_SECOND;

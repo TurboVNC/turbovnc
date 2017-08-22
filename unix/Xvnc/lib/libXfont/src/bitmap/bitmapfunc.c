@@ -32,29 +32,20 @@ in this Software without prior written authorization from The Open Group.
 #include <config.h>
 #endif
 
-/*
- * Translate monolithic #defines to modular definitions
- */
-
-#ifdef PCFFORMAT
-#define XFONT_PCFFORMAT 1
-#endif
-
-#ifdef SNFFORMAT
-#define XFONT_SNFFORMAT 1
-#endif
-
-#ifdef BDFFORMAT
-#define XFONT_BDFFORMAT 1
-#endif
-
 #include <X11/fonts/fntfilst.h>
 #include <X11/fonts/bitmap.h>
 #include <X11/fonts/fontutil.h>
+#if XFONT_BDFFORMAT
 #include <X11/fonts/bdfint.h>
+#endif
+#if XFONT_PCFFORMAT
 #include <X11/fonts/pcf.h>
+#endif
+#if XFONT_SNFFORMAT
 #include "snfstr.h"
+#endif
 
+#if XFONT_PCFFORMAT || XFONT_SNFFORMAT || XFONT_BDFFORMAT
 typedef struct _BitmapFileFunctions {
     int         (*ReadFont) (FontPtr /* pFont */, FontFilePtr /* file */,
 			     int /* bit */, int /* byte */,
@@ -252,3 +243,11 @@ BitmapGetRenderIndex(FontRendererPtr renderer)
 {
     return renderer - renderers;
 }
+
+#else
+void
+BitmapRegisterFontFileFunctions (void)
+{
+    /* nothing to do */
+}
+#endif /* XFONT_PCFFORMAT || XFONT_SNFFORMAT || XFONT_BDFFORMAT */

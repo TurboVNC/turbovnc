@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -199,7 +199,7 @@ dixLookupDrawable(DrawablePtr *pDraw, XID id, ClientPtr client,
 
     *pDraw = NULL;
 
-    rc = dixLookupResourceByClass((pointer *) &pTmp, id, RC_DRAWABLE, client,
+    rc = dixLookupResourceByClass((void **) &pTmp, id, RC_DRAWABLE, client,
                                   access);
 
     if (rc != Success)
@@ -236,7 +236,7 @@ dixLookupWindow(WindowPtr *pWin, XID id, ClientPtr client, Mask access)
 int
 dixLookupGC(GCPtr *pGC, XID id, ClientPtr client, Mask access)
 {
-    return dixLookupResourceByType((pointer *) pGC, id, RT_GC, client, access);
+    return dixLookupResourceByType((void **) pGC, id, RT_GC, client, access);
 }
 
 int
@@ -246,11 +246,11 @@ dixLookupFontable(FontPtr *pFont, XID id, ClientPtr client, Mask access)
     GC *pGC;
 
     client->errorValue = id;    /* EITHER font or gc */
-    rc = dixLookupResourceByType((pointer *) pFont, id, RT_FONT, client,
+    rc = dixLookupResourceByType((void **) pFont, id, RT_FONT, client,
                                  access);
     if (rc != BadFont)
         return rc;
-    rc = dixLookupResourceByType((pointer *) &pGC, id, RT_GC, client, access);
+    rc = dixLookupResourceByType((void **) &pGC, id, RT_GC, client, access);
     if (rc == BadGC)
         return BadFont;
     if (rc == Success)
@@ -261,7 +261,7 @@ dixLookupFontable(FontPtr *pFont, XID id, ClientPtr client, Mask access)
 int
 dixLookupClient(ClientPtr *pClient, XID rid, ClientPtr client, Mask access)
 {
-    pointer pRes;
+    void *pRes;
     int rc = BadValue, clientIndex = CLIENT_ID(rid);
 
     if (!clientIndex || !clients[clientIndex] || (rid & SERVER_BIT))
@@ -296,7 +296,7 @@ AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
     j = 0;
     if (numnow) {
         pTmp = client->saveSet;
-        while ((j < numnow) && (SaveSetWindow(pTmp[j]) != (pointer) pWin))
+        while ((j < numnow) && (SaveSetWindow(pTmp[j]) != (void *) pWin))
             j++;
     }
     if (mode == SetModeInsert) {
@@ -352,7 +352,7 @@ DeleteWindowFromAnySaveSet(WindowPtr pWin)
 /* No-op Don't Do Anything : sometimes we need to be able to call a procedure
  * that doesn't do anything.  For example, on screen with only static
  * colormaps, if someone calls install colormap, it's easier to have a dummy
- * procedure to call than to check if there's a procedure 
+ * procedure to call than to check if there's a procedure
  */
 void
 NoopDDA(void)
@@ -362,7 +362,7 @@ NoopDDA(void)
 typedef struct _BlockHandler {
     BlockHandlerProcPtr BlockHandler;
     WakeupHandlerProcPtr WakeupHandler;
-    pointer blockData;
+    void *blockData;
     Bool deleted;
 } BlockHandlerRec, *BlockHandlerPtr;
 
@@ -373,20 +373,22 @@ static Bool inHandler;
 static Bool handlerDeleted;
 
 /**
- * 
+ *
  *  \param pTimeout   DIX doesn't want to know how OS represents time
  *  \param pReadMask  nor how it represents the det of descriptors
  */
 void
-BlockHandler(pointer pTimeout, pointer pReadmask)
+BlockHandler(void *pTimeout, void *pReadmask)
 {
     int i, j;
 
     ++inHandler;
     for (i = 0; i < screenInfo.numScreens; i++)
-        (*screenInfo.screens[i]->BlockHandler) (i,
-                                                screenInfo.screens[i]->
-                                                blockData, pTimeout, pReadmask);
+        (*screenInfo.screens[i]->BlockHandler) (screenInfo.screens[i],
+                                                pTimeout, pReadmask);
+    for (i = 0; i < screenInfo.numGPUScreens; i++)
+        (*screenInfo.gpuscreens[i]->BlockHandler) (screenInfo.gpuscreens[i],
+                                                   pTimeout, pReadmask);
     for (i = 0; i < numHandlers; i++)
         if (!handlers[i].deleted)
             (*handlers[i].BlockHandler) (handlers[i].blockData,
@@ -411,7 +413,7 @@ BlockHandler(pointer pTimeout, pointer pReadmask)
  *  \param pReadmask the resulting descriptor mask
  */
 void
-WakeupHandler(int result, pointer pReadmask)
+WakeupHandler(int result, void *pReadmask)
 {
     int i, j;
 
@@ -421,9 +423,11 @@ WakeupHandler(int result, pointer pReadmask)
             (*handlers[i].WakeupHandler) (handlers[i].blockData,
                                           result, pReadmask);
     for (i = 0; i < screenInfo.numScreens; i++)
-        (*screenInfo.screens[i]->WakeupHandler) (i,
-                                                 screenInfo.screens[i]->
-                                                 wakeupData, result, pReadmask);
+        (*screenInfo.screens[i]->WakeupHandler) (screenInfo.screens[i],
+                                                 result, pReadmask);
+    for (i = 0; i < screenInfo.numGPUScreens; i++)
+        (*screenInfo.gpuscreens[i]->WakeupHandler) (screenInfo.gpuscreens[i],
+                                                    result, pReadmask);
     if (handlerDeleted) {
         for (i = 0; i < numHandlers;)
             if (handlers[i].deleted) {
@@ -445,7 +449,7 @@ WakeupHandler(int result, pointer pReadmask)
 Bool
 RegisterBlockAndWakeupHandlers(BlockHandlerProcPtr blockHandler,
                                WakeupHandlerProcPtr wakeupHandler,
-                               pointer blockData)
+                               void *blockData)
 {
     BlockHandlerPtr new;
 
@@ -468,7 +472,7 @@ RegisterBlockAndWakeupHandlers(BlockHandlerProcPtr blockHandler,
 void
 RemoveBlockAndWakeupHandlers(BlockHandlerProcPtr blockHandler,
                              WakeupHandlerProcPtr wakeupHandler,
-                             pointer blockData)
+                             void *blockData)
 {
     int i;
 
@@ -552,9 +556,8 @@ ProcessWorkQueueZombies(void)
 }
 
 Bool
-QueueWorkProc(Bool (*function)
-              (ClientPtr /* pClient */ , pointer /* closure */ ),
-              ClientPtr client, pointer closure)
+QueueWorkProc(Bool (*function) (ClientPtr pClient, void *closure),
+              ClientPtr client, void *closure)
 {
     WorkQueuePtr q;
 
@@ -582,13 +585,13 @@ typedef struct _SleepQueue {
     struct _SleepQueue *next;
     ClientPtr client;
     ClientSleepProcPtr function;
-    pointer closure;
+    void *closure;
 } SleepQueueRec, *SleepQueuePtr;
 
 static SleepQueuePtr sleepQueue = NULL;
 
 Bool
-ClientSleep(ClientPtr client, ClientSleepProcPtr function, pointer closure)
+ClientSleep(ClientPtr client, ClientSleepProcPtr function, void *closure)
 {
     SleepQueuePtr q;
 
@@ -662,7 +665,7 @@ static int numCallbackListsToCleanup = 0;
 static CallbackListPtr **listsToCleanup = NULL;
 
 static Bool
-_AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
+_AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
     CallbackPtr cbr;
 
@@ -678,7 +681,7 @@ _AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
 }
 
 static Bool
-_DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
+_DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
     CallbackListPtr cbl = *pcbl;
     CallbackPtr cbr, pcbr;
@@ -705,7 +708,7 @@ _DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
 }
 
 void
-_CallCallbacks(CallbackListPtr *pcbl, pointer call_data)
+_CallCallbacks(CallbackListPtr *pcbl, void *call_data)
 {
     CallbackListPtr cbl = *pcbl;
     CallbackPtr cbr, pcbr;
@@ -817,7 +820,7 @@ CreateCallbackList(CallbackListPtr *pcbl)
 /* ===== Public Procedures ===== */
 
 Bool
-AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
+AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
     if (!pcbl)
         return FALSE;
@@ -829,7 +832,7 @@ AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
 }
 
 Bool
-DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
+DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
     if (!pcbl || !*pcbl)
         return FALSE;
@@ -845,7 +848,7 @@ DeleteCallbackList(CallbackListPtr *pcbl)
 }
 
 void
-InitCallbackManager(void)
+DeleteCallbackManager(void)
 {
     int i;
 
@@ -857,3 +860,34 @@ InitCallbackManager(void)
     numCallbackListsToCleanup = 0;
     listsToCleanup = NULL;
 }
+
+void
+InitCallbackManager(void)
+{
+    DeleteCallbackManager();
+}
+
+/**
+ * Coordinates the global GL context used by modules in the X Server
+ * doing rendering with OpenGL.
+ *
+ * When setting a GL context (glXMakeCurrent() or eglMakeCurrent()),
+ * there is an expensive implied glFlush() required by the GLX and EGL
+ * APIs, so modules don't want to have to do it on every request.  But
+ * the individual modules using GL also don't know about each other,
+ * so they have to coordinate who owns the current context.
+ *
+ * When you're about to do a MakeCurrent, you should set this variable
+ * to your context's address, and you can skip MakeCurrent if it's
+ * already set to yours.
+ *
+ * When you're about to do a DestroyContext, you should set this to
+ * NULL if it's set to your context.
+ *
+ * When you're about to do an unbindContext on a DRI driver, you
+ * should set this to NULL.  Despite the unbindContext interface
+ * sounding like it only unbinds the passed in context, it actually
+ * unconditionally clears the dispatch table even if the given
+ * context wasn't current.
+ */
+void *lastGLContext = NULL;

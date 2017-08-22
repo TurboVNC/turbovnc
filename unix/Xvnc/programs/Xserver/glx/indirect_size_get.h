@@ -3,18 +3,18 @@
 /*
  * (C) Copyright IBM Corporation 2004
  * All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sub license,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the next
  * paragraph) shall be included in all copies or substantial portions of the
  * Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.  IN NO EVENT SHALL
@@ -67,6 +67,7 @@ extern _X_INTERNAL PURE FASTCALL GLint __glGetTexParameterfv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint __glGetTexParameteriv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint __glGetTexLevelParameterfv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint __glGetTexLevelParameteriv_size(GLenum);
+extern _X_INTERNAL PURE FASTCALL GLint __glGetPointerv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint
 __glGetColorTableParameterfv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint
@@ -79,19 +80,12 @@ extern _X_INTERNAL PURE FASTCALL GLint __glGetHistogramParameterfv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint __glGetHistogramParameteriv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint __glGetMinmaxParameterfv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint __glGetMinmaxParameteriv_size(GLenum);
+extern _X_INTERNAL PURE FASTCALL GLint __glGetQueryObjectiv_size(GLenum);
+extern _X_INTERNAL PURE FASTCALL GLint __glGetQueryObjectuiv_size(GLenum);
+extern _X_INTERNAL PURE FASTCALL GLint __glGetQueryiv_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint __glGetProgramivARB_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetVertexAttribdvARB_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetVertexAttribfvARB_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetVertexAttribivARB_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetQueryObjectivARB_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetQueryObjectuivARB_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetQueryivARB_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetProgramivNV_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetVertexAttribdvNV_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetVertexAttribfvNV_size(GLenum);
-extern _X_INTERNAL PURE FASTCALL GLint __glGetVertexAttribivNV_size(GLenum);
 extern _X_INTERNAL PURE FASTCALL GLint
-__glGetFramebufferAttachmentParameterivEXT_size(GLenum);
+__glGetFramebufferAttachmentParameteriv_size(GLenum);
 
 #undef PURE
 #undef FASTCALL

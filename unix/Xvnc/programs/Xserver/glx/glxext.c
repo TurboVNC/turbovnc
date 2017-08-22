@@ -39,17 +39,13 @@
 #include <registry.h>
 #include "privates.h"
 #include <os.h>
+#include "extinit.h"
+#include "glx_extinit.h"
 #include "unpack.h"
 #include "glxutil.h"
 #include "glxext.h"
 #include "indirect_table.h"
 #include "indirect_util.h"
-
-/*
-** The last context used by the server.  It is the context that is current
-** from the server's perspective.
-*/
-__GLXcontext *__glXLastContext;
 
 /*
 ** X resources.
@@ -70,6 +66,7 @@ static DevPrivateKeyRec glxClientPrivateKeyRec;
 ** Forward declarations.
 */
 static int __glXDispatch(ClientPtr);
+static GLboolean __glXFreeContext(__GLXcontext * cx);
 
 /*
 ** Called when the extension is reset.
@@ -77,7 +74,7 @@ static int __glXDispatch(ClientPtr);
 static void
 ResetExtension(ExtensionEntry * extEntry)
 {
-    __glXFlushContextCache();
+    lastGLContext = NULL;
 }
 
 /*
@@ -93,16 +90,15 @@ __glXResetLargeCommandStatus(__GLXclientState * cl)
 }
 
 /*
-** This procedure is called when the client who created the context goes
-** away OR when glXDestroyContext is called.  In either case, all we do is
-** flag that the ID is no longer valid, and (maybe) free the context.
-** use.
-*/
+ * This procedure is called when the client who created the context goes away
+ * OR when glXDestroyContext is called.  In either case, all we do is flag that
+ * the ID is no longer valid, and (maybe) free the context.
+ */
 static int
 ContextGone(__GLXcontext * cx, XID id)
 {
     cx->idExists = GL_FALSE;
-    if (!cx->isCurrent) {
+    if (!cx->currentClient) {
         __glXFreeContext(cx);
     }
 
@@ -136,11 +132,14 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
 
     for (c = glxAllContexts; c; c = next) {
         next = c->next;
-        if (c->isCurrent && (c->drawPriv == glxPriv || c->readPriv == glxPriv)) {
+        if (c->currentClient &&
+		(c->drawPriv == glxPriv || c->readPriv == glxPriv)) {
+            /* flush the context */
+            glFlush();
+            c->hasUnflushedCommands = GL_FALSE;
+            /* just force a re-bind the next time through */
             (*c->loseCurrent) (c);
-            c->isCurrent = GL_FALSE;
-            if (c == __glXLastContext)
-                __glXFlushContextCache();
+            lastGLContext = NULL;
         }
         if (c->drawPriv == glxPriv)
             c->drawPriv = NULL;
@@ -157,11 +156,18 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
     return True;
 }
 
-void
-__glXAddToContextList(__GLXcontext * cx)
+Bool
+__glXAddContext(__GLXcontext * cx)
 {
+    /* Register this context as a resource.
+     */
+    if (!AddResource(cx->id, __glXContextRes, (void *)cx)) {
+	return False;
+    }
+
     cx->next = glxAllContexts;
     glxAllContexts = cx;
+    return True;
 }
 
 static void
@@ -184,19 +190,19 @@ __glXRemoveFromContextList(__GLXcontext * cx)
 /*
 ** Free a context.
 */
-GLboolean
+static GLboolean
 __glXFreeContext(__GLXcontext * cx)
 {
-    if (cx->idExists || cx->isCurrent)
+    if (cx->idExists || cx->currentClient)
         return GL_FALSE;
+
+    __glXRemoveFromContextList(cx);
 
     free(cx->feedbackBuf);
     free(cx->selectBuf);
-    if (cx == __glXLastContext) {
-        __glXFlushContextCache();
+    if (cx == lastGLContext) {
+        lastGLContext = NULL;
     }
-
-    __glXRemoveFromContextList(cx);
 
     /* We can get here through both regular dispatching from
      * __glXDispatch() or as a callback from the resource manager.  In
@@ -269,24 +275,30 @@ glxGetClient(ClientPtr pClient)
 }
 
 static void
-glxClientCallback(CallbackListPtr *list, pointer closure, pointer data)
+glxClientCallback(CallbackListPtr *list, void *closure, void *data)
 {
     NewClientInfoRec *clientinfo = (NewClientInfoRec *) data;
     ClientPtr pClient = clientinfo->client;
     __GLXclientState *cl = glxGetClient(pClient);
+    __GLXcontext *c, *next;
 
     switch (pClient->clientState) {
     case ClientStateRunning:
-        /*
-         ** By default, assume that the client supports
-         ** GLX major version 1 minor version 0 protocol.
-         */
-        cl->GLClientmajorVersion = 1;
-        cl->GLClientminorVersion = 0;
         cl->client = pClient;
         break;
 
     case ClientStateGone:
+        /* detach from all current contexts */
+        for (c = glxAllContexts; c; c = next) {
+            next = c->next;
+            if (c->currentClient == pClient) {
+                c->loseCurrent(c);
+                lastGLContext = NULL;
+                c->currentClient = NULL;
+                FreeResourceByType(c->id, __glXContextRes, FALSE);
+            }
+        }
+
         free(cl->returnBuf);
         free(cl->largeCmdBuf);
         free(cl->GLClientextensions);
@@ -308,6 +320,23 @@ GlxPushProvider(__GLXprovider * provider)
     __glXProviderStack = provider;
 }
 
+static Bool
+checkScreenVisuals(void)
+{
+    int i, j;
+
+    for (i = 0; i < screenInfo.numScreens; i++) {
+        ScreenPtr screen = screenInfo.screens[i];
+        for (j = 0; j < screen->numVisuals; j++) {
+            if (screen->visuals[j].class == TrueColor ||
+                screen->visuals[j].class == DirectColor)
+                return True;
+        }
+    }
+
+    return False;
+}
+
 /*
 ** Initialize the GLX extension.
 */
@@ -317,8 +346,18 @@ GlxExtensionInit(void)
     ExtensionEntry *extEntry;
     ScreenPtr pScreen;
     int i;
-    __GLXprovider *p;
+    __GLXprovider *p, **stack;
     Bool glx_provided = False;
+
+    if (serverGeneration == 1) {
+        for (stack = &__glXProviderStack; *stack; stack = &(*stack)->next)
+            ;
+        *stack = &__glXDRISWRastProvider;
+    }
+
+    /* Mesa requires at least one True/DirectColor visual */
+    if (!checkScreenVisuals())
+        return;
 
     __glXContextRes = CreateNewResourceType((DeleteType) ContextGone,
                                             "GLXContext");
@@ -379,15 +418,12 @@ GlxExtensionInit(void)
 
     __glXErrorBase = extEntry->errorBase;
     __glXEventBase = extEntry->eventBase;
+#if PRESENT
+    __glXregisterPresentCompleteNotify();
+#endif
 }
 
 /************************************************************************/
-
-void
-__glXFlushContextCache(void)
-{
-    __glXLastContext = 0;
-}
 
 /*
 ** Make a context the current one for the GL (in this implementation, there
@@ -426,21 +462,22 @@ __glXForceCurrent(__GLXclientState * cl, GLXContextTag tag, int *error)
     if (cx->wait && (*cx->wait) (cx, cl, error))
         return NULL;
 
-    if (cx == __glXLastContext) {
+    if (cx == lastGLContext) {
         /* No need to re-bind */
         return cx;
     }
 
     /* Make this context the current one for the GL. */
     if (!cx->isDirect) {
+        lastGLContext = cx;
         if (!(*cx->makeCurrent) (cx)) {
             /* Bind failed, and set the error code.  Bummer */
+            lastGLContext = NULL;
             cl->client->errorValue = cx->id;
             *error = __glXError(GLXBadContextState);
             return 0;
         }
     }
-    __glXLastContext = cx;
     return cx;
 }
 
@@ -519,6 +556,21 @@ __glXleaveServer(GLboolean rendering)
         (*__glXleaveServerFunc) (rendering);
 
     glxServerLeaveCount++;
+}
+
+static glx_gpa_proc _get_proc_address;
+
+void
+__glXsetGetProcAddress(glx_gpa_proc get_proc_address)
+{
+    _get_proc_address = get_proc_address;
+}
+
+void *__glGetProcAddress(const char *proc)
+{
+    void *ret = (void *) _get_proc_address(proc);
+
+    return ret ? ret : (void *) NoopDDA;
 }
 
 /*

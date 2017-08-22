@@ -121,7 +121,7 @@ RRTransformRescale(struct pixman_f_transform *f_transform, double limit)
 
     for (j = 0; j < 3; j++)
         for (i = 0; i < 3; i++)
-            if ((v = abs(f_transform->m[j][i])) > max)
+            if ((v = fabs(f_transform->m[j][i])) > max)
                 max = v;
     scale = limit / max;
     for (j = 0; j < 3; j++)
@@ -131,7 +131,7 @@ RRTransformRescale(struct pixman_f_transform *f_transform, double limit)
 
 /*
  * Compute the complete transformation matrix including
- * client-specified transform, rotation/reflection values and the crtc 
+ * client-specified transform, rotation/reflection values and the crtc
  * offset.
  *
  * Return TRUE if the resulting transform is not a simple translation.

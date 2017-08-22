@@ -125,7 +125,7 @@ RegionEnd(RegionPtr reg)
 }
 
 static inline size_t
-RegionSizeof(int n)
+RegionSizeof(size_t n)
 {
     if (n < ((INT_MAX - sizeof(RegDataRec)) / sizeof(BoxRec)))
         return (sizeof(RegDataRec) + ((n) * sizeof(BoxRec)));
@@ -144,7 +144,7 @@ RegionInit(RegionPtr _pReg, BoxPtr _rect, int _size)
         size_t rgnSize;
         (_pReg)->extents = RegionEmptyBox;
         if (((_size) > 1) && ((rgnSize = RegionSizeof(_size)) > 0) &&
-            (((_pReg)->data = malloc(rgnSize)) != NULL)) {
+            (((_pReg)->data = (RegDataPtr) malloc(rgnSize)) != NULL)) {
             (_pReg)->data->size = (_size);
             (_pReg)->data->numRects = 0;
         }
@@ -216,6 +216,8 @@ extern _X_EXPORT RegionPtr RegionCreate(BoxPtr /*rect */ ,
                                         int /*size */ );
 
 extern _X_EXPORT void RegionDestroy(RegionPtr /*pReg */ );
+
+extern _X_EXPORT RegionPtr RegionDuplicate(RegionPtr /* pOld */);
 
 static inline Bool
 RegionCopy(RegionPtr dst, RegionPtr src)

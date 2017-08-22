@@ -1,4 +1,4 @@
-include_directories(. ../fb ../mi)
+include_directories(../mi)
 
 handle_type_puns()
 

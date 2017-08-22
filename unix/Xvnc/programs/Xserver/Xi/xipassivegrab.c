@@ -79,7 +79,13 @@ int
 ProcXIPassiveGrabDevice(ClientPtr client)
 {
     DeviceIntPtr dev, mod_dev;
-    xXIPassiveGrabDeviceReply rep;
+    xXIPassiveGrabDeviceReply rep = {
+        .repType = X_Reply,
+        .RepType = X_XIPassiveGrabDevice,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .num_modifiers = 0
+    };
     int i, ret = Success;
     uint32_t *modifiers;
     xXIGrabModifierInfo *modifiers_failed;
@@ -139,12 +145,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     xi2mask_set_one_mask(mask.xi2mask, stuff->deviceid,
                          (unsigned char *) &stuff[1], mask_len * 4);
 
-    rep.repType = X_Reply;
-    rep.RepType = X_XIPassiveGrabDevice;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.num_modifiers = 0;
-
     memset(&param, 0, sizeof(param));
     param.grabtype = XI2;
     param.ownerEvents = stuff->owner_events;
@@ -193,6 +193,10 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         uint8_t status = Success;
 
         param.modifiers = *modifiers;
+        ret = CheckGrabValues(client, &param);
+        if (ret != Success)
+            goto out;
+
         switch (stuff->grab_type) {
         case XIGrabtypeButton:
             status = GrabButton(client, dev, mod_dev, stuff->detail,
@@ -226,7 +230,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
 
     WriteReplyToClient(client, sizeof(rep), &rep);
     if (rep.num_modifiers)
-        WriteToClient(client, rep.length * 4, (char *) modifiers_failed);
+        WriteToClient(client, rep.length * 4, modifiers_failed);
 
     free(modifiers_failed);
  out:
@@ -242,7 +246,7 @@ SRepXIPassiveGrabDevice(ClientPtr client, int size,
     swapl(&rep->length);
     swaps(&rep->num_modifiers);
 
-    WriteToClient(client, size, (char *) rep);
+    WriteToClient(client, size, rep);
 }
 
 int
@@ -315,7 +319,7 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
 
     mod_dev = (IsFloating(dev)) ? dev : GetMaster(dev, MASTER_KEYBOARD);
 
-    tempGrab = AllocGrab();
+    tempGrab = AllocGrab(NULL);
     if (!tempGrab)
         return BadAlloc;
 

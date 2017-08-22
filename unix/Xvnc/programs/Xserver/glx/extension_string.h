@@ -36,7 +36,14 @@
 
 enum {
 /*   GLX_ARB_get_proc_address is implemented on the client. */
-    ARB_multisample_bit = 0,
+    ARB_context_flush_control_bit = 0,
+    ARB_create_context_bit,
+    ARB_create_context_profile_bit,
+    ARB_create_context_robustness_bit,
+    ARB_fbconfig_float_bit,
+    ARB_framebuffer_sRGB_bit,
+    ARB_multisample_bit,
+    EXT_create_context_es2_profile_bit,
     EXT_import_context_bit,
     EXT_texture_from_pixmap_bit,
     EXT_visual_info_bit,
@@ -53,6 +60,10 @@ enum {
     INTEL_swap_event_bit,
     __NUM_GLX_EXTS,
 };
+
+/* For extensions which have identical ARB and EXT implementation
+ * in GLX area, use one enabling bit for both. */
+#define EXT_framebuffer_sRGB_bit ARB_framebuffer_sRGB_bit
 
 #define __GLX_EXT_BYTES ((__NUM_GLX_EXTS + 7) / 8)
 
