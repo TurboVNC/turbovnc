@@ -306,6 +306,7 @@ if ($bits eq "64") {
 } else {
   @dridirs = ('/usr/lib/dri', '/usr/lib32/dri', '/usr/lib/i386-linux-gnu/dri', '/usr/lib/xorg/modules/dri');
 }
+push(@dridirs, '/opt/X11/lib/dri', '/usr/local/lib/dri');
 foreach $_dridir (@dridirs) {
   if (-f "$_dridir/swrast_dri.so") {
     $dridir = "$_dridir";
