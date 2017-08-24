@@ -1405,15 +1405,16 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
             screen->s.flags = Swap32IfLE(screen->s.flags);
             if (screen->s.w < 1 || screen->s.h < 1)
                 EDSERROR("Screen 0x%.8x requested dimensions %dx%d are invalid",
-                         screen->s.id, screen->s.w, screen->s.h);
+                         (unsigned int)screen->s.id, screen->s.w, screen->s.h);
             if (screen->s.x >= msg.sds.w || screen->s.y >= msg.sds.h ||
                 screen->s.x + screen->s.w > msg.sds.w ||
                 screen->s.y + screen->s.h > msg.sds.h)
                 EDSERROR("Screen 0x%.8x requested geometry %dx%d+%d+%d exceeds requested framebuffer dimensions",
-                         screen->s.id, screen->s.w, screen->s.h, screen->s.x,
-                         screen->s.y);
+                         (unsigned int)screen->s.id, screen->s.w, screen->s.h,
+                         screen->s.x, screen->s.y);
             if (rfbFindScreenID(&newScreens, screen->s.id)) {
-                EDSERROR("Screen 0x%.8x duplicate ID", screen->s.id);
+                EDSERROR("Screen 0x%.8x duplicate ID",
+                         (unsigned int)screen->s.id);
                 free(screen);
             } else
                 rfbAddScreen(&newScreens, screen);
