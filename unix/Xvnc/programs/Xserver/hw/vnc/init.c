@@ -511,7 +511,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
 
     if (strcasecmp(argv[i], "-verbose") == 0) {
-        LogSetParameter(XLOG_VERBOSITY, 1);
+        LogSetParameter(XLOG_VERBOSITY, X_NOT_IMPLEMENTED);
         return 1;
     }
 
