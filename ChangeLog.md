@@ -119,6 +119,12 @@ the server with automatic desktop resizing enabled, toggling on/off the
 toolbar, or changing the scaling settings), always behave as if the
 `CurrentMonitorIsPrimary` parameter was disabled.
 
+20. The default xstartup.turbovnc script that the TurboVNC Server creates now
+allows the window manager startup script/executable to be specified using
+an environment variable (`TVNC_WM`.)  This facilitates using a different window
+manager for local and remote desktop sessions on the same machine, or
+temporarily switching the window manager used by TurboVNC.
+
 
 2.1.1
 =====

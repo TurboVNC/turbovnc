@@ -153,6 +153,16 @@ $defaultXStartup
        "  fi\n".
        "fi\n".
        "\n".
+       "if [ \"\$TVNC_WM\" != \"\" ]; then\n".
+       "  TVNC_WM=`which \"\$TVNC_WM\" 2>/dev/null`\n".
+       "  if [ -x \"\$TVNC_WM\" ]; then\n".
+       "    exec \$TVNC_SSHAGENT \$TVNC_VGLRUN \"\$TVNC_WM\"\n".
+       "  fi\n".
+       "  if [ -f \"\$TVNC_WM\" ]; then\n".
+       "    exec \$TVNC_SSHAGENT \$TVNC_VGLRUN sh \"\$TVNC_WM\"\n".
+       "  fi\n".
+       "fi\n".
+       "\n".
        "if [ -x /etc/X11/xinit/xinitrc ]; then\n".
        "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN /etc/X11/xinit/xinitrc\n".
        "fi\n".
