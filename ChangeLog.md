@@ -125,6 +125,11 @@ an environment variable (`TVNC_WM`.)  This facilitates using a different window
 manager for local and remote desktop sessions on the same machine, or
 temporarily switching the window manager used by TurboVNC.
 
+21. The default xstartup.turbovnc script that the TurboVNC Server creates now
+sets the `XDG_SESSION_TYPE` environment variable to `x11`.  This is necessary
+when running GNOME 3 on Fedora 25 and later.  Otherwise, GNOME 3 will assume it
+is operating in a Wayland environment.
+
 
 2.1.1
 =====

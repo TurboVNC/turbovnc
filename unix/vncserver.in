@@ -83,6 +83,7 @@ $defaultXStartup
     = ("#!/bin/sh\n\n".
        "unset SESSION_MANAGER\n".
        "unset DBUS_SESSION_BUS_ADDRESS\n".
+       "XDG_SESSION_TYPE=x11; export XDG_SESSION_TYPE\n".
        "\n".
        "# This works around pointer disappearance issues under GNOME 3\n".
        "if [ -x /usr/bin/dconf ]; then\n".
@@ -119,7 +120,6 @@ $defaultXStartup
        "    GDMSESSION=\$SESSION; export GDMSESSION\n".
        "    SESSIONTYPE=gnome-session; export SESSIONTYPE\n".
        "    XDG_CURRENT_DESKTOP=Unity; export XDG_CURRENT_DESKTOP\n".
-       "    XDG_SESSION_TYPE=x11; export XDG_SESSION_TYPE\n".
        "    STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\"; export STARTUP\n".
        "  fi\n".
        "else\n".
