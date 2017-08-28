@@ -239,8 +239,29 @@ XFixesExtensionInit(void)
     if (!AddCallback(&ClientStateCallback, XFixesClientCallback, 0))
         return;
 
+
     if (XFixesSelectionInit() && XFixesCursorInit() && XFixesRegionInit() &&
+#ifdef TURBOVNC
+        /* Ubuntu 12.04 (precise) shipped a proposed/experimental patch
+         * (https://patchwork.freedesktop.org/patch/8884) to the XFixes
+         * protocol that extended the functionality of pointer barriers.  This
+         * patch was apparently never accepted upstream and was removed in
+         * 13.10 (raring).  Basically everything on Ubuntu 12.04 (probably
+         * 12.10 and 13.04 as well) that uses XFixes, including the window
+         * managers, believes that there are 3 XFixes events, but our server
+         * (and anything else built against the official X.org fixesproto)
+         * believes that there are only 2.  Since X RandR events come
+         * immediately after XFixes events in the sequence, when the TurboVNC
+         * Server sends those events to the window manager and other X clients,
+         * the X clients misinterpret the events, and desktop resizing fails.
+         * Easiest way to work around the issue is to add a slot for the
+         * unofficial XFixes event.  Refer also to
+         * https://lists.x.org/archives/xorg-devel/2012-April/030484.html
+         */
+        (extEntry = AddExtension(XFIXES_NAME, XFixesNumberEvents + 1,
+#else
         (extEntry = AddExtension(XFIXES_NAME, XFixesNumberEvents,
+#endif
                                  XFixesNumberErrors,
                                  ProcXFixesDispatch, SProcXFixesDispatch,
                                  XFixesResetProc, StandardMinorOpcode)) != 0) {

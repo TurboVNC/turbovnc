@@ -130,6 +130,12 @@ sets the `XDG_SESSION_TYPE` environment variable to `x11`.  This is necessary
 when running GNOME 3 on Fedora 25 and later.  Otherwise, GNOME 3 will assume it
 is operating in a Wayland environment.
 
+22. Worked around an issue whereby desktop resizing in the TurboVNC Server
+would fail on Ubuntu 12.04 LTS (and likely on Ubuntu 12.10 and 13.04 as well,
+although those releases are EOL as of this writing) due to Ubuntu's inclusion
+of an experimental extension to the XFixes protocol that was never accepted
+upstream in X.org.
+
 
 2.1.1
 =====
