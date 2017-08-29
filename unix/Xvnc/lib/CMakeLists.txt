@@ -1,5 +1,4 @@
 add_subdirectory(bzip2)
-add_subdirectory(freetype2)
 add_subdirectory(libXau)
 add_subdirectory(libXdmcp)
 add_subdirectory(libXfont)

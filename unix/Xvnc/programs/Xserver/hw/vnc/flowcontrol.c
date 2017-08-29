@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2014, 2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -359,14 +359,14 @@ Bool rfbIsCongested(rfbClientPtr cl)
  */
 void rfbSendEndOfCU(rfbClientPtr cl)
 {
-    char type = rfbEndOfContinuousUpdates;
+    CARD8 type = rfbEndOfContinuousUpdates;
 
     if (!cl->enableCU) {
         rfbLog("ERROR in rfbSendEndOfCU: Client does not support Continuous Updates\n");
         return;
     }
 
-    if (WriteExact(cl, &type, 1) < 0) {
+    if (WriteExact(cl, (char *)&type, 1) < 0) {
         rfbLogPerror("rfbSendEndOfCU: write");
         rfbCloseClient(cl);
         return;

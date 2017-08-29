@@ -189,6 +189,220 @@ ddxProcessArgument(int argc, char *argv[], int i)
         firstTime = FALSE;
     }
 
+    /***** TurboVNC connection options *****/
+
+    if (strcasecmp(argv[i], "-alwaysshared") == 0) {
+        rfbAlwaysShared = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-capture") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        captureFile = strdup(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-deferupdate") == 0) { /* -deferupdate ms */
+        if (i + 1 >= argc) UseMsg();
+        rfbDeferUpdateTime = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-desktop") == 0) {     /* -desktop desktop-name */
+        if (i + 1 >= argc) UseMsg();
+        desktopName = argv[i + 1];
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-disconnect") == 0) {
+        rfbDontDisconnect = FALSE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-dontdisconnect") == 0) {
+        rfbDontDisconnect = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-httpd") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        httpDir = argv[i + 1];
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-httpport") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        httpPort = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
+        if (i + 1 >= argc) UseMsg();
+        rfbIdleTimeout = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-inetd") == 0) {       /* -inetd */
+        int n;
+        for (n = 1; n < 100; n++) {
+            if (CheckDisplayNumber(n))
+                break;
+        }
+
+        if (n >= 100)
+            FatalError("-inetd: couldn't find free display number");
+
+        sprintf(inetdDisplayNumStr, "%d", n);
+        display = inetdDisplayNumStr;
+
+        /* fds 0, 1 and 2 (stdin, out and err) are all the same socket to the
+           RFB client.  OsInit() closes stdout and stdin, and we don't want
+           stderr to go to the RFB client, so make the client socket 3 and
+           close stderr.  OsInit() will redirect stderr logging to an
+           appropriate log file or /dev/null if that doesn't work. */
+        dup2(0, 3);
+        inetdSock = 3;
+        close(2);
+
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-interface") == 0) {   /* -interface ipaddr */
+        struct addrinfo hints, *addr;
+        if (i + 1 >= argc) {
+            UseMsg();
+            return 2;
+        }
+        if (interface.s_addr != htonl(INADDR_ANY) ||
+            memcmp(&interface6, &in6addr_any, sizeof(interface6))) {
+            /* Already set (-localhost?) */
+            return 2;
+        }
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_flags = AI_PASSIVE;
+        if (getaddrinfo(argv[i + 1], NULL, &hints, &addr) == 0) {
+            struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)addr->ai_addr;
+            struct sockaddr_in *addr4 = (struct sockaddr_in *)addr->ai_addr;
+            family = addr->ai_family;
+            if (family == AF_INET6)
+                interface6 = addr6->sin6_addr;
+            else
+                interface.s_addr = addr4->sin_addr.s_addr;
+        }
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-ipv6") == 0) {
+        if (family == -1) family = AF_INET6;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-localhost") == 0) {
+        interface.s_addr = htonl(INADDR_LOOPBACK);
+        interface6 = in6addr_loopback;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-maxclipboard") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbMaxClipboard = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-nevershared") == 0) {
+        rfbNeverShared = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-noclipboardrecv") == 0) {
+        rfbAuthDisableCBRecv = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-noclipboardsend") == 0) {
+        rfbAuthDisableCBSend = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-nocutbuffersync") == 0) {
+        rfbSyncCutBuffer = FALSE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-noflowcontrol") == 0) {
+        rfbCongestionControl = FALSE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-noreverse") == 0) {
+        rfbAuthDisableRevCon = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-rfbport") == 0) {     /* -rfbport port */
+        if (i + 1 >= argc) UseMsg();
+        rfbPort = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-rfbwait") == 0) {     /* -rfbwait ms */
+        if (i + 1 >= argc) UseMsg();
+        rfbMaxClientWait = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-udpinputport") == 0) { /* -udpinputport port */
+        if (i + 1 >= argc) UseMsg();
+        udpPort = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    /***** TurboVNC input options *****/
+
+    if (strcasecmp(argv[i], "-compatiblekbd") == 0) {
+        compatibleKbd = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-nocursor") == 0) {
+        noCursor = TRUE;
+        return 1;
+    }
+
+    /* Run server in view-only mode - Ehud Karni SW */
+    if (strcasecmp(argv[i], "-viewonly") == 0) {
+        rfbViewOnly = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-virtualtablet") == 0) {
+        rfbVirtualTablet = TRUE;
+        return 1;
+    }
+
+    /***** TurboVNC display options *****/
+
+    if (strcasecmp(argv[i], "-blackpixel") == 0) {  /* -blackpixel n */
+        if (i + 1 >= argc) UseMsg();
+        rfbFB.blackPixel = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-depth") == 0) {       /* -depth D */
+        if (i + 1 >= argc) UseMsg();
+        rfbFB.depth = atoi(argv[i + 1]);
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-dridir") == 0) {
+        extern char *dri_driver_path;
+        if (i + 1 >= argc) UseMsg();
+        dri_driver_path = strdup(argv[i + 1]);
+        return 2;
+    }
+
     if (strcasecmp(argv[i], "-geometry") == 0) {
         /* -geometry WxH or W0xH0+X0+Y0[,W1xH1+X1+Y1,...] */
         char *str, *token;
@@ -223,11 +437,14 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-depth") == 0) {       /* -depth D */
+#ifdef NVCONTROL
+    if (strcasecmp(argv[i], "-nvcontrol") == 0) {
         if (i + 1 >= argc) UseMsg();
-        rfbFB.depth = atoi(argv[i + 1]);
+        nvCtrlDisplay = strdup(argv[i + 1]);
+        noNVCTRLExtension = FALSE;
         return 2;
     }
+#endif
 
     if (strcasecmp(argv[i], "-pixelformat") == 0) {
         if (i + 1 >= argc) UseMsg();
@@ -249,128 +466,13 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-blackpixel") == 0) {  /* -blackpixel n */
-        if (i + 1 >= argc) UseMsg();
-        rfbFB.blackPixel = atoi(argv[i + 1]);
-        return 2;
-    }
-
     if (strcasecmp(argv[i], "-whitepixel") == 0) {  /* -whitepixel n */
         if (i + 1 >= argc) UseMsg();
         rfbFB.whitePixel = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-udpinputport") == 0) { /* -udpinputport port */
-        if (i + 1 >= argc) UseMsg();
-        udpPort = atoi(argv[i + 1]);
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-rfbport") == 0) {     /* -rfbport port */
-        if (i + 1 >= argc) UseMsg();
-        rfbPort = atoi(argv[i + 1]);
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-rfbwait") == 0) {     /* -rfbwait ms */
-        if (i + 1 >= argc) UseMsg();
-        rfbMaxClientWait = atoi(argv[i + 1]);
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-nocursor") == 0) {
-        noCursor = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-rfbauth") == 0) {     /* -rfbauth passwd-file */
-        if (i + 1 >= argc) UseMsg();
-        rfbAuthPasswdFile = argv[i + 1];
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-securitytypes") == 0) {
-        if (i + 1 >= argc) UseMsg();
-        rfbAuthParseCommandLine(argv[i + 1]);
-        return 2;
-    }
-
-#if USETLS
-    if (strcasecmp(argv[i], "-x509cert") == 0) {
-        if (i + 1 >= argc) UseMsg();
-        rfbAuthX509Cert = argv[i + 1];
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-x509key") == 0) {
-        if (i + 1 >= argc) UseMsg();
-        rfbAuthX509Key = argv[i + 1];
-        return 2;
-    }
-#endif
-
-#ifdef XVNC_AuthPAM
-    if (strcasecmp(argv[i], "-pamsession") == 0) {
-        rfbAuthPAMSession = TRUE;
-        return 1;
-    }
-#endif
-
-    if (strcasecmp(argv[i], "-noreverse") == 0) {
-        rfbAuthDisableRevCon = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-noclipboardsend") == 0) {
-        rfbAuthDisableCBSend = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-noclipboardrecv") == 0) {
-        rfbAuthDisableCBRecv = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-nocutbuffersync") == 0) {
-        rfbSyncCutBuffer = FALSE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-maxclipboard") == 0) {
-        if (i + 1 >= argc) UseMsg();
-        rfbMaxClipboard = atoi(argv[i + 1]);
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
-        if (i + 1 >= argc) UseMsg();
-        rfbIdleTimeout = atoi(argv[i + 1]);
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-httpd") == 0) {
-        if (i + 1 >= argc) UseMsg();
-        httpDir = argv[i + 1];
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-httpport") == 0) {
-        if (i + 1 >= argc) UseMsg();
-        httpPort = atoi(argv[i + 1]);
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-deferupdate") == 0) { /* -deferupdate ms */
-        if (i + 1 >= argc) UseMsg();
-        rfbDeferUpdateTime = atoi(argv[i + 1]);
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-noflowcontrol") == 0) {
-        rfbCongestionControl = FALSE;
-        return 1;
-    }
+    /***** TurboVNC encoding options *****/
 
     if (strcasecmp(argv[i], "-alr") == 0) {
         if (i + 1 >= argc) UseMsg();
@@ -403,155 +505,23 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-interframe") == 0) {
-        rfbInterframe = 1;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-nointerframe") == 0) {
-        rfbInterframe = 0;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-capture") == 0) {
-        if (i + 1 >= argc) UseMsg();
-        captureFile = strdup(argv[i + 1]);
-        return 2;
-    }
-
-#ifdef NVCONTROL
-    if (strcasecmp(argv[i], "-nvcontrol") == 0) {
-        if (i + 1 >= argc) UseMsg();
-        nvCtrlDisplay = strdup(argv[i + 1]);
-        noNVCTRLExtension = FALSE;
-        return 2;
-    }
-#endif
-
-    if (strcasecmp(argv[i], "-virtualtablet") == 0) {
-        rfbVirtualTablet = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-dridir") == 0) {
-        extern char *dri_driver_path;
-        if (i + 1 >= argc) UseMsg();
-        dri_driver_path = strdup(argv[i + 1]);
-        return 2;
-    }
-
     if (strcasecmp(argv[i], "-economictranslate") == 0) {
         rfbEconomicTranslate = TRUE;
         return 1;
     }
 
-    if (strcasecmp(argv[i], "-desktop") == 0) {     /* -desktop desktop-name */
-        if (i + 1 >= argc) UseMsg();
-        desktopName = argv[i + 1];
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-alwaysshared") == 0) {
-        rfbAlwaysShared = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-nevershared") == 0) {
-        rfbNeverShared = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-disconnect") == 0) {
-        rfbDontDisconnect = FALSE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-dontdisconnect") == 0) {
-        rfbDontDisconnect = TRUE;
-        return 1;
-    }
-
-    /* Run server in view-only mode - Ehud Karni SW */
-    if (strcasecmp(argv[i], "-viewonly") == 0) {
-        rfbViewOnly = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-localhost") == 0) {
-        interface.s_addr = htonl(INADDR_LOOPBACK);
-        interface6 = in6addr_loopback;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-ipv6") == 0) {
-        if (family == -1) family = AF_INET6;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-interface") == 0) {   /* -interface ipaddr */
-        struct addrinfo hints, *addr;
-        if (i + 1 >= argc) {
-            UseMsg();
-            return 2;
-        }
-        if (interface.s_addr != htonl(INADDR_ANY) ||
-            memcmp(&interface6, &in6addr_any, sizeof(interface6))) {
-            /* Already set (-localhost?) */
-            return 2;
-        }
-        memset(&hints, 0, sizeof(hints));
-        hints.ai_family = AF_UNSPEC;
-        hints.ai_socktype = SOCK_STREAM;
-        hints.ai_flags = AI_PASSIVE;
-        if (getaddrinfo(argv[i + 1], NULL, &hints, &addr) == 0) {
-            struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)addr->ai_addr;
-            struct sockaddr_in *addr4 = (struct sockaddr_in *)addr->ai_addr;
-            family = addr->ai_family;
-            if (family == AF_INET6)
-                interface6 = addr6->sin6_addr;
-            else
-                interface.s_addr = addr4->sin_addr.s_addr;
-        }
-        return 2;
-    }
-
-    if (strcasecmp(argv[i], "-inetd") == 0) {       /* -inetd */
-        int n;
-        for (n = 1; n < 100; n++) {
-            if (CheckDisplayNumber(n))
-                break;
-        }
-
-        if (n >= 100)
-            FatalError("-inetd: couldn't find free display number");
-
-        sprintf(inetdDisplayNumStr, "%d", n);
-        display = inetdDisplayNumStr;
-
-        /* fds 0, 1 and 2 (stdin, out and err) are all the same socket to the
-           RFB client.  OsInit() closes stdout and stdin, and we don't want
-           stderr to go to the RFB client, so make the client socket 3 and
-           close stderr.  OsInit() will redirect stderr logging to an
-           appropriate log file or /dev/null if that doesn't work. */
-        dup2(0, 3);
-        inetdSock = 3;
-        close(2);
-
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-compatiblekbd") == 0) {
-        compatibleKbd = TRUE;
-        return 1;
-    }
-
-    if (strcasecmp(argv[i], "-verbose") == 0) {
-        LogSetParameter(XLOG_VERBOSITY, 1);
+    if (strcasecmp(argv[i], "-interframe") == 0) {
+        rfbInterframe = 1;
         return 1;
     }
 
     if (strcasecmp(argv[i], "-mt") == 0) {
         rfbMT = TRUE;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-nointerframe") == 0) {
+        rfbInterframe = 0;
         return 1;
     }
 
@@ -561,6 +531,48 @@ ddxProcessArgument(int argc, char *argv[], int i)
         if (rfbNumThreads < 1 || rfbNumThreads > MAX_ENCODING_THREADS)
             UseMsg();
         return 2;
+    }
+
+    /***** TurboVNC security and authentication options *****/
+
+#ifdef XVNC_AuthPAM
+    if (strcasecmp(argv[i], "-pamsession") == 0) {
+        rfbAuthPAMSession = TRUE;
+        return 1;
+    }
+#endif
+
+    if (strcasecmp(argv[i], "-rfbauth") == 0) {     /* -rfbauth passwd-file */
+        if (i + 1 >= argc) UseMsg();
+        rfbAuthPasswdFile = argv[i + 1];
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-securitytypes") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbAuthParseCommandLine(argv[i + 1]);
+        return 2;
+    }
+
+#if USETLS
+    if (strcasecmp(argv[i], "-x509cert") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbAuthX509Cert = argv[i + 1];
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-x509key") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rfbAuthX509Key = argv[i + 1];
+        return 2;
+    }
+#endif
+
+    /***** TurboVNC miscellaneous options *****/
+
+    if (strcasecmp(argv[i], "-verbose") == 0) {
+        LogSetParameter(XLOG_VERBOSITY, X_NOT_IMPLEMENTED);
+        return 1;
     }
 
     if (strcasecmp(argv[i], "-version") == 0) {
@@ -993,7 +1005,7 @@ AddExtInputDevice(rfbDevInfo *dev)
         goto bailout;
     }
 
-    if (asprintf(&dev->pDev->name, dev->name) < 0) {
+    if (asprintf(&dev->pDev->name, "%s", dev->name) < 0) {
         rfbLogPerror("ERROR: Could not initialize extended input device");
         goto bailout;
     }
@@ -1509,15 +1521,84 @@ OsVendorFatalError()
 void
 ddxUseMsg()
 {
+    ErrorF("\nTurboVNC connection options\n");
+    ErrorF("===========================\n");
+    ErrorF("-alwaysshared          always treat new clients as shared\n");
+    ErrorF("-capture F             capture the data sent to the first connected viewer to\n");
+    ErrorF("                       a file (F).\n");
+    ErrorF("-deferupdate time      time in ms to defer updates (default 40)\n");
+    ErrorF("-desktop name          VNC desktop name (default x11)\n");
+    ErrorF("-disconnect            disconnect existing clients when a new non-shared\n"
+           "                       connection comes in, rather than refusing the new\n"
+           "                       connection\n");
+    ErrorF("-httpd dir             serve files from the specified directory using HTTP\n");
+    ErrorF("-httpport port         port for HTTP server\n");
+    ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
+    ErrorF("-inetd                 Xvnc is launched by inetd\n");
+    ErrorF("-interface ipaddr      only bind to specified interface address\n");
+    ErrorF("-ipv6                  enable IPv6 support\n");
+    ErrorF("-localhost             only allow connections from localhost\n");
+    ErrorF("-maxclipboard B        set max. clipboard transfer size to B bytes\n");
+    ErrorF("                       (default: %d)\n", rfbMaxClipboard);
+    ErrorF("-nevershared           never treat new clients as shared\n");
+    ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
+    ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");
+    ErrorF("-nocutbuffersync       disable clipboard synchronization for applications\n");
+    ErrorF("                       that use the (obsolete) X cut buffer\n");
+    ErrorF("-noflowcontrol         when continuous updates are enabled, send updates whether\n");
+    ErrorF("                       or not the client is ready to receive them\n");
+    ErrorF("-noreverse             disable reverse connections\n");
+    ErrorF("-rfbport port          TCP port for RFB protocol\n");
+    ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
+    ErrorF("-udpinputport port     UDP port for keyboard/pointer data\n");
+
+    ErrorF("\nTurboVNC input options\n");
+    ErrorF("======================\n");
+    ErrorF("-compatiblekbd         set META key = ALT key as in the original VNC\n");
+    ErrorF("-nocursor              don't display a cursor\n");
+    ErrorF("-viewonly              only let clients view the remote desktop\n");
+    ErrorF("-virtualtablet         set up virtual stylus and eraser devices for this\n");
+    ErrorF("                       session, to emulate a Wacom tablet, and map all\n");
+    ErrorF("                       extended input events from all viewers to these devices\n");
+    ErrorF("                       (see man page)\n");
+
+    ErrorF("\nTurboVNC display options\n");
+    ErrorF("========================\n");
+    ErrorF("-depth D               set framebuffer depth\n");
+    ErrorF("-dridir dir            specify directory containing the swrast Mesa driver\n");
     ErrorF("-geometry WxH          set framebuffer width & height (single-screen)\n");
     ErrorF("-geometry W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]\n");
     ErrorF("                       set multi-screen geometry (see man page)\n");
-    ErrorF("-depth D               set framebuffer depth\n");
+#ifdef NVCONTROL
+    ErrorF("-nvcontrol display     set up a virtual NV-CONTROL extension and redirect\n");
+    ErrorF("                       NV-CONTROL requests to the specified X display\n");
+#endif
     ErrorF("-pixelformat format    set pixel format (BGRnnn or RGBnnn)\n");
-    ErrorF("-udpinputport port     UDP port for keyboard/pointer data\n");
-    ErrorF("-rfbport port          TCP port for RFB protocol\n");
-    ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
-    ErrorF("-nocursor              don't display a cursor\n");
+
+    ErrorF("\nTurboVNC encoding options\n");
+    ErrorF("=========================\n");
+    ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
+    ErrorF("                       seconds (S is floating point)\n");
+    ErrorF("-alrqual Q             send automatic lossless refresh as a JPEG image with\n");
+    ErrorF("                       quality Q, rather than as a mathematically lossless image\n");
+    ErrorF("-alrsamp S             specify chroma subsampling factor for automatic lossless\n");
+    ErrorF("                       refresh JPEG images (S = 1x, 2x, 4x, or gray)\n");
+    ErrorF("-economictranslate     less memory hungry translation\n");
+    ErrorF("-interframe            always use interframe comparison\n");
+    ErrorF("-mt                    enable multithreaded encoding\n");
+    ErrorF("-nointerframe          never use interframe comparison\n");
+    ErrorF("-nthreads N            specify number of threads (1 <= N <= %d) to use with\n",
+           MAX_ENCODING_THREADS);
+    ErrorF("                       multithreaded encoding (default: 1 per CPU core, max. 4)\n");
+
+    ErrorF("\nTurboVNC security and authentication options\n");
+    ErrorF("============================================\n");
+#ifdef XVNC_AuthPAM
+    ErrorF("-pamsession            create a new PAM session for each viewer that\n");
+    ErrorF("                       authenticates using the username/password of the user\n");
+    ErrorF("                       who owns the TurboVNC session, and leave the PAM session\n");
+    ErrorF("                       open until the viewer disconnects\n");
+#endif
     ErrorF("-rfbauth passwd-file   specify password file for VNC Password authentication\n");
     ErrorF("-securitytypes types   list of security types that the server should support\n");
     rfbAuthListAvailableSecurityTypes();
@@ -1525,63 +1606,11 @@ ddxUseMsg()
     ErrorF("-x509cert file         specify filename of X.509 signed certificate\n");
     ErrorF("-x509key file          specify filename of X.509 private key\n");
 #endif
-#ifdef XVNC_AuthPAM
-    ErrorF("-pamsession            create a new PAM session for each viewer that\n");
-    ErrorF("                       authenticates using the username/password of the user\n");
-    ErrorF("                       who owns the TurboVNC session, and leave the PAM session\n");
-    ErrorF("                       open until the viewer disconnects\n");
-#endif
-    ErrorF("-noreverse             disable reverse connections\n");
-    ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");
-    ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
-    ErrorF("-nocutbuffersync       disable clipboard synchronization for applications\n");
-    ErrorF("                       that use the (obsolete) X cut buffer\n");
-    ErrorF("-maxclipboard B        set max. clipboard transfer size to B bytes\n");
-    ErrorF("                       (default: %d)\n", rfbMaxClipboard);
-    ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
-    ErrorF("-httpd dir             serve files from the specified directory using HTTP\n");
-    ErrorF("-httpport port         port for HTTP server\n");
-    ErrorF("-deferupdate time      time in ms to defer updates (default 40)\n");
-    ErrorF("-noflowcontrol         when continuous updates are enabled, send updates whether\n");
-    ErrorF("                       or not the client is ready to receive them\n");
-    ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
-    ErrorF("                       seconds (S is floating point)\n");
-    ErrorF("-alrqual Q             send automatic lossless refresh as a JPEG image with\n");
-    ErrorF("                       quality Q, rather than as a mathematically lossless image\n");
-    ErrorF("-alrsamp S             specify chroma subsampling factor for automatic lossless\n");
-    ErrorF("                       refresh JPEG images (S = 1x, 2x, 4x, or gray)\n");
-    ErrorF("-interframe            always use interframe comparison\n");
-    ErrorF("-nointerframe          never use interframe comparison\n");
-    ErrorF("-capture F             capture the data sent to the first connected viewer to\n");
-    ErrorF("                       a file (F).\n");
-#ifdef NVCONTROL
-    ErrorF("-nvcontrol display     set up a virtual NV-CONTROL extension and redirect\n");
-    ErrorF("                       NV-CONTROL requests to the specified X display\n");
-#endif
-    ErrorF("-dridir dir            specify directory containing the swrast Mesa driver\n");
-    ErrorF("-virtualtablet         set up virtual stylus and eraser devices for this\n");
-    ErrorF("                       session, to emulate a Wacom tablet, and map all\n");
-    ErrorF("                       extended input events from all viewers to these devices\n");
-    ErrorF("                       (see man page)\n");
-    ErrorF("-economictranslate     less memory hungry translation\n");
-    ErrorF("-desktop name          VNC desktop name (default x11)\n");
-    ErrorF("-alwaysshared          always treat new clients as shared\n");
-    ErrorF("-nevershared           never treat new clients as shared\n");
-    ErrorF("-disconnect            disconnect existing clients when a new non-shared\n"
-           "                       connection comes in, rather than refusing the new\n"
-           "                       connection\n");
-    ErrorF("-viewonly              only let clients view the remote desktop\n");
-    ErrorF("-localhost             only allow connections from localhost\n");
-    ErrorF("-interface ipaddr      only bind to specified interface address\n");
-    ErrorF("-ipv6                  enable IPv6 support\n");
-    ErrorF("-inetd                 Xvnc is launched by inetd\n");
-    ErrorF("-compatiblekbd         set META key = ALT key as in the original VNC\n");
-    ErrorF("-version               report Xvnc version on stderr\n");
+
+    ErrorF("\nTurboVNC miscellaneous options\n");
+    ErrorF("==============================\n");
     ErrorF("-verbose               print all X.org errors, warnings, and messages\n");
-    ErrorF("-mt                    enable multithreaded encoding\n");
-    ErrorF("-nthreads N            specify number of threads (1 <= N <= %d) to use with\n",
-           MAX_ENCODING_THREADS);
-    ErrorF("                       multithreaded encoding (default: 1 per CPU core, max. 4)\n");
+    ErrorF("-version               report Xvnc version on stderr\n\n");
     exit(1);
 }
 

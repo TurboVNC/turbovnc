@@ -1,4 +1,4 @@
-copy_X_header(Xdmcp.h X11)
+copy_X_header(include/X11/Xdmcp.h X11)
 
 include(CheckFunctionExists)
 check_function_exists(srand48 HAVE_SRAND48)

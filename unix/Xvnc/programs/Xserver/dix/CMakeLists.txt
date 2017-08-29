@@ -4,10 +4,7 @@ include_directories(../Xi ../composite ../damageext ../mi ../miext/damage
 add_definitions(-DRGB_DB=\"/usr/share/X11/rgb\"
 	-DCOMPILEDDEFAULTFONTPATH=\"/usr/share/X11/fonts/misc/,/usr/share/X11/fonts/Type1/,/usr/share/X11/fonts/75dpi/,/usr/share/X11/fonts/100dpi/\")
 
-# This code has a lot of type puns.  Disable strict aliasing just to be safe.
-if(CMAKE_COMPILER_IS_GNUCC)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-endif()
+handle_type_puns()
 
 add_library(main STATIC
 	main.c)

@@ -34,6 +34,9 @@ static void rfbErr(char *format, ...);
 
 #define BUFSIZE 1024
 
+#undef SSL_library_init
+#undef SSL_load_error_strings
+
 
 typedef void (*DH_free_type)(DH *);
 typedef int (*DH_generate_key_type)(DH *);

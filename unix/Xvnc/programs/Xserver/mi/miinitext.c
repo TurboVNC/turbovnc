@@ -153,8 +153,10 @@ extern Bool noSELinuxExtension;
 extern Bool noXvExtension;
 #endif
 extern Bool noGEExtension;
+#ifdef TURBOVNC
 #ifdef NVCONTROL
 extern Bool noNVCTRLExtension;
+#endif
 #endif
 
 #ifndef XFree86LOADER
@@ -270,9 +272,11 @@ extern void DamageExtensionInit(INITARGS);
 extern void CompositeExtensionInit(INITARGS);
 #endif
 extern void GEExtensionInit(INITARGS);
+#ifdef TURBOVNC
 extern void vncExtensionInit(INITARGS);
 #ifdef NVCONTROL
 extern void nvCtrlExtensionInit(INITARGS);
+#endif
 #endif
 
 /* The following is only a small first step towards run-time
@@ -505,10 +509,12 @@ InitExtensions(int argc, char *argv[])
         GlxExtensionInit();
 #endif
 
+#ifdef TURBOVNC
     vncExtensionInit();
 #ifdef NVCONTROL
     if (!noNVCTRLExtension)
         nvCtrlExtensionInit();
+#endif
 #endif
 }
 

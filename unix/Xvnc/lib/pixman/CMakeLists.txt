@@ -1,37 +1,34 @@
-include_directories(.)
+include_directories(pixman)
 
 add_definitions(-DHAVE_CONFIG_H -DPIXMAN_NO_TLS)
 
-# This code has a lot of type puns.  Disable strict aliasing just to be safe.
-if(CMAKE_COMPILER_IS_GNUCC)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-endif()
+handle_type_puns()
 
 add_library(pixman STATIC
-	pixman-access-accessors.c
-	pixman-access.c
-	pixman-arm.c
-	pixman-bits-image.c
-	pixman-combine-float.c
-	pixman-combine32.c
-	pixman-conical-gradient.c
-	pixman-edge.c
-	pixman-edge-accessors.c
-	pixman-fast-path.c
-	pixman-general.c
-	pixman-gradient-walker.c
-	pixman-image.c
-	pixman-implementation.c
-	pixman-linear-gradient.c
-	pixman-matrix.c
-	pixman-mips.c
-	pixman-noop.c
-	pixman-ppc.c
-	pixman-radial-gradient.c
-	pixman-region16.c
-	pixman-region32.c
-	pixman-solid-fill.c
-	pixman-trap.c
-	pixman-utils.c
-	pixman-x86.c
-	pixman.c)
+	pixman/pixman-access-accessors.c
+	pixman/pixman-access.c
+	pixman/pixman-arm.c
+	pixman/pixman-bits-image.c
+	pixman/pixman-combine-float.c
+	pixman/pixman-combine32.c
+	pixman/pixman-conical-gradient.c
+	pixman/pixman-edge.c
+	pixman/pixman-edge-accessors.c
+	pixman/pixman-fast-path.c
+	pixman/pixman-general.c
+	pixman/pixman-gradient-walker.c
+	pixman/pixman-image.c
+	pixman/pixman-implementation.c
+	pixman/pixman-linear-gradient.c
+	pixman/pixman-matrix.c
+	pixman/pixman-mips.c
+	pixman/pixman-noop.c
+	pixman/pixman-ppc.c
+	pixman/pixman-radial-gradient.c
+	pixman/pixman-region16.c
+	pixman/pixman-region32.c
+	pixman/pixman-solid-fill.c
+	pixman/pixman-trap.c
+	pixman/pixman-utils.c
+	pixman/pixman-x86.c
+	pixman/pixman.c)

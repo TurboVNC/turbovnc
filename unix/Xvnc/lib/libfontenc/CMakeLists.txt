@@ -11,5 +11,5 @@ message(STATUS "FONT_ENCODINGS_DIRECTORY = ${FONT_ENCODINGS_DIRECTORY}")
 add_definitions(-DFONT_ENCODINGS_DIRECTORY=\"${FONT_ENCODINGS_DIRECTORY}\")
 
 add_library(fontenc STATIC
-	encparse.c
-	fontenc.c)
+	src/encparse.c
+	src/fontenc.c)

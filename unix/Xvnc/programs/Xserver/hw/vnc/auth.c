@@ -464,7 +464,7 @@ rfbAuthParseCommandLine(char *securityTypes)
 static void
 setMethods(char *buf, Bool backwardCompatible)
 {
-    char *saveptr;
+    char *saveptr = NULL;
     char *p;
     AuthMethodData *a;
 

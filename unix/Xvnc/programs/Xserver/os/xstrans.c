@@ -12,4 +12,4 @@ _X_ATTRIBUTE_PRINTF(1, 2);
 #define TRANS_REOPEN
 #define TRANS_SERVER
 #define XSERV_t
-#include "../../../lib/xtrans/transport.c"
+#include <X11/Xtrans/transport.c>
