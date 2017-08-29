@@ -92,6 +92,18 @@ domain sockets.  To restore the behavior of previous versions of TurboVNC, pass
 `-listen tcp` to vncserver (assuming that X11 TCP connections are not globally
 disabled in the TurboVNC Server's security configuration file.)
 
+9. The default xstartup.turbovnc script that the TurboVNC Server creates will
+no longer start a 2D window manager by default on Ubuntu systems, since the
+TurboVNC Server now has a software OpenGL implementation that supports running
+Unity 3D without VirtualGL.  The xstartup.turbovnc script will now always
+attempt to start the window manager specified by the system or user defaults,
+unless the `TVNC_WM` environment variable is set.  Setting the `TVNC_WM`
+environment variable to `2d` will start the GNOME fallback/flashback or Unity
+2D session on Ubuntu systems instead of Unity 3D.  Setting the `TVNC_WM`
+environment variable to `2d` will also start the GNOME classic session on RHEL
+7 and recent Fedora releases.  To start MATE, set the `TVNC_WM` environment
+variable to `mate-session`.
+
 
 2.1.2
 =====

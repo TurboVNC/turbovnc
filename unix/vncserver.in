@@ -80,141 +80,108 @@ ReadAuthConfiguration("/etc/turbovncserver-security.conf");
 
 # Done reading configuration.
 
-$defaultXStartup
-    = ("#!/bin/sh\n\n".
-       "unset SESSION_MANAGER\n".
-       "unset DBUS_SESSION_BUS_ADDRESS\n".
-       "XDG_SESSION_TYPE=x11; export XDG_SESSION_TYPE\n".
-       "\n".
-       "# This works around pointer disappearance issues under GNOME 3\n".
-       "if [ -x /usr/bin/dconf ]; then\n".
-       "  dconf write /org/gnome/settings-daemon/plugins/cursor/active false\n".
-       "fi\n".
-       "\n".
-       "OS=`uname -s`\n".
-       "if [ \$OS = 'Linux' ]; then\n".
-       "  case \"\$WINDOWMANAGER\" in\n".
-       "    \*gnome\*)\n".
-       "      if [ -e /etc/SuSE-release ]; then\n".
-       "        PATH=\$PATH:/opt/gnome/bin\n".
-       "        export PATH\n".
-       "      fi\n".
-       "      ;;\n".
-       "  esac\n".
-       "fi\n".
-       "\n".
-       "if [ \"\$TVNC_3DWM\" = \"1\" ]; then\n".
-       "  if [ -z \"\$SSH_AGENT_PID\" -a -x /usr/bin/ssh-agent ]; then\n".
-       "    TVNC_SSHAGENT=/usr/bin/ssh-agent\n".
-       "  fi\n".
-       "  if [ -z \"\$TVNC_VGLRUN\" ]; then\n".
-       "    TVNC_VGLRUN=\"vglrun +wm\"\n".
-       "  fi\n".
-       "  # This is necessary to make Unity work on Ubuntu 16, and on Ubuntu 14, it\n".
-       "  # ensures that the proper compiz profile is set up.  Otherwise, if you forget\n".
-       "  # to specify -3dwm, compiz will automatically disable its OpenGL plugin,\n".
-       "  # requiring you to reset the compiz plugin state before Unity will work\n".
-       "  # again.\n".
-       "  if [ -f /usr/share/gnome-session/sessions/ubuntu.session ]; then\n".
-       "    SESSION=ubuntu\n".
-       "    DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
-       "    GDMSESSION=\$SESSION; export GDMSESSION\n".
-       "    SESSIONTYPE=gnome-session; export SESSIONTYPE\n".
-       "    XDG_CURRENT_DESKTOP=Unity; export XDG_CURRENT_DESKTOP\n".
-       "    STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\"; export STARTUP\n".
-       "  fi\n".
-       "else\n".
-       "  if [ -f /usr/bin/mate-session ]; then\n".
-       "    DESKTOP_SESSION=mate; export DESKTOP_SESSION\n".
-       "    STARTUP=\"/usr/bin/mate-session\"; export STARTUP\n".
-       "  elif [ -f /usr/bin/gnome-session ]; then\n".
-       "    for SESSION in \"gnome-fallback\" \"ubuntu-2d\" \"2d-gnome\"; do\n".
-       "      if [ -f /usr/share/gnome-session/sessions/\$SESSION.session ]; then\n".
-       "        DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
-       "        GDMSESSION=\$SESSION; export GDMSESSION\n".
-       "        SESSIONTYPE=gnome-session; export SESSIONTYPE\n".
-       "        XDG_CURRENT_DESKTOP=\$SESSION; export XDG_CURRENT_DESKTOP\n".
-       "        STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\"; export STARTUP\n".
-       "        # Ubuntu 14 runs gnome-session-check-accelerated, even though the\n".
-       "        # gnome-fallback session doesn't need OpenGL, so we set an atom to make\n".
-       "        # gnome-session-check-accelerated think it has already been run.\n".
-       "        xprop -root -f _GNOME_SESSION_ACCELERATED 32c -set _GNOME_SESSION_ACCELERATED 1\n".
-       "      fi\n".
-       "    done\n".
-       "    # Launch GNOME 2D (Metacity) session under Ubuntu 16\n".
-       "    if [ -f /usr/share/gnome-session/sessions/gnome-flashback-metacity.session ]; then\n".
-       "      SESSION=gnome-flashback-metacity\n".
-       "      DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
-       "      GDMSESSION=\$SESSION; export GDMSESSION\n".
-       "      SESSIONTYPE=gnome-session; export SESSIONTYPE\n".
-       "      XDG_CURRENT_DESKTOP=\"GNOME-Flashback:Unity\"; export XDG_CURRENT_DESKTOP\n".
-       "      XDG_SESSION_DESKTOP=\$SESSION; export XDG_SESSION_DESKTOP\n".
-       "      STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\ --disable-acceleration-check\"; export STARTUP\n".
-       "    fi\n".
-       "  fi\n".
-       "fi\n".
-       "\n".
-       "if [ \"\$TVNC_WM\" != \"\" ]; then\n".
-       "  TVNC_WM=`which \"\$TVNC_WM\" 2>/dev/null`\n".
-       "  if [ -x \"\$TVNC_WM\" ]; then\n".
-       "    exec \$TVNC_SSHAGENT \$TVNC_VGLRUN \"\$TVNC_WM\"\n".
-       "  fi\n".
-       "  if [ -f \"\$TVNC_WM\" ]; then\n".
-       "    exec \$TVNC_SSHAGENT \$TVNC_VGLRUN sh \"\$TVNC_WM\"\n".
-       "  fi\n".
-       "fi\n".
-       "\n".
-       "if [ -x /etc/X11/xinit/xinitrc ]; then\n".
-       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN /etc/X11/xinit/xinitrc\n".
-       "fi\n".
-       "if [ -f /etc/X11/xinit/xinitrc ]; then\n".
-       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN sh /etc/X11/xinit/xinitrc\n".
-       "fi\n".
-       "if [ -x \$HOME/.xinitrc ]; then\n".
-       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN \$HOME/.xinitrc\n".
-       "fi\n".
-       "if [ -f \$HOME/.xinitrc ]; then\n".
-       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN sh \$HOME/.xinitrc\n".
-       "fi\n".
-       "if [ -x /usr/local/lib/X11/xinit/xinitrc ]; then\n".
-       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN /usr/local/lib/X11/xinit/xinitrc\n".
-       "fi\n".
-       "if [ -f /usr/local/lib/X11/xinit/xinitrc ]; then\n".
-       "  exec \$TVNC_SSHAGENT \$TVNC_VGLRUN sh /usr/local/lib/X11/xinit/xinitrc\n".
-       "fi\n".
-       "if [ \$OS = 'SunOS' -a -f \$HOME/.dt/sessions/lastsession ]; then\n".
-       "  if [ -x `cat \$HOME/.dt/sessions/lastsession` ]; then\n".
-       "    exec `cat \$HOME/.dt/sessions/lastsession`\n".
-       "  fi\n".
-       "fi\n".
-       "if [ -f /usr/dt/config/Xsession.jds ]; then\n".
-       "  exec /usr/dt/config/Xsession.jds\n".
-       "else\n".
-       "  if [ -f /usr/dt/config/Xinitrc.jds ]; then\n".
-       "    exec /usr/dt/config/Xinitrc.jds\n".
-       "  else\n".
-       "    if [ -f /usr/dt/bin/Xsession ]; then\n".
-       "      exec /usr/dt/bin/Xsession\n".
-       "    else\n".
-       "      if [ -x /opt/sfw/bin/fvwm2 ]; then\n".
-       "        /opt/sfw/bin/fvwm2\n".
-       "      else\n".
-       "        which fvwm2 && {\n".
-       "          fvwm2\n".
-       "        } || {\n".
-       "          which twm && {\n".
-       "            if [ -f \$HOME/.Xresources ]; then xrdb \$HOME/.Xresources; fi\n".
-       "            xsetroot -solid grey\n".
-       "            xterm -geometry 80x24+10+10 -ls -title \"\$VNCDESKTOP Desktop\" &\n".
-       "            twm\n".
-       "          } || {\n".
-       "            echo No window manager found!\n".
-       "          }\n".
-       "        }\n".
-       "      fi\n".
-       "    fi\n".
-       "  fi\n".
-       "fi\n");
+$defaultXStartup = <<'END_XSTARTUP';
+#!/bin/sh
+
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+XDG_SESSION_TYPE=x11;  export XDG_SESSION_TYPE
+
+OS=`uname -s`
+
+# Emulate GDM
+if [ -x /usr/bin/gnome-session ]; then
+  case "$TVNC_WM" in
+    2d)
+      # Ubuntu 12: ubuntu-2d
+      # Ubuntu 14: gnome-fallback
+      for SESSION in "gnome-fallback" "ubuntu-2d" "2d-gnome"; do
+        if [ -f /usr/share/gnome-session/sessions/$SESSION.session ]; then
+          DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
+          XDG_CURRENT_DESKTOP=$SESSION;  export XDG_CURRENT_DESKTOP
+        fi
+      done
+      # RHEL 7, Fedora
+      if [ -f /usr/share/gnome-session/sessions/gnome-classic.session ]; then
+        DESKTOP_SESSION=gnome-classic;  export DESKTOP_SESSION
+        GNOME_SHELL_SESSION_MODE=classic;  export GNOME_SHELL_SESSION_MODE
+        XDG_CURRENT_DESKTOP="GNOME-Classic:GNOME";  export XDG_CURRENT_DESKTOP
+      fi
+      # Ubuntu 16
+      if [ -f /usr/share/gnome-session/sessions/gnome-flashback-metacity.session ]; then
+        DESKTOP_SESSION=gnome-flashback-metacity;  export DESKTOP_SESSION
+        XDG_CURRENT_DESKTOP="GNOME-Flashback:Unity"
+        export XDG_CURRENT_DESKTOP
+      fi
+      unset TVNC_WM
+      ;;
+    *)
+      # This is necessary to make Unity work on Ubuntu 16, and on Ubuntu 14, it
+      # ensures that the proper compiz profile is set up.  Otherwise, if you
+      # accidentally launch Unity in a TurboVNC Server session that lacks
+      # OpenGL support, compiz will automatically disable its OpenGL plugin,
+      # requiring you to reset the compiz plugin state before Unity will work
+      # again.
+      if [ -f /usr/share/gnome-session/sessions/ubuntu.session ]; then
+        DESKTOP_SESSION=ubuntu;  export DESKTOP_SESSION
+        XDG_CURRENT_DESKTOP=Unity;  export XDG_CURRENT_DESKTOP
+      fi
+      ;;
+  esac
+  if [ "$DESKTOP_SESSION" != "" ]; then
+    GDMSESSION=$DESKTOP_SESSION;  export GDMSESSION
+    SESSIONTYPE=gnome-session;  export SESSIONTYPE
+    STARTUP="/usr/bin/gnome-session --session=$DESKTOP_SESSION"
+    export STARTUP
+  fi
+fi
+
+if [ "$TVNC_3DWM" = "1" ]; then
+  if [ -z "$SSH_AGENT_PID" -a -x /usr/bin/ssh-agent ]; then
+    TVNC_SSHAGENT=/usr/bin/ssh-agent
+  fi
+  if [ -z "$TVNC_VGLRUN" ]; then
+    TVNC_VGLRUN="vglrun +wm"
+  fi
+fi
+
+if [ "$TVNC_WM" = "" ]; then
+  # Typical system-wide WM startup script on Linux and Solaris 11
+  if [ -f /etc/X11/xinit/xinitrc ]; then
+    TVNC_WM=/etc/X11/xinit/xinitrc
+  fi
+  # Typical system-wide WM startup script on Solaris 10
+  if [ $OS = 'SunOS' -a -f /usr/dt/config/Xinitrc.jds ]; then
+    TVNC_WM=/usr/dt/config/Xinitrc.jds
+  fi
+  # Typical per-user WM startup script on Solaris 10
+  if [ $OS = 'SunOS' -a -f $HOME/.dt/sessions/lastsession ]; then
+    TVNC_WM=`cat $HOME/.dt/sessions/lastsession`
+  fi
+else
+  TVNC_WM=`which "$TVNC_WM" 2>/dev/null`
+fi
+if [ "$TVNC_WM" != "" ]; then
+  if [ -x "$TVNC_WM" ]; then
+    exec $TVNC_SSHAGENT $TVNC_VGLRUN "$TVNC_WM"
+  else
+    exec $TVNC_SSHAGENT $TVNC_VGLRUN sh "$TVNC_WM"
+  fi
+else
+  echo "No window manager startup script found.  Use the TVNC_WM environment"
+  echo "variable to specify the path to a window manager startup script or"
+  echo "executable.  Falling back to TWM."
+  which twm >/dev/null && {
+    if [ -f $HOME/.Xresources ]; then xrdb $HOME/.Xresources; fi
+    xsetroot -solid grey
+    xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
+    twm
+  } || {
+    echo "TWM not found.  I give up."
+    exit 1
+  }
+fi
+END_XSTARTUP
 
 $xauthorityFile = "$ENV{XAUTHORITY}";
 
