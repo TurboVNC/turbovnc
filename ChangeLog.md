@@ -104,6 +104,10 @@ environment variable to `2d` will also start the GNOME classic session on RHEL
 7 and recent Fedora releases.  To start MATE, set the `TVNC_WM` environment
 variable to `mate-session`.
 
+10. The `-3dwm` option to the vncserver script has been renamed to `-vgl`, to
+reflect the fact that the TurboVNC Server is now able to run 3D window managers
+without using VirtualGL.
+
 
 2.1.2
 =====

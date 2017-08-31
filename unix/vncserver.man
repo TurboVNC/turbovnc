@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "July 2017" "" "TurboVNC"
+.TH vncserver 1 "August 2017" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
@@ -25,7 +25,7 @@ vncserver \- a wrapper to launch an X server for VNC.
 [\-depth\ \fIdepth\fR] [\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR]
 [\-fp\ \%\fIfont\-path\fR] [\-name\ \fIdesktop\-name\fR] [\-nohttpd] [\-otp]
 [\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-fg] [\-autokill]
-[\-noxstartup] [\-xstartup\ \fIscript\fR] [\-3dwm] [\-log\ \fIfile\fR]
+[\-noxstartup] [\-xstartup\ \fIscript\fR] [\-vgl] [\-log\ \fIfile\fR]
 \%[\fIXvnc\-options\fR...]
 .ad
 .hy
@@ -141,11 +141,11 @@ allows for running a full-screen application (such as a game or a
 virtualization solution) in TurboVNC without a window manager and causes the
 TurboVNC session to terminate whenever the application exits.
 .TP
-\fB\-3dwm\fR
-This sets an environment variable (\fBTVNC_3DWM\fR) to 1, and the default
+\fB\-vgl\fR
+This sets an environment variable (\fBTVNC_VGL\fR) to 1, and the default
 xstartup.turbovnc script that \fBvncserver\fR creates will launch the window
 manager using VirtualGL if that environment variable is set.  More
-specifically, if \fBTVNC_3DWM\fR is set, then the xstartup.turbovnc script will
+specifically, if \fBTVNC_VGL\fR is set, then the xstartup.turbovnc script will
 launch the window manager using a command specified in another environment
 variable (\fBTVNC_VGLRUN\fR.)  The default value of \fBTVNC_VGLRUN\fR is
 "vglrun +wm", but users can override that environment variable in order to pass

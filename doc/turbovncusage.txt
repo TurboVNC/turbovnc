@@ -82,18 +82,18 @@
 
 *** Window Manager Compatibility
 
-Although this version of the TurboVNC Server provides an option (''-3dwm'')
-that allows for running 3D window managers (such as Unity or GNOME 3+ or KDE
-5+) in a TurboVNC Server session using VirtualGL, it is generally recommended
-that you use a 2D window manager with the TurboVNC Server.  Many recent Linux
-distributions ship with only 3D window managers, so it may be necessary to
-install a 2D window manager prior to launching the TurboVNC Server for the
-first time.  As of this writing, Ubuntu provides an optional 2D window manager
-called "GNOME Fallback" or "GNOME Flashback", which will automatically be used
-if it is installed and ''-3dwm'' is not passed to ''vncserver''.  For other
+This version of the TurboVNC Server can run 3D (compositing) window managers
+(such as Unity or GNOME 3+ or KDE 5+) using its built-in software OpenGL
+implementation, and it also provides an option (''-vgl'') that allows for
+running 3D window managers using VirtualGL.  However, for performance reasons,
+it is generally recommended that you use a 2D window manager with the TurboVNC
+Server (even with VirtualGL, 3D window managers have a lot of overhead.)  As of
+this writing, Ubuntu provides an optional 2D window manager called "GNOME
+Fallback" or "GNOME Flashback", which will automatically be used if it is
+installed and the ''TVNC_WM'' environment variable is set to ''2d''.  For other
 systems that lack a 2D window manager, it is recommended that you install MATE.
 Refer to
-[[http://www.turbovnc.org/Documentation/Compatibility][this article]] for an
+[[http://www.turbovnc.org/Documentation/Compatibility][this report]] for an
 up-to-date list of window managers that have been tested with this version of
 the TurboVNC Server, how to configure the TurboVNC Server to use those window
 managers, and a list of known compatibility issues.

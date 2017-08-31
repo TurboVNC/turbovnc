@@ -136,7 +136,7 @@ if [ -x /usr/bin/gnome-session ]; then
   fi
 fi
 
-if [ "$TVNC_3DWM" = "1" ]; then
+if [ "$TVNC_VGL" = "1" ]; then
   if [ -z "$SSH_AGENT_PID" -a -x /usr/bin/ssh-agent ]; then
     TVNC_SSHAGENT=/usr/bin/ssh-agent
   fi
@@ -299,8 +299,8 @@ foreach $_registrydir (@registrydirs) {
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
               "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
               "-securitytypes",1,"-nohttp",0,"-nohttpd",0,"-rfbauth",1,
-              "-noxstartup",0,"-xstartup",1,"-log",1,"-3dwm",0,"-debug",0,
-              "-x509cert",1,"-x509key",1,"-autokill",0,"-quiet",0);
+              "-noxstartup",0,"-xstartup",1,"-log",1,"-3dwm",0,"-vgl",0,
+              "-debug",0,"-x509cert",1,"-x509key",1,"-autokill",0,"-quiet",0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -334,7 +334,7 @@ if ($opt{'-noxstartup'}) {
 if ($opt{'-xstartup'}) {
     $xstartup = $opt{'-xstartup'};
 }
-if ($opt{'-3dwm'}) {
+if ($opt{'-3dwm'} || $opt{'-vgl'}) {
     $useVGL = 1;
 }
 if ($opt{'-fp'}) {
@@ -607,8 +607,8 @@ if (! $skipxstartup) {
 
     warn "Starting applications specified in $xstartup\n";
     if ($useVGL) {
-        warn "(Enabling 3D window manager support)\n";
-        $ENV{TVNC_3DWM}= "1";
+        warn "(Enabling VirtualGL)\n";
+        $ENV{TVNC_VGL}= "1";
     }
 }
 warn "Log file is $desktopLog\n\n";
@@ -870,7 +870,7 @@ sub Usage
         "        -autokill\n".
         "        -noxstartup\n".
         "        -xstartup <SCRIPT>\n".
-        "        -3dwm\n".
+        "        -vgl\n".
         "        -log <FILE>\n".
         "\n".
         "See vncserver and Xvnc manual pages for more information.\n");

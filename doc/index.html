@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-08-16T18:08:14">
+<meta name="date" content="2017-08-31T17:01:37">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -859,23 +859,24 @@ ssh&nbsp;{user}@{server}
 
 <h3 id="hd006001002">6.1.2&nbsp;Window Manager Compatibility</h3>
 
-<p>Although this version of the TurboVNC Server provides an option 
-(<code>-3dwm</code>) that allows for running 3D window managers (such as 
-Unity or GNOME 3+ or KDE 5+) in a TurboVNC Server session using 
-VirtualGL, it is generally recommended that you use a 2D window manager 
-with the TurboVNC Server.  Many recent Linux distributions ship with 
-only 3D window managers, so it may be necessary to install a 2D window 
-manager prior to launching the TurboVNC Server for the first time.  As 
-of this writing, Ubuntu provides an optional 2D window manager called 
+<p>This version of the TurboVNC Server can run 3D (compositing) window 
+managers (such as Unity or GNOME 3+ or KDE 5+) using its built-in 
+software OpenGL implementation, and it also provides an option 
+(<code>-vgl</code>) that allows for running 3D window managers using 
+VirtualGL.  However, for performance reasons, it is generally 
+recommended that you use a 2D window manager with the TurboVNC Server 
+(even with VirtualGL, 3D window managers have a lot of overhead.)  As of 
+this writing, Ubuntu provides an optional 2D window manager called 
 &ldquo;GNOME Fallback&rdquo; or &ldquo;GNOME Flashback&rdquo;, which 
-will automatically be used if it is installed and <code>-3dwm</code> is 
-not passed to <code>vncserver</code>.  For other systems that lack a 2D 
-window manager, it is recommended that you install MATE. Refer to 
+will automatically be used if it is installed and the 
+<code>TVNC_WM</code> environment variable is set to <code>2d</code>.  
+For other systems that lack a 2D window manager, it is recommended that 
+you install MATE. Refer to 
 <span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility" class="remote">this 
-article</a></span><a name="idx0032"></a> for an up-to-date list of 
-window managers that have been tested with this version of the TurboVNC 
-Server, how to configure the TurboVNC Server to use those window 
-managers, and a list of known compatibility issues.</p>
+report</a></span><a name="idx0032"></a> for an up-to-date list of window 
+managers that have been tested with this version of the TurboVNC Server, 
+how to configure the TurboVNC Server to use those window managers, and a 
+list of known compatibility issues.</p>
 
 
 
