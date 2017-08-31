@@ -16,7 +16,7 @@ include_directories(include/X11)
 handle_type_puns()
 
 add_library(X11xcb STATIC
-	src/Xlibint.c
+	src/XlibInt.c
 	src/globals.c
 	src/x11_xcb.c
 	src/xcb_io.c)
