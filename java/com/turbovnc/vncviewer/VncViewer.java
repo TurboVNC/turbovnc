@@ -37,8 +37,7 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
 
-public class VncViewer implements Runnable, ActionListener,
-  OptionsDialogCallback {
+public class VncViewer implements Runnable, OptionsDialogCallback {
   public static final String PRODUCT_NAME = "TurboVNC Viewer";
   public static String copyrightYear = null;
   public static String copyright = null;
@@ -507,16 +506,11 @@ public class VncViewer implements Runnable, ActionListener,
   }
 
   public void exit(int n) {
-    if (nViewers > 0) {
+    if (nViewers > 0)
       nViewers--;
+    if (nViewers > 0)
       return;
-    }
     System.exit(n);
-  }
-
-  // If "Reconnect" button is pressed
-  public void actionPerformed(ActionEvent e) {
-    start();
   }
 
   void reportException(Exception e) {
