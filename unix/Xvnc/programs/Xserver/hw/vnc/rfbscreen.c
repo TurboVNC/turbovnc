@@ -86,7 +86,7 @@ rfbScreenInfo *rfbFindScreen(struct xorg_list *list, CARD16 x, CARD16 y,
 
   xorg_list_for_each_entry(screen, list, entry) {
    if (screen->s.x == x && screen->s.y == y && screen->s.w == w &&
-       screen->s.h == h)
+       screen->s.h == h && screen->idAssigned)
      return screen;
   }
 

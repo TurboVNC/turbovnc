@@ -316,11 +316,13 @@ static void vncPrintScreenLayout(struct xorg_list *list)
 
   rfbLog("New screen layout:\n");
   xorg_list_for_each_entry(screen, list, entry) {
-    if (screen->output && screen->output->crtc && screen->output->crtc->mode)
-      rfbLog("  0x%.8x: %dx%d+%d+%d\n", screen->s.id, screen->s.w,
-             screen->s.h, screen->s.x, screen->s.y);
+    if (screen->output->crtc && screen->output->crtc->mode)
+      rfbLog("  0x%.8x (output 0x%.8x): %dx%d+%d+%d\n", screen->s.id,
+             screen->output->id, screen->s.w, screen->s.h, screen->s.x,
+             screen->s.y);
     else
-      rfbLog("  0x%.8x: DISABLED\n", screen->s.id);
+      rfbLog("  0x%.8x (output 0x%.8x): DISABLED\n", screen->s.id,
+             screen->output->id);
   }
 }
 
@@ -539,13 +541,20 @@ static void vncUpdateScreenLayout(struct xorg_list *list)
 
   xorg_list_for_each_entry(screen, list, entry) {
     /* Disabled? */
-    if (!screen->output->crtc || !screen->output->crtc->mode)
+    if (!screen->output->crtc || !screen->output->crtc->mode) {
+      screen->s.id = 0;
+      screen->idAssigned = FALSE;
       continue;
+    }
 
     screen->s.x = screen->output->crtc->x;
     screen->s.y = screen->output->crtc->y;
     screen->s.w = screen->output->crtc->mode->mode.width;
     screen->s.h = screen->output->crtc->mode->mode.height;
+    if (!screen->idAssigned) {
+      screen->s.id = screen->output->id;
+      screen->idAssigned = TRUE;
+    }
   }
 }
 
@@ -675,14 +684,14 @@ int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
 
   rfbDupeScreens(&serverScreens, &rfbScreens);
   xorg_list_for_each_entry(serverScreen, &serverScreens, entry)
-    serverScreen->idAssigned = FALSE;
+    serverScreen->used = FALSE;
 
   /* Try to match client screen ID with existing server screen ID */
   xorg_list_for_each_entry_safe(clientScreen, tmp, clientScreens, entry) {
     serverScreen = rfbFindScreenID(&serverScreens, clientScreen->s.id);
     if (serverScreen) {
       memcpy(&serverScreen->s, &clientScreen->s, sizeof(rfbScreenDesc));
-      serverScreen->idAssigned = TRUE;
+      serverScreen->idAssigned = serverScreen->used = TRUE;
       rfbRemoveScreen(clientScreen);
       if (!vncReconfigureOutput(serverScreen)) {
         rfbLog("Desktop resize ERROR: Could not reconfigure output for Screen 0x%.8x\n",
@@ -693,14 +702,12 @@ int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
     }
   }
 
-  /* No match.  Try to find an unused server screen.  We have to do this
-     because the viewer will lose track of some of the server's IDs if it
-     temporarily switches to a configuration with fewer screens. */
+  /* No match.  Try to find an unused server screen. */
   xorg_list_for_each_entry_safe(clientScreen, tmp, clientScreens, entry) {
     xorg_list_for_each_entry(serverScreen, &serverScreens, entry) {
-      if (!serverScreen->idAssigned) {
+      if (!serverScreen->used) {
         memcpy(&serverScreen->s, &clientScreen->s, sizeof(rfbScreenDesc));
-        serverScreen->idAssigned = TRUE;
+        serverScreen->idAssigned = serverScreen->used = TRUE;
         rfbRemoveScreen(clientScreen);
         if (!vncReconfigureOutput(serverScreen)) {
           rfbLog("Desktop resize ERROR: Could not reconfigure output for Screen 0x%.8x\n",
@@ -716,7 +723,7 @@ int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
   /* Could not match existing screen or find an unused screen to use, so
      create a new one. */
   xorg_list_for_each_entry_safe(clientScreen, tmp, clientScreens, entry) {
-    clientScreen->idAssigned = TRUE;
+    clientScreen->idAssigned = clientScreen->used = TRUE;
     xorg_list_del(&clientScreen->entry);
     rfbAddScreen(&serverScreens, clientScreen);
     if (!(vncCreateOutput(pScreen, clientScreen))) {
@@ -729,14 +736,15 @@ int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
 
   /* Disable the outputs for the remaining unused screens */
   xorg_list_for_each_entry(serverScreen, &serverScreens, entry) {
-    if (!serverScreen->idAssigned) {
-      serverScreen->idAssigned = TRUE;
+    if (!serverScreen->used) {
       if (!vncDisableOutput(serverScreen->output)) {
         rfbLog("Desktop resize ERROR: Could not disable output for Screen 0x%.8x\n",
                serverScreen->s.id);
         rfbRemoveScreens(&serverScreens);
         return rfbEDSResultInvalid;
       }
+      serverScreen->idAssigned = FALSE;
+      serverScreen->s.id = 0;
     }
   }
 
