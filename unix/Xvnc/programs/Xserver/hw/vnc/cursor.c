@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -266,8 +267,7 @@ rfbSendCursorShape(rfbClientPtr cl, ScreenPtr pScreen)
                         *dst |= 1 << b;
                     src++;
                 }
-                if (screenInfo.bitmapBitOrder == LSBFirst)
-                    *dst = _reverse_byte[*dst];
+                *dst = _reverse_byte[*dst];
                 dst++;  ublen++;
             }
         }
@@ -463,15 +463,29 @@ EncodeRichCursorDataARGB##bpp(char *buf, rfbPixelFormat *fmt,            \
     int gShift = 8 + 9 - ffs(fmt->greenMax + 1);                         \
     int bShift = 9 - ffs(fmt->blueMax + 1);                              \
                                                                          \
-    for (y = 0; y < pCursor->bits->height; y++) {                        \
-        for (x = 0; x < pCursor->bits->width; x++) {                     \
-            CARD32 r = (*src >> rShift) & fmt->redMax;                   \
-            CARD32 g = (*src >> gShift) & fmt->greenMax;                 \
-            CARD32 b = (*src >> bShift) & fmt->blueMax;                  \
-            *dst = ((CARD##bpp)r << fmt->redShift) |                     \
-                   ((CARD##bpp)g << fmt->greenShift) |                   \
-                   ((CARD##bpp)b << fmt->blueShift);                     \
-            src++;  dst++;                                               \
+    if (fmt->bigEndian != rfbServerFormat.bigEndian) {                   \
+        for (y = 0; y < pCursor->bits->height; y++) {                    \
+            for (x = 0; x < pCursor->bits->width; x++) {                 \
+                CARD32 r = (*src >> rShift) & fmt->redMax;               \
+                CARD32 g = (*src >> gShift) & fmt->greenMax;             \
+                CARD32 b = (*src >> bShift) & fmt->blueMax;              \
+                *dst = ((CARD##bpp)r << (24 - fmt->redShift)) |          \
+                       ((CARD##bpp)g << (24 - fmt->greenShift)) |        \
+                       ((CARD##bpp)b << (24 - fmt->blueShift));          \
+                src++;  dst++;                                           \
+            }                                                            \
+        }                                                                \
+    } else {                                                             \
+        for (y = 0; y < pCursor->bits->height; y++) {                    \
+            for (x = 0; x < pCursor->bits->width; x++) {                 \
+                CARD32 r = (*src >> rShift) & fmt->redMax;               \
+                CARD32 g = (*src >> gShift) & fmt->greenMax;             \
+                CARD32 b = (*src >> bShift) & fmt->blueMax;              \
+                *dst = ((CARD##bpp)r << fmt->redShift) |                 \
+                       ((CARD##bpp)g << fmt->greenShift) |               \
+                       ((CARD##bpp)b << fmt->blueShift);                 \
+                src++;  dst++;                                           \
+            }                                                            \
         }                                                                \
     }                                                                    \
     return (pCursor->bits->width * pCursor->bits->height * (bpp / 8));   \
