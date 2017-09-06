@@ -269,7 +269,7 @@ foreach $_xkbcompdir (@xkbcompdirs) {
 }
 
 if ($bits eq "64") {
-  @dridirs = ('/usr/lib64/dri', '/usr/lib/dri', '/usr/lib/x86_64-linux-gnu/dri', '/usr/lib/xorg/modules/dri/amd64');
+  @dridirs = ('/usr/lib64/dri', '/usr/lib/dri', '/usr/lib/x86_64-linux-gnu/dri', '/usr/lib/xorg/modules/dri/amd64', '/usr/lib/powerpc64-linux-gnu/dri', '/usr/lib/powerpc64le-linux-gnu/dri');
 } else {
   @dridirs = ('/usr/lib/dri', '/usr/lib32/dri', '/usr/lib/i386-linux-gnu/dri', '/usr/lib/xorg/modules/dri');
 }
