@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P Hinz
- * Copyright (C) 2012, 2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2016-2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,7 +97,10 @@ public class CSecurityRFBTLS extends CSecurityTLS {
   }
 
   public final int getType() { return chosenType; }
-  public final String description() { return Security.secTypeName(chosenType); }
+
+  public final String getDescription() {
+    return Security.secTypeName(chosenType);
+  }
 
   private CSecurity csecurity;
   SecurityClient security;

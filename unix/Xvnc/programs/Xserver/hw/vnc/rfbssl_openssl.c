@@ -23,6 +23,9 @@
  */
 
 #include "rfb.h"
+#ifdef DLOPENSSL
+#define OPENSSL_API_COMPAT 0x10100000L
+#endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #ifdef DLOPENSSL
@@ -34,16 +37,32 @@ static void rfbErr(char *format, ...);
 
 #define BUFSIZE 1024
 
-#undef SSL_library_init
-#undef SSL_load_error_strings
+#ifndef SSL_CTRL_OPTIONS
+#define SSL_CTRL_OPTIONS 32
+#endif
+#ifndef OPENSSL_INIT_LOAD_CRYPTO_STRINGS
+#define OPENSSL_INIT_LOAD_CRYPTO_STRINGS 0x00000002L
+#endif
+#ifndef OPENSSL_INIT_LOAD_SSL_STRINGS
+#define OPENSSL_INIT_LOAD_SSL_STRINGS 0x00200000L
+#endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+#define CONST const
+#else
+#define CONST
+#endif
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+typedef struct ossl_init_settings_st OPENSSL_INIT_SETTINGS;
+#endif
 
 typedef void (*DH_free_type)(DH *);
 typedef int (*DH_generate_key_type)(DH *);
 typedef DH *(*DSA_dup_DH_type)(const DSA *);
 typedef void (*DSA_free_type)(DSA *);
-typedef int (*DSA_generate_parameters_ex_type)(DSA *, int, unsigned char *,
-                                               int, int *, unsigned long *,
+typedef int (*DSA_generate_parameters_ex_type)(DSA *, int,
+                                               CONST unsigned char *, int,
+                                               int *, unsigned long *,
                                                BN_GENCB *);
 typedef DSA *(*DSA_new_type)(void);
 typedef unsigned long (*ERR_get_error_type)(void);
@@ -68,6 +87,7 @@ static struct rfbcrypto_functions crypto
 ;
 
 typedef int (*SSL_accept_type)(SSL *);
+typedef int (*OPENSSL_init_ssl_type)(uint64_t, const OPENSSL_INIT_SETTINGS *);
 typedef int (*SSL_library_init_type)(void);
 typedef void (*SSL_load_error_strings_type)(void);
 typedef void (*SSL_free_type)(SSL *);
@@ -80,14 +100,16 @@ typedef int (*SSL_shutdown_type)(SSL *);
 typedef int (*SSL_write_type)(SSL *, const void *, int);
 typedef long (*SSL_CTX_ctrl_type)(SSL_CTX *, int, long, void *);
 typedef void (*SSL_CTX_free_type)(SSL_CTX *);
-typedef SSL_CTX *(*SSL_CTX_new_type)(SSL_METHOD *);
+typedef SSL_CTX *(*SSL_CTX_new_type)(CONST SSL_METHOD *);
 typedef int (*SSL_CTX_set_cipher_list_type)(SSL_CTX *, const char *);
+typedef void (*SSL_CTX_set_security_level_type)(SSL_CTX *, int);
 typedef int (*SSL_CTX_use_certificate_file_type)(SSL_CTX *, const char *, int);
 typedef int (*SSL_CTX_use_PrivateKey_file_type)(SSL_CTX *, const char *, int);
-typedef SSL_METHOD *(*TLSv1_server_method_type)(void);
+typedef CONST SSL_METHOD *(*SSLv23_server_method_type)(void);
 
 struct rfbssl_functions {
     SSL_accept_type SSL_accept;
+    OPENSSL_init_ssl_type OPENSSL_init_ssl;
     SSL_library_init_type SSL_library_init;
     SSL_load_error_strings_type SSL_load_error_strings;
     SSL_free_type SSL_free;
@@ -102,18 +124,35 @@ struct rfbssl_functions {
     SSL_CTX_free_type SSL_CTX_free;
     SSL_CTX_new_type SSL_CTX_new;
     SSL_CTX_set_cipher_list_type SSL_CTX_set_cipher_list;
+    SSL_CTX_set_security_level_type SSL_CTX_set_security_level;
     SSL_CTX_use_certificate_file_type SSL_CTX_use_certificate_file;
     SSL_CTX_use_PrivateKey_file_type SSL_CTX_use_PrivateKey_file;
-    TLSv1_server_method_type TLSv1_server_method;
+    SSLv23_server_method_type SSLv23_server_method;
 };
 
 static struct rfbssl_functions ssl
 #ifndef DLOPENSSL
-    = { SSL_accept, SSL_library_init, SSL_load_error_strings, SSL_free,
-        SSL_get_error, SSL_new, SSL_pending, SSL_read, SSL_set_fd,
+    = { SSL_accept,
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        OPENSSL_init_ssl, NULL, NULL,
+#else
+        NULL, SSL_library_init, SSL_load_error_strings,
+#endif
+        SSL_free, SSL_get_error, SSL_new, SSL_pending, SSL_read, SSL_set_fd,
         SSL_shutdown, SSL_write, SSL_CTX_ctrl, SSL_CTX_free, SSL_CTX_new,
-        SSL_CTX_set_cipher_list, SSL_CTX_use_certificate_file,
-        SSL_CTX_use_PrivateKey_file, TLSv1_server_method }
+        SSL_CTX_set_cipher_list,
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        SSL_CTX_set_security_level,
+#else
+        NULL,
+#endif
+        SSL_CTX_use_certificate_file, SSL_CTX_use_PrivateKey_file,
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+        TLS_server_method
+#else
+        SSLv23_server_method
+#endif
+      }
 #endif
 ;
 
@@ -122,10 +161,10 @@ static struct rfbssl_functions ssl
 static void *sslHandle = NULL, *cryptoHandle = NULL;
 
 #ifndef __APPLE__
-#define SUFFIXES 19
+#define SUFFIXES 20
 static const char *suffix[SUFFIXES] = { "0.9.8", "1.0.0", "1.0.1", "1.0.2",
-    "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18",
-    "19", "20" };
+    "1.1", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17",
+    "18", "19", "20" };
 #endif
 
 #define LOADSYM(lib, sym) {  \
@@ -138,6 +177,11 @@ static const char *suffix[SUFFIXES] = { "0.9.8", "1.0.0", "1.0.1", "1.0.2",
             rfbErr("Could not load symbol "#sym" from %s\n", libName);  \
         return -1;  \
     }  \
+}
+
+#define LOADSYMOPT(lib, sym, name) {  \
+    dlerror();  \
+    lib.sym = (sym##_type)dlsym(lib##Handle, name);  \
 }
 
 static int loadFunctions(void)
@@ -172,8 +216,11 @@ static int loadFunctions(void)
         }
 #endif
         LOADSYM(ssl, SSL_accept);
-        LOADSYM(ssl, SSL_library_init);
-        LOADSYM(ssl, SSL_load_error_strings);
+        LOADSYMOPT(ssl, OPENSSL_init_ssl, "OPENSSL_init_ssl");
+        if (!ssl.OPENSSL_init_ssl) {
+            LOADSYM(ssl, SSL_library_init);
+            LOADSYM(ssl, SSL_load_error_strings);
+        }
         LOADSYM(ssl, SSL_free);
         LOADSYM(ssl, SSL_get_error);
         LOADSYM(ssl, SSL_new);
@@ -186,9 +233,14 @@ static int loadFunctions(void)
         LOADSYM(ssl, SSL_CTX_free);
         LOADSYM(ssl, SSL_CTX_new);
         LOADSYM(ssl, SSL_CTX_set_cipher_list);
+        LOADSYMOPT(ssl, SSL_CTX_set_security_level,
+                   "SSL_CTX_set_security_level");
         LOADSYM(ssl, SSL_CTX_use_certificate_file);
         LOADSYM(ssl, SSL_CTX_use_PrivateKey_file);
-        LOADSYM(ssl, TLSv1_server_method);
+        LOADSYMOPT(ssl, SSLv23_server_method, "TLS_server_method");
+        if (!ssl.SSLv23_server_method) {
+            LOADSYM(ssl, SSLv23_server_method);
+        }
         rfbLog("Successfully loaded symbols from %s\n", libName);
     }
 
@@ -262,8 +314,12 @@ static void rfbssl_error(const char *function)
 {
     char buf[1024];
     unsigned long e = crypto.ERR_get_error();
-    rfbErr("%s failed: %s (%d)\n", function, crypto.ERR_error_string(e, buf),
-           e);
+
+    while (e) {
+        rfbLog("Server TLS ERROR: %s failed: %s (%d)\n", function,
+               crypto.ERR_error_string(e, buf), e);
+        e = crypto.ERR_get_error();
+    }
 }
 
 
@@ -273,14 +329,20 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     struct rfbssl_ctx *ctx = NULL;
     DH *dh = NULL;
     DSA *dsa = NULL;
+    int flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3;
 
 #ifdef DLOPENSSL
     if (loadFunctions() == -1)
         return NULL;
 #endif
 
-    ssl.SSL_library_init();
-    ssl.SSL_load_error_strings();
+    if (ssl.OPENSSL_init_ssl)
+        ssl.OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS |
+                             OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+    else {
+        ssl.SSL_library_init();
+        ssl.SSL_load_error_strings();
+    }
 
     if (rfbAuthX509Key) {
       keyfile = rfbAuthX509Key;
@@ -289,10 +351,11 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     }
 
     ctx = rfbAlloc0(sizeof(struct rfbssl_ctx));
-    if ((ctx->ssl_ctx = ssl.SSL_CTX_new(ssl.TLSv1_server_method())) == NULL) {
+    if ((ctx->ssl_ctx = ssl.SSL_CTX_new(ssl.SSLv23_server_method())) == NULL) {
         rfbssl_error("SSL_CTX_new()");
         goto bailout;
     }
+    ssl.SSL_CTX_ctrl(ctx->ssl_ctx, SSL_CTRL_OPTIONS, flags, NULL);
     if (anon) {
         if ((dsa = crypto.DSA_new()) == NULL) {
             rfbssl_error("DSA_new()");
@@ -321,6 +384,8 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
             rfbssl_error("SSL_CTX_set_cipher_list()");
             goto bailout;
         }
+        if (ssl.SSL_CTX_set_security_level)
+            ssl.SSL_CTX_set_security_level(ctx->ssl_ctx, 0);
     } else {
         if (!rfbAuthX509Cert || !rfbAuthX509Cert[0]) {
             rfbErr("No X.509 certificate specified\n");
@@ -382,7 +447,7 @@ int rfbssl_accept(rfbClientPtr cl)
         else if (err == SSL_ERROR_SYSCALL)
             rfbErr("SSL_accept() failed: errno=%d\n", errno);
         else
-            rfbErr("SSL_accept() failed: %d\n", err);
+            rfbssl_error("SSL_accept()");
         return -1;
     }
 

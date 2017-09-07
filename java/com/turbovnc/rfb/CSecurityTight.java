@@ -1,5 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,14 +162,18 @@ public class CSecurityTight extends CSecurity {
     return false;
   }
 
+  public final int getType() { return Security.secTypeTight; }
+
+  public final String getDescription() {
+    return (cs != null ? cs.getDescription() : "UnixLogin");
+  }
+
+  public final String getProtocol() {
+    return (cs != null ? cs.getProtocol() : "None");
+  }
+
   SecurityClient security;
   CSecurity cs;
-  public int getType() { return Security.secTypeTight; }
-  public String description() {
-    if (cs != null)
-      return cs.description();
-    return "UnixLogin";
-  }
 
   static LogWriter vlog = new LogWriter("Tight");
 }

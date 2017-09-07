@@ -203,7 +203,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public final boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
     String title = ((user == null ? "Standard VNC Authentication" :
                                     "Unix Login Authentication") +
-                    " [" + csecurity.description() + "]");
+                    " [" + csecurity.getDescription() + "]");
     String passwordFileStr = VncViewer.passwordFile.getValue();
     PasswdDialog dlg = null;
     String autoPass;
@@ -1383,7 +1383,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
         "\n" +
       "Protocol version:  " + cp.majorVersion + "." + cp.minorVersion + "\n" +
       "Security type:  " + Security.secTypeName(csecurity.getType()) +
-        " [" + csecurity.description() + "]\n" +
+        " [" + csecurity.getDescription() + "]\n" +
+      "Encryption protocol:  " + csecurity.getProtocol() + "\n" +
       "JPEG decompression:  " +
         (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
       (VncViewer.osGrab() ? "\nTurboVNC Helper:  " +

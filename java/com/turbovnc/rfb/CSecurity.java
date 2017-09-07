@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +37,8 @@ package com.turbovnc.rfb;
 public abstract class CSecurity {
   public abstract boolean processMsg(CConnection cc);
   public abstract int getType();
-  public abstract String description();
+  public abstract String getDescription();
+  public abstract String getProtocol();
 
   /*
    * Use variable directly instead of dumb get/set methods.

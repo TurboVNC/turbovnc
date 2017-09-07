@@ -43,9 +43,20 @@ instance, by executing `xrandr --output TurboVNC --mode {new_mode}`.)
 6. Fixed an issue whereby the TurboVNC Server could not be built using GnuTLS
 3.4.0 or later.
 
-7. The TurboVNC Server now supports the anonymous Elliptic Curve Diffie-Hellman
-(ECDH) key exchange algorithm when built using GnuTLS 3.0.0 and later.  The
-Java/Mac/Un\*x TurboVNC Viewer already supports ECDH.
+7. Improved the TLS encryption feature in the following ways:
+
+     - The anonymous Elliptic Curve Diffie-Hellman (ECDH) key exchange
+algorithm is now supported when the TurboVNC Server is built using GnuTLS 3.0.0
+and later.  (The Java/Mac/Un\*x TurboVNC Viewer already supports ECDH.)
+     - The TurboVNC Server will now use the most recent version of the TLS
+protocol that both the server and the client support.
+     - The "VNC connection info" dialog in the Java/Mac/Un*x TurboVNC Viewer
+will now display the TLS protocol version currently in use.
+     - The TurboVNC Server can now be built with OpenSSL 1.1, and if it is
+built with `TVNC_DLOPENSSL=1` (the default), it can use OpenSSL 1.1 at run time
+regardless of whether it was built on a machine that has OpenSSL 1.1 installed.
+     - When using OpenSSL, the TurboVNC Server will now log a more meaningful
+error message if the TLS handshake fails.
 
 8. Fixed an issue in the Mac (Java) TurboVNC Viewer whereby the initial
 non-full-screen window was positioned incorrectly if it spanned multiple
