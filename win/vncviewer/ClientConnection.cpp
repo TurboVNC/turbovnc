@@ -2629,6 +2629,7 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
                      SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
       }
       vnclog.Print(6, "Losing focus - cancelling modifiers\n");
+      _this->SwitchOffKeys();
       return 0;
     }
     case WM_QUERYNEWPALETTE:

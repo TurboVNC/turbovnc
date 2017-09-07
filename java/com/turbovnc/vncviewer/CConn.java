@@ -183,6 +183,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         viewport.timer.stop();
       viewport.dispose();
     }
+    releasePressedKeys();
     viewport = null;
   }
 

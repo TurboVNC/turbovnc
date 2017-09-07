@@ -180,6 +180,20 @@ public class VncViewer extends javax.swing.JApplet
     setOpenFileHandler.invoke(app, new Object[]{proxy});
   }
 
+  static void enableQuitStrategy() throws Exception {
+    Class appClass = Class.forName("com.apple.eawt.Application");
+    Method getApplication = appClass.getMethod("getApplication",
+                                               (Class[])null);
+    Object app = getApplication.invoke(appClass);
+
+    Class quitStrategyClass = Class.forName("com.apple.eawt.QuitStrategy");
+    Enum closeAllWindows = Enum.valueOf(quitStrategyClass,
+                                        "CLOSE_ALL_WINDOWS");
+    Method setQuitStrategy =
+      appClass.getMethod("setQuitStrategy", quitStrategyClass);
+    setQuitStrategy.invoke(app, closeAllWindows);
+  }
+
   static void setLookAndFeel() {
     try {
       if (os.startsWith("windows")) {
@@ -201,6 +215,7 @@ public class VncViewer extends javax.swing.JApplet
       if (os.startsWith("mac os x")) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         enableFileHandler();
+        enableQuitStrategy();
 
         try {
           Class appClass = Class.forName("com.apple.eawt.Application");

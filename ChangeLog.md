@@ -154,6 +154,13 @@ working properly on little endian PowerPC systems.
 being rendered and transmitted properly if the server was running on a big
 endian system.
 
+25. Fixed an issue in the Windows TurboVNC Viewer whereby, if keyboard grabbing
+was disabled, using Alt-Tab to select another window would sometimes leave the
+Alt key in a pressed state on the server.  Fixed a similar issue in the Mac
+TurboVNC Viewer whereby, when quitting the viewer using Command-Q or closing
+the connection using Command-W, the Super/Windows key would be left in a
+pressed state on the server.
+
 
 2.1.1
 =====
