@@ -32,7 +32,7 @@
 #include <dlfcn.h>
 #endif
 
-static void rfbErr(char *format, ...);
+static void rfbErr(const char *format, ...);
 
 
 #define BUFSIZE 1024
@@ -298,15 +298,15 @@ struct rfbssl_ctx {
 };
 
 
-static void rfbErr(char *format, ...)
+static void rfbErr(const char *format, ...)
 {
     va_list args;
 
     va_start(args, format);
     snprintf(errStr, BUFSIZE, "Server TLS ERROR: ");
     vsnprintf(&errStr[strlen(errStr)], BUFSIZE - strlen(errStr), format, args);
-    vrfbLog(format, args);
     va_end(args);
+    rfbLog("%s", &errStr[18]);
 }
 
 
@@ -316,7 +316,7 @@ static void rfbssl_error(const char *function)
     unsigned long e = crypto.ERR_get_error();
 
     while (e) {
-        rfbLog("Server TLS ERROR: %s failed: %s (%d)\n", function,
+        rfbErr("%s failed: %s (%d)\n", function,
                crypto.ERR_error_string(e, buf), e);
         e = crypto.ERR_get_error();
     }

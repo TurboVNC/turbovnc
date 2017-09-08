@@ -704,7 +704,6 @@ extern struct in6_addr interface6;
 extern int family;
 
 extern int rfbBitsPerPixel(int depth);
-extern void vrfbLog(char *format, va_list args);
 extern void rfbLog(char *format, ...);
 extern void rfbLogPerror(char *str);
 

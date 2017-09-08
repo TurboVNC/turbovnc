@@ -1577,11 +1577,14 @@ ddxUseMsg()
  * rfbLog prints a time-stamped message to the log file (stderr.)
  */
 
-void vrfbLog(char *format, va_list args)
+void rfbLog(char *format, ...)
 {
+    va_list args;
     char buf[256];
     time_t clock;
     int i;
+
+    va_start(args, format);
 
     time(&clock);
     strftime(buf, 255, "%d/%m/%Y %H:%M:%S ", localtime(&clock));
@@ -1591,15 +1594,7 @@ void vrfbLog(char *format, va_list args)
 
     vfprintf(stderr, format, args);
     fflush(stderr);
-}
 
-
-void rfbLog(char *format, ...)
-{
-    va_list args;
-
-    va_start(args, format);
-    vrfbLog(format, args);
     va_end(args);
 }
 
