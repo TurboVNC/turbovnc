@@ -180,6 +180,14 @@ circumstances, background updating was causing the TurboVNC Server to become
 unresponsive, since it is running the VNC, X11, and HTTP servers in the same
 thread.
 
+28. Worked around an issue in OS X whereby the TurboVNC Viewer window would not
+be brought to the foreground if a mouse button other than the primary button
+was clicked in it.  Because OS X sends only mouse press events to
+non-foreground windows, this issue was causing mouse buttons other than the
+primary button to become stuck in the pressed state on the server if one of
+those buttons was clicked in the viewer window while the window was in the
+background.
+
 
 2.1.1
 =====
