@@ -161,6 +161,11 @@ TurboVNC Viewer whereby, when quitting the viewer using Command-Q or closing
 the connection using Command-W, the Super/Windows key would be left in a
 pressed state on the server.
 
+26. Fixed an issue in the Java TurboVNC Viewer whereby the client clipboard
+contents would not be transferred to the server if text was selected in the
+server session and the middle mouse button was clicked in the viewer window
+without first bringing the window to the foreground.
+
 
 2.1.1
 =====
