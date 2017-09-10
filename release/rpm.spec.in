@@ -115,7 +115,8 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  -DTVNC_BUILDJAVA=%{java} -DTVNC_BUILDNATIVE=%{native} \
 #-->  -DTVNC_BUILDSERVER=%{server} \
 #-->  $JNIJARS_ARGS .
-#-->make
+#-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
+#-->make -j$NUMCPUS --load-average=$NUMCPUS
 
 %install
 rm -rf $RPM_BUILD_ROOT
