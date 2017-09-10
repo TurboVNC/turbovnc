@@ -29,6 +29,7 @@ import java.awt.Image;
 import java.io.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import java.lang.reflect.*;
@@ -180,20 +181,6 @@ public class VncViewer extends javax.swing.JApplet
     setOpenFileHandler.invoke(app, new Object[]{proxy});
   }
 
-  static void enableQuitStrategy() throws Exception {
-    Class appClass = Class.forName("com.apple.eawt.Application");
-    Method getApplication = appClass.getMethod("getApplication",
-                                               (Class[])null);
-    Object app = getApplication.invoke(appClass);
-
-    Class quitStrategyClass = Class.forName("com.apple.eawt.QuitStrategy");
-    Enum closeAllWindows = Enum.valueOf(quitStrategyClass,
-                                        "CLOSE_ALL_WINDOWS");
-    Method setQuitStrategy =
-      appClass.getMethod("setQuitStrategy", quitStrategyClass);
-    setQuitStrategy.invoke(app, closeAllWindows);
-  }
-
   static void setLookAndFeel() {
     try {
       if (os.startsWith("windows")) {
@@ -215,7 +202,6 @@ public class VncViewer extends javax.swing.JApplet
       if (os.startsWith("mac os x")) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         enableFileHandler();
-        enableQuitStrategy();
 
         try {
           Class appClass = Class.forName("com.apple.eawt.Application");
@@ -231,6 +217,16 @@ public class VncViewer extends javax.swing.JApplet
           vlog.debug("Could not set OS X dock icon:");
           vlog.debug("  " + e.toString());
         }
+        // This allows us to trap Command-Q and shut things down properly.
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+          public void run() {
+            synchronized(VncViewer.conns) {
+              for (CConn cc: VncViewer.conns)
+                cc.close(false);
+              VncViewer.conns.clear();
+            }
+          }
+        });
       }
 
       // Set the shared frame's icon, which will be inherited by any ownerless
@@ -809,8 +805,14 @@ public class VncViewer extends javax.swing.JApplet
       double tStart = 0.0, tTotal;
 
       try {
-        if (cc == null)
+        if (cc == null) {
           cc = new CConn(this, sock);
+          if (os.startsWith("mac os x") && benchFile == null) {
+            synchronized(conns) {
+              conns.add(cc);
+            }
+          }
+        }
         if (benchFile != null) {
           if (i < benchWarmup)
             System.out.format("Benchmark warmup run %d\n", i + 1);
@@ -860,7 +862,7 @@ public class VncViewer extends javax.swing.JApplet
                           cc.state() == CConnection.RFBSTATE_NORMAL &&
                           !VncViewer.noReconnect.getValue());
           exitStatus = 1;
-          if (cc != null) cc.deleteWindow();
+          if (cc != null) cc.deleteWindow(true);
         } else if (cc.shuttingDown && embed.getValue()) {
           reportException(new WarningException("Connection closed"));
         } else {
@@ -1537,5 +1539,6 @@ public class VncViewer extends javax.swing.JApplet
   OptionsDialog options;
   TrayMenu trayMenu;
   Thread listenThread;
+  static ArrayList<CConn> conns = new ArrayList<CConn>();
   static Insets insets;
 }

@@ -177,11 +177,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT: deleteWindow() is called when the user closes the window or selects
   // "Close Connection" from the F8 menu.
-  void deleteWindow() {
+  void deleteWindow(boolean disposeViewport) {
     if (viewport != null) {
       if (viewport.timer != null)
         viewport.timer.stop();
-      viewport.dispose();
+      if (disposeViewport)
+        viewport.dispose();
     }
     releasePressedKeys();
     viewport = null;
@@ -1346,8 +1347,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // The following methods are all called from the EDT.
 
   // close() shuts down the socket, thus waking up the RFB thread.
-  public void close() {
-    deleteWindow();
+  public void close() { close(true); }
+
+  public void close(boolean disposeViewport) {
+    deleteWindow(disposeViewport);
     shuttingDown = true;
     if (sock != null)
       sock.shutdown();
