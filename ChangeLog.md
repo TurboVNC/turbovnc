@@ -188,6 +188,11 @@ primary button to become stuck in the pressed state on the server if one of
 those buttons was clicked in the viewer window while the window was in the
 background.
 
+29. Fixed an issue in the TurboVNC Server whereby it would hang and eventually
+time out when attempting to negotiate VeNCrypt capabilities with the viewer.
+This issue was known to affect only Solaris 11 servers, but it might have also
+affected other platforms under rare circumstances.
+
 
 2.1.1
 =====

@@ -1040,6 +1040,8 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
 
     WRITE(&serverVersion.minor, 1);
     WRITE(&serverVersion.major, 1);
+    rfbUncorkSock(cl->sock);
+    rfbCorkSock(cl->sock);
     READ(&clientVersion, 2);
 
     if (clientVersion.major == 0 && clientVersion.minor < 2) {
@@ -1083,6 +1085,8 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
         }
     }
 
+    rfbUncorkSock(cl->sock);
+    rfbCorkSock(cl->sock);
     READ(&chosenType, sizeof(CARD32));
     chosenType = Swap32IfLE(chosenType);
 
