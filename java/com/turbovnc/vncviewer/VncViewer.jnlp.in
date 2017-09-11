@@ -19,6 +19,10 @@
     <vendor>The VirtualGL Project</vendor>
   </information>
 
+  <offline-allowed/>
+
+  <update check="always" policy="always"/>
+
   <resources>
     <jar href="VncViewer.jar" main="true"/>
   </resources>

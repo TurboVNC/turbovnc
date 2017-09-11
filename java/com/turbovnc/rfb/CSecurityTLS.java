@@ -4,7 +4,7 @@
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012, 2015 Brian P. Hinz
- * Copyright (C) 2012, 2015-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -441,8 +441,14 @@ public class CSecurityTLS extends CSecurity {
     return anon ? Security.secTypeTLSNone : Security.secTypeX509None;
   }
 
-  public String description() {
+  public String getDescription() {
     return anon ? "TLSNone" : "X509None";
+  }
+
+  public final String getProtocol() {
+    if (manager != null && manager.getSession() != null)
+      return manager.getSession().getProtocol();
+    return "Not initialized";
   }
 
   protected CConnection client;

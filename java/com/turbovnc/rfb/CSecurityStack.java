@@ -2,6 +2,7 @@
  * Copyright (C) 2006 OCCAM Financial Technology
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +59,11 @@ public class CSecurityStack extends CSecurity {
   }
 
   public final int getType() { return type; }
-  public final String description() { return name; }
+  public final String getDescription() { return name; }
+
+  public final String getProtocol() {
+    return (state0 != null ? state0.getProtocol() : "None");
+  }
 
   private int state;
   private CSecurity state0;

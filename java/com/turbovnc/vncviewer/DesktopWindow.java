@@ -1,7 +1,8 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
- * Copyright (C) 2010, 2012-2013, 2015-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2010, 2012-2013, 2015-2017 D. R. Commander.
+                                            All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -25,6 +26,7 @@
 // thread").  This means that we need to be careful with synchronization here.
 
 package com.turbovnc.vncviewer;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.font.TextHitInfo;
@@ -34,6 +36,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.Clipboard;
 import java.io.BufferedReader;
+import java.lang.reflect.*;
 import java.nio.CharBuffer;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -499,6 +502,22 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     mouseCB(e, cc.viewport.buttonReleaseType);
   }
   public void mousePressed(MouseEvent e) {
+    if (VncViewer.os.startsWith("mac os x")) {
+      try {
+        Class appClass = Class.forName("com.apple.eawt.Application");
+        Method getApplication = appClass.getMethod("getApplication",
+                                                   (Class[])null);
+        Object app = getApplication.invoke(appClass);
+
+        Method requestForeground =
+          appClass.getMethod("requestForeground", boolean.class);
+        requestForeground.invoke(app, false);
+      } catch(Exception ex) {
+        vlog.error("Could not bring window to foreground:");
+        vlog.error("  " + ex.getMessage());
+      }
+    }
+    if (cc.viewer.benchFile == null) checkClipboard();
     mouseCB(e, cc.viewport.buttonPressType);
   }
   public void mouseClicked(MouseEvent e) {}

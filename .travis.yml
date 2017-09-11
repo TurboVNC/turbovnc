@@ -48,6 +48,10 @@ before_install:
           unzip libjpeg-turbo-jws.zip &&
           rm libjpeg-turbo-jws.zip;
         fi &&
+        popd &&
+        mkdir ~/libjpeg-turbo-rpm &&
+        pushd ~/libjpeg-turbo-rpm &&
+        wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm &&
         popd;
       elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
         brew install md5sha1sum &&
@@ -83,7 +87,7 @@ script:
         mv .git/shallow .git/shallow.bak;
       fi &&
       if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-        docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-jni:/opt/libjpeg-turbo-jni -t dcommander/buildvnc:latest bash -c "rpm --import $LJT_GPG_KEY && wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm && rpm -K *.rpm && rpm -i *.rpm && rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvnc -r file:///root/src/turbovnc $TRAVIS_BRANCH -v" &&
+        docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-jni:/opt/libjpeg-turbo-jni -v $HOME/libjpeg-turbo-rpm:/rpms -t dcommander/buildvnc:latest bash -c "rpm --import $LJT_GPG_KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvnc -r file:///root/src/turbovnc $TRAVIS_BRANCH -v" &&
         sudo chown -R travis:travis ~/src/vnc.nightly;
       else
         ~/src/buildscripts/buildvnc -r file://$TRAVIS_BUILD_DIR $TRAVIS_BRANCH -v;
@@ -97,7 +101,8 @@ script:
       mkdir build &&
       pushd build &&
       cmake -G"Unix Makefiles" ${CMAKE_FLAGS} .. &&
-      make -j &&
+      export NUMCPUS=`grep -c '^processor' /proc/cpuinfo` &&
+      make -j$NUMCPUS --load-average=$NUMCPUS &&
       popd;
     fi
 

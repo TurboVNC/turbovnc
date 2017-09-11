@@ -29,6 +29,7 @@ import java.awt.Image;
 import java.io.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import java.lang.reflect.*;
@@ -215,6 +216,16 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
           vlog.debug("Could not set OS X dock icon:");
           vlog.debug("  " + e.toString());
         }
+        // This allows us to trap Command-Q and shut things down properly.
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+          public void run() {
+            synchronized(VncViewer.conns) {
+              for (CConn cc: VncViewer.conns)
+                cc.close(false);
+              VncViewer.conns.clear();
+            }
+          }
+        });
       }
 
       // Set the shared frame's icon, which will be inherited by any ownerless
@@ -722,8 +733,14 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       double tStart = 0.0, tTotal;
 
       try {
-        if (cc == null)
+        if (cc == null) {
           cc = new CConn(this, sock);
+          if (os.startsWith("mac os x") && benchFile == null) {
+            synchronized(conns) {
+              conns.add(cc);
+            }
+          }
+        }
         if (benchFile != null) {
           if (i < benchWarmup)
             System.out.format("Benchmark warmup run %d\n", i + 1);
@@ -773,7 +790,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
                           cc.state() == CConnection.RFBSTATE_NORMAL &&
                           !VncViewer.noReconnect.getValue());
           exitStatus = 1;
-          if (cc != null) cc.deleteWindow();
+          if (cc != null) cc.deleteWindow(true);
         } else {
           cc = null;
         }
@@ -1444,5 +1461,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   OptionsDialog options;
   TrayMenu trayMenu;
   Thread listenThread;
+  static ArrayList<CConn> conns = new ArrayList<CConn>();
   static Insets insets;
 }

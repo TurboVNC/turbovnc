@@ -1,5 +1,5 @@
 /* Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,12 +45,12 @@ public class CSecurityIdent extends CSecurity {
     return true;
   }
 
-  public int getType() { return Security.secTypeIdent; }
+  public final int getType() { return Security.secTypeIdent; }
+  public final String getDescription() { return "Ident"; }
+  public final String getProtocol() { return "None"; }
 
   java.net.Socket sock;
   UserPasswdGetter upg;
 
   static LogWriter vlog = new LogWriter("Ident");
-  public String description() { return "Ident"; }
-
 }

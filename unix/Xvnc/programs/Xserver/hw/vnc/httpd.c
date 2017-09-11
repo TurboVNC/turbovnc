@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
@@ -55,7 +57,7 @@
     "<BODY><H1>File Not Found</H1></BODY>\n"
 
 #define OK_STR "HTTP/1.0 200 OK\r\n"
-#define CONTENT_STR "Content-Type: application/x-java-jnlp-file\r\n\r\n"
+#define CONTENT_STR "Content-Type: application/x-java-jnlp-file\r\n"
 
 static void httpProcessInput();
 static Bool compareAndSkip(char **ptr, const char *str);
@@ -223,6 +225,7 @@ httpProcessInput()
     Bool performSubstitutions = FALSE;
     char str[256];
     struct passwd *user;
+    struct stat st;
 
     cl.sock = httpSock;
 
@@ -338,8 +341,21 @@ httpProcessInput()
         return;
     }
 
+    if (fstat(fd, &st) < 0) {
+        rfbLogPerror("httpProcessInput: fstat");
+        WriteExact(&cl, NOT_FOUND_STR, strlen(NOT_FOUND_STR));
+        httpCloseSock();
+        return;
+    }
+
     WriteExact(&cl, OK_STR, strlen(OK_STR));
+    snprintf(str, 256, "Content-Length: %ld\r\n", st.st_size);
+    WriteExact(&cl, str, strlen(str));
+    strftime(str, 256, "Last-Modified: %a, %d %b %Y %T GMT\r\n",
+             gmtime(&st.st_mtime));
+    WriteExact(&cl, str, strlen(str));
     WriteExact(&cl, CONTENT_STR, strlen(CONTENT_STR));
+    WriteExact(&cl, "\r\n", 2);
 
     while (1) {
         int n = read(fd, buf, BUF_SIZE-1);

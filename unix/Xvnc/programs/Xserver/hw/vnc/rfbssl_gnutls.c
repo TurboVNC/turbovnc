@@ -41,7 +41,7 @@ struct rfbssl_ctx {
 };
 
 
-static void rfbErr(char *format, ...)
+static void rfbErr(const char *format, ...)
 {
     va_list args;
 
@@ -138,6 +138,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
         }
         if (!rfbAuthX509Cert || !rfbAuthX509Cert[0]) {
             rfbErr("No X.509 certificate specified\n");
+            rfbLog("No X.509 certificate specified\n");
             goto bailout;
         }
         if ((ret = gnutls_certificate_allocate_credentials(&ctx->x509_cred)) !=
