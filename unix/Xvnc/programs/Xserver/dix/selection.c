@@ -54,6 +54,13 @@ SOFTWARE.
 #include "selection.h"
 #include "xace.h"
 
+#ifdef TURBOVNC
+extern int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
+                               Atom property, Window requestor,
+                               TimeStamp time);
+extern Window vncGetSelectionWindow(void);
+#endif
+
 /*****************************************************************
  * Selection Stuff
  *
@@ -284,6 +291,16 @@ ProcConvertSelection(ClientPtr client)
     memset(&event, 0, sizeof(xEvent));
     if (rc != Success && rc != BadMatch)
         return rc;
+#ifdef TURBOVNC
+    else if (rc == Success && pSel->client == serverClient &&
+             pSel->window == vncGetSelectionWindow()) {
+        TimeStamp time;
+        time = ClientTimeToServerTime(stuff->time);
+        rc = vncConvertSelection(client, stuff->selection, stuff->target,
+                                 stuff->property, stuff->requestor, time);
+        if (rc == Success) return rc;
+    }
+#endif
     else if (rc == Success && pSel->window != None) {
         event.u.u.type = SelectionRequest;
         event.u.selectionRequest.owner = pSel->window;

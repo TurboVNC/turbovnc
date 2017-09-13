@@ -28,6 +28,11 @@ set(TVNC_USETLS "OpenSSL" CACHE STRING
 set_property(CACHE TVNC_USETLS PROPERTY STRINGS OpenSSL GnuTLS None)
 string(TOLOWER "${TVNC_USETLS}" TVNC_USETLS)
 
+if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+	find_path(ICONV_INCLUDE_DIR iconv.h)
+	include_directories(${ICONV_INCLUDE_DIR})
+endif()
+
 if(TVNC_USETLS STREQUAL "openssl")
 	include(FindOpenSSL)
 	if(NOT OPENSSL_FOUND)

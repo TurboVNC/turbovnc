@@ -108,6 +108,9 @@ variable to `mate-session`.
 reflect the fact that the TurboVNC Server is now able to run 3D window managers
 without using VirtualGL.
 
+11. Clipboard synchronization is now performed within the TurboVNC Server
+process, so the tvncconfig utility is no longer needed or provided.
+
 
 2.1.2
 =====

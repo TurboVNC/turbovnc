@@ -640,6 +640,8 @@ extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
 
 extern void rfbSetXCutText(char *str, int len);
 extern void rfbGotXCutText(char *str, int len);
+extern void vncClientCutText(const char *str, int len);
+extern void vncSelectionInit(void);
 
 
 /* dispcur.c */
@@ -935,11 +937,6 @@ extern Bool rfbSetTranslateFunction(rfbClientPtr cl);
 extern void rfbSetClientColourMaps(int firstColour, int nColours);
 extern Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour,
                                   int nColours);
-
-
-/* vncextinit.c */
-
-extern void vncClientCutText(const char* str, int len);
 
 
 /* zlib.c */

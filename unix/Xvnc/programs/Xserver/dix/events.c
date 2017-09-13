@@ -148,6 +148,12 @@ Equipment Corporation.
 #include "eventconvert.h"
 #include "mi.h"
 
+#ifdef TURBOVNC
+extern Window vncGetSelectionWindow(void);
+extern void vncHandleSelection(Atom selection, Atom target, Atom property,
+                               Atom requestor, TimeStamp time);
+#endif
+
 /* Extension events type numbering starts at EXTENSION_EVENT_BASE.  */
 #define NoSuchEvent 0x80000000  /* so doesn't match NoEventMask */
 #define StructureAndSubMask ( StructureNotifyMask | SubstructureNotifyMask )
@@ -5344,6 +5350,18 @@ ProcSendEvent(ClientPtr client)
      * back in once we send the event to the client */
 
     stuff->event.u.u.type &= ~(SEND_EVENT_BIT);
+
+#ifdef TURBOVNC
+    if (stuff->event.u.u.type == SelectionNotify &&
+        stuff->event.u.selectionNotify.requestor == vncGetSelectionWindow()) {
+        TimeStamp time;
+        time = ClientTimeToServerTime(stuff->event.u.selectionNotify.time);
+        vncHandleSelection(stuff->event.u.selectionNotify.selection,
+                           stuff->event.u.selectionNotify.target,
+                           stuff->event.u.selectionNotify.property,
+                           stuff->event.u.selectionNotify.requestor, time);
+    }
+#endif
 
     /* The client's event type must be a core event type or one defined by an
        extension. */

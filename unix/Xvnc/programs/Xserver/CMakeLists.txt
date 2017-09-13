@@ -153,12 +153,14 @@ endif()
 if(HAVE_MONOTONIC_CLOCK)
 	set(EXTRA_LIB ${EXTRA_LIB} rt)
 endif()
-target_link_libraries(Xvnc main dix vnc fb Xi composite mi damage damageext
+target_link_libraries(Xvnc main dix mi vnc fb Xi composite mi damage damageext
 	randr render os present Xext-server sync xfixes xkb Xau Xdmcp
 	Xfont fontenc freetype2 pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m
 	pthread ${PAM_LIB} ${EXTRA_LIB})
-if(NOT APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES
-	"(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+	find_library(ICONV_LIBRARIES NAMES iconv)
+	target_link_libraries(Xvnc ${ICONV_LIBRARIES})
+else()
 	target_link_libraries(Xvnc dl)
 endif()
 

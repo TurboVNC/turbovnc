@@ -245,7 +245,6 @@ fi
 %endif
 %if "%{server}" == "1"
  %{bindir}/Xvnc
- %{bindir}/tvncconfig
  %{bindir}/vncserver
  %{bindir}/vncpasswd
  %{bindir}/vncconnect

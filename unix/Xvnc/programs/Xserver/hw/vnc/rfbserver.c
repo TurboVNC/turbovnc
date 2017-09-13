@@ -2664,6 +2664,8 @@ rfbSendServerCutText(char *str, int len)
         if (cl->captureFD >= 0)
             WriteCapture(cl->captureFD, str, len);
     }
+    LogMessage(X_DEBUG, "Sent server clipboard: '%.*s%s' (%d bytes)\n",
+               len <= 10 ? len : 20, str, len <= 20 ? "" : "...", len);
 }
 
 

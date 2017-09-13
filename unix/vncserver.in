@@ -624,8 +624,6 @@ if (-e "/tmp/.X11-unix/X$displayNumber") {
 $ENV{VNCDESKTOP}= $desktopName;
 $ENV{VGL_COMPRESS}= "0";
 
-system($exedir."tvncconfig >> " . &quotedString($desktopLog) . " 2>&1 &");
-
 if (! $skipxstartup) {
   if ($opt{'-fg'}) {
     system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");

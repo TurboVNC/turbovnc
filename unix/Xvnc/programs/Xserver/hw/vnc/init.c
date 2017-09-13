@@ -340,6 +340,12 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
+    if (strcasecmp(argv[i], "-noprimarysync") == 0) {
+        extern Bool rfbSyncPrimary;
+        rfbSyncPrimary = FALSE;
+        return 1;
+    }
+
     if (strcasecmp(argv[i], "-noreverse") == 0) {
         rfbAuthDisableRevCon = TRUE;
         return 1;
@@ -1569,6 +1575,9 @@ ddxUseMsg()
     ErrorF("                       that use the (obsolete) X cut buffer\n");
     ErrorF("-noflowcontrol         when continuous updates are enabled, send updates whether\n");
     ErrorF("                       or not the client is ready to receive them\n");
+    ErrorF("-noprimarysync         disable clipboard synchronization with the PRIMARY\n");
+    ErrorF("                       selection (typically used when pasting with the middle\n");
+    ErrorF("                       mouse button)\n");
     ErrorF("-noreverse             disable reverse connections\n");
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
     ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
