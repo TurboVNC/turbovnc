@@ -61,10 +61,12 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/X_include
 configure_file(include/tvnc_version.h.in
 	programs/Xserver/include/tvnc_version.h)
 
-option(TVNC_GLX
-	"Include GLX extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"
-	ON)
-report_option(TVNC_GLX "GLX extension")
+if(NOT APPLE)
+	option(TVNC_GLX
+		"Include GLX extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"
+		ON)
+	report_option(TVNC_GLX "GLX extension")
+endif()
 
 add_subdirectory(include)
 add_subdirectory(extras/freetype2)

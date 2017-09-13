@@ -21,22 +21,6 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
 endif()
 
-check_c_source_compiles("int __thread test;  int main(void) { return 0; }"
-	TLS_WORKS)
-if(TLS_WORKS)
-	set(TLS __thread)
-	check_c_source_compiles("int ${TLS} __attribute__((tls_model(\"initial-exec\"))) test;  int main(void) { return 0; }"
-		TLS_INITIAL_EXEC_WORKS)
-	if(TLS_INITIAL_EXEC_WORKS)
-		set(TLS "${TLS} __attribute__((tls_model(\"initial-exec\")))")
-	endif()
-	add_definitions(-DTLS=${TLS})
-else()
-	message(FATAL_ERROR "Could not figure out how to use thread-local storage with this compiler.")
-endif()
-
-message(STATUS "Thread-local storage directive: ${TLS}")
-
 add_library(glapi STATIC
 	src/mapi/glapi/glapi.c
 	src/mapi/glapi/glapi_dispatch.c
