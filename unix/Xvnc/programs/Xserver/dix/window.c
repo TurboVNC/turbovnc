@@ -226,7 +226,7 @@ log_window_info(WindowPtr pWin, int depth)
 
     win_name = get_window_name(pWin);
     ErrorF("win 0x%.8x (%s), [%d, %d] to [%d, %d]",
-           pWin->drawable.id,
+           (unsigned) pWin->drawable.id,
            win_name ? win_name : "no name",
            pWin->drawable.x, pWin->drawable.y,
            pWin->drawable.x + pWin->drawable.width,
@@ -239,7 +239,7 @@ log_window_info(WindowPtr pWin, int depth)
         ErrorF(" (%s compositing: pixmap %x)",
                (pWin->redirectDraw == RedirectDrawAutomatic) ?
                "automatic" : "manual",
-               pScreen->GetWindowPixmap(pWin)->drawable.id);
+               (unsigned) pScreen->GetWindowPixmap(pWin)->drawable.id);
 #endif
 
     switch (pWin->visibility) {
@@ -282,7 +282,7 @@ PrintWindowTree(void)
     for (scrnum = 0; scrnum < screenInfo.numScreens; scrnum++) {
         pScreen = screenInfo.screens[scrnum];
         ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", scrnum,
-               pScreen->GetScreenPixmap(pScreen)->drawable.id);
+               (unsigned) pScreen->GetScreenPixmap(pScreen)->drawable.id);
         pWin = pScreen->root;
         depth = 1;
         while (pWin) {
