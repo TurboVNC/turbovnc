@@ -1922,11 +1922,18 @@ public class CConn extends CConnection implements UserPasswdGetter,
           else if (key < 32)
             key += 64;
           // Windows and Mac sometimes return CHAR_UNDEFINED with CTRL-SHIFT
-          // combinations, so the best we can do is send the key code if it is
-          // a valid ASCII symbol.
-          else if (key == KeyEvent.CHAR_UNDEFINED && keycode >= 0 &&
-                   keycode <= 127)
-            key = keycode;
+          // combinations.
+          else if (key == KeyEvent.CHAR_UNDEFINED) {
+            // CTRL-SHIFT-Minus should generate an underscore key character in
+            // almost all keyboard layouts.  Emacs, in particular, uses
+            // CTRL-SHIFT-Underscore for its undo function.
+            if (keycode == KeyEvent.VK_MINUS && ev.isShiftDown())
+              key = '_';
+            // The best we can do for other keys is to send the key code if
+            // it is a valid ASCII symbol.
+            else if (keycode >= 0 && keycode <= 127)
+              key = keycode;
+          }
         } else if (pressedKeys.containsValue(Keysyms.Alt_L) &&
                    VncViewer.os.startsWith("mac os x") && key > 127) {
           // Un*x and Windows servers expect that, if Alt + an ASCII key is
@@ -1945,6 +1952,20 @@ public class CConn extends CConnection implements UserPasswdGetter,
             key = keycode;
         }
         switch (keycode) {
+        // NOTE: For keyboard layouts that produce a different symbol when
+        // AltGr+{a dead key} is pressed, Java tends to send us the key code
+        // for the dead key.  It is difficult to distinguish those key events
+        // from key events in which the dead key itself is pressed.
+        // Fortunately, it seems that Java usually accompanies actual dead key
+        // events with a key character corresponding to the equivalent ASCII or
+        // ISO-8859-1 symbol (e.g. '^' for a dead circumflex) or
+        // KeyEvent.CHAR_UNDEFINED.  We assume that, if we receive the key code
+        // for a dead key, the key character is an ASCII/ISO-8859-1 symbol,
+        // and it doesn't match the equivalent ASCII/ISO-8859-1 symbol for the
+        // dead key, we should send the keysym for the key character instead
+        // of the keysym for the dead key.  We only do this for the dead keys
+        // that are known to have AltGr symbols associated with them in various
+        // QWERTY layouts.
         case KeyEvent.VK_DEAD_ABOVEDOT:
           if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
             keysym = Keysyms.Dead_AboveDot;
@@ -1954,7 +1975,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
             keysym = Keysyms.Dead_AboveRing;
           break;
         case KeyEvent.VK_DEAD_ACUTE:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+              (key == '\'' || key == 180 || key > 255))
             keysym = Keysyms.Dead_Acute;
           break;
         case KeyEvent.VK_DEAD_BREVE:
@@ -1966,15 +1988,18 @@ public class CConn extends CConnection implements UserPasswdGetter,
             keysym = Keysyms.Dead_Caron;
           break;
         case KeyEvent.VK_DEAD_CEDILLA:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+              (key == 184 || key > 255))
             keysym = Keysyms.Dead_Cedilla;
           break;
         case KeyEvent.VK_DEAD_CIRCUMFLEX:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+              (key == '^' || key > 255))
             keysym = Keysyms.Dead_Circumflex;
           break;
         case KeyEvent.VK_DEAD_DIAERESIS:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+              (key == '\"'|| key == 168 || key > 255))
             keysym = Keysyms.Dead_Diaeresis;
           break;
         case KeyEvent.VK_DEAD_DOUBLEACUTE:
@@ -1982,7 +2007,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
             keysym = Keysyms.Dead_DoubleAcute;
           break;
         case KeyEvent.VK_DEAD_GRAVE:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+              (key == '`' || key > 255))
             keysym = Keysyms.Dead_Grave;
           break;
         case KeyEvent.VK_DEAD_IOTA:
@@ -2002,16 +2028,17 @@ public class CConn extends CConnection implements UserPasswdGetter,
             keysym = Keysyms.Dead_Semivoiced_Sound;
           break;
         case KeyEvent.VK_DEAD_TILDE:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+              (key == '~' || key > 255))
             keysym = Keysyms.Dead_Tilde;
           break;
         case KeyEvent.VK_DEAD_VOICED_SOUND:
           if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
             keysym = Keysyms.Dead_Voiced_Sound;
           break;
-        default:
-          keysym = UnicodeToKeysym.ucs2keysym(key);
         }
+        if (keysym == -1)
+          keysym = UnicodeToKeysym.ucs2keysym(key);
         if (keysym == -1) {
           debugStr += " NO KEYSYM";
           vlog.debug(debugStr);

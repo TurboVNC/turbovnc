@@ -300,7 +300,9 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   XDevice *device = NULL;
   int nDevices = 0, i, ci, ai, nEvents = 0;
   int buttonPressType = -1, buttonReleaseType = -1, motionType = -1;
-  XEventClass events[100] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+  XEventClass events[100] = { (XEventClass)-1, (XEventClass)-1,
+    (XEventClass)-1, (XEventClass)-1, (XEventClass)-1, (XEventClass)-1,
+    (XEventClass)-1, (XEventClass)-1, (XEventClass)-1, (XEventClass)-1 };
   jobject extInputDevice;
 
   if ((dpy = XOpenDisplay(NULL)) == NULL)
@@ -452,7 +454,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   SET_INT(cls, obj, buttonPressType, buttonPressType);
   SET_INT(cls, obj, buttonReleaseType, buttonReleaseType);
   SET_INT(cls, obj, motionType, motionType);
-  SET_LONG(cls, obj, x11dpy, (jlong)dpy);
+  SET_LONG(cls, obj, x11dpy, (jlong)(intptr_t)dpy);
 
   printf("TurboVNC Helper: Listening for XInput events on %s (window 0x%.8x)\n",
          DisplayString(dpy), (unsigned int)win);
@@ -485,7 +487,7 @@ JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputE
   bailif0(fid = (*env)->GetFieldID(env, cls, "motionType", "I"));
   motionType = (*env)->GetIntField(env, obj, fid);
   bailif0(fid = (*env)->GetFieldID(env, cls, "x11dpy", "J"));
-  bailif0(dpy = (Display *)(*env)->GetLongField(env, obj, fid));
+  bailif0(dpy = (Display *)(intptr_t)(*env)->GetLongField(env, obj, fid));
 
   while (XCheckTypedEvent(dpy, type, &e.xe)) {
 
@@ -557,7 +559,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
 
   bailif0(cls = (*env)->GetObjectClass(env, obj));
   bailif0(fid = (*env)->GetFieldID(env, cls, "x11dpy", "J"));
-  bailif0(dpy = (Display *)(*env)->GetLongField(env, obj, fid));
+  bailif0(dpy = (Display *)(intptr_t)(*env)->GetLongField(env, obj, fid));
   printf("TurboVNC Helper: Shutting down XInput listener on display %s\n",
          DisplayString(dpy));
   XCloseDisplay(dpy);

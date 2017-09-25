@@ -307,6 +307,12 @@ time out when attempting to negotiate VeNCrypt capabilities with the viewer.
 This issue was known to affect only Solaris 11 servers, but it might have also
 affected other platforms under rare circumstances.
 
+30. Worked around an issue in Java that caused Control-Underscore (the keyboard
+shortcut for the Undo command in Emacs) to be transmitted incorrectly when
+using the Java TurboVNC Viewer.  Worked around another issue in Java that
+caused AltGr symbols associated with a dead key (for instance, the '|' symbol
+on Danish keyboards) to be transmitted incorrectly.
+
 
 2.1.1
 =====

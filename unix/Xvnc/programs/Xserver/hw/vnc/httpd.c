@@ -349,7 +349,7 @@ httpProcessInput()
     }
 
     WriteExact(&cl, OK_STR, strlen(OK_STR));
-    snprintf(str, 256, "Content-Length: %ld\r\n", st.st_size);
+    snprintf(str, 256, "Content-Length: %ld\r\n", (long)st.st_size);
     WriteExact(&cl, str, strlen(str));
     strftime(str, 256, "Last-Modified: %a, %d %b %Y %T GMT\r\n",
              gmtime(&st.st_mtime));
