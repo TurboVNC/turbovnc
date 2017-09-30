@@ -114,6 +114,12 @@ without using VirtualGL.
 11. Clipboard synchronization is now performed within the TurboVNC Server
 process, so the tvncconfig utility is no longer needed or provided.
 
+12. The TurboVNC Server now uses a 30-bit default visual (BGRX 10/10/10/2 on
+little endian machines and XRGB 2/10/10/10 on big endian machines) when
+launched with `-depth 30`.  This is mainly useful for application testing at
+the moment, since the pixels are downsampled to 8-bit RGB prior to
+transmission.
+
 
 2.1.2
 =====

@@ -621,6 +621,7 @@ static PixmapFormatRec formats[MAXFORMATS] = {
     { 24, 32, BITMAP_SCANLINE_PAD },
 #ifdef RENDER
     { 32, 32, BITMAP_SCANLINE_PAD },
+    { 32, 32, BITMAP_SCANLINE_PAD },
 #endif
 };
 #ifdef RENDER
@@ -672,6 +673,17 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
     screenInfo->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
     screenInfo->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
     screenInfo->bitmapBitOrder = BITMAP_BIT_ORDER;
+    if (rfbFB.depth == 30) {
+        numFormats++;
+#ifdef RENDER
+        formats[numFormats - 2] = (PixmapFormatRec) {
+#else
+        formats[numFormats - 1] = (PixmapFormatRec) {
+#endif
+            .depth = 30, .bitsPerPixel = 32,
+            .scanlinePad = BITMAP_SCANLINE_PAD
+        };
+    }
     screenInfo->numPixmapFormats = numFormats;
     for (i = 0; i < numFormats; i++)
         screenInfo->formats[i] = formats[i];
@@ -713,8 +725,6 @@ rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
     pbits = rfbAllocateFramebufferMemory(prfb);
     if (!pbits) return FALSE;
 
-    miSetPixmapDepths();
-
     switch (prfb->depth) {
     case 8:
         miSetVisualTypesAndMasks(8, ((1 << StaticGray) | (1 << GrayScale) |
@@ -730,6 +740,11 @@ rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
         miSetVisualTypesAndMasks(24, ((1 << TrueColor) | (1 << DirectColor)),
                                  8, TrueColor, 0xff0000, 0x00ff00, 0x0000ff);
         break;
+    case 30:
+        miSetVisualTypesAndMasks(30, ((1 << TrueColor) | (1 << DirectColor)),
+                                 10, TrueColor, 0x3ff00000, 0x000ffc00,
+                                 0x000003ff);
+        break;
     case 32:
         miSetVisualTypesAndMasks(32, ((1 << TrueColor) | (1 << DirectColor)),
                                  8, TrueColor, 0xff000000, 0x00ff0000,
@@ -739,6 +754,8 @@ rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
         rfbLog("Depth %d not supported\n", prfb->depth);
         return FALSE;
     }
+
+    miSetPixmapDepths();
 
     switch (prfb->bitsPerPixel)
     {
@@ -752,9 +769,34 @@ rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
         blueBits = 5; greenBits = 6; redBits = 5;
         break;
     case 32:
-        ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-                           dpix, dpiy, prfb->paddedWidthInBytes / 4, 32);
-        blueBits = 8; greenBits = 8; redBits = 8;
+        if (prfb->depth == 30) {
+            VisualPtr visuals;
+            DepthPtr depths;
+            int nVisuals, nDepths, rootDepth = 0;
+            VisualID defaultVisual;
+
+            if (!fbSetupScreen(pScreen, pbits, prfb->width, prfb->height, dpix,
+                               dpiy, prfb->paddedWidthInBytes / 4, 32))
+                ret = FALSE;
+            fbGetScreenPrivate(pScreen)->win32bpp = 32;
+            fbGetScreenPrivate(pScreen)->pix32bpp = 32;
+            if (!fbInitVisuals(&visuals, &depths, &nVisuals, &nDepths,
+                               &rootDepth, &defaultVisual,
+                               ((unsigned long) 1 << 31), 10))
+                ret = FALSE;
+            if (!miScreenInit(pScreen, pbits, prfb->width, prfb->height, dpix,
+                              dpiy, prfb->paddedWidthInBytes / 4, rootDepth,
+                              nDepths, depths, defaultVisual, nVisuals,
+                              visuals))
+                ret = FALSE;
+            pScreen->CloseScreen = fbCloseScreen;
+            blueBits = greenBits = redBits = 10;
+            ret = TRUE;
+        } else {
+            ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
+                               dpix, dpiy, prfb->paddedWidthInBytes / 4, 32);
+            blueBits = greenBits = redBits = 8;
+        }
         break;
     default:
         return FALSE;

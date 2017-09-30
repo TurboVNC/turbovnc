@@ -1682,6 +1682,50 @@ DEFINE_MONO_ENCODE_FUNCTION(16)
 DEFINE_MONO_ENCODE_FUNCTION(32)
 
 
+#define DEFINE_RGB_CONVERT_FUNCTION(bpp)                                \
+                                                                        \
+static unsigned char *                                                  \
+ConvertRGB##bpp(rfbClientPtr cl, int x, int y, int w, int h)            \
+{                                                                       \
+    CARD##bpp *srcptr, pix;                                             \
+    unsigned char *dst, *tmpbuf;                                        \
+    int inRed, inGreen, inBlue, i, j, ps = bpp / 8;                     \
+                                                                        \
+    tmpbuf = (unsigned char *)rfbAlloc(w * h * 3);                      \
+    srcptr = (CARD##bpp *)&cl->fb[y * rfbFB.paddedWidthInBytes          \
+                                  + x * ps];                            \
+    dst = tmpbuf;                                                       \
+    for (j = 0; j < h; j++) {                                           \
+        CARD##bpp *srcptr2 = srcptr;                                    \
+        unsigned char *dst2 = dst;                                      \
+        for (i = 0; i < w; i++) {                                       \
+            pix = *srcptr2++;                                           \
+            inRed = (int) (pix >> rfbServerFormat.redShift              \
+                           & rfbServerFormat.redMax);                   \
+            inGreen = (int) (pix >> rfbServerFormat.greenShift          \
+                             & rfbServerFormat.greenMax);               \
+            inBlue  = (int) (pix >> rfbServerFormat.blueShift           \
+                             & rfbServerFormat.blueMax);                \
+            *dst2++ = (CARD8)                                           \
+                ((inRed * 255 + rfbServerFormat.redMax / 2)             \
+                 / rfbServerFormat.redMax);                             \
+            *dst2++ = (CARD8)                                           \
+                ((inGreen * 255 + rfbServerFormat.greenMax / 2)         \
+                 / rfbServerFormat.greenMax);                           \
+            *dst2++ = (CARD8)                                           \
+                ((inBlue  * 255 + rfbServerFormat.blueMax / 2)          \
+                 / rfbServerFormat.blueMax);                            \
+        }                                                               \
+        srcptr += rfbFB.paddedWidthInBytes / ps;                        \
+        dst += w * 3;                                                   \
+    }                                                                   \
+    return tmpbuf;                                                      \
+}
+
+DEFINE_RGB_CONVERT_FUNCTION(16)
+DEFINE_RGB_CONVERT_FUNCTION(32)
+
+
 /*
  * JPEG compression stuff.
  */
@@ -1724,37 +1768,12 @@ SendJpegRect(threadparam *t, int x, int y, int w, int h, int quality)
     }
 
     if (ps == 2) {
-        CARD16 *srcptr, pix;
-        unsigned char *dst;
-        int inRed, inGreen, inBlue, i, j;
-
-        tmpbuf = (unsigned char *)rfbAlloc(w * h * 3);
-        srcptr = (CARD16 *)&cl->fb[y * rfbFB.paddedWidthInBytes + x * ps];
-        dst = tmpbuf;
-        for (j = 0; j < h; j++) {
-            CARD16 *srcptr2 = srcptr;
-            unsigned char *dst2 = dst;
-            for (i = 0; i < w; i++) {
-                pix = *srcptr2++;
-                inRed = (int) (pix >> rfbServerFormat.redShift
-                               & rfbServerFormat.redMax);
-                inGreen = (int) (pix >> rfbServerFormat.greenShift
-                                 & rfbServerFormat.greenMax);
-                inBlue  = (int) (pix >> rfbServerFormat.blueShift
-                                 & rfbServerFormat.blueMax);
-                *dst2++ = (CARD8)
-                    ((inRed * 255 + rfbServerFormat.redMax / 2)
-                     / rfbServerFormat.redMax);
-                *dst2++ = (CARD8)
-                    ((inGreen * 255 + rfbServerFormat.greenMax / 2)
-                     / rfbServerFormat.greenMax);
-                *dst2++ = (CARD8)
-                    ((inBlue  * 255 + rfbServerFormat.blueMax / 2)
-                     / rfbServerFormat.blueMax);
-            }
-            srcptr += rfbFB.paddedWidthInBytes / ps;
-            dst += w * 3;
-        }
+        tmpbuf = ConvertRGB16(cl, x, y, w, h);
+        srcbuf = tmpbuf;
+        pitch = w * 3;
+        ps = 3;
+    } else if (rfbServerFormat.depth == 30) {
+        tmpbuf = ConvertRGB32(cl, x, y, w, h);
         srcbuf = tmpbuf;
         pitch = w * 3;
         ps = 3;
