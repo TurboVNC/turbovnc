@@ -181,6 +181,7 @@ _XkbFilterSetState(XkbSrvInfoPtr xkbi,
                    XkbFilterPtr filter, unsigned keycode, XkbAction *pAction)
 {
     if (filter->keycode == 0) { /* initial press */
+        AccessXCancelRepeatKey(xkbi, keycode);
         filter->keycode = keycode;
         filter->active = 1;
         filter->filterOthers = ((pAction->mods.mask & XkbSA_ClearLocks) != 0);
@@ -354,6 +355,9 @@ static int
 _XkbFilterLockState(XkbSrvInfoPtr xkbi,
                     XkbFilterPtr filter, unsigned keycode, XkbAction *pAction)
 {
+    if (filter->keycode == 0) /* initial press */
+        AccessXCancelRepeatKey(xkbi, keycode);
+
     if (pAction && (pAction->type == XkbSA_LockGroup)) {
         if (pAction->group.flags & XkbSA_GroupAbsolute)
             xkbi->state.locked_group = XkbSAGroup(&pAction->group);
@@ -635,6 +639,7 @@ _XkbFilterPointerBtn(XkbSrvInfoPtr xkbi,
         }
             break;
         }
+        return 0;
     }
     else if (filter->keycode == keycode) {
         int button = filter->upAction.btn.button;
@@ -660,8 +665,9 @@ _XkbFilterPointerBtn(XkbSrvInfoPtr xkbi,
             break;
         }
         filter->active = 0;
+        return 0;
     }
-    return 0;
+    return 1;
 }
 
 static int
@@ -678,6 +684,7 @@ _XkbFilterControls(XkbSrvInfoPtr xkbi,
     ctrls = xkbi->desc->ctrls;
     old = *ctrls;
     if (filter->keycode == 0) { /* initial press */
+        AccessXCancelRepeatKey(xkbi, keycode);
         filter->keycode = keycode;
         filter->active = 1;
         filter->filterOthers = 0;
@@ -1103,8 +1110,8 @@ _XkbNextFreeFilter(XkbSrvInfoPtr xkbi)
         }
     }
     xkbi->szFilters *= 2;
-    xkbi->filters = realloc(xkbi->filters,
-                            xkbi->szFilters * sizeof(XkbFilterRec));
+    xkbi->filters = reallocarray(xkbi->filters,
+                                 xkbi->szFilters, sizeof(XkbFilterRec));
     /* 6/21/93 (ef) -- XXX! deal with allocation failure */
     memset(&xkbi->filters[xkbi->szFilters / 2], 0,
            (xkbi->szFilters / 2) * sizeof(XkbFilterRec));
@@ -1192,6 +1199,106 @@ XkbPushLockedStateToSlaves(DeviceIntPtr master, int evtype, int key)
     }
 }
 
+static void
+XkbActionGetFilter(DeviceIntPtr dev, DeviceEvent *event, KeyCode key,
+                   XkbAction *act, int *sendEvent)
+{
+    XkbSrvInfoPtr xkbi = dev->key->xkbInfo;
+    XkbFilterPtr filter;
+
+    /* For focus events, we only want to run actions which update our state to
+     * (hopefully vaguely kinda) match that of the host server, rather than
+     * actually execute anything. For example, if we enter our VT with
+     * Ctrl+Alt+Backspace held down, we don't want to terminate our server
+     * immediately, but we _do_ want Ctrl+Alt to be latched down, so if
+     * Backspace is released and then pressed again, the server will terminate.
+     *
+     * This is pretty flaky, and we should in fact inherit the complete state
+     * from the host server. There are some state combinations that we cannot
+     * express by running the state machine over every key, e.g. if AltGr+Shift
+     * generates a different state to Shift+AltGr. */
+    if (event->source_type == EVENT_SOURCE_FOCUS) {
+        switch (act->type) {
+        case XkbSA_SetMods:
+        case XkbSA_SetGroup:
+        case XkbSA_LatchMods:
+        case XkbSA_LatchGroup:
+        case XkbSA_LockMods:
+        case XkbSA_LockGroup:
+            break;
+        default:
+            *sendEvent = 1;
+            return;
+        }
+    }
+
+    switch (act->type) {
+    case XkbSA_SetMods:
+    case XkbSA_SetGroup:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterSetState(xkbi, filter, key, act);
+        break;
+    case XkbSA_LatchMods:
+    case XkbSA_LatchGroup:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterLatchState(xkbi, filter, key, act);
+        break;
+    case XkbSA_LockMods:
+    case XkbSA_LockGroup:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterLockState(xkbi, filter, key, act);
+        break;
+    case XkbSA_ISOLock:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterISOLock(xkbi, filter, key, act);
+        break;
+    case XkbSA_MovePtr:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterPointerMove(xkbi, filter, key, act);
+        break;
+    case XkbSA_PtrBtn:
+    case XkbSA_LockPtrBtn:
+    case XkbSA_SetPtrDflt:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterPointerBtn(xkbi, filter, key, act);
+        break;
+    case XkbSA_Terminate:
+        *sendEvent = XkbDDXTerminateServer(dev, key, act);
+        break;
+    case XkbSA_SwitchScreen:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterSwitchScreen(xkbi, filter, key, act);
+        break;
+    case XkbSA_SetControls:
+    case XkbSA_LockControls:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterControls(xkbi, filter, key, act);
+        break;
+    case XkbSA_ActionMessage:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterActionMessage(xkbi, filter, key, act);
+        break;
+    case XkbSA_RedirectKey:
+        filter = _XkbNextFreeFilter(xkbi);
+        /* redirect actions must create a new DeviceEvent.  The
+         * source device id for this event cannot be obtained from
+         * xkbi, so we pass it here explicitly. The field deviceid
+         * equals to xkbi->device->id. */
+        filter->priv = event->sourceid;
+        *sendEvent = _XkbFilterRedirectKey(xkbi, filter, key, act);
+        break;
+    case XkbSA_DeviceBtn:
+    case XkbSA_LockDeviceBtn:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterDeviceBtn(xkbi, filter, key, act);
+        break;
+    case XkbSA_XFree86Private:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterXF86Private(xkbi, filter, key, act);
+        break;
+    }
+}
+
 void
 XkbHandleActions(DeviceIntPtr dev, DeviceIntPtr kbd, DeviceEvent *event)
 {
@@ -1201,7 +1308,6 @@ XkbHandleActions(DeviceIntPtr dev, DeviceIntPtr kbd, DeviceEvent *event)
     int sendEvent;
     Bool genStateNotify;
     XkbAction act;
-    XkbFilterPtr filter;
     Bool keyEvent;
     Bool pressEvent;
     ProcessInputProc backupproc;
@@ -1229,74 +1335,10 @@ XkbHandleActions(DeviceIntPtr dev, DeviceIntPtr kbd, DeviceEvent *event)
             act = XkbGetButtonAction(kbd, dev, key);
             key |= BTN_ACT_FLAG;
         }
+
         sendEvent = _XkbApplyFilters(xkbi, key, &act);
-        if (sendEvent) {
-            switch (act.type) {
-            case XkbSA_SetMods:
-            case XkbSA_SetGroup:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterSetState(xkbi, filter, key, &act);
-                break;
-            case XkbSA_LatchMods:
-            case XkbSA_LatchGroup:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterLatchState(xkbi, filter, key, &act);
-                break;
-            case XkbSA_LockMods:
-            case XkbSA_LockGroup:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterLockState(xkbi, filter, key, &act);
-                break;
-            case XkbSA_ISOLock:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterISOLock(xkbi, filter, key, &act);
-                break;
-            case XkbSA_MovePtr:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterPointerMove(xkbi, filter, key, &act);
-                break;
-            case XkbSA_PtrBtn:
-            case XkbSA_LockPtrBtn:
-            case XkbSA_SetPtrDflt:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterPointerBtn(xkbi, filter, key, &act);
-                break;
-            case XkbSA_Terminate:
-                sendEvent = XkbDDXTerminateServer(dev, key, &act);
-                break;
-            case XkbSA_SwitchScreen:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterSwitchScreen(xkbi, filter, key, &act);
-                break;
-            case XkbSA_SetControls:
-            case XkbSA_LockControls:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterControls(xkbi, filter, key, &act);
-                break;
-            case XkbSA_ActionMessage:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterActionMessage(xkbi, filter, key, &act);
-                break;
-            case XkbSA_RedirectKey:
-                filter = _XkbNextFreeFilter(xkbi);
-                /* redirect actions must create a new DeviceEvent.  The
-                 * source device id for this event cannot be obtained from
-                 * xkbi, so we pass it here explicitly. The field deviceid
-                 * equals to xkbi->device->id. */
-                filter->priv = event->sourceid;
-                sendEvent = _XkbFilterRedirectKey(xkbi, filter, key, &act);
-                break;
-            case XkbSA_DeviceBtn:
-            case XkbSA_LockDeviceBtn:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterDeviceBtn(xkbi, filter, key, &act);
-                break;
-            case XkbSA_XFree86Private:
-                filter = _XkbNextFreeFilter(xkbi);
-                sendEvent = _XkbFilterXF86Private(xkbi, filter, key, &act);
-                break;
-            }
-        }
+        if (sendEvent)
+            XkbActionGetFilter(dev, event, key, &act, &sendEvent);
     }
     else {
         if (!keyEvent)
@@ -1485,7 +1527,7 @@ InjectPointerKeyEvents(DeviceIntPtr dev, int type, int button, int flags,
         return;
 
     events = InitEventList(GetMaximumEventsNum() + 1);
-    OsBlockSignals();
+    input_lock();
     pScreen = miPointerGetScreen(ptr);
     saveWait = miPointerSetWaitForUpdate(pScreen, FALSE);
     nevents = GetPointerEvents(events, ptr, type, button, flags, mask);
@@ -1493,13 +1535,12 @@ InjectPointerKeyEvents(DeviceIntPtr dev, int type, int button, int flags,
         UpdateFromMaster(&events[nevents], lastSlave, DEVCHANGE_POINTER_EVENT,
                          &nevents);
     miPointerSetWaitForUpdate(pScreen, saveWait);
-    OsReleaseSignals();
 
     for (i = 0; i < nevents; i++)
         mieqProcessDeviceEvent(ptr, &events[i], NULL);
+    input_unlock();
 
     FreeEventList(events, GetMaximumEventsNum());
-
 }
 
 static void

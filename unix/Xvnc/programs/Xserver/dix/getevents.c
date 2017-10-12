@@ -208,14 +208,25 @@ init_raw(DeviceIntPtr dev, RawDeviceEvent *event, Time ms, int type, int detail)
 }
 
 static void
-set_raw_valuators(RawDeviceEvent *event, ValuatorMask *mask, double *data)
+set_raw_valuators(RawDeviceEvent *event, ValuatorMask *mask,
+                  BOOL use_unaccel, double *data)
 {
     int i;
 
+    use_unaccel = use_unaccel && valuator_mask_has_unaccelerated(mask);
+
     for (i = 0; i < valuator_mask_size(mask); i++) {
         if (valuator_mask_isset(mask, i)) {
+            double v;
+
             SetBit(event->valuators.mask, i);
-            data[i] = valuator_mask_get_double(mask, i);
+
+            if (use_unaccel)
+                v = valuator_mask_get_unaccelerated(mask, i);
+            else
+                v = valuator_mask_get_double(mask, i);
+
+            data[i] = v;
         }
     }
 }
@@ -1049,21 +1060,18 @@ event_set_root_coordinates(DeviceEvent *event, double x, double y)
  *
  * This function is not reentrant. Disable signals before calling.
  *
- * FIXME: flags for relative/abs motion?
- *
  * @param device The device to generate the event for
  * @param type Event type, one of KeyPress or KeyRelease
  * @param keycode Key code of the pressed/released key
- * @param mask Valuator mask for valuators present for this event.
  *
  */
 void
 QueueKeyboardEvents(DeviceIntPtr device, int type,
-                    int keycode, const ValuatorMask *mask)
+                    int keycode)
 {
     int nevents;
 
-    nevents = GetKeyboardEvents(InputEventList, device, type, keycode, mask);
+    nevents = GetKeyboardEvents(InputEventList, device, type, keycode);
     queueEventList(device, InputEventList, nevents);
 }
 
@@ -1078,22 +1086,28 @@ QueueKeyboardEvents(DeviceIntPtr device, int type,
  */
 int
 GetKeyboardEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
-                  int key_code, const ValuatorMask *mask_in)
+                  int key_code)
 {
     int num_events = 0;
     CARD32 ms = 0;
     DeviceEvent *event;
     RawDeviceEvent *raw;
-    ValuatorMask mask;
+    enum DeviceEventSource source_type = EVENT_SOURCE_NORMAL;
 
 #if XSERVER_DTRACE
     if (XSERVER_INPUT_EVENT_ENABLED()) {
-        XSERVER_INPUT_EVENT(pDev->id, type, key_code, 0,
-                            mask_in ? mask_in->last_bit + 1 : 0,
-                            mask_in ? mask_in->mask : NULL,
-                            mask_in ? mask_in->valuators : NULL);
+        XSERVER_INPUT_EVENT(pDev->id, type, key_code, 0, 0,
+                            NULL, NULL);
     }
 #endif
+
+    if (type == EnterNotify) {
+        source_type = EVENT_SOURCE_FOCUS;
+        type = KeyPress;
+    } else if (type == LeaveNotify) {
+        source_type = EVENT_SOURCE_FOCUS;
+        type = KeyRelease;
+    }
 
     /* refuse events from disabled devices */
     if (!pDev->enabled)
@@ -1103,11 +1117,6 @@ GetKeyboardEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
         (type != KeyPress && type != KeyRelease) ||
         (key_code < 8 || key_code > 255))
         return 0;
-
-    if (mask_in && valuator_mask_size(mask_in) > 1) {
-        ErrorF("[dix] the server does not handle valuator masks with "
-               "keyboard events. This is a bug. You may fix it.\n");
-    }
 
     num_events = 1;
 
@@ -1126,21 +1135,15 @@ GetKeyboardEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
 
     ms = GetTimeInMillis();
 
-    raw = &events->raw_event;
-    events++;
-    num_events++;
-
-    valuator_mask_copy(&mask, mask_in);
-
-    init_raw(pDev, raw, ms, type, key_code);
-    set_raw_valuators(raw, &mask, raw->valuators.data_raw);
-
-    clipValuators(pDev, &mask);
-
-    set_raw_valuators(raw, &mask, raw->valuators.data);
+    if (source_type == EVENT_SOURCE_NORMAL) {
+        raw = &events->raw_event;
+        init_raw(pDev, raw, ms, type, key_code);
+        events++;
+        num_events++;
+    }
 
     event = &events->device_event;
-    init_device_event(event, pDev, ms);
+    init_device_event(event, pDev, ms, source_type);
     event->detail.key = key_code;
 
     if (type == KeyPress) {
@@ -1150,18 +1153,6 @@ GetKeyboardEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
     else if (type == KeyRelease) {
         event->type = ET_KeyRelease;
         set_key_up(pDev, key_code, KEY_POSTED);
-    }
-
-    clipValuators(pDev, &mask);
-
-    set_valuators(pDev, event, &mask);
-
-    if (!IsFloating(pDev)) {
-        DeviceIntPtr master = GetMaster(pDev, MASTER_POINTER);
-
-        event_set_root_coordinates(event,
-                                   master->last.valuators[0],
-                                   master->last.valuators[1]);
     }
 
     return num_events;
@@ -1418,8 +1409,10 @@ fill_pointer_events(InternalEvent *events, DeviceIntPtr pDev, int type,
         num_events++;
 
         init_raw(pDev, raw, ms, type, buttons);
-        set_raw_valuators(raw, &mask, raw->valuators.data_raw);
+        set_raw_valuators(raw, &mask, TRUE, raw->valuators.data_raw);
     }
+
+    valuator_mask_drop_unaccelerated(&mask);
 
     /* valuators are in driver-native format (rel or abs) */
 
@@ -1433,7 +1426,7 @@ fill_pointer_events(InternalEvent *events, DeviceIntPtr pDev, int type,
         transformAbsolute(pDev, &mask);
         clipAbsolute(pDev, &mask);
         if ((flags & POINTER_NORAW) == 0 && raw)
-            set_raw_valuators(raw, &mask, raw->valuators.data);
+            set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
     }
     else {
         transformRelative(pDev, &mask);
@@ -1441,7 +1434,7 @@ fill_pointer_events(InternalEvent *events, DeviceIntPtr pDev, int type,
         if (flags & POINTER_ACCELERATE)
             accelPointer(pDev, &mask, ms);
         if ((flags & POINTER_NORAW) == 0 && raw)
-            set_raw_valuators(raw, &mask, raw->valuators.data);
+            set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
 
         moveRelative(pDev, flags, &mask);
     }
@@ -1485,7 +1478,7 @@ fill_pointer_events(InternalEvent *events, DeviceIntPtr pDev, int type,
     }
 
     event = &events->device_event;
-    init_device_event(event, pDev, ms);
+    init_device_event(event, pDev, ms, EVENT_SOURCE_NORMAL);
 
     if (type == MotionNotify) {
         event->type = ET_Motion;
@@ -1556,6 +1549,10 @@ emulate_scroll_button_events(InternalEvent *events,
 
     ax = &dev->valuator->axes[axis];
     incr = ax->scroll.increment;
+
+    BUG_WARN_MSG(incr == 0, "for device %s\n", dev->name);
+    if (incr == 0)
+        return 0;
 
     if (type != ButtonPress && type != ButtonRelease)
         flags |= POINTER_EMULATED;
@@ -1817,7 +1814,7 @@ GetProximityEvents(InternalEvent *events, DeviceIntPtr pDev, int type,
         UpdateFromMaster(events, pDev, DEVCHANGE_POINTER_EVENT, &num_events);
 
     event = &events->device_event;
-    init_device_event(event, pDev, GetTimeInMillis());
+    init_device_event(event, pDev, GetTimeInMillis(), EVENT_SOURCE_NORMAL);
     event->type = (type == ProximityIn) ? ET_ProximityIn : ET_ProximityOut;
 
     clipValuators(pDev, &mask);
@@ -1946,13 +1943,13 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
         events++;
         num_events++;
         init_raw(dev, raw, ms, type, client_id);
-        set_raw_valuators(raw, &mask, raw->valuators.data_raw);
+        set_raw_valuators(raw, &mask, TRUE, raw->valuators.data_raw);
     }
 
     event = &events->device_event;
     num_events++;
 
-    init_device_event(event, dev, ms);
+    init_device_event(event, dev, ms, EVENT_SOURCE_NORMAL);
 
     switch (type) {
     case XI_TouchBegin:
@@ -2008,7 +2005,7 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
         screeny = dev->spriteInfo->sprite->hotPhys.y;
     }
     if (need_rawevent)
-        set_raw_valuators(raw, &mask, raw->valuators.data);
+        set_raw_valuators(raw, &mask, FALSE, raw->valuators.data);
 
     /* Indirect device touch coordinates are not used for cursor positioning.
      * They are merely informational, and are provided in device coordinates.
@@ -2067,7 +2064,7 @@ GetDixTouchEnd(InternalEvent *ievent, DeviceIntPtr dev, TouchPointInfoPtr ti,
 
     BUG_WARN(!dev->enabled);
 
-    init_device_event(event, dev, ms);
+    init_device_event(event, dev, ms, EVENT_SOURCE_NORMAL);
 
     event->sourceid = ti->sourceid;
     event->type = ET_TouchEnd;
@@ -2111,7 +2108,7 @@ PostSyntheticMotion(DeviceIntPtr pDev,
 #endif
 
     memset(&ev, 0, sizeof(DeviceEvent));
-    init_device_event(&ev, pDev, time);
+    init_device_event(&ev, pDev, time, EVENT_SOURCE_NORMAL);
     ev.root_x = x;
     ev.root_y = y;
     ev.type = ET_Motion;

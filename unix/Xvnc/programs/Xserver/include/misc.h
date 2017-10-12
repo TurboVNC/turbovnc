@@ -79,6 +79,7 @@ OF THIS SOFTWARE.
 
 #include <stddef.h>
 #include <stdint.h>
+#include <pthread.h>
 
 #ifndef MAXSCREENS
 #define MAXSCREENS	16
@@ -86,7 +87,8 @@ OF THIS SOFTWARE.
 #ifndef MAXGPUSCREENS
 #define MAXGPUSCREENS	16
 #endif
-#define MAXCLIENTS	256
+#define MAXCLIENTS	2048
+#define LIMITCLIENTS	256     /* Must be a power of 2 and <= MAXCLIENTS */
 #define MAXEXTENSIONS   128
 #define MAXFORMATS	8
 #define MAXDEVICES	40      /* input devices */

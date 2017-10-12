@@ -108,6 +108,7 @@ int ProcInitialConnection();
 
 #include "windowstr.h"
 #include <X11/fonts/fontstruct.h>
+#include <X11/fonts/libxfont2.h>
 #include "dixfontstr.h"
 #include "gcstruct.h"
 #include "selection.h"
@@ -150,7 +151,6 @@ static ClientPtr grabClient;
 
 #define GrabNone 0
 #define GrabActive 1
-#define GrabKickout 2
 static int grabState = GrabNone;
 static long grabWaiters[mskcnt];
 CallbackListPtr ServerGrabCallback = NULL;
@@ -195,7 +195,7 @@ UpdateCurrentTime(void)
     systime.milliseconds = GetTimeInMillis();
     if (systime.milliseconds < currentTime.milliseconds)
         systime.months++;
-    if (*checkForInput[0] != *checkForInput[1])
+    if (InputCheckPending())
         ProcessInputEvents();
     if (CompareTimeStamps(systime, currentTime) == LATER)
         currentTime = systime;
@@ -218,19 +218,14 @@ UpdateCurrentTimeIf(void)
 #undef SMART_DEBUG
 
 /* in milliseconds */
-#ifdef TURBOVNC
-#define SMART_SCHEDULE_DEFAULT_INTERVAL	20      /* ms */
-#define SMART_SCHEDULE_MAX_SLICE	200     /* ms */
-#else
 #define SMART_SCHEDULE_DEFAULT_INTERVAL	5
 #define SMART_SCHEDULE_MAX_SLICE	15
+
+#ifdef HAVE_SETITIMER
+#define SMART_SCHEDULE_DEFAULT_SIGNAL_ENABLE HAVE_SETITIMER
+Bool SmartScheduleSignalEnable = SMART_SCHEDULE_DEFAULT_SIGNAL_ENABLE;
 #endif
 
-#if defined(WIN32) && !defined(__CYGWIN__)
-Bool SmartScheduleDisable = TRUE;
-#else
-Bool SmartScheduleDisable = FALSE;
-#endif
 long SmartScheduleSlice = SMART_SCHEDULE_DEFAULT_INTERVAL;
 long SmartScheduleInterval = SMART_SCHEDULE_DEFAULT_INTERVAL;
 long SmartScheduleMaxSlice = SMART_SCHEDULE_MAX_SLICE;
@@ -245,23 +240,88 @@ long SmartLastPrint;
 
 void Dispatch(void);
 
-static int
-SmartScheduleClient(int *clientReady, int nready)
+static struct xorg_list ready_clients;
+static struct xorg_list saved_ready_clients;
+struct xorg_list output_pending_clients;
+
+static void
+init_client_ready(void)
 {
-    ClientPtr pClient;
-    int i;
-    int client;
-    int bestPrio, best = 0;
+    xorg_list_init(&ready_clients);
+    xorg_list_init(&saved_ready_clients);
+    xorg_list_init(&output_pending_clients);
+}
+
+Bool
+clients_are_ready(void)
+{
+    return !xorg_list_is_empty(&ready_clients);
+}
+
+/* Client has requests queued or data on the network */
+void
+mark_client_ready(ClientPtr client)
+{
+    if (xorg_list_is_empty(&client->ready))
+        xorg_list_append(&client->ready, &ready_clients);
+}
+
+/*
+ * Client has requests queued or data on the network, but awaits a
+ * server grab release
+ */
+void mark_client_saved_ready(ClientPtr client)
+{
+    if (xorg_list_is_empty(&client->ready))
+        xorg_list_append(&client->ready, &saved_ready_clients);
+}
+
+/* Client has no requests queued and no data on network */
+void
+mark_client_not_ready(ClientPtr client)
+{
+    xorg_list_del(&client->ready);
+}
+
+static void
+mark_client_grab(ClientPtr grab)
+{
+    ClientPtr   client, tmp;
+
+    xorg_list_for_each_entry_safe(client, tmp, &ready_clients, ready) {
+        if (client != grab) {
+            xorg_list_del(&client->ready);
+            xorg_list_append(&client->ready, &saved_ready_clients);
+        }
+    }
+}
+
+static void
+mark_client_ungrab(void)
+{
+    ClientPtr   client, tmp;
+
+    xorg_list_for_each_entry_safe(client, tmp, &saved_ready_clients, ready) {
+        xorg_list_del(&client->ready);
+        xorg_list_append(&client->ready, &ready_clients);
+    }
+}
+
+static ClientPtr
+SmartScheduleClient(void)
+{
+    ClientPtr pClient, best = NULL;
     int bestRobin, robin;
     long now = SmartScheduleTime;
     long idle;
+    int nready = 0;
 
-    bestPrio = -0x7fffffff;
     bestRobin = 0;
     idle = 2 * SmartScheduleSlice;
-    for (i = 0; i < nready; i++) {
-        client = clientReady[i];
-        pClient = clients[client];
+
+    xorg_list_for_each_entry(pClient, &ready_clients, ready) {
+        nready++;
+
         /* Praise clients which haven't run in a while */
         if ((now - pClient->smart_stop_tick) >= idle) {
             if (pClient->smart_priority < 0)
@@ -273,31 +333,35 @@ SmartScheduleClient(int *clientReady, int nready)
             (pClient->index -
              SmartLastIndex[pClient->smart_priority -
                             SMART_MIN_PRIORITY]) & 0xff;
-        if (pClient->smart_priority > bestPrio ||
-            (pClient->smart_priority == bestPrio && robin > bestRobin)) {
-            bestPrio = pClient->smart_priority;
+
+        /* pick the best client */
+        if (!best ||
+            pClient->priority > best->priority ||
+            (pClient->priority == best->priority &&
+             (pClient->smart_priority > best->smart_priority ||
+              (pClient->smart_priority == best->smart_priority && robin > bestRobin))))
+        {
+            best = pClient;
             bestRobin = robin;
-            best = client;
         }
 #ifdef SMART_DEBUG
         if ((now - SmartLastPrint) >= 5000)
-            fprintf(stderr, " %2d: %3d", client, pClient->smart_priority);
+            fprintf(stderr, " %2d: %3d", pClient->index, pClient->smart_priority);
 #endif
     }
 #ifdef SMART_DEBUG
     if ((now - SmartLastPrint) >= 5000) {
-        fprintf(stderr, " use %2d\n", best);
+        fprintf(stderr, " use %2d\n", best->index);
         SmartLastPrint = now;
     }
 #endif
-    pClient = clients[best];
-    SmartLastIndex[bestPrio - SMART_MIN_PRIORITY] = pClient->index;
+    SmartLastIndex[best->smart_priority - SMART_MIN_PRIORITY] = best->index;
     /*
      * Set current client pointer
      */
-    if (SmartLastClient != pClient) {
-        pClient->smart_start_tick = now;
-        SmartLastClient = pClient;
+    if (SmartLastClient != best) {
+        best->smart_start_tick = now;
+        SmartLastClient = best;
     }
     /*
      * Adjust slice
@@ -308,7 +372,7 @@ SmartScheduleClient(int *clientReady, int nready)
          * has run, bump the slice up to get maximal
          * performance from a single client
          */
-        if ((now - pClient->smart_start_tick) > 1000 &&
+        if ((now - best->smart_start_tick) > 1000 &&
             SmartScheduleSlice < SmartScheduleMaxSlice) {
             SmartScheduleSlice += SmartScheduleInterval;
         }
@@ -339,69 +403,50 @@ DisableLimitedSchedulingLatency(void)
 void
 Dispatch(void)
 {
-    int *clientReady;           /* array of request ready clients */
     int result;
     ClientPtr client;
-    int nready;
-    HWEventQueuePtr *icheck = checkForInput;
     long start_tick;
 
     nextFreeClientID = 1;
     nClients = 0;
 
-    clientReady = malloc(sizeof(int) * MaxClients);
-    if (!clientReady)
-        return;
-
     SmartScheduleSlice = SmartScheduleInterval;
+    init_client_ready();
+
     while (!dispatchException) {
-        if (*icheck[0] != *icheck[1]) {
+        if (InputCheckPending()) {
             ProcessInputEvents();
             FlushIfCriticalOutputPending();
         }
 
-        nready = WaitForSomething(clientReady);
+        if (!WaitForSomething(clients_are_ready()))
+            continue;
 
-        if (nready && !SmartScheduleDisable) {
-            clientReady[0] = SmartScheduleClient(clientReady, nready);
-            nready = 1;
-        }
        /*****************
 	*  Handle events in round robin fashion, doing input between
 	*  each round
 	*****************/
 
-        while (!dispatchException && (--nready >= 0)) {
-            client = clients[clientReady[nready]];
-            if (!client) {
-                /* KillClient can cause this to happen */
-                continue;
-            }
-            /* GrabServer activation can cause this to be true */
-            if (grabState == GrabKickout) {
-                grabState = GrabActive;
-                break;
-            }
+        if (!dispatchException && clients_are_ready()) {
+            client = SmartScheduleClient();
+
             isItTimeToYield = FALSE;
 
             start_tick = SmartScheduleTime;
             while (!isItTimeToYield) {
-                if (*icheck[0] != *icheck[1])
+                if (InputCheckPending())
                     ProcessInputEvents();
 
                 FlushIfCriticalOutputPending();
-                if (!SmartScheduleDisable &&
-                    (SmartScheduleTime - start_tick) >= SmartScheduleSlice) {
+                if ((SmartScheduleTime - start_tick) >= SmartScheduleSlice)
+                {
                     /* Penalize clients which consume ticks */
                     if (client->smart_priority > SMART_MIN_PRIORITY)
                         client->smart_priority--;
                     break;
                 }
-                /* now, finally, deal with client requests */
 
-                /* Update currentTime so request time checks, such as for input
-                 * device grabs, are calculated correctly */
-                UpdateCurrentTimeIf();
+                /* now, finally, deal with client requests */
                 result = ReadRequestFromClient(client);
                 if (result <= 0) {
                     if (result < 0)
@@ -433,8 +478,10 @@ Dispatch(void)
                     if (result == Success)
                         result =
                             (*client->requestVector[client->majorOp]) (client);
-                    XaceHookAuditEnd(client, result);
                 }
+                if (!SmartScheduleSignalEnable)
+                    SmartScheduleTime = GetTimeInMillis();
+
 #ifdef XSERVER_DTRACE
                 if (XSERVER_REQUEST_DONE_ENABLED())
                     XSERVER_REQUEST_DONE(LookupMajorName(client->majorOp),
@@ -454,8 +501,7 @@ Dispatch(void)
                 }
             }
             FlushAllOutput();
-            client = clients[clientReady[nready]];
-            if (client)
+            if (client == SmartLastClient)
                 client->smart_stop_tick = SmartScheduleTime;
         }
         dispatchException &= ~DE_PRIORITYCHANGE;
@@ -464,7 +510,6 @@ Dispatch(void)
     ddxBeforeReset();
 #endif
     KillAllClients();
-    free(clientReady);
     dispatchException &= ~DE_RESET;
     SmartScheduleLatencyLimited = 0;
     ResetOsBuffers();
@@ -968,7 +1013,7 @@ ProcQueryTree(ClientPtr client)
     if (numChildren) {
         int curChild = 0;
 
-        childIDs = malloc(numChildren * sizeof(Window));
+        childIDs = xallocarray(numChildren, sizeof(Window));
         if (!childIDs)
             return BadAlloc;
         for (pChild = pWin->lastChild; pChild != pHead;
@@ -1062,8 +1107,9 @@ ProcGrabServer(ClientPtr client)
     rc = OnlyListenToOneClient(client);
     if (rc != Success)
         return rc;
-    grabState = GrabKickout;
+    grabState = GrabActive;
     grabClient = client;
+    mark_client_grab(client);
 
     if (ServerGrabCallback) {
         ServerGrabInfoRec grabinfo;
@@ -1083,6 +1129,7 @@ UngrabServer(ClientPtr client)
 
     grabState = GrabNone;
     ListenToAllClients();
+    mark_client_ungrab();
     for (i = mskcnt; --i >= 0 && !grabWaiters[i];);
     if (i >= 0) {
         i <<= 5;
@@ -1290,7 +1337,7 @@ ProcQueryTextExtents(ClientPtr client)
             return BadLength;
         length--;
     }
-    if (!QueryTextExtents(pFont, length, (unsigned char *) &stuff[1], &info))
+    if (!xfont2_query_text_extents(pFont, length, (unsigned char *) &stuff[1], &info))
         return BadAlloc;
     reply = (xQueryTextExtentsReply) {
         .type = X_Reply,
@@ -2150,12 +2197,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         return BadAlloc;
     WriteReplyToClient(client, sizeof(xGetImageReply), &xgi);
 
-    if (pDraw->type == DRAWABLE_WINDOW) {
-        pVisibleRegion = NotClippedByChildren((WindowPtr) pDraw);
-        if (pVisibleRegion) {
-            RegionTranslate(pVisibleRegion, -pDraw->x, -pDraw->y);
-        }
-    }
+    if (pDraw->type == DRAWABLE_WINDOW)
+        pVisibleRegion = &((WindowPtr) pDraw)->borderClip;
 
     if (linesPerBuf == 0) {
         /* nothing to do */
@@ -2214,8 +2257,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
             }
         }
     }
-    if (pVisibleRegion)
-        RegionDestroy(pVisibleRegion);
     free(pBuf);
     return Success;
 }
@@ -2791,7 +2832,7 @@ ProcQueryColors(ClientPtr client)
 
         count =
             bytes_to_int32((client->req_len << 2) - sizeof(xQueryColorsReq));
-        prgbs = calloc(1, count * sizeof(xrgb));
+        prgbs = calloc(count, sizeof(xrgb));
         if (!prgbs && count)
             return BadAlloc;
         if ((rc =
@@ -2913,10 +2954,10 @@ ProcCreateCursor(ClientPtr client)
     if (stuff->x > width || stuff->y > height)
         return BadMatch;
 
-    n = BitmapBytePad(width) * height;
-    srcbits = calloc(1, n);
+    srcbits = calloc(BitmapBytePad(width), height);
     if (!srcbits)
         return BadAlloc;
+    n = BitmapBytePad(width) * height;
     mskbits = malloc(n);
     if (!mskbits) {
         free(srcbits);
@@ -3403,6 +3444,8 @@ CloseDownClient(ClientPtr client)
             ClientSignal(client);
         ProcessWorkQueueZombies();
         CloseDownConnection(client);
+        output_pending_clear(client);
+        mark_client_not_ready(client);
 
         /* If the client made it to the Running stage, nClients has
          * been incremented on its behalf, so we need to decrement it
@@ -3463,6 +3506,8 @@ void
 InitClient(ClientPtr client, int i, void *ospriv)
 {
     client->index = i;
+    xorg_list_init(&client->ready);
+    xorg_list_init(&client->output_pending);
     client->clientAsMask = ((Mask) i) << CLIENTOFFSET;
     client->closeDownMode = i ? DestroyAll : RetainPermanent;
     client->requestVector = InitialVector;
@@ -3488,7 +3533,7 @@ NextAvailableClient(void *ospriv)
     xReq data;
 
     i = nextFreeClientID;
-    if (i == MAXCLIENTS)
+    if (i == LimitClients)
         return (ClientPtr) NULL;
     clients[i] = client =
         dixAllocateObjectWithPrivates(ClientRec, PRIVATE_CLIENT);
@@ -3508,7 +3553,7 @@ NextAvailableClient(void *ospriv)
     }
     if (i == currentMaxClients)
         currentMaxClients++;
-    while ((nextFreeClientID < MAXCLIENTS) && clients[nextFreeClientID])
+    while ((nextFreeClientID < LimitClients) && clients[nextFreeClientID])
         nextFreeClientID++;
 
     /* Enable client ID tracking. This must be done before
@@ -3658,7 +3703,12 @@ ProcEstablishConnection(ClientPtr client)
     prefix = (xConnClientPrefix *) ((char *) stuff + sz_xReq);
     auth_proto = (char *) prefix + sz_xConnClientPrefix;
     auth_string = auth_proto + pad_to_int32(prefix->nbytesAuthProto);
-    if ((prefix->majorVersion != X_PROTOCOL) ||
+
+    if ((client->req_len << 2) != sz_xReq + sz_xConnClientPrefix +
+	pad_to_int32(prefix->nbytesAuthProto) +
+	pad_to_int32(prefix->nbytesAuthString))
+        reason = "Bad length";
+    else if ((prefix->majorVersion != X_PROTOCOL) ||
         (prefix->minorVersion != X_PROTOCOL_REVISION))
         reason = "Protocol version mismatch";
     else
@@ -3794,9 +3844,7 @@ static int init_screen(ScreenPtr pScreen, int i, Bool gpu)
     pScreen->CreateScreenResources = 0;
 
     xorg_list_init(&pScreen->pixmap_dirty_list);
-    xorg_list_init(&pScreen->unattached_list);
-    xorg_list_init(&pScreen->output_slave_list);
-    xorg_list_init(&pScreen->offload_slave_list);
+    xorg_list_init(&pScreen->slave_list);
 
     /*
      * This loop gets run once for every Screen that gets added,
@@ -3925,6 +3973,16 @@ AddGPUScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
 
     update_desktop_dimensions();
 
+    /*
+     * We cannot register the Screen PRIVATE_CURSOR key if cursors are already
+     * created, because dix/privates.c does not have relocation code for
+     * PRIVATE_CURSOR. Once this is fixed the if() can be removed and we can
+     * register the Screen PRIVATE_CURSOR key unconditionally.
+     */
+    if (!dixPrivatesCreated(PRIVATE_CURSOR))
+        dixRegisterScreenPrivateKey(&cursorScreenDevPriv, pScreen,
+                                    PRIVATE_CURSOR, 0);
+
     return i;
 }
 
@@ -3955,7 +4013,7 @@ AttachUnboundGPU(ScreenPtr pScreen, ScreenPtr new)
 {
     assert(new->isGPU);
     assert(!new->current_master);
-    xorg_list_add(&new->unattached_head, &pScreen->unattached_list);
+    xorg_list_add(&new->slave_head, &pScreen->slave_list);
     new->current_master = pScreen;
 }
 
@@ -3963,7 +4021,9 @@ void
 DetachUnboundGPU(ScreenPtr slave)
 {
     assert(slave->isGPU);
-    xorg_list_del(&slave->unattached_head);
+    assert(!slave->is_output_slave);
+    assert(!slave->is_offload_slave);
+    xorg_list_del(&slave->slave_head);
     slave->current_master = NULL;
 }
 
@@ -3971,31 +4031,35 @@ void
 AttachOutputGPU(ScreenPtr pScreen, ScreenPtr new)
 {
     assert(new->isGPU);
-    xorg_list_add(&new->output_head, &pScreen->output_slave_list);
-    new->current_master = pScreen;
+    assert(!new->is_output_slave);
+    assert(new->current_master == pScreen);
+    new->is_output_slave = TRUE;
+    new->current_master->output_slaves++;
 }
 
 void
 DetachOutputGPU(ScreenPtr slave)
 {
     assert(slave->isGPU);
-    xorg_list_del(&slave->output_head);
-    slave->current_master = NULL;
+    assert(slave->is_output_slave);
+    slave->current_master->output_slaves--;
+    slave->is_output_slave = FALSE;
 }
 
 void
 AttachOffloadGPU(ScreenPtr pScreen, ScreenPtr new)
 {
     assert(new->isGPU);
-    xorg_list_add(&new->offload_head, &pScreen->offload_slave_list);
-    new->current_master = pScreen;
+    assert(!new->is_offload_slave);
+    assert(new->current_master == pScreen);
+    new->is_offload_slave = TRUE;
 }
 
 void
 DetachOffloadGPU(ScreenPtr slave)
 {
     assert(slave->isGPU);
-    xorg_list_del(&slave->offload_head);
-    slave->current_master = NULL;
+    assert(slave->is_offload_slave);
+    slave->is_offload_slave = FALSE;
 }
 

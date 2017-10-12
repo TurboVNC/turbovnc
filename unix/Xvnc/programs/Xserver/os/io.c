@@ -74,7 +74,6 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include "os.h"
 #include "osdep.h"
-#include <X11/Xpoll.h>
 #include "opaque.h"
 #include "dixstruct.h"
 #include "misc.h"
@@ -102,20 +101,6 @@ typedef struct _connectionOutput {
 static ConnectionInputPtr AllocateInputBuffer(void);
 static ConnectionOutputPtr AllocateOutputBuffer(void);
 
-/* If EAGAIN and EWOULDBLOCK are distinct errno values, then we check errno
- * for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
- * systems are broken and return EWOULDBLOCK when they should return EAGAIN
- */
-#ifndef WIN32
-# if (EAGAIN != EWOULDBLOCK)
-#  define ETEST(err) (err == EAGAIN || err == EWOULDBLOCK)
-# else
-#  define ETEST(err) (err == EAGAIN)
-# endif
-#else   /* WIN32 The socket errorcodes differ from the normal errors */
-#define ETEST(err) (err == EAGAIN || err == WSAEWOULDBLOCK)
-#endif
-
 static Bool CriticalOutputPending;
 static int timesThisConnection = 0;
 static ConnectionInputPtr FreeInputs = (ConnectionInputPtr) NULL;
@@ -132,8 +117,8 @@ static OsCommPtr AvailableInput = (OsCommPtr) NULL;
 				  ((xBigReq *)(req))->length)
 
 #define MAX_TIMES_PER         10
-#define BUFSIZE 4096
-#define BUFWATERMARK 8192
+#define BUFSIZE 16384
+#define BUFWATERMARK 32768
 
 /*
  *   A lot of the code in this file manipulates a ConnectionInputPtr:
@@ -202,7 +187,7 @@ static void
 YieldControlNoInput(int fd)
 {
     YieldControl();
-    FD_CLR(fd, &ClientsWithInput);
+    ospoll_reset_events(server_poll, fd);
 }
 
 static void
@@ -368,7 +353,8 @@ ReadRequestFromClient(ClientPtr client)
                                  oci->size - oci->bufcnt);
         if (result <= 0) {
             if ((result < 0) && ETEST(errno)) {
-#if defined(SVR4) && defined(__i386__) && !defined(sun)
+                mark_client_not_ready(client);
+#if defined(SVR4) && defined(__i386__) && !defined(__sun)
                 if (0)
 #endif
                 {
@@ -452,34 +438,14 @@ ReadRequestFromClient(ClientPtr client)
      */
 
     gotnow -= needed;
-    if (gotnow >= sizeof(xReq)) {
-        request = (xReq *) (oci->bufptr + needed);
-        if (gotnow >= (result = (get_req_len(request, client) << 2))
-            && (result ||
-                (client->big_requests &&
-                 (gotnow >= sizeof(xBigReq) &&
-                  gotnow >= (get_big_req_len(request, client) << 2))))
-            )
-            FD_SET(fd, &ClientsWithInput);
-        else {
-            if (!SmartScheduleDisable)
-                FD_CLR(fd, &ClientsWithInput);
-            else
-                YieldControlNoInput(fd);
-        }
-    }
-    else {
-        if (!gotnow)
-            AvailableInput = oc;
-        if (!SmartScheduleDisable)
-            FD_CLR(fd, &ClientsWithInput);
-        else
-            YieldControlNoInput(fd);
-    }
-    if (SmartScheduleDisable)
-        if (++timesThisConnection >= MAX_TIMES_PER)
-            YieldControl();
+    if (!gotnow)
+        AvailableInput = oc;
     if (move_header) {
+        if (client->req_len < bytes_to_int32(sizeof(xBigReq) - sizeof(xReq))) {
+            YieldControlDeath();
+            return -1;
+        }
+
         request = (xReq *) oci->bufptr;
         oci->bufptr += (sizeof(xBigReq) - sizeof(xReq));
         *(xReq *) oci->bufptr = *request;
@@ -571,7 +537,7 @@ InsertFakeRequest(ClientPtr client, char *data, int count)
     gotnow += count;
     if ((gotnow >= sizeof(xReq)) &&
         (gotnow >= (int) (get_req_len((xReq *) oci->bufptr, client) << 2)))
-        FD_SET(fd, &ClientsWithInput);
+        mark_client_ready(client);
     else
         YieldControlNoInput(fd);
     return TRUE;
@@ -611,12 +577,8 @@ ResetCurrentRequest(ClientPtr client)
             }
         }
         if (gotnow >= (needed << 2)) {
-            if (FD_ISSET(fd, &AllClients)) {
-                FD_SET(fd, &ClientsWithInput);
-            }
-            else {
-                FD_SET(fd, &IgnoredClientsWithInput);
-            }
+            if (listen_to_client(client))
+                mark_client_ready(client);
             YieldControl();
         }
         else
@@ -637,18 +599,9 @@ ResetCurrentRequest(ClientPtr client)
 void
 FlushAllOutput(void)
 {
-    register int index, base;
-    register fd_mask mask;      /* raphael */
     OsCommPtr oc;
-    register ClientPtr client;
+    register ClientPtr client, tmp;
     Bool newoutput = NewOutputPending;
-
-#if defined(WIN32)
-    fd_set newOutputPending;
-#endif
-
-    if (FlushCallback)
-        CallCallbacks(&FlushCallback, NULL);
 
     if (!newoutput)
         return;
@@ -661,48 +614,15 @@ FlushAllOutput(void)
     CriticalOutputPending = FALSE;
     NewOutputPending = FALSE;
 
-#ifndef WIN32
-    for (base = 0; base < howmany(XFD_SETSIZE, NFDBITS); base++) {
-        mask = OutputPending.fds_bits[base];
-        OutputPending.fds_bits[base] = 0;
-        while (mask) {
-            index = ffs(mask) - 1;
-            mask &= ~lowbit(mask);
-            if ((index =
-                 ConnectionTranslation[(base * (sizeof(fd_mask) * 8)) +
-                                       index]) == 0)
-                continue;
-            client = clients[index];
-            if (client->clientGone)
-                continue;
-            oc = (OsCommPtr) client->osPrivate;
-            if (FD_ISSET(oc->fd, &ClientsWithInput)) {
-                FD_SET(oc->fd, &OutputPending); /* set the bit again */
-                NewOutputPending = TRUE;
-            }
-            else
-                (void) FlushClient(client, oc, (char *) NULL, 0);
-        }
-    }
-#else                           /* WIN32 */
-    FD_ZERO(&newOutputPending);
-    for (base = 0; base < XFD_SETCOUNT(&OutputPending); base++) {
-        index = XFD_FD(&OutputPending, base);
-        if ((index = GetConnectionTranslation(index)) == 0)
-            continue;
-        client = clients[index];
+    xorg_list_for_each_entry_safe(client, tmp, &output_pending_clients, output_pending) {
         if (client->clientGone)
             continue;
-        oc = (OsCommPtr) client->osPrivate;
-        if (FD_ISSET(oc->fd, &ClientsWithInput)) {
-            FD_SET(oc->fd, &newOutputPending);  /* set the bit again */
-            NewOutputPending = TRUE;
-        }
-        else
+        if (!client_is_ready(client)) {
+            oc = (OsCommPtr) client->osPrivate;
             (void) FlushClient(client, oc, (char *) NULL, 0);
+        } else
+            NewOutputPending = TRUE;
     }
-    XFD_COPYSET(&newOutputPending, &OutputPending);
-#endif                          /* WIN32 */
 }
 
 void
@@ -716,6 +636,28 @@ void
 SetCriticalOutputPending(void)
 {
     CriticalOutputPending = TRUE;
+}
+
+/*****************
+ * AbortClient:
+ *    When a write error occurs to a client, close
+ *    the connection and clean things up. Mark
+ *    the client as 'ready' so that the server will
+ *    try to read from it again, notice that the fd is
+ *    closed and clean up from there.
+ *****************/
+
+static void
+AbortClient(ClientPtr client)
+{
+    OsCommPtr oc = client->osPrivate;
+
+    if (oc->trans_conn) {
+        _XSERVTransDisconnect(oc->trans_conn);
+        _XSERVTransClose(oc->trans_conn);
+        oc->trans_conn = NULL;
+        mark_client_ready(client);
+    }
 }
 
 /*****************
@@ -736,6 +678,9 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
     ConnectionOutputPtr oco;
     int padBytes;
     const char *buf = __buf;
+
+    BUG_RETURN_VAL_MSG(in_input_thread(), 0,
+                       "******** %s called from input thread *********\n", __func__);
 
 #ifdef DEBUG_COMMUNICATION
     Bool multicount = FALSE;
@@ -790,11 +735,7 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
             FreeOutputs = oco->next;
         }
         else if (!(oco = AllocateOutputBuffer())) {
-            if (oc->trans_conn) {
-                _XSERVTransDisconnect(oc->trans_conn);
-                _XSERVTransClose(oc->trans_conn);
-                oc->trans_conn = NULL;
-            }
+            AbortClient(who);
             MarkClientException(who);
             return -1;
         }
@@ -844,20 +785,17 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
     }
 #endif
     if (oco->count == 0 || oco->count + count + padBytes > oco->size) {
-        FD_CLR(oc->fd, &OutputPending);
-        if (!XFD_ANYSET(&OutputPending)) {
+        output_pending_clear(who);
+        if (!any_output_pending()) {
             CriticalOutputPending = FALSE;
             NewOutputPending = FALSE;
         }
-
-        if (FlushCallback)
-            CallCallbacks(&FlushCallback, NULL);
 
         return FlushClient(who, oc, buf, count);
     }
 
     NewOutputPending = TRUE;
-    FD_SET(oc->fd, &OutputPending);
+    output_pending_mark(who);
     memmove((char *) oco->buf + oco->count, buf, count);
     oco->count += count;
     if (padBytes) {
@@ -881,7 +819,6 @@ int
 FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
 {
     ConnectionOutputPtr oco = oc->output;
-    int connection = oc->fd;
     XtransConnInfo trans_conn = oc->trans_conn;
     struct iovec iov[3];
     static char padBuffer[3];
@@ -898,6 +835,9 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
     notWritten = oco->count + extraCount + padsize;
     if (!notWritten)
         return 0;
+
+    if (FlushCallback)
+        CallCallbacks(&FlushCallback, who);
 
     todo = notWritten;
     while (notWritten) {
@@ -954,8 +894,7 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
             /* If we've arrived here, then the client is stuffed to the gills
                and not ready to accept more.  Make a note of it and buffer
                the rest. */
-            FD_SET(connection, &ClientsWriteBlocked);
-            AnyClientsWriteBlocked = TRUE;
+            output_pending_mark(who);
 
             if (written < oco->count) {
                 if (written > 0) {
@@ -977,9 +916,7 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
                     obuf = realloc(oco->buf, notWritten + BUFSIZE);
                 }
                 if (!obuf) {
-                    _XSERVTransDisconnect(oc->trans_conn);
-                    _XSERVTransClose(oc->trans_conn);
-                    oc->trans_conn = NULL;
+                    AbortClient(who);
                     MarkClientException(who);
                     oco->count = 0;
                     return -1;
@@ -995,6 +932,8 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
                         extraBuf + written, len);
 
             oco->count = notWritten;    /* this will include the pad */
+            ospoll_listen(server_poll, oc->fd, X_NOTIFY_WRITE);
+
             /* return only the amount explicitly requested */
             return extraCount;
         }
@@ -1004,11 +943,7 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
         }
 #endif
         else {
-            if (oc->trans_conn) {
-                _XSERVTransDisconnect(oc->trans_conn);
-                _XSERVTransClose(oc->trans_conn);
-                oc->trans_conn = NULL;
-            }
+            AbortClient(who);
             MarkClientException(who);
             oco->count = 0;
             return -1;
@@ -1017,12 +952,8 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
 
     /* everything was flushed out */
     oco->count = 0;
-    /* check to see if this client was write blocked */
-    if (AnyClientsWriteBlocked) {
-        FD_CLR(oc->fd, &ClientsWriteBlocked);
-        if (!XFD_ANYSET(&ClientsWriteBlocked))
-            AnyClientsWriteBlocked = FALSE;
-    }
+    output_pending_clear(who);
+
     if (oco->size > BUFWATERMARK) {
         free(oco->buf);
         free(oco);

@@ -1,6 +1,6 @@
-include_directories(. ../mi ../xfixes)
+include_directories(. ../mi ../render ../xfixes)
 
-handle_type_puns()
+handle_type_puns_all()
 
 add_library(Xi STATIC
 	allowev.c

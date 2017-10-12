@@ -45,6 +45,7 @@
 #include "indirect_dispatch.h"
 #include "indirect_table.h"
 #include "indirect_util.h"
+#include "protocol-versions.h"
 
 static char GLXServerVendorName[] = "SGI";
 
@@ -145,7 +146,7 @@ validGlxContext(ClientPtr client, XID id, int access_mode,
     return TRUE;
 }
 
-static int
+int
 validGlxDrawable(ClientPtr client, XID id, int type, int access_mode,
                  __GLXdrawable ** drawable, int *err)
 {
@@ -313,16 +314,8 @@ DoCreateContext(__GLXclientState * cl, GLXContextID gcId,
     glxc->id = gcId;
     glxc->share_id = shareList;
     glxc->idExists = GL_TRUE;
-    glxc->currentClient = NULL;
     glxc->isDirect = isDirect;
-    glxc->hasUnflushedCommands = GL_FALSE;
     glxc->renderMode = GL_RENDER;
-    glxc->feedbackBuf = NULL;
-    glxc->feedbackBufSize = 0;
-    glxc->selectBuf = NULL;
-    glxc->selectBufSize = 0;
-    glxc->drawPriv = NULL;
-    glxc->readPriv = NULL;
 
     /* The GLX_ARB_create_context_robustness spec says:
      *
@@ -544,7 +537,6 @@ __glXGetDrawable(__GLXcontext * glxc, GLXDrawable drawId, ClientPtr client,
 
     /* since we are creating the drawablePrivate, drawId should be new */
     if (!AddResource(drawId, __glXDrawableRes, pGlxDraw)) {
-        pGlxDraw->destroy(pGlxDraw);
         *error = BadAlloc;
         return NULL;
     }
@@ -644,10 +636,9 @@ DoMakeCurrent(__GLXclientState * cl,
         if (prevglxc->releaseBehavior == GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB)
             need_flush = GL_FALSE;
 #endif
-        if (prevglxc->hasUnflushedCommands && need_flush) {
+        if (need_flush) {
             if (__glXForceCurrent(cl, tag, (int *) &error)) {
                 glFlush();
-                prevglxc->hasUnflushedCommands = GL_FALSE;
             }
             else {
                 return error;
@@ -798,8 +789,8 @@ __glXDisp_QueryVersion(__GLXclientState * cl, GLbyte * pc)
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
-        .majorVersion = glxMajorVersion,
-        .minorVersion = glxMinorVersion
+        .majorVersion = SERVER_GLX_MAJOR_VERSION,
+        .minorVersion = SERVER_GLX_MINOR_VERSION
     };
 
     if (client->swapped) {
@@ -930,7 +921,6 @@ __glXDisp_CopyContext(__GLXclientState * cl, GLbyte * pc)
              ** in both streams are completed before the copy is executed.
              */
             glFinish();
-            tagcx->hasUnflushedCommands = GL_FALSE;
         }
         else {
             return error;
@@ -1114,7 +1104,10 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
 
         WRITE_PAIR(GLX_VISUAL_ID, modes->visualID);
         WRITE_PAIR(GLX_FBCONFIG_ID, modes->fbconfigID);
-        WRITE_PAIR(GLX_X_RENDERABLE, GL_TRUE);
+        WRITE_PAIR(GLX_X_RENDERABLE,
+                   (modes->drawableType & (GLX_WINDOW_BIT | GLX_PIXMAP_BIT)
+                    ? GL_TRUE
+                    : GL_FALSE));
 
         WRITE_PAIR(GLX_RGBA,
                    (modes->renderType & GLX_RGBA_BIT) ? GL_TRUE : GL_FALSE);
@@ -1239,20 +1232,16 @@ DoCreateGLXDrawable(ClientPtr client, __GLXscreen * pGlxScreen,
     if (pGlxDraw == NULL)
         return BadAlloc;
 
-    if (!AddResource(glxDrawableId, __glXDrawableRes, pGlxDraw)) {
-        pGlxDraw->destroy(pGlxDraw);
+    if (!AddResource(glxDrawableId, __glXDrawableRes, pGlxDraw))
         return BadAlloc;
-    }
 
     /*
      * Windows aren't refcounted, so track both the X and the GLX window
      * so we get called regardless of destruction order.
      */
     if (drawableId != glxDrawableId && type == GLX_DRAWABLE_WINDOW &&
-        !AddResource(pDraw->id, __glXDrawableRes, pGlxDraw)) {
-        pGlxDraw->destroy(pGlxDraw);
+        !AddResource(pDraw->id, __glXDrawableRes, pGlxDraw))
         return BadAlloc;
-    }
 
     return Success;
 }
@@ -1708,7 +1697,6 @@ __glXDisp_SwapBuffers(__GLXclientState * cl, GLbyte * pc)
              ** in both streams are completed before the swap is executed.
              */
             glFinish();
-            glxc->hasUnflushedCommands = GL_FALSE;
         }
         else {
             return error;
@@ -1905,7 +1893,6 @@ __glXDisp_CopySubBufferMESA(__GLXclientState * cl, GLbyte * pc)
              ** in both streams are completed before the swap is executed.
              */
             glFinish();
-            glxc->hasUnflushedCommands = GL_FALSE;
         }
         else {
             return error;
@@ -1926,6 +1913,11 @@ __glXDisp_CopySubBufferMESA(__GLXclientState * cl, GLbyte * pc)
     return Success;
 }
 
+/* hack for old glxext.h */
+#ifndef GLX_STEREO_TREE_EXT
+#define GLX_STEREO_TREE_EXT                 0x20F5
+#endif
+
 /*
 ** Get drawable attributes
 */
@@ -1936,7 +1928,7 @@ DoGetDrawableAttributes(__GLXclientState * cl, XID drawId)
     xGLXGetDrawableAttributesReply reply;
     __GLXdrawable *pGlxDraw = NULL;
     DrawablePtr pDraw;
-    CARD32 attributes[14];
+    CARD32 attributes[18];
     int num = 0, error;
 
     if (!validGlxDrawable(client, drawId, GLX_DRAWABLE_ANY,
@@ -1950,33 +1942,30 @@ DoGetDrawableAttributes(__GLXclientState * cl, XID drawId)
     if (pGlxDraw)
         pDraw = pGlxDraw->pDraw;
 
-    attributes[2*num] = GLX_Y_INVERTED_EXT;
-    attributes[2*num+1] = GL_FALSE;
-    num++;
-    attributes[2*num] = GLX_WIDTH;
-    attributes[2*num+1] = pDraw->width;
-    num++;
-    attributes[2*num] = GLX_HEIGHT;
-    attributes[2*num+1] = pDraw->height;
-    num++;
+#define ATTRIB(a, v) do { \
+    attributes[2*num] = (a); \
+    attributes[2*num+1] = (v); \
+    num++; \
+    } while (0)
+
+    ATTRIB(GLX_Y_INVERTED_EXT, GL_FALSE);
+    ATTRIB(GLX_WIDTH, pDraw->width);
+    ATTRIB(GLX_HEIGHT, pDraw->height);
+    ATTRIB(GLX_SCREEN, pDraw->pScreen->myNum);
     if (pGlxDraw) {
-        attributes[2*num] = GLX_TEXTURE_TARGET_EXT;
-        attributes[2*num+1] = pGlxDraw->target == GL_TEXTURE_2D ?
-            GLX_TEXTURE_2D_EXT :
-            GLX_TEXTURE_RECTANGLE_EXT;
-        num++;
-        attributes[2*num] = GLX_EVENT_MASK;
-        attributes[2*num+1] = pGlxDraw->eventMask;
-        num++;
-        attributes[2*num] = GLX_FBCONFIG_ID;
-        attributes[2*num+1] = pGlxDraw->config->fbconfigID;
-        num++;
+        ATTRIB(GLX_TEXTURE_TARGET_EXT,
+               pGlxDraw->target == GL_TEXTURE_2D ?
+                GLX_TEXTURE_2D_EXT : GLX_TEXTURE_RECTANGLE_EXT);
+        ATTRIB(GLX_EVENT_MASK, pGlxDraw->eventMask);
+        ATTRIB(GLX_FBCONFIG_ID, pGlxDraw->config->fbconfigID);
         if (pGlxDraw->type == GLX_DRAWABLE_PBUFFER) {
-            attributes[2*num] = GLX_PRESERVED_CONTENTS;
-            attributes[2*num+1] = GL_TRUE;
-            num++;
+            ATTRIB(GLX_PRESERVED_CONTENTS, GL_TRUE);
+        }
+        if (pGlxDraw->type == GLX_DRAWABLE_WINDOW) {
+            ATTRIB(GLX_STEREO_TREE_EXT, 0);
         }
     }
+#undef ATTRIB
 
     reply = (xGLXGetDrawableAttributesReply) {
         .type = X_Reply,
@@ -2126,7 +2115,6 @@ __glXDisp_Render(__GLXclientState * cl, GLbyte * pc)
         left -= cmdlen;
         commandsDone++;
     }
-    glxc->hasUnflushedCommands = GL_TRUE;
     return Success;
 }
 
@@ -2337,7 +2325,6 @@ __glXDisp_RenderLarge(__GLXclientState * cl, GLbyte * pc)
              ** Skip over the header and execute the command.
              */
             (*proc) (cl->largeCmdBuf + __GLX_RENDER_LARGE_HDR_SIZE);
-            glxc->hasUnflushedCommands = GL_TRUE;
 
             /*
              ** Reset for the next RenderLarge series.
@@ -2446,6 +2433,10 @@ __glXDisp_QueryExtensionsString(__GLXclientState * cl, GLbyte * pc)
     return Success;
 }
 
+#ifndef GLX_VENDOR_NAMES_EXT
+#define GLX_VENDOR_NAMES_EXT 0x20F6
+#endif
+
 int
 __glXDisp_QueryServerString(__GLXclientState * cl, GLbyte * pc)
 {
@@ -2457,7 +2448,6 @@ __glXDisp_QueryServerString(__GLXclientState * cl, GLbyte * pc)
     char *buf;
     __GLXscreen *pGlxScreen;
     int err;
-    char ver_str[16];
 
     REQUEST_SIZE_MATCH(xGLXQueryServerStringReq);
 
@@ -2469,15 +2459,17 @@ __glXDisp_QueryServerString(__GLXclientState * cl, GLbyte * pc)
         ptr = GLXServerVendorName;
         break;
     case GLX_VERSION:
-        /* Return to the server version rather than the screen version
-         * to prevent confusion when they do not match.
-         */
-        snprintf(ver_str, 16, "%d.%d", glxMajorVersion, glxMinorVersion);
-        ptr = ver_str;
+        ptr = "1.4";
         break;
     case GLX_EXTENSIONS:
         ptr = pGlxScreen->GLXextensions;
         break;
+    case GLX_VENDOR_NAMES_EXT:
+        if (pGlxScreen->glvnd) {
+            ptr = pGlxScreen->glvnd;
+            break;
+        }
+        /* else fall through */
     default:
         return BadValue;
     }

@@ -223,7 +223,7 @@ ProcXResQueryClients(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXResQueryClientsReq);
 
-    current_clients = malloc(currentMaxClients * sizeof(int));
+    current_clients = xallocarray(currentMaxClients, sizeof(int));
 
     num_clients = 0;
     for (i = 0; i < currentMaxClients; i++) {
@@ -349,21 +349,6 @@ ProcXResQueryClientResources(ClientPtr client)
     return Success;
 }
 
-static unsigned long
-ResGetApproxPixmapBytes(PixmapPtr pix)
-{
-    unsigned long nPixels;
-    float bytesPerPixel;
-
-    bytesPerPixel = (float)pix->drawable.bitsPerPixel / 8.0;
-    nPixels = pix->drawable.width * pix->drawable.height;
-
-    /* Divide by refcnt as pixmap could be shared between clients,
-     * so total pixmap mem is shared between these.
-     */
-    return (nPixels * bytesPerPixel) / pix->refcnt;
-}
-
 static void
 ResFindResourcePixmaps(void *value, XID id, RESTYPE type, void *cdata)
 {
@@ -373,57 +358,6 @@ ResFindResourcePixmaps(void *value, XID id, RESTYPE type, void *cdata)
 
     sizeFunc(value, id, &size);
     *bytes += size.pixmapRefSize;
-}
-
-static void
-ResFindPixmaps(void *value, XID id, void *cdata)
-{
-    unsigned long *bytes = (unsigned long *) cdata;
-    PixmapPtr pix = (PixmapPtr) value;
-
-    *bytes += ResGetApproxPixmapBytes(pix);
-}
-
-static void
-ResFindWindowPixmaps(void *value, XID id, void *cdata)
-{
-    unsigned long *bytes = (unsigned long *) cdata;
-    WindowPtr pWin = (WindowPtr) value;
-
-    if (pWin->backgroundState == BackgroundPixmap)
-        *bytes += ResGetApproxPixmapBytes(pWin->background.pixmap);
-
-    if (pWin->border.pixmap != NULL && !pWin->borderIsPixel)
-        *bytes += ResGetApproxPixmapBytes(pWin->border.pixmap);
-}
-
-static void
-ResFindGCPixmaps(void *value, XID id, void *cdata)
-{
-    unsigned long *bytes = (unsigned long *) cdata;
-    GCPtr pGC = (GCPtr) value;
-
-    if (pGC->stipple != NULL)
-        *bytes += ResGetApproxPixmapBytes(pGC->stipple);
-
-    if (pGC->tile.pixmap != NULL && !pGC->tileIsPixel)
-        *bytes += ResGetApproxPixmapBytes(pGC->tile.pixmap);
-}
-
-static void
-ResFindPicturePixmaps(void *value, XID id, void *cdata)
-{
-#ifdef RENDER
-    ResFindResourcePixmaps(value, id, PictureType, cdata);
-#endif
-}
-
-static void
-ResFindCompositeClientWindowPixmaps (void *value, XID id, void *cdata)
-{
-#ifdef COMPOSITE
-    ResFindResourcePixmaps(value, id, CompositeClientWindowType, cdata);
-#endif
 }
 
 static int
@@ -445,34 +379,8 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
 
     bytes = 0;
 
-    FindClientResourcesByType(clients[clientID], RT_PIXMAP, ResFindPixmaps,
-                              (void *) (&bytes));
-
-    /*
-     * Make sure win background pixmaps also held to account.
-     */
-    FindClientResourcesByType(clients[clientID], RT_WINDOW,
-                              ResFindWindowPixmaps, (void *) (&bytes));
-
-    /*
-     * GC Tile & Stipple pixmaps too.
-     */
-    FindClientResourcesByType(clients[clientID], RT_GC,
-                              ResFindGCPixmaps, (void *) (&bytes));
-
-#ifdef RENDER
-    /* Render extension picture pixmaps. */
-    FindClientResourcesByType(clients[clientID], PictureType,
-                              ResFindPicturePixmaps,
-                              (void *)(&bytes));
-#endif
-
-#ifdef COMPOSITE
-    /* Composite extension client window pixmaps. */
-    FindClientResourcesByType(clients[clientID], CompositeClientWindowType,
-                              ResFindCompositeClientWindowPixmaps,
-                              (void *)(&bytes));
-#endif
+    FindAllClientResources(clients[clientID], ResFindResourcePixmaps,
+                           (void *) (&bytes));
 
     rep = (xXResQueryClientPixmapBytesReply) {
         .type = X_Reply,
@@ -1039,6 +947,8 @@ ProcXResQueryResourceBytes (ClientPtr client)
     ConstructResourceBytesCtx    ctx;
 
     REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
+    if (stuff->numSpecs > UINT32_MAX / sizeof(ctx.specs[0]))
+        return BadLength;
     REQUEST_FIXED_SIZE(xXResQueryResourceBytesReq,
                        stuff->numSpecs * sizeof(ctx.specs[0]));
 
@@ -1144,8 +1054,8 @@ SProcXResQueryResourceBytes (ClientPtr client)
     int c;
     xXResResourceIdSpec *specs = (void*) ((char*) stuff + sizeof(*stuff));
 
-    swapl(&stuff->numSpecs);
     REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
+    swapl(&stuff->numSpecs);
     REQUEST_FIXED_SIZE(xXResQueryResourceBytesReq,
                        stuff->numSpecs * sizeof(specs[0]));
 

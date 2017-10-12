@@ -620,7 +620,7 @@ SyncAwaitTriggerFired(SyncTrigger * pTrigger)
 
     pAwaitUnion = (SyncAwaitUnion *) pAwait->pHeader;
     numwaits = pAwaitUnion->header.num_waitconditions;
-    ppAwait = malloc(numwaits * sizeof(SyncAwait *));
+    ppAwait = xallocarray(numwaits, sizeof(SyncAwait *));
     if (!ppAwait)
         goto bail;
 
@@ -984,20 +984,7 @@ SyncCreateSystemCounter(const char *name,
                         SyncSystemCounterBracketValues BracketValues
     )
 {
-    SyncCounter *pCounter;
-
-    /* this function may be called before SYNC has been initialized, so we
-     * have to make sure RTCounter is created.
-     */
-    if (RTCounter == 0) {
-        RTCounter = CreateNewResourceType(FreeCounter, "SyncCounter");
-        if (RTCounter == 0) {
-            return NULL;
-        }
-        xorg_list_init(&SysCounterList);
-    }
-
-    pCounter = SyncCreateCounter(NULL, FakeClientID(0), initial);
+    SyncCounter *pCounter = SyncCreateCounter(NULL, FakeClientID(0), initial);
 
     if (pCounter) {
         SysCounterInfo *psci;
@@ -1514,7 +1501,7 @@ SyncAwaitPrologue(ClientPtr client, int items)
     /*  all the memory for the entire await list is allocated
      *  here in one chunk
      */
-    pAwaitUnion = malloc((items + 1) * sizeof(SyncAwaitUnion));
+    pAwaitUnion = xallocarray(items + 1, sizeof(SyncAwaitUnion));
     if (!pAwaitUnion)
         return NULL;
 
@@ -1912,7 +1899,7 @@ ProcSyncCreateFence(ClientPtr client)
     if (!AddResource(stuff->fid, RTFence, (void *) pFence))
         return BadAlloc;
 
-    return client->noClientException;
+    return Success;
 }
 
 static int
@@ -1953,7 +1940,7 @@ ProcSyncTriggerFence(ClientPtr client)
 
     miSyncTriggerFence(pFence);
 
-    return client->noClientException;
+    return Success;
 }
 
 static int
@@ -1975,7 +1962,7 @@ ProcSyncResetFence(ClientPtr client)
 
     pFence->funcs.Reset(pFence);
 
-    return client->noClientException;
+    return Success;
 }
 
 static int
@@ -1993,7 +1980,7 @@ ProcSyncDestroyFence(ClientPtr client)
         return rc;
 
     FreeResource(stuff->fid, RT_NONE);
-    return client->noClientException;
+    return Success;
 }
 
 static int
@@ -2025,7 +2012,7 @@ ProcSyncQueryFence(ClientPtr client)
     }
 
     WriteToClient(client, sizeof(xSyncQueryFenceReply), &rep);
-    return client->noClientException;
+    return Success;
 }
 
 static int
@@ -2103,7 +2090,7 @@ ProcSyncAwaitFence(ClientPtr client)
 
     SyncAwaitEpilogue(client, items, pAwaitUnion);
 
-    return client->noClientException;
+    return Success;
 }
 
 /*
@@ -2501,10 +2488,8 @@ SyncExtensionInit(void)
     for (s = 0; s < screenInfo.numScreens; s++)
         miSyncSetup(screenInfo.screens[s]);
 
-    if (RTCounter == 0) {
-        RTCounter = CreateNewResourceType(FreeCounter, "SyncCounter");
-        xorg_list_init(&SysCounterList);
-    }
+    RTCounter = CreateNewResourceType(FreeCounter, "SyncCounter");
+    xorg_list_init(&SysCounterList);
     RTAlarm = CreateNewResourceType(FreeAlarm, "SyncAlarm");
     RTAwait = CreateNewResourceType(FreeAwait, "SyncAwait");
     RTFence = CreateNewResourceType(FreeFence, "SyncFence");
@@ -2571,8 +2556,8 @@ static XSyncValue *pnext_time;
 *** Server Block Handler
 *** code inspired by multibuffer extension (now deprecated)
  */
- /*ARGSUSED*/ static void
-ServertimeBlockHandler(void *env, struct timeval **wt, void *LastSelectMask)
+/*ARGSUSED*/ static void
+ServertimeBlockHandler(void *env, void *wt)
 {
     XSyncValue delay;
     unsigned long timeout;
@@ -2597,8 +2582,8 @@ ServertimeBlockHandler(void *env, struct timeval **wt, void *LastSelectMask)
 /*
 *** Wakeup Handler
  */
- /*ARGSUSED*/ static void
-ServertimeWakeupHandler(void *env, int rc, void *LastSelectMask)
+/*ARGSUSED*/ static void
+ServertimeWakeupHandler(void *env, int rc)
 {
     if (pnext_time) {
         GetTime();
@@ -2673,7 +2658,7 @@ IdleTimeQueryValue(void *pCounter, CARD64 * pValue_return)
 }
 
 static void
-IdleTimeBlockHandler(void *pCounter, struct timeval **wt, void *LastSelectMask)
+IdleTimeBlockHandler(void *pCounter, void *wt)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
@@ -2766,7 +2751,7 @@ IdleTimeCheckBrackets(SyncCounter *counter, XSyncValue idle, XSyncValue *less, X
 }
 
 static void
-IdleTimeWakeupHandler(void *pCounter, int rc, void *LastSelectMask)
+IdleTimeWakeupHandler(void *pCounter, int rc)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);

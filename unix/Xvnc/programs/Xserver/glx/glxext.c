@@ -1,6 +1,7 @@
 /*
  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
  * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.
+ * Copyright (C) 2017 D. R. Commander. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -46,6 +47,10 @@
 #include "glxext.h"
 #include "indirect_table.h"
 #include "indirect_util.h"
+
+#ifdef TURBOVNC
+Bool indirectGlxActive = FALSE;
+#endif
 
 /*
 ** X resources.
@@ -136,7 +141,6 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
 		(c->drawPriv == glxPriv || c->readPriv == glxPriv)) {
             /* flush the context */
             glFlush();
-            c->hasUnflushedCommands = GL_FALSE;
             /* just force a re-bind the next time through */
             (*c->loseCurrent) (c);
             lastGLContext = NULL;
@@ -167,6 +171,12 @@ __glXAddContext(__GLXcontext * cx)
 
     cx->next = glxAllContexts;
     glxAllContexts = cx;
+#ifdef TURBOVNC
+    if (!indirectGlxActive && !cx->isDirect) {
+        LogMessage(X_INFO, "Activating indirect GLX ...\n");
+        indirectGlxActive = TRUE;
+    }
+#endif
     return True;
 }
 
@@ -174,6 +184,9 @@ static void
 __glXRemoveFromContextList(__GLXcontext * cx)
 {
     __GLXcontext *c, *prev;
+#ifdef TURBOVNC
+    Bool indirectGlxStillActive = FALSE;
+#endif
 
     if (cx == glxAllContexts)
         glxAllContexts = cx->next;
@@ -185,6 +198,18 @@ __glXRemoveFromContextList(__GLXcontext * cx)
             prev = c;
         }
     }
+#ifdef TURBOVNC
+    for (c = glxAllContexts; c; c = c->next) {
+        if (!c->isDirect) {
+            indirectGlxStillActive = TRUE;
+            break;
+        }
+    }
+    if (indirectGlxActive && !indirectGlxStillActive) {
+        LogMessage(X_INFO, "Deactivating indirect GLX ...\n");
+        indirectGlxActive = FALSE;
+    }
+#endif
 }
 
 /*
@@ -337,6 +362,23 @@ checkScreenVisuals(void)
     return False;
 }
 
+static void
+GetGLXDrawableBytes(void *value, XID id, ResourceSizePtr size)
+{
+    __GLXdrawable *draw = value;
+
+    size->resourceSize = 0;
+    size->pixmapRefSize = 0;
+    size->refCnt = 1;
+
+    if (draw->type == GLX_DRAWABLE_PIXMAP) {
+        SizeType pixmapSizeFunc = GetResourceTypeSizeFunc(RT_PIXMAP);
+        ResourceSizeRec pixmapSize = { 0, };
+        pixmapSizeFunc((PixmapPtr)draw->pDraw, draw->pDraw->id, &pixmapSize);
+        size->pixmapRefSize += pixmapSize.pixmapRefSize;
+    }
+}
+
 /*
 ** Initialize the GLX extension.
 */
@@ -366,6 +408,8 @@ GlxExtensionInit(void)
     if (!__glXContextRes || !__glXDrawableRes)
         return;
 
+    SetResourceTypeSizeFunc(__glXDrawableRes, GetGLXDrawableBytes);
+
     if (!dixRegisterPrivateKey
         (&glxClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(__GLXclientState)))
         return;
@@ -380,8 +424,6 @@ GlxExtensionInit(void)
 
             glxScreen = p->screenProbe(pScreen);
             if (glxScreen != NULL) {
-                if (glxScreen->GLXminor < glxMinorVersion)
-                    glxMinorVersion = glxScreen->GLXminor;
                 LogMessage(X_INFO,
                            "GLX: Initialized %s GL provider for screen %d\n",
                            p->name, i);
@@ -469,6 +511,12 @@ __glXForceCurrent(__GLXclientState * cl, GLXContextTag tag, int *error)
 
     /* Make this context the current one for the GL. */
     if (!cx->isDirect) {
+        /*
+         * If it is being forced, it means that this context was already made
+         * current. So it cannot just be made current again without decrementing
+         * refcount's
+         */
+        (*cx->loseCurrent) (cx);
         lastGLContext = cx;
         if (!(*cx->makeCurrent) (cx)) {
             /* Bind failed, and set the error code.  Bummer */

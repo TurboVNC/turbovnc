@@ -27,6 +27,15 @@
 /* Define to 1 if you have the `getzoneid' function. */
 #cmakedefine HAVE_GETZONEID
 
+/* Define to 1 if you have the <ieeefp.h> header file. */
+#cmakedefine HAVE_IEEEFP_H
+
+/* Define to 1 if you have the `reallocarray' function. */
+#cmakedefine HAVE_REALLOCARRAY
+
+/* Define to 1 if you have the `arc4random_buf' function. */
+#cmakedefine HAVE_ARC4RANDOM_BUF
+
 /* Define to 1 if you have the `shmctl64' function. */
 #cmakedefine HAVE_SHMCTL64
 
@@ -48,6 +57,9 @@
 /* Define to 1 if you have the `strndup' function. */
 #cmakedefine HAVE_STRNDUP
 
+/* Define to 1 if you have the `timingsafe_memcmp' function. */
+#cmakedefine HAVE_TIMINGSAFE_MEMCMP
+
 /* Define to 1 if you have the `asprintf' function. */
 #cmakedefine HAVE_ASPRINTF
 
@@ -68,5 +80,14 @@
 
 /* Listen on Unix socket */
 #define LISTEN_UNIX
+
+/* Have setitimer support */
+#cmakedefine01 HAVE_SETITIMER
+
+/* Have poll() */
+#cmakedefine01 HAVE_POLL
+
+/* Have epoll_create1() */
+#cmakedefine01 HAVE_EPOLL_CREATE1
 
 #endif /* _DIX_CONFIG_H_ */

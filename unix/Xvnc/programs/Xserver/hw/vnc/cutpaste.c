@@ -117,9 +117,9 @@ void
 rfbSetXCutText(char *str, int len)
 {
     inSetXCutText = TRUE;
-    ChangeWindowProperty(screenInfo.screens[0]->root, XA_CUT_BUFFER0,
-                         XA_STRING, 8, PropModeReplace, len,
-                         (pointer)str, TRUE);
+    dixChangeWindowProperty(serverClient, screenInfo.screens[0]->root,
+                            XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, len,
+                            (pointer)str, TRUE);
     inSetXCutText = FALSE;
 }
 

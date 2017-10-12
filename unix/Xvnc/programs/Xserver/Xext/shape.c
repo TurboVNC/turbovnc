@@ -881,6 +881,7 @@ SendShapeNotify(WindowPtr pWin, int which)
     default:
         return;
     }
+    UpdateCurrentTimeIf();
     for (pShapeEvent = *pHead; pShapeEvent; pShapeEvent = pShapeEvent->next) {
         xShapeNotifyEvent se = {
             .type = ShapeNotify + ShapeEventBase,
@@ -996,7 +997,7 @@ ProcShapeGetRectangles(ClientPtr client)
 
         nrects = RegionNumRects(region);
         box = RegionRects(region);
-        rects = malloc(nrects * sizeof(xRectangle));
+        rects = xallocarray(nrects, sizeof(xRectangle));
         if (!rects && nrects)
             return BadAlloc;
         for (i = 0; i < nrects; i++, box++) {

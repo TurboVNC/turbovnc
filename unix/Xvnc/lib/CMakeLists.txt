@@ -1,7 +1,7 @@
 add_subdirectory(bzip2)
 add_subdirectory(libXau)
 add_subdirectory(libXdmcp)
-add_subdirectory(libXfont)
+add_subdirectory(libXfont2)
 add_subdirectory(libfontenc)
 add_subdirectory(libsha1)
 add_subdirectory(libxshmfence)

@@ -61,7 +61,7 @@ PictureWindowFormat(WindowPtr pWindow)
                               WindowGetVisual(pWindow));
 }
 
-Bool
+static Bool
 PictureDestroyWindow(WindowPtr pWindow)
 {
     ScreenPtr pScreen = pWindow->drawable.pScreen;
@@ -82,7 +82,7 @@ PictureDestroyWindow(WindowPtr pWindow)
     return ret;
 }
 
-Bool
+static Bool
 PictureCloseScreen(ScreenPtr pScreen)
 {
     PictureScreenPtr ps = GetPictureScreen(pScreen);
@@ -102,7 +102,7 @@ PictureCloseScreen(ScreenPtr pScreen)
     return ret;
 }
 
-void
+static void
 PictureStoreColors(ColormapPtr pColormap, int ndef, xColorItem * pdef)
 {
     ScreenPtr pScreen = pColormap->pScreen;
@@ -163,7 +163,7 @@ addFormat(FormatInitRec formats[256], int nformat, CARD32 format, CARD8 depth)
 
 #define Mask(n) ((1 << (n)) - 1)
 
-PictFormatPtr
+static PictFormatPtr
 PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
 {
     int nformats, f;
@@ -439,7 +439,7 @@ PictureFindVisual(ScreenPtr pScreen, VisualID visual)
     return 0;
 }
 
-Bool
+static Bool
 PictureInitIndexedFormat(ScreenPtr pScreen, PictFormatPtr format)
 {
     PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
@@ -625,6 +625,12 @@ GetPictureBytes(void *value, XID id, ResourceSizePtr size)
     }
 }
 
+static int
+FreePictFormat(void *pPictFormat, XID pid)
+{
+    return Success;
+}
+
 Bool
 PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
 {
@@ -659,6 +665,9 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     for (n = 0; n < nformats; n++) {
         if (!AddResource
             (formats[n].id, PictFormatType, (void *) (formats + n))) {
+            int i;
+            for (i = 0; i < n; i++)
+                FreeResource(formats[i].id, RT_NONE);
             free(formats);
             return FALSE;
         }
@@ -724,7 +733,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     return TRUE;
 }
 
-void
+static void
 SetPictureToDefaults(PicturePtr pPicture)
 {
     pPicture->refcnt = 1;
@@ -837,7 +846,7 @@ initGradient(SourcePictPtr pGradient, int stopCount,
         dpos = stopPoints[i];
     }
 
-    pGradient->gradient.stops = malloc(stopCount * sizeof(PictGradientStop));
+    pGradient->gradient.stops = xallocarray(stopCount, sizeof(PictGradientStop));
     if (!pGradient->gradient.stops) {
         *error = BadAlloc;
         return;
@@ -1432,12 +1441,6 @@ FreePicture(void *value, XID pid)
         }
         dixFreeObjectWithPrivates(pPicture, PRIVATE_PICTURE);
     }
-    return Success;
-}
-
-int
-FreePictFormat(void *pPictFormat, XID pid)
-{
     return Success;
 }
 

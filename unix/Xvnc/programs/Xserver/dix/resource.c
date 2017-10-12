@@ -156,7 +156,7 @@ static void RebuildTable(int    /*client */
 
 #define INITBUCKETS 64
 #define INITHASHSIZE 6
-#define MAXHASHSIZE 11
+#define MAXHASHSIZE 16
 
 typedef struct _Resource {
     struct _Resource *next;
@@ -510,7 +510,7 @@ CreateNewResourceType(DeleteType deleteFunc, const char *name)
 
     if (next & lastResourceClass)
         return 0;
-    types = realloc(resourceTypes, (next + 1) * sizeof(*resourceTypes));
+    types = reallocarray(resourceTypes, next + 1, sizeof(*resourceTypes));
     if (!types)
         return 0;
 
@@ -600,6 +600,29 @@ CreateNewResourceClass(void)
 
 static ClientResourceRec clientTable[MAXCLIENTS];
 
+static unsigned int
+ilog2(int val)
+{
+    int bits;
+
+    if (val <= 0)
+	return 0;
+    for (bits = 0; val != 0; bits++)
+	val >>= 1;
+    return bits - 1;
+}
+
+/*****************
+ * ResourceClientBits
+ *    Returns the client bit offset in the client + resources ID field
+ *****************/
+
+unsigned int
+ResourceClientBits(void)
+{
+    return (ilog2(LimitClients));
+}
+
 /*****************
  * InitClientResources
  *    When a new client is created, call this to allocate space
@@ -645,29 +668,14 @@ InitClientResources(ClientPtr client)
 int
 HashResourceID(XID id, int numBits)
 {
-    id &= RESOURCE_ID_MASK;
-    switch (numBits)
-    {
-        case 6:
-            return ((int)(0x03F & (id ^ (id>>6) ^ (id>>12))));
-        case 7:
-            return ((int)(0x07F & (id ^ (id>>7) ^ (id>>13))));
-        case 8:
-            return ((int)(0x0FF & (id ^ (id>>8) ^ (id>>16))));
-        case 9:
-            return ((int)(0x1FF & (id ^ (id>>9))));
-        case 10:
-            return ((int)(0x3FF & (id ^ (id>>10))));
-        case 11:
-            return ((int)(0x7FF & (id ^ (id>>11))));
-    }
-    if (numBits >= 11)
-        return ((int)(0x7FF & (id ^ (id>>11))));
-    else
-    {
-        assert(numBits >= 0);
-        return id & ~((~0) << numBits);
-    }
+    static XID mask;
+
+    if (!mask)
+        mask = RESOURCE_ID_MASK;
+    id &= mask;
+    if (numBits < 9)
+        return (id ^ (id >> numBits) ^ (id >> (numBits<<1))) & ~((~0) << numBits);
+    return (id ^ (id >> numBits)) & ~((~0) << numBits);
 }
 
 static XID
@@ -834,10 +842,10 @@ RebuildTable(int client)
      */
 
     j = 2 * clientTable[client].buckets;
-    tails = malloc(j * sizeof(ResourcePtr *));
+    tails =  xallocarray(j, sizeof(ResourcePtr *));
     if (!tails)
         return;
-    resources = malloc(j * sizeof(ResourcePtr));
+    resources =  xallocarray(j, sizeof(ResourcePtr));
     if (!resources) {
         free(tails);
         return;
@@ -883,7 +891,7 @@ FreeResource(XID id, RESTYPE skipDeleteFuncType)
     int *eltptr;
     int elements;
 
-    if (((cid = CLIENT_ID(id)) < MAXCLIENTS) && clientTable[cid].buckets) {
+    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
         head = &clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
         eltptr = &clientTable[cid].elements;
 
@@ -917,7 +925,7 @@ FreeResourceByType(XID id, RESTYPE type, Bool skipFree)
     ResourcePtr res;
     ResourcePtr *prev, *head;
 
-    if (((cid = CLIENT_ID(id)) < MAXCLIENTS) && clientTable[cid].buckets) {
+    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
         head = &clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         prev = head;
@@ -952,7 +960,7 @@ ChangeResourceValue(XID id, RESTYPE rtype, void *value)
     int cid;
     ResourcePtr res;
 
-    if (((cid = CLIENT_ID(id)) < MAXCLIENTS) && clientTable[cid].buckets) {
+    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
         res = clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         for (; res; res = res->next)
@@ -1190,18 +1198,20 @@ dixLookupResourceByType(void **result, XID id, RESTYPE rtype,
     if ((rtype & TypeMask) > lastResourceType)
         return BadImplementation;
 
-    if ((cid < MAXCLIENTS) && clientTable[cid].buckets) {
+    if ((cid < LimitClients) && clientTable[cid].buckets) {
         res = clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         for (; res; res = res->next)
             if (res->id == id && res->type == rtype)
                 break;
     }
+    if (client) {
+        client->errorValue = id;
+    }
     if (!res)
         return resourceTypes[rtype & TypeMask].errorValue;
 
     if (client) {
-        client->errorValue = id;
         cid = XaceHook(XACE_RESOURCE_ACCESS, client, id, res->type,
                        res->value, RT_NONE, NULL, mode);
         if (cid == BadValue)
@@ -1223,18 +1233,20 @@ dixLookupResourceByClass(void **result, XID id, RESTYPE rclass,
 
     *result = NULL;
 
-    if ((cid < MAXCLIENTS) && clientTable[cid].buckets) {
+    if ((cid < LimitClients) && clientTable[cid].buckets) {
         res = clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         for (; res; res = res->next)
             if (res->id == id && (res->type & rclass))
                 break;
     }
+    if (client) {
+        client->errorValue = id;
+    }
     if (!res)
         return BadValue;
 
     if (client) {
-        client->errorValue = id;
         cid = XaceHook(XACE_RESOURCE_ACCESS, client, id, res->type,
                        res->value, RT_NONE, NULL, mode);
         if (cid != Success)

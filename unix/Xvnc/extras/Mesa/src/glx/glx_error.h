@@ -26,21 +26,22 @@
  promote the sale, use or other dealings in this Software without
  prior written authorization.
 */
+#include <stdbool.h>
 #include <stdint.h>
 #include <X11/Xlib.h>
 #include <xcb/xcb.h>
 
-#ifndef true
-#define true (unsigned char)1
-#endif
-
-#ifndef false
-#define false (unsigned char)0
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 void __glXSendError(Display * dpy, int_fast8_t errorCode,
 		    uint_fast32_t resourceID, uint_fast16_t minorCode,
-		    unsigned char coreX11error);
+		    bool coreX11error);
 
 _X_HIDDEN void __glXSendErrorForXcb(Display * dpy,
 				    const xcb_generic_error_t *err);
+
+#ifdef __cplusplus
+}
+#endif

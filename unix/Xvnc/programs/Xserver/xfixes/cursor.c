@@ -153,6 +153,7 @@ CursorDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     if (pCursor != CursorCurrent[pDev->id]) {
         CursorEventPtr e;
 
+        UpdateCurrentTimeIf();
         CursorCurrent[pDev->id] = pCursor;
         for (e = cursorEvents; e; e = e->next) {
             if ((e->eventMask & XFixesDisplayCursorNotifyMask)) {
@@ -280,6 +281,7 @@ int
 SProcXFixesSelectCursorInput(ClientPtr client)
 {
     REQUEST(xXFixesSelectCursorInputReq);
+    REQUEST_SIZE_MATCH(xXFixesSelectCursorInputReq);
 
     swaps(&stuff->length);
     swapl(&stuff->window);
@@ -306,11 +308,9 @@ CopyCursorToImage(CursorPtr pCursor, CARD32 *image)
     int height = pCursor->bits->height;
     int npixels = width * height;
 
-#ifdef ARGB_CURSOR
     if (pCursor->bits->argb)
         memcpy(image, pCursor->bits->argb, npixels * sizeof(CARD32));
     else
-#endif
     {
         unsigned char *srcLine = pCursor->bits->source;
         unsigned char *mskLine = pCursor->bits->mask;
@@ -415,7 +415,7 @@ ProcXFixesSetCursorName(ClientPtr client)
     REQUEST(xXFixesSetCursorNameReq);
     Atom atom;
 
-    REQUEST_AT_LEAST_SIZE(xXFixesSetCursorNameReq);
+    REQUEST_FIXED_SIZE(xXFixesSetCursorNameReq, stuff->nbytes);
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixSetAttrAccess);
     tchar = (char *) &stuff[1];
     atom = MakeAtom(tchar, stuff->nbytes, TRUE);
@@ -776,10 +776,8 @@ createCursorHideCount(ClientPtr pClient, ScreenPtr pScreen)
      * Create a resource for this element so it can be deleted
      * when the client goes away.
      */
-    if (!AddResource(pChc->resource, CursorHideCountType, (void *) pChc)) {
-        free(pChc);
+    if (!AddResource(pChc->resource, CursorHideCountType, (void *) pChc))
         return BadAlloc;
-    }
 
     return Success;
 }
@@ -1009,6 +1007,8 @@ SProcXFixesCreatePointerBarrier(ClientPtr client)
     REQUEST(xXFixesCreatePointerBarrierReq);
     int i;
     CARD16 *in_devices = (CARD16 *) &stuff[1];
+
+    REQUEST_AT_LEAST_SIZE(xXFixesCreatePointerBarrierReq);
 
     swaps(&stuff->length);
     swaps(&stuff->num_devices);

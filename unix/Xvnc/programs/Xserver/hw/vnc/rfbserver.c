@@ -38,9 +38,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
 #include <sys/time.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include "windowstr.h"
 #include "rfb.h"
@@ -353,7 +351,7 @@ rfbNewClient(int sock)
     rfbProtocolVersionMsg pv;
     rfbClientPtr cl;
     BoxRec box;
-    struct sockaddr_storage addr;
+    rfbSockAddr addr;
     socklen_t addrlen = sizeof(struct sockaddr_storage);
     char addrStr[INET6_ADDRSTRLEN];
     char *env = NULL;
@@ -383,7 +381,7 @@ rfbNewClient(int sock)
       cl->captureFD = -1;
 
     cl->sock = sock;
-    getpeername(sock, (struct sockaddr *)&addr, &addrlen);
+    getpeername(sock, &addr.u.sa, &addrlen);
     cl->host = strdup(sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
     /* Dispatch client input to rfbProcessClientProtocolVersion(). */

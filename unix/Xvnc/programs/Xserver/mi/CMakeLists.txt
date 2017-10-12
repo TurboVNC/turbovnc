@@ -1,6 +1,6 @@
 include_directories(. ../Xi ../composite ../damageext ../render ../xfixes)
 
-handle_type_puns()
+handle_type_puns(micmap.c)
 
 add_library(mi STATIC
 	miarc.c

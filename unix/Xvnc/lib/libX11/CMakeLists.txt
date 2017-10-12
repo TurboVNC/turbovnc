@@ -13,7 +13,9 @@ endforeach()
 
 include_directories(include/X11)
 
-handle_type_puns()
+add_definitions(-DHAVE_UNISTD_H -DHAVE_SYS_SELECT_H)
+
+handle_type_puns(src/XlibInt.c)
 
 add_library(X11xcb STATIC
 	src/XlibInt.c

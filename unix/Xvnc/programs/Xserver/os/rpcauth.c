@@ -46,7 +46,7 @@ from The Open Group.
 
 #include <rpc/rpc.h>
 
-#ifdef sun
+#ifdef __sun
 /* <rpc/auth.h> only includes this if _KERNEL is #defined... */
 extern bool_t xdr_opaque_auth(XDR *, struct opaque_auth *);
 #endif
@@ -173,12 +173,6 @@ SecureRPCReset(void)
 {
     rpc_id = (XID) ~0L;
     return 1;
-}
-
-_X_HIDDEN XID
-SecureRPCToID(unsigned short data_length, char *data)
-{
-    return rpc_id;
 }
 
 _X_HIDDEN int

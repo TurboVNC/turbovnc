@@ -1,6 +1,9 @@
-include_directories(../mi)
+include_directories(. ../mi)
 
-handle_type_puns()
+handle_type_puns(
+	glyph.c
+	picture.c
+	render.c)
 
 add_library(render STATIC
 	animcur.c

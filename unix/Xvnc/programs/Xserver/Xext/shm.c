@@ -153,7 +153,6 @@ static ShmFuncs fbFuncs = { fbShmCreatePixmap, NULL };
 }
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
-#include <sys/signal.h>
 
 static Bool badSysCall = FALSE;
 
@@ -170,7 +169,7 @@ CheckForShmSyscall(void)
     int shmid = -1;
 
     /* If no SHM support in the kernel, the bad syscall will generate SIGSYS */
-    oldHandler = signal(SIGSYS, SigSysHandler);
+    oldHandler = OsSignal(SIGSYS, SigSysHandler);
 
     badSysCall = FALSE;
     shmid = shmget(IPC_PRIVATE, 4096, IPC_CREAT);
@@ -183,7 +182,7 @@ CheckForShmSyscall(void)
         /* Allocation failed */
         badSysCall = TRUE;
     }
-    signal(SIGSYS, oldHandler);
+    OsSignal(SIGSYS, oldHandler);
     return !badSysCall;
 }
 
@@ -619,6 +618,7 @@ ProcShmGetImage(ClientPtr client)
     xShmGetImageReply xgi;
     ShmDescPtr shmdesc;
     VisualID visual = None;
+    RegionPtr pVisibleRegion = NULL;
     int rc;
 
     REQUEST(xShmGetImageReq);
@@ -650,6 +650,8 @@ ProcShmGetImage(ClientPtr client)
                wBorderWidth((WindowPtr) pDraw) + (int) pDraw->height)
             return BadMatch;
         visual = wVisual(((WindowPtr) pDraw));
+        if (pDraw->type == DRAWABLE_WINDOW)
+            pVisibleRegion = &((WindowPtr) pDraw)->borderClip;
     }
     else {
         if (stuff->x < 0 ||
@@ -686,6 +688,11 @@ ProcShmGetImage(ClientPtr client)
                                      stuff->width, stuff->height,
                                      stuff->format, stuff->planeMask,
                                      shmdesc->addr + stuff->offset);
+        if (pVisibleRegion)
+            XaceCensorImage(client, pVisibleRegion,
+                    PixmapBytePad(stuff->width, pDraw->depth), pDraw,
+                    stuff->x, stuff->y, stuff->width, stuff->height,
+                    stuff->format, shmdesc->addr + stuff->offset);
     }
     else {
 
@@ -697,6 +704,11 @@ ProcShmGetImage(ClientPtr client)
                                              stuff->width, stuff->height,
                                              stuff->format, plane,
                                              shmdesc->addr + length);
+                if (pVisibleRegion)
+                    XaceCensorImage(client, pVisibleRegion,
+                            BitmapBytePad(stuff->width), pDraw,
+                            stuff->x, stuff->y, stuff->width, stuff->height,
+                            stuff->format, shmdesc->addr + length);
                 length += lenPer;
             }
         }
@@ -975,7 +987,7 @@ ProcPanoramiXShmCreatePixmap(ClientPtr client)
                               RT_PIXMAP, pMap, RT_NONE, NULL, DixCreateAccess);
             if (result != Success) {
                 pDraw->pScreen->DestroyPixmap(pMap);
-                return result;
+                break;
             }
             dixSetPrivate(&pMap->devPrivates, shmPixmapPrivateKey, shmdesc);
             shmdesc->refcnt++;
@@ -992,7 +1004,7 @@ ProcPanoramiXShmCreatePixmap(ClientPtr client)
         }
     }
 
-    if (result == BadAlloc) {
+    if (result != Success) {
         while (j--)
             FreeResource(newPix->info[j].id, RT_NONE);
         free(newPix);
@@ -1197,7 +1209,8 @@ shm_tmpfile(void)
 	if (fd < 0)
 		return -1;
 	unlink(template);
-	if (fcntl(fd, F_GETFD, &flags) >= 0) {
+	flags = fcntl(fd, F_GETFD);
+	if (flags != -1) {
 		flags |= FD_CLOEXEC;
 		(void) fcntl(fd, F_SETFD, &flags);
 	}
@@ -1221,6 +1234,7 @@ ProcShmCreateSegment(ClientPtr client)
     };
 
     REQUEST_SIZE_MATCH(xShmCreateSegmentReq);
+    LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
         client->errorValue = stuff->readOnly;
         return BadValue;

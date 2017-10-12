@@ -12,10 +12,6 @@ check_function_exists(sendmsg HAVE_SENDMSG)
 if(HAVE_SENDMSG)
 	add_definitions(-DHAVE_SENDMSG)
 endif()
-check_function_exists(poll USE_POLL)
-if(USE_POLL)
-	add_definitions(-DUSE_POLL)
-endif()
 add_definitions(-DXCB_QUEUE_BUFFER_SIZE=16384)
 
 add_library(xcbglx STATIC

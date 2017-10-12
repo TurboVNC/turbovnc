@@ -12,21 +12,15 @@ include_directories(include src src/mapi src/mapi/glapi)
 
 add_definitions(-DGLX_USE_TLS -DHAVE_PTHREAD -DMAPI_MODE_UTIL
 	-DGLX_INDIRECT_RENDERING)
-if(APPLE)
-	add_definitions(-DGLX_ALIAS_UNSUPPORTED)
-endif()
 
-# This code has a lot of type puns.  Disable strict aliasing just to be safe.
-if(CMAKE_COMPILER_IS_GNUCC)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-endif()
+handle_type_puns(src/mapi/u_current.c)
 
-add_library(glapi STATIC
-	src/mapi/glapi/glapi.c
+add_library(glapi-server STATIC
 	src/mapi/glapi/glapi_dispatch.c
 	src/mapi/glapi/glapi_entrypoint.c
 	src/mapi/glapi/glapi_getproc.c
 	src/mapi/glapi/glapi_nop.c
+	src/mapi/glapi/glapi.c
 	src/mapi/u_current.c
 	src/mapi/u_execmem.c)
 
@@ -36,15 +30,15 @@ add_library(glx STATIC
 	src/glx/compsize.c
 	src/glx/create_context.c
 	src/glx/eval.c
+	src/glx/glx_error.c
+	src/glx/glx_pbuffer.c
+	src/glx/glx_query.c
 	src/glx/glxcmds.c
 	src/glx/glxconfig.c
 	src/glx/glxcurrent.c
 	src/glx/glxext.c
 	src/glx/glxextensions.c
 	src/glx/glxhash.c
-	src/glx/glx_error.c
-	src/glx/glx_pbuffer.c
-	src/glx/glx_query.c
 	src/glx/indirect.c
 	src/glx/indirect_glx.c
 	src/glx/indirect_init.c

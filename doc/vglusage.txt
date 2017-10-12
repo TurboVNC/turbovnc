@@ -1,4 +1,5 @@
 * Using TurboVNC with VirtualGL
+{anchor: VGL}
 
 Referring to the VirtualGL User's Guide, VirtualGL's X11 Transport draws 3D
 images onto an X display using standard X11 drawing commands.  Since this

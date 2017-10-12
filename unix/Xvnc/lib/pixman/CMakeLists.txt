@@ -1,8 +1,21 @@
 include_directories(pixman)
 
+set(BUILTIN_CLZ_SOURCE "\n
+  unsigned int x = 11;\n
+  int main (void) {\n
+    return __builtin_clz(x);\n
+ }")
+check_c_source_compiles("${BUILTIN_CLZ_SOURCE}" HAVE_BUILTIN_CLZ)
+if(HAVE_BUILTIN_CLZ)
+	add_definitions(-DHAVE_BUILTIN_CLZ)
+endif()
+
 add_definitions(-DHAVE_CONFIG_H -DPIXMAN_NO_TLS)
 
-handle_type_puns()
+handle_type_puns(
+	pixman/pixman-access.c
+	pixman/pixman-access-accessors.c
+	pixman/pixman-fast-path.c)
 
 add_library(pixman STATIC
 	pixman/pixman-access-accessors.c

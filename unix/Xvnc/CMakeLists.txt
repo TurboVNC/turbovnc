@@ -43,12 +43,27 @@ endif()
 
 add_definitions(-DIPv6)
 
+check_function_exists(poll USE_POLL)
+if(USE_POLL)
+	add_definitions(-DUSE_POLL)
+endif()
+
 function(copy_X_header file dir)
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/unix/Xvnc/X_include/${dir})
 	file(COPY ${file} DESTINATION ${CMAKE_BINARY_DIR}/unix/Xvnc/X_include/${dir})
 endfunction()
 
 function(handle_type_puns)
+	# NOTE: For whatever reason, Clang doesn't need this
+	if(CMAKE_COMPILER_IS_GNUCC)
+		foreach(file ${ARGV})
+			set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS
+				-fno-strict-aliasing)
+		endforeach()
+	endif()
+endfunction()
+
+function(handle_type_puns_all)
 	# NOTE: For whatever reason, Clang doesn't need this
 	if(CMAKE_COMPILER_IS_GNUCC)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing" PARENT_SCOPE)

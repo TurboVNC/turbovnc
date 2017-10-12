@@ -225,8 +225,7 @@ static void rfbSpriteSourceValidate(DrawablePtr pDrawable, int x, int y,
                                     unsigned int subWindowMode);
 static void rfbSpriteCopyWindow(WindowPtr pWindow,
                                 DDXPointRec ptOldOrg, RegionPtr prgnSrc);
-static void rfbSpriteBlockHandler(ScreenPtr pScreen,
-                                 void *pTimeout, void *pReadMask);
+static void rfbSpriteBlockHandler(ScreenPtr pScreen, void *timeout);
 static void rfbSpriteInstallColormap(ColormapPtr pMap);
 static void rfbSpriteStoreColors(ColormapPtr pMap, int ndef, xColorItem * pdef);
 
@@ -543,8 +542,7 @@ rfbSpriteCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
 }
 
 static void
-rfbSpriteBlockHandler(ScreenPtr pScreen, void *pTimeout,
-                      void *pReadmask)
+rfbSpriteBlockHandler(ScreenPtr pScreen, void *timeout)
 {
     rfbSpriteScreenPtr pPriv = GetSpriteScreen(pScreen);
     DeviceIntPtr pDev;
@@ -576,7 +574,7 @@ rfbSpriteBlockHandler(ScreenPtr pScreen, void *pTimeout,
         }
     }
 
-    (*pScreen->BlockHandler) (pScreen, pTimeout, pReadmask);
+    (*pScreen->BlockHandler) (pScreen, timeout);
 
     if (WorkToDo)
         SCREEN_EPILOGUE(pPriv, pScreen, BlockHandler);

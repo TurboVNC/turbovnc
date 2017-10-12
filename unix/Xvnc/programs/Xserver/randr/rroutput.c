@@ -31,15 +31,27 @@ RESTYPE RROutputType;
 void
 RROutputChanged(RROutputPtr output, Bool configChanged)
 {
+    /* set changed bits on the master screen only */
     ScreenPtr pScreen = output->pScreen;
+    rrScrPrivPtr mastersp;
 
     output->changed = TRUE;
-    if (pScreen) {
-        rrScrPriv(pScreen);
-        RRSetChanged(pScreen);
-        if (configChanged)
-            pScrPriv->configChanged = TRUE;
+    if (!pScreen)
+        return;
+
+    if (pScreen->isGPU) {
+        ScreenPtr master = pScreen->current_master;
+        if (!master)
+            return;
+        mastersp = rrGetScrPriv(master);
     }
+    else {
+        mastersp = rrGetScrPriv(pScreen);
+    }
+
+    RRSetChanged(pScreen);
+    if (configChanged)
+        mastersp->configChanged = TRUE;
 }
 
 /*
@@ -60,8 +72,8 @@ RROutputCreate(ScreenPtr pScreen,
     pScrPriv = rrGetScrPriv(pScreen);
 
     if (pScrPriv->numOutputs)
-        outputs = realloc(pScrPriv->outputs,
-                          (pScrPriv->numOutputs + 1) * sizeof(RROutputPtr));
+        outputs = reallocarray(pScrPriv->outputs,
+                               pScrPriv->numOutputs + 1, sizeof(RROutputPtr));
     else
         outputs = malloc(sizeof(RROutputPtr));
     if (!outputs)
@@ -124,7 +136,7 @@ RROutputSetClones(RROutputPtr output, RROutputPtr * clones, int numClones)
             return TRUE;
     }
     if (numClones) {
-        newClones = malloc(numClones * sizeof(RROutputPtr));
+        newClones = xallocarray(numClones, sizeof(RROutputPtr));
         if (!newClones)
             return FALSE;
     }
@@ -157,7 +169,7 @@ RROutputSetModes(RROutputPtr output,
     }
 
     if (numModes) {
-        newModes = malloc(numModes * sizeof(RRModePtr));
+        newModes = xallocarray(numModes, sizeof(RRModePtr));
         if (!newModes)
             return FALSE;
     }
@@ -200,8 +212,8 @@ RROutputAddUserMode(RROutputPtr output, RRModePtr mode)
             return BadMatch;
 
     if (output->userModes)
-        newModes = realloc(output->userModes,
-                           (output->numUserModes + 1) * sizeof(RRModePtr));
+        newModes = reallocarray(output->userModes,
+                                output->numUserModes + 1, sizeof(RRModePtr));
     else
         newModes = malloc(sizeof(RRModePtr));
     if (!newModes)
@@ -256,7 +268,7 @@ RROutputSetCrtcs(RROutputPtr output, RRCrtcPtr * crtcs, int numCrtcs)
             return TRUE;
     }
     if (numCrtcs) {
-        newCrtcs = malloc(numCrtcs * sizeof(RRCrtcPtr));
+        newCrtcs = xallocarray(numCrtcs, sizeof(RRCrtcPtr));
         if (!newCrtcs)
             return FALSE;
     }
@@ -531,6 +543,7 @@ ProcRRSetOutputPrimary(ClientPtr client)
     WindowPtr pWin;
     rrScrPrivPtr pScrPriv;
     int ret;
+    ScreenPtr slave;
 
     REQUEST_SIZE_MATCH(xRRSetOutputPrimaryReq);
 
@@ -553,7 +566,16 @@ ProcRRSetOutputPrimary(ClientPtr client)
 
     pScrPriv = rrGetScrPriv(pWin->drawable.pScreen);
     if (pScrPriv)
+    {
         RRSetPrimaryOutput(pWin->drawable.pScreen, pScrPriv, output);
+
+        xorg_list_for_each_entry(slave,
+                                 &pWin->drawable.pScreen->slave_list,
+                                 slave_head) {
+            if (slave->is_output_slave)
+                RRSetPrimaryOutput(slave, rrGetScrPriv(slave), output);
+        }
+    }
 
     return Success;
 }

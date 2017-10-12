@@ -853,7 +853,7 @@ ScreenSaverSetAttributes(ClientPtr client)
         goto bail;
     }
     /* over allocate for override redirect */
-    pAttr->values = values = malloc((len + 1) * sizeof(unsigned long));
+    pAttr->values = values = xallocarray(len + 1, sizeof(unsigned long));
     if (!values) {
         ret = BadAlloc;
         goto bail;
@@ -1143,7 +1143,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
         if ((Mask) stuff->mask & CWColormap) {
             cmap_offset = Ones((Mask) stuff->mask & (CWColormap - 1));
             tmp = *((CARD32 *) &stuff[1] + cmap_offset);
-            if ((tmp != CopyFromParent) && (tmp != None)) {
+            if (tmp != CopyFromParent) {
                 status = dixLookupResourceByType((void **) &cmap, tmp,
                                                  XRT_COLORMAP, client,
                                                  DixReadAccess);
@@ -1184,6 +1184,8 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
         REQUEST(xScreenSaverUnsetAttributesReq);
         PanoramiXRes *draw;
         int rc, i;
+
+        REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
 
         rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);

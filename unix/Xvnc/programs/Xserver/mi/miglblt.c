@@ -53,6 +53,7 @@ SOFTWARE.
 #include	<X11/Xproto.h>
 #include	"misc.h"
 #include	<X11/fonts/fontstruct.h>
+#include        <X11/fonts/libxfont2.h>
 #include	"dixfontstr.h"
 #include	"gcstruct.h"
 #include	"windowstr.h"
@@ -131,7 +132,7 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GC * pGC, int x, int y, unsigned int nglyp
              gcvals);
 
     nbyLine = BitmapBytePad(width);
-    pbits = malloc(height * nbyLine);
+    pbits = xallocarray(height, nbyLine);
     if (!pbits) {
         (*pDrawable->pScreen->DestroyPixmap) (pPixmap);
         FreeScratchGC(pGCtmp);
@@ -185,13 +186,13 @@ miImageGlyphBlt(DrawablePtr pDrawable, GC * pGC, int x, int y, unsigned int ngly
                 void *pglyphBase      /* start of array of glyphs */
     )
 {
-    ExtentInfoRec info;         /* used by QueryGlyphExtents() */
+    ExtentInfoRec info;         /* used by xfont2_query_glyph_extents() */
     ChangeGCVal gcvals[3];
     int oldAlu, oldFS;
     unsigned long oldFG;
     xRectangle backrect;
 
-    QueryGlyphExtents(pGC->font, ppci, (unsigned long) nglyph, &info);
+    xfont2_query_glyph_extents(pGC->font, ppci, (unsigned long) nglyph, &info);
 
     if (info.overallWidth >= 0) {
         backrect.x = x;

@@ -66,8 +66,6 @@ from the X Consortium.
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <netdb.h>
 #include "servermd.h"
 #ifdef GLXEXT
@@ -136,9 +134,6 @@ static Bool rfbCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y);
 static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
 static void rfbClientStateChange(CallbackListPtr *, pointer myData,
                                  pointer client);
-
-static void rfbBlockHandler(pointer data, OSTimePtr timeout, pointer readmask);
-static void rfbWakeupHandler(pointer data, int nfds, pointer readmask);
 
 static miPointerScreenFuncRec rfbPointerCursorFuncs = {
     rfbCursorOffScreen,
@@ -691,8 +686,6 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
     if (AddScreen(rfbScreenInit, argc, argv) == -1) {
         FatalError("Couldn't add screen");
     }
-
-    RegisterBlockAndWakeupHandlers(rfbBlockHandler, rfbWakeupHandler, 0);
 }
 
 
@@ -1261,22 +1254,14 @@ LegalModifier(unsigned int key, DeviceIntPtr pDev)
 void
 ProcessInputEvents()
 {
-    rfbCheckFds();
-    httpCheckFds();
+    static Bool inetdInitDone = FALSE;
+
+    if (!inetdInitDone && inetdSock != -1) {
+        rfbNewClientConnection(inetdSock);
+        inetdInitDone = TRUE;
+    }
     mieqProcessInputEvents();
     IdleTimerCheck();
-}
-
-
-static void
-rfbBlockHandler(pointer data, OSTimePtr timeout, pointer readmask)
-{
-}
-
-static void
-rfbWakeupHandler(pointer data, int nfds, pointer readmask)
-{
-    ProcessInputEvents();
 }
 
 
@@ -1284,17 +1269,15 @@ static Bool CheckDisplayNumber(int n)
 {
     char fname[32];
     int sock;
-    struct sockaddr_storage addr;
-    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
-    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+    rfbSockAddr addr;
 
     sock = socket(AF_INET6, SOCK_STREAM, 0);
 
     memset(&addr, 0, sizeof(addr));
-    addr6->sin6_family = AF_INET6;
-    addr6->sin6_addr = in6addr_any;
-    addr6->sin6_port = htons(6000 + n);
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in6)) < 0) {
+    addr.u.sin6.sin6_family = AF_INET6;
+    addr.u.sin6.sin6_addr = in6addr_any;
+    addr.u.sin6.sin6_port = htons(6000 + n);
+    if (bind(sock, &addr.u.sa, sizeof(struct sockaddr_in6)) < 0) {
         close(sock);
         return FALSE;
     }
@@ -1303,10 +1286,10 @@ static Bool CheckDisplayNumber(int n)
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     memset(&addr, 0, sizeof(addr));
-    addr4->sin_family = AF_INET;
-    addr4->sin_addr.s_addr = htonl(INADDR_ANY);
-    addr4->sin_port = htons(6000 + n);
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) < 0) {
+    addr.u.sin.sin_family = AF_INET;
+    addr.u.sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.u.sin.sin_port = htons(6000 + n);
+    if (bind(sock, &addr.u.sa, sizeof(struct sockaddr_in)) < 0) {
         close(sock);
         return FALSE;
     }

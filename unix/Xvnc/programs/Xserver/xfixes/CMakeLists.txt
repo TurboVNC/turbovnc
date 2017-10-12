@@ -1,6 +1,6 @@
 include_directories(. ../Xi ../mi ../render)
 
-handle_type_puns()
+handle_type_puns_all()
 
 add_library(xfixes STATIC
 	cursor.c

@@ -76,6 +76,8 @@ typedef struct _saveSet {
 typedef struct _Client {
     void *requestBuffer;
     void *osPrivate;             /* for OS layer, including scheduler */
+    struct xorg_list ready;      /* List of clients ready to run */
+    struct xorg_list output_pending; /* List of clients with output queued */
     Mask clientAsMask;
     short index;
     unsigned char majorOp, minorOp;
@@ -126,21 +128,61 @@ SetReqFds(ClientPtr client, int req_fds) {
 /*
  * Scheduling interface
  */
-extern _X_EXPORT long SmartScheduleTime;
-extern _X_EXPORT long SmartScheduleInterval;
-extern _X_EXPORT long SmartScheduleSlice;
-extern _X_EXPORT long SmartScheduleMaxSlice;
-extern _X_EXPORT Bool SmartScheduleDisable;
-extern _X_EXPORT void
-SmartScheduleStartTimer(void);
-extern _X_EXPORT void
-SmartScheduleStopTimer(void);
+extern long SmartScheduleTime;
+extern long SmartScheduleInterval;
+extern long SmartScheduleSlice;
+extern long SmartScheduleMaxSlice;
+#if HAVE_SETITIMER
+extern Bool SmartScheduleSignalEnable;
+#else
+#define SmartScheduleSignalEnable FALSE
+#endif
+extern void SmartScheduleStartTimer(void);
+extern void SmartScheduleStopTimer(void);
+
+/* Client has requests queued or data on the network */
+void mark_client_ready(ClientPtr client);
+
+/*
+ * Client has requests queued or data on the network, but awaits a
+ * server grab release
+ */
+void mark_client_saved_ready(ClientPtr client);
+
+/* Client has no requests queued and no data on network */
+void mark_client_not_ready(ClientPtr client);
+
+static inline Bool client_is_ready(ClientPtr client)
+{
+    return !xorg_list_is_empty(&client->ready);
+}
+
+Bool
+clients_are_ready(void);
+
+extern struct xorg_list output_pending_clients;
+
+static inline void
+output_pending_mark(ClientPtr client)
+{
+    if (!client->clientGone && xorg_list_is_empty(&client->output_pending))
+        xorg_list_append(&client->output_pending, &output_pending_clients);
+}
+
+static inline void
+output_pending_clear(ClientPtr client)
+{
+    xorg_list_del(&client->output_pending);
+}
+
+static inline Bool any_output_pending(void) {
+    return !xorg_list_is_empty(&output_pending_clients);
+}
 
 #define SMART_MAX_PRIORITY  (20)
 #define SMART_MIN_PRIORITY  (-20)
 
-extern _X_EXPORT void
-SmartScheduleInit(void);
+extern void SmartScheduleInit(void);
 
 /* This prototype is used pervasively in Xext, dix */
 #define DISPATCH_PROC(func) int func(ClientPtr /* client */)
@@ -179,13 +221,13 @@ typedef struct _CallbackList {
 
 /* proc vectors */
 
-extern _X_EXPORT int (*InitialVector[3]) (ClientPtr /*client */ );
+extern int (*InitialVector[3]) (ClientPtr /*client */ );
 
 extern _X_EXPORT int (*ProcVector[256]) (ClientPtr /*client */ );
 
 extern _X_EXPORT int (*SwappedProcVector[256]) (ClientPtr /*client */ );
 
-extern _X_EXPORT ReplySwapPtr ReplySwapVector[256];
+extern ReplySwapPtr ReplySwapVector[256];
 
 extern _X_EXPORT int
 ProcBadRequest(ClientPtr /*client */ );

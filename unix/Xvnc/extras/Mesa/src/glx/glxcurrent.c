@@ -145,7 +145,7 @@ __glXSetCurrentContextNull(void)
 #endif
 }
 
-_X_EXPORT GLXContext
+_GLX_PUBLIC GLXContext
 glXGetCurrentContext(void)
 {
    struct glx_context *cx = __glXGetCurrentContext();
@@ -158,7 +158,7 @@ glXGetCurrentContext(void)
    }
 }
 
-_X_EXPORT GLXDrawable
+_GLX_PUBLIC GLXDrawable
 glXGetCurrentDrawable(void)
 {
    struct glx_context *gc = __glXGetCurrentContext();
@@ -252,22 +252,34 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
 
    __glXUnlock();
 
+   /* The indirect vertex array state must to be initialised after we
+    * have setup the context, as it needs to query server attributes.
+    */
+   if (gc && !gc->isDirect) {
+      __GLXattribute *state = gc->client_state_private;
+      if (state && state->array_state == NULL) {
+         glGetString(GL_EXTENSIONS);
+         glGetString(GL_VERSION);
+         __glXInitVertexArrayState(gc);
+      }
+   }
+
    return GL_TRUE;
 }
 
 
-_X_EXPORT Bool
+_GLX_PUBLIC Bool
 glXMakeCurrent(Display * dpy, GLXDrawable draw, GLXContext gc)
 {
    return MakeContextCurrent(dpy, draw, draw, gc);
 }
 
-_X_EXPORT
+_GLX_PUBLIC
 GLX_ALIAS(Bool, glXMakeCurrentReadSGI,
           (Display * dpy, GLXDrawable d, GLXDrawable r, GLXContext ctx),
           (dpy, d, r, ctx), MakeContextCurrent)
 
-_X_EXPORT
+_GLX_PUBLIC
 GLX_ALIAS(Bool, glXMakeContextCurrent,
           (Display * dpy, GLXDrawable d, GLXDrawable r,
            GLXContext ctx), (dpy, d, r, ctx), MakeContextCurrent)

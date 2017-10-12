@@ -14,12 +14,8 @@ endif()
 
 set(NVCTRLSRC "")
 if(TVNC_NVCONTROL)
+	handle_type_puns(nvctrlext.c)
 	set(NVCTRLSRC nvctrlext.c)
-	# This code has a lot of type puns.  Disable strict aliasing just to be safe.
-	if(CMAKE_COMPILER_IS_GNUCC)
-		set_source_files_properties(${NVCTRLSRC} PROPERTIES COMPILE_FLAGS
-			-fno-strict-aliasing)
-	endif()
 	include_directories(${CMAKE_SOURCE_DIR}/unix/libXNVCtrl ${X11_INCLUDE_DIR})
 endif()
 
@@ -72,6 +68,8 @@ else()
 	add_definitions(-DHAVE_STRSEP)
 endif()
 
+handle_type_puns(vncextinit.c)
+
 add_library(vnc STATIC
 	auth.c
 	cmap.c
@@ -104,17 +102,6 @@ add_library(vnc STATIC
 	${PAMSRC}
 	${NVCTRLSRC}
 	${RFBSSLSRC})
-
-# These files have a lot of type puns.  Disable strict aliasing just to be
-# safe.
-if(CMAKE_COMPILER_IS_GNUCC)
-	set_source_files_properties(init.c PROPERTIES COMPILE_FLAGS
-		-fno-strict-aliasing)
-	set_source_files_properties(sockets.c PROPERTIES COMPILE_FLAGS
-		-fno-strict-aliasing)
-	set_source_files_properties(vncextinit.c PROPERTIES COMPILE_FLAGS
-		-fno-strict-aliasing)
-endif()
 
 if(TVNC_USETLS STREQUAL "openssl" AND NOT TVNC_DLOPENSSL)
 	target_link_libraries(vnc ${OPENSSL_LIBRARIES})

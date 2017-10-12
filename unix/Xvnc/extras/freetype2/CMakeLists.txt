@@ -7,6 +7,8 @@ endif()
 
 add_definitions(-DFT2_BUILD_LIBRARY)
 
+handle_type_puns(src/psaux/psaux.c)
+
 add_library(freetype2 STATIC
 	src/base/ftsystem.c
 	src/base/ftinit.c
@@ -20,6 +22,7 @@ add_library(freetype2 STATIC
 	src/base/ftbdf.c
 	src/base/ftbitmap.c
 	src/base/ftcid.c
+	src/base/ftfntfmt.c
 	src/base/ftfstype.c
 	src/base/ftgasp.c
 	src/base/ftgxval.c
@@ -32,7 +35,6 @@ add_library(freetype2 STATIC
 	src/base/ftsynth.c
 	src/base/fttype1.c
 	src/base/ftwinfnt.c
-	src/base/ftxf86.c
 
 	src/bdf/bdf.c
 	src/cff/cff.c
@@ -40,7 +42,6 @@ add_library(freetype2 STATIC
 	src/pcf/pcf.c
 	src/pfr/pfr.c
 	src/sfnt/sfnt.c
-
 	src/truetype/truetype.c
 	src/type1/type1.c
 	src/type42/type42.c

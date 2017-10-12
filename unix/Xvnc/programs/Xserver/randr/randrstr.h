@@ -64,10 +64,10 @@ typedef XID RROutput;
 typedef XID RRCrtc;
 typedef XID RRProvider;
 
-extern _X_EXPORT int RREventBase, RRErrorBase;
+extern int RREventBase, RRErrorBase;
 
-extern _X_EXPORT int (*ProcRandrVector[RRNumberRequests]) (ClientPtr);
-extern _X_EXPORT int (*SProcRandrVector[RRNumberRequests]) (ClientPtr);
+extern int (*ProcRandrVector[RRNumberRequests]) (ClientPtr);
+extern int (*SProcRandrVector[RRNumberRequests]) (ClientPtr);
 
 /*
  * Modeline for a monitor. Name follows directly after this struct
@@ -80,6 +80,7 @@ typedef struct _rrProperty RRPropertyRec, *RRPropertyPtr;
 typedef struct _rrCrtc RRCrtcRec, *RRCrtcPtr;
 typedef struct _rrOutput RROutputRec, *RROutputPtr;
 typedef struct _rrProvider RRProviderRec, *RRProviderPtr;
+typedef struct _rrMonitor RRMonitorRec, *RRMonitorPtr;
 
 struct _rrMode {
     int refcnt;
@@ -129,6 +130,7 @@ struct _rrCrtc {
     struct pict_f_transform f_inverse;
 
     PixmapPtr scanout_pixmap;
+    PixmapPtr scanout_pixmap_back;
 };
 
 struct _rrOutput {
@@ -167,6 +169,22 @@ struct _rrProvider {
     Bool changed;
     struct _rrProvider *offload_sink;
     struct _rrProvider *output_source;
+};
+
+typedef struct _rrMonitorGeometry {
+    BoxRec box;
+    CARD32 mmWidth;
+    CARD32 mmHeight;
+} RRMonitorGeometryRec, *RRMonitorGeometryPtr;
+
+struct _rrMonitor {
+    Atom name;
+    ScreenPtr pScreen;
+    int numOutputs;
+    RROutput *outputs;
+    Bool primary;
+    Bool automatic;
+    RRMonitorGeometryRec geometry;
 };
 
 #if RANDR_12_INTERFACE
@@ -261,6 +279,19 @@ typedef Bool (*RRSetConfigProcPtr) (ScreenPtr pScreen,
 
 typedef Bool (*RRCrtcSetScanoutPixmapProcPtr)(RRCrtcPtr crtc, PixmapPtr pixmap);
 
+typedef Bool (*RRStartFlippingPixmapTrackingProcPtr)(RRCrtcPtr, PixmapPtr,
+                                                     PixmapPtr, PixmapPtr,
+                                                     int x, int y,
+                                                     int dst_x, int dst_y,
+                                                     Rotation rotation);
+
+typedef Bool (*RREnableSharedPixmapFlippingProcPtr)(RRCrtcPtr,
+                                                    PixmapPtr front,
+                                                    PixmapPtr back);
+
+typedef void (*RRDisableSharedPixmapFlippingProcPtr)(RRCrtcPtr);
+
+
 typedef struct _rrScrPriv {
     /*
      * 'public' part of the structure; DDXen fill this in
@@ -286,6 +317,10 @@ typedef struct _rrScrPriv {
 #endif
     /* TODO #if RANDR_15_INTERFACE */
     RRCrtcSetScanoutPixmapProcPtr rrCrtcSetScanoutPixmap;
+
+    RRStartFlippingPixmapTrackingProcPtr rrStartFlippingPixmapTracking;
+    RREnableSharedPixmapFlippingProcPtr rrEnableSharedPixmapFlipping;
+    RRDisableSharedPixmapFlippingProcPtr rrDisableSharedPixmapFlipping;
 
     RRProviderSetOutputSourceProcPtr rrProviderSetOutputSource;
     RRProviderSetOffloadSinkProcPtr rrProviderSetOffloadSink;
@@ -338,6 +373,9 @@ typedef struct _rrScrPriv {
 
     RRProviderDestroyProcPtr rrProviderDestroy;
 
+    int numMonitors;
+    RRMonitorPtr *monitors;
+
 } rrScrPrivRec, *rrScrPrivPtr;
 
 extern _X_EXPORT DevPrivateKeyRec rrPrivKeyRec;
@@ -377,8 +415,8 @@ typedef struct _RRClient {
 /*  RRTimesRec	times[0]; */
 } RRClientRec, *RRClientPtr;
 
-extern _X_EXPORT RESTYPE RRClientType, RREventType;     /* resource types for event masks */
-extern _X_EXPORT DevPrivateKeyRec RRClientPrivateKeyRec;
+extern RESTYPE RRClientType, RREventType;     /* resource types for event masks */
+extern DevPrivateKeyRec RRClientPrivateKeyRec;
 
 #define RRClientPrivateKey (&RRClientPrivateKeyRec)
 extern _X_EXPORT RESTYPE RRCrtcType, RRModeType, RROutputType, RRProviderType;
@@ -688,6 +726,12 @@ extern _X_EXPORT Bool
  RRReplaceScanoutPixmap(DrawablePtr pDrawable, PixmapPtr pPixmap, Bool enable);
 
 /*
+ * Return if the screen has any scanout_pixmap's attached
+ */
+extern _X_EXPORT Bool
+ RRHasScanoutPixmap(ScreenPtr pScreen);
+
+/*
  * Crtc dispatch
  */
 
@@ -897,6 +941,7 @@ extern _X_EXPORT int
  ProcRRDeleteOutputProperty(ClientPtr client);
 
 /* rrprovider.c */
+#define PRIME_SYNC_PROP         "PRIME Synchronization"
 extern _X_EXPORT void
 RRProviderInitErrorValue(void);
 
@@ -980,6 +1025,39 @@ extern _X_EXPORT int
 extern _X_EXPORT void
  RRXineramaExtensionInit(void);
 #endif
+
+void
+RRMonitorInit(ScreenPtr screen);
+
+Bool
+RRMonitorMakeList(ScreenPtr screen, Bool get_active, RRMonitorPtr *monitors_ret, int *nmon_ret);
+
+int
+RRMonitorCountList(ScreenPtr screen);
+
+void
+RRMonitorFreeList(RRMonitorPtr monitors, int nmon);
+
+void
+RRMonitorClose(ScreenPtr screen);
+
+RRMonitorPtr
+RRMonitorAlloc(int noutput);
+
+int
+RRMonitorAdd(ClientPtr client, ScreenPtr screen, RRMonitorPtr monitor);
+
+void
+RRMonitorFree(RRMonitorPtr monitor);
+
+int
+ProcRRGetMonitors(ClientPtr client);
+
+int
+ProcRRSetMonitor(ClientPtr client);
+
+int
+ProcRRDeleteMonitor(ClientPtr client);
 
 #endif                          /* _RANDRSTR_H_ */
 

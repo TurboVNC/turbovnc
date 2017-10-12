@@ -87,16 +87,10 @@ struct array_state
 
     /**
      * Pre-calculated GLX protocol command header.
+     * This contains two 16-bit words: the command length and the command
+     * opcode.
      */
-   uint32_t header[2];
-
-    /**
-     * Size of the header data.  For simple data, like glColorPointerfv,
-     * this is 4.  For complex data that requires either a count (e.g.,
-     * glWeightfvARB), an index (e.g., glVertexAttrib1fvARB), or a
-     * selector enum (e.g., glMultiTexCoord2fv) this is 8.
-     */
-   unsigned header_size;
+   uint16_t header[2];
 
     /**
      * Set to \c GL_TRUE if this array is enabled.  Otherwise, it is set

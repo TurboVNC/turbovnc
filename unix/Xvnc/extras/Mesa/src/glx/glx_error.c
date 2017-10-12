@@ -26,6 +26,7 @@
  promote the sale, use or other dealings in this Software without
  prior written authorization.
 */
+#include <stdbool.h>
 #include <assert.h>
 #include <X11/Xlibint.h>
 #include <X11/extensions/extutil.h>
@@ -35,14 +36,12 @@
 
 void
 __glXSendError(Display * dpy, int_fast8_t errorCode, uint_fast32_t resourceID,
-               uint_fast16_t minorCode, unsigned char coreX11error)
+               uint_fast16_t minorCode, bool coreX11error)
 {
    struct glx_display *glx_dpy = __glXInitialize(dpy);
-   struct glx_context *gc = __glXGetCurrentContext();
    xError error;
 
    assert(glx_dpy);
-   assert(gc);
 
    LockDisplay(dpy);
 
@@ -58,7 +57,7 @@ __glXSendError(Display * dpy, int_fast8_t errorCode, uint_fast32_t resourceID,
    error.sequenceNumber = dpy->request;
    error.resourceID = resourceID;
    error.minorCode = minorCode;
-   error.majorCode = gc ? gc->majorOpcode : 0;
+   error.majorCode = glx_dpy->majorOpcode;
 
    _XError(dpy, &error);
 

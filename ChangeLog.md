@@ -16,7 +16,10 @@ Using VirtualGL for OpenGL rendering will still be much faster and more
 compatible, but this feature allows the TurboVNC Server to be used for casual
 OpenGL rendering if VirtualGL is not installed.  Passing `-extension GLX` to
 vncserver disables the extension.  Note that your system must have Mesa 8.x or
-later installed in order for the swrast DRI driver to be available.
+later installed in order for the swrast DRI driver to be available.  On systems
+that do not have vendor-specific GPU drivers installed, or on systems that
+provide a libglvnd-enabled build of Mesa, the TurboVNC Server's GLX extension
+will use direct rendering, which improves performance and compatibility.
 
 4. The Java/Mac/Un*x TurboVNC Viewer is no longer supported with Java 6 and
 earlier.  This increases the Mac system requirements to OS X 10.7 "Lion" or
@@ -82,7 +85,7 @@ system property to `1`.
 (`xrandr`) or through the window manager's display configuration applet, to
 modify the server's screen layout.
 
-7. The TurboVNC Server is now based on xorg-xserver 1.17.4, which improves
+7. The TurboVNC Server is now based on xorg-xserver 1.19.5, which improves
 compatibility with newer window managers.
 
 8. By default, the TurboVNC Server will no longer listen on a TCP socket for

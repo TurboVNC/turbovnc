@@ -86,6 +86,9 @@ int limitStackSpace = -1;
 int limitNoFile = -1;
 #endif
 
+/* The actual user defined max number of clients */
+int LimitClients = LIMITCLIENTS;
+
 static OsSigWrapperPtr OsSigWrapper = NULL;
 
 OsSigWrapperPtr
@@ -111,10 +114,14 @@ OsSigHandler(int signo)
 #endif
 {
 #ifdef RTLD_DI_SETSIGNAL
-    const char *dlerr = dlerror();
+# define SIGNAL_FOR_RTLD_ERROR SIGQUIT
+    if (signo == SIGNAL_FOR_RTLD_ERROR) {
+        const char *dlerr = dlerror();
 
-    if (dlerr) {
-        LogMessageVerbSigSafe(X_ERROR, 1, "Dynamic loader error: %s\n", dlerr);
+        if (dlerr) {
+            LogMessageVerbSigSafe(X_ERROR, 1,
+                                  "Dynamic loader error: %s\n", dlerr);
+        }
     }
 #endif                          /* RTLD_DI_SETSIGNAL */
 
@@ -155,8 +162,10 @@ void
 OsInit(void)
 {
     static Bool been_here = FALSE;
+#ifndef XQUARTZ
     static const char *devnull = "/dev/null";
     char fname[PATH_MAX];
+#endif
 
     if (!been_here) {
 #if !defined(WIN32) || defined(__CYGWIN__)
@@ -164,6 +173,7 @@ OsInit(void)
         int i;
 
         int siglist[] = { SIGSEGV, SIGQUIT, SIGILL, SIGFPE, SIGBUS,
+            SIGABRT,
             SIGSYS,
             SIGXCPU,
             SIGXFSZ,
@@ -190,6 +200,9 @@ OsInit(void)
 #ifdef BUSFAULT
         busfault_init();
 #endif
+        server_poll = ospoll_create();
+        if (!server_poll)
+            FatalError("failed to allocate poll structure");
 
 #ifdef HAVE_BACKTRACE
         /*
@@ -209,24 +222,13 @@ OsInit(void)
          * after ourselves.
          */
         {
-            int failure_signal = SIGQUIT;
+            int failure_signal = SIGNAL_FOR_RTLD_ERROR;
 
             dlinfo(RTLD_SELF, RTLD_DI_SETSIGNAL, &failure_signal);
         }
 #endif
 
 #if !defined(XQUARTZ)    /* STDIN is already /dev/null and STDOUT/STDERR is managed by console_redirect.c */
-# if defined(__APPLE__)
-        int devnullfd = open(devnull, O_RDWR, 0);
-        assert(devnullfd > 2);
-
-        dup2(devnullfd, STDIN_FILENO);
-        dup2(devnullfd, STDOUT_FILENO);
-        close(devnullfd);
-# elif !defined(__CYGWIN__)
-        fclose(stdin);
-        fclose(stdout);
-# endif
         /*
          * If a write of zero bytes to stderr returns non-zero, i.e. -1,
          * then writing to stderr failed, and we'll write somewhere else

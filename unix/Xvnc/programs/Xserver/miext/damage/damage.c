@@ -32,7 +32,9 @@
 #include    <X11/fonts/font.h>
 #include    "dixfontstr.h"
 #include    <X11/fonts/fontstruct.h>
+#include    <X11/fonts/libxfont2.h>
 #include    "mi.h"
+#include    "mipict.h"
 #include    "regionstr.h"
 #include    "globals.h"
 #include    "gcstruct.h"
@@ -498,6 +500,15 @@ damageComposite(CARD8 op,
         if (BOX_NOT_EMPTY(box))
             damageDamageBox(pDst->pDrawable, &box, pDst->subWindowMode);
     }
+    /*
+     * Validating a source picture bound to a window may trigger other
+     * composite operations. Do it before unwrapping to make sure damage
+     * is reported correctly.
+     */
+    if (pSrc->pDrawable && WindowDrawable(pSrc->pDrawable->type))
+        miCompositeSourceValidate(pSrc);
+    if (pMask && pMask->pDrawable && WindowDrawable(pMask->pDrawable->type))
+        miCompositeSourceValidate(pMask);
     unwrap(pScrPriv, ps, Composite);
     (*ps->Composite) (op,
                       pSrc,
@@ -1247,7 +1258,7 @@ damageDamageChars(DrawablePtr pDrawable,
     ExtentInfoRec extents;
     BoxRec box;
 
-    QueryGlyphExtents(font, charinfo, n, &extents);
+    xfont2_query_glyph_extents(font, charinfo, n, &extents);
     if (imageblt) {
         if (extents.overallWidth > extents.overallRight)
             extents.overallRight = extents.overallWidth;
@@ -1293,7 +1304,7 @@ damageText(DrawablePtr pDrawable,
     if (!checkGCDamage(pDrawable, pGC))
         return;
 
-    charinfo = malloc(count * sizeof(CharInfoPtr));
+    charinfo = xallocarray(count, sizeof(CharInfoPtr));
     if (!charinfo)
         return;
 

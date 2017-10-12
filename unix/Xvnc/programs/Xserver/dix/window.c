@@ -127,6 +127,7 @@ Equipment Corporation.
 #include "compint.h"
 #endif
 #include "selection.h"
+#include "inpututils.h"
 
 #include "privates.h"
 #include "xace.h"
@@ -220,7 +221,6 @@ log_window_info(WindowPtr pWin, int depth)
     int i;
     const char *win_name, *visibility = NULL;
     BoxPtr rects;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
 
     for (i = 0; i < (depth << 2); i++)
         ErrorF(" ");
@@ -240,7 +240,7 @@ log_window_info(WindowPtr pWin, int depth)
         ErrorF(" (%s compositing: pixmap %x)",
                (pWin->redirectDraw == RedirectDrawAutomatic) ?
                "automatic" : "manual",
-               (unsigned) pScreen->GetWindowPixmap(pWin)->drawable.id);
+               (unsigned) pWin->drawable.pScreen->GetWindowPixmap(pWin)->drawable.id);
 #endif
 
     switch (pWin->visibility) {
@@ -259,10 +259,10 @@ log_window_info(WindowPtr pWin, int depth)
     }
     ErrorF(", %s", visibility);
 
-    if (REGION_NOTEMPTY(pScreen, &pWin->clipList)) {
+    if (RegionNotEmpty(&pWin->clipList)) {
         ErrorF(", clip list:");
-        rects = REGION_RECTS(&pWin->clipList);
-        for (i = 0; i < REGION_NUM_RECTS(&pWin->clipList); i++)
+        rects = RegionRects(&pWin->clipList);
+        for (i = 0; i < RegionNumRects(&pWin->clipList); i++)
             ErrorF(" [(%d, %d) to (%d, %d)]",
                    rects[i].x1, rects[i].y1, rects[i].x2, rects[i].y2);
         ErrorF("; extents [(%d, %d) to (%d, %d)]",
@@ -271,6 +271,131 @@ log_window_info(WindowPtr pWin, int depth)
     }
 
     ErrorF("\n");
+}
+
+static const char*
+grab_grabtype_to_text(GrabPtr pGrab)
+{
+    switch (pGrab->grabtype) {
+        case XI2:
+            return "xi2";
+        case CORE:
+            return "core";
+        default:
+            return "xi1";
+    }
+}
+
+static const char*
+grab_type_to_text(GrabPtr pGrab)
+{
+    switch (pGrab->type) {
+        case ButtonPress:
+            return "ButtonPress";
+        case KeyPress:
+            return "KeyPress";
+        case XI_Enter:
+            return "XI_Enter";
+        case XI_FocusIn:
+            return "XI_FocusIn";
+        default:
+            return "unknown?!";
+    }
+}
+
+static void
+log_grab_info(void *value, XID id, void *cdata)
+{
+    int i, j;
+    GrabPtr pGrab = (GrabPtr)value;
+
+    ErrorF("  grab 0x%lx (%s), type '%s' on window 0x%lx\n",
+           (unsigned long) pGrab->resource,
+           grab_grabtype_to_text(pGrab),
+           grab_type_to_text(pGrab),
+           (unsigned long) pGrab->window->drawable.id);
+    ErrorF("    detail %d (mask %lu), modifiersDetail %d (mask %lu)\n",
+           pGrab->detail.exact,
+           pGrab->detail.pMask ? (unsigned long) *(pGrab->detail.pMask) : 0,
+           pGrab->modifiersDetail.exact,
+           pGrab->modifiersDetail.pMask ?
+           (unsigned long) *(pGrab->modifiersDetail.pMask) :
+           (unsigned long) 0);
+    ErrorF("    device '%s' (%d), modifierDevice '%s' (%d)\n",
+           pGrab->device->name, pGrab->device->id,
+           pGrab->modifierDevice->name, pGrab->modifierDevice->id);
+    if (pGrab->grabtype == CORE) {
+        ErrorF("    core event mask 0x%lx\n",
+               (unsigned long) pGrab->eventMask);
+    }
+    else if (pGrab->grabtype == XI) {
+        ErrorF("    xi1 event mask 0x%lx\n",
+               (unsigned long) pGrab->eventMask);
+    }
+    else if (pGrab->grabtype == XI2) {
+        for (i = 0; i < xi2mask_num_masks(pGrab->xi2mask); i++) {
+            const unsigned char *mask;
+            int print;
+
+            print = 0;
+            for (j = 0; j < XI2MASKSIZE; j++) {
+                mask = xi2mask_get_one_mask(pGrab->xi2mask, i);
+                if (mask[j]) {
+                    print = 1;
+                    break;
+                }
+            }
+            if (!print)
+                continue;
+            ErrorF("      xi2 event mask 0x");
+            for (j = 0; j < xi2mask_mask_size(pGrab->xi2mask); j++)
+                ErrorF("%x ", mask[j]);
+            ErrorF("\n");
+        }
+    }
+    ErrorF("    owner-events %s, kb %d ptr %d, confine 0x%lx, cursor 0x%lx\n",
+           pGrab->ownerEvents ? "true" : "false",
+           pGrab->keyboardMode, pGrab->pointerMode,
+           pGrab->confineTo ? (unsigned long) pGrab->confineTo->drawable.id : 0,
+           pGrab->cursor ? (unsigned long) pGrab->cursor->id : 0);
+}
+
+void
+PrintPassiveGrabs(void)
+{
+    int i;
+    LocalClientCredRec *lcc;
+    pid_t clientpid;
+    const char *cmdname;
+    const char *cmdargs;
+
+    ErrorF("Printing all currently registered grabs\n");
+
+    for (i = 1; i < currentMaxClients; i++) {
+        if (!clients[i] || clients[i]->clientState != ClientStateRunning)
+            continue;
+
+        clientpid = GetClientPid(clients[i]);
+        cmdname = GetClientCmdName(clients[i]);
+        cmdargs = GetClientCmdArgs(clients[i]);
+        if ((clientpid > 0) && (cmdname != NULL)) {
+            ErrorF("  Printing all registered grabs of client pid %ld %s %s\n",
+                   (long) clientpid, cmdname, cmdargs ? cmdargs : "");
+        } else {
+            if (GetLocalClientCreds(clients[i], &lcc) == -1) {
+                ErrorF("  GetLocalClientCreds() failed\n");
+                continue;
+            }
+            ErrorF("  Printing all registered grabs of client pid %ld uid %ld gid %ld\n",
+                   (lcc->fieldsSet & LCC_PID_SET) ? (long) lcc->pid : 0,
+                   (lcc->fieldsSet & LCC_UID_SET) ? (long) lcc->euid : 0,
+                   (lcc->fieldsSet & LCC_GID_SET) ? (long) lcc->egid : 0);
+            FreeLocalClientCreds(lcc);
+        }
+
+        FindClientResourcesByType(clients[i], RT_PASSIVEGRAB, log_grab_info, NULL);
+    }
+    ErrorF("End list of registered passive grabs\n");
 }
 
 void
@@ -380,10 +505,7 @@ SetWindowToDefaults(WindowPtr pWin)
     pWin->forcedBS = FALSE;
     pWin->redirectDraw = RedirectDrawNone;
     pWin->forcedBG = FALSE;
-
-#ifdef ROOTLESS
-    pWin->rootlessUnhittable = FALSE;
-#endif
+    pWin->unhittable = FALSE;
 
 #ifdef COMPOSITE
     pWin->damagedDescendants = FALSE;
@@ -1470,7 +1592,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
 
         RegionNull(&exposed);
         RegionSubtract(&exposed, &pWin->borderClip, &pWin->winSize);
-        miPaintWindow(pWin, &exposed, PW_BORDER);
+        pWin->drawable.pScreen->PaintWindow(pWin, &exposed, PW_BORDER);
         RegionUninit(&exposed);
     }
     return error;
@@ -3037,7 +3159,7 @@ dixSaveScreens(ClientPtr client, int on, int mode)
 
                 /* make it look like screen saver is off, so that
                  * NotClippedByChildren will compute a clip list
-                 * for the root window, so miPaintWindow works
+                 * for the root window, so PaintWindow works
                  */
                 screenIsSaved = SCREEN_SAVER_OFF;
                 (*pWin->drawable.pScreen->MoveWindow) (pWin,
@@ -3525,7 +3647,7 @@ WindowParentHasDeviceCursor(WindowPtr pWin,
  *	all of the windows
  */
 void
-SetRootClip(ScreenPtr pScreen, Bool enable)
+SetRootClip(ScreenPtr pScreen, int enable)
 {
     WindowPtr pWin = pScreen->root;
     WindowPtr pChild;
@@ -3533,6 +3655,7 @@ SetRootClip(ScreenPtr pScreen, Bool enable)
     Bool anyMarked = FALSE;
     WindowPtr pLayerWin;
     BoxRec box;
+    enum RootClipMode mode = enable;
 
     if (!pWin)
         return;
@@ -3557,23 +3680,32 @@ SetRootClip(ScreenPtr pScreen, Bool enable)
         }
     }
 
-    /*
-     * Use REGION_BREAK to avoid optimizations in ValidateTree
-     * that assume the root borderClip can't change well, normally
-     * it doesn't...)
-     */
-    if (enable) {
+    if (mode != ROOT_CLIP_NONE) {
+        pWin->drawable.width = pScreen->width;
+        pWin->drawable.height = pScreen->height;
+
         box.x1 = 0;
         box.y1 = 0;
         box.x2 = pScreen->width;
         box.y2 = pScreen->height;
+
         RegionInit(&pWin->winSize, &box, 1);
         RegionInit(&pWin->borderSize, &box, 1);
-        if (WasViewable)
-            RegionReset(&pWin->borderClip, &box);
-        pWin->drawable.width = pScreen->width;
-        pWin->drawable.height = pScreen->height;
+
+        /*
+         * Use REGION_BREAK to avoid optimizations in ValidateTree
+         * that assume the root borderClip can't change well, normally
+         * it doesn't...)
+         */
         RegionBreak(&pWin->clipList);
+
+	/* For INPUT_ONLY, empty the borderClip so no rendering will ever
+	 * be attempted to the screen pixmap (only redirected windows),
+	 * but we keep borderSize as full regardless. */
+        if (WasViewable && mode == ROOT_CLIP_FULL)
+            RegionReset(&pWin->borderClip, &box);
+        else
+            RegionEmpty(&pWin->borderClip);
     }
     else {
         RegionEmpty(&pWin->borderClip);

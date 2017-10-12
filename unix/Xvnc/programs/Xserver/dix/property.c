@@ -108,11 +108,13 @@ dixLookupProperty(PropertyPtr *result, WindowPtr pWin, Atom propertyName,
 static void
 deliverPropertyNotifyEvent(WindowPtr pWin, int state, Atom atom)
 {
-    xEvent event = {
+    xEvent event;
+    UpdateCurrentTimeIf();
+    event = (xEvent) {
         .u.property.window = pWin->drawable.id,
         .u.property.state = state,
         .u.property.atom = atom,
-        .u.property.time = currentTime.milliseconds
+        .u.property.time = currentTime.milliseconds,
     };
     event.u.u.type = PropertyNotify;
     DeliverEvents(pWin, &event, 1, (WindowPtr) NULL);
@@ -136,8 +138,8 @@ ProcRotateProperties(ClientPtr client)
         return rc;
 
     atoms = (Atom *) &stuff[1];
-    props = malloc(stuff->nAtoms * sizeof(PropertyPtr));
-    saved = malloc(stuff->nAtoms * sizeof(PropertyRec));
+    props = xallocarray(stuff->nAtoms, sizeof(PropertyPtr));
+    saved = xallocarray(stuff->nAtoms, sizeof(PropertyRec));
     if (!props || !saved) {
         rc = BadAlloc;
         goto out;
@@ -313,7 +315,7 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
             /* do nothing */
         }
         else if (mode == PropModeAppend) {
-            data = malloc((pProp->size + len) * sizeInBytes);
+            data = xallocarray(pProp->size + len, sizeInBytes);
             if (!data)
                 return BadAlloc;
             memcpy(data, pProp->data, pProp->size * sizeInBytes);
@@ -322,7 +324,7 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
             pProp->size += len;
         }
         else if (mode == PropModePrepend) {
-            data = malloc(sizeInBytes * (len + pProp->size));
+            data = xallocarray(len + pProp->size, sizeInBytes);
             if (!data)
                 return BadAlloc;
             memcpy(data + totalSize, pProp->data, pProp->size * sizeInBytes);
@@ -359,14 +361,6 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
 #endif
 
     return Success;
-}
-
-int
-ChangeWindowProperty(WindowPtr pWin, Atom property, Atom type, int format,
-                     int mode, unsigned long len, void *value, Bool sendevent)
-{
-    return dixChangeWindowProperty(serverClient, pWin, property, type, format,
-                                   mode, len, value, sendevent);
 }
 
 int
@@ -588,7 +582,7 @@ ProcListProperties(ClientPtr client)
     for (pProp = wUserProps(pWin); pProp; pProp = pProp->next)
         numProps++;
 
-    if (numProps && !(pAtoms = malloc(numProps * sizeof(Atom))))
+    if (numProps && !(pAtoms = xallocarray(numProps, sizeof(Atom))))
         return BadAlloc;
 
     numProps = 0;

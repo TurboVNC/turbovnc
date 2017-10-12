@@ -110,8 +110,8 @@ ProcXIQueryPointer(ClientPtr client)
 
     rc = dixLookupWindow(&pWin, stuff->win, client, DixGetAttrAccess);
     if (rc != Success) {
-        SendErrorToClient(client, IReqCode, X_XIQueryPointer, stuff->win, rc);
-        return Success;
+        client->errorValue = stuff->win;
+        return rc;
     }
 
     if (pDev->valuator->motionHintWindow)
@@ -152,10 +152,10 @@ ProcXIQueryPointer(ClientPtr client)
         rep.buttons_len =
             bytes_to_int32(bits_to_bytes(pDev->button->numButtons));
         rep.length += rep.buttons_len;
-        buttons_size = rep.buttons_len * 4;
-        buttons = calloc(1, buttons_size);
+        buttons = calloc(rep.buttons_len, 4);
         if (!buttons)
             return BadAlloc;
+        buttons_size = rep.buttons_len * 4;
 
         for (i = 1; i < pDev->button->numButtons; i++)
             if (BitIsOn(pDev->button->down, i))

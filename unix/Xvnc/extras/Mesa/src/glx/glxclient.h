@@ -56,6 +56,16 @@
 
 #include "glxextensions.h"
 
+#if defined(USE_LIBGLVND)
+#define _GLX_PUBLIC _X_HIDDEN
+#else
+#define _GLX_PUBLIC _X_EXPORT
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #define GLX_MAJOR_VERSION 1       /* current version numbers */
 #define GLX_MINOR_VERSION 4
@@ -144,10 +154,14 @@ struct __GLXDRIdrawableRec
 extern __GLXDRIdisplay *driswCreateDisplay(Display * dpy);
 extern __GLXDRIdisplay *driCreateDisplay(Display * dpy);
 extern __GLXDRIdisplay *dri2CreateDisplay(Display * dpy);
+extern __GLXDRIdisplay *dri3_create_display(Display * dpy);
+extern __GLXDRIdisplay *driwindowsCreateDisplay(Display * dpy);
+
+/*
+**
+*/
 extern void dri2InvalidateBuffers(Display *dpy, XID drawable);
 extern unsigned dri2GetSwapEventType(Display *dpy, XID drawable);
-
-extern __GLXDRIdisplay *dri3_create_display(Display * dpy);
 
 /*
 ** Functions to obtain driver configuration information from a direct
@@ -208,6 +222,10 @@ typedef struct __GLXattributeMachineRec
    __GLXattribute **stackPointer;
 } __GLXattributeMachine;
 
+struct mesa_glinterop_device_info;
+struct mesa_glinterop_export_in;
+struct mesa_glinterop_export_out;
+
 struct glx_context_vtable {
    void (*destroy)(struct glx_context *ctx);
    int (*bind)(struct glx_context *context, struct glx_context *old,
@@ -222,6 +240,11 @@ struct glx_context_vtable {
 			  int buffer, const int *attrib_list);
    void (*release_tex_image)(Display * dpy, GLXDrawable drawable, int buffer);
    void * (*get_proc_address)(const char *symbol);
+   int (*interop_query_device_info)(struct glx_context *ctx,
+                                    struct mesa_glinterop_device_info *out);
+   int (*interop_export_object)(struct glx_context *ctx,
+                                struct mesa_glinterop_export_in *in,
+                                struct mesa_glinterop_export_out *out);
 };
 
 /**
@@ -587,6 +610,9 @@ struct glx_display
    __GLXDRIdisplay *dri2Display;
    __GLXDRIdisplay *dri3Display;
 #endif
+#ifdef GLX_USE_WINDOWSGL
+   __GLXDRIdisplay *windowsdriDisplay;
+#endif
 };
 
 struct glx_drawable {
@@ -814,5 +840,9 @@ indirect_create_context_attribs(struct glx_screen *base,
                                 unsigned num_attribs,
                                 const uint32_t *attribs,
                                 unsigned *error);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !__GLX_client_h__ */

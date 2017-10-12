@@ -949,7 +949,6 @@ ProcXvShmPutImage(ClientPtr client)
 static int
 ProcXvShmPutImage(ClientPtr client)
 {
-    SendErrorToClient(client, XvReqCode, xv_ShmPutImage, 0, BadImplementation);
     return BadImplementation;
 }
 #endif
@@ -1108,7 +1107,6 @@ ProcXvDispatch(ClientPtr client)
     UpdateCurrentTime();
 
     if (stuff->data >= xvNumRequests) {
-        SendErrorToClient(client, XvReqCode, stuff->data, 0, BadRequest);
         return BadRequest;
     }
 
@@ -1429,7 +1427,6 @@ SProcXvDispatch(ClientPtr client)
     UpdateCurrentTime();
 
     if (stuff->data >= xvNumRequests) {
-        SendErrorToClient(client, XvReqCode, stuff->data, 0, BadRequest);
         return BadRequest;
     }
 
@@ -1496,11 +1493,13 @@ XineramaXvShmPutImage(ClientPtr client)
 {
     REQUEST(xvShmPutImageReq);
     PanoramiXRes *draw, *gc, *port;
-    Bool send_event = stuff->send_event;
+    Bool send_event;
     Bool isRoot;
     int result, i, x, y;
 
     REQUEST_SIZE_MATCH(xvShmPutImageReq);
+
+    send_event = stuff->send_event;
 
     result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);

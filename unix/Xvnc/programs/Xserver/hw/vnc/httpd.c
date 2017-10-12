@@ -32,8 +32,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <fcntl.h>
@@ -76,6 +74,8 @@ static char buf[BUF_SIZE];
 static size_t buf_filled = 0;
 static rfbClientRec cl;
 
+static void httpSockNotify(int fd, int ready, void *data);
+
 
 /*
  * httpInitSockets sets up the TCP socket to listen for HTTP connections.
@@ -113,23 +113,15 @@ httpInitSockets()
         exit(1);
     }
 
-    AddEnabledDevice(httpListenSock);
+    SetNotifyFd(httpListenSock, httpSockNotify, X_NOTIFY_READ, NULL);
 }
 
 
-/*
- * httpCheckFds is called from ProcessInputEvents to check for input on the
- * HTTP socket(s).  If there is input to process, httpProcessInput is called.
- */
-
-void
-httpCheckFds()
+static void
+httpSockNotify(int fd, int ready, void *data)
 {
-    int nfds;
-    fd_set fds;
-    struct timeval tv;
-    struct sockaddr_storage addr;
-    socklen_t addrlen = sizeof(addr);
+    rfbSockAddr addr;
+    socklen_t addrlen = sizeof(struct sockaddr_storage);
 #if USE_LIBWRAP
     char addrStr[INET6_ADDRSTRLEN];
 #endif
@@ -137,35 +129,21 @@ httpCheckFds()
     if (!httpDir)
         return;
 
-    FD_ZERO(&fds);
-    FD_SET(httpListenSock, &fds);
-    if (httpSock >= 0) {
-        FD_SET(httpSock, &fds);
-    }
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    nfds = select(max(httpSock, httpListenSock) + 1, &fds, NULL, NULL, &tv);
-
-    if (nfds == 0) {
-        return;
-    }
-    if (nfds < 0) {
-        rfbLogPerror("httpCheckFds: select");
-        return;
-    }
-
-    if ((httpSock >= 0) && FD_ISSET(httpSock, &fds)) {
+    if ((httpSock >= 0) && fd == httpSock) {
         httpProcessInput();
+        return;
     }
 
-    if (FD_ISSET(httpListenSock, &fds)) {
+    if (fd == httpListenSock) {
         int flags;
 
-        if (httpSock >= 0) close(httpSock);
+        if (httpSock >= 0) {
+            RemoveNotifyFd(httpSock);
+            close(httpSock);
+        }
 
-        if ((httpSock = accept(httpListenSock,
-                               (struct sockaddr *)&addr, &addrlen)) < 0) {
-            rfbLogPerror("httpCheckFds: accept");
+        if ((httpSock = accept(httpListenSock, &addr.u.sa, &addrlen)) < 0) {
+            rfbLogPerror("httpSockNotify: accept");
             return;
         }
 
@@ -175,6 +153,7 @@ httpCheckFds()
                        STRING_UNKNOWN)) {
             rfbLog("Rejected HTTP connection from client %s\n",
                    sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
+            RemoveNotifyFd(httpSock);
             close(httpSock);
             httpSock = -1;
             return;
@@ -185,13 +164,14 @@ httpCheckFds()
 
         if (flags == -1 ||
         fcntl (httpSock, F_SETFL, flags | O_NONBLOCK) == -1) {
-            rfbLogPerror("httpCheckFds: fcntl");
+            rfbLogPerror("httpSockNotify: fcntl");
+            RemoveNotifyFd(httpSock);
             close (httpSock);
             httpSock = -1;
             return;
         }
 
-        AddEnabledDevice(httpSock);
+        SetNotifyFd(httpSock, httpSockNotify, X_NOTIFY_READ, NULL);
     }
 }
 
@@ -200,7 +180,7 @@ static void
 httpCloseSock()
 {
     close(httpSock);
-    RemoveEnabledDevice(httpSock);
+    RemoveNotifyFd(httpSock);
     httpSock = -1;
     buf_filled = 0;
 }
@@ -213,8 +193,8 @@ httpCloseSock()
 static void
 httpProcessInput()
 {
-    struct sockaddr_storage addr;
-    socklen_t addrlen = sizeof(addr);
+    rfbSockAddr addr;
+    socklen_t addrlen = sizeof(struct sockaddr_storage);
     char addrStr[INET6_ADDRSTRLEN];
     char fullFname[512];
     char params[1024];
@@ -303,7 +283,7 @@ httpProcessInput()
         return;
     }
 
-    getpeername(httpSock, (struct sockaddr *)&addr, &addrlen);
+    getpeername(httpSock, &addr.u.sa, &addrlen);
     rfbLog("httpd: get '%s' for %s\n", fname + 1,
            sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 

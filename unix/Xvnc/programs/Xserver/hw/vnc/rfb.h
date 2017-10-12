@@ -46,6 +46,7 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <sys/time.h>
 #ifdef RENDER
 #include "picturestr.h"
@@ -174,6 +175,15 @@ typedef struct
   rfbScreenDesc s;
   struct xorg_list entry;
 } rfbScreenInfo, *rfbScreenInfoPtr;
+
+typedef struct {
+    union {
+        struct sockaddr sa;
+        struct sockaddr_storage ss;
+        struct sockaddr_in sin;
+        struct sockaddr_in6 sin6;
+    } u;
+} rfbSockAddr;
 
 
 /*
@@ -700,7 +710,6 @@ extern int httpPort;
 extern char *httpDir;
 
 extern void httpInitSockets(void);
-extern void httpCheckFds(void);
 
 
 /* init.c */
@@ -880,7 +889,6 @@ extern void rfbInitSockets(void);
 extern void rfbDisconnectUDPSock(void);
 extern void rfbCloseSock(int);
 extern void rfbCloseClient(rfbClientPtr cl);
-extern void rfbCheckFds(void);
 extern int rfbConnect(char *host, int port);
 extern void rfbCorkSock(int sock);
 extern void rfbUncorkSock(int sock);
@@ -892,8 +900,7 @@ extern int ListenOnTCPPort(int port);
 extern int ListenOnUDPPort(int port);
 extern int ConnectToTcpAddr(char *host, int port);
 
-extern const char *sockaddr_string(struct sockaddr_storage *addr, char *buf,
-                                   int len);
+extern const char *sockaddr_string(rfbSockAddr *addr, char *buf, int len);
 
 
 /* stats.c */

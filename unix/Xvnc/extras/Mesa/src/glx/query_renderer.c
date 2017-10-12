@@ -106,7 +106,7 @@ glXQueryCurrentRendererIntegerMESA(int attribute, unsigned int *value)
 {
    struct glx_context *gc = __glXGetCurrentContext();
 
-   if (gc == NULL)
+   if (gc == &dummyContext)
       return False;
 
    return __glXQueryRendererInteger(gc->psc, attribute, value);
@@ -166,7 +166,7 @@ glXQueryCurrentRendererStringMESA(int attribute)
 {
    struct glx_context *gc = __glXGetCurrentContext();
 
-   if (gc == NULL)
+   if (gc == &dummyContext)
       return False;
 
    return __glXQueryRendererString(gc->psc, attribute);

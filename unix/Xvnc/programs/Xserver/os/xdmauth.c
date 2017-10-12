@@ -277,7 +277,7 @@ XdmAuthorizationValidate(unsigned char *plain, int length,
         if (_XSERVTransGetPeerAddr(((OsCommPtr) xclient->osPrivate)->trans_conn,
                                    &family, &addr_len, &addr) == 0
             && _XSERVTransConvertAddress(&family, &addr_len, &addr) == 0) {
-#if defined(TCPCONN) || defined(STREAMSCONN)
+#if defined(TCPCONN)
             if (family == FamilyInternet &&
                 memcmp((char *) addr, client->client, 4) != 0) {
                 free(client);
@@ -409,33 +409,6 @@ XdmResetCookie(void)
     }
     xdmClients = (XdmClientAuthPtr) 0;
     return 1;
-}
-
-XID
-XdmToID(unsigned short cookie_length, char *cookie)
-{
-    XdmAuthorizationPtr auth;
-    XdmClientAuthPtr client;
-    unsigned char *plain;
-
-    plain = malloc(cookie_length);
-    if (!plain)
-        return (XID) -1;
-    for (auth = xdmAuth; auth; auth = auth->next) {
-        XdmcpUnwrap((unsigned char *) cookie, (unsigned char *) &auth->key,
-                    plain, cookie_length);
-        if ((client =
-             XdmAuthorizationValidate(plain, cookie_length, &auth->rho, NULL,
-                                      NULL)) != NULL) {
-            free(client);
-            free(cookie);
-            free(plain);
-            return auth->id;
-        }
-    }
-    free(cookie);
-    free(plain);
-    return (XID) -1;
 }
 
 int

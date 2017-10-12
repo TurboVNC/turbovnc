@@ -65,8 +65,8 @@
    */
 
 
-#ifndef __CF2BLUES_H__
-#define __CF2BLUES_H__
+#ifndef CF2BLUES_H_
+#define CF2BLUES_H_
 
 
 #include "cf2glue.h"
@@ -111,7 +111,7 @@ FT_BEGIN_HEADER
    * Constant used for hint adjustment and for synthetic em box hint
    * placement.
    */
-#define CF2_MIN_COUNTER  cf2_floatToFixed( 0.5 )
+#define CF2_MIN_COUNTER  cf2_doubleToFixed( 0.5 )
 
 
   /* shared typedef is in cf2glue.h */
@@ -179,7 +179,7 @@ FT_BEGIN_HEADER
 FT_END_HEADER
 
 
-#endif /* __CF2BLUES_H__ */
+#endif /* CF2BLUES_H_ */
 
 
 /* END */

@@ -131,7 +131,6 @@ indirect_bind_context(struct glx_context *gc, struct glx_context *old,
 		      GLXDrawable draw, GLXDrawable read)
 {
    GLXContextTag tag;
-   __GLXattribute *state;
    Display *dpy = gc->psc->dpy;
    int opcode = __glXSetupForCommand(dpy);
    Bool sent;
@@ -150,13 +149,6 @@ indirect_bind_context(struct glx_context *gc, struct glx_context *old,
       IndirectAPI = __glXNewIndirectAPI();
    _glapi_set_dispatch(IndirectAPI);
 
-   state = gc->client_state_private;
-   if (state->array_state == NULL) {
-      glGetString(GL_EXTENSIONS);
-      glGetString(GL_VERSION);
-      __glXInitVertexArrayState(gc);
-   }
-
    return !sent;
 }
 
@@ -169,7 +161,7 @@ indirect_unbind_context(struct glx_context *gc, struct glx_context *new)
    if (gc == new)
       return;
    
-   /* We are either switching to no context, away from a indirect
+   /* We are either switching to no context, away from an indirect
     * context to a direct context or from one dpy to another and have
     * to send a request to the dpy to unbind the previous context.
     */

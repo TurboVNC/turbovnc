@@ -4,7 +4,7 @@
 /*                                                                         */
 /*    Some convenience conversions (body).                                 */
 /*                                                                         */
-/*  Copyright 2006, 2008, 2009, 2012-2013 by                               */
+/*  Copyright 2006-2017 by                                                 */
 /*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
 /*                                                                         */
 /*  This file is part of the FreeType project, and may only be used,       */
@@ -111,6 +111,10 @@
       p++;
       if ( p == limit )
         goto Bad;
+
+      /* only a single sign is allowed */
+      if ( *p == '-' || *p == '+' )
+        return 0;
     }
 
     num_limit = 0x7FFFFFFFL / base;
@@ -215,6 +219,10 @@
       p++;
       if ( p == limit )
         goto Bad;
+
+      /* only a single sign is allowed */
+      if ( *p == '-' || *p == '+' )
+        return 0;
     }
 
     /* read the integer part */
@@ -489,8 +497,8 @@
       if ( c OP 0x80 )
         break;
 
-      c = ft_char_table[c & 0x7F];
-      if ( (unsigned)c >= 16 )
+      c = (FT_UInt)ft_char_table[c & 0x7F];
+      if ( c >= 16 )
         break;
 
       pad = ( pad << 4 ) | c;

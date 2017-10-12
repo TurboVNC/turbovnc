@@ -65,9 +65,7 @@ in this Software without prior written authorization from The Open Group.
 #include   "sprite.h"
 #include   "gcstruct.h"
 
-#ifdef ARGB_CURSOR
 #include   "picturestr.h"
-#endif
 
 #include "inputstr.h"
 #include "rfb.h"
@@ -88,9 +86,7 @@ typedef struct {
     GCPtr pSourceGC, pMaskGC;
     GCPtr pSaveGC, pRestoreGC;
     PixmapPtr pSave;
-#ifdef ARGB_CURSOR
     PicturePtr pRootPicture;
-#endif
 } rfbDCBufferRec, *rfbDCBufferPtr;
 
 #define rfbGetDCDevice(dev, screen) \
@@ -106,9 +102,7 @@ typedef struct {
     CloseScreenProcPtr CloseScreen;
     PixmapPtr sourceBits;       /* source bits */
     PixmapPtr maskBits;         /* mask bits */
-#ifdef ARGB_CURSOR
     PicturePtr pPicture;
-#endif
     CursorPtr pCursor;
 } rfbDCScreenRec, *rfbDCScreenPtr;
 
@@ -151,11 +145,9 @@ rfbDCSwitchScreenCursor(ScreenPtr pScreen, CursorPtr pCursor, PixmapPtr sourceBi
         (*pScreen->DestroyPixmap)(pScreenPriv->maskBits);
     pScreenPriv->maskBits = maskBits;
 
-#ifdef ARGB_CURSOR
     if (pScreenPriv->pPicture)
         FreePicture(pScreenPriv->pPicture, 0);
     pScreenPriv->pPicture = pPicture;
-#endif
 
     pScreenPriv->pCursor = pCursor;
 }
@@ -180,7 +172,6 @@ rfbDCRealizeCursor(ScreenPtr pScreen, CursorPtr pCursor)
     return TRUE;
 }
 
-#ifdef ARGB_CURSOR
 #define EnsurePicture(picture,draw,win) (picture || rfbDCMakePicture(&picture,draw,win))
 
 static PicturePtr
@@ -200,7 +191,6 @@ rfbDCMakePicture(PicturePtr * ppPicture, DrawablePtr pDraw, WindowPtr pWin)
     *ppPicture = pPicture;
     return pPicture;
 }
-#endif
 
 static Bool
 rfbDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
@@ -212,8 +202,6 @@ rfbDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
 
     if (pScreenPriv->pCursor == pCursor)
         return TRUE;
-
-#ifdef ARGB_CURSOR
 
     if (pCursor->bits->argb) {
         PixmapPtr pPixmap;
@@ -251,7 +239,7 @@ rfbDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
         rfbDCSwitchScreenCursor(pScreen, pCursor, NULL, NULL, pPicture);
         return TRUE;
     }
-#endif
+
     sourceBits = (*pScreen->CreatePixmap) (pScreen, pCursor->bits->width,
                                            pCursor->bits->height, 1, 0);
     if (!sourceBits)
@@ -391,7 +379,6 @@ rfbDCPutUpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor,
     pWin = pScreen->root;
     pBuffer = rfbGetDCDevice(pDev, pScreen);
 
-#ifdef ARGB_CURSOR
     if (pScreenPriv->pPicture) {
         if (!EnsurePicture(pBuffer->pRootPicture, &pWin->drawable, pWin))
             return FALSE;
@@ -403,7 +390,6 @@ rfbDCPutUpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor,
                          x, y, pCursor->bits->width, pCursor->bits->height);
     }
     else
-#endif
     {
         rfbDCPutBits((DrawablePtr) pWin,
                     pBuffer->pSourceGC, pBuffer->pMaskGC,
@@ -502,9 +488,7 @@ rfbDCDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
         if (!pBuffer->pRestoreGC)
             goto failure;
 
-#ifdef ARGB_CURSOR
         pBuffer->pRootPicture = NULL;
-#endif
 
         /* (re)allocated lazily depending on the cursor size */
         pBuffer->pSave = NULL;
@@ -541,11 +525,9 @@ rfbDCDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
                 if (pBuffer->pRestoreGC)
                     FreeGC(pBuffer->pRestoreGC, (GContext) 0);
 
-#ifdef ARGB_CURSOR
                 /* If a pRootPicture was allocated for a root window, it
                  * is freed when that root window is destroyed, so don't
                  * free it again here. */
-#endif
 
                 if (pBuffer->pSave)
                     (*pScreen->DestroyPixmap) (pBuffer->pSave);

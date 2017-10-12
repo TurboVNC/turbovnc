@@ -44,6 +44,7 @@
 #endif 
 
 
+#if 0 /* TURBOVNC */
 #if !defined(_MSC_VER) && \
     __STDC_VERSION__ < 199901L && \
     (!defined(_XOPEN_SOURCE) || _XOPEN_SOURCE < 600) && \
@@ -114,6 +115,7 @@ exp2(double d)
 }
 
 #endif /* C99 */
+#endif /* TURBOVNC */
 
 
 /*
@@ -141,6 +143,7 @@ exp2(double d)
 #endif
 
 
+#if 0 /* TURBOVNC */
 #if defined(fpclassify)
 /* ISO C99 says that fpclassify is a macro.  Assume that any implementation
  * of fpclassify, whether it's in a C99 compiler or not, will be a macro.
@@ -182,6 +185,30 @@ fpclassify(double x)
 }
 #else
 #error "Need to include or define an fpclassify function"
+#endif
+#endif /* TURBOVNC */
+
+
+/* Since C++11, the following functions are part of the std namespace. Their C
+ * counteparts should still exist in the global namespace, however cmath
+ * undefines those functions, which in glibc 2.23, are defined as macros rather
+ * than functions as in glibc 2.22.
+ */
+#if __cplusplus >= 201103L && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 23))
+#include <cmath>
+
+using std::fpclassify;
+using std::isfinite;
+using std::isinf;
+using std::isnan;
+using std::isnormal;
+using std::signbit;
+using std::isgreater;
+using std::isgreaterequal;
+using std::isless;
+using std::islessequal;
+using std::islessgreater;
+using std::isunordered;
 #endif
 
 

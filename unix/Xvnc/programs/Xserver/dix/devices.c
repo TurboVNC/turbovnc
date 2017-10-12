@@ -76,6 +76,11 @@ SOFTWARE.
 #include <X11/extensions/XI2.h>
 #include <X11/extensions/XIproto.h>
 #include <math.h>
+#ifdef TURBOVNC
+#ifdef HAVE_IEEEFP_H
+#include <ieeefp.h>
+#endif
+#endif
 #include <pixman.h>
 #include "exglobals.h"
 #include "exevents.h"
@@ -174,11 +179,15 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
             return BadValue;
 
         for (i = 0; i < 9; i++)
+#ifdef TURBOVNC
+            if (!finite(f[i]))
+#else
             if (!isfinite(f[i]))
+#endif
                 return BadValue;
 
-	if (!dev->valuator)
-		return BadMatch;
+        if (!dev->valuator)
+            return BadMatch;
 
         if (!checkonly)
             DeviceSetTransform(dev, f);
@@ -281,6 +290,7 @@ AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
     dev->startup = autoStart;
 
     /* device grab defaults */
+    UpdateCurrentTimeIf();
     dev->deviceGrab.grabTime = currentTime;
     dev->deviceGrab.ActivateGrab = ActivateKeyboardGrab;
     dev->deviceGrab.DeactivateGrab = DeactivateKeyboardGrab;
@@ -336,12 +346,13 @@ void
 SendDevicePresenceEvent(int deviceid, int type)
 {
     DeviceIntRec dummyDev = { .id =  XIAllDevices };
-    devicePresenceNotify ev = {
-        .type = DevicePresenceNotify,
-        .time = currentTime.milliseconds,
-        .devchange = type,
-        .deviceid = deviceid
-    };
+    devicePresenceNotify ev;
+
+    UpdateCurrentTimeIf();
+    ev.type = DevicePresenceNotify;
+    ev.time = currentTime.milliseconds;
+    ev.devchange = type;
+    ev.deviceid = deviceid;
 
     SendEventToAllWindows(&dummyDev, DevicePresenceNotifyMask,
                           (xEvent *) &ev, 1);
@@ -397,9 +408,11 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
         }
     }
 
+    input_lock();
     if ((*prev != dev) || !dev->inited ||
         ((ret = (*dev->deviceProc) (dev, DEVICE_ON)) != Success)) {
         ErrorF("[dix] couldn't enable device %d\n", dev->id);
+        input_unlock();
         return FALSE;
     }
     dev->enabled = TRUE;
@@ -408,6 +421,7 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
     for (prev = &inputInfo.devices; *prev; prev = &(*prev)->next);
     *prev = dev;
     dev->next = NULL;
+    input_unlock();
 
     enabled = TRUE;
     XIChangeDeviceProperty(dev, XIGetKnownProperty(XI_PROP_ENABLED),
@@ -486,19 +500,19 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
     if (dev->spriteInfo->paired)
         dev->spriteInfo->paired = NULL;
 
+    input_lock();
     (void) (*dev->deviceProc) (dev, DEVICE_OFF);
     dev->enabled = FALSE;
 
-    FreeSprite(dev);
-
-    /* now that the device is disabled, we can reset the signal handler's
+    /* now that the device is disabled, we can reset the event reader's
      * last.slave */
-    OsBlockSignals();
     for (other = inputInfo.devices; other; other = other->next) {
         if (other->last.slave == dev)
             other->last.slave = NULL;
     }
-    OsReleaseSignals();
+    input_unlock();
+
+    FreeSprite(dev);
 
     LeaveWindow(dev);
     SetFocusOut(dev);
@@ -567,7 +581,9 @@ ActivateDevice(DeviceIntPtr dev, BOOL sendevent)
     if (!dev || !dev->deviceProc)
         return BadImplementation;
 
+    input_lock();
     ret = (*dev->deviceProc) (dev, DEVICE_INIT);
+    input_unlock();
     dev->inited = (ret == Success);
     if (!dev->inited)
         return ret;
@@ -702,17 +718,32 @@ CorePointerProc(DeviceIntPtr pDev, int what)
 void
 InitCoreDevices(void)
 {
-    if (AllocDevicePair(serverClient, "Virtual core",
-                        &inputInfo.pointer, &inputInfo.keyboard,
-                        CorePointerProc, CoreKeyboardProc, TRUE) != Success)
-         FatalError("Failed to allocate core devices");
+    int result;
 
-    if (ActivateDevice(inputInfo.pointer, TRUE) != Success ||
-        ActivateDevice(inputInfo.keyboard, TRUE) != Success)
-         FatalError("Failed to activate core devices.");
-    if (!EnableDevice(inputInfo.pointer, TRUE) ||
-        !EnableDevice(inputInfo.keyboard, TRUE))
-         FatalError("Failed to enable core devices.");
+    result = AllocDevicePair(serverClient, "Virtual core",
+                             &inputInfo.pointer, &inputInfo.keyboard,
+                             CorePointerProc, CoreKeyboardProc, TRUE);
+    if (result != Success) {
+        FatalError("Failed to allocate virtual core devices: %d", result);
+    }
+
+    result = ActivateDevice(inputInfo.pointer, TRUE);
+    if (result != Success) {
+        FatalError("Failed to activate virtual core pointer: %d", result);
+    }
+
+    result = ActivateDevice(inputInfo.keyboard, TRUE);
+    if (result != Success) {
+        FatalError("Failed to activate virtual core keyboard: %d", result);
+    }
+
+    if (!EnableDevice(inputInfo.pointer, TRUE)) {
+         FatalError("Failed to enable virtual core pointer.");
+    }
+
+    if (!EnableDevice(inputInfo.keyboard, TRUE)) {
+         FatalError("Failed to enable virtual core keyboard.");
+    }
 
     InitXTestDevices();
 }
@@ -933,6 +964,8 @@ FreeAllDeviceClasses(ClassesPtr classes)
  * enable it again and free associated structs. If you want the device to just
  * be disabled, DisableDevice().
  * Don't call this function directly, use RemoveDevice() instead.
+ *
+ * Called with input lock held.
  */
 static void
 CloseDevice(DeviceIntPtr dev)
@@ -1031,7 +1064,7 @@ CloseDownDevices(void)
 {
     DeviceIntPtr dev;
 
-    OsBlockSignals();
+    input_lock();
 
     /* Float all SDs before closing them. Note that at this point resources
      * (e.g. cursors) have been freed already, so we can't just call
@@ -1058,7 +1091,7 @@ CloseDownDevices(void)
     XkbDeleteRulesDflts();
     XkbDeleteRulesUsed();
 
-    OsReleaseSignals();
+    input_unlock();
 }
 
 /**
@@ -1069,6 +1102,11 @@ void
 AbortDevices(void)
 {
     DeviceIntPtr dev;
+
+    /* Do not call input_lock as we don't know what
+     * state the input thread might be in, and that could
+     * cause a dead-lock.
+     */
     nt_list_for_each_entry(dev, inputInfo.devices, next) {
         if (!IsMaster(dev))
             (*dev->deviceProc) (dev, DEVICE_ABORT);
@@ -1133,6 +1171,8 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
         flags[dev->id] = XIDeviceDisabled;
     }
 
+    input_lock();
+
     prev = NULL;
     for (tmp = inputInfo.devices; tmp; (prev = tmp), (tmp = next)) {
         next = tmp->next;
@@ -1164,6 +1204,8 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
             ret = Success;
         }
     }
+
+    input_unlock();
 
     if (ret == Success && initialized) {
         inputInfo.numDevices--;
@@ -1403,6 +1445,7 @@ InitFocusClassDeviceStruct(DeviceIntPtr dev)
     focc = malloc(sizeof(FocusClassRec));
     if (!focc)
         return FALSE;
+    UpdateCurrentTimeIf();
     focc->win = PointerRootWin;
     focc->revert = None;
     focc->time = currentTime;
@@ -1472,8 +1515,8 @@ InitStringFeedbackClassDeviceStruct(DeviceIntPtr dev,
     feedc->ctrl.num_symbols_displayed = 0;
     feedc->ctrl.max_symbols = max_symbols;
     feedc->ctrl.symbols_supported =
-        malloc(sizeof(KeySym) * num_symbols_supported);
-    feedc->ctrl.symbols_displayed = malloc(sizeof(KeySym) * max_symbols);
+        xallocarray(num_symbols_supported, sizeof(KeySym));
+    feedc->ctrl.symbols_displayed = xallocarray(max_symbols, sizeof(KeySym));
     if (!feedc->ctrl.symbols_supported || !feedc->ctrl.symbols_displayed) {
         free(feedc->ctrl.symbols_supported);
         free(feedc->ctrl.symbols_displayed);
@@ -1682,8 +1725,7 @@ ProcSetModifierMapping(ClientPtr client)
                        stuff->numKeyPerModifier);
     if (rc == MappingFailed || rc == -1)
         return BadValue;
-    if (rc != Success && rc != MappingSuccess && rc != MappingFailed &&
-        rc != MappingBusy)
+    if (rc != MappingSuccess && rc != MappingFailed && rc != MappingBusy)
         return rc;
 
     rep.success = rc;
@@ -2355,6 +2397,7 @@ ProcGetMotionEvents(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    UpdateCurrentTimeIf();
     if (mouse->valuator->motionHintWindow)
         MaybeStopHint(mouse, client);
     rep = (xGetMotionEventsReply) {
@@ -2521,7 +2564,7 @@ ReleaseButtonsAndKeys(DeviceIntPtr dev)
     /* Release all keys */
     for (i = 0; k && i < MAP_LENGTH; i++) {
         if (BitIsOn(k->down, i)) {
-            nevents = GetKeyboardEvents(eventlist, dev, KeyRelease, i, NULL);
+            nevents = GetKeyboardEvents(eventlist, dev, KeyRelease, i);
             for (j = 0; j < nevents; j++)
                 mieqProcessDeviceEvent(dev, &eventlist[j], NULL);
         }

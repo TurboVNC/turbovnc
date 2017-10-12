@@ -47,8 +47,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
@@ -78,12 +76,11 @@ int rfbListenSock = -1;
 int udpPort = 0;
 int udpSock = -1;
 Bool udpSockConnected = FALSE;
-static struct sockaddr_storage udpRemoteAddr;
-
-static fd_set allFds;
-static int maxFd = 0;
+static rfbSockAddr udpRemoteAddr;
 
 extern unsigned long long sendBytes;
+
+static void rfbSockNotify(int fd, int ready, void *data);
 
 
 /*
@@ -91,18 +88,17 @@ extern unsigned long long sendBytes;
  * address
  */
 const char *
-sockaddr_string(struct sockaddr_storage *addr, char *buf, int len)
+sockaddr_string(rfbSockAddr *addr, char *buf, int len)
 {
     const char *string = NULL;
     if (!addr || !buf || len < 1)
         return "Invalid argument";
-    if (addr->ss_family == AF_INET6)
-        string = inet_ntop(addr->ss_family,
-                           &((struct sockaddr_in6 *)addr)->sin6_addr, buf,
+    if (addr->u.ss.ss_family == AF_INET6)
+        string = inet_ntop(addr->u.ss.ss_family, &addr->u.sin6.sin6_addr, buf,
                            len);
     else
-        string = inet_ntop(addr->ss_family,
-                           &((struct sockaddr_in *)addr)->sin_addr, buf, len);
+        string = inet_ntop(addr->u.ss.ss_family, &addr->u.sin.sin_addr, buf,
+                           len);
     if (!string)
         return strerror(errno);
     return string;
@@ -138,10 +134,7 @@ rfbInitSockets()
             exit(1);
         }
 
-        AddEnabledDevice(inetdSock);
-        FD_ZERO(&allFds);
-        FD_SET(inetdSock, &allFds);
-        maxFd = inetdSock;
+        SetNotifyFd(inetdSock, rfbSockNotify, X_NOTIFY_READ, NULL);
         return;
     }
 
@@ -156,11 +149,7 @@ rfbInitSockets()
         exit(1);
     }
 
-    AddEnabledDevice(rfbListenSock);
-
-    FD_ZERO(&allFds);
-    FD_SET(rfbListenSock, &allFds);
-    maxFd = rfbListenSock;
+    SetNotifyFd(rfbListenSock, rfbSockNotify, X_NOTIFY_READ, NULL);
 
     if (udpPort != 0) {
         rfbLog("rfbInitSockets: listening for input on UDP port %d\n",
@@ -170,69 +159,38 @@ rfbInitSockets()
             rfbLogPerror("ListenOnUDPPort");
             exit(1);
         }
-        AddEnabledDevice(udpSock);
-        FD_SET(udpSock, &allFds);
-        maxFd = max(udpSock, maxFd);
+        SetNotifyFd(udpSock, rfbSockNotify, X_NOTIFY_READ, NULL);
     }
 }
 
 
-/*
- * rfbCheckFds is called from ProcessInputEvents to check for input on the RFB
- * socket(s).  If there is input to process, the appropriate function in the
- * RFB server code will be called (rfbNewClientConnection,
- * rfbProcessClientMessage, etc).
- */
-
-void
-rfbCheckFds()
+static void
+rfbSockNotify(int fd, int ready, void *data)
 {
-    int nfds;
-    fd_set fds;
-    struct timeval tv;
-    struct sockaddr_storage addr;
-    socklen_t addrlen = sizeof(addr);
+    rfbSockAddr addr;
+    socklen_t addrlen = sizeof(struct sockaddr_storage);
     char addrStr[INET6_ADDRSTRLEN];
     char buf[6];
     const int one = 1;
     int sock;
     rfbClientPtr cl;
-    static Bool inetdInitDone = FALSE;
 
-    if (!inetdInitDone && inetdSock != -1) {
-        rfbNewClientConnection(inetdSock);
-        inetdInitDone = TRUE;
-    }
+    if (rfbListenSock != -1 && fd == rfbListenSock) {
 
-    memcpy((char *)&fds, (char *)&allFds, sizeof(fd_set));
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    nfds = select(maxFd + 1, &fds, NULL, NULL, &tv);
-    if (nfds == 0) {
-        return;
-    }
-    if (nfds < 0) {
-        rfbLogPerror("rfbCheckFds: select");
-        return;
-    }
-
-    if (rfbListenSock != -1 && FD_ISSET(rfbListenSock, &fds)) {
-
-        if ((sock = accept(rfbListenSock,
-                           (struct sockaddr *)&addr, &addrlen)) < 0) {
-            rfbLogPerror("rfbCheckFds: accept");
+        if ((sock = accept(rfbListenSock, &addr.u.sa, &addrlen)) < 0) {
+            rfbLogPerror("rfbSockNotify: accept");
             return;
         }
 
         if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
-            rfbLogPerror("rfbCheckFds: fcntl");
+            rfbLogPerror("rfbSockNotify: fcntl");
             close(sock);
             return;
         }
 
         if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
                        (char *)&one, sizeof(one)) < 0) {
-            rfbLogPerror("rfbCheckFds: setsockopt");
+            rfbLogPerror("rfbSockNotify: setsockopt");
             close(sock);
             return;
         }
@@ -253,23 +211,17 @@ rfbCheckFds()
         rfbLog("Got connection from client %s\n",
                sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
-        AddEnabledDevice(sock);
-        FD_SET(sock, &allFds);
-        maxFd = max(sock, maxFd);
+        SetNotifyFd(sock, rfbSockNotify, X_NOTIFY_READ, NULL);
 
         rfbNewClientConnection(sock);
-
-        FD_CLR(rfbListenSock, &fds);
-        if (--nfds == 0)
-            return;
+        return;
     }
 
-    if ((udpSock != -1) && FD_ISSET(udpSock, &fds)) {
+    if ((udpSock != -1) && fd == udpSock) {
 
-        if (recvfrom(udpSock, buf, 1, MSG_PEEK,
-                     (struct sockaddr *)&addr, &addrlen) < 0) {
+        if (recvfrom(udpSock, buf, 1, MSG_PEEK, &addr.u.sa, &addrlen) < 0) {
 
-            rfbLogPerror("rfbCheckFds: UDP: recvfrom");
+            rfbLogPerror("rfbSockNotify: UDP: recvfrom");
             rfbDisconnectUDPSock();
 
         } else {
@@ -278,14 +230,13 @@ rfbCheckFds()
                 (memcmp(&addr, &udpRemoteAddr, addrlen) != 0))
             {
                 /* new remote end */
-                rfbLog("rfbCheckFds: UDP: got connection\n");
+                rfbLog("rfbSockNotify: UDP: got connection\n");
 
                 memcpy(&udpRemoteAddr, &addr, addrlen);
                 udpSockConnected = TRUE;
 
-                if (connect(udpSock,
-                            (struct sockaddr *)&addr, addrlen) < 0) {
-                    rfbLogPerror("rfbCheckFds: UDP: connect");
+                if (connect(udpSock, &addr.u.sa, addrlen) < 0) {
+                    rfbLogPerror("rfbSockNotify: UDP: connect");
                     rfbDisconnectUDPSock();
                     return;
                 }
@@ -295,14 +246,11 @@ rfbCheckFds()
 
             rfbProcessUDPInput(udpSock);
         }
-
-        FD_CLR(udpSock, &fds);
-        if (--nfds == 0)
-            return;
+        return;
     }
 
     for (cl = rfbClientHead; cl; cl = cl->next) {
-        if (FD_ISSET(cl->sock, &fds) && FD_ISSET(cl->sock, &allFds)) {
+        if (fd == cl->sock) {
             rfbClientPtr cl2;
 #if USETLS
             do {
@@ -386,8 +334,7 @@ void
 rfbCloseSock(int sock)
 {
     close(sock);
-    RemoveEnabledDevice(sock);
-    FD_CLR(sock, &allFds);
+    RemoveNotifyFd(sock);
     if (sock == inetdSock)
         GiveUp(0);
 }
@@ -405,8 +352,7 @@ rfbCloseClient(rfbClientPtr cl)
     }
 #endif
     close(sock);
-    RemoveEnabledDevice(sock);
-    FD_CLR(sock, &allFds);
+    RemoveNotifyFd(sock);
     rfbClientConnectionGone(cl);
     if (sock == inetdSock)
         GiveUp(0);
@@ -445,9 +391,7 @@ rfbConnect(char *host, int port)
         return -1;
     }
 
-    AddEnabledDevice(sock);
-    FD_SET(sock, &allFds);
-    maxFd = max(sock, maxFd);
+    SetNotifyFd(sock, rfbSockNotify, X_NOTIFY_READ, NULL);
 
     return sock;
 }
@@ -622,9 +566,7 @@ WriteExact(rfbClientPtr cl, char *buf, int len)
 int
 ListenOnTCPPort(int port)
 {
-    struct sockaddr_storage addr;
-    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
-    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+    rfbSockAddr addr;
     socklen_t addrlen;
     char hostname[NI_MAXHOST];
     int sock;
@@ -632,15 +574,15 @@ ListenOnTCPPort(int port)
 
     memset(&addr, 0, sizeof(addr));
     if (family == AF_INET6) {
-        addr6->sin6_family = family;
-        addr6->sin6_port = htons(port);
-        addr6->sin6_addr = interface6;
+        addr.u.sin6.sin6_family = family;
+        addr.u.sin6.sin6_port = htons(port);
+        addr.u.sin6.sin6_addr = interface6;
         addrlen = sizeof(struct sockaddr_in6);
     } else {
         family = AF_INET;
-        addr4->sin_family = family;
-        addr4->sin_port = htons(port);
-        addr4->sin_addr.s_addr = interface.s_addr;
+        addr.u.sin.sin_family = family;
+        addr.u.sin.sin_port = htons(port);
+        addr.u.sin.sin_addr.s_addr = interface.s_addr;
         addrlen = sizeof(struct sockaddr_in);
     }
 
@@ -653,7 +595,7 @@ ListenOnTCPPort(int port)
         close(sock);
         return -1;
     }
-    if (bind(sock, (struct sockaddr *)&addr, addrlen) < 0) {
+    if (bind(sock, &addr.u.sa, addrlen) < 0) {
         close(sock);
         return -1;
     }
@@ -662,8 +604,8 @@ ListenOnTCPPort(int port)
         return -1;
     }
 
-    if (getnameinfo((struct sockaddr *)&addr, addrlen, hostname,
-                    NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == 0) {
+    if (getnameinfo(&addr.u.sa, addrlen, hostname, NI_MAXHOST, NULL, 0,
+                    NI_NUMERICHOST) == 0) {
         rfbLog("  Interface %s\n", hostname);
     }
     return sock;
@@ -704,24 +646,22 @@ ConnectToTcpAddr(char *host, int port)
 int
 ListenOnUDPPort(int port)
 {
-    struct sockaddr_storage addr;
-    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
-    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+    rfbSockAddr addr;
     socklen_t addrlen;
     int sock;
     int one = 1;
 
     memset(&addr, 0, sizeof(addr));
     if (family == AF_INET6) {
-        addr6->sin6_family = family;
-        addr6->sin6_port = htons(port);
-        addr6->sin6_addr = interface6;
+        addr.u.sin6.sin6_family = family;
+        addr.u.sin6.sin6_port = htons(port);
+        addr.u.sin6.sin6_addr = interface6;
         addrlen = sizeof(struct sockaddr_in6);
     } else {
         family = AF_INET;
-        addr4->sin_family = family;
-        addr4->sin_port = htons(port);
-        addr4->sin_addr.s_addr = interface.s_addr;
+        addr.u.sin.sin_family = family;
+        addr.u.sin.sin_port = htons(port);
+        addr.u.sin.sin_addr.s_addr = interface.s_addr;
         addrlen = sizeof(struct sockaddr_in);
     }
 
@@ -733,7 +673,7 @@ ListenOnUDPPort(int port)
                    (char *)&one, sizeof(one)) < 0) {
         return -1;
     }
-    if (bind(sock, (struct sockaddr *)&addr, addrlen) < 0) {
+    if (bind(sock, &addr.u.sa, addrlen) < 0) {
         return -1;
     }
 

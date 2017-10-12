@@ -96,8 +96,6 @@ static Bool badSysCall = FALSE;
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
 
-#include <sys/signal.h>
-
 static void
 SigSysHandler(int signo)
 {
@@ -111,7 +109,7 @@ CheckForShmSyscall(void)
     int shmid = -1;
 
     /* If no SHM support in the kernel, the bad syscall will generate SIGSYS */
-    oldHandler = signal(SIGSYS, SigSysHandler);
+    oldHandler = OsSignal(SIGSYS, SigSysHandler);
 
     badSysCall = FALSE;
     shmid = shmget(IPC_PRIVATE, 4096, IPC_CREAT);
@@ -123,7 +121,7 @@ CheckForShmSyscall(void)
         /* Allocation failed */
         badSysCall = TRUE;
     }
-    signal(SIGSYS, oldHandler);
+    OsSignal(SIGSYS, oldHandler);
     return !badSysCall;
 }
 
@@ -401,7 +399,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             }
             else {
 #endif
-                pCI = malloc(nCharInfos * sizeof(xCharInfo));
+                pCI = xallocarray(nCharInfos, sizeof(xCharInfo));
                 if (!pCI)
                     return BadAlloc;
 #ifdef HAS_SHM
@@ -439,7 +437,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 #ifdef HAS_SHM
             if (pDesc && !badSysCall) {
                 *(CARD32 *) (pCI + nCharInfos) = signature;
-                if (!FontSetPrivate(pFont, FontShmdescIndex, pDesc)) {
+                if (!xfont2_font_set_private(pFont, FontShmdescIndex, pDesc)) {
                     shmdealloc(pDesc);
                     return BadAlloc;
                 }
@@ -463,7 +461,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             if (hashModulus > nCharInfos + 1)
                 hashModulus = nCharInfos + 1;
 
-            tmp = malloc((4 * nCharInfos + 1) * sizeof(CARD16));
+            tmp = xallocarray(4 * nCharInfos + 1, sizeof(CARD16));
             if (!tmp) {
                 if (!pDesc)
                     free(pCI);
@@ -723,7 +721,7 @@ XFree86BigfontExtensionInit(void)
             + (unsigned int) (65536.0 / (RAND_MAX + 1.0) * rand());
         /* fprintf(stderr, "signature = 0x%08X\n", signature); */
 
-        FontShmdescIndex = AllocateFontPrivateIndex();
+        FontShmdescIndex = xfont2_allocate_font_private_index();
 
 #if !defined(CSRG_BASED) && !defined(__CYGWIN__)
         pagesize = SHMLBA;

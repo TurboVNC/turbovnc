@@ -55,13 +55,13 @@ compScreenUpdate(ScreenPtr pScreen)
 }
 
 static void
-compBlockHandler(ScreenPtr pScreen, void *pTimeout, void *pReadmask)
+compBlockHandler(ScreenPtr pScreen, void *pTimeout)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
 
     pScreen->BlockHandler = cs->BlockHandler;
     compScreenUpdate(pScreen);
-    (*pScreen->BlockHandler) (pScreen, pTimeout, pReadmask);
+    (*pScreen->BlockHandler) (pScreen, pTimeout);
 
     /* Next damage will restore the block handler */
     cs->BlockHandler = NULL;
@@ -612,7 +612,7 @@ compAllocPixmap(WindowPtr pWin)
     else
         pWin->redirectDraw = RedirectDrawManual;
 
-    compSetPixmap(pWin, pPixmap);
+    compSetPixmap(pWin, pPixmap, bw);
     cw->oldx = COMP_ORIGIN_INVALID;
     cw->oldy = COMP_ORIGIN_INVALID;
     cw->damageRegistered = FALSE;
@@ -651,7 +651,7 @@ compSetParentPixmap(WindowPtr pWin)
     RegionCopy(&pWin->borderClip, &cw->borderClip);
     pParentPixmap = (*pScreen->GetWindowPixmap) (pWin->parent);
     pWin->redirectDraw = RedirectDrawNone;
-    compSetPixmap(pWin, pParentPixmap);
+    compSetPixmap(pWin, pParentPixmap, pWin->borderWidth);
 }
 
 /*
@@ -682,7 +682,7 @@ compReallocPixmap(WindowPtr pWin, int draw_x, int draw_y,
         if (!pNew)
             return FALSE;
         cw->pOldPixmap = pOld;
-        compSetPixmap(pWin, pNew);
+        compSetPixmap(pWin, pNew, bw);
     }
     else {
         pNew = pOld;

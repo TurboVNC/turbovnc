@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-08-31T17:01:37">
+<meta name="date" content="2017-10-20T19:12:40">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -102,7 +102,10 @@
                 <a href="#hd006005" class="hd">6.5 Securing a TurboVNC Connection</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006006" class="hd">6.6 Further Reading</a>
+                <a href="#hd006006" class="hd">6.6 Running OpenGL Applications</a>
+            </li>
+            <li class="Itemize-3 hd">
+                <a href="#hd006007" class="hd">6.7 Further Reading</a>
             </li>
         </ul>
     </li>
@@ -1237,7 +1240,32 @@ new TurboVNC sessions that are started on the machine.</p>
 
 
 
-<h2 id="hd006006">6.6&nbsp;Further Reading</h2>
+<h2 id="hd006006">6.6&nbsp;Running OpenGL Applications</h2>
+
+<p>The TurboVNC Server includes a software GLX/OpenGL implementation that 
+can be used for casual 3D rendering.  This implementation uses the 
+swrast DRI driver provided by Mesa 8.x and later.  On systems that do 
+not have vendor-specific GPU drivers installed, or on systems that 
+provide a libglvnd-enabled build of Mesa, TurboVNC&rsquo;s software 
+OpenGL implementation can use direct rendering. Otherwise, it falls back 
+to indirect rendering, which is limited to the OpenGL 1.4 API and which 
+may perform sluggishly (particularly with continuous mouse input.)  In 
+general, if the server machine has a GPU, then you should use 
+<a href="#VGL">VirtualGL</a><a name="idx0036"></a> rather than relying 
+on TurboVNC&rsquo;s software OpenGL implementation.</p>
+
+<p>Passing <code>-extension&nbsp;GLX</code> to <code>vncserver</code> 
+disables the built-in GLX/OpenGL implementation, thus restoring the 
+behavior of TurboVNC 2.1.x and earlier (which required VirtualGL in 
+order to run OpenGL applications.)  Passing <code>-iglx</code> to 
+<code>vncserver</code> disables indirect rendering.  If the built-in 
+GLX/OpenGL implementation is not functioning properly, then pass 
+<code>-verbose</code> to <code>vncserver</code> to log informational 
+messages that may reveal the source of the problem.</p>
+
+
+
+<h2 id="hd006007">6.7&nbsp;Further Reading</h2>
 
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 
@@ -1349,7 +1377,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0036"></a> should be used
+            comparison</a><a name="idx0037"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1401,7 +1429,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0037"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0038"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1752,15 +1780,15 @@ the <code>vncviewer</code> script (Linux/Un*x), the
 <code>vncviewer-java.bat</code> script or the Start Menu shortcut 
 (Windows), or the standalone TurboVNC Viewer app (Mac).  If the viewer 
 is launched with Java Web Start using the <a href="#JWS">recommended 
-procedure</a><a name="idx0038"></a> or the 
+procedure</a><a name="idx0039"></a> or the 
 <a href="#Zero_Install">TurboVNC Server&rsquo;s built-in web 
-server</a><a name="idx0039"></a>, then the appropriate libjpeg-turbo JNI 
+server</a><a name="idx0040"></a>, then the appropriate libjpeg-turbo JNI 
 library will be downloaded along with it, assuming that the client 
 machine is running Windows, OS X, or Linux.  For other deployment 
 scenarios, the Java TurboVNC Viewer will find the libjpeg-turbo JNI 
 library if 
 <span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
-of the official libjpeg-turbo packages</a></span><a name="idx0040"></a> 
+of the official libjpeg-turbo packages</a></span><a name="idx0041"></a> 
 is installed on the client machine.</p>
 
 <p>If you suspect for whatever reason that JPEG decoding is not being 
@@ -2146,6 +2174,8 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;vncpasswd
 
 <h1 id="hd009"><a name="file009"></a>9&nbsp;Using TurboVNC with VirtualGL</h1>
 
+<p><a name="VGL"></a></p>
+
 <p>Referring to the VirtualGL User&rsquo;s Guide, VirtualGL&rsquo;s X11 
 Transport draws 3D images onto an X display using standard X11 drawing 
 commands.  Since this results in the images being sent uncompressed to 
@@ -2413,7 +2443,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0041"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0042"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>

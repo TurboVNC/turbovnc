@@ -219,17 +219,6 @@ typedef struct _RenderClient {
 
 #define GetRenderClient(pClient) ((RenderClientPtr)dixLookupPrivate(&(pClient)->devPrivates, RenderClientPrivateKey))
 
-static void
-RenderClientCallback(CallbackListPtr *list, void *closure, void *data)
-{
-    NewClientInfoRec *clientinfo = (NewClientInfoRec *) data;
-    ClientPtr pClient = clientinfo->client;
-    RenderClientPtr pRenderClient = GetRenderClient(pClient);
-
-    pRenderClient->major_version = 0;
-    pRenderClient->minor_version = 0;
-}
-
 #ifdef PANORAMIX
 RESTYPE XRT_PICTURE;
 #endif
@@ -245,8 +234,6 @@ RenderExtensionInit(void)
         return;
     if (!dixRegisterPrivateKey
         (&RenderClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(RenderClientRec)))
-        return;
-    if (!AddCallback(&ClientStateCallback, RenderClientCallback, 0))
         return;
 
     extEntry = AddExtension(RENDER_NAME, 0, RenderNumberErrors,
@@ -1318,14 +1305,14 @@ ProcRenderCompositeGlyphs(ClientPtr client)
     if (nglyph <= NLOCALGLYPH)
         glyphsBase = glyphsLocal;
     else {
-        glyphsBase = (GlyphPtr *) malloc(nglyph * sizeof(GlyphPtr));
+        glyphsBase = xallocarray(nglyph, sizeof(GlyphPtr));
         if (!glyphsBase)
             return BadAlloc;
     }
     if (nlist <= NLOCALDELTA)
         listsBase = listsLocal;
     else {
-        listsBase = (GlyphListPtr) malloc(nlist * sizeof(GlyphListRec));
+        listsBase = xallocarray(nlist, sizeof(GlyphListRec));
         if (!listsBase) {
             rc = BadAlloc;
             goto bail;
@@ -1770,6 +1757,9 @@ ProcRenderSetPictureFilter(ClientPtr client)
     name = (char *) (stuff + 1);
     params = (xFixed *) (name + pad_to_int32(stuff->nbytes));
     nparams = ((xFixed *) stuff + client->req_len) - params;
+    if (nparams < 0)
+	return BadLength;
+
     result = SetPictureFilter(pPicture, name, stuff->nbytes, params, nparams);
     return result;
 }
@@ -1793,7 +1783,7 @@ ProcRenderCreateAnimCursor(ClientPtr client)
     ncursor =
         (client->req_len -
          (bytes_to_int32(sizeof(xRenderCreateAnimCursorReq)))) >> 1;
-    cursors = malloc(ncursor * (sizeof(CursorPtr) + sizeof(CARD32)));
+    cursors = xallocarray(ncursor, sizeof(CursorPtr) + sizeof(CARD32));
     if (!cursors)
         return BadAlloc;
     deltas = (CARD32 *) (cursors + ncursor);
@@ -1921,6 +1911,8 @@ ProcRenderCreateRadialGradient(ClientPtr client)
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
     len = (client->req_len << 2) - sizeof(xRenderCreateRadialGradientReq);
+    if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
+        return BadLength;
     if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
         return BadLength;
 
@@ -1959,6 +1951,8 @@ ProcRenderCreateConicalGradient(ClientPtr client)
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
     len = (client->req_len << 2) - sizeof(xRenderCreateConicalGradientReq);
+    if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
+        return BadLength;
     if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
         return BadLength;
 

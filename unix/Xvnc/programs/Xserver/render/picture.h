@@ -169,11 +169,11 @@ typedef enum _PictFormatShort {
 #define PictureCmapPolicyColor	    3
 #define PictureCmapPolicyAll	    4
 
-extern _X_EXPORT int PictureCmapPolicy;
+extern int PictureCmapPolicy;
 
-extern _X_EXPORT int PictureParseCmapPolicy(const char *name);
+extern int PictureParseCmapPolicy(const char *name);
 
-extern _X_EXPORT int RenderErrBase;
+extern int RenderErrBase;
 
 /* Fixed point updates from Carl Worth, USC, Information Sciences Institute */
 
@@ -211,7 +211,7 @@ typedef pixman_fixed_t xFixed;
 /* whether 't' is a well defined not obviously empty trapezoid */
 #define xTrapezoidValid(t)  ((t)->left.p1.y != (t)->left.p2.y && \
 			     (t)->right.p1.y != (t)->right.p2.y && \
-			     (int) ((t)->bottom - (t)->top) > 0)
+			     ((t)->bottom > (t)->top))
 
 /*
  * Standard NTSC luminance conversions:

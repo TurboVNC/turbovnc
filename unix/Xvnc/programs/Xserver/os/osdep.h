@@ -63,42 +63,22 @@ SOFTWARE.
 #undef _POSIX_SOURCE
 #endif
 
-#ifndef OPEN_MAX
-#ifdef SVR4
-#define OPEN_MAX 256
-#else
-#include <sys/param.h>
-#ifndef OPEN_MAX
-#if defined(NOFILE) && !defined(NOFILES_MAX)
-#define OPEN_MAX NOFILE
-#else
-#if !defined(WIN32)
-#define OPEN_MAX NOFILES_MAX
-#else
-#define OPEN_MAX 256
-#endif
-#endif
-#endif
-#endif
-#endif
-
-#include <X11/Xpoll.h>
-
-/*
- * MAXSOCKS is used only for initialising MaxClients when no other method
- * like sysconf(_SC_OPEN_MAX) is not supported.
- */
-
-#if OPEN_MAX <= 256
-#define MAXSOCKS (OPEN_MAX - 1)
-#else
-#define MAXSOCKS 256
-#endif
-
-/* MAXSELECT is the number of fds that select() can handle */
-#define MAXSELECT (sizeof(fd_set) * NBBY)
-
 #include <stddef.h>
+#include <X11/Xos.h>
+
+/* If EAGAIN and EWOULDBLOCK are distinct errno values, then we check errno
+ * for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
+ * systems are broken and return EWOULDBLOCK when they should return EAGAIN
+ */
+#ifndef WIN32
+# if (EAGAIN != EWOULDBLOCK)
+#  define ETEST(err) (err == EAGAIN || err == EWOULDBLOCK)
+# else
+#  define ETEST(err) (err == EAGAIN)
+# endif
+#else   /* WIN32 The socket errorcodes differ from the normal errors */
+#define ETEST(err) (err == EAGAIN || err == WSAEWOULDBLOCK)
+#endif
 
 #if defined(XDMCP) || defined(HASXDMAUTH)
 typedef Bool (*ValidatorFunc) (ARRAY8Ptr Auth, ARRAY8Ptr Data, int packet_type);
@@ -133,9 +113,6 @@ typedef int (*AuthRemCFunc) (AuthRemCArgs);
 #define AuthRstCArgs void
 typedef int (*AuthRstCFunc) (AuthRstCArgs);
 
-#define AuthToIDArgs unsigned short data_length, char *data
-typedef XID (*AuthToIDFunc) (AuthToIDArgs);
-
 typedef void (*OsCloseFunc) (ClientPtr);
 
 typedef int (*OsFlushFunc) (ClientPtr who, struct _osComm * oc, char *extraBuf,
@@ -148,7 +125,11 @@ typedef struct _osComm {
     XID auth_id;                /* authorization id */
     CARD32 conn_time;           /* timestamp if not established, else 0  */
     struct _XtransConnInfo *trans_conn; /* transport connection object */
+    int flags;
 } OsCommRec, *OsCommPtr;
+
+#define OS_COMM_GRAB_IMPERVIOUS 1
+#define OS_COMM_IGNORED         2
 
 extern int FlushClient(ClientPtr /*who */ ,
                        OsCommPtr /*oc */ ,
@@ -160,19 +141,21 @@ extern void FreeOsBuffers(OsCommPtr     /*oc */
     );
 
 #include "dix.h"
+#include "ospoll.h"
 
-extern fd_set AllSockets;
-extern fd_set AllClients;
-extern fd_set LastSelectMask;
-extern fd_set WellKnownConnections;
-extern fd_set EnabledDevices;
-extern fd_set ClientsWithInput;
-extern fd_set ClientsWriteBlocked;
-extern fd_set OutputPending;
-extern fd_set IgnoredClientsWithInput;
+extern struct ospoll    *server_poll;
 
-#ifndef WIN32
+Bool
+listen_to_client(ClientPtr client);
+
+#if !defined(WIN32) || defined(__CYGWIN__)
 extern int *ConnectionTranslation;
+extern int ConnectionTranslationSize;
+static inline int GetConnectionTranslation(int conn) {
+    if (conn >= ConnectionTranslationSize)
+        return 0;
+    return ConnectionTranslation[conn];
+}
 #else
 extern int GetConnectionTranslation(int conn);
 extern void SetConnectionTranslation(int conn, int client);
@@ -180,12 +163,11 @@ extern void ClearConnectionTranslation(void);
 #endif
 
 extern Bool NewOutputPending;
-extern Bool AnyClientsWriteBlocked;
 
 extern WorkQueuePtr workQueue;
 
 /* in WaitFor.c */
-#ifdef WIN32
+#if defined(WIN32) && !defined(__CYGWIN__)
 typedef long int fd_mask;
 #endif
 #define ffs mffs
@@ -200,7 +182,6 @@ extern void GenerateRandomData(int len, char *buf);
 /* in mitauth.c */
 extern XID MitCheckCookie(AuthCheckArgs);
 extern XID MitGenerateCookie(AuthGenCArgs);
-extern XID MitToID(AuthToIDArgs);
 extern int MitAddCookie(AuthAddCArgs);
 extern int MitFromID(AuthFromIDArgs);
 extern int MitRemoveCookie(AuthRemCArgs);
@@ -209,7 +190,6 @@ extern int MitResetCookie(AuthRstCArgs);
 /* in xdmauth.c */
 #ifdef HASXDMAUTH
 extern XID XdmCheckCookie(AuthCheckArgs);
-extern XID XdmToID(AuthToIDArgs);
 extern int XdmAddCookie(AuthAddCArgs);
 extern int XdmFromID(AuthFromIDArgs);
 extern int XdmRemoveCookie(AuthRemCArgs);
@@ -220,7 +200,6 @@ extern int XdmResetCookie(AuthRstCArgs);
 #ifdef SECURE_RPC
 extern void SecureRPCInit(AuthInitArgs);
 extern XID SecureRPCCheck(AuthCheckArgs);
-extern XID SecureRPCToID(AuthToIDArgs);
 extern int SecureRPCAdd(AuthAddCArgs);
 extern int SecureRPCFromID(AuthFromIDArgs);
 extern int SecureRPCRemove(AuthRemCArgs);

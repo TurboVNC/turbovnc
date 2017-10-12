@@ -427,6 +427,27 @@ security configuration file, then that has the effect of enabling the
 ''-noreverse'' option for all new TurboVNC sessions that are started on
 the machine.
 
+** Running OpenGL Applications
+
+The TurboVNC Server includes a software GLX/OpenGL implementation that can be
+used for casual 3D rendering.  This implementation uses the swrast DRI driver
+provided by Mesa 8.x and later.  On systems that do not have vendor-specific
+GPU drivers installed, or on systems that provide a libglvnd-enabled build of
+Mesa, TurboVNC's software OpenGL implementation can use direct rendering.
+Otherwise, it falls back to indirect rendering, which is limited to the OpenGL
+1.4 API and which may perform sluggishly (particularly with continuous mouse
+input.)  In general, if the server machine has a GPU, then you should use
+[[#VGL][VirtualGL]] rather than relying on TurboVNC's software OpenGL
+implementation.
+
+Passing ''-extension GLX'' to ''vncserver'' disables the built-in GLX/OpenGL
+implementation, thus restoring the behavior of TurboVNC 2.1.x and earlier
+(which required VirtualGL in order to run OpenGL applications.)  Passing
+''-iglx'' to ''vncserver'' disables indirect rendering.  If the built-in
+GLX/OpenGL implementation is not functioning properly, then pass ''-verbose''
+to ''vncserver'' to log informational messages that may reveal the source of
+the problem.
+
 ** Further Reading
 
 For more detailed instructions on the usage of TurboVNC:

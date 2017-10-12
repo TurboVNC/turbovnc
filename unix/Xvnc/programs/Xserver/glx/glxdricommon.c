@@ -41,29 +41,6 @@
 #include "glxscreens.h"
 #include "glxdricommon.h"
 
-static int
-getUST(int64_t * ust)
-{
-    struct timeval tv;
-
-    if (ust == NULL)
-        return -EFAULT;
-
-    if (gettimeofday(&tv, NULL) == 0) {
-        ust[0] = (tv.tv_sec * 1000000) + tv.tv_usec;
-        return 0;
-    }
-    else {
-        return -errno;
-    }
-}
-
-const __DRIsystemTimeExtension systemTimeExtension = {
-    {__DRI_SYSTEM_TIME, 1},
-    getUST,
-    NULL,
-};
-
 #define __ATTRIB(attrib, field) \
     { attrib, offsetof(__GLXconfig, field) }
 
@@ -122,14 +99,28 @@ setScalar(__GLXconfig * config, unsigned int attrib, unsigned int value)
         }
 }
 
+static Bool
+render_type_is_pbuffer_only(unsigned renderType)
+{
+    /* The GL_ARB_color_buffer_float spec says:
+     *
+     *     "Note that floating point rendering is only supported for
+     *     GLXPbuffer drawables.  The GLX_DRAWABLE_TYPE attribute of the
+     *     GLXFBConfig must have the GLX_PBUFFER_BIT bit set and the
+     *     GLX_RENDER_TYPE attribute must have the GLX_RGBA_FLOAT_BIT set."
+     */
+    return !!(renderType & (__DRI_ATTRIB_UNSIGNED_FLOAT_BIT
+                            | __DRI_ATTRIB_FLOAT_BIT));
+}
+
 static __GLXconfig *
 createModeFromConfig(const __DRIcoreExtension * core,
                      const __DRIconfig * driConfig,
-                     unsigned int visualType, unsigned int drawableType)
+                     unsigned int visualType)
 {
     __GLXDRIconfig *config;
     GLint renderType = 0;
-    unsigned int attrib, value;
+    unsigned int attrib, value, drawableType = GLX_PBUFFER_BIT;
     int i;
 
     config = calloc(1, sizeof *config);
@@ -173,8 +164,10 @@ createModeFromConfig(const __DRIcoreExtension * core,
         }
     }
 
+    if (!render_type_is_pbuffer_only(renderType))
+        drawableType |= GLX_WINDOW_BIT | GLX_PIXMAP_BIT;
+
     config->config.next = NULL;
-    config->config.xRenderable = GL_TRUE;
     config->config.visualType = visualType;
     config->config.renderType = renderType;
     config->config.drawableType = drawableType;
@@ -183,23 +176,9 @@ createModeFromConfig(const __DRIcoreExtension * core,
     return &config->config;
 }
 
-static Bool
-render_type_is_pbuffer_only(unsigned renderType)
-{
-    /* The GL_ARB_color_buffer_float spec says:
-     *
-     *     "Note that floating point rendering is only supported for
-     *     GLXPbuffer drawables.  The GLX_DRAWABLE_TYPE attribute of the
-     *     GLXFBConfig must have the GLX_PBUFFER_BIT bit set and the
-     *     GLX_RENDER_TYPE attribute must have the GLX_RGBA_FLOAT_BIT set."
-     */
-    return !!(renderType & (__DRI_ATTRIB_UNSIGNED_FLOAT_BIT
-                            | __DRI_ATTRIB_FLOAT_BIT));
-}
-
 __GLXconfig *
 glxConvertConfigs(const __DRIcoreExtension * core,
-                  const __DRIconfig ** configs, unsigned int drawableType)
+                  const __DRIconfig ** configs)
 {
     __GLXconfig head, *tail;
     int i;
@@ -208,17 +187,7 @@ glxConvertConfigs(const __DRIcoreExtension * core,
     head.next = NULL;
 
     for (i = 0; configs[i]; i++) {
-        unsigned renderType = 0;
-        if (core->getConfigAttrib(configs[i], __DRI_ATTRIB_RENDER_TYPE,
-                                  &renderType)) {
-            if (render_type_is_pbuffer_only(renderType) &&
-                !(drawableType & GLX_PBUFFER_BIT))
-                continue;
-        }
-        /* Add all the others */
-        tail->next = createModeFromConfig(core,
-                                          configs[i], GLX_TRUE_COLOR,
-                                          drawableType);
+        tail->next = createModeFromConfig(core, configs[i], GLX_TRUE_COLOR);
         if (tail->next == NULL)
             break;
 
@@ -226,17 +195,7 @@ glxConvertConfigs(const __DRIcoreExtension * core,
     }
 
     for (i = 0; configs[i]; i++) {
-        unsigned int renderType = 0;
-        if (core->getConfigAttrib(configs[i], __DRI_ATTRIB_RENDER_TYPE,
-                                  &renderType)) {
-            if (render_type_is_pbuffer_only(renderType) &&
-                !(drawableType & GLX_PBUFFER_BIT))
-                continue;
-        }
-        /* Add all the others */
-        tail->next = createModeFromConfig(core,
-                                          configs[i], GLX_DIRECT_COLOR,
-                                          drawableType);
+        tail->next = createModeFromConfig(core, configs[i], GLX_DIRECT_COLOR);
         if (tail->next == NULL)
             break;
 

@@ -268,10 +268,11 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
         RegionTranslate(&rgnExposed, pDstDrawable->x, pDstDrawable->y);
 
         if (extents) {
-            /* miPaintWindow doesn't clip, so we have to */
+            /* PaintWindow doesn't clip, so we have to */
             RegionIntersect(&rgnExposed, &rgnExposed, &pWin->clipList);
         }
-        miPaintWindow((WindowPtr) pDstDrawable, &rgnExposed, PW_BACKGROUND);
+        pDstDrawable->pScreen->PaintWindow((WindowPtr) pDstDrawable,
+                                           &rgnExposed, PW_BACKGROUND);
 
         if (extents) {
             RegionReset(&rgnExposed, &expBox);
@@ -373,7 +374,7 @@ miWindowExposures(WindowPtr pWin, RegionPtr prgn)
     RegionPtr exposures = prgn;
 
     if (prgn && !RegionNil(prgn)) {
-        RegionRec expRec;
+        RegionRec expRec = { {0, 0, 0, 0}, NULL };
         int clientInterested =
             (pWin->eventMask | wOtherEventMasks(pWin)) & ExposureMask;
         if (clientInterested && (RegionNumRects(prgn) > RECTLIMIT)) {
@@ -383,16 +384,14 @@ miWindowExposures(WindowPtr pWin, RegionPtr prgn)
              * work overall, on both client and server.  This is cheating, but
              * isn't prohibited by the protocol ("spontaneous combustion" :-).
              */
-            BoxRec box;
-
-            box = *RegionExtents(prgn);
+            BoxRec box = *RegionExtents(prgn);
             exposures = &expRec;
             RegionInit(exposures, &box, 1);
             RegionReset(prgn, &box);
             /* miPaintWindow doesn't clip, so we have to */
             RegionIntersect(prgn, prgn, &pWin->clipList);
         }
-        miPaintWindow(pWin, prgn, PW_BACKGROUND);
+        pWin->drawable.pScreen->PaintWindow(pWin, prgn, PW_BACKGROUND);
         if (clientInterested)
             miSendExposures(pWin, exposures,
                             pWin->drawable.x, pWin->drawable.y);
@@ -401,14 +400,6 @@ miWindowExposures(WindowPtr pWin, RegionPtr prgn)
         RegionEmpty(prgn);
     }
 }
-
-#ifdef ROOTLESS
-/* Ugly, ugly, but we lost our hooks into miPaintWindow... =/ */
-void RootlessSetPixmapOfAncestors(WindowPtr pWin);
-void RootlessStartDrawing(WindowPtr pWin);
-void RootlessDamageRegion(WindowPtr pWin, RegionPtr prgn);
-Bool IsFramedWindow(WindowPtr pWin);
-#endif
 
 void
 miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
@@ -436,22 +427,6 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
     PixUnion fill;
     Bool solid = TRUE;
     DrawablePtr drawable = &pWin->drawable;
-
-#ifdef ROOTLESS
-    if (!drawable || drawable->type == UNDRAWABLE_WINDOW)
-        return;
-
-    if (IsFramedWindow(pWin)) {
-        RootlessStartDrawing(pWin);
-        RootlessDamageRegion(pWin, prgn);
-
-        if (pWin->backgroundState == ParentRelative) {
-            if ((what == PW_BACKGROUND) ||
-                (what == PW_BORDER && !pWin->borderIsPixel))
-                RootlessSetPixmapOfAncestors(pWin);
-        }
-    }
-#endif
 
     if (what == PW_BACKGROUND) {
         while (pWin->backgroundState == ParentRelative)
@@ -540,7 +515,7 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
         gcmask |= GCFillStyle | GCTile | GCTileStipXOrigin | GCTileStipYOrigin;
     }
 
-    prect = malloc(RegionNumRects(prgn) * sizeof(xRectangle));
+    prect = xallocarray(RegionNumRects(prgn), sizeof(xRectangle));
     if (!prect)
         return;
 

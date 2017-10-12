@@ -103,24 +103,19 @@
    a = (GLint) reply.size
 
 #define __GLX_SINGLE_GET_CHAR(p)                \
-   *p = *(GLbyte *)&reply.pad3;
+   memcpy((p), &reply.pad3, 1);
 
 #define __GLX_SINGLE_GET_SHORT(p)               \
-   *p = *(GLshort *)&reply.pad3;
+   memcpy((p), &reply.pad3, 2);
 
 #define __GLX_SINGLE_GET_LONG(p)                \
-   *p = *(GLint *)&reply.pad3;
+   memcpy((p), &reply.pad3, 4);
 
 #define __GLX_SINGLE_GET_FLOAT(p)               \
-   *p = *(GLfloat *)&reply.pad3;
+   memcpy((p), &reply.pad3, 4);
 
-#ifdef __GLX_ALIGN64
 #define __GLX_SINGLE_GET_DOUBLE(p)              \
-   __GLX_MEM_COPY(p, &reply.pad3, 8)
-#else
-#define __GLX_SINGLE_GET_DOUBLE(p)              \
-   *p = *(GLdouble *)&reply.pad3
-#endif
+   memcpy((p), &reply.pad3, 8);
 
 /* Get an array of typed data */
 #define __GLX_SINGLE_GET_VOID_ARRAY(a,alen)     \

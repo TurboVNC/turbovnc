@@ -33,10 +33,7 @@ struct __GLXDRIconfig {
 };
 
 __GLXconfig *glxConvertConfigs(const __DRIcoreExtension * core,
-                               const __DRIconfig ** configs,
-                               unsigned int drawableType);
-
-extern const __DRIsystemTimeExtension systemTimeExtension;
+                               const __DRIconfig ** configs);
 
 void *glxProbeDriver(const char *name,
                      void **coreExt, const char *coreName, int coreVersion,

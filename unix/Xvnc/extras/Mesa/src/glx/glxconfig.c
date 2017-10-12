@@ -32,7 +32,6 @@
  */
 
 #include <GL/glx.h>
-#include "GL/glxint.h"
 #include <stdlib.h>
 #include <string.h>
 

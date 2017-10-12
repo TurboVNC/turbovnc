@@ -4,11 +4,6 @@ if(BITS EQUAL 64)
 	add_definitions(-D__GLX_ALIGN64)
 endif()
 
-# This code has a lot of type puns.  Disable strict aliasing just to be safe.
-if(CMAKE_COMPILER_IS_GNUCC)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-endif()
-
 check_function_exists(backtrace HAVE_BACKTRACE)
 if(HAVE_BACKTRACE)
 	add_definitions(-DHAVE_BACKTRACE)
@@ -23,6 +18,15 @@ set(DRI_DRIVER_PATH ${DEFAULT_DRI_DRIVER_PATH} CACHE PATH
 	"Path to DRI drivers (default: ${DEFAULT_DRI_DRIVER_PATH})")
 message(STATUS "DRI_DRIVER_PATH = ${DRI_DRIVER_PATH}")
 add_definitions(-DDRI_DRIVER_PATH=\"${DRI_DRIVER_PATH}\")
+
+handle_type_puns(
+	glxcmds.c
+	glxdriswrast.c
+	indirect_dispatch_swap.c
+	indirect_program.c
+	indirect_texture_compression.c
+	singlepix.c
+	singlepixswap.c)
 
 add_library(glx-server STATIC
 	clientinfo.c

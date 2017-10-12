@@ -155,28 +155,34 @@
 
 /* Single item copy macros */
 #define __GLX_PUT_CHAR(offset,a)                \
-   *((INT8 *) (pc + offset)) = a
+   do {                                         \
+      int8_t __tmp = (a);                       \
+      memcpy((pc + (offset)), &__tmp, 1);       \
+   } while (0)
 
 #define __GLX_PUT_SHORT(offset,a)               \
-   *((INT16 *) (pc + offset)) = a
+   do {                                         \
+      int16_t __tmp = (a);                      \
+      memcpy((pc + (offset)), &__tmp, 2);       \
+   } while (0)
 
 #define __GLX_PUT_LONG(offset,a)                \
-   *((INT32 *) (pc + offset)) = a
+   do {                                         \
+      int32_t __tmp = (a);                      \
+      memcpy((pc + (offset)), &__tmp, 4);       \
+   } while (0)
 
 #define __GLX_PUT_FLOAT(offset,a)               \
-   *((FLOAT32 *) (pc + offset)) = a
+   do {                                         \
+      float __tmp = (a);                        \
+      memcpy((pc + (offset)), &__tmp, 4);       \
+   } while (0)
 
-#ifdef __GLX_ALIGN64
-/*
-** This can certainly be done better for a particular machine
-** architecture!
-*/
 #define __GLX_PUT_DOUBLE(offset,a)              \
-   __GLX_MEM_COPY(pc + offset, &a, 8)
-#else
-#define __GLX_PUT_DOUBLE(offset,a)              \
-   *((FLOAT64 *) (pc + offset)) = a
-#endif
+   do {                                         \
+      double __tmp = (a);                       \
+      memcpy((pc + (offset)), &__tmp, 8);       \
+   } while (0)
 
 #define __GLX_PUT_CHAR_ARRAY(offset,a,alen)                 \
    __GLX_MEM_COPY(pc + offset, a, alen * __GLX_SIZE_INT8)
