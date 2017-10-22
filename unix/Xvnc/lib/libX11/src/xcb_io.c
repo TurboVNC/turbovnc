@@ -25,8 +25,7 @@
 #endif
 
 #define xcb_fail_assert(_message, _var) { \
-	unsigned int _var = 0; \
-	_var++; \
+	unsigned int _var = 1; \
 	fprintf(stderr, "[xcb] Aborting, sorry about that.\n"); \
 	assert(!_var); \
 }

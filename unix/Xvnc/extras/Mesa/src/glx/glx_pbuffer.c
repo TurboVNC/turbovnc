@@ -86,10 +86,10 @@ ChangeDrawableAttribute(Display * dpy, GLXDrawable drawable,
    struct glx_display *priv = __glXInitialize(dpy);
 #ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw;
-   int i;
 #endif
    CARD32 *output;
    CARD8 opcode;
+   int i;
 
    if ((priv == NULL) || (dpy == NULL) || (drawable == 0)) {
       return;

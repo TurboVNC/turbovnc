@@ -1742,9 +1742,7 @@ __glXSwapIntervalSGI(int interval)
 {
    xGLXVendorPrivateReq *req;
    struct glx_context *gc = __glXGetCurrentContext();
-#ifdef GLX_DIRECT_RENDERING
    struct glx_screen *psc;
-#endif
    Display *dpy;
    CARD32 *interval_ptr;
    CARD8 opcode;
@@ -1757,9 +1755,9 @@ __glXSwapIntervalSGI(int interval)
       return GLX_BAD_VALUE;
    }
 
-#ifdef GLX_DIRECT_RENDERING
    psc = GetGLXScreenConfigs( gc->currentDpy, gc->screen);
 
+#ifdef GLX_DIRECT_RENDERING
    if (gc->isDirect && psc && psc->driScreen &&
           psc->driScreen->setSwapInterval) {
       __GLXDRIdrawable *pdraw =
@@ -1859,11 +1857,11 @@ __glXGetSwapIntervalMESA(void)
 static int
 __glXGetVideoSyncSGI(unsigned int *count)
 {
-   struct glx_context *gc = __glXGetCurrentContext();
-#ifdef GLX_DIRECT_RENDERING
    int64_t ust, msc, sbc;
    int ret;
+   struct glx_context *gc = __glXGetCurrentContext();
    struct glx_screen *psc;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw;
 #endif
 
@@ -1873,14 +1871,18 @@ __glXGetVideoSyncSGI(unsigned int *count)
 #ifdef GLX_DIRECT_RENDERING
    if (!gc->isDirect)
       return GLX_BAD_CONTEXT;
+#endif
 
    psc = GetGLXScreenConfigs(gc->currentDpy, gc->screen);
+#ifdef GLX_DIRECT_RENDERING
    pdraw = GetGLXDRIDrawable(gc->currentDpy, gc->currentDrawable);
+#endif
 
    /* FIXME: Looking at the GLX_SGI_video_sync spec in the extension registry,
     * FIXME: there should be a GLX encoding for this call.  I can find no
     * FIXME: documentation for the GLX encoding.
     */
+#ifdef GLX_DIRECT_RENDERING
    if (psc && psc->driScreen && psc->driScreen->getDrawableMSC) {
       ret = psc->driScreen->getDrawableMSC(psc, pdraw, &ust, &msc, &sbc);
       *count = (unsigned) msc;
@@ -1895,12 +1897,12 @@ static int
 __glXWaitVideoSyncSGI(int divisor, int remainder, unsigned int *count)
 {
    struct glx_context *gc = __glXGetCurrentContext();
-#ifdef GLX_DIRECT_RENDERING
    struct glx_screen *psc;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw;
+#endif
    int64_t ust, msc, sbc;
    int ret;
-#endif
 
    if (divisor <= 0 || remainder < 0)
       return GLX_BAD_VALUE;
@@ -1911,10 +1913,14 @@ __glXWaitVideoSyncSGI(int divisor, int remainder, unsigned int *count)
 #ifdef GLX_DIRECT_RENDERING
    if (!gc->isDirect)
       return GLX_BAD_CONTEXT;
+#endif
 
    psc = GetGLXScreenConfigs( gc->currentDpy, gc->screen);
+#ifdef GLX_DIRECT_RENDERING
    pdraw = GetGLXDRIDrawable(gc->currentDpy, gc->currentDrawable);
+#endif
 
+#ifdef GLX_DIRECT_RENDERING
    if (psc && psc->driScreen && psc->driScreen->waitForMSC) {
       ret = psc->driScreen->waitForMSC(pdraw, 0, divisor, remainder, &ust, &msc,
 				       &sbc);
@@ -2087,11 +2093,11 @@ __glXGetSyncValuesOML(Display * dpy, GLXDrawable drawable,
                       int64_t * ust, int64_t * msc, int64_t * sbc)
 {
    struct glx_display * const priv = __glXInitialize(dpy);
-#ifdef GLX_DIRECT_RENDERING
    int ret;
+#ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw;
-   struct glx_screen *psc;
 #endif
+   struct glx_screen *psc;
 
    if (!priv)
       return False;
@@ -2707,6 +2713,9 @@ __glXGetUST(int64_t * ust)
       return -errno;
    }
 }
+#endif /* GLX_DIRECT_RENDERING */
+
+#if defined(GLX_DIRECT_RENDERING) && !defined(GLX_USE_APPLEGL)
 
 PUBLIC int
 MesaGLInteropGLXQueryDeviceInfo(Display *dpy, GLXContext context,

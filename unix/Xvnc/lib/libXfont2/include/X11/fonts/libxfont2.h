@@ -67,7 +67,7 @@ typedef struct _xfont2_client_funcs {
 	FontResolutionPtr	(*get_client_resolutions)(int *num);
 	int			(*get_default_point_size)(void);
 	Font			(*get_new_font_client_id)(void);
-	uint32_t		(*get_time_in_millis)(void);
+	CARD32			(*get_time_in_millis)(void);
 	int			(*init_fs_handlers)(FontPathElementPtr fpe,
 						    FontBlockHandlerProcPtr block_handler);
 	int			(*register_fpe_funcs)(const xfont2_fpe_funcs_rec *funcs);

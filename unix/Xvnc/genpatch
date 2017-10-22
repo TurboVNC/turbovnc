@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		rm -rf $TMPDIR
+	fi
+}
+
+TMPDIR=`mktemp -d /tmp/genpatch.XXXXXX`
+SRCDIR=$(cd $SRCDIR; pwd)
+ln -fs $SRCDIR $TMPDIR/
+SRCDIR=${SRCDIR##*/}
+
+pushd $TMPDIR >/dev/null 2>&1
+
+>&2 echo Downloading $URL/$PROJECT.$EXT ...
+wget --quiet $URL/$PROJECT.$EXT
+>&2 echo Generating diff ...
+tar xfz $PROJECT.$EXT
+git diff --no-index --diff-filter=M $PROJECT $SRCDIR/
+
+popd >/dev/null 2>&1

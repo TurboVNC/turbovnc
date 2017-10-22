@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROJECT=xorg-server-1.19.5
+EXT=tar.gz
+URL=https://www.x.org/releases/individual/xserver
+SRCDIR=`dirname $0`
+
+. $SRCDIR/../../genpatch | filterdiff -p1 -x Xserver/include/dix-config.h.in -x Xserver/include/version-config.h.in -x Xserver/include/xkb-config.h.in >$SRCDIR/turbovnc.patch

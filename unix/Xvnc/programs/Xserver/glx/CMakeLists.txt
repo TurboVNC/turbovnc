@@ -27,6 +27,7 @@ handle_type_puns(
 	indirect_texture_compression.c
 	singlepix.c
 	singlepixswap.c)
+handle_unused(indirect_dispatch_swap.c)
 
 add_library(glx-server STATIC
 	clientinfo.c

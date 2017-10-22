@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROJECT=mesa-17.2.3
+EXT=tar.gz
+URL=https://mesa.freedesktop.org/archive
+SRCDIR=`dirname $0`
+
+. $SRCDIR/../../genpatch >$SRCDIR/turbovnc.patch

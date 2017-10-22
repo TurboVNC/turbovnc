@@ -16,6 +16,9 @@ include_directories(include/X11)
 add_definitions(-DHAVE_UNISTD_H -DHAVE_SYS_SELECT_H)
 
 handle_type_puns(src/XlibInt.c)
+handle_unused(
+	src/XlibInt.c
+	src/xcb_io.c)
 
 add_library(X11xcb STATIC
 	src/XlibInt.c

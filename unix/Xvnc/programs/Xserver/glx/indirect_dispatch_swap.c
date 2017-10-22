@@ -81,6 +81,18 @@ bswap_ENUM(const void *src)
     return x.ret;
 }
 
+static GLsync
+bswap_CARD64(const void *src)
+{
+    union {
+        uint64_t dst;
+        GLsync ret;
+    } x;
+
+    x.dst = bswap_64(*(uint64_t *) src);
+    return x.ret;
+}
+
 static GLdouble
 bswap_FLOAT64(const void *src)
 {

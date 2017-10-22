@@ -8,7 +8,7 @@ foreach(dir /run/shm /dev/shm /var/tmp /tmp)
 	endif()
 endforeach()
 
-handle_type_puns_all()
+handle_type_puns()
 
 add_library(Xext-server STATIC
 	bigreq.c

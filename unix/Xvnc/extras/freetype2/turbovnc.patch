@@ -1,0 +1,13 @@
+diff --git a/freetype-2.8.1/src/sfnt/ttcmap.c b/freetype2/src/sfnt/ttcmap.c
+index b995e5c..02ac8b7 100644
+--- a/freetype-2.8.1/src/sfnt/ttcmap.c
++++ b/freetype2/src/sfnt/ttcmap.c
+@@ -3640,7 +3640,7 @@
+   tt_get_glyph_name( TT_Face  face,
+                      FT_UInt  idx )
+   {
+-    FT_String*  PSname;
++    FT_String*  PSname = NULL;
+ 
+ 
+     tt_face_get_ps_name( face, idx, &PSname );

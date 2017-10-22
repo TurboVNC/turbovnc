@@ -246,7 +246,7 @@ WaitForSomething(Bool are_ready)
 
 #if defined(TURBOVNC) && defined(GLXEXT)
         if (indirectGlxActive) {
-            /* This basically restores the logic from xorg-server 1.18x and
+            /* This basically restores the logic from xorg-server 1.18.x and
                earlier.  Without it, the timers in the VNC server are never
                invoked (and thus framebuffer updates are never sent) while
                indirect OpenGL applications are running. */

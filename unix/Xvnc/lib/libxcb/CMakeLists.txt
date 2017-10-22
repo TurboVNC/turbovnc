@@ -14,6 +14,8 @@ if(HAVE_SENDMSG)
 endif()
 add_definitions(-DXCB_QUEUE_BUFFER_SIZE=16384)
 
+handle_unused(src/xcb_in.c)
+
 add_library(xcbglx STATIC
 	src/bigreq.c
 	src/glx.c

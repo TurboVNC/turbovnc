@@ -56,17 +56,27 @@ endfunction()
 function(handle_type_puns)
 	# NOTE: For whatever reason, Clang doesn't need this
 	if(CMAKE_COMPILER_IS_GNUCC)
-		foreach(file ${ARGV})
-			set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS
-				-fno-strict-aliasing)
-		endforeach()
+		if(ARGC EQUAL 0)
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing" PARENT_SCOPE)
+		else()
+			foreach(file ${ARGV})
+				set_property(SOURCE ${file} APPEND_STRING PROPERTY COMPILE_FLAGS
+					" -fno-strict-aliasing")
+			endforeach()
+		endif()
 	endif()
 endfunction()
 
-function(handle_type_puns_all)
-	# NOTE: For whatever reason, Clang doesn't need this
-	if(CMAKE_COMPILER_IS_GNUCC)
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing" PARENT_SCOPE)
+function(handle_unused)
+	if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+		if(ARGC EQUAL 0)
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused" PARENT_SCOPE)
+		else()
+			foreach(file ${ARGV})
+				set_property(SOURCE ${file} APPEND_STRING PROPERTY COMPILE_FLAGS
+					" -Wno-unused")
+			endforeach()
+		endif()
 	endif()
 endfunction()
 

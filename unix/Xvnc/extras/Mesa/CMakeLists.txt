@@ -14,6 +14,10 @@ add_definitions(-DGLX_USE_TLS -DHAVE_PTHREAD -DMAPI_MODE_UTIL
 	-DGLX_INDIRECT_RENDERING)
 
 handle_type_puns(src/mapi/u_current.c)
+handle_unused(
+	src/glx/glx_pbuffer.c
+	src/glx/glxcmds.c
+	src/glx/indirect.c)
 
 add_library(glapi-server STATIC
 	src/mapi/glapi/glapi_dispatch.c

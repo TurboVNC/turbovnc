@@ -1,0 +1,52 @@
+diff --git a/mesa-17.2.3/include/c99_math.h b/Mesa/include/c99_math.h
+index e906c26..e14c6d9 100644
+--- a/mesa-17.2.3/include/c99_math.h
++++ b/Mesa/include/c99_math.h
+@@ -44,6 +44,7 @@
+ #endif 
+ 
+ 
++#if 0 /* TURBOVNC */
+ #if !defined(_MSC_VER) && \
+     __STDC_VERSION__ < 199901L && \
+     (!defined(_XOPEN_SOURCE) || _XOPEN_SOURCE < 600) && \
+@@ -114,6 +115,7 @@ exp2(double d)
+ }
+ 
+ #endif /* C99 */
++#endif /* TURBOVNC */
+ 
+ 
+ /*
+@@ -141,6 +143,7 @@ exp2(double d)
+ #endif
+ 
+ 
++#if 0 /* TURBOVNC */
+ #if defined(fpclassify)
+ /* ISO C99 says that fpclassify is a macro.  Assume that any implementation
+  * of fpclassify, whether it's in a C99 compiler or not, will be a macro.
+@@ -183,6 +186,7 @@ fpclassify(double x)
+ #else
+ #error "Need to include or define an fpclassify function"
+ #endif
++#endif /* TURBOVNC */
+ 
+ 
+ /* Since C++11, the following functions are part of the std namespace. Their C
+diff --git a/mesa-17.2.3/src/glx/glxext.c b/Mesa/src/glx/glxext.c
+index 9ef7ff5..e4df105 100644
+--- a/mesa-17.2.3/src/glx/glxext.c
++++ b/Mesa/src/glx/glxext.c
+@@ -150,9 +150,9 @@ __glXWireToEvent(Display *dpy, XEvent *event, xEvent *wire)
+        * of sequence 64-Bit sbc's
+        */
+       if ((int64_t) awire->sbc < ((int64_t) glxDraw->lastEventSbc - 0x40000000))
+-         glxDraw->eventSbcWrap += 0x100000000;
++         glxDraw->eventSbcWrap += 0x100000000LL;
+       if ((int64_t) awire->sbc > ((int64_t) glxDraw->lastEventSbc + 0x40000000))
+-         glxDraw->eventSbcWrap -= 0x100000000;
++         glxDraw->eventSbcWrap -= 0x100000000LL;
+       glxDraw->lastEventSbc = awire->sbc;
+       aevent->sbc = awire->sbc + glxDraw->eventSbcWrap;
+       return True;
