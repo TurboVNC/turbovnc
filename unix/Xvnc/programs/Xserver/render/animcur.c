@@ -169,10 +169,9 @@ AnimCurTimerNotify(OsTimerPtr timer, CARD32 now, void *arg)
     }
 
     if (activeDevice)
-        TimerSet(as->timer, TimerAbsolute, soonest, AnimCurTimerNotify, pScreen);
-    else
-        as->timer_set = FALSE;
+        return soonest - now;
 
+    as->timer_set = FALSE;
     return 0;
 }
 
