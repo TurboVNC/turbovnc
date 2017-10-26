@@ -77,12 +77,9 @@ static CursorBits animCursorBits = {
 
 static DevPrivateKeyRec AnimCurScreenPrivateKeyRec;
 
-#define AnimCurScreenPrivateKey (&AnimCurScreenPrivateKeyRec)
-
 #define IsAnimCur(c)	    ((c) && ((c)->bits == &animCursorBits))
 #define GetAnimCur(c)	    ((AnimCurPtr) ((((char *)(c) + CURSOR_REC_SIZE))))
-#define GetAnimCurScreen(s) ((AnimCurScreenPtr)dixLookupPrivate(&(s)->devPrivates, AnimCurScreenPrivateKey))
-#define SetAnimCurScreen(s,p) dixSetPrivate(&(s)->devPrivates, AnimCurScreenPrivateKey, p)
+#define GetAnimCurScreen(s) ((AnimCurScreenPtr)dixLookupPrivate(&(s)->devPrivates, &AnimCurScreenPrivateKeyRec))
 
 #define Wrap(as,s,elt,func) (((as)->elt = (s)->elt), (s)->elt = func)
 #define Unwrap(as,s,elt)    ((s)->elt = (as)->elt)
@@ -101,9 +98,7 @@ AnimCurCloseScreen(ScreenPtr pScreen)
     Unwrap(as, pScreen, RealizeCursor);
     Unwrap(as, pScreen, UnrealizeCursor);
     Unwrap(as, pScreen, RecolorCursor);
-    SetAnimCurScreen(pScreen, 0);
     ret = (*pScreen->CloseScreen) (pScreen);
-    free(as);
     return ret;
 }
 
@@ -308,15 +303,13 @@ AnimCurInit(ScreenPtr pScreen)
 {
     AnimCurScreenPtr as;
 
-    if (!dixRegisterPrivateKey(&AnimCurScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
+    if (!dixRegisterPrivateKey(&AnimCurScreenPrivateKeyRec, PRIVATE_SCREEN,
+                               sizeof(AnimCurScreenRec)))
         return FALSE;
 
-    as = (AnimCurScreenPtr) malloc(sizeof(AnimCurScreenRec));
-    if (!as)
-        return FALSE;
+    as = GetAnimCurScreen(pScreen);
     as->timer = TimerSet(NULL, TimerAbsolute, 0, AnimCurTimerNotify, pScreen);
     if (!as->timer) {
-        free(as);
         return FALSE;
     }
     as->timer_set = FALSE;
@@ -329,7 +322,6 @@ AnimCurInit(ScreenPtr pScreen)
     Wrap(as, pScreen, RealizeCursor, AnimCurRealizeCursor);
     Wrap(as, pScreen, UnrealizeCursor, AnimCurUnrealizeCursor);
     Wrap(as, pScreen, RecolorCursor, AnimCurRecolorCursor);
-    SetAnimCurScreen(pScreen, as);
     return TRUE;
 }
 
