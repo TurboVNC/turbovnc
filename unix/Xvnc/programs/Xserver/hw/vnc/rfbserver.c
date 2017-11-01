@@ -1778,6 +1778,22 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
         return TRUE;
     }
 
+    /* In continuous mode, we will be outputting at least three distinct
+       messages.  We need to aggregate these in order to not clog up TCP's
+       congestion window. */
+
+    rfbCorkSock(cl->sock);
+
+    if (cl->pendingDesktopResize) {
+        if (!rfbSendDesktopSize(cl)) return FALSE;
+        cl->pendingDesktopResize = FALSE;
+    }
+
+    if (rfbScreen.blockUpdates) {
+        rfbUncorkSock(cl->sock);
+        return TRUE;
+    }
+
     /*
      * If this client understands cursor shape updates, cursor should be
      * removed from the framebuffer. Otherwise, make sure it's put up.
@@ -1831,17 +1847,6 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
         !sendCursorShape && !sendCursorPos) {
         REGION_UNINIT(pScreen, updateRegion);
         return TRUE;
-    }
-
-    /* In continuous mode, we will be outputting at least three distinct
-       messages.  We need to aggregate these in order to not clog up TCP's
-       congestion window. */
-
-    rfbCorkSock(cl->sock);
-
-    if (cl->pendingDesktopResize) {
-        if (!rfbSendDesktopSize(cl)) return FALSE;
-        cl->pendingDesktopResize = FALSE;
     }
 
     /*
