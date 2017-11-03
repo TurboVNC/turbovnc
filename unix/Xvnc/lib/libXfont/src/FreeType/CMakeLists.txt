@@ -1,5 +1,4 @@
-include_directories(../../../../extras/freetype2/include
-	../../../../extras/freetype2/src/truetype)
+include_directories(${FREETYPE_INCLUDE_DIRS})
 
 add_library(FreeType OBJECT
 	ftfuncs.c

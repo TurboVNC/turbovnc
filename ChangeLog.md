@@ -1,3 +1,16 @@
+2.1.3
+=====
+
+1. Introduced a new CMake variable (`TVNC_SYSTEMLIBS`) that, when enabled,
+will cause the TurboVNC Server to be built against the system-supplied versions
+of zlib, bzip2, and FreeType.
+
+2. Introduced a new CMake variable (`TVNC_SYSTEMX11`) that, when enabled,
+will cause the TurboVNC Server to be built against the system-supplied versions
+of the X11 headers and libraries.  This will probably fail unless the system is
+using xorg-server 1.12.x or later.
+
+
 2.1.2
 =====
 
