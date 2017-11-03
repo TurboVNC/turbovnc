@@ -57,7 +57,15 @@ option(TVNC_NVCONTROL
 	"Include fake NV-CONTROL extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"
 	ON)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
+option(TVNC_SYSTEMLIBS
+	"Build the TurboVNC Server against the system-supplied versions of zlib, bzip2, and FreeType rather than the in-tree versions"
+	OFF)
+boolean_number(TVNC_SYSTEMLIBS)
+report_option(TVNC_SYSTEMLIBS "System zlib/bzip2/FreeType")
+
+if(NOT TVNC_SYSTEMLIBS)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
+endif()
 add_subdirectory(libvncauth)
 if(TVNC_NVCONTROL)
 	add_subdirectory(libXNVCtrl)

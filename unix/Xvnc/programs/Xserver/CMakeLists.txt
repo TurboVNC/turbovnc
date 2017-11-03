@@ -154,16 +154,21 @@ if(TVNC_NVCONTROL)
 	set(EXTRA_LIB ${EXTRA_LIB} XNVCtrl)
 endif()
 if(TVNC_GLX)
-	set(EXTRA_LIB ${EXTRA_LIB} glx-server glx glapi-server xcbglx X11xcb
-		${X11_LIBRARIES})
+	if(TVNC_SYSTEMX11)
+		set(EXTRA_LIB ${EXTRA_LIB} glx-server ${OPENGL_gl_LIBRARY})
+	else()
+		set(EXTRA_LIB ${EXTRA_LIB} glx-server glx glapi-server xcbglx X11xcb
+			${X11_LIBRARIES})
+	endif()
 endif()
 if(HAVE_MONOTONIC_CLOCK)
 	set(EXTRA_LIB ${EXTRA_LIB} rt)
 endif()
 target_link_libraries(Xvnc main dix mi vnc fb Xi composite mi damage damageext
-	randr render os present Xext-server sync xfixes xkb Xau Xdmcp
-	Xfont2 fontenc freetype2 pixman sha1 ${TJPEG_LIBRARY} zlib bzip2 vncauth m
-	pthread ${PAM_LIB} ${EXTRA_LIB})
+	randr render os present Xext-server sync xfixes xkb ${X11_Xau_LIB}
+	${X11_Xdmcp_LIB} ${X11_Xfont2_LIB} ${X11_Fontenc_LIB} ${FREETYPE_LIBRARIES}
+	${X11_Pixman_LIB} sha1 ${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
+	vncauth m pthread ${PAM_LIB} ${EXTRA_LIB})
 if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	find_library(ICONV_LIBRARIES NAMES iconv)
 	target_link_libraries(Xvnc ${ICONV_LIBRARIES})

@@ -418,7 +418,7 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     return rfbEDSResultNoResources;
   }
 
-  rfbFB.blockUpdates = TRUE;
+  rfbFB.blockUpdates = newFB.blockUpdates = TRUE;
   xf86SetRootClip(pScreen, FALSE);
 
   if (!pScreen->ModifyPixmapHeader(rootPixmap, newFB.width, newFB.height,

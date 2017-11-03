@@ -120,6 +120,15 @@ launched with `-depth 30`.  This is mainly useful for application testing at
 the moment, since the pixels are downsampled to 8-bit RGB prior to
 transmission.
 
+13. Introduced a new CMake variable (`TVNC_SYSTEMLIBS`) that, when enabled,
+will cause the TurboVNC Server to be built against the system-supplied versions
+of zlib, bzip2, and FreeType.
+
+14. Introduced a new CMake variable (`TVNC_SYSTEMX11`) that, when enabled,
+will cause the TurboVNC Server to be built against the system-supplied versions
+of the X11 and OpenGL headers and libraries.  This will probably fail unless
+the system is using xorg-server 1.19.x or later.
+
 
 2.1.2
 =====

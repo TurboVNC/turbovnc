@@ -1,4 +1,4 @@
-include_directories(../../../bzip2)
+include_directories(${BZIP2_INCLUDE_DIR})
 
 add_library(fontfile OBJECT
 	bitsource.c
