@@ -1036,8 +1036,8 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
     int ret;
 #endif
 
-    WRITE(&serverVersion.minor, 1);
     WRITE(&serverVersion.major, 1);
+    WRITE(&serverVersion.minor, 1);
     rfbUncorkSock(cl->sock);
     rfbCorkSock(cl->sock);
     READ(&clientVersion, 2);
