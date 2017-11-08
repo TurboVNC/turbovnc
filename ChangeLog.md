@@ -132,6 +132,13 @@ the system is using xorg-server 1.19.x or later.
 15. Fixed a bug in the TurboVNC Server's VeNCrypt implementation that prevented
 it from working properly with LibVNCClient.
 
+16. The TurboVNC Server and Windows TurboVNC Viewer, when built with
+`TVNC_SYSTEMLIBS=0` (which is the default), now incorporate the Intel zlib
+library, which accelerates zlib encoding and decoding significantly on
+SSE2-equipped CPUs.  This improves the end-to-end performance of the Lossless
+Tight + Zlib encoding method, and of non-JPEG (low-color-depth) subrectangles
+encoded with one of the Tight + JPEG encoding methods, by approximately 20-40%.
+
 
 2.1.2
 =====
