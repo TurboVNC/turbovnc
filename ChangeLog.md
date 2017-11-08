@@ -129,7 +129,7 @@ will cause the TurboVNC Server to be built against the system-supplied versions
 of the X11 and OpenGL headers and libraries.  This will probably fail unless
 the system is using xorg-server 1.19.x or later.
 
-3. Fixed a bug in the TurboVNC Server's VeNCrypt implementation that prevented
+15. Fixed a bug in the TurboVNC Server's VeNCrypt implementation that prevented
 it from working properly with LibVNCClient.
 
 
