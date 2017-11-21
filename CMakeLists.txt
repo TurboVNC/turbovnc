@@ -166,7 +166,7 @@ if(USEC)
 	endif()
 	message(STATUS "${BITS}-bit build (${CPU_TYPE})")
 endif()
-if(TVNC_BUILDNATIVE OR TVNC_BUILDSERVER)
+if((WIN32 AND TVNC_BUILDNATIVE) OR TVNC_BUILDSERVER)
 	include(cmakescripts/FindTurboJPEG.cmake)
 endif()
 
