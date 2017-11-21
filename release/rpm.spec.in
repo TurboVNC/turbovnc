@@ -248,6 +248,7 @@ fi
 %endif
 %if "%{server}" == "1"
  %{bindir}/Xvnc
+ %{bindir}/tvncconfig
  %{bindir}/vncserver
  %{bindir}/xstartup.turbovnc
  %{bindir}/vncpasswd
@@ -264,6 +265,7 @@ fi
 %if "%{server}" == "1"
  %{mandir}/man1/Xvnc.1*
  %{mandir}/man1/Xserver.1*
+ %{mandir}/man1/tvncconfig.1*
  %{mandir}/man1/vncserver.1*
  %{mandir}/man1/vncconnect.1*
  %{mandir}/man1/vncpasswd.1*

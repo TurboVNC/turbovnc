@@ -863,11 +863,12 @@ extern int rfbMaxWidth, rfbMaxHeight;
 
 extern Bool rfbAlwaysShared;
 extern Bool rfbNeverShared;
-extern Bool rfbDontDisconnect;
+extern Bool rfbDisconnect;
 extern Bool rfbViewOnly;  /* run server in view-only mode - Ehud Karni SW */
 extern Bool rfbSyncCutBuffer;
 extern Bool rfbCongestionControl;
 extern double rfbAutoLosslessRefresh;
+extern Bool rfbALRAll;
 extern int rfbALRQualityLevel;
 extern int rfbALRSubsampLevel;
 extern int rfbInterframe;
@@ -964,6 +965,7 @@ char *strsep(char **stringp, const char *delim);
 
 #define TVNC_SAMPOPT 4
 enum { TVNC_1X = 0, TVNC_4X, TVNC_2X, TVNC_GRAY };
+static const char subsampStr[TVNC_SAMPOPT][5] = { "1X", "4X", "2X", "Gray" };
 #define TIGHT_DEFAULT_COMPRESSION  1
 #define TIGHT_DEFAULT_SUBSAMP      TVNC_1X
 #define TIGHT_DEFAULT_QUALITY      95

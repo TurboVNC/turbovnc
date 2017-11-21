@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011, 2013-2015, 2017-2018 D. R. Commander.
- *                                          All Rights Reserved.
+ * Copyright (C) 2011, 2013-2015, 2017-2018, 2021 D. R. Commander.
+ *                                                All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,43 @@ typedef struct _VncInputSelect {
 static int vncErrorBase = 0;
 static int vncEventBase = 0;
 
+enum VncParamType { VNC_BOOL = 0, VNC_BOOL_AUTO, VNC_DOUBLE, VNC_INT,
+                    VNC_SUBSAMP };
+
+typedef struct _VncParam {
+  const char *name;
+  void *ptr;
+  enum VncParamType type;
+  double min, max;
+  const char *desc;
+} VncParam;
+
+#define NUM_PARAMS 8
+
+VncParam params[NUM_PARAMS] =
+{
+  { "AlwaysShared", (void *)&rfbAlwaysShared, VNC_BOOL, 0.0, 1.0,
+    "Always treat new connections as shared" },
+  { "Disconnect", (void *)&rfbDisconnect, VNC_BOOL, 0.0, 1.0,
+    "Disconnect existing viewers when a new non-shared connection comes in, "
+    "rather than refusing the new connection" },
+  { "NeverShared", (void *)&rfbNeverShared, VNC_BOOL, 0.0, 1.0,
+    "Never treat new connections as shared" },
+  { "ALR", (void *)&rfbAutoLosslessRefresh, VNC_DOUBLE, 0.0, 3600.0,
+    "Automatic lossless refresh timeout (0.0 = ALR disabled)" },
+  { "ALRAll", (void *)&rfbALRAll, VNC_BOOL, 0.0, 1.0,
+    "True = Make all screen regions eligible for ALR; False = Make only "
+    "regions affected by PutImage operations eligible for ALR" },
+  { "ALRQual", (void *)&rfbALRQualityLevel, VNC_INT, -1.0, 100.0,
+    "Automatic lossless refresh JPEG quality (-1 = send ALR using "
+    "mathematically lossless image rather than JPEG image)" },
+  { "ALRSamp", (void *)&rfbALRSubsampLevel, VNC_SUBSAMP, 0.0, 3.0,
+    "Automatic lossless refresh JPEG chroma subsampling (1x, 2x, 4x, or "
+    "gray)" },
+  { "Interframe", (void *)&rfbInterframe, VNC_BOOL_AUTO, -1.0, 1.0,
+     "Use interframe comparison (Auto = determined by compression level)" }
+};
+
 
 void vncExtensionInit(void)
 {
@@ -112,6 +149,277 @@ static void vncClientStateChange(CallbackListPtr *callbacks, pointer data,
       nextPtr = &cur->next;
     }
   }
+}
+
+
+static int ProcVncExtSetParam(ClientPtr client)
+{
+  xVncExtSetParamReply rep;
+  int i;
+  char *name, *str, *value;
+
+  REQUEST(xVncExtSetParamReq);
+  REQUEST_FIXED_SIZE(xVncExtSetParamReq, stuff->paramLen);
+  str = (char *)rfbAlloc(stuff->paramLen + 1);
+  strncpy(str, (char *)&stuff[1], stuff->paramLen);
+  str[stuff->paramLen] = 0;
+
+  rep.type = X_Reply;
+  rep.length = 0;
+  rep.sequenceNumber = client->sequence;
+  rep.success = 0;
+
+  name = str;
+  value = strstr(str, "=");
+  if (value) *value++ = '\0';
+
+  if (value) {
+    for (i = 0; i < NUM_PARAMS; i++) {
+      if (!strcasecmp(name, params[i].name)) {
+        switch (params[i].type) {
+          case VNC_BOOL:
+            if (!strcmp(value, "1") || !strncasecmp(value, "on", 2) ||
+                toupper(value[0]) == 'T' || toupper(value[0]) == 'Y') {
+              *(Bool *)params[i].ptr = TRUE;
+              rep.success = 1;
+            }
+            else if (!strcmp(value, "0") || !strncasecmp(value, "of", 2) ||
+                     toupper(value[0]) == 'F' || toupper(value[0]) == 'N') {
+              *(Bool *)params[i].ptr = FALSE;
+              rep.success = 1;
+            }
+            break;
+          case VNC_BOOL_AUTO:
+            if (!strcmp(value, "-1") || toupper(value[0]) == 'A') {
+              *(int *)params[i].ptr = -1;
+              rep.success = 1;
+            }
+            else if (!strcmp(value, "1") || !strncasecmp(value, "on", 2) ||
+                     toupper(value[0]) == 'T' || toupper(value[0]) == 'Y') {
+              *(int *)params[i].ptr = 1;
+              rep.success = 1;
+            }
+            else if (!strcmp(value, "0") || !strncasecmp(value, "of", 2) ||
+                     toupper(value[0]) == 'F' || toupper(value[0]) == 'N') {
+              *(int *)params[i].ptr = 0;
+              rep.success = 1;
+            }
+            break;
+          case VNC_DOUBLE:
+          {
+            double tmp;
+            if (sscanf(value, "%lf", &tmp) == 1 && tmp >= params[i].min &&
+                tmp <= params[i].max) {
+              *(double *)params[i].ptr = tmp;
+              rep.success = 1;
+            }
+            break;
+          }
+          case VNC_INT:
+          {
+            int tmp;
+            if (sscanf(value, "%d", &tmp) == 1 && tmp >= (int)params[i].min &&
+                tmp <= (int)params[i].max) {
+              *(int *)params[i].ptr = tmp;
+              rep.success = 1;
+            }
+            break;
+          }
+          case VNC_SUBSAMP:
+          {
+            int s;
+            for (s = 0; s < TVNC_SAMPOPT; s++) {
+              if (toupper(value[0]) == toupper(subsampStr[s][0]) ||
+                  (s == TVNC_GRAY && value[0] == '0')) {
+                *(int *)params[i].ptr = s;
+                rep.success = 1;
+                break;
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  if (client->swapped) {
+    swaps(&rep.sequenceNumber);
+    swapl(&rep.length);
+  }
+  WriteToClient(client, sizeof(xVncExtSetParamReply), (char *)&rep);
+  free(str);
+  return (client->noClientException);
+}
+
+
+static int SProcVncExtSetParam(ClientPtr client)
+{
+  REQUEST(xVncExtSetParamReq);
+  swaps(&stuff->length);
+  REQUEST_AT_LEAST_SIZE(xVncExtSetParamReq);
+  return ProcVncExtSetParam(client);
+}
+
+
+static int ProcVncExtGetParam(ClientPtr client)
+{
+  xVncExtGetParamReply rep;
+  int i, len = 0;
+  char *str, temps[80], *value = NULL;
+
+  REQUEST(xVncExtGetParamReq);
+  REQUEST_FIXED_SIZE(xVncExtGetParamReq, stuff->paramLen);
+  str = (char *)rfbAlloc(stuff->paramLen + 1);
+  strncpy(str, (char *)&stuff[1], stuff->paramLen);
+  str[stuff->paramLen] = 0;
+
+  rep.type = X_Reply;
+  rep.sequenceNumber = client->sequence;
+  rep.success = 0;
+
+  #define BOOL_STR(var) ((var) ? "True" : "False")
+  #define BOOL_AUTO_STR(var) ((var) < 0 ? "Auto" : BOOL_STR(var))
+
+  for (i = 0; i < NUM_PARAMS; i++) {
+    if (!strcasecmp(str, params[i].name)) {
+      switch (params[i].type) {
+        case VNC_BOOL:
+          snprintf(temps, 80, "%s", BOOL_STR(*(Bool *)params[i].ptr));
+          break;
+        case VNC_BOOL_AUTO:
+          snprintf(temps, 80, "%s", BOOL_AUTO_STR(*(int *)params[i].ptr));
+          break;
+        case VNC_DOUBLE:
+          snprintf(temps, 80, "%f", *(double *)params[i].ptr);
+          break;
+        case VNC_INT:
+          snprintf(temps, 80, "%d", *(int *)params[i].ptr);
+          break;
+        case VNC_SUBSAMP:
+          snprintf(temps, 80, "%s", subsampStr[*(int *)params[i].ptr]);
+          break;
+      }
+      value = temps;
+      rep.success = 1;
+      len = strlen(value);
+    }
+  }
+
+  rep.length = (len + 3) >> 2;
+  rep.valueLen = len;
+  if (client->swapped) {
+    swaps(&rep.sequenceNumber);
+    swapl(&rep.length);
+    swaps(&rep.valueLen);
+  }
+  WriteToClient(client, sizeof(xVncExtGetParamReply), (char *)&rep);
+  if (value)
+    WriteToClient(client, len, value);
+  free(str);
+  return client->noClientException;
+}
+
+
+static int SProcVncExtGetParam(ClientPtr client)
+{
+  REQUEST(xVncExtGetParamReq);
+  swaps(&stuff->length);
+  REQUEST_AT_LEAST_SIZE(xVncExtGetParamReq);
+  return ProcVncExtGetParam(client);
+}
+
+
+static int ProcVncExtGetParamDesc(ClientPtr client)
+{
+  xVncExtGetParamDescReply rep;
+  int i, len = 0;
+  const char *desc = NULL;
+  char *str;
+
+  REQUEST(xVncExtGetParamDescReq);
+  REQUEST_FIXED_SIZE(xVncExtGetParamDescReq, stuff->paramLen);
+  str = (char *)rfbAlloc(stuff->paramLen + 1);
+  strncpy(str, (char *)&stuff[1], stuff->paramLen);
+  str[stuff->paramLen] = 0;
+
+  rep.type = X_Reply;
+  rep.sequenceNumber = client->sequence;
+  rep.success = 0;
+
+  for (i = 0; i < NUM_PARAMS; i++) {
+    if (!strcasecmp(str, params[i].name)) {
+      desc = params[i].desc;
+      rep.success = 1;
+      len = strlen(desc);
+    }
+  }
+
+  rep.length = (len + 3) >> 2;
+  rep.descLen = len;
+  if (client->swapped) {
+    swaps(&rep.sequenceNumber);
+    swapl(&rep.length);
+    swaps(&rep.descLen);
+  }
+  WriteToClient(client, sizeof(xVncExtGetParamDescReply), (char *)&rep);
+  if (desc)
+    WriteToClient(client, len, (char *)desc);
+  free(str);
+  return client->noClientException;
+}
+
+
+static int SProcVncExtGetParamDesc(ClientPtr client)
+{
+  REQUEST(xVncExtGetParamDescReq);
+  swaps(&stuff->length);
+  REQUEST_AT_LEAST_SIZE(xVncExtGetParamDescReq);
+  return ProcVncExtGetParamDesc(client);
+}
+
+
+static int ProcVncExtListParams(ClientPtr client)
+{
+  xVncExtListParamsReply rep;
+  int i, len = 0;
+  char *ptr, *str;
+
+  REQUEST_SIZE_MATCH(xVncExtListParamsReq);
+
+  rep.type = X_Reply;
+  rep.sequenceNumber = client->sequence;
+
+  for (i = 0; i < NUM_PARAMS; i++)
+    len += strlen(params[i].name) + 1;
+  str = (char *)rfbAlloc(len);
+  ptr = str;
+  for (i = 0; i < NUM_PARAMS; i++) {
+    *ptr++ = strlen(params[i].name);
+    memcpy(ptr, params[i].name, strlen(params[i].name));
+    ptr += strlen(params[i].name);
+  }
+
+  rep.length = (len + 3) >> 2;
+  rep.nParams = NUM_PARAMS;
+  if (client->swapped) {
+    swaps(&rep.sequenceNumber);
+    swapl(&rep.length);
+    swaps(&rep.nParams);
+  }
+  WriteToClient(client, sizeof(xVncExtListParamsReply), (char *)&rep);
+  WriteToClient(client, len, str);
+  free(str);
+  return client->noClientException;
+}
+
+
+static int SProcVncExtListParams(ClientPtr client)
+{
+  REQUEST(xVncExtListParamsReq);
+  swaps(&stuff->length);
+  REQUEST_SIZE_MATCH(xVncExtListParamsReq);
+  return ProcVncExtListParams(client);
 }
 
 
@@ -224,6 +532,14 @@ static int ProcVncExtDispatch(ClientPtr client)
 {
   REQUEST(xReq);
   switch (stuff->data) {
+    case X_VncExtSetParam:
+      return ProcVncExtSetParam(client);
+    case X_VncExtGetParam:
+      return ProcVncExtGetParam(client);
+    case X_VncExtGetParamDesc:
+      return ProcVncExtGetParamDesc(client);
+    case X_VncExtListParams:
+      return ProcVncExtListParams(client);
     case X_VncExtSelectInput:
       return ProcVncExtSelectInput(client);
     case X_VncExtConnect:
@@ -238,6 +554,14 @@ static int SProcVncExtDispatch(ClientPtr client)
 {
   REQUEST(xReq);
   switch (stuff->data) {
+    case X_VncExtSetParam:
+      return SProcVncExtSetParam(client);
+    case X_VncExtGetParam:
+      return SProcVncExtGetParam(client);
+    case X_VncExtGetParamDesc:
+      return SProcVncExtGetParamDesc(client);
+    case X_VncExtListParams:
+      return SProcVncExtListParams(client);
     case X_VncExtSelectInput:
       return SProcVncExtSelectInput(client);
     case X_VncExtConnect:

@@ -28,11 +28,6 @@ extern "C" {
 #define X_VncExtListParams 3
 #define X_VncExtSelectInput 6
 #define X_VncExtConnect 7
-#define X_VncExtGetQueryConnect 8
-#define X_VncExtApproveConnect 9
-
-#define VncExtQueryConnectNotify 2
-#define VncExtQueryConnectMask (1 << VncExtQueryConnectNotify)
 
 #define VncExtNumberEvents 3
 #define VncExtNumberErrors 0
@@ -45,20 +40,7 @@ Bool XVncExtGetParam(Display* dpy, const char* param, char** value, int* len);
 char* XVncExtGetParamDesc(Display* dpy, const char* param);
 char** XVncExtListParams(Display* dpy, int* nParams);
 void XVncExtFreeParamList(char** list);
-Bool XVncExtSelectInput(Display* dpy, Window w, int mask);
-Bool XVncExtConnect(Display* dpy, char* hostAndPort);
-Bool XVncExtGetQueryConnect(Display* dpy, char** addr,
-                            char** user, int* timeout, void** opaqueId);
-Bool XVncExtApproveConnect(Display* dpy, void* opaqueId, int approve);
-
-
-typedef struct {
-  int type;
-  unsigned long serial;
-  Bool send_event;
-  Display *display;
-  Window window;
-} XVncExtQueryConnectEvent;
+Bool XVncExtConnect(Display* dpy, const char* hostAndPort);
 
 #endif
 
@@ -199,83 +181,6 @@ typedef struct {
  CARD32 pad5 B32;
 } xVncExtConnectReply;
 #define sz_xVncExtConnectReply 32
-
-
-typedef struct {
-  CARD8 reqType;       /* always VncExtReqCode */
-  CARD8 vncExtReqType; /* always VncExtGetQueryConnect */
-  CARD16 length B16;
-} xVncExtGetQueryConnectReq;
-#define sz_xVncExtGetQueryConnectReq 4
-
-typedef struct {
- BYTE type; /* X_Reply */
- BYTE pad0;
- CARD16 sequenceNumber B16;
- CARD32 length B32;
- CARD32 addrLen B32;
- CARD32 userLen B32;
- CARD32 timeout B32;
- CARD32 opaqueId B32;
- CARD32 pad4 B32;
- CARD32 pad5 B32;
-} xVncExtGetQueryConnectReply;
-#define sz_xVncExtGetQueryConnectReply 32
-
-typedef struct {
-  CARD8 reqType;       /* always VncExtReqCode */
-  CARD8 vncExtReqType; /* always VncExtApproveConnect */
-  CARD16 length B16;
-  CARD8 approve;
-  CARD8 pad0;
-  CARD16 pad1;
-  CARD32 opaqueId B32;
-} xVncExtApproveConnectReq;
-#define sz_xVncExtApproveConnectReq 12
-
-
-
-typedef struct {
-  BYTE type;    /* always eventBase + VncExtClientCutTextNotify */
-  BYTE pad0;
-  CARD16 sequenceNumber B16;
-  CARD32 window B32;
-  CARD32 time B32;
-  CARD32 pad1 B32;
-  CARD32 pad2 B32;
-  CARD32 pad3 B32;
-  CARD32 pad4 B32;
-  CARD32 pad5 B32;
-} xVncExtClientCutTextNotifyEvent;
-#define sz_xVncExtClientCutTextNotifyEvent 32
-
-typedef struct {
-  BYTE type;    /* always eventBase + VncExtSelectionChangeNotify */
-  BYTE pad0;
-  CARD16 sequenceNumber B16;
-  CARD32 window B32;
-  CARD32 selection B32;
-  CARD32 pad1 B32;
-  CARD32 pad2 B32;
-  CARD32 pad3 B32;
-  CARD32 pad4 B32;
-  CARD32 pad5 B32;
-} xVncExtSelectionChangeNotifyEvent;
-#define sz_xVncExtSelectionChangeNotifyEvent 32
-
-typedef struct {
-  BYTE type;    /* always eventBase + VncExtQueryConnectNotify */
-  BYTE pad0;
-  CARD16 sequenceNumber B16;
-  CARD32 window B32;
-  CARD32 pad6 B32;
-  CARD32 pad1 B32;
-  CARD32 pad2 B32;
-  CARD32 pad3 B32;
-  CARD32 pad4 B32;
-  CARD32 pad5 B32;
-} xVncExtQueryConnectNotifyEvent;
-#define sz_xVncExtQueryConnectNotifyEvent 32
 
 #endif
 

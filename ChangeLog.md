@@ -171,6 +171,11 @@ disabled cursor shape updates.)
 from TigerVNC v1.9.0 and later, for improved performance on
 high-latency/low-bandwidth networks.
 
+24. The automatic lossless refresh (ALR), interframe comparison, and sharing
+parameters can now be configured dynamically for a running TurboVNC session,
+using the newly repurposed `tvncconfig` program (or the `vncconfig` program
+from any RealVNC-compatible VNC implementation.)
+
 
 2.2.6
 =====

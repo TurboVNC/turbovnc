@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "January 2021" "" "TurboVNC"
+.TH Xvnc 1 "March 2021" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -42,7 +42,9 @@ untrusted network.
 Xvnc supports many standard X server options and a number of
 VNC-specific options.  To see which standard X server options are
 supported, please look at the output of \fBXvnc\fR \fI\-help\fR and read
-the \fBXserver\fR(1) manual page.
+the \fBXserver\fR(1) manual page.  Some command-line options have equivalent
+"Xvnc parameters" that can be configured dynamically using the
+\fBtvncconfig\fP(1) program.
 
 The VNC-specific options are as follows:
 
@@ -696,7 +698,7 @@ tunneling or another suitable encryption mechanism is enforced, then the use of
 these authentication schemes will result in Unix passwords being sent
 unencrypted over the network.
 .SH SEE ALSO
-\fBvncserver\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1),
+\fBtvncconfig\fR(1), \fBvncserver\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1),
 \fBvncconnect\fR(1), \fBsshd\fR(1)
 .SH AUTHORS
 VNC was originally developed at AT&T Laboratories Cambridge.  TightVNC

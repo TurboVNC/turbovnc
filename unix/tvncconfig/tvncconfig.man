@@ -1,0 +1,82 @@
+'\" t
+.\" ** The above line should force tbl to be a preprocessor **
+.\" Man page for tvncconfig
+.\"
+.\" Copyright (C) 2001-2003 Constantin Kaplinsky
+.\" Copyright (C) 2002-2005 RealVNC Ltd
+.\" Copyright (C) 2005 Sun Microsystems, Inc.
+.\" Copyright (C) 2021 D. R. Commander.
+.\"
+.\" You may distribute under the terms of the GNU General Public
+.\" License as specified in the file LICENCE.TXT that comes with the
+.\" TurboVNC distribution.
+.\"
+.TH tvncconfig 1 "March 2021" "" "TurboVNC"
+.SH NAME
+tvncconfig \- configure and control a VNC server
+.SH SYNOPSIS
+.B tvncconfig
+.RI [ options ]
+.RB [ -set ]
+.IR Xvnc-param = value " ..."
+.br
+.B tvncconfig
+.RI [ options ]
+.B \-list
+.br
+.B tvncconfig
+.RI [ options ]
+\fB\-get\fP \fIXvnc-param\fP
+.br
+.B tvncconfig
+.RI [ options ]
+\fB\-desc\fP \fIXvnc-param\fP
+.SH DESCRIPTION
+.B tvncconfig
+can be used to set and retrieve Xvnc parameters.
+
+Note that the DISPLAY environment variable or the \fB\-display\fP option
+must be set as appropriate to control Xvnc.  If you run
+.B tvncconfig
+on an ordinary X server, you will get an error message saying that there is no
+VNC extension.
+
+.SH OPTIONS
+.TP
+[\fB-set\fP] \fIXvnc-param\fP=\fIvalue\fP
+Set an Xvnc parameter to the given value.
+
+.TP
+.B \-list
+List all of the parameters supported by Xvnc.
+
+.TP
+.B \-get \fIXvnc-param\fP
+Print the current value of the given Xvnc parameter.
+
+.TP
+.B \-desc \fIXvnc-param\fP
+Print a short description of the given Xvnc parameter.
+
+.TP
+.B \-display \fIVNC-display\fP
+Specify the Xvnc server to control.
+
+.TP
+.B \-verbose
+Print descriptions with \fB-get\fR and \fB-list\fR.
+
+.SH SEE ALSO
+.BR Xvnc (1)
+.br
+.SH AUTHORS
+VNC was originally developed at AT&T Laboratories Cambridge. TightVNC
+additions were implemented by Constantin Kaplinsky. TurboVNC, based
+on TightVNC, is provided by The VirtualGL Project. Many other people
+participated in development, testing and support.
+
+\fBMan page authors:\fR
+.br
+Tristan Richardson, RealVNC Ltd.
+.br
+D. R. Commander <information@turbovnc.org>

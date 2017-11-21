@@ -231,12 +231,12 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 
   if (strcasecmp(argv[i], "-disconnect") == 0) {
-    rfbDontDisconnect = FALSE;
+    rfbDisconnect = TRUE;
     return 1;
   }
 
   if (strcasecmp(argv[i], "-dontdisconnect") == 0) {
-    rfbDontDisconnect = TRUE;
+    rfbDisconnect = FALSE;
     return 1;
   }
 
@@ -538,19 +538,17 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 
   if (strcasecmp(argv[i], "-alrsamp") == 0) {
+    int s;
     REQUIRE_ARG();
-    switch (toupper(argv[i + 1][0])) {
-      case 'G': case '0':
-        rfbALRSubsampLevel = TVNC_GRAY;  break;
-      case '1':
-        rfbALRSubsampLevel = TVNC_1X;  break;
-      case '2':
-        rfbALRSubsampLevel = TVNC_2X;  break;
-      case '4':
-        rfbALRSubsampLevel = TVNC_4X;  break;
-      default:
-        UseMsg();
-        exit(1);
+    for (s = 0; s < TVNC_SAMPOPT; s++) {
+      if (toupper(argv[i + 1][0]) == toupper(subsampStr[s][0]) ||
+          (s == TVNC_GRAY && argv[i + 1][0] == '0')) {
+        rfbALRSubsampLevel = s;  break;
+      }
+    }
+    if (s >= TVNC_SAMPOPT) {
+      UseMsg();
+      exit(1);
     }
     return 2;
   }

@@ -16,15 +16,13 @@
  * USA.
  */
 #include <stdio.h>
+#include <stdint.h>
 
 #define NEED_REPLIES
 #include <X11/Xlib.h>
 #include <X11/Xlibint.h>
 #define _VNCEXT_PROTO_
 #include "vncExt.h"
-
-static Bool XVncExtQueryConnectNotifyWireToEvent(Display* dpy, XEvent* e,
-                                                 xEvent* w);
 
 static Bool extensionInited = False;
 static XExtCodes* codes = 0;
@@ -35,8 +33,6 @@ static Bool checkExtension(Display* dpy)
     extensionInited = True;
     codes = XInitExtension(dpy, VNCEXTNAME);
     if (!codes) return False;
-    XESetWireToEvent(dpy, codes->first_event + VncExtQueryConnectNotify,
-                     XVncExtQueryConnectNotifyWireToEvent);
   }
   return codes != 0;
 }
@@ -101,6 +97,10 @@ Bool XVncExtGetParam(Display* dpy, const char* param, char** value, int* len)
   if (rep.success) {
     *len = rep.valueLen;
     *value = (char*) Xmalloc (*len+1);
+    if (!*value) {
+      _XEatData(dpy, (*len+1)&~1);
+      return False;
+    }
     _XReadPad(dpy, *value, *len);
     (*value)[*len] = 0;
   }
@@ -133,6 +133,10 @@ char* XVncExtGetParamDesc(Display* dpy, const char* param)
   }
   if (rep.success) {
     desc = (char*)Xmalloc(rep.descLen+1);
+    if (!desc) {
+      _XEatData(dpy, (rep.descLen+1)&~1);
+      return False;
+    }
     _XReadPad(dpy, desc, rep.descLen);
     desc[rep.descLen] = 0;
   }
@@ -197,24 +201,7 @@ void XVncExtFreeParamList(char** list)
   }
 }
 
-Bool XVncExtSelectInput(Display* dpy, Window w, int mask)
-{
-  xVncExtSelectInputReq* req;
-
-  if (!checkExtension(dpy)) return False;
-
-  LockDisplay(dpy);
-  GetReq(VncExtSelectInput, req);
-  req->reqType = codes->major_opcode;
-  req->vncExtReqType = X_VncExtSelectInput;
-  req->window = w;
-  req->mask = mask;
-  UnlockDisplay(dpy);
-  SyncHandle();
-  return True;
-}
-
-Bool XVncExtConnect(Display* dpy, char* hostAndPort)
+Bool XVncExtConnect(Display* dpy, const char* hostAndPort)
 {
   xVncExtConnectReq* req;
   xVncExtConnectReply rep;
@@ -238,67 +225,4 @@ Bool XVncExtConnect(Display* dpy, char* hostAndPort)
   UnlockDisplay(dpy);
   SyncHandle();
   return rep.success;
-}
-
-Bool XVncExtGetQueryConnect(Display* dpy, char** addr, char** user,
-                            int* timeout, void** opaqueId)
-{
-  xVncExtGetQueryConnectReq* req;
-  xVncExtGetQueryConnectReply rep;
-
-  if (!checkExtension(dpy)) return False;
-
-  LockDisplay(dpy);
-  GetReq(VncExtGetQueryConnect, req);
-  req->reqType = codes->major_opcode;
-  req->vncExtReqType = X_VncExtGetQueryConnect;
-  if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
-    UnlockDisplay(dpy);
-    SyncHandle();
-    return False;
-  }
-  UnlockDisplay(dpy);
-  SyncHandle();
-
-  *addr = Xmalloc(rep.addrLen+1);
-  _XReadPad(dpy, *addr, rep.addrLen);
-  (*addr)[rep.addrLen] = 0;
-  *user = Xmalloc(rep.userLen+1);
-  _XReadPad(dpy, *user, rep.userLen);
-  (*user)[rep.userLen] = 0;
-  *timeout = rep.timeout;
-  *opaqueId = (void*)(long)rep.opaqueId;
-  return True;
-}
-
-Bool XVncExtApproveConnect(Display* dpy, void* opaqueId, int approve)
-{
-  xVncExtApproveConnectReq* req;
-
-  if (!checkExtension(dpy)) return False;
-
-  LockDisplay(dpy);
-  GetReq(VncExtApproveConnect, req);
-  req->reqType = codes->major_opcode;
-  req->vncExtReqType = X_VncExtApproveConnect;
-  req->approve = approve;
-  req->opaqueId = (CARD32)(long)opaqueId;
-  UnlockDisplay(dpy);
-  SyncHandle();
-  return True;
-}
-
-
-static Bool XVncExtQueryConnectNotifyWireToEvent(Display* dpy, XEvent* e,
-                                                    xEvent* w)
-{
-  XVncExtQueryConnectEvent* ev = (XVncExtQueryConnectEvent*)e;
-  xVncExtQueryConnectNotifyEvent* wire
-    = (xVncExtQueryConnectNotifyEvent*)w;
-  ev->type = wire->type & 0x7f;
-  ev->serial = _XSetLastRequestRead(dpy,(xGenericReply*)wire);
-  ev->send_event = (wire->type & 0x80) != 0;
-  ev->display = dpy;
-  ev->window = wire->window;
-  return True;
 }

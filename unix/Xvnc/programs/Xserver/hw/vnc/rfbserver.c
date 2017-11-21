@@ -66,11 +66,12 @@ rfbClientPtr pointerOwner = NULL;
 
 Bool rfbAlwaysShared = FALSE;
 Bool rfbNeverShared = FALSE;
-Bool rfbDontDisconnect = TRUE;
+Bool rfbDisconnect = FALSE;
 Bool rfbViewOnly = FALSE;  /* run server in view only mode - Ehud Karni SW */
 Bool rfbSyncCutBuffer = TRUE;
 Bool rfbCongestionControl = TRUE;
 double rfbAutoLosslessRefresh = 0.0;
+Bool rfbALRAll = FALSE;
 int rfbALRQualityLevel = -1;
 int rfbALRSubsampLevel = TVNC_1X;
 int rfbCombineRect = 100;
@@ -160,7 +161,7 @@ double gettime(void)
  * Auto Lossless Refresh
  */
 
-static Bool putImageOnly = TRUE, alrCopyRect = TRUE;
+static Bool alrCopyRect = TRUE;
 
 static CARD32 alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
@@ -172,7 +173,7 @@ static CARD32 alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
   RegionRec tmpRegion;
 
   REGION_INIT(pScreen, &tmpRegion, NullBox, 0);
-  if (putImageOnly && !cl->firstUpdate)
+  if (!rfbALRAll && !cl->firstUpdate)
     REGION_INTERSECT(pScreen, &tmpRegion, &cl->alrRegion, &cl->lossyRegion);
   else
     REGION_COPY(pScreen, &tmpRegion, &cl->lossyRegion);
@@ -455,7 +456,7 @@ static rfbClientPtr rfbNewClient(int sock)
   if (rfbAutoLosslessRefresh > 0.0) {
     REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
     if ((env = getenv("TVNC_ALRALL")) != NULL && !strcmp(env, "1"))
-      putImageOnly = FALSE;
+      rfbALRAll = TRUE;
     if ((env = getenv("TVNC_ALRCOPYRECT")) != NULL && !strcmp(env, "0"))
       alrCopyRect = FALSE;
     REGION_INIT(pScreen, &cl->alrRegion, NullBox, 0);
@@ -750,7 +751,7 @@ static void rfbProcessClientInitMessage(rfbClientPtr cl)
   if (!cl->reverseConnection &&
       (rfbNeverShared || (!rfbAlwaysShared && !ci.shared))) {
 
-    if (rfbDontDisconnect) {
+    if (!rfbDisconnect) {
       for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
         if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
           rfbLog("-dontdisconnect: Not shared & existing client\n");
@@ -2260,11 +2261,11 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   }
 
   if (rfbAutoLosslessRefresh > 0.0 && !redundantUpdate && !cl->inALR &&
-      (!putImageOnly || REGION_NOTEMPTY(pScreen, &cl->alrEligibleRegion) ||
+      (rfbALRAll || REGION_NOTEMPTY(pScreen, &cl->alrEligibleRegion) ||
        cl->firstUpdate)) {
     CARD32 timeout = (CARD32)(rfbAutoLosslessRefresh * 1000.0);
 
-    if (putImageOnly)
+    if (!rfbALRAll)
       REGION_UNION(pScreen, &cl->alrRegion, &cl->alrRegion,
                    &cl->alrEligibleRegion);
     REGION_EMPTY(pScreen, &cl->alrEligibleRegion);
