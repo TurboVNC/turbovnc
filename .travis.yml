@@ -54,6 +54,7 @@ before_install:
         wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm &&
         popd;
       elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        brew update &&
         brew install md5sha1sum &&
         ln -fs /usr/local/bin/gpg1 /usr/local/bin/gpg;
       fi &&
