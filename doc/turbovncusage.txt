@@ -248,6 +248,8 @@ knowledge of web server administration.
 		  <resources os="Mac OS X">
 		    <j2se version="1.8+" java-vm-args="-server"/>
 		    <nativelib href="ljtosx.jar"/>
+		    <!-- Enable drawing tablet support for OS X clients -->
+		    <nativelib href="tvnchelper-osx.jar"/>
 		  </resources>
 
 		  <resources os="Windows" arch="x86">
@@ -267,16 +269,16 @@ knowledge of web server administration.
 		  <resources os="Linux" arch="i386">
 		    <j2se version="1.8+" java-vm-args="-server"/>
 		    <nativelib href="ljtlinux32.jar"/>
-		    <!-- Enable keyboard grabbing and multi-screen spanning for
-		         32-bit Linux clients -->
+		    <!-- Enable keyboard grabbing, multi-screen spanning, and extended
+		         input device support for 32-bit Linux clients -->
 		    <nativelib href="tvnchelper-linux32.jar"/>
 		  </resources>
 
 		  <resources os="Linux" arch="amd64">
 		    <j2se version="1.8+"/>
 		    <nativelib href="ljtlinux64.jar"/>
-		    <!-- Enable keyboard grabbing and multi-screen spanning for
-		         64-bit Linux clients -->
+		    <!-- Enable keyboard grabbing, multi-screen spanning, and extended
+		         input device support for 64-bit Linux clients -->
 		    <nativelib href="tvnchelper-linux64.jar"/>
 		  </resources>
 

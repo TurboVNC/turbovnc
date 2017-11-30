@@ -1430,7 +1430,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       "Encryption protocol:  " + csecurity.getProtocol() + "\n" +
       "JPEG decompression:  " +
         (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
-      (VncViewer.osGrab() ? "\nTurboVNC Helper:  " +
+      (VncViewer.osGrab() || VncViewer.osEID() ? "\nTurboVNC Helper:  " +
         (Viewport.isHelperAvailable() ? "Loaded" : "Not found") : ""),
       JOptionPane.PLAIN_MESSAGE);
     JDialog dlg = pane.createDialog(viewport, "VNC connection info");

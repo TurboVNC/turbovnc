@@ -139,6 +139,12 @@ SSE2-equipped CPUs.  This improves the end-to-end performance of the Lossless
 Tight + Zlib encoding method, and of non-JPEG (low-color-depth) subrectangles
 encoded with one of the Tight + JPEG encoding methods, by approximately 20-40%.
 
+17. The Mac/Java TurboVNC Viewer now includes remote drawing tablet support.
+This feature is implemented using a TurboVNC Helper JNI library, which is
+similar to the TurboVNC Helper included with the Un*x TurboVNC Viewer.  This
+library connects the built-in drawing tablet drivers for OS X with the existing
+remote X Input feature in the Java TurboVNC Viewer.
+
 
 2.1.2
 =====

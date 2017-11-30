@@ -112,7 +112,7 @@ endif() # WIN32
 # Mac DMG
 ###############################################################################
 
-if(APPLE AND TVNC_BUILDJAVA)
+if(APPLE AND TVNC_BUILDJAVA AND TVNC_BUILDNATIVE)
 
 string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "^:" "" CMAKE_INSTALL_MACPREFIX

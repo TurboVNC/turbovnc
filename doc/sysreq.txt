@@ -40,7 +40,7 @@
 
 || || Client ||
 | Recommended CPU \
-	| Any Intel-based Mac \
+	| Any 64-bit Intel-based Mac \
 	|
 | O/S \
 	| OS X 10.7 "Lion" or later \

@@ -118,7 +118,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   public static boolean osEID() {
-    return !os.startsWith("mac os x") && !os.startsWith("windows");
+    return !os.startsWith("windows");
   }
 
   public static boolean osGrab() {

@@ -1,3 +1,24 @@
+if(APPLE AND TVNC_BUILDJAVA)
+
+find_package(JNI REQUIRED)
+
+include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+
+set(HELPER_SOURCES turbovnchelper.m JRSwizzle.m)
+add_library(turbovnchelper SHARED ${HELPER_SOURCES})
+set_source_files_properties(${HELPER_SOURCES} PROPERTIES LANGUAGE C)
+set_target_properties(turbovnchelper PROPERTIES
+	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
+target_link_libraries(turbovnchelper "-framework Cocoa")
+
+add_executable(JavaAppLauncher JavaAppLauncher.m)
+set_source_files_properties(JavaAppLauncher.m PROPERTIES LANGUAGE C)
+target_link_libraries(JavaAppLauncher "-framework Cocoa")
+
+install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
+
+else() # APPLE AND TVNC_BUILDJAVA
+
 include(CheckCSourceCompiles)
 
 include_directories(${X11_INCLUDE_DIR})
@@ -68,3 +89,5 @@ target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${X11_Xi_LIB} ${LIBDL})
 install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
 endif()
+
+endif() # APPLE AND TVNC_BUILDJAVA

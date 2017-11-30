@@ -1,7 +1,0 @@
-CC=gcc
-
-JavaAppLauncher: JavaAppLauncher.m
-	${CC} -I/System/Library/Frameworks/JavaVM.framework/Headers -framework Cocoa -isysroot /Applications/Xcode45.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -mmacosx-version-min=10.7 -o $@ $<
-
-clean:
-	$(RM) JavaAppLauncher

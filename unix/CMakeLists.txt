@@ -23,11 +23,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
 endif()
 
-find_package(X11 REQUIRED)
-
-message(STATUS "X11_X11_LIB = ${X11_X11_LIB}")
-
-include_directories(include)
+if(NOT APPLE OR TVNC_BUILDSERVER)
+	find_package(X11 REQUIRED)
+	message(STATUS "X11_X11_LIB = ${X11_X11_LIB}")
+endif()
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UC)
 
@@ -52,6 +51,8 @@ endif()
 ###############################################################################
 
 if(TVNC_BUILDSERVER)
+
+include_directories(include)
 
 option(TVNC_NVCONTROL
 	"Include fake NV-CONTROL extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"

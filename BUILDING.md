@@ -61,7 +61,9 @@ Build Requirements
     environment.
 
 
-### Mac/Java
+### Mac
+
+- Xcode 4.1 or later (OS X 10.7.x or later SDK required)
 
 - JDK 8 or later
   * Download the
@@ -85,25 +87,16 @@ Build Procedure
 ---------------
 
 
-### Un*x (not Mac)
+### Un*x (including Mac)
 
-The following procedure will build the Java TurboVNC Viewer and some native/X11
-infrastructure to support running it as a standalone application.
-Additionally, if the TurboVNC Server build is enabled (which is the default),
-then this procedure will build the TurboVNC Server and a handful of C
-applications that are used to interface with it.  On most 64-bit systems
-(Solaris being a notable exception), this will build a 64-bit version of
-TurboVNC.  See "Build Recipes" for specific instructions on how to build a
+The following procedure will build the Java TurboVNC Viewer and some native
+glueware to support running it as a standalone application.  Additionally, if
+the TurboVNC Server build is enabled (which is the default on Un*x platforms
+other than Mac), then this procedure will build the TurboVNC Server and a
+handful of C applications that are used to interface with it.  On most 64-bit
+systems (Solaris being a notable exception), this will build a 64-bit version
+of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
 32-bit or 64-bit version of TurboVNC on systems that support both.
-
-    cd {build_directory}
-    cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
-    make
-
-
-### Mac
-
-The following procedure will build the Java TurboVNC Viewer.
 
     cd {build_directory}
     cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
@@ -181,7 +174,7 @@ Build Recipes
 -------------
 
 
-### 32-bit Build on 64-bit Linux/Unix
+### 32-bit Build on 64-bit Linux/Unix (including Mac)
 
 Use export/setenv to set the following environment variables before running
 CMake:

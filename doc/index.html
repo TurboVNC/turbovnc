@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-10-20T19:12:40">
+<meta name="date" content="2017-12-01T11:47:13">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -463,7 +463,7 @@ other VNC distributions without interference.</p>
   </thead>
   <tr class="standard">
     <td class="high standard">Recommended CPU</td>
-    <td class="standard">Any Intel-based Mac</td>
+    <td class="standard">Any 64-bit Intel-based Mac</td>
   </tr>
   <tr class="standard">
     <td class="high standard">O/S</td>
@@ -1044,6 +1044,8 @@ knowledge of web server administration.</p>
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Mac&nbsp;OS&nbsp;X&quot;&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtosx.jar&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;drawing&nbsp;tablet&nbsp;support&nbsp;for&nbsp;OS&nbsp;X&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-osx.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;x86&quot;&gt;
@@ -1063,16 +1065,16 @@ knowledge of web server administration.</p>
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;i386&quot;&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux32.jar&quot;/&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;and&nbsp;multi-screen&nbsp;spanning&nbsp;for
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing,&nbsp;multi-screen&nbsp;spanning,&nbsp;and&nbsp;extended
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input&nbsp;device&nbsp;support&nbsp;for&nbsp;32-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-linux32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;amd64&quot;&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux64.jar&quot;/&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;and&nbsp;multi-screen&nbsp;spanning&nbsp;for
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing,&nbsp;multi-screen&nbsp;spanning,&nbsp;and&nbsp;extended
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input&nbsp;device&nbsp;support&nbsp;for&nbsp;64-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-linux64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 

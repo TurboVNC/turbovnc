@@ -1,6 +1,6 @@
 /*
  * Copyright 2012, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013, D. R. Commander. All rights reserved.
+ * Copyright 2013, 2017, D. R. Commander. All rights reserved.
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -58,7 +58,7 @@ int launch(char *);
 
 char **jargv = NULL;
 int jargc = 0;
-bool firstTime = true; 
+bool firstTime = true;
 
 int main(int argc, char *argv[]) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -150,7 +150,7 @@ int launch(char *commandName) {
     }
 
     // Set the library path
-    NSString *libraryPath = [NSString stringWithFormat:@"-Djava.library.path=%@/Contents/Resources/TurboJPEG", mainBundlePath];
+    NSString *libraryPath = [NSString stringWithFormat:@"-Djava.library.path=%@/Contents/Resources/Native", mainBundlePath];
 
     // Get the VM options
     NSArray *options = [infoDictionary objectForKey:@JVM_OPTIONS_KEY];

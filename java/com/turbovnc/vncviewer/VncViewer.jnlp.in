@@ -31,6 +31,9 @@
   <resources os="Mac OS X">
     <j2se version="1.6+" java-vm-args="-server" />
     <nativelib href="ljtosx.jar"/>
+    <!-- Uncomment if you have the TurboVNC Helper JAR for OS X
+    <nativelib href="tvnchelper-osx.jar"/>
+    -->
   </resources>
 
   <resources os="Windows" arch="x86">
