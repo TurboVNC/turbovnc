@@ -27,7 +27,7 @@ Build Requirements
 
 ### Linux and other Un*x O/S's (except Mac)
 
-- GCC
+- GCC (or a GCC-compatible compiler)
 
 - X11 development kit
 
