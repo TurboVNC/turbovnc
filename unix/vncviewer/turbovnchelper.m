@@ -93,7 +93,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 - (void)newSendEvent:(NSEvent *)event
 {
   JNIEnv *env;
-  bool shouldDetach = false;
+  bool shouldDetach = false, success = true;
 
   switch ([event type]) {
     case NSTabletProximity:
@@ -130,12 +130,12 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
       }
       NSPoint tilt = [event tilt];
       NSPoint location = [event locationInWindow];
-      (*env)->CallVoidMethod(env, g_object, g_methodID, [event type],
-                             location.x, location.y,
-                             [event pressure], tilt.x, tilt.y);
+      success = (*env)->CallBooleanMethod(env, g_object, g_methodID,
+                                          [event type], location.x, location.y,
+                                          [event pressure], tilt.x, tilt.y);
       if (shouldDetach)
         (*g_jvm)->DetachCurrentThread(g_jvm);
-      return;
+      if (success) return;
 
     default:
       break;
@@ -167,7 +167,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
 
   bailif0(g_methodID = (*env)->GetMethodID(env, cls,
                                            "handleTabletEvent",
-                                           "(IDDFFF)V"));
+                                           "(IDDFFF)Z"));
   bailif0(g_methodID_prox = (*env)->GetMethodID(env, cls,
                                                 "handleTabletProximityEvent",
                                                 "(ZI)V"));

@@ -600,32 +600,33 @@ public class Viewport extends JFrame {
                                   final int pointingDeviceType) {
     if (devices == null) return;
 
-    try {
-      SwingUtilities.invokeLater(
-        new Runnable() {
-          public void run() {
-            if (enteringProximity) {
-              switch (pointingDeviceType) {
-              case 1:  // pen
-                lastEvent.deviceID = 0;  // Stylus
-                break;
-              case 3:  // eraser
-                lastEvent.deviceID = 1;  // Eraser
-                break;
-              }
-            } else
-              lastEvent.deviceID = -1;
-          }
-        });
-    } catch (Exception e) {
-      vlog.error("SwingUtilities.invokeLater() failed: " + e.getMessage());
+    synchronized(lastEvent) {
+      if (enteringProximity) {
+        switch (pointingDeviceType) {
+        case 1:  // pen
+          lastEvent.deviceID = 0;  // Stylus
+          break;
+        case 3:  // eraser
+          lastEvent.deviceID = 1;  // Eraser
+          break;
+        }
+      } else
+        lastEvent.deviceID = -1;
     }
   }
 
-  void handleTabletEvent(final int type, final double x, final double y,
+  boolean handleTabletEvent(final int type, final double x, final double y,
                          final float pressure, final float tiltX,
                          final float tiltY) {
-    if (devices == null) return;
+    if (devices == null) return false;
+
+    synchronized(lastEvent) {
+      if (lastEvent.deviceID < 0)
+        // No prior proximity event was received, so we don't know which
+        // tablet device is generating this event.  Punt to the regular
+        // mouse handler.
+        return false;
+    }
 
     final int NSLeftMouseDown = 1;
     final int NSLeftMouseUp = 2;
@@ -642,87 +643,86 @@ public class Viewport extends JFrame {
       SwingUtilities.invokeLater(
         new Runnable() {
           public void run() {
-            if (lastEvent.deviceID < 0)
-              // No prior proximity event was received, so we don't know which
-              // tablet device is generating this event.  Punt.
-              return;
+            synchronized(lastEvent) {
+              Dimension winSize = sp.getSize();
+              java.awt.Point spOffset = sp.getViewport().getViewPosition();
+              ExtInputDevice dev = null;
+              for (ExtInputDevice d : devices) {
+                if (lastEvent.deviceID == d.id && d.remoteID != 0)
+                  dev = d;
+              }
+              if (dev == null)
+                return;
 
-            Dimension winSize = sp.getSize();
-            java.awt.Point spOffset = sp.getViewport().getViewPosition();
-            ExtInputDevice dev = null;
-            for (ExtInputDevice d : devices) {
-              if (lastEvent.deviceID == d.id && d.remoteID != 0)
-                dev = d;
+              if (type == NSLeftMouseDown || type == NSRightMouseDown ||
+                  type == NSOtherMouseDown)
+                lastEvent.type = giiTypes.giiButtonPress;
+              else if (type == NSLeftMouseUp || type == NSRightMouseUp ||
+                       type == NSOtherMouseUp)
+                lastEvent.type = giiTypes.giiButtonRelease;
+              else
+                lastEvent.type = giiTypes.giiValuatorAbsolute;
+
+              lastEvent.buttonNumber = 0;
+              if (type == NSLeftMouseDown || type == NSLeftMouseUp)
+                lastEvent.buttonNumber = 1;
+              else if (type == NSRightMouseDown || type == NSRightMouseUp)
+                lastEvent.buttonNumber = 2;
+              else if (type == NSOtherMouseDown || type == NSOtherMouseUp)
+                lastEvent.buttonNumber = 3;
+
+              lastEvent.firstValuator = 0;
+              lastEvent.numValuators = 5;
+
+              double xtmp = (double)x;
+              if (dx > 0)
+                xtmp -= (double)dx;
+              xtmp += spOffset.x;
+              if (cc.cp.width != cc.desktop.scaledWidth) {
+                xtmp = (cc.desktop.scaleWidthRatio == 1.00) ? xtmp :
+                        xtmp / cc.desktop.scaleWidthRatio;
+              }
+              ExtInputDevice.Valuator v =
+                (ExtInputDevice.Valuator)dev.valuators.get(0);
+              lastEvent.valuators[0] = (int)(xtmp / (double)(cc.cp.width - 1) *
+                                       (double)(v.rangeMax - v.rangeMin) +
+                                       (double)v.rangeMin + 0.5);
+              if (lastEvent.valuators[0] > v.rangeMax)
+                lastEvent.valuators[0] = v.rangeMax;
+              else if (lastEvent.valuators[0] < v.rangeMin)
+                lastEvent.valuators[0] = v.rangeMin;
+
+              double ytmp = (double)sp.getSize().height - y - 1.0;
+              if (dy > 0)
+                ytmp -= (double)dy;
+              ytmp += spOffset.y;
+              if (cc.cp.height != cc.desktop.scaledHeight) {
+                ytmp = (cc.desktop.scaleHeightRatio == 1.00) ? ytmp :
+                       ytmp / cc.desktop.scaleHeightRatio;
+              }
+              v = (ExtInputDevice.Valuator)dev.valuators.get(1);
+              lastEvent.valuators[1] = (int)(ytmp / (double)(cc.cp.height - 1) *
+                                       (double)(v.rangeMax - v.rangeMin) +
+                                       (double)v.rangeMin + 0.5);
+              if (lastEvent.valuators[1] > v.rangeMax)
+                lastEvent.valuators[1] = v.rangeMax;
+              else if (lastEvent.valuators[1] < v.rangeMin)
+                lastEvent.valuators[1] = v.rangeMin;
+
+              lastEvent.valuators[2] = (int)(pressure * 65536.0 + 0.5);
+              lastEvent.valuators[3] = (int)(tiltX * 63.0 + 0.5);
+              lastEvent.valuators[4] = (int)(tiltY * 63.0 + 0.5);
+
+              lastEvent.print();
+              cc.writer().writeGIIEvent(dev, lastEvent);
             }
-            if (dev == null)
-              return;
-
-            if (type == NSLeftMouseDown || type == NSRightMouseDown ||
-                type == NSOtherMouseDown)
-              lastEvent.type = giiTypes.giiButtonPress;
-            else if (type == NSLeftMouseUp || type == NSRightMouseUp ||
-                     type == NSOtherMouseUp)
-              lastEvent.type = giiTypes.giiButtonRelease;
-            else
-              lastEvent.type = giiTypes.giiValuatorAbsolute;
-
-            lastEvent.buttonNumber = 0;
-            if (type == NSLeftMouseDown || type == NSLeftMouseUp)
-              lastEvent.buttonNumber = 1;
-            else if (type == NSRightMouseDown || type == NSRightMouseUp)
-              lastEvent.buttonNumber = 2;
-            else if (type == NSOtherMouseDown || type == NSOtherMouseUp)
-              lastEvent.buttonNumber = 3;
-
-            lastEvent.firstValuator = 0;
-            lastEvent.numValuators = 5;
-
-            double xtmp = (double)x;
-            if (dx > 0)
-              xtmp -= (double)dx;
-            xtmp += spOffset.x;
-            if (cc.cp.width != cc.desktop.scaledWidth) {
-              xtmp = (cc.desktop.scaleWidthRatio == 1.00) ? xtmp :
-                      xtmp / cc.desktop.scaleWidthRatio;
-            }
-            ExtInputDevice.Valuator v =
-              (ExtInputDevice.Valuator)dev.valuators.get(0);
-            lastEvent.valuators[0] = (int)(xtmp / (double)(cc.cp.width - 1) *
-                                     (double)(v.rangeMax - v.rangeMin) +
-                                     (double)v.rangeMin + 0.5);
-            if (lastEvent.valuators[0] > v.rangeMax)
-              lastEvent.valuators[0] = v.rangeMax;
-            else if (lastEvent.valuators[0] < v.rangeMin)
-              lastEvent.valuators[0] = v.rangeMin;
-
-            double ytmp = (double)sp.getSize().height - y - 1.0;
-            if (dy > 0)
-              ytmp -= (double)dy;
-            ytmp += spOffset.y;
-            if (cc.cp.height != cc.desktop.scaledHeight) {
-              ytmp = (cc.desktop.scaleHeightRatio == 1.00) ? ytmp :
-                     ytmp / cc.desktop.scaleHeightRatio;
-            }
-            v = (ExtInputDevice.Valuator)dev.valuators.get(1);
-            lastEvent.valuators[1] = (int)(ytmp / (double)(cc.cp.height - 1) *
-                                     (double)(v.rangeMax - v.rangeMin) +
-                                     (double)v.rangeMin + 0.5);
-            if (lastEvent.valuators[1] > v.rangeMax)
-              lastEvent.valuators[1] = v.rangeMax;
-            else if (lastEvent.valuators[1] < v.rangeMin)
-              lastEvent.valuators[1] = v.rangeMin;
-
-            lastEvent.valuators[2] = (int)(pressure * 65536.0 + 0.5);
-            lastEvent.valuators[3] = (int)(tiltX * 63.0 + 0.5);
-            lastEvent.valuators[4] = (int)(tiltY * 63.0 + 0.5);
-
-            lastEvent.print();
-            cc.writer().writeGIIEvent(dev, lastEvent);
           }
         });
     } catch (Exception e) {
       vlog.error("SwingUtilities.invokeLater() failed: " + e.getMessage());
+      return false;
     }
+    return true;
   }
 
   private native void x11FullScreen(boolean on);
