@@ -89,6 +89,8 @@ public class Viewport extends JFrame {
           grabKeyboardHelper(true);
           keyboardTempUngrabbed = false;
         }
+        if (VncViewer.os.startsWith("mac os x"))
+          setupExtInputHelper();
       }
       public void windowLostFocus(WindowEvent e) {
         if (cc.keyboardGrabbed && isVisible()) {
@@ -96,6 +98,8 @@ public class Viewport extends JFrame {
           grabKeyboardHelper(false);
           keyboardTempUngrabbed = true;
         }
+        if (VncViewer.os.startsWith("mac os x"))
+          cleanupExtInputHelper();
       }
     });
 
@@ -444,7 +448,7 @@ public class Viewport extends JFrame {
         vlog.info("  " + e.toString());
         vlog.info("  Extended input device support may not work correctly.");
       }
-      if (VncViewer.os.startsWith("mac os x")) {
+      if (VncViewer.os.startsWith("mac os x") && devices == null) {
         // Create default devices for Wacom tablet
         for (int i = 0; i < 2; i++) {
           ExtInputDevice dev = new ExtInputDevice();
@@ -627,6 +631,10 @@ public class Viewport extends JFrame {
         // mouse handler.
         return false;
     }
+
+    // Don't handle events that are out of the viewport bounds
+    if ((double)sp.getSize().height - y - 1.0 < 0.0)
+      return false;
 
     final int NSLeftMouseDown = 1;
     final int NSLeftMouseUp = 2;

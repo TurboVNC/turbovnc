@@ -187,6 +187,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   (JNIEnv *env, jobject obj)
 {
+  jclass cls;
+  jfieldID fid;
   NSError *error = NULL;
 
   [NSApplication jr_swizzleMethod:@selector(sendEvent:)
@@ -202,5 +204,11 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   g_methodID = g_methodID_prox = NULL;
   g_jvm = NULL;
 
+  bailif0(cls = (*env)->GetObjectClass(env, obj));
+  SET_LONG(cls, obj, x11dpy, 0);
+
   printf("TurboVNC Helper: Shutting down tablet event interceptor\n");
+
+  bailout:
+  return;
 }
