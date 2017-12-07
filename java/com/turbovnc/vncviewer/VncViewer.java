@@ -264,7 +264,8 @@ public class VncViewer extends javax.swing.JApplet
           frame.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
               synchronized(frame) {
-                if (frame.isVisible() && frame.getExtendedState() == JFrame.NORMAL) {
+                if (frame.isVisible() &&
+                    frame.getExtendedState() == JFrame.NORMAL) {
                   insets = frame.getInsets();
                   frame.notifyAll();
                 }
@@ -290,6 +291,7 @@ public class VncViewer extends javax.swing.JApplet
       vlog.error("  " + e.toString());
     }
   }
+
   public static void setBlitterDefaults() {
     // Java 1.7 and later do not include hardware-accelerated 2D blitting
     // routines on Mac platforms.  They only support OpenGL blitting, and using
