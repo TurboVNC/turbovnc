@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,27 +32,22 @@ public class StringParameter extends VoidParameter {
     values = values_;
   }
 
-  public boolean setParam(String v) {
+  public synchronized boolean setParam(String v) {
     value = v;
     isDefault = false;
     return value != null;
   }
 
-  public boolean setDefaultStr(String v) {
-    value = defValue = v;
-    return defValue != null;
-  }
-
   public String getDefaultStr() { return defValue; }
-  public String getValueStr() { return value; }
+  public synchronized String getValueStr() { return value; }
   public String getValues() { return values; }
 
-  public String getValue() { return value; }
-  public String getData() { return value; }
+  public synchronized String getValue() { return value; }
+  public synchronized String getData() { return value; }
 
   public boolean isDefault = true;
 
   protected String value;
-  protected String defValue;
-  protected String values;
+  protected final String defValue;
+  protected final String values;
 }
