@@ -258,4 +258,3 @@ public class UserPreferences {
 
   static LogWriter vlog = new LogWriter("UserPreferences");
 }
-

@@ -58,7 +58,7 @@ int launch(char *);
 
 char **jargv = NULL;
 int jargc = 0;
-bool firstTime = true; 
+bool firstTime = true;
 
 int main(int argc, char *argv[]) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

@@ -176,4 +176,3 @@ void TcpListener::getMyAddresses(std::list<char*>* result) {
   private Selector selector;
 
 }
-

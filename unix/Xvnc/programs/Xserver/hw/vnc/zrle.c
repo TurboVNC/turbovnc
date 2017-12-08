@@ -255,4 +255,3 @@ void rfbFreeZrleData(rfbClientPtr cl)
   }
   cl->paletteHelper = NULL;
 }
-

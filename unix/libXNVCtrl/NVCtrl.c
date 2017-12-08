@@ -1296,4 +1296,3 @@ static Bool wire_to_event (Display *dpy, XEvent *host, xEvent *wire)
 
     return True;
 }
-
