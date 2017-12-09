@@ -1008,6 +1008,26 @@ public class VncViewer extends javax.swing.JApplet
     setGlobalInsets();
   }
 
+  // Is the keyboard grabbed by any TurboVNC Viewer window?
+  static public boolean isKeyboardGrabbed() {
+    synchronized(VncViewer.class) {
+      return grabOwner != null;
+    }
+  }
+
+  // Is the keyboard grabbed by a specific TurboVNC Viewer window?
+  static public boolean isKeyboardGrabbed(Viewport viewport) {
+    synchronized(VncViewer.class) {
+      return grabOwner == viewport;
+    }
+  }
+
+  static public void setGrabOwner(Viewport viewport) {
+    synchronized(VncViewer.class) {
+      grabOwner = viewport;
+    }
+  }
+
   // CONNECTION PARAMETERS
 
   static HeaderParameter connHeader
@@ -1125,13 +1145,13 @@ public class VncViewer extends javax.swing.JApplet
   osGrab() ? "When the keyboard is grabbed, special key sequences (such as " +
   "Alt-Tab) that are used to switch windows and perform other window " +
   "management functions are passed to the VNC server instead of being " +
-  "handled by the local window manager.  The default is to grab the " +
-  "keyboard when switching to full-screen mode and ungrab it when exiting " +
-  "full-screen mode.  Setting this parameter to \"Always\" grabs the " +
-  "keyboard when the viewer starts up and does not automatically ungrab it. " +
-  "When this parameter is set to \"Manual\", the keyboard is only grabbed " +
-  "or ungrabbed when the \"Grab Keyboard\" option is selected in the F8 " +
-  "menu, or when the Ctrl-Alt-Shift-G hotkey is pressed.  Regardless of the " +
+  "handled by the local window manager.  The default is to automatically " +
+  "grab the keyboard in full-screen mode and to ungrab it in windowed " +
+  "mode.  Setting this parameter to \"Always\" automatically grabs the " +
+  "keyboard in both full-screen mode and windowed mode.  When this " +
+  "parameter is set to \"Manual\", the keyboard is only grabbed or " +
+  "ungrabbed when the \"Grab Keyboard\" option is selected in the F8 menu, " +
+  "or when the Ctrl-Alt-Shift-G hotkey is pressed.  Regardless of the " +
   "grabbing mode, the F8 menu option and hotkey can always be used to " +
   "grab or ungrab the keyboard." : null, "FS", "Always, FS, Manual");
 
@@ -1543,4 +1563,5 @@ public class VncViewer extends javax.swing.JApplet
   Thread listenThread;
   static ArrayList<CConn> conns = new ArrayList<CConn>();
   static Insets insets;
+  static Viewport grabOwner;
 }

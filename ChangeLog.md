@@ -1,6 +1,8 @@
 2.1.3
 =====
 
+### Significant changes relative to 2.1.2:
+
 1. Introduced a new CMake variable (`TVNC_SYSTEMLIBS`) that, when enabled,
 will cause the TurboVNC Server to be built against the system-supplied versions
 of zlib, bzip2, and FreeType.
@@ -12,6 +14,11 @@ using xorg-server 1.12.x or later.
 
 3. Fixed a bug in the TurboVNC Server's VeNCrypt implementation that prevented
 it from working properly with LibVNCClient.
+
+4. Fixed an issue in the Un*x/X11 TurboVNC Viewer and the Windows/Java
+TurboVNC Viewer whereby keyboard grabbing was always initially disabled in the
+second and subsequent connections initiated by the viewer, regardless of the
+grab mode.
 
 
 2.1.2
