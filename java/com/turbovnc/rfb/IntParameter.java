@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@ public class IntParameter extends VoidParameter {
     super(name_, desc_);
     value = v;
     defValue = v;
+    minValue = Integer.MIN_VALUE;
+    maxValue = Integer.MAX_VALUE;
     useMinMax = false;
   }
 
@@ -48,7 +50,7 @@ public class IntParameter extends VoidParameter {
     return setValue(i);
   }
 
-  public boolean setValue(int v) {
+  public synchronized boolean setValue(int v) {
     if (useMinMax && (v < minValue || v > maxValue))
       return false;
     value = v;
@@ -60,7 +62,7 @@ public class IntParameter extends VoidParameter {
       return Integer.toString(defValue);
     return null;
   }
-  public String getValueStr() { return Integer.toString(value); }
+  public synchronized String getValueStr() { return Integer.toString(value); }
   public String getValues() {
     if (useMinMax) {
       return minValue + "-" + maxValue;
@@ -68,11 +70,11 @@ public class IntParameter extends VoidParameter {
     return null;
   }
 
-  public int getValue() { return value; }
+  public synchronized int getValue() { return value; }
 
   protected int value;
-  protected int defValue;
-  protected int minValue;
-  protected int maxValue;
-  boolean useMinMax;
+  protected final int defValue;
+  protected final int minValue;
+  protected final int maxValue;
+  final boolean useMinMax;
 }

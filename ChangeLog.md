@@ -145,6 +145,11 @@ similar to the TurboVNC Helper included with the Un*x TurboVNC Viewer.  This
 library connects the built-in drawing tablet drivers for OS X with the existing
 remote X Input feature in the Java TurboVNC Viewer.
 
+18. Fixed an issue in the Un*x/X11 TurboVNC Viewer and the Windows/Java
+TurboVNC Viewer whereby keyboard grabbing was always initially disabled in the
+second and subsequent connections initiated by the viewer, regardless of the
+grab mode.
+
 
 2.1.2
 =====

@@ -113,4 +113,3 @@ BOOL CALLBACK LoginAuthDialog::DlgProc(HWND hwnd, UINT uMsg,
   }
   return 0;
 }
-

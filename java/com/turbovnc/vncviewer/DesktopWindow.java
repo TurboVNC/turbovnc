@@ -565,7 +565,10 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           cc.toggleFullScreen();
           return;
         case KeyEvent.VK_G:
-          cc.toggleKeyboardGrab();
+          if (cc.viewport != null) {
+            cc.viewport.grabKeyboardHelper(!cc.isGrabSelected());
+            cc.selectGrab(!cc.isGrabSelected());
+          }
           return;
         case KeyEvent.VK_I:
           cc.showInfo();

@@ -91,7 +91,7 @@ class omni_thread;
 // define _OMNITHREAD_DLL. If compiling as a statuc library, define
 // _WINSTATIC
 // If compiling an application that is to be statically linked to omnithread,
-// define _WINSTATIC (if the application is  to be dynamically linked, 
+// define _WINSTATIC (if the application is  to be dynamically linked,
 // there is no need to define any of these macros).
 
 #if defined (_OMNITHREAD_DLL) && defined(_WINSTATIC)
@@ -112,7 +112,7 @@ class omni_thread;
 
 #endif
  // _MSC_VER
- 
+
 #elif defined(__sunos__) && (__OSVERSION__ == 5)
 #ifdef UsePthread
 #include <omnithread/posix.h>

@@ -80,23 +80,27 @@ public class Viewport extends JFrame {
     // full-screen state.
     showToolbar(cc.showToolbar, canDoLionFS);
 
+    final Viewport vp = this;
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         if (sp.getViewport().getView() != null)
           sp.getViewport().getView().requestFocusInWindow();
-        if (isVisible() && keyboardTempUngrabbed) {
-          vlog.info("Keyboard focus regained. Re-grabbing keyboard.");
-          grabKeyboardHelper(true);
-          keyboardTempUngrabbed = false;
+        if (isVisible()) {
+          if (cc.shouldGrab() && !VncViewer.isKeyboardGrabbed(vp))
+            vlog.info("Keyboard focus regained. Re-grabbing keyboard.");
+          else if (!cc.shouldGrab() && VncViewer.isKeyboardGrabbed())
+            vlog.info("Keyboard focus regained. Ungrabbing keyboard.");
+          grabKeyboardHelper(cc.shouldGrab());
+          cc.selectGrab(cc.shouldGrab());
         }
         if (VncViewer.os.startsWith("mac os x"))
           setupExtInputHelper();
       }
       public void windowLostFocus(WindowEvent e) {
-        if (cc.keyboardGrabbed && isVisible()) {
+        if (VncViewer.isKeyboardGrabbed() && isVisible() &&
+            e.getOppositeWindow() == null) {
           vlog.info("Keyboard focus lost. Temporarily ungrabbing keyboard.");
           grabKeyboardHelper(false);
-          keyboardTempUngrabbed = true;
         }
         if (VncViewer.os.startsWith("mac os x"))
           cleanupExtInputHelper();
@@ -416,13 +420,13 @@ public class Viewport extends JFrame {
   }
 
   public void grabKeyboardHelper(boolean on, boolean force) {
-    if (isHelperAvailable()) {
+    if (VncViewer.osGrab() && isHelperAvailable()) {
       try {
-        if (cc.keyboardGrabbed == on && !force)
+        if (((on && VncViewer.isKeyboardGrabbed(this)) ||
+             (!on && !VncViewer.isKeyboardGrabbed())) && !force)
           return;
         grabKeyboard(on, VncViewer.grabPointer.getValue());
-        cc.keyboardGrabbed = on;
-        cc.menu.grabKeyboard.setSelected(cc.keyboardGrabbed);
+        VncViewer.setGrabOwner(on ? this : null);
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper.");
         vlog.info("  Keyboard grabbing will be disabled.");
@@ -752,7 +756,6 @@ public class Viewport extends JFrame {
   public int dx, dy = 0, adjustWidth, adjustHeight;
   MacMenuBar macMenu;
   boolean canDoLionFS;
-  public boolean keyboardTempUngrabbed;
   static boolean triedHelperInit, helperAvailable;
   Timer timer;
   private long x11dpy, x11win;

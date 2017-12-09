@@ -540,4 +540,3 @@ validateString(char *str)
     }
     return TRUE;
 }
-

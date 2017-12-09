@@ -31,7 +31,7 @@
 #include "omnithread.h"
 #include <process.h>
 
-#define DB(x) // x 
+#define DB(x) // x
 //#include <iostream.h> or #include <iostream> if DB is on.
 
 static void get_time_now(unsigned long* abs_sec, unsigned long* abs_nsec);
@@ -122,7 +122,7 @@ private:
 
 class _internal_omni_thread_helper {
 public:
-  inline _internal_omni_thread_helper()  { 
+  inline _internal_omni_thread_helper()  {
     d = 0;
     t = omni_thread::self();
     if (!t) {
@@ -137,7 +137,7 @@ public:
       t = d;
     }
   }
-  inline ~_internal_omni_thread_helper() { 
+  inline ~_internal_omni_thread_helper() {
     if (d) {
       omni_mutex_lock sync(cachelock);
       d->next = cache;
@@ -455,7 +455,7 @@ omni_thread::init_t::init_t(void)
 // Wrapper for thread creation.
 //
 
-extern "C" 
+extern "C"
 unsigned __stdcall
 omni_thread_wrapper(void* ptr)
 {
@@ -585,7 +585,7 @@ omni_thread::start(void)
                         0,
                         omni_thread_wrapper,
                         (LPVOID)this,
-                        CREATE_SUSPENDED, 
+                        CREATE_SUSPENDED,
                         &t);
     nt_id = t;
     if (handle == NULL)

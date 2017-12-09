@@ -182,5 +182,3 @@ public class TcpSocket extends Socket {
   static LogWriter vlog = new LogWriter("TcpSocket");
 
 }
-
-

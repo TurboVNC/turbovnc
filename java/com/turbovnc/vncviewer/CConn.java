@@ -951,7 +951,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
   private void recreateViewport() { recreateViewport(false); }
 
   private void recreateViewport(boolean restore) {
-    boolean keyboardTempUngrabbed = false;
     if (viewport != null) {
       if (opts.fullScreen) {
         savedState = viewport.getExtendedState();
@@ -960,11 +959,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
       if (viewport.timer != null)
         viewport.timer.stop();
-      if (VncViewer.osGrab() && keyboardGrabbed) {
-        viewport.grabKeyboardHelper(false);
-        if (opts.grabKeyboard == Options.GRAB_MANUAL)
-          keyboardTempUngrabbed = true;
-      }
+      viewport.grabKeyboardHelper(false);
       if (VncViewer.currentMonitorIsPrimary.getValue())
         oldViewportBounds = viewport.getBounds();
       viewport.dispose();
@@ -983,12 +978,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (opts.fullScreen && viewport.lionFSSupported())
       viewport.toggleLionFS();
     desktop.requestFocusInWindow();
-    if (VncViewer.osGrab()) {
-      if (opts.grabKeyboard == Options.GRAB_ALWAYS ||
-          (opts.grabKeyboard == Options.GRAB_MANUAL && keyboardTempUngrabbed) ||
-          (opts.grabKeyboard == Options.GRAB_FS && opts.fullScreen))
-        viewport.grabKeyboardHelper(true);
-    }
+    if (shouldGrab())
+      viewport.grabKeyboardHelper(true);
+    selectGrab(VncViewer.isKeyboardGrabbed(viewport));
     if (VncViewer.osEID())
       viewport.setupExtInputHelper();
   }
@@ -1627,12 +1619,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
+      boolean isGrabbed = VncViewer.isKeyboardGrabbed(viewport);
       if (viewport != null &&
-          ((opts.grabKeyboard == Options.GRAB_ALWAYS &&
-           !viewport.keyboardTempUngrabbed) ||
-          (opts.grabKeyboard == Options.GRAB_FS &&
-           opts.fullScreen != viewport.keyboardTempUngrabbed))) {
-        viewport.keyboardTempUngrabbed = !viewport.keyboardTempUngrabbed;
+          ((opts.grabKeyboard == Options.GRAB_ALWAYS && !isGrabbed) ||
+           (opts.grabKeyboard == Options.GRAB_FS &&
+            opts.fullScreen != isGrabbed))) {
+        viewport.grabKeyboardHelper(!isGrabbed);
+        selectGrab(!isGrabbed);
       }
     }
 
@@ -1707,12 +1700,22 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
-  // EDT
-  public void toggleKeyboardGrab() {
-    if (!VncViewer.osGrab())
-      return;
-    if (viewport != null)
-      viewport.grabKeyboardHelper(!keyboardGrabbed);
+  public boolean shouldGrab() {
+    return VncViewer.osGrab() &&
+           (opts.grabKeyboard == Options.GRAB_ALWAYS ||
+            (opts.grabKeyboard == Options.GRAB_MANUAL && isGrabSelected()) ||
+            (opts.grabKeyboard == Options.GRAB_FS && opts.fullScreen));
+  }
+
+  public void selectGrab(boolean on) {
+    if (VncViewer.osGrab())
+      menu.grabKeyboard.setSelected(on);
+  }
+
+  public boolean isGrabSelected() {
+    if (VncViewer.osGrab())
+      return menu.grabKeyboard.isSelected();
+    return false;
   }
 
   // EDT

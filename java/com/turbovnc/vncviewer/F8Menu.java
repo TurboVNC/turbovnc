@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011, 2013 Brian P. Hinz
- * Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       grabKeyboard = new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
       grabKeyboard.setMnemonic(KeyEvent.VK_G);
-      grabKeyboard.setSelected(cc.keyboardGrabbed);
+      grabKeyboard.setSelected(VncViewer.isKeyboardGrabbed());
       grabKeyboard.addActionListener(this);
       add(grabKeyboard);
     }
@@ -93,7 +93,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     if (VncViewer.osGrab())
       addPopupMenuListener(new PopupMenuListener() {
         public void popupMenuCanceled(PopupMenuEvent e) {
-          if (cc.keyboardGrabbed)
+          if (cc.isGrabSelected())
             cc.viewport.grabKeyboardHelper(true, true);
         }
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
@@ -141,7 +141,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, grabKeyboard)) {
-      cc.toggleKeyboardGrab();
+      if (cc.viewport != null)
+        cc.viewport.grabKeyboardHelper(grabKeyboard.isSelected());
     } else if (actionMatch(ev, f8)) {
       cc.writeKeyEvent(MenuKey.getMenuKeySym(), true);
       cc.writeKeyEvent(MenuKey.getMenuKeySym(), false);
