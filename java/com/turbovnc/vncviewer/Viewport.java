@@ -93,8 +93,10 @@ public class Viewport extends JFrame {
           grabKeyboardHelper(cc.shouldGrab());
           cc.selectGrab(cc.shouldGrab());
         }
-        if (VncViewer.os.startsWith("mac os x"))
+        if (VncViewer.os.startsWith("mac os x")) {
+          x11dpy = 0;
           setupExtInputHelper();
+        }
       }
       public void windowLostFocus(WindowEvent e) {
         if (VncViewer.isKeyboardGrabbed() && isVisible() &&
@@ -102,7 +104,8 @@ public class Viewport extends JFrame {
           vlog.info("Keyboard focus lost. Temporarily ungrabbing keyboard.");
           grabKeyboardHelper(false);
         }
-        if (VncViewer.os.startsWith("mac os x"))
+        if (VncViewer.os.startsWith("mac os x") &&
+            e.getOppositeWindow() == null)
           cleanupExtInputHelper();
       }
     });
@@ -442,7 +445,12 @@ public class Viewport extends JFrame {
   public void setupExtInputHelper() {
     if (isHelperAvailable() && cc.cp.supportsGII && x11dpy == 0) {
       try {
-        setupExtInput();
+        if (VncViewer.os.startsWith("mac os x")) {
+          synchronized(VncViewer.class) {
+            setupExtInput();
+          }
+        } else
+          setupExtInput();
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
@@ -531,7 +539,12 @@ public class Viewport extends JFrame {
   public void cleanupExtInputHelper() {
     if (isHelperAvailable() && x11dpy != 0) {
       try {
-        cleanupExtInput();
+        if (VncViewer.os.startsWith("mac os x")) {
+          synchronized(VncViewer.class) {
+            cleanupExtInput();
+          }
+        } else
+          cleanupExtInput();
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke cleanupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
@@ -605,8 +618,10 @@ public class Viewport extends JFrame {
 
   // At the moment, these two methods are used only by the Mac TurboVNC Helper.
   void handleTabletProximityEvent(final boolean enteringProximity,
-                                  final int pointingDeviceType) {
-    if (devices == null) return;
+                                  final int pointingDeviceType,
+                                  long windowID) {
+    if (devices == null || windowID != x11win)
+      return;
 
     synchronized(lastEvent) {
       if (enteringProximity) {
@@ -625,8 +640,9 @@ public class Viewport extends JFrame {
 
   boolean handleTabletEvent(final int type, final double x, final double y,
                          final float pressure, final float tiltX,
-                         final float tiltY) {
-    if (devices == null) return false;
+                         final float tiltY, long windowID) {
+    if (devices == null || windowID != x11win)
+      return false;
 
     synchronized(lastEvent) {
       if (lastEvent.deviceID < 0)
@@ -637,7 +653,8 @@ public class Viewport extends JFrame {
     }
 
     // Don't handle events that are out of the viewport bounds
-    if ((double)sp.getSize().height - y - 1.0 < 0.0)
+    if (y < 0.0 || y > (double)sp.getSize().height - 1.0 ||
+        x < 0.0 || x > (double)sp.getSize().width - 1.0)
       return false;
 
     final int NSLeftMouseDown = 1;

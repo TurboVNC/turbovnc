@@ -49,6 +49,7 @@
 #include "com_turbovnc_vncviewer_Viewport.h"
 #include <Cocoa/Cocoa.h>
 #include "JRSwizzle.h"
+#import <objc/objc-class.h>
 
 
 #define bailif0(f) {  \
@@ -65,6 +66,7 @@
 static JavaVM *g_jvm = NULL;
 static jobject g_object = NULL;
 static jmethodID g_methodID = NULL, g_methodID_prox = NULL;
+IMP origSendEvent = NULL;
 
 
 static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
@@ -105,7 +107,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
       }
       (*env)->CallVoidMethod(env, g_object, g_methodID_prox,
                              [event isEnteringProximity],
-                             [event pointingDeviceType]);
+                             [event pointingDeviceType], [event window]);
       if (shouldDetach)
         (*g_jvm)->DetachCurrentThread(g_jvm);
       return;
@@ -130,9 +132,12 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
       }
       NSPoint tilt = [event tilt];
       NSPoint location = [event locationInWindow];
+      if ([event window] == NULL)
+        break;
       success = (*env)->CallBooleanMethod(env, g_object, g_methodID,
                                           [event type], location.x, location.y,
-                                          [event pressure], tilt.x, tilt.y);
+                                          [event pressure], tilt.x, tilt.y,
+                                          [event window]);
       if (shouldDetach)
         (*g_jvm)->DetachCurrentThread(g_jvm);
       if (success) return;
@@ -153,28 +158,44 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   jfieldID fid;
   NSError *error = NULL;
 
-  [NSApplication jr_swizzleMethod:@selector(sendEvent:)
-                 withMethod:@selector(newSendEvent:) error:&error];
-  if (error) {
-    NSLog(@"%@", [error localizedDescription]);
-    return;
+  if (!g_jvm) {
+    origSendEvent =
+      class_getMethodImplementation(objc_getClass("NSApplication"),
+                                    @selector(sendEvent:));
+    if ((*env)->GetJavaVM(env, &g_jvm) || (*env)->ExceptionCheck(env))
+      goto bailout;
   }
 
-  if ((*env)->GetJavaVM(env, &g_jvm) || (*env)->ExceptionCheck(env))
-    goto bailout;
+  if (class_getMethodImplementation(objc_getClass("NSApplication"),
+                                    @selector(sendEvent:)) == origSendEvent) {
+    [NSApplication jr_swizzleMethod:@selector(sendEvent:)
+                   withMethod:@selector(newSendEvent:) error:&error];
+    if (error) {
+      NSLog(@"%@", [error localizedDescription]);
+      return;
+    }
+  }
+
+  if (g_object) {
+    (*env)->DeleteGlobalRef(env, g_object);  g_object = NULL;
+  }
   bailif0(g_object = (*env)->NewGlobalRef(env, obj));
+
   bailif0(cls = (*env)->GetObjectClass(env, obj));
 
   bailif0(g_methodID = (*env)->GetMethodID(env, cls,
                                            "handleTabletEvent",
-                                           "(IDDFFF)Z"));
+                                           "(IDDFFFJ)Z"));
   bailif0(g_methodID_prox = (*env)->GetMethodID(env, cls,
                                                 "handleTabletProximityEvent",
-                                                "(ZI)V"));
+                                                "(ZIJ)V"));
 
   SET_LONG(cls, obj, x11dpy, 1);
+  SET_LONG(cls, obj, x11win,
+           (jlong)[[NSApplication sharedApplication] keyWindow]);
 
-  printf("TurboVNC Helper: Intercepting tablet events\n");
+  printf("TurboVNC Helper: Intercepting tablet events for window 0x%.8lx\n",
+         (unsigned long)[[NSApplication sharedApplication] keyWindow]);
   return;
 
   bailout:
@@ -191,11 +212,14 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   jfieldID fid;
   NSError *error = NULL;
 
-  [NSApplication jr_swizzleMethod:@selector(sendEvent:)
-                 withMethod:@selector(newSendEvent:) error:&error];
-  if (error) {
-    NSLog(@"%@", [error localizedDescription]);
-    return;
+  if (class_getMethodImplementation(objc_getClass("NSApplication"),
+                                    @selector(sendEvent:)) != origSendEvent) {
+    [NSApplication jr_swizzleMethod:@selector(sendEvent:)
+                   withMethod:@selector(newSendEvent:) error:&error];
+    if (error) {
+      NSLog(@"%@", [error localizedDescription]);
+      return;
+    }
   }
 
   if (g_object) {
