@@ -1,6 +1,6 @@
-diff --git a/mesa-17.2.3/include/c99_math.h b/Mesa/include/c99_math.h
+diff --git a/mesa-17.2.7/include/c99_math.h b/Mesa/include/c99_math.h
 index e906c26..e14c6d9 100644
---- a/mesa-17.2.3/include/c99_math.h
+--- a/mesa-17.2.7/include/c99_math.h
 +++ b/Mesa/include/c99_math.h
 @@ -44,6 +44,7 @@
  #endif 
@@ -34,9 +34,9 @@ index e906c26..e14c6d9 100644
  
  
  /* Since C++11, the following functions are part of the std namespace. Their C
-diff --git a/mesa-17.2.3/src/glx/glxext.c b/Mesa/src/glx/glxext.c
+diff --git a/mesa-17.2.7/src/glx/glxext.c b/Mesa/src/glx/glxext.c
 index 9ef7ff5..e4df105 100644
---- a/mesa-17.2.3/src/glx/glxext.c
+--- a/mesa-17.2.7/src/glx/glxext.c
 +++ b/Mesa/src/glx/glxext.c
 @@ -150,9 +150,9 @@ __glXWireToEvent(Display *dpy, XEvent *event, xEvent *wire)
         * of sequence 64-Bit sbc's

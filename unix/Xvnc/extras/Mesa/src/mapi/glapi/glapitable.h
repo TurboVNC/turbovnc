@@ -38,6 +38,10 @@
 #endif
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct _glapi_table
 {
    void (GLAPIENTRYP NewList)(GLuint list, GLenum mode); /* 0 */
@@ -1423,5 +1427,9 @@ struct _glapi_table
    void (GLAPIENTRYP BlendBarrier)(void); /* 1380 */
    void (GLAPIENTRYP PrimitiveBoundingBox)(GLfloat minX, GLfloat minY, GLfloat minZ, GLfloat minW, GLfloat maxX, GLfloat maxY, GLfloat maxZ, GLfloat maxW); /* 1381 */
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !defined( _GLAPI_TABLE_H_ ) */
