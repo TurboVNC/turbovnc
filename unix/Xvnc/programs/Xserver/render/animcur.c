@@ -152,11 +152,20 @@ AnimCurTimerNotify(OsTimerPtr timer, CARD32 now, void *arg)
     return ac->elts[elt].delay;
 }
 
+static void
+AnimCurCancelTimer(DeviceIntPtr pDev)
+{
+    CursorPtr cur = pDev->spriteInfo->anim.pCursor;
+
+    if (IsAnimCur(cur))
+        TimerCancel(GetAnimCur(cur)->timer);
+}
+
 static Bool
 AnimCurDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
-    Bool ret;
+    Bool ret = TRUE;
 
     if (IsFloating(pDev))
         return FALSE;
@@ -166,8 +175,10 @@ AnimCurDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
         if (pCursor != pDev->spriteInfo->anim.pCursor) {
             AnimCurPtr ac = GetAnimCur(pCursor);
 
-            ret = (*pScreen->DisplayCursor)
-                (pDev, pScreen, ac->elts[0].pCursor);
+            AnimCurCancelTimer(pDev);
+            ret = (*pScreen->DisplayCursor) (pDev, pScreen,
+                                             ac->elts[0].pCursor);
+
             if (ret) {
                 pDev->spriteInfo->anim.elt = 0;
                 pDev->spriteInfo->anim.time =
@@ -179,15 +190,9 @@ AnimCurDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
                                      AnimCurTimerNotify, pDev);
             }
         }
-        else
-            ret = TRUE;
     }
     else {
-        CursorPtr old = pDev->spriteInfo->anim.pCursor;
-
-        if (old && IsAnimCur(old))
-            TimerCancel(GetAnimCur(old)->timer);
-
+        AnimCurCancelTimer(pDev);
         pDev->spriteInfo->anim.pCursor = 0;
         pDev->spriteInfo->anim.pScreen = 0;
         ret = (*pScreen->DisplayCursor) (pDev, pScreen, pCursor);
