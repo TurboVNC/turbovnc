@@ -620,7 +620,7 @@ public class Viewport extends JFrame {
   void handleTabletProximityEvent(final boolean enteringProximity,
                                   final int pointingDeviceType,
                                   long windowID) {
-    if (devices == null || windowID != x11win)
+    if (devices == null)
       return;
 
     synchronized(lastEvent) {
@@ -639,8 +639,8 @@ public class Viewport extends JFrame {
   }
 
   boolean handleTabletEvent(final int type, final double x, final double y,
-                         final float pressure, final float tiltX,
-                         final float tiltY, long windowID) {
+                            final float pressure, final float tiltX,
+                            final float tiltY, long windowID) {
     if (devices == null || windowID != x11win)
       return false;
 
