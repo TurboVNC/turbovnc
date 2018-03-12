@@ -25,6 +25,12 @@ grab mode.
 6. The SSH tunneling feature in the Java TurboVNC Viewer now works properly
 when the SSH username contains a @ character.
 
+7. The Windows TurboVNC Viewer now disables the Windows IME (Input Method
+Editor) system in the TurboVNC Viewer window.  This system is normally used to
+input language-specific characters in Asian languages, but since the TurboVNC
+Viewer does not handle those characters, the IME does nothing but interfere
+with the normal operation of the viewer.
+
 
 2.1.2
 =====
