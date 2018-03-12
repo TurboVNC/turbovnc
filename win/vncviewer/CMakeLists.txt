@@ -62,10 +62,10 @@ if(TVNC_WINCONSOLE)
 endif()
 
 target_link_libraries(vncviewer zlib ${TJPEG_LIBRARY} fbx ws2_32.lib winmm.lib
-	htmlhelp.lib comctl32.lib)
+	htmlhelp.lib comctl32.lib imm32.lib)
 if(TVNC_WINCONSOLE)
 	target_link_libraries(cvncviewer zlib ${TJPEG_LIBRARY} fbx ws2_32.lib
-		winmm.lib htmlhelp.lib comctl32.lib)
+		winmm.lib htmlhelp.lib comctl32.lib imm32.lib)
 endif()
 
 install(TARGETS vncviewer DESTINATION ${CMAKE_INSTALL_BINDIR})

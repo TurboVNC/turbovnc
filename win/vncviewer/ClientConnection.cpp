@@ -550,6 +550,7 @@ void ClientConnection::CreateDisplay()
                         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, m_hwndscroll, NULL,
                         m_pApp->m_instance, NULL);
+  ImmAssociateContext(m_hwnd, NULL);
   m_opts.m_hWindow = m_hwnd;
   hotkeys.SetWindow(m_hwnd1);
   ShowWindow(m_hwnd, SW_HIDE);
