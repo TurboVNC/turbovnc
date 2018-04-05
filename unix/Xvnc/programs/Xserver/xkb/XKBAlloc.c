@@ -6,19 +6,19 @@ software and its documentation for any purpose and without
 fee is hereby granted, provided that the above copyright
 notice appear in all copies and that both that copyright
 notice and this permission notice appear in supporting
-documentation, and that the name of Silicon Graphics not be 
-used in advertising or publicity pertaining to distribution 
+documentation, and that the name of Silicon Graphics not be
+used in advertising or publicity pertaining to distribution
 of the software without specific prior written permission.
-Silicon Graphics makes no representation about the suitability 
+Silicon Graphics makes no representation about the suitability
 of this software for any purpose. It is provided "as is"
 without any express or implied warranty.
 
-SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS 
-SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY 
+SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL SILICON
-GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL 
-DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, 
-DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE 
+GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
+DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
 OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION  WITH
 THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
@@ -56,8 +56,8 @@ XkbAllocCompatMap(XkbDescPtr xkb, unsigned which, unsigned nSI)
         if (compat->sym_interpret == NULL)
             compat->num_si = 0;
         prev_interpret = compat->sym_interpret;
-        compat->sym_interpret = realloc(compat->sym_interpret,
-                                        nSI * sizeof(XkbSymInterpretRec));
+        compat->sym_interpret = reallocarray(compat->sym_interpret,
+                                             nSI, sizeof(XkbSymInterpretRec));
         if (compat->sym_interpret == NULL) {
             free(prev_interpret);
             compat->size_si = compat->num_si = 0;
@@ -159,9 +159,9 @@ XkbAllocNames(XkbDescPtr xkb, unsigned which, int nTotalRG, int nTotalAliases)
         else if (nTotalAliases > names->num_key_aliases) {
             XkbKeyAliasRec *prev_aliases = names->key_aliases;
 
-            names->key_aliases = realloc(names->key_aliases,
-                                         nTotalAliases *
-                                         sizeof(XkbKeyAliasRec));
+            names->key_aliases = reallocarray(names->key_aliases,
+                                              nTotalAliases,
+                                              sizeof(XkbKeyAliasRec));
             if (names->key_aliases != NULL) {
                 memset(&names->key_aliases[names->num_key_aliases], 0,
                        (nTotalAliases -
@@ -184,8 +184,8 @@ XkbAllocNames(XkbDescPtr xkb, unsigned which, int nTotalRG, int nTotalAliases)
         else if (nTotalRG > names->num_rg) {
             Atom *prev_radio_groups = names->radio_groups;
 
-            names->radio_groups = realloc(names->radio_groups,
-                                          nTotalRG * sizeof(Atom));
+            names->radio_groups = reallocarray(names->radio_groups,
+                                               nTotalRG, sizeof(Atom));
             if (names->radio_groups != NULL) {
                 memset(&names->radio_groups[names->num_rg], 0,
                        (nTotalRG - names->num_rg) * sizeof(Atom));

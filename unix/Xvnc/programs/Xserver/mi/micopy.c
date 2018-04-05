@@ -62,7 +62,7 @@ miCopyRegion(DrawablePtr pSrcDrawable,
 
         if (nbox > 1) {
             /* keep ordering in each band, reverse order of bands */
-            pboxNew1 = (BoxPtr) malloc(sizeof(BoxRec) * nbox);
+            pboxNew1 = xallocarray(nbox, sizeof(BoxRec));
             if (!pboxNew1)
                 return;
             pboxBase = pboxNext = pbox + nbox - 1;
@@ -93,7 +93,7 @@ miCopyRegion(DrawablePtr pSrcDrawable,
 
         if (nbox > 1) {
             /* reverse order of rects in each band */
-            pboxNew2 = (BoxPtr) malloc(sizeof(BoxRec) * nbox);
+            pboxNew2 = xallocarray(nbox, sizeof(BoxRec));
             if (!pboxNew2) {
                 free(pboxNew1);
                 return;
@@ -167,7 +167,7 @@ miDoCopy(DrawablePtr pSrcDrawable,
 
     /* Compute source clip region */
     if (pSrcDrawable->type == DRAWABLE_PIXMAP) {
-        if ((pSrcDrawable == pDstDrawable) && (pGC->clientClipType == CT_NONE))
+        if ((pSrcDrawable == pDstDrawable) && (!pGC->clientClip))
             prgnSrcClip = miGetCompositeClip(pGC);
         else
             fastSrc = TRUE;
@@ -186,8 +186,7 @@ miDoCopy(DrawablePtr pSrcDrawable,
                  */
                 fastSrc = TRUE;
             }
-            else if ((pSrcDrawable == pDstDrawable) &&
-                     (pGC->clientClipType == CT_NONE)) {
+            else if ((pSrcDrawable == pDstDrawable) && (!pGC->clientClip)) {
                 prgnSrcClip = miGetCompositeClip(pGC);
             }
             else {
@@ -304,8 +303,7 @@ miDoCopy(DrawablePtr pSrcDrawable,
                                         yIn - pSrcDrawable->y,
                                         widthSrc, heightSrc,
                                         xOut - pDstDrawable->x,
-                                        yOut - pDstDrawable->y,
-                                        (unsigned long) bitPlane);
+                                        yOut - pDstDrawable->y);
     RegionUninit(&rgnDst);
     if (freeSrcClip)
         RegionDestroy(prgnSrcClip);

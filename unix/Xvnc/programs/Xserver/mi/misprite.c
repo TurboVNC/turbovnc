@@ -86,10 +86,6 @@ typedef struct {
     /* os layer procedures */
     ScreenBlockHandlerProcPtr BlockHandler;
 
-    /* device cursor procedures */
-    DeviceCursorInitializeProcPtr DeviceCursorInitialize;
-    DeviceCursorCleanupProcPtr DeviceCursorCleanup;
-
     xColorItem colors[2];
     ColormapPtr pInstalledMap;
     ColormapPtr pColormap;
@@ -150,8 +146,7 @@ static void
 miSpriteDisableDamage(ScreenPtr pScreen, miSpriteScreenPtr pScreenPriv)
 {
     if (pScreenPriv->damageRegistered) {
-        DamageUnregister(&(pScreen->GetScreenPixmap(pScreen)->drawable),
-                         pScreenPriv->pDamage);
+        DamageUnregister(pScreenPriv->pDamage);
         pScreenPriv->damageRegistered = 0;
     }
 }
@@ -191,7 +186,7 @@ static DevPrivateKeyRec miSpriteDevPrivatesKeyRec;
 
 #define miSpriteDevPrivatesKey (&miSpriteDevPrivatesKeyRec)
 
-static Bool miSpriteCloseScreen(int i, ScreenPtr pScreen);
+static Bool miSpriteCloseScreen(ScreenPtr pScreen);
 static void miSpriteGetImage(DrawablePtr pDrawable, int sx, int sy,
                              int w, int h, unsigned int format,
                              unsigned long planemask, char *pdstLine);
@@ -203,8 +198,7 @@ static void miSpriteSourceValidate(DrawablePtr pDrawable, int x, int y,
                                    unsigned int subWindowMode);
 static void miSpriteCopyWindow(WindowPtr pWindow,
                                DDXPointRec ptOldOrg, RegionPtr prgnSrc);
-static void miSpriteBlockHandler(int i, pointer blockData,
-                                 pointer pTimeout, pointer pReadMask);
+static void miSpriteBlockHandler(ScreenPtr pScreen, void *timeout);
 static void miSpriteInstallColormap(ColormapPtr pMap);
 static void miSpriteStoreColors(ColormapPtr pMap, int ndef, xColorItem * pdef);
 
@@ -329,9 +323,6 @@ miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
 
     pScreenPriv->BlockHandler = NULL;
 
-    pScreenPriv->DeviceCursorInitialize = pScreen->DeviceCursorInitialize;
-    pScreenPriv->DeviceCursorCleanup = pScreen->DeviceCursorCleanup;
-
     pScreenPriv->pInstalledMap = NULL;
     pScreenPriv->pColormap = NULL;
     pScreenPriv->colors[SOURCE_COLOR].red = 0;
@@ -367,7 +358,7 @@ miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
  */
 
 static Bool
-miSpriteCloseScreen(int i, ScreenPtr pScreen)
+miSpriteCloseScreen(ScreenPtr pScreen)
 {
     miSpriteScreenPtr pScreenPriv = GetSpriteScreen(pScreen);
 
@@ -382,7 +373,7 @@ miSpriteCloseScreen(int i, ScreenPtr pScreen)
 
     free(pScreenPriv);
 
-    return (*pScreen->CloseScreen) (i, pScreen);
+    return (*pScreen->CloseScreen) (pScreen);
 }
 
 static void
@@ -520,14 +511,14 @@ miSpriteCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
 }
 
 static void
-miSpriteBlockHandler(int i, pointer blockData, pointer pTimeout,
-                     pointer pReadmask)
+miSpriteBlockHandler(ScreenPtr pScreen, void *timeout)
 {
-    ScreenPtr pScreen = screenInfo.screens[i];
     miSpriteScreenPtr pPriv = GetSpriteScreen(pScreen);
     DeviceIntPtr pDev;
     miCursorInfoPtr pCursorInfo;
     Bool WorkToDo = FALSE;
+
+    SCREEN_PROLOGUE(pPriv, pScreen, BlockHandler);
 
     for (pDev = inputInfo.devices; pDev; pDev = pDev->next) {
         if (DevHasCursor(pDev)) {
@@ -552,9 +543,7 @@ miSpriteBlockHandler(int i, pointer blockData, pointer pTimeout,
         }
     }
 
-    SCREEN_PROLOGUE(pPriv, pScreen, BlockHandler);
-
-    (*pScreen->BlockHandler) (i, blockData, pTimeout, pReadmask);
+    (*pScreen->BlockHandler) (pScreen, timeout);
 
     if (WorkToDo)
         SCREEN_EPILOGUE(pPriv, pScreen, BlockHandler);

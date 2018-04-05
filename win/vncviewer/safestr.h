@@ -47,3 +47,6 @@
 // Safe, truncating version of strcpy() for static destination buffers.
 #define STRCPY(dst, src)  \
   STRNCPY(dst, src, _countof(dst))
+
+
+extern "C" char *strsep(char **stringp, const char *delim);

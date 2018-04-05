@@ -56,13 +56,11 @@ ReplyNotSwappd(ClientPtr /* pClient */ ,
                void * /* pbuf */ ) _X_NORETURN;
 
 typedef enum { ClientStateInitial,
-    /* 1 is unused now, was ClientStateAuthenticating */
-    ClientStateRunning = 2,
+    ClientStateRunning,
     ClientStateRetained,
     ClientStateGone
 } ClientState;
 
-#ifdef XFIXES
 typedef struct _saveSet {
     struct _Window *windowPtr;
     Bool toRoot;
@@ -74,38 +72,33 @@ typedef struct _saveSet {
 #define SaveSetAssignWindow(ss,w)   ((ss).windowPtr = (w))
 #define SaveSetAssignToRoot(ss,tr)  ((ss).toRoot = (tr))
 #define SaveSetAssignMap(ss,m)      ((ss).map = (m))
-#else
-typedef struct _Window *SaveSetElt;
-
-#define SaveSetWindow(ss)   (ss)
-#define SaveSetToRoot(ss)   FALSE
-#define SaveSetShouldMap(ss)	    TRUE
-#define SaveSetAssignWindow(ss,w)   ((ss) = (w))
-#define SaveSetAssignToRoot(ss,tr)
-#define SaveSetAssignMap(ss,m)
-#endif
 
 typedef struct _Client {
-    int index;
+    void *requestBuffer;
+    void *osPrivate;             /* for OS layer, including scheduler */
+    struct xorg_list ready;      /* List of clients ready to run */
+    struct xorg_list output_pending; /* List of clients with output queued */
     Mask clientAsMask;
-    pointer requestBuffer;
-    pointer osPrivate;          /* for OS layer, including scheduler */
-    Bool swapped;
+    short index;
+    unsigned char majorOp, minorOp;
+    unsigned int swapped:1;
+    unsigned int local:1;
+    unsigned int big_requests:1; /* supports large requests */
+    unsigned int clientGone:1;
+    unsigned int closeDownMode:2;
+    unsigned int clientState:2;
+    signed char smart_priority;
+    short noClientException;      /* this client died or needs to be killed */
+    int priority;
     ReplySwapPtr pSwapReplyFunc;
     XID errorValue;
     int sequence;
-    int closeDownMode;
-    int clientGone;
-    int noClientException;      /* this client died or needs to be
-                                 * killed */
     int ignoreCount;            /* count for Attend/IgnoreClient */
-    SaveSetElt *saveSet;
     int numSaved;
+    SaveSetElt *saveSet;
     int (**requestVector) (ClientPtr /* pClient */ );
     CARD32 req_len;             /* length of current request */
-    Bool big_requests;          /* supports large requests */
-    int priority;
-    ClientState clientState;
+    unsigned int replyBytesRemaining;
     PrivateRec *devPrivates;
     unsigned short xkbClientFlags;
     unsigned short mapNotifyMask;
@@ -113,35 +106,83 @@ typedef struct _Client {
     unsigned short vMajor, vMinor;
     KeyCode minKC, maxKC;
 
-    unsigned long replyBytesRemaining;
-    int smart_priority;
-    long smart_start_tick;
-    long smart_stop_tick;
-    long smart_check_tick;
+    int smart_start_tick;
+    int smart_stop_tick;
 
     DeviceIntPtr clientPtr;
     ClientIdPtr clientIds;
-    unsigned short majorOp, minorOp;
+#if XTRANS_SEND_FDS
+    int req_fds;
+#endif
 } ClientRec;
+
+#if XTRANS_SEND_FDS
+static inline void
+SetReqFds(ClientPtr client, int req_fds) {
+    if (client->req_fds != 0 && req_fds != client->req_fds)
+        LogMessage(X_ERROR, "Mismatching number of request fds %d != %d\n", req_fds, client->req_fds);
+    client->req_fds = req_fds;
+}
+#endif
 
 /*
  * Scheduling interface
  */
-extern _X_EXPORT long SmartScheduleTime;
-extern _X_EXPORT long SmartScheduleInterval;
-extern _X_EXPORT long SmartScheduleSlice;
-extern _X_EXPORT long SmartScheduleMaxSlice;
-extern _X_EXPORT Bool SmartScheduleDisable;
-extern _X_EXPORT void
-SmartScheduleStartTimer(void);
-extern _X_EXPORT void
-SmartScheduleStopTimer(void);
+extern long SmartScheduleTime;
+extern long SmartScheduleInterval;
+extern long SmartScheduleSlice;
+extern long SmartScheduleMaxSlice;
+#if HAVE_SETITIMER
+extern Bool SmartScheduleSignalEnable;
+#else
+#define SmartScheduleSignalEnable FALSE
+#endif
+extern void SmartScheduleStartTimer(void);
+extern void SmartScheduleStopTimer(void);
+
+/* Client has requests queued or data on the network */
+void mark_client_ready(ClientPtr client);
+
+/*
+ * Client has requests queued or data on the network, but awaits a
+ * server grab release
+ */
+void mark_client_saved_ready(ClientPtr client);
+
+/* Client has no requests queued and no data on network */
+void mark_client_not_ready(ClientPtr client);
+
+static inline Bool client_is_ready(ClientPtr client)
+{
+    return !xorg_list_is_empty(&client->ready);
+}
+
+Bool
+clients_are_ready(void);
+
+extern struct xorg_list output_pending_clients;
+
+static inline void
+output_pending_mark(ClientPtr client)
+{
+    if (!client->clientGone && xorg_list_is_empty(&client->output_pending))
+        xorg_list_append(&client->output_pending, &output_pending_clients);
+}
+
+static inline void
+output_pending_clear(ClientPtr client)
+{
+    xorg_list_del(&client->output_pending);
+}
+
+static inline Bool any_output_pending(void) {
+    return !xorg_list_is_empty(&output_pending_clients);
+}
 
 #define SMART_MAX_PRIORITY  (20)
 #define SMART_MIN_PRIORITY  (-20)
 
-extern _X_EXPORT void
-SmartScheduleInit(void);
+extern void SmartScheduleInit(void);
 
 /* This prototype is used pervasively in Xext, dix */
 #define DISPATCH_PROC(func) int func(ClientPtr /* client */)
@@ -149,14 +190,13 @@ SmartScheduleInit(void);
 typedef struct _WorkQueue {
     struct _WorkQueue *next;
     Bool (*function) (ClientPtr /* pClient */ ,
-                      pointer   /* closure */
+                      void *    /* closure */
         );
     ClientPtr client;
-    pointer closure;
+    void *closure;
 } WorkQueueRec;
 
 extern _X_EXPORT TimeStamp currentTime;
-extern _X_EXPORT TimeStamp lastDeviceEventTime;
 
 extern _X_EXPORT int
 CompareTimeStamps(TimeStamp /*a */ ,
@@ -167,7 +207,7 @@ ClientTimeToServerTime(CARD32 /*c */ );
 
 typedef struct _CallbackRec {
     CallbackProcPtr proc;
-    pointer data;
+    void *data;
     Bool deleted;
     struct _CallbackRec *next;
 } CallbackRec, *CallbackPtr;
@@ -181,13 +221,13 @@ typedef struct _CallbackList {
 
 /* proc vectors */
 
-extern _X_EXPORT int (*InitialVector[3]) (ClientPtr /*client */ );
+extern int (*InitialVector[3]) (ClientPtr /*client */ );
 
 extern _X_EXPORT int (*ProcVector[256]) (ClientPtr /*client */ );
 
 extern _X_EXPORT int (*SwappedProcVector[256]) (ClientPtr /*client */ );
 
-extern _X_EXPORT ReplySwapPtr ReplySwapVector[256];
+extern ReplySwapPtr ReplySwapVector[256];
 
 extern _X_EXPORT int
 ProcBadRequest(ClientPtr /*client */ );

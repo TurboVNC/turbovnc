@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2017 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -279,22 +279,47 @@ bool VNCOptions::ParseDesktopSize(char *sizeString, DesktopSize &size)
     size.set(SIZE_SERVER, 0, 0);
     return true;
   } else {
-    for (int i = 0; i < (int)strlen(sizeString); i++) {
-      if ((sizeString[i] < '0' || sizeString[i] > '9') && sizeString[i] != 'x')
-        sizeString[i] = ' ';
+    ScreenSet layout;
+    char *src, *dest, *str = sizeString, *token;
+    int fbWidth = 0, fbHeight = 0;
+    int r = INT_MIN, b = INT_MIN;
+
+    src = dest = sizeString;
+    while (*src) {
+      if ((*src >= '0' && *src <= '9') || *src == 'x' || *src == '+' ||
+          *src == ',')
+        *dest++ = *src;
+      src++;
     }
-    long width, height;
-    char *ptr = strchr(sizeString, 'x');
-    if (!ptr || ptr == sizeString || strlen(ptr) < 2)
+    *dest = '\0';
+
+    while ((token = strsep(&str, ",")) != NULL) {
+      int x = 0, y = 0, w, h;
+
+      if ((sscanf_s(token, "%dx%d+%d+%d", &w, &h, &x, &y) != 4 &&
+           sscanf_s(token, "%dx%d", &w, &h) != 2) ||
+          x < 0 || y < 0 || w < 1 || h < 1)
+          return false;
+
+      if (x >= 65535 || y >= 65535) continue;
+      if (x + w > 65535) w = 65535 - x;
+      if (y + h > 65535) h = 65535 - y;
+
+      layout.add_screen(Screen(0, x, y, w, h, 0));
+
+      if (x + w > r) r = x + w;
+      if (y + h > b) b = y + h;
+    }
+
+    fbWidth = r;
+    fbHeight = b;
+
+    if (!layout.validate(fbWidth, fbHeight, false))
       return false;
-    width = strtol(sizeString, NULL, 10);
-    height = strtol(ptr + 1, NULL, 10);
-    if (width >= 1 && height >= 1) {
-      size.set(SIZE_MANUAL, width, height);
-      return true;
-    }
+
+    size.set(SIZE_MANUAL, fbWidth, fbHeight, layout);
+    return true;
   }
-  return false;
 }
 
 
@@ -772,10 +797,11 @@ int readInt(char *name, int defval, char *fname)
 
 void VNCOptions::Save(char *fname)
 {
+  char temps[MAX_DS_STR];
+
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
-    char buf[128];
-    SPRINTF(buf, "use_encoding_%d", i);
-    saveInt(buf, m_UseEnc[i], fname);
+    SPRINTF(temps, "use_encoding_%d", i);
+    saveInt(temps, m_UseEnc[i], fname);
   }
   saveInt("preferred_encoding", m_PreferredEncoding,   fname);
   saveInt("restricted",         m_restricted,          fname);
@@ -798,9 +824,8 @@ void VNCOptions::Save(char *fname)
   saveInt("fitwindow",          m_FitWindow,           fname);
   saveInt("scale_den",          m_scale_den,           fname);
   saveInt("scale_num",          m_scale_num,           fname);
-  saveInt("resizemode",         m_desktopSize.mode,    fname);
-  saveInt("desktopwidth",       m_desktopSize.width,   fname);
-  saveInt("desktopheight",      m_desktopSize.height,  fname);
+  m_desktopSize.getString(temps, MAX_DS_STR);
+  WritePrivateProfileString("options", "desktopsize", temps, fname);
   saveInt("cursorshape",        m_requestShapeUpdates, fname);
   saveInt("noremotecursor",     m_ignoreShapeUpdates,  fname);
   saveInt("compresslevel",      m_compressLevel,       fname);
@@ -809,16 +834,16 @@ void VNCOptions::Save(char *fname)
   saveInt("nounixlogin",        m_noUnixLogin,         fname);
   if (strlen(m_user) > 0)
     WritePrivateProfileString("connection", "user", m_user, fname);
-
 }
 
 
 void VNCOptions::Load(char *fname)
 {
+  char temps[MAX_DS_STR];
+
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
-    char buf[128];
-    SPRINTF(buf, "use_encoding_%d", i);
-    m_UseEnc[i] = readInt(buf, m_UseEnc[i], fname) != 0;
+    SPRINTF(temps, "use_encoding_%d", i);
+    m_UseEnc[i] = readInt(temps, m_UseEnc[i], fname) != 0;
   }
 
   m_PreferredEncoding =   readInt("preferred_encoding", m_PreferredEncoding, fname);
@@ -842,9 +867,22 @@ void VNCOptions::Load(char *fname)
   m_FitWindow =           readInt("fitwindow", m_FitWindow, fname) != 0;
   m_scale_den =           readInt("scale_den", m_scale_den, fname);
   m_scale_num =           readInt("scale_num", m_scale_num, fname);
-  m_desktopSize.mode =    readInt("resizemode", m_desktopSize.mode, fname);
-  m_desktopSize.width =   readInt("desktopwidth", m_desktopSize.width, fname);
-  m_desktopSize.height =  readInt("desktopheight", m_desktopSize.height, fname);
+  if (GetPrivateProfileString("options", "desktopsize", "", temps, MAX_DS_STR,
+                              fname) == 0) {
+    int resizeMode =      readInt("resizemode", m_desktopSize.mode, fname);
+    int desktopWidth =    readInt("desktopwidth", m_desktopSize.width, fname);
+    int desktopHeight =   readInt("desktopheight", m_desktopSize.height, fname);
+    switch (resizeMode) {
+      case SIZE_SERVER:
+        SPRINTF(temps, "Server");  break;
+      case SIZE_MANUAL:
+        SPRINTF(temps, "%dx%d", desktopWidth, desktopHeight);  break;
+      case SIZE_AUTO:
+        SPRINTF(temps, "Auto");  break;
+    }
+  }
+  if (strlen(temps) && !ParseDesktopSize(temps, m_desktopSize))
+    ArgError("Invalid desktop size specified");
   m_requestShapeUpdates = readInt("cursorshape", m_requestShapeUpdates, fname) != 0;
   m_ignoreShapeUpdates =  readInt("noremotecursor", m_ignoreShapeUpdates, fname) != 0;
 
@@ -866,8 +904,7 @@ void VNCOptions::Load(char *fname)
 
   m_noUnixLogin =         readInt("nounixlogin", m_noUnixLogin, fname) != 0;
 
-  char temps[256];
-  if (GetPrivateProfileString("connection", "user", "", temps, 255,
+  if (GetPrivateProfileString("connection", "user", "", temps, MAX_DS_STR,
                               fname) != 0)
     STRCPY(m_user, temps);
 }
@@ -1424,30 +1461,39 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
                       FALSE);
       GetDlgItemText(hwnd, IDC_SCALE_EDIT, _this->m_oldScalingFactor, 20);
 
-      char sizecombo[37][10] = {
+      char sizecombo[51][31] = {
         "Auto", "Server", "480x320", "640x360", "640x480", "800x480",
-        "800x600", "854x480", "960x540", "960x600", "960x640", "1024x640",
-        "1024x768", "1136x640", "1152x864", "1280x720", "1280x800", "1280x960",
-        "1280x1024", "1344x840", "1344x1008", "1360x768", "1366x768",
-        "1400x1050", "1440x900", "1600x900", "1600x1000", "1600x1200",
-        "1680x1050", "1920x1080", "1920x1200", "2048x1152", "2048x1536",
-        "2560x1440", "2560x1600", "2880x1800", "3200x1800"
+        "800x600", "854x480", "960x540", "960x600", "960x640",
+        "1024x640", "1024x640+0+0,1024x640+1024+0",
+        "1024x768", "1136x640", "1152x864",
+        "1280x720", "1280x720+0+0,1280x720+1280+0",
+        "1280x800", "1280x800+0+0,1280x800+1280+0",
+        "1280x960", "1280x1024",
+        "1344x840", "1344x840+0+0,1344x840+1344+0",
+        "1344x1008", "1360x768",
+        "1366x768", "1366x768+0+0,1366x768+1366+0",
+        "1400x1050",
+        "1440x900", "1440x900+0+0,1440x900+1440+0",
+        "1600x900", "1600x900+0+0,1600x900+1600+0",
+        "1600x1000", "1600x1000+0+0,1600x1000+1600+0",
+        "1600x1200", "1680x1050",
+        "1920x1080", "1920x1080+0+0,1920x1080+1920+0",
+        "1920x1200", "1920x1200+0+0,1920x1200+1920+0",
+        "2048x1152", "2048x1536",
+        "2560x1440", "2560x1440+0+0,2560x1440+2560+0",
+        "2560x1600", "2560x1600+0+0,2560x1600+2560+0",
+        "2880x1800", "2880x1800+0+0,2880x1800+2880+0",
+        "3200x1800", "3200x1800+0+0,3200x1800+3200+0"
       };
       HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
-      for (i = 0; i < 37; i++)
+      for (i = 0; i < 51; i++)
         SendMessage(hSizeEdit, CB_INSERTSTRING, (WPARAM)i,
               (LPARAM)(int FAR*)sizecombo[i]);
-      if (_this->m_desktopSize.mode == SIZE_AUTO)
-        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Auto");
-      else if (_this->m_desktopSize.mode == SIZE_SERVER)
-        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
-      else {
-        char temps[12];
-        SPRINTF(temps, "%dx%d", _this->m_desktopSize.width,
-                 _this->m_desktopSize.height);
-        SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
-      }
-      GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, _this->m_oldDesktopSize, 20);
+      char temps[MAX_DS_STR];
+      _this->m_desktopSize.getString(temps, MAX_DS_STR);
+      SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
+      GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, _this->m_oldDesktopSize,
+                     MAX_DS_STR);
 
       HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
       SendMessage(hFullScreen, BM_SETCHECK, _this->m_FullScreen, 0);
@@ -1505,25 +1551,18 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
         case IDC_DESKTOPSIZE_EDIT:
           switch (HIWORD(wParam)) {
             case CBN_KILLFOCUS:
-              char newDesktopSize[20];
-              GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, newDesktopSize, 20);
+              char newDesktopSize[MAX_DS_STR];
+              GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, newDesktopSize,
+                             MAX_DS_STR);
               DesktopSize desktopSize;
               if (!ParseDesktopSize(newDesktopSize, desktopSize))
                 SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT,
                                _this->m_oldDesktopSize);
               else {
-                if (desktopSize.mode == SIZE_AUTO)
-                    SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Auto");
-                else if (desktopSize.mode == SIZE_SERVER)
-                    SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, "Server");
-                else {
-                  char temps[12];
-                  SPRINTF(temps, "%dx%d", desktopSize.width,
-                           desktopSize.height);
-                  SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
-                }
+                desktopSize.getString(newDesktopSize, MAX_DS_STR);
+                SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, newDesktopSize);
                 GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT,
-                               _this->m_oldDesktopSize, 20);
+                               _this->m_oldDesktopSize, MAX_DS_STR);
               }
           }
           return 0;
@@ -1568,8 +1607,8 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           }
 
           HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
-          char buf[12];
-          GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, buf, 12);
+          char buf[MAX_DS_STR];
+          GetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, buf, MAX_DS_STR);
           DesktopSize desktopSize;
           if (ParseDesktopSize(buf, desktopSize))
             _this->m_desktopSize = desktopSize;
@@ -2074,7 +2113,8 @@ void VNCOptions::Lim(HWND hwnd, int control, DWORD min, DWORD max)
 void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 {
   HKEY RegKey;
-  char key[80];
+  char key[80], temps[MAX_DS_STR];
+  DWORD buflen = MAX_DS_STR;
 
   STRCPY(key, keyname);
   STRCAT(key, "\\");
@@ -2082,9 +2122,8 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
    RegOpenKeyEx(HKEY_CURRENT_USER, key, 0, KEY_ALL_ACCESS, &RegKey);
 
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
-    char buf[128];
-    SPRINTF(buf, "use_encoding_%d", i);
-    m_UseEnc[i] = read(RegKey, buf, m_UseEnc[i]) != 0;
+    SPRINTF(temps, "use_encoding_%d", i);
+    m_UseEnc[i] = read(RegKey, temps, m_UseEnc[i]) != 0;
   }
 
 // NOTE: We do not cache some of the options that aren't exposed in the GUI,
@@ -2117,9 +2156,22 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
   m_FitWindow =           read(RegKey, "fitwindow", m_FitWindow) != 0;
   m_scale_den =           read(RegKey, "scale_den", m_scale_den);
   m_scale_num =           read(RegKey, "scale_num", m_scale_num);
-  m_desktopSize.mode =    read(RegKey, "resizemode", m_desktopSize.mode);
-  m_desktopSize.width =   read(RegKey, "desktopwidth", m_desktopSize.width);
-  m_desktopSize.height =  read(RegKey, "desktopheight", m_desktopSize.height);
+  if (RegQueryValueEx(RegKey, "desktopsize", NULL, NULL, (LPBYTE)temps,
+                      &buflen) != ERROR_SUCCESS) {
+    int resizeMode =      read(RegKey, "resizemode", m_desktopSize.mode);
+    int desktopWidth =    read(RegKey, "desktopwidth", m_desktopSize.width);
+    int desktopHeight =   read(RegKey, "desktopheight", m_desktopSize.height);
+    switch (resizeMode) {
+      case SIZE_SERVER:
+        SPRINTF(temps, "Server");  break;
+      case SIZE_MANUAL:
+        SPRINTF(temps, "%dx%d", desktopWidth, desktopHeight);  break;
+      case SIZE_AUTO:
+        SPRINTF(temps, "Auto");  break;
+    }
+  }
+  if (strlen(temps) && (!ParseDesktopSize(temps, m_desktopSize)))
+    ArgError("Invalid desktop size specified");
   m_requestShapeUpdates = read(RegKey, "cursorshape", m_requestShapeUpdates) != 0;
   m_ignoreShapeUpdates =  read(RegKey, "noremotecursor", m_ignoreShapeUpdates) != 0;
 //m_noUnixLogin =         read(RegKey, "nounixlogin", m_noUnixLogin) != 0;
@@ -2168,7 +2220,7 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 {
   DWORD dispos;
   HKEY RegKey;
-  char key[80];
+  char key[80], temps[MAX_DS_STR];
 
   STRCPY(key, keyname);
   STRCAT(key, "\\");
@@ -2177,9 +2229,8 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
                  KEY_ALL_ACCESS, NULL, &RegKey, &dispos);
 
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
-    char buf[128];
-    SPRINTF(buf, "use_encoding_%d", i);
-    save(RegKey, buf, m_UseEnc[i]);
+    SPRINTF(temps, "use_encoding_%d", i);
+    save(RegKey, temps, m_UseEnc[i]);
   }
 
   save(RegKey, "preferred_encoding", m_PreferredEncoding);
@@ -2202,9 +2253,9 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
   save(RegKey, "fitwindow", m_FitWindow);
   save(RegKey, "scale_den", m_scale_den);
   save(RegKey, "scale_num", m_scale_num);
-  save(RegKey, "resizemode", m_desktopSize.mode);
-  save(RegKey, "desktopwidth", m_desktopSize.width);
-  save(RegKey, "desktopheight", m_desktopSize.height);
+  m_desktopSize.getString(temps, MAX_DS_STR);
+  RegSetValueEx(RegKey, "desktopsize", NULL, REG_SZ, (CONST BYTE *)temps,
+                (DWORD)(strlen(temps) + 1));
   save(RegKey, "cursorshape", m_requestShapeUpdates);
   save(RegKey, "noremotecursor", m_ignoreShapeUpdates);
   save(RegKey, "compresslevel", m_compressLevel);

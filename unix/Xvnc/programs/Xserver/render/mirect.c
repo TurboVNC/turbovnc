@@ -54,7 +54,7 @@ miColorRects(PicturePtr pDst,
     tmpval[1].val = pixel;
     tmpval[2].val = pDst->subWindowMode;
     mask = GCFunction | GCForeground | GCSubwindowMode;
-    if (pClipPict->clientClipType == CT_REGION) {
+    if (pClipPict->clientClip) {
         tmpval[3].val = pDst->clipOrigin.x - xoff;
         tmpval[4].val = pDst->clipOrigin.y - yoff;
         mask |= GCClipXOrigin | GCClipYOrigin;
@@ -156,7 +156,7 @@ miCompositeRects(CARD8 op,
             rects++;
         }
 
-        FreePicture((pointer) pSrc, 0);
+        FreePicture((void *) pSrc, 0);
  bail4:
         FreeScratchGC(pGC);
  bail3:

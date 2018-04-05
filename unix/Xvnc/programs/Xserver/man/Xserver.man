@@ -1,5 +1,5 @@
-.\" $Xorg: Xserver.man,v 1.4 2001/02/09 02:04:07 xorgcvs Exp $
-.\" $XdotOrg: xserver/xorg/doc/Xserver.man.pre,v 1.4 2005/12/23 20:11:12 alanc Exp $
+'\" t
+.\"
 .\" Copyright 1984 - 1991, 1993, 1994, 1998  The Open Group
 .\"
 .\" Permission to use, copy, modify, distribute, and sell this software and its
@@ -127,6 +127,13 @@ Not obeyed by all servers.
 .B \-core
 causes the server to generate a core dump on fatal errors.
 .TP 8
+.B \-displayfd \fIfd\fP
+specifies a file descriptor in the launching process.  Rather than specify
+a display number, the X server will attempt to listen on successively higher
+display numbers, and upon finding a free one, will write the display number back
+on this file descriptor as a newline-terminated string.  The \-pn option is
+ignored when using \-displayfd.
+.TP 8
 .B \-deferglyphs \fIwhichfonts\fP
 specifies the types of fonts for which the server should attempt to use
 deferred glyph loading.  \fIwhichfonts\fP can be all (all fonts),
@@ -174,6 +181,16 @@ prints a usage message.
 .B \-I
 causes all remaining command line arguments to be ignored.
 .TP 8
+.B \-iglx
+Prohibit creating indirect GLX contexts.  Indirect GLX is of limited use,
+since it lacks support for many modern OpenGL features and extensions;
+it's slower than direct contexts; and it opens a large attack surface for
+protocol parsing errors.
+This is the default unless +iglx is specified.
+.TP 8
+.B +iglx
+Allow creating indirect GLX contexts.
+.TP 8
 .B \-maxbigreqsize \fIsize\fP
 sets the maximum big request to
 .I size
@@ -187,6 +204,22 @@ disables a transport type.  For example, TCP/IP connections can be disabled
 with
 .BR "\-nolisten tcp" .
 This option may be issued multiple times to disable listening to different
+transport types.
+Supported transport types are platform dependent, but commonly include:
+.TS
+l l.
+tcp     TCP over IPv4 or IPv6
+inet    TCP over IPv4 only
+inet6   TCP over IPv6 only
+unix    UNIX Domain Sockets
+local   Platform preferred local connection method
+.TE
+.TP 8
+.B \-listen \fItrans-type\fP
+enables a transport type.  For example, TCP/IP connections can be enabled
+with
+.BR "\-listen tcp" .
+This option may be issued multiple times to enable listening to different
 transport types.
 .TP 8
 .B \-noreset
@@ -214,11 +247,10 @@ turns off auto-repeat.
 turns on auto-repeat.
 .TP 8
 .B -retro
-starts the stipple with the classic stipple and cursor visible.  The default
+starts the server with the classic stipple and cursor visible.  The default
 is to start with a black root window, and to suppress display of the cursor
-until the first time an application calls XDefineCursor().  For the Xorg
-server, this also sets the default for the DontZap option to FALSE.  For
-kdrive servers, this implies -zap.
+until the first time an application calls XDefineCursor(). For kdrive
+servers, this implies -zap.
 .TP 8
 .B \-s \fIminutes\fP
 sets screen-saver timeout time in minutes.
@@ -297,6 +329,11 @@ sets the stack space limit of the server to the specified number of kilobytes.
 A value of zero makes the stack size as large as possible.  The default value
 of \-1 leaves the stack space limit unchanged.
 .TP 8
+.B \-maxclients
+.BR 64 | 128 | 256 | 512
+Set the maximum number of clients allowed to connect to the X server.
+Acceptable values are 64, 128, 256 or 512.
+.TP 8
 .B \-render
 .BR default | mono | gray | color
 sets the color allocation policy that will be used by the render extension.
@@ -368,7 +405,7 @@ ends.
 .B \-class \fIdisplay-class\fP
 XDMCP has an additional display qualifier used in resource lookup for
 display-specific options.  This option sets that value, by default it
-is "MIT-Unspecified" (not a very useful value).
+is "MIT-unspecified" (not a very useful value).
 .TP 8
 .B \-cookie \fIxdm-auth-bits\fP
 When testing XDM-AUTHENTICATION-1, a private key is shared between the
@@ -405,7 +442,7 @@ elapse between autorepeat-generated keystrokes).
 loads keyboard description in \fIfilename\fP on server startup.
 .SH "NETWORK CONNECTIONS"
 The X server supports client connections via a platform-dependent subset of
-the following transport types: TCP\/IP, Unix Domain sockets, DECnet,
+the following transport types: TCP/IP, Unix Domain sockets,
 and several varieties of SVR4 local connections.  See the DISPLAY
 NAMES section of the \fIX\fP(__miscmansuffix__) manual page to learn how to
 specify which transport type clients should try to use.
@@ -434,8 +471,8 @@ If no other authorization mechanism is being used,
 this list initially consists of the host on which the server is running as
 well as any machines listed in the file \fI/etc/X\fBn\fI.hosts\fR, where
 \fBn\fP is the display number of the server.  Each line of the file should
-contain either an Internet hostname (e.g. expo.lcs.mit.edu) or a DECnet
-hostname in double colon format (e.g. hydra::) or a complete name in the format
+contain either an Internet hostname (e.g. expo.lcs.mit.edu)
+or a complete name in the format
 \fIfamily\fP:\fIname\fP as described in the \fIxhost\fP(1) manual page.
 There should be no leading or trailing spaces on any lines.  For example:
 .sp
@@ -443,7 +480,6 @@ There should be no leading or trailing spaces on any lines.  For example:
 .nf
 joesworkstation
 corporate.company.com
-star::
 inet:bigcpu
 local:
 .fi

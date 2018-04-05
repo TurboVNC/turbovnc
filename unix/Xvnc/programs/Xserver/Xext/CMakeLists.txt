@@ -1,4 +1,12 @@
-include_directories(../miext/sync ../mi ../Xi)
+include_directories(../Xi ../composite ../damageext ../mi ../miext/sync
+	../render ../xfixes)
+
+foreach(dir /run/shm /dev/shm /var/tmp /tmp)
+	if(EXISTS ${dir})
+		add_definitions(-DSHMDIR=\"${dir}\")
+		break()
+	endif()
+endforeach()
 
 handle_type_puns()
 
@@ -7,6 +15,10 @@ add_library(Xext-server STATIC
 	dpms.c
 	dpmsstubs.c
 	geext.c
+	hashtable.c
+	panoramiX.c
+	panoramiXprocs.c
+	panoramiXSwap.c
 	saver.c
 	security.c
 	shape.c

@@ -1,3 +1,514 @@
+commit 79b63f0e57cd5baf06ff24252d3f1675dcb64467
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Sun May 17 14:29:29 2015 +1000
+
+    randrproto 1.5.0
+
+commit 895ee5264524c7c239ee4ef5e39c4e295323fb51
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Wed Apr 22 10:58:18 2015 +1000
+
+    randrproto: clarify output XID lifetimes.
+    
+    This just makes a note that randr won't make outputs disappear
+    dynamically.
+    
+    Reviewed-by: Aaron Plattner <aplattner@nvidia.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+commit 98da0d6e48b7d124d6788ea568e9f9e3dc204322
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Feb 2 16:17:56 2015 +1000
+
+    randrproto: add tile property info for randr 1.5
+    
+    expose this as an array of 8 32-bit values.
+    
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+commit 4109f29861a7066970a2afd079d0fc2c12828bcb
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Dec 12 15:57:57 2014 -0800
+
+    Add Monitors, update version to 1.5 (v2)
+    
+    v2: [airlied] add get_active to monitor get
+    interface, to allow normal vs configuration
+    clients to see active vs all monitors. (r-b by keithp)
+    
+    Reviewed-by: Dave Airlie <airlied@redhat.com>
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit d501a4f08ee3c5435841aa70c0d5cd4b7398bd12
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Dec 12 15:57:40 2014 -0800
+
+    Fix spelling errors in randrproto.txt
+    
+    Reviewed-by: Dave Airlie <airlied@redhat.com>
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit b1ba68df8a5fc113a387123ec2f312195e28e47f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 14 09:35:04 2015 -0700
+
+    randrproto 1.4.1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a4a6694c059d74247c16527eef4a0ec9f56bbef6
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Mon Jan 6 21:34:51 2014 -0800
+
+    spec: RRCrtcChangeMask and RROutputChangeMask are not things
+    
+    The correct names for these are RRCrtcChangeNotifyMask and
+    RROutputChangeNotifyMask, respectively.
+    
+    v2: "when a the configuration" is also not a thing.
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 1755cbe0f501a86afe515f92bb24e417a1866092
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Fri Jan 3 13:43:21 2014 -0800
+
+    spec: Move the GUID property into a new section since xrandr-1.4.0 was already released
+    
+    I pushed commit 19fc4c5a72eb9919d720ad66734029d9f8e313b1 before I remembered
+    that xrandr-1.4.0 has already been released.  Move it to a new 1.4.1 section.
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 4d8e809684dedb970001099076bb62a38fcd82ca
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jan 5 10:40:11 2014 -0800
+
+    Bug 73176 - randrproto typo (s/fundmentally/fundamentally)
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=73176
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 19fc4c5a72eb9919d720ad66734029d9f8e313b1
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Tue Jun 12 12:32:19 2012 -0700
+
+    Add a "GUID" property
+    
+    This property represents the globally-unique identifier of the connected
+    display, if one is available.
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Andy Ritger <aritger@nvidia.com>
+
+commit e7526e6b5fe0966929cda10b2ded0258413744db
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Oct 26 09:42:05 2013 -0400
+
+    config: replace deprecated use of AC_OUTPUT with AC_CONFIG_FILES
+    
+    Fix Automake warning: AC_OUTPUT should be used without arguments.
+    www.gnu.org/software/autoconf/manual/autoconf.html#Configuration-Files
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit ca7cc541c2e43e6c784df19b4583ac35829d2f72
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 4ab506168ffad46518eb2b4d929034691344e9ff
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:01:10 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 4fcbd8584e55ff789522a38a41a33c34446d1455
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Aug 27 23:59:02 2012 -0700
+
+    spec: Correct lengths in encoding of OffloadSink & OutputSource
+    
+    Make listed lengths match data shown & values in header for
+    RRSetProviderOffloadSink & RRSetProviderOutputSource
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f876e00d29693e25c2b44ce33cd4a02f7a603eba
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Aug 27 23:59:02 2012 -0700
+
+    spec: Add config-timestamp to descriptions of OffloadSink & OutputSource
+    
+    Present in header & encoding section, just not in the descriptions of
+    RRSetProviderOffloadSink & RRSetProviderOutputSource
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ed09b382e42d2131034b98abc861c091c3d1771c
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Aug 27 23:45:56 2012 -0700
+
+    spec: Add PROVIDER_CAPS encoding to Appendix A
+    
+    Uses values found in randr.h
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c69dfe0cd310c122eae0b11c5547d5cd200ebbf5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Aug 27 23:28:22 2012 -0700
+
+    spec: Make encoding of RRGetProviderInfo match header
+    
+    The encoding is missing the 8 bytes of padding at the end of the
+    base reply struct before the variable length lists begin.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3672b5430c9f665680e6a7a77f00202fc96243a0
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Aug 27 23:28:22 2012 -0700
+
+    spec: Make encoding of RRGetProviders match description & header
+    
+    The description section matches randrproto.h - neither of which have
+    the "maximum masters" or "flags" members, but do have padding before
+    the providers list starts.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 722cf0c2ba07e986cbedf9d687a87daddd04fa92
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 26 23:38:38 2012 -0700
+
+    spec: Make description of RRProviderChangeNotify match encoding & header
+    
+    The encoding section matches randrproto.h - neither of which have the
+    config-timestamp, root, or crtc members.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 534dea4512b812b9f8a62b4bbdbfe60d650ef01f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 26 22:50:05 2012 -0700
+
+    spec: correct sub-code values for RRProvider*Notify event encoding
+    
+    These values match the RRNotify_* definitions in randrproto.h and
+    don't overlap with the RROutput*Notify codes from RandR 1.2.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Dave Airlie <airlied@redhat.com>
+
+commit ed0233e46fd2fe41b1c10e525423e90e0fa2bdc8
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 26 20:51:03 2012 -0700
+
+    spec: Correct length calculation in encoding of gamma lists
+    
+    The padding for RRGetCrtcGamma & RRSetCrtcGamma is a variable p,
+    not a fixed 2 bytes, since it depends on how many values are
+    included in the lists.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ddc00f44df77ff3309b2b7cd77d3423781947b14
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 26 20:40:06 2012 -0700
+
+    spec: Correct size of outputs in RRSetCrtcConfig encoding
+    
+    Each OUTPUT is 4 bytes, not 8.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7339eaea1296de0e0f3ebc03d3606470ba143ac3
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 26 19:00:35 2012 -0700
+
+    spec: Update data type sections
+    
+    Make definitions more consistent about use of {} for enums, [] for structs
+    Reflect the incorporation of more types from the Render spec in 1.3
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit afe532b119fe46d32513dc71c76c3a906e06c5a8
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 26 18:58:06 2012 -0700
+
+    spec: Fix typos in text
+    
+    At least I'm assuming "providre" is a typo, not just a non-American variant.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a74417d782a39423e44a5a2e573816894635c234
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 26 18:31:16 2012 -0700
+
+    spec: Correct length for RRCreateMode in encoding section
+    
+    (1 + 1 + 2 + 4 + 32) / 4 is 10 words, not 12
+    10 also matches the sz_xRRCreateModeReq value of 40 in randrproto.h
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b52f4e39b670e98e56e346b7aa1393a2b24544f2
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Aug 28 00:07:01 2012 -0700
+
+    spec: add missing brackets between requests in encoding section
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 5f5cb2767618ad22a5608142513c7dd81927a8d5
+Author: Dave Airlie <airlied@gmail.com>
+Date:   Thu Jul 12 22:45:05 2012 +1000
+
+    bump to 1.4.0 (for release.sh)
+    
+    a trivial commit to make release.sh work.
+    
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+commit 74637d53fa8f5bf44258f773c4aaf60053cccfc4
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jul 9 22:18:22 2012 -0700
+
+    1.4 spec: update Extension Versioning section to include 1.4
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+    Signed-off-by: Dave Airlie <airlied@gmail.com>
+
+commit 7b4b49760ff33022a8120841017bcfb7ffe5f6ac
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jul 9 22:18:21 2012 -0700
+
+    1.4 spec: Add descriptions of new RRSELECTMASK bits
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+    Signed-off-by: Dave Airlie <airlied@gmail.com>
+
+commit 75a1d1aa8fb539ec5a7a6c8337e46ee8e5de4a36
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jul 9 22:18:20 2012 -0700
+
+    1.4 spec: Change "LISTof ATOM" to "LISTofATOM" to match other LIST types
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+    Signed-off-by: Dave Airlie <airlied@gmail.com>
+
+commit ef99bda581449d6c8dab7233e287c7bfd578730c
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Fri Jan 20 17:38:16 2012 +0000
+
+    randr: add provider object (v8)
+    
+    A provider object represents a GPU or virtual device that provides
+    rendering or output services to the X server. This protocol
+    allow controlling provider objects for output and offload slave devices.
+    
+    v1.1: fix typo add missing define
+    
+    v2: rename nProperties back to nAtoms, makes server simpler to c-n-p,
+    add missing Get request/reply
+    
+    v3: bring back configure property, no point in diverging from the
+    output property code without good reason.
+    also fix typo pointed out on irc by rei4dan.
+    
+    v3.1: drop cut-n-paste, increase RRNumberRequests
+    
+    v4: reviewed by Aaron, address comments:
+    Fix provider error code
+    add missing notify, remove dri2 references, fix c-n-p issues.
+    
+    v5: add provider change notify event with current role.
+    v5.1: fix cut-n-paste
+    
+    v6:
+    document flags, fix whitespace, add better errors for SetProviderRoles,
+    add new events, fix pending language.
+    
+    v6.1: add missing change notify event struct + missing padding
+    
+    v7: fix a bunch more tab/spaces, add appendix sections for requests, events
+    and errors, remove multimaster flag in favour of max master counter,
+    move some members around to follow other events.
+    
+    v7.1 fix maxMaster + wrong comment, one whitespace
+    v7.2 bump to being randr 1.4, fix some too generic names.
+    v7.3 remove dynamic flag, fix some language
+    
+    v8 overhaul complete protocol, remove set provider roles, add specific
+    methods for setting offload sinks and output sources, add a list
+    of associated providers into the get provider info struct.
+    
+    Earlier-review-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+commit e0c94fa3a9e9f237c65c35e42aaa673994e55b7e
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Jun 25 12:01:03 2012 +0100
+
+    Revert the unused 1.4.0 protocol
+    
+    This patch reverts:
+    Revert "Make SetCrtcConfigs take flags bits to allow partial configuration changes"
+    
+    This reverts commit 105a161a3f5fb67f5fe7e4119629d424672804aa.
+    
+    Revert "Define new semantics for scanout pixmap destruction."
+    
+    This reverts commit 0d32bb0780db35cec31e423faffa7061ec3e697f.
+    
+    Revert "Fix spelling errors, add description of SCANOUTPIXMAPINFO fields."
+    
+    This reverts commit 3e28d3098faa1a420cd0eb0474b2959cecc8813a.
+    
+    Revert "Add some informative text about the reasons for the PCP and ST bits"
+    
+    This reverts commit ebab32deea654d2ceb0538177e78d8ad48cf2a82.
+    
+    Revert "RandR version 1.4 additions"
+    
+    This reverts commit dd14a2275521b4cc50a588c95cc34cca7db51a91.
+    
+    None of this was ever used in the X server and I think it should
+    probably be addressed in smaller pieces later.
+    
+    Acked-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+commit 40cce2d010c1eff087301d5bb0098d0e041ed71f
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Wed Jul 27 22:57:56 2011 -0700
+
+    Add "Border" and "BorderDimensions" properties
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Stéphane Marchesin <marcheu@chromium.org>
+
+commit e151e053fbbcfd28b5465b6c495413f16e568e95
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Tue Aug 2 14:58:31 2011 -0700
+
+    Be more specific about property types
+    
+    RandR output properties are X properties, which have a type atom, a
+    "format" (i.e. an element size) and a number of items.  Be explicit
+    about these fields when describing properties in the protocol
+    document.  E.g., instead of specifying "int32 [2 * n] / Atom pairs,"
+    say "Type: INTEGER / Format: 32 / Num. items: 2*n."
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit b5c977ad70b845c278ef52c004d9e5fc3ec97cbf
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Thu May 19 16:26:27 2011 -0400
+
+    Remove nonsense paragraph about dual-link DVI
+    
+    I've never heard of any hardware that behaves so.
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 105a161a3f5fb67f5fe7e4119629d424672804aa
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Feb 16 22:44:30 2011 -0800
+
+    Make SetCrtcConfigs take flags bits to allow partial configuration changes
+    
+    Instead of requiring a complete new configuration to be computed,
+    allow the client to send a partial configuration with only the changed
+    values included. This simplifies clients so that they need not change
+    things they don't understand.
+    
+    This also removes the 'CurrentScanoutPixmap' hack as that is no longer
+    necessary.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 611a4e0c7bdc9831e0eda396030a27bcd2c11759
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Jan 6 22:13:22 2011 -0800
+
+    Add missing Red Hat copyright notice to COPYING
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 0d32bb0780db35cec31e423faffa7061ec3e697f
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Dec 6 22:39:07 2010 -0800
+
+    Define new semantics for scanout pixmap destruction.
+    
+    This is not yet implemented in the X server...
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 3e28d3098faa1a420cd0eb0474b2959cecc8813a
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Dec 6 10:01:21 2010 -0800
+
+    Fix spelling errors, add description of SCANOUTPIXMAPINFO fields.
+    
+    Review results from Aaron Plattner.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit ebab32deea654d2ceb0538177e78d8ad48cf2a82
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sun Dec 5 23:22:26 2010 -0800
+
+    Add some informative text about the reasons for the PCP and ST bits
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit dd14a2275521b4cc50a588c95cc34cca7db51a91
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sun Dec 5 20:31:18 2010 -0800
+
+    RandR version 1.4 additions
+    
+    This adds the specification and protocol header definitions for the
+    RandR 1.4 protocol changes, including
+    
+     * Per crtc pixmaps and pixmap origins
+     * Sprite position and image transforms
+     * SetCrtcConfigs request
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 1325b011247e52cd8ffd0ca96408d77ea22ffaaa
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sun Dec 5 20:30:43 2010 -0800
+
+    Whitespace cleanups in randrproto.txt
+    
+    This just eliminates some ugly space/tab combos
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Cyril Brulebois <kibi@debian.org>
+
 commit 75b7c5feed818291c8ba8ac1ee5b6a6ee4b61851
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Fri Oct 29 23:12:30 2010 -0700

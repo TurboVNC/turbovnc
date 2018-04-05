@@ -32,10 +32,9 @@
 #include "geint.h"
 #include "geext.h"
 #include "protocol-versions.h"
+#include "extinit.h"
 
 DevPrivateKeyRec GEClientPrivateKeyRec;
-
-int RT_GECLIENT = 0;
 
 GEExtension GEExtensions[MAXEXTENSIONS];
 
@@ -65,14 +64,16 @@ ProcGEQueryVersion(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xGEQueryVersionReq);
 
-    rep.repType = X_Reply;
-    rep.RepType = X_GEQueryVersion;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
+    rep = (xGEQueryVersionReply) {
+        .repType = X_Reply,
+        .RepType = X_GEQueryVersion,
+        .sequenceNumber = client->sequence,
+        .length = 0,
 
-    /* return the supported version by the server */
-    rep.majorVersion = SERVER_GE_MAJOR_VERSION;
-    rep.minorVersion = SERVER_GE_MINOR_VERSION;
+        /* return the supported version by the server */
+        .majorVersion = SERVER_GE_MAJOR_VERSION,
+        .minorVersion = SERVER_GE_MINOR_VERSION
+    };
 
     /* Remember version the client requested */
     pGEClient->major_version = stuff->majorVersion;
@@ -85,13 +86,14 @@ ProcGEQueryVersion(ClientPtr client)
         swaps(&rep.minorVersion);
     }
 
-    WriteToClient(client, sizeof(xGEQueryVersionReply), (char *) &rep);
+    WriteToClient(client, sizeof(xGEQueryVersionReply), &rep);
     return Success;
 }
 
-int (*ProcGEVector[GENumberRequests]) (ClientPtr) = {
+static int (*ProcGEVector[GENumberRequests]) (ClientPtr) = {
     /* Version 1.0 */
-ProcGEQueryVersion};
+    ProcGEQueryVersion,
+};
 
 /************************************************************/
 /*                swapped request handlers                  */
@@ -108,9 +110,10 @@ SProcGEQueryVersion(ClientPtr client)
     return (*ProcGEVector[stuff->ReqType]) (client);
 }
 
-int (*SProcGEVector[GENumberRequests]) (ClientPtr) = {
+static int (*SProcGEVector[GENumberRequests]) (ClientPtr) = {
     /* Version 1.0 */
-SProcGEQueryVersion};
+    SProcGEQueryVersion
+};
 
 /************************************************************/
 /*                callbacks                                 */
@@ -142,28 +145,10 @@ SProcGEDispatch(ClientPtr client)
     return (*SProcGEVector[stuff->ReqType]) (client);
 }
 
-/**
- * Called when a new client inits a connection to the X server.
- *
- * We alloc a simple struct to store the client's major/minor version. Can be
- * used in the furture for versioning support.
- */
-static void
-GEClientCallback(CallbackListPtr *list, pointer closure, pointer data)
-{
-    NewClientInfoRec *clientinfo = (NewClientInfoRec *) data;
-    ClientPtr pClient = clientinfo->client;
-    GEClientInfoPtr pGEClient = GEGetClient(pClient);
-
-    pGEClient->major_version = 0;
-    pGEClient->minor_version = 0;
-}
-
 /* Reset extension. Called on server shutdown. */
 static void
 GEResetProc(ExtensionEntry * extEntry)
 {
-    DeleteCallback(&ClientStateCallback, GEClientCallback, 0);
     EventSwapVector[GenericEvent] = NotImplemented;
 }
 
@@ -201,10 +186,6 @@ GEExtensionInit(void)
     if (!dixRegisterPrivateKey
         (&GEClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(GEClientInfoRec)))
         FatalError("GEExtensionInit: GE private request failed.\n");
-
-    if (!AddCallback(&ClientStateCallback, GEClientCallback, 0)) {
-        FatalError("GEExtensionInit: register client callback failed.\n");
-    }
 
     if ((extEntry = AddExtension(GE_NAME,
                                  0, GENumberErrors,

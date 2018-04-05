@@ -82,18 +82,18 @@
 
 *** Window Manager Compatibility
 
-Although this version of the TurboVNC Server provides an option (''-3dwm'')
-that allows for running 3D window managers (such as Unity or GNOME 3+ or KDE
-5+) in a TurboVNC Server session using VirtualGL, it is generally recommended
-that you use a 2D window manager with the TurboVNC Server.  Many recent Linux
-distributions ship with only 3D window managers, so it may be necessary to
-install a 2D window manager prior to launching the TurboVNC Server for the
-first time.  As of this writing, Ubuntu provides an optional 2D window manager
-called "GNOME Fallback" or "GNOME Flashback", which will automatically be used
-if it is installed and ''-3dwm'' is not passed to ''vncserver''.  For other
+This version of the TurboVNC Server can run 3D (compositing) window managers
+(such as Unity or GNOME 3+ or KDE 5+) using its built-in software OpenGL
+implementation, and it also provides an option (''-vgl'') that allows for
+running 3D window managers using VirtualGL.  However, for performance reasons,
+it is generally recommended that you use a 2D window manager with the TurboVNC
+Server (even with VirtualGL, 3D window managers have a lot of overhead.)  As of
+this writing, Ubuntu provides an optional 2D window manager called "GNOME
+Fallback" or "GNOME Flashback", which will automatically be used if it is
+installed and the ''TVNC_WM'' environment variable is set to ''2d''.  For other
 systems that lack a 2D window manager, it is recommended that you install MATE.
 Refer to
-[[http://www.turbovnc.org/Documentation/Compatibility][this article]] for an
+[[http://www.turbovnc.org/Documentation/Compatibility][this report]] for an
 up-to-date list of window managers that have been tested with this version of
 the TurboVNC Server, how to configure the TurboVNC Server to use those window
 managers, and a list of known compatibility issues.
@@ -135,16 +135,14 @@ the following command:
 {anchor: Zero_Install}
 
 When a TurboVNC session is created, it automatically starts a miniature web
-server that serves up the Java TurboVNC Viewer as either an applet or a Java
-Web Start app.  This allows you to easily connect to the TurboVNC session from
-a machine that does not have the TurboVNC Viewer installed locally.  If one of
-the official TurboVNC binary packages is installed on the server, then it will
-automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI library for
-Linux, OS X, or Windows clients when launching the TurboVNC Viewer using Java
-Web Start.  If using the Java TurboVNC Viewer as an applet, then you can
-install
-[[http://www.sourceforge.net/projects/libjpeg-turbo/files][one of the official libjpeg-turbo packages]]
-on the client machine to accelerate JPEG decoding.
+server that serves up the Java TurboVNC Viewer as a Java Web Start app.  This
+allows you to easily connect to the TurboVNC session from a machine that does
+not have the TurboVNC Viewer installed locally.  If one of the official
+TurboVNC binary packages is installed on the server, then the miniature web
+server will automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI
+library for Linux, OS X, or Windows clients when launching the TurboVNC Viewer.
+This provides most of the advantages of the standalone TurboVNC viewers,
+including native levels of performance on popular client platforms.
 
 To launch the Java TurboVNC Viewer from a web browser, point your web browser
 to:
@@ -162,33 +160,25 @@ web browser to:
 ''http://my_server:5801''
 
 This will download a JNLP file to your computer, which you can open in Java
-Web Start.  Add ''/applet'' to the URL to launch the viewer as a Java applet
-instead (as of this writing, browsers are starting to do away with Java
-plugins, so running the viewer as an applet is more of a legacy feature.)
+Web Start.
 
 You can add viewer parameters to the URL using the following format:
 
 ''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}?''__''{param1}''__''=''__''{value1}''__''&''__''{param2}''__''=''__''{value2}''__
 
-Examples:
-
-''http://my_server:5801/applet?embed=1&tunnel=1''
-
-will run the viewer as an applet in the browser window and tunnel the VNC
-connection through SSH.
+Example:
 
 ''http://my_server:5801?tunnel=1&samp=2x&quality=80''
 
-will run the viewer as a JWS app, tunnel the VNC connection through SSH, and
-enable Medium-Quality JPEG.
+will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
 
 	!!! NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in
-	the Java browser plug-in or JWS by default.  This is not an issue if you are
-	using the official TurboVNC binary packages, but if you are building a
-	self-signed version of the Java TurboVNC Viewer for development purposes,
-	then you will need to add ''http://{turbovnc_server}:{http_port}''
-	(for example, ''http://my_server:5801'') to Java's Exception Site List, which
-	can be found under the "Security" tab in the Java Control Panel.
+	Java Web Start by default.  This is not an issue if you are using the
+	official TurboVNC binary packages, but if you are building a self-signed
+	version of the Java TurboVNC Viewer for development purposes, then you will
+	need to add ''http://{turbovnc_server}:{http_port}'' (for example,
+	''http://my_server:5801'') to Java's Exception Site List, which can be found
+	under the "Security" tab in the Java Control Panel.
 
 	!!! NOTE: On some newer OS X systems, downloading a JNLP file may result
 	in an error: "xxxxxxxx.jnlp can't be opened because it it from an
@@ -205,11 +195,8 @@ described above, is a quick and easy way of running the TurboVNC Viewer on
 machines that don't already have a VNC viewer installed (for instance, for the
 purpose of collaborating with colleagues who don't normally use TurboVNC.)
 
-To set up a large-scale zero-install deployment of the Java TurboVNC Viewer,
-it is desirable to serve up the JAR files from a dedicated web server.  When
-deployed using JWS, the Java TurboVNC Viewer provides all of the advantages of
-a standalone native viewer, including native levels of performance on most
-platforms (see [[#MacJavaPerf][notes regarding performance on Mac platforms]].)
+To set up a large-scale deployment of the Java TurboVNC Viewer, however, it is
+desirable to serve up the JAR files from a dedicated web server.
 
 For the purposes of this guide, it is assumed that the reader has some
 knowledge of web server administration.
@@ -221,7 +208,7 @@ knowledge of web server administration.
 	* Copy the libjpeg-turbo JNI JAR files into that same directory.  You can
 		obtain these from one of the official TurboVNC 2.0 or later binary packages
 		for Linux, or you can download ''libjpeg-turbo-{version}-jws.zip'' from
-		libjpeg-turbo 1.3.0 or later (available at
+		libjpeg-turbo 1.4.0 or later (available at
 		[[http://sourceforge.net/projects/libjpeg-turbo/files]].)  Note that only
 		the JARs included in the official TurboVNC packages are signed using an
 		official code signing certificate.
@@ -259,37 +246,39 @@ knowledge of web server administration.
 		  </security>
 
 		  <resources os="Mac OS X">
-		    <j2se version="1.6+" java-vm-args="-server"/>
+		    <j2se version="1.8+" java-vm-args="-server"/>
 		    <nativelib href="ljtosx.jar"/>
+		    <!-- Enable drawing tablet support for OS X clients -->
+		    <nativelib href="tvnchelper-osx.jar"/>
 		  </resources>
 
 		  <resources os="Windows" arch="x86">
-		    <j2se version="1.6+" java-vm-args="-Dsun.java2d.d3d=false"/>
+		    <j2se version="1.8+" java-vm-args="-Dsun.java2d.d3d=false"/>
 		    <nativelib href="ljtwin32.jar"/>
 		    <!-- Enable keyboard grabbing for 32-bit Windows clients -->
 		    <nativelib href="tvnchelper-win32.jar"/>
 		  </resources>
 
 		  <resources os="Windows" arch="amd64">
-		    <j2se version="1.6+" java-vm-args="-Dsun.java2d.d3d=false"/>
+		    <j2se version="1.8+" java-vm-args="-Dsun.java2d.d3d=false"/>
 		    <nativelib href="ljtwin64.jar"/>
 		    <!-- Enable keyboard grabbing for 64-bit Windows clients -->
 		    <nativelib href="tvnchelper-win64.jar"/>
 		  </resources>
 
 		  <resources os="Linux" arch="i386">
-		    <j2se version="1.6+" java-vm-args="-server"/>
+		    <j2se version="1.8+" java-vm-args="-server"/>
 		    <nativelib href="ljtlinux32.jar"/>
-		    <!-- Enable keyboard grabbing and multi-screen spanning for
-		         32-bit Linux clients -->
+		    <!-- Enable keyboard grabbing, multi-screen spanning, and extended
+		         input device support for 32-bit Linux clients -->
 		    <nativelib href="tvnchelper-linux32.jar"/>
 		  </resources>
 
 		  <resources os="Linux" arch="amd64">
-		    <j2se version="1.6+"/>
+		    <j2se version="1.8+"/>
 		    <nativelib href="ljtlinux64.jar"/>
-		    <!-- Enable keyboard grabbing and multi-screen spanning for
-		         64-bit Linux clients -->
+		    <!-- Enable keyboard grabbing, multi-screen spanning, and extended
+		         input device support for 64-bit Linux clients -->
 		    <nativelib href="tvnchelper-linux64.jar"/>
 		  </resources>
 
@@ -408,8 +397,8 @@ details.
 	along with the libjpeg-turbo JNI library and necessary glueware to make the
 	viewer behave and perform like a standalone native viewer.  Since the Java
 	TurboVNC Viewer contains an embedded SSH client, the ''via'' and
-	''tunnel'' parameters can also be used when the viewer is run as an applet
-	or deployed using Java Web Start.
+	''tunnel'' parameters can also be used when the viewer is deployed using Java
+	Web Start.
 
 	!!! The Windows TurboVNC Viewer contains experimental support for the
 	''-via'' and ''-tunnel'' command-line options.  Currently the use of these
@@ -439,6 +428,27 @@ If the ''no-reverse-connections'' directive is set in the TurboVNC
 security configuration file, then that has the effect of enabling the
 ''-noreverse'' option for all new TurboVNC sessions that are started on
 the machine.
+
+** Running OpenGL Applications
+
+The TurboVNC Server includes a software GLX/OpenGL implementation that can be
+used for casual 3D rendering.  This implementation uses the swrast DRI driver
+provided by Mesa 8.x and later.  On systems that do not have vendor-specific
+GPU drivers installed, or on systems that provide a libglvnd-enabled build of
+Mesa, TurboVNC's software OpenGL implementation can use direct rendering.
+Otherwise, it falls back to indirect rendering, which is limited to the OpenGL
+1.4 API and which may perform sluggishly (particularly with continuous mouse
+input.)  In general, if the server machine has a GPU, then you should use
+[[#VGL][VirtualGL]] rather than relying on TurboVNC's software OpenGL
+implementation.
+
+Passing ''-extension GLX'' to ''vncserver'' disables the built-in GLX/OpenGL
+implementation, thus restoring the behavior of TurboVNC 2.1.x and earlier
+(which required VirtualGL in order to run OpenGL applications.)  Passing
+''-iglx'' to ''vncserver'' disables indirect rendering.  If the built-in
+GLX/OpenGL implementation is not functioning properly, then pass ''-verbose''
+to ''vncserver'' to log informational messages that may reveal the source of
+the problem.
 
 ** Further Reading
 

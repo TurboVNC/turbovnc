@@ -27,19 +27,19 @@ used in advertising or otherwise to promote the sale, use or other dealings
 in this Software without prior written authorization from The Open Group.
 
  *
- * Copyright 1987, 1988, 1989 by 
+ * Copyright 1987, 1988, 1989 by
  * Digital Equipment Corporation, Maynard, Massachusetts,
- * 
+ *
  *                         All Rights Reserved
- * 
- * Permission to use, copy, modify, and distribute this software and its 
- * documentation for any purpose and without fee is hereby granted, 
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose and without fee is hereby granted,
  * provided that the above copyright notice appear in all copies and that
- * both that copyright notice and this permission notice appear in 
+ * both that copyright notice and this permission notice appear in
  * supporting documentation, and that the name of Digital not be
  * used in advertising or publicity pertaining to distribution of the
- * software without specific, written prior permission.  
- * 
+ * software without specific, written prior permission.
+ *
  * DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
  * ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
  * DIGITAL BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
@@ -47,7 +47,7 @@ in this Software without prior written authorization from The Open Group.
  * WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
  * ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
- * 
+ *
  ******************************************************************/
 
 /* The panoramix components contained the following notice */
@@ -79,7 +79,7 @@ Equipment Corporation.
 
 ******************************************************************/
 
- /* 
+ /*
   * Aug '86: Susan Angebranndt -- original code
   * July '87: Adam de Boor -- substantially modified and commented
   * Summer '89: Joel McCormack -- so fast you wouldn't believe it possible.
@@ -99,8 +99,10 @@ Equipment Corporation.
 #include    "mi.h"
 #include    "regionstr.h"
 #include    "mivalidate.h"
-
 #include    "globals.h"
+#ifdef COMPOSITE
+#include    "compint.h"
+#endif
 
 /*
  * Compute the visibility of a shaped window
@@ -158,17 +160,6 @@ miShapedWindowIn(RegionPtr universe, RegionPtr bounding,
     if (someIn)
         return rgnIN;
     return rgnOUT;
-}
-
-static GetRedirectBorderClipProcPtr miGetRedirectBorderClipProc;
-static SetRedirectBorderClipProcPtr miSetRedirectBorderClipProc;
-
-void
-miRegisterRedirectBorderClipProc(SetRedirectBorderClipProcPtr setBorderClip,
-                                 GetRedirectBorderClipProcPtr getBorderClip)
-{
-    miSetRedirectBorderClipProc = setBorderClip;
-    miGetRedirectBorderClipProc = getBorderClip;
 }
 
 /*
@@ -242,11 +233,9 @@ miComputeClips(WindowPtr pParent,
      * In redirected drawing case, reset universe to borderSize
      */
     if (pParent->redirectDraw != RedirectDrawNone) {
-        if (miSetRedirectBorderClipProc) {
-            if (TreatAsTransparent(pParent))
-                RegionEmpty(universe);
-            (*miSetRedirectBorderClipProc) (pParent, universe);
-        }
+        if (TreatAsTransparent(pParent))
+            RegionEmpty(universe);
+        compSetRedirectBorderClip (pParent, universe);
         RegionCopy(universe, &pParent->borderSize);
     }
 #endif
@@ -516,6 +505,17 @@ miTreeObscured(WindowPtr pParent)
     }
 }
 
+static RegionPtr
+getBorderClip(WindowPtr pWin)
+{
+#ifdef COMPOSITE
+    if (pWin->redirectDraw != RedirectDrawNone)
+        return compGetRedirectBorderClip(pWin);
+    else
+#endif
+        return &pWin->borderClip;
+}
+
 /*
  *-----------------------------------------------------------------------
  * miValidateTree --
@@ -609,14 +609,7 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
             forward = TRUE;
             for (pWin = pChild; pWin; pWin = pWin->nextSib) {
                 if (pWin->valdata) {
-                    RegionPtr pBorderClip = &pWin->borderClip;
-
-#ifdef COMPOSITE
-                    if (pWin->redirectDraw != RedirectDrawNone &&
-                        miGetRedirectBorderClipProc)
-                        pBorderClip = (*miGetRedirectBorderClipProc) (pWin);
-#endif
-                    RegionAppend(&totalClip, pBorderClip);
+                    RegionAppend(&totalClip, getBorderClip(pWin));
                     if (pWin->viewable)
                         viewvals++;
                 }
@@ -627,14 +620,7 @@ miValidateTree(WindowPtr pParent,       /* Parent to validate */
             pWin = pParent->lastChild;
             while (1) {
                 if (pWin->valdata) {
-                    RegionPtr pBorderClip = &pWin->borderClip;
-
-#ifdef COMPOSITE
-                    if (pWin->redirectDraw != RedirectDrawNone &&
-                        miGetRedirectBorderClipProc)
-                        pBorderClip = (*miGetRedirectBorderClipProc) (pWin);
-#endif
-                    RegionAppend(&totalClip, pBorderClip);
+                    RegionAppend(&totalClip, getBorderClip(pWin));
                     if (pWin->viewable)
                         viewvals++;
                 }

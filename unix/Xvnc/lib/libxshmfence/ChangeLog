@@ -1,0 +1,261 @@
+commit fe2d6dbba6356ff275649017dd516f0270d79595
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Jan 2 10:44:39 2015 -0800
+
+    Bump version to 1.2
+    
+    Release with memfd support
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit b63ea144a0439c54a3a147274afeeb115caced5a
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Oct 9 14:01:21 2014 +0200
+
+    Use linux 3.17 memfd_create syscall when available
+    
+    Linux 3.17 introduces a new anonymous memory allocation that returns a
+    file descriptor which we can pass around. Use this in preference to
+    creating a file in the filesystem where available.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 9c4f070e1304a3503cfab08f68573443025fc4c9
+Author: Keith Packard <keithp@keithp.com>
+Date:   Tue Jun 17 13:45:24 2014 -0700
+
+    Use /dev/shm as an optional shared memory directory
+    
+    This is the path coded into glibc, so it should exist and be useful on
+    any glibc-based system
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit d3efccb33fa599d48004b22f2e07a19da4aaf789
+Author: Jung-uk Kim <jkim@FreeBSD.org>
+Date:   Mon Dec 9 18:35:45 2013 -0500
+
+    Add support for FreeBSD using umtx (v3).
+    
+    This fixes a sign-extension bug in the previous versions.
+    
+    Signed-off-by: Jung-uk Kim <jkim@FreeBSD.org>
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 2b3415a32d44b9b51bf57877bb61d982667c10f0
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat May 31 21:39:32 2014 -0700
+
+    autogen.sh: Honor NOCONFIGURE=1
+    
+    See http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 9089c55ac4433bc79b6f3951c71dda9691ab5c29
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat May 31 21:38:41 2014 -0700
+
+    configure: Drop AM_MAINTAINER_MODE
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ca4ef282b55f3f05acc29a7c76b624f130cc74de
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Tue Dec 3 20:14:38 2013 +0100
+
+    Check return value from ftruncate
+    
+    Silences compiler warning:
+    
+    xshmfence_alloc.c: In function 'xshmfence_alloc_shm':
+    xshmfence_alloc.c:54:11: warning: ignoring return value of 'ftruncate', declared with attribute warn_unused_result [-Wunused-result]
+      ftruncate(fd, sizeof (struct xshmfence));
+               ^
+    
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+
+commit e8dd66fee206f93e1bee059bdadde064901ed745
+Author: Keith Packard <keithp@keithp.com>
+Date:   Tue Nov 26 21:55:20 2013 -0800
+
+    Update to version 1.1
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 4b7c89d0dcaf48140c190dfe6a4560960229ab44
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Nov 25 13:36:54 2013 -0800
+
+    Describe the library better in the README file
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit c43c79c34d26277609fa02aedc1b862f4a280808
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 20 14:21:35 2013 -0800
+
+    Ignore test build files and release announcements
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit d4938bf5e57375b70c73831402fc8637996aad31
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 20 11:23:56 2013 -0800
+
+    Set symbol visibility attribute to hide internal symbols
+    
+    Expose only the official API.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit e390e3aaee3dace2a1e6cfe66efd884fc256b0f0
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 20 11:22:04 2013 -0800
+
+    Provide pthread-based alternative implementation
+    
+    This uses pthread mutexes and condition variables instead of futexes.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit daa78ee9a5f9b5590d540aa06466d6728fb2c795
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 20 11:19:50 2013 -0800
+
+    Split out futex implementation from general API
+    
+    This splits the futex-specific code out into a separate file so that
+    future versions of the library could use some other underlying primitive.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit e15fa576597fb09330e603d17a51d7449a392e7c
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 20 09:13:48 2013 -0800
+
+    Add test program
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit bdbb26378da91e541f2fe2b3e827d9f6ed11f4a8
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 20 09:12:36 2013 -0800
+
+    Use O_TMPFILE if available
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit c17583d05872e4d9fb39af1a9963dc3738556b27
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 20 08:30:44 2013 -0800
+
+    Locate directory for shared memory files at configure time
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit b394d499eeb6abb0f23a629f22f6634f137d279e
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 20 08:25:44 2013 -0800
+
+    Change fence memory type from 'int32_t' to 'struct shmfence'
+    
+    This will allow other implementations to use alternate
+    representations, as well as providing additional typechecking.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit d6fe39b4c3ec6ca75fb935b88a14916c730a6c26
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 5 21:49:48 2013 -0500
+
+    lint: remove usage of libxshmfence_la_SOURCES
+    
+    This variable is always empty.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 3b70b526f1dd4ccf35a63fc7d385d4d7098b8f6a
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 5 21:36:18 2013 -0500
+
+    make: list non installed headers under the _SOURCES variable
+    
+    Recommended by Automake:
+    http://www.gnu.org/software/automake/manual/automake.html#Headers
+    
+    Also, this header is missing in the lint target $(libxshmfence_la_SOURCES)
+    
+    As a bonus, all other libraries are following this advice.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f3fbd8e5026c0bb8b4d7f48875550bd3711e3c6e
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 5 21:31:42 2013 -0500
+
+    make: add $(CWARNFLAGS)
+    
+    It's required for all X libraries
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit b77bedb25d8eea02cc8114daf105dfed096ca024
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 5 09:20:46 2013 -0500
+
+    Add the required README file
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 67517e51374688c899e295d4d37371bda85bedbc
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Tue Nov 5 09:18:53 2013 -0500
+
+    Add mandatory COPYING file.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit d2272731010bd352219eb4ac738224bb5b69a6f9
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Fri Nov 1 14:44:54 2013 -0700
+
+    Copy autotools boilerplate from http://www.x.org/wiki/NewModuleGuidelines/
+    
+    I verified that this works with autoconf both 2.60 and 2.69.
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 7f32d04bd4f583b0d4871450560bd2e9bafc3d79
+Author: Aaron Plattner <aplattner@nvidia.com>
+Date:   Fri Nov 1 14:12:55 2013 -0700
+
+    Copy the standard .gitignore from other lib packages
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 8c83034247886168218eaa4d378cc8bf0c65a9cd
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Oct 31 16:36:54 2013 -0700
+
+    Update to verion 1.0
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 534cfada3291b56fd13546615f12654cde1a502f
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Apr 29 13:21:56 2013 -0700
+
+    Import first version of the library
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>

@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -72,16 +72,22 @@ struct _Cursor;
 typedef struct _BackingStore *BackingStorePtr;
 typedef struct _Window *WindowPtr;
 
-typedef int (*VisitWindowProcPtr) (WindowPtr /*pWin */ ,
-                                   pointer /*data */ );
+enum RootClipMode {
+    ROOT_CLIP_NONE = 0, /**< resize the root window to 0x0 */
+    ROOT_CLIP_FULL = 1, /**< resize the root window to fit screen */
+    ROOT_CLIP_INPUT_ONLY = 2, /**< as above, but no rendering to screen */
+};
 
-extern _X_EXPORT int TraverseTree(WindowPtr /*pWin */ ,
-                                  VisitWindowProcPtr /*func */ ,
-                                  pointer /*data */ );
+typedef int (*VisitWindowProcPtr) (WindowPtr pWin,
+                                   void *data);
 
-extern _X_EXPORT int WalkTree(ScreenPtr /*pScreen */ ,
-                              VisitWindowProcPtr /*func */ ,
-                              pointer /*data */ );
+extern _X_EXPORT int TraverseTree(WindowPtr pWin,
+                                  VisitWindowProcPtr func,
+                                  void *data);
+
+extern _X_EXPORT int WalkTree(ScreenPtr pScreen,
+                              VisitWindowProcPtr func,
+                              void *data);
 
 extern _X_EXPORT Bool CreateRootWindow(ScreenPtr /*pScreen */ );
 
@@ -108,8 +114,8 @@ extern _X_EXPORT WindowPtr CreateWindow(Window /*wid */ ,
                                         VisualID /*visual */ ,
                                         int * /*error */ );
 
-extern _X_EXPORT int DeleteWindow(pointer /*pWin */ ,
-                                  XID /*wid */ );
+extern _X_EXPORT int DeleteWindow(void *pWin,
+                                  XID wid);
 
 extern _X_EXPORT int DestroySubwindows(WindowPtr /*pWin */ ,
                                        ClientPtr /*client */ );
@@ -214,19 +220,16 @@ extern _X_EXPORT void ResizeChildrenWinSize(WindowPtr /*pWin */ ,
                                             int /*dw */ ,
                                             int /*dh */ );
 
-extern _X_EXPORT void ShapeExtensionInit(void);
-
 extern _X_EXPORT void SendShapeNotify(WindowPtr /* pWin */ ,
-                                      int /* which */ );
+                                      int /* which */);
 
 extern _X_EXPORT RegionPtr CreateBoundingShape(WindowPtr /* pWin */ );
 
 extern _X_EXPORT RegionPtr CreateClipShape(WindowPtr /* pWin */ );
 
-extern _X_EXPORT void DisableMapUnmapEvents(WindowPtr /* pWin */ );
-extern _X_EXPORT void EnableMapUnmapEvents(WindowPtr /* pWin */ );
-
-extern _X_EXPORT void SetRootClip(ScreenPtr pScreen, Bool enable);
+extern _X_EXPORT void SetRootClip(ScreenPtr pScreen, int enable);
 extern _X_EXPORT void PrintWindowTree(void);
+extern _X_EXPORT void PrintPassiveGrabs(void);
 
+extern _X_EXPORT VisualPtr WindowGetVisual(WindowPtr /*pWin*/);
 #endif                          /* WINDOW_H */

@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012, 2015-2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012, 2015-2017 D. R. Commander. All Rights Reserved.
 //  Copyright 2005 Alexandre Julliard
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -37,6 +37,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    PSTR szCmdLine, int iCmdShow)
 {
   int retval = 0;
+
+  srand((unsigned int)time(NULL));
 
   // The state of the application as a whole is contained in the one app object
   VNCviewerApp32 app(hInstance, szCmdLine);

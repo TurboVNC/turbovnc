@@ -42,6 +42,7 @@ set(VNCVIEWER_SOURCES
 	LowLevelHook.cpp
 	SessionDialog.cpp
 	stdhdrs.cpp
+	strsep.c
 	vncauth.c
 	VNCOptions.cpp
 	vncviewer.cpp

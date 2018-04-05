@@ -37,7 +37,6 @@
 #include "windowstr.h"
 #include "selection.h"
 #include "scrnintstr.h"
-#include "damageext.h"
 #include "damage.h"
 #include "xfixes.h"
 
@@ -59,7 +58,7 @@ typedef struct _DamageExt {
 } DamageExtRec, *DamageExtPtr;
 
 #define VERIFY_DAMAGEEXT(pDamageExt, rid, client, mode) { \
-    int rc = dixLookupResourceByType((pointer *)&(pDamageExt), rid, \
+    int rc = dixLookupResourceByType((void **)&(pDamageExt), rid, \
                                      DamageExtType, client, mode); \
     if (rc != Success) \
         return rc; \
@@ -67,5 +66,8 @@ typedef struct _DamageExt {
 
 void
  DamageExtSetCritical(ClientPtr pClient, Bool critical);
+
+void PanoramiXDamageInit(void);
+void PanoramiXDamageReset(void);
 
 #endif                          /* _DAMAGEEXTINT_H_ */

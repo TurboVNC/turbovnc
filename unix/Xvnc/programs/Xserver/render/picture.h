@@ -16,7 +16,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, SuSE, Inc.
@@ -129,7 +129,7 @@ typedef enum _PictFormatShort {
 } PictFormatShort;
 
 /*
- * For dynamic indexed visuals (GrayScale and PseudoColor), these control the 
+ * For dynamic indexed visuals (GrayScale and PseudoColor), these control the
  * selection of colors allocated for drawing to Pictures.  The default
  * policy depends on the size of the colormap:
  *
@@ -169,11 +169,11 @@ typedef enum _PictFormatShort {
 #define PictureCmapPolicyColor	    3
 #define PictureCmapPolicyAll	    4
 
-extern _X_EXPORT int PictureCmapPolicy;
+extern int PictureCmapPolicy;
 
-extern _X_EXPORT int PictureParseCmapPolicy(const char *name);
+extern int PictureParseCmapPolicy(const char *name);
 
-extern _X_EXPORT int RenderErrBase;
+extern int RenderErrBase;
 
 /* Fixed point updates from Carl Worth, USC, Information Sciences Institute */
 
@@ -189,8 +189,8 @@ typedef pixman_fixed_1_16_t xFixed_1_16;
 typedef pixman_fixed_16_16_t xFixed_16_16;
 
 /*
- * An unadorned "xFixed" is the same as xFixed_16_16, 
- * (since it's quite common in the code) 
+ * An unadorned "xFixed" is the same as xFixed_16_16,
+ * (since it's quite common in the code)
  */
 typedef pixman_fixed_t xFixed;
 
@@ -211,7 +211,7 @@ typedef pixman_fixed_t xFixed;
 /* whether 't' is a well defined not obviously empty trapezoid */
 #define xTrapezoidValid(t)  ((t)->left.p1.y != (t)->left.p2.y && \
 			     (t)->right.p1.y != (t)->right.p2.y && \
-			     (int) ((t)->bottom - (t)->top) > 0)
+			     ((t)->bottom > (t)->top))
 
 /*
  * Standard NTSC luminance conversions:

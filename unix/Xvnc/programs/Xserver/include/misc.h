@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -43,7 +43,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 Copyright 1992, 1993 Data General Corporation;
-Copyright 1992, 1993 OMRON Corporation  
+Copyright 1992, 1993 OMRON Corporation
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that the
@@ -51,9 +51,9 @@ above copyright notice appear in all copies and that both that copyright
 notice and this permission notice appear in supporting documentation, and that
 neither the name OMRON or DATA GENERAL be used in advertising or publicity
 pertaining to distribution of the software without specific, written prior
-permission of the party whose name is to be used.  Neither OMRON or 
+permission of the party whose name is to be used.  Neither OMRON or
 DATA GENERAL make any representation about the suitability of this software
-for any purpose.  It is provided "as is" without express or implied warranty.  
+for any purpose.  It is provided "as is" without express or implied warranty.
 
 OMRON AND DATA GENERAL EACH DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
 SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
@@ -67,7 +67,7 @@ OF THIS SOFTWARE.
 #ifndef MISC_H
 #define MISC_H 1
 /*
- *  X internal definitions 
+ *  X internal definitions
  *
  */
 
@@ -79,14 +79,20 @@ OF THIS SOFTWARE.
 
 #include <stddef.h>
 #include <stdint.h>
+#include <pthread.h>
 
 #ifndef MAXSCREENS
 #define MAXSCREENS	16
 #endif
-#define MAXCLIENTS	256
+#ifndef MAXGPUSCREENS
+#define MAXGPUSCREENS	16
+#endif
+#define MAXCLIENTS	2048
+#define LIMITCLIENTS	256     /* Must be a power of 2 and <= MAXCLIENTS */
 #define MAXEXTENSIONS   128
 #define MAXFORMATS	8
 #define MAXDEVICES	40      /* input devices */
+#define GPU_SCREEN_OFFSET 256
 
 /* 128 event opcodes for core + extension events, excluding GE */
 #define MAXEVENTS       128
@@ -134,7 +140,7 @@ lswapl(uint32_t x)
 static inline uint16_t
 lswaps(uint16_t x)
 {
-    return ((x & 0xff) << 8) | ((x >> 8) & 0xff);
+    return (uint16_t)((x & 0xff) << 8) | ((x >> 8) & 0xff);
 }
 
 #undef min
@@ -228,7 +234,25 @@ pad_to_int32(const int bytes)
     return (((bytes) + 3) & ~3);
 }
 
+/**
+ * Calculate padding needed to bring the number of bytes to an even
+ * multiple of 4.
+ * @param bytes The minimum number of bytes needed.
+ * @return The bytes of padding needed to arrive at the closest multiple of 4
+ * that is equal or higher than bytes.
+ */
+static inline int
+padding_for_int32(const int bytes)
+{
+    return ((-bytes) & 3);
+}
+
+
 extern char **xstrtokenize(const char *str, const char *separators);
+extern void FormatInt64(int64_t num, char *string);
+extern void FormatUInt64(uint64_t num, char *string);
+extern void FormatUInt64Hex(uint64_t num, char *string);
+extern void FormatDouble(double dbl, char *string);
 
 /**
  * Compare the two version numbers comprising of major.minor.
@@ -237,15 +261,19 @@ extern char **xstrtokenize(const char *str, const char *separators);
  * or a value greater than 0
  */
 static inline int
-version_compare(uint16_t a_major, uint16_t a_minor,
-                uint16_t b_major, uint16_t b_minor)
+version_compare(uint32_t a_major, uint32_t a_minor,
+                uint32_t b_major, uint32_t b_minor)
 {
-    int a, b;
+    if (a_major > b_major)
+        return 1;
+    if (a_major < b_major)
+        return -1;
+    if (a_minor > b_minor)
+        return 1;
+    if (a_minor < b_minor)
+        return -1;
 
-    a = a_major << 16 | a_minor;
-    b = b_major << 16 | b_minor;
-
-    return (a - b);
+    return 0;
 }
 
 /* some macros to help swap requests, replies, and events */
@@ -282,6 +310,35 @@ __builtin_constant_p(int x)
     return 0;
 }
 #endif
+
+/* byte swap a 64-bit value */
+static inline void
+swap_uint64(uint64_t *x)
+{
+    char n;
+
+    n = ((char *) x)[0];
+    ((char *) x)[0] = ((char *) x)[7];
+    ((char *) x)[7] = n;
+
+    n = ((char *) x)[1];
+    ((char *) x)[1] = ((char *) x)[6];
+    ((char *) x)[6] = n;
+
+    n = ((char *) x)[2];
+    ((char *) x)[2] = ((char *) x)[5];
+    ((char *) x)[5] = n;
+
+    n = ((char *) x)[3];
+    ((char *) x)[3] = ((char *) x)[4];
+    ((char *) x)[4] = n;
+}
+
+#define swapll(x) do { \
+		if (sizeof(*(x)) != 8) \
+			wrong_size(); \
+                swap_uint64((uint64_t *)(x));   \
+	} while (0)
 
 /* byte swap a 32-bit value */
 static inline void
@@ -369,10 +426,10 @@ extern _X_EXPORT unsigned long serverGeneration;
 /* Don't use this directly, use BUG_WARN or BUG_WARN_MSG instead */
 #define __BUG_WARN_MSG(cond, with_msg, ...)                                \
           do { if (cond) {                                                \
-              ErrorF("BUG: triggered 'if (" #cond ")'\n");                \
-              ErrorF("BUG: %s:%d in %s()\n",                              \
-                      __FILE__, __LINE__, __func__);                      \
-              if (with_msg) ErrorF(__VA_ARGS__);                          \
+              ErrorFSigSafe("BUG: triggered 'if (" #cond ")'\n");          \
+              ErrorFSigSafe("BUG: %s:%u in %s()\n",                        \
+                           __FILE__, __LINE__, __func__);                 \
+              if (with_msg) ErrorFSigSafe(__VA_ARGS__);                    \
               xorg_backtrace();                                           \
           } } while(0)
 
@@ -380,5 +437,17 @@ extern _X_EXPORT unsigned long serverGeneration;
           __BUG_WARN_MSG(cond, 1, __VA_ARGS__)
 
 #define BUG_WARN(cond)  __BUG_WARN_MSG(cond, 0, NULL)
+
+#define BUG_RETURN(cond) \
+        do { if (cond) { __BUG_WARN_MSG(cond, 0, NULL); return; } } while(0)
+
+#define BUG_RETURN_MSG(cond, ...) \
+        do { if (cond) { __BUG_WARN_MSG(cond, 1, __VA_ARGS__); return; } } while(0)
+
+#define BUG_RETURN_VAL(cond, val) \
+        do { if (cond) { __BUG_WARN_MSG(cond, 0, NULL); return (val); } } while(0)
+
+#define BUG_RETURN_VAL_MSG(cond, val, ...) \
+        do { if (cond) { __BUG_WARN_MSG(cond, 1, __VA_ARGS__); return (val); } } while(0)
 
 #endif                          /* MISC_H */

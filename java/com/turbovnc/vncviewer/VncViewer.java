@@ -38,8 +38,7 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
 
-public class VncViewer extends javax.swing.JApplet
-  implements Runnable, ActionListener, OptionsDialogCallback {
+public class VncViewer implements Runnable, OptionsDialogCallback {
   public static final String PRODUCT_NAME = "TurboVNC Viewer";
   public static String copyrightYear = null;
   public static String copyright = null;
@@ -119,7 +118,7 @@ public class VncViewer extends javax.swing.JApplet
   }
 
   public static boolean osEID() {
-    return !os.startsWith("mac os x") && !os.startsWith("windows");
+    return !os.startsWith("windows");
   }
 
   public static boolean osGrab() {
@@ -256,36 +255,34 @@ public class VncViewer extends javax.swing.JApplet
       //    subsequent calls to getInsets().
       // Thus, we have to compute the insets globally using a dummy JFrame.
       // Dear Swing, eff ewe.
-      if (!embed.getValue()) {
-        final JFrame frame = new JFrame();
-        // Under certain Linux WM's, the insets aren't valid until
-        // componentResized() is called (see above.)
-        if (isX11()) {
-          frame.addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent e) {
-              synchronized(frame) {
-                if (frame.isVisible() &&
-                    frame.getExtendedState() == JFrame.NORMAL) {
-                  insets = frame.getInsets();
-                  frame.notifyAll();
-                }
+      final JFrame frame = new JFrame();
+      // Under certain Linux WM's, the insets aren't valid until
+      // componentResized() is called (see above.)
+      if (isX11()) {
+        frame.addComponentListener(new ComponentAdapter() {
+          public void componentResized(ComponentEvent e) {
+            synchronized(frame) {
+              if (frame.isVisible() &&
+                  frame.getExtendedState() == JFrame.NORMAL) {
+                insets = frame.getInsets();
+                frame.notifyAll();
               }
             }
-          });
-          frame.setExtendedState(JFrame.NORMAL);
-          frame.setVisible(true);
-          synchronized(frame) {
-            while (insets == null)
-              frame.wait();
           }
-          frame.setVisible(false);
-        } else {
-          frame.setVisible(true);
-          insets = frame.getInsets();
-          frame.setVisible(false);
+        });
+        frame.setExtendedState(JFrame.NORMAL);
+        frame.setVisible(true);
+        synchronized(frame) {
+          while (insets == null)
+            frame.wait();
         }
-        frame.dispose();
+        frame.setVisible(false);
+      } else {
+        frame.setVisible(true);
+        insets = frame.getInsets();
+        frame.setVisible(false);
       }
+      frame.dispose();
     } catch (Exception e) {
       vlog.error("Could not set insets:");
       vlog.error("  " + e.toString());
@@ -358,8 +355,6 @@ public class VncViewer extends javax.swing.JApplet
   }
 
   public VncViewer(String[] argv) {
-    applet = false;
-
     UserPreferences.load("global");
 
     setVersion();
@@ -458,8 +453,6 @@ public class VncViewer extends javax.swing.JApplet
     }
 
     setGlobalOptions();
-
-    embed.setParam(false);
   }
 
   public static void usage() {
@@ -492,13 +485,6 @@ public class VncViewer extends javax.swing.JApplet
     System.exit(1);
   }
 
-  public VncViewer() {
-    applet = true;
-    UserPreferences.load("global");
-    setVersion();
-    setGlobalOptions();
-  }
-
   public VncViewer(Socket sock_) {
     sock = sock_;
     UserPreferences.load("global");
@@ -519,35 +505,9 @@ public class VncViewer extends javax.swing.JApplet
       newViewer(oldViewer, null, false);
   }
 
-  public void init() {
-    vlog.debug("init called");
-    Container parent = getParent();
-    while (!parent.isFocusCycleRoot()) {
-      parent = parent.getParent();
-    }
-    parent.setFocusable(false);
-    parent.setFocusTraversalKeysEnabled(false);
-    setLookAndFeel();
-    setBackground(Color.white);
-  }
-
   public void start() {
     vlog.debug("start called");
-    String host = null;
-    if (applet && nViewers == 0) {
-      Configuration.readAppletParams(this);
-      if (embed.getValue()) {
-        fullScreen.setParam(false);
-        noNewConn.setParam(true);
-        scalingFactor.setParam("100");
-      }
-      String str = getParameter("LogLevel");
-      if (str != null)
-        LogWriter.setLogParams(str);
-      setGlobalOptions();
-      host = opts.serverName;
-    } else if (!applet)
-      host = opts.serverName;
+    String host = opts.serverName;
     if (host != null && host.indexOf(':') < 0 &&
         opts.port > 0) {
       opts.serverName = host + ((opts.port >= 5900 && opts.port <= 5999) ?
@@ -561,19 +521,9 @@ public class VncViewer extends javax.swing.JApplet
   public void exit(int n) {
     if (nViewers > 0)
       nViewers--;
-    if (nViewers > 0 || embed.getValue())
+    if (nViewers > 0)
       return;
-    if (applet) {
-      destroy();
-    } else {
-      System.exit(n);
-    }
-  }
-
-  // If "Reconnect" button is pressed
-  public void actionPerformed(ActionEvent e) {
-    getContentPane().removeAll();
-    start();
+    System.exit(n);
   }
 
   void reportException(Exception e) {
@@ -595,39 +545,20 @@ public class VncViewer extends javax.swing.JApplet
       title = "TurboVNC Viewer : Unexpected Error";
       e.printStackTrace();
     }
-    if (embed.getValue()) {
-      getContentPane().removeAll();
-      JLabel label = new JLabel("<html><center><b>" + title + "</b><p><i>" +
-                                msg + "</i></center></html>", JLabel.CENTER);
-      label.setFont(new Font("Helvetica", Font.PLAIN, 24));
-      label.setMaximumSize(new Dimension(getSize().width, 100));
-      label.setVerticalAlignment(JLabel.CENTER);
-      label.setAlignmentX(Component.CENTER_ALIGNMENT);
-      JButton button = new JButton("Reconnect");
-      button.addActionListener(this);
-      button.setMaximumSize(new Dimension(200, 30));
-      button.setAlignmentX(Component.CENTER_ALIGNMENT);
-      setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-      add(label);
-      add(button);
-      validate();
-      repaint();
-    } else {
-      JOptionPane pane;
-      Object[] options = { UIManager.getString("OptionPane.yesButtonText"),
-                           UIManager.getString("OptionPane.noButtonText") };
-      if (reconnect)
-        pane = new JOptionPane(msg + "\nReconnect?", msgType,
-                               JOptionPane.YES_NO_OPTION, null, options,
-                               options[1]);
-      else
-        pane = new JOptionPane(msg, msgType);
-      JDialog dlg = pane.createDialog(null, title);
-      dlg.setAlwaysOnTop(true);
-      dlg.setVisible(true);
-      if (reconnect && pane.getValue() == options[0])
-        start();
-    }
+    JOptionPane pane;
+    Object[] options = { UIManager.getString("OptionPane.yesButtonText"),
+                         UIManager.getString("OptionPane.noButtonText") };
+    if (reconnect)
+      pane = new JOptionPane(msg + "\nReconnect?", msgType,
+                             JOptionPane.YES_NO_OPTION, null, options,
+                             options[1]);
+    else
+      pane = new JOptionPane(msg, msgType);
+    JDialog dlg = pane.createDialog(null, title);
+    dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
+    if (reconnect && pane.getValue() == options[0])
+      start();
   }
 
   static void showAbout(Component comp) {
@@ -643,8 +574,6 @@ public class VncViewer extends javax.swing.JApplet
       VncViewer.url, JOptionPane.INFORMATION_MESSAGE);
     pane.setIcon(VncViewer.logoIcon128);
     JDialog dlg = pane.createDialog(comp, "About TurboVNC Viewer");
-    if (VncViewer.embed.getValue())
-      dlg.setAlwaysOnTop(true);
     dlg.setVisible(true);
   }
 
@@ -695,11 +624,10 @@ public class VncViewer extends javax.swing.JApplet
       options.scalingFactor.setEnabled(false);
     } else if (opts.desktopSize.mode == Options.SIZE_SERVER) {
       options.desktopSize.setSelectedItem("Server");
-      options.scalingFactor.setEnabled(!VncViewer.embed.getValue());
+      options.scalingFactor.setEnabled(true);
     } else {
-      options.desktopSize.setSelectedItem(opts.desktopSize.width + "x" +
-                                          opts.desktopSize.height);
-      options.scalingFactor.setEnabled(!VncViewer.embed.getValue());
+      options.desktopSize.setSelectedItem(opts.desktopSize.getString());
+      options.scalingFactor.setEnabled(true);
     }
 
     options.gateway.setEnabled(false);
@@ -865,8 +793,6 @@ public class VncViewer extends javax.swing.JApplet
                           !VncViewer.noReconnect.getValue());
           exitStatus = 1;
           if (cc != null) cc.deleteWindow(true);
-        } else if (cc.shuttingDown && embed.getValue()) {
-          reportException(new WarningException("Connection closed"));
         } else {
           cc = null;
         }
@@ -1036,10 +962,9 @@ public class VncViewer extends javax.swing.JApplet
   static BoolParameter alwaysShowConnectionDialog
   = new BoolParameter("AlwaysShowConnectionDialog",
   "Always show the \"New TurboVNC Connection\" dialog even if the server " +
-  "has been specified in an applet parameter or on the command line.  This " +
-  "defaults to 1 if the viewer is being run as an applet.  This parameter " +
-  "has no effect if SSH tunneling is enabled (the \"New TurboVNC " +
-  "Connection\" dialog is never shown in that case.)", false);
+  "has been specified on the command line.  This parameter has no effect " +
+  "if SSH tunneling is enabled (the \"New TurboVNC Connection\" dialog is " +
+  "never shown in that case.)", false);
 
   static BoolParameter clientRedirect
   = new BoolParameter("ClientRedirect", null, false);
@@ -1248,19 +1173,17 @@ public class VncViewer extends javax.swing.JApplet
   static StringParameter desktopSize
   = new StringParameter("DesktopSize",
   "If the VNC server supports remote desktop resizing, then attempt to " +
-  "resize the remote desktop to the specified size (example: 1920x1200).  " +
-  "Setting this parameter to \"Auto\" causes the remote desktop to be " +
-  "resized to fit in the local window without using scrollbars (this is the " +
-  "default behavior.)  Setting this parameter to \"Server\" or \"0\" " +
-  "disables remote desktop resizing and uses the desktop size set by the " +
-  "server.", "Auto", "WxH, Auto, or Server");
-
-  static BoolParameter embed
-  = new BoolParameter("Embed",
-  "If the TurboVNC Viewer is being run as an applet, display its output to " +
-  "an embedded frame in the browser window rather than to a dedicated " +
-  "window.  This also has the effect of setting FullScreen=0, " +
-  "NoNewConn=1, and Scale=100.", false);
+  "resize the remote desktop to the specified size (example: 1920x1200) or " +
+  "reconfigure the server's virtual screens with a specified layout " +
+  "(example: 1920x1200+0+0,1920x1200+1920+0).  Setting this parameter to " +
+  "\"Auto\" causes the remote desktop to be resized to fit in the viewer " +
+  "window without using scrollbars, and it causes the server's virtual " +
+  "screens to be reconfigured such that their screen boundaries align with " +
+  "the client's screen boundaries when the viewer window is in its default " +
+  "position (this is the default behavior.)  Setting this parameter to " +
+  "\"Server\" or \"0\" disables remote desktop resizing and uses the " +
+  "desktop size and screen configuration set by the server.", "Auto",
+  "WxH, W0xH0+X0+Y0[,W1xH1+X1+Y1,...], Auto, or Server");
 
   static BoolParameter fsAltEnter
   = new BoolParameter("FSAltEnter",
@@ -1550,7 +1473,6 @@ public class VncViewer extends javax.swing.JApplet
 
   Thread thread;
   Socket sock;
-  static boolean applet;
   static int nViewers;
   static LogWriter vlog = new LogWriter("main");
   FileInStream benchFile;

@@ -139,7 +139,7 @@
 	Fix compilation warning.
 
 	* src/base/ftbase.h: s/LOCAL_DEF/LOCAL/.
-	* src/base/ftobjc.s: Include ftbase.h conditionally.
+	* src/base/ftobjs.c: Include ftbase.h conditionally.
 
 2010-01-11  Kwang Yul Seo  <skyul@company100.net>
 
@@ -197,7 +197,7 @@
 	Fix Savannah bug #28395.
 
 	* src/truetype/ttdriver.c (Load_Glyph), src/type1/t1gload.c
-	(T1_Loada_Glyph): Don't check `num_glyphs' if incremental interface
+	(T1_Load_Glyph): Don't check `num_glyphs' if incremental interface
 	is used.
 
 2010-01-05  Ken Sharp  <ken.sharp@artifex.com>
@@ -607,7 +607,7 @@
 	(ft_black_render): Initialize `worker->gray_lines' (problem found by
 	valgrind).
 
-	(FT_RASTER_OPTION_ANTI_ALIASING, DEBUG_RASTER): Dont' #undef, just
+	(FT_RASTER_OPTION_ANTI_ALIASING, DEBUG_RASTER): Don't #undef, just
 	comment out.
 
 2009-09-12  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
@@ -655,7 +655,7 @@
 	[Win64] Improve the computation of random seed from stack address.
 
 	On LLP64 platform, the conversion from pointer to FT_Fixed need
-	to drop higher 32-bit.  Explict casts are required. Reported by
+	to drop higher 32-bit.  Explicit casts are required. Reported by
 	NightStrike from MinGW-w64 project.  See
 	http://lists.gnu.org/archive/html/freetype/2009-09/msg00000.html
 
@@ -671,7 +671,7 @@
 	* src/raster/rules.mk: Don't handle ftmisc.h.  It is needed for
 	stand-alone mode only.
 
-	* src/raster/ftmisc.h (FT_MemoryRec , FT_Alloc_Func, FT_Free_Func,
+	* src/raster/ftmisc.h (FT_MemoryRec, FT_Alloc_Func, FT_Free_Func,
 	FT_Realloc_Func): Copy declarations from ftsystem.h.
 
 2009-09-02  Bram Tassyns  <bramt@enfocus.be>
@@ -891,7 +891,7 @@
 	pcf: Fix a comparison between FT_Long and FT_ULong.
 
 	* src/pcf/pcfread.c (pcf_get_bitmaps): Return an error
-	if PCF_Face->nemetrics is negative.
+	if PCF_Face->nmetrics is negative.
 
 2009-07-31  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
@@ -929,7 +929,7 @@
 	type1: Fix a data type mismatching with its source.
 
 	* include/freetype/internal/t1types.h: The type of
-	T1_Face->buildchar is matched with T1_Decorder->top.
+	T1_Face->buildchar is matched with T1_Decoder->top.
 
 2009-07-31  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
@@ -944,7 +944,7 @@
 
 	pfr: Fix a data type mismatching with its source.
 
-	* src/pfr/pfrtypes.h: The type of PFR_PhysFont->chars_offset
+	* src/pfr/pfrtypes.h: The type of PFR_PhyFont->chars_offset
 	is extended from FT_UInt32 to FT_Offset, because it is
 	calculated with the pointer difference in pfr_phy_font_load().
 
@@ -975,8 +975,8 @@
 	psaux: Fix a data type mismatching with its source.
 
 	* include/freetype/internal/psaux.h: The type of
-	T1_DecorderRec.buildchar is matched with
-	T1_DecorderRec.top.
+	T1_DecoderRec.buildchar is matched with
+	T1_DecoderRec.top.
 
 2009-07-31  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
@@ -1150,7 +1150,7 @@
 
 2009-07-31  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
-	cache: Insert explict casts for LP64 systems.
+	cache: Insert explicit casts for LP64 systems.
 
 	* src/cache/ftcbasic.c (FTC_ImageCache_Lookup,
 	FTC_SBitCache_Lookup): The type of FTC_ImageType->width
@@ -1409,7 +1409,7 @@
 
 	base: Prevent some overflows on LP64 systems.
 
-	* src/base/ftadvance.c (FT_Get_Advances): Cast the
+	* src/base/ftadvanc.c (FT_Get_Advances): Cast the
 	unsigned long constant FT_LOAD_ADVANCE_ONLY to FT_UInt32
 	for LP64 platforms.
 
@@ -1499,7 +1499,7 @@
 
 	bdf: Fix some data types mismatching with their sources.
 
-	* src/bdf/bdrdrivr.c (bdf_cmap_char_index): The type
+	* src/bdf/bdfdrivr.c (bdf_cmap_char_index): The type
 	of `code' is matched with BDF_encoding_el->enc.
 	(bdf_cmap_char_next): The type of `charcode' is
 	matched with BDF_encoding_el->enc.  When *acharcode
@@ -1545,7 +1545,7 @@
 	* src/cache/ftcbasic.c (FTC_ImageCache_Lookup): Exclude
 	the legacy behaviour from 16-bit platform, because the
 	current hack cannot detect the caller uses this function
-	via legacy convension.
+	via legacy convention.
 	(FTC_SBitCache_Lookup): Ditto.
 
 2009-07-31  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
@@ -1585,7 +1585,7 @@
 
 2009-07-31  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
-	fttypes.h: Cast FT_MAKE_TAG output to FT_Tag exlicitly.
+	fttypes.h: Cast FT_MAKE_TAG output to FT_Tag explicitly.
 
 	* include/freetype/fttypes.h (FT_MAKE_TAG):
 	Cast the result to FT_Tag.
@@ -1687,7 +1687,7 @@
 	sfnt: Count the size of the memory object by ptrdiff_t.
 
 	* src/sfnt/ttbdf.c (tt_face_find_bdf_prop): The type of
-	`peroperty_len' is changed from FT_UInt to FT_Offset,
+	`property_len' is changed from FT_UInt to FT_Offset,
 	to match with size_t, which is appropriate type for the
 	object in the memory buffer.
 
@@ -2122,10 +2122,10 @@
 	Use 16.16 format everywhere (except for large integers followed by a
 	`div').
 	[CAN_HANDLE_NON_INTEGRAL_T1_OPERANDS]: Remove #ifdef and activate
-	code uncoditionally.
+	code unconditionally.
 	Add support for random numbers and update remaining code
 	accordingly; this should work now.
-	(t1_operator_seac): Updated.
+	(t1operator_seac): Updated.
 	* src/psaux/pshrec.c: Include FT_INTERNAL_CALC_H.
 	(ps_hints_t1stem3, t1_hints_stem): Updated.
 
@@ -2479,7 +2479,7 @@
 	af_latin_script_class struct will have function to init it instead of
 	being allocated in the global scope.
 	Change af_latin_blue_chars to be PIC-compatible by being a two
-	dimentional array rather than array of pointers.
+	dimensional array rather than array of pointers.
 
 
 	* src/autofit/aflatin2.h declare af_latin2_script_class
@@ -2489,11 +2489,11 @@
 	af_latin2_script_class struct will have function to init it instead of
 	being allocated in the global scope.
 	Change af_latin2_blue_chars to be PIC-compatible by being a two
-	dimentional array rather than array of pointers.
+	dimensional array rather than array of pointers.
 
 	* src/autofit/afglobal.c when FT_CONFIG_OPTION_PIC is defined
 	af_script_classes array initialization was moved to afpic.c and
-	is later refered using macros defeined in afpic.h.
+	is later referred using macros defined in afpic.h.
 
 	New Files:
 	* src/autofit/afpic.h declare struct to hold PIC globals for autofit
@@ -2573,7 +2573,7 @@
 	Macros will be used from rastpic.h in order to access
 	ft_standard_raster from the pic_container (allocated in ftraster.c).
 	In ft_raster1_render when PIC is enabled, the last letter of
-	module_name is used to verfy the renderer class rather than the
+	module_name is used to verify the renderer class rather than the
 	class pointer.
 
 	* src/raster/ftraster.c when FT_CONFIG_OPTION_PIC is defined
@@ -2594,14 +2594,14 @@
 	Position Independent Code (PIC) support in smooth renderer.
 
 	* src/smooth/ftsmooth.h declare ft_smooth_renderer_class,
-	ft_smooth_lcd_renderer_class and ft_smooth_lcd_v_renderer_class
+	ft_smooth_lcd_renderer_class and ft_smooth_lcdv_renderer_class
 	using macros from ftrender.h,
 	when FT_CONFIG_OPTION_PIC is defined create and destroy
 	functions will be declared.
 	* src/smooth/ftsmooth.c when FT_CONFIG_OPTION_PIC is defined
 	the following structs:
 	ft_smooth_renderer_class, ft_smooth_lcd_renderer_class
-	and ft_smooth_lcd_v_renderer_class
+	and ft_smooth_lcdv_renderer_class
 	will have functions to init or create and destroy them
 	instead of being allocated in the global scope.
 	And macros will be used from ftspic.h in order to access
@@ -2755,7 +2755,7 @@
 	And macros will be used from ttpic.h in order to access them
 	from the pic_container.
 	* src/truetype/ttobjs.c change trick_names array to be
-	PIC-compatible by being a two dimentional array rather than array
+	PIC-compatible by being a two dimensional array rather than array
 	of pointers.
 
 	New Files:
@@ -2784,14 +2784,14 @@
 	Add macros to declare, allocate and initialize drivers
 	(FT_Driver_ClassRec).
 	* include/freetype/internal/ftpic.h new file to declare the
-	FT_PIC_Container struct and the functions to allocate and detroy it.
+	FT_PIC_Container struct and the functions to allocate and destroy it.
 	* include/freetype/internal/ftserv.h add macros to allocate and
-	destory arrays of FT_ServiceDescRec.
+	destroy arrays of FT_ServiceDescRec.
 	* include/freetype/internal/internal.h define macro to include
 	ftpic.h.
 
 	New Files:
-	* src/base/ftpic.c implement functions to allocate and destory the
+	* src/base/ftpic.c implement functions to allocate and destroy the
 	global pic_container.
 	* src/base/basepic.h declare struct to hold PIC globals for base and
 	macros to access them.
@@ -2814,8 +2814,8 @@
 	* src/base/ftglyph.c when FT_CONFIG_OPTION_PIC is defined
 	ft_bitmap_glyph_class and ft_outline_glyph_class will be allocated
 	in the pic_container instead of the global scope and use macros from
- 	basepic.h to access them.
-	* src/base/ftbbox.c allocate bbox_interface stract on the stack
+	basepic.h to access them.
+	* src/base/ftbbox.c allocate bbox_interface struct on the stack
 	instead of the global scope when FT_CONFIG_OPTION_PIC is defined.
 	* src/base/ftstroke.c access ft_outline_glyph_class allocated in
 	ftglyph.c via macros from basepic.h
@@ -3519,7 +3519,7 @@
 2008-12-21  Werner Lemberg  <wl@gnu.org>
 
 	* src/pfr/pfrdrivr.c, src/winfonts/winfnt.c, src/cache/ftcmanag.c,
-	src/smooth/ftgrays.c, src/base/ftobjc.s, src/sfobjs.c:
+	src/smooth/ftgrays.c, src/base/ftobjs.c, src/sfobjs.c:
 	s/_Err_Bad_Argument/_Err_Invalid_Argument/.  The former is for
 	errors in the bytecode interpreter only.
 
@@ -3576,7 +3576,7 @@
 
 	* docs/CHANGES: Updated.
 
-2008-12-18  Bevan, David  <dbevan@emtex.com>
+2008-12-18  David Bevan  <dbevan@emtex.com>
 
 	Provide API for accessing embedding and subsetting restriction
 	information.
@@ -3656,12 +3656,12 @@
 	* src/sfnt/sfobjs.c (sfnt_load_face): A font with neither outlines
 	nor bitmaps is scalable.
 
-2008-12-05  Werner Lemberg  <wl@nu.org>
+2008-12-05  Werner Lemberg  <wl@gnu.org>
 
 	* src/autofit/aflatin.c (af_latin_uniranges): Add more ranges.  This
 	fixes Savannah bug #21190 which also provides a basic patch.
 
-2008-12-05  Werner Lemberg  <wl@nu.org>
+2008-12-05  Werner Lemberg  <wl@gnu.org>
 
 	* include/freetype/freetype.h (FT_LOAD_ADVANCE_ONLY): Use value
 	0x100 instead of 0x10000; the latter value is already occupied by
@@ -4098,7 +4098,7 @@
 2008-09-18  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
 	* src/cff/cffobjs.c (cff_face_init): Use TTAG_OTTO defined
-	in ttags.h instead of numerical value 0x4F54544FL.
+	in tttags.h instead of numerical value 0x4F54544FL.
 
 2008-09-16  Werner Lemberg  <wl@gnu.org>
 
@@ -4156,11 +4156,11 @@
 2008-09-05  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
 	* builds/unix/configure.raw: Clear FT2_EXTRA_LIBS when Carbon or
-	ApplicationService framework is missing.  Although this value is not
+	ApplicationServices framework is missing.  Although this value is not
 	used in building of FreeType2, it is written in `freetype2.pc' and
 	`freetype-config'.
 
-2008-09-01  david turner  <david@freetype.org>
+2008-09-01  David Turner  <david@freetype.org>
 
 	* src/cache/ftccmap.c (FTC_CMapCache_Lookup): Accept a negative cmap
 	index to mean `use default cached FT_Face's charmap'.  This fixes
@@ -4248,7 +4248,7 @@
 2008-08-29  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
 	* src/sfnt/sfobjs.c (sfnt_open_font): Use TTAG_OTTO defined in
-	ttags.h instead of FT_MAKE_TAG( 'O', 'T', 'T', 'O' ).
+	tttags.h instead of FT_MAKE_TAG( 'O', 'T', 'T', 'O' ).
 
 2008-08-28  Werner Lemberg  <wl@gnu.org>
 
@@ -4258,7 +4258,7 @@
 
 2008-08-23  Werner Lemberg  <wl@gnu.org>
 
-	* src/type/t1afm.c (compare_kern_pairs), src/pxaux/afmparse.c
+	* src/type/t1afm.c (compare_kern_pairs), src/psaux/afmparse.c
 	(afm_compare_kern_pairs): Fix comparison.  This fixes Savannah bug
 	#24119.
 
@@ -4387,7 +4387,7 @@
 
 	* src/cff/cffload.c (cff_font_load): Pass `pure_cff'.
 	Invert sids table only if `pure_cff' is set.
-	* src/cff/cffload.h: Udpated.
+	* src/cff/cffload.h: Updated.
 
 	* src/cff/cffobjs.c (cff_face_init): Updated.
 	Set FT_FACE_FLAG_CID_KEYED only if pure_cff is set.
@@ -4861,7 +4861,7 @@
 2008-04-14  Werner Lemberg  <wl@gnu.org>
 
 	* src/pcf/pcfdrivr.c (PCF_Face_Init): Protect call to
-	`FT_Stream_OpenLZW' with `FT_CONFIG_OPTION_USE_LZ'.  From Savannah
+	`FT_Stream_OpenLZW' with `FT_CONFIG_OPTION_USE_LZW'.  From Savannah
 	bug #22909.
 
 2008-04-13  Werner Lemberg  <wl@gnu.org>
@@ -4931,7 +4931,7 @@
 	tt_cmap14_find_variant): Return correct value.
 	(tt_cmap14_variant_chars): Fix check for `di'.
 
-2008-02-29  Wermer Lemberg  <wl@gnu.org>
+2008-02-29  Werner Lemberg  <wl@gnu.org>
 
 	* docs/CHANGES: Updated.
 
@@ -5243,7 +5243,7 @@
 	functions related to cmap type 14 support to the
 	`FT_Object_ActionName' scheme:
 
-	  FT_Get_Char_Variant_index     -> FT_Face_GetCharVariantIndex
+	  FT_Get_Char_Variant_Index     -> FT_Face_GetCharVariantIndex
 	  FT_Get_Char_Variant_IsDefault -> FT_Face_GetCharVariantIsDefault
 	  FT_Get_Variant_Selectors      -> FT_Face_GetVariantSelectors
 	  FT_Get_Variants_Of_Char       -> FT_Face_GetVariantsOfChar
@@ -5329,7 +5329,7 @@
 
 2007-08-18  Werner Lemberg  <wl@gnu.org>
 
-	* src/otvalid/otvcmmn.c (otv_x_y_ux_sy): Skip context glyphs.  Found
+	* src/otvalid/otvcommn.c (otv_x_y_ux_sy): Skip context glyphs.  Found
 	by Imran Yousaf.  Fixes Savannah bug #20773.
 
 	(otv_Lookup_validate): Correct handling of LookupType.  Found by
@@ -5383,7 +5383,7 @@
 	* include/freetype/ftotval.h (FT_VALIDATE_MATH): New macro.
 	(FT_VALIDATE_OT): Updated.
 
-	* src/otvalid/otmath.c: New file.
+	* src/otvalid/otvmath.c: New file.
 
 	* src/otvalid/otvalid.c: Include otvmath.c.
 	* src/otvalid/otvmod.c (otv_validate): Handle `MATH' table.
@@ -5428,7 +5428,7 @@
 	* include/freetype/config/ftheader.h (FT_CID_H): New macro.
 	* include/freetype/ftcid.h: New file.
 
-	* include/freetype/internal/ftserv.h (FT_SERVIVE_CID_H): New macro.
+	* include/freetype/internal/ftserv.h (FT_SERVICE_CID_H): New macro.
 	* include/freetype/internal/services/svcid.h: New file.
 
 	* src/base/ftcid.c: New file.
@@ -5530,7 +5530,7 @@
 	* src/truetype/ttinterp.c (Ins_IUP): Add missing variable
 	initialization.
 
-	* src/autofit/aflatin.c (af_latin_metric_init_blues): Get rid of an
+	* src/autofit/aflatin.c (af_latin_metrics_init_blues): Get rid of an
 	infinite loop in the case of degenerate fonts.
 
 2007-06-26  Rahul Bhalerao  <b.rahul.pm@gmail.com>
@@ -5938,7 +5938,7 @@
 
 	Savannah patch #5929.
 
-	* include/freetype/tttables.h, src/base/ftobjcs.c
+	* include/freetype/tttables.h, src/base/ftobjs.c
 	(FT_Get_CMap_Format): New function.
 
 	* include/freetype/internal/services/svttcmap.c (TT_CMapInfo): Add
@@ -5965,7 +5965,7 @@
 	* include/freetype/config/ftstdlib.h,
 	include/freetype/internal/ftobjs.h: As suggested by Graham Asher,
 	ensure that ft_isalnum, ft_isdigit, etc., use hard-coded values
-	instead on relying on the locale-dependent functions provided by
+	instead of relying on the locale-dependent functions provided by
 	<ctypes.h>.
 
 2007-05-15  Graham Asher  <graham.asher@btinternet.com>
@@ -6005,7 +6005,7 @@
 
 2007-05-11  David Turner  <david@freetype.org>
 
-	* src/cache/ftbasic.c, include/freetype/ftcache.h
+	* src/cache/ftcbasic.c, include/freetype/ftcache.h
 	(FTC_ImageCache_LookupScaler, FTC_SBit_Cache_LookupScaler): Two new
 	functions that allow us to look up glyphs using an FTC_Scaler object
 	to specify the size, making it possible to use fractional pixel
@@ -6097,8 +6097,8 @@
 
 2007-04-06  David Turner  <david@freetype.org>
 
-	* src/base/ftbimap.c (ft_bitmap_assure_buffer): Fix buffer-overwrite bug
-	(Savannah bug #19536).
+	* src/base/ftbitmap.c (ft_bitmap_assure_buffer): Fix buffer-overwrite
+	bug (Savannah bug #19536).
 
 2007-04-04  Werner Lemberg  <wl@gnu.org>
 
@@ -6201,14 +6201,14 @@
 	conftest.c, to avoid unexpected shell evaluation.  Possibly it is a
 	bug or undocumented behaviour of autoconf.
 
-2007-03-18  David Turner   <david@freetype.org>
+2007-03-18  David Turner  <david@freetype.org>
 
 	* src/truetype/ttinterp.c (Ins_MDRP): Another bytecode regression
 	fix; testing still needed.
 
 	* src/truetype/ttinterp.c (Ins_MD): Another bytecode regression fix.
 
-2007-03-17  David Turner   <david@freetype.org>
+2007-03-17  David Turner  <david@freetype.org>
 
 	* src/truetype/ttinterp.c (Ins_IP): Fix wrong handling of the
 	(undocumented) twilight zone special case.
@@ -6256,7 +6256,7 @@
 	case FT_Init_FreeType fails for some reason.  Problem reported by
 	Maximilian Schwerin <maximilian.schwerin@buelowssiege.de>.
 
-	* src/truetype/ttobs.c (tt_size_init_bytecode): Clear the `x_ppem'
+	* src/truetype/ttobjs.c (tt_size_init_bytecode): Clear the `x_ppem'
 	and `y_ppem' fields of the `TT_Size.metrics' structure, not those of
 	`TT_Size.root.metrics'.  Problem reported by Daniel Glöckner
 	<daniel-gl@gmx.net>.
@@ -6335,7 +6335,7 @@
 	* src/base/ftutil.c (ft_mem_dup, ft_mem_strdup, ft_mem_strcpyn): New
 	functions.
 
-	* src/bfd/bfddrivr.c (bdf_interpret_style, BDF_Face_Init),
+	* src/bdf/bdfdrivr.c (bdf_interpret_style, BDF_Face_Init),
 	src/bdf/bdflib.c (_bdf_add_property), src/pcf/pcfread.c
 	(pcf_get_properties, pcf_interpret_style, pcf_load_font),
 	src/cff/cffdrivr.c (cff_get_glyph_name), src/cff/cffload.c
@@ -6546,7 +6546,7 @@
 2007-01-16  David Turner  <david@freetype.org>
 
 	* src/autofit/aflatin.c (af_latin_hints_compute_segments),
-	src/cff/cffdriver.c (cff_ps_get_font_info), src/truetype/ttobjs.c
+	src/cff/cffdrivr.c (cff_ps_get_font_info), src/truetype/ttobjs.c
 	(tt_face_init), src/truetype/ttinterp.c (Ins_SHC): Fix compiler
 	warnings.
 
@@ -6592,7 +6592,7 @@
 	* src/cff/cffload.c: Include FT_TYPE1_TABLES_H.
 	(cff_font_done): Free font->font_info if necessary.
 
-	* src/cff/cffdrvr.c (cff_ps_get_font_info): New function.
+	* src/cff/cffdrivr.c (cff_ps_get_font_info): New function.
 	(cff_service_ps_info): Register cff_ps_get_font_info.
 
 2007-01-13  Werner Lemberg  <wl@gnu.org>
@@ -6734,7 +6734,7 @@
 	files are not used.
 
 	* include/freetype/internal/tttypes.h (TT_FaceRec): Add members
-	`horz_metrics_offset' and `vert_metrics_ofset'.
+	`horz_metrics_offset' and `vert_metrics_offset'.
 	* src/sfnt/ttmtx.c (tt_face_load_hmtx, tt_face_get_metrics):
 	Updated.
 
@@ -7023,7 +7023,7 @@
 	(_ft_lcd_filter_fir): This.
 	Update parameters.
 	(_ft_lcd_filter_legacy) [USE_LEGACY]: New filter function.
-	(FT_Library_Set_LcdFilter): Update parameters.
+	(FT_Library_SetLcdFilter): Update parameters.
 	Handle new filter modes.
 
 	* include/internal/ftobjs.h: Include FT_LCD_FILTER_H.
@@ -7366,7 +7366,7 @@
 	to recognize a few fonts that require the automatic unpatented
 	loader.
 
-	* src/smooth/ftgrays.c: Optmize the performance of the anti-aliased
+	* src/smooth/ftgrays.c: Optimize the performance of the anti-aliased
 	rasterizer.  The speed improvement is between 15% and 25%, depending
 	on the font data.
 
@@ -7517,7 +7517,7 @@
 2006-08-15  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
 
 	* modules.cfg (BASE_EXTENSIONS): Compile in ftgxval.c by default to
-	build ftvalid in ft2demos.  This has been inadvertedly changed
+	build ftvalid in ft2demos.  This has been inadvertently changed
 	2006-08-13.
 
 2006-08-15  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
@@ -7647,7 +7647,7 @@
 	`len_buildchar'.
 	Remove `keywords_flags'.
 
-	* src/type1/t1load.h (T1_LoaderRect): New field
+	* src/type1/t1load.h (T1_LoaderRec): New field
 	`keywords_encountered'.
 	(T1_PRIVATE, T1_FONTDIR_AFTER_PRIVATE): New macros.
 
@@ -7840,7 +7840,7 @@
 	* src/base/ftobjs.c (load_face_in_embedded_rfork): Replace
 	`FT_Stream_Close' by `FT_Stream_Free' to fix memory leak.
 
-	* src/base/ftrfrk.c (raccess_guess_linux_double_from_file_name):
+	* src/base/ftrfork.c (raccess_guess_linux_double_from_file_name):
 	Replace `FT_Stream_Close' by `FT_Stream_Free' to fix memory leak.
 
 2006-05-19  suzuki toshiya  <mpsuzuki@hiroshima-u.ac.jp>
@@ -7857,7 +7857,7 @@
 2006-05-18  Werner Lemberg  <wl@gnu.org>
 
 	* src/truetype/ttgload.c (TT_Load_Composite_Glyph)
-	[FT_CONFIG_OPTION_BYTECODE_INTERPRETER]: Make it compilable again.
+	[TT_CONFIG_OPTION_BYTECODE_INTERPRETER]: Make it compilable again.
 
 2006-05-17  David Turner  <david@freetype.org>
 
@@ -7902,7 +7902,7 @@
 	(FT_Stream_OpenGzip): Use it to handle small files directly in
 	memory.
 
-	* src/psaux/psconv.c (PS_Conv_ASCIIHexDecode, PS_ConvEexecDecode):
+	* src/psaux/psconv.c (PS_Conv_ASCIIHexDecode, PS_Conv_EexecDecode):
 	Improve performance.
 
 	* src/truetype/ttgload.c (TT_Access_Glyph_Frame): Set `cursor' and
@@ -7932,7 +7932,7 @@
 
 ----------------------------------------------------------------------------
 
-Copyright 2006, 2007, 2008, 2009, 2010 by
+Copyright 2006-2017 by
 David Turner, Robert Wilhelm, and Werner Lemberg.
 
 This file is part of the FreeType project, and may only be used, modified,

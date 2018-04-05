@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
 //
 //  VNC is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ class HotKeys
     HotKeys();
     void SetWindow(HWND hwnd) { m_hwnd = hwnd; }
     bool TranslateAccel(MSG *pmsg);
-    void Init(bool);
+    void Init(bool, bool);
     void Destroy(void);
     virtual ~HotKeys();
 

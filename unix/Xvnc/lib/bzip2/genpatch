@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROJECT=bzip2-1.0.6
+EXT=tar.gz
+URL=http://www.bzip.org/1.0.6
+SRCDIR=`dirname $0`
+
+. $SRCDIR/../../genpatch >$SRCDIR/turbovnc.patch

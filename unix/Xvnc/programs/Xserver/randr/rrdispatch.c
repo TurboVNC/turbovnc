@@ -35,16 +35,17 @@ RRClientKnowsRates(ClientPtr pClient)
 static int
 ProcRRQueryVersion(ClientPtr client)
 {
-    xRRQueryVersionReply rep = { 0 };
+    xRRQueryVersionReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0
+    };
     REQUEST(xRRQueryVersionReq);
     rrClientPriv(client);
 
     REQUEST_SIZE_MATCH(xRRQueryVersionReq);
     pRRClient->major_version = stuff->majorVersion;
     pRRClient->minor_version = stuff->minorVersion;
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
 
     if (version_compare(stuff->majorVersion, stuff->minorVersion,
                         SERVER_RANDR_MAJOR_VERSION,
@@ -63,7 +64,7 @@ ProcRRQueryVersion(ClientPtr client)
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xRRQueryVersionReply), (char *) &rep);
+    WriteToClient(client, sizeof(xRRQueryVersionReply), &rep);
     return Success;
 }
 
@@ -82,7 +83,7 @@ ProcRRSelectInput(ClientPtr client)
     rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (rc != Success)
         return rc;
-    rc = dixLookupResourceByType((pointer *) &pHead, pWin->drawable.id,
+    rc = dixLookupResourceByType((void **) &pHead, pWin->drawable.id,
                                  RREventType, client, DixWriteAccess);
     if (rc != Success && rc != BadValue)
         return rc;
@@ -90,7 +91,10 @@ ProcRRSelectInput(ClientPtr client)
     if (stuff->enable & (RRScreenChangeNotifyMask |
                          RRCrtcChangeNotifyMask |
                          RROutputChangeNotifyMask |
-                         RROutputPropertyNotifyMask)) {
+                         RROutputPropertyNotifyMask |
+                         RRProviderChangeNotifyMask |
+                         RRProviderPropertyNotifyMask |
+                         RRResourceChangeNotifyMask)) {
         ScreenPtr pScreen = pWin->drawable.pScreen;
 
         rrScrPriv(pScreen);
@@ -118,7 +122,7 @@ ProcRRSelectInput(ClientPtr client)
              */
             clientResource = FakeClientID(client->index);
             pRREvent->clientResource = clientResource;
-            if (!AddResource(clientResource, RRClientType, (pointer) pRREvent))
+            if (!AddResource(clientResource, RRClientType, (void *) pRREvent))
                 return BadAlloc;
             /*
              * create a resource to contain a pointer to the list
@@ -130,7 +134,7 @@ ProcRRSelectInput(ClientPtr client)
                 pHead = (RREventPtr *) malloc(sizeof(RREventPtr));
                 if (!pHead ||
                     !AddResource(pWin->drawable.id, RREventType,
-                                 (pointer) pHead)) {
+                                 (void *) pHead)) {
                     FreeResource(clientResource, RT_NONE);
                     return BadAlloc;
                 }
@@ -241,4 +245,18 @@ int (*ProcRandrVector[RRNumberRequests]) (ClientPtr) = {
         ProcRRSetPanning,       /* 29 */
         ProcRRSetOutputPrimary, /* 30 */
         ProcRRGetOutputPrimary, /* 31 */
+/* V1.4 additions */
+        ProcRRGetProviders,     /* 32 */
+        ProcRRGetProviderInfo,  /* 33 */
+        ProcRRSetProviderOffloadSink, /* 34 */
+        ProcRRSetProviderOutputSource, /* 35 */
+        ProcRRListProviderProperties,    /* 36 */
+        ProcRRQueryProviderProperty,     /* 37 */
+        ProcRRConfigureProviderProperty, /* 38 */
+        ProcRRChangeProviderProperty, /* 39 */
+        ProcRRDeleteProviderProperty, /* 40 */
+        ProcRRGetProviderProperty,    /* 41 */
+        ProcRRGetMonitors,            /* 42 */
+        ProcRRSetMonitor,             /* 43 */
+        ProcRRDeleteMonitor,          /* 44 */
 };

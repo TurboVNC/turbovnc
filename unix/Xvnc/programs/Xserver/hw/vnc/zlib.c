@@ -63,14 +63,13 @@ rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
     int deflateResult;
     int previousOut;
     int i;
-    char *fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y) +
-                   (x * (rfbScreen.bitsPerPixel / 8)));
+    char *fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y) +
+                   (x * (rfbFB.bitsPerPixel / 8)));
 
     int maxRawSize;
     int maxCompSize;
 
-    maxRawSize = (rfbScreen.width * rfbScreen.height *
-                  (cl->format.bitsPerPixel / 8));
+    maxRawSize = (rfbFB.width * rfbFB.height * (cl->format.bitsPerPixel / 8));
 
     if (zlibBeforeBufSize < maxRawSize) {
         zlibBeforeBufSize = maxRawSize;
@@ -84,8 +83,7 @@ rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
     /* zlib compression is not useful for very small data sets.
      * So, we just send these raw without any compression.
      */
-    if (( w * h * (rfbScreen.bitsPerPixel / 8)) <
-          VNC_ENCODE_ZLIB_MIN_COMP_SIZE ) {
+    if (( w * h * (rfbFB.bitsPerPixel / 8)) < VNC_ENCODE_ZLIB_MIN_COMP_SIZE ) {
 
         int result;
 
@@ -126,7 +124,7 @@ rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
      */
     (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
                        &cl->format, fbptr, zlibBeforeBuf,
-                       rfbScreen.paddedWidthInBytes, w, h);
+                       rfbFB.paddedWidthInBytes, w, h);
 
     cl->compStream.next_in = ( Bytef * )zlibBeforeBuf;
     cl->compStream.avail_in = w * h * (cl->format.bitsPerPixel / 8);

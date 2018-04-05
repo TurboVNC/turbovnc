@@ -1,6 +1,7 @@
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
+Copyright 2017  D. R. Commander
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -26,13 +27,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -66,12 +67,12 @@ SOFTWARE.
 #include "misc.h"
 
 #include "osdep.h"
-#include <X11/Xpoll.h>
 #include "dixstruct.h"
 #include "opaque.h"
 #ifdef DPMSExtension
 #include "dpmsproc.h"
 #endif
+#include "busfault.h"
 
 #ifdef WIN32
 /* Error codes from windows sockets differ from fileio error codes  */
@@ -81,7 +82,7 @@ SOFTWARE.
 #define EINVAL WSAEINVAL
 #undef EBADF
 #define EBADF WSAENOTSOCK
-/* Windows select does not set errno. Use GetErrno as wrapper for 
+/* Windows select does not set errno. Use GetErrno as wrapper for
    WSAGetLastError */
 #define GetErrno WSAGetLastError
 #else
@@ -113,16 +114,55 @@ mffs(fd_mask mask)
 #endif
 
 struct _OsTimerRec {
-    OsTimerPtr next;
+    struct xorg_list list;
     CARD32 expires;
     CARD32 delta;
     OsTimerCallback callback;
-    pointer arg;
+    void *arg;
 };
 
-static void DoTimer(OsTimerPtr timer, CARD32 now, OsTimerPtr *prev);
+static void DoTimer(OsTimerPtr timer, CARD32 now);
+static void DoTimers(CARD32 now);
 static void CheckAllTimers(void);
-static OsTimerPtr timers = NULL;
+static volatile struct xorg_list timers;
+
+static inline OsTimerPtr
+first_timer(void)
+{
+    /* inline xorg_list_is_empty which can't handle volatile */
+    if (timers.next == &timers)
+        return NULL;
+    return xorg_list_first_entry(&timers, struct _OsTimerRec, list);
+}
+
+/*
+ * Compute timeout until next timer, running
+ * any expired timers
+ */
+static int
+check_timers(void)
+{
+    OsTimerPtr timer;
+
+    if ((timer = first_timer()) != NULL) {
+        CARD32 now = GetTimeInMillis();
+        int timeout = timer->expires - now;
+
+        if (timeout <= 0) {
+            DoTimers(now);
+        } else {
+            /* Make sure the timeout is sane */
+            if (timeout < timer->delta + 250)
+                return timeout;
+
+            /* time has rewound.  reset the timers. */
+            CheckAllTimers();
+        }
+
+        return 0;
+    }
+    return -1;
+}
 
 /*****************
  * WaitForSomething:
@@ -141,237 +181,113 @@ static OsTimerPtr timers = NULL;
  *     pClientsReady is an array to store ready client->index values into.
  *****************/
 
-int
-WaitForSomething(int *pClientsReady)
+Bool
+WaitForSomething(Bool are_ready)
 {
     int i;
-    struct timeval waittime, *wt;
-    INT32 timeout = 0;
-    fd_set clientsReadable;
-    fd_set clientsWritable;
-    int curclient;
-    int selecterr;
-    static int nready;
-    fd_set devicesReadable;
+    int timeout;
+    int pollerr;
+    static Bool were_ready;
+    Bool timer_is_running;
+#if defined(TURBOVNC) && defined(GLXEXT)
     CARD32 now = 0;
-    Bool someReady = FALSE;
+    OsTimerPtr timer;
+    extern Bool indirectGlxActive;
+#endif
 
-    FD_ZERO(&clientsReadable);
+    timer_is_running = were_ready;
 
-    if (nready)
+    if (were_ready && !are_ready) {
+        timer_is_running = FALSE;
         SmartScheduleStopTimer();
-    nready = 0;
+    }
 
-    /* We need a while loop here to handle 
+    were_ready = FALSE;
+
+#ifdef BUSFAULT
+    busfault_check();
+#endif
+
+    /* We need a while loop here to handle
        crashed connections and the screen saver timeout */
     while (1) {
         /* deal with any blocked jobs */
-        if (workQueue)
+        if (workQueue) {
             ProcessWorkQueue();
-        if (XFD_ANYSET(&ClientsWithInput)) {
-            if (!SmartScheduleDisable) {
-                someReady = TRUE;
-                waittime.tv_sec = 0;
-                waittime.tv_usec = 0;
-                wt = &waittime;
-            }
-            else {
-                XFD_COPYSET(&ClientsWithInput, &clientsReadable);
-                break;
-            }
-        }
-        if (someReady) {
-            XFD_COPYSET(&AllSockets, &LastSelectMask);
-            XFD_UNSET(&LastSelectMask, &ClientsWithInput);
-        }
-        else {
-            wt = NULL;
-            if (timers) {
-                now = GetTimeInMillis();
-                timeout = timers->expires - now;
-                if (timeout > 0 && timeout > timers->delta + 250) {
-                    /* time has rewound.  reset the timers. */
-                    CheckAllTimers();
-                }
-
-                if (timers) {
-                    timeout = timers->expires - now;
-                    if (timeout < 0)
-                        timeout = 0;
-                    waittime.tv_sec = timeout / MILLI_PER_SECOND;
-                    waittime.tv_usec = (timeout % MILLI_PER_SECOND) *
-                        (1000000 / MILLI_PER_SECOND);
-                    wt = &waittime;
-                }
-            }
-            XFD_COPYSET(&AllSockets, &LastSelectMask);
+            are_ready = clients_are_ready();
         }
 
-        BlockHandler((pointer) &wt, (pointer) &LastSelectMask);
+        if (are_ready)
+            timeout = 0;
+        else
+            timeout = check_timers();
+
+        BlockHandler(&timeout);
         if (NewOutputPending)
             FlushAllOutput();
         /* keep this check close to select() call to minimize race */
         if (dispatchException)
             i = -1;
-        else if (AnyClientsWriteBlocked) {
-            XFD_COPYSET(&ClientsWriteBlocked, &clientsWritable);
-            i = Select(MaxClients, &LastSelectMask, &clientsWritable, NULL, wt);
-        }
-        else {
-            i = Select(MaxClients, &LastSelectMask, NULL, NULL, wt);
-        }
-        selecterr = GetErrno();
-        WakeupHandler(i, (pointer) &LastSelectMask);
+        else
+            i = ospoll_wait(server_poll, timeout);
+        pollerr = GetErrno();
+        WakeupHandler(i);
         if (i <= 0) {           /* An error or timeout occurred */
             if (dispatchException)
-                return 0;
+                return FALSE;
             if (i < 0) {
-                if (selecterr == EBADF) {       /* Some client disconnected */
-                    CheckConnections();
-                    if (!XFD_ANYSET(&AllClients))
-                        return 0;
-                }
-                else if (selecterr == EINVAL) {
-                    FatalError("WaitForSomething(): select: %s\n",
-                               strerror(selecterr));
-                }
-                else if (selecterr != EINTR && selecterr != EAGAIN) {
-                    ErrorF("WaitForSomething(): select: %s\n",
-                           strerror(selecterr));
+                if (pollerr != EINTR && !ETEST(pollerr)) {
+                    ErrorF("WaitForSomething(): poll: %s\n",
+                           strerror(pollerr));
                 }
             }
-            else if (someReady) {
-                /*
-                 * If no-one else is home, bail quickly
-                 */
-                XFD_COPYSET(&ClientsWithInput, &LastSelectMask);
-                XFD_COPYSET(&ClientsWithInput, &clientsReadable);
-                break;
-            }
-            if (*checkForInput[0] != *checkForInput[1])
-                return 0;
+        } else
+            are_ready = clients_are_ready();
 
-            if (timers) {
-                int expired = 0;
+#if defined(TURBOVNC) && defined(GLXEXT)
+        if (indirectGlxActive) {
+            /* This basically restores the logic from xorg-server 1.18.x and
+               earlier.  Without it, the timers in the VNC server are never
+               invoked (and thus framebuffer updates are never sent) while
+               indirect OpenGL applications are running. */
+            if (i > 0) {
+                if (InputCheckPending())
+                    return FALSE;
 
-                now = GetTimeInMillis();
-                if ((int) (timers->expires - now) <= 0)
-                    expired = 1;
-
-                while (timers && (int) (timers->expires - now) <= 0)
-                    DoTimer(timers, now, &timers);
-
-                if (expired)
-                    return 0;
-            }
-        }
-        else {
-            fd_set tmp_set;
-
-            if (*checkForInput[0] == *checkForInput[1]) {
-                if (timers) {
-                    int expired = 0;
-
+                if ((timer = first_timer()) != NULL) {
                     now = GetTimeInMillis();
-                    if ((int) (timers->expires - now) <= 0)
-                        expired = 1;
-
-                    while (timers && (int) (timers->expires - now) <= 0)
-                        DoTimer(timers, now, &timers);
-
-                    if (expired)
-                        return 0;
+                    if ((int) (timer->expires - now) <= 0) {
+                        DoTimers(now);
+                        return FALSE;
+                    }
                 }
             }
-            if (someReady)
-                XFD_ORSET(&LastSelectMask, &ClientsWithInput, &LastSelectMask);
-            if (AnyClientsWriteBlocked && XFD_ANYSET(&clientsWritable)) {
-                NewOutputPending = TRUE;
-                XFD_ORSET(&OutputPending, &clientsWritable, &OutputPending);
-                XFD_UNSET(&ClientsWriteBlocked, &clientsWritable);
-                if (!XFD_ANYSET(&ClientsWriteBlocked))
-                    AnyClientsWriteBlocked = FALSE;
-            }
+        } else
+#endif
+        if (InputCheckPending())
+            return FALSE;
 
-            XFD_ANDSET(&devicesReadable, &LastSelectMask, &EnabledDevices);
-            XFD_ANDSET(&clientsReadable, &LastSelectMask, &AllClients);
-            XFD_ANDSET(&tmp_set, &LastSelectMask, &WellKnownConnections);
-            if (XFD_ANYSET(&tmp_set))
-                QueueWorkProc(EstablishNewConnections, NULL,
-                              (pointer) &LastSelectMask);
-
-            if (XFD_ANYSET(&devicesReadable) || XFD_ANYSET(&clientsReadable))
-                break;
-            /* check here for DDXes that queue events during Block/Wakeup */
-            if (*checkForInput[0] != *checkForInput[1])
-                return 0;
+        if (are_ready) {
+            were_ready = TRUE;
+            if (!timer_is_running)
+                SmartScheduleStartTimer();
+            return TRUE;
         }
     }
+}
 
-    nready = 0;
-    if (XFD_ANYSET(&clientsReadable)) {
-#ifndef WIN32
-        for (i = 0; i < howmany(XFD_SETSIZE, NFDBITS); i++) {
-            int highest_priority = 0;
+void
+AdjustWaitForDelay(void *waitTime, int newdelay)
+{
+    int *timeoutp = waitTime;
+    int timeout = *timeoutp;
 
-            while (clientsReadable.fds_bits[i]) {
-                int client_priority, client_index;
+    if (timeout < 0 || newdelay < timeout)
+        *timeoutp = newdelay;
+}
 
-                curclient = mffs(clientsReadable.fds_bits[i]) - 1;
-                client_index =  /* raphael: modified */
-                    ConnectionTranslation[curclient +
-                                          (i * (sizeof(fd_mask) * 8))];
-#else
-        int highest_priority = 0;
-        fd_set savedClientsReadable;
-
-        XFD_COPYSET(&clientsReadable, &savedClientsReadable);
-        for (i = 0; i < XFD_SETCOUNT(&savedClientsReadable); i++) {
-            int client_priority, client_index;
-
-            curclient = XFD_FD(&savedClientsReadable, i);
-            client_index = GetConnectionTranslation(curclient);
-#endif
-            /*  We implement "strict" priorities.
-             *  Only the highest priority client is returned to
-             *  dix.  If multiple clients at the same priority are
-             *  ready, they are all returned.  This means that an
-             *  aggressive client could take over the server.
-             *  This was not considered a big problem because
-             *  aggressive clients can hose the server in so many 
-             *  other ways :)
-             */
-            client_priority = clients[client_index]->priority;
-            if (nready == 0 || client_priority > highest_priority) {
-                /*  Either we found the first client, or we found
-                 *  a client whose priority is greater than all others
-                 *  that have been found so far.  Either way, we want 
-                 *  to initialize the list of clients to contain just
-                 *  this client.
-                 */
-                pClientsReady[0] = client_index;
-                highest_priority = client_priority;
-                nready = 1;
-            }
-            /*  the following if makes sure that multiple same-priority 
-             *  clients get batched together
-             */
-            else if (client_priority == highest_priority) {
-                pClientsReady[nready++] = client_index;
-            }
-#ifndef WIN32
-            clientsReadable.fds_bits[i] &= ~(((fd_mask) 1L) << curclient);
-        }
-#else
-            FD_CLR(curclient, &clientsReadable);
-#endif
-        }
-    }
-
-    if (nready)
-        SmartScheduleStartTimer();
-
-    return nready;
+static inline Bool timer_pending(OsTimerPtr timer) {
+    return !xorg_list_is_empty(&timer->list);
 }
 
 /* If time has rewound, re-run every affected timer.
@@ -382,56 +298,65 @@ CheckAllTimers(void)
     OsTimerPtr timer;
     CARD32 now;
 
-    OsBlockSignals();
+    input_lock();
  start:
     now = GetTimeInMillis();
 
-    for (timer = timers; timer; timer = timer->next) {
+    xorg_list_for_each_entry(timer, &timers, list) {
         if (timer->expires - now > timer->delta + 250) {
-            TimerForce(timer);
+            DoTimer(timer, now);
             goto start;
         }
     }
-    OsReleaseSignals();
+    input_unlock();
 }
 
 static void
-DoTimer(OsTimerPtr timer, CARD32 now, OsTimerPtr *prev)
+DoTimer(OsTimerPtr timer, CARD32 now)
 {
     CARD32 newTime;
 
-    OsBlockSignals();
-    *prev = timer->next;
-    timer->next = NULL;
+    xorg_list_del(&timer->list);
     newTime = (*timer->callback) (timer, now, timer->arg);
     if (newTime)
         TimerSet(timer, 0, newTime, timer->callback, timer->arg);
-    OsReleaseSignals();
+}
+
+static void
+DoTimers(CARD32 now)
+{
+    OsTimerPtr  timer;
+
+    input_lock();
+    while ((timer = first_timer())) {
+        if ((int) (timer->expires - now) > 0)
+            break;
+        DoTimer(timer, now);
+    }
+    input_unlock();
 }
 
 OsTimerPtr
 TimerSet(OsTimerPtr timer, int flags, CARD32 millis,
-         OsTimerCallback func, pointer arg)
+         OsTimerCallback func, void *arg)
 {
-    register OsTimerPtr *prev;
+    OsTimerPtr existing, tmp;
     CARD32 now = GetTimeInMillis();
 
     if (!timer) {
-        timer = malloc(sizeof(struct _OsTimerRec));
+        timer = calloc(1, sizeof(struct _OsTimerRec));
         if (!timer)
             return NULL;
+        xorg_list_init(&timer->list);
     }
     else {
-        OsBlockSignals();
-        for (prev = &timers; *prev; prev = &(*prev)->next) {
-            if (*prev == timer) {
-                *prev = timer->next;
-                if (flags & TimerForceOld)
-                    (void) (*timer->callback) (timer, now, timer->arg);
-                break;
-            }
+        input_lock();
+        if (timer_pending(timer)) {
+            xorg_list_del(&timer->list);
+            if (flags & TimerForceOld)
+                (void) (*timer->callback) (timer, now, timer->arg);
         }
-        OsReleaseSignals();
+        input_unlock();
     }
     if (!millis)
         return timer;
@@ -445,55 +370,44 @@ TimerSet(OsTimerPtr timer, int flags, CARD32 millis,
     timer->expires = millis;
     timer->callback = func;
     timer->arg = arg;
-    if ((int) (millis - now) <= 0) {
-        timer->next = NULL;
-        millis = (*timer->callback) (timer, now, timer->arg);
-        if (!millis)
-            return timer;
-    }
-    OsBlockSignals();
-    for (prev = &timers;
-         *prev && (int) ((*prev)->expires - millis) <= 0;
-         prev = &(*prev)->next);
-    timer->next = *prev;
-    *prev = timer;
-    OsReleaseSignals();
+    input_lock();
+
+    /* Sort into list */
+    xorg_list_for_each_entry_safe(existing, tmp, &timers, list)
+        if ((int) (existing->expires - millis) > 0)
+            break;
+    /* This even works at the end of the list -- existing->list will be timers */
+    xorg_list_add(&timer->list, existing->list.prev);
+
+    /* Check to see if the timer is ready to run now */
+    if ((int) (millis - now) <= 0)
+        DoTimer(timer, now);
+
+    input_unlock();
     return timer;
 }
 
 Bool
 TimerForce(OsTimerPtr timer)
 {
-    int rc = FALSE;
-    OsTimerPtr *prev;
+    int pending;
 
-    OsBlockSignals();
-    for (prev = &timers; *prev; prev = &(*prev)->next) {
-        if (*prev == timer) {
-            DoTimer(timer, GetTimeInMillis(), prev);
-            rc = TRUE;
-            break;
-        }
-    }
-    OsReleaseSignals();
-    return rc;
+    input_lock();
+    pending = timer_pending(timer);
+    if (pending)
+        DoTimer(timer, GetTimeInMillis());
+    input_unlock();
+    return pending;
 }
 
 void
 TimerCancel(OsTimerPtr timer)
 {
-    OsTimerPtr *prev;
-
     if (!timer)
         return;
-    OsBlockSignals();
-    for (prev = &timers; *prev; prev = &(*prev)->next) {
-        if (*prev == timer) {
-            *prev = timer->next;
-            break;
-        }
-    }
-    OsReleaseSignals();
+    input_lock();
+    xorg_list_del(&timer->list);
+    input_unlock();
 }
 
 void
@@ -508,19 +422,22 @@ TimerFree(OsTimerPtr timer)
 void
 TimerCheck(void)
 {
-    CARD32 now = GetTimeInMillis();
-
-    while (timers && (int) (timers->expires - now) <= 0)
-        DoTimer(timers, now, &timers);
+    DoTimers(GetTimeInMillis());
 }
 
 void
 TimerInit(void)
 {
-    OsTimerPtr timer;
+    static Bool been_here;
+    OsTimerPtr timer, tmp;
 
-    while ((timer = timers)) {
-        timers = timer->next;
+    if (!been_here) {
+        been_here = TRUE;
+        xorg_list_init((struct xorg_list*) &timers);
+    }
+
+    xorg_list_for_each_entry_safe(timer, tmp, &timers, list) {
+        xorg_list_del(&timer->list);
         free(timer);
     }
 }
@@ -559,9 +476,9 @@ NextDPMSTimeout(INT32 timeout)
 #endif                          /* DPMSExtension */
 
 static CARD32
-ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, pointer arg)
+ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
 {
-    INT32 timeout = now - lastDeviceEventTime.milliseconds;
+    INT32 timeout = now - LastEventTime(XIAllDevices).milliseconds;
     CARD32 nextTimeout = 0;
 
 #ifdef DPMSExtension

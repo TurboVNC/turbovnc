@@ -52,6 +52,7 @@
 #include "xkbsrv.h"
 
 #include "xichangehierarchy.h"
+#include "xibarriers.h"
 
 /**
  * Send the current state of the device hierarchy to all clients.
@@ -79,7 +80,7 @@ XISendDeviceHierarchyEvent(int flags[MAXDEVICES])
     ev->flags = 0;
     ev->num_info = inputInfo.numDevices;
 
-    info = (xXIHierarchyInfo *) & ev[1];
+    info = (xXIHierarchyInfo *) &ev[1];
     for (dev = inputInfo.devices; dev; dev = dev->next) {
         info->deviceid = dev->id;
         info->enabled = dev->enabled;
@@ -139,9 +140,13 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
 {
     DeviceIntPtr ptr, keybd, XTestptr, XTestkeybd;
     char *name;
-    int rc;
+    int i, rc;
 
     name = calloc(c->name_len + 1, sizeof(char));
+    if (name == NULL) {
+        rc = BadAlloc;
+        goto unwind;
+    }
     strncpy(name, (char *) &c[1], c->name_len);
 
     rc = AllocDevicePair(client, name, &ptr, &keybd,
@@ -189,6 +194,9 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
     flags[XTestptr->id] |= XISlaveAttached;
     flags[XTestkeybd->id] |= XISlaveAttached;
 
+    for (i = 0; i < currentMaxClients; i++)
+        XIBarrierNewMasterDevice(clients[i], ptr->id);
+
  unwind:
     free(name);
     return rc;
@@ -211,7 +219,7 @@ static int
 remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
 {
     DeviceIntPtr ptr, keybd, XTestptr, XTestkeybd;
-    int rc = Success;
+    int i, rc = Success;
 
     if (r->return_mode != XIAttachToMaster && r->return_mode != XIFloating)
         return BadValue;
@@ -293,11 +301,8 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
         }
     }
 
-    /* can't disable until we removed pairing */
-    keybd->spriteInfo->paired = NULL;
-    ptr->spriteInfo->paired = NULL;
-    XTestptr->spriteInfo->paired = NULL;
-    XTestkeybd->spriteInfo->paired = NULL;
+    for (i = 0; i < currentMaxClients; i++)
+        XIBarrierRemoveMasterDevice(clients[i], ptr->id);
 
     /* disable the remove the devices, XTest devices must be done first
        else the sprites they rely on will be destroyed  */
@@ -310,14 +315,15 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
     flags[keybd->id] |= XIDeviceDisabled;
     flags[ptr->id] |= XIDeviceDisabled;
 
-    RemoveDevice(XTestptr, FALSE);
-    RemoveDevice(XTestkeybd, FALSE);
-    RemoveDevice(keybd, FALSE);
-    RemoveDevice(ptr, FALSE);
     flags[XTestptr->id] |= XISlaveRemoved;
     flags[XTestkeybd->id] |= XISlaveRemoved;
     flags[keybd->id] |= XIMasterRemoved;
     flags[ptr->id] |= XIMasterRemoved;
+
+    RemoveDevice(XTestptr, FALSE);
+    RemoveDevice(XTestkeybd, FALSE);
+    RemoveDevice(keybd, FALSE);
+    RemoveDevice(ptr, FALSE);
 
  unwind:
     return rc;
@@ -417,9 +423,7 @@ ProcXIChangeHierarchy(ClientPtr client)
     if (!stuff->num_changes)
         return rc;
 
-    if (stuff->length > (INT_MAX >> 2))
-        return BadAlloc;
-    len = (stuff->length << 2) - sizeof(xXIAnyHierarchyChangeInfo);
+    len = ((size_t)stuff->length << 2) - sizeof(xXIChangeHierarchyReq);
 
     any = (xXIAnyHierarchyChangeInfo *) &stuff[1];
     while (stuff->num_changes--) {
@@ -431,7 +435,7 @@ ProcXIChangeHierarchy(ClientPtr client)
         SWAPIF(swaps(&any->type));
         SWAPIF(swaps(&any->length));
 
-        if ((any->length > (INT_MAX >> 2)) || (len < (any->length << 2)))
+        if (len < ((size_t)any->length << 2))
             return BadLength;
 
 #define CHANGE_SIZE_MATCH(type) \

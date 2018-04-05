@@ -25,6 +25,7 @@
 #include "vncviewer.h"
 #include "ClientConnection.h"
 #include "LowLevelHook.h"
+#include "ScreenSet.h"
 
 // Parameters for scrolling in full screen mode
 #define BUMPSCROLLBORDER 4
@@ -111,9 +112,10 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 
 
 typedef struct _FSMetrics {
-  RECT screenArea, workArea, screenArea0, workArea0, winRect;
-  bool equal;
-  int maxArea;
+  RECT screenArea, workArea, screenArea0, workArea0, winRect, clientRect;
+  bool equal, fullScreen, verbose;
+  int maxArea, screenNum;
+  ScreenSet computedLayout;
 } FSMetrics;
 
 
@@ -126,6 +128,17 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
   memset(&mi, 0, sizeof(MONITORINFO));
   mi.cbSize = sizeof(MONITORINFO);
   GetMonitorInfo(hmon, &mi);
+
+  if (fsm->verbose) {
+    if (fsm->fullScreen)
+      vnclog.Print(4, "Screen %d FS area: %d, %d %d x %d\n", fsm->screenNum++,
+                   mi.rcMonitor.left, mi.rcMonitor.top, WidthOf(mi.rcMonitor),
+                   HeightOf(mi.rcMonitor));
+    else
+      vnclog.Print(4, "Screen %d work area: %d, %d %d x %d\n",
+                   fsm->screenNum++, mi.rcWork.left, mi.rcWork.top,
+                   WidthOf(mi.rcWork), HeightOf(mi.rcWork));
+  }
 
   // If any monitors aren't equal in resolution to and evenly offset from the
   // primary, then we can't use the simple path.
@@ -161,16 +174,36 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
     fsm->workArea.bottom = min(mi.rcWork.bottom, fsm->workArea.bottom);
   }
 
-  if (fsm->winRect.right - fsm->winRect.left > 0 &&
-      fsm->winRect.bottom - fsm->winRect.top > 0) {
+  if (WidthOf(fsm->winRect) > 0 && HeightOf(fsm->winRect) > 0) {
     RECT vpRect;
+
     IntersectRect(&vpRect, &fsm->winRect, &mi.rcMonitor);
-    int area = IsRectEmpty(&vpRect) ? 0 :
-               (vpRect.right - vpRect.left) * (vpRect.bottom - vpRect.top);
+    int area = IsRectEmpty(&vpRect) ? 0 : WidthOf(vpRect) * HeightOf(vpRect);
     if (area > fsm->maxArea) {
       fsm->maxArea = area;
       fsm->workArea0 = mi.rcWork;
       fsm->screenArea0 = mi.rcMonitor;
+    }
+
+    IntersectRect(&vpRect, &fsm->clientRect, &mi.rcMonitor);
+    if (!IsRectEmpty(&vpRect)) {
+      vpRect.left -= fsm->clientRect.left;
+      vpRect.top -= fsm->clientRect.top;
+      vpRect.right -= fsm->clientRect.left;
+      vpRect.bottom -= fsm->clientRect.top;
+      Screen screen(0, vpRect.left, vpRect.top, WidthOf(vpRect),
+                    HeightOf(vpRect), 0);
+
+      // We map client screens to server screens in the server's preferred
+      // order (which, in the case of the TurboVNC Server, is always the order
+      // of RANDR outputs), so we send the "primary" screen (the screen
+      // containing 0, 0) first.  This ensures that the window manager taskbar
+      // on the server will follow the taskbar on the client.
+      POINT origin = { 0, 0 };
+      if (PtInRect(&mi.rcMonitor, origin))
+        fsm->computedLayout.add_screen0(screen);
+      else
+        fsm->computedLayout.add_screen(screen);
     }
   }
 
@@ -178,8 +211,9 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
 }
 
 
-void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
-                                            int spanMode)
+ScreenSet ClientConnection::GetFullScreenMetrics(RECT &screenArea,
+                                                 RECT &workArea, int spanMode,
+                                                 bool verbose)
 {
   FSMetrics fsm;
   int primaryWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -196,8 +230,16 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
   fsm.screenArea0 = fsm.screenArea;
   SystemParametersInfo(SPI_GETWORKAREA, 0, &fsm.workArea, 0);
   fsm.workArea0 = fsm.workArea;
-  fsm.maxArea = 0;
+  fsm.maxArea = fsm.screenNum = 0;
+  fsm.fullScreen = m_opts.m_FullScreen;
+  fsm.verbose = verbose;
 
+  GetActualClientRect(&fsm.clientRect);
+  POINT ul = { fsm.clientRect.left, fsm.clientRect.top };
+  POINT lr = { fsm.clientRect.right, fsm.clientRect.bottom };
+  ClientToScreen(m_hwnd1, &ul);
+  ClientToScreen(m_hwnd1, &lr);
+  SetRect(&fsm.clientRect, ul.x, ul.y, lr.x, lr.y);
   if (m_opts.m_CurrentMonitorIsPrimary) {
     GetWindowRect(m_hwnd1, &fsm.winRect);
     if (m_opts.m_FullScreen && savedRect.bottom - savedRect.top > 0 &&
@@ -242,6 +284,8 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea,
     else screenArea = fsm.screenArea;
     workArea = fsm.workArea;
   }
+
+  return fsm.computedLayout;
 }
 
 

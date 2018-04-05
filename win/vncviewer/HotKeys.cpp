@@ -1,4 +1,4 @@
-//  Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012, 2016 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
 //
 //  VNC is free software; you can redistribute it and/or modify
@@ -24,13 +24,13 @@
 HotKeys::HotKeys()
 {
   m_hwnd = 0;
-  Init(false);
+  Init(false, false);
 }
 
 
-void HotKeys::Init(bool FSAltEnter)
+void HotKeys::Init(bool FSAltEnter, bool zoom)
 {
-  const int MAX_ACCELS = 16;
+  const int MAX_ACCELS = 20;
   ACCEL accel[MAX_ACCELS];
   int i = 0;
 
@@ -71,12 +71,34 @@ void HotKeys::Init(bool FSAltEnter)
   accel[i++].cmd = ID_TOOLBAR;
 
   accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x56;  // "V"
+  accel[i++].cmd = ID_TOGGLE_VIEWONLY;
+
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x43;  // "C"
+  accel[i++].cmd = ID_TOGGLE_CLIPBOARD;
+
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
   accel[i].key = 0x45;  // "E"
   accel[i++].cmd = IDD_FILETRANSFER;
 
   accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
   accel[i].key = 0x5A;  // "Z"
   accel[i++].cmd = ID_DEFAULT_WINDOW_SIZE;
+
+  if (zoom) {
+    accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+    accel[i].key = VK_OEM_PLUS;
+    accel[i++].cmd = ID_ZOOM_IN;
+
+    accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+    accel[i].key = VK_OEM_MINUS;
+    accel[i++].cmd = ID_ZOOM_OUT;
+
+    accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+    accel[i].key = 0x30;  // "0"
+    accel[i++].cmd = ID_ZOOM_100;
+  }
 
   if (FSAltEnter) {
     accel[i].fVirt = FVIRTKEY | FALT | FNOINVERT;

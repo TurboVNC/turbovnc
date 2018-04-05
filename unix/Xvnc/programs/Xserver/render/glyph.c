@@ -16,7 +16,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, SuSE, Inc.
@@ -88,7 +88,6 @@ GlyphUninit(ScreenPtr pScreen)
     PictureScreenPtr ps = GetPictureScreen(pScreen);
     GlyphPtr glyph;
     int fdepth, i;
-    int scrno = pScreen->myNum;
 
     for (fdepth = 0; fdepth < GlyphFormatNum; fdepth++) {
         if (!globalGlyphs[fdepth].hashSet)
@@ -97,9 +96,9 @@ GlyphUninit(ScreenPtr pScreen)
         for (i = 0; i < globalGlyphs[fdepth].hashSet->size; i++) {
             glyph = globalGlyphs[fdepth].table[i].glyph;
             if (glyph && glyph != DeletedGlyph) {
-                if (GlyphPicture(glyph)[scrno]) {
-                    FreePicture((pointer) GlyphPicture(glyph)[scrno], 0);
-                    GlyphPicture(glyph)[scrno] = NULL;
+                if (GetGlyphPicture(glyph, pScreen)) {
+                    FreePicture((void *) GetGlyphPicture(glyph, pScreen), 0);
+                    SetGlyphPicture(glyph, pScreen, NULL);
                 }
                 (*ps->UnrealizeGlyph) (pScreen, glyph);
             }
@@ -107,7 +106,7 @@ GlyphUninit(ScreenPtr pScreen)
     }
 }
 
-GlyphHashSetPtr
+static GlyphHashSetPtr
 FindGlyphHashSet(CARD32 filled)
 {
     int i;
@@ -118,7 +117,7 @@ FindGlyphHashSet(CARD32 filled)
     return 0;
 }
 
-GlyphRefPtr
+static GlyphRefPtr
 FindGlyphRef(GlyphHashPtr hash,
              CARD32 signature, Bool match, unsigned char sha1[20])
 {
@@ -237,8 +236,8 @@ FreeGlyphPicture(GlyphPtr glyph)
     for (i = 0; i < screenInfo.numScreens; i++) {
         ScreenPtr pScreen = screenInfo.screens[i];
 
-        if (GlyphPicture(glyph)[i])
-            FreePicture((pointer) GlyphPicture(glyph)[i], 0);
+        if (GetGlyphPicture(glyph, pScreen))
+            FreePicture((void *) GetGlyphPicture(glyph, pScreen), 0);
 
         ps = GetPictureScreenIfSet(pScreen);
         if (ps)
@@ -246,7 +245,7 @@ FreeGlyphPicture(GlyphPtr glyph)
     }
 }
 
-void
+static void
 FreeGlyph(GlyphPtr glyph, int format)
 {
     CheckDuplicates(&globalGlyphs[format], "FreeGlyph");
@@ -361,11 +360,12 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     dixInitPrivates(glyph, (char *) glyph + head_size, PRIVATE_GLYPH);
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        GlyphPicture(glyph)[i] = NULL;
-        ps = GetPictureScreenIfSet(screenInfo.screens[i]);
+        ScreenPtr pScreen = screenInfo.screens[i];
+        SetGlyphPicture(glyph, pScreen, NULL);
+        ps = GetPictureScreenIfSet(pScreen);
 
         if (ps) {
-            if (!(*ps->RealizeGlyph) (screenInfo.screens[i], glyph))
+            if (!(*ps->RealizeGlyph) (pScreen, glyph))
                 goto bail;
         }
     }
@@ -383,7 +383,7 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     return 0;
 }
 
-Bool
+static Bool
 AllocateGlyphHash(GlyphHashPtr hash, GlyphHashSetPtr hashSet)
 {
     hash->table = calloc(hashSet->size, sizeof(GlyphRefRec));
@@ -394,7 +394,7 @@ AllocateGlyphHash(GlyphHashPtr hash, GlyphHashSetPtr hashSet)
     return TRUE;
 }
 
-Bool
+static Bool
 ResizeGlyphHash(GlyphHashPtr hash, CARD32 change, Bool global)
 {
     CARD32 tableEntries;
@@ -467,7 +467,7 @@ AllocateGlyphSet(int fdepth, PictFormatPtr format)
 }
 
 int
-FreeGlyphSet(pointer value, XID gid)
+FreeGlyphSet(void *value, XID gid)
 {
     GlyphSetPtr glyphSet = (GlyphSetPtr) value;
 
@@ -636,7 +636,7 @@ miGlyphs(CARD8 op,
         n = list->len;
         while (n--) {
             glyph = *glyphs++;
-            pPicture = GlyphPicture(glyph)[pScreen->myNum];
+            pPicture = GetGlyphPicture(glyph, pScreen);
 
             if (pPicture) {
                 if (maskFormat) {
@@ -678,7 +678,19 @@ miGlyphs(CARD8 op,
                          pDst,
                          xSrc + x - xDst,
                          ySrc + y - yDst, 0, 0, x, y, width, height);
-        FreePicture((pointer) pMask, (XID) 0);
+        FreePicture((void *) pMask, (XID) 0);
         (*pScreen->DestroyPixmap) (pMaskPixmap);
     }
+}
+
+PicturePtr GetGlyphPicture(GlyphPtr glyph, ScreenPtr pScreen)
+{
+    if (pScreen->isGPU)
+        return NULL;
+    return GlyphPicture(glyph)[pScreen->myNum];
+}
+
+void SetGlyphPicture(GlyphPtr glyph, ScreenPtr pScreen, PicturePtr picture)
+{
+    GlyphPicture(glyph)[pScreen->myNum] = picture;
 }

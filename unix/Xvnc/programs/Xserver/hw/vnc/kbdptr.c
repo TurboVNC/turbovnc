@@ -117,7 +117,7 @@ static inline void PressKey(DeviceIntPtr dev, int kc, Bool down,
         rfbLog("PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
 
     action = down ? KeyPress : KeyRelease;
-    QueueKeyboardEvents(dev, action, kc, NULL);
+    QueueKeyboardEvents(dev, action, kc);
 }
 
 
@@ -590,10 +590,8 @@ KbdReleaseAllKeys()
     for (i = 0; i < DOWN_LENGTH; i++) {
         if (kbdDevice->key->down[i] != 0) {
             for (j = 0; j < 8; j++) {
-                if (kbdDevice->key->down[i] & (1 << j)) {
-                    QueueKeyboardEvents(kbdDevice, KeyRelease, (i << 3) | j,
-                                        NULL);
-                }
+                if (kbdDevice->key->down[i] & (1 << j))
+                    QueueKeyboardEvents(kbdDevice, KeyRelease, (i << 3) | j);
             }
         }
     }

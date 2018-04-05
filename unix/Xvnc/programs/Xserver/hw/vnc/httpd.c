@@ -32,8 +32,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <fcntl.h>
@@ -61,8 +59,7 @@
 
 static void httpProcessInput();
 static Bool compareAndSkip(char **ptr, const char *str);
-static Bool parseParams(const char *request, char *result, int max_bytes,
-                        Bool jnlp);
+static Bool parseParams(const char *request, char *result, int max_bytes);
 static Bool validateString(char *str);
 
 int httpPort = 0;
@@ -76,6 +73,8 @@ int httpSock = -1;
 static char buf[BUF_SIZE];
 static size_t buf_filled = 0;
 static rfbClientRec cl;
+
+static void httpSockNotify(int fd, int ready, void *data);
 
 
 /*
@@ -114,23 +113,15 @@ httpInitSockets()
         exit(1);
     }
 
-    AddEnabledDevice(httpListenSock);
+    SetNotifyFd(httpListenSock, httpSockNotify, X_NOTIFY_READ, NULL);
 }
 
 
-/*
- * httpCheckFds is called from ProcessInputEvents to check for input on the
- * HTTP socket(s).  If there is input to process, httpProcessInput is called.
- */
-
-void
-httpCheckFds()
+static void
+httpSockNotify(int fd, int ready, void *data)
 {
-    int nfds;
-    fd_set fds;
-    struct timeval tv;
-    struct sockaddr_storage addr;
-    socklen_t addrlen = sizeof(addr);
+    rfbSockAddr addr;
+    socklen_t addrlen = sizeof(struct sockaddr_storage);
 #if USE_LIBWRAP
     char addrStr[INET6_ADDRSTRLEN];
 #endif
@@ -138,35 +129,21 @@ httpCheckFds()
     if (!httpDir)
         return;
 
-    FD_ZERO(&fds);
-    FD_SET(httpListenSock, &fds);
-    if (httpSock >= 0) {
-        FD_SET(httpSock, &fds);
-    }
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    nfds = select(max(httpSock, httpListenSock) + 1, &fds, NULL, NULL, &tv);
-
-    if (nfds == 0) {
-        return;
-    }
-    if (nfds < 0) {
-        rfbLogPerror("httpCheckFds: select");
-        return;
-    }
-
-    if ((httpSock >= 0) && FD_ISSET(httpSock, &fds)) {
+    if ((httpSock >= 0) && fd == httpSock) {
         httpProcessInput();
+        return;
     }
 
-    if (FD_ISSET(httpListenSock, &fds)) {
+    if (fd == httpListenSock) {
         int flags;
 
-        if (httpSock >= 0) close(httpSock);
+        if (httpSock >= 0) {
+            RemoveNotifyFd(httpSock);
+            close(httpSock);
+        }
 
-        if ((httpSock = accept(httpListenSock,
-                               (struct sockaddr *)&addr, &addrlen)) < 0) {
-            rfbLogPerror("httpCheckFds: accept");
+        if ((httpSock = accept(httpListenSock, &addr.u.sa, &addrlen)) < 0) {
+            rfbLogPerror("httpSockNotify: accept");
             return;
         }
 
@@ -176,6 +153,7 @@ httpCheckFds()
                        STRING_UNKNOWN)) {
             rfbLog("Rejected HTTP connection from client %s\n",
                    sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
+            RemoveNotifyFd(httpSock);
             close(httpSock);
             httpSock = -1;
             return;
@@ -186,13 +164,14 @@ httpCheckFds()
 
         if (flags == -1 ||
         fcntl (httpSock, F_SETFL, flags | O_NONBLOCK) == -1) {
-            rfbLogPerror("httpCheckFds: fcntl");
+            rfbLogPerror("httpSockNotify: fcntl");
+            RemoveNotifyFd(httpSock);
             close (httpSock);
             httpSock = -1;
             return;
         }
 
-        AddEnabledDevice(httpSock);
+        SetNotifyFd(httpSock, httpSockNotify, X_NOTIFY_READ, NULL);
     }
 }
 
@@ -201,7 +180,7 @@ static void
 httpCloseSock()
 {
     close(httpSock);
-    RemoveEnabledDevice(httpSock);
+    RemoveNotifyFd(httpSock);
     httpSock = -1;
     buf_filled = 0;
 }
@@ -214,17 +193,16 @@ httpCloseSock()
 static void
 httpProcessInput()
 {
-    struct sockaddr_storage addr;
-    socklen_t addrlen = sizeof(addr);
+    rfbSockAddr addr;
+    socklen_t addrlen = sizeof(struct sockaddr_storage);
     char addrStr[INET6_ADDRSTRLEN];
     char fullFname[512];
-    char params[1024], jnlpParams[1024];
+    char params[1024];
     char *ptr;
     char *fname;
     int maxFnameLen;
     int fd;
     Bool performSubstitutions = FALSE;
-    Bool jnlp = FALSE;
     char str[256];
     struct passwd *user;
     struct stat st;
@@ -305,23 +283,18 @@ httpProcessInput()
         return;
     }
 
-    getpeername(httpSock, (struct sockaddr *)&addr, &addrlen);
+    getpeername(httpSock, &addr.u.sa, &addrlen);
     rfbLog("httpd: get '%s' for %s\n", fname + 1,
            sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
     /* Extract parameters from the URL string if necessary */
 
     params[0] = '\0';
-    jnlpParams[0] = '\0';
     ptr = strchr(fname, '?');
     if (ptr != NULL) {
         *ptr = '\0';
-        if (!parseParams(&ptr[1], params, sizeof(params), FALSE)) {
+        if (!parseParams(&ptr[1], params, sizeof(params))) {
             params[0] = '\0';
-            rfbLog("httpd: bad parameters in the URL\n");
-        }
-        if (!parseParams(&ptr[1], jnlpParams, sizeof(jnlpParams), TRUE)) {
-            jnlpParams[0] = '\0';
             rfbLog("httpd: bad parameters in the URL\n");
         }
     }
@@ -333,21 +306,9 @@ httpProcessInput()
         rfbLog("httpd: defaulting to '%s'\n", fname + 1);
     }
 
-    /* If we were asked for '/applet', actually read the file index.vnc */
-
-    if (strcmp(fname, "/applet") == 0) {
-        strcpy(fname, "/index.vnc");
-        rfbLog("httpd: defaulting to '%s'\n", fname + 1);
-    }
-
-    /* Substitutions are performed on files ending in .vnc or .jnlp */
+    /* Substitutions are performed on files ending in .jnlp */
 
     if (strlen(fname) >= 5 && strcmp(&fname[strlen(fname)-5], ".jnlp") == 0) {
-        performSubstitutions = TRUE;
-        jnlp = TRUE;
-    }
-
-    if (strlen(fname) >= 4 && strcmp(&fname[strlen(fname)-4], ".vnc") == 0) {
         performSubstitutions = TRUE;
     }
 
@@ -373,8 +334,7 @@ httpProcessInput()
     strftime(str, 256, "Last-Modified: %a, %d %b %Y %T GMT\r\n",
              gmtime(&st.st_mtime));
     WriteExact(&cl, str, strlen(str));
-    if (jnlp)
-      WriteExact(&cl, CONTENT_STR, strlen(CONTENT_STR));
+    WriteExact(&cl, CONTENT_STR, strlen(CONTENT_STR));
     WriteExact(&cl, "\r\n", 2);
 
     while (1) {
@@ -391,9 +351,9 @@ httpProcessInput()
 
         if (performSubstitutions) {
 
-            /* Substitute $WIDTH, $HEIGHT, etc with the appropriate values.
-               This won't quite work properly if the .vnc file is longer than
-               BUF_SIZE, but it's reasonable to assume that .vnc files will
+            /* Substitute $PORT, $SERVER, etc. with the appropriate values.
+               This won't quite work properly if the .jnlp file is longer than
+               BUF_SIZE, but it's reasonable to assume that .jnlp files will
                always be short. */
 
             char *ptr = buf;
@@ -405,27 +365,7 @@ httpProcessInput()
 
                 ptr = dollar;
 
-                if (compareAndSkip(&ptr, "$WIDTH")) {
-
-                    sprintf(str, "%d", rfbScreen.width);
-                    WriteExact(&cl, str, strlen(str));
-
-                } else if (compareAndSkip(&ptr, "$HEIGHT")) {
-
-                    sprintf(str, "%d", rfbScreen.height);
-                    WriteExact(&cl, str, strlen(str));
-
-                } else if (compareAndSkip(&ptr, "$APPLETWIDTH")) {
-
-                    sprintf(str, "%d", rfbScreen.width);
-                    WriteExact(&cl, str, strlen(str));
-
-                } else if (compareAndSkip(&ptr, "$APPLETHEIGHT")) {
-
-                    sprintf(str, "%d", rfbScreen.height + 22);
-                    WriteExact(&cl, str, strlen(str));
-
-                } else if (compareAndSkip(&ptr, "$PORT")) {
+                if (compareAndSkip(&ptr, "$PORT")) {
 
                     sprintf(str, "%d", rfbPort);
                     WriteExact(&cl, str, strlen(str));
@@ -460,14 +400,8 @@ httpProcessInput()
 
                 } else if (compareAndSkip(&ptr, "$PARAMS")) {
 
-                    if (jnlp) {
-                        if (jnlpParams[0] != '\0')
-                            WriteExact(&cl, jnlpParams,
-                                       strlen(jnlpParams));
-                    } else {
-                        if (params[0] != '\0')
-                            WriteExact(&cl, params, strlen(params));
-                    }
+                    if (params[0] != '\0')
+                        WriteExact(&cl, params, strlen(params));
 
                 } else {
                     if (!compareAndSkip(&ptr, "$$"))
@@ -485,7 +419,7 @@ httpProcessInput()
 
         } else {
 
-            /* For files not ending .vnc, just write out the buffer */
+            /* For files not ending in .jnlp, just write out the buffer */
 
             if (WriteExact(&cl, buf, n) < 0)
                 break;
@@ -511,11 +445,11 @@ compareAndSkip(char **ptr, const char *str)
 
 /*
  * Parse the request tail after the '?' character, and format a sequence
- * of <param> tags for inclusion into an HTML page with embedded applet.
+ * of <param> tags for inclusion in a JNLP file.
  */
 
 static Bool
-parseParams(const char *request, char *result, int max_bytes, Bool jnlp)
+parseParams(const char *request, char *result, int max_bytes)
 {
     char param_request[128];
     char param_formatted[196];
@@ -563,15 +497,10 @@ parseParams(const char *request, char *result, int max_bytes, Bool jnlp)
                 return FALSE;
             }
 
-            /* Prepare HTML-formatted representation of the name=value pair */
-            if (jnlp)
-                len = snprintf(param_formatted, sizeof(param_formatted),
-                              "<argument>%s=%s</argument>\n",
-                              param_request, value_str);
-            else
-                len = snprintf(param_formatted, sizeof(param_formatted),
-                              "<PARAM NAME=\"%s\" VALUE=\"%s\">\n",
-                              param_request, value_str);
+            /* Prepare JNLP-formatted representation of the name=value pair */
+            len = snprintf(param_formatted, sizeof(param_formatted),
+                          "<argument>%s=%s</argument>\n",
+                          param_request, value_str);
             if ((len >= sizeof(param_formatted)) ||
                 (cur_bytes + len + 1 > max_bytes)) {
                 return FALSE;

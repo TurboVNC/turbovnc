@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -49,7 +49,7 @@ SOFTWARE.
 #include "misc.h"
 #include "property.h"
 #include "privates.h"
-/* 
+/*
  *   PROPERTY -- property element
  */
 
@@ -59,7 +59,7 @@ typedef struct _Property {
     ATOM type;                  /* ignored by server */
     uint32_t format;            /* format of data for swapping - 8,16,32 */
     uint32_t size;              /* size of data in (format/8) bytes */
-    pointer data;               /* private to client */
+    void *data;                 /* private to client */
     PrivateRec *devPrivates;
 } PropertyRec;
 

@@ -1,6 +1,6 @@
 find_package(Java)
 
-set(DEFAULT_JAVACFLAGS "-source 1.5 -target 1.5 -Xlint:all,-serial,-cast,-unchecked,-rawtypes -J-Dfile.encoding=UTF8")
+set(DEFAULT_JAVACFLAGS "-source 1.6 -target 1.6 -Xlint:all,-serial,-cast,-unchecked,-rawtypes -J-Dfile.encoding=UTF8")
 set(JAVACFLAGS ${DEFAULT_JAVACFLAGS} CACHE STRING
 	"Java compiler flags (Default: ${DEFAULT_JAVACFLAGS})")
 message(STATUS "Java compiler flags = ${JAVACFLAGS}")
@@ -59,6 +59,9 @@ set(JAVA_CLASSES "")
 
 set(JSCH_CLASSNAMES
 	CipherNone
+	DHEC256
+	DHEC384
+	DHEC521
 	DHG1
 	DHG14
 	DHGEX
@@ -79,6 +82,10 @@ set(JSCH_CLASSNAMES
 	jce/ARCFOUR256
 	jce/BlowfishCBC
 	jce/DH
+	jce/ECDH256
+	jce/ECDH384
+	jce/ECDH521
+	jce/ECDHN
 	jce/HMACMD5
 	jce/HMACMD596
 	jce/HMACSHA1
@@ -86,13 +93,17 @@ set(JSCH_CLASSNAMES
 	jce/HMACSHA256
 	jce/HMACSHA512
 	jce/KeyPairGenDSA
+	jce/KeyPairGenECDSA
 	jce/KeyPairGenRSA
 	jce/MD5
 	jce/PBKDF
 	jce/Random
 	jce/SHA1
 	jce/SHA256
+	jce/SHA384
+	jce/SHA512
 	jce/SignatureDSA
+	jce/SignatureECDSA
 	jce/SignatureRSA
 	jce/TripleDESCBC
 	jce/TripleDESCTR
@@ -157,11 +168,6 @@ add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-128.png
 endif()
 
 if(TVNC_BUILDSERVER)
-
-add_custom_target(index.vnc ALL
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/index.vnc ${BINDIR}/index.vnc
-	DEPENDS ${SRCDIR}/${CLASSPATH}/index.vnc)
 
 set(TVNCJNIOPENCOMMENT "<!--")
 set(TVNCJNICLOSECOMMENT "-->")
@@ -272,8 +278,6 @@ install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${CMAKE_INSTALL_JAVADIR})
 install(FILES ${SRCDIR}/${CLASSPATH}/README.txt
 	DESTINATION ${CMAKE_INSTALL_JAVADIR})
 if(TVNC_BUILDSERVER)
-	install(FILES ${SRCDIR}/${CLASSPATH}/index.vnc
-		DESTINATION ${CMAKE_INSTALL_JAVADIR})
 	install(FILES ${BINDIR}/VncViewer.jnlp DESTINATION ${CMAKE_INSTALL_JAVADIR})
 	install(FILES ${SRCDIR}/${CLASSPATH}/favicon.ico
 		DESTINATION ${CMAKE_INSTALL_JAVADIR})

@@ -46,7 +46,7 @@ from The Open Group.
 
 #include <rpc/rpc.h>
 
-#ifdef sun
+#ifdef __sun
 /* <rpc/auth.h> only includes this if _KERNEL is #defined... */
 extern bool_t xdr_opaque_auth(XDR *, struct opaque_auth *);
 #endif
@@ -117,7 +117,7 @@ authdes_ezdecode(const char *inmsg, int len)
 static XID rpc_id = (XID) ~0L;
 
 static Bool
-CheckNetName(unsigned char *addr, short len, pointer closure)
+CheckNetName(unsigned char *addr, short len, void *closure)
 {
     return (len == strlen((char *) closure) &&
             strncmp((char *) addr, (char *) closure, len) == 0);
@@ -163,7 +163,7 @@ _X_HIDDEN int
 SecureRPCAdd(unsigned short data_length, const char *data, XID id)
 {
     if (data_length)
-        AddHost((pointer) 0, FamilyNetname, data_length, data);
+        AddHost((void *) 0, FamilyNetname, data_length, data);
     rpc_id = id;
     return 1;
 }
@@ -173,12 +173,6 @@ SecureRPCReset(void)
 {
     rpc_id = (XID) ~0L;
     return 1;
-}
-
-_X_HIDDEN XID
-SecureRPCToID(unsigned short data_length, char *data)
-{
-    return rpc_id;
 }
 
 _X_HIDDEN int

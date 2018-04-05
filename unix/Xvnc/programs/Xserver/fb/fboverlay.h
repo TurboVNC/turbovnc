@@ -16,7 +16,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, SuSE, Inc.
@@ -38,7 +38,7 @@ typedef void (*fbOverlayPaintKeyProc) (DrawablePtr, RegionPtr, CARD32, int);
 typedef struct _fbOverlayLayer {
     union {
         struct {
-            pointer pbits;
+            void *pbits;
             int width;
             int depth;
         } init;
@@ -63,7 +63,7 @@ extern _X_EXPORT Bool
  fbOverlayCreateWindow(WindowPtr pWin);
 
 extern _X_EXPORT Bool
- fbOverlayCloseScreen(int iScreen, ScreenPtr pScreen);
+ fbOverlayCloseScreen(ScreenPtr pScreen);
 
 extern _X_EXPORT int
  fbOverlayWindowLayer(WindowPtr pWin);
@@ -82,15 +82,13 @@ extern _X_EXPORT void
  fbOverlayCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc);
 
 extern _X_EXPORT void
-
-fbOverlayWindowExposures(WindowPtr pWin,
-                         RegionPtr prgn, RegionPtr other_exposed);
+fbOverlayWindowExposures(WindowPtr pWin, RegionPtr prgn);
 
 extern _X_EXPORT Bool
 
 fbOverlaySetupScreen(ScreenPtr pScreen,
-                     pointer pbits1,
-                     pointer pbits2,
+                     void *pbits1,
+                     void *pbits2,
                      int xsize,
                      int ysize,
                      int dpix,
@@ -99,8 +97,8 @@ fbOverlaySetupScreen(ScreenPtr pScreen,
 extern _X_EXPORT Bool
 
 fbOverlayFinishScreenInit(ScreenPtr pScreen,
-                          pointer pbits1,
-                          pointer pbits2,
+                          void *pbits1,
+                          void *pbits2,
                           int xsize,
                           int ysize,
                           int dpix,

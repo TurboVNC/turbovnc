@@ -48,6 +48,7 @@
 
 #include "xfixesint.h"
 #include "protocol-versions.h"
+#include "extinit.h"
 
 static unsigned char XFixesReqCode;
 int XFixesEventBase;
@@ -61,19 +62,19 @@ static int
 ProcXFixesQueryVersion(ClientPtr client)
 {
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
-    xXFixesQueryVersionReply rep;
+    xXFixesQueryVersionReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0
+    };
 
     REQUEST(xXFixesQueryVersionReq);
 
     REQUEST_SIZE_MATCH(xXFixesQueryVersionReq);
-    memset(&rep, 0, sizeof(xXFixesQueryVersionReply));
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
 
     if (version_compare(stuff->majorVersion, stuff->minorVersion,
                         SERVER_XFIXES_MAJOR_VERSION,
-                        SERVER_XFIXES_MAJOR_VERSION) < 0) {
+                        SERVER_XFIXES_MINOR_VERSION) < 0) {
         rep.majorVersion = stuff->majorVersion;
         rep.minorVersion = stuff->minorVersion;
     }
@@ -90,7 +91,7 @@ ProcXFixesQueryVersion(ClientPtr client)
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xXFixesQueryVersionReply), (char *) &rep);
+    WriteToClient(client, sizeof(xXFixesQueryVersionReply), &rep);
     return Success;
 }
 
@@ -159,6 +160,7 @@ static int
 SProcXFixesQueryVersion(ClientPtr client)
 {
     REQUEST(xXFixesQueryVersionReq);
+    REQUEST_SIZE_MATCH(xXFixesQueryVersionReq);
 
     swaps(&stuff->length);
     swapl(&stuff->majorVersion);
@@ -211,23 +213,6 @@ SProcXFixesDispatch(ClientPtr client)
     return (*SProcXFixesVector[stuff->xfixesReqType]) (client);
 }
 
-static void
-XFixesClientCallback(CallbackListPtr *list, pointer closure, pointer data)
-{
-    NewClientInfoRec *clientinfo = (NewClientInfoRec *) data;
-    ClientPtr pClient = clientinfo->client;
-    XFixesClientPtr pXFixesClient = GetXFixesClient(pClient);
-
-    pXFixesClient->major_version = 0;
-    pXFixesClient->minor_version = 0;
-}
-
- /*ARGSUSED*/ static void
-XFixesResetProc(ExtensionEntry * extEntry)
-{
-    DeleteCallback(&ClientStateCallback, XFixesClientCallback, 0);
-}
-
 void
 XFixesExtensionInit(void)
 {
@@ -236,9 +221,6 @@ XFixesExtensionInit(void)
     if (!dixRegisterPrivateKey
         (&XFixesClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(XFixesClientRec)))
         return;
-    if (!AddCallback(&ClientStateCallback, XFixesClientCallback, 0))
-        return;
-
 
     if (XFixesSelectionInit() && XFixesCursorInit() && XFixesRegionInit() &&
 #ifdef TURBOVNC
@@ -264,7 +246,7 @@ XFixesExtensionInit(void)
 #endif
                                  XFixesNumberErrors,
                                  ProcXFixesDispatch, SProcXFixesDispatch,
-                                 XFixesResetProc, StandardMinorOpcode)) != 0) {
+                                 NULL, StandardMinorOpcode)) != 0) {
         XFixesReqCode = (unsigned char) extEntry->base;
         XFixesEventBase = extEntry->eventBase;
         XFixesErrorBase = extEntry->errorBase;

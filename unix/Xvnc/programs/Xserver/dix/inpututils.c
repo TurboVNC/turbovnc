@@ -60,7 +60,8 @@ check_butmap_change(DeviceIntPtr dev, CARD8 *map, int len, CARD32 *errval_out,
     }
 
     for (i = 0; i < len; i++) {
-        if (dev->button->map[i + 1] != map[i] && dev->button->down[i + 1])
+        if (dev->button->map[i + 1] != map[i] &&
+            button_is_down(dev, i + 1, BUTTON_PROCESSED))
             return MappingBusy;
     }
 
@@ -71,14 +72,13 @@ static void
 do_butmap_change(DeviceIntPtr dev, CARD8 *map, int len, ClientPtr client)
 {
     int i;
-    xEvent core_mn;
+    xEvent core_mn = { .u.u.type = MappingNotify };
     deviceMappingNotify xi_mn;
 
     /* The map in ButtonClassRec refers to button numbers, whereas the
      * protocol is zero-indexed.  Sigh. */
     memcpy(&(dev->button->map[1]), map, len);
 
-    core_mn.u.u.type = MappingNotify;
     core_mn.u.mappingNotify.request = MappingPointer;
 
     /* 0 is the server client. */
@@ -93,10 +93,12 @@ do_butmap_change(DeviceIntPtr dev, CARD8 *map, int len, ClientPtr client)
         WriteEventsToClient(clients[i], 1, &core_mn);
     }
 
-    xi_mn.type = DeviceMappingNotify;
-    xi_mn.request = MappingPointer;
-    xi_mn.deviceid = dev->id;
-    xi_mn.time = GetTimeInMillis();
+    xi_mn = (deviceMappingNotify) {
+        .type = DeviceMappingNotify,
+        .request = MappingPointer,
+        .deviceid = dev->id,
+        .time = GetTimeInMillis()
+    };
 
     SendEventToAllWindows(dev, DeviceMappingNotifyMask, (xEvent *) &xi_mn, 1);
 }
@@ -237,8 +239,10 @@ build_modmap_from_modkeymap(CARD8 *modmap, KeyCode *modkeymap,
         if (!modkeymap[i])
             continue;
 
+#if MAP_LENGTH < 256
         if (modkeymap[i] >= MAP_LENGTH)
             return BadValue;
+#endif
 
         if (modmap[modkeymap[i]])
             return BadValue;
@@ -501,15 +505,23 @@ valuator_mask_isset(const ValuatorMask *mask, int valuator)
     return mask->last_bit >= valuator && BitIsOn(mask->mask, valuator);
 }
 
+static inline void
+_valuator_mask_set_double(ValuatorMask *mask, int valuator, double data)
+{
+    mask->last_bit = max(valuator, mask->last_bit);
+    SetBit(mask->mask, valuator);
+    mask->valuators[valuator] = data;
+}
+
 /**
  * Set the valuator to the given floating-point data.
  */
 void
 valuator_mask_set_double(ValuatorMask *mask, int valuator, double data)
 {
-    mask->last_bit = max(valuator, mask->last_bit);
-    SetBit(mask->mask, valuator);
-    mask->valuators[valuator] = data;
+    BUG_WARN_MSG(mask->has_unaccelerated,
+                 "Do not mix valuator types, zero mask first\n");
+    _valuator_mask_set_double(mask, valuator, data);
 }
 
 /**
@@ -590,11 +602,15 @@ valuator_mask_unset(ValuatorMask *mask, int valuator)
 
         ClearBit(mask->mask, valuator);
         mask->valuators[valuator] = 0.0;
+        mask->unaccelerated[valuator] = 0.0;
 
         for (i = 0; i <= mask->last_bit; i++)
             if (valuator_mask_isset(mask, i))
                 lastbit = max(lastbit, i);
         mask->last_bit = lastbit;
+
+        if (mask->last_bit == -1)
+            mask->has_unaccelerated = FALSE;
     }
 }
 
@@ -605,6 +621,79 @@ valuator_mask_copy(ValuatorMask *dest, const ValuatorMask *src)
         memcpy(dest, src, sizeof(*dest));
     else
         valuator_mask_zero(dest);
+}
+
+Bool
+valuator_mask_has_unaccelerated(const ValuatorMask *mask)
+{
+    return mask->has_unaccelerated;
+}
+
+void
+valuator_mask_drop_unaccelerated(ValuatorMask *mask)
+{
+    memset(mask->unaccelerated, 0, sizeof(mask->unaccelerated));
+    mask->has_unaccelerated = FALSE;
+}
+
+void
+valuator_mask_set_absolute_unaccelerated(ValuatorMask *mask,
+                                         int valuator,
+                                         int absolute,
+                                         double unaccel)
+{
+    BUG_WARN_MSG(mask->last_bit != -1 && !mask->has_unaccelerated,
+                 "Do not mix valuator types, zero mask first\n");
+    _valuator_mask_set_double(mask, valuator, absolute);
+    mask->has_unaccelerated = TRUE;
+    mask->unaccelerated[valuator] = unaccel;
+}
+
+/**
+ * Set both accelerated and unaccelerated value for this mask.
+ */
+void
+valuator_mask_set_unaccelerated(ValuatorMask *mask,
+                                int valuator,
+                                double accel,
+                                double unaccel)
+{
+    BUG_WARN_MSG(mask->last_bit != -1 && !mask->has_unaccelerated,
+                 "Do not mix valuator types, zero mask first\n");
+    _valuator_mask_set_double(mask, valuator, accel);
+    mask->has_unaccelerated = TRUE;
+    mask->unaccelerated[valuator] = unaccel;
+}
+
+double
+valuator_mask_get_accelerated(const ValuatorMask *mask,
+                              int valuator)
+{
+    return valuator_mask_get_double(mask, valuator);
+}
+
+double
+valuator_mask_get_unaccelerated(const ValuatorMask *mask,
+                                int valuator)
+{
+    return mask->unaccelerated[valuator];
+}
+
+Bool
+valuator_mask_fetch_unaccelerated(const ValuatorMask *mask,
+                                  int valuator,
+                                  double *accel,
+                                  double *unaccel)
+{
+    if (valuator_mask_isset(mask, valuator)) {
+        if (accel)
+            *accel = valuator_mask_get_accelerated(mask, valuator);
+        if (unaccel)
+            *unaccel = valuator_mask_get_unaccelerated(mask, valuator);
+        return TRUE;
+    }
+    else
+        return FALSE;
 }
 
 int
@@ -651,7 +740,8 @@ verify_internal_event(const InternalEvent *ev)
  * device.
  */
 void
-init_device_event(DeviceEvent *event, DeviceIntPtr dev, Time ms)
+init_device_event(DeviceEvent *event, DeviceIntPtr dev, Time ms,
+                  enum DeviceEventSource source_type)
 {
     memset(event, 0, sizeof(DeviceEvent));
     event->header = ET_Internal;
@@ -659,6 +749,7 @@ init_device_event(DeviceEvent *event, DeviceIntPtr dev, Time ms)
     event->time = ms;
     event->deviceid = dev->id;
     event->sourceid = dev->id;
+    event->source_type = source_type;
 }
 
 int
@@ -909,11 +1000,7 @@ input_option_set_value(InputOption *opt, const char *value)
 double
 fp1616_to_double(FP1616 in)
 {
-    double ret;
-
-    ret = (double) (in >> 16);
-    ret += (double) (in & 0xffff) * (1.0 / (1UL << 16));        /* Optimized: ldexp((double)(in & 0xffff), -16); */
-    return ret;
+    return pixman_fixed_to_double(in);
 }
 
 double
@@ -929,20 +1016,7 @@ fp3232_to_double(FP3232 in)
 FP1616
 double_to_fp1616(double in)
 {
-    FP1616 ret;
-    int32_t integral;
-    double tmp;
-    uint32_t frac_d;
-
-    tmp = floor(in);
-    integral = (int32_t) tmp;
-
-    tmp = (in - integral) * (1UL << 16);        /* Optimized: ldexp(in - integral, 16) */
-    frac_d = (uint16_t) tmp;
-
-    ret = integral << 16;
-    ret |= frac_d & 0xffff;
-    return ret;
+    return pixman_double_to_fixed(in);
 }
 
 FP3232
@@ -976,8 +1050,15 @@ XI2Mask *
 xi2mask_new_with_size(size_t nmasks, size_t size)
 {
     int i;
+    int alloc_size;
+    unsigned char *cursor;
+    XI2Mask *mask;
 
-    XI2Mask *mask = calloc(1, sizeof(*mask));
+    alloc_size = sizeof(struct _XI2Mask)
+	       + nmasks * sizeof(unsigned char *)
+	       + nmasks * size;
+
+    mask = calloc(1, alloc_size);
 
     if (!mask)
         return NULL;
@@ -985,20 +1066,14 @@ xi2mask_new_with_size(size_t nmasks, size_t size)
     mask->nmasks = nmasks;
     mask->mask_size = size;
 
-    mask->masks = calloc(mask->nmasks, sizeof(*mask->masks));
-    if (!mask->masks)
-        goto unwind;
+    mask->masks = (unsigned char **)(mask + 1);
+    cursor = (unsigned char *)(mask + 1) + nmasks * sizeof(unsigned char *);
 
-    for (i = 0; i < mask->nmasks; i++) {
-        mask->masks[i] = calloc(1, mask->mask_size);
-        if (!mask->masks[i])
-            goto unwind;
+    for (i = 0; i < nmasks; i++) {
+        mask->masks[i] = cursor;
+	cursor += size;
     }
     return mask;
-
- unwind:
-    xi2mask_free(&mask);
-    return NULL;
 }
 
 /**
@@ -1019,16 +1094,26 @@ xi2mask_new(void)
 void
 xi2mask_free(XI2Mask **mask)
 {
-    int i;
-
     if (!(*mask))
         return;
 
-    for (i = 0; (*mask)->masks && i < (*mask)->nmasks; i++)
-        free((*mask)->masks[i]);
-    free((*mask)->masks);
     free((*mask));
     *mask = NULL;
+}
+
+/**
+ * Test if the bit for event type is set for this device only.
+ *
+ * @return TRUE if the bit is set, FALSE otherwise
+ */
+Bool
+xi2mask_isset_for_device(XI2Mask *mask, const DeviceIntPtr dev, int event_type)
+{
+    BUG_WARN(dev->id < 0);
+    BUG_WARN(dev->id >= mask->nmasks);
+    BUG_WARN(bits_to_bytes(event_type + 1) > mask->mask_size);
+
+    return BitIsOn(mask->masks[dev->id], event_type);
 }
 
 /**
@@ -1042,15 +1127,12 @@ xi2mask_isset(XI2Mask *mask, const DeviceIntPtr dev, int event_type)
 {
     int set = 0;
 
-    BUG_WARN(dev->id < 0);
-    BUG_WARN(dev->id >= mask->nmasks);
-    BUG_WARN(bits_to_bytes(event_type + 1) > mask->mask_size);
-
-    set = ! !BitIsOn(mask->masks[XIAllDevices], event_type);
-    if (!set)
-        set = ! !BitIsOn(mask->masks[dev->id], event_type);
-    if (!set && IsMaster(dev))
-        set = ! !BitIsOn(mask->masks[XIAllMasterDevices], event_type);
+    if (xi2mask_isset_for_device(mask, inputInfo.all_devices, event_type))
+        set = 1;
+    else if (xi2mask_isset_for_device(mask, dev, event_type))
+        set = 1;
+    else if (IsMaster(dev) && xi2mask_isset_for_device(mask, inputInfo.all_master_devices, event_type))
+        set = 1;
 
     return set;
 }

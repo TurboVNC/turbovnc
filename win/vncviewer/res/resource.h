@@ -27,6 +27,11 @@
 #define ID_CONN_ALTENTER                114
 #define ID_DEFAULT_WINDOW_SIZE          115
 #define ID_TOGGLE_GRAB                  116
+#define ID_TOGGLE_VIEWONLY              117
+#define ID_ZOOM_IN                      118
+#define ID_ZOOM_OUT                     119
+#define ID_ZOOM_100                     120
+#define ID_TOGGLE_CLIPBOARD             121
 #define IDD_SESSION_DLG                 135
 #define IDD_SERVINFO_DLG                137
 #define IDD_AUTH_DIALOG                 138

@@ -37,6 +37,7 @@ in this Software without prior written authorization from The Open Group.
 #include <sys/shm.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include "misc.h"
@@ -53,7 +54,9 @@ in this Software without prior written authorization from The Open Group.
 #include "xace.h"
 #include <X11/extensions/shmproto.h>
 #include <X11/Xfuncproto.h>
+#include <sys/mman.h>
 #include "protocol-versions.h"
+#include "busfault.h"
 
 /* Needed for Solaris cross-zone shared memory extension */
 #ifdef HAVE_SHMCTL64
@@ -87,16 +90,7 @@ in this Software without prior written authorization from The Open Group.
 #include "panoramiXsrv.h"
 #endif
 
-#include "modinit.h"
-
-typedef struct _ShmDesc {
-    struct _ShmDesc *next;
-    int shmid;
-    int refcnt;
-    char *addr;
-    Bool writable;
-    unsigned long size;
-} ShmDescRec, *ShmDescPtr;
+#include "extinit.h"
 
 typedef struct _ShmScrPrivateRec {
     CloseScreenProcPtr CloseScreen;
@@ -105,14 +99,10 @@ typedef struct _ShmScrPrivateRec {
 } ShmScrPrivateRec;
 
 static PixmapPtr fbShmCreatePixmap(XSHM_CREATE_PIXMAP_ARGS);
-static int ShmDetachSegment(pointer /* value */ ,
-                            XID /* shmseg */
-    );
-static void ShmResetProc(ExtensionEntry *       /* extEntry */
-    );
-static void SShmCompletionEvent(xShmCompletionEvent * /* from */ ,
-                                xShmCompletionEvent *   /* to */
-    );
+static int ShmDetachSegment(void *value, XID shmseg);
+static void ShmResetProc(ExtensionEntry *extEntry);
+static void SShmCompletionEvent(xShmCompletionEvent *from,
+                                xShmCompletionEvent *to);
 
 static Bool ShmDestroyPixmap(PixmapPtr pPixmap);
 
@@ -135,11 +125,11 @@ static ShmFuncs fbFuncs = { fbShmCreatePixmap, NULL };
 
 #define VERIFY_SHMSEG(shmseg,shmdesc,client) \
 { \
-    int rc; \
-    rc = dixLookupResourceByType((pointer *)&(shmdesc), shmseg, ShmSegType, \
-                                 client, DixReadAccess); \
-    if (rc != Success) \
-	return rc; \
+    int tmprc; \
+    tmprc = dixLookupResourceByType((void **)&(shmdesc), shmseg, ShmSegType, \
+                                    client, DixReadAccess); \
+    if (tmprc != Success) \
+	return tmprc; \
 }
 
 #define VERIFY_SHMPTR(shmseg,offset,needwrite,shmdesc,client) \
@@ -163,7 +153,6 @@ static ShmFuncs fbFuncs = { fbShmCreatePixmap, NULL };
 }
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
-#include <sys/signal.h>
 
 static Bool badSysCall = FALSE;
 
@@ -180,7 +169,7 @@ CheckForShmSyscall(void)
     int shmid = -1;
 
     /* If no SHM support in the kernel, the bad syscall will generate SIGSYS */
-    oldHandler = signal(SIGSYS, SigSysHandler);
+    oldHandler = OsSignal(SIGSYS, SigSysHandler);
 
     badSysCall = FALSE;
     shmid = shmget(IPC_PRIVATE, 4096, IPC_CREAT);
@@ -193,7 +182,7 @@ CheckForShmSyscall(void)
         /* Allocation failed */
         badSysCall = TRUE;
     }
-    signal(SIGSYS, oldHandler);
+    OsSignal(SIGSYS, oldHandler);
     return !badSysCall;
 }
 
@@ -202,14 +191,14 @@ CheckForShmSyscall(void)
 #endif
 
 static Bool
-ShmCloseScreen(int i, ScreenPtr pScreen)
+ShmCloseScreen(ScreenPtr pScreen)
 {
     ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
 
     pScreen->CloseScreen = screen_priv->CloseScreen;
     dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, NULL);
     free(screen_priv);
-    return (*pScreen->CloseScreen) (i, pScreen);
+    return (*pScreen->CloseScreen) (pScreen);
 }
 
 static ShmScrPrivateRec *
@@ -258,21 +247,20 @@ ShmDestroyPixmap(PixmapPtr pPixmap)
 {
     ScreenPtr pScreen = pPixmap->drawable.pScreen;
     ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
+    void *shmdesc = NULL;
     Bool ret;
 
-    if (pPixmap->refcnt == 1) {
-        ShmDescPtr shmdesc;
-
-        shmdesc = (ShmDescPtr) dixLookupPrivate(&pPixmap->devPrivates,
-                                                shmPixmapPrivateKey);
-        if (shmdesc)
-            ShmDetachSegment((pointer) shmdesc, pPixmap->drawable.id);
-    }
+    if (pPixmap->refcnt == 1)
+        shmdesc = dixLookupPrivate(&pPixmap->devPrivates, shmPixmapPrivateKey);
 
     pScreen->DestroyPixmap = screen_priv->destroyPixmap;
     ret = (*pScreen->DestroyPixmap) (pPixmap);
     screen_priv->destroyPixmap = pScreen->DestroyPixmap;
     pScreen->DestroyPixmap = ShmDestroyPixmap;
+
+    if (shmdesc)
+	ShmDetachSegment(shmdesc, 0);
+
     return ret;
 }
 
@@ -285,19 +273,20 @@ ShmRegisterFbFuncs(ScreenPtr pScreen)
 static int
 ProcShmQueryVersion(ClientPtr client)
 {
-    xShmQueryVersionReply rep;
+    xShmQueryVersionReply rep = {
+        .type = X_Reply,
+        .sharedPixmaps = sharedPixmaps,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .majorVersion = SERVER_SHM_MAJOR_VERSION,
+        .minorVersion = SERVER_SHM_MINOR_VERSION,
+        .uid = geteuid(),
+        .gid = getegid(),
+        .pixmapFormat = sharedPixmaps ? ZPixmap : 0
+    };
 
     REQUEST_SIZE_MATCH(xShmQueryVersionReq);
-    memset(&rep, 0, sizeof(xShmQueryVersionReply));
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.sharedPixmaps = sharedPixmaps;
-    rep.pixmapFormat = sharedPixmaps ? ZPixmap : 0;
-    rep.majorVersion = SERVER_SHM_MAJOR_VERSION;
-    rep.minorVersion = SERVER_SHM_MINOR_VERSION;
-    rep.uid = geteuid();
-    rep.gid = getegid();
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -306,7 +295,7 @@ ProcShmQueryVersion(ClientPtr client)
         swaps(&rep.uid);
         swaps(&rep.gid);
     }
-    WriteToClient(client, sizeof(xShmQueryVersionReply), (char *) &rep);
+    WriteToClient(client, sizeof(xShmQueryVersionReply), &rep);
     return Success;
 }
 
@@ -390,8 +379,10 @@ ProcShmAttach(ClientPtr client)
         client->errorValue = stuff->readOnly;
         return BadValue;
     }
-    for (shmdesc = Shmsegs;
-         shmdesc && (shmdesc->shmid != stuff->shmid); shmdesc = shmdesc->next);
+    for (shmdesc = Shmsegs; shmdesc; shmdesc = shmdesc->next) {
+        if (!SHMDESC_IS_FD(shmdesc) && shmdesc->shmid == stuff->shmid)
+            break;
+    }
     if (shmdesc) {
         if (!stuff->readOnly && !shmdesc->writable)
             return BadAccess;
@@ -401,6 +392,9 @@ ProcShmAttach(ClientPtr client)
         shmdesc = malloc(sizeof(ShmDescRec));
         if (!shmdesc)
             return BadAlloc;
+#ifdef SHM_FD_PASSING
+        shmdesc->is_fd = FALSE;
+#endif
         shmdesc->addr = shmat(stuff->shmid, 0,
                               stuff->readOnly ? SHM_RDONLY : 0);
         if ((shmdesc->addr == ((char *) -1)) || SHMSTAT(stuff->shmid, &buf)) {
@@ -409,7 +403,7 @@ ProcShmAttach(ClientPtr client)
         }
 
         /* The attach was performed with root privs. We must
-         * do manual checking of access rights for the credentials 
+         * do manual checking of access rights for the credentials
          * of the client */
 
         if (shm_access(client, &(SHM_PERM(buf)), stuff->readOnly) == -1) {
@@ -425,21 +419,28 @@ ProcShmAttach(ClientPtr client)
         shmdesc->next = Shmsegs;
         Shmsegs = shmdesc;
     }
-    if (!AddResource(stuff->shmseg, ShmSegType, (pointer) shmdesc))
+    if (!AddResource(stuff->shmseg, ShmSegType, (void *) shmdesc))
         return BadAlloc;
     return Success;
 }
 
  /*ARGSUSED*/ static int
-ShmDetachSegment(pointer value, /* must conform to DeleteType */
-                 XID shmseg)
+ShmDetachSegment(void *value, /* must conform to DeleteType */
+                 XID unused)
 {
     ShmDescPtr shmdesc = (ShmDescPtr) value;
     ShmDescPtr *prev;
 
     if (--shmdesc->refcnt)
         return TRUE;
-    shmdt(shmdesc->addr);
+#if SHM_FD_PASSING
+    if (shmdesc->is_fd) {
+        if (shmdesc->busfault)
+            busfault_unregister(shmdesc->busfault);
+        munmap(shmdesc->addr, shmdesc->size);
+    } else
+#endif
+        shmdt(shmdesc->addr);
     for (prev = &Shmsegs; *prev != shmdesc; prev = &(*prev)->next);
     *prev = shmdesc->next;
     free(shmdesc);
@@ -594,14 +595,14 @@ ProcShmPutImage(ClientPtr client)
                       stuff->dstX, stuff->dstY, shmdesc->addr + stuff->offset);
 
     if (stuff->sendEvent) {
-        xShmCompletionEvent ev;
-
-        ev.type = ShmCompletionCode;
-        ev.drawable = stuff->drawable;
-        ev.minorEvent = X_ShmPutImage;
-        ev.majorEvent = ShmReqCode;
-        ev.shmseg = stuff->shmseg;
-        ev.offset = stuff->offset;
+        xShmCompletionEvent ev = {
+            .type = ShmCompletionCode,
+            .drawable = stuff->drawable,
+            .minorEvent = X_ShmPutImage,
+            .majorEvent = ShmReqCode,
+            .shmseg = stuff->shmseg,
+            .offset = stuff->offset
+        };
         WriteEventsToClient(client, 1, (xEvent *) &ev);
     }
 
@@ -616,6 +617,8 @@ ProcShmGetImage(ClientPtr client)
     Mask plane = 0;
     xShmGetImageReply xgi;
     ShmDescPtr shmdesc;
+    VisualID visual = None;
+    RegionPtr pVisibleRegion = NULL;
     int rc;
 
     REQUEST(xShmGetImageReq);
@@ -630,7 +633,7 @@ ProcShmGetImage(ClientPtr client)
         return rc;
     VERIFY_SHMPTR(stuff->shmseg, stuff->offset, TRUE, shmdesc, client);
     if (pDraw->type == DRAWABLE_WINDOW) {
-        if (                    /* check for being viewable */
+        if (   /* check for being viewable */
                !((WindowPtr) pDraw)->realized ||
                /* check for being on screen */
                pDraw->x + stuff->x < 0 ||
@@ -646,19 +649,24 @@ ProcShmGetImage(ClientPtr client)
                stuff->y + (int) stuff->height >
                wBorderWidth((WindowPtr) pDraw) + (int) pDraw->height)
             return BadMatch;
-        xgi.visual = wVisual(((WindowPtr) pDraw));
+        visual = wVisual(((WindowPtr) pDraw));
+        if (pDraw->type == DRAWABLE_WINDOW)
+            pVisibleRegion = &((WindowPtr) pDraw)->borderClip;
     }
     else {
         if (stuff->x < 0 ||
             stuff->x + (int) stuff->width > pDraw->width ||
             stuff->y < 0 || stuff->y + (int) stuff->height > pDraw->height)
             return BadMatch;
-        xgi.visual = None;
+        visual = None;
     }
-    xgi.type = X_Reply;
-    xgi.length = 0;
-    xgi.sequenceNumber = client->sequence;
-    xgi.depth = pDraw->depth;
+    xgi = (xShmGetImageReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .visual = visual,
+        .depth = pDraw->depth
+    };
     if (stuff->format == ZPixmap) {
         length = PixmapBytePad(stuff->width, pDraw->depth) * stuff->height;
     }
@@ -680,6 +688,11 @@ ProcShmGetImage(ClientPtr client)
                                      stuff->width, stuff->height,
                                      stuff->format, stuff->planeMask,
                                      shmdesc->addr + stuff->offset);
+        if (pVisibleRegion)
+            XaceCensorImage(client, pVisibleRegion,
+                    PixmapBytePad(stuff->width, pDraw->depth), pDraw,
+                    stuff->x, stuff->y, stuff->width, stuff->height,
+                    stuff->format, shmdesc->addr + stuff->offset);
     }
     else {
 
@@ -691,6 +704,11 @@ ProcShmGetImage(ClientPtr client)
                                              stuff->width, stuff->height,
                                              stuff->format, plane,
                                              shmdesc->addr + length);
+                if (pVisibleRegion)
+                    XaceCensorImage(client, pVisibleRegion,
+                            BitmapBytePad(stuff->width), pDraw,
+                            stuff->x, stuff->y, stuff->width, stuff->height,
+                            stuff->format, shmdesc->addr + length);
                 length += lenPer;
             }
         }
@@ -702,7 +720,7 @@ ProcShmGetImage(ClientPtr client)
         swapl(&xgi.visual);
         swapl(&xgi.size);
     }
-    WriteToClient(client, sizeof(xShmGetImageReply), (char *) &xgi);
+    WriteToClient(client, sizeof(xShmGetImageReply), &xgi);
 
     return Success;
 }
@@ -718,12 +736,12 @@ ProcPanoramiXShmPutImage(ClientPtr client)
     REQUEST(xShmPutImageReq);
     REQUEST_SIZE_MATCH(xShmPutImageReq);
 
-    result = dixLookupResourceByClass((pointer *) &draw, stuff->drawable,
+    result = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
     if (result != Success)
         return (result == BadValue) ? BadDrawable : result;
 
-    result = dixLookupResourceByType((pointer *) &gc, stuff->gc,
+    result = dixLookupResourceByType((void **) &gc, stuff->gc,
                                      XRT_GC, client, DixReadAccess);
     if (result != Success)
         return result;
@@ -772,7 +790,7 @@ ProcPanoramiXShmGetImage(ClientPtr client)
         return BadValue;
     }
 
-    rc = dixLookupResourceByClass((pointer *) &draw, stuff->drawable,
+    rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                   XRC_DRAWABLE, client, DixWriteAccess);
     if (rc != Success)
         return (rc == BadValue) ? BadDrawable : rc;
@@ -830,11 +848,13 @@ ProcPanoramiXShmGetImage(ClientPtr client)
         }
     }
 
-    xgi.visual = wVisual(((WindowPtr) pDraw));
-    xgi.type = X_Reply;
-    xgi.length = 0;
-    xgi.sequenceNumber = client->sequence;
-    xgi.depth = pDraw->depth;
+    xgi = (xShmGetImageReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .visual = wVisual(((WindowPtr) pDraw)),
+        .depth = pDraw->depth
+    };
 
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(w, pDraw->depth);
@@ -877,7 +897,7 @@ ProcPanoramiXShmGetImage(ClientPtr client)
         swapl(&xgi.visual);
         swapl(&xgi.size);
     }
-    WriteToClient(client, sizeof(xShmGetImageReply), (char *) &xgi);
+    WriteToClient(client, sizeof(xShmGetImageReply), &xgi);
 
     return Success;
 }
@@ -963,11 +983,17 @@ ProcPanoramiXShmCreatePixmap(ClientPtr client)
                                                        stuff->offset);
 
         if (pMap) {
+            result = XaceHook(XACE_RESOURCE_ACCESS, client, stuff->pid,
+                              RT_PIXMAP, pMap, RT_NONE, NULL, DixCreateAccess);
+            if (result != Success) {
+                pDraw->pScreen->DestroyPixmap(pMap);
+                break;
+            }
             dixSetPrivate(&pMap->devPrivates, shmPixmapPrivateKey, shmdesc);
             shmdesc->refcnt++;
             pMap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
             pMap->drawable.id = newPix->info[j].id;
-            if (!AddResource(newPix->info[j].id, RT_PIXMAP, (pointer) pMap)) {
+            if (!AddResource(newPix->info[j].id, RT_PIXMAP, (void *) pMap)) {
                 result = BadAlloc;
                 break;
             }
@@ -978,7 +1004,7 @@ ProcPanoramiXShmCreatePixmap(ClientPtr client)
         }
     }
 
-    if (result == BadAlloc) {
+    if (result != Success) {
         while (j--)
             FreeResource(newPix->info[j].id, RT_NONE);
         free(newPix);
@@ -1003,7 +1029,7 @@ fbShmCreatePixmap(ScreenPtr pScreen,
     if (!(*pScreen->ModifyPixmapHeader) (pPixmap, width, height, depth,
                                          BitsPerPixel(depth),
                                          PixmapBytePad(width, depth),
-                                         (pointer) addr)) {
+                                         (void *) addr)) {
         (*pScreen->DestroyPixmap) (pPixmap);
         return NullPixmap;
     }
@@ -1082,12 +1108,190 @@ ProcShmCreatePixmap(ClientPtr client)
         shmdesc->refcnt++;
         pMap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
         pMap->drawable.id = stuff->pid;
-        if (AddResource(stuff->pid, RT_PIXMAP, (pointer) pMap)) {
+        if (AddResource(stuff->pid, RT_PIXMAP, (void *) pMap)) {
             return Success;
         }
     }
     return BadAlloc;
 }
+
+#ifdef SHM_FD_PASSING
+
+static void
+ShmBusfaultNotify(void *context)
+{
+    ShmDescPtr shmdesc = context;
+
+    ErrorF("shared memory 0x%x truncated by client\n",
+           (unsigned int) shmdesc->resource);
+    busfault_unregister(shmdesc->busfault);
+    shmdesc->busfault = NULL;
+    FreeResource (shmdesc->resource, RT_NONE);
+}
+
+static int
+ProcShmAttachFd(ClientPtr client)
+{
+    int fd;
+    ShmDescPtr shmdesc;
+    REQUEST(xShmAttachFdReq);
+    struct stat statb;
+
+    SetReqFds(client, 1);
+    REQUEST_SIZE_MATCH(xShmAttachFdReq);
+    LEGAL_NEW_RESOURCE(stuff->shmseg, client);
+    if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
+        client->errorValue = stuff->readOnly;
+        return BadValue;
+    }
+    fd = ReadFdFromClient(client);
+    if (fd < 0)
+        return BadMatch;
+
+    if (fstat(fd, &statb) < 0 || statb.st_size == 0) {
+        close(fd);
+        return BadMatch;
+    }
+
+    shmdesc = malloc(sizeof(ShmDescRec));
+    if (!shmdesc) {
+        close(fd);
+        return BadAlloc;
+    }
+    shmdesc->is_fd = TRUE;
+    shmdesc->addr = mmap(NULL, statb.st_size,
+                         stuff->readOnly ? PROT_READ : PROT_READ|PROT_WRITE,
+                         MAP_SHARED,
+                         fd, 0);
+
+    close(fd);
+    if (shmdesc->addr == ((char *) -1)) {
+        free(shmdesc);
+        return BadAccess;
+    }
+
+    shmdesc->refcnt = 1;
+    shmdesc->writable = !stuff->readOnly;
+    shmdesc->size = statb.st_size;
+    shmdesc->resource = stuff->shmseg;
+
+    shmdesc->busfault = busfault_register_mmap(shmdesc->addr, shmdesc->size, ShmBusfaultNotify, shmdesc);
+    if (!shmdesc->busfault) {
+        munmap(shmdesc->addr, shmdesc->size);
+        free(shmdesc);
+        return BadAlloc;
+    }
+
+    shmdesc->next = Shmsegs;
+    Shmsegs = shmdesc;
+
+    if (!AddResource(stuff->shmseg, ShmSegType, (void *) shmdesc))
+        return BadAlloc;
+    return Success;
+}
+
+static int
+shm_tmpfile(void)
+{
+#ifdef SHMDIR
+	int	fd;
+	int	flags;
+	char	template[] = SHMDIR "/shmfd-XXXXXX";
+#ifdef O_TMPFILE
+	fd = open(SHMDIR, O_TMPFILE|O_RDWR|O_CLOEXEC|O_EXCL, 0666);
+	if (fd >= 0) {
+		ErrorF ("Using O_TMPFILE\n");
+		return fd;
+	}
+	ErrorF ("Not using O_TMPFILE\n");
+#endif
+	fd = mkstemp(template);
+	if (fd < 0)
+		return -1;
+	unlink(template);
+	flags = fcntl(fd, F_GETFD);
+	if (flags != -1) {
+		flags |= FD_CLOEXEC;
+		(void) fcntl(fd, F_SETFD, &flags);
+	}
+	return fd;
+#else
+        return -1;
+#endif
+}
+
+static int
+ProcShmCreateSegment(ClientPtr client)
+{
+    int fd;
+    ShmDescPtr shmdesc;
+    REQUEST(xShmCreateSegmentReq);
+    xShmCreateSegmentReply rep = {
+        .type = X_Reply,
+        .nfd = 1,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+    };
+
+    REQUEST_SIZE_MATCH(xShmCreateSegmentReq);
+    LEGAL_NEW_RESOURCE(stuff->shmseg, client);
+    if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
+        client->errorValue = stuff->readOnly;
+        return BadValue;
+    }
+    fd = shm_tmpfile();
+    if (fd < 0)
+        return BadAlloc;
+    if (ftruncate(fd, stuff->size) < 0) {
+        close(fd);
+        return BadAlloc;
+    }
+    shmdesc = malloc(sizeof(ShmDescRec));
+    if (!shmdesc) {
+        close(fd);
+        return BadAlloc;
+    }
+    shmdesc->is_fd = TRUE;
+    shmdesc->addr = mmap(NULL, stuff->size,
+                         stuff->readOnly ? PROT_READ : PROT_READ|PROT_WRITE,
+                         MAP_SHARED,
+                         fd, 0);
+
+    if (shmdesc->addr == ((char *) -1)) {
+        close(fd);
+        free(shmdesc);
+        return BadAccess;
+    }
+
+    shmdesc->refcnt = 1;
+    shmdesc->writable = !stuff->readOnly;
+    shmdesc->size = stuff->size;
+
+    shmdesc->busfault = busfault_register_mmap(shmdesc->addr, shmdesc->size, ShmBusfaultNotify, shmdesc);
+    if (!shmdesc->busfault) {
+        close(fd);
+        munmap(shmdesc->addr, shmdesc->size);
+        free(shmdesc);
+        return BadAlloc;
+    }
+
+    shmdesc->next = Shmsegs;
+    Shmsegs = shmdesc;
+
+    if (!AddResource(stuff->shmseg, ShmSegType, (void *) shmdesc)) {
+        close(fd);
+        return BadAlloc;
+    }
+
+    if (WriteFdToClient(client, fd, TRUE) < 0) {
+        FreeResource(stuff->shmseg, RT_NONE);
+        close(fd);
+        return BadAlloc;
+    }
+    WriteToClient(client, sizeof (xShmCreateSegmentReply), &rep);
+    return Success;
+}
+#endif /* SHM_FD_PASSING */
 
 static int
 ProcShmDispatch(ClientPtr client)
@@ -1118,6 +1322,12 @@ ProcShmDispatch(ClientPtr client)
             return ProcPanoramiXShmCreatePixmap(client);
 #endif
         return ProcShmCreatePixmap(client);
+#ifdef SHM_FD_PASSING
+    case X_ShmAttachFd:
+        return ProcShmAttachFd(client);
+    case X_ShmCreateSegment:
+        return ProcShmCreateSegment(client);
+#endif
     default:
         return BadRequest;
     }
@@ -1218,6 +1428,30 @@ SProcShmCreatePixmap(ClientPtr client)
     return ProcShmCreatePixmap(client);
 }
 
+#ifdef SHM_FD_PASSING
+static int
+SProcShmAttachFd(ClientPtr client)
+{
+    REQUEST(xShmAttachFdReq);
+    SetReqFds(client, 1);
+    swaps(&stuff->length);
+    REQUEST_SIZE_MATCH(xShmAttachFdReq);
+    swapl(&stuff->shmseg);
+    return ProcShmAttachFd(client);
+}
+
+static int
+SProcShmCreateSegment(ClientPtr client)
+{
+    REQUEST(xShmCreateSegmentReq);
+    swaps(&stuff->length);
+    REQUEST_SIZE_MATCH(xShmCreateSegmentReq);
+    swapl(&stuff->shmseg);
+    swapl(&stuff->size);
+    return ProcShmCreateSegment(client);
+}
+#endif  /* SHM_FD_PASSING */
+
 static int
 SProcShmDispatch(ClientPtr client)
 {
@@ -1235,13 +1469,19 @@ SProcShmDispatch(ClientPtr client)
         return SProcShmGetImage(client);
     case X_ShmCreatePixmap:
         return SProcShmCreatePixmap(client);
+#ifdef SHM_FD_PASSING
+    case X_ShmAttachFd:
+        return SProcShmAttachFd(client);
+    case X_ShmCreateSegment:
+        return SProcShmCreateSegment(client);
+#endif
     default:
         return BadRequest;
     }
 }
 
 void
-ShmExtensionInit(INITARGS)
+ShmExtensionInit(void)
 {
     ExtensionEntry *extEntry;
     int i;

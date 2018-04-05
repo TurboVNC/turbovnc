@@ -29,37 +29,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gcstruct.h"
 #include "xacestr.h"
 
-#define XSERV_t
-#define TRANS_SERVER
-#include <X11/Xtrans/Xtrans.h>
-#include "../os/osdep.h"
-
 _X_EXPORT CallbackListPtr XaceHooks[XACE_NUM_HOOKS] = { 0 };
 
 /* Special-cased hook functions.  Called by Xserver.
  */
+#undef XaceHookDispatch
 int
 XaceHookDispatch(ClientPtr client, int major)
 {
-    /* Call the audit begin callback, there is no return value. */
-    XaceAuditRec rec = { client, 0 };
-    CallCallbacks(&XaceHooks[XACE_AUDIT_BEGIN], &rec);
-
-    if (major < 128) {
-        /* Call the core dispatch hook */
-        XaceCoreDispatchRec rec = { client, Success /* default allow */  };
-        CallCallbacks(&XaceHooks[XACE_CORE_DISPATCH], &rec);
-        return rec.status;
-    }
-    else {
-        /* Call the extension dispatch hook */
-        ExtensionEntry *ext = GetExtensionEntry(major);
-        XaceExtAccessRec rec = { client, ext, DixUseAccess, Success };
-        if (ext)
-            CallCallbacks(&XaceHooks[XACE_EXT_DISPATCH], &rec);
-        /* On error, pretend extension doesn't exist */
-        return (rec.status == Success) ? Success : BadRequest;
-    }
+    /* Call the extension dispatch hook */
+    ExtensionEntry *ext = GetExtensionEntry(major);
+    XaceExtAccessRec erec = { client, ext, DixUseAccess, Success };
+    if (ext)
+        CallCallbacks(&XaceHooks[XACE_EXT_DISPATCH], &erec);
+    /* On error, pretend extension doesn't exist */
+    return (erec.status == Success) ? Success : BadRequest;
 }
 
 int
@@ -77,14 +61,6 @@ XaceHookSelectionAccess(ClientPtr client, Selection ** ppSel, Mask access_mode)
     XaceSelectionAccessRec rec = { client, ppSel, access_mode, Success };
     CallCallbacks(&XaceHooks[XACE_SELECTION_ACCESS], &rec);
     return rec.status;
-}
-
-void
-XaceHookAuditEnd(ClientPtr ptr, int result)
-{
-    XaceAuditRec rec = { ptr, result };
-    /* call callbacks, there is no return value. */
-    CallCallbacks(&XaceHooks[XACE_AUDIT_END], &rec);
 }
 
 /* Entry point for hook functions.  Called by Xserver.
@@ -122,9 +98,9 @@ XaceHook(int hook, ...)
         u.res.client = va_arg(ap, ClientPtr);
         u.res.id = va_arg(ap, XID);
         u.res.rtype = va_arg(ap, RESTYPE);
-        u.res.res = va_arg(ap, pointer);
+        u.res.res = va_arg(ap, void *);
         u.res.ptype = va_arg(ap, RESTYPE);
-        u.res.parent = va_arg(ap, pointer);
+        u.res.parent = va_arg(ap, void *);
         u.res.access_mode = va_arg(ap, Mask);
 
         u.res.status = Success; /* default allow */
@@ -213,6 +189,21 @@ XaceHook(int hook, ...)
     return prv ? *prv : Success;
 }
 
+/* XaceHookIsSet
+ *
+ * Utility function to determine whether there are any callbacks listening on a
+ * particular XACE hook.
+ *
+ * Returns non-zero if there is a callback, zero otherwise.
+ */
+int
+XaceHookIsSet(int hook)
+{
+    if (hook < 0 || hook >= XACE_NUM_HOOKS)
+        return 0;
+    return XaceHooks[hook] != NULL;
+}
+
 /* XaceCensorImage
  *
  * Called after pScreen->GetImage to prevent pieces or trusted windows from
@@ -245,10 +236,10 @@ XaceCensorImage(ClientPtr client,
     BoxRec imageBox;
     int nRects;
 
-    imageBox.x1 = x;
-    imageBox.y1 = y;
-    imageBox.x2 = x + w;
-    imageBox.y2 = y + h;
+    imageBox.x1 = pDraw->x + x;
+    imageBox.y1 = pDraw->y + y;
+    imageBox.x2 = pDraw->x + x + w;
+    imageBox.y2 = pDraw->y + y + h;
     RegionInit(&imageRegion, &imageBox, 1);
     RegionNull(&censorRegion);
 
@@ -273,7 +264,7 @@ XaceCensorImage(ClientPtr client,
             goto failSafe;
         }
         for (pBox = RegionRects(&censorRegion), i = 0; i < nRects; i++, pBox++) {
-            pRects[i].x = pBox->x1;
+            pRects[i].x = pBox->x1 - imageBox.x1;
             pRects[i].y = pBox->y1 - imageBox.y1;
             pRects[i].width = pBox->x2 - pBox->x1;
             pRects[i].height = pBox->y2 - pBox->y1;
@@ -288,7 +279,7 @@ XaceCensorImage(ClientPtr client,
 
         pPix = GetScratchPixmapHeader(pDraw->pScreen, w, h,
                                       depth, bitsPerPixel,
-                                      widthBytesLine, (pointer) pBuf);
+                                      widthBytesLine, (void *) pBuf);
         if (!pPix) {
             failed = TRUE;
             goto failSafe;
@@ -327,15 +318,11 @@ XaceCensorImage(ClientPtr client,
 int
 XaceGetConnectionNumber(ClientPtr client)
 {
-    XtransConnInfo ci = ((OsCommPtr) client->osPrivate)->trans_conn;
-
-    return _XSERVTransGetConnectionNumber(ci);
+    return GetClientFd(client);
 }
 
 int
 XaceIsLocal(ClientPtr client)
 {
-    XtransConnInfo ci = ((OsCommPtr) client->osPrivate)->trans_conn;
-
-    return _XSERVTransIsLocal(ci);
+    return ClientIsLocal(client);
 }

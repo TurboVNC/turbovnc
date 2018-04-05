@@ -60,7 +60,7 @@ in this Software without prior written authorization from The Open Group.
 #endif
 
 /* Maximum size should be initial size multiplied by a power of 2 */
-#define QUEUE_INITIAL_SIZE                 256
+#define QUEUE_INITIAL_SIZE                 512
 #define QUEUE_RESERVED_SIZE                 64
 #define QUEUE_MAXIMUM_SIZE                4096
 #define QUEUE_DROP_BACKTRACE_FREQUENCY     100
@@ -87,27 +87,6 @@ typedef struct _EventQueue {
 
 static EventQueueRec miEventQueue;
 
-#ifdef XQUARTZ
-#include  <pthread.h>
-static pthread_mutex_t miEventQueueMutex = PTHREAD_MUTEX_INITIALIZER;
-
-extern BOOL serverRunning;
-extern pthread_mutex_t serverRunningMutex;
-extern pthread_cond_t serverRunningCond;
-
-static inline void
-wait_for_server_init(void)
-{
-    /* If the server hasn't finished initializing, wait for it... */
-    if (!serverRunning) {
-        pthread_mutex_lock(&serverRunningMutex);
-        while (!serverRunning)
-            pthread_cond_wait(&serverRunningCond, &serverRunningMutex);
-        pthread_mutex_unlock(&serverRunningMutex);
-    }
-}
-#endif
-
 static size_t
 mieqNumEnqueued(EventQueuePtr eventQueue)
 {
@@ -122,7 +101,7 @@ mieqNumEnqueued(EventQueuePtr eventQueue)
     return n_enqueued;
 }
 
-/* Pre-condition: Called with miEventQueueMutex held */
+/* Pre-condition: Called with input_lock held */
 static Bool
 mieqGrowQueue(EventQueuePtr eventQueue, size_t new_nevents)
 {
@@ -145,11 +124,6 @@ mieqGrowQueue(EventQueuePtr eventQueue, size_t new_nevents)
 
     n_enqueued = mieqNumEnqueued(eventQueue);
 
-    /* We block signals, so an mieqEnqueue triggered by SIGIO does not
-     * write to our queue as we are modifying it.
-     */
-    OsBlockSignals();
-
     /* First copy the existing events */
     first_hunk = eventQueue->nevents - eventQueue->head;
     memcpy(new_events,
@@ -168,7 +142,6 @@ mieqGrowQueue(EventQueuePtr eventQueue, size_t new_nevents)
             for (j = 0; j < i; j++)
                 FreeEventList(new_events[j].events, 1);
             free(new_events);
-            OsReleaseSignals();
             return FALSE;
         }
         new_events[i].events = evlist;
@@ -181,7 +154,6 @@ mieqGrowQueue(EventQueuePtr eventQueue, size_t new_nevents)
     free(eventQueue->events);
     eventQueue->events = new_events;
 
-    OsReleaseSignals();
     return TRUE;
 }
 
@@ -191,8 +163,10 @@ mieqInit(void)
     memset(&miEventQueue, 0, sizeof(miEventQueue));
     miEventQueue.lastEventTime = GetTimeInMillis();
 
+    input_lock();
     if (!mieqGrowQueue(&miEventQueue, QUEUE_INITIAL_SIZE))
         FatalError("Could not allocate event queue.\n");
+    input_unlock();
 
     SetInputCheck(&miEventQueue.head, &miEventQueue.tail);
     return TRUE;
@@ -212,32 +186,9 @@ mieqFini(void)
     free(miEventQueue.events);
 }
 
-/* This function will determine if the given event is allowed to used the reserved
- * queue space.
- */
-static Bool
-mieqReservedCandidate(InternalEvent *e)
-{
-    switch (e->any.type) {
-    case ET_KeyRelease:
-    case ET_ButtonRelease:
-#if XFreeXDGA
-    case ET_DGAEvent:
-#endif
-    case ET_RawKeyRelease:
-    case ET_RawButtonRelease:
-    case ET_XQuartz:
-        return TRUE;
-    default:
-        return FALSE;
-    }
-}
-
 /*
  * Must be reentrant with ProcessInputEvents.  Assumption: mieqEnqueue
- * will never be interrupted.  If this is called from both signal
- * handlers and regular code, make sure the signal is suspended when
- * called from regular code.
+ * will never be interrupted. Must be called with input_lock held
  */
 
 void
@@ -249,11 +200,6 @@ mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e)
     int evlen;
     Time time;
     size_t n_enqueued;
-
-#ifdef XQUARTZ
-    wait_for_server_init();
-    pthread_mutex_lock(&miEventQueueMutex);
-#endif
 
     verify_internal_event(e);
 
@@ -267,40 +213,35 @@ mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e)
         oldtail != miEventQueue.head) {
         oldtail = (oldtail - 1) % miEventQueue.nevents;
     }
-    else if ((n_enqueued + 1 == miEventQueue.nevents) ||
-             ((n_enqueued + 1 >= miEventQueue.nevents - QUEUE_RESERVED_SIZE) &&
-              !mieqReservedCandidate(e))) {
-        /* Toss events which come in late.  Usually this means your server's
-         * stuck in an infinite loop somewhere, but SIGIO is still getting
-         * handled.
-         */
-        miEventQueue.dropped++;
-        if (miEventQueue.dropped == 1) {
-            ErrorF
-                ("[mi] EQ overflowing.  Additional events will be discarded until existing events are processed.\n");
-            xorg_backtrace();
-            ErrorF
-                ("[mi] These backtraces from mieqEnqueue may point to a culprit higher up the stack.\n");
-            ErrorF("[mi] mieq is *NOT* the cause.  It is a victim.\n");
-        }
-        else if (miEventQueue.dropped % QUEUE_DROP_BACKTRACE_FREQUENCY == 0 &&
-                 miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY <=
-                 QUEUE_DROP_BACKTRACE_MAX) {
-            ErrorF
-                ("[mi] EQ overflow continuing.  %lu events have been dropped.\n",
-                 (unsigned long) miEventQueue.dropped);
-            if (miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY ==
-                QUEUE_DROP_BACKTRACE_MAX) {
-                ErrorF
-                    ("[mi] No further overflow reports will be reported until the clog is cleared.\n");
+    else if (n_enqueued + 1 == miEventQueue.nevents) {
+        if (!mieqGrowQueue(&miEventQueue, miEventQueue.nevents << 1)) {
+            /* Toss events which come in late.  Usually this means your server's
+             * stuck in an infinite loop in the main thread.
+             */
+            miEventQueue.dropped++;
+            if (miEventQueue.dropped == 1) {
+                ErrorFSigSafe("[mi] EQ overflowing.  Additional events will be "
+                              "discarded until existing events are processed.\n");
+                xorg_backtrace();
+                ErrorFSigSafe("[mi] These backtraces from mieqEnqueue may point to "
+                              "a culprit higher up the stack.\n");
+                ErrorFSigSafe("[mi] mieq is *NOT* the cause.  It is a victim.\n");
             }
-            xorg_backtrace();
+            else if (miEventQueue.dropped % QUEUE_DROP_BACKTRACE_FREQUENCY == 0 &&
+                     miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY <=
+                     QUEUE_DROP_BACKTRACE_MAX) {
+                ErrorFSigSafe("[mi] EQ overflow continuing.  %zu events have been "
+                              "dropped.\n", miEventQueue.dropped);
+                if (miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY ==
+                    QUEUE_DROP_BACKTRACE_MAX) {
+                    ErrorFSigSafe("[mi] No further overflow reports will be "
+                                  "reported until the clog is cleared.\n");
+                }
+                xorg_backtrace();
+            }
+            return;
         }
-
-#ifdef XQUARTZ
-        pthread_mutex_unlock(&miEventQueueMutex);
-#endif
-        return;
+        oldtail = miEventQueue.tail;
     }
 
     evlen = e->any.length;
@@ -320,9 +261,6 @@ mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e)
 
     miEventQueue.lastMotion = isMotion;
     miEventQueue.tail = (oldtail + 1) % miEventQueue.nevents;
-#ifdef XQUARTZ
-    pthread_mutex_unlock(&miEventQueueMutex);
-#endif
 }
 
 /**
@@ -343,31 +281,19 @@ mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e)
 void
 mieqSwitchScreen(DeviceIntPtr pDev, ScreenPtr pScreen, Bool set_dequeue_screen)
 {
-#ifdef XQUARTZ
-    pthread_mutex_lock(&miEventQueueMutex);
-#endif
     EnqueueScreen(pDev) = pScreen;
     if (set_dequeue_screen)
         DequeueScreen(pDev) = pScreen;
-#ifdef XQUARTZ
-    pthread_mutex_unlock(&miEventQueueMutex);
-#endif
 }
 
 void
 mieqSetHandler(int event, mieqHandler handler)
 {
-#ifdef XQUARTZ
-    pthread_mutex_lock(&miEventQueueMutex);
-#endif
     if (handler && miEventQueue.handlers[event])
         ErrorF("[mi] mieq: warning: overriding existing handler %p with %p for "
                "event %d\n", miEventQueue.handlers[event], handler, event);
 
     miEventQueue.handlers[event] = handler;
-#ifdef XQUARTZ
-    pthread_mutex_unlock(&miEventQueueMutex);
-#endif
 }
 
 /**
@@ -407,6 +333,10 @@ ChangeDeviceID(DeviceIntPtr dev, InternalEvent *event)
     case ET_RawTouchEnd:
     case ET_RawTouchUpdate:
         event->raw_event.deviceid = dev->id;
+        break;
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+        event->barrier_event.deviceid = dev->id;
         break;
     default:
         ErrorF("[mi] Unknown event type (%d), cannot change id.\n",
@@ -512,6 +442,10 @@ mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen)
 
     verify_internal_event(event);
 
+    /* refuse events from disabled devices */
+    if (dev && !dev->enabled)
+        return;
+
     /* Custom event handler */
     handler = miEventQueue.handlers[event->any.type];
 
@@ -569,30 +503,25 @@ mieqProcessInputEvents(void)
 {
     EventRec *e = NULL;
     ScreenPtr screen;
-    static InternalEvent event;
+    InternalEvent event;
     DeviceIntPtr dev = NULL, master = NULL;
-    size_t n_enqueued;
+    static Bool inProcessInputEvents = FALSE;
 
-#ifdef XQUARTZ
-    pthread_mutex_lock(&miEventQueueMutex);
-#endif
+    input_lock();
 
-    /* Grow our queue if we are reaching capacity: < 2 * QUEUE_RESERVED_SIZE remaining */
-    n_enqueued = mieqNumEnqueued(&miEventQueue);
-    if (n_enqueued >= (miEventQueue.nevents - (2 * QUEUE_RESERVED_SIZE)) &&
-        miEventQueue.nevents < QUEUE_MAXIMUM_SIZE) {
-        ErrorF("[mi] Increasing EQ size to %lu to prevent dropped events.\n",
-               (unsigned long) (miEventQueue.nevents << 1));
-        if (!mieqGrowQueue(&miEventQueue, miEventQueue.nevents << 1)) {
-            ErrorF("[mi] Increasing the size of EQ failed.\n");
-        }
-    }
+    /*
+     * report an error if mieqProcessInputEvents() is called recursively;
+     * this can happen, e.g., if something in the mieqProcessDeviceEvent()
+     * call chain calls UpdateCurrentTime() instead of UpdateCurrentTimeIf()
+     */
+    BUG_WARN_MSG(inProcessInputEvents, "[mi] mieqProcessInputEvents() called recursively.\n");
+    inProcessInputEvents = TRUE;
 
     if (miEventQueue.dropped) {
         ErrorF("[mi] EQ processing has resumed after %lu dropped events.\n",
                (unsigned long) miEventQueue.dropped);
         ErrorF
-            ("[mi] This may be caused my a misbehaving driver monopolizing the server's resources.\n");
+            ("[mi] This may be caused by a misbehaving driver monopolizing the server's resources.\n");
         miEventQueue.dropped = 0;
     }
 
@@ -605,9 +534,7 @@ mieqProcessInputEvents(void)
 
         miEventQueue.head = (miEventQueue.head + 1) % miEventQueue.nevents;
 
-#ifdef XQUARTZ
-        pthread_mutex_unlock(&miEventQueueMutex);
-#endif
+        input_unlock();
 
         master = (dev) ? GetMaster(dev, MASTER_ATTACHED) : NULL;
 
@@ -624,14 +551,17 @@ mieqProcessInputEvents(void)
         mieqProcessDeviceEvent(dev, &event, screen);
 
         /* Update the sprite now. Next event may be from different device. */
-        if (event.any.type == ET_Motion && master)
+        if (master &&
+            (event.any.type == ET_Motion ||
+             ((event.any.type == ET_TouchBegin ||
+               event.any.type == ET_TouchUpdate) &&
+              event.device_event.flags & TOUCH_POINTER_EMULATED)))
             miPointerUpdateSprite(dev);
 
-#ifdef XQUARTZ
-        pthread_mutex_lock(&miEventQueueMutex);
-#endif
+        input_lock();
     }
-#ifdef XQUARTZ
-    pthread_mutex_unlock(&miEventQueueMutex);
-#endif
+
+    inProcessInputEvents = FALSE;
+
+    input_unlock();
 }

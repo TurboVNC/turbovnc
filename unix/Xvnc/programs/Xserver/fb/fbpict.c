@@ -70,6 +70,152 @@ fbComposite(CARD8 op,
     free_pixman_pict(pDst, dest);
 }
 
+static pixman_glyph_cache_t *glyphCache;
+
+void
+fbDestroyGlyphCache(void)
+{
+    if (glyphCache)
+    {
+	pixman_glyph_cache_destroy (glyphCache);
+	glyphCache = NULL;
+    }
+}
+
+static void
+fbUnrealizeGlyph(ScreenPtr pScreen,
+		 GlyphPtr pGlyph)
+{
+    if (glyphCache)
+	pixman_glyph_cache_remove (glyphCache, pGlyph, NULL);
+}
+
+void
+fbGlyphs(CARD8 op,
+	 PicturePtr pSrc,
+	 PicturePtr pDst,
+	 PictFormatPtr maskFormat,
+	 INT16 xSrc,
+	 INT16 ySrc, int nlist,
+	 GlyphListPtr list,
+	 GlyphPtr *glyphs)
+{
+#define N_STACK_GLYPHS 512
+    ScreenPtr pScreen = pDst->pDrawable->pScreen;
+    pixman_glyph_t stack_glyphs[N_STACK_GLYPHS];
+    pixman_glyph_t *pglyphs = stack_glyphs;
+    pixman_image_t *srcImage, *dstImage;
+    int srcXoff, srcYoff, dstXoff, dstYoff;
+    GlyphPtr glyph;
+    int n_glyphs;
+    int x, y;
+    int i, n;
+    int xDst = list->xOff, yDst = list->yOff;
+
+    miCompositeSourceValidate(pSrc);
+
+    n_glyphs = 0;
+    for (i = 0; i < nlist; ++i)
+	n_glyphs += list[i].len;
+
+    if (!glyphCache)
+	glyphCache = pixman_glyph_cache_create();
+
+    pixman_glyph_cache_freeze (glyphCache);
+
+    if (n_glyphs > N_STACK_GLYPHS) {
+	if (!(pglyphs = xallocarray(n_glyphs, sizeof(pixman_glyph_t))))
+	    goto out;
+    }
+
+    i = 0;
+    x = y = 0;
+    while (nlist--) {
+        x += list->xOff;
+        y += list->yOff;
+        n = list->len;
+        while (n--) {
+	    const void *g;
+
+            glyph = *glyphs++;
+
+	    if (!(g = pixman_glyph_cache_lookup (glyphCache, glyph, NULL))) {
+		pixman_image_t *glyphImage;
+		PicturePtr pPicture;
+		int xoff, yoff;
+
+		pPicture = GetGlyphPicture(glyph, pScreen);
+		if (!pPicture) {
+		    n_glyphs--;
+		    goto next;
+		}
+
+		if (!(glyphImage = image_from_pict(pPicture, FALSE, &xoff, &yoff)))
+		    goto out;
+
+		g = pixman_glyph_cache_insert(glyphCache, glyph, NULL,
+					      glyph->info.x,
+					      glyph->info.y,
+					      glyphImage);
+
+		free_pixman_pict(pPicture, glyphImage);
+
+		if (!g)
+		    goto out;
+	    }
+
+	    pglyphs[i].x = x;
+	    pglyphs[i].y = y;
+	    pglyphs[i].glyph = g;
+	    i++;
+
+	next:
+            x += glyph->info.xOff;
+            y += glyph->info.yOff;
+	}
+	list++;
+    }
+
+    if (!(srcImage = image_from_pict(pSrc, FALSE, &srcXoff, &srcYoff)))
+	goto out;
+
+    if (!(dstImage = image_from_pict(pDst, TRUE, &dstXoff, &dstYoff)))
+	goto out_free_src;
+
+    if (maskFormat) {
+	pixman_format_code_t format;
+	pixman_box32_t extents;
+
+	format = maskFormat->format | (maskFormat->depth << 24);
+
+	pixman_glyph_get_extents(glyphCache, n_glyphs, pglyphs, &extents);
+
+	pixman_composite_glyphs(op, srcImage, dstImage, format,
+				xSrc + srcXoff + extents.x1 - xDst, ySrc + srcYoff + extents.y1 - yDst,
+				extents.x1, extents.y1,
+				extents.x1 + dstXoff, extents.y1 + dstYoff,
+				extents.x2 - extents.x1,
+				extents.y2 - extents.y1,
+				glyphCache, n_glyphs, pglyphs);
+    }
+    else {
+	pixman_composite_glyphs_no_mask(op, srcImage, dstImage,
+					xSrc + srcXoff - xDst, ySrc + srcYoff - yDst,
+					dstXoff, dstYoff,
+					glyphCache, n_glyphs, pglyphs);
+    }
+
+    free_pixman_pict(pDst, dstImage);
+
+out_free_src:
+    free_pixman_pict(pSrc, srcImage);
+
+out:
+    pixman_glyph_cache_thaw(glyphCache);
+    if (pglyphs != stack_glyphs)
+	free(pglyphs);
+}
+
 static pixman_image_t *
 create_solid_fill_image(PicturePtr pict)
 {
@@ -163,24 +309,16 @@ create_bits_picture(PicturePtr pict, Bool has_clip, int *xoff, int *yoff)
         return NULL;
 
 #ifdef FB_ACCESS_WRAPPER
-#if FB_SHIFT==5
-
     pixman_image_set_accessors(image,
                                (pixman_read_memory_func_t) wfbReadMemory,
                                (pixman_write_memory_func_t) wfbWriteMemory);
-
-#else
-
-#error The pixman library only works when FbBits is 32 bits wide
-
-#endif
 #endif
 
     /* pCompositeClip is undefined for source pictures, so
      * only set the clip region for pictures with drawables
      */
     if (has_clip) {
-        if (pict->clientClipType != CT_NONE)
+        if (pict->clientClip)
             pixman_image_set_has_client_clip(image, TRUE);
 
         if (*xoff || *yoff)
@@ -206,6 +344,11 @@ create_bits_picture(PicturePtr pict, Bool has_clip, int *xoff, int *yoff)
 static pixman_image_t *image_from_pict_internal(PicturePtr pict, Bool has_clip,
                                                 int *xoff, int *yoff,
                                                 Bool is_alpha_map);
+
+static void image_destroy(pixman_image_t *image, void *data)
+{
+    fbFinishAccess((DrawablePtr)data);
+}
 
 static void
 set_image_properties(pixman_image_t * image, PicturePtr pict, Bool has_clip,
@@ -291,6 +434,10 @@ set_image_properties(pixman_image_t * image, PicturePtr pict, Bool has_clip,
         break;
     }
 
+    if (pict->pDrawable)
+        pixman_image_set_destroy_function(image, &image_destroy,
+                                          pict->pDrawable);
+
     pixman_image_set_filter(image, filter,
                             (pixman_fixed_t *) pict->filter_params,
                             pict->filter_nparams);
@@ -343,8 +490,8 @@ image_from_pict(PicturePtr pict, Bool has_clip, int *xoff, int *yoff)
 void
 free_pixman_pict(PicturePtr pict, pixman_image_t * image)
 {
-    if (image && pixman_image_unref(image) && pict->pDrawable)
-        fbFinishAccess(pict->pDrawable);
+    if (image)
+        pixman_image_unref(image);
 }
 
 Bool
@@ -357,7 +504,8 @@ fbPictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
         return FALSE;
     ps = GetPictureScreen(pScreen);
     ps->Composite = fbComposite;
-    ps->Glyphs = miGlyphs;
+    ps->Glyphs = fbGlyphs;
+    ps->UnrealizeGlyph = fbUnrealizeGlyph;
     ps->CompositeRects = miCompositeRects;
     ps->RasterizeTrapezoid = fbRasterizeTrapezoid;
     ps->Trapezoids = fbTrapezoids;

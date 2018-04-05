@@ -10,7 +10,7 @@ Build Requirements
 
 - [CMake](http://www.cmake.org) v2.8.11 or later
 
-- libjpeg-turbo SDK v1.0.0 or later (v1.3.1 or later required if building the
+- libjpeg-turbo SDK v1.0.0 or later (v1.4 or later required if building the
   Java viewer.)
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
@@ -33,7 +33,7 @@ Build Requirements
 
 - PAM development kit [if building the TurboVNC Server]
 
-- JDK 6 or OpenJDK 1.6 or later [if building the TurboVNC Viewer]
+- JDK 8 or OpenJDK 1.7 or later [if building the TurboVNC Viewer]
   * For systems that do not provide a JDK, download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
 
@@ -61,13 +61,13 @@ Build Requirements
     environment.
 
 
-### Mac/Java
+### Mac
 
-- JDK 6 or later
-  * To build with Java 7 or later (recommended), download the
+- Xcode 4.1 or later (OS X 10.7.x or later SDK required)
+
+- JDK 8 or later
+  * Download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
-  * To build with Java 6, install the Java Developer Package from
-    <http://developer.apple.com/tools/xcode> (Apple ID required)
 
 
 Out-of-Tree Builds
@@ -87,25 +87,16 @@ Build Procedure
 ---------------
 
 
-### Un*x (not Mac)
+### Un*x (including Mac)
 
-The following procedure will build the Java TurboVNC Viewer and some native/X11
-infrastructure to support running it as a standalone application.
-Additionally, if the TurboVNC Server build is enabled (which is the default),
-then this procedure will build the TurboVNC Server and a handful of C
-applications that are used to interface with it.  On most 64-bit systems
-(Solaris being a notable exception), this will build a 64-bit version of
-TurboVNC.  See "Build Recipes" for specific instructions on how to build a
+The following procedure will build the Java TurboVNC Viewer and some native
+glueware to support running it as a standalone application.  Additionally, if
+the TurboVNC Server build is enabled (which is the default on Un*x platforms
+other than Mac), then this procedure will build the TurboVNC Server and a
+handful of C applications that are used to interface with it.  On most 64-bit
+systems (Solaris being a notable exception), this will build a 64-bit version
+of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
 32-bit or 64-bit version of TurboVNC on systems that support both.
-
-    cd {build_directory}
-    cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
-    make
-
-
-### Mac
-
-The following procedure will build the Java TurboVNC Viewer.
 
     cd {build_directory}
     cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
@@ -183,7 +174,7 @@ Build Recipes
 -------------
 
 
-### 32-bit Build on 64-bit Linux/Unix
+### 32-bit Build on 64-bit Linux/Unix (including Mac)
 
 Use export/setenv to set the following environment variables before running
 CMake:
@@ -303,20 +294,6 @@ Create Mac package/disk image.  This requires pkgbuild and productbuild, which
 are installed by default on OS X 10.7 and later.  This command generates a
 package containing a Java app bundle that relies on Oracle Java.  The DMG built
 with this command can be installed on OS X 10.7 and later.
-
-    make compatdmg
-
-Create Mac package/disk image.  This requires pkgbuild and productbuild, which
-are installed by default on OS X 10.7 and later and which can be obtained by
-installing Xcode 3.2.6 (with the "Unix Development" option) on OS X 10.6.  This
-command generates a package containing a Java app bundle that relies on Java
-for OS X, which was pre-installed with OS X 10.6 and prior (for later versions
-of OS X, Java for OS X can be obtained from Apple Support.)  The "AppleJava"
-DMG built with this command can be installed on OS X 10.5 and later, but since
-pkgbuild and productbuild are not available on OS X 10.5, the package must be
-built on OS X 10.6 or later.  Referring to the TurboVNC User's Guide, Java for
-OS X may perform better than Oracle Java on older Mac systems, but it should
-not be used on OS X 10.10 "Yosemite" or later.
 
 
 Windows

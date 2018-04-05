@@ -6,19 +6,19 @@
  fee is hereby granted, provided that the above copyright
  notice appear in all copies and that both that copyright
  notice and this permission notice appear in supporting
- documentation, and that the name of Silicon Graphics not be 
- used in advertising or publicity pertaining to distribution 
+ documentation, and that the name of Silicon Graphics not be
+ used in advertising or publicity pertaining to distribution
  of the software without specific prior written permission.
- Silicon Graphics makes no representation about the suitability 
+ Silicon Graphics makes no representation about the suitability
  of this software for any purpose. It is provided "as is"
  without any express or implied warranty.
- 
- SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS 
- SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+ SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+ SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
  AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL SILICON
- GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL 
- DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, 
- DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE 
+ GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
+ DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+ DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
  OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION  WITH
  THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
@@ -64,7 +64,7 @@ XkmInsureSize(void *oldPtr, int oldCount, int *newCountRtrn, int elemSize)
         oldPtr = calloc(newCount, elemSize);
     }
     else if (oldCount < newCount) {
-        oldPtr = realloc(oldPtr, newCount * elemSize);
+        oldPtr = reallocarray(oldPtr, newCount, elemSize);
         if (oldPtr != NULL) {
             char *tmp = (char *) oldPtr;
 
@@ -772,8 +772,6 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
         memset((char *) typeName, 0, XkbNumKbdGroups * sizeof(Atom));
         memset((char *) type, 0, XkbNumKbdGroups * sizeof(XkbKeyTypePtr));
         if (wireMap.flags & XkmKeyHasTypes) {
-            register int g;
-
             for (g = 0; g < XkbNumKbdGroups; g++) {
                 if ((wireMap.flags & (1 << g)) &&
                     ((tmp = XkmGetCountedString(file, buf, 100)) > 0)) {
@@ -1206,7 +1204,8 @@ XkmReadTOC(FILE * file, xkmFileInfo * file_info, int max_toc,
         }
         return 0;
     }
-    fread(file_info, SIZEOF(xkmFileInfo), 1, file);
+    if (fread(file_info, SIZEOF(xkmFileInfo), 1, file) != 1)
+        return 0;
     size_toc = file_info->num_toc;
     if (size_toc > max_toc) {
         DebugF("Warning! Too many TOC entries; last %d ignored\n",
@@ -1214,7 +1213,8 @@ XkmReadTOC(FILE * file, xkmFileInfo * file_info, int max_toc,
         size_toc = max_toc;
     }
     for (i = 0; i < size_toc; i++) {
-        fread(&toc[i], SIZEOF(xkmSectionInfo), 1, file);
+        if (fread(&toc[i], SIZEOF(xkmSectionInfo), 1, file) != 1)
+            return 0;
     }
     return 1;
 }

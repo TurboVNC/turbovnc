@@ -423,7 +423,7 @@ void ClientConnection::TranslateWacomCoords(HWND hwnd, int localX, int localY,
 
   RECT winRect, workArea, screenArea;
   GetWindowRect(hwnd, &winRect);
-  GetFullScreenMetrics(screenArea, workArea, SPAN_ALL);
+  GetFullScreenMetrics(screenArea, workArea, SPAN_ALL, false);
 
   AXIS axisX, axisY;
   if (!gpWTInfoA(WTI_DEVICES, DVC_X, &axisX) ||

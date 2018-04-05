@@ -6,19 +6,19 @@ software and its documentation for any purpose and without
 fee is hereby granted, provided that the above copyright
 notice appear in all copies and that both that copyright
 notice and this permission notice appear in supporting
-documentation, and that the name of Silicon Graphics not be 
-used in advertising or publicity pertaining to distribution 
+documentation, and that the name of Silicon Graphics not be
+used in advertising or publicity pertaining to distribution
 of the software without specific prior written permission.
-Silicon Graphics makes no representation about the suitability 
+Silicon Graphics makes no representation about the suitability
 of this software for any purpose. It is provided "as is"
 without any express or implied warranty.
 
-SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS 
-SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY 
+SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL SILICON
-GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL 
-DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, 
-DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE 
+GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
+DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
 OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION  WITH
 THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
@@ -142,6 +142,10 @@ typedef struct _XkbFilter {
     struct _XkbFilter *next;
 } XkbFilterRec, *XkbFilterPtr;
 
+typedef Bool (*XkbSrvCheckRepeatPtr) (DeviceIntPtr dev,
+                                      struct _XkbSrvInfo * /* xkbi */ ,
+                                      unsigned /* keycode */);
+
 typedef struct _XkbSrvInfo {
     XkbStateRec prev_state;
     XkbStateRec state;
@@ -171,6 +175,7 @@ typedef struct _XkbSrvInfo {
     KeyCode mouseKey;
     KeyCode inactiveKey;
     KeyCode slowKey;
+    KeyCode slowKeyEnableKey;
     KeyCode repeatKey;
     CARD8 krgTimerActive;
     CARD8 beepType;
@@ -188,6 +193,8 @@ typedef struct _XkbSrvInfo {
 
     int szFilters;
     XkbFilterPtr filters;
+
+    XkbSrvCheckRepeatPtr checkRepeat;
 } XkbSrvInfoRec, *XkbSrvInfoPtr;
 
 #define	XkbSLI_IsDefault	(1L<<0)
@@ -280,7 +287,7 @@ extern _X_EXPORT DevPrivateKeyRec xkbDevicePrivateKeyRec;
 
 #define XKBDEVICEINFO(dev) ((xkbDeviceInfoPtr)dixLookupPrivate(&(dev)->devPrivates, xkbDevicePrivateKey))
 
-extern void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, pointer);
+extern void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
 /***====================================================================***/
 
@@ -301,12 +308,14 @@ extern _X_EXPORT const char *XkbBinDirectory;
 extern _X_EXPORT CARD32 xkbDebugFlags;
 
 #define	_XkbLibError(c,l,d)     /* Epoch fail */
+
+/* "a" is a "unique" numeric identifier that just defines which error
+ * code statement it is. _XkbErrCode2(4, foo) means "this is the 4th error
+ * statement in this function". lovely.
+ */
 #define	_XkbErrCode2(a,b) ((XID)((((unsigned int)(a))<<24)|((b)&0xffffff)))
 #define	_XkbErrCode3(a,b,c)	_XkbErrCode2(a,(((unsigned int)(b))<<16)|(c))
 #define	_XkbErrCode4(a,b,c,d) _XkbErrCode3(a,b,((((unsigned int)(c))<<8)|(d)))
-
-extern _X_EXPORT int DeviceKeyPress, DeviceKeyRelease, DeviceMotionNotify;
-extern _X_EXPORT int DeviceButtonPress, DeviceButtonRelease;
 
 #define	Status		int
 
@@ -493,6 +502,10 @@ extern _X_EXPORT void XkbUpdateIndicators(DeviceIntPtr /* keybd */ ,
                                           XkbEventCausePtr      /* cause */
     );
 
+extern _X_EXPORT void XkbUpdateAllDeviceIndicators(XkbChangesPtr /* changes */,
+                                                   XkbEventCausePtr /* cause */
+    );
+
 extern _X_EXPORT XkbSrvLedInfoPtr XkbAllocSrvLedInfo(DeviceIntPtr /* dev */ ,
                                                      KbdFeedbackPtr /* kf */ ,
                                                      LedFeedbackPtr /* lf */ ,
@@ -593,15 +606,15 @@ extern _X_EXPORT void XkbSendCompatMapNotify(DeviceIntPtr /* kbd */ ,
                                              xkbCompatMapNotify *       /* ev */
     );
 
-extern _X_EXPORT void XkbHandleBell(BOOL /* force */ ,
-                                    BOOL /* eventOnly */ ,
-                                    DeviceIntPtr /* kbd */ ,
-                                    CARD8 /* percent */ ,
-                                    pointer /* ctrl */ ,
-                                    CARD8 /* class */ ,
-                                    Atom /* name */ ,
-                                    WindowPtr /* pWin */ ,
-                                    ClientPtr   /* pClient */
+extern _X_EXPORT void XkbHandleBell(BOOL force,
+                                    BOOL eventOnly,
+                                    DeviceIntPtr kbd,
+                                    CARD8 percent,
+                                    void *ctrl,
+                                    CARD8 class,
+                                    Atom name,
+                                    WindowPtr pWin,
+                                    ClientPtr pClient
     );
 
 extern _X_EXPORT void XkbSendAccessXNotify(DeviceIntPtr /* kbd */ ,
@@ -634,6 +647,10 @@ extern _X_EXPORT void XkbHandleActions(DeviceIntPtr /* dev */ ,
                                        DeviceIntPtr /* kbd */ ,
                                        DeviceEvent *    /* event */
     );
+
+extern void XkbPushLockedStateToSlaves(DeviceIntPtr /* master */,
+                                       int /* evtype */,
+                                       int /* key */);
 
 extern _X_EXPORT Bool XkbEnableDisableControls(XkbSrvInfoPtr /* xkbi */ ,
                                                unsigned long /* change */ ,
@@ -735,6 +752,14 @@ extern _X_EXPORT void XkbClearAllLatchesAndLocks(DeviceIntPtr /* dev */ ,
                                                  XkbEventCausePtr       /* cause */
     );
 
+extern _X_EXPORT void XkbInitRules(XkbRMLVOSet * /* rmlvo   */,
+                                   const char *  /* rules   */,
+                                   const char *  /* model   */,
+                                   const char *  /* layout  */,
+                                   const char *  /* variant */,
+                                   const char *  /* options */
+    ) ;
+
 extern _X_EXPORT void XkbGetRulesDflts(XkbRMLVOSet *    /* rmlvo */
     );
 
@@ -746,6 +771,9 @@ extern _X_EXPORT void XkbSetRulesDflts(XkbRMLVOSet *    /* rmlvo */
     );
 
 extern _X_EXPORT void XkbDeleteRulesDflts(void
+    );
+
+extern _X_EXPORT void XkbDeleteRulesUsed(void
     );
 
 extern _X_EXPORT int SProcXkbDispatch(ClientPtr /* client */
@@ -806,8 +834,11 @@ extern _X_EXPORT void XkbSendNewKeyboardNotify(DeviceIntPtr /* kbd */ ,
 extern Bool XkbCopyKeymap(XkbDescPtr /* dst */ ,
                           XkbDescPtr /* src */ );
 
-extern _X_EXPORT Bool XkbCopyDeviceKeymap(DeviceIntPtr /* dst */ ,
-                                          DeviceIntPtr /* src */ );
+extern _X_EXPORT Bool XkbCopyDeviceKeymap(DeviceIntPtr /* dst */,
+					  DeviceIntPtr /* src */);
+
+extern _X_EXPORT Bool XkbDeviceApplyKeymap(DeviceIntPtr /* dst */ ,
+                                           XkbDescPtr /* src */ );
 
 extern void XkbFilterEvents(ClientPtr /* pClient */ ,
                             int /* nEvents */ ,
@@ -823,6 +854,9 @@ extern void XkbFakeDeviceButton(DeviceIntPtr /* dev */ ,
                                 int /* press */ ,
                                 int /* button */ );
 
+extern _X_EXPORT void XkbCopyControls(XkbDescPtr /* dst */ ,
+                                      XkbDescPtr /* src */ );
+
 #include "xkbfile.h"
 #include "xkbrules.h"
 
@@ -832,23 +866,6 @@ extern void XkbFakeDeviceButton(DeviceIntPtr /* dev */ ,
 #define	_XkbListSymbols		3
 #define	_XkbListGeometry	4
 #define	_XkbListNumComponents	5
-
-typedef struct _XkbSrvListInfo {
-    int szPool;
-    int nPool;
-    char *pool;
-
-    int maxRtrn;
-    int nTotal;
-
-    char *pattern[_XkbListNumComponents];
-    int nFound[_XkbListNumComponents];
-} XkbSrvListInfoRec, *XkbSrvListInfoPtr;
-
-extern _X_EXPORT Status XkbDDXList(DeviceIntPtr /* dev */ ,
-                                   XkbSrvListInfoPtr /* listing */ ,
-                                   ClientPtr    /* client */
-    );
 
 extern _X_EXPORT unsigned int XkbDDXLoadKeymapByNames(DeviceIntPtr /* keybd */ ,
                                                       XkbComponentNamesPtr
@@ -863,7 +880,7 @@ extern _X_EXPORT unsigned int XkbDDXLoadKeymapByNames(DeviceIntPtr /* keybd */ ,
     );
 
 extern _X_EXPORT Bool XkbDDXNamesFromRules(DeviceIntPtr /* keybd */ ,
-                                           char * /* rules */ ,
+                                           const char * /* rules */ ,
                                            XkbRF_VarDefsPtr /* defs */ ,
                                            XkbComponentNamesPtr /* names */
     );
@@ -871,5 +888,9 @@ extern _X_EXPORT Bool XkbDDXNamesFromRules(DeviceIntPtr /* keybd */ ,
 extern _X_EXPORT XkbDescPtr XkbCompileKeymap(DeviceIntPtr /* dev */ ,
                                              XkbRMLVOSet *      /* rmlvo */
     );
+
+extern _X_EXPORT XkbDescPtr XkbCompileKeymapFromString(DeviceIntPtr dev,
+						       const char *keymap,
+						       int keymap_length);
 
 #endif                          /* _XKBSRV_H_ */

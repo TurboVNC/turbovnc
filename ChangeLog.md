@@ -1,21 +1,151 @@
-2.1.3
-=====
+2.2 pre-beta
+============
 
 ### Significant changes relative to 2.1.2:
 
-1. Introduced a new CMake variable (`TVNC_SYSTEMLIBS`) that, when enabled,
+1. Added a system menu option and hotkey (CTRL-ALT-SHIFT-V) that can be used to
+quickly toggle view-only mode on and off.
+
+2. Added system menu options and hotkeys that can be used to zoom in and out
+(increase or decrease the scaling factor) or reset the view to 100% when
+desktop scaling is enabled.
+
+3. The TurboVNC Server now includes a GLX extension that uses the swrast DRI
+driver installed on the system to perform unaccelerated OpenGL rendering.
+Using VirtualGL for OpenGL rendering will still be much faster and more
+compatible, but this feature allows the TurboVNC Server to be used for casual
+OpenGL rendering if VirtualGL is not installed.  Passing `-extension GLX` to
+vncserver disables the extension.  Note that your system must have Mesa 8.x or
+later installed in order for the swrast DRI driver to be available.  On systems
+that do not have vendor-specific GPU drivers installed, or on systems that
+provide a libglvnd-enabled build of Mesa, the TurboVNC Server's GLX extension
+will use direct rendering, which improves performance and compatibility.
+
+4. The Java/Mac/Un*x TurboVNC Viewer is no longer supported with Java 6 and
+earlier.  This increases the Mac system requirements to OS X 10.7 "Lion" or
+later.  Apple's obsolete Java for OS X is no longer supported, and the
+standalone "AppleJava" version of the TurboVNC Viewer is no longer provided.
+Java SE 6 ceased receiving public updates in 2013 and, as of this writing,
+critical bug fixes and security fixes for that platform are only available with
+an Oracle Extended Support contract.  Furthermore, Red Hat ceased supporting
+OpenJDK 6 in late 2016.  The TurboVNC Viewer JAR will continue to be built with
+`-source 1.6 -target 1.6`, but it will only be tested with Oracle Java SE
+releases that are currently receiving public updates and OpenJDK releases that
+are actively supported by Red Hat.  The 2.1.x version of the TurboVNC Viewer
+will continue to support Java 6 on a break/fix basis.
+
+5. The ability to run the Java TurboVNC Viewer as an in-browser applet has been
+removed.  Most popular web browsers have already abandoned the NPAPI plugin
+standard around which the Java plugin was designed, because that plugin
+standard grants full access to the client machine.  However, such access is
+necessary in order to write a full-featured application (including a VNC
+viewer), and absent any other cross-browser plugin standard, it would be
+impossible for Oracle to make the Java plugin more secure without abandoning
+the write-once-run-anywhere nature of the Java language.  Thus, they have
+chosen not to include any kind of browser plugin in Java 9.  As of this
+writing, NPAPI support can only be obtained on most platforms by installing an
+older browser version.  The only advantage of using the TurboVNC Viewer as an
+applet, as opposed to with Java Web Start, was the ability to embed the viewer
+in a web page, but this mode of operation had some known usability issues and
+was increasingly receiving little or no attention from the TurboVNC community.
+The applet feature will continue to be supported in TurboVNC 2.1.x on a
+break/fix basis.
+
+6. The TurboVNC Server now has full support for the Xinerama extension, which
+allows multiple virtual screens to be configured within the same remote
+desktop.  This provides better usability for multi-screen environments, since
+dialogs and maximized application windows are no longer split across screen
+boundaries.  The server's screen layout can be configured in the following
+ways:
+
+    -  Multi-screen geometry descriptors, in the format
+`W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]]`, are now accepted in these places:
+        * The TurboVNC Server's `-geometry` command-line argument and the
+`$geometry` variable in turbovncserver.conf (thus allowing the user to specify
+a screen layout for the initial framebuffer)
+        * The "Remote desktop size" combo box in the TurboVNC Viewer's Options
+dialog, the TurboVNC Viewer's `-desktopsize` command-line argument, and the
+`DesktopSize` parameter in the Java TurboVNC Viewer (thus allowing the user to
+remotely request a specific screen layout)
+        * A new .vnc connection info file directive (`desktopsize`) that can
+be used instead of the `resizemode`, `desktopwidth`, and `desktopheight`
+directives
+
+    - The automatic desktop resize feature in the TurboVNC Viewer is now
+multi-screen aware in both windowed and full-screen modes.  When the viewer
+window is resized or reset to its default position, the viewer will now compute
+and request a new server-side screen layout that matches not only the viewer
+window boundaries but also the client's screen boundaries and the position of
+the taskbar/menu bar on the client.  The single-screen automatic desktop
+resizing behavior of the TurboVNC 2.1.x viewer can be restored by setting the
+`TVNC_SINGLESCREEN` environment variable or the `turbovnc.singlescreen` Java
+system property to `1`.
+
+    - The X RandR extension can be used, either from the command line
+(`xrandr`) or through the window manager's display configuration applet, to
+modify the server's screen layout.
+
+7. The TurboVNC Server is now based on xorg-xserver 1.19.5, which improves
+compatibility with newer window managers.
+
+8. By default, the TurboVNC Server will no longer listen on a TCP socket for
+X11 protocol connections from X11 applications.  This mimics the behavior of
+most modern X servers, which require X11 connections to be made using Unix
+domain sockets.  To restore the behavior of previous versions of TurboVNC, pass
+`-listen tcp` to vncserver (assuming that X11 TCP connections are not globally
+disabled in the TurboVNC Server's security configuration file.)
+
+9. The default xstartup.turbovnc script that the TurboVNC Server creates will
+no longer start a 2D window manager by default on Ubuntu systems, since the
+TurboVNC Server now has a software OpenGL implementation that supports running
+Unity 3D without VirtualGL.  The xstartup.turbovnc script will now always
+attempt to start the window manager specified by the system or user defaults,
+unless the `TVNC_WM` environment variable is set.  Setting the `TVNC_WM`
+environment variable to `2d` will start the GNOME fallback/flashback or Unity
+2D session on Ubuntu systems instead of Unity 3D.  Setting the `TVNC_WM`
+environment variable to `2d` will also start the GNOME classic session on RHEL
+7 and recent Fedora releases.  To start MATE, set the `TVNC_WM` environment
+variable to `mate-session`.
+
+10. The `-3dwm` option to the vncserver script has been renamed to `-vgl`, to
+reflect the fact that the TurboVNC Server is now able to run 3D window managers
+without using VirtualGL.
+
+11. Clipboard synchronization is now performed within the TurboVNC Server
+process, so the tvncconfig utility is no longer needed or provided.
+
+12. The TurboVNC Server now uses a 30-bit default visual (BGRX 10/10/10/2 on
+little endian machines and XRGB 2/10/10/10 on big endian machines) when
+launched with `-depth 30`.  This is mainly useful for application testing at
+the moment, since the pixels are downsampled to 8-bit RGB prior to
+transmission.
+
+13. Introduced a new CMake variable (`TVNC_SYSTEMLIBS`) that, when enabled,
 will cause the TurboVNC Server to be built against the system-supplied versions
 of zlib, bzip2, and FreeType.
 
-2. Introduced a new CMake variable (`TVNC_SYSTEMX11`) that, when enabled,
+14. Introduced a new CMake variable (`TVNC_SYSTEMX11`) that, when enabled,
 will cause the TurboVNC Server to be built against the system-supplied versions
-of the X11 headers and libraries.  This will probably fail unless the system is
-using xorg-server 1.12.x or later.
+of the X11 and OpenGL headers and libraries.  This will probably fail unless
+the system is using xorg-server 1.19.x or later.
 
-3. Fixed a bug in the TurboVNC Server's VeNCrypt implementation that prevented
+15. Fixed a bug in the TurboVNC Server's VeNCrypt implementation that prevented
 it from working properly with LibVNCClient.
 
-4. Fixed an issue in the Un*x/X11 TurboVNC Viewer and the Windows/Java
+16. The TurboVNC Server and Windows TurboVNC Viewer, when built with
+`TVNC_SYSTEMLIBS=0` (which is the default), now incorporate the Intel zlib
+library, which accelerates zlib encoding and decoding significantly on
+SSE2-equipped CPUs.  This improves the end-to-end performance of the Lossless
+Tight + Zlib encoding method, and of non-JPEG (low-color-depth) subrectangles
+encoded with one of the Tight + JPEG encoding methods, by approximately 20-40%.
+
+17. The Mac/Java TurboVNC Viewer now includes remote drawing tablet support.
+This feature is implemented using a TurboVNC Helper JNI library, which is
+similar to the TurboVNC Helper included with the Un*x TurboVNC Viewer.  This
+library connects the built-in drawing tablet drivers for OS X with the existing
+remote X Input feature in the Java TurboVNC Viewer.
+
+18. Fixed an issue in the Un*x/X11 TurboVNC Viewer and the Windows/Java
 TurboVNC Viewer whereby keyboard grabbing was always initially disabled in the
 second and subsequent connections initiated by the viewer, regardless of the
 grab mode.

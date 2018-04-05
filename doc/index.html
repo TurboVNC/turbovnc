@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-08-12T13:23:56">
+<meta name="date" content="2017-12-01T11:47:13">
 <meta name="generator" content="deplate.rb 0.8.5">
-<title>User&rsquo;s Guide for TurboVNC 2.1.2</title>
+<title>User&rsquo;s Guide for TurboVNC 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Conventions Used in This Document">
@@ -23,7 +23,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for TurboVNC 2.1.2</p>
+<p class="title">User&rsquo;s Guide for TurboVNC 2.2</p>
 </div>
 <div id="hd">
 <div id="hdBlock" class="hd">
@@ -102,7 +102,10 @@
                 <a href="#hd006005" class="hd">6.5 Securing a TurboVNC Connection</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006006" class="hd">6.6 Further Reading</a>
+                <a href="#hd006006" class="hd">6.6 Running OpenGL Applications</a>
+            </li>
+            <li class="Itemize-3 hd">
+                <a href="#hd006007" class="hd">6.7 Further Reading</a>
             </li>
         </ul>
     </li>
@@ -438,7 +441,8 @@ other VNC distributions without interference.</p>
     True Color (24-bit or 32-bit) visuals.
 </li>
 <li class="Itemize-0">
-    Java 5 or later (Java 6 or later recommended)
+    <span class="remote"><a href="http://www.java.com" class="remote">Oracle 
+    Java</a></span><a name="idx0015"></a> 8 or later, or OpenJDK 7 or later
 </li></ul></td>
   </tr>
 </table>
@@ -459,15 +463,15 @@ other VNC distributions without interference.</p>
   </thead>
   <tr class="standard">
     <td class="high standard">Recommended CPU</td>
-    <td class="standard">Any Intel-based Mac</td>
+    <td class="standard">Any 64-bit Intel-based Mac</td>
   </tr>
   <tr class="standard">
     <td class="high standard">O/S</td>
-    <td class="standard">OS X 10.5 &ldquo;Leopard&rdquo; or later (OS X 10.7 &ldquo;Lion&rdquo; or later recommended)</td>
+    <td class="standard">OS X 10.7 &ldquo;Lion&rdquo; or later</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard"><span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0015"></a> 8u40 or later, or <span class="remote"><a href="https://support.apple.com/kb/DL1572" class="remote">Java for OS X</a></span><a name="idx0016"></a> (see Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details)</td>
+    <td class="standard"><span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0016"></a> 8u40 or later</td>
   </tr>
 </table>
 </div>
@@ -609,11 +613,6 @@ TurboVNC is installed in this manner.</p>
 
 <h2 id="hd005002">5.2&nbsp;Installing the TurboVNC Viewer on OS X</h2>
 
-<dl class="Description">
-    <dt class="Description-1 Description">OS X 10.10 &ldquo;Yosemite&rdquo; and later</dt>
-    <dd class="Description-1 Description">
-    </dd>
-</dl>
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the TurboVNC Mac disk image 
@@ -625,32 +624,6 @@ TurboVNC is installed in this manner.</p>
         SourceForge project page</a></span><a name="idx0026"></a>.
         <div class="important"><p class="important">
         This package requires <span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0027"></a>.
-        </p></div>
-        <div class="important"><p class="important">
-        This package can also be used on OS X 10.7-10.9, but the &ldquo;AppleJava&rdquo; package (see below) will likely perform better on such systems.  See Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details.
-        </p></div>
-    </li>
-    <li class="Ordered-1 Ordered">
-        Open the disk image, then open <code>TurboVNC.pkg</code> inside the disk 
-        image.  Follow the instructions to install the Mac TurboVNC Viewer.
-    </li>
-</ol>
-<dl class="Description">
-    <dt class="Description-1 Description">OS X 10.9 &ldquo;Mavericks&rdquo; and earlier</dt>
-    <dd class="Description-1 Description">
-    </dd>
-</dl>
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered">
-        Download the TurboVNC Mac disk image 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-AppleJava.dmg</code>) 
-        from the 
-        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0028"></a> of the 
-        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0029"></a>.
-        <div class="important"><p class="important">
-        This package requires Java for OS X, which was pre-installed on versions of OS X prior to 10.7 (but which can be installed on later OS X versions by downloading the <span class="remote"><a href="https://support.apple.com/kb/DL1572" class="remote">Java for OS X package</a></span><a name="idx0030"></a> from Apple Support.)  It should not be used on OS X 10.10 and later.  See Section <a href="#MacJavaPerf" class="ref">7.6.3</a> for more details.
         </p></div>
     </li>
     <li class="Ordered-1 Ordered">
@@ -671,9 +644,9 @@ TurboVNC is installed in this manner.</p>
         <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0031"></a> of the 
+        area</a></span><a name="idx0028"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0032"></a>.
+        SourceForge project page</a></span><a name="idx0029"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -692,9 +665,9 @@ download the TurboVNC source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-area</a></span><a name="idx0033"></a> of the 
+area</a></span><a name="idx0030"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-SourceForge project page</a></span><a name="idx0034"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0031"></a>, uncompress 
 it, <code>cd&nbsp;turbovnc-</code><em><code>{version}</code></em>, and 
 read <code>BUILDING.txt</code> for further instructions on how to build 
 TurboVNC from source.</p>
@@ -889,23 +862,24 @@ ssh&nbsp;{user}@{server}
 
 <h3 id="hd006001002">6.1.2&nbsp;Window Manager Compatibility</h3>
 
-<p>Although this version of the TurboVNC Server provides an option 
-(<code>-3dwm</code>) that allows for running 3D window managers (such as 
-Unity or GNOME 3+ or KDE 5+) in a TurboVNC Server session using 
-VirtualGL, it is generally recommended that you use a 2D window manager 
-with the TurboVNC Server.  Many recent Linux distributions ship with 
-only 3D window managers, so it may be necessary to install a 2D window 
-manager prior to launching the TurboVNC Server for the first time.  As 
-of this writing, Ubuntu provides an optional 2D window manager called 
+<p>This version of the TurboVNC Server can run 3D (compositing) window 
+managers (such as Unity or GNOME 3+ or KDE 5+) using its built-in 
+software OpenGL implementation, and it also provides an option 
+(<code>-vgl</code>) that allows for running 3D window managers using 
+VirtualGL.  However, for performance reasons, it is generally 
+recommended that you use a 2D window manager with the TurboVNC Server 
+(even with VirtualGL, 3D window managers have a lot of overhead.)  As of 
+this writing, Ubuntu provides an optional 2D window manager called 
 &ldquo;GNOME Fallback&rdquo; or &ldquo;GNOME Flashback&rdquo;, which 
-will automatically be used if it is installed and <code>-3dwm</code> is 
-not passed to <code>vncserver</code>.  For other systems that lack a 2D 
-window manager, it is recommended that you install MATE. Refer to 
+will automatically be used if it is installed and the 
+<code>TVNC_WM</code> environment variable is set to <code>2d</code>.  
+For other systems that lack a 2D window manager, it is recommended that 
+you install MATE. Refer to 
 <span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility" class="remote">this 
-article</a></span><a name="idx0035"></a> for an up-to-date list of 
-window managers that have been tested with this version of the TurboVNC 
-Server, how to configure the TurboVNC Server to use those window 
-managers, and a list of known compatibility issues.</p>
+report</a></span><a name="idx0032"></a> for an up-to-date list of window 
+managers that have been tested with this version of the TurboVNC Server, 
+how to configure the TurboVNC Server to use those window managers, and a 
+list of known compatibility issues.</p>
 
 
 
@@ -952,17 +926,15 @@ server machine, type the following command:</p>
 <p><a name="Zero_Install"></a></p>
 
 <p>When a TurboVNC session is created, it automatically starts a miniature 
-web server that serves up the Java TurboVNC Viewer as either an applet 
-or a Java Web Start app.  This allows you to easily connect to the 
-TurboVNC session from a machine that does not have the TurboVNC Viewer 
-installed locally.  If one of the official TurboVNC binary packages is 
-installed on the server, then it will automatically send the appropriate 
+web server that serves up the Java TurboVNC Viewer as a Java Web Start 
+app.  This allows you to easily connect to the TurboVNC session from a 
+machine that does not have the TurboVNC Viewer installed locally.  If 
+one of the official TurboVNC binary packages is installed on the server, 
+then the miniature web server will automatically send the appropriate 
 x86 or x86-64 libjpeg-turbo JNI library for Linux, OS X, or Windows 
-clients when launching the TurboVNC Viewer using Java Web Start.  If 
-using the Java TurboVNC Viewer as an applet, then you can install 
-<span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
-of the official libjpeg-turbo packages</a></span><a name="idx0036"></a> 
-on the client machine to accelerate JPEG decoding.</p>
+clients when launching the TurboVNC Viewer. This provides most of the 
+advantages of the standalone TurboVNC viewers, including native levels 
+of performance on popular client platforms.</p>
 
 <p>To launch the Java TurboVNC Viewer from a web browser, point your web 
 browser to:</p>
@@ -980,29 +952,21 @@ connect.</p>
 <p><code>http://my_server:5801</code></p>
 
 <p>This will download a JNLP file to your computer, which you can open in 
-Java Web Start.  Add <code>/applet</code> to the URL to launch the 
-viewer as a Java applet instead (as of this writing, browsers are 
-starting to do away with Java plugins, so running the viewer as an 
-applet is more of a legacy feature.)</p>
+Java Web Start.</p>
 
 <p>You can add viewer parameters to the URL using the following format:</p>
 
 <p><code>http://</code><em><code>{turbovnc_server}</code></em><code>:{5800+</code><em><code>n</code></em><code>}?</code><em><code>{param1}</code></em><code>=</code><em><code>{value1}</code></em><code>&amp;</code><em><code>{param2}</code></em><code>=</code><em><code>{value2}</code></em></p>
 
-<p>Examples:</p>
-
-<p><code>http://my_server:5801/applet?embed=1&amp;tunnel=1</code></p>
-
-<p>will run the viewer as an applet in the browser window and tunnel the 
-VNC connection through SSH.</p>
+<p>Example:</p>
 
 <p><code>http://my_server:5801?tunnel=1&amp;samp=2x&amp;quality=80</code></p>
 
-<p>will run the viewer as a JWS app, tunnel the VNC connection through SSH, 
-and enable Medium-Quality JPEG.</p>
+<p>will tunnel the VNC connection through SSH and enable Medium-Quality 
+JPEG.</p>
 
 <div class="important"><p class="important">
-NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in the Java browser plug-in or JWS by default.  This is not an issue if you are using the official TurboVNC binary packages, but if you are building a self-signed version of the Java TurboVNC Viewer for development purposes, then you will need to add <code>http://{turbovnc_server}:{http_port}</code> (for example, <code>http://my_server:5801</code>) to Java&rsquo;s Exception Site List, which can be found under the &ldquo;Security&rdquo; tab in the Java Control Panel.
+NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in Java Web Start by default.  This is not an issue if you are using the official TurboVNC binary packages, but if you are building a self-signed version of the Java TurboVNC Viewer for development purposes, then you will need to add <code>http://{turbovnc_server}:{http_port}</code> (for example, <code>http://my_server:5801</code>) to Java&rsquo;s Exception Site List, which can be found under the &ldquo;Security&rdquo; tab in the Java Control Panel.
 </p></div>
 
 <div class="important"><p class="important">
@@ -1021,12 +985,8 @@ TurboVNC Viewer on machines that don&rsquo;t already have a VNC viewer
 installed (for instance, for the purpose of collaborating with 
 colleagues who don&rsquo;t normally use TurboVNC.)</p>
 
-<p>To set up a large-scale zero-install deployment of the Java TurboVNC 
-Viewer, it is desirable to serve up the JAR files from a dedicated web 
-server.  When deployed using JWS, the Java TurboVNC Viewer provides all 
-of the advantages of a standalone native viewer, including native levels 
-of performance on most platforms (see <a href="#MacJavaPerf">notes 
-regarding performance on Mac platforms</a><a name="idx0037"></a>.)</p>
+<p>To set up a large-scale deployment of the Java TurboVNC Viewer, however, 
+it is desirable to serve up the JAR files from a dedicated web server.</p>
 
 <p>For the purposes of this guide, it is assumed that the reader has some 
 knowledge of web server administration.</p>
@@ -1040,9 +1000,9 @@ knowledge of web server administration.</p>
         Copy the libjpeg-turbo JNI JAR files into that same directory.  You can 
         obtain these from one of the official TurboVNC 2.0 or later binary 
         packages for Linux, or you can download 
-        <code>libjpeg-turbo-{version}-jws.zip</code> from libjpeg-turbo 1.3.0 or 
+        <code>libjpeg-turbo-{version}-jws.zip</code> from libjpeg-turbo 1.4.0 or 
         later (available at 
-        <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files" class="remote">http://sourceforge.net/projects/libjpeg-turbo/files</a></span><a name="idx0038"></a>.)  
+        <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files" class="remote">http://sourceforge.net/projects/libjpeg-turbo/files</a></span><a name="idx0033"></a>.)  
         Note that only the JARs included in the official TurboVNC packages are 
         signed using an official code signing certificate. <br /><br />
     </li>
@@ -1051,7 +1011,7 @@ knowledge of web server administration.</p>
         directory. You can obtain these from 
         <code>turbovnc-{version}-jws.zip</code>, which is supplied with official 
         releases of TurboVNC 2.1.2 and later (available at 
-        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files" class="remote">http://sourceforge.net/projects/turbovnc/files</a></span><a name="idx0039"></a>.) 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files" class="remote">http://sourceforge.net/projects/turbovnc/files</a></span><a name="idx0034"></a>.) 
         <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1082,37 +1042,39 @@ knowledge of web server administration.</p>
 &nbsp;&nbsp;&lt;/security&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Mac&nbsp;OS&nbsp;X&quot;&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtosx.jar&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;drawing&nbsp;tablet&nbsp;support&nbsp;for&nbsp;OS&nbsp;X&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-osx.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;x86&quot;&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtwin32.jar&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;for&nbsp;32-bit&nbsp;Windows&nbsp;clients&nbsp;--&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-win32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Windows&quot;&nbsp;arch=&quot;amd64&quot;&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-Dsun.java2d.d3d=false&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtwin64.jar&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;for&nbsp;64-bit&nbsp;Windows&nbsp;clients&nbsp;--&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-win64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;i386&quot;&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;&nbsp;java-vm-args=&quot;-server&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux32.jar&quot;/&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;and&nbsp;multi-screen&nbsp;spanning&nbsp;for
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;32-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing,&nbsp;multi-screen&nbsp;spanning,&nbsp;and&nbsp;extended
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input&nbsp;device&nbsp;support&nbsp;for&nbsp;32-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-linux32.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
 &nbsp;&nbsp;&lt;resources&nbsp;os=&quot;Linux&quot;&nbsp;arch=&quot;amd64&quot;&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.6+&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;j2se&nbsp;version=&quot;1.8+&quot;/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;ljtlinux64.jar&quot;/&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing&nbsp;and&nbsp;multi-screen&nbsp;spanning&nbsp;for
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;!--&nbsp;Enable&nbsp;keyboard&nbsp;grabbing,&nbsp;multi-screen&nbsp;spanning,&nbsp;and&nbsp;extended
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input&nbsp;device&nbsp;support&nbsp;for&nbsp;64-bit&nbsp;Linux&nbsp;clients&nbsp;--&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;nativelib&nbsp;href=&quot;tvnchelper-linux64.jar&quot;/&gt;
 &nbsp;&nbsp;&lt;/resources&gt;
 
@@ -1128,7 +1090,7 @@ knowledge of web server administration.</p>
         </p></div>
         This is just a minimal example.  Refer to the 
         <span class="remote"><a href="http://docs.oracle.com/javase/6/docs/technotes/guides/javaws/" class="remote">Java 
-        Web Start documentation</a></span><a name="idx0040"></a> for additional 
+        Web Start documentation</a></span><a name="idx0035"></a> for additional 
         fields that you might want to add. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1251,7 +1213,7 @@ environment variables.  See Section
 <a href="#VNC_VIA_CMD" class="ref">11.2</a> for more details.</p>
 
 <div class="important"><p class="important">
-NOTE: In this release of TurboVNC, the TurboVNC Viewer for Linux/Un*x and Mac platforms is actually the Java TurboVNC Viewer, which is packaged along with the libjpeg-turbo JNI library and necessary glueware to make the viewer behave and perform like a standalone native viewer.  Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>via</code> and <code>tunnel</code> parameters can also be used when the viewer is run as an applet or deployed using Java Web Start.
+NOTE: In this release of TurboVNC, the TurboVNC Viewer for Linux/Un*x and Mac platforms is actually the Java TurboVNC Viewer, which is packaged along with the libjpeg-turbo JNI library and necessary glueware to make the viewer behave and perform like a standalone native viewer.  Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>via</code> and <code>tunnel</code> parameters can also be used when the viewer is deployed using Java Web Start.
 </p></div>
 
 <div class="important"><p class="important">
@@ -1280,7 +1242,32 @@ new TurboVNC sessions that are started on the machine.</p>
 
 
 
-<h2 id="hd006006">6.6&nbsp;Further Reading</h2>
+<h2 id="hd006006">6.6&nbsp;Running OpenGL Applications</h2>
+
+<p>The TurboVNC Server includes a software GLX/OpenGL implementation that 
+can be used for casual 3D rendering.  This implementation uses the 
+swrast DRI driver provided by Mesa 8.x and later.  On systems that do 
+not have vendor-specific GPU drivers installed, or on systems that 
+provide a libglvnd-enabled build of Mesa, TurboVNC&rsquo;s software 
+OpenGL implementation can use direct rendering. Otherwise, it falls back 
+to indirect rendering, which is limited to the OpenGL 1.4 API and which 
+may perform sluggishly (particularly with continuous mouse input.)  In 
+general, if the server machine has a GPU, then you should use 
+<a href="#VGL">VirtualGL</a><a name="idx0036"></a> rather than relying 
+on TurboVNC&rsquo;s software OpenGL implementation.</p>
+
+<p>Passing <code>-extension&nbsp;GLX</code> to <code>vncserver</code> 
+disables the built-in GLX/OpenGL implementation, thus restoring the 
+behavior of TurboVNC 2.1.x and earlier (which required VirtualGL in 
+order to run OpenGL applications.)  Passing <code>-iglx</code> to 
+<code>vncserver</code> disables indirect rendering.  If the built-in 
+GLX/OpenGL implementation is not functioning properly, then pass 
+<code>-verbose</code> to <code>vncserver</code> to log informational 
+messages that may reveal the source of the problem.</p>
+
+
+
+<h2 id="hd006007">6.7&nbsp;Further Reading</h2>
 
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 
@@ -1392,7 +1379,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0041"></a> should be used
+            comparison</a><a name="idx0037"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1444,7 +1431,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0042"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0038"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1795,15 +1782,15 @@ the <code>vncviewer</code> script (Linux/Un*x), the
 <code>vncviewer-java.bat</code> script or the Start Menu shortcut 
 (Windows), or the standalone TurboVNC Viewer app (Mac).  If the viewer 
 is launched with Java Web Start using the <a href="#JWS">recommended 
-procedure</a><a name="idx0043"></a> or the 
+procedure</a><a name="idx0039"></a> or the 
 <a href="#Zero_Install">TurboVNC Server&rsquo;s built-in web 
-server</a><a name="idx0044"></a>, then the appropriate libjpeg-turbo JNI 
+server</a><a name="idx0040"></a>, then the appropriate libjpeg-turbo JNI 
 library will be downloaded along with it, assuming that the client 
 machine is running Windows, OS X, or Linux.  For other deployment 
 scenarios, the Java TurboVNC Viewer will find the libjpeg-turbo JNI 
 library if 
 <span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
-of the official libjpeg-turbo packages</a></span><a name="idx0045"></a> 
+of the official libjpeg-turbo packages</a></span><a name="idx0041"></a> 
 is installed on the client machine.</p>
 
 <p>If you suspect for whatever reason that JPEG decoding is not being 
@@ -1816,95 +1803,41 @@ also print a warning if it is unable to load libjpeg-turbo.</p>
 
 
 
-<h3 id="hd007006002">Windows Blitting Performance</h3>
+<h3 id="hd007006002">Blitting Performance</h3>
 
-<p>The default in Java 2D on Windows platforms is to use Direct3D for 
-blitting, but in the case of TurboVNC, using GDI blitting is almost 
-always much faster. If you are using Java 7 or later, running the Java 
-TurboVNC Viewer using the <code>vncviewer-java.bat</code> script, 
-launching the viewer using the Windows Start Menu shortcut, or launching 
-the viewer using Java Web Start, then Direct3D blitting will be disabled 
-by default, and no further action is necessary.  Otherwise, you should 
-consider setting the <code>sun.java2d.d3d</code> system property to 
-<code>false</code> (for instance, by passing 
-<code>-Dsun.java2d.d3d=false</code> as an argument to 
-<code>java</code>.)  You can use the ImageDrawTest benchmark to verify 
-whether Direct3D blitting is enabled or disabled.  To do this, execute 
-the following command:</p>
+<p>The Java TurboVNC Viewer includes a benchmark that can be used to 
+diagnose performance problems with Java 2D.  In order to run the 
+benchmark, execute the following command in a Command Prompt/terminal 
+window:</p>
 
+<dl class="Description">
+    <dt class="Description-1 Description">Windows</dt>
+    <dd class="Description-1 Description">
 <pre class="verbatim">
 java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;&quot;c:\Program&nbsp;Files\TurboVNC\Java\VncViewer.jar&quot;&nbsp;com.turbovnc.vncviewer.ImageDrawTest
 </pre>
 
-<p>Let the benchmark run for 15 or 20 seconds, then abort it with CTRL-C.  
-Looking at the Java 2D trace output will reveal which underlying API 
-(such as Windows GDI, OpenGL, Direct3D, etc.) is being used to draw the 
-images.</p>
-
-
-
-<h3 id="hd007006003">Mac Blitting Performance</h3>
-
-<p><a name="MacJavaPerf"></a></p>
-
-<p>When using the TurboVNC Viewer as a standalone application (as opposed 
-to with Java Web Start), there are two packages provided:</p>
-
-<p><code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>:</p>
-
-<ul class="Itemize">
-    <li class="Itemize-1 Itemize asterisk">
-        Requires 
-        <span class="remote"><a href="http://www.java.com" class="remote">Oracle 
-        Java</a></span><a name="idx0046"></a>, which requires OS X 10.7 
-        &ldquo;Lion&rdquo; or later
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Uses OpenGL for Java 2D blitting, which provides optimal performance for 
-        TurboVNC on OS X 10.10 &ldquo;Yosemite&rdquo; and later
-    </li>
-</ul>
-
-<p><code>TurboVNC-</code><em><code>{version}</code></em><code>-AppleJava.dmg</code>:</p>
-
-<ul class="Itemize">
-    <li class="Itemize-1 Itemize asterisk">
-        Requires Apple&rsquo;s (deprecated) distribution of Java (Java for OS X)
-        <ul class="Itemize">
-            <li class="Itemize-3 Itemize asterisk">
-                Java for OS X is pre-installed on OS X 10.6 and earlier and can be 
-                installed on later OS X releases by downloading the 
-                <span class="remote"><a href="https://support.apple.com/kb/DL1572" class="remote">Java 
-                for OS X package</a></span><a name="idx0047"></a> from Apple Support.
-            </li>
-        </ul>
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Uses a Quartz-accelerated Java 2D blitter that provides optimal 
-        performance for TurboVNC on OS X 10.9 &ldquo;Mavericks&rdquo; and earlier
-    </li>
-    <li class="Itemize-1 Itemize asterisk">
-        Should not be used on OS X 10.10 &ldquo;Yosemite&rdquo; and later
-        <ul class="Itemize">
-            <li class="Itemize-3 Itemize asterisk">
-                Doing so may result in visual anomalies and extremely slow performance, 
-                since Java for OS X does not enable its Quartz-accelerated Java 2D 
-                blitter on Yosemite and later.
-            </li>
-        </ul>
-    </li>
-</ul>
-
-<p>If you are unsure which package to use, then you can compare the 
-performance of both of them using the ImageDrawTest benchmark:</p>
-
+    </dd>
+    <dt class="Description-1 Description">Mac</dt>
+    <dd class="Description-1 Description">
 <pre class="verbatim">
-java&nbsp;-cp&nbsp;/Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Resources/Java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
+java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;/Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Resources/Java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
 </pre>
 
-<div class="important"><p class="important">
-NOTE: if you intend to use the desktop scaling feature in the Java TurboVNC Viewer along with Oracle Java, then upgrade Oracle Java to Java 8 Update 40 or later.  Java 8 Update 40 includes a fix for a severe performance issue in the OpenGL Java 2D blitter that affected scaled blitting.
-</p></div>
+    </dd>
+    <dt class="Description-1 Description">Linux/Un*x</dt>
+    <dd class="Description-1 Description">
+<pre class="verbatim">
+java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;/opt/TurboVNC/java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
+</pre>
+
+    </dd>
+</dl>
+
+<p>Let the benchmark run until it produces stable results, then abort it 
+with CTRL-C.  Looking at the Java 2D trace output will reveal which 
+underlying API is being used to draw the images.  This should generally 
+be OpenGL on Mac platforms and Windows GDI on Windows platforms.</p>
 
 <p><br /></p>
 
@@ -2243,6 +2176,8 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;vncpasswd
 
 <h1 id="hd009"><a name="file009"></a>9&nbsp;Using TurboVNC with VirtualGL</h1>
 
+<p><a name="VGL"></a></p>
+
 <p>Referring to the VirtualGL User&rsquo;s Guide, VirtualGL&rsquo;s X11 
 Transport draws 3D images onto an X display using standard X11 drawing 
 commands.  Since this results in the images being sent uncompressed to 
@@ -2510,7 +2445,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0048"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0042"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -3039,6 +2974,46 @@ about how Hextile, RRE, and ZRLE work.</p>
     </dd>
 </dl>
 
+<p><a name="TVNC_SINGLESCREEN"></a></p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_SINGLESCREEN&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable forcing a single-screen layout when using automatic desktop resizing</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">All</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        The default behavior of the TurboVNC Viewer, when automatic desktop 
+        resizing is enabled, is to request a desktop size from the server that 
+        will fit within the viewer window without using scrollbars, and (if 
+        multi-screen spanning is enabled) to request a screen layout from the 
+        server that will align the server&rsquo;s screen boundaries with the 
+        client&rsquo;s when the viewer window is in its default position.  
+        Setting this environment variable to 1 will restore the automatic 
+        desktop resizing behavior of previous versions of the TurboVNC Viewer, 
+        thus forcing the server to use a single-screen layout even if it 
+        supports multi-screen layouts.
+    </dd>
+</dl>
+
 <p><a name="VNC_VIA_CMD"></a></p>
 
 <div class="table">
@@ -3146,10 +3121,9 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 
 <p>to start the TurboVNC Viewer without JPEG acceleration.</p>
 
-<p>Refer to the default <code>index.vnc</code> and 
-<code>VncViewer.jnlp</code> files installed with the TurboVNC Server for 
-an example of how to specify Java command-line arguments in an applet or 
-Java Web Start environment.</p>
+<p>Refer to the default <code>VncViewer.jnlp</code> file installed with the 
+TurboVNC Server for an example of how to specify Java command-line 
+arguments in a Java Web Start environment.</p>
 
 <p><a name="turbovnc.forcealpha"></a></p>
 
@@ -3201,7 +3175,7 @@ Java Web Start environment.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">Enabled if running on OS X 10.7 or later</td>
+    <td class="standard">Enabled</td>
   </tr>
 </table>
 </div>
@@ -3257,6 +3231,33 @@ Java Web Start environment.</p>
         will only affect the client&rsquo;s CLIPBOARD selection (in other words, 
         you will have to explicitly paste the server&rsquo;s clipboard contents 
         by using a menu option or hotkey on the client.)
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.singlescreen&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable forcing a single-screen layout when using automatic desktop resizing</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        A more Java-friendly way of disabling the multi-screen-aware automatic 
+        desktop resize feature.  See the <code>TVNC_SINGLESCREEN</code> 
+        environment variable above for more details.
     </dd>
 </dl>
 

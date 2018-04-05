@@ -1,0 +1,578 @@
+Release 1.12 (2016-05-18)
+=========================
+* configure: Various fixes for dri3 and FD passing support
+* configure: Don't report all the warning CFLAGS
+* configure: Disable Xevie and Xprint by default
+* Add support for various new constructs in the XML schema
+* Make some functions also accept connections in an error state
+* Never return NULL from xcb_get_setup()
+* Use Requires.private in .pc files to avoid overlinking
+* Fix align-pads for switches which start at unaligned positions
+* Use anonymous structs for some nested structs
+* Also generate accessors for variable-sized events and requests
+* Improved python3 compatibility
+* Generate C99 initializers instead of comments
+* Various simplifications to the python code
+* Fix line breaks in xcb-requests manual page
+* Always close FDs in xcb_send_fd()
+* Fix thread-safety issues with FD passing
+* Add xcb_send_request_with_fds() and xcb_send_request_with_fds64()
+* Fix endless loop with too many outstanding FDs to send
+* Link with winsock library on MinGW
+* Disable some unfinished API for some server-side code by default
+* Use align-offsets computed by xcb-proto instead of low bits of pointers
+* Fix iterator interaction with align padding
+* Stop serializing padding by default
+* Increase unix socket send buffer to at least 64KiB
+
+Release 1.11.1 (2015-09-06)
+===========================
+* Expose 64-bit sequence numbers for XLib
+* Fix some hangs related to xcb_wait_for_special_event()
+
+Release 1.11 (2014-08-01)
+=========================
+* Force structures with 64-bit fields to be packed
+* Add support for <pad align="n">
+* Use X.org's build machinery from xorg-macros
+* Fix leak with xcb_disconnect() and connections in an error state
+* Make xcb_disconnect(NULL) safe
+* Use less #include statements in generated code
+* Automatically validate the Requires lines in our .pc.in files
+* Fix a race that resulted in a failed assertion
+* Improve launchd secure socket support
+* Improve API documentation
+* Remove trailing whitespaces
+* c_client.py: prefix all monkey-patched fields with c_
+* c_client.py: make the man page output deterministic
+* c_client.py: remove useless generated comments
+* xcb.h: add 'struct' before xcb_setup_t, xcb_query_extension_reply_t
+
+Release 1.10 (2013-12-22)
+=========================
+* Bump libxcb-xkb SONAME due to ABI break introduced in 1.9.2
+* Enable libxcb-xkb by default
+* Bump libxcb-sync SONAME
+* c_client.py: Fix _sizeof() functions
+* c_client.py: Do not create pointers in unions
+* c_client.py: Always initialize xcb_align_to
+* Re-introduce xcb_ge_event_t (deprecated, xcb_ge_generic_event_t should be
+  used instead)
+* Fix alignment issues in FD passing code
+* Fix poll() if POLLIN == ROLLRDNORM|POLLRDBAND
+* Use /usr/spool/sockets/X11/ on HP-UX for UNIX sockets
+* Make xsltproc optional
+
+Release 1.9.3 (2013-11-07)
+==========================
+* Check if we need to define _XOPEN_SOURCE for struct msghdr.msg_control
+* Add configure option to enable or disable fd passing with sendmsg
+* Switch to using the CMSG_* macros for FD passing
+* Initialize automake earlier (bugfix for #66413)
+
+Release 1.9.2 (2013-11-07)
+==========================
+* Add Present extension
+* Add DRI3 library
+* Add event queue splitting
+* Add support for receiving fds in replies
+* Add xcb_send_fd API
+* Remove xcb_ge_event_t from xcb.h
+* c_client.py: Inject full_sequence into GE events
+* c_client.py: Handle multiple expr. in a bitcase
+
+Release 1.9.1 (2013-05-30)
+==========================
+* Fix python code to work with python-3
+* Security fix for integer overflow in read_packet() [CVE-2013-2064]
+
+Release 1.9 (2012-10-05)
+========================
+* Always include "config.h" at the start of all C source files.
+* Add AC_USE_SYSTEM_EXTENSIONS to allow use of more system functionality
+* Return connection failure if display string specifies non-existent screen
+* c_client: Fix parallel-make issue creating 'man' directory
+* xcb_connect: launchd: Don't fall back on tcp if $DISPLAY is a path to a launchd socket
+* c_client.py: generate manpages
+* Allow xcb_send_request with >MAX_IOV iovecs
+* Add a .gitignore for src/man/
+* Fix a multi-thread deadlock
+
+Release 1.8.1 (2012-03-09)
+==========================
+- Fix a busy loop on BSD and Mac OS
+- Bump xcb-proto requirement
+- Fallback to TCP if no protocol is specified and the UNIX connection fails
+- Update use of error_connection under WIN32 to _xcb_conn_ret_error()
+- Fix build of xcb_auth.c with XDMCP on WIN32
+- Revert "Fix include order with Xdmcp on WIN32"
+- darwin: Use read(2) rather than recv(2)
+- Add xkb_internals and xkb_issues to EXTRA_DIST.
+
+Release 1.8 (2012-01-11)
+========================
+- xcb_disconnect: call shutdown() to force a disconnect
+- Use special path to sockets when running under Solaris Trusted Extensions
+- Remove unused DECnet code
+- Add #include <sys/socket.h> to xcb_conn.c
+- Make launchd code in xcb_util.c match surrounding code indent levels
+- If protocol is "unix", use a Unix domain socket, not TCP
+- Added more error states and removed global error_connection
+- Handle XGE events with the "send event" flag
+- added xcb_sumof() with restriction to uint8_t
+- xkb: updated configure.ac/Makefile.am
+- xkb: added pkg config file
+- special case 'intermixed variable and fixed size fields': fixed reply side, needs testing
+- added accessors for special cases
+- Add support for building with Python 3
+- Insert, not append explicit xcbgen dir python path
+- xcb_request_check: Sync even if an event was read for this sequence.
+- _xcb_conn_wait: Shut down the connection on unexpected poll() events.
+- xcb_send_request: Send all requests using a common internal send_request.
+- xcb_request_check: Hold the I/O lock while deciding to sync.
+- xcb_discard_reply: Simplify by re-using poll_for_reply helper.
+- xcb_in: Use 64-bit sequence numbers internally everywhere.
+- Enable AM_SILENT_RULES on automake 1.11 or newer.
+- Factor reader_list management out of wait_for_reply.
+- Dequeue readers that can't receive any new responses.
+- Delete the old c-client.xsl.
+- Keep ALIGNOF definition out of the public namespace.
+- darwin: Don't use poll() when expected to run on darwin10 and prior
+- Add Win32
+- Allow disconnecting connections that are in error state.
+- Make xcb_take_socket keep flushing until idle
+- Support pre-IPv6 systems (without getaddrinfo)
+- Drop AI_ADDRCONFIG when resolving TCP addresses
+- xcb_auth: Fix memory leak in _xcb_get_auth_info.
+- Don't emit out-of-module sizeof definitions
+- Clean up a couple of warnings in xprint
+- Prevent reply waiters from being blocked.
+- Prevent theoretical double free and leak on get_peer_sock_name.
+- Introduce a variant of xcb_poll_for_event for examining event queue.
+- xcb_take_socket: Document sequence wrap requirements
+- Compute alignment correctly
+- Fix a dead-lock due to xcb_poll_for_reply
+
+Release 1.7 (2010-08-13)
+========================
+- Always wake up readers after writing
+- Get rid of PATH_MAX and MAXPATHLEN
+- Add ~ operator support in code generator
+- xcb_open: Improve protocol/host parsing
+- xcb_connect_to_display_with_auth_info: Fix memory leak
+- Report which extensions are being built
+
+Release 1.6 (2010-04-09)
+========================
+- darwin: xnu doesn't support poll on ttys on the master side
+- Fix descriptor leak on memory error path
+- Support xcb_discard_reply
+- Open the X11 socket with close-on-exec flag
+- Fix authentication on hpux and Hurd
+
+Release 1.5 (2009-12-03)
+========================
+- setsockopt(SO_KEEPALIVE) on TCP display connections
+- Add DRI2 support
+- Fix check dependency
+- Cygwin build fix: Add -no-undefined to libtool flags
+
+Release 1.4 (2009-07-15)
+========================
+* Add majorCode, minorCode and resourceID fields to X generic error
+* Fix precedence bug: wrong length for big-requests preceded by sync
+* Fix libxcb-randr version info
+
+Release 1.3 (2009-05-29)
+========================
+* Copy full IPv4 mapping (Bug #20665)
+* Fix XID allocation
+* Use poll() instead of select() when available
+* Fix local socket connection on Hurd
+* Fix XDM-AUTHORIZATION-1
+* Disable Nagle on TCP socket
+
+Release 1.2 (2009-02-17)
+========================
+* Stop packaging auto-generated C files into tarball.
+
+Release 1.1.93 (2008-12-11)
+===========================
+Enhancements:
+* Apple: Enable support for launchd DISPLAY socket
+* Treat XIDs the same as other cardinal values.
+
+Release 1.1.92 (2008-11-01)
+===========================
+Enhancements:
+* Added small fix to support trailing fixed fields; also warning for non-pad fixed fields
+* Fixed overly aggressive warning about fixed field following variable
+* Added generation of extern "C" for compatibility with C++
+* Remove libxcb-xlib and xcbxlib.h.
+* Inline _xcb_lock_io, _xcb_unlock_io, and _xcb_wait_io.
+* Track 64-bit sequence numbers internally.
+* Use sequence number ranges in pending replies
+* Remove duplicate XCB_EXTENSION calls for Composite extension
+* Factorize m4 macros and add one to set X extensions
+* Allow compile-time setting for XCB queue buffer size
+* Support handing off socket write permission to external code.
+* Add support for the abstract socket namespace under Linux
+
+Bug fixes:
+* Fix tiny memory leak in read_packet
+* Fix some fd leaks in _xcb_open_*()
+
+Release 1.1 (2007-11-04)
+========================
+
+This release requires xcb-proto 1.1, due to the addition of the
+extension-multiword attribute to the XML schema.
+
+This release contains several important bug fixes, summarized below. It
+also contains a patch much like Novell's libxcb-sloppy-lock.diff.
+Rationale from the commit message follows. The patch and this rationale
+were authored by Jamey Sharp <jamey@minilop.net>, with agreement from
+Josh Triplett <josh@freedesktop.org>.
+
+    I strongly opposed proposals like this one for a long time.
+    Originally I had a very good reason: libX11, when compiled to use
+    XCB, would crash soon after a locking correctness violation, so it
+    was better to have an informative assert failure than a mystifying
+    crash soon after.
+
+    It took some time for me to realize that I'd changed the libX11
+    implementation (for unrelated reasons) so that it could survive most
+    invalid locking situations, as long as it wasn't actually being used
+    from multiple threads concurrently.
+
+    The other thing that has changed is that most of the code with
+    incorrect locking has now been fixed. The value of the assert is
+    accordingly lower.
+
+    However, remaining broken callers do need to be fixed. That's why
+    libXCB will still noisily print a stacktrace (if possible) on each
+    assertion failure, even when assert isn't actually invoked to
+    abort() the program; and that's why aborting is still default. This
+    environment variable is provided only for use as a temporary
+    workaround for broken applications.
+
+Enhancements:
+* Print a backtrace, if possible, on locking assertion failures.
+* Skip abort() on locking assertions if LIBXCB_ALLOW_SLOPPY_LOCK is set.
+* xcb_poll_for_event: Return already-read events before reading again.
+* Output a configuration summary at the end of ./configure.
+
+Bug fixes:
+* Don't hold the xlib-xcb lock while sleeping: that allows deadlock.
+* Allow unix:<screen> style display names again.
+* Bug #9119: test xcb_popcount
+* Fix unit tests for FreeBSD
+* NetBSD doesn't have AI_ADDRCONFIG: use it only if it's available.
+* Require libXau >= 0.99.2; earlier versions have a broken .pc file
+* Use substitition variables in xcb-xinerama.pc.in
+* Update autogen.sh to one that does objdir != srcdir
+* Add tools/* and autogen.sh to EXTRA_DIST.
+* Doxygen can now be fully disabled if desired.
+
+Documentation improvements:
+* Many fixes and updates to the tutorial.
+* Iterators, requests, and replies get partial Doxygen documentation.
+
+
+Release 1.0 (2006-11-23)
+========================
+
+The "Thanksgiving" release: We feel thankful to have it released.  Five years
+have passed since XCB's initial commit on September 3rd, 2001:
+    <http://gitweb.freedesktop.org/?p=xcb.git;a=commit;h=09e54c4a3c>
+
+* Support IPv6.  XCB now supports displays with IPv6 addresses, with or without
+  enclosing square brackets, or with hosts which resolve to IPv6 addresses, by
+  using getaddrinfo instead of gethostbyname, and by including support for
+  authentication for such connections.  This allows such displays as "::1:1.1".
+
+* XCB now uses the libpthread-stubs, to properly support optional use of
+  pthreads even on platforms which do not have all the necessary pthread stubs
+  in libc or otherwise available by default.
+
+* Switch from the old AM_PATH_CHECK macro to pkg-config.  check 0.9.4 is now
+  required to build XCB's unit tests.  The version that we were requiring was
+  not actually new enough to let our unit tests compile, and the AM_PATH_CHECK
+  macro is now considered deprecated.  We know that versions of check using
+  pkg-config are new enough to work, and the check dependency was optional
+  anyway, so we've dropped support for older versions.
+
+* Provide a xcb_prefetch_maximum_request_length counterpart to
+  xcb_get_maximum_request_length.
+
+* Fix Bug #5958: zero out padding bytes in requests.
+
+* Change xcb_connect to pass the display number to _xcb_get_auth_info, which
+  passes it to get_authptr.  This allows get_authptr to stop hacking the
+  display number out of the sockaddrs of various address families, such as
+  port - X_TCP_PORT, or the number after the last X in the UNIX socket path.
+
+* Remove --with-opt and --with-debug options from configure.ac; configure
+  supports the use of custom CFLAGS, so please use that instead.
+
+* Reove support for the <localfield> tag in protocol descriptions, since they
+  no longer use it, and since new protocol descriptions should not need it
+  either.
+
+* xcb-proto has no libraries or headers, so don't use XCBPROTO_CFLAGS or
+  XCBPROTO_LIBS.
+
+* XCB builds which use xdmcp now include it in Requires.private, to support
+  static linking.
+
+* Replace "long" with uint32_t when used for a 32-bit quantity
+
+* Various enhancements to the generation of documentation with Doxygen:
+  * Check for doxygen in configure.ac
+  * Fix some Doxygen warnings.
+  * Install documentation.
+  * Handle out-of-tree builds, with srcdir != builddir.  xcb.doxygen now gets
+    generated from xcb.doxygen.in, so that it can use top_builddir and
+    top_srcdir to find source and to output documentation.
+  * Fill in PROJECT_NUMBER from @VERSION@, now that we have it readily
+    available via autoconf.
+
+
+Release 1.0 RC3 (2006-11-02)
+============================
+
+Note: Version 0.9.4 of the test suite tool "check" provides a broken
+version of the AM_PATH_CHECK macro, which causes autoconf to fail due to
+insufficient quoting on the macro names it prints in its deprecation
+message. We have written a patch to fix this problem, available at:
+<http://bugs.debian.org/cgi-bin/bugreport.cgi/check-m4-am-path-check-use-quadrigraphs-in-macro-names-to-unbreak-autoconf.patch?bug=395466;msg=20;att=1>
+Version 0.9.4-2 of the Debian package for check includes this patch.
+Users of other distributions who want to re-autotool libxcb will need to
+apply this patch, use an older version of check, or wait for a fixed
+upstream version. This bug does not affect users who use the distributed
+tarballs and do not re-autotool.
+
+* Add library support for xcb-xinerama, using new protocol description
+  from xcb-proto.
+* In the generated protocol code, define and use constants for opcode
+  numbers rather than hard-coding them.
+* In the API conversion script, match only XCB-namespaced XID generators
+  when converting to xcb_generate_id.
+* Quit treating xproto specially in Makefile.am: handle it like all the
+  extensions.
+* Generate Doxygen documentation comments in the protocol stubs, and
+  provide a Doxygen config file for building HTML documentation for XCB.
+* Add note to xcbxlib.h that nothing except Xlib/XCB should use it.
+* Extend test suite to test xcb_parse_display with NULL argument and
+  display in $DISPLAY.
+
+
+Release 1.0 RC2 (2006-10-07)
+============================
+
+API changes
+-----------
+
+In our announcement of XCB 1.0 RC1, we proposed two API changes for
+community feedback:
+
+    We would greatly appreciate API review in this final release
+    candidate period. We've had some limited feedback that our attempts
+    to impose static type safety on XIDs in C pose more a hindrance than
+    a help, so we would appreciate discussion over whether this
+    constitutes a "serious issue with the API". Some question also
+    remains of whether xcb_poll_for_event should have the out-parameter
+    'error', now that XCB has a more uniform mechanism for reporting
+    connection errors. Speak now on these points or leave us alone. ;-)
+
+Since we've received feedback agreeing with our proposed changes, and no
+objections or requests to keep the existing API, we made both changes
+and bumped the soname to libxcb.so.1.0.0 in preparation for the release
+of XCB 1.0.
+
+* Remove XID wrapper structures and replace them with uint32_t typedefs.
+  XID union types like xcb_drawable_t and xcb_fontable_t also become
+  uint32_t typedefs. The API conversion script now replaces xcb_*_new
+  with calls directly to xcb_generate_id.  This change makes
+  xcb_generate_id part of the client API rather than the extension API,
+  so move xcb_generate_id from xcbext.h to xcb.h.
+
+* Remove the 'int *error' out-parameter for xcb_poll_for_event. 
+  xcb_poll_for_event now shuts down the xcb_connection_t on fatal
+  errors; use xcb_connection_has_error to check.
+
+The Xlib-specific API in libxcb-xlib also changed:
+
+* Stop exposing the XCB IO lock for Xlib's benefit, by removing
+  xcb_get_io_lock from the Xlib-specific XCB API; instead, libxcb-xlib
+  now provides xcb_xlib_lock and xcb_xlib_unlock.
+
+Code generation changes
+-----------------------
+
+* The code generator no longer implicitly imports xproto for extensions.
+  xcb-proto 1.0 RC2 includes the corresponding change to explicitly
+  import xproto in extensions that need it
+
+* The generated protocol headers now declare "struct foo", "union foo"
+  or "enum foo", not just the typedef "foo" of an unnamed
+  struct/union/enum type.
+
+Bug Fixes
+---------
+
+* Make Plan 7 'checked' requests work correctly.
+
+Documentation improvements
+--------------------------
+
+* Document xcb_generate_id.
+
+* Tutorial enhancements.
+
+
+Release 1.0 RC1 (2006-09-25)
+============================
+
+The Great XCB Renaming
+----------------------
+
+Rename API to follow a new naming convention:
+
+* XCB_CONSTANTS_UPPERCASE_WITH_UNDERSCORES
+* xcb_functions_lowercase_with_underscores
+* xcb_types_lowercase_with_underscores_and_suffix_t
+* expand all abbreviations like "req", "rep", and "iter"
+
+Word boundaries for the names in the protocol descriptions fall:
+
+* Wherever the protocol descriptions already have an underscore
+* Between a lowercase letter and a subsequent uppercase letter
+* Before the last uppercase letter in a string of uppercase letters
+  followed by a lowercase letter (such as in LSBFirst between LSB and
+  First)
+* Before and after a string of digits (with exceptions for sized types
+  like xcb_char2b_t and xcb_glx_float32_t to match the stdint.h
+  convention)
+
+Also fix up some particular naming issues:
+
+* Rename shape_op and shape_kind to drop the "shape_" prefix, since
+  otherwise these types end up as xcb_shape_shape_{op,kind}_t.
+* Remove leading underscores from enums in the GLX protocol description,
+  previously needed to ensure a word separator, but now redundant.
+
+This renaming breaks code written for the previous API naming
+convention. The scripts in XCB's tools directory will convert code
+written for the old API to use the new API; they work well enough that
+we used them to convert the non-program-generated code in XCB, and when
+run on the old program-generated code, they almost exactly reproduce the
+new program-generated code (modulo whitespace and bugs in the old code
+generator).
+
+Authors: Vincent Torri, Thomas Hunger, Josh Triplett
+
+In addition to the API renaming, the library SONAMEs have changed to
+libxcb.so and libxcb-extname.so. The library major version remains at 0,
+to become version 1 before 1.0 is released; the SONAME lowercasing means
+that this will not conflict with XCB 0.9 libraries.
+
+The header files have moved from /usr/include/X11/XCB/ to
+/usr/include/xcb/. The XML-XCB protocol descriptions have moved to
+/usr/share/xcb, with extension descriptions no longer relegated to an
+extensions/ subdirectory. The API conversion script api_conv.pl will fix
+references to the header files, and packages using pkg-config will
+automatically use the new library names.
+
+Error handling Plan 7
+---------------------
+
+All request functions now come in an "unchecked" and "checked" variant.
+The checked variant allows callers to handle errors inline where they
+obtain the reply, or by calling xcb_request_check for requests with no
+reply. The unchecked variant uses the event queue for errors. Requests
+with replies default to checked, because the caller must already make a
+function call to retrieve the reply and can see the error at that time;
+the unchecked variant uses the suffix _unchecked. Requests without
+replies default to unchecked, because the caller will not necessarily
+expect to handle a response, and the checked variant uses the suffix
+_checked.
+
+Connection error handling
+-------------------------
+
+Fatal connection errors now put the xcb_connection_t object into an
+error state, at which point all further operations on that connection
+will fail. Callers can use the new xcb_connection_has_error function to
+check for this state in a connection. Functions that return a
+connection, such as the xcb_connect function, may instead return an
+xcb_connection_t already in an error state.
+
+In the future we expect to add additional API for getting more
+information about the error condition that caused the connection to get
+into an error state.
+
+Smaller API changes
+-------------------
+
+All functions that have been marked 'deprecated' up to now have been
+removed for this release. After XCB 1.0 is released, functions marked
+'deprecated' will be preserved until the end of time to maintain
+compatibility.
+
+XCB no longer provides a sync function. Most callers of this function
+should use xcb_flush instead, which usually provides the intended
+functionality and does not require a round-trip to the server. If you
+really need this functionality, either use xcb_get_input_focus like sync
+used to do, or use the xcb_aux_sync function from the xcb-aux library in
+xcb-util. However, note that we do not consider the libraries in
+xcb-util remotely stable yet.
+
+XCB no longer provides xcb_[extension_name]_init functions for each
+extension. These functions previously caused XCB to issue and process a
+QueryExtension request. Callers should now directly call
+xcb_get_extension_data on the xcb_[extension_name]_id, or use
+xcb_prefetch_extension_data if they do not need to force a round-trip
+immediately.
+
+The compatibility functions in xcbxlib.h, provided solely for use by
+Xlib/XCB, now exist in a separate library libxcb-xlib. We don't want to
+have to change the libxcb soname if we later change or remove the Xlib
+compatibility functions, and nothing except Xlib/XCB should ever use
+them. (Applications which use Xlib/XCB do not need this library either;
+Xlib/XCB only uses it internally.)
+
+The descriptions of several extensions have been updated to match the
+latest versions implemented in the X.org X server.
+
+GIT Repository split
+--------------------
+
+Previously, several XCB-related projects all existed under the umbrella
+of a single monolithic GIT repository with per-project subdirectories.
+We have split this repository into individual per-project repositories.
+
+Josh Triplett and Jamey Sharp wrote a tool called git-split to
+accomplish this repository split. git-split reconstructs the history of
+a sub-project previously stored in a subdirectory of a larger
+repository. It constructs new commit objects based on the existing tree
+objects for the subtree in each commit, and discards commits which do
+not affect the history of the sub-project, as well as merges made
+unnecessary due to these discarded commits.
+
+We would like to acknowledge the work of the gobby team in creating a
+collaborative editor which greatly aided the development of git-split
+(as well as these release notes).
+
+Build and implementation fixes
+------------------------------
+
+XCB no longer needs proto/x11 from X.org; the XCB header xproto.h
+provides the definitions from X.h, named according to XCB conventions.
+
+XCB should now build with non-GNU implementations of Make.
+
+XCB properly handles 32-bit wrap of sequence numbers, and thus now
+supports issuing more than 2**32 requests in one connection.
+
+Fixed bugs #7001, #7261.

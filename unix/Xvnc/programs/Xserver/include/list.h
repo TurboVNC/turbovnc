@@ -26,6 +26,8 @@
 #ifndef _XORG_LIST_H_
 #define _XORG_LIST_H_
 
+#include <stddef.h> /* offsetof() */
+
 /**
  * @file Classic doubly-link circular list implementation.
  * For real usage examples of the linked list, see the file test/list.c
@@ -115,9 +117,9 @@ struct xorg_list {
  * Example:
  * xorg_list_init(&bar->list_of_foos);
  *
- * @param The list to initialized.
+ * @param list The list to initialize
  */
-static void
+static inline void
 xorg_list_init(struct xorg_list *list)
 {
     list->next = list->prev = list;
@@ -211,7 +213,7 @@ xorg_list_del(struct xorg_list *entry)
  *
  * @return True if the list contains one or more elements or False otherwise.
  */
-static inline Bool
+static inline int
 xorg_list_is_empty(struct xorg_list *head)
 {
     return head->next == head;
@@ -232,7 +234,7 @@ xorg_list_is_empty(struct xorg_list *head)
  */
 #ifndef container_of
 #define container_of(ptr, type, member) \
-    (type *)((char *)(ptr) - (char *) &((type *)0)->member)
+    (type *)((char *)(ptr) - offsetof(type, member))
 #endif
 
 /**
@@ -271,9 +273,20 @@ xorg_list_is_empty(struct xorg_list *head)
 #define xorg_list_last_entry(ptr, type, member) \
     xorg_list_entry((ptr)->prev, type, member)
 
-#define __container_of(ptr, sample, member)				\
-    (void *)((char *)(ptr)						\
-	     - ((char *)&(sample)->member - (char *)(sample)))
+#ifdef HAVE_TYPEOF
+#define __container_of(ptr, sample, member)			\
+    container_of(ptr, typeof(*sample), member)
+#else
+/* This implementation of __container_of has undefined behavior according
+ * to the C standard, but it works in many cases.  If your compiler doesn't
+ * support typeof() and fails with this implementation, please try a newer
+ * compiler.
+ */
+#define __container_of(ptr, sample, member)                            \
+    (void *)((char *)(ptr)                                             \
+            - ((char *)&(sample)->member - (char *)(sample)))
+#endif
+
 /**
  * Loop through the list given by head and set pos to struct in the list.
  *
@@ -291,8 +304,9 @@ xorg_list_is_empty(struct xorg_list *head)
  * @param member Member name of the struct xorg_list in the list elements.
  *
  */
-#define xorg_list_for_each_entry(pos, head, member)				\
-    for (pos = __container_of((head)->next, pos, member);		\
+#define xorg_list_for_each_entry(pos, head, member)			\
+    for (pos = NULL,                                                    \
+         pos = __container_of((head)->next, pos, member);		\
 	 &pos->member != (head);					\
 	 pos = __container_of(pos->member.next, pos, member))
 
@@ -304,7 +318,8 @@ xorg_list_is_empty(struct xorg_list *head)
  * See xorg_list_for_each_entry for more details.
  */
 #define xorg_list_for_each_entry_safe(pos, tmp, head, member)		\
-    for (pos = __container_of((head)->next, pos, member),		\
+    for (pos = NULL,                                                    \
+         pos = __container_of((head)->next, pos, member),		\
 	 tmp = __container_of(pos->member.next, pos, member);		\
 	 &pos->member != (head);					\
 	 pos = tmp, tmp = __container_of(pos->member.next, tmp, member))
@@ -345,7 +360,7 @@ xorg_list_is_empty(struct xorg_list *head)
  * struct foo *element = list;
  * while ((element = nt_list_next(element, next)) { }
  *
- * This macro is not safe for node deletion. Use xorg_list_for_each_entry_safe
+ * This macro is not safe for node deletion. Use nt_list_for_each_entry_safe
  * instead.
  *
  * @param list The list or current element.

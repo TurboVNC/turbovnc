@@ -75,7 +75,7 @@ miUninstallColormap(ColormapPtr pmap)
 
     if (pmap == curpmap) {
         if (pmap->mid != pmap->pScreen->defColormap) {
-            dixLookupResourceByType((pointer *) &curpmap,
+            dixLookupResourceByType((void **) &curpmap,
                                     pmap->pScreen->defColormap,
                                     RT_COLORMAP, serverClient, DixUseAccess);
             (*pmap->pScreen->InstallColormap) (curpmap);
@@ -235,42 +235,7 @@ miExpandDirectColors(ColormapPtr pmap, int ndef, xColorItem * indefs,
 Bool
 miCreateDefColormap(ScreenPtr pScreen)
 {
-/* 
- * In the following sources PC X server vendors may want to delete 
- * "_not_tog" from "#ifdef WIN32_not_tog"
- */
-#ifdef WIN32_not_tog
-    /*  
-     * these are the MS-Windows desktop colors, adjusted for X's 16-bit 
-     * color specifications.
-     */
-    static xColorItem citems[] = {
-        {0, 0, 0, 0, 0, 0},
-        {1, 0x8000, 0, 0, 0, 0},
-        {2, 0, 0x8000, 0, 0, 0},
-        {3, 0x8000, 0x8000, 0, 0, 0},
-        {4, 0, 0, 0x8000, 0, 0},
-        {5, 0x8000, 0, 0x8000, 0, 0},
-        {6, 0, 0x8000, 0x8000, 0, 0},
-        {7, 0xc000, 0xc000, 0xc000, 0, 0},
-        {8, 0xc000, 0xdc00, 0xc000, 0, 0},
-        {9, 0xa600, 0xca00, 0xf000, 0, 0},
-        {246, 0xff00, 0xfb00, 0xf000, 0, 0},
-        {247, 0xa000, 0xa000, 0xa400, 0, 0},
-        {248, 0x8000, 0x8000, 0x8000, 0, 0},
-        {249, 0xff00, 0, 0, 0, 0},
-        {250, 0, 0xff00, 0, 0, 0},
-        {251, 0xff00, 0xff00, 0, 0, 0},
-        {252, 0, 0, 0xff00, 0, 0},
-        {253, 0xff00, 0, 0xff00, 0, 0},
-        {254, 0, 0xff00, 0xff00, 0, 0},
-        {255, 0xff00, 0xff00, 0xff00, 0, 0}
-    };
-#define NUM_DESKTOP_COLORS sizeof citems / sizeof citems[0]
-    int i;
-#else
     unsigned short zero = 0, ones = 0xFFFF;
-#endif
     Pixel wp, bp;
     VisualPtr pVisual;
     ColormapPtr cmap;
@@ -294,21 +259,12 @@ miCreateDefColormap(ScreenPtr pScreen)
     if (pScreen->rootDepth > 1) {
         wp = pScreen->whitePixel;
         bp = pScreen->blackPixel;
-#ifdef WIN32_not_tog
-        for (i = 0; i < NUM_DESKTOP_COLORS; i++) {
-            if (AllocColor(cmap,
-                           &citems[i].red, &citems[i].green, &citems[i].blue,
-                           &citems[i].pixel, 0) != Success)
-                return FALSE;
-        }
-#else
         if ((AllocColor(cmap, &ones, &ones, &ones, &wp, 0) !=
              Success) ||
             (AllocColor(cmap, &zero, &zero, &zero, &bp, 0) != Success))
             return FALSE;
         pScreen->whitePixel = wp;
         pScreen->blackPixel = bp;
-#endif
     }
 
     (*pScreen->InstallColormap) (cmap);
@@ -502,9 +458,9 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
         ndepth++;
         nvisual += visuals->count;
     }
-    depth = malloc(ndepth * sizeof(DepthRec));
-    visual = malloc(nvisual * sizeof(VisualRec));
-    preferredCVCs = malloc(ndepth * sizeof(int));
+    depth = xallocarray(ndepth, sizeof(DepthRec));
+    visual = xallocarray(nvisual, sizeof(VisualRec));
+    preferredCVCs = xallocarray(ndepth, sizeof(int));
     if (!depth || !visual || !preferredCVCs) {
         free(depth);
         free(visual);
@@ -525,7 +481,7 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
         prefp++;
         vid = NULL;
         if (nvtype) {
-            vid = malloc(nvtype * sizeof(VisualID));
+            vid = xallocarray(nvtype, sizeof(VisualID));
             if (!vid) {
                 free(depth);
                 free(visual);

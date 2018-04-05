@@ -46,6 +46,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "cursorstr.h"
 #include "colormapst.h"
 #include "xace.h"
+#include "inputstr.h"
 #ifdef PANORAMIX
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
@@ -57,7 +58,7 @@ in this Software without prior written authorization from the X Consortium.
 
 #include <stdio.h>
 
-#include "modinit.h"
+#include "extinit.h"
 
 static int ScreenSaverEventBase = 0;
 
@@ -106,9 +107,7 @@ typedef struct _ScreenSaverSuspension {
     int count;
 } ScreenSaverSuspensionRec;
 
-static int ScreenSaverFreeSuspend(pointer /*value */ ,
-                                  XID   /* id */
-    );
+static int ScreenSaverFreeSuspend(void *value, XID id);
 
 /*
  * each screen has a list of clients requesting
@@ -130,18 +129,14 @@ typedef struct _ScreenSaverEvent {
     CARD32 mask;
 } ScreenSaverEventRec;
 
-static int ScreenSaverFreeEvents(pointer /* value */ ,
-                                 XID    /* id */
-    );
+static int ScreenSaverFreeEvents(void * value, XID id);
 
-static Bool setEventMask(ScreenPtr /* pScreen */ ,
-                         ClientPtr /* client */ ,
-                         unsigned long  /* mask */
-    );
+static Bool setEventMask(ScreenPtr      pScreen,
+                         ClientPtr      client,
+                         unsigned long  mask);
 
-static unsigned long getEventMask(ScreenPtr /* pScreen */ ,
-                                  ClientPtr     /* client */
-    );
+static unsigned long getEventMask(ScreenPtr     pScreen,
+                                  ClientPtr     client);
 
 /*
  * when a client sets the screen saver attributes, a resource is
@@ -167,21 +162,16 @@ typedef struct _ScreenSaverAttr {
     unsigned long *values;
 } ScreenSaverAttrRec, *ScreenSaverAttrPtr;
 
-static int ScreenSaverFreeAttr(pointer /* value */ ,
-                               XID      /* id */
-    );
+static int ScreenSaverFreeAttr(void *value, XID id);
 
-static void FreeAttrs(ScreenSaverAttrPtr        /* pAttr */
-    );
+static void FreeAttrs(ScreenSaverAttrPtr pAttr);
 
-static void FreeScreenAttr(ScreenSaverAttrPtr   /* pAttr */
-    );
+static void FreeScreenAttr(ScreenSaverAttrPtr pAttr);
 
 static void
- SendScreenSaverNotify(ScreenPtr /* pScreen */ ,
-                       int /* state */ ,
-                       Bool     /* forced */
-    );
+SendScreenSaverNotify(ScreenPtr pScreen,
+                      int       state,
+                      Bool      forced);
 
 typedef struct _ScreenSaverScreenPrivate {
     ScreenSaverEventPtr events;
@@ -190,8 +180,7 @@ typedef struct _ScreenSaverScreenPrivate {
     Colormap installedMap;
 } ScreenSaverScreenPrivateRec, *ScreenSaverScreenPrivatePtr;
 
-static ScreenSaverScreenPrivatePtr MakeScreenPrivate(ScreenPtr  /* pScreen */
-    );
+static ScreenSaverScreenPrivatePtr MakeScreenPrivate(ScreenPtr pScreen);
 
 static DevPrivateKeyRec ScreenPrivateKeyRec;
 
@@ -287,7 +276,7 @@ setEventMask(ScreenPtr pScreen, ClientPtr client, unsigned long mask)
             pEv->client = client;
             pEv->screen = pScreen;
             pEv->resource = FakeClientID(client->index);
-            if (!AddResource(pEv->resource, SaverEventType, (pointer) pEv))
+            if (!AddResource(pEv->resource, SaverEventType, (void *) pEv))
                 return FALSE;
         }
         pEv->mask = mask;
@@ -318,7 +307,7 @@ FreeScreenAttr(ScreenSaverAttrPtr pAttr)
 }
 
 static int
-ScreenSaverFreeEvents(pointer value, XID id)
+ScreenSaverFreeEvents(void *value, XID id)
 {
     ScreenSaverEventPtr pOld = (ScreenSaverEventPtr) value;
     ScreenPtr pScreen = pOld->screen;
@@ -340,7 +329,7 @@ ScreenSaverFreeEvents(pointer value, XID id)
 }
 
 static int
-ScreenSaverFreeAttr(pointer value, XID id)
+ScreenSaverFreeAttr(void *value, XID id)
 {
     ScreenSaverAttrPtr pOldAttr = (ScreenSaverAttrPtr) value;
     ScreenPtr pScreen = pOldAttr->screen;
@@ -362,7 +351,7 @@ ScreenSaverFreeAttr(pointer value, XID id)
 }
 
 static int
-ScreenSaverFreeSuspend(pointer value, XID id)
+ScreenSaverFreeSuspend(void *value, XID id)
 {
     ScreenSaverSuspensionPtr data = (ScreenSaverSuspensionPtr) value;
     ScreenSaverSuspensionPtr *prev, this;
@@ -388,8 +377,10 @@ ScreenSaverFreeSuspend(pointer value, XID id)
         if (screenIsSaved != SCREEN_SAVER_ON)
 #endif
         {
+            DeviceIntPtr dev;
             UpdateCurrentTimeIf();
-            lastDeviceEventTime = currentTime;
+            nt_list_for_each_entry(dev, inputInfo.devices, next)
+                NoticeTime(dev, currentTime);
             SetScreenSaverTimer();
         }
     }
@@ -403,7 +394,6 @@ SendScreenSaverNotify(ScreenPtr pScreen, int state, Bool forced)
     ScreenSaverScreenPrivatePtr pPriv;
     ScreenSaverEventPtr pEv;
     unsigned long mask;
-    xScreenSaverNotifyEvent ev;
     int kind;
 
     UpdateCurrentTimeIf();
@@ -421,16 +411,18 @@ SendScreenSaverNotify(ScreenPtr pScreen, int state, Bool forced)
     else
         kind = ScreenSaverInternal;
     for (pEv = pPriv->events; pEv; pEv = pEv->next) {
-        if (!(pEv->mask & mask))
-            continue;
-        ev.type = ScreenSaverNotify + ScreenSaverEventBase;
-        ev.state = state;
-        ev.timestamp = currentTime.milliseconds;
-        ev.root = pScreen->root->drawable.id;
-        ev.window = pScreen->screensaver.wid;
-        ev.kind = kind;
-        ev.forced = forced;
-        WriteEventsToClient(pEv->client, 1, (xEvent *) &ev);
+        if (pEv->mask & mask) {
+            xScreenSaverNotifyEvent ev = {
+                .type = ScreenSaverNotify + ScreenSaverEventBase,
+                .state = state,
+                .timestamp = currentTime.milliseconds,
+                .root = pScreen->root->drawable.id,
+                .window = pScreen->screensaver.wid,
+                .kind = kind,
+                .forced = forced
+            };
+            WriteEventsToClient(pEv->client, 1, (xEvent *) &ev);
+        }
     }
 }
 
@@ -456,7 +448,7 @@ UninstallSaverColormap(ScreenPtr pScreen)
     int rc;
 
     if (pPriv && pPriv->installedMap != None) {
-        rc = dixLookupResourceByType((pointer *) &pCmap, pPriv->installedMap,
+        rc = dixLookupResourceByType((void **) &pCmap, pPriv->installedMap,
                                      RT_COLORMAP, serverClient,
                                      DixUninstallAccess);
         if (rc == Success)
@@ -475,9 +467,6 @@ CreateSaverWindow(ScreenPtr pScreen)
     WindowPtr pWin;
     int result;
     unsigned long mask;
-    Colormap *installedMaps;
-    int numInstalled;
-    int i;
     Colormap wantMap;
     ColormapPtr pCmap;
 
@@ -525,15 +514,16 @@ CreateSaverWindow(ScreenPtr pScreen)
         mask |= CWBorderPixmap;
     }
     if (pAttr->pCursor) {
+        CursorPtr cursor;
         if (!pWin->optional)
             if (!MakeWindowOptional(pWin)) {
                 FreeResource(pWin->drawable.id, RT_NONE);
                 return FALSE;
             }
-        pAttr->pCursor->refcnt++;
+        cursor = RefCursor(pAttr->pCursor);
         if (pWin->optional->cursor)
             FreeCursor(pWin->optional->cursor, (Cursor) 0);
-        pWin->optional->cursor = pAttr->pCursor;
+        pWin->optional->cursor = cursor;
         pWin->cursorIsNone = FALSE;
         CheckWindowOptionalNeed(pWin);
         mask |= CWCursor;
@@ -552,21 +542,10 @@ CreateSaverWindow(ScreenPtr pScreen)
 
     /* check and install our own colormap if it isn't installed now */
     wantMap = wColormap(pWin);
-    if (wantMap == None)
-        return TRUE;
-    installedMaps = malloc(pScreen->maxInstalledCmaps * sizeof(Colormap));
-    numInstalled = (*pWin->drawable.pScreen->ListInstalledColormaps)
-        (pScreen, installedMaps);
-    for (i = 0; i < numInstalled; i++)
-        if (installedMaps[i] == wantMap)
-            break;
-
-    free((char *) installedMaps);
-
-    if (i < numInstalled)
+    if (wantMap == None || IsMapInstalled(wantMap, pWin))
         return TRUE;
 
-    result = dixLookupResourceByType((pointer *) &pCmap, wantMap, RT_COLORMAP,
+    result = dixLookupResourceByType((void **) &pCmap, wantMap, RT_COLORMAP,
                                      serverClient, DixInstallAccess);
     if (result != Success)
         return TRUE;
@@ -631,19 +610,21 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 static int
 ProcScreenSaverQueryVersion(ClientPtr client)
 {
-    xScreenSaverQueryVersionReply rep;
+    xScreenSaverQueryVersionReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .majorVersion = SERVER_SAVER_MAJOR_VERSION,
+        .minorVersion = SERVER_SAVER_MINOR_VERSION
+    };
 
     REQUEST_SIZE_MATCH(xScreenSaverQueryVersionReq);
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.majorVersion = SERVER_SAVER_MAJOR_VERSION;
-    rep.minorVersion = SERVER_SAVER_MINOR_VERSION;
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
     }
-    WriteToClient(client, sizeof(xScreenSaverQueryVersionReply), (char *) &rep);
+    WriteToClient(client, sizeof(xScreenSaverQueryVersionReply), &rep);
     return Success;
 }
 
@@ -672,12 +653,14 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     pPriv = GetScreenPrivate(pDraw->pScreen);
 
     UpdateCurrentTime();
-    lastInput = GetTimeInMillis() - lastDeviceEventTime.milliseconds;
+    lastInput = GetTimeInMillis() - LastEventTime(XIAllDevices).milliseconds;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.window = pSaver->wid;
+    rep = (xScreenSaverQueryInfoReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .window = pSaver->wid
+    };
     if (screenIsSaved != SCREEN_SAVER_OFF) {
         rep.state = ScreenSaverOn;
         if (ScreenSaverTime)
@@ -714,7 +697,7 @@ ProcScreenSaverQueryInfo(ClientPtr client)
         swapl(&rep.idle);
         swapl(&rep.eventMask);
     }
-    WriteToClient(client, sizeof(xScreenSaverQueryInfoReply), (char *) &rep);
+    WriteToClient(client, sizeof(xScreenSaverQueryInfoReply), &rep);
     return Success;
 }
 
@@ -827,7 +810,7 @@ ScreenSaverSetAttributes(ClientPtr client)
     if ((visual != ancwopt->visual) || (depth != pParent->drawable.depth)) {
         fOK = FALSE;
         for (idepth = 0; idepth < pScreen->numDepths; idepth++) {
-            pDepth = (DepthPtr) & pScreen->allowedDepths[idepth];
+            pDepth = (DepthPtr) &pScreen->allowedDepths[idepth];
             if ((depth == pDepth->depth) || (depth == 0)) {
                 for (ivisual = 0; ivisual < pDepth->numVids; ivisual++) {
                     if (visual == pDepth->vids[ivisual]) {
@@ -870,7 +853,7 @@ ScreenSaverSetAttributes(ClientPtr client)
         goto bail;
     }
     /* over allocate for override redirect */
-    pAttr->values = values = malloc((len + 1) * sizeof(unsigned long));
+    pAttr->values = values = xallocarray(len + 1, sizeof(unsigned long));
     if (!values) {
         ret = BadAlloc;
         goto bail;
@@ -914,7 +897,7 @@ ScreenSaverSetAttributes(ClientPtr client)
             }
             else {
                 ret =
-                    dixLookupResourceByType((pointer *) &pPixmap, pixID,
+                    dixLookupResourceByType((void **) &pPixmap, pixID,
                                             RT_PIXMAP, client, DixReadAccess);
                 if (ret == Success) {
                     if ((pPixmap->drawable.depth != depth) ||
@@ -946,7 +929,7 @@ ScreenSaverSetAttributes(ClientPtr client)
             }
             else {
                 ret =
-                    dixLookupResourceByType((pointer *) &pPixmap, pixID,
+                    dixLookupResourceByType((void **) &pPixmap, pixID,
                                             RT_PIXMAP, client, DixReadAccess);
                 if (ret == Success) {
                     if ((pPixmap->drawable.depth != depth) ||
@@ -1030,7 +1013,7 @@ ScreenSaverSetAttributes(ClientPtr client)
             break;
         case CWColormap:
             cmap = (Colormap) * pVlist;
-            ret = dixLookupResourceByType((pointer *) &pCmap, cmap, RT_COLORMAP,
+            ret = dixLookupResourceByType((void **) &pCmap, cmap, RT_COLORMAP,
                                           client, DixUseAccess);
             if (ret != Success) {
                 client->errorValue = cmap;
@@ -1049,14 +1032,13 @@ ScreenSaverSetAttributes(ClientPtr client)
                 *values++ = None;
             }
             else {
-                ret = dixLookupResourceByType((pointer *) &pCursor, cursorID,
+                ret = dixLookupResourceByType((void **) &pCursor, cursorID,
                                               RT_CURSOR, client, DixUseAccess);
                 if (ret != Success) {
                     client->errorValue = cursorID;
                     goto PatchUp;
                 }
-                pCursor->refcnt++;
-                pAttr->pCursor = pCursor;
+                pAttr->pCursor = RefCursor(pCursor);
                 pAttr->mask &= ~CWCursor;
             }
             break;
@@ -1071,7 +1053,7 @@ ScreenSaverSetAttributes(ClientPtr client)
         FreeScreenAttr(pPriv->attr);
     pPriv->attr = pAttr;
     pAttr->resource = FakeClientID(client->index);
-    if (!AddResource(pAttr->resource, AttrType, (pointer) pAttr))
+    if (!AddResource(pAttr->resource, AttrType, (void *) pAttr))
         return BadAlloc;
     return Success;
  PatchUp:
@@ -1123,7 +1105,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
 
         REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
 
-        status = dixLookupResourceByClass((pointer *) &draw, stuff->drawable,
+        status = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                           XRC_DRAWABLE, client, DixWriteAccess);
         if (status != Success)
             return (status == BadValue) ? BadDrawable : status;
@@ -1138,7 +1120,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
             pback_offset = Ones((Mask) stuff->mask & (CWBackPixmap - 1));
             tmp = *((CARD32 *) &stuff[1] + pback_offset);
             if ((tmp != None) && (tmp != ParentRelative)) {
-                status = dixLookupResourceByType((pointer *) &backPix, tmp,
+                status = dixLookupResourceByType((void **) &backPix, tmp,
                                                  XRT_PIXMAP, client,
                                                  DixReadAccess);
                 if (status != Success)
@@ -1150,7 +1132,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
             pbord_offset = Ones((Mask) stuff->mask & (CWBorderPixmap - 1));
             tmp = *((CARD32 *) &stuff[1] + pbord_offset);
             if (tmp != CopyFromParent) {
-                status = dixLookupResourceByType((pointer *) &bordPix, tmp,
+                status = dixLookupResourceByType((void **) &bordPix, tmp,
                                                  XRT_PIXMAP, client,
                                                  DixReadAccess);
                 if (status != Success)
@@ -1161,8 +1143,8 @@ ProcScreenSaverSetAttributes(ClientPtr client)
         if ((Mask) stuff->mask & CWColormap) {
             cmap_offset = Ones((Mask) stuff->mask & (CWColormap - 1));
             tmp = *((CARD32 *) &stuff[1] + cmap_offset);
-            if ((tmp != CopyFromParent) && (tmp != None)) {
-                status = dixLookupResourceByType((pointer *) &cmap, tmp,
+            if (tmp != CopyFromParent) {
+                status = dixLookupResourceByType((void **) &cmap, tmp,
                                                  XRT_COLORMAP, client,
                                                  DixReadAccess);
                 if (status != Success)
@@ -1203,7 +1185,9 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
         PanoramiXRes *draw;
         int rc, i;
 
-        rc = dixLookupResourceByClass((pointer *) &draw, stuff->drawable,
+        REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
+
+        rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
         if (rc != Success)
             return (rc == BadValue) ? BadDrawable : rc;
@@ -1262,7 +1246,7 @@ ProcScreenSaverSuspend(ClientPtr client)
     this->count = 1;
     this->clientResource = FakeClientID(client->index);
 
-    if (!AddResource(this->clientResource, SuspendType, (pointer) this)) {
+    if (!AddResource(this->clientResource, SuspendType, (void *) this)) {
         free(this);
         return BadAlloc;
     }
@@ -1381,7 +1365,7 @@ SProcScreenSaverDispatch(ClientPtr client)
 }
 
 void
-ScreenSaverExtensionInit(INITARGS)
+ScreenSaverExtensionInit(void)
 {
     ExtensionEntry *extEntry;
     int i;

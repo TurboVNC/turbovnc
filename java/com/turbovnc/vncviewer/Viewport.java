@@ -93,6 +93,10 @@ public class Viewport extends JFrame {
           grabKeyboardHelper(cc.shouldGrab());
           cc.selectGrab(cc.shouldGrab());
         }
+        if (VncViewer.os.startsWith("mac os x")) {
+          x11dpy = 0;
+          setupExtInputHelper();
+        }
       }
       public void windowLostFocus(WindowEvent e) {
         if (VncViewer.isKeyboardGrabbed() && isVisible() &&
@@ -100,6 +104,9 @@ public class Viewport extends JFrame {
           vlog.info("Keyboard focus lost. Temporarily ungrabbing keyboard.");
           grabKeyboardHelper(false);
         }
+        if (VncViewer.os.startsWith("mac os x") &&
+            e.getOppositeWindow() == null)
+          cleanupExtInputHelper();
       }
     });
 
@@ -149,7 +156,8 @@ public class Viewport extends JFrame {
                 Dimension availableSize = cc.viewport.getAvailableSize();
                 if (availableSize.width < 1 || availableSize.height < 1)
                   throw new ErrorException("Unexpected zero-size component");
-                cc.sendDesktopSize(availableSize.width, availableSize.height, true);
+                cc.sendDesktopSize(availableSize.width, availableSize.height,
+                                   true);
               }
             };
             timer = new Timer(500, actionListener);
@@ -183,7 +191,22 @@ public class Viewport extends JFrame {
         }
         repaint();
       }
+
+      public void componentMoved(ComponentEvent e) {
+        if (cc.opts.desktopSize.mode == Options.SIZE_AUTO &&
+            !cc.firstUpdate && !cc.pendingServerResize && cc.checkLayout) {
+          Dimension availableSize = cc.viewport.getAvailableSize();
+          int w = availableSize.width, h = availableSize.height;
+          ScreenSet layout = cc.computeScreenLayout(w, h);
+          cc.checkLayout = false;
+
+          if (w >= 1 && h >= 1 && !layout.equals(cc.cp.screenLayout))
+            cc.sendDesktopSize(w, h, layout, true);
+        }
+      }
     });
+
+    lastEvent.deviceID = -1;
   }
 
   public Dimension getAvailableSize() {
@@ -400,8 +423,7 @@ public class Viewport extends JFrame {
   }
 
   public void grabKeyboardHelper(boolean on, boolean force) {
-    if (VncViewer.osGrab() && !VncViewer.embed.getValue() &&
-        isHelperAvailable()) {
+    if (VncViewer.osGrab() && isHelperAvailable()) {
       try {
         if (((on && VncViewer.isKeyboardGrabbed(this)) ||
              (!on && !VncViewer.isKeyboardGrabbed())) && !force)
@@ -423,7 +445,12 @@ public class Viewport extends JFrame {
   public void setupExtInputHelper() {
     if (isHelperAvailable() && cc.cp.supportsGII && x11dpy == 0) {
       try {
-        setupExtInput();
+        if (VncViewer.os.startsWith("mac os x")) {
+          synchronized(VncViewer.class) {
+            setupExtInput();
+          }
+        } else
+          setupExtInput();
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
@@ -433,13 +460,91 @@ public class Viewport extends JFrame {
         vlog.info("  " + e.toString());
         vlog.info("  Extended input device support may not work correctly.");
       }
+      if (VncViewer.os.startsWith("mac os x") && devices == null) {
+        // Create default devices for Wacom tablet
+        for (int i = 0; i < 2; i++) {
+          ExtInputDevice dev = new ExtInputDevice();
+          dev.name = new String(i == 0 ? "Stylus" : "Eraser");
+          dev.id = i;
+          dev.vendorID = 4242;
+          dev.productID = (i == 0 ? giiTypes.giiDevTypeStylus :
+                                    giiTypes.giiDevTypeEraser);
+          dev.canGenerate = giiTypes.giiButtonPressMask |
+                            giiTypes.giiButtonReleaseMask |
+                            giiTypes.giiValuatorAbsoluteMask;
+          dev.numButtons = 3;
+          dev.absolute = true;
+
+          ExtInputDevice.Valuator val = dev.new Valuator();
+          val.index = 0;
+          val.longName = new String("Abs X");
+          val.shortName = new String("0");
+          val.rangeMin = 0;
+          val.rangeMax = 31496;
+          val.rangeCenter = 15748;
+          val.siUnit = giiTypes.giiUnitLength;
+          val.siDiv = 200000;
+          dev.addValuator(val);
+
+          val = dev.new Valuator();
+          val.index = 1;
+          val.longName = new String("Abs Y");
+          val.shortName = new String("1");
+          val.rangeMin = 0;
+          val.rangeMax = 19685;
+          val.rangeCenter = 9843;
+          val.siUnit = giiTypes.giiUnitLength;
+          val.siDiv = 200000;
+          dev.addValuator(val);
+
+          val = dev.new Valuator();
+          val.index = 2;
+          val.longName = new String("Abs Pressure");
+          val.shortName = new String("2");
+          val.rangeMin = 0;
+          val.rangeMax = 65536;
+          val.rangeCenter = 32768;
+          val.siUnit = giiTypes.giiUnitLength;
+          val.siDiv = 1;
+          dev.addValuator(val);
+
+          val = dev.new Valuator();
+          val.index = 3;
+          val.longName = new String("Abs Tilt X");
+          val.shortName = new String("3");
+          val.rangeMin = -64;
+          val.rangeMax = 63;
+          val.rangeCenter = 0;
+          val.siUnit = giiTypes.giiUnitLength;
+          val.siDiv = 57;
+          dev.addValuator(val);
+
+          val = dev.new Valuator();
+          val.index = 4;
+          val.longName = new String("Abs Tilt Y");
+          val.shortName = new String("4");
+          val.rangeMin = -64;
+          val.rangeMax = 63;
+          val.rangeCenter = 0;
+          val.siUnit = giiTypes.giiUnitLength;
+          val.siDiv = 57;
+          dev.addValuator(val);
+
+          addInputDevice(dev);
+        }
+      }
     }
   }
 
   public void cleanupExtInputHelper() {
     if (isHelperAvailable() && x11dpy != 0) {
       try {
-        cleanupExtInput();
+        if (VncViewer.os.startsWith("mac os x")) {
+          synchronized(VncViewer.class) {
+            cleanupExtInput();
+          }
+        } else
+          cleanupExtInput();
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke cleanupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
@@ -478,7 +583,8 @@ public class Viewport extends JFrame {
 
   boolean processExtInputEventHelper(int type) {
     boolean retval = false;
-    if (isHelperAvailable() && cc.cp.supportsGII) {
+    if (isHelperAvailable() && cc.cp.supportsGII &&
+        !VncViewer.os.startsWith("mac os x")) {
       boolean isExtEvent = false;
       try {
         isExtEvent = processExtInputEvent(type);
@@ -508,6 +614,144 @@ public class Viewport extends JFrame {
       }
     }
     return retval;
+  }
+
+  // At the moment, these two methods are used only by the Mac TurboVNC Helper.
+  void handleTabletProximityEvent(final boolean enteringProximity,
+                                  final int pointingDeviceType,
+                                  long windowID) {
+    if (devices == null)
+      return;
+
+    synchronized(lastEvent) {
+      if (enteringProximity) {
+        switch (pointingDeviceType) {
+        case 1:  // pen
+          lastEvent.deviceID = 0;  // Stylus
+          break;
+        case 3:  // eraser
+          lastEvent.deviceID = 1;  // Eraser
+          break;
+        }
+      } else
+        lastEvent.deviceID = -1;
+    }
+  }
+
+  boolean handleTabletEvent(final int type, final double x, final double y,
+                            final float pressure, final float tiltX,
+                            final float tiltY, long windowID) {
+    if (devices == null || windowID != x11win)
+      return false;
+
+    synchronized(lastEvent) {
+      if (lastEvent.deviceID < 0)
+        // No prior proximity event was received, so we don't know which
+        // tablet device is generating this event.  Punt to the regular
+        // mouse handler.
+        return false;
+    }
+
+    // Don't handle events that are out of the viewport bounds
+    if (y < 0.0 || y > (double)sp.getSize().height - 1.0 ||
+        x < 0.0 || x > (double)sp.getSize().width - 1.0)
+      return false;
+
+    final int NSLeftMouseDown = 1;
+    final int NSLeftMouseUp = 2;
+    final int NSRightMouseDown = 3;
+    final int NSRightMouseUp = 4;
+    final int NSMouseMoved = 5;
+    final int NSLeftMouseDragged = 6;
+    final int NSRightMouseDragged = 7;
+    final int NSOtherMouseDown = 25;
+    final int NSOtherMouseUp = 26;
+    final int NSOtherMouseDragged = 27;
+
+    try {
+      SwingUtilities.invokeLater(
+        new Runnable() {
+          public void run() {
+            synchronized(lastEvent) {
+              Dimension winSize = sp.getSize();
+              java.awt.Point spOffset = sp.getViewport().getViewPosition();
+              ExtInputDevice dev = null;
+              for (ExtInputDevice d : devices) {
+                if (lastEvent.deviceID == d.id && d.remoteID != 0)
+                  dev = d;
+              }
+              if (dev == null)
+                return;
+
+              if (type == NSLeftMouseDown || type == NSRightMouseDown ||
+                  type == NSOtherMouseDown)
+                lastEvent.type = giiTypes.giiButtonPress;
+              else if (type == NSLeftMouseUp || type == NSRightMouseUp ||
+                       type == NSOtherMouseUp)
+                lastEvent.type = giiTypes.giiButtonRelease;
+              else
+                lastEvent.type = giiTypes.giiValuatorAbsolute;
+
+              lastEvent.buttonNumber = 0;
+              if (type == NSLeftMouseDown || type == NSLeftMouseUp)
+                lastEvent.buttonNumber = 1;
+              else if (type == NSRightMouseDown || type == NSRightMouseUp)
+                lastEvent.buttonNumber = 2;
+              else if (type == NSOtherMouseDown || type == NSOtherMouseUp)
+                lastEvent.buttonNumber = 3;
+
+              lastEvent.firstValuator = 0;
+              lastEvent.numValuators = 5;
+
+              double xtmp = (double)x;
+              if (dx > 0)
+                xtmp -= (double)dx;
+              xtmp += spOffset.x;
+              if (cc.cp.width != cc.desktop.scaledWidth) {
+                xtmp = (cc.desktop.scaleWidthRatio == 1.00) ? xtmp :
+                        xtmp / cc.desktop.scaleWidthRatio;
+              }
+              ExtInputDevice.Valuator v =
+                (ExtInputDevice.Valuator)dev.valuators.get(0);
+              lastEvent.valuators[0] = (int)(xtmp / (double)(cc.cp.width - 1) *
+                                       (double)(v.rangeMax - v.rangeMin) +
+                                       (double)v.rangeMin + 0.5);
+              if (lastEvent.valuators[0] > v.rangeMax)
+                lastEvent.valuators[0] = v.rangeMax;
+              else if (lastEvent.valuators[0] < v.rangeMin)
+                lastEvent.valuators[0] = v.rangeMin;
+
+              double ytmp = (double)sp.getSize().height - y - 1.0;
+              if (dy > 0)
+                ytmp -= (double)dy;
+              ytmp += spOffset.y;
+              if (cc.cp.height != cc.desktop.scaledHeight) {
+                ytmp = (cc.desktop.scaleHeightRatio == 1.00) ? ytmp :
+                       ytmp / cc.desktop.scaleHeightRatio;
+              }
+              v = (ExtInputDevice.Valuator)dev.valuators.get(1);
+              lastEvent.valuators[1] = (int)(ytmp / (double)(cc.cp.height - 1) *
+                                       (double)(v.rangeMax - v.rangeMin) +
+                                       (double)v.rangeMin + 0.5);
+              if (lastEvent.valuators[1] > v.rangeMax)
+                lastEvent.valuators[1] = v.rangeMax;
+              else if (lastEvent.valuators[1] < v.rangeMin)
+                lastEvent.valuators[1] = v.rangeMin;
+
+              lastEvent.valuators[2] = (int)(pressure * 65536.0 + 0.5);
+              lastEvent.valuators[3] = (int)(tiltX * 63.0 + 0.5);
+              lastEvent.valuators[4] = (int)(tiltY * 63.0 + 0.5);
+
+              lastEvent.print();
+              cc.writer().writeGIIEvent(dev, lastEvent);
+            }
+          }
+        });
+    } catch (Exception e) {
+      vlog.error("SwingUtilities.invokeLater() failed: " + e.getMessage());
+      return false;
+    }
+    return true;
   }
 
   private native void x11FullScreen(boolean on);

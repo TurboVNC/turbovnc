@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -49,7 +49,8 @@ SOFTWARE.
 
 #include "misc.h"
 #include "screenint.h"
-
+#include "regionstr.h"
+#include <X11/extensions/randr.h>
 /* types for Drawable */
 #define DRAWABLE_WINDOW 0
 #define DRAWABLE_PIXMAP 1
@@ -73,6 +74,8 @@ SOFTWARE.
 typedef struct _Drawable *DrawablePtr;
 typedef struct _Pixmap *PixmapPtr;
 
+typedef struct _PixmapDirtyUpdate *PixmapDirtyUpdatePtr;
+
 typedef union _PixUnion {
     PixmapPtr pixmap;
     unsigned long pixel;
@@ -90,23 +93,44 @@ typedef union _PixUnion {
 #define WindowDrawable(type) \
 	((type == DRAWABLE_WINDOW) || (type == UNDRAWABLE_WINDOW))
 
-extern _X_EXPORT PixmapPtr GetScratchPixmapHeader(ScreenPtr /*pScreen */ ,
-                                                  int /*width */ ,
-                                                  int /*height */ ,
-                                                  int /*depth */ ,
-                                                  int /*bitsPerPixel */ ,
-                                                  int /*devKind */ ,
-                                                  pointer /*pPixData */ );
+extern _X_EXPORT PixmapPtr GetScratchPixmapHeader(ScreenPtr pScreen,
+                                                  int width,
+                                                  int height,
+                                                  int depth,
+                                                  int bitsPerPixel,
+                                                  int devKind,
+                                                  void *pPixData);
 
 extern _X_EXPORT void FreeScratchPixmapHeader(PixmapPtr /*pPixmap */ );
 
-extern _X_EXPORT Bool CreateScratchPixmapsForScreen(int /*scrnum */ );
+extern _X_EXPORT Bool CreateScratchPixmapsForScreen(ScreenPtr /*pScreen */ );
 
-extern _X_EXPORT void FreeScratchPixmapsForScreen(int /*scrnum */ );
+extern _X_EXPORT void FreeScratchPixmapsForScreen(ScreenPtr /*pScreen */ );
 
 extern _X_EXPORT PixmapPtr AllocatePixmap(ScreenPtr /*pScreen */ ,
                                           int /*pixDataSize */ );
 
 extern _X_EXPORT void FreePixmap(PixmapPtr /*pPixmap */ );
+
+extern _X_EXPORT PixmapPtr
+PixmapShareToSlave(PixmapPtr pixmap, ScreenPtr slave);
+
+extern _X_EXPORT void
+PixmapUnshareSlavePixmap(PixmapPtr slave_pixmap);
+
+#define HAS_DIRTYTRACKING_ROTATION 1
+extern _X_EXPORT Bool
+PixmapStartDirtyTracking(PixmapPtr src,
+                         PixmapPtr slave_dst,
+                         int x, int y, int dst_x, int dst_y,
+                         Rotation rotation);
+
+extern _X_EXPORT Bool
+PixmapStopDirtyTracking(PixmapPtr src, PixmapPtr slave_dst);
+
+/* helper function, drivers can do this themselves if they can do it more
+   efficently */
+extern _X_EXPORT Bool
+PixmapSyncDirtyHelper(PixmapDirtyUpdatePtr dirty);
 
 #endif                          /* PIXMAP_H */

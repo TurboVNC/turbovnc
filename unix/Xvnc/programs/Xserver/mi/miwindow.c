@@ -27,13 +27,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -57,6 +57,7 @@ SOFTWARE.
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "mivalidate.h"
+#include "inputstr.h"
 
 void
 miClearToBackground(WindowPtr pWin,
@@ -110,9 +111,9 @@ miClearToBackground(WindowPtr pWin,
 
     RegionIntersect(&reg, &reg, &pWin->clipList);
     if (generateExposures)
-        (*pWin->drawable.pScreen->WindowExposures) (pWin, &reg, NULL);
+        (*pWin->drawable.pScreen->WindowExposures) (pWin, &reg);
     else if (pWin->backgroundState != None)
-        miPaintWindow(pWin, &reg, PW_BACKGROUND);
+        pWin->drawable.pScreen->PaintWindow(pWin, &reg, PW_BACKGROUND);
     RegionUninit(&reg);
 }
 
@@ -218,9 +219,11 @@ miHandleValidateExposures(WindowPtr pWin)
     while (1) {
         if ((val = pChild->valdata)) {
             if (RegionNotEmpty(&val->after.borderExposed))
-                miPaintWindow(pChild, &val->after.borderExposed, PW_BORDER);
+                pWin->drawable.pScreen->PaintWindow(pChild,
+                                                    &val->after.borderExposed,
+                                                    PW_BORDER);
             RegionUninit(&val->after.borderExposed);
-            (*WindowExposures) (pChild, &val->after.exposed, NullRegion);
+            (*WindowExposures) (pChild, &val->after.exposed);
             RegionUninit(&val->after.exposed);
             free(val);
             pChild->valdata = NULL;
@@ -291,9 +294,9 @@ miMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pNextSib, VTKind kind)
             RegionDestroy(oldRegion);
             /* XXX need to retile border if ParentRelative origin */
             (*pScreen->HandleExposures) (pLayerWin->parent);
+            if (pScreen->PostValidateTree)
+                (*pScreen->PostValidateTree) (pLayerWin->parent, NULL, kind);
         }
-        if (anyMarked && pScreen->PostValidateTree)
-            (*pScreen->PostValidateTree) (pLayerWin->parent, NullWindow, kind);
     }
     if (pWin->realized)
         WindowsRestructured();
@@ -305,7 +308,7 @@ miMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pNextSib, VTKind kind)
  */
 
 static int
-miRecomputeExposures(WindowPtr pWin, pointer value)
+miRecomputeExposures(WindowPtr pWin, void *value)
 {                               /* must conform to VisitWindowProcPtr */
     RegionPtr pValid = (RegionPtr) value;
 
@@ -336,9 +339,8 @@ miRecomputeExposures(WindowPtr pWin, pointer value)
 }
 
 void
-miSlideAndSizeWindow(WindowPtr pWin,
-                     int x, int y,
-                     unsigned int w, unsigned int h, WindowPtr pSib)
+miResizeWindow(WindowPtr pWin, int x, int y, unsigned int w, unsigned int h,
+               WindowPtr pSib)
 {
     WindowPtr pParent;
     Bool WasViewable = (Bool) (pWin->viewable);
@@ -584,7 +586,7 @@ miSlideAndSizeWindow(WindowPtr pWin,
                 if (pChild->winGravity != g)
                     continue;
                 RegionIntersect(pRegion, &pChild->borderClip, gravitate[g]);
-                TraverseTree(pChild, miRecomputeExposures, (pointer) pRegion);
+                TraverseTree(pChild, miRecomputeExposures, (void *) pRegion);
             }
 
             /*
@@ -607,11 +609,12 @@ miSlideAndSizeWindow(WindowPtr pWin,
         RegionDestroy(pRegion);
         if (destClip)
             RegionDestroy(destClip);
-        if (anyMarked)
+        if (anyMarked) {
             (*pScreen->HandleExposures) (pLayerWin->parent);
-        if (anyMarked && pScreen->PostValidateTree)
-            (*pScreen->PostValidateTree) (pLayerWin->parent, pFirstChange,
-                                          VTOther);
+            if (pScreen->PostValidateTree)
+                (*pScreen->PostValidateTree) (pLayerWin->parent, pFirstChange,
+                                              VTOther);
+        }
     }
     if (pWin->realized)
         WindowsRestructured();
@@ -663,17 +666,14 @@ miSetShape(WindowPtr pWin, int kind)
         if (WasViewable) {
             anyMarked |= (*pScreen->MarkOverlappedWindows) (pWin, pWin, NULL);
 
-            if (anyMarked)
+            if (anyMarked) {
                 (*pScreen->ValidateTree) (pLayerWin->parent, NullWindow,
                                           VTOther);
-        }
-
-        if (WasViewable) {
-            if (anyMarked)
                 (*pScreen->HandleExposures) (pLayerWin->parent);
-            if (anyMarked && pScreen->PostValidateTree)
-                (*pScreen->PostValidateTree) (pLayerWin->parent, NullWindow,
-                                              VTOther);
+                if (pScreen->PostValidateTree)
+                    (*pScreen->PostValidateTree) (pLayerWin->parent, NULL,
+                                                  VTOther);
+            }
         }
     }
     if (pWin->realized)
@@ -725,10 +725,10 @@ miChangeBorderWidth(WindowPtr pWin, unsigned int width)
         if (anyMarked) {
             (*pScreen->ValidateTree) (pLayerWin->parent, pLayerWin, VTOther);
             (*pScreen->HandleExposures) (pLayerWin->parent);
+            if (pScreen->PostValidateTree)
+                (*pScreen->PostValidateTree) (pLayerWin->parent, pLayerWin,
+                                              VTOther);
         }
-        if (anyMarked && pScreen->PostValidateTree)
-            (*pScreen->PostValidateTree) (pLayerWin->parent, pLayerWin,
-                                          VTOther);
     }
     if (pWin->realized)
         WindowsRestructured();
@@ -745,16 +745,64 @@ miMarkUnrealizedWindow(WindowPtr pChild, WindowPtr pWin, Bool fromConfigure)
     }
 }
 
-void
-miSegregateChildren(WindowPtr pWin, RegionPtr pReg, int depth)
+WindowPtr
+miSpriteTrace(SpritePtr pSprite, int x, int y)
 {
-    WindowPtr pChild;
+    WindowPtr pWin;
+    BoxRec box;
 
-    for (pChild = pWin->firstChild; pChild; pChild = pChild->nextSib) {
-        if (pChild->drawable.depth == depth)
-            RegionUnion(pReg, pReg, &pChild->borderClip);
-
-        if (pChild->firstChild)
-            miSegregateChildren(pChild, pReg, depth);
+    pWin = DeepestSpriteWin(pSprite)->firstChild;
+    while (pWin) {
+        if ((pWin->mapped) &&
+            (x >= pWin->drawable.x - wBorderWidth(pWin)) &&
+            (x < pWin->drawable.x + (int) pWin->drawable.width +
+             wBorderWidth(pWin)) &&
+            (y >= pWin->drawable.y - wBorderWidth(pWin)) &&
+            (y < pWin->drawable.y + (int) pWin->drawable.height +
+             wBorderWidth(pWin))
+            /* When a window is shaped, a further check
+             * is made to see if the point is inside
+             * borderSize
+             */
+            && (!wBoundingShape(pWin) || PointInBorderSize(pWin, x, y))
+            && (!wInputShape(pWin) ||
+                RegionContainsPoint(wInputShape(pWin),
+                                    x - pWin->drawable.x,
+                                    y - pWin->drawable.y, &box))
+            /* In rootless mode windows may be offscreen, even when
+             * they're in X's stack. (E.g. if the native window system
+             * implements some form of virtual desktop system).
+             */
+            && !pWin->unhittable) {
+            if (pSprite->spriteTraceGood >= pSprite->spriteTraceSize) {
+                pSprite->spriteTraceSize += 10;
+                pSprite->spriteTrace = reallocarray(pSprite->spriteTrace,
+                                                    pSprite->spriteTraceSize,
+                                                    sizeof(WindowPtr));
+            }
+            pSprite->spriteTrace[pSprite->spriteTraceGood++] = pWin;
+            pWin = pWin->firstChild;
+        }
+        else
+            pWin = pWin->nextSib;
     }
+    return DeepestSpriteWin(pSprite);
+}
+
+/**
+ * Traversed from the root window to the window at the position x/y. While
+ * traversing, it sets up the traversal history in the spriteTrace array.
+ * After completing, the spriteTrace history is set in the following way:
+ *   spriteTrace[0] ... root window
+ *   spriteTrace[1] ... top level window that encloses x/y
+ *       ...
+ *   spriteTrace[spriteTraceGood - 1] ... window at x/y
+ *
+ * @returns the window at the given coordinates.
+ */
+WindowPtr
+miXYToWindow(ScreenPtr pScreen, SpritePtr pSprite, int x, int y)
+{
+    pSprite->spriteTraceGood = 1;       /* root window still there */
+    return miSpriteTrace(pSprite, x, y);
 }

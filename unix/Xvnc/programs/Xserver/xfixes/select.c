@@ -51,7 +51,7 @@ typedef struct _SelectionEvent {
 static SelectionEventPtr selectionEvents;
 
 static void
-XFixesSelectionCallback(CallbackListPtr *callbacks, pointer data, pointer args)
+XFixesSelectionCallback(CallbackListPtr *callbacks, void *data, void *args)
 {
     SelectionEventPtr e;
     SelectionInfoRec *info = (SelectionInfoRec *) args;
@@ -75,21 +75,19 @@ XFixesSelectionCallback(CallbackListPtr *callbacks, pointer data, pointer args)
     default:
         return;
     }
+    UpdateCurrentTimeIf();
     for (e = selectionEvents; e; e = e->next) {
         if (e->selection == selection->selection && (e->eventMask & eventMask)) {
-            xXFixesSelectionNotifyEvent ev;
-
-            memset(&ev, 0, sizeof(xXFixesSelectionNotifyEvent));
-            ev.type = XFixesEventBase + XFixesSelectionNotify;
-            ev.subtype = subtype;
-            ev.window = e->pWindow->drawable.id;
-            if (subtype == XFixesSetSelectionOwnerNotify)
-                ev.owner = selection->window;
-            else
-                ev.owner = 0;
-            ev.selection = e->selection;
-            ev.timestamp = currentTime.milliseconds;
-            ev.selectionTimestamp = selection->lastTimeChanged.milliseconds;
+            xXFixesSelectionNotifyEvent ev = {
+                .type = XFixesEventBase + XFixesSelectionNotify,
+                .subtype = subtype,
+                .window = e->pWindow->drawable.id,
+                .owner = (subtype == XFixesSetSelectionOwnerNotify) ?
+                            selection->window : 0,
+                .selection = e->selection,
+                .timestamp = currentTime.milliseconds,
+                .selectionTimestamp = selection->lastTimeChanged.milliseconds
+            };
             WriteEventsToClient(e->pClient, 1, (xEvent *) &ev);
         }
     }
@@ -122,7 +120,7 @@ static int
 XFixesSelectSelectionInput(ClientPtr pClient,
                            Atom selection, WindowPtr pWindow, CARD32 eventMask)
 {
-    pointer val;
+    void *val;
     int rc;
     SelectionEventPtr *prev, e;
 
@@ -162,12 +160,12 @@ XFixesSelectSelectionInput(ClientPtr pClient,
                                      DixGetAttrAccess);
         if (rc != Success)
             if (!AddResource(pWindow->drawable.id, SelectionWindowType,
-                             (pointer) pWindow)) {
+                             (void *) pWindow)) {
                 free(e);
                 return BadAlloc;
             }
 
-        if (!AddResource(e->clientResource, SelectionClientType, (pointer) e))
+        if (!AddResource(e->clientResource, SelectionClientType, (void *) e))
             return BadAlloc;
 
         *prev = e;
@@ -226,7 +224,7 @@ SXFixesSelectionNotifyEvent(xXFixesSelectionNotifyEvent * from,
 }
 
 static int
-SelectionFreeClient(pointer data, XID id)
+SelectionFreeClient(void *data, XID id)
 {
     SelectionEventPtr old = (SelectionEventPtr) data;
     SelectionEventPtr *prev, e;
@@ -243,7 +241,7 @@ SelectionFreeClient(pointer data, XID id)
 }
 
 static int
-SelectionFreeWindow(pointer data, XID id)
+SelectionFreeWindow(void *data, XID id)
 {
     WindowPtr pWindow = (WindowPtr) data;
     SelectionEventPtr e, next;

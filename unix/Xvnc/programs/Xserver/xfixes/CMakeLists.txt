@@ -1,4 +1,4 @@
-include_directories(../mi ../render ../Xext)
+include_directories(. ../Xi ../mi ../render)
 
 handle_type_puns()
 

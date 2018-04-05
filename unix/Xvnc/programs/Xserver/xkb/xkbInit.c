@@ -6,19 +6,19 @@ software and its documentation for any purpose and without
 fee is hereby granted, provided that the above copyright
 notice appear in all copies and that both that copyright
 notice and this permission notice appear in supporting
-documentation, and that the name of Silicon Graphics not be 
-used in advertising or publicity pertaining to distribution 
+documentation, and that the name of Silicon Graphics not be
+used in advertising or publicity pertaining to distribution
 of the software without specific prior written permission.
-Silicon Graphics makes no representation about the suitability 
+Silicon Graphics makes no representation about the suitability
 of this software for any purpose. It is provided "as is"
 without any express or implied warranty.
 
-SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS 
-SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY 
+SILICON GRAPHICS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL SILICON
-GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL 
-DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, 
-DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE 
+GRAPHICS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
+DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
 OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION  WITH
 THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
@@ -60,7 +60,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	LED_NUM		5
 #define	PHYS_LEDS	0x1f
 #else
-#ifdef sun
+#ifdef __sun
 #define LED_NUM		1
 #define	LED_SCROLL	2
 #define	LED_COMPOSE	3
@@ -142,7 +142,7 @@ XkbFreeRMLVOSet(XkbRMLVOSet * rmlvo, Bool freeRMLVO)
 }
 
 static Bool
-XkbWriteRulesProp(ClientPtr client, pointer closure)
+XkbWriteRulesProp(ClientPtr client, void *closure)
 {
     int len, out;
     Atom name;
@@ -206,6 +206,21 @@ XkbWriteRulesProp(ClientPtr client, pointer closure)
     return TRUE;
 }
 
+void
+XkbInitRules(XkbRMLVOSet *rmlvo,
+             const char *rules,
+             const char *model,
+             const char *layout,
+             const char *variant,
+             const char *options)
+{
+    rmlvo->rules = rules ? xnfstrdup(rules) : NULL;
+    rmlvo->model = model ? xnfstrdup(model) : NULL;
+    rmlvo->layout = layout ? xnfstrdup(layout) : NULL;
+    rmlvo->variant = variant ? xnfstrdup(variant) : NULL;
+    rmlvo->options = options ? xnfstrdup(options) : NULL;
+}
+
 static void
 XkbSetRulesUsed(XkbRMLVOSet * rmlvo)
 {
@@ -248,6 +263,21 @@ XkbSetRulesDflts(XkbRMLVOSet * rmlvo)
         XkbOptionsDflt = Xstrdup(rmlvo->options);
     }
     return;
+}
+
+void
+XkbDeleteRulesUsed(void)
+{
+    free(XkbRulesUsed);
+    XkbRulesUsed = NULL;
+    free(XkbModelUsed);
+    XkbModelUsed = NULL;
+    free(XkbLayoutUsed);
+    XkbLayoutUsed = NULL;
+    free(XkbVariantUsed);
+    XkbVariantUsed = NULL;
+    free(XkbOptionsUsed);
+    XkbOptionsUsed = NULL;
 }
 
 void
@@ -475,9 +505,10 @@ XkbInitControls(DeviceIntPtr pXDev, XkbSrvInfoPtr xkbi)
     return Success;
 }
 
-_X_EXPORT Bool
-InitKeyboardDeviceStruct(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
-                         BellProcPtr bell_func, KbdCtrlProcPtr ctrl_func)
+static Bool
+InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
+                                 const char *keymap, int keymap_length,
+                                 BellProcPtr bell_func, KbdCtrlProcPtr ctrl_func)
 {
     int i;
     unsigned int check;
@@ -488,10 +519,12 @@ InitKeyboardDeviceStruct(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     XkbEventCauseRec cause;
     XkbRMLVOSet rmlvo_dflts = { NULL };
 
-    if (dev->key || dev->kbdfeed)
-        return FALSE;
+    BUG_RETURN_VAL(dev == NULL, FALSE);
+    BUG_RETURN_VAL(dev->key != NULL, FALSE);
+    BUG_RETURN_VAL(dev->kbdfeed != NULL, FALSE);
+    BUG_RETURN_VAL(rmlvo && keymap, FALSE);
 
-    if (!rmlvo) {
+    if (!rmlvo && !keymap) {
         rmlvo = &rmlvo_dflts;
         XkbGetRulesDflts(rmlvo);
     }
@@ -519,7 +552,7 @@ InitKeyboardDeviceStruct(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     }
     dev->key->xkbInfo = xkbi;
 
-    if (xkb_cached_map && !XkbCompareUsedRMLVO(rmlvo)) {
+    if (xkb_cached_map && (keymap || (rmlvo && !XkbCompareUsedRMLVO(rmlvo)))) {
         XkbFreeKeyboard(xkb_cached_map, XkbAllComponentsMask, TRUE);
         xkb_cached_map = NULL;
     }
@@ -527,7 +560,11 @@ InitKeyboardDeviceStruct(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     if (xkb_cached_map)
         LogMessageVerb(X_INFO, 4, "XKB: Reusing cached keymap\n");
     else {
-        xkb_cached_map = XkbCompileKeymap(dev, rmlvo);
+        if (rmlvo)
+            xkb_cached_map = XkbCompileKeymap(dev, rmlvo);
+        else
+            xkb_cached_map = XkbCompileKeymapFromString(dev, keymap, keymap_length);
+
         if (!xkb_cached_map) {
             ErrorF("XKB: Failed to compile keymap\n");
             goto unwind_info;
@@ -574,7 +611,8 @@ InitKeyboardDeviceStruct(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     XkbUpdateActions(dev, xkb->min_key_code, XkbNumKeys(xkb), &changes,
                      &check, &cause);
 
-    InitFocusClassDeviceStruct(dev);
+    if (!dev->focus)
+        InitFocusClassDeviceStruct(dev);
 
     xkbi->kbdProc = ctrl_func;
     dev->kbdfeed->BellProc = bell_func;
@@ -595,8 +633,10 @@ InitKeyboardDeviceStruct(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
 
     dev->kbdfeed->CtrlProc(dev, &dev->kbdfeed->ctrl);
 
-    XkbSetRulesDflts(rmlvo);
-    XkbSetRulesUsed(rmlvo);
+    if (rmlvo) {
+        XkbSetRulesDflts(rmlvo);
+        XkbSetRulesUsed(rmlvo);
+    }
     XkbFreeRMLVOSet(&rmlvo_dflts, FALSE);
 
     return TRUE;
@@ -615,12 +655,30 @@ InitKeyboardDeviceStruct(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     return FALSE;
 }
 
+_X_EXPORT Bool
+InitKeyboardDeviceStruct(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
+                         BellProcPtr bell_func, KbdCtrlProcPtr ctrl_func)
+{
+    return InitKeyboardDeviceStructInternal(dev, rmlvo,
+                                            NULL, 0, bell_func, ctrl_func);
+}
+
+_X_EXPORT Bool
+InitKeyboardDeviceStructFromString(DeviceIntPtr dev,
+                                   const char *keymap, int keymap_length,
+                                   BellProcPtr bell_func, KbdCtrlProcPtr ctrl_func)
+{
+    return InitKeyboardDeviceStructInternal(dev, NULL,
+                                            keymap, keymap_length,
+                                            bell_func, ctrl_func);
+}
+
 /***====================================================================***/
 
         /*
-         * Be very careful about what does and doesn't get freed by this 
-         * function.  To reduce fragmentation, XkbInitDevice allocates a 
-         * single huge block per device and divides it up into most of the 
+         * Be very careful about what does and doesn't get freed by this
+         * function.  To reduce fragmentation, XkbInitDevice allocates a
+         * single huge block per device and divides it up into most of the
          * fixed-size structures for the device.   Don't free anything that
          * is part of this larger block.
          */
@@ -766,13 +824,15 @@ XkbProcessArguments(int argc, char *argv[], int i)
     if ((strcmp(argv[i], "-ardelay") == 0) || (strcmp(argv[i], "-ar1") == 0)) { /* -ardelay int */
         if (++i >= argc)
             UseMsg();
-        XkbDfltRepeatDelay = (long) atoi(argv[i]);
+        else
+            XkbDfltRepeatDelay = (long) atoi(argv[i]);
         return 2;
     }
     if ((strcmp(argv[i], "-arinterval") == 0) || (strcmp(argv[i], "-ar2") == 0)) {      /* -arinterval int */
         if (++i >= argc)
             UseMsg();
-        XkbDfltRepeatInterval = (long) atoi(argv[i]);
+        else
+            XkbDfltRepeatInterval = (long) atoi(argv[i]);
         return 2;
     }
     return 0;

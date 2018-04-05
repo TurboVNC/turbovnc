@@ -30,18 +30,22 @@
 #define INPUTUTILS_H
 
 #include "input.h"
+#include "eventstr.h"
 #include <X11/extensions/XI2proto.h>
 
 extern Mask event_filters[MAXDEVICES][MAXEVENTS];
 
 struct _ValuatorMask {
     int8_t last_bit;            /* highest bit set in mask */
+    int8_t has_unaccelerated;
     uint8_t mask[(MAX_VALUATORS + 7) / 8];
     double valuators[MAX_VALUATORS];    /* valuator data */
+    double unaccelerated[MAX_VALUATORS];    /* valuator data */
 };
 
 extern void verify_internal_event(const InternalEvent *ev);
-extern void init_device_event(DeviceEvent *event, DeviceIntPtr dev, Time ms);
+extern void init_device_event(DeviceEvent *event, DeviceIntPtr dev, Time ms,
+                              enum DeviceEventSource event_source);
 extern int event_get_corestate(DeviceIntPtr mouse, DeviceIntPtr kbd);
 extern void event_set_state(DeviceIntPtr mouse, DeviceIntPtr kbd,
                             DeviceEvent *event);
@@ -57,6 +61,7 @@ XI2Mask *xi2mask_new(void);
 XI2Mask *xi2mask_new_with_size(size_t, size_t); /* don't use it */
 void xi2mask_free(XI2Mask **mask);
 Bool xi2mask_isset(XI2Mask *mask, const DeviceIntPtr dev, int event_type);
+Bool xi2mask_isset_for_device(XI2Mask *mask, const DeviceIntPtr dev, int event_type);
 void xi2mask_set(XI2Mask *mask, int deviceid, int event_type);
 void xi2mask_zero(XI2Mask *mask, int deviceid);
 void xi2mask_merge(XI2Mask *dest, const XI2Mask *source);

@@ -1,3 +1,28 @@
+/* Copyright © 2007 Carl Worth
+ * Copyright © 2009 Jeremy Huddleston, Julien Cristau, and Matthieu Herrb
+ * Copyright © 2009-2010 Mikhail Gusarov
+ * Copyright © 2012 Yaakov Selkowitz and Keith Packard
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
@@ -71,6 +96,78 @@ x_sha1_final(void *ctx, unsigned char result[20])
 
     CC_SHA1_Final(result, sha1_ctx);
     free(sha1_ctx);
+    return 1;
+}
+
+#elif defined(HAVE_SHA1_IN_CRYPTOAPI)        /* Use CryptoAPI for SHA1 */
+
+#define WIN32_LEAN_AND_MEAN
+#include <X11/Xwindows.h>
+#include <wincrypt.h>
+
+static HCRYPTPROV hProv;
+
+void *
+x_sha1_init(void)
+{
+    HCRYPTHASH *ctx = malloc(sizeof(*ctx));
+
+    if (!ctx)
+        return NULL;
+    CryptAcquireContext(&hProv, NULL, MS_DEF_PROV, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+    CryptCreateHash(hProv, CALG_SHA1, 0, 0, ctx);
+    return ctx;
+}
+
+int
+x_sha1_update(void *ctx, void *data, int size)
+{
+    HCRYPTHASH *hHash = ctx;
+
+    CryptHashData(*hHash, data, size, 0);
+    return 1;
+}
+
+int
+x_sha1_final(void *ctx, unsigned char result[20])
+{
+    HCRYPTHASH *hHash = ctx;
+    DWORD len = 20;
+
+    CryptGetHashParam(*hHash, HP_HASHVAL, result, &len, 0);
+    CryptDestroyHash(*hHash);
+    CryptReleaseContext(hProv, 0);
+    free(ctx);
+    return 1;
+}
+
+#elif defined(HAVE_SHA1_IN_LIBNETTLE)   /* Use libnettle for SHA1 */
+
+#include <nettle/sha.h>
+
+void *
+x_sha1_init(void)
+{
+    struct sha1_ctx *ctx = malloc(sizeof(*ctx));
+
+    if (!ctx)
+        return NULL;
+    sha1_init(ctx);
+    return ctx;
+}
+
+int
+x_sha1_update(void *ctx, void *data, int size)
+{
+    sha1_update(ctx, size, data);
+    return 1;
+}
+
+int
+x_sha1_final(void *ctx, unsigned char result[20])
+{
+    sha1_digest(ctx, 20, result);
+    free(ctx);
     return 1;
 }
 

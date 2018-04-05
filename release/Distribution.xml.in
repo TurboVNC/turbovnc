@@ -2,9 +2,9 @@
 <installer-gui-script minSpecVersion="1">
 	<script>
 	function installationCheck() {
-		if(!(system.compareVersions(system.version.ProductVersion, '@MINOSVER@') >= 0)) {
+		if(!(system.compareVersions(system.version.ProductVersion, '10.7') >= 0)) {
 			my.result.title = system.localizedString('Cannot install @CMAKE_PROJECT_NAME@');
-			my.result.message = system.localizedString('This package requires OS X @MINOSVER@ or higher.');
+			my.result.message = system.localizedString('This package requires OS X 10.7 or higher.');
 			my.result.type = 'Fatal';
 			return false;
 		}

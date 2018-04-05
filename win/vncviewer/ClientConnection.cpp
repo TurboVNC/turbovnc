@@ -201,6 +201,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 
   m_supportsSetDesktopSize = false;
   m_waitingOnResizeTimer = false;
+  m_checkLayout = false;
 
   m_firstUpdate = true;
 
@@ -351,13 +352,16 @@ void ClientConnection::Run()
 
   EnableFullControlOptions();
 
+  EnableZoomOptions();
+
   CreateLocalFramebuffer();
 
   SetupPixelFormat();
 
   m_pendingEncodingChange = true;
 
-  hotkeys.Init(m_opts.m_FSAltEnter);
+  hotkeys.Init(m_opts.m_FSAltEnter, m_opts.m_desktopSize.mode != SIZE_AUTO &&
+                                    !m_opts.m_FitWindow);
 
   // This starts the worker thread.
   // The rest of the processing continues in run_undetached.
@@ -492,9 +496,17 @@ void ClientConnection::CreateDisplay()
              "&Full screen\tCtrl-Alt-Shift-F");
   AppendMenu(hsysmenu, MF_STRING, ID_DEFAULT_WINDOW_SIZE,
              "Default window si&ze/position\tCtrl-Alt-Shift-Z");
+  AppendMenu(hsysmenu, MF_STRING, ID_ZOOM_IN,
+             "Zoom in\tCtrl-Alt-Shift +");
+  AppendMenu(hsysmenu, MF_STRING, ID_ZOOM_OUT,
+             "Zoom out\tCtrl-Alt-Shift -");
+  AppendMenu(hsysmenu, MF_STRING, ID_ZOOM_100,
+             "Zoom 100%\tCtrl-Alt-Shift-0");
   AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
              "Show &toolbar\tCtrl-Alt-Shift-T");
   AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_VIEWONLY,
+             "&View only\tCtrl-Alt-Shift-V");
   AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_GRAB,
              "&Grab keyboard\tCtrl-Alt-Shift-G");
   if (!m_opts.m_restricted) {
@@ -510,6 +522,9 @@ void ClientConnection::CreateDisplay()
              "Ctrl key down");
   AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTDOWN,
              "Alt key down");
+  AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+  AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_CLIPBOARD,
+             "&Clipboard transfer\tCtrl-Alt-Shift-C");
   AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
   AppendMenu(hsysmenu, MF_STRING | MF_GRAYED, IDD_FILETRANSFER,
              "Transf&er files...\tCtrl-Alt-Shift-E");
@@ -572,6 +587,13 @@ void ClientConnection::CreateDisplay()
   if (pApp->m_options.m_toolbar)
     CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
           ID_TOOLBAR, MF_BYCOMMAND | MF_CHECKED);
+  CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_VIEWONLY,
+                MF_BYCOMMAND | (pApp->m_options.m_ViewOnly ?
+                                MF_CHECKED : MF_UNCHECKED));
+  CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_CLIPBOARD,
+                MF_BYCOMMAND | (pApp->m_options.m_DisableClipboard ?
+                                MF_UNCHECKED : MF_CHECKED));
+
   SaveConnectionHistory();
   // record which client created this window
 
@@ -779,6 +801,20 @@ void ClientConnection::EnableFullControlOptions()
     EnableAction(ID_CONN_ALTDOWN, true);
     EnableAction(ID_CONN_CTLESC, true);
     EnableAction(ID_CONN_ALTENTER, true);
+  }
+}
+
+
+void ClientConnection::EnableZoomOptions()
+{
+  if (m_opts.m_desktopSize.mode == SIZE_AUTO || m_opts.m_FitWindow) {
+    EnableAction(ID_ZOOM_IN, false);
+    EnableAction(ID_ZOOM_OUT, false);
+    EnableAction(ID_ZOOM_100, false);
+  } else {
+    EnableAction(ID_ZOOM_IN, true);
+    EnableAction(ID_ZOOM_OUT, true);
+    EnableAction(ID_ZOOM_100, true);
   }
 }
 
@@ -1467,6 +1503,12 @@ void ClientConnection::SetWindowTitle()
                encStr[enc]);
     }
   }
+  if (m_opts.m_scaling) {
+    int sf = (m_opts.m_scale_num * 100) / m_opts.m_scale_den;
+    if (sf != 100)
+      snprintf(&title[strlen(title)], len - strlen(title), " - %d%%",
+               (m_opts.m_scale_num * 100) / m_opts.m_scale_den);
+  }
   SetWindowText(m_hwnd1, title);
   delete [] title;
 }
@@ -1513,13 +1555,35 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
                                   bool manual)
 {
-  RECT fullwinrect, screenArea, workArea;
+  RECT fullwinrect, screenArea, workArea, winrect;
 
   if (InFullScreenMode() && !resizeFullScreen) {
     if (manual) {
+      bool checkLayoutNow = false;
+
       GetFullScreenMetrics(screenArea, workArea);
+      if (m_opts.m_desktopSize.mode == SIZE_AUTO) {
+        GetWindowRect(m_hwnd1, &winrect);
+        // If the window size is unchanged, check whether we need to force a
+        // desktop resize message to inform the server of a new screen layout
+        if (WidthOf(screenArea) == WidthOf(winrect) &&
+            HeightOf(screenArea) == HeightOf(winrect)) {
+          if (!EqualRect(&screenArea, &winrect))
+            m_checkLayout = true;
+          else
+            // A WM_MOVE message is unlikely to be sent to the window, so we
+            // need to check the layout immediately.
+            checkLayoutNow = true;
+        }
+      }
       SetWindowPos(m_hwnd1, HWND_TOPMOST, screenArea.left, screenArea.top,
         WidthOf(screenArea), HeightOf(screenArea), SWP_NOSIZE);
+      if (checkLayoutNow) {
+        int w = WidthOf(screenArea), h = HeightOf(screenArea);
+        ScreenSet layout = ComputeScreenLayout(w, h);
+        if (w >= 1 && h >= 1 && layout != m_screenLayout)
+          SendDesktopSize(w, h, layout);
+      }
     }
     return;
   }
@@ -1527,6 +1591,12 @@ void ClientConnection::SizeWindow(bool centered, bool resizeFullScreen,
   if (m_opts.m_desktopSize.mode == SIZE_AUTO && manual) {
     GetFullScreenMetrics(screenArea, workArea);
     fullwinrect = workArea;
+    GetWindowRect(m_hwnd1, &winrect);
+    // If the window size is unchanged, check whether we need to force a
+    // desktop resize message to inform the server of a new screen layout
+    if (WidthOf(fullwinrect) == WidthOf(winrect) &&
+        HeightOf(fullwinrect) == HeightOf(winrect))
+      m_checkLayout = true;
     PositionWindow(fullwinrect, centered);
     return;
   } else if (m_opts.m_scaling && !m_opts.m_FitWindow) {
@@ -1556,8 +1626,6 @@ void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered,
   GetFullScreenMetrics(screenArea, workrect);
   int workwidth = workrect.right - workrect.left;
   int workheight = workrect.bottom - workrect.top;
-  vnclog.Print(2, "Screen work area is %d x %d\n",
-               workwidth, workheight);
 
   AdjustWindowRectEx(&fullwinrect, GetWindowLong(m_hwnd, GWL_STYLE),
                      FALSE, GetWindowLong(m_hwnd, GWL_EXSTYLE));
@@ -1627,6 +1695,20 @@ void ClientConnection::PositionWindow(RECT &fullwinrect, bool centered,
   winplace.rcNormalPosition.bottom = y + m_winheight;
   SetWindowPlacement(m_hwnd1, &winplace);
   SetForegroundWindow(m_hwnd1);
+}
+
+
+void ClientConnection::GetActualClientRect(RECT *rect)
+{
+  GetClientRect(m_hwnd1, rect);
+
+  if (GetMenuState(GetSystemMenu(m_hwnd1, FALSE),
+        ID_TOOLBAR, MF_BYCOMMAND) == MF_CHECKED) {
+    RECT rtb;
+    GetWindowRect(m_hToolbar, &rtb);
+    int rtbheight = HeightOf(rtb) - 3;
+    rect->top += rtbheight;
+  }
 }
 
 
@@ -2273,6 +2355,10 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
             _this->m_opts.SaveOpt(_this->m_opts.m_display,
                                   KEY_VNCVIEWER_HISTORY);
           _this->EnableFullControlOptions();
+          _this->EnableZoomOptions();
+           hotkeys.Init(_this->m_opts.m_FSAltEnter,
+                        _this->m_opts.m_desktopSize.mode != SIZE_AUTO &&
+                        !_this->m_opts.m_FitWindow);
           _this->SetWindowTitle();
           if (SetForegroundWindow(_this->m_opts.m_hParent) != 0) return 0;
           COND_REGRAB_KEYBOARD
@@ -2315,6 +2401,70 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
             _this->UngrabKeyboard();
           else
             _this->GrabKeyboard();
+          return 0;
+        case ID_TOGGLE_VIEWONLY:
+          _this->m_opts.m_ViewOnly = !_this->m_opts.m_ViewOnly;
+          CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
+                        ID_TOGGLE_VIEWONLY,
+                        MF_BYCOMMAND | (_this->m_opts.m_ViewOnly ?
+                                        MF_CHECKED : MF_UNCHECKED));
+          _this->EnableFullControlOptions();
+          return 0;
+        case ID_TOGGLE_CLIPBOARD:
+          _this->m_opts.m_DisableClipboard = !_this->m_opts.m_DisableClipboard;
+          CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
+                        ID_TOGGLE_CLIPBOARD,
+                        MF_BYCOMMAND | (_this->m_opts.m_DisableClipboard ?
+                                        MF_UNCHECKED : MF_CHECKED));
+          return 0;
+        case ID_ZOOM_IN:
+          if (_this->m_opts.m_desktopSize.mode != SIZE_AUTO &&
+              !_this->m_opts.m_FitWindow) {
+            int sf = (_this->m_opts.m_scale_num * 100) /
+                     _this->m_opts.m_scale_den;
+            if (sf < 100)
+              sf = ((sf / 10) + 1) * 10;
+            else if (sf >= 100 && sf <= 200)
+              sf = ((sf / 25) + 1) * 25;
+            else
+              sf = ((sf / 50) + 1) * 50;
+            if (sf > 400) sf = 400;
+            _this->m_opts.m_scale_num = sf;
+            _this->m_opts.m_scale_den = 100;
+            _this->m_opts.m_scaling = (sf != 100);
+            _this->SizeWindow(true, true, false);
+            _this->SetWindowTitle();
+            InvalidateRect(_this->m_hwnd, NULL, FALSE);
+          }
+          return 0;
+        case ID_ZOOM_OUT:
+          if (_this->m_opts.m_desktopSize.mode != SIZE_AUTO &&
+              !_this->m_opts.m_FitWindow) {
+            int sf = (_this->m_opts.m_scale_num * 100) /
+                     _this->m_opts.m_scale_den;
+            if (sf <= 100)
+              sf = ((sf / 10) - 1) * 10;
+            else if (sf >= 100 && sf <= 200)
+              sf = ((sf / 25) - 1) * 25;
+            else
+              sf = ((sf / 50) - 1) * 50;
+            if (sf < 10) sf = 10;
+            _this->m_opts.m_scale_num = sf;
+            _this->m_opts.m_scale_den = 100;
+            _this->m_opts.m_scaling = (sf != 100);
+            _this->SizeWindow(true, true, false);
+            _this->SetWindowTitle();
+            InvalidateRect(_this->m_hwnd, NULL, FALSE);
+          }
+          return 0;
+        case ID_ZOOM_100:
+          if (_this->m_opts.m_scaling) {
+            _this->m_opts.m_scale_num = 100;
+            _this->m_opts.m_scale_den = 100;
+            _this->SizeWindow(true, true, false);
+            _this->SetWindowTitle();
+            InvalidateRect(_this->m_hwnd, NULL, FALSE);
+          }
           return 0;
         case ID_DEFAULT_WINDOW_SIZE:
           // Reset window geometry to default (taking into account spanning
@@ -2419,6 +2569,17 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
       return 0;
     case WM_SIZE:
       _this->PositionChildWindow();
+      return 0;
+    case WM_MOVE:
+      if (_this->m_checkLayout) {
+        RECT clientRect;
+        _this->GetActualClientRect(&clientRect);
+        int w = WidthOf(clientRect), h = HeightOf(clientRect);
+        ScreenSet layout = _this->ComputeScreenLayout(w, h);
+        _this->m_checkLayout = false;
+        if (w >= 1 && h >= 1 && layout != _this->m_screenLayout)
+          _this->SendDesktopSize(w, h, layout);
+      }
       return 0;
     case WM_CLOSE:
       // Close the worker thread as well
@@ -3891,11 +4052,6 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
   RealiseFullScreenMode(true);
   if (InFullScreenMode())
     m_pendingServerResize = false;
-
-  if (m_opts.m_desktopSize.mode == SIZE_MANUAL && !m_firstUpdate) {
-    m_opts.m_desktopSize.width = pfburh->r.w;
-    m_opts.m_desktopSize.height = pfburh->r.h;
-  }
 }
 
 
@@ -3923,6 +4079,8 @@ void ClientConnection::ReadExtendedDesktopSize(
                              screen.flags));
   }
 
+  layout.debugPrint("LAYOUT RECEIVED");
+
   int reason = pfburh->r.x, result = pfburh->r.y;
 
   if ((reason == (signed)reasonClient) && (result != (signed)resultSuccess)) {
@@ -3930,7 +4088,7 @@ void ClientConnection::ReadExtendedDesktopSize(
     return;
   }
 
-  if (!layout.validate(pfburh->r.w, pfburh->r.h))
+  if (!layout.validate(pfburh->r.w, pfburh->r.h, true))
     vnclog.Print(-1, "Server sent us an invalid screen layout\n");
 
   m_supportsSetDesktopSize = true;
@@ -3939,36 +4097,78 @@ void ClientConnection::ReadExtendedDesktopSize(
   ReadNewFBSize(pfburh);
 }
 
+ScreenSet ClientConnection::ComputeScreenLayout(int width, int height)
+{
+  ScreenSet layout;
+  char env[256];  size_t envlen;
+
+  if (getenv_s(&envlen, env, 256, "TVNC_SINGLESCREEN") == 0 &&
+      !strcmp(env, "1")) {
+    layout = m_screenLayout;
+
+    if (layout.num_screens() == 0)
+      layout.add_screen(Screen());
+    else if (layout.num_screens() != 1) {
+      ScreenSet::iterator iter;
+      while (true) {
+        iter = layout.begin();
+        ++iter;
+
+        if (iter == layout.end())
+          break;
+
+        layout.remove_screen(iter->id);
+      }
+    }
+
+    layout.begin()->dimensions.left = 0;
+    layout.begin()->dimensions.top = 0;
+    layout.begin()->dimensions.right = width;
+    layout.begin()->dimensions.bottom = height;
+  } else {
+    RECT workArea, screenArea;
+    layout = GetFullScreenMetrics(screenArea, workArea, m_opts.m_Span, false);
+    layout.assignIDs(m_screenLayout);
+  }
+
+  return layout;
+}
 
 void ClientConnection::SendDesktopSize(int width, int height)
 {
-  ScreenSet::iterator iter;
   ScreenSet layout;
 
   if (!m_supportsSetDesktopSize)
     return;
 
-  layout = m_screenLayout;
-
-  if (layout.num_screens() == 0)
-    layout.add_screen(Screen());
-  else if (layout.num_screens() != 1) {
-
-    while (true) {
-      iter = layout.begin();
-      ++iter;
-
-      if (iter == layout.end())
-        break;
-
-      layout.remove_screen(iter->id);
+  if (m_opts.m_desktopSize.mode == SIZE_AUTO) {
+    layout = ComputeScreenLayout(width, height);
+  } else {
+    if (m_opts.m_desktopSize.mode != SIZE_MANUAL ||
+        m_opts.m_desktopSize.layout.num_screens() < 1) {
+      vnclog.Print(-1, "ERROR: Unexpected desktop size configuration");
+      return;
     }
+    layout = m_opts.m_desktopSize.layout;
+    // Map client screens to server screen IDs in the server's preferred order.
+    // This allows us to control the server's screen order from the client.
+    layout.assignIDs(m_screenLayout);
   }
 
-  layout.begin()->dimensions.left = 0;
-  layout.begin()->dimensions.top = 0;
-  layout.begin()->dimensions.right = width;
-  layout.begin()->dimensions.bottom = height;
+  SendDesktopSize(width, height, layout);
+}
+
+void ClientConnection::SendDesktopSize(int width, int height, ScreenSet layout)
+{
+  ScreenSet::const_iterator iter;
+
+  if (!m_supportsSetDesktopSize)
+    return;
+
+  if (!layout.validate(width, height, true)) {
+    vnclog.Print(-1, "Invalid screen layout\n");
+    return;
+  }
 
   rfbSetDesktopSizeMsg msg;
   msg.type = rfbSetDesktopSize;
@@ -3983,11 +4183,13 @@ void ClientConnection::SendDesktopSize(int width, int height)
     screen.id = Swap32IfLE(iter->id);
     screen.x = Swap16IfLE(iter->dimensions.left);
     screen.y = Swap16IfLE(iter->dimensions.top);
-    screen.w = Swap16IfLE(iter->dimensions.right);
-    screen.h = Swap16IfLE(iter->dimensions.bottom);
+    screen.w = Swap16IfLE(WidthOf(iter->dimensions));
+    screen.h = Swap16IfLE(HeightOf(iter->dimensions));
     screen.flags = Swap32IfLE(iter->flags);
     WriteExact((char *)&screen, sz_rfbScreenDesc);
   }
+
+  layout.debugPrint("LAYOUT SENT");
 }
 
 

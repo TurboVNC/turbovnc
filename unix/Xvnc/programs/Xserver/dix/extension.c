@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -96,17 +96,16 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
     }
     ext->name = strdup(name);
     ext->num_aliases = 0;
-    ext->aliases = (char **) NULL;
+    ext->aliases = (const char **) NULL;
     if (!ext->name) {
         dixFreePrivates(ext->devPrivates, PRIVATE_EXTENSION);
         free(ext);
         return ((ExtensionEntry *) NULL);
     }
     i = NumExtensions;
-    newexts = (ExtensionEntry **) realloc(extensions,
-                                          (i + 1) * sizeof(ExtensionEntry *));
+    newexts = reallocarray(extensions, i + 1, sizeof(ExtensionEntry *));
     if (!newexts) {
-        free(ext->name);
+        free((void *) ext->name);
         dixFreePrivates(ext->devPrivates, PRIVATE_EXTENSION);
         free(ext);
         return ((ExtensionEntry *) NULL);
@@ -139,7 +138,9 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
         ext->errorLast = 0;
     }
 
+#ifdef X_REGISTRY_REQUEST
     RegisterExtensionNames(ext);
+#endif
     return ext;
 }
 
@@ -147,12 +148,11 @@ Bool
 AddExtensionAlias(const char *alias, ExtensionEntry * ext)
 {
     char *name;
-    char **aliases;
+    const char **aliases;
 
     if (!ext)
         return FALSE;
-    aliases = (char **) realloc(ext->aliases,
-                                (ext->num_aliases + 1) * sizeof(char *));
+    aliases = reallocarray(ext->aliases, ext->num_aliases + 1, sizeof(char *));
     if (!aliases)
         return FALSE;
     ext->aliases = aliases;
@@ -229,9 +229,9 @@ CloseDownExtensions(void)
         if (extensions[i]->CloseDown)
             extensions[i]->CloseDown(extensions[i]);
         NumExtensions = i;
-        free(extensions[i]->name);
+        free((void *) extensions[i]->name);
         for (j = extensions[i]->num_aliases; --j >= 0;)
-            free(extensions[i]->aliases[j]);
+            free((void *) extensions[i]->aliases[j]);
         free(extensions[i]->aliases);
         dixFreePrivates(extensions[i]->devPrivates, PRIVATE_EXTENSION);
         free(extensions[i]);
@@ -252,11 +252,12 @@ ProcQueryExtension(ClientPtr client)
 
     REQUEST_FIXED_SIZE(xQueryExtensionReq, stuff->nbytes);
 
-    memset(&reply, 0, sizeof(xQueryExtensionReply));
-    reply.type = X_Reply;
-    reply.length = 0;
-    reply.major_opcode = 0;
-    reply.sequenceNumber = client->sequence;
+    reply = (xQueryExtensionReply) {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .major_opcode = 0
+    };
 
     if (!NumExtensions)
         reply.present = xFalse;
@@ -284,11 +285,12 @@ ProcListExtensions(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xReq);
 
-    memset(&reply, 0, sizeof(xListExtensionsReply));
-    reply.type = X_Reply;
-    reply.nExtensions = 0;
-    reply.length = 0;
-    reply.sequenceNumber = client->sequence;
+    reply = (xListExtensionsReply) {
+        .type = X_Reply,
+        .nExtensions = 0,
+        .sequenceNumber = client->sequence,
+        .length = 0
+    };
     buffer = NULL;
 
     if (NumExtensions) {

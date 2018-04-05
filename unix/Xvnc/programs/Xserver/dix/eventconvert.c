@@ -57,6 +57,7 @@ static int eventToKeyButtonPointer(DeviceEvent *ev, xEvent **xi, int *count);
 static int eventToDeviceChanged(DeviceChangedEvent *ev, xEvent **dcce);
 static int eventToDeviceEvent(DeviceEvent *ev, xEvent **xi);
 static int eventToRawEvent(RawDeviceEvent *ev, xEvent **xi);
+static int eventToBarrierEvent(BarrierEvent *ev, xEvent **xi);
 static int eventToTouchOwnershipEvent(TouchOwnershipEvent *ev, xEvent **xi);
 
 /* Do not use, read comments below */
@@ -160,6 +161,8 @@ EventToCore(InternalEvent *event, xEvent **core_out, int *count_out)
     case ET_TouchUpdate:
     case ET_TouchEnd:
     case ET_TouchOwnership:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
         ret = BadMatch;
         break;
     default:
@@ -216,6 +219,8 @@ EventToXI(InternalEvent *ev, xEvent **xi, int *count)
     case ET_TouchUpdate:
     case ET_TouchEnd:
     case ET_TouchOwnership:
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
         *count = 0;
         *xi = NULL;
         return BadMatch;
@@ -277,6 +282,9 @@ EventToXI2(InternalEvent *ev, xEvent **xi)
     case ET_RawTouchUpdate:
     case ET_RawTouchEnd:
         return eventToRawEvent(&ev->raw_event, xi);
+    case ET_BarrierHit:
+    case ET_BarrierLeave:
+        return eventToBarrierEvent(&ev->barrier_event, xi);
     default:
         break;
     }
@@ -451,7 +459,7 @@ appendKeyInfo(DeviceChangedEvent *dce, xXIKeyInfo * info)
     info->length = sizeof(xXIKeyInfo) / 4 + info->num_keycodes;
     info->sourceid = dce->sourceid;
 
-    kc = (uint32_t *) & info[1];
+    kc = (uint32_t *) &info[1];
     for (i = 0; i < info->num_keycodes; i++)
         *kc++ = i + dce->keys.min_keycode;
 
@@ -493,9 +501,7 @@ appendValuatorInfo(DeviceChangedEvent *dce, xXIValuatorInfo * info,
     info->min.frac = 0;
     info->max.integral = dce->valuators[axisnumber].max;
     info->max.frac = 0;
-    /* FIXME: value */
-    info->value.integral = 0;
-    info->value.frac = 0;
+    info->value = double_to_fp3232(dce->valuators[axisnumber].value);
     info->resolution = dce->valuators[axisnumber].resolution;
     info->number = axisnumber;
     info->mode = dce->valuators[axisnumber].mode;
@@ -673,20 +679,21 @@ eventToDeviceEvent(DeviceEvent *ev, xEvent **xi)
     xde->valuators_len = vallen;
     xde->deviceid = ev->deviceid;
     xde->sourceid = ev->sourceid;
-    xde->root_x = FP1616(ev->root_x, ev->root_x_frac);
-    xde->root_y = FP1616(ev->root_y, ev->root_y_frac);
+    xde->root_x = double_to_fp1616(ev->root_x + ev->root_x_frac);
+    xde->root_y = double_to_fp1616(ev->root_y + ev->root_y_frac);
 
-    if (ev->type == ET_TouchUpdate)
-        xde->flags |= (ev->flags & TOUCH_PENDING_END) ? XITouchPendingEnd : 0;
-    else
+    if (IsTouchEvent((InternalEvent *)ev)) {
+        if (ev->type == ET_TouchUpdate)
+            xde->flags |= (ev->flags & TOUCH_PENDING_END) ? XITouchPendingEnd : 0;
+
+        if (ev->flags & TOUCH_POINTER_EMULATED)
+            xde->flags |= XITouchEmulatingPointer;
+    } else {
         xde->flags = ev->flags;
 
-    if (IsTouchEvent((InternalEvent *) ev) &&
-        ev->flags & TOUCH_POINTER_EMULATED)
-        xde->flags |= XITouchEmulatingPointer;
-
-    if (ev->key_repeat)
-        xde->flags |= XIKeyRepeat;
+        if (ev->key_repeat)
+            xde->flags |= XIKeyRepeat;
+    }
 
     xde->mods.base_mods = ev->mods.base;
     xde->mods.latched_mods = ev->mods.latched;
@@ -778,6 +785,35 @@ eventToRawEvent(RawDeviceEvent *ev, xEvent **xi)
             axisval_raw++;
         }
     }
+
+    return Success;
+}
+
+static int
+eventToBarrierEvent(BarrierEvent *ev, xEvent **xi)
+{
+    xXIBarrierEvent *barrier;
+    int len = sizeof(xXIBarrierEvent);
+
+    *xi = calloc(1, len);
+    barrier = (xXIBarrierEvent*) *xi;
+    barrier->type = GenericEvent;
+    barrier->extension = IReqCode;
+    barrier->evtype = GetXI2Type(ev->type);
+    barrier->length = bytes_to_int32(len - sizeof(xEvent));
+    barrier->deviceid = ev->deviceid;
+    barrier->sourceid = ev->sourceid;
+    barrier->time = ev->time;
+    barrier->event = ev->window;
+    barrier->root = ev->root;
+    barrier->dx = double_to_fp3232(ev->dx);
+    barrier->dy = double_to_fp3232(ev->dy);
+    barrier->dtime = ev->dt;
+    barrier->flags = ev->flags;
+    barrier->eventid = ev->event_id;
+    barrier->barrier = ev->barrierid;
+    barrier->root_x = double_to_fp1616(ev->root_x);
+    barrier->root_y = double_to_fp1616(ev->root_y);
 
     return Success;
 }
@@ -928,6 +964,12 @@ GetXI2Type(enum EventType type)
         break;
     case ET_TouchOwnership:
         xi2type = XI_TouchOwnership;
+        break;
+    case ET_BarrierHit:
+        xi2type = XI_BarrierHit;
+        break;
+    case ET_BarrierLeave:
+        xi2type = XI_BarrierLeave;
         break;
     default:
         break;

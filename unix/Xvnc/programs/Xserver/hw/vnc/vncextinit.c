@@ -32,7 +32,6 @@
 #include <X11/X.h>
 #include "misc.h"
 #include "extnsionst.h"
-#include "selection.h"
 #include "rfb.h"
 #define _VNCEXT_SERVER_
 #define _VNCEXT_PROTO_
@@ -43,16 +42,10 @@
 
 static void vncResetProc(ExtensionEntry* extEntry);
 static void vncClientStateChange(CallbackListPtr*, pointer, pointer);
-static void SendSelectionChangeEvent(Atom selection);
 static int ProcVncExtDispatch(ClientPtr client);
 static int SProcVncExtDispatch(ClientPtr client);
-static void vncSelectionCallback(CallbackListPtr *callbacks, pointer data,
-                                 pointer args);
 
 static unsigned long vncExtGeneration = 0;
-
-static char* clientCutText = 0;
-static int clientCutTextLen = 0;
 
 static struct _VncInputSelect* vncInputSelectHead = 0;
 typedef struct _VncInputSelect {
@@ -88,29 +81,18 @@ void vncExtensionInit(void)
   vncErrorBase = extEntry->errorBase;
   vncEventBase = extEntry->eventBase;
 
+  vncSelectionInit();
+
   rfbLog("VNC extension running!\n");
 
   if (!AddCallback(&ClientStateCallback, vncClientStateChange, 0)) {
     FatalError("Add ClientStateCallback failed");
-  }
-
-  if (!AddCallback(&SelectionCallback, vncSelectionCallback, 0)) {
-    FatalError("Add SelectionCallback failed");
   }
 }
 
 
 static void vncResetProc(ExtensionEntry* extEntry)
 {
-}
-
-
-static void vncSelectionCallback(CallbackListPtr *callbacks, pointer data, pointer args)
-{
-  SelectionInfoRec *info = (SelectionInfoRec *) args;
-  Selection *selection = info->selection;
-
-  SendSelectionChangeEvent(selection->selection);
 }
 
 
@@ -129,109 +111,6 @@ static void vncClientStateChange(CallbackListPtr *callbacks, pointer data, point
       nextPtr = &cur->next;
     }
   }
-}
-
-
-void vncClientCutText(const char* str, int len)
-{
-  VncInputSelect *cur;
-  xVncExtClientCutTextNotifyEvent ev;
-  if (clientCutText) free (clientCutText);
-  clientCutText = (char *)rfbAlloc(len);
-  memcpy(clientCutText, str, len);
-  clientCutTextLen = len;
-  ev.type = vncEventBase + VncExtClientCutTextNotify;
-  for (cur = vncInputSelectHead; cur; cur = cur->next) {
-    if (cur->mask & VncExtClientCutTextMask) {
-      ev.sequenceNumber = cur->client->sequence;
-      ev.window = cur->window;
-      ev.time = GetTimeInMillis();
-      if (cur->client->swapped) {
-        swaps(&ev.sequenceNumber);
-        swapl(&ev.window);
-        swapl(&ev.time);
-      }
-      WriteToClient(cur->client, sizeof(xVncExtClientCutTextNotifyEvent),
-                    (char *)&ev);
-    }
-  }
-}
-
-
-static void SendSelectionChangeEvent(Atom selection)
-{
-  VncInputSelect *cur;
-  xVncExtSelectionChangeNotifyEvent ev;
-  ev.type = vncEventBase + VncExtSelectionChangeNotify;
-  for (cur = vncInputSelectHead; cur; cur = cur->next) {
-    if (cur->mask & VncExtSelectionChangeMask) {
-      ev.sequenceNumber = cur->client->sequence;
-      ev.window = cur->window;
-      ev.selection = selection;
-      if (cur->client->swapped) {
-        swaps(&ev.sequenceNumber);
-        swapl(&ev.window);
-        swapl(&ev.selection);
-      }
-      WriteToClient(cur->client, sizeof(xVncExtSelectionChangeNotifyEvent),
-                    (char *)&ev);
-    }
-  }
-}
-
-
-static int ProcVncExtSetServerCutText(ClientPtr client)
-{
-  char *str;
-  REQUEST(xVncExtSetServerCutTextReq);
-  REQUEST_FIXED_SIZE(xVncExtSetServerCutTextReq, stuff->textLen);
-  str = (char *)rfbAlloc(stuff->textLen + 1);
-  strncpy(str, (char*)&stuff[1], stuff->textLen);
-  str[stuff->textLen] = 0;
-  rfbSendServerCutText(str, stuff->textLen);
-  free (str);
-  return (client->noClientException);
-}
-
-
-static int SProcVncExtSetServerCutText(ClientPtr client)
-{
-  REQUEST(xVncExtSetServerCutTextReq);
-  swaps(&stuff->length);
-  REQUEST_AT_LEAST_SIZE(xVncExtSetServerCutTextReq);
-  swapl(&stuff->textLen);
-  return ProcVncExtSetServerCutText(client);
-}
-
-
-static int ProcVncExtGetClientCutText(ClientPtr client)
-{
-  xVncExtGetClientCutTextReply rep;
-
-  REQUEST_SIZE_MATCH(xVncExtGetClientCutTextReq);
-
-  rep.type = X_Reply;
-  rep.length = (clientCutTextLen + 3) >> 2;
-  rep.sequenceNumber = client->sequence;
-  rep.textLen = clientCutTextLen;
-  if (client->swapped) {
-    swaps(&rep.sequenceNumber);
-    swapl(&rep.length);
-    swapl(&rep.textLen);
-  }
-  WriteToClient(client, sizeof(xVncExtGetClientCutTextReply), (char *)&rep);
-  if (clientCutText)
-    WriteToClient(client, clientCutTextLen, clientCutText);
-  return (client->noClientException);
-}
-
-
-static int SProcVncExtGetClientCutText(ClientPtr client)
-{
-  REQUEST(xVncExtGetClientCutTextReq);
-  swaps(&stuff->length);
-  REQUEST_SIZE_MATCH(xVncExtGetClientCutTextReq);
-  return ProcVncExtGetClientCutText(client);
 }
 
 
@@ -341,10 +220,6 @@ static int ProcVncExtDispatch(ClientPtr client)
 {
   REQUEST(xReq);
   switch (stuff->data) {
-  case X_VncExtSetServerCutText:
-    return ProcVncExtSetServerCutText(client);
-  case X_VncExtGetClientCutText:
-    return ProcVncExtGetClientCutText(client);
   case X_VncExtSelectInput:
     return ProcVncExtSelectInput(client);
   case X_VncExtConnect:
@@ -359,10 +234,6 @@ static int SProcVncExtDispatch(ClientPtr client)
 {
   REQUEST(xReq);
   switch (stuff->data) {
-  case X_VncExtSetServerCutText:
-    return SProcVncExtSetServerCutText(client);
-  case X_VncExtGetClientCutText:
-    return SProcVncExtGetClientCutText(client);
   case X_VncExtSelectInput:
     return SProcVncExtSelectInput(client);
   case X_VncExtConnect:

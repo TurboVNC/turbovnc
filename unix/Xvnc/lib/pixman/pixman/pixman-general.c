@@ -109,6 +109,20 @@ static const op_info_t op_flags[PIXMAN_N_OPERATORS] =
 
 #define SCANLINE_BUFFER_LENGTH 8192
 
+static pixman_bool_t
+operator_needs_division (pixman_op_t op)
+{
+    static const uint8_t needs_division[] =
+    {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, /* SATURATE */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, /* DISJOINT */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, /* CONJOINT */
+	0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, /* blend ops */
+    };
+
+    return needs_division[op];
+}
+
 static void
 general_composite_rect  (pixman_implementation_t *imp,
                          pixman_composite_info_t *info)
@@ -124,9 +138,10 @@ general_composite_rect  (pixman_implementation_t *imp,
     int Bpp;
     int i;
 
-    if ((src_image->common.flags & FAST_PATH_NARROW_FORMAT)		    &&
-	(!mask_image || mask_image->common.flags & FAST_PATH_NARROW_FORMAT) &&
-	(dest_image->common.flags & FAST_PATH_NARROW_FORMAT))
+    if ((src_image->common.flags & FAST_PATH_NARROW_FORMAT)		     &&
+	(!mask_image || mask_image->common.flags & FAST_PATH_NARROW_FORMAT)  &&
+	(dest_image->common.flags & FAST_PATH_NARROW_FORMAT)		     &&
+	!(operator_needs_division (op)))
     {
 	width_flag = ITER_NARROW;
 	Bpp = 4;
@@ -143,9 +158,9 @@ general_composite_rect  (pixman_implementation_t *imp,
     if (width <= 0 || _pixman_multiply_overflows_int (width, Bpp * 3))
 	return;
 
-    if (width * Bpp * 3 > sizeof (stack_scanline_buffer) - 32 * 3)
+    if (width * Bpp * 3 > sizeof (stack_scanline_buffer) - 15 * 3)
     {
-	scanline_buffer = pixman_malloc_ab_plus_c (width, Bpp * 3, 32 * 3);
+	scanline_buffer = pixman_malloc_ab_plus_c (width, Bpp * 3, 15 * 3);
 
 	if (!scanline_buffer)
 	    return;
@@ -181,11 +196,7 @@ general_composite_rect  (pixman_implementation_t *imp,
 	mask_image = NULL;
     }
 
-    component_alpha =
-        mask_image			      &&
-        mask_image->common.type == BITS       &&
-        mask_image->common.component_alpha    &&
-        PIXMAN_FORMAT_RGB (mask_image->bits.format);
+    component_alpha = mask_image && mask_image->common.component_alpha;
 
     _pixman_implementation_iter_init (
 	imp->toplevel, &mask_iter,

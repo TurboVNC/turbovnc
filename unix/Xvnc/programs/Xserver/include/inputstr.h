@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -65,13 +65,13 @@ extern _X_EXPORT int CountBits(const uint8_t * mask, int len);
 #define SameClient(obj,client) \
 	(CLIENT_BITS((obj)->resource) == (client)->clientAsMask)
 
-#define EMASKSIZE	MAXDEVICES + 2
+#define EMASKSIZE	(MAXDEVICES + 2)
 
 /* This is the last XI2 event supported by the server. If you add
  * events to the protocol, the server will not support these events until
  * this number here is bumped.
  */
-#define XI2LASTEVENT    XI_RawTouchEnd
+#define XI2LASTEVENT    XI_BarrierLeave
 #define XI2MASKSIZE     ((XI2LASTEVENT >> 3) + 1)       /* no of bytes for masks */
 
 /**
@@ -159,7 +159,7 @@ typedef struct _OtherInputMasks {
  */
 
 #define MasksPerDetailMask 8    /* 256 keycodes and 256 possible
-                                   modifier combinations, but only      
+                                   modifier combinations, but only
                                    3 buttons. */
 
 typedef struct _DetailRec {     /* Grab details may be bit masks */
@@ -174,9 +174,9 @@ union _GrabMask {
 };
 
 /**
- * Central struct for device grabs. 
+ * Central struct for device grabs.
  * The same struct is used for both core grabs and device grabs, with
- * different fields being set. 
+ * different fields being set.
  * If the grab is a core grab (GrabPointer/GrabKeyboard), then the eventMask
  * is a combination of standard event masks (i.e. PointerMotionMask |
  * ButtonPressMask).
@@ -195,7 +195,7 @@ typedef struct _GrabRec {
     unsigned keyboardMode:1;
     unsigned pointerMode:1;
     enum InputLevel grabtype;
-    CARD8 type;                 /* event type */
+    CARD8 type;                 /* event type for passive grabs, 0 for active grabs */
     DetailRec modifiersDetail;
     DeviceIntPtr modifierDevice;
     DetailRec detail;           /* key or button */
@@ -298,6 +298,17 @@ typedef struct _ValuatorClassRec {
     int v_scroll_axis;          /* vert smooth-scrolling axis */
 } ValuatorClassRec;
 
+typedef struct _TouchListener {
+    XID listener;           /* grabs/event selection IDs receiving
+                             * events for this touch */
+    int resource_type;      /* listener's resource type */
+    enum TouchListenerType type;
+    enum TouchListenerState state;
+    enum InputLevel level;  /* matters only for emulating touches */
+    WindowPtr window;
+    GrabPtr grab;
+} TouchListener;
+
 typedef struct _TouchPointInfo {
     uint32_t client_id;         /* touch ID as seen in client events */
     int sourceid;               /* Source device's ID for this touchpoint */
@@ -306,14 +317,7 @@ typedef struct _TouchPointInfo {
                                  * but still owned by a grab */
     SpriteRec sprite;           /* window trace for delivery */
     ValuatorMask *valuators;    /* last recorded axis values */
-    struct _TouchListener {
-        XID listener;           /* grabs/event selection IDs receiving
-                                 * events for this touch */
-        enum TouchListenerType type;
-        enum TouchListenerState state;
-        enum InputLevel level;  /* matters only for emulating touches */
-        WindowPtr window;
-    } *listeners;
+    TouchListener *listeners;   /* set of listeners */
     int num_listeners;
     int num_grabs;              /* number of open grabs on this touch
                                  * which have not accepted or rejected */
@@ -323,15 +327,13 @@ typedef struct _TouchPointInfo {
     size_t history_size;        /* Size of history in elements */
 } TouchPointInfoRec;
 
-typedef struct _TouchListener TouchListener;
-
 typedef struct _DDXTouchPointInfo {
     uint32_t client_id;         /* touch ID as seen in client events */
     Bool active;                /* whether or not the touch is active */
     uint32_t ddx_id;            /* touch ID given by the DDX */
     Bool emulate_pointer;
 
-    ValuatorMask *valuators;    /* last recorded axis values */
+    ValuatorMask *valuators;    /* last axis values as posted, pre-transform */
 } DDXTouchPointInfoRec;
 
 typedef struct _TouchClassRec {
@@ -445,7 +447,7 @@ typedef struct _XIPropertyValue {
     Atom type;                  /* ignored by server */
     short format;               /* format of data for swapping - 8,16,32 */
     long size;                  /* size of data in (format/8) bytes */
-    pointer data;               /* private to client */
+    void *data;                 /* private to client */
 } XIPropertyValueRec;
 
 typedef struct _XIProperty {
@@ -483,7 +485,7 @@ typedef struct _GrabInfoRec {
     TimeStamp grabTime;
     Bool fromPassiveGrab;       /* true if from passive grab */
     Bool implicitGrab;          /* implicit from ButtonPress */
-    GrabPtr activeGrab;
+    GrabPtr unused;             /* Kept for ABI stability, remove soon */
     GrabPtr grab;
     CARD8 activatingKey;
     void (*ActivateGrab) (DeviceIntPtr /*device */ ,
@@ -586,11 +588,17 @@ typedef struct _DeviceIntRec {
         XIPropertyHandlerPtr handlers;  /* NULL-terminated */
     } properties;
 
-    /* coordinate transformation matrix for absolute input devices */
-    struct pixman_f_transform transform;
+    /* coordinate transformation matrix for relative movement. Matrix with
+     * the translation component dropped */
+    struct pixman_f_transform relative_transform;
+    /* scale matrix for absolute devices, this is the combined matrix of
+       [1/scale] . [transform] . [scale]. See DeviceSetTransform */
+    struct pixman_f_transform scale_and_transform;
 
     /* XTest related master device id */
     int xtest_master_id;
+
+    struct _SyncCounter *idle_counter;
 } DeviceIntRec;
 
 typedef struct {

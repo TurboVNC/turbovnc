@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -66,6 +66,11 @@ typedef struct _miDash *miDashPtr;
 #define ODD_DASH	~0
 
 /* miarc.c */
+
+extern _X_EXPORT void miWideArc(DrawablePtr pDraw,
+                                GCPtr pGC,
+                                int narcs,
+                                xArc * parcs);
 
 extern _X_EXPORT void miPolyArc(DrawablePtr /*pDraw */ ,
                                 GCPtr /*pGC */ ,
@@ -224,15 +229,7 @@ extern _X_EXPORT RegionPtr miHandleExposures(DrawablePtr /*pSrcDrawable */ ,
                                              int /*width */ ,
                                              int /*height */ ,
                                              int /*dstx */ ,
-                                             int /*dsty */ ,
-                                             unsigned long      /*plane */
-    );
-
-extern _X_EXPORT void miSendGraphicsExpose(ClientPtr /*client */ ,
-                                           RegionPtr /*pRgn */ ,
-                                           XID /*drawable */ ,
-                                           int /*major */ ,
-                                           int  /*minor */
+                                             int /*dsty */
     );
 
 extern _X_EXPORT void miSendExposures(WindowPtr /*pWin */ ,
@@ -242,9 +239,7 @@ extern _X_EXPORT void miSendExposures(WindowPtr /*pWin */ ,
     );
 
 extern _X_EXPORT void miWindowExposures(WindowPtr /*pWin */ ,
-                                        RegionPtr /*prgn */ ,
-                                        RegionPtr       /*other_exposed */
-    );
+                                        RegionPtr /*prgn */);
 
 extern _X_EXPORT void miPaintWindow(WindowPtr /*pWin */ ,
                                     RegionPtr /*prgn */ ,
@@ -265,22 +260,22 @@ extern _X_EXPORT void miPolyFillRect(DrawablePtr /*pDrawable */ ,
 
 /* miglblt.c */
 
-extern _X_EXPORT void miPolyGlyphBlt(DrawablePtr /*pDrawable */ ,
-                                     GCPtr /*pGC */ ,
-                                     int /*x */ ,
-                                     int /*y */ ,
-                                     unsigned int /*nglyph */ ,
-                                     CharInfoPtr * /*ppci */ ,
-                                     pointer    /*pglyphBase */
+extern _X_EXPORT void miPolyGlyphBlt(DrawablePtr pDrawable,
+                                     GCPtr pGC,
+                                     int x,
+                                     int y,
+                                     unsigned int nglyph,
+                                     CharInfoPtr *ppci,
+                                     void *pglyphBase
     );
 
-extern _X_EXPORT void miImageGlyphBlt(DrawablePtr /*pDrawable */ ,
-                                      GCPtr /*pGC */ ,
-                                      int /*x */ ,
-                                      int /*y */ ,
-                                      unsigned int /*nglyph */ ,
-                                      CharInfoPtr * /*ppci */ ,
-                                      pointer   /*pglyphBase */
+extern _X_EXPORT void miImageGlyphBlt(DrawablePtr pDrawable,
+                                      GCPtr pGC,
+                                      int x,
+                                      int y,
+                                      unsigned int nglyph,
+                                      CharInfoPtr *ppci,
+                                      void *pglyphBase
     );
 
 /* mipoly.c */
@@ -291,22 +286,6 @@ extern _X_EXPORT void miFillPolygon(DrawablePtr /*dst */ ,
                                     int /*mode */ ,
                                     int /*count */ ,
                                     DDXPointPtr /*pPts */
-    );
-
-/* mipolycon.c */
-
-extern _X_EXPORT Bool miFillConvexPoly(DrawablePtr /*dst */ ,
-                                       GCPtr /*pgc */ ,
-                                       int /*count */ ,
-                                       DDXPointPtr      /*ptsIn */
-    );
-
-/* mipolygen.c */
-
-extern _X_EXPORT Bool miFillGeneralPoly(DrawablePtr /*dst */ ,
-                                        GCPtr /*pgc */ ,
-                                        int /*count */ ,
-                                        DDXPointPtr     /*ptsIn */
     );
 
 /* mipolypnt.c */
@@ -381,36 +360,36 @@ extern _X_EXPORT void miPushPixels(GCPtr /*pGC */ ,
 
 /* miscrinit.c */
 
-extern _X_EXPORT Bool miModifyPixmapHeader(PixmapPtr /*pPixmap */ ,
-                                           int /*width */ ,
-                                           int /*height */ ,
-                                           int /*depth */ ,
-                                           int /*bitsPerPixel */ ,
-                                           int /*devKind */ ,
-                                           pointer      /*pPixData */
+extern _X_EXPORT Bool miModifyPixmapHeader(PixmapPtr pPixmap,
+                                           int width,
+                                           int height,
+                                           int depth,
+                                           int bitsPerPixel,
+                                           int devKind,
+                                           void *pPixData
     );
 
 extern _X_EXPORT Bool miCreateScreenResources(ScreenPtr /*pScreen */
     );
 
-extern _X_EXPORT Bool miScreenDevPrivateInit(ScreenPtr /*pScreen */ ,
-                                             int /*width */ ,
-                                             pointer    /*pbits */
+extern _X_EXPORT Bool miScreenDevPrivateInit(ScreenPtr pScreen,
+                                             int width,
+                                             void *pbits
     );
 
-extern _X_EXPORT Bool miScreenInit(ScreenPtr /*pScreen */ ,
-                                   pointer /*pbits */ ,
-                                   int /*xsize */ ,
-                                   int /*ysize */ ,
-                                   int /*dpix */ ,
-                                   int /*dpiy */ ,
-                                   int /*width */ ,
-                                   int /*rootDepth */ ,
-                                   int /*numDepths */ ,
-                                   DepthPtr /*depths */ ,
-                                   VisualID /*rootVisual */ ,
-                                   int /*numVisuals */ ,
-                                   VisualPtr    /*visuals */
+extern _X_EXPORT Bool miScreenInit(ScreenPtr pScreen,
+                                   void *pbits,
+                                   int xsize,
+                                   int ysize,
+                                   int dpix,
+                                   int dpiy,
+                                   int width,
+                                   int rootDepth,
+                                   int numDepths,
+                                   DepthPtr depths,
+                                   VisualID rootVisual,
+                                   int numVisuals,
+                                   VisualPtr visuals
     );
 
 /* mivaltree.c */
@@ -421,17 +400,6 @@ extern _X_EXPORT int miShapedWindowIn(RegionPtr /*universe */ ,
                                       int /*x */ ,
                                       int       /*y */
     );
-
-typedef void
- (*SetRedirectBorderClipProcPtr) (WindowPtr pWindow, RegionPtr pRegion);
-
-typedef RegionPtr
- (*GetRedirectBorderClipProcPtr) (WindowPtr pWindow);
-
-extern _X_EXPORT void
-
-miRegisterRedirectBorderClipProc(SetRedirectBorderClipProcPtr setBorderClip,
-                                 GetRedirectBorderClipProcPtr getBorderClip);
 
 extern _X_EXPORT int miValidateTree(WindowPtr /*pParent */ ,
                                     WindowPtr /*pChild */ ,
@@ -451,6 +419,12 @@ extern _X_EXPORT void miWideDash(DrawablePtr /*pDrawable */ ,
                                  int /*npt */ ,
                                  DDXPointPtr    /*pPts */
     );
+
+extern _X_EXPORT void miPolylines(DrawablePtr pDrawable,
+                                  GCPtr pGC,
+                                  int mode,
+                                  int npt,
+                                  DDXPointPtr pPts);
 
 /* miwindow.c */
 
@@ -480,12 +454,12 @@ extern _X_EXPORT void miMoveWindow(WindowPtr /*pWin */ ,
                                    VTKind       /*kind */
     );
 
-extern _X_EXPORT void miSlideAndSizeWindow(WindowPtr /*pWin */ ,
-                                           int /*x */ ,
-                                           int /*y */ ,
-                                           unsigned int /*w */ ,
-                                           unsigned int /*h */ ,
-                                           WindowPtr    /*pSib */
+extern _X_EXPORT void miResizeWindow(WindowPtr /*pWin */ ,
+                                     int /*x */ ,
+                                     int /*y */ ,
+                                     unsigned int /*w */ ,
+                                     unsigned int /*h */ ,
+                                     WindowPtr    /*pSib */
     );
 
 extern _X_EXPORT WindowPtr miGetLayerWindow(WindowPtr   /*pWin */
@@ -504,8 +478,9 @@ extern _X_EXPORT void miMarkUnrealizedWindow(WindowPtr /*pChild */ ,
                                              Bool       /*fromConfigure */
     );
 
-extern _X_EXPORT void miSegregateChildren(WindowPtr pWin, RegionPtr pReg,
-                                          int depth);
+extern _X_EXPORT WindowPtr miSpriteTrace(SpritePtr pSprite, int x, int y);
+
+extern _X_EXPORT WindowPtr miXYToWindow(ScreenPtr pScreen, SpritePtr pSprite, int x, int y);
 
 /* mizerarc.c */
 

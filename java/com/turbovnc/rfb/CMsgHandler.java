@@ -45,7 +45,7 @@ public abstract class CMsgHandler {
         (result != screenTypes.resultSuccess))
       return;
 
-    if (!layout.validate(width, height))
+    if (!layout.validate(width, height, true))
       vlog.error("Server sent us an invalid screen layout");
 
     cp.width = width;

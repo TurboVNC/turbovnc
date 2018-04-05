@@ -63,12 +63,15 @@ from the X Consortium.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <netdb.h>
 #include "servermd.h"
+#ifdef GLXEXT
+#include "glx_extinit.h"
+#endif
+#include "extension.h"
 #include "fb.h"
 #include "dixstruct.h"
 #include "propertyst.h"
@@ -82,6 +85,7 @@ from the X Consortium.
 #include "tvnc_version.h"
 #include "input-xkb.h"
 #include "xkbsrv.h"
+#include "registry.h"
 #define XSERV_t
 #define TRANS_SERVER
 #define TRANS_REOPEN
@@ -93,7 +97,7 @@ from the X Consortium.
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
 
-rfbScreenInfo rfbScreen;
+rfbFBInfo rfbFB;
 DevPrivateKeyRec rfbGCKey;
 
 static Bool initOutputCalled = FALSE;
@@ -118,22 +122,18 @@ Atom VNC_ACL;
 static char primaryOrder[4] = "";
 static int redBits, greenBits, blueBits;
 
-static Bool rfbScreenInit(int index, ScreenPtr pScreen, int argc,
-                          char **argv);
+static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv);
 static int rfbKeybdProc(DeviceIntPtr pDevice, int onoff);
 static int rfbMouseProc(DeviceIntPtr pDevice, int onoff);
 static int rfbExtInputProc(DeviceIntPtr pDevice, int onoff);
 static Bool CheckDisplayNumber(int n);
 
 static Bool rfbAlwaysTrue();
-char *rfbAllocateFramebufferMemory(rfbScreenInfoPtr prfb);
+char *rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb);
 static Bool rfbCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y);
 static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
 static void rfbClientStateChange(CallbackListPtr *, pointer myData,
                                  pointer client);
-
-static void rfbBlockHandler(pointer data, OSTimePtr timeout, pointer readmask);
-static void rfbWakeupHandler(pointer data, int nfds, pointer readmask);
 
 static miPointerScreenFuncRec rfbPointerCursorFuncs = {
     rfbCursorOffScreen,
@@ -173,12 +173,15 @@ ddxProcessArgument(int argc, char *argv[], int i)
     static Bool firstTime = TRUE;
 
     if (firstTime) {
-        rfbScreen.width = RFB_DEFAULT_WIDTH;
-        rfbScreen.height = RFB_DEFAULT_HEIGHT;
-        rfbScreen.depth = RFB_DEFAULT_DEPTH;
-        rfbScreen.blackPixel = RFB_DEFAULT_BLACKPIXEL;
-        rfbScreen.whitePixel = RFB_DEFAULT_WHITEPIXEL;
-        rfbScreen.pfbMemory = NULL;
+        rfbFB.width = RFB_DEFAULT_WIDTH;
+        rfbFB.height = RFB_DEFAULT_HEIGHT;
+        xorg_list_init(&rfbScreens);
+        rfbAddScreen(&rfbScreens, rfbNewScreen(0, 0, 0, rfbFB.width,
+                                               rfbFB.height, 0));
+        rfbFB.depth = RFB_DEFAULT_DEPTH;
+        rfbFB.blackPixel = RFB_DEFAULT_BLACKPIXEL;
+        rfbFB.whitePixel = RFB_DEFAULT_WHITEPIXEL;
+        rfbFB.pfbMemory = NULL;
         gethostname(rfbThisHost, 255);
         interface.s_addr = htonl(INADDR_ANY);
         interface6 = in6addr_any;
@@ -332,6 +335,12 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
+    if (strcasecmp(argv[i], "-noprimarysync") == 0) {
+        extern Bool rfbSyncPrimary;
+        rfbSyncPrimary = FALSE;
+        return 1;
+    }
+
     if (strcasecmp(argv[i], "-noreverse") == 0) {
         rfbAuthDisableRevCon = TRUE;
         return 1;
@@ -382,23 +391,56 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     if (strcasecmp(argv[i], "-blackpixel") == 0) {  /* -blackpixel n */
         if (i + 1 >= argc) UseMsg();
-        rfbScreen.blackPixel = atoi(argv[i + 1]);
+        rfbFB.blackPixel = atoi(argv[i + 1]);
         return 2;
     }
 
     if (strcasecmp(argv[i], "-depth") == 0) {       /* -depth D */
         if (i + 1 >= argc) UseMsg();
-        rfbScreen.depth = atoi(argv[i + 1]);
+        rfbFB.depth = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-geometry") == 0) {    /* -geometry WxH */
+    if (strcasecmp(argv[i], "-dridir") == 0) {
+#ifdef GLXEXT
+        extern char *dri_driver_path;
         if (i + 1 >= argc) UseMsg();
-        if (sscanf(argv[i + 1], "%dx%d",
-                   &rfbScreen.width, &rfbScreen.height) != 2) {
-            ErrorF("Invalid geometry %s\n", argv[i + 1]);
-            UseMsg();
+        dri_driver_path = strdup(argv[i + 1]);
+#endif
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-geometry") == 0) {
+        /* -geometry WxH or W0xH0+X0+Y0[,W1xH1+X1+Y1,...] */
+        char *str, *token;
+        int index = 0, w, h, x, y;
+        int r = INT_MIN, b = INT_MIN;
+        if (i + 1 >= argc) UseMsg();
+        str = argv[i + 1];
+        while ((token = strsep(&str, ",")) != NULL) {
+            x = y = 0;
+            if ((sscanf(token, "%dx%d+%d+%d", &w, &h, &x, &y) != 4 &&
+                 sscanf(token, "%dx%d", &w, &h) != 2) ||
+                x < 0 || y < 0 || w < 1 || h < 1)
+                FatalError("Invalid geometry %s\n", token);
+            if (rfbFindScreen(&rfbScreens, x, y, w, h))
+                continue;
+            if (index == 0) {
+                rfbScreenInfo *screen;
+                screen = xorg_list_first_entry(&rfbScreens, rfbScreenInfo,
+                                               entry);
+                screen->s.x = x;  screen->s.y = y;
+                screen->s.w = w;  screen->s.h = h;
+            } else
+                rfbAddScreen(&rfbScreens, rfbNewScreen(0, x, y, w, h, 0));
+            if (x + w > r) r = x + w;
+            if (y + h > b) b = y + h;
+            index++;
+            if (index > 255)
+                FatalError("Cannot create more than 255 screens\n");
         }
+        rfbFB.width = r;
+        rfbFB.height = b;
         return 2;
     }
 
@@ -433,7 +475,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     if (strcasecmp(argv[i], "-whitepixel") == 0) {  /* -whitepixel n */
         if (i + 1 >= argc) UseMsg();
-        rfbScreen.whitePixel = atoi(argv[i + 1]);
+        rfbFB.whitePixel = atoi(argv[i + 1]);
         return 2;
     }
 
@@ -535,8 +577,17 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
     /***** TurboVNC miscellaneous options *****/
 
+    if (strcasecmp(argv[i], "-registrydir") == 0) {
+#ifdef X_REGISTRY_REQUEST
+        extern char registry_path[PATH_MAX];
+        if (i + 1 >= argc) UseMsg();
+        snprintf(registry_path, PATH_MAX, "%s/protocol.txt", argv[i + 1]);
+#endif
+        return 2;
+    }
+
     if (strcasecmp(argv[i], "-verbose") == 0) {
-        LogSetParameter(XLOG_VERBOSITY, X_NOT_IMPLEMENTED);
+        LogSetParameter(XLOG_VERBOSITY, X_DEBUG);
         return 1;
     }
 
@@ -570,6 +621,7 @@ static PixmapFormatRec formats[MAXFORMATS] = {
     { 24, 32, BITMAP_SCANLINE_PAD },
 #ifdef RENDER
     { 32, 32, BITMAP_SCANLINE_PAD },
+    { 32, 32, BITMAP_SCANLINE_PAD },
 #endif
 };
 #ifdef RENDER
@@ -584,6 +636,13 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 {
     int i;
     initOutputCalled = TRUE;
+#ifdef GLXEXT
+    const ExtensionModule glxExtension =
+        { GlxExtensionInit, "GLX", &noGlxExtension };
+
+    if (serverGeneration == 1)
+        LoadExtensionList(&glxExtension, 1, TRUE);
+#endif
 
     rfbLog("Desktop name '%s' (%s:%s)\n", desktopName, rfbThisHost, display);
     rfbLog("Protocol versions supported: 3.3, 3.7, 3.8, 3.7t, 3.8t\n");
@@ -614,6 +673,17 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
     screenInfo->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
     screenInfo->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
     screenInfo->bitmapBitOrder = BITMAP_BIT_ORDER;
+    if (rfbFB.depth == 30) {
+        numFormats++;
+#ifdef RENDER
+        formats[numFormats - 2] = (PixmapFormatRec) {
+#else
+        formats[numFormats - 1] = (PixmapFormatRec) {
+#endif
+            .depth = 30, .bitsPerPixel = 32,
+            .scanlinePad = BITMAP_SCANLINE_PAD
+        };
+    }
     screenInfo->numPixmapFormats = numFormats;
     for (i = 0; i < numFormats; i++)
         screenInfo->formats[i] = formats[i];
@@ -628,15 +698,13 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
     if (AddScreen(rfbScreenInit, argc, argv) == -1) {
         FatalError("Couldn't add screen");
     }
-
-    RegisterBlockAndWakeupHandlers(rfbBlockHandler, rfbWakeupHandler, 0);
 }
 
 
 static Bool
-rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
+rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
-    rfbScreenInfoPtr prfb = &rfbScreen;
+    rfbFBInfoPtr prfb = &rfbFB;
     int dpix = 96, dpiy = 96;
     int ret;
     char *pbits;
@@ -657,8 +725,6 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
     pbits = rfbAllocateFramebufferMemory(prfb);
     if (!pbits) return FALSE;
 
-    miSetPixmapDepths();
-
     switch (prfb->depth) {
     case 8:
         miSetVisualTypesAndMasks(8, ((1 << StaticGray) | (1 << GrayScale) |
@@ -674,6 +740,11 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
         miSetVisualTypesAndMasks(24, ((1 << TrueColor) | (1 << DirectColor)),
                                  8, TrueColor, 0xff0000, 0x00ff00, 0x0000ff);
         break;
+    case 30:
+        miSetVisualTypesAndMasks(30, ((1 << TrueColor) | (1 << DirectColor)),
+                                 10, TrueColor, 0x3ff00000, 0x000ffc00,
+                                 0x000003ff);
+        break;
     case 32:
         miSetVisualTypesAndMasks(32, ((1 << TrueColor) | (1 << DirectColor)),
                                  8, TrueColor, 0xff000000, 0x00ff0000,
@@ -683,6 +754,8 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
         rfbLog("Depth %d not supported\n", prfb->depth);
         return FALSE;
     }
+
+    miSetPixmapDepths();
 
     switch (prfb->bitsPerPixel)
     {
@@ -696,9 +769,34 @@ rfbScreenInit(int index, ScreenPtr pScreen, int argc, char **argv)
         blueBits = 5; greenBits = 6; redBits = 5;
         break;
     case 32:
-        ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-                           dpix, dpiy, prfb->paddedWidthInBytes / 4, 32);
-        blueBits = 8; greenBits = 8; redBits = 8;
+        if (prfb->depth == 30) {
+            VisualPtr visuals;
+            DepthPtr depths;
+            int nVisuals, nDepths, rootDepth = 0;
+            VisualID defaultVisual;
+
+            if (!fbSetupScreen(pScreen, pbits, prfb->width, prfb->height, dpix,
+                               dpiy, prfb->paddedWidthInBytes / 4, 32))
+                ret = FALSE;
+            fbGetScreenPrivate(pScreen)->win32bpp = 32;
+            fbGetScreenPrivate(pScreen)->pix32bpp = 32;
+            if (!fbInitVisuals(&visuals, &depths, &nVisuals, &nDepths,
+                               &rootDepth, &defaultVisual,
+                               ((unsigned long) 1 << 31), 10))
+                ret = FALSE;
+            if (!miScreenInit(pScreen, pbits, prfb->width, prfb->height, dpix,
+                              dpiy, prfb->paddedWidthInBytes / 4, rootDepth,
+                              nDepths, depths, defaultVisual, nVisuals,
+                              visuals))
+                ret = FALSE;
+            pScreen->CloseScreen = fbCloseScreen;
+            blueBits = greenBits = redBits = 10;
+            ret = TRUE;
+        } else {
+            ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
+                               dpix, dpiy, prfb->paddedWidthInBytes / 4, 32);
+            blueBits = greenBits = redBits = 8;
+        }
         break;
     default:
         return FALSE;
@@ -1198,22 +1296,14 @@ LegalModifier(unsigned int key, DeviceIntPtr pDev)
 void
 ProcessInputEvents()
 {
-    rfbCheckFds();
-    httpCheckFds();
+    static Bool inetdInitDone = FALSE;
+
+    if (!inetdInitDone && inetdSock != -1) {
+        rfbNewClientConnection(inetdSock);
+        inetdInitDone = TRUE;
+    }
     mieqProcessInputEvents();
     IdleTimerCheck();
-}
-
-
-static void
-rfbBlockHandler(pointer data, OSTimePtr timeout, pointer readmask)
-{
-}
-
-static void
-rfbWakeupHandler(pointer data, int nfds, pointer readmask)
-{
-    ProcessInputEvents();
 }
 
 
@@ -1221,17 +1311,15 @@ static Bool CheckDisplayNumber(int n)
 {
     char fname[32];
     int sock;
-    struct sockaddr_storage addr;
-    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
-    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+    rfbSockAddr addr;
 
     sock = socket(AF_INET6, SOCK_STREAM, 0);
 
     memset(&addr, 0, sizeof(addr));
-    addr6->sin6_family = AF_INET6;
-    addr6->sin6_addr = in6addr_any;
-    addr6->sin6_port = htons(6000 + n);
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in6)) < 0) {
+    addr.u.sin6.sin6_family = AF_INET6;
+    addr.u.sin6.sin6_addr = in6addr_any;
+    addr.u.sin6.sin6_port = htons(6000 + n);
+    if (bind(sock, &addr.u.sa, sizeof(struct sockaddr_in6)) < 0) {
         close(sock);
         return FALSE;
     }
@@ -1240,10 +1328,10 @@ static Bool CheckDisplayNumber(int n)
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     memset(&addr, 0, sizeof(addr));
-    addr4->sin_family = AF_INET;
-    addr4->sin_addr.s_addr = htonl(INADDR_ANY);
-    addr4->sin_port = htons(6000 + n);
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) < 0) {
+    addr.u.sin.sin_family = AF_INET;
+    addr.u.sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.u.sin.sin_port = htons(6000 + n);
+    if (bind(sock, &addr.u.sa, sizeof(struct sockaddr_in)) < 0) {
         close(sock);
         return FALSE;
     }
@@ -1376,7 +1464,7 @@ rfbAlwaysTrue()
 
 
 char *
-rfbAllocateFramebufferMemory(rfbScreenInfoPtr prfb)
+rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb)
 {
     if (prfb->pfbMemory) return prfb->pfbMemory; /* already done */
 
@@ -1417,7 +1505,7 @@ ddxGiveUp(enum ExitCode error)
         rfbPAMEnd(cl);
 #endif
     ShutdownTightThreads();
-    free(rfbScreen.pfbMemory);
+    free(rfbFB.pfbMemory);
     if (initOutputCalled) {
         char unixSocketName[32];
         sprintf(unixSocketName, "/tmp/.X11-unix/X%s", display);
@@ -1458,12 +1546,16 @@ OsVendorInit()
     }
     if (rfbIdleTimeout > 0)
         IdleTimerSet();
-    if (rfbScreen.width > rfbMaxWidth || rfbScreen.height > rfbMaxHeight) {
-        rfbScreen.width = min(rfbScreen.width, rfbMaxWidth);
-        rfbScreen.height = min(rfbScreen.height, rfbMaxHeight);
+    if (rfbFB.width > rfbMaxWidth || rfbFB.height > rfbMaxHeight) {
+        rfbFB.width = min(rfbFB.width, rfbMaxWidth);
+        rfbFB.height = min(rfbFB.height, rfbMaxHeight);
         rfbLog("NOTICE: desktop size clamped to %dx%d per system policy\n",
-               rfbScreen.width, rfbScreen.height);
+               rfbFB.width, rfbFB.height);
     }
+    rfbClipScreens(&rfbScreens, rfbFB.width, rfbFB.height);
+    if (xorg_list_is_empty(&rfbScreens))
+        FatalError("All screens are outside of the framebuffer (%dx%d)",
+                   rfbFB.width, rfbFB.height);
 #ifdef XVNC_AuthPAM
     if (rfbAuthDisablePAMSession && rfbAuthPAMSession) {
         rfbLog("NOTICE: PAM sessions disabled per system policy\n");
@@ -1474,7 +1566,7 @@ OsVendorInit()
 
 
 void
-OsVendorFatalError()
+OsVendorFatalError(const char *f, va_list args)
 {
 }
 
@@ -1508,6 +1600,9 @@ ddxUseMsg()
     ErrorF("                       that use the (obsolete) X cut buffer\n");
     ErrorF("-noflowcontrol         when continuous updates are enabled, send updates whether\n");
     ErrorF("                       or not the client is ready to receive them\n");
+    ErrorF("-noprimarysync         disable clipboard synchronization with the PRIMARY\n");
+    ErrorF("                       selection (typically used when pasting with the middle\n");
+    ErrorF("                       mouse button)\n");
     ErrorF("-noreverse             disable reverse connections\n");
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
     ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
@@ -1526,7 +1621,10 @@ ddxUseMsg()
     ErrorF("\nTurboVNC display options\n");
     ErrorF("========================\n");
     ErrorF("-depth D               set framebuffer depth\n");
-    ErrorF("-geometry WxH          set framebuffer width & height\n");
+    ErrorF("-dridir dir            specify directory containing the swrast Mesa driver\n");
+    ErrorF("-geometry WxH          set framebuffer width & height (single-screen)\n");
+    ErrorF("-geometry W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]\n");
+    ErrorF("                       set multi-screen geometry (see man page)\n");
 #ifdef NVCONTROL
     ErrorF("-nvcontrol display     set up a virtual NV-CONTROL extension and redirect\n");
     ErrorF("                       NV-CONTROL requests to the specified X display\n");
@@ -1567,6 +1665,7 @@ ddxUseMsg()
 
     ErrorF("\nTurboVNC miscellaneous options\n");
     ErrorF("==============================\n");
+    ErrorF("-registrydir dir       specify directory containing protocol.txt\n");
     ErrorF("-verbose               print all X.org errors, warnings, and messages\n");
     ErrorF("-version               report Xvnc version on stderr\n\n");
     exit(1);

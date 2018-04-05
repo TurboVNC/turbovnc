@@ -46,75 +46,55 @@ miDestroyPicture(PicturePtr pPicture)
         RegionDestroy(pPicture->pCompositeClip);
 }
 
-void
+static void
 miDestroyPictureClip(PicturePtr pPicture)
 {
-    switch (pPicture->clientClipType) {
-    case CT_NONE:
-        return;
-    case CT_PIXMAP:
-        (*pPicture->pDrawable->pScreen->
-         DestroyPixmap) ((PixmapPtr) (pPicture->clientClip));
-        break;
-    default:
-        /*
-         * we know we'll never have a list of rectangles, since ChangeClip
-         * immediately turns them into a region
-         */
+    if (pPicture->clientClip)
         RegionDestroy(pPicture->clientClip);
-        break;
-    }
     pPicture->clientClip = NULL;
-    pPicture->clientClipType = CT_NONE;
 }
 
-int
-miChangePictureClip(PicturePtr pPicture, int type, pointer value, int n)
+static int
+miChangePictureClip(PicturePtr pPicture, int type, void *value, int n)
 {
     ScreenPtr pScreen = pPicture->pDrawable->pScreen;
     PictureScreenPtr ps = GetPictureScreen(pScreen);
-    pointer clientClip;
-    int clientClipType;
+    RegionPtr clientClip;
 
     switch (type) {
     case CT_PIXMAP:
         /* convert the pixmap to a region */
-        clientClip = (pointer) BitmapToRegion(pScreen, (PixmapPtr) value);
+        clientClip = BitmapToRegion(pScreen, (PixmapPtr) value);
         if (!clientClip)
             return BadAlloc;
-        clientClipType = CT_REGION;
         (*pScreen->DestroyPixmap) ((PixmapPtr) value);
         break;
     case CT_REGION:
         clientClip = value;
-        clientClipType = CT_REGION;
         break;
     case CT_NONE:
         clientClip = 0;
-        clientClipType = CT_NONE;
         break;
     default:
-        clientClip = (pointer) RegionFromRects(n, (xRectangle *) value, type);
+        clientClip = RegionFromRects(n, (xRectangle *) value, type);
         if (!clientClip)
             return BadAlloc;
-        clientClipType = CT_REGION;
         free(value);
         break;
     }
     (*ps->DestroyPictureClip) (pPicture);
     pPicture->clientClip = clientClip;
-    pPicture->clientClipType = clientClipType;
     pPicture->stateChanges |= CPClipMask;
     return Success;
 }
 
-void
+static void
 miChangePicture(PicturePtr pPicture, Mask mask)
 {
     return;
 }
 
-void
+static void
 miValidatePicture(PicturePtr pPicture, Mask mask)
 {
     DrawablePtr pDrawable = pPicture->pDrawable;
@@ -144,7 +124,7 @@ miValidatePicture(PicturePtr pPicture, Mask mask)
              * copying of regions.  (this wins especially if many clients clip
              * by children and have no client clip.)
              */
-            if (pPicture->clientClipType == CT_NONE) {
+            if (!pPicture->clientClip) {
                 if (freeCompClip)
                     RegionDestroy(pPicture->pCompositeClip);
                 pPicture->pCompositeClip = pregWin;
@@ -203,7 +183,7 @@ miValidatePicture(PicturePtr pPicture, Mask mask)
                 pPicture->pCompositeClip = RegionCreate(&pixbounds, 1);
             }
 
-            if (pPicture->clientClipType == CT_REGION) {
+            if (pPicture->clientClip) {
                 if (pDrawable->x || pDrawable->y) {
                     RegionTranslate(pPicture->clientClip,
                                     pDrawable->x + pPicture->clipOrigin.x,
@@ -231,13 +211,13 @@ miValidatePicture(PicturePtr pPicture, Mask mask)
     }
 }
 
-int
+static int
 miChangePictureTransform(PicturePtr pPicture, PictTransform * transform)
 {
     return Success;
 }
 
-int
+static int
 miChangePictureFilter(PicturePtr pPicture,
                       int filter, xFixed * params, int nparams)
 {
@@ -284,7 +264,7 @@ miClipPictureReg(pixman_region16_t * pRegion,
 static inline Bool
 miClipPictureSrc(RegionPtr pRegion, PicturePtr pPicture, int dx, int dy)
 {
-    if (pPicture->clientClipType != CT_NONE) {
+    if (pPicture->clientClip) {
         Bool result;
 
         pixman_region_translate(pPicture->clientClip,
@@ -519,7 +499,7 @@ miRenderPixelToColor(PictFormatPtr format, CARD32 pixel, xRenderColor * color)
     }
 }
 
-void
+static void
 miTriStrip(CARD8 op,
            PicturePtr pSrc,
            PicturePtr pDst,
@@ -530,7 +510,7 @@ miTriStrip(CARD8 op,
     int ntri;
 
     ntri = npoints - 2;
-    tris = malloc(ntri * sizeof(xTriangle));
+    tris = xallocarray(ntri, sizeof(xTriangle));
     if (!tris)
         return;
 
@@ -543,7 +523,7 @@ miTriStrip(CARD8 op,
     free(tris);
 }
 
-void
+static void
 miTriFan(CARD8 op,
          PicturePtr pSrc,
          PicturePtr pDst,
@@ -555,7 +535,7 @@ miTriFan(CARD8 op,
     int ntri;
 
     ntri = npoints - 2;
-    tris = malloc(ntri * sizeof(xTriangle));
+    tris = xallocarray(ntri, sizeof(xTriangle));
     if (!tris)
         return;
 

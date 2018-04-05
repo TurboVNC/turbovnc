@@ -4,6 +4,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -392,8 +393,8 @@ rfbSetClientColourMap(rfbClientPtr cl, int firstColour, int nColours)
 
         REGION_UNINIT(pScreen, &cl->modifiedRegion);
         box.x1 = box.y1 = 0;
-        box.x2 = rfbScreen.width;
-        box.y2 = rfbScreen.height;
+        box.x2 = rfbFB.width;
+        box.y2 = rfbFB.height;
         REGION_INIT(pScreen, &cl->modifiedRegion, &box, 0);
 
         return TRUE;

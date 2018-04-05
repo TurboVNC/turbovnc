@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -66,13 +66,13 @@ SOFTWARE.
 extern int ffs(int);
 #endif
 
-/* MICOPYAREA -- public entry for the CopyArea request 
+/* MICOPYAREA -- public entry for the CopyArea request
  * For each rectangle in the source region
  *     get the pixels with GetSpans
  *     set them in the destination with SetSpans
  * We let SetSpans worry about clipping to the destination.
  */
-RegionPtr
+_X_COLD RegionPtr
 miCopyArea(DrawablePtr pSrcDrawable,
            DrawablePtr pDstDrawable,
            GCPtr pGC,
@@ -136,11 +136,11 @@ miCopyArea(DrawablePtr pSrcDrawable,
         dsty += pDstDrawable->y;
     }
 
-    pptFirst = ppt = malloc(heightSrc * sizeof(DDXPointRec));
-    pwidthFirst = pwidth = malloc(heightSrc * sizeof(unsigned int));
+    pptFirst = ppt = xallocarray(heightSrc, sizeof(DDXPointRec));
+    pwidthFirst = pwidth = xallocarray(heightSrc, sizeof(unsigned int));
     numRects = RegionNumRects(prgnSrcClip);
     boxes = RegionRects(prgnSrcClip);
-    ordering = malloc(numRects * sizeof(unsigned int));
+    ordering = xallocarray(numRects, sizeof(unsigned int));
     if (!pptFirst || !pwidthFirst || !ordering) {
         free(ordering);
         free(pwidthFirst);
@@ -221,7 +221,7 @@ miCopyArea(DrawablePtr pSrcDrawable,
             ppt++->y = y++;
             *pwidth++ = width;
         }
-        pbits = malloc(height * PixmapBytePad(width, pSrcDrawable->depth));
+        pbits = xallocarray(height, PixmapBytePad(width, pSrcDrawable->depth));
         if (pbits) {
             (*pSrcDrawable->pScreen->GetSpans) (pSrcDrawable, width, pptFirst,
                                                 (int *) pwidthFirst, height,
@@ -242,8 +242,7 @@ miCopyArea(DrawablePtr pSrcDrawable,
         }
     }
     prgnExposed = miHandleExposures(pSrcDrawable, pDstDrawable, pGC, xIn, yIn,
-                                    widthSrc, heightSrc, xOut, yOut,
-                                    (unsigned long) 0);
+                                    widthSrc, heightSrc, xOut, yOut);
     if (realSrcClip)
         RegionDestroy(prgnSrcClip);
 
@@ -254,7 +253,7 @@ miCopyArea(DrawablePtr pSrcDrawable,
 }
 
 /* MIGETPLANE -- gets a bitmap representing one plane of pDraw
- * A helper used for CopyPlane and XY format GetImage 
+ * A helper used for CopyPlane and XY format GetImage
  * No clever strategy here, we grab a scanline at a time, pull out the
  * bits and then stuff them in a 1 bit deep map.
  */
@@ -262,8 +261,7 @@ miCopyArea(DrawablePtr pSrcDrawable,
  * This should be replaced with something more general.  mi shouldn't have to
  * care about such things as scanline padding et alia.
  */
-static
-MiBits *
+_X_COLD static MiBits *
 miGetPlane(DrawablePtr pDraw, int planeNum,     /* number of the bitPlane */
            int sx, int sy, int w, int h, MiBits * result)
 {
@@ -360,16 +358,16 @@ miGetPlane(DrawablePtr pDraw, int planeNum,     /* number of the bitPlane */
 }
 
 /* MIOPQSTIPDRAWABLE -- use pbits as an opaque stipple for pDraw.
- * Drawing through the clip mask we SetSpans() the bits into a 
+ * Drawing through the clip mask we SetSpans() the bits into a
  * bitmap and stipple those bits onto the destination drawable by doing a
- * PolyFillRect over the whole drawable, 
+ * PolyFillRect over the whole drawable,
  * then we invert the bitmap by copying it onto itself with an alu of
  * GXinvert, invert the foreground/background colors of the gc, and draw
  * the background bits.
  * Note how the clipped out bits of the bitmap are always the background
  * color so that the stipple never causes FillRect to draw them.
  */
-static void
+_X_COLD static void
 miOpqStipDrawable(DrawablePtr pDraw, GCPtr pGC, RegionPtr prgnSrc,
                   MiBits * pbits, int srcx, int w, int h, int dstx, int dsty)
 {
@@ -400,8 +398,8 @@ miOpqStipDrawable(DrawablePtr pDraw, GCPtr pGC, RegionPtr prgnSrc,
     ChangeGC(NullClient, pGCT, GCBackground, gcv);
     ValidateGC((DrawablePtr) pPixmap, pGCT);
     miClearDrawable((DrawablePtr) pPixmap, pGCT);
-    ppt = pptFirst = malloc(h * sizeof(DDXPointRec));
-    pwidth = pwidthFirst = malloc(h * sizeof(int));
+    ppt = pptFirst = xallocarray(h, sizeof(DDXPointRec));
+    pwidth = pwidthFirst = xallocarray(h, sizeof(int));
     if (!pptFirst || !pwidthFirst) {
         free(pwidthFirst);
         free(pptFirst);
@@ -506,12 +504,12 @@ miOpqStipDrawable(DrawablePtr pDraw, GCPtr pGC, RegionPtr prgnSrc,
 }
 
 /* MICOPYPLANE -- public entry for the CopyPlane request.
- * strategy: 
- * First build up a bitmap out of the bits requested 
+ * strategy:
+ * First build up a bitmap out of the bits requested
  * build a source clip
- * Use the bitmap we've built up as a Stipple for the destination 
+ * Use the bitmap we've built up as a Stipple for the destination
  */
-RegionPtr
+_X_COLD RegionPtr
 miCopyPlane(DrawablePtr pSrcDrawable,
             DrawablePtr pDstDrawable,
             GCPtr pGC,
@@ -579,7 +577,7 @@ miCopyPlane(DrawablePtr pSrcDrawable,
         }
     }
     prgnExposed = miHandleExposures(pSrcDrawable, pDstDrawable, pGC, srcx, srcy,
-                                    width, height, dstx, dsty, bitPlane);
+                                    width, height, dstx, dsty);
     RegionDestroy(prgnSrc);
     return prgnExposed;
 }
@@ -600,7 +598,7 @@ miCopyPlane(DrawablePtr pSrcDrawable,
  * XY format:
  * get the single plane specified in planemask
  */
-void
+_X_COLD void
 miGetImage(DrawablePtr pDraw, int sx, int sy, int w, int h,
            unsigned int format, unsigned long planeMask, char *pDst)
 {
@@ -614,7 +612,7 @@ miGetImage(DrawablePtr pDraw, int sx, int sy, int w, int h,
     if (format == ZPixmap) {
         if ((((1LL << depth) - 1) & planeMask) != (1LL << depth) - 1) {
             ChangeGCVal gcv;
-            xPoint pt;
+            xPoint xpt;
 
             pGC = GetScratchGC(depth, pDraw->pScreen);
             if (!pGC)
@@ -629,9 +627,9 @@ miGetImage(DrawablePtr pDraw, int sx, int sy, int w, int h,
              * Clear the pixmap before doing anything else
              */
             ValidateGC((DrawablePtr) pPixmap, pGC);
-            pt.x = pt.y = 0;
+            xpt.x = xpt.y = 0;
             width = w;
-            (*pGC->ops->FillSpans) ((DrawablePtr) pPixmap, pGC, 1, &pt, &width,
+            (*pGC->ops->FillSpans) ((DrawablePtr) pPixmap, pGC, 1, &xpt, &width,
                                     TRUE);
 
             /* alu is already GXCopy */
@@ -672,16 +670,16 @@ miGetImage(DrawablePtr pDraw, int sx, int sy, int w, int h,
 
 /* MIPUTIMAGE -- public entry for the PutImage request
  * Here we benefit from knowing the format of the bits pointed to by pImage,
- * even if we don't know how pDraw represents them.  
- * Three different strategies are used depending on the format 
+ * even if we don't know how pDraw represents them.
+ * Three different strategies are used depending on the format
  * XYBitmap Format:
  * 	we just use the Opaque Stipple helper function to cover the destination
- * 	Note that this covers all the planes of the drawable with the 
+ * 	Note that this covers all the planes of the drawable with the
  *	foreground color (masked with the GC planemask) where there are 1 bits
  *	and the background color (masked with the GC planemask) where there are
  *	0 bits
  * XYPixmap format:
- *	what we're called with is a series of XYBitmaps, but we only want 
+ *	what we're called with is a series of XYBitmaps, but we only want
  *	each XYPixmap to update 1 plane, instead of updating all of them.
  * 	we set the foreground color to be all 1s and the background to all 0s
  *	then for each plane, we set the plane mask to only effect that one
@@ -690,7 +688,7 @@ miGetImage(DrawablePtr pDraw, int sx, int sy, int w, int h,
  * ZPixmap format:
  *	This part is simple, just call SetSpans
  */
-void
+_X_COLD void
 miPutImage(DrawablePtr pDraw, GCPtr pGC, int depth,
            int x, int y, int w, int h, int leftPad, int format, char *pImage)
 {
@@ -730,7 +728,7 @@ miPutImage(DrawablePtr pDraw, GCPtr pGC, int depth,
         ChangeGC(NullClient, pGC, GCForeground | GCBackground, gcv);
         bytesPer = (long) h *BitmapBytePad(w + leftPad);
 
-        for (i = 1 << (depth - 1); i != 0; i >>= 1, pImage += bytesPer) {
+        for (i = (unsigned long) 1 << (depth - 1); i != 0; i >>= 1, pImage += bytesPer) {
             if (i & oldPlanemask) {
                 gcv[0].val = (XID) i;
                 ChangeGC(NullClient, pGC, GCPlaneMask, gcv);
@@ -748,8 +746,8 @@ miPutImage(DrawablePtr pDraw, GCPtr pGC, int depth,
         break;
 
     case ZPixmap:
-        ppt = pptFirst = malloc(h * sizeof(DDXPointRec));
-        pwidth = pwidthFirst = malloc(h * sizeof(int));
+        ppt = pptFirst = xallocarray(h, sizeof(DDXPointRec));
+        pwidth = pwidthFirst = xallocarray(h, sizeof(int));
         if (!pptFirst || !pwidthFirst) {
             free(pwidthFirst);
             free(pptFirst);

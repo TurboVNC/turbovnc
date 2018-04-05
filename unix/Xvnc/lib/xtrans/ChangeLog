@@ -1,3 +1,488 @@
+commit 7cbad9fe2e61cd9d5caeaf361826a6f4bd320f03
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Sep 20 10:02:05 2014 -0700
+
+    xtrans 1.3.5
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit fb7f198c88e97d22c8c89e76e9cd06b2b2720a96
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Sep 12 11:27:39 2014 -0700
+
+    Add TRANS(Listen) function to re-enable specific listen sockets
+    
+    This will allow a server to disable listeners by default and then
+    let later configuration re-enable them. In particular, this lets the X
+    server disable inet and unix listen sockets by default while still
+    providing a '-listen' command line option to re-enable them later on.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Hans de Goede <hdegoede@redhat.com>
+
+commit 17491de45c352c833442cccf17a9bd65909889db
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 23 12:28:14 2014 -0700
+
+    Add const qualifiers to TRANS(OpenC{L,O}TS{Server,Client}) args
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 305d20f2ee888d1c890f902da978176b8ec58a8d
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 23 12:10:48 2014 -0700
+
+    Add const qualifiers to TRANS(MakeAll*ServerListeners) port args
+    
+    Required also changing receive_listening_fds to specify port as const,
+    which we can do now that TRANS(ReopenCOTSServer) takes it as const.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ba70d48951fb925fb3082d81afb08c330333aa51
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 23 11:33:57 2014 -0700
+
+    Add const qualifiers to TRANS(Connect) args
+    
+    Also required constifying UnixHostReallyLocal, since SocketUNIXConnect
+    passes the host arg through to it.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 63b65a20706def951dd25e531949b7bc556419eb
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 23 10:17:57 2014 -0700
+
+    Add const qualifiers to TRANS(CreateListener) port args
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit fd90a4e00321b22c96565cfa354b8b0efa376979
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 23 10:07:22 2014 -0700
+
+    Add const qualifiers to TRANS(Reopen...) port args
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a56ec9d720a7964bada837790e9c1f6ceef97861
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 23 09:58:05 2014 -0700
+
+    Add const qualifiers to TRANS(Open...) address args
+    
+    Required also adding const to static TRANS(ParseAddress) function which
+    they pass the address arg to for parsing.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 30b3fd74a27c80993e81dfcb33e33520ae8684fb
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 23 12:46:44 2014 -0700
+
+    Update docs to note that TransName is now const char *
+    
+    Missed when the code was updated in commit eb9a8904fbef61a57ff0.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a57a7f62242e1ea972b81414741729bf3dbae0a4
+Author: Hans de Goede <hdegoede@redhat.com>
+Date:   Mon Mar 31 12:37:43 2014 +0200
+
+    xtrans 1.3.4
+    
+    Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+
+commit 1cd9cbe9b404e6c3e73dc0239d11547a5e2c02c4
+Author: Mark Kettenis <kettenis@openbsd.org>
+Date:   Sat Mar 29 23:51:49 2014 +0100
+
+    Increase UNIX socket buffer size
+    
+    Some systems provide a really small default buffer size for UNIX sockets.
+    Bump it up to 64k if necessary such that large transfers (such as
+    XGetImage() on a 8-megapixel image) don't take tens of seconds.
+    
+    Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+
+commit 68f60238c4224f954ff6556ae778c72e420175f0
+Author: Thomas Klausner <wiz@NetBSD.org>
+Date:   Wed Mar 26 13:21:49 2014 +0100
+
+    Add missing headers for free() and strlen().
+    
+    Reviewed-by: Mark Kettenis <kettenis@openbsd.org>
+    Signed-off-by: Thomas Klausner <wiz@NetBSD.org>
+
+commit 34463baacb3cafc096e0e0859bc10d6868cb2299
+Author: Thomas Klausner <wiz@NetBSD.org>
+Date:   Wed Mar 26 13:21:23 2014 +0100
+
+    Cast ctype(3) function arguments to unsigned char.
+    
+    Fixes warnings on at least NetBSD.
+    
+    Reviewed-by: Mark Kettenis <kettenis@openbsd.org>
+    Signed-off-by: Thomas Klausner <wiz@NetBSD.org>
+
+commit f20a9bb2ea25408ce9f1166b3b6e48759960fe86
+Author: Hans de Goede <hdegoede@redhat.com>
+Date:   Mon Mar 3 08:42:45 2014 +0100
+
+    configure: Also add -D_DEFAULT_SOURCE to .pc cflags to shut up glibc warnings
+    
+    The latest glibc considers _BSD_SOURCE deprecated, leading to the following
+    warning being issued for pretty much every C-file in the xserver:
+    
+    In file included from /usr/include/stdint.h:25:0,
+                     from /usr/lib/gcc/x86_64-redhat-linux/4.8.2/include/stdint.h:9,
+                     from ../include/misc.h:81,
+                     from miexpose.c:82:
+    /usr/include/features.h:145:3: warning: #warning "_BSD_SOURCE and _SVID_SOURCE are deprecated, use _DEFAULT_SOURCE" [-Wcpp]
+     # warning "_BSD_SOURCE and _SVID_SOURCE are deprecated, use _DEFAULT_SOURCE"
+       ^
+    
+    I've discussed this with the glibc developers and the prefered way of fixing
+    this is by also defining _DEFAULT_SOURCE which is the new way of stating
+    _BSD_SOURCE / _SVID_SOURCE .
+    
+    Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+    Reviewed-by: Mark Kettenis <kettenis@openbsd.org>
+    Tested-by: Kristian Høgsberg <krh@bitplanet.net>
+    Reviewed-by: Kristian Høgsberg <krh@bitplanet.net>
+
+commit 3f0de269abe59353acbd7a5587d68ce0da91db67
+Author: Hans de Goede <hdegoede@redhat.com>
+Date:   Thu Jan 23 11:47:25 2014 +0100
+
+    xtrans 1.3.3
+    
+    Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+
+commit 8f3bbed42c308f9c90293f23b7eaceff006aa232
+Author: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date:   Wed Jul 10 16:29:12 2013 +0100
+
+    Add TransIsListening()
+    
+    libxtrans provides TransNoListen() to set the 'don't listen' flag for a
+    particular transport, but there is no interface to query the state of that flag
+    
+    This is a bit of a problem for the XWin server, as it wants to start some helper
+    clients (for clipboard integration and integrated window management), so needs
+    to know what transports the server is listening on to construct appropriate
+    display names for those clients.
+    
+    Add TransIsListening() to discover if TransNoListen() has been called for a
+    particular protocol or not
+    
+    HdG:
+    -Invert the final check so that TransIsListening returns True when
+     TRANS_NOLISTEN is not set, as one would expect of it.
+    -Make the protocol argument a const char * as similar functions do
+    -Fix "warning: too many arguments for format" warning
+    
+    Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+    Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+
+commit e1e6121a1638d43d9929589b4723da2b38cb6b44
+Author: Łukasz Stelmach <l.stelmach@samsung.com>
+Date:   Mon Nov 25 11:11:54 2013 +0100
+
+    Enable systemd socket activation
+    
+    Receive file descriptors of open sockets from systemd instead of
+    creating them.
+    
+    Signed-off-by: Łukasz Stelmach <l.stelmach@samsung.com>
+    Cc: Kyungmin Park <kyungmin.park@samsung.com>
+    Cc: MyungJoo Ham <myungjoo.ham@samsung.com>
+    Cc: Piort Bereza <p.bereza@samsung.com>
+    Cc: Karol Lewandowski <k.lewandowsk@samsung.com>
+    Cc: Lennart Poettering <lennart@poettering.net>
+    Cc: Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
+    Cc: Peter Hutterer <peter.hutterer@who-t.net>
+    Cc: walter harms <wharms@bfs.de>
+    Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+    Acked-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit b895d45e225dd3d1bf9d598774d3ae4f29fcbc25
+Author: Łukasz Stelmach <l.stelmach@samsung.com>
+Date:   Thu Nov 28 12:57:21 2013 +0100
+
+    Define TRANS_RECEIVED flag for transports
+    
+    The flag is to be used to mark transports related to sockets
+    received from systemd.
+    
+    Signed-off-by: Łukasz Stelmach <l.stelmach@samsung.com>
+    Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+    Acked-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 2c0a7840a28ae696e80e73157856d7a049fdf6c7
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Dec 15 19:49:59 2013 -0500
+
+    xtrans.m4: remove AC_TYPE_SIGNAL and Imake SIGNALRETURNSINT
+    
+    Assume signal handlers return void, as C89 requires
+    
+    Drops use of autoconf's obsolete AC_TYPE_SIGNAL and Imake's even more
+    obsolete SIGNALRETURNSINT.
+    
+    None of the modules including xtrans.m4 uses RETSIGTYPE from autoconf.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 87547e43189301e3dd42feb9d7ff32a75d0e727f
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Dec 15 16:11:00 2013 -0500
+
+    xtrans.m4: replace deprecated AC_HAVE_LIBRARY with AC_CHECK_LIB
+    
+    The #define HAVE_LIBWS2_32 is still done and the lib ws2_32 is
+    prepended to LIBS if found.
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 88433eb1abe887000d34315c2f55aa42fcddfdee
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sun Dec 15 15:36:48 2013 -0500
+
+    xtrans.m4: fix warning by replacing obsolete AC_HELP_STRING
+    
+    with AS_HELP_STRING
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit 9487701904b71985549f60c9d8bc5df48682b55a
+Author: Mark Kettenis <kettenis@openbsd.org>
+Date:   Thu Nov 21 11:55:17 2013 +0100
+
+    Don't restrict FD passing to Linux & Solaris
+    
+    Signed-off-by: Mark Kettenis <kettenis@openbsd.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8b2c8aabe27bcaa4de6432b53c4a1296010ea823
+Author: Mark Kettenis <kettenis@openbsd.org>
+Date:   Mon Nov 11 23:18:01 2013 +0100
+
+    Fix alignment issues in FD passing code
+    
+    A char array on the stack is not guaranteed to have more than byte
+    alignment.  This means that casting it to a 'struct cmsghdr' and
+    accessing its members may result in unaligned access.  This will
+    generate SIGBUS on strict alignment architectures like OpenBSD/sparc64.
+    The solution is to use a union to force proper alignment.
+    
+    Signed-off-by: Mark Kettenis <kettenis@openbsd.org>
+    Reviewed-by: Matthieu Herrb <matthieu@herrb.eu>
+
+commit 81662d2018a35a161a5e9707563ee7f503f8d3e0
+Author: Mark Kettenis <kettenis@openbsd.org>
+Date:   Mon Nov 11 23:16:15 2013 +0100
+
+    Remove unused static inlines
+    
+    Signed-off-by: Mark Kettenis <kettenis@openbsd.org>
+    Reviewed-by: Matthieu Herrb <matthieu@herrb.eu>
+
+commit 0153d1670e4a1883e1bb6dd971435d6268eac5ba
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Nov 7 20:16:53 2013 -0800
+
+    xtrans 1.3.2
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 426049c30162ed620cc16bb58edef6aac4e2ee5d
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Nov 7 19:17:44 2013 -0800
+
+    Allow XTRANS_SEND_FDS on Solaris as well
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 76b4f4430f9a857a1b54bfde9ef57a95b87789f5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Nov 6 22:34:03 2013 -0800
+
+    Check if we need to define _XOPEN_SOURCE for struct msghdr.msg_control
+    
+    Required to expose the structure members in Solaris headers, since it
+    was an XPG4/UNIX95 addition to the Solaris ABI.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 32070a64ba99fb89ec039e26444b1e026d6a978e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Nov 6 21:52:21 2013 -0800
+
+    Add stubs for send/recv fd functions in local transports
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 08bf85958fab64951a9ba9e27dcb6b8eb818cc7e
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Nov 7 18:04:30 2013 -0800
+
+    Switch to CMSG_* macros for FD passing
+    
+    This should be portable to non-Linux systems
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6b54b5cf8086f127aa87096e2bdd2263d1c81683
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Nov 7 03:49:05 2013 -0800
+
+    Actually disable all of the FD passing code unless XTRANS_SEND_FDS is set
+    
+    Stick all of the functions relating to FD passing inside
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit f3709f3e0b883a0b4956313f89fa931e9264c346
+Author: Keith Packard <keithp@keithp.com>
+Date:   Wed Nov 6 23:16:11 2013 -0800
+
+    Update to version 1.3.1
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 074614940c570524e1446f55fc12a64415057e1f
+Author: Mark Kettenis <kettenis@openbsd.org>
+Date:   Wed Nov 6 23:13:28 2013 -0800
+
+    Don't include file descriptor passing code by default
+    
+    Leave it up to the consumer to request this functionality by defining
+    XTRANS_SEND_FDS.
+    
+    Signed-off-by: Mark Kettenis <kettenis@openbsd.org>
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    
+    v2 - make sure this is only defined on systems where the code actually
+    works (Linux for now)
+
+commit a7094c389ac9fd5ca265996f76eb55cb1133974b
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Nov 2 19:23:41 2013 -0700
+
+    Add SEND_FDS version of Readv
+    
+    Now that we've found that libFS uses readv, we can test whether this
+    readv implementation works correctly.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 58151f63553faf81babd1371770b7a7f33cecac1
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sat Nov 2 19:10:11 2013 -0700
+
+    Revert "Remove 'Readv' interface"
+    
+    This reverts commit 9e8d99c2e27f2c8acbbfb5b760649aa1bfad665e.
+    
+    libFS still uses this API...
+
+commit 1fb0fd555a16dd8fce4abc6d3fd22b315f46762a
+Author: Keith Packard <keithp@keithp.com>
+Date:   Thu Oct 31 17:21:53 2013 -0700
+
+    Update to version 1.3.0
+    
+    Adds FD passing interfaces and pulls in current patches past 1.2.7
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit adf920aa25c1709998c7c9276927061bd58e2dfc
+Author: Keith Packard <keithp@keithp.com>
+Date:   Tue Jan 8 16:47:05 2013 -0800
+
+    Add APIs to send file descriptors through the network
+    
+    Exposes new TRANS(SendFd)/TRANS(RecvFd) APIs.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit 9e8d99c2e27f2c8acbbfb5b760649aa1bfad665e
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Jan 18 16:47:30 2013 -0800
+
+    Remove 'Readv' interface
+    
+    No-one uses this, so there's no reason for it to be in the library
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+
+commit f6a161f2a003f4da0a2e414b4faa0ee0de0c01f0
+Author: Łukasz Stelmach <l.stelmach@samsung.com>
+Date:   Tue Jul 9 16:24:43 2013 +0200
+
+    Add const qualifier to unix_nolisten
+    
+    Signed-off-by: Łukasz Stelmach <l.stelmach@samsung.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit bd53f4c8543faf910a7a151241ee07661b4d57ad
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jan 27 22:11:40 2013 -0800
+
+    Docs: Drop pre-C89 TRANS() from docs since it's no longer in the headers
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3c4e0455425d5afd546c4a3f2cc9f8c7e60f2fca
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jan 27 21:39:34 2013 -0800
+
+    Docs: convert function synopses to docbook funcsynopsis markup
+    
+    Also add some cross-reference links and various other markup improvements.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d9f3728ff74ceb956f6cf8dc24b38611f9a4868a
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 575e1e901ca842ba8ff7417f48175fb6a8d70859
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:28:48 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit ec3136232f7ce930f9ca812b6ab42a71b60af4af
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Dec 26 19:08:16 2012 -0800
+
+    Remove unused TLI ("STREAMSCONN") code from xtrans
+    
+    Has never been converted to build in modular builds, so has been unusable
+    since X11R7.0 release in 2005.  All known platforms with TLI/XTI support
+    that X11R7 & later releases run on also have (and mostly prefer) BSD
+    socket support for their networking API.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit 8ce5ecd33b05becc054dbd07f87e385165b6c979
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Thu Mar 22 20:04:07 2012 -0700

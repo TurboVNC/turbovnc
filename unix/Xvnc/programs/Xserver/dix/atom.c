@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -56,7 +56,7 @@ SOFTWARE.
 #include "resource.h"
 #include "dix.h"
 
-#define InitialTableSize 100
+#define InitialTableSize 256
 
 typedef struct _Node {
     struct _Node *left, *right;
@@ -69,8 +69,6 @@ static Atom lastAtom = None;
 static NodePtr atomRoot = NULL;
 static unsigned long tableLength;
 static NodePtr *nodeTable;
-
-void FreeAtom(NodePtr patom);
 
 Atom
 MakeAtom(const char *string, unsigned len, Bool makeit)
@@ -119,7 +117,7 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         if ((lastAtom + 1) >= tableLength) {
             NodePtr *table;
 
-            table = realloc(nodeTable, tableLength * (2 * sizeof(NodePtr)));
+            table = reallocarray(nodeTable, tableLength, 2 * sizeof(NodePtr));
             if (!table) {
                 if (nd->string != string) {
                     /* nd->string has been strdup'ed */
@@ -166,7 +164,7 @@ AtomError(void)
     FatalError("initializing atoms");
 }
 
-void
+static void
 FreeAtom(NodePtr patom)
 {
     if (patom->left)
@@ -200,7 +198,7 @@ InitAtoms(void)
 {
     FreeAllAtoms();
     tableLength = InitialTableSize;
-    nodeTable = malloc(InitialTableSize * sizeof(NodePtr));
+    nodeTable = xallocarray(InitialTableSize, sizeof(NodePtr));
     if (!nodeTable)
         AtomError();
     nodeTable[None] = NULL;

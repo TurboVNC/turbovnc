@@ -1,0 +1,14 @@
+diff --git a/libxcb-1.12/src/xcb_out.c b/libxcb/src/xcb_out.c
+index 3601a5f..11a5cf7 100644
+--- a/libxcb-1.12/src/xcb_out.c
++++ b/libxcb/src/xcb_out.c
+@@ -179,7 +179,8 @@ uint32_t xcb_get_maximum_request_length(xcb_connection_t *c)
+ 
+ static void close_fds(int *fds, unsigned int num_fds)
+ {
+-    for (unsigned int index = 0; index < num_fds; index++)
++    unsigned int index;
++    for (index = 0; index < num_fds; index++)
+         close(fds[index]);
+ }
+ 

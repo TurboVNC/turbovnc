@@ -1,3 +1,277 @@
+commit 6946d497e3fe496818fa70de6702934bf70e44ec
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Mon Apr 4 12:28:42 2016 +1000
+
+    inputproto 2.3.2
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 1dbdc297d915e4979a7823d6a569d9c7fed14617
+Author: Andreas Boll <andreas.boll.dev@gmail.com>
+Date:   Fri Dec 11 10:49:33 2015 +0100
+
+    specs: Set TZ=UTC before calling asciidoc
+    
+    Set TZ=UTC before calling asciidoc to make the embedded dates invariant
+    to timezones in order to make the package build reproducibly.
+    
+    Fixes bug:
+    https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=795981
+    
+    v2: Set TZ=UTC after $(AM_V_GEN) (fixes non-verbose build)
+    
+    Suggested-by: Eduard Sanou <dhole@openmailbox.org>
+    Signed-off-by: Andreas Boll <andreas.boll.dev@gmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 7c7c2c18864d166391e49758d83e9cc601bbfb17
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Mon Oct 27 14:22:58 2014 +1000
+
+    specs: rename EVENTMASK to EVTYPEMASK
+    
+    EVENTMASK was used twice in the spec, once as the actual bitmask for events,
+    once as the set of deviceid, mask length and mask.
+    
+    The libXi public API uses XIEventMask for the latter data triplet, so leave
+    EVENTMASK, and rename the pure bitmask to EVTYPEMASK.
+    
+    Reported-by: Gabriel Laskar <gabriel@lse.epita.fr>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Hans de Goede <hdegoede@redhat.com>
+
+commit 81378a1e7139af9d476d90df8737c0c1a58670f3
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Mon Aug 25 11:04:38 2014 +1000
+
+    specs: note the (unused) time field in XIPassiveGrabDevice
+    
+    We don't actually use it either in libXi or in the server, it's a copy/paste
+    error that never got noticed and removed.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 343ff0938f592876b9d82c966f166bf45a78c3c8
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri May 30 11:25:39 2014 +1000
+
+    inputproto 2.3.1
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit c2cf8cab4aa781306ff26b171107d26f12bac015
+Author: Daniel Martin <consume.noise@gmail.com>
+Date:   Thu May 29 12:24:46 2014 +0200
+
+    XI2: Fix XI_TouchOwnershipChangedMask value
+    
+    A none existing define
+        XI_TouchOwnershipChanged
+    had been used to set the value of XI_TouchOwnershipChangedMask. Fix this
+    by using
+        XI_TouchOwnership.
+    
+    Signed-off-by: Daniel Martin <consume.noise@gmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit b4184619702b6801e3a2ea9733ae1620fa4ceda7
+Author: Keith Packard <keithp@keithp.com>
+Date:   Mon Dec 16 09:43:41 2013 -0800
+
+    inputproto: Allow library users to avoid having the 'Pointer' typedef declared
+    
+    'Pointer' collides with too many other application names, so stop
+    using it locally and allow applications to avoid having it in the API.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+
+commit 3c1ebd1cfe71029ebc6a732a6b55308861e549e0
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Wed Aug 14 19:30:24 2013 +1000
+
+    specs: note that axis values are non-sparse arrays
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 06da19e15c9d3a9e57f4fe89fe507a4fa7160a45
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Jul 19 15:54:45 2013 +1000
+
+    specs: clarify SD keyboard focus behaviour
+    
+    The smart thing would be to have the SD's keyboard focus to be identical to
+    the MD's keyboard focus (and a BadDevice returned when trying to set an
+    attached SD's keyboard focus) but alas, the server never implemented this
+    behaviour and we've now shipped 7 versions with separate SD and MD focus. So
+    consider this set in stone. oops.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Jasper St. Pierre <jstpierre@mecheye.net>
+
+commit 65f14b2edaf70a2520e0180609f79f52836ca4f9
+Author: Gaetan Nadon <memsize@videotron.ca>
+Date:   Sat Oct 26 09:42:05 2013 -0400
+
+    config: replace deprecated use of AC_OUTPUT with AC_CONFIG_FILES
+    
+    Fix Automake warning: AC_OUTPUT should be used without arguments.
+    www.gnu.org/software/autoconf/manual/autoconf.html#Configuration-Files
+    
+    Signed-off-by: Gaetan Nadon <memsize@videotron.ca>
+
+commit f33a329026c9f2eaa5fa436543e4feb0e54b685d
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Mar 7 10:42:39 2013 +1000
+
+    inputproto 2.3
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit f8428123019e7357891bbfc0aef21dbb4d0db10f
+Author: Colin Walters <walters@verbum.org>
+Date:   Wed Jan 4 17:37:06 2012 -0500
+
+    autogen.sh: Implement GNOME Build API
+    
+    http://people.gnome.org/~walters/docs/build-api.txt
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 8cad031f9f583089dd33bae41dfa8a7e0d8a71f4
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Tue Jan 15 14:01:10 2013 -0500
+
+    configure: Remove AM_MAINTAINER_MODE
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 4832c94775ee4a02cfaf53ba427d7cf677f70932
+Merge: 48e3209 e93e9d0
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Mon Dec 17 14:24:59 2012 +1000
+
+    Merge branch 'barriers'
+
+commit e93e9d004c11a59cab56139c0c04ea2b5c6a926b
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Mon Dec 17 14:18:07 2012 +1000
+
+    specs: removing a device results in a BarrierLeave event
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit bc009eb4dadf2138212291da05b514854923ae85
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Dec 7 14:41:03 2012 +1000
+
+    inputproto 2.2.99.1
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 5f9d3b8584d88f49fa7533c429e32199a06ed215
+Author: Jasper St. Pierre <jstpierre@mecheye.net>
+Date:   Fri Dec 7 14:42:17 2012 +1000
+
+    Add support for pointer barrier events
+    
+    Signed-off-by: Jasper St. Pierre <jstpierre@mecheye.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 0b88ca65bdaab4c60f945fe64c48982bc89e5d1f
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Dec 7 14:41:54 2012 +1000
+
+    Claim support for XI 2.3
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 48e32091c5a3220a464caad49fd7dd013c429eda
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Dec 7 12:55:24 2012 +1000
+
+    Fix typo in comment
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 377efaaa9828b4004741744ae172a193b5483a34
+Author: Daniel Martin <consume.noise@gmail.com>
+Date:   Wed Nov 7 12:41:49 2012 +0100
+
+    specs: XI2: Fix mods in XIPassive(Un)GrabDevice
+    
+    XIPassiveGrabDevice and XIPassiveUngrabDevice are using lists of
+    modifier masks. This one corrects these types.
+    
+    MODIFIERMASK was introduced, because a SETofMODIFIERMASK differs from a
+    SETofKEYMASK: AnyModifier=(1<<15) vs. GrabAnyModifier=(1U<<31).
+    
+    Signed-off-by: Daniel Martin <consume.noise@gmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit eb38fd9af846afe39287d5cf281b0274f42e8558
+Author: Daniel Martin <consume.noise@gmail.com>
+Date:   Wed Nov 7 12:41:48 2012 +0100
+
+    specs: XI2: Rename AxisClass to ValuatorClass
+    
+    ValuatorClass is the XI2 term for AxisClass.
+    
+    Signed-off-by: Daniel Martin <consume.noise@gmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit b30e7221b8888b674e6889beeada9b5b9dfc2f34
+Author: Daniel Martin <consume.noise@gmail.com>
+Date:   Wed Nov 7 12:41:47 2012 +0100
+
+    specs: XI2: Fix typos
+    
+    Signed-off-by: Daniel Martin <consume.noise@gmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 743cb2cf1567cf685dfe5444621eb56447768c7c
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Fri Nov 2 15:37:28 2012 +1000
+
+    XI2proto: spec formatting fix
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit a06905c8efc053e8ffcd0fc93736c0e45b715c38
+Author: Ran Benita <ran234@gmail.com>
+Date:   Sat Oct 27 14:56:49 2012 +0200
+
+    specs: XI2: add titles to requests/events and show them in TOC
+    
+    You often want to quickly jump to the specification of a specific
+    request/event, so add them to the table of contents to allow for that.
+    This also provides the reader with a quick glance at what the protocol
+    looks like.
+    
+    Signed-off-by: Ran Benita <ran234@gmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 74098071768a4b25670cf5582bc68433403deefe
+Author: Ran Benita <ran234@gmail.com>
+Date:   Sat Oct 27 14:56:48 2012 +0200
+
+    specs: XI2: make event/request name formatting consistent
+    
+    None of the other have ':' there.
+    
+    Signed-off-by: Ran Benita <ran234@gmail.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 3ed8aed32199edaa8621ccea571a04883e050cb5
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Thu Jun 14 08:56:55 2012 +1000
+
+    Fix two typos in spec/comments
+    
+    The ButtonClass provides the number of buttons, not the lentgh of the mask.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
 commit e752e92dbdcf01b1cd46a3853f582ff765d19e90
 Author: Peter Hutterer <peter.hutterer@who-t.net>
 Date:   Fri Mar 2 12:58:18 2012 +1000

@@ -112,7 +112,7 @@ endif() # WIN32
 # Mac DMG
 ###############################################################################
 
-if(APPLE AND TVNC_BUILDJAVA)
+if(APPLE AND TVNC_BUILDJAVA AND TVNC_BUILDNATIVE)
 
 string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "^:" "" CMAKE_INSTALL_MACPREFIX
@@ -120,14 +120,8 @@ string(REGEX REPLACE "^:" "" CMAKE_INSTALL_MACPREFIX
 
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
 configure_file(release/makemacapp.in pkgscripts/makemacapp)
-set(MINOSVER 10.7)
 configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
-set(MINOSVER 10.5)
-configure_file(release/Distribution.xml.in
-	pkgscripts/Distribution-AppleJava.xml)
 configure_file(release/Info.plist.in pkgscripts/Info.plist)
-configure_file(release/Info-AppleJava.plist.in
-	pkgscripts/Info-AppleJava.plist)
 configure_file(release/Package.plist.in pkgscripts/Package.plist)
 configure_file(release/uninstall.in pkgscripts/uninstall)
 configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)

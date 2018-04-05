@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -107,7 +107,7 @@ the region package can call this.
 #define RECTLIMIT 25            /* pick a number, any number > 8 */
 #endif
 
-/* miHandleExposures 
+/* miHandleExposures
     generate a region for exposures for areas that were copied from obscured or
 non-existent areas to non-obscured areas of the destination.  Paint the
 background for the region, if the destination is a window.
@@ -116,18 +116,12 @@ NOTE:
      this should generally be called, even if graphicsExposures is false,
 because this is where bits get recovered from backing store.
 
-NOTE:
-     added argument 'plane' is used to indicate how exposures from backing
-store should be accomplished. If plane is 0 (i.e. no bit plane), CopyArea
-should be used, else a CopyPlane of the indicated plane will be used. The
-exposing is done by the backing store's GraphicsExpose function, of course.
-
 */
 
 RegionPtr
 miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
                   GCPtr pGC, int srcx, int srcy, int width, int height,
-                  int dstx, int dsty, unsigned long plane)
+                  int dstx, int dsty)
 {
     RegionPtr prgnSrcClip;      /* drawable-relative source clip */
     RegionRec rgnSrcRec;
@@ -137,8 +131,8 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
     RegionRec rgnExposed;       /* exposed region, calculated source-
                                    relative, made dst relative to
                                    intersect with visible parts of
-                                   dest and send events to client, 
-                                   and then screen relative to paint 
+                                   dest and send events to client,
+                                   and then screen relative to paint
                                    the window background
                                  */
     WindowPtr pSrcWin;
@@ -149,7 +143,7 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
     if (!pGC->graphicsExposures &&
         (pDstDrawable->type == DRAWABLE_PIXMAP) &&
         ((pSrcDrawable->type == DRAWABLE_PIXMAP) ||
-         (((WindowPtr) pSrcDrawable)->backStorage == NULL)))
+         (((WindowPtr) pSrcDrawable)->backStorage == 0)))
         return NULL;
 
     srcBox.x1 = srcx;
@@ -236,7 +230,7 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
     RegionIntersect(&rgnExposed, &rgnExposed, prgnDstClip);
 
     /* intersect with client clip region. */
-    if (pGC->clientClipType == CT_REGION)
+    if (pGC->clientClip)
         RegionIntersect(&rgnExposed, &rgnExposed, pGC->clientClip);
 
     /*
@@ -274,10 +268,11 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
         RegionTranslate(&rgnExposed, pDstDrawable->x, pDstDrawable->y);
 
         if (extents) {
-            /* miPaintWindow doesn't clip, so we have to */
+            /* PaintWindow doesn't clip, so we have to */
             RegionIntersect(&rgnExposed, &rgnExposed, &pWin->clipList);
         }
-        miPaintWindow((WindowPtr) pDstDrawable, &rgnExposed, PW_BACKGROUND);
+        pDstDrawable->pScreen->PaintWindow((WindowPtr) pDstDrawable,
+                                           &rgnExposed, PW_BACKGROUND);
 
         if (extents) {
             RegionReset(&rgnExposed, &expBox);
@@ -309,54 +304,6 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
     else {
         RegionUninit(&rgnExposed);
         return NULL;
-    }
-}
-
-/* send GraphicsExpose events, or a NoExpose event, based on the region */
-
-void
-miSendGraphicsExpose(ClientPtr client, RegionPtr pRgn, XID drawable,
-                     int major, int minor)
-{
-    if (pRgn && !RegionNil(pRgn)) {
-        xEvent *pEvent;
-        xEvent *pe;
-        BoxPtr pBox;
-        int i;
-        int numRects;
-
-        numRects = RegionNumRects(pRgn);
-        pBox = RegionRects(pRgn);
-        if (!(pEvent = calloc(numRects, sizeof(xEvent))))
-            return;
-        pe = pEvent;
-
-        for (i = 1; i <= numRects; i++, pe++, pBox++) {
-            pe->u.u.type = GraphicsExpose;
-            pe->u.graphicsExposure.drawable = drawable;
-            pe->u.graphicsExposure.x = pBox->x1;
-            pe->u.graphicsExposure.y = pBox->y1;
-            pe->u.graphicsExposure.width = pBox->x2 - pBox->x1;
-            pe->u.graphicsExposure.height = pBox->y2 - pBox->y1;
-            pe->u.graphicsExposure.count = numRects - i;
-            pe->u.graphicsExposure.majorEvent = major;
-            pe->u.graphicsExposure.minorEvent = minor;
-        }
-        /* GraphicsExpose is a "critical event", which TryClientEvents
-         * handles specially. */
-        TryClientEvents(client, NULL, pEvent, numRects,
-                        (Mask) 0, NoEventMask, NullGrab);
-        free(pEvent);
-    }
-    else {
-        xEvent event;
-
-        memset(&event, 0, sizeof(xEvent));
-        event.u.u.type = NoExpose;
-        event.u.noExposure.drawable = drawable;
-        event.u.noExposure.majorEvent = major;
-        event.u.noExposure.minorEvent = minor;
-        WriteEventsToClient(client, 1, &event);
     }
 }
 
@@ -422,75 +369,37 @@ miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy)
 }
 
 void
-miWindowExposures(WindowPtr pWin, RegionPtr prgn, RegionPtr other_exposed)
+miWindowExposures(WindowPtr pWin, RegionPtr prgn)
 {
     RegionPtr exposures = prgn;
 
-    if ((prgn && !RegionNil(prgn)) ||
-        (exposures && !RegionNil(exposures)) || other_exposed) {
-        RegionRec expRec;
-        int clientInterested;
-
-        /*
-         * Restore from backing-store FIRST.
-         */
-        clientInterested =
+    if (prgn && !RegionNil(prgn)) {
+        RegionRec expRec = { {0, 0, 0, 0}, NULL };
+        int clientInterested =
             (pWin->eventMask | wOtherEventMasks(pWin)) & ExposureMask;
-        if (other_exposed) {
-            if (exposures) {
-                RegionUnion(other_exposed, exposures, other_exposed);
-                if (exposures != prgn)
-                    RegionDestroy(exposures);
-            }
-            exposures = other_exposed;
-        }
-        if (clientInterested && exposures &&
-            (RegionNumRects(exposures) > RECTLIMIT)) {
+        if (clientInterested && (RegionNumRects(prgn) > RECTLIMIT)) {
             /*
              * If we have LOTS of rectangles, we decide to take the extents
              * and force an exposure on that.  This should require much less
              * work overall, on both client and server.  This is cheating, but
              * isn't prohibited by the protocol ("spontaneous combustion" :-).
              */
-            BoxRec box;
-
-            box = *RegionExtents(exposures);
-            if (exposures == prgn) {
-                exposures = &expRec;
-                RegionInit(exposures, &box, 1);
-                RegionReset(prgn, &box);
-            }
-            else {
-                RegionReset(exposures, &box);
-                RegionUnion(prgn, prgn, exposures);
-            }
+            BoxRec box = *RegionExtents(prgn);
+            exposures = &expRec;
+            RegionInit(exposures, &box, 1);
+            RegionReset(prgn, &box);
             /* miPaintWindow doesn't clip, so we have to */
             RegionIntersect(prgn, prgn, &pWin->clipList);
         }
-        if (prgn && !RegionNil(prgn))
-            miPaintWindow(pWin, prgn, PW_BACKGROUND);
-        if (clientInterested && exposures && !RegionNil(exposures))
+        pWin->drawable.pScreen->PaintWindow(pWin, prgn, PW_BACKGROUND);
+        if (clientInterested)
             miSendExposures(pWin, exposures,
                             pWin->drawable.x, pWin->drawable.y);
-        if (exposures == &expRec) {
+        if (exposures == &expRec)
             RegionUninit(exposures);
-        }
-        else if (exposures && exposures != prgn && exposures != other_exposed)
-            RegionDestroy(exposures);
-        if (prgn)
-            RegionEmpty(prgn);
+        RegionEmpty(prgn);
     }
-    else if (exposures && exposures != prgn)
-        RegionDestroy(exposures);
 }
-
-#ifdef ROOTLESS
-/* Ugly, ugly, but we lost our hooks into miPaintWindow... =/ */
-void RootlessSetPixmapOfAncestors(WindowPtr pWin);
-void RootlessStartDrawing(WindowPtr pWin);
-void RootlessDamageRegion(WindowPtr pWin, RegionPtr prgn);
-Bool IsFramedWindow(WindowPtr pWin);
-#endif
 
 void
 miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
@@ -519,22 +428,6 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
     Bool solid = TRUE;
     DrawablePtr drawable = &pWin->drawable;
 
-#ifdef ROOTLESS
-    if (!drawable || drawable->type == UNDRAWABLE_WINDOW)
-        return;
-
-    if (IsFramedWindow(pWin)) {
-        RootlessStartDrawing(pWin);
-        RootlessDamageRegion(pWin, prgn);
-
-        if (pWin->backgroundState == ParentRelative) {
-            if ((what == PW_BACKGROUND) ||
-                (what == PW_BORDER && !pWin->borderIsPixel))
-                RootlessSetPixmapOfAncestors(pWin);
-        }
-    }
-#endif
-
     if (what == PW_BACKGROUND) {
         while (pWin->backgroundState == ParentRelative)
             pWin = pWin->parent;
@@ -560,14 +453,21 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
     else {
         PixmapPtr pixmap;
 
-        tile_x_off = drawable->x;
-        tile_y_off = drawable->y;
+        fill = pWin->border;
+        solid = pWin->borderIsPixel;
 
         /* servers without pixmaps draw their own borders */
         if (!pScreen->GetWindowPixmap)
             return;
         pixmap = (*pScreen->GetWindowPixmap) ((WindowPtr) drawable);
         drawable = &pixmap->drawable;
+
+        while (pWin->backgroundState == ParentRelative)
+            pWin = pWin->parent;
+
+        tile_x_off = pWin->drawable.x;
+        tile_y_off = pWin->drawable.y;
+
 #ifdef COMPOSITE
         draw_x_off = pixmap->screen_x;
         draw_y_off = pixmap->screen_y;
@@ -577,8 +477,6 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
         draw_x_off = 0;
         draw_y_off = 0;
 #endif
-        fill = pWin->border;
-        solid = pWin->borderIsPixel;
     }
 
     gcval[0].val = GXcopy;
@@ -611,13 +509,13 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
         gcmask |= GCPlaneMask;
 #endif
         gcval[c++].val = FillTiled;
-        gcval[c++].ptr = (pointer) fill.pixmap;
+        gcval[c++].ptr = (void *) fill.pixmap;
         gcval[c++].val = tile_x_off;
         gcval[c++].val = tile_y_off;
         gcmask |= GCFillStyle | GCTile | GCTileStipXOrigin | GCTileStipYOrigin;
     }
 
-    prect = malloc(RegionNumRects(prgn) * sizeof(xRectangle));
+    prect = xallocarray(RegionNumRects(prgn), sizeof(xRectangle));
     if (!prect)
         return;
 
@@ -646,7 +544,7 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
 }
 
 /* MICLEARDRAWABLE -- sets the entire drawable to the background color of
- * the GC.  Useful when we have a scratch drawable and need to initialize 
+ * the GC.  Useful when we have a scratch drawable and need to initialize
  * it. */
 void
 miClearDrawable(DrawablePtr pDraw, GCPtr pGC)

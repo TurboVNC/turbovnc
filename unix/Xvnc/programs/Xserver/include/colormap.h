@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -82,14 +82,14 @@ extern _X_EXPORT int CreateColormap(Colormap /*mid */ ,
                                     int /*alloc */ ,
                                     int /*client */ );
 
-extern _X_EXPORT int FreeColormap(pointer /*pmap */ ,
-                                  XID /*mid */ );
+extern _X_EXPORT int FreeColormap(void *pmap,
+                                  XID mid);
 
-extern _X_EXPORT int TellLostMap(WindowPtr /*pwin */ ,
-                                 pointer /* Colormap *pmid */ );
+extern _X_EXPORT int TellLostMap(WindowPtr pwin,
+                                 void *value);
 
-extern _X_EXPORT int TellGainedMap(WindowPtr /*pwin */ ,
-                                   pointer /* Colormap *pmid */ );
+extern _X_EXPORT int TellGainedMap(WindowPtr pwin,
+                                   void *value);
 
 extern _X_EXPORT int CopyColormapAndFree(Colormap /*mid */ ,
                                          ColormapPtr /*pSrc */ ,
@@ -108,26 +108,14 @@ extern _X_EXPORT void FakeAllocColor(ColormapPtr /*pmap */ ,
 extern _X_EXPORT void FakeFreeColor(ColormapPtr /*pmap */ ,
                                     Pixel /*pixel */ );
 
-typedef int (*ColorCompareProcPtr) (EntryPtr /*pent */ ,
-                                    xrgb * /*prgb */ );
-
-extern _X_EXPORT int FindColor(ColormapPtr /*pmap */ ,
-                               EntryPtr /*pentFirst */ ,
-                               int /*size */ ,
-                               xrgb * /*prgb */ ,
-                               Pixel * /*pPixel */ ,
-                               int /*channel */ ,
-                               int /*client */ ,
-                               ColorCompareProcPtr /*comp */ );
-
 extern _X_EXPORT int QueryColors(ColormapPtr /*pmap */ ,
                                  int /*count */ ,
                                  Pixel * /*ppixIn */ ,
                                  xrgb * /*prgbList */ ,
                                  ClientPtr client);
 
-extern _X_EXPORT int FreeClientPixels(pointer /*pcr */ ,
-                                      XID /*fakeid */ );
+extern _X_EXPORT int FreeClientPixels(void *pcr,
+                                      XID fakeid);
 
 extern _X_EXPORT int AllocColorCells(int /*client */ ,
                                      ColormapPtr /*pmap */ ,

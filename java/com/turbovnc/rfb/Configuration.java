@@ -142,16 +142,6 @@ public class Configuration {
     }
   }
 
-  public static void readAppletParams(java.applet.Applet applet) {
-    VoidParameter current = head;
-    while (current != null) {
-      String str = applet.getParameter(current.getName());
-      if (str != null)
-        current.setParam(str);
-      current = current.next;
-    }
-  }
-
   public static void load(String filename) {
     if (filename == null)
       return;
@@ -170,6 +160,8 @@ public class Configuration {
 
     int scaleNum = -1, scaleDenom = -1, fitWindow = -1;
     int resizeMode = -1, desktopWidth = -1, desktopHeight = -1;
+    String desktopSize = null;
+
     for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
       String name = (String)i.nextElement();
 
@@ -292,6 +284,8 @@ public class Configuration {
           temp = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         if (temp >= 1) desktopHeight = temp;
+      } else if (name.equalsIgnoreCase("desktopsize")) {
+        desktopSize = props.getProperty(name);
       } else if (name.equalsIgnoreCase("cursorshape")) {
         setParam("CursorShape", props.getProperty(name));
       } else if (name.equalsIgnoreCase("noremotecursor")) {
@@ -334,15 +328,17 @@ public class Configuration {
       setParam("Scale", "FixedRatio");
     }
 
-    switch (resizeMode) {
-    case Options.SIZE_SERVER:
-      setParam("DesktopSize", "Server");  break;
-    case Options.SIZE_MANUAL:
-      if (desktopWidth > 0 && desktopHeight > 0)
-        setParam("DesktopSize", desktopWidth + "x" + desktopHeight);
-      break;
-    case Options.SIZE_AUTO:
-      setParam("DesktopSize", "Auto");  break;
+    if (desktopSize != null)
+      setParam("DesktopSize", desktopSize);
+    else switch (resizeMode) {
+      case Options.SIZE_SERVER:
+        setParam("DesktopSize", "Server");  break;
+      case Options.SIZE_MANUAL:
+        if (desktopWidth > 0 && desktopHeight > 0)
+          setParam("DesktopSize", desktopWidth + "x" + desktopHeight);
+        break;
+      case Options.SIZE_AUTO:
+        setParam("DesktopSize", "Auto");  break;
     }
   }
 

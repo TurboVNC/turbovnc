@@ -119,9 +119,9 @@ SizeDeviceInfo(DeviceIntPtr d, int *namesize, int *size)
  */
 
 static void
-CopyDeviceName(char **namebuf, char *name)
+CopyDeviceName(char **namebuf, const char *name)
 {
-    char *nameptr = (char *) *namebuf;
+    char *nameptr = *namebuf;
 
     if (name) {
         *nameptr++ = strlen(name);
@@ -342,11 +342,12 @@ ProcXListInputDevices(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xListInputDevicesReq);
 
-    memset(&rep, 0, sizeof(xListInputDevicesReply));
-    rep.repType = X_Reply;
-    rep.RepType = X_ListInputDevices;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
+    rep = (xListInputDevicesReply) {
+        .repType = X_Reply,
+        .RepType = X_ListInputDevices,
+        .sequenceNumber = client->sequence,
+        .length = 0
+    };
 
     /* allocate space for saving skip value */
     skip = calloc(sizeof(Bool), inputInfo.numDevices);
@@ -417,5 +418,5 @@ SRepXListInputDevices(ClientPtr client, int size, xListInputDevicesReply * rep)
 {
     swaps(&rep->sequenceNumber);
     swapl(&rep->length);
-    WriteToClient(client, size, (char *) rep);
+    WriteToClient(client, size, rep);
 }

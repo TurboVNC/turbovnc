@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -101,7 +101,7 @@ Equipment Corporation.
  *	FreeAllResources, LookupIDByType, LookupIDByClass, GetXIDRange
  */
 
-/* 
+/*
  *      A resource ID is a 32 bit quantity, the upper 2 bits of which are
  *	off-limits for client-visible resources.  The next 8 bits are
  *      used as client ID, and the low 22 bits come from the client.
@@ -141,12 +141,10 @@ Equipment Corporation.
 #include "xace.h"
 #include <assert.h>
 #include "registry.h"
+#include "gcstruct.h"
 
 #ifdef XSERVER_DTRACE
-#include <sys/types.h>
-typedef const char *string;
-
-#include "Xserver-dtrace.h"
+#include "probes.h"
 
 #define TypeNameString(t) LookupResourceName(t)
 #endif
@@ -158,13 +156,13 @@ static void RebuildTable(int    /*client */
 
 #define INITBUCKETS 64
 #define INITHASHSIZE 6
-#define MAXHASHSIZE 11
+#define MAXHASHSIZE 16
 
 typedef struct _Resource {
     struct _Resource *next;
     XID id;
     RESTYPE type;
-    pointer value;
+    void *value;
 } ResourceRec, *ResourcePtr;
 
 typedef struct _ClientResource {
@@ -182,50 +180,313 @@ RESTYPE TypeMask;
 
 struct ResourceType {
     DeleteType deleteFunc;
+    SizeType sizeFunc;
+    FindTypeSubResources findSubResFunc;
     int errorValue;
 };
+
+/**
+ * Used by all resources that don't specify a function to calculate
+ * resource size. Currently this is used for all resources with
+ * insignificant memory usage.
+ *
+ * @see GetResourceTypeSizeFunc, SetResourceTypeSizeFunc
+ *
+ * @param[in] value Pointer to resource object.
+ *
+ * @param[in] id Resource ID for the object.
+ *
+ * @param[out] size Fill all fields to zero to indicate that size of
+ *                  resource can't be determined.
+ */
+static void
+GetDefaultBytes(void *value, XID id, ResourceSizePtr size)
+{
+    size->resourceSize = 0;
+    size->pixmapRefSize = 0;
+    size->refCnt = 1;
+}
+
+/**
+ * Used by all resources that don't specify a function to iterate
+ * through subresources. Currently this is used for all resources with
+ * insignificant memory usage.
+ *
+ * @see FindSubResources, SetResourceTypeFindSubResFunc
+ *
+ * @param[in] value Pointer to resource object.
+ *
+ * @param[in] func Function to call for each subresource.
+
+ * @param[out] cdata Pointer to opaque data.
+ */
+static void
+DefaultFindSubRes(void *value, FindAllRes func, void *cdata)
+{
+    /* do nothing */
+}
+
+/**
+ * Calculate drawable size in bytes. Reference counting is not taken
+ * into account.
+ *
+ * @param[in] drawable Pointer to a drawable.
+ *
+ * @return Estimate of total memory usage for the drawable.
+ */
+static unsigned long
+GetDrawableBytes(DrawablePtr drawable)
+{
+    int bytes = 0;
+
+    if (drawable)
+    {
+        int bytesPerPixel = drawable->bitsPerPixel >> 3;
+        int numberOfPixels = drawable->width * drawable->height;
+        bytes = numberOfPixels * bytesPerPixel;
+    }
+
+    return bytes;
+}
+
+/**
+ * Calculate pixmap size in bytes. Reference counting is taken into
+ * account. Any extra data attached by extensions and drivers is not
+ * taken into account. The purpose of this function is to estimate
+ * memory usage that can be attributed to single reference of the
+ * pixmap.
+ *
+ * @param[in] value Pointer to a pixmap.
+ *
+ * @param[in] id Resource ID of pixmap. If the pixmap hasn't been
+ *               added as resource, just pass value->drawable.id.
+ *
+ * @param[out] size Estimate of memory usage attributed to a single
+ *                  pixmap reference.
+ */
+static void
+GetPixmapBytes(void *value, XID id, ResourceSizePtr size)
+{
+    PixmapPtr pixmap = value;
+
+    size->resourceSize = 0;
+    size->pixmapRefSize = 0;
+    size->refCnt = pixmap->refcnt;
+
+    if (pixmap && pixmap->refcnt)
+    {
+        DrawablePtr drawable = &pixmap->drawable;
+        size->resourceSize = GetDrawableBytes(drawable);
+        size->pixmapRefSize = size->resourceSize / pixmap->refcnt;
+    }
+}
+
+/**
+ * Calculate window size in bytes. The purpose of this function is to
+ * estimate memory usage that can be attributed to all pixmap
+ * references of the window.
+ *
+ * @param[in] value Pointer to a window.
+ *
+ * @param[in] id Resource ID of window.
+ *
+ * @param[out] size Estimate of memory usage attributed to a all
+ *                  pixmap references of a window.
+ */
+static void
+GetWindowBytes(void *value, XID id, ResourceSizePtr size)
+{
+    SizeType pixmapSizeFunc = GetResourceTypeSizeFunc(RT_PIXMAP);
+    ResourceSizeRec pixmapSize = { 0, 0, 0 };
+    WindowPtr window = value;
+
+    /* Currently only pixmap bytes are reported to clients. */
+    size->resourceSize = 0;
+
+    /* Calculate pixmap reference sizes. */
+    size->pixmapRefSize = 0;
+
+    size->refCnt = 1;
+
+    if (window->backgroundState == BackgroundPixmap)
+    {
+        PixmapPtr pixmap = window->background.pixmap;
+        pixmapSizeFunc(pixmap, pixmap->drawable.id, &pixmapSize);
+        size->pixmapRefSize += pixmapSize.pixmapRefSize;
+    }
+    if (window->border.pixmap && !window->borderIsPixel)
+    {
+        PixmapPtr pixmap = window->border.pixmap;
+        pixmapSizeFunc(pixmap, pixmap->drawable.id, &pixmapSize);
+        size->pixmapRefSize += pixmapSize.pixmapRefSize;
+    }
+}
+
+/**
+ * Iterate through subresources of a window. The purpose of this
+ * function is to gather accurate information on what resources
+ * a resource uses.
+ *
+ * @note Currently only sub-pixmaps are iterated
+ *
+ * @param[in] value  Pointer to a window
+ *
+ * @param[in] func   Function to call with each subresource
+ *
+ * @param[out] cdata Pointer to opaque data
+ */
+static void
+FindWindowSubRes(void *value, FindAllRes func, void *cdata)
+{
+    WindowPtr window = value;
+
+    /* Currently only pixmap subresources are reported to clients. */
+
+    if (window->backgroundState == BackgroundPixmap)
+    {
+        PixmapPtr pixmap = window->background.pixmap;
+        func(window->background.pixmap, pixmap->drawable.id, RT_PIXMAP, cdata);
+    }
+    if (window->border.pixmap && !window->borderIsPixel)
+    {
+        PixmapPtr pixmap = window->border.pixmap;
+        func(window->background.pixmap, pixmap->drawable.id, RT_PIXMAP, cdata);
+    }
+}
+
+/**
+ * Calculate graphics context size in bytes. The purpose of this
+ * function is to estimate memory usage that can be attributed to all
+ * pixmap references of the graphics context.
+ *
+ * @param[in] value Pointer to a graphics context.
+ *
+ * @param[in] id    Resource ID of graphics context.
+ *
+ * @param[out] size Estimate of memory usage attributed to a all
+ *                  pixmap references of a graphics context.
+ */
+static void
+GetGcBytes(void *value, XID id, ResourceSizePtr size)
+{
+    SizeType pixmapSizeFunc = GetResourceTypeSizeFunc(RT_PIXMAP);
+    ResourceSizeRec pixmapSize = { 0, 0, 0 };
+    GCPtr gc = value;
+
+    /* Currently only pixmap bytes are reported to clients. */
+    size->resourceSize = 0;
+
+    /* Calculate pixmap reference sizes. */
+    size->pixmapRefSize = 0;
+
+    size->refCnt = 1;
+    if (gc->stipple)
+    {
+        PixmapPtr pixmap = gc->stipple;
+        pixmapSizeFunc(pixmap, pixmap->drawable.id, &pixmapSize);
+        size->pixmapRefSize += pixmapSize.pixmapRefSize;
+    }
+    if (gc->tile.pixmap && !gc->tileIsPixel)
+    {
+        PixmapPtr pixmap = gc->tile.pixmap;
+        pixmapSizeFunc(pixmap, pixmap->drawable.id, &pixmapSize);
+        size->pixmapRefSize += pixmapSize.pixmapRefSize;
+    }
+}
+
+/**
+ * Iterate through subresources of a graphics context. The purpose of
+ * this function is to gather accurate information on what resources a
+ * resource uses.
+ *
+ * @note Currently only sub-pixmaps are iterated
+ *
+ * @param[in] value  Pointer to a window
+ *
+ * @param[in] func   Function to call with each subresource
+ *
+ * @param[out] cdata Pointer to opaque data
+ */
+static void
+FindGCSubRes(void *value, FindAllRes func, void *cdata)
+{
+    GCPtr gc = value;
+
+    /* Currently only pixmap subresources are reported to clients. */
+
+    if (gc->stipple)
+    {
+        PixmapPtr pixmap = gc->stipple;
+        func(pixmap, pixmap->drawable.id, RT_PIXMAP, cdata);
+    }
+    if (gc->tile.pixmap && !gc->tileIsPixel)
+    {
+        PixmapPtr pixmap = gc->tile.pixmap;
+        func(pixmap, pixmap->drawable.id, RT_PIXMAP, cdata);
+    }
+}
 
 static struct ResourceType *resourceTypes;
 
 static const struct ResourceType predefTypes[] = {
     [RT_NONE & (RC_LASTPREDEF - 1)] = {
                                        .deleteFunc = (DeleteType) NoopDDA,
+                                       .sizeFunc = GetDefaultBytes,
+                                       .findSubResFunc = DefaultFindSubRes,
                                        .errorValue = BadValue,
                                        },
     [RT_WINDOW & (RC_LASTPREDEF - 1)] = {
                                          .deleteFunc = DeleteWindow,
+                                         .sizeFunc = GetWindowBytes,
+                                         .findSubResFunc = FindWindowSubRes,
                                          .errorValue = BadWindow,
                                          },
     [RT_PIXMAP & (RC_LASTPREDEF - 1)] = {
                                          .deleteFunc = dixDestroyPixmap,
+                                         .sizeFunc = GetPixmapBytes,
+                                         .findSubResFunc = DefaultFindSubRes,
                                          .errorValue = BadPixmap,
                                          },
     [RT_GC & (RC_LASTPREDEF - 1)] = {
                                      .deleteFunc = FreeGC,
+                                     .sizeFunc = GetGcBytes,
+                                     .findSubResFunc = FindGCSubRes,
                                      .errorValue = BadGC,
                                      },
     [RT_FONT & (RC_LASTPREDEF - 1)] = {
                                        .deleteFunc = CloseFont,
+                                       .sizeFunc = GetDefaultBytes,
+                                       .findSubResFunc = DefaultFindSubRes,
                                        .errorValue = BadFont,
                                        },
     [RT_CURSOR & (RC_LASTPREDEF - 1)] = {
                                          .deleteFunc = FreeCursor,
+                                         .sizeFunc = GetDefaultBytes,
+                                         .findSubResFunc = DefaultFindSubRes,
                                          .errorValue = BadCursor,
                                          },
     [RT_COLORMAP & (RC_LASTPREDEF - 1)] = {
                                            .deleteFunc = FreeColormap,
+                                           .sizeFunc = GetDefaultBytes,
+                                           .findSubResFunc = DefaultFindSubRes,
                                            .errorValue = BadColor,
                                            },
     [RT_CMAPENTRY & (RC_LASTPREDEF - 1)] = {
                                             .deleteFunc = FreeClientPixels,
+                                            .sizeFunc = GetDefaultBytes,
+                                            .findSubResFunc = DefaultFindSubRes,
                                             .errorValue = BadColor,
                                             },
     [RT_OTHERCLIENT & (RC_LASTPREDEF - 1)] = {
                                               .deleteFunc = OtherClientGone,
+                                              .sizeFunc = GetDefaultBytes,
+                                              .findSubResFunc = DefaultFindSubRes,
                                               .errorValue = BadValue,
                                               },
     [RT_PASSIVEGRAB & (RC_LASTPREDEF - 1)] = {
                                               .deleteFunc = DeletePassiveGrab,
+                                              .sizeFunc = GetDefaultBytes,
+                                              .findSubResFunc = DefaultFindSubRes,
                                               .errorValue = BadValue,
                                               },
 };
@@ -249,19 +510,74 @@ CreateNewResourceType(DeleteType deleteFunc, const char *name)
 
     if (next & lastResourceClass)
         return 0;
-    types = realloc(resourceTypes, (next + 1) * sizeof(*resourceTypes));
+    types = reallocarray(resourceTypes, next + 1, sizeof(*resourceTypes));
     if (!types)
         return 0;
 
     lastResourceType = next;
     resourceTypes = types;
     resourceTypes[next].deleteFunc = deleteFunc;
+    resourceTypes[next].sizeFunc = GetDefaultBytes;
+    resourceTypes[next].findSubResFunc = DefaultFindSubRes;
     resourceTypes[next].errorValue = BadValue;
 
+#if X_REGISTRY_RESOURCE
     /* Called even if name is NULL, to remove any previous entry */
     RegisterResourceName(next, name);
+#endif
 
     return next;
+}
+
+/**
+ * Get the function used to calculate resource size. Extensions and
+ * drivers need to be able to determine the current size calculation
+ * function if they want to wrap or override it.
+ *
+ * @param[in] type     Resource type used in size calculations.
+ *
+ * @return Function to calculate the size of a single
+ *                     resource.
+ */
+SizeType
+GetResourceTypeSizeFunc(RESTYPE type)
+{
+    return resourceTypes[type & TypeMask].sizeFunc;
+}
+
+/**
+ * Override the default function that calculates resource size. For
+ * example, video driver knows better how to calculate pixmap memory
+ * usage and can therefore wrap or override size calculation for
+ * RT_PIXMAP.
+ *
+ * @param[in] type     Resource type used in size calculations.
+ *
+ * @param[in] sizeFunc Function to calculate the size of a single
+ *                     resource.
+ */
+void
+SetResourceTypeSizeFunc(RESTYPE type, SizeType sizeFunc)
+{
+    resourceTypes[type & TypeMask].sizeFunc = sizeFunc;
+}
+
+/**
+ * Provide a function for iterating the subresources of a resource.
+ * This allows for example more accurate accounting of the (memory)
+ * resources consumed by a resource.
+ *
+ * @see FindSubResources
+ *
+ * @param[in] type     Resource type used in size calculations.
+ *
+ * @param[in] sizeFunc Function to calculate the size of a single
+ *                     resource.
+ */
+void
+SetResourceTypeFindSubResFunc(RESTYPE type, FindTypeSubResources findFunc)
+{
+    resourceTypes[type & TypeMask].findSubResFunc = findFunc;
 }
 
 void
@@ -283,6 +599,29 @@ CreateNewResourceClass(void)
 }
 
 static ClientResourceRec clientTable[MAXCLIENTS];
+
+static unsigned int
+ilog2(int val)
+{
+    int bits;
+
+    if (val <= 0)
+	return 0;
+    for (bits = 0; val != 0; bits++)
+	val >>= 1;
+    return bits - 1;
+}
+
+/*****************
+ * ResourceClientBits
+ *    Returns the client bit offset in the client + resources ID field
+ *****************/
+
+unsigned int
+ResourceClientBits(void)
+{
+    return (ilog2(LimitClients));
+}
 
 /*****************
  * InitClientResources
@@ -326,25 +665,17 @@ InitClientResources(ClientPtr client)
     return TRUE;
 }
 
-static int
-Hash(int client, XID id)
+int
+HashResourceID(XID id, int numBits)
 {
-    id &= RESOURCE_ID_MASK;
-    switch (clientTable[client].hashsize) {
-    case 6:
-        return ((int) (0x03F & (id ^ (id >> 6) ^ (id >> 12))));
-    case 7:
-        return ((int) (0x07F & (id ^ (id >> 7) ^ (id >> 13))));
-    case 8:
-        return ((int) (0x0FF & (id ^ (id >> 8) ^ (id >> 16))));
-    case 9:
-        return ((int) (0x1FF & (id ^ (id >> 9))));
-    case 10:
-        return ((int) (0x3FF & (id ^ (id >> 10))));
-    case 11:
-        return ((int) (0x7FF & (id ^ (id >> 11))));
-    }
-    return -1;
+    static XID mask;
+
+    if (!mask)
+        mask = RESOURCE_ID_MASK;
+    id &= mask;
+    if (numBits < 9)
+        return (id ^ (id >> numBits) ^ (id >> (numBits<<1))) & ~((~0) << numBits);
+    return (id ^ (id >> numBits)) & ~((~0) << numBits);
 }
 
 static XID
@@ -355,7 +686,7 @@ AvailableID(int client, XID id, XID maxid, XID goodid)
     if ((goodid >= id) && (goodid <= maxid))
         return goodid;
     for (; id <= maxid; id++) {
-        res = clientTable[client].resources[Hash(client, id)];
+        res = clientTable[client].resources[HashResourceID(id, clientTable[client].hashsize)];
         while (res && (res->id != id))
             res = res->next;
         if (!res)
@@ -399,7 +730,7 @@ GetXIDRange(int client, Bool server, XID *minp, XID *maxp)
 
 /**
  *  GetXIDList is called by the XC-MISC extension's MiscGetXIDList function.
- *  This function tries to find count unused XIDs for the given client.  It 
+ *  This function tries to find count unused XIDs for the given client.  It
  *  puts the IDs in the array pids and returns the number found, which should
  *  almost always be the number requested.
  *
@@ -419,7 +750,7 @@ GetXIDList(ClientPtr pClient, unsigned count, XID *pids)
     unsigned int found = 0;
     XID rc, id = pClient->clientAsMask;
     XID maxid;
-    pointer val;
+    void *val;
 
     maxid = id | RESOURCE_ID_MASK;
     while ((found < count) && (id <= maxid)) {
@@ -463,7 +794,7 @@ FakeClientID(int client)
 }
 
 Bool
-AddResource(XID id, RESTYPE type, pointer value)
+AddResource(XID id, RESTYPE type, void *value)
 {
     int client;
     ClientResourceRec *rrec;
@@ -481,7 +812,7 @@ AddResource(XID id, RESTYPE type, pointer value)
     }
     if ((rrec->elements >= 4 * rrec->buckets) && (rrec->hashsize < MAXHASHSIZE))
         RebuildTable(client);
-    head = &rrec->resources[Hash(client, id)];
+    head = &rrec->resources[HashResourceID(id, clientTable[client].hashsize)];
     res = malloc(sizeof(ResourceRec));
     if (!res) {
         (*resourceTypes[type & TypeMask].deleteFunc) (value, id);
@@ -511,10 +842,10 @@ RebuildTable(int client)
      */
 
     j = 2 * clientTable[client].buckets;
-    tails = malloc(j * sizeof(ResourcePtr *));
+    tails =  xallocarray(j, sizeof(ResourcePtr *));
     if (!tails)
         return;
-    resources = malloc(j * sizeof(ResourcePtr));
+    resources =  xallocarray(j, sizeof(ResourcePtr));
     if (!resources) {
         free(tails);
         return;
@@ -529,7 +860,7 @@ RebuildTable(int client)
         for (res = *rptr; res; res = next) {
             next = res->next;
             res->next = NULL;
-            tptr = &tails[Hash(client, res->id)];
+            tptr = &tails[HashResourceID(res->id, clientTable[client].hashsize)];
             **tptr = res;
             *tptr = &res->next;
         }
@@ -560,8 +891,8 @@ FreeResource(XID id, RESTYPE skipDeleteFuncType)
     int *eltptr;
     int elements;
 
-    if (((cid = CLIENT_ID(id)) < MAXCLIENTS) && clientTable[cid].buckets) {
-        head = &clientTable[cid].resources[Hash(cid, id)];
+    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
+        head = &clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
         eltptr = &clientTable[cid].elements;
 
         prev = head;
@@ -594,8 +925,8 @@ FreeResourceByType(XID id, RESTYPE type, Bool skipFree)
     ResourcePtr res;
     ResourcePtr *prev, *head;
 
-    if (((cid = CLIENT_ID(id)) < MAXCLIENTS) && clientTable[cid].buckets) {
-        head = &clientTable[cid].resources[Hash(cid, id)];
+    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
+        head = &clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         prev = head;
         while ((res = *prev)) {
@@ -624,13 +955,13 @@ FreeResourceByType(XID id, RESTYPE type, Bool skipFree)
  */
 
 Bool
-ChangeResourceValue(XID id, RESTYPE rtype, pointer value)
+ChangeResourceValue(XID id, RESTYPE rtype, void *value)
 {
     int cid;
     ResourcePtr res;
 
-    if (((cid = CLIENT_ID(id)) < MAXCLIENTS) && clientTable[cid].buckets) {
-        res = clientTable[cid].resources[Hash(cid, id)];
+    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
+        res = clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         for (; res; res = res->next)
             if ((res->id == id) && (res->type == rtype)) {
@@ -649,7 +980,7 @@ ChangeResourceValue(XID id, RESTYPE rtype, pointer value)
 
 void
 FindClientResourcesByType(ClientPtr client,
-                          RESTYPE type, FindResType func, pointer cdata)
+                          RESTYPE type, FindResType func, void *cdata)
 {
     ResourcePtr *resources;
     ResourcePtr this, next;
@@ -674,8 +1005,17 @@ FindClientResourcesByType(ClientPtr client,
     }
 }
 
+void FindSubResources(void *resource,
+                      RESTYPE    type,
+                      FindAllRes func,
+                      void *cdata)
+{
+    struct ResourceType rtype = resourceTypes[type & TypeMask];
+    rtype.findSubResFunc(resource, func, cdata);
+}
+
 void
-FindAllClientResources(ClientPtr client, FindAllRes func, pointer cdata)
+FindAllClientResources(ClientPtr client, FindAllRes func, void *cdata)
 {
     ResourcePtr *resources;
     ResourcePtr this, next;
@@ -698,14 +1038,14 @@ FindAllClientResources(ClientPtr client, FindAllRes func, pointer cdata)
     }
 }
 
-pointer
+void *
 LookupClientResourceComplex(ClientPtr client,
                             RESTYPE type,
-                            FindComplexResType func, pointer cdata)
+                            FindComplexResType func, void *cdata)
 {
     ResourcePtr *resources;
     ResourcePtr this, next;
-    pointer value;
+    void *value;
     int i;
 
     if (!client)
@@ -783,8 +1123,8 @@ FreeClientResources(ClientPtr client)
     resources = clientTable[client->index].resources;
     for (j = 0; j < clientTable[client->index].buckets; j++) {
         /* It may seem silly to update the head of this resource list as
-           we delete the members, since the entire list will be deleted any way, 
-           but there are some resource deletion functions "FreeClientPixels" for 
+           we delete the members, since the entire list will be deleted any way,
+           but there are some resource deletion functions "FreeClientPixels" for
            one which do a LookupID on another resource id (a Colormap id in this
            case), so the resource list must be kept valid up to the point that
            it is deleted, so every time we delete a resource, we must update the
@@ -825,7 +1165,7 @@ FreeAllResources(void)
 Bool
 LegalNewID(XID id, ClientPtr client)
 {
-    pointer val;
+    void *val;
     int rc;
 
 #ifdef PANORAMIX
@@ -848,7 +1188,7 @@ LegalNewID(XID id, ClientPtr client)
 }
 
 int
-dixLookupResourceByType(pointer *result, XID id, RESTYPE rtype,
+dixLookupResourceByType(void **result, XID id, RESTYPE rtype,
                         ClientPtr client, Mask mode)
 {
     int cid = CLIENT_ID(id);
@@ -858,18 +1198,20 @@ dixLookupResourceByType(pointer *result, XID id, RESTYPE rtype,
     if ((rtype & TypeMask) > lastResourceType)
         return BadImplementation;
 
-    if ((cid < MAXCLIENTS) && clientTable[cid].buckets) {
-        res = clientTable[cid].resources[Hash(cid, id)];
+    if ((cid < LimitClients) && clientTable[cid].buckets) {
+        res = clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         for (; res; res = res->next)
             if (res->id == id && res->type == rtype)
                 break;
     }
+    if (client) {
+        client->errorValue = id;
+    }
     if (!res)
         return resourceTypes[rtype & TypeMask].errorValue;
 
     if (client) {
-        client->errorValue = id;
         cid = XaceHook(XACE_RESOURCE_ACCESS, client, id, res->type,
                        res->value, RT_NONE, NULL, mode);
         if (cid == BadValue)
@@ -883,7 +1225,7 @@ dixLookupResourceByType(pointer *result, XID id, RESTYPE rtype,
 }
 
 int
-dixLookupResourceByClass(pointer *result, XID id, RESTYPE rclass,
+dixLookupResourceByClass(void **result, XID id, RESTYPE rclass,
                          ClientPtr client, Mask mode)
 {
     int cid = CLIENT_ID(id);
@@ -891,18 +1233,20 @@ dixLookupResourceByClass(pointer *result, XID id, RESTYPE rclass,
 
     *result = NULL;
 
-    if ((cid < MAXCLIENTS) && clientTable[cid].buckets) {
-        res = clientTable[cid].resources[Hash(cid, id)];
+    if ((cid < LimitClients) && clientTable[cid].buckets) {
+        res = clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         for (; res; res = res->next)
             if (res->id == id && (res->type & rclass))
                 break;
     }
+    if (client) {
+        client->errorValue = id;
+    }
     if (!res)
         return BadValue;
 
     if (client) {
-        client->errorValue = id;
         cid = XaceHook(XACE_RESOURCE_ACCESS, client, id, res->type,
                        res->value, RT_NONE, NULL, mode);
         if (cid != Success)

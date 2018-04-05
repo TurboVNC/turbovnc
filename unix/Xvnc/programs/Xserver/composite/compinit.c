@@ -53,7 +53,7 @@ DevPrivateKeyRec CompWindowPrivateKeyRec;
 DevPrivateKeyRec CompSubwindowsPrivateKeyRec;
 
 static Bool
-compCloseScreen(int index, ScreenPtr pScreen)
+compCloseScreen(ScreenPtr pScreen)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
     Bool ret;
@@ -78,11 +78,12 @@ compCloseScreen(int index, ScreenPtr pScreen)
     pScreen->PositionWindow = cs->PositionWindow;
 
     pScreen->GetImage = cs->GetImage;
+    pScreen->GetSpans = cs->GetSpans;
     pScreen->SourceValidate = cs->SourceValidate;
 
     free(cs);
     dixSetPrivate(&pScreen->devPrivates, CompScreenPrivateKey, NULL);
-    ret = (*pScreen->CloseScreen) (index, pScreen);
+    ret = (*pScreen->CloseScreen) (pScreen);
 
     return ret;
 }
@@ -104,6 +105,20 @@ compInstallColormap(ColormapPtr pColormap)
     pScreen->InstallColormap = compInstallColormap;
 }
 
+static void
+compCheckBackingStore(WindowPtr pWin)
+{
+    if (pWin->backingStore != NotUseful && !pWin->backStorage) {
+        compRedirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
+        pWin->backStorage = TRUE;
+    }
+    else if (pWin->backingStore == NotUseful && pWin->backStorage) {
+        compUnredirectWindow(serverClient, pWin,
+                             CompositeRedirectAutomatic);
+        pWin->backStorage = FALSE;
+    }
+}
+
 /* Fake backing store via automatic redirection */
 static Bool
 compChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
@@ -116,17 +131,8 @@ compChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
     ret = pScreen->ChangeWindowAttributes(pWin, mask);
 
     if (ret && (mask & CWBackingStore) &&
-        pScreen->backingStoreSupport != NotUseful) {
-        if (pWin->backingStore != NotUseful) {
-            compRedirectWindow(serverClient, pWin, CompositeRedirectAutomatic);
-            pWin->backStorage = (pointer) (intptr_t) 1;
-        }
-        else {
-            compUnredirectWindow(serverClient, pWin,
-                                 CompositeRedirectAutomatic);
-            pWin->backStorage = NULL;
-        }
-    }
+        pScreen->backingStoreSupport != NotUseful)
+        compCheckBackingStore(pWin);
 
     pScreen->ChangeWindowAttributes = compChangeWindowAttributes;
 
@@ -148,6 +154,21 @@ compGetImage(DrawablePtr pDrawable,
     (*pScreen->GetImage) (pDrawable, sx, sy, w, h, format, planemask, pdstLine);
     cs->GetImage = pScreen->GetImage;
     pScreen->GetImage = compGetImage;
+}
+
+static void
+compGetSpans(DrawablePtr pDrawable, int wMax, DDXPointPtr ppt, int *pwidth,
+             int nspans, char *pdstStart)
+{
+    ScreenPtr pScreen = pDrawable->pScreen;
+    CompScreenPtr cs = GetCompScreen(pScreen);
+
+    pScreen->GetSpans = cs->GetSpans;
+    if (pDrawable->type == DRAWABLE_WINDOW)
+        compPaintChildrenToWindow((WindowPtr) pDrawable);
+    (*pScreen->GetSpans) (pDrawable, wMax, ppt, pwidth, nspans, pdstStart);
+    cs->GetSpans = pScreen->GetSpans;
+    pScreen->GetSpans = compGetSpans;
 }
 
 static void
@@ -193,7 +214,7 @@ compFindVisuallessDepth(ScreenPtr pScreen, int d)
         }
     }
     /*
-     * If there isn't one, then it's gonna be hard to have 
+     * If there isn't one, then it's gonna be hard to have
      * an associated visual
      */
     return 0;
@@ -207,8 +228,8 @@ compRegisterAlternateVisuals(CompScreenPtr cs, VisualID * vids, int nVisuals)
 {
     VisualID *p;
 
-    p = realloc(cs->alternateVisuals,
-                sizeof(VisualID) * (cs->numAlternateVisuals + nVisuals));
+    p = reallocarray(cs->alternateVisuals,
+                     cs->numAlternateVisuals + nVisuals, sizeof(VisualID));
     if (p == NULL)
         return FALSE;
 
@@ -227,6 +248,28 @@ CompositeRegisterAlternateVisuals(ScreenPtr pScreen, VisualID * vids,
     CompScreenPtr cs = GetCompScreen(pScreen);
 
     return compRegisterAlternateVisuals(cs, vids, nVisuals);
+}
+
+Bool
+CompositeRegisterImplicitRedirectionException(ScreenPtr pScreen,
+                                              VisualID parentVisual,
+                                              VisualID winVisual)
+{
+    CompScreenPtr cs = GetCompScreen(pScreen);
+    CompImplicitRedirectException *p;
+
+    p = reallocarray(cs->implicitRedirectExceptions,
+                     cs->numImplicitRedirectExceptions + 1, sizeof(p[0]));
+    if (p == NULL)
+        return FALSE;
+
+    p[cs->numImplicitRedirectExceptions].parentVisual = parentVisual;
+    p[cs->numImplicitRedirectExceptions].winVisual = winVisual;
+
+    cs->implicitRedirectExceptions = p;
+    cs->numImplicitRedirectExceptions++;
+
+    return TRUE;
 }
 
 typedef struct _alternateVisual {
@@ -349,11 +392,16 @@ compScreenInit(ScreenPtr pScreen)
 
     cs->numAlternateVisuals = 0;
     cs->alternateVisuals = NULL;
+    cs->numImplicitRedirectExceptions = 0;
+    cs->implicitRedirectExceptions = NULL;
 
     if (!compAddAlternateVisuals(pScreen, cs)) {
         free(cs);
         return FALSE;
     }
+
+    if (!disableBackingStore)
+        pScreen->backingStoreSupport = WhenMapped;
 
     cs->PositionWindow = pScreen->PositionWindow;
     pScreen->PositionWindow = compPositionWindow;
@@ -404,6 +452,9 @@ compScreenInit(ScreenPtr pScreen)
 
     cs->GetImage = pScreen->GetImage;
     pScreen->GetImage = compGetImage;
+
+    cs->GetSpans = pScreen->GetSpans;
+    pScreen->GetSpans = compGetSpans;
 
     cs->SourceValidate = pScreen->SourceValidate;
     pScreen->SourceValidate = compSourceValidate;

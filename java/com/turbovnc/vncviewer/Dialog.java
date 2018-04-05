@@ -86,7 +86,7 @@ class Dialog {
       if (owner.isAlwaysOnTop())
         dlg.setAlwaysOnTop(true);
     }
-    if ((VncViewer.applet && w == null) || !modal)
+    if (!modal)
       dlg.setAlwaysOnTop(true);
     dlg.setVisible(true);
     return ret;

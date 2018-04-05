@@ -38,6 +38,7 @@
 #include "colormapst.h"
 #include "gcstruct.h"
 #include "osdep.h"
+#include "list.h"
 #include <rfbproto.h>
 #include <turbovnc_devtypes.h>
 #include <vncauth.h>
@@ -45,6 +46,7 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <sys/time.h>
 #ifdef RENDER
 #include "picturestr.h"
@@ -79,7 +81,7 @@
    the CPU count */
 #define MAX_ENCODING_THREADS 8
 
-extern char *display;
+extern const char *display;
 
 
 /*
@@ -157,7 +159,31 @@ typedef struct
     StoreColorsProcPtr                  StoreColors;
     SaveScreenProcPtr                   SaveScreen;
 
+} rfbFBInfo, *rfbFBInfoPtr;
+
+
+typedef struct _Res
+{
+  int w, h;
+} Res;
+
+typedef struct
+{
+  RROutputPtr output;
+  Bool idAssigned, used;
+  Res prefRes;
+  rfbScreenDesc s;
+  struct xorg_list entry;
 } rfbScreenInfo, *rfbScreenInfoPtr;
+
+typedef struct {
+    union {
+        struct sockaddr sa;
+        struct sockaddr_storage ss;
+        struct sockaddr_in sin;
+        struct sockaddr_in6 sin6;
+    } u;
+} rfbSockAddr;
 
 
 /*
@@ -427,7 +453,7 @@ typedef struct rfbClientRec {
  */
 
 #define FB_UPDATE_PENDING(cl)                                           \
-    ((!(cl)->enableCursorShapeUpdates && !rfbScreen.cursorIsDrawn) ||   \
+    ((!(cl)->enableCursorShapeUpdates && !rfbFB.cursorIsDrawn) ||       \
      ((cl)->enableCursorShapeUpdates && (cl)->cursorWasChanged) ||      \
      ((cl)->enableCursorPosUpdates && (cl)->cursorWasMoved) ||          \
      REGION_NOTEMPTY((pScreen), &(cl)->copyRegion) ||                   \
@@ -456,8 +482,8 @@ typedef struct rfbClientRec {
  */
 
 typedef struct {
-    GCFuncs *wrapFuncs;
-    GCOps *wrapOps;
+    const GCFuncs *wrapFuncs;
+    const GCOps *wrapOps;
 } rfbGCRec, *rfbGCPtr;
 
 
@@ -624,6 +650,8 @@ extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
 
 extern void rfbSetXCutText(char *str, int len);
 extern void rfbGotXCutText(char *str, int len);
+extern void vncClientCutText(const char *str, int len);
+extern void vncSelectionInit(void);
 
 
 /* dispcur.c */
@@ -648,7 +676,7 @@ extern void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
                       int nlists, GlyphListPtr lists, GlyphPtr * glyphs);
 #endif
 
-extern Bool rfbCloseScreen(int, ScreenPtr);
+extern Bool rfbCloseScreen(ScreenPtr);
 extern Bool rfbCreateGC(GCPtr);
 extern void rfbPaintWindowBackground(WindowPtr, RegionPtr, int what);
 extern void rfbPaintWindowBorder(WindowPtr, RegionPtr, int what);
@@ -682,7 +710,6 @@ extern int httpPort;
 extern char *httpDir;
 
 extern void httpInitSockets(void);
-extern void httpCheckFds(void);
 
 
 /* init.c */
@@ -691,7 +718,7 @@ extern char *desktopName;
 extern char rfbThisHost[];
 extern Atom VNC_LAST_CLIENT_ID;
 
-extern rfbScreenInfo rfbScreen;
+extern rfbFBInfo rfbFB;
 extern DevPrivateKeyRec rfbGCKey;
 extern rfbDevInfo virtualTabletTouch;
 extern rfbDevInfo virtualTabletStylus;
@@ -739,10 +766,27 @@ extern char *nvCtrlDisplay;
 /* randr.c */
 
 #ifdef RANDR
-extern Bool ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h);
+extern int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
+                         struct xorg_list *newScreens);
 extern Bool vncRRInit(ScreenPtr);
 extern void vncRRDeinit(ScreenPtr);
 #endif
+
+
+/* rfbscreen.c */
+
+extern struct xorg_list rfbScreens;
+
+void rfbAddScreen(struct xorg_list *list, rfbScreenInfo *screen);
+void rfbClipScreens(struct xorg_list *list, int w, int h);
+void rfbDupeScreens(struct xorg_list *newList, struct xorg_list *list);
+rfbScreenInfo *rfbFindScreen(struct xorg_list *list, CARD16 x, CARD16 y,
+                             CARD16 w, CARD16 h);
+rfbScreenInfo *rfbFindScreenID(struct xorg_list *list, CARD32 id);
+rfbScreenInfo *rfbNewScreen(CARD32 id, CARD16 x, CARD16 y, CARD16 w, CARD16 h,
+                            CARD32 flags);
+void rfbRemoveScreen(rfbScreenInfo *screen);
+void rfbRemoveScreens(struct xorg_list *list);
 
 
 /* rfbserver.c */
@@ -845,7 +889,6 @@ extern void rfbInitSockets(void);
 extern void rfbDisconnectUDPSock(void);
 extern void rfbCloseSock(int);
 extern void rfbCloseClient(rfbClientPtr cl);
-extern void rfbCheckFds(void);
 extern int rfbConnect(char *host, int port);
 extern void rfbCorkSock(int sock);
 extern void rfbUncorkSock(int sock);
@@ -857,14 +900,19 @@ extern int ListenOnTCPPort(int port);
 extern int ListenOnUDPPort(int port);
 extern int ConnectToTcpAddr(char *host, int port);
 
-extern const char *sockaddr_string(struct sockaddr_storage *addr, char *buf,
-                                   int len);
+extern const char *sockaddr_string(rfbSockAddr *addr, char *buf, int len);
 
 
 /* stats.c */
 
 extern void rfbResetStats(rfbClientPtr cl);
 extern void rfbPrintStats(rfbClientPtr cl);
+
+
+/* strsep.c */
+#ifndef HAVE_STRSEP
+char *strsep(char **stringp, const char *delim);
+#endif
 
 
 /* tight.c */
@@ -896,11 +944,6 @@ extern Bool rfbSetTranslateFunction(rfbClientPtr cl);
 extern void rfbSetClientColourMaps(int firstColour, int nColours);
 extern Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour,
                                   int nColours);
-
-
-/* vncextinit.c */
-
-extern void vncClientCutText(const char* str, int len);
 
 
 /* zlib.c */

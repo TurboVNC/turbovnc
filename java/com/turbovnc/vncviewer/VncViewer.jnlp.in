@@ -8,9 +8,6 @@
      USER - the user account under which the VNC server session is running
      DESKTOP - the VNC session name
      DISPLAY - hostname:display_number of the VNC server session
-     APPLETWIDTH, WIDTH - the width of the remote desktop
-     HEIGHT - the height of the remote desktop
-     APPLETHEIGHT - the height of the remote desktop + the viewer toolbar
      PORT - TCP port on which the VNC server is listening (e.g. 5901)
 
      Use two dollar signs ($$) to get a dollar sign in the generated JNLP file.
@@ -34,6 +31,9 @@
   <resources os="Mac OS X">
     <j2se version="1.6+" java-vm-args="-server" />
     <nativelib href="ljtosx.jar"/>
+    <!-- Uncomment if you have the TurboVNC Helper JAR for OS X
+    <nativelib href="tvnchelper-osx.jar"/>
+    -->
   </resources>
 
   <resources os="Windows" arch="x86">

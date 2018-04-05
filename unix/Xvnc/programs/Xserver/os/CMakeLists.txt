@@ -1,49 +1,70 @@
 include_directories(../render ../../../lib/libsha1)
 
-add_definitions(-DUNIXCONN -DTCPCONN -DIPV6CONN -DHASXDMAUTH ${ServerOSDefines}
-	-DXDMCP -DHAVE_SHA1_IN_LIBSHA1)
+add_definitions(-DUNIXCONN -DTCPCONN -DHASXDMAUTH ${ServerOSDefines} -DXDMCP
+	-DHAVE_SHA1_IN_LIBSHA1)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	add_definitions(-DLOCALCONN)
+elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	# This is already defined for Linux
+	add_definitions(-DHAVE_ABSTRACT_SOCKETS)
+endif()
 
 if(FOUND_BSD44SOCKETS)
 	add_definitions(-DBSD44SOCKETS)
 endif()
 
-set(RPCSRCS "")
+set(EXTRASRCS "")
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	add_definitions(-DSECURE_RPC)
-	set(RPCSRCS rpcauth.c)
+	set(EXTRASRCS ${EXTRASRCS} rpcauth.c)
 endif()
-
-handle_type_puns()
-
-set(STRSRCS "")
+if(NOT HAVE_REALLOCARRAY)
+	set(EXTRASRCS ${EXTRASRCS} reallocarray.c)
+endif()
 if(NOT HAVE_STRCASECMP)
-	set(STRSRCS ${STRSRCS} strcasecmp.c)
+	set(EXTRASRCS ${EXTRASRCS} strcasecmp.c)
 endif()
 if(NOT HAVE_STRCASESTR)
-	set(STRSRCS ${STRSRCS} strcasestr.c)
+	set(EXTRASRCS ${EXTRASRCS} strcasestr.c)
 endif()
 if(NOT HAVE_STRLCAT)
-	set(STRSRCS ${STRSRCS} strlcat.c)
+	set(EXTRASRCS ${EXTRASRCS} strlcat.c)
 endif()
 if(NOT HAVE_STRLCPY)
-	set(STRSRCS ${STRSRCS} strlcpy.c)
+	set(EXTRASRCS ${EXTRASRCS} strlcpy.c)
 endif()
 if(NOT HAVE_STRNDUP)
-	set(STRSRCS ${STRSRCS} strndup.c)
+	set(EXTRASRCS ${EXTRASRCS} strndup.c)
 endif()
+if(NOT HAVE_TIMINGSAFE_MEMCMP)
+	set(EXTRASRCS ${EXTRASRCS} timingsafe_memcmp.c)
+endif()
+if(NOT HAVE_EPOLL_CREATE1 AND NOT HAVE_POLL)
+	set(EXTRASRCS ${EXTRASRCS} xserver_poll.c)
+endif()
+
+handle_type_puns(
+	access.c
+	io.c
+	xdmcp.c
+	xstrans.c)
 
 add_library(os STATIC
 	WaitFor.c
 	access.c
 	auth.c
 	backtrace.c
+	busfault.c
 	client.c
 	connection.c
+	inputthread.c
 	io.c
 	log.c
 	mitauth.c
 	oscolor.c
 	osinit.c
+	ospoll.c
+	reallocarray.c
 	rpcauth.c
 	utils.c
 	xdmauth.c
@@ -51,5 +72,4 @@ add_library(os STATIC
 	xprintf.c
 	xsha1.c
 	xstrans.c
-	${RPCSRCS}
-	${STRSRCS})
+	${EXTRASRCS})

@@ -15,7 +15,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, SuSE, Inc.
@@ -495,7 +495,7 @@ fb24_32ReformatTile(PixmapPtr pOldTile, int bitsPerPixel)
 }
 
 typedef struct {
-    pointer pbits;
+    void *pbits;
     int width;
 } miScreenInitParmsRec, *miScreenInitParmsPtr;
 
@@ -526,7 +526,7 @@ fb24_32ModifyPixmapHeader(PixmapPtr pPixmap,
                           int width,
                           int height,
                           int depth,
-                          int bitsPerPixel, int devKind, pointer pPixData)
+                          int bitsPerPixel, int devKind, void *pPixData)
 {
     int bpp, w;
 

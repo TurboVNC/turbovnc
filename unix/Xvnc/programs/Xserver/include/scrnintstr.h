@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -55,6 +55,7 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include "dix.h"
 #include "privates.h"
+#include <X11/extensions/randr.h>
 
 typedef struct _PixmapFormat {
     unsigned char depth;
@@ -95,8 +96,7 @@ typedef struct _ScreenSaverStuff {
  *  or as a local variable) can easily do so and retain full type checking.
  */
 
-typedef Bool (*CloseScreenProcPtr) (int /*index */ ,
-                                    ScreenPtr /*pScreen */ );
+typedef Bool (*CloseScreenProcPtr) (ScreenPtr /*pScreen */ );
 
 typedef void (*QueryBestSizeProcPtr) (int /*class */ ,
                                       unsigned short * /*pwidth */ ,
@@ -156,8 +156,11 @@ typedef void (*PostValidateTreeProcPtr) (WindowPtr /*pParent */ ,
                                          VTKind /*kind */ );
 
 typedef void (*WindowExposuresProcPtr) (WindowPtr /*pWindow */ ,
-                                        RegionPtr /*prgn */ ,
-                                        RegionPtr /*other_exposed */ );
+                                        RegionPtr /*prgn */);
+
+typedef void (*PaintWindowProcPtr) (WindowPtr /*pWindow*/,
+                                    RegionPtr /*pRegion*/,
+                                    int /*what*/);
 
 typedef void (*CopyWindowProcPtr) (WindowPtr /*pWindow */ ,
                                    DDXPointRec /*ptOldOrg */ ,
@@ -180,6 +183,8 @@ typedef void (*ClipNotifyProcPtr) (WindowPtr /*pWindow */ ,
 #define CREATE_PIXMAP_USAGE_BACKING_PIXMAP              2
 /* pixmap will contain a glyph */
 #define CREATE_PIXMAP_USAGE_GLYPH_PICTURE               3
+/* pixmap will be shared */
+#define CREATE_PIXMAP_USAGE_SHARED                      4
 
 typedef PixmapPtr (*CreatePixmapProcPtr) (ScreenPtr /*pScreen */ ,
                                           int /*width */ ,
@@ -228,6 +233,18 @@ typedef Bool (*SetCursorPositionProcPtr) (DeviceIntPtr /* pDev */ ,
                                           int /*y */ ,
                                           Bool /*generateEvent */ );
 
+typedef void (*CursorWarpedToProcPtr) (DeviceIntPtr /* pDev */ ,
+                                       ScreenPtr /*pScreen */ ,
+                                       ClientPtr /*pClient */ ,
+                                       WindowPtr /*pWindow */ ,
+                                       SpritePtr /*pSprite */ ,
+                                       int /*x */ ,
+                                       int /*y */ );
+
+typedef void (*CurserConfinedToProcPtr) (DeviceIntPtr /* pDev */ ,
+                                         ScreenPtr /*pScreen */ ,
+                                         WindowPtr /*pWindow */ );
+
 typedef Bool (*CreateGCProcPtr) (GCPtr /*pGC */ );
 
 typedef Bool (*CreateColormapProcPtr) (ColormapPtr /*pColormap */ );
@@ -252,31 +269,26 @@ typedef void (*ResolveColorProcPtr) (unsigned short * /*pred */ ,
 
 typedef RegionPtr (*BitmapToRegionProcPtr) (PixmapPtr /*pPix */ );
 
-typedef void (*SendGraphicsExposeProcPtr) (ClientPtr /*client */ ,
-                                           RegionPtr /*pRgn */ ,
-                                           XID /*drawable */ ,
-                                           int /*major */ ,
-                                           int /*minor */ );
+typedef void (*ScreenBlockHandlerProcPtr) (ScreenPtr pScreen,
+                                           void *timeout);
 
-typedef void (*ScreenBlockHandlerProcPtr) (int /*screenNum */ ,
-                                           pointer /*blockData */ ,
-                                           pointer /*pTimeout */ ,
-                                           pointer /*pReadmask */ );
-
-typedef void (*ScreenWakeupHandlerProcPtr) (int /*screenNum */ ,
-                                            pointer /*wakeupData */ ,
-                                            unsigned long /*result */ ,
-                                            pointer /*pReadMask */ );
+/* result has three possible values:
+ * < 0 - error
+ * = 0 - timeout
+ * > 0 - activity
+ */
+typedef void (*ScreenWakeupHandlerProcPtr) (ScreenPtr pScreen,
+                                            int result);
 
 typedef Bool (*CreateScreenResourcesProcPtr) (ScreenPtr /*pScreen */ );
 
-typedef Bool (*ModifyPixmapHeaderProcPtr) (PixmapPtr /*pPixmap */ ,
-                                           int /*width */ ,
-                                           int /*height */ ,
-                                           int /*depth */ ,
-                                           int /*bitsPerPixel */ ,
-                                           int /*devKind */ ,
-                                           pointer /*pPixData */ );
+typedef Bool (*ModifyPixmapHeaderProcPtr) (PixmapPtr pPixmap,
+                                           int width,
+                                           int height,
+                                           int depth,
+                                           int bitsPerPixel,
+                                           int devKind,
+                                           void *pPixData);
 
 typedef PixmapPtr (*GetWindowPixmapProcPtr) (WindowPtr /*pWin */ );
 
@@ -342,6 +354,142 @@ typedef void (*DeviceCursorCleanupProcPtr) (DeviceIntPtr /* pDev */ ,
 typedef void (*ConstrainCursorHarderProcPtr) (DeviceIntPtr, ScreenPtr, int,
                                               int *, int *);
 
+
+typedef Bool (*SharePixmapBackingProcPtr)(PixmapPtr, ScreenPtr, void **);
+
+typedef Bool (*SetSharedPixmapBackingProcPtr)(PixmapPtr, void *);
+
+#define HAS_SYNC_SHARED_PIXMAP 1
+/* The SyncSharedPixmap hook has two purposes:
+ *
+ * 1. If the master driver has it, the slave driver can use it to
+ * synchronize the shared pixmap contents with the screen pixmap.
+ * 2. If the slave driver has it, the master driver can expect the slave
+ * driver to call the master screen's SyncSharedPixmap hook, so the master
+ * driver doesn't have to synchronize the shared pixmap contents itself,
+ * e.g. from the BlockHandler.
+ *
+ * A driver must only set the hook if it handles both cases correctly.
+ *
+ * The argument is the slave screen's pixmap_dirty_list entry, the hook is
+ * responsible for finding the corresponding entry in the master screen's
+ * pixmap_dirty_list.
+ */
+typedef void (*SyncSharedPixmapProcPtr)(PixmapDirtyUpdatePtr);
+
+typedef Bool (*StartPixmapTrackingProcPtr)(PixmapPtr, PixmapPtr,
+                                           int x, int y,
+                                           int dst_x, int dst_y,
+                                           Rotation rotation);
+
+typedef Bool (*PresentSharedPixmapProcPtr)(PixmapPtr);
+
+typedef Bool (*RequestSharedPixmapNotifyDamageProcPtr)(PixmapPtr);
+
+typedef Bool (*StopPixmapTrackingProcPtr)(PixmapPtr, PixmapPtr);
+
+typedef Bool (*StopFlippingPixmapTrackingProcPtr)(PixmapPtr,
+                                                  PixmapPtr, PixmapPtr);
+
+typedef Bool (*SharedPixmapNotifyDamageProcPtr)(PixmapPtr);
+
+typedef Bool (*ReplaceScanoutPixmapProcPtr)(DrawablePtr, PixmapPtr, Bool);
+
+typedef WindowPtr (*XYToWindowProcPtr)(ScreenPtr pScreen,
+                                       SpritePtr pSprite, int x, int y);
+
+typedef int (*NameWindowPixmapProcPtr)(WindowPtr, PixmapPtr, CARD32);
+
+/* Wrapping Screen procedures
+
+   There are a few modules in the X server which dynamically add and
+    remove themselves from various screen procedure call chains.
+
+    For example, the BlockHandler is dynamically modified by:
+
+     * xf86Rotate
+     * miSprite
+     * composite
+     * render (for animated cursors)
+
+    Correctly manipulating this chain is complicated by the fact that
+    the chain is constructed through a sequence of screen private
+    structures, each holding the next screen->proc pointer.
+
+    To add a module to a screen->proc chain is fairly simple; just save
+    the current screen->proc value in the module screen private
+    and store the module's function in the screen->proc location.
+
+    Removing a screen proc is a bit trickier. It seems like all you
+    need to do is set the screen->proc pointer back to the value saved
+    in your screen private. However, if some other module has come
+    along and wrapped on top of you, then the right place to store the
+    previous screen->proc value is actually in the wrapping module's
+    screen private structure(!). Of course, you have no idea what
+    other module may have wrapped on top, nor could you poke inside
+    its screen private in any case.
+
+    To make this work, we restrict the unwrapping process to happen
+    during the invocation of the screen proc itself, and then we
+    require the screen proc to take some care when manipulating the
+    screen proc functions pointers.
+
+    The requirements are:
+
+     1) The screen proc must set the screen->proc pointer back to the
+        value saved in its screen private before calling outside its
+        module.
+
+     2a) If the screen proc wants to be remove itself from the chain,
+         it must not manipulate screen->proc pointer again before
+         returning.
+
+     2b) If the screen proc wants to remain in the chain, it must:
+
+       2b.1) Re-fetch the screen->proc pointer and store that in
+             its screen private. This ensures that any changes
+             to the chain will be preserved.
+
+       2b.2) Set screen->proc back to itself
+
+    One key requirement here is that these steps must wrap not just
+    any invocation of the nested screen->proc value, but must nest
+    essentially any calls outside the current module. This ensures
+    that other modules can reliably manipulate screen->proc wrapping
+    using these same rules.
+
+    For example, the animated cursor code in render has two macros,
+    Wrap and Unwrap.
+
+        #define Unwrap(as,s,elt)    ((s)->elt = (as)->elt)
+
+    Unwrap takes the screen private (as), the screen (s) and the
+    member name (elt), and restores screen->proc to that saved in the
+    screen private.
+
+        #define Wrap(as,s,elt,func) (((as)->elt = (s)->elt), (s)->elt = func)
+
+    Wrap takes the screen private (as), the screen (s), the member
+    name (elt) and the wrapping function (func). It saves the
+    current screen->proc value in the screen private, and then sets the
+    screen->proc to the local wrapping function.
+
+    Within each of these functions, there's a pretty simple pattern:
+
+        Unwrap(as, pScreen, UnrealizeCursor);
+
+        // Do local stuff, including possibly calling down through
+        // pScreen->UnrealizeCursor
+
+        Wrap(as, pScreen, UnrealizeCursor, AnimCurUnrealizeCursor);
+
+    The wrapping block handler is a bit different; it does the Unwrap,
+    the local operations and then only re-Wraps if the hook is still
+    required. Unwrap occurrs at the top of each function, just after
+    entry, and Wrap occurrs at the bottom of each function, just
+    before returning.
+ */
+
 typedef struct _Screen {
     int myNum;                  /* index of this instance in Screens[] */
     ATOM id;
@@ -364,11 +512,13 @@ typedef struct _Screen {
        a standard one.
      */
     PixmapPtr PixmapPerDepth[1];
-    pointer devPrivate;
+    void *devPrivate;
     short numVisuals;
     VisualPtr visuals;
     WindowPtr root;
     ScreenSaverStuffRec screensaver;
+
+    DevPrivateSetRec    screenSpecificPrivates[PRIVATE_LAST];
 
     /* Random screen procedures */
 
@@ -394,6 +544,7 @@ typedef struct _Screen {
     ClearToBackgroundProcPtr ClearToBackground;
     ClipNotifyProcPtr ClipNotify;
     RestackWindowProcPtr RestackWindow;
+    PaintWindowProcPtr PaintWindow;
 
     /* Pixmap procedures */
 
@@ -415,6 +566,8 @@ typedef struct _Screen {
     UnrealizeCursorProcPtr UnrealizeCursor;
     RecolorCursorProcPtr RecolorCursor;
     SetCursorPositionProcPtr SetCursorPosition;
+    CursorWarpedToProcPtr CursorWarpedTo;
+    CurserConfinedToProcPtr CursorConfinedTo;
 
     /* GC procedures */
 
@@ -433,15 +586,11 @@ typedef struct _Screen {
     /* Region procedures */
 
     BitmapToRegionProcPtr BitmapToRegion;
-    SendGraphicsExposeProcPtr SendGraphicsExpose;
 
     /* os layer procedures */
 
     ScreenBlockHandlerProcPtr BlockHandler;
     ScreenWakeupHandlerProcPtr WakeupHandler;
-
-    pointer blockData;
-    pointer wakeupData;
 
     /* anybody can get a piece of this array */
     PrivateRec *devPrivates;
@@ -453,6 +602,7 @@ typedef struct _Screen {
     SetWindowPixmapProcPtr SetWindowPixmap;
     GetScreenPixmapProcPtr GetScreenPixmap;
     SetScreenPixmapProcPtr SetScreenPixmap;
+    NameWindowPixmapProcPtr NameWindowPixmap;
 
     PixmapPtr pScratchPixmap;   /* scratch pixmap "pool" */
 
@@ -481,6 +631,34 @@ typedef struct _Screen {
      * malicious users to steal framebuffer's content if that would be the
      * default */
     Bool canDoBGNoneRoot;
+
+    Bool isGPU;
+
+    /* Info on this screen's slaves (if any) */
+    struct xorg_list slave_list;
+    struct xorg_list slave_head;
+    int output_slaves;
+    /* Info for when this screen is a slave */
+    ScreenPtr current_master;
+    Bool is_output_slave;
+    Bool is_offload_slave;
+
+    SharePixmapBackingProcPtr SharePixmapBacking;
+    SetSharedPixmapBackingProcPtr SetSharedPixmapBacking;
+
+    StartPixmapTrackingProcPtr StartPixmapTracking;
+    StopPixmapTrackingProcPtr StopPixmapTracking;
+    SyncSharedPixmapProcPtr SyncSharedPixmap;
+
+    SharedPixmapNotifyDamageProcPtr SharedPixmapNotifyDamage;
+    RequestSharedPixmapNotifyDamageProcPtr RequestSharedPixmapNotifyDamage;
+    PresentSharedPixmapProcPtr PresentSharedPixmap;
+    StopFlippingPixmapTrackingProcPtr StopFlippingPixmapTracking;
+
+    struct xorg_list pixmap_dirty_list;
+
+    ReplaceScanoutPixmapProcPtr ReplaceScanoutPixmap;
+    XYToWindowProcPtr XYToWindow;
 } ScreenRec;
 
 static inline RegionPtr
@@ -498,6 +676,8 @@ typedef struct _ScreenInfo {
      PixmapFormatRec formats[MAXFORMATS];
     int numScreens;
     ScreenPtr screens[MAXSCREENS];
+    int numGPUScreens;
+    ScreenPtr gpuscreens[MAXGPUSCREENS];
     int x;                      /* origin */
     int y;                      /* origin */
     int width;                  /* total width of all screens together */

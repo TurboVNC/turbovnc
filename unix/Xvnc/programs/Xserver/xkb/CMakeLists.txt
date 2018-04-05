@@ -1,6 +1,11 @@
-include_directories(../Xi ../mi)
+include_directories(../Xi ../mi ../render)
 
-handle_type_puns()
+handle_type_puns(
+	XKBGAlloc.c
+	xkb.c
+	xkbEvents.c
+	xkbSwap.c
+	xkbUtils.c)
 
 add_library(xkb STATIC
 	XKBAlloc.c
@@ -11,7 +16,6 @@ add_library(xkb STATIC
 	ddxCtrls.c
 	ddxKillSrv.c
 	ddxLEDs.c
-	ddxList.c
 	ddxLoad.c
 	ddxPrivate.c
 	ddxVT.c

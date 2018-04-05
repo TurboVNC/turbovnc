@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -86,6 +86,9 @@ int limitStackSpace = -1;
 int limitNoFile = -1;
 #endif
 
+/* The actual user defined max number of clients */
+int LimitClients = LIMITCLIENTS;
+
 static OsSigWrapperPtr OsSigWrapper = NULL;
 
 OsSigWrapperPtr
@@ -102,6 +105,7 @@ OsRegisterSigWrapper(OsSigWrapperPtr newSigWrapper)
  * OsSigHandler --
  *    Catch unexpected signals and exit or continue cleanly.
  */
+#if !defined(WIN32) || defined(__CYGWIN__)
 static void
 #ifdef SA_SIGINFO
 OsSigHandler(int signo, siginfo_t * sip, void *unused)
@@ -110,10 +114,14 @@ OsSigHandler(int signo)
 #endif
 {
 #ifdef RTLD_DI_SETSIGNAL
-    const char *dlerr = dlerror();
+# define SIGNAL_FOR_RTLD_ERROR SIGQUIT
+    if (signo == SIGNAL_FOR_RTLD_ERROR) {
+        const char *dlerr = dlerror();
 
-    if (dlerr) {
-        LogMessage(X_ERROR, "Dynamic loader error: %s\n", dlerr);
+        if (dlerr) {
+            LogMessageVerbSigSafe(X_ERROR, 1,
+                                  "Dynamic loader error: %s\n", dlerr);
+        }
     }
 #endif                          /* RTLD_DI_SETSIGNAL */
 
@@ -129,8 +137,8 @@ OsSigHandler(int signo)
 
 #ifdef SA_SIGINFO
     if (sip->si_code == SI_USER) {
-        ErrorF("Recieved signal %d sent by process %ld, uid %ld\n",
-               signo, (long) sip->si_pid, (long) sip->si_uid);
+        ErrorFSigSafe("Received signal %u sent by process %u, uid %u\n", signo,
+                     sip->si_pid, sip->si_uid);
     }
     else {
         switch (signo) {
@@ -138,7 +146,7 @@ OsSigHandler(int signo)
         case SIGBUS:
         case SIGILL:
         case SIGFPE:
-            ErrorF("%s at address %p\n", strsignal(signo), sip->si_addr);
+            ErrorFSigSafe("%s at address %p\n", strsignal(signo), sip->si_addr);
         }
     }
 #endif
@@ -146,19 +154,26 @@ OsSigHandler(int signo)
     FatalError("Caught signal %d (%s). Server aborting\n",
                signo, strsignal(signo));
 }
+#endif /* !WIN32 || __CYGWIN__ */
+
+#include "busfault.h"
 
 void
 OsInit(void)
 {
     static Bool been_here = FALSE;
+#ifndef XQUARTZ
     static const char *devnull = "/dev/null";
     char fname[PATH_MAX];
+#endif
 
     if (!been_here) {
+#if !defined(WIN32) || defined(__CYGWIN__)
         struct sigaction act, oact;
         int i;
 
         int siglist[] = { SIGSEGV, SIGQUIT, SIGILL, SIGFPE, SIGBUS,
+            SIGABRT,
             SIGSYS,
             SIGXCPU,
             SIGXFSZ,
@@ -181,6 +196,14 @@ OsInit(void)
                        siglist[i], strerror(errno));
             }
         }
+#endif /* !WIN32 || __CYGWIN__ */
+#ifdef BUSFAULT
+        busfault_init();
+#endif
+        server_poll = ospoll_create();
+        if (!server_poll)
+            FatalError("failed to allocate poll structure");
+
 #ifdef HAVE_BACKTRACE
         /*
          * initialize the backtracer, since the ctor calls dlopen(), which
@@ -198,18 +221,17 @@ OsInit(void)
          * for failures to load libraries/modules at runtime so we can clean up
          * after ourselves.
          */
-        int failure_signal = SIGQUIT;
+        {
+            int failure_signal = SIGNAL_FOR_RTLD_ERROR;
 
-        dlinfo(RTLD_SELF, RTLD_DI_SETSIGNAL, &failure_signal);
+            dlinfo(RTLD_SELF, RTLD_DI_SETSIGNAL, &failure_signal);
+        }
 #endif
 
-#if !defined(__CYGWIN__)
-        fclose(stdin);
-        fclose(stdout);
-#endif
-        /* 
-         * If a write of zero bytes to stderr returns non-zero, i.e. -1, 
-         * then writing to stderr failed, and we'll write somewhere else 
+#if !defined(XQUARTZ)    /* STDIN is already /dev/null and STDOUT/STDERR is managed by console_redirect.c */
+        /*
+         * If a write of zero bytes to stderr returns non-zero, i.e. -1,
+         * then writing to stderr failed, and we'll write somewhere else
          * instead. (Apparently this never happens in the Real World.)
          */
         if (write(2, fname, 0) == -1) {
@@ -240,9 +262,12 @@ OsInit(void)
             setlinebuf(stderr);
 #endif
         }
+#endif /* !XQUARTZ */
 
+#if !defined(WIN32) || defined(__CYGWIN__)
         if (getpgrp() == 0)
             setpgid(0, 0);
+#endif
 
 #ifdef RLIMIT_DATA
         if (limitDataSpace >= 0) {
@@ -288,6 +313,7 @@ OsInit(void)
     }
     TimerInit();
     OsVendorInit();
+    OsResetSignals();
     /*
      * No log file by default.  OsVendorInit() should call LogInit() with the
      * log file name if logging to a file is desired.

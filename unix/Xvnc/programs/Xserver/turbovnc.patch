@@ -1,0 +1,865 @@
+diff --git a/xorg-server-1.19.5/Xext/shm.c b/Xserver/Xext/shm.c
+index c98d4a0..b1c71d6 100644
+--- a/xorg-server-1.19.5/Xext/shm.c
++++ b/Xserver/Xext/shm.c
+@@ -306,7 +306,7 @@ ProcShmQueryVersion(ClientPtr client)
+ static int
+ shm_access(ClientPtr client, SHMPERM_TYPE * perm, int readonly)
+ {
+-    int uid, gid;
++    int uid = 0, gid = 0;
+     mode_t mask;
+     int uidset = 0, gidset = 0;
+     LocalClientCredRec *lcc;
+@@ -650,9 +650,8 @@ ProcShmGetImage(ClientPtr client)
+                wBorderWidth((WindowPtr) pDraw) + (int) pDraw->height)
+             return BadMatch;
+         visual = wVisual(((WindowPtr) pDraw));
+-        pVisibleRegion = NotClippedByChildren((WindowPtr) pDraw);
+-        if (pVisibleRegion)
+-            RegionTranslate(pVisibleRegion, -pDraw->x, -pDraw->y);
++        if (pDraw->type == DRAWABLE_WINDOW)
++            pVisibleRegion = &((WindowPtr) pDraw)->borderClip;
+     }
+     else {
+         if (stuff->x < 0 ||
+@@ -715,9 +714,6 @@ ProcShmGetImage(ClientPtr client)
+         }
+     }
+ 
+-    if (pVisibleRegion)
+-        RegionDestroy(pVisibleRegion);
+-
+     if (client->swapped) {
+         swaps(&xgi.sequenceNumber);
+         swapl(&xgi.length);
+diff --git a/xorg-server-1.19.5/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
+index 7286eff..d786951 100644
+--- a/xorg-server-1.19.5/Xi/xichangehierarchy.c
++++ b/Xserver/Xi/xichangehierarchy.c
+@@ -140,7 +140,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
+ {
+     DeviceIntPtr ptr, keybd, XTestptr, XTestkeybd;
+     char *name;
+-    int rc;
++    int i, rc;
+ 
+     name = calloc(c->name_len + 1, sizeof(char));
+     if (name == NULL) {
+@@ -194,7 +194,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
+     flags[XTestptr->id] |= XISlaveAttached;
+     flags[XTestkeybd->id] |= XISlaveAttached;
+ 
+-    for (int i = 0; i < currentMaxClients; i++)
++    for (i = 0; i < currentMaxClients; i++)
+         XIBarrierNewMasterDevice(clients[i], ptr->id);
+ 
+  unwind:
+@@ -219,7 +219,7 @@ static int
+ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
+ {
+     DeviceIntPtr ptr, keybd, XTestptr, XTestkeybd;
+-    int rc = Success;
++    int i, rc = Success;
+ 
+     if (r->return_mode != XIAttachToMaster && r->return_mode != XIFloating)
+         return BadValue;
+@@ -301,7 +301,7 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
+         }
+     }
+ 
+-    for (int i = 0; i < currentMaxClients; i++)
++    for (i = 0; i < currentMaxClients; i++)
+         XIBarrierRemoveMasterDevice(clients[i], ptr->id);
+ 
+     /* disable the remove the devices, XTest devices must be done first
+diff --git a/xorg-server-1.19.5/composite/compalloc.c b/Xserver/composite/compalloc.c
+index 05ffc7e..a4a4cce 100644
+--- a/xorg-server-1.19.5/composite/compalloc.c
++++ b/Xserver/composite/compalloc.c
+@@ -137,7 +137,7 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
+     CompWindowPtr cw = GetCompWindow(pWin);
+     CompClientWindowPtr ccw;
+     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);
+-    WindowPtr pLayerWin;
++    WindowPtr pLayerWin = NULL;
+     Bool anyMarked = FALSE;
+ 
+     if (pWin == cs->pOverlayWin) {
+@@ -264,7 +264,7 @@ compFreeClientWindow(WindowPtr pWin, XID id)
+     CompWindowPtr cw = GetCompWindow(pWin);
+     CompClientWindowPtr ccw, *prev;
+     Bool anyMarked = FALSE;
+-    WindowPtr pLayerWin;
++    WindowPtr pLayerWin = NULL;
+     PixmapPtr pPixmap = NULL;
+ 
+     if (!cw)
+diff --git a/xorg-server-1.19.5/dix/devices.c b/Xserver/dix/devices.c
+index ea3c6c8..dc57cf5 100644
+--- a/xorg-server-1.19.5/dix/devices.c
++++ b/Xserver/dix/devices.c
+@@ -76,6 +76,11 @@ SOFTWARE.
+ #include <X11/extensions/XI2.h>
+ #include <X11/extensions/XIproto.h>
+ #include <math.h>
++#ifdef TURBOVNC
++#ifdef HAVE_IEEEFP_H
++#include <ieeefp.h>
++#endif
++#endif
+ #include <pixman.h>
+ #include "exglobals.h"
+ #include "exevents.h"
+@@ -174,7 +179,11 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
+             return BadValue;
+ 
+         for (i = 0; i < 9; i++)
++#ifdef TURBOVNC
++            if (!finite(f[i]))
++#else
+             if (!isfinite(f[i]))
++#endif
+                 return BadValue;
+ 
+         if (!dev->valuator)
+diff --git a/xorg-server-1.19.5/dix/events.c b/Xserver/dix/events.c
+index 3faad53..45a91d8 100644
+--- a/xorg-server-1.19.5/dix/events.c
++++ b/Xserver/dix/events.c
+@@ -148,6 +148,12 @@ Equipment Corporation.
+ #include "eventconvert.h"
+ #include "mi.h"
+ 
++#ifdef TURBOVNC
++extern Window vncGetSelectionWindow(void);
++extern void vncHandleSelection(Atom selection, Atom target, Atom property,
++                               Atom requestor, TimeStamp time);
++#endif
++
+ /* Extension events type numbering starts at EXTENSION_EVENT_BASE.  */
+ #define NoSuchEvent 0x80000000  /* so doesn't match NoEventMask */
+ #define StructureAndSubMask ( StructureNotifyMask | SubstructureNotifyMask )
+@@ -5356,6 +5362,18 @@ ProcSendEvent(ClientPtr client)
+ 
+     stuff->event.u.u.type &= ~(SEND_EVENT_BIT);
+ 
++#ifdef TURBOVNC
++    if (stuff->event.u.u.type == SelectionNotify &&
++        stuff->event.u.selectionNotify.requestor == vncGetSelectionWindow()) {
++        TimeStamp time;
++        time = ClientTimeToServerTime(stuff->event.u.selectionNotify.time);
++        vncHandleSelection(stuff->event.u.selectionNotify.selection,
++                           stuff->event.u.selectionNotify.target,
++                           stuff->event.u.selectionNotify.property,
++                           stuff->event.u.selectionNotify.requestor, time);
++    }
++#endif
++
+     /* The client's event type must be a core event type or one defined by an
+        extension. */
+ 
+diff --git a/xorg-server-1.19.5/dix/getevents.c b/Xserver/dix/getevents.c
+index 0d87453..d895596 100644
+--- a/xorg-server-1.19.5/dix/getevents.c
++++ b/Xserver/dix/getevents.c
+@@ -1231,7 +1231,7 @@ transformRelative(DeviceIntPtr dev, ValuatorMask *mask)
+ static void
+ transformAbsolute(DeviceIntPtr dev, ValuatorMask *mask)
+ {
+-    double x, y, ox, oy;
++    double x, y, ox = 0.0, oy = 0.0;
+     int has_x, has_y;
+ 
+     has_x = valuator_mask_isset(mask, 0);
+diff --git a/xorg-server-1.19.5/dix/property.c b/Xserver/dix/property.c
+index fa4da2d..c5f8ceb 100644
+--- a/xorg-server-1.19.5/dix/property.c
++++ b/Xserver/dix/property.c
+@@ -353,6 +353,13 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
+     if (sendevent)
+         deliverPropertyNotifyEvent(pWin, PropertyNewValue, pProp->propertyName);
+ 
++#ifdef TURBOVNC
++    if (pWin->parent == NullWindow) {
++        extern void rfbRootPropertyChange();
++        rfbRootPropertyChange(pProp);
++    }
++#endif
++
+     return Success;
+ }
+ 
+diff --git a/xorg-server-1.19.5/dix/registry.c b/Xserver/dix/registry.c
+index 84d48b4..de4bf8e 100644
+--- a/xorg-server-1.19.5/dix/registry.c
++++ b/Xserver/dix/registry.c
+@@ -1,6 +1,7 @@
+ /************************************************************
+ 
+-Author: Eamon Walsh <ewalsh@tycho.nsa.gov>
++Authors: Eamon Walsh <ewalsh@tycho.nsa.gov>
++         D. R. Commander
+ 
+ Permission to use, copy, modify, distribute, and sell this software and its
+ documentation for any purpose is hereby granted without fee, provided that
+@@ -32,7 +33,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ 
+ #ifdef X_REGISTRY_REQUEST
+ #define CORE "X11"
++#ifdef TURBOVNC
++char registry_path[PATH_MAX] = SERVER_MISC_CONFIG_PATH "/protocol.txt";
++#define FILENAME registry_path
++#else
+ #define FILENAME SERVER_MISC_CONFIG_PATH "/protocol.txt"
++#endif
+ 
+ #define PROT_COMMENT '#'
+ #define PROT_REQUEST 'R'
+@@ -202,7 +208,11 @@ RegisterExtensionNames(ExtensionEntry * extEntry)
+         }
+ 
+  invalid:
++#ifdef TURBOVNC
++        LogMessage(X_WARNING, "Invalid line in %s, skipping\n", FILENAME);
++#else
+         LogMessage(X_WARNING, "Invalid line in " FILENAME ", skipping\n");
++#endif
+  skip:
+         free(lineobj);
+     }
+@@ -353,7 +363,11 @@ dixResetRegistry(void)
+     fh = fopen(FILENAME, "r");
+     if (!fh)
+         LogMessage(X_WARNING,
++#ifdef TURBOVNC
++                   "Failed to open protocol names file %s\n", FILENAME);
++#else
+                    "Failed to open protocol names file " FILENAME "\n");
++#endif
+ 
+     /* Add the core protocol */
+     RegisterExtensionNames(&extEntry);
+diff --git a/xorg-server-1.19.5/dix/selection.c b/Xserver/dix/selection.c
+index d46103f..c8321f1 100644
+--- a/xorg-server-1.19.5/dix/selection.c
++++ b/Xserver/dix/selection.c
+@@ -54,6 +54,13 @@ SOFTWARE.
+ #include "selection.h"
+ #include "xace.h"
+ 
++#ifdef TURBOVNC
++extern int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
++                               Atom property, Window requestor,
++                               TimeStamp time);
++extern Window vncGetSelectionWindow(void);
++#endif
++
+ /*****************************************************************
+  * Selection Stuff
+  *
+@@ -287,6 +294,16 @@ ProcConvertSelection(ClientPtr client)
+     memset(&event, 0, sizeof(xEvent));
+     if (rc != Success && rc != BadMatch)
+         return rc;
++#ifdef TURBOVNC
++    else if (rc == Success && pSel->client == serverClient &&
++             pSel->window == vncGetSelectionWindow()) {
++        TimeStamp time;
++        time = ClientTimeToServerTime(stuff->time);
++        rc = vncConvertSelection(client, stuff->selection, stuff->target,
++                                 stuff->property, stuff->requestor, time);
++        if (rc == Success) return rc;
++    }
++#endif
+     else if (rc == Success && pSel->window != None) {
+         event.u.u.type = SelectionRequest;
+         event.u.selectionRequest.owner = pSel->window;
+diff --git a/xorg-server-1.19.5/dix/touch.c b/Xserver/dix/touch.c
+index 37902bd..486ad00 100644
+--- a/xorg-server-1.19.5/dix/touch.c
++++ b/Xserver/dix/touch.c
+@@ -587,7 +587,7 @@ TouchConvertToPointerEvent(const InternalEvent *event,
+                            InternalEvent *motion_event,
+                            InternalEvent *button_event)
+ {
+-    int ptrtype;
++    int ptrtype = 0;
+     int nevents = 0;
+ 
+     BUG_RETURN_VAL(!event, 0);
+diff --git a/xorg-server-1.19.5/dix/window.c b/Xserver/dix/window.c
+index ead4dc2..7e41565 100644
+--- a/xorg-server-1.19.5/dix/window.c
++++ b/Xserver/dix/window.c
+@@ -219,7 +219,7 @@ static void
+ log_window_info(WindowPtr pWin, int depth)
+ {
+     int i;
+-    const char *win_name, *visibility;
++    const char *win_name, *visibility = NULL;
+     BoxPtr rects;
+ 
+     for (i = 0; i < (depth << 2); i++)
+diff --git a/xorg-server-1.19.5/glx/glxdricommon.c b/Xserver/glx/glxdricommon.c
+index f6c6fcd..a4a2843 100644
+--- a/xorg-server-1.19.5/glx/glxdricommon.c
++++ b/Xserver/glx/glxdricommon.c
+@@ -41,29 +41,6 @@
+ #include "glxscreens.h"
+ #include "glxdricommon.h"
+ 
+-static int
+-getUST(int64_t * ust)
+-{
+-    struct timeval tv;
+-
+-    if (ust == NULL)
+-        return -EFAULT;
+-
+-    if (gettimeofday(&tv, NULL) == 0) {
+-        ust[0] = (tv.tv_sec * 1000000) + tv.tv_usec;
+-        return 0;
+-    }
+-    else {
+-        return -errno;
+-    }
+-}
+-
+-const __DRIsystemTimeExtension systemTimeExtension = {
+-    {__DRI_SYSTEM_TIME, 1},
+-    getUST,
+-    NULL,
+-};
+-
+ #define __ATTRIB(attrib, field) \
+     { attrib, offsetof(__GLXconfig, field) }
+ 
+@@ -228,7 +205,11 @@ glxConvertConfigs(const __DRIcoreExtension * core,
+     return head.next;
+ }
+ 
++#ifdef TURBOVNC
++char *dri_driver_path = DRI_DRIVER_PATH;
++#else
+ static const char dri_driver_path[] = DRI_DRIVER_PATH;
++#endif
+ 
+ /* Temporary define to allow building without a dri_interface.h from
+  * updated Mesa.  Some day when we don't care about Mesa that old any
+diff --git a/xorg-server-1.19.5/glx/glxdricommon.h b/Xserver/glx/glxdricommon.h
+index 2db46dc..6851f24 100644
+--- a/xorg-server-1.19.5/glx/glxdricommon.h
++++ b/Xserver/glx/glxdricommon.h
+@@ -35,8 +35,6 @@ struct __GLXDRIconfig {
+ __GLXconfig *glxConvertConfigs(const __DRIcoreExtension * core,
+                                const __DRIconfig ** configs);
+ 
+-extern const __DRIsystemTimeExtension systemTimeExtension;
+-
+ void *glxProbeDriver(const char *name,
+                      void **coreExt, const char *coreName, int coreVersion,
+                      void **renderExt, const char *renderName,
+diff --git a/xorg-server-1.19.5/glx/glxdriswrast.c b/Xserver/glx/glxdriswrast.c
+index ed0469f..f0c1c3e 100644
+--- a/xorg-server-1.19.5/glx/glxdriswrast.c
++++ b/Xserver/glx/glxdriswrast.c
+@@ -366,7 +366,6 @@ static const __DRIswrastLoaderExtension swrastLoaderExtension = {
+ };
+ 
+ static const __DRIextension *loader_extensions[] = {
+-    &systemTimeExtension.base,
+     &swrastLoaderExtension.base,
+     NULL
+ };
+diff --git a/xorg-server-1.19.5/glx/glxext.c b/Xserver/glx/glxext.c
+index d595a05..b81adad 100644
+--- a/xorg-server-1.19.5/glx/glxext.c
++++ b/Xserver/glx/glxext.c
+@@ -1,6 +1,7 @@
+ /*
+  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
+  * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.
++ * Copyright (C) 2017 D. R. Commander. All Rights Reserved.
+  *
+  * Permission is hereby granted, free of charge, to any person obtaining a
+  * copy of this software and associated documentation files (the "Software"),
+@@ -47,6 +48,10 @@
+ #include "indirect_table.h"
+ #include "indirect_util.h"
+ 
++#ifdef TURBOVNC
++Bool indirectGlxActive = FALSE;
++#endif
++
+ /*
+ ** X resources.
+ */
+@@ -166,6 +171,12 @@ __glXAddContext(__GLXcontext * cx)
+ 
+     cx->next = glxAllContexts;
+     glxAllContexts = cx;
++#ifdef TURBOVNC
++    if (!indirectGlxActive && !cx->isDirect) {
++        LogMessage(X_INFO, "Activating indirect GLX ...\n");
++        indirectGlxActive = TRUE;
++    }
++#endif
+     return True;
+ }
+ 
+@@ -173,6 +184,9 @@ static void
+ __glXRemoveFromContextList(__GLXcontext * cx)
+ {
+     __GLXcontext *c, *prev;
++#ifdef TURBOVNC
++    Bool indirectGlxStillActive = FALSE;
++#endif
+ 
+     if (cx == glxAllContexts)
+         glxAllContexts = cx->next;
+@@ -184,6 +198,18 @@ __glXRemoveFromContextList(__GLXcontext * cx)
+             prev = c;
+         }
+     }
++#ifdef TURBOVNC
++    for (c = glxAllContexts; c; c = c->next) {
++        if (!c->isDirect) {
++            indirectGlxStillActive = TRUE;
++            break;
++        }
++    }
++    if (indirectGlxActive && !indirectGlxStillActive) {
++        LogMessage(X_INFO, "Deactivating indirect GLX ...\n");
++        indirectGlxActive = FALSE;
++    }
++#endif
+ }
+ 
+ /*
+diff --git a/xorg-server-1.19.5/include/extinit.h b/Xserver/include/extinit.h
+index 4ad4fca..08fa370 100644
+--- a/xorg-server-1.19.5/include/extinit.h
++++ b/Xserver/include/extinit.h
+@@ -1,6 +1,7 @@
+ /************************************************************
+ 
+ Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
++Copyright 2017 D. R. Commander
+ 
+                         All Rights Reserved
+ 
+@@ -181,4 +182,13 @@ extern void dri3_extension_init(void);
+ #include "presentext.h"
+ #endif
+ 
++#ifdef TURBOVNC
++extern void vncExtensionInit(void);
++
++#ifdef NVCONTROL
++extern Bool noNVCTRLExtension;
++extern void nvCtrlExtensionInit(void);
++#endif
++#endif
++
+ #endif
+diff --git a/xorg-server-1.19.5/mi/miarc.c b/Xserver/mi/miarc.c
+index 2588ee4..9f54bfa 100644
+--- a/xorg-server-1.19.5/mi/miarc.c
++++ b/Xserver/mi/miarc.c
+@@ -1874,7 +1874,7 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
+     double a0, a1;
+     struct arcData *data;
+     miArcDataPtr arc;
+-    xArc xarc;
++    xArc xarc = { 0, 0, 0, 0, 0, 0 };
+     int iphase, prevphase = 0, joinphase;
+     int arcsJoin;
+     int selfJoin;
+diff --git a/xorg-server-1.19.5/mi/miexpose.c b/Xserver/mi/miexpose.c
+index 148d1a6..df085e3 100644
+--- a/xorg-server-1.19.5/mi/miexpose.c
++++ b/Xserver/mi/miexpose.c
+@@ -136,7 +136,7 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
+                                    the window background
+                                  */
+     WindowPtr pSrcWin;
+-    BoxRec expBox;
++    BoxRec expBox = { 0, 0, 0, 0 };
+     Bool extents;
+ 
+     /* avoid work if we can */
+@@ -374,7 +374,7 @@ miWindowExposures(WindowPtr pWin, RegionPtr prgn)
+     RegionPtr exposures = prgn;
+ 
+     if (prgn && !RegionNil(prgn)) {
+-        RegionRec expRec;
++        RegionRec expRec = { {0, 0, 0, 0}, NULL };
+         int clientInterested =
+             (pWin->eventMask | wOtherEventMasks(pWin)) & ExposureMask;
+         if (clientInterested && (RegionNumRects(prgn) > RECTLIMIT)) {
+diff --git a/xorg-server-1.19.5/mi/miinitext.c b/Xserver/mi/miinitext.c
+index 5fc44e3..628e9f3 100644
+--- a/xorg-server-1.19.5/mi/miinitext.c
++++ b/Xserver/mi/miinitext.c
+@@ -1,6 +1,7 @@
+ /***********************************************************
+ 
+ Copyright 1987, 1998  The Open Group
++Copyright 2012, 2015, 2017  D. R. Commander
+ 
+ Permission to use, copy, modify, distribute, and sell this software and its
+ documentation for any purpose is hereby granted without fee, provided that
+@@ -306,6 +307,12 @@ static const ExtensionModule staticExtensions[] = {
+ #ifdef XSELINUX
+     {SELinuxExtensionInit, SELINUX_EXTENSION_NAME, &noSELinuxExtension},
+ #endif
++#ifdef TURBOVNC
++    {vncExtensionInit, "VNC-EXTENSION", NULL},
++#ifdef NVCONTROL
++    {nvCtrlExtensionInit, "NV-CONTROL", &noNVCTRLExtension},
++#endif
++#endif
+ };
+ 
+ static ExtensionModule *ExtensionModuleList = NULL;
+diff --git a/xorg-server-1.19.5/mi/mioverlay.c b/Xserver/mi/mioverlay.c
+index b8b7a5b..bd750ad 100644
+--- a/xorg-server-1.19.5/mi/mioverlay.c
++++ b/Xserver/mi/mioverlay.c
+@@ -986,7 +986,7 @@ miOverlayWindowExposures(WindowPtr pWin, RegionPtr prgn)
+     ScreenPtr pScreen = pWin->drawable.pScreen;
+ 
+     if (prgn && !RegionNil(prgn)) {
+-        RegionRec expRec;
++        RegionRec expRec = { {0, 0, 0, 0}, NULL };
+         int clientInterested =
+             (pWin->eventMask | wOtherEventMasks(pWin)) & ExposureMask;
+         if (clientInterested && (RegionNumRects(prgn) > RECTLIMIT)) {
+diff --git a/xorg-server-1.19.5/mi/miwideline.c b/Xserver/mi/miwideline.c
+index 54de1d3..a733e97 100644
+--- a/xorg-server-1.19.5/mi/miwideline.c
++++ b/Xserver/mi/miwideline.c
+@@ -2032,7 +2032,7 @@ miWideDashSegment(DrawablePtr pDrawable,
+     double L, l;
+     double k;
+     PolyVertexRec vertices[4];
+-    PolyVertexRec saveRight, saveBottom;
++    PolyVertexRec saveRight = { 0, 0 }, saveBottom = { 0, 0 };
+     PolySlopeRec slopes[4];
+     PolyEdgeRec left[4], right[4];
+     LineFaceRec lcapFace, rcapFace;
+diff --git a/xorg-server-1.19.5/os/WaitFor.c b/Xserver/os/WaitFor.c
+index 613608f..66c5c69 100644
+--- a/xorg-server-1.19.5/os/WaitFor.c
++++ b/Xserver/os/WaitFor.c
+@@ -1,6 +1,7 @@
+ /***********************************************************
+ 
+ Copyright 1987, 1998  The Open Group
++Copyright 2017  D. R. Commander
+ 
+ Permission to use, copy, modify, distribute, and sell this software and its
+ documentation for any purpose is hereby granted without fee, provided that
+@@ -188,6 +189,11 @@ WaitForSomething(Bool are_ready)
+     int pollerr;
+     static Bool were_ready;
+     Bool timer_is_running;
++#if defined(TURBOVNC) && defined(GLXEXT)
++    CARD32 now = 0;
++    OsTimerPtr timer;
++    extern Bool indirectGlxActive;
++#endif
+ 
+     timer_is_running = were_ready;
+ 
+@@ -238,6 +244,26 @@ WaitForSomething(Bool are_ready)
+         } else
+             are_ready = clients_are_ready();
+ 
++#if defined(TURBOVNC) && defined(GLXEXT)
++        if (indirectGlxActive) {
++            /* This basically restores the logic from xorg-server 1.18.x and
++               earlier.  Without it, the timers in the VNC server are never
++               invoked (and thus framebuffer updates are never sent) while
++               indirect OpenGL applications are running. */
++            if (i > 0) {
++                if (InputCheckPending())
++                    return FALSE;
++
++                if ((timer = first_timer()) != NULL) {
++                    now = GetTimeInMillis();
++                    if ((int) (timer->expires - now) <= 0) {
++                        DoTimers(now);
++                        return FALSE;
++                    }
++                }
++            }
++        } else
++#endif
+         if (InputCheckPending())
+             return FALSE;
+ 
+diff --git a/xorg-server-1.19.5/os/backtrace.c b/Xserver/os/backtrace.c
+index 9e3e38e..b9d2c0f 100644
+--- a/xorg-server-1.19.5/os/backtrace.c
++++ b/Xserver/os/backtrace.c
+@@ -156,8 +156,10 @@ xorg_backtrace(void)
+ #else                           /* not glibc or glibc < 2.1 */
+ 
+ #if defined(__sun) && defined(__SVR4)
++#ifndef TURBOVNC
+ #define HAVE_PSTACK
+ #endif
++#endif
+ 
+ #if defined(HAVE_WALKCONTEXT)   /* Solaris 9 & later */
+ 
+diff --git a/xorg-server-1.19.5/os/log.c b/Xserver/os/log.c
+index 91e55a5..1705b0e 100644
+--- a/xorg-server-1.19.5/os/log.c
++++ b/Xserver/os/log.c
+@@ -645,7 +645,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
+ void
+ LogVWrite(int verb, const char *f, va_list args)
+ {
+-    return LogVMessageVerb(X_NONE, verb, f, args);
++    LogVMessageVerb(X_NONE, verb, f, args);
+ }
+ 
+ void
+diff --git a/xorg-server-1.19.5/os/utils.c b/Xserver/os/utils.c
+index 6dcf328..f0cdffa 100644
+--- a/xorg-server-1.19.5/os/utils.c
++++ b/Xserver/os/utils.c
+@@ -1,6 +1,7 @@
+ /*
+ 
+ Copyright 1987, 1998  The Open Group
++Copyright 2017  D. R. Commander
+ 
+ Permission to use, copy, modify, distribute, and sell this software and its
+ documentation for any purpose is hereby granted without fee, provided that
+@@ -194,7 +195,11 @@ Bool noGEExtension = FALSE;
+ 
+ Bool CoreDump;
+ 
++#ifdef TURBOVNC
++Bool enableIndirectGLX = TRUE;
++#else
+ Bool enableIndirectGLX = FALSE;
++#endif
+ 
+ #ifdef PANORAMIX
+ Bool PanoramiXExtensionDisabledHack = FALSE;
+@@ -540,8 +545,13 @@ UseMsg(void)
+     ErrorF("-fn string             default font name\n");
+     ErrorF("-fp string             default font path\n");
+     ErrorF("-help                  prints message with these options\n");
++#ifdef TURBOVNC
++    ErrorF("+iglx                  Allow creating indirect GLX contexts (default)\n");
++    ErrorF("-iglx                  Prohibit creating indirect GLX contexts\n");
++#else
+     ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
+     ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
++#endif
+     ErrorF("-I                     ignore all remaining arguments\n");
+ #ifdef RLIMIT_DATA
+     ErrorF("-ld int                limit data space to N Kb\n");
+@@ -1257,7 +1267,9 @@ SmartScheduleEnable(void)
+     memset((char *) &act, 0, sizeof(struct sigaction));
+ 
+     /* Set up the timer signal function */
++#ifdef SA_RESTART
+     act.sa_flags = SA_RESTART;
++#endif
+     act.sa_handler = SmartScheduleTimer;
+     sigemptyset(&act.sa_mask);
+     sigaddset(&act.sa_mask, SIGALRM);
+diff --git a/xorg-server-1.19.5/randr/rrmode.c b/Xserver/randr/rrmode.c
+index a7aa433..149adb1 100644
+--- a/xorg-server-1.19.5/randr/rrmode.c
++++ b/Xserver/randr/rrmode.c
+@@ -1,5 +1,6 @@
+ /*
+  * Copyright © 2006 Keith Packard
++ * Copyright © 2017 D. R. Commander
+  *
+  * Permission to use, copy, modify, distribute, and sell this software and its
+  * documentation for any purpose is hereby granted without fee, provided that
+@@ -68,6 +69,15 @@ RRModeCreate(xRRModeInfo * modeInfo, const char *name, ScreenPtr userScreen)
+     if (!RRInit())
+         return NULL;
+ 
++#ifdef TURBOVNC
++    /*
++     * The screen structure uses a signed short to represent width and height,
++     * so activating a mode with width or height > 32767 can crash the server.
++     */
++    if (modeInfo->width > MAXSHORT || modeInfo->height > MAXSHORT)
++        return NULL;
++#endif
++
+     mode = malloc(sizeof(RRModeRec) + modeInfo->nameLength + 1);
+     if (!mode)
+         return NULL;
+diff --git a/xorg-server-1.19.5/randr/rrprovider.c b/Xserver/randr/rrprovider.c
+index e4bc2bf..c430f74 100644
+--- a/xorg-server-1.19.5/randr/rrprovider.c
++++ b/Xserver/randr/rrprovider.c
+@@ -276,7 +276,7 @@ RRInitPrimeSyncProps(ScreenPtr pScreen)
+     Atom syncProp = MakeAtom(syncStr, strlen(syncStr), TRUE);
+ 
+     int defaultVal = TRUE;
+-    int validVals[2] = {FALSE, TRUE};
++    INT32 validVals[2] = {FALSE, TRUE};
+ 
+     int i;
+     for (i = 0; i < pScrPriv->numOutputs; i++) {
+diff --git a/xorg-server-1.19.5/xfixes/xfixes.c b/Xserver/xfixes/xfixes.c
+index 8b45c53..40f5812 100644
+--- a/xorg-server-1.19.5/xfixes/xfixes.c
++++ b/Xserver/xfixes/xfixes.c
+@@ -223,7 +223,27 @@ XFixesExtensionInit(void)
+         return;
+ 
+     if (XFixesSelectionInit() && XFixesCursorInit() && XFixesRegionInit() &&
++#ifdef TURBOVNC
++        /* Ubuntu 12.04 (precise) shipped a proposed/experimental patch
++         * (https://patchwork.freedesktop.org/patch/8884) to the XFixes
++         * protocol that extended the functionality of pointer barriers.  This
++         * patch was apparently never accepted upstream and was removed in
++         * 13.10 (raring).  Basically everything on Ubuntu 12.04 (probably
++         * 12.10 and 13.04 as well) that uses XFixes, including the window
++         * managers, believes that there are 3 XFixes events, but our server
++         * (and anything else built against the official X.org fixesproto)
++         * believes that there are only 2.  Since X RandR events come
++         * immediately after XFixes events in the sequence, when the TurboVNC
++         * Server sends those events to the window manager and other X clients,
++         * the X clients misinterpret the events, and desktop resizing fails.
++         * Easiest way to work around the issue is to add a slot for the
++         * unofficial XFixes event.  Refer also to
++         * https://lists.x.org/archives/xorg-devel/2012-April/030484.html
++         */
++        (extEntry = AddExtension(XFIXES_NAME, XFixesNumberEvents + 1,
++#else
+         (extEntry = AddExtension(XFIXES_NAME, XFixesNumberEvents,
++#endif
+                                  XFixesNumberErrors,
+                                  ProcXFixesDispatch, SProcXFixesDispatch,
+                                  NULL, StandardMinorOpcode)) != 0) {
+diff --git a/xorg-server-1.19.5/xkb/XKBMisc.c b/Xserver/xkb/XKBMisc.c
+index df268b5..d3fdbfc 100644
+--- a/xorg-server-1.19.5/xkb/XKBMisc.c
++++ b/Xserver/xkb/XKBMisc.c
+@@ -717,7 +717,7 @@ XkbUpdateKeyTypeVirtualMods(XkbDescPtr xkb,
+                             unsigned int changed, XkbChangesPtr changes)
+ {
+     register unsigned int i;
+-    unsigned int mask;
++    unsigned int mask = 0;
+ 
+     XkbVirtualModsToReal(xkb, type->mods.vmods, &mask);
+     type->mods.mask = type->mods.real_mods | mask;
+@@ -778,7 +778,7 @@ XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
+                                         changes);
+     }
+     if (changed & xkb->ctrls->internal.vmods) {
+-        unsigned int newMask;
++        unsigned int newMask = 0;
+ 
+         XkbVirtualModsToReal(xkb, xkb->ctrls->internal.vmods, &newMask);
+         newMask |= xkb->ctrls->internal.real_mods;
+@@ -791,7 +791,7 @@ XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
+         }
+     }
+     if (changed & xkb->ctrls->ignore_lock.vmods) {
+-        unsigned int newMask;
++        unsigned int newMask = 0;
+ 
+         XkbVirtualModsToReal(xkb, xkb->ctrls->ignore_lock.vmods, &newMask);
+         newMask |= xkb->ctrls->ignore_lock.real_mods;
+@@ -809,7 +809,7 @@ XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
+         map = &xkb->indicators->maps[0];
+         for (i = 0; i < XkbNumIndicators; i++, map++) {
+             if (map->mods.vmods & changed) {
+-                unsigned int newMask;
++                unsigned int newMask = 0;
+ 
+                 XkbVirtualModsToReal(xkb, map->mods.vmods, &newMask);
+                 newMask |= map->mods.real_mods;
+@@ -828,7 +828,7 @@ XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned changed,
+ 
+         compat = xkb->compat;
+         for (i = 0; i < XkbNumKbdGroups; i++) {
+-            unsigned int newMask;
++            unsigned int newMask = 0;
+ 
+             XkbVirtualModsToReal(xkb, compat->groups[i].vmods, &newMask);
+             newMask |= compat->groups[i].real_mods;
+diff --git a/xorg-server-1.19.5/xkb/xkb.c b/Xserver/xkb/xkb.c
+index 678f823..80307dc 100644
+--- a/xorg-server-1.19.5/xkb/xkb.c
++++ b/Xserver/xkb/xkb.c
+@@ -2697,7 +2697,7 @@ XkbSendCompatMap(ClientPtr client,
+                  XkbCompatMapPtr compat, xkbGetCompatMapReply * rep)
+ {
+     char *data;
+-    int size;
++    int size = 0;
+ 
+     if (rep->length > 0) {
+         data = xallocarray(rep->length, 4);
+@@ -3081,7 +3081,7 @@ static int
+ XkbSendIndicatorMap(ClientPtr client,
+                     XkbIndicatorPtr indicators, xkbGetIndicatorMapReply * rep)
+ {
+-    int length;
++    int length = 0;
+     CARD8 *map;
+     register int i;
+     register unsigned bit;
+@@ -4295,7 +4295,7 @@ ProcXkbSetNames(ClientPtr client)
+ {
+     DeviceIntPtr dev;
+     CARD32 *tmp;
+-    Atom bad;
++    Atom bad = None;
+     int rc;
+ 
+     REQUEST(xkbSetNamesReq);
+diff --git a/xorg-server-1.19.5/xkb/xkbInit.c b/Xserver/xkb/xkbInit.c
+index 9c772f5..8426e30 100644
+--- a/xorg-server-1.19.5/xkb/xkbInit.c
++++ b/Xserver/xkb/xkbInit.c
+@@ -758,6 +758,30 @@ XkbProcessArguments(int argc, char *argv[], int i)
+             return -1;
+         }
+     }
++#ifdef TURBOVNC
++    else if (strncmp(argv[i], "-xkbcompdir", 11) == 0) {
++        if (++i < argc) {
++#if !defined(WIN32) && !defined(__CYGWIN__)
++            if (getuid() != geteuid()) {
++                LogMessage(X_WARNING,
++                           "-xkbcompdir is not available for setuid X servers\n");
++                return -1;
++            }
++            else
++#endif
++            {
++                if (strlen(argv[i]) < PATH_MAX) {
++                    XkbBinDirectory = argv[i];
++                    return 2;
++                }
++                else {
++                    LogMessage(X_ERROR, "-xkbcompdir pathname too long\n");
++                    return -1;
++                }
++            }
++        }
++    }
++#endif
+     else if ((strncmp(argv[i], "-accessx", 8) == 0) ||
+              (strncmp(argv[i], "+accessx", 8) == 0)) {
+         int j = 1;

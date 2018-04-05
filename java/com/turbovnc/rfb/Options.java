@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015, 2017 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,8 +59,7 @@ public class Options {
     fullScreen = old.fullScreen;
     span = old.span;
     scalingFactor = old.scalingFactor;
-    desktopSize = new DesktopSize(old.desktopSize.mode, old.desktopSize.width,
-                                  old.desktopSize.height);
+    desktopSize = new DesktopSize(old.desktopSize);
     acceptClipboard = old.acceptClipboard;
     sendClipboard = old.sendClipboard;
     acceptBell = old.acceptBell;
@@ -111,14 +110,47 @@ public class Options {
              sizeString.equals("0"))
       return new DesktopSize(SIZE_SERVER, 0, 0);
     else {
-      String array[] = sizeString.replaceAll("[^\\dx]", "").split("x");
-      if (array.length <= 1)
+      ScreenSet layout = new ScreenSet();
+      String screenSpecs[] = sizeString.replaceAll("[^\\dx,+]", "").split(",");
+      int fbWidth = 0, fbHeight = 0;
+      int r = Integer.MIN_VALUE, b = Integer.MIN_VALUE;
+
+      if (screenSpecs.length < 1)
         return null;
-      int width = Integer.parseInt(array[0]);
-      int height = Integer.parseInt(array[1]);
-      if (width < 1 || height < 1)
+
+      for (int i = 0; i < screenSpecs.length; i++) {
+        String array[] = screenSpecs[i].split("[x\\+]");
+
+        if (array.length < 2)
+          return null;
+
+        int w = Integer.parseInt(array[0]);
+        int h = Integer.parseInt(array[1]);
+        if (w < 1 || h < 1)
+          return null;
+
+        int x = 0, y = 0;
+        if (array.length > 2) x = Integer.parseInt(array[2]);
+        if (array.length > 3) y = Integer.parseInt(array[3]);
+        if (x < 0 || y < 0)
+          return null;
+
+        if (x >= 65535 || y >= 65535) continue;
+        if (x + w > 65535) w = 65535 - x;
+        if (y + h > 65535) h = 65535 - y;
+
+        layout.addScreen(new Screen(0, x, y, w, h, 0));
+        if (x + w > r) r = x + w;
+        if (y + h > b) b = y + h;
+      }
+
+      fbWidth = r;
+      fbHeight = b;
+
+      if (!layout.validate(fbWidth, fbHeight, false))
         return null;
-      return new DesktopSize(SIZE_MANUAL, width, height);
+
+      return new DesktopSize(SIZE_MANUAL, fbWidth, fbHeight, layout);
     }
   }
 
@@ -163,7 +195,7 @@ public class Options {
     printOpt("span", span);
     printOpt("scalingFactor", scalingFactor);
     if (desktopSize.mode == SIZE_MANUAL)
-      printOpt("desktopSize", desktopSize.width + "x" + desktopSize.height);
+      printOpt("desktopSize", desktopSize.getString());
     else
       printOpt("desktopSize", desktopSize.mode);
     printOpt("acceptClipboard", acceptClipboard);
@@ -189,19 +221,56 @@ public class Options {
   public static class DesktopSize {
     public DesktopSize() {};
 
-    public DesktopSize(int mode, int width, int height) {
+    // Deep copy
+    public DesktopSize(DesktopSize old) {
+      this(old.mode, old.width, old.height, new ScreenSet(old.layout));
+    }
+
+    public DesktopSize(int mode, int width, int height, ScreenSet layout) {
       this.mode = mode;
       this.width = width;
       this.height = height;
+      this.layout = layout;
     }
 
-    public boolean isEqual(DesktopSize size) {
-      return size.mode == mode && size.width == width && size.height == height;
+    public DesktopSize(int mode, int width, int height) {
+      this(mode, width, height, new ScreenSet());
+    }
+
+    public boolean equals(DesktopSize size) {
+      return size.mode == mode && size.width == width &&
+             size.height == height && size.layout.equals(layout);
+    }
+
+    public String getString() {
+      if (mode == Options.SIZE_AUTO)
+        return "Auto";
+      else if (mode == Options.SIZE_SERVER)
+        return "Server";
+      else {
+        if (layout.numScreens() < 2)
+          return width + "x" + height;
+        else {
+          StringBuffer s = new StringBuffer();
+
+          for (int i = 0; i < layout.numScreens(); i++) {
+            Screen screen = layout.screens.get(i);
+
+            s.append(screen.dimensions.width() + "x" +
+                     screen.dimensions.height() + "+" +
+                     screen.dimensions.tl.x + "+" + screen.dimensions.tl.y +
+                     (i < layout.numScreens() - 1 ? "," : ""));
+          }
+
+          return s.toString();
+        }
+      }
     }
 
     public int mode;
     public int width;
     public int height;
+    public ScreenSet layout;
   }
 
   public String serverName;

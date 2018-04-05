@@ -1,4 +1,4 @@
-include_directories(../mi)
+include_directories(. ../mi ../render ../xfixes)
 
 handle_type_puns()
 
@@ -42,6 +42,7 @@ add_library(Xi STATIC
 	ungrdevb.c
 	ungrdevk.c
 	xiallowev.c
+	xibarriers.c
 	xichangecursor.c
 	xichangehierarchy.c
 	xigetclientpointer.c

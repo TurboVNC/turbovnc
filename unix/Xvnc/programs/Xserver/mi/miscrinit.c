@@ -45,7 +45,7 @@ from The Open Group.
 
 /* We use this structure to propogate some information from miScreenInit to
  * miCreateScreenResources.  miScreenInit allocates the structure, fills it
- * in, and puts it into pScreen->devPrivate.  miCreateScreenResources 
+ * in, and puts it into pScreen->devPrivate.  miCreateScreenResources
  * extracts the info and frees the structure.  We could've accomplished the
  * same thing by adding fields to the screen structure, but they would have
  * ended up being redundant, and would have exposed this mi implementation
@@ -53,14 +53,14 @@ from The Open Group.
  */
 
 typedef struct {
-    pointer pbits;              /* pointer to framebuffer */
+    void *pbits;                /* pointer to framebuffer */
     int width;                  /* delta to add to a framebuffer addr to move one row down */
 } miScreenInitParmsRec, *miScreenInitParmsPtr;
 
 /* this plugs into pScreen->ModifyPixmapHeader */
 Bool
 miModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
-                     int bitsPerPixel, int devKind, pointer pPixData)
+                     int bitsPerPixel, int devKind, void *pPixData)
 {
     if (!pPixmap)
         return FALSE;
@@ -119,7 +119,7 @@ miModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
 }
 
 static Bool
-miCloseScreen(int iScreen, ScreenPtr pScreen)
+miCloseScreen(ScreenPtr pScreen)
 {
     return ((*pScreen->DestroyPixmap) ((PixmapPtr) pScreen->devPrivate));
 }
@@ -135,7 +135,7 @@ Bool
 miCreateScreenResources(ScreenPtr pScreen)
 {
     miScreenInitParmsPtr pScrInitParms;
-    pointer value;
+    void *value;
 
     pScrInitParms = (miScreenInitParmsPtr) pScreen->devPrivate;
 
@@ -161,7 +161,7 @@ miCreateScreenResources(ScreenPtr pScreen)
                                                            pScreen->rootDepth),
                                              pScrInitParms->pbits))
             return FALSE;
-        value = (pointer) pPixmap;
+        value = (void *) pPixmap;
     }
     else {
         value = pScrInitParms->pbits;
@@ -172,7 +172,7 @@ miCreateScreenResources(ScreenPtr pScreen)
 }
 
 Bool
-miScreenDevPrivateInit(ScreenPtr pScreen, int width, pointer pbits)
+miScreenDevPrivateInit(ScreenPtr pScreen, int width, void *pbits)
 {
     miScreenInitParmsPtr pScrInitParms;
 
@@ -185,7 +185,7 @@ miScreenDevPrivateInit(ScreenPtr pScreen, int width, pointer pbits)
         return FALSE;
     pScrInitParms->pbits = pbits;
     pScrInitParms->width = width;
-    pScreen->devPrivate = (pointer) pScrInitParms;
+    pScreen->devPrivate = (void *) pScrInitParms;
     return TRUE;
 }
 
@@ -199,11 +199,11 @@ static void
 miSetScreenPixmap(PixmapPtr pPix)
 {
     if (pPix)
-        pPix->drawable.pScreen->devPrivate = (pointer) pPix;
+        pPix->drawable.pScreen->devPrivate = (void *) pPix;
 }
 
 Bool
-miScreenInit(ScreenPtr pScreen, pointer pbits,  /* pointer to screen bits */
+miScreenInit(ScreenPtr pScreen, void *pbits,  /* pointer to screen bits */
              int xsize, int ysize,      /* in pixels */
              int dpix, int dpiy,        /* dots per inch */
              int width,         /* pixel width of frame buffer */
@@ -253,27 +253,26 @@ miScreenInit(ScreenPtr pScreen, pointer pbits,  /* pointer to screen bits */
     pScreen->ClearToBackground = miClearToBackground;
     pScreen->ClipNotify = (ClipNotifyProcPtr) 0;
     pScreen->RestackWindow = (RestackWindowProcPtr) 0;
+    pScreen->PaintWindow = miPaintWindow;
     /* CreatePixmap, DestroyPixmap */
     /* RealizeFont, UnrealizeFont */
     /* CreateGC */
     /* CreateColormap, DestroyColormap, InstallColormap, UninstallColormap */
     /* ListInstalledColormaps, StoreColors, ResolveColor */
     /* BitmapToRegion */
-    pScreen->SendGraphicsExpose = miSendGraphicsExpose;
     pScreen->BlockHandler = (ScreenBlockHandlerProcPtr) NoopDDA;
     pScreen->WakeupHandler = (ScreenWakeupHandlerProcPtr) NoopDDA;
-    pScreen->blockData = (pointer) 0;
-    pScreen->wakeupData = (pointer) 0;
     pScreen->MarkWindow = miMarkWindow;
     pScreen->MarkOverlappedWindows = miMarkOverlappedWindows;
     pScreen->MoveWindow = miMoveWindow;
-    pScreen->ResizeWindow = miSlideAndSizeWindow;
+    pScreen->ResizeWindow = miResizeWindow;
     pScreen->GetLayerWindow = miGetLayerWindow;
     pScreen->HandleExposures = miHandleValidateExposures;
     pScreen->ReparentWindow = (ReparentWindowProcPtr) 0;
     pScreen->ChangeBorderWidth = miChangeBorderWidth;
     pScreen->SetShape = miSetShape;
     pScreen->MarkUnrealizedWindow = miMarkUnrealizedWindow;
+    pScreen->XYToWindow = miXYToWindow;
 
     miSetZeroLineBias(pScreen, DEFAULTZEROLINEBIAS);
 

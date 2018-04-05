@@ -61,10 +61,7 @@
  ****************************************************************************/
 
 /* fwds */
-int
- SetAccelerationProfile(DeviceVelocityPtr vel, int profile_num);
 static double
-
 SimpleSmoothProfile(DeviceIntPtr dev, DeviceVelocityPtr vel, double velocity,
                     double threshold, double acc);
 static PointerAccelerationProfileFunc
@@ -80,7 +77,7 @@ DeletePredictableAccelerationProperties(DeviceIntPtr,
 /*#define PTRACCEL_DEBUGGING*/
 
 #ifdef PTRACCEL_DEBUGGING
-#define DebugAccelF ErrorF
+#define DebugAccelF(...) ErrorFSigSafe("dix/ptraccel: " __VA_ARGS__)
 #else
 #define DebugAccelF(...)        /* */
 #endif
@@ -137,13 +134,19 @@ InitPredictableAccelerationScheme(DeviceIntPtr dev,
     scheme = *protoScheme;
     vel = calloc(1, sizeof(DeviceVelocityRec));
     schemeData = calloc(1, sizeof(PredictableAccelSchemeRec));
-    if (!vel || !schemeData)
+    if (!vel || !schemeData) {
+        free(vel);
+        free(schemeData);
         return FALSE;
+    }
     InitVelocityData(vel);
     schemeData->vel = vel;
     scheme.accelData = schemeData;
-    if (!InitializePredictableAccelerationProperties(dev, vel, schemeData))
+    if (!InitializePredictableAccelerationProperties(dev, vel, schemeData)) {
+        free(vel);
+        free(schemeData);
         return FALSE;
+    }
     /* all fine, assign scheme to device */
     dev->valuator->accelScheme = scheme;
     return TRUE;
@@ -162,7 +165,7 @@ AccelerationDefaultCleanup(DeviceIntPtr dev)
          * AccelSchemeProc(), but that seems impossible. Schemes don't get
          * switched often anyway.
          */
-        OsBlockSignals();
+        input_lock();
         dev->valuator->accelScheme.AccelSchemeProc = NULL;
         FreeVelocityData(vel);
         free(vel);
@@ -172,7 +175,7 @@ AccelerationDefaultCleanup(DeviceIntPtr dev)
                                                 accelData);
         free(dev->valuator->accelScheme.accelData);
         dev->valuator->accelScheme.accelData = NULL;
-        OsReleaseSignals();
+        input_unlock();
     }
 }
 
@@ -248,11 +251,10 @@ AccelSetDecelProperty(DeviceIntPtr dev, Atom atom,
     if (checkOnly) {
         if (rc)
             return rc;
-        return (v >= 1.0f) ? Success : BadValue;
+        return (v > 0) ? Success : BadValue;
     }
 
-    if (v >= 1.0f)
-        vel->const_acceleration = 1 / v;
+    vel->const_acceleration = 1 / v;
 
     return Success;
 }
@@ -424,7 +426,7 @@ void
 InitTrackers(DeviceVelocityPtr vel, int ntracker)
 {
     if (ntracker < 1) {
-        ErrorF("(dix ptracc) invalid number of trackers\n");
+        ErrorF("invalid number of trackers\n");
         return;
     }
     free(vel->tracker);
@@ -569,7 +571,7 @@ FeedTrackers(DeviceVelocityPtr vel, double dx, double dy, int cur_t)
     vel->tracker[n].dy = 0.0;
     vel->tracker[n].time = cur_t;
     vel->tracker[n].dir = GetDirection(dx, dy);
-    DebugAccelF("(dix prtacc) motion [dx: %i dy: %i dir:%i diff: %i]\n",
+    DebugAccelF("motion [dx: %f dy: %f dir:%d diff: %d]\n",
                 dx, dy, vel->tracker[n].dir,
                 cur_t - vel->tracker[vel->cur_tracker].time);
     vel->cur_tracker = n;
@@ -617,7 +619,8 @@ QueryTrackers(DeviceVelocityPtr vel, int cur_t)
 
         /* bail out if data is too old and protect from overrun */
         if (age_ms >= vel->reset_time || age_ms < 0) {
-            DebugAccelF("(dix prtacc) query: tracker too old\n");
+            DebugAccelF("query: tracker too old (reset after %d, age is %d)\n",
+                        vel->reset_time, age_ms);
             break;
         }
 
@@ -629,7 +632,7 @@ QueryTrackers(DeviceVelocityPtr vel, int cur_t)
          */
         dir &= tracker->dir;
         if (dir == 0) {         /* we've changed octant of movement (e.g. NE → NW) */
-            DebugAccelF("(dix prtacc) query: no longer linear\n");
+            DebugAccelF("query: no longer linear\n");
             /* instead of breaking it we might also inspect the partition after,
              * but actual improvement with this is probably rare. */
             break;
@@ -650,7 +653,7 @@ QueryTrackers(DeviceVelocityPtr vel, int cur_t)
                 velocity_diff / (initial_velocity + tracker_velocity) >=
                 vel->max_rel_diff) {
                 /* we're not in range, quit - it won't get better. */
-                DebugAccelF("(dix prtacc) query: tracker too different:"
+                DebugAccelF("query: tracker too different:"
                             " old %2.2f initial %2.2f diff: %2.2f\n",
                             tracker_velocity, initial_velocity, velocity_diff);
                 break;
@@ -663,14 +666,14 @@ QueryTrackers(DeviceVelocityPtr vel, int cur_t)
         }
     }
     if (offset == vel->num_tracker) {
-        DebugAccelF("(dix prtacc) query: last tracker in effect\n");
+        DebugAccelF("query: last tracker in effect\n");
         used_offset = vel->num_tracker - 1;
     }
     if (used_offset >= 0) {
 #ifdef PTRACCEL_DEBUGGING
         MotionTracker *tracker = TRACKER(vel, used_offset);
 
-        DebugAccelF("(dix prtacc) result: offset %i [dx: %i dy: %i diff: %i]\n",
+        DebugAccelF("result: offset %i [dx: %f dy: %f diff: %i]\n",
                     used_offset, tracker->dx, tracker->dy,
                     cur_t - tracker->time);
 #endif
@@ -695,6 +698,8 @@ ProcessVelocityData2D(DeviceVelocityPtr vel, double dx, double dy, int time)
     FeedTrackers(vel, dx, dy, time);
 
     velocity = QueryTrackers(vel, time);
+
+    DebugAccelF("velocity is %f\n", velocity);
 
     vel->velocity = velocity;
     return velocity == 0;
@@ -741,7 +746,7 @@ ApplyConstantDeceleration(DeviceVelocityPtr vel, double *fdx, double *fdy)
 }
 
 /*
- * compute the acceleration for given velocity and enforce min_acceleartion
+ * compute the acceleration for given velocity and enforce min_acceleration
  */
 double
 BasicComputeAcceleration(DeviceIntPtr dev,
@@ -771,7 +776,7 @@ ComputeAcceleration(DeviceIntPtr dev,
     double result;
 
     if (vel->velocity <= 0) {
-        DebugAccelF("(dix ptracc) profile skipped\n");
+        DebugAccelF("profile skipped\n");
         /*
          * If we have no idea about device velocity, don't pretend it.
          */
@@ -789,19 +794,20 @@ ComputeAcceleration(DeviceIntPtr dev,
             BasicComputeAcceleration(dev, vel, vel->last_velocity, threshold,
                                      acc);
         result +=
-            4.0f * BasicComputeAcceleration(dev, vel,
+            4.0 * BasicComputeAcceleration(dev, vel,
                                             (vel->last_velocity +
-                                             vel->velocity) / 2, threshold,
+                                             vel->velocity) / 2,
+                                            threshold,
                                             acc);
-        result /= 6.0f;
-        DebugAccelF("(dix ptracc) profile average [%.2f ... %.2f] is %.3f\n",
+        result /= 6.0;
+        DebugAccelF("profile average [%.2f ... %.2f] is %.3f\n",
                     vel->velocity, vel->last_velocity, result);
     }
     else {
         result = BasicComputeAcceleration(dev, vel,
                                           vel->velocity, threshold, acc);
-        DebugAccelF("(dix ptracc) profile sample [%.2f] is %.3f\n",
-                    vel->velocity, res);
+        DebugAccelF("profile sample [%.2f] is %.3f\n",
+                    vel->velocity, result);
     }
 
     return result;
@@ -854,7 +860,7 @@ PowerProfile(DeviceIntPtr dev,
 {
     double vel_dist;
 
-    acc = (acc - 1.0) * 0.1f + 1.0;     /* without this, acc of 2 is unuseable */
+    acc = (acc - 1.0) * 0.1 + 1.0;     /* without this, acc of 2 is unuseable */
 
     if (velocity <= threshold)
         return vel->min_acceleration;
@@ -872,9 +878,9 @@ PowerProfile(DeviceIntPtr dev,
 static inline double
 CalcPenumbralGradient(double x)
 {
-    x *= 2.0f;
-    x -= 1.0f;
-    return 0.5f + (x * sqrt(1.0 - x * x) + asin(x)) / M_PI;
+    x *= 2.0;
+    x -= 1.0;
+    return 0.5 + (x * sqrt(1.0 - x * x) + asin(x)) / M_PI;
 }
 
 /**
@@ -910,23 +916,23 @@ SmoothLinearProfile(DeviceIntPtr dev,
 {
     double res, nv;
 
-    if (acc > 1.0f)
-        acc -= 1.0f;            /*this is so acc = 1 is no acceleration */
+    if (acc > 1.0)
+        acc -= 1.0;            /*this is so acc = 1 is no acceleration */
     else
-        return 1.0f;
+        return 1.0;
 
-    nv = (velocity - threshold) * acc * 0.5f;
+    nv = (velocity - threshold) * acc * 0.5;
 
     if (nv < 0) {
         res = 0;
     }
     else if (nv < 2) {
-        res = CalcPenumbralGradient(nv * 0.25f) * 2.0f;
+        res = CalcPenumbralGradient(nv * 0.25) * 2.0;
     }
     else {
-        nv -= 2.0f;
-        res = nv * 2.0f / M_PI  /* steepness of gradient at 0.5 */
-            + 1.0f;             /* gradient crosses 2|1 */
+        nv -= 2.0;
+        res = nv * 2.0 / M_PI  /* steepness of gradient at 0.5 */
+            + 1.0;             /* gradient crosses 2|1 */
     }
     res += vel->min_acceleration;
     return res;
@@ -943,7 +949,7 @@ SmoothLimitedProfile(DeviceIntPtr dev,
 {
     double res;
 
-    if (velocity >= threshold || threshold == 0.0f)
+    if (velocity >= threshold || threshold == 0.0)
         return acc;
 
     velocity /= threshold;      /* should be [0..1[ now */
@@ -965,7 +971,7 @@ static double
 NoProfile(DeviceIntPtr dev,
           DeviceVelocityPtr vel, double velocity, double threshold, double acc)
 {
-    return 1.0f;
+    return 1.0;
 }
 
 static PointerAccelerationProfileFunc
@@ -1052,11 +1058,8 @@ SetDeviceSpecificAccelerationProfile(DeviceVelocityPtr vel,
 DeviceVelocityPtr
 GetDevicePredictableAccelData(DeviceIntPtr dev)
 {
-    /*sanity check */
-    if (!dev) {
-        ErrorF("[dix] accel: DeviceIntPtr was NULL");
-        return NULL;
-    }
+    BUG_RETURN_VAL(!dev, NULL);
+
     if (dev->valuator &&
         dev->valuator->accelScheme.AccelSchemeProc ==
         acceleratePointerPredictable &&
@@ -1088,7 +1091,7 @@ acceleratePointerPredictable(DeviceIntPtr dev, ValuatorMask *val, CARD32 evtime)
         return;
 
     if (velocitydata->statistics.profile_number == AccelProfileNone &&
-        velocitydata->const_acceleration == 1.0f) {
+        velocitydata->const_acceleration == 1.0) {
         return;                 /*we're inactive anyway, so skip the whole thing. */
     }
 
@@ -1115,8 +1118,9 @@ acceleratePointerPredictable(DeviceIntPtr dev, ValuatorMask *val, CARD32 evtime)
                                        (double) dev->ptrfeed->ctrl.num /
                                        (double) dev->ptrfeed->ctrl.den);
 
-            if (mult != 1.0f || velocitydata->const_acceleration != 1.0f) {
-                if (mult > 1.0f && soften)
+            DebugAccelF("mult is %f\n", mult);
+            if (mult != 1.0 || velocitydata->const_acceleration != 1.0) {
+                if (mult > 1.0 && soften)
                     ApplySoftening(velocitydata, &dx, &dy);
                 ApplyConstantDeceleration(velocitydata, &dx, &dy);
 
@@ -1124,8 +1128,7 @@ acceleratePointerPredictable(DeviceIntPtr dev, ValuatorMask *val, CARD32 evtime)
                     valuator_mask_set_double(val, 0, mult * dx);
                 if (dy != 0.0)
                     valuator_mask_set_double(val, 1, mult * dy);
-                DebugAccelF("pos (%i | %i) delta x:%.3f y:%.3f\n", mult * dx,
-                            mult * dy);
+                DebugAccelF("delta x:%.3f y:%.3f\n", mult * dx, mult * dy);
             }
         }
     }

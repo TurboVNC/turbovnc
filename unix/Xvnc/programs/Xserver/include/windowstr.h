@@ -26,13 +26,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -86,8 +86,8 @@ typedef struct _WindowOpt {
     struct _OtherClients *otherClients; /* default: NULL */
     struct _GrabRec *passiveGrabs;      /* default: NULL */
     PropertyPtr userProps;      /* default: NULL */
-    unsigned long backingBitPlanes;     /* default: ~0L */
-    unsigned long backingPixel; /* default: 0 */
+    CARD32 backingBitPlanes;    /* default: ~0L */
+    CARD32 backingPixel;        /* default: 0 */
     RegionPtr boundingShape;    /* default: NULL */
     RegionPtr clipShape;        /* default: NULL */
     RegionPtr inputShape;       /* default: NULL */
@@ -144,14 +144,13 @@ typedef struct _Window {
     Mask eventMask;             /* mask from the creating client */
     PixUnion background;
     PixUnion border;
-    pointer backStorage;        /* null when BS disabled */
     WindowOptPtr optional;
     unsigned backgroundState:2; /* None, Relative, Pixel, Pixmap */
     unsigned borderIsPixel:1;
     unsigned cursorIsNone:1;    /* else real cursor (might inherit) */
     unsigned backingStore:2;
+    unsigned backStorage:1;     /* if bs is allocated */
     unsigned saveUnder:1;
-    unsigned DIXsaveUnder:1;
     unsigned bitGravity:4;
     unsigned winGravity:4;
     unsigned overrideRedirect:1;
@@ -163,9 +162,7 @@ typedef struct _Window {
     unsigned forcedBS:1;        /* system-supplied backingStore */
     unsigned redirectDraw:2;    /* COMPOSITE rendering redirect */
     unsigned forcedBG:1;        /* must have an opaque background */
-#ifdef ROOTLESS
-    unsigned rootlessUnhittable:1;      /* doesn't hit-test */
-#endif
+    unsigned unhittable:1;      /* doesn't hit-test, for rootless */
 #ifdef COMPOSITE
     unsigned damagedDescendants:1;      /* some descendants are damaged */
     unsigned inhibitBGPaint:1;  /* paint the background? */

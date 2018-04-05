@@ -101,11 +101,13 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     REQUEST(xGetDeviceDontPropagateListReq);
     REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
 
-    rep.repType = X_Reply;
-    rep.RepType = X_GetDeviceDontPropagateList;
-    rep.sequenceNumber = client->sequence;
-    rep.length = 0;
-    rep.count = 0;
+    rep = (xGetDeviceDontPropagateListReply) {
+        .repType = X_Reply,
+        .RepType = X_GetDeviceDontPropagateList,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .count = 0
+    };
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
@@ -116,7 +118,7 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
             ClassFromMask(NULL, others->dontPropagateMask[i], i, &count, COUNT);
         if (count) {
             rep.count = count;
-            buf = (XEventClass *) malloc(rep.count * sizeof(XEventClass));
+            buf = xallocarray(rep.count, sizeof(XEventClass));
             rep.length = bytes_to_int32(rep.count * sizeof(XEventClass));
 
             tbuf = buf;
@@ -178,5 +180,5 @@ SRepXGetDeviceDontPropagateList(ClientPtr client, int size,
     swaps(&rep->sequenceNumber);
     swapl(&rep->length);
     swaps(&rep->count);
-    WriteToClient(client, size, (char *) rep);
+    WriteToClient(client, size, rep);
 }

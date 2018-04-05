@@ -123,6 +123,16 @@ from The Open Group.
 #define X_TCP_PORT	6000
 #endif
 
+#if XTRANS_SEND_FDS
+
+struct _XtransConnFd {
+    struct _XtransConnFd   *next;
+    int                    fd;
+    int                    do_close;
+};
+
+#endif
+
 struct _XtransConnInfo {
     struct _Xtransport     *transptr;
     int		index;
@@ -135,6 +145,8 @@ struct _XtransConnInfo {
     int		addrlen;
     char	*peeraddr;
     int		peeraddrlen;
+    struct _XtransConnFd        *recv_fds;
+    struct _XtransConnFd        *send_fds;
 };
 
 #define XTRANS_OPEN_COTS_CLIENT       1
@@ -151,9 +163,9 @@ typedef struct _Xtransport {
 
     XtransConnInfo (*OpenCOTSClient)(
 	struct _Xtransport *,	/* transport */
-	char *,			/* protocol */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* protocol */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_CLIENT */
@@ -162,9 +174,9 @@ typedef struct _Xtransport {
     const char **	nolisten;
     XtransConnInfo (*OpenCOTSServer)(
 	struct _Xtransport *,	/* transport */
-	char *,			/* protocol */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* protocol */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_SERVER */
@@ -173,9 +185,9 @@ typedef struct _Xtransport {
 
     XtransConnInfo (*OpenCLTSClient)(
 	struct _Xtransport *,	/* transport */
-	char *,			/* protocol */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* protocol */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_CLIENT */
@@ -184,9 +196,9 @@ typedef struct _Xtransport {
 
     XtransConnInfo (*OpenCLTSServer)(
 	struct _Xtransport *,	/* transport */
-	char *,			/* protocol */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* protocol */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_SERVER */
@@ -197,13 +209,13 @@ typedef struct _Xtransport {
     XtransConnInfo (*ReopenCOTSServer)(
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
-        char *			/* port */
+        const char *		/* port */
     );
 
     XtransConnInfo (*ReopenCLTSServer)(
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
-        char *			/* port */
+        const char *		/* port */
     );
 
 #endif /* TRANS_REOPEN */
@@ -221,7 +233,7 @@ typedef struct _Xtransport {
 
     int	(*CreateListener)(
 	XtransConnInfo,		/* connection */
-	char *,			/* port */
+	const char *,		/* port */
 	unsigned int		/* flags */
     );
 
@@ -240,8 +252,8 @@ typedef struct _Xtransport {
 
     int	(*Connect)(
 	XtransConnInfo,		/* connection */
-	char *,			/* host */
-	char *			/* port */
+	const char *,		/* host */
+	const char *		/* port */
     );
 
 #endif /* TRANS_CLIENT */
@@ -275,6 +287,18 @@ typedef struct _Xtransport {
 	int			/* size */
     );
 
+#if XTRANS_SEND_FDS
+    int (*SendFd)(
+	XtransConnInfo,		/* connection */
+        int,                    /* fd */
+        int                     /* do_close */
+    );
+
+    int (*RecvFd)(
+	XtransConnInfo		/* connection */
+    );
+#endif
+
     int	(*Disconnect)(
 	XtransConnInfo		/* connection */
     );
@@ -307,6 +331,7 @@ typedef struct _Xtransport_table {
 #define TRANS_NOUNLINK	(1<<4)	/* Don't unlink transport endpoints */
 #define TRANS_ABSTRACT	(1<<5)	/* Use abstract sockets if available */
 #define TRANS_NOXAUTH	(1<<6)	/* Don't verify authentication (because it's secure some other way at the OS layer) */
+#define TRANS_RECEIVED	(1<<7)  /* The fd for this has already been opened by someone else. */
 
 /* Flags to preserve when setting others */
 #define TRANS_KEEPFLAGS	(TRANS_NOUNLINK|TRANS_ABSTRACT)

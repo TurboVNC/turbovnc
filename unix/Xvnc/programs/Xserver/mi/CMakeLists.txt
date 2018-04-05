@@ -1,36 +1,30 @@
-include_directories(../fb ../render ../Xi ../miext/damage)
+include_directories(. ../Xi ../composite ../damageext ../render ../xfixes)
 
-handle_type_puns()
+handle_type_puns(micmap.c)
 
 add_library(mi STATIC
 	miarc.c
 	mibitblt.c
 	micmap.c
 	micopy.c
-	micursor.c
 	midash.c
 	midispcur.c
 	mieq.c
 	miexpose.c
 	mifillarc.c
 	mifillrct.c
-	mifpolycon.c
 	migc.c
 	miglblt.c
 	miinitext.c
 	mioverlay.c
 	mipointer.c
 	mipoly.c
-	mipolycon.c
-	mipolygen.c
 	mipolypnt.c
 	mipolyrect.c
 	mipolyseg.c
 	mipolytext.c
-	mipolyutil.c
 	mipushpxl.c
 	miscrinit.c
-	mispans.c
 	misprite.c
 	mivaltree.c
 	miwideline.c

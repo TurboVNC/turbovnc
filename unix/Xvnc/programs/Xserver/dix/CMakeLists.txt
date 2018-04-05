@@ -1,13 +1,34 @@
-include_directories(../Xi ../composite ../damageext ../mi ../miext/damage
-	../render ../xfixes)
+include_directories(../Xi ../composite ../damageext ../mi	../miext/sync
+	../randr ../render ../xfixes)
 
 add_definitions(-DRGB_DB=\"/usr/share/X11/rgb\"
 	-DCOMPILEDDEFAULTFONTPATH=\"/usr/share/X11/fonts/misc/,/usr/share/X11/fonts/Type1/,/usr/share/X11/fonts/75dpi/,/usr/share/X11/fonts/100dpi/\")
 
-handle_type_puns()
+if(BITS EQUAL 64)
+	set(DEFAULT_SERVER_MISC_CONFIG_PATH "/usr/lib64/xorg")
+else()
+	set(DEFAULT_SERVER_MISC_CONFIG_PATH "/usr/lib/xorg")
+endif()
+set(SERVER_MISC_CONFIG_PATH ${DEFAULT_SERVER_MISC_CONFIG_PATH} CACHE PATH
+	"Path to miscellaneous server config files (default: ${DEFAULT_SERVER_MISC_CONFIG_PATH})")
+message(STATUS "SERVER_MISC_CONFIG_PATH = ${SERVER_MISC_CONFIG_PATH}")
+add_definitions(-DSERVER_MISC_CONFIG_PATH=\"${SERVER_MISC_CONFIG_PATH}\")
+
+handle_type_puns(
+	colormap.c
+	cursor.c
+	dispatch.c
+	dixfonts.c
+	dixutils.c
+	events.c
+	privates.c
+	registry.c
+	swaprep.c
+	swapreq.c
+	window.c)
 
 add_library(main STATIC
-	main.c)
+	stubmain.c)
 
 add_library(dix STATIC
 	atom.c
@@ -29,6 +50,7 @@ add_library(dix STATIC
 	grabs.c
 	initatoms.c
 	inpututils.c
+	main.c
 	pixmap.c
 	privates.c
 	property.c

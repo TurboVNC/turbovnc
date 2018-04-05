@@ -85,6 +85,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <stdlib.h>             /* for malloc() */
+#include <errno.h>
 
 #include "input.h"
 #include "site.h"
@@ -108,6 +109,7 @@ void (*OsVendorVErrorFProc) (const char *, va_list args) = NULL;
 #endif
 
 static FILE *logFile = NULL;
+static int logFileFd = -1;
 static Bool logFlush = FALSE;
 static Bool logSync = FALSE;
 static int logVerbosity = DEFAULT_LOG_VERBOSITY;
@@ -126,7 +128,7 @@ static char __crashreporter_info_buff__[4096] = { 0 };
 static const char *__crashreporter_info__ __attribute__ ((__used__)) =
     &__crashreporter_info_buff__[0];
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1050
-// This is actually a toolchain requirement, but I'm not sure the correct check,        
+// This is actually a toolchain requirement, but I'm not sure the correct check,
 // but it should be fine to just only include it for Leopard and later.  This line
 // just tells the linker to never strip this symbol (such as for space optimization)
 asm(".desc ___crashreporter_info__, 0x10");
@@ -164,9 +166,67 @@ asm(".desc ___crashreporter_info__, 0x10");
 #ifndef X_NOT_IMPLEMENTED_STRING
 #define X_NOT_IMPLEMENTED_STRING	"(NI)"
 #endif
+#ifndef X_DEBUG_STRING
+#define X_DEBUG_STRING			"(DB)"
+#endif
 #ifndef X_NONE_STRING
 #define X_NONE_STRING			""
 #endif
+
+static size_t
+strlen_sigsafe(const char *s)
+{
+    size_t len;
+    for (len = 0; s[len]; len++);
+    return len;
+}
+
+/*
+ * LogFilePrep is called to setup files for logging, including getting
+ * an old file out of the way, but it doesn't actually open the file,
+ * since it may be used for renaming a file we're already logging to.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+
+static char *
+LogFilePrep(const char *fname, const char *backup, const char *idstring)
+{
+    char *logFileName = NULL;
+
+    if (asprintf(&logFileName, fname, idstring) == -1)
+        FatalError("Cannot allocate space for the log file name\n");
+
+    if (backup && *backup) {
+        struct stat buf;
+
+        if (!stat(logFileName, &buf) && S_ISREG(buf.st_mode)) {
+            char *suffix;
+            char *oldLog;
+
+            if ((asprintf(&suffix, backup, idstring) == -1) ||
+                (asprintf(&oldLog, "%s%s", logFileName, suffix) == -1)) {
+                FatalError("Cannot allocate space for the log file name\n");
+            }
+            free(suffix);
+
+            if (rename(logFileName, oldLog) == -1) {
+                FatalError("Cannot move old log file \"%s\" to \"%s\"\n",
+                           logFileName, oldLog);
+            }
+            free(oldLog);
+        }
+    }
+    else {
+        if (remove(logFileName) != 0 && errno != ENOENT) {
+            FatalError("Cannot remove old log file \"%s\": %s\n",
+                       logFileName, strerror(errno));
+        }
+    }
+
+    return logFileName;
+}
+#pragma GCC diagnostic pop
 
 /*
  * LogInit is called to start logging to a file.  It is also called (with
@@ -174,8 +234,12 @@ asm(".desc ___crashreporter_info__, 0x10");
  * called, otherwise log messages will continue to accumulate in a buffer.
  *
  * %s, if present in the fname or backup strings, is expanded to the display
- * string.
+ * string (or to a string containing the pid if the display is not yet set).
  */
+
+static char *saved_log_fname;
+static char *saved_log_backup;
+static char *saved_log_tempname;
 
 const char *
 LogInit(const char *fname, const char *backup)
@@ -183,30 +247,27 @@ LogInit(const char *fname, const char *backup)
     char *logFileName = NULL;
 
     if (fname && *fname) {
-        if (asprintf(&logFileName, fname, display) == -1)
-            FatalError("Cannot allocate space for the log file name\n");
+        if (displayfd != -1) {
+            /* Display isn't set yet, so we can't use it in filenames yet. */
+            char pidstring[32];
+            snprintf(pidstring, sizeof(pidstring), "pid-%ld",
+                     (unsigned long) getpid());
+            logFileName = LogFilePrep(fname, backup, pidstring);
+            saved_log_tempname = logFileName;
 
-        if (backup && *backup) {
-            struct stat buf;
-
-            if (!stat(logFileName, &buf) && S_ISREG(buf.st_mode)) {
-                char *suffix;
-                char *oldLog;
-
-                if ((asprintf(&suffix, backup, display) == -1) ||
-                    (asprintf(&oldLog, "%s%s", logFileName, suffix) == -1))
-                    FatalError("Cannot allocate space for the log file name\n");
-                free(suffix);
-                if (rename(logFileName, oldLog) == -1) {
-                    FatalError("Cannot move old log file \"%s\" to \"%s\"\n",
-                               logFileName, oldLog);
-                }
-                free(oldLog);
-            }
-        }
+            /* Save the patterns for use when the display is named. */
+            saved_log_fname = strdup(fname);
+            if (backup == NULL)
+                saved_log_backup = NULL;
+            else
+                saved_log_backup = strdup(backup);
+        } else
+            logFileName = LogFilePrep(fname, backup, display);
         if ((logFile = fopen(logFileName, "w")) == NULL)
             FatalError("Cannot open log file \"%s\"\n", logFileName);
         setvbuf(logFile, NULL, _IONBF, 0);
+
+        logFileFd = fileno(logFile);
 
         /* Flush saved log information. */
         if (saveBuffer && bufferSize > 0) {
@@ -233,13 +294,47 @@ LogInit(const char *fname, const char *backup)
 }
 
 void
+LogSetDisplay(void)
+{
+    if (saved_log_fname) {
+        char *logFileName;
+
+        logFileName = LogFilePrep(saved_log_fname, saved_log_backup, display);
+
+        if (rename(saved_log_tempname, logFileName) == 0) {
+            LogMessageVerb(X_PROBED, 0,
+                           "Log file renamed from \"%s\" to \"%s\"\n",
+                           saved_log_tempname, logFileName);
+
+            if (strlen(saved_log_tempname) >= strlen(logFileName))
+                strncpy(saved_log_tempname, logFileName,
+                        strlen(saved_log_tempname));
+        }
+        else {
+            ErrorF("Failed to rename log file \"%s\" to \"%s\": %s\n",
+                   saved_log_tempname, logFileName, strerror(errno));
+        }
+
+        /* free newly allocated string - can't free old one since existing
+           pointers to it may exist in DDX callers. */
+        free(logFileName);
+        free(saved_log_fname);
+        free(saved_log_backup);
+    }
+}
+
+void
 LogClose(enum ExitCode error)
 {
     if (logFile) {
-        ErrorF("Server terminated %s (%d). Closing log file.\n",
-               (error == EXIT_NO_ERROR) ? "successfully" : "with error", error);
+        int msgtype = (error == EXIT_NO_ERROR) ? X_INFO : X_ERROR;
+        LogMessageVerbSigSafe(msgtype, -1,
+                "Server terminated %s (%d). Closing log file.\n",
+                (error == EXIT_NO_ERROR) ? "successfully" : "with error",
+                error);
         fclose(logFile);
         logFile = NULL;
+        logFileFd = -1;
     }
 }
 
@@ -264,16 +359,257 @@ LogSetParameter(LogParameter param, int value)
     }
 }
 
-/* This function does the actual log message writes. */
+enum {
+    LMOD_LONG     = 0x1,
+    LMOD_LONGLONG = 0x2,
+    LMOD_SHORT    = 0x4,
+    LMOD_SIZET    = 0x8,
+};
+
+/**
+ * Parse non-digit length modifiers and set the corresponding flag in
+ * flags_return.
+ *
+ * @return the number of bytes parsed
+ */
+static int parse_length_modifier(const char *format, size_t len, int *flags_return)
+{
+    int idx = 0;
+    int length_modifier = 0;
+
+    while (idx < len) {
+        switch (format[idx]) {
+            case 'l':
+                BUG_RETURN_VAL(length_modifier & LMOD_SHORT, 0);
+
+                if (length_modifier & LMOD_LONG)
+                    length_modifier |= LMOD_LONGLONG;
+                else
+                    length_modifier |= LMOD_LONG;
+                break;
+            case 'h':
+                BUG_RETURN_VAL(length_modifier & (LMOD_LONG|LMOD_LONGLONG), 0);
+                length_modifier |= LMOD_SHORT;
+                /* gcc says 'short int' is promoted to 'int' when
+                 * passed through '...', so ignored during
+                 * processing */
+                break;
+            case 'z':
+                length_modifier |= LMOD_SIZET;
+                break;
+            default:
+                goto out;
+        }
+        idx++;
+    }
+
+out:
+    *flags_return = length_modifier;
+    return idx;
+}
+
+/**
+ * Signal-safe snprintf, with some limitations over snprintf. Be careful
+ * which directives you use.
+ */
+static int
+vpnprintf(char *string, int size_in, const char *f, va_list args)
+{
+    int f_idx = 0;
+    int s_idx = 0;
+    int f_len = strlen_sigsafe(f);
+    char *string_arg;
+    char number[21];
+    int p_len;
+    int i;
+    uint64_t ui;
+    int64_t si;
+    size_t size = size_in;
+    int precision;
+
+    for (; f_idx < f_len && s_idx < size - 1; f_idx++) {
+        int length_modifier = 0;
+        if (f[f_idx] != '%') {
+            string[s_idx++] = f[f_idx];
+            continue;
+        }
+
+        f_idx++;
+
+        /* silently swallow minimum field width */
+        if (f[f_idx] == '*') {
+            f_idx++;
+            va_arg(args, int);
+        } else {
+            while (f_idx < f_len && ((f[f_idx] >= '0' && f[f_idx] <= '9')))
+                f_idx++;
+        }
+
+        /* is there a precision? */
+        precision = size;
+        if (f[f_idx] == '.') {
+            f_idx++;
+            if (f[f_idx] == '*') {
+                f_idx++;
+                /* precision is supplied in an int argument */
+                precision = va_arg(args, int);
+            } else {
+                /* silently swallow precision digits */
+                while (f_idx < f_len && ((f[f_idx] >= '0' && f[f_idx] <= '9')))
+                    f_idx++;
+            }
+        }
+
+        /* non-digit length modifiers */
+        if (f_idx < f_len) {
+            int parsed_bytes = parse_length_modifier(&f[f_idx], f_len - f_idx, &length_modifier);
+            if (parsed_bytes < 0)
+                return 0;
+            f_idx += parsed_bytes;
+        }
+
+        if (f_idx >= f_len)
+            break;
+
+        switch (f[f_idx]) {
+        case 's':
+            string_arg = va_arg(args, char*);
+
+            for (i = 0; string_arg[i] != 0 && s_idx < size - 1 && s_idx < precision; i++)
+                string[s_idx++] = string_arg[i];
+            break;
+
+        case 'u':
+            if (length_modifier & LMOD_LONGLONG)
+                ui = va_arg(args, unsigned long long);
+            else if (length_modifier & LMOD_LONG)
+                ui = va_arg(args, unsigned long);
+            else if (length_modifier & LMOD_SIZET)
+                ui = va_arg(args, size_t);
+            else
+                ui = va_arg(args, unsigned);
+
+            FormatUInt64(ui, number);
+            p_len = strlen_sigsafe(number);
+
+            for (i = 0; i < p_len && s_idx < size - 1; i++)
+                string[s_idx++] = number[i];
+            break;
+        case 'i':
+        case 'd':
+            if (length_modifier & LMOD_LONGLONG)
+                si = va_arg(args, long long);
+            else if (length_modifier & LMOD_LONG)
+                si = va_arg(args, long);
+            else if (length_modifier & LMOD_SIZET)
+                si = va_arg(args, ssize_t);
+            else
+                si = va_arg(args, int);
+
+            FormatInt64(si, number);
+            p_len = strlen_sigsafe(number);
+
+            for (i = 0; i < p_len && s_idx < size - 1; i++)
+                string[s_idx++] = number[i];
+            break;
+
+        case 'p':
+            string[s_idx++] = '0';
+            if (s_idx < size - 1)
+                string[s_idx++] = 'x';
+            ui = (uintptr_t)va_arg(args, void*);
+            FormatUInt64Hex(ui, number);
+            p_len = strlen_sigsafe(number);
+
+            for (i = 0; i < p_len && s_idx < size - 1; i++)
+                string[s_idx++] = number[i];
+            break;
+
+        case 'x':
+            if (length_modifier & LMOD_LONGLONG)
+                ui = va_arg(args, unsigned long long);
+            else if (length_modifier & LMOD_LONG)
+                ui = va_arg(args, unsigned long);
+            else if (length_modifier & LMOD_SIZET)
+                ui = va_arg(args, size_t);
+            else
+                ui = va_arg(args, unsigned);
+
+            FormatUInt64Hex(ui, number);
+            p_len = strlen_sigsafe(number);
+
+            for (i = 0; i < p_len && s_idx < size - 1; i++)
+                string[s_idx++] = number[i];
+            break;
+        case 'f':
+            {
+                double d = va_arg(args, double);
+                FormatDouble(d, number);
+                p_len = strlen_sigsafe(number);
+
+                for (i = 0; i < p_len && s_idx < size - 1; i++)
+                    string[s_idx++] = number[i];
+            }
+            break;
+        case 'c':
+            {
+                char c = va_arg(args, int);
+                if (s_idx < size - 1)
+                    string[s_idx++] = c;
+            }
+            break;
+        case '%':
+            string[s_idx++] = '%';
+            break;
+        default:
+            BUG_WARN_MSG(f[f_idx], "Unsupported printf directive '%c'\n", f[f_idx]);
+            va_arg(args, char*);
+            string[s_idx++] = '%';
+            if (s_idx < size - 1)
+                string[s_idx++] = f[f_idx];
+            break;
+        }
+    }
+
+    string[s_idx] = '\0';
+
+    return s_idx;
+}
+
+static int
+pnprintf(char *string, int size, const char *f, ...)
+{
+    int rc;
+    va_list args;
+
+    va_start(args, f);
+    rc = vpnprintf(string, size, f, args);
+    va_end(args);
+
+    return rc;
+}
+
+/* This function does the actual log message writes. It must be signal safe.
+ * When attempting to call non-signal-safe functions, guard them with a check
+ * of the inSignalContext global variable. */
 static void
 LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 {
     static Bool newline = TRUE;
+    int ret;
 
     if (verb < 0 || logVerbosity >= verb)
-        fwrite(buf, len, 1, stderr);
+        ret = write(2, buf, len);
+
     if (verb < 0 || logFileVerbosity >= verb) {
-        if (logFile) {
+        if (inSignalContext && logFileFd >= 0) {
+            ret = write(logFileFd, buf, len);
+#ifndef WIN32
+            if (logFlush && logSync)
+                fsync(logFileFd);
+#endif
+        }
+        else if (!inSignalContext && logFile) {
             if (newline)
                 fprintf(logFile, "[%10.3f] ", GetTimeInMillis() / 1000.0);
             newline = end_line;
@@ -286,7 +622,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 #endif
             }
         }
-        else if (needBuffer) {
+        else if (!inSignalContext && needBuffer) {
             if (len > bufferUnused) {
                 bufferSize += 1024;
                 bufferUnused += 1024;
@@ -299,6 +635,11 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
             bufferPos += len;
         }
     }
+
+    /* There's no place to log an error message if the log write
+     * fails...
+     */
+    (void) ret;
 }
 
 void
@@ -351,6 +692,8 @@ LogMessageTypeVerbString(MessageType type, int verb)
         return X_UNKNOWN_STRING;
     case X_NONE:
         return X_NONE_STRING;
+    case X_DEBUG:
+        return X_DEBUG_STRING;
     default:
         return X_UNKNOWN_STRING;
     }
@@ -364,6 +707,11 @@ LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
     const size_t size = sizeof(buf);
     Bool newline;
     size_t len = 0;
+
+    if (inSignalContext) {
+        LogVMessageVerbSigSafe(type, verb, format, args);
+        return;
+    }
 
     type_str = LogMessageTypeVerbString(type, verb);
     if (!type_str)
@@ -406,6 +754,44 @@ LogMessage(MessageType type, const char *format, ...)
     va_end(ap);
 }
 
+/* Log a message using only signal safe functions. */
+void
+LogMessageVerbSigSafe(MessageType type, int verb, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    LogVMessageVerbSigSafe(type, verb, format, ap);
+    va_end(ap);
+}
+
+void
+LogVMessageVerbSigSafe(MessageType type, int verb, const char *format, va_list args)
+{
+    const char *type_str;
+    char buf[1024];
+    int len;
+    Bool newline;
+
+    type_str = LogMessageTypeVerbString(type, verb);
+    if (!type_str)
+        return;
+
+    /* if type_str is not "", prepend it and ' ', to message */
+    if (type_str[0] != '\0') {
+        LogSWrite(verb, type_str, strlen_sigsafe(type_str), FALSE);
+        LogSWrite(verb, " ", 1, FALSE);
+    }
+
+    len = vpnprintf(buf, sizeof(buf), format, args);
+
+    /* Force '\n' at end of truncated line */
+    if (sizeof(buf) - len == 1)
+        buf[len - 1] = '\n';
+
+    newline = (len > 0 && buf[len - 1] == '\n');
+    LogSWrite(verb, buf, len, newline);
+}
+
 void
 LogVHdrMessageVerb(MessageType type, int verb, const char *msg_format,
                    va_list msg_args, const char *hdr_format, va_list hdr_args)
@@ -415,20 +801,32 @@ LogVHdrMessageVerb(MessageType type, int verb, const char *msg_format,
     const size_t size = sizeof(buf);
     Bool newline;
     size_t len = 0;
+    int (*vprintf_func)(char *, int, const char* _X_RESTRICT_KYWD f, va_list args)
+            _X_ATTRIBUTE_PRINTF(3, 0);
+    int (*printf_func)(char *, int, const char* _X_RESTRICT_KYWD f, ...)
+            _X_ATTRIBUTE_PRINTF(3, 4);
 
     type_str = LogMessageTypeVerbString(type, verb);
     if (!type_str)
         return;
 
+    if (inSignalContext) {
+        vprintf_func = vpnprintf;
+        printf_func = pnprintf;
+    } else {
+        vprintf_func = Xvscnprintf;
+        printf_func = Xscnprintf;
+    }
+
     /* if type_str is not "", prepend it and ' ', to message */
     if (type_str[0] != '\0')
-        len += Xscnprintf(&buf[len], size - len, "%s ", type_str);
+        len += printf_func(&buf[len], size - len, "%s ", type_str);
 
     if (hdr_format && size - len > 1)
-        len += Xvscnprintf(&buf[len], size - len, hdr_format, hdr_args);
+        len += vprintf_func(&buf[len], size - len, hdr_format, hdr_args);
 
     if (msg_format && size - len > 1)
-        len += Xvscnprintf(&buf[len], size - len, msg_format, msg_args);
+        len += vprintf_func(&buf[len], size - len, msg_format, msg_args);
 
     /* Force '\n' at end of truncated line */
     if (size - len == 1)
@@ -472,7 +870,7 @@ AbortServer(void)
 #endif
     CloseWellKnownConnections();
     OsCleanup(TRUE);
-    CloseDownDevices();
+    AbortDevices();
     AbortDDX(EXIT_ERR_ABORT);
     fflush(stderr);
     if (CoreDump)
@@ -532,7 +930,7 @@ AuditF(const char *f, ...)
 }
 
 static CARD32
-AuditFlush(OsTimerPtr timer, CARD32 now, pointer arg)
+AuditFlush(OsTimerPtr timer, CARD32 now, void *arg)
 {
     char *prefix;
 
@@ -583,29 +981,35 @@ void
 FatalError(const char *f, ...)
 {
     va_list args;
+    va_list args2;
     static Bool beenhere = FALSE;
 
     if (beenhere)
-        ErrorF("\nFatalError re-entered, aborting\n");
+        ErrorFSigSafe("\nFatalError re-entered, aborting\n");
     else
-        ErrorF("\nFatal server error:\n");
+        ErrorFSigSafe("\nFatal server error:\n");
 
     va_start(args, f);
+
+    /* Make a copy for OsVendorFatalError */
+    va_copy(args2, args);
+
 #ifdef __APPLE__
     {
-        va_list args2;
+        va_list apple_args;
 
-        va_copy(args2, args);
-        (void) vsnprintf(__crashreporter_info_buff__,
-                         sizeof(__crashreporter_info_buff__), f, args2);
-        va_end(args2);
+        va_copy(apple_args, args);
+        (void)vsnprintf(__crashreporter_info_buff__,
+                        sizeof(__crashreporter_info_buff__), f, apple_args);
+        va_end(apple_args);
     }
 #endif
-    VErrorF(f, args);
+    VErrorFSigSafe(f, args);
     va_end(args);
-    ErrorF("\n");
+    ErrorFSigSafe("\n");
     if (!beenhere)
-        OsVendorFatalError();
+        OsVendorFatalError(f, args2);
+    va_end(args2);
     if (!beenhere) {
         beenhere = TRUE;
         AbortServer();
@@ -634,6 +1038,22 @@ ErrorF(const char *f, ...)
 
     va_start(args, f);
     VErrorF(f, args);
+    va_end(args);
+}
+
+void
+VErrorFSigSafe(const char *f, va_list args)
+{
+    LogVMessageVerbSigSafe(X_ERROR, -1, f, args);
+}
+
+void
+ErrorFSigSafe(const char *f, ...)
+{
+    va_list args;
+
+    va_start(args, f);
+    VErrorFSigSafe(f, args);
     va_end(args);
 }
 

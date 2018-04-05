@@ -52,9 +52,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define XACE_SCREENSAVER_ACCESS		12
 #define XACE_AUTH_AVAIL			13
 #define XACE_KEY_AVAIL			14
-#define XACE_AUDIT_BEGIN		15
-#define XACE_AUDIT_END			16
-#define XACE_NUM_HOOKS			17
+#define XACE_NUM_HOOKS			15
 
 extern _X_EXPORT CallbackListPtr XaceHooks[XACE_NUM_HOOKS];
 
@@ -65,15 +63,22 @@ extern _X_EXPORT int XaceHook(int /*hook */ ,
                               ...       /*appropriate args for hook */
     );
 
+/* determine whether any callbacks are present for the XACE hook */
+extern _X_EXPORT int XaceHookIsSet(int hook);
+
 /* Special-cased hook functions
  */
 extern _X_EXPORT int XaceHookDispatch(ClientPtr ptr, int major);
+#define XaceHookDispatch(c, m) \
+    ((XaceHooks[XACE_EXT_DISPATCH] && (m) >= EXTENSION_BASE) ? \
+    XaceHookDispatch((c), (m)) : \
+    Success)
+
 extern _X_EXPORT int XaceHookPropertyAccess(ClientPtr ptr, WindowPtr pWin,
                                             PropertyPtr *ppProp,
                                             Mask access_mode);
 extern _X_EXPORT int XaceHookSelectionAccess(ClientPtr ptr, Selection ** ppSel,
                                              Mask access_mode);
-extern _X_EXPORT void XaceHookAuditEnd(ClientPtr ptr, int result);
 
 /* Register a callback for a given hook.
  */
@@ -109,17 +114,17 @@ extern _X_EXPORT void XaceCensorImage(ClientPtr client,
 
 #ifdef __GNUC__
 #define XaceHook(args...) Success
+#define XaceHookIsSet(args...) 0
 #define XaceHookDispatch(args...) Success
 #define XaceHookPropertyAccess(args...) Success
 #define XaceHookSelectionAccess(args...) Success
-#define XaceHookAuditEnd(args...) { ; }
 #define XaceCensorImage(args...) { ; }
 #else
 #define XaceHook(...) Success
+#define XaceHookIsSet(...) 0
 #define XaceHookDispatch(...) Success
 #define XaceHookPropertyAccess(...) Success
 #define XaceHookSelectionAccess(...) Success
-#define XaceHookAuditEnd(...) { ; }
 #define XaceCensorImage(...) { ; }
 #endif
 
