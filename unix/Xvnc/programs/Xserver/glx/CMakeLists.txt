@@ -4,7 +4,7 @@ if(BITS EQUAL 64)
 	add_definitions(-D__GLX_ALIGN64)
 endif()
 
-check_function_exists(backtrace HAVE_BACKTRACE)
+check_symbol_exists(backtrace execinfo.h HAVE_BACKTRACE)
 if(HAVE_BACKTRACE)
 	add_definitions(-DHAVE_BACKTRACE)
 endif()

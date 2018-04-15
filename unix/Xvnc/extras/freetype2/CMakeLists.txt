@@ -1,6 +1,6 @@
 include_directories(include)
 
-check_function_exists(strerror HAVE_STRERROR)
+check_symbol_exists(strerror string.h HAVE_STRERROR)
 if(HAVE_STRERROR)
 	add_definitions(-DHAVE_STRERROR)
 endif()

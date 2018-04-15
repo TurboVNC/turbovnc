@@ -1,10 +1,10 @@
 copy_X_header(include/X11/Xdmcp.h X11)
 
-check_function_exists(srand48 HAVE_SRAND48)
+check_symbol_exists(srand48 stdlib.h HAVE_SRAND48)
 if(HAVE_SRAND48)
 	add_definitions(-DHAVE_SRAND48)
 endif()
-check_function_exists(lrand48 HAVE_LRAND48)
+check_symbol_exists(lrand48 stdlib.h HAVE_LRAND48)
 if(HAVE_LRAND48)
 	add_definitions(-DHAVE_LRAND48)
 endif()

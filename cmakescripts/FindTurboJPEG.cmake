@@ -50,11 +50,11 @@ if(WIN32)
 endif()
 set(CMAKE_REQUIRED_INCLUDES ${TJPEG_INCLUDE_DIR})
 set(CMAKE_REQUIRED_LIBRARIES ${TJPEG_LIBRARY})
-check_c_source_compiles("#include <turbojpeg.h>\nint main(void) { tjhandle h=tjInitCompress(); return 0; }" TURBOJPEG_WORKS)
+check_c_source_compiles("#include <turbojpeg.h>\nint main(void) { tjhandle h = tjInitCompress();  return h != 0 ? 0 : 1; }" TURBOJPEG_WORKS)
 if(NOT TURBOJPEG_WORKS AND NOT TJPEG_LIBRARY_OVERRIDE AND UNIX)
 	message(STATUS "Could not link with official TurboJPEG library ${TJPEG_LIBRARY}.  Checking whether the operating system supplies it ...")
 	set(CMAKE_REQUIRED_LIBRARIES turbojpeg)
-	check_c_source_compiles("#include <turbojpeg.h>\nint main(void) { tjhandle h=tjInitCompress(); return 0; }" SYSTEM_TURBOJPEG_WORKS)
+	check_c_source_compiles("#include <turbojpeg.h>\nint main(void) { tjhandle h = tjInitCompress();  return h != 0 ? 0 : 1; }" SYSTEM_TURBOJPEG_WORKS)
 	if(SYSTEM_TURBOJPEG_WORKS)
 		set(TJPEG_LIBRARY turbojpeg CACHE STRING
 			"Path to TurboJPEG library or flags necessary to link with it (default: ${DEFAULT_TJPEG_LIBRARY})"

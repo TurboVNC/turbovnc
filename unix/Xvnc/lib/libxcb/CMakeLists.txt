@@ -8,7 +8,7 @@ foreach(h ${HEADERS})
 	copy_X_header(${h} xcb)
 endforeach()
 
-check_function_exists(sendmsg HAVE_SENDMSG)
+check_symbol_exists(sendmsg sys/socket.h HAVE_SENDMSG)
 if(HAVE_SENDMSG)
 	add_definitions(-DHAVE_SENDMSG)
 endif()

@@ -1,5 +1,5 @@
 include(CheckCSourceCompiles)
-include(CheckFunctionExists)
+include(CheckSymbolExists)
 
 set(GLIBC_SOURCE "\n
   #include <features.h>\n
@@ -19,6 +19,7 @@ set(BSD44SOCKETS_SOURCE "\n
   #include <netinet/in.h>\n
   int main(void) {\n
     struct sockaddr_in sa;\n
+    sa.sin_len = 0;\n
     return sa.sin_len;\n
   }")
 check_c_source_compiles("${BSD44SOCKETS_SOURCE}" FOUND_BSD44SOCKETS)
@@ -43,7 +44,7 @@ endif()
 
 add_definitions(-DIPv6)
 
-check_function_exists(poll USE_POLL)
+check_symbol_exists(poll poll.h USE_POLL)
 if(USE_POLL)
 	add_definitions(-DUSE_POLL)
 endif()
