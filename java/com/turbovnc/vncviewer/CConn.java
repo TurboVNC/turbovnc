@@ -1352,8 +1352,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // has been called, since the menu is only accessible from the DesktopWindow.
 
   void showMenu(int x, int y) {
-    String os = System.getProperty("os.name");
-    if (os.startsWith("Windows"))
+    if (VncViewer.os.startsWith("windows"))
       com.sun.java.swing.plaf.windows.WindowsLookAndFeel.setMnemonicHidden(false);
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       x += viewport.dx;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -67,8 +67,7 @@ public class SocketDescriptor implements FileDescriptor {
   private static SelectorProvider defaultSelectorProvider() {
     // kqueue() selector provider on OS X is not working, fall back to select()
     // for now
-    String os = System.getProperty("os.name");
-    if (os.startsWith("Mac OS X"))
+    if (VncViewer.os.startsWith("mac os x"))
       System.setProperty("java.nio.channels.spi.SelectorProvider",
                          "sun.nio.ch.PollSelectorProvider");
     return SelectorProvider.provider();
