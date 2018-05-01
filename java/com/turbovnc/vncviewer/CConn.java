@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2018 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -1689,12 +1689,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void selectGrab(boolean on) {
-    if (VncViewer.osGrab())
+    if (menu.grabKeyboard != null)
       menu.grabKeyboard.setSelected(on);
   }
 
   public boolean isGrabSelected() {
-    if (VncViewer.osGrab())
+    if (menu.grabKeyboard != null)
       return menu.grabKeyboard.isSelected();
     return false;
   }
