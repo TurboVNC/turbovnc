@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2014 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -65,7 +66,8 @@ public class KeyPairRSA extends KeyPair{
     this.key_size=key_size;
     try{
       Class c=Class.forName(JSch.getConfig("keypairgen.rsa"));
-      KeyPairGenRSA keypairgen=(KeyPairGenRSA)(c.newInstance());
+      KeyPairGenRSA keypairgen=
+        (KeyPairGenRSA)(c.getConstructor().newInstance());
       keypairgen.init(key_size);
       pub_array=keypairgen.getE();
       prv_array=keypairgen.getD();
@@ -319,7 +321,7 @@ public class KeyPairRSA extends KeyPair{
   public byte[] getSignature(byte[] data){
     try{      
       Class c=Class.forName((String)JSch.getConfig("signature.rsa"));
-      SignatureRSA rsa=(SignatureRSA)(c.newInstance());
+      SignatureRSA rsa=(SignatureRSA)(c.getConstructor().newInstance());
       rsa.init();
       rsa.setPrvKey(prv_array, n_array);
 
@@ -338,7 +340,7 @@ public class KeyPairRSA extends KeyPair{
   public Signature getVerifier(){
     try{      
       Class c=Class.forName((String)JSch.getConfig("signature.rsa"));
-      SignatureRSA rsa=(SignatureRSA)(c.newInstance());
+      SignatureRSA rsa=(SignatureRSA)(c.getConstructor().newInstance());
       rsa.init();
 
       if(pub_array == null && n_array == null && getPublicKeyBlob()!=null){

@@ -38,6 +38,7 @@ import java.awt.event.*;
 
 import java.io.*;
 import java.lang.Exception;
+import java.lang.reflect.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.swing.*;
@@ -369,7 +370,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
     sp.getViewport().setBackground(Color.BLACK);
     InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-    int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
+    int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
+                           InputEvent.CTRL_DOWN_MASK |
+                           InputEvent.ALT_DOWN_MASK;
     if (im != null) {
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask),
              "unitScrollUp");
@@ -1353,7 +1356,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   void showMenu(int x, int y) {
     if (VncViewer.os.startsWith("windows"))
-      com.sun.java.swing.plaf.windows.WindowsLookAndFeel.setMnemonicHidden(false);
+      UIManager.put("Button.showMnemonics", true);
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       x += viewport.dx;
       y += viewport.dy;

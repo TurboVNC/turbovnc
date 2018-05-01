@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2014 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -91,7 +92,7 @@ public class DHG1 extends KeyExchange{
 //    sha.init();
     try{
       Class c=Class.forName(session.getConfig("sha-1"));
-      sha=(HASH)(c.newInstance());
+      sha=(HASH)(c.getConstructor().newInstance());
       sha.init();
     }
     catch(Exception e){
@@ -103,7 +104,7 @@ public class DHG1 extends KeyExchange{
 
     try{
       Class c=Class.forName(session.getConfig("dh"));
-      dh=(DH)(c.newInstance());
+      dh=(DH)(c.getConstructor().newInstance());
       dh.init();
     }
     catch(Exception e){
@@ -230,7 +231,7 @@ System.err.println("");
 	SignatureRSA sig=null;
 	try{
 	  Class c=Class.forName(session.getConfig("signature.rsa"));
-	  sig=(SignatureRSA)(c.newInstance());
+	  sig=(SignatureRSA)(c.getConstructor().newInstance());
 	  sig.init();
 	}
 	catch(Exception e){
@@ -276,7 +277,7 @@ System.err.println("");
 	SignatureDSA sig=null;
 	try{
 	  Class c=Class.forName(session.getConfig("signature.dss"));
-	  sig=(SignatureDSA)(c.newInstance());
+	  sig=(SignatureDSA)(c.getConstructor().newInstance());
 	  sig.init();
 	}
 	catch(Exception e){

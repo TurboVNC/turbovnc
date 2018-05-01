@@ -20,6 +20,8 @@ TurboVNC Viewer whereby keyboard grabbing was always initially disabled in the
 second and subsequent connections initiated by the viewer, regardless of the
 grab mode.
 
+5. The Java TurboVNC Viewer now builds and runs with Java 9 and later.
+
 
 2.1.2
 =====

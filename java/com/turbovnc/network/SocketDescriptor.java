@@ -26,6 +26,7 @@ import java.nio.channels.*;
 import java.nio.channels.spi.SelectorProvider;
 
 import com.turbovnc.rdr.*;
+import com.turbovnc.vncviewer.*;
 
 public class SocketDescriptor implements FileDescriptor {
 
@@ -67,7 +68,7 @@ public class SocketDescriptor implements FileDescriptor {
   private static SelectorProvider defaultSelectorProvider() {
     // kqueue() selector provider on OS X is not working, fall back to select()
     // for now
-    if (VncViewer.os.startsWith("mac os x"))
+    if (VncViewer.os.startsWith("mac os x") && VncViewer.javaVersion < 9)
       System.setProperty("java.nio.channels.spi.SelectorProvider",
                          "sun.nio.ch.PollSelectorProvider");
     return SelectorProvider.provider();
@@ -83,9 +84,9 @@ public class SocketDescriptor implements FileDescriptor {
     }
     if (n <= 0)
       return (n == 0) ? -1 : 0;
-    b.flip();
+    ((Buffer)b).flip();
     b.get(buf, bufPtr, n);
-    b.clear();
+    ((Buffer)b).clear();
     return n;
 
   }
@@ -94,13 +95,13 @@ public class SocketDescriptor implements FileDescriptor {
     int n;
     ByteBuffer b = ByteBuffer.allocate(length);
     b.put(buf, bufPtr, length);
-    b.flip();
+    ((Buffer)b).flip();
     try {
       n = channel.write(b);
     } catch (IOException e) {
       throw new ErrorException("Write error: " + e.getMessage());
     }
-    b.clear();
+    ((Buffer)b).clear();
     return n;
   }
 

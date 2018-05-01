@@ -31,7 +31,7 @@ public class FileUtils {
       if (VncViewer.os.startsWith("windows")) {
         // JRE prior to 1.5 cannot reliably determine USERPROFILE.
         // Return user.home and hope it's right.
-        if (Integer.parseInt(System.getProperty("java.version").split("\\.")[1]) < 5) {
+        if (VncViewer.javaVersion < 5) {
           try {
             homeDir = System.getProperty("user.home");
           } catch (java.security.AccessControlException e) {

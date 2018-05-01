@@ -60,15 +60,26 @@ public class TrayMenu extends PopupMenu implements ActionListener {
 
   void setDockMenu(PopupMenu menu) {
     try {
-      Class appClass = Class.forName("com.apple.eawt.Application");
-      Method getApplication =
-        appClass.getMethod("getApplication", (Class[])null);
-      Object app = getApplication.invoke(appClass);
+      Class appClass;
+      Object obj;
+
+      if (VncViewer.javaVersion >= 9) {
+        appClass = Class.forName("java.awt.Taskbar");
+        Method getTaskbar =
+          appClass.getMethod("getTaskbar", (Class[])null);
+        obj = getTaskbar.invoke(appClass);
+      } else {
+        appClass = Class.forName("com.apple.eawt.Application");
+        Method getApplication =
+          appClass.getMethod("getApplication", (Class[])null);
+        obj = getApplication.invoke(appClass);
+      }
       Class paramTypes[] = new Class[1];
       paramTypes[0] = PopupMenu.class;
-      Method setDockMenu =
+      Method setDockMenu = VncViewer.javaVersion >= 9 ?
+        appClass.getMethod("setMenu", paramTypes) :
         appClass.getMethod("setDockMenu", paramTypes);
-      setDockMenu.invoke(app, menu);
+      setDockMenu.invoke(obj, menu);
     } catch (Exception e) {
       vlog.error("Could not modify dock menu:");
       vlog.error("  " + e.toString());

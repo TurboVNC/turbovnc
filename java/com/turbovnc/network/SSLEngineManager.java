@@ -1,5 +1,5 @@
 /* Copyright (C) 2012, 2014 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -76,7 +76,7 @@ public class SSLEngineManager {
 
       case NEED_UNWRAP:
         // Receive handshaking data from peer
-        peerNetData.flip();
+        ((Buffer)peerNetData).flip();
         SSLEngineResult res = engine.unwrap(peerNetData, peerAppData);
         peerNetData.compact();
         hs = res.getHandshakeStatus();
@@ -86,10 +86,10 @@ public class SSLEngineManager {
         case BUFFER_UNDERFLOW:
           int max = Math.min(peerNetData.remaining(), in.getBufSize());
           int m = in.check(1, max, true);
-          int pos = peerNetData.position();
+          int pos = ((Buffer)peerNetData).position();
           in.readBytes(peerNetData.array(), pos, m);
-          peerNetData.position(pos + m);
-          peerNetData.flip();
+          ((Buffer)peerNetData).position(pos + m);
+          ((Buffer)peerNetData).flip();
           peerNetData.compact();
           break;
 
@@ -105,7 +105,7 @@ public class SSLEngineManager {
 
       case NEED_WRAP:
         // Empty the local network packet buffer.
-        myNetData.clear();
+        ((Buffer)myNetData).clear();
 
         // Generate handshaking data
         res = engine.wrap(myAppData, myNetData);
@@ -115,10 +115,10 @@ public class SSLEngineManager {
         switch (res.getStatus()) {
         case OK:
           myAppData.compact();
-          myNetData.flip();
+          ((Buffer)myNetData).flip();
           os.writeBytes(myNetData.array(), 0, myNetData.remaining());
           os.flush();
-          myNetData.clear();
+          ((Buffer)myNetData).clear();
           break;
 
         case BUFFER_OVERFLOW:
@@ -150,27 +150,27 @@ public class SSLEngineManager {
   public int read(byte[] data, int dataPtr, int length) throws IOException {
     // Read SSL/TLS encoded data from peer
     int bytesRead = 0;
-    peerNetData.flip();
+    ((Buffer)peerNetData).flip();
     SSLEngineResult res = engine.unwrap(peerNetData, peerAppData);
     peerNetData.compact();
     switch (res.getStatus()) {
     case OK :
       bytesRead = Math.min(length, res.bytesProduced());
-      peerAppData.flip();
+      ((Buffer)peerAppData).flip();
       peerAppData.get(data, dataPtr, bytesRead);
       peerAppData.compact();
       break;
 
     case BUFFER_UNDERFLOW:
       // need more net data
-      int pos = peerNetData.position();
+      int pos = ((Buffer)peerNetData).position();
       // attempt to drain the underlying buffer first
       int need = peerNetData.remaining();
       int avail = in.check(1, in.getBufSize(), false);
       if (avail < need)
         avail = in.check(1, Math.min(need, in.getBufSize()), true);
       in.readBytes(peerNetData.array(), pos, Math.min(need, avail));
-      peerNetData.position(pos + Math.min(need, avail));
+      ((Buffer)peerNetData).position(pos + Math.min(need, avail));
       break;
 
     case CLOSED:
@@ -183,7 +183,7 @@ public class SSLEngineManager {
   public int write(byte[] data, int dataPtr, int length) throws IOException {
     int n = 0;
     myAppData.put(data, dataPtr, length);
-    myAppData.flip();
+    ((Buffer)myAppData).flip();
     while (myAppData.hasRemaining()) {
       SSLEngineResult res = engine.wrap(myAppData, myNetData);
       n += res.bytesConsumed();
@@ -193,10 +193,10 @@ public class SSLEngineManager {
 
       case BUFFER_OVERFLOW:
         // Make room in the buffer by flushing the outstream
-        myNetData.flip();
+        ((Buffer)myNetData).flip();
         os.writeBytes(myNetData.array(), 0, myNetData.remaining());
         os.flush();
-        myNetData.clear();
+        ((Buffer)myNetData).clear();
         break;
 
       case CLOSED:
@@ -204,11 +204,11 @@ public class SSLEngineManager {
         break;
       }
     }
-    myAppData.clear();
-    myNetData.flip();
+    ((Buffer)myAppData).clear();
+    ((Buffer)myNetData).flip();
     os.writeBytes(myNetData.array(), 0, myNetData.remaining());
     os.flush();
-    myNetData.clear();
+    ((Buffer)myNetData).clear();
     return n;
   }
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2013-2014 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2013-2014, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -278,7 +278,8 @@ class ProfileDialog extends Dialog {
     dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     ks = KeyStroke.getKeyStroke(KeyEvent.VK_P,
-      KeyEvent.CTRL_MASK | KeyEvent.ALT_MASK | KeyEvent.SHIFT_MASK);
+      KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK |
+      KeyEvent.SHIFT_DOWN_MASK);
     dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     if (VncViewer.os.startsWith("mac os x")) {

@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
- * Copyright (C) 2010, 2012-2013, 2015-2017 D. R. Commander.
+ * Copyright (C) 2010, 2012-2013, 2015-2018 D. R. Commander.
                                             All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
@@ -37,7 +37,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.Clipboard;
 import java.io.BufferedReader;
 import java.lang.reflect.*;
-import java.nio.CharBuffer;
+import java.nio.*;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import javax.swing.*;
@@ -435,7 +435,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         CharBuffer cbuf =
           CharBuffer.allocate(VncViewer.maxClipboard.getValue());
         br.read(cbuf);
-        cbuf.flip();
+        ((Buffer)cbuf).flip();
         String newContents = cbuf.toString();
         if (!cc.clipboardDialog.compareContentsTo(newContents)) {
           cc.clipboardDialog.setContents(newContents);
@@ -504,14 +504,22 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void mousePressed(MouseEvent e) {
     if (VncViewer.os.startsWith("mac os x")) {
       try {
-        Class appClass = Class.forName("com.apple.eawt.Application");
-        Method getApplication = appClass.getMethod("getApplication",
-                                                   (Class[])null);
-        Object app = getApplication.invoke(appClass);
+        Class appClass;
+        Object obj;
+
+        if (VncViewer.javaVersion >= 9) {
+          appClass = Desktop.class;
+          obj = Desktop.getDesktop();
+        } else {
+          appClass = Class.forName("com.apple.eawt.Application");
+          Method getApplication = appClass.getMethod("getApplication",
+                                                     (Class[])null);
+          obj = getApplication.invoke(appClass);
+        }
 
         Method requestForeground =
           appClass.getMethod("requestForeground", boolean.class);
-        requestForeground.invoke(app, false);
+        requestForeground.invoke(obj, false);
       } catch(Exception ex) {
         vlog.error("Could not bring window to foreground:");
         vlog.error("  " + ex.getMessage());
@@ -561,8 +569,10 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       e.consume();
       return;
     }
-    int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
-    if ((e.getModifiers() & ctrlAltShiftMask) == ctrlAltShiftMask) {
+    int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
+                           InputEvent.CTRL_DOWN_MASK |
+                           InputEvent.ALT_DOWN_MASK;
+    if ((e.getModifiersEx() & ctrlAltShiftMask) == ctrlAltShiftMask) {
       switch (e.getKeyCode()) {
         case KeyEvent.VK_F:
           cc.toggleFullScreen();
@@ -612,7 +622,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           return;
       }
     }
-    if ((e.getModifiers() & Event.META_MASK) == Event.META_MASK) {
+    if ((e.getModifiersEx() & InputEvent.META_DOWN_MASK) ==
+        InputEvent.META_DOWN_MASK) {
       switch (e.getKeyCode()) {
         case KeyEvent.VK_COMMA:
         case KeyEvent.VK_N:
@@ -626,8 +637,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           return;
       }
     }
-    if ((e.getModifiers() & Event.ALT_MASK) == Event.ALT_MASK &&
-        e.getKeyCode() == KeyEvent.VK_ENTER &&
+    if ((e.getModifiersEx() & InputEvent.ALT_DOWN_MASK) ==
+        InputEvent.ALT_DOWN_MASK && e.getKeyCode() == KeyEvent.VK_ENTER &&
         VncViewer.fsAltEnter.getValue()) {
       cc.toggleFullScreen();
       return;

@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2014 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -156,7 +157,7 @@ public abstract class KeyExchange{
     HASH hash=null;
     try{
       Class c=Class.forName(session.getConfig("md5"));
-      hash=(HASH)(c.newInstance());
+      hash=(HASH)(c.getConstructor().newInstance());
     }
     catch(Exception e){ System.err.println("getFingerPrint: "+e); }
     return Util.getFingerPrint(hash, getHostKey());
