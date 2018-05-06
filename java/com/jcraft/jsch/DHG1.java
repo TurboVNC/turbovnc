@@ -92,7 +92,7 @@ public class DHG1 extends KeyExchange{
 //    sha.init();
     try{
       Class c=Class.forName(session.getConfig("sha-1"));
-      sha=(HASH)(c.getConstructor().newInstance());
+      sha=(HASH)(c.getDeclaredConstructor().newInstance());
       sha.init();
     }
     catch(Exception e){
@@ -104,7 +104,7 @@ public class DHG1 extends KeyExchange{
 
     try{
       Class c=Class.forName(session.getConfig("dh"));
-      dh=(DH)(c.getConstructor().newInstance());
+      dh=(DH)(c.getDeclaredConstructor().newInstance());
       dh.init();
     }
     catch(Exception e){
@@ -231,7 +231,7 @@ System.err.println("");
 	SignatureRSA sig=null;
 	try{
 	  Class c=Class.forName(session.getConfig("signature.rsa"));
-	  sig=(SignatureRSA)(c.getConstructor().newInstance());
+	  sig=(SignatureRSA)(c.getDeclaredConstructor().newInstance());
 	  sig.init();
 	}
 	catch(Exception e){
@@ -277,7 +277,7 @@ System.err.println("");
 	SignatureDSA sig=null;
 	try{
 	  Class c=Class.forName(session.getConfig("signature.dss"));
-	  sig=(SignatureDSA)(c.getConstructor().newInstance());
+	  sig=(SignatureDSA)(c.getDeclaredConstructor().newInstance());
 	  sig.init();
 	}
 	catch(Exception e){

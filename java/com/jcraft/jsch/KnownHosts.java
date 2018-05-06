@@ -490,7 +490,7 @@ loop:
     if(hmacsha1==null){
       try{
         Class c=Class.forName(JSch.getConfig("hmac-sha1"));
-        hmacsha1=(MAC)(c.getConstructor().newInstance());
+        hmacsha1=(MAC)(c.getDeclaredConstructor().newInstance());
       }
       catch(Exception e){ 
         System.err.println("hmacsha1: "+e); 

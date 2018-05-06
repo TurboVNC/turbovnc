@@ -65,7 +65,7 @@ public class KeyPairDSA extends KeyPair{
     try{
       Class c=Class.forName(JSch.getConfig("keypairgen.dsa"));
       KeyPairGenDSA keypairgen=
-        (KeyPairGenDSA)(c.getConstructor().newInstance());
+        (KeyPairGenDSA)(c.getDeclaredConstructor().newInstance());
       keypairgen.init(key_size);
       P_array=keypairgen.getP();
       Q_array=keypairgen.getQ();
@@ -252,7 +252,8 @@ public class KeyPairDSA extends KeyPair{
   public byte[] getSignature(byte[] data){
     try{      
       Class c=Class.forName((String)JSch.getConfig("signature.dss"));
-      SignatureDSA dsa=(SignatureDSA)(c.getConstructor().newInstance());
+      SignatureDSA dsa=
+        (SignatureDSA)(c.getDeclaredConstructor().newInstance());
       dsa.init();
       dsa.setPrvKey(prv_array, P_array, Q_array, G_array);
 
@@ -272,7 +273,8 @@ public class KeyPairDSA extends KeyPair{
   public Signature getVerifier(){
     try{      
       Class c=Class.forName((String)JSch.getConfig("signature.dss"));
-      SignatureDSA dsa=(SignatureDSA)(c.getConstructor().newInstance());
+      SignatureDSA dsa=
+        (SignatureDSA)(c.getDeclaredConstructor().newInstance());
       dsa.init();
 
       if(pub_array == null && P_array == null && getPublicKeyBlob()!=null){

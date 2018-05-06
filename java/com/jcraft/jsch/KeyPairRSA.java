@@ -67,7 +67,7 @@ public class KeyPairRSA extends KeyPair{
     try{
       Class c=Class.forName(JSch.getConfig("keypairgen.rsa"));
       KeyPairGenRSA keypairgen=
-        (KeyPairGenRSA)(c.getConstructor().newInstance());
+        (KeyPairGenRSA)(c.getDeclaredConstructor().newInstance());
       keypairgen.init(key_size);
       pub_array=keypairgen.getE();
       prv_array=keypairgen.getD();
@@ -321,7 +321,8 @@ public class KeyPairRSA extends KeyPair{
   public byte[] getSignature(byte[] data){
     try{      
       Class c=Class.forName((String)JSch.getConfig("signature.rsa"));
-      SignatureRSA rsa=(SignatureRSA)(c.getConstructor().newInstance());
+      SignatureRSA rsa=
+        (SignatureRSA)(c.getDeclaredConstructor().newInstance());
       rsa.init();
       rsa.setPrvKey(prv_array, n_array);
 
@@ -340,7 +341,8 @@ public class KeyPairRSA extends KeyPair{
   public Signature getVerifier(){
     try{      
       Class c=Class.forName((String)JSch.getConfig("signature.rsa"));
-      SignatureRSA rsa=(SignatureRSA)(c.getConstructor().newInstance());
+      SignatureRSA rsa=
+        (SignatureRSA)(c.getDeclaredConstructor().newInstance());
       rsa.init();
 
       if(pub_array == null && n_array == null && getPublicKeyBlob()!=null){

@@ -193,7 +193,7 @@ public class Session implements Runnable{
     if(random==null){
       try{
 	Class c=Class.forName(getConfig("random"));
-        random=(Random)(c.getConstructor().newInstance());
+        random=(Random)(c.getDeclaredConstructor().newInstance());
       }
       catch(Exception e){ 
         throw new JSchException(e.toString(), e);
@@ -381,7 +381,7 @@ public class Session implements Runnable{
       UserAuth ua=null;
       try{
 	Class c=Class.forName(getConfig("userauth.none"));
-        ua=(UserAuth)(c.getConstructor().newInstance());
+        ua=(UserAuth)(c.getDeclaredConstructor().newInstance());
       }
       catch(Exception e){ 
         throw new JSchException(e.toString(), e);
@@ -448,7 +448,7 @@ public class Session implements Runnable{
             Class c=null;
             if(getConfig("userauth."+method)!=null){
               c=Class.forName(getConfig("userauth."+method));
-              ua=(UserAuth)(c.getConstructor().newInstance());
+              ua=(UserAuth)(c.getDeclaredConstructor().newInstance());
             }
           }
           catch(Exception e){
@@ -593,7 +593,7 @@ public class Session implements Runnable{
     KeyExchange kex=null;
     try{
       Class c=Class.forName(getConfig(guess[KeyExchange.PROPOSAL_KEX_ALGS]));
-      kex=(KeyExchange)(c.getConstructor().newInstance());
+      kex=(KeyExchange)(c.getDeclaredConstructor().newInstance());
     }
     catch(Exception e){ 
       throw new JSchException(e.toString(), e);
@@ -1137,7 +1137,7 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
   
       method=guess[KeyExchange.PROPOSAL_ENC_ALGS_STOC];
       c=Class.forName(getConfig(method));
-      s2ccipher=(Cipher)(c.getConstructor().newInstance());
+      s2ccipher=(Cipher)(c.getDeclaredConstructor().newInstance());
       while(s2ccipher.getBlockSize()>Es2c.length){
         buf.reset();
         buf.putMPInt(K);
@@ -1155,7 +1155,7 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
 
       method=guess[KeyExchange.PROPOSAL_MAC_ALGS_STOC];
       c=Class.forName(getConfig(method));
-      s2cmac=(MAC)(c.getConstructor().newInstance());
+      s2cmac=(MAC)(c.getDeclaredConstructor().newInstance());
       MACs2c = expandKey(buf, K, H, MACs2c, hash, s2cmac.getBlockSize());
       s2cmac.init(MACs2c);
       //mac_buf=new byte[s2cmac.getBlockSize()];
@@ -1164,7 +1164,7 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
 
       method=guess[KeyExchange.PROPOSAL_ENC_ALGS_CTOS];
       c=Class.forName(getConfig(method));
-      c2scipher=(Cipher)(c.getConstructor().newInstance());
+      c2scipher=(Cipher)(c.getDeclaredConstructor().newInstance());
       while(c2scipher.getBlockSize()>Ec2s.length){
         buf.reset();
         buf.putMPInt(K);
@@ -1182,7 +1182,7 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
 
       method=guess[KeyExchange.PROPOSAL_MAC_ALGS_CTOS];
       c=Class.forName(getConfig(method));
-      c2smac=(MAC)(c.getConstructor().newInstance());
+      c2smac=(MAC)(c.getDeclaredConstructor().newInstance());
       MACc2s = expandKey(buf, K, H, MACc2s, hash, c2smac.getBlockSize());
       c2smac.init(MACc2s);
 
@@ -2208,7 +2208,7 @@ break;
          (isAuthed && method.equals("zlib@openssh.com"))){
         try{
           Class c=Class.forName(foo);
-          deflater=(Compression)(c.getConstructor().newInstance());
+          deflater=(Compression)(c.getDeclaredConstructor().newInstance());
           int level=6;
           try{ level=Integer.parseInt(getConfig("compression_level"));}
           catch(Exception ee){ }
@@ -2235,7 +2235,7 @@ break;
          (isAuthed && method.equals("zlib@openssh.com"))){
         try{
           Class c=Class.forName(foo);
-          inflater=(Compression)(c.getConstructor().newInstance());
+          inflater=(Compression)(c.getDeclaredConstructor().newInstance());
           inflater.init(Compression.INFLATER, 0);
         }
         catch(Exception ee){
@@ -2470,7 +2470,7 @@ break;
   static boolean checkCipher(String cipher){
     try{
       Class c=Class.forName(cipher);
-      Cipher _c=(Cipher)(c.getConstructor().newInstance());
+      Cipher _c=(Cipher)(c.getDeclaredConstructor().newInstance());
       _c.init(Cipher.ENCRYPT_MODE,
               new byte[_c.getBlockSize()],
               new byte[_c.getIVSize()]);
@@ -2515,7 +2515,7 @@ break;
   static boolean checkKex(Session s, String kex){
     try{
       Class c=Class.forName(kex);
-      KeyExchange _c=(KeyExchange)(c.getConstructor().newInstance());
+      KeyExchange _c=(KeyExchange)(c.getDeclaredConstructor().newInstance());
       _c.init(s ,null, null, null, null);
       return true;
     }

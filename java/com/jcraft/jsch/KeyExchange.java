@@ -157,7 +157,7 @@ public abstract class KeyExchange{
     HASH hash=null;
     try{
       Class c=Class.forName(session.getConfig("md5"));
-      hash=(HASH)(c.getConstructor().newInstance());
+      hash=(HASH)(c.getDeclaredConstructor().newInstance());
     }
     catch(Exception e){ System.err.println("getFingerPrint: "+e); }
     return Util.getFingerPrint(hash, getHostKey());
