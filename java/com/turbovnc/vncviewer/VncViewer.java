@@ -1002,7 +1002,7 @@ public class VncViewer extends javax.swing.JApplet
 
     String v = via.getValue();
     if (v != null && !v.isEmpty()) {
-      int atIndex = v.indexOf('@');
+      int atIndex = v.lastIndexOf('@');
       if (atIndex >= 0) {
         opts.via = v.substring(atIndex + 1);
         opts.sshUser = v.substring(0, atIndex);
@@ -1015,7 +1015,7 @@ public class VncViewer extends javax.swing.JApplet
 
     String s = vncServerName.getValue();
     if (s != null) {
-      int atIndex = s.indexOf('@');
+      int atIndex = s.lastIndexOf('@');
       if (atIndex >= 0 && opts.tunnel) {
         opts.serverName = s.substring(atIndex + 1);
         opts.sshUser = s.substring(0, atIndex);

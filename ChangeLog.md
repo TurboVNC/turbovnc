@@ -22,6 +22,9 @@ grab mode.
 
 5. The Java TurboVNC Viewer now builds and runs with Java 9 and later.
 
+6. The SSH tunneling feature in the Java TurboVNC Viewer now works properly
+when the SSH username contains a @ character.
+
 
 2.1.2
 =====
