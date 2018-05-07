@@ -1,12 +1,12 @@
 find_package(Java)
 
-# Allow the Java compiler flags to be set using an environment variable
+# Allow the default Java compiler flags to be set using an environment variable
 if(NOT DEFINED CMAKE_JAVA_COMPILE_FLAGS AND DEFINED ENV{JAVAFLAGS})
-	set(CMAKE_JAVA_COMPILE_FLAGS $ENV{JAVAFLAGS})
+	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS $ENV{JAVAFLAGS})
+else()
+	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS
+		"-Xlint:all,-serial,-cast,-unchecked,-rawtypes")
 endif()
-
-set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS
-	"-Xlint:all,-serial,-cast,-unchecked,-rawtypes")
 set(CMAKE_JAVA_COMPILE_FLAGS ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS} CACHE STRING
 	"Java compiler flags (Default: ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS})")
 set(CMAKE_JAVA_COMPILE_FLAGS "${CMAKE_JAVA_COMPILE_FLAGS} -J-Dfile.encoding=UTF8")
