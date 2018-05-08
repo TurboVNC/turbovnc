@@ -62,7 +62,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
         prefsHandlerClass =
           Class.forName("java.awt.desktop.PreferencesHandler");
       } else {
-        appClass  = Class.forName("com.apple.eawt.Application");
+        appClass = Class.forName("com.apple.eawt.Application");
         Method getApplication = appClass.getMethod("getApplication",
                                                    (Class[])null);
         obj = getApplication.invoke(appClass);
