@@ -93,7 +93,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
 
   public MacMenuBar(CConn cc_) {
     cc = cc_;
-    int acceleratorMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    int acceleratorMask = VncViewer.getMenuShortcutKeyMask();
 
     setupAppMenu();
 

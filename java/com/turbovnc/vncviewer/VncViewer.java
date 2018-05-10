@@ -131,6 +131,27 @@ public class VncViewer extends javax.swing.JApplet
     Integer.parseInt(System.getProperty("java.version").split("\\.")[1]) :
     Integer.parseInt(System.getProperty("java.version").split("\\.")[0]);
 
+  public static int getMenuShortcutKeyMask() {
+    Method getMenuShortcutKeyMask;
+    Integer mask = null;
+
+    try {
+      if (javaVersion >= 10)
+        getMenuShortcutKeyMask =
+          Toolkit.class.getMethod("getMenuShortcutKeyMaskEx");
+      else
+        getMenuShortcutKeyMask =
+          Toolkit.class.getMethod("getMenuShortcutKeyMask");
+      mask =
+        (Integer)getMenuShortcutKeyMask.invoke(Toolkit.getDefaultToolkit());
+    } catch (Exception e) {
+      vlog.error("Could not get menu shortcut key mask:");
+      vlog.error("  " + e.toString());
+    }
+
+    return (mask != null ? mask.intValue() : 0);
+  }
+
   // This allows the Mac app to handle .vnc files opened or dragged onto its
   // icon from the Finder.
 

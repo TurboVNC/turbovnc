@@ -283,7 +283,7 @@ class ProfileDialog extends Dialog {
     dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     if (VncViewer.os.startsWith("mac os x")) {
-      int appleKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+      int appleKey = VncViewer.getMenuShortcutKeyMask();
       ks = KeyStroke.getKeyStroke(KeyEvent.VK_P, appleKey);
       dlg.getRootPane().registerKeyboardAction(actionListener, ks,
         JComponent.WHEN_IN_FOCUSED_WINDOW);
