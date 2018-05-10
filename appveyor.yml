@@ -1,7 +1,7 @@
 environment:
-  LJT_VERSION: 1.5.80
-  LJT_64BIT_SDK: "https://ci.appveyor.com/api/projects/dcommander/libjpeg-turbo/artifacts/libjpeg-turbo-%LJT_VERSION%-vc64.exe?branch=dev"
-  LJT_32BIT_SDK: "https://ci.appveyor.com/api/projects/dcommander/libjpeg-turbo/artifacts/libjpeg-turbo-%LJT_VERSION%-vc.exe?branch=dev"
+  LJT_VERSION: 1.5.90
+  LJT_64BIT_SDK: "https://sourceforge.net/projects/libjpeg-turbo/files/1.5.90 (2.0 beta1)/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
+  LJT_32BIT_SDK: "https://sourceforge.net/projects/libjpeg-turbo/files/1.5.90 (2.0 beta1)/libjpeg-turbo-%LJT_VERSION%-vc.exe"
 
 install:
   - cmd: >-
@@ -11,11 +11,11 @@ install:
 
       choco install -y InnoSetup
 
-      curl -fSL -o c:\installers\libjpeg-turbo-vc64.exe %LJT_64BIT_SDK%
+      curl -fSL -o c:\installers\libjpeg-turbo-vc64.exe "%LJT_64BIT_SDK%"
 
       c:\installers\libjpeg-turbo-vc64.exe /S
 
-      curl -fSL -o c:\installers\libjpeg-turbo-vc.exe %LJT_32BIT_SDK%
+      curl -fSL -o c:\installers\libjpeg-turbo-vc.exe "%LJT_32BIT_SDK%"
 
       c:\installers\libjpeg-turbo-vc.exe /S
 

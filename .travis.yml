@@ -2,12 +2,12 @@ language: c
 
 env:
   global:
-    - LJT_VERSION=1.5.80
-    - LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/dev/$TRAVIS_OS_NAME
+    - LJT_VERSION=1.5.90
+    - LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/1.5.90%20%282.0%20beta1%29
     - LJT_LINUX_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
-    - LJT_OSX_JNI=https://s3.amazonaws.com/libjpeg-turbo-pr/dev/osx/libjpeg-turbo-$LJT_VERSION-jws.zip
-    - LJT_WINDOWS_JNI="https://ci.appveyor.com/api/projects/dcommander/libjpeg-turbo/artifacts/libjpeg-turbo-$LJT_VERSION-jws.zip?branch=dev"
-    - LJT_GPG_KEY="http://pgp.mit.edu/pks/lookup?op=get\&search=0x0575F26BD5B3FDB1"
+    - LJT_OSX_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
+    - LJT_WINDOWS_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
+    - LJT_GPG_KEY="http://pgp.mit.edu/pks/lookup?op=get\&search=0x85C7044E033FDE16"
 
 matrix:
   include:
