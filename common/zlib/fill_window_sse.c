@@ -13,6 +13,7 @@
 #ifdef HAVE_SSE2
 
 #include <xmmintrin.h>
+#include <emmintrin.h>
 
 extern int read_buf        OF((z_streamp strm, Bytef *buf, unsigned size));
 
