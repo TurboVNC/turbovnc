@@ -26,7 +26,8 @@ string(TOLOWER "${TVNC_USETLS}" TVNC_USETLS)
 
 if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	find_path(ICONV_INCLUDE_DIR iconv.h)
-	include_directories(${ICONV_INCLUDE_DIR})
+	set_property(SOURCE cutpaste.c APPEND_STRING PROPERTY COMPILE_FLAGS
+		" -I${ICONV_INCLUDE_DIR}")
 endif()
 
 if(TVNC_USETLS STREQUAL "openssl")
@@ -38,7 +39,8 @@ if(TVNC_USETLS STREQUAL "openssl")
 		set(RFBSSLSRC rfbssl_openssl.c)
 		message(STATUS "Enabling TLS encryption using OpenSSL")
 		add_definitions(-DUSETLS)
-		include_directories(${OPENSSL_INCLUDE_DIR})
+		set_property(SOURCE ${RFBSSLSRC} APPEND_STRING PROPERTY COMPILE_FLAGS
+			" -I${OPENSSL_INCLUDE_DIR}")
 	endif()
 	set(DEFAULT_TVNC_DLOPENSSL 1)
 	option(TVNC_DLOPENSSL "Load OpenSSL using dlopen()/dlsym() instead of linking directly with it"
@@ -55,7 +57,8 @@ elseif(TVNC_USETLS STREQUAL "gnutls")
 		set(RFBSSLSRC rfbssl_gnutls.c)
 		message(STATUS "Enabling TLS encryption using GnuTLS")
 		add_definitions(-DUSETLS ${GNUTLS_DEFINITIONS})
-		include_directories(${GNUTLS_INCLUDE_DIR})
+		set_property(SOURCE ${RFBSSLSRC} APPEND_STRING PROPERTY COMPILE_FLAGS
+			" -I${GNUTLS_INCLUDE_DIR}")
 	endif()
 else()
 	message(STATUS "Disabling TLS encryption")
