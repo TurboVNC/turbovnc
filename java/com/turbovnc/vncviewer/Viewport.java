@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,9 @@ public class Viewport extends JFrame {
     sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
     sp.getViewport().setBackground(Color.BLACK);
     InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-    int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
+    int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
+                           InputEvent.CTRL_DOWN_MASK |
+                           InputEvent.ALT_DOWN_MASK;
     if (im != null) {
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask),
              "unitScrollUp");
@@ -273,9 +275,12 @@ public class Viewport extends JFrame {
 
       Class fsuClass = Class.forName("com.apple.eawt.FullScreenUtilities");
       Class argClasses[] = new Class[]{Window.class, Boolean.TYPE};
-      Method setWindowCanFullScreen =
-        fsuClass.getMethod("setWindowCanFullScreen", argClasses);
-      setWindowCanFullScreen.invoke(fsuClass, this, true);
+
+      if (VncViewer.javaVersion < 9) {
+        Method setWindowCanFullScreen =
+          fsuClass.getMethod("setWindowCanFullScreen", argClasses);
+        setWindowCanFullScreen.invoke(fsuClass, this, true);
+      }
 
       Class fsListenerClass =
         Class.forName("com.apple.eawt.FullScreenListener");

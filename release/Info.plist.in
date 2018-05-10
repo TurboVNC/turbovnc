@@ -44,7 +44,6 @@
 	<key>JVMOptions</key>
 	<array>
 		<string>-server</string>
-		<string>-d64</string>
 	</array>
 </dict>
 </plist>

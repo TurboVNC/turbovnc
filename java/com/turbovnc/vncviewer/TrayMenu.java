@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2014, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
       exit = addMenuItem("Close listener");
     }
 
-    if (System.getProperty("os.name").startsWith("Mac OS X")) {
+    if (VncViewer.os.startsWith("mac os x")) {
       setDockMenu(this);
     } else {
       trayIcon = new TrayIcon(VncViewer.frameImage);
@@ -60,15 +60,26 @@ public class TrayMenu extends PopupMenu implements ActionListener {
 
   void setDockMenu(PopupMenu menu) {
     try {
-      Class appClass = Class.forName("com.apple.eawt.Application");
-      Method getApplication =
-        appClass.getMethod("getApplication", (Class[])null);
-      Object app = getApplication.invoke(appClass);
+      Class appClass;
+      Object obj;
+
+      if (VncViewer.javaVersion >= 9) {
+        appClass = Class.forName("java.awt.Taskbar");
+        Method getTaskbar =
+          appClass.getMethod("getTaskbar", (Class[])null);
+        obj = getTaskbar.invoke(appClass);
+      } else {
+        appClass = Class.forName("com.apple.eawt.Application");
+        Method getApplication =
+          appClass.getMethod("getApplication", (Class[])null);
+        obj = getApplication.invoke(appClass);
+      }
       Class paramTypes[] = new Class[1];
       paramTypes[0] = PopupMenu.class;
-      Method setDockMenu =
+      Method setDockMenu = VncViewer.javaVersion >= 9 ?
+        appClass.getMethod("setMenu", paramTypes) :
         appClass.getMethod("setDockMenu", paramTypes);
-      setDockMenu.invoke(app, menu);
+      setDockMenu.invoke(obj, menu);
     } catch (Exception e) {
       vlog.error("Could not modify dock menu:");
       vlog.error("  " + e.toString());
@@ -76,8 +87,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
   }
 
   static boolean isSupported() {
-    return (System.getProperty("os.name").startsWith("Mac OS X")
-            || SystemTray.isSupported());
+    return (VncViewer.os.startsWith("mac os x") || SystemTray.isSupported());
   }
 
   MenuItem addMenuItem(String str) {
@@ -101,7 +111,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
     } else if (actionMatch(ev, about)) {
       VncViewer.showAbout(null);
     } else if (actionMatch(ev, exit)) {
-      if (System.getProperty("os.name").startsWith("Mac OS X"))
+      if (VncViewer.os.startsWith("mac os x"))
         setDockMenu(null);
       else if (tray != null && trayIcon != null)
         tray.remove(trayIcon);

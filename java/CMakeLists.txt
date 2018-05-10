@@ -1,9 +1,19 @@
 find_package(Java)
 
-set(DEFAULT_JAVACFLAGS "-source 1.6 -target 1.6 -Xlint:all,-serial,-cast,-unchecked,-rawtypes -J-Dfile.encoding=UTF8")
-set(JAVACFLAGS ${DEFAULT_JAVACFLAGS} CACHE STRING
-	"Java compiler flags (Default: ${DEFAULT_JAVACFLAGS})")
-message(STATUS "Java compiler flags = ${JAVACFLAGS}")
+# Allow the default Java compiler flags to be set using an environment variable
+if(NOT DEFINED CMAKE_JAVA_COMPILE_FLAGS AND DEFINED ENV{JAVAFLAGS})
+	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS $ENV{JAVAFLAGS})
+else()
+	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS
+		"-Xlint:all,-serial,-cast,-unchecked,-rawtypes")
+endif()
+set(CMAKE_JAVA_COMPILE_FLAGS ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS} CACHE STRING
+	"Java compiler flags (Default: ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS})")
+set(CMAKE_JAVA_COMPILE_FLAGS "${CMAKE_JAVA_COMPILE_FLAGS} -J-Dfile.encoding=UTF8")
+if(Java_VERSION_MAJOR GREATER 8)
+	set(CMAKE_JAVA_COMPILE_FLAGS "${CMAKE_JAVA_COMPILE_FLAGS} --add-modules java.xml.bind")
+endif()
+message(STATUS "CMAKE_JAVA_COMPILE_FLAGS = ${CMAKE_JAVA_COMPILE_FLAGS}")
 
 set(CLASSPATH com/turbovnc/vncviewer)
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -131,12 +141,14 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/jcraft/jsch/jgss/*.java
 	${SRCDIR}/com/jcraft/jzlib/*.java)
 
-string(REGEX REPLACE " " ";" JAVACFLAGS "${JAVACFLAGS}")
+string(REGEX REPLACE " " ";" CMAKE_JAVA_COMPILE_FLAGS
+	"${CMAKE_JAVA_COMPILE_FLAGS}")
 add_custom_command(OUTPUT ${JAVA_CLASSES}
 	DEPENDS ${JAVA_SOURCES} ${DEPEND_SOURCES}
 	COMMAND ${JAVA_COMPILE}
-	ARGS ${JAVACFLAGS} -cp ${TJPEG_JAR} -sourcepath ${SRCDIR} -d ${BINDIR}
-		${CLASSPATH}/VncViewer.java ${CLASSPATH}/ImageDrawTest.java ${JAVA_SOURCES}
+	ARGS ${CMAKE_JAVA_COMPILE_FLAGS} -cp ${TJPEG_JAR} -sourcepath ${SRCDIR}
+		-d ${BINDIR} ${CLASSPATH}/VncViewer.java ${CLASSPATH}/ImageDrawTest.java
+		${JAVA_SOURCES}
 	WORKING_DIRECTORY ${SRCDIR})
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)

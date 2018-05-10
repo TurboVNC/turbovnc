@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2018 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -125,6 +125,32 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     return !os.startsWith("mac os x");
   }
 
+  public static int javaVersion =
+    Integer.parseInt(System.getProperty("java.version").split("\\.")[0]) <= 1 ?
+    Integer.parseInt(System.getProperty("java.version").split("\\.")[1]) :
+    Integer.parseInt(System.getProperty("java.version").split("\\.")[0]);
+
+  public static int getMenuShortcutKeyMask() {
+    Method getMenuShortcutKeyMask;
+    Integer mask = null;
+
+    try {
+      if (javaVersion >= 10)
+        getMenuShortcutKeyMask =
+          Toolkit.class.getMethod("getMenuShortcutKeyMaskEx");
+      else
+        getMenuShortcutKeyMask =
+          Toolkit.class.getMethod("getMenuShortcutKeyMask");
+      mask =
+        (Integer)getMenuShortcutKeyMask.invoke(Toolkit.getDefaultToolkit());
+    } catch (Exception e) {
+      vlog.error("Could not get menu shortcut key mask:");
+      vlog.error("  " + e.toString());
+    }
+
+    return (mask != null ? mask.intValue() : 0);
+  }
+
   // This allows the Mac app to handle .vnc files opened or dragged onto its
   // icon from the Finder.
 
@@ -136,7 +162,9 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         if (method.getName().equals("openFiles") && args[0] != null) {
           synchronized(VncViewer.class) {
             Class ofEventClass =
-              Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
+              javaVersion >= 9 ?
+                Class.forName("java.awt.desktop.OpenFilesEvent") :
+                Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
             Method getFiles = ofEventClass.getMethod("getFiles",
                                                      (Class[])null);
             List<File> files =(List<File>)getFiles.invoke(args[0]);
@@ -165,19 +193,28 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void enableFileHandler() throws Exception {
-    Class appClass = Class.forName("com.apple.eawt.Application");
-    Method getApplication = appClass.getMethod("getApplication",
-                                               (Class[])null);
-    Object app = getApplication.invoke(appClass);
+    Class appClass, fileHandlerClass;
+    Object obj;
 
-    Class fileHandlerClass = Class.forName("com.apple.eawt.OpenFilesHandler");
+    if (javaVersion >= 9) {
+      appClass = Desktop.class;
+      obj = Desktop.getDesktop();
+      fileHandlerClass = Class.forName("java.awt.desktop.OpenFilesHandler");
+    } else {
+      appClass = Class.forName("com.apple.eawt.Application");
+      Method getApplication = appClass.getMethod("getApplication",
+                                                 (Class[])null);
+      obj = getApplication.invoke(appClass);
+      fileHandlerClass = Class.forName("com.apple.eawt.OpenFilesHandler");
+    }
+
     InvocationHandler handler = new MyInvocationHandler();
     Object proxy = Proxy.newProxyInstance(fileHandlerClass.getClassLoader(),
                                           new Class[]{fileHandlerClass},
                                           handler);
     Method setOpenFileHandler =
       appClass.getMethod("setOpenFileHandler", fileHandlerClass);
-    setOpenFileHandler.invoke(app, new Object[]{proxy});
+    setOpenFileHandler.invoke(obj, new Object[]{proxy});
   }
 
   static void setLookAndFeel() {
@@ -203,15 +240,27 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         enableFileHandler();
 
         try {
-          Class appClass = Class.forName("com.apple.eawt.Application");
-          Method getApplication =
-            appClass.getMethod("getApplication", (Class[])null);
-          Object app = getApplication.invoke(appClass);
+          Class appClass;
+          Object obj;
+
+          if (javaVersion >= 9) {
+            appClass = Class.forName("java.awt.Taskbar");
+            Method getTaskbar =
+              appClass.getMethod("getTaskbar", (Class[])null);
+            obj = getTaskbar.invoke(appClass);
+          } else {
+            appClass = Class.forName("com.apple.eawt.Application");
+            Method getApplication =
+              appClass.getMethod("getApplication", (Class[])null);
+            obj = getApplication.invoke(appClass);
+          }
+
           Class paramTypes[] = new Class[1];
           paramTypes[0] = Image.class;
-          Method setDockIconImage =
+          Method setDockIconImage = javaVersion >= 9 ?
+            appClass.getMethod("setIconImage", paramTypes) :
             appClass.getMethod("setDockIconImage", paramTypes);
-          setDockIconImage.invoke(app, logoIcon128.getImage());
+          setDockIconImage.invoke(obj, logoIcon128.getImage());
         } catch (Exception e) {
           vlog.debug("Could not set OS X dock icon:");
           vlog.debug("  " + e.toString());
@@ -298,9 +347,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     boolean defForceAlpha = false;
 
     if (os.startsWith("mac os x")) {
-      int minorVersion =
-        Integer.parseInt(System.getProperty("java.version").split("\\.")[1]);
-      if (minorVersion >= 7)
+      if (javaVersion >= 7)
         defForceAlpha = true;
     }
     // TYPE_INT_ARGB_PRE images are also faster when using OpenGL blitting on
@@ -902,7 +949,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
     String v = via.getValue();
     if (v != null && !v.isEmpty()) {
-      int atIndex = v.indexOf('@');
+      int atIndex = v.lastIndexOf('@');
       if (atIndex >= 0) {
         opts.via = v.substring(atIndex + 1);
         opts.sshUser = v.substring(0, atIndex);
@@ -915,7 +962,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
     String s = vncServerName.getValue();
     if (s != null) {
-      int atIndex = s.indexOf('@');
+      int atIndex = s.lastIndexOf('@');
       if (atIndex >= 0 && opts.tunnel) {
         opts.serverName = s.substring(atIndex + 1);
         opts.sshUser = s.substring(0, atIndex);

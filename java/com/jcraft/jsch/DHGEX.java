@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -68,7 +69,7 @@ public class DHGEX extends KeyExchange{
 
     try{
       Class c=Class.forName(session.getConfig(hash));
-      sha=(HASH)(c.newInstance());
+      sha=(HASH)(c.getDeclaredConstructor().newInstance());
       sha.init();
     }
     catch(Exception e){
@@ -83,7 +84,7 @@ public class DHGEX extends KeyExchange{
       // Since JDK8, SunJCE has lifted the keysize restrictions
       // from 1024 to 2048 for DH.
       preferred = max = check2048(c, max); 
-      dh=(com.jcraft.jsch.DH)(c.newInstance());
+      dh=(com.jcraft.jsch.DH)(c.getDeclaredConstructor().newInstance());
       dh.init();
     }
     catch(Exception e){
@@ -227,7 +228,7 @@ public class DHGEX extends KeyExchange{
   public int getState(){return state; }
 
   protected int check2048(Class c, int _max) throws Exception {
-    DH dh=(com.jcraft.jsch.DH)(c.newInstance());
+    DH dh=(com.jcraft.jsch.DH)(c.getDeclaredConstructor().newInstance());
     dh.init();
     byte[] foo = new byte[257];
     foo[1]=(byte)0xdd;

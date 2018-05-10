@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012, 2014 Brian P. Hinz
- * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -179,9 +179,9 @@ public class FdInStream extends InStream {
         Integer tv;
 
         if (!wait) {
-          tv = new Integer(0);
+          tv = Integer.valueOf(0);
         } else if (timeoutms != -1) {
-          tv = new Integer(timeoutms);
+          tv = Integer.valueOf(timeoutms);
         } else {
           tv = null;
         }

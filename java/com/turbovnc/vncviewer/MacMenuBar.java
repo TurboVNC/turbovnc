@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,29 +52,39 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
 
   void setupAppMenu() {
     try {
-      Class appClass = Class.forName("com.apple.eawt.Application");
-      Method getApplication = appClass.getMethod("getApplication",
-                                                 (Class[])null);
-      Object app = getApplication.invoke(appClass);
+      Class appClass, aboutHandlerClass, prefsHandlerClass;
+      Object obj;
 
-      Class aboutHandlerClass = Class.forName("com.apple.eawt.AboutHandler");
+      if (VncViewer.javaVersion >= 9) {
+        appClass = Desktop.class;
+        obj = Desktop.getDesktop();
+        aboutHandlerClass = Class.forName("java.awt.desktop.AboutHandler");
+        prefsHandlerClass =
+          Class.forName("java.awt.desktop.PreferencesHandler");
+      } else {
+        appClass = Class.forName("com.apple.eawt.Application");
+        Method getApplication = appClass.getMethod("getApplication",
+                                                   (Class[])null);
+        obj = getApplication.invoke(appClass);
+        aboutHandlerClass = Class.forName("com.apple.eawt.AboutHandler");
+        prefsHandlerClass = Class.forName("com.apple.eawt.PreferencesHandler");
+      }
+
       InvocationHandler aboutHandler = new MyInvocationHandler(cc);
       Object proxy = Proxy.newProxyInstance(aboutHandlerClass.getClassLoader(),
                                             new Class[]{aboutHandlerClass},
                                             aboutHandler);
       Method setAboutHandler =
         appClass.getMethod("setAboutHandler", aboutHandlerClass);
-      setAboutHandler.invoke(app, new Object[]{proxy});
+      setAboutHandler.invoke(obj, new Object[]{proxy});
 
-      Class prefsHandlerClass =
-        Class.forName("com.apple.eawt.PreferencesHandler");
       InvocationHandler prefsHandler = new MyInvocationHandler(cc);
       proxy = Proxy.newProxyInstance(prefsHandlerClass.getClassLoader(),
                                      new Class[]{prefsHandlerClass},
                                      prefsHandler);
       Method setPreferencesHandler =
         appClass.getMethod("setPreferencesHandler", prefsHandlerClass);
-      setPreferencesHandler.invoke(app, new Object[]{proxy});
+      setPreferencesHandler.invoke(obj, new Object[]{proxy});
     } catch (Exception e) {
       vlog.info("Could not override About/Preferences menu items:");
       vlog.info("  " + e.toString());
@@ -83,7 +93,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
 
   public MacMenuBar(CConn cc_) {
     cc = cc_;
-    int acceleratorMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    int acceleratorMask = VncViewer.getMenuShortcutKeyMask();
 
     setupAppMenu();
 

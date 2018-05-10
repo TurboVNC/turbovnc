@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2013-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -301,7 +302,7 @@ or
       byte[] key=null;
       try{
         Class c=Class.forName((String)JSch.getConfig("pbkdf"));
-        PBKDF tmp=(PBKDF)(c.newInstance());
+        PBKDF tmp=(PBKDF)(c.getDeclaredConstructor().newInstance());
         key = tmp.getKey(_passphrase, salt, iterations, cipher.getBlockSize());
       }
       catch(Exception ee){
@@ -344,7 +345,7 @@ or
         name="aes256-cbc";
       }
       Class c=Class.forName((String)JSch.getConfig(name));
-      cipher=(Cipher)(c.newInstance());
+      cipher=(Cipher)(c.getDeclaredConstructor().newInstance());
     }
     catch(Exception e){
       if(JSch.getLogger().isEnabled(Logger.FATAL)){

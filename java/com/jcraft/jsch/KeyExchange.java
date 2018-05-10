@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -161,7 +162,7 @@ public abstract class KeyExchange{
     HASH hash=null;
     try{
       Class c=Class.forName(session.getConfig("md5"));
-      hash=(HASH)(c.newInstance());
+      hash=(HASH)(c.getDeclaredConstructor().newInstance());
     }
     catch(Exception e){ System.err.println("getFingerPrint: "+e); }
     return Util.getFingerPrint(hash, getHostKey());
@@ -215,7 +216,7 @@ public abstract class KeyExchange{
       SignatureRSA sig=null;
       try{
         Class c=Class.forName(session.getConfig("signature.rsa"));
-        sig=(SignatureRSA)(c.newInstance());
+        sig=(SignatureRSA)(c.getDeclaredConstructor().newInstance());
         sig.init();
       }
       catch(Exception e){
@@ -260,7 +261,7 @@ public abstract class KeyExchange{
       SignatureDSA sig=null;
       try{
         Class c=Class.forName(session.getConfig("signature.dss"));
-        sig=(SignatureDSA)(c.newInstance());
+        sig=(SignatureDSA)(c.getDeclaredConstructor().newInstance());
         sig.init();
       }
       catch(Exception e){
@@ -302,7 +303,7 @@ public abstract class KeyExchange{
       SignatureECDSA sig=null;
       try{
         Class c=Class.forName(session.getConfig("signature.ecdsa"));
-        sig=(SignatureECDSA)(c.newInstance());
+        sig=(SignatureECDSA)(c.getDeclaredConstructor().newInstance());
         sig.init();
       }
       catch(Exception e){

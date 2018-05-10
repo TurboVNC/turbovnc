@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -61,7 +62,7 @@ public class ChannelForwardedTCPIP extends Channel{
       if(config instanceof ConfigDaemon){
         ConfigDaemon _config = (ConfigDaemon)config;
         Class c=Class.forName(_config.target);
-        daemon=(ForwardedTCPIPDaemon)c.newInstance();
+        daemon=(ForwardedTCPIPDaemon)c.getDeclaredConstructor().newInstance();
 
         PipedOutputStream out=new PipedOutputStream();
         io.setInputStream(new PassiveInputStream(out

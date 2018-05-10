@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -107,7 +108,7 @@ public class HostKey{
     HASH hash=null;
     try{
       Class c=Class.forName(JSch.getConfig("md5"));
-      hash=(HASH)(c.newInstance());
+      hash=(HASH)(c.getDeclaredConstructor().newInstance());
     }
     catch(Exception e){ System.err.println("getFingerPrint: "+e); }
     return Util.getFingerPrint(hash, key);

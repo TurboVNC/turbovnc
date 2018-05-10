@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -95,7 +96,7 @@ public class DHG14 extends KeyExchange{
 
     try{
       Class c=Class.forName(session.getConfig("sha-1"));
-      sha=(HASH)(c.newInstance());
+      sha=(HASH)(c.getDeclaredConstructor().newInstance());
       sha.init();
     }
     catch(Exception e){
@@ -107,7 +108,7 @@ public class DHG14 extends KeyExchange{
 
     try{
       Class c=Class.forName(session.getConfig("dh"));
-      dh=(DH)(c.newInstance());
+      dh=(DH)(c.getDeclaredConstructor().newInstance());
       dh.init();
     }
     catch(Exception e){

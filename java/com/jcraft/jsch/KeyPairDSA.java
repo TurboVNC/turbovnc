@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -63,7 +64,8 @@ public class KeyPairDSA extends KeyPair{
     this.key_size=key_size;
     try{
       Class c=Class.forName(JSch.getConfig("keypairgen.dsa"));
-      KeyPairGenDSA keypairgen=(KeyPairGenDSA)(c.newInstance());
+      KeyPairGenDSA keypairgen=
+        (KeyPairGenDSA)(c.getDeclaredConstructor().newInstance());
       keypairgen.init(key_size);
       P_array=keypairgen.getP();
       Q_array=keypairgen.getQ();
@@ -250,7 +252,8 @@ public class KeyPairDSA extends KeyPair{
   public byte[] getSignature(byte[] data){
     try{      
       Class c=Class.forName((String)JSch.getConfig("signature.dss"));
-      SignatureDSA dsa=(SignatureDSA)(c.newInstance());
+      SignatureDSA dsa=
+        (SignatureDSA)(c.getDeclaredConstructor().newInstance());
       dsa.init();
       dsa.setPrvKey(prv_array, P_array, Q_array, G_array);
 
@@ -270,7 +273,8 @@ public class KeyPairDSA extends KeyPair{
   public Signature getVerifier(){
     try{      
       Class c=Class.forName((String)JSch.getConfig("signature.dss"));
-      SignatureDSA dsa=(SignatureDSA)(c.newInstance());
+      SignatureDSA dsa=
+        (SignatureDSA)(c.getDeclaredConstructor().newInstance());
       dsa.init();
 
       if(pub_array == null && P_array == null && getPublicKeyBlob()!=null){

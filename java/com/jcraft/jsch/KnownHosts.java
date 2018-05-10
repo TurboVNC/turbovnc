@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -487,7 +488,7 @@ loop:
     if(hmacsha1==null){
       try{
         Class c=Class.forName(JSch.getConfig("hmac-sha1"));
-        hmacsha1=(MAC)(c.newInstance());
+        hmacsha1=(MAC)(c.getDeclaredConstructor().newInstance());
       }
       catch(Exception e){ 
         System.err.println("hmacsha1: "+e); 

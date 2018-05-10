@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2018 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import java.awt.event.*;
 
 import java.io.*;
 import java.lang.Exception;
+import java.lang.reflect.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.swing.*;
@@ -1391,9 +1392,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // has been called, since the menu is only accessible from the DesktopWindow.
 
   void showMenu(int x, int y) {
-    String os = System.getProperty("os.name");
-    if (os.startsWith("Windows"))
-      com.sun.java.swing.plaf.windows.WindowsLookAndFeel.setMnemonicHidden(false);
+    if (VncViewer.os.startsWith("windows"))
+      UIManager.put("Button.showMnemonics", true);
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       x += viewport.dx;
       y += viewport.dy;
@@ -1708,12 +1708,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void selectGrab(boolean on) {
-    if (VncViewer.osGrab())
+    if (menu.grabKeyboard != null)
       menu.grabKeyboard.setSelected(on);
   }
 
   public boolean isGrabSelected() {
-    if (VncViewer.osGrab())
+    if (menu.grabKeyboard != null)
       return menu.grabKeyboard.isSelected();
     return false;
   }
