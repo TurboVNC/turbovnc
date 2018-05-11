@@ -19,6 +19,7 @@ set(DRI_DRIVER_PATH ${DEFAULT_DRI_DRIVER_PATH} CACHE PATH
 message(STATUS "DRI_DRIVER_PATH = ${DRI_DRIVER_PATH}")
 add_definitions(-DDRI_DRIVER_PATH=\"${DRI_DRIVER_PATH}\")
 
+disable_compiler_warnings()
 handle_type_puns(
 	glxcmds.c
 	glxdriswrast.c

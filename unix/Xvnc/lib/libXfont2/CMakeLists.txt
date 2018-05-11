@@ -9,6 +9,8 @@ include_directories(include src/stubs ../libfontenc/include)
 
 add_definitions(-DHAVE_CONFIG_H -DHAVE_READLINK -UUSE_POLL)
 
+disable_compiler_warnings()
+
 add_subdirectory(src/FreeType)
 add_subdirectory(src/bitmap)
 add_subdirectory(src/builtins)

@@ -1,5 +1,7 @@
 add_definitions(-DHAVE_PTHREAD)
 
+disable_compiler_warnings()
+
 foreach(dir /run/shm /dev/shm /var/tmp /tmp)
 	if(EXISTS ${dir})
 		add_definitions(-DSHMDIR=\"${dir}\")

@@ -8,6 +8,7 @@ foreach(dir /run/shm /dev/shm /var/tmp /tmp)
 	endif()
 endforeach()
 
+disable_compiler_warnings()
 handle_type_puns()
 
 add_library(Xext-server STATIC

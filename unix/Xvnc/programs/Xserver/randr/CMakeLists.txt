@@ -2,6 +2,7 @@ include_directories(../mi ../render)
 
 add_definitions(-DXINERAMA)
 
+disable_compiler_warnings()
 handle_type_puns()
 
 add_library(randr STATIC

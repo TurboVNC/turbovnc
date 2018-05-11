@@ -14,6 +14,7 @@ set(SERVER_MISC_CONFIG_PATH ${DEFAULT_SERVER_MISC_CONFIG_PATH} CACHE PATH
 message(STATUS "SERVER_MISC_CONFIG_PATH = ${SERVER_MISC_CONFIG_PATH}")
 add_definitions(-DSERVER_MISC_CONFIG_PATH=\"${SERVER_MISC_CONFIG_PATH}\")
 
+disable_compiler_warnings()
 handle_type_puns(
 	colormap.c
 	cursor.c
@@ -26,9 +27,6 @@ handle_type_puns(
 	swaprep.c
 	swapreq.c
 	window.c)
-
-add_library(main STATIC
-	stubmain.c)
 
 add_library(dix STATIC
 	atom.c

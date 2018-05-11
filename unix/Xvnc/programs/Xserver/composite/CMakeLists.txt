@@ -1,5 +1,6 @@
 include_directories(../Xi ../damageext ../mi  ../render ../xfixes)
 
+disable_compiler_warnings()
 handle_type_puns(compext.c)
 
 add_library(composite STATIC

@@ -2697,7 +2697,7 @@ XkbSendCompatMap(ClientPtr client,
                  XkbCompatMapPtr compat, xkbGetCompatMapReply * rep)
 {
     char *data;
-    int size = 0;
+    int size;
 
     if (rep->length > 0) {
         data = xallocarray(rep->length, 4);
@@ -3081,7 +3081,7 @@ static int
 XkbSendIndicatorMap(ClientPtr client,
                     XkbIndicatorPtr indicators, xkbGetIndicatorMapReply * rep)
 {
-    int length = 0;
+    int length;
     CARD8 *map;
     register int i;
     register unsigned bit;
@@ -4295,7 +4295,7 @@ ProcXkbSetNames(ClientPtr client)
 {
     DeviceIntPtr dev;
     CARD32 *tmp;
-    Atom bad = None;
+    Atom bad;
     int rc;
 
     REQUEST(xkbSetNamesReq);

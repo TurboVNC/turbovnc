@@ -1,3 +1,5 @@
+disable_compiler_warnings()
+
 add_library(bzip2 STATIC
 	blocksort.c
 	bzlib.c

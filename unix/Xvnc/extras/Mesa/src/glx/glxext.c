@@ -150,9 +150,9 @@ __glXWireToEvent(Display *dpy, XEvent *event, xEvent *wire)
        * of sequence 64-Bit sbc's
        */
       if ((int64_t) awire->sbc < ((int64_t) glxDraw->lastEventSbc - 0x40000000))
-         glxDraw->eventSbcWrap += 0x100000000LL;
+         glxDraw->eventSbcWrap += 0x100000000;
       if ((int64_t) awire->sbc > ((int64_t) glxDraw->lastEventSbc + 0x40000000))
-         glxDraw->eventSbcWrap -= 0x100000000LL;
+         glxDraw->eventSbcWrap -= 0x100000000;
       glxDraw->lastEventSbc = awire->sbc;
       aevent->sbc = awire->sbc + glxDraw->eventSbcWrap;
       return True;

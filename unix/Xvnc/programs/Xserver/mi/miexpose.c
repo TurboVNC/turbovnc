@@ -136,7 +136,7 @@ miHandleExposures(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
                                    the window background
                                  */
     WindowPtr pSrcWin;
-    BoxRec expBox = { 0, 0, 0, 0 };
+    BoxRec expBox;
     Bool extents;
 
     /* avoid work if we can */
@@ -374,7 +374,7 @@ miWindowExposures(WindowPtr pWin, RegionPtr prgn)
     RegionPtr exposures = prgn;
 
     if (prgn && !RegionNil(prgn)) {
-        RegionRec expRec = { {0, 0, 0, 0}, NULL };
+        RegionRec expRec;
         int clientInterested =
             (pWin->eventMask | wOtherEventMasks(pWin)) & ExposureMask;
         if (clientInterested && (RegionNumRects(prgn) > RECTLIMIT)) {

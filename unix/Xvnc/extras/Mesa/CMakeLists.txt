@@ -13,6 +13,7 @@ include_directories(include src src/mapi src/mapi/glapi)
 add_definitions(-DGLX_USE_TLS -DHAVE_PTHREAD -DMAPI_MODE_UTIL
 	-DGLX_INDIRECT_RENDERING)
 
+disable_compiler_warnings()
 handle_type_puns(src/mapi/u_current.c)
 handle_unused(
 	src/glx/glx_pbuffer.c

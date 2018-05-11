@@ -1,5 +1,6 @@
 include_directories(../Xi ../mi ../render)
 
+disable_compiler_warnings()
 handle_type_puns(
 	XKBGAlloc.c
 	xkb.c

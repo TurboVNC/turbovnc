@@ -2032,7 +2032,7 @@ miWideDashSegment(DrawablePtr pDrawable,
     double L, l;
     double k;
     PolyVertexRec vertices[4];
-    PolyVertexRec saveRight = { 0, 0 }, saveBottom = { 0, 0 };
+    PolyVertexRec saveRight, saveBottom;
     PolySlopeRec slopes[4];
     PolyEdgeRec left[4], right[4];
     LineFaceRec lcapFace, rcapFace;

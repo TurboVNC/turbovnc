@@ -43,6 +43,7 @@ if(NOT HAVE_EPOLL_CREATE1 AND NOT HAVE_POLL)
 	set(EXTRASRCS ${EXTRASRCS} xserver_poll.c)
 endif()
 
+disable_compiler_warnings()
 handle_type_puns(
 	access.c
 	io.c

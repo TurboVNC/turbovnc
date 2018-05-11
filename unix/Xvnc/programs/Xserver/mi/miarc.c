@@ -1874,7 +1874,7 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
     double a0, a1;
     struct arcData *data;
     miArcDataPtr arc;
-    xArc xarc = { 0, 0, 0, 0, 0, 0 };
+    xArc xarc;
     int iphase, prevphase = 0, joinphase;
     int arcsJoin;
     int selfJoin;

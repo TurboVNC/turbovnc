@@ -22,6 +22,8 @@ elseif(CPU_TYPE STREQUAL "i386")
 	set(X86_SOURCES fill_window_sse.c x86.c)
 endif()
 
+disable_compiler_warnings()
+
 add_library(zlib STATIC
 	adler32.c
 	compress.c

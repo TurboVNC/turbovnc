@@ -1,5 +1,7 @@
 include_directories(../mi ../render)
 
+disable_compiler_warnings()
+
 add_library(fb STATIC
 	fb24_32.c
 	fballpriv.c

@@ -137,7 +137,7 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
     CompWindowPtr cw = GetCompWindow(pWin);
     CompClientWindowPtr ccw;
     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);
-    WindowPtr pLayerWin = NULL;
+    WindowPtr pLayerWin;
     Bool anyMarked = FALSE;
 
     if (pWin == cs->pOverlayWin) {
@@ -264,7 +264,7 @@ compFreeClientWindow(WindowPtr pWin, XID id)
     CompWindowPtr cw = GetCompWindow(pWin);
     CompClientWindowPtr ccw, *prev;
     Bool anyMarked = FALSE;
-    WindowPtr pLayerWin = NULL;
+    WindowPtr pLayerWin;
     PixmapPtr pPixmap = NULL;
 
     if (!cw)

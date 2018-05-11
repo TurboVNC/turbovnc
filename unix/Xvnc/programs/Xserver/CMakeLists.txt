@@ -150,7 +150,7 @@ add_subdirectory(xfixes)
 add_subdirectory(xkb)
 add_subdirectory(hw/vnc)
 
-add_executable(Xvnc dummy.c)
+add_executable(Xvnc dix/stubmain.c)
 set(PAM_LIB "")
 if(TVNC_USEPAM)
 	set(PAM_LIB pam)
@@ -173,11 +173,11 @@ endif()
 if(HAVE_MONOTONIC_CLOCK)
 	set(EXTRA_LIB ${EXTRA_LIB} rt)
 endif()
-target_link_libraries(Xvnc main dix mi vnc fb Xi composite mi damage damageext
-	randr render os present Xext-server sync xfixes xkb ${X11_Xau_LIB}
-	${X11_Xdmcp_LIB} ${X11_Xfont2_LIB} ${X11_Fontenc_LIB} ${FREETYPE_LIBRARIES}
-	${X11_Pixman_LIB} sha1 ${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
-	vncauth m pthread ${PAM_LIB} ${EXTRA_LIB})
+target_link_libraries(Xvnc dix mi vnc fb Xi composite mi damage damageext randr
+	render os present Xext-server sync xfixes xkb ${X11_Xau_LIB} ${X11_Xdmcp_LIB}
+	${X11_Xfont2_LIB} ${X11_Fontenc_LIB} ${FREETYPE_LIBRARIES} ${X11_Pixman_LIB}
+	sha1 ${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} vncauth m pthread
+	${PAM_LIB} ${EXTRA_LIB})
 if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	find_library(ICONV_LIBRARIES NAMES iconv)
 	target_link_libraries(Xvnc ${ICONV_LIBRARIES})

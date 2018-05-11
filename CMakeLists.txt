@@ -77,6 +77,15 @@ if(USEC)
 	endif()
 
 	message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+
+	function(disable_compiler_warnings)
+		if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w" PARENT_SCOPE)
+		endif()
+		if(CMAKE_C_COMPILER_ID MATCHES SunPro)
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -erroff" PARENT_SCOPE)
+		endif()
+	endfunction()
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

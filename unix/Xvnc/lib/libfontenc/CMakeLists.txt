@@ -1,5 +1,7 @@
 include_directories(include)
 
+disable_compiler_warnings()
+
 if(APPLE)
 	set(DEFAULT_FONT_ENCODINGS_DIRECTORY "/opt/X11/share/fonts/encodings")
 else()

@@ -1,5 +1,6 @@
 include_directories(. ../mi)
 
+disable_compiler_warnings()
 handle_type_puns(
 	glyph.c
 	picture.c
