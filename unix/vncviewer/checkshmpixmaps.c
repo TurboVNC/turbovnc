@@ -1,4 +1,4 @@
-/*  Copyright (C) 2013, 2015 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C) 2013, 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,6 +15,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  *  USA.
  */
+
+#ifdef __SUNPRO_C
+/* Oracle Developer Studio sometimes erroneously detects the _error() or
+   _warning*() macro followed by a semicolon as an unreachable statement. */
+#pragma error_messages(off, E_STATEMENT_NOT_REACHED)
+#endif
 
 #include <stdio.h>
 #include <string.h>

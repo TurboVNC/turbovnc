@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -517,7 +517,7 @@ static const int rfbEndianTest = 1;
 {                                                       \
     rfbCapabilityInfo *pcap;                            \
     pcap = (cap_ptr);                                   \
-    pcap->code = Swap32IfLE(code_sym);                  \
+    pcap->code = Swap32IfLE((CARD32)code_sym);          \
     memcpy(pcap->vendorSignature, (vendor),             \
            sz_rfbCapabilityInfoVendor);                 \
     memcpy(pcap->nameSignature, sig_##code_sym,         \

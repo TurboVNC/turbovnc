@@ -302,7 +302,7 @@ static const signed char zywrleConv[4][256]={
 	0, 0, 0, 0, 0, 0, 0, 0,
 }
 };
-const static signed char* zywrleParam[3][3][3]={
+static const signed char* zywrleParam[3][3][3]={
 	{{zywrleConv[0],zywrleConv[2],zywrleConv[0]},{zywrleConv[0],zywrleConv[0],zywrleConv[0]},{zywrleConv[0],zywrleConv[0],zywrleConv[0]}},
 	{{zywrleConv[0],zywrleConv[3],zywrleConv[0]},{zywrleConv[1],zywrleConv[1],zywrleConv[1]},{zywrleConv[0],zywrleConv[0],zywrleConv[0]}},
 	{{zywrleConv[0],zywrleConv[3],zywrleConv[0]},{zywrleConv[2],zywrleConv[2],zywrleConv[2]},{zywrleConv[1],zywrleConv[1],zywrleConv[1]}},

@@ -27,10 +27,6 @@
  * libXNVCtrl library properly protects the Display connection.
  */
 
-#if !defined(XTHREADS)
-#define XTHREADS
-#endif /* XTHREADS */
-
 #define NEED_EVENTS
 #define NEED_REPLIES
 #include <stdint.h>
@@ -41,6 +37,10 @@
 #include <X11/extensions/extutil.h>
 #include "NVCtrlLib.h"
 #include "nv_control.h"
+
+#if !defined(XTHREADS)
+#define XTHREADS
+#endif /* XTHREADS */
 
 #define NVCTRL_EXT_EXISTS              1
 #define NVCTRL_EXT_NEED_TARGET_SWAP    2

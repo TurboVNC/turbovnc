@@ -5,7 +5,7 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
- *  Copyright (C) 2015, 2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2015, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 
 #include "rfb.h"
 
-#if defined(AIX) || defined(SOLARIS)
+#if defined(AIX) || defined(sun)
 #  define MESSAGE_ARG_TYPE struct pam_message**
 #else
 #  define MESSAGE_ARG_TYPE const struct pam_message**

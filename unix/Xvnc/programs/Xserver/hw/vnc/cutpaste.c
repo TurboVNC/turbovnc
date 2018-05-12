@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2014, 2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014, 2017-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright 2016 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
@@ -68,6 +68,16 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
+
+/* The iconv() prototype in Solaris 10 expects const char **inbuf.  The iconv()
+   prototype in Solaris 11, Linux, and FreeBSD expects char **inbuf. */
+#ifdef __SUNPRO_C
+#pragma error_messages(off, E_ARG_INCOMPATIBLE_WITH_ARG_L)
+#elif defined(sun) && defined(__GNUC__)
+/* No way to disable just the incompatible pointer type warning with GCC 4.x,
+   so we have to disable all of them. */
+#pragma GCC diagnostic warning "-w"
+#endif
 
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
