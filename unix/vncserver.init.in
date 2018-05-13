@@ -3,6 +3,10 @@
 # chkconfig: - 91 35
 # description: Starts and stops the TurboVNC Server
 #
+### If you are using LDAP or another distributed authentication system, then
+### be sure to add any services needed for your distributed authentication
+### system to the Required-Start line below.
+#
 ### BEGIN INIT INFO
 # Provides: tvncserver
 # Required-Start: $syslog
