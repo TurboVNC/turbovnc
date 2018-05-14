@@ -54,8 +54,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   }
 
   // RFB thread
-  public DesktopWindow(int width, int height, PixelFormat serverPF,
-                       CConn cc_) {
+  DesktopWindow(int width, int height, PixelFormat serverPF, CConn cc_) {
     cc = cc_;
     setSize(width, height);
     swingDB = VncViewer.getBooleanProperty("turbovnc.swingdb", false);
@@ -144,9 +143,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int maskBytesPerRow = (w + 7) / 8;
     for (int y = 0; y < h; y++) {
       for (int x = 0; x < w; x++) {
-        int byte_ = y * maskBytesPerRow + x / 8;
+        int _byte = y * maskBytesPerRow + x / 8;
         int bit = 7 - x % 8;
-        if ((mask[byte_] & (1 << bit)) > 0) {
+        if ((mask[_byte] & (1 << bit)) > 0) {
           ((int[])cursor.data)[y * cursor.width() + x] = (0xff << 24) |
             (cursor.cm.getRed(data[y * w + x]) << 16) |
             (cursor.cm.getGreen(data[y * w + x]) << 8) |
@@ -378,7 +377,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         }
         if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
           float widthRatio = (float)availableSize.width / (float)cc.cp.width;
-          float heightRatio = (float)availableSize.height / (float)cc.cp.height;
+          float heightRatio =
+            (float)availableSize.height / (float)cc.cp.height;
           float ratio = Math.min(widthRatio, heightRatio);
           scaledWidth = (int)Math.floor(cc.cp.width * ratio);
           scaledHeight = (int)Math.floor(cc.cp.height * ratio);
@@ -394,7 +394,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // EDT
   public void paintComponent(Graphics g) {
-    Graphics2D g2 = (Graphics2D) g;
+    Graphics2D g2 = (Graphics2D)g;
     if (!swingDB &&
         RepaintManager.currentManager(this).isDoubleBufferingEnabled())
       // If double buffering is enabled, then this must be a system-triggered
@@ -502,12 +502,12 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     mouseCB(e, cc.viewport.buttonReleaseType);
   }
   public void mousePressed(MouseEvent e) {
-    if (VncViewer.os.startsWith("mac os x")) {
+    if (VncViewer.OS.startsWith("mac os x")) {
       try {
         Class appClass;
         Object obj;
 
-        if (VncViewer.javaVersion >= 9) {
+        if (VncViewer.JAVA_VERSION >= 9) {
           appClass = Desktop.class;
           obj = Desktop.getDesktop();
         } else {
@@ -520,7 +520,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         Method requestForeground =
           appClass.getMethod("requestForeground", boolean.class);
         requestForeground.invoke(obj, false);
-      } catch(Exception ex) {
+      } catch (Exception ex) {
         vlog.error("Could not bring window to foreground:");
         vlog.error("  " + ex.getMessage());
       }
@@ -722,36 +722,37 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     setColourMapEntriesTimerThread = null;
   }
 
-// These methods, mostly borrowed from https://github.com/brackeen/Scared,
-// ensure that key input continues to work on Mac platforms even if
-// ApplePressAndHoldEnabled is true in the user defaults.
-//
-// Copyright (c) 1998-2012, David Brackeen
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-//  * Redistributions of source code must retain the above copyright notice,
-//    this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in the
-//    documentation and/or other materials provided with the distribution.
-//  * Neither the name of David Brackeen nor the names of its contributors may
-//    be used to endorse or promote products derived from this software
-//    without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+  // These methods, mostly borrowed from https://github.com/brackeen/Scared,
+  // ensure that key input continues to work on Mac platforms even if
+  // ApplePressAndHoldEnabled is true in the user defaults.
+  //
+  // Copyright (c) 1998-2012, David Brackeen
+  // All rights reserved.
+  //
+  // Redistribution and use in source and binary forms, with or without
+  // modification, are permitted provided that the following conditions are
+  // met:
+  //
+  //  * Redistributions of source code must retain the above copyright notice,
+  //    this list of conditions and the following disclaimer.
+  //  * Redistributions in binary form must reproduce the above copyright
+  //    notice, this list of conditions and the following disclaimer in the
+  //    documentation and/or other materials provided with the distribution.
+  //  * Neither the name of David Brackeen nor the names of its contributors
+  //    may be used to endorse or promote products derived from this software
+  //    without specific prior written permission.
+  //
+  // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+  // IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+  // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  // PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+  // CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  // EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  // PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  // PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  // LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
   @Override
   public AttributedCharacterIterator cancelLatestCommittedText(
@@ -772,7 +773,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   @Override
   public InputMethodRequests getInputMethodRequests() {
-    if (VncViewer.os.startsWith("mac os x"))
+    if (VncViewer.OS.startsWith("mac os x"))
       return this;
     return null;
   }
@@ -798,7 +799,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     return new Rectangle(-32768, -32768, 0, 0);
   }
 
-// End borrowed code
+  // End borrowed code
 
   CConn cc;
 
@@ -816,7 +817,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   static Toolkit tk = Toolkit.getDefaultToolkit();
   boolean swingDB;
 
-  public int scaledWidth = 0, scaledHeight = 0;
+  int scaledWidth = 0, scaledHeight = 0;
   float scaleWidthRatio, scaleHeightRatio;
 
   int lastX, lastY;  // EDT only

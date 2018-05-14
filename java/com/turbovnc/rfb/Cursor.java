@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +28,8 @@ public class Cursor extends ManagedPixelBuffer {
   }
   public int maskLen() { return (width() + 7) / 8 * height(); }
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public Point hotspot;
   public byte[] mask;
+  // CHECKSTYLE VisibilityModifier:ON
 }

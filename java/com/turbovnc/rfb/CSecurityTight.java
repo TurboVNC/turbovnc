@@ -1,5 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,34 +79,34 @@ public class CSecurityTight extends CSecurity {
       String signature = new String(s);
 
       switch (code) {
-      case CODE_NOAUTH:
-        if (!Security.getEnabledSecTypes().contains(Security.secTypeNone))
+        case CODE_NOAUTH:
+          if (!Security.getEnabledSecTypes().contains(RFB.SECTYPE_NONE))
+            break;
+          if (vendor.equals(VENDOR_STDV) && signature.equals(SIG_NOAUTH))
+            supportedAuthTypes.add(code);
           break;
-        if (vendor.equals(VENDOR_STDV) && signature.equals(SIG_NOAUTH))
-          supportedAuthTypes.add(code);
-        break;
-      case CODE_VNCAUTH:
-        if (!Security.getEnabledSecTypes().contains(Security.secTypeVncAuth))
+        case CODE_VNCAUTH:
+          if (!Security.getEnabledSecTypes().contains(RFB.SECTYPE_VNCAUTH))
+            break;
+          if (vendor.equals(VENDOR_STDV) && signature.equals(SIG_VNCAUTH))
+            supportedAuthTypes.add(code);
           break;
-        if (vendor.equals(VENDOR_STDV) && signature.equals(SIG_VNCAUTH))
-          supportedAuthTypes.add(code);
-        break;
-      case CODE_ULGNAUTH:
-        if (!Security.getEnabledTightSecTypes().contains(Security.secTypeUnixLogin))
+        case CODE_ULGNAUTH:
+          if (!Security.getEnabledTightSecTypes().contains(RFB.SECTYPE_UNIX_LOGIN))
+            break;
+          if (vendor.equals(VENDOR_TGHT) && signature.equals(SIG_ULGNAUTH))
+            supportedAuthTypes.add(code);
           break;
-        if (vendor.equals(VENDOR_TGHT) && signature.equals(SIG_ULGNAUTH))
-          supportedAuthTypes.add(code);
-        break;
-      case CODE_VENCRYPT:
-        if (!Security.getEnabledSecTypes().contains(Security.secTypeVeNCrypt))
+        case CODE_VENCRYPT:
+          if (!Security.getEnabledSecTypes().contains(RFB.SECTYPE_VENCRYPT))
+            break;
+          if (vendor.equals(VENDOR_VENC) && signature.equals(SIG_VENCRYPT))
+            supportedAuthTypes.add(code);
           break;
-        if (vendor.equals(VENDOR_VENC) && signature.equals(SIG_VENCRYPT))
-          supportedAuthTypes.add(code);
-        break;
-      default:
-        vlog.info("Unsupported auth type: " + code + " " + vendor + " " +
-                  signature);
-        break;
+        default:
+          vlog.info("Unsupported auth type: " + code + " " + vendor + " " +
+                    signature);
+          break;
       }
     }
 
@@ -117,52 +117,52 @@ public class CSecurityTight extends CSecurity {
       int authType = (Integer)i.next();
       if (authType == CODE_ULGNAUTH || authType == CODE_NOAUTH ||
           authType == CODE_VNCAUTH || authType == CODE_VENCRYPT)
-        vlog.debug("Choosing security type " + Security.secTypeName(authType) +
+        vlog.debug("Choosing security type " + RFB.secTypeName(authType) +
                    "(" + authType + ")");
       switch (authType) {
-      case CODE_ULGNAUTH:
-        os.writeU32(CODE_ULGNAUTH);
+        case CODE_ULGNAUTH:
+          os.writeU32(CODE_ULGNAUTH);
 
-        StringBuffer username = new StringBuffer();
-        StringBuffer password = new StringBuffer();
+          StringBuffer username = new StringBuffer();
+          StringBuffer password = new StringBuffer();
 
-        CConn.upg.getUserPasswd(username, password);
+          CConn.upg.getUserPasswd(username, password);
 
-        // Return the response to the server
-        os.writeU32(username.length());
-        os.writeU32(password.length());
-        byte[] utf8str;
-        try {
-          utf8str = username.toString().getBytes("UTF8");
-          os.writeBytes(utf8str, 0, username.length());
-          utf8str = password.toString().getBytes("UTF8");
-          os.writeBytes(utf8str, 0, password.length());
-        } catch (java.io.UnsupportedEncodingException e) {
-          e.printStackTrace();
-        }
-        os.flush();
-        return true;
-      case CODE_NOAUTH:
-        os.writeU32(CODE_NOAUTH);
-        os.flush();
-        cs = new CSecurityNone();
-        return (cs.processMsg(cc));
-      case CODE_VNCAUTH:
-        os.writeU32(CODE_VNCAUTH);
-        os.flush();
-        cs = new CSecurityVncAuth();
-        return (cs.processMsg(cc));
-      case CODE_VENCRYPT:
-        os.writeU32(CODE_VENCRYPT);
-        os.flush();
-        cs = new CSecurityVeNCrypt(security);
-        return (cs.processMsg(cc));
+          // Return the response to the server
+          os.writeU32(username.length());
+          os.writeU32(password.length());
+          byte[] utf8str;
+          try {
+            utf8str = username.toString().getBytes("UTF8");
+            os.writeBytes(utf8str, 0, username.length());
+            utf8str = password.toString().getBytes("UTF8");
+            os.writeBytes(utf8str, 0, password.length());
+          } catch (java.io.UnsupportedEncodingException e) {
+            e.printStackTrace();
+          }
+          os.flush();
+          return true;
+        case CODE_NOAUTH:
+          os.writeU32(CODE_NOAUTH);
+          os.flush();
+          cs = new CSecurityNone();
+          return (cs.processMsg(cc));
+        case CODE_VNCAUTH:
+          os.writeU32(CODE_VNCAUTH);
+          os.flush();
+          cs = new CSecurityVncAuth();
+          return (cs.processMsg(cc));
+        case CODE_VENCRYPT:
+          os.writeU32(CODE_VENCRYPT);
+          os.flush();
+          cs = new CSecurityVeNCrypt(security);
+          return (cs.processMsg(cc));
       }
     }
     return false;
   }
 
-  public final int getType() { return Security.secTypeTight; }
+  public final int getType() { return RFB.SECTYPE_TIGHT; }
 
   public final String getDescription() {
     return (cs != null ? cs.getDescription() : "UnixLogin");

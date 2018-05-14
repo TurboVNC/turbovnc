@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P Hinz
- * Copyright (C) 2012, 2016-2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2016-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class CSecurityRFBTLS extends CSecurityTLS {
     // Shamelessly horked from CConnection.processSecurityTypesMsg()
     vlog.debug("processing TLS security types message");
 
-    int secType = Security.secTypeInvalid;
+    int secType = RFB.SECTYPE_INVALID;
 
     List<Integer> secTypes = new ArrayList<Integer>();
     secTypes = Security.getEnabledExtSecTypes();
@@ -58,20 +58,19 @@ public class CSecurityRFBTLS extends CSecurityTLS {
     for (int i = 0; i < nServerSecTypes; i++) {
       int serverSecType = is.readU8();
       vlog.debug("Server offers TLS security type " +
-                 Security.secTypeName(serverSecType) +
-                 "(" + serverSecType + ")");
+                 RFB.secTypeName(serverSecType) + "(" + serverSecType + ")");
 
       /*
        * Use the first type sent by server which matches client's type.
        * It means server's order specifies priority.
        */
-      if (secType == Security.secTypeInvalid) {
+      if (secType == RFB.SECTYPE_INVALID) {
         for (Iterator<Integer> j = secTypes.iterator(); j.hasNext();) {
           int refType = (Integer)j.next();
-          if ((refType == Security.secTypeTLSVnc &&
-               serverSecType == Security.secTypeVncAuth) ||
-              (refType == Security.secTypeTLSNone &&
-               serverSecType == Security.secTypeNone)) {
+          if ((refType == RFB.SECTYPE_TLS_VNC &&
+               serverSecType == RFB.SECTYPE_VNCAUTH) ||
+              (refType == RFB.SECTYPE_TLS_NONE &&
+               serverSecType == RFB.SECTYPE_NONE)) {
             secType = serverSecType;
             chosenType = refType;
             break;
@@ -80,8 +79,8 @@ public class CSecurityRFBTLS extends CSecurityTLS {
       }
     }
 
-    if (secType == Security.secTypeInvalid) {
-      cc.state_ = CConnection.RFBSTATE_INVALID;
+    if (secType == RFB.SECTYPE_INVALID) {
+      cc.state = CConnection.RFBSTATE_INVALID;
       vlog.error("No matching security types");
       throw new ErrorException("No matching security types");
     }
@@ -90,7 +89,7 @@ public class CSecurityRFBTLS extends CSecurityTLS {
     os.writeU8(secType);
     os.flush();
     vlog.debug("Choosing TLS security type " +
-               Security.secTypeName(secType) + "(" + secType + ")");
+               RFB.secTypeName(secType) + "(" + secType + ")");
 
     csecurity = security.getCSecurity(secType);
     return csecurity.processMsg(cc);
@@ -99,7 +98,7 @@ public class CSecurityRFBTLS extends CSecurityTLS {
   public final int getType() { return chosenType; }
 
   public final String getDescription() {
-    return Security.secTypeName(chosenType);
+    return RFB.secTypeName(chosenType);
   }
 
   private CSecurity csecurity;

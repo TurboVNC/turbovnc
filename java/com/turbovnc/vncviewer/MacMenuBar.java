@@ -55,7 +55,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       Class appClass, aboutHandlerClass, prefsHandlerClass;
       Object obj;
 
-      if (VncViewer.javaVersion >= 9) {
+      if (VncViewer.JAVA_VERSION >= 9) {
         appClass = Desktop.class;
         obj = Desktop.getDesktop();
         aboutHandlerClass = Class.forName("java.awt.desktop.AboutHandler");
@@ -180,17 +180,17 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, ctrlAltDel) && !cc.opts.viewOnly) {
-      cc.writeKeyEvent(Keysyms.Control_L, true);
-      cc.writeKeyEvent(Keysyms.Alt_L, true);
-      cc.writeKeyEvent(Keysyms.Delete, true);
-      cc.writeKeyEvent(Keysyms.Delete, false);
-      cc.writeKeyEvent(Keysyms.Alt_L, false);
-      cc.writeKeyEvent(Keysyms.Control_L, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, true);
+      cc.writeKeyEvent(Keysyms.ALT_L, true);
+      cc.writeKeyEvent(Keysyms.DELETE, true);
+      cc.writeKeyEvent(Keysyms.DELETE, false);
+      cc.writeKeyEvent(Keysyms.ALT_L, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, false);
     } else if (actionMatch(ev, ctrlEsc) && !cc.opts.viewOnly) {
-      cc.writeKeyEvent(Keysyms.Control_L, true);
-      cc.writeKeyEvent(Keysyms.Escape, true);
-      cc.writeKeyEvent(Keysyms.Escape, false);
-      cc.writeKeyEvent(Keysyms.Control_L, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, true);
+      cc.writeKeyEvent(Keysyms.ESCAPE, true);
+      cc.writeKeyEvent(Keysyms.ESCAPE, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, false);
     } else if (actionMatch(ev, refresh)) {
       cc.refresh();
     } else if (actionMatch(ev, losslessRefresh)) {

@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011, 2015 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,21 +26,21 @@ import java.nio.charset.Charset;
 import com.turbovnc.rdr.*;
 import com.turbovnc.vncviewer.*;
 
-abstract public class CMsgWriter {
+public abstract class CMsgWriter {
 
-  abstract public void writeClientInit(boolean shared);
+  public abstract void writeClientInit(boolean shared);
 
-  synchronized public void writeSetPixelFormat(PixelFormat pf)
+  public synchronized void writeSetPixelFormat(PixelFormat pf)
   {
-    startMsg(MsgTypes.msgTypeSetPixelFormat);
+    startMsg(RFB.SET_PIXEL_FORMAT);
     os.pad(3);
     pf.write(os);
     endMsg();
   }
 
-  synchronized public void writeSetEncodings(int nEncodings, int[] encodings)
+  public synchronized void writeSetEncodings(int nEncodings, int[] encodings)
   {
-    startMsg(MsgTypes.msgTypeSetEncodings);
+    startMsg(RFB.SET_ENCODINGS);
     os.skip(1);
     os.writeU16(nEncodings);
     for (int i = 0; i < nEncodings; i++)
@@ -51,38 +51,38 @@ abstract public class CMsgWriter {
   // Ask for encodings based on which decoders are supported.  Assumes higher
   // encoding numbers are more desirable.
 
-  synchronized public void writeSetEncodings(int preferredEncoding,
+  public synchronized void writeSetEncodings(int preferredEncoding,
                                              int lastEncoding, Options opts)
   {
     int nEncodings = 0;
-    int[] encodings = new int[Encodings.encodingMax+3];
+    int[] encodings = new int[RFB.ENCODING_MAX + 3];
     if (opts.cursorShape) {
       if (!VncViewer.getBooleanProperty("turbovnc.forcexcursor", false))
-        encodings[nEncodings++] = Encodings.pseudoEncodingCursor;
-      encodings[nEncodings++] = Encodings.pseudoEncodingXCursor;
+        encodings[nEncodings++] = RFB.ENCODING_RICH_CURSOR;
+      encodings[nEncodings++] = RFB.ENCODING_X_CURSOR;
     }
     if (cp.supportsDesktopResize)
-      encodings[nEncodings++] = Encodings.pseudoEncodingDesktopSize;
+      encodings[nEncodings++] = RFB.ENCODING_NEW_FB_SIZE;
     if (cp.supportsExtendedDesktopSize)
-      encodings[nEncodings++] = Encodings.pseudoEncodingExtendedDesktopSize;
+      encodings[nEncodings++] = RFB.ENCODING_EXTENDED_DESKTOP_SIZE;
     if (cp.supportsDesktopRename)
-      encodings[nEncodings++] = Encodings.pseudoEncodingDesktopName;
+      encodings[nEncodings++] = RFB.ENCODING_DESKTOP_NAME;
     if (cp.supportsClientRedirect)
-      encodings[nEncodings++] = Encodings.pseudoEncodingClientRedirect;
+      encodings[nEncodings++] = RFB.ENCODING_CLIENT_REDIRECT;
 
-    encodings[nEncodings++] = Encodings.pseudoEncodingLastRect;
+    encodings[nEncodings++] = RFB.ENCODING_LAST_RECT;
     if (opts.continuousUpdates) {
-      encodings[nEncodings++] = Encodings.pseudoEncodingContinuousUpdates;
-      encodings[nEncodings++] = Encodings.pseudoEncodingFence;
+      encodings[nEncodings++] = RFB.ENCODING_CONTINUOUS_UPDATES;
+      encodings[nEncodings++] = RFB.ENCODING_FENCE;
     }
-    encodings[nEncodings++] = Encodings.pseudoEncodingGII;
+    encodings[nEncodings++] = RFB.ENCODING_GII;
 
     if (Decoder.supported(preferredEncoding)) {
       encodings[nEncodings++] = preferredEncoding;
     }
 
     if (opts.copyRect) {
-      encodings[nEncodings++] = Encodings.encodingCopyRect;
+      encodings[nEncodings++] = RFB.ENCODING_COPYRECT;
     }
 
     /*
@@ -91,60 +91,57 @@ abstract public class CMsgWriter {
      *   Tight, ZRLE, Hextile, *
      */
 
-    if ((preferredEncoding != Encodings.encodingTight) &&
-        Decoder.supported(Encodings.encodingTight))
-      encodings[nEncodings++] = Encodings.encodingTight;
+    if ((preferredEncoding != RFB.ENCODING_TIGHT) &&
+        Decoder.supported(RFB.ENCODING_TIGHT))
+      encodings[nEncodings++] = RFB.ENCODING_TIGHT;
 
-    if ((preferredEncoding != Encodings.encodingZRLE) &&
-        Decoder.supported(Encodings.encodingZRLE))
-      encodings[nEncodings++] = Encodings.encodingZRLE;
+    if ((preferredEncoding != RFB.ENCODING_ZRLE) &&
+        Decoder.supported(RFB.ENCODING_ZRLE))
+      encodings[nEncodings++] = RFB.ENCODING_ZRLE;
 
-    if ((preferredEncoding != Encodings.encodingHextile) &&
-        Decoder.supported(Encodings.encodingHextile))
-      encodings[nEncodings++] = Encodings.encodingHextile;
+    if ((preferredEncoding != RFB.ENCODING_HEXTILE) &&
+        Decoder.supported(RFB.ENCODING_HEXTILE))
+      encodings[nEncodings++] = RFB.ENCODING_HEXTILE;
 
     // Remaining encodings
-    for (int i = Encodings.encodingMax; i >= 0; i--) {
+    for (int i = RFB.ENCODING_MAX; i >= 0; i--) {
       switch (i) {
-      case Encodings.encodingTight:
-      case Encodings.encodingZRLE:
-      case Encodings.encodingHextile:
-        break;
-      default:
-        if ((i != preferredEncoding) && Decoder.supported(i))
+        case RFB.ENCODING_TIGHT:
+        case RFB.ENCODING_ZRLE:
+        case RFB.ENCODING_HEXTILE:
+          break;
+        default:
+          if ((i != preferredEncoding) && Decoder.supported(i))
             encodings[nEncodings++] = i;
       }
     }
 
-    encodings[nEncodings++] = Encodings.pseudoEncodingLastRect;
+    encodings[nEncodings++] = RFB.ENCODING_LAST_RECT;
     if (opts.compressLevel >= 0 && opts.compressLevel <= 9)
-      encodings[nEncodings++] = Encodings.pseudoEncodingCompressLevel0
-        + opts.compressLevel;
-    if (opts.allowJpeg && opts.preferredEncoding == Encodings.encodingTight) {
+      encodings[nEncodings++] = RFB.ENCODING_COMPRESS_LEVEL_0 +
+        opts.compressLevel;
+    if (opts.allowJpeg && opts.preferredEncoding == RFB.ENCODING_TIGHT) {
       int qualityLevel = opts.quality / 10;
       if (qualityLevel > 9) qualityLevel = 9;
-      encodings[nEncodings++] = Encodings.pseudoEncodingQualityLevel0
-        + qualityLevel;
-      encodings[nEncodings++] = Encodings.pseudoEncodingFineQualityLevel0
-        + opts.quality;
-      encodings[nEncodings++] = Encodings.pseudoEncodingSubsamp1X
-        + opts.subsampling;
-    } else if (opts.preferredEncoding != Encodings.encodingTight ||
-               (lastEncoding >= 0 &&
-                lastEncoding != Encodings.encodingTight)) {
+      encodings[nEncodings++] = RFB.ENCODING_QUALITY_LEVEL_0 + qualityLevel;
+      encodings[nEncodings++] = RFB.ENCODING_FINE_QUALITY_LEVEL_0 +
+        opts.quality;
+      encodings[nEncodings++] = RFB.ENCODING_SUBSAMP_1X + opts.subsampling;
+    } else if (opts.preferredEncoding != RFB.ENCODING_TIGHT ||
+               (lastEncoding >= 0 && lastEncoding != RFB.ENCODING_TIGHT)) {
       int qualityLevel = opts.quality;
       if (qualityLevel > 9) qualityLevel = 9;
-      encodings[nEncodings++] = Encodings.pseudoEncodingQualityLevel0
-        + qualityLevel;
+      encodings[nEncodings++] = RFB.ENCODING_QUALITY_LEVEL_0 + qualityLevel;
     }
 
     writeSetEncodings(nEncodings, encodings);
   }
 
-  synchronized public void writeFramebufferUpdateRequest(Rect r, boolean incremental)
+  public synchronized void writeFramebufferUpdateRequest(Rect r,
+                                                         boolean incremental)
   {
-    startMsg(MsgTypes.msgTypeFramebufferUpdateRequest);
-    os.writeU8(incremental?1:0);
+    startMsg(RFB.FRAMEBUFFER_UPDATE_REQUEST);
+    os.writeU8(incremental ? 1 : 0);
     os.writeU16(r.tl.x);
     os.writeU16(r.tl.y);
     os.writeU16(r.width());
@@ -152,33 +149,33 @@ abstract public class CMsgWriter {
     endMsg();
   }
 
-  synchronized public void writeKeyEvent(int key, boolean down)
+  public synchronized void writeKeyEvent(int key, boolean down)
   {
-    startMsg(MsgTypes.msgTypeKeyEvent);
-    os.writeU8(down?1:0);
+    startMsg(RFB.KEY_EVENT);
+    os.writeU8(down ? 1 : 0);
     os.pad(2);
     os.writeU32(key);
     endMsg();
   }
 
-  synchronized public void writePointerEvent(Point pos, int buttonMask)
+  public synchronized void writePointerEvent(Point pos, int buttonMask)
   {
-    Point p = new Point(pos.x,pos.y);
+    Point p = new Point(pos.x, pos.y);
     if (p.x < 0) p.x = 0;
     if (p.y < 0) p.y = 0;
     if (p.x >= cp.width) p.x = cp.width - 1;
     if (p.y >= cp.height) p.y = cp.height - 1;
 
-    startMsg(MsgTypes.msgTypePointerEvent);
+    startMsg(RFB.POINTER_EVENT);
     os.writeU8(buttonMask);
     os.writeU16(p.x);
     os.writeU16(p.y);
     endMsg();
   }
 
-  synchronized public void writeClientCutText(String str, int len)
+  public synchronized void writeClientCutText(String str, int len)
   {
-    startMsg(MsgTypes.msgTypeClientCutText);
+    startMsg(RFB.CLIENT_CUT_TEXT);
     os.pad(3);
     os.writeU32(len);
     Charset latin1 = Charset.forName("ISO-8859-1");
@@ -187,10 +184,10 @@ abstract public class CMsgWriter {
     endMsg();
   }
 
-  abstract public void startMsg(int type);
-  abstract public void endMsg();
+  public abstract void startMsg(int type);
+  public abstract void endMsg();
 
-  synchronized public void setOutStream(OutStream os_) { os = os_; }
+  public synchronized void setOutStream(OutStream os_) { os = os_; }
 
   ConnParams getConnParams() { return cp; }
   OutStream getOutStream() { return os; }
@@ -200,7 +197,6 @@ abstract public class CMsgWriter {
   }
 
   ConnParams cp;
-  Options opts;
   OutStream os;
 
   static LogWriter vlog = new LogWriter("CMsgWriter");

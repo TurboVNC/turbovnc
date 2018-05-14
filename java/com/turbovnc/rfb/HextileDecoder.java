@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,40 +46,33 @@ public class HextileDecoder extends Decoder {
 
         int tileType = is.readU8();
 
-        if ((tileType & Hextile.raw) != 0) {
+        if ((tileType & RFB.HEXTILE_RAW) != 0) {
           is.readPixels(buf, t.area(), bytesPerPixel, bigEndian);
           handler.imageRect(t, buf);
           continue;
         }
 
-        if ((tileType & Hextile.bgSpecified) != 0)
+        if ((tileType & RFB.HEXTILE_BACKGROUND_SPECIFIED) != 0)
           bg = is.readPixel(bytesPerPixel, bigEndian);
 
         int len = t.area();
         int ptr = 0;
         while (len-- > 0) buf[ptr++] = bg;
 
-        if ((tileType & Hextile.fgSpecified) != 0)
+        if ((tileType & RFB.HEXTILE_FOREGROUND_SPECIFIED) != 0)
           fg = is.readPixel(bytesPerPixel, bigEndian);
 
-        if ((tileType & Hextile.anySubrects) != 0) {
+        if ((tileType & RFB.HEXTILE_ANY_SUBRECTS) != 0) {
           int nSubrects = is.readU8();
 
           for (int i = 0; i < nSubrects; i++) {
 
-            if ((tileType & Hextile.subrectsColoured) != 0)
+            if ((tileType & RFB.HEXTILE_SUBRECTS_COLOURED) != 0)
               fg = is.readPixel(bytesPerPixel, bigEndian);
 
             int xy = is.readU8();
             int wh = is.readU8();
 
-/*
-            Rect s = new Rect();
-            s.tl.x = t.tl.x + ((xy >> 4) & 15);
-            s.tl.y = t.tl.y + (xy & 15);
-            s.br.x = s.tl.x + ((wh >> 4) & 15) + 1;
-            s.br.y = s.tl.y + (wh & 15) + 1;
-*/
             int x = ((xy >> 4) & 15);
             int y = (xy & 15);
             int w = ((wh >> 4) & 15) + 1;

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
- * Copyright (C) 2011-2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -36,13 +36,11 @@ public abstract class CMsgHandler {
     cp.height = height;
   }
 
-  public void setExtendedDesktopSize(int reason, int result,
-                                     int width, int height,
-                                     ScreenSet layout) {
+  public void setExtendedDesktopSize(int reason, int result, int width,
+                                     int height, ScreenSet layout) {
     cp.supportsSetDesktopSize = true;
 
-    if ((reason == screenTypes.reasonClient) &&
-        (result != screenTypes.resultSuccess))
+    if (reason == RFB.EDS_REASON_CLIENT && result != RFB.EDS_RESULT_SUCCESS)
       return;
 
     if (!layout.validate(width, height, true))
@@ -72,28 +70,28 @@ public abstract class CMsgHandler {
   public abstract void enableGII();
   public abstract void giiDeviceCreated(int deviceOrigin);
 
-  public void clientRedirect(int port, String host,
-                             String x509subject) {}
+  public abstract void clientRedirect(int port, String host,
+                                      String x509subject);
 
-  public void setCursor(int width, int height, Point hotspot,
-                        int[] data, byte[] mask) {}
-  public void serverInit() {}
+  public abstract void setCursor(int width, int height, Point hotspot,
+                                 int[] data, byte[] mask);
+  public abstract void serverInit();
 
-  public void framebufferUpdateStart() {}
-  public void framebufferUpdateEnd() {}
-  public void beginRect(Rect r, int encoding) {}
-  public void endRect(Rect r, int encoding) {}
-  public void startDecodeTimer() {}
-  public void stopDecodeTimer() {}
+  public abstract void framebufferUpdateStart();
+  public abstract void framebufferUpdateEnd();
+  public abstract void beginRect(Rect r, int encoding);
+  public abstract void endRect(Rect r, int encoding);
+  public abstract void startDecodeTimer();
+  public abstract void stopDecodeTimer();
 
-  public void setColourMapEntries(int firstColour, int nColours,
-                                  int[] rgbs) {}
-  public void bell() {}
-  public void serverCutText(String str, int len) {}
+  public abstract void setColourMapEntries(int firstColour, int nColours,
+                                           int[] rgbs);
+  public abstract void bell();
+  public abstract void serverCutText(String str, int len);
 
-  public void fillRect(Rect r, int pix) {}
-  public void imageRect(Rect r, Object pixels) {}
-  public void copyRect(Rect r, int srcX, int srcY) {}
+  public abstract void fillRect(Rect r, int pix);
+  public abstract void imageRect(Rect r, Object pixels);
+  public abstract void copyRect(Rect r, int srcX, int srcY);
 
   public abstract Object getRawPixelsRW(int[] stride);
   public abstract void releaseRawPixels(Rect r);
@@ -101,7 +99,7 @@ public abstract class CMsgHandler {
   public abstract PixelFormat getPreferredPF();
   public abstract CSecurity getCurrentCSecurity();
 
-
+  @SuppressWarnings("checkstyle:VisibilityModifier")
   public ConnParams cp;
 
   static LogWriter vlog = new LogWriter("CMsgHandler");

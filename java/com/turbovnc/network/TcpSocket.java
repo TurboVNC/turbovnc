@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,8 @@ import java.nio.channels.*;
 public class TcpSocket extends Socket {
 
   // -=- Socket initialisation
-  public static boolean socketsInitialised = false;
+  static boolean socketsInitialised = false;
+
   public static void initSockets() {
     if (socketsInitialised)
       return;
@@ -97,7 +98,8 @@ public class TcpSocket extends Socket {
   }
 
   public int getMyPort() {
-    SocketAddress address = ((SocketDescriptor)getFd()).socket().getLocalSocketAddress();
+    SocketAddress address =
+      ((SocketDescriptor)getFd()).socket().getLocalSocketAddress();
     return ((InetSocketAddress)address).getPort();
   }
 
@@ -161,7 +163,9 @@ public class TcpSocket extends Socket {
   }
 
   public int getSockPort() {
-    return ((InetSocketAddress)((SocketDescriptor)getFd()).socket().getRemoteSocketAddress()).getPort();
+    SocketAddress address =
+      ((SocketDescriptor)getFd()).socket().getRemoteSocketAddress();
+    return ((InetSocketAddress)address).getPort();
   }
 
   /* Tunnelling support. */
@@ -180,5 +184,4 @@ public class TcpSocket extends Socket {
 
   private boolean closeFd;
   static LogWriter vlog = new LogWriter("TcpSocket");
-
 }

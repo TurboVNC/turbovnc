@@ -21,7 +21,7 @@
 package com.turbovnc.rdr;
 
 class TimedOut extends ErrorException {
-  public TimedOut() {
+  TimedOut() {
     super("Timed out");
   }
 }

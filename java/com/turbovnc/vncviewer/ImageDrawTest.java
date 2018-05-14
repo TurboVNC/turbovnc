@@ -1,5 +1,5 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,16 +97,16 @@ public class ImageDrawTest extends JFrame {
       int i, j;
       PixelFormat pf = im.getPF();
       int[] stride = new int[]{w};
-      Object data_ = im.getRawPixelsRW(stride);
+      Object pixels = im.getRawPixelsRW(stride);
 
-      if (pf.is888() && data_ instanceof int[]) {
-       int[] data = (int[])data_;
+      if (pf.is888() && pixels instanceof int[]) {
+        int[] buf = (int[])pixels;
         for (j = 0; j < h; j++) {
           for (i = 0; i < w; i++) {
-            data[j * stride[0] + i] = 0xff << 24;
-            data[j * stride[0] + i] |= ((i + offset) % 256) << pf.redShift;
-            data[j * stride[0] + i] |= ((j + offset) % 256) << pf.greenShift;
-            data[j * stride[0] + i] |= ((i + j + offset) % 256) << pf.blueShift;
+            buf[j * stride[0] + i] = 0xff << 24;
+            buf[j * stride[0] + i] |= ((i + offset) % 256) << pf.redShift;
+            buf[j * stride[0] + i] |= ((j + offset) % 256) << pf.greenShift;
+            buf[j * stride[0] + i] |= ((i + j + offset) % 256) << pf.blueShift;
           }
         }
       } else {
@@ -119,12 +119,12 @@ public class ImageDrawTest extends JFrame {
             rgbBuf[(j * w + i) * 3 + 2] = (byte)((i + j + offset) % 256);
           }
         }
-        pf.bufferFromRGB(data_, 0, 0, stride[0], rgbBuf, w, h);
+        pf.bufferFromRGB(pixels, 0, 0, stride[0], rgbBuf, w, h);
       }
     }
 
     public void paintComponent(Graphics g) {
-      Graphics2D g2 = (Graphics2D) g;
+      Graphics2D g2 = (Graphics2D)g;
       if (!swingDB &&
           RepaintManager.currentManager(this).isDoubleBufferingEnabled())
         super.paintComponent(g);
@@ -198,8 +198,8 @@ public class ImageDrawTest extends JFrame {
         int temp = -1;
         try {
           temp = Integer.parseInt(arg[++i]);
-        } catch (NumberFormatException e) {};
-        switch(temp) {
+        } catch (NumberFormatException e) {}
+        switch (temp) {
           case 8:  case 64:  case 256:  case 32768:  case 65536:
             colors = temp;
         }
@@ -208,7 +208,7 @@ public class ImageDrawTest extends JFrame {
         int temp = -1;
         try {
           temp = Integer.parseInt(arg[++i]);
-        } catch (NumberFormatException e) {};
+        } catch (NumberFormatException e) {}
         if (temp > 0)
           width = temp;
       }
@@ -216,7 +216,7 @@ public class ImageDrawTest extends JFrame {
         int temp = -1;
         try {
           temp = Integer.parseInt(arg[++i]);
-        } catch (NumberFormatException e) {};
+        } catch (NumberFormatException e) {}
         if (temp > 0)
           height = temp;
       }

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,28 +26,20 @@ public abstract class Decoder {
   public void reset() {}
 
   public static boolean supported(int encoding) {
-/*
-    return encoding <= Encodings.encodingMax && createFns[encoding];
-*/
-    return (encoding == Encodings.encodingRaw ||
-            encoding == Encodings.encodingRRE ||
-            encoding == Encodings.encodingHextile ||
-            encoding == Encodings.encodingTight ||
-            encoding == Encodings.encodingZRLE);
+    return (encoding == RFB.ENCODING_RAW ||
+            encoding == RFB.ENCODING_RRE ||
+            encoding == RFB.ENCODING_HEXTILE ||
+            encoding == RFB.ENCODING_TIGHT ||
+            encoding == RFB.ENCODING_ZRLE);
   }
 
   public static Decoder createDecoder(int encoding, CMsgReader reader) {
-/*
-    if (encoding <= Encodings.encodingMax && createFns[encoding])
-      return (createFns[encoding])(reader);
-    return 0;
-*/
-    switch(encoding) {
-    case Encodings.encodingRaw:      return new RawDecoder(reader);
-    case Encodings.encodingRRE:      return new RREDecoder(reader);
-    case Encodings.encodingHextile:  return new HextileDecoder(reader);
-    case Encodings.encodingTight:    return new TightDecoder(reader);
-    case Encodings.encodingZRLE:     return new ZRLEDecoder(reader);
+    switch (encoding) {
+      case RFB.ENCODING_RAW:      return new RawDecoder(reader);
+      case RFB.ENCODING_RRE:      return new RREDecoder(reader);
+      case RFB.ENCODING_HEXTILE:  return new HextileDecoder(reader);
+      case RFB.ENCODING_TIGHT:    return new TightDecoder(reader);
+      case RFB.ENCODING_ZRLE:     return new ZRLEDecoder(reader);
     }
     return null;
   }

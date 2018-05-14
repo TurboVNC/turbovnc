@@ -1,6 +1,6 @@
 /* Copyright 2009 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,8 +73,9 @@ public class Screen {
       id = rng.nextInt();
   }
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public int id;
   public Rect dimensions;
   public int flags;
-
+  // CHECKSTYLE VisibilityModifier:ON
 }

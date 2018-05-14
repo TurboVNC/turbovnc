@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009 Pierre Ossman for Cendio AB
- * Copyright (C) 2011-2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -340,6 +340,7 @@ public class PixelFormat {
     return s.toString();
   }
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public int bpp;
   public int depth;
   public boolean bigEndian;
@@ -352,4 +353,5 @@ public class PixelFormat {
   public int blueShift;
   public boolean alpha;
   public boolean alphaPreMultiplied = true;
+  // CHECKSTYLE VisibilityModifier:ON
 }

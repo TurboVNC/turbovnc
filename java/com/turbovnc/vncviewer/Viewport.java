@@ -40,7 +40,7 @@ public class Viewport extends JFrame {
     updateTitle();
     setFocusable(false);
     setFocusTraversalKeysEnabled(false);
-    setIconImage(VncViewer.frameImage);
+    setIconImage(VncViewer.FRAME_IMAGE);
     UIManager.getDefaults().put("ScrollPane.ancestorInputMap",
       new UIDefaults.LazyInputMap(new Object[]{}));
     sp = new JScrollPane();
@@ -71,7 +71,7 @@ public class Viewport extends JFrame {
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
     getContentPane().add(sp);
-    if (VncViewer.os.startsWith("mac os x")) {
+    if (VncViewer.OS.startsWith("mac os x")) {
       macMenu = new MacMenuBar(cc);
       setJMenuBar(macMenu);
       if (VncViewer.getBooleanProperty("turbovnc.lionfs", true))
@@ -95,7 +95,7 @@ public class Viewport extends JFrame {
           grabKeyboardHelper(cc.shouldGrab());
           cc.selectGrab(cc.shouldGrab());
         }
-        if (VncViewer.os.startsWith("mac os x")) {
+        if (VncViewer.OS.startsWith("mac os x")) {
           x11dpy = 0;
           setupExtInputHelper();
         }
@@ -106,7 +106,7 @@ public class Viewport extends JFrame {
           vlog.info("Keyboard focus lost. Temporarily ungrabbing keyboard.");
           grabKeyboardHelper(false);
         }
-        if (VncViewer.os.startsWith("mac os x") &&
+        if (VncViewer.OS.startsWith("mac os x") &&
             e.getOppositeWindow() == null)
           cleanupExtInputHelper();
       }
@@ -125,8 +125,10 @@ public class Viewport extends JFrame {
           if ((sp.getSize().width != cc.desktop.scaledWidth) ||
               (sp.getSize().height != cc.desktop.scaledHeight)) {
             cc.desktop.setScaledSize();
-            sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            sp.setHorizontalScrollBarPolicy(
+              ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            sp.setVerticalScrollBarPolicy(
+              ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             sp.validate();
             if (getExtendedState() != JFrame.MAXIMIZED_BOTH &&
                 !cc.opts.fullScreen) {
@@ -148,8 +150,10 @@ public class Viewport extends JFrame {
           if (availableSize.width >= 1 && availableSize.height >= 1 &&
               (availableSize.width != cc.desktop.scaledWidth ||
                availableSize.height != cc.desktop.scaledHeight)) {
-            sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+            sp.setHorizontalScrollBarPolicy(
+              ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            sp.setVerticalScrollBarPolicy(
+              ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
             sp.validate();
             if (timer != null)
               timer.stop();
@@ -167,8 +171,10 @@ public class Viewport extends JFrame {
             timer.start();
           }
         } else {
-          sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-          sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+          sp.setHorizontalScrollBarPolicy(
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          sp.setVerticalScrollBarPolicy(
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
           sp.validate();
         }
         if (cc.desktop.cursor != null) {
@@ -274,9 +280,9 @@ public class Viewport extends JFrame {
         throw new Exception("Operating system version is " + version);
 
       Class fsuClass = Class.forName("com.apple.eawt.FullScreenUtilities");
-      Class argClasses[] = new Class[]{Window.class, Boolean.TYPE};
+      Class[] argClasses = new Class[]{Window.class, Boolean.TYPE};
 
-      if (VncViewer.javaVersion < 9) {
+      if (VncViewer.JAVA_VERSION < 9) {
         Method setWindowCanFullScreen =
           fsuClass.getMethod("setWindowCanFullScreen", argClasses);
         setWindowCanFullScreen.invoke(fsuClass, this, true);
@@ -337,7 +343,7 @@ public class Viewport extends JFrame {
     // work properly on OS X until the component is visible, so we store the
     // new position and call setLocation() again once the component is made
     // visible.
-    if (VncViewer.os.startsWith("mac os x") && !isVisible())
+    if (VncViewer.OS.startsWith("mac os x") && !isVisible())
       deferredPosition = new Point(x, y);
   }
 
@@ -361,7 +367,7 @@ public class Viewport extends JFrame {
   public void updateTitle() {
     int enc = cc.lastServerEncoding;
     if (enc < 0) enc = cc.currentEncoding;
-    if (enc == Encodings.encodingTight) {
+    if (enc == RFB.ENCODING_TIGHT) {
       if (cc.opts.allowJpeg) {
         String[] subsampStr = { "1X", "4X", "2X", "Gray" };
         setTitle(cc.cp.name() + " [Tight + JPEG " +
@@ -372,7 +378,7 @@ public class Viewport extends JFrame {
                  " + CL " + cc.opts.compressLevel + "]");
       }
     } else {
-      setTitle(cc.cp.name() + " [" + Encodings.encodingName(enc) + "]");
+      setTitle(cc.cp.name() + " [" + RFB.encodingName(enc) + "]");
     }
   }
 
@@ -450,7 +456,7 @@ public class Viewport extends JFrame {
   public void setupExtInputHelper() {
     if (isHelperAvailable() && cc.cp.supportsGII && x11dpy == 0) {
       try {
-        if (VncViewer.os.startsWith("mac os x")) {
+        if (VncViewer.OS.startsWith("mac os x")) {
           synchronized(VncViewer.class) {
             setupExtInput();
           }
@@ -465,18 +471,18 @@ public class Viewport extends JFrame {
         vlog.info("  " + e.toString());
         vlog.info("  Extended input device support may not work correctly.");
       }
-      if (VncViewer.os.startsWith("mac os x") && devices == null) {
+      if (VncViewer.OS.startsWith("mac os x") && devices == null) {
         // Create default devices for Wacom tablet
         for (int i = 0; i < 2; i++) {
           ExtInputDevice dev = new ExtInputDevice();
           dev.name = new String(i == 0 ? "Stylus" : "Eraser");
           dev.id = i;
           dev.vendorID = 4242;
-          dev.productID = (i == 0 ? giiTypes.giiDevTypeStylus :
-                                    giiTypes.giiDevTypeEraser);
-          dev.canGenerate = giiTypes.giiButtonPressMask |
-                            giiTypes.giiButtonReleaseMask |
-                            giiTypes.giiValuatorAbsoluteMask;
+          dev.productID = (i == 0 ? RFB.GII_DEVTYPE_STYLUS :
+                                    RFB.GII_DEVTYPE_ERASER);
+          dev.canGenerate = RFB.GII_BUTTON_PRESS_MASK |
+                            RFB.GII_BUTTON_RELEASE_MASK |
+                            RFB.GII_VALUATOR_ABSOLUTE_MASK;
           dev.numButtons = 3;
           dev.absolute = true;
 
@@ -487,7 +493,7 @@ public class Viewport extends JFrame {
           val.rangeMin = 0;
           val.rangeMax = 31496;
           val.rangeCenter = 15748;
-          val.siUnit = giiTypes.giiUnitLength;
+          val.siUnit = RFB.GII_UNIT_LENGTH;
           val.siDiv = 200000;
           dev.addValuator(val);
 
@@ -498,7 +504,7 @@ public class Viewport extends JFrame {
           val.rangeMin = 0;
           val.rangeMax = 19685;
           val.rangeCenter = 9843;
-          val.siUnit = giiTypes.giiUnitLength;
+          val.siUnit = RFB.GII_UNIT_LENGTH;
           val.siDiv = 200000;
           dev.addValuator(val);
 
@@ -509,7 +515,7 @@ public class Viewport extends JFrame {
           val.rangeMin = 0;
           val.rangeMax = 65536;
           val.rangeCenter = 32768;
-          val.siUnit = giiTypes.giiUnitLength;
+          val.siUnit = RFB.GII_UNIT_LENGTH;
           val.siDiv = 1;
           dev.addValuator(val);
 
@@ -520,7 +526,7 @@ public class Viewport extends JFrame {
           val.rangeMin = -64;
           val.rangeMax = 63;
           val.rangeCenter = 0;
-          val.siUnit = giiTypes.giiUnitLength;
+          val.siUnit = RFB.GII_UNIT_LENGTH;
           val.siDiv = 57;
           dev.addValuator(val);
 
@@ -531,7 +537,7 @@ public class Viewport extends JFrame {
           val.rangeMin = -64;
           val.rangeMax = 63;
           val.rangeCenter = 0;
-          val.siUnit = giiTypes.giiUnitLength;
+          val.siUnit = RFB.GII_UNIT_LENGTH;
           val.siDiv = 57;
           dev.addValuator(val);
 
@@ -544,7 +550,7 @@ public class Viewport extends JFrame {
   public void cleanupExtInputHelper() {
     if (isHelperAvailable() && x11dpy != 0) {
       try {
-        if (VncViewer.os.startsWith("mac os x")) {
+        if (VncViewer.OS.startsWith("mac os x")) {
           synchronized(VncViewer.class) {
             cleanupExtInput();
           }
@@ -579,8 +585,8 @@ public class Viewport extends JFrame {
       ExtInputDevice dev = (ExtInputDevice)i.next();
       if (dev.remoteID == 0) {
         dev.remoteID = deviceOrigin;
-        vlog.info("Successfully created device " + deviceOrigin + " ("
-                  + dev.name + ")");
+        vlog.info("Successfully created device " + deviceOrigin + " (" +
+                  dev.name + ")");
         break;
       }
     }
@@ -589,7 +595,7 @@ public class Viewport extends JFrame {
   boolean processExtInputEventHelper(int type) {
     boolean retval = false;
     if (isHelperAvailable() && cc.cp.supportsGII &&
-        !VncViewer.os.startsWith("mac os x")) {
+        !VncViewer.OS.startsWith("mac os x")) {
       boolean isExtEvent = false;
       try {
         isExtEvent = processExtInputEvent(type);
@@ -611,8 +617,8 @@ public class Viewport extends JFrame {
       for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
         ExtInputDevice dev = (ExtInputDevice)i.next();
         if (lastEvent.deviceID == dev.id && dev.remoteID != 0) {
-          if (dev.absolute && lastEvent.type == giiTypes.giiValuatorRelative)
-            lastEvent.type = giiTypes.giiValuatorAbsolute;
+          if (dev.absolute && lastEvent.type == RFB.GII_VALUATOR_RELATIVE)
+            lastEvent.type = RFB.GII_VALUATOR_ABSOLUTE;
           cc.giiSendEvent(dev, lastEvent);
           retval = true;
         }
@@ -631,17 +637,28 @@ public class Viewport extends JFrame {
     synchronized(lastEvent) {
       if (enteringProximity) {
         switch (pointingDeviceType) {
-        case 1:  // pen
-          lastEvent.deviceID = 0;  // Stylus
-          break;
-        case 3:  // eraser
-          lastEvent.deviceID = 1;  // Eraser
-          break;
+          case 1:  // pen
+            lastEvent.deviceID = 0;  // Stylus
+            break;
+          case 3:  // eraser
+            lastEvent.deviceID = 1;  // Eraser
+            break;
         }
       } else
         lastEvent.deviceID = -1;
     }
   }
+
+  static final int NS_LEFT_MOUSE_DOWN = 1;
+  static final int NS_LEFT_MOUSE_UP = 2;
+  static final int NS_RIGHT_MOUSE_DOWN = 3;
+  static final int NS_RIGHT_MOUSE_UP = 4;
+  static final int NS_MOUSE_MOVED = 5;
+  static final int NS_LEFT_MOUSE_DRAGGED = 6;
+  static final int NS_RIGHT_MOUSE_DRAGGED = 7;
+  static final int NS_OTHER_MOUSE_DOWN = 25;
+  static final int NS_OTHER_MOUSE_UP = 26;
+  static final int NS_OTHER_MOUSE_DRAGGED = 27;
 
   boolean handleTabletEvent(final int type, final double x, final double y,
                             final float pressure, final float tiltX,
@@ -662,17 +679,6 @@ public class Viewport extends JFrame {
         x < 0.0 || x > (double)sp.getSize().width - 1.0)
       return false;
 
-    final int NSLeftMouseDown = 1;
-    final int NSLeftMouseUp = 2;
-    final int NSRightMouseDown = 3;
-    final int NSRightMouseUp = 4;
-    final int NSMouseMoved = 5;
-    final int NSLeftMouseDragged = 6;
-    final int NSRightMouseDragged = 7;
-    final int NSOtherMouseDown = 25;
-    final int NSOtherMouseUp = 26;
-    final int NSOtherMouseDragged = 27;
-
     try {
       SwingUtilities.invokeLater(
         new Runnable() {
@@ -688,21 +694,23 @@ public class Viewport extends JFrame {
               if (dev == null)
                 return;
 
-              if (type == NSLeftMouseDown || type == NSRightMouseDown ||
-                  type == NSOtherMouseDown)
-                lastEvent.type = giiTypes.giiButtonPress;
-              else if (type == NSLeftMouseUp || type == NSRightMouseUp ||
-                       type == NSOtherMouseUp)
-                lastEvent.type = giiTypes.giiButtonRelease;
+              if (type == NS_LEFT_MOUSE_DOWN || type == NS_RIGHT_MOUSE_DOWN ||
+                  type == NS_OTHER_MOUSE_DOWN)
+                lastEvent.type = RFB.GII_BUTTON_PRESS;
+              else if (type == NS_LEFT_MOUSE_UP || type == NS_RIGHT_MOUSE_UP ||
+                       type == NS_OTHER_MOUSE_UP)
+                lastEvent.type = RFB.GII_BUTTON_RELEASE;
               else
-                lastEvent.type = giiTypes.giiValuatorAbsolute;
+                lastEvent.type = RFB.GII_VALUATOR_ABSOLUTE;
 
               lastEvent.buttonNumber = 0;
-              if (type == NSLeftMouseDown || type == NSLeftMouseUp)
+              if (type == NS_LEFT_MOUSE_DOWN || type == NS_LEFT_MOUSE_UP)
                 lastEvent.buttonNumber = 1;
-              else if (type == NSRightMouseDown || type == NSRightMouseUp)
+              else if (type == NS_RIGHT_MOUSE_DOWN ||
+                       type == NS_RIGHT_MOUSE_UP)
                 lastEvent.buttonNumber = 2;
-              else if (type == NSOtherMouseDown || type == NSOtherMouseUp)
+              else if (type == NS_OTHER_MOUSE_DOWN ||
+                       type == NS_OTHER_MOUSE_UP)
                 lastEvent.buttonNumber = 3;
 
               lastEvent.firstValuator = 0;
@@ -735,9 +743,10 @@ public class Viewport extends JFrame {
                        ytmp / cc.desktop.scaleHeightRatio;
               }
               v = (ExtInputDevice.Valuator)dev.valuators.get(1);
-              lastEvent.valuators[1] = (int)(ytmp / (double)(cc.cp.height - 1) *
-                                       (double)(v.rangeMax - v.rangeMin) +
-                                       (double)v.rangeMin + 0.5);
+              lastEvent.valuators[1] =
+                (int)(ytmp / (double)(cc.cp.height - 1) *
+                        (double)(v.rangeMax - v.rangeMin) +
+                      (double)v.rangeMin + 0.5);
               if (lastEvent.valuators[1] > v.rangeMax)
                 lastEvent.valuators[1] = v.rangeMax;
               else if (lastEvent.valuators[1] < v.rangeMin)
@@ -774,14 +783,14 @@ public class Viewport extends JFrame {
 
   CConn cc;
   JScrollPane sp;
-  public Toolbar tb;
-  public int dx, dy = 0, adjustWidth, adjustHeight;
+  Toolbar tb;
+  int dx, dy = 0, adjustWidth, adjustHeight;
   MacMenuBar macMenu;
   boolean canDoLionFS;
   static boolean triedHelperInit, helperAvailable;
   Timer timer;
   private long x11dpy, x11win;
-  public int buttonPressType, buttonReleaseType, motionType;
+  int buttonPressType, buttonReleaseType, motionType;
   ArrayList<ExtInputDevice> devices;
   ExtInputEvent lastEvent = new ExtInputEvent();
   Point deferredPosition;

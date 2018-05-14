@@ -89,7 +89,7 @@ public class Options {
       int sf = -1;
       try {
         sf = Integer.parseInt(scaleString);
-      } catch (NumberFormatException e) {};
+      } catch (NumberFormatException e) {}
       if (sf >= 1 && sf <= 1000) {
         return sf;
       }
@@ -111,7 +111,7 @@ public class Options {
       return new DesktopSize(SIZE_SERVER, 0, 0);
     else {
       ScreenSet layout = new ScreenSet();
-      String screenSpecs[] = sizeString.replaceAll("[^\\dx,+]", "").split(",");
+      String[] screenSpecs = sizeString.replaceAll("[^\\dx,+]", "").split(",");
       int fbWidth = 0, fbHeight = 0;
       int r = Integer.MIN_VALUE, b = Integer.MIN_VALUE;
 
@@ -119,7 +119,7 @@ public class Options {
         return null;
 
       for (int i = 0; i < screenSpecs.length; i++) {
-        String array[] = screenSpecs[i].split("[x\\+]");
+        String[] array = screenSpecs[i].split("[x\\+]");
 
         if (array.length < 2)
           return null;
@@ -162,12 +162,12 @@ public class Options {
 
   public int getSubsamplingOrdinal() {
     switch (subsampling) {
-    case SUBSAMP_2X:
-      return 1;
-    case SUBSAMP_4X:
-      return 2;
-    case SUBSAMP_GRAY:
-      return 3;
+      case SUBSAMP_2X:
+        return 1;
+      case SUBSAMP_4X:
+        return 2;
+      case SUBSAMP_GRAY:
+        return 3;
     }
     return 0;
   }
@@ -219,22 +219,22 @@ public class Options {
   }
 
   public static class DesktopSize {
-    public DesktopSize() {};
+    public DesktopSize() {}
 
     // Deep copy
     public DesktopSize(DesktopSize old) {
       this(old.mode, old.width, old.height, new ScreenSet(old.layout));
     }
 
-    public DesktopSize(int mode, int width, int height, ScreenSet layout) {
-      this.mode = mode;
-      this.width = width;
-      this.height = height;
-      this.layout = layout;
+    public DesktopSize(int mode_, int width_, int height_, ScreenSet layout_) {
+      mode = mode_;
+      width = width_;
+      height = height_;
+      layout = layout_;
     }
 
-    public DesktopSize(int mode, int width, int height) {
-      this(mode, width, height, new ScreenSet());
+    public DesktopSize(int mode_, int width_, int height_) {
+      this(mode_, width_, height_, new ScreenSet());
     }
 
     public boolean equals(DesktopSize size) {
@@ -267,6 +267,7 @@ public class Options {
       }
     }
 
+    // CHECKSTYLE VisibilityModifier:OFF
     public int mode;
     public int width;
     public int height;

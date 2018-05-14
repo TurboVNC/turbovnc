@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,17 +32,11 @@ import java.util.Iterator;
 import com.turbovnc.rdr.ErrorException;
 import com.turbovnc.rdr.WarningException;
 
-public class TcpListener extends SocketListener  {
-
-  public static boolean socketsInitialised = false;
+public class TcpListener  {
 
   public TcpListener(String listenaddr, int port, boolean localhostOnly,
-                     SocketDescriptor sock, boolean close_) {
+                     boolean close_) {
     closeFd = close_;
-    if (sock != null) {
-      fd = sock;
-      return;
-    }
 
     TcpSocket.initSockets();
     try {
@@ -60,7 +54,7 @@ public class TcpListener extends SocketListener  {
       if (localhostOnly) {
         addr = InetAddress.getByName(null);
       } else if (listenaddr != null) {
-          addr = java.net.InetAddress.getByName(listenaddr);
+        addr = java.net.InetAddress.getByName(listenaddr);
       } else {
         addr = InetAddress.getByName("0.0.0.0");
       }
@@ -86,12 +80,8 @@ public class TcpListener extends SocketListener  {
   }
 
   public TcpListener(String listenaddr, int port) {
-    this(listenaddr, port, false, null, true);
+    this(listenaddr, port, false, true);
   }
-
-//  TcpListener::~TcpListener() {
-//    if (closeFd) closesocket(fd);
-//  }
 
   public void shutdown() {
     try {
@@ -100,7 +90,6 @@ public class TcpListener extends SocketListener  {
       throw new ErrorException("Could not close listener: " +
                                e.getMessage());
     }
-    //shutdown(getFd(), 2);
   }
 
   public TcpSocket accept() {
@@ -144,35 +133,11 @@ public class TcpListener extends SocketListener  {
     fd = new SocketDescriptor();
     fd.setChannel(newSock);
     TcpSocket s = new TcpSocket(fd);
-    //if (filter && !filter->verifyConnection(s)) {
-    //  delete s;
-    //  return 0;
-    //}
+
     return s;
   }
-
-/*
-void TcpListener::getMyAddresses(std::list<char*>* result) {
-  const hostent* addrs = gethostbyname(0);
-  if (addrs == 0)
-    throw rdr::SystemException("gethostbyname", errorNumber);
-  if (addrs->h_addrtype != AF_INET)
-    throw rdr::Exception("getMyAddresses: bad family");
-  for (int i=0; addrs->h_addr_list[i] != 0; i++) {
-    const char* addrC = inet_ntoa(*((struct in_addr*)addrs->h_addr_list[i]));
-    char* addr = new char[strlen(addrC)+1];
-    strcpy(addr, addrC);
-    result->push_back(addr);
-  }
-}
-  */
-
-  //public int getMyPort() {
-  //  return TcpSocket.getSockPort();
-  //}
 
   private boolean closeFd;
   private ServerSocketChannel channel;
   private Selector selector;
-
 }

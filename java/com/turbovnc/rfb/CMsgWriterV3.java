@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,25 +28,25 @@ public class CMsgWriterV3 extends CMsgWriter {
 
   public CMsgWriterV3(ConnParams cp_, OutStream os_) { super(cp_, os_); }
 
-  synchronized public void writeClientInit(boolean shared) {
+  public synchronized void writeClientInit(boolean shared) {
     os.writeU8(shared ? 1 : 0);
     endMsg();
   }
 
-  synchronized public void startMsg(int type) {
+  public synchronized void startMsg(int type) {
     os.writeU8(type);
   }
 
-  synchronized public void endMsg() {
+  public synchronized void endMsg() {
     os.flush();
   }
 
-  synchronized public void writeSetDesktopSize(int width, int height,
+  public synchronized void writeSetDesktopSize(int width, int height,
                                                ScreenSet layout) {
     if (!cp.supportsSetDesktopSize)
       throw new ErrorException("Server does not support SetDesktopSize");
 
-    startMsg(MsgTypes.msgTypeSetDesktopSize);
+    startMsg(RFB.SET_DESKTOP_SIZE);
     os.pad(1);
 
     os.writeU16(width);
@@ -55,7 +55,7 @@ public class CMsgWriterV3 extends CMsgWriter {
     os.writeU8(layout.numScreens());
     os.pad(1);
 
-    for (Iterator<Screen> iter = layout.screens.iterator(); iter.hasNext(); ) {
+    for (Iterator<Screen> iter = layout.screens.iterator(); iter.hasNext();) {
       Screen refScreen = (Screen)iter.next();
       os.writeU32(refScreen.id);
       os.writeU16(refScreen.dimensions.tl.x);
@@ -70,15 +70,15 @@ public class CMsgWriterV3 extends CMsgWriter {
     layout.debugPrint("LAYOUT SENT");
   }
 
-  synchronized public void writeFence(int flags, int len, byte[] data) {
+  public synchronized void writeFence(int flags, int len, byte[] data) {
     if (!cp.supportsFence)
       throw new ErrorException("Server does not support fences");
     if (len > 64)
       throw new ErrorException("Fence payload too large");
-    if ((flags & ~fenceTypes.fenceFlagsSupported) != 0)
+    if ((flags & ~RFB.FENCE_FLAGS_SUPPORTED) != 0)
       throw new ErrorException("Unknown fence flags");
 
-    startMsg(MsgTypes.msgTypeClientFence);
+    startMsg(RFB.FENCE);
     os.pad(3);
 
     os.writeU32(flags);
@@ -89,13 +89,13 @@ public class CMsgWriterV3 extends CMsgWriter {
     endMsg();
   }
 
-  synchronized public void writeEnableContinuousUpdates(boolean enable,
+  public synchronized void writeEnableContinuousUpdates(boolean enable,
                                                         int x, int y,
                                                         int w, int h) {
     if (!cp.supportsContinuousUpdates)
       throw new ErrorException("Server does not support continuous updates");
 
-    startMsg(MsgTypes.msgTypeEnableContinuousUpdates);
+    startMsg(RFB.ENABLE_CONTINUOUS_UPDATES);
 
     os.writeU8((enable ? 1 : 0));
 
@@ -107,26 +107,26 @@ public class CMsgWriterV3 extends CMsgWriter {
     endMsg();
   }
 
-  synchronized public void writeGIIVersion() {
+  public synchronized void writeGIIVersion() {
     if (!cp.supportsGII)
       throw new ErrorException("Server does not support GII");
 
-    startMsg(MsgTypes.msgTypeGII);
+    startMsg(RFB.GII);
 
-    os.writeU8(giiTypes.giiVersion | giiTypes.giiBE);
+    os.writeU8(RFB.GII_VERSION | RFB.GII_BE);
     os.writeU16(2);
     os.writeU16(1);
 
     endMsg();
   }
 
-  synchronized public void writeGIIDeviceCreate(ExtInputDevice dev) {
+  public synchronized void writeGIIDeviceCreate(ExtInputDevice dev) {
     if (!cp.supportsGII)
       throw new ErrorException("Server does not support GII");
 
-    startMsg(MsgTypes.msgTypeGII);
+    startMsg(RFB.GII);
 
-    os.writeU8(giiTypes.giiDeviceCreate | giiTypes.giiBE);
+    os.writeU8(RFB.GII_DEVICE_CREATE | RFB.GII_BE);
     os.writeU16(56 + dev.valuators.size() * 116);
     os.writePaddedString(dev.name, 32);
     os.writeU32((int)dev.vendorID);
@@ -156,12 +156,11 @@ public class CMsgWriterV3 extends CMsgWriter {
     endMsg();
   }
 
-  synchronized public void writeGIIEvent(ExtInputDevice dev, ExtInputEvent e) {
+  public synchronized void writeGIIEvent(ExtInputDevice dev, ExtInputEvent e) {
     if (!cp.supportsGII)
       throw new ErrorException("Server does not support GII");
 
-    if ((e.type == giiTypes.giiButtonPress ||
-         e.type == giiTypes.giiButtonRelease) &&
+    if ((e.type == RFB.GII_BUTTON_PRESS || e.type == RFB.GII_BUTTON_RELEASE) &&
         (e.buttonNumber > dev.numButtons || e.buttonNumber < 1)) {
       vlog.error("Button " + e.buttonNumber + " event ignored.");
       vlog.error("  Device " + dev.name + " has buttons 1-" + dev.numButtons +
@@ -169,8 +168,8 @@ public class CMsgWriterV3 extends CMsgWriter {
       return;
     }
 
-    if ((e.type == giiTypes.giiValuatorRelative ||
-         e.type == giiTypes.giiValuatorAbsolute) &&
+    if ((e.type == RFB.GII_VALUATOR_RELATIVE ||
+         e.type == RFB.GII_VALUATOR_ABSOLUTE) &&
         (e.firstValuator + e.numValuators > dev.valuators.size())) {
       vlog.error("Valuator " + e.firstValuator + "-" +
                  (e.firstValuator + e.numValuators - 1) + " event ignored.");
@@ -179,36 +178,36 @@ public class CMsgWriterV3 extends CMsgWriter {
       return;
     }
 
-    startMsg(MsgTypes.msgTypeGII);
+    startMsg(RFB.GII);
 
-    os.writeU8(giiTypes.giiEvent | giiTypes.giiBE);
+    os.writeU8(RFB.GII_EVENT | RFB.GII_BE);
 
     switch (e.type) {
 
-    case giiTypes.giiButtonPress:
-    case giiTypes.giiButtonRelease:
+      case RFB.GII_BUTTON_PRESS:
+      case RFB.GII_BUTTON_RELEASE:
 
-      os.writeU16(12);
-      os.writeU8(12);
-      os.writeU8(e.type);
-      os.writeU16(0);
-      os.writeU32(dev.remoteID);
-      os.writeU32(e.buttonNumber);
-      break;
+        os.writeU16(12);
+        os.writeU8(12);
+        os.writeU8(e.type);
+        os.writeU16(0);
+        os.writeU32(dev.remoteID);
+        os.writeU32(e.buttonNumber);
+        break;
 
-    case giiTypes.giiValuatorRelative:
-    case giiTypes.giiValuatorAbsolute:
+      case RFB.GII_VALUATOR_RELATIVE:
+      case RFB.GII_VALUATOR_ABSOLUTE:
 
-      os.writeU16(16 + e.numValuators * 4);
-      os.writeU8(16 + e.numValuators * 4);
-      os.writeU8(e.type);
-      os.writeU16(0);
-      os.writeU32(dev.remoteID);
-      os.writeU32(e.firstValuator);
-      os.writeU32(e.numValuators);
-      for (int i = 0; i < e.numValuators; i++)
-        os.writeU32(e.valuators[i]);
-      break;
+        os.writeU16(16 + e.numValuators * 4);
+        os.writeU8(16 + e.numValuators * 4);
+        os.writeU8(e.type);
+        os.writeU16(0);
+        os.writeU32(dev.remoteID);
+        os.writeU32(e.firstValuator);
+        os.writeU32(e.numValuators);
+        for (int i = 0; i < e.numValuators; i++)
+          os.writeU32(e.valuators[i]);
+        break;
 
     }
 

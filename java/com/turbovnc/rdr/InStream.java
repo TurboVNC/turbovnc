@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
 /* Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,14 +62,20 @@ public abstract class InStream {
   // readU/SN() methods read unsigned and signed N-bit integers.
 
   public final int readS8()  { check(1, 1, true);  return b[ptr++]; }
-  public final int readS16() { check(2, 1, true);  int b0 = b[ptr++];
-                               int b1 = b[ptr++] & 0xff;
-                               return b0 << 8 | b1; }
-  public final int readS32() { check(4, 1, true);  int b0 = b[ptr++];
-                               int b1 = b[ptr++] & 0xff;
-                               int b2 = b[ptr++] & 0xff;
-                               int b3 = b[ptr++] & 0xff;
-                               return b0 << 24 | b1 << 16 | b2 << 8 | b3; }
+  public final int readS16() {
+    check(2, 1, true);
+    int b0 = b[ptr++];
+    int b1 = b[ptr++] & 0xff;
+    return b0 << 8 | b1;
+  }
+  public final int readS32() {
+    check(4, 1, true);
+    int b0 = b[ptr++];
+    int b1 = b[ptr++] & 0xff;
+    int b2 = b[ptr++] & 0xff;
+    int b3 = b[ptr++] & 0xff;
+    return b0 << 24 | b1 << 16 | b2 << 8 | b3;
+  }
 
   public final int readU8()  { return readS8()  & 0xff;  }
   public final int readU16() { return readS16() & 0xffff; }
@@ -79,7 +85,7 @@ public abstract class InStream {
 
   public final String readString() {
     int len = readU32();
-    if (len > maxStringLength)
+    if (len > MAX_STRING_LENGTH)
       throw new ErrorException("InStream max string length exceeded");
 
     byte[] str = new byte[len];
@@ -93,10 +99,10 @@ public abstract class InStream {
     return utf8string;
   }
 
-  // maxStringLength protects against allocating a huge buffer.  Set it
+  // MAX_STRING_LENGTH protects against allocating a huge buffer.  Set it
   // higher if you need longer strings.
 
-  public static int maxStringLength = 65535;
+  static final int MAX_STRING_LENGTH = 65535;
 
   public final void skip(int bytes) {
     while (bytes > 0) {
@@ -124,12 +130,20 @@ public abstract class InStream {
   public final int readOpaque8()  { return readU8(); }
   public final int readOpaque16() { return readU16(); }
   public final int readOpaque32() { return readU32(); }
-  public final int readOpaque24A() { check(3, 1, true);  int b0 = b[ptr++];
-                                     int b1 = b[ptr++];  int b2 = b[ptr++];
-                                     return b0 << 24 | b1 << 16 | b2 << 8; }
-  public final int readOpaque24B() { check(3, 1, true);  int b0 = b[ptr++];
-                                     int b1 = b[ptr++];  int b2 = b[ptr++];
-                                     return b0 << 16 | b1 << 8 | b2; }
+  public final int readOpaque24A() {
+    check(3, 1, true);
+    int b0 = b[ptr++];
+    int b1 = b[ptr++];
+    int b2 = b[ptr++];
+    return b0 << 24 | b1 << 16 | b2 << 8;
+  }
+  public final int readOpaque24B() {
+    check(3, 1, true);
+    int b0 = b[ptr++];
+    int b1 = b[ptr++];
+    int b2 = b[ptr++];
+    return b0 << 16 | b1 << 8 | b2;
+  }
 
   public final int readPixel(int bytesPerPixel, boolean bigEndian) {
     byte[] pix = new byte[4];
@@ -147,7 +161,7 @@ public abstract class InStream {
   public final void readPixels(Object buf, int length, int bytesPerPixel,
                                boolean bigEndian) {
     int nbytes = length * bytesPerPixel;
-    int ptr = 0, srcPtr = 0;
+    int dstPtr = 0, srcPtr = 0;
     byte[] pixels = new byte[nbytes];
 
     readBytes(pixels, 0, nbytes);
@@ -157,42 +171,42 @@ public abstract class InStream {
     } else if (bytesPerPixel == 2 && buf instanceof short[]) {
       if (bigEndian) {
         while (length-- > 0) {
-          ((short[])buf)[ptr] = (short)((pixels[srcPtr++] & 0xff) << 8);
-          ((short[])buf)[ptr++] |= (pixels[srcPtr++] & 0xff);
+          ((short[])buf)[dstPtr] = (short)((pixels[srcPtr++] & 0xff) << 8);
+          ((short[])buf)[dstPtr++] |= (pixels[srcPtr++] & 0xff);
         }
       } else {
         while (length-- > 0) {
-          ((short[])buf)[ptr] = (short)(pixels[srcPtr++] & 0xff);
-          ((short[])buf)[ptr++] |= (pixels[srcPtr++] & 0xff) << 8;
+          ((short[])buf)[dstPtr] = (short)(pixels[srcPtr++] & 0xff);
+          ((short[])buf)[dstPtr++] |= (pixels[srcPtr++] & 0xff) << 8;
         }
       }
     } else if (bytesPerPixel == 3 && buf instanceof int[]) {
       if (bigEndian) {
         while (length-- > 0)
-          ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
-                                (pixels[srcPtr++] & 0xff) << 16 |
-                                (pixels[srcPtr++] & 0xff) << 8 |
-                                0x000000ff;
+          ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                   (pixels[srcPtr++] & 0xff) << 16 |
+                                   (pixels[srcPtr++] & 0xff) << 8 |
+                                   0x000000ff;
       } else {
         while (length-- > 0)
-          ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
-                                (pixels[srcPtr++] & 0xff) << 8 |
-                                (pixels[srcPtr++] & 0xff) << 16 |
-                                0xff000000;
+          ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) |
+                                   (pixels[srcPtr++] & 0xff) << 8 |
+                                   (pixels[srcPtr++] & 0xff) << 16 |
+                                   0xff000000;
       }
     } else if (bytesPerPixel == 4 && buf instanceof int[]) {
       if (bigEndian) {
         while (length-- > 0)
-          ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
-                                (pixels[srcPtr++] & 0xff) << 16 |
-                                (pixels[srcPtr++] & 0xff) << 8 |
-                                (pixels[srcPtr++] & 0xff);
+          ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                   (pixels[srcPtr++] & 0xff) << 16 |
+                                   (pixels[srcPtr++] & 0xff) << 8 |
+                                   (pixels[srcPtr++] & 0xff);
       } else {
         while (length-- > 0)
-          ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
-                                (pixels[srcPtr++] & 0xff) << 8 |
-                                (pixels[srcPtr++] & 0xff) << 16 |
-                                (pixels[srcPtr++] & 0xff) << 24;
+          ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) |
+                                   (pixels[srcPtr++] & 0xff) << 8 |
+                                   (pixels[srcPtr++] & 0xff) << 16 |
+                                   (pixels[srcPtr++] & 0xff) << 24;
       }
     } else {
       assert buf instanceof int[];
@@ -200,20 +214,20 @@ public abstract class InStream {
         while (length-- > 0) {
           byte[] pix = new byte[4];
           System.arraycopy(pixels, srcPtr, pix, 0, bytesPerPixel);
-          ((int[])buf)[ptr++] = (pix[0] & 0xff) << 24 |
-                                (pix[1] & 0xff) << 16 |
-                                (pix[2] & 0xff) << 8 |
-                                0x000000ff;
+          ((int[])buf)[dstPtr++] = (pix[0] & 0xff) << 24 |
+                                   (pix[1] & 0xff) << 16 |
+                                   (pix[2] & 0xff) << 8 |
+                                   0x000000ff;
           srcPtr += bytesPerPixel;
         }
       } else {
         while (length-- > 0) {
           byte[] pix = new byte[4];
           System.arraycopy(pixels, srcPtr, pix, 0, bytesPerPixel);
-          ((int[])buf)[ptr++] = (pix[0] & 0xff) |
-                                (pix[1] & 0xff) << 8 |
-                                (pix[2] & 0xff) << 16 |
-                                0xff000000;
+          ((int[])buf)[dstPtr++] = (pix[0] & 0xff) |
+                                   (pix[1] & 0xff) << 8 |
+                                   (pix[2] & 0xff) << 16 |
+                                   0xff000000;
           srcPtr += bytesPerPixel;
         }
       }
@@ -225,7 +239,7 @@ public abstract class InStream {
                                int bytesPerPixel, boolean bigEndian) {
     int w = r.width(), h = r.height();
     int nbytes = w * h * bytesPerPixel;
-    int ptr = r.tl.y * stride + r.tl.x, srcPtr = 0;
+    int dstPtr = r.tl.y * stride + r.tl.x, srcPtr = 0;
     byte[] pixels = new byte[nbytes];
     int pad = stride - w;
 
@@ -233,82 +247,82 @@ public abstract class InStream {
 
     if (bytesPerPixel == 1 && buf instanceof byte[]) {
       while (h > 0) {
-        System.arraycopy(pixels, srcPtr, (byte[])buf, ptr, w);
-        ptr += stride;
+        System.arraycopy(pixels, srcPtr, (byte[])buf, dstPtr, w);
+        dstPtr += stride;
         srcPtr += w;
         h--;
       }
     } else if (bytesPerPixel == 2 && buf instanceof short[]) {
       if (bigEndian) {
         while (h > 0) {
-          int endOfRow = ptr + w;
-          while (ptr < endOfRow) {
-            ((short[])buf)[ptr] = (short)((pixels[srcPtr++] & 0xff) << 8);
-            ((short[])buf)[ptr++] |= (pixels[srcPtr++] & 0xff);
+          int endOfRow = dstPtr + w;
+          while (dstPtr < endOfRow) {
+            ((short[])buf)[dstPtr] = (short)((pixels[srcPtr++] & 0xff) << 8);
+            ((short[])buf)[dstPtr++] |= (pixels[srcPtr++] & 0xff);
           }
-          ptr += pad;
+          dstPtr += pad;
           h--;
         }
       } else {
         while (h > 0) {
-          int endOfRow = ptr + w;
-          while (ptr < endOfRow) {
-            ((short[])buf)[ptr] = (short)(pixels[srcPtr++] & 0xff);
-            ((short[])buf)[ptr++] |= (pixels[srcPtr++] & 0xff) << 8;
+          int endOfRow = dstPtr + w;
+          while (dstPtr < endOfRow) {
+            ((short[])buf)[dstPtr] = (short)(pixels[srcPtr++] & 0xff);
+            ((short[])buf)[dstPtr++] |= (pixels[srcPtr++] & 0xff) << 8;
           }
-          ptr += pad;
+          dstPtr += pad;
           h--;
         }
       }
     } else if (bytesPerPixel == 3 && buf instanceof int[]) {
       if (bigEndian) {
         while (h > 0) {
-          int endOfRow = ptr + w;
-          while (ptr < endOfRow)
-            ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
-                                  (pixels[srcPtr++] & 0xff) << 16 |
-                                  (pixels[srcPtr++] & 0xff) << 8 |
-                                  0x000000ff;
-          ptr += pad;
+          int endOfRow = dstPtr + w;
+          while (dstPtr < endOfRow)
+            ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                     (pixels[srcPtr++] & 0xff) << 16 |
+                                     (pixels[srcPtr++] & 0xff) << 8 |
+                                     0x000000ff;
+          dstPtr += pad;
           h--;
         }
       } else {
         while (h > 0) {
-          int endOfRow = ptr + w;
-          while (ptr < endOfRow)
-            ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
-                                  (pixels[srcPtr++] & 0xff) << 8 |
-                                  (pixels[srcPtr++] & 0xff) << 16 |
-                                  0xff000000;
-          ptr += pad;
+          int endOfRow = dstPtr + w;
+          while (dstPtr < endOfRow)
+            ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) |
+                                     (pixels[srcPtr++] & 0xff) << 8 |
+                                     (pixels[srcPtr++] & 0xff) << 16 |
+                                     0xff000000;
+          dstPtr += pad;
           h--;
         }
       }
     } else if (bytesPerPixel == 4 && buf instanceof int[]) {
       if (bigEndian) {
         while (h > 0) {
-          int endOfRow = ptr + w;
-          while (ptr < endOfRow) {
-            ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
-                                  (pixels[srcPtr++] & 0xff) << 16 |
-                                  (pixels[srcPtr++] & 0xff) << 8 |
-                                  0x000000ff;
+          int endOfRow = dstPtr + w;
+          while (dstPtr < endOfRow) {
+            ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                     (pixels[srcPtr++] & 0xff) << 16 |
+                                     (pixels[srcPtr++] & 0xff) << 8 |
+                                     0x000000ff;
             srcPtr++;
           }
-          ptr += pad;
+          dstPtr += pad;
           h--;
         }
       } else {
         while (h > 0) {
-          int endOfRow = ptr + w;
-          while (ptr < endOfRow) {
-            ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
-                                  (pixels[srcPtr++] & 0xff) << 8 |
-                                  (pixels[srcPtr++] & 0xff) << 16 |
-                                  0xff000000;
+          int endOfRow = dstPtr + w;
+          while (dstPtr < endOfRow) {
+            ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) |
+                                     (pixels[srcPtr++] & 0xff) << 8 |
+                                     (pixels[srcPtr++] & 0xff) << 16 |
+                                     0xff000000;
             srcPtr++;
           }
-          ptr += pad;
+          dstPtr += pad;
           h--;
         }
       }
@@ -319,14 +333,14 @@ public abstract class InStream {
   }
 
   public final int readCompactLength() {
-    int b = readU8();
-    int result = b & 0x7F;
-    if ((b & 0x80) != 0) {
-      b = readU8();
-      result |= (b & 0x7F) << 7;
-      if ((b & 0x80) != 0) {
-        b = readU8();
-        result |= (b & 0xFF) << 14;
+    int lenByte = readU8();
+    int result = lenByte & 0x7F;
+    if ((lenByte & 0x80) != 0) {
+      lenByte = readU8();
+      result |= (lenByte & 0x7F) << 7;
+      if ((lenByte & 0x80) != 0) {
+        lenByte = readU8();
+        result |= (lenByte & 0xFF) << 14;
       }
     }
     return result;

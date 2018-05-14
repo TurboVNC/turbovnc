@@ -1,7 +1,7 @@
 /* Copyright 2011 Martin Koegler <mkoegler@auto.tuwien.ac.at>
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright 2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,10 @@ import java.awt.event.KeyEvent;
 
 import com.turbovnc.rfb.*;
 
-public class MenuKey {
+public final class MenuKey {
 
   static class MenuKeySymbol {
-    public MenuKeySymbol(String name_, int keycode_, int keysym_) {
+    MenuKeySymbol(String name_, int keycode_, int keysym_) {
       name = name_;
       keycode = keycode_;
       keysym = keysym_;
@@ -38,7 +38,7 @@ public class MenuKey {
     int keysym;
   }
 
-  private static final MenuKeySymbol[] menuSymbols = {
+  private static final MenuKeySymbol[] MENU_SYMBOLS = {
     new MenuKeySymbol("F1", KeyEvent.VK_F1, Keysyms.F1),
     new MenuKeySymbol("F2", KeyEvent.VK_F2, Keysyms.F2),
     new MenuKeySymbol("F3", KeyEvent.VK_F3, Keysyms.F3),
@@ -51,30 +51,30 @@ public class MenuKey {
     new MenuKeySymbol("F10", KeyEvent.VK_F10, Keysyms.F10),
     new MenuKeySymbol("F11", KeyEvent.VK_F11, Keysyms.F11),
     new MenuKeySymbol("F12", KeyEvent.VK_F12, Keysyms.F12),
-    new MenuKeySymbol("Pause", KeyEvent.VK_PAUSE, Keysyms.Pause),
-    new MenuKeySymbol("Print", KeyEvent.VK_PRINTSCREEN, Keysyms.Print),
+    new MenuKeySymbol("Pause", KeyEvent.VK_PAUSE, Keysyms.PAUSE),
+    new MenuKeySymbol("Print", KeyEvent.VK_PRINTSCREEN, Keysyms.PRINT),
     new MenuKeySymbol("ScrollLock", KeyEvent.VK_SCROLL_LOCK,
-                      Keysyms.Scroll_Lock),
-    new MenuKeySymbol("Escape", KeyEvent.VK_ESCAPE, Keysyms.Escape),
-    new MenuKeySymbol("Insert", KeyEvent.VK_INSERT, Keysyms.Insert),
-    new MenuKeySymbol("Delete", KeyEvent.VK_DELETE, Keysyms.Delete),
-    new MenuKeySymbol("Home", KeyEvent.VK_HOME, Keysyms.Home),
-    new MenuKeySymbol("PageUp", KeyEvent.VK_PAGE_UP, Keysyms.Prior),
-    new MenuKeySymbol("PageDown", KeyEvent.VK_PAGE_DOWN, Keysyms.Next)
+                      Keysyms.SCROLL_LOCK),
+    new MenuKeySymbol("Escape", KeyEvent.VK_ESCAPE, Keysyms.ESCAPE),
+    new MenuKeySymbol("Insert", KeyEvent.VK_INSERT, Keysyms.INSERT),
+    new MenuKeySymbol("Delete", KeyEvent.VK_DELETE, Keysyms.DELETE),
+    new MenuKeySymbol("Home", KeyEvent.VK_HOME, Keysyms.HOME),
+    new MenuKeySymbol("PageUp", KeyEvent.VK_PAGE_UP, Keysyms.PRIOR),
+    new MenuKeySymbol("PageDown", KeyEvent.VK_PAGE_DOWN, Keysyms.NEXT)
   };
 
   static int getMenuKeySymbolCount() {
-    return menuSymbols.length;
+    return MENU_SYMBOLS.length;
   }
 
   public static MenuKeySymbol[] getMenuKeySymbols() {
-    return menuSymbols;
+    return MENU_SYMBOLS;
   }
 
   public static String getMenuKeyValueStr() {
     String s = "";
     for (int i = 0; i < getMenuKeySymbolCount(); i++) {
-      s += menuSymbols[i].name;
+      s += MENU_SYMBOLS[i].name;
       if (i < getMenuKeySymbolCount() - 1)
         s += ", ";
     }
@@ -88,8 +88,8 @@ public class MenuKey {
     menuKeyStr =
       Configuration.getParam("menuKey").getValueStr();
     for (int i = 0; i < getMenuKeySymbolCount(); i++)
-      if (menuSymbols[i].name.equals(menuKeyStr))
-        menuKeyCode = menuSymbols[i].keycode;
+      if (MENU_SYMBOLS[i].name.equals(menuKeyStr))
+        menuKeyCode = MENU_SYMBOLS[i].keycode;
 
     return menuKeyCode;
   }
@@ -101,10 +101,11 @@ public class MenuKey {
     menuKeyStr =
       Configuration.getParam("menuKey").getValueStr();
     for (int i = 0; i < getMenuKeySymbolCount(); i++)
-      if (menuSymbols[i].name.equals(menuKeyStr))
-        menuKeySym = menuSymbols[i].keysym;
+      if (MENU_SYMBOLS[i].name.equals(menuKeyStr))
+        menuKeySym = MENU_SYMBOLS[i].keysym;
 
     return menuKeySym;
   }
 
+  private MenuKey() {}
 }

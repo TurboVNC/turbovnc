@@ -37,10 +37,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import java.io.*;
-import java.lang.Exception;
 import java.lang.reflect.*;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import javax.swing.*;
 import java.util.*;
 
@@ -64,7 +61,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     new PixelFormat(16, 15, false, true, 31, 31, 31, 10, 5, 0);
   static final PixelFormat HIGH_COLOR_PF =
     new PixelFormat(16, 16, false, true, 31, 63, 31, 11, 5, 0);
-  static final int SUPER_MASK = 1<<16;
+  static final int SUPER_MASK = 1 << 16;
 
   static final double getTime() {
     return (double)System.nanoTime() / 1.0e9;
@@ -103,17 +100,17 @@ public class CConn extends CConnection implements UserPasswdGetter,
     menu = new F8Menu(this);
 
     if (VncViewer.noUnixLogin.getValue()) {
-      Security.disableSecType(Security.secTypePlain);
-      Security.disableSecType(Security.secTypeTLSPlain);
-      Security.disableSecType(Security.secTypeX509Plain);
-      Security.disableSecType(Security.secTypeUnixLogin);
+      Security.disableSecType(RFB.SECTYPE_PLAIN);
+      Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
+      Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
+      Security.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
     } else if (isUnixLoginForced()) {
-      Security.disableSecType(Security.secTypeVncAuth);
-      Security.disableSecType(Security.secTypeTLSVnc);
-      Security.disableSecType(Security.secTypeX509Vnc);
-      Security.disableSecType(Security.secTypeNone);
-      Security.disableSecType(Security.secTypeTLSNone);
-      Security.disableSecType(Security.secTypeX509None);
+      Security.disableSecType(RFB.SECTYPE_VNCAUTH);
+      Security.disableSecType(RFB.SECTYPE_TLS_VNC);
+      Security.disableSecType(RFB.SECTYPE_X509_VNC);
+      Security.disableSecType(RFB.SECTYPE_NONE);
+      Security.disableSecType(RFB.SECTYPE_TLS_NONE);
+      Security.disableSecType(RFB.SECTYPE_X509_NONE);
     }
 
     if (sock != null) {
@@ -159,8 +156,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     if (benchmark) {
-      state_ = RFBSTATE_INITIALISATION;
-      reader_ = new CMsgReaderV3(this, viewer.benchFile);
+      state = RFBSTATE_INITIALISATION;
+      reader = new CMsgReaderV3(this, viewer.benchFile);
     } else {
       sock.inStream().setBlockCallback(this);
       setServerName(opts.serverName);
@@ -171,9 +168,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // RFB thread
   public void reset() {
-    if (reader_ != null)
-      reader_.reset();
-    state_ = RFBSTATE_INITIALISATION;
+    if (reader != null)
+      reader.reset();
+    state = RFBSTATE_INITIALISATION;
   }
 
   // EDT: deleteWindow() is called when the user closes the window or selects
@@ -374,8 +371,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
                                      ScreenSet layout) {
     super.setExtendedDesktopSize(reason, result, w, h, layout);
 
-    if ((reason == screenTypes.reasonClient) &&
-        (result != screenTypes.resultSuccess)) {
+    if (reason == RFB.EDS_REASON_CLIENT && result != RFB.EDS_RESULT_SUCCESS) {
       vlog.error("SetDesktopSize failed: " + result);
       return;
     }
@@ -430,8 +426,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       // We need fences to make extra update requests and continuous updates
       // "safe".  See fence() for the next step.
       if (cp.supportsFence)
-        writer().writeFence(
-          fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
+        writer().writeFence(RFB.FENCE_FLAG_REQUEST | RFB.FENCE_FLAG_SYNC_NEXT,
+                            0, null);
 
       if (!cp.supportsSetDesktopSize) {
         if (opts.desktopSize.mode == Options.SIZE_AUTO)
@@ -493,7 +489,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
         profileDialog.mpsDecodeVal.setText(str);
         str = String.format("%.3f", (double)blitPixels / 1000000. / tBlit);
         profileDialog.mpsBlitVal.setText(str);
-        str = String.format("%.3f", (double)decodePixels / 1000000. / tElapsed);
+        str = String.format("%.3f", (double)decodePixels / 1000000. /
+                            tElapsed);
         profileDialog.mpsTotalVal.setText(str);
 
         str = String.format("%d", decodeRect);
@@ -514,7 +511,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
         System.out.format("Total:   %.3f updates/sec,  %.3f Mpixels/sec,  %.3f Mbits/sec\n",
                           (double)updates / tElapsed,
                           (double)decodePixels / 1000000. / tElapsed,
-                          (double)sock.inStream().getBytesRead() / 125000. / tElapsed);
+                          (double)sock.inStream().getBytesRead() / 125000. /
+                            tElapsed);
         System.out.format("Decode:  %.3f Mpixels,  %.3f Mpixels/sec,  %d rect,\n",
                           (double)decodePixels / 1000000.,
                           (double)decodePixels / 1000000. / tDecode,
@@ -529,7 +527,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
         System.out.format("         %.0f pixels/update\n",
                           (double)blitPixels / (double)blits);
         System.out.format("Time/update:  Recv = %.3f ms,  Decode = %.3f ms,  Blit = %.3f ms\n",
-                          sock.inStream().getReadTime() / (double)updates * 1000.,
+                          sock.inStream().getReadTime() / (double)updates *
+                            1000.,
                           tDecode / (double)updates * 1000.,
                           tBlit / (double)updates * 1000.);
         System.out.format("              Total = %.3f ms  +  Overhead = %.3f ms\n",
@@ -701,7 +700,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void beginRect(Rect r, int encoding) {
     if (!benchmark)
       sock.inStream().startTiming();
-    if (encoding != Encodings.encodingCopyRect) {
+    if (encoding != RFB.ENCODING_COPYRECT) {
       boolean updateTitle = false;
       if (encoding != lastServerEncoding)
         updateTitle = true;
@@ -751,10 +750,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     // can't call super.super.fence(flags, len, data);
     cp.supportsFence = true;
 
-    if ((flags & fenceTypes.fenceFlagRequest) != 0) {
+    if ((flags & RFB.FENCE_FLAG_REQUEST) != 0) {
       // We handle everything synchronously, so we trivially honor these modes.
-      flags = flags & (fenceTypes.fenceFlagBlockBefore |
-                       fenceTypes.fenceFlagBlockAfter);
+      flags = flags & (RFB.FENCE_FLAG_BLOCK_BEFORE |
+                       RFB.FENCE_FLAG_BLOCK_AFTER);
 
       writer().writeFence(flags, len, data);
       return;
@@ -762,7 +761,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (len == 0) {
       // Initial probe
-      if ((flags & fenceTypes.fenceFlagSyncNext) != 0) {
+      if ((flags & RFB.FENCE_FLAG_SYNC_NEXT) != 0) {
         supportsSyncFence = true;
 
         if (cp.supportsContinuousUpdates) {
@@ -1045,7 +1044,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // EDT
   public Rectangle getSpannedSize() {
     boolean fullScreenWindow = opts.fullScreen &&
-                               (!VncViewer.os.startsWith("mac os x") ||
+                               (!VncViewer.OS.startsWith("mac os x") ||
                                 viewport.lionFSSupported());
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
@@ -1220,7 +1219,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       h = span.height;
 
     if (viewport.getExtendedState() != JFrame.ICONIFIED &&
-        !VncViewer.os.startsWith("mac os x"))
+        !VncViewer.OS.startsWith("mac os x"))
       viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
@@ -1345,9 +1344,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
         pf.write(memStream);
 
-        writer().writeFence(fenceTypes.fenceFlagRequest |
-                            fenceTypes.fenceFlagSyncNext, memStream.length(),
-                            (byte[])memStream.data());
+        writer().writeFence(RFB.FENCE_FLAG_REQUEST | RFB.FENCE_FLAG_SYNC_NEXT,
+                            memStream.length(), (byte[])memStream.data());
       } else {
         // New update requests are sent out before processing the last update,
         // so we cannot switch our internal format right now (doing so would
@@ -1367,8 +1365,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (forceNonincremental || !continuousUpdates) {
       pendingUpdate = true;
-      writer().writeFramebufferUpdateRequest(new Rect(0, 0, cp.width, cp.height),
-                                             !formatChange && !forceNonincremental);
+      writer().writeFramebufferUpdateRequest(
+        new Rect(0, 0, cp.width, cp.height),
+        !formatChange && !forceNonincremental);
     }
 
     forceNonincremental = false;
@@ -1392,7 +1391,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // has been called, since the menu is only accessible from the DesktopWindow.
 
   void showMenu(int x, int y) {
-    if (VncViewer.os.startsWith("windows"))
+    if (VncViewer.OS.startsWith("windows"))
       UIManager.put("Button.showMnemonics", true);
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       x += viewport.dx;
@@ -1412,16 +1411,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
       "Size:  " + cp.width + "x" + cp.height + "\n" +
       "Pixel format:  " + desktop.getPF().print() + "\n" +
       "(server default " + serverPF.print() + ")\n" +
-      "Requested encoding:  " + Encodings.encodingName(currentEncoding) +
-        "\n" +
-      "Last used encoding:  " + Encodings.encodingName(lastServerEncoding) +
-        "\n" +
+      "Requested encoding:  " + RFB.encodingName(currentEncoding) + "\n" +
+      "Last used encoding:  " + RFB.encodingName(lastServerEncoding) + "\n" +
       "Protocol version:  " + cp.majorVersion + "." + cp.minorVersion + "\n" +
-      "Security type:  " + Security.secTypeName(csecurity.getType()) +
+      "Security type:  " + RFB.secTypeName(csecurity.getType()) +
         " [" + csecurity.getDescription() + "]\n" +
       "Encryption protocol:  " + csecurity.getProtocol() + "\n" +
       "JPEG decompression:  " +
-        (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
+        (reader.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
       (VncViewer.osGrab() || VncViewer.osEID() ? "\nTurboVNC Helper:  " +
         (Viewport.isHelperAvailable() ? "Loaded" : "Not found") : ""),
       JOptionPane.PLAIN_MESSAGE);
@@ -1442,12 +1439,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
     boolean allowJpegSave = opts.allowJpeg;
     boolean alreadyLossless = false;
 
-    if (currentEncoding == Encodings.encodingTight &&
-        opts.compressLevel == 1 && opts.quality == -1 && !opts.allowJpeg)
+    if (currentEncoding == RFB.ENCODING_TIGHT && opts.compressLevel == 1 &&
+        opts.quality == -1 && !opts.allowJpeg)
       alreadyLossless = true;
 
     if (!alreadyLossless) {
-      currentEncoding = Encodings.encodingTight;
+      currentEncoding = RFB.ENCODING_TIGHT;
       opts.compressLevel = 1;
       opts.quality = -1;
       opts.allowJpeg = false;
@@ -1475,8 +1472,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   public void setTightOptions() {
     int encoding = currentEncoding;
-    if (lastServerEncoding != Encodings.encodingTight &&
-        lastServerEncoding >= 0)
+    if (lastServerEncoding != RFB.ENCODING_TIGHT && lastServerEncoding >= 0)
       encoding = lastServerEncoding;
     options.setTightOptions(encoding);
   }
@@ -1493,7 +1489,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     options.reverseScroll.setSelected(opts.reverseScroll);
     options.acceptClipboard.setSelected(opts.acceptClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
-    options.menuKey.setSelectedItem(KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    options.menuKey.setSelectedItem(
+      KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
     if (VncViewer.osGrab() && Viewport.isHelperAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
@@ -1749,25 +1746,25 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // KeyEvent.getKeyModifiersText() is unfortunately broken on some platforms.
   String getKeyModifiersText() {
     String str = "";
-    if (pressedKeys.containsValue(Keysyms.Shift_L))
+    if (pressedKeys.containsValue(Keysyms.SHIFT_L))
       str += " LShift";
-    if (pressedKeys.containsValue(Keysyms.Shift_R))
+    if (pressedKeys.containsValue(Keysyms.SHIFT_R))
       str += " RShift";
-    if (pressedKeys.containsValue(Keysyms.Control_L))
+    if (pressedKeys.containsValue(Keysyms.CONTROL_L))
       str += " LCtrl";
-    if (pressedKeys.containsValue(Keysyms.Control_R))
+    if (pressedKeys.containsValue(Keysyms.CONTROL_R))
       str += " RCtrl";
-    if (pressedKeys.containsValue(Keysyms.Alt_L))
+    if (pressedKeys.containsValue(Keysyms.ALT_L))
       str += " LAlt";
-    if (pressedKeys.containsValue(Keysyms.Alt_R))
+    if (pressedKeys.containsValue(Keysyms.ALT_R))
       str += " RAlt";
-    if (pressedKeys.containsValue(Keysyms.Meta_L))
+    if (pressedKeys.containsValue(Keysyms.META_L))
       str += " LMeta";
-    if (pressedKeys.containsValue(Keysyms.Meta_R))
+    if (pressedKeys.containsValue(Keysyms.META_R))
       str += " RMeta";
-    if (pressedKeys.containsValue(Keysyms.Super_L))
+    if (pressedKeys.containsValue(Keysyms.SUPER_L))
       str += " LSuper";
-    if (pressedKeys.containsValue(Keysyms.Super_R))
+    if (pressedKeys.containsValue(Keysyms.SUPER_R))
       str += " RSuper";
     return str;
   }
@@ -1800,7 +1797,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     debugStr = ((ev.isActionKey() ? "action " : "") + "key " +
                   (down ? "PRESS" : "release") +
-                ", code " + KeyEvent.getKeyText(keycode) + " (" + keycode + ")" +
+                ", code " + KeyEvent.getKeyText(keycode) +
+                  " (" + keycode + ")" +
                 ", loc " + getLocationText(location) +
                 ", char " +
                   (key >= 32 && key <= 126 ? "'" + (char)key + "'" : key) +
@@ -1839,327 +1837,345 @@ public class CConn extends CConnection implements UserPasswdGetter,
         keysym = Keysyms.KP_0 + keycode - KeyEvent.VK_0;
 
       switch (keycode) {
-      case KeyEvent.VK_BACK_SPACE: keysym = Keysyms.BackSpace;  break;
-      case KeyEvent.VK_TAB:        keysym = Keysyms.Tab;  break;
-      case KeyEvent.VK_ENTER:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Enter;
-        else
-          keysym = Keysyms.Return;  break;
-      case KeyEvent.VK_ESCAPE:     keysym = Keysyms.Escape;  break;
-      case KeyEvent.VK_NUMPAD0:    keysym = Keysyms.KP_0;  break;
-      case KeyEvent.VK_NUMPAD1:    keysym = Keysyms.KP_1;  break;
-      case KeyEvent.VK_NUMPAD2:    keysym = Keysyms.KP_2;  break;
-      case KeyEvent.VK_NUMPAD3:    keysym = Keysyms.KP_3;  break;
-      case KeyEvent.VK_NUMPAD4:    keysym = Keysyms.KP_4;  break;
-      case KeyEvent.VK_NUMPAD5:    keysym = Keysyms.KP_5;  break;
-      case KeyEvent.VK_NUMPAD6:    keysym = Keysyms.KP_6;  break;
-      case KeyEvent.VK_NUMPAD7:    keysym = Keysyms.KP_7;  break;
-      case KeyEvent.VK_NUMPAD8:    keysym = Keysyms.KP_8;  break;
-      case KeyEvent.VK_NUMPAD9:    keysym = Keysyms.KP_9;  break;
-      case KeyEvent.VK_DECIMAL:    keysym = Keysyms.KP_Decimal;  break;
-      case KeyEvent.VK_ADD:        keysym = Keysyms.KP_Add;  break;
-      case KeyEvent.VK_SUBTRACT:   keysym = Keysyms.KP_Subtract;  break;
-      case KeyEvent.VK_MULTIPLY:   keysym = Keysyms.KP_Multiply;  break;
-      case KeyEvent.VK_DIVIDE:     keysym = Keysyms.KP_Divide;  break;
-      case KeyEvent.VK_DELETE:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Delete;
-        else
-          keysym = Keysyms.Delete;  break;
-      case KeyEvent.VK_CLEAR:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Begin;
-        else
-          keysym = Keysyms.Clear;  break;
-      case KeyEvent.VK_CONTROL:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
-          keysym = Keysyms.Control_R;
-        else
-          keysym = Keysyms.Control_L;  break;
-      case KeyEvent.VK_ALT:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
-          // Mac has no AltGr key, but the Option/Alt keys serve the same
-          // purpose.  Thus, we allow RAlt to be used as AltGr and LAlt to be
-          // used as a regular Alt key.
-          if (VncViewer.os.startsWith("mac os x"))
-            keysym = Keysyms.ISO_Level3_Shift;
+        case KeyEvent.VK_BACK_SPACE:  keysym = Keysyms.BACKSPACE;  break;
+        case KeyEvent.VK_TAB:         keysym = Keysyms.TAB;  break;
+        case KeyEvent.VK_ENTER:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_ENTER;
           else
-            keysym = Keysyms.Alt_R;
-        } else {
-          keysym = Keysyms.Alt_L;
-        }
-        break;
-      case KeyEvent.VK_SHIFT:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
-          keysym = Keysyms.Shift_R;
-        else
-          keysym = Keysyms.Shift_L;  break;
-      case KeyEvent.VK_META:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
-          keysym = Keysyms.Super_R;
-        else
-          keysym = Keysyms.Super_L;  break;
-      case KeyEvent.VK_ALT_GRAPH:
-        keysym = Keysyms.ISO_Level3_Shift;
-        break;
-      default:
-        // On Windows, pressing AltGr has the same effect as pressing LCtrl +
-        // RAlt, so we have to send fake key release events for those modifiers
-        // (and any other Ctrl and Alt modifiers that are pressed), then send
-        // the key event for the modified key, then send fake key press events
-        // for the same modifiers.
-        if (pressedKeys.containsValue(Keysyms.Alt_R) &&
-            pressedKeys.containsValue(Keysyms.Control_L) &&
-            VncViewer.os.startsWith("windows")) {
-          winAltGr = true;
-        } else if (ev.isControlDown()) {
-          // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.
-          if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
-              // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
-              (key >= 27 && key <= 29 && ev.isShiftDown()))
-            key += 96;
-          // For CTRL-SHIFT-<letter>, send capital <letter> to emulate the
-          // behavior of Linux.  For CTRL-@, send @.  For CTRL-_, send _.
-          // For CTRL-^, send ^.
-          else if (key < 32)
-            key += 64;
-          // Windows and Mac sometimes return CHAR_UNDEFINED with CTRL-SHIFT
-          // combinations.
-          else if (key == KeyEvent.CHAR_UNDEFINED) {
-            // CTRL-SHIFT-Minus should generate an underscore key character in
-            // almost all keyboard layouts.  Emacs, in particular, uses
-            // CTRL-SHIFT-Underscore for its undo function.
-            if (keycode == KeyEvent.VK_MINUS && ev.isShiftDown())
-              key = '_';
-            // The best we can do for other keys is to send the key code if
-            // it is a valid ASCII symbol.
-            else if (keycode >= 0 && keycode <= 127)
+            keysym = Keysyms.RETURN;
+          break;
+        case KeyEvent.VK_ESCAPE:      keysym = Keysyms.ESCAPE;  break;
+        case KeyEvent.VK_NUMPAD0:     keysym = Keysyms.KP_0;  break;
+        case KeyEvent.VK_NUMPAD1:     keysym = Keysyms.KP_1;  break;
+        case KeyEvent.VK_NUMPAD2:     keysym = Keysyms.KP_2;  break;
+        case KeyEvent.VK_NUMPAD3:     keysym = Keysyms.KP_3;  break;
+        case KeyEvent.VK_NUMPAD4:     keysym = Keysyms.KP_4;  break;
+        case KeyEvent.VK_NUMPAD5:     keysym = Keysyms.KP_5;  break;
+        case KeyEvent.VK_NUMPAD6:     keysym = Keysyms.KP_6;  break;
+        case KeyEvent.VK_NUMPAD7:     keysym = Keysyms.KP_7;  break;
+        case KeyEvent.VK_NUMPAD8:     keysym = Keysyms.KP_8;  break;
+        case KeyEvent.VK_NUMPAD9:     keysym = Keysyms.KP_9;  break;
+        case KeyEvent.VK_DECIMAL:     keysym = Keysyms.KP_DECIMAL;  break;
+        case KeyEvent.VK_ADD:         keysym = Keysyms.KP_ADD;  break;
+        case KeyEvent.VK_SUBTRACT:    keysym = Keysyms.KP_SUBTRACT;  break;
+        case KeyEvent.VK_MULTIPLY:    keysym = Keysyms.KP_MULTIPLY;  break;
+        case KeyEvent.VK_DIVIDE:      keysym = Keysyms.KP_DIVIDE;  break;
+        case KeyEvent.VK_DELETE:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_DELETE;
+          else
+            keysym = Keysyms.DELETE;
+          break;
+        case KeyEvent.VK_CLEAR:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_BEGIN;
+          else
+            keysym = Keysyms.CLEAR;
+          break;
+        case KeyEvent.VK_CONTROL:
+          if (location == KeyEvent.KEY_LOCATION_RIGHT)
+            keysym = Keysyms.CONTROL_R;
+          else
+            keysym = Keysyms.CONTROL_L;
+          break;
+        case KeyEvent.VK_ALT:
+          if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+            // Mac has no AltGr key, but the Option/Alt keys serve the same
+            // purpose.  Thus, we allow RAlt to be used as AltGr and LAlt to be
+            // used as a regular Alt key.
+            if (VncViewer.OS.startsWith("mac os x"))
+              keysym = Keysyms.ISO_LEVEL3_SHIFT;
+            else
+              keysym = Keysyms.ALT_R;
+          } else {
+            keysym = Keysyms.ALT_L;
+          }
+          break;
+        case KeyEvent.VK_SHIFT:
+          if (location == KeyEvent.KEY_LOCATION_RIGHT)
+            keysym = Keysyms.SHIFT_R;
+          else
+            keysym = Keysyms.SHIFT_L;
+          break;
+        case KeyEvent.VK_META:
+          if (location == KeyEvent.KEY_LOCATION_RIGHT)
+            keysym = Keysyms.SUPER_R;
+          else
+            keysym = Keysyms.SUPER_L;
+          break;
+        case KeyEvent.VK_ALT_GRAPH:
+          keysym = Keysyms.ISO_LEVEL3_SHIFT;
+          break;
+        default:
+          // On Windows, pressing AltGr has the same effect as pressing LCtrl +
+          // RAlt, so we have to send fake key release events for those
+          // modifiers (and any other Ctrl and Alt modifiers that are pressed),
+          // then send the key event for the modified key, then send fake key
+          // press events for the same modifiers.
+          if (pressedKeys.containsValue(Keysyms.ALT_R) &&
+              pressedKeys.containsValue(Keysyms.CONTROL_L) &&
+              VncViewer.OS.startsWith("windows")) {
+            winAltGr = true;
+          } else if (ev.isControlDown()) {
+            // For CTRL-<letter>, CTRL is sent separately, so just send
+            // <letter>.
+            if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
+                // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
+                (key >= 27 && key <= 29 && ev.isShiftDown()))
+              key += 96;
+            // For CTRL-SHIFT-<letter>, send capital <letter> to emulate the
+            // behavior of Linux.  For CTRL-@, send @.  For CTRL-_, send _.
+            // For CTRL-^, send ^.
+            else if (key < 32)
+              key += 64;
+            // Windows and Mac sometimes return CHAR_UNDEFINED with CTRL-SHIFT
+            // combinations.
+            else if (key == KeyEvent.CHAR_UNDEFINED) {
+              // CTRL-SHIFT-Minus should generate an underscore key character
+              // in almost all keyboard layouts.  Emacs, in particular, uses
+              // CTRL-SHIFT-Underscore for its undo function.
+              if (keycode == KeyEvent.VK_MINUS && ev.isShiftDown())
+                key = '_';
+              // The best we can do for other keys is to send the key code if
+              // it is a valid ASCII symbol.
+              else if (keycode >= 0 && keycode <= 127)
+                key = keycode;
+            }
+          } else if (pressedKeys.containsValue(Keysyms.ALT_L) &&
+                     VncViewer.OS.startsWith("mac os x") && key > 127) {
+            // Un*x and Windows servers expect that, if Alt + an ASCII key is
+            // pressed, the key event for the ASCII key will be the same as if
+            // Alt had not been pressed.  On OS X, however, the Alt/Option keys
+            // act like AltGr keys, so if Alt + an ASCII key is pressed, the
+            // key code is the ASCII key symbol, but the key char is the code
+            // for the alternate graphics symbol.
+            if (keycode >= 65 && keycode <= 90 &&
+                !pressedKeys.containsValue(Keysyms.SHIFT_L) &&
+                !pressedKeys.containsValue(Keysyms.SHIFT_R))
+              key = keycode + 32;
+            else if (keycode == KeyEvent.VK_QUOTE)
+              key = '\'';
+            else if (keycode >= 32 && keycode <= 126)
               key = keycode;
           }
-        } else if (pressedKeys.containsValue(Keysyms.Alt_L) &&
-                   VncViewer.os.startsWith("mac os x") && key > 127) {
-          // Un*x and Windows servers expect that, if Alt + an ASCII key is
-          // pressed, the key event for the ASCII key will be the same as if
-          // Alt had not been pressed.  On OS X, however, the Alt/Option keys
-          // act like AltGr keys, so if Alt + an ASCII key is pressed, the key
-          // code is the ASCII key symbol, but the key char is the code for the
-          // alternate graphics symbol.
-          if (keycode >= 65 && keycode <= 90 &&
-              !pressedKeys.containsValue(Keysyms.Shift_L) &&
-              !pressedKeys.containsValue(Keysyms.Shift_R))
-            key = keycode + 32;
-          else if (keycode == KeyEvent.VK_QUOTE)
-            key = '\'';
-          else if (keycode >= 32 && keycode <= 126)
-            key = keycode;
-        }
-        switch (keycode) {
-        // NOTE: For keyboard layouts that produce a different symbol when
-        // AltGr+{a dead key} is pressed, Java tends to send us the key code
-        // for the dead key.  It is difficult to distinguish those key events
-        // from key events in which the dead key itself is pressed.
-        // Fortunately, it seems that Java usually accompanies actual dead key
-        // events with a key character corresponding to the equivalent ASCII or
-        // ISO-8859-1 symbol (e.g. '^' for a dead circumflex) or
-        // KeyEvent.CHAR_UNDEFINED.  We assume that, if we receive the key code
-        // for a dead key, the key character is an ASCII/ISO-8859-1 symbol,
-        // and it doesn't match the equivalent ASCII/ISO-8859-1 symbol for the
-        // dead key, we should send the keysym for the key character instead
-        // of the keysym for the dead key.  We only do this for the dead keys
-        // that are known to have AltGr symbols associated with them in various
-        // QWERTY layouts.
-        case KeyEvent.VK_DEAD_ABOVEDOT:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_AboveDot;
-          break;
-        case KeyEvent.VK_DEAD_ABOVERING:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_AboveRing;
-          break;
-        case KeyEvent.VK_DEAD_ACUTE:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-              (key == '\'' || key == 180 || key > 255))
-            keysym = Keysyms.Dead_Acute;
-          break;
-        case KeyEvent.VK_DEAD_BREVE:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_Breve;
-          break;
-        case KeyEvent.VK_DEAD_CARON:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_Caron;
-          break;
-        case KeyEvent.VK_DEAD_CEDILLA:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-              (key == 184 || key > 255))
-            keysym = Keysyms.Dead_Cedilla;
-          break;
-        case KeyEvent.VK_DEAD_CIRCUMFLEX:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-              (key == '^' || key > 255))
-            keysym = Keysyms.Dead_Circumflex;
-          break;
-        case KeyEvent.VK_DEAD_DIAERESIS:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-              (key == '\"'|| key == 168 || key > 255))
-            keysym = Keysyms.Dead_Diaeresis;
-          break;
-        case KeyEvent.VK_DEAD_DOUBLEACUTE:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_DoubleAcute;
-          break;
-        case KeyEvent.VK_DEAD_GRAVE:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-              (key == '`' || key > 255))
-            keysym = Keysyms.Dead_Grave;
-          break;
-        case KeyEvent.VK_DEAD_IOTA:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_Iota;
-          break;
-        case KeyEvent.VK_DEAD_MACRON:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_Macron;
-          break;
-        case KeyEvent.VK_DEAD_OGONEK:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_Ogonek;
-          break;
-        case KeyEvent.VK_DEAD_SEMIVOICED_SOUND:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_Semivoiced_Sound;
-          break;
-        case KeyEvent.VK_DEAD_TILDE:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-              (key == '~' || key > 255))
-            keysym = Keysyms.Dead_Tilde;
-          break;
-        case KeyEvent.VK_DEAD_VOICED_SOUND:
-          if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
-            keysym = Keysyms.Dead_Voiced_Sound;
-          break;
-        }
-        if (keysym == -1)
-          keysym = UnicodeToKeysym.ucs2keysym(key);
-        if (keysym == -1) {
-          debugStr += " NO KEYSYM";
-          vlog.debug(debugStr);
-          return;
-        }
+          switch (keycode) {
+            // NOTE: For keyboard layouts that produce a different symbol when
+            // AltGr+{a dead key} is pressed, Java tends to send us the key
+            // code for the dead key.  It is difficult to distinguish those key
+            // events from key events in which the dead key itself is pressed.
+            // Fortunately, it seems that Java usually accompanies actual dead
+            // key events with a key character corresponding to the equivalent
+            // ASCII or ISO-8859-1 symbol (e.g. '^' for a dead circumflex) or
+            // KeyEvent.CHAR_UNDEFINED.  We assume that, if we receive the key
+            // code for a dead key, the key character is an ASCII/ISO-8859-1
+            // symbol, and it doesn't match the equivalent ASCII/ISO-8859-1
+            // symbol for the dead key, we should send the keysym for the key
+            // character instead of the keysym for the dead key.  We only do
+            // this for the dead keys that are known to have AltGr symbols
+            // associated with them in various QWERTY layouts.
+            case KeyEvent.VK_DEAD_ABOVEDOT:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_ABOVEDOT;
+              break;
+            case KeyEvent.VK_DEAD_ABOVERING:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_ABOVERING;
+              break;
+            case KeyEvent.VK_DEAD_ACUTE:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+                  (key == '\'' || key == 180 || key > 255))
+                keysym = Keysyms.DEAD_ACUTE;
+              break;
+            case KeyEvent.VK_DEAD_BREVE:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_BREVE;
+              break;
+            case KeyEvent.VK_DEAD_CARON:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_CARON;
+              break;
+            case KeyEvent.VK_DEAD_CEDILLA:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+                  (key == 184 || key > 255))
+                keysym = Keysyms.DEAD_CEDILLA;
+              break;
+            case KeyEvent.VK_DEAD_CIRCUMFLEX:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+                  (key == '^' || key > 255))
+                keysym = Keysyms.DEAD_CIRCUMFLEX;
+              break;
+            case KeyEvent.VK_DEAD_DIAERESIS:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+                  (key == '\"' || key == 168 || key > 255))
+                keysym = Keysyms.DEAD_DIAERESIS;
+              break;
+            case KeyEvent.VK_DEAD_DOUBLEACUTE:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_DOUBLEACUTE;
+              break;
+            case KeyEvent.VK_DEAD_GRAVE:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+                  (key == '`' || key > 255))
+                keysym = Keysyms.DEAD_GRAVE;
+              break;
+            case KeyEvent.VK_DEAD_IOTA:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_IOTA;
+              break;
+            case KeyEvent.VK_DEAD_MACRON:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_MACRON;
+              break;
+            case KeyEvent.VK_DEAD_OGONEK:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_OGONEK;
+              break;
+            case KeyEvent.VK_DEAD_SEMIVOICED_SOUND:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_SEMIVOICED_SOUND;
+              break;
+            case KeyEvent.VK_DEAD_TILDE:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
+                  (key == '~' || key > 255))
+                keysym = Keysyms.DEAD_TILDE;
+              break;
+            case KeyEvent.VK_DEAD_VOICED_SOUND:
+              if (location != KeyEvent.KEY_LOCATION_UNKNOWN)
+                keysym = Keysyms.DEAD_VOICED_SOUND;
+              break;
+          }
+          if (keysym == -1)
+            keysym = UnicodeToKeysym.ucs2keysym(key);
+          if (keysym == -1) {
+            debugStr += " NO KEYSYM";
+            vlog.debug(debugStr);
+            return;
+          }
       }
     } else {
       // KEY_ACTION
       switch (keycode) {
-      case KeyEvent.VK_HOME:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Home;
-        else
-          keysym = Keysyms.Home;  break;
-      case KeyEvent.VK_END:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_End;
-        else
-          keysym = Keysyms.End;  break;
-      case KeyEvent.VK_PAGE_UP:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Page_Up;
-        else
-          keysym = Keysyms.Page_Up;  break;
-      case KeyEvent.VK_PAGE_DOWN:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Page_Down;
-        else
-          keysym = Keysyms.Page_Down;  break;
-      case KeyEvent.VK_UP:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Up;
-        else
-          keysym = Keysyms.Up;  break;
-      case KeyEvent.VK_DOWN:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Down;
-        else
-         keysym = Keysyms.Down;  break;
-      case KeyEvent.VK_LEFT:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Left;
-        else
-         keysym = Keysyms.Left;  break;
-      case KeyEvent.VK_RIGHT:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Right;
-        else
-          keysym = Keysyms.Right;  break;
-      case KeyEvent.VK_F1:           keysym = Keysyms.F1;  break;
-      case KeyEvent.VK_F2:           keysym = Keysyms.F2;  break;
-      case KeyEvent.VK_F3:           keysym = Keysyms.F3;  break;
-      case KeyEvent.VK_F4:           keysym = Keysyms.F4;  break;
-      case KeyEvent.VK_F5:           keysym = Keysyms.F5;  break;
-      case KeyEvent.VK_F6:           keysym = Keysyms.F6;  break;
-      case KeyEvent.VK_F7:           keysym = Keysyms.F7;  break;
-      case KeyEvent.VK_F8:           keysym = Keysyms.F8;  break;
-      case KeyEvent.VK_F9:           keysym = Keysyms.F9;  break;
-      case KeyEvent.VK_F10:          keysym = Keysyms.F10;  break;
-      case KeyEvent.VK_F11:          keysym = Keysyms.F11;  break;
-      case KeyEvent.VK_F12:          keysym = Keysyms.F12;  break;
-      case KeyEvent.VK_F13:          keysym = Keysyms.F13;  break;
-      case KeyEvent.VK_HELP:         keysym = Keysyms.Help;  break;
-      case KeyEvent.VK_UNDO:         keysym = Keysyms.Undo;  break;
-      case KeyEvent.VK_AGAIN:        keysym = Keysyms.Redo;  break;
-      case KeyEvent.VK_PRINTSCREEN:  keysym = Keysyms.Print;  break;
-      case KeyEvent.VK_PAUSE:
-        if (ev.isControlDown())
-          keysym = Keysyms.Break;
-        else
-          keysym = Keysyms.Pause;
-        break;
-      case KeyEvent.VK_INSERT:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Insert;
-        else
-          keysym = Keysyms.Insert;  break;
-      case KeyEvent.VK_KP_DOWN:      keysym = Keysyms.KP_Down;  break;
-      case KeyEvent.VK_KP_LEFT:      keysym = Keysyms.KP_Left;  break;
-      case KeyEvent.VK_KP_RIGHT:     keysym = Keysyms.KP_Right;  break;
-      case KeyEvent.VK_KP_UP:        keysym = Keysyms.KP_Up;  break;
-      case KeyEvent.VK_NUM_LOCK:     keysym = Keysyms.Num_Lock;  break;
-      case KeyEvent.VK_WINDOWS:
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
-          keysym = Keysyms.Super_R;
-        else
-          keysym = Keysyms.Super_L;  break;
-      case KeyEvent.VK_CONTEXT_MENU: keysym = Keysyms.Menu;  break;
-      case KeyEvent.VK_SCROLL_LOCK:  keysym = Keysyms.Scroll_Lock;  break;
-      case KeyEvent.VK_CAPS_LOCK:    keysym = Keysyms.Caps_Lock;  break;
-      case KeyEvent.VK_BEGIN:
-        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
-          keysym = Keysyms.KP_Begin;
-        else
-          keysym = Keysyms.Begin;  break;
-      default:
-        debugStr += " NO KEYSYM";
-        vlog.debug(debugStr);
-        return;
+        case KeyEvent.VK_HOME:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_HOME;
+          else
+            keysym = Keysyms.HOME;
+          break;
+        case KeyEvent.VK_END:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_END;
+          else
+            keysym = Keysyms.END;
+          break;
+        case KeyEvent.VK_PAGE_UP:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_PAGE_UP;
+          else
+            keysym = Keysyms.PAGE_UP;
+          break;
+        case KeyEvent.VK_PAGE_DOWN:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_PAGE_DOWN;
+          else
+            keysym = Keysyms.PAGE_DOWN;
+          break;
+        case KeyEvent.VK_UP:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_UP;
+          else
+            keysym = Keysyms.UP;
+          break;
+        case KeyEvent.VK_DOWN:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_DOWN;
+          else
+            keysym = Keysyms.DOWN;
+          break;
+        case KeyEvent.VK_LEFT:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_LEFT;
+          else
+            keysym = Keysyms.LEFT;
+          break;
+        case KeyEvent.VK_RIGHT:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_RIGHT;
+          else
+            keysym = Keysyms.RIGHT;
+          break;
+        case KeyEvent.VK_F1:            keysym = Keysyms.F1;  break;
+        case KeyEvent.VK_F2:            keysym = Keysyms.F2;  break;
+        case KeyEvent.VK_F3:            keysym = Keysyms.F3;  break;
+        case KeyEvent.VK_F4:            keysym = Keysyms.F4;  break;
+        case KeyEvent.VK_F5:            keysym = Keysyms.F5;  break;
+        case KeyEvent.VK_F6:            keysym = Keysyms.F6;  break;
+        case KeyEvent.VK_F7:            keysym = Keysyms.F7;  break;
+        case KeyEvent.VK_F8:            keysym = Keysyms.F8;  break;
+        case KeyEvent.VK_F9:            keysym = Keysyms.F9;  break;
+        case KeyEvent.VK_F10:           keysym = Keysyms.F10;  break;
+        case KeyEvent.VK_F11:           keysym = Keysyms.F11;  break;
+        case KeyEvent.VK_F12:           keysym = Keysyms.F12;  break;
+        case KeyEvent.VK_F13:           keysym = Keysyms.F13;  break;
+        case KeyEvent.VK_HELP:          keysym = Keysyms.HELP;  break;
+        case KeyEvent.VK_UNDO:          keysym = Keysyms.UNDO;  break;
+        case KeyEvent.VK_AGAIN:         keysym = Keysyms.REDO;  break;
+        case KeyEvent.VK_PRINTSCREEN:   keysym = Keysyms.PRINT;  break;
+        case KeyEvent.VK_PAUSE:
+          if (ev.isControlDown())
+            keysym = Keysyms.BREAK;
+          else
+            keysym = Keysyms.PAUSE;
+          break;
+        case KeyEvent.VK_INSERT:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_INSERT;
+          else
+            keysym = Keysyms.INSERT;
+          break;
+        case KeyEvent.VK_KP_DOWN:       keysym = Keysyms.KP_DOWN;  break;
+        case KeyEvent.VK_KP_LEFT:       keysym = Keysyms.KP_LEFT;  break;
+        case KeyEvent.VK_KP_RIGHT:      keysym = Keysyms.KP_RIGHT;  break;
+        case KeyEvent.VK_KP_UP:         keysym = Keysyms.KP_UP;  break;
+        case KeyEvent.VK_NUM_LOCK:      keysym = Keysyms.NUM_LOCK;  break;
+        case KeyEvent.VK_WINDOWS:
+          if (location == KeyEvent.KEY_LOCATION_RIGHT)
+            keysym = Keysyms.SUPER_R;
+          else
+            keysym = Keysyms.SUPER_L;
+          break;
+        case KeyEvent.VK_CONTEXT_MENU:  keysym = Keysyms.MENU;  break;
+        case KeyEvent.VK_SCROLL_LOCK:   keysym = Keysyms.SCROLL_LOCK;  break;
+        case KeyEvent.VK_CAPS_LOCK:     keysym = Keysyms.CAPS_LOCK;  break;
+        case KeyEvent.VK_BEGIN:
+          if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+            keysym = Keysyms.KP_BEGIN;
+          else
+            keysym = Keysyms.BEGIN;
+          break;
+        default:
+          debugStr += " NO KEYSYM";
+          vlog.debug(debugStr);
+          return;
       }
     }
 
     if (winAltGr) {
-      if (pressedKeys.containsValue(Keysyms.Control_L)) {
+      if (pressedKeys.containsValue(Keysyms.CONTROL_L)) {
         vlog.debug("Fake L Ctrl released");
-        writeKeyEvent(Keysyms.Control_L, false);
+        writeKeyEvent(Keysyms.CONTROL_L, false);
       }
-      if (pressedKeys.containsValue(Keysyms.Alt_L)) {
+      if (pressedKeys.containsValue(Keysyms.ALT_L)) {
         vlog.debug("Fake L Alt released");
-        writeKeyEvent(Keysyms.Alt_L, false);
+        writeKeyEvent(Keysyms.ALT_L, false);
       }
-      if (pressedKeys.containsValue(Keysyms.Control_R)) {
+      if (pressedKeys.containsValue(Keysyms.CONTROL_R)) {
         vlog.debug("Fake R Ctrl released");
-        writeKeyEvent(Keysyms.Control_R, false);
+        writeKeyEvent(Keysyms.CONTROL_R, false);
       }
-      if (pressedKeys.containsValue(Keysyms.Alt_R)) {
+      if (pressedKeys.containsValue(Keysyms.ALT_R)) {
         vlog.debug("Fake R Alt released");
-        writeKeyEvent(Keysyms.Alt_R, false);
+        writeKeyEvent(Keysyms.ALT_R, false);
       }
     }
     debugStr += String.format(" => 0x%04x", keysym);
@@ -2167,31 +2183,25 @@ public class CConn extends CConnection implements UserPasswdGetter,
     pressedKeys.put(keycode, keysym);
     writeKeyEvent(keysym, down);
     if (winAltGr) {
-      if (pressedKeys.containsValue(Keysyms.Control_L)) {
+      if (pressedKeys.containsValue(Keysyms.CONTROL_L)) {
         vlog.debug("Fake L Ctrl pressed");
-        writeKeyEvent(Keysyms.Control_L, true);
+        writeKeyEvent(Keysyms.CONTROL_L, true);
       }
-      if (pressedKeys.containsValue(Keysyms.Alt_L)) {
+      if (pressedKeys.containsValue(Keysyms.ALT_L)) {
         vlog.debug("Fake L Alt pressed");
-        writeKeyEvent(Keysyms.Alt_L, true);
+        writeKeyEvent(Keysyms.ALT_L, true);
       }
-      if (pressedKeys.containsValue(Keysyms.Control_R)) {
+      if (pressedKeys.containsValue(Keysyms.CONTROL_R)) {
         vlog.debug("Fake R Ctrl pressed");
-        writeKeyEvent(Keysyms.Control_R, true);
+        writeKeyEvent(Keysyms.CONTROL_R, true);
       }
-      if (pressedKeys.containsValue(Keysyms.Alt_R)) {
+      if (pressedKeys.containsValue(Keysyms.ALT_R)) {
         vlog.debug("Fake R Alt pressed");
-        writeKeyEvent(Keysyms.Alt_R, true);
+        writeKeyEvent(Keysyms.ALT_R, true);
       }
     }
   }
 
-
-  public static final int rfbButton1Mask = 1;
-  public static final int rfbButton2Mask = 2;
-  public static final int rfbButton3Mask = 4;
-  public static final int rfbButton4Mask = 8;
-  public static final int rfbButton5Mask = 16;
 
   // EDT
   public void writePointerEvent(MouseEvent ev) {
@@ -2199,34 +2209,34 @@ public class CConn extends CConnection implements UserPasswdGetter,
       return;
 
     switch (ev.getID()) {
-    case MouseEvent.MOUSE_PRESSED:
-      switch(ev.getButton()) {
-      case 1:
-        buttonMask |= rfbButton1Mask;  break;
-      case 2:
-        buttonMask |= rfbButton2Mask;  break;
-      case 3:
-        buttonMask |= rfbButton3Mask;  break;
-      default:
-        return;
-      }
-      vlog.debug("mouse PRESS, button " + ev.getButton() +
-                 ", coords " + ev.getX() + "," + ev.getY());
-      break;
-    case MouseEvent.MOUSE_RELEASED:
-      switch(ev.getButton()) {
-      case 1:
-        buttonMask &= ~rfbButton1Mask;  break;
-      case 2:
-        buttonMask &= ~rfbButton2Mask;  break;
-      case 3:
-        buttonMask &= ~rfbButton3Mask;  break;
-      default:
-        return;
-      }
-      vlog.debug("mouse release, button " + ev.getButton() +
-                 ", coords " + ev.getX() + "," + ev.getY());
-      break;
+      case MouseEvent.MOUSE_PRESSED:
+        switch (ev.getButton()) {
+          case 1:
+            buttonMask |= RFB.BUTTON1_MASK;  break;
+          case 2:
+            buttonMask |= RFB.BUTTON2_MASK;  break;
+          case 3:
+            buttonMask |= RFB.BUTTON3_MASK;  break;
+          default:
+            return;
+        }
+        vlog.debug("mouse PRESS, button " + ev.getButton() +
+                   ", coords " + ev.getX() + "," + ev.getY());
+        break;
+      case MouseEvent.MOUSE_RELEASED:
+        switch (ev.getButton()) {
+          case 1:
+            buttonMask &= ~RFB.BUTTON1_MASK;  break;
+          case 2:
+            buttonMask &= ~RFB.BUTTON2_MASK;  break;
+          case 3:
+            buttonMask &= ~RFB.BUTTON3_MASK;  break;
+          default:
+            return;
+        }
+        vlog.debug("mouse release, button " + ev.getButton() +
+                   ", coords " + ev.getX() + "," + ev.getY());
+        break;
     }
 
     if (cp.width != desktop.scaledWidth ||
@@ -2264,9 +2274,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       clicks = -clicks;
     }
     if (clicks < 0) {
-      wheelMask = buttonMask | rfbButton4Mask;
+      wheelMask = buttonMask | RFB.BUTTON4_MASK;
     } else {
-      wheelMask = buttonMask | rfbButton5Mask;
+      wheelMask = buttonMask | RFB.BUTTON5_MASK;
     }
 
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
@@ -2312,8 +2322,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // checkEncodings() sends a setEncodings message if one is needed.
   private void checkEncodings() {
     if (encodingChange && (writer() != null)) {
-      vlog.info("Requesting " + Encodings.encodingName(currentEncoding) +
-        " encoding");
+      vlog.info("Requesting " + RFB.encodingName(currentEncoding) +
+                " encoding");
       writer().writeSetEncodings(currentEncoding, lastServerEncoding, opts);
       encodingChange = false;
       if (viewport != null)
@@ -2323,6 +2333,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // The following need no synchronization:
   VncViewer viewer;
+  @SuppressWarnings("checkstyle:VisibilityModifier")
   public static UserPasswdGetter upg;
 
   // shuttingDown is set in the EDT and is only ever tested by the RFB thread
@@ -2345,24 +2356,23 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   protected DesktopWindow desktop;
 
-  // FIXME: should be private
-  public PixelFormat serverPF;
+  PixelFormat serverPF;
   private PixelFormat fullColourPF;
 
   private boolean pendingPFChange;
   private PixelFormat pendingPF;
-  public boolean pendingServerResize;
+  boolean pendingServerResize;
   Rect pendingAutoResize = new Rect();
 
-  public int currentEncoding, lastServerEncoding;
+  int currentEncoding, lastServerEncoding;
 
   private boolean formatChange;
   private boolean encodingChange;
 
-  public boolean firstUpdate;
+  boolean firstUpdate;
   private boolean pendingUpdate;
   private boolean continuousUpdates;
-  public boolean checkLayout;
+  boolean checkLayout;
 
   private boolean forceNonincremental;
 
@@ -2375,8 +2385,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   boolean keyboardGrabbed;
   GraphicsDevice primaryGD;
 
-  public double tDecode, tBlit;
-  public long decodePixels, decodeRect, blitPixels, blits;
+  double tDecode, tBlit;
+  long decodePixels, decodeRect, blitPixels, blits;
   double tDecodeStart, tReadOld;
   boolean benchmark;
 

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,7 @@ import com.turbovnc.rfb.*;
 
 class ServerDialog extends Dialog implements ActionListener {
 
-  public ServerDialog(OptionsDialog options_,
-                      Options opts_, CConn cc_) {
+  ServerDialog(OptionsDialog options_, Options opts_, CConn cc_) {
 
     super(true);
     cc = cc_;
@@ -43,23 +42,23 @@ class ServerDialog extends Dialog implements ActionListener {
     JLabel serverLabel = new JLabel("VNC server:", JLabel.RIGHT);
     String valueStr = null;
     if (opts.serverName != null) {
-      String [] s = new String[1];
+      String[] s = new String[1];
       s[0] = opts.serverName;
       server = new JComboBox(s);
-    } else if ((valueStr = UserPreferences.get("ServerDialog", "history"))
-               != null) {
+    } else if ((valueStr = UserPreferences.get("ServerDialog", "history")) !=
+               null) {
       server = new JComboBox(valueStr.split(","));
     } else {
       server = new JComboBox();
     }
 
     // Hack to set the left inset on editable JComboBox
-    if (UIManager.getLookAndFeel().getID() == "Windows") {
+    if (UIManager.getLookAndFeel().getID().equals("Windows")) {
       server.setBorder(BorderFactory.createCompoundBorder(server.getBorder(),
         BorderFactory.createEmptyBorder(0, 2, 0, 0)));
-    } else if (UIManager.getLookAndFeel().getID() == "Metal") {
-      ComboBoxEditor editor = server.getEditor();
-      JTextField jtf = (JTextField)editor.getEditorComponent();
+    } else if (UIManager.getLookAndFeel().getID().equals("Metal")) {
+      ComboBoxEditor cbEditor = server.getEditor();
+      JTextField jtf = (JTextField)cbEditor.getEditorComponent();
       jtf.setBorder(new CompoundBorder(jtf.getBorder(),
                                        new EmptyBorder(0, 2, 0, 0)));
     }
@@ -81,7 +80,7 @@ class ServerDialog extends Dialog implements ActionListener {
 
     topPanel = new JPanel(new GridBagLayout());
 
-    Dialog.addGBComponent(new JLabel(VncViewer.logoIcon), topPanel,
+    Dialog.addGBComponent(new JLabel(VncViewer.LOGO_ICON), topPanel,
                           0, 0, 1, 1, 0, 0, 0, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.LINE_START,
@@ -209,7 +208,8 @@ class ServerDialog extends Dialog implements ActionListener {
     String valueStr = UserPreferences.get("ServerDialog", "history");
     String t = (valueStr == null) ? "" : valueStr;
     StringTokenizer st = new StringTokenizer(t, ",");
-    StringBuffer sb = new StringBuffer().append((String)server.getSelectedItem());
+    StringBuffer sb =
+      new StringBuffer().append((String)server.getSelectedItem());
     while (st.hasMoreTokens()) {
       String str = st.nextToken();
       if (!str.equals((String)server.getSelectedItem()) && !str.equals("")) {

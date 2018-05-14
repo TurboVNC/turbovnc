@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2015-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2016, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,51 +19,12 @@
  * USA.
  */
 
-//
-// SecTypes.java - constants for the various security types.
-//
-
 package com.turbovnc.rfb;
+
 import java.util.*;
 import com.turbovnc.rdr.*;
 
 public class Security {
-
-  public static final int secTypeInvalid   = 0;
-  public static final int secTypeNone      = 1;
-  public static final int secTypeVncAuth   = 2;
-
-  public static final int secTypeRA2       = 5;
-  public static final int secTypeRA2ne     = 6;
-
-  public static final int secTypeSSPI      = 7;
-  public static final int secTypeSSPIne    = 8;
-
-  public static final int secTypeTight     = 16;
-  public static final int secTypeUltra     = 17;
-  public static final int secTypeTLS       = 18;
-  public static final int secTypeVeNCrypt  = 19;
-
-  /* Tight subtypes */
-  public static final int secTypeUnixLogin = 129;
-
-  /* VeNCrypt subtypes */
-  public static final int secTypePlain     = 256;
-  public static final int secTypeTLSNone   = 257;
-  public static final int secTypeTLSVnc    = 258;
-  public static final int secTypeTLSPlain  = 259;
-  public static final int secTypeX509None  = 260;
-  public static final int secTypeX509Vnc   = 261;
-  public static final int secTypeX509Plain = 262;
-  public static final int secTypeIdent     = 265;
-  public static final int secTypeTLSIdent  = 266;
-  public static final int secTypeX509Ident = 267;
-
-  // result types
-
-  public static final int secResultOK = 0;
-  public static final int secResultFailed = 1;
-  public static final int secResultTooMany = 2; // deprecated
 
   public Security(StringParameter secTypes) {
     if (setInUserPrefs && secTypes.isDefault) return;
@@ -76,7 +37,7 @@ public class Security {
     secTypesStr = null;
   }
 
-  public static List<Integer> enabledSecTypes = new ArrayList<Integer>();
+  static List<Integer> enabledSecTypes = new ArrayList<Integer>();
 
   public static final List<Integer> getEnabledSecTypes() {
     List<Integer> result = new ArrayList<Integer>();
@@ -84,15 +45,16 @@ public class Security {
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
       if (refType >= 0x100) {
-        result.add(secTypeVeNCrypt);
+        result.add(RFB.SECTYPE_VENCRYPT);
         break;
       }
     }
-    result.add(secTypeTight);
-    result.add(secTypeTLS);
+    result.add(RFB.SECTYPE_TIGHT);
+    result.add(RFB.SECTYPE_TLS);
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
-      if (refType < 0x100 && refType != secTypeTight && refType != secTypeTLS)
+      if (refType < 0x100 && refType != RFB.SECTYPE_TIGHT &&
+          refType != RFB.SECTYPE_TLS)
         result.add(refType);
     }
 
@@ -104,7 +66,7 @@ public class Security {
 
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
-      if (refType != secTypeVeNCrypt && refType != secTypeUnixLogin)
+      if (refType != RFB.SECTYPE_VENCRYPT && refType != RFB.SECTYPE_UNIX_LOGIN)
         /* ^^ Do not include VeNCrypt to avoid loops */
         result.add(refType);
     }
@@ -117,8 +79,8 @@ public class Security {
 
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
-      if (refType < 0x100 && refType != secTypeVeNCrypt &&
-          refType != secTypeTight && refType != secTypeTLS)
+      if (refType < 0x100 && refType != RFB.SECTYPE_VENCRYPT &&
+          refType != RFB.SECTYPE_TIGHT && refType != RFB.SECTYPE_TLS)
         result.add(refType);
     }
 
@@ -137,14 +99,14 @@ public class Security {
     Iterator<Integer> i;
 
     for (i = enabledSecTypes.iterator(); i.hasNext();)
-     if ((Integer)i.next() == secType)
-       return true;
-    if (secType == secTypeVeNCrypt)
-     return true;
-    if (secType == secTypeTight)
-     return true;
-    if (secType == secTypeTLS)
-     return true;
+      if ((Integer)i.next() == secType)
+        return true;
+    if (secType == RFB.SECTYPE_VENCRYPT)
+      return true;
+    if (secType == RFB.SECTYPE_TIGHT)
+      return true;
+    if (secType == RFB.SECTYPE_TLS)
+      return true;
 
     return false;
   }
@@ -153,74 +115,12 @@ public class Security {
     enabledSecTypes.remove((Object)secType);
   }
 
-  public static int secTypeNum(String name) {
-    if (name.equalsIgnoreCase("None"))      return secTypeNone;
-    if (name.equalsIgnoreCase("VncAuth"))   return secTypeVncAuth;
-    if (name.equalsIgnoreCase("VNC"))       return secTypeVncAuth;
-    if (name.equalsIgnoreCase("Tight"))     return secTypeTight;
-    if (name.equalsIgnoreCase("RA2"))       return secTypeRA2;
-    if (name.equalsIgnoreCase("RA2ne"))     return secTypeRA2ne;
-    if (name.equalsIgnoreCase("SSPI"))      return secTypeSSPI;
-    if (name.equalsIgnoreCase("SSPIne"))    return secTypeSSPIne;
-    //if (name.equalsIgnoreCase("ultra"))    return secTypeUltra;
-    if (name.equalsIgnoreCase("TLS"))       return secTypeTLS;
-    if (name.equalsIgnoreCase("VeNCrypt"))  return secTypeVeNCrypt;
-
-    /* Tight subtypes */
-    if (name.equalsIgnoreCase("UnixLogin")) return secTypeUnixLogin;
-
-    /* VeNCrypt subtypes */
-    if (name.equalsIgnoreCase("Plain"))     return secTypePlain;
-    if (name.equalsIgnoreCase("Ident"))     return secTypeIdent;
-    if (name.equalsIgnoreCase("TLSNone"))   return secTypeTLSNone;
-    if (name.equalsIgnoreCase("TLSVnc"))    return secTypeTLSVnc;
-    if (name.equalsIgnoreCase("TLSPlain"))  return secTypeTLSPlain;
-    if (name.equalsIgnoreCase("TLSIdent"))  return secTypeTLSIdent;
-    if (name.equalsIgnoreCase("X509None"))  return secTypeX509None;
-    if (name.equalsIgnoreCase("X509Vnc"))   return secTypeX509Vnc;
-    if (name.equalsIgnoreCase("X509Plain")) return secTypeX509Plain;
-    if (name.equalsIgnoreCase("X509Ident")) return secTypeX509Ident;
-
-    return secTypeInvalid;
-  }
-
-  public static String secTypeName(int num) {
-    switch (num) {
-    case secTypeNone:       return "None";
-    case secTypeVncAuth:    return "VncAuth";
-    case secTypeTight:      return "Tight";
-    case secTypeRA2:        return "RA2";
-    case secTypeRA2ne:      return "RA2ne";
-    case secTypeSSPI:       return "SSPI";
-    case secTypeSSPIne:     return "SSPIne";
-    //case secTypeUltra:      return "Ultra";
-    case secTypeTLS:        return "TLS";
-    case secTypeVeNCrypt:   return "VeNCrypt";
-
-    /* Tight subtypes */
-    case secTypeUnixLogin:  return "UnixLogin";
-
-    /* VeNCrypt subtypes */
-    case secTypePlain:      return "Plain";
-    case secTypeIdent:      return "Ident";
-    case secTypeTLSNone:    return "TLSNone";
-    case secTypeTLSVnc:     return "TLSVnc";
-    case secTypeTLSPlain:   return "TLSPlain";
-    case secTypeTLSIdent:   return "TLSIdent";
-    case secTypeX509None:   return "X509None";
-    case secTypeX509Vnc:    return "X509Vnc";
-    case secTypeX509Plain:  return "X509Plain";
-    case secTypeX509Ident:  return "X509Ident";
-    default:                return "[unknown secType]";
-    }
-  }
-
   public static final List<Integer> parseSecTypes(String types_) {
     List<Integer> result = new ArrayList<Integer>();
     String[] types = types_.split(",");
     for (int i = 0; i < types.length; i++) {
-      int typeNum = secTypeNum(types[i]);
-      if (typeNum != secTypeInvalid)
+      int typeNum = RFB.secTypeNum(types[i]);
+      if (typeNum != RFB.SECTYPE_INVALID)
         result.add(typeNum);
       else
         throw new WarningException("Security type \'" + types[i] +
@@ -233,6 +133,7 @@ public class Security {
     enabledSecTypes = secTypes;
   }
 
+  @SuppressWarnings("checkstyle:VisibilityModifier")
   public static boolean setInUserPrefs;
 
   static LogWriter vlog = new LogWriter("Security");

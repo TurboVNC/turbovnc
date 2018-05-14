@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@ public class ConnParams {
     supportsContinuousUpdates = false;
     supportsClientRedirect = false;
     supportsGII = false;
-    name_ = null;  nEncodings_ = 0;  encodings_ = null;
+    name = null;  nEncodings = 0;  encodings = null;
     verStrPos = 0;
     screenLayout = new ScreenSet();
 
@@ -71,8 +71,10 @@ public class ConnParams {
     os.flush();
   }
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public int majorVersion;
   public int minorVersion;
+  // CHECKSTYLE VisibilityModifier:ON
 
   public void setVersion(int major, int minor) {
     majorVersion = major; minorVersion = minor;
@@ -91,31 +93,34 @@ public class ConnParams {
     return !beforeVersion(major, minor + 1);
   }
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public int width;
   public int height;
   public ScreenSet screenLayout;
+  // CHECKSTYLE VisibilityModifier:ON
 
-  public PixelFormat pf() { return pf_; }
+  public PixelFormat pf() { return pf; }
 
-  public void setPF(PixelFormat pf) {
-    pf_ = pf;
+  public void setPF(PixelFormat pf_) {
+    pf = pf_;
     if (pf.bpp != 8 && pf.bpp != 16 && pf.bpp != 32) {
       throw new ErrorException("setPF(): not 8, 16, or 32 bpp?");
     }
   }
 
-  public String name() { return name_; }
+  public String name() { return name; }
 
-  public void setName(String name) {
-    name_ = name;
+  public void setName(String name_) {
+    name = name_;
   }
 
-  public int nEncodings() { return nEncodings_; }
+  public int nEncodings() { return nEncodings; }
 
-  public int[] encodings() { return encodings_; }
+  public int[] encodings() { return encodings; }
 
-  public boolean done;
+  boolean done;
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public boolean supportsDesktopResize;
   public boolean supportsExtendedDesktopSize;
   public boolean supportsDesktopRename;
@@ -126,11 +131,12 @@ public class ConnParams {
   public boolean supportsGII;
 
   public boolean supportsSetDesktopSize;
+  // CHECKSTYLE VisibilityModifier:ON
 
-  private PixelFormat pf_;
-  private String name_;
-  private int nEncodings_;
-  private int[] encodings_;
+  private PixelFormat pf;
+  private String name;
+  private int nEncodings;
+  private int[] encodings;
   private StringBuilder verStr;
   private int verStrPos;
 }

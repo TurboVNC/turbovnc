@@ -28,8 +28,8 @@ import com.jcraft.jsch.*;
 class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   UIKeyboardInteractive {
 
-  public PasswdDialog(String title_, boolean userDisabled,
-                      String userName_, boolean passwdDisabled) {
+  PasswdDialog(String title_, boolean userDisabled, String userName_,
+               boolean passwdDisabled) {
     super(true);
     title = title_;
     userName = userName_;
@@ -80,10 +80,10 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   }
 
   /** Handle the key-typed event. */
-  public void keyTyped(KeyEvent event) { }
+  public void keyTyped(KeyEvent event) {}
 
   /** Handle the key-released event. */
-  public void keyReleased(KeyEvent event) { }
+  public void keyReleased(KeyEvent event) {}
 
   /** Handle the key-pressed event. */
   public void keyPressed(KeyEvent event) {
@@ -175,8 +175,8 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
 
     if (JOptionPane.showConfirmDialog(null, panel, destination + ": " + name,
                                       JOptionPane.OK_CANCEL_OPTION,
-                                      JOptionPane.QUESTION_MESSAGE)
-        == JOptionPane.OK_OPTION) {
+                                      JOptionPane.QUESTION_MESSAGE) ==
+        JOptionPane.OK_OPTION) {
       String[] response = new String[prompt.length];
       for (int i = 0; i < prompt.length; i++) {
         response[i] = texts[i].getText();

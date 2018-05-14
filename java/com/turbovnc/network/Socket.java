@@ -30,7 +30,7 @@ public abstract class Socket {
   public Socket(FileDescriptor fd) {
     instream = new FdInStream(fd);
     outstream = new FdOutStream(fd);
-    ownStreams = true; isShutdown_ = false;
+    ownStreams = true; isShutdown = false;
     queryConnection = false;
   }
 
@@ -39,9 +39,9 @@ public abstract class Socket {
   public FileDescriptor getFd() { return outstream.getFd(); }
 
   // if shutdown() is overridden then the override MUST call on to here
-  public void shutdown() { isShutdown_ = true; }
+  public void shutdown() { isShutdown = true; }
   public void close() { getFd().close(); }
-  public final boolean isShutdown() { return isShutdown_; }
+  public final boolean isShutdown() { return isShutdown; }
 
   // information about this end of the socket
   public abstract int getMyPort();
@@ -61,43 +61,17 @@ public abstract class Socket {
 
   protected Socket() {
     instream = null; outstream = null; ownStreams = false;
-    isShutdown_ = false; queryConnection = false;
+    isShutdown = false; queryConnection = false;
   }
 
   protected Socket(FdInStream i, FdOutStream o, boolean own) {
     instream = i; outstream = o; ownStreams = own;
-    isShutdown_ = false; queryConnection = false;
+    isShutdown = false; queryConnection = false;
   }
 
   protected FdInStream instream;
   protected FdOutStream outstream;
   boolean ownStreams;
-  boolean isShutdown_;
+  boolean isShutdown;
   boolean queryConnection;
 }
-
-/*
-abstract class ConnectionFilter {
-  public abstract boolean verifyConnection(Socket s);
-};
-
-abstract class SocketListener {
-  public SocketListener() {
-    fd = null; filter = null;
-  }
-
-  // shutdown() stops the socket from accepting further connections
-  public abstract void shutdown();
-
-  // accept() returns a new Socket object if there is a connection
-  // attempt in progress AND if the connection passes the filter
-  // if one is installed.  Otherwise, returns 0.
-  public abstract Socket accept();
-
-  // setFilter() applies the specified filter to all new connections
-  public void setFilter(ConnectionFilter f) {filter = f;}
-  //public SocketDescriptor getFd() {return fd;}
-  protected FileDescriptor fd;
-  protected ConnectionFilter filter;
-};
-*/

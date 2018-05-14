@@ -2,7 +2,7 @@
 /* Copyright (C) 2005 Martin Koegler
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import com.turbovnc.vncviewer.*;
 
 public class CSecurityPlain extends CSecurity {
 
-  public CSecurityPlain() { }
+  public CSecurityPlain() {}
 
   public boolean processMsg(CConnection cc) {
     OutStream os = cc.getOutStream();
@@ -53,7 +53,7 @@ public class CSecurityPlain extends CSecurity {
     return true;
   }
 
-  public final int getType() { return Security.secTypePlain; }
+  public final int getType() { return RFB.SECTYPE_PLAIN; }
   public final String getDescription() { return "Plain"; }
   public final String getProtocol() { return "None"; }
 

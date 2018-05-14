@@ -1,6 +1,7 @@
 /* Copyright (C) 2000-2003 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2011-2013, 2015, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2013, 2015, 2017-2018 D. R. Commander.
+ *                                          All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -32,22 +33,9 @@ import org.libjpegturbo.turbojpeg.*;
 public class TightDecoder extends Decoder {
 
   static final int TIGHT_MAX_WIDTH = 2048;
+  static final int TIGHT_MIN_TO_COMPRESS = 12;
 
-  // Compression control
-  static final int rfbTightExplicitFilter = 0x04;
-  static final int rfbTightFill = 0x08;
-  static final int rfbTightJpeg = 0x09;
-  static final int rfbTightMaxSubencoding = 0x09;
-
-  // Filters to improve compression efficiency
-  static final int rfbTightFilterCopy = 0x00;
-  static final int rfbTightFilterPalette = 0x01;
-  static final int rfbTightFilterGradient = 0x02;
-  static final int rfbTightMinToCompress = 12;
-
-  static final int rfbTightNoZlib = 0x0A;
-
-  static final Toolkit tk = Toolkit.getDefaultToolkit();
+  static final Toolkit TK = Toolkit.getDefaultToolkit();
 
   public TightDecoder(CMsgReader reader_) {
     reader = reader_;
@@ -153,19 +141,19 @@ public class TightDecoder extends Decoder {
     }
 
     boolean readUncompressed = false;
-    if ((compCtl & rfbTightNoZlib) == rfbTightNoZlib) {
-      compCtl &= ~(rfbTightNoZlib);
+    if ((compCtl & RFB.TIGHT_NO_ZLIB) == RFB.TIGHT_NO_ZLIB) {
+      compCtl &= ~(RFB.TIGHT_NO_ZLIB);
       readUncompressed = true;
     }
 
     // "JPEG" compression type.
-    if (compCtl == rfbTightJpeg) {
+    if (compCtl == RFB.TIGHT_JPEG) {
       decompressJpegRect(r, is, handler);
       return;
     }
 
     // Quit on unsupported compression type.
-    if (compCtl > rfbTightMaxSubencoding) {
+    if (compCtl > RFB.TIGHT_MAX_SUBENCODING) {
       throw new ErrorException("TightDecoder: bad subencoding value received");
     }
 
@@ -176,7 +164,7 @@ public class TightDecoder extends Decoder {
     int ptr = r.tl.y * stride[0] + r.tl.x;
 
     // "Fill" compression type.
-    if (compCtl == rfbTightFill) {
+    if (compCtl == RFB.TIGHT_FILL) {
       if (cutZeros) {
         byte[] bytebuf = new byte[3];
         is.readBytes(bytebuf, 0, 3);
@@ -214,27 +202,28 @@ public class TightDecoder extends Decoder {
     int palSize = 0;
     boolean useGradient = false;
 
-    if ((compCtl & rfbTightExplicitFilter) != 0) {
+    if ((compCtl & RFB.TIGHT_EXPLICIT_FILTER) != 0) {
       int filterId = is.readU8();
 
       switch (filterId) {
-      case rfbTightFilterPalette:
-        palSize = is.readU8() + 1;
-        checkPalette(bpp, cutZeros);
-        if (cutZeros) {
-          is.readBytes(tightPalette, 0, palSize * 3);
-          serverpf.bufferFromRGB((int[])palette, 0, tightPalette, 0, palSize);
-        } else
-          is.readPixels(palette, palSize, serverpf.bpp / 8,
-                        serverpf.bigEndian);
-        break;
-      case rfbTightFilterGradient:
-        useGradient = true;
-        break;
-      case rfbTightFilterCopy:
-        break;
-      default:
-        throw new ErrorException("TightDecoder: unknown filter code recieved");
+        case RFB.TIGHT_FILTER_PALETTE:
+          palSize = is.readU8() + 1;
+          checkPalette(bpp, cutZeros);
+          if (cutZeros) {
+            is.readBytes(tightPalette, 0, palSize * 3);
+            serverpf.bufferFromRGB((int[])palette, 0, tightPalette, 0,
+                                   palSize);
+          } else
+            is.readPixels(palette, palSize, serverpf.bpp / 8,
+                          serverpf.bigEndian);
+          break;
+        case RFB.TIGHT_FILTER_GRADIENT:
+          useGradient = true;
+          break;
+        case RFB.TIGHT_FILTER_COPY:
+          break;
+        default:
+          throw new ErrorException("TightDecoder: unknown filter code recieved");
       }
     }
 
@@ -251,8 +240,8 @@ public class TightDecoder extends Decoder {
     int streamId = -1;
 
     // Allocate netbuf and read in data
-    if (dataSize < rfbTightMinToCompress || readUncompressed) {
-      if (dataSize >= rfbTightMinToCompress)
+    if (dataSize < TIGHT_MIN_TO_COMPRESS || readUncompressed) {
+      if (dataSize >= TIGHT_MIN_TO_COMPRESS)
         dataSize = is.readCompactLength();
       checkDecodebuf(dataSize);
       is.readBytes(decodebuf, 0, dataSize);
@@ -276,9 +265,9 @@ public class TightDecoder extends Decoder {
       // Truecolor data.
       if (useGradient) {
         if (cutZeros) {
-          filterGradient24(decodebuf, (int[])buf, stride[0], r);
+          filterGradient24((int[])buf, stride[0], r);
         } else if (bpp == 16) {
-          filterGradient16(decodebuf, (short[])buf, stride[0], r);
+          filterGradient16((short[])buf, stride[0], r);
         } else {
           // We should never get here
           throw new ErrorException("Unsupported pixel type");
@@ -393,7 +382,8 @@ public class TightDecoder extends Decoder {
           while (h > 0) {
             int endOfRow = ptr + w;
             while (ptr < endOfRow) {
-              ((byte[])buf)[ptr++] = ((byte[])palette)[decodebuf[srcPtr++] & 0xff];
+              ((byte[])buf)[ptr++] =
+                ((byte[])palette)[decodebuf[srcPtr++] & 0xff];
             }
             ptr += pad;
             h--;
@@ -402,7 +392,8 @@ public class TightDecoder extends Decoder {
           while (h > 0) {
             int endOfRow = ptr + w;
             while (ptr < endOfRow) {
-              ((short[])buf)[ptr++] = ((short[])palette)[decodebuf[srcPtr++] & 0xff];
+              ((short[])buf)[ptr++] =
+                ((short[])palette)[decodebuf[srcPtr++] & 0xff];
             }
             ptr += pad;
             h--;
@@ -411,7 +402,8 @@ public class TightDecoder extends Decoder {
           while (h > 0) {
             int endOfRow = ptr + w;
             while (ptr < endOfRow) {
-              ((int[])buf)[ptr++] = ((int[])palette)[decodebuf[srcPtr++] & 0xff];
+              ((int[])buf)[ptr++] =
+                ((int[])palette)[decodebuf[srcPtr++] & 0xff];
             }
             ptr += pad;
             h--;
@@ -486,7 +478,7 @@ public class TightDecoder extends Decoder {
     }
 
     // Create an Image object from the JPEG data.
-    Image jpeg = tk.createImage(netbuf);
+    Image jpeg = TK.createImage(netbuf);
     jpeg.setAccelerationPriority(1);
     handler.imageRect(r, jpeg);
     jpeg.flush();
@@ -495,8 +487,7 @@ public class TightDecoder extends Decoder {
   /* NOTE: we support gradient encoding only for backward compatibility with
      TightVNC 1.3.x.  It is decidedly non-optimal. */
 
-  private void filterGradient24(byte[] netbuf, int[] buf, int stride,
-                                Rect r) {
+  private void filterGradient24(int[] buf, int stride, Rect r) {
 
     int x, y, c;
     int ptr = r.tl.y * stride + r.tl.x;
@@ -512,7 +503,7 @@ public class TightDecoder extends Decoder {
     for (y = 0; y < rectHeight; y++) {
       /* First pixel in a row */
       for (c = 0; c < 3; c++) {
-        pix[c] = (netbuf[y * rectWidth * 3 + c] + prevRow[c]) & 0xff;
+        pix[c] = (decodebuf[y * rectWidth * 3 + c] + prevRow[c]) & 0xff;
         thisRow[c] = pix[c];
       }
       buf[ptr + y * stride] = serverpf.pixelFromRGB(pix[0], pix[1], pix[2],
@@ -527,7 +518,7 @@ public class TightDecoder extends Decoder {
           } else if (est[c] < 0) {
             est[c] = 0;
           }
-          pix[c] = (netbuf[(y * rectWidth + x) * 3 + c] + est[c]) & 0xff;
+          pix[c] = (decodebuf[(y * rectWidth + x) * 3 + c] + est[c]) & 0xff;
           thisRow[x * 3 + c] = pix[c];
         }
         buf[ptr + y * stride + x] = serverpf.pixelFromRGB(pix[0], pix[1],
@@ -538,8 +529,7 @@ public class TightDecoder extends Decoder {
     }
   }
 
-  private void filterGradient16(byte[] netbuf, short[] buf, int stride,
-                                Rect r) {
+  private void filterGradient16(short[] buf, int stride, Rect r) {
 
     int x, y, c, p;
     int ptr = r.tl.y * stride + r.tl.x;
@@ -558,7 +548,7 @@ public class TightDecoder extends Decoder {
 
     for (y = 0; y < rectHeight; y++) {
       /* First pixel in a row */
-      p = getShort(netbuf, y * rectWidth * 2);
+      p = getShort(decodebuf, y * rectWidth * 2);
       for (c = 0; c < 3; c++) {
         pix[c] = ((p >> shift[c]) + prevRow[c]) & max[c];
         thisRow[c] = pix[c];
@@ -569,7 +559,7 @@ public class TightDecoder extends Decoder {
 
       /* Remaining pixels of a row */
       for (x = 1; x < rectWidth; x++) {
-        p = getShort(netbuf, (y * rectWidth + x) * 2);
+        p = getShort(decodebuf, (y * rectWidth + x) * 2);
         for (c = 0; c < 3; c++) {
           est[c] = prevRow[x * 3 + c] + pix[c] - prevRow[(x - 1) * 3 + c];
           if (est[c] > max[c]) {

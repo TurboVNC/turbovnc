@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011, 2013 Brian P. Hinz
- * Copyright (C) 2012-2015, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       addSeparator();
     }
     options = addMenuItem("Options...   (Ctrl-Alt-Shift-O)", KeyEvent.VK_O);
-    info = addMenuItem("Connection Info...  (Ctrl-Alt-Shift-I)", KeyEvent.VK_I);
+    info = addMenuItem("Connection Info...  (Ctrl-Alt-Shift-I)",
+                       KeyEvent.VK_I);
     info.setDisplayedMnemonicIndex(11);
     profile = new JCheckBoxMenuItem("Performance Info...  (Ctrl-Alt-Shift-P)");
     profile.setMnemonic(KeyEvent.VK_P);
@@ -46,9 +47,12 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     profile.addActionListener(this);
     add(profile);
     addSeparator();
-    refresh = addMenuItem("Request Screen Refresh   (Ctrl-Alt-Shift-R)", KeyEvent.VK_R);
+    refresh = addMenuItem("Request Screen Refresh   (Ctrl-Alt-Shift-R)",
+                          KeyEvent.VK_R);
     refresh.setDisplayedMnemonicIndex(15);
-    losslessRefresh = addMenuItem("Request Lossless Refresh   (Ctrl-Alt-Shift-L)", KeyEvent.VK_L);
+    losslessRefresh =
+      addMenuItem("Request Lossless Refresh   (Ctrl-Alt-Shift-L)",
+                  KeyEvent.VK_L);
     losslessRefresh.setDisplayedMnemonicIndex(8);
     addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");
@@ -56,7 +60,9 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     fullScreen.setSelected(cc.opts.fullScreen);
     fullScreen.addActionListener(this);
     add(fullScreen);
-    defaultSize = addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
+    defaultSize =
+      addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)",
+                  KeyEvent.VK_Z);
     showToolbar = new JCheckBoxMenuItem("Show Toolbar   (Ctrl-Alt-Shift-T)");
     showToolbar.setMnemonic(KeyEvent.VK_T);
     showToolbar.setSelected(cc.showToolbar);
@@ -64,7 +70,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     add(showToolbar);
     addSeparator();
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
-      grabKeyboard = new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
+      grabKeyboard =
+        new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
       grabKeyboard.setMnemonic(KeyEvent.VK_G);
       grabKeyboard.setSelected(VncViewer.isKeyboardGrabbed());
       grabKeyboard.addActionListener(this);
@@ -148,18 +155,18 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.writeKeyEvent(MenuKey.getMenuKeySym(), false);
       firePopupMenuCanceled();
     } else if (actionMatch(ev, ctrlAltDel)) {
-      cc.writeKeyEvent(Keysyms.Control_L, true);
-      cc.writeKeyEvent(Keysyms.Alt_L, true);
-      cc.writeKeyEvent(Keysyms.Delete, true);
-      cc.writeKeyEvent(Keysyms.Delete, false);
-      cc.writeKeyEvent(Keysyms.Alt_L, false);
-      cc.writeKeyEvent(Keysyms.Control_L, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, true);
+      cc.writeKeyEvent(Keysyms.ALT_L, true);
+      cc.writeKeyEvent(Keysyms.DELETE, true);
+      cc.writeKeyEvent(Keysyms.DELETE, false);
+      cc.writeKeyEvent(Keysyms.ALT_L, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       firePopupMenuCanceled();
     } else if (actionMatch(ev, ctrlEsc)) {
-      cc.writeKeyEvent(Keysyms.Control_L, true);
-      cc.writeKeyEvent(Keysyms.Escape, true);
-      cc.writeKeyEvent(Keysyms.Escape, false);
-      cc.writeKeyEvent(Keysyms.Control_L, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, true);
+      cc.writeKeyEvent(Keysyms.ESCAPE, true);
+      cc.writeKeyEvent(Keysyms.ESCAPE, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       firePopupMenuCanceled();
     } else if (actionMatch(ev, refresh)) {
       cc.refresh();
@@ -179,7 +186,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       else
         cc.profileDialog.showDialog(cc.viewport);
       cc.toggleProfile();
-     } else if (actionMatch(ev, about)) {
+    } else if (actionMatch(ev, about)) {
       cc.showAbout();
     } else if (actionMatch(ev, dismiss)) {
       firePopupMenuCanceled();

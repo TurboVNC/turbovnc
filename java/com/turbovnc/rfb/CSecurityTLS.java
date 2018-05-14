@@ -4,7 +4,7 @@
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012, 2015 Brian P. Hinz
- * Copyright (C) 2012, 2015-2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ import java.security.cert.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -42,13 +41,11 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-import javax.net.ssl.HostnameVerifier;
 import javax.swing.JOptionPane;
 import javax.xml.bind.DatatypeConverter;
 
@@ -77,11 +74,11 @@ public class CSecurityTLS extends CSecurity {
     manager = null;
   }
 
-// FIXME:
-// Need to shutdown the connection cleanly
+  // FIXME:
+  // Need to shutdown the connection cleanly
 
-// FIXME?
-// add a finalizer method that calls shutdown
+  // FIXME?
+  // add a finalizer method that calls shutdown
 
   public boolean processMsg(CConnection cc) {
     return processMsg(cc, true);
@@ -102,8 +99,7 @@ public class CSecurityTLS extends CSecurity {
         if (is.readU8() == 0) {
           int result = is.readU32();
           String reason;
-          if (result == Security.secResultFailed ||
-              result == Security.secResultTooMany)
+          if (result == RFB.AUTH_FAILED || result == RFB.AUTH_TOO_MANY)
             reason = is.readString();
           else
             reason = new String("Authentication failure (protocol error)");
@@ -296,8 +292,8 @@ public class CSecurityTLS extends CSecurity {
             InputStream caStream = new MyFileInputStream(caFile);
             CertificateFactory cf =
               CertificateFactory.getInstance("X.509");
-            cacerts =
-              (Collection <? extends X509Certificate>)cf.generateCertificates(caStream);
+            cacerts = (Collection<? extends X509Certificate>)
+              cf.generateCertificates(caStream);
             for (int i = 0; i < chain.length; i++) {
               if (cacerts == null || !cacerts.contains(chain[i])) {
                 byte[] der = chain[i].getEncoded();
@@ -307,7 +303,7 @@ public class CSecurityTLS extends CSecurity {
                 try {
                   fw = new FileWriter(caFile.getAbsolutePath(), true);
                   fw.write("-----BEGIN CERTIFICATE-----\n");
-                  fw.write(pem+"\n");
+                  fw.write(pem + "\n");
                   fw.write("-----END CERTIFICATE-----\n");
                 } catch (IOException ioe) {
                   throw new SystemException(ioe.getMessage());
@@ -385,18 +381,18 @@ public class CSecurityTLS extends CSecurity {
       // "DerInputStream.getLength(): lengthTag=127, too big" exception.
       ByteBuffer buf;
 
-      public MyFileInputStream(String name) {
+      MyFileInputStream(String name) {
         this(new File(name));
       }
 
-      public MyFileInputStream(File file) {
+      MyFileInputStream(File file) {
         StringBuffer sb = new StringBuffer();
         BufferedReader reader = null;
         try {
           reader = new BufferedReader(new FileReader(file));
           String l;
           while ((l = reader.readLine()) != null) {
-            if (l.trim().length() > 0 )
+            if (l.trim().length() > 0)
               sb.append(l + "\n");
           }
         } catch (java.lang.Exception e) {
@@ -438,7 +434,7 @@ public class CSecurityTLS extends CSecurity {
   }
 
   public int getType() {
-    return anon ? Security.secTypeTLSNone : Security.secTypeX509None;
+    return anon ? RFB.SECTYPE_TLS_NONE : RFB.SECTYPE_X509_NONE;
   }
 
   public String getDescription() {

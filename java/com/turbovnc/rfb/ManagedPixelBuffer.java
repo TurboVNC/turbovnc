@@ -21,8 +21,8 @@ package com.turbovnc.rfb;
 
 public class ManagedPixelBuffer extends PixelBuffer {
   public void setSize(int w, int h) {
-    width_ = w;
-    height_ = h;
+    width = w;
+    height = h;
     checkDataSize();
   }
   public void setPF(PixelFormat pf) {

@@ -1,6 +1,6 @@
 /*  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
- *  Copyright (C) 2012-2015, 2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2015, 2017-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2012 Brian P. Hinz.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@ import com.turbovnc.network.*;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
-public class Tunnel {
+public final class Tunnel {
 
   public static void createTunnel(Options opts) throws Exception {
     int localPort;
@@ -196,7 +196,7 @@ public class Tunnel {
                                        String remoteHost, int remotePort,
                                        int localPort, Options opts) {
     int i, j;
-    boolean H_found = false, G_found = false, R_found = false, L_found = false;
+    boolean hFound = false, gFound = false, rFound = false, lFound = false;
     String command = "";
 
     if (opts.sshUser != null)
@@ -207,33 +207,34 @@ public class Tunnel {
         switch (pattern.charAt(++i)) {
           case 'H':
             command += (opts.tunnel ? gatewayHost : remoteHost);
-            H_found = true;
+            hFound = true;
             continue;
           case 'G':
             command += gatewayHost;
-            G_found = true;
+            gFound = true;
             continue;
           case 'R':
             command += remotePort;
-            R_found = true;
+            rFound = true;
             continue;
           case 'L':
             command += localPort;
-            L_found = true;
+            lFound = true;
             continue;
         }
       }
       command += pattern.charAt(i);
     }
 
-    if (!H_found || !R_found || !L_found)
+    if (!hFound || !rFound || !lFound)
       throw new ErrorException("%H, %R or %L absent in tunneling command template.");
 
-    if (!opts.tunnel && !G_found)
+    if (!opts.tunnel && !gFound)
       throw new ErrorException("%G pattern absent in tunneling command template.");
 
     return command;
   }
 
+  private Tunnel() {}
   static LogWriter vlog = new LogWriter("Tunnel");
 }

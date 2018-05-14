@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public class CMsgReaderV3 extends CMsgReader {
     String name = is.readString();
     handler.setName(name);
     if (!benchmark &&
-        handler.getCurrentCSecurity().getType() == Security.secTypeTight) {
+        handler.getCurrentCSecurity().getType() == RFB.SECTYPE_TIGHT) {
       int nServerMsg = is.readU16();
       int nClientMsg = is.readU16();
       int nEncodings = is.readU16();
@@ -49,19 +49,19 @@ public class CMsgReaderV3 extends CMsgReader {
       List<byte[]> serverMsgCaps = new ArrayList<byte[]>();
       for (int i = 0; i < nServerMsg; i++) {
         byte[] cap = new byte[16];
-        is.readBytes(cap, 0 , 16);
+        is.readBytes(cap, 0, 16);
         serverMsgCaps.add(cap);
       }
       List<byte[]> clientMsgCaps = new ArrayList<byte[]>();
       for (int i = 0; i < nClientMsg; i++) {
         byte[] cap = new byte[16];
-        is.readBytes(cap, 0 , 16);
+        is.readBytes(cap, 0, 16);
         clientMsgCaps.add(cap);
       }
       List<byte[]> supportedEncodings = new ArrayList<byte[]>();
       for (int i = 0; i < nEncodings; i++) {
         byte[] cap = new byte[16];
-        is.readBytes(cap, 0 , 16);
+        is.readBytes(cap, 0, 16);
         supportedEncodings.add(cap);
       }
     }
@@ -73,23 +73,23 @@ public class CMsgReaderV3 extends CMsgReader {
 
       int type = is.readU8();
       switch (type) {
-      case MsgTypes.msgTypeFramebufferUpdate:
-        readFramebufferUpdate();  break;
-      case MsgTypes.msgTypeSetColourMapEntries:
-        readSetColourMapEntries();  break;
-      case MsgTypes.msgTypeBell:
-        readBell();  break;
-      case MsgTypes.msgTypeServerCutText:
-        readServerCutText();  break;
-      case MsgTypes.msgTypeServerFence:
-        readFence();  break;
-      case MsgTypes.msgTypeEndOfContinuousUpdates:
-        readEndOfContinuousUpdates();  break;
-      case MsgTypes.msgTypeGII:
-        readGII();  break;
-      default:
-        vlog.error("Unknown message type " + type);
-        throw new ErrorException("Unknown message type " + type);
+        case RFB.FRAMEBUFFER_UPDATE:
+          readFramebufferUpdate();  break;
+        case RFB.SET_COLOUR_MAP_ENTRIES:
+          readSetColourMapEntries();  break;
+        case RFB.BELL:
+          readBell();  break;
+        case RFB.SERVER_CUT_TEXT:
+          readServerCutText();  break;
+        case RFB.FENCE:
+          readFence();  break;
+        case RFB.END_OF_CONTINUOUS_UPDATES:
+          readEndOfContinuousUpdates();  break;
+        case RFB.GII:
+          readGII();  break;
+        default:
+          vlog.error("Unknown message type " + type);
+          throw new ErrorException("Unknown message type " + type);
       }
 
     } else {
@@ -101,30 +101,30 @@ public class CMsgReaderV3 extends CMsgReader {
       int encoding = is.readS32();
 
       switch (encoding) {
-      case Encodings.pseudoEncodingDesktopSize:
-        handler.setDesktopSize(w, h);
-        break;
-      case Encodings.pseudoEncodingExtendedDesktopSize:
-        readExtendedDesktopSize(x, y, w, h);
-        break;
-      case Encodings.pseudoEncodingDesktopName:
-        readSetDesktopName(x, y, w, h);
-        break;
-      case Encodings.pseudoEncodingXCursor:
-        readSetXCursor(w, h, new Point(x, y));
-        break;
-      case Encodings.pseudoEncodingCursor:
-        readSetCursor(w, h, new Point(x, y));
-        break;
-      case Encodings.pseudoEncodingLastRect:
-        nUpdateRectsLeft = 1;     // this rectangle is the last one
-        break;
-      case Encodings.pseudoEncodingClientRedirect:
-        readClientRedirect(x, y, w, h);
-        break;
-      default:
-        readRect(new Rect(x, y, x + w, y + h), encoding);
-        break;
+        case RFB.ENCODING_NEW_FB_SIZE:
+          handler.setDesktopSize(w, h);
+          break;
+        case RFB.ENCODING_EXTENDED_DESKTOP_SIZE:
+          readExtendedDesktopSize(x, y, w, h);
+          break;
+        case RFB.ENCODING_DESKTOP_NAME:
+          readSetDesktopName(x, y, w, h);
+          break;
+        case RFB.ENCODING_X_CURSOR:
+          readSetXCursor(w, h, new Point(x, y));
+          break;
+        case RFB.ENCODING_RICH_CURSOR:
+          readSetCursor(w, h, new Point(x, y));
+          break;
+        case RFB.ENCODING_LAST_RECT:
+          nUpdateRectsLeft = 1;   // this rectangle is the last one
+          break;
+        case RFB.ENCODING_CLIENT_REDIRECT:
+          readClientRedirect(x, y, w, h);
+          break;
+        default:
+          readRect(new Rect(x, y, x + w, y + h), encoding);
+          break;
       }
 
       nUpdateRectsLeft--;
@@ -200,10 +200,10 @@ public class CMsgReaderV3 extends CMsgReader {
 
   void readGII() {
     int endianAndSubType = is.readU8();
-    int endian = endianAndSubType & giiTypes.giiBE;
-    int subType = endianAndSubType & ~giiTypes.giiBE;
+    int endian = endianAndSubType & RFB.GII_BE;
+    int subType = endianAndSubType & ~RFB.GII_BE;
 
-    if (endian != giiTypes.giiBE) {
+    if (endian != RFB.GII_BE) {
       vlog.error("ERROR: don't know how to handle little endian GII messages");
       is.skip(6);
       return;
@@ -217,31 +217,29 @@ public class CMsgReaderV3 extends CMsgReader {
     }
 
     switch (subType) {
+      case RFB.GII_VERSION:
+        int maximumVersion = is.readU16();
+        int minimumVersion = is.readU16();
+        if (maximumVersion < 1 || minimumVersion > 1) {
+          vlog.error("ERROR: GII version mismatch");
+          return;
+        }
+        if (minimumVersion != maximumVersion)
+          vlog.debug("Server supports GII versions " + minimumVersion + " - " +
+                     maximumVersion);
+        else
+          vlog.debug("Server supports GII version " + minimumVersion);
+        handler.enableGII();
+        break;
 
-    case giiTypes.giiVersion:
-      int maximumVersion = is.readU16();
-      int minimumVersion = is.readU16();
-      if (maximumVersion < 1 || minimumVersion > 1) {
-        vlog.error("ERROR: GII version mismatch");
-        return;
-      }
-      if (minimumVersion != maximumVersion)
-        vlog.debug("Server supports GII versions " + minimumVersion + " - " +
-                   maximumVersion);
-      else
-        vlog.debug("Server supports GII version " + minimumVersion);
-      handler.enableGII();
-      break;
-
-    case giiTypes.giiDeviceCreate:
-      int deviceOrigin = is.readU32();
-      if (deviceOrigin == 0) {
-        vlog.error("ERROR: Could not create GII device");
-        return;
-      }
-      handler.giiDeviceCreated(deviceOrigin);
-      break;
-
+      case RFB.GII_DEVICE_CREATE:
+        int deviceOrigin = is.readU32();
+        if (deviceOrigin == 0) {
+          vlog.error("ERROR: Could not create GII device");
+          return;
+        }
+        handler.giiDeviceCreated(deviceOrigin);
+        break;
     }
   }
 

@@ -44,10 +44,10 @@ public class TrayMenu extends PopupMenu implements ActionListener {
       exit = addMenuItem("Close listener");
     }
 
-    if (VncViewer.os.startsWith("mac os x")) {
+    if (VncViewer.OS.startsWith("mac os x")) {
       setDockMenu(this);
     } else {
-      trayIcon = new TrayIcon(VncViewer.frameImage);
+      trayIcon = new TrayIcon(VncViewer.FRAME_IMAGE);
       trayIcon.setPopupMenu(this);
       tray = SystemTray.getSystemTray();
       try {
@@ -63,7 +63,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
       Class appClass;
       Object obj;
 
-      if (VncViewer.javaVersion >= 9) {
+      if (VncViewer.JAVA_VERSION >= 9) {
         appClass = Class.forName("java.awt.Taskbar");
         Method getTaskbar =
           appClass.getMethod("getTaskbar", (Class[])null);
@@ -74,9 +74,9 @@ public class TrayMenu extends PopupMenu implements ActionListener {
           appClass.getMethod("getApplication", (Class[])null);
         obj = getApplication.invoke(appClass);
       }
-      Class paramTypes[] = new Class[1];
+      Class[] paramTypes = new Class[1];
       paramTypes[0] = PopupMenu.class;
-      Method setDockMenu = VncViewer.javaVersion >= 9 ?
+      Method setDockMenu = VncViewer.JAVA_VERSION >= 9 ?
         appClass.getMethod("setMenu", paramTypes) :
         appClass.getMethod("setDockMenu", paramTypes);
       setDockMenu.invoke(obj, menu);
@@ -87,7 +87,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
   }
 
   static boolean isSupported() {
-    return (VncViewer.os.startsWith("mac os x") || SystemTray.isSupported());
+    return (VncViewer.OS.startsWith("mac os x") || SystemTray.isSupported());
   }
 
   MenuItem addMenuItem(String str) {
@@ -111,7 +111,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
     } else if (actionMatch(ev, about)) {
       VncViewer.showAbout(null);
     } else if (actionMatch(ev, exit)) {
-      if (VncViewer.os.startsWith("mac os x"))
+      if (VncViewer.OS.startsWith("mac os x"))
         setDockMenu(null);
       else if (tray != null && trayIcon != null)
         tray.remove(trayIcon);

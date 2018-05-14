@@ -24,7 +24,6 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Image;
 import java.io.*;
 import java.util.jar.Attributes;
@@ -39,21 +38,21 @@ import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
 
 public class VncViewer implements Runnable, OptionsDialogCallback {
-  public static final String PRODUCT_NAME = "TurboVNC Viewer";
-  public static String copyrightYear = null;
-  public static String copyright = null;
-  public static String url = null;
-  public static String version = null;
-  public static String build = null;
-  public static String pkgDate = null;
-  public static String pkgTime = null;
+  static final String PRODUCT_NAME = "TurboVNC Viewer";
+  static String copyrightYear = null;
+  static String copyright = null;
+  static String url = null;
+  static String version = null;
+  static String build = null;
+  static String pkgDate = null;
+  static String pkgTime = null;
 
-  private static final ImageIcon frameIcon =
+  private static final ImageIcon FRAME_ICON =
     new ImageIcon(VncViewer.class.getResource("turbovnc-sm.png"));
-  public static final Image frameImage = frameIcon.getImage();
-  public static final ImageIcon logoIcon =
+  public static final Image FRAME_IMAGE = FRAME_ICON.getImage();
+  public static final ImageIcon LOGO_ICON =
     new ImageIcon(VncViewer.class.getResource("turbovnc.png"));
-  public static final ImageIcon logoIcon128 =
+  public static final ImageIcon LOGO_ICON128 =
     new ImageIcon(VncViewer.class.getResource("turbovnc-128.png"));
 
   void setVersion() {
@@ -102,7 +101,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       int i = -1;
       try {
         i = Integer.parseInt(prop);
-      } catch (NumberFormatException e) {};
+      } catch (NumberFormatException e) {}
       if (i == 1)
         return true;
       if (i == 0)
@@ -111,21 +110,21 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     return def;
   }
 
-  public static final String os = System.getProperty("os.name").toLowerCase();
+  public static final String OS = System.getProperty("os.name").toLowerCase();
 
   public static boolean isX11() {
-    return !os.startsWith("mac os x") && !os.startsWith("windows");
+    return !OS.startsWith("mac os x") && !OS.startsWith("windows");
   }
 
   public static boolean osEID() {
-    return !os.startsWith("windows");
+    return !OS.startsWith("windows");
   }
 
   public static boolean osGrab() {
-    return !os.startsWith("mac os x");
+    return !OS.startsWith("mac os x");
   }
 
-  public static int javaVersion =
+  public static final int JAVA_VERSION =
     Integer.parseInt(System.getProperty("java.version").split("\\.")[0]) <= 1 ?
     Integer.parseInt(System.getProperty("java.version").split("\\.")[1]) :
     Integer.parseInt(System.getProperty("java.version").split("\\.")[0]);
@@ -135,7 +134,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     Integer mask = null;
 
     try {
-      if (javaVersion >= 10)
+      if (JAVA_VERSION >= 10)
         getMenuShortcutKeyMask =
           Toolkit.class.getMethod("getMenuShortcutKeyMaskEx");
       else
@@ -162,12 +161,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         if (method.getName().equals("openFiles") && args[0] != null) {
           synchronized(VncViewer.class) {
             Class ofEventClass =
-              javaVersion >= 9 ?
+              JAVA_VERSION >= 9 ?
                 Class.forName("java.awt.desktop.OpenFilesEvent") :
                 Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
             Method getFiles = ofEventClass.getMethod("getFiles",
                                                      (Class[])null);
-            List<File> files =(List<File>)getFiles.invoke(args[0]);
+            List<File> files = (List<File>)getFiles.invoke(args[0]);
             String fName = files.iterator().next().getAbsolutePath();
             if (nViewers == 0)
               fileName = fName;
@@ -196,7 +195,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     Class appClass, fileHandlerClass;
     Object obj;
 
-    if (javaVersion >= 9) {
+    if (JAVA_VERSION >= 9) {
       appClass = Desktop.class;
       obj = Desktop.getDesktop();
       fileHandlerClass = Class.forName("java.awt.desktop.OpenFilesHandler");
@@ -219,7 +218,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static void setLookAndFeel() {
     try {
-      if (os.startsWith("windows")) {
+      if (OS.startsWith("windows")) {
         String laf = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         UIManager.setLookAndFeel(laf);
       } else {
@@ -235,7 +234,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         }
       }
       UIManager.put("TitledBorder.titleColor", Color.blue);
-      if (os.startsWith("mac os x")) {
+      if (OS.startsWith("mac os x")) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         enableFileHandler();
 
@@ -243,7 +242,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
           Class appClass;
           Object obj;
 
-          if (javaVersion >= 9) {
+          if (JAVA_VERSION >= 9) {
             appClass = Class.forName("java.awt.Taskbar");
             Method getTaskbar =
               appClass.getMethod("getTaskbar", (Class[])null);
@@ -255,12 +254,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
             obj = getApplication.invoke(appClass);
           }
 
-          Class paramTypes[] = new Class[1];
+          Class[] paramTypes = new Class[1];
           paramTypes[0] = Image.class;
-          Method setDockIconImage = javaVersion >= 9 ?
+          Method setDockIconImage = JAVA_VERSION >= 9 ?
             appClass.getMethod("setIconImage", paramTypes) :
             appClass.getMethod("setDockIconImage", paramTypes);
-          setDockIconImage.invoke(obj, logoIcon128.getImage());
+          setDockIconImage.invoke(obj, LOGO_ICON128.getImage());
         } catch (Exception e) {
           vlog.debug("Could not set OS X dock icon:");
           vlog.debug("  " + e.toString());
@@ -282,7 +281,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       JDialog dlg = new JDialog();
       Object owner = dlg.getOwner();
       if (owner instanceof Frame && owner != null)
-        ((Frame)owner).setIconImage(frameImage);
+        ((Frame)owner).setIconImage(FRAME_IMAGE);
       dlg.dispose();
 
     } catch (Exception e) {
@@ -346,8 +345,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     // on certain models.)
     boolean defForceAlpha = false;
 
-    if (os.startsWith("mac os x")) {
-      if (javaVersion >= 7)
+    if (OS.startsWith("mac os x")) {
+      if (JAVA_VERSION >= 7)
         defForceAlpha = true;
     }
     // TYPE_INT_ARGB_PRE images are also faster when using OpenGL blitting on
@@ -365,7 +364,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     // default.  Note that this doesn't work with Java 1.6 and earlier, for
     // unknown reasons.  Apparently it reads the Java 2D system properties
     // before our code can influence them.
-    if (os.startsWith("windows")) {
+    if (OS.startsWith("windows")) {
       String prop = System.getProperty("sun.java2d.d3d");
       if (prop == null || prop.length() < 1 || !Boolean.parseBoolean(prop))
         System.setProperty("sun.java2d.d3d", "false");
@@ -384,7 +383,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   public static void main(String[] argv) {
     setLookAndFeel();
     VncViewer viewer = new VncViewer(argv);
-    if (os.startsWith("mac os x")) {
+    if (OS.startsWith("mac os x")) {
       synchronized(VncViewer.class) {
         if (fileName != null) {
           try {
@@ -417,7 +416,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         if (++i < argv.length) {
           if (!argv[i].equalsIgnoreCase(System.getProperty("os.arch"))) {
             reportException(new WarningException("You must use a " +
-              argv[i] + " Java Runtime Environment with this version of TurboVNC."));
+              argv[i] +
+              " Java Runtime Environment with this version of TurboVNC."));
             exit(1);
           }
         }
@@ -447,8 +447,9 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
           try {
             benchFile = new FileInStream(argv[++i]);
           } catch (Exception e) {
-            reportException(new WarningException("Could not open session capture:\n" +
-                                                 e.getMessage()));
+            reportException(
+              new WarningException("Could not open session capture:\n" +
+                                   e.getMessage()));
             exit(1);
           }
         }
@@ -503,26 +504,26 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   public static void usage() {
-    String usage = ("\n" +
-                    "USAGE: VncViewer [options/parameters] [host:displayNum] [options/parameters]\n" +
-                    "       VncViewer [options/parameters] [host::port] [options/parameters]\n" +
-                    "       VncViewer [options/parameters] -listen [port] [options/parameters]\n" +
-                    "\n" +
-                    "Options:\n" +
-                    "  -loglevel <level>   configure logging level\n" +
-                    "                      0 = errors only\n" +
-                    "                      10 = status messages\n" +
-                    "                      30 = informational messages (default)\n" +
-                    "                      100 = debugging messages\n" +
-                    "\n" +
-                    "Specifying boolean parameters:\n" +
-                    "  On:   -<param>=1 or -<param>\n" +
-                    "  Off:  -<param>=0 or -no<param>\n" +
-                    "Parameters that take a value can be specified as:\n" +
-                    "  -<param> <value> or <param>=<value> or -<param>=<value> or --<param>=<value>\n" +
-                    "Parameter names and values are case-insensitive (except for the value of\n" +
-                    "Password.)\n\n" +
-                    "The parameters are:\n\n");
+    String usage = "\n" +
+      "USAGE: VncViewer [options/parameters] [host:displayNum] [options/parameters]\n" +
+      "       VncViewer [options/parameters] [host::port] [options/parameters]\n" +
+      "       VncViewer [options/parameters] -listen [port] [options/parameters]\n" +
+      "\n" +
+      "Options:\n" +
+      "  -loglevel <level>   configure logging level\n" +
+      "                      0 = errors only\n" +
+      "                      10 = status messages\n" +
+      "                      30 = informational messages (default)\n" +
+      "                      100 = debugging messages\n" +
+      "\n" +
+      "Specifying boolean parameters:\n" +
+      "  On:   -<param>=1 or -<param>\n" +
+      "  Off:  -<param>=0 or -no<param>\n" +
+      "Parameters that take a value can be specified as:\n" +
+      "  -<param> <value> or <param>=<value> or -<param>=<value> or --<param>=<value>\n" +
+      "Parameter names and values are case-insensitive (except for the value of\n" +
+      "Password.)\n\n" +
+      "The parameters are:\n\n";
     System.out.println("\nTurboVNC Viewer v" + version + " (build " + build +
                        ") [JVM: " + System.getProperty("os.arch") + "]");
     System.out.println("Copyright (C) " + copyrightYear + " " + copyright);
@@ -593,18 +594,18 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       e.printStackTrace();
     }
     JOptionPane pane;
-    Object[] options = { UIManager.getString("OptionPane.yesButtonText"),
-                         UIManager.getString("OptionPane.noButtonText") };
+    Object[] dlgOptions = { UIManager.getString("OptionPane.yesButtonText"),
+                            UIManager.getString("OptionPane.noButtonText") };
     if (reconnect)
       pane = new JOptionPane(msg + "\nReconnect?", msgType,
-                             JOptionPane.YES_NO_OPTION, null, options,
-                             options[1]);
+                             JOptionPane.YES_NO_OPTION, null, dlgOptions,
+                             dlgOptions[1]);
     else
       pane = new JOptionPane(msg, msgType);
     JDialog dlg = pane.createDialog(null, title);
     dlg.setAlwaysOnTop(true);
     dlg.setVisible(true);
-    if (reconnect && pane.getValue() == options[0])
+    if (reconnect && pane.getValue() == dlgOptions[0])
       start();
   }
 
@@ -619,7 +620,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
         "\n" +
       VncViewer.url, JOptionPane.INFORMATION_MESSAGE);
-    pane.setIcon(VncViewer.logoIcon128);
+    pane.setIcon(LOGO_ICON128);
     JDialog dlg = pane.createDialog(comp, "About TurboVNC Viewer");
     dlg.setVisible(true);
   }
@@ -646,7 +647,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     options.reverseScroll.setSelected(opts.reverseScroll);
     options.acceptClipboard.setSelected(opts.acceptClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
-    options.menuKey.setSelectedItem(KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    options.menuKey.setSelectedItem(
+      KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
     if (VncViewer.osGrab() && Viewport.isHelperAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
@@ -784,7 +786,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       try {
         if (cc == null) {
           cc = new CConn(this, sock);
-          if (os.startsWith("mac os x") && benchFile == null) {
+          if (OS.startsWith("mac os x") && benchFile == null) {
             synchronized(conns) {
               conns.add(cc);
             }
@@ -858,119 +860,119 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   void setGlobalOptions() {
     try {
 
-    if (opts == null)
-      opts = new Options();
+      if (opts == null)
+        opts = new Options();
 
-    opts.port = vncServerPort.getValue();
-    vncServerPort.setValue(-1);
+      opts.port = vncServerPort.getValue();
+      vncServerPort.setValue(-1);
 
-    opts.shared = shared.getValue();
-    opts.viewOnly = viewOnly.getValue();
-    opts.reverseScroll = reverseScroll.getValue();
-    opts.fullScreen = fullScreen.getValue();
+      opts.shared = shared.getValue();
+      opts.viewOnly = viewOnly.getValue();
+      opts.reverseScroll = reverseScroll.getValue();
+      opts.fullScreen = fullScreen.getValue();
 
-    if (osGrab()) {
-      if (grabKeyboard.getValue().toLowerCase().startsWith("f"))
-        opts.grabKeyboard = Options.GRAB_FS;
-      else if (grabKeyboard.getValue().toLowerCase().startsWith("a"))
-        opts.grabKeyboard = Options.GRAB_ALWAYS;
-      else if (grabKeyboard.getValue().toLowerCase().startsWith("m"))
-        opts.grabKeyboard = Options.GRAB_MANUAL;
-    }
-
-    if (span.getValue().toLowerCase().startsWith("p"))
-      opts.span = Options.SPAN_PRIMARY;
-    else if (span.getValue().toLowerCase().startsWith("al"))
-      opts.span = Options.SPAN_ALL;
-    else
-      opts.span = Options.SPAN_AUTO;
-
-    opts.scalingFactor = Integer.parseInt(scalingFactor.getDefaultStr());
-
-    if (benchFile != null)
-      opts.desktopSize.mode = Options.SIZE_SERVER;
-    else {
-      Options.DesktopSize size =
-        Options.parseDesktopSize(desktopSize.getValue());
-      if (size == null)
-        throw new ErrorException("DesktopSize parameter is incorrect");
-      opts.desktopSize = size;
-    }
-
-    opts.setScalingFactor(scalingFactor.getValue());
-    if (opts.scalingFactor != 100 &&
-        opts.desktopSize.mode == Options.SIZE_AUTO) {
-      vlog.info("Desktop scaling enabled.  Disabling automatic desktop resizing.");
-      opts.desktopSize.mode = Options.SIZE_SERVER;
-    }
-
-    opts.acceptClipboard = acceptClipboard.getValue();
-    opts.sendClipboard = sendClipboard.getValue();
-    opts.acceptBell = acceptBell.getValue();
-
-    String encStr = preferredEncoding.getValue();
-    int encNum = Encodings.encodingNum(encStr);
-    if (encNum != -1)
-      opts.preferredEncoding = encNum;
-    else
-      opts.preferredEncoding =
-        Encodings.encodingNum(preferredEncoding.getDefaultStr());
-
-    opts.allowJpeg = allowJpeg.getValue();
-    opts.quality = quality.getValue();
-
-    opts.subsampling = Options.SUBSAMP_NONE;
-    switch (subsampling.getValue().toUpperCase().charAt(0)) {
-      case '2':
-        opts.subsampling = Options.SUBSAMP_2X;
-        break;
-      case '4':
-        opts.subsampling = Options.SUBSAMP_4X;
-        break;
-      case 'G':
-        opts.subsampling = Options.SUBSAMP_GRAY;
-        break;
-    }
-
-    opts.compressLevel = compressLevel.getValue();
-
-    opts.colors = -1;
-    switch (colors.getValue()) {
-      case 8:  case 64:  case 256:  case 32768:  case 65536:
-        opts.colors = colors.getValue();
-        break;
-    }
-
-    opts.cursorShape = cursorShape.getValue();
-    opts.continuousUpdates = continuousUpdates.getValue();
-    opts.copyRect = copyRect.getValue();
-    if (user.getValue() != null) opts.user = new String(user.getValue());
-    opts.sendLocalUsername = sendLocalUsername.getValue();
-
-    String v = via.getValue();
-    if (v != null && !v.isEmpty()) {
-      int atIndex = v.lastIndexOf('@');
-      if (atIndex >= 0) {
-        opts.via = v.substring(atIndex + 1);
-        opts.sshUser = v.substring(0, atIndex);
-      } else {
-        opts.via = new String(v);
+      if (osGrab()) {
+        if (grabKeyboard.getValue().toLowerCase().startsWith("f"))
+          opts.grabKeyboard = Options.GRAB_FS;
+        else if (grabKeyboard.getValue().toLowerCase().startsWith("a"))
+          opts.grabKeyboard = Options.GRAB_ALWAYS;
+        else if (grabKeyboard.getValue().toLowerCase().startsWith("m"))
+          opts.grabKeyboard = Options.GRAB_MANUAL;
       }
-    }
-    opts.tunnel = tunnel.getValue();
-    opts.extSSH = extSSH.getValue();
 
-    String s = vncServerName.getValue();
-    if (s != null) {
-      int atIndex = s.lastIndexOf('@');
-      if (atIndex >= 0 && opts.tunnel) {
-        opts.serverName = s.substring(atIndex + 1);
-        opts.sshUser = s.substring(0, atIndex);
-      } else {
-        opts.serverName = new String(s);
+      if (span.getValue().toLowerCase().startsWith("p"))
+        opts.span = Options.SPAN_PRIMARY;
+      else if (span.getValue().toLowerCase().startsWith("al"))
+        opts.span = Options.SPAN_ALL;
+      else
+        opts.span = Options.SPAN_AUTO;
+
+      opts.scalingFactor = Integer.parseInt(scalingFactor.getDefaultStr());
+
+      if (benchFile != null)
+        opts.desktopSize.mode = Options.SIZE_SERVER;
+      else {
+        Options.DesktopSize size =
+          Options.parseDesktopSize(desktopSize.getValue());
+        if (size == null)
+          throw new ErrorException("DesktopSize parameter is incorrect");
+        opts.desktopSize = size;
       }
-    }
-    vncServerName.setParam(null);
+
+      opts.setScalingFactor(scalingFactor.getValue());
+      if (opts.scalingFactor != 100 &&
+          opts.desktopSize.mode == Options.SIZE_AUTO) {
+        vlog.info("Desktop scaling enabled.  Disabling automatic desktop resizing.");
+        opts.desktopSize.mode = Options.SIZE_SERVER;
+      }
+
+      opts.acceptClipboard = acceptClipboard.getValue();
+      opts.sendClipboard = sendClipboard.getValue();
+      opts.acceptBell = acceptBell.getValue();
+
+      String encStr = preferredEncoding.getValue();
+      int encNum = RFB.encodingNum(encStr);
+      if (encNum != -1)
+        opts.preferredEncoding = encNum;
+      else
+        opts.preferredEncoding =
+          RFB.encodingNum(preferredEncoding.getDefaultStr());
+
+      opts.allowJpeg = allowJpeg.getValue();
+      opts.quality = quality.getValue();
+
+      opts.subsampling = Options.SUBSAMP_NONE;
+      switch (subsampling.getValue().toUpperCase().charAt(0)) {
+        case '2':
+          opts.subsampling = Options.SUBSAMP_2X;
+          break;
+        case '4':
+          opts.subsampling = Options.SUBSAMP_4X;
+          break;
+        case 'G':
+          opts.subsampling = Options.SUBSAMP_GRAY;
+          break;
+      }
+
+      opts.compressLevel = compressLevel.getValue();
+
+      opts.colors = -1;
+      switch (colors.getValue()) {
+        case 8:  case 64:  case 256:  case 32768:  case 65536:
+          opts.colors = colors.getValue();
+          break;
+      }
+
+      opts.cursorShape = cursorShape.getValue();
+      opts.continuousUpdates = continuousUpdates.getValue();
+      opts.copyRect = copyRect.getValue();
+      if (user.getValue() != null) opts.user = new String(user.getValue());
+      opts.sendLocalUsername = sendLocalUsername.getValue();
+
+      String v = via.getValue();
+      if (v != null && !v.isEmpty()) {
+        int atIndex = v.lastIndexOf('@');
+        if (atIndex >= 0) {
+          opts.via = v.substring(atIndex + 1);
+          opts.sshUser = v.substring(0, atIndex);
+        } else {
+          opts.via = new String(v);
+        }
+      }
+      opts.tunnel = tunnel.getValue();
+      opts.extSSH = extSSH.getValue();
+
+      String s = vncServerName.getValue();
+      if (s != null) {
+        int atIndex = s.lastIndexOf('@');
+        if (atIndex >= 0 && opts.tunnel) {
+          opts.serverName = s.substring(atIndex + 1);
+          opts.sshUser = s.substring(0, atIndex);
+        } else {
+          opts.serverName = new String(s);
+        }
+      }
+      vncServerName.setParam(null);
 
     } catch (Exception e) {
       reportException(new WarningException("Could not set global options:\n" +
@@ -982,24 +984,26 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   // Is the keyboard grabbed by any TurboVNC Viewer window?
-  static public boolean isKeyboardGrabbed() {
+  public static boolean isKeyboardGrabbed() {
     synchronized(VncViewer.class) {
       return grabOwner != null;
     }
   }
 
   // Is the keyboard grabbed by a specific TurboVNC Viewer window?
-  static public boolean isKeyboardGrabbed(Viewport viewport) {
+  public static boolean isKeyboardGrabbed(Viewport viewport) {
     synchronized(VncViewer.class) {
       return grabOwner == viewport;
     }
   }
 
-  static public void setGrabOwner(Viewport viewport) {
+  public static void setGrabOwner(Viewport viewport) {
     synchronized(VncViewer.class) {
       grabOwner = viewport;
     }
   }
+
+  // CHECKSTYLE Indentation:OFF
 
   // CONNECTION PARAMETERS
 
@@ -1517,6 +1521,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "connect.  If using an SSH server, then the Via parameter can be prefixed " +
   "by <user>@ to indicate that user name <user> (default = local user name) " +
   "should be used when authenticating with the SSH server.", null);
+
+  // CHECKSTYLE Indentation:ON
 
   Thread thread;
   Socket sock;

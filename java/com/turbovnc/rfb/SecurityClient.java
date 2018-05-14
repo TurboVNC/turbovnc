@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2015-2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2016, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,44 +38,47 @@ public class SecurityClient extends Security {
       throw new ErrorException("Security type not supported");
 
     switch (secType) {
-    case Security.secTypeNone: return (new CSecurityNone());
-    case Security.secTypeVncAuth: return (new CSecurityVncAuth());
-    case Security.secTypeTight: return (new CSecurityTight(this));
-    case Security.secTypeTLS: return (new CSecurityRFBTLS(this));
-    case Security.secTypeVeNCrypt: return (new CSecurityVeNCrypt(this));
-    case Security.secTypePlain: return (new CSecurityPlain());
-    case Security.secTypeIdent: return (new CSecurityIdent());
-    case Security.secTypeTLSNone:
-      return (new CSecurityStack(secTypeTLSNone, "TLSNone",
-              new CSecurityTLS(true), null));
-    case Security.secTypeTLSVnc:
-      return (new CSecurityStack(secTypeTLSVnc, "TLSVnc",
-              new CSecurityTLS(true), new CSecurityVncAuth()));
-    case Security.secTypeTLSPlain:
-      return (new CSecurityStack(secTypeTLSPlain, "TLSPlain",
-              new CSecurityTLS(true), new CSecurityPlain()));
-    case Security.secTypeTLSIdent:
-      return (new CSecurityStack(secTypeTLSIdent, "TLSIdent",
-              new CSecurityTLS(true), new CSecurityIdent()));
-    case Security.secTypeX509None:
-      return (new CSecurityStack(secTypeX509None, "X509None",
-              new CSecurityTLS(false), null));
-    case Security.secTypeX509Vnc:
-      return (new CSecurityStack(secTypeX509Vnc, "X509Vnc",
-              new CSecurityTLS(false), new CSecurityVncAuth()));
-    case Security.secTypeX509Plain:
-      return (new CSecurityStack(secTypeX509Plain, "X509Plain",
-              new CSecurityTLS(false), new CSecurityPlain()));
-    case Security.secTypeX509Ident:
-      return (new CSecurityStack(secTypeX509Ident, "X509Ident",
-              new CSecurityTLS(false), new CSecurityIdent()));
-    default:
-      throw new ErrorException("Security type not supported");
+      case RFB.SECTYPE_NONE:      return (new CSecurityNone());
+      case RFB.SECTYPE_VNCAUTH:   return (new CSecurityVncAuth());
+      case RFB.SECTYPE_TIGHT:     return (new CSecurityTight(this));
+      case RFB.SECTYPE_TLS:       return (new CSecurityRFBTLS(this));
+      case RFB.SECTYPE_VENCRYPT:  return (new CSecurityVeNCrypt(this));
+      case RFB.SECTYPE_PLAIN:     return (new CSecurityPlain());
+      case RFB.SECTYPE_IDENT:     return (new CSecurityIdent());
+      case RFB.SECTYPE_TLS_NONE:
+        return (new CSecurityStack(RFB.SECTYPE_TLS_NONE, "TLSNone",
+                new CSecurityTLS(true), null));
+      case RFB.SECTYPE_TLS_VNC:
+        return (new CSecurityStack(RFB.SECTYPE_TLS_VNC, "TLSVnc",
+                new CSecurityTLS(true), new CSecurityVncAuth()));
+      case RFB.SECTYPE_TLS_PLAIN:
+        return (new CSecurityStack(RFB.SECTYPE_TLS_PLAIN, "TLSPlain",
+                new CSecurityTLS(true), new CSecurityPlain()));
+      case RFB.SECTYPE_TLS_IDENT:
+        return (new CSecurityStack(RFB.SECTYPE_TLS_IDENT, "TLSIdent",
+                new CSecurityTLS(true), new CSecurityIdent()));
+      case RFB.SECTYPE_X509_NONE:
+        return (new CSecurityStack(RFB.SECTYPE_X509_NONE, "X509None",
+                new CSecurityTLS(false), null));
+      case RFB.SECTYPE_X509_VNC:
+        return (new CSecurityStack(RFB.SECTYPE_X509_VNC, "X509Vnc",
+                new CSecurityTLS(false), new CSecurityVncAuth()));
+      case RFB.SECTYPE_X509_PLAIN:
+        return (new CSecurityStack(RFB.SECTYPE_X509_PLAIN, "X509Plain",
+                new CSecurityTLS(false), new CSecurityPlain()));
+      case RFB.SECTYPE_X509_IDENT:
+        return (new CSecurityStack(RFB.SECTYPE_X509_IDENT, "X509Ident",
+                new CSecurityTLS(false), new CSecurityIdent()));
+      default:
+        throw new ErrorException("Security type not supported");
     }
 
   }
 
   String msg = null;
+
+  // CHECKSTYLE VisibilityModifier:OFF
+  // CHECKSTYLE Indentation:OFF
 
   public static StringParameter secTypes
   = new StringParameter("SecurityTypes",

@@ -19,5 +19,5 @@
 package com.turbovnc.rdr;
 
 public interface FdInStreamBlockCallback {
-  abstract public void blockCallback();
+  void blockCallback();
 }

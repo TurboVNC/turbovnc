@@ -1,5 +1,5 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import com.turbovnc.rfb.*;
 
 public class Toolbar extends JToolBar implements ActionListener {
 
-  static final String[] buttons = {
+  static final String[] BUTTONS = {
     "Connection options...", "Connection info...", "Full screen",
     "Request screen refresh", "Request lossless refresh",
     "Send Ctrl-Alt-Del", "Send Ctrl-Esc",
@@ -64,22 +64,22 @@ public class Toolbar extends JToolBar implements ActionListener {
         continue;
       if (i >= 5 && i <= 6 && VncViewer.restricted.getValue())
         continue;
-      ImageIcon icon =
-        new ImageIcon(tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
+      ImageIcon icon = new ImageIcon(
+        tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
       AbstractButton button;
       switch (i) {
-      case 7:
-        // fallthrough
-      case 8:
-        button = new JToggleButton(icon);
-        button.setBorder(BorderFactory.createLoweredBevelBorder());
-        break;
-      default:
-        button = new JButton(icon);
-        button.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        case 7:
+          // fallthrough
+        case 8:
+          button = new JToggleButton(icon);
+          button.setBorder(BorderFactory.createLoweredBevelBorder());
+          break;
+        default:
+          button = new JButton(icon);
+          button.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
       }
-      button.setName(buttons[i]);
-      button.setToolTipText(buttons[i]);
+      button.setName(BUTTONS[i]);
+      button.setToolTipText(BUTTONS[i]);
       button.setBorderPainted(false);
       button.setFocusPainted(false);
       button.setFocusable(false);
@@ -93,11 +93,11 @@ public class Toolbar extends JToolBar implements ActionListener {
           (i == 8 && !VncViewer.noNewConn.getValue())) {
         // ref http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4346610
         add(new JSeparator(JSeparator.VERTICAL) {
-              public Dimension getMaximumSize() {
-                return new Dimension(getPreferredSize().width,
-                                     Integer.MAX_VALUE);
-              }
-            });
+          public Dimension getMaximumSize() {
+            return new Dimension(getPreferredSize().width,
+                                 Integer.MAX_VALUE);
+          }
+        });
         add(Box.createHorizontalStrut(2));
       }
     }
@@ -105,47 +105,47 @@ public class Toolbar extends JToolBar implements ActionListener {
 
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
-    if (((AbstractButton)s).getName() == buttons[0]) {
+    if (((AbstractButton)s).getName() == BUTTONS[0]) {
       cc.options.showDialog(cc.viewport);
-    } else if (((AbstractButton)s).getName() == buttons[1]) {
+    } else if (((AbstractButton)s).getName() == BUTTONS[1]) {
       cc.showInfo();
-    } else if (((AbstractButton)s).getName() == buttons[2]) {
+    } else if (((AbstractButton)s).getName() == BUTTONS[2]) {
       cc.toggleFullScreen();
-    } else if (((AbstractButton)s).getName() == buttons[3]) {
+    } else if (((AbstractButton)s).getName() == BUTTONS[3]) {
       cc.refresh();
-    } else if (((AbstractButton)s).getName() == buttons[4]) {
+    } else if (((AbstractButton)s).getName() == BUTTONS[4]) {
       cc.losslessRefresh();
-    } else if (((AbstractButton)s).getName() == buttons[5] &&
+    } else if (((AbstractButton)s).getName() == BUTTONS[5] &&
                !cc.opts.viewOnly) {
-      cc.writeKeyEvent(Keysyms.Control_L, true);
-      cc.writeKeyEvent(Keysyms.Alt_L, true);
-      cc.writeKeyEvent(Keysyms.Delete, true);
-      cc.writeKeyEvent(Keysyms.Delete, false);
-      cc.writeKeyEvent(Keysyms.Alt_L, false);
-      cc.writeKeyEvent(Keysyms.Control_L, false);
-    } else if (((AbstractButton)s).getName() == buttons[6] &&
+      cc.writeKeyEvent(Keysyms.CONTROL_L, true);
+      cc.writeKeyEvent(Keysyms.ALT_L, true);
+      cc.writeKeyEvent(Keysyms.DELETE, true);
+      cc.writeKeyEvent(Keysyms.DELETE, false);
+      cc.writeKeyEvent(Keysyms.ALT_L, false);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, false);
+    } else if (((AbstractButton)s).getName() == BUTTONS[6] &&
                !cc.opts.viewOnly) {
-      cc.writeKeyEvent(Keysyms.Control_L, true);
-      cc.writeKeyEvent(Keysyms.Escape, true);
-      cc.writeKeyEvent(Keysyms.Control_L, false);
-      cc.writeKeyEvent(Keysyms.Escape, false);
-    } else if (((AbstractButton)s).getName() == buttons[7] &&
-               !cc.opts.viewOnly) {
-      if (((AbstractButton)s).isSelected()) {
-        cc.writeKeyEvent(Keysyms.Control_L, true);
-      } else {
-        cc.writeKeyEvent(Keysyms.Control_L, false);
-      }
-    } else if (((AbstractButton)s).getName() == buttons[8] &&
+      cc.writeKeyEvent(Keysyms.CONTROL_L, true);
+      cc.writeKeyEvent(Keysyms.ESCAPE, true);
+      cc.writeKeyEvent(Keysyms.CONTROL_L, false);
+      cc.writeKeyEvent(Keysyms.ESCAPE, false);
+    } else if (((AbstractButton)s).getName() == BUTTONS[7] &&
                !cc.opts.viewOnly) {
       if (((AbstractButton)s).isSelected()) {
-        cc.writeKeyEvent(Keysyms.Alt_L, true);
+        cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       } else {
-        cc.writeKeyEvent(Keysyms.Control_L, false);
+        cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       }
-    } else if (((AbstractButton)s).getName() == buttons[9]) {
+    } else if (((AbstractButton)s).getName() == BUTTONS[8] &&
+               !cc.opts.viewOnly) {
+      if (((AbstractButton)s).isSelected()) {
+        cc.writeKeyEvent(Keysyms.ALT_L, true);
+      } else {
+        cc.writeKeyEvent(Keysyms.CONTROL_L, false);
+      }
+    } else if (((AbstractButton)s).getName() == BUTTONS[9]) {
       VncViewer.newViewer(cc.viewer);
-    } else if (((AbstractButton)s).getName() == buttons[10]) {
+    } else if (((AbstractButton)s).getName() == BUTTONS[10]) {
       cc.close();
     }
   }
@@ -177,7 +177,7 @@ public class Toolbar extends JToolBar implements ActionListener {
       }
     }
 
-    public void mouseClicked(MouseEvent e) { }
+    public void mouseClicked(MouseEvent e) {}
 
     public void mouseEntered(MouseEvent e) {
       if (!b.isEnabled()) return;

@@ -24,7 +24,7 @@ import javax.swing.*;
 
 class ProfileDialog extends Dialog {
 
-  public ProfileDialog(CConn cc_) {
+  ProfileDialog(CConn cc_) {
     super(false);
     cc = cc_;
 
@@ -282,7 +282,7 @@ class ProfileDialog extends Dialog {
       KeyEvent.SHIFT_DOWN_MASK);
     dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
-    if (VncViewer.os.startsWith("mac os x")) {
+    if (VncViewer.OS.startsWith("mac os x")) {
       int appleKey = VncViewer.getMenuShortcutKeyMask();
       ks = KeyStroke.getKeyStroke(KeyEvent.VK_P, appleKey);
       dlg.getRootPane().registerKeyboardAction(actionListener, ks,
@@ -297,9 +297,9 @@ class ProfileDialog extends Dialog {
 
   CConn cc;
   JPanel panel;
-  public JLabel upsVal, tpVal;
-  public JLabel tpuRecvVal, tpuDecodeVal, tpuBlitVal, tpuTotalVal;
-  public JLabel mpDecodeVal, mpBlitVal, mpsDecodeVal, mpsBlitVal, mpsTotalVal;
-  public JLabel rectDecodeVal, rectBlitVal, pprDecodeVal, pprBlitVal;
-  public JLabel rpuDecodeVal;
+  JLabel upsVal, tpVal;
+  JLabel tpuRecvVal, tpuDecodeVal, tpuBlitVal, tpuTotalVal;
+  JLabel mpDecodeVal, mpBlitVal, mpsDecodeVal, mpsBlitVal, mpsTotalVal;
+  JLabel rectDecodeVal, rectBlitVal, pprDecodeVal, pprBlitVal;
+  JLabel rpuDecodeVal;
 }

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2014, 2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014, 2016, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ import com.turbovnc.vncviewer.*;
 public abstract class CConnection extends CMsgHandler {
 
   public CConnection() {
-    csecurity = null;  is = null;  os = null;  reader_ = null;
-    writer_ = null;  shared = false;
-    state_ = RFBSTATE_UNINITIALISED;  useProtocol3_3 = false;
+    csecurity = null;  is = null;  os = null;  reader = null;
+    writer = null;  shared = false;
+    state = RFBSTATE_UNINITIALISED;  useProtocol3_3 = false;
     security = new SecurityClient();
   }
 
@@ -41,39 +41,38 @@ public abstract class CConnection extends CMsgHandler {
   // SConnection is made to read or write.
   // XXX Do we really need this at all???
   public void deleteReaderAndWriter() {
-    reader_ = null;
-    writer_ = null;
+    reader = null;
+    writer = null;
   }
 
   // initialiseProtocol() should be called once the streams and security
   // types are set.  Subsequently, processMsg() should be called whenever
   // there is data to read on the InStream.
   public final void initialiseProtocol() {
-    state_ = RFBSTATE_PROTOCOL_VERSION;
+    state = RFBSTATE_PROTOCOL_VERSION;
   }
 
   // processMsg() should be called whenever there is data to read on the
   // InStream.  You must have called initialiseProtocol() first.
   public void processMsg(boolean benchmark) {
-    switch (state_) {
-
-    case RFBSTATE_PROTOCOL_VERSION: processVersionMsg();        break;
-    case RFBSTATE_SECURITY_TYPES:   processSecurityTypesMsg();  break;
-    case RFBSTATE_SECURITY:         processSecurityMsg();       break;
-    case RFBSTATE_SECURITY_RESULT:  processSecurityResultMsg(); break;
-    case RFBSTATE_INITIALISATION:   processInitMsg(benchmark);  break;
-    case RFBSTATE_NORMAL:           reader_.readMsg();          break;
-    case RFBSTATE_UNINITIALISED:
-      throw new ErrorException("CConnection.processMsg: not initialised yet?");
-    default:
-      throw new ErrorException("CConnection.processMsg: invalid state");
+    switch (state) {
+      case RFBSTATE_PROTOCOL_VERSION:  processVersionMsg();        break;
+      case RFBSTATE_SECURITY_TYPES:    processSecurityTypesMsg();  break;
+      case RFBSTATE_SECURITY:          processSecurityMsg();       break;
+      case RFBSTATE_SECURITY_RESULT:   processSecurityResultMsg(); break;
+      case RFBSTATE_INITIALISATION:    processInitMsg(benchmark);  break;
+      case RFBSTATE_NORMAL:            reader.readMsg();           break;
+      case RFBSTATE_UNINITIALISED:
+        throw new ErrorException("CConnection.processMsg: not initialised yet?");
+      default:
+        throw new ErrorException("CConnection.processMsg: invalid state");
     }
   }
 
   private void processVersionMsg() {
     vlog.debug("reading protocol version");
     if (!cp.readVersion(is)) {
-      state_ = RFBSTATE_INVALID;
+      state = RFBSTATE_INVALID;
       throw new ErrorException("Reading version failed: not an RFB server?");
     }
     if (!cp.done) return;
@@ -90,7 +89,7 @@ public abstract class CConnection extends CMsgHandler {
       vlog.info("Connecting to " + serverName + " via UltraVNC repeater");
       os.writeBytes(serverName.getBytes(), 0,
                     Math.min(serverName.length(), 250));
-      if(serverName.length() < 250) {
+      if (serverName.length() < 250) {
         byte[] pad = new byte[250 - serverName.length()];
         os.writeBytes(pad, 0, pad.length);
       }
@@ -103,7 +102,7 @@ public abstract class CConnection extends CMsgHandler {
       String msg = ("Server gave unsupported RFB protocol version " +
                     cp.majorVersion + "." + cp.minorVersion);
       vlog.error(msg);
-      state_ = RFBSTATE_INVALID;
+      state = RFBSTATE_INVALID;
       throw new ErrorException(msg);
     } else if (useProtocol3_3 || cp.beforeVersion(3, 7)) {
       cp.setVersion(3, 3);
@@ -112,7 +111,7 @@ public abstract class CConnection extends CMsgHandler {
     }
 
     cp.writeVersion(os);
-    state_ = RFBSTATE_SECURITY_TYPES;
+    state = RFBSTATE_SECURITY_TYPES;
 
     vlog.info("Using RFB protocol version " +
               cp.majorVersion + "." + cp.minorVersion);
@@ -121,7 +120,7 @@ public abstract class CConnection extends CMsgHandler {
   private void processSecurityTypesMsg() {
     vlog.debug("processing security types message");
 
-    int secType = Security.secTypeInvalid;
+    int secType = RFB.SECTYPE_INVALID;
 
     List<Integer> secTypes = new ArrayList<Integer>();
     secTypes = Security.getEnabledSecTypes();
@@ -131,11 +130,11 @@ public abstract class CConnection extends CMsgHandler {
       // legacy 3.3 server may only offer "vnc authentication" or "none"
 
       secType = is.readU32();
-      if (secType == Security.secTypeInvalid) {
+      if (secType == RFB.SECTYPE_INVALID) {
         throwConnFailedException();
 
-      } else if (secType == Security.secTypeNone ||
-                 secType == Security.secTypeVncAuth) {
+      } else if (secType == RFB.SECTYPE_NONE ||
+                 secType == RFB.SECTYPE_VNCAUTH) {
         Iterator<Integer> i;
         for (i = secTypes.iterator(); i.hasNext();) {
           int refType = (Integer)i.next();
@@ -146,7 +145,7 @@ public abstract class CConnection extends CMsgHandler {
         }
 
         if (!secTypes.contains(secType))
-          secType = Security.secTypeInvalid;
+          secType = RFB.SECTYPE_INVALID;
       } else {
         vlog.error("Unknown RFB 3.3 security type " + secType);
         throw new ErrorException("Unknown RFB 3.3 security type " + secType);
@@ -163,21 +162,19 @@ public abstract class CConnection extends CMsgHandler {
       for (int i = 0; i < nServerSecTypes; i++) {
         int serverSecType = is.readU8();
         vlog.debug("Server offers security type " +
-                   Security.secTypeName(serverSecType) +
-                   "(" + serverSecType + ")");
+                   RFB.secTypeName(serverSecType) + "(" + serverSecType + ")");
 
         /*
          * TurboVNC specific - use secTypeTight if the server supports it.
          */
-        if (serverSecType == Security.secTypeTight)
-          secType = Security.secTypeTight;
+        if (serverSecType == RFB.SECTYPE_TIGHT)
+          secType = RFB.SECTYPE_TIGHT;
 
         /*
          * Use the first type sent by server which matches client's type.
          * It means server's order specifies priority.
          */
-        if (secType == Security.secTypeInvalid &&
-            secType != Security.secTypeTight) {
+        if (secType == RFB.SECTYPE_INVALID && secType != RFB.SECTYPE_TIGHT) {
           for (Iterator<Integer> j = secTypes.iterator(); j.hasNext();) {
             int refType = (Integer)j.next();
             if (refType == serverSecType) {
@@ -189,21 +186,21 @@ public abstract class CConnection extends CMsgHandler {
       }
 
       // Inform the server of our decision
-      if (secType != Security.secTypeInvalid) {
+      if (secType != RFB.SECTYPE_INVALID) {
         os.writeU8(secType);
         os.flush();
-        vlog.debug("Choosing security type " + Security.secTypeName(secType) +
+        vlog.debug("Choosing security type " + RFB.secTypeName(secType) +
                    "(" + secType + ")");
       }
     }
 
-    if (secType == Security.secTypeInvalid) {
-      state_ = RFBSTATE_INVALID;
+    if (secType == RFB.SECTYPE_INVALID) {
+      state = RFBSTATE_INVALID;
       vlog.error("No matching security types");
       throw new ErrorException("No matching security types");
     }
 
-    state_ = RFBSTATE_SECURITY;
+    state = RFBSTATE_SECURITY;
     csecurity = security.getCSecurity(secType);
     processSecurityMsg();
   }
@@ -211,7 +208,7 @@ public abstract class CConnection extends CMsgHandler {
   private void processSecurityMsg() {
     vlog.debug("processing security message");
     if (csecurity.processMsg(this)) {
-      state_ = RFBSTATE_SECURITY_RESULT;
+      state = RFBSTATE_SECURITY_RESULT;
       processSecurityResultMsg();
     }
   }
@@ -220,55 +217,55 @@ public abstract class CConnection extends CMsgHandler {
     vlog.debug("processing security result message");
     int result;
     if (cp.beforeVersion(3, 8) &&
-        (csecurity.getType() == Security.secTypeNone ||
+        (csecurity.getType() == RFB.SECTYPE_NONE ||
          (csecurity instanceof CSecurityRFBTLS &&
-          csecurity.getType() == Security.secTypeTLSNone))) {
-      result = Security.secResultOK;
+          csecurity.getType() == RFB.SECTYPE_TLS_NONE))) {
+      result = RFB.AUTH_OK;
     } else {
       if (!is.checkNoWait(1)) return;
       result = is.readU32();
     }
     switch (result) {
-    case Security.secResultOK:
-      securityCompleted();
-      return;
-    case Security.secResultFailed:
-      vlog.debug("auth failed");
-      break;
-    case Security.secResultTooMany:
-      vlog.debug("auth failed - too many tries");
-      break;
-    default:
-      throw new ErrorException("Unknown security result from server");
+      case RFB.AUTH_OK:
+        securityCompleted();
+        return;
+      case RFB.AUTH_FAILED:
+        vlog.debug("auth failed");
+        break;
+      case RFB.AUTH_TOO_MANY:
+        vlog.debug("auth failed - too many tries");
+        break;
+      default:
+        throw new ErrorException("Unknown security result from server");
     }
     String reason;
     if (cp.beforeVersion(3, 8))
       reason = "Authentication failure";
     else
       reason = is.readString();
-    state_ = RFBSTATE_INVALID;
+    state = RFBSTATE_INVALID;
     throw new AuthFailureException(reason);
   }
 
   private void processInitMsg(boolean benchmark) {
     vlog.debug("reading server initialisation");
-    reader_.readServerInit(benchmark);
+    reader.readServerInit(benchmark);
   }
 
   private void throwConnFailedException() {
-    state_ = RFBSTATE_INVALID;
+    state = RFBSTATE_INVALID;
     String reason;
     reason = is.readString();
     throw new ConnFailedException(reason);
   }
 
   private void securityCompleted() {
-    state_ = RFBSTATE_INITIALISATION;
-    reader_ = new CMsgReaderV3(this, is);
-    writer_ = new CMsgWriterV3(cp, os);
+    state = RFBSTATE_INITIALISATION;
+    reader = new CMsgReaderV3(this, is);
+    writer = new CMsgWriterV3(cp, os);
     vlog.debug("Authentication success!");
-    authSuccess();
-    writer_.writeClientInit(shared);
+    //authSuccess();
+    writer.writeClientInit(shared);
   }
 
   // Methods to initialise the connection
@@ -310,17 +307,18 @@ public abstract class CConnection extends CMsgHandler {
 
   // Methods to be overridden in a derived class
 
-  // getIdVerifier() returns the identity verifier associated with the connection.
-  // Ownership of the IdentityVerifier is retained by the CConnection instance.
+  // getIdVerifier() returns the identity verifier associated with the
+  // connection.  Ownership of the IdentityVerifier is retained by the
+  // CConnection instance.
   //public IdentityVerifier getIdentityVerifier() { return 0; }
 
   // authSuccess() is called when authentication has succeeded.
-  public void authSuccess() {}
+  //public void authSuccess() {}
 
   // serverInit() is called when the ServerInit message is received.  The
   // derived class must call on to CConnection::serverInit().
   public void serverInit() {
-    state_ = RFBSTATE_NORMAL;
+    state = RFBSTATE_NORMAL;
     vlog.debug("initialisation done");
   }
 
@@ -344,8 +342,8 @@ public abstract class CConnection extends CMsgHandler {
 
   // Other methods
 
-  public CMsgReaderV3 reader() { return reader_; }
-  public CMsgWriterV3 writer() { return writer_; }
+  public CMsgReaderV3 reader() { return reader; }
+  public CMsgWriterV3 writer() { return writer; }
 
   public InStream getInStream() { return is; }
   public OutStream getOutStream() { return os; }
@@ -362,14 +360,14 @@ public abstract class CConnection extends CMsgHandler {
   public static final int RFBSTATE_NORMAL = 6;
   public static final int RFBSTATE_INVALID = 7;
 
-  public int state() { return state_; }
+  public int state() { return state; }
 
-  protected final void setState(int s) { state_ = s; }
+  protected final void setState(int s) { state = s; }
 
   public void fence(int flags, int len, byte[] data) {
     super.fence(flags, len, data);
 
-    if ((flags & fenceTypes.fenceFlagRequest) != 0)
+    if ((flags & RFB.FENCE_FLAG_REQUEST) != 0)
       return;
 
     // We cannot guarantee any synchronisation at this level
@@ -389,21 +387,20 @@ public abstract class CConnection extends CMsgHandler {
     } else {
       reason = "Authentication failure";
     }
-    state_ = RFBSTATE_INVALID;
+    state = RFBSTATE_INVALID;
     vlog.error(reason);
     throw new AuthFailureException(reason);
   }
 
   InStream is;
   OutStream os;
-  protected CMsgReaderV3 reader_;
-  CMsgWriterV3 writer_;
+  protected CMsgReaderV3 reader;
+  CMsgWriterV3 writer;
   boolean shared;
-  public CSecurity csecurity;
-  public SecurityClient security;
+  protected CSecurity csecurity;
+  SecurityClient security;
   int nSecTypes;
-  int[] secTypes;
-  protected int state_ = RFBSTATE_UNINITIALISED;
+  protected int state = RFBSTATE_UNINITIALISED;
   String serverName;
   int serverPort;
   boolean useProtocol3_3;

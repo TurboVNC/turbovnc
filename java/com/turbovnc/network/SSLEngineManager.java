@@ -15,7 +15,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, 5th Floor, Boston, MA 02110-1301 USA
  */
- package com.turbovnc.network;
+package com.turbovnc.network;
 
 import java.io.*;
 import java.nio.*;
@@ -74,67 +74,67 @@ public class SSLEngineManager {
 
       switch (hs) {
 
-      case NEED_UNWRAP:
-        // Receive handshaking data from peer
-        ((Buffer)peerNetData).flip();
-        SSLEngineResult res = engine.unwrap(peerNetData, peerAppData);
-        peerNetData.compact();
-        hs = res.getHandshakeStatus();
-
-        // Check status
-        switch (res.getStatus()) {
-        case BUFFER_UNDERFLOW:
-          int max = Math.min(peerNetData.remaining(), in.getBufSize());
-          int m = in.check(1, max, true);
-          int pos = ((Buffer)peerNetData).position();
-          in.readBytes(peerNetData.array(), pos, m);
-          ((Buffer)peerNetData).position(pos + m);
+        case NEED_UNWRAP:
+          // Receive handshaking data from peer
           ((Buffer)peerNetData).flip();
+          SSLEngineResult res = engine.unwrap(peerNetData, peerAppData);
           peerNetData.compact();
+          hs = res.getHandshakeStatus();
+
+          // Check status
+          switch (res.getStatus()) {
+            case BUFFER_UNDERFLOW:
+              int max = Math.min(peerNetData.remaining(), in.getBufSize());
+              int m = in.check(1, max, true);
+              int pos = ((Buffer)peerNetData).position();
+              in.readBytes(peerNetData.array(), pos, m);
+              ((Buffer)peerNetData).position(pos + m);
+              ((Buffer)peerNetData).flip();
+              peerNetData.compact();
+              break;
+
+            case OK:
+              // Process incoming handshaking data
+              break;
+
+            case CLOSED:
+              engine.closeInbound();
+              break;
+          }
           break;
 
-        case OK:
-          // Process incoming handshaking data
-          break;
-
-        case CLOSED:
-          engine.closeInbound();
-          break;
-        }
-        break;
-
-      case NEED_WRAP:
-        // Empty the local network packet buffer.
-        ((Buffer)myNetData).clear();
-
-        // Generate handshaking data
-        res = engine.wrap(myAppData, myNetData);
-        hs = res.getHandshakeStatus();
-
-        // Check status
-        switch (res.getStatus()) {
-        case OK:
-          myAppData.compact();
-          ((Buffer)myNetData).flip();
-          os.writeBytes(myNetData.array(), 0, myNetData.remaining());
-          os.flush();
+        case NEED_WRAP:
+          // Empty the local network packet buffer.
           ((Buffer)myNetData).clear();
+
+          // Generate handshaking data
+          res = engine.wrap(myAppData, myNetData);
+          hs = res.getHandshakeStatus();
+
+          // Check status
+          switch (res.getStatus()) {
+            case OK:
+              myAppData.compact();
+              ((Buffer)myNetData).flip();
+              os.writeBytes(myNetData.array(), 0, myNetData.remaining());
+              os.flush();
+              ((Buffer)myNetData).clear();
+              break;
+
+            case BUFFER_OVERFLOW:
+              // FIXME: How much larger should the buffer be?
+              break;
+
+            case CLOSED:
+              engine.closeOutbound();
+              break;
+          }
           break;
 
-        case BUFFER_OVERFLOW:
-          // FIXME: How much larger should the buffer be?
+        case NEED_TASK:
+          // Handle blocking tasks
+          executeTasks();
           break;
-
-        case CLOSED:
-          engine.closeOutbound();
-          break;
-        }
-        break;
-
-      case NEED_TASK:
-        // Handle blocking tasks
-        executeTasks();
-        break;
       }
       hs = engine.getHandshakeStatus();
     }
@@ -154,28 +154,28 @@ public class SSLEngineManager {
     SSLEngineResult res = engine.unwrap(peerNetData, peerAppData);
     peerNetData.compact();
     switch (res.getStatus()) {
-    case OK :
-      bytesRead = Math.min(length, res.bytesProduced());
-      ((Buffer)peerAppData).flip();
-      peerAppData.get(data, dataPtr, bytesRead);
-      peerAppData.compact();
-      break;
+      case OK:
+        bytesRead = Math.min(length, res.bytesProduced());
+        ((Buffer)peerAppData).flip();
+        peerAppData.get(data, dataPtr, bytesRead);
+        peerAppData.compact();
+        break;
 
-    case BUFFER_UNDERFLOW:
-      // need more net data
-      int pos = ((Buffer)peerNetData).position();
-      // attempt to drain the underlying buffer first
-      int need = peerNetData.remaining();
-      int avail = in.check(1, in.getBufSize(), false);
-      if (avail < need)
-        avail = in.check(1, Math.min(need, in.getBufSize()), true);
-      in.readBytes(peerNetData.array(), pos, Math.min(need, avail));
-      ((Buffer)peerNetData).position(pos + Math.min(need, avail));
-      break;
+      case BUFFER_UNDERFLOW:
+        // need more net data
+        int pos = ((Buffer)peerNetData).position();
+        // attempt to drain the underlying buffer first
+        int need = peerNetData.remaining();
+        int avail = in.check(1, in.getBufSize(), false);
+        if (avail < need)
+          avail = in.check(1, Math.min(need, in.getBufSize()), true);
+        in.readBytes(peerNetData.array(), pos, Math.min(need, avail));
+        ((Buffer)peerNetData).position(pos + Math.min(need, avail));
+        break;
 
-    case CLOSED:
-      engine.closeInbound();
-      break;
+      case CLOSED:
+        engine.closeInbound();
+        break;
     }
     return bytesRead;
   }
@@ -188,20 +188,20 @@ public class SSLEngineManager {
       SSLEngineResult res = engine.wrap(myAppData, myNetData);
       n += res.bytesConsumed();
       switch (res.getStatus()) {
-      case OK:
-        break;
+        case OK:
+          break;
 
-      case BUFFER_OVERFLOW:
-        // Make room in the buffer by flushing the outstream
-        ((Buffer)myNetData).flip();
-        os.writeBytes(myNetData.array(), 0, myNetData.remaining());
-        os.flush();
-        ((Buffer)myNetData).clear();
-        break;
+        case BUFFER_OVERFLOW:
+          // Make room in the buffer by flushing the outstream
+          ((Buffer)myNetData).flip();
+          os.writeBytes(myNetData.array(), 0, myNetData.remaining());
+          os.flush();
+          ((Buffer)myNetData).clear();
+          break;
 
-      case CLOSED:
-        engine.closeOutbound();
-        break;
+        case CLOSED:
+          engine.closeOutbound();
+          break;
       }
     }
     ((Buffer)myAppData).clear();

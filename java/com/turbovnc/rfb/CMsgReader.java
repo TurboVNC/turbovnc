@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ public abstract class CMsgReader {
     is = is_;
     imageBuf = null;
     imageBufSize = 0;
-    decoders = new Decoder[Encodings.encodingMax + 1];
+    decoders = new Decoder[RFB.ENCODING_MAX + 1];
   }
 
   protected void readSetColourMapEntries() {
@@ -91,7 +91,7 @@ public abstract class CMsgReader {
 
     handler.beginRect(r, encoding);
 
-    if (encoding == Encodings.encodingCopyRect) {
+    if (encoding == RFB.ENCODING_COPYRECT) {
       readCopyRect(r);
     } else {
 
@@ -199,14 +199,14 @@ public abstract class CMsgReader {
   }
 
   public final boolean isTurboJPEG() {
-    Decoder d = decoders[Encodings.encodingTight];
+    Decoder d = decoders[RFB.ENCODING_TIGHT];
     if (d instanceof TightDecoder && d != null)
       return ((TightDecoder)d).isTurboJPEG();
     return false;
   }
 
   public final void reset() {
-    for (int i = 0; i < Encodings.encodingMax; i++) {
+    for (int i = 0; i < RFB.ENCODING_MAX; i++) {
       if (decoders[i] != null)
         decoders[i].reset();
     }
@@ -219,7 +219,7 @@ public abstract class CMsgReader {
 
   public InStream getInStream() { return is; }
 
-  public int imageBufIdealSize;
+  int imageBufIdealSize;
 
   protected CMsgHandler handler;
   protected InStream is;

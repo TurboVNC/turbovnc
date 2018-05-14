@@ -90,14 +90,14 @@ public class FdOutStream extends OutStream {
   }
 
   private int writeWithTimeout(byte[] data, int dataPtr, int length,
-                               int timeoutms) {
+                               int timeoutms_) {
     int n;
 
     do {
 
       Integer tv;
-      if (timeoutms != -1) {
-        tv = Integer.valueOf(timeoutms);
+      if (timeoutms_ != -1) {
+        tv = Integer.valueOf(timeoutms_);
       } else {
         tv = null;
       }

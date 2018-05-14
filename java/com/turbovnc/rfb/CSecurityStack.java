@@ -70,5 +70,4 @@ public class CSecurityStack extends CSecurity {
   private CSecurity state1;
   private String name;
   private int type;
-
 }

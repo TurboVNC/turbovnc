@@ -68,7 +68,7 @@ public class SocketDescriptor implements FileDescriptor {
   private static SelectorProvider defaultSelectorProvider() {
     // kqueue() selector provider on OS X is not working, fall back to select()
     // for now
-    if (VncViewer.os.startsWith("mac os x") && VncViewer.javaVersion < 9)
+    if (VncViewer.OS.startsWith("mac os x") && VncViewer.JAVA_VERSION < 9)
       System.setProperty("java.nio.channels.spi.SelectorProvider",
                          "sun.nio.ch.PollSelectorProvider");
     return SelectorProvider.provider();
@@ -119,13 +119,13 @@ public class SocketDescriptor implements FileDescriptor {
         n = selector.select();
       } else {
         int tv = timeout.intValue();
-        switch(tv) {
-        case 0:
-          n = selector.selectNow();
-          break;
-        default:
-          n = selector.select((long)tv);
-          break;
+        switch (tv) {
+          case 0:
+            n = selector.selectNow();
+            break;
+          default:
+            n = selector.select((long)tv);
+            break;
         }
       }
     } catch (IOException e) {
@@ -240,5 +240,4 @@ public class SocketDescriptor implements FileDescriptor {
   protected SocketChannel channel;
   protected Selector writeSelector;
   protected Selector readSelector;
-
 }

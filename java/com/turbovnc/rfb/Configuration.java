@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2012-2013, 2015, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015, 2017-2018 D. R. Commander.
+ *                                          All Rights Reserved.
  * Copyright 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -29,7 +30,7 @@ import com.turbovnc.rdr.*;
 import java.io.FileInputStream;
 import java.util.*;
 
-public class Configuration {
+public final class Configuration {
 
   // - Set named parameter to value
   public static boolean setParam(String name, String value) {
@@ -194,8 +195,8 @@ public class Configuration {
         try {
           encoding = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
-        if (encoding >= 0 && encoding <= Encodings.LASTENCODING)
-          setParam("Encoding", Encodings.encodingName(encoding));
+        if (encoding >= 0 && encoding <= RFB.ENCODING_LAST)
+          setParam("Encoding", RFB.encodingName(encoding));
       } else if (name.equalsIgnoreCase("restricted")) {
         setParam("Restricted", props.getProperty(name));
       } else if (name.equalsIgnoreCase("viewonly")) {
@@ -212,12 +213,12 @@ public class Configuration {
           grabKeyboard = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         switch (grabKeyboard) {
-        case Options.GRAB_FS:
-          setParam("GrabKeyboard", "FS");  break;
-        case Options.GRAB_ALWAYS:
-          setParam("GrabKeyboard", "Always");  break;
-        case Options.GRAB_MANUAL:
-          setParam("GrabKeyboard", "Manual");  break;
+          case Options.GRAB_FS:
+            setParam("GrabKeyboard", "FS");  break;
+          case Options.GRAB_ALWAYS:
+            setParam("GrabKeyboard", "Always");  break;
+          case Options.GRAB_MANUAL:
+            setParam("GrabKeyboard", "Manual");  break;
         }
       } else if (name.equalsIgnoreCase("span")) {
         int span = -1;
@@ -298,10 +299,10 @@ public class Configuration {
           subsampling = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         switch (subsampling) {
-        case Options.SUBSAMP_NONE:  setParam("Subsampling", "1X");  break;
-        case Options.SUBSAMP_4X:    setParam("Subsampling", "4X");  break;
-        case Options.SUBSAMP_2X:    setParam("Subsampling", "2X");  break;
-        case Options.SUBSAMP_GRAY:  setParam("Subsampling", "Gray");  break;
+          case Options.SUBSAMP_NONE:  setParam("Subsampling", "1X");  break;
+          case Options.SUBSAMP_4X:    setParam("Subsampling", "4X");  break;
+          case Options.SUBSAMP_2X:    setParam("Subsampling", "2X");  break;
+          case Options.SUBSAMP_GRAY:  setParam("Subsampling", "Gray");  break;
         }
       } else if (name.equalsIgnoreCase("quality")) {
         int quality = -2;
@@ -330,19 +331,22 @@ public class Configuration {
 
     if (desktopSize != null)
       setParam("DesktopSize", desktopSize);
-    else switch (resizeMode) {
-      case Options.SIZE_SERVER:
-        setParam("DesktopSize", "Server");  break;
-      case Options.SIZE_MANUAL:
-        if (desktopWidth > 0 && desktopHeight > 0)
-          setParam("DesktopSize", desktopWidth + "x" + desktopHeight);
-        break;
-      case Options.SIZE_AUTO:
-        setParam("DesktopSize", "Auto");  break;
+    else {
+      switch (resizeMode) {
+        case Options.SIZE_SERVER:
+          setParam("DesktopSize", "Server");  break;
+        case Options.SIZE_MANUAL:
+          if (desktopWidth > 0 && desktopHeight > 0)
+            setParam("DesktopSize", desktopWidth + "x" + desktopHeight);
+          break;
+        case Options.SIZE_AUTO:
+          setParam("DesktopSize", "Auto");  break;
+      }
     }
   }
 
-  public static VoidParameter head;
-  public static VoidParameter tail;
+  private Configuration() {}
+  static VoidParameter head;
+  static VoidParameter tail;
   static LogWriter vlog = new LogWriter("Configuration");
 }

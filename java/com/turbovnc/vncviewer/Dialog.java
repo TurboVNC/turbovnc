@@ -37,7 +37,7 @@ import com.turbovnc.rfb.LogWriter;
 
 class Dialog {
 
-  public Dialog(boolean modal_) {
+  Dialog(boolean modal_) {
     modal = modal_;
   }
 
@@ -111,9 +111,9 @@ class Dialog {
     // JDialog.setIconImage() to set the icon image, and since that method is
     // only available in Java 6 and later, we have to use reflect to invoke it.
     try {
-      Class argClasses[] = new Class[]{Image.class};
+      Class[] argClasses = new Class[]{Image.class};
       Method setIconImage = Window.class.getMethod("setIconImage", argClasses);
-      setIconImage.invoke(dlg, VncViewer.frameImage);
+      setIconImage.invoke(dlg, VncViewer.FRAME_IMAGE);
       return;
     } catch (Exception e) {
       vlog.debug("Could not set dialog icon:");
@@ -139,7 +139,7 @@ class Dialog {
 
   // populateDialog() can be overridden in a derived class.  Typically it is
   // used to add pre-initialized components to the dialog instance.
-  protected void populateDialog(JDialog dlg) {
+  protected void populateDialog(JDialog dialog) {
   }
 
   public static void addGBComponent(JComponent c, JComponent cp,
@@ -149,19 +149,19 @@ class Dialog {
                                     double gwx, double gwy,
                                     int fill, int anchor,
                                     Insets insets) {
-      GridBagConstraints gbc = new GridBagConstraints();
-      gbc.anchor = anchor;
-      gbc.fill = fill;
-      gbc.gridx = gx;
-      gbc.gridy = gy;
-      gbc.gridwidth = gw;
-      gbc.gridheight = gh;
-      gbc.insets = insets;
-      gbc.ipadx = gipx;
-      gbc.ipady = gipy;
-      gbc.weightx = gwx;
-      gbc.weighty = gwy;
-      cp.add(c, gbc);
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.anchor = anchor;
+    gbc.fill = fill;
+    gbc.gridx = gx;
+    gbc.gridy = gy;
+    gbc.gridwidth = gw;
+    gbc.gridheight = gh;
+    gbc.insets = insets;
+    gbc.ipadx = gipx;
+    gbc.ipady = gipy;
+    gbc.weightx = gwx;
+    gbc.weighty = gwy;
+    cp.add(c, gbc);
   }
 
   private JDialog dlg;

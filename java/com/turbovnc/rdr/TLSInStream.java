@@ -31,9 +31,9 @@ public class TLSInStream extends InStream {
 
   static final int DEFAULT_BUF_SIZE = 16384;
 
-  public TLSInStream(InStream _in, SSLEngineManager _manager) {
-    in = (FdInStream)_in;
-    manager = _manager;
+  public TLSInStream(InStream in_, SSLEngineManager manager_) {
+    in = (FdInStream)in_;
+    manager = manager_;
     offset = 0;
     SSLSession session = manager.getSession();
     bufSize = session.getApplicationBufferSize();

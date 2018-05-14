@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 package com.turbovnc.rfb;
 
 public class ExtInputEvent {
+  // CHECKSTYLE VisibilityModifier:OFF
   public int type;
   public long deviceID;
   public long buttonMask;
@@ -26,13 +27,14 @@ public class ExtInputEvent {
   public int numValuators;
   public int firstValuator;
   public int[] valuators = new int[6];
+  // CHECKSTYLE VisibilityModifier:ON
 
   public void print() {
     vlog.eidebug("EVENT:");
     vlog.eidebug("  type = " + type);
     vlog.eidebug("  deviceID = " + deviceID);
     vlog.eidebug("  buttonMask = " + buttonMask);
-    if (type == giiTypes.giiButtonPress || type == giiTypes.giiButtonRelease)
+    if (type == RFB.GII_BUTTON_PRESS || type == RFB.GII_BUTTON_RELEASE)
       vlog.eidebug("  buttonNumber = " + buttonNumber);
     vlog.eidebug("  firstValuator = " + firstValuator);
     for (int i = 0; i < numValuators; i++)

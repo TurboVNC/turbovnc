@@ -3,7 +3,7 @@
  * Copyright (C) 2006 OCCAM Financial Technology
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public class CSecurityVeNCrypt extends CSecurity {
     haveChosenType = false;
     majorVersion = 0;
     minorVersion = 0;
-    chosenType = Security.secTypeVeNCrypt;
+    chosenType = RFB.SECTYPE_VENCRYPT;
     nAvailableTypes = 0;
     availableTypes = null;
     iAvailableType = 0;
@@ -50,7 +50,8 @@ public class CSecurityVeNCrypt extends CSecurity {
     InStream is = cc.getInStream();
     OutStream os = cc.getOutStream();
 
-    /* get major, minor versions, send what we can support (or 0.0 for can't support it) */
+    /* get major, minor versions, send what we can support (or 0.0 for can't
+       support it) */
     if (!haveRecvdMajorVersion) {
       majorVersion = is.readU8();
       haveRecvdMajorVersion = true;
@@ -117,8 +118,8 @@ public class CSecurityVeNCrypt extends CSecurity {
           availableTypes[iAvailableType++] = is.readU32();
           haveListOfTypes = (iAvailableType >= nAvailableTypes);
           vlog.debug("Server offers security type " +
-            Security.secTypeName(availableTypes[iAvailableType - 1]) + " (" +
-                                 availableTypes[iAvailableType - 1] + ")");
+            RFB.secTypeName(availableTypes[iAvailableType - 1]) + " (" +
+                            availableTypes[iAvailableType - 1] + ")");
 
           if (!haveListOfTypes)
             return false;
@@ -129,7 +130,7 @@ public class CSecurityVeNCrypt extends CSecurity {
 
       /* make a choice and send it to the server, meanwhile set up the stack */
       if (!haveChosenType) {
-        chosenType = Security.secTypeInvalid;
+        chosenType = RFB.SECTYPE_INVALID;
         int i;
         Iterator<Integer> j;
         List<Integer> secTypes = new ArrayList<Integer>();
@@ -146,17 +147,16 @@ public class CSecurityVeNCrypt extends CSecurity {
             }
           }
 
-          if (chosenType != Security.secTypeInvalid)
+          if (chosenType != RFB.SECTYPE_INVALID)
             break;
         }
 
         vlog.debug("Choosing security type " +
-                   Security.secTypeName(chosenType) + " (" + chosenType +
-                   ")");
+                   RFB.secTypeName(chosenType) + " (" + chosenType + ")");
 
         /* Set up the stack according to the chosen type: */
-        if (chosenType == Security.secTypeInvalid ||
-            chosenType == Security.secTypeVeNCrypt)
+        if (chosenType == RFB.SECTYPE_INVALID ||
+            chosenType == RFB.SECTYPE_VENCRYPT)
           throw new AuthFailureException("No valid VeNCrypt sub-type");
 
         csecurity = security.getCSecurity(chosenType);
@@ -182,14 +182,14 @@ public class CSecurityVeNCrypt extends CSecurity {
   public final int getType() { return chosenType; }
 
   public final String getDescription() {
-    return Security.secTypeName(chosenType);
+    return RFB.secTypeName(chosenType);
   }
 
   public final String getProtocol() {
     return (csecurity != null ? csecurity.getProtocol() : "Not initialized");
   }
 
-  public static StringParameter secTypesStr;
+  static StringParameter secTypesStr;
 
   private CSecurity csecurity;
   SecurityClient security;

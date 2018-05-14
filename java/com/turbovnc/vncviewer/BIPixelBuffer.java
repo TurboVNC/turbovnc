@@ -40,7 +40,7 @@ public class BIPixelBuffer extends PlatformPixelBuffer
 
   public void updateColourMap() {
     cm = new IndexColorModel(8, nColours, reds, greens, blues);
-    createImage(width_, height_);
+    createImage(width, height);
   }
 
   // resize() resizes the image, preserving the image data where possible.
@@ -48,8 +48,8 @@ public class BIPixelBuffer extends PlatformPixelBuffer
     if (w == width() && h == height())
       return;
 
-    width_ = w;
-    height_ = h;
+    width = w;
+    height = h;
     createImage(w, h);
   }
 
@@ -63,9 +63,9 @@ public class BIPixelBuffer extends PlatformPixelBuffer
     image = new BufferedImage(cm, wr, true, null);
     SampleModel sm = image.getSampleModel();
     if (sm instanceof SinglePixelPackedSampleModel) {
-      stride_ = ((SinglePixelPackedSampleModel)sm).getScanlineStride();
+      stride = ((SinglePixelPackedSampleModel)sm).getScanlineStride();
     } else {
-      stride_ = sm.getWidth();
+      stride = sm.getWidth();
     }
     db = wr.getDataBuffer();
     if (sm.getTransferType() == DataBuffer.TYPE_INT)
@@ -81,16 +81,16 @@ public class BIPixelBuffer extends PlatformPixelBuffer
   public void fillRect(int x, int y, int w, int h, int pix) {
     Graphics2D graphics = (Graphics2D)image.getGraphics();
     switch (format.depth) {
-    case 24:
-      graphics.setColor(new Color(pix));
-      graphics.fillRect(x, y, w, h);
-      break;
-    default:
-      Color color = new Color((0xff << 24) | (cm.getRed(pix) << 16) |
-                              (cm.getGreen(pix) << 8) | (cm.getBlue(pix)));
-      graphics.setColor(color);
-      graphics.fillRect(x, y, w, h);
-      break;
+      case 24:
+        graphics.setColor(new Color(pix));
+        graphics.fillRect(x, y, w, h);
+        break;
+      default:
+        Color color = new Color((0xff << 24) | (cm.getRed(pix) << 16) |
+                                (cm.getGreen(pix) << 8) | (cm.getBlue(pix)));
+        graphics.setColor(color);
+        graphics.fillRect(x, y, w, h);
+        break;
     }
     graphics.dispose();
   }

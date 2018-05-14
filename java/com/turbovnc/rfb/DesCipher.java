@@ -270,31 +270,31 @@ public class DesCipher {
     0x000008, 0x000004, 0x000002, 0x000001
   };
   private static byte[] pc1 = {
-     (byte)56, (byte)48, (byte)40, (byte)32, (byte)24, (byte)16, (byte) 8,
-    (byte) 0, (byte)57, (byte)49, (byte)41, (byte)33, (byte)25, (byte)17,
-     (byte) 9, (byte) 1, (byte)58, (byte)50, (byte)42, (byte)34, (byte)26,
-    (byte)18, (byte)10, (byte) 2, (byte)59, (byte)51, (byte)43, (byte)35,
-     (byte)62, (byte)54, (byte)46, (byte)38, (byte)30, (byte)22, (byte)14,
-    (byte) 6, (byte)61, (byte)53, (byte)45, (byte)37, (byte)29, (byte)21,
-     (byte)13, (byte) 5, (byte)60, (byte)52, (byte)44, (byte)36, (byte)28,
-    (byte)20, (byte)12, (byte) 4, (byte)27, (byte)19, (byte)11, (byte)3
+    (byte)56, (byte)48, (byte)40, (byte)32, (byte)24, (byte)16, (byte)8,
+    (byte)0,  (byte)57, (byte)49, (byte)41, (byte)33, (byte)25, (byte)17,
+    (byte)9,  (byte)1,  (byte)58, (byte)50, (byte)42, (byte)34, (byte)26,
+    (byte)18, (byte)10, (byte)2,  (byte)59, (byte)51, (byte)43, (byte)35,
+    (byte)62, (byte)54, (byte)46, (byte)38, (byte)30, (byte)22, (byte)14,
+    (byte)6,  (byte)61, (byte)53, (byte)45, (byte)37, (byte)29, (byte)21,
+    (byte)13, (byte)5,  (byte)60, (byte)52, (byte)44, (byte)36, (byte)28,
+    (byte)20, (byte)12, (byte)4,  (byte)27, (byte)19, (byte)11, (byte)3
   };
   private static int[] totrot = {
     1, 2, 4, 6, 8, 10, 12, 14, 15, 17, 19, 21, 23, 25, 27, 28
   };
 
   private static byte[] pc2 = {
-    (byte)13, (byte)16, (byte)10, (byte)23, (byte) 0, (byte) 4,
-          (byte) 2, (byte)27, (byte)14, (byte) 5, (byte)20, (byte) 9,
-    (byte)22, (byte)18, (byte)11, (byte)3 , (byte)25, (byte) 7,
-          (byte)15, (byte) 6, (byte)26, (byte)19, (byte)12, (byte) 1,
+    (byte)13, (byte)16, (byte)10, (byte)23, (byte)0,  (byte)4,
+    (byte)2,  (byte)27, (byte)14, (byte)5,  (byte)20, (byte)9,
+    (byte)22, (byte)18, (byte)11, (byte)3,  (byte)25, (byte)7,
+    (byte)15, (byte)6,  (byte)26, (byte)19, (byte)12, (byte)1,
     (byte)40, (byte)51, (byte)30, (byte)36, (byte)46, (byte)54,
-          (byte)29, (byte)39, (byte)50, (byte)44, (byte)32, (byte)47,
+    (byte)29, (byte)39, (byte)50, (byte)44, (byte)32, (byte)47,
     (byte)43, (byte)48, (byte)38, (byte)55, (byte)33, (byte)52,
-          (byte)45, (byte)41, (byte)49, (byte)35, (byte)28, (byte)31,
+    (byte)45, (byte)41, (byte)49, (byte)35, (byte)28, (byte)31,
   };
 
-  private static int[] SP1 = {
+  private static final int[] SP1 = {
     0x01010400, 0x00000000, 0x00010000, 0x01010404,
     0x01010004, 0x00010404, 0x00000004, 0x00010000,
     0x00000400, 0x01010400, 0x01010404, 0x00000400,
@@ -312,7 +312,7 @@ public class DesCipher {
     0x00000404, 0x01000400, 0x01000400, 0x00000000,
     0x00010004, 0x00010400, 0x00000000, 0x01010004
   };
-  private static int[] SP2 = {
+  private static final int[] SP2 = {
     0x80108020, 0x80008000, 0x00008000, 0x00108020,
     0x00100000, 0x00000020, 0x80100020, 0x80008020,
     0x80000020, 0x80108020, 0x80108000, 0x80000000,
@@ -330,7 +330,7 @@ public class DesCipher {
     0x00108000, 0x00000000, 0x80008000, 0x00008020,
     0x80000000, 0x80100020, 0x80108020, 0x00108000
   };
-  private static int[] SP3 = {
+  private static final int[] SP3 = {
     0x00000208, 0x08020200, 0x00000000, 0x08020008,
     0x08000200, 0x00000000, 0x00020208, 0x08000200,
     0x00020008, 0x08000008, 0x08000008, 0x00020000,
@@ -348,7 +348,7 @@ public class DesCipher {
     0x08020000, 0x08000208, 0x00000208, 0x08020000,
     0x00020208, 0x00000008, 0x08020008, 0x00020200
   };
-  private static int[] SP4 = {
+  private static final int[] SP4 = {
     0x00802001, 0x00002081, 0x00002081, 0x00000080,
     0x00802080, 0x00800081, 0x00800001, 0x00002001,
     0x00000000, 0x00802000, 0x00802000, 0x00802081,
@@ -366,7 +366,7 @@ public class DesCipher {
     0x00002001, 0x00002080, 0x00800000, 0x00802001,
     0x00000080, 0x00800000, 0x00002000, 0x00802080
   };
-  private static int[] SP5 = {
+  private static final int[] SP5 = {
     0x00000100, 0x02080100, 0x02080000, 0x42000100,
     0x00080000, 0x00000100, 0x40000000, 0x02080000,
     0x40080100, 0x00080000, 0x02000100, 0x40080100,
@@ -384,7 +384,7 @@ public class DesCipher {
     0x00080100, 0x02000100, 0x40000100, 0x00080000,
     0x00000000, 0x40080000, 0x02080100, 0x40000100
   };
-  private static int[] SP6 = {
+  private static final int[] SP6 = {
     0x20000010, 0x20400000, 0x00004000, 0x20404010,
     0x20400000, 0x00000010, 0x20404010, 0x00400000,
     0x20004000, 0x00404010, 0x00400000, 0x20000010,
@@ -402,7 +402,7 @@ public class DesCipher {
     0x00004000, 0x00400010, 0x20004010, 0x00000000,
     0x20404000, 0x20000000, 0x00400010, 0x20004010
   };
-  private static int[] SP7 = {
+  private static final int[] SP7 = {
     0x00200000, 0x04200002, 0x04000802, 0x00000000,
     0x00000800, 0x04000802, 0x00200802, 0x04200800,
     0x04200802, 0x00200000, 0x00000000, 0x04000002,
@@ -420,7 +420,7 @@ public class DesCipher {
     0x00000000, 0x00200802, 0x04200000, 0x00000800,
     0x04000002, 0x04000800, 0x00000800, 0x00200002
   };
-  private static int[] SP8 = {
+  private static final int[] SP8 = {
     0x10001040, 0x00001000, 0x00040000, 0x10041040,
     0x10000000, 0x10001040, 0x00000040, 0x10000000,
     0x00040040, 0x10040000, 0x10041040, 0x00041000,
@@ -457,10 +457,10 @@ public class DesCipher {
                                        byte[] outBytes, int outOff,
                                        int intLen) {
     for (int i = 0; i < intLen; ++i) {
-      outBytes[outOff + i * 4]     = (byte) (inInts[inOff + i] >>> 24);
-      outBytes[outOff + i * 4 + 1] = (byte) (inInts[inOff + i] >>> 16);
-      outBytes[outOff + i * 4 + 2] = (byte) (inInts[inOff + i] >>>  8);
-      outBytes[outOff + i * 4 + 3] = (byte)  inInts[inOff + i];
+      outBytes[outOff + i * 4]     = (byte)(inInts[inOff + i] >>> 24);
+      outBytes[outOff + i * 4 + 1] = (byte)(inInts[inOff + i] >>> 16);
+      outBytes[outOff + i * 4 + 2] = (byte)(inInts[inOff + i] >>>  8);
+      outBytes[outOff + i * 4 + 3] = (byte)inInts[inOff + i];
     }
   }
 }

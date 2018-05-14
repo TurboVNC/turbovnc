@@ -1,5 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import java.util.prefs.BackingStoreException;
 
 import com.turbovnc.rfb.*;
 
-public class UserPreferences {
+public final class UserPreferences {
 
   private static Preferences root = Preferences.userRoot().node("TurboVNC");
 
@@ -166,95 +166,98 @@ public class UserPreferences {
     if ((setEncX509 || setEncTLS || setEncNone) &&
         (setSecPlain || setSecIdent || setSecVnc || setSecNone ||
          setSecUnixLogin)) {
-      Security.disableSecType(Security.secTypeNone);
-      Security.disableSecType(Security.secTypeVncAuth);
-      Security.disableSecType(Security.secTypePlain);
-      Security.disableSecType(Security.secTypeIdent);
-      Security.disableSecType(Security.secTypeTLSNone);
-      Security.disableSecType(Security.secTypeTLSVnc);
-      Security.disableSecType(Security.secTypeTLSPlain);
-      Security.disableSecType(Security.secTypeTLSIdent);
-      Security.disableSecType(Security.secTypeX509None);
-      Security.disableSecType(Security.secTypeX509Vnc);
-      Security.disableSecType(Security.secTypeX509Plain);
-      Security.disableSecType(Security.secTypeX509Ident);
-      Security.disableSecType(Security.secTypeUnixLogin);
+      Security.disableSecType(RFB.SECTYPE_NONE);
+      Security.disableSecType(RFB.SECTYPE_VNCAUTH);
+      Security.disableSecType(RFB.SECTYPE_PLAIN);
+      Security.disableSecType(RFB.SECTYPE_IDENT);
+      Security.disableSecType(RFB.SECTYPE_TLS_NONE);
+      Security.disableSecType(RFB.SECTYPE_TLS_VNC);
+      Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
+      Security.disableSecType(RFB.SECTYPE_TLS_IDENT);
+      Security.disableSecType(RFB.SECTYPE_X509_NONE);
+      Security.disableSecType(RFB.SECTYPE_X509_VNC);
+      Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
+      Security.disableSecType(RFB.SECTYPE_X509_IDENT);
+      Security.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
     }
 
     if (setSecVeNCrypt) {
-      if (secVeNCrypt) Security.enableSecType(Security.secTypeVeNCrypt);
+      if (secVeNCrypt) Security.enableSecType(RFB.SECTYPE_VENCRYPT);
       else {
-        Security.disableSecType(Security.secTypeVeNCrypt);
+        Security.disableSecType(RFB.SECTYPE_VENCRYPT);
         encX509 = encTLS = secPlain = secIdent = false;
       }
       Security.setInUserPrefs = true;
     }
     if (setEncX509 && setSecPlain) {
-      if (encX509 && secPlain) Security.enableSecType(Security.secTypeX509Plain);
-      else Security.disableSecType(Security.secTypeX509Plain);
+      if (encX509 && secPlain)
+        Security.enableSecType(RFB.SECTYPE_X509_PLAIN);
+      else Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
       Security.setInUserPrefs = true;
     }
     if (setEncX509 && setSecIdent) {
-      if (encX509 && secIdent) Security.enableSecType(Security.secTypeX509Ident);
-      else Security.disableSecType(Security.secTypeX509Ident);
+      if (encX509 && secIdent)
+        Security.enableSecType(RFB.SECTYPE_X509_IDENT);
+      else Security.disableSecType(RFB.SECTYPE_X509_IDENT);
       Security.setInUserPrefs = true;
     }
     if (setEncX509 && setSecVnc) {
-      if (encX509 && secVnc) Security.enableSecType(Security.secTypeX509Vnc);
-      else Security.disableSecType(Security.secTypeX509Vnc);
+      if (encX509 && secVnc) Security.enableSecType(RFB.SECTYPE_X509_VNC);
+      else Security.disableSecType(RFB.SECTYPE_X509_VNC);
       Security.setInUserPrefs = true;
     }
     if (setEncX509 && setSecNone) {
-      if (encX509 && secNone) Security.enableSecType(Security.secTypeX509None);
-      else Security.disableSecType(Security.secTypeX509None);
+      if (encX509 && secNone) Security.enableSecType(RFB.SECTYPE_X509_NONE);
+      else Security.disableSecType(RFB.SECTYPE_X509_NONE);
       Security.setInUserPrefs = true;
     }
     if (setEncTLS && setSecPlain) {
-      if (encTLS && secPlain) Security.enableSecType(Security.secTypeTLSPlain);
-      else Security.disableSecType(Security.secTypeTLSPlain);
+      if (encTLS && secPlain) Security.enableSecType(RFB.SECTYPE_TLS_PLAIN);
+      else Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
       Security.setInUserPrefs = true;
     }
     if (setEncTLS && setSecIdent) {
-      if (encTLS && secIdent) Security.enableSecType(Security.secTypeTLSIdent);
-      else Security.disableSecType(Security.secTypeTLSIdent);
+      if (encTLS && secIdent) Security.enableSecType(RFB.SECTYPE_TLS_IDENT);
+      else Security.disableSecType(RFB.SECTYPE_TLS_IDENT);
       Security.setInUserPrefs = true;
     }
     if (setEncTLS && setSecVnc) {
-      if (encTLS && secVnc) Security.enableSecType(Security.secTypeTLSVnc);
-      else Security.disableSecType(Security.secTypeTLSVnc);
+      if (encTLS && secVnc) Security.enableSecType(RFB.SECTYPE_TLS_VNC);
+      else Security.disableSecType(RFB.SECTYPE_TLS_VNC);
       Security.setInUserPrefs = true;
     }
     if (setEncTLS && setSecNone) {
-      if (encTLS && secNone) Security.enableSecType(Security.secTypeTLSNone);
-      else Security.disableSecType(Security.secTypeTLSNone);
+      if (encTLS && secNone) Security.enableSecType(RFB.SECTYPE_TLS_NONE);
+      else Security.disableSecType(RFB.SECTYPE_TLS_NONE);
       Security.setInUserPrefs = true;
     }
     if (setEncNone && setSecPlain) {
-      if (encNone && secPlain) Security.enableSecType(Security.secTypePlain);
-      else Security.disableSecType(Security.secTypePlain);
+      if (encNone && secPlain) Security.enableSecType(RFB.SECTYPE_PLAIN);
+      else Security.disableSecType(RFB.SECTYPE_PLAIN);
       Security.setInUserPrefs = true;
     }
     if (setEncNone && setSecIdent) {
-      if (encNone && secIdent) Security.enableSecType(Security.secTypeIdent);
-      else Security.disableSecType(Security.secTypeIdent);
+      if (encNone && secIdent) Security.enableSecType(RFB.SECTYPE_IDENT);
+      else Security.disableSecType(RFB.SECTYPE_IDENT);
       Security.setInUserPrefs = true;
     }
     if (setSecVnc) {
-      if (secVnc) Security.enableSecType(Security.secTypeVncAuth);
-      else Security.disableSecType(Security.secTypeVncAuth);
+      if (secVnc) Security.enableSecType(RFB.SECTYPE_VNCAUTH);
+      else Security.disableSecType(RFB.SECTYPE_VNCAUTH);
       Security.setInUserPrefs = true;
     }
     if (setSecNone) {
-      if (secNone) Security.enableSecType(Security.secTypeNone);
-      else Security.disableSecType(Security.secTypeNone);
+      if (secNone) Security.enableSecType(RFB.SECTYPE_NONE);
+      else Security.disableSecType(RFB.SECTYPE_NONE);
       Security.setInUserPrefs = true;
     }
     if (setSecUnixLogin) {
-      if (secUnixLogin) Security.enableSecType(Security.secTypeUnixLogin);
-      else Security.disableSecType(Security.secTypeUnixLogin);
+      if (secUnixLogin) Security.enableSecType(RFB.SECTYPE_UNIX_LOGIN);
+      else Security.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
       Security.setInUserPrefs = true;
     }
   }
 
+  private UserPreferences() {}
   static LogWriter vlog = new LogWriter("UserPreferences");
 }

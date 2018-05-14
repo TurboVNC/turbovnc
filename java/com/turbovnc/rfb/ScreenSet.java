@@ -1,6 +1,6 @@
 /* Copyright 2009 Pierre Ossman for Cendio AB
  * Copyright 2011 Brian P. Hinz
- * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -141,8 +141,8 @@ public class ScreenSet {
     }
   }
 
+  @SuppressWarnings("checkstyle:VisibilityModifier")
   public ArrayList<Screen> screens;
 
   static LogWriter vlog = new LogWriter("ScreenSet");
-
 }

@@ -32,7 +32,7 @@ import com.turbovnc.rfb.LogWriter;
 
 class ClipboardDialog extends Dialog implements ActionListener {
 
-  public ClipboardDialog(CConn cc_) {
+  ClipboardDialog(CConn cc_) {
     super(false);
     cc = cc_;
 

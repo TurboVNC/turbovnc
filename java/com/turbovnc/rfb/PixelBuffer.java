@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,66 +42,66 @@ public class PixelBuffer {
                                pf.bpp + ")");
     format = pf;
     switch (pf.depth) {
-    case  3:
-      // Fall-through to depth 8
-    case  6:
-      // Fall-through to depth 8
-    case  8:
-      int rmask = pf.redMax << pf.redShift;
-      int gmask = pf.greenMax << pf.greenShift;
-      int bmask = pf.blueMax << pf.blueShift;
-      if (pf.trueColour)
-        cm = new DirectColorModel(8, rmask, gmask, bmask);
-      else
-        cm = new IndexColorModel(8, 256, new byte[256], new byte[256],
-                                 new byte[256]);
-      break;
-    case 15:
-      cm = new DirectColorModel(15, 0x7C00, 0x03E0, 0x001F);
-      break;
-    case 16:
-      cm = new DirectColorModel(16, 0xF800, 0x07E0, 0x001F);
-      break;
-    case 24:
-      if (pf.alpha)
-        cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                                  32, (0xff << 16), (0xff << 8), 0xff,
-                                  (0xff << 24), pf.alphaPreMultiplied,
-                                  DataBuffer.TYPE_INT);
-      else
-        cm = new DirectColorModel(32, (0xff << 16), (0xff << 8), 0xff);
-      break;
-    case 32:
-      cm = new DirectColorModel(32, (0xff << pf.redShift),
-        (0xff << pf.greenShift), (0xff << pf.blueShift));
-      break;
-    default:
-      throw new ErrorException("Unsupported color depth (" + pf.depth + ")");
+      case  3:
+        // Fall-through to depth 8
+      case  6:
+        // Fall-through to depth 8
+      case  8:
+        int rmask = pf.redMax << pf.redShift;
+        int gmask = pf.greenMax << pf.greenShift;
+        int bmask = pf.blueMax << pf.blueShift;
+        if (pf.trueColour)
+          cm = new DirectColorModel(8, rmask, gmask, bmask);
+        else
+          cm = new IndexColorModel(8, 256, new byte[256], new byte[256],
+                                   new byte[256]);
+        break;
+      case 15:
+        cm = new DirectColorModel(15, 0x7C00, 0x03E0, 0x001F);
+        break;
+      case 16:
+        cm = new DirectColorModel(16, 0xF800, 0x07E0, 0x001F);
+        break;
+      case 24:
+        if (pf.alpha)
+          cm = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                                    32, (0xff << 16), (0xff << 8), 0xff,
+                                    (0xff << 24), pf.alphaPreMultiplied,
+                                    DataBuffer.TYPE_INT);
+        else
+          cm = new DirectColorModel(32, (0xff << 16), (0xff << 8), 0xff);
+        break;
+      case 32:
+        cm = new DirectColorModel(32, (0xff << pf.redShift),
+          (0xff << pf.greenShift), (0xff << pf.blueShift));
+        break;
+      default:
+        throw new ErrorException("Unsupported color depth (" + pf.depth + ")");
     }
   }
   public PixelFormat getPF() { return format; }
 
-  public final int width() { return width_; }
-  public final int height() { return height_; }
-  public final int area() { return width_ * height_; }
+  public final int width() { return width; }
+  public final int height() { return height; }
+  public final int area() { return width * height; }
 
   public void fillRect(int x, int y, int w, int h, int pix) {
     assert data instanceof int[];
     for (int ry = y; ry < y + h; ry++)
       for (int rx = x; rx < x + w; rx++)
-        ((int[])data)[ry * width_ + rx] = pix;
+        ((int[])data)[ry * width + rx] = pix;
   }
 
   public void imageRect(int x, int y, int w, int h, int[] pix) {
     assert data instanceof int[];
     for (int j = 0; j < h; j++)
-      System.arraycopy(pix, (w * j), data, width_ * (y + j) + x, w);
+      System.arraycopy(pix, (w * j), data, width * (y + j) + x, w);
   }
 
   public void copyRect(int x, int y, int w, int h, int srcX, int srcY) {
-    int dest = (width_ * y) + x;
-    int src = (width_ * srcY) + srcX;
-    int inc = width_;
+    int dest = (width * y) + x;
+    int src = (width * srcY) + srcX;
+    int inc = width;
 
     if (y > srcY) {
       src += (h - 1) * inc;
@@ -117,11 +117,11 @@ public class PixelBuffer {
     }
   }
 
-  public Object getRawPixelsRW(int[] stride) {
-    if (stride_ > 0)
-      stride[0] = stride_;
+  public Object getRawPixelsRW(int[] stride_) {
+    if (stride > 0)
+      stride_[0] = stride;
     else
-      stride[0] = width_;
+      stride_[0] = width;
     return data;
   }
 
@@ -132,28 +132,29 @@ public class PixelBuffer {
     for (int j = 0; j < h; j++) {
       int cy = y + j;
 
-      if (cy < 0 || cy >= height_)
+      if (cy < 0 || cy >= height)
         continue;
 
       for (int i = 0; i < w; i++) {
         int cx = x + i;
 
-        if (cx < 0 || cx >= width_)
+        if (cx < 0 || cx >= width)
           continue;
 
-        int byte_ = j * maskBytesPerRow + i / 8;
+        int _byte = j * maskBytesPerRow + i / 8;
         int bit = 7 - i % 8;
 
-        if ((mask[byte_] & (1 << bit)) != 0)
-         ((int[])data)[cy * width_ + cx] = pix[j * w + i];
+        if ((mask[_byte] & (1 << bit)) != 0)
+         ((int[])data)[cy * width + cx] = pix[j * w + i];
       }
     }
   }
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public Object data;
-  public int stride_;
   public ColorModel cm;
+  // CHECKSTYLE VisibilityModifier:ON
 
   protected PixelFormat format;
-  protected int width_, height_;
+  protected int width, height, stride;
 }

@@ -23,6 +23,7 @@ import java.util.Iterator;
 
 public class ExtInputDevice {
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public String name;
   public long id;
   public int remoteID;
@@ -86,6 +87,7 @@ public class ExtInputDevice {
   }
 
   public ArrayList<Valuator> valuators;
+  // CHECKSTYLE VisibilityModifier:ON
 
   static LogWriter vlog = new LogWriter("ExtInputDevice");
 };

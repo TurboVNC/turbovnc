@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import com.turbovnc.vncviewer.*;
 
 public class CSecurityVncAuth extends CSecurity {
 
-  public CSecurityVncAuth() { }
+  public CSecurityVncAuth() {}
 
   private static final int VNC_AUTH_CHALLENGE_SIZE = 16;
 
@@ -59,7 +59,7 @@ public class CSecurityVncAuth extends CSecurity {
     return true;
   }
 
-  public final int getType() { return Security.secTypeVncAuth; }
+  public final int getType() { return RFB.SECTYPE_VNCAUTH; }
   public final String getDescription() { return "VncAuth"; }
   public final String getProtocol() { return "None"; }
 
