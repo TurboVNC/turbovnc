@@ -113,6 +113,7 @@ class ClientConnection : public omni_thread
     SOCKET m_sock;
     bool m_serverInitiated;
     HWND m_hwnd, m_hbands, m_hwnd1, m_hToolbar, m_hwndscroll;
+    HIMC m_hIMC;
 
     void Init(VNCviewerApp *pApp);
     void InitCapabilities();

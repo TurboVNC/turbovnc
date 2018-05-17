@@ -140,6 +140,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   m_hwnd1 = NULL;
   m_hwndscroll = NULL;
   m_hToolbar = NULL;
+  m_hIMC = NULL;
   m_desktopName = NULL;
   m_port = -1;
   m_serverInitiated = false;
@@ -535,6 +536,7 @@ void ClientConnection::CreateDisplay()
                         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
                         CW_USEDEFAULT, m_hwndscroll, NULL,
                         m_pApp->m_instance, NULL);
+  m_hIMC = ImmAssociateContext(m_hwnd, NULL);
   m_opts.m_hWindow = m_hwnd;
   hotkeys.SetWindow(m_hwnd1);
   ShowWindow(m_hwnd, SW_HIDE);
