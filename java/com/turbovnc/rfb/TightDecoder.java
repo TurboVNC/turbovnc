@@ -73,6 +73,20 @@ public class TightDecoder extends Decoder {
     }
   }
 
+  // NOTE: must be idempotent
+  public void close() {
+    for (int i = 0; i < 4; i++) {
+      if (inflater[i] != null)
+        inflater[i].end();
+    }
+    if (tjd != null) {
+      try {
+        tjd.close();
+      } catch (TJException e) {}
+      tjd = null;
+    }
+  }
+
   public boolean isTurboJPEG() {
     return tjd != null;
   }

@@ -212,6 +212,13 @@ public abstract class CMsgReader {
     }
   }
 
+  public final void close() {
+    for (int i = 0; i < RFB.ENCODING_MAX; i++) {
+      if (decoders[i] != null)
+        decoders[i].close();
+    }
+  }
+
   public abstract void readServerInit(boolean benchmark);
 
   // readMsg() reads a message, calling the handler as appropriate.

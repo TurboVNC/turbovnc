@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,17 +46,9 @@ public class ZlibInStream extends InStream {
 
   public ZlibInStream() { this(DEFAULT_BUF_SIZE); }
 
-  public void finalize() {
-    try {
-      b = null;
-      zs.inflateEnd();
-    } finally {
-      try {
-        super.finalize();
-      } catch (Throwable e) {
-        throw new SystemException(e.toString());
-      }
-    }
+  public void close() {
+    b = null;
+    zs.inflateEnd();
   }
 
   public void setUnderlying(InStream is, int bytesIn_) {

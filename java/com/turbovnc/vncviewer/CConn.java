@@ -1385,6 +1385,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
     shuttingDown = true;
     if (sock != null)
       sock.shutdown();
+    if (reader != null)
+      reader.close();
+  }
+
+  public void closeSocket() {
+    if (sock != null) {
+      sock.close();
+      sock = null;
+    }
   }
 
   // Menu callbacks.  These are guaranteed only to be called after serverInit()

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ public class ZRLEDecoder extends Decoder {
     int bpp = handler.cp.pf().bpp;
     int bytesPerPixel = (bpp > 24 ? 3 : bpp / 8);
     boolean bigEndian = handler.cp.pf().bigEndian;
+
+    if (zis == null) return;
 
     int length = is.readU32();
     zis.setUnderlying(is, length);
@@ -150,6 +152,14 @@ public class ZRLEDecoder extends Decoder {
     }
 
     zis.reset();
+  }
+
+  // NOTE: must be idempotent
+  public void close() {
+    if (zis != null) {
+      zis.close();
+      zis = null;
+    }
   }
 
   CMsgReader reader;

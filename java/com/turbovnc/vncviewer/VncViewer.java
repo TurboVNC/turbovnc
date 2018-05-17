@@ -841,8 +841,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
                           cc.state() == CConnection.RFBSTATE_NORMAL &&
                           !VncViewer.noReconnect.getValue());
           exitStatus = 1;
-          if (cc != null) cc.deleteWindow(true);
+          if (cc != null) {
+            cc.deleteWindow(true);
+            cc.closeSocket();
+          }
         } else {
+          cc.closeSocket();
           cc = null;
         }
       }

@@ -45,17 +45,11 @@ public class TcpSocket extends Socket {
 
   // -=- TcpSocket
 
-  public TcpSocket(SocketDescriptor sock, boolean close) {
-    super(new FdInStream(sock), new FdOutStream(sock), true);
-    closeFd = close;
-  }
-
   public TcpSocket(SocketDescriptor sock) {
-    this(sock, true);
+    super(new FdInStream(sock), new FdOutStream(sock), true);
   }
 
   public TcpSocket(String host, int port) {
-    closeFd = true;
     SocketDescriptor sock = null;
     InetAddress addr = null;
     boolean result = false;
@@ -90,11 +84,6 @@ public class TcpSocket extends Socket {
     instream = new FdInStream(sock);
     outstream = new FdOutStream(sock);
     ownStreams = true;
-  }
-
-  protected void finalize() {
-    if (closeFd)
-      ((SocketDescriptor)getFd()).close();
   }
 
   public int getMyPort() {
@@ -182,6 +171,5 @@ public class TcpSocket extends Socket {
     return port;
   }
 
-  private boolean closeFd;
   static LogWriter vlog = new LogWriter("TcpSocket");
 }

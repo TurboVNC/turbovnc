@@ -25,6 +25,8 @@ public abstract class Decoder {
 
   public void reset() {}
 
+  public void close() {}
+
   public static boolean supported(int encoding) {
     return (encoding == RFB.ENCODING_RAW ||
             encoding == RFB.ENCODING_RRE ||
