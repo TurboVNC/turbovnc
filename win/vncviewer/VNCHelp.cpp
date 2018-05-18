@@ -33,7 +33,7 @@ VNCHelp::VNCHelp()
 
 void VNCHelp::Popup(LPARAM lParam)
 {
-  LPHELPINFO hlp = (LPHELPINFO) lParam;
+  LPHELPINFO hlp = (LPHELPINFO)lParam;
   HH_POPUP popup;
 
   if (hlp->iCtrlId != 0) {

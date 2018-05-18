@@ -2,11 +2,11 @@ include(CheckCSourceCompiles)
 include(CheckSymbolExists)
 
 set(GLIBC_SOURCE "\n
-  #include <features.h>\n
-  #ifndef __GLIBC__\n
-  #error\n
-  #endif\n
-  int main(void) { return 0; }\n")
+	#include <features.h>\n
+	#ifndef __GLIBC__\n
+	#error\n
+	#endif\n
+	int main(void) { return 0; }\n")
 
 check_c_source_compiles("${GLIBC_SOURCE}" FOUND_GLIBC)
 if(FOUND_GLIBC)
@@ -14,21 +14,21 @@ if(FOUND_GLIBC)
 endif()
 
 set(BSD44SOCKETS_SOURCE "\n
-  #include <sys/types.h>\n
-  #include <sys/socket.h>\n
-  #include <netinet/in.h>\n
-  int main(void) {\n
-    struct sockaddr_in sa;\n
-    sa.sin_len = 0;\n
-    return sa.sin_len;\n
-  }")
+	#include <sys/types.h>\n
+	#include <sys/socket.h>\n
+	#include <netinet/in.h>\n
+	int main(void) {\n
+		struct sockaddr_in sa;\n
+		sa.sin_len = 0;\n
+		return sa.sin_len;\n
+	}")
 check_c_source_compiles("${BSD44SOCKETS_SOURCE}" FOUND_BSD44SOCKETS)
 
 set(SVR4_SOURCE "\n
-  #if !defined(SVR4) && !defined(__svr4__) && !defined(__SVR4)\n
-  #error\n
-  #endif\n
-  int main(void) { return 0; }\n")
+	#if !defined(SVR4) && !defined(__svr4__) && !defined(__SVR4)\n
+	#error\n
+	#endif\n
+	int main(void) { return 0; }\n")
 check_c_source_compiles("${SVR4_SOURCE}" FOUND_SVR4)
 if(FOUND_SVR4)
 	add_definitions(-DSVR4)

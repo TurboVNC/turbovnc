@@ -124,4 +124,4 @@ class FileTransfer
     FileTransferItemInfo m_FTServerItemInfo;
 };
 
-#endif // !defined(FILETRANSFER)
+#endif  // !defined(FILETRANSFER)

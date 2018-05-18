@@ -67,7 +67,7 @@ void FileTransfer::CreateFileTransferDialog()
 
   ShowWindow(m_hwndFileTransfer, SW_SHOW);
   UpdateWindow(m_hwndFileTransfer);
-  SetWindowLongPtr(m_hwndFileTransfer, GWLP_USERDATA, (LONG_PTR) this);
+  SetWindowLongPtr(m_hwndFileTransfer, GWLP_USERDATA, (LONG_PTR)this);
 
   m_hwndFTProgress = GetDlgItem(m_hwndFileTransfer, IDC_FTPROGRESS);
   m_hwndFTClientList = GetDlgItem(m_hwndFileTransfer, IDC_FTCLIENTLIST);
@@ -284,15 +284,14 @@ LRESULT CALLBACK FileTransfer::FileTransferDlgProc(HWND hwnd, UINT uMsg,
     case WM_NOTIFY:
       switch (LOWORD(wParam)) {
         case IDC_FTCLIENTLIST:
-          switch (((LPNMHDR) lParam)->code)
-          {
+          switch (((LPNMHDR)lParam)->code) {
             case NM_SETFOCUS:
               SetWindowText(GetDlgItem(hwnd, IDC_FTCOPY), uploadText);
               EnableWindow(GetDlgItem(hwnd, IDC_FTCOPY), TRUE);
               _this->m_bFTCOPY = FALSE;
               return TRUE;
             case LVN_GETDISPINFO:
-              _this->OnGetDispClientInfo((NMLVDISPINFO *) lParam);
+              _this->OnGetDispClientInfo((NMLVDISPINFO *)lParam);
               return TRUE;
             case LVN_ITEMACTIVATE:
               LPNMITEMACTIVATE lpnmia = (LPNMITEMACTIVATE)lParam;
@@ -304,14 +303,14 @@ LRESULT CALLBACK FileTransfer::FileTransferDlgProc(HWND hwnd, UINT uMsg,
           }
           break;
         case IDC_FTSERVERLIST:
-          switch (((LPNMHDR) lParam)->code) {
+          switch (((LPNMHDR)lParam)->code) {
             case NM_SETFOCUS:
               SetWindowText(GetDlgItem(hwnd, IDC_FTCOPY), downloadText);
               EnableWindow(GetDlgItem(hwnd, IDC_FTCOPY), TRUE);
               _this->m_bFTCOPY = TRUE;
               return TRUE;
             case LVN_GETDISPINFO:
-              _this->OnGetDispServerInfo((NMLVDISPINFO *) lParam);
+              _this->OnGetDispServerInfo((NMLVDISPINFO *)lParam);
               return TRUE;
             case LVN_ITEMACTIVATE:
               LPNMITEMACTIVATE lpnmia = (LPNMITEMACTIVATE)lParam;
@@ -385,8 +384,7 @@ BOOL FileTransfer::SendMultipleFileDownloadRequests()
       BlockingFileTransferDialog(TRUE);
 
       return TRUE;
-    }
-    else {
+    } else {
       // File transfer will start for all the selected files now.  Enable the
       // cancel button and disable the rest of the UI components.
       m_bTransferEnable = TRUE;
@@ -493,7 +491,7 @@ void FileTransfer::FileTransferUpload()
 {
   int numOfFilesToUpload = 0, currentUploadIndex = -1;
   DWORD sz_rfbFileSize;
-  DWORD sz_rfbBlockSize= 8192;
+  DWORD sz_rfbBlockSize = 8192;
   DWORD dwNumberOfBytesRead = 0;
   unsigned int mTime = 0;
   char path[rfbMAX_PATH + rfbMAX_PATH + 2];
@@ -822,12 +820,11 @@ BOOL CALLBACK FileTransfer::FTBrowseDlgProc(HWND hwnd, UINT uMsg,
                                             WPARAM wParam, LPARAM lParam)
 {
   FileTransfer *_this = (FileTransfer *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  switch (uMsg)
-  {
+  switch (uMsg) {
     case WM_INITDIALOG:
     {
       SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
-      _this = (FileTransfer *) lParam;
+      _this = (FileTransfer *)lParam;
       CenterWindow(hwnd);
       _this->m_hwndFTBrowse = hwnd;
       if (_this->m_bServerBrowseRequest) {
@@ -889,10 +886,10 @@ BOOL CALLBACK FileTransfer::FTBrowseDlgProc(HWND hwnd, UINT uMsg,
     case WM_NOTIFY:
       switch (LOWORD(wParam)) {
         case IDC_FTBROWSETREE:
-          switch (((LPNMHDR) lParam)->code) {
+          switch (((LPNMHDR)lParam)->code) {
             case TVN_SELCHANGED:
             {
-              NMTREEVIEW *m_lParam = (NMTREEVIEW *) lParam;
+              NMTREEVIEW *m_lParam = (NMTREEVIEW *)lParam;
               char path[rfbMAX_PATH];
               _this->GetTVPath(GetDlgItem(hwnd, IDC_FTBROWSETREE),
                                m_lParam->itemNew.hItem, path);
@@ -902,7 +899,7 @@ BOOL CALLBACK FileTransfer::FTBrowseDlgProc(HWND hwnd, UINT uMsg,
             break;
             case TVN_ITEMEXPANDING:
             {
-              NMTREEVIEW *m_lParam = (NMTREEVIEW *) lParam;
+              NMTREEVIEW *m_lParam = (NMTREEVIEW *)lParam;
               char Path[rfbMAX_PATH];
               if (m_lParam -> action == 2) {
                 if (_this->m_bServerBrowseRequest) {
@@ -935,7 +932,7 @@ void FileTransfer::CreateFTBrowseDialog(BOOL status)
 {
   m_bServerBrowseRequest = status;
   DialogBoxParam(m_pApp->m_instance, MAKEINTRESOURCE(IDD_FTBROWSE_DLG),
-                 m_hwndFileTransfer, (DLGPROC) FTBrowseDlgProc, (LPARAM)this);
+                 m_hwndFileTransfer, (DLGPROC)FTBrowseDlgProc, (LPARAM)this);
 }
 
 
@@ -1262,7 +1259,7 @@ void FileTransfer::SendFileUploadDataMessage(unsigned short size, char *pFile)
 {
   int msgLen = sz_rfbFileUploadDataMsg + size;
   char *pAllFUDMessage = new char[msgLen];
-  rfbFileUploadDataMsg *pFUD = (rfbFileUploadDataMsg *) pAllFUDMessage;
+  rfbFileUploadDataMsg *pFUD = (rfbFileUploadDataMsg *)pAllFUDMessage;
   char *pFollow = &pAllFUDMessage[sz_rfbFileUploadDataMsg];
   pFUD->type = rfbFileUploadData;
   pFUD->compressedLevel = 0;
@@ -1372,6 +1369,6 @@ unsigned int FileTransfer::FiletimeToTime70(FILETIME ftime)
 void FileTransfer::Time70ToFiletime(unsigned int time70, FILETIME *pftime)
 {
   LONGLONG ll = Int32x32To64(time70, 10000000) + 116444736000000000;
-  pftime->dwLowDateTime = (DWORD) ll;
+  pftime->dwLowDateTime = (DWORD)ll;
   pftime->dwHighDateTime = (DWORD)(ll >> 32);
 }

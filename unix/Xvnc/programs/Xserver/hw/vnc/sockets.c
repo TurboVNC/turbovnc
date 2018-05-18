@@ -87,8 +87,7 @@ static void rfbSockNotify(int fd, int ready, void *data);
  * Convenience function to return a string from either an IPv4 or an IPv6
  * address
  */
-const char *
-sockaddr_string(rfbSockAddr *addr, char *buf, int len)
+const char *sockaddr_string(rfbSockAddr *addr, char *buf, int len)
 {
     const char *string = NULL;
     if (!addr || !buf || len < 1)
@@ -110,8 +109,7 @@ sockaddr_string(rfbSockAddr *addr, char *buf, int len)
  * connections.  It does nothing if called again.
  */
 
-void
-rfbInitSockets()
+void rfbInitSockets()
 {
     static Bool done = FALSE;
 
@@ -164,8 +162,7 @@ rfbInitSockets()
 }
 
 
-static void
-rfbSockNotify(int fd, int ready, void *data)
+static void rfbSockNotify(int fd, int ready, void *data)
 {
     rfbSockAddr addr;
     socklen_t addrlen = sizeof(struct sockaddr_storage);
@@ -280,8 +277,7 @@ rfbSockNotify(int fd, int ready, void *data)
  * layer to send only complete packets
  */
 
-void
-rfbCorkSock(int sock)
+void rfbCorkSock(int sock)
 {
     static int alreadywarned = 0;
 #ifdef TCP_CORK
@@ -306,8 +302,7 @@ rfbCorkSock(int sock)
  * rfbUncorkSock disables corking and sends all partially-complete packets
  */
 
-void
-rfbUncorkSock(int sock)
+void rfbUncorkSock(int sock)
 {
 #ifdef TCP_CORK
     static int alreadywarned = 0;
@@ -323,15 +318,13 @@ rfbUncorkSock(int sock)
 }
 
 
-void
-rfbDisconnectUDPSock()
+void rfbDisconnectUDPSock()
 {
     udpSockConnected = FALSE;
 }
 
 
-void
-rfbCloseSock(int sock)
+void rfbCloseSock(int sock)
 {
     close(sock);
     RemoveNotifyFd(sock);
@@ -340,8 +333,7 @@ rfbCloseSock(int sock)
 }
 
 
-void
-rfbCloseClient(rfbClientPtr cl)
+void rfbCloseClient(rfbClientPtr cl)
 {
     int sock = cl->sock;
 
@@ -363,8 +355,7 @@ rfbCloseClient(rfbClientPtr cl)
  * rfbConnect is called to make a connection out to a given TCP address.
  */
 
-int
-rfbConnect(char *host, int port)
+int rfbConnect(char *host, int port)
 {
     int sock;
     int one = 1;
@@ -403,8 +394,7 @@ rfbConnect(char *host, int port)
  * occurred (errno is set to ETIMEDOUT if it timed out).
  */
 
-int
-ReadExact(rfbClientPtr cl, char *buf, int len)
+int ReadExact(rfbClientPtr cl, char *buf, int len)
 {
     int n;
     fd_set fds;
@@ -469,8 +459,7 @@ ReadExact(rfbClientPtr cl, char *buf, int len)
  * out).
  */
 
-int
-SkipExact(rfbClientPtr cl, int len)
+int SkipExact(rfbClientPtr cl, int len)
 {
     char *tmpbuf = NULL;
     int bufLen = min(len, 65536), i, retval = 1;
@@ -493,8 +482,7 @@ SkipExact(rfbClientPtr cl, int len)
  * ETIMEDOUT if it timed out).
  */
 
-int
-WriteExact(rfbClientPtr cl, char *buf, int len)
+int WriteExact(rfbClientPtr cl, char *buf, int len)
 {
     int n, bytesWritten = 0;
     fd_set fds;
@@ -563,8 +551,7 @@ WriteExact(rfbClientPtr cl, char *buf, int len)
 }
 
 
-int
-ListenOnTCPPort(int port)
+int ListenOnTCPPort(int port)
 {
     rfbSockAddr addr;
     socklen_t addrlen;
@@ -612,8 +599,7 @@ ListenOnTCPPort(int port)
 }
 
 
-int
-ConnectToTcpAddr(char *host, int port)
+int ConnectToTcpAddr(char *host, int port)
 {
     char portname[10];
     int sock;
@@ -643,8 +629,7 @@ ConnectToTcpAddr(char *host, int port)
 }
 
 
-int
-ListenOnUDPPort(int port)
+int ListenOnUDPPort(int port)
 {
     rfbSockAddr addr;
     socklen_t addrlen;

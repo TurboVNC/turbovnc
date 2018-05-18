@@ -32,9 +32,9 @@
 #include "rfb.h"
 
 #if defined(AIX) || defined(sun)
-#  define MESSAGE_ARG_TYPE struct pam_message**
+#  define MESSAGE_ARG_TYPE struct pam_message **
 #else
-#  define MESSAGE_ARG_TYPE const struct pam_message**
+#  define MESSAGE_ARG_TYPE const struct pam_message **
 #endif
 
 Bool rfbAuthPAMSession = FALSE;
@@ -42,9 +42,8 @@ Bool rfbAuthDisablePAMSession = FALSE;
 
 static const char *password;
 
-static int
-conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
-     void *appdata_ptr)
+static int conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
+                void *appdata_ptr)
 {
     const struct pam_message *m;
     struct pam_response *rp;
@@ -72,26 +71,26 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
         }
 
         switch (m->msg_style) {
-        case PAM_ERROR_MSG:
-            rfbLog("PAMAuthenticate: PAM_ERROR_MSG '%s'\n", m->msg);
-            break;
+            case PAM_ERROR_MSG:
+                rfbLog("PAMAuthenticate: PAM_ERROR_MSG '%s'\n", m->msg);
+                break;
 
-        case PAM_TEXT_INFO:
-            rfbLog("PAMAuthenticate: PAM_TEXT_INFO '%s'\n", m->msg);
-            break;
+            case PAM_TEXT_INFO:
+                rfbLog("PAMAuthenticate: PAM_TEXT_INFO '%s'\n", m->msg);
+                break;
 
-        case PAM_PROMPT_ECHO_OFF:
-        case PAM_PROMPT_ECHO_ON:
-            len = strlen(password) + 1;
-            rp->resp = (char *)rfbAlloc(len);
+            case PAM_PROMPT_ECHO_OFF:
+            case PAM_PROMPT_ECHO_ON:
+                len = strlen(password) + 1;
+                rp->resp = (char *)rfbAlloc(len);
 
-            memcpy(rp->resp, password, len);
-            break;
+                memcpy(rp->resp, password, len);
+                break;
 
-        default:
-            rfbLog("PAMAuthenticate: conv unknown msg_style!\n");
-            pamRet = PAM_SERVICE_ERR;
-            break;
+            default:
+                rfbLog("PAMAuthenticate: conv unknown msg_style!\n");
+                pamRet = PAM_SERVICE_ERR;
+                break;
         }
     }
 
@@ -114,9 +113,8 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
 }
 
 
-Bool
-rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
-                   const char *pwd, const char **emsg)
+Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
+                        const char *pwd, const char **emsg)
 {
     pam_handle_t *pamHandle;
     struct pam_conv pamConv;
@@ -142,8 +140,8 @@ rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
         return(FALSE);
     }
 
-    if ((authStatus = pam_authenticate(pamHandle, PAM_DISALLOW_NULL_AUTHTOK))
-        != PAM_SUCCESS) {
+    authStatus = pam_authenticate(pamHandle, PAM_DISALLOW_NULL_AUTHTOK);
+    if (authStatus != PAM_SUCCESS) {
         rfbLog("PAMAuthenticate: pam_authenticate: %s\n",
                pam_strerror(pamHandle, authStatus));
     } else if (pamSession) {
@@ -163,27 +161,27 @@ rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
         cl->pamHandle = pamHandle;
 
     switch (authStatus) {
-    case PAM_SUCCESS:
-        *emsg = NULL;
-        return(TRUE);
+        case PAM_SUCCESS:
+            *emsg = NULL;
+            return(TRUE);
 
-    case PAM_AUTH_ERR:
-    case PAM_USER_UNKNOWN:
-    case PAM_MAXTRIES:
-        *emsg = "Authentication failed";
-        break;
+        case PAM_AUTH_ERR:
+        case PAM_USER_UNKNOWN:
+        case PAM_MAXTRIES:
+            *emsg = "Authentication failed";
+            break;
 
-    case PAM_SESSION_ERR:
-        *emsg = "Could not open PAM session on server";
-        break;
+        case PAM_SESSION_ERR:
+            *emsg = "Could not open PAM session on server";
+            break;
 
-    case PAM_AUTHINFO_UNAVAIL:
-        *emsg = "Cannot authenticate at this time.  Try again later.";
-        break;
+        case PAM_AUTHINFO_UNAVAIL:
+            *emsg = "Cannot authenticate at this time.  Try again later.";
+            break;
 
-    default:
-        *emsg = "Unknown authentication failure";
-        break;
+        default:
+            *emsg = "Unknown authentication failure";
+            break;
     }
 
     return(FALSE);

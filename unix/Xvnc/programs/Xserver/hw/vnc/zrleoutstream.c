@@ -97,24 +97,24 @@ Bool zrleOutStreamFlush(zrleOutStream *os)
       int ret;
 
       if (os->out.ptr >= os->out.end)
-	zrleBufferGrow(&os->out, os->out.end - os->out.start);
+        zrleBufferGrow(&os->out, os->out.end - os->out.start);
 
       os->zs.next_out = os->out.ptr;
       os->zs.avail_out = os->out.end - os->out.ptr;
 
 #ifdef ZRLE_DEBUG
       rfbLog("zrleOutStreamFlush: calling deflate, avail_in %d, avail_out %d\n",
-	     os->zs.avail_in, os->zs.avail_out);
+             os->zs.avail_in, os->zs.avail_out);
 #endif
 
       if ((ret = deflate(&os->zs, Z_SYNC_FLUSH)) != Z_OK) {
-	rfbLog("zrleOutStreamFlush: deflate failed with error code %d\n", ret);
-	return FALSE;
+        rfbLog("zrleOutStreamFlush: deflate failed with error code %d\n", ret);
+        return FALSE;
       }
 
 #ifdef ZRLE_DEBUG
       rfbLog("zrleOutStreamFlush: after deflate: %d bytes\n",
-	     os->zs.next_out - os->out.ptr);
+             os->zs.next_out - os->out.ptr);
 #endif
 
       os->out.ptr = os->zs.next_out;
@@ -127,7 +127,7 @@ Bool zrleOutStreamFlush(zrleOutStream *os)
 }
 
 static int zrleOutStreamOverrun(zrleOutStream *os,
-				int            size)
+                                int            size)
 {
 #ifdef ZRLE_DEBUG
   rfbLog("zrleOutStreamOverrun\n");
@@ -141,24 +141,24 @@ static int zrleOutStreamOverrun(zrleOutStream *os,
       int ret;
 
       if (os->out.ptr >= os->out.end)
-	zrleBufferGrow(&os->out, os->out.end - os->out.start);
+        zrleBufferGrow(&os->out, os->out.end - os->out.start);
 
       os->zs.next_out = os->out.ptr;
       os->zs.avail_out = os->out.end - os->out.ptr;
 
 #ifdef ZRLE_DEBUG
       rfbLog("zrleOutStreamOverrun: calling deflate, avail_in %d, avail_out %d\n",
-	     os->zs.avail_in, os->zs.avail_out);
+             os->zs.avail_in, os->zs.avail_out);
 #endif
 
       if ((ret = deflate(&os->zs, 0)) != Z_OK) {
-	rfbLog("zrleOutStreamOverrun: deflate failed with error code %d\n", ret);
-	return 0;
+        rfbLog("zrleOutStreamOverrun: deflate failed with error code %d\n", ret);
+        return 0;
       }
 
 #ifdef ZRLE_DEBUG
       rfbLog("zrleOutStreamOverrun: after deflate: %d bytes\n",
-	     os->zs.next_out - os->out.ptr);
+             os->zs.next_out - os->out.ptr);
 #endif
 
       os->out.ptr = os->zs.next_out;
@@ -193,8 +193,8 @@ static int zrleOutStreamCheck(zrleOutStream *os, int size)
 }
 
 void zrleOutStreamWriteBytes(zrleOutStream *os,
-			     const zrle_U8 *data,
-			     int            length)
+                             const zrle_U8 *data,
+                             int            length)
 {
   const zrle_U8* dataEnd = data + length;
   while (data < dataEnd) {

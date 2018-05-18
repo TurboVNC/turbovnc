@@ -76,7 +76,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     opts = new Options(VncViewer.opts);
 
-    formatChange = false; encodingChange = false;
+    formatChange = false;  encodingChange = false;
     currentEncoding = opts.preferredEncoding;
     showToolbar = VncViewer.showToolbar.getValue() && !benchmark;
     options = new OptionsDialog(this);
@@ -86,8 +86,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     String env = System.getenv("TVNC_PROFILE");
     if (env != null && env.equals("1"))
       alwaysProfile = true;
-    firstUpdate = true; pendingUpdate = false; continuousUpdates = false;
-    forceNonincremental = true; supportsSyncFence = false;
+    firstUpdate = true;  pendingUpdate = false;  continuousUpdates = false;
+    forceNonincremental = true;  supportsSyncFence = false;
     pressedKeys = new HashMap<Integer, Integer>();
 
     setShared(opts.shared);
@@ -558,8 +558,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       else if (layout.numScreens() != 1) {
         int i = 0;
 
-        for (Iterator<Screen> iter = layout.screens.iterator();
-             iter.hasNext(); i++) {
+        for (Iterator<Screen> iter = layout.screens.iterator(); iter.hasNext();
+             i++) {
           Screen screen = (Screen)iter.next();
           if (i > 0)
             iter.remove();

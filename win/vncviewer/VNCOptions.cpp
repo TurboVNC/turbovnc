@@ -58,8 +58,8 @@ VNCOptions::VNCOptions()
   m_LastEncoding = -1;
   m_SwapMouse = false;
   m_Emul3Buttons = false;
-  m_Emul3Timeout = 100; // milliseconds
-  m_Emul3Fuzz = 4;      // pixels away before emulation is cancelled
+  m_Emul3Timeout = 100;  // milliseconds
+  m_Emul3Fuzz = 4;       // pixels away before emulation is cancelled
   m_Shared = true;
   m_CU = true;
   m_DeiconifyOnBell = false;
@@ -119,7 +119,7 @@ VNCOptions::VNCOptions()
 }
 
 
-VNCOptions& VNCOptions::operator = (VNCOptions& s)
+VNCOptions &VNCOptions::operator = (VNCOptions &s)
 {
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++)
     m_UseEnc[i] = s.m_UseEnc[i];
@@ -458,7 +458,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
     } else if (SwitchMatch(args[j], "smalldotcursor")) {
       m_localCursor = SMALLCURSOR;
     } else if (SwitchMatch(args[j], "normalcursor")) {
-      m_localCursor= NORMALCURSOR;
+      m_localCursor = NORMALCURSOR;
     } else if (SwitchMatch(args[j], "belldeiconify")) {
       m_DeiconifyOnBell = true;
     } else if (SwitchMatch(args[j], "raiseonbeep")) {
@@ -558,8 +558,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
       m_DisableClipboard = false;
     } else if (SwitchMatch(args[j], "noclipboard")) {
       m_DisableClipboard = true;
-    }
-    else if (SwitchMatch(args[j], "delay")) {
+    } else if (SwitchMatch(args[j], "delay")) {
       if (++j == i) {
         ArgError("No delay specified");
         continue;
@@ -637,8 +636,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         continue;
       }
       int level = -1;
-      if (sscanf_s(args[j], "%d", &level) != 1
-        || level < 0 || level > 9) {
+      if (sscanf_s(args[j], "%d", &level) != 1 || level < 0 || level > 9) {
         ArgError("Invalid compression level specified");
         continue;
       }
@@ -651,7 +649,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         continue;
       }
       int subsamp = -1;
-      switch(_totupper(args[j][0])) {
+      switch (_totupper(args[j][0])) {
         case '0': case 'G':  subsamp = TVNC_GRAY;  break;
         case '1':  subsamp = TVNC_1X;  break;
         case '2':  subsamp = TVNC_2X;  break;
@@ -830,7 +828,7 @@ void VNCOptions::Save(char *fname)
   saveInt("noremotecursor",     m_ignoreShapeUpdates,  fname);
   saveInt("compresslevel",      m_compressLevel,       fname);
   saveInt("subsampling",        m_subsampLevel,        fname);
-  saveInt("quality", m_enableJpegCompression? m_jpegQualityLevel : -1, fname);
+  saveInt("quality", m_enableJpegCompression ? m_jpegQualityLevel : -1, fname);
   saveInt("nounixlogin",        m_noUnixLogin,         fname);
   if (strlen(m_user) > 0)
     WritePrivateProfileString("connection", "user", m_user, fname);
@@ -930,8 +928,8 @@ void VNCOptions::Register()
   }
   vnclog.Print(2, "Viewer is %s\n", filename);
 
-  if (RegCreateKey(HKEY_CLASSES_ROOT, "VncViewer.Config", &hKey)
-      == ERROR_SUCCESS) {
+  if (RegCreateKey(HKEY_CLASSES_ROOT, "VncViewer.Config", &hKey) ==
+      ERROR_SUCCESS) {
     RegSetValue(hKey, NULL, REG_SZ, "VNCviewer Config File", 0);
 
     if (RegCreateKey(hKey, "DefaultIcon", &hKey2) == ERROR_SUCCESS) {
@@ -939,7 +937,7 @@ void VNCOptions::Register()
       RegSetValue(hKey2, NULL, REG_SZ, keybuf, 0);
       RegCloseKey(hKey2);
     }
-    if (RegCreateKey(hKey, "Shell\\open\\command", &hKey2)  == ERROR_SUCCESS) {
+    if (RegCreateKey(hKey, "Shell\\open\\command", &hKey2) == ERROR_SUCCESS) {
       SPRINTF(keybuf, "\"%s\" -config \"%%1\"", filename);
       RegSetValue(hKey2, NULL, REG_SZ, keybuf, 0);
       RegCloseKey(hKey2);
@@ -963,7 +961,7 @@ INT_PTR VNCOptions::DoDialog(bool running)
 {
   m_running = running;
   return DialogBoxParam(pApp->m_instance, MAKEINTRESOURCE(IDD_PARENT),
-                        NULL, (DLGPROC) DlgProc, (LPARAM)this);
+                        NULL, (DLGPROC)DlgProc, (LPARAM)this);
 }
 
 
@@ -1093,15 +1091,15 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
             case IDC_TAB:
               int i = TabCtrl_GetCurFocus(_this->m_hTab);
               switch (i) {
-              case 0:
-                ShowWindow(_this->m_hPageEncoding, SW_HIDE);
-                break;
-              case 1:
-                ShowWindow(_this->m_hPageConnection, SW_HIDE);
-                break;
-              case 2:
-                ShowWindow(_this->m_hPageGlobal, SW_HIDE);
-                break;
+                case 0:
+                  ShowWindow(_this->m_hPageEncoding, SW_HIDE);
+                  break;
+                case 1:
+                  ShowWindow(_this->m_hPageConnection, SW_HIDE);
+                  break;
+                case 2:
+                  ShowWindow(_this->m_hPageGlobal, SW_HIDE);
+                  break;
               }
               return 0;
           }
@@ -1160,7 +1158,7 @@ BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
     case WM_INITDIALOG:
     {
       SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
-      VNCOptions *_this = (VNCOptions *) lParam;
+      VNCOptions *_this = (VNCOptions *)lParam;
 
       int encoding = _this->m_PreferredEncoding;
       if (_this->m_LastEncoding != rfbEncodingTight &&
@@ -1172,7 +1170,7 @@ BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
       int i;
       for (i = 0; i <= (MAX_LEN_COMBO - 1); i++) {
         SendMessage(hListBox, CB_INSERTSTRING, (WPARAM)i,
-                    (LPARAM)(int FAR*)rfbcombo[i].NameString);
+                    (LPARAM)(int FAR *)rfbcombo[i].NameString);
       }
       if (encoding != rfbEncodingTight) {
         SendMessage(hListBox, CB_INSERTSTRING, MAX_LEN_COMBO,
@@ -1209,7 +1207,7 @@ BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
                     FALSE);
 
       HWND hSubsampLevel = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
-      SendMessage(hSubsampLevel, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(0, 3));
+      SendMessage(hSubsampLevel, TBM_SETRANGE, TRUE, (LPARAM)MAKELONG(0, 3));
       _this->SetSubsampSlider(hwnd, _this->m_subsampLevel);
 
       _this->EnableSubsamp(hwnd,
@@ -1217,9 +1215,9 @@ BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
 
       HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
       if (encoding == rfbEncodingTight)
-        SendMessage(hJpeg, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(1, 100));
+        SendMessage(hJpeg, TBM_SETRANGE, TRUE, (LPARAM)MAKELONG(1, 100));
       else {
-        SendMessage(hJpeg, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(0, 9));
+        SendMessage(hJpeg, TBM_SETRANGE, TRUE, (LPARAM)MAKELONG(0, 9));
         SetDlgItemText(hwnd, IDC_STATIC_QUAL, "Image quality level:");
         if (_this->m_jpegQualityLevel > 9)
           _this->m_jpegQualityLevel = 9;
@@ -1264,14 +1262,14 @@ BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
                 _this->EnableSubsamp(hwnd, TRUE);
                 if (slidermax < 9)
                   SendMessage(hCompress, TBM_SETRANGE, TRUE,
-                              (LPARAM) MAKELONG(1, 2));
+                              (LPARAM)MAKELONG(1, 2));
                 SendMessage(hAllowJpeg, BM_SETCHECK, TRUE, 0);
               } else {
                 _this->EnableQuality(hwnd, FALSE);
                 _this->EnableSubsamp(hwnd, FALSE);
                 if (slidermax < 9)
                   SendMessage(hCompress, TBM_SETRANGE, TRUE,
-                              (LPARAM) MAKELONG(0, 1));
+                              (LPARAM)MAKELONG(0, 1));
                 SendMessage(hAllowJpeg, BM_SETCHECK, FALSE, 0);
               }
               _this->SetComboBox(hwnd);
@@ -1336,8 +1334,7 @@ BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
                 while (count > MAX_LEN_COMBO)
                   count = (int)SendMessage(hListBox, CB_DELETESTRING,
                                            MAX_LEN_COMBO, 0);
-              }
-              else break;
+              } else break;
               DWORD slidermax = (DWORD)SendMessage(hCompress, TBM_GETRANGEMAX,
                                                    0, 0);
               if (rfbcombo[i].enableJpeg) {
@@ -1348,7 +1345,7 @@ BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
                 _this->SetQualitySlider(hwnd, rfbcombo[i].qualityLevel);
                 if (slidermax < 9)
                   SendMessage(hCompress, TBM_SETRANGE, TRUE,
-                              (LPARAM) MAKELONG(1, 2));
+                              (LPARAM)MAKELONG(1, 2));
                 _this->SetCompressLevel(hwnd, rfbcombo[i].compressLevel);
               } else {
                 _this->EnableQuality(hwnd, 0);
@@ -1356,7 +1353,7 @@ BOOL CALLBACK VNCOptions::DlgProcEncOptions(HWND hwnd, UINT uMsg,
                 SendMessage(hAllowJpeg, BM_SETCHECK, 0, 0);
                 if (slidermax < 9)
                   SendMessage(hCompress, TBM_SETRANGE, TRUE,
-                              (LPARAM) MAKELONG(0, 1));
+                              (LPARAM)MAKELONG(0, 1));
                 _this->SetCompressLevel(hwnd, rfbcombo[i].compressLevel);
               }
               SendMessage(hCopyRect, BM_SETCHECK, 1, 0);
@@ -1416,7 +1413,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
     case WM_INITDIALOG:
     {
       SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
-      VNCOptions *_this = (VNCOptions *) lParam;
+      VNCOptions *_this = (VNCOptions *)lParam;
 
       // Initialise the controls
       HWND hSwap = GetDlgItem(hwnd, ID_SESSION_SWAPMOUSE);
@@ -1442,7 +1439,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       int i;
       for (i = 0; i < TVNC_GRABOPT; i++)
         SendMessage(hGrab, CB_INSERTSTRING, (WPARAM)i,
-              (LPARAM)(int FAR*)grabcombo[i]);
+              (LPARAM)(int FAR *)grabcombo[i]);
       SendMessage(hGrab, CB_SETCURSEL, (WPARAM)_this->m_GrabKeyboard, 0);
 
       char scalecombo[14][19] = {
@@ -1452,7 +1449,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
       for (i = 0; i <= 13; i++)
         SendMessage(hScalEdit, CB_INSERTSTRING, (WPARAM)i,
-              (LPARAM)(int FAR*)scalecombo[i]);
+              (LPARAM)(int FAR *)scalecombo[i]);
       if (_this->m_FitWindow) {
         SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Fixed Aspect Ratio");
       } else
@@ -1488,7 +1485,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       HWND hSizeEdit = GetDlgItem(hwnd, IDC_DESKTOPSIZE_EDIT);
       for (i = 0; i < 51; i++)
         SendMessage(hSizeEdit, CB_INSERTSTRING, (WPARAM)i,
-              (LPARAM)(int FAR*)sizecombo[i]);
+              (LPARAM)(int FAR *)sizecombo[i]);
       char temps[MAX_DS_STR];
       _this->m_desktopSize.getString(temps, MAX_DS_STR);
       SetDlgItemText(hwnd, IDC_DESKTOPSIZE_EDIT, temps);
@@ -1504,7 +1501,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       };
       for (i = 0; i < SPAN_OPTS; i++)
         SendMessage(hSpan, CB_INSERTSTRING, (WPARAM)i,
-              (LPARAM)(int FAR*)spancombo[i]);
+              (LPARAM)(int FAR *)spancombo[i]);
       SendMessage(hSpan, CB_SETCURSEL, (WPARAM)_this->m_Span, 0);
 
       HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
@@ -1825,8 +1822,7 @@ void VNCOptions::SetComboBox(HWND hwnd)
     if (count <= MAX_LEN_COMBO)
       SendMessage(hListBox, CB_INSERTSTRING, MAX_LEN_COMBO, (LPARAM)"Custom");
     SendMessage(hListBox, CB_SETCURSEL, MAX_LEN_COMBO, 0);
-  }
-  else {
+  } else {
     int count = (int)SendMessage(hListBox, CB_GETCOUNT, 0, 0);
     while (count > MAX_LEN_COMBO)
       count = (int)SendMessage(hListBox, CB_DELETESTRING, MAX_LEN_COMBO, 0);
@@ -1874,21 +1870,21 @@ BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
                     FALSE);
 
       HWND hSpin1 = GetDlgItem(hwnd, IDC_SPIN1);
-      SendMessage(hSpin1, UDM_SETBUDDY, (WPARAM) (HWND)hEditList, 0);
+      SendMessage(hSpin1, UDM_SETBUDDY, (WPARAM)(HWND)hEditList, 0);
 
       HWND hChec = GetDlgItem(hwnd, IDC_CHECK_LOG_FILE);
       HWND hEditFile = GetDlgItem(hwnd, IDC_EDIT_LOG_FILE);
       HWND hEditLevel = GetDlgItem(hwnd, IDC_EDIT_LOG_LEVEL);
 
       HWND hSpin2 = GetDlgItem(hwnd, IDC_SPIN2);
-      SendMessage(hSpin2, UDM_SETBUDDY, (WPARAM) (HWND)hEditLevel, 0);
+      SendMessage(hSpin2, UDM_SETBUDDY, (WPARAM)(HWND)hEditLevel, 0);
 
       HWND hListenPort = GetDlgItem(hwnd, IDC_LISTEN_PORT);
       SetDlgItemInt(hwnd, IDC_LISTEN_PORT, pApp->m_options.m_listenPort,
                     FALSE);
 
       HWND hSpin3 = GetDlgItem(hwnd, IDC_SPIN3);
-      SendMessage(hSpin3, UDM_SETBUDDY, (WPARAM) (HWND)hListenPort, 0);
+      SendMessage(hSpin3, UDM_SETBUDDY, (WPARAM)(HWND)hListenPort, 0);
 
       SendMessage(hChec, BM_SETCHECK, pApp->m_options.m_logToFile, 0);
       _this->EnableLog(hwnd, !(SendMessage(hChec, BM_GETCHECK, 0, 0) == 0));
@@ -2023,7 +2019,7 @@ BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
           switch (HIWORD(wParam)) {
             case BN_CLICKED:
               HWND hChec = GetDlgItem(hwnd, IDC_CHECK_LOG_FILE);
-              if (SendMessage(hChec, BM_GETCHECK, 0, 0) == 0){
+              if (SendMessage(hChec, BM_GETCHECK, 0, 0) == 0) {
                 _this->EnableLog(hwnd, TRUE);
                 SendMessage(hChec, BM_SETCHECK, TRUE, 0);
               } else {
@@ -2042,7 +2038,7 @@ BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
         case UDN_DELTAPOS:
         {
           int max, min;
-          NMUPDOWN lpnmud = *(LPNMUPDOWN) lParam;
+          NMUPDOWN lpnmud = *(LPNMUPDOWN)lParam;
           NMHDR hdr = lpnmud.hdr;
           HWND hCtrl = (HWND)SendMessage(hdr.hwndFrom, UDM_GETBUDDY, 0, 0);
           long ctrl = GetDlgCtrlID(hCtrl);
@@ -2178,7 +2174,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 
 //char buf[256];
 //DWORD buflen = 255;
-//if (RegQueryValueEx(RegKey, (LPTSTR) "user", NULL, NULL, (LPBYTE) buf,
+//if (RegQueryValueEx(RegKey, (LPTSTR)"user", NULL, NULL, (LPBYTE)buf,
 //                    &buflen) == ERROR_SUCCESS && buflen > 0)
 //  STRCPY(m_user, buf);
 
@@ -2289,8 +2285,8 @@ void VNCOptions::LoadGenOpt()
 {
   HKEY hRegKey;
 
-  if (RegOpenKey(HKEY_CURRENT_USER, SETTINGS_KEY_NAME, &hRegKey)
-      != ERROR_SUCCESS) {
+  if (RegOpenKey(HKEY_CURRENT_USER, SETTINGS_KEY_NAME, &hRegKey) !=
+      ERROR_SUCCESS) {
     hRegKey = NULL;
   } else {
     DWORD buffer;
@@ -2328,7 +2324,7 @@ void VNCOptions::LoadGenOpt()
     char buf[_MAX_PATH];
     buffersize = _MAX_PATH;
     if (RegQueryValueEx(hRegKey, "LogFileName", NULL, &valtype,
-                        (LPBYTE) &buf, &buffersize) == ERROR_SUCCESS) {
+                        (LPBYTE)&buf, &buffersize) == ERROR_SUCCESS) {
       STRCPY(m_logFilename, buf);
     }
     RegCloseKey(hRegKey);
@@ -2384,7 +2380,7 @@ void VNCOptions::SaveGenOpt()
 void VNCOptions::BrowseLogFile()
 {
   OPENFILENAME ofn;
-  char filter[] = "Log files (*.log)\0*.log\0" \
+  char filter[] = "Log files (*.log)\0*.log\0"  \
                   "All files (*.*)\0*.*\0";
   char tname[_MAX_FNAME + _MAX_EXT];
 
@@ -2402,8 +2398,8 @@ void VNCOptions::BrowseLogFile()
   if (!GetSaveFileName(&ofn)) {
     DWORD err = CommDlgExtendedError();
     char msg[1024];
-    switch(err) {
-      case 0: // user cancelled
+    switch (err) {
+      case 0:  // user cancelled
         break;
       case FNERR_INVALIDFILENAME:
         STRCPY(msg, "Invalid filename");

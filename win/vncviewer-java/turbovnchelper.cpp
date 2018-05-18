@@ -24,13 +24,13 @@
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
-  switch(fdwReason) {
-  case DLL_PROCESS_ATTACH:
-    LowLevelHook::Initialize(hinstDLL);
-    break;
-  case DLL_PROCESS_DETACH:
-    LowLevelHook::Release();
-    break;
+  switch (fdwReason) {
+    case DLL_PROCESS_ATTACH:
+      LowLevelHook::Initialize(hinstDLL);
+      break;
+    case DLL_PROCESS_DETACH:
+      LowLevelHook::Release();
+      break;
   }
   return TRUE;
 }
@@ -54,7 +54,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 }
 
 
-typedef jboolean (JNICALL *__JAWT_GetAWT_type)(JNIEnv* env, JAWT* awt);
+typedef jboolean (JNICALL *__JAWT_GetAWT_type)(JNIEnv *env, JAWT *awt);
 static __JAWT_GetAWT_type __JAWT_GetAWT = NULL;
 
 static HMODULE handle = NULL;
@@ -94,7 +94,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
     if ((dsi = ds->GetDrawingSurfaceInfo(ds)) == NULL)
       _throw("Could not get drawing surface info");
 
-    if ((w32dsi = (JAWT_Win32DrawingSurfaceInfo*)dsi->platformInfo) == NULL)
+    if ((w32dsi = (JAWT_Win32DrawingSurfaceInfo *)dsi->platformInfo) == NULL)
       _throw("Could not get Win32 drawing surface info");
 
     LowLevelHook::Activate(w32dsi->hwnd);

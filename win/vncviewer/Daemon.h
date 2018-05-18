@@ -46,4 +46,4 @@ class Daemon
     char netbuf[1024];
 };
 
-#endif // DAEMON_H__
+#endif  // DAEMON_H__

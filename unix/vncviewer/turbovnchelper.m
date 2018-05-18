@@ -53,9 +53,10 @@
 
 
 #define bailif0(f) {  \
-  if(!(f) || (*env)->ExceptionCheck(env)) {  \
+  if (!(f) || (*env)->ExceptionCheck(env)) {  \
     goto bailout;  \
-}}
+  }  \
+}
 
 #define SET_LONG(cls, obj, fieldName, val) {  \
   bailif0(fid = (*env)->GetFieldID(env, cls, #fieldName, "J"));  \

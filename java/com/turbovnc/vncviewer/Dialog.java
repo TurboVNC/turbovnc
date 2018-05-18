@@ -111,7 +111,7 @@ class Dialog {
     // JDialog.setIconImage() to set the icon image, and since that method is
     // only available in Java 6 and later, we have to use reflect to invoke it.
     try {
-      Class[] argClasses = new Class[]{Image.class};
+      Class[] argClasses = new Class[]{ Image.class };
       Method setIconImage = Window.class.getMethod("setIconImage", argClasses);
       setIconImage.invoke(dlg, VncViewer.FRAME_IMAGE);
       return;

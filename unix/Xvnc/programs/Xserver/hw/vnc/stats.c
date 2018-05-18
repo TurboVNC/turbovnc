@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include "rfb.h"
 
-static char* encNames[MAX_ENCODINGS] = {
+static char *encNames[MAX_ENCODINGS] = {
     "Raw", "CopyRect", "RRE", "[Encoding 3]", "CoRRE", "Hextile", "Zlib",
     "Tight", "[Encoding 8]", "[Encoding 9]", "[Encoding 10]", "[Encoding 11]",
     "[Encoding 12]", "[Encoding 13]", "[Encoding 14]", "[Encoding 15]",
@@ -35,8 +35,7 @@ static char* encNames[MAX_ENCODINGS] = {
 };
 
 
-void
-rfbResetStats(rfbClientPtr cl)
+void rfbResetStats(rfbClientPtr cl)
 {
     int i;
     for (i = 0; i < MAX_ENCODINGS; i++) {
@@ -56,8 +55,7 @@ rfbResetStats(rfbClientPtr cl)
 }
 
 
-void
-rfbPrintStats(rfbClientPtr cl)
+void rfbPrintStats(rfbClientPtr cl)
 {
     int i;
     int totalRectanglesSent = 0;

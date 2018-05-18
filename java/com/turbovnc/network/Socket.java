@@ -30,7 +30,7 @@ public abstract class Socket {
   public Socket(FileDescriptor fd) {
     instream = new FdInStream(fd);
     outstream = new FdOutStream(fd);
-    ownStreams = true; isShutdown = false;
+    ownStreams = true;  isShutdown = false;
     queryConnection = false;
   }
 
@@ -47,10 +47,10 @@ public abstract class Socket {
   public abstract int getMyPort();
 
   // information about the remote end of the socket
-  public abstract String getPeerAddress(); // a string e.g. "192.168.0.1"
+  public abstract String getPeerAddress();  // a string e.g. "192.168.0.1"
   public abstract String getPeerName();
   public abstract int getPeerPort();
-  public abstract String getPeerEndpoint(); // <address>::<port>
+  public abstract String getPeerEndpoint();  // <address>::<port>
 
   // Is the remote end on the same machine?
   public abstract boolean sameMachine();
@@ -60,13 +60,13 @@ public abstract class Socket {
   public final boolean requiresQuery() { return queryConnection; }
 
   protected Socket() {
-    instream = null; outstream = null; ownStreams = false;
-    isShutdown = false; queryConnection = false;
+    instream = null;  outstream = null;  ownStreams = false;
+    isShutdown = false;  queryConnection = false;
   }
 
   protected Socket(FdInStream i, FdOutStream o, boolean own) {
-    instream = i; outstream = o; ownStreams = own;
-    isShutdown = false; queryConnection = false;
+    instream = i;  outstream = o;  ownStreams = own;
+    isShutdown = false;  queryConnection = false;
   }
 
   protected FdInStream instream;

@@ -379,10 +379,10 @@ void ClientConnection::SoftCursorToScreen(RECT *screenArea,
   }
 
   if (w < 0) {
-    cx = 0; x = 0; w = 0;
+    cx = 0;  x = 0;  w = 0;
   }
   if (h < 0) {
-    cy = 0; y = 0; h = 0;
+    cy = 0;  y = 0;  h = 0;
   }
 
   if (screenArea != NULL) {

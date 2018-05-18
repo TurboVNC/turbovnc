@@ -85,7 +85,7 @@ void WarningException::Report()
 #endif
   printf("WARNING: %s\n", m_info);
   MessageBox(NULL, m_info, "TurboVNC info",
-             MB_OK| MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+             MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
 }
 
 
@@ -132,5 +132,5 @@ void AuthException::Report()
 #endif
   printf("AUTHENTICATION FAILURE: %s\n", m_info);
   MessageBox(NULL, m_info, "TurboVNC authentication info",
-             MB_OK| MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+             MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
 }

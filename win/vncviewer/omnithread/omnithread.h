@@ -41,7 +41,7 @@
 #endif
 
 #ifndef NULL
-#define NULL (void*)0
+#define NULL (void *)0
 #endif
 
 class omni_mutex;
@@ -94,7 +94,7 @@ class omni_thread;
 // define _WINSTATIC (if the application is  to be dynamically linked,
 // there is no need to define any of these macros).
 
-#if defined (_OMNITHREAD_DLL) && defined(_WINSTATIC)
+#if defined(_OMNITHREAD_DLL) && defined(_WINSTATIC)
 #error "Both _OMNITHREAD_DLL and _WINSTATIC are defined."
 #elif defined(_OMNITHREAD_DLL)
 #define _OMNITHREAD_NTDLL_ __declspec(dllexport)
@@ -146,9 +146,9 @@ class omni_thread;
 #define _OMNITHREAD_NTDLL_
 #endif
 
-#if (!defined(OMNI_MUTEX_IMPLEMENTATION) || \
-     !defined(OMNI_CONDITION_IMPLEMENTATION) || \
-     !defined(OMNI_SEMAPHORE_IMPLEMENTATION) || \
+#if (!defined(OMNI_MUTEX_IMPLEMENTATION) ||  \
+     !defined(OMNI_CONDITION_IMPLEMENTATION) ||  \
+     !defined(OMNI_SEMAPHORE_IMPLEMENTATION) ||  \
      !defined(OMNI_THREAD_IMPLEMENTATION))
 #error "Implementation header file incomplete"
 #endif
@@ -196,8 +196,8 @@ public:
 
 private:
     // dummy copy constructor and operator= to prevent copying
-    omni_mutex(const omni_mutex&);
-    omni_mutex& operator=(const omni_mutex&);
+    omni_mutex(const omni_mutex &);
+    omni_mutex &operator = (const omni_mutex &);
 
 OMNI_THREAD_EXPOSE:
     OMNI_MUTEX_IMPLEMENTATION
@@ -223,14 +223,14 @@ OMNI_THREAD_EXPOSE:
 //
 
 class _OMNITHREAD_NTDLL_ omni_mutex_lock {
-    omni_mutex& mutex;
+    omni_mutex &mutex;
 public:
-    omni_mutex_lock(omni_mutex& m) : mutex(m) { mutex.lock(); }
+    omni_mutex_lock(omni_mutex &m) : mutex(m) { mutex.lock(); }
     ~omni_mutex_lock(void) { mutex.unlock(); }
 private:
     // dummy copy constructor and operator= to prevent copying
-    omni_mutex_lock(const omni_mutex_lock&);
-    omni_mutex_lock& operator=(const omni_mutex_lock&);
+    omni_mutex_lock(const omni_mutex_lock &);
+    omni_mutex_lock &operator = (const omni_mutex_lock &);
 };
 
 
@@ -242,10 +242,10 @@ private:
 
 class _OMNITHREAD_NTDLL_ omni_condition {
 
-    omni_mutex* mutex;
+    omni_mutex *mutex;
 
 public:
-    omni_condition(omni_mutex* m);
+    omni_condition(omni_mutex *m);
         // constructor must be given a pointer to an existing mutex. The
         // condition variable is then linked to the mutex, so that there is an
         // implicit unlock and lock around wait() and timed_wait().
@@ -276,8 +276,8 @@ public:
 
 private:
     // dummy copy constructor and operator= to prevent copying
-    omni_condition(const omni_condition&);
-    omni_condition& operator=(const omni_condition&);
+    omni_condition(const omni_condition &);
+    omni_condition &operator = (const omni_condition &);
 
 OMNI_THREAD_EXPOSE:
     OMNI_CONDITION_IMPLEMENTATION
@@ -310,8 +310,8 @@ public:
 
 private:
     // dummy copy constructor and operator= to prevent copying
-    omni_semaphore(const omni_semaphore&);
-    omni_semaphore& operator=(const omni_semaphore&);
+    omni_semaphore(const omni_semaphore &);
+    omni_semaphore &operator = (const omni_semaphore &);
 
 OMNI_THREAD_EXPOSE:
     OMNI_SEMAPHORE_IMPLEMENTATION
@@ -322,14 +322,14 @@ OMNI_THREAD_EXPOSE:
 //
 
 class _OMNITHREAD_NTDLL_ omni_semaphore_lock {
-    omni_semaphore& sem;
+    omni_semaphore &sem;
 public:
-    omni_semaphore_lock(omni_semaphore& s) : sem(s) { sem.wait(); }
+    omni_semaphore_lock(omni_semaphore &s) : sem(s) { sem.wait(); }
     ~omni_semaphore_lock(void) { sem.post(); }
 private:
     // dummy copy constructor and operator= to prevent copying
-    omni_semaphore_lock(const omni_semaphore_lock&);
-    omni_semaphore_lock& operator=(const omni_semaphore_lock&);
+    omni_semaphore_lock(const omni_semaphore_lock &);
+    omni_semaphore_lock &operator = (const omni_semaphore_lock &);
 };
 
 
@@ -363,9 +363,9 @@ public:
     // a thread in a single call.
     //
 
-    omni_thread(void (*fn)(void*), void* arg = NULL,
+    omni_thread(void (*fn) (void *), void *arg = NULL,
                 priority_t pri = PRIORITY_NORMAL);
-    omni_thread(void* (*fn)(void*), void* arg = NULL,
+    omni_thread(void *(*fn) (void *), void *arg = NULL,
                 priority_t pri = PRIORITY_NORMAL);
         // these constructors create a thread which will run the given function
         // when start() is called.  The thread will be detached if given a
@@ -380,7 +380,7 @@ public:
 
 protected:
 
-    omni_thread(void* arg = NULL, priority_t pri = PRIORITY_NORMAL);
+    omni_thread(void *arg = NULL, priority_t pri = PRIORITY_NORMAL);
         // this constructor is used in a derived class.  The thread will
         // execute the run() or run_undetached() member functions depending on
         // whether start() or start_undetached() is called respectively.
@@ -400,7 +400,7 @@ protected:
 
 public:
 
-    void join(void**);
+    void join(void **);
         // join causes the calling thread to wait for another's completion,
         // putting the return value in the variable of type void* whose address
         // is given (unless passed a null pointer). Only undetached threads
@@ -409,19 +409,19 @@ public:
     void set_priority(priority_t);
         // set the priority of the thread.
 
-    static omni_thread* create(void (*fn)(void*), void* arg = NULL,
+    static omni_thread *create(void (*fn) (void *), void *arg = NULL,
                                priority_t pri = PRIORITY_NORMAL);
-    static omni_thread* create(void* (*fn)(void*), void* arg = NULL,
+    static omni_thread *create(void *(*fn) (void *), void *arg = NULL,
                                priority_t pri = PRIORITY_NORMAL);
         // create spawns a new thread executing the given function with the
         // given argument at the given priority. Returns a pointer to the
         // thread object. It simply constructs a new thread object then calls
         // start.
 
-    static void exit(void* return_value = NULL);
+    static void exit(void *return_value = NULL);
         // causes the calling thread to terminate.
 
-    static omni_thread* self(void);
+    static omni_thread *self(void);
         // returns the calling thread's omni_thread object.
         // If the calling thread is not the main thread and
         // is not created using this library, returns 0.
@@ -432,21 +432,22 @@ public:
     static void sleep(unsigned long secs, unsigned long nanosecs = 0);
         // sleeps for the given time.
 
-    static void get_time(unsigned long* abs_sec, unsigned long* abs_nsec,
-                         unsigned long rel_sec = 0, unsigned long rel_nsec=0);
+    static void get_time(unsigned long *abs_sec, unsigned long *abs_nsec,
+                         unsigned long rel_sec = 0,
+                         unsigned long rel_nsec = 0);
         // calculates an absolute time in seconds and nanoseconds, suitable for
         // use in timed_waits on condition variables, which is the current time
         // plus the given relative offset.
 
 private:
 
-    virtual void run(void* arg) {}
-    virtual void* run_undetached(void* arg) { return NULL; }
+    virtual void run(void *arg) {}
+    virtual void *run_undetached(void *arg) { return NULL; }
         // can be overridden in a derived class.  When constructed using the
         // the constructor omni_thread(void*, priority_t), these functions are
         // called by start() and start_undetached() respectively.
 
-    void common_constructor(void* arg, priority_t pri, int det);
+    void common_constructor(void *arg, priority_t pri, int det);
         // implements the common parts of the constructors.
 
     omni_mutex mutex;
@@ -456,13 +457,13 @@ private:
     state_t _state;
     priority_t _priority;
 
-    static omni_mutex* next_id_mutex;
+    static omni_mutex *next_id_mutex;
     static int next_id;
     int _id;
 
-    void (*fn_void)(void*);
-    void* (*fn_ret)(void*);
-    void* thread_arg;
+    void (*fn_void) (void *);
+    void *(*fn_ret) (void *);
+    void *thread_arg;
     int detached;
 
 public:

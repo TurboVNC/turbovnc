@@ -31,7 +31,7 @@ public class SecurityClient extends Security {
   public SecurityClient() { super(secTypes); }
 
   public CSecurity getCSecurity(int secType) {
-    assert (CConn.upg != null); /* (upg == null) means bug in the viewer */
+    assert (CConn.upg != null);  // (upg == null) means bug in the viewer
     assert (msg != null);
 
     if (!isSupported(secType))
@@ -80,8 +80,8 @@ public class SecurityClient extends Security {
   // CHECKSTYLE VisibilityModifier:OFF
   // CHECKSTYLE Indentation:OFF
 
-  public static StringParameter secTypes
-  = new StringParameter("SecurityTypes",
+  public static StringParameter secTypes =
+  new StringParameter("SecurityTypes",
   "A comma-separated list of the security types that can be used, if the " +
   "server supports them.  \"VNC\" and \"None\" are the standard VNC " +
   "password and no-password authentication schemes supported by all VNC " +
@@ -99,14 +99,14 @@ public class SecurityClient extends Security {
   "list does not matter, since the server's preferred order is always used.",
   "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VNC,Ident,Plain,UnixLogin,None");
 
-  public static StringParameter x509ca
-  = new StringParameter("X509CA",
+  public static StringParameter x509ca =
+  new StringParameter("X509CA",
   "X.509 Certificate Authority certificate to use with the X509* security " +
   "types.  This is used to check the validity of the server's X.509 " +
   "certificate.", FileUtils.getVncHomeDir() + "x509_ca.pem");
 
-  public static StringParameter x509crl
-  = new StringParameter("X509CRL",
+  public static StringParameter x509crl =
+  new StringParameter("X509CRL",
   "X.509 Certificate Revocation List to use with the X509* security types. " +
   "This is used to check the validity of the server's X.509 " +
   "certificate.", FileUtils.getVncHomeDir() + "x509_crl.pem");

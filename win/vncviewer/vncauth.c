@@ -41,7 +41,7 @@
  * as plain text.
  */
 
-unsigned char fixedkey[8] = {23, 82, 107, 6, 35, 78, 88, 7};
+unsigned char fixedkey[8] = { 23, 82, 107, 6, 35, 78, 88, 7 };
 
 
 /*

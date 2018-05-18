@@ -56,12 +56,12 @@ public abstract class CConnection extends CMsgHandler {
   // InStream.  You must have called initialiseProtocol() first.
   public void processMsg(boolean benchmark) {
     switch (state) {
-      case RFBSTATE_PROTOCOL_VERSION:  processVersionMsg();        break;
-      case RFBSTATE_SECURITY_TYPES:    processSecurityTypesMsg();  break;
-      case RFBSTATE_SECURITY:          processSecurityMsg();       break;
-      case RFBSTATE_SECURITY_RESULT:   processSecurityResultMsg(); break;
-      case RFBSTATE_INITIALISATION:    processInitMsg(benchmark);  break;
-      case RFBSTATE_NORMAL:            reader.readMsg();           break;
+      case RFBSTATE_PROTOCOL_VERSION:  processVersionMsg();         break;
+      case RFBSTATE_SECURITY_TYPES:    processSecurityTypesMsg();   break;
+      case RFBSTATE_SECURITY:          processSecurityMsg();        break;
+      case RFBSTATE_SECURITY_RESULT:   processSecurityResultMsg();  break;
+      case RFBSTATE_INITIALISATION:    processInitMsg(benchmark);   break;
+      case RFBSTATE_NORMAL:            reader.readMsg();            break;
       case RFBSTATE_UNINITIALISED:
         throw new ErrorException("CConnection.processMsg: not initialised yet?");
       default:

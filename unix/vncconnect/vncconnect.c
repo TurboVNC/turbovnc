@@ -63,6 +63,7 @@ int main(int argc, char **argv)
       disconnect = 1;
     } else if (!strncmp(argv[i], "-id", 3)) {
       int _id = -1;
+
       if (++i >= argc) usage();
       _id = atoi(argv[i]);
       if (_id <= 0) {
@@ -70,16 +71,15 @@ int main(int argc, char **argv)
         exit(1);
       }
       id = _id;
-    }
-    else usage();
+    } else usage();
   }
 
-  if (argc != i+1 && !disconnect)
+  if (argc != i + 1 && !disconnect)
     usage();
 
   if (!(dpy = XOpenDisplay(displayname))) {
-    fprintf(stderr,"%s: unable to open display \"%s\"\n",
-        programName, XDisplayName (displayname));
+    fprintf(stderr, "%s: unable to open display \"%s\"\n", programName,
+            XDisplayName(displayname));
     exit(1);
   }
 
@@ -90,6 +90,7 @@ int main(int argc, char **argv)
     }
   } else {
     char temps[256];
+
     if (id >= 0) {
       strncpy(temps, argv[i], 255);
       temps[255] = 0;

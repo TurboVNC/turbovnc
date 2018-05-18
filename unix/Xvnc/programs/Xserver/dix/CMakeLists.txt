@@ -1,4 +1,4 @@
-include_directories(../Xi ../composite ../damageext ../mi	../miext/sync
+include_directories(../Xi ../composite ../damageext ../mi ../miext/sync
 	../randr ../render ../xfixes)
 
 add_definitions(-DRGB_DB=\"/usr/share/X11/rgb\"

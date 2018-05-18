@@ -1,4 +1,3 @@
-
 /********************************************************************
  *                                                                  *
  * THIS FILE IS PART OF THE 'ZYWRLE' VNC CODEC SOURCE CODE.         *
@@ -9,7 +8,7 @@
  *                                                                  *
  * THE 'ZYWRLE' VNC CODEC SOURCE CODE IS (C) COPYRIGHT 2006         *
  * BY Hitachi Systems & Services, Ltd.                              *
- * (Noriaki Yamazaki, Research & Developement Center)               *                                                                 *
+ * (Noriaki Yamazaki, Research & Development Center)                *                                                                 *
  *                                                                  *
  ********************************************************************
 Redistribution and use in source and binary forms, with or without
@@ -352,7 +351,7 @@ static InlineX void Harr(signed char* pX0, signed char* pX1)
  In this method, H/L and X0/X1 is always same position.
  This lead us to more speed and less memory.
  Of cause, the result of both method is quite same
- because it's only difference that coefficient position.
+ because its only difference is that coefficient position.
 */
 static InlineX void WaveletLevel(int* data, int size, int l, int SkipPixel)
 {

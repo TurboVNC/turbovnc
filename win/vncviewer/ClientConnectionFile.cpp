@@ -80,8 +80,8 @@ void ClientConnection::SaveConnection()
   if (!GetSaveFileName(&ofn)) {
     DWORD err = CommDlgExtendedError();
     char msg[1024];
-    switch(err) {
-      case 0: // user cancelled
+    switch (err) {
+      case 0:  // user cancelled
         break;
       case FNERR_INVALIDFILENAME:
         STRCPY(msg, "Invalid filename");

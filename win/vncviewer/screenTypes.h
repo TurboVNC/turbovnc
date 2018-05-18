@@ -29,6 +29,6 @@ const unsigned int resultProhibited = 1;
 const unsigned int resultNoResources = 2;
 const unsigned int resultInvalid = 3;
 
-const int resultUnsolicited = 0xffff; // internal code used for server changes
+const int resultUnsolicited = 0xffff;  // internal code used for server changes
 
 #endif

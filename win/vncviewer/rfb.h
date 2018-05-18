@@ -52,12 +52,12 @@ typedef unsigned char CARD8;
 #ifdef LITTLE_ENDIAN_HOST
 
 #define Swap16IfLE(s)  \
-  ((CARD16) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)))
+  ((CARD16)((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)))
 #define Swap32IfLE(l)  \
-  ((CARD32) ((((l) & 0xff000000) >> 24) |  \
-             (((l) & 0x00ff0000) >> 8)  |  \
-             (((l) & 0x0000ff00) << 8)  |  \
-             (((l) & 0x000000ff) << 24)))
+  ((CARD32)((((l) & 0xff000000) >> 24) |  \
+            (((l) & 0x00ff0000) >> 8)  |  \
+            (((l) & 0x0000ff00) << 8)  |  \
+            (((l) & 0x000000ff) << 24)))
 
 #else
 
@@ -67,4 +67,4 @@ typedef unsigned char CARD8;
 #endif
 
 
-#endif // RFB_H__
+#endif  // RFB_H__

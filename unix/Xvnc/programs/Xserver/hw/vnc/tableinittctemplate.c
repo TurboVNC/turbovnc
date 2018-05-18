@@ -45,9 +45,8 @@
 #define rfbInitTrueColourRGBTablesOUT CONCAT2E(rfbInitTrueColourRGBTables, OUT)
 #define rfbInitOneRGBTableOUT CONCAT2E(rfbInitOneRGBTable, OUT)
 
-static void
-rfbInitOneRGBTableOUT(OUT_T *table, int inMax, int outMax, int outShift,
-                      int swap);
+static void rfbInitOneRGBTableOUT(OUT_T *table, int inMax, int outMax,
+                                  int outShift, int swap);
 
 
 /*
@@ -55,9 +54,8 @@ rfbInitOneRGBTableOUT(OUT_T *table, int inMax, int outMax, int outShift,
  * translation.
  */
 
-static void
-rfbInitTrueColourSingleTableOUT(char **table, rfbPixelFormat *in,
-                                rfbPixelFormat *out)
+static void rfbInitTrueColourSingleTableOUT(char **table, rfbPixelFormat *in,
+                                            rfbPixelFormat *out)
 {
     int i;
     int inRed, inGreen, inBlue, outRed, outGreen, outBlue;
@@ -94,9 +92,8 @@ rfbInitTrueColourSingleTableOUT(char **table, rfbPixelFormat *in,
  * red, green and blue values.
  */
 
-static void
-rfbInitTrueColourRGBTablesOUT(char **table, rfbPixelFormat *in,
-                              rfbPixelFormat *out)
+static void rfbInitTrueColourRGBTablesOUT(char **table, rfbPixelFormat *in,
+                                          rfbPixelFormat *out)
 {
     OUT_T *redTable;
     OUT_T *greenTable;
@@ -118,9 +115,8 @@ rfbInitTrueColourRGBTablesOUT(char **table, rfbPixelFormat *in,
 }
 
 
-static void
-rfbInitOneRGBTableOUT(OUT_T *table, int inMax, int outMax, int outShift,
-                      int swap)
+static void rfbInitOneRGBTableOUT(OUT_T *table, int inMax, int outMax,
+                                  int outShift, int swap)
 {
     int i;
     int nEntries = inMax + 1;

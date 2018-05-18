@@ -27,7 +27,7 @@ public class ConnParams {
   static LogWriter vlog = new LogWriter("ConnParams");
 
   public ConnParams() {
-    majorVersion = 0; minorVersion = 0;
+    majorVersion = 0;  minorVersion = 0;
     width = 0;  height = 0;
     supportsDesktopResize = false;  supportsExtendedDesktopSize = false;
     supportsDesktopRename = false;  supportsLastRect = false;
@@ -77,7 +77,7 @@ public class ConnParams {
   // CHECKSTYLE VisibilityModifier:ON
 
   public void setVersion(int major, int minor) {
-    majorVersion = major; minorVersion = minor;
+    majorVersion = major;  minorVersion = minor;
   }
 
   public boolean isVersion(int major, int minor) {

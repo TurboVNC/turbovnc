@@ -35,7 +35,7 @@ CapsContainer::~CapsContainer()
   delete[] plist;
 
   // Remove char[] strings allocated by the new[] operator.
-  std::map<CARD32, char*>::const_iterator iter;
+  std::map<CARD32, char *>::const_iterator iter;
   for (iter = descMap.begin(); iter != descMap.end(); iter++)
     delete[] iter->second;
 }

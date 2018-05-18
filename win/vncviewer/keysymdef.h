@@ -49,7 +49,7 @@ SOFTWARE.
 ******************************************************************/
 /* $XFree86: xc/include/keysymdef.h,v 1.11 2001/01/17 17:53:12 dawes Exp $ */
 
-#define XK_VoidSymbol		0xFFFFFF	/* void symbol */
+#define XK_VoidSymbol           0xFFFFFF        /* void symbol */
 
 #ifdef XK_MISCELLANY
 /*
@@ -58,124 +58,124 @@ SOFTWARE.
  * tables in client code.
  */
 
-#define XK_BackSpace		0xFF08	/* back space, back char */
-#define XK_Tab			0xFF09
-#define XK_Linefeed		0xFF0A	/* Linefeed, LF */
-#define XK_Clear		0xFF0B
-#define XK_Return		0xFF0D	/* Return, enter */
-#define XK_Pause		0xFF13	/* Pause, hold */
-#define XK_Scroll_Lock		0xFF14
-#define XK_Sys_Req		0xFF15
-#define XK_Escape		0xFF1B
-#define XK_Delete		0xFFFF	/* Delete, rubout */
+#define XK_BackSpace            0xFF08  /* back space, back char */
+#define XK_Tab                  0xFF09
+#define XK_Linefeed             0xFF0A  /* Linefeed, LF */
+#define XK_Clear                0xFF0B
+#define XK_Return               0xFF0D  /* Return, enter */
+#define XK_Pause                0xFF13  /* Pause, hold */
+#define XK_Scroll_Lock          0xFF14
+#define XK_Sys_Req              0xFF15
+#define XK_Escape               0xFF1B
+#define XK_Delete               0xFFFF  /* Delete, rubout */
 
 
 
 /* International & multi-key character composition */
 
-#define XK_Multi_key		0xFF20  /* Multi-key character compose */
-#define XK_Codeinput		0xFF37
-#define XK_SingleCandidate	0xFF3C
-#define XK_MultipleCandidate	0xFF3D
-#define XK_PreviousCandidate	0xFF3E
+#define XK_Multi_key            0xFF20  /* Multi-key character compose */
+#define XK_Codeinput            0xFF37
+#define XK_SingleCandidate      0xFF3C
+#define XK_MultipleCandidate    0xFF3D
+#define XK_PreviousCandidate    0xFF3E
 
 /* Japanese keyboard support */
 
-#define XK_Kanji		0xFF21	/* Kanji, Kanji convert */
-#define XK_Muhenkan		0xFF22  /* Cancel Conversion */
-#define XK_Henkan_Mode		0xFF23  /* Start/Stop Conversion */
-#define XK_Henkan		0xFF23  /* Alias for Henkan_Mode */
-#define XK_Romaji		0xFF24  /* to Romaji */
-#define XK_Hiragana		0xFF25  /* to Hiragana */
-#define XK_Katakana		0xFF26  /* to Katakana */
-#define XK_Hiragana_Katakana	0xFF27  /* Hiragana/Katakana toggle */
-#define XK_Zenkaku		0xFF28  /* to Zenkaku */
-#define XK_Hankaku		0xFF29  /* to Hankaku */
-#define XK_Zenkaku_Hankaku	0xFF2A  /* Zenkaku/Hankaku toggle */
-#define XK_Touroku		0xFF2B  /* Add to Dictionary */
-#define XK_Massyo		0xFF2C  /* Delete from Dictionary */
-#define XK_Kana_Lock		0xFF2D  /* Kana Lock */
-#define XK_Kana_Shift		0xFF2E  /* Kana Shift */
-#define XK_Eisu_Shift		0xFF2F  /* Alphanumeric Shift */
-#define XK_Eisu_toggle		0xFF30  /* Alphanumeric toggle */
-#define XK_Kanji_Bangou		0xFF37  /* Codeinput */
-#define XK_Zen_Koho		0xFF3D	/* Multiple/All Candidate(s) */
-#define XK_Mae_Koho		0xFF3E	/* Previous Candidate */
+#define XK_Kanji                0xFF21  /* Kanji, Kanji convert */
+#define XK_Muhenkan             0xFF22  /* Cancel Conversion */
+#define XK_Henkan_Mode          0xFF23  /* Start/Stop Conversion */
+#define XK_Henkan               0xFF23  /* Alias for Henkan_Mode */
+#define XK_Romaji               0xFF24  /* to Romaji */
+#define XK_Hiragana             0xFF25  /* to Hiragana */
+#define XK_Katakana             0xFF26  /* to Katakana */
+#define XK_Hiragana_Katakana    0xFF27  /* Hiragana/Katakana toggle */
+#define XK_Zenkaku              0xFF28  /* to Zenkaku */
+#define XK_Hankaku              0xFF29  /* to Hankaku */
+#define XK_Zenkaku_Hankaku      0xFF2A  /* Zenkaku/Hankaku toggle */
+#define XK_Touroku              0xFF2B  /* Add to Dictionary */
+#define XK_Massyo               0xFF2C  /* Delete from Dictionary */
+#define XK_Kana_Lock            0xFF2D  /* Kana Lock */
+#define XK_Kana_Shift           0xFF2E  /* Kana Shift */
+#define XK_Eisu_Shift           0xFF2F  /* Alphanumeric Shift */
+#define XK_Eisu_toggle          0xFF30  /* Alphanumeric toggle */
+#define XK_Kanji_Bangou         0xFF37  /* Codeinput */
+#define XK_Zen_Koho             0xFF3D  /* Multiple/All Candidate(s) */
+#define XK_Mae_Koho             0xFF3E  /* Previous Candidate */
 
 /* 0xFF31 thru 0xFF3F are under XK_KOREAN */
 
 /* Cursor control & motion */
 
-#define XK_Home			0xFF50
-#define XK_Left			0xFF51	/* Move left, left arrow */
-#define XK_Up			0xFF52	/* Move up, up arrow */
-#define XK_Right		0xFF53	/* Move right, right arrow */
-#define XK_Down			0xFF54	/* Move down, down arrow */
-#define XK_Prior		0xFF55	/* Prior, previous */
-#define XK_Page_Up		0xFF55
-#define XK_Next			0xFF56	/* Next */
-#define XK_Page_Down		0xFF56
-#define XK_End			0xFF57	/* EOL */
-#define XK_Begin		0xFF58	/* BOL */
+#define XK_Home                 0xFF50
+#define XK_Left                 0xFF51  /* Move left, left arrow */
+#define XK_Up                   0xFF52  /* Move up, up arrow */
+#define XK_Right                0xFF53  /* Move right, right arrow */
+#define XK_Down                 0xFF54  /* Move down, down arrow */
+#define XK_Prior                0xFF55  /* Prior, previous */
+#define XK_Page_Up              0xFF55
+#define XK_Next                 0xFF56  /* Next */
+#define XK_Page_Down            0xFF56
+#define XK_End                  0xFF57  /* EOL */
+#define XK_Begin                0xFF58  /* BOL */
 
 
 /* Misc Functions */
 
-#define XK_Select		0xFF60	/* Select, mark */
-#define XK_Print		0xFF61
-#define XK_Execute		0xFF62	/* Execute, run, do */
-#define XK_Insert		0xFF63	/* Insert, insert here */
-#define XK_Undo			0xFF65	/* Undo, oops */
-#define XK_Redo			0xFF66	/* redo, again */
-#define XK_Menu			0xFF67
-#define XK_Find			0xFF68	/* Find, search */
-#define XK_Cancel		0xFF69	/* Cancel, stop, abort, exit */
-#define XK_Help			0xFF6A	/* Help */
-#define XK_Break		0xFF6B
-#define XK_Mode_switch		0xFF7E	/* Character set switch */
+#define XK_Select               0xFF60  /* Select, mark */
+#define XK_Print                0xFF61
+#define XK_Execute              0xFF62  /* Execute, run, do */
+#define XK_Insert               0xFF63  /* Insert, insert here */
+#define XK_Undo                 0xFF65  /* Undo, oops */
+#define XK_Redo                 0xFF66  /* redo, again */
+#define XK_Menu                 0xFF67
+#define XK_Find                 0xFF68  /* Find, search */
+#define XK_Cancel               0xFF69  /* Cancel, stop, abort, exit */
+#define XK_Help                 0xFF6A  /* Help */
+#define XK_Break                0xFF6B
+#define XK_Mode_switch          0xFF7E  /* Character set switch */
 #define XK_script_switch        0xFF7E  /* Alias for mode_switch */
-#define XK_Num_Lock		0xFF7F
+#define XK_Num_Lock             0xFF7F
 
 /* Keypad Functions, keypad numbers cleverly chosen to map to ascii */
 
-#define XK_KP_Space		0xFF80	/* space */
-#define XK_KP_Tab		0xFF89
-#define XK_KP_Enter		0xFF8D	/* enter */
-#define XK_KP_F1		0xFF91	/* PF1, KP_A, ... */
-#define XK_KP_F2		0xFF92
-#define XK_KP_F3		0xFF93
-#define XK_KP_F4		0xFF94
-#define XK_KP_Home		0xFF95
-#define XK_KP_Left		0xFF96
-#define XK_KP_Up		0xFF97
-#define XK_KP_Right		0xFF98
-#define XK_KP_Down		0xFF99
-#define XK_KP_Prior		0xFF9A
-#define XK_KP_Page_Up		0xFF9A
-#define XK_KP_Next		0xFF9B
-#define XK_KP_Page_Down		0xFF9B
-#define XK_KP_End		0xFF9C
-#define XK_KP_Begin		0xFF9D
-#define XK_KP_Insert		0xFF9E
-#define XK_KP_Delete		0xFF9F
-#define XK_KP_Equal		0xFFBD	/* equals */
-#define XK_KP_Multiply		0xFFAA
-#define XK_KP_Add		0xFFAB
-#define XK_KP_Separator		0xFFAC	/* separator, often comma */
-#define XK_KP_Subtract		0xFFAD
-#define XK_KP_Decimal		0xFFAE
-#define XK_KP_Divide		0xFFAF
+#define XK_KP_Space             0xFF80  /* space */
+#define XK_KP_Tab               0xFF89
+#define XK_KP_Enter             0xFF8D  /* enter */
+#define XK_KP_F1                0xFF91  /* PF1, KP_A, ... */
+#define XK_KP_F2                0xFF92
+#define XK_KP_F3                0xFF93
+#define XK_KP_F4                0xFF94
+#define XK_KP_Home              0xFF95
+#define XK_KP_Left              0xFF96
+#define XK_KP_Up                0xFF97
+#define XK_KP_Right             0xFF98
+#define XK_KP_Down              0xFF99
+#define XK_KP_Prior             0xFF9A
+#define XK_KP_Page_Up           0xFF9A
+#define XK_KP_Next              0xFF9B
+#define XK_KP_Page_Down         0xFF9B
+#define XK_KP_End               0xFF9C
+#define XK_KP_Begin             0xFF9D
+#define XK_KP_Insert            0xFF9E
+#define XK_KP_Delete            0xFF9F
+#define XK_KP_Equal             0xFFBD  /* equals */
+#define XK_KP_Multiply          0xFFAA
+#define XK_KP_Add               0xFFAB
+#define XK_KP_Separator         0xFFAC  /* separator, often comma */
+#define XK_KP_Subtract          0xFFAD
+#define XK_KP_Decimal           0xFFAE
+#define XK_KP_Divide            0xFFAF
 
-#define XK_KP_0			0xFFB0
-#define XK_KP_1			0xFFB1
-#define XK_KP_2			0xFFB2
-#define XK_KP_3			0xFFB3
-#define XK_KP_4			0xFFB4
-#define XK_KP_5			0xFFB5
-#define XK_KP_6			0xFFB6
-#define XK_KP_7			0xFFB7
-#define XK_KP_8			0xFFB8
-#define XK_KP_9			0xFFB9
+#define XK_KP_0                 0xFFB0
+#define XK_KP_1                 0xFFB1
+#define XK_KP_2                 0xFFB2
+#define XK_KP_3                 0xFFB3
+#define XK_KP_4                 0xFFB4
+#define XK_KP_5                 0xFFB5
+#define XK_KP_6                 0xFFB6
+#define XK_KP_7                 0xFFB7
+#define XK_KP_8                 0xFFB8
+#define XK_KP_9                 0xFFB9
 
 
 
@@ -186,84 +186,84 @@ SOFTWARE.
  * We've not found a keyboard with more than 35 function keys total.
  */
 
-#define XK_F1			0xFFBE
-#define XK_F2			0xFFBF
-#define XK_F3			0xFFC0
-#define XK_F4			0xFFC1
-#define XK_F5			0xFFC2
-#define XK_F6			0xFFC3
-#define XK_F7			0xFFC4
-#define XK_F8			0xFFC5
-#define XK_F9			0xFFC6
-#define XK_F10			0xFFC7
-#define XK_F11			0xFFC8
-#define XK_L1			0xFFC8
-#define XK_F12			0xFFC9
-#define XK_L2			0xFFC9
-#define XK_F13			0xFFCA
-#define XK_L3			0xFFCA
-#define XK_F14			0xFFCB
-#define XK_L4			0xFFCB
-#define XK_F15			0xFFCC
-#define XK_L5			0xFFCC
-#define XK_F16			0xFFCD
-#define XK_L6			0xFFCD
-#define XK_F17			0xFFCE
-#define XK_L7			0xFFCE
-#define XK_F18			0xFFCF
-#define XK_L8			0xFFCF
-#define XK_F19			0xFFD0
-#define XK_L9			0xFFD0
-#define XK_F20			0xFFD1
-#define XK_L10			0xFFD1
-#define XK_F21			0xFFD2
-#define XK_R1			0xFFD2
-#define XK_F22			0xFFD3
-#define XK_R2			0xFFD3
-#define XK_F23			0xFFD4
-#define XK_R3			0xFFD4
-#define XK_F24			0xFFD5
-#define XK_R4			0xFFD5
-#define XK_F25			0xFFD6
-#define XK_R5			0xFFD6
-#define XK_F26			0xFFD7
-#define XK_R6			0xFFD7
-#define XK_F27			0xFFD8
-#define XK_R7			0xFFD8
-#define XK_F28			0xFFD9
-#define XK_R8			0xFFD9
-#define XK_F29			0xFFDA
-#define XK_R9			0xFFDA
-#define XK_F30			0xFFDB
-#define XK_R10			0xFFDB
-#define XK_F31			0xFFDC
-#define XK_R11			0xFFDC
-#define XK_F32			0xFFDD
-#define XK_R12			0xFFDD
-#define XK_F33			0xFFDE
-#define XK_R13			0xFFDE
-#define XK_F34			0xFFDF
-#define XK_R14			0xFFDF
-#define XK_F35			0xFFE0
-#define XK_R15			0xFFE0
+#define XK_F1                   0xFFBE
+#define XK_F2                   0xFFBF
+#define XK_F3                   0xFFC0
+#define XK_F4                   0xFFC1
+#define XK_F5                   0xFFC2
+#define XK_F6                   0xFFC3
+#define XK_F7                   0xFFC4
+#define XK_F8                   0xFFC5
+#define XK_F9                   0xFFC6
+#define XK_F10                  0xFFC7
+#define XK_F11                  0xFFC8
+#define XK_L1                   0xFFC8
+#define XK_F12                  0xFFC9
+#define XK_L2                   0xFFC9
+#define XK_F13                  0xFFCA
+#define XK_L3                   0xFFCA
+#define XK_F14                  0xFFCB
+#define XK_L4                   0xFFCB
+#define XK_F15                  0xFFCC
+#define XK_L5                   0xFFCC
+#define XK_F16                  0xFFCD
+#define XK_L6                   0xFFCD
+#define XK_F17                  0xFFCE
+#define XK_L7                   0xFFCE
+#define XK_F18                  0xFFCF
+#define XK_L8                   0xFFCF
+#define XK_F19                  0xFFD0
+#define XK_L9                   0xFFD0
+#define XK_F20                  0xFFD1
+#define XK_L10                  0xFFD1
+#define XK_F21                  0xFFD2
+#define XK_R1                   0xFFD2
+#define XK_F22                  0xFFD3
+#define XK_R2                   0xFFD3
+#define XK_F23                  0xFFD4
+#define XK_R3                   0xFFD4
+#define XK_F24                  0xFFD5
+#define XK_R4                   0xFFD5
+#define XK_F25                  0xFFD6
+#define XK_R5                   0xFFD6
+#define XK_F26                  0xFFD7
+#define XK_R6                   0xFFD7
+#define XK_F27                  0xFFD8
+#define XK_R7                   0xFFD8
+#define XK_F28                  0xFFD9
+#define XK_R8                   0xFFD9
+#define XK_F29                  0xFFDA
+#define XK_R9                   0xFFDA
+#define XK_F30                  0xFFDB
+#define XK_R10                  0xFFDB
+#define XK_F31                  0xFFDC
+#define XK_R11                  0xFFDC
+#define XK_F32                  0xFFDD
+#define XK_R12                  0xFFDD
+#define XK_F33                  0xFFDE
+#define XK_R13                  0xFFDE
+#define XK_F34                  0xFFDF
+#define XK_R14                  0xFFDF
+#define XK_F35                  0xFFE0
+#define XK_R15                  0xFFE0
 
 /* Modifiers */
 
-#define XK_Shift_L		0xFFE1	/* Left shift */
-#define XK_Shift_R		0xFFE2	/* Right shift */
-#define XK_Control_L		0xFFE3	/* Left control */
-#define XK_Control_R		0xFFE4	/* Right control */
-#define XK_Caps_Lock		0xFFE5	/* Caps lock */
-#define XK_Shift_Lock		0xFFE6	/* Shift lock */
+#define XK_Shift_L              0xFFE1  /* Left shift */
+#define XK_Shift_R              0xFFE2  /* Right shift */
+#define XK_Control_L            0xFFE3  /* Left control */
+#define XK_Control_R            0xFFE4  /* Right control */
+#define XK_Caps_Lock            0xFFE5  /* Caps lock */
+#define XK_Shift_Lock           0xFFE6  /* Shift lock */
 
-#define XK_Meta_L		0xFFE7	/* Left meta */
-#define XK_Meta_R		0xFFE8	/* Right meta */
-#define XK_Alt_L		0xFFE9	/* Left alt */
-#define XK_Alt_R		0xFFEA	/* Right alt */
-#define XK_Super_L		0xFFEB	/* Left super */
-#define XK_Super_R		0xFFEC	/* Right super */
-#define XK_Hyper_L		0xFFED	/* Left hyper */
-#define XK_Hyper_R		0xFFEE	/* Right hyper */
+#define XK_Meta_L               0xFFE7  /* Left meta */
+#define XK_Meta_R               0xFFE8  /* Right meta */
+#define XK_Alt_L                0xFFE9  /* Left alt */
+#define XK_Alt_R                0xFFEA  /* Right alt */
+#define XK_Super_L              0xFFEB  /* Left super */
+#define XK_Super_R              0xFFEC  /* Right super */
+#define XK_Hyper_L              0xFFED  /* Left hyper */
+#define XK_Hyper_R              0xFFEE  /* Right hyper */
 #endif /* XK_MISCELLANY */
 
 /*
@@ -272,114 +272,114 @@ SOFTWARE.
  */
 
 #ifdef XK_XKB_KEYS
-#define	XK_ISO_Lock					0xFE01
-#define	XK_ISO_Level2_Latch				0xFE02
-#define	XK_ISO_Level3_Shift				0xFE03
-#define	XK_ISO_Level3_Latch				0xFE04
-#define	XK_ISO_Level3_Lock				0xFE05
-#define	XK_ISO_Group_Shift		0xFF7E	/* Alias for mode_switch */
-#define	XK_ISO_Group_Latch				0xFE06
-#define	XK_ISO_Group_Lock				0xFE07
-#define	XK_ISO_Next_Group				0xFE08
-#define	XK_ISO_Next_Group_Lock				0xFE09
-#define	XK_ISO_Prev_Group				0xFE0A
-#define	XK_ISO_Prev_Group_Lock				0xFE0B
-#define	XK_ISO_First_Group				0xFE0C
-#define	XK_ISO_First_Group_Lock				0xFE0D
-#define	XK_ISO_Last_Group				0xFE0E
-#define	XK_ISO_Last_Group_Lock				0xFE0F
+#define XK_ISO_Lock                                     0xFE01
+#define XK_ISO_Level2_Latch                             0xFE02
+#define XK_ISO_Level3_Shift                             0xFE03
+#define XK_ISO_Level3_Latch                             0xFE04
+#define XK_ISO_Level3_Lock                              0xFE05
+#define XK_ISO_Group_Shift              0xFF7E  /* Alias for mode_switch */
+#define XK_ISO_Group_Latch                              0xFE06
+#define XK_ISO_Group_Lock                               0xFE07
+#define XK_ISO_Next_Group                               0xFE08
+#define XK_ISO_Next_Group_Lock                          0xFE09
+#define XK_ISO_Prev_Group                               0xFE0A
+#define XK_ISO_Prev_Group_Lock                          0xFE0B
+#define XK_ISO_First_Group                              0xFE0C
+#define XK_ISO_First_Group_Lock                         0xFE0D
+#define XK_ISO_Last_Group                               0xFE0E
+#define XK_ISO_Last_Group_Lock                          0xFE0F
 
-#define	XK_ISO_Left_Tab					0xFE20
-#define	XK_ISO_Move_Line_Up				0xFE21
-#define	XK_ISO_Move_Line_Down				0xFE22
-#define	XK_ISO_Partial_Line_Up				0xFE23
-#define	XK_ISO_Partial_Line_Down			0xFE24
-#define	XK_ISO_Partial_Space_Left			0xFE25
-#define	XK_ISO_Partial_Space_Right			0xFE26
-#define	XK_ISO_Set_Margin_Left				0xFE27
-#define	XK_ISO_Set_Margin_Right				0xFE28
-#define	XK_ISO_Release_Margin_Left			0xFE29
-#define	XK_ISO_Release_Margin_Right			0xFE2A
-#define	XK_ISO_Release_Both_Margins			0xFE2B
-#define	XK_ISO_Fast_Cursor_Left				0xFE2C
-#define	XK_ISO_Fast_Cursor_Right			0xFE2D
-#define	XK_ISO_Fast_Cursor_Up				0xFE2E
-#define	XK_ISO_Fast_Cursor_Down				0xFE2F
-#define	XK_ISO_Continuous_Underline			0xFE30
-#define	XK_ISO_Discontinuous_Underline			0xFE31
-#define	XK_ISO_Emphasize				0xFE32
-#define	XK_ISO_Center_Object				0xFE33
-#define	XK_ISO_Enter					0xFE34
+#define XK_ISO_Left_Tab                                 0xFE20
+#define XK_ISO_Move_Line_Up                             0xFE21
+#define XK_ISO_Move_Line_Down                           0xFE22
+#define XK_ISO_Partial_Line_Up                          0xFE23
+#define XK_ISO_Partial_Line_Down                        0xFE24
+#define XK_ISO_Partial_Space_Left                       0xFE25
+#define XK_ISO_Partial_Space_Right                      0xFE26
+#define XK_ISO_Set_Margin_Left                          0xFE27
+#define XK_ISO_Set_Margin_Right                         0xFE28
+#define XK_ISO_Release_Margin_Left                      0xFE29
+#define XK_ISO_Release_Margin_Right                     0xFE2A
+#define XK_ISO_Release_Both_Margins                     0xFE2B
+#define XK_ISO_Fast_Cursor_Left                         0xFE2C
+#define XK_ISO_Fast_Cursor_Right                        0xFE2D
+#define XK_ISO_Fast_Cursor_Up                           0xFE2E
+#define XK_ISO_Fast_Cursor_Down                         0xFE2F
+#define XK_ISO_Continuous_Underline                     0xFE30
+#define XK_ISO_Discontinuous_Underline                  0xFE31
+#define XK_ISO_Emphasize                                0xFE32
+#define XK_ISO_Center_Object                            0xFE33
+#define XK_ISO_Enter                                    0xFE34
 
-#define	XK_dead_grave					0xFE50
-#define	XK_dead_acute					0xFE51
-#define	XK_dead_circumflex				0xFE52
-#define	XK_dead_tilde					0xFE53
-#define	XK_dead_macron					0xFE54
-#define	XK_dead_breve					0xFE55
-#define	XK_dead_abovedot				0xFE56
-#define	XK_dead_diaeresis				0xFE57
-#define	XK_dead_abovering				0xFE58
-#define	XK_dead_doubleacute				0xFE59
-#define	XK_dead_caron					0xFE5A
-#define	XK_dead_cedilla					0xFE5B
-#define	XK_dead_ogonek					0xFE5C
-#define	XK_dead_iota					0xFE5D
-#define	XK_dead_voiced_sound				0xFE5E
-#define	XK_dead_semivoiced_sound			0xFE5F
-#define	XK_dead_belowdot				0xFE60
-#define XK_dead_hook					0xFE61
-#define XK_dead_horn					0xFE62
+#define XK_dead_grave                                   0xFE50
+#define XK_dead_acute                                   0xFE51
+#define XK_dead_circumflex                              0xFE52
+#define XK_dead_tilde                                   0xFE53
+#define XK_dead_macron                                  0xFE54
+#define XK_dead_breve                                   0xFE55
+#define XK_dead_abovedot                                0xFE56
+#define XK_dead_diaeresis                               0xFE57
+#define XK_dead_abovering                               0xFE58
+#define XK_dead_doubleacute                             0xFE59
+#define XK_dead_caron                                   0xFE5A
+#define XK_dead_cedilla                                 0xFE5B
+#define XK_dead_ogonek                                  0xFE5C
+#define XK_dead_iota                                    0xFE5D
+#define XK_dead_voiced_sound                            0xFE5E
+#define XK_dead_semivoiced_sound                        0xFE5F
+#define XK_dead_belowdot                                0xFE60
+#define XK_dead_hook                                    0xFE61
+#define XK_dead_horn                                    0xFE62
 
-#define	XK_First_Virtual_Screen				0xFED0
-#define	XK_Prev_Virtual_Screen				0xFED1
-#define	XK_Next_Virtual_Screen				0xFED2
-#define	XK_Last_Virtual_Screen				0xFED4
-#define	XK_Terminate_Server				0xFED5
+#define XK_First_Virtual_Screen                         0xFED0
+#define XK_Prev_Virtual_Screen                          0xFED1
+#define XK_Next_Virtual_Screen                          0xFED2
+#define XK_Last_Virtual_Screen                          0xFED4
+#define XK_Terminate_Server                             0xFED5
 
-#define	XK_AccessX_Enable				0xFE70
-#define	XK_AccessX_Feedback_Enable			0xFE71
-#define	XK_RepeatKeys_Enable				0xFE72
-#define	XK_SlowKeys_Enable				0xFE73
-#define	XK_BounceKeys_Enable				0xFE74
-#define	XK_StickyKeys_Enable				0xFE75
-#define	XK_MouseKeys_Enable				0xFE76
-#define	XK_MouseKeys_Accel_Enable			0xFE77
-#define	XK_Overlay1_Enable				0xFE78
-#define	XK_Overlay2_Enable				0xFE79
-#define	XK_AudibleBell_Enable				0xFE7A
+#define XK_AccessX_Enable                               0xFE70
+#define XK_AccessX_Feedback_Enable                      0xFE71
+#define XK_RepeatKeys_Enable                            0xFE72
+#define XK_SlowKeys_Enable                              0xFE73
+#define XK_BounceKeys_Enable                            0xFE74
+#define XK_StickyKeys_Enable                            0xFE75
+#define XK_MouseKeys_Enable                             0xFE76
+#define XK_MouseKeys_Accel_Enable                       0xFE77
+#define XK_Overlay1_Enable                              0xFE78
+#define XK_Overlay2_Enable                              0xFE79
+#define XK_AudibleBell_Enable                           0xFE7A
 
-#define	XK_Pointer_Left					0xFEE0
-#define	XK_Pointer_Right				0xFEE1
-#define	XK_Pointer_Up					0xFEE2
-#define	XK_Pointer_Down					0xFEE3
-#define	XK_Pointer_UpLeft				0xFEE4
-#define	XK_Pointer_UpRight				0xFEE5
-#define	XK_Pointer_DownLeft				0xFEE6
-#define	XK_Pointer_DownRight				0xFEE7
-#define	XK_Pointer_Button_Dflt				0xFEE8
-#define	XK_Pointer_Button1				0xFEE9
-#define	XK_Pointer_Button2				0xFEEA
-#define	XK_Pointer_Button3				0xFEEB
-#define	XK_Pointer_Button4				0xFEEC
-#define	XK_Pointer_Button5				0xFEED
-#define	XK_Pointer_DblClick_Dflt			0xFEEE
-#define	XK_Pointer_DblClick1				0xFEEF
-#define	XK_Pointer_DblClick2				0xFEF0
-#define	XK_Pointer_DblClick3				0xFEF1
-#define	XK_Pointer_DblClick4				0xFEF2
-#define	XK_Pointer_DblClick5				0xFEF3
-#define	XK_Pointer_Drag_Dflt				0xFEF4
-#define	XK_Pointer_Drag1				0xFEF5
-#define	XK_Pointer_Drag2				0xFEF6
-#define	XK_Pointer_Drag3				0xFEF7
-#define	XK_Pointer_Drag4				0xFEF8
-#define	XK_Pointer_Drag5				0xFEFD
+#define XK_Pointer_Left                                 0xFEE0
+#define XK_Pointer_Right                                0xFEE1
+#define XK_Pointer_Up                                   0xFEE2
+#define XK_Pointer_Down                                 0xFEE3
+#define XK_Pointer_UpLeft                               0xFEE4
+#define XK_Pointer_UpRight                              0xFEE5
+#define XK_Pointer_DownLeft                             0xFEE6
+#define XK_Pointer_DownRight                            0xFEE7
+#define XK_Pointer_Button_Dflt                          0xFEE8
+#define XK_Pointer_Button1                              0xFEE9
+#define XK_Pointer_Button2                              0xFEEA
+#define XK_Pointer_Button3                              0xFEEB
+#define XK_Pointer_Button4                              0xFEEC
+#define XK_Pointer_Button5                              0xFEED
+#define XK_Pointer_DblClick_Dflt                        0xFEEE
+#define XK_Pointer_DblClick1                            0xFEEF
+#define XK_Pointer_DblClick2                            0xFEF0
+#define XK_Pointer_DblClick3                            0xFEF1
+#define XK_Pointer_DblClick4                            0xFEF2
+#define XK_Pointer_DblClick5                            0xFEF3
+#define XK_Pointer_Drag_Dflt                            0xFEF4
+#define XK_Pointer_Drag1                                0xFEF5
+#define XK_Pointer_Drag2                                0xFEF6
+#define XK_Pointer_Drag3                                0xFEF7
+#define XK_Pointer_Drag4                                0xFEF8
+#define XK_Pointer_Drag5                                0xFEFD
 
-#define	XK_Pointer_EnableKeys				0xFEF9
-#define	XK_Pointer_Accelerate				0xFEFA
-#define	XK_Pointer_DfltBtnNext				0xFEFB
-#define	XK_Pointer_DfltBtnPrev				0xFEFC
+#define XK_Pointer_EnableKeys                           0xFEF9
+#define XK_Pointer_Accelerate                           0xFEFA
+#define XK_Pointer_DfltBtnNext                          0xFEFB
+#define XK_Pointer_DfltBtnPrev                          0xFEFC
 
 #endif
 
@@ -434,7 +434,7 @@ SOFTWARE.
 #define XK_percent             0x025
 #define XK_ampersand           0x026
 #define XK_apostrophe          0x027
-#define XK_quoteright          0x027	/* deprecated */
+#define XK_quoteright          0x027    /* deprecated */
 #define XK_parenleft           0x028
 #define XK_parenright          0x029
 #define XK_asterisk            0x02a
@@ -492,7 +492,7 @@ SOFTWARE.
 #define XK_asciicircum         0x05e
 #define XK_underscore          0x05f
 #define XK_grave               0x060
-#define XK_quoteleft           0x060	/* deprecated */
+#define XK_quoteleft           0x060    /* deprecated */
 #define XK_a                   0x061
 #define XK_b                   0x062
 #define XK_c                   0x063
@@ -526,7 +526,7 @@ SOFTWARE.
 
 #define XK_nobreakspace        0x0a0
 #define XK_exclamdown          0x0a1
-#define XK_cent        	       0x0a2
+#define XK_cent                0x0a2
 #define XK_sterling            0x0a3
 #define XK_currency            0x0a4
 #define XK_yen                 0x0a5
@@ -535,7 +535,7 @@ SOFTWARE.
 #define XK_diaeresis           0x0a8
 #define XK_copyright           0x0a9
 #define XK_ordfeminine         0x0aa
-#define XK_guillemotleft       0x0ab	/* left angle quotation mark */
+#define XK_guillemotleft       0x0ab    /* left angle quotation mark */
 #define XK_notsign             0x0ac
 #define XK_hyphen              0x0ad
 #define XK_registered          0x0ae
@@ -551,7 +551,7 @@ SOFTWARE.
 #define XK_cedilla             0x0b8
 #define XK_onesuperior         0x0b9
 #define XK_masculine           0x0ba
-#define XK_guillemotright      0x0bb	/* right angle quotation mark */
+#define XK_guillemotright      0x0bb    /* right angle quotation mark */
 #define XK_onequarter          0x0bc
 #define XK_onehalf             0x0bd
 #define XK_threequarters       0x0be
@@ -573,7 +573,7 @@ SOFTWARE.
 #define XK_Icircumflex         0x0ce
 #define XK_Idiaeresis          0x0cf
 #define XK_ETH                 0x0d0
-#define XK_Eth                 0x0d0	/* deprecated */
+#define XK_Eth                 0x0d0    /* deprecated */
 #define XK_Ntilde              0x0d1
 #define XK_Ograve              0x0d2
 #define XK_Oacute              0x0d3
@@ -589,7 +589,7 @@ SOFTWARE.
 #define XK_Udiaeresis          0x0dc
 #define XK_Yacute              0x0dd
 #define XK_THORN               0x0de
-#define XK_Thorn               0x0de	/* deprecated */
+#define XK_Thorn               0x0de    /* deprecated */
 #define XK_ssharp              0x0df
 #define XK_agrave              0x0e0
 #define XK_aacute              0x0e1
@@ -729,7 +729,7 @@ SOFTWARE.
 
 #ifdef XK_LATIN4
 #define XK_kra                 0x3a2
-#define XK_kappa               0x3a2	/* deprecated */
+#define XK_kappa               0x3a2    /* deprecated */
 #define XK_Rcedilla            0x3a3
 #define XK_Itilde              0x3a5
 #define XK_Lcedilla            0x3a6
@@ -816,7 +816,7 @@ SOFTWARE.
  */
 
 #ifdef XK_KATAKANA
-#define XK_overline				       0x47e
+#define XK_overline                                    0x47e
 #define XK_kana_fullstop                               0x4a1
 #define XK_kana_openingbracket                         0x4a2
 #define XK_kana_closingbracket                         0x4a3
@@ -992,37 +992,37 @@ SOFTWARE.
  * Byte 3 = 6
  */
 #ifdef XK_CYRILLIC
-#define XK_Cyrillic_GHE_bar	                           0x680
-#define XK_Cyrillic_ghe_bar	                           0x690
-#define XK_Cyrillic_ZHE_descender	                   0x681
-#define XK_Cyrillic_zhe_descender	                   0x691
-#define XK_Cyrillic_KA_descender	                   0x682
-#define XK_Cyrillic_ka_descender	                   0x692
-#define XK_Cyrillic_KA_vertstroke	                   0x683
-#define XK_Cyrillic_ka_vertstroke	                   0x693
-#define XK_Cyrillic_EN_descender	                   0x684
-#define XK_Cyrillic_en_descender	                   0x694
-#define XK_Cyrillic_U_straight	                       0x685
-#define XK_Cyrillic_u_straight	                       0x695
-#define XK_Cyrillic_U_straight_bar	                   0x686
-#define XK_Cyrillic_u_straight_bar	                   0x696
-#define XK_Cyrillic_HA_descender	                   0x687
-#define XK_Cyrillic_ha_descender	                   0x697
-#define XK_Cyrillic_CHE_descender	                   0x688
-#define XK_Cyrillic_che_descender	                   0x698
-#define XK_Cyrillic_CHE_vertstroke	                   0x689
-#define XK_Cyrillic_che_vertstroke	                   0x699
-#define XK_Cyrillic_SHHA	                           0x68a
-#define XK_Cyrillic_shha	                           0x69a
+#define XK_Cyrillic_GHE_bar                                0x680
+#define XK_Cyrillic_ghe_bar                                0x690
+#define XK_Cyrillic_ZHE_descender                          0x681
+#define XK_Cyrillic_zhe_descender                          0x691
+#define XK_Cyrillic_KA_descender                           0x682
+#define XK_Cyrillic_ka_descender                           0x692
+#define XK_Cyrillic_KA_vertstroke                          0x683
+#define XK_Cyrillic_ka_vertstroke                          0x693
+#define XK_Cyrillic_EN_descender                           0x684
+#define XK_Cyrillic_en_descender                           0x694
+#define XK_Cyrillic_U_straight                         0x685
+#define XK_Cyrillic_u_straight                         0x695
+#define XK_Cyrillic_U_straight_bar                         0x686
+#define XK_Cyrillic_u_straight_bar                         0x696
+#define XK_Cyrillic_HA_descender                           0x687
+#define XK_Cyrillic_ha_descender                           0x697
+#define XK_Cyrillic_CHE_descender                          0x688
+#define XK_Cyrillic_che_descender                          0x698
+#define XK_Cyrillic_CHE_vertstroke                         0x689
+#define XK_Cyrillic_che_vertstroke                         0x699
+#define XK_Cyrillic_SHHA                                   0x68a
+#define XK_Cyrillic_shha                                   0x69a
 
-#define XK_Cyrillic_SCHWA	                           0x68c
-#define XK_Cyrillic_schwa	                           0x69c
-#define XK_Cyrillic_I_macron		                   0x68d
-#define XK_Cyrillic_i_macron		                   0x69d
-#define XK_Cyrillic_O_bar	                           0x68e
-#define XK_Cyrillic_o_bar	                           0x69e
-#define XK_Cyrillic_U_macron		                   0x68f
-#define XK_Cyrillic_u_macron		                   0x69f
+#define XK_Cyrillic_SCHWA                                  0x68c
+#define XK_Cyrillic_schwa                                  0x69c
+#define XK_Cyrillic_I_macron                               0x68d
+#define XK_Cyrillic_i_macron                               0x69d
+#define XK_Cyrillic_O_bar                                  0x68e
+#define XK_Cyrillic_o_bar                                  0x69e
+#define XK_Cyrillic_U_macron                               0x68f
+#define XK_Cyrillic_u_macron                               0x69f
 
 #define XK_Serbian_dje                                 0x6a1
 #define XK_Macedonia_gje                               0x6a2
@@ -1479,90 +1479,90 @@ SOFTWARE.
  */
 
 #ifdef XK_THAI
-#define XK_Thai_kokai					0xda1
-#define XK_Thai_khokhai					0xda2
-#define XK_Thai_khokhuat				0xda3
-#define XK_Thai_khokhwai				0xda4
-#define XK_Thai_khokhon					0xda5
-#define XK_Thai_khorakhang			        0xda6
-#define XK_Thai_ngongu					0xda7
-#define XK_Thai_chochan					0xda8
-#define XK_Thai_choching				0xda9
-#define XK_Thai_chochang				0xdaa
-#define XK_Thai_soso					0xdab
-#define XK_Thai_chochoe					0xdac
-#define XK_Thai_yoying					0xdad
-#define XK_Thai_dochada					0xdae
-#define XK_Thai_topatak					0xdaf
-#define XK_Thai_thothan					0xdb0
-#define XK_Thai_thonangmontho			        0xdb1
-#define XK_Thai_thophuthao			        0xdb2
-#define XK_Thai_nonen					0xdb3
-#define XK_Thai_dodek					0xdb4
-#define XK_Thai_totao					0xdb5
-#define XK_Thai_thothung				0xdb6
-#define XK_Thai_thothahan				0xdb7
-#define XK_Thai_thothong	 			0xdb8
-#define XK_Thai_nonu					0xdb9
-#define XK_Thai_bobaimai				0xdba
-#define XK_Thai_popla					0xdbb
-#define XK_Thai_phophung				0xdbc
-#define XK_Thai_fofa					0xdbd
-#define XK_Thai_phophan					0xdbe
-#define XK_Thai_fofan					0xdbf
-#define XK_Thai_phosamphao			        0xdc0
-#define XK_Thai_moma					0xdc1
-#define XK_Thai_yoyak					0xdc2
-#define XK_Thai_rorua					0xdc3
-#define XK_Thai_ru					0xdc4
-#define XK_Thai_loling					0xdc5
-#define XK_Thai_lu					0xdc6
-#define XK_Thai_wowaen					0xdc7
-#define XK_Thai_sosala					0xdc8
-#define XK_Thai_sorusi					0xdc9
-#define XK_Thai_sosua					0xdca
-#define XK_Thai_hohip					0xdcb
-#define XK_Thai_lochula					0xdcc
-#define XK_Thai_oang					0xdcd
-#define XK_Thai_honokhuk				0xdce
-#define XK_Thai_paiyannoi				0xdcf
-#define XK_Thai_saraa					0xdd0
-#define XK_Thai_maihanakat				0xdd1
-#define XK_Thai_saraaa					0xdd2
-#define XK_Thai_saraam					0xdd3
-#define XK_Thai_sarai					0xdd4
-#define XK_Thai_saraii					0xdd5
-#define XK_Thai_saraue					0xdd6
-#define XK_Thai_sarauee					0xdd7
-#define XK_Thai_sarau					0xdd8
-#define XK_Thai_sarauu					0xdd9
-#define XK_Thai_phinthu					0xdda
-#define XK_Thai_maihanakat_maitho   			0xdde
-#define XK_Thai_baht					0xddf
-#define XK_Thai_sarae					0xde0
-#define XK_Thai_saraae					0xde1
-#define XK_Thai_sarao					0xde2
-#define XK_Thai_saraaimaimuan				0xde3
-#define XK_Thai_saraaimaimalai				0xde4
-#define XK_Thai_lakkhangyao				0xde5
-#define XK_Thai_maiyamok				0xde6
-#define XK_Thai_maitaikhu				0xde7
-#define XK_Thai_maiek					0xde8
-#define XK_Thai_maitho					0xde9
-#define XK_Thai_maitri					0xdea
-#define XK_Thai_maichattawa				0xdeb
-#define XK_Thai_thanthakhat				0xdec
-#define XK_Thai_nikhahit				0xded
-#define XK_Thai_leksun					0xdf0
-#define XK_Thai_leknung					0xdf1
-#define XK_Thai_leksong					0xdf2
-#define XK_Thai_leksam					0xdf3
-#define XK_Thai_leksi					0xdf4
-#define XK_Thai_lekha					0xdf5
-#define XK_Thai_lekhok					0xdf6
-#define XK_Thai_lekchet					0xdf7
-#define XK_Thai_lekpaet					0xdf8
-#define XK_Thai_lekkao					0xdf9
+#define XK_Thai_kokai                                   0xda1
+#define XK_Thai_khokhai                                 0xda2
+#define XK_Thai_khokhuat                                0xda3
+#define XK_Thai_khokhwai                                0xda4
+#define XK_Thai_khokhon                                 0xda5
+#define XK_Thai_khorakhang                              0xda6
+#define XK_Thai_ngongu                                  0xda7
+#define XK_Thai_chochan                                 0xda8
+#define XK_Thai_choching                                0xda9
+#define XK_Thai_chochang                                0xdaa
+#define XK_Thai_soso                                    0xdab
+#define XK_Thai_chochoe                                 0xdac
+#define XK_Thai_yoying                                  0xdad
+#define XK_Thai_dochada                                 0xdae
+#define XK_Thai_topatak                                 0xdaf
+#define XK_Thai_thothan                                 0xdb0
+#define XK_Thai_thonangmontho                           0xdb1
+#define XK_Thai_thophuthao                              0xdb2
+#define XK_Thai_nonen                                   0xdb3
+#define XK_Thai_dodek                                   0xdb4
+#define XK_Thai_totao                                   0xdb5
+#define XK_Thai_thothung                                0xdb6
+#define XK_Thai_thothahan                               0xdb7
+#define XK_Thai_thothong                                0xdb8
+#define XK_Thai_nonu                                    0xdb9
+#define XK_Thai_bobaimai                                0xdba
+#define XK_Thai_popla                                   0xdbb
+#define XK_Thai_phophung                                0xdbc
+#define XK_Thai_fofa                                    0xdbd
+#define XK_Thai_phophan                                 0xdbe
+#define XK_Thai_fofan                                   0xdbf
+#define XK_Thai_phosamphao                              0xdc0
+#define XK_Thai_moma                                    0xdc1
+#define XK_Thai_yoyak                                   0xdc2
+#define XK_Thai_rorua                                   0xdc3
+#define XK_Thai_ru                                      0xdc4
+#define XK_Thai_loling                                  0xdc5
+#define XK_Thai_lu                                      0xdc6
+#define XK_Thai_wowaen                                  0xdc7
+#define XK_Thai_sosala                                  0xdc8
+#define XK_Thai_sorusi                                  0xdc9
+#define XK_Thai_sosua                                   0xdca
+#define XK_Thai_hohip                                   0xdcb
+#define XK_Thai_lochula                                 0xdcc
+#define XK_Thai_oang                                    0xdcd
+#define XK_Thai_honokhuk                                0xdce
+#define XK_Thai_paiyannoi                               0xdcf
+#define XK_Thai_saraa                                   0xdd0
+#define XK_Thai_maihanakat                              0xdd1
+#define XK_Thai_saraaa                                  0xdd2
+#define XK_Thai_saraam                                  0xdd3
+#define XK_Thai_sarai                                   0xdd4
+#define XK_Thai_saraii                                  0xdd5
+#define XK_Thai_saraue                                  0xdd6
+#define XK_Thai_sarauee                                 0xdd7
+#define XK_Thai_sarau                                   0xdd8
+#define XK_Thai_sarauu                                  0xdd9
+#define XK_Thai_phinthu                                 0xdda
+#define XK_Thai_maihanakat_maitho                       0xdde
+#define XK_Thai_baht                                    0xddf
+#define XK_Thai_sarae                                   0xde0
+#define XK_Thai_saraae                                  0xde1
+#define XK_Thai_sarao                                   0xde2
+#define XK_Thai_saraaimaimuan                           0xde3
+#define XK_Thai_saraaimaimalai                          0xde4
+#define XK_Thai_lakkhangyao                             0xde5
+#define XK_Thai_maiyamok                                0xde6
+#define XK_Thai_maitaikhu                               0xde7
+#define XK_Thai_maiek                                   0xde8
+#define XK_Thai_maitho                                  0xde9
+#define XK_Thai_maitri                                  0xdea
+#define XK_Thai_maichattawa                             0xdeb
+#define XK_Thai_thanthakhat                             0xdec
+#define XK_Thai_nikhahit                                0xded
+#define XK_Thai_leksun                                  0xdf0
+#define XK_Thai_leknung                                 0xdf1
+#define XK_Thai_leksong                                 0xdf2
+#define XK_Thai_leksam                                  0xdf3
+#define XK_Thai_leksi                                   0xdf4
+#define XK_Thai_lekha                                   0xdf5
+#define XK_Thai_lekhok                                  0xdf6
+#define XK_Thai_lekchet                                 0xdf7
+#define XK_Thai_lekpaet                                 0xdf8
+#define XK_Thai_lekkao                                  0xdf9
 #endif /* XK_THAI */
 
 /*
@@ -1572,127 +1572,127 @@ SOFTWARE.
 
 #ifdef XK_KOREAN
 
-#define XK_Hangul		0xff31    /* Hangul start/stop(toggle) */
-#define XK_Hangul_Start		0xff32    /* Hangul start */
-#define XK_Hangul_End		0xff33    /* Hangul end, English start */
-#define XK_Hangul_Hanja		0xff34    /* Start Hangul->Hanja Conversion */
-#define XK_Hangul_Jamo		0xff35    /* Hangul Jamo mode */
-#define XK_Hangul_Romaja	0xff36    /* Hangul Romaja mode */
-#define XK_Hangul_Codeinput	0xff37    /* Hangul code input mode */
-#define XK_Hangul_Jeonja	0xff38    /* Jeonja mode */
-#define XK_Hangul_Banja		0xff39    /* Banja mode */
-#define XK_Hangul_PreHanja	0xff3a    /* Pre Hanja conversion */
-#define XK_Hangul_PostHanja	0xff3b    /* Post Hanja conversion */
-#define XK_Hangul_SingleCandidate	0xff3c    /* Single candidate */
-#define XK_Hangul_MultipleCandidate	0xff3d    /* Multiple candidate */
-#define XK_Hangul_PreviousCandidate	0xff3e    /* Previous candidate */
-#define XK_Hangul_Special	0xff3f    /* Special symbols */
-#define XK_Hangul_switch	0xFF7E    /* Alias for mode_switch */
+#define XK_Hangul               0xff31    /* Hangul start/stop(toggle) */
+#define XK_Hangul_Start         0xff32    /* Hangul start */
+#define XK_Hangul_End           0xff33    /* Hangul end, English start */
+#define XK_Hangul_Hanja         0xff34    /* Start Hangul->Hanja Conversion */
+#define XK_Hangul_Jamo          0xff35    /* Hangul Jamo mode */
+#define XK_Hangul_Romaja        0xff36    /* Hangul Romaja mode */
+#define XK_Hangul_Codeinput     0xff37    /* Hangul code input mode */
+#define XK_Hangul_Jeonja        0xff38    /* Jeonja mode */
+#define XK_Hangul_Banja         0xff39    /* Banja mode */
+#define XK_Hangul_PreHanja      0xff3a    /* Pre Hanja conversion */
+#define XK_Hangul_PostHanja     0xff3b    /* Post Hanja conversion */
+#define XK_Hangul_SingleCandidate       0xff3c    /* Single candidate */
+#define XK_Hangul_MultipleCandidate     0xff3d    /* Multiple candidate */
+#define XK_Hangul_PreviousCandidate     0xff3e    /* Previous candidate */
+#define XK_Hangul_Special       0xff3f    /* Special symbols */
+#define XK_Hangul_switch        0xFF7E    /* Alias for mode_switch */
 
 /* Hangul Consonant Characters */
-#define XK_Hangul_Kiyeog				0xea1
-#define XK_Hangul_SsangKiyeog				0xea2
-#define XK_Hangul_KiyeogSios				0xea3
-#define XK_Hangul_Nieun					0xea4
-#define XK_Hangul_NieunJieuj				0xea5
-#define XK_Hangul_NieunHieuh				0xea6
-#define XK_Hangul_Dikeud				0xea7
-#define XK_Hangul_SsangDikeud				0xea8
-#define XK_Hangul_Rieul					0xea9
-#define XK_Hangul_RieulKiyeog				0xeaa
-#define XK_Hangul_RieulMieum				0xeab
-#define XK_Hangul_RieulPieub				0xeac
-#define XK_Hangul_RieulSios				0xead
-#define XK_Hangul_RieulTieut				0xeae
-#define XK_Hangul_RieulPhieuf				0xeaf
-#define XK_Hangul_RieulHieuh				0xeb0
-#define XK_Hangul_Mieum					0xeb1
-#define XK_Hangul_Pieub					0xeb2
-#define XK_Hangul_SsangPieub				0xeb3
-#define XK_Hangul_PieubSios				0xeb4
-#define XK_Hangul_Sios					0xeb5
-#define XK_Hangul_SsangSios				0xeb6
-#define XK_Hangul_Ieung					0xeb7
-#define XK_Hangul_Jieuj					0xeb8
-#define XK_Hangul_SsangJieuj				0xeb9
-#define XK_Hangul_Cieuc					0xeba
-#define XK_Hangul_Khieuq				0xebb
-#define XK_Hangul_Tieut					0xebc
-#define XK_Hangul_Phieuf				0xebd
-#define XK_Hangul_Hieuh					0xebe
+#define XK_Hangul_Kiyeog                                0xea1
+#define XK_Hangul_SsangKiyeog                           0xea2
+#define XK_Hangul_KiyeogSios                            0xea3
+#define XK_Hangul_Nieun                                 0xea4
+#define XK_Hangul_NieunJieuj                            0xea5
+#define XK_Hangul_NieunHieuh                            0xea6
+#define XK_Hangul_Dikeud                                0xea7
+#define XK_Hangul_SsangDikeud                           0xea8
+#define XK_Hangul_Rieul                                 0xea9
+#define XK_Hangul_RieulKiyeog                           0xeaa
+#define XK_Hangul_RieulMieum                            0xeab
+#define XK_Hangul_RieulPieub                            0xeac
+#define XK_Hangul_RieulSios                             0xead
+#define XK_Hangul_RieulTieut                            0xeae
+#define XK_Hangul_RieulPhieuf                           0xeaf
+#define XK_Hangul_RieulHieuh                            0xeb0
+#define XK_Hangul_Mieum                                 0xeb1
+#define XK_Hangul_Pieub                                 0xeb2
+#define XK_Hangul_SsangPieub                            0xeb3
+#define XK_Hangul_PieubSios                             0xeb4
+#define XK_Hangul_Sios                                  0xeb5
+#define XK_Hangul_SsangSios                             0xeb6
+#define XK_Hangul_Ieung                                 0xeb7
+#define XK_Hangul_Jieuj                                 0xeb8
+#define XK_Hangul_SsangJieuj                            0xeb9
+#define XK_Hangul_Cieuc                                 0xeba
+#define XK_Hangul_Khieuq                                0xebb
+#define XK_Hangul_Tieut                                 0xebc
+#define XK_Hangul_Phieuf                                0xebd
+#define XK_Hangul_Hieuh                                 0xebe
 
 /* Hangul Vowel Characters */
-#define XK_Hangul_A					0xebf
-#define XK_Hangul_AE					0xec0
-#define XK_Hangul_YA					0xec1
-#define XK_Hangul_YAE					0xec2
-#define XK_Hangul_EO					0xec3
-#define XK_Hangul_E					0xec4
-#define XK_Hangul_YEO					0xec5
-#define XK_Hangul_YE					0xec6
-#define XK_Hangul_O					0xec7
-#define XK_Hangul_WA					0xec8
-#define XK_Hangul_WAE					0xec9
-#define XK_Hangul_OE					0xeca
-#define XK_Hangul_YO					0xecb
-#define XK_Hangul_U					0xecc
-#define XK_Hangul_WEO					0xecd
-#define XK_Hangul_WE					0xece
-#define XK_Hangul_WI					0xecf
-#define XK_Hangul_YU					0xed0
-#define XK_Hangul_EU					0xed1
-#define XK_Hangul_YI					0xed2
-#define XK_Hangul_I					0xed3
+#define XK_Hangul_A                                     0xebf
+#define XK_Hangul_AE                                    0xec0
+#define XK_Hangul_YA                                    0xec1
+#define XK_Hangul_YAE                                   0xec2
+#define XK_Hangul_EO                                    0xec3
+#define XK_Hangul_E                                     0xec4
+#define XK_Hangul_YEO                                   0xec5
+#define XK_Hangul_YE                                    0xec6
+#define XK_Hangul_O                                     0xec7
+#define XK_Hangul_WA                                    0xec8
+#define XK_Hangul_WAE                                   0xec9
+#define XK_Hangul_OE                                    0xeca
+#define XK_Hangul_YO                                    0xecb
+#define XK_Hangul_U                                     0xecc
+#define XK_Hangul_WEO                                   0xecd
+#define XK_Hangul_WE                                    0xece
+#define XK_Hangul_WI                                    0xecf
+#define XK_Hangul_YU                                    0xed0
+#define XK_Hangul_EU                                    0xed1
+#define XK_Hangul_YI                                    0xed2
+#define XK_Hangul_I                                     0xed3
 
 /* Hangul syllable-final (JongSeong) Characters */
-#define XK_Hangul_J_Kiyeog				0xed4
-#define XK_Hangul_J_SsangKiyeog				0xed5
-#define XK_Hangul_J_KiyeogSios				0xed6
-#define XK_Hangul_J_Nieun				0xed7
-#define XK_Hangul_J_NieunJieuj				0xed8
-#define XK_Hangul_J_NieunHieuh				0xed9
-#define XK_Hangul_J_Dikeud				0xeda
-#define XK_Hangul_J_Rieul				0xedb
-#define XK_Hangul_J_RieulKiyeog				0xedc
-#define XK_Hangul_J_RieulMieum				0xedd
-#define XK_Hangul_J_RieulPieub				0xede
-#define XK_Hangul_J_RieulSios				0xedf
-#define XK_Hangul_J_RieulTieut				0xee0
-#define XK_Hangul_J_RieulPhieuf				0xee1
-#define XK_Hangul_J_RieulHieuh				0xee2
-#define XK_Hangul_J_Mieum				0xee3
-#define XK_Hangul_J_Pieub				0xee4
-#define XK_Hangul_J_PieubSios				0xee5
-#define XK_Hangul_J_Sios				0xee6
-#define XK_Hangul_J_SsangSios				0xee7
-#define XK_Hangul_J_Ieung				0xee8
-#define XK_Hangul_J_Jieuj				0xee9
-#define XK_Hangul_J_Cieuc				0xeea
-#define XK_Hangul_J_Khieuq				0xeeb
-#define XK_Hangul_J_Tieut				0xeec
-#define XK_Hangul_J_Phieuf				0xeed
-#define XK_Hangul_J_Hieuh				0xeee
+#define XK_Hangul_J_Kiyeog                              0xed4
+#define XK_Hangul_J_SsangKiyeog                         0xed5
+#define XK_Hangul_J_KiyeogSios                          0xed6
+#define XK_Hangul_J_Nieun                               0xed7
+#define XK_Hangul_J_NieunJieuj                          0xed8
+#define XK_Hangul_J_NieunHieuh                          0xed9
+#define XK_Hangul_J_Dikeud                              0xeda
+#define XK_Hangul_J_Rieul                               0xedb
+#define XK_Hangul_J_RieulKiyeog                         0xedc
+#define XK_Hangul_J_RieulMieum                          0xedd
+#define XK_Hangul_J_RieulPieub                          0xede
+#define XK_Hangul_J_RieulSios                           0xedf
+#define XK_Hangul_J_RieulTieut                          0xee0
+#define XK_Hangul_J_RieulPhieuf                         0xee1
+#define XK_Hangul_J_RieulHieuh                          0xee2
+#define XK_Hangul_J_Mieum                               0xee3
+#define XK_Hangul_J_Pieub                               0xee4
+#define XK_Hangul_J_PieubSios                           0xee5
+#define XK_Hangul_J_Sios                                0xee6
+#define XK_Hangul_J_SsangSios                           0xee7
+#define XK_Hangul_J_Ieung                               0xee8
+#define XK_Hangul_J_Jieuj                               0xee9
+#define XK_Hangul_J_Cieuc                               0xeea
+#define XK_Hangul_J_Khieuq                              0xeeb
+#define XK_Hangul_J_Tieut                               0xeec
+#define XK_Hangul_J_Phieuf                              0xeed
+#define XK_Hangul_J_Hieuh                               0xeee
 
 /* Ancient Hangul Consonant Characters */
-#define XK_Hangul_RieulYeorinHieuh			0xeef
-#define XK_Hangul_SunkyeongeumMieum			0xef0
-#define XK_Hangul_SunkyeongeumPieub			0xef1
-#define XK_Hangul_PanSios				0xef2
-#define XK_Hangul_KkogjiDalrinIeung			0xef3
-#define XK_Hangul_SunkyeongeumPhieuf			0xef4
-#define XK_Hangul_YeorinHieuh				0xef5
+#define XK_Hangul_RieulYeorinHieuh                      0xeef
+#define XK_Hangul_SunkyeongeumMieum                     0xef0
+#define XK_Hangul_SunkyeongeumPieub                     0xef1
+#define XK_Hangul_PanSios                               0xef2
+#define XK_Hangul_KkogjiDalrinIeung                     0xef3
+#define XK_Hangul_SunkyeongeumPhieuf                    0xef4
+#define XK_Hangul_YeorinHieuh                           0xef5
 
 /* Ancient Hangul Vowel Characters */
-#define XK_Hangul_AraeA					0xef6
-#define XK_Hangul_AraeAE				0xef7
+#define XK_Hangul_AraeA                                 0xef6
+#define XK_Hangul_AraeAE                                0xef7
 
 /* Ancient Hangul syllable-final (JongSeong) Characters */
-#define XK_Hangul_J_PanSios				0xef8
-#define XK_Hangul_J_KkogjiDalrinIeung			0xef9
-#define XK_Hangul_J_YeorinHieuh				0xefa
+#define XK_Hangul_J_PanSios                             0xef8
+#define XK_Hangul_J_KkogjiDalrinIeung                   0xef9
+#define XK_Hangul_J_YeorinHieuh                         0xefa
 
 /* Korean currency symbol */
-#define XK_Korean_Won					0xeff
+#define XK_Korean_Won                                   0xeff
 
 #endif /* XK_KOREAN */
 
@@ -1702,108 +1702,108 @@ SOFTWARE.
  */
 
 #ifdef XK_ARMENIAN
-#define XK_Armenian_eternity				0x14a1
-#define XK_Armenian_ligature_ew				0x14a2
-#define XK_Armenian_full_stop				0x14a3
-#define XK_Armenian_verjaket				0x14a3
-#define XK_Armenian_parenright				0x14a4
-#define XK_Armenian_parenleft				0x14a5
-#define XK_Armenian_guillemotright			0x14a6
-#define XK_Armenian_guillemotleft			0x14a7
-#define XK_Armenian_em_dash				0x14a8
-#define XK_Armenian_dot					0x14a9
-#define XK_Armenian_mijaket				0x14a9
-#define XK_Armenian_separation_mark			0x14aa
-#define XK_Armenian_but					0x14aa
-#define XK_Armenian_comma				0x14ab
-#define XK_Armenian_en_dash				0x14ac
-#define XK_Armenian_hyphen				0x14ad
-#define XK_Armenian_yentamna				0x14ad
-#define XK_Armenian_ellipsis				0x14ae
-#define XK_Armenian_exclam				0x14af
-#define XK_Armenian_amanak				0x14af
-#define XK_Armenian_accent				0x14b0
-#define XK_Armenian_shesht				0x14b0
-#define XK_Armenian_question				0x14b1
-#define XK_Armenian_paruyk				0x14b1
-#define XK_Armenian_AYB					0x14b2
-#define XK_Armenian_ayb					0x14b3
-#define XK_Armenian_BEN					0x14b4
-#define XK_Armenian_ben					0x14b5
-#define XK_Armenian_GIM					0x14b6
-#define XK_Armenian_gim					0x14b7
-#define XK_Armenian_DA					0x14b8
-#define XK_Armenian_da					0x14b9
-#define XK_Armenian_YECH				0x14ba
-#define XK_Armenian_yech				0x14bb
-#define XK_Armenian_ZA					0x14bc
-#define XK_Armenian_za					0x14bd
-#define XK_Armenian_E					0x14be
-#define XK_Armenian_e					0x14bf
-#define XK_Armenian_AT					0x14c0
-#define XK_Armenian_at					0x14c1
-#define XK_Armenian_TO					0x14c2
-#define XK_Armenian_to					0x14c3
-#define XK_Armenian_ZHE					0x14c4
-#define XK_Armenian_zhe					0x14c5
-#define XK_Armenian_INI					0x14c6
-#define XK_Armenian_ini					0x14c7
-#define XK_Armenian_LYUN				0x14c8
-#define XK_Armenian_lyun				0x14c9
-#define XK_Armenian_KHE					0x14ca
-#define XK_Armenian_khe					0x14cb
-#define XK_Armenian_TSA					0x14cc
-#define XK_Armenian_tsa					0x14cd
-#define XK_Armenian_KEN					0x14ce
-#define XK_Armenian_ken					0x14cf
-#define XK_Armenian_HO					0x14d0
-#define XK_Armenian_ho					0x14d1
-#define XK_Armenian_DZA					0x14d2
-#define XK_Armenian_dza					0x14d3
-#define XK_Armenian_GHAT				0x14d4
-#define XK_Armenian_ghat				0x14d5
-#define XK_Armenian_TCHE				0x14d6
-#define XK_Armenian_tche				0x14d7
-#define XK_Armenian_MEN					0x14d8
-#define XK_Armenian_men					0x14d9
-#define XK_Armenian_HI					0x14da
-#define XK_Armenian_hi					0x14db
-#define XK_Armenian_NU					0x14dc
-#define XK_Armenian_nu					0x14dd
-#define XK_Armenian_SHA					0x14de
-#define XK_Armenian_sha					0x14df
-#define XK_Armenian_VO					0x14e0
-#define XK_Armenian_vo					0x14e1
-#define XK_Armenian_CHA					0x14e2
-#define XK_Armenian_cha					0x14e3
-#define XK_Armenian_PE					0x14e4
-#define XK_Armenian_pe					0x14e5
-#define XK_Armenian_JE					0x14e6
-#define XK_Armenian_je					0x14e7
-#define XK_Armenian_RA					0x14e8
-#define XK_Armenian_ra					0x14e9
-#define XK_Armenian_SE					0x14ea
-#define XK_Armenian_se					0x14eb
-#define XK_Armenian_VEV					0x14ec
-#define XK_Armenian_vev					0x14ed
-#define XK_Armenian_TYUN				0x14ee
-#define XK_Armenian_tyun				0x14ef
-#define XK_Armenian_RE					0x14f0
-#define XK_Armenian_re					0x14f1
-#define XK_Armenian_TSO					0x14f2
-#define XK_Armenian_tso					0x14f3
-#define XK_Armenian_VYUN				0x14f4
-#define XK_Armenian_vyun				0x14f5
-#define XK_Armenian_PYUR				0x14f6
-#define XK_Armenian_pyur				0x14f7
-#define XK_Armenian_KE					0x14f8
-#define XK_Armenian_ke					0x14f9
-#define XK_Armenian_O					0x14fa
-#define XK_Armenian_o					0x14fb
-#define XK_Armenian_FE					0x14fc
-#define XK_Armenian_fe					0x14fd
-#define XK_Armenian_apostrophe				0x14fe
-#define XK_Armenian_section_sign			0x14ff
+#define XK_Armenian_eternity                            0x14a1
+#define XK_Armenian_ligature_ew                         0x14a2
+#define XK_Armenian_full_stop                           0x14a3
+#define XK_Armenian_verjaket                            0x14a3
+#define XK_Armenian_parenright                          0x14a4
+#define XK_Armenian_parenleft                           0x14a5
+#define XK_Armenian_guillemotright                      0x14a6
+#define XK_Armenian_guillemotleft                       0x14a7
+#define XK_Armenian_em_dash                             0x14a8
+#define XK_Armenian_dot                                 0x14a9
+#define XK_Armenian_mijaket                             0x14a9
+#define XK_Armenian_separation_mark                     0x14aa
+#define XK_Armenian_but                                 0x14aa
+#define XK_Armenian_comma                               0x14ab
+#define XK_Armenian_en_dash                             0x14ac
+#define XK_Armenian_hyphen                              0x14ad
+#define XK_Armenian_yentamna                            0x14ad
+#define XK_Armenian_ellipsis                            0x14ae
+#define XK_Armenian_exclam                              0x14af
+#define XK_Armenian_amanak                              0x14af
+#define XK_Armenian_accent                              0x14b0
+#define XK_Armenian_shesht                              0x14b0
+#define XK_Armenian_question                            0x14b1
+#define XK_Armenian_paruyk                              0x14b1
+#define XK_Armenian_AYB                                 0x14b2
+#define XK_Armenian_ayb                                 0x14b3
+#define XK_Armenian_BEN                                 0x14b4
+#define XK_Armenian_ben                                 0x14b5
+#define XK_Armenian_GIM                                 0x14b6
+#define XK_Armenian_gim                                 0x14b7
+#define XK_Armenian_DA                                  0x14b8
+#define XK_Armenian_da                                  0x14b9
+#define XK_Armenian_YECH                                0x14ba
+#define XK_Armenian_yech                                0x14bb
+#define XK_Armenian_ZA                                  0x14bc
+#define XK_Armenian_za                                  0x14bd
+#define XK_Armenian_E                                   0x14be
+#define XK_Armenian_e                                   0x14bf
+#define XK_Armenian_AT                                  0x14c0
+#define XK_Armenian_at                                  0x14c1
+#define XK_Armenian_TO                                  0x14c2
+#define XK_Armenian_to                                  0x14c3
+#define XK_Armenian_ZHE                                 0x14c4
+#define XK_Armenian_zhe                                 0x14c5
+#define XK_Armenian_INI                                 0x14c6
+#define XK_Armenian_ini                                 0x14c7
+#define XK_Armenian_LYUN                                0x14c8
+#define XK_Armenian_lyun                                0x14c9
+#define XK_Armenian_KHE                                 0x14ca
+#define XK_Armenian_khe                                 0x14cb
+#define XK_Armenian_TSA                                 0x14cc
+#define XK_Armenian_tsa                                 0x14cd
+#define XK_Armenian_KEN                                 0x14ce
+#define XK_Armenian_ken                                 0x14cf
+#define XK_Armenian_HO                                  0x14d0
+#define XK_Armenian_ho                                  0x14d1
+#define XK_Armenian_DZA                                 0x14d2
+#define XK_Armenian_dza                                 0x14d3
+#define XK_Armenian_GHAT                                0x14d4
+#define XK_Armenian_ghat                                0x14d5
+#define XK_Armenian_TCHE                                0x14d6
+#define XK_Armenian_tche                                0x14d7
+#define XK_Armenian_MEN                                 0x14d8
+#define XK_Armenian_men                                 0x14d9
+#define XK_Armenian_HI                                  0x14da
+#define XK_Armenian_hi                                  0x14db
+#define XK_Armenian_NU                                  0x14dc
+#define XK_Armenian_nu                                  0x14dd
+#define XK_Armenian_SHA                                 0x14de
+#define XK_Armenian_sha                                 0x14df
+#define XK_Armenian_VO                                  0x14e0
+#define XK_Armenian_vo                                  0x14e1
+#define XK_Armenian_CHA                                 0x14e2
+#define XK_Armenian_cha                                 0x14e3
+#define XK_Armenian_PE                                  0x14e4
+#define XK_Armenian_pe                                  0x14e5
+#define XK_Armenian_JE                                  0x14e6
+#define XK_Armenian_je                                  0x14e7
+#define XK_Armenian_RA                                  0x14e8
+#define XK_Armenian_ra                                  0x14e9
+#define XK_Armenian_SE                                  0x14ea
+#define XK_Armenian_se                                  0x14eb
+#define XK_Armenian_VEV                                 0x14ec
+#define XK_Armenian_vev                                 0x14ed
+#define XK_Armenian_TYUN                                0x14ee
+#define XK_Armenian_tyun                                0x14ef
+#define XK_Armenian_RE                                  0x14f0
+#define XK_Armenian_re                                  0x14f1
+#define XK_Armenian_TSO                                 0x14f2
+#define XK_Armenian_tso                                 0x14f3
+#define XK_Armenian_VYUN                                0x14f4
+#define XK_Armenian_vyun                                0x14f5
+#define XK_Armenian_PYUR                                0x14f6
+#define XK_Armenian_pyur                                0x14f7
+#define XK_Armenian_KE                                  0x14f8
+#define XK_Armenian_ke                                  0x14f9
+#define XK_Armenian_O                                   0x14fa
+#define XK_Armenian_o                                   0x14fb
+#define XK_Armenian_FE                                  0x14fc
+#define XK_Armenian_fe                                  0x14fd
+#define XK_Armenian_apostrophe                          0x14fe
+#define XK_Armenian_section_sign                        0x14ff
 #endif /* XK_ARMENIAN */
 
 /*
@@ -1812,45 +1812,45 @@ SOFTWARE.
  */
 
 #ifdef XK_GEORGIAN
-#define XK_Georgian_an					0x15d0
-#define XK_Georgian_ban					0x15d1
-#define XK_Georgian_gan					0x15d2
-#define XK_Georgian_don					0x15d3
-#define XK_Georgian_en					0x15d4
-#define XK_Georgian_vin					0x15d5
-#define XK_Georgian_zen					0x15d6
-#define XK_Georgian_tan					0x15d7
-#define XK_Georgian_in					0x15d8
-#define XK_Georgian_kan					0x15d9
-#define XK_Georgian_las					0x15da
-#define XK_Georgian_man					0x15db
-#define XK_Georgian_nar					0x15dc
-#define XK_Georgian_on					0x15dd
-#define XK_Georgian_par					0x15de
-#define XK_Georgian_zhar				0x15df
-#define XK_Georgian_rae					0x15e0
-#define XK_Georgian_san					0x15e1
-#define XK_Georgian_tar					0x15e2
-#define XK_Georgian_un					0x15e3
-#define XK_Georgian_phar				0x15e4
-#define XK_Georgian_khar				0x15e5
-#define XK_Georgian_ghan				0x15e6
-#define XK_Georgian_qar					0x15e7
-#define XK_Georgian_shin				0x15e8
-#define XK_Georgian_chin				0x15e9
-#define XK_Georgian_can					0x15ea
-#define XK_Georgian_jil					0x15eb
-#define XK_Georgian_cil					0x15ec
-#define XK_Georgian_char				0x15ed
-#define XK_Georgian_xan					0x15ee
-#define XK_Georgian_jhan				0x15ef
-#define XK_Georgian_hae					0x15f0
-#define XK_Georgian_he					0x15f1
-#define XK_Georgian_hie					0x15f2
-#define XK_Georgian_we					0x15f3
-#define XK_Georgian_har					0x15f4
-#define XK_Georgian_hoe					0x15f5
-#define XK_Georgian_fi					0x15f6
+#define XK_Georgian_an                                  0x15d0
+#define XK_Georgian_ban                                 0x15d1
+#define XK_Georgian_gan                                 0x15d2
+#define XK_Georgian_don                                 0x15d3
+#define XK_Georgian_en                                  0x15d4
+#define XK_Georgian_vin                                 0x15d5
+#define XK_Georgian_zen                                 0x15d6
+#define XK_Georgian_tan                                 0x15d7
+#define XK_Georgian_in                                  0x15d8
+#define XK_Georgian_kan                                 0x15d9
+#define XK_Georgian_las                                 0x15da
+#define XK_Georgian_man                                 0x15db
+#define XK_Georgian_nar                                 0x15dc
+#define XK_Georgian_on                                  0x15dd
+#define XK_Georgian_par                                 0x15de
+#define XK_Georgian_zhar                                0x15df
+#define XK_Georgian_rae                                 0x15e0
+#define XK_Georgian_san                                 0x15e1
+#define XK_Georgian_tar                                 0x15e2
+#define XK_Georgian_un                                  0x15e3
+#define XK_Georgian_phar                                0x15e4
+#define XK_Georgian_khar                                0x15e5
+#define XK_Georgian_ghan                                0x15e6
+#define XK_Georgian_qar                                 0x15e7
+#define XK_Georgian_shin                                0x15e8
+#define XK_Georgian_chin                                0x15e9
+#define XK_Georgian_can                                 0x15ea
+#define XK_Georgian_jil                                 0x15eb
+#define XK_Georgian_cil                                 0x15ec
+#define XK_Georgian_char                                0x15ed
+#define XK_Georgian_xan                                 0x15ee
+#define XK_Georgian_jhan                                0x15ef
+#define XK_Georgian_hae                                 0x15f0
+#define XK_Georgian_he                                  0x15f1
+#define XK_Georgian_hie                                 0x15f2
+#define XK_Georgian_we                                  0x15f3
+#define XK_Georgian_har                                 0x15f4
+#define XK_Georgian_hoe                                 0x15f5
+#define XK_Georgian_fi                                  0x15f6
 #endif /* XK_GEORGIAN */
 
 /*
@@ -1860,37 +1860,37 @@ SOFTWARE.
 
 #ifdef XK_CAUCASUS
 /* latin */
-#define XK_Ccedillaabovedot	0x16a2
-#define XK_Xabovedot		0x16a3
-#define XK_Qabovedot		0x16a5
-#define	XK_Ibreve		0x16a6
-#define XK_IE			0x16a7
-#define XK_UO			0x16a8
-#define XK_Zstroke		0x16a9
-#define	XK_Gcaron		0x16aa
-#define	XK_Obarred		0x16af
-#define XK_ccedillaabovedot	0x16b2
-#define XK_xabovedot		0x16b3
-#define	XK_Ocaron		0x16b4
-#define XK_qabovedot		0x16b5
-#define	XK_ibreve		0x16b6
-#define XK_ie			0x16b7
-#define XK_uo			0x16b8
-#define XK_zstroke		0x16b9
-#define	XK_gcaron		0x16ba
-#define	XK_ocaron		0x16bd
-#define	XK_obarred		0x16bf
-#define XK_SCHWA		0x16c6
-#define XK_schwa		0x16f6
+#define XK_Ccedillaabovedot     0x16a2
+#define XK_Xabovedot            0x16a3
+#define XK_Qabovedot            0x16a5
+#define XK_Ibreve               0x16a6
+#define XK_IE                   0x16a7
+#define XK_UO                   0x16a8
+#define XK_Zstroke              0x16a9
+#define XK_Gcaron               0x16aa
+#define XK_Obarred              0x16af
+#define XK_ccedillaabovedot     0x16b2
+#define XK_xabovedot            0x16b3
+#define XK_Ocaron               0x16b4
+#define XK_qabovedot            0x16b5
+#define XK_ibreve               0x16b6
+#define XK_ie                   0x16b7
+#define XK_uo                   0x16b8
+#define XK_zstroke              0x16b9
+#define XK_gcaron               0x16ba
+#define XK_ocaron               0x16bd
+#define XK_obarred              0x16bf
+#define XK_SCHWA                0x16c6
+#define XK_schwa                0x16f6
 /* those are not really Caucasus, but I put them here for now */
 /* For Inupiak */
-#define XK_Lbelowdot		0x16d1
-#define XK_Lstrokebelowdot	0x16d2
-#define XK_lbelowdot		0x16e1
-#define XK_lstrokebelowdot	0x16e2
+#define XK_Lbelowdot            0x16d1
+#define XK_Lstrokebelowdot      0x16d2
+#define XK_lbelowdot            0x16e1
+#define XK_lstrokebelowdot      0x16e2
 /* For Guarani */
-#define XK_Gtilde		0x16d3
-#define XK_gtilde		0x16e3
+#define XK_Gtilde               0x16d3
+#define XK_gtilde               0x16e3
 #endif /* XK_CAUCASUS */
 
 /*
@@ -1899,118 +1899,118 @@ SOFTWARE.
  */
 
 #ifdef XK_VIETNAMESE
-#define XK_Abelowdot					0x1ea0
-#define XK_abelowdot					0x1ea1
-#define XK_Ahook					0x1ea2
-#define XK_ahook					0x1ea3
-#define XK_Acircumflexacute				0x1ea4
-#define XK_acircumflexacute				0x1ea5
-#define XK_Acircumflexgrave				0x1ea6
-#define XK_acircumflexgrave				0x1ea7
-#define XK_Acircumflexhook				0x1ea8
-#define XK_acircumflexhook				0x1ea9
-#define XK_Acircumflextilde				0x1eaa
-#define XK_acircumflextilde				0x1eab
-#define XK_Acircumflexbelowdot				0x1eac
-#define XK_acircumflexbelowdot				0x1ead
-#define XK_Abreveacute					0x1eae
-#define XK_abreveacute					0x1eaf
-#define XK_Abrevegrave					0x1eb0
-#define XK_abrevegrave					0x1eb1
-#define XK_Abrevehook					0x1eb2
-#define XK_abrevehook					0x1eb3
-#define XK_Abrevetilde					0x1eb4
-#define XK_abrevetilde					0x1eb5
-#define XK_Abrevebelowdot				0x1eb6
-#define XK_abrevebelowdot				0x1eb7
-#define XK_Ebelowdot					0x1eb8
-#define XK_ebelowdot					0x1eb9
-#define XK_Ehook					0x1eba
-#define XK_ehook					0x1ebb
-#define XK_Etilde					0x1ebc
-#define XK_etilde					0x1ebd
-#define XK_Ecircumflexacute				0x1ebe
-#define XK_ecircumflexacute				0x1ebf
-#define XK_Ecircumflexgrave				0x1ec0
-#define XK_ecircumflexgrave				0x1ec1
-#define XK_Ecircumflexhook				0x1ec2
-#define XK_ecircumflexhook				0x1ec3
-#define XK_Ecircumflextilde				0x1ec4
-#define XK_ecircumflextilde				0x1ec5
-#define XK_Ecircumflexbelowdot				0x1ec6
-#define XK_ecircumflexbelowdot				0x1ec7
-#define XK_Ihook					0x1ec8
-#define XK_ihook					0x1ec9
-#define XK_Ibelowdot					0x1eca
-#define XK_ibelowdot					0x1ecb
-#define XK_Obelowdot					0x1ecc
-#define XK_obelowdot					0x1ecd
-#define XK_Ohook					0x1ece
-#define XK_ohook					0x1ecf
-#define XK_Ocircumflexacute				0x1ed0
-#define XK_ocircumflexacute				0x1ed1
-#define XK_Ocircumflexgrave				0x1ed2
-#define XK_ocircumflexgrave				0x1ed3
-#define XK_Ocircumflexhook				0x1ed4
-#define XK_ocircumflexhook				0x1ed5
-#define XK_Ocircumflextilde				0x1ed6
-#define XK_ocircumflextilde				0x1ed7
-#define XK_Ocircumflexbelowdot				0x1ed8
-#define XK_ocircumflexbelowdot				0x1ed9
-#define XK_Ohornacute					0x1eda
-#define XK_ohornacute					0x1edb
-#define XK_Ohorngrave					0x1edc
-#define XK_ohorngrave					0x1edd
-#define XK_Ohornhook					0x1ede
-#define XK_ohornhook					0x1edf
-#define XK_Ohorntilde					0x1ee0
-#define XK_ohorntilde					0x1ee1
-#define XK_Ohornbelowdot				0x1ee2
-#define XK_ohornbelowdot				0x1ee3
-#define XK_Ubelowdot					0x1ee4
-#define XK_ubelowdot					0x1ee5
-#define XK_Uhook					0x1ee6
-#define XK_uhook					0x1ee7
-#define XK_Uhornacute					0x1ee8
-#define XK_uhornacute					0x1ee9
-#define XK_Uhorngrave					0x1eea
-#define XK_uhorngrave					0x1eeb
-#define XK_Uhornhook					0x1eec
-#define XK_uhornhook					0x1eed
-#define XK_Uhorntilde					0x1eee
-#define XK_uhorntilde					0x1eef
-#define XK_Uhornbelowdot				0x1ef0
-#define XK_uhornbelowdot				0x1ef1
-#define XK_Ybelowdot					0x1ef4
-#define XK_ybelowdot					0x1ef5
-#define XK_Yhook					0x1ef6
-#define XK_yhook					0x1ef7
-#define XK_Ytilde					0x1ef8
-#define XK_ytilde					0x1ef9
-#define XK_Ohorn					0x1efa /* U+01a0 */
-#define XK_ohorn					0x1efb /* U+01a1 */
-#define XK_Uhorn					0x1efc /* U+01af */
-#define XK_uhorn					0x1efd /* U+01b0 */
+#define XK_Abelowdot                                    0x1ea0
+#define XK_abelowdot                                    0x1ea1
+#define XK_Ahook                                        0x1ea2
+#define XK_ahook                                        0x1ea3
+#define XK_Acircumflexacute                             0x1ea4
+#define XK_acircumflexacute                             0x1ea5
+#define XK_Acircumflexgrave                             0x1ea6
+#define XK_acircumflexgrave                             0x1ea7
+#define XK_Acircumflexhook                              0x1ea8
+#define XK_acircumflexhook                              0x1ea9
+#define XK_Acircumflextilde                             0x1eaa
+#define XK_acircumflextilde                             0x1eab
+#define XK_Acircumflexbelowdot                          0x1eac
+#define XK_acircumflexbelowdot                          0x1ead
+#define XK_Abreveacute                                  0x1eae
+#define XK_abreveacute                                  0x1eaf
+#define XK_Abrevegrave                                  0x1eb0
+#define XK_abrevegrave                                  0x1eb1
+#define XK_Abrevehook                                   0x1eb2
+#define XK_abrevehook                                   0x1eb3
+#define XK_Abrevetilde                                  0x1eb4
+#define XK_abrevetilde                                  0x1eb5
+#define XK_Abrevebelowdot                               0x1eb6
+#define XK_abrevebelowdot                               0x1eb7
+#define XK_Ebelowdot                                    0x1eb8
+#define XK_ebelowdot                                    0x1eb9
+#define XK_Ehook                                        0x1eba
+#define XK_ehook                                        0x1ebb
+#define XK_Etilde                                       0x1ebc
+#define XK_etilde                                       0x1ebd
+#define XK_Ecircumflexacute                             0x1ebe
+#define XK_ecircumflexacute                             0x1ebf
+#define XK_Ecircumflexgrave                             0x1ec0
+#define XK_ecircumflexgrave                             0x1ec1
+#define XK_Ecircumflexhook                              0x1ec2
+#define XK_ecircumflexhook                              0x1ec3
+#define XK_Ecircumflextilde                             0x1ec4
+#define XK_ecircumflextilde                             0x1ec5
+#define XK_Ecircumflexbelowdot                          0x1ec6
+#define XK_ecircumflexbelowdot                          0x1ec7
+#define XK_Ihook                                        0x1ec8
+#define XK_ihook                                        0x1ec9
+#define XK_Ibelowdot                                    0x1eca
+#define XK_ibelowdot                                    0x1ecb
+#define XK_Obelowdot                                    0x1ecc
+#define XK_obelowdot                                    0x1ecd
+#define XK_Ohook                                        0x1ece
+#define XK_ohook                                        0x1ecf
+#define XK_Ocircumflexacute                             0x1ed0
+#define XK_ocircumflexacute                             0x1ed1
+#define XK_Ocircumflexgrave                             0x1ed2
+#define XK_ocircumflexgrave                             0x1ed3
+#define XK_Ocircumflexhook                              0x1ed4
+#define XK_ocircumflexhook                              0x1ed5
+#define XK_Ocircumflextilde                             0x1ed6
+#define XK_ocircumflextilde                             0x1ed7
+#define XK_Ocircumflexbelowdot                          0x1ed8
+#define XK_ocircumflexbelowdot                          0x1ed9
+#define XK_Ohornacute                                   0x1eda
+#define XK_ohornacute                                   0x1edb
+#define XK_Ohorngrave                                   0x1edc
+#define XK_ohorngrave                                   0x1edd
+#define XK_Ohornhook                                    0x1ede
+#define XK_ohornhook                                    0x1edf
+#define XK_Ohorntilde                                   0x1ee0
+#define XK_ohorntilde                                   0x1ee1
+#define XK_Ohornbelowdot                                0x1ee2
+#define XK_ohornbelowdot                                0x1ee3
+#define XK_Ubelowdot                                    0x1ee4
+#define XK_ubelowdot                                    0x1ee5
+#define XK_Uhook                                        0x1ee6
+#define XK_uhook                                        0x1ee7
+#define XK_Uhornacute                                   0x1ee8
+#define XK_uhornacute                                   0x1ee9
+#define XK_Uhorngrave                                   0x1eea
+#define XK_uhorngrave                                   0x1eeb
+#define XK_Uhornhook                                    0x1eec
+#define XK_uhornhook                                    0x1eed
+#define XK_Uhorntilde                                   0x1eee
+#define XK_uhorntilde                                   0x1eef
+#define XK_Uhornbelowdot                                0x1ef0
+#define XK_uhornbelowdot                                0x1ef1
+#define XK_Ybelowdot                                    0x1ef4
+#define XK_ybelowdot                                    0x1ef5
+#define XK_Yhook                                        0x1ef6
+#define XK_yhook                                        0x1ef7
+#define XK_Ytilde                                       0x1ef8
+#define XK_ytilde                                       0x1ef9
+#define XK_Ohorn                                        0x1efa /* U+01a0 */
+#define XK_ohorn                                        0x1efb /* U+01a1 */
+#define XK_Uhorn                                        0x1efc /* U+01af */
+#define XK_uhorn                                        0x1efd /* U+01b0 */
 
-#define XK_combining_tilde				0x1e9f /* U+0303 */
-#define XK_combining_grave				0x1ef2 /* U+0300 */
-#define XK_combining_acute				0x1ef3 /* U+0301 */
-#define XK_combining_hook				0x1efe /* U+0309 */
-#define XK_combining_belowdot				0x1eff /* U+0323 */
+#define XK_combining_tilde                              0x1e9f /* U+0303 */
+#define XK_combining_grave                              0x1ef2 /* U+0300 */
+#define XK_combining_acute                              0x1ef3 /* U+0301 */
+#define XK_combining_hook                               0x1efe /* U+0309 */
+#define XK_combining_belowdot                           0x1eff /* U+0323 */
 #endif /* XK_VIETNAMESE */
 
 #ifdef XK_CURRENCY
-#define XK_EcuSign					0x20a0
-#define XK_ColonSign					0x20a1
-#define XK_CruzeiroSign					0x20a2
-#define XK_FFrancSign					0x20a3
-#define XK_LiraSign					0x20a4
-#define XK_MillSign					0x20a5
-#define XK_NairaSign					0x20a6
-#define XK_PesetaSign					0x20a7
-#define XK_RupeeSign					0x20a8
-#define XK_WonSign					0x20a9
-#define XK_NewSheqelSign				0x20aa
-#define XK_DongSign					0x20ab
-#define XK_EuroSign					0x20ac
+#define XK_EcuSign                                      0x20a0
+#define XK_ColonSign                                    0x20a1
+#define XK_CruzeiroSign                                 0x20a2
+#define XK_FFrancSign                                   0x20a3
+#define XK_LiraSign                                     0x20a4
+#define XK_MillSign                                     0x20a5
+#define XK_NairaSign                                    0x20a6
+#define XK_PesetaSign                                   0x20a7
+#define XK_RupeeSign                                    0x20a8
+#define XK_WonSign                                      0x20a9
+#define XK_NewSheqelSign                                0x20aa
+#define XK_DongSign                                     0x20ab
+#define XK_EuroSign                                     0x20ac
 #endif

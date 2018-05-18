@@ -65,8 +65,7 @@ unsigned char ptrAcceleration = 50;
 KeySym pressedKeys[256] = { NoSymbol64 NoSymbol64 NoSymbol64 NoSymbol64 };
 
 
-void
-KbdDeviceInit(DeviceIntPtr pDevice)
+void KbdDeviceInit(DeviceIntPtr pDevice)
 {
     char *env;
 
@@ -86,16 +85,14 @@ KbdDeviceInit(DeviceIntPtr pDevice)
 }
 
 
-void
-PtrDeviceOn(DeviceIntPtr pDev)
+void PtrDeviceOn(DeviceIntPtr pDev)
 {
     ptrAcceleration = (char)pDev->ptrfeed->ctrl.num;
     ptrDevice = pDev;
 }
 
 
-void
-PtrDeviceControl(DevicePtr dev, PtrCtrl *ctrl)
+void PtrDeviceControl(DevicePtr dev, PtrCtrl *ctrl)
 {
     ptrAcceleration = (char)ctrl->num;
 
@@ -445,8 +442,7 @@ void KeyEvent(CARD32 keysym, Bool down)
 static int cursorPosX = -1, cursorPosY = -1;
 
 
-void
-PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
+void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
 {
     int i;
     int valuators[2];
@@ -495,10 +491,10 @@ char *stristr(const char *s1, const char *s2)
         return NULL;
 
     str1 = strdup(s1);
-    for(i = 0; i < strlen(str1); i++)
+    for (i = 0; i < strlen(str1); i++)
         str1[i] = tolower(str1[i]);
     str2 = strdup(s2);
-    for(i = 0; i < strlen(str2); i++)
+    for (i = 0; i < strlen(str2); i++)
         str2[i] = tolower(str2[i]);
 
     ret = strstr(str1, str2);
@@ -507,8 +503,7 @@ char *stristr(const char *s1, const char *s2)
 }
 
 
-void
-ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
+void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 {
     ValuatorMask mask;
 
@@ -520,29 +515,29 @@ ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
         rfbDevInfoPtr vtDev;
 
         switch (dev->productID) {
-        case rfbGIIDevTypeStylus:
-            vtDev = &virtualTabletStylus;
-            break;
-        case rfbGIIDevTypeEraser:
-            vtDev = &virtualTabletEraser;
-            break;
-        case rfbGIIDevTypeTouch:
-            vtDev = &virtualTabletTouch;
-            break;
-        case rfbGIIDevTypePad:
-            vtDev = &virtualTabletPad;
-            break;
-        default:
-            if (stristr(dev->name, "stylus"))
+            case rfbGIIDevTypeStylus:
                 vtDev = &virtualTabletStylus;
-            else if (stristr(dev->name, "eraser"))
+                break;
+            case rfbGIIDevTypeEraser:
                 vtDev = &virtualTabletEraser;
-            else if (stristr(dev->name, "touch"))
+                break;
+            case rfbGIIDevTypeTouch:
                 vtDev = &virtualTabletTouch;
-            else if (stristr(dev->name, "pad"))
+                break;
+            case rfbGIIDevTypePad:
                 vtDev = &virtualTabletPad;
-            else
-                return;
+                break;
+            default:
+                if (stristr(dev->name, "stylus"))
+                    vtDev = &virtualTabletStylus;
+                else if (stristr(dev->name, "eraser"))
+                    vtDev = &virtualTabletEraser;
+                else if (stristr(dev->name, "touch"))
+                    vtDev = &virtualTabletTouch;
+                else if (stristr(dev->name, "pad"))
+                    vtDev = &virtualTabletPad;
+                else
+                    return;
         }
 
         if (dev->valFirst >= vtDev->numValuators ||
@@ -553,8 +548,7 @@ ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
         vtDev->valCount = min(dev->valCount,
                               vtDev->numValuators - vtDev->valFirst);
 
-        for (i = vtDev->valFirst; i < vtDev->valFirst + vtDev->valCount; i++)
-				{
+        for (i = vtDev->valFirst; i < vtDev->valFirst + vtDev->valCount; i++) {
             vtDev->values[i] = (int)round(
                 (double)(dev->values[i] - dev->valuators[i].rangeMin) /
                     (double)(dev->valuators[i].rangeMax -
@@ -579,8 +573,7 @@ ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 }
 
 
-void
-KbdReleaseAllKeys()
+void KbdReleaseAllKeys()
 {
     int i, j;
 

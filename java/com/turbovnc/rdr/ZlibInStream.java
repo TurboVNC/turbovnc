@@ -67,7 +67,7 @@ public class ZlibInStream extends InStream {
 
     while (bytesIn > 0) {
       decompress(true);
-      end = start; // throw away any data
+      end = start;  // throw away any data
     }
     underlying = null;
   }

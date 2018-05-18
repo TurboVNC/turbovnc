@@ -85,4 +85,4 @@ class AuthException : public WarningException
     virtual ~AuthException();
 };
 
-#endif // EXCEPTION_H__
+#endif  // EXCEPTION_H__

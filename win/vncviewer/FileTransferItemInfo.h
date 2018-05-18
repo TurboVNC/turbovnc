@@ -60,4 +60,4 @@ class FileTransferItemInfo
     int m_NumEntries;
 };
 
-#endif // !defined(FILETRANSFERITEMINFO_H)
+#endif  // !defined(FILETRANSFERITEMINFO_H)

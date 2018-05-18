@@ -253,8 +253,8 @@ void VNCviewerApp32::ListenMode()
 
 // Register the Bell sound event
 
-const char* BELL_APPL_KEY_NAME  = "AppEvents\\Schemes\\Apps\\VNCviewer";
-const char* BELL_LABEL = "VNCviewerBell";
+const char *BELL_APPL_KEY_NAME = "AppEvents\\Schemes\\Apps\\VNCviewer";
+const char *BELL_LABEL = "VNCviewerBell";
 
 void VNCviewerApp32::RegisterSounds()
 {
@@ -268,8 +268,8 @@ void VNCviewerApp32::RegisterSounds()
     RegCloseKey(hBellKey);
 
     // Then put the detail in the app-specific area
-    if (RegCreateKey(HKEY_CURRENT_USER, BELL_APPL_KEY_NAME, &hBellKey)
-        == ERROR_SUCCESS) {
+    if (RegCreateKey(HKEY_CURRENT_USER, BELL_APPL_KEY_NAME, &hBellKey) ==
+        ERROR_SUCCESS) {
       SPRINTF(keybuf, "%s\\%s", BELL_APPL_KEY_NAME, BELL_LABEL);
       RegCreateKey(HKEY_CURRENT_USER, keybuf, &hBellKey);
       RegSetValue(hBellKey, NULL, REG_SZ, "Bell", 0);

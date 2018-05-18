@@ -83,7 +83,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       "Tight + Medium-Quality JPEG",
       "Tight + Low-Quality JPEG (WAN)",
       "Lossless Tight (Gigabit)",
-      "Lossless Tight + Zlib (WAN)"};
+      "Lossless Tight + Zlib (WAN)"
+    };
     encMethodComboBox = new JComboBox(encMethod);
     encMethodComboBox.addActionListener(this);
 
@@ -248,7 +249,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     JLabel scalingFactorLabel = new JLabel("Scaling factor:");
     Object[] scalingFactors = {
       "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%",
-      "125%", "150%", "175%", "200%", "250%", "300%", "350%", "400%" };
+      "125%", "150%", "175%", "200%", "250%", "300%", "350%", "400%"
+    };
     scalingFactor = new JComboBox(scalingFactors);
     scalingFactor.setEditable(true);
     scalingFactor.addItemListener(this);
@@ -286,7 +288,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       "2560x1440", "2560x1440+0+0,2560x1440+2560+0",
       "2560x1600", "2560x1600+0+0,2560x1600+2560+0",
       "2880x1800", "2880x1800+0+0,2880x1800+2880+0",
-      "3200x1800", "3200x1800+0+0,3200x1800+3200+0" };
+      "3200x1800", "3200x1800+0+0,3200x1800+3200+0"
+    };
     JLabel desktopSizeLabel = new JLabel("Remote desktop size:");
     desktopSize = new JComboBox(desktopSizeOptions);
     desktopSize.setEditable(true);
@@ -314,7 +317,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           new Insets(4, 5, 0, 5));
 
     Object[] spanOptions = {
-      "Primary monitor only", "All monitors", "Automatic" };
+      "Primary monitor only", "All monitors", "Automatic"
+    };
     JLabel spanLabel;
     if (VncViewer.isX11() && Viewport.isHelperAvailable())
       spanLabel = new JLabel("Full-screen span mode:");

@@ -22,7 +22,7 @@ public class VncAuth {
 
   public static final int OK = 0;
   public static final int FAILED = 1;
-  public static final int TOO_MANY = 2; // deprecated
+  public static final int TOO_MANY = 2;  // deprecated
 
   public static final int CHALLENGE_SIZE = 16;
 
@@ -63,5 +63,5 @@ public class VncAuth {
     return new String(plain);
   }
 
-  static byte[] obfuscationKey = {23, 82, 107, 6, 35, 78, 88, 7};
+  static byte[] obfuscationKey = { 23, 82, 107, 6, 35, 78, 88, 7 };
 }

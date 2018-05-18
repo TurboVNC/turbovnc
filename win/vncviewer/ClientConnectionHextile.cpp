@@ -78,13 +78,13 @@ void ClientConnection::HandleHextileEncoding##bpp(int rx, int ry, int rw,     \
       }                                                                       \
                                                                               \
       if (subencoding & rfbHextileBackgroundSpecified) {                      \
-        ReadExact((char *)&bg, (bpp/8));                                      \
+        ReadExact((char *)&bg, (bpp / 8));                                    \
         bgcolor = COLOR_FROM_PIXEL##bpp##_ADDRESS(&bg);                       \
       }                                                                       \
       FillSolidRect(x, y, w, h, bgcolor);                                     \
                                                                               \
       if (subencoding & rfbHextileForegroundSpecified)  {                     \
-        ReadExact((char *)&fg, (bpp/8));                                      \
+        ReadExact((char *)&fg, (bpp / 8));                                    \
         fgcolor = COLOR_FROM_PIXEL##bpp##_ADDRESS(&fg);                       \
       }                                                                       \
                                                                               \
@@ -101,7 +101,7 @@ void ClientConnection::HandleHextileEncoding##bpp(int rx, int ry, int rw,     \
                                                                               \
         for (i = 0; i < nSubrects; i++) {                                     \
           fgcolor = COLOR_FROM_PIXEL##bpp##_ADDRESS(ptr);                     \
-          ptr += (bpp/8);                                                     \
+          ptr += (bpp / 8);                                                   \
           sx = *ptr >> 4;                                                     \
           sy = *ptr++ & 0x0f;                                                 \
           sw = (*ptr >> 4) + 1;                                               \

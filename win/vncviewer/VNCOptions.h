@@ -118,7 +118,7 @@ class VNCOptions
 {
   public:
     VNCOptions();
-    VNCOptions& operator = (VNCOptions& s);
+    VNCOptions &operator = (VNCOptions &s);
     virtual ~VNCOptions();
 
     // Save and load a set of options from a config file
@@ -126,7 +126,7 @@ class VNCOptions
     void Load(char *fname);
     void VNCOptions::LoadOpt(char subkey[256], char keyname[256]);
     int VNCOptions::read(HKEY hkey, char *name, int retval);
-    void VNCOptions::save(HKEY hkey ,char *name, int value);
+    void VNCOptions::save(HKEY hkey, char *name, int value);
     void VNCOptions::LoadGenOpt();
     void VNCOptions::SaveGenOpt();
     void VNCOptions::delkey(char subkey[256], char keyname[256]);
@@ -168,7 +168,7 @@ class VNCOptions
     int   m_localCursor;
     bool  m_scaling;
     bool  m_FitWindow;
-    int   m_scale_num, m_scale_den; // Numerator & denominator
+    int   m_scale_num, m_scale_den;  // Numerator & denominator
     char  m_oldScalingFactor[20];
     int   m_subsampLevel;
     int   m_compressLevel;
@@ -255,4 +255,4 @@ class VNCOptions
     void setHistoryLimit(int newLimit);
 };
 
-#endif // VNCOPTIONS_H__
+#endif  // VNCOPTIONS_H__

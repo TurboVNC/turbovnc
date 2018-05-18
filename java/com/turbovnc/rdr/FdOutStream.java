@@ -31,7 +31,7 @@ public class FdOutStream extends OutStream {
 
   public FdOutStream(FileDescriptor fd_, boolean blocking_, int timeoutms_,
                      int bufSize_) {
-    fd = fd_; blocking = blocking_; timeoutms = timeoutms_;
+    fd = fd_;  blocking = blocking_;  timeoutms = timeoutms_;
     bufSize = ((bufSize_ > 0) ? bufSize_ : DEFAULT_BUF_SIZE);
     b = new byte[bufSize];
     offset = 0;

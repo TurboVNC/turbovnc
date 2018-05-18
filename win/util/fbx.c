@@ -80,7 +80,7 @@ static char *lastError="No error";
 #define X_ShmAttach 1
 #endif
 
-#endif /* _WIN32 */
+#endif  /* _WIN32 */
 
 
 #ifdef INFAKER
@@ -89,9 +89,9 @@ typedef int (*_XCopyAreaType)(Display *, Drawable, Drawable, GC, int, int,
 	unsigned int, unsigned int, int, int);
 extern _XCopyAreaType __XCopyArea;
 
-#define XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y) { \
-	if(!__XCopyArea) _throw("[FBX] ERROR: XCopyArea symbol not loaded"); \
-	__XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y); \
+#define XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y) {  \
+	if(!__XCopyArea) _throw("[FBX] ERROR: XCopyArea symbol not loaded");  \
+	__XCopyArea(dpy, src, dst, gc, src_x, src_y, w, h, dest_x, dest_y);  \
 }
 
 #endif

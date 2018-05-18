@@ -118,7 +118,7 @@ stop() {
 reload() {
     # Walk the process list and shut down any TurboVNC sessions that aren't
     # specified in the tvncservers file.
-    for active in `ps uh -C Xvnc | grep @CMAKE_INSTALL_FULL_BINDIR@/Xvnc | awk '{ print $12,$16 }' | tr -d ':' | tr ' ' ':' | sed -e 's/(//' -e 's/)//'`
+    for active in `ps uh -C Xvnc | grep @CMAKE_INSTALL_FULL_BINDIR@/Xvnc | awk '{ print $12, $16 }' | tr -d ':' | tr ' ' ':' | sed -e 's/(//' -e 's/)//'`
     do
         skip=
         for display in ${VNCSERVERS}

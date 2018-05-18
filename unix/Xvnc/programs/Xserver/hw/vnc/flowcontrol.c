@@ -115,19 +115,17 @@ void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len, const char *data)
     }
 
     switch (len) {
+        case 0:
+            /* Initial dummy fence */
+            break;
 
-    case 0:
-        // Initial dummy fence
-        break;
+        case sizeof(RTTInfo):
+            memcpy(&rttInfo, data, sizeof(RTTInfo));
+            HandleRTTPong(cl, &rttInfo);
+            break;
 
-    case sizeof(RTTInfo):
-        memcpy(&rttInfo, data, sizeof(RTTInfo));
-        HandleRTTPong(cl, &rttInfo);
-        break;
-
-    default:
-        rfbLog("Fence of unusual size received\n");
-
+        default:
+            rfbLog("Fence of unusual size received\n");
     }
 }
 

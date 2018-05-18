@@ -41,4 +41,4 @@
 
 #include "rfb.h"
 
-extern const char* g_buildTime;
+extern const char *g_buildTime;

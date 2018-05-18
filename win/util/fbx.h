@@ -48,10 +48,10 @@ typedef HWND fbx_wh;
 typedef GC fbx_gc;
 typedef struct
 {
-  Display *dpy;  Drawable d;  Visual *v;
+	Display *dpy;  Drawable d;  Visual *v;
 } fbx_wh;
 
-#endif /* _WIN32 */
+#endif  /* _WIN32 */
 
 
 /* Pixel formats */
@@ -282,4 +282,4 @@ void fbx_printwarnings(FILE *output_stream);
 }
 #endif
 
-#endif /* __FBX_H__ */
+#endif  /* __FBX_H__ */

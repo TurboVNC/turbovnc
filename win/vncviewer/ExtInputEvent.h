@@ -61,4 +61,4 @@ class ExtInputEvent
     }
 };
 
-#endif // EXTINPUTEVENT_H__
+#endif  // EXTINPUTEVENT_H__

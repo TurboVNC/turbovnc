@@ -280,8 +280,8 @@ ScreenSet ClientConnection::GetFullScreenMetrics(RECT &screenArea,
                          GetSystemMetrics(SM_CXVIRTUALSCREEN);
       screenArea.bottom = screenArea.top +
                           GetSystemMetrics(SM_CYVIRTUALSCREEN);
-    }
-    else screenArea = fsm.screenArea;
+    } else
+      screenArea = fsm.screenArea;
     workArea = fsm.workArea;
   }
 
@@ -300,11 +300,11 @@ bool ClientConnection::BumpScroll(int x, int y)
   if (x < BUMPSCROLLBORDER)
     dx = -BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;
   if (x >= rightborder)
-    dx = +BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;;
+    dx = BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;;
   if (y < BUMPSCROLLBORDER)
     dy = -BUMPSCROLLAMOUNTY * m_opts.m_scale_num / m_opts.m_scale_den;;
   if (y >= bottomborder)
-    dy = +BUMPSCROLLAMOUNTY * m_opts.m_scale_num / m_opts.m_scale_den;;
+    dy = BUMPSCROLLAMOUNTY * m_opts.m_scale_num / m_opts.m_scale_den;;
   if (dx || dy) {
     if (ScrollScreen(dx, dy)) {
       // If we haven't physically moved the cursor, then artificially

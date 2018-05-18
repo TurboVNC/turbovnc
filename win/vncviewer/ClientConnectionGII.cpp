@@ -36,10 +36,10 @@ char *stristr(const char *s1, const char *s2)
     return NULL;
 
   str1 = _strdup(s1);
-  for(i = 0; i < (int)strlen(str1); i++)
+  for (i = 0; i < (int)strlen(str1); i++)
     str1[i] = tolower(str1[i]);
   str2 = _strdup(s2);
-  for(i = 0; i < (int)strlen(str2); i++)
+  for (i = 0; i < (int)strlen(str2); i++)
     str2[i] = tolower(str2[i]);
 
   ret = strstr(str1, str2);
@@ -64,35 +64,35 @@ void ClientConnection::ReadGII(void)
 
   switch (subType) {
 
-  case rfbGIIVersion:
-    if (endian & rfbGIIBE) {
-      msg.giisv.maximumVersion = Swap16IfLE(msg.giisv.maximumVersion);
-      msg.giisv.minimumVersion = Swap16IfLE(msg.giisv.minimumVersion);
-    }
-    if (msg.giisv.maximumVersion < 1 || msg.giisv.minimumVersion > 1)
-      _throw("ERROR: GII version mismatch");
-    if (msg.giisv.minimumVersion != msg.giisv.maximumVersion)
-      vnclog.Print(100, "Server supports GII versions %d - %d\n",
-                   msg.giisv.minimumVersion + msg.giisv.maximumVersion);
-    else
-      vnclog.Print(100, "Server supports GII version %d\n",
-                   msg.giisv.minimumVersion);
-    supportsGII = true;
-    if (!m_opts.m_benchFile) {
-      vnclog.Print(-1, "Enabling GII\n");
-      SendGIIVersion();
-    }
-    if (m_pApp->m_wacom)
-      CreateWacomGIIDevices();
-    break;
+    case rfbGIIVersion:
+      if (endian & rfbGIIBE) {
+        msg.giisv.maximumVersion = Swap16IfLE(msg.giisv.maximumVersion);
+        msg.giisv.minimumVersion = Swap16IfLE(msg.giisv.minimumVersion);
+      }
+      if (msg.giisv.maximumVersion < 1 || msg.giisv.minimumVersion > 1)
+        _throw("ERROR: GII version mismatch");
+      if (msg.giisv.minimumVersion != msg.giisv.maximumVersion)
+        vnclog.Print(100, "Server supports GII versions %d - %d\n",
+                     msg.giisv.minimumVersion + msg.giisv.maximumVersion);
+      else
+        vnclog.Print(100, "Server supports GII version %d\n",
+                     msg.giisv.minimumVersion);
+      supportsGII = true;
+      if (!m_opts.m_benchFile) {
+        vnclog.Print(-1, "Enabling GII\n");
+        SendGIIVersion();
+      }
+      if (m_pApp->m_wacom)
+        CreateWacomGIIDevices();
+      break;
 
-  case rfbGIIDeviceCreate:
-    if (endian & rfbGIIBE)
-      msg.giidc.deviceOrigin = Swap32IfLE(msg.giidc.deviceOrigin);
-    if (msg.giidc.deviceOrigin == 0)
-      _throw("ERROR: Could not create GII device");
-    if (!m_opts.m_benchFile)
-      AssignInputDevice(msg.giidc.deviceOrigin);
+    case rfbGIIDeviceCreate:
+      if (endian & rfbGIIBE)
+        msg.giidc.deviceOrigin = Swap32IfLE(msg.giidc.deviceOrigin);
+      if (msg.giidc.deviceOrigin == 0)
+        _throw("ERROR: Could not create GII device");
+      if (!m_opts.m_benchFile)
+        AssignInputDevice(msg.giidc.deviceOrigin);
   }
 
   bailout:
@@ -198,49 +198,49 @@ void ClientConnection::SendGIIEvent(UINT deviceID, ExtInputEvent &e)
 
   switch (e.type) {
 
-  case rfbGIIButtonPress:
-  case rfbGIIButtonRelease:
+    case rfbGIIButtonPress:
+    case rfbGIIButtonRelease:
 
-    giie.length = Swap16IfLE(sz_rfbGIIButtonEvent);
+      giie.length = Swap16IfLE(sz_rfbGIIButtonEvent);
 
-    WriteExact((char *)&giie, sz_rfbGIIEventMsg);
+      WriteExact((char *)&giie, sz_rfbGIIEventMsg);
 
-    rfbGIIButtonEvent be;
-    be.eventSize = sz_rfbGIIButtonEvent;
-    be.eventType = e.type;
-    be.pad = 0;
-    be.deviceOrigin = Swap32IfLE(dev.remoteID);
-    be.buttonNumber = Swap32IfLE(e.buttonNumber);
+      rfbGIIButtonEvent be;
+      be.eventSize = sz_rfbGIIButtonEvent;
+      be.eventType = e.type;
+      be.pad = 0;
+      be.deviceOrigin = Swap32IfLE(dev.remoteID);
+      be.buttonNumber = Swap32IfLE(e.buttonNumber);
 
-    WriteExact((char *)&be, sz_rfbGIIButtonEvent);
-    break;
+      WriteExact((char *)&be, sz_rfbGIIButtonEvent);
+      break;
 
-  case rfbGIIValuatorRelative:
-  case rfbGIIValuatorAbsolute:
+    case rfbGIIValuatorRelative:
+    case rfbGIIValuatorAbsolute:
 
-    giie.length = Swap16IfLE(sz_rfbGIIValuatorEvent +
-                             e.numValuators * sizeof(int));
+      giie.length = Swap16IfLE(sz_rfbGIIValuatorEvent +
+                               e.numValuators * sizeof(int));
 
-    WriteExact((char *)&giie, sz_rfbGIIEventMsg);
+      WriteExact((char *)&giie, sz_rfbGIIEventMsg);
 
-    rfbGIIValuatorEvent ve;
-    ve.eventSize = (CARD8)(sz_rfbGIIValuatorEvent + e.numValuators *
-                           sizeof(int));
-    ve.eventType = e.type;
-    ve.pad = 0;
-    ve.deviceOrigin = Swap32IfLE(dev.remoteID);
-    ve.first = Swap32IfLE(e.firstValuator);
-    ve.count = Swap32IfLE(e.numValuators);
+      rfbGIIValuatorEvent ve;
+      ve.eventSize = (CARD8)(sz_rfbGIIValuatorEvent + e.numValuators *
+                             sizeof(int));
+      ve.eventType = e.type;
+      ve.pad = 0;
+      ve.deviceOrigin = Swap32IfLE(dev.remoteID);
+      ve.first = Swap32IfLE(e.firstValuator);
+      ve.count = Swap32IfLE(e.numValuators);
 
-    WriteExact((char *)&ve, sz_rfbGIIValuatorEvent);
+      WriteExact((char *)&ve, sz_rfbGIIValuatorEvent);
 
-    for (int i = 0; i < e.numValuators; i++) {
-      int valuator = e.valuators[i];
+      for (int i = 0; i < e.numValuators; i++) {
+        int valuator = e.valuators[i];
 
-      valuator = Swap32IfLE(valuator);
-      WriteExact((char *)&valuator, sizeof(int));
-    }
-    break;
+        valuator = Swap32IfLE(valuator);
+        WriteExact((char *)&valuator, sizeof(int));
+      }
+      break;
   }
 }
 

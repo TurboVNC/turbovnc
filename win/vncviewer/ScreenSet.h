@@ -53,7 +53,7 @@ struct Screen
     SetRect(&dimensions, x_, y_, x_ + w_, y_ + h_);
   };
 
-  inline bool operator==(const Screen& r) const {
+  inline bool operator == (const Screen &r) const {
     if (id != r.id)
       return false;
     if (!EqualRect(&dimensions, &r.dimensions))
@@ -177,11 +177,11 @@ struct ScreenSet
   };
 
   // FIXME: List order shouldn't matter
-  inline bool operator==(const ScreenSet& r) const {
+  inline bool operator == (const ScreenSet &r) const {
     return screens == r.screens;
   }
 
-  inline bool operator!=(const ScreenSet& r) const {
+  inline bool operator != (const ScreenSet &r) const {
     return screens != r.screens;
   }
 

@@ -50,7 +50,7 @@ public final class Configuration {
     if (config.charAt(0) == '-' && config.length() > 1) {
       hyphen = true;
       if (config.charAt(1) == '-')
-        config = config.substring(2); // allow gnu-style --<option>
+        config = config.substring(2);  // allow gnu-style --<option>
       else
         config = config.substring(1);
     }

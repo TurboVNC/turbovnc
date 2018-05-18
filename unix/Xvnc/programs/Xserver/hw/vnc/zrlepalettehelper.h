@@ -39,8 +39,8 @@ typedef struct {
 
 void zrlePaletteHelperInit  (zrlePaletteHelper *helper);
 void zrlePaletteHelperInsert(zrlePaletteHelper *helper,
-			     zrle_U32           pix);
+                             zrle_U32           pix);
 int  zrlePaletteHelperLookup(zrlePaletteHelper *helper,
-			     zrle_U32           pix);
+                             zrle_U32           pix);
 
 #endif /* __ZRLE_PALETTE_HELPER_H__ */

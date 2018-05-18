@@ -280,7 +280,7 @@ public class Viewport extends JFrame {
         throw new Exception("Operating system version is " + version);
 
       Class fsuClass = Class.forName("com.apple.eawt.FullScreenUtilities");
-      Class[] argClasses = new Class[]{Window.class, Boolean.TYPE};
+      Class[] argClasses = new Class[]{ Window.class, Boolean.TYPE };
 
       if (VncViewer.JAVA_VERSION < 9) {
         Method setWindowCanFullScreen =
@@ -292,9 +292,9 @@ public class Viewport extends JFrame {
         Class.forName("com.apple.eawt.FullScreenListener");
       InvocationHandler fsHandler = new MyInvocationHandler(cc);
       Object proxy = Proxy.newProxyInstance(fsListenerClass.getClassLoader(),
-                                            new Class[]{fsListenerClass},
+                                            new Class[]{ fsListenerClass },
                                             fsHandler);
-      argClasses = new Class[]{Window.class, fsListenerClass};
+      argClasses = new Class[]{ Window.class, fsListenerClass };
       Method addFullScreenListenerTo =
         fsuClass.getMethod("addFullScreenListenerTo", argClasses);
       addFullScreenListenerTo.invoke(fsuClass, this, proxy);

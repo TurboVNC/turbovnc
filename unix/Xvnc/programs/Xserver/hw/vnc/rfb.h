@@ -138,10 +138,11 @@ typedef struct
        dontSendFramebufferUpdate to TRUE, and all the drawing routines check
        this before calling rfbSendFramebufferUpdate. */
 
-    Bool cursorIsDrawn;             /* TRUE if the cursor is currently drawn */
-    Bool dontSendFramebufferUpdate; /* TRUE while removing or drawing the
-                                       cursor */
-    Bool blockUpdates;              /* TRUE while resizing the screen */
+    Bool cursorIsDrawn;              /* TRUE if the cursor is currently
+                                        drawn */
+    Bool dontSendFramebufferUpdate;  /* TRUE while removing or drawing the
+                                        cursor */
+    Bool blockUpdates;               /* TRUE while resizing the screen */
 
     /* wrapped screen functions */
 
@@ -191,11 +192,11 @@ typedef struct {
  */
 
 struct rfbClientRec;
-typedef void (*rfbTranslateFnType)(char *table, rfbPixelFormat *in,
-                                   rfbPixelFormat *out,
-                                   char *iptr, char *optr,
-                                   int bytesBetweenInputLines,
-                                   int width, int height);
+typedef void (*rfbTranslateFnType) (char *table, rfbPixelFormat *in,
+                                    rfbPixelFormat *out,
+                                    char *iptr, char *optr,
+                                    int bytesBetweenInputLines,
+                                    int width, int height);
 
 
 /*
@@ -363,7 +364,7 @@ typedef struct rfbClientRec {
 
     /* ZRLE encoding */
 
-    void* zrleData;
+    void *zrleData;
     int zywrleLevel;
     int zywrleBuf[rfbZRLETileWidth * rfbZRLETileHeight];
     char *zrleBeforeBuf;
@@ -379,20 +380,21 @@ typedef struct rfbClientRec {
     int tightQualityLevel;
     int imageQualityLevel;
 
-    Bool enableLastRectEncoding;   /* client supports LastRect encoding */
-    Bool enableCursorShapeUpdates; /* client supports cursor shape updates */
-    Bool enableCursorPosUpdates;   /* client supports PointerPos updates */
-    Bool enableCU;                 /* client supports Continuous Updates */
-    Bool enableFence;              /* client supports fence extension */
-    Bool enableDesktopSize;        /* client supports desktop size extension */
-    Bool enableExtDesktopSize;     /* client supports extended desktop size
-                                      extension */
-    Bool enableGII;                /* client supports GII extension */
-    Bool useRichCursorEncoding;    /* rfbEncodingRichCursor is preferred */
-    Bool cursorWasChanged;         /* cursor shape update should be sent */
-    Bool cursorWasMoved;           /* cursor position update should be sent */
+    Bool enableLastRectEncoding;    /* client supports LastRect encoding */
+    Bool enableCursorShapeUpdates;  /* client supports cursor shape updates */
+    Bool enableCursorPosUpdates;    /* client supports PointerPos updates */
+    Bool enableCU;                  /* client supports Continuous Updates */
+    Bool enableFence;               /* client supports fence extension */
+    Bool enableDesktopSize;         /* client supports desktop size
+                                       extension */
+    Bool enableExtDesktopSize;      /* client supports extended desktop size
+                                       extension */
+    Bool enableGII;                 /* client supports GII extension */
+    Bool useRichCursorEncoding;     /* rfbEncodingRichCursor is preferred */
+    Bool cursorWasChanged;          /* cursor shape update should be sent */
+    Bool cursorWasMoved;            /* cursor position update should be sent */
 
-    int cursorX, cursorY;          /* client's cursor position */
+    int cursorX, cursorY;           /* client's cursor position */
 
     Bool firstUpdate;
     OsTimerPtr alrTimer;
@@ -452,11 +454,11 @@ typedef struct rfbClientRec {
  * be sent to the client.
  */
 
-#define FB_UPDATE_PENDING(cl)                                           \
-    ((!(cl)->enableCursorShapeUpdates && !rfbFB.cursorIsDrawn) ||       \
-     ((cl)->enableCursorShapeUpdates && (cl)->cursorWasChanged) ||      \
-     ((cl)->enableCursorPosUpdates && (cl)->cursorWasMoved) ||          \
-     REGION_NOTEMPTY((pScreen), &(cl)->copyRegion) ||                   \
+#define FB_UPDATE_PENDING(cl)  \
+    ((!(cl)->enableCursorShapeUpdates && !rfbFB.cursorIsDrawn) ||  \
+     ((cl)->enableCursorShapeUpdates && (cl)->cursorWasChanged) ||  \
+     ((cl)->enableCursorPosUpdates && (cl)->cursorWasMoved) ||  \
+     REGION_NOTEMPTY((pScreen), &(cl)->copyRegion) ||  \
      REGION_NOTEMPTY((pScreen), &(cl)->modifiedRegion))
 
 /*
@@ -466,14 +468,13 @@ typedef struct rfbClientRec {
  * rectangles, but it should with completely empty regions.
  */
 
-#define SAFE_REGION_INIT(pscreen, preg, rect, size)          \
-{                                                            \
-      if ( ( (rect)->x2 == (rect)->x1 ) ||                   \
-           ( (rect)->y2 == (rect)->y1 ) ) {                  \
-          REGION_INIT( (pscreen), (preg), NullBox, 0 );      \
-      } else {                                               \
-          REGION_INIT( (pscreen), (preg), (rect), (size) );  \
-      }                                                      \
+#define SAFE_REGION_INIT(pscreen, preg, rect, size) {  \
+    if ( ( (rect)->x2 == (rect)->x1 ) ||  \
+         ( (rect)->y2 == (rect)->y1 ) ) {  \
+        REGION_INIT( (pscreen), (preg), NullBox, 0 );  \
+    } else {  \
+        REGION_INIT( (pscreen), (preg), (rect), (size) );  \
+    }  \
 }
 
 /*
@@ -494,9 +495,9 @@ typedef struct {
 
 #define Swap16(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))
 
-#define Swap32(l) (((l) >> 24) | \
-                   (((l) & 0x00ff0000) >> 8)  | \
-                   (((l) & 0x0000ff00) << 8)  | \
+#define Swap32(l) (((l) >> 24) |  \
+                   (((l) & 0x00ff0000) >> 8)  |  \
+                   (((l) & 0x0000ff00) << 8)  |  \
                    ((l) << 24))
 
 static const int rfbEndianTest = 1;
@@ -513,15 +514,12 @@ static const int rfbEndianTest = 1;
  * Note that "code_sym" argument should be a single symbol, not an expression.
  */
 
-#define SetCapInfo(cap_ptr, code_sym, vendor)           \
-{                                                       \
-    rfbCapabilityInfo *pcap;                            \
-    pcap = (cap_ptr);                                   \
-    pcap->code = Swap32IfLE((CARD32)code_sym);          \
-    memcpy(pcap->vendorSignature, (vendor),             \
-           sz_rfbCapabilityInfoVendor);                 \
-    memcpy(pcap->nameSignature, sig_##code_sym,         \
-           sz_rfbCapabilityInfoName);                   \
+#define SetCapInfo(cap_ptr, code_sym, vendor) {  \
+    rfbCapabilityInfo *pcap;  \
+    pcap = (cap_ptr);  \
+    pcap->code = Swap32IfLE((CARD32)code_sym);  \
+    memcpy(pcap->vendorSignature, (vendor), sz_rfbCapabilityInfoVendor);  \
+    memcpy(pcap->nameSignature, sig_##code_sym, sz_rfbCapabilityInfoName);  \
 }
 
 
@@ -534,7 +532,7 @@ static const int rfbEndianTest = 1;
     static int __first = 1;  \
     double __elapsed;  \
     static int __iter = 0;  \
-    if (__first) {__start = gettime();  __first = 0;}
+    if (__first) { __start = gettime();  __first = 0; }
 
 #define ProfileCount(message, pixels, time)  \
     __iter++;  \
@@ -570,13 +568,13 @@ void rfbAuthInit(void);
 void rfbAuthProcessResponse(rfbClientPtr cl);
 void rfbAuthParseCommandLine(char *buf);
 void rfbAuthListAvailableSecurityTypes(void);
-extern char* rfbAuthConfigFile;
+extern char *rfbAuthConfigFile;
 
 extern Bool  rfbOptOtpAuth(void);
 extern Bool  rfbOptPamAuth(void);
 extern Bool  rfbOptRfbAuth(void);
 
-extern char* rfbAuthOTPValue;
+extern char *rfbAuthOTPValue;
 extern int   rfbAuthOTPValueLen;
 extern Bool  rfbAuthDisableRevCon;
 extern Bool  rfbAuthDisableCBSend;
@@ -585,8 +583,8 @@ extern Bool  rfbAuthDisableHTTP;
 extern Bool  rfbAuthDisableX11TCP;
 
 #ifdef XVNC_AuthPAM
-extern void rfbAuthAddUser(const char* name, Bool viewOnly);
-extern void rfbAuthRevokeUser(const char* name);
+extern void rfbAuthAddUser(const char *name, Bool viewOnly);
+extern void rfbAuthRevokeUser(const char *name);
 #endif
 
 extern char *rfbAuthPasswdFile;
@@ -816,7 +814,7 @@ extern int rfbMaxWidth, rfbMaxHeight;
 extern Bool rfbAlwaysShared;
 extern Bool rfbNeverShared;
 extern Bool rfbDontDisconnect;
-extern Bool rfbViewOnly; /* run server in view-only mode - Ehud Karni SW */
+extern Bool rfbViewOnly;  /* run server in view-only mode - Ehud Karni SW */
 extern Bool rfbSyncCutBuffer;
 extern Bool rfbCongestionControl;
 extern double rfbAutoLosslessRefresh;
@@ -832,8 +830,8 @@ extern int rfbNumThreads;
 
 extern char *captureFile;
 
-#define debugregion(r, m) \
-    rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1, \
+#define debugregion(r, m)  \
+    rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1,  \
         (r).extents.x2 - (r).extents.x1, (r).extents.y2 - (r).extents.y1)
 
 extern void rfbNewClientConnection(int sock);
@@ -956,8 +954,8 @@ extern Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour,
 /* Set maximum zlib rectangle size in pixels.  Always allow at least
  * two scan lines.
  */
-#define ZLIB_MAX_RECT_SIZE (128*256)
-#define ZLIB_MAX_SIZE(min) ((( min * 2 ) > ZLIB_MAX_RECT_SIZE ) ? \
+#define ZLIB_MAX_RECT_SIZE (128 * 256)
+#define ZLIB_MAX_SIZE(min) ((( min * 2 ) > ZLIB_MAX_RECT_SIZE ) ?  \
                             ( min * 2 ) : ZLIB_MAX_RECT_SIZE )
 
 extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
@@ -970,4 +968,4 @@ extern Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w,
 void rfbFreeZrleData(rfbClientPtr cl);
 
 
-#endif /* __RFB_H__ */
+#endif  /* __RFB_H__ */

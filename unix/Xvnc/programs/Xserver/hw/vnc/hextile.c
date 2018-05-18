@@ -36,8 +36,7 @@ static Bool sendHextiles32(rfbClientPtr cl, int x, int y, int w, int h);
  * rfbSendRectEncodingHextile - send a rectangle using hextile encoding.
  */
 
-Bool
-rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w, int h)
+Bool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w, int h)
 {
     rfbFramebufferUpdateRectHeader rect;
 
@@ -60,12 +59,12 @@ rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w, int h)
     cl->rfbBytesSent[rfbEncodingHextile] += sz_rfbFramebufferUpdateRectHeader;
 
     switch (cl->format.bitsPerPixel) {
-    case 8:
-        return sendHextiles8(cl, x, y, w, h);
-    case 16:
-        return sendHextiles16(cl, x, y, w, h);
-    case 32:
-        return sendHextiles32(cl, x, y, w, h);
+        case 8:
+            return sendHextiles8(cl, x, y, w, h);
+        case 16:
+            return sendHextiles16(cl, x, y, w, h);
+        case 32:
+            return sendHextiles32(cl, x, y, w, h);
     }
 
     rfbLog("rfbSendRectEncodingHextile: bpp %d?\n", cl->format.bitsPerPixel);
@@ -75,13 +74,13 @@ rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w, int h)
 
 #define PUT_PIXEL8(pix) (updateBuf[ublen++] = (pix))
 
-#define PUT_PIXEL16(pix) (updateBuf[ublen++] = ((char*)&(pix))[0], \
-                          updateBuf[ublen++] = ((char*)&(pix))[1])
+#define PUT_PIXEL16(pix) (updateBuf[ublen++] = ((char *)&(pix))[0],  \
+                          updateBuf[ublen++] = ((char *)&(pix))[1])
 
-#define PUT_PIXEL32(pix) (updateBuf[ublen++] = ((char*)&(pix))[0], \
-                          updateBuf[ublen++] = ((char*)&(pix))[1], \
-                          updateBuf[ublen++] = ((char*)&(pix))[2], \
-                          updateBuf[ublen++] = ((char*)&(pix))[3])
+#define PUT_PIXEL32(pix) (updateBuf[ublen++] = ((char *)&(pix))[0],  \
+                          updateBuf[ublen++] = ((char *)&(pix))[1],  \
+                          updateBuf[ublen++] = ((char *)&(pix))[2],  \
+                          updateBuf[ublen++] = ((char *)&(pix))[3])
 
 
 #define DEFINE_SEND_HEXTILES(bpp)                                             \
@@ -97,8 +96,8 @@ static void testColours##bpp(CARD##bpp *data, int size, Bool *mono,           \
  * rfbSendHextiles                                                            \
  */                                                                           \
                                                                               \
-static Bool                                                                   \
-sendHextiles##bpp(rfbClientPtr cl, int rx, int ry, int rw, int rh)            \
+static Bool sendHextiles##bpp(rfbClientPtr cl, int rx, int ry,                \
+                              int rw, int rh)                                 \
 {                                                                             \
     int x, y, w, h;                                                           \
     int startUblen;                                                           \
@@ -125,16 +124,16 @@ sendHextiles##bpp(rfbClientPtr cl, int rx, int ry, int rw, int rh)            \
             fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y) +                \
                      (x * (rfbFB.bitsPerPixel / 8)));                         \
                                                                               \
-            (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,    \
-                               &cl->format, fbptr, (char *)clientPixelData,   \
-                               rfbFB.paddedWidthInBytes, w, h);               \
+            (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,   \
+                                &cl->format, fbptr, (char *)clientPixelData,  \
+                                rfbFB.paddedWidthInBytes, w, h);              \
                                                                               \
             startUblen = ublen;                                               \
             updateBuf[startUblen] = 0;                                        \
             ublen++;                                                          \
                                                                               \
-            testColours##bpp(clientPixelData, w * h,                          \
-                             &mono, &solid, &newBg, &newFg);                  \
+            testColours##bpp(clientPixelData, w * h, &mono, &solid,           \
+                             &newBg, &newFg);                                 \
                                                                               \
             if (!validBg || (newBg != bg)) {                                  \
                 validBg = TRUE;                                               \
@@ -168,10 +167,10 @@ sendHextiles##bpp(rfbClientPtr cl, int rx, int ry, int rw, int rh)            \
                 validFg = FALSE;                                              \
                 ublen = startUblen;                                           \
                 updateBuf[ublen++] = rfbHextileRaw;                           \
-                (*cl->translateFn)(cl->translateLookupTable,                  \
-                                   &rfbServerFormat, &cl->format, fbptr,      \
-                                   (char *)clientPixelData,                   \
-                                   rfbFB.paddedWidthInBytes, w, h);           \
+                (*cl->translateFn) (cl->translateLookupTable,                 \
+                                    &rfbServerFormat, &cl->format, fbptr,     \
+                                    (char *)clientPixelData,                  \
+                                    rfbFB.paddedWidthInBytes, w, h);          \
                                                                               \
                 memcpy(&updateBuf[ublen], (char *)clientPixelData,            \
                        w * h * (bpp / 8));                                    \
@@ -187,9 +186,8 @@ sendHextiles##bpp(rfbClientPtr cl, int rx, int ry, int rw, int rh)            \
 }                                                                             \
                                                                               \
                                                                               \
-static Bool                                                                   \
-subrectEncode##bpp(CARD##bpp *data, int w, int h, CARD##bpp bg,               \
-                   CARD##bpp fg, Bool mono)                                   \
+static Bool subrectEncode##bpp(CARD##bpp *data, int w, int h, CARD##bpp bg,   \
+                               CARD##bpp fg, Bool mono)                       \
 {                                                                             \
     CARD##bpp cl;                                                             \
     int x, y;                                                                 \
@@ -209,14 +207,14 @@ subrectEncode##bpp(CARD##bpp *data, int w, int h, CARD##bpp bg,               \
                                                                               \
     for (y = 0; y < h; y++) {                                                 \
         line = data + (y * w);                                                \
-        for (x=0; x < w; x++) {                                               \
+        for (x = 0; x < w; x++) {                                             \
             if (line[x] != bg) {                                              \
                 cl = line[x];                                                 \
                 hy = y - 1;                                                   \
                 hyflag = 1;                                                   \
                 for (j = y; j < h; j++) {                                     \
                     seg = data + (j * w);                                     \
-                    if (seg[x] != cl) {break;}                                \
+                    if (seg[x] != cl) break;                                  \
                     i = x;                                                    \
                     while ((seg[i] == cl) && (i < w)) i += 1;                 \
                     i -= 1;                                                   \
@@ -252,10 +250,10 @@ subrectEncode##bpp(CARD##bpp *data, int w, int h, CARD##bpp bg,               \
                 if (mono) {                                                   \
                     newLen = ublen - nSubrectsUblen + 2;                      \
                 } else {                                                      \
-                    newLen = ublen - nSubrectsUblen + bpp/8 + 2;              \
+                    newLen = ublen - nSubrectsUblen + bpp / 8 + 2;            \
                 }                                                             \
                                                                               \
-                if (newLen > (w * h * (bpp/8)))                               \
+                if (newLen > (w * h * (bpp / 8)))                             \
                     return FALSE;                                             \
                                                                               \
                 numsubs += 1;                                                 \
@@ -268,11 +266,9 @@ subrectEncode##bpp(CARD##bpp *data, int w, int h, CARD##bpp bg,               \
                 /*                                                            \
                  * Now mark the subrect as done.                              \
                  */                                                           \
-                for (j = they; j < (they + theh); j++) {                      \
-                    for (i = thex; i < (thex + thew); i++) {                  \
+                for (j = they; j < (they + theh); j++)                        \
+                    for (i = thex; i < (thex + thew); i++)                    \
                         data[j * w + i] = bg;                                 \
-                    }                                                         \
-                }                                                             \
             }                                                                 \
         }                                                                     \
     }                                                                         \
@@ -289,9 +285,8 @@ subrectEncode##bpp(CARD##bpp *data, int w, int h, CARD##bpp bg,               \
  * pixel, and the foreground pixel for mono.                                  \
  */                                                                           \
                                                                               \
-static void                                                                   \
-testColours##bpp(CARD##bpp *data, int size, Bool *mono, Bool *solid,          \
-                 CARD##bpp *bg, CARD##bpp *fg)                                \
+static void testColours##bpp(CARD##bpp *data, int size, Bool *mono,           \
+                             Bool *solid, CARD##bpp *bg, CARD##bpp *fg)       \
 {                                                                             \
     CARD##bpp colour1 = 0, colour2 = 0;                                       \
     int n1 = 0, n2 = 0;                                                       \

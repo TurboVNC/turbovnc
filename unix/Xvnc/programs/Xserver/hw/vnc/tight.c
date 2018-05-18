@@ -85,10 +85,10 @@ typedef struct TIGHT_CONF_s {
 } TIGHT_CONF;
 
 static TIGHT_CONF tightConf[4] = {
-    { 65536, 2048,   6, 0, 0, 0,   4, 24 }, // 0  (used only without JPEG)
-    { 65536, 2048,  32, 1, 1, 1,  96, 24 }, // 1
-    { 65536, 2048,  32, 3, 3, 2,  96, 96 }, // 2  (used only with JPEG)
-    { 65536, 2048,  32, 7, 7, 5,  96, 256 } // 9
+    { 65536, 2048,   6, 0, 0, 0,   4, 24 },  /* 0  (used only without JPEG) */
+    { 65536, 2048,  32, 1, 1, 1,  96, 24 },  /* 1 */
+    { 65536, 2048,  32, 3, 3, 2,  96, 96 },  /* 2  (used only with JPEG) */
+    { 65536, 2048,  32, 7, 7, 5,  96, 256 }  /* 9 */
 };
 
 static int compressLevel;
@@ -123,7 +123,7 @@ typedef struct PALETTE_s {
 /* Globals for multi-threading */
 
 static Bool threadInit = FALSE;
-static pthread_t thnd[MAX_ENCODING_THREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
+static pthread_t thnd[MAX_ENCODING_THREADS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 typedef struct _threadparam {
     rfbClientPtr cl;
@@ -150,45 +150,45 @@ static threadparam tparam[MAX_ENCODING_THREADS];
 
 /* Prototypes for static functions. */
 
-static void FindBestSolidArea (rfbClientPtr cl, int x, int y, int w, int h,
-                               CARD32 colorValue, int *w_ptr, int *h_ptr);
-static void ExtendSolidArea   (rfbClientPtr cl, int x, int y, int w, int h,
-                               CARD32 colorValue,
-                               int *x_ptr, int *y_ptr, int *w_ptr, int *h_ptr);
-static Bool CheckSolidTile    (rfbClientPtr cl, int x, int y, int w, int h,
-                               CARD32 *colorPtr, Bool needSameColor);
-static Bool CheckSolidTile8   (rfbClientPtr cl, int x, int y, int w, int h,
-                               CARD32 *colorPtr, Bool needSameColor);
-static Bool CheckSolidTile16  (rfbClientPtr cl, int x, int y, int w, int h,
-                               CARD32 *colorPtr, Bool needSameColor);
-static Bool CheckSolidTile32  (rfbClientPtr cl, int x, int y, int w, int h,
-                               CARD32 *colorPtr, Bool needSameColor);
+static void FindBestSolidArea(rfbClientPtr cl, int x, int y, int w, int h,
+                              CARD32 colorValue, int *w_ptr, int *h_ptr);
+static void ExtendSolidArea(rfbClientPtr cl, int x, int y, int w, int h,
+                            CARD32 colorValue, int *x_ptr, int *y_ptr,
+                            int *w_ptr, int *h_ptr);
+static Bool CheckSolidTile(rfbClientPtr cl, int x, int y, int w, int h,
+                           CARD32 *colorPtr, Bool needSameColor);
+static Bool CheckSolidTile8(rfbClientPtr cl, int x, int y, int w, int h,
+                            CARD32 *colorPtr, Bool needSameColor);
+static Bool CheckSolidTile16(rfbClientPtr cl, int x, int y, int w, int h,
+                             CARD32 *colorPtr, Bool needSameColor);
+static Bool CheckSolidTile32(rfbClientPtr cl, int x, int y, int w, int h,
+                             CARD32 *colorPtr, Bool needSameColor);
 
-static Bool SendRectSimple    (threadparam *t, int x, int y, int w, int h);
-static Bool SendSubrect       (threadparam *t, int x, int y, int w, int h);
-static Bool SendTightHeader   (threadparam *t, int x, int y, int w, int h);
+static Bool SendRectSimple(threadparam *t, int x, int y, int w, int h);
+static Bool SendSubrect(threadparam *t, int x, int y, int w, int h);
+static Bool SendTightHeader(threadparam *t, int x, int y, int w, int h);
 
-static Bool SendSolidRect     (threadparam *t);
-static Bool SendMonoRect      (threadparam *t, int w, int h);
-static Bool SendIndexedRect   (threadparam *t, int w, int h);
-static Bool SendFullColorRect (threadparam *t, int w, int h);
+static Bool SendSolidRect(threadparam *t);
+static Bool SendMonoRect(threadparam *t, int w, int h);
+static Bool SendIndexedRect(threadparam *t, int w, int h);
+static Bool SendFullColorRect(threadparam *t, int w, int h);
 
-static Bool CompressData (threadparam *t, int streamId, int dataLen,
-                          int zlibLevel, int zlibStrategy);
-static Bool SendCompressedData (threadparam *t, char *buf, int compressedLen);
+static Bool CompressData(threadparam *t, int streamId, int dataLen,
+                         int zlibLevel, int zlibStrategy);
+static Bool SendCompressedData(threadparam *t, char *buf, int compressedLen);
 
-static void FillPalette8 (threadparam *t, int count);
-static void FillPalette16 (threadparam *t, int count);
-static void FillPalette32 (threadparam *t, int count);
-static void FastFillPalette16 (threadparam *t, CARD16 *data, int w, int pitch,
-                               int h);
-static void FastFillPalette32 (threadparam *t, CARD32 *data, int w, int pitch,
-                               int h);
+static void FillPalette8(threadparam *t, int count);
+static void FillPalette16(threadparam *t, int count);
+static void FillPalette32(threadparam *t, int count);
+static void FastFillPalette16(threadparam *t, CARD16 *data, int w, int pitch,
+                              int h);
+static void FastFillPalette32(threadparam *t, CARD32 *data, int w, int pitch,
+                              int h);
 
-static void PaletteReset (threadparam *t);
-static int PaletteInsert (threadparam *t, CARD32 rgb, int numPixels, int bpp);
+static void PaletteReset(threadparam *t);
+static int PaletteInsert(threadparam *t, CARD32 rgb, int numPixels, int bpp);
 
-static void Pack24 (char *buf, rfbPixelFormat *fmt, int count);
+static void Pack24(char *buf, rfbPixelFormat *fmt, int count);
 
 static void EncodeIndexedRect16(threadparam *t, CARD8 *buf, int count);
 static void EncodeIndexedRect32(threadparam *t, CARD8 *buf, int count);
@@ -210,8 +210,7 @@ static Bool CheckUpdateBuf(threadparam *t, int bytes);
  * Tight encoding implementation.
  */
 
-int
-rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h)
+int rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h)
 {
     int maxRectSize, maxRectWidth;
     int subrectMaxWidth, subrectMaxHeight;
@@ -239,8 +238,7 @@ rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h)
  * Translate compression level into Tight compression level
  */
 
-int
-rfbTightCompressLevel(rfbClientPtr cl)
+int rfbTightCompressLevel(rfbClientPtr cl)
 {
     int compressLevel = cl->tightCompressLevel;
 
@@ -283,8 +281,7 @@ rfbTightCompressLevel(rfbClientPtr cl)
 }
 
 
-static void
-InitThreads(void)
+static void InitThreads(void)
 {
     int err = 0, i;
     if (threadInit) return;
@@ -311,8 +308,8 @@ InitThreads(void)
             pthread_mutex_lock(&tparam[i].done);
             if ((err = pthread_create(&thnd[i], NULL, TightThreadFunc,
                                       &tparam[i])) != 0) {
-                rfbLog ("Could not start thread %d: %s\n", i + 1,
-                    strerror(err == -1 ? errno : err));
+                rfbLog("Could not start thread %d: %s\n", i + 1,
+                       strerror(err == -1 ? errno : err));
                 return;
             }
         }
@@ -320,8 +317,7 @@ InitThreads(void)
     threadInit = TRUE;
 }
 
-void
-ShutdownTightThreads(void)
+void ShutdownTightThreads(void)
 {
     int i;
     if (!threadInit) return;
@@ -351,8 +347,7 @@ ShutdownTightThreads(void)
     threadInit = FALSE;
 }
 
-static void *
-TightThreadFunc(void *param)
+static void *TightThreadFunc(void *param)
 {
     threadparam *t = (threadparam *)param;
     while (!t->deadyet) {
@@ -365,8 +360,7 @@ TightThreadFunc(void *param)
 }
 
 
-static Bool
-CheckUpdateBuf(threadparam *t, int bytes)
+static Bool CheckUpdateBuf(threadparam *t, int bytes)
 {
     rfbClientPtr cl = t->cl;
     if (t->id == 0) {
@@ -374,8 +368,7 @@ CheckUpdateBuf(threadparam *t, int bytes)
             if (!rfbSendUpdateBuf(cl))
                 return FALSE;
         }
-    }
-    else {
+    } else {
         if ((*t->ublen) + bytes > t->updateBufSize) {
             t->updateBufSize += UPDATE_BUF_SIZE;
             t->updateBuf = (char *)rfbRealloc(t->updateBuf, t->updateBufSize);
@@ -385,8 +378,7 @@ CheckUpdateBuf(threadparam *t, int bytes)
 }
 
 
-Bool
-rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
+Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
 {
     Bool status = TRUE;
     int i, nt;
@@ -442,7 +434,7 @@ rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
 
     if (nt > 1) {
         for (i = 1; i < nt; i++) {
-            pthread_mutex_lock (&tparam[i].done);
+            pthread_mutex_lock(&tparam[i].done);
             status &= tparam[i].status;
         }
         if (status == FALSE) return FALSE;
@@ -481,8 +473,7 @@ rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
 }
 
 
-static Bool
-SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
+static Bool SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
 {
     int nMaxRows;
     CARD32 colorValue = 0;
@@ -543,8 +534,8 @@ SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
                     CARD32 r = (colorValue >> 16) & 0xFF;
                     CARD32 g = (colorValue >> 8) & 0xFF;
                     CARD32 b = (colorValue) & 0xFF;
-                    double y = (0.257 * (double)r) + (0.504 * (double)g)
-                             + (0.098 * (double)b) + 16.;
+                    double y = (0.257 * (double)r) + (0.504 * (double)g) +
+                               (0.098 * (double)b) + 16.;
                     colorValue = (int)y + (((int)y) << 8) + (((int)y) << 16);
                 }
 
@@ -562,7 +553,7 @@ SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
 
                 /* Try to extend solid rectangle to maximum size. */
 
-                x_best = dx; y_best = dy;
+                x_best = dx;  y_best = dy;
                 ExtendSolidArea(cl, x, y, w, h, colorValue,
                                 &x_best, &y_best, &w_best, &h_best);
 
@@ -584,9 +575,9 @@ SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
                 fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y_best) +
                          (x_best * (rfbFB.bitsPerPixel / 8)));
 
-                (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-                                   &cl->format, fbptr, t->tightBeforeBuf,
-                                   rfbFB.paddedWidthInBytes, 1, 1);
+                (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,
+                                    &cl->format, fbptr, t->tightBeforeBuf,
+                                    rfbFB.paddedWidthInBytes, 1, 1);
 
                 if (!SendSolidRect(t))
                     return FALSE;
@@ -618,9 +609,8 @@ SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
 }
 
 
-static void
-FindBestSolidArea(rfbClientPtr cl, int x, int y, int w, int h,
-                  CARD32 colorValue, int *w_ptr, int *h_ptr)
+static void FindBestSolidArea(rfbClientPtr cl, int x, int y, int w, int h,
+                              CARD32 colorValue, int *w_ptr, int *h_ptr)
 {
     int dx, dy, dw, dh;
     int w_prev;
@@ -658,9 +648,9 @@ FindBestSolidArea(rfbClientPtr cl, int x, int y, int w, int h,
 }
 
 
-static void
-ExtendSolidArea(rfbClientPtr cl, int x, int y, int w, int h, CARD32 colorValue,
-                int *x_ptr, int *y_ptr, int *w_ptr, int *h_ptr)
+static void ExtendSolidArea(rfbClientPtr cl, int x, int y, int w, int h,
+                            CARD32 colorValue, int *x_ptr, int *y_ptr,
+                            int *w_ptr, int *h_ptr)
 {
     int cx, cy;
 
@@ -703,35 +693,31 @@ ExtendSolidArea(rfbClientPtr cl, int x, int y, int w, int h, CARD32 colorValue,
  * that case new color will be stored in *colorPtr.
  */
 
-static Bool
-CheckSolidTile(rfbClientPtr cl, int x, int y, int w, int h, CARD32 *colorPtr,
-               Bool needSameColor)
+static Bool CheckSolidTile(rfbClientPtr cl, int x, int y, int w, int h,
+                           CARD32 *colorPtr, Bool needSameColor)
 {
-    switch(rfbServerFormat.bitsPerPixel) {
-    case 32:
-        return CheckSolidTile32(cl, x, y, w, h, colorPtr, needSameColor);
-    case 16:
-        return CheckSolidTile16(cl, x, y, w, h, colorPtr, needSameColor);
-    default:
-        return CheckSolidTile8(cl, x, y, w, h, colorPtr, needSameColor);
+    switch (rfbServerFormat.bitsPerPixel) {
+        case 32:
+            return CheckSolidTile32(cl, x, y, w, h, colorPtr, needSameColor);
+        case 16:
+            return CheckSolidTile16(cl, x, y, w, h, colorPtr, needSameColor);
+        default:
+            return CheckSolidTile8(cl, x, y, w, h, colorPtr, needSameColor);
     }
 }
 
 
 #define DEFINE_CHECK_SOLID_FUNCTION(bpp)                                      \
                                                                               \
-static Bool                                                                   \
-CheckSolidTile##bpp(cl, x, y, w, h, colorPtr, needSameColor)                  \
-    rfbClientPtr cl;                                                          \
-    int x, y, w, h;                                                           \
-    CARD32 *colorPtr;                                                         \
-    Bool needSameColor;                                                       \
+static Bool CheckSolidTile##bpp(rfbClientPtr cl, int x, int y, int w, int h,  \
+                                CARD32 *colorPtr, Bool needSameColor)         \
 {                                                                             \
     CARD##bpp *fbptr;                                                         \
     CARD##bpp colorValue;                                                     \
     int dx, dy;                                                               \
                                                                               \
-    fbptr = (CARD##bpp *)&cl->fb[y * rfbFB.paddedWidthInBytes + x * (bpp/8)]; \
+    fbptr =                                                                   \
+        (CARD##bpp *)&cl->fb[y * rfbFB.paddedWidthInBytes + x * (bpp / 8)];   \
                                                                               \
     colorValue = *fbptr;                                                      \
     if (needSameColor && (CARD32)colorValue != *colorPtr)                     \
@@ -754,8 +740,7 @@ DEFINE_CHECK_SOLID_FUNCTION(16)
 DEFINE_CHECK_SOLID_FUNCTION(32)
 
 
-static Bool
-SendRectSimple(threadparam *t, int x, int y, int w, int h)
+static Bool SendRectSimple(threadparam *t, int x, int y, int w, int h)
 {
     int maxBeforeSize, maxAfterSize;
     int maxRectSize, maxRectWidth;
@@ -809,8 +794,7 @@ SendRectSimple(threadparam *t, int x, int y, int w, int h)
 }
 
 
-static Bool
-SendSubrect(threadparam *t, int x, int y, int w, int h)
+static Bool SendSubrect(threadparam *t, int x, int y, int w, int h)
 {
     char *fbptr;
     Bool success = FALSE;
@@ -827,8 +811,8 @@ SendSubrect(threadparam *t, int x, int y, int w, int h)
     if (!SendTightHeader(t, x, y, w, h))
         return FALSE;
 
-    fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y)
-             + (x * (rfbFB.bitsPerPixel / 8)));
+    fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y) +
+             (x * (rfbFB.bitsPerPixel / 8)));
 
     if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1 &&
         rfbFB.bitsPerPixel > 8)
@@ -851,69 +835,67 @@ SendSubrect(threadparam *t, int x, int y, int w, int h)
         /* This is so we can avoid translating the pixels when compressing
            with JPEG, since it is unnecessary */
         switch (cl->format.bitsPerPixel) {
-        case 16:
-            FastFillPalette16(t, (CARD16 *)fbptr, w,
-                              rfbFB.paddedWidthInBytes/2, h);
-            break;
-        default:
-            FastFillPalette32(t, (CARD32 *)fbptr, w,
-                              rfbFB.paddedWidthInBytes/4, h);
+            case 16:
+                FastFillPalette16(t, (CARD16 *)fbptr, w,
+                                  rfbFB.paddedWidthInBytes / 2, h);
+                break;
+            default:
+                FastFillPalette32(t, (CARD32 *)fbptr, w,
+                                  rfbFB.paddedWidthInBytes / 4, h);
         }
 
         if (t->paletteNumColors != 0 || qualityLevel == -1) {
-            (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-                               &cl->format, fbptr, t->tightBeforeBuf,
-                               rfbFB.paddedWidthInBytes, w, h);
+            (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,
+                                &cl->format, fbptr, t->tightBeforeBuf,
+                                rfbFB.paddedWidthInBytes, w, h);
         }
-    }
-    else {
-        (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-                           &cl->format, fbptr, t->tightBeforeBuf,
-                           rfbFB.paddedWidthInBytes, w, h);
+    } else {
+        (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,
+                            &cl->format, fbptr, t->tightBeforeBuf,
+                            rfbFB.paddedWidthInBytes, w, h);
 
         switch (cl->format.bitsPerPixel) {
-        case 8:
-            FillPalette8(t, w * h);
-            break;
-        case 16:
-            FillPalette16(t, w * h);
-            break;
-        default:
-            FillPalette32(t, w * h);
+            case 8:
+                FillPalette8(t, w * h);
+                break;
+            case 16:
+                FillPalette16(t, w * h);
+                break;
+            default:
+                FillPalette32(t, w * h);
         }
     }
 
     switch (t->paletteNumColors) {
-    case 0:
-        /* Truecolor image */
-        if (qualityLevel != -1) {
-            success = SendJpegRect(t, x, y, w, h, qualityLevel);
-        } else {
-            success = SendFullColorRect(t, w, h);
+        case 0:
+            /* Truecolor image */
+            if (qualityLevel != -1) {
+                success = SendJpegRect(t, x, y, w, h, qualityLevel);
+            } else {
+                success = SendFullColorRect(t, w, h);
+                ADD_TO_LOSSLESS_REGION(x, y, w, h);
+            }
+            break;
+        case 1:
+            /* Solid rectangle */
+            success = SendSolidRect(t);
             ADD_TO_LOSSLESS_REGION(x, y, w, h);
-        }
-        break;
-    case 1:
-        /* Solid rectangle */
-        success = SendSolidRect(t);
-        ADD_TO_LOSSLESS_REGION(x, y, w, h);
-        break;
-    case 2:
-        /* Two-color rectangle */
-        success = SendMonoRect(t, w, h);
-        ADD_TO_LOSSLESS_REGION(x, y, w, h);
-        break;
-    default:
-        /* Up to 256 different colors */
-        success = SendIndexedRect(t, w, h);
-        ADD_TO_LOSSLESS_REGION(x, y, w, h);
+            break;
+        case 2:
+            /* Two-color rectangle */
+            success = SendMonoRect(t, w, h);
+            ADD_TO_LOSSLESS_REGION(x, y, w, h);
+            break;
+        default:
+            /* Up to 256 different colors */
+            success = SendIndexedRect(t, w, h);
+            ADD_TO_LOSSLESS_REGION(x, y, w, h);
     }
     return success;
 }
 
 
-static Bool
-SendTightHeader(threadparam *t, int x, int y, int w, int h)
+static Bool SendTightHeader(threadparam *t, int x, int y, int w, int h)
 {
     rfbFramebufferUpdateRectHeader rect;
 
@@ -941,8 +923,7 @@ SendTightHeader(threadparam *t, int x, int y, int w, int h)
  * Subencoding implementations.
  */
 
-static Bool
-SendSolidRect(threadparam *t)
+static Bool SendSolidRect(threadparam *t)
 {
     int len;
     rfbClientPtr cl = t->cl;
@@ -966,8 +947,7 @@ SendSolidRect(threadparam *t)
 }
 
 
-static Bool
-SendMonoRect(threadparam *t, int w, int h)
+static Bool SendMonoRect(threadparam *t, int w, int h)
 {
     int streamId = t->streamId;
     int paletteLen, dataLen;
@@ -997,40 +977,39 @@ SendMonoRect(threadparam *t, int w, int h)
 
     /* Prepare palette, convert image. */
     switch (cl->format.bitsPerPixel) {
+        case 32:
+            EncodeMonoRect32(t, (CARD8 *)t->tightBeforeBuf, w, h);
 
-    case 32:
-        EncodeMonoRect32(t, (CARD8 *)t->tightBeforeBuf, w, h);
+            ((CARD32 *)t->tightAfterBuf)[0] = t->monoBackground;
+            ((CARD32 *)t->tightAfterBuf)[1] = t->monoForeground;
+            if (usePixelFormat24) {
+                Pack24(t->tightAfterBuf, &cl->format, 2);
+                paletteLen = 6;
+            } else
+                paletteLen = 8;
 
-        ((CARD32 *)t->tightAfterBuf)[0] = t->monoBackground;
-        ((CARD32 *)t->tightAfterBuf)[1] = t->monoForeground;
-        if (usePixelFormat24) {
-            Pack24(t->tightAfterBuf, &cl->format, 2);
-            paletteLen = 6;
-        } else
-            paletteLen = 8;
+            memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf, paletteLen);
+            (*t->ublen) += paletteLen;
+            t->bytessent += 3 + paletteLen;
+            break;
 
-        memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf, paletteLen);
-        (*t->ublen) += paletteLen;
-        t->bytessent += 3 + paletteLen;
-        break;
+        case 16:
+            EncodeMonoRect16(t, (CARD8 *)t->tightBeforeBuf, w, h);
 
-    case 16:
-        EncodeMonoRect16(t, (CARD8 *)t->tightBeforeBuf, w, h);
+            ((CARD16 *)t->tightAfterBuf)[0] = (CARD16)t->monoBackground;
+            ((CARD16 *)t->tightAfterBuf)[1] = (CARD16)t->monoForeground;
 
-        ((CARD16 *)t->tightAfterBuf)[0] = (CARD16)t->monoBackground;
-        ((CARD16 *)t->tightAfterBuf)[1] = (CARD16)t->monoForeground;
+            memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf, 4);
+            (*t->ublen) += 4;
+            t->bytessent += 7;
+            break;
 
-        memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf, 4);
-        (*t->ublen) += 4;
-        t->bytessent += 7;
-        break;
+        default:
+            EncodeMonoRect8(t, (CARD8 *)t->tightBeforeBuf, w, h);
 
-    default:
-        EncodeMonoRect8(t, (CARD8 *)t->tightBeforeBuf, w, h);
-
-        t->updateBuf[(*t->ublen)++] = (char)t->monoBackground;
-        t->updateBuf[(*t->ublen)++] = (char)t->monoForeground;
-        t->bytessent += 5;
+            t->updateBuf[(*t->ublen)++] = (char)t->monoBackground;
+            t->updateBuf[(*t->ublen)++] = (char)t->monoForeground;
+            t->bytessent += 5;
     }
 
     return CompressData(t, streamId, dataLen,
@@ -1039,8 +1018,7 @@ SendMonoRect(threadparam *t, int w, int h)
 }
 
 
-static Bool
-SendIndexedRect(threadparam *t, int w, int h)
+static Bool SendIndexedRect(threadparam *t, int w, int h)
 {
     int streamId = t->streamId;
     int i, entryLen;
@@ -1067,42 +1045,41 @@ SendIndexedRect(threadparam *t, int w, int h)
 
     /* Prepare palette, convert image. */
     switch (cl->format.bitsPerPixel) {
+        case 32:
+            EncodeIndexedRect32(t, (CARD8 *)t->tightBeforeBuf, w * h);
 
-    case 32:
-        EncodeIndexedRect32(t, (CARD8 *)t->tightBeforeBuf, w * h);
+            for (i = 0; i < t->paletteNumColors; i++) {
+                ((CARD32 *)t->tightAfterBuf)[i] =
+                    t->palette.entry[i].listNode->rgb;
+            }
+            if (usePixelFormat24) {
+                Pack24(t->tightAfterBuf, &cl->format, t->paletteNumColors);
+                entryLen = 3;
+            } else
+                entryLen = 4;
 
-        for (i = 0; i < t->paletteNumColors; i++) {
-            ((CARD32 *)t->tightAfterBuf)[i] =
-                t->palette.entry[i].listNode->rgb;
-        }
-        if (usePixelFormat24) {
-            Pack24(t->tightAfterBuf, &cl->format, t->paletteNumColors);
-            entryLen = 3;
-        } else
-            entryLen = 4;
+            memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf,
+                   t->paletteNumColors * entryLen);
+            (*t->ublen) += t->paletteNumColors * entryLen;
+            t->bytessent += 3 + t->paletteNumColors * entryLen;
+            break;
 
-        memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf,
-               t->paletteNumColors * entryLen);
-        (*t->ublen) += t->paletteNumColors * entryLen;
-        t->bytessent += 3 + t->paletteNumColors * entryLen;
-        break;
+        case 16:
+            EncodeIndexedRect16(t, (CARD8 *)t->tightBeforeBuf, w * h);
 
-    case 16:
-        EncodeIndexedRect16(t, (CARD8 *)t->tightBeforeBuf, w * h);
+            for (i = 0; i < t->paletteNumColors; i++) {
+                ((CARD16 *)t->tightAfterBuf)[i] =
+                    (CARD16)t->palette.entry[i].listNode->rgb;
+            }
 
-        for (i = 0; i < t->paletteNumColors; i++) {
-            ((CARD16 *)t->tightAfterBuf)[i] =
-                (CARD16)t->palette.entry[i].listNode->rgb;
-        }
+            memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf,
+                   t->paletteNumColors * 2);
+            (*t->ublen) += t->paletteNumColors * 2;
+            t->bytessent += 3 + t->paletteNumColors * 2;
+            break;
 
-        memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf,
-               t->paletteNumColors * 2);
-        (*t->ublen) += t->paletteNumColors * 2;
-        t->bytessent += 3 + t->paletteNumColors * 2;
-        break;
-
-    default:
-        return FALSE;           /* Should never happen. */
+        default:
+            return FALSE;           /* Should never happen. */
     }
 
     return CompressData(t, streamId, w * h,
@@ -1111,8 +1088,7 @@ SendIndexedRect(threadparam *t, int w, int h)
 }
 
 
-static Bool
-SendFullColorRect(threadparam *t, int w, int h)
+static Bool SendFullColorRect(threadparam *t, int w, int h)
 {
     int streamId = t->streamId;
     int len;
@@ -1145,9 +1121,8 @@ SendFullColorRect(threadparam *t, int w, int h)
 }
 
 
-static Bool
-CompressData(threadparam *t, int streamId, int dataLen, int zlibLevel,
-             int zlibStrategy)
+static Bool CompressData(threadparam *t, int streamId, int dataLen,
+                         int zlibLevel, int zlibStrategy)
 {
     z_streamp pz;
     int err;
@@ -1169,7 +1144,7 @@ CompressData(threadparam *t, int streamId, int dataLen, int zlibLevel,
        threads, then threads 5 and beyond must encode their data without Zlib
        compression. */
     if (zlibLevel == 0 || t->id > 3)
-        return SendCompressedData (t, t->tightBeforeBuf, dataLen);
+        return SendCompressedData(t, t->tightBeforeBuf, dataLen);
 
     pz = &cl->zsStruct[streamId];
 
@@ -1249,8 +1224,7 @@ static Bool SendCompressedData(threadparam *t, char *buf, int compressedLen)
  * Code to determine how many different colors used in rectangle.
  */
 
-static void
-FillPalette8(threadparam *t, int count)
+static void FillPalette8(threadparam *t, int count)
 {
     CARD8 *data = (CARD8 *)t->tightBeforeBuf;
     CARD8 c0, c1;
@@ -1294,10 +1268,7 @@ FillPalette8(threadparam *t, int count)
 
 #define DEFINE_FILL_PALETTE_FUNCTION(bpp)                               \
                                                                         \
-static void                                                             \
-FillPalette##bpp(t, count)                                              \
-    threadparam *t;                                                     \
-    int count;                                                          \
+static void FillPalette##bpp(threadparam *t, int count)                 \
 {                                                                       \
     CARD##bpp *data = (CARD##bpp *)t->tightBeforeBuf;                   \
     CARD##bpp c0, c1, ci;                                               \
@@ -1348,7 +1319,7 @@ FillPalette##bpp(t, count)                                              \
         if (data[i] == ci) {                                            \
             ni++;                                                       \
         } else {                                                        \
-            if (!PaletteInsert (t, ci, (CARD32)ni, bpp))                \
+            if (!PaletteInsert(t, ci, (CARD32)ni, bpp))                 \
                 return;                                                 \
             ci = data[i];                                               \
             ni = 1;                                                     \
@@ -1361,104 +1332,101 @@ DEFINE_FILL_PALETTE_FUNCTION(16)
 DEFINE_FILL_PALETTE_FUNCTION(32)
 
 
-#define DEFINE_FAST_FILL_PALETTE_FUNCTION(bpp)                          \
-                                                                        \
-static void                                                             \
-FastFillPalette##bpp(t, data, w, pitch, h)                              \
-    threadparam *t;                                                     \
-    CARD##bpp *data;                                                    \
-    int w, pitch, h;                                                    \
-{                                                                       \
-    CARD##bpp c0, c1, ci, mask, c0t, c1t, cit;                          \
-    int i, j, i2 = 0, j2, n0, n1, ni;                                   \
-    rfbClientPtr cl = t->cl;                                            \
-                                                                        \
-    if (cl->translateFn != rfbTranslateNone) {                          \
-        mask = rfbServerFormat.redMax << rfbServerFormat.redShift;      \
-        mask |= rfbServerFormat.greenMax << rfbServerFormat.greenShift; \
-        mask |= rfbServerFormat.blueMax << rfbServerFormat.blueShift;   \
-    } else mask = ~0;                                                   \
-                                                                        \
-    c0 = data[0] & mask;                                                \
-    for (j = 0; j < h; j++) {                                           \
-        for (i = 0; i < w; i++) {                                       \
-            if ((data[j * pitch + i] & mask) != c0)                     \
-                goto done;                                              \
-        }                                                               \
-    }                                                                   \
-    done:                                                               \
-    if (j >= h) {                                                       \
-        t->paletteNumColors = 1;   /* Solid rectangle */                \
-        return;                                                         \
-    }                                                                   \
-    if (t->paletteMaxColors < 2) {                                      \
-        t->paletteNumColors = 0;   /* Full-color encoding preferred */  \
-        return;                                                         \
-    }                                                                   \
-                                                                        \
-    n0 = j * w + i;                                                     \
-    c1 = data[j * pitch + i] & mask;                                    \
-    n1 = 0;                                                             \
-    i++;  if (i >= w) {i = 0;  j++;}                                    \
-    for (j2 = j; j2 < h; j2++) {                                        \
-        for (i2 = i; i2 < w; i2++) {                                    \
-            ci = data[j2 * pitch + i2] & mask;                          \
-            if (ci == c0) {                                             \
-                n0++;                                                   \
-            } else if (ci == c1) {                                      \
-                n1++;                                                   \
-            } else                                                      \
-                goto done2;                                             \
-        }                                                               \
-        i = 0;                                                          \
-    }                                                                   \
-    done2:                                                              \
-    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,      \
-                       &cl->format, (char *)&c0, (char *)&c0t, bpp/8,   \
-                       1, 1);                                           \
-    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,      \
-                       &cl->format, (char *)&c1, (char *)&c1t, bpp/8,   \
-                       1, 1);                                           \
-    if (j2 >= h) {                                                      \
-        if (n0 > n1) {                                                  \
-            t->monoBackground = (CARD32)c0t;                            \
-            t->monoForeground = (CARD32)c1t;                            \
-        } else {                                                        \
-            t->monoBackground = (CARD32)c1t;                            \
-            t->monoForeground = (CARD32)c0t;                            \
-        }                                                               \
-        t->paletteNumColors = 2;   /* Two colors */                     \
-        return;                                                         \
-    }                                                                   \
-                                                                        \
-    PaletteReset(t);                                                    \
-    PaletteInsert(t, c0t, (CARD32)n0, bpp);                             \
-    PaletteInsert(t, c1t, (CARD32)n1, bpp);                             \
-                                                                        \
-    ni = 1;                                                             \
-    i2++;  if (i2 >= w) {i2 = 0;  j2++;}                                \
-    for (j = j2; j < h; j++) {                                          \
-        for (i = i2; i < w; i++) {                                      \
-            if ((data[j * pitch + i] & mask) == ci) {                   \
-                ni++;                                                   \
-            } else {                                                    \
-                (*cl->translateFn)(cl->translateLookupTable,            \
-                                   &rfbServerFormat, &cl->format,       \
-                                   (char *)&ci, (char *)&cit, bpp/8,    \
-                                   1, 1);                               \
-                if (!PaletteInsert (t, cit, (CARD32)ni, bpp))           \
-                    return;                                             \
-                ci = data[j * pitch + i] & mask;                        \
-                ni = 1;                                                 \
-            }                                                           \
-        }                                                               \
-        i2 = 0;                                                         \
-    }                                                                   \
-                                                                        \
-    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,      \
-                       &cl->format, (char *)&ci, (char *)&cit, bpp/8,   \
-                       1, 1);                                           \
-    PaletteInsert(t, cit, (CARD32)ni, bpp);                             \
+#define DEFINE_FAST_FILL_PALETTE_FUNCTION(bpp)                            \
+                                                                          \
+static void FastFillPalette##bpp(threadparam *t, CARD##bpp *data,         \
+                                 int w, int pitch, int h)                 \
+{                                                                         \
+    CARD##bpp c0, c1, ci, mask, c0t, c1t, cit;                            \
+    int i, j, i2 = 0, j2, n0, n1, ni;                                     \
+    rfbClientPtr cl = t->cl;                                              \
+                                                                          \
+    if (cl->translateFn != rfbTranslateNone) {                            \
+        mask = rfbServerFormat.redMax << rfbServerFormat.redShift;        \
+        mask |= rfbServerFormat.greenMax << rfbServerFormat.greenShift;   \
+        mask |= rfbServerFormat.blueMax << rfbServerFormat.blueShift;     \
+    } else mask = ~0;                                                     \
+                                                                          \
+    c0 = data[0] & mask;                                                  \
+    for (j = 0; j < h; j++) {                                             \
+        for (i = 0; i < w; i++) {                                         \
+            if ((data[j * pitch + i] & mask) != c0)                       \
+                goto done;                                                \
+        }                                                                 \
+    }                                                                     \
+    done:                                                                 \
+    if (j >= h) {                                                         \
+        t->paletteNumColors = 1;   /* Solid rectangle */                  \
+        return;                                                           \
+    }                                                                     \
+    if (t->paletteMaxColors < 2) {                                        \
+        t->paletteNumColors = 0;   /* Full-color encoding preferred */    \
+        return;                                                           \
+    }                                                                     \
+                                                                          \
+    n0 = j * w + i;                                                       \
+    c1 = data[j * pitch + i] & mask;                                      \
+    n1 = 0;                                                               \
+    i++;  if (i >= w) { i = 0;  j++; }                                    \
+    for (j2 = j; j2 < h; j2++) {                                          \
+        for (i2 = i; i2 < w; i2++) {                                      \
+            ci = data[j2 * pitch + i2] & mask;                            \
+            if (ci == c0) {                                               \
+                n0++;                                                     \
+            } else if (ci == c1) {                                        \
+                n1++;                                                     \
+            } else                                                        \
+                goto done2;                                               \
+        }                                                                 \
+        i = 0;                                                            \
+    }                                                                     \
+    done2:                                                                \
+    (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,       \
+                        &cl->format, (char *)&c0, (char *)&c0t, bpp / 8,  \
+                        1, 1);                                            \
+    (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,       \
+                        &cl->format, (char *)&c1, (char *)&c1t, bpp / 8,  \
+                        1, 1);                                            \
+    if (j2 >= h) {                                                        \
+        if (n0 > n1) {                                                    \
+            t->monoBackground = (CARD32)c0t;                              \
+            t->monoForeground = (CARD32)c1t;                              \
+        } else {                                                          \
+            t->monoBackground = (CARD32)c1t;                              \
+            t->monoForeground = (CARD32)c0t;                              \
+        }                                                                 \
+        t->paletteNumColors = 2;   /* Two colors */                       \
+        return;                                                           \
+    }                                                                     \
+                                                                          \
+    PaletteReset(t);                                                      \
+    PaletteInsert(t, c0t, (CARD32)n0, bpp);                               \
+    PaletteInsert(t, c1t, (CARD32)n1, bpp);                               \
+                                                                          \
+    ni = 1;                                                               \
+    i2++;  if (i2 >= w) { i2 = 0;  j2++; }                                \
+    for (j = j2; j < h; j++) {                                            \
+        for (i = i2; i < w; i++) {                                        \
+            if ((data[j * pitch + i] & mask) == ci) {                     \
+                ni++;                                                     \
+            } else {                                                      \
+                (*cl->translateFn) (cl->translateLookupTable,             \
+                                    &rfbServerFormat, &cl->format,        \
+                                    (char *)&ci, (char *)&cit, bpp / 8,   \
+                                    1, 1);                                \
+                if (!PaletteInsert(t, cit, (CARD32)ni, bpp))              \
+                    return;                                               \
+                ci = data[j * pitch + i] & mask;                          \
+                ni = 1;                                                   \
+            }                                                             \
+        }                                                                 \
+        i2 = 0;                                                           \
+    }                                                                     \
+                                                                          \
+    (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,       \
+                        &cl->format, (char *)&ci, (char *)&cit, bpp / 8,  \
+                        1, 1);                                            \
+    PaletteInsert(t, cit, (CARD32)ni, bpp);                               \
 }
 
 DEFINE_FAST_FILL_PALETTE_FUNCTION(16)
@@ -1473,16 +1441,14 @@ DEFINE_FAST_FILL_PALETTE_FUNCTION(32)
 #define HASH_FUNC32(rgb) ((int)((((rgb) >> 16) + ((rgb) >> 8)) & 0xFF))
 
 
-static void
-PaletteReset(threadparam *t)
+static void PaletteReset(threadparam *t)
 {
     t->paletteNumColors = 0;
     memset(t->palette.hash, 0, 256 * sizeof(COLOR_LIST *));
 }
 
 
-static int
-PaletteInsert(threadparam *t, CARD32 rgb, int numPixels, int bpp)
+static int PaletteInsert(threadparam *t, CARD32 rgb, int numPixels, int bpp)
 {
     COLOR_LIST *pnode;
     COLOR_LIST *prev_pnode = NULL;
@@ -1584,97 +1550,89 @@ static void Pack24(char *buf, rfbPixelFormat *fmt, int count)
  * Converting truecolor samples into palette indices.
  */
 
-#define DEFINE_IDX_ENCODE_FUNCTION(bpp)                                 \
-                                                                        \
-static void                                                             \
-EncodeIndexedRect##bpp(t, buf, count)                                   \
-    threadparam *t;                                                     \
-    CARD8 *buf;                                                         \
-    int count;                                                          \
-{                                                                       \
-    COLOR_LIST *pnode;                                                  \
-    CARD##bpp *src;                                                     \
-    CARD##bpp rgb;                                                      \
-    int rep = 0;                                                        \
-                                                                        \
-    src = (CARD##bpp *) buf;                                            \
-                                                                        \
-    while (count--) {                                                   \
-        rgb = *src++;                                                   \
-        while (count && *src == rgb) {                                  \
-            rep++, src++, count--;                                      \
-        }                                                               \
-        pnode = t->palette.hash[HASH_FUNC##bpp(rgb)];                   \
-        while (pnode != NULL) {                                         \
-            if ((CARD##bpp)pnode->rgb == rgb) {                         \
-                *buf++ = (CARD8)pnode->idx;                             \
-                while (rep) {                                           \
-                    *buf++ = (CARD8)pnode->idx;                         \
-                    rep--;                                              \
-                }                                                       \
-                break;                                                  \
-            }                                                           \
-            pnode = pnode->next;                                        \
-        }                                                               \
-    }                                                                   \
+#define DEFINE_IDX_ENCODE_FUNCTION(bpp)                                    \
+                                                                           \
+static void EncodeIndexedRect##bpp(threadparam *t, CARD8 *buf, int count)  \
+{                                                                          \
+    COLOR_LIST *pnode;                                                     \
+    CARD##bpp *src;                                                        \
+    CARD##bpp rgb;                                                         \
+    int rep = 0;                                                           \
+                                                                           \
+    src = (CARD##bpp *)buf;                                                \
+                                                                           \
+    while (count--) {                                                      \
+        rgb = *src++;                                                      \
+        while (count && *src == rgb) {                                     \
+            rep++, src++, count--;                                         \
+        }                                                                  \
+        pnode = t->palette.hash[HASH_FUNC##bpp(rgb)];                      \
+        while (pnode != NULL) {                                            \
+            if ((CARD##bpp)pnode->rgb == rgb) {                            \
+                *buf++ = (CARD8)pnode->idx;                                \
+                while (rep) {                                              \
+                    *buf++ = (CARD8)pnode->idx;                            \
+                    rep--;                                                 \
+                }                                                          \
+                break;                                                     \
+            }                                                              \
+            pnode = pnode->next;                                           \
+        }                                                                  \
+    }                                                                      \
 }
 
 DEFINE_IDX_ENCODE_FUNCTION(16)
 DEFINE_IDX_ENCODE_FUNCTION(32)
 
 
-#define DEFINE_MONO_ENCODE_FUNCTION(bpp)                                \
-                                                                        \
-static void                                                             \
-EncodeMonoRect##bpp(t, buf, w, h)                                       \
-    threadparam *t;                                                     \
-    CARD8 *buf;                                                         \
-    int w, h;                                                           \
-{                                                                       \
-    CARD##bpp *ptr;                                                     \
-    CARD##bpp bg;                                                       \
-    unsigned int value, mask;                                           \
-    int aligned_width;                                                  \
-    int x, y, bg_bits;                                                  \
-                                                                        \
-    ptr = (CARD##bpp *) buf;                                            \
-    bg = (CARD##bpp) t->monoBackground;                                 \
-    aligned_width = w - w % 8;                                          \
-                                                                        \
-    for (y = 0; y < h; y++) {                                           \
-        for (x = 0; x < aligned_width; x += 8) {                        \
-            for (bg_bits = 0; bg_bits < 8; bg_bits++) {                 \
-                if (*ptr++ != bg)                                       \
-                    break;                                              \
-            }                                                           \
-            if (bg_bits == 8) {                                         \
-                *buf++ = 0;                                             \
-                continue;                                               \
-            }                                                           \
-            mask = 0x80 >> bg_bits;                                     \
-            value = mask;                                               \
-            for (bg_bits++; bg_bits < 8; bg_bits++) {                   \
-                mask >>= 1;                                             \
-                if (*ptr++ != bg) {                                     \
-                    value |= mask;                                      \
-                }                                                       \
-            }                                                           \
-            *buf++ = (CARD8)value;                                      \
-        }                                                               \
-                                                                        \
-        mask = 0x80;                                                    \
-        value = 0;                                                      \
-        if (x >= w)                                                     \
-            continue;                                                   \
-                                                                        \
-        for (; x < w; x++) {                                            \
-            if (*ptr++ != bg) {                                         \
-                value |= mask;                                          \
-            }                                                           \
-            mask >>= 1;                                                 \
-        }                                                               \
-        *buf++ = (CARD8)value;                                          \
-    }                                                                   \
+#define DEFINE_MONO_ENCODE_FUNCTION(bpp)                                   \
+                                                                           \
+static void EncodeMonoRect##bpp(threadparam *t, CARD8 *buf, int w, int h)  \
+{                                                                          \
+    CARD##bpp *ptr;                                                        \
+    CARD##bpp bg;                                                          \
+    unsigned int value, mask;                                              \
+    int aligned_width;                                                     \
+    int x, y, bg_bits;                                                     \
+                                                                           \
+    ptr = (CARD##bpp *)buf;                                                \
+    bg = (CARD##bpp)t->monoBackground;                                     \
+    aligned_width = w - w % 8;                                             \
+                                                                           \
+    for (y = 0; y < h; y++) {                                              \
+        for (x = 0; x < aligned_width; x += 8) {                           \
+            for (bg_bits = 0; bg_bits < 8; bg_bits++) {                    \
+                if (*ptr++ != bg)                                          \
+                    break;                                                 \
+            }                                                              \
+            if (bg_bits == 8) {                                            \
+                *buf++ = 0;                                                \
+                continue;                                                  \
+            }                                                              \
+            mask = 0x80 >> bg_bits;                                        \
+            value = mask;                                                  \
+            for (bg_bits++; bg_bits < 8; bg_bits++) {                      \
+                mask >>= 1;                                                \
+                if (*ptr++ != bg) {                                        \
+                    value |= mask;                                         \
+                }                                                          \
+            }                                                              \
+            *buf++ = (CARD8)value;                                         \
+        }                                                                  \
+                                                                           \
+        mask = 0x80;                                                       \
+        value = 0;                                                         \
+        if (x >= w)                                                        \
+            continue;                                                      \
+                                                                           \
+        for (; x < w; x++) {                                               \
+            if (*ptr++ != bg) {                                            \
+                value |= mask;                                             \
+            }                                                              \
+            mask >>= 1;                                                    \
+        }                                                                  \
+        *buf++ = (CARD8)value;                                             \
+    }                                                                      \
 }
 
 DEFINE_MONO_ENCODE_FUNCTION(8)
@@ -1682,44 +1640,43 @@ DEFINE_MONO_ENCODE_FUNCTION(16)
 DEFINE_MONO_ENCODE_FUNCTION(32)
 
 
-#define DEFINE_RGB_CONVERT_FUNCTION(bpp)                                \
-                                                                        \
-static unsigned char *                                                  \
-ConvertRGB##bpp(rfbClientPtr cl, int x, int y, int w, int h)            \
-{                                                                       \
-    CARD##bpp *srcptr, pix;                                             \
-    unsigned char *dst, *tmpbuf;                                        \
-    int inRed, inGreen, inBlue, i, j, ps = bpp / 8;                     \
-                                                                        \
-    tmpbuf = (unsigned char *)rfbAlloc(w * h * 3);                      \
-    srcptr = (CARD##bpp *)&cl->fb[y * rfbFB.paddedWidthInBytes          \
-                                  + x * ps];                            \
-    dst = tmpbuf;                                                       \
-    for (j = 0; j < h; j++) {                                           \
-        CARD##bpp *srcptr2 = srcptr;                                    \
-        unsigned char *dst2 = dst;                                      \
-        for (i = 0; i < w; i++) {                                       \
-            pix = *srcptr2++;                                           \
-            inRed = (int) (pix >> rfbServerFormat.redShift              \
-                           & rfbServerFormat.redMax);                   \
-            inGreen = (int) (pix >> rfbServerFormat.greenShift          \
-                             & rfbServerFormat.greenMax);               \
-            inBlue  = (int) (pix >> rfbServerFormat.blueShift           \
-                             & rfbServerFormat.blueMax);                \
-            *dst2++ = (CARD8)                                           \
-                ((inRed * 255 + rfbServerFormat.redMax / 2)             \
-                 / rfbServerFormat.redMax);                             \
-            *dst2++ = (CARD8)                                           \
-                ((inGreen * 255 + rfbServerFormat.greenMax / 2)         \
-                 / rfbServerFormat.greenMax);                           \
-            *dst2++ = (CARD8)                                           \
-                ((inBlue  * 255 + rfbServerFormat.blueMax / 2)          \
-                 / rfbServerFormat.blueMax);                            \
-        }                                                               \
-        srcptr += rfbFB.paddedWidthInBytes / ps;                        \
-        dst += w * 3;                                                   \
-    }                                                                   \
-    return tmpbuf;                                                      \
+#define DEFINE_RGB_CONVERT_FUNCTION(bpp)                                   \
+                                                                           \
+static unsigned char *ConvertRGB##bpp(rfbClientPtr cl, int x, int y,       \
+                                      int w, int h)                        \
+{                                                                          \
+    CARD##bpp *srcptr, pix;                                                \
+    unsigned char *dst, *tmpbuf;                                           \
+    int inRed, inGreen, inBlue, i, j, ps = bpp / 8;                        \
+                                                                           \
+    tmpbuf = (unsigned char *)rfbAlloc(w * h * 3);                         \
+    srcptr = (CARD##bpp *)&cl->fb[y * rfbFB.paddedWidthInBytes + x * ps];  \
+    dst = tmpbuf;                                                          \
+    for (j = 0; j < h; j++) {                                              \
+        CARD##bpp *srcptr2 = srcptr;                                       \
+        unsigned char *dst2 = dst;                                         \
+        for (i = 0; i < w; i++) {                                          \
+            pix = *srcptr2++;                                              \
+            inRed = (int)(pix >> rfbServerFormat.redShift &                \
+                          rfbServerFormat.redMax);                         \
+            inGreen = (int)(pix >> rfbServerFormat.greenShift &            \
+                            rfbServerFormat.greenMax);                     \
+            inBlue  = (int)(pix >> rfbServerFormat.blueShift &             \
+                            rfbServerFormat.blueMax);                      \
+            *dst2++ = (CARD8)                                              \
+                ((inRed * 255 + rfbServerFormat.redMax / 2) /              \
+                 rfbServerFormat.redMax);                                  \
+            *dst2++ = (CARD8)                                              \
+                ((inGreen * 255 + rfbServerFormat.greenMax / 2) /          \
+                 rfbServerFormat.greenMax);                                \
+            *dst2++ = (CARD8)                                              \
+                ((inBlue  * 255 + rfbServerFormat.blueMax / 2) /           \
+                 rfbServerFormat.blueMax);                                 \
+        }                                                                  \
+        srcptr += rfbFB.paddedWidthInBytes / ps;                           \
+        dst += w * 3;                                                      \
+    }                                                                      \
+    return tmpbuf;                                                         \
 }
 
 DEFINE_RGB_CONVERT_FUNCTION(16)
@@ -1730,8 +1687,8 @@ DEFINE_RGB_CONVERT_FUNCTION(32)
  * JPEG compression stuff.
  */
 
-static Bool
-SendJpegRect(threadparam *t, int x, int y, int w, int h, int quality)
+static Bool SendJpegRect(threadparam *t, int x, int y, int w, int h,
+                         int quality)
 {
     unsigned char *srcbuf;
     int ps = rfbServerFormat.bitsPerPixel / 8;

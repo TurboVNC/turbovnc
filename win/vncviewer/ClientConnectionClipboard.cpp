@@ -51,7 +51,7 @@ void ClientConnection::ProcessLocalClipboardChange()
       if (hglb == NULL) {
         CloseClipboard();
       } else {
-        LPSTR lpstr = (LPSTR) GlobalLock(hglb);
+        LPSTR lpstr = (LPSTR)GlobalLock(hglb);
 
         char *contents = new char[strlen(lpstr) + 1];
         char *unixcontents = new char[strlen(lpstr) + 1];
@@ -121,12 +121,12 @@ void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
     }
 
     // Allocate a global memory object for the text.
-    HGLOBAL hglbCopy = GlobalAlloc(GMEM_DDESHARE, (len +1) * sizeof(char));
+    HGLOBAL hglbCopy = GlobalAlloc(GMEM_DDESHARE, (len + 1) * sizeof(char));
     if (hglbCopy != NULL) {
       // Lock the handle and copy the text to the buffer.
-      LPTSTR lptstrCopy = (LPTSTR) GlobalLock(hglbCopy);
+      LPTSTR lptstrCopy = (LPTSTR)GlobalLock(hglbCopy);
       memcpy(lptstrCopy, wincontents, len * sizeof(char));
-      lptstrCopy[len] = (char) 0;    // null character
+      lptstrCopy[len] = (char)0;      // null character
       GlobalUnlock(hglbCopy);         // Place the handle on the clipboard.
       SetClipboardData(CF_TEXT, hglbCopy);
     }

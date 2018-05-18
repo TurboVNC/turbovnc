@@ -71,4 +71,4 @@ class VNCviewerApp
     friend ClientConnection;
 };
 
-#endif // VNCVIEWERAPP_H__
+#endif  // VNCVIEWERAPP_H__

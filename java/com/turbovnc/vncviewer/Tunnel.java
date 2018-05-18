@@ -171,10 +171,10 @@ public final class Tunnel {
      do. */
 
   private static final String DEFAULT_SSH_CMD = "/usr/bin/ssh";
-  private static final String DEFAULT_TUNNEL_CMD
-    = DEFAULT_SSH_CMD + " -f -L %L:localhost:%R %H sleep 20";
-  private static final String DEFAULT_VIA_CMD
-    = DEFAULT_SSH_CMD + " -f -L %L:%H:%R %G sleep 20";
+  private static final String DEFAULT_TUNNEL_CMD =
+    DEFAULT_SSH_CMD + " -f -L %L:localhost:%R %H sleep 20";
+  private static final String DEFAULT_VIA_CMD =
+    DEFAULT_SSH_CMD + " -f -L %L:%H:%R %G sleep 20";
 
   public static void createTunnelExt(String gatewayHost, String remoteHost,
                                      int remotePort, int localPort,

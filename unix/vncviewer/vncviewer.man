@@ -3,7 +3,7 @@
 .\" Man page for Java vncviewer
 .\"
 .\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
-.\" Copyright (C) 2000,2001 Red Hat, Inc.
+.\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research

@@ -55,8 +55,7 @@ static int zlibAfterBufLen;
  *                              rectangle encoding.
  */
 
-Bool
-rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
+Bool rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
 {
     rfbFramebufferUpdateRectHeader rect;
     rfbZlibHeader hdr;
@@ -122,9 +121,9 @@ rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
     /*
      * Convert pixel data to client format.
      */
-    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-                       &cl->format, fbptr, zlibBeforeBuf,
-                       rfbFB.paddedWidthInBytes, w, h);
+    (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,
+                        &cl->format, fbptr, zlibBeforeBuf,
+                        rfbFB.paddedWidthInBytes, w, h);
 
     cl->compStream.next_in = ( Bytef * )zlibBeforeBuf;
     cl->compStream.avail_in = w * h * (cl->format.bitsPerPixel / 8);
@@ -178,8 +177,8 @@ rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
     cl->rfbBytesSent[rfbEncodingZlib] += (sz_rfbFramebufferUpdateRectHeader +
                                           sz_rfbZlibHeader + zlibAfterBufLen);
 
-    if (ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbZlibHeader
-        > UPDATE_BUF_SIZE)
+    if (ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbZlibHeader >
+        UPDATE_BUF_SIZE)
     {
         if (!rfbSendUpdateBuf(cl))
             return FALSE;
@@ -229,8 +228,7 @@ rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
  *                           Zlib encoding rectangles.
  */
 
-Bool
-rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
+Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
 {
     int maxLines;
     int linesRemaining;
@@ -260,11 +258,11 @@ rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
         partialRect.h = linesToComp;
 
         /* Encode (compress) and send the next rectangle. */
-        if ( ! rfbSendOneRectEncodingZlib( cl,
-                                           partialRect.x,
-                                           partialRect.y,
-                                           partialRect.w,
-                                           partialRect.h )) {
+        if ( !rfbSendOneRectEncodingZlib( cl,
+                                          partialRect.x,
+                                          partialRect.y,
+                                          partialRect.w,
+                                          partialRect.h )) {
 
             return FALSE;
         }

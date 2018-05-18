@@ -57,4 +57,4 @@ class CapsContainer
     CARD32 *plist;
 };
 
-#endif // _VNC_CAPSCONTAINER
+#endif  // _VNC_CAPSCONTAINER

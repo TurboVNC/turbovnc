@@ -67,8 +67,8 @@ Bool rfbAuthDisableHTTP   = FALSE;
 Bool rfbAuthDisableX11TCP = FALSE;
 
 static int nAuthMethodsEnabled = 0;
-static int preferenceLimit = 1; /* Force one iteration of the loop in
-                                   rfbSendAuthCaps() */
+static int preferenceLimit = 1;  /* Force one iteration of the loop in
+                                    rfbSendAuthCaps() */
 
 char *rfbAuthOTPValue = NULL;
 int rfbAuthOTPValueLen = 0;
@@ -78,14 +78,12 @@ char *rfbAuthX509Key = NULL;
 #endif
 
 
-static void
-AuthNoneStartFunc(rfbClientPtr cl)
+static void AuthNoneStartFunc(rfbClientPtr cl)
 {
     rfbClientAuthSucceeded(cl, rfbAuthNone);
 }
 
-static void
-AuthNoneRspFunc(rfbClientPtr cl)
+static void AuthNoneRspFunc(rfbClientPtr cl)
 {
 }
 
@@ -109,8 +107,7 @@ static UserList *userACL = NULL;
 Bool rfbAuthUserACL = FALSE;
 
 
-void
-rfbAuthAddUser(const char *name, Bool viewOnly)
+void rfbAuthAddUser(const char *name, Bool viewOnly)
 {
     UserList *p = (UserList *)rfbAlloc(sizeof(UserList));
 
@@ -123,8 +120,7 @@ rfbAuthAddUser(const char *name, Bool viewOnly)
 }
 
 
-void
-rfbAuthRevokeUser(const char *name)
+void rfbAuthRevokeUser(const char *name)
 {
     UserList **prev = &userACL;
     UserList *p;
@@ -144,15 +140,13 @@ rfbAuthRevokeUser(const char *name)
 }
 
 
-static void
-AuthPAMUserPwdStartFunc(rfbClientPtr cl)
+static void AuthPAMUserPwdStartFunc(rfbClientPtr cl)
 {
     cl->state = RFB_AUTHENTICATION;
 }
 
 
-static void
-AuthPAMUserPwdRspFunc(rfbClientPtr cl)
+static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
 {
     CARD32 userLen;
     CARD32 pwdLen;
@@ -269,7 +263,7 @@ static SecTypeData *secTypes[] = {
     &secTypeNone, &secTypeVncAuth, &secTypeVeNCrypt, &secTypeTight, NULL
 };
 
-typedef void (*AuthFunc)(rfbClientPtr cl);
+typedef void (*AuthFunc) (rfbClientPtr cl);
 
 typedef struct {
     int authType;
@@ -379,8 +373,7 @@ static AuthMethodData authMethods[] = {
 };
 
 
-Bool
-rfbOptOtpAuth(void)
+Bool rfbOptOtpAuth(void)
 {
     AuthMethodData *a;
 
@@ -394,8 +387,7 @@ rfbOptOtpAuth(void)
 }
 
 
-Bool
-rfbOptPamAuth(void)
+Bool rfbOptPamAuth(void)
 {
     AuthMethodData *a;
 
@@ -410,8 +402,7 @@ rfbOptPamAuth(void)
 }
 
 
-Bool
-rfbOptRfbAuth(void)
+Bool rfbOptRfbAuth(void)
 {
     AuthMethodData *a;
 
@@ -425,8 +416,7 @@ rfbOptRfbAuth(void)
 }
 
 
-void
-rfbAuthParseCommandLine(char *securityTypes)
+void rfbAuthParseCommandLine(char *securityTypes)
 {
     char *p1 = securityTypes, *p2 = securityTypes;
     AuthMethodData *a;
@@ -459,8 +449,7 @@ rfbAuthParseCommandLine(char *securityTypes)
 }
 
 
-static void
-setMethods(char *buf, Bool backwardCompatible)
+static void setMethods(char *buf, Bool backwardCompatible)
 {
     char *saveptr = NULL;
     char *p;
@@ -498,8 +487,7 @@ setMethods(char *buf, Bool backwardCompatible)
 }
 
 
-void
-rfbAuthListAvailableSecurityTypes(void)
+void rfbAuthListAvailableSecurityTypes(void)
 {
     AuthMethodData *a;
     int chars = 23;
@@ -520,8 +508,7 @@ rfbAuthListAvailableSecurityTypes(void)
 }
 
 
-static void
-ReadConfigFile(void)
+static void ReadConfigFile(void)
 {
     FILE *fp;
     char buf[256], buf2[256];
@@ -572,7 +559,7 @@ ReadConfigFile(void)
         }
 
         if (!strcmp(buf2, "no-remote-connections")) {
-            interface.s_addr = htonl (INADDR_LOOPBACK);
+            interface.s_addr = htonl(INADDR_LOOPBACK);
             interface6 = in6addr_loopback;
             continue;
         }
@@ -696,8 +683,7 @@ ReadConfigFile(void)
 }
 
 
-void
-rfbAuthInit()
+void rfbAuthInit()
 {
     AuthMethodData *a;
     int nSelected = 0;
@@ -785,8 +771,7 @@ rfbAuthInit()
 }
 
 
-void
-rfbAuthProcessResponse(rfbClientPtr cl)
+void rfbAuthProcessResponse(rfbClientPtr cl)
 {
     AuthCapData **p;
     AuthCapData *c;
@@ -811,8 +796,7 @@ rfbAuthProcessResponse(rfbClientPtr cl)
  * "security types" (protocol 3.7 and above.)
  */
 
-void
-rfbAuthNewClient(rfbClientPtr cl)
+void rfbAuthNewClient(rfbClientPtr cl)
 {
     SecTypeData **p;
     SecTypeData *s;
@@ -850,8 +834,7 @@ rfbAuthNewClient(rfbClientPtr cl)
  * Tell the client which security type will be used (protocol 3.3)
  */
 
-static void
-rfbSendSecurityType(rfbClientPtr cl, int securityType)
+static void rfbSendSecurityType(rfbClientPtr cl, int securityType)
 {
     CARD32 value32;
 
@@ -863,17 +846,17 @@ rfbSendSecurityType(rfbClientPtr cl, int securityType)
     }
 
     switch (securityType) {
-    case rfbSecTypeNone:
-        /* Dispatch client input to rfbProcessClientInitMessage() */
-        cl->state = RFB_INITIALISATION;
-        break;
-    case rfbSecTypeVncAuth:
-        /* Begin the Standard VNC authentication procedure */
-        rfbVncAuthSendChallenge(cl);
-        break;
-    default:
-        rfbLogPerror("rfbSendSecurityType: assertion failed");
-        rfbCloseClient(cl);
+        case rfbSecTypeNone:
+            /* Dispatch client input to rfbProcessClientInitMessage() */
+            cl->state = RFB_INITIALISATION;
+            break;
+        case rfbSecTypeVncAuth:
+            /* Begin the Standard VNC authentication procedure */
+            rfbVncAuthSendChallenge(cl);
+            break;
+        default:
+            rfbLogPerror("rfbSendSecurityType: assertion failed");
+            rfbCloseClient(cl);
     }
 }
 
@@ -882,8 +865,7 @@ rfbSendSecurityType(rfbClientPtr cl, int securityType)
  * Advertise our supported security types (protocol 3.7 and above)
  */
 
-static void
-rfbSendSecurityTypeList(rfbClientPtr cl)
+static void rfbSendSecurityTypeList(rfbClientPtr cl)
 {
     int i, j, n;
     AuthMethodData *a;
@@ -994,8 +976,7 @@ rfbSendSecurityTypeList(rfbClientPtr cl)
     }
 
 
-void
-rfbAuthTLSHandshake(rfbClientPtr cl)
+void rfbAuthTLSHandshake(rfbClientPtr cl)
 {
     int ret;
 
@@ -1006,24 +987,23 @@ rfbAuthTLSHandshake(rfbClientPtr cl)
         return;
 
     switch (cl->selectedAuthType) {
-    case rfbAuthNone:
-        rfbClientAuthSucceeded(cl, rfbAuthNone);
-        break;
-    case rfbAuthVNC:
-        rfbVncAuthSendChallenge(cl);
-        break;
+        case rfbAuthNone:
+            rfbClientAuthSucceeded(cl, rfbAuthNone);
+            break;
+        case rfbAuthVNC:
+            rfbVncAuthSendChallenge(cl);
+            break;
 #ifdef XVNC_AuthPAM
-    case rfbAuthUnixLogin:
-        AuthPAMUserPwdRspFunc(cl);
-        break;
+        case rfbAuthUnixLogin:
+            AuthPAMUserPwdRspFunc(cl);
+            break;
 #endif
     }
 }
 #endif
 
 
-void
-rfbVeNCryptAuthenticate(rfbClientPtr cl)
+void rfbVeNCryptAuthenticate(rfbClientPtr cl)
 {
     struct { CARD8 major, minor; } serverVersion = { 0, 2 },
         clientVersion = { 0, 0 };
@@ -1101,55 +1081,55 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
 
     cl->selectedAuthType = chosenType;
     switch (chosenType) {
-    case rfbAuthNone:
-        rfbClientAuthSucceeded(cl, rfbAuthNone);
-        break;
-    case rfbAuthVNC:
-        rfbVncAuthSendChallenge(cl);
-        break;
+        case rfbAuthNone:
+            rfbClientAuthSucceeded(cl, rfbAuthNone);
+            break;
+        case rfbAuthVNC:
+            rfbVncAuthSendChallenge(cl);
+            break;
 #ifdef XVNC_AuthPAM
-    case rfbVeNCryptPlain:
-        AuthPAMUserPwdRspFunc(cl);
-        break;
+        case rfbVeNCryptPlain:
+            AuthPAMUserPwdRspFunc(cl);
+            break;
 #endif
 #if USETLS
-    case rfbVeNCryptTLSNone:
-        cl->selectedAuthType = rfbAuthNone;
-        TLS_INIT(TRUE);
-        rfbClientAuthSucceeded(cl, rfbAuthNone);
-        break;
-    case rfbVeNCryptTLSVnc:
-        cl->selectedAuthType = rfbAuthVNC;
-        TLS_INIT(TRUE);
-        rfbVncAuthSendChallenge(cl);
-        break;
+        case rfbVeNCryptTLSNone:
+            cl->selectedAuthType = rfbAuthNone;
+            TLS_INIT(TRUE);
+            rfbClientAuthSucceeded(cl, rfbAuthNone);
+            break;
+        case rfbVeNCryptTLSVnc:
+            cl->selectedAuthType = rfbAuthVNC;
+            TLS_INIT(TRUE);
+            rfbVncAuthSendChallenge(cl);
+            break;
 #ifdef XVNC_AuthPAM
-    case rfbVeNCryptTLSPlain:
-        cl->selectedAuthType = rfbAuthUnixLogin;
-        TLS_INIT(TRUE);
-        AuthPAMUserPwdRspFunc(cl);
-        break;
+        case rfbVeNCryptTLSPlain:
+            cl->selectedAuthType = rfbAuthUnixLogin;
+            TLS_INIT(TRUE);
+            AuthPAMUserPwdRspFunc(cl);
+            break;
 #endif
-    case rfbVeNCryptX509None:
-        cl->selectedAuthType = rfbAuthNone;
-        TLS_INIT(FALSE);
-        rfbClientAuthSucceeded(cl, rfbAuthNone);
-        break;
-    case rfbVeNCryptX509Vnc:
-        cl->selectedAuthType = rfbAuthVNC;
-        TLS_INIT(FALSE);
-        rfbVncAuthSendChallenge(cl);
-        break;
+        case rfbVeNCryptX509None:
+            cl->selectedAuthType = rfbAuthNone;
+            TLS_INIT(FALSE);
+            rfbClientAuthSucceeded(cl, rfbAuthNone);
+            break;
+        case rfbVeNCryptX509Vnc:
+            cl->selectedAuthType = rfbAuthVNC;
+            TLS_INIT(FALSE);
+            rfbVncAuthSendChallenge(cl);
+            break;
 #ifdef XVNC_AuthPAM
-    case rfbVeNCryptX509Plain:
-        cl->selectedAuthType = rfbAuthUnixLogin;
-        TLS_INIT(FALSE);
-        AuthPAMUserPwdRspFunc(cl);
-        break;
+        case rfbVeNCryptX509Plain:
+            cl->selectedAuthType = rfbAuthUnixLogin;
+            TLS_INIT(FALSE);
+            AuthPAMUserPwdRspFunc(cl);
+            break;
 #endif
 #endif
-    default:
-        FatalError("rfbVeNCryptAuthenticate: chosen type is invalid (this should never occur)");
+        default:
+            FatalError("rfbVeNCryptAuthenticate: chosen type is invalid (this should never occur)");
     }
 }
 
@@ -1158,8 +1138,7 @@ rfbVeNCryptAuthenticate(rfbClientPtr cl)
  * Read the security type chosen by the client (protocol 3.7 and above)
  */
 
-void
-rfbProcessClientSecurityType(rfbClientPtr cl)
+void rfbProcessClientSecurityType(rfbClientPtr cl)
 {
     int n, count, i;
     CARD8 chosenType;
@@ -1190,31 +1169,31 @@ rfbProcessClientSecurityType(rfbClientPtr cl)
 
     cl->selectedAuthType = chosenType;
     switch (chosenType) {
-    case rfbSecTypeNone:
-        /* No authentication needed */
-        rfbClientAuthSucceeded(cl, rfbAuthNone);
-        break;
-    case rfbSecTypeVncAuth:
-        /* Begin the Standard VNC authentication procedure */
-        rfbVncAuthSendChallenge(cl);
-        break;
-    case rfbSecTypeTight:
-        /* The viewer supports TightVNC extensions */
-        rfbLog("Enabling TightVNC protocol extensions\n");
-        /* Switch to protocol 3.7t/3.8t */
-        cl->protocol_tightvnc = TRUE;
-        /* Advertise our tunneling capabilities */
-        rfbSendTunnelingCaps(cl);
-        break;
-    case rfbSecTypeVeNCrypt:
-        /* The viewer supports VeNCrypt extensions */
-        rfbLog("Enabling VeNCrypt protocol extensions\n");
-        rfbVeNCryptAuthenticate(cl);
-        break;
-    default:
-        rfbLog("rfbProcessClientSecurityType: unknown authentication scheme\n");
-        rfbCloseClient(cl);
-        break;
+        case rfbSecTypeNone:
+            /* No authentication needed */
+            rfbClientAuthSucceeded(cl, rfbAuthNone);
+            break;
+        case rfbSecTypeVncAuth:
+            /* Begin the Standard VNC authentication procedure */
+            rfbVncAuthSendChallenge(cl);
+            break;
+        case rfbSecTypeTight:
+            /* The viewer supports TightVNC extensions */
+            rfbLog("Enabling TightVNC protocol extensions\n");
+            /* Switch to protocol 3.7t/3.8t */
+            cl->protocol_tightvnc = TRUE;
+            /* Advertise our tunneling capabilities */
+            rfbSendTunnelingCaps(cl);
+            break;
+        case rfbSecTypeVeNCrypt:
+            /* The viewer supports VeNCrypt extensions */
+            rfbLog("Enabling VeNCrypt protocol extensions\n");
+            rfbVeNCryptAuthenticate(cl);
+            break;
+        default:
+            rfbLog("rfbProcessClientSecurityType: unknown authentication scheme\n");
+            rfbCloseClient(cl);
+            break;
    }
 }
 
@@ -1223,8 +1202,7 @@ rfbProcessClientSecurityType(rfbClientPtr cl)
  * Send the list of our tunneling capabilities (protocol 3.7t/3.8t)
  */
 
-static void
-rfbSendTunnelingCaps(rfbClientPtr cl)
+static void rfbSendTunnelingCaps(rfbClientPtr cl)
 {
     rfbTunnelingCapsMsg caps;
     CARD32 nTypes = 0;          /* We don't support tunneling yet */
@@ -1252,8 +1230,7 @@ rfbSendTunnelingCaps(rfbClientPtr cl)
  * called.
  */
 
-void
-rfbProcessClientTunnelingType(rfbClientPtr cl)
+void rfbProcessClientTunnelingType(rfbClientPtr cl)
 {
     /* If we were called, then something's really wrong. */
     rfbLog("rfbProcessClientTunnelingType: not implemented\n");
@@ -1267,8 +1244,7 @@ rfbProcessClientTunnelingType(rfbClientPtr cl)
  * (protocol 3.7t/3.8t)
  */
 
-static void
-rfbSendAuthCaps(rfbClientPtr cl)
+static void rfbSendAuthCaps(rfbClientPtr cl)
 {
     rfbAuthenticationCapsMsg caps;
     rfbCapabilityInfo caplist[MAX_AUTH_CAPS];
@@ -1321,7 +1297,7 @@ rfbSendAuthCaps(rfbClientPtr cl)
                        sz_rfbCapabilityInfoName);
                 cl->authCaps[count] = c->authType;
                 strncpy(tempstr, (char *)pcap->nameSignature, 8);
-                tempstr[8]=0;
+                tempstr[8] = 0;
                 rfbLog("Advertising Tight auth cap '%s'\n", tempstr);
                 count++;
             }
@@ -1361,8 +1337,7 @@ rfbSendAuthCaps(rfbClientPtr cl)
  * Read client's preferred authentication type (protocol 3.7t/3.8t)
  */
 
-void
-rfbProcessClientAuthType(rfbClientPtr cl)
+void rfbProcessClientAuthType(rfbClientPtr cl)
 {
     CARD32 auth_type;
     int n, i;
@@ -1411,8 +1386,7 @@ rfbProcessClientAuthType(rfbClientPtr cl)
  * Send the authentication challenge
  */
 
-static void
-rfbVncAuthSendChallenge(rfbClientPtr cl)
+static void rfbVncAuthSendChallenge(rfbClientPtr cl)
 {
     vncRandomBytes(cl->authChallenge);
     if (WriteExact(cl, (char *)cl->authChallenge, CHALLENGESIZE) < 0) {
@@ -1426,9 +1400,9 @@ rfbVncAuthSendChallenge(rfbClientPtr cl)
 }
 
 
-static Bool
-CheckResponse(rfbClientPtr cl, int numPasswords, char *passwdFullControl,
-              char *passwdViewOnly, CARD8 *response)
+static Bool CheckResponse(rfbClientPtr cl, int numPasswords,
+                          char *passwdFullControl, char *passwdViewOnly,
+                          CARD8 *response)
 {
     Bool ok = FALSE;
     CARD8 encryptedChallenge1[CHALLENGESIZE];
@@ -1464,8 +1438,7 @@ CheckResponse(rfbClientPtr cl, int numPasswords, char *passwdFullControl,
  * authentication response.
  */
 
-void
-rfbVncAuthProcessResponse(rfbClientPtr cl)
+void rfbVncAuthProcessResponse(rfbClientPtr cl)
 {
     char passwdFullControl[MAXPWLEN + 1] = "\0";
     char passwdViewOnly[MAXPWLEN + 1] = "\0";
@@ -1552,8 +1525,7 @@ rfbVncAuthProcessResponse(rfbClientPtr cl)
  * the authentication stage.
  */
 
-void
-rfbClientConnFailed(rfbClientPtr cl, char *reason)
+void rfbClientConnFailed(rfbClientPtr cl, char *reason)
 {
     int headerLen, reasonLen;
     char buf[8];
@@ -1579,12 +1551,11 @@ rfbClientConnFailed(rfbClientPtr cl, char *reason)
  * string is defined in RFB 3.8 and above.
  */
 
-void
-rfbClientAuthFailed(rfbClientPtr cl, char *reason)
+void rfbClientAuthFailed(rfbClientPtr cl, char *reason)
 {
     int reasonLen;
     char buf[8];
-    CARD32 *buf32=(CARD32 *)buf;
+    CARD32 *buf32 = (CARD32 *)buf;
 
     if (cl->protocol_minor_ver < 8)
         reason = NULL;          /* invalidate the pointer */
@@ -1615,8 +1586,7 @@ rfbClientAuthFailed(rfbClientPtr cl, char *reason)
  * if authentication was not required and the protocol version is 3.7 or lower.
  */
 
-void
-rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType)
+void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType)
 {
     CARD32 authResult;
 
@@ -1656,8 +1626,7 @@ static OsTimerPtr timer = NULL;
  * timer in rfbAuthConsiderBlocking().
  */
 
-static CARD32
-rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
+static CARD32 rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
 {
     rfbAuthTooManyTries = FALSE;
     return 0;
@@ -1669,8 +1638,7 @@ rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
  * return value will be true if there were too many failures.
  */
 
-Bool
-rfbAuthConsiderBlocking(void)
+Bool rfbAuthConsiderBlocking(void)
 {
     int i;
 
@@ -1696,8 +1664,7 @@ rfbAuthConsiderBlocking(void)
  * function.
  */
 
-void
-rfbAuthUnblock(void)
+void rfbAuthUnblock(void)
 {
     rfbAuthTries = 0;
 }
@@ -1709,8 +1676,7 @@ rfbAuthUnblock(void)
  * should not allow another try.
  */
 
-Bool
-rfbAuthIsBlocked(void)
+Bool rfbAuthIsBlocked(void)
 {
     return rfbAuthTooManyTries;
 }

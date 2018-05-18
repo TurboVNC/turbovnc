@@ -75,4 +75,4 @@ SOFTWARE.
 
 #include "keysymdef.h"
 
-#endif // __KEYSYM_H__
+#endif  // __KEYSYM_H__

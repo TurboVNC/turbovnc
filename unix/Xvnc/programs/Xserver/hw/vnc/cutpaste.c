@@ -123,8 +123,7 @@ static void vncSelectionRequest(Atom selection, Atom target);
  * can't work out how to do that without some kind of helper X client.
  */
 
-void
-rfbSetXCutText(char *str, int len)
+void rfbSetXCutText(char *str, int len)
 {
     inSetXCutText = TRUE;
     dixChangeWindowProperty(serverClient, screenInfo.screens[0]->root,
@@ -156,7 +155,7 @@ void vncSelectionInit(void)
 }
 
 
-void vncClientCutText(const char* str, int len)
+void vncClientCutText(const char *str, int len)
 {
   if (clientCutText) free(clientCutText);
   clientCutText = (char *)rfbAlloc(len);

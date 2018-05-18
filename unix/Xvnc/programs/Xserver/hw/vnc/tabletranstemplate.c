@@ -50,12 +50,11 @@
  * using a single lookup table.
  */
 
-static void
-rfbTranslateWithSingleTableINtoOUT(char *table, rfbPixelFormat *in,
-                                   rfbPixelFormat *out,
-                                   char *iptr, char *optr,
-                                   int bytesBetweenInputLines,
-                                   int width, int height)
+static void rfbTranslateWithSingleTableINtoOUT(char *table, rfbPixelFormat *in,
+                                               rfbPixelFormat *out,
+                                               char *iptr, char *optr,
+                                               int bytesBetweenInputLines,
+                                               int width, int height)
 {
     IN_T *ip = (IN_T *)iptr;
     OUT_T *op = (OUT_T *)optr;
@@ -81,12 +80,11 @@ rfbTranslateWithSingleTableINtoOUT(char *table, rfbPixelFormat *in,
  * using three separate lookup tables for the red, green and blue values.
  */
 
-static void
-rfbTranslateWithRGBTablesINtoOUT(char *table, rfbPixelFormat *in,
-                                 rfbPixelFormat *out,
-                                 char *iptr, char *optr,
-                                 int bytesBetweenInputLines,
-                                 int width, int height)
+static void rfbTranslateWithRGBTablesINtoOUT(char *table, rfbPixelFormat *in,
+                                             rfbPixelFormat *out,
+                                             char *iptr, char *optr,
+                                             int bytesBetweenInputLines,
+                                             int width, int height)
 {
     IN_T *ip = (IN_T *)iptr;
     OUT_T *op = (OUT_T *)optr;

@@ -59,8 +59,8 @@ class KeyMap {
     KeyActionSpec PCtoX(UINT virtkey, DWORD keyData);
   private:
     // CARD32 keymap[256];
-    WCHAR buf[10]; // lots of space for now
+    WCHAR buf[10];  // lots of space for now
     BYTE keystate[256];
 };
 
-#endif // KEYMAP_H__
+#endif  // KEYMAP_H__

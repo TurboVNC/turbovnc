@@ -42,9 +42,8 @@
     CONCAT2E(rfbInitColourMapSingleTable, OUT)
 
 
-static void
-rfbInitColourMapSingleTableOUT(char **table, rfbPixelFormat *in,
-                               rfbPixelFormat *out)
+static void rfbInitColourMapSingleTableOUT(char **table, rfbPixelFormat *in,
+                                           rfbPixelFormat *out)
 {
     int i, r, g, b;
     OUT_T *t;

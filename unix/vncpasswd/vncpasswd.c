@@ -62,14 +62,14 @@ int alsoView;
 
 int otp;
 int otpClear;
-char* displayname;
+char *displayname;
 
 
 int DoOTP()
 {
   unsigned int full;
   unsigned int view = 0;
-  Display* dpy;
+  Display *dpy;
   Atom prop;
   int len;
   char buf[MAXPWLEN + 1];
@@ -115,7 +115,7 @@ int DoOTP()
     struct timeval now;
 
     gettimeofday(&now, NULL);
-    srandom((unsigned int) now.tv_sec + (unsigned int) now.tv_usec);
+    srandom((unsigned int)now.tv_sec + (unsigned int)now.tv_usec);
     full = random();
     if (alsoView)
       view = random();
@@ -147,44 +147,44 @@ int DoOTP()
                   PropModeReplace, (unsigned char *)bytes, len);
   memset(bytes, 0, sizeof(bytes));
   XCloseDisplay(dpy);
-  return(0);
+  return 0;
 }
 
 
 int addUser;
 int userList;
-char* user;
+char *user;
 
 #define MAXUSERLEN  63
 
 int DoUserList()
 {
-  Display* dpy;
+  Display *dpy;
   Atom prop;
   int len;
   char bytes[MAXUSERLEN + 1];
 
   if ((user == NULL) || ((len = strlen(user)) == 0)) {
     fprintf(stderr, "missing the user name!");
-    return(1);
+    return 1;
   }
 
   if (len > MAXUSERLEN) {
     fprintf(stderr, "user name is too large");
-    return(1);
+    return 1;
   }
 
   if ((dpy = XOpenDisplay(displayname)) == NULL) {
     fprintf(stderr, "unable to open display \"%s\"\n",
             XDisplayName(displayname));
-    return(1);
+    return 1;
   }
 
   prop = XInternAtom(dpy, "VNC_ACL", True);
   if (prop == None) {
     fprintf(stderr, "The X server \"%s\" does not support VNC user access control lists\n",
             XDisplayName(displayname));
-    return(1);
+    return 1;
   }
 
   bytes[0] = addUser | (alsoView ? 0x10 : 0x00);
@@ -192,7 +192,7 @@ int DoUserList()
   XChangeProperty(dpy, DefaultRootWindow(dpy), prop, XA_STRING, 8,
                   PropModeReplace, (unsigned char *)bytes, len + 1);
   XCloseDisplay(dpy);
-  return(0);
+  return 0;
 }
 
 
@@ -433,8 +433,8 @@ static void mkdir_and_check(char *dirname, int be_strict)
     }
     fprintf(stderr, "VNC directory %s does not exist, creating.\n", dirname);
     if (mkdir(dirname, S_IRWXU) == -1) {
-      fprintf(stderr, "Error creating directory %s: %s\n",
-              dirname, strerror(errno));
+      fprintf(stderr, "Error creating directory %s: %s\n", dirname,
+              strerror(errno));
       exit(1);
     }
   }
@@ -451,7 +451,7 @@ static void mkdir_and_check(char *dirname, int be_strict)
     fprintf(stderr, "Error: bad ownership on %s\n", dirname);
     exit(1);
   }
-  if (be_strict && ((S_IRWXG|S_IRWXO) & stbuf.st_mode)){
+  if (be_strict && ((S_IRWXG | S_IRWXO) & stbuf.st_mode)) {
     fprintf(stderr, "Error: bad access modes on %s\n", dirname);
     exit(1);
   }
@@ -528,7 +528,7 @@ static int ask_password(char *result)
     if (strcmp(passwd, passwd_copy) == 0)
       break;                    /* success */
 
-    fprintf(stderr,"Passwords do not match. Please try again.\n\n");
+    fprintf(stderr, "Passwords do not match. Please try again.\n\n");
   }
 
   /* Save the password and zero our copies. */

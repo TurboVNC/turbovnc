@@ -83,7 +83,7 @@ int vncEncryptAndStorePasswd2(char *passwd, char *passwdViewOnly, char *fname)
   if (strcmp(fname, "-") != 0) {
     fp = fopen(fname, "w");
     if (fp == NULL) {
-    return 0;
+      return 0;
     }
     chmod(fname, S_IRUSR | S_IWUSR);
   } else
@@ -143,8 +143,8 @@ char *vncDecryptPasswdFromFile(char *fname)
  * the buffers should be at least 9 bytes in length.
  */
 
-int vncDecryptPasswdFromFile2(char *fname,
-                              char *passwdFullControl, char *passwdViewOnly)
+int vncDecryptPasswdFromFile2(char *fname, char *passwdFullControl,
+                              char *passwdViewOnly)
 {
   FILE *fp;
   int i, ch;

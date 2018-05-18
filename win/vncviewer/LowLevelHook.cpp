@@ -197,7 +197,8 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
         case VK_BROWSER_BACK:
         case VK_BROWSER_FORWARD:
           PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND,
-                      fKeyDown? ID_CONN_SENDKEYDOWN : ID_CONN_SENDKEYUP, xkey);
+                      fKeyDown ? ID_CONN_SENDKEYDOWN : ID_CONN_SENDKEYUP,
+                      xkey);
           fHandled = TRUE;
           break;
 
@@ -242,8 +243,7 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
             }
             fAltEsc = FALSE;
           }
-          if ((GetAsyncKeyState(VK_CONTROL) & 0x8000)
-            && fKeyDown) {
+          if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && fKeyDown) {
             PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND, ID_CONN_SENDKEYDOWN,
                         XK_Escape);
             fHandled = TRUE;
@@ -259,11 +259,11 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
           break;
         }
 
-      } // switch(pkbdllhook->vkCode)
+      }  // switch (pkbdllhook->vkCode)
 
-    } // if (ProcessID == g_VncProcesID && isActive(hwndCurrent))
+    }  // if (ProcessID == g_VncProcesID && isActive(hwndCurrent))
 
-  } // if (nCode == HT_ACTION)
+  }  // if (nCode == HT_ACTION)
 
   // Call the next hook, if we didn't handle this message
   return (fHandled ? TRUE : CallNextHookEx(g_HookID, nCode, wParam, lParam));

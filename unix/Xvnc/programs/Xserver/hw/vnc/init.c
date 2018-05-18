@@ -152,8 +152,7 @@ int family = -1;
 extern char *stristr(const char *s1, const char *s2);
 
 
-static void
-PrintVersion(void)
+static void PrintVersion(void)
 {
     fprintf(stderr, "TurboVNC Server (Xvnc) %d-bit v"__VERSION" (build "__BUILD")\n",
             (int)sizeof(size_t) * 8);
@@ -167,8 +166,7 @@ PrintVersion(void)
  * very start for each argument.  It is not called again on server reset.
  */
 
-int
-ddxProcessArgument(int argc, char *argv[], int i)
+int ddxProcessArgument(int argc, char *argv[], int i)
 {
     static Bool firstTime = TRUE;
 
@@ -201,13 +199,13 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-deferupdate") == 0) { /* -deferupdate ms */
+    if (strcasecmp(argv[i], "-deferupdate") == 0) {  /* -deferupdate ms */
         if (i + 1 >= argc) UseMsg();
         rfbDeferUpdateTime = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-desktop") == 0) {     /* -desktop desktop-name */
+    if (strcasecmp(argv[i], "-desktop") == 0) {  /* -desktop desktop-name */
         if (i + 1 >= argc) UseMsg();
         desktopName = argv[i + 1];
         return 2;
@@ -235,13 +233,13 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
+    if (strcasecmp(argv[i], "-idletimeout") == 0) {  /* -idletimeout sec */
         if (i + 1 >= argc) UseMsg();
         rfbIdleTimeout = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-inetd") == 0) {       /* -inetd */
+    if (strcasecmp(argv[i], "-inetd") == 0) {  /* -inetd */
         int n;
         for (n = 1; n < 100; n++) {
             if (CheckDisplayNumber(n))
@@ -266,7 +264,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
-    if (strcasecmp(argv[i], "-interface") == 0) {   /* -interface ipaddr */
+    if (strcasecmp(argv[i], "-interface") == 0) {  /* -interface ipaddr */
         struct addrinfo hints, *addr;
         if (i + 1 >= argc) {
             UseMsg();
@@ -346,19 +344,19 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
-    if (strcasecmp(argv[i], "-rfbport") == 0) {     /* -rfbport port */
+    if (strcasecmp(argv[i], "-rfbport") == 0) {  /* -rfbport port */
         if (i + 1 >= argc) UseMsg();
         rfbPort = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-rfbwait") == 0) {     /* -rfbwait ms */
+    if (strcasecmp(argv[i], "-rfbwait") == 0) {  /* -rfbwait ms */
         if (i + 1 >= argc) UseMsg();
         rfbMaxClientWait = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-udpinputport") == 0) { /* -udpinputport port */
+    if (strcasecmp(argv[i], "-udpinputport") == 0) {  /* -udpinputport port */
         if (i + 1 >= argc) UseMsg();
         udpPort = atoi(argv[i + 1]);
         return 2;
@@ -395,7 +393,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-depth") == 0) {       /* -depth D */
+    if (strcasecmp(argv[i], "-depth") == 0) {  /* -depth D */
         if (i + 1 >= argc) UseMsg();
         rfbFB.depth = atoi(argv[i + 1]);
         return 2;
@@ -498,16 +496,16 @@ ddxProcessArgument(int argc, char *argv[], int i)
     if (strcasecmp(argv[i], "-alrsamp") == 0) {
         if (i + 1 >= argc) UseMsg();
         switch (toupper(argv[i + 1][0])) {
-        case 'G': case '0':
-            rfbALRSubsampLevel = TVNC_GRAY;  break;
-        case '1':
-            rfbALRSubsampLevel = TVNC_1X;  break;
-        case '2':
-            rfbALRSubsampLevel = TVNC_2X;  break;
-        case '4':
-            rfbALRSubsampLevel = TVNC_4X;  break;
-        default:
-            UseMsg();
+            case 'G': case '0':
+                rfbALRSubsampLevel = TVNC_GRAY;  break;
+            case '1':
+                rfbALRSubsampLevel = TVNC_1X;  break;
+            case '2':
+                rfbALRSubsampLevel = TVNC_2X;  break;
+            case '4':
+                rfbALRSubsampLevel = TVNC_4X;  break;
+            default:
+                UseMsg();
         }
         return 2;
     }
@@ -549,7 +547,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
 #endif
 
-    if (strcasecmp(argv[i], "-rfbauth") == 0) {     /* -rfbauth passwd-file */
+    if (strcasecmp(argv[i], "-rfbauth") == 0) {  /* -rfbauth passwd-file */
         if (i + 1 >= argc) UseMsg();
         rfbAuthPasswdFile = argv[i + 1];
         return 2;
@@ -631,8 +629,7 @@ static int numFormats = 6;
 #endif
 
 
-void
-InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
+void InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 {
     int i;
     initOutputCalled = TRUE;
@@ -701,8 +698,7 @@ InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 }
 
 
-static Bool
-rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
+static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
     rfbFBInfoPtr prfb = &rfbFB;
     int dpix = 96, dpiy = 96;
@@ -726,80 +722,82 @@ rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
     if (!pbits) return FALSE;
 
     switch (prfb->depth) {
-    case 8:
-        miSetVisualTypesAndMasks(8, ((1 << StaticGray) | (1 << GrayScale) |
-                                 (1 << StaticColor) | (1 << PseudoColor) |
-                                 (1 << TrueColor) | (1 << DirectColor)),
-                                 8, PseudoColor, 0, 0, 0);
-        break;
-    case 16:
-        miSetVisualTypesAndMasks(16, ((1 << TrueColor) | (1 << DirectColor)),
-                                 8, TrueColor, 0xf800, 0x07e0, 0x001f);
-        break;
-    case 24:
-        miSetVisualTypesAndMasks(24, ((1 << TrueColor) | (1 << DirectColor)),
-                                 8, TrueColor, 0xff0000, 0x00ff00, 0x0000ff);
-        break;
-    case 30:
-        miSetVisualTypesAndMasks(30, ((1 << TrueColor) | (1 << DirectColor)),
-                                 10, TrueColor, 0x3ff00000, 0x000ffc00,
-                                 0x000003ff);
-        break;
-    case 32:
-        miSetVisualTypesAndMasks(32, ((1 << TrueColor) | (1 << DirectColor)),
-                                 8, TrueColor, 0xff000000, 0x00ff0000,
-                                 0x0000ff00);
-        break;
-    default:
-        rfbLog("Depth %d not supported\n", prfb->depth);
-        return FALSE;
+        case 8:
+            miSetVisualTypesAndMasks(8, (1 << StaticGray) | (1 << GrayScale) |
+                                     (1 << StaticColor) | (1 << PseudoColor) |
+                                     (1 << TrueColor) | (1 << DirectColor),
+                                     8, PseudoColor, 0, 0, 0);
+            break;
+        case 16:
+            miSetVisualTypesAndMasks(16, (1 << TrueColor) | (1 << DirectColor),
+                                     8, TrueColor, 0xf800, 0x07e0, 0x001f);
+            break;
+        case 24:
+            miSetVisualTypesAndMasks(24, (1 << TrueColor) | (1 << DirectColor),
+                                     8, TrueColor, 0xff0000, 0x00ff00,
+                                     0x0000ff);
+            break;
+        case 30:
+            miSetVisualTypesAndMasks(30, (1 << TrueColor) | (1 << DirectColor),
+                                     10, TrueColor, 0x3ff00000, 0x000ffc00,
+                                     0x000003ff);
+            break;
+        case 32:
+            miSetVisualTypesAndMasks(32, (1 << TrueColor) | (1 << DirectColor),
+                                     8, TrueColor, 0xff000000, 0x00ff0000,
+                                     0x0000ff00);
+            break;
+        default:
+            rfbLog("Depth %d not supported\n", prfb->depth);
+            return FALSE;
     }
 
     miSetPixmapDepths();
 
-    switch (prfb->bitsPerPixel)
-    {
-    case 8:
-        ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-                           dpix, dpiy, prfb->paddedWidthInBytes, 8);
-        break;
-    case 16:
-        ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-                           dpix, dpiy, prfb->paddedWidthInBytes / 2, 16);
-        blueBits = 5; greenBits = 6; redBits = 5;
-        break;
-    case 32:
-        if (prfb->depth == 30) {
-            VisualPtr visuals;
-            DepthPtr depths;
-            int nVisuals, nDepths, rootDepth = 0;
-            VisualID defaultVisual;
-
-            if (!fbSetupScreen(pScreen, pbits, prfb->width, prfb->height, dpix,
-                               dpiy, prfb->paddedWidthInBytes / 4, 32))
-                ret = FALSE;
-            fbGetScreenPrivate(pScreen)->win32bpp = 32;
-            fbGetScreenPrivate(pScreen)->pix32bpp = 32;
-            if (!fbInitVisuals(&visuals, &depths, &nVisuals, &nDepths,
-                               &rootDepth, &defaultVisual,
-                               ((unsigned long) 1 << 31), 10))
-                ret = FALSE;
-            if (!miScreenInit(pScreen, pbits, prfb->width, prfb->height, dpix,
-                              dpiy, prfb->paddedWidthInBytes / 4, rootDepth,
-                              nDepths, depths, defaultVisual, nVisuals,
-                              visuals))
-                ret = FALSE;
-            pScreen->CloseScreen = fbCloseScreen;
-            blueBits = greenBits = redBits = 10;
-            ret = TRUE;
-        } else {
+    switch (prfb->bitsPerPixel) {
+        case 8:
             ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-                               dpix, dpiy, prfb->paddedWidthInBytes / 4, 32);
-            blueBits = greenBits = redBits = 8;
-        }
-        break;
-    default:
-        return FALSE;
+                               dpix, dpiy, prfb->paddedWidthInBytes, 8);
+            break;
+        case 16:
+            ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
+                               dpix, dpiy, prfb->paddedWidthInBytes / 2, 16);
+            blueBits = 5;  greenBits = 6;  redBits = 5;
+            break;
+        case 32:
+            if (prfb->depth == 30) {
+                VisualPtr visuals;
+                DepthPtr depths;
+                int nVisuals, nDepths, rootDepth = 0;
+                VisualID defaultVisual;
+
+                if (!fbSetupScreen(pScreen, pbits, prfb->width, prfb->height,
+                                   dpix, dpiy, prfb->paddedWidthInBytes / 4,
+                                   32))
+                    ret = FALSE;
+                fbGetScreenPrivate(pScreen)->win32bpp = 32;
+                fbGetScreenPrivate(pScreen)->pix32bpp = 32;
+                if (!fbInitVisuals(&visuals, &depths, &nVisuals, &nDepths,
+                                   &rootDepth, &defaultVisual,
+                                   ((unsigned long) 1 << 31), 10))
+                    ret = FALSE;
+                if (!miScreenInit(pScreen, pbits, prfb->width, prfb->height,
+                                  dpix, dpiy, prfb->paddedWidthInBytes / 4,
+                                  rootDepth, nDepths, depths, defaultVisual,
+                                  nVisuals, visuals))
+                    ret = FALSE;
+                pScreen->CloseScreen = fbCloseScreen;
+                blueBits = greenBits = redBits = 10;
+                ret = TRUE;
+            } else {
+                ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
+                                   dpix, dpiy, prfb->paddedWidthInBytes / 4,
+                                   32);
+                blueBits = greenBits = redBits = 8;
+            }
+            break;
+        default:
+            return FALSE;
     }
 
     if (!ret) return FALSE;
@@ -915,10 +913,10 @@ rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
         rfbServerFormat.greenShift = vis->offsetGreen;
         rfbServerFormat.blueShift = vis->offsetBlue;
     } else {
-        rfbServerFormat.redMax = rfbServerFormat.greenMax
-            = rfbServerFormat.blueMax = 0;
-        rfbServerFormat.redShift = rfbServerFormat.greenShift
-            = rfbServerFormat.blueShift = 0;
+        rfbServerFormat.redMax = rfbServerFormat.greenMax =
+            rfbServerFormat.blueMax = 0;
+        rfbServerFormat.redShift = rfbServerFormat.greenShift =
+            rfbServerFormat.blueShift = 0;
     }
 
     ret = fbCreateDefColormap(pScreen);
@@ -931,7 +929,7 @@ rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 
     return ret;
 
-} /* end rfbScreenInit */
+}  /* end rfbScreenInit */
 
 
 /*
@@ -942,69 +940,69 @@ rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 rfbDevInfo virtualTabletTouch =
     { "TurboVNC virtual tablet touch", 16, 6, Absolute, 0,
       rfbGIIDevTypeTouch, NULL,
-      {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 2048, 4096, rfbGIIUnitLength,
-         0, 1, 26000, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 2048, 4096, rfbGIIUnitLength,
-         0, 1, 41000, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
-         0, 1, 1, 0 },
-       { 0, "None", "3", 0, 0, 1, rfbGIIUnitLength,
-         0, 1, 1, 0 },
-       { 0, "None", "4", 0, 0, 1, rfbGIIUnitLength,
-         0, 1, 1, 0 },
-       { 0, "None", "5", 0, 0, 1, rfbGIIUnitLength,
-         0, 1, 1, 0 }}
+      { { 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 2048, 4096, rfbGIIUnitLength,
+          0, 1, 26000, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 2048, 4096, rfbGIIUnitLength,
+          0, 1, 41000, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
+          0, 1, 1, 0 },
+        { 0, "None", "3", 0, 0, 1, rfbGIIUnitLength,
+          0, 1, 1, 0 },
+        { 0, "None", "4", 0, 0, 1, rfbGIIUnitLength,
+          0, 1, 1, 0 },
+        { 0, "None", "5", 0, 0, 1, rfbGIIUnitLength,
+          0, 1, 1, 0 } }
     };
 
 rfbDevInfo virtualTabletStylus =
     { "TurboVNC virtual tablet stylus", 16, 6, Absolute, 0,
       rfbGIIDevTypeStylus, NULL,
-      {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
-         0, 1, 200000, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 9843, 19685, rfbGIIUnitLength,
-         0, 1, 200000, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
-         0, 1, 1, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_TILT_X, "3", -64, 0, 63, rfbGIIUnitLength,
-         0, 1, 57, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_TILT_Y, "4", -64, 0, 63, rfbGIIUnitLength,
-         0, 1, 57, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_WHEEL, "5", -900, 0, 899, rfbGIIUnitLength,
-         0, 1, 1, 0 }}
+      { { 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
+          0, 1, 200000, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 9843, 19685, rfbGIIUnitLength,
+          0, 1, 200000, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
+          0, 1, 1, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_TILT_X, "3", -64, 0, 63, rfbGIIUnitLength,
+          0, 1, 57, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_TILT_Y, "4", -64, 0, 63, rfbGIIUnitLength,
+          0, 1, 57, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_WHEEL, "5", -900, 0, 899, rfbGIIUnitLength,
+          0, 1, 1, 0 } }
     };
 
 rfbDevInfo virtualTabletEraser =
     { "TurboVNC virtual tablet eraser", 16, 6, Absolute, 0,
       rfbGIIDevTypeEraser, NULL,
-      {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
-         0, 1, 200000, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 9843, 19685, rfbGIIUnitLength,
-         0, 1, 200000, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
-         0, 1, 1, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_TILT_X, "3", -64, 0, 63, rfbGIIUnitLength,
-         0, 1, 57, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_TILT_Y, "4", -64, 0, 63, rfbGIIUnitLength,
-         0, 1, 57, 0 },
-       { 0, "None", "5", 0, 0, 1, rfbGIIUnitLength,
-         0, 1, 1, 0 }}
+      { { 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
+          0, 1, 200000, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 9843, 19685, rfbGIIUnitLength,
+          0, 1, 200000, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_PRESSURE, "2", 0, 1024, 2048, rfbGIIUnitLength,
+          0, 1, 1, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_TILT_X, "3", -64, 0, 63, rfbGIIUnitLength,
+          0, 1, 57, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_TILT_Y, "4", -64, 0, 63, rfbGIIUnitLength,
+          0, 1, 57, 0 },
+        { 0, "None", "5", 0, 0, 1, rfbGIIUnitLength,
+          0, 1, 1, 0 } }
     };
 
 rfbDevInfo virtualTabletPad =
     { "TurboVNC virtual tablet pad", 16, 6, Absolute, 0,
       rfbGIIDevTypePad, NULL,
-      {{ 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 0, 0, rfbGIIUnitLength,
-         0, 1, 0, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 0, 0, rfbGIIUnitLength,
-         0, 1, 0, 0 },
-       { 0, "None", "2", 0, 0, 1, rfbGIIUnitLength,
-         0, 1, 1, 0 },
-       { 0, "None", "3", 0, 0, 1, rfbGIIUnitLength,
-         0, 1, 1, 0 },
-       { 0, "None", "4", 0, 0, 1, rfbGIIUnitLength,
-         0, 1, 1, 0 },
-       { 0, AXIS_LABEL_PROP_ABS_WHEEL, "5", 0, 36, 71, rfbGIIUnitLength,
-         0, 1, 1, 0 }}
+      { { 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 0, 0, rfbGIIUnitLength,
+          0, 1, 0, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_Y, "1", 0, 0, 0, rfbGIIUnitLength,
+          0, 1, 0, 0 },
+        { 0, "None", "2", 0, 0, 1, rfbGIIUnitLength,
+          0, 1, 1, 0 },
+        { 0, "None", "3", 0, 0, 1, rfbGIIUnitLength,
+          0, 1, 1, 0 },
+        { 0, "None", "4", 0, 0, 1, rfbGIIUnitLength,
+          0, 1, 1, 0 },
+        { 0, AXIS_LABEL_PROP_ABS_WHEEL, "5", 0, 36, 71, rfbGIIUnitLength,
+          0, 1, 1, 0 } }
     };
 
 
@@ -1013,8 +1011,7 @@ rfbDevInfo virtualTabletPad =
  * InitOutput, so we can assume that rfbInitSockets has already been called.
  */
 
-void
-InitInput(int argc, char *argv[])
+void InitInput(int argc, char *argv[])
 {
     DeviceIntPtr p, k;
 
@@ -1046,8 +1043,7 @@ InitInput(int argc, char *argv[])
 }
 
 
-Bool
-AddExtInputDevice(rfbDevInfo *dev)
+Bool AddExtInputDevice(rfbDevInfo *dev)
 {
     int i;
     Atom btn_labels[MAX_BUTTONS], axes_labels[MAX_VALUATORS];
@@ -1062,8 +1058,8 @@ AddExtInputDevice(rfbDevInfo *dev)
         }
     }
 
-    if ((dev->pDev = AddInputDevice(serverClient, rfbExtInputProc, TRUE))
-        == NULL) {
+    if ((dev->pDev = AddInputDevice(serverClient, rfbExtInputProc, TRUE)) ==
+        NULL) {
         rfbLog("ERROR: Could not add extended input device\n");
         goto bailout;
     }
@@ -1083,33 +1079,35 @@ AddExtInputDevice(rfbDevInfo *dev)
     dev->pDev->last.slave = NULL;
     dev->pDev->type = SLAVE;
     switch (dev->productID) {
-    case rfbGIIDevTypeCursor:
-        dev->pDev->xinput_type = XA_CURSOR;
-        break;
-    case rfbGIIDevTypeStylus:
-        dev->pDev->xinput_type = MakeAtom("STYLUS", strlen("STYLUS"), 1);
-        break;
-    case rfbGIIDevTypeEraser:
-        dev->pDev->xinput_type = MakeAtom("ERASER", strlen("ERASER"), 1);
-        break;
-    case rfbGIIDevTypeTouch:
-        dev->pDev->xinput_type = MakeAtom("TOUCH", strlen("TOUCH"), 1);
-        break;
-    case rfbGIIDevTypePad:
-        dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
-        break;
-    default:
-        if (stristr(dev->name, "cursor"))
+        case rfbGIIDevTypeCursor:
             dev->pDev->xinput_type = XA_CURSOR;
-        else if (stristr(dev->name, "stylus"))
+            break;
+        case rfbGIIDevTypeStylus:
             dev->pDev->xinput_type = MakeAtom("STYLUS", strlen("STYLUS"), 1);
-        else if (stristr(dev->name, "eraser"))
+            break;
+        case rfbGIIDevTypeEraser:
             dev->pDev->xinput_type = MakeAtom("ERASER", strlen("ERASER"), 1);
-        else if (stristr(dev->name, "touch"))
+            break;
+        case rfbGIIDevTypeTouch:
             dev->pDev->xinput_type = MakeAtom("TOUCH", strlen("TOUCH"), 1);
-        else if (stristr(dev->name, "pad"))
+            break;
+        case rfbGIIDevTypePad:
             dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
-        break;
+            break;
+        default:
+            if (stristr(dev->name, "cursor"))
+                dev->pDev->xinput_type = XA_CURSOR;
+            else if (stristr(dev->name, "stylus"))
+                dev->pDev->xinput_type =
+                    MakeAtom("STYLUS", strlen("STYLUS"), 1);
+            else if (stristr(dev->name, "eraser"))
+                dev->pDev->xinput_type =
+                    MakeAtom("ERASER", strlen("ERASER"), 1);
+            else if (stristr(dev->name, "touch"))
+                dev->pDev->xinput_type = MakeAtom("TOUCH", strlen("TOUCH"), 1);
+            else if (stristr(dev->name, "pad"))
+                dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
+            break;
     }
 
     for (i = 0; i < dev->numButtons; i++) {
@@ -1159,8 +1157,7 @@ AddExtInputDevice(rfbDevInfo *dev)
 }
 
 
-void
-RemoveExtInputDevice(rfbClientPtr cl, int index)
+void RemoveExtInputDevice(rfbClientPtr cl, int index)
 {
     rfbClientPtr cl2;
     int i;
@@ -1195,106 +1192,98 @@ void CloseInput(void)
 }
 
 
-static int
-rfbKeybdProc(DeviceIntPtr pDevice, int onoff)
+static int rfbKeybdProc(DeviceIntPtr pDevice, int onoff)
 {
     DevicePtr pDev = (DevicePtr)pDevice;
 
-    switch (onoff)
-    {
-    case DEVICE_INIT:
-        KbdDeviceInit(pDevice);
-        InitKeyboardDeviceStruct(pDevice, NULL, (BellProcPtr)rfbSendBell,
-                                 (KbdCtrlProcPtr)NoopDDA);
-        break;
-    case DEVICE_ON:
-        pDev->on = TRUE;
-        break;
-    case DEVICE_OFF:
-        pDev->on = FALSE;
-        break;
+    switch (onoff) {
+        case DEVICE_INIT:
+            KbdDeviceInit(pDevice);
+            InitKeyboardDeviceStruct(pDevice, NULL, (BellProcPtr)rfbSendBell,
+                                     (KbdCtrlProcPtr)NoopDDA);
+            break;
+        case DEVICE_ON:
+            pDev->on = TRUE;
+            break;
+        case DEVICE_OFF:
+            pDev->on = FALSE;
+            break;
     }
     return Success;
 }
 
 
-static int
-rfbMouseProc(DeviceIntPtr pDevice, int onoff)
+static int rfbMouseProc(DeviceIntPtr pDevice, int onoff)
 {
     BYTE map[6];
     DevicePtr pDev = (DevicePtr)pDevice;
 
-    switch (onoff)
-    {
-    case DEVICE_INIT:
-    {
-        Atom btn_labels[5], axes_labels[2];
+    switch (onoff) {
+        case DEVICE_INIT:
+        {
+            Atom btn_labels[5], axes_labels[2];
 
-        map[1] = 1;
-        map[2] = 2;
-        map[3] = 3;
-        map[4] = 4;
-        map[5] = 5;
+            map[1] = 1;
+            map[2] = 2;
+            map[3] = 3;
+            map[4] = 4;
+            map[5] = 5;
 
-        btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
-        btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
-        btn_labels[2] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_RIGHT);
-        btn_labels[3] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_UP);
-        btn_labels[4] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_DOWN);
+            btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
+            btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
+            btn_labels[2] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_RIGHT);
+            btn_labels[3] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_UP);
+            btn_labels[4] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_WHEEL_DOWN);
 
-        axes_labels[0] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_X);
-        axes_labels[1] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_Y);
+            axes_labels[0] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_X);
+            axes_labels[1] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_Y);
 
-        InitPointerDeviceStruct(pDev, map, 5, btn_labels,
-                                (PtrCtrlProcPtr)NoopDDA,
-                                GetMotionHistorySize(), 2, axes_labels);
-        break;
-    }
+            InitPointerDeviceStruct(pDev, map, 5, btn_labels,
+                                    (PtrCtrlProcPtr)NoopDDA,
+                                    GetMotionHistorySize(), 2, axes_labels);
+            break;
+        }
 
-    case DEVICE_ON:
-        pDev->on = TRUE;
-        PtrDeviceOn(pDevice);
-        break;
+        case DEVICE_ON:
+            pDev->on = TRUE;
+            PtrDeviceOn(pDevice);
+            break;
 
-    case DEVICE_OFF:
-        pDev->on = FALSE;
-        break;
+        case DEVICE_OFF:
+            pDev->on = FALSE;
+            break;
     }
     return Success;
 }
 
 
-int
-rfbExtInputProc(DeviceIntPtr pDevice, int onoff)
+int rfbExtInputProc(DeviceIntPtr pDevice, int onoff)
 {
     DevicePtr pDev = (DevicePtr)pDevice;
 
-    switch (onoff)
-    {
-    case DEVICE_INIT:
-        break;
+    switch (onoff) {
+        case DEVICE_INIT:
+            break;
 
-    case DEVICE_ON:
-        pDev->on = TRUE;
-        break;
+        case DEVICE_ON:
+            pDev->on = TRUE;
+            break;
 
-    case DEVICE_OFF:
-        pDev->on = FALSE;
-        break;
+        case DEVICE_OFF:
+            pDev->on = FALSE;
+            break;
     }
     return Success;
 }
 
 
-Bool
-LegalModifier(unsigned int key, DeviceIntPtr pDev)
+Bool LegalModifier(unsigned int key, DeviceIntPtr pDev)
 {
     return TRUE;
 }
 
 
-void
-ProcessInputEvents()
+void ProcessInputEvents()
 {
     static Bool inetdInitDone = FALSE;
 
@@ -1349,8 +1338,7 @@ static Bool CheckDisplayNumber(int n)
 }
 
 
-void
-rfbRootPropertyChange(PropertyPtr pProp)
+void rfbRootPropertyChange(PropertyPtr pProp)
 {
     if ((pProp->propertyName == XA_CUT_BUFFER0) &&
         (pProp->type == XA_STRING) && (pProp->format == 8) &&
@@ -1437,7 +1425,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
         (pProp->type == XA_STRING) && (pProp->format == 8) &&
         (pProp->size > 1) && (pProp->size <= 1024)) {
         if (nvCtrlDisplay)
-            free (nvCtrlDisplay);
+            free(nvCtrlDisplay);
         nvCtrlDisplay = (char *)rfbAlloc(pProp->size + 1);
         memcpy(nvCtrlDisplay, pProp->data, pProp->size);
         nvCtrlDisplay[pProp->size] = '\0';
@@ -1446,8 +1434,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
 }
 
 
-int
-rfbBitsPerPixel(int depth)
+int rfbBitsPerPixel(int depth)
 {
     if (depth == 1) return 1;
     else if (depth <= 8) return 8;
@@ -1456,17 +1443,15 @@ rfbBitsPerPixel(int depth)
 }
 
 
-static Bool
-rfbAlwaysTrue()
+static Bool rfbAlwaysTrue()
 {
     return TRUE;
 }
 
 
-char *
-rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb)
+char *rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb)
 {
-    if (prfb->pfbMemory) return prfb->pfbMemory; /* already done */
+    if (prfb->pfbMemory) return prfb->pfbMemory;  /* already done */
 
     prfb->sizeInBytes = (prfb->paddedWidthInBytes * prfb->height);
 
@@ -1476,28 +1461,25 @@ rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb)
 }
 
 
-static Bool
-rfbCursorOffScreen (ScreenPtr *ppScreen, int *x, int *y)
+static Bool rfbCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 {
     return FALSE;
 }
 
 
-static void
-rfbCrossScreen(ScreenPtr pScreen, Bool entering)
+static void rfbCrossScreen(ScreenPtr pScreen, Bool entering)
 {
 }
 
 
-static void
-rfbClientStateChange(CallbackListPtr *cbl, pointer myData, pointer clt)
+static void rfbClientStateChange(CallbackListPtr *cbl, pointer myData,
+                                 pointer clt)
 {
     dispatchException &= ~DE_RESET;     /* hack - force server not to reset */
 }
 
 
-void
-ddxGiveUp(enum ExitCode error)
+void ddxGiveUp(enum ExitCode error)
 {
     rfbClientPtr cl;
 #ifdef XVNC_AuthPAM
@@ -1514,8 +1496,7 @@ ddxGiveUp(enum ExitCode error)
 }
 
 
-void
-AbortDDX(enum ExitCode error)
+void AbortDDX(enum ExitCode error)
 {
     ddxGiveUp(error);
 }
@@ -1528,8 +1509,7 @@ void DDXRingBell(int percent, int pitch, int duration)
 }
 
 
-void
-OsVendorInit()
+void OsVendorInit()
 {
     PrintVersion();
     rfbAuthInit();
@@ -1565,14 +1545,12 @@ OsVendorInit()
 }
 
 
-void
-OsVendorFatalError(const char *f, va_list args)
+void OsVendorFatalError(const char *f, va_list args)
 {
 }
 
 
-void
-ddxUseMsg()
+void ddxUseMsg()
 {
     ErrorF("\nTurboVNC connection options\n");
     ErrorF("===========================\n");
@@ -1687,7 +1665,7 @@ void rfbLog(char *format, ...)
 
     time(&clock);
     strftime(buf, 255, "%d/%m/%Y %H:%M:%S ", localtime(&clock));
-    for(i = 0; i < traceLevel; i++)
+    for (i = 0; i < traceLevel; i++)
         snprintf(&buf[strlen(buf)], 256 - strlen(buf), "  ");
     fputs(buf, stderr);
 

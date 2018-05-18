@@ -102,8 +102,8 @@ int main(int argc, char **argv)
     else if (*cmdline == '\"') {
       if (!(bcount & 1)) in_quotes = !in_quotes;
       bcount = 0;
-    }
-    else bcount = 0;
+    } else
+      bcount = 0;
     cmdline++;
   }
   while (*cmdline == '\t' || *cmdline == ' ') cmdline++;

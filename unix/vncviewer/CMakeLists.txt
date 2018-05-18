@@ -59,16 +59,16 @@ endif()
 
 set(CMAKE_REQUIRED_LIBRARIES ${TJPEG_JNILIBRARY})
 check_c_source_compiles("\n
-  struct JNINativeInterface_;\n
-  typedef const struct JNINativeInterface_ *JNIEnv;\n
-  typedef struct _jobject *jobject;\n
-  typedef jobject jclass;\n
-  int Java_org_libjpegturbo_turbojpeg_TJ_bufSize\n
-    (JNIEnv *, jclass, int, int, int);\n
-  int main(void) {\n
-    Java_org_libjpegturbo_turbojpeg_TJ_bufSize(0, 0, 1, 1, 0);\n
-    return 0;\n
-  }" TURBOJPEG_JNI_WORKS)
+	struct JNINativeInterface_;\n
+	typedef const struct JNINativeInterface_ *JNIEnv;\n
+	typedef struct _jobject *jobject;\n
+	typedef jobject jclass;\n
+	int Java_org_libjpegturbo_turbojpeg_TJ_bufSize\n
+		(JNIEnv *, jclass, int, int, int);\n
+	int main(void) {\n
+		Java_org_libjpegturbo_turbojpeg_TJ_bufSize(0, 0, 1, 1, 0);\n
+		return 0;\n
+	}" TURBOJPEG_JNI_WORKS)
 set(CMAKE_REQUIRED_LIBRARIES)
 if(NOT TURBOJPEG_JNI_WORKS)
 	message(FATAL_ERROR "Could not link with TurboJPEG JNI library ${TJPEG_JNILIBRARY}.  This may be because it was not built with JNI support.")

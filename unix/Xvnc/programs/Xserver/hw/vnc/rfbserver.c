@@ -55,7 +55,7 @@ rfbClientPtr pointerClient = NULL;  /* Mutex for pointer events */
 Bool rfbAlwaysShared = FALSE;
 Bool rfbNeverShared = FALSE;
 Bool rfbDontDisconnect = TRUE;
-Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
+Bool rfbViewOnly = FALSE;  /* run server in view only mode - Ehud Karni SW */
 Bool rfbSyncCutBuffer = TRUE;
 Bool rfbCongestionControl = TRUE;
 double rfbAutoLosslessRefresh = 0.0;
@@ -86,8 +86,7 @@ Bool rfbSendDesktopSize(rfbClientPtr cl);
 
 char *captureFile = NULL;
 
-static void
-WriteCapture(int captureFD, char *buf, int len)
+static void WriteCapture(int captureFD, char *buf, int len)
 {
     if (write(captureFD, buf, len) < len)
         rfbLogPerror("WriteCapture: Could not write to capture file");
@@ -102,20 +101,17 @@ CARD32 rfbMaxIdleTimeout = 0;
 CARD32 rfbIdleTimeout = 0;
 static double idleTimeout = -1.0;
 
-void
-IdleTimerSet(void)
+void IdleTimerSet(void)
 {
     idleTimeout = gettime() + (double)rfbIdleTimeout;
 }
 
-void
-IdleTimerCancel(void)
+void IdleTimerCancel(void)
 {
     idleTimeout = -1.0;
 }
 
-void
-IdleTimerCheck(void)
+void IdleTimerCheck(void)
 {
     if (idleTimeout >= 0.0 && gettime() >= idleTimeout)
         FatalError("TurboVNC server has been idle for %u seconds.  Exiting.",
@@ -147,8 +143,7 @@ double gettime(void)
 
 static Bool putImageOnly = TRUE, alrCopyRect = TRUE;
 
-CARD32
-alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
+CARD32 alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
     RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave,
         ifRegionSave;
@@ -224,8 +219,7 @@ alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 }
 
 
-static CARD32
-updateCallback(OsTimerPtr timer, CARD32 time, pointer arg)
+static CARD32 updateCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
     rfbClientPtr cl = (rfbClientPtr)arg;
     rfbSendFramebufferUpdate(cl);
@@ -239,8 +233,7 @@ updateCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 
 int rfbInterframe = -1;  /* -1 = auto (determined by compression level) */
 
-Bool
-InterframeOn(rfbClientPtr cl)
+Bool InterframeOn(rfbClientPtr cl)
 {
     if (!cl->compareFB) {
         if (!(cl->compareFB = (char *)malloc(rfbFB.paddedWidthInBytes *
@@ -257,8 +250,7 @@ InterframeOn(rfbClientPtr cl)
     return TRUE;
 }
 
-void
-InterframeOff(rfbClientPtr cl)
+void InterframeOff(rfbClientPtr cl)
 {
     if (cl->compareFB) {
         free(cl->compareFB);
@@ -290,8 +282,7 @@ static int JPEG_SUBSAMP[10] = {
  * comes in.
  */
 
-void
-rfbNewClientConnection(int sock)
+void rfbNewClientConnection(int sock)
 {
     rfbNewClient(sock);
 }
@@ -302,8 +293,7 @@ rfbNewClientConnection(int sock)
  * "listening" RFB client.
  */
 
-rfbClientPtr
-rfbReverseConnection(char *host, int port, int id)
+rfbClientPtr rfbReverseConnection(char *host, int port, int id)
 {
     int sock;
     rfbClientPtr cl;
@@ -345,8 +335,7 @@ rfbReverseConnection(char *host, int port, int id)
  * means.
  */
 
-static rfbClientPtr
-rfbNewClient(int sock)
+static rfbClientPtr rfbNewClient(int sock)
 {
     rfbProtocolVersionMsg pv;
     rfbClientPtr cl;
@@ -509,8 +498,7 @@ rfbNewClient(int sock)
  * has gone away.
  */
 
-void
-rfbClientConnectionGone(rfbClientPtr cl)
+void rfbClientConnectionGone(rfbClientPtr cl)
 {
     int i;
 
@@ -590,8 +578,7 @@ rfbClientConnectionGone(rfbClientPtr cl)
  * rfbProcessClientMessage is called when there is data to read from a client.
  */
 
-void
-rfbProcessClientMessage(rfbClientPtr cl)
+void rfbProcessClientMessage(rfbClientPtr cl)
 {
     rfbClientPtr cl2;
 
@@ -603,33 +590,32 @@ rfbProcessClientMessage(rfbClientPtr cl)
     }
 
     switch (cl->state) {
-    case RFB_PROTOCOL_VERSION:
-        rfbProcessClientProtocolVersion(cl);
-        break;
-    case RFB_SECURITY_TYPE:     /* protocol versions 3.7 and above */
-        rfbProcessClientSecurityType(cl);
-        break;
-    case RFB_TUNNELING_TYPE:    /* protocol versions 3.7t, 3.8t */
-        rfbProcessClientTunnelingType(cl);
-        break;
-    case RFB_AUTH_TYPE:         /* protocol versions 3.7t, 3.8t */
-        rfbProcessClientAuthType(cl);
-        break;
+        case RFB_PROTOCOL_VERSION:
+            rfbProcessClientProtocolVersion(cl);
+            break;
+        case RFB_SECURITY_TYPE:     /* protocol versions 3.7 and above */
+            rfbProcessClientSecurityType(cl);
+            break;
+        case RFB_TUNNELING_TYPE:    /* protocol versions 3.7t, 3.8t */
+            rfbProcessClientTunnelingType(cl);
+            break;
+        case RFB_AUTH_TYPE:         /* protocol versions 3.7t, 3.8t */
+            rfbProcessClientAuthType(cl);
+            break;
 #if USETLS
-    case RFB_TLS_HANDSHAKE:
-        rfbAuthTLSHandshake(cl);
-        break;
+        case RFB_TLS_HANDSHAKE:
+            rfbAuthTLSHandshake(cl);
+            break;
 #endif
-
-    case RFB_AUTHENTICATION:
-        rfbAuthProcessResponse(cl);
-        break;
-    case RFB_INITIALISATION:
-        rfbInitFlowControl(cl);
-        rfbProcessClientInitMessage(cl);
-        break;
-    default:
-        rfbProcessClientNormalMessage(cl);
+        case RFB_AUTHENTICATION:
+            rfbAuthProcessResponse(cl);
+            break;
+        case RFB_INITIALISATION:
+            rfbInitFlowControl(cl);
+            rfbProcessClientInitMessage(cl);
+            break;
+        default:
+            rfbProcessClientNormalMessage(cl);
     }
 
     /* Make sure cl hasn't been freed */
@@ -653,8 +639,7 @@ rfbProcessClientMessage(rfbClientPtr cl)
  * protocol version.
  */
 
-static void
-rfbProcessClientProtocolVersion(rfbClientPtr cl)
+static void rfbProcessClientProtocolVersion(rfbClientPtr cl)
 {
     rfbProtocolVersionMsg pv;
     int n, major, minor;
@@ -682,11 +667,11 @@ rfbProcessClientProtocolVersion(rfbClientPtr cl)
 
     /* Always use one of the three standard versions of the RFB protocol. */
     cl->protocol_minor_ver = minor;
-    if (minor > 8) {            /* buggy client */
+    if (minor > 8) {                      /* buggy client */
         cl->protocol_minor_ver = 8;
-    } else if (minor > 3 && minor < 7) { /* non-standard client */
+    } else if (minor > 3 && minor < 7) {  /* non-standard client */
         cl->protocol_minor_ver = 3;
-    } else if (minor < 3) {     /* ancient client */
+    } else if (minor < 3) {               /* ancient client */
         cl->protocol_minor_ver = 3;
     }
     if (cl->protocol_minor_ver != minor) {
@@ -708,8 +693,7 @@ rfbProcessClientProtocolVersion(rfbClientPtr cl)
  * initialisation message.
  */
 
-static void
-rfbProcessClientInitMessage(rfbClientPtr cl)
+static void rfbProcessClientInitMessage(rfbClientPtr cl)
 {
     rfbClientInitMsg ci;
     char buf[256];
@@ -748,7 +732,7 @@ rfbProcessClientInitMessage(rfbClientPtr cl)
     }
 
     if (cl->protocol_tightvnc)
-        rfbSendInteractionCaps(cl); /* protocol 3.7t */
+        rfbSendInteractionCaps(cl);  /* protocol 3.7t */
 
     /* Dispatch client input to rfbProcessClientNormalMessage(). */
     cl->state = RFB_NORMAL;
@@ -791,8 +775,7 @@ rfbProcessClientInitMessage(rfbClientPtr cl)
 #define N_CMSG_CAPS  0
 #define N_ENC_CAPS  17
 
-void
-rfbSendInteractionCaps(rfbClientPtr cl)
+void rfbSendInteractionCaps(rfbClientPtr cl)
 {
     rfbInteractionCapsMsg intr_caps;
     rfbCapabilityInfo enc_list[N_ENC_CAPS];
@@ -895,8 +878,7 @@ rfbSendInteractionCaps(rfbClientPtr cl)
         return;  \
     }
 
-static void
-rfbProcessClientNormalMessage(rfbClientPtr cl)
+static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 {
     int n;
     rfbClientToServerMsg msg;
@@ -1800,8 +1782,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
  * the RFB client.
  */
 
-Bool
-rfbSendFramebufferUpdate(rfbClientPtr cl)
+Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
 {
     ScreenPtr pScreen = screenInfo.screens[0];
     int i;
@@ -2085,8 +2066,8 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
             int y = REGION_RECTS(updateRegion)[i].y1;
             int w = REGION_RECTS(updateRegion)[i].x2 - x;
             int h = REGION_RECTS(updateRegion)[i].y2 - y;
-            nUpdateRegionRects += (((w-1) / cl->correMaxWidth + 1)
-                                     * ((h-1) / cl->correMaxHeight + 1));
+            nUpdateRegionRects += (((w-1) / cl->correMaxWidth + 1) *
+                                   ((h-1) / cl->correMaxHeight + 1));
         }
     } else if (cl->preferredEncoding == rfbEncodingZlib) {
         nUpdateRegionRects = 0;
@@ -2155,41 +2136,41 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
         int w = REGION_RECTS(updateRegion)[i].x2 - x;
         int h = REGION_RECTS(updateRegion)[i].y2 - y;
 
-        cl->rfbRawBytesEquivalent += (sz_rfbFramebufferUpdateRectHeader
-                                      + w * (cl->format.bitsPerPixel / 8) * h);
+        cl->rfbRawBytesEquivalent += (sz_rfbFramebufferUpdateRectHeader +
+                                      w * (cl->format.bitsPerPixel / 8) * h);
 
         if (rfbProfile) mpixels += (double)w * (double)h / 1000000.;
 
         switch (cl->preferredEncoding) {
-        case rfbEncodingRaw:
-            if (!rfbSendRectEncodingRaw(cl, x, y, w, h))
-                goto abort;
-            break;
-        case rfbEncodingRRE:
-            if (!rfbSendRectEncodingRRE(cl, x, y, w, h))
-                goto abort;
-            break;
-        case rfbEncodingCoRRE:
-            if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h))
-                goto abort;
-            break;
-        case rfbEncodingHextile:
-            if (!rfbSendRectEncodingHextile(cl, x, y, w, h))
-                goto abort;
-            break;
-        case rfbEncodingZlib:
-            if (!rfbSendRectEncodingZlib(cl, x, y, w, h))
-                goto abort;
-            break;
-        case rfbEncodingZRLE:
-        case rfbEncodingZYWRLE:
-            if (!rfbSendRectEncodingZRLE(cl, x, y, w, h))
-                goto abort;
-            break;
-        case rfbEncodingTight:
-            if (!rfbSendRectEncodingTight(cl, x, y, w, h))
-                goto abort;
-            break;
+            case rfbEncodingRaw:
+                if (!rfbSendRectEncodingRaw(cl, x, y, w, h))
+                    goto abort;
+                break;
+            case rfbEncodingRRE:
+                if (!rfbSendRectEncodingRRE(cl, x, y, w, h))
+                    goto abort;
+                break;
+            case rfbEncodingCoRRE:
+                if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h))
+                    goto abort;
+                break;
+            case rfbEncodingHextile:
+                if (!rfbSendRectEncodingHextile(cl, x, y, w, h))
+                    goto abort;
+                break;
+            case rfbEncodingZlib:
+                if (!rfbSendRectEncodingZlib(cl, x, y, w, h))
+                    goto abort;
+                break;
+            case rfbEncodingZRLE:
+            case rfbEncodingZYWRLE:
+                if (!rfbSendRectEncodingZRLE(cl, x, y, w, h))
+                    goto abort;
+                break;
+            case rfbEncodingTight:
+                if (!rfbSendRectEncodingTight(cl, x, y, w, h))
+                    goto abort;
+                break;
         }
     }
 
@@ -2291,8 +2272,7 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
  * of a later one.
  */
 
-static Bool
-rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
+static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
 {
     int nrects, nrectsInBand, x_inc, y_inc, thisRect, firstInNextBand;
     int x, y, w, h;
@@ -2347,8 +2327,8 @@ rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
         nrectsInBand = 0;
 
         while ((nrects > 0) &&
-               (REGION_RECTS(reg)[firstInNextBand].y1
-                == REGION_RECTS(reg)[thisRect].y1))
+               (REGION_RECTS(reg)[firstInNextBand].y1 ==
+                REGION_RECTS(reg)[thisRect].y1))
         {
             firstInNextBand += y_inc;
             nrects--;
@@ -2360,8 +2340,8 @@ rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
         }
 
         while (nrectsInBand > 0) {
-            if ((ublen + sz_rfbFramebufferUpdateRectHeader
-                 + sz_rfbCopyRect) > UPDATE_BUF_SIZE)
+            if ((ublen + sz_rfbFramebufferUpdateRectHeader +
+                 sz_rfbCopyRect) > UPDATE_BUF_SIZE)
             {
                 if (!rfbSendUpdateBuf(cl))
                     return FALSE;
@@ -2409,8 +2389,8 @@ rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
             ublen += sz_rfbCopyRect;
 
             cl->rfbRectanglesSent[rfbEncodingCopyRect]++;
-            cl->rfbBytesSent[rfbEncodingCopyRect]
-                += sz_rfbFramebufferUpdateRectHeader + sz_rfbCopyRect;
+            cl->rfbBytesSent[rfbEncodingCopyRect] +=
+                sz_rfbFramebufferUpdateRectHeader + sz_rfbCopyRect;
 
             thisRect += x_inc;
             nrectsInBand--;
@@ -2427,14 +2407,13 @@ rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy)
  * Send a given rectangle in raw encoding (rfbEncodingRaw).
  */
 
-Bool
-rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
+Bool rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
 {
     rfbFramebufferUpdateRectHeader rect;
     int nlines;
     int bytesPerLine = w * (cl->format.bitsPerPixel / 8);
-    char *fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y)
-                   + (x * (rfbFB.bitsPerPixel / 8)));
+    char *fbptr = (cl->fb + (rfbFB.paddedWidthInBytes * y) +
+                   (x * (rfbFB.bitsPerPixel / 8)));
 
     /* Flush the buffer to guarantee correct alignment for translateFn(). */
     if (ublen > 0) {
@@ -2453,8 +2432,8 @@ rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
     ublen += sz_rfbFramebufferUpdateRectHeader;
 
     cl->rfbRectanglesSent[rfbEncodingRaw]++;
-    cl->rfbBytesSent[rfbEncodingRaw]
-        += sz_rfbFramebufferUpdateRectHeader + bytesPerLine * h;
+    cl->rfbBytesSent[rfbEncodingRaw] +=
+        sz_rfbFramebufferUpdateRectHeader + bytesPerLine * h;
 
     nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
 
@@ -2462,9 +2441,9 @@ rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
         if (nlines > h)
             nlines = h;
 
-        (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-                           &cl->format, fbptr, &updateBuf[ublen],
-                           rfbFB.paddedWidthInBytes, w, nlines);
+        (*cl->translateFn) (cl->translateLookupTable, &rfbServerFormat,
+                            &cl->format, fbptr, &updateBuf[ublen],
+                            rfbFB.paddedWidthInBytes, w, nlines);
 
         ublen += nlines * bytesPerLine;
         h -= nlines;
@@ -2497,8 +2476,7 @@ rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
  * protocol).
  */
 
-static Bool
-rfbSendLastRectMarker(rfbClientPtr cl)
+static Bool rfbSendLastRectMarker(rfbClientPtr cl)
 {
     rfbFramebufferUpdateRectHeader rect;
 
@@ -2529,8 +2507,7 @@ rfbSendLastRectMarker(rfbClientPtr cl)
  * not (errno should be set).
  */
 
-Bool
-rfbSendUpdateBuf(rfbClientPtr cl)
+Bool rfbSendUpdateBuf(rfbClientPtr cl)
 {
     /*
     int i;
@@ -2559,8 +2536,7 @@ rfbSendUpdateBuf(rfbClientPtr cl)
  * client, using values from the currently installed colormap.
  */
 
-Bool
-rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour, int nColours)
+Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour, int nColours)
 {
     char buf[sz_rfbSetColourMapEntriesMsg + 256 * 3 * 2];
     rfbSetColourMapEntriesMsg *scme = (rfbSetColourMapEntriesMsg *)buf;
@@ -2608,8 +2584,7 @@ rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour, int nColours)
  * rfbSendBell sends a Bell message to all the clients.
  */
 
-void
-rfbSendBell()
+void rfbSendBell()
 {
     rfbClientPtr cl, nextCl;
     rfbBellMsg b;
@@ -2633,8 +2608,7 @@ rfbSendBell()
  * rfbSendServerCutText sends a ServerCutText message to all the clients.
  */
 
-void
-rfbSendServerCutText(char *str, int len)
+void rfbSendServerCutText(char *str, int len)
 {
     rfbClientPtr cl, nextCl;
     rfbServerCutTextMsg sct;
@@ -2676,8 +2650,7 @@ rfbSendServerCutText(char *str, int len)
  * rfbSendDesktopSize sends a DesktopSize message to a specific client.
  */
 
-Bool
-rfbSendDesktopSize(rfbClientPtr cl)
+Bool rfbSendDesktopSize(rfbClientPtr cl)
 {
     rfbFramebufferUpdateRectHeader rh;
     rfbFramebufferUpdateMsg fu;
@@ -2784,8 +2757,7 @@ rfbSendDesktopSize(rfbClientPtr cl)
  * packets (such as 100s of pen readings per second!).
  */
 
-void
-rfbNewUDPConnection(int sock)
+void rfbNewUDPConnection(int sock)
 {
     if (write(sock, &ptrAcceleration, 1) < 0) {
         rfbLogPerror("rfbNewUDPConnection: write");
@@ -2799,8 +2771,7 @@ rfbNewUDPConnection(int sock)
  * number of bytes we can possibly get.
  */
 
-void
-rfbProcessUDPInput(int sock)
+void rfbProcessUDPInput(int sock)
 {
     int n;
     rfbClientToServerMsg msg;
@@ -2814,33 +2785,32 @@ rfbProcessUDPInput(int sock)
     }
 
     switch (msg.type) {
+        case rfbKeyEvent:
+            if (n != sz_rfbKeyEventMsg) {
+                rfbLog("rfbProcessUDPInput: key event incorrect length\n");
+                rfbDisconnectUDPSock();
+                return;
+            }
+            if (!rfbViewOnly) {
+                KeyEvent((KeySym)Swap32IfLE(msg.ke.key), msg.ke.down);
+            }
+            break;
 
-    case rfbKeyEvent:
-        if (n != sz_rfbKeyEventMsg) {
-            rfbLog("rfbProcessUDPInput: key event incorrect length\n");
+        case rfbPointerEvent:
+            if (n != sz_rfbPointerEventMsg) {
+                rfbLog("rfbProcessUDPInput: ptr event incorrect length\n");
+                rfbDisconnectUDPSock();
+                return;
+            }
+            if (!rfbViewOnly) {
+                PtrAddEvent(msg.pe.buttonMask,
+                            Swap16IfLE(msg.pe.x), Swap16IfLE(msg.pe.y), 0);
+            }
+            break;
+
+        default:
+            rfbLog("rfbProcessUDPInput: unknown message type %d\n",
+                   msg.type);
             rfbDisconnectUDPSock();
-            return;
-        }
-        if (!rfbViewOnly) {
-            KeyEvent((KeySym)Swap32IfLE(msg.ke.key), msg.ke.down);
-        }
-        break;
-
-    case rfbPointerEvent:
-        if (n != sz_rfbPointerEventMsg) {
-            rfbLog("rfbProcessUDPInput: ptr event incorrect length\n");
-            rfbDisconnectUDPSock();
-            return;
-        }
-        if (!rfbViewOnly) {
-            PtrAddEvent(msg.pe.buttonMask,
-                        Swap16IfLE(msg.pe.x), Swap16IfLE(msg.pe.y), 0);
-        }
-        break;
-
-    default:
-        rfbLog("rfbProcessUDPInput: unknown message type %d\n",
-               msg.type);
-        rfbDisconnectUDPSock();
     }
 }

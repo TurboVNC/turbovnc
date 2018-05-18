@@ -51,4 +51,4 @@ class SessionDialog
     static void UpdateConnectButton(HWND hDialog);
 };
 
-#endif // SESSIONDIALOG_H__
+#endif  // SESSIONDIALOG_H__

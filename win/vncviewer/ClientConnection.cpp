@@ -171,7 +171,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   m_pendingFormatChange = false;
   m_pendingEncodingChange = false;
 
-  m_hScrollPos = 0; m_vScrollPos = 0;
+  m_hScrollPos = 0;  m_vScrollPos = 0;
 
   m_waitingOnEmulateTimer = false;
   m_emulatingMiddleButton = false;
@@ -305,7 +305,7 @@ void ClientConnection::Run()
       }
     }
 
-    if (strlen((const char *) m_pApp->m_options.m_encPasswd) > 0) {
+    if (strlen((const char *)m_pApp->m_options.m_encPasswd) > 0) {
       memcpy(m_encPasswd, m_pApp->m_options.m_encPasswd, 8);
       memset(m_pApp->m_options.m_encPasswd, 0, 8);
       m_passwdSet = true;
@@ -369,7 +369,7 @@ void ClientConnection::Run()
 }
 
 
-static WNDCLASS wndclass; // FIXME!
+static WNDCLASS wndclass;  // FIXME!
 
 void ClientConnection::CreateDisplay()
 {
@@ -396,7 +396,7 @@ void ClientConnection::CreateDisplay()
   wndclass.hInstance      = m_pApp->m_instance;
   wndclass.hIcon          = NULL;
   wndclass.hCursor        = LoadCursor(NULL, IDC_ARROW);
-  wndclass.hbrBackground  = (HBRUSH) GetStockObject(BLACK_BRUSH);
+  wndclass.hbrBackground  = (HBRUSH)GetStockObject(BLACK_BRUSH);
   wndclass.lpszMenuName   = (LPCTSTR)NULL;
   wndclass.lpszClassName  = "ScrollClass";
 
@@ -581,7 +581,7 @@ void ClientConnection::CreateDisplay()
       m_hctx = hctx;
   }
 
-  SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR) this);
+  SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR)this);
   SetWindowLongPtr(m_hwnd, GWLP_WNDPROC, (LONG_PTR)ClientConnection::WndProc);
 
   if (pApp->m_options.m_toolbar)
@@ -729,7 +729,7 @@ void ClientConnection::SaveConnectionHistory()
   memset(connListBuffer, 0, connListBufferSize * sizeof(char));
 
   // Index first characters of each entry for convenient access.
-  char **connList = new char*[maxEntries];
+  char **connList = new char *[maxEntries];
   int i;
   for (i = 0; i < maxEntries; i++)
     connList[i] = &connListBuffer[i * entryBufferSize];
@@ -968,8 +968,8 @@ void ClientConnection::NegotiateProtocolVersion()
     m_connDlg->SetStatus("Server protocol version received");
 
   int majorVersion, minorVersion;
-  if (sscanf_s(pv, rfbProtocolVersionFormat, &majorVersion, &minorVersion)
-      != 2) {
+  if (sscanf_s(pv, rfbProtocolVersionFormat, &majorVersion,
+               &minorVersion) != 2) {
     throw WarningException("Invalid protocol");
   }
   vnclog.Print(0, "RFB server supports protocol version 3.%d\n",
@@ -1064,8 +1064,8 @@ int ClientConnection::SelectSecurityType()
   if (nSecTypes == 0)
     throw WarningException(ReadFailureReason());
 
-  char *secTypeNames[] = {"None", "VncAuth"};
-  CARD8 knownSecTypes[] = {rfbSecTypeNone, rfbSecTypeVncAuth};
+  char *secTypeNames[] = { "None", "VncAuth" };
+  CARD8 knownSecTypes[] = { rfbSecTypeNone, rfbSecTypeVncAuth };
   int nKnownSecTypes = sizeof(knownSecTypes);
   CARD8 *secTypes = new CARD8[nSecTypes];
   ReadExact((char *)secTypes, nSecTypes);
@@ -1223,20 +1223,20 @@ void ClientConnection::Authenticate(CARD32 authScheme)
   }
   ***/
 
-  switch(authScheme) {
-  case rfbAuthNone:
-    authFuncPtr = &ClientConnection::AuthenticateNone;
-    break;
-  case rfbAuthVNC:
-    authFuncPtr = &ClientConnection::AuthenticateVNC;
-    break;
-  case rfbAuthUnixLogin:
-    authFuncPtr = &ClientConnection::AuthenticateUnixLogin;
-    break;
-  default:
-    vnclog.Print(0, "Unknown authentication scheme: %d\n",
-                 (int)authScheme);
-    throw ErrorException("Unknown authentication scheme!");
+  switch (authScheme) {
+    case rfbAuthNone:
+      authFuncPtr = &ClientConnection::AuthenticateNone;
+      break;
+    case rfbAuthVNC:
+      authFuncPtr = &ClientConnection::AuthenticateVNC;
+      break;
+    case rfbAuthUnixLogin:
+      authFuncPtr = &ClientConnection::AuthenticateUnixLogin;
+      break;
+    default:
+      vnclog.Print(0, "Unknown authentication scheme: %d\n",
+                   (int)authScheme);
+      throw ErrorException("Unknown authentication scheme!");
   }
 
   vnclog.Print(0, "Authentication scheme: %s\n",
@@ -1484,8 +1484,7 @@ void ClientConnection::SetWindowTitle()
       SPRINTF(zlibstr, " + CL %d", m_opts.m_compressLevel);
       snprintf(&title[strlen(title)], len - strlen(title),
                "[Lossless Tight%s]", zlibstr);
-    }
-    else {
+    } else {
       SPRINTF(zlibstr, " + CL %d", m_opts.m_compressLevel);
       snprintf(&title[strlen(title)], len - strlen(title),
                "[Tight + JPEG %s Q%d%s]", sampopt2str[m_opts.m_subsampLevel],
@@ -1498,7 +1497,7 @@ void ClientConnection::SetWindowTitle()
     else
       enc = m_opts.m_PreferredEncoding;
     if (enc >= 0 && enc <= rfbEncodingHextile) {
-      char encStr[6][8] = {"Raw", "", "", "", "", "Hextile"};
+      char encStr[6][8] = { "Raw", "", "", "", "", "Hextile" };
       snprintf(&title[strlen(title)], len - strlen(title), "[%s]",
                encStr[enc]);
     }
@@ -2141,18 +2140,18 @@ LRESULT CALLBACK ClientConnection::ScrollProc(HWND hwnd, UINT iMsg,
       int dx = 0;
       int pos = HIWORD(wParam);
       switch (LOWORD(wParam)) {
-      case SB_LINEUP:
-        dx = - 2; break;
-      case SB_LINEDOWN:
-        dx = 2; break;
-      case SB_PAGEUP:
-        dx = _this->m_cliwidth * -1/4; break;
-      case SB_PAGEDOWN:
-        dx = _this->m_cliwidth * 1/4; break;
-      case SB_THUMBPOSITION:
-        dx = pos - _this->m_hScrollPos;
-      case SB_THUMBTRACK:
-        dx = pos - _this->m_hScrollPos;
+        case SB_LINEUP:
+          dx = -2;  break;
+        case SB_LINEDOWN:
+          dx = 2;  break;
+        case SB_PAGEUP:
+          dx = _this->m_cliwidth * -1 / 4;  break;
+        case SB_PAGEDOWN:
+          dx = _this->m_cliwidth * 1 / 4;  break;
+        case SB_THUMBPOSITION:
+          dx = pos - _this->m_hScrollPos;
+        case SB_THUMBTRACK:
+          dx = pos - _this->m_hScrollPos;
       }
       if (!_this->m_opts.m_FitWindow)
         _this->ScrollScreen(dx, 0);
@@ -2164,13 +2163,13 @@ LRESULT CALLBACK ClientConnection::ScrollProc(HWND hwnd, UINT iMsg,
       int pos = HIWORD(wParam);
       switch (LOWORD(wParam)) {
         case SB_LINEUP:
-          dy =  - 2; break;
+          dy = -2;  break;
         case SB_LINEDOWN:
-          dy = 2; break;
+          dy = 2;  break;
         case SB_PAGEUP:
-          dy =  _this->m_cliheight * -1/4; break;
+          dy = _this->m_cliheight * -1 / 4;  break;
         case SB_PAGEDOWN:
-          dy = _this->m_cliheight * 1/4; break;
+          dy = _this->m_cliheight * 1 / 4;  break;
         case SB_THUMBPOSITION:
           dy = pos - _this->m_vScrollPos;
         case SB_THUMBTRACK:
@@ -2730,8 +2729,8 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
     {
       if (!_this->m_running) return 0;
       if (_this->m_opts.m_ViewOnly) return 0;
-      bool down = (((DWORD) lParam & 0x80000000l) == 0);
-      if ((int) wParam == 0x11) {
+      bool down = (((DWORD)lParam & 0x80000000l) == 0);
+      if ((int)wParam == 0x11) {
         if (!down) {
           CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
                         ID_CONN_CTLDOWN, MF_BYCOMMAND | MF_UNCHECKED);
@@ -2744,7 +2743,7 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
                       (LPARAM)MAKELONG(TBSTATE_CHECKED | TBSTATE_ENABLED, 0));
         }
       }
-      if ((int) wParam == 0x12) {
+      if ((int)wParam == 0x12) {
         if (!down) {
           CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
                         ID_CONN_ALTDOWN, MF_BYCOMMAND | MF_UNCHECKED);
@@ -2758,7 +2757,7 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
         }
       }
 
-      _this->ProcessKeyEvent((int) wParam, (DWORD) lParam);
+      _this->ProcessKeyEvent((int)wParam, (DWORD)lParam);
       return 0;
     }
     case WM_CHAR:
@@ -2808,8 +2807,7 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
     case WM_PALETTECHANGED:
       // If this application did not change the palette, select
       // and realize this application's palette
-      if ((HWND)wParam != hwnd)
-      {
+      if ((HWND)wParam != hwnd) {
         // Need the window's DC for SelectPalette/RealizePalette
         TempDC hDC(hwnd);
         PaletteSelector p(hDC, _this->m_hPalette);
@@ -2839,8 +2837,8 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
     case WM_CHANGECBCHAIN:
     {
       // The clipboard chain is changing
-      HWND hWndRemove = (HWND) wParam;     // handle of window being removed
-      HWND hWndNext = (HWND) lParam;       // handle of next window in chain
+      HWND hWndRemove = (HWND)wParam;      // handle of window being removed
+      HWND hWndNext = (HWND)lParam;        // handle of next window in chain
       // If next window is closing, update our pointer.
       if (hWndRemove == _this->m_hwndNextViewer)
         _this->m_hwndNextViewer = hWndNext;
@@ -2854,7 +2852,7 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
     case WT_PACKET:
     {
       PACKET pkt;
-      if(gpWTPacket((HCTX)lParam, (UINT)wParam, &pkt)) {
+      if (gpWTPacket((HCTX)lParam, (UINT)wParam, &pkt)) {
         ExtInputEvent e;
 
         if (pkt.pkChanged & PK_X || pkt.pkChanged & PK_Y ||
@@ -2946,8 +2944,7 @@ void ClientConnection::ProcessPointerEvent(int x, int y, DWORD keyflags,
       KillTimer(m_hwnd, m_emulate3ButtonsTimer);
       m_waitingOnEmulateTimer = false;
     } else if (m_emulatingMiddleButton) {
-      if ((keyflags & MK_LBUTTON) == 0 && (keyflags & MK_RBUTTON) == 0)
-      {
+      if ((keyflags & MK_LBUTTON) == 0 && (keyflags & MK_RBUTTON) == 0) {
         // We finish emulation only when both buttons come back up.
         m_emulatingMiddleButton = false;
         SubProcessPointerEvent(x, y, keyflags);
@@ -3313,7 +3310,7 @@ inline void ClientConnection::UpdateScrollbars()
   scri.fMask = SIF_ALL | SIF_DISABLENOSCROLL;
   scri.nMin = 0;
   scri.nMax = m_hScrollMax;
-  scri.nPage= m_cliwidth;
+  scri.nPage = m_cliwidth;
   scri.nPos = m_hScrollPos;
 
   if (setInfo)
@@ -3323,7 +3320,7 @@ inline void ClientConnection::UpdateScrollbars()
   scri.fMask = SIF_ALL | SIF_DISABLENOSCROLL;
   scri.nMin = 0;
   scri.nMax = m_vScrollMax;
-  scri.nPage= m_cliheight;
+  scri.nPage = m_cliheight;
   scri.nPos = m_vScrollPos;
 
   if (setInfo)
@@ -3357,7 +3354,7 @@ void ClientConnection::ShowConnInfo()
 //  They finish the initialisation, then chiefly read data from the server.
 // ********************************************************************
 
-void* ClientConnection::run_undetached(void* arg) {
+void *ClientConnection::run_undetached(void *arg) {
 
   vnclog.Print(9, "Update-processing thread started\n");
 
@@ -3457,8 +3454,8 @@ void* ClientConnection::run_undetached(void* arg) {
     if (!m_bKillThread) {
       PostMessage(m_hwnd1, WM_CLOSE, 1, 0);
       e.Report();
-    }
-    else PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
+    } else
+      PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
   } catch (ErrorException &e) {
     m_running = false;
     e.Report();
@@ -3569,7 +3566,7 @@ void ClientConnection::ReadScreenUpdate()
       if (m_opts.m_benchFile) tBlitStart = getTime();
 
       while (m_opts.m_DoubleBuffer && list != NULL) {
-        rfbFramebufferUpdateRectHeader* r1;
+        rfbFramebufferUpdateRectHeader *r1;
         node = list;
         r1 = &node->region;
 
@@ -3689,7 +3686,7 @@ void ClientConnection::ReadScreenUpdate()
     if (m_opts.m_benchFile) tBlitStart = getTime();
 
     while (list != NULL) {
-      rfbFramebufferUpdateRectHeader* r1;
+      rfbFramebufferUpdateRectHeader *r1;
       node = list;
       r1 = &node->region;
 
@@ -3892,8 +3889,8 @@ inline void ClientConnection::WriteExact(char *buf, int bytes)
       FormatMessage(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
           FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
-        err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-        (LPTSTR)&lpMsgBuf, 0, NULL); // Process any inserts in lpMsgBuf.
+        err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),  // Default language
+        (LPTSTR)&lpMsgBuf, 0, NULL);  // Process any inserts in lpMsgBuf.
       vnclog.Print(1, "Socket error %d: %s\n", err, lpMsgBuf);
       LocalFree(lpMsgBuf);
       m_running = false;
@@ -3998,8 +3995,8 @@ void ClientConnection::InvalidateScreenRect(const RECT *pRect) {
     int d = m_opts.m_scale_den;
     int left   = (pRect->left / d) * d;
     int top    = (pRect->top  / d) * d;
-    int right  = (pRect->right  + d - 1) / d * d; // round up
-    int bottom = (pRect->bottom + d - 1) / d * d; // round up
+    int right  = (pRect->right  + d - 1) / d * d;  // round up
+    int bottom = (pRect->bottom + d - 1) / d * d;  // round up
 
     // Then we scale the rectangle, which should now give whole numbers.
     rect.left   = (left   * n / d) - m_hScrollPos;
@@ -4202,13 +4199,15 @@ void ClientConnection::InitSetPixels(void)
   if (rs == 0 && gs == 8 && bs == 16) {
     if (srcps == 3) m_srcpf = FBX_RGB;
     else if (srcps == 4) m_srcpf = FBX_RGBA;
-  }
-  else if (rs == 16 && gs == 8 && bs == 0) {
+
+  } else if (rs == 16 && gs == 8 && bs == 0) {
     if (srcps == 3) m_srcpf = FBX_BGR;
     else if (srcps == 4) m_srcpf = FBX_BGRA;
-  }
-  else if (rs == 8 && gs == 16 && bs == 24 && srcps == 4) m_srcpf = FBX_ARGB;
-  else if (rs == 24 && gs == 16 && bs == 8 && srcps == 4) m_srcpf = FBX_ABGR;
+
+  } else if (rs == 8 && gs == 16 && bs == 24 && srcps == 4)
+    m_srcpf = FBX_ARGB;
+  else if (rs == 24 && gs == 16 && bs == 8 && srcps == 4)
+    m_srcpf = FBX_ABGR;
 
   if (m_srcpf < 0) {
     // Source is not 24-bit or 32-bit
@@ -4268,9 +4267,9 @@ void ClientConnection::SetPixelsFullConv##bpp(char *buffer, int x, int y,     \
     CARD##bpp *p = srcptr, *pfinal = &p[w];                                   \
     CARD32 *dstptr2 = dstptr;                                                 \
     for (; p < pfinal; p++, dstptr2++)                                        \
-      *dstptr2 = (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs)            \
-               | (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs)            \
-               | (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);           \
+      *dstptr2 = (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs) |          \
+                 (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs) |          \
+                 (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);           \
   }                                                                           \
 }
 

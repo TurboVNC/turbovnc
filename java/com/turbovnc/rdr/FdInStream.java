@@ -51,8 +51,8 @@ public class FdInStream extends InStream {
 
   public FdInStream(FileDescriptor fd_, FdInStreamBlockCallback blockCallback_,
                     int bufSize_) {
-    fd = fd_; timeoutms = 0; blockCallback = blockCallback_;
-    timing = false; timeWaitedIn100us = 5; timedKbits = 0;
+    fd = fd_;  timeoutms = 0;  blockCallback = blockCallback_;
+    timing = false;  timeWaitedIn100us = 5;  timedKbits = 0;
     bufSize = ((bufSize_ > 0) ? bufSize_ : DEFAULT_BUF_SIZE);
     b = new byte[bufSize];
     ptr = end = offset = 0;
@@ -116,7 +116,7 @@ public class FdInStream extends InStream {
   public final void stopTiming() {
     timing = false;
     if (timeWaitedIn100us < timedKbits / 2)
-      timeWaitedIn100us = timedKbits / 2; // upper limit 20Mbit/s
+      timeWaitedIn100us = timedKbits / 2;  // upper limit 20Mbit/s
   }
 
   public final long kbitsPerSecond() {

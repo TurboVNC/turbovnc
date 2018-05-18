@@ -56,17 +56,17 @@ static void rfbErr(const char *format, ...);
 typedef struct ossl_init_settings_st OPENSSL_INIT_SETTINGS;
 #endif
 
-typedef void (*DH_free_type)(DH *);
-typedef int (*DH_generate_key_type)(DH *);
-typedef DH *(*DSA_dup_DH_type)(const DSA *);
-typedef void (*DSA_free_type)(DSA *);
-typedef int (*DSA_generate_parameters_ex_type)(DSA *, int,
-                                               CONST unsigned char *, int,
-                                               int *, unsigned long *,
-                                               BN_GENCB *);
-typedef DSA *(*DSA_new_type)(void);
-typedef unsigned long (*ERR_get_error_type)(void);
-typedef char *(*ERR_error_string_type)(unsigned long, char *);
+typedef void (*DH_free_type) (DH *);
+typedef int (*DH_generate_key_type) (DH *);
+typedef DH *(*DSA_dup_DH_type) (const DSA *);
+typedef void (*DSA_free_type) (DSA *);
+typedef int (*DSA_generate_parameters_ex_type) (DSA *, int,
+                                                CONST unsigned char *, int,
+                                                int *, unsigned long *,
+                                                BN_GENCB *);
+typedef DSA *(*DSA_new_type) (void);
+typedef unsigned long (*ERR_get_error_type) (void);
+typedef char *(*ERR_error_string_type) (unsigned long, char *);
 
 struct rfbcrypto_functions {
     DH_free_type DH_free;
@@ -79,33 +79,36 @@ struct rfbcrypto_functions {
     ERR_error_string_type ERR_error_string;
 };
 
-static struct rfbcrypto_functions crypto
-#ifndef DLOPENSSL
-    = { DH_free, DH_generate_key, DSA_dup_DH, DSA_free,
-        DSA_generate_parameters_ex, DSA_new, ERR_get_error, ERR_error_string }
+static struct rfbcrypto_functions crypto = {
+#ifdef DLOPENSSL
+    NULL
+#else
+    DH_free, DH_generate_key, DSA_dup_DH, DSA_free, DSA_generate_parameters_ex,
+    DSA_new, ERR_get_error, ERR_error_string
 #endif
-;
+};
 
-typedef int (*SSL_accept_type)(SSL *);
-typedef int (*OPENSSL_init_ssl_type)(uint64_t, const OPENSSL_INIT_SETTINGS *);
-typedef int (*SSL_library_init_type)(void);
-typedef void (*SSL_load_error_strings_type)(void);
-typedef void (*SSL_free_type)(SSL *);
-typedef int (*SSL_get_error_type)(const SSL *, int);
-typedef SSL *(*SSL_new_type)(SSL_CTX *);
-typedef int (*SSL_pending_type)(const SSL *);
-typedef int (*SSL_read_type)(SSL *, void *, int);
-typedef int (*SSL_set_fd_type)(SSL *, int);
-typedef int (*SSL_shutdown_type)(SSL *);
-typedef int (*SSL_write_type)(SSL *, const void *, int);
-typedef long (*SSL_CTX_ctrl_type)(SSL_CTX *, int, long, void *);
-typedef void (*SSL_CTX_free_type)(SSL_CTX *);
-typedef SSL_CTX *(*SSL_CTX_new_type)(CONST SSL_METHOD *);
-typedef int (*SSL_CTX_set_cipher_list_type)(SSL_CTX *, const char *);
-typedef void (*SSL_CTX_set_security_level_type)(SSL_CTX *, int);
-typedef int (*SSL_CTX_use_certificate_file_type)(SSL_CTX *, const char *, int);
-typedef int (*SSL_CTX_use_PrivateKey_file_type)(SSL_CTX *, const char *, int);
-typedef CONST SSL_METHOD *(*SSLv23_server_method_type)(void);
+typedef int (*SSL_accept_type) (SSL *);
+typedef int (*OPENSSL_init_ssl_type) (uint64_t, const OPENSSL_INIT_SETTINGS *);
+typedef int (*SSL_library_init_type) (void);
+typedef void (*SSL_load_error_strings_type) (void);
+typedef void (*SSL_free_type) (SSL *);
+typedef int (*SSL_get_error_type) (const SSL *, int);
+typedef SSL *(*SSL_new_type) (SSL_CTX *);
+typedef int (*SSL_pending_type) (const SSL *);
+typedef int (*SSL_read_type) (SSL *, void *, int);
+typedef int (*SSL_set_fd_type) (SSL *, int);
+typedef int (*SSL_shutdown_type) (SSL *);
+typedef int (*SSL_write_type) (SSL *, const void *, int);
+typedef long (*SSL_CTX_ctrl_type) (SSL_CTX *, int, long, void *);
+typedef void (*SSL_CTX_free_type) (SSL_CTX *);
+typedef SSL_CTX *(*SSL_CTX_new_type) (CONST SSL_METHOD *);
+typedef int (*SSL_CTX_set_cipher_list_type) (SSL_CTX *, const char *);
+typedef void (*SSL_CTX_set_security_level_type) (SSL_CTX *, int);
+typedef int (*SSL_CTX_use_certificate_file_type) (SSL_CTX *, const char *,
+                                                  int);
+typedef int (*SSL_CTX_use_PrivateKey_file_type) (SSL_CTX *, const char *, int);
+typedef CONST SSL_METHOD *(*SSLv23_server_method_type) (void);
 
 struct rfbssl_functions {
     SSL_accept_type SSL_accept;
@@ -130,31 +133,32 @@ struct rfbssl_functions {
     SSLv23_server_method_type SSLv23_server_method;
 };
 
-static struct rfbssl_functions ssl
-#ifndef DLOPENSSL
-    = { SSL_accept,
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-        OPENSSL_init_ssl, NULL, NULL,
+static struct rfbssl_functions ssl = {
+#ifdef DLOPENSSL
+    NULL
 #else
-        NULL, SSL_library_init, SSL_load_error_strings,
-#endif
-        SSL_free, SSL_get_error, SSL_new, SSL_pending, SSL_read, SSL_set_fd,
-        SSL_shutdown, SSL_write, SSL_CTX_ctrl, SSL_CTX_free, SSL_CTX_new,
-        SSL_CTX_set_cipher_list,
+    SSL_accept,
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-        SSL_CTX_set_security_level,
+    OPENSSL_init_ssl, NULL, NULL,
 #else
-        NULL,
+    NULL, SSL_library_init, SSL_load_error_strings,
 #endif
-        SSL_CTX_use_certificate_file, SSL_CTX_use_PrivateKey_file,
+    SSL_free, SSL_get_error, SSL_new, SSL_pending, SSL_read, SSL_set_fd,
+    SSL_shutdown, SSL_write, SSL_CTX_ctrl, SSL_CTX_free, SSL_CTX_new,
+    SSL_CTX_set_cipher_list,
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-        TLS_server_method
+    SSL_CTX_set_security_level,
 #else
-        SSLv23_server_method
+    NULL,
 #endif
-      }
+    SSL_CTX_use_certificate_file, SSL_CTX_use_PrivateKey_file,
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    TLS_server_method
+#else
+    SSLv23_server_method
 #endif
-;
+#endif
+};
 
 #ifdef DLOPENSSL
 
@@ -169,10 +173,10 @@ static const char *suffix[SUFFIXES] = { "0.9.8", "1.0.0", "1.0.1", "1.0.2",
 
 #define LOADSYM(lib, sym) {  \
     dlerror();  \
-    if((lib.sym = (sym##_type)dlsym(lib##Handle, #sym)) == NULL) {  \
+    if ((lib.sym = (sym##_type)dlsym(lib##Handle, #sym)) == NULL) {  \
         char *err = dlerror();  \
         if (err)  \
-            rfbErr("Could not load symbol: %s\n", err); \
+            rfbErr("Could not load symbol: %s\n", err);  \
         else  \
             rfbErr("Could not load symbol "#sym" from %s\n", libName);  \
         return -1;  \

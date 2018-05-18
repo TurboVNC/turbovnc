@@ -102,7 +102,7 @@ void HotKeys::Init(bool FSAltEnter, bool zoom)
 
   if (FSAltEnter) {
     accel[i].fVirt = FVIRTKEY | FALT | FNOINVERT;
-    accel[i].key = VK_RETURN; // Enter
+    accel[i].key = VK_RETURN;  // Enter
     accel[i++].cmd = ID_FULLSCREEN_NODIALOG;
   }
 

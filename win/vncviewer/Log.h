@@ -91,4 +91,4 @@ class Log
     HANDLE hlogfile;
 };
 
-#endif // LOG_H__
+#endif  // LOG_H__

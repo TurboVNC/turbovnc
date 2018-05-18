@@ -42,7 +42,7 @@ public class BoolParameter extends VoidParameter {
     return true;
   }
 
-  public boolean setParam() { setParam(true); return true; }
+  public boolean setParam() { setParam(true);  return true; }
   public synchronized void setParam(boolean b) { value = b; }
 
   public String getDefaultStr() { return defValue ? "1" : "0"; }

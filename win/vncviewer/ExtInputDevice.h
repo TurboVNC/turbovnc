@@ -88,4 +88,4 @@ class ExtInputDevice
     }
 };
 
-#endif // EXTINPUTDEVICE_H__
+#endif  // EXTINPUTDEVICE_H__

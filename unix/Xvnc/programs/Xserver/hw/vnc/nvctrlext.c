@@ -96,7 +96,7 @@ static inline void swap_float(float *ptr)
 static int xhandler(Display *dpy, XErrorEvent *xe)
 {
   char errstr[256];
-  errstr[0]=0;
+  errstr[0] = 0;
   XGetErrorText(dpy, xe->error_code, errstr, 255);
   rfbLog("NV-CONTROL X11 ERROR: %s (XID: 0x%.8x)\n", errstr, xe->resourceid);
   error_code = xe->error_code;
@@ -608,27 +608,27 @@ static int ProcNVCTRLQueryAttributePermissions(ClientPtr client, int reqType)
   memset(&permissions, 0, sizeof(NVCTRLAttributePermissionsRec));
 
   switch (reqType) {
-  case X_nvCtrlQueryAttributePermissions:
-    rep.flags =
-      XNVCTRLQueryAttributePermissions(dpy, stuff->attribute, &permissions);
-    break;
-  case X_nvCtrlQueryStringAttributePermissions:
-    rep.flags =
-      XNVCTRLQueryStringAttributePermissions(dpy, stuff->attribute,
-                                             &permissions);
-    break;
-  case X_nvCtrlQueryBinaryDataAttributePermissions:
-    rep.flags =
-      XNVCTRLQueryBinaryDataAttributePermissions(dpy, stuff->attribute,
-                                                 &permissions);
-    break;
-  case X_nvCtrlQueryStringOperationAttributePermissions:
-    rep.flags =
-      XNVCTRLQueryStringOperationAttributePermissions(dpy, stuff->attribute,
-                                                      &permissions);
-    break;
-  default:
-    return BadRequest;
+    case X_nvCtrlQueryAttributePermissions:
+      rep.flags =
+        XNVCTRLQueryAttributePermissions(dpy, stuff->attribute, &permissions);
+      break;
+    case X_nvCtrlQueryStringAttributePermissions:
+      rep.flags =
+        XNVCTRLQueryStringAttributePermissions(dpy, stuff->attribute,
+                                               &permissions);
+      break;
+    case X_nvCtrlQueryBinaryDataAttributePermissions:
+      rep.flags =
+        XNVCTRLQueryBinaryDataAttributePermissions(dpy, stuff->attribute,
+                                                   &permissions);
+      break;
+    case X_nvCtrlQueryStringOperationAttributePermissions:
+      rep.flags =
+        XNVCTRLQueryStringOperationAttributePermissions(dpy, stuff->attribute,
+                                                        &permissions);
+      break;
+    default:
+      return BadRequest;
   }
 
   X_DEINIT();
@@ -871,43 +871,43 @@ static int ProcNVCTRLDispatch(ClientPtr client)
 {
   REQUEST(xReq);
   switch (stuff->data) {
-  case X_nvCtrlQueryExtension:
-    return ProcNVCTRLQueryExtension(client);
-  case X_nvCtrlIsNv:
-    return ProcNVCTRLIsNv(client);
-  case X_nvCtrlQueryTargetCount:
-    return ProcNVCTRLQueryTargetCount(client);
-  case X_nvCtrlSetAttribute:
-    return ProcNVCTRLSetAttribute(client);
-  case X_nvCtrlSetAttributeAndGetStatus:
-    return ProcNVCTRLSetAttributeAndGetStatus(client);
-  case X_nvCtrlQueryAttribute:
-    return ProcNVCTRLQueryAttribute(client);
-  case X_nvCtrlQueryAttribute64:
-    return ProcNVCTRLQueryAttribute64(client);
-  case X_nvCtrlQueryStringAttribute:
-    return ProcNVCTRLQueryStringAttribute(client);
-  case X_nvCtrlSetStringAttribute:
-    return ProcNVCTRLSetStringAttribute(client);
-  case X_nvCtrlQueryValidAttributeValues:
-    return ProcNVCTRLQueryValidAttributeValues(client);
-  case X_nvCtrlQueryValidAttributeValues64:
-    return ProcNVCTRLQueryValidAttributeValues64(client);
-  case X_nvCtrlQueryAttributePermissions:
-  case X_nvCtrlQueryStringAttributePermissions:
-  case X_nvCtrlQueryBinaryDataAttributePermissions:
-  case X_nvCtrlQueryStringOperationAttributePermissions:
-    return ProcNVCTRLQueryAttributePermissions(client, stuff->data);
-  case X_nvCtrlSetGvoColorConversion:
-    return ProcNVCTRLSetGvoColorConversion(client);
-  case X_nvCtrlQueryGvoColorConversion:
-    return ProcNVCTRLQueryGvoColorConversion(client);
-  case X_nvCtrlQueryBinaryData:
-    return ProcNVCTRLQueryBinaryData(client);
-  case X_nvCtrlStringOperation:
-    return ProcNVCTRLStringOperation(client);
-  default:
-    return BadRequest;
+    case X_nvCtrlQueryExtension:
+      return ProcNVCTRLQueryExtension(client);
+    case X_nvCtrlIsNv:
+      return ProcNVCTRLIsNv(client);
+    case X_nvCtrlQueryTargetCount:
+      return ProcNVCTRLQueryTargetCount(client);
+    case X_nvCtrlSetAttribute:
+      return ProcNVCTRLSetAttribute(client);
+    case X_nvCtrlSetAttributeAndGetStatus:
+      return ProcNVCTRLSetAttributeAndGetStatus(client);
+    case X_nvCtrlQueryAttribute:
+      return ProcNVCTRLQueryAttribute(client);
+    case X_nvCtrlQueryAttribute64:
+      return ProcNVCTRLQueryAttribute64(client);
+    case X_nvCtrlQueryStringAttribute:
+      return ProcNVCTRLQueryStringAttribute(client);
+    case X_nvCtrlSetStringAttribute:
+      return ProcNVCTRLSetStringAttribute(client);
+    case X_nvCtrlQueryValidAttributeValues:
+      return ProcNVCTRLQueryValidAttributeValues(client);
+    case X_nvCtrlQueryValidAttributeValues64:
+      return ProcNVCTRLQueryValidAttributeValues64(client);
+    case X_nvCtrlQueryAttributePermissions:
+    case X_nvCtrlQueryStringAttributePermissions:
+    case X_nvCtrlQueryBinaryDataAttributePermissions:
+    case X_nvCtrlQueryStringOperationAttributePermissions:
+      return ProcNVCTRLQueryAttributePermissions(client, stuff->data);
+    case X_nvCtrlSetGvoColorConversion:
+      return ProcNVCTRLSetGvoColorConversion(client);
+    case X_nvCtrlQueryGvoColorConversion:
+      return ProcNVCTRLQueryGvoColorConversion(client);
+    case X_nvCtrlQueryBinaryData:
+      return ProcNVCTRLQueryBinaryData(client);
+    case X_nvCtrlStringOperation:
+      return ProcNVCTRLStringOperation(client);
+    default:
+      return BadRequest;
   }
 }
 
@@ -916,42 +916,42 @@ static int SProcNVCTRLDispatch(ClientPtr client)
 {
   REQUEST(xReq);
   switch (stuff->data) {
-  case X_nvCtrlQueryExtension:
-    return SProcNVCTRLQueryExtension(client);
-  case X_nvCtrlIsNv:
-    return SProcNVCTRLIsNv(client);
-  case X_nvCtrlQueryTargetCount:
-    return SProcNVCTRLQueryTargetCount(client);
-  case X_nvCtrlSetAttribute:
-    return SProcNVCTRLSetAttribute(client);
-  case X_nvCtrlSetAttributeAndGetStatus:
-    return SProcNVCTRLSetAttributeAndGetStatus(client);
-  case X_nvCtrlQueryAttribute:
-    return SProcNVCTRLQueryAttribute(client);
-  case X_nvCtrlQueryAttribute64:
-    return SProcNVCTRLQueryAttribute64(client);
-  case X_nvCtrlQueryStringAttribute:
-    return SProcNVCTRLQueryStringAttribute(client);
-  case X_nvCtrlSetStringAttribute:
-    return SProcNVCTRLSetStringAttribute(client);
-  case X_nvCtrlQueryValidAttributeValues:
-    return SProcNVCTRLQueryValidAttributeValues(client);
-  case X_nvCtrlQueryValidAttributeValues64:
-    return SProcNVCTRLQueryValidAttributeValues64(client);
-  case X_nvCtrlQueryAttributePermissions:
-  case X_nvCtrlQueryStringAttributePermissions:
-  case X_nvCtrlQueryBinaryDataAttributePermissions:
-  case X_nvCtrlQueryStringOperationAttributePermissions:
-    return SProcNVCTRLQueryAttributePermissions(client);
-  case X_nvCtrlSetGvoColorConversion:
-    return SProcNVCTRLSetGvoColorConversion(client);
-  case X_nvCtrlQueryGvoColorConversion:
-    return SProcNVCTRLQueryGvoColorConversion(client);
-  case X_nvCtrlQueryBinaryData:
-    return SProcNVCTRLQueryBinaryData(client);
-  case X_nvCtrlStringOperation:
-    return SProcNVCTRLStringOperation(client);
-  default:
-    return BadRequest;
+    case X_nvCtrlQueryExtension:
+      return SProcNVCTRLQueryExtension(client);
+    case X_nvCtrlIsNv:
+      return SProcNVCTRLIsNv(client);
+    case X_nvCtrlQueryTargetCount:
+      return SProcNVCTRLQueryTargetCount(client);
+    case X_nvCtrlSetAttribute:
+      return SProcNVCTRLSetAttribute(client);
+    case X_nvCtrlSetAttributeAndGetStatus:
+      return SProcNVCTRLSetAttributeAndGetStatus(client);
+    case X_nvCtrlQueryAttribute:
+      return SProcNVCTRLQueryAttribute(client);
+    case X_nvCtrlQueryAttribute64:
+      return SProcNVCTRLQueryAttribute64(client);
+    case X_nvCtrlQueryStringAttribute:
+      return SProcNVCTRLQueryStringAttribute(client);
+    case X_nvCtrlSetStringAttribute:
+      return SProcNVCTRLSetStringAttribute(client);
+    case X_nvCtrlQueryValidAttributeValues:
+      return SProcNVCTRLQueryValidAttributeValues(client);
+    case X_nvCtrlQueryValidAttributeValues64:
+      return SProcNVCTRLQueryValidAttributeValues64(client);
+    case X_nvCtrlQueryAttributePermissions:
+    case X_nvCtrlQueryStringAttributePermissions:
+    case X_nvCtrlQueryBinaryDataAttributePermissions:
+    case X_nvCtrlQueryStringOperationAttributePermissions:
+      return SProcNVCTRLQueryAttributePermissions(client);
+    case X_nvCtrlSetGvoColorConversion:
+      return SProcNVCTRLSetGvoColorConversion(client);
+    case X_nvCtrlQueryGvoColorConversion:
+      return SProcNVCTRLQueryGvoColorConversion(client);
+    case X_nvCtrlQueryBinaryData:
+      return SProcNVCTRLQueryBinaryData(client);
+    case X_nvCtrlStringOperation:
+      return SProcNVCTRLStringOperation(client);
+    default:
+      return BadRequest;
   }
 }

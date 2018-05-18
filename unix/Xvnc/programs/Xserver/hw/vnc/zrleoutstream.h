@@ -44,19 +44,19 @@ zrleOutStream *zrleOutStreamNew           (void);
 void           zrleOutStreamFree          (zrleOutStream *os);
 Bool           zrleOutStreamFlush         (zrleOutStream *os);
 void           zrleOutStreamWriteBytes    (zrleOutStream *os,
-					   const zrle_U8 *data,
-					   int            length);
+                                           const zrle_U8 *data,
+                                           int            length);
 void           zrleOutStreamWriteU8       (zrleOutStream *os,
-					   zrle_U8        u);
+                                           zrle_U8        u);
 void           zrleOutStreamWriteOpaque8  (zrleOutStream *os,
-					   zrle_U8        u);
+                                           zrle_U8        u);
 void           zrleOutStreamWriteOpaque16 (zrleOutStream *os,
-					   zrle_U16       u);
+                                           zrle_U16       u);
 void           zrleOutStreamWriteOpaque32 (zrleOutStream *os,
-					   zrle_U32       u);
+                                           zrle_U32       u);
 void           zrleOutStreamWriteOpaque24A(zrleOutStream *os,
-					   zrle_U32       u);
+                                           zrle_U32       u);
 void           zrleOutStreamWriteOpaque24B(zrleOutStream *os,
-					   zrle_U32       u);
+                                           zrle_U32       u);
 
 #endif /* __ZRLE_OUT_STREAM_H__ */

@@ -51,17 +51,17 @@ static const rfbPixelFormat BGR233Format = {
  * Macro to compare pixel formats.
  */
 
-#define PF_EQ(x, y)                                                     \
-        ((x.bitsPerPixel == y.bitsPerPixel) &&                          \
-         (x.depth == y.depth) &&                                        \
-         ((x.bigEndian == y.bigEndian) || (x.bitsPerPixel == 8)) &&     \
-         (x.trueColour == y.trueColour) &&                              \
-         (!x.trueColour || ((x.redMax == y.redMax) &&                   \
-                            (x.greenMax == y.greenMax) &&               \
-                            (x.blueMax == y.blueMax) &&                 \
-                            (x.redShift == y.redShift) &&               \
-                            (x.greenShift == y.greenShift) &&           \
-                            (x.blueShift == y.blueShift))))
+#define PF_EQ(x, y)  \
+    ((x.bitsPerPixel == y.bitsPerPixel) &&  \
+     (x.depth == y.depth) &&  \
+     ((x.bigEndian == y.bigEndian) || (x.bitsPerPixel == 8)) &&  \
+     (x.trueColour == y.trueColour) &&  \
+     (!x.trueColour || ((x.redMax == y.redMax) &&  \
+                        (x.greenMax == y.greenMax) &&  \
+                        (x.blueMax == y.blueMax) &&  \
+                        (x.redShift == y.redShift) &&  \
+                        (x.greenShift == y.greenShift) &&  \
+                        (x.blueShift == y.blueShift))))
 
 #define CONCAT2(a, b) a##b
 #define CONCAT2E(a, b) CONCAT2(a, b)
@@ -110,8 +110,8 @@ static const rfbPixelFormat BGR233Format = {
 #undef IN
 #undef OUT
 
-typedef void (*rfbInitTableFnType)(char **table, rfbPixelFormat *in,
-                                   rfbPixelFormat *out);
+typedef void (*rfbInitTableFnType) (char **table, rfbPixelFormat *in,
+                                    rfbPixelFormat *out);
 
 rfbInitTableFnType rfbInitTrueColourSingleTableFns[3] = {
     rfbInitTrueColourSingleTable8,
@@ -161,10 +161,9 @@ rfbTranslateFnType rfbTranslateWithRGBTablesFns[3][3] = {
  * rfbTranslateNone is used when no translation is required.
  */
 
-void
-rfbTranslateNone(char *table, rfbPixelFormat *in, rfbPixelFormat *out,
-                 char *iptr, char *optr, int bytesBetweenInputLines,
-                 int width, int height)
+void rfbTranslateNone(char *table, rfbPixelFormat *in, rfbPixelFormat *out,
+                      char *iptr, char *optr, int bytesBetweenInputLines,
+                      int width, int height)
 {
     int bytesPerOutputLine = width * (out->bitsPerPixel / 8);
 
@@ -181,8 +180,7 @@ rfbTranslateNone(char *table, rfbPixelFormat *in, rfbPixelFormat *out,
  * rfbSetTranslateFunction sets the translation function.
  */
 
-Bool
-rfbSetTranslateFunction(rfbClientPtr cl)
+Bool rfbSetTranslateFunction(rfbClientPtr cl)
 {
     rfbLog("Pixel format for client %s:\n", cl->host);
     PrintPixelFormat(&cl->format);
@@ -321,8 +319,7 @@ rfbSetTranslateFunction(rfbClientPtr cl)
  * just like an 8-bit BGR233 true colour client.
  */
 
-static Bool
-rfbSetClientColourMapBGR233(rfbClientPtr cl)
+static Bool rfbSetClientColourMapBGR233(rfbClientPtr cl)
 {
     char buf[sz_rfbSetColourMapEntriesMsg + 256 * 3 * 2];
     rfbSetColourMapEntriesMsg *scme = (rfbSetColourMapEntriesMsg *)buf;
@@ -373,8 +370,7 @@ rfbSetClientColourMapBGR233(rfbClientPtr cl)
  * and mark the whole screen as having been modified.
  */
 
-Bool
-rfbSetClientColourMap(rfbClientPtr cl, int firstColour, int nColours)
+Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour, int nColours)
 {
     BoxRec box;
 
@@ -408,10 +404,7 @@ rfbSetClientColourMap(rfbClientPtr cl, int firstColour, int nColours)
  * rfbSetClientColourMaps sets the colour map for each RFB client.
  */
 
-void
-rfbSetClientColourMaps(firstColour, nColours)
-    int firstColour;
-    int nColours;
+void rfbSetClientColourMaps(int firstColour, int nColours)
 {
     rfbClientPtr cl, nextCl;
 
@@ -422,16 +415,15 @@ rfbSetClientColourMaps(firstColour, nColours)
 }
 
 
-static void
-PrintPixelFormat(rfbPixelFormat *pf)
+static void PrintPixelFormat(rfbPixelFormat *pf)
 {
     if (pf->bitsPerPixel == 1) {
         rfbLog("  1 bpp, %s sig bit in each byte is leftmost on the screen.\n",
                (pf->bigEndian ? "most" : "least"));
     } else {
         rfbLog("  %d bpp, depth %d%s\n", pf->bitsPerPixel, pf->depth,
-               ((pf->bitsPerPixel == 8) ? ""
-                : (pf->bigEndian ? ", big endian" : ", little endian")));
+               ((pf->bitsPerPixel == 8) ? "" :
+                (pf->bigEndian ? ", big endian" : ", little endian")));
         if (pf->trueColour) {
             rfbLog("  true colour: max r %d g %d b %d, shift r %d g %d b %d\n",
                    pf->redMax, pf->greenMax, pf->blueMax,

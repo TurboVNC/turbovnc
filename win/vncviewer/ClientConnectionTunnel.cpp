@@ -165,5 +165,5 @@ void ClientConnection::SetupSSHTunnel(void)
   SPRINTF(m_host, "localhost");
 
   if (system(cmd) != 0)
-		throw WarningException("Could not start SSH client to create tunnel");
+    throw WarningException("Could not start SSH client to create tunnel");
 }

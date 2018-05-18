@@ -114,7 +114,7 @@ static Bool XkbTranslateKeyCode(register XkbDescPtr xkb, KeyCode key,
   type = XkbKeyKeyType(xkb, key, effectiveGroup);
 
   preserve = 0;
-  if (type->map) { /* find the column (shift level) within the group */
+  if (type->map) {  /* find the column (shift level) within the group */
     register int i;
     register XkbKTMapEntryPtr entry;
     for (i = 0, entry = type->map; i < type->map_count; i++, entry++) {
@@ -159,23 +159,23 @@ static XkbAction *XkbKeyActionPtr(XkbDescPtr xkb, KeyCode key,
   if (effectiveGroup >= nKeyGroups) {
     unsigned groupInfo = XkbKeyGroupInfo(xkb, key);
     switch (XkbOutOfRangeGroupAction(groupInfo)) {
-    default:
-      effectiveGroup %= nKeyGroups;
-      break;
-    case XkbClampIntoRange:
-      effectiveGroup = nKeyGroups - 1;
-      break;
-    case XkbRedirectIntoRange:
-      effectiveGroup = XkbOutOfRangeGroupNumber(groupInfo);
-      if (effectiveGroup >= nKeyGroups)
-        effectiveGroup = 0;
-      break;
+      default:
+        effectiveGroup %= nKeyGroups;
+        break;
+      case XkbClampIntoRange:
+        effectiveGroup = nKeyGroups - 1;
+        break;
+      case XkbRedirectIntoRange:
+        effectiveGroup = XkbOutOfRangeGroupNumber(groupInfo);
+        if (effectiveGroup >= nKeyGroups)
+          effectiveGroup = 0;
+        break;
     }
   }
   col = effectiveGroup * XkbKeyGroupsWidth(xkb, key);
   type = XkbKeyKeyType(xkb, key, effectiveGroup);
 
-  if (type->map) { /* find the column (shift level) within the group */
+  if (type->map) {  /* find the column (shift level) within the group */
     register int i;
     register XkbKTMapEntryPtr entry;
     for (i = 0, entry = type->map; i < type->map_count; i++, entry++) {
@@ -204,17 +204,17 @@ static unsigned XkbKeyEffectiveGroup(XkbDescPtr xkb, KeyCode key,
   if (effectiveGroup >= nKeyGroups) {
     unsigned groupInfo = XkbKeyGroupInfo(xkb, key);
     switch (XkbOutOfRangeGroupAction(groupInfo)) {
-    default:
-      effectiveGroup %= nKeyGroups;
-      break;
-    case XkbClampIntoRange:
-      effectiveGroup = nKeyGroups - 1;
-      break;
-    case XkbRedirectIntoRange:
-      effectiveGroup = XkbOutOfRangeGroupNumber(groupInfo);
-      if (effectiveGroup >= nKeyGroups)
-        effectiveGroup = 0;
-      break;
+      default:
+        effectiveGroup %= nKeyGroups;
+        break;
+      case XkbClampIntoRange:
+        effectiveGroup = nKeyGroups - 1;
+        break;
+      case XkbRedirectIntoRange:
+        effectiveGroup = XkbOutOfRangeGroupNumber(groupInfo);
+        if (effectiveGroup >= nKeyGroups)
+          effectiveGroup = 0;
+        break;
     }
   }
 
@@ -623,7 +623,7 @@ KeyCode AddKeysym(KeySym keysym, unsigned state)
 
   XkbChangeTypesOfKey(xkb, key, 1, XkbGroup1Mask, types, &changes.map);
 
-  syms = XkbKeySymsPtr(xkb,key);
+  syms = XkbKeySymsPtr(xkb, key);
   if (upper == lower)
     syms[0] = keysym;
   else {

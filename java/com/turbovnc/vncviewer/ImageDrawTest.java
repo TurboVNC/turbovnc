@@ -96,7 +96,7 @@ public class ImageDrawTest extends JFrame {
     public void initImage(BIPixelBuffer im, int w, int h, int offset) {
       int i, j;
       PixelFormat pf = im.getPF();
-      int[] stride = new int[]{w};
+      int[] stride = new int[]{ w };
       Object pixels = im.getRawPixelsRW(stride);
 
       if (pf.is888() && pixels instanceof int[]) {

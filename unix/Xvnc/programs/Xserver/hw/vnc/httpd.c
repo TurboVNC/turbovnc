@@ -50,8 +50,8 @@
 
 #include "rfb.h"
 
-#define NOT_FOUND_STR "HTTP/1.0 404 Not found\r\n\r\n" \
-    "<HEAD><TITLE>File Not Found</TITLE></HEAD>\n" \
+#define NOT_FOUND_STR "HTTP/1.0 404 Not found\r\n\r\n"  \
+    "<HEAD><TITLE>File Not Found</TITLE></HEAD>\n"  \
     "<BODY><H1>File Not Found</H1></BODY>\n"
 
 #define OK_STR "HTTP/1.0 200 OK\r\n"
@@ -81,8 +81,7 @@ static void httpSockNotify(int fd, int ready, void *data);
  * httpInitSockets sets up the TCP socket to listen for HTTP connections.
  */
 
-void
-httpInitSockets()
+void httpInitSockets()
 {
     static Bool done = FALSE;
 
@@ -117,8 +116,7 @@ httpInitSockets()
 }
 
 
-static void
-httpSockNotify(int fd, int ready, void *data)
+static void httpSockNotify(int fd, int ready, void *data)
 {
     rfbSockAddr addr;
     socklen_t addrlen = sizeof(struct sockaddr_storage);
@@ -160,13 +158,13 @@ httpSockNotify(int fd, int ready, void *data)
         }
 #endif
 
-        flags = fcntl (httpSock, F_GETFL);
+        flags = fcntl(httpSock, F_GETFL);
 
         if (flags == -1 ||
-        fcntl (httpSock, F_SETFL, flags | O_NONBLOCK) == -1) {
+        fcntl(httpSock, F_SETFL, flags | O_NONBLOCK) == -1) {
             rfbLogPerror("httpSockNotify: fcntl");
             RemoveNotifyFd(httpSock);
-            close (httpSock);
+            close(httpSock);
             httpSock = -1;
             return;
         }
@@ -176,8 +174,7 @@ httpSockNotify(int fd, int ready, void *data)
 }
 
 
-static void
-httpCloseSock()
+static void httpCloseSock()
 {
     close(httpSock);
     RemoveNotifyFd(httpSock);
@@ -190,8 +187,7 @@ httpCloseSock()
  * httpProcessInput is called when input is received on the HTTP socket.
  */
 
-static void
-httpProcessInput()
+static void httpProcessInput()
 {
     rfbSockAddr addr;
     socklen_t addrlen = sizeof(struct sockaddr_storage);
@@ -222,8 +218,8 @@ httpProcessInput()
 
     /* Read data from the HTTP client until we get a complete request. */
     while (1) {
-        ssize_t got = read (httpSock, buf + buf_filled,
-                            sizeof (buf) - buf_filled - 1);
+        ssize_t got = read(httpSock, buf + buf_filled,
+                           sizeof(buf) - buf_filled - 1);
 
         if (got <= 0) {
             if (got == 0) {
@@ -358,7 +354,7 @@ httpProcessInput()
 
             char *ptr = buf;
             char *dollar;
-            buf[n] = 0; /* make sure it's null-terminated */
+            buf[n] = 0;  /* make sure it's null-terminated */
 
             while ((dollar = strchr(ptr, '$'))) {
                 WriteExact(&cl, ptr, (dollar - ptr));
@@ -431,8 +427,7 @@ httpProcessInput()
 }
 
 
-static Bool
-compareAndSkip(char **ptr, const char *str)
+static Bool compareAndSkip(char **ptr, const char *str)
 {
     if (strncmp(*ptr, str, strlen(str)) == 0) {
         *ptr += strlen(str);
@@ -448,8 +443,7 @@ compareAndSkip(char **ptr, const char *str)
  * of <param> tags for inclusion in a JNLP file.
  */
 
-static Bool
-parseParams(const char *request, char *result, int max_bytes)
+static Bool parseParams(const char *request, char *result, int max_bytes)
 {
     char param_request[128];
     char param_formatted[196];
@@ -524,8 +518,7 @@ parseParams(const char *request, char *result, int max_bytes)
  * signs, underscores, and dots. Replace all '+' signs with spaces.
  */
 
-static Bool
-validateString(char *str)
+static Bool validateString(char *str)
 {
     char *ptr;
 

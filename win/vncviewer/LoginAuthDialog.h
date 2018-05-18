@@ -44,4 +44,4 @@ class LoginAuthDialog
     bool m_username_disabled;
 };
 
-#endif // LOGINAUTHDIALOG_H__
+#endif  // LOGINAUTHDIALOG_H__

@@ -74,8 +74,8 @@ __inline double getTime(void)
   if (QueryPerformanceFrequency(&frequency) != 0) {
     QueryPerformanceCounter(&time);
     return (double)time.QuadPart / (double)frequency.QuadPart;
-  }
-  else return (double)GetTickCount() * 0.001;
+  } else
+    return (double)GetTickCount() * 0.001;
 }
 
-#endif // VNCVIEWER_H__
+#endif  // VNCVIEWER_H__

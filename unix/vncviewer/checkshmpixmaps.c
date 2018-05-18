@@ -61,14 +61,15 @@ XErrorHandler prevhandler = NULL;
 #endif
 
 
-int xhandler(Display *dpy, XErrorEvent *e) {
+int xhandler(Display *dpy, XErrorEvent *e)
+{
   if (e->serial == serial && (e->minor_code == X_ShmAttach &&
-      e->error_code == BadAccess)) {
+                              e->error_code == BadAccess)) {
     shmok = 0;
     return 0;
   }
   if (e->serial == serial && (e->minor_code == X_ShmCreatePixmap &&
-      e->error_code == BadImplementation)) {
+                              e->error_code == BadImplementation)) {
     shmok = 0;
     return 0;
   }
@@ -89,7 +90,8 @@ int xhandler(Display *dpy, XErrorEvent *e) {
   XSetErrorHandler(prevhandler);
 
 
-int main(void) {
+int main(void)
+{
   Display *dpy = NULL;
   Window win = 0;
   XSetWindowAttributes wattrs;
@@ -113,8 +115,8 @@ int main(void) {
   wattrs.border_pixel = 0;
   wattrs.colormap = cmap;
   wattrs.event_mask = 0;
-  win = XCreateWindow(dpy, DefaultRootWindow(dpy), 0, 0, 1, 1, 1,
-                      depth, InputOutput, DefaultVisual(dpy, screen),
+  win = XCreateWindow(dpy, DefaultRootWindow(dpy), 0, 0, 1, 1, 1, depth,
+                      InputOutput, DefaultVisual(dpy, screen),
                       CWBackPixel | CWBorderPixel | CWEventMask | CWColormap,
                       &wattrs);
   if (!win)

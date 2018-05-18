@@ -80,42 +80,42 @@
 
 
 static Res vncRRResolutions[] = {
-  {  -1,   -1},  /* Original resolution of the VNC server          */
-  {3200, 1800},  /* WQXGA+  16:9                                   */
-  {2880, 1800},  /*          8:5 (Mac)                             */
-  {2560, 1600},  /* WQXGA    8:5                                   */
-  {2560, 1440},  /* QHD     16:9                                   */
-  {2048, 1536},  /* QXGA     4:3 (iPad)                            */
-  {2048, 1152},  /* QWXGA   16:9                                   */
-  {1920, 1200},  /* WUXGA    8:5                                   */
-  {1920, 1080},  /* FHD     16:9                                   */
-  {1680, 1050},  /* WSXGA+   8:5                                   */
-  {1600, 1200},  /* UXGA     4:3                                   */
-  {1600, 1000},  /*          8:5 (Mac)                             */
-  {1600,  900},  /* HD+     16:9                                   */
-  {1440,  900},  /* WXGA+    8:5                                   */
-  {1400, 1050},  /* SXGA+    4:3                                   */
-  {1366,  768},  /* WXGA    16:9                                   */
-  {1360,  768},  /* WXGA    16:9                                   */
-  {1344, 1008},  /*          4:3 (Mac)                             */
-  {1344,  840},  /*          8:5 (Mac)                             */
-  {1280, 1024},  /* SXGA     5:4                                   */
-  {1280,  960},  /* SXGA-    4:3                                   */
-  {1280,  800},  /* WXGA     8:5                                   */
-  {1280,  720},  /* HD      16:9                                   */
-  {1152,  864},  /* XGA+     4:3                                   */
-  {1136,  640},  /*         16:9 (iPhone 5)                        */
-  {1024,  768},  /* XGA      4:3                                   */
-  {1024,  640},  /*          8:5 (laptops)                         */
-  { 960,  640},  /* DVGA     3:2 (iPhone 4S)                       */
-  { 960,  600},  /*          8:5 (Mac)                             */
-  { 960,  540},  /* qHD     16:9                                   */
-  { 854,  480},  /* FWVGA   16:9 (mobile devices)                  */
-  { 800,  600},  /* SVGA     4:3                                   */
-  { 800,  480},  /* WVGA     5:3 (mobile devices)                  */
-  { 640,  480},  /* VGA      4:3                                   */
-  { 640,  360},  /* nHD     16:9 (mobile devices)                  */
-  { 480,  320},  /* HVGA     3:2 (iPhone and other mobile devices) */
+  {   -1,   -1 },  /* Original resolution of the VNC server          */
+  { 3200, 1800 },  /* WQXGA+  16:9                                   */
+  { 2880, 1800 },  /*          8:5 (Mac)                             */
+  { 2560, 1600 },  /* WQXGA    8:5                                   */
+  { 2560, 1440 },  /* QHD     16:9                                   */
+  { 2048, 1536 },  /* QXGA     4:3 (iPad)                            */
+  { 2048, 1152 },  /* QWXGA   16:9                                   */
+  { 1920, 1200 },  /* WUXGA    8:5                                   */
+  { 1920, 1080 },  /* FHD     16:9                                   */
+  { 1680, 1050 },  /* WSXGA+   8:5                                   */
+  { 1600, 1200 },  /* UXGA     4:3                                   */
+  { 1600, 1000 },  /*          8:5 (Mac)                             */
+  { 1600,  900 },  /* HD+     16:9                                   */
+  { 1440,  900 },  /* WXGA+    8:5                                   */
+  { 1400, 1050 },  /* SXGA+    4:3                                   */
+  { 1366,  768 },  /* WXGA    16:9                                   */
+  { 1360,  768 },  /* WXGA    16:9                                   */
+  { 1344, 1008 },  /*          4:3 (Mac)                             */
+  { 1344,  840 },  /*          8:5 (Mac)                             */
+  { 1280, 1024 },  /* SXGA     5:4                                   */
+  { 1280,  960 },  /* SXGA-    4:3                                   */
+  { 1280,  800 },  /* WXGA     8:5                                   */
+  { 1280,  720 },  /* HD      16:9                                   */
+  { 1152,  864 },  /* XGA+     4:3                                   */
+  { 1136,  640 },  /*         16:9 (iPhone 5)                        */
+  { 1024,  768 },  /* XGA      4:3                                   */
+  { 1024,  640 },  /*          8:5 (laptops)                         */
+  {  960,  640 },  /* DVGA     3:2 (iPhone 4S)                       */
+  {  960,  600 },  /*          8:5 (Mac)                             */
+  {  960,  540 },  /* qHD     16:9                                   */
+  {  854,  480 },  /* FWVGA   16:9 (mobile devices)                  */
+  {  800,  600 },  /* SVGA     4:3                                   */
+  {  800,  480 },  /* WVGA     5:3 (mobile devices)                  */
+  {  640,  480 },  /* VGA      4:3                                   */
+  {  640,  360 },  /* nHD     16:9 (mobile devices)                  */
+  {  480,  320 },  /* HVGA     3:2 (iPhone and other mobile devices) */
 };
 
 extern int monitorResolution;
@@ -136,7 +136,7 @@ static RRModePtr vncSetModes(rfbScreenInfo *screen);
  *        all of the windows
  */
 
-static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
+static void xf86SetRootClip(ScreenPtr pScreen, Bool enable)
 {
   WindowPtr pWin = pScreen->root;
   WindowPtr pChild;
@@ -147,12 +147,12 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
 
   if (WasViewable) {
     for (pChild = pWin->firstChild; pChild; pChild = pChild->nextSib) {
-      (void) (*pScreen->MarkOverlappedWindows)(pChild, pChild, &pLayerWin);
+      (void)(*pScreen->MarkOverlappedWindows) (pChild, pChild, &pLayerWin);
     }
-    (*pScreen->MarkWindow)(pWin);
+    (*pScreen->MarkWindow) (pWin);
     anyMarked = TRUE;
     if (pWin->valdata) {
-      if (HasBorder (pWin)) {
+      if (HasBorder(pWin)) {
         RegionPtr borderVisible;
 
         borderVisible = REGION_CREATE(pScreen, NullBox, 1);
@@ -174,35 +174,35 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
     box.y1 = 0;
     box.x2 = pScreen->width;
     box.y2 = pScreen->height;
-    REGION_INIT (pScreen, &pWin->winSize, &box, 1);
-    REGION_INIT (pScreen, &pWin->borderSize, &box, 1);
+    REGION_INIT(pScreen, &pWin->winSize, &box, 1);
+    REGION_INIT(pScreen, &pWin->borderSize, &box, 1);
     if (WasViewable)
       REGION_RESET(pScreen, &pWin->borderClip, &box);
     pWin->drawable.width = pScreen->width;
     pWin->drawable.height = pScreen->height;
-    REGION_BREAK (pWin->drawable.pScreen, &pWin->clipList);
+    REGION_BREAK(pWin->drawable.pScreen, &pWin->clipList);
   } else {
     REGION_EMPTY(pScreen, &pWin->borderClip);
-    REGION_BREAK (pWin->drawable.pScreen, &pWin->clipList);
+    REGION_BREAK(pWin->drawable.pScreen, &pWin->clipList);
   }
 
-  ResizeChildrenWinSize (pWin, 0, 0, 0, 0);
+  ResizeChildrenWinSize(pWin, 0, 0, 0, 0);
 
   if (WasViewable) {
     if (pWin->firstChild) {
-      anyMarked |= (*pScreen->MarkOverlappedWindows)(pWin->firstChild,
-                                                     pWin->firstChild,
-                                                     (WindowPtr *)NULL);
+      anyMarked |= (*pScreen->MarkOverlappedWindows) (pWin->firstChild,
+                                                      pWin->firstChild,
+                                                      (WindowPtr *)NULL);
     } else {
       (*pScreen->MarkWindow) (pWin);
       anyMarked = TRUE;
     }
 
     if (anyMarked) {
-      (*pScreen->ValidateTree)(pWin, NullWindow, VTOther);
-      (*pScreen->HandleExposures)(pWin);
+      (*pScreen->ValidateTree) (pWin, NullWindow, VTOther);
+      (*pScreen->HandleExposures) (pWin);
       if (pScreen->PostValidateTree)
-        (*pScreen->PostValidateTree)(pWin, NullWindow, VTOther);
+        (*pScreen->PostValidateTree) (pWin, NullWindow, VTOther);
     }
   }
   if (pWin->realized)
@@ -343,7 +343,7 @@ static Bool vncReconfigureOutput(rfbScreenInfo *screen)
     if (crtc == NULL) return FALSE;
   }
 
-  if(!(mode = vncSetModes(screen))) return FALSE;
+  if (!(mode = vncSetModes(screen))) return FALSE;
 
   return vncCrtcSet(crtc, mode, screen->s.x, screen->s.y, RR_Rotate_0, 1,
                     &screen->output);

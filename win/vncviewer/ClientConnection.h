@@ -42,7 +42,7 @@
 #include "ExtInputEvent.h"
 extern "C" {
 #include "wintab/Utils.h"
-#define PACKETDATA (PK_CURSOR | PK_X | PK_Y | PK_NORMAL_PRESSURE | \
+#define PACKETDATA (PK_CURSOR | PK_X | PK_Y | PK_NORMAL_PRESSURE |  \
   PK_ORIENTATION | PK_BUTTONS | PK_CHANGED)
 #define PACKETMODE 0
 #include "wintab/pktdef.h"
@@ -57,8 +57,8 @@ extern "C" {
 
 
 class ClientConnection;
-typedef void (ClientConnection:: *tightFilterFunc)(int, int, int);
-typedef void (ClientConnection:: *setPixelsFunc)(char *, int, int, int, int);
+typedef void (ClientConnection::*tightFilterFunc)(int, int, int);
+typedef void (ClientConnection::*setPixelsFunc)(char *, int, int, int, int);
 
 
 typedef struct _UpdateList
@@ -200,18 +200,18 @@ class ClientConnection : public omni_thread
     // ClientConnectionTight.cpp
     void ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh);
     int ReadCompactLen();
-    int InitFilterCopy (int rw, int rh);
-    int InitFilterGradient (int rw, int rh);
-    int InitFilterPalette (int rw, int rh);
-    void FilterCopy8 (int srcx, int srcy, int numRows);
-    void FilterCopy16 (int srcx, int srcy, int numRows);
-    void FilterCopy24 (int srcx, int srcy, int numRows);
-    void FilterCopy32 (int srcx, int srcy, int numRows);
-    void FilterGradient8 (int srcx, int srcy, int numRows);
-    void FilterGradient16 (int srcx, int srcy, int numRows);
-    void FilterGradient24 (int srcx, int srcy, int numRows);
-    void FilterGradient32 (int srcx, int srcy, int numRows);
-    void FilterPalette (int srcx, int srcy, int numRows);
+    int InitFilterCopy(int rw, int rh);
+    int InitFilterGradient(int rw, int rh);
+    int InitFilterPalette(int rw, int rh);
+    void FilterCopy8(int srcx, int srcy, int numRows);
+    void FilterCopy16(int srcx, int srcy, int numRows);
+    void FilterCopy24(int srcx, int srcy, int numRows);
+    void FilterCopy32(int srcx, int srcy, int numRows);
+    void FilterGradient8(int srcx, int srcy, int numRows);
+    void FilterGradient16(int srcx, int srcy, int numRows);
+    void FilterGradient24(int srcx, int srcy, int numRows);
+    void FilterGradient32(int srcx, int srcy, int numRows);
+    void FilterPalette(int srcx, int srcy, int numRows);
     void DecompressJpegRect(int x, int y, int w, int h);
 
     bool zlibDecompress(unsigned char *from_buf, unsigned char *to_buf,
@@ -267,7 +267,7 @@ class ClientConnection : public omni_thread
     void ReadSetColorMapEntries();
     void ReadBell();
 
-    void SendRFBMsg(CARD8 msgType, void* data, int length);
+    void SendRFBMsg(CARD8 msgType, void *data, int length);
     void ReadExact(char *buf, int bytes);
     void ReadString(char *buf, int length);
     void WriteExact(char *buf, int bytes);
@@ -306,7 +306,7 @@ class ClientConnection : public omni_thread
     void SetupSSHTunnel(void);
 
     // This is what controls the thread
-    void * run_undetached(void* arg);
+    void *run_undetached(void *arg);
     bool m_bKillThread;
 
     // Utilities
@@ -508,47 +508,47 @@ class TempDC
 // Define rs, rm, bs, bm, gs & gm before using, e.g. with the following:
 
 #define SETUP_COLOR_SHORTCUTS  \
-   CARD8 rs = m_myFormat.redShift;   CARD16 rm = m_myFormat.redMax;    \
-   CARD8 gs = m_myFormat.greenShift; CARD16 gm = m_myFormat.greenMax;  \
-   CARD8 bs = m_myFormat.blueShift;  CARD16 bm = m_myFormat.blueMax;   \
+   CARD8 rs = m_myFormat.redShift;    CARD16 rm = m_myFormat.redMax;    \
+   CARD8 gs = m_myFormat.greenShift;  CARD16 gm = m_myFormat.greenMax;  \
+   CARD8 bs = m_myFormat.blueShift;   CARD16 bm = m_myFormat.blueMax;   \
 
 // read a pixel from the given address and return a color value
 #define COLOR_FROM_PIXEL8_ADDRESS(p) (  \
-  PALETTERGB( (int) (((*(CARD8 *)(p) >> rs) & rm) * 255 / rm),  \
-              (int) (((*(CARD8 *)(p) >> gs) & gm) * 255 / gm),  \
-              (int) (((*(CARD8 *)(p) >> bs) & bm) * 255 / bm) ))
+  PALETTERGB( (int)(((*(CARD8 *)(p) >> rs) & rm) * 255 / rm),  \
+              (int)(((*(CARD8 *)(p) >> gs) & gm) * 255 / gm),  \
+              (int)(((*(CARD8 *)(p) >> bs) & bm) * 255 / bm) ))
 
 #define COLOR_FROM_PIXEL16_ADDRESS(p) (  \
-  PALETTERGB( (int) ((( *(CARD16 *)(p) >> rs) & rm) * 255 / rm),  \
-              (int) ((( *(CARD16 *)(p) >> gs) & gm) * 255 / gm),  \
-              (int) ((( *(CARD16 *)(p) >> bs) & bm) * 255 / bm) ))
+  PALETTERGB( (int)((( *(CARD16 *)(p) >> rs) & rm) * 255 / rm),  \
+              (int)((( *(CARD16 *)(p) >> gs) & gm) * 255 / gm),  \
+              (int)((( *(CARD16 *)(p) >> bs) & bm) * 255 / bm) ))
 
 #define COLOR_FROM_PIXEL24_ADDRESS(p) (  \
-  PALETTERGB( (int) (((CARD8 *)(p))[0]),  \
-              (int) (((CARD8 *)(p))[1]),  \
-              (int) (((CARD8 *)(p))[2]) ))
+  PALETTERGB( (int)(((CARD8 *)(p))[0]),  \
+              (int)(((CARD8 *)(p))[1]),  \
+              (int)(((CARD8 *)(p))[2]) ))
 
 #define COLOR_FROM_PIXEL32_ADDRESS(p) (  \
-  PALETTERGB( (int) ((( *(CARD32 *)(p) >> rs) & rm) * 255 / rm),  \
-              (int) ((( *(CARD32 *)(p) >> gs) & gm) * 255 / gm),  \
-              (int) ((( *(CARD32 *)(p) >> bs) & bm) * 255 / bm) ))
+  PALETTERGB( (int)((( *(CARD32 *)(p) >> rs) & rm) * 255 / rm),  \
+              (int)((( *(CARD32 *)(p) >> gs) & gm) * 255 / gm),  \
+              (int)((( *(CARD32 *)(p) >> bs) & bm) * 255 / bm) ))
 
 // The following may be faster if you already have a pixel value of the
 // appropriate size
 #define COLOR_FROM_PIXEL8(p) (  \
-  PALETTERGB( (int) (((p >> rs) & rm) * 255 / rm),  \
-              (int) (((p >> gs) & gm) * 255 / gm),  \
-              (int) (((p >> bs) & bm) * 255 / bm) ))
+  PALETTERGB( (int)(((p >> rs) & rm) * 255 / rm),  \
+              (int)(((p >> gs) & gm) * 255 / gm),  \
+              (int)(((p >> bs) & bm) * 255 / bm) ))
 
 #define COLOR_FROM_PIXEL16(p) (  \
-  PALETTERGB( (int) (((p >> rs) & rm) * 255 / rm),  \
-              (int) (((p >> gs) & gm) * 255 / gm),  \
-              (int) (((p >> bs) & bm) * 255 / bm) ))
+  PALETTERGB( (int)(((p >> rs) & rm) * 255 / rm),  \
+              (int)(((p >> gs) & gm) * 255 / gm),  \
+              (int)(((p >> bs) & bm) * 255 / bm) ))
 
 #define COLOR_FROM_PIXEL32(p) (  \
-  PALETTERGB( (int) (((p >> rs) & rm) * 255 / rm),  \
-              (int) (((p >> gs) & gm) * 255 / gm),  \
-              (int) (((p >> bs) & bm) * 255 / bm) ))
+  PALETTERGB( (int)(((p >> rs) & rm) * 255 / rm),  \
+              (int)(((p >> gs) & gm) * 255 / gm),  \
+              (int)(((p >> bs) & bm) * 255 / bm) ))
 
 
 #define SETPIXEL(b, x, y, c) SetPixelV((b), (x), (y), (c))
@@ -559,4 +559,4 @@ class TempDC
 #define SETPIXELS_NOCONV(buffer, x, y, w, h)  \
   (this->*setPixels)((char *)buffer, x, y, w, h);
 
-#endif // CLIENTCONNECTION_H__
+#endif  // CLIENTCONNECTION_H__

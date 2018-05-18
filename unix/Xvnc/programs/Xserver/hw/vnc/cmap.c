@@ -62,20 +62,19 @@ from the X Consortium.
 #include "colormapst.h"
 #include "rfb.h"
 
-#define SCREEN_PROLOGUE(scrn, field)            \
-    ScreenPtr pScreen = scrn;                   \
-    rfbFBInfoPtr prfb = &rfbFB;                 \
+#define SCREEN_PROLOGUE(scrn, field)  \
+    ScreenPtr pScreen = scrn;  \
+    rfbFBInfoPtr prfb = &rfbFB;  \
     pScreen->field = prfb->field;
 
-#define SCREEN_EPILOGUE(field, wrapper) \
+#define SCREEN_EPILOGUE(field, wrapper)  \
     pScreen->field = wrapper;
 
 
 ColormapPtr rfbInstalledColormap;
 
 
-int
-rfbListInstalledColormaps(ScreenPtr pScreen, Colormap *pmaps)
+int rfbListInstalledColormaps(ScreenPtr pScreen, Colormap *pmaps)
 {
     /* By the time we are processing requests, we can guarantee that there
      * is always a colormap installed */
@@ -84,16 +83,15 @@ rfbListInstalledColormaps(ScreenPtr pScreen, Colormap *pmaps)
 }
 
 
-void
-rfbInstallColormap(ColormapPtr pmap)
+void rfbInstallColormap(ColormapPtr pmap)
 {
     ColormapPtr oldpmap = rfbInstalledColormap;
 
-    SCREEN_PROLOGUE (pmap->pScreen, InstallColormap);
+    SCREEN_PROLOGUE(pmap->pScreen, InstallColormap);
 
     (*pScreen->InstallColormap) (pmap);
 
-    SCREEN_EPILOGUE (InstallColormap, rfbInstallColormap);
+    SCREEN_EPILOGUE(InstallColormap, rfbInstallColormap);
 
     if (pmap != oldpmap) {
         if (oldpmap != (ColormapPtr)None)
@@ -107,23 +105,20 @@ rfbInstallColormap(ColormapPtr pmap)
 }
 
 
-void
-rfbUninstallColormap(ColormapPtr pmap)
+void rfbUninstallColormap(ColormapPtr pmap)
 {
     ColormapPtr curpmap = rfbInstalledColormap;
 
-    if (pmap == curpmap)
-    {
-        if (pmap->mid != pmap->pScreen->defColormap)
-        {
+    if (pmap == curpmap) {
+        if (pmap->mid != pmap->pScreen->defColormap) {
             int ret;
             pointer ptr;
             ret = dixLookupResourceByType(&ptr, pmap->pScreen->defColormap,
                                           RT_COLORMAP, serverClient,
                                           DixUnknownAccess);
-            curpmap = (ColormapPtr) ptr;
+            curpmap = (ColormapPtr)ptr;
             if (ret == Success)
-                (*pmap->pScreen->InstallColormap)(curpmap);
+                (*pmap->pScreen->InstallColormap) (curpmap);
         }
     }
 }
@@ -136,18 +131,17 @@ rfbUninstallColormap(ColormapPtr pmap)
  */
 
 
-void
-rfbStoreColors(ColormapPtr pmap, int ndef, xColorItem *pdefs)
+void rfbStoreColors(ColormapPtr pmap, int ndef, xColorItem *pdefs)
 {
     int i;
     int first = -1;
     int n = 0;
 
-    SCREEN_PROLOGUE (pmap->pScreen, StoreColors);
+    SCREEN_PROLOGUE(pmap->pScreen, StoreColors);
 
     (*pScreen->StoreColors) (pmap, ndef, pdefs);
 
-    SCREEN_EPILOGUE (StoreColors, rfbStoreColors);
+    SCREEN_EPILOGUE(StoreColors, rfbStoreColors);
 
     if (pmap == rfbInstalledColormap) {
         for (i = 0; i < ndef; i++) {

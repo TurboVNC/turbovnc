@@ -1,4 +1,3 @@
-
 This is the directory containing the code specific to the VNC X server.
 Note that within this directory the name RFB is still used instead of VNC.
 

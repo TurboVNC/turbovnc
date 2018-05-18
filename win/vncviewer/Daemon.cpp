@@ -44,8 +44,8 @@ Daemon::Daemon(int port, bool ipv6)
   wndclass.hInstance     = pApp->m_instance;
   wndclass.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
   wndclass.hCursor       = LoadCursor(NULL, IDC_ARROW);
-  wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
-  wndclass.lpszMenuName  = (const char *) NULL;
+  wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+  wndclass.lpszMenuName  = (const char *)NULL;
   wndclass.lpszClassName = DAEMON_CLASS_NAME;
   wndclass.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
 
@@ -56,7 +56,7 @@ Daemon::Daemon(int port, bool ipv6)
                         200, 200, NULL, NULL, pApp->m_instance, NULL);
 
   // record which client created this window
-  SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR) this);
+  SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR)this);
 
   // Load a popup menu
   m_hmenu = LoadMenu(pApp->m_instance, MAKEINTRESOURCE(IDR_TRAYMENU));
@@ -86,12 +86,12 @@ Daemon::Daemon(int port, bool ipv6)
     throw WarningException("Error creating Daemon socket");
 
   int one = 1, res = 0;
-  //res = setsockopt(m_sock, SOL_SOCKET, SO_REUSEADDR, (const char *) &one, sizeof(one));
-  //if (res == SOCKET_ERROR)  {
-  //  closesocket(m_sock);
-  //  m_sock = 0;
-  //  throw WarningException("Error setting Daemon socket options");
-  //}
+  // res = setsockopt(m_sock, SOL_SOCKET, SO_REUSEADDR, (const char *) &one, sizeof(one));
+  // if (res == SOCKET_ERROR)  {
+  //   closesocket(m_sock);
+  //   m_sock = 0;
+  //   throw WarningException("Error setting Daemon socket options");
+  // }
 
   res = bind(m_sock, (struct sockaddr *)&addr, addrlen);
   if (res == SOCKET_ERROR) {
@@ -147,7 +147,7 @@ bool Daemon::SendTrayMsg(DWORD msg)
 {
   m_nid.hWnd = m_hwnd;
   m_nid.cbSize = sizeof(m_nid);
-  m_nid.uID = IDR_TRAY; // never changes after construction
+  m_nid.uID = IDR_TRAY;  // never changes after construction
   m_nid.hIcon = LoadIcon(pApp->m_instance, MAKEINTRESOURCE(IDR_TRAY));
   m_nid.uFlags = NIF_ICON | NIF_MESSAGE;
   m_nid.uCallbackMessage = WM_TRAYNOTIFY;
@@ -180,7 +180,7 @@ LRESULT CALLBACK Daemon::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
       if (wParam != _this->m_sock)
         return 0;
 
-      switch(lParam) {
+      switch (lParam) {
         case FD_ACCEPT:
         {
           SOCKET hNewSock;

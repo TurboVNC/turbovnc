@@ -16,4 +16,4 @@
  * USA.
  */
 
-const char* g_buildTime = "Built on " __DATE__ " at " __TIME__;
+const char *g_buildTime = "Built on " __DATE__ " at " __TIME__;
