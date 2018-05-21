@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -90,6 +90,7 @@ from the X Consortium.
 #define TRANS_SERVER
 #define TRANS_REOPEN
 #include <X11/Xtrans/Xtrans.h>
+#include <xkb-config.h>
 
 #define RFB_DEFAULT_WIDTH  1024
 #define RFB_DEFAULT_HEIGHT 768
@@ -140,6 +141,9 @@ static miPointerScreenFuncRec rfbPointerCursorFuncs = {
     rfbCrossScreen,
     miPointerWarpCursor
 };
+
+XkbRMLVOSet rmlvo = { XKB_DFLT_RULES, XKB_DFLT_MODEL, XKB_DFLT_LAYOUT,
+                      XKB_DFLT_VARIANT, XKB_DFLT_OPTIONS };
 
 int inetdSock = -1;
 static char inetdDisplayNumStr[10];
@@ -383,6 +387,36 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     if (strcasecmp(argv[i], "-virtualtablet") == 0) {
         rfbVirtualTablet = TRUE;
         return 1;
+    }
+
+    if (strcasecmp(argv[i], "-xkblayout") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rmlvo.layout = argv[i + 1];
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-xkbmodel") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rmlvo.model = argv[i + 1];
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-xkboptions") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rmlvo.options = argv[i + 1];
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-xkbrules") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rmlvo.rules = argv[i + 1];
+        return 2;
+    }
+
+    if (strcasecmp(argv[i], "-xkbvariant") == 0) {
+        if (i + 1 >= argc) UseMsg();
+        rmlvo.variant = argv[i + 1];
+        return 2;
     }
 
     /***** TurboVNC display options *****/
@@ -1199,7 +1233,7 @@ static int rfbKeybdProc(DeviceIntPtr pDevice, int onoff)
     switch (onoff) {
         case DEVICE_INIT:
             KbdDeviceInit(pDevice);
-            InitKeyboardDeviceStruct(pDevice, NULL, (BellProcPtr)rfbSendBell,
+            InitKeyboardDeviceStruct(pDevice, &rmlvo, (BellProcPtr)rfbSendBell,
                                      (KbdCtrlProcPtr)NoopDDA);
             break;
         case DEVICE_ON:
@@ -1595,6 +1629,16 @@ void ddxUseMsg()
     ErrorF("                       session, to emulate a Wacom tablet, and map all\n");
     ErrorF("                       extended input events from all viewers to these devices\n");
     ErrorF("                       (see man page)\n");
+    ErrorF("-xkblayout layout      set XKEYBOARD layout (default: %s)\n",
+           XKB_DFLT_LAYOUT);
+    ErrorF("-xkbmodel model        set XKEYBOARD model (default: %s)\n",
+           XKB_DFLT_MODEL);
+    ErrorF("-xkboptions options    set XKEYBOARD options (default: %s)\n",
+           XKB_DFLT_OPTIONS);
+    ErrorF("-xkbrules rules        set XKEYBOARD rules (default: %s)\n",
+           XKB_DFLT_RULES);
+    ErrorF("-xkbvariant variant    set XKEYBOARD variant (default: %s)\n",
+           XKB_DFLT_VARIANT);
 
     ErrorF("\nTurboVNC display options\n");
     ErrorF("========================\n");
