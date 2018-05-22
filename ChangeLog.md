@@ -161,6 +161,9 @@ input language-specific characters in Asian languages, but since the TurboVNC
 Viewer does not handle those characters, the IME does nothing but interfere
 with the normal operation of the viewer.
 
+22. Introduced a new security configuration file directive (`no-remote-resize`)
+that can be used to disable remote desktop resizing on a system-wide basis.
+
 
 2.1.2
 =====

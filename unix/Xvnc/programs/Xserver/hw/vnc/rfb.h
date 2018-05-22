@@ -576,6 +576,7 @@ extern Bool  rfbOptRfbAuth(void);
 
 extern char *rfbAuthOTPValue;
 extern int   rfbAuthOTPValueLen;
+extern Bool  rfbAuthDisableRemoteResize;
 extern Bool  rfbAuthDisableRevCon;
 extern Bool  rfbAuthDisableCBSend;
 extern Bool  rfbAuthDisableCBRecv;

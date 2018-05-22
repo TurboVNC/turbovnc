@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -1056,16 +1056,22 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                 break;
             case rfbEncodingNewFBSize:
                 if (!cl->enableDesktopSize) {
-                    rfbLog("Enabling Desktop Size protocol extension for client "
-                           "%s\n", cl->host);
-                    cl->enableDesktopSize = TRUE;
+                    if (!rfbAuthDisableRemoteResize) {
+                        rfbLog("Enabling Desktop Size protocol extension for client "
+                               "%s\n", cl->host);
+                        cl->enableDesktopSize = TRUE;
+                    } else
+                        rfbLog("WARNING: Remote desktop resizing disabled per system policy.\n");
                 }
                 break;
             case rfbEncodingExtendedDesktopSize:
                 if (!cl->enableExtDesktopSize) {
-                    rfbLog("Enabling Extended Desktop Size protocol extension for client "
-                           "%s\n", cl->host);
-                    cl->enableExtDesktopSize = TRUE;
+                    if (!rfbAuthDisableRemoteResize) {
+                        rfbLog("Enabling Extended Desktop Size protocol extension for client "
+                               "%s\n", cl->host);
+                        cl->enableExtDesktopSize = TRUE;
+                    } else
+                        rfbLog("WARNING: Remote desktop resizing disabled per system policy.\n");
                 }
                 break;
             case rfbEncodingGII:

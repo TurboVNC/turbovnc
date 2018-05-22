@@ -1,5 +1,5 @@
 /*
- *  Copyright (C)2013-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2013-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright 2012-2015 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
@@ -655,6 +655,11 @@ int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
   struct xorg_list serverScreens;
   rfbScreenInfo *clientScreen, *serverScreen, *tmp;
   rfbClientPtr cl2;
+
+  if (rfbAuthDisableRemoteResize) {
+    rfbLog("WARNING: Remote desktop resizing disabled per system policy.\n");
+    return rfbEDSResultProhibited;
+  }
 
   for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
     if (!cl2->enableDesktopSize && !cl2->enableExtDesktopSize) {

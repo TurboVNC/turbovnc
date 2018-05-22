@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -60,10 +60,11 @@ static void rfbVeNCryptAuthenticate(rfbClientPtr cl);
 #define MAX_PWD_LEN 64
 
 char *rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
+Bool rfbAuthDisableRemoteResize = FALSE;
 Bool rfbAuthDisableRevCon = FALSE;
 Bool rfbAuthDisableCBSend = FALSE;
 Bool rfbAuthDisableCBRecv = FALSE;
-Bool rfbAuthDisableHTTP   = FALSE;
+Bool rfbAuthDisableHTTP = FALSE;
 Bool rfbAuthDisableX11TCP = FALSE;
 
 static int nAuthMethodsEnabled = 0;
@@ -552,6 +553,11 @@ static void ReadConfigFile(void)
         len = j;
         buf2[len] = '\0';
         if (len < 1) continue;
+
+        if (!strcmp(buf2, "no-remote-resize")) {
+            rfbAuthDisableRemoteResize = TRUE;
+            continue;
+        }
 
         if (!strcmp(buf2, "no-reverse-connections")) {
             rfbAuthDisableRevCon = TRUE;
