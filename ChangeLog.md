@@ -3,12 +3,12 @@
 
 ### Significant changes relative to 2.1.2:
 
-1. Added a system menu option and hotkey (CTRL-ALT-SHIFT-V) that can be used to
-quickly toggle view-only mode on and off.
+1. Added a system menu option and hotkey (CTRL-ALT-SHIFT-V) to the Windows
+TurboVNC Viewer that can be used to quickly toggle view-only mode on and off.
 
-2. Added system menu options and hotkeys that can be used to zoom in and out
-(increase or decrease the scaling factor) or reset the view to 100% when
-desktop scaling is enabled.
+2. Added system menu options and hotkeys to the Windows TurboVNC Viewer that
+can be used to zoom in and out (increase or decrease the scaling factor) or
+reset the view to 100% when desktop scaling is enabled.
 
 3. The TurboVNC Server now includes a GLX extension that uses the swrast DRI
 driver installed on the system to perform unaccelerated OpenGL rendering.
@@ -21,8 +21,8 @@ that do not have vendor-specific GPU drivers installed, or on systems that
 provide a libglvnd-enabled build of Mesa, the TurboVNC Server's GLX extension
 will use direct rendering, which improves performance and compatibility.
 
-4. The Java/Mac/Un*x TurboVNC Viewer is no longer supported with Java 6 and
-earlier.  This increases the Mac system requirements to OS X 10.7 "Lion" or
+4. Java 6 and earlier is no longer supported with the Java/Mac/Un*x TurboVNC
+Viewer.  This increases the Mac system requirements to OS X 10.7 "Lion" or
 later.  Apple's obsolete Java for OS X is no longer supported, and the
 standalone "AppleJava" version of the TurboVNC Viewer is no longer provided.
 Java SE 6 ceased receiving public updates in 2013 and, as of this writing,
@@ -107,7 +107,7 @@ environment variable to `2d` will also start the GNOME classic session on RHEL
 7 and recent Fedora releases.  To start MATE, set the `TVNC_WM` environment
 variable to `mate-session`.
 
-10. The `-3dwm` option to the vncserver script has been renamed to `-vgl`, to
+10. The `-3dwm` option for the vncserver script has been renamed to `-vgl`, to
 reflect the fact that the TurboVNC Server is now able to run 3D window managers
 without using VirtualGL.
 
@@ -143,7 +143,7 @@ encoded with one of the Tight + JPEG encoding methods, by approximately 20-40%.
 This feature is implemented using a TurboVNC Helper JNI library, which is
 similar to the TurboVNC Helper included with the Un*x TurboVNC Viewer.  This
 library connects the built-in drawing tablet drivers for OS X with the existing
-remote X Input feature in the Java TurboVNC Viewer.
+remote X Input feature in the Java TurboVNC Viewer and TurboVNC Server.
 
 18. Fixed an issue in the Un*x/X11 TurboVNC Viewer and the Windows/Java
 TurboVNC Viewer whereby keyboard grabbing was always initially disabled in the
