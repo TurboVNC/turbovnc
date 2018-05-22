@@ -164,6 +164,10 @@ with the normal operation of the viewer.
 22. Introduced a new security configuration file directive (`no-remote-resize`)
 that can be used to disable remote desktop resizing on a system-wide basis.
 
+23. The Java TurboVNC Viewer now saves the current options as defaults when
+"OK" is clicked to dismiss the Options dialog.  This more closely mimics the
+behavior of the Windows TurboVNC Viewer and other applications.
+
 
 2.1.2
 =====

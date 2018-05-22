@@ -56,7 +56,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JButton okButton, cancelButton;
   JButton x509caButton, x509crlButton;
   JTextField x509ca, x509crl;
-  JButton defSaveButton, defClearButton;
+  JButton defClearButton;
   JLabel encMethodLabel;
   JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
   JLabel subsamplingLabel, subsamplingLabelLo, subsamplingLabelHi;
@@ -490,17 +490,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     JPanel defaultsPanel = new JPanel(new GridBagLayout());
     defaultsPanel.setBorder(BorderFactory.createTitledBorder("Defaults"));
-    defSaveButton = new JButton("Save");
-    defSaveButton.addActionListener(this);
-    Dialog.addGBComponent(defSaveButton, defaultsPanel,
-                          0, 0, 1, 1, 2, 2, 1, 0,
-                          GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(2, 2, 2, 2));
     defClearButton = new JButton("Clear");
     defClearButton.addActionListener(this);
     Dialog.addGBComponent(defClearButton, defaultsPanel,
-                          1, 0, 1, 1, 2, 2, 1, 0,
+                          0, 0, 1, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(2, 2, 2, 2));
@@ -842,13 +835,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == okButton) {
+      updatePreferences();
+      UserPreferences.save();
       if (callback != null) callback.getOptions();
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       endDialog();
-    } else if (s instanceof JButton && (JButton)s == defSaveButton) {
-      updatePreferences();
-      UserPreferences.save();
     } else if (s instanceof JButton && (JButton)s == defClearButton) {
       UserPreferences.clear();
     } else if (s instanceof JButton && (JButton)s == x509caButton) {
