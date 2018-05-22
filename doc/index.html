@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2017-12-01T11:47:13">
+<meta name="date" content="2018-05-21T23:45:30">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1742,22 +1742,22 @@ prior.</p>
 
 <p><a name="Multithreading"></a></p>
 
-<p>The TurboVNC Server can use multiple threads to perform image encoding 
-and compression, thus allowing it to take advantage of multi-core or 
-multi-processor systems.  The server splits the screen vertically into N 
-tiles, where N is the number of threads, and assigns each tile to a 
-separate thread. The scalability of this algorithm is nearly linear when 
-used with demanding 3D or video applications that fill most of the 
-screen.  However, whether or not multithreading improves the overall 
-performance of TurboVNC depends largely on the performance of the viewer 
-and the network.  If either the viewer or the network is the primary 
-performance bottleneck, then enabling multithreading in the server will 
-not help.  Multithreading is also not currently implemented with 
-non-Tight encoding types.</p>
+<p>By default, the TurboVNC Server uses multiple threads to perform image 
+encoding and compression, thus allowing it to take advantage of 
+multi-core or multi-processor systems.  The server splits the screen 
+vertically into N tiles, where N is the number of threads, and assigns 
+each tile to a separate thread. The scalability of this algorithm is 
+nearly linear when used with demanding 3D or video applications that 
+fill most of the screen.  However, whether or not multithreading 
+improves the overall performance of TurboVNC depends largely on the 
+performance of the viewer and the network.  If either the viewer or the 
+network is the primary performance bottleneck, then enabling 
+multithreading in the server will not help.  Multithreading is also not 
+currently implemented with non-Tight encoding types.</p>
 
-<p>To enable server-side multithreading, set the <code>TVNC_MT</code> 
-environment variable to <code>1</code> on the server prior to starting 
-<code>vncserver</code>, or pass an argument of <code>-mt</code> to 
+<p>To disable server-side multithreading, set the <code>TVNC_MT</code> 
+environment variable to <code>0</code> on the server prior to starting 
+<code>vncserver</code>, or pass an argument of <code>-nomt</code> to 
 <code>vncserver</code>.  The default behavior is to use as many threads 
 as there are cores on the server machine (up to a maximum of 4), but you 
 can set the <code>TVNC_NTHREADS</code> environment variable or pass an 
@@ -2874,7 +2874,7 @@ about how Hextile, RRE, and ZRLE work.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
+    <td class="standard">Enabled</td>
   </tr>
 </table>
 </div>

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  Copyright (C) 2009-2017 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2009-2018 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
@@ -67,7 +67,7 @@ $useVGL = 0;
 $autokill = 0;
 $pamSession = 0;
 $bits = @BITS@;
-$multiThread = 0;
+$multiThread = 1;
 $numThreads = 0;
 
 # Read configuration from the system-wide and user files if present.
@@ -548,7 +548,7 @@ $cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir);
 $cmd .= " -pamsession" if ($pamSession);
 $cmd .= " -dridir $dridir" if ($dridir);
 $cmd .= " -registrydir $registrydir" if ($registrydir);
-$cmd .= " -mt" if ($multiThread);
+$cmd .= " -nomt" if (!$multiThread);
 $cmd .= " -nthreads $numThreads" if ($numThreads);
 
 foreach $arg (@ARGV) {

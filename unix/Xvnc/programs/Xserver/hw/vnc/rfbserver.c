@@ -67,7 +67,7 @@ Bool rfbInterframeDebug = FALSE;
 int rfbMaxWidth = MAXSHORT, rfbMaxHeight = MAXSHORT;
 int rfbMaxClipboard = MAX_CUTTEXT_LEN;
 Bool rfbVirtualTablet = FALSE;
-Bool rfbMT = FALSE;
+Bool rfbMT = TRUE;
 int rfbNumThreads = 0;
 
 static rfbClientPtr rfbNewClient(int sock);
@@ -451,8 +451,8 @@ static rfbClientPtr rfbNewClient(int sock)
         REGION_INIT(pScreen, &cl->alrEligibleRegion, NullBox, 0);
     }
 
-    if ((env = getenv("TVNC_MT")) != NULL && !strcmp(env, "1"))
-        rfbMT = TRUE;
+    if ((env = getenv("TVNC_MT")) != NULL && !strcmp(env, "0"))
+        rfbMT = FALSE;
 
     if ((env = getenv("TVNC_NTHREADS")) != NULL && strlen(env) >= 1) {
         int temp = atoi(env);

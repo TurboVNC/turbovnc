@@ -554,8 +554,8 @@ int ddxProcessArgument(int argc, char *argv[], int i)
         return 1;
     }
 
-    if (strcasecmp(argv[i], "-mt") == 0) {
-        rfbMT = TRUE;
+    if (strcasecmp(argv[i], "-nomt") == 0) {
+        rfbMT = FALSE;
         return 1;
     }
 
@@ -1663,8 +1663,8 @@ void ddxUseMsg()
     ErrorF("                       refresh JPEG images (S = 1x, 2x, 4x, or gray)\n");
     ErrorF("-economictranslate     less memory hungry translation\n");
     ErrorF("-interframe            always use interframe comparison\n");
-    ErrorF("-mt                    enable multithreaded encoding\n");
     ErrorF("-nointerframe          never use interframe comparison\n");
+    ErrorF("-nomt                  disable multithreaded encoding\n");
     ErrorF("-nthreads N            specify number of threads (1 <= N <= %d) to use with\n",
            MAX_ENCODING_THREADS);
     ErrorF("                       multithreaded encoding (default: 1 per CPU core, max. 4)\n");

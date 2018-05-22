@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "July 2017" "" "TurboVNC"
+.TH Xvnc 1 "May 2018" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -38,7 +38,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-economictranslate] [\-desktop\ \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-disconnect] [\-viewonly] [\-localhost]
 [\-interface\ ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
-[\-mt] [\-nthreads\ \%\fIthread-count\fR]
+[\-nomt] [\-nthreads\ \%\fIthread-count\fR]
 \%[\fIX-options\fR...]
 .ad
 .hy
@@ -324,8 +324,8 @@ network input/output to stdin/stdout.
 Set META and ALT keys to the same X modifier flag, as in the original
 version of Xvnc by AT&T labs (this option is specific to TightVNC/TurboVNC.)
 .TP
-\fB\-mt\fR
-Enable multithreaded Tight encoding
+\fB\-nomt\fR
+Disable multithreaded Tight encoding
 .TP
 \fB\-nthreads\fR \fIthread-count\fR
 Specify the number of threads to use with multithreaded Tight encoding.  The

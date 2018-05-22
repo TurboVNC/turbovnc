@@ -168,6 +168,11 @@ that can be used to disable remote desktop resizing on a system-wide basis.
 "OK" is clicked to dismiss the Options dialog.  This more closely mimics the
 behavior of the Windows TurboVNC Viewer and other applications.
 
+24. The TurboVNC Server now enables multithreaded Tight encoding by default.
+Because of 2.1.2[1], there is no longer any danger of incompatibility with
+non-TurboVNC viewers when using this feature with default settings, so there is
+no downside to enabling it.
+
 
 2.1.2
 =====

@@ -79,7 +79,7 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 
 | Environment Variable | ''TVNC_MT = ''__''0 \| 1''__ |
 | Summary | Disable/Enable multithreaded image encoding |
-| Default Value | Disabled |
+| Default Value | Enabled |
 #OPT: hiCol=first
 
 	Description :: See {ref prefix="Section ": Multithreading}
