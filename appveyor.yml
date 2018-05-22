@@ -35,7 +35,7 @@ build_script:
   - cmd: >-
       for /f %%i in ('"cygpath %CD%"') do set MINGWPATH=%%i
 
-      bash c:/buildscripts/buildvnc -r file://%MINGWPATH% -b /c/vnc.nightly %APPVEYOR_REPO_BRANCH% -v
+      bash c:/buildscripts/buildvnc -d %MINGWPATH% -b /c/vnc.nightly -v
 
       move c:\vnc.nightly\files\*.tar.gz .
 
