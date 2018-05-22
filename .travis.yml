@@ -7,7 +7,7 @@ env:
     - LJT_LINUX_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
     - LJT_OSX_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
     - LJT_WINDOWS_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
-    - LJT_GPG_KEY="http://pgp.mit.edu/pks/lookup?op=get\&search=0x85C7044E033FDE16"
+    - LJT_GPG_KEY="http://pool.sks-keyservers.net/pks/lookup?op=get\&search=0x85C7044E033FDE16"
 
 matrix:
   include:
@@ -88,7 +88,7 @@ script:
         mv .git/shallow .git/shallow.bak;
       fi &&
       if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-        docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-jni:/opt/libjpeg-turbo-jni -v $HOME/libjpeg-turbo-rpm:/rpms -t dcommander/buildvnc:latest bash -c "rpm --import $LJT_GPG_KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import http://pgp.mit.edu/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvnc -r file:///root/src/turbovnc $TRAVIS_BRANCH -v" &&
+        docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-jni:/opt/libjpeg-turbo-jni -v $HOME/libjpeg-turbo-rpm:/rpms -t dcommander/buildvnc:latest bash -c "rpm --import $LJT_GPG_KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import http://pool.sks-keyservers.net/pks/lookup?op=get\&search=0x727C3C5010DFDCB7 && ~/src/buildscripts/buildvnc -r file:///root/src/turbovnc $TRAVIS_BRANCH -v" &&
         sudo chown -R travis:travis ~/src/vnc.nightly;
       else
         ~/src/buildscripts/buildvnc -r file://$TRAVIS_BUILD_DIR $TRAVIS_BRANCH -v;
