@@ -118,17 +118,5 @@ deploy:
     local-dir: $HOME/src/vnc.nightly/latest/files
     upload-dir: $TRAVIS_BRANCH/$TRAVIS_OS_NAME
     on:
-      branch: master
-      condition: -n "$BUILD_OFFICIAL"
-  - provider: s3
-    bucket: turbovnc-pr
-    access_key_id:
-      secure: G+x3WRY/nWPntRjmWr+PMW9G3QhGI0X79E9FC41XxkSzbBMVAOoxdC6TDmN1wiyajhZbKj5cjBBvbB43Jy2MagyhOTMZ3o6Gz3PRPkCJrqmT+qtoKmYtASNqirATFKSPRumsT3zGqbScvC0hIA/YY0I7DTq0sRYrhfo1IitlwR/vtb0j3NmxfBOqi84+tD1s7qVU9ibzg6MD0TAseIO7wRxgm22Wx3ekNjjc6PBlkgORam5Vx0AYoaDeXnUNm4dJWHAgcenPzKz2qEdw5Vkaot+YjXHdIf72pV+mkahtjInIeHgcyr7uUW89w2WNIAKZ8VdSoh+oKyb6PGYXG7dsHhFb1lYcZXERR/CjB9MlLlMsV6/4NFGJOknKSRYTh8J5ijg2uV/dkaMK0V/9bUgv+sG9qxvW0FlQNCteCUFSTsspY4oNvRXrVnQhXj6qb0vFV5L7OGlE8Y9c/UMskcfeDGxMVRMldm2RwYj1KS3mkAecSGSTAYEEKTEH6E980ZmIFsHe4u1yZB8eiIFibCdoRdZuCdTBnXC9cN4aUqg5WSz8lMS3v130rc260p3UEbU5Z/q2ettJ5f2PKhTyuexZFJ+cjmDf4CgcZv1EEUC+G2yuybydy/zNXVOgeD4XrPnDbcA3p8KCdVk1wr8g/0vvyGjGeazWfoEGGy4CdtTHudc=
-    secret_access_key:
-      secure: 6odGWpddG2WBa1cZ7nlTnCX3lv0Xlq/tNQo005dFA7ySLyal3qNId2fdXpTStNmYjfXx7kXj62wl094hJ5hzxD/dEyY+x83VpaFJ7bYNfz/pWGNWw/SIDrvkjdn+sPApgBUter710eO3kE77QIUjrnVPXEdurIN5Gsue45XDFSOmf/TBDDBKi0FlyoWj687GJyxZSNRSMpEW29EzXU45kj78sEsPE96eo7cNZ5aIsvV+bpWEritiuGZdzfixOzpHI/ypmm7Hctyz2JOMyMSR0VIbf43zCeEQf4UBN0yz0RtB+bBVtwjWo+0Rt0hLQjsxlFri5ox67NwWe3k9yC2hLCWpQdVvVyqM6C1wVjA5RcSMQJQU2/Z34y+F84AdwgM6Zh0KD9TROVjjg6bAGYkVTtWqTXLheglM5lrxJzn1wuaKom029VDkyhDe8J881EkuA0miECyR0g98ZyyCN/HoDlg8D17ixRSYqNkfmZQmiSHOlmPVGkP7/ElQWW6yEe1u7elq/v2i3OtjG3I+LLiNGwFy9reyq132dhmoiR9eLK0ppqoqFb4eP01FgqnS5avaZnFDUi+RVRERTZ1JazxR12vY8DFtUDaFiYszkD29Lp4pG3L9me0COodU2mp7Lg6+zmNt0VLMd5XcKlngFXeFRApIqmTlH83WZ04jyMaYa+E=
-    acl: public_read
-    local-dir: $HOME/src/vnc.nightly/latest/files
-    upload-dir: $TRAVIS_BRANCH/$TRAVIS_OS_NAME
-    on:
-      branch: dev
+      branch: 2.1.x
       condition: -n "$BUILD_OFFICIAL"
