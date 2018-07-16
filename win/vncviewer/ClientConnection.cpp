@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2013, 2015-2017 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2013, 2015-2018 D. R. Commander. All Rights Reserved.
 //  Copyright 2009 Pierre Ossman for Cendio AB
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
@@ -918,10 +918,12 @@ void ClientConnection::Connect()
   SPRINTF(portname, "%d", m_port);
   if (strlen(hostname) < 1)
     hostname = NULL;
-  if (getaddrinfo(hostname, portname, &hints, &addr) != 0) {
+  int gai_err = getaddrinfo(hostname, portname, &hints, &addr);
+  if (gai_err != 0) {
     char msg[512];
-    SPRINTF(msg, "Failed to get server address (%s).\n"
-            "Did you type the host name correctly?", m_host);
+    SPRINTF(msg, "Failed to get server address (%s):\n%s\n"
+            "Did you type the host name correctly?", m_host,
+            gai_strerror(gai_err));
     throw WarningException(msg);
   }
 
