@@ -8,8 +8,8 @@ branches:
 
 env:
   global:
-    - LJT_VERSION=1.5.90
-    - LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/1.5.90%20%282.0%20beta1%29
+    - LJT_VERSION=2.0.0
+    - LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/2.0.0
     - LJT_LINUX_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
     - LJT_OSX_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
     - LJT_WINDOWS_JNI=$LJT_URL/libjpeg-turbo-$LJT_VERSION-jws.zip
