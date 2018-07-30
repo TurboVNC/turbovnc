@@ -1,3 +1,10 @@
+2.3 pre-beta
+============
+
+1. Added a screenshot feature to the Java/Mac/Un*x TurboVNC Viewer that allows
+an image of the remote desktop to be saved to the client machine.
+
+
 2.2 beta1
 =========
 

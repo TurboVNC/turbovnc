@@ -54,6 +54,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       addMenuItem("Request Lossless Refresh   (Ctrl-Alt-Shift-L)",
                   KeyEvent.VK_L);
     losslessRefresh.setDisplayedMnemonicIndex(8);
+    screenshot = addMenuItem("Save Remote Desktop Image...   (Ctrl-Alt-Shift-S)",
+                             KeyEvent.VK_S);
     addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");
     fullScreen.setMnemonic(KeyEvent.VK_F);
@@ -174,6 +176,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     } else if (actionMatch(ev, losslessRefresh)) {
       cc.losslessRefresh();
       firePopupMenuCanceled();
+    } else if (actionMatch(ev, screenshot)) {
+      cc.screenshot();
     } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
     } else if (actionMatch(ev, options)) {
@@ -196,7 +200,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   CConn cc;
   JMenuItem defaultSize;
   JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
-  JMenuItem newConn, options, info, profile, about, dismiss;
+  JMenuItem newConn, options, info, profile, screenshot, about, dismiss;
   static JMenuItem f8;
   JCheckBoxMenuItem fullScreen, showToolbar, grabKeyboard;
 

@@ -39,6 +39,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.lang.reflect.*;
 import javax.swing.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.turbovnc.rdr.*;
@@ -1704,6 +1705,20 @@ public class CConn extends CConnection implements UserPasswdGetter,
         viewport.toggleLionFS();
       }
     }
+  }
+
+  // EDT
+  public void screenshot() {
+    JFileChooser fc =
+      new JFileChooser(System.getProperty("user.home") + "/Desktop");
+    SimpleDateFormat df =
+      new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+    fc.setDialogTitle("Save Remote Desktop Image");
+    fc.setSelectedFile(new File("TurboVNC Screenshot " +
+                       df.format(Calendar.getInstance().getTime()) + ".png"));
+    int ret = fc.showSaveDialog(null);
+    if (ret == JFileChooser.APPROVE_OPTION)
+      desktop.screenshot(fc.getSelectedFile());
   }
 
   public boolean shouldGrab() {

@@ -124,6 +124,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     losslessRefresh = addMenuItem(connMenu, "Request Lossless Refresh");
     losslessRefresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
                                                           acceleratorMask));
+    screenshot = addMenuItem(connMenu, "Save Remote Desktop Image");
+    screenshot.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+                                                     acceleratorMask));
     connMenu.addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen");
     fullScreen.setSelected(cc.opts.fullScreen);
@@ -195,6 +198,8 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.refresh();
     } else if (actionMatch(ev, losslessRefresh)) {
       cc.losslessRefresh();
+    } else if (actionMatch(ev, screenshot)) {
+      cc.screenshot();
     } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
     } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, closeConn)) {
@@ -221,7 +226,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
   CConn cc;
   JMenuItem defaultSize;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
-  JMenuItem newConn, closeConn, info, profile, showToolbar;
+  JMenuItem newConn, closeConn, info, profile, showToolbar, screenshot;
   JCheckBoxMenuItem fullScreen;
   static LogWriter vlog = new LogWriter("MacMenuBar");
 }

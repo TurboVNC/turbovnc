@@ -35,13 +35,15 @@ import java.awt.image.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.Clipboard;
-import java.io.BufferedReader;
+import java.io.*;
 import java.lang.reflect.*;
 import java.nio.*;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
 import com.turbovnc.rfb.Point;
@@ -605,6 +607,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_T:
           cc.toggleToolbar();
           return;
+        case KeyEvent.VK_S:
+          cc.screenshot();
+          return;
         case KeyEvent.VK_Z:
           cc.sizeWindow();
           return;
@@ -642,6 +647,25 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
     if (!cc.opts.viewOnly)
       cc.writeKeyEvent(e);
+  }
+
+  // EDT: Save screenshot
+  public void screenshot(File file) {
+    int index = file.getName().lastIndexOf('.');
+    String formatName =
+      (index > 0 ? file.getName().substring(index + 1) : "");
+    BufferedImage fbImage = (BufferedImage)im.getImage();
+    int width = fbImage.getWidth(), height = fbImage.getHeight();
+    BufferedImage rgbImage =
+      new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    rgbImage.createGraphics().drawImage(fbImage, 0, 0, width, height, null);
+    try {
+      if (!ImageIO.write(rgbImage, formatName, file))
+        cc.viewer.reportException(new WarningException("Could not save remote desktop image:\nImage format not supported"));
+    } catch (IOException e) {
+      cc.viewer.reportException(new WarningException("Could not save remote desktop image:\n" +
+                                                     e.toString()));
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////////
