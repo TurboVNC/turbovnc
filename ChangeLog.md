@@ -5,6 +5,15 @@
 an image of the remote desktop to be saved to the client machine.
 
 
+2.2
+===
+
+### Significant changes relative to 2.2 beta1:
+
+1. The Alt button in the Java/Mac/Un*x TurboVNC Viewer toolbar now works
+properly.  Previously, it was sending an Alt key press and a Ctrl key release.
+
+
 2.2 beta1
 =========
 
