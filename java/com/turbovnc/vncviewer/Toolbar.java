@@ -143,7 +143,7 @@ public class Toolbar extends JToolBar implements ActionListener {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.Alt_L, true);
       } else {
-        cc.writeKeyEvent(Keysyms.Control_L, false);
+        cc.writeKeyEvent(Keysyms.Alt_L, false);
       }
     } else if (((AbstractButton)s).getName() == buttons[9]) {
       VncViewer.newViewer(cc.viewer);

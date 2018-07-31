@@ -31,6 +31,9 @@ input language-specific characters in Asian languages, but since the TurboVNC
 Viewer does not handle those characters, the IME does nothing but interfere
 with the normal operation of the viewer.
 
+8. The Alt button in the Java/Mac/Un*x TurboVNC Viewer toolbar now works
+properly.  Previously, it was sending an Alt key press and a Ctrl key release.
+
 
 2.1.2
 =====
