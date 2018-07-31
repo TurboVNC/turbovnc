@@ -152,3 +152,7 @@ This distribution contains Java DES software by Dave Zimmerman
 
     Visit the ACME Labs Java page for up-to-date versions of this and other
     fine Java utilities: http://www.acme.com/java/
+
+Screenshot icon in the TurboVNC Viewer toolbar is by VisualPharm and is used
+under the terms of the Creative Commons Attributon license:
+https://www.shareicon.net/screenshot-586081

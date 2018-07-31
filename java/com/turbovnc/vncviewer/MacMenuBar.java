@@ -125,7 +125,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     losslessRefresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
                                                           acceleratorMask));
     screenshot = addMenuItem(connMenu, "Save Remote Desktop Image");
-    screenshot.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+    screenshot.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
                                                      acceleratorMask));
     connMenu.addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen");

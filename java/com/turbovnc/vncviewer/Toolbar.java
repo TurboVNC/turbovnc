@@ -36,7 +36,7 @@ public class Toolbar extends JToolBar implements ActionListener {
   static final String[] BUTTONS = {
     "Connection options...", "Connection info...", "Full screen",
     "Request screen refresh", "Request lossless refresh",
-    "Send Ctrl-Alt-Del", "Send Ctrl-Esc",
+    "Save remote desktop image", "Send Ctrl-Alt-Del", "Send Ctrl-Esc",
     "Send Ctrl key press/release", "Send Alt key press/release",
     "New Connection...", "Disconnect"
   };
@@ -50,27 +50,27 @@ public class Toolbar extends JToolBar implements ActionListener {
     super();
     cc = cc_;
     BufferedImage bi =
-      new BufferedImage(176, 16, BufferedImage.TYPE_INT_ARGB);
+      new BufferedImage(192, 16, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = bi.createGraphics();
-    g.drawImage(toolbarImage, 0, 0, 176, 16, null);
+    g.drawImage(toolbarImage, 0, 0, 192, 16, null);
     setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
     setAlignmentY(java.awt.Component.CENTER_ALIGNMENT);
     setFloatable(false);
     setBorder(new EmptyBorder(1, 2, 1, 0));
-    for (int i = 0; i < 11; i++) {
-      if (i >= 5 && i <= 8 && cc.opts.viewOnly)
+    for (int i = 0; i < 12; i++) {
+      if (i >= 6 && i <= 9 && cc.opts.viewOnly)
         continue;
-      if (i >= 9 && i <= 10 && VncViewer.noNewConn.getValue())
+      if (i >= 10 && i <= 11 && VncViewer.noNewConn.getValue())
         continue;
-      if (i >= 5 && i <= 6 && VncViewer.restricted.getValue())
+      if (i >= 6 && i <= 7 && VncViewer.restricted.getValue())
         continue;
       ImageIcon icon = new ImageIcon(
         tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
       AbstractButton button;
       switch (i) {
-        case 7:
-          // fallthrough
         case 8:
+          // fallthrough
+        case 9:
           button = new JToggleButton(icon);
           button.setBorder(BorderFactory.createLoweredBevelBorder());
           break;
@@ -89,8 +89,8 @@ public class Toolbar extends JToolBar implements ActionListener {
       add(button);
       add(Box.createHorizontalStrut(2));
       if (i == 1 ||
-          (i == 4 && (!cc.opts.viewOnly || !VncViewer.noNewConn.getValue())) ||
-          (i == 8 && !VncViewer.noNewConn.getValue())) {
+          (i == 5 && (!cc.opts.viewOnly || !VncViewer.noNewConn.getValue())) ||
+          (i == 9 && !VncViewer.noNewConn.getValue())) {
         // ref http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4346610
         add(new JSeparator(JSeparator.VERTICAL) {
           public Dimension getMaximumSize() {
@@ -115,7 +115,9 @@ public class Toolbar extends JToolBar implements ActionListener {
       cc.refresh();
     } else if (((AbstractButton)s).getName() == BUTTONS[4]) {
       cc.losslessRefresh();
-    } else if (((AbstractButton)s).getName() == BUTTONS[5] &&
+    } else if (((AbstractButton)s).getName() == BUTTONS[5]) {
+      cc.screenshot();
+    } else if (((AbstractButton)s).getName() == BUTTONS[6] &&
                !cc.opts.viewOnly) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       cc.writeKeyEvent(Keysyms.ALT_L, true);
@@ -123,29 +125,29 @@ public class Toolbar extends JToolBar implements ActionListener {
       cc.writeKeyEvent(Keysyms.DELETE, false);
       cc.writeKeyEvent(Keysyms.ALT_L, false);
       cc.writeKeyEvent(Keysyms.CONTROL_L, false);
-    } else if (((AbstractButton)s).getName() == BUTTONS[6] &&
+    } else if (((AbstractButton)s).getName() == BUTTONS[7] &&
                !cc.opts.viewOnly) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       cc.writeKeyEvent(Keysyms.ESCAPE, true);
       cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       cc.writeKeyEvent(Keysyms.ESCAPE, false);
-    } else if (((AbstractButton)s).getName() == BUTTONS[7] &&
+    } else if (((AbstractButton)s).getName() == BUTTONS[8] &&
                !cc.opts.viewOnly) {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       } else {
         cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       }
-    } else if (((AbstractButton)s).getName() == BUTTONS[8] &&
+    } else if (((AbstractButton)s).getName() == BUTTONS[9] &&
                !cc.opts.viewOnly) {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.ALT_L, true);
       } else {
         cc.writeKeyEvent(Keysyms.ALT_L, false);
       }
-    } else if (((AbstractButton)s).getName() == BUTTONS[9]) {
-      VncViewer.newViewer(cc.viewer);
     } else if (((AbstractButton)s).getName() == BUTTONS[10]) {
+      VncViewer.newViewer(cc.viewer);
+    } else if (((AbstractButton)s).getName() == BUTTONS[11]) {
       cc.close();
     }
   }
