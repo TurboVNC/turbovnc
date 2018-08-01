@@ -54,8 +54,9 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       addMenuItem("Request Lossless Refresh   (Ctrl-Alt-Shift-L)",
                   KeyEvent.VK_L);
     losslessRefresh.setDisplayedMnemonicIndex(8);
-    screenshot = addMenuItem("Save Remote Desktop Image...   (Ctrl-Alt-Shift-M)",
-                             KeyEvent.VK_M);
+    screenshot =
+      addMenuItem("Save Remote Desktop Image...   (Ctrl-Alt-Shift-M)",
+                  KeyEvent.VK_M);
     screenshot.setDisplayedMnemonicIndex(21);
     addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");

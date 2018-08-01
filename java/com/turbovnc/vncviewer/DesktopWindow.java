@@ -588,6 +588,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_L:
           cc.losslessRefresh();
           return;
+        case KeyEvent.VK_M:
+          cc.screenshot();
+          return;
         case KeyEvent.VK_N:
           VncViewer.newViewer(cc.viewer);
           return;
@@ -606,9 +609,6 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           return;
         case KeyEvent.VK_T:
           cc.toggleToolbar();
-          return;
-        case KeyEvent.VK_M:
-          cc.screenshot();
           return;
         case KeyEvent.VK_Z:
           cc.sizeWindow();
@@ -660,11 +660,15 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     rgbImage.createGraphics().drawImage(fbImage, 0, 0, width, height, null);
     try {
-      if (!ImageIO.write(rgbImage, formatName, file))
-        cc.viewer.reportException(new WarningException("Could not save remote desktop image:\nImage format not supported"));
+      if (!ImageIO.write(rgbImage, formatName, file)) {
+        WarningException we = new WarningException(
+          "Could not save remote desktop image:\nImage format not supported");
+        cc.viewer.reportException(we);
+      }
     } catch (IOException e) {
-      cc.viewer.reportException(new WarningException("Could not save remote desktop image:\n" +
-                                                     e.toString()));
+      WarningException we = new WarningException(
+        "Could not save remote desktop image:\n" + e.toString());
+      cc.viewer.reportException(we);
     }
   }
 
