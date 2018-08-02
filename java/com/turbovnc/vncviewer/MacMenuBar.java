@@ -137,6 +137,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     defaultSize = addMenuItem(connMenu, "Default Window Size/Position");
     defaultSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
                                                       acceleratorMask));
+    tileWindows = addMenuItem(connMenu, "Tile All Viewer Windows");
+    tileWindows.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
+                                                      acceleratorMask));
     showToolbar = new JCheckBoxMenuItem("Show Toolbar");
     showToolbar.setSelected(cc.showToolbar);
     showToolbar.addActionListener(this);
@@ -177,6 +180,8 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.toggleFullScreen();
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
+    } else if (actionMatch(ev, tileWindows)) {
+      VncViewer.tileWindows();
     } else if (actionMatch(ev, showToolbar)) {
       cc.toggleToolbar();
       showToolbar.setSelected(cc.showToolbar);
@@ -224,7 +229,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
   }
 
   CConn cc;
-  JMenuItem defaultSize;
+  JMenuItem defaultSize, tileWindows;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, closeConn, info, profile, showToolbar, screenshot;
   JCheckBoxMenuItem fullScreen;

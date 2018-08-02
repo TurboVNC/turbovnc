@@ -72,6 +72,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     showToolbar.setSelected(cc.showToolbar);
     showToolbar.addActionListener(this);
     add(showToolbar);
+    tileWindows = addMenuItem("Tile All Viewer Windows   (Ctrl-Alt-Shift-X)",
+                              KeyEvent.VK_X);
     addSeparator();
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       grabKeyboard =
@@ -149,6 +151,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
       firePopupMenuCanceled();
+    } else if (actionMatch(ev, tileWindows)) {
+      VncViewer.tileWindows();
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, grabKeyboard)) {
@@ -200,7 +204,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   }
 
   CConn cc;
-  JMenuItem defaultSize;
+  JMenuItem defaultSize, tileWindows;
   JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, options, info, profile, screenshot, about, dismiss;
   static JMenuItem f8;

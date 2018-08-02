@@ -553,6 +553,33 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       newViewer(oldViewer, null, false);
   }
 
+  public static void tileWindows() {
+    Rectangle workArea = CConn.getMaxSpannedSize(true);
+    int nTilesX, nTilesY;
+
+    synchronized(conns) {
+      nTilesX = nTilesY = (int)Math.sqrt(conns.size());
+      if (nTilesX * nTilesY < conns.size()) {
+        nTilesX++;
+        if (nTilesX * nTilesY < conns.size())
+          nTilesY++;
+      }
+
+      int x = workArea.x, y = workArea.y;
+      for (int i = 0; i < conns.size(); i++) {
+        CConn cc = conns.get(i);
+        int w = workArea.width / nTilesX;
+        int h = workArea.height / nTilesY;
+
+        cc.resize(x, y, w, h);
+        x += w;
+        if (x >= workArea.width) {
+          x = 0;  y += h;
+        }
+      }
+    }
+  }
+
   public void start() {
     vlog.debug("start called");
     String host = opts.serverName;
@@ -786,7 +813,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       try {
         if (cc == null) {
           cc = new CConn(this, sock);
-          if (OS.startsWith("mac os x") && benchFile == null) {
+          if (benchFile == null) {
             synchronized(conns) {
               conns.add(cc);
             }
@@ -834,6 +861,9 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         } else {
           while (!cc.shuttingDown)
             cc.processMsg(false);
+          synchronized(conns) {
+            conns.remove(cc);
+          }
         }
       } catch (Exception e) {
         if (cc == null || !cc.shuttingDown) {
@@ -844,9 +874,15 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
           if (cc != null) {
             cc.deleteWindow(true);
             cc.closeSocket();
+            synchronized(conns) {
+              conns.remove(cc);
+            }
           }
         } else {
           cc.closeSocket();
+          synchronized(conns) {
+            conns.remove(cc);
+          }
           cc = null;
         }
       }

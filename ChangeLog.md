@@ -4,6 +4,10 @@
 1. Added a screenshot feature to the Java/Mac/Un*x TurboVNC Viewer that allows
 an image of the remote desktop to be saved to the client machine.
 
+2. Added a window tiling feature to the Java/Mac/Un*x TurboVNC Viewer that
+automatically arranges all viewer windows in a grid pattern when a hotkey is
+pressed or an option is selected in the F8 or Mac menu.
+
 
 2.2
 ===

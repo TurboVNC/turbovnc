@@ -814,7 +814,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (viewport == null || benchmark)
       return;
 
-    Rectangle screenArea = getMaxSpannedSize();
+    Rectangle screenArea = getMaxSpannedSize(false);
     java.awt.Point spOffset = viewport.sp.getViewport().getViewPosition();
     java.awt.Point winOffset = viewport.sp.getLocationOnScreen();
 
@@ -986,18 +986,28 @@ public class CConn extends CConnection implements UserPasswdGetter,
       viewport.setupExtInputHelper();
   }
 
-  public Rectangle getMaxSpannedSize() {
+  public static Rectangle getMaxSpannedSize(boolean workArea) {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
     Rectangle s0 = null;
     Rectangle span = new Rectangle(-1, -1, 0, 0);
+    Insets in = new Insets(0, 0, 0, 0);
     int tLeft = 0, tTop = 0, tRight = 0, tBottom = 0;
     boolean equal = true;
+
+    Toolkit tk = Toolkit.getDefaultToolkit();
 
     for (GraphicsDevice gs : gsList) {
       GraphicsConfiguration[] gcList = gs.getConfigurations();
       for (GraphicsConfiguration gc : gcList) {
         Rectangle s = gc.getBounds();
+        if (workArea) {
+          if (gc == gcList[0])
+            in = tk.getScreenInsets(gc);
+          s.setBounds(s.x + in.left, s.y + in.top,
+                      s.width - in.left - in.right,
+                      s.height - in.top - in.bottom);
+        }
         if (s0 == null) {
           s0 = s;
           span.setBounds(s);
@@ -1140,7 +1150,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
             s.height != s0.height ||
             (Math.abs(s.y - s0.y) % s0.height) != 0 ||
             (Math.abs(s.x - s0.x) % s0.width) != 0)
-            equal = false;
+          equal = false;
 
         // If the screen/work area of this monitor overlaps vertically with the
         // multi-screen span area, then allow the window to extend horizontally
@@ -1704,6 +1714,23 @@ public class CConn extends CConnection implements UserPasswdGetter,
       } else {
         viewport.toggleLionFS();
       }
+    }
+  }
+
+  // EDT
+  public void resize(int x, int y, int w, int h) {
+    if (viewport != null) {
+      if (opts.fullScreen)
+        toggleFullScreen();
+
+      Dimension vpSize = viewport.getSize();
+
+      // If the window size is unchanged, check whether we need to force a
+      // desktop resize message to inform the server of a new screen layout
+      if (opts.desktopSize.mode == Options.SIZE_AUTO && w == vpSize.width &&
+          h == vpSize.height)
+        checkLayout = true;
+      viewport.setGeometry(x, y, w, h);
     }
   }
 
