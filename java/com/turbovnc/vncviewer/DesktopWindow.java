@@ -626,9 +626,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         InputEvent.META_DOWN_MASK) {
       switch (e.getKeyCode()) {
         case KeyEvent.VK_COMMA:
+        case KeyEvent.VK_BACK_QUOTE:
+        case KeyEvent.VK_H:
+        case KeyEvent.VK_Q:
         case KeyEvent.VK_N:
         case KeyEvent.VK_W:
         case KeyEvent.VK_I:
+        case KeyEvent.VK_P:
         case KeyEvent.VK_R:
         case KeyEvent.VK_L:
         case KeyEvent.VK_F:
