@@ -13,6 +13,12 @@ an image of the remote desktop to be saved to the client machine.
 1. The Alt button in the Java/Mac/Un*x TurboVNC Viewer toolbar now works
 properly.  Previously, it was sending an Alt key press and a Ctrl key release.
 
+2. Fixed an issue whereby, when using certain Command-{key} sequences in the
+Mac TurboVNC Viewer (specifically: Command-`, which switches between the two
+most recent viewer windows; Command-H, which hides all viewer windows;
+Command-Q, which exits the viewer; and Command-P, which toggles the profiling
+dialog), {key} was unintentionally transmitted to the VNC server.
+
 
 2.2 beta1
 =========
