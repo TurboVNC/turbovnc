@@ -448,11 +448,11 @@ if (!-d _ || !-o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
 # Make sure the user has a password.
 if ($authTypeVNC && "$passwdFile" eq "$vncUserDir/passwd") {
   ($z, $z, $mode) = lstat("$vncUserDir/passwd");
-  if (-e _ && (!-f _ || !-o _)) {
-    die "$prog: Wrong type or ownership on $vncUserDir/passwd.\n";
+  if (-e _ && (!-f _ || !-o _ || ($mode & 077) != 0)) {
+    die "$prog: Wrong type, ownership, or permissions on\n           $vncUserDir/passwd.\n";
   }
 
-  if (!-e _ || ($mode & 077) != 0) {
+  if (!-e _) {
     if ($opt{'-quiet'}) {
       warn "$vncUserDir/passwd does not exist.  Run vncpasswd to create passwd file.\n";
       exit 1;
