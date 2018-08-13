@@ -12,6 +12,10 @@ most recent viewer windows; Command-H, which hides all viewer windows;
 Command-Q, which exits the viewer; and Command-P, which toggles the profiling
 dialog), {key} was unintentionally transmitted to the VNC server.
 
+3. Fixed a segfault in the TurboVNC Server that occurred when attempting to
+disable the Composite extension.  This was a regression caused by a bug in the
+xorg-xserver 1.19.6 code.
+
 
 2.2 beta1
 =========

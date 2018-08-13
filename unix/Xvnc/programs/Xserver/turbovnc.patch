@@ -341,6 +341,30 @@ index d595a05..b81adad 100644
  }
  
  /*
+diff --git a/xorg-server-1.19.6/glx/glxscreens.c b/Xserver/glx/glxscreens.c
+index 29bacd9..ec5eb8b 100644
+--- a/xorg-server-1.19.6/glx/glxscreens.c
++++ b/Xserver/glx/glxscreens.c
+@@ -280,7 +280,8 @@ pickFBConfig(__GLXscreen * pGlxScreen, VisualPtr visual)
+             continue;
+ #ifdef COMPOSITE
+ 	/* Use only duplicated configs for compIsAlternateVisuals */
+-        if (!!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
++        if (!noCompositeExtension &&
++	    !!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
+ 	    !!config->duplicatedForComp)
+             continue;
+ #endif
+@@ -352,7 +353,8 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
+             pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
+             config->visualID = visual->vid;
+ #ifdef COMPOSITE
+-            if (compIsAlternateVisual(pScreen, visual->vid))
++            if (!noCompositeExtension &&
++                compIsAlternateVisual(pScreen, visual->vid))
+                 config->visualSelectGroup++;
+ #endif
+         }
 diff --git a/xorg-server-1.19.6/include/extinit.h b/Xserver/include/extinit.h
 index 4ad4fca..08fa370 100644
 --- a/xorg-server-1.19.6/include/extinit.h

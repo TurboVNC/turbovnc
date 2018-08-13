@@ -280,7 +280,8 @@ pickFBConfig(__GLXscreen * pGlxScreen, VisualPtr visual)
             continue;
 #ifdef COMPOSITE
 	/* Use only duplicated configs for compIsAlternateVisuals */
-        if (!!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
+        if (!noCompositeExtension &&
+	    !!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
 	    !!config->duplicatedForComp)
             continue;
 #endif
@@ -352,7 +353,8 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
             pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
             config->visualID = visual->vid;
 #ifdef COMPOSITE
-            if (compIsAlternateVisual(pScreen, visual->vid))
+            if (!noCompositeExtension &&
+                compIsAlternateVisual(pScreen, visual->vid))
                 config->visualSelectGroup++;
 #endif
         }
