@@ -21,6 +21,11 @@ works around an issue whereby the desktop contents would not be displayed when
 running the GNOME Classic window manager on RHEL/CentOS 7 or recent Fedora
 releases.
 
+5. The default xstartup.turbovnc script that the TurboVNC Server creates now
+launches Unity 2D by default on Ubuntu 12, as was the case with TurboVNC 2.1.x.
+Unity 3D 5.20.x does not work properly with the TurboVNC X server, and Unity 2D
+provides a similar user experience.
+
 
 2.2 beta1
 =========

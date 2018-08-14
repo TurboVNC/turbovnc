@@ -92,6 +92,11 @@ OS=`uname -s`
 # Emulate GDM
 USESTARTUP=0
 if [ -x /usr/bin/gnome-session ]; then
+  # Use Unity 2D on Ubuntu 12 if no WM is specified.  Unity 3D 5.20.x doesn't
+  # even pretend to work properly with our X server.
+  if [ -f /usr/share/gnome-session/sessions/ubuntu-2d.session -a -z "$TVNC_WM" ]; then
+    TVNC_WM=2d
+  fi
   case "$TVNC_WM" in
     2d)
       # Ubuntu 12: ubuntu-2d
