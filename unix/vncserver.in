@@ -90,6 +90,7 @@ XDG_SESSION_TYPE=x11;  export XDG_SESSION_TYPE
 OS=`uname -s`
 
 # Emulate GDM
+USESTARTUP=0
 if [ -x /usr/bin/gnome-session ]; then
   case "$TVNC_WM" in
     2d)
@@ -106,6 +107,7 @@ if [ -x /usr/bin/gnome-session ]; then
         DESKTOP_SESSION=gnome-classic;  export DESKTOP_SESSION
         GNOME_SHELL_SESSION_MODE=classic;  export GNOME_SHELL_SESSION_MODE
         XDG_CURRENT_DESKTOP="GNOME-Classic:GNOME";  export XDG_CURRENT_DESKTOP
+        USESTARTUP=1
       fi
       # Ubuntu 16
       if [ -f /usr/share/gnome-session/sessions/gnome-flashback-metacity.session ]; then
@@ -145,6 +147,9 @@ if [ "$TVNC_VGL" = "1" ]; then
   fi
 fi
 
+if [ "$STARTUP" != "" -a "$USESTARTUP" = "1" ]; then
+  exec $TVNC_VGLRUN $STARTUP
+fi
 if [ "$TVNC_WM" = "" ]; then
   # Typical system-wide WM startup script on Linux and Solaris 11
   if [ -f /etc/X11/xinit/xinitrc ]; then

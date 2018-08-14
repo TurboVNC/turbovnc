@@ -16,6 +16,11 @@ dialog), {key} was unintentionally transmitted to the VNC server.
 disable the Composite extension.  This was a regression caused by a bug in the
 xorg-xserver 1.19.6 code.
 
+4. The default xstartup.turbovnc script that the TurboVNC Server creates now
+works around an issue whereby the desktop contents would not be displayed when
+running the GNOME Classic window manager on RHEL/CentOS 7 or recent Fedora
+releases.
+
 
 2.2 beta1
 =========
