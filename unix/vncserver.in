@@ -114,11 +114,18 @@ if [ -x /usr/bin/gnome-session ]; then
         XDG_CURRENT_DESKTOP="GNOME-Classic:GNOME";  export XDG_CURRENT_DESKTOP
         USESTARTUP=1
       fi
-      # Ubuntu 16
+      # Ubuntu 16+
       if [ -f /usr/share/gnome-session/sessions/gnome-flashback-metacity.session ]; then
         DESKTOP_SESSION=gnome-flashback-metacity;  export DESKTOP_SESSION
-        XDG_CURRENT_DESKTOP="GNOME-Flashback:Unity"
-        export XDG_CURRENT_DESKTOP
+        grep -q "unity" /usr/share/gnome-session/sessions/gnome-flashback-metacity.session && {
+          XDG_CURRENT_DESKTOP="GNOME-Flashback:Unity";
+          export XDG_CURRENT_DESKTOP;
+        } || {
+          XDG_CURRENT_DESKTOP="GNOME-Flashback:GNOME";
+          export XDG_CURRENT_DESKTOP;
+          GNOME_SHELL_SESSION_MODE=ubuntu;  export GNOME_SHELL_SESSION_MODE;
+          USESTARTUP=1;
+        }
       fi
       unset TVNC_WM
       ;;
@@ -129,9 +136,15 @@ if [ -x /usr/bin/gnome-session ]; then
       # OpenGL support, compiz will automatically disable its OpenGL plugin,
       # requiring you to reset the compiz plugin state before Unity will work
       # again.
-      if [ -f /usr/share/gnome-session/sessions/ubuntu.session ]; then
+      if [ -f /usr/share/gnome-session/sessions/ubuntu.session -a "$TVNC_WM" = "" ]; then
         DESKTOP_SESSION=ubuntu;  export DESKTOP_SESSION
-        XDG_CURRENT_DESKTOP=Unity;  export XDG_CURRENT_DESKTOP
+        grep -qE "DesktopName\s*=\s*Unity" /usr/share/gnome-session/sessions/ubuntu.session && {
+          XDG_CURRENT_DESKTOP=Unity;  export XDG_CURRENT_DESKTOP;
+        } || {
+          XDG_CURRENT_DESKTOP=ubuntu:GNOME;  export XDG_CURRENT_DESKTOP;
+          GNOME_SHELL_SESSION_MODE=ubuntu;  export GNOME_SHELL_SESSION_MODE;
+          USESTARTUP=1;
+        }
       fi
       ;;
   esac

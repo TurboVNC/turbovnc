@@ -26,6 +26,10 @@ launches Unity 2D by default on Ubuntu 12, as was the case with TurboVNC 2.1.x.
 Unity 3D 5.20.x does not work properly with the TurboVNC X server, and Unity 2D
 provides a similar user experience.
 
+6. The default xstartup.turbovnc script that the TurboVNC Server creates now
+properly launches the GNOME 3, GNOME Flashback (Metacity), and MATE window
+managers on Ubuntu 18.
+
 
 2.2 beta1
 =========
