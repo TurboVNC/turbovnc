@@ -30,6 +30,11 @@ provides a similar user experience.
 properly launches the GNOME 3, GNOME Flashback (Metacity), and MATE window
 managers on Ubuntu 18.
 
+7. Fixed an issue whereby the TurboVNC Server would fail to launch via the
+vncserver script (giving the error `Unrecognized option: -x509cert`) if the
+server was built with `TVNC_USETLS=OpenSSL` or `TVNC_USETLS=GnuTLS` and the
+OpenSSL or GnuTLS headers/libraries were not installed.
+
 
 2.2 beta1
 =========
