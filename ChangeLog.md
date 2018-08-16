@@ -40,6 +40,11 @@ most recent viewer windows; Command-H, which hides all viewer windows;
 Command-Q, which exits the viewer; and Command-P, which toggles the profiling
 dialog), {key} was unintentionally transmitted to the VNC server.
 
+10. Fixed an issue whereby the TurboVNC Server would fail to launch via the
+vncserver script (giving the error `Unrecognized option: -x509cert`) if the
+server was built with `TVNC_USETLS=OpenSSL` or `TVNC_USETLS=GnuTLS` and the
+OpenSSL or GnuTLS headers/libraries were not installed.
+
 
 2.1.2
 =====
