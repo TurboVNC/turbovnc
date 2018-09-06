@@ -71,7 +71,7 @@ public final class Hostname {
       }
     }
     if (colonPos == -1 || colonPos == vncServerName.length() - 1)
-      return 5900;
+      return 0;
     if (vncServerName.charAt(colonPos + 1) == ':') {
       return Integer.parseInt(vncServerName.substring(colonPos + 2));
     }

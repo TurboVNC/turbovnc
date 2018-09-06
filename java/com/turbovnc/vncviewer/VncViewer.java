@@ -505,7 +505,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   public static void usage() {
     String usage = "\n" +
-      "USAGE: VncViewer [options/parameters] [host:displayNum] [options/parameters]\n" +
+      "USAGE: VncViewer [options/parameters] [host] [options/parameters]\n" +
+      "       VncViewer [options/parameters] [host:displayNum] [options/parameters]\n" +
       "       VncViewer [options/parameters] [host::port] [options/parameters]\n" +
       "       VncViewer [options/parameters] -listen [port] [options/parameters]\n" +
       "\n" +
@@ -620,6 +621,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       title = "TurboVNC Viewer : Unexpected Error";
       e.printStackTrace();
     }
+    if (VncViewer.noExceptionDialog) return;
     JOptionPane pane;
     Object[] dlgOptions = { UIManager.getString("OptionPane.yesButtonText"),
                             UIManager.getString("OptionPane.noButtonText") };
@@ -1105,7 +1107,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "The TCP port number on which the VNC server session is listening.  For " +
   "Unix VNC servers, this is typically 5900 + the X display number of the " +
   "VNC session (example: 5901 if connecting to display :1.)  For Windows " +
-  "and Mac VNC servers, this is typically 5900.  (default = 5900)\n " +
+  "and Mac VNC servers, this is typically 5900.\n " +
   "If listen mode is enabled, this parameter specifies the TCP port on " +
   "which the viewer will listen for connections from a VNC server.  " +
   "(default = 5500)",
@@ -1139,8 +1141,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "The VNC server to which to connect.  This can be specified in the " +
   "format <host>[:<display number>] or <host>::<port>, where <host> is the " +
   "host name or IP address of the machine on which the VNC server is " +
-  "running, <display number> is an optional X display number (default: 0), " +
-  "and <port> is a TCP port.", null);
+  "running, <display number> is an optional X display number, and <port> is " +
+  "a TCP port.  If no port or display number is specified, then the viewer " +
+  "will enable the TurboVNC Session Manager, which allows you to remotely " +
+  "start a new TurboVNC session or to choose an existing TurboVNC session " +
+  "to which to connect.", null);
 
   static BoolParameter shared =
   new BoolParameter("Shared",
@@ -1499,30 +1504,32 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static StringParameter sshKey =
   new StringParameter("SSHKey",
-  "When using the Via or Tunnel options with the built-in SSH client, this " +
-  "parameter specifies the text of the SSH private key to use when " +
-  "authenticating with the SSH server.  You can use \\n within the string " +
-  "to specify a new line.", null);
+  "When using the Via or Tunnel options with the built-in SSH client, or " +
+  "when using the TurboVNC Session Manager, this parameter specifies the " +
+  "text of the SSH private key to use when authenticating with the SSH " +
+  "server.  You can use \\n within the string to specify a new line.", null);
 
   static StringParameter sshKeyFile =
   new StringParameter("SSHKeyFile",
-  "When using the Via or Tunnel options with the built-in SSH client, this " +
-  "parameter specifies a file that contains an SSH private key (or keys) to " +
-  "use when authenticating with the SSH server.  If not specified, then the " +
-  "built-in SSH client will attempt to read private keys from ~/.ssh/id_dsa " +
-  "and ~/.ssh/id_rsa.  It will fall back to asking for an SSH password if " +
-  "private key authentication fails.", null);
+  "When using the Via or Tunnel options with the built-in SSH client, or " +
+  "when using the TurboVNC Session Manager, this parameter specifies a file " +
+  "that contains an SSH private key (or keys) to use when authenticating " +
+  "with the SSH server.  If not specified, then the built-in SSH client " +
+  "will attempt to read private keys from ~/.ssh/id_dsa and ~/.ssh/id_rsa. " +
+  "It will fall back to asking for an SSH password if private key " +
+  "authentication fails.", null);
 
   static StringParameter sshKeyPass =
   new StringParameter("SSHKeyPass",
-  "When using the Via or Tunnel options with the built-in SSH client, this " +
-  "parameter specifies the passphrase for the SSH key.", null);
+  "When using the Via or Tunnel options with the built-in SSH client, or " +
+  "when using the TurboVNC Session Manager, this parameter specifies the " +
+  "passphrase for the SSH key.", null);
 
   static IntParameter sshPort =
   new IntParameter("SSHPort",
-  "When using the Via or Tunnel options with the built-in SSH client, this " +
-  "parameter specifies the TCP port on which the SSH server is " +
-  "listening.", 22);
+  "When using the Via or Tunnel options with the built-in SSH client, or " +
+  "when using the TurboVNC Session Manager, this parameter specifies the " +
+  "TCP port on which the SSH server is listening.", 22);
 
   static BoolParameter tunnel =
   new BoolParameter("Tunnel",
@@ -1579,4 +1586,5 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   static ArrayList<CConn> conns = new ArrayList<CConn>();
   static Insets insets;
   static Viewport grabOwner;
+  static boolean noExceptionDialog;
 }

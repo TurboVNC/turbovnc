@@ -35,7 +35,7 @@ import com.turbovnc.network.*;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
-public final class Tunnel {
+public class Tunnel {
 
   public static void createTunnel(Options opts) throws Exception {
     int localPort;
@@ -75,7 +75,9 @@ public final class Tunnel {
       createTunnelExt(gatewayHost, remoteHost, remotePort, localPort, pattern,
                       opts);
     else {
-      createTunnelJSch(gatewayHost, opts);
+      vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
+      if (opts.sshSession == null)
+        createTunnelJSch(gatewayHost, opts);
       vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
                  ":" + remotePort + " (relative to gateway)");
       opts.sshSession.setPortForwardingL(localPort, remoteHost, remotePort);
@@ -85,8 +87,8 @@ public final class Tunnel {
 
   /* Create a tunnel using the builtin JSch SSH client */
 
-  private static void createTunnelJSch(String host, Options opts)
-                                       throws Exception {
+  protected static void createTunnelJSch(String host, Options opts)
+                                         throws Exception {
     JSch jsch = new JSch();
     String homeDir = new String("");
     try {
@@ -135,7 +137,6 @@ public final class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    vlog.debug("Opening SSH tunnel through gateway " + host);
     String user = opts.sshUser;
     if (user == null)
       user = (String)System.getProperties().get("user.name");
@@ -234,6 +235,6 @@ public final class Tunnel {
     return command;
   }
 
-  private Tunnel() {}
+  protected Tunnel() {}
   static LogWriter vlog = new LogWriter("Tunnel");
 }

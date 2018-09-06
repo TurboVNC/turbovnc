@@ -142,12 +142,42 @@ public class CConn extends CConnection implements UserPasswdGetter,
         port = Hostname.getPort(opts.via);
         serverName = Hostname.getHost(opts.via);
       } else if (opts.via != null || opts.tunnel) {
+        if (opts.port == 0) {
+          try {
+            // TurboVNC Session Manager
+            String session = SessionManager.createSession(opts);
+            if (session == null) {
+              close();
+              return;
+            }
+            opts.port = Hostname.getPort(session);
+          } catch (Exception e) {
+            throw new ErrorException("Session Manager Error:\n" +
+                                     e.getMessage());
+          }
+        }
         try {
           Tunnel.createTunnel(opts);
           port = Hostname.getPort(opts.serverName);
           serverName = Hostname.getHost(opts.serverName);
         } catch (Exception e) {
           throw new ErrorException("Could not create SSH tunnel:\n" +
+                                   e.getMessage());
+        }
+      }
+
+      if (port == 0) {
+        try {
+          // TurboVNC Session Manager
+          String session = SessionManager.createSession(opts);
+          if (session == null) {
+            close();
+            return;
+          }
+          port = Hostname.getPort(session);
+          opts.sshSession.disconnect();
+        } catch (Exception e) {
+          throw new ErrorException("Session Manager Error:\n" +
                                    e.getMessage());
         }
       }
