@@ -915,7 +915,7 @@ sub List
   print "\nTurboVNC server sessions:\n\n";
   print "X DISPLAY #\tPROCESS ID\n";
   foreach my $file (@filelist) {
-    if ($file =~ /$host:(\d+)$\.pid/) {
+    if ($file =~ /$host:(\d+)$\.pid/ && !&CheckDisplayNumber($1)) {
       print ":".$1."\t\t".`cat $vncUserDir/$file`;
     }
   }

@@ -35,6 +35,10 @@ vncserver script (giving the error `Unrecognized option: -x509cert`) if the
 server was built with `TVNC_USETLS=OpenSSL` or `TVNC_USETLS=GnuTLS` and the
 OpenSSL or GnuTLS headers/libraries were not installed.
 
+8. The `-list` option for the vncserver script no longer lists orphaned
+TurboVNC sessions (sessions for which a PID file exists in the user's VNC
+directory but for which the corresponding Xvnc process is no longer running.)
+
 
 2.2 beta1
 =========
