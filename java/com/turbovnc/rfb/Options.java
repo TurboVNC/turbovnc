@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013, 2015 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  */
 
 package com.turbovnc.rfb;
+
+import com.jcraft.jsch.Session;
 
 public class Options {
 
@@ -77,6 +79,7 @@ public class Options {
     if (old.via != null) via = new String(old.via);
     tunnel = old.tunnel;
     extSSH = old.extSSH;
+    sshSession = old.sshSession;
     if (old.sshUser != null) sshUser = new String(old.sshUser);
   }
 
@@ -231,5 +234,6 @@ public class Options {
   public String via;
   public boolean tunnel;
   public boolean extSSH;
+  public Session sshSession;
   public String sshUser;
 }

@@ -1349,6 +1349,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     shuttingDown = true;
     if (sock != null)
       sock.shutdown();
+    if (opts.sshSession != null) {
+      opts.sshSession.disconnect();
+      opts.sshSession = null;
+    }
   }
 
   // Menu callbacks.  These are guaranteed only to be called after serverInit()
