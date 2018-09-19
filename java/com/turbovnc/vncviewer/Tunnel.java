@@ -74,16 +74,19 @@ public final class Tunnel {
     if (opts.extSSH || (pattern != null && pattern.length() > 0))
       createTunnelExt(gatewayHost, remoteHost, remotePort, localPort, pattern,
                       opts);
-    else
-      createTunnelJSch(gatewayHost, remoteHost, remotePort, localPort, opts);
+    else {
+      createTunnelJSch(gatewayHost, opts);
+      vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
+                 ":" + remotePort + " (relative to gateway)");
+      opts.sshSession.setPortForwardingL(localPort, remoteHost, remotePort);
+    }
     opts.serverName = "localhost::" + localPort;
   }
 
   /* Create a tunnel using the builtin JSch SSH client */
 
-  private static void createTunnelJSch(String gatewayHost, String remoteHost,
-                                       int remotePort, int localPort,
-                                       Options opts) throws Exception {
+  private static void createTunnelJSch(String host, Options opts)
+                                       throws Exception {
     JSch jsch = new JSch();
     String homeDir = new String("");
     try {
@@ -132,38 +135,34 @@ public final class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
+    vlog.debug("Opening SSH tunnel through gateway " + host);
     String user = opts.sshUser;
     if (user == null)
       user = (String)System.getProperties().get("user.name");
-    Session session = null;
     if (user != null && jsch.getIdentityNames().size() > 0) {
-      session = jsch.getSession(user, gatewayHost,
-                                VncViewer.sshPort.getValue());
+      opts.sshSession = jsch.getSession(user, host,
+                                        VncViewer.sshPort.getValue());
       try {
         PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                             false, user, false);
-        session.setUserInfo(dlg);
-        session.connect();
+        opts.sshSession.setUserInfo(dlg);
+        opts.sshSession.connect();
       } catch (com.jcraft.jsch.JSchException e) {
         System.err.println("Could not authenticate using SSH private key.  Falling back to user/password.");
         jsch.removeAllIdentity();
-        session = null;
+        opts.sshSession = null;
       }
     }
-    if (session == null) {
+    if (opts.sshSession == null) {
       PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                           false, user, false);
       dlg.promptPassword(new String("SSH Authentication"));
-      session = jsch.getSession(dlg.userEntry.getText(), gatewayHost,
-                                VncViewer.sshPort.getValue());
-      session.setPassword(new String(dlg.passwdEntry.getPassword()));
-      session.setUserInfo(dlg);
-      session.connect();
+      opts.sshSession = jsch.getSession(dlg.userEntry.getText(), host,
+                                        VncViewer.sshPort.getValue());
+      opts.sshSession.setPassword(new String(dlg.passwdEntry.getPassword()));
+      opts.sshSession.setUserInfo(dlg);
+      opts.sshSession.connect();
     }
-    vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
-               ":" + remotePort + " (relative to gateway)");
-    session.setPortForwardingL(localPort, remoteHost, remotePort);
   }
 
   /* Create a tunnel using an external SSH client.  This supports the same

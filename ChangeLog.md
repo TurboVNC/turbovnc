@@ -39,6 +39,10 @@ OpenSSL or GnuTLS headers/libraries were not installed.
 TurboVNC sessions (sessions for which a PID file exists in the user's VNC
 directory but for which the corresponding Xvnc process is no longer running.)
 
+9. Fixed an issue in the Java TurboVNC Viewer whereby, when using SSH tunneling
+with the built-in SSH client, the SSH connection would remain open even if the
+associated VNC connection had been closed.
+
 
 2.2 beta1
 =========
