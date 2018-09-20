@@ -30,7 +30,7 @@ import com.turbovnc.rfb.*;
 
 class SessionManagerDialog extends Dialog implements ActionListener {
 
-  SessionManagerDialog(String [] sessions_, String host) {
+  SessionManagerDialog(String[] sessions_, String host) {
     super(true);
     sessions = sessions_;
 
@@ -153,11 +153,11 @@ class SessionManagerDialog extends Dialog implements ActionListener {
 
   JPanel sessionManagerPanel, sessionsPanel, scrollPanel;
   JScrollPane scrollPane;
-  JButton connectButton[] = new JButton[SessionManager.MAX_SESSIONS];
-  JButton killButton[] = new JButton[SessionManager.MAX_SESSIONS];
+  JButton[] connectButton = new JButton[SessionManager.MAX_SESSIONS];
+  JButton[] killButton = new JButton[SessionManager.MAX_SESSIONS];
   JButton newSessionButton, refreshButton, cancelButton;
 
-  String [] sessions;
+  String[] sessions;
   String connectSession, killSession;
 
   static LogWriter vlog = new LogWriter("SessionManagerDialog");

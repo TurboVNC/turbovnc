@@ -23,7 +23,6 @@
 package com.turbovnc.vncviewer;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -33,7 +32,6 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
 
 import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
 public final class SessionManager extends Tunnel {
@@ -47,7 +45,7 @@ public final class SessionManager extends Tunnel {
     createTunnelJSch(host, opts);
 
     boolean firstTime = true;
-    while(true) {
+    while (true) {
       String[] sessions = getSessions(opts.sshSession, host);
 
       if ((sessions == null || sessions.length <= 0) && firstTime) {
@@ -85,7 +83,7 @@ public final class SessionManager extends Tunnel {
 
     BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
     String result = br.readLine(), error = result;
-    String [] sessions = null;
+    String[] sessions = null;
     if (result != null)
       sessions = result.split(" ");
 
@@ -136,7 +134,7 @@ public final class SessionManager extends Tunnel {
 
     BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
     String result = br.readLine(), error = result;
-    String [] sessions = null;
+    String[] sessions = null;
     if (result != null)
       sessions = result.split(" ");
 
