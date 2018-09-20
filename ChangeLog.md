@@ -23,6 +23,37 @@ most recent viewer windows; Command-H, which hides all viewer windows;
 Command-Q, which exits the viewer; and Command-P, which toggles the profiling
 dialog), {key} was unintentionally transmitted to the VNC server.
 
+3. Fixed a segfault in the TurboVNC Server that occurred when attempting to
+disable the Composite extension.  This was a regression caused by a bug in the
+xorg-xserver 1.19.6 code.
+
+4. The default xstartup.turbovnc script that the TurboVNC Server creates now
+works around an issue whereby the desktop contents would not be displayed when
+running the GNOME Classic window manager on RHEL/CentOS 7 or recent Fedora
+releases.
+
+5. The default xstartup.turbovnc script that the TurboVNC Server creates now
+launches Unity 2D by default on Ubuntu 12, as was the case with TurboVNC 2.1.x.
+Unity 3D 5.20.x does not work properly with the TurboVNC X server, and Unity 2D
+provides a similar user experience.
+
+6. The default xstartup.turbovnc script that the TurboVNC Server creates now
+properly launches the GNOME 3, GNOME Flashback (Metacity), and MATE window
+managers on Ubuntu 18.
+
+7. Fixed an issue whereby the TurboVNC Server would fail to launch via the
+vncserver script (giving the error `Unrecognized option: -x509cert`) if the
+server was built with `TVNC_USETLS=OpenSSL` or `TVNC_USETLS=GnuTLS` and the
+OpenSSL or GnuTLS headers/libraries were not installed.
+
+8. The `-list` option for the vncserver script no longer lists orphaned
+TurboVNC sessions (sessions for which a PID file exists in the user's VNC
+directory but for which the corresponding Xvnc process is no longer running.)
+
+9. Fixed an issue in the Java TurboVNC Viewer whereby, when using SSH tunneling
+with the built-in SSH client, the SSH connection would remain open even if the
+associated VNC connection had been closed.
+
 
 2.2 beta1
 =========

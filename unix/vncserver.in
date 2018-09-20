@@ -90,7 +90,13 @@ XDG_SESSION_TYPE=x11;  export XDG_SESSION_TYPE
 OS=`uname -s`
 
 # Emulate GDM
+USESTARTUP=0
 if [ -x /usr/bin/gnome-session ]; then
+  # Use Unity 2D on Ubuntu 12 if no WM is specified.  Unity 3D 5.20.x doesn't
+  # even pretend to work properly with our X server.
+  if [ -f /usr/share/gnome-session/sessions/ubuntu-2d.session -a -z "$TVNC_WM" ]; then
+    TVNC_WM=2d
+  fi
   case "$TVNC_WM" in
     2d)
       # Ubuntu 12: ubuntu-2d
@@ -106,12 +112,20 @@ if [ -x /usr/bin/gnome-session ]; then
         DESKTOP_SESSION=gnome-classic;  export DESKTOP_SESSION
         GNOME_SHELL_SESSION_MODE=classic;  export GNOME_SHELL_SESSION_MODE
         XDG_CURRENT_DESKTOP="GNOME-Classic:GNOME";  export XDG_CURRENT_DESKTOP
+        USESTARTUP=1
       fi
-      # Ubuntu 16
+      # Ubuntu 16+
       if [ -f /usr/share/gnome-session/sessions/gnome-flashback-metacity.session ]; then
         DESKTOP_SESSION=gnome-flashback-metacity;  export DESKTOP_SESSION
-        XDG_CURRENT_DESKTOP="GNOME-Flashback:Unity"
-        export XDG_CURRENT_DESKTOP
+        grep -q "unity" /usr/share/gnome-session/sessions/gnome-flashback-metacity.session && {
+          XDG_CURRENT_DESKTOP="GNOME-Flashback:Unity";
+          export XDG_CURRENT_DESKTOP;
+        } || {
+          XDG_CURRENT_DESKTOP="GNOME-Flashback:GNOME";
+          export XDG_CURRENT_DESKTOP;
+          GNOME_SHELL_SESSION_MODE=ubuntu;  export GNOME_SHELL_SESSION_MODE;
+          USESTARTUP=1;
+        }
       fi
       unset TVNC_WM
       ;;
@@ -122,9 +136,15 @@ if [ -x /usr/bin/gnome-session ]; then
       # OpenGL support, compiz will automatically disable its OpenGL plugin,
       # requiring you to reset the compiz plugin state before Unity will work
       # again.
-      if [ -f /usr/share/gnome-session/sessions/ubuntu.session ]; then
+      if [ -f /usr/share/gnome-session/sessions/ubuntu.session -a "$TVNC_WM" = "" ]; then
         DESKTOP_SESSION=ubuntu;  export DESKTOP_SESSION
-        XDG_CURRENT_DESKTOP=Unity;  export XDG_CURRENT_DESKTOP
+        grep -qE "DesktopName\s*=\s*Unity" /usr/share/gnome-session/sessions/ubuntu.session && {
+          XDG_CURRENT_DESKTOP=Unity;  export XDG_CURRENT_DESKTOP;
+        } || {
+          XDG_CURRENT_DESKTOP=ubuntu:GNOME;  export XDG_CURRENT_DESKTOP;
+          GNOME_SHELL_SESSION_MODE=ubuntu;  export GNOME_SHELL_SESSION_MODE;
+          USESTARTUP=1;
+        }
       fi
       ;;
   esac
@@ -145,6 +165,9 @@ if [ "$TVNC_VGL" = "1" ]; then
   fi
 fi
 
+if [ "$STARTUP" != "" -a "$USESTARTUP" = "1" ]; then
+  exec $TVNC_VGLRUN $STARTUP
+fi
 if [ "$TVNC_WM" = "" ]; then
   # Typical system-wide WM startup script on Linux and Solaris 11
   if [ -f /etc/X11/xinit/xinitrc ]; then
@@ -448,11 +471,11 @@ if (!-d _ || !-o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
 # Make sure the user has a password.
 if ($authTypeVNC && "$passwdFile" eq "$vncUserDir/passwd") {
   ($z, $z, $mode) = lstat("$vncUserDir/passwd");
-  if (-e _ && (!-f _ || !-o _)) {
-    die "$prog: Wrong type or ownership on $vncUserDir/passwd.\n";
+  if (-e _ && (!-f _ || !-o _ || ($mode & 077) != 0)) {
+    die "$prog: Wrong type, ownership, or permissions on\n           $vncUserDir/passwd.\n";
   }
 
-  if (!-e _ || ($mode & 077) != 0) {
+  if (!-e _) {
     if ($opt{'-quiet'}) {
       warn "$vncUserDir/passwd does not exist.  Run vncpasswd to create passwd file.\n";
       exit 1;
@@ -892,7 +915,7 @@ sub List
   print "\nTurboVNC server sessions:\n\n";
   print "X DISPLAY #\tPROCESS ID\n";
   foreach my $file (@filelist) {
-    if ($file =~ /$host:(\d+)$\.pid/) {
+    if ($file =~ /$host:(\d+)$\.pid/ && !&CheckDisplayNumber($1)) {
       print ":".$1."\t\t".`cat $vncUserDir/$file`;
     }
   }
