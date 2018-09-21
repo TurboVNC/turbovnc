@@ -53,6 +53,10 @@ directory but for which the corresponding Xvnc process is no longer running.)
 tunneling with the built-in SSH client, the SSH connection would remain open
 even if the associated VNC connection had been closed.
 
+13. Fixed an issue in the `vncviewer-javaw.bat` script, which is used to
+launch the Java TurboVNC Viewer on Windows without a console window, whereby
+jawt.dll would not be found when using certain versions of the Oracle JRE.
+
 
 2.1.2
 =====
