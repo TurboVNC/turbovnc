@@ -401,7 +401,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       synchronized(viewer) {
         viewer.wait();
       }
-    } catch(InterruptedException e) {
+    } catch (InterruptedException e) {
     }
   }
 
