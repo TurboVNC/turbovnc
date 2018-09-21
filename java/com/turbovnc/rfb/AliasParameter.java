@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ public class AliasParameter extends VoidParameter {
 
   public boolean setParam(String v) { return param.setParam(v); }
   public boolean setParam() { return param.setParam(); }
+
+  public synchronized void reset() { param.reset(); }
 
   public String getDefaultStr() { return null; }
   public String getValueStr() { return param.getValueStr(); }

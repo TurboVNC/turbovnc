@@ -45,6 +45,11 @@ public class BoolParameter extends VoidParameter {
   public boolean setParam() { setParam(true);  return true; }
   public synchronized void setParam(boolean b) { value = b; }
 
+  public synchronized void reset() {
+    value = defValue;
+    reverse = false;
+  }
+
   public String getDefaultStr() { return defValue ? "1" : "0"; }
   public synchronized String getValueStr() { return value ? "1" : "0"; }
   public String getValues() { return "0, 1"; }

@@ -8,6 +8,11 @@ an image of the remote desktop to be saved to the client machine.
 automatically arranges all viewer windows in a grid pattern when a hotkey is
 pressed or an option is selected in the F8 or Mac menu.
 
+3. The Java/Mac/Un*x TurboVNC Viewer can now automatically connect to multiple
+VNC servers, applying a different set of options for each.  This is
+accomplished by separating the command-line arguments for each VNC server
+with `--`.
+
 
 2.2
 ===

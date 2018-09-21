@@ -39,6 +39,11 @@ public class StringParameter extends VoidParameter {
     return value != null;
   }
 
+  public synchronized void reset() {
+    value = defValue;
+    isDefault = true;
+  }
+
   public String getDefaultStr() { return defValue; }
   public synchronized String getValueStr() { return value; }
   public String getValues() { return values; }

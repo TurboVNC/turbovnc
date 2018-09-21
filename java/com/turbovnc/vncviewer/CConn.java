@@ -383,6 +383,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       else if (cause != null)
         throw new SystemException(cause.toString());
     }
+    synchronized(viewer) {
+      viewer.notify();
+    }
   }
 
   // RFB thread: setDesktopSize() is called when the desktop size changes

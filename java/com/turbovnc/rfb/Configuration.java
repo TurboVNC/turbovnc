@@ -345,6 +345,16 @@ public final class Configuration {
     }
   }
 
+  public static void reset() {
+    VoidParameter current = head;
+
+    while (current != null) {
+      if (!(current instanceof HeaderParameter))
+        current.reset();
+      current = current.next;
+    }
+  }
+
   private Configuration() {}
   static VoidParameter head;
   static VoidParameter tail;

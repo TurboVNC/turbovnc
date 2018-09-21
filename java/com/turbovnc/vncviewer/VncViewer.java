@@ -380,8 +380,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     setBlitterDefaults();
   }
 
-  public static void main(String[] argv) {
-    setLookAndFeel();
+  static void startViewer(String[] argv) {
     VncViewer viewer = new VncViewer(argv);
     if (OS.startsWith("mac os x")) {
       synchronized(VncViewer.class) {
@@ -398,6 +397,42 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       }
     }
     viewer.start();
+    try {
+      synchronized(viewer) {
+        viewer.wait();
+      }
+    } catch(InterruptedException e) {
+    }
+  }
+
+  public static void main(String[] argv) {
+    setLookAndFeel();
+
+    // Split argument array at "--" to allow multiple connections to be
+    // specified
+    int index = 0, i;
+    String[] newArgv = null;
+
+    for (i = 0; i < argv.length; i++) {
+      if (argv[i].equals("--")) {
+        newArgv = new String[i - index];
+        System.arraycopy(argv, index, newArgv, 0, i - index);
+        if (index > 0)
+          Configuration.reset();
+        startViewer(newArgv);
+        index = i + 1;
+      }
+    }
+
+    if (index < argv.length || argv.length == 0) {
+      if (index != 0) {
+        newArgv = new String[i - index];
+        System.arraycopy(argv, index, newArgv, 0, i - index);
+        argv = newArgv;
+        Configuration.reset();
+      }
+      startViewer(argv);
+    }
   }
 
   public VncViewer(String[] argv) {
@@ -509,6 +544,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "       VncViewer [options/parameters] [host:displayNum] [options/parameters]\n" +
       "       VncViewer [options/parameters] [host::port] [options/parameters]\n" +
       "       VncViewer [options/parameters] -listen [port] [options/parameters]\n" +
+      "\n" +
+      "Multiple VNC servers and associated options/parameters can be specified by\n" +
+      "separating the command-line arguments for each server with --.  The TurboVNC\n" +
+      "Viewer will connect to the VNC servers serially and in the specified order.\n" +
       "\n" +
       "Options:\n" +
       "  -loglevel <level>   configure logging level\n" +
@@ -636,6 +675,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     dlg.setVisible(true);
     if (reconnect && pane.getValue() == dlgOptions[0])
       start();
+    else {
+      synchronized(this) {
+        this.notify();
+      }
+    }
   }
 
   static void showAbout(Component comp) {
