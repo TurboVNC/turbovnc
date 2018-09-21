@@ -8,7 +8,7 @@
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
  *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
- *  Copyright (C) 2013 Pierre Ossman for Cendio AB.  All Rights Reserved.
+ *  Copyright (C) 2013, 2018 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2014-2016, 2019 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -224,6 +224,31 @@ void KeyEvent(CARD32 keysym, Bool down)
   state = GetKeyboardState();
 
   keycode = KeysymToKeycode(keysym, state, &new_state);
+
+  /*
+   * Shift+Alt is often mapped to Meta, so try that rather than
+   * allocating a new entry, faking shift, or using the dummy
+   * key entries that many layouts have.
+   */
+  if ((state & ShiftMask) &&
+      ((keysym == XK_Alt_L) || (keysym == XK_Alt_R))) {
+    KeyCode alt, meta;
+
+    if (keysym == XK_Alt_L) {
+      alt = KeysymToKeycode(XK_Alt_L, state & ~ShiftMask, NULL);
+      meta = KeysymToKeycode(XK_Meta_L, state, NULL);
+    } else {
+      alt = KeysymToKeycode(XK_Alt_R, state & ~ShiftMask, NULL);
+      meta = KeysymToKeycode(XK_Meta_R, state, NULL);
+    }
+
+    if ((meta != 0) && (alt == meta)) {
+      if (xkbDebug)
+        rfbLog("Replacing Shift+Alt with Shift+Meta\n");
+      keycode = meta;
+      new_state = state;
+    }
+  }
 
   /* Try some equivalent keysyms if we couldn't find a perfect match */
   if (keycode == 0) {
