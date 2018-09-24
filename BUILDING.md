@@ -36,6 +36,7 @@ Build Requirements
 - JDK 8 or OpenJDK 1.7 or later [if building the TurboVNC Viewer]
   * For systems that do not provide a JDK, download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
+  * If using JDK 11 or later, CMake 3.10.x or later must also be used
 
 
 ### Windows
@@ -68,6 +69,7 @@ Build Requirements
 - JDK 8 or later
   * Download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
+  * If using JDK 11 or later, CMake 3.10.x or later must also be used
 
 
 Out-of-Tree Builds

@@ -47,6 +47,8 @@ associated VNC connection had been closed.
 launch the Java TurboVNC Viewer on Windows without a console window, whereby
 jawt.dll would not be found when using certain versions of the Oracle JRE.
 
+11. The Java TurboVNC Viewer now builds successfully with JDK 11.
+
 
 2.2 beta1
 =========

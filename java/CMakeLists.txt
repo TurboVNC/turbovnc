@@ -10,9 +10,6 @@ endif()
 set(CMAKE_JAVA_COMPILE_FLAGS ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS} CACHE STRING
 	"Java compiler flags (Default: ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS})")
 set(CMAKE_JAVA_COMPILE_FLAGS "${CMAKE_JAVA_COMPILE_FLAGS} -J-Dfile.encoding=UTF8")
-if(Java_VERSION_MAJOR GREATER 8)
-	set(CMAKE_JAVA_COMPILE_FLAGS "${CMAKE_JAVA_COMPILE_FLAGS} --add-modules java.xml.bind")
-endif()
 message(STATUS "CMAKE_JAVA_COMPILE_FLAGS = ${CMAKE_JAVA_COMPILE_FLAGS}")
 
 set(CLASSPATH com/turbovnc/vncviewer)
@@ -139,7 +136,8 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/jcraft/jsch/jce/*.java
 	${SRCDIR}/com/jcraft/jsch/jcraft/*.java
 	${SRCDIR}/com/jcraft/jsch/jgss/*.java
-	${SRCDIR}/com/jcraft/jzlib/*.java)
+	${SRCDIR}/com/jcraft/jzlib/*.java
+	${SRCDIR}/org/spf4j/base/*.java)
 
 string(REGEX REPLACE " " ";" CMAKE_JAVA_COMPILE_FLAGS
 	"${CMAKE_JAVA_COMPILE_FLAGS}")
@@ -225,6 +223,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/jcraft/jsch/jcraft/*.class
 		com/jcraft/jsch/jce/*.class
 		com/jcraft/jsch/*.class
+		org/spf4j/base/*.class
 		org/libjpegturbo/turbojpeg/*.class
 		${CLASSPATH}/toolbar.png
 		${CLASSPATH}/turbovnc.png
