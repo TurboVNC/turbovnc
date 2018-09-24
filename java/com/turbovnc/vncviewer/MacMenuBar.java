@@ -42,7 +42,8 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       if (method.getName().equals("handleAbout")) {
         cc.showAbout();
       } else if (method.getName().equals("handlePreferences")) {
-        cc.options.showDialog(cc.viewport);
+        if (!cc.options.isShown())
+          cc.options.showDialog(cc.viewport);
       }
       return null;
     }
