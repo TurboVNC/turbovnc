@@ -622,6 +622,10 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     if ((e.getModifiersEx() & InputEvent.META_DOWN_MASK) ==
         InputEvent.META_DOWN_MASK) {
       switch (e.getKeyCode()) {
+        case KeyEvent.VK_P:
+          if (VncViewer.JAVA_VERSION >= 9 && VncViewer.JAVA_VERSION <= 11)
+            e.consume();
+          return;
         case KeyEvent.VK_COMMA:
         case KeyEvent.VK_BACK_QUOTE:
         case KeyEvent.VK_H:
@@ -629,7 +633,6 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_N:
         case KeyEvent.VK_W:
         case KeyEvent.VK_I:
-        case KeyEvent.VK_P:
         case KeyEvent.VK_R:
         case KeyEvent.VK_L:
         case KeyEvent.VK_F:

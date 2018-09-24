@@ -54,6 +54,10 @@ option in the VncViewer menu (and its associated hotkey, Command-,) would pop
 up a new copy of the Options dialog even if the Options dialog was already
 visible.
 
+13. Worked around an issue in Java 9 through 11 that caused the Profiling
+dialog in the Mac TurboVNC Viewer to immediately disappear if it was popped up
+using the Command-P hotkey.
+
 
 2.2 beta1
 =========
