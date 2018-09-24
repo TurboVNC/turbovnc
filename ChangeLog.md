@@ -49,6 +49,11 @@ jawt.dll would not be found when using certain versions of the Oracle JRE.
 
 11. The Java TurboVNC Viewer now builds successfully with JDK 11.
 
+12. Fixed an issue in the Mac TurboVNC Viewer whereby the "Preferences..."
+option in the VncViewer menu (and its associated hotkey, Command-,) would pop
+up a new copy of the Options dialog even if the Options dialog was already
+visible.
+
 
 2.2 beta1
 =========
