@@ -39,43 +39,42 @@
 #define OUT_T CONCAT2E(CARD, OUT)
 #define SwapOUT(x) CONCAT2E(Swap, OUT(x))
 #define rfbInitColourMapSingleTableOUT  \
-    CONCAT2E(rfbInitColourMapSingleTable, OUT)
+  CONCAT2E(rfbInitColourMapSingleTable, OUT)
 
 
 static void rfbInitColourMapSingleTableOUT(char **table, rfbPixelFormat *in,
                                            rfbPixelFormat *out)
 {
-    int i, r, g, b;
-    OUT_T *t;
-    EntryPtr pent;
-    int nEntries = 1 << in->bitsPerPixel;
+  int i, r, g, b;
+  OUT_T *t;
+  EntryPtr pent;
+  int nEntries = 1 << in->bitsPerPixel;
 
-    if (*table) free(*table);
-    *table = (char *)rfbAlloc(nEntries * sizeof(OUT_T));
-    t = (OUT_T *)*table;
+  if (*table) free(*table);
+  *table = (char *)rfbAlloc(nEntries * sizeof(OUT_T));
+  t = (OUT_T *)*table;
 
-    pent = (EntryPtr)&rfbInstalledColormap->red[0];
+  pent = (EntryPtr)&rfbInstalledColormap->red[0];
 
-    for (i = 0; i < nEntries; i++) {
-        if (pent->fShared) {
-            r = pent->co.shco.red->color;
-            g = pent->co.shco.green->color;
-            b = pent->co.shco.blue->color;
-        } else {
-            r = pent->co.local.red;
-            g = pent->co.local.green;
-            b = pent->co.local.blue;
-        }
-        t[i] = ((((r * out->redMax + 32767) / 65535) << out->redShift) |
-                (((g * out->greenMax + 32767) / 65535) << out->greenShift) |
-                (((b * out->blueMax + 32767) / 65535) << out->blueShift));
-#if (OUT != 8)
-        if (out->bigEndian != in->bigEndian) {
-            t[i] = SwapOUT(t[i]);
-        }
-#endif
-        pent++;
+  for (i = 0; i < nEntries; i++) {
+    if (pent->fShared) {
+      r = pent->co.shco.red->color;
+      g = pent->co.shco.green->color;
+      b = pent->co.shco.blue->color;
+    } else {
+      r = pent->co.local.red;
+      g = pent->co.local.green;
+      b = pent->co.local.blue;
     }
+    t[i] = ((((r * out->redMax + 32767) / 65535) << out->redShift) |
+            (((g * out->greenMax + 32767) / 65535) << out->greenShift) |
+            (((b * out->blueMax + 32767) / 65535) << out->blueShift));
+#if (OUT != 8)
+    if (out->bigEndian != in->bigEndian)
+      t[i] = SwapOUT(t[i]);
+#endif
+    pent++;
+  }
 }
 
 

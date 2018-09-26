@@ -96,6 +96,7 @@ static inline void swap_float(float *ptr)
 static int xhandler(Display *dpy, XErrorEvent *xe)
 {
   char errstr[256];
+
   errstr[0] = 0;
   XGetErrorText(dpy, xe->error_code, errstr, 255);
   rfbLog("NV-CONTROL X11 ERROR: %s (XID: 0x%.8x)\n", errstr, xe->resourceid);
@@ -680,11 +681,11 @@ static int ProcNVCTRLSetGvoColorConversion(ClientPtr client)
   colorMatrix[2][1] = stuff->cscMatrix_cb_g;
   colorMatrix[2][2] = stuff->cscMatrix_cb_b;
 
-  colorOffset[0] = stuff->cscOffset_y ;
+  colorOffset[0] = stuff->cscOffset_y;
   colorOffset[1] = stuff->cscOffset_cr;
   colorOffset[2] = stuff->cscOffset_cb;
 
-  colorScale[0] = stuff->cscScale_y ;
+  colorScale[0] = stuff->cscScale_y;
   colorScale[1] = stuff->cscScale_cr;
   colorScale[2] = stuff->cscScale_cb;
 
@@ -710,10 +711,10 @@ static int SProcNVCTRLSetGvoColorConversion(ClientPtr client)
   swap_float(&stuff->cscMatrix_cb_r);
   swap_float(&stuff->cscMatrix_cb_g);
   swap_float(&stuff->cscMatrix_cb_b);
-  swap_float(&stuff->cscOffset_y );
+  swap_float(&stuff->cscOffset_y);
   swap_float(&stuff->cscOffset_cr);
   swap_float(&stuff->cscOffset_cb);
-  swap_float(&stuff->cscScale_y );
+  swap_float(&stuff->cscScale_y);
   swap_float(&stuff->cscScale_cr);
   swap_float(&stuff->cscScale_cb);
   return ProcNVCTRLSetGvoColorConversion(client);

@@ -67,104 +67,104 @@ KeySym pressedKeys[256] = { NoSymbol64 NoSymbol64 NoSymbol64 NoSymbol64 };
 
 void KbdDeviceInit(DeviceIntPtr pDevice)
 {
-    char *env;
+  char *env;
 
-    kbdDevice = pDevice;
-    if ((env = getenv("TVNC_XKBDEBUG")) != NULL && !strcmp(env, "1")) {
-        rfbLog("XKEYBOARD handler debugging messages enabled\n");
-        xkbDebug = TRUE;
-    }
-    if ((env = getenv("TVNC_XKBFAKESHIFT")) != NULL && !strcmp(env, "0")) {
-        rfbLog("Disabling fake shift key event generation in XKEYBOARD handler\n");
-        fakeShift = FALSE;
-    }
-    if ((env = getenv("TVNC_XKBIGNORELOCK")) != NULL && !strcmp(env, "0")) {
-        rfbLog("Allowing Caps Lock and other lock modifiers in XKEYBOARD handler\n");
-        ignoreLockModifiers = FALSE;
-    }
+  kbdDevice = pDevice;
+  if ((env = getenv("TVNC_XKBDEBUG")) != NULL && !strcmp(env, "1")) {
+    rfbLog("XKEYBOARD handler debugging messages enabled\n");
+    xkbDebug = TRUE;
+  }
+  if ((env = getenv("TVNC_XKBFAKESHIFT")) != NULL && !strcmp(env, "0")) {
+    rfbLog("Disabling fake shift key event generation in XKEYBOARD handler\n");
+    fakeShift = FALSE;
+  }
+  if ((env = getenv("TVNC_XKBIGNORELOCK")) != NULL && !strcmp(env, "0")) {
+    rfbLog("Allowing Caps Lock and other lock modifiers in XKEYBOARD handler\n");
+    ignoreLockModifiers = FALSE;
+  }
 }
 
 
 void PtrDeviceOn(DeviceIntPtr pDev)
 {
-    ptrAcceleration = (char)pDev->ptrfeed->ctrl.num;
-    ptrDevice = pDev;
+  ptrAcceleration = (char)pDev->ptrfeed->ctrl.num;
+  ptrDevice = pDev;
 }
 
 
 void PtrDeviceControl(DevicePtr dev, PtrCtrl *ctrl)
 {
-    ptrAcceleration = (char)ctrl->num;
+  ptrAcceleration = (char)ctrl->num;
 
-    if (udpSockConnected) {
-        if (write(udpSock, &ptrAcceleration, 1) <= 0) {
-            rfbLogPerror("PtrDeviceControl: UDP input: write");
-            rfbDisconnectUDPSock();
-        }
+  if (udpSockConnected) {
+    if (write(udpSock, &ptrAcceleration, 1) <= 0) {
+      rfbLogPerror("PtrDeviceControl: UDP input: write");
+      rfbDisconnectUDPSock();
     }
+  }
 }
 
 
 static inline void PressKey(DeviceIntPtr dev, int kc, Bool down,
                             const char *msg)
 {
-    int action;
+  int action;
 
-    if (msg != NULL && xkbDebug)
-        rfbLog("PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
+  if (msg != NULL && xkbDebug)
+    rfbLog("PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
 
-    action = down ? KeyPress : KeyRelease;
-    QueueKeyboardEvents(dev, action, kc);
+  action = down ? KeyPress : KeyRelease;
+  QueueKeyboardEvents(dev, action, kc);
 }
 
 
 /* altKeysym is a table of alternative keysyms which have the same meaning. */
 
 static struct altKeysym_t {
-    KeySym a, b;
+  KeySym a, b;
 } altKeysym[] = {
-    { XK_Shift_L, XK_Shift_R },
-    { XK_Control_L, XK_Control_R },
-    { XK_Meta_L, XK_Meta_R },
-    { XK_Alt_L, XK_Alt_R },
-    { XK_Super_L, XK_Super_R },
-    { XK_Hyper_L, XK_Hyper_R },
-    { XK_KP_Space, XK_space },
-    { XK_KP_Tab, XK_Tab },
-    { XK_KP_Enter, XK_Return },
-    { XK_KP_F1, XK_F1 },
-    { XK_KP_F2, XK_F2 },
-    { XK_KP_F3, XK_F3 },
-    { XK_KP_F4, XK_F4 },
-    { XK_KP_Home, XK_Home },
-    { XK_KP_Left, XK_Left },
-    { XK_KP_Up, XK_Up },
-    { XK_KP_Right, XK_Right },
-    { XK_KP_Down, XK_Down },
-    { XK_KP_Page_Up, XK_Page_Up },
-    { XK_KP_Page_Down, XK_Page_Down },
-    { XK_KP_End, XK_End },
-    { XK_KP_Begin, XK_Begin },
-    { XK_KP_Insert, XK_Insert },
-    { XK_KP_Delete, XK_Delete },
-    { XK_KP_Equal, XK_equal },
-    { XK_KP_Multiply, XK_asterisk },
-    { XK_KP_Add, XK_plus },
-    { XK_KP_Separator, XK_comma },
-    { XK_KP_Subtract, XK_minus },
-    { XK_KP_Decimal, XK_period },
-    { XK_KP_Divide, XK_slash },
-    { XK_KP_0, XK_0 },
-    { XK_KP_1, XK_1 },
-    { XK_KP_2, XK_2 },
-    { XK_KP_3, XK_3 },
-    { XK_KP_4, XK_4 },
-    { XK_KP_5, XK_5 },
-    { XK_KP_6, XK_6 },
-    { XK_KP_7, XK_7 },
-    { XK_KP_8, XK_8 },
-    { XK_KP_9, XK_9 },
-    { XK_ISO_Level3_Shift, XK_Mode_switch },
+  { XK_Shift_L, XK_Shift_R },
+  { XK_Control_L, XK_Control_R },
+  { XK_Meta_L, XK_Meta_R },
+  { XK_Alt_L, XK_Alt_R },
+  { XK_Super_L, XK_Super_R },
+  { XK_Hyper_L, XK_Hyper_R },
+  { XK_KP_Space, XK_space },
+  { XK_KP_Tab, XK_Tab },
+  { XK_KP_Enter, XK_Return },
+  { XK_KP_F1, XK_F1 },
+  { XK_KP_F2, XK_F2 },
+  { XK_KP_F3, XK_F3 },
+  { XK_KP_F4, XK_F4 },
+  { XK_KP_Home, XK_Home },
+  { XK_KP_Left, XK_Left },
+  { XK_KP_Up, XK_Up },
+  { XK_KP_Right, XK_Right },
+  { XK_KP_Down, XK_Down },
+  { XK_KP_Page_Up, XK_Page_Up },
+  { XK_KP_Page_Down, XK_Page_Down },
+  { XK_KP_End, XK_End },
+  { XK_KP_Begin, XK_Begin },
+  { XK_KP_Insert, XK_Insert },
+  { XK_KP_Delete, XK_Delete },
+  { XK_KP_Equal, XK_equal },
+  { XK_KP_Multiply, XK_asterisk },
+  { XK_KP_Add, XK_plus },
+  { XK_KP_Separator, XK_comma },
+  { XK_KP_Subtract, XK_minus },
+  { XK_KP_Decimal, XK_period },
+  { XK_KP_Divide, XK_slash },
+  { XK_KP_0, XK_0 },
+  { XK_KP_1, XK_1 },
+  { XK_KP_2, XK_2 },
+  { XK_KP_3, XK_3 },
+  { XK_KP_4, XK_4 },
+  { XK_KP_5, XK_5 },
+  { XK_KP_6, XK_6 },
+  { XK_KP_7, XK_7 },
+  { XK_KP_8, XK_8 },
+  { XK_KP_9, XK_9 },
+  { XK_ISO_Level3_Shift, XK_Mode_switch },
 };
 
 
@@ -284,8 +284,8 @@ void KeyEvent(CARD32 keysym, Bool down)
    * avoid faking shift), we try to avoid the fake shifts if we
    * can use an alternative keysym.
    */
-  if (((state & ShiftMask) != (new_state & ShiftMask)) &&
-      avoidShiftNumLock && IsAffectedByNumLock(keycode)) {
+  if (((state & ShiftMask) != (new_state & ShiftMask)) && avoidShiftNumLock &&
+      IsAffectedByNumLock(keycode)) {
     KeyCode keycode2 = 0;
     unsigned new_state2;
 
@@ -444,148 +444,146 @@ static int cursorPosX = -1, cursorPosY = -1;
 
 void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
 {
-    int i;
-    int valuators[2];
-    ValuatorMask mask;
-    static int oldButtonMask = 0;
+  int i;
+  int valuators[2];
+  ValuatorMask mask;
+  static int oldButtonMask = 0;
 
-    if (!ptrDevice)
-        FatalError("Pointer device not initialized");
+  if (!ptrDevice)
+    FatalError("Pointer device not initialized");
 
-    if (cursorPosX != x || cursorPosY != y) {
-        valuators[0] = x;
-        valuators[1] = y;
-        valuator_mask_set_range(&mask, 0, 2, valuators);
-        QueuePointerEvents(ptrDevice, MotionNotify, 0, POINTER_ABSOLUTE,
+  if (cursorPosX != x || cursorPosY != y) {
+    valuators[0] = x;
+    valuators[1] = y;
+    valuator_mask_set_range(&mask, 0, 2, valuators);
+    QueuePointerEvents(ptrDevice, MotionNotify, 0, POINTER_ABSOLUTE, &mask);
+
+    cursorPosX = x;
+    cursorPosY = y;
+  }
+
+  for (i = 0; i < 5; i++) {
+    if ((buttonMask ^ oldButtonMask) & (1 << i)) {
+      if (buttonMask & (1 << i)) {
+        valuator_mask_set_range(&mask, 0, 0, NULL);
+        QueuePointerEvents(ptrDevice, ButtonPress, i + 1, POINTER_RELATIVE,
                            &mask);
-
-        cursorPosX = x;
-        cursorPosY = y;
+      } else {
+        valuator_mask_set_range(&mask, 0, 0, NULL);
+        QueuePointerEvents(ptrDevice, ButtonRelease, i + 1, POINTER_RELATIVE,
+                           &mask);
+      }
     }
+  }
 
-    for (i = 0; i < 5; i++) {
-        if ((buttonMask ^ oldButtonMask) & (1 << i)) {
-            if (buttonMask & (1 << i)) {
-                valuator_mask_set_range(&mask, 0, 0, NULL);
-                QueuePointerEvents(ptrDevice, ButtonPress, i + 1,
-                                   POINTER_RELATIVE, &mask);
-            } else {
-                valuator_mask_set_range(&mask, 0, 0, NULL);
-                QueuePointerEvents(ptrDevice, ButtonRelease, i + 1,
-                                   POINTER_RELATIVE, &mask);
-            }
-        }
-    }
-
-    oldButtonMask = buttonMask;
-    mieqProcessInputEvents();
+  oldButtonMask = buttonMask;
+  mieqProcessInputEvents();
 }
 
 
 char *stristr(const char *s1, const char *s2)
 {
-    char *str1, *str2, *ret;
-    int i;
+  char *str1, *str2, *ret;
+  int i;
 
-    if (!s1 || !s2 || strlen(s1) < 1 || strlen(s2) < 1)
-        return NULL;
+  if (!s1 || !s2 || strlen(s1) < 1 || strlen(s2) < 1)
+    return NULL;
 
-    str1 = strdup(s1);
-    for (i = 0; i < strlen(str1); i++)
-        str1[i] = tolower(str1[i]);
-    str2 = strdup(s2);
-    for (i = 0; i < strlen(str2); i++)
-        str2[i] = tolower(str2[i]);
+  str1 = strdup(s1);
+  for (i = 0; i < strlen(str1); i++)
+    str1[i] = tolower(str1[i]);
+  str2 = strdup(s2);
+  for (i = 0; i < strlen(str2); i++)
+    str2[i] = tolower(str2[i]);
 
-    ret = strstr(str1, str2);
-    free(str1);  free(str2);
-    return ret;
+  ret = strstr(str1, str2);
+  free(str1);  free(str2);
+  return ret;
 }
 
 
 void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 {
-    ValuatorMask mask;
+  ValuatorMask mask;
 
-    if (!dev)
-        FatalError("ExtInputDeviceAddEvent(): Invalid argument");
+  if (!dev)
+    FatalError("ExtInputDeviceAddEvent(): Invalid argument");
 
-    if (rfbVirtualTablet) {
-        int i;
-        rfbDevInfoPtr vtDev;
+  if (rfbVirtualTablet) {
+    int i;
+    rfbDevInfoPtr vtDev;
 
-        switch (dev->productID) {
-            case rfbGIIDevTypeStylus:
-                vtDev = &virtualTabletStylus;
-                break;
-            case rfbGIIDevTypeEraser:
-                vtDev = &virtualTabletEraser;
-                break;
-            case rfbGIIDevTypeTouch:
-                vtDev = &virtualTabletTouch;
-                break;
-            case rfbGIIDevTypePad:
-                vtDev = &virtualTabletPad;
-                break;
-            default:
-                if (stristr(dev->name, "stylus"))
-                    vtDev = &virtualTabletStylus;
-                else if (stristr(dev->name, "eraser"))
-                    vtDev = &virtualTabletEraser;
-                else if (stristr(dev->name, "touch"))
-                    vtDev = &virtualTabletTouch;
-                else if (stristr(dev->name, "pad"))
-                    vtDev = &virtualTabletPad;
-                else
-                    return;
-        }
-
-        if (dev->valFirst >= vtDev->numValuators ||
-            buttons > vtDev->numButtons)
-            return;
-
-        vtDev->valFirst = dev->valFirst;
-        vtDev->valCount = min(dev->valCount,
-                              vtDev->numValuators - vtDev->valFirst);
-
-        for (i = vtDev->valFirst; i < vtDev->valFirst + vtDev->valCount; i++) {
-            vtDev->values[i] = (int)round(
-                (double)(dev->values[i] - dev->valuators[i].rangeMin) /
-                    (double)(dev->valuators[i].rangeMax -
-                             dev->valuators[i].rangeMin) *
-                (double)(vtDev->valuators[i].rangeMax -
-                         vtDev->valuators[i].rangeMin) +
-                (double)vtDev->valuators[i].rangeMin);
-        }
-        dev = vtDev;
+    switch (dev->productID) {
+      case rfbGIIDevTypeStylus:
+        vtDev = &virtualTabletStylus;
+        break;
+      case rfbGIIDevTypeEraser:
+        vtDev = &virtualTabletEraser;
+        break;
+      case rfbGIIDevTypeTouch:
+        vtDev = &virtualTabletTouch;
+        break;
+      case rfbGIIDevTypePad:
+        vtDev = &virtualTabletPad;
+        break;
+      default:
+        if (stristr(dev->name, "stylus"))
+          vtDev = &virtualTabletStylus;
+        else if (stristr(dev->name, "eraser"))
+          vtDev = &virtualTabletEraser;
+        else if (stristr(dev->name, "touch"))
+          vtDev = &virtualTabletTouch;
+        else if (stristr(dev->name, "pad"))
+          vtDev = &virtualTabletPad;
+        else
+          return;
     }
 
-    if (dev->valCount > 0) {
-        valuator_mask_set_range(&mask, 0, dev->numValuators, dev->values);
-        QueuePointerEvents(dev->pDev, type, buttons,
-                           dev->mode == Absolute ? POINTER_ABSOLUTE :
-                           POINTER_RELATIVE, &mask);
-    } else {
-        valuator_mask_set_range(&mask, 0, 0, NULL);
-        QueuePointerEvents(dev->pDev, type, buttons, POINTER_RELATIVE, &mask);
+    if (dev->valFirst >= vtDev->numValuators || buttons > vtDev->numButtons)
+      return;
+
+    vtDev->valFirst = dev->valFirst;
+    vtDev->valCount =
+      min(dev->valCount, vtDev->numValuators - vtDev->valFirst);
+
+    for (i = vtDev->valFirst; i < vtDev->valFirst + vtDev->valCount; i++) {
+      vtDev->values[i] =
+        (int)round((double)(dev->values[i] - dev->valuators[i].rangeMin) /
+                   (double)(dev->valuators[i].rangeMax -
+                            dev->valuators[i].rangeMin) *
+                   (double)(vtDev->valuators[i].rangeMax -
+                            vtDev->valuators[i].rangeMin) +
+                   (double)vtDev->valuators[i].rangeMin);
     }
-    mieqProcessInputEvents();
+    dev = vtDev;
+  }
+
+  if (dev->valCount > 0) {
+    valuator_mask_set_range(&mask, 0, dev->numValuators, dev->values);
+    QueuePointerEvents(dev->pDev, type, buttons,
+                       dev->mode == Absolute ? POINTER_ABSOLUTE : POINTER_RELATIVE,
+                       &mask);
+  } else {
+    valuator_mask_set_range(&mask, 0, 0, NULL);
+    QueuePointerEvents(dev->pDev, type, buttons, POINTER_RELATIVE, &mask);
+  }
+  mieqProcessInputEvents();
 }
 
 
 void KbdReleaseAllKeys()
 {
-    int i, j;
+  int i, j;
 
-    if (!kbdDevice)
-        FatalError("Keyboard device not initialized");
+  if (!kbdDevice)
+    FatalError("Keyboard device not initialized");
 
-    for (i = 0; i < DOWN_LENGTH; i++) {
-        if (kbdDevice->key->down[i] != 0) {
-            for (j = 0; j < 8; j++) {
-                if (kbdDevice->key->down[i] & (1 << j))
-                    QueueKeyboardEvents(kbdDevice, KeyRelease, (i << 3) | j);
-            }
-        }
+  for (i = 0; i < DOWN_LENGTH; i++) {
+    if (kbdDevice->key->down[i] != 0) {
+      for (j = 0; j < 8; j++) {
+        if (kbdDevice->key->down[i] & (1 << j))
+          QueueKeyboardEvents(kbdDevice, KeyRelease, (i << 3) | j);
+      }
     }
+  }
 }

@@ -81,7 +81,7 @@ char *rfbAuthX509Key = NULL;
 
 static void AuthNoneStartFunc(rfbClientPtr cl)
 {
-    rfbClientAuthSucceeded(cl, rfbAuthNone);
+  rfbClientAuthSucceeded(cl, rfbAuthNone);
 }
 
 static void AuthNoneRspFunc(rfbClientPtr cl)
@@ -99,9 +99,9 @@ Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
 static char *pamServiceName = AUTH_DEFAULT_PAM_SERVICE_NAME;
 
 typedef struct UserList {
-    struct UserList *next;
-    const char *name;
-    Bool viewOnly;
+  struct UserList *next;
+  const char *name;
+  Bool viewOnly;
 } UserList;
 
 static UserList *userACL = NULL;
@@ -110,205 +110,202 @@ Bool rfbAuthUserACL = FALSE;
 
 void rfbAuthAddUser(const char *name, Bool viewOnly)
 {
-    UserList *p = (UserList *)rfbAlloc(sizeof(UserList));
+  UserList *p = (UserList *)rfbAlloc(sizeof(UserList));
 
-    rfbLog("Adding user '%s' to ACL with %s privileges\n", name,
-           viewOnly ? " view-only" : "full control");
-    p->next = userACL;
-    p->name = name;
-    p->viewOnly = viewOnly;
-    userACL = p;
+  rfbLog("Adding user '%s' to ACL with %s privileges\n", name,
+         viewOnly ? " view-only" : "full control");
+  p->next = userACL;
+  p->name = name;
+  p->viewOnly = viewOnly;
+  userACL = p;
 }
 
 
 void rfbAuthRevokeUser(const char *name)
 {
-    UserList **prev = &userACL;
-    UserList *p;
+  UserList **prev = &userACL;
+  UserList *p;
 
-    rfbLog("Removing user '%s' from ACL\n", name);
-    while (*prev != NULL) {
-        p = *prev;
-        if (!strcmp(p->name, name)) {
-            *prev = p->next;
-            free((void *)p->name);
-            free(p);
-            return;
-        }
-
-        prev = &p->next;
+  rfbLog("Removing user '%s' from ACL\n", name);
+  while (*prev != NULL) {
+    p = *prev;
+    if (!strcmp(p->name, name)) {
+      *prev = p->next;
+      free((void *)p->name);
+      free(p);
+      return;
     }
+
+    prev = &p->next;
+  }
 }
 
 
 static void AuthPAMUserPwdStartFunc(rfbClientPtr cl)
 {
-    cl->state = RFB_AUTHENTICATION;
+  cl->state = RFB_AUTHENTICATION;
 }
 
 
 static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
 {
-    CARD32 userLen;
-    CARD32 pwdLen;
-    char userBuf[MAX_USER_LEN + 1];
-    char pwdBuf[MAX_PWD_LEN + 1];
-    int n;
-    const char *emsg;
+  CARD32 userLen;
+  CARD32 pwdLen;
+  char userBuf[MAX_USER_LEN + 1];
+  char pwdBuf[MAX_PWD_LEN + 1];
+  int n;
+  const char *emsg;
 
-    n = ReadExact(cl, (char *)&userLen, sizeof(userLen));
-    if (n <= 0) {
-        if (n != 0)
-            rfbLogPerror("AuthPAMUserPwdRspFunc: read error");
-        rfbCloseClient(cl);
-        return;
+  n = ReadExact(cl, (char *)&userLen, sizeof(userLen));
+  if (n <= 0) {
+    if (n != 0)
+      rfbLogPerror("AuthPAMUserPwdRspFunc: read error");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  userLen = Swap32IfLE(userLen);
+  n = ReadExact(cl, (char *)&pwdLen, sizeof(pwdLen));
+  if (n <= 0) {
+    if (n != 0)
+      rfbLogPerror("AuthPAMUserPwdRspFunc: read error");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  pwdLen = Swap32IfLE(pwdLen);
+  if ((userLen > MAX_USER_LEN) || (pwdLen > MAX_PWD_LEN)) {
+    rfbLogPerror("AuthPAMUserPwdRspFunc: excessively large user name or password in response");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  n = ReadExact(cl, userBuf, userLen);
+  if (n <= 0) {
+    if (n != 0)
+      rfbLogPerror("AuthPAMUserPwdRspFunc: error reading user name");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  userBuf[userLen] = '\0';
+  n = ReadExact(cl, pwdBuf, pwdLen);
+  if (n <= 0) {
+    if (n != 0)
+      rfbLogPerror("AuthPAMUserPwdRspFunc: error reading password");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  pwdBuf[pwdLen] = '\0';
+  if (rfbAuthUserACL) {
+    UserList *p = userACL;
+
+    if (p == NULL)
+      rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix Login authentication.\n");
+
+    while (p != NULL) {
+      if (!strcmp(p->name, userBuf))
+        break;
+      p = p->next;
     }
 
-    userLen = Swap32IfLE(userLen);
-    n = ReadExact(cl, (char *)&pwdLen, sizeof(pwdLen));
-    if (n <= 0) {
-        if (n != 0)
-            rfbLogPerror("AuthPAMUserPwdRspFunc: read error");
-        rfbCloseClient(cl);
-        return;
+    if (p == NULL) {
+      rfbLog("User '%s' is not in the ACL and has been denied access\n",
+             userBuf);
+      rfbClientAuthFailed(cl, "User denied access");
+      return;
     }
 
-    pwdLen = Swap32IfLE(pwdLen);
-    if ((userLen > MAX_USER_LEN) || (pwdLen > MAX_PWD_LEN)) {
-        rfbLogPerror("AuthPAMUserPwdRspFunc: excessively large user name or password in response");
-        rfbCloseClient(cl);
-        return;
+    cl->viewOnly = p->viewOnly;
+  } else {
+    struct passwd pbuf;
+    struct passwd *pw;
+    char buf[256];
+
+    if (getpwuid_r(getuid(), &pbuf, buf, sizeof(buf), &pw) != 0)
+      FatalError("AuthPAMUserPwdRspFunc: getpwuid_r failed: %s",
+                 strerror(errno));
+
+    if (strcmp(pbuf.pw_name, userBuf)) {
+      rfbLog("User '%s' denied access (not the session owner)\n", userBuf);
+      rfbLog("  Enable user ACL to grant access to other users.\n");
+      rfbClientAuthFailed(cl, "User denied access");
+      return;
     }
+  }
 
-    n = ReadExact(cl, userBuf, userLen);
-    if (n <= 0) {
-        if (n != 0)
-            rfbLogPerror("AuthPAMUserPwdRspFunc: error reading user name");
-        rfbCloseClient(cl);
-        return;
-    }
-
-    userBuf[userLen] = '\0';
-    n = ReadExact(cl, pwdBuf, pwdLen);
-    if (n <= 0) {
-        if (n != 0)
-            rfbLogPerror("AuthPAMUserPwdRspFunc: error reading password");
-        rfbCloseClient(cl);
-        return;
-    }
-
-    pwdBuf[pwdLen] = '\0';
-    if (rfbAuthUserACL) {
-        UserList *p = userACL;
-
-        if (p == NULL)
-            rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix Login authentication.\n");
-
-        while (p != NULL) {
-            if (!strcmp(p->name, userBuf))
-                break;
-            p = p->next;
-        }
-
-        if (p == NULL) {
-            rfbLog("User '%s' is not in the ACL and has been denied access\n",
-                   userBuf);
-            rfbClientAuthFailed(cl, "User denied access");
-            return;
-        }
-
-        cl->viewOnly = p->viewOnly;
-    } else {
-        struct passwd pbuf;
-        struct passwd *pw;
-        char buf[256];
-
-        if (getpwuid_r(getuid(), &pbuf, buf, sizeof(buf), &pw) != 0) {
-            FatalError("AuthPAMUserPwdRspFunc: getpwuid_r failed: %s",
-                strerror(errno));
-        }
-
-        if (strcmp(pbuf.pw_name, userBuf)) {
-            rfbLog("User '%s' denied access (not the session owner)\n",
-                   userBuf);
-            rfbLog("  Enable user ACL to grant access to other users.\n");
-            rfbClientAuthFailed(cl, "User denied access");
-            return;
-        }
-    }
-
-    if (rfbPAMAuthenticate(cl, pamServiceName, userBuf, pwdBuf, &emsg)) {
-        rfbClientAuthSucceeded(cl, rfbAuthUnixLogin);
-    } else {
-        rfbClientAuthFailed(cl, (char *)emsg);
-    }
+  if (rfbPAMAuthenticate(cl, pamServiceName, userBuf, pwdBuf, &emsg))
+    rfbClientAuthSucceeded(cl, rfbAuthUnixLogin);
+  else
+    rfbClientAuthFailed(cl, (char *)emsg);
 }
 
 #endif
 
 
 typedef struct {
-    const char *name;
-    int protocolMinorVer;
-    Bool advertise;
-    CARD8 securityType;
+  const char *name;
+  int protocolMinorVer;
+  Bool advertise;
+  CARD8 securityType;
 } SecTypeData;
 
 static SecTypeData secTypeNone    = { "none",    3, TRUE, rfbSecTypeNone };
 static SecTypeData secTypeVncAuth = { "vncauth", 3, TRUE, rfbSecTypeVncAuth };
 static SecTypeData secTypeTight   = { "tight",   7, TRUE, rfbSecTypeTight };
 static SecTypeData secTypeVeNCrypt =
-    { "vencrypt", 7, TRUE, rfbSecTypeVeNCrypt };
+  { "vencrypt", 7, TRUE, rfbSecTypeVeNCrypt };
 
 static SecTypeData *secTypes[] = {
-    &secTypeNone, &secTypeVncAuth, &secTypeVeNCrypt, &secTypeTight, NULL
+  &secTypeNone, &secTypeVncAuth, &secTypeVeNCrypt, &secTypeTight, NULL
 };
 
 typedef void (*AuthFunc) (rfbClientPtr cl);
 
 typedef struct {
-    int authType;
-    CARD8 vendorSignature[4];
-    CARD8 nameSignature[8];
-    AuthFunc startFunc;
-    AuthFunc rspFunc;
+  int authType;
+  CARD8 vendorSignature[4];
+  CARD8 nameSignature[8];
+  AuthFunc startFunc;
+  AuthFunc rspFunc;
 } AuthCapData;
 
 static AuthCapData authCapNone =
-    { rfbAuthNone, rfbStandardVendor, sig_rfbAuthNone,
-      AuthNoneStartFunc, AuthNoneRspFunc };
+  { rfbAuthNone, rfbStandardVendor, sig_rfbAuthNone, AuthNoneStartFunc,
+    AuthNoneRspFunc };
 
 static AuthCapData authCapVncAuth =
-    { rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
-      rfbVncAuthSendChallenge, rfbVncAuthProcessResponse };
+  { rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC, rfbVncAuthSendChallenge,
+    rfbVncAuthProcessResponse };
 
 static AuthCapData authCapVeNCrypt =
-    { rfbAuthVeNCrypt, rfbVeNCryptVendor, sig_rfbAuthVeNCrypt,
-      rfbVeNCryptAuthenticate, AuthNoneRspFunc };
+  { rfbAuthVeNCrypt, rfbVeNCryptVendor, sig_rfbAuthVeNCrypt,
+    rfbVeNCryptAuthenticate, AuthNoneRspFunc };
 
 #ifdef XVNC_AuthPAM
 static AuthCapData authCapUnixLogin =
-    { rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
-      AuthPAMUserPwdStartFunc, AuthPAMUserPwdRspFunc };
+  { rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
+    AuthPAMUserPwdStartFunc, AuthPAMUserPwdRspFunc };
 #endif
 
 static AuthCapData *authCaps[] = {
-    &authCapNone, &authCapVncAuth, &authCapVeNCrypt,
+  &authCapNone, &authCapVncAuth, &authCapVeNCrypt,
 #ifdef XVNC_AuthPAM
-    &authCapUnixLogin,
+  &authCapUnixLogin,
 #endif
-    NULL
+  NULL
 };
 
 typedef struct {
-    const char *name;
-    Bool enabled;
-    Bool permitted;
-    int preference;
-    Bool requiredData;
-    SecTypeData *secType;
-    AuthCapData *authCap;
-    int subType;
+  const char *name;
+  Bool enabled;
+  Bool permitted;
+  int preference;
+  Bool requiredData;
+  SecTypeData *secType;
+  AuthCapData *authCap;
+  int subType;
 } AuthMethodData;
 
 /*
@@ -322,476 +319,457 @@ typedef struct {
  */
 static AuthMethodData authMethods[] = {
 #if USETLS
-    /* name         enabled  permitted  preference  requiredData */
-    {  "tlsnone",   FALSE,   TRUE,      -1,         FALSE,
-    /* secType           authCap            subType */
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSNone },
+/*  name         enabled  permitted  preference  requiredData */
+  { "tlsnone",   FALSE,   TRUE,      -1,         FALSE,
+/*  secType           authCap            subType */
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSNone },
 
-    {  "tlsvnc",    TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSVnc },
+  { "tlsvnc",    TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSVnc },
 
-    {  "tlsotp",    TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSVnc },
-
-#ifdef XVNC_AuthPAM
-    {  "tlsplain",  TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSPlain },
-#endif
-
-    {  "x509none",  FALSE,   TRUE,      -1,         FALSE,
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509None },
-
-    {  "x509vnc",   TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Vnc },
-
-    {  "x509otp",   TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Vnc },
+  { "tlsotp",    TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSVnc },
 
 #ifdef XVNC_AuthPAM
-    {  "x509plain", TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Plain },
+  { "tlsplain",  TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptTLSPlain },
 #endif
-#endif
 
-    {  "none",      FALSE,   TRUE,      -1,         FALSE,
-       &secTypeNone,     &authCapNone,      rfbSecTypeNone },
+  { "x509none",  FALSE,   TRUE,      -1,         FALSE,
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509None },
 
-    {  "vnc",       TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVncAuth,  &authCapVncAuth,   rfbSecTypeVncAuth },
+  { "x509vnc",   TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Vnc },
 
-    {  "otp",       TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVncAuth,  &authCapVncAuth,   rfbSecTypeVncAuth },
+  { "x509otp",   TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Vnc },
 
 #ifdef XVNC_AuthPAM
-    {  "unixlogin", TRUE,    TRUE,      -1,         TRUE,
-       &secTypeTight,    &authCapUnixLogin, -1 },
-
-    {  "plain",     TRUE,    TRUE,      -1,         TRUE,
-       &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptPlain },
+  { "x509plain", TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptX509Plain },
+#endif
 #endif
 
-    { NULL }
+  { "none",      FALSE,   TRUE,      -1,         FALSE,
+    &secTypeNone,     &authCapNone,      rfbSecTypeNone },
+
+  { "vnc",       TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVncAuth,  &authCapVncAuth,   rfbSecTypeVncAuth },
+
+  { "otp",       TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVncAuth,  &authCapVncAuth,   rfbSecTypeVncAuth },
+
+#ifdef XVNC_AuthPAM
+  { "unixlogin", TRUE,    TRUE,      -1,         TRUE,
+    &secTypeTight,    &authCapUnixLogin, -1 },
+
+  { "plain",     TRUE,    TRUE,      -1,         TRUE,
+    &secTypeVeNCrypt, &authCapVeNCrypt,  rfbVeNCryptPlain },
+#endif
+
+  { NULL }
 };
 
 
 Bool rfbOptOtpAuth(void)
 {
-    AuthMethodData *a;
+  AuthMethodData *a;
 
-    for (a = authMethods; a->name != NULL; a++) {
-        if (!strcmp(&a->name[strlen(a->name) - 3], "otp") &&
-            a->enabled)
-            return TRUE;
-    }
+  for (a = authMethods; a->name != NULL; a++) {
+    if (!strcmp(&a->name[strlen(a->name) - 3], "otp") && a->enabled)
+      return TRUE;
+  }
 
-    return FALSE;
+  return FALSE;
 }
 
 
 Bool rfbOptPamAuth(void)
 {
-    AuthMethodData *a;
+  AuthMethodData *a;
 
-    for (a = authMethods; a->name != NULL; a++) {
-        if ((!strcmp(a->name, "unixlogin") ||
-             !strcmp(&a->name[strlen(a->name) - 5], "plain")) &&
-            a->enabled)
-            return TRUE;
-    }
+  for (a = authMethods; a->name != NULL; a++) {
+    if ((!strcmp(a->name, "unixlogin") ||
+         !strcmp(&a->name[strlen(a->name) - 5], "plain")) && a->enabled)
+      return TRUE;
+  }
 
-    return FALSE;
+  return FALSE;
 }
 
 
 Bool rfbOptRfbAuth(void)
 {
-    AuthMethodData *a;
+  AuthMethodData *a;
 
-    for (a = authMethods; a->name != NULL; a++) {
-        if (!strcmp(&a->name[strlen(a->name) - 3], "vnc") &&
-            a->enabled)
-            return TRUE;
-    }
+  for (a = authMethods; a->name != NULL; a++) {
+    if (!strcmp(&a->name[strlen(a->name) - 3], "vnc") && a->enabled)
+      return TRUE;
+  }
 
-    return FALSE;
+  return FALSE;
 }
 
 
 void rfbAuthParseCommandLine(char *securityTypes)
 {
-    char *p1 = securityTypes, *p2 = securityTypes;
-    AuthMethodData *a;
+  char *p1 = securityTypes, *p2 = securityTypes;
+  AuthMethodData *a;
 
-    for (a = authMethods; a->name != NULL; a++)
-        a->enabled = FALSE;
+  for (a = authMethods; a->name != NULL; a++)
+    a->enabled = FALSE;
 
-    do {
-        *p2 = *p1;
-        if (!isspace(*p2))
-            p2++;
-    } while (*p1++ != 0);
+  do {
+    *p2 = *p1;
+    if (!isspace(*p2))
+      p2++;
+  } while (*p1++ != 0);
 
-    while (TRUE) {
-        p1 = strtok_r(securityTypes, ",", &p2);
-        securityTypes = NULL;
-        if (p1 == NULL)
-            break;
+  while (TRUE) {
+    p1 = strtok_r(securityTypes, ",", &p2);
+    securityTypes = NULL;
+    if (p1 == NULL)
+      break;
 
-        for (a = authMethods; a->name != NULL; a++) {
-            if (!strcasecmp(a->name, p1)) {
-                a->enabled = TRUE;
-                break;
-            }
-        }
-
-        if (a->name == NULL)
-            FatalError("ERROR: Unknown security type '%s'", p1);
+    for (a = authMethods; a->name != NULL; a++) {
+      if (!strcasecmp(a->name, p1)) {
+        a->enabled = TRUE;
+        break;
+      }
     }
+
+    if (a->name == NULL)
+      FatalError("ERROR: Unknown security type '%s'", p1);
+  }
 }
 
 
 static void setMethods(char *buf, Bool backwardCompatible)
 {
-    char *saveptr = NULL;
-    char *p;
-    AuthMethodData *a;
+  char *saveptr = NULL;
+  char *p;
+  AuthMethodData *a;
 
-    preferenceLimit = 0;
+  preferenceLimit = 0;
+  for (a = authMethods; a->name != NULL; a++) {
+    a->permitted = FALSE;
+    a->preference = -1;
+    a->secType->advertise = FALSE;
+  }
+
+  while (TRUE) {
+    p = strtok_r(buf, ",", &saveptr);
+    buf = NULL;
+    if (p == NULL)
+      break;
+
     for (a = authMethods; a->name != NULL; a++) {
-        a->permitted = FALSE;
-        a->preference = -1;
-        a->secType->advertise = FALSE;
+      if (backwardCompatible && a->secType == &secTypeVeNCrypt)
+        continue;
+      if (!strcasecmp(a->name, p) ||
+          (backwardCompatible && !strcasecmp(a->name, "unixlogin") &&
+           !strcasecmp(p, "pam-userpwd")))
+        break;
     }
 
-    while (TRUE) {
-        p = strtok_r(buf, ",", &saveptr);
-        buf = NULL;
-        if (p == NULL)
-            break;
+    if (a->name == NULL)
+      FatalError("ERROR: Unknown auth method name '%s'", p);
 
-        for (a = authMethods; a->name != NULL; a++) {
-            if (backwardCompatible && a->secType == &secTypeVeNCrypt)
-                continue;
-            if (!strcasecmp(a->name, p) ||
-                (backwardCompatible && !strcasecmp(a->name, "unixlogin") &&
-                 !strcasecmp(p, "pam-userpwd")))
-                break;
-        }
-
-        if (a->name == NULL) {
-            FatalError("ERROR: Unknown auth method name '%s'", p);
-        }
-
-        a->permitted = TRUE;
-        a->preference = preferenceLimit++;
-    }
+    a->permitted = TRUE;
+    a->preference = preferenceLimit++;
+  }
 }
 
 
 void rfbAuthListAvailableSecurityTypes(void)
 {
-    AuthMethodData *a;
-    int chars = 23;
+  AuthMethodData *a;
+  int chars = 23;
 
-    ErrorF("                       Available security types (case-insensitive):\n");
-    ErrorF("                       ");
-    for (a = authMethods; a->name != NULL; a++) {
-        ErrorF("%s", a->name);  chars += strlen(a->name);
-        if ((a + 1)->name != NULL) {
-            ErrorF(", ");  chars += 2;
-            if (chars + strlen((a + 1)->name) > 77) {
-                ErrorF("\n                       ");
-                chars = 23;
-            }
-        }
+  ErrorF("                       Available security types (case-insensitive):\n");
+  ErrorF("                       ");
+  for (a = authMethods; a->name != NULL; a++) {
+    ErrorF("%s", a->name);  chars += strlen(a->name);
+    if ((a + 1)->name != NULL) {
+      ErrorF(", ");  chars += 2;
+      if (chars + strlen((a + 1)->name) > 77) {
+        ErrorF("\n                       ");
+        chars = 23;
+      }
     }
-    ErrorF("\n");
+  }
+  ErrorF("\n");
 }
 
 
 static void ReadConfigFile(void)
 {
-    FILE *fp;
-    char buf[256], buf2[256];
-    int line;
-    int len;
-    int n, i, j;
-    struct stat sb;
+  FILE *fp;
+  char buf[256], buf2[256];
+  int line;
+  int len;
+  int n, i, j;
+  struct stat sb;
 
-    if ((fp = fopen(rfbAuthConfigFile, "r")) == NULL)
-        return;
+  if ((fp = fopen(rfbAuthConfigFile, "r")) == NULL)
+    return;
 
-    if (fstat(fileno(fp), &sb) == -1) {
-        FatalError("rfbAuthInit: ERROR: fstat %s: %s", rfbAuthConfigFile,
-                   strerror(errno));
+  if (fstat(fileno(fp), &sb) == -1)
+    FatalError("rfbAuthInit: ERROR: fstat %s: %s", rfbAuthConfigFile,
+               strerror(errno));
+
+  if ((sb.st_uid != 0) && (sb.st_uid != getuid()))
+    FatalError("ERROR: %s must be owned by you or by root", rfbAuthConfigFile);
+
+  if (sb.st_mode & (S_IWGRP | S_IWOTH))
+    FatalError("ERROR: %s cannot have group or global write permissions",
+               rfbAuthConfigFile);
+
+  rfbLog("Using auth configuration file %s\n", rfbAuthConfigFile);
+  for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
+    len = strlen(buf) - 1;
+    if (buf[len] != '\n' && strlen(buf) == 256)
+      FatalError("ERROR in %s: line %d is too long!", rfbAuthConfigFile,
+                 line + 1);
+
+    buf[len] = '\0';
+
+    for (i = 0, j = 0; i < len; i++) {
+      if (buf[i] != ' ' && buf[i] != '\t')
+        buf2[j++] = buf[i];
+    }
+    len = j;
+    buf2[len] = '\0';
+    if (len < 1) continue;
+
+    if (!strcmp(buf2, "no-remote-resize")) {
+      rfbAuthDisableRemoteResize = TRUE;
+      continue;
     }
 
-    if ((sb.st_uid != 0) && (sb.st_uid != getuid())) {
-        FatalError("ERROR: %s must be owned by you or by root",
-                   rfbAuthConfigFile);
+    if (!strcmp(buf2, "no-reverse-connections")) {
+      rfbAuthDisableRevCon = TRUE;
+      continue;
     }
 
-    if (sb.st_mode & (S_IWGRP | S_IWOTH)) {
-        FatalError("ERROR: %s cannot have group or global write permissions",
-                   rfbAuthConfigFile);
+    if (!strcmp(buf2, "no-remote-connections")) {
+      interface.s_addr = htonl(INADDR_LOOPBACK);
+      interface6 = in6addr_loopback;
+      continue;
     }
 
-    rfbLog("Using auth configuration file %s\n", rfbAuthConfigFile);
-    for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
-        len = strlen(buf) - 1;
-        if (buf[len] != '\n' && strlen(buf) == 256) {
-            FatalError("ERROR in %s: line %d is too long!",
-                       rfbAuthConfigFile, line + 1);
-        }
+    if (!strcmp(buf2, "no-clipboard-send")) {
+      rfbAuthDisableCBSend = TRUE;
+      continue;
+    }
 
-        buf[len] = '\0';
+    if (!strcmp(buf2, "no-clipboard-recv")) {
+      rfbAuthDisableCBRecv = TRUE;
+      continue;
+    }
 
-        for (i = 0, j = 0; i < len; i++) {
-            if (buf[i] != ' ' && buf[i] != '\t')
-                 buf2[j++] = buf[i];
-        }
-        len = j;
-        buf2[len] = '\0';
-        if (len < 1) continue;
+    if (!strcmp(buf2, "no-httpd")) {
+      rfbAuthDisableHTTP = TRUE;
+      continue;
+    }
 
-        if (!strcmp(buf2, "no-remote-resize")) {
-            rfbAuthDisableRemoteResize = TRUE;
-            continue;
-        }
-
-        if (!strcmp(buf2, "no-reverse-connections")) {
-            rfbAuthDisableRevCon = TRUE;
-            continue;
-        }
-
-        if (!strcmp(buf2, "no-remote-connections")) {
-            interface.s_addr = htonl(INADDR_LOOPBACK);
-            interface6 = in6addr_loopback;
-            continue;
-        }
-
-        if (!strcmp(buf2, "no-clipboard-send")) {
-            rfbAuthDisableCBSend = TRUE;
-            continue;
-        }
-
-        if (!strcmp(buf2, "no-clipboard-recv")) {
-            rfbAuthDisableCBRecv = TRUE;
-            continue;
-        }
-
-        if (!strcmp(buf2, "no-httpd")) {
-            rfbAuthDisableHTTP = TRUE;
-            continue;
-        }
-
-        if (!strcmp(buf2, "no-x11-tcp-connections")) {
-            rfbAuthDisableX11TCP = TRUE;
-            continue;
-        }
+    if (!strcmp(buf2, "no-x11-tcp-connections")) {
+      rfbAuthDisableX11TCP = TRUE;
+      continue;
+    }
 
 #ifdef XVNC_AuthPAM
-        if (!strcmp(buf2, "no-pam-sessions")) {
-            rfbAuthDisablePAMSession = TRUE;
-            continue;
-        }
-
-        if (!strcmp(buf2, "enable-user-acl")) {
-            rfbAuthUserACL = TRUE;
-            continue;
-        }
-
-        n = 17;
-        if (!strncmp(buf2, "pam-service-name=", n)) {
-            if (buf2[n] == '\0') {
-                FatalError("ERROR in %s: pam-service-name is empty!",
-                           rfbAuthConfigFile);
-            }
-
-            if ((pamServiceName = strdup(&buf2[n])) == NULL) {
-                FatalError("rfbAuthInit strdup: %s", strerror(errno));
-            }
-
-            continue;
-        }
-#endif
-
-        /* permitted-auth-methods provides backward compatibility with TurboVNC
-           2.0.x and earlier.  It can only be used to enable non-VeNCrypt
-           security types. */
-        n = 23;
-        if (!strncmp(buf2, "permitted-auth-methods=", n)) {
-            if (buf2[n] == '\0') {
-                FatalError("ERROR in %s: permitted-auth-methods is empty!",
-                           rfbAuthConfigFile);
-            }
-
-            setMethods(&buf2[n], TRUE);
-            continue;
-        }
-
-        /* permitted-security-types was introduced in TurboVNC 2.1. */
-        n = 25;
-        if (!strncmp(buf2, "permitted-security-types=", n)) {
-            if (buf2[n] == '\0') {
-                FatalError("ERROR in %s: permitted-security-types is empty!",
-                           rfbAuthConfigFile);
-            }
-
-            setMethods(&buf2[n], FALSE);
-            continue;
-        }
-
-        n = 17;
-        if (!strncmp(buf2, "max-idle-timeout=", n)) {
-            int t;
-
-            if (buf2[n] == '\0') {
-                FatalError("ERROR in %s: max-idle-timeout is empty!",
-                           rfbAuthConfigFile);
-            }
-
-            if (sscanf(&buf2[n], "%d", &t) < 1 || t <= 0) {
-                FatalError("ERROR in %s: max-idle-timeout value must be > 0!",
-                           rfbAuthConfigFile);
-            }
-
-            rfbMaxIdleTimeout = (CARD32)t;
-            continue;
-        }
-
-        n = 17;
-        if (!strncmp(buf2, "max-desktop-size=", n)) {
-            int w = -1, h = -1;
-
-            if (buf2[n] == '\0') {
-                FatalError("ERROR in %s: max-desktop-size is empty!",
-                           rfbAuthConfigFile);
-            }
-
-            if (sscanf(&buf2[n], "%dx%d", &w, &h) < 2 || w <= 0 || h <= 0) {
-                FatalError("ERROR in %s: max-desktop-size value is incorrect.",
-                           rfbAuthConfigFile);
-            }
-
-            if (w == 0) w = MAXSHORT;
-            if (h == 0) h = MAXSHORT;
-            rfbMaxWidth = (CARD32)w;
-            rfbMaxHeight = (CARD32)h;
-            continue;
-        }
-
-        if (buf2[0] != '#')
-            rfbLog("WARNING: unrecognized auth config line '%s'\n", buf);
+    if (!strcmp(buf2, "no-pam-sessions")) {
+      rfbAuthDisablePAMSession = TRUE;
+      continue;
     }
 
-    fclose(fp);
+    if (!strcmp(buf2, "enable-user-acl")) {
+      rfbAuthUserACL = TRUE;
+      continue;
+    }
+
+    n = 17;
+    if (!strncmp(buf2, "pam-service-name=", n)) {
+      if (buf2[n] == '\0')
+        FatalError("ERROR in %s: pam-service-name is empty!",
+                   rfbAuthConfigFile);
+
+      if ((pamServiceName = strdup(&buf2[n])) == NULL)
+        FatalError("rfbAuthInit strdup: %s", strerror(errno));
+
+      continue;
+    }
+#endif
+
+    /* permitted-auth-methods provides backward compatibility with TurboVNC
+       2.0.x and earlier.  It can only be used to enable non-VeNCrypt
+       security types. */
+    n = 23;
+    if (!strncmp(buf2, "permitted-auth-methods=", n)) {
+      if (buf2[n] == '\0')
+        FatalError("ERROR in %s: permitted-auth-methods is empty!",
+                   rfbAuthConfigFile);
+
+      setMethods(&buf2[n], TRUE);
+      continue;
+    }
+
+    /* permitted-security-types was introduced in TurboVNC 2.1. */
+    n = 25;
+    if (!strncmp(buf2, "permitted-security-types=", n)) {
+      if (buf2[n] == '\0')
+        FatalError("ERROR in %s: permitted-security-types is empty!",
+                   rfbAuthConfigFile);
+
+      setMethods(&buf2[n], FALSE);
+      continue;
+    }
+
+    n = 17;
+    if (!strncmp(buf2, "max-idle-timeout=", n)) {
+      int t;
+
+      if (buf2[n] == '\0')
+        FatalError("ERROR in %s: max-idle-timeout is empty!",
+                   rfbAuthConfigFile);
+
+      if (sscanf(&buf2[n], "%d", &t) < 1 || t <= 0)
+        FatalError("ERROR in %s: max-idle-timeout value must be > 0!",
+                   rfbAuthConfigFile);
+
+      rfbMaxIdleTimeout = (CARD32)t;
+      continue;
+    }
+
+    n = 17;
+    if (!strncmp(buf2, "max-desktop-size=", n)) {
+      int w = -1, h = -1;
+
+      if (buf2[n] == '\0')
+        FatalError("ERROR in %s: max-desktop-size is empty!",
+                   rfbAuthConfigFile);
+
+      if (sscanf(&buf2[n], "%dx%d", &w, &h) < 2 || w <= 0 || h <= 0)
+        FatalError("ERROR in %s: max-desktop-size value is incorrect.",
+                   rfbAuthConfigFile);
+
+      if (w == 0) w = MAXSHORT;
+      if (h == 0) h = MAXSHORT;
+      rfbMaxWidth = (CARD32)w;
+      rfbMaxHeight = (CARD32)h;
+      continue;
+    }
+
+    if (buf2[0] != '#')
+      rfbLog("WARNING: unrecognized auth config line '%s'\n", buf);
+  }
+
+  fclose(fp);
 }
 
 
 void rfbAuthInit()
 {
-    AuthMethodData *a;
-    int nSelected = 0;
+  AuthMethodData *a;
+  int nSelected = 0;
 
-    ReadConfigFile();
+  ReadConfigFile();
 
+  for (a = authMethods; a->name != NULL; a++) {
+    if (a->enabled) {
+      nSelected++;
+      if (!a->permitted) {
+        rfbLog("WARNING: security type '%s' is not permitted\n", a->name);
+        a->enabled = FALSE;
+        continue;
+      }
+    }
+
+    if (a->enabled) {
+      nAuthMethodsEnabled++;
+      rfbLog("Enabled authentication method '%s'\n", a->name);
+      if (!a->secType->advertise) {
+        a->secType->advertise = TRUE;
+        rfbLog("Advertising security type '%s' to viewers\n",
+               a->secType->name);
+      }
+    }
+  }
+
+  if (nSelected == 0) {
+    /* No auth method was selected.  See if we should enable the
+       rfbAuthNone authentication method. */
     for (a = authMethods; a->name != NULL; a++) {
-        if (a->enabled) {
-            nSelected++;
-            if (!a->permitted) {
-                rfbLog("WARNING: security type '%s' is not permitted\n",
-                       a->name);
-                a->enabled = FALSE;
-                continue;
-            }
+      if (!a->requiredData) {
+        if (a->permitted) {
+          nAuthMethodsEnabled++;
+          a->enabled = TRUE;
+          a->secType->advertise = TRUE;
+          rfbLog("Enabled authentication method '%s'\n", a->name);
+          rfbLog("Advertising security type '%s' to viewers\n",
+                 a->secType->name);
         }
-
-        if (a->enabled) {
-            nAuthMethodsEnabled++;
-            rfbLog("Enabled authentication method '%s'\n", a->name);
-            if (!a->secType->advertise) {
-                a->secType->advertise = TRUE;
-                rfbLog("Advertising security type '%s' to viewers\n",
-                       a->secType->name);
-            }
-        }
+      } else {
+        a->secType->advertise = FALSE;
+      }
     }
-
-    if (nSelected == 0) {
-        /* No auth method was selected.  See if we should enable the
-           rfbAuthNone authentication method. */
-        for (a = authMethods; a->name != NULL; a++) {
-            if (!a->requiredData) {
-                if (a->permitted) {
-                    nAuthMethodsEnabled++;
-                    a->enabled = TRUE;
-                    a->secType->advertise = TRUE;
-                    rfbLog("Enabled authentication method '%s'\n", a->name);
-                    rfbLog("Advertising security type '%s' to viewers\n",
-                           a->secType->name);
-                }
-            } else {
-                a->secType->advertise = FALSE;
-            }
-        }
-    }
+  }
 
 #ifndef XVNC_AuthPAM
-    if (rfbOptPamAuth())
-        rfbLog("WARNING: PAM support is not compiled in.\n");
+  if (rfbOptPamAuth())
+    rfbLog("WARNING: PAM support is not compiled in.\n");
 #endif
 
-    if (nAuthMethodsEnabled == 0) {
-        for (a = authMethods; a->name != NULL; a++) {
-            if (a->permitted)
-                rfbLog("NOTICE: %s is a permitted auth method\n", a->name);
-        }
-
-        FatalError("ERROR: no authentication methods enabled!");
-    } else {
-        /* Do not advertise rfbAuthNone if any other auth method is enabled */
-        for (a = authMethods; a->name != NULL; a++) {
-            if (a->enabled && strcmp(a->name, "none"))
-                secTypeNone.advertise = FALSE;
-        }
+  if (nAuthMethodsEnabled == 0) {
+    for (a = authMethods; a->name != NULL; a++) {
+      if (a->permitted)
+        rfbLog("NOTICE: %s is a permitted auth method\n", a->name);
     }
+
+    FatalError("ERROR: no authentication methods enabled!");
+  } else {
+    /* Do not advertise rfbAuthNone if any other auth method is enabled */
+    for (a = authMethods; a->name != NULL; a++) {
+      if (a->enabled && strcmp(a->name, "none"))
+        secTypeNone.advertise = FALSE;
+    }
+  }
 
 #ifdef XVNC_AuthPAM
-    if (rfbOptPamAuth() && rfbAuthUserACL) {
-        struct passwd pbuf;
-        struct passwd *pw;
-        char buf[256];
-        char *n;
+  if (rfbOptPamAuth() && rfbAuthUserACL) {
+    struct passwd pbuf;
+    struct passwd *pw;
+    char buf[256];
+    char *n;
 
-        if (getpwuid_r(getuid(), &pbuf, buf, sizeof(buf), &pw) != 0) {
-            FatalError("AuthPAMUserPwdRspFunc: limit-user enabled and getpwuid_r failed: %s",
-                strerror(errno));
-        }
+    if (getpwuid_r(getuid(), &pbuf, buf, sizeof(buf), &pw) != 0)
+      FatalError("AuthPAMUserPwdRspFunc: limit-user enabled and getpwuid_r failed: %s",
+                 strerror(errno));
 
-        n = (char *)rfbAlloc(strlen(pbuf.pw_name));
-        strcpy(n, pbuf.pw_name);
-        rfbAuthAddUser(n, FALSE);
-    }
+    n = (char *)rfbAlloc(strlen(pbuf.pw_name));
+    strcpy(n, pbuf.pw_name);
+    rfbAuthAddUser(n, FALSE);
+  }
 #endif
 }
 
 
 void rfbAuthProcessResponse(rfbClientPtr cl)
 {
-    AuthCapData **p;
-    AuthCapData *c;
+  AuthCapData **p;
+  AuthCapData *c;
 
-    for (p = authCaps; *p != NULL; p++) {
-        c = *p;
-        if (cl->selectedAuthType == c->authType) {
-            c->rspFunc(cl);
-            return;
-        }
+  for (p = authCaps; *p != NULL; p++) {
+    c = *p;
+    if (cl->selectedAuthType == c->authType) {
+      c->rspFunc(cl);
+      return;
     }
+  }
 
-    rfbLog("rfbAuthProcessResponse: authType assertion failed\n");
-    rfbCloseClient(cl);
+  rfbLog("rfbAuthProcessResponse: authType assertion failed\n");
+  rfbCloseClient(cl);
 }
 
 
@@ -804,35 +782,35 @@ void rfbAuthProcessResponse(rfbClientPtr cl)
 
 void rfbAuthNewClient(rfbClientPtr cl)
 {
-    SecTypeData **p;
-    SecTypeData *s;
+  SecTypeData **p;
+  SecTypeData *s;
 
-    if (rfbAuthIsBlocked()) {
-        rfbLog("Too many authentication failures - client rejected\n");
-        rfbClientConnFailed(cl, "Too many authentication failures");
-        return;
-    }
+  if (rfbAuthIsBlocked()) {
+    rfbLog("Too many authentication failures - client rejected\n");
+    rfbClientConnFailed(cl, "Too many authentication failures");
+    return;
+  }
 
-    if (cl->protocol_minor_ver >= 7) {
-        rfbSendSecurityTypeList(cl);
-        return;
-    }
+  if (cl->protocol_minor_ver >= 7) {
+    rfbSendSecurityTypeList(cl);
+    return;
+  }
 
-    /* Make sure we use only RFB 3.3-compatible security types */
-    for (p = secTypes; *p != NULL; p++) {
-        s = *p;
-        if (s->advertise && (s->protocolMinorVer < 7))
-            break;
-    }
+  /* Make sure we use only RFB 3.3-compatible security types */
+  for (p = secTypes; *p != NULL; p++) {
+    s = *p;
+    if (s->advertise && (s->protocolMinorVer < 7))
+      break;
+  }
 
-    if (*p == NULL) {
-        rfbLog("VNC authentication disabled - RFB 3.3 client rejected\n");
-        rfbClientConnFailed(cl, "Your viewer cannot handle required authentication methods");
-        return;
-    }
+  if (*p == NULL) {
+    rfbLog("VNC authentication disabled - RFB 3.3 client rejected\n");
+    rfbClientConnFailed(cl, "Your viewer cannot handle required authentication methods");
+    return;
+  }
 
-    cl->selectedAuthType = s->securityType;
-    rfbSendSecurityType(cl, s->securityType);
+  cl->selectedAuthType = s->securityType;
+  rfbSendSecurityType(cl, s->securityType);
 }
 
 
@@ -842,28 +820,28 @@ void rfbAuthNewClient(rfbClientPtr cl)
 
 static void rfbSendSecurityType(rfbClientPtr cl, int securityType)
 {
-    CARD32 value32;
+  CARD32 value32;
 
-    value32 = Swap32IfLE(securityType);
-    if (WriteExact(cl, (char *)&value32, 4) < 0) {
-        rfbLogPerror("rfbSendSecurityType: write");
-        rfbCloseClient(cl);
-        return;
-    }
+  value32 = Swap32IfLE(securityType);
+  if (WriteExact(cl, (char *)&value32, 4) < 0) {
+    rfbLogPerror("rfbSendSecurityType: write");
+    rfbCloseClient(cl);
+    return;
+  }
 
-    switch (securityType) {
-        case rfbSecTypeNone:
-            /* Dispatch client input to rfbProcessClientInitMessage() */
-            cl->state = RFB_INITIALISATION;
-            break;
-        case rfbSecTypeVncAuth:
-            /* Begin the Standard VNC authentication procedure */
-            rfbVncAuthSendChallenge(cl);
-            break;
-        default:
-            rfbLogPerror("rfbSendSecurityType: assertion failed");
-            rfbCloseClient(cl);
-    }
+  switch (securityType) {
+    case rfbSecTypeNone:
+      /* Dispatch client input to rfbProcessClientInitMessage() */
+      cl->state = RFB_INITIALISATION;
+      break;
+    case rfbSecTypeVncAuth:
+      /* Begin the Standard VNC authentication procedure */
+      rfbVncAuthSendChallenge(cl);
+      break;
+    default:
+      rfbLogPerror("rfbSendSecurityType: assertion failed");
+      rfbCloseClient(cl);
+  }
 }
 
 
@@ -873,270 +851,267 @@ static void rfbSendSecurityType(rfbClientPtr cl, int securityType)
 
 static void rfbSendSecurityTypeList(rfbClientPtr cl)
 {
-    int i, j, n;
-    AuthMethodData *a;
-    SecTypeData *s;
-    Bool tightAdvertised = FALSE;
+  int i, j, n;
+  AuthMethodData *a;
+  SecTypeData *s;
+  Bool tightAdvertised = FALSE;
 
+  /*
+   * When no preference order was set using "permitted-security-types", the
+   * default value of preferenceLimit (1) will cause us to execute the
+   * outer loop once.  In this case, the a->preference members will all
+   * be the default value (-1), and we skip the order testing.
+   */
+  n = 0;
+  for (i = 0; i < preferenceLimit; i++) {
+    for (a = authMethods; a->name != NULL; a++) {
+      if (((a->preference != -1) && (i != a->preference)) || !a->enabled)
+        continue;
+
+      s = a->secType;
+
+      if (n > MAX_SECURITY_TYPES)
+        FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES");
+
+      /*
+       * Check whether we have already advertised this security type
+       */
+      for (j = 0; j < n; j++) {
+        if (cl->securityTypes[j + 1] == s->securityType)
+          break;
+      }
+
+      if (j < n)
+        continue;
+
+      if (s->advertise && (cl->protocol_minor_ver >= s->protocolMinorVer)) {
+        cl->securityTypes[++n] = s->securityType;
+        if (s->securityType == rfbSecTypeTight)
+          tightAdvertised = TRUE;
+      }
+    }
+  }
+
+  if (n == 0)
+    FatalError("rfbSendSecurityTypeList: no security types enabled! This should not have happened!");
+
+  if (!tightAdvertised) {
     /*
-     * When no preference order was set using "permitted-security-types", the
-     * default value of preferenceLimit (1) will cause us to execute the
-     * outer loop once.  In this case, the a->preference members will all
-     * be the default value (-1), and we skip the order testing.
+     * Make sure to advertise the Tight security type, in order to allow
+     * TightVNC-compatible clients to enable other (non-auth) Tight
+     * extensions.
      */
-    n = 0;
-    for (i = 0; i < preferenceLimit; i++) {
-        for (a = authMethods; a->name != NULL; a++) {
-            if (((a->preference != -1) && (i != a->preference)) ||
-                !a->enabled)
-                continue;
+    if (n > MAX_SECURITY_TYPES)
+      FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES");
 
-            s = a->secType;
+    rfbLog("rfbSendSecurityTypeList: advertise sectype tight\n");
+    cl->securityTypes[++n] = rfbSecTypeTight;
+  }
 
-            if (n > MAX_SECURITY_TYPES)
-                FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES");
+  cl->securityTypes[0] = (CARD8)n;
 
-            /*
-             * Check whether we have already advertised this security type
-             */
-            for (j = 0; j < n; j++) {
-                if (cl->securityTypes[j + 1] == s->securityType)
-                    break;
-            }
+  /* Send the list */
+  if (WriteExact(cl, (char *)cl->securityTypes, n + 1) < 0) {
+    rfbLogPerror("rfbSendSecurityTypeList: write");
+    rfbCloseClient(cl);
+    return;
+  }
 
-            if (j < n)
-                continue;
-
-            if (s->advertise &&
-                (cl->protocol_minor_ver >= s->protocolMinorVer)) {
-                cl->securityTypes[++n] = s->securityType;
-                if (s->securityType == rfbSecTypeTight)
-                    tightAdvertised = TRUE;
-            }
-        }
-    }
-
-    if (n == 0)
-        FatalError("rfbSendSecurityTypeList: no security types enabled! This should not have happened!");
-
-    if (!tightAdvertised) {
-        /*
-         * Make sure to advertise the Tight security type, in order to allow
-         * TightVNC-compatible clients to enable other (non-auth) Tight
-         * extensions.
-         */
-        if (n > MAX_SECURITY_TYPES) {
-            FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES");
-        }
-
-        rfbLog("rfbSendSecurityTypeList: advertise sectype tight\n");
-        cl->securityTypes[++n] = rfbSecTypeTight;
-    }
-
-    cl->securityTypes[0] = (CARD8)n;
-
-    /* Send the list */
-    if (WriteExact(cl, (char *)cl->securityTypes, n + 1) < 0) {
-        rfbLogPerror("rfbSendSecurityTypeList: write");
-        rfbCloseClient(cl);
-        return;
-    }
-
-    /* Dispatch client input to rfbProcessClientSecurityType() */
-    cl->state = RFB_SECURITY_TYPE;
+  /* Dispatch client input to rfbProcessClientSecurityType() */
+  cl->state = RFB_SECURITY_TYPE;
 }
 
 
 #define WRITE(data, size)  \
-    if (WriteExact(cl, (char *)data, size) <= 0) {  \
-        rfbLogPerror("rfbVeNCryptAuthenticate: write");  \
-        rfbCloseClient(cl);  \
-        return;  \
-    }
+  if (WriteExact(cl, (char *)data, size) <= 0) {  \
+    rfbLogPerror("rfbVeNCryptAuthenticate: write");  \
+    rfbCloseClient(cl);  \
+    return;  \
+  }
 
 #define READ(data, size)  \
-    if (ReadExact(cl, (char *)data, size) <= 0) {  \
-        rfbLogPerror("rfbVeNCryptAuthenticate: read");  \
-        rfbCloseClient(cl);  \
-        return;  \
-    }
+  if (ReadExact(cl, (char *)data, size) <= 0) {  \
+    rfbLogPerror("rfbVeNCryptAuthenticate: read");  \
+    rfbCloseClient(cl);  \
+    return;  \
+  }
 
 #if USETLS
 #define TLS_INIT(anon)  \
-    if ((ctx = rfbssl_init(cl, anon)) == NULL) {  \
-        reply = 0;  \
-        WRITE(&reply, 1);  \
-        rfbClientAuthFailed(cl, rfbssl_geterr());  \
-        return;  \
-    }  \
-    reply = 1;  \
+  if ((ctx = rfbssl_init(cl, anon)) == NULL) {  \
+    reply = 0;  \
     WRITE(&reply, 1);  \
-    cl->sslctx = ctx;  \
-    if ((ret = rfbssl_accept(cl)) < 0) {  \
-        rfbCloseClient(cl);  \
-        return;  \
-    } else if (ret == 1) {  \
-        rfbLog("Deferring TLS handshake\n");  \
-        cl->state = RFB_TLS_HANDSHAKE;  \
-        return;  \
-    }
+    rfbClientAuthFailed(cl, rfbssl_geterr());  \
+    return;  \
+  }  \
+  reply = 1;  \
+  WRITE(&reply, 1);  \
+  cl->sslctx = ctx;  \
+  if ((ret = rfbssl_accept(cl)) < 0) {  \
+    rfbCloseClient(cl);  \
+    return;  \
+  } else if (ret == 1) {  \
+    rfbLog("Deferring TLS handshake\n");  \
+    cl->state = RFB_TLS_HANDSHAKE;  \
+    return;  \
+  }
 
 
 void rfbAuthTLSHandshake(rfbClientPtr cl)
 {
-    int ret;
+  int ret;
 
-    if ((ret = rfbssl_accept(cl)) < 0) {
-        rfbCloseClient(cl);
-        return;
-    } else if (ret == 1)
-        return;
+  if ((ret = rfbssl_accept(cl)) < 0) {
+    rfbCloseClient(cl);
+    return;
+  } else if (ret == 1)
+    return;
 
-    switch (cl->selectedAuthType) {
-        case rfbAuthNone:
-            rfbClientAuthSucceeded(cl, rfbAuthNone);
-            break;
-        case rfbAuthVNC:
-            rfbVncAuthSendChallenge(cl);
-            break;
+  switch (cl->selectedAuthType) {
+    case rfbAuthNone:
+      rfbClientAuthSucceeded(cl, rfbAuthNone);
+      break;
+    case rfbAuthVNC:
+      rfbVncAuthSendChallenge(cl);
+      break;
 #ifdef XVNC_AuthPAM
-        case rfbAuthUnixLogin:
-            AuthPAMUserPwdRspFunc(cl);
-            break;
+    case rfbAuthUnixLogin:
+      AuthPAMUserPwdRspFunc(cl);
+      break;
 #endif
-    }
+  }
 }
 #endif
 
 
 void rfbVeNCryptAuthenticate(rfbClientPtr cl)
 {
-    struct { CARD8 major, minor; } serverVersion = { 0, 2 },
-        clientVersion = { 0, 0 };
-    CARD8 reply, count = 0;
-    int i, j;
-    AuthMethodData *a;
-    CARD32 subTypes[MAX_VENCRYPT_SUBTYPES], chosenType = 0;
+  struct {
+    CARD8 major, minor;
+  } serverVersion = { 0, 2 }, clientVersion = { 0, 0 };
+  CARD8 reply, count = 0;
+  int i, j;
+  AuthMethodData *a;
+  CARD32 subTypes[MAX_VENCRYPT_SUBTYPES], chosenType = 0;
 #if USETLS
-    rfbSslCtx *ctx;
-    int ret;
+  rfbSslCtx *ctx;
+  int ret;
 #endif
 
-    WRITE(&serverVersion.major, 1);
-    WRITE(&serverVersion.minor, 1);
-    rfbUncorkSock(cl->sock);
-    rfbCorkSock(cl->sock);
-    READ(&clientVersion, 2);
+  WRITE(&serverVersion.major, 1);
+  WRITE(&serverVersion.minor, 1);
+  rfbUncorkSock(cl->sock);
+  rfbCorkSock(cl->sock);
+  READ(&clientVersion, 2);
 
-    if (clientVersion.major == 0 && clientVersion.minor < 2) {
-        reply = 0xFF;
-        WRITE(&reply, 1);
-        rfbCloseClient(cl);
-        return;
-    } else {
-        reply = 0;
-        WRITE(&reply, 1);
+  if (clientVersion.major == 0 && clientVersion.minor < 2) {
+    reply = 0xFF;
+    WRITE(&reply, 1);
+    rfbCloseClient(cl);
+    return;
+  } else {
+    reply = 0;
+    WRITE(&reply, 1);
+  }
+
+  memset(subTypes, 0, sizeof(CARD32) * MAX_VENCRYPT_SUBTYPES);
+  for (i = 0; i < preferenceLimit; i++) {
+    for (a = authMethods; a->name != NULL; a++) {
+      if (((a->preference != -1) && (i != a->preference)) || !a->enabled ||
+          a->subType == -1)
+        continue;
+
+      if (count > MAX_VENCRYPT_SUBTYPES)
+        FatalError("rfbVeNCryptAuthenticate: # enabled subtypes > MAX_VENCRYPT_SUBTYPES");
+
+      /* Check whether we have already advertised this subtype */
+      for (j = 0; j < count; j++) {
+        if (subTypes[j] == a->subType)
+          break;
+      }
+      if (j < count)
+        continue;
+
+      subTypes[count++] = a->subType;
     }
+  }
 
-    memset(subTypes, 0, sizeof(CARD32) * MAX_VENCRYPT_SUBTYPES);
-    for (i = 0; i < preferenceLimit; i++) {
-        for (a = authMethods; a->name != NULL; a++) {
-            if (((a->preference != -1) && (i != a->preference)) ||
-                !a->enabled || a->subType == -1)
-                continue;
-
-            if (count > MAX_VENCRYPT_SUBTYPES) {
-                FatalError("rfbVeNCryptAuthenticate: # enabled subtypes > MAX_VENCRYPT_SUBTYPES");
-            }
-
-            /* Check whether we have already advertised this subtype */
-            for (j = 0; j < count; j++) {
-                if (subTypes[j] == a->subType)
-                    break;
-            }
-            if (j < count)
-                continue;
-
-            subTypes[count++] = a->subType;
-        }
-    }
-
-    WRITE(&count, 1);
-    if (count > 0) {
-        for (i = 0; i < count; i++) {
-            CARD32 subType = Swap32IfLE(subTypes[i]);
-            WRITE(&subType, sizeof(CARD32));
-        }
-    }
-
-    rfbUncorkSock(cl->sock);
-    rfbCorkSock(cl->sock);
-    READ(&chosenType, sizeof(CARD32));
-    chosenType = Swap32IfLE(chosenType);
-
+  WRITE(&count, 1);
+  if (count > 0) {
     for (i = 0; i < count; i++) {
-        if (chosenType == subTypes[i])
-            break;
+      CARD32 subType = Swap32IfLE(subTypes[i]);
+      WRITE(&subType, sizeof(CARD32));
     }
-    rfbLog("Client requested VeNCrypt sub-type %d\n", chosenType);
-    if (chosenType == 0 || chosenType == rfbSecTypeVeNCrypt || i >= count) {
-        rfbLog("Requested VeNCrypt sub-type not supported\n");
-        rfbCloseClient(cl);
-        return;
-    }
+  }
 
-    cl->selectedAuthType = chosenType;
-    switch (chosenType) {
-        case rfbAuthNone:
-            rfbClientAuthSucceeded(cl, rfbAuthNone);
-            break;
-        case rfbAuthVNC:
-            rfbVncAuthSendChallenge(cl);
-            break;
+  rfbUncorkSock(cl->sock);
+  rfbCorkSock(cl->sock);
+  READ(&chosenType, sizeof(CARD32));
+  chosenType = Swap32IfLE(chosenType);
+
+  for (i = 0; i < count; i++) {
+    if (chosenType == subTypes[i])
+      break;
+  }
+  rfbLog("Client requested VeNCrypt sub-type %d\n", chosenType);
+  if (chosenType == 0 || chosenType == rfbSecTypeVeNCrypt || i >= count) {
+    rfbLog("Requested VeNCrypt sub-type not supported\n");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  cl->selectedAuthType = chosenType;
+  switch (chosenType) {
+    case rfbAuthNone:
+      rfbClientAuthSucceeded(cl, rfbAuthNone);
+      break;
+    case rfbAuthVNC:
+      rfbVncAuthSendChallenge(cl);
+      break;
 #ifdef XVNC_AuthPAM
-        case rfbVeNCryptPlain:
-            AuthPAMUserPwdRspFunc(cl);
-            break;
+    case rfbVeNCryptPlain:
+      AuthPAMUserPwdRspFunc(cl);
+      break;
 #endif
 #if USETLS
-        case rfbVeNCryptTLSNone:
-            cl->selectedAuthType = rfbAuthNone;
-            TLS_INIT(TRUE);
-            rfbClientAuthSucceeded(cl, rfbAuthNone);
-            break;
-        case rfbVeNCryptTLSVnc:
-            cl->selectedAuthType = rfbAuthVNC;
-            TLS_INIT(TRUE);
-            rfbVncAuthSendChallenge(cl);
-            break;
+    case rfbVeNCryptTLSNone:
+      cl->selectedAuthType = rfbAuthNone;
+      TLS_INIT(TRUE);
+      rfbClientAuthSucceeded(cl, rfbAuthNone);
+      break;
+    case rfbVeNCryptTLSVnc:
+      cl->selectedAuthType = rfbAuthVNC;
+      TLS_INIT(TRUE);
+      rfbVncAuthSendChallenge(cl);
+      break;
 #ifdef XVNC_AuthPAM
-        case rfbVeNCryptTLSPlain:
-            cl->selectedAuthType = rfbAuthUnixLogin;
-            TLS_INIT(TRUE);
-            AuthPAMUserPwdRspFunc(cl);
-            break;
+    case rfbVeNCryptTLSPlain:
+      cl->selectedAuthType = rfbAuthUnixLogin;
+      TLS_INIT(TRUE);
+      AuthPAMUserPwdRspFunc(cl);
+      break;
 #endif
-        case rfbVeNCryptX509None:
-            cl->selectedAuthType = rfbAuthNone;
-            TLS_INIT(FALSE);
-            rfbClientAuthSucceeded(cl, rfbAuthNone);
-            break;
-        case rfbVeNCryptX509Vnc:
-            cl->selectedAuthType = rfbAuthVNC;
-            TLS_INIT(FALSE);
-            rfbVncAuthSendChallenge(cl);
-            break;
+    case rfbVeNCryptX509None:
+      cl->selectedAuthType = rfbAuthNone;
+      TLS_INIT(FALSE);
+      rfbClientAuthSucceeded(cl, rfbAuthNone);
+      break;
+    case rfbVeNCryptX509Vnc:
+      cl->selectedAuthType = rfbAuthVNC;
+      TLS_INIT(FALSE);
+      rfbVncAuthSendChallenge(cl);
+      break;
 #ifdef XVNC_AuthPAM
-        case rfbVeNCryptX509Plain:
-            cl->selectedAuthType = rfbAuthUnixLogin;
-            TLS_INIT(FALSE);
-            AuthPAMUserPwdRspFunc(cl);
-            break;
+    case rfbVeNCryptX509Plain:
+      cl->selectedAuthType = rfbAuthUnixLogin;
+      TLS_INIT(FALSE);
+      AuthPAMUserPwdRspFunc(cl);
+      break;
 #endif
 #endif
-        default:
-            FatalError("rfbVeNCryptAuthenticate: chosen type is invalid (this should never occur)");
-    }
+    default:
+      FatalError("rfbVeNCryptAuthenticate: chosen type is invalid (this should never occur)");
+  }
 }
 
 
@@ -1146,61 +1121,60 @@ void rfbVeNCryptAuthenticate(rfbClientPtr cl)
 
 void rfbProcessClientSecurityType(rfbClientPtr cl)
 {
-    int n, count, i;
-    CARD8 chosenType;
+  int n, count, i;
+  CARD8 chosenType;
 
-    /* Read the security type */
-    n = ReadExact(cl, (char *)&chosenType, 1);
-    if (n <= 0) {
-        if (n == 0)
-            rfbLog("rfbProcessClientSecurityType: client gone\n");
-        else
-            rfbLogPerror("rfbProcessClientSecurityType: read");
-        rfbCloseClient(cl);
-        return;
-    }
+  /* Read the security type */
+  n = ReadExact(cl, (char *)&chosenType, 1);
+  if (n <= 0) {
+    if (n == 0)
+      rfbLog("rfbProcessClientSecurityType: client gone\n");
+    else
+      rfbLogPerror("rfbProcessClientSecurityType: read");
+    rfbCloseClient(cl);
+    return;
+  }
 
-    /* Make sure it was present in the list sent by the server */
-    count = (int)cl->securityTypes[0];
-    for (i = 1; i <= count; i++) {
-        if (chosenType == cl->securityTypes[i])
-            break;
-    }
-    if (i > count) {
-        rfbLog("rfbProcessClientSecurityType: "
-               "wrong security type requested\n");
-        rfbCloseClient(cl);
-        return;
-    }
+  /* Make sure it was present in the list sent by the server */
+  count = (int)cl->securityTypes[0];
+  for (i = 1; i <= count; i++) {
+    if (chosenType == cl->securityTypes[i])
+      break;
+  }
+  if (i > count) {
+    rfbLog("rfbProcessClientSecurityType: wrong security type requested\n");
+    rfbCloseClient(cl);
+    return;
+  }
 
-    cl->selectedAuthType = chosenType;
-    switch (chosenType) {
-        case rfbSecTypeNone:
-            /* No authentication needed */
-            rfbClientAuthSucceeded(cl, rfbAuthNone);
-            break;
-        case rfbSecTypeVncAuth:
-            /* Begin the Standard VNC authentication procedure */
-            rfbVncAuthSendChallenge(cl);
-            break;
-        case rfbSecTypeTight:
-            /* The viewer supports TightVNC extensions */
-            rfbLog("Enabling TightVNC protocol extensions\n");
-            /* Switch to protocol 3.7t/3.8t */
-            cl->protocol_tightvnc = TRUE;
-            /* Advertise our tunneling capabilities */
-            rfbSendTunnelingCaps(cl);
-            break;
-        case rfbSecTypeVeNCrypt:
-            /* The viewer supports VeNCrypt extensions */
-            rfbLog("Enabling VeNCrypt protocol extensions\n");
-            rfbVeNCryptAuthenticate(cl);
-            break;
-        default:
-            rfbLog("rfbProcessClientSecurityType: unknown authentication scheme\n");
-            rfbCloseClient(cl);
-            break;
-   }
+  cl->selectedAuthType = chosenType;
+  switch (chosenType) {
+    case rfbSecTypeNone:
+      /* No authentication needed */
+      rfbClientAuthSucceeded(cl, rfbAuthNone);
+      break;
+    case rfbSecTypeVncAuth:
+      /* Begin the Standard VNC authentication procedure */
+      rfbVncAuthSendChallenge(cl);
+      break;
+    case rfbSecTypeTight:
+      /* The viewer supports TightVNC extensions */
+      rfbLog("Enabling TightVNC protocol extensions\n");
+      /* Switch to protocol 3.7t/3.8t */
+      cl->protocol_tightvnc = TRUE;
+      /* Advertise our tunneling capabilities */
+      rfbSendTunnelingCaps(cl);
+      break;
+    case rfbSecTypeVeNCrypt:
+      /* The viewer supports VeNCrypt extensions */
+      rfbLog("Enabling VeNCrypt protocol extensions\n");
+      rfbVeNCryptAuthenticate(cl);
+      break;
+    default:
+      rfbLog("rfbProcessClientSecurityType: unknown authentication scheme\n");
+      rfbCloseClient(cl);
+      break;
+  }
 }
 
 
@@ -1210,22 +1184,21 @@ void rfbProcessClientSecurityType(rfbClientPtr cl)
 
 static void rfbSendTunnelingCaps(rfbClientPtr cl)
 {
-    rfbTunnelingCapsMsg caps;
-    CARD32 nTypes = 0;          /* We don't support tunneling yet */
+  rfbTunnelingCapsMsg caps;
+  CARD32 nTypes = 0;            /* We don't support tunneling yet */
 
-    caps.nTunnelTypes = Swap32IfLE(nTypes);
-    if (WriteExact(cl, (char *)&caps, sz_rfbTunnelingCapsMsg) < 0) {
-        rfbLogPerror("rfbSendTunnelingCaps: write");
-        rfbCloseClient(cl);
-        return;
-    }
+  caps.nTunnelTypes = Swap32IfLE(nTypes);
+  if (WriteExact(cl, (char *)&caps, sz_rfbTunnelingCapsMsg) < 0) {
+    rfbLogPerror("rfbSendTunnelingCaps: write");
+    rfbCloseClient(cl);
+    return;
+  }
 
-    if (nTypes) {
-        /* Dispatch client input to rfbProcessClientTunnelingType() */
-        cl->state = RFB_TUNNELING_TYPE;
-    } else {
-        rfbSendAuthCaps(cl);
-    }
+  if (nTypes)
+    /* Dispatch client input to rfbProcessClientTunnelingType() */
+    cl->state = RFB_TUNNELING_TYPE;
+  else
+    rfbSendAuthCaps(cl);
 }
 
 
@@ -1238,10 +1211,9 @@ static void rfbSendTunnelingCaps(rfbClientPtr cl)
 
 void rfbProcessClientTunnelingType(rfbClientPtr cl)
 {
-    /* If we were called, then something's really wrong. */
-    rfbLog("rfbProcessClientTunnelingType: not implemented\n");
-    rfbCloseClient(cl);
-    return;
+  /* If we were called, then something's really wrong. */
+  rfbLog("rfbProcessClientTunnelingType: not implemented\n");
+  rfbCloseClient(cl);
 }
 
 
@@ -1252,90 +1224,85 @@ void rfbProcessClientTunnelingType(rfbClientPtr cl)
 
 static void rfbSendAuthCaps(rfbClientPtr cl)
 {
-    rfbAuthenticationCapsMsg caps;
-    rfbCapabilityInfo caplist[MAX_AUTH_CAPS];
-    int count = 0;
+  rfbAuthenticationCapsMsg caps;
+  rfbCapabilityInfo caplist[MAX_AUTH_CAPS];
+  int count = 0;
+  int j;
+  AuthMethodData *a;
+  AuthCapData *c;
+  rfbCapabilityInfo *pcap;
+  char tempstr[9];
 
-    int j;
-    AuthMethodData *a;
-    AuthCapData *c;
-    rfbCapabilityInfo *pcap;
-    char tempstr[9];
+  if (!cl->reverseConnection) {
+    int i;
 
-    if (!cl->reverseConnection) {
-        int i;
+    /*
+     * When no preference order was set using "permitted-security-types",
+     * the default value of preferenceLimit (1) will cause us to execute
+     * the outer loop once.  In this case, the a->preference members will
+     * all be the default value (-1), and we skip the order testing.
+     */
+    for (i = 0; i < preferenceLimit; i++) {
+      for (a = authMethods; a->name != NULL; a++) {
+        if (((a->preference != -1) && (i != a->preference)) || !a->enabled)
+          continue;
+
+        c = a->authCap;
+
+        if (count > MAX_AUTH_CAPS)
+          FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS");
 
         /*
-         * When no preference order was set using "permitted-security-types",
-         * the default value of preferenceLimit (1) will cause us to execute
-         * the outer loop once.  In this case, the a->preference members will
-         * all be the default value (-1), and we skip the order testing.
+         * Check to see if we have already advertised this auth cap.
+         * VNC password and OTP both use the VNC authentication cap.
          */
-        for (i = 0; i < preferenceLimit; i++) {
-            for (a = authMethods; a->name != NULL; a++) {
-                if (((a->preference != -1) && (i != a->preference)) ||
-                    !a->enabled)
-                    continue;
-
-                c = a->authCap;
-
-                if (count > MAX_AUTH_CAPS) {
-                    FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS");
-                }
-
-                /*
-                 * Check to see if we have already advertised this auth cap.
-                 * VNC password and OTP both use the VNC authentication cap.
-                 */
-                for (j = 0; j < count; j++) {
-                    if (cl->authCaps[j] == c->authType)
-                        break;
-                }
-
-                if (j < count)
-                    continue;
-
-                pcap = &caplist[count];
-                pcap->code = Swap32IfLE(c->authType);
-                memcpy(pcap->vendorSignature, c->vendorSignature,
-                       sz_rfbCapabilityInfoVendor);
-                memcpy(pcap->nameSignature, c->nameSignature,
-                       sz_rfbCapabilityInfoName);
-                cl->authCaps[count] = c->authType;
-                strncpy(tempstr, (char *)pcap->nameSignature, 8);
-                tempstr[8] = 0;
-                rfbLog("Advertising Tight auth cap '%s'\n", tempstr);
-                count++;
-            }
+        for (j = 0; j < count; j++) {
+          if (cl->authCaps[j] == c->authType)
+            break;
         }
 
-        if (count == 0) {
-            FatalError("rfbSendAuthCaps: authentication required but no auth methods enabled! This should not have happened!");
-        }
+        if (j < count)
+          continue;
+
+        pcap = &caplist[count];
+        pcap->code = Swap32IfLE(c->authType);
+        memcpy(pcap->vendorSignature, c->vendorSignature,
+               sz_rfbCapabilityInfoVendor);
+        memcpy(pcap->nameSignature, c->nameSignature,
+               sz_rfbCapabilityInfoName);
+        cl->authCaps[count] = c->authType;
+        strncpy(tempstr, (char *)pcap->nameSignature, 8);
+        tempstr[8] = 0;
+        rfbLog("Advertising Tight auth cap '%s'\n", tempstr);
+        count++;
+      }
     }
 
-    cl->nAuthCaps = count;
-    caps.nAuthTypes = Swap32IfLE((CARD32)count);
-    if (WriteExact(cl, (char *)&caps, sz_rfbAuthenticationCapsMsg) < 0) {
-        rfbLogPerror("rfbSendAuthCaps: write");
-        rfbCloseClient(cl);
-        return;
-    }
+    if (count == 0)
+      FatalError("rfbSendAuthCaps: authentication required but no auth methods enabled! This should not have happened!");
+  }
 
-    if (count) {
-        if (WriteExact(cl, (char *)&caplist[0],
-                       count *sz_rfbCapabilityInfo) < 0) {
-            rfbLogPerror("rfbSendAuthCaps: write");
-            rfbCloseClient(cl);
-            return;
-        }
-        /* Dispatch client input to rfbProcessClientAuthType() */
-        cl->state = RFB_AUTH_TYPE;
-    } else {
-        /* No authentication needed */
-        rfbClientAuthSucceeded(cl, rfbAuthNone);
-        cl->state = RFB_INITIALISATION;
+  cl->nAuthCaps = count;
+  caps.nAuthTypes = Swap32IfLE((CARD32)count);
+  if (WriteExact(cl, (char *)&caps, sz_rfbAuthenticationCapsMsg) < 0) {
+    rfbLogPerror("rfbSendAuthCaps: write");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  if (count) {
+    if (WriteExact(cl, (char *)&caplist[0], count *sz_rfbCapabilityInfo) < 0) {
+      rfbLogPerror("rfbSendAuthCaps: write");
+      rfbCloseClient(cl);
+      return;
     }
+    /* Dispatch client input to rfbProcessClientAuthType() */
+    cl->state = RFB_AUTH_TYPE;
+  } else {
+    /* No authentication needed */
+    rfbClientAuthSucceeded(cl, rfbAuthNone);
+    cl->state = RFB_INITIALISATION;
+  }
 }
 
 
@@ -1345,46 +1312,45 @@ static void rfbSendAuthCaps(rfbClientPtr cl)
 
 void rfbProcessClientAuthType(rfbClientPtr cl)
 {
-    CARD32 auth_type;
-    int n, i;
-    AuthCapData **p;
-    AuthCapData *c;
+  CARD32 auth_type;
+  int n, i;
+  AuthCapData **p;
+  AuthCapData *c;
 
-    /* Read authentication type selected by the client */
-    n = ReadExact(cl, (char *)&auth_type, sizeof(auth_type));
-    if (n <= 0) {
-        if (n == 0)
-            rfbLog("rfbProcessClientAuthType: client gone\n");
-        else
-            rfbLogPerror("rfbProcessClientAuthType: read");
-        rfbCloseClient(cl);
-        return;
-    }
-    auth_type = Swap32IfLE(auth_type);
-
-    /* Make sure it was present in the list sent by the server */
-    for (i = 0; i < cl->nAuthCaps; i++) {
-        if (auth_type == cl->authCaps[i])
-            break;
-    }
-    if (i >= cl->nAuthCaps) {
-        rfbLog("rfbProcessClientAuthType: "
-               "wrong authentication type requested\n");
-        rfbCloseClient(cl);
-        return;
-    }
-
-    for (p = authCaps; *p != NULL; p++) {
-        c = *p;
-        if (auth_type == c->authType) {
-            cl->selectedAuthType = auth_type;
-            c->startFunc(cl);
-            return;
-        }
-    }
-
-    rfbLog("rfbProcessClientAuthType: unknown authentication scheme\n");
+  /* Read authentication type selected by the client */
+  n = ReadExact(cl, (char *)&auth_type, sizeof(auth_type));
+  if (n <= 0) {
+    if (n == 0)
+      rfbLog("rfbProcessClientAuthType: client gone\n");
+    else
+      rfbLogPerror("rfbProcessClientAuthType: read");
     rfbCloseClient(cl);
+    return;
+  }
+  auth_type = Swap32IfLE(auth_type);
+
+  /* Make sure it was present in the list sent by the server */
+  for (i = 0; i < cl->nAuthCaps; i++) {
+    if (auth_type == cl->authCaps[i])
+      break;
+  }
+  if (i >= cl->nAuthCaps) {
+    rfbLog("rfbProcessClientAuthType: wrong authentication type requested\n");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  for (p = authCaps; *p != NULL; p++) {
+    c = *p;
+    if (auth_type == c->authType) {
+      cl->selectedAuthType = auth_type;
+      c->startFunc(cl);
+      return;
+    }
+  }
+
+  rfbLog("rfbProcessClientAuthType: unknown authentication scheme\n");
+  rfbCloseClient(cl);
 }
 
 
@@ -1394,15 +1360,15 @@ void rfbProcessClientAuthType(rfbClientPtr cl)
 
 static void rfbVncAuthSendChallenge(rfbClientPtr cl)
 {
-    vncRandomBytes(cl->authChallenge);
-    if (WriteExact(cl, (char *)cl->authChallenge, CHALLENGESIZE) < 0) {
-        rfbLogPerror("rfbVncAuthSendChallenge: write");
-        rfbCloseClient(cl);
-        return;
-    }
+  vncRandomBytes(cl->authChallenge);
+  if (WriteExact(cl, (char *)cl->authChallenge, CHALLENGESIZE) < 0) {
+    rfbLogPerror("rfbVncAuthSendChallenge: write");
+    rfbCloseClient(cl);
+    return;
+  }
 
-    /* Dispatch client input to rfbVncAuthProcessResponse() */
-    cl->state = RFB_AUTHENTICATION;
+  /* Dispatch client input to rfbVncAuthProcessResponse() */
+  cl->state = RFB_AUTHENTICATION;
 }
 
 
@@ -1410,32 +1376,32 @@ static Bool CheckResponse(rfbClientPtr cl, int numPasswords,
                           char *passwdFullControl, char *passwdViewOnly,
                           CARD8 *response)
 {
-    Bool ok = FALSE;
-    CARD8 encryptedChallenge1[CHALLENGESIZE];
-    CARD8 encryptedChallenge2[CHALLENGESIZE];
+  Bool ok = FALSE;
+  CARD8 encryptedChallenge1[CHALLENGESIZE];
+  CARD8 encryptedChallenge2[CHALLENGESIZE];
 
-    memcpy(encryptedChallenge1, cl->authChallenge, CHALLENGESIZE);
-    vncEncryptBytes(encryptedChallenge1, passwdFullControl);
-    memcpy(encryptedChallenge2, cl->authChallenge, CHALLENGESIZE);
-    vncEncryptBytes(encryptedChallenge2, (numPasswords == 2) ?
-                    passwdViewOnly : passwdFullControl);
+  memcpy(encryptedChallenge1, cl->authChallenge, CHALLENGESIZE);
+  vncEncryptBytes(encryptedChallenge1, passwdFullControl);
+  memcpy(encryptedChallenge2, cl->authChallenge, CHALLENGESIZE);
+  vncEncryptBytes(encryptedChallenge2,
+                  (numPasswords == 2) ? passwdViewOnly : passwdFullControl);
 
-    /* Delete the passwords from memory */
-    memset(passwdFullControl, 0, MAXPWLEN + 1);
-    memset(passwdViewOnly, 0, MAXPWLEN + 1);
+  /* Delete the passwords from memory */
+  memset(passwdFullControl, 0, MAXPWLEN + 1);
+  memset(passwdViewOnly, 0, MAXPWLEN + 1);
 
-    if (memcmp(encryptedChallenge1, response, CHALLENGESIZE) == 0) {
-        rfbLog("Full-control authentication enabled for %s\n", cl->host);
-        ok = TRUE;
-        cl->viewOnly = FALSE;
+  if (memcmp(encryptedChallenge1, response, CHALLENGESIZE) == 0) {
+    rfbLog("Full-control authentication enabled for %s\n", cl->host);
+    ok = TRUE;
+    cl->viewOnly = FALSE;
 
-    } else if (memcmp(encryptedChallenge2, response, CHALLENGESIZE) == 0) {
-        rfbLog("View-only authentication enabled for %s\n", cl->host);
-        ok = TRUE;
-        cl->viewOnly = TRUE;
-    }
+  } else if (memcmp(encryptedChallenge2, response, CHALLENGESIZE) == 0) {
+    rfbLog("View-only authentication enabled for %s\n", cl->host);
+    ok = TRUE;
+    cl->viewOnly = TRUE;
+  }
 
-    return(ok);
+  return ok;
 }
 
 
@@ -1446,83 +1412,82 @@ static Bool CheckResponse(rfbClientPtr cl, int numPasswords,
 
 void rfbVncAuthProcessResponse(rfbClientPtr cl)
 {
-    char passwdFullControl[MAXPWLEN + 1] = "\0";
-    char passwdViewOnly[MAXPWLEN + 1] = "\0";
-    int numPasswords;
-    Bool ok;
-    int n;
-    CARD8 response[CHALLENGESIZE];
+  char passwdFullControl[MAXPWLEN + 1] = "\0";
+  char passwdViewOnly[MAXPWLEN + 1] = "\0";
+  int numPasswords;
+  Bool ok;
+  int n;
+  CARD8 response[CHALLENGESIZE];
 
-    n = ReadExact(cl, (char *)response, CHALLENGESIZE);
-    if (n <= 0) {
-        if (n != 0)
-            rfbLogPerror("rfbVncAuthProcessResponse: read");
-        rfbCloseClient(cl);
+  n = ReadExact(cl, (char *)response, CHALLENGESIZE);
+  if (n <= 0) {
+    if (n != 0)
+      rfbLogPerror("rfbVncAuthProcessResponse: read");
+    rfbCloseClient(cl);
+    return;
+  }
+
+  ok = FALSE;
+  if (rfbOptOtpAuth()) {
+    if (rfbAuthOTPValue == NULL) {
+      if (nAuthMethodsEnabled == 1) {
+        rfbClientAuthFailed(cl, "The one-time password has not been set on the server");
         return;
-    }
+      }
 
-    ok = FALSE;
-    if (rfbOptOtpAuth()) {
-        if (rfbAuthOTPValue == NULL) {
-            if (nAuthMethodsEnabled == 1) {
-                rfbClientAuthFailed(cl, "The one-time password has not been set on the server");
-                return;
-            }
-
-        } else {
-            memcpy(passwdFullControl, rfbAuthOTPValue, MAXPWLEN);
-            passwdFullControl[MAXPWLEN] = '\0';
-            numPasswords = rfbAuthOTPValueLen / MAXPWLEN;
-            if (numPasswords > 1) {
-                memcpy(passwdViewOnly, rfbAuthOTPValue + MAXPWLEN, MAXPWLEN);
-                passwdViewOnly[MAXPWLEN] = '\0';
-            }
-
-            ok = CheckResponse(cl, numPasswords, passwdFullControl,
-                               passwdViewOnly, response);
-            if (ok) {
-                memset(rfbAuthOTPValue, 0, rfbAuthOTPValueLen);
-                free(rfbAuthOTPValue);
-                rfbAuthOTPValue = NULL;
-            }
-        }
-    }
-
-    if ((ok == FALSE) && rfbOptRfbAuth()) {
-        if (!rfbAuthPasswdFile) {
-            rfbClientAuthFailed(cl, "No VNC password file specified on the server (did you forget -rfbauth?)");
-            return;
-        }
-
-        numPasswords = vncDecryptPasswdFromFile2(rfbAuthPasswdFile,
-                                                 passwdFullControl,
-                                                 passwdViewOnly);
-        if (numPasswords == 0) {
-            rfbLog("rfbVncAuthProcessResponse: could not get password from %s\n",
-                   rfbAuthPasswdFile);
-
-            if (nAuthMethodsEnabled == 1) {
-                rfbClientAuthFailed(cl, "The server could not read the VNC password file");
-                return;
-            }
-        }
-
-        ok = CheckResponse(cl, numPasswords, passwdFullControl, passwdViewOnly,
-                           response);
-    }
-
-    if (ok) {
-        rfbAuthUnblock();
-        rfbClientAuthSucceeded(cl, rfbAuthVNC);
     } else {
-        rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",
-               cl->host);
-        if (rfbAuthConsiderBlocking()) {
-            rfbClientAuthFailed(cl, "Authentication failed.  Too many tries");
-        } else {
-            rfbClientAuthFailed(cl, "Authentication failed");
-        }
+      memcpy(passwdFullControl, rfbAuthOTPValue, MAXPWLEN);
+      passwdFullControl[MAXPWLEN] = '\0';
+      numPasswords = rfbAuthOTPValueLen / MAXPWLEN;
+      if (numPasswords > 1) {
+        memcpy(passwdViewOnly, rfbAuthOTPValue + MAXPWLEN, MAXPWLEN);
+        passwdViewOnly[MAXPWLEN] = '\0';
+      }
+
+      ok = CheckResponse(cl, numPasswords, passwdFullControl, passwdViewOnly,
+                         response);
+      if (ok) {
+        memset(rfbAuthOTPValue, 0, rfbAuthOTPValueLen);
+        free(rfbAuthOTPValue);
+        rfbAuthOTPValue = NULL;
+      }
     }
+  }
+
+  if ((ok == FALSE) && rfbOptRfbAuth()) {
+    if (!rfbAuthPasswdFile) {
+      rfbClientAuthFailed(cl, "No VNC password file specified on the server (did you forget -rfbauth?)");
+      return;
+    }
+
+    numPasswords = vncDecryptPasswdFromFile2(rfbAuthPasswdFile,
+                                             passwdFullControl,
+                                             passwdViewOnly);
+    if (numPasswords == 0) {
+      rfbLog("rfbVncAuthProcessResponse: could not get password from %s\n",
+             rfbAuthPasswdFile);
+
+      if (nAuthMethodsEnabled == 1) {
+        rfbClientAuthFailed(cl, "The server could not read the VNC password file");
+        return;
+      }
+    }
+
+    ok = CheckResponse(cl, numPasswords, passwdFullControl, passwdViewOnly,
+                       response);
+  }
+
+  if (ok) {
+    rfbAuthUnblock();
+    rfbClientAuthSucceeded(cl, rfbAuthVNC);
+  } else {
+    rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",
+           cl->host);
+    if (rfbAuthConsiderBlocking())
+      rfbClientAuthFailed(cl, "Authentication failed.  Too many tries");
+    else
+      rfbClientAuthFailed(cl, "Authentication failed");
+  }
 }
 
 
@@ -1533,22 +1498,20 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
 
 void rfbClientConnFailed(rfbClientPtr cl, char *reason)
 {
-    int headerLen, reasonLen;
-    char buf[8];
-    CARD32 *buf32 = (CARD32 *)buf;
+  int headerLen, reasonLen;
+  char buf[8];
+  CARD32 *buf32 = (CARD32 *)buf;
 
-    headerLen = (cl->protocol_minor_ver >= 7) ? 1 : 4;
-    reasonLen = strlen(reason);
-    buf32[0] = 0;
-    buf32[1] = Swap32IfLE(reasonLen);
+  headerLen = (cl->protocol_minor_ver >= 7) ? 1 : 4;
+  reasonLen = strlen(reason);
+  buf32[0] = 0;
+  buf32[1] = Swap32IfLE(reasonLen);
 
-    if (WriteExact(cl, buf, headerLen) < 0 ||
-        WriteExact(cl, buf + 4, 4) < 0 ||
-        WriteExact(cl, reason, reasonLen) < 0) {
-        rfbLogPerror("rfbClientConnFailed: write");
-    }
+  if (WriteExact(cl, buf, headerLen) < 0 || WriteExact(cl, buf + 4, 4) < 0 ||
+      WriteExact(cl, reason, reasonLen) < 0)
+    rfbLogPerror("rfbClientConnFailed: write");
 
-    rfbCloseClient(cl);
+  rfbCloseClient(cl);
 }
 
 
@@ -1559,29 +1522,26 @@ void rfbClientConnFailed(rfbClientPtr cl, char *reason)
 
 void rfbClientAuthFailed(rfbClientPtr cl, char *reason)
 {
-    int reasonLen;
-    char buf[8];
-    CARD32 *buf32 = (CARD32 *)buf;
+  int reasonLen;
+  char buf[8];
+  CARD32 *buf32 = (CARD32 *)buf;
 
-    if (cl->protocol_minor_ver < 8)
-        reason = NULL;          /* invalidate the pointer */
+  if (cl->protocol_minor_ver < 8)
+    reason = NULL;              /* invalidate the pointer */
 
-    reasonLen = (reason == NULL) ? 0 : strlen(reason);
-    buf32[0] = Swap32IfLE(rfbAuthFailed);
-    buf32[1] = Swap32IfLE(reasonLen);
+  reasonLen = (reason == NULL) ? 0 : strlen(reason);
+  buf32[0] = Swap32IfLE(rfbAuthFailed);
+  buf32[1] = Swap32IfLE(reasonLen);
 
-    if (reasonLen == 0) {
-        if (WriteExact(cl, buf, 4) < 0) {
-            rfbLogPerror("rfbClientAuthFailed: write");
-        }
-    } else {
-        if (WriteExact(cl, buf, 8) < 0 ||
-            WriteExact(cl, reason, reasonLen) < 0) {
-            rfbLogPerror("rfbClientAuthFailed: write");
-        }
-    }
+  if (reasonLen == 0) {
+    if (WriteExact(cl, buf, 4) < 0)
+      rfbLogPerror("rfbClientAuthFailed: write");
+  } else {
+    if (WriteExact(cl, buf, 8) < 0 || WriteExact(cl, reason, reasonLen) < 0)
+      rfbLogPerror("rfbClientAuthFailed: write");
+  }
 
-    rfbCloseClient(cl);
+  rfbCloseClient(cl);
 }
 
 
@@ -1594,19 +1554,19 @@ void rfbClientAuthFailed(rfbClientPtr cl, char *reason)
 
 void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType)
 {
-    CARD32 authResult;
+  CARD32 authResult;
 
-    if (cl->protocol_minor_ver >= 8 || authType == rfbAuthVNC) {
-        authResult = Swap32IfLE(rfbAuthOK);
-        if (WriteExact(cl, (char *)&authResult, 4) < 0) {
-            rfbLogPerror("rfbClientAuthSucceeded: write");
-            rfbCloseClient(cl);
-            return;
-        }
+  if (cl->protocol_minor_ver >= 8 || authType == rfbAuthVNC) {
+    authResult = Swap32IfLE(rfbAuthOK);
+    if (WriteExact(cl, (char *)&authResult, 4) < 0) {
+      rfbLogPerror("rfbClientAuthSucceeded: write");
+      rfbCloseClient(cl);
+      return;
     }
+  }
 
-    /* Dispatch client input to rfbProcessClientInitMessage() */
-    cl->state = RFB_INITIALISATION;
+  /* Dispatch client input to rfbProcessClientInitMessage() */
+  cl->state = RFB_INITIALISATION;
 }
 
 
@@ -1634,8 +1594,8 @@ static OsTimerPtr timer = NULL;
 
 static CARD32 rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
 {
-    rfbAuthTooManyTries = FALSE;
-    return 0;
+  rfbAuthTooManyTries = FALSE;
+  return 0;
 }
 
 
@@ -1646,20 +1606,21 @@ static CARD32 rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
 
 Bool rfbAuthConsiderBlocking(void)
 {
-    int i;
+  int i;
 
-    rfbAuthTries++;
+  rfbAuthTries++;
 
-    if (rfbAuthTries >= MAX_AUTH_TRIES) {
-        CARD32 delay = AUTH_TOO_MANY_BASE_DELAY;
-        for (i = MAX_AUTH_TRIES; i < rfbAuthTries; i++)
-            delay *= 2;
-        timer = TimerSet(timer, 0, delay, rfbAuthReenable, NULL);
-        rfbAuthTooManyTries = TRUE;
-        return TRUE;
-    }
+  if (rfbAuthTries >= MAX_AUTH_TRIES) {
+    CARD32 delay = AUTH_TOO_MANY_BASE_DELAY;
 
-    return FALSE;
+    for (i = MAX_AUTH_TRIES; i < rfbAuthTries; i++)
+      delay *= 2;
+    timer = TimerSet(timer, 0, delay, rfbAuthReenable, NULL);
+    rfbAuthTooManyTries = TRUE;
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 
@@ -1672,7 +1633,7 @@ Bool rfbAuthConsiderBlocking(void)
 
 void rfbAuthUnblock(void)
 {
-    rfbAuthTries = 0;
+  rfbAuthTries = 0;
 }
 
 
@@ -1684,5 +1645,5 @@ void rfbAuthUnblock(void)
 
 Bool rfbAuthIsBlocked(void)
 {
-    return rfbAuthTooManyTries;
+  return rfbAuthTooManyTries;
 }
