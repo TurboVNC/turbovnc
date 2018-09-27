@@ -46,9 +46,8 @@ VNCviewerApp::VNCviewerApp(HINSTANCE hInstance, LPTSTR szCmdLine)
     else
       vnclog.SetMode(Log::ToConsole | Log::ToDebug);
   }
-  if (m_options.m_logToFile) {
+  if (m_options.m_logToFile)
     vnclog.SetFile(m_options.m_logFilename);
-  }
 
   // Clear connection list
   for (int i = 0; i < MAX_CONNECTIONS; i++)
@@ -83,8 +82,7 @@ void VNCviewerApp::RegisterConnection(ClientConnection *pConn)
   }
   // If we've reached this point, something is wrong
   vnclog.Print(-1, "Client list overflow!\n");
-  MessageBox(NULL, "Client list overflow!", "VNC error",
-             MB_OK | MB_ICONSTOP);
+  MessageBox(NULL, "Client list overflow!", "VNC error", MB_OK | MB_ICONSTOP);
   PostQuitMessage(1);
 
 }
@@ -97,9 +95,9 @@ void VNCviewerApp::DeregisterConnection(ClientConnection *pConn)
   for (i = 0; i < MAX_CONNECTIONS; i++) {
     if (m_clilist[i] == pConn) {
       // shuffle everything above downwards
-      for (int j = i; m_clilist[j] && j < MAX_CONNECTIONS-1 ; j++)
+      for (int j = i; m_clilist[j] && j < MAX_CONNECTIONS - 1; j++)
         m_clilist[j] = m_clilist[j + 1];
-      m_clilist[MAX_CONNECTIONS-1] = NULL;
+      m_clilist[MAX_CONNECTIONS - 1] = NULL;
       vnclog.Print(4, "Deregistered connection from app\n");
 
       // No clients left?  Then we should finish, unless we're in

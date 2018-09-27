@@ -40,9 +40,9 @@
 #define IN_T CONCAT2E(CARD, IN)
 #define OUT_T CONCAT2E(CARD, OUT)
 #define rfbTranslateWithSingleTableINtoOUT  \
-    CONCAT4E(rfbTranslateWithSingleTable, IN, to, OUT)
+  CONCAT4E(rfbTranslateWithSingleTable, IN, to, OUT)
 #define rfbTranslateWithRGBTablesINtoOUT  \
-    CONCAT4E(rfbTranslateWithRGBTables, IN, to, OUT)
+  CONCAT4E(rfbTranslateWithRGBTables, IN, to, OUT)
 
 
 /*
@@ -56,22 +56,21 @@ static void rfbTranslateWithSingleTableINtoOUT(char *table, rfbPixelFormat *in,
                                                int bytesBetweenInputLines,
                                                int width, int height)
 {
-    IN_T *ip = (IN_T *)iptr;
-    OUT_T *op = (OUT_T *)optr;
-    int ipextra = bytesBetweenInputLines / sizeof(IN_T) - width;
-    OUT_T *opLineEnd;
-    OUT_T *t = (OUT_T *)table;
+  IN_T *ip = (IN_T *)iptr;
+  OUT_T *op = (OUT_T *)optr;
+  int ipextra = bytesBetweenInputLines / sizeof(IN_T) - width;
+  OUT_T *opLineEnd;
+  OUT_T *t = (OUT_T *)table;
 
-    while (height > 0) {
-        opLineEnd = op + width;
+  while (height > 0) {
+    opLineEnd = op + width;
 
-        while (op < opLineEnd) {
-            *(op++) = t[*(ip++)];
-        }
+    while (op < opLineEnd)
+      *(op++) = t[*(ip++)];
 
-        ip += ipextra;
-        height--;
-    }
+    ip += ipextra;
+    height--;
+  }
 }
 
 
@@ -86,26 +85,26 @@ static void rfbTranslateWithRGBTablesINtoOUT(char *table, rfbPixelFormat *in,
                                              int bytesBetweenInputLines,
                                              int width, int height)
 {
-    IN_T *ip = (IN_T *)iptr;
-    OUT_T *op = (OUT_T *)optr;
-    int ipextra = bytesBetweenInputLines / sizeof(IN_T) - width;
-    OUT_T *opLineEnd;
-    OUT_T *redTable = (OUT_T *)table;
-    OUT_T *greenTable = redTable + in->redMax + 1;
-    OUT_T *blueTable = greenTable + in->greenMax + 1;
+  IN_T *ip = (IN_T *)iptr;
+  OUT_T *op = (OUT_T *)optr;
+  int ipextra = bytesBetweenInputLines / sizeof(IN_T) - width;
+  OUT_T *opLineEnd;
+  OUT_T *redTable = (OUT_T *)table;
+  OUT_T *greenTable = redTable + in->redMax + 1;
+  OUT_T *blueTable = greenTable + in->greenMax + 1;
 
-    while (height > 0) {
-        opLineEnd = op + width;
+  while (height > 0) {
+    opLineEnd = op + width;
 
-        while (op < opLineEnd) {
-            *(op++) = (redTable[(*ip >> in->redShift) & in->redMax] |
-                       greenTable[(*ip >> in->greenShift) & in->greenMax] |
-                       blueTable[(*ip >> in->blueShift) & in->blueMax]);
-            ip++;
-        }
-        ip += ipextra;
-        height--;
+    while (op < opLineEnd) {
+      *(op++) = (redTable[(*ip >> in->redShift) & in->redMax] |
+                 greenTable[(*ip >> in->greenShift) & in->greenMax] |
+                 blueTable[(*ip >> in->blueShift) & in->blueMax]);
+      ip++;
     }
+    ip += ipextra;
+    height--;
+  }
 }
 
 

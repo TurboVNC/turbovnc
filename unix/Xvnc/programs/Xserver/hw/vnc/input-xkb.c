@@ -71,8 +71,7 @@ extern DeviceIntPtr kbdDevice;
 
 static Bool XkbTranslateKeyCode(register XkbDescPtr xkb, KeyCode key,
                                 register unsigned int mods,
-                                unsigned int *mods_rtrn,
-                                KeySym *keysym_rtrn)
+                                unsigned int *mods_rtrn, KeySym *keysym_rtrn)
 {
   XkbKeyTypeRec *type;
   int col, nKeyGroups;
@@ -132,7 +131,7 @@ static Bool XkbTranslateKeyCode(register XkbDescPtr xkb, KeyCode key,
   if (mods_rtrn)
     *mods_rtrn = type->mods.mask & (~preserve);
 
-  return (syms[col] != NoSymbol);
+  return syms[col] != NoSymbol;
 }
 
 
@@ -471,8 +470,7 @@ KeyCode KeysymToKeycode(KeySym keysym, unsigned state, unsigned *new_state)
   if (new_state == NULL)
     return 0;
 
-  *new_state = (state & ~ShiftMask) |
-               ((state & ShiftMask) ? 0 : ShiftMask);
+  *new_state = (state & ~ShiftMask) | ((state & ShiftMask) ? 0 : ShiftMask);
   key = KeysymToKeycode(keysym, *new_state, NULL);
   if (key != 0)
     return key;
@@ -641,8 +639,7 @@ KeyCode AddKeysym(KeySym keysym, unsigned state)
 }
 
 
-void vncXkbProcessDeviceEvent(int screenNum,
-                              InternalEvent *event,
+void vncXkbProcessDeviceEvent(int screenNum, InternalEvent *event,
                               DeviceIntPtr dev)
 {
   unsigned int backupctrls = 0;

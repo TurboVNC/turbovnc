@@ -36,7 +36,7 @@ class FileTransfer
     static const char noactionText[];
 
   public:
-    FileTransfer(ClientConnection * pCC, VNCviewerApp * pApp);
+    FileTransfer(ClientConnection *pCC, VNCviewerApp *pApp);
     ~FileTransfer();
 
     void FTInsertColumn(HWND hwnd, char *iText, int iOrder, int xWidth);
@@ -78,8 +78,8 @@ class FileTransfer
     BOOL SendFileDownloadRequest();
     BOOL SendMultipleFileDownloadRequests();
 
-    ClientConnection * m_clientconn;
-    VNCviewerApp * m_pApp;
+    ClientConnection *m_clientconn;
+    VNCviewerApp *m_pApp;
 
   private:
     DWORD m_dwDownloadRead;

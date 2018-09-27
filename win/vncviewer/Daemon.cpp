@@ -132,7 +132,7 @@ void Daemon::CheckTrayIcon()
   if (!SendTrayMsg(NIM_MODIFY)) {
     vnclog.Print(4, "Tray icon not there - reinstalling\n");
     AddTrayIcon();
-  };
+  }
 }
 
 

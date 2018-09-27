@@ -33,8 +33,8 @@ class ConnDialogThread : public omni_thread
     void Close();
 
   private:
-    static LRESULT CALLBACK DlgProc(HWND hwnd, UINT uMsg,
-                    WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
+                                    LPARAM lParam);
     HINSTANCE m_hInst;
     char *m_vnchost;
 
@@ -73,8 +73,8 @@ ConnDialogThread::~ConnDialogThread()
 
 void *ConnDialogThread::run_undetached(void *)
 {
-  DialogBoxParam(m_hInst, MAKEINTRESOURCE(IDD_CONNECTING_DIALOG),
-                 NULL, (DLGPROC)DlgProc, (LPARAM)this);
+  DialogBoxParam(m_hInst, MAKEINTRESOURCE(IDD_CONNECTING_DIALOG), NULL,
+                 (DLGPROC)DlgProc, (LPARAM)this);
   return NULL;
 }
 

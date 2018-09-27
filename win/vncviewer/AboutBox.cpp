@@ -44,8 +44,8 @@ static LRESULT CALLBACK AboutDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam,
 void ShowAboutBox()
 {
   INT_PTR res = DialogBox(pApp->m_instance,
-                          MAKEINTRESOURCE(IDD_APP_ABOUT),
-                          NULL, (DLGPROC)AboutDlgProc);
+                          MAKEINTRESOURCE(IDD_APP_ABOUT), NULL,
+                          (DLGPROC)AboutDlgProc);
 }
 
 
@@ -60,7 +60,7 @@ static LRESULT CALLBACK HelpDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam,
       for (int i = 0; i < IDS_NUMHELP; i++) {
         if (strlen(buf) < 16383)
           LoadString(pApp->m_instance, IDS_HELP + i, &buf[strlen(buf)],
-            sizeof(buf) - (int)strlen(buf));
+                     sizeof(buf) - (int)strlen(buf));
       }
       SetDlgItemText(hwnd, IDC_EDIT_HELP, buf);
       SetWindowText(hwnd, (LPTSTR)lParam);

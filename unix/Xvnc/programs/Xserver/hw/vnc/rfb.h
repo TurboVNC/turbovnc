@@ -89,87 +89,84 @@ extern const char *display;
  * don't allow the X server to have multiple screens.
  */
 
-typedef struct
-{
-    int width;
-    int paddedWidthInBytes;
-    int height;
-    int depth;
-    int bitsPerPixel;
-    int sizeInBytes;
-    char *pfbMemory;
-    Pixel blackPixel;
-    Pixel whitePixel;
+typedef struct {
+  int width;
+  int paddedWidthInBytes;
+  int height;
+  int depth;
+  int bitsPerPixel;
+  int sizeInBytes;
+  char *pfbMemory;
+  Pixel blackPixel;
+  Pixel whitePixel;
 
-    /* The following two members are used to minimise the amount of unnecessary
-       drawing caused by cursor movement.  Whenever any drawing affects the
-       part of the screen where the cursor is, the cursor is removed first and
-       then the drawing is done (this is what the sprite routines test for).
-       Afterwards, however, we do not replace the cursor, even when the cursor
-       is logically being moved across the screen.  We only draw the cursor
-       again just as we are about to send the client a framebuffer update.
+  /* The following two members are used to minimise the amount of unnecessary
+     drawing caused by cursor movement.  Whenever any drawing affects the
+     part of the screen where the cursor is, the cursor is removed first and
+     then the drawing is done (this is what the sprite routines test for).
+     Afterwards, however, we do not replace the cursor, even when the cursor
+     is logically being moved across the screen.  We only draw the cursor
+     again just as we are about to send the client a framebuffer update.
 
-       We need to be careful when removing and drawing the cursor because of
-       their relationship with the normal drawing routines.  The drawing
-       routines can invoke the cursor routines, but also the cursor routines
-       themselves end up invoking drawing routines.
+     We need to be careful when removing and drawing the cursor because of
+     their relationship with the normal drawing routines.  The drawing
+     routines can invoke the cursor routines, but also the cursor routines
+     themselves end up invoking drawing routines.
 
-       Removing the cursor (rfbSpriteRemoveCursor) is eventually achieved by
-       doing a CopyArea from a pixmap to the screen, where the pixmap contains
-       the saved contents of the screen under the cursor.  Before doing this,
-       however, we set cursorIsDrawn to FALSE.  Then, when CopyArea is called,
-       it sees that cursorIsDrawn is FALSE and so doesn't feel the need to
-       (recursively!) remove the cursor before doing it.
+     Removing the cursor (rfbSpriteRemoveCursor) is eventually achieved by
+     doing a CopyArea from a pixmap to the screen, where the pixmap contains
+     the saved contents of the screen under the cursor.  Before doing this,
+     however, we set cursorIsDrawn to FALSE.  Then, when CopyArea is called,
+     it sees that cursorIsDrawn is FALSE and so doesn't feel the need to
+     (recursively!) remove the cursor before doing it.
 
-       Putting up the cursor (rfbSpriteRestoreCursor) involves a call to
-       PushPixels.  While this is happening, cursorIsDrawn must be FALSE so
-       that PushPixels doesn't think it has to remove the cursor first.
-       Obviously cursorIsDrawn is set to TRUE afterwards.
+     Putting up the cursor (rfbSpriteRestoreCursor) involves a call to
+     PushPixels.  While this is happening, cursorIsDrawn must be FALSE so
+     that PushPixels doesn't think it has to remove the cursor first.
+     Obviously cursorIsDrawn is set to TRUE afterwards.
 
-       Another problem we face is that drawing routines sometimes cause a
-       framebuffer update to be sent to the RFB client.  When the RFB client is
-       already waiting for a framebuffer update and some drawing to the
-       framebuffer then happens, the drawing routine sees that the client is
-       ready, so it calls rfbSendFramebufferUpdate.  If the cursor is not drawn
-       at this stage, it must be put up, and so rfbSpriteRestoreCursor is
-       called.  However, if the original drawing routine was actually called
-       from within rfbSpriteRestoreCursor or rfbSpriteRemoveCursor we don't
-       want this to happen.  So both the cursor routines set
-       dontSendFramebufferUpdate to TRUE, and all the drawing routines check
-       this before calling rfbSendFramebufferUpdate. */
+     Another problem we face is that drawing routines sometimes cause a
+     framebuffer update to be sent to the RFB client.  When the RFB client is
+     already waiting for a framebuffer update and some drawing to the
+     framebuffer then happens, the drawing routine sees that the client is
+     ready, so it calls rfbSendFramebufferUpdate.  If the cursor is not drawn
+     at this stage, it must be put up, and so rfbSpriteRestoreCursor is
+     called.  However, if the original drawing routine was actually called
+     from within rfbSpriteRestoreCursor or rfbSpriteRemoveCursor we don't
+     want this to happen.  So both the cursor routines set
+     dontSendFramebufferUpdate to TRUE, and all the drawing routines check
+     this before calling rfbSendFramebufferUpdate. */
 
-    Bool cursorIsDrawn;              /* TRUE if the cursor is currently
+  Bool cursorIsDrawn;                /* TRUE if the cursor is currently
                                         drawn */
-    Bool dontSendFramebufferUpdate;  /* TRUE while removing or drawing the
+  Bool dontSendFramebufferUpdate;    /* TRUE while removing or drawing the
                                         cursor */
-    Bool blockUpdates;               /* TRUE while resizing the screen */
+  Bool blockUpdates;                 /* TRUE while resizing the screen */
 
-    /* wrapped screen functions */
+  /* wrapped screen functions */
 
-    CloseScreenProcPtr                  CloseScreen;
-    CreateGCProcPtr                     CreateGC;
-    CopyWindowProcPtr                   CopyWindow;
-    ClearToBackgroundProcPtr            ClearToBackground;
+  CloseScreenProcPtr                    CloseScreen;
+  CreateGCProcPtr                       CreateGC;
+  CopyWindowProcPtr                     CopyWindow;
+  ClearToBackgroundProcPtr              ClearToBackground;
 #ifdef RENDER
-    CompositeProcPtr                    Composite;
-    GlyphsProcPtr                       Glyphs;
+  CompositeProcPtr                      Composite;
+  GlyphsProcPtr                         Glyphs;
 #endif
-    InstallColormapProcPtr              InstallColormap;
-    UninstallColormapProcPtr            UninstallColormap;
-    ListInstalledColormapsProcPtr       ListInstalledColormaps;
-    StoreColorsProcPtr                  StoreColors;
-    SaveScreenProcPtr                   SaveScreen;
+  InstallColormapProcPtr                InstallColormap;
+  UninstallColormapProcPtr              UninstallColormap;
+  ListInstalledColormapsProcPtr         ListInstalledColormaps;
+  StoreColorsProcPtr                    StoreColors;
+  SaveScreenProcPtr                     SaveScreen;
 
 } rfbFBInfo, *rfbFBInfoPtr;
 
 
-typedef struct _Res
-{
+typedef struct _Res {
   int w, h;
 } Res;
 
-typedef struct
-{
+typedef struct {
   RROutputPtr output;
   Bool idAssigned, used;
   Res prefRes;
@@ -178,12 +175,12 @@ typedef struct
 } rfbScreenInfo, *rfbScreenInfoPtr;
 
 typedef struct {
-    union {
-        struct sockaddr sa;
-        struct sockaddr_storage ss;
-        struct sockaddr_in sin;
-        struct sockaddr_in6 sin6;
-    } u;
+  union {
+    struct sockaddr sa;
+    struct sockaddr_storage ss;
+    struct sockaddr_in sin;
+    struct sockaddr_in6 sin6;
+  } u;
 } rfbSockAddr;
 
 
@@ -203,18 +200,17 @@ typedef void (*rfbTranslateFnType) (char *table, rfbPixelFormat *in,
  * Extended input device structure.
  */
 
-typedef struct
-{
-    char name[32];
-    int numButtons;
-    int numValuators;
-    int mode;
-    CARD32 eventMask;
-    CARD32 productID;
-    DeviceIntPtr pDev;
-    rfbGIIValuator valuators[MAX_VALUATORS];
-    int values[MAX_VALUATORS];
-    CARD32 valFirst, valCount;
+typedef struct {
+  char name[32];
+  int numButtons;
+  int numValuators;
+  int mode;
+  CARD32 eventMask;
+  CARD32 productID;
+  DeviceIntPtr pDev;
+  rfbGIIValuator valuators[MAX_VALUATORS];
+  int values[MAX_VALUATORS];
+  CARD32 valFirst, valCount;
 } rfbDevInfo, *rfbDevInfoPtr;
 
 
@@ -228,223 +224,223 @@ typedef struct _rfbSslCtx rfbSslCtx;
 
 typedef struct rfbClientRec {
 
-    int sock;
-    char *host;
-    char *login;
+  int sock;
+  char *host;
+  char *login;
 
-    int protocol_minor_ver;     /* RFB protocol minor version in use */
-    Bool protocol_tightvnc;     /* TightVNC protocol extensions enabled */
+  int protocol_minor_ver;       /* RFB protocol minor version in use */
+  Bool protocol_tightvnc;       /* TightVNC protocol extensions enabled */
 
-    /* Possible client states: */
+  /* Possible client states: */
 
-    enum {
-        RFB_PROTOCOL_VERSION,   /* establishing protocol version */
-        RFB_SECURITY_TYPE,      /* negotiating security (RFB v.3.7) */
-        RFB_TUNNELING_TYPE,     /* establishing tunneling (RFB v.3.7t) */
-        RFB_AUTH_TYPE,          /* negotiating authentication (RFB v.3.7t) */
-        RFB_AUTHENTICATION,     /* authenticating (VNC authentication) */
+  enum {
+    RFB_PROTOCOL_VERSION,       /* establishing protocol version */
+    RFB_SECURITY_TYPE,          /* negotiating security (RFB v.3.7) */
+    RFB_TUNNELING_TYPE,         /* establishing tunneling (RFB v.3.7t) */
+    RFB_AUTH_TYPE,              /* negotiating authentication (RFB v.3.7t) */
+    RFB_AUTHENTICATION,         /* authenticating (VNC authentication) */
 #if USETLS
-        RFB_TLS_HANDSHAKE,      /* waiting for TLS handshake to complete */
+    RFB_TLS_HANDSHAKE,          /* waiting for TLS handshake to complete */
 #endif
-        RFB_INITIALISATION,     /* sending initialisation messages */
-        RFB_NORMAL              /* normal protocol messages */
-    } state;
+    RFB_INITIALISATION,         /* sending initialisation messages */
+    RFB_NORMAL                  /* normal protocol messages */
+  } state;
 
-    Bool viewOnly;              /* Do not accept input from this client. */
+  Bool viewOnly;                /* Do not accept input from this client. */
 
-    Bool reverseConnection;
+  Bool reverseConnection;
 
-    Bool readyForSetColourMapEntries;
+  Bool readyForSetColourMapEntries;
 
-    Bool useCopyRect;
-    int preferredEncoding;
-    int correMaxWidth, correMaxHeight;
+  Bool useCopyRect;
+  int preferredEncoding;
+  int correMaxWidth, correMaxHeight;
 
-    /* The list of security types sent to this client (protocol 3.7).
-       Note that the first entry is the number of list items following. */
+  /* The list of security types sent to this client (protocol 3.7).
+     Note that the first entry is the number of list items following. */
 
-    CARD8 securityTypes[MAX_SECURITY_TYPES + 1];
+  CARD8 securityTypes[MAX_SECURITY_TYPES + 1];
 
-    /* Lists of capability codes sent to clients. We remember these
-       lists to restrict clients from choosing those tunneling and
-       authentication types that were not advertised. */
+  /* Lists of capability codes sent to clients. We remember these
+     lists to restrict clients from choosing those tunneling and
+     authentication types that were not advertised. */
 
-    int nAuthCaps;
-    CARD32 authCaps[MAX_AUTH_CAPS];
-    CARD8 selectedAuthType;
+  int nAuthCaps;
+  CARD32 authCaps[MAX_AUTH_CAPS];
+  CARD8 selectedAuthType;
 
-    /* This is not useful while we don't support tunneling:
-    int nTunnelingCaps;
-    CARD32 tunnelingCaps[MAX_TUNNELING_CAPS]; */
+  /* This is not useful while we don't support tunneling:
+  int nTunnelingCaps;
+  CARD32 tunnelingCaps[MAX_TUNNELING_CAPS]; */
 
-    /* The following member is only used during VNC authentication */
+  /* The following member is only used during VNC authentication */
 
-    CARD8 authChallenge[CHALLENGESIZE];
+  CARD8 authChallenge[CHALLENGESIZE];
 
 #ifdef XVNC_AuthPAM
-    pam_handle_t *pamHandle;
+  pam_handle_t *pamHandle;
 #endif
 
-    /* The following members represent the update needed to get the client's
-       framebuffer from its present state to the current state of our
-       framebuffer.
+  /* The following members represent the update needed to get the client's
+     framebuffer from its present state to the current state of our
+     framebuffer.
 
-       If the client does not accept CopyRect encoding then the update is
-       simply represented as the region of the screen which has been modified
-       (modifiedRegion).
+     If the client does not accept CopyRect encoding then the update is
+     simply represented as the region of the screen which has been modified
+     (modifiedRegion).
 
-       If the client does accept CopyRect encoding, then the update consists of
-       two parts.  First we have a single copy from one region of the screen to
-       another (the destination of the copy is copyRegion), and second we have
-       the region of the screen which has been modified in some other way
-       (modifiedRegion).
+     If the client does accept CopyRect encoding, then the update consists of
+     two parts.  First we have a single copy from one region of the screen to
+     another (the destination of the copy is copyRegion), and second we have
+     the region of the screen which has been modified in some other way
+     (modifiedRegion).
 
-       Although the copy is of a single region, this region may have many
-       rectangles.  When sending an update, the copyRegion is always sent
-       before the modifiedRegion.  This is because the modifiedRegion may
-       overlap parts of the screen which are in the source of the copy.
+     Although the copy is of a single region, this region may have many
+     rectangles.  When sending an update, the copyRegion is always sent
+     before the modifiedRegion.  This is because the modifiedRegion may
+     overlap parts of the screen which are in the source of the copy.
 
-       In fact during normal processing, the modifiedRegion may even overlap
-       the destination copyRegion.  Just before an update is sent we remove
-       from the copyRegion anything in the modifiedRegion. */
+     In fact during normal processing, the modifiedRegion may even overlap
+     the destination copyRegion.  Just before an update is sent we remove
+     from the copyRegion anything in the modifiedRegion. */
 
-    RegionRec copyRegion;       /* the destination region of the copy */
-    int copyDX, copyDY;         /* the translation by which the copy happens */
+  RegionRec copyRegion;         /* the destination region of the copy */
+  int copyDX, copyDY;           /* the translation by which the copy happens */
 
-    RegionRec modifiedRegion;   /* the region of the screen modified in any
+  RegionRec modifiedRegion;     /* the region of the screen modified in any
                                    other way */
 
-    /* As part of the FramebufferUpdateRequest, a client can express interest
-       in a subrectangle of the whole framebuffer.  This is stored in the
-       requestedRegion member.  In the normal case this is the whole
-       framebuffer if the client is ready, empty if it's not. */
+  /* As part of the FramebufferUpdateRequest, a client can express interest
+     in a subrectangle of the whole framebuffer.  This is stored in the
+     requestedRegion member.  In the normal case this is the whole
+     framebuffer if the client is ready, empty if it's not. */
 
-    RegionRec requestedRegion;
+  RegionRec requestedRegion;
 
-    /* The following members represent the state of the "deferred update" timer
-       - when the framebuffer is modified and the client is ready, in most
-       cases it is more efficient to defer sending the update by a few
-       milliseconds so that several changes to the framebuffer can be combined
-       into a single update. */
+  /* The following members represent the state of the "deferred update" timer
+     - when the framebuffer is modified and the client is ready, in most
+     cases it is more efficient to defer sending the update by a few
+     milliseconds so that several changes to the framebuffer can be combined
+     into a single update. */
 
-    Bool deferredUpdateScheduled;
-    OsTimerPtr deferredUpdateTimer;
-    double deferredUpdateStart;
+  Bool deferredUpdateScheduled;
+  OsTimerPtr deferredUpdateTimer;
+  double deferredUpdateStart;
 
-    /* translateFn points to the translation function which is used to copy
-       and translate a rectangle from the framebuffer to an output buffer. */
+  /* translateFn points to the translation function which is used to copy
+     and translate a rectangle from the framebuffer to an output buffer. */
 
-    rfbTranslateFnType translateFn;
+  rfbTranslateFnType translateFn;
 
-    char *translateLookupTable;
+  char *translateLookupTable;
 
-    rfbPixelFormat format;
+  rfbPixelFormat format;
 
-    /* statistics */
+  /* statistics */
 
-    long long rfbBytesSent[MAX_ENCODINGS];
-    int rfbRectanglesSent[MAX_ENCODINGS];
-    int rfbLastRectMarkersSent;
-    long long rfbLastRectBytesSent;
-    long long rfbCursorShapeBytesSent;
-    int rfbCursorShapeUpdatesSent;
-    long long rfbCursorPosBytesSent;
-    int rfbCursorPosUpdatesSent;
-    int rfbFramebufferUpdateMessagesSent;
-    long long rfbRawBytesEquivalent;
-    int rfbKeyEventsRcvd;
-    int rfbPointerEventsRcvd;
+  long long rfbBytesSent[MAX_ENCODINGS];
+  int rfbRectanglesSent[MAX_ENCODINGS];
+  int rfbLastRectMarkersSent;
+  long long rfbLastRectBytesSent;
+  long long rfbCursorShapeBytesSent;
+  int rfbCursorShapeUpdatesSent;
+  long long rfbCursorPosBytesSent;
+  int rfbCursorPosUpdatesSent;
+  int rfbFramebufferUpdateMessagesSent;
+  long long rfbRawBytesEquivalent;
+  int rfbKeyEventsRcvd;
+  int rfbPointerEventsRcvd;
 
-    /* zlib encoding -- necessary compression state info per client */
+  /* zlib encoding -- necessary compression state info per client */
 
-    struct z_stream_s compStream;
-    Bool compStreamInited;
+  struct z_stream_s compStream;
+  Bool compStreamInited;
 
-    CARD32 zlibCompressLevel;
+  CARD32 zlibCompressLevel;
 
-    /* ZRLE encoding */
+  /* ZRLE encoding */
 
-    void *zrleData;
-    int zywrleLevel;
-    int zywrleBuf[rfbZRLETileWidth * rfbZRLETileHeight];
-    char *zrleBeforeBuf;
-    void *paletteHelper;
+  void *zrleData;
+  int zywrleLevel;
+  int zywrleBuf[rfbZRLETileWidth * rfbZRLETileHeight];
+  char *zrleBeforeBuf;
+  void *paletteHelper;
 
-    /* tight encoding -- preserve zlib streams' state for each client */
+  /* tight encoding -- preserve zlib streams' state for each client */
 
-    z_stream zsStruct[4];
-    Bool zsActive[4];
-    int zsLevel[4];
-    int tightCompressLevel;
-    int tightSubsampLevel;
-    int tightQualityLevel;
-    int imageQualityLevel;
+  z_stream zsStruct[4];
+  Bool zsActive[4];
+  int zsLevel[4];
+  int tightCompressLevel;
+  int tightSubsampLevel;
+  int tightQualityLevel;
+  int imageQualityLevel;
 
-    Bool enableLastRectEncoding;    /* client supports LastRect encoding */
-    Bool enableCursorShapeUpdates;  /* client supports cursor shape updates */
-    Bool enableCursorPosUpdates;    /* client supports PointerPos updates */
-    Bool enableCU;                  /* client supports Continuous Updates */
-    Bool enableFence;               /* client supports fence extension */
-    Bool enableDesktopSize;         /* client supports desktop size
+  Bool enableLastRectEncoding;      /* client supports LastRect encoding */
+  Bool enableCursorShapeUpdates;    /* client supports cursor shape updates */
+  Bool enableCursorPosUpdates;      /* client supports PointerPos updates */
+  Bool enableCU;                    /* client supports Continuous Updates */
+  Bool enableFence;                 /* client supports fence extension */
+  Bool enableDesktopSize;           /* client supports desktop size
                                        extension */
-    Bool enableExtDesktopSize;      /* client supports extended desktop size
+  Bool enableExtDesktopSize;        /* client supports extended desktop size
                                        extension */
-    Bool enableGII;                 /* client supports GII extension */
-    Bool useRichCursorEncoding;     /* rfbEncodingRichCursor is preferred */
-    Bool cursorWasChanged;          /* cursor shape update should be sent */
-    Bool cursorWasMoved;            /* cursor position update should be sent */
+  Bool enableGII;                   /* client supports GII extension */
+  Bool useRichCursorEncoding;       /* rfbEncodingRichCursor is preferred */
+  Bool cursorWasChanged;            /* cursor shape update should be sent */
+  Bool cursorWasMoved;              /* cursor position update should be sent */
 
-    int cursorX, cursorY;           /* client's cursor position */
+  int cursorX, cursorY;             /* client's cursor position */
 
-    Bool firstUpdate;
-    OsTimerPtr alrTimer;
-    RegionRec lossyRegion, alrRegion, alrEligibleRegion;
+  Bool firstUpdate;
+  OsTimerPtr alrTimer;
+  RegionRec lossyRegion, alrRegion, alrEligibleRegion;
 
-    /* Interframe comparison */
-    char *compareFB, *fb;
-    Bool firstCompare;
-    RegionRec ifRegion;
+  /* Interframe comparison */
+  char *compareFB, *fb;
+  Bool firstCompare;
+  RegionRec ifRegion;
 
-    struct rfbClientRec *prev, *next;
+  struct rfbClientRec *prev, *next;
 
-    char *cutText;
-    int cutTextLen;
+  char *cutText;
+  int cutTextLen;
 
-    /* flow control extensions */
+  /* flow control extensions */
 
-    Bool continuousUpdates;
-    RegionRec cuRegion;
+  Bool continuousUpdates;
+  RegionRec cuRegion;
 
-    Bool pendingSyncFence, syncFence;
-    CARD32 fenceFlags;
-    unsigned fenceDataLen;
-    char fenceData[64];
+  Bool pendingSyncFence, syncFence;
+  CARD32 fenceFlags;
+  unsigned fenceDataLen;
+  char fenceData[64];
 
-    unsigned baseRTT;
-    unsigned congWindow;
-    int ackedOffset, sentOffset, sockOffset;
-    unsigned minRTT;
-    Bool seenCongestion;
-    unsigned pingCounter;
-    OsTimerPtr updateTimer;
-    OsTimerPtr congestionTimer;
-    Bool congestionTimerRunning;
-    struct timeval lastWrite;
+  unsigned baseRTT;
+  unsigned congWindow;
+  int ackedOffset, sentOffset, sockOffset;
+  unsigned minRTT;
+  Bool seenCongestion;
+  unsigned pingCounter;
+  OsTimerPtr updateTimer;
+  OsTimerPtr congestionTimer;
+  Bool congestionTimerRunning;
+  struct timeval lastWrite;
 
-    Bool pendingDesktopResize;
-    int reason, result;
+  Bool pendingDesktopResize;
+  int reason, result;
 
 #if USETLS
-    rfbSslCtx *sslctx;
+  rfbSslCtx *sslctx;
 #endif
 
-    /* Extended input device support */
-    rfbDevInfo devices[MAXDEVICES];
-    int numDevices;
+  /* Extended input device support */
+  rfbDevInfo devices[MAXDEVICES];
+  int numDevices;
 
-    /* Session capture */
-    int captureFD;
-    Bool captureEnable;
+  /* Session capture */
+  int captureFD;
+  Bool captureEnable;
 
 } rfbClientRec, *rfbClientPtr;
 
@@ -455,11 +451,11 @@ typedef struct rfbClientRec {
  */
 
 #define FB_UPDATE_PENDING(cl)  \
-    ((!(cl)->enableCursorShapeUpdates && !rfbFB.cursorIsDrawn) ||  \
-     ((cl)->enableCursorShapeUpdates && (cl)->cursorWasChanged) ||  \
-     ((cl)->enableCursorPosUpdates && (cl)->cursorWasMoved) ||  \
-     REGION_NOTEMPTY((pScreen), &(cl)->copyRegion) ||  \
-     REGION_NOTEMPTY((pScreen), &(cl)->modifiedRegion))
+  ((!(cl)->enableCursorShapeUpdates && !rfbFB.cursorIsDrawn) ||  \
+   ((cl)->enableCursorShapeUpdates && (cl)->cursorWasChanged) ||  \
+   ((cl)->enableCursorPosUpdates && (cl)->cursorWasMoved) ||  \
+   REGION_NOTEMPTY((pScreen), &(cl)->copyRegion) ||  \
+   REGION_NOTEMPTY((pScreen), &(cl)->modifiedRegion))
 
 /*
  * This macro creates an empty region (ie. a region with no areas) if it is
@@ -469,11 +465,10 @@ typedef struct rfbClientRec {
  */
 
 #define SAFE_REGION_INIT(pscreen, preg, rect, size) {  \
-    if ( ( (rect)->x2 == (rect)->x1 ) ||  \
-         ( (rect)->y2 == (rect)->y1 ) ) {  \
-        REGION_INIT( (pscreen), (preg), NullBox, 0 );  \
+    if ( ( (rect)->x2 == (rect)->x1 ) || ( (rect)->y2 == (rect)->y1 ) ) {  \
+      REGION_INIT( (pscreen), (preg), NullBox, 0 );  \
     } else {  \
-        REGION_INIT( (pscreen), (preg), (rect), (size) );  \
+      REGION_INIT( (pscreen), (preg), (rect), (size) );  \
     }  \
 }
 
@@ -483,8 +478,8 @@ typedef struct rfbClientRec {
  */
 
 typedef struct {
-    const GCFuncs *wrapFuncs;
-    const GCOps *wrapOps;
+  const GCFuncs *wrapFuncs;
+  const GCOps *wrapOps;
 } rfbGCRec, *rfbGCPtr;
 
 
@@ -528,21 +523,21 @@ static const int rfbEndianTest = 1;
  */
 
 #define ProfileInit()  \
-    static double __start, __mpixels = 0.;  \
-    static int __first = 1;  \
-    double __elapsed;  \
-    static int __iter = 0;  \
-    if (__first) { __start = gettime();  __first = 0; }
+  static double __start, __mpixels = 0.;  \
+  static int __first = 1;  \
+  double __elapsed;  \
+  static int __iter = 0;  \
+  if (__first) { __start = gettime();  __first = 0; }
 
 #define ProfileCount(message, pixels, time)  \
-    __iter++;  \
-    __mpixels += (double)(pixels) / 1000000.;  \
-    if ((__elapsed = gettime() - __start) >= (double)(time)) {  \
-        rfbLog(message":  %f/sec  %f Mpixels/sec\n",  \
-            (double)__iter / __elapsed, __mpixels / __elapsed);  \
-        __start = gettime();  \
-        __iter = 0;  __mpixels = 0.;  \
-    }
+  __iter++;  \
+  __mpixels += (double)(pixels) / 1000000.;  \
+  if ((__elapsed = gettime() - __start) >= (double)(time)) {  \
+    rfbLog(message":  %f/sec  %f Mpixels/sec\n",  \
+           (double)__iter / __elapsed, __mpixels / __elapsed);  \
+    __start = gettime();  \
+    __iter = 0;  __mpixels = 0.;  \
+  }
 
 
 /*
@@ -672,7 +667,7 @@ extern void rfbComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask,
 
 extern void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
                       PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
-                      int nlists, GlyphListPtr lists, GlyphPtr * glyphs);
+                      int nlists, GlyphListPtr lists, GlyphPtr *glyphs);
 #endif
 
 extern Bool rfbCloseScreen(ScreenPtr);
@@ -680,8 +675,8 @@ extern Bool rfbCreateGC(GCPtr);
 extern void rfbPaintWindowBackground(WindowPtr, RegionPtr, int what);
 extern void rfbPaintWindowBorder(WindowPtr, RegionPtr, int what);
 extern void rfbCopyWindow(WindowPtr, DDXPointRec, RegionPtr);
-extern void rfbClearToBackground(WindowPtr, int x, int y, int w,
-                                 int h, Bool generateExposures);
+extern void rfbClearToBackground(WindowPtr, int x, int y, int w, int h,
+                                 Bool generateExposures);
 extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
 
 
@@ -832,8 +827,8 @@ extern int rfbNumThreads;
 extern char *captureFile;
 
 #define debugregion(r, m)  \
-    rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1,  \
-        (r).extents.x2 - (r).extents.x1, (r).extents.y2 - (r).extents.y1)
+  rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1,  \
+         (r).extents.x2 - (r).extents.x1, (r).extents.y2 - (r).extents.y1)
 
 extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port, int id);

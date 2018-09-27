@@ -63,12 +63,12 @@ from the X Consortium.
 #include "rfb.h"
 
 #define SCREEN_PROLOGUE(scrn, field)  \
-    ScreenPtr pScreen = scrn;  \
-    rfbFBInfoPtr prfb = &rfbFB;  \
-    pScreen->field = prfb->field;
+  ScreenPtr pScreen = scrn;  \
+  rfbFBInfoPtr prfb = &rfbFB;  \
+  pScreen->field = prfb->field;
 
 #define SCREEN_EPILOGUE(field, wrapper)  \
-    pScreen->field = wrapper;
+  pScreen->field = wrapper;
 
 
 ColormapPtr rfbInstalledColormap;
@@ -76,51 +76,51 @@ ColormapPtr rfbInstalledColormap;
 
 int rfbListInstalledColormaps(ScreenPtr pScreen, Colormap *pmaps)
 {
-    /* By the time we are processing requests, we can guarantee that there
-     * is always a colormap installed */
-    *pmaps = rfbInstalledColormap->mid;
-    return (1);
+  /* By the time we are processing requests, we can guarantee that there
+   * is always a colormap installed */
+  *pmaps = rfbInstalledColormap->mid;
+  return 1;
 }
 
 
 void rfbInstallColormap(ColormapPtr pmap)
 {
-    ColormapPtr oldpmap = rfbInstalledColormap;
+  ColormapPtr oldpmap = rfbInstalledColormap;
 
-    SCREEN_PROLOGUE(pmap->pScreen, InstallColormap);
+  SCREEN_PROLOGUE(pmap->pScreen, InstallColormap);
 
-    (*pScreen->InstallColormap) (pmap);
+  (*pScreen->InstallColormap) (pmap);
 
-    SCREEN_EPILOGUE(InstallColormap, rfbInstallColormap);
+  SCREEN_EPILOGUE(InstallColormap, rfbInstallColormap);
 
-    if (pmap != oldpmap) {
-        if (oldpmap != (ColormapPtr)None)
-            WalkTree(pmap->pScreen, TellLostMap, (char *)&oldpmap->mid);
-        /* Install pmap */
-        rfbInstalledColormap = pmap;
-        WalkTree(pmap->pScreen, TellGainedMap, (char *)&pmap->mid);
+  if (pmap != oldpmap) {
+    if (oldpmap != (ColormapPtr)None)
+      WalkTree(pmap->pScreen, TellLostMap, (char *)&oldpmap->mid);
+    /* Install pmap */
+    rfbInstalledColormap = pmap;
+    WalkTree(pmap->pScreen, TellGainedMap, (char *)&pmap->mid);
 
-        rfbSetClientColourMaps(0, 0);
-    }
+    rfbSetClientColourMaps(0, 0);
+  }
 }
 
 
 void rfbUninstallColormap(ColormapPtr pmap)
 {
-    ColormapPtr curpmap = rfbInstalledColormap;
+  ColormapPtr curpmap = rfbInstalledColormap;
 
-    if (pmap == curpmap) {
-        if (pmap->mid != pmap->pScreen->defColormap) {
-            int ret;
-            pointer ptr;
-            ret = dixLookupResourceByType(&ptr, pmap->pScreen->defColormap,
-                                          RT_COLORMAP, serverClient,
-                                          DixUnknownAccess);
-            curpmap = (ColormapPtr)ptr;
-            if (ret == Success)
-                (*pmap->pScreen->InstallColormap) (curpmap);
-        }
+  if (pmap == curpmap) {
+    if (pmap->mid != pmap->pScreen->defColormap) {
+      int ret;
+      pointer ptr;
+      ret = dixLookupResourceByType(&ptr, pmap->pScreen->defColormap,
+                                    RT_COLORMAP, serverClient,
+                                    DixUnknownAccess);
+      curpmap = (ColormapPtr)ptr;
+      if (ret == Success)
+        (*pmap->pScreen->InstallColormap) (curpmap);
     }
+  }
 }
 
 
@@ -133,28 +133,27 @@ void rfbUninstallColormap(ColormapPtr pmap)
 
 void rfbStoreColors(ColormapPtr pmap, int ndef, xColorItem *pdefs)
 {
-    int i;
-    int first = -1;
-    int n = 0;
+  int i;
+  int first = -1;
+  int n = 0;
 
-    SCREEN_PROLOGUE(pmap->pScreen, StoreColors);
+  SCREEN_PROLOGUE(pmap->pScreen, StoreColors);
 
-    (*pScreen->StoreColors) (pmap, ndef, pdefs);
+  (*pScreen->StoreColors) (pmap, ndef, pdefs);
 
-    SCREEN_EPILOGUE(StoreColors, rfbStoreColors);
+  SCREEN_EPILOGUE(StoreColors, rfbStoreColors);
 
-    if (pmap == rfbInstalledColormap) {
-        for (i = 0; i < ndef; i++) {
-            if ((first != -1) && (first + n == pdefs[i].pixel)) {
-                n++;
-            } else {
-                if (first != -1) {
-                    rfbSetClientColourMaps(first, n);
-                }
-                first = pdefs[i].pixel;
-                n = 1;
-            }
-        }
-        rfbSetClientColourMaps(first, n);
+  if (pmap == rfbInstalledColormap) {
+    for (i = 0; i < ndef; i++) {
+      if ((first != -1) && (first + n == pdefs[i].pixel)) {
+        n++;
+      } else {
+        if (first != -1)
+          rfbSetClientColourMaps(first, n);
+        first = pdefs[i].pixel;
+        n = 1;
+      }
     }
+    rfbSetClientColourMaps(first, n);
+  }
 }

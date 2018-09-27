@@ -32,19 +32,18 @@
 
 LoginAuthDialog::LoginAuthDialog(char *vnchost, char *title, char *username)
 {
-  if (title != NULL) {
+  if (title != NULL)
     STRCPY(m_title, title);
-  } else {
+  else
     m_title[0] = '\0';
-  }
 
   m_username_disabled = (username == NULL);
 
-  if (username == NULL || username[0] == '\0') {
+  if (username == NULL || username[0] == '\0')
     m_username[0] = '\0';
-  } else {
+  else
     STRCPY(m_username, username);
-  }
+
   m_passwd[0] = '\0';
   m_vnchost = (vnchost != NULL) ? vnchost : "[unknown]";
 }
@@ -58,13 +57,13 @@ LoginAuthDialog::~LoginAuthDialog()
 INT_PTR LoginAuthDialog::DoDialog()
 {
   return DialogBoxParam(pApp->m_instance,
-                        MAKEINTRESOURCE(IDD_LOGIN_AUTH_DIALOG),
-                        NULL, (DLGPROC)DlgProc, (LPARAM)this);
+                        MAKEINTRESOURCE(IDD_LOGIN_AUTH_DIALOG), NULL,
+                        (DLGPROC)DlgProc, (LPARAM)this);
 }
 
 
-BOOL CALLBACK LoginAuthDialog::DlgProc(HWND hwnd, UINT uMsg,
-                                       WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK LoginAuthDialog::DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
+                                       LPARAM lParam)
 {
   // This is a static method, so we don't know which instantiation we're
   // dealing with.  But we can get a pseudo-this from the parameter to
@@ -87,9 +86,8 @@ BOOL CALLBACK LoginAuthDialog::DlgProc(HWND hwnd, UINT uMsg,
         SetFocus(GetDlgItem(hwnd, IDC_PASSWD_EDIT));
         return FALSE;
       }
-      if (_this->m_username_disabled) {
+      if (_this->m_username_disabled)
         EnableWindow(GetDlgItem(hwnd, IDC_LOGIN_EDIT), FALSE);
-      }
       return TRUE;
 
     case WM_COMMAND:

@@ -66,7 +66,7 @@ void FileTransferItemInfo::Add(char *Name, char *Size, unsigned int Data)
   STRCPY(pTemporary[m_NumEntries].Size, Size);
   pTemporary[m_NumEntries].Data = Data;
   if (m_pEntries != NULL) {
-    delete [] m_pEntries;
+    delete[] m_pEntries;
     m_pEntries = NULL;
   }
   m_pEntries = pTemporary;
@@ -78,7 +78,7 @@ void FileTransferItemInfo::Add(char *Name, char *Size, unsigned int Data)
 void FileTransferItemInfo::Free()
 {
   if (m_pEntries != NULL) {
-    delete [] m_pEntries;
+    delete[] m_pEntries;
     m_pEntries = NULL;
   }
   m_NumEntries = 0;

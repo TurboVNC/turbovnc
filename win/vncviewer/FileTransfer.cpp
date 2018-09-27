@@ -29,7 +29,7 @@ const char FileTransfer::downloadText[] = "<<<";
 const char FileTransfer::noactionText[] = "<--->";
 
 
-FileTransfer::FileTransfer(ClientConnection * pCC, VNCviewerApp * pApp)
+FileTransfer::FileTransfer(ClientConnection *pCC, VNCviewerApp *pApp)
 {
   m_clientconn = pCC;
   m_pApp = pApp;
@@ -227,7 +227,8 @@ LRESULT CALLBACK FileTransfer::FileTransferDlgProc(HWND hwnd, UINT uMsg,
           // Now, try to upload/download.
           SetWindowText(GetDlgItem(hwnd, IDC_FTCOPY), noactionText);
           EnableWindow(GetDlgItem(hwnd, IDC_FTCOPY), FALSE);
-          if (_this->m_ClientPath[0] == '\0' || _this->m_ServerPath[0] == '\0') {
+          if (_this->m_ClientPath[0] == '\0' ||
+              _this->m_ServerPath[0] == '\0') {
             SetWindowText(_this->m_hwndFTStatus,
                           "Cannot transfer files: illegal directory.");
             return TRUE;
@@ -358,7 +359,7 @@ BOOL FileTransfer::SendMultipleFileDownloadRequests()
   // A download request for all of the selected files has been sent.
   if (m_numOfFilesToDownload == 0) {
 
-    m_numOfFilesToDownload = -1 ;
+    m_numOfFilesToDownload = -1;
     m_currentDownloadIndex = -1;
 
     EnableWindow(GetDlgItem(m_hwndFileTransfer, IDC_FTCANCEL), FALSE);
@@ -528,7 +529,8 @@ void FileTransfer::FileTransferUpload()
                     "Could not find selected file, can't upload");
       // Continue with upload of other files
       continue;
-    } else if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+    } else if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) !=
+               0) {
       SetWindowText(m_hwndFTStatus, "Cannot upload a directory");
       // Continue with upload of other files
       continue;
@@ -538,8 +540,7 @@ void FileTransfer::FileTransferUpload()
       STRCPY(m_ServerFilename, FindFileData.cFileName);
     }
     FindClose(hFile);
-    if ((sz_rfbFileSize != 0) &&
-        (sz_rfbFileSize <= sz_rfbBlockSize))
+    if ((sz_rfbFileSize != 0) && (sz_rfbFileSize <= sz_rfbBlockSize))
       sz_rfbBlockSize = sz_rfbFileSize;
     m_hFiletoRead = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL,
                                OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
@@ -568,7 +569,7 @@ void FileTransfer::FileTransferUpload()
     memcpy(pFollowMsg, path, pathLen);
     m_clientconn->WriteExact(pAllFURMessage,
                              sz_rfbFileUploadRequestMsg + pathLen);
-    delete [] pAllFURMessage;
+    delete[] pAllFURMessage;
 
     if (sz_rfbFileSize == 0) {
       SendFileUploadDataMessage(mTime);
@@ -578,7 +579,7 @@ void FileTransfer::FileTransferUpload()
       InitProgressBar(0, 0, amount, 1);
 
       DWORD dwPortionRead = 0;
-      char *pBuff = new char [sz_rfbBlockSize];
+      char *pBuff = new char[sz_rfbBlockSize];
       m_bUploadStarted = TRUE;
       while (m_bUploadStarted) {
         ProcessDlgMessage(m_hwndFileTransfer);
@@ -596,7 +597,7 @@ void FileTransfer::FileTransferUpload()
           memcpy(pReason, reason, reasonLen);
           m_clientconn->WriteExact(pFUFMessage,
                                    sz_rfbFileUploadFailedMsg + reasonLen);
-          delete [] pFUFMessage;
+          delete[] pFUFMessage;
           break;
         }
         bResult = ReadFile(m_hFiletoRead, pBuff, sz_rfbBlockSize,
@@ -616,7 +617,7 @@ void FileTransfer::FileTransferUpload()
       if (m_bTransferEnable == FALSE)
         break;
       m_bUploadStarted = FALSE;
-      delete [] pBuff;
+      delete[] pBuff;
     }
     SendMessage(m_hwndFTProgress, PBM_SETPOS, 0, 0);
     SetWindowText(m_hwndFTStatus, "");
@@ -669,7 +670,7 @@ void FileTransfer::FileTransferDownload()
   }
   if ((fdd.realSize == 0) && (fdd.compressedSize == 0)) {
     unsigned int mTime;
-    m_clientconn->ReadExact((char *) &mTime, sizeof(unsigned int));
+    m_clientconn->ReadExact((char *)&mTime, sizeof(unsigned int));
     if (m_hFiletoWrite == INVALID_HANDLE_VALUE) {
       CancelDownload("Could not create file");
       MessageBox(m_hwndFileTransfer,
@@ -697,7 +698,7 @@ void FileTransfer::FileTransferDownload()
   ProcessDlgMessage(m_hwndFileTransfer);
   if (!m_bTransferEnable) {
     CancelDownload("Download cancelled by user");
-    delete [] pBuff;
+    delete[] pBuff;
     return;
   }
   if (m_hFiletoWrite == INVALID_HANDLE_VALUE) {
@@ -705,7 +706,7 @@ void FileTransfer::FileTransferDownload()
     MessageBox(m_hwndFileTransfer,
                "Download failed: could not create local file",
                "Download Failed", MB_ICONEXCLAMATION | MB_OK);
-    delete [] pBuff;
+    delete[] pBuff;
     return;
   }
   WriteFile(m_hFiletoWrite, pBuff, fdd.compressedSize, &dwNumberOfBytesWritten,
@@ -715,7 +716,7 @@ void FileTransfer::FileTransferDownload()
     m_dwDownloadRead = 0;
     SendMessage(m_hwndFTProgress, PBM_STEPIT, 0, 0);
   }
-  delete [] pBuff;
+  delete[] pBuff;
 }
 
 
@@ -761,7 +762,7 @@ void FileTransfer::ShowClientItems(char *path)
       ShowListViewItems(m_hwndFTClientList, &m_FTClientItemInfo);
     }
   } else {
-    //Show Files
+    // Show Files
     HANDLE m_handle;
     int n = 0;
     WIN32_FIND_DATA m_FindFileData;
@@ -842,8 +843,8 @@ BOOL CALLBACK FileTransfer::FTBrowseDlgProc(HWND hwnd, UINT uMsg,
           TVItem.pszText = drive;
           TVItem.cChildren = 1;
           tvins.item = TVItem;
-          tvins.hParent = TreeView_InsertItem(
-            GetDlgItem(hwnd, IDC_FTBROWSETREE), &tvins);
+          tvins.hParent =
+            TreeView_InsertItem(GetDlgItem(hwnd, IDC_FTBROWSETREE), &tvins);
           tvins.item = TVItem;
           TreeView_InsertItem(GetDlgItem(hwnd, IDC_FTBROWSETREE), &tvins);
           tvins.hParent = NULL;
@@ -901,7 +902,7 @@ BOOL CALLBACK FileTransfer::FTBrowseDlgProc(HWND hwnd, UINT uMsg,
             {
               NMTREEVIEW *m_lParam = (NMTREEVIEW *)lParam;
               char Path[rfbMAX_PATH];
-              if (m_lParam -> action == 2) {
+              if (m_lParam->action == 2) {
                 if (_this->m_bServerBrowseRequest) {
                   _this->m_hTreeItem = m_lParam->itemNew.hItem;
                   _this->GetTVPath(GetDlgItem(hwnd, IDC_FTBROWSETREE),
@@ -950,8 +951,7 @@ void FileTransfer::GetTVPath(HWND hwnd, HTREEITEM hTItem, char *path)
     STRNCAT(path, "\\", rfbMAX_PATH);
     STRNCAT(path, _tvi.pszText, rfbMAX_PATH);
     hTItem = TreeView_GetParent(hwnd, hTItem);
-  }
-  while (hTItem != NULL);
+  } while (hTItem != NULL);
   char path_tmp[rfbMAX_PATH], path_out[rfbMAX_PATH];
   path_tmp[0] = '\0';
   path_out[0] = '\0';
@@ -981,7 +981,8 @@ void FileTransfer::StrInvert(char str[rfbMAX_PATH])
   int len = (int)strlen(str), i;
   char str_out[rfbMAX_PATH];
   str_out[0] = '\0';
-  for (i = (len-1); i >= 0; i--) str_out[len - i - 1] = str[i];
+  for (i = (len - 1); i >= 0; i--)
+    str_out[len - i - 1] = str[i];
   str_out[len] = '\0';
   STRNCPY(str, str_out, rfbMAX_PATH);
 }
@@ -1000,7 +1001,7 @@ void FileTransfer::ShowTreeViewItems(HWND hwnd, LPNMTREEVIEW m_lParam)
                            m_lParam->itemNew.hItem) != NULL) {
     TreeView_DeleteItem(GetDlgItem(hwnd, IDC_FTBROWSETREE),
                         TreeView_GetChild(GetDlgItem(hwnd, IDC_FTBROWSETREE),
-                        m_lParam->itemNew.hItem));
+                                          m_lParam->itemNew.hItem));
   }
   UINT savedErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
   m_handle = FindFirstFile(path, &m_FindFileData);
@@ -1074,8 +1075,8 @@ void FileTransfer::ShowServerItems()
       STRCPY(m_ServerPath, m_ServerPathTmp);
       SetWindowText(m_hwndFTServerPath, m_ServerPath);
       ListView_DeleteAllItems(m_hwndFTServerList);
-      delete [] pftSD;
-      delete [] pFilenames;
+      delete[] pftSD;
+      delete[] pFilenames;
       return;
     } else {
       m_FTServerItemInfo.Free();
@@ -1105,18 +1106,19 @@ void FileTransfer::ShowServerItems()
         TVItem.cChildren = 1;
         tvins.item = TVItem;
         tvins.hParent = m_hTreeItem;
-        tvins.hParent = TreeView_InsertItem(
-          GetDlgItem(m_hwndFTBrowse, IDC_FTBROWSETREE), &tvins);
+        tvins.hParent =
+          TreeView_InsertItem(GetDlgItem(m_hwndFTBrowse, IDC_FTBROWSETREE),
+                              &tvins);
         tvins.item = TVItem;
         TreeView_InsertItem(GetDlgItem(m_hwndFTBrowse, IDC_FTBROWSETREE),
                             &tvins);
-        tvins.hParent = m_hTreeItem;;
+        tvins.hParent = m_hTreeItem;
       }
       pos += (int)strlen(pFilenames + pos) + 1;
     }
   }
-  delete [] pftSD;
-  delete [] pFilenames;
+  delete[] pftSD;
+  delete[] pFilenames;
   BlockingFileTransferDialog(TRUE);
 }
 
@@ -1173,7 +1175,6 @@ void FileTransfer::ConvertPath(char *path)
   }
   path[len + 1] = '\0';
   path[0] = '/';
-  return;
 }
 
 
@@ -1226,11 +1227,10 @@ void FileTransfer::CreateServerItemInfoList(FileTransferItemInfo *pftii,
     char buf[16];
     ftsd[i].size = Swap32IfLE(ftsd[i].size);
     ftsd[i].data = Swap32IfLE(ftsd[i].data);
-    if (ftsd[i].size == -1) {
+    if (ftsd[i].size == -1)
       STRCPY(buf, FileTransferItemInfo::folderText);
-    } else {
+    else
       SPRINTF(buf, "%d", ftsd[i].size);
-    }
     pftii->Add(pfnames + pos, buf, ftsd[i].data);
     pos += (int)strlen(pfnames + pos) + 1;
   }
@@ -1267,12 +1267,12 @@ void FileTransfer::SendFileUploadDataMessage(unsigned short size, char *pFile)
   pFUD->compressedSize = Swap16IfLE(size);
   memcpy(pFollow, pFile, size);
   m_clientconn->WriteExact(pAllFUDMessage, msgLen);
-  delete [] pAllFUDMessage;
+  delete[] pAllFUDMessage;
 }
 
 
 void FileTransfer::SendFileDownloadCancelMessage(unsigned short reasonLen,
-                                                  char *reason)
+                                                 char *reason)
 {
   int msgLen = sz_rfbFileDownloadCancelMsg + reasonLen;
   char *pAllFDCMessage = new char[msgLen];
@@ -1282,7 +1282,7 @@ void FileTransfer::SendFileDownloadCancelMessage(unsigned short reasonLen,
   pFDC->reasonLen = Swap16IfLE(reasonLen);
   memcpy(pFollow, reason, reasonLen);
   m_clientconn->WriteExact(pAllFDCMessage, msgLen);
-  delete [] pAllFDCMessage;
+  delete[] pAllFDCMessage;
 }
 
 

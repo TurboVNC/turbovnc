@@ -44,8 +44,8 @@ class SessionDialog
     VNCOptions *m_pOpt;
     char keyname[40];
 
-    static BOOL CALLBACK SessDlgProc(HWND hwndDlg,  UINT uMsg,
-                                     WPARAM wParam, LPARAM lParam);
+    static BOOL CALLBACK SessDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam,
+                                     LPARAM lParam);
 
     static void EnableConnectButton(HWND hDialog, BOOL bEnable);
     static void UpdateConnectButton(HWND hDialog);

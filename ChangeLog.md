@@ -59,6 +59,21 @@ directory but for which the corresponding Xvnc process is no longer running.)
 with the built-in SSH client, the SSH connection would remain open even if the
 associated VNC connection had been closed.
 
+10. Fixed an issue in the vncviewer-javaw.bat script, which is used to
+launch the Java TurboVNC Viewer on Windows without a console window, whereby
+jawt.dll would not be found when using certain versions of the Oracle JRE.
+
+11. The Java TurboVNC Viewer now builds successfully with JDK 11.
+
+12. Fixed an issue in the Mac TurboVNC Viewer whereby the "Preferences..."
+option in the VncViewer menu (and its associated hotkey, Command-,) would pop
+up a new copy of the Options dialog even if the Options dialog was already
+visible.
+
+13. Worked around an issue in Java 9 through 11 that caused the Profiling
+dialog in the Mac TurboVNC Viewer to immediately disappear if it was popped up
+using the Command-P hotkey.
+
 
 2.2 beta1
 =========
@@ -339,7 +354,7 @@ only") when in windowed mode and multi-screen spanning ("All monitors") when in
 full-screen mode.
 
 14. Fixed an issue whereby the Java TurboVNC Viewer, when launched from the
-`vncviewer-java.bat` script, the Start Menu shortcut, or Java Web Start on
+vncviewer-java.bat script, the Start Menu shortcut, or Java Web Start on
 Windows clients with a 32-bit JRE, would fail with "Error: missing 'server'
 JVM".  On Windows, the 32-bit JRE only provides the client VM, and the 64-bit
 JRE only provides the server VM, so specifying `-server` in the launch scripts

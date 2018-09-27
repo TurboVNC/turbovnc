@@ -116,7 +116,7 @@ void HotKeys::Init(bool FSAltEnter, bool zoom)
 
 bool HotKeys::TranslateAccel(MSG *pmsg)
 {
-  return (TranslateAccelerator(m_hwnd, m_hAccel, pmsg) != 0);
+  return TranslateAccelerator(m_hwnd, m_hAccel, pmsg) != 0;
 }
 
 

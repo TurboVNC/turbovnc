@@ -101,12 +101,10 @@ void ClientConnection::SaveConnection()
   buf[0] = '\0';
   if (m_authScheme == rfbAuthVNC) {
     if (MessageBox(m_hwnd,
-      "Do you want to save the password in this file?\n\r"
-      "If you say Yes, anyone with access to this file could access your session\n\r"
-      "and (potentially) discover your VNC password.",
-      "Security warning",
-      MB_YESNO | MB_ICONWARNING) == IDYES)
-    {
+                   "Do you want to save the password in this file?\n\r"
+                   "If you say Yes, anyone with access to this file could access your session\n\r"
+                   "and (potentially) discover your VNC password.",
+                   "Security warning", MB_YESNO | MB_ICONWARNING) == IDYES) {
       for (int i = 0; i < MAXPWLEN; i++)
         snprintf(buf + i * 2, 32 - i * 2, "%02x",
                  (unsigned int)m_encPasswd[i]);
@@ -151,10 +149,10 @@ int ClientConnection::LoadConnection(char *fname, bool sess)
   m_passwdSet = false;
   if (GetPrivateProfileString("connection", "password", "", buf, 32,
                               fname) > 0) {
-    for (int i = 0; i < MAXPWLEN; i++)  {
+    for (int i = 0; i < MAXPWLEN; i++) {
       int x = 0;
       sscanf_s(buf + i * 2, "%2x", &x);
-      m_encPasswd[i] = (unsigned char) x;
+      m_encPasswd[i] = (unsigned char)x;
     }
     m_passwdSet = true;
   }

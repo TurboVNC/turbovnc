@@ -86,9 +86,8 @@ static int FindFreeTcpPort(void)
 
 // NOTE: result points to a 1024-byte buffer
 
-static void fillCmdPattern(char *result, char *pattern,
-                           char *gatewayHost, char *remoteHost,
-                           char *remotePort, char *localPort,
+static void fillCmdPattern(char *result, char *pattern, char *gatewayHost,
+                           char *remoteHost, char *remotePort, char *localPort,
                            bool tunnelOption)
 {
   int i, j;

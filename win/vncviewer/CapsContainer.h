@@ -49,7 +49,7 @@ class CapsContainer
 
   private:
     std::map<CARD32, rfbCapabilityInfo> infoMap;
-    std::map<CARD32, char*> descMap;
+    std::map<CARD32, char *> descMap;
     std::map<CARD32, bool> enableMap;
 
     int maxSize;

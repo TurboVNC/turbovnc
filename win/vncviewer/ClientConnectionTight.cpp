@@ -48,12 +48,11 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
     if ((comp_ctl & 1) && m_tightZlibStreamActive[i]) {
       int err = inflateEnd(&m_tightZlibStream[i]);
       if (err != Z_OK) {
-        if (m_tightZlibStream[i].msg != NULL) {
+        if (m_tightZlibStream[i].msg != NULL)
           vnclog.Print(0, "zlib inflateEnd() error: %s\n",
                        m_tightZlibStream[i].msg);
-        } else {
+        else
           vnclog.Print(0, "zlib inflateEnd() error: %d\n", err);
-        }
         return;
       }
       m_tightZlibStreamActive[i] = FALSE;
@@ -63,8 +62,8 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
 
   bool readUncompressed = false;
   if ((comp_ctl & rfbTightNoZlib) == rfbTightNoZlib) {
-     comp_ctl &= ~(rfbTightNoZlib);
-     readUncompressed = true;
+    comp_ctl &= ~(rfbTightNoZlib);
+    readUncompressed = true;
   }
 
   // Handle solid subrectangles
@@ -218,7 +217,8 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
 // byte contains 7 bits of actual data, and the 8th bit is set to indicate
 // that an additional byte should be read.
 
-int ClientConnection::ReadCompactLen() {
+int ClientConnection::ReadCompactLen()
+{
   CARD8 len_byte;
   ReadExact((char *)&len_byte, 1);
   int compressedLen = (int)len_byte & 0x7F;
@@ -382,8 +382,7 @@ void ClientConnection::FilterCopy##bpp(int srcx, int srcy, int numRows)       \
         dstPtr += stride;                                                     \
         srcPtr += m_tightRectWidth;                                           \
       }                                                                       \
-    }                                                                         \
-    else {                                                                    \
+    } else {                                                                  \
       while (numRows-- > 0) {                                                 \
         CARD32 *dstEndOfRow = dstPtr + m_tightRectWidth;                      \
         while (dstPtr < dstEndOfRow) {                                        \
@@ -395,8 +394,7 @@ void ClientConnection::FilterCopy##bpp(int srcx, int srcy, int numRows)       \
         dstPtr += dstPad;                                                     \
       }                                                                       \
     }                                                                         \
-  }                                                                           \
-  else {                                                                      \
+  } else {                                                                    \
     while (numRows-- > 0) {                                                   \
       CARD32 *dstEndOfRow = dstPtr + m_tightRectWidth;                        \
       while (dstPtr < dstEndOfRow) {                                          \
@@ -482,11 +480,10 @@ void ClientConnection::FilterGradient##bpp(int srcx, int srcy, int numRows)   \
       for (c = 0; c < 3; c++) {                                               \
         est[c] = (int)thatRow[x * 3 + c] + (int)pix[c] -                      \
                  (int)thatRow[(x - 1) * 3 + c];                               \
-        if (est[c] > (int)max[c]) {                                           \
+        if (est[c] > (int)max[c])                                             \
           est[c] = (int)max[c];                                               \
-        } else if (est[c] < 0) {                                              \
+        else if (est[c] < 0)                                                  \
           est[c] = 0;                                                         \
-        }                                                                     \
         pix[c] = (CARD16)((src[y * m_tightRectWidth + x] >> shift[c]) +       \
                           est[c] & max[c]);                                   \
         thisRow[x * 3 + c] = pix[c];                                          \
@@ -553,8 +550,8 @@ void ClientConnection::FilterGradient24(int srcx, int srcy, int numRows)
 void ClientConnection::FilterPalette(int srcx, int srcy, int numRows)
 {
   CARD8 *srcPtr = (CARD8 *)m_netbuf;
-  CARD32 *dstPtr = (CARD32 *)&fb.bits[srcy * fb.pitch +
-                                      srcx * fbx_ps[fb.format]];
+  CARD32 *dstPtr =
+    (CARD32 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];
   int dstPad = fb.pitch / fbx_ps[fb.format] - m_tightRectWidth;
 
   if (m_tightRectColors == 2) {
@@ -575,18 +572,16 @@ void ClientConnection::FilterPalette(int srcx, int srcy, int numRows)
       }
       if (remainder != 0) {
         CARD8 bits = *srcPtr++;
-        for (int b = 7; b >= 8 - remainder; b--) {
+        for (int b = 7; b >= 8 - remainder; b--)
           *dstPtr++ = m_tightPalette[bits >> b & 1];
-        }
       }
       dstPtr += dstPad;
     }
   } else {
     while (numRows-- > 0) {
       CARD32 *dstEndOfRow = dstPtr + m_tightRectWidth;
-      while (dstPtr < dstEndOfRow) {
+      while (dstPtr < dstEndOfRow)
         *dstPtr++ = m_tightPalette[*srcPtr++];
-      }
       dstPtr += dstPad;
     }
   }

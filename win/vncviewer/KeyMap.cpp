@@ -142,7 +142,7 @@ static const vncKeymapping keymap[] = {
 
 KeyMap::KeyMap()
 {
-};
+}
 
 
 KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
@@ -158,7 +158,7 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
   if (extended) {
     vnclog.Print(8, " [ext]");
     switch (virtkey) {
-      case VK_MENU :
+      case VK_MENU:
         virtkey = VK_RMENU;  break;
       case VK_CONTROL:
         virtkey = VK_RCONTROL;  break;
@@ -206,8 +206,7 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
   if (numkeys != 0) {
     // A special case - use Meta instead of Alt if ScrollLock is on
     UINT key = kas.keycodes[numkeys - 1];
-    if ((key == XK_Alt_L || key == XK_Alt_R) &&
-        GetKeyState(VK_SCROLL)) {
+    if ((key == XK_Alt_L || key == XK_Alt_R) && GetKeyState(VK_SCROLL)) {
       if (key == XK_Alt_L)
         kas.keycodes[numkeys - 1] = XK_Meta_L;
       else
@@ -298,4 +297,4 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
   vnclog.Print(8, "\n");
   kas.keycodes[numkeys] = VoidKeyCode;
   return kas;
-};
+}

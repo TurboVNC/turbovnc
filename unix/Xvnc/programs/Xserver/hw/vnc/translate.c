@@ -43,7 +43,7 @@ rfbPixelFormat rfbServerFormat;
  */
 
 static const rfbPixelFormat BGR233Format = {
-    8, 8, 0, 1, 7, 7, 3, 0, 3, 6
+  8, 8, 0, 1, 7, 7, 3, 0, 3, 6
 };
 
 
@@ -52,16 +52,13 @@ static const rfbPixelFormat BGR233Format = {
  */
 
 #define PF_EQ(x, y)  \
-    ((x.bitsPerPixel == y.bitsPerPixel) &&  \
-     (x.depth == y.depth) &&  \
-     ((x.bigEndian == y.bigEndian) || (x.bitsPerPixel == 8)) &&  \
-     (x.trueColour == y.trueColour) &&  \
-     (!x.trueColour || ((x.redMax == y.redMax) &&  \
-                        (x.greenMax == y.greenMax) &&  \
-                        (x.blueMax == y.blueMax) &&  \
-                        (x.redShift == y.redShift) &&  \
-                        (x.greenShift == y.greenShift) &&  \
-                        (x.blueShift == y.blueShift))))
+  ((x.bitsPerPixel == y.bitsPerPixel) && (x.depth == y.depth) &&  \
+   ((x.bigEndian == y.bigEndian) || (x.bitsPerPixel == 8)) &&  \
+   (x.trueColour == y.trueColour) &&  \
+   (!x.trueColour ||  \
+    ((x.redMax == y.redMax) && (x.redShift == y.redShift) &&  \
+     (x.greenMax == y.greenMax) && (x.greenShift == y.greenShift) &&  \
+     (x.blueMax == y.blueMax) && (x.blueShift == y.blueShift))))
 
 #define CONCAT2(a, b) a##b
 #define CONCAT2E(a, b) CONCAT2(a, b)
@@ -114,45 +111,45 @@ typedef void (*rfbInitTableFnType) (char **table, rfbPixelFormat *in,
                                     rfbPixelFormat *out);
 
 rfbInitTableFnType rfbInitTrueColourSingleTableFns[3] = {
-    rfbInitTrueColourSingleTable8,
-    rfbInitTrueColourSingleTable16,
-    rfbInitTrueColourSingleTable32
+  rfbInitTrueColourSingleTable8,
+  rfbInitTrueColourSingleTable16,
+  rfbInitTrueColourSingleTable32
 };
 
 rfbInitTableFnType rfbInitColourMapSingleTableFns[3] = {
-    rfbInitColourMapSingleTable8,
-    rfbInitColourMapSingleTable16,
-    rfbInitColourMapSingleTable32
+  rfbInitColourMapSingleTable8,
+  rfbInitColourMapSingleTable16,
+  rfbInitColourMapSingleTable32
 };
 
 rfbInitTableFnType rfbInitTrueColourRGBTablesFns[3] = {
-    rfbInitTrueColourRGBTables8,
-    rfbInitTrueColourRGBTables16,
-    rfbInitTrueColourRGBTables32
+  rfbInitTrueColourRGBTables8,
+  rfbInitTrueColourRGBTables16,
+  rfbInitTrueColourRGBTables32
 };
 
 rfbTranslateFnType rfbTranslateWithSingleTableFns[3][3] = {
-    { rfbTranslateWithSingleTable8to8,
-      rfbTranslateWithSingleTable8to16,
-      rfbTranslateWithSingleTable8to32 },
-    { rfbTranslateWithSingleTable16to8,
-      rfbTranslateWithSingleTable16to16,
-      rfbTranslateWithSingleTable16to32 },
-    { rfbTranslateWithSingleTable32to8,
-      rfbTranslateWithSingleTable32to16,
-      rfbTranslateWithSingleTable32to32 }
+  { rfbTranslateWithSingleTable8to8,
+    rfbTranslateWithSingleTable8to16,
+    rfbTranslateWithSingleTable8to32 },
+  { rfbTranslateWithSingleTable16to8,
+    rfbTranslateWithSingleTable16to16,
+    rfbTranslateWithSingleTable16to32 },
+  { rfbTranslateWithSingleTable32to8,
+    rfbTranslateWithSingleTable32to16,
+    rfbTranslateWithSingleTable32to32 }
 };
 
 rfbTranslateFnType rfbTranslateWithRGBTablesFns[3][3] = {
-    { rfbTranslateWithRGBTables8to8,
-      rfbTranslateWithRGBTables8to16,
-      rfbTranslateWithRGBTables8to32 },
-    { rfbTranslateWithRGBTables16to8,
-      rfbTranslateWithRGBTables16to16,
-      rfbTranslateWithRGBTables16to32 },
-    { rfbTranslateWithRGBTables32to8,
-      rfbTranslateWithRGBTables32to16,
-      rfbTranslateWithRGBTables32to32 }
+  { rfbTranslateWithRGBTables8to8,
+    rfbTranslateWithRGBTables8to16,
+    rfbTranslateWithRGBTables8to32 },
+  { rfbTranslateWithRGBTables16to8,
+    rfbTranslateWithRGBTables16to16,
+    rfbTranslateWithRGBTables16to32 },
+  { rfbTranslateWithRGBTables32to8,
+    rfbTranslateWithRGBTables32to16,
+    rfbTranslateWithRGBTables32to32 }
 };
 
 
@@ -165,14 +162,14 @@ void rfbTranslateNone(char *table, rfbPixelFormat *in, rfbPixelFormat *out,
                       char *iptr, char *optr, int bytesBetweenInputLines,
                       int width, int height)
 {
-    int bytesPerOutputLine = width * (out->bitsPerPixel / 8);
+  int bytesPerOutputLine = width * (out->bitsPerPixel / 8);
 
-    while (height > 0) {
-        memcpy(optr, iptr, bytesPerOutputLine);
-        iptr += bytesBetweenInputLines;
-        optr += bytesPerOutputLine;
-        height--;
-    }
+  while (height > 0) {
+    memcpy(optr, iptr, bytesPerOutputLine);
+    iptr += bytesBetweenInputLines;
+    optr += bytesPerOutputLine;
+    height--;
+  }
 }
 
 
@@ -182,134 +179,128 @@ void rfbTranslateNone(char *table, rfbPixelFormat *in, rfbPixelFormat *out,
 
 Bool rfbSetTranslateFunction(rfbClientPtr cl)
 {
-    rfbLog("Pixel format for client %s:\n", cl->host);
-    PrintPixelFormat(&cl->format);
+  rfbLog("Pixel format for client %s:\n", cl->host);
+  PrintPixelFormat(&cl->format);
 
-    /*
-     * Check that bits per pixel values are valid
-     */
+  /*
+   * Check that bits per pixel values are valid
+   */
 
-    if ((rfbServerFormat.bitsPerPixel != 8) &&
-        (rfbServerFormat.bitsPerPixel != 16) &&
-        (rfbServerFormat.bitsPerPixel != 32))
-    {
-        rfbLog("%s: server bits per pixel not 8, 16 or 32\n",
-                "rfbSetTranslateFunction");
-        rfbCloseClient(cl);
-        return FALSE;
-    }
+  if ((rfbServerFormat.bitsPerPixel != 8) &&
+      (rfbServerFormat.bitsPerPixel != 16) &&
+      (rfbServerFormat.bitsPerPixel != 32)) {
+    rfbLog("rfbSetTranslateFunction: server bits per pixel not 8, 16 or 32\n");
+    rfbCloseClient(cl);
+    return FALSE;
+  }
 
-    if ((cl->format.bitsPerPixel != 8) &&
-        (cl->format.bitsPerPixel != 16) &&
-        (cl->format.bitsPerPixel != 32))
-    {
-        rfbLog("%s: client bits per pixel not 8, 16 or 32\n",
-                "rfbSetTranslateFunction");
-        rfbCloseClient(cl);
-        return FALSE;
-    }
+  if ((cl->format.bitsPerPixel != 8) &&
+      (cl->format.bitsPerPixel != 16) &&
+      (cl->format.bitsPerPixel != 32)) {
+    rfbLog("rfbSetTranslateFunction: client bits per pixel not 8, 16 or 32\n");
+    rfbCloseClient(cl);
+    return FALSE;
+  }
 
-    if (!rfbServerFormat.trueColour && (rfbServerFormat.bitsPerPixel != 8)) {
-        rfbLog("rfbSetTranslateFunction: server has colour map "
-                "but %d-bit - can only cope with 8-bit colour maps\n",
-                rfbServerFormat.bitsPerPixel);
-        rfbCloseClient(cl);
-        return FALSE;
-    }
+  if (!rfbServerFormat.trueColour && (rfbServerFormat.bitsPerPixel != 8)) {
+    rfbLog("rfbSetTranslateFunction: server has colour map "
+           "but %d-bit - can only cope with 8-bit colour maps\n",
+           rfbServerFormat.bitsPerPixel);
+    rfbCloseClient(cl);
+    return FALSE;
+  }
 
-    if (!cl->format.trueColour && (cl->format.bitsPerPixel != 8)) {
-        rfbLog("rfbSetTranslateFunction: client has colour map "
-                "but %d-bit - can only cope with 8-bit colour maps\n",
-                cl->format.bitsPerPixel);
-        rfbCloseClient(cl);
-        return FALSE;
-    }
+  if (!cl->format.trueColour && (cl->format.bitsPerPixel != 8)) {
+    rfbLog("rfbSetTranslateFunction: client has colour map "
+           "but %d-bit - can only cope with 8-bit colour maps\n",
+           cl->format.bitsPerPixel);
+    rfbCloseClient(cl);
+    return FALSE;
+  }
 
-    /*
-     * bpp is valid, now work out how to translate
-     */
+  /*
+   * bpp is valid, now work out how to translate
+   */
 
-    if (!cl->format.trueColour) {
+  if (!cl->format.trueColour) {
 
-        /* ? -> colour map */
-
-        if (!rfbServerFormat.trueColour) {
-
-            /* colour map -> colour map */
-
-            rfbLog("rfbSetTranslateFunction: both 8-bit colour map: "
-                    "no translation needed\n");
-            cl->translateFn = rfbTranslateNone;
-            return rfbSetClientColourMap(cl, 0, 0);
-        }
-
-        /*
-         * truecolour -> colour map
-         *
-         * Set client's colour map to BGR233, then effectively it's
-         * truecolour as well
-         */
-
-        if (!rfbSetClientColourMapBGR233(cl))
-            return FALSE;
-
-        cl->format = BGR233Format;
-    }
-
-    /* ? -> truecolour */
+    /* ? -> colour map */
 
     if (!rfbServerFormat.trueColour) {
 
-        /* colour map -> truecolour */
+      /* colour map -> colour map */
 
-        rfbLog("rfbSetTranslateFunction: client is %d-bit trueColour,"
-                " server has colour map\n", cl->format.bitsPerPixel);
-
-        cl->translateFn = rfbTranslateWithSingleTableFns
-                              [rfbServerFormat.bitsPerPixel / 16]
-                                  [cl->format.bitsPerPixel / 16];
-
-        return rfbSetClientColourMap(cl, 0, 0);
+      rfbLog("rfbSetTranslateFunction: both 8-bit colour map: "
+             "no translation needed\n");
+      cl->translateFn = rfbTranslateNone;
+      return rfbSetClientColourMap(cl, 0, 0);
     }
 
-    /* truecolour -> truecolour */
+    /*
+     * truecolour -> colour map
+     *
+     * Set client's colour map to BGR233, then effectively it's
+     * truecolour as well
+     */
 
-    if (PF_EQ(cl->format, rfbServerFormat)) {
+    if (!rfbSetClientColourMapBGR233(cl))
+      return FALSE;
 
-        /* client & server the same */
+    cl->format = BGR233Format;
+  }
 
-        rfbLog("  no translation needed\n");
-        cl->translateFn = rfbTranslateNone;
-        return TRUE;
-    }
+  /* ? -> truecolour */
 
-    if ((rfbServerFormat.bitsPerPixel < 16) ||
-        (!rfbEconomicTranslate && (rfbServerFormat.bitsPerPixel == 16))) {
+  if (!rfbServerFormat.trueColour) {
 
-        /* we can use a single lookup table for <= 16 bpp */
+    /* colour map -> truecolour */
 
-        cl->translateFn = rfbTranslateWithSingleTableFns
-                              [rfbServerFormat.bitsPerPixel / 16]
-                                  [cl->format.bitsPerPixel / 16];
+    rfbLog("rfbSetTranslateFunction: client is %d-bit trueColour,"
+           " server has colour map\n", cl->format.bitsPerPixel);
 
-        (*rfbInitTrueColourSingleTableFns
-            [cl->format.bitsPerPixel / 16]) (&cl->translateLookupTable,
-                                             &rfbServerFormat, &cl->format);
+    cl->translateFn = rfbTranslateWithSingleTableFns
+                        [rfbServerFormat.bitsPerPixel / 16]
+                          [cl->format.bitsPerPixel / 16];
 
-    } else {
+    return rfbSetClientColourMap(cl, 0, 0);
+  }
 
-        /* otherwise we use three separate tables for red, green and blue */
+  /* truecolour -> truecolour */
 
-        cl->translateFn = rfbTranslateWithRGBTablesFns
-                              [rfbServerFormat.bitsPerPixel / 16]
-                                  [cl->format.bitsPerPixel / 16];
+  if (PF_EQ(cl->format, rfbServerFormat)) {
 
-        (*rfbInitTrueColourRGBTablesFns
-            [cl->format.bitsPerPixel / 16]) (&cl->translateLookupTable,
-                                             &rfbServerFormat, &cl->format);
-    }
+    /* client & server the same */
 
+    rfbLog("  no translation needed\n");
+    cl->translateFn = rfbTranslateNone;
     return TRUE;
+  }
+
+  if ((rfbServerFormat.bitsPerPixel < 16) ||
+      (!rfbEconomicTranslate && (rfbServerFormat.bitsPerPixel == 16))) {
+
+    /* we can use a single lookup table for <= 16 bpp */
+
+    cl->translateFn = rfbTranslateWithSingleTableFns
+                        [rfbServerFormat.bitsPerPixel / 16]
+                          [cl->format.bitsPerPixel / 16];
+
+    (*rfbInitTrueColourSingleTableFns[cl->format.bitsPerPixel / 16])
+      (&cl->translateLookupTable, &rfbServerFormat, &cl->format);
+
+  } else {
+
+    /* otherwise we use three separate tables for red, green and blue */
+
+    cl->translateFn = rfbTranslateWithRGBTablesFns
+                        [rfbServerFormat.bitsPerPixel / 16]
+                          [cl->format.bitsPerPixel / 16];
+
+    (*rfbInitTrueColourRGBTablesFns[cl->format.bitsPerPixel / 16])
+      (&cl->translateLookupTable, &rfbServerFormat, &cl->format);
+    }
+
+  return TRUE;
 }
 
 
@@ -321,46 +312,45 @@ Bool rfbSetTranslateFunction(rfbClientPtr cl)
 
 static Bool rfbSetClientColourMapBGR233(rfbClientPtr cl)
 {
-    char buf[sz_rfbSetColourMapEntriesMsg + 256 * 3 * 2];
-    rfbSetColourMapEntriesMsg *scme = (rfbSetColourMapEntriesMsg *)buf;
-    CARD16 *rgb = (CARD16 *)(&buf[sz_rfbSetColourMapEntriesMsg]);
-    int i, len;
-    int r, g, b;
+  char buf[sz_rfbSetColourMapEntriesMsg + 256 * 3 * 2];
+  rfbSetColourMapEntriesMsg *scme = (rfbSetColourMapEntriesMsg *)buf;
+  CARD16 *rgb = (CARD16 *)(&buf[sz_rfbSetColourMapEntriesMsg]);
+  int i, len;
+  int r, g, b;
 
-    if (cl->format.bitsPerPixel != 8) {
-        rfbLog("%s: client not 8 bits per pixel\n",
-                "rfbSetClientColourMapBGR233");
-        rfbCloseClient(cl);
-        return FALSE;
+  if (cl->format.bitsPerPixel != 8) {
+    rfbLog("rfbSetClientColourMapBGR233: client not 8 bits per pixel\n");
+    rfbCloseClient(cl);
+    return FALSE;
+  }
+
+  scme->type = rfbSetColourMapEntries;
+
+  scme->firstColour = Swap16IfLE(0);
+  scme->nColours = Swap16IfLE(256);
+
+  len = sz_rfbSetColourMapEntriesMsg;
+
+  i = 0;
+
+  for (b = 0; b < 4; b++) {
+    for (g = 0; g < 8; g++) {
+      for (r = 0; r < 8; r++) {
+        rgb[i++] = Swap16IfLE(r * 65535 / 7);
+        rgb[i++] = Swap16IfLE(g * 65535 / 7);
+        rgb[i++] = Swap16IfLE(b * 65535 / 3);
+      }
     }
+  }
 
-    scme->type = rfbSetColourMapEntries;
+  len += 256 * 3 * 2;
 
-    scme->firstColour = Swap16IfLE(0);
-    scme->nColours = Swap16IfLE(256);
-
-    len = sz_rfbSetColourMapEntriesMsg;
-
-    i = 0;
-
-    for (b = 0; b < 4; b++) {
-        for (g = 0; g < 8; g++) {
-            for (r = 0; r < 8; r++) {
-                rgb[i++] = Swap16IfLE(r * 65535 / 7);
-                rgb[i++] = Swap16IfLE(g * 65535 / 7);
-                rgb[i++] = Swap16IfLE(b * 65535 / 3);
-            }
-        }
-    }
-
-    len += 256 * 3 * 2;
-
-    if (WriteExact(cl, buf, len) < 0) {
-        rfbLogPerror("rfbSetClientColourMapBGR233: write");
-        rfbCloseClient(cl);
-        return FALSE;
-    }
-    return TRUE;
+  if (WriteExact(cl, buf, len) < 0) {
+    rfbLogPerror("rfbSetClientColourMapBGR233: write");
+    rfbCloseClient(cl);
+    return FALSE;
+  }
+  return TRUE;
 }
 
 
@@ -372,31 +362,28 @@ static Bool rfbSetClientColourMapBGR233(rfbClientPtr cl)
 
 Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour, int nColours)
 {
-    BoxRec box;
+  BoxRec box;
 
-    if (nColours == 0) {
-        nColours = rfbInstalledColormap->pVisual->ColormapEntries;
-    }
+  if (nColours == 0)
+    nColours = rfbInstalledColormap->pVisual->ColormapEntries;
 
-    if (rfbServerFormat.trueColour || !cl->readyForSetColourMapEntries) {
-        return TRUE;
-    }
+  if (rfbServerFormat.trueColour || !cl->readyForSetColourMapEntries)
+    return TRUE;
 
-    if (cl->format.trueColour) {
-        (*rfbInitColourMapSingleTableFns
-            [cl->format.bitsPerPixel / 16]) (&cl->translateLookupTable,
-                                             &rfbServerFormat, &cl->format);
+  if (cl->format.trueColour) {
+    (*rfbInitColourMapSingleTableFns[cl->format.bitsPerPixel / 16])
+      (&cl->translateLookupTable, &rfbServerFormat, &cl->format);
 
-        REGION_UNINIT(pScreen, &cl->modifiedRegion);
-        box.x1 = box.y1 = 0;
-        box.x2 = rfbFB.width;
-        box.y2 = rfbFB.height;
-        REGION_INIT(pScreen, &cl->modifiedRegion, &box, 0);
+    REGION_UNINIT(pScreen, &cl->modifiedRegion);
+    box.x1 = box.y1 = 0;
+    box.x2 = rfbFB.width;
+    box.y2 = rfbFB.height;
+    REGION_INIT(pScreen, &cl->modifiedRegion, &box, 0);
 
-        return TRUE;
-    }
+    return TRUE;
+  }
 
-    return rfbSendSetColourMapEntries(cl, firstColour, nColours);
+  return rfbSendSetColourMapEntries(cl, firstColour, nColours);
 }
 
 
@@ -406,30 +393,29 @@ Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour, int nColours)
 
 void rfbSetClientColourMaps(int firstColour, int nColours)
 {
-    rfbClientPtr cl, nextCl;
+  rfbClientPtr cl, nextCl;
 
-    for (cl = rfbClientHead; cl; cl = nextCl) {
-        nextCl = cl->next;
-        rfbSetClientColourMap(cl, firstColour, nColours);
-    }
+  for (cl = rfbClientHead; cl; cl = nextCl) {
+    nextCl = cl->next;
+    rfbSetClientColourMap(cl, firstColour, nColours);
+  }
 }
 
 
 static void PrintPixelFormat(rfbPixelFormat *pf)
 {
-    if (pf->bitsPerPixel == 1) {
-        rfbLog("  1 bpp, %s sig bit in each byte is leftmost on the screen.\n",
-               (pf->bigEndian ? "most" : "least"));
-    } else {
-        rfbLog("  %d bpp, depth %d%s\n", pf->bitsPerPixel, pf->depth,
-               ((pf->bitsPerPixel == 8) ? "" :
-                (pf->bigEndian ? ", big endian" : ", little endian")));
-        if (pf->trueColour) {
-            rfbLog("  true colour: max r %d g %d b %d, shift r %d g %d b %d\n",
-                   pf->redMax, pf->greenMax, pf->blueMax,
-                   pf->redShift, pf->greenShift, pf->blueShift);
-        } else {
-            rfbLog("  uses a colour map (not true colour).\n");
-        }
-    }
+  if (pf->bitsPerPixel == 1) {
+    rfbLog("  1 bpp, %s sig bit in each byte is leftmost on the screen.\n",
+           (pf->bigEndian ? "most" : "least"));
+  } else {
+    rfbLog("  %d bpp, depth %d%s\n", pf->bitsPerPixel, pf->depth,
+           ((pf->bitsPerPixel == 8) ? "" :
+            (pf->bigEndian ? ", big endian" : ", little endian")));
+    if (pf->trueColour)
+      rfbLog("  true colour: max r %d g %d b %d, shift r %d g %d b %d\n",
+             pf->redMax, pf->greenMax, pf->blueMax,
+             pf->redShift, pf->greenShift, pf->blueShift);
+    else
+      rfbLog("  uses a colour map (not true colour).\n");
+  }
 }

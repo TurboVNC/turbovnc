@@ -214,9 +214,10 @@ static void xf86SetRootClip(ScreenPtr pScreen, Bool enable)
 static int mm(int dimension)
 {
   int dpi = 96;
-  if (monitorResolution != 0) {
+
+  if (monitorResolution != 0)
     dpi = monitorResolution;
-  }
+
   return (dimension * 254 + dpi * 5) / (dpi * 10);
 }
 
@@ -515,18 +516,18 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     REGION_EMPTY(pScreen, &cl->ifRegion);
     REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion, &tmpRegion);
     if (rfbAutoLosslessRefresh > 0.0) {
-        REGION_EMPTY(pScreen, &cl->alrRegion);
-        REGION_EMPTY(pScreen, &cl->alrEligibleRegion);
-        REGION_EMPTY(pScreen, &cl->lossyRegion);
-        cl->firstUpdate = TRUE;
+      REGION_EMPTY(pScreen, &cl->alrRegion);
+      REGION_EMPTY(pScreen, &cl->alrEligibleRegion);
+      REGION_EMPTY(pScreen, &cl->lossyRegion);
+      cl->firstUpdate = TRUE;
     }
     if (cl->continuousUpdates) {
-        REGION_EMPTY(pScreen, &cl->cuRegion);
-        REGION_UNION(pScreen, &cl->cuRegion, &cl->cuRegion, &tmpRegion);
+      REGION_EMPTY(pScreen, &cl->cuRegion);
+      REGION_UNION(pScreen, &cl->cuRegion, &cl->cuRegion, &tmpRegion);
     } else {
-        REGION_EMPTY(pScreen, &cl->requestedRegion);
-        REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
-                     &tmpRegion);
+      REGION_EMPTY(pScreen, &cl->requestedRegion);
+      REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
+                   &tmpRegion);
     }
     REGION_UNINIT(pScreen, &tmpRegion);
   }
@@ -689,7 +690,7 @@ int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
 
   rfbDupeScreens(&serverScreens, &rfbScreens);
   xorg_list_for_each_entry(serverScreen, &serverScreens, entry)
-    serverScreen->used = FALSE;
+  serverScreen->used = FALSE;
 
   /* Try to match client screen ID with existing server screen ID */
   xorg_list_for_each_entry_safe(clientScreen, tmp, clientScreens, entry) {

@@ -108,9 +108,9 @@ int main(int argc, char **argv)
   }
   while (*cmdline == '\t' || *cmdline == ' ') cmdline++;
 
-  GetStartupInfoA( &info );
+  GetStartupInfoA(&info);
   if (!(info.dwFlags & STARTF_USESHOWWINDOW)) info.wShowWindow = SW_SHOWNORMAL;
-  return WinMain( GetModuleHandleA(0), 0, cmdline, info.wShowWindow );
+  return WinMain(GetModuleHandleA(0), 0, cmdline, info.wShowWindow);
 }
 
 
@@ -151,7 +151,7 @@ bool ParseDisplay(LPTSTR display, int displaylen, LPTSTR phost, int hostlen,
                   int *pport)
 {
   if (hostlen - 1 < (int)strlen(display))
-      return false;
+    return false;
 
   int tmp_port;
   bool doubleColon = false;

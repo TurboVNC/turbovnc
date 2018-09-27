@@ -70,9 +70,8 @@ void ClientConnection::ReadCursorShape(rfbFramebufferUpdateRectHeader *pfburh)
         for (n = 7; n >= 0; n--)
           rcSource[i++] = rcolors[b >> n & 1];
       }
-      for (n = 7; n >= 8 - pfburh->r.w % 8; n--) {
+      for (n = 7; n >= 8 - pfburh->r.w % 8; n--)
         rcSource[i++] = rcolors[m_netbuf[y * bytesPerRow + x] >> n & 1];
-      }
     }
   } else {
     // rfb.EncodingRichCursor
@@ -111,9 +110,8 @@ void ClientConnection::ReadCursorShape(rfbFramebufferUpdateRectHeader *pfburh)
       for (n = 7; n >= 0; n--)
         rcMask[i++] = (b >> n & 1) != 0;
     }
-    for (n = 7; n >= 8 - pfburh->r.w % 8; n--) {
+    for (n = 7; n >= 8 - pfburh->r.w % 8; n--)
       rcMask[i++] = (m_netbuf[y * bytesPerRow + x] >> n & 1) != 0;
-    }
   }
 
   // Set remaining data associated with the cursor
@@ -263,10 +261,10 @@ void ClientConnection::SoftCursorFree()
 
 bool ClientConnection::SoftCursorInLockedArea()
 {
-    return (rcLockX < rcCursorX - rcHotX + rcWidth &&
-            rcLockY < rcCursorY - rcHotY + rcHeight &&
-            rcLockX + rcLockWidth > rcCursorX - rcHotX &&
-            rcLockY + rcLockHeight > rcCursorY - rcHotY);
+  return rcLockX < rcCursorX - rcHotX + rcWidth &&
+         rcLockY < rcCursorY - rcHotY + rcHeight &&
+         rcLockX + rcLockWidth > rcCursorX - rcHotX &&
+         rcLockY + rcLockHeight > rcCursorY - rcHotY;
 }
 
 
@@ -287,9 +285,8 @@ void ClientConnection::SoftCursorSaveArea()
   ObjectSelector b2(m_hSavedAreaDC, m_hSavedAreaBitmap);
   PaletteSelector ps2(m_hSavedAreaDC, m_hPalette);
 
-  if (!BitBlt(m_hSavedAreaDC, 0, 0, w, h, m_hBitmapDC, x, y, SRCCOPY)) {
-              vnclog.Print(0, "Error saving screen under cursor\n");
-  }
+  if (!BitBlt(m_hSavedAreaDC, 0, 0, w, h, m_hBitmapDC, x, y, SRCCOPY))
+    vnclog.Print(0, "Error saving screen under cursor\n");
 }
 
 
@@ -310,9 +307,8 @@ void ClientConnection::SoftCursorRestoreArea()
   ObjectSelector b2(m_hSavedAreaDC, m_hSavedAreaBitmap);
   PaletteSelector ps2(m_hSavedAreaDC, m_hPalette);
 
-  if (!BitBlt(m_hBitmapDC, x, y, w, h, m_hSavedAreaDC, 0, 0, SRCCOPY)) {
-              vnclog.Print(0, "Error restoring screen under cursor\n");
-  }
+  if (!BitBlt(m_hBitmapDC, x, y, w, h, m_hSavedAreaDC, 0, 0, SRCCOPY))
+    vnclog.Print(0, "Error restoring screen under cursor\n");
 
   InvalidateScreenRect(&r);
 }
@@ -336,9 +332,8 @@ void ClientConnection::SoftCursorDraw()
         x0 = rcCursorX - rcHotX + x;
         if (x0 >= 0 && x0 < m_si.framebufferWidth) {
           offset = y * rcWidth + x;
-          if (rcMask[offset]) {
+          if (rcMask[offset])
             SETPIXEL(m_hBitmapDC, x0, y0, rcSource[offset]);
-          }
         }
       }
     }
@@ -385,9 +380,9 @@ void ClientConnection::SoftCursorToScreen(RECT *screenArea,
     cy = 0;  y = 0;  h = 0;
   }
 
-  if (screenArea != NULL) {
+  if (screenArea != NULL)
     SetRect(screenArea, x, y, x + w, y + h);
-  }
+
   if (cursorOffset != NULL) {
     cursorOffset->x = cx;
     cursorOffset->y = cy;

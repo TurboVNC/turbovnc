@@ -69,10 +69,9 @@ void vncExtensionInit(void)
   }
   vncExtGeneration = serverGeneration;
 
-  extEntry =
-    AddExtension(VNCEXTNAME, VncExtNumberEvents, VncExtNumberErrors,
-                 ProcVncExtDispatch, SProcVncExtDispatch, vncResetProc,
-                 StandardMinorOpcode);
+  extEntry = AddExtension(VNCEXTNAME, VncExtNumberEvents, VncExtNumberErrors,
+                          ProcVncExtDispatch, SProcVncExtDispatch,
+                          vncResetProc, StandardMinorOpcode);
   if (!extEntry) {
     ErrorF("vncExtensionInit(): AddExtension failed\n");
     return;
@@ -85,9 +84,8 @@ void vncExtensionInit(void)
 
   rfbLog("VNC extension running!\n");
 
-  if (!AddCallback(&ClientStateCallback, vncClientStateChange, 0)) {
+  if (!AddCallback(&ClientStateCallback, vncClientStateChange, 0))
     FatalError("Add ClientStateCallback failed");
-  }
 }
 
 
@@ -101,6 +99,7 @@ static void vncClientStateChange(CallbackListPtr *callbacks, pointer data,
 {
   VncInputSelect *cur;
   ClientPtr client = ((NewClientInfoRec *)p)->client;
+
   if (client->clientState == ClientStateGone) {
     VncInputSelect **nextPtr = &vncInputSelectHead;
     for (cur = vncInputSelectHead; cur; cur = *nextPtr) {
@@ -119,6 +118,7 @@ static int ProcVncExtSelectInput(ClientPtr client)
 {
   VncInputSelect **nextPtr = &vncInputSelectHead;
   VncInputSelect *cur;
+
   REQUEST(xVncExtSelectInputReq);
   REQUEST_SIZE_MATCH(xVncExtSelectInputReq);
   for (cur = vncInputSelectHead; cur; cur = *nextPtr) {
@@ -140,7 +140,7 @@ static int ProcVncExtSelectInput(ClientPtr client)
     cur->next = vncInputSelectHead;
     vncInputSelectHead = cur;
   }
-  return (client->noClientException);
+  return client->noClientException;
 }
 
 
@@ -158,6 +158,7 @@ static int SProcVncExtSelectInput(ClientPtr client)
 static int ProcVncExtConnect(ClientPtr client)
 {
   char *str;
+
   REQUEST(xVncExtConnectReq);
   REQUEST_FIXED_SIZE(xVncExtConnectReq, stuff->strLen);
   str = (char *)rfbAlloc(stuff->strLen + 1);
@@ -204,7 +205,7 @@ static int ProcVncExtConnect(ClientPtr client)
   }
   WriteToClient(client, sizeof(xVncExtConnectReply), (char *)&rep);
   free(str);
-  return (client->noClientException);
+  return client->noClientException;
 }
 
 

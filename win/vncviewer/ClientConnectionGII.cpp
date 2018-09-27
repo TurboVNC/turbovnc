@@ -224,8 +224,8 @@ void ClientConnection::SendGIIEvent(UINT deviceID, ExtInputEvent &e)
       WriteExact((char *)&giie, sz_rfbGIIEventMsg);
 
       rfbGIIValuatorEvent ve;
-      ve.eventSize = (CARD8)(sz_rfbGIIValuatorEvent + e.numValuators *
-                             sizeof(int));
+      ve.eventSize =
+        (CARD8)(sz_rfbGIIValuatorEvent + e.numValuators * sizeof(int));
       ve.eventType = e.type;
       ve.pad = 0;
       ve.deviceOrigin = Swap32IfLE(dev.remoteID);
@@ -345,11 +345,11 @@ void ClientConnection::CreateWacomGIIDevices(void)
     v.rangeMin = x.axMin;
     v.rangeCenter = (x.axMin + x.axMax) / 2;
     v.rangeMax = x.axMax;
-    if (x.axUnits == TU_CENTIMETERS) {
+    if (x.axUnits == TU_CENTIMETERS)
       v.siDiv = ROUND(x.axResolution) * 100;
-    } else if (x.axUnits == TU_INCHES) {
+    else if (x.axUnits == TU_INCHES)
       v.siDiv = (int)(ROUND(x.axResolution) * 39.37);
-    } else
+    else
       _throw("Improper units for X axis");
     v.siUnit = rfbGIIUnitLength;
     dev.addValuator(v);
@@ -360,11 +360,11 @@ void ClientConnection::CreateWacomGIIDevices(void)
     v.rangeMin = y.axMin;
     v.rangeCenter = (y.axMin + y.axMax) / 2;
     v.rangeMax = y.axMax;
-    if (x.axUnits == TU_CENTIMETERS) {
+    if (x.axUnits == TU_CENTIMETERS)
       v.siDiv = ROUND(y.axResolution) * 100;
-    } else if (x.axUnits == TU_INCHES) {
+    else if (x.axUnits == TU_INCHES)
       v.siDiv = (int)(ROUND(y.axResolution) * 39.37);
-    } else
+    else
       _throw("Improper units for Y axis");
     v.siUnit = rfbGIIUnitLength;
     dev.addValuator(v);

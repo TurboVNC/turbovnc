@@ -63,9 +63,9 @@ void CapsContainer::Add(const rfbCapabilityInfo *capinfo, const char *desc)
   infoMap[capinfo->code] = *capinfo;
   enableMap[capinfo->code] = false;
 
-  if (IsKnown(capinfo->code)) {
+  if (IsKnown(capinfo->code))
     delete[] descMap[capinfo->code];
-  }
+
   char *desc_copy = NULL;
   if (desc != NULL) {
     desc_copy = new char[strlen(desc) + 1];
@@ -79,7 +79,7 @@ void CapsContainer::Add(const rfbCapabilityInfo *capinfo, const char *desc)
 
 bool CapsContainer::IsKnown(CARD32 code)
 {
-  return (descMap.find(code) != descMap.end());
+  return descMap.find(code) != descMap.end();
 }
 
 

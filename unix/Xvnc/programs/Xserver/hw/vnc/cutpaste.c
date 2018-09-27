@@ -125,18 +125,18 @@ static void vncSelectionRequest(Atom selection, Atom target);
 
 void rfbSetXCutText(char *str, int len)
 {
-    inSetXCutText = TRUE;
-    dixChangeWindowProperty(serverClient, screenInfo.screens[0]->root,
-                            XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, len,
-                            (pointer)str, TRUE);
-    inSetXCutText = FALSE;
+  inSetXCutText = TRUE;
+  dixChangeWindowProperty(serverClient, screenInfo.screens[0]->root,
+                          XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, len,
+                          (pointer)str, TRUE);
+  inSetXCutText = FALSE;
 }
 
 
 void rfbGotXCutText(char *str, int len)
 {
-    if (!inSetXCutText)
-        rfbSendServerCutText(str, len);
+  if (!inSetXCutText)
+    rfbSendServerCutText(str, len);
 }
 
 
@@ -202,8 +202,8 @@ int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
   else realProperty = target;
 
   if (target == xaTARGETS) {
-    Atom targets[] = { xaTARGETS, xaTIMESTAMP,
-                       xaSTRING, xaTEXT, xaUTF8_STRING };
+    Atom targets[] = { xaTARGETS, xaTIMESTAMP, xaSTRING, xaTEXT,
+                       xaUTF8_STRING };
 
     rc = dixChangeWindowProperty(serverClient, pWin, realProperty, XA_ATOM, 32,
                                  PropModeReplace, 5, targets, TRUE);

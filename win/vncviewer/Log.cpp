@@ -50,18 +50,17 @@ void Log::SetMode(int mode)
   else
     m_todebug = false;
 
-  if (mode & ToFile)  {
+  if (mode & ToFile) {
     m_tofile = true;
   } else {
     CloseFile();
     m_tofile = false;
   }
 
-  if (mode & UseStdio) {
+  if (mode & UseStdio)
     m_usestdio = true;
-  } else {
+  else
     m_usestdio = false;
-  }
 
   if (mode & ToConsole) {
     if (!m_toconsole && !m_usestdio)
