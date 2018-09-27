@@ -23,16 +23,14 @@
 #define rfbMAX_PATH 255
 
 
-typedef struct tagFTITEMINFO
-{
+typedef struct tagFTITEMINFO {
   char Name[rfbMAX_PATH];
   char Size[16];
   unsigned int Data;
 } FTITEMINFO;
 
 
-typedef struct tagFTSIZEDATA
-{
+typedef struct tagFTSIZEDATA {
   unsigned int size;
   unsigned int data;
 } FTSIZEDATA;
@@ -44,8 +42,8 @@ class FileTransferItemInfo
     int GetIntSizeAt(int Number);
     static const char folderText[];
     int GetNumEntries();
-    char * GetSizeAt(int Number);
-    char * GetNameAt(int Number);
+    char *GetSizeAt(int Number);
+    char *GetNameAt(int Number);
     unsigned int GetDataAt(int Number);
     bool IsFile(int Number);
     void Sort();
@@ -56,7 +54,7 @@ class FileTransferItemInfo
 
   private:
     int ConvertCharToInt(char *pStr);
-    FTITEMINFO * m_pEntries;
+    FTITEMINFO *m_pEntries;
     int m_NumEntries;
 };
 

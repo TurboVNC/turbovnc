@@ -47,13 +47,14 @@ const CARD32 KEYMAP_LALT     = 0x0004;
 const CARD32 KEYMAP_RALT     = 0x0008;
 
 typedef struct {
-    CARD32 keycodes[MaxKeysPerKey];
-    CARD32 releaseModifiers;
+  CARD32 keycodes[MaxKeysPerKey];
+  CARD32 releaseModifiers;
 } KeyActionSpec;
 
 
 
-class KeyMap {
+class KeyMap
+{
   public:
     KeyMap();
     KeyActionSpec PCtoX(UINT virtkey, DWORD keyData);

@@ -28,7 +28,7 @@ void ClientConnection::ReadCopyRect(rfbFramebufferUpdateRectHeader *pfburh)
   rfbCopyRect cr;
   double tBlitStart;
 
-  ReadExact((char *) &cr, sz_rfbCopyRect);
+  ReadExact((char *)&cr, sz_rfbCopyRect);
   cr.srcX = Swap16IfLE(cr.srcX);
   cr.srcY = Swap16IfLE(cr.srcY);
 

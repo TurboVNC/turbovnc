@@ -56,7 +56,7 @@ class VNCviewerApp
     void DeregisterConnection(ClientConnection *pConn);
 
     VNCOptions m_options;
-    HINSTANCE  m_instance;
+    HINSTANCE m_instance;
     bool m_wacom;
 
   private:

@@ -42,18 +42,21 @@
 
 struct ScreenSet;
 
-struct Screen
-{
-  Screen(void) : id(0), flags(0) {
+struct Screen {
+
+  Screen(void) : id(0), flags(0)
+  {
     SetRect(&dimensions, 0, 0, 0, 0);
   }
 
   Screen(unsigned int id_, int x_, int y_, int w_, int h_,
-         unsigned int flags_) : id(id_), flags(flags_) {
+         unsigned int flags_) : id(id_), flags(flags_)
+  {
     SetRect(&dimensions, x_, y_, x_ + w_, y_ + h_);
-  };
+  }
 
-  inline bool operator == (const Screen &r) const {
+  inline bool operator == (const Screen &r) const
+  {
     if (id != r.id)
       return false;
     if (!EqualRect(&dimensions, &r.dimensions))
@@ -76,21 +79,22 @@ struct Screen
 // Represents a complete screen configuration, excluding framebuffer
 // dimensions.
 
-struct ScreenSet
-{
-  ScreenSet(void) {};
+struct ScreenSet {
+
+  ScreenSet(void) {}
 
   typedef std::list<Screen>::iterator iterator;
   typedef std::list<Screen>::const_iterator const_iterator;
 
-  inline iterator begin(void) { return screens.begin(); };
-  inline const_iterator begin(void) const { return screens.begin(); };
-  inline iterator end(void) { return screens.end(); };
-  inline const_iterator end(void) const { return screens.end(); };
+  inline iterator begin(void) { return screens.begin(); }
+  inline const_iterator begin(void) const { return screens.begin(); }
+  inline iterator end(void) { return screens.end(); }
+  inline const_iterator end(void) const { return screens.end(); }
 
-  inline int num_screens(void) const { return (int)screens.size(); };
+  inline int num_screens(void) const { return (int)screens.size(); }
 
-  inline void add_screen(const Screen screen) {
+  inline void add_screen(const Screen screen)
+  {
     const_iterator iter;
 
     if (!screens.empty()) {
@@ -100,9 +104,10 @@ struct ScreenSet
       }
     }
     screens.push_back(screen);
-  };
+  }
 
-  inline void add_screen0(const Screen screen) {
+  inline void add_screen0(const Screen screen)
+  {
     const_iterator iter;
 
     if (!screens.empty()) {
@@ -112,9 +117,10 @@ struct ScreenSet
       }
     }
     screens.push_front(screen);
-  };
+  }
 
-  inline void remove_screen(unsigned int id) {
+  inline void remove_screen(unsigned int id)
+  {
     iterator iter, nextiter;
 
     for (iter = begin(); iter != end(); iter = nextiter) {
@@ -124,7 +130,8 @@ struct ScreenSet
     }
   }
 
-  inline bool validate(int fb_width, int fb_height, bool checkIds) const {
+  inline bool validate(int fb_width, int fb_height, bool checkIds) const
+  {
     const_iterator iter;
     std::set<unsigned int> seen_ids;
 
@@ -148,9 +155,10 @@ struct ScreenSet
     }
 
     return true;
-  };
+  }
 
-  inline void assignIDs(ScreenSet ref) {
+  inline void assignIDs(ScreenSet ref)
+  {
     iterator iter;  const_iterator riter = ref.begin();
 
     for (iter = begin(); iter != end(); ++iter) {
@@ -163,25 +171,29 @@ struct ScreenSet
     }
   }
 
-  inline void debugPrint(const char *msg) {
+  inline void debugPrint(const char *msg)
+  {
     const_iterator iter;
     extern Log vnclog;
 
     vnclog.Print(4, "%s:\n", msg);
     for (iter = begin(); iter != end(); ++iter) {
       vnclog.Print(4, "    %10d (0x%08x): %dx%d+%d+%d (flags 0x%08x)\n",
-               (int)iter->id, (unsigned)iter->id, WidthOf(iter->dimensions),
-               HeightOf(iter->dimensions), iter->dimensions.left,
-               iter->dimensions.top, (unsigned)iter->flags);
+                   (int)iter->id, (unsigned)iter->id,
+                   WidthOf(iter->dimensions), HeightOf(iter->dimensions),
+                   iter->dimensions.left, iter->dimensions.top,
+                   (unsigned)iter->flags);
     }
-  };
+  }
 
   // FIXME: List order shouldn't matter
-  inline bool operator == (const ScreenSet &r) const {
+  inline bool operator == (const ScreenSet &r) const
+  {
     return screens == r.screens;
   }
 
-  inline bool operator != (const ScreenSet &r) const {
+  inline bool operator != (const ScreenSet &r) const
+  {
     return screens != r.screens;
   }
 
@@ -199,7 +211,7 @@ inline void Screen::generateID(ScreenSet ref)
 
     for (iter = ref.begin(); iter != ref.end(); ++iter) {
       if (iter->id == newId)
-          break;
+        break;
     }
     if (iter == ref.end())
       break;

@@ -36,7 +36,7 @@
 bool ClientConnection::InFullScreenMode()
 {
   return m_opts.m_FullScreen;
-};
+}
 
 
 void ClientConnection::SetFullScreenMode(bool enable, bool suppressPrompt)
@@ -56,11 +56,11 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
   if (m_opts.m_FullScreen) {
     if (!suppressPrompt && !pApp->m_options.m_skipprompt) {
       MessageBox(m_hwnd1,
-        "To exit from full-screen mode, press Ctrl-Alt-Shift-F.\r\n"
-        "Alternatively, press Ctrl-Esc Esc and then right-click\r\n"
-        "on the vncviewer taskbar icon to see the menu.",
-        "VNCviewer full-screen mode",
-        MB_OK | MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND);
+                 "To exit from full-screen mode, press Ctrl-Alt-Shift-F.\r\n"
+                 "Alternatively, press Ctrl-Esc Esc and then right-click\r\n"
+                 "on the vncviewer taskbar icon to see the menu.",
+                 "VNCviewer full-screen mode",
+                 MB_OK | MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND);
     }
     ShowWindow(m_hToolbar, SW_HIDE);
     EnableMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOOLBAR,
@@ -75,8 +75,8 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
         savedRect.bottom < 0)
       GetWindowRect(m_hwnd1, &savedRect);
     SetWindowPos(m_hwnd1, HWND_TOPMOST, screenArea.left, screenArea.top,
-      screenArea.right - screenArea.left,
-      screenArea.bottom - screenArea.top, SWP_FRAMECHANGED);
+                 screenArea.right - screenArea.left,
+                 screenArea.bottom - screenArea.top, SWP_FRAMECHANGED);
     CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN,
                   MF_BYCOMMAND | MF_CHECKED);
     if (m_opts.m_GrabKeyboard == TVNC_FS) {
@@ -92,14 +92,14 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 
     SetWindowLong(m_hwnd1, GWL_STYLE, style);
     if (savedRect.bottom - savedRect.top > 0 &&
-      savedRect.right - savedRect.left > 0) {
-      SetWindowPos(m_hwnd1, HWND_NOTOPMOST, savedRect.left,
-                   savedRect.top, savedRect.right - savedRect.left,
+        savedRect.right - savedRect.left > 0) {
+      SetWindowPos(m_hwnd1, HWND_NOTOPMOST, savedRect.left, savedRect.top,
+                   savedRect.right - savedRect.left,
                    savedRect.bottom - savedRect.top, 0);
       SetRect(&savedRect, -1, -1, -1, -1);
     } else
       SetWindowPos(m_hwnd1, HWND_NOTOPMOST, 0, 0, 0, 0,
-        SWP_NOMOVE | SWP_NOSIZE);
+                   SWP_NOMOVE | SWP_NOSIZE);
     CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN,
                   MF_BYCOMMAND | MF_UNCHECKED);
     if (m_opts.m_GrabKeyboard == TVNC_FS) {
@@ -145,9 +145,9 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
   if (WidthOf(mi.rcMonitor) != WidthOf(fsm->screenArea0) ||
       HeightOf(mi.rcMonitor) != HeightOf(fsm->screenArea0) ||
       (abs(mi.rcMonitor.top - fsm->screenArea0.top) %
-        HeightOf(fsm->screenArea0)) != 0 ||
+       HeightOf(fsm->screenArea0)) != 0 ||
       (abs(mi.rcMonitor.left - fsm->screenArea0.left) %
-        WidthOf(fsm->screenArea0)) != 0)
+       WidthOf(fsm->screenArea0)) != 0)
     fsm->equal = 0;
 
   // If the screen area of this monitor overlaps vertically with the
@@ -264,8 +264,8 @@ ScreenSet ClientConnection::GetFullScreenMetrics(RECT &screenArea,
         HeightOf(fsm.screenArea) <= primaryHeight)) ||
       // Automatic spanning + Auto resizing is enabled and we're in windowed
       // mode
-      (spanMode == SPAN_AUTO &&
-       m_opts.m_desktopSize.mode == SIZE_AUTO && !m_opts.m_FullScreen)) {
+      (spanMode == SPAN_AUTO && m_opts.m_desktopSize.mode == SIZE_AUTO &&
+       !m_opts.m_FullScreen)) {
     workArea = fsm.workArea0;
     screenArea = fsm.screenArea0;
   } else {
@@ -300,11 +300,11 @@ bool ClientConnection::BumpScroll(int x, int y)
   if (x < BUMPSCROLLBORDER)
     dx = -BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;
   if (x >= rightborder)
-    dx = BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;;
+    dx = BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;
   if (y < BUMPSCROLLBORDER)
-    dy = -BUMPSCROLLAMOUNTY * m_opts.m_scale_num / m_opts.m_scale_den;;
+    dy = -BUMPSCROLLAMOUNTY * m_opts.m_scale_num / m_opts.m_scale_den;
   if (y >= bottomborder)
-    dy = BUMPSCROLLAMOUNTY * m_opts.m_scale_num / m_opts.m_scale_den;;
+    dy = BUMPSCROLLAMOUNTY * m_opts.m_scale_num / m_opts.m_scale_den;
   if (dx || dy) {
     if (ScrollScreen(dx, dy)) {
       // If we haven't physically moved the cursor, then artificially

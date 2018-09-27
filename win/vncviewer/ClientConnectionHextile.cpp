@@ -37,7 +37,7 @@ void ClientConnection::ReadHextileRect(rfbFramebufferUpdateRectHeader *pfburh)
       HandleHextileEncoding32(pfburh->r.x, pfburh->r.y, pfburh->r.w,
                               pfburh->r.h);
       break;
-    }
+  }
 }
 
 
@@ -72,9 +72,9 @@ void ClientConnection::HandleHextileEncoding##bpp(int rx, int ry, int rw,     \
       ReadExact((char *)&subencoding, 1);                                     \
                                                                               \
       if (subencoding & rfbHextileRaw) {                                      \
-          ReadExact(m_netbuf, w * h * (bpp / 8));                             \
-          SETPIXELS(m_netbuf, bpp, x, y, w, h)                                \
-          continue;                                                           \
+        ReadExact(m_netbuf, w * h * (bpp / 8));                               \
+        SETPIXELS(m_netbuf, bpp, x, y, w, h)                                  \
+        continue;                                                             \
       }                                                                       \
                                                                               \
       if (subencoding & rfbHextileBackgroundSpecified) {                      \
@@ -83,15 +83,15 @@ void ClientConnection::HandleHextileEncoding##bpp(int rx, int ry, int rw,     \
       }                                                                       \
       FillSolidRect(x, y, w, h, bgcolor);                                     \
                                                                               \
-      if (subencoding & rfbHextileForegroundSpecified)  {                     \
+      if (subencoding & rfbHextileForegroundSpecified) {                      \
         ReadExact((char *)&fg, (bpp / 8));                                    \
         fgcolor = COLOR_FROM_PIXEL##bpp##_ADDRESS(&fg);                       \
       }                                                                       \
                                                                               \
       if (!(subencoding & rfbHextileAnySubrects))                             \
-          continue;                                                           \
+        continue;                                                             \
                                                                               \
-      ReadExact((char *)&nSubrects, 1) ;                                      \
+      ReadExact((char *)&nSubrects, 1);                                       \
                                                                               \
       ptr = (CARD8 *)m_netbuf;                                                \
                                                                               \

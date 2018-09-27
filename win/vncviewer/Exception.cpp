@@ -34,7 +34,7 @@ Exception::Exception(const char *info)
 
 Exception::~Exception()
 {
-  delete [] m_info;
+  delete[] m_info;
 }
 
 

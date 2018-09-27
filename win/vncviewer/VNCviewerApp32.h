@@ -32,7 +32,7 @@ class VNCviewerApp32 : public VNCviewerApp
     int NewConnection();
     int NewConnection(char *host, int port);
     int NewConnection(SOCKET sock);
-    Daemon  *m_pdaemon;
+    Daemon *m_pdaemon;
     ~VNCviewerApp32();
 
   private:

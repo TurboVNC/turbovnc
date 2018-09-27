@@ -43,7 +43,7 @@
 extern "C" {
 #include "wintab/Utils.h"
 #define PACKETDATA (PK_CURSOR | PK_X | PK_Y | PK_NORMAL_PRESSURE |  \
-  PK_ORIENTATION | PK_BUTTONS | PK_CHANGED)
+                    PK_ORIENTATION | PK_BUTTONS | PK_CHANGED)
 #define PACKETMODE 0
 #include "wintab/pktdef.h"
 }
@@ -61,8 +61,7 @@ typedef void (ClientConnection::*tightFilterFunc)(int, int, int);
 typedef void (ClientConnection::*setPixelsFunc)(char *, int, int, int, int);
 
 
-typedef struct _UpdateList
-{
+typedef struct _UpdateList {
   rfbFramebufferUpdateRectHeader region;
   COLORREF fillColor;
   struct _UpdateList *next;
@@ -81,7 +80,7 @@ class ClientConnection : public omni_thread
     void Run();
     void KillThread();
     void CopyOptions(ClientConnection *source);
-    int  LoadConnection(char *fname, bool sess);
+    int LoadConnection(char *fname, bool sess);
     void UnloadConnection() { m_opts.m_configSpecified = false; }
 
     int m_port;
@@ -319,14 +318,15 @@ class ClientConnection : public omni_thread
       COLORREF oldbgcol = SetBkColor(m_hBitmapDC, color);
       // This is the call MFC uses for FillSolidRect.  Who am I to argue?
       ExtTextOut(m_hBitmapDC, 0, 0, ETO_OPAQUE, pRect, NULL, 0, NULL);
-    };
+    }
 
-    inline void FillSolidRect(int x, int y, int w, int h, COLORREF color) {
+    inline void FillSolidRect(int x, int y, int w, int h, COLORREF color)
+    {
       RECT r;
       r.left = x;   r.right = x + w;
       r.top = y;    r.bottom = y + h;
       FillSolidRect(&r, color);
-    };
+    }
 
     // how many other windows are owned by this process?
     unsigned int CountProcessOtherWindows();
@@ -508,9 +508,9 @@ class TempDC
 // Define rs, rm, bs, bm, gs & gm before using, e.g. with the following:
 
 #define SETUP_COLOR_SHORTCUTS  \
-   CARD8 rs = m_myFormat.redShift;    CARD16 rm = m_myFormat.redMax;    \
-   CARD8 gs = m_myFormat.greenShift;  CARD16 gm = m_myFormat.greenMax;  \
-   CARD8 bs = m_myFormat.blueShift;   CARD16 bm = m_myFormat.blueMax;   \
+  CARD8 rs = m_myFormat.redShift;    CARD16 rm = m_myFormat.redMax;    \
+  CARD8 gs = m_myFormat.greenShift;  CARD16 gm = m_myFormat.greenMax;  \
+  CARD8 bs = m_myFormat.blueShift;   CARD16 bm = m_myFormat.blueMax;   \
 
 // read a pixel from the given address and return a color value
 #define COLOR_FROM_PIXEL8_ADDRESS(p) (  \
@@ -519,9 +519,9 @@ class TempDC
               (int)(((*(CARD8 *)(p) >> bs) & bm) * 255 / bm) ))
 
 #define COLOR_FROM_PIXEL16_ADDRESS(p) (  \
-  PALETTERGB( (int)((( *(CARD16 *)(p) >> rs) & rm) * 255 / rm),  \
-              (int)((( *(CARD16 *)(p) >> gs) & gm) * 255 / gm),  \
-              (int)((( *(CARD16 *)(p) >> bs) & bm) * 255 / bm) ))
+  PALETTERGB( (int)(((*(CARD16 *)(p) >> rs) & rm) * 255 / rm),  \
+              (int)(((*(CARD16 *)(p) >> gs) & gm) * 255 / gm),  \
+              (int)(((*(CARD16 *)(p) >> bs) & bm) * 255 / bm) ))
 
 #define COLOR_FROM_PIXEL24_ADDRESS(p) (  \
   PALETTERGB( (int)(((CARD8 *)(p))[0]),  \
@@ -529,9 +529,9 @@ class TempDC
               (int)(((CARD8 *)(p))[2]) ))
 
 #define COLOR_FROM_PIXEL32_ADDRESS(p) (  \
-  PALETTERGB( (int)((( *(CARD32 *)(p) >> rs) & rm) * 255 / rm),  \
-              (int)((( *(CARD32 *)(p) >> gs) & gm) * 255 / gm),  \
-              (int)((( *(CARD32 *)(p) >> bs) & bm) * 255 / bm) ))
+  PALETTERGB( (int)(((*(CARD32 *)(p) >> rs) & rm) * 255 / rm),  \
+              (int)(((*(CARD32 *)(p) >> gs) & gm) * 255 / gm),  \
+              (int)(((*(CARD32 *)(p) >> bs) & bm) * 255 / bm) ))
 
 // The following may be faster if you already have a pixel value of the
 // appropriate size

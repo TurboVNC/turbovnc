@@ -73,8 +73,8 @@ void ClientConnection::ProcessLocalClipboardChange()
                        e.m_info);
           DestroyWindow(m_hwnd1);
         }
-        delete [] contents;
-        delete [] unixcontents;
+        delete[] contents;
+        delete[] unixcontents;
       }
     }
   }
@@ -86,7 +86,8 @@ void ClientConnection::ProcessLocalClipboardChange()
 // We've read some text from the remote server, and we need to copy it into the
 // local clipboard.  Called by ClientConnection::ReadServerCutText()
 
-void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
+void ClientConnection::UpdateLocalClipboard(char *buf, size_t len)
+{
 
   if (m_opts.m_DisableClipboard)
     return;
@@ -110,13 +111,13 @@ void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
     if (!OpenClipboard(m_hwnd)) {
       vnclog.Print(0, "Failed to open clipboard (error = %d)\n",
                    GetLastError());
-      delete [] wincontents;
+      delete[] wincontents;
       return;
     }
     if (!EmptyClipboard()) {
       vnclog.Print(0, "Failed to empty clipboard (error = %d)\n",
                    GetLastError());
-      delete [] wincontents;
+      delete[] wincontents;
       return;
     }
 
@@ -131,7 +132,7 @@ void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
       SetClipboardData(CF_TEXT, hglbCopy);
     }
 
-    delete [] wincontents;
+    delete[] wincontents;
 
     if (!CloseClipboard()) {
       vnclog.Print(0, "Failed to close clipboard (error = %d)\n",

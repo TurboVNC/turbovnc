@@ -40,8 +40,8 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
     HKL hkl = LoadKeyboardLayout(m_options.m_kbdname,
                                  KLF_ACTIVATE | KLF_REPLACELANG | KLF_REORDER);
     if (hkl == NULL) {
-      MessageBox(NULL, "Error loading specified keyboard layout",
-                 "VNC info", MB_OK | MB_ICONSTOP);
+      MessageBox(NULL, "Error loading specified keyboard layout", "VNC info",
+                 MB_OK | MB_ICONSTOP);
       exit(1);
     }
   }
@@ -65,8 +65,7 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
     return;
   }
   char name[256];
-  if (!gpWTInfoA(WTI_DEVICES, DVC_NAME, name) ||
-      strncmp(name, "WACOM", 5)) {
+  if (!gpWTInfoA(WTI_DEVICES, DVC_NAME, name) || strncmp(name, "WACOM", 5)) {
     vnclog.Print(-1, "Wacom tablet not installed\n");
     return;
   }
@@ -243,8 +242,8 @@ void VNCviewerApp32::ListenMode()
     m_pdaemon = new Daemon(m_options.m_listenPort, m_options.m_ipv6);
   } catch (WarningException &e) {
     char msg[1024];
-    SPRINTF(msg, "Error creating listening daemon:\n\r(%s)\n\r%s",
-            e.m_info, "Perhaps another VNCviewer is already running?");
+    SPRINTF(msg, "Error creating listening daemon:\n\r(%s)\n\r%s", e.m_info,
+            "Perhaps another VNCviewer is already running?");
     MessageBox(NULL, msg, "VNCviewer error", MB_OK | MB_ICONSTOP);
     exit(1);
   }
@@ -268,8 +267,8 @@ void VNCviewerApp32::RegisterSounds()
     RegCloseKey(hBellKey);
 
     // Then put the detail in the app-specific area
-    if (RegCreateKey(HKEY_CURRENT_USER, BELL_APPL_KEY_NAME, &hBellKey) ==
-        ERROR_SUCCESS) {
+    if (RegCreateKey(HKEY_CURRENT_USER, BELL_APPL_KEY_NAME,
+                     &hBellKey) == ERROR_SUCCESS) {
       SPRINTF(keybuf, "%s\\%s", BELL_APPL_KEY_NAME, BELL_LABEL);
       RegCreateKey(HKEY_CURRENT_USER, keybuf, &hBellKey);
       RegSetValue(hBellKey, NULL, REG_SZ, "Bell", 0);
