@@ -51,6 +51,10 @@ class ServerDialog extends Dialog implements ActionListener {
     } else {
       server = new JComboBox();
     }
+    JLabel sessionLabel =
+      new JLabel("host:displayNum, host::port = connect to VNC server");
+    JLabel sessionLabel2 =
+      new JLabel("host = start TurboVNC Session Manager on host");
 
     // Hack to set the left inset on editable JComboBox
     if (UIManager.getLookAndFeel().getID().equals("Windows")) {
@@ -81,7 +85,7 @@ class ServerDialog extends Dialog implements ActionListener {
     topPanel = new JPanel(new GridBagLayout());
 
     Dialog.addGBComponent(new JLabel(VncViewer.LOGO_ICON), topPanel,
-                          0, 0, 1, 1, 0, 0, 0, 1,
+                          0, 0, 1, 3, 0, 0, 0, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.LINE_START,
                           new Insets(5, 5, 5, 15));
@@ -95,6 +99,16 @@ class ServerDialog extends Dialog implements ActionListener {
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.CENTER,
                           new Insets(10, 0, 5, 20));
+    Dialog.addGBComponent(sessionLabel, topPanel,
+                          1, 1, 2, 1, 0, 0, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(0, 0, 0, 20));
+    Dialog.addGBComponent(sessionLabel2, topPanel,
+                          1, 2, 2, 1, 0, 0, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(0, 0, 0, 20));
 
     optionsButton = new JButton("Options...");
     aboutButton = new JButton("About...");
