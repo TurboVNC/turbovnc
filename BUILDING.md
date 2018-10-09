@@ -66,9 +66,12 @@ Build Requirements
 
 - Xcode 4.1 or later (OS X 10.7.x or later SDK required)
 
-- JDK 8 or later
+- JDK 8 or OpenJDK 1.8 or later
   * Download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
+    or [OpenJDK](https://jdk.java.net)
+  * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
+    a Mac package/disk image
   * If using JDK 11 or later, CMake 3.10.x or later must also be used
 
 
@@ -294,8 +297,11 @@ Mac
 
 Create Mac package/disk image.  This requires pkgbuild and productbuild, which
 are installed by default on OS X 10.7 and later.  This command generates a
-package containing a Java app bundle that relies on Oracle Java.  The DMG built
-with this command can be installed on OS X 10.7 and later.
+package containing a standalone TurboVNC Viewer app bundle with a custom JRE
+based on OpenJDK.  The DMG built with this command can be installed on OS X
+10.7 and later, but it requires OS X 10.9 or later in order to run.  OpenJDK
+must be used in order to avoid legal restrictions regarding the redistribution
+of Oracle JDK components.
 
 
 Windows

@@ -73,8 +73,6 @@ in this manner.
 		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
-		!!! This package requires [[http://www.java.com][Oracle Java]].
-
 	#. Open the disk image, then open ''TurboVNC.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac TurboVNC Viewer.
 

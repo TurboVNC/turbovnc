@@ -13,6 +13,12 @@ VNC servers, applying a different set of options for each.  This is
 accomplished by separating the command-line arguments for each VNC server
 with `--`.
 
+4. The standalone Mac TurboVNC Viewer app now contains a custom Java Runtime
+Environment (JRE), based on OpenJDK 11, so it is no longer necessary to install
+a separate JRE or JDK package in order to use the Mac TurboVNC Viewer.  As a
+result, `make dmg` now requires OpenJDK 11 or later.  An external JRE can still
+be used at run time by setting the `JAVA_HOME` environment variable.
+
 
 2.2.1
 =====

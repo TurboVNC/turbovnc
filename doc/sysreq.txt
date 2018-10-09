@@ -43,10 +43,7 @@
 	| Any 64-bit Intel-based Mac \
 	|
 | O/S \
-	| OS X 10.7 "Lion" or later \
-	|
-| Other Software \
-	| [[http://www.java.com][Oracle Java]] 8u40 or later \
+	| OS X 10.9 "Mavericks" or later \
 	|
 #OPT: hiCol=first
 

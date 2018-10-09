@@ -114,22 +114,33 @@ endif() # WIN32
 
 if(APPLE AND TVNC_BUILDJAVA AND TVNC_BUILDNATIVE)
 
-string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
-string(REGEX REPLACE "^:" "" CMAKE_INSTALL_MACPREFIX
-	${CMAKE_INSTALL_MACPREFIX})
+find_package(Java)
 
-configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
-configure_file(release/makemacapp.in pkgscripts/makemacapp)
-configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
-configure_file(release/Info.plist.in pkgscripts/Info.plist)
-configure_file(release/Package.plist.in pkgscripts/Package.plist)
-configure_file(release/uninstall.in pkgscripts/uninstall)
-configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
+if(Java_VERSION VERSION_LESS 11)
 
-add_custom_target(dmg sh pkgscripts/makemacpkg
-	SOURCES pkgscripts/makemacpkg)
-add_custom_target(compatdmg sh pkgscripts/makemacpkg compat
-	SOURCES pkgscripts/makemacpkg)
+	message(WARNING "JDK 11 or later required in order to build Mac package/disk image")
+
+else()
+
+	string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
+	string(REGEX REPLACE "^:" "" CMAKE_INSTALL_MACPREFIX
+		${CMAKE_INSTALL_MACPREFIX})
+
+	configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
+	configure_file(release/makemacapp.in pkgscripts/makemacapp)
+	configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
+	configure_file(release/Info.plist.in pkgscripts/Info.plist)
+	configure_file(release/Package.plist.in pkgscripts/Package.plist)
+	configure_file(release/uninstall.in pkgscripts/uninstall)
+	configure_file(release/uninstall.applescript.in
+		pkgscripts/uninstall.applescript)
+
+	add_custom_target(dmg sh pkgscripts/makemacpkg
+		SOURCES pkgscripts/makemacpkg)
+	add_custom_target(compatdmg sh pkgscripts/makemacpkg compat
+		SOURCES pkgscripts/makemacpkg)
+
+endif()
 
 endif() # APPLE
 

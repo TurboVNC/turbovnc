@@ -39,6 +39,8 @@
 			<string>Viewer</string>
 		</dict>
 	</array>
+	<key>JVMRuntime</key>
+	<key>jre</key>
 	<key>JVMMainClassName</key>
 	<string>com.turbovnc.vncviewer.VncViewer</string>
 	<key>JVMOptions</key>

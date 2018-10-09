@@ -116,7 +116,7 @@ int launch(char *commandName) {
     if (runtime != nil) {
       NSString *runtimePath = [[[NSBundle mainBundle] builtInPlugInsPath]
                                stringByAppendingPathComponent:runtime];
-      libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/jre/lib/jli/libjli.dylib"]
+      libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/lib/jli/libjli.dylib"]
                     fileSystemRepresentation];
     } else
       libjliPath = LIBJLI_DYLIB;
