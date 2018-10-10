@@ -42,17 +42,14 @@
 
 #define LIBJLI_DYLIB "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/lib/jli/libjli.dylib"
 
-typedef int (JNICALL *JLI_Launch_t)(int argc, char ** argv,
-                                    int jargc, const char** jargv,
-                                    int appclassc, const char** appclassv,
-                                    const char* fullversion,
-                                    const char* dotversion,
-                                    const char* pname,
-                                    const char* lname,
-                                    jboolean javaargs,
-                                    jboolean cpwildcard,
-                                    jboolean javaw,
-                                    jint ergo);
+typedef int (JNICALL *JLI_Launch_t)(int argc, char **argv,
+                                    int jargc, const char **jargv,
+                                    int appclassc, const char **appclassv,
+                                    const char *fullversion,
+                                    const char *dotversion,
+                                    const char *pname, const char *lname,
+                                    jboolean javaargs, jboolean cpwildcard,
+                                    jboolean javaw, jint ergo);
 
 int launch(char *);
 
@@ -61,151 +58,144 @@ int jargc = 0;
 bool firstTime = true;
 
 int main(int argc, char *argv[]) {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    int result;
-    @try {
-        // DRC: I have no idea why this program re-enters itself, but that's
-        // why the "firstTime" check is necessary.
-        if (argc > 1 && !jargv && firstTime) {
-            jargv = &argv[1];
-            jargc = argc - 1;
-        }
-        firstTime = false;
-        launch(argv[0]);
-        result = 0;
-    } @catch (NSException *exception) {
-        NSAlert *alert = [[NSAlert alloc] init];
-        [alert setAlertStyle:NSCriticalAlertStyle];
-        [alert setMessageText:[exception reason]];
-        [alert runModal];
-
-        result = 1;
+  int result;
+  @try {
+    // DRC: I have no idea why this program re-enters itself, but that's
+    // why the "firstTime" check is necessary.
+    if (argc > 1 && !jargv && firstTime) {
+      jargv = &argv[1];
+      jargc = argc - 1;
     }
+    firstTime = false;
+    launch(argv[0]);
+    result = 0;
+  } @catch (NSException *exception) {
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setAlertStyle:NSCriticalAlertStyle];
+    [alert setMessageText:[exception reason]];
+    [alert runModal];
 
-    [pool drain];
+    result = 1;
+  }
 
-    return result;
+  [pool drain];
+
+  return result;
 }
 
 int launch(char *commandName) {
-    // Get the main bundle
-    NSBundle *mainBundle = [NSBundle mainBundle];
+  // Get the main bundle
+  NSBundle *mainBundle = [NSBundle mainBundle];
 
-    // Set the working directory to the user's home directory
-    chdir([NSHomeDirectory() UTF8String]);
+  // Set the working directory to the user's home directory
+  chdir([NSHomeDirectory() UTF8String]);
 
-    // Get the main bundle's info dictionary
-    NSDictionary *infoDictionary = [mainBundle infoDictionary];
+  // Get the main bundle's info dictionary
+  NSDictionary *infoDictionary = [mainBundle infoDictionary];
 
-    // Locate the JLI_Launch() function
-    NSString *runtime = [infoDictionary objectForKey:@JVM_RUNTIME_KEY];
+  // Locate the JLI_Launch() function
+  NSString *runtime = [infoDictionary objectForKey:@JVM_RUNTIME_KEY];
 
-    const char *libjliPath = NULL;
-    if (runtime != nil) {
-        NSString *runtimePath = [[[NSBundle mainBundle] builtInPlugInsPath] stringByAppendingPathComponent:runtime];
-        libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/jre/lib/jli/libjli.dylib"] fileSystemRepresentation];
-    } else {
-        libjliPath = LIBJLI_DYLIB;
+  const char *libjliPath = NULL;
+  if (runtime != nil) {
+    NSString *runtimePath = [[[NSBundle mainBundle] builtInPlugInsPath]
+                             stringByAppendingPathComponent:runtime];
+    libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/jre/lib/jli/libjli.dylib"]
+                  fileSystemRepresentation];
+  } else
+    libjliPath = LIBJLI_DYLIB;
+
+  void *libJLI = dlopen(libjliPath, RTLD_LAZY);
+
+  JLI_Launch_t jli_LaunchFxnPtr = NULL;
+  if (libJLI != NULL)
+    jli_LaunchFxnPtr = dlsym(libJLI, "JLI_Launch");
+
+  if (jli_LaunchFxnPtr == NULL)
+    [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
+      reason:NSLocalizedString(@"JRELoadError", @UNSPECIFIED_ERROR)
+      userInfo:nil] raise];
+
+  // Get the main class name
+  NSString *mainClassName =
+    [infoDictionary objectForKey:@JVM_MAIN_CLASS_NAME_KEY];
+  if (mainClassName == nil)
+    [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
+      reason:NSLocalizedString(@"MainClassNameRequired", @UNSPECIFIED_ERROR)
+      userInfo:nil] raise];
+
+  // Set the class path
+  NSString *mainBundlePath = [mainBundle bundlePath];
+  NSString *javaPath =
+    [mainBundlePath stringByAppendingString:@"/Contents/Resources/Java"];
+  NSMutableString *classPath =
+    [NSMutableString stringWithFormat:@"-Djava.class.path=%@/Classes",
+     javaPath];
+
+  NSFileManager *defaultFileManager = [NSFileManager defaultManager];
+  NSArray *javaDirectoryContents =
+    [defaultFileManager contentsOfDirectoryAtPath:javaPath error:nil];
+  if (javaDirectoryContents == nil)
+    [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
+      reason:NSLocalizedString(@"JavaDirectoryNotFound", @UNSPECIFIED_ERROR)
+      userInfo:nil] raise];
+
+  for (NSString *file in javaDirectoryContents) {
+    if ([file hasSuffix:@".jar"])
+      [classPath appendFormat:@":%@/%@", javaPath, file];
+  }
+
+  // Set the library path
+  NSString *libraryPath = [NSString stringWithFormat:@"-Djava.library.path=%@/Contents/Resources/Native", mainBundlePath];
+
+  // Get the VM options
+  NSArray *options = [infoDictionary objectForKey:@JVM_OPTIONS_KEY];
+  if (options == nil)
+    options = [NSArray array];
+
+  // Get the application arguments
+  NSArray *arguments = [infoDictionary objectForKey:@JVM_ARGUMENTS_KEY];
+  if (arguments == nil)
+    arguments = [NSArray array];
+
+  // Initialize the arguments to JLI_Launch()
+  int argc = 1 + [options count] + 2 + [arguments count] + 1 + jargc;
+  char *argv[argc];
+
+  int i = 0;
+  argv[i++] = commandName;
+  argv[i++] = strdup([classPath UTF8String]);
+  argv[i++] = strdup([libraryPath UTF8String]);
+
+  for (NSString *option in options) {
+    option = [option stringByReplacingOccurrencesOfString:@APP_ROOT_PREFIX
+              withString:[mainBundle bundlePath]];
+    argv[i++] = strdup([option UTF8String]);
+  }
+
+  argv[i++] = strdup([mainClassName UTF8String]);
+
+  for (NSString *argument in arguments) {
+    argument = [argument stringByReplacingOccurrencesOfString:@APP_ROOT_PREFIX
+                withString:[mainBundle bundlePath]];
+    argv[i++] = strdup([argument UTF8String]);
+  }
+
+  if (jargc > 0 && jargv) {
+    int j;
+
+    for (j = 0; j < jargc; j++) {
+      if (!strncmp(jargv[j], "-psn", 4)) {
+        argc--;
+        continue;
+      }
+      argv[i++] = jargv[j];
     }
+  }
 
-    void *libJLI = dlopen(libjliPath, RTLD_LAZY);
-
-    JLI_Launch_t jli_LaunchFxnPtr = NULL;
-    if (libJLI != NULL) {
-        jli_LaunchFxnPtr = dlsym(libJLI, "JLI_Launch");
-    }
-
-    if (jli_LaunchFxnPtr == NULL) {
-        [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
-            reason:NSLocalizedString(@"JRELoadError", @UNSPECIFIED_ERROR)
-            userInfo:nil] raise];
-    }
-
-    // Get the main class name
-    NSString *mainClassName = [infoDictionary objectForKey:@JVM_MAIN_CLASS_NAME_KEY];
-    if (mainClassName == nil) {
-        [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
-            reason:NSLocalizedString(@"MainClassNameRequired", @UNSPECIFIED_ERROR)
-            userInfo:nil] raise];
-    }
-
-    // Set the class path
-    NSString *mainBundlePath = [mainBundle bundlePath];
-    NSString *javaPath = [mainBundlePath stringByAppendingString:@"/Contents/Resources/Java"];
-    NSMutableString *classPath = [NSMutableString stringWithFormat:@"-Djava.class.path=%@/Classes", javaPath];
-
-    NSFileManager *defaultFileManager = [NSFileManager defaultManager];
-    NSArray *javaDirectoryContents = [defaultFileManager contentsOfDirectoryAtPath:javaPath error:nil];
-    if (javaDirectoryContents == nil) {
-        [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
-            reason:NSLocalizedString(@"JavaDirectoryNotFound", @UNSPECIFIED_ERROR)
-            userInfo:nil] raise];
-    }
-
-    for (NSString *file in javaDirectoryContents) {
-        if ([file hasSuffix:@".jar"]) {
-            [classPath appendFormat:@":%@/%@", javaPath, file];
-        }
-    }
-
-    // Set the library path
-    NSString *libraryPath = [NSString stringWithFormat:@"-Djava.library.path=%@/Contents/Resources/Native", mainBundlePath];
-
-    // Get the VM options
-    NSArray *options = [infoDictionary objectForKey:@JVM_OPTIONS_KEY];
-    if (options == nil) {
-        options = [NSArray array];
-    }
-
-    // Get the application arguments
-    NSArray *arguments = [infoDictionary objectForKey:@JVM_ARGUMENTS_KEY];
-    if (arguments == nil) {
-        arguments = [NSArray array];
-    }
-
-    // Initialize the arguments to JLI_Launch()
-    int argc = 1 + [options count] + 2 + [arguments count] + 1 + jargc;
-    char *argv[argc];
-
-    int i = 0;
-    argv[i++] = commandName;
-    argv[i++] = strdup([classPath UTF8String]);
-    argv[i++] = strdup([libraryPath UTF8String]);
-
-    for (NSString *option in options) {
-        option = [option stringByReplacingOccurrencesOfString:@APP_ROOT_PREFIX withString:[mainBundle bundlePath]];
-        argv[i++] = strdup([option UTF8String]);
-    }
-
-    argv[i++] = strdup([mainClassName UTF8String]);
-
-    for (NSString *argument in arguments) {
-        argument = [argument stringByReplacingOccurrencesOfString:@APP_ROOT_PREFIX withString:[mainBundle bundlePath]];
-        argv[i++] = strdup([argument UTF8String]);
-    }
-
-    if (jargc > 0 && jargv) {
-        int j;
-        for (j = 0; j < jargc; j++) {
-            if (!strncmp(jargv[j], "-psn", 4)) {
-                argc--;
-                continue;
-            }
-            argv[i++] = jargv[j];
-        }
-    }
-
-    // Invoke JLI_Launch()
-    return jli_LaunchFxnPtr(argc, argv,
-                            0, NULL,
-                            0, NULL,
-                            "",
-                            "",
-                            "java",
-                            "java",
-                            FALSE,
-                            FALSE,
-                            FALSE,
-                            0);
+  // Invoke JLI_Launch()
+  return jli_LaunchFxnPtr(argc, argv, 0, NULL, 0, NULL, "", "", "java", "java",
+                          FALSE, FALSE, FALSE, 0);
 }
