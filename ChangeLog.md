@@ -1,3 +1,16 @@
+2.2.1
+=====
+
+### Significant changes relative to 2.2:
+
+1. The standalone Mac TurboVNC Viewer app will now use the JRE pointed to by
+the `JAVA_HOME` environment variable, if that variable is defined.  This
+facilitates using the viewer with Java 11, which doesn't provide a separate JRE
+and thus doesn't install anything under
+/Library/Internet Plug-Ins/JavaAppletPlugin.plugin (the directory in which the
+Mac TurboVNC Viewer app launcher normally looks for a JRE.)
+
+
 2.2
 ===
 
