@@ -128,8 +128,6 @@ configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript
 
 add_custom_target(dmg sh pkgscripts/makemacpkg
 	SOURCES pkgscripts/makemacpkg)
-add_custom_target(compatdmg sh pkgscripts/makemacpkg compat
-	SOURCES pkgscripts/makemacpkg)
 
 endif() # APPLE
 
