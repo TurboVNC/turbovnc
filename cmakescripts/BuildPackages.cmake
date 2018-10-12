@@ -129,7 +129,8 @@ configure_file(release/installer.iss.in pkgscripts/installer.iss)
 if(TVNC_INCLUDEJRE)
 	add_custom_target(jre
 		${CMAKE_COMMAND} -DJRE_OUTPUT_DIR=java/jre
-			-P ${CMAKE_BINARY_DIR}/java/cmake/BuildJRE.cmake)
+			-P ${CMAKE_BINARY_DIR}/java/cmake/BuildJRE.cmake
+		DEPENDS java)
 endif()
 add_custom_target(installer
 	iscc -o${INSTALLERDIR} ${INST_DEFS} -F${INST_NAME} pkgscripts/installer.iss
