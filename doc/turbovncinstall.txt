@@ -120,7 +120,7 @@ TurboVNC binary package available, then log in as root, download the TurboVNC
 source tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the
 [[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]],
-uncompress it, ''cd turbovnc-''__''{version}''__, and read ''BUILDING.txt''
+uncompress it, ''cd turbovnc-''__''{version}''__, and read ''BUILDING.md''
 for further instructions on how to build TurboVNC from source.
 
 ** Uninstalling TurboVNC
