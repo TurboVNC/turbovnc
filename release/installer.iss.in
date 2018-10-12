@@ -52,6 +52,7 @@ Source: "@CMAKE_BINARY_DIR@\java\VncViewer.jar"; DestDir: "{app}\java"; Flags: i
 Source: "@CMAKE_BINARY_DIR@\vncviewer-javaw.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
 Source: "@CMAKE_BINARY_DIR@\vncviewer-java.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
 Source: "@CMAKE_SOURCE_DIR@\java\com\turbovnc\vncviewer\README.md"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
+Source: "@CMAKE_SOURCE_DIR@\win\vncviewer\res\vncviewer.ico"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
 Source: "@CMAKE_BINARY_DIR@\java\turbojpeg.dll"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
 #ifdef TURBOVNCHELPER
 Source: "@CMAKE_BINARY_DIR@\java\turbovnchelper.dll"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
@@ -72,8 +73,8 @@ Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer";                      FileName: "{ap
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode)";        FileName: "{app}\vncviewer.exe"; Parameters: "-listen";          WorkingDir: "{app}";      Components: viewer;
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode - IPv6)"; FileName: "{app}\vncviewer.exe"; Parameters: "-listen -ipv6";    WorkingDir: "{app}";      Components: viewer;
 #ifdef JAVA
-Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer";                 FileName: "{app}\vncviewer-javaw.bat";                           WorkingDir: "{app}";      Flags: "runminimized"
-Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer (Listen Mode)";   FileName: "{app}\vncviewer-javaw.bat"; Parameters: "-listen";    WorkingDir: "{app}";      Flags: "runminimized"
+Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer";                 FileName: "{app}\vncviewer-javaw.bat";                           WorkingDir: "{app}";      Flags: "runminimized"; IconFileName: "{app}\vncviewer.ico"
+Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer (Listen Mode)";   FileName: "{app}\vncviewer-javaw.bat"; Parameters: "-listen";    WorkingDir: "{app}";      Flags: "runminimized"; IconFileName: "{app}\vncviewer.ico"
 #endif
 Name: "{group}\Uninstall @CMAKE_PROJECT_NAME@";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ README";        FileName: "write.exe";           Parameters: "README.txt";       WorkingDir: "{app}";      Flags: "useapppaths"
