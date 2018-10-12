@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-10-12T12:43:36">
+<meta name="date" content="2018-10-12T18:25:34">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -265,8 +265,8 @@ was originally a fork of
 <span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx005"></a> 
 1.3.x, and on the surface, the X server and Windows viewer still behave 
 similarly to their parents.  However, the current version of TurboVNC 
-contains a much more modern X server code base (based on X.org 7.7) and 
-a variety of other features and fixes, including a high-performance 
+contains a much more modern X server code base (based on X.org) and a 
+variety of other features and fixes, including a high-performance 
 zero-install Java viewer.  TurboVNC compresses 3D and video workloads 
 significantly better than the &ldquo;tightest&rdquo; compression mode in 
 TightVNC 1.3.x while using only typically 15-20% of the CPU time of the 
@@ -662,7 +662,7 @@ area</a></span><a name="idx0028"></a> of the
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
 SourceForge project page</a></span><a name="idx0029"></a>, uncompress 
 it, <code>cd&nbsp;turbovnc-</code><em><code>{version}</code></em>, and 
-read <code>BUILDING.txt</code> for further instructions on how to build 
+read <code>BUILDING.md</code> for further instructions on how to build 
 TurboVNC from source.</p>
 
 
@@ -862,12 +862,13 @@ software OpenGL implementation, and it also provides an option
 VirtualGL.  However, for performance reasons, it is generally 
 recommended that you use a 2D window manager with the TurboVNC Server 
 (even with VirtualGL, 3D window managers have a lot of overhead.)  As of 
-this writing, Ubuntu provides an optional 2D window manager called 
-&ldquo;GNOME Fallback&rdquo; or &ldquo;GNOME Flashback&rdquo;, which 
-will automatically be used if it is installed and the 
-<code>TVNC_WM</code> environment variable is set to <code>2d</code>.  
-For other systems that lack a 2D window manager, it is recommended that 
-you install MATE. Refer to 
+this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window 
+manager called &ldquo;GNOME Fallback&rdquo;, &ldquo;GNOME 
+Flashback&rdquo;, or &ldquo;GNOME Classic&rdquo;, which will 
+automatically be used if it is installed and the <code>TVNC_WM</code> 
+environment variable is set to <code>2d</code>.  For other systems that 
+lack a 2D window manager, it is recommended that you install MATE.  
+Refer to 
 <span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility" class="remote">this 
 report</a></span><a name="idx0030"></a> for an up-to-date list of window 
 managers that have been tested with this version of the TurboVNC Server, 
