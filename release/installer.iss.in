@@ -57,6 +57,9 @@ Source: "@CMAKE_BINARY_DIR@\java\turbojpeg.dll"; DestDir: "{app}\java"; Flags: i
 #ifdef TURBOVNCHELPER
 Source: "@CMAKE_BINARY_DIR@\java\turbovnchelper.dll"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
 #endif
+#ifdef INCLUDEJRE
+Source: "@CMAKE_BINARY_DIR@\java\jre\*"; DestDir: "{app}\java\jre"; Flags: ignoreVersion recursesubdirs; Components: javaviewer
+#endif
 #endif
 Source: "@CMAKE_SOURCE_DIR@\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\ChangeLog.md"; DestDir: "{app}"; Flags: ignoreversion

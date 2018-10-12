@@ -2,31 +2,15 @@
 
 set -u
 set -e
-trap onexit INT
-trap onexit TERM
-trap onexit EXIT
-
-TMPDIR=
-
-onexit()
-{
-	if [ ! "$TMPDIR" = "" ]; then
-		rm -rf $TMPDIR
-	fi
-}
 
 SRCDIR=@CMAKE_SOURCE_DIR@
-JAR=@Java_JAR_EXECUTABLE@
-JAVAC=@Java_JAVAC_EXECUTABLE@
-JDEPS=`dirname "$JAR"`/jdeps
-JLINK=`dirname "$JAR"`/jlink
-JMODS=`dirname "$JAR"`/../jmods
-JVERSION=@Java_VERSION_MAJOR@
+BINDIR=@CMAKE_BINARY_DIR@
+CMAKE_COMMAND=@CMAKE_COMMAND@
+INCLUDEJRE=@TVNC_INCLUDEJRE@
 
 SUFFIX=
 
 umask 022
-TMPDIR=`mktemp -d /tmp/makemacapp.XXXXXX`
 APP="@CMAKE_PROJECT_NAME@ Viewer$SUFFIX.app"
 
 if [ -d "$APP" ]; then
@@ -37,11 +21,10 @@ mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources/Java"
 mkdir -p "$APP/Contents/Resources/Native"
 
-$JDEPS --generate-module-info $TMPDIR java/VncViewer.jar
-cp java/VncViewer.jar $TMPDIR
-$JAVAC --patch-module VncViewer=$TMPDIR/VncViewer.jar $TMPDIR/VncViewer/module-info.java
-$JAR uf $TMPDIR/VncViewer.jar -C $TMPDIR/VncViewer module-info.class
-$JLINK -p $TMPDIR/VncViewer.jar:$JMODS --add-modules VncViewer --limit-modules VncViewer --output "$APP/Contents/PlugIns/jre/Contents/Home" --ignore-signing-information
+if [ "$INCLUDEJRE" = "1" ]; then
+	$CMAKE_COMMAND -DJRE_OUTPUT_DIR="$APP/Contents/PlugIns/jre/Contents/Home" \
+		-P $BINDIR/java/cmake/BuildJRE.cmake
+fi
 
 cp pkgscripts/Info.plist "$APP/Contents/Info.plist"
 cp bin/JavaAppLauncher "$APP/Contents/MacOS/@CMAKE_PROJECT_NAME@ Viewer"

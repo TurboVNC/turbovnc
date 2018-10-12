@@ -1,0 +1,57 @@
+set(Java_JAR_EXECUTABLE "@Java_JAR_EXECUTABLE@")
+set(Java_JAVAC_EXECUTABLE "@Java_JAVAC_EXECUTABLE@")
+
+if(NOT JRE_OUTPUT_DIR)
+  message(FATAL_ERROR "JRE_OUTPUT_DIR must be defined")
+endif()
+
+string(REGEX REPLACE "jar" "" Java_PATH "${Java_JAR_EXECUTABLE}")
+string(REGEX REPLACE ".exe" "" Java_PATH "${Java_PATH}")
+
+macro(cleanup)
+  if(EXISTS jretmp)
+    file(REMOVE_RECURSE jretmp)
+  endif()
+endmacro()
+
+macro(check_error program)
+  if(NOT RESULT EQUAL 0)
+    cleanup()
+    message(FATAL_ERROR "${program} failed.")
+  endif()
+endmacro()
+
+if(EXISTS ${JRE_OUTPUT_DIR})
+  file(REMOVE_RECURSE ${JRE_OUTPUT_DIR})
+endif()
+cleanup()
+
+execute_process(COMMAND "${Java_PATH}/jdeps"
+  --generate-module-info jretmp java/VncViewer.jar
+  RESULT_VARIABLE RESULT)
+check_error(jdeps)
+
+file(COPY java/VncViewer.jar DESTINATION jretmp/)
+execute_process(COMMAND "${Java_JAVAC_EXECUTABLE}"
+  --patch-module VncViewer=jretmp/VncViewer.jar
+    jretmp/VncViewer/module-info.java
+  RESULT_VARIABLE RESULT)
+check_error(javac)
+
+execute_process(COMMAND "${Java_JAR_EXECUTABLE}"
+  uf jretmp/VncViewer.jar -C jretmp/VncViewer module-info.class
+  RESULT_VARIABLE RESULT)
+check_error(jar)
+
+set(SEP ":")
+if(WIN32)
+  set(SEP ";")
+endif()
+execute_process(COMMAND "${Java_PATH}/jlink"
+  -p "jretmp/VncViewer.jar${SEP}${Java_PATH}/../jmods" --add-modules VncViewer
+    --limit-modules VncViewer --output ${JRE_OUTPUT_DIR}
+    --ignore-signing-information
+  RESULT_VARIABLE RESULT)
+check_error(jlink)
+
+cleanup()

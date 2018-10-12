@@ -2,6 +2,11 @@
 setlocal enableextensions enabledelayedexpansion
 if DEFINED JAVA_HOME goto java_home_defined
 
+if exist "%~d0%~p0java\jre" (
+	set JAVA=%~d0%~p0java\jre\bin\java
+	set JAWT_PATH=%~d0%~p0java\jre\bin
+	goto jawt_path_defined
+)
 set JAVA=java
 goto java_home_undefined
 
