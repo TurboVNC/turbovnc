@@ -31,7 +31,7 @@ install:
 
       bash -c "pacman --noconfirm -S zip"
 
-      git clone --depth=1 https://github.com/TurboVNC/buildscripts.git c:/buildscripts
+      git clone --depth=1 https://github.com/TurboVNC/buildscripts.git -b %APPVEYOR_REPO_BRANCH% c:/buildscripts
 
 build_script:
   - cmd: >-
