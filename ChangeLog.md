@@ -24,6 +24,12 @@ that contains a custom JRE (including the official TurboVNC Viewer packages),
 an external JRE can still be used at run time by setting the `JAVA_HOME`
 environment variable.
 
+5. The built-in HTTP server in the TurboVNC Server is no longer enabled by
+default.  This reflects the fact that Java Web Start is now a legacy
+technology.  JWS is no longer provided in Java 11, so once Java 8 stops
+receiving public updates, the ability to deploy the Java TurboVNC Viewer using
+JWS will be limited.
+
 
 2.2.1
 =====

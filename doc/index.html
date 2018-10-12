@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-10-12T18:25:34">
+<meta name="date" content="2018-10-12T18:26:51">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -919,7 +919,7 @@ server machine, type the following command:</p>
 
 <p><a name="Zero_Install"></a></p>
 
-<p>When a TurboVNC session is created, it automatically starts a miniature 
+<p>When a TurboVNC session is created, it can optionally start a miniature 
 web server that serves up the Java TurboVNC Viewer as a Java Web Start 
 app.  This allows you to easily connect to the TurboVNC session from a 
 machine that does not have the TurboVNC Viewer installed locally.  If 
@@ -930,8 +930,9 @@ clients when launching the TurboVNC Viewer. This provides most of the
 advantages of the standalone TurboVNC viewers, including native levels 
 of performance on popular client platforms.</p>
 
-<p>To launch the Java TurboVNC Viewer from a web browser, point your web 
-browser to:</p>
+<p>To launch the Java TurboVNC Viewer from a web browser, pass 
+<code>-httpd</code> to <code>/opt/TurboVNC/bin/vncserver</code> when 
+starting the server, then point your web browser to:</p>
 
 <p><code>http://</code><em><code>{turbovnc_server}</code></em><code>:{5800+</code><em><code>n</code></em><code>}</code></p>
 

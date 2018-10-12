@@ -134,7 +134,7 @@ the following command:
 ** Launching the TurboVNC Viewer from a Web Browser
 {anchor: Zero_Install}
 
-When a TurboVNC session is created, it automatically starts a miniature web
+When a TurboVNC session is created, it can optionally start a miniature web
 server that serves up the Java TurboVNC Viewer as a Java Web Start app.  This
 allows you to easily connect to the TurboVNC session from a machine that does
 not have the TurboVNC Viewer installed locally.  If one of the official
@@ -144,8 +144,9 @@ library for Linux, OS X, or Windows clients when launching the TurboVNC Viewer.
 This provides most of the advantages of the standalone TurboVNC viewers,
 including native levels of performance on popular client platforms.
 
-To launch the Java TurboVNC Viewer from a web browser, point your web browser
-to:
+To launch the Java TurboVNC Viewer from a web browser, pass ''-httpd'' to
+''/opt/TurboVNC/bin/vncserver'' when starting the server, then point your web
+browser to:
 
 ''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}''
 

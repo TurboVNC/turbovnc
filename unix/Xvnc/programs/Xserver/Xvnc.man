@@ -578,8 +578,8 @@ started on this machine.  Only connections from localhost can be made, which
 effectively forces the use of SSH tunneling to make inbound remote connections.
 
 .IP \fIno-httpd\fR
-Disable the built-in HTTP server in all TurboVNC servers started on this
-machine.
+Do not allow the built-in HTTP server to be enabled in any TurboVNC server
+started on this machine.
 
 .IP \fIno-x11-tcp-connections\fR
 Do not allow X11 TCP connections to any TurboVNC server started on this

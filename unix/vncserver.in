@@ -59,7 +59,7 @@ $x509CertFile = "$vncUserDir/x509_cert.pem";
 $x509KeyFile = "$vncUserDir/x509_private.pem";
 $securityTypes = "";
 $encTypeX509 = @USETLS@;
-$enableHTTP = 1;
+$enableHTTP = 0;
 $skipxstartup = 0;
 $autoLosslessRefresh = 0.0;
 $deferUpdate = 1;
@@ -330,7 +330,7 @@ foreach $_registrydir (@registrydirs) {
 &ParseOptions("-geometry", 1, "-depth", 1, "-pixelformat", 1, "-name", 1,
               "-kill", 1, "-help", 0, "-h", 0, "--help", 0, "-fg", 0,
               "-list", 0, "-fp", 1, "-otp", 0, "-securitytypes", 1,
-              "-nohttp", 0, "-nohttpd", 0, "-rfbauth", 1, "-noxstartup", 0,
+              "-http", 0, "-httpd", 0, "-rfbauth", 1, "-noxstartup", 0,
               "-xstartup", 1, "-log", 1, "-3dwm", 0, "-vgl", 0, "-debug", 0,
               "-x509cert", 1, "-x509key", 1, "-autokill", 0, "-quiet", 0,
               "-sessionlist", 0, "-sessionstart", 0);
@@ -361,11 +361,11 @@ if ($opt{'-depth'}) {
 if ($opt{'-pixelformat'}) {
   $pixelformat = $opt{'-pixelformat'};
 }
-if ($opt{'-nohttp'}) {
-  $enableHTTP = 0;
+if ($opt{'-http'}) {
+  $enableHTTP = 1;
 }
-if ($opt{'-nohttpd'}) {
-  $enableHTTP = 0;
+if ($opt{'-httpd'}) {
+  $enableHTTP = 1;
 }
 if ($opt{'-noxstartup'}) {
   $skipxstartup = 1;
@@ -899,7 +899,7 @@ sub Usage
       "        -pixelformat bgr<NNN>\n".
       "        -fp <FONT-PATH>\n".
       "        -name <DESKTOP-NAME>\n".
-      "        -nohttpd\n".
+      "        -httpd\n".
       "        -otp\n".
       "        -fg\n".
       "        -x509cert <CERT-FILE>\n".
