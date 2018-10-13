@@ -53,9 +53,8 @@
 
 	#. A small dialog box will appear.
 		{nl}{nl}
-		|| Windows TurboVNC Viewer || Linux/Un*x/Mac (Java) TurboVNC Viewer ||
-		| {img:newconn-win.png} | {img:newconn-java.png} |
-		{nl}
+		{img:newconn.png}
+		{nl}{nl}
 		Enter the X display name (hostname, or IP address, and display number) of
 		the TurboVNC session in the "VNC server" field, then click "Connect".
 
@@ -63,12 +62,11 @@
 		VNC authentication is being used) or for the username and password (if
 		Unix Login authentication is being used.)
 		{nl}{nl}
-		|| || Windows TurboVNC Viewer || Linux/Un*x/Mac (Java) TurboVNC Viewer ||
-		| Standard VNC Authentication Dialog | {img:vncauth-win.png} | {img:vncauth-java.png} |
-		| Unix Login Authentication Dialog   | {img:unixauth-win.png} | {img:unixauth-java.png} |
+		| Standard VNC Authentication Dialog | {img:vncauth.png} |
+		| Unix Login Authentication Dialog   | {img:unixauth.png} |
 		{nl}
-		Enter the VNC session password or the Unix username/password and click
-		"OK" (Windows) or press Enter (Linux/Un*x/Mac.)
+		Enter the VNC session password or the Unix username/password and press
+		Enter.
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
 		window contains a virtual desktop with which you can interact to launch
@@ -128,16 +126,16 @@ the following command:
 {anchor: Zero_Install}
 
 When a TurboVNC session is created, it can optionally start a miniature web
-server that serves up the Java TurboVNC Viewer as a Java Web Start app.  This
-allows you to easily connect to the TurboVNC session from a machine that does
-not have the TurboVNC Viewer installed locally.  If one of the official
-TurboVNC binary packages is installed on the server, then the miniature web
-server will automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI
-library for Linux, OS X, or Windows clients when launching the TurboVNC Viewer.
-This provides most of the advantages of the standalone TurboVNC viewers,
-including native levels of performance on popular client platforms.
+server that serves up the TurboVNC Viewer as a Java Web Start app.  This allows
+you to easily connect to the TurboVNC session from a machine that does not have
+the TurboVNC Viewer installed locally.  If one of the official TurboVNC binary
+packages is installed on the server, then the miniature web server will
+automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI library for
+Linux, OS X, or Windows clients when launching the TurboVNC Viewer. This
+provides most of the advantages of the standalone TurboVNC viewers, including
+native levels of performance on popular client platforms.
 
-To launch the Java TurboVNC Viewer from a web browser, pass ''-httpd'' to
+To launch the TurboVNC Viewer from a web browser, pass ''-httpd'' to
 ''/opt/TurboVNC/bin/vncserver'' when starting the server, then point your web
 browser to:
 
@@ -169,8 +167,8 @@ will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
 	!!! NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in
 	Java Web Start by default.  This is not an issue if you are using the
 	official TurboVNC binary packages, but if you are building a self-signed
-	version of the Java TurboVNC Viewer for development purposes, then you will
-	need to add ''http://{turbovnc_server}:{http_port}'' (for example,
+	version of the TurboVNC Viewer for development purposes, then you will need
+	to add ''http://{turbovnc_server}:{http_port}'' (for example,
 	''http://my_server:5801'') to Java's Exception Site List, which can be found
 	under the "Security" tab in the Java Control Panel.
 
@@ -181,22 +179,22 @@ will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
 	security settings in the "Security & Privacy" section of System Preferences
 	to allow applications downloaded from anywhere.
 
-** Deploying the Java TurboVNC Viewer Using Java Web Start
+** Deploying the TurboVNC Viewer Using Java Web Start
 {anchor: JWS}
 
-Accessing the Java TurboVNC Viewer through TurboVNC's built-in HTTP server, as
+Accessing the TurboVNC Viewer through TurboVNC's built-in HTTP server, as
 described above, is a quick and easy way of running the TurboVNC Viewer on
 machines that don't already have a VNC viewer installed (for instance, for the
 purpose of collaborating with colleagues who don't normally use TurboVNC.)
 
-To set up a large-scale deployment of the Java TurboVNC Viewer, however, it is
+To set up a large-scale deployment of the TurboVNC Viewer, however, it is
 desirable to serve up the JAR files from a dedicated web server.
 
 For the purposes of this guide, it is assumed that the reader has some
 knowledge of web server administration.
 
-	* Copy the Java TurboVNC Viewer JAR file (''VncViewer.jar'') into a directory
-		on your web server.
+	* Copy the TurboVNC Viewer JAR file (''VncViewer.jar'') into a directory on
+		your web server.
 		{nl}{nl}
 
 	* Copy the libjpeg-turbo JNI JAR files into that same directory.  You can
@@ -292,7 +290,7 @@ knowledge of web server administration.
 		{nl}{nl}
 
 	* You should now be able to access ''{turbovnc_url}/TurboVNC.jnlp'' in your
-		browser to launch the Java TurboVNC Viewer with full performance.
+		browser to launch the TurboVNC Viewer with full performance.
 
 ** Securing a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}
@@ -329,9 +327,8 @@ above example.)
 {anchor: via}
 
 You can simplify the above by using the ''-via'' and ''-tunnel'' command-line
-options in the TurboVNC Viewer (or, if you are using the Java TurboVNC Viewer,
-the equivalent GUI options, which are located under the "Security" tab in the
-Options dialog.)  For instance, running
+options in the TurboVNC Viewer (or the equivalent GUI options, which are
+located under the "Security" tab in the Options dialog.)  For instance, running
 
 	#Verb: <<---
 	{vncviewer} -via {user}@{server} localhost:{n}
@@ -355,10 +352,7 @@ automatically determined by the TurboVNC Viewer.)
 
 	!!! In the above examples, ''{vncviewer}'' is the command used to launch the
 	TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Mac/Linux/Un*x
-	systems, or ''c:\\Program Files\\TurboVNC\\vncviewer-java.bat'' if running
-	the Java TurboVNC Viewer on Windows systems, or
-	''c:\\Program Files\\TurboVNC\\cvncviewer.exe'' if running the native Windows
-	TurboVNC Viewer.
+	systems or ''c:\\Program Files\\TurboVNC\\vncviewer.bat'' on Windows systems.
 
 ''-tunnel'' can be used as a shortcut whenever the SSH and VNC servers are the
 same machine.  ''-via'' is more flexible, since it allows you to specify the
@@ -370,19 +364,11 @@ The command used to establish the SSH tunnel is configurable by way of
 environment variables.  See {ref prefix="Section ": VNC_VIA_CMD} for more
 details.
 
-	!!! NOTE: Since the Java TurboVNC Viewer contains an embedded SSH client, the
+	!!! NOTE: Since the TurboVNC Viewer contains an embedded SSH client, the
 	''-via'' and ''-tunnel'' command-line options can also be used when the
 	viewer is deployed using [[#JWS][Java Web Start]].  These options would be
 	specified as ''<argument>'' elements under the ''<application-desc>''
 	element in the JNLP file.
-
-	!!! Currently the use of the ''-via'' and ''-tunnel'' command-line options in
-	the Windows TurboVNC Viewer requires Cygwin or MSYS2, since those are the
-	only known Windows SSH implementations that support detaching the SSH process
-	once the tunnel has been established.  When using ''-via'' or ''-tunnel'', it
-	is recommended that you use the console version of the Windows TurboVNC
-	Viewer (cvncviewer.exe) rather than vncviewer.exe.  Otherwise, a new console
-	window will pop up and remain for the duration of the VNC connection.
 
 *** Forcing Secure Connections
 #OPT: noList! plain!
@@ -434,21 +420,13 @@ For more detailed instructions on the usage of TurboVNC:
 	man -M /opt/TurboVNC/man vncpasswd
 	---
 
-	Windows TurboVNC Viewer :: Use the embedded help feature (the question mark
-	button in the upper right of the TurboVNC Viewer dialogs.)  You can also
-	run ''vncviewer.exe /?'' from a command prompt to get a full list of
-	supported command-line options and their descriptions.
-
-	Linux/Un*x/Mac (Java) TurboVNC Viewer :: Run
+	TurboVNC Viewer :: Run
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncviewer -?
 	---
-	to display a full list of supported command-line options/parameters and
-	their descriptions.
-
-	Java TurboVNC Viewer on Windows :: Run
+	on Un*x or
 	#Verb: <<---
-	c:\Program Files\TurboVNC\vncviewer-java.bat -?
+	c:\Program Files\TurboVNC\vncviewer.bat -?
 	---
-	to display a full list of supported command-line options/parameters and
-	their descriptions.
+	on Windows to display a full list of supported command-line
+	options/parameters and their descriptions.

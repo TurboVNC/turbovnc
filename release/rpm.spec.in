@@ -14,13 +14,13 @@
 %define mandir @CMAKE_INSTALL_FULL_MANDIR@
 
 # Whether or not to include the Java viewer
-%define java @TVNC_BUILDJAVA@
+%define viewer @TVNC_BUILDVIEWER@
 
 # Whether or not to include a custom JRE
 %define jre @TVNC_INCLUDEJRE@
 
 # Whether or not to include the native infrastructure for the Java viewer
-%define native @TVNC_BUILDNATIVE@
+%define helper @TVNC_BUILDHELPER@
 
 # Whether or not to include the server
 %define server @TVNC_BUILDSERVER@
@@ -115,7 +115,7 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG \
 #-->  $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG \
 #-->  $JAVA_TSA_ALG_ARG \
-#-->  -DTVNC_BUILDJAVA=%{java} -DTVNC_BUILDNATIVE=%{native} \
+#-->  -DTVNC_BUILDVIEWER=%{viewer} -DTVNC_BUILDHELPER=%{helper} \
 #-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_INCLUDEJRE=%{jre} \
 #-->  $JNIJARS_ARGS .
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
@@ -171,7 +171,7 @@ fi
 
 #-->%endif
 
-%if "%{native}" == "1"
+%if "%{helper}" == "1"
 mkdir -p %{buildroot}/usr/share/applications
 cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
@@ -227,7 +227,7 @@ fi
 %dir %{bindir}
 %dir %{mandir}
 %dir %{mandir}/man1
-%if "%{java}" == "1"
+%if "%{viewer}" == "1"
  %dir %{javadir}
 %endif
 
@@ -236,12 +236,12 @@ fi
 %else
   %{docdir}/README.txt
 %endif
-%if "%{native}" == "1"
+%if "%{helper}" == "1"
  %{bindir}/checkshmpixmaps
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop
  %{mandir}/man1/vncviewer.1*
- %if "%{java}" == "1"
+ %if "%{viewer}" == "1"
   %{javadir}/libturbojpeg.so
   %{javadir}/libturbovnchelper.so
  %endif
@@ -252,7 +252,7 @@ fi
  %{bindir}/vncpasswd
  %{bindir}/vncconnect
 %endif
-%if "%{java}" == "1"
+%if "%{viewer}" == "1"
  %if "%{server}" == "1"
   %config(noreplace) %{javadir}/VncViewer.jnlp
   %{javadir}/favicon.ico

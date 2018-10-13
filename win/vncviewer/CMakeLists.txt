@@ -1,74 +1,59 @@
-add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0500 -DNTDDI_VERSION=0x05000100)
+if(BITS EQUAL 64)
+	set(REQARCH amd64)
+else()
+	set(REQARCH x86)
+endif()
 
-include_directories(omnithread ${CMAKE_SOURCE_DIR}/common
-	${CMAKE_SOURCE_DIR}/common/d3des ${CMAKE_CURRENT_BINARY_DIR}/res
-	${CMAKE_SOURCE_DIR}/win/util)
+configure_file(vncviewer.bat.in ${CMAKE_BINARY_DIR}/vncviewer.bat
+	@ONLY)
+configure_file(vncviewerw.bat.in ${CMAKE_BINARY_DIR}/vncviewerw.bat
+	@ONLY)
+
+install(PROGRAMS ${CMAKE_BINARY_DIR}/vncviewer.bat
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(PROGRAMS ${CMAKE_BINARY_DIR}/vncviewerw.bat
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(BITS EQUAL 64)
-	set(APPNAME "TurboVNC Viewer 64-bit v${VERSION} (${BUILD})")
+	set(DEFAULT_TJPEG_JNILIBRARY "c:\\libjpeg-turbo64\\bin\\turbojpeg.dll")
 else()
-	set(APPNAME "TurboVNC Viewer v${VERSION} (${BUILD})")
+	set(DEFAULT_TJPEG_JNILIBRARY "c:\\libjpeg-turbo\\bin\\turbojpeg.dll")
 endif()
 
-configure_file(res/resdefs.h.in res/resdefs.h)
+set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE FILEPATH
+	"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
 
-set(VNCVIEWER_SOURCES
-	AboutBox.cpp
-	BuildTime.cpp
-	CapsContainer.cpp
-	ClientConnection.cpp
-	ClientConnectionClipboard.cpp
-	ClientConnectionCopyRect.cpp
-	ClientConnectionCursor.cpp
-	ClientConnectionFile.cpp
-	ClientConnectionFlowControl.cpp
-	ClientConnectionFullScreen.cpp
-	ClientConnectionGII.cpp
-	ClientConnectionHextile.cpp
-	ClientConnectionRaw.cpp
-	ClientConnectionTight.cpp
-	ClientConnectionTunnel.cpp
-	ConnectingDialog.cpp
-	${CMAKE_SOURCE_DIR}/common/d3des/d3des.c
-	Daemon.cpp
-	Exception.cpp
-	FileTransfer.cpp
-	FileTransferItemInfo.cpp
-	HotKeys.cpp
-	KeyMap.cpp
-	keysym2ucs.c
-	Log.cpp
-	LoginAuthDialog.cpp
-	LowLevelHook.cpp
-	SessionDialog.cpp
-	stdhdrs.cpp
-	strsep.c
-	vncauth.c
-	VNCOptions.cpp
-	vncviewer.cpp
-	VNCHelp.cpp
-	VNCviewerApp.cpp
-	VNCviewerApp32.cpp
-	omnithread/nt.cpp
-	wintab/Utils.c
-	res/vncviewer.rc)
-
-add_executable(vncviewer WIN32 ${VNCVIEWER_SOURCES})
-option(TVNC_WINCONSOLE
-	"Build Win32 console version of the TurboVNC Viewer (useful for debugging)"
-	1)
-if(TVNC_WINCONSOLE)
-	add_executable(cvncviewer ${VNCVIEWER_SOURCES})
+if(NOT EXISTS ${TJPEG_JNILIBRARY})
+	message(FATAL_ERROR "Could not find TurboJPEG JNI library at ${TJPEG_JNILIBRARY}.  Set TJPEG_JNILIBRARY to the full pathname of turbojpeg.dll or install the libjpeg-turbo SDK.")
 endif()
 
-target_link_libraries(vncviewer zlib ${TJPEG_LIBRARY} fbx ws2_32.lib winmm.lib
-	htmlhelp.lib comctl32.lib imm32.lib)
-if(TVNC_WINCONSOLE)
-	target_link_libraries(cvncviewer zlib ${TJPEG_LIBRARY} fbx ws2_32.lib
-		winmm.lib htmlhelp.lib comctl32.lib imm32.lib)
-endif()
+file(COPY ${TJPEG_JNILIBRARY} DESTINATION ${CMAKE_BINARY_DIR}/java)
 
-install(TARGETS vncviewer DESTINATION ${CMAKE_INSTALL_BINDIR})
-if(TVNC_WINCONSOLE)
-	install(TARGETS cvncviewer DESTINATION ${CMAKE_INSTALL_BINDIR})
+# We have to just assume that the DLL contains the JNI functions, because there
+# is no straightforward way to check for that using CMake.
+
+message(STATUS "TJPEG_JNILIBRARY = ${TJPEG_JNILIBRARY}")
+
+install(PROGRAMS ${TJPEG_JNILIBRARY} DESTINATION ${CMAKE_INSTALL_JAVADIR}
+	RENAME turbojpeg.dll)
+
+if(TVNC_BUILDHELPER)
+
+find_package(JNI REQUIRED)
+
+add_definitions(-D_WINSTATIC)
+
+include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} omnithread)
+
+add_library(turbovnchelper SHARED turbovnchelper.cpp LowLevelHook.cpp
+	omnithread/nt.cpp)
+
+set_target_properties(turbovnchelper PROPERTIES PREFIX ""
+	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java
+	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
+
+target_link_libraries(turbovnchelper)
+
+install(TARGETS turbovnchelper RUNTIME DESTINATION ${CMAKE_INSTALL_JAVADIR})
+
 endif()

@@ -79,9 +79,9 @@ in this manner.
 ** Installing the TurboVNC Viewer on Windows
 
 	#. Download the TurboVNC Windows installer package
-		(''TurboVNC-''__''{version}''__''-x86.exe'' for 32-bit systems or
-		''TurboVNC-''__''{version}''__''-x64.exe'' for 64-bit systems) from the
-		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
+		(''TurboVNC-''__''{version}''__''-x64.exe'' for 64-bit systems or
+		''TurboVNC-''__''{version}''__''-x86.exe'' for legacy 32-bit-only systems)
+		from the [[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
 	#. Run the TurboVNC installer.  The installation of TurboVNC should be

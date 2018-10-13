@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.cpp from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012, 2016 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,10 @@
 // server.
 
 #include "LowLevelHook.h"
-#include "XF86keysym.h"
+#include <stdio.h>
+
+
+#define WM_SHUTDOWNLLKBHOOK WM_USER + 1
 
 
 HWND LowLevelHook::g_hwndVNCViewer = NULL;
@@ -40,10 +43,10 @@ void LowLevelHook::Initialize(HINSTANCE hInstance)
   // the hook callbacks via the message pump, so by using it on the main
   // connection thread, it could be delayed because of file transfers, etc.
   // Thus, we use a dedicated thread.
-  g_hThread =
-    CreateThread(NULL, 0, HookThreadProc, hInstance, 0, &g_nThreadID);
+  g_hThread = CreateThread(NULL, 0, HookThreadProc, hInstance, 0,
+    &g_nThreadID);
   if (!g_hThread)
-    vnclog.Print(0, "Error %d from CreateThread()", GetLastError());
+    printf("Error %d from CreateThread()\n", (int)GetLastError());
 }
 
 
@@ -63,13 +66,13 @@ DWORD WINAPI LowLevelHook::HookThreadProc(LPVOID lpParam)
                               hInstance, 0);
 
   if (g_HookID == 0) {
-    vnclog.Print(0, "Error %d from SetWindowsHookEx()", GetLastError());
+    printf("Error %d from SetWindowsHookEx()\n", (int)GetLastError());
     return 0;
   }
 
   while ((bRet = GetMessage(&msg, NULL, 0, 0)) != 0) {
     if (bRet == -1) {
-      vnclog.Print(0, "Error %d from GetMessage()", GetLastError());
+      printf("Error %d from GetMessage()\n", (int)GetLastError());
       return 0;
     } else if (msg.message == WM_SHUTDOWNLLKBHOOK) {
       PostQuitMessage(0);
@@ -86,7 +89,7 @@ DWORD WINAPI LowLevelHook::HookThreadProc(LPVOID lpParam)
 void LowLevelHook::Release()
 {
   // adzm 2009-09-25 - Post a message to the thread instructing it to
-  // terminate
+    // terminate
   if (g_hThread) {
     PostThreadMessage(g_nThreadID, WM_SHUTDOWNLLKBHOOK, 0, 0);
     WaitForSingleObject(g_hThread, INFINITE);
@@ -124,6 +127,27 @@ bool LowLevelHook::isActive(HWND win)
 }
 
 
+static LPARAM MakeLParam(WPARAM wParam, KBDLLHOOKSTRUCT *pkbdllhook)
+{
+  LPARAM lParam = 0x00000001;
+  bool extended = (pkbdllhook->flags & LLKHF_EXTENDED) ? true : false;
+  bool altDown = (pkbdllhook->flags & LLKHF_ALTDOWN) ? true : false;
+  bool keyWasDown = (pkbdllhook->flags & LLKHF_UP) ? true : false;
+
+  lParam &= (LPARAM)(pkbdllhook->scanCode << 16);
+  if (extended)
+    lParam &= 0x01000000;
+  if (altDown && (wParam == WM_SYSKEYDOWN || wParam == WM_SYSKEYUP))
+    lParam &= 0x20000000;
+  if (keyWasDown || wParam == WM_SYSKEYUP || wParam == WM_KEYUP)
+    lParam &= 0x40000000;
+  if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
+    lParam &= 0x80000000;
+
+  return lParam;
+}
+
+
 LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
                                                      LPARAM lParam)
 {
@@ -136,7 +160,7 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
 
   if (nCode == HC_ACTION) {
     KBDLLHOOKSTRUCT *pkbdllhook = (KBDLLHOOKSTRUCT *)lParam;
-    DWORD ProcessID;
+    DWORD ProcessID ;
 
     // Get the process ID of the Active Window (the window with the input
     // focus)
@@ -148,59 +172,15 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
     // Intercept keypresses only if this is the vncviewer process and
     // only if the foreground window is the one we want to hook
     if (ProcessID == g_VncProcessID && isActive(hwndCurrent)) {
-      int xkey;
-
-      switch (pkbdllhook->vkCode) {
-        case VK_LWIN:
-          xkey = XK_Super_L;  break;
-        case VK_RWIN:
-          xkey = XK_Super_R;  break;
-        case VK_APPS:
-          xkey = XK_Menu;  break;
-        case VK_BROWSER_HOME:
-          xkey = XF86XK_HomePage;  break;
-        case VK_BROWSER_SEARCH:
-          xkey = XF86XK_Search;  break;
-        case VK_LAUNCH_MAIL:
-          xkey = XF86XK_Mail;  break;
-        case VK_VOLUME_MUTE:
-          xkey = XF86XK_AudioMute;  break;
-        case VK_VOLUME_DOWN:
-          xkey = XF86XK_AudioLowerVolume;  break;
-        case VK_VOLUME_UP:
-          xkey = XF86XK_AudioRaiseVolume;  break;
-        case VK_MEDIA_PLAY_PAUSE:
-          xkey = XF86XK_AudioPlay;  break;
-        case VK_LAUNCH_APP2:
-          xkey = XF86XK_Calculator;  break;
-        case VK_BROWSER_FAVORITES:
-          xkey = XF86XK_Favorites;  break;
-        case VK_BROWSER_BACK:
-          xkey = XF86XK_Back;  break;
-        case VK_BROWSER_FORWARD:
-          xkey = XF86XK_Forward;  break;
-      }
-
       switch (pkbdllhook->vkCode) {
         case VK_LWIN:
         case VK_RWIN:
         case VK_APPS:
-        case VK_BROWSER_HOME:
-        case VK_BROWSER_SEARCH:
-        case VK_LAUNCH_MAIL:
-        case VK_VOLUME_MUTE:
-        case VK_VOLUME_DOWN:
-        case VK_VOLUME_UP:
-        case VK_MEDIA_PLAY_PAUSE:
-        case VK_LAUNCH_APP2:
-        case VK_BROWSER_FAVORITES:
-        case VK_BROWSER_BACK:
-        case VK_BROWSER_FORWARD:
-          PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND,
-                      fKeyDown ? ID_CONN_SENDKEYDOWN : ID_CONN_SENDKEYUP,
-                      xkey);
+          PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
+                      MakeLParam(wParam, pkbdllhook));
           fHandled = TRUE;
           break;
+
 
         // For window switching sequences (ALT+TAB, ALT+ESC, CTRL+ESC),
         // we intercept the primary keypress when it occurs after the
@@ -211,14 +191,14 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
         {
           static BOOL fAltTab = FALSE;
           if (pkbdllhook->flags & LLKHF_ALTDOWN && fKeyDown) {
-            PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND, ID_CONN_SENDKEYDOWN,
-                        XK_Tab);
+            PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
+                        MakeLParam(wParam, pkbdllhook));
             fHandled = TRUE;
             fAltTab = TRUE;
           } else if (fAltTab) {
             if (!fKeyDown) {
-              PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND, ID_CONN_SENDKEYUP,
-                          XK_Tab);
+              PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
+                          MakeLParam(wParam, pkbdllhook));
               fHandled = TRUE;
             }
             fAltTab = FALSE;
@@ -230,27 +210,27 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
         {
           static BOOL fAltEsc = FALSE, fCtrlEsc = FALSE;
           if (pkbdllhook->flags & LLKHF_ALTDOWN && fKeyDown) {
-            PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND, ID_CONN_SENDKEYDOWN,
-                        XK_Escape);
+            PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
+                        MakeLParam(wParam, pkbdllhook));
             fHandled = TRUE;
             fAltEsc = TRUE;
           } else if (fAltEsc) {
             if (!fKeyDown) {
-              PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND, ID_CONN_SENDKEYUP,
-                          XK_Escape);
+              PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
+                          MakeLParam(wParam, pkbdllhook));
               fHandled = TRUE;
             }
             fAltEsc = FALSE;
           }
           if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && fKeyDown) {
-            PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND, ID_CONN_SENDKEYDOWN,
-                        XK_Escape);
+            PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
+                        MakeLParam(wParam, pkbdllhook));
             fHandled = TRUE;
             fCtrlEsc = TRUE;
           } else if (fCtrlEsc) {
             if (!fKeyDown) {
-              PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND, ID_CONN_SENDKEYUP,
-                          XK_Escape);
+              PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
+                          MakeLParam(wParam, pkbdllhook));
               fHandled = TRUE;
             }
             fCtrlEsc = FALSE;
@@ -265,5 +245,5 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
   }  // if (nCode == HT_ACTION)
 
   // Call the next hook, if we didn't handle this message
-  return fHandled ? TRUE : CallNextHookEx(g_HookID, nCode, wParam, lParam);
+  return (fHandled ? TRUE : CallNextHookEx(g_HookID, nCode, wParam, lParam));
 }

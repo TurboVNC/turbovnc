@@ -1,34 +1,50 @@
 2.3 pre-beta
 ============
 
-1. Added a screenshot feature to the Java/Mac/Un*x TurboVNC Viewer that allows
-an image of the remote desktop to be saved to the client machine.
+1. Since Java 11 introduced the ability to create a custom Java Runtime
+Environment (JRE) with only the modules that the TurboVNC Viewer needs, it has
+become possible to package the Windows/Java TurboVNC Viewer in such a way that
+it does not require a separate installation of Java (except on 32-bit systems,
+for which Java 11 is not available.)  Thus, the native Windows TurboVNC Viewer
+has been retired and replaced with the Java TurboVNC Viewer, which means that
+the Java TurboVNC Viewer is now the only TurboVNC Viewer.  The native Windows
+viewer will continue to be maintained in the 2.2.x branch on a break/fix basis
+only.  The native Windows viewer, owing to its use of raw Win32 GUI code rather
+than a modern GUI framework, has become difficult to maintain and even more
+difficult to extend.  Meanwhile, the Java viewer provides similar levels of
+performance and more features, including some features (TLS encryption and SSH
+tunneling, most notably) that would have been difficult to implement in the
+native viewer.
 
-2. Added a window tiling feature to the Java/Mac/Un*x TurboVNC Viewer that
-automatically arranges all viewer windows in a grid pattern when a hotkey is
-pressed or an option is selected in the F8 or Mac menu.
+2. Added a screenshot feature to the TurboVNC Viewer that allows an image of
+the remote desktop to be saved to the client machine.
 
-3. The Java/Mac/Un*x TurboVNC Viewer can now automatically connect to multiple
-VNC servers, applying a different set of options for each.  This is
-accomplished by separating the command-line arguments for each VNC server
-with `--`.
+3. Added a window tiling feature to the TurboVNC Viewer that automatically
+arranges all viewer windows in a grid pattern when a hotkey is pressed or an
+option is selected in the F8 or Mac menu.
 
-4. When generating a Mac package/disk image (for instance, by using `make dmg`)
-or a Windows installer (for instance, by using `nmake installer`), a custom
-Java Runtime Environment (JRE) based on OpenJDK can now optionally be included
-in the Mac TurboVNC Viewer app bundle or the Windows TurboVNC Viewer
-installation directory by setting the `TVNC_INCLUDEJRE` CMake variable to `1`.
-When including a custom JRE, OpenJDK 11 or later must be used.  When using an
-installation of the Mac TurboVNC Viewer or the Windows/Java TurboVNC Viewer
-that contains a custom JRE (including the official TurboVNC Viewer packages),
-an external JRE can still be used at run time by setting the `JAVA_HOME`
-environment variable.
+4. The TurboVNC Viewer can now automatically connect to multiple VNC servers,
+applying a different set of options for each.  This is accomplished by
+separating the command-line arguments for each VNC server with `--`.
 
-5. The built-in HTTP server in the TurboVNC Server is no longer enabled by
+5. When generating a Mac package/disk image (for instance, by using `make dmg`)
+or a Windows installer (for instance, by using `nmake installer`), a custom JRE
+based on OpenJDK can now optionally be included in the Mac TurboVNC Viewer app
+bundle or the Windows TurboVNC Viewer installation directory by setting the
+`TVNC_INCLUDEJRE` CMake variable to `1`.  When including a custom JRE, OpenJDK
+11 or later must be used.  When using an installation of the Mac TurboVNC
+Viewer or the Windows/Java TurboVNC Viewer that contains a custom JRE
+(including the official TurboVNC Viewer packages), an external JRE can still be
+used at run time by setting the `JAVA_HOME` environment variable.
+
+6. The built-in HTTP server in the TurboVNC Server is no longer enabled by
 default.  This reflects the fact that Java Web Start is now a legacy
 technology.  JWS is no longer provided in Java 11, so once Java 8 stops
-receiving public updates, the ability to deploy the Java TurboVNC Viewer using
-JWS will be limited.
+receiving public updates, the ability to deploy the TurboVNC Viewer using JWS
+will be limited.
+
+7. MinGW can now be used instead of Visual C++ when building the TurboVNC
+Viewer (more specifically, the TurboVNC Helper library) for Windows.
 
 
 2.2.1

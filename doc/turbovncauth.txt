@@ -85,8 +85,7 @@ uses the following terminology when referring to its security extensions:
 
 ** Supported Encryption Methods
 
-The Linux/Un*x/Mac/Java TurboVNC Viewer and the TurboVNC Server support three
-encryption methods:
+TurboVNC supports three encryption methods:
 
 	None :: {:}
 		No encryption
@@ -100,8 +99,7 @@ encryption methods:
 
 ** Supported Security Types
 
-The TurboVNC Server and Linux/Un*x/Mac/Java TurboVNC Viewer support the
-following security types:
+TurboVNC supports the following security types:
 
 || Server Security Type || Authentication Method || Encryption Method || \
 	Viewer Security Type || Authentication Scheme || Compatibility ||
@@ -143,11 +141,10 @@ Unix Login/Plain authentication by passing an argument of
 session.  Similarly, if the VNC server prefers a security type that supports
 Unix Login/Plain authentication, then the user can force the use of Standard
 VNC authentication by passing an argument of ''-nounixlogin'' to ''vncviewer''.
-Both of these command-line options work with all versions of the TurboVNC
-Viewer.  When using the Java TurboVNC Viewer, you can also accomplish the same
-thing by unchecking "Unix Login" or "Plain" or "Standard VNC" in the "Security"
-tab of the Options dialog or by limiting the available security types using the
-''SecurityTypes'', ''User'', or ''NoUnixLogin'' arguments/parameters.
+You can also accomplish the same thing by unchecking "Unix Login" or "Plain" or
+"Standard VNC" in the "Security" tab of the Options dialog or by limiting the
+available security types using the ''SecurityTypes'', ''User'', or
+''NoUnixLogin'' arguments/parameters.
 
 If the system administrator has not restricted any of the server security types
 on a system-wide basis, then the user can choose to disable some or all of them

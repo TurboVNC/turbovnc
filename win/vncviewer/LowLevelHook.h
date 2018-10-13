@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.h from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include "vncviewer.h"
+#include <windows.h>
+#include "omnithread.h"
 
 
 class LowLevelHook

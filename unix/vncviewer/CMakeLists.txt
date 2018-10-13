@@ -1,4 +1,4 @@
-if(APPLE AND TVNC_BUILDJAVA)
+if(APPLE AND TVNC_BUILDVIEWER)
 
 find_package(JNI REQUIRED)
 
@@ -22,7 +22,7 @@ target_link_libraries(JavaAppLauncher "-framework Cocoa")
 
 install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
-else() # APPLE AND TVNC_BUILDJAVA
+else() # APPLE AND TVNC_BUILDVIEWER
 
 include(CheckCSourceCompiles)
 
@@ -39,7 +39,7 @@ configure_file(vncviewer.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer @ONLY)
 execute_process(COMMAND chmod +x vncviewer
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-if(TVNC_BUILDJAVA)
+if(TVNC_BUILDVIEWER)
 
 if(BITS EQUAL 64)
 	set(DEFAULT_TJPEG_JNILIBRARY /opt/libjpeg-turbo/lib64/libturbojpeg.so)
@@ -99,7 +99,7 @@ install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
 endif()
 
-endif() # APPLE AND TVNC_BUILDJAVA
+endif() # APPLE AND TVNC_BUILDVIEWER
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
 	DESTINATION ${CMAKE_INSTALL_BINDIR})

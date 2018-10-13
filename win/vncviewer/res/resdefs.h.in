@@ -1,7 +1,0 @@
-#define __APPNAME "@APPNAME@"
-#define __RCVERSION @RCVERSION@
-#define __RCVERSIONSTR "@RCVERSION@\0"
-#define __COPYRIGHT1 "Copyright \xA9 @COPYRIGHT_YEAR@ @COPYRIGHT@"
-#define __COPYRIGHT2 "Copyright \xA9 @COPYRIGHT_YEAR@ [many holders]\0"
-#define __URLTEXT "@URLTEXT@"
-#cmakedefine WIN64

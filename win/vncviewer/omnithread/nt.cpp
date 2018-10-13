@@ -234,7 +234,7 @@ int omni_condition::timedwait(unsigned long abs_sec, unsigned long abs_nsec)
 
   DWORD timeout = (abs_sec - now_sec) * 1000 + (abs_nsec - now_nsec) / 1000000;
 
-  if ((abs_sec <= now_sec) && ((abs_sec < now_sec) || (abs_nsec < abs_nsec)))
+  if ((abs_sec <= now_sec) && (abs_sec < now_sec))
     timeout = 0;
 
   DWORD result = WaitForSingleObject(me->cond_semaphore, timeout);

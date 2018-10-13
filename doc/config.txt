@@ -140,25 +140,21 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 | Default Value | See below |
 #OPT: hiCol=first
 
-When the ''-via'' option (or the ''via'' parameter in the Java viewer, along
-with the ''extssh'' parameter) is used, the TurboVNC Viewer reads the
-''VNC_VIA_CMD'' environment variable (the Java viewer can also read this
-information from the ''turbovnc.via'' system property), expands patterns
-beginning with the "%" character, and uses the resulting command line to
-establish the secure tunnel to the VNC gateway.  If ''VNC_VIA_CMD'' is not set,
-then this command line defaults to ''/usr/bin/ssh -f -L %L:%H:%R %G sleep 20''
-(or ''ssh.exe -f -L %L:%H:%R %G sleep 20'' if using the Windows native viewer.)
-
-When the ''-tunnel'' option (or the ''tunnel'' parameter in the Java viewer,
-along with the ''extssh'' parameter) is used, the TurboVNC Viewer reads the
-''VNC_TUNNEL_CMD'' environment variable (the Java viewer can also read this
-information from the ''turbovnc.tunnel'' system property), expands patterns
-beginning with the "%" character, and uses the resulting command line to
-establish the secure tunnel to the VNC server.  If ''VNC_TUNNEL_CMD'' is not
+When the ''-via'' option is used along with the ''-extssh'' option, the
+TurboVNC Viewer reads the ''VNC_VIA_CMD'' environment variable (it can also
+read this information from the ''turbovnc.via'' system property), expands
+patterns beginning with the "%" character, and uses the resulting command line
+to establish the secure tunnel to the VNC gateway.  If ''VNC_VIA_CMD'' is not
 set, then this command line defaults to
-''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20'' (or
-''ssh.exe -f -L %L:localhost:%R %H sleep 20'' if using the Windows native
-viewer.)
+''/usr/bin/ssh -f -L %L:%H:%R %G sleep 20''.
+
+When the ''-tunnel'' option is used along with the ''-extssh'' option, the
+TurboVNC Viewer reads the ''VNC_TUNNEL_CMD'' environment variable (it can also
+read this information from the ''turbovnc.tunnel'' system property), expands
+patterns beginning with the "%" character, and uses the resulting command line
+to establish the secure tunnel to the VNC server.  If ''VNC_TUNNEL_CMD'' is not
+set, then this command line defaults to
+''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20''.
 
 The following patterns are recognized in the ''VNC_VIA_CMD'' and
 ''VNC_TUNNEL_CMD'' environment variables (note that ''%H'', ''%L'' and ''%R''
@@ -204,14 +200,14 @@ Start environment.
 | Default Value | Enabled if using OpenGL Java 2D blitting, disabled otherwise |
 #OPT: hiCol=first
 
-	Description :: If this property is enabled, then the Java TurboVNC Viewer
-	will use a TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel)
-	BufferedImage as its back buffer instead of a TYPE_INT_RGB (BGRX)
-	BufferedImage.  When using OpenGL blitting in Java 2D (normally accomplished
-	by passing an argument of ''-Dsun.java2d.opengl=true'' to ''java''), it is
-	generally faster to draw an alpha-enabled BufferedImage to the screen,
-	because otherwise glDrawPixels() has to set all of the alpha values itself
-	(which can cause it to revert to an unaccelerated code path in some cases.)
+	Description :: If this property is enabled, then the TurboVNC Viewer will use
+	a TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel) BufferedImage as
+	its back buffer instead of a TYPE_INT_RGB (BGRX) BufferedImage.  When using
+	OpenGL blitting in Java 2D (normally accomplished by passing an argument of
+	''-Dsun.java2d.opengl=true'' to ''java''), it is generally faster to draw an
+	alpha-enabled BufferedImage to the screen, because otherwise glDrawPixels()
+	has to set all of the alpha values itself (which can cause it to revert to an
+	unaccelerated code path in some cases.)
 
 	!!! NOTE: this property is enabled by default when using Java 7 or later on
 	Mac platforms, because OpenGL Java 2D blitting is the only option available.
@@ -221,8 +217,8 @@ Start environment.
 | Default Value | Enabled |
 #OPT: hiCol=first
 
-	Description :: When running in full-screen mode, the Java TurboVNC Viewer
-	will normally try to take advantage of the full-screen application feature
+	Description :: When running in full-screen mode, the TurboVNC Viewer will
+	normally try to take advantage of the full-screen application feature
 	provided by OS X 10.7 and later, if available.  Disabling this property will
 	force the viewer to use its own built-in cross-platform "pseudo-full-screen"
 	feature instead.  This is useful mainly for testing.
@@ -264,13 +260,13 @@ Start environment.
 | Default Value | Disabled |
 #OPT: hiCol=first
 
-	Description :: The Java TurboVNC Viewer has its own double buffering
-	mechanism, so it normally disables the double buffering mechanism in Swing
-	and Java 2D in order to increase performance.  This also allows the viewer to
-	achieve optimal performance under X11 without requiring MIT-SHM pixmap
-	support.  Although the viewer has been thoroughly tested, the
-	''turbovnc.swingdb'' system property is provided as a fallback in case issues
-	are discovered when running it under a specific version of Java.
+	Description :: The TurboVNC Viewer has its own double buffering mechanism, so
+	it normally disables the double buffering mechanism in Swing and Java 2D in
+	order to increase performance.  This also allows the viewer to achieve
+	optimal performance under X11 without requiring MIT-SHM pixmap support.
+	Although the viewer has been thoroughly tested, the ''turbovnc.swingdb''
+	system property is provided as a fallback in case issues are discovered when
+	running it under a specific version of Java.
 
 | Java System Property | ''turbovnc.tunnel'' |
 | Summary | SSH command-line template for use with the ''Tunnel'' and \
@@ -287,11 +283,11 @@ Start environment.
 | Default Value | Enabled if the libjpeg-turbo JNI library is available |
 #OPT: hiCol=first
 
-	Description :: Normally, the Java TurboVNC Viewer will try to load the
-	libjpeg-turbo JNI library and use it to accelerate the decompression of
-	JPEG subrectangles.  If this property is disabled, then the viewer will
-	revert to using unaccelerated JPEG decompression.  This is useful mainly for
-	testing and benchmarking purposes.
+	Description :: Normally, the TurboVNC Viewer will try to load the
+	libjpeg-turbo JNI library and use it to accelerate the decompression of JPEG
+	subrectangles.  If this property is disabled, then the viewer will revert to
+	using unaccelerated JPEG decompression.  This is useful mainly for testing
+	and benchmarking purposes.
 
 | Java System Property | ''turbovnc.via'' |
 | Summary | SSH command-line template for use with the ''Via'' and \

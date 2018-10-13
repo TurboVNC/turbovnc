@@ -49,23 +49,24 @@
 
 ** Windows
 
-|| || Client ||
+|| || Client (x86) || Client (x64) ||
 | Recommended CPU \
 	| For optimal performance, the CPU should support SSE2 extensions. \
+	| {:} \
 	|
 | O/S \
-	| Windows 2000 SP1 or later \
+	| Windows Vista or later \
+	| Windows 7 or later \
 	|
 | Other \
 	| {list type=ul: \
 			{item:For optimal performance, the client display should have a 24-bit \
 				or 32-bit (True Color) color depth.} \
-			{item:SSH client ([[https://www.msys2.org][MSYS2]] or \
-				[[http://cygwin.com][Cygwin]] implementation preferred, since those \
-				implementations work with the \
-				[[#via][''-via'' and ''-tunnel'' options]] in the native Windows \
-				TurboVNC Viewer, but other SSH implementations will work without the \
-				''-via'' and ''-tunnel'' options.  ''ssh.exe'' should be in the \
-				''PATH''.)}} \
+			{item:SSH client (''ssh.exe'' should be in the ''PATH''.)} \
+			{item:[[http://www.java.com][Oracle Java]] 8}} \
+	| {list type=ul: \
+			{item:For optimal performance, the client display should have a 24-bit \
+				or 32-bit (True Color) color depth.} \
+			{item:SSH client (''ssh.exe'' should be in the ''PATH''.)}} \
 	|
 #OPT: hiCol=first
