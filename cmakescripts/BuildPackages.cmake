@@ -124,7 +124,8 @@ configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)
 configure_file(release/Info.plist.in pkgscripts/Info.plist)
 configure_file(release/Package.plist.in pkgscripts/Package.plist)
 configure_file(release/uninstall.in pkgscripts/uninstall)
-configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
+configure_file(release/uninstall.applescript.in
+	pkgscripts/uninstall.applescript)
 
 add_custom_target(dmg sh pkgscripts/makemacpkg
 	SOURCES pkgscripts/makemacpkg)
