@@ -1,4 +1,4 @@
-find_package(Java)
+find_package(Java REQUIRED)
 
 # Allow the default Java compiler flags to be set using an environment variable
 if(NOT DEFINED CMAKE_JAVA_COMPILE_FLAGS AND DEFINED ENV{JAVAFLAGS})
