@@ -2,6 +2,11 @@ if(APPLE AND TVNC_BUILDJAVA)
 
 find_package(JNI REQUIRED)
 
+configure_file(vncviewer-mac.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
+	@ONLY)
+execute_process(COMMAND chmod +x vncviewer
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 
 set(HELPER_SOURCES turbovnchelper.m JRSwizzle.m)
@@ -33,12 +38,6 @@ install(TARGETS checkshmpixmaps DESTINATION ${CMAKE_INSTALL_BINDIR})
 configure_file(vncviewer.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer @ONLY)
 execute_process(COMMAND chmod +x vncviewer
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
-	DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-install(FILES vncviewer.man DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
-	RENAME vncviewer.1)
 
 if(TVNC_BUILDJAVA)
 
@@ -101,3 +100,9 @@ install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 endif()
 
 endif() # APPLE AND TVNC_BUILDJAVA
+
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(FILES vncviewer.man DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+	RENAME vncviewer.1)
