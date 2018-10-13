@@ -55,6 +55,6 @@ set_target_properties(turbovnchelper PROPERTIES
 
 target_link_libraries(turbovnchelper)
 
-install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
+install(TARGETS turbovnchelper RUNTIME DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
 endif()
