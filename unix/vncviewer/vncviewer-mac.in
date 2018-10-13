@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+BINDIR=`dirname $0`
+if [ "$JAVA_HOME" = "" ]; then
+	JAVA=java
+else
+	JAVA="$JAVA_HOME/bin/java"
+fi
+TVNC_JAVADIR=@CMAKE_INSTALL_FULL_JAVADIR@
+if [ -d $BINDIR/../java ]; then
+	TVNC_JAVADIR=$BINDIR/../java
+fi
+
+if [ "@BITS@" = "32" ]; then
+	exec $JAVA -server -d@BITS@ -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
+else
+	exec $JAVA -server -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
+fi
