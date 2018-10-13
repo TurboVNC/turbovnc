@@ -18,28 +18,6 @@ string(TOLOWER ${PKGNAME} PKGNAME_LC)
 set(PKGID "com.virtualgl.${PKGNAME_LC}" CACHE STRING
 	"Globally unique package identifier (reverse DNS notation) (default: com.virtualgl.${PKGNAME_LC})")
 
-if((WIN32 OR APPLE) AND TVNC_BUILDJAVA)
-	option(TVNC_INCLUDEJRE "Include a custom Java Runtime Environment (JRE) with the Mac TurboVNC Viewer and Windows/Java TurboVNC Viewer"
-		FALSE)
-	boolean_number(TVNC_INCLUDEJRE)
-	report_option(TVNC_INCLUDEJRE "Custom JRE")
-	if(TVNC_INCLUDEJRE)
-		find_package(Java REQUIRED)
-		execute_process(COMMAND ${Java_JAVA_EXECUTABLE} -version
-			RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_VARIABLE OUTPUT
-			OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
-		if(NOT RESULT EQUAL 0)
-			message(FATAL_ERROR "Could not determine Java version:\n${OUTPUT}")
-		endif()
-		string(TOLOWER ${OUTPUT} OUTPUT_LC)
-		if(NOT OUTPUT_LC MATCHES ".*openjdk.*" OR Java_VERSION VERSION_LESS 11)
-			message(FATAL_ERROR "OpenJDK 11 or later required with TVNC_INCLUDEJRE=1")
-		endif()
-		configure_file(java/cmake/BuildJRE.cmake.in java/cmake/BuildJRE.cmake
-			@ONLY)
-	endif()
-endif()
-
 
 ###############################################################################
 # Linux RPM and DEB
@@ -126,12 +104,6 @@ endif()
 
 configure_file(release/installer.iss.in pkgscripts/installer.iss)
 
-if(TVNC_INCLUDEJRE)
-	add_custom_target(jre
-		${CMAKE_COMMAND} -DJRE_OUTPUT_DIR=java/jre
-			-P ${CMAKE_BINARY_DIR}/java/cmake/BuildJRE.cmake
-		DEPENDS java)
-endif()
 add_custom_target(installer
 	iscc -o${INSTALLERDIR} ${INST_DEFS} -F${INST_NAME} pkgscripts/installer.iss
 	DEPENDS ${INST_DEPENDS}

@@ -16,6 +16,9 @@
 # Whether or not to include the Java viewer
 %define java @TVNC_BUILDJAVA@
 
+# Whether or not to include a custom JRE
+%define jre @TVNC_INCLUDEJRE@
+
 # Whether or not to include the native infrastructure for the Java viewer
 %define native @TVNC_BUILDNATIVE@
 
@@ -113,7 +116,7 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG \
 #-->  $JAVA_TSA_ALG_ARG \
 #-->  -DTVNC_BUILDJAVA=%{java} -DTVNC_BUILDNATIVE=%{native} \
-#-->  -DTVNC_BUILDSERVER=%{server} \
+#-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_INCLUDEJRE=%{jre} \
 #-->  $JNIJARS_ARGS .
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 #-->make -j$NUMCPUS --load-average=$NUMCPUS
@@ -263,6 +266,9 @@ fi
  %endif
  %{javadir}/VncViewer.jar
  %{javadir}/README.txt
+ %if "%{jre}" == "1"
+  %{javadir}/jre
+ %endif
 %endif
 %if "%{server}" == "1"
  %{mandir}/man1/Xvnc.1*

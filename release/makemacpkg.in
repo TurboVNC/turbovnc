@@ -71,6 +71,10 @@ if [ -d $PKGROOT$BINDIR ]; then
 	rmdir $PKGROOT$BINDIR
 fi
 if [ -d $PKGROOT$JAVADIR ]; then
+	if [ -d $PKGROOT$JAVADIR/jre ]; then
+		rm -rf $PKGROOT$JAVADIR/jre/*
+		rmdir $PKGROOT$JAVADIR/jre
+	fi
 	mv -f $PKGROOT$JAVADIR/README.txt $PKGROOT$PREFIX/
 	rm $PKGROOT$JAVADIR/*
 	rmdir $PKGROOT$JAVADIR

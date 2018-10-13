@@ -285,6 +285,35 @@ if(TVNC_BUILDSERVER AND TVNC_INCLUDEJNIJARS)
 	add_custom_target(jnijars ALL DEPENDS ${JNI_JAR_FILES})
 endif()
 
+option(TVNC_INCLUDEJRE "Include a custom Java Runtime Environment (JRE) with the Mac TurboVNC Viewer and Windows/Java TurboVNC Viewer"
+	FALSE)
+boolean_number(TVNC_INCLUDEJRE)
+report_option(TVNC_INCLUDEJRE "Custom JRE")
+
+if(TVNC_INCLUDEJRE)
+	execute_process(COMMAND ${Java_JAVA_EXECUTABLE} -version
+		RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_VARIABLE OUTPUT
+		OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+	if(NOT RESULT EQUAL 0)
+		message(FATAL_ERROR "Could not determine Java version:\n${OUTPUT}")
+	endif()
+	string(TOLOWER ${OUTPUT} OUTPUT_LC)
+	if(NOT OUTPUT_LC MATCHES ".*openjdk.*" OR Java_VERSION VERSION_LESS 11)
+		message(FATAL_ERROR "OpenJDK 11 or later required with TVNC_INCLUDEJRE=1")
+	endif()
+	configure_file(cmake/BuildJRE.cmake.in cmake/BuildJRE.cmake @ONLY)
+
+	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/jrestamp
+		${CMAKE_CURRENT_BINARY_DIR}/jre
+		COMMAND ${CMAKE_COMMAND} -DJRE_OUTPUT_DIR=java/jre
+			-P ${CMAKE_CURRENT_BINARY_DIR}/cmake/BuildJRE.cmake
+		COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/jrestamp
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		DEPENDS VncViewer.jar
+		COMMENT "Generating Custom Java Runtime Environment (JRE)")
+	add_custom_target(jre ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/jrestamp)
+endif()
+
 install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${CMAKE_INSTALL_JAVADIR})
 install(FILES ${SRCDIR}/${CLASSPATH}/README.txt
 	DESTINATION ${CMAKE_INSTALL_JAVADIR})
@@ -292,4 +321,8 @@ if(TVNC_BUILDSERVER)
 	install(FILES ${BINDIR}/VncViewer.jnlp DESTINATION ${CMAKE_INSTALL_JAVADIR})
 	install(FILES ${SRCDIR}/${CLASSPATH}/favicon.ico
 		DESTINATION ${CMAKE_INSTALL_JAVADIR})
+endif()
+if(TVNC_INCLUDEJRE)
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/jre
+		DESTINATION ${CMAKE_INSTALL_JAVADIR} USE_SOURCE_PERMISSIONS)
 endif()

@@ -3,7 +3,11 @@ set -e
 
 BINDIR=`dirname $0`
 if [ "$JAVA_HOME" = "" ]; then
-	JAVA=java
+	if [ -d $BINDIR/../java/jre ]; then
+		JAVA=$BINDIR/../java/jre/bin/java
+	else
+		JAVA=java
+	fi
 else
 	JAVA="$JAVA_HOME/bin/java"
 fi
