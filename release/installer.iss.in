@@ -7,6 +7,7 @@ ArchitecturesInstallIn64BitMode=x64
 AppName=@CMAKE_PROJECT_NAME@ 64-bit
 AppVerName=@CMAKE_PROJECT_NAME@ 64-bit v@VERSION@ (@BUILD@)
 #else
+ArchitecturesAllowed=x86
 AppName=@CMAKE_PROJECT_NAME@
 AppVerName=@CMAKE_PROJECT_NAME@ v@VERSION@ (@BUILD@)
 #endif
