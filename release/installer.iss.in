@@ -48,7 +48,6 @@ Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}vncviewer.exe"; DestDir: "{
 #ifdef WINCONSOLE
 Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}cvncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 #endif
-Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 #ifdef JAVA
 Source: "@CMAKE_BINARY_DIR@\java\VncViewer.jar"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
 Source: "@CMAKE_BINARY_DIR@\vncviewer-javaw.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer
@@ -87,7 +86,7 @@ Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ README";        FileName: "wri
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc";  Components: doc;
 Name: "{group}\Documentation\Licensing Terms";                    FileName: "write.exe";           Parameters: "LICENSE.txt";      WorkingDir: "{app}\doc";  Flags: "useapppaths"
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Web Site";      FileName: "{app}\@CMAKE_PROJECT_NAME@.url"
-Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Change Log";    FileName: "write.exe";           Parameters: "ChangeLog.md";    WorkingDir: "{app}";      Flags: "useapppaths"
+Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Change Log";    FileName: "write.exe";           Parameters: "ChangeLog.md";     WorkingDir: "{app}";      Flags: "useapppaths"
 
 [Tasks]
 Name: associate; Description: "&Associate .vnc files with @CMAKE_PROJECT_NAME@ Viewer"; GroupDescription: "File associations:"; Components: viewer

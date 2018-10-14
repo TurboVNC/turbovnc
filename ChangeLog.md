@@ -43,6 +43,15 @@ and thus doesn't install anything under
 /Library/Internet Plug-Ins/JavaAppletPlugin.plugin (the directory in which the
 Mac TurboVNC Viewer app launcher normally looks for a JRE.)
 
+2. The Windows TurboVNC Viewer packages no longer include a custom build of
+PuTTY.  An optimized version of PuTTY 0.60 was originally included in TurboVNC
+0.4/Sun Shared Visualization 1.1 because, at the time, the stock version of
+PuTTY was slow, and installing OpenSSH generally required Cygwin.  The custom
+build of PuTTY was retained in TurboVNC 1.2, because few Windows SSH
+implementations had proper IPv6 support at the time.  However, in 2018,
+numerous Windows SSH clients will work properly with the TurboVNC Viewer, and
+generally with better performance than our custom build of PuTTY.
+
 
 2.2
 ===

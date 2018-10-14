@@ -57,7 +57,15 @@
 	| Windows 2000 SP1 or later \
 	|
 | Other \
-	| For optimal performance, the client display should have a 24-bit or 32-bit (True \
-		Color) color depth. \
+	| {list type=ul: \
+			{item:For optimal performance, the client display should have a 24-bit \
+				or 32-bit (True Color) color depth.} \
+			{item:SSH client ([[https://www.msys2.org][MSYS2]] or \
+				[[http://cygwin.com][Cygwin]] implementation preferred, since those \
+				implementations work with the \
+				[[#via][''-via'' and ''-tunnel'' options]] in the native Windows \
+				TurboVNC Viewer, but other SSH implementations will work without the \
+				''-via'' and ''-tunnel'' options.  ''ssh.exe'' should be in the \
+				''PATH''.)}} \
 	|
 #OPT: hiCol=first
