@@ -11,7 +11,4 @@ source of the material and list the current URL for the TurboVNC web site.
 The official TurboVNC binaries contain libjpeg-turbo, which is based in part on
 the work of the Independent JPEG Group.
 
-The TurboVNC Windows packages include [[http://www.chiark.greenend.org.uk/~sgtatham/putty/][PuTTY]],
-which is released under [[LICENSE-PuTTY.txt][this license]!].
-
 TurboVNC is licensed under the [[LICENSE.txt][GNU General Public License, v2]!].
