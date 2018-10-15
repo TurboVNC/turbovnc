@@ -33,9 +33,9 @@ based on OpenJDK can now optionally be included in the Mac TurboVNC Viewer app
 bundle or the Windows TurboVNC Viewer installation directory by setting the
 `TVNC_INCLUDEJRE` CMake variable to `1`.  When including a custom JRE, OpenJDK
 11 or later must be used.  When using an installation of the Mac TurboVNC
-Viewer or the Windows/Java TurboVNC Viewer that contains a custom JRE
-(including the official TurboVNC Viewer packages), an external JRE can still be
-used at run time by setting the `JAVA_HOME` environment variable.
+Viewer or the Windows TurboVNC Viewer that contains a custom JRE (including the
+official TurboVNC Viewer packages), an external JRE can still be used at run
+time by setting the `JAVA_HOME` environment variable.
 
 6. The built-in HTTP server in the TurboVNC Server is no longer enabled by
 default.  This reflects the fact that Java Web Start is now a legacy
