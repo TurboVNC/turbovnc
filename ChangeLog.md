@@ -27,7 +27,22 @@ option is selected in the F8 or Mac menu.
 applying a different set of options for each.  This is accomplished by
 separating the command-line arguments for each VNC server with `--`.
 
-5. When generating a Mac package/disk image (for instance, by using `make dmg`)
+5. The TurboVNC Viewer now includes the TurboVNC Session Manager, which allows
+users to remotely manage multiple TurboVNC sessions running on a particular
+TurboVNC server machine.  If no display number or port is specified in the "VNC
+server" field, the TurboVNC Viewer will connect to the specified TurboVNC
+server machine using SSH, list all TurboVNC sessions running under the user's
+account, and display a dialog that allows the user to choose a session to which
+to connect, kill any of the sessions, or start a new session.  Previously, the
+TurboVNC Viewer defaulted to Display :0/Port 5900 when no display number or
+port was specified, but it is now necessary to specify :0 or ::5900 in order to
+connect to Display :0/Port 5900.  The TurboVNC Session Manager uses the
+TurboVNC Viewer's built-in SSH client (it cannot use an external SSH client
+because of the need to leave the SSH session open and reuse it to run multiple
+commands), so it is affected by the `SSHKey`, `SSHKeyFile`, `SSHKeyPass`, and
+`SSHPort` parameters.
+
+6. When generating a Mac package/disk image (for instance, by using `make dmg`)
 or a Windows installer (for instance, by using `nmake installer`), a custom JRE
 based on OpenJDK can now optionally be included in the Mac TurboVNC Viewer app
 bundle or the Windows TurboVNC Viewer installation directory by setting the
@@ -37,13 +52,13 @@ Viewer or the Windows TurboVNC Viewer that contains a custom JRE (including the
 official TurboVNC Viewer packages), an external JRE can still be used at run
 time by setting the `JAVA_HOME` environment variable.
 
-6. The built-in HTTP server in the TurboVNC Server is no longer enabled by
+7. The built-in HTTP server in the TurboVNC Server is no longer enabled by
 default.  This reflects the fact that Java Web Start is now a legacy
 technology.  JWS is no longer provided in Java 11, so once Java 8 stops
 receiving public updates, the ability to deploy the TurboVNC Viewer using JWS
 will be limited.
 
-7. MinGW can now be used instead of Visual C++ when building the TurboVNC
+8. MinGW can now be used instead of Visual C++ when building the TurboVNC
 Viewer (more specifically, the TurboVNC Helper library) for Windows.
 
 
