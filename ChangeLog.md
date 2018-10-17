@@ -62,6 +62,12 @@ option in the VncViewer menu (and its associated hotkey, Command-,) would pop
 up a new copy of the Options dialog even if the Options dialog was already
 visible.
 
+15. Fixed an issue in the vncserver script whereby generating an initial
+one-time password (OTP) would fail if X11 TCP connections were disabled (which
+is now the default, because of 2.2 beta1[8]) and the hostname of the TurboVNC
+server machine resolved to its external IP address rather than to its local IP
+address.
+
 
 2.1.2
 =====
