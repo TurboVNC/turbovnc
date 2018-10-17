@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     dlg.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         endDialog();
+        ret = false;
       }
     });
 
@@ -104,13 +105,17 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     return new String(passwdEntry.getPassword());
   }
 
-  public String getPassphrase() { return null; }
+  public String getPassphrase() { return getPassword(); }
 
-  public boolean promptPassphrase(String message) { return false; }
+  public boolean promptPassphrase(String message) {
+    if (showDialog(message) && passwdEntry != null &&
+        passwdEntry.getPassword().length > 0)
+      return true;
+    return false;
+  }
 
   public boolean promptPassword(String message) {
-    showDialog(message);
-    if (passwdEntry != null)
+    if (showDialog("SSH " + message) && passwdEntry != null)
       return true;
     return false;
   }

@@ -28,6 +28,22 @@ address.
 4. The Java TurboVNC Viewer will now display all informational messages and
 warnings from its built-in SSH client whenever the logging level is >= 100.
 
+5. The built-in SSH client in the Java TurboVNC Viewer has been improved in the
+following ways:
+
+     - The SSH client will now prompt for an SSH key passphrase if one is
+required but has not been specified using the `SSHKeyPass` parameter.  This
+emulates the behavior of OpenSSH.
+     - The SSH Password dialog will no longer be displayed unless SSH password
+authentication is necessary.  Previously, the dialog was displayed even if the
+hostname was invalid.
+     - Closing the SSH Password dialog will now immediately cancel SSH
+authentication.
+     - The SSH client will now automatically read and process the OpenSSH
+configuration file stored in ~/.ssh/config (or the location specified in the
+`SSHConfig` parameter), if the file exists.  Parameters read from the OpenSSH
+configuration file will take precedence over any TurboVNC Viewer parameters.
+
 
 2.2
 ===
