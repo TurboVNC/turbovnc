@@ -33,6 +33,7 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
 
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Logger;
 
 public final class Tunnel {
 
@@ -87,6 +88,7 @@ public final class Tunnel {
   private static void createTunnelJSch(String host, Options opts)
                                        throws Exception {
     JSch jsch = new JSch();
+    JSch.setLogger(logger);
     String homeDir = new String("");
     try {
       homeDir = System.getProperty("user.home");
@@ -233,6 +235,40 @@ public final class Tunnel {
     return command;
   }
 
+  // JSch logging interface
+  private static final Logger logger = new Logger() {
+    public boolean isEnabled(int level) {
+      switch(level) {
+        case Logger.DEBUG:
+        case Logger.INFO:
+        case Logger.WARN:
+        case Logger.ERROR:
+        case Logger.FATAL:
+          return true;
+        default:
+          return false;
+      }
+    }
+
+    public void log(int level, String message) {
+      switch(level) {
+        case Logger.DEBUG:
+        case Logger.INFO:
+          vlogSSH.debug(message);
+          return;
+        case Logger.WARN:
+          vlogSSH.status(message);
+          return;
+        case Logger.ERROR:
+          vlogSSH.error(message);
+          return;
+        case Logger.FATAL:
+          throw new ErrorException("JSch: " + message);
+      }
+    }
+  };
+
   private Tunnel() {}
   static LogWriter vlog = new LogWriter("Tunnel");
+  static LogWriter vlogSSH = new LogWriter("JSch");
 }
