@@ -17,16 +17,16 @@
 #INCLUDE: sysreq.txt
 {nl}
 ----8<--------------
-#INCLUDE: turbovncinstall.txt
+#INCLUDE: install.txt
 {nl}
 ----8<--------------
-#INCLUDE: turbovncusage.txt
+#INCLUDE: usage.txt
 {nl}
 ----8<--------------
 #INCLUDE: performance.txt
 {nl}
 ----8<--------------
-#INCLUDE: turbovncauth.txt
+#INCLUDE: auth.txt
 {nl}
 ----8<--------------
 #INCLUDE: vglusage.txt
