@@ -31,15 +31,30 @@ following error:
 		and [[http://www.ubuntu.com][Ubuntu]] 8.04 or later.)
 		{nl}
 
-	2. Log in as root, cd to the directory where you downloaded the binary
-		package, and issue one of the following commands:
+	2. cd to the directory where you downloaded the binary package, and issue
+		one of the following commands as root:
 
-		RPM-based systems :: {:}
+		RPM-based systems using YUM :: {:}
+		#Verb <<---
+		yum install turbovnc*.rpm
+		---
+
+		RPM-based systems using DNF :: {:}
+		#Verb <<---
+		dnf install turbovnc*.rpm
+		---
+
+		RPM-based systems using YaST2 :: {:}
+		#Verb <<---
+		yast2 --install turbovnc*.rpm
+		---
+
+		Other RPM-based systems (dependencies will not be installed automatically) :: {:}
 		#Verb <<---
 		rpm -U turbovnc*.rpm
 		---
 
-		Debian-based systems :: {:}
+		Debian-based systems (dependencies will not be installed automatically) :: {:}
 		#Verb <<---
 		dpkg -i turbovnc*.deb
 		---
@@ -94,8 +109,8 @@ in this manner.
 ** Installing TurboVNC from Source
 
 If you are using a Linux/Un*x platform for which there is not a pre-built
-TurboVNC binary package available, then log in as root, download the TurboVNC
-source tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the
+TurboVNC binary package available, then download the TurboVNC source tarball
+(''turbovnc-''__''{version}''__''.tar.gz'') from the
 [[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]],
 uncompress it, ''cd turbovnc-''__''{version}''__, and read ''BUILDING.md''

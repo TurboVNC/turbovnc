@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-10-14T12:15:59">
+<meta name="date" content="2018-10-17T00:14:20">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -568,17 +568,38 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         8.04 or later.) <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
-        Log in as root, cd to the directory where you downloaded the binary 
-        package, and issue one of the following commands:
+        cd to the directory where you downloaded the binary package, and issue 
+        one of the following commands as root:
         <dl class="Description">
-            <dt class="Description-3 Description">RPM-based systems</dt>
+            <dt class="Description-3 Description">RPM-based systems using YUM</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+yum&nbsp;install&nbsp;turbovnc*.rpm
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">RPM-based systems using DNF</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+dnf&nbsp;install&nbsp;turbovnc*.rpm
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">RPM-based systems using YaST2</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+yast2&nbsp;--install&nbsp;turbovnc*.rpm
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">Other RPM-based systems (dependencies will not be installed automatically)</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
 rpm&nbsp;-U&nbsp;turbovnc*.rpm
 </pre>
 
             </dd>
-            <dt class="Description-3 Description">Debian-based systems</dt>
+            <dt class="Description-3 Description">Debian-based systems (dependencies will not be installed automatically)</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
 dpkg&nbsp;-i&nbsp;turbovnc*.deb
@@ -670,8 +691,8 @@ TurboVNC is installed in this manner.</p>
 <h2 id="hd005004">5.4&nbsp;Installing TurboVNC from Source</h2>
 
 <p>If you are using a Linux/Un*x platform for which there is not a 
-pre-built TurboVNC binary package available, then log in as root, 
-download the TurboVNC source tarball 
+pre-built TurboVNC binary package available, then download the TurboVNC 
+source tarball 
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
