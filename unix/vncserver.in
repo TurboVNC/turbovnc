@@ -612,13 +612,13 @@ warn "\nDesktop '$desktopName' started on display $host:$displayNumber\n\n";
 if ($generateOTP == 1) {
   warn "One-Time Password authentication enabled.  Generating initial OTP ...\n";
 
-  system($exedir."vncpasswd -o -display $host:$displayNumber");
+  system($exedir."vncpasswd -o -display :$displayNumber");
   if (($? & 0xFF00) != 0) {
     print "Could not generate initial OTP.\n";
     exit 1;
   }
 
-  warn "Run 'vncpasswd -o' from within the TurboVNC session or\n    'vncpasswd -o -display $host:$displayNumber' from within this shell\n    to generate additional OTPs\n";
+  warn "Run 'vncpasswd -o' from within the TurboVNC session or\n    'vncpasswd -o -display :$displayNumber' from within this shell\n    to generate additional OTPs\n";
 }
 
 # Create the user's xstartup script if necessary.

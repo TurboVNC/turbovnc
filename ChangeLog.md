@@ -19,6 +19,12 @@ implementations had proper IPv6 support at the time.  However, in 2018,
 numerous Windows SSH clients will work properly with the TurboVNC Viewer, and
 generally with better performance than our custom build of PuTTY.
 
+3. Fixed an issue in the vncserver script whereby generating an initial
+one-time password (OTP) would fail if X11 TCP connections were disabled (which
+is now the default, because of 2.2 beta1[8]) and the hostname of the TurboVNC
+server machine resolved to its external IP address rather than to its local IP
+address.
+
 
 2.2
 ===
