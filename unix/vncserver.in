@@ -477,7 +477,7 @@ if ($authTypeVNC && "$passwdFile" eq "$vncUserDir/passwd") {
 
   if (!-e _) {
     if ($opt{'-quiet'}) {
-      warn "$vncUserDir/passwd does not exist.  Run vncpasswd to create passwd file.\n";
+      warn "$vncUserDir/passwd does not exist.\nRun ".$exedir."vncpasswd to create passwd file.\n";
       exit 1;
     } else {
       warn "\nYou will require a password to access your desktops.\n\n";
@@ -618,7 +618,7 @@ if ($generateOTP == 1) {
     exit 1;
   }
 
-  warn "Run 'vncpasswd -o' from within the TurboVNC session or\n    'vncpasswd -o -display :$displayNumber' from within this shell\n    to generate additional OTPs\n";
+  warn "Run '".$exedir."vncpasswd -o' from within the TurboVNC session or\n    '".$exedir."vncpasswd -o -display :$displayNumber' from within this shell\n    to generate additional OTPs\n";
 }
 
 # Create the user's xstartup script if necessary.
