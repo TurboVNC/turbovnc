@@ -113,7 +113,7 @@ class UserAuthPublicKey extends UserAuth{
 
 //System.err.println("UserAuthPublicKey: identity.isEncrypted()="+identity.isEncrypted());
 
-        int count=5;
+        int count=3;
         while(true){
           if((identity.isEncrypted() && passphrase==null)){
             if(userinfo==null) throw new JSchException("USERAUTH fail");

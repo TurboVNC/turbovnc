@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2018 D. R. Commander.  All Rights Reserved.
- * Copyright (C) 2011-2013 Brian P. Hinz
+ * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1545,6 +1545,14 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "(Unix Login, Plain, Ident) rather than prompting for it.  As with the " +
   "\"User\" parameter, setting this parameter has the effect of disabling " +
   "any authentication schemes that don't require a user name.", false);
+
+  static StringParameter sshConfig =
+  new StringParameter("SSHConfig",
+  "When using the Via or Tunnel options with the built-in SSH client, this " +
+  "parameter specifies the path to an OpenSSH configuration file to use " +
+  "when authenticating with the SSH server.  The OpenSSH configuration file " +
+  "takes precedence over any TurboVNC Viewer parameters.",
+  FileUtils.getHomeDir() + ".ssh/config");
 
   static StringParameter sshKey =
   new StringParameter("SSHKey",

@@ -68,6 +68,31 @@ implementations had proper IPv6 support at the time.  However, in 2018,
 numerous Windows SSH clients will work properly with the TurboVNC Viewer, and
 generally with better performance than our custom build of PuTTY.
 
+3. Fixed an issue in the vncserver script whereby generating an initial
+one-time password (OTP) would fail if X11 TCP connections were disabled (which
+is now the default, because of 2.2 beta1[8]) and the hostname of the TurboVNC
+server machine resolved to its external IP address rather than to its local IP
+address.
+
+4. The Java TurboVNC Viewer will now display all informational messages and
+warnings from its built-in SSH client whenever the logging level is >= 100.
+
+5. The built-in SSH client in the Java TurboVNC Viewer has been improved in the
+following ways:
+
+     - The SSH client will now prompt for an SSH key passphrase if one is
+required but has not been specified using the `SSHKeyPass` parameter.  This
+emulates the behavior of OpenSSH.
+     - The SSH Password dialog will no longer be displayed unless SSH password
+authentication is necessary.  Previously, the dialog was displayed even if the
+hostname was invalid.
+     - Closing the SSH Password dialog will now immediately cancel SSH
+authentication.
+     - The SSH client will now automatically read and process the OpenSSH
+configuration file stored in ~/.ssh/config (or the location specified in the
+`SSHConfig` parameter), if the file exists.  Parameters read from the OpenSSH
+configuration file will take precedence over any TurboVNC Viewer parameters.
+
 
 2.2
 ===
