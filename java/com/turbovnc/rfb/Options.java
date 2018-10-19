@@ -227,7 +227,8 @@ public class Options {
 
     // Deep copy
     public DesktopSize(DesktopSize old) {
-      this(old.mode, old.width, old.height, new ScreenSet(old.layout));
+      this(old.mode, old.width, old.height,
+           (old.layout != null ? new ScreenSet(old.layout) : null));
     }
 
     public DesktopSize(int mode_, int width_, int height_, ScreenSet layout_) {
