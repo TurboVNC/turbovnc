@@ -90,6 +90,7 @@ public final class SessionManager extends Tunnel {
     br = new BufferedReader(new InputStreamReader(stderr));
     int nLines = 0;
     while ((result = br.readLine()) != null && nLines < 20) {
+      if (error == null) error = result;
       if (nLines == 0) {
         vlog.debug("===============================================================================");
         vlog.debug("SERVER WARNINGS/NOTIFICATIONS:");
@@ -108,7 +109,8 @@ public final class SessionManager extends Tunnel {
                                "Is the TurboVNC Server installed?");
     } else if (channelExec.getExitStatus() != 0) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
-                               "on host " + host + ":\n    " + error);
+                               "on host " + host +
+                               (error != null ? ":\n    " + error : ""));
     }
 
     vlog.debug("Available sessions: " + (error != null ? error : "None"));
@@ -141,6 +143,7 @@ public final class SessionManager extends Tunnel {
     br = new BufferedReader(new InputStreamReader(stderr));
     int nLines = 0;
     while ((result = br.readLine()) != null && nLines < 20) {
+      if (error == null) error = result;
       if (nLines == 0) {
         vlog.debug("===============================================================================");
         vlog.debug("SERVER WARNINGS/NOTIFICATIONS:");
@@ -159,7 +162,8 @@ public final class SessionManager extends Tunnel {
                                "Is the TurboVNC Server installed?");
     } else if (channelExec.getExitStatus() != 0) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
-                               "on host " + host + ":\n    " + error);
+                               "on host " + host +
+                               (error != null ? ":\n    " + error : ""));
     }
 
     if (sessions == null)
@@ -192,6 +196,7 @@ public final class SessionManager extends Tunnel {
     br = new BufferedReader(new InputStreamReader(stderr));
     int nLines = 0;
     while ((result = br.readLine()) != null && nLines < 20) {
+      if (error == null) error = result;
       if (nLines == 0) {
         vlog.debug("===============================================================================");
         vlog.debug("SERVER WARNINGS/NOTIFICATIONS:");
@@ -212,7 +217,8 @@ public final class SessionManager extends Tunnel {
                                "Is the TurboVNC Server installed?");
     } else if (channelExec.getExitStatus() != 0) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
-                               "on host " + host + ":\n    " + error);
+                               "on host " + host +
+                               (error != null ? ":\n    " + error : ""));
     }
   }
 
