@@ -1417,6 +1417,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
     VncViewer.showAbout(viewport);
   }
 
+  String getEncryptionProtocol() {
+    String protocol = csecurity.getProtocol();
+    if (protocol.equals("None") && opts.sshTunnelActive)
+      return "SSH";
+    else
+      return protocol + (opts.sshTunnelActive ? " (+ SSH)" : "");
+  }
+
   void showInfo() {
     JOptionPane pane = new JOptionPane(
       "Desktop name:  " + cp.name() + "\n" +
@@ -1429,7 +1437,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       "Protocol version:  " + cp.majorVersion + "." + cp.minorVersion + "\n" +
       "Security type:  " + RFB.secTypeName(csecurity.getType()) +
         " [" + csecurity.getDescription() + "]\n" +
-      "Encryption protocol:  " + csecurity.getProtocol() + "\n" +
+      "Encryption protocol:  " + getEncryptionProtocol() + "\n" +
       "JPEG decompression:  " +
         (reader.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
       (VncViewer.osGrab() || VncViewer.osEID() ? "\nTurboVNC Helper:  " +

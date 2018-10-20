@@ -83,6 +83,7 @@ public final class Tunnel {
       opts.sshSession.setPortForwardingL(localPort, remoteHost, remotePort);
     }
     opts.serverName = "localhost::" + localPort;
+    opts.sshTunnelActive = true;
   }
 
   /* Create a tunnel using the builtin JSch SSH client */

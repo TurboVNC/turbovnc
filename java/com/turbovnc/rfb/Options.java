@@ -78,6 +78,7 @@ public class Options {
     sendLocalUsername = old.sendLocalUsername;
     if (old.via != null) via = new String(old.via);
     tunnel = old.tunnel;
+    sshTunnelActive = old.sshTunnelActive;
     extSSH = old.extSSH;
     sshSession = old.sshSession;
     if (old.sshUser != null) sshUser = new String(old.sshUser);
@@ -305,6 +306,7 @@ public class Options {
   public boolean sendLocalUsername;
   public String via;
   public boolean tunnel;
+  public boolean sshTunnelActive;
   public boolean extSSH;
   public Session sshSession;
   public String sshUser;
