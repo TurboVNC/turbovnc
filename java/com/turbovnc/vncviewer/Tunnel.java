@@ -247,7 +247,7 @@ public final class Tunnel {
   // JSch logging interface
   private static final Logger logger = new Logger() {
     public boolean isEnabled(int level) {
-      switch(level) {
+      switch (level) {
         case Logger.DEBUG:
         case Logger.INFO:
         case Logger.WARN:
@@ -260,7 +260,7 @@ public final class Tunnel {
     }
 
     public void log(int level, String message) {
-      switch(level) {
+      switch (level) {
         case Logger.DEBUG:
         case Logger.INFO:
           vlogSSH.debug(message);
