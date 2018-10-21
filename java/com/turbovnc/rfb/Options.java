@@ -67,6 +67,7 @@ public class Options {
     sendClipboard = old.sendClipboard;
     acceptBell = old.acceptBell;
     preferredEncoding = old.preferredEncoding;
+    copyRect = old.copyRect;
     allowJpeg = old.allowJpeg;
     quality = old.quality;
     subsampling = old.subsampling;
