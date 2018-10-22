@@ -645,7 +645,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
     options.viewOnly.setSelected(opts.viewOnly);
     options.reverseScroll.setSelected(opts.reverseScroll);
-    options.acceptClipboard.setSelected(opts.acceptClipboard);
+    options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(
       KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
@@ -696,7 +696,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     opts.sendLocalUsername = options.sendLocalUsername.isSelected();
     opts.viewOnly = options.viewOnly.isSelected();
     opts.reverseScroll = options.reverseScroll.isSelected();
-    opts.acceptClipboard = options.acceptClipboard.isSelected();
+    opts.recvClipboard = options.recvClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
     VncViewer.showToolbar.setParam(options.showToolbar.isSelected());
@@ -910,7 +910,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         opts.desktopSize.mode = Options.SIZE_SERVER;
       }
 
-      opts.acceptClipboard = acceptClipboard.getValue();
+      opts.recvClipboard = recvClipboard.getValue();
       opts.sendClipboard = sendClipboard.getValue();
       opts.acceptBell = acceptBell.getValue();
 
@@ -1072,8 +1072,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "and Mac VNC servers, this is typically 5900.  (default = 5900)\n " +
   "If listen mode is enabled, this parameter specifies the TCP port on " +
   "which the viewer will listen for connections from a VNC server.  " +
-  "(default = 5500)",
-  -1);
+  "(default = 5500)", -1);
 
   static IntParameter profileInt =
   new IntParameter("ProfileInterval",
@@ -1088,7 +1087,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "updated in the dialog or on the console.  The statistics are averaged " +
   "over this interval.", 5);
 
-  static BoolParameter acceptClipboard =
+  static BoolParameter recvClipboard =
   new BoolParameter("RecvClipboard",
   "Synchronize the local clipboard with the clipboard of the TurboVNC " +
   "session whenever the latter changes.", true);

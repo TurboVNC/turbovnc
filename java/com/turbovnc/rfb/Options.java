@@ -63,7 +63,7 @@ public class Options {
     span = old.span;
     scalingFactor = old.scalingFactor;
     desktopSize = new DesktopSize(old.desktopSize);
-    acceptClipboard = old.acceptClipboard;
+    recvClipboard = old.recvClipboard;
     sendClipboard = old.sendClipboard;
     acceptBell = old.acceptBell;
     preferredEncoding = old.preferredEncoding;
@@ -204,7 +204,7 @@ public class Options {
       printOpt("desktopSize", desktopSize.getString());
     else
       printOpt("desktopSize", desktopSize.mode);
-    printOpt("acceptClipboard", acceptClipboard);
+    printOpt("recvClipboard", recvClipboard);
     printOpt("sendClipboard", sendClipboard);
     printOpt("acceptBell", acceptBell);
     printOpt("preferredEncoding", preferredEncoding);
@@ -291,7 +291,7 @@ public class Options {
   public int span;
   public int scalingFactor;
   public DesktopSize desktopSize = new DesktopSize();
-  public boolean acceptClipboard;
+  public boolean recvClipboard;
   public boolean sendClipboard;
   public boolean acceptBell;
   public int preferredEncoding;

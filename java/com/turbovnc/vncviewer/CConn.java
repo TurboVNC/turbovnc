@@ -676,7 +676,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void serverCutText(String str, int len) {
-    if (opts.acceptClipboard)
+    if (opts.recvClipboard)
       clipboardDialog.serverCutText(str, len);
   }
 
@@ -1508,7 +1508,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     options.viewOnly.setSelected(opts.viewOnly);
     options.reverseScroll.setSelected(opts.reverseScroll);
-    options.acceptClipboard.setSelected(opts.acceptClipboard);
+    options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(
       KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
@@ -1595,7 +1595,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       recreate = true;
     opts.viewOnly = options.viewOnly.isSelected();
     opts.reverseScroll = options.reverseScroll.isSelected();
-    opts.acceptClipboard = options.acceptClipboard.isSelected();
+    opts.recvClipboard = options.recvClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
     VncViewer.showToolbar.setParam(options.showToolbar.isSelected());

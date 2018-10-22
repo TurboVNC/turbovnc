@@ -46,7 +46,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JComboBox menuKey, scalingFactor, encMethodComboBox, span, desktopSize,
     grabKeyboard;
   JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
-  JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell,
+  JCheckBox viewOnly, recvClipboard, sendClipboard, acceptBell,
     reverseScroll;
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
   JCheckBox secVeNCrypt, encNone, encTLS, encX509;
@@ -419,10 +419,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
 
-    acceptClipboard = new JCheckBox("Accept clipboard from server");
-    acceptClipboard.addItemListener(this);
+    recvClipboard = new JCheckBox("Accept clipboard from server");
+    recvClipboard.addItemListener(this);
 
-    Dialog.addGBComponent(acceptClipboard, restrictionsPanel,
+    Dialog.addGBComponent(recvClipboard, restrictionsPanel,
                           0, 1, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.LINE_START,
@@ -713,7 +713,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "AlwaysShowConnectionDialog",
                         VncViewer.alwaysShowConnectionDialog.getValue());
     UserPreferences.set("global", "RecvClipboard",
-                        acceptClipboard.isSelected());
+                        recvClipboard.isSelected());
     UserPreferences.set("global", "SendClipboard", sendClipboard.isSelected());
     UserPreferences.set("global", "Shared", shared.isSelected());
 
