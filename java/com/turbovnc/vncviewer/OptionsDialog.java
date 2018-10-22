@@ -472,6 +472,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     menuKey  = new JComboBox(menuKeys);
     menuKey.addItemListener(this);
 
+    defClearButton = new JButton("Clear the list of saved connections");
+    defClearButton.addActionListener(this);
+
     Dialog.addGBComponent(showToolbar, globalPanel,
                           0, 1, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
@@ -487,22 +490,11 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
-
-    JPanel defaultsPanel = new JPanel(new GridBagLayout());
-    defaultsPanel.setBorder(BorderFactory.createTitledBorder("Defaults"));
-    defClearButton = new JButton("Clear");
-    defClearButton.addActionListener(this);
-    Dialog.addGBComponent(defClearButton, defaultsPanel,
-                          0, 0, 1, 1, 2, 2, 1, 0,
-                          GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(2, 2, 2, 2));
-
-    Dialog.addGBComponent(defaultsPanel, globalPanel,
+    Dialog.addGBComponent(defClearButton, globalPanel,
                           0, 3, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
-                          new Insets(25, 5, 4, 5));
+                          new Insets(2, 2, 2, 2));
 
     // security tab
     secPanel = new JPanel(new GridBagLayout());
