@@ -44,6 +44,10 @@ configuration file stored in ~/.ssh/config (or the location specified in the
 `SSHConfig` parameter), if the file exists.  Parameters read from the OpenSSH
 configuration file will take precedence over any TurboVNC Viewer parameters.
 
+6. Fixed a race condition in the TurboVNC Server that, under rare
+circumstances, caused the TurboVNC Viewer to incorrectly assume that the server
+did not support remote desktop resizing.
+
 
 2.2
 ===

@@ -435,7 +435,6 @@ static rfbClientPtr rfbNewClient(int sock)
   /* The TigerVNC Viewer won't enable remote desktop resize until it receives
      a desktop resize message from the server, so we give it one with the
      first FBU. */
-  cl->pendingDesktopResize = TRUE;
   cl->reason = rfbEDSReasonServer;
   cl->result = rfbEDSResultSuccess;
 
@@ -1184,6 +1183,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                      &tmpRegion);
         REGION_SUBTRACT(pScreen, &cl->copyRegion, &cl->copyRegion, &tmpRegion);
         REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion, &tmpRegion);
+        cl->pendingDesktopResize = TRUE;
       }
 
       if (FB_UPDATE_PENDING(cl) &&
