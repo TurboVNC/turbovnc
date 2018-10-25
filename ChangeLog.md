@@ -61,6 +61,9 @@ will be limited.
 8. MinGW can now be used instead of Visual C++ when building the TurboVNC
 Viewer (more specifically, the TurboVNC Helper library) for Windows.
 
+9. The TurboVNC Viewer authentication dialog will now indicate whether the
+connection is encrypted, unencrypted, or redundantly encrypted.
+
 
 2.2.1
 =====

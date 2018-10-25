@@ -164,6 +164,10 @@ public class CSecurityTight extends CSecurity {
 
   public final int getType() { return RFB.SECTYPE_TIGHT; }
 
+  public final int getChosenType() {
+    return (cs != null ? cs.getType() : RFB.SECTYPE_UNIX_LOGIN);
+  }
+
   public final String getDescription() {
     return (cs != null ? cs.getDescription() : "UnixLogin");
   }

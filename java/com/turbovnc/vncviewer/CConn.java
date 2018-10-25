@@ -293,7 +293,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (user == null) {
       if (autoPass == null)
-        dlg = new PasswdDialog(title, (user == null), null, (passwd == null));
+        dlg = new PasswdDialog(title, (user == null), null, (passwd == null),
+                               opts.sshTunnelActive,
+                               csecurity.getChosenType());
     } else {
       String userName = opts.user;
       if (opts.sendLocalUsername) {
@@ -305,7 +307,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
       if (autoPass == null)
         dlg = new PasswdDialog(title, (userName != null), userName,
-                               (passwd == null));
+                               (passwd == null), opts.sshTunnelActive,
+                               csecurity.getChosenType());
       else
         user.append(userName);
     }

@@ -171,7 +171,7 @@ public class Tunnel {
       opts.sshSession.setConfig("StrictHostKeyChecking", "ask");
     opts.sshSession.setConfig("MaxAuthTries", "3");
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
-                                        true, user, false);
+                                        true, user, false, true, -1);
     opts.sshSession.setUserInfo(dlg);
     opts.sshSession.connect();
   }

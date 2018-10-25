@@ -153,27 +153,13 @@ configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
 if(NOT "${SRCDIR}" STREQUAL "${BINDIR}")
 
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/toolbar.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/toolbar.png ${BINDIR}/${CLASSPATH}/toolbar.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/toolbar.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/turbovnc.png ${BINDIR}/${CLASSPATH}/turbovnc.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-sm.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/turbovnc-sm.png
-		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-128.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/turbovnc-128.png
-		${BINDIR}/${CLASSPATH}/turbovnc-128.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-128.png)
+foreach(icon toolbar.png turbovnc.png turbovnc-sm.png turbovnc-128.png
+	insecure.png secure.png)
+	add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/${icon}
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${SRCDIR}/${CLASSPATH}/${icon} ${BINDIR}/${CLASSPATH}/${icon}
+	DEPENDS ${SRCDIR}/${CLASSPATH}/${icon})
+endforeach()
 
 endif()
 
@@ -206,6 +192,8 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/turbovnc.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
+		${BINDIR}/${CLASSPATH}/insecure.png
+		${BINDIR}/${CLASSPATH}/secure.png
 		${TJPEG_JAR}
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
@@ -229,6 +217,8 @@ add_custom_command(OUTPUT VncViewer.jar
 		${CLASSPATH}/turbovnc.png
 		${CLASSPATH}/turbovnc-sm.png
 		${CLASSPATH}/turbovnc-128.png
+		${CLASSPATH}/insecure.png
+		${CLASSPATH}/secure.png
 	COMMAND ${CMAKE_COMMAND}
 	ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/VncViewer-unsigned.jar
 		-DJAVA_KEYSTORE=${JAVA_KEYSTORE}

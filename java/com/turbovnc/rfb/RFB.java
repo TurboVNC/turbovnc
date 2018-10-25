@@ -119,6 +119,23 @@ public final class RFB {
     }
   }
 
+  public static boolean isEncrypted(int secType) {
+    switch (secType) {
+      case SECTYPE_TLS:
+      case SECTYPE_TLS_NONE:
+      case SECTYPE_TLS_VNC:
+      case SECTYPE_TLS_PLAIN:
+      case SECTYPE_TLS_IDENT:
+      case SECTYPE_X509_NONE:
+      case SECTYPE_X509_VNC:
+      case SECTYPE_X509_PLAIN:
+      case SECTYPE_X509_IDENT:
+        return true;
+      default:
+        return false;
+    }
+  }
+
   //***************************************************************************
   // Authentication result codes
   //***************************************************************************
