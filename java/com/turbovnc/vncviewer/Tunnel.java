@@ -91,7 +91,7 @@ public final class Tunnel {
   private static void createTunnelJSch(String host, Options opts)
                                        throws Exception {
     JSch jsch = new JSch();
-    JSch.setLogger(logger);
+    JSch.setLogger(LOGGER);
     String homeDir = new String("");
     try {
       homeDir = System.getProperty("user.home");
@@ -245,7 +245,7 @@ public final class Tunnel {
   }
 
   // JSch logging interface
-  private static final Logger logger = new Logger() {
+  private static final Logger LOGGER = new Logger() {
     public boolean isEnabled(int level) {
       switch (level) {
         case Logger.DEBUG:
