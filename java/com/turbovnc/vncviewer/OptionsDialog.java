@@ -494,7 +494,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           0, 3, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
-                          new Insets(2, 2, 2, 2));
+                          new Insets(8, 5, 0, 5));
 
     // security tab
     secPanel = new JPanel(new GridBagLayout());
