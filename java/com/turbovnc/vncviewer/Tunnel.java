@@ -198,7 +198,7 @@ public final class Tunnel {
       auth = "publickey,keyboard-interactive,password";
     opts.sshSession.setConfig("PreferredAuthentications", auth);
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
-                                        true, user, false);
+                                        true, user, false, true, -1);
     opts.sshSession.setUserInfo(dlg);
     opts.sshSession.connect();
   }

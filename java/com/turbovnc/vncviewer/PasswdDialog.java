@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2012, 2017 Brian P. Hinz
  * Copyright (C) 2012, 2014, 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -23,16 +23,49 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
+import com.turbovnc.rfb.*;
+
 import com.jcraft.jsch.*;
 
 class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   UIKeyboardInteractive {
 
   PasswdDialog(String title_, boolean userDisabled, String userName_,
-               boolean passwdDisabled) {
+               boolean passwdDisabled, boolean sshTunnelActive, int secType) {
     super(true);
     title = title_;
     userName = userName_;
+
+    if (secType >= 0) {
+      secureMsg = new JPanel();
+      JLabel banner = new JLabel();
+      banner.setHorizontalAlignment(JLabel.CENTER);
+      banner.setOpaque(true);
+      if (!sshTunnelActive && !RFB.isEncrypted(secType)) {
+        banner.setText("This connection is not encrypted");
+        banner.setBackground(Color.RED);
+        secureMsg.setBackground(Color.RED);
+        ImageIcon insecureIcon =
+          new ImageIcon(VncViewer.class.getResource("insecure.png"));
+        banner.setIcon(insecureIcon);
+      } else if (sshTunnelActive && RFB.isEncrypted(secType)) {
+        banner.setText("This connection has redundant encryption");
+        banner.setBackground(Color.YELLOW);
+        secureMsg.setBackground(Color.YELLOW);
+        ImageIcon secureIcon =
+          new ImageIcon(VncViewer.class.getResource("secure.png"));
+        banner.setIcon(secureIcon);
+      } else {
+        banner.setText("This connection is encrypted");
+        banner.setBackground(Color.GREEN);
+        secureMsg.setBackground(Color.GREEN);
+        ImageIcon secureIcon =
+          new ImageIcon(VncViewer.class.getResource("secure.png"));
+        banner.setIcon(secureIcon);
+      }
+      secureMsg.add(banner);
+    }
 
     p1 = new JPanel();
     userLabel = new JLabel("Username:");
@@ -69,6 +102,8 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
 
     dlg.getContentPane().setLayout(new BoxLayout(dlg.getContentPane(),
                                                  BoxLayout.Y_AXIS));
+    if (secureMsg != null)
+      dlg.getContentPane().add(secureMsg);
     dlg.getContentPane().add(p1);
     dlg.getContentPane().add(p2);
     dlg.pack();
@@ -197,7 +232,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     }
   }
 
-  JPanel p1, p2;
+  JPanel p1, p2, secureMsg;
   JLabel userLabel;
   JTextField userEntry;
   JLabel passwdLabel;

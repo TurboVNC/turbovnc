@@ -73,6 +73,16 @@
 		window contains a virtual desktop with which you can interact to launch
 		X-Windows applications on the TurboVNC host.
 
+	!!! If you are connecting to a non-VeNCrypt-compatible VNC server using the
+	Java TurboVNC Viewer, then the authentication dialog will warn you that the
+	connection is not encrypted:
+	{nl}{nl}
+	{img:vncauth-insecure.png}
+	{nl}{nl}
+	You should never use Unix Login authentication with an unencrypted
+	connection.  Instead, tunnel the connection through SSH (see
+	{ref prefix="Section ": Secure_TurboVNC_Usage} below for more details.)
+
 *** Window Manager Compatibility
 
 This version of the TurboVNC Server can run 3D (compositing) window managers
@@ -390,6 +400,8 @@ disallowing the TLS* security types on a system-wide basis (by setting the
 ''permitted-security-types'' directive in the TurboVNC security configuration
 file) is recommended.  Otherwise, when using the Java TurboVNC Viewer with
 default settings, the connection will have redundant encryption.
+
+{img:vncauth-redundant.png}
 
 ** Running OpenGL Applications
 

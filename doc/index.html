@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-03-31T13:17:21">
+<meta name="date" content="2022-03-31T17:44:46">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.8</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -888,6 +888,9 @@ Features</strong> applet if you are running Windows 10), or select
         <br /><br /> A TurboVNC desktop window should appear on your client 
         machine.  This window contains a virtual desktop with which you can 
         interact to launch X-Windows applications on the TurboVNC host.
+        <div class="important"><p class="important">
+        If you are connecting to a non-VeNCrypt-compatible VNC server using the Java TurboVNC Viewer, then the authentication dialog will warn you that the connection is not encrypted: <br /><br /> <img src="vncauth-insecure.png" alt="vncauth-insecure" class="inline" id="imgid_7" name="imgid_7"/> <br /><br /> You should never use Unix Login authentication with an unencrypted connection.  Instead, tunnel the connection through SSH (see Section <a href="#Secure_TurboVNC_Usage" class="ref">6.5</a> below for more details.)
+        </p></div>
     </li>
 </ol>
 
@@ -1213,6 +1216,8 @@ the <code>permitted-security-types</code> directive in the TurboVNC
 security configuration file) is recommended.  Otherwise, when using the 
 Java TurboVNC Viewer with default settings, the connection will have 
 redundant encryption.</p>
+
+<p><img src="vncauth-redundant.png" alt="vncauth-redundant" class="inline" id="imgid_8" name="imgid_8"/></p>
 
 
 
@@ -2195,7 +2200,7 @@ This allows VirtualGL to send rendered frames to TurboVNC through shared
 memory rather than over a network.</p>
 
 <div class="figure">
-<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_7" name="imgid_7"/>
+<img src="x11transport.png" alt="x11transport" class="figure" id="imgid_9" name="imgid_9"/>
 </div>
 
 <p>The following procedure describes how to launch a 3D application using 
@@ -2224,7 +2229,7 @@ this configuration.</p>
 <h2 id="hd009002">9.2&nbsp;Using VirtualGL on a Machine Other Than a TurboVNC Host</h2>
 
 <div class="figure">
-<img src="vgltransportservernetwork.png" alt="vgltransportservernetwork" class="figure" id="imgid_8" name="imgid_8"/>
+<img src="vgltransportservernetwork.png" alt="vgltransportservernetwork" class="figure" id="imgid_10" name="imgid_10"/>
 </div>
 
 <p>If the TurboVNC host and VirtualGL server are different machines, then 

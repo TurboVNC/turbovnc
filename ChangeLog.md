@@ -1,6 +1,8 @@
 2.2.8
 =====
 
+### Significant changes relative to 2.2.7:
+
 1. Fixed an issue in the Java TurboVNC Viewer whereby scroll wheel events were
 transmitted to the VNC Server with incorrect coordinates if desktop scaling was
 enabled.
@@ -12,6 +14,9 @@ domain rather than the `initrc_exec_t` SELinux domain.  This fixes an issue
 whereby either Xvnc or the window manager failed to launch when attempting to
 start a TurboVNC session from the TurboVNC Server init.d script on recent Red
 Hat/CentOS, Fedora, and SuSE releases.
+
+3. The TurboVNC Viewer authentication dialog will now indicate whether the
+connection is encrypted, unencrypted, or redundantly encrypted.
 
 
 2.2.7
