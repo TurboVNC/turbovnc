@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2016 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2016, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
  */
 
 package com.turbovnc.rfb;
+
+import com.turbovnc.rdr.*;
 
 public class Hostname {
 
@@ -73,11 +75,19 @@ public class Hostname {
     if (colonPos == -1 || colonPos == vncServerName.length() - 1)
       return 5900;
     if (vncServerName.charAt(colonPos + 1) == ':') {
-      return Integer.parseInt(vncServerName.substring(colonPos + 2));
+      try {
+        return Integer.parseInt(vncServerName.substring(colonPos + 2));
+      } catch (NumberFormatException e) {
+        throw new ErrorException("Invalid VNC server specified.");
+      }
     }
-    int port = Integer.parseInt(vncServerName.substring(colonPos + 1));
-    if (port < 100)
-      port += 5900;
-    return port;
+    try {
+      int port = Integer.parseInt(vncServerName.substring(colonPos + 1));
+      if (port < 100)
+        port += 5900;
+      return port;
+    } catch (NumberFormatException e) {
+      throw new ErrorException("Invalid VNC server specified.");
+    }
   }
 }
