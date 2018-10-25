@@ -19,6 +19,8 @@
 
 package com.turbovnc.rfb;
 
+import com.turbovnc.rdr.*;
+
 public final class Hostname {
 
   public static String getHost(String vncServerName) {
@@ -73,12 +75,20 @@ public final class Hostname {
     if (colonPos == -1 || colonPos == vncServerName.length() - 1)
       return 0;
     if (vncServerName.charAt(colonPos + 1) == ':') {
-      return Integer.parseInt(vncServerName.substring(colonPos + 2));
+      try {
+        return Integer.parseInt(vncServerName.substring(colonPos + 2));
+      } catch (NumberFormatException e) {
+        throw new ErrorException("Invalid VNC server specified.");
+      }
     }
-    int port = Integer.parseInt(vncServerName.substring(colonPos + 1));
-    if (port < 100)
-      port += 5900;
-    return port;
+    try {
+      int port = Integer.parseInt(vncServerName.substring(colonPos + 1));
+      if (port < 100)
+        port += 5900;
+      return port;
+    } catch (NumberFormatException e) {
+      throw new ErrorException("Invalid VNC server specified.");
+    }
   }
 
   private Hostname() {}

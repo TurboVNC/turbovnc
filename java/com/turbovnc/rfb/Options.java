@@ -63,10 +63,11 @@ public class Options {
     span = old.span;
     scalingFactor = old.scalingFactor;
     desktopSize = new DesktopSize(old.desktopSize);
-    acceptClipboard = old.acceptClipboard;
+    recvClipboard = old.recvClipboard;
     sendClipboard = old.sendClipboard;
     acceptBell = old.acceptBell;
     preferredEncoding = old.preferredEncoding;
+    copyRect = old.copyRect;
     allowJpeg = old.allowJpeg;
     quality = old.quality;
     subsampling = old.subsampling;
@@ -78,6 +79,7 @@ public class Options {
     sendLocalUsername = old.sendLocalUsername;
     if (old.via != null) via = new String(old.via);
     tunnel = old.tunnel;
+    sshTunnelActive = old.sshTunnelActive;
     extSSH = old.extSSH;
     sshSession = old.sshSession;
     if (old.sshUser != null) sshUser = new String(old.sshUser);
@@ -202,7 +204,7 @@ public class Options {
       printOpt("desktopSize", desktopSize.getString());
     else
       printOpt("desktopSize", desktopSize.mode);
-    printOpt("acceptClipboard", acceptClipboard);
+    printOpt("recvClipboard", recvClipboard);
     printOpt("sendClipboard", sendClipboard);
     printOpt("acceptBell", acceptBell);
     printOpt("preferredEncoding", preferredEncoding);
@@ -289,7 +291,7 @@ public class Options {
   public int span;
   public int scalingFactor;
   public DesktopSize desktopSize = new DesktopSize();
-  public boolean acceptClipboard;
+  public boolean recvClipboard;
   public boolean sendClipboard;
   public boolean acceptBell;
   public int preferredEncoding;
@@ -305,6 +307,7 @@ public class Options {
   public boolean sendLocalUsername;
   public String via;
   public boolean tunnel;
+  public boolean sshTunnelActive;
   public boolean extSSH;
   public Session sshSession;
   public String sshUser;

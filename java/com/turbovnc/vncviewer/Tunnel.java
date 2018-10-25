@@ -85,6 +85,7 @@ public class Tunnel {
       opts.sshSession.setPortForwardingL(localPort, remoteHost, remotePort);
     }
     opts.serverName = "localhost::" + localPort;
+    opts.sshTunnelActive = true;
   }
 
   /* Create a tunnel using the builtin JSch SSH client */
@@ -92,7 +93,7 @@ public class Tunnel {
   protected static void createTunnelJSch(String host, Options opts)
                                          throws Exception {
     JSch jsch = new JSch();
-    JSch.setLogger(logger);
+    JSch.setLogger(LOGGER);
     String homeDir = new String("");
     try {
       homeDir = System.getProperty("user.home");
@@ -245,9 +246,9 @@ public class Tunnel {
   }
 
   // JSch logging interface
-  private static final Logger logger = new Logger() {
+  private static final Logger LOGGER = new Logger() {
     public boolean isEnabled(int level) {
-      switch(level) {
+      switch (level) {
         case Logger.DEBUG:
         case Logger.INFO:
         case Logger.WARN:
@@ -260,7 +261,7 @@ public class Tunnel {
     }
 
     public void log(int level, String message) {
-      switch(level) {
+      switch (level) {
         case Logger.DEBUG:
         case Logger.INFO:
           vlogSSH.debug(message);

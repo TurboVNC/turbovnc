@@ -710,7 +710,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void serverCutText(String str, int len) {
-    if (opts.acceptClipboard)
+    if (opts.recvClipboard)
       clipboardDialog.serverCutText(str, len);
   }
 
@@ -1461,6 +1461,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
     VncViewer.showAbout(viewport);
   }
 
+  String getEncryptionProtocol() {
+    String protocol = csecurity.getProtocol();
+    if (protocol.equals("None") && opts.sshTunnelActive)
+      return "SSH";
+    else
+      return protocol + (opts.sshTunnelActive ? " (+ SSH)" : "");
+  }
+
   void showInfo() {
     JOptionPane pane = new JOptionPane(
       "Desktop name:  " + cp.name() + "\n" +
@@ -1473,7 +1481,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       "Protocol version:  " + cp.majorVersion + "." + cp.minorVersion + "\n" +
       "Security type:  " + RFB.secTypeName(csecurity.getType()) +
         " [" + csecurity.getDescription() + "]\n" +
-      "Encryption protocol:  " + csecurity.getProtocol() + "\n" +
+      "Encryption protocol:  " + getEncryptionProtocol() + "\n" +
       "JPEG decompression:  " +
         (reader.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
       (VncViewer.osGrab() || VncViewer.osEID() ? "\nTurboVNC Helper:  " +
@@ -1544,7 +1552,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     options.viewOnly.setSelected(opts.viewOnly);
     options.reverseScroll.setSelected(opts.reverseScroll);
-    options.acceptClipboard.setSelected(opts.acceptClipboard);
+    options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(
       KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
@@ -1631,7 +1639,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       recreate = true;
     opts.viewOnly = options.viewOnly.isSelected();
     opts.reverseScroll = options.reverseScroll.isSelected();
-    opts.acceptClipboard = options.acceptClipboard.isSelected();
+    opts.recvClipboard = options.recvClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
     VncViewer.showToolbar.setParam(options.showToolbar.isSelected());
