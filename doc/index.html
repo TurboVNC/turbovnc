@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-11-01T18:26:02">
+<meta name="date" content="2018-11-01T19:04:23">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -204,9 +204,6 @@
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd0011002" class="hd">11.2 Viewer Settings</a>
-            </li>
-            <li class="Itemize-3 hd">
-                <a href="#hd0011003" class="hd">11.3 Java Viewer Settings</a>
             </li>
         </ul>
     </li>
@@ -2917,157 +2914,6 @@ about how Hextile, RRE, and ZRLE work.</p>
 
 <h2 id="hd0011002">11.2&nbsp;Viewer Settings</h2>
 
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_PROFILE&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable profiling output</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Platforms</td>
-    <td class="standard">Un*x, Mac (Java)</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        If profiling output is enabled, then the TurboVNC Viewer will 
-        continuously benchmark itself and periodically print the throughput of 
-        various stages in its image pipeline to the console.
-    </dd>
-</dl>
-
-<p><a name="TVNC_SINGLESCREEN"></a></p>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_SINGLESCREEN&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable forcing a single-screen layout when using automatic desktop resizing</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Platforms</td>
-    <td class="standard">All</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        The default behavior of the TurboVNC Viewer, when automatic desktop 
-        resizing is enabled, is to request a desktop size from the server that 
-        will fit within the viewer window without using scrollbars, and (if 
-        multi-screen spanning is enabled) to request a screen layout from the 
-        server that will align the server&rsquo;s screen boundaries with the 
-        client&rsquo;s when the viewer window is in its default position.  
-        Setting this environment variable to 1 will restore the automatic 
-        desktop resizing behavior of previous versions of the TurboVNC Viewer, 
-        thus forcing the server to use a single-screen layout even if it 
-        supports multi-screen layouts.
-    </dd>
-</dl>
-
-<p><a name="VNC_VIA_CMD"></a></p>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VNC_VIA_CMD</code>, <code>VNC_TUNNEL_CMD</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">SSH command-line templates for use with the <code>via</code> and <code>tunnel</code> options (respectively)</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Platforms</td>
-    <td class="standard">All</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">See below</td>
-  </tr>
-</table>
-</div>
-
-
-<p>When the <code>-via</code> option is used along with the 
-<code>-extssh</code> option, the TurboVNC Viewer reads the 
-<code>VNC_VIA_CMD</code> environment variable (it can also read this 
-information from the <code>turbovnc.via</code> system property), expands 
-patterns beginning with the &ldquo;%&rdquo; character, and uses the 
-resulting command line to establish the secure tunnel to the VNC 
-gateway.  If <code>VNC_VIA_CMD</code> is not set, then this command line 
-defaults to 
-<code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code>.</p>
-
-<p>When the <code>-tunnel</code> option is used along with the 
-<code>-extssh</code> option, the TurboVNC Viewer reads the 
-<code>VNC_TUNNEL_CMD</code> environment variable (it can also read this 
-information from the <code>turbovnc.tunnel</code> system property), 
-expands patterns beginning with the &ldquo;%&rdquo; character, and uses 
-the resulting command line to establish the secure tunnel to the VNC 
-host.  If <code>VNC_TUNNEL_CMD</code> is not set, then this command line 
-defaults to 
-<code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>.</p>
-
-<p>The following patterns are recognized in the <code>VNC_VIA_CMD</code> 
-and <code>VNC_TUNNEL_CMD</code> environment variables (note that 
-<code>%H</code>, <code>%L</code> and <code>%R</code> must be present in 
-the command template, and <code>%G</code> must also be present if using 
-the <code>-via</code> option):</p>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="standard"><code>%%</code></td>
-    <td class="standard">A literal &ldquo;%&rdquo;</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard"><code>%G</code></td>
-    <td class="standard">gateway host name or IP address</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard"><code>%H</code></td>
-    <td class="standard">remote VNC host name or IP address (if using the <code>-via</code> option, then this is specified from the point of view of the gateway)</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard"><code>%L</code></td>
-    <td class="standard">local TCP port number</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard"><code>%R</code></td>
-    <td class="standard">remote TCP port number</td>
-  </tr>
-</table>
-</div>
-
-
-
-
-<h2 id="hd0011003">11.3&nbsp;Java Viewer Settings</h2>
-
 <p>Java system properties are normally specified as command-line arguments 
 to the Java executable.  For example:</p>
 
@@ -3091,8 +2937,6 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <p>Refer to the default <code>VncViewer.jnlp</code> file installed with the 
 TurboVNC Server for an example of how to specify Java command-line 
 arguments in a Java Web Start environment.</p>
-
-<p><a name="turbovnc.forcealpha"></a></p>
 
 <div class="table">
 <table class="standard">
@@ -3204,6 +3048,37 @@ arguments in a Java Web Start environment.</p>
 <div class="table">
 <table class="standard">
   <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_PROFILE&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable profiling output</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        If profiling output is enabled, then the TurboVNC Viewer will 
+        continuously benchmark itself and periodically print the throughput of 
+        various stages in its image pipeline to the console.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_SINGLESCREEN&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
     <td class="high standard">Java System Property</td>
     <td class="standard"><code>turbovnc.singlescreen&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
   </tr>
@@ -3222,9 +3097,16 @@ arguments in a Java Web Start environment.</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        A more Java-friendly way of disabling the multi-screen-aware automatic 
-        desktop resize feature.  See the <code>TVNC_SINGLESCREEN</code> 
-        environment variable above for more details.
+        The default behavior of the TurboVNC Viewer, when automatic desktop 
+        resizing is enabled, is to request a desktop size from the server that 
+        will fit within the viewer window without using scrollbars, and (if 
+        multi-screen spanning is enabled) to request a screen layout from the 
+        server that will align the server&rsquo;s screen boundaries with the 
+        client&rsquo;s when the viewer window is in its default position.  
+        Setting this environment variable or property to 1 will restore the 
+        automatic desktop resizing behavior of previous versions of the TurboVNC 
+        Viewer, thus forcing the server to use a single-screen layout even if it 
+        supports multi-screen layouts.
     </dd>
 </dl>
 
@@ -3264,30 +3146,6 @@ arguments in a Java Web Start environment.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.tunnel</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">SSH command-line template for use with the <code>Tunnel</code> and <code>ExtSSH</code> parameters</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        A more Java-friendly way of specifying the command line to use when 
-        establishing a secure tunnel with the <code>Tunnel</code> and 
-        <code>ExtSSH</code> parameters.  See the <code>VNC_TUNNEL_CMD</code> 
-        environment variable above for more details.
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Java System Property</td>
     <td class="standard"><code>turbovnc.turbojpeg&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
   </tr>
   <tr class="standard">
@@ -3313,15 +3171,25 @@ arguments in a Java Web Start environment.</p>
     </dd>
 </dl>
 
+<p><a name="VNC_VIA_CMD"></a></p>
+
 <div class="table">
 <table class="standard">
   <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VNC_VIA_CMD</code>, <code>VNC_TUNNEL_CMD</code></td>
+  </tr>
+  <tr class="standard">
     <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.via</code></td>
+    <td class="standard"><code>turbovnc.via</code>, <code>turbovnc.tunnel</code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">SSH command-line template for use with the <code>Via</code> and <code>ExtSSH</code> parameters</td>
+    <td class="standard">SSH command-line templates for use with the <code>via</code> and <code>tunnel</code> options (respectively)</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">See below</td>
   </tr>
 </table>
 </div>
@@ -3330,10 +3198,54 @@ arguments in a Java Web Start environment.</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        A more Java-friendly way of specifying the command line to use when 
-        establishing a secure tunnel with the <code>Via</code> and 
-        <code>ExtSSH</code> parameters.  See the <code>VNC_VIA_CMD</code> 
-        environment variable above for more details.
+        When the <code>-via</code> option is used along with the 
+        <code>-extssh</code> option, the TurboVNC Viewer reads the 
+        <code>VNC_VIA_CMD</code> environment variable or the 
+        <code>turbovnc.via</code> system property, expands patterns beginning 
+        with the &ldquo;%&rdquo; character, and uses the resulting command line 
+        to establish the secure tunnel to the VNC gateway.  If 
+        <code>VNC_VIA_CMD</code> is not set, then this command line defaults to 
+        <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code>. 
+        <br /><br /> When the <code>-tunnel</code> option is used along with the 
+        <code>-extssh</code> option, the TurboVNC Viewer reads the 
+        <code>VNC_TUNNEL_CMD</code> environment variable or the 
+        <code>turbovnc.tunnel</code> system property, expands patterns beginning 
+        with the &ldquo;%&rdquo; character, and uses the resulting command line 
+        to establish the secure tunnel to the VNC host.  If 
+        <code>VNC_TUNNEL_CMD</code> is not set, then this command line defaults 
+        to 
+        <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>. 
+        <br /><br /> The following patterns are recognized in the 
+        <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> environment 
+        variables and their corresponding system properties (note that 
+        <code>%H</code>, <code>%L</code> and <code>%R</code> must be present in 
+        the command template, and <code>%G</code> must also be present if using 
+        the <code>-via</code> option): <br /><br />
+        <div class="table">
+        <table class="standard">
+          <tr class="standard">
+            <td class="standard"><code>%%</code></td>
+            <td class="standard">A literal &ldquo;%&rdquo;</td>
+          </tr>
+          <tr class="standard">
+            <td class="standard"><code>%G</code></td>
+            <td class="standard">gateway host name or IP address</td>
+          </tr>
+          <tr class="standard">
+            <td class="standard"><code>%H</code></td>
+            <td class="standard">remote VNC host name or IP address (if using the <code>-via</code> option, then this is specified from the point of view of the gateway)</td>
+          </tr>
+          <tr class="standard">
+            <td class="standard"><code>%L</code></td>
+            <td class="standard">local TCP port number</td>
+          </tr>
+          <tr class="standard">
+            <td class="standard"><code>%R</code></td>
+            <td class="standard">remote TCP port number</td>
+          </tr>
+        </table>
+        </div>
+        
     </dd>
 </dl>
 
