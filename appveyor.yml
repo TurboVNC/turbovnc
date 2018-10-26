@@ -27,7 +27,7 @@ install:
 
       set MSYSTEM=MINGW32
 
-      set JAVA_HOME=c:\Program Files\OpenJDK\jdk-11
+      set JAVA_HOME=c:\Program Files\OpenJDK\jdk-11.0.1
 
       bash -c "pacman --noconfirm -S zip"
 
