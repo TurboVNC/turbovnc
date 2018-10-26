@@ -58,7 +58,11 @@ public final class SessionManager extends Tunnel {
         else if (dlg.getConnectSession() != null) {
           if (dlg.getConnectSession().equals("NEW"))
             return startSession(opts.sshSession, host);
-          else return dlg.getConnectSession();
+          else {
+            if (VncViewer.sessMgrAuto.getValue())
+              generateOTP(opts.sshSession, host, dlg.getConnectSession());
+            return dlg.getConnectSession();
+          }
         } else if (dlg.getKillSession() != null) {
           killSession(opts.sshSession, host, dlg.getKillSession());
         }
@@ -70,12 +74,14 @@ public final class SessionManager extends Tunnel {
   private static String[] getSessions(Session sshSession, String host)
                                       throws Exception {
     ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
-    String command = System.getProperty("turbovnc.session");
-    if (command == null)
-      command = System.getenv("VNC_SESSION_CMD");
-    if (command == null)
-      command = "/opt/TurboVNC/bin/vncserver";
-    command += " -sessionlist";
+
+    String dir = System.getProperty("turbovnc.serverdir");
+    if (dir == null)
+      dir = System.getenv("TVNC_SERVERDIR");
+    if (dir == null)
+      dir = "/opt/TurboVNC";
+
+    String command = dir + "/bin/vncserver -sessionlist";
     channelExec.setCommand(command);
     InputStream stdout = channelExec.getInputStream();
     InputStream stderr = channelExec.getErrStream();
@@ -106,7 +112,8 @@ public final class SessionManager extends Tunnel {
     if (channelExec.getExitStatus() == 127) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
                                "on host " + host + ".\n" +
-                               "Is the TurboVNC Server installed?");
+                               "Is the TurboVNC Server installed in " + dir +
+                               " ?");
     } else if (channelExec.getExitStatus() != 0) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
                                "on host " + host +
@@ -123,12 +130,19 @@ public final class SessionManager extends Tunnel {
     vlog.debug("Starting new TurboVNC session on host " + host);
 
     ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
-    String command = System.getProperty("turbovnc.session");
-    if (command == null)
-      command = System.getenv("VNC_SESSION_CMD");
-    if (command == null)
-      command = "/opt/TurboVNC/bin/vncserver";
-    command += " -sessionstart";
+
+    String dir = System.getProperty("turbovnc.serverdir");
+    if (dir == null)
+      dir = System.getenv("TVNC_SERVERDIR");
+    if (dir == null)
+      dir = "/opt/TurboVNC";
+
+    String args = System.getProperty("turbovnc.serverargs");
+    if (args == null)
+      args = System.getenv("TVNC_SERVERARGS");
+
+    String command = dir + "/bin/vncserver -sessionstart" +
+                     (args != null ? " " + args : "");
     channelExec.setCommand(command);
     InputStream stdout = channelExec.getInputStream();
     InputStream stderr = channelExec.getErrStream();
@@ -159,7 +173,8 @@ public final class SessionManager extends Tunnel {
     if (channelExec.getExitStatus() == 127) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
                                "on host " + host + ".\n" +
-                               "Is the TurboVNC Server installed?");
+                               "Is the TurboVNC Server installed in " + dir +
+                               " ?");
     } else if (channelExec.getExitStatus() != 0) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
                                "on host " + host +
@@ -169,7 +184,67 @@ public final class SessionManager extends Tunnel {
     if (sessions == null)
       throw new ErrorException("Could not parse TurboVNC Server output");
 
+    if (VncViewer.sessMgrAuto.getValue())
+      generateOTP(sshSession, host, sessions[0]);
+
     return sessions[0];
+  }
+
+  private static void generateOTP(Session sshSession, String host,
+                                  String session) throws Exception {
+    vlog.debug("Generating one-time password for session " + host + session);
+
+    VncViewer.noExceptionDialog = true;
+
+    ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
+
+    String dir = System.getProperty("turbovnc.serverdir");
+    if (dir == null)
+      dir = System.getenv("TVNC_SERVERDIR");
+    if (dir == null)
+      dir = "/opt/TurboVNC";
+
+    String command = dir + "/bin/vncpasswd -o -display " + session;
+    channelExec.setCommand(command);
+    InputStream stderr = channelExec.getErrStream();
+    channelExec.connect();
+
+    BufferedReader br = new BufferedReader(new InputStreamReader(stderr));
+    String result = null, error = null, line;
+    int nLines = 0;
+    while ((line = br.readLine()) != null && nLines < 20) {
+      if (result == null) result = line;
+      if (error == null) error = line;
+      if (nLines == 0) {
+        vlog.debug("===============================================================================");
+        vlog.debug("SERVER WARNINGS/NOTIFICATIONS:");
+      }
+      vlog.debug(line);
+      nLines++;
+    }
+    if (nLines > 0)
+      vlog.debug("===============================================================================");
+
+    if (result != null) {
+      result = result.replaceAll("\\s", "");
+      result = result.replaceAll("^.*:", "");
+      VncViewer.password.setParam(result);
+    }
+
+    channelExec.disconnect();
+
+    VncViewer.noExceptionDialog = false;
+
+    if (channelExec.getExitStatus() == 127) {
+      throw new ErrorException("Could not execute\n    " + command + "\n" +
+                               "on host " + host + ".\n" +
+                               "Is the TurboVNC Server installed in " + dir +
+                               " ?");
+    } else if (channelExec.getExitStatus() != 0) {
+      throw new ErrorException("Could not execute\n    " + command + "\n" +
+                               "on host " + host +
+                               (error != null ? ":\n    " + error : ""));
+    }
   }
 
   private static void killSession(Session sshSession, String host,
@@ -179,12 +254,14 @@ public final class SessionManager extends Tunnel {
     VncViewer.noExceptionDialog = true;
 
     ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
-    String command = System.getProperty("turbovnc.session");
-    if (command == null)
-      command = System.getenv("VNC_SESSION_CMD");
-    if (command == null)
-      command = "/opt/TurboVNC/bin/vncserver";
-    command += " -kill " + session;
+
+    String dir = System.getProperty("turbovnc.serverdir");
+    if (dir == null)
+      dir = System.getenv("TVNC_SERVERDIR");
+    if (dir == null)
+      dir = "/opt/TurboVNC";
+
+    String command = dir + "/bin/vncserver -kill " + session;
     channelExec.setCommand(command);
     InputStream stdout = channelExec.getInputStream();
     InputStream stderr = channelExec.getErrStream();
@@ -214,7 +291,8 @@ public final class SessionManager extends Tunnel {
     if (channelExec.getExitStatus() == 127) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
                                "on host " + host + ".\n" +
-                               "Is the TurboVNC Server installed?");
+                               "Is the TurboVNC Server installed in " + dir +
+                               " ?");
     } else if (channelExec.getExitStatus() != 0) {
       throw new ErrorException("Could not execute\n    " + command + "\n" +
                                "on host " + host +

@@ -187,6 +187,28 @@ Start environment.
 	continuously benchmark itself and periodically print the throughput of
 	various stages in its image pipeline to the console.
 
+| Environment Variable | ''TVNC_SERVERARGS'' |
+| Java System Property | ''turbovnc.serverargs'' |
+| Summary | Additional arguments that the TurboVNC Session Manager will pass \
+	to ''vncserver'' when starting a new TurboVNC session \
+|
+#OPT: hiCol=first
+
+	Description :: The TurboVNC Session Manager will pass these command-line
+	arguments to the ''vncserver'' script when starting a new TurboVNC session on
+	the TurboVNC host.  This can be used, for instance, to enable
+	[[#ALR][automatic lossless refresh]].
+
+| Environment Variable | ''TVNC_SERVERDIR'' |
+| Java System Property | ''turbovnc.serverdir'' |
+| Summary | The directory in which the TurboVNC Server is installed on the \
+	TurboVNC host |
+| Default Value | ''/opt/TurboVNC'' |
+#OPT: hiCol=first
+
+	Description :: The TurboVNC Session Manager will execute ''bin/vncserver''
+	and ''bin/vncpasswd'' from this directory on the TurboVNC host.
+
 | Environment Variable | ''TVNC_SINGLESCREEN = ''__''0 \| 1''__ |
 | Java System Property | ''turbovnc.singlescreen = ''__''0 \| 1''__ |
 | Summary | Disable/enable forcing a single-screen layout when using \

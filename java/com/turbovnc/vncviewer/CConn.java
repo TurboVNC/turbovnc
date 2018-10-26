@@ -141,7 +141,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (opts.via != null && opts.via.indexOf(':') >= 0) {
         port = Hostname.getPort(opts.via);
         serverName = Hostname.getHost(opts.via);
-      } else if (opts.via != null || opts.tunnel) {
+      } else if (opts.via != null || opts.tunnel ||
+                 (opts.port == 0 && VncViewer.sessMgrAuto.getValue())) {
         if (opts.port == 0) {
           try {
             // TurboVNC Session Manager
@@ -149,6 +150,17 @@ public class CConn extends CConnection implements UserPasswdGetter,
             if (session == null) {
               close();
               return;
+            }
+            if (VncViewer.sessMgrAuto.getValue()) {
+              Security.disableSecType(RFB.SECTYPE_NONE);
+              Security.disableSecType(RFB.SECTYPE_TLS_NONE);
+              Security.disableSecType(RFB.SECTYPE_X509_NONE);
+              Security.disableSecType(RFB.SECTYPE_TLS_VNC);
+              Security.disableSecType(RFB.SECTYPE_X509_VNC);
+              Security.disableSecType(RFB.SECTYPE_PLAIN);
+              Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
+              Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
+              Security.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
             }
             opts.port = Hostname.getPort(session);
           } catch (Exception e) {

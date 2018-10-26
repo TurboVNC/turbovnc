@@ -1545,6 +1545,13 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "\"User\" parameter, setting this parameter has the effect of disabling " +
   "any authentication schemes that don't require a user name.", false);
 
+  static BoolParameter sessMgrAuto =
+  new BoolParameter("SessMgrAuto",
+  "When using the TurboVNC Session Manager, the default behavior is to " +
+  "automatically enable OTP authentication and SSH tunneling.  Disabling " +
+  "this option overrides that behavior and allows any security " +
+  "configuration to be used.", true);
+
   static StringParameter sshConfig =
   new StringParameter("SSHConfig",
   "When using the Via or Tunnel options with the built-in SSH client, this " +
@@ -1590,7 +1597,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "command line or in the Server parameter when using the Tunnel parameter. " +
   "When using the Tunnel parameter, the VNC host can be prefixed by {user}@ " +
   "to indicate that user name {user} (default = local user name) should be " +
-  "used when authenticating with the SSH server.", false);
+  "used when authenticating with the SSH server.\n " +
+
+  "When using the TurboVNC Session Manager, this option is effectively " +
+  "enabled unless the \"SessMgrAuto\" option is disabled.", false);
 
   static StringParameter user =
   new StringParameter("User",

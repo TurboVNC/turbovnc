@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-11-01T19:04:23">
+<meta name="date" content="2018-11-01T21:03:10">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3069,6 +3069,64 @@ arguments in a Java Web Start environment.</p>
         If profiling output is enabled, then the TurboVNC Viewer will 
         continuously benchmark itself and periodically print the throughput of 
         various stages in its image pipeline to the console.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_SERVERARGS</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.serverargs</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Additional arguments that the TurboVNC Session Manager will pass to <code>vncserver</code> when starting a new TurboVNC session</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        The TurboVNC Session Manager will pass these command-line arguments to 
+        the <code>vncserver</code> script when starting a new TurboVNC session 
+        on the TurboVNC host.  This can be used, for instance, to enable 
+        <a href="#ALR">automatic lossless refresh</a><a name="idx0041"></a>.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_SERVERDIR</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.serverdir</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">The directory in which the TurboVNC Server is installed on the TurboVNC host</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>/opt/TurboVNC</code></td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        The TurboVNC Session Manager will execute <code>bin/vncserver</code> and 
+        <code>bin/vncpasswd</code> from this directory on the TurboVNC host.
     </dd>
 </dl>
 

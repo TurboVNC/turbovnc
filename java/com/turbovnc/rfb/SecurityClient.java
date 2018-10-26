@@ -96,7 +96,11 @@ public class SecurityClient extends Security {
   "strongly recommended that those types only be used with either TLS " +
   "encryption or SSH tunneling.  \"Ident\", which is designed for use by " +
   "VNC proxies, authenticates using only a user name.  The order of this " +
-  "list does not matter, since the server's preferred order is always used.",
+  "list does not matter, since the server's preferred order is always " +
+  "used.\n " +
+
+  "When using the TurboVNC Session Manager, this parameter is effectively " +
+  "set to \"VNC\" unless the \"SessMgrAuto\" option is disabled.",
   "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VNC,Ident,Plain,UnixLogin,None");
 
   public static StringParameter x509ca =
