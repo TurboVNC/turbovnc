@@ -38,6 +38,13 @@ pre
 	margin-right: 25px;
 }
 
+code
+{
+	color: rgb(0, 0, 204);
+	font-family: courier,monospace;
+	font-size: 14px;
+}
+
 tr
 {
 	background-color: rgb(238, 238, 255);
