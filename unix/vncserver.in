@@ -25,7 +25,7 @@
 #
 
 #
-# vncserver - wrapper script to start an X VNC server.
+# vncserver - wrapper script to start the TurboVNC X server.
 #
 
 # First make sure we're operating in a sane environment.
@@ -132,10 +132,9 @@ if [ -x /usr/bin/gnome-session ]; then
     *)
       # This is necessary to make Unity work on Ubuntu 16, and on Ubuntu 14, it
       # ensures that the proper compiz profile is set up.  Otherwise, if you
-      # accidentally launch Unity in a TurboVNC Server session that lacks
-      # OpenGL support, compiz will automatically disable its OpenGL plugin,
-      # requiring you to reset the compiz plugin state before Unity will work
-      # again.
+      # accidentally launch Unity in a TurboVNC session that lacks OpenGL
+      # support, compiz will automatically disable its OpenGL plugin, requiring
+      # you to reset the compiz plugin state before Unity will work again.
       if [ -f /usr/share/gnome-session/sessions/ubuntu.session -a "$TVNC_WM" = "" ]; then
         DESKTOP_SESSION=ubuntu;  export DESKTOP_SESSION
         grep -qE "DesktopName\s*=\s*Unity" /usr/share/gnome-session/sessions/ubuntu.session && {
@@ -554,7 +553,7 @@ if ($vncUserDirUnderTmp) {
   system("$xauth merge $xauthorityFile");
 }
 
-# Now start the X VNC Server
+# Now start the TurboVNC X server
 
 $cmd = $exedir."Xvnc :$displayNumber";
 $cmd .= " -dpi $dpi" if ($dpi);
@@ -777,7 +776,7 @@ sub CheckDisplayNumber
 #
 # GetXDisplayDefaults uses xdpyinfo to find out the geometry, depth and pixel
 # format of the current X display being used.  If successful, it sets the
-# options as appropriate so that the X VNC server will use the same settings
+# options as appropriate so that the TurboVNC X server will use the same settings
 # (minus an allowance for window manager decorations on the geometry).  Using
 # the same depth and pixel format means that the VNC server won't have to
 # translate pixels when the desktop is being viewed on this X display (for
@@ -923,7 +922,7 @@ sub List
   opendir(dir, $vncUserDir);
   my @filelist = readdir(dir);
   closedir(dir);
-  print "\nTurboVNC server sessions:\n\n";
+  print "\nTurboVNC sessions:\n\n";
   print "X DISPLAY #\tPROCESS ID\n";
   foreach my $file (@filelist) {
     if ($file =~ /$host:(\d+)$\.pid/ && !&CheckDisplayNumber($1)) {

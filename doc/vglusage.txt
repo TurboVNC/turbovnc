@@ -1,10 +1,10 @@
-* Using TurboVNC with VirtualGL
+* Hardware 3D Acceleration (Using VirtualGL with TurboVNC)
 {anchor: VGL}
 
 Referring to the VirtualGL User's Guide, VirtualGL's X11 Transport draws 3D
 images onto an X display using standard X11 drawing commands.  Since this
 results in the images being sent uncompressed to the X server, the X11
-Transport is designed to be used with an "X Proxy."  An X proxy acts as a
+Transport is designed to be used with an "X proxy."  An X proxy acts as a
 virtual X server, receiving X11 commands from the application (and from
 VirtualGL), rendering the X11 commands into images, compressing the resulting
 images, and sending the compressed images over the network to a client or
@@ -37,10 +37,10 @@ client machine without using VirtualGL's embedded VGL Transport.
 		than the pure JPEG encoding method used by the VGL Transport.
 
 	* TurboVNC provides two lossless compression modes, one of which is designed
-		to reduce server CPU usage on gigabit networks and the other of which is
+		to reduce host CPU usage on gigabit networks and the other of which is
 		designed to provide reasonable performance on wide-area networks (at the
-		expense of higher server CPU usage.)  The VGL Transport's only
-		lossless option is uncompressed RGB.
+		expense of higher host CPU usage.)  The VGL Transport's only lossless
+		option is uncompressed RGB.
 
 	* TurboVNC includes a lossless refresh feature that will, on demand, send
 		a mathematically lossless image of the current VNC desktop to the client.
@@ -53,13 +53,13 @@ client machine without using VirtualGL's embedded VGL Transport.
 		copy of certain regions of the screen during periods of inactivity
 		(Automatic Lossless Refresh.)
 
-	* TurboVNC provides rudimentary collaboration capabilities.  Multiple clients
+	* TurboVNC provides rudimentary collaboration capabilities.  Multiple users
 		can simultaneously view the same TurboVNC session and pass around control
 		of the keyboard and mouse.
 
 	* The TurboVNC Viewer is stateless.  If the network hiccups or the viewer is
-		otherwise disconnected, the session continues to run on the server and can
-		be rejoined from any machine on the network.
+		otherwise disconnected, the session continues to run on the host and can be
+		rejoined from any machine on the network.
 
 	* No X server is required on the client machine.  This reduces the deployment
 		complexity for Windows clients.
@@ -76,7 +76,7 @@ client machine without using VirtualGL's embedded VGL Transport.
 	* No seamless windows.  All application windows are constrained to a "virtual
 		desktop", which displays in a single window on the client machine.
 
-	* TurboVNC will generally	require about 20% more server CPU cycles to
+	* TurboVNC will generally require about 20% more host/server CPU cycles to
 		maintain the same frame rate as the VGL Transport, both because it
 		has to compress more pixels in each frame	(an entire desktop rather than a
 		single window) and because it has to perform 2D (X11) rendering as well as
@@ -84,13 +84,13 @@ client machine without using VirtualGL's embedded VGL Transport.
 
 	* TurboVNC does not support quad-buffered stereo or transparent overlays.
 
-** Using TurboVNC and VirtualGL on the Same Server
+** Using VirtualGL on a TurboVNC Host
 {anchor: TurboVNC_Usage_Local}
 
-The most common (and optimal) way to use TurboVNC is to set it up on the same
-server that is running VirtualGL.  This allows VirtualGL to send its rendered
-3D images to TurboVNC through shared memory rather than sending them over a
-network.
+The most common (and optimal) way to use VirtualGL with TurboVNC is to
+configure the same machine as a TurboVNC host and a VirtualGL server.  This
+allows VirtualGL to send its rendered 3D images to TurboVNC through shared
+memory rather than sending them over a network.
 
 #IMG: x11transport.png
 #OPT fmt=latex: w=4cm
@@ -112,26 +112,21 @@ configuration.
 		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
 		---
 
-		The TurboVNC startup script sets the ''VGL_COMPRESS'' environment variable
-		to ''0'', which will automatically enable the X11 Transport within
-		VirtualGL.
-
-** Using TurboVNC When VirtualGL Is Running on a Different Machine
+** Using VirtualGL on a Machine Other Than a TurboVNC Host
 {anchor: TurboVNC_Usage_Remote}
 
 #IMG: vgltransportservernetwork.png
 #OPT fmt=latex: w=4cm
 
-If TurboVNC and VirtualGL are running on different servers, then it is
-desirable to use the VGL Transport to send images from the VirtualGL
-server to the TurboVNC server.  It is also desirable to disable image
-compression in the VGL Transport.  Otherwise, the images would have to be
-compressed by the VirtualGL server, decompressed by the VirtualGL Client, then
-recompressed by the TurboVNC Server, which is a waste of CPU resources.
-However, sending images uncompressed over a network requires a fast network
-(generally, Gigabit Ethernet or faster), so there needs to be a fast link
-between the VirtualGL server and the TurboVNC server for this procedure to
-perform well.
+If the TurboVNC host and VirtualGL server are different machines, then it is
+desirable to use the VGL Transport to send images from the VirtualGL server to
+the TurboVNC session.  It is also desirable to disable image compression in the
+VGL Transport.  Otherwise, the images would have to be compressed by the
+VirtualGL server, decompressed by the VirtualGL Client, then recompressed by
+the TurboVNC Server, which is a waste of CPU resources.  However, sending
+images uncompressed over a network requires a fast network (generally, Gigabit
+Ethernet or faster), so there needs to be a fast link between the VirtualGL
+server and the TurboVNC host for this procedure to perform well.
 
 *** Procedure
 #OPT: noList! plain!

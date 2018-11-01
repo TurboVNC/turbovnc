@@ -32,22 +32,22 @@ uses the following terminology when referring to its security extensions:
 	VNC Password Authentication :: {:}
 		A session password sent from the VNC viewer is validated against a password
 		file, which is typically located under the user's home directory on the
-		server machine.  The VNC password is separate from any other login
-		credentials and thus represents less of a security threat if compromised
-		(that is, assuming the VNC password and the user's account password are not
-		the same.)
+		VNC host.  The VNC password is separate from any other login credentials
+		and thus represents less of a security threat if compromised (that is,
+		assuming the VNC password and the user's account password are not the
+		same.)
 
 	One-Time Password (OTP) Authentication :: {:}
 		Using the ''vncpasswd'' program, a unique password is generated "on the
-		fly" for the VNC server session, and the password is printed on the
-		command line (see the man page for ''vncpasswd'' for more details.)  The
-		user enters this password in the VNC viewer, and the VNC viewer sends the
-		password to the VNC server as if it were a VNC password.  However, once the
-		OTP has been used to authenticate a viewer, the OTP is forgotten and cannot
-		be reused.  OTP authentication can be used, for instance, to launch or
-		connect to TurboVNC sessions from an automated web portal or from a job
-		scheduler.  OTP authentication is also useful for allowing temporary access
-		to a TurboVNC session for collaboration purposes.
+		fly" for the TurboVNC session, and the password is printed on the command
+		line (see the man page for ''vncpasswd'' for more details.)  The user
+		enters this password in the VNC viewer, and the VNC viewer sends the
+		password to the server as if it were a VNC password.  However, once the OTP
+		has been used to authenticate a viewer, the OTP is forgotten and cannot be
+		reused.  OTP authentication can be used, for instance, to launch or connect
+		to TurboVNC sessions from an automated web portal or from a job scheduler.
+		OTP authentication is also useful for allowing temporary access to a
+		TurboVNC session for collaboration purposes.
 
 	PAM User/Password Authentication :: {:}
 		The VNC server uses Pluggable Authentication Modules (PAM) to validate a
@@ -58,9 +58,10 @@ uses the following terminology when referring to its security extensions:
 		through PAM.  Since the user/password authentication schemes supported by
 		TurboVNC (see below) transmit the password from the VNC viewer to the VNC
 		server as plain text, it is strongly recommended that the PAM User/Password
-		authentication method be used only with session encryption or if the server
-		is restricted to allow only loopback (SSH) connections and to disallow
-		reverse connections (see {ref prefix="Section ": Secure_TurboVNC_Usage}.)
+		authentication method be used only with session encryption or if the
+		session is restricted to allow only loopback (SSH) connections and to
+		disallow reverse connections (see
+		{ref prefix="Section ": Secure_TurboVNC_Usage}.)
 
 ** TurboVNC Viewer Authentication Schemes
 
@@ -128,7 +129,7 @@ The default behavior of the TurboVNC Server is for all security types except
 "TLSNone", "X509None", and "None" to be enabled and for VNC Password and OTP
 authentication to be preferred over PAM User/Password authentication.  However,
 the system administrator can disable one or more of the security types or set
-the preferred order of the security types by editing the server's security
+the preferred order of the security types by editing the TurboVNC security
 configuration file.  See the ''Xvnc'' man page for more details.
 
 If the VNC server allows multiple security types, then the VNC viewer's default

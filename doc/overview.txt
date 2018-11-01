@@ -15,18 +15,17 @@ produced by TightVNC 1.3.x for 2D workloads (see
 {ref prefix="Section ": AdvancedCompression}.)
 
 All VNC implementations, including TurboVNC, use the RFB (remote framebuffer)
-protocol to send "framebuffer updates" from the
-VNC server to any connected "viewers."  Each framebuffer update can contain
-multiple "rectangles" (regions that have changed since the last update.)  As
-with TightVNC, TurboVNC analyzes each rectangle, splits it into multiple
-"subrectangles", and attempts to encode each subrectangle using the
-"subencoding type" that will provide the most efficient compression, given the
-number of unique colors in the subrectangle.  The process by which TurboVNC
-does this is referred to as an "encoding method."  A rectangle is first
-analyzed to determine if any significant portion of it is solid,
-and if so, that portion is encoded as a bounding box and a fill color ("Solid
-subencoding.")  Of the remaining subrectangles, those with only two colors are
-encoded as a 1-bit-per-pixel bitmap with a 2-color palette ("Mono
+protocol to send "framebuffer updates" from the VNC server to any connected
+viewers.  Each framebuffer update can contain multiple "rectangles" (regions
+that have changed since the last update.)  As with TightVNC, TurboVNC analyzes
+each rectangle, splits it into multiple "subrectangles", and attempts to encode
+each subrectangle using the "subencoding type" that will provide the most
+efficient compression, given the number of unique colors in the subrectangle.
+The process by which TurboVNC does this is referred to as an "encoding method."
+A rectangle is first analyzed to determine if any significant portion of it is
+solid, and if so, that portion is encoded as a bounding box and a fill color
+("Solid subencoding.")  Of the remaining subrectangles, those with only two
+colors are encoded as a 1-bit-per-pixel bitmap with a 2-color palette ("Mono
 subencoding"), those with low numbers of unique colors are encoded as a color
 palette and an 8-bit-per-pixel bitmap ("Indexed color subencoding"), and
 subrectangles with high numbers of unique colors are encoded using either JPEG
@@ -46,7 +45,7 @@ levels that can be shown to have a measurable performance benefit.
 
 TurboVNC is the product of extensive research, in which many different
 permutations of the TightVNC encoder were benchmarked at the low level against
-a variety of captured RFB sessions that simulate real-world application
+a variety of RFB session captures that simulate real-world application
 workloads, both 2D and 3D.  For more information on the research leading to
 TurboVNC's encoder design, see
 [[http://www.TurboVNC.org/pmwiki/uploads/About/tighttoturbo.pdf][this report]].
@@ -68,12 +67,13 @@ In addition to high performance, other notable features of TurboVNC include:
 		can improve performance dramatically on high-latency connections.
 
 	* Authentication with one-time passwords or Unix login credentials.  Access
-		control lists can be used to share VNC sessions with only certain users.
+		control lists can be used to share TurboVNC sessions with only certain
+		users.
 
 	* TLS encryption support (VeNCrypt-compatible)
 
 	* TurboVNC allows security/authentication policies to be set globally for a
-		particular server machine.
+		particular host.
 
 	* Multithreaded Tight encoding
 

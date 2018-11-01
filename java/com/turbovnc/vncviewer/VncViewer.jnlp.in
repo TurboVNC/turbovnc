@@ -5,9 +5,9 @@
      embedded in Xvnc will substitute the following variables when preceded by
      a dollar sign:
 
-     USER - the user account under which the VNC server session is running
+     USER - the user account under which the VNC session is running
      DESKTOP - the VNC session name
-     DISPLAY - hostname:display_number of the VNC server session
+     DISPLAY - hostname:display_number of the VNC session
      PORT - TCP port on which the VNC server is listening (e.g. 5901)
 
      Use two dollar signs ($$) to get a dollar sign in the generated JNLP file.

@@ -5,3 +5,34 @@ directory (''/opt/TurboVNC'' on Linux/Un*x and Mac systems and
 ''c:\\Program Files\\TurboVNC'' on Windows systems.)  If your installation of
 TurboVNC resides in a different directory, then adjust the instructions
 accordingly.
+
+** Terminology
+
+	VNC server (sometimes just "server") :: A computer program, implementing
+	the Remote Framebuffer (RFB) protocol and usually designed to run as a
+	background process, that provides an interactive remote desktop environment
+	through which authenticated users can run graphical programs remotely from
+	other computers on the network.  VNC servers can be implemented as
+	single-user screen scrapers, which transmit the contents of the host's
+	physical display (most common with Windows and Mac VNC servers), or as
+	virtual display servers, which provide isolated remote desktop environments
+	for an arbitrary number of simultaneous users on the same host (most common
+	with Un*x VNC servers.)
+
+	VNC host (sometimes just "host") :: The machine on which a VNC server is
+	running
+
+	VNC viewer (sometimes just "viewer") :: A computer program, implementing
+	the Remote Framebuffer (RFB) protocol, that connects to a VNC server running
+	on another computer, thus allowing users to run graphical programs remotely.
+
+	client machine (sometimes just "client") :: The machine on which a VNC viewer
+	is running
+
+	VNC session (sometimes just "session") :: A specific instance of a Un*x VNC
+	server (Xvnc.)  Each instance of an Xvnc server, including the TurboVNC
+	Server, acts as an independent virtual X server, listening on a unique X11
+	display number for connections from X11 clients and listening on a unique RFB
+	port number for connections from VNC viewers.  Multiple simultaneous VNC
+	sessions can exist on a given host, under any number of different user
+	accounts.

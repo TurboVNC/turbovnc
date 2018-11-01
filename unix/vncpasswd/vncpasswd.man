@@ -7,15 +7,15 @@
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
-.\" Copyright (C) 2010, 2015 D. R. Commander
+.\" Copyright (C) 2010, 2015, 2018 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncpasswd 1 "August 2015" "" "TurboVNC"
+.TH vncpasswd 1 "October 2018" "" "TurboVNC"
 .SH NAME
-vncpasswd \- set passwords for VNC server
+vncpasswd \- set passwords for TurboVNC sessions
 .SH SYNOPSIS
 \fBvncpasswd\fR [\-v] [\fIfile\fR]
 .br
@@ -39,7 +39,7 @@ passwords when started with the \fB\-rfbauth\fR command line option
 
 \fBvncpasswd\fR allows one to enter a primary VNC password and an
 optional view-only password.  \fBXvnc\fR will ignore mouse and keyboard
-input from clients who authenticate with the view-only password.
+input from viewers that authenticate with the view-only password.
 
 The password filename defaults to \fB$HOME/.vnc/passwd\fR, unless the
 \fB\-t\fR command line option was used (see the OPTIONS section
@@ -57,20 +57,20 @@ utility may perform certain sanity checks to prevent writing a
 password file into some hazardous place.
 .br
 .SH ONE-TIME PASSWORD (OTP) SUPPORT
-If the VNC server is configured to support one-time passwords, then
+If the TurboVNC session is configured to support one-time passwords, then
 \fBvncpasswd\fR can be used to generate new one-time passwords for both full
 control and, optionally, view-only access.  A one-time password is valid for
-one successful connection from a VNC viewer to the VNC server session.  For
-each subsequent connection, a new one-time password must be generated.
+one successful connection from a VNC viewer to the TurboVNC session.  For each
+subsequent connection, a new one-time password must be generated.
 \fBvncpasswd\fR can also be used to clear any one-time passwords that are
-currently enabled for a VNC server session.
+currently enabled for a TurboVNC session.
 .br
 .SH USER ACCESS CONTROL LIST SUPPORT
-If the VNC server is configured to support a user access control list (ACL) for
-the PAM User/Password authentication method, then \fBvncpasswd\fR
-can be used to add users to or remove users from the ACL.  Be careful not to
-remove yourself from the list, or you will not be able to connect again until
-you re-add yourself.
+If the TurboVNC Server is configured to support user access control lists
+(ACLs) for the PAM User/Password authentication method, then \fBvncpasswd\fR
+can be used to add users to or remove users from a session's ACL.  Be careful
+not to remove yourself from the list, or you will not be able to connect again
+until you re-add yourself.
 .br
 .SH OPTIONS
 .TP
@@ -95,7 +95,7 @@ If adding a user to the user ACL, then the \fB\-v\fR option specifies that the
 user should be granted view-only access instead of full control.
 .TP
 \fB\-display\fR \fIVNC-display\fR
-This option specifies the X display of the VNC server session to use when
+This option specifies the X display of the TurboVNC session to use when
 setting/clearing one-time passwords or adding users to/removing users from the
 ACL.  If \fIVNC-display\fR is not specified, then it defaults to the value of
 the \fBDISPLAY\fR environment variable.

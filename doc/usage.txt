@@ -9,15 +9,14 @@
 	#. Open a new Command Prompt/terminal window on your client machine.
 
 	#. In the new Command Prompt/terminal window, open a Secure Shell (SSH)
-		session into the TurboVNC server machine:
+		session into the TurboVNC host:
 
 		#Verb: <<---
-		ssh {user}@{server}
+		ssh {user}@{host}
 		---
 
-		Replace __''{user}''__ with your username on the TurboVNC server
-		machine and __''{server}''__ with the hostname or IP address of that
-		machine.
+		Replace __''{user}''__ with your username on the TurboVNC host and
+		__''{host}''__ with the hostname or IP address of the host.
 
 	#. In the SSH session, start a TurboVNC session:
 
@@ -28,7 +27,7 @@
 	#. Make a note of the X display number that the TurboVNC session is
 		occupying, for instance:
 		{nl}{nl}
-		''Desktop 'TurboVNC: my_server:1 (my_user)' started on display my_server:1''
+		''Desktop 'TurboVNC: my_host:1 (my_user)' started on display my_host:1''
 		{nl}{nl}
 		If this is the first time that a TurboVNC session has ever been run
 		under this user account, and if VNC password authentication is enabled for
@@ -70,7 +69,7 @@
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
 		window contains a virtual desktop with which you can interact to launch
-		X-Windows applications on the TurboVNC server machine.
+		X-Windows applications on the TurboVNC host.
 
 *** Window Manager Compatibility
 
@@ -93,14 +92,14 @@ managers, and a list of known compatibility issues.
 ** Disconnecting and Killing a TurboVNC Session
 
 Closing the TurboVNC Viewer disconnects from the TurboVNC session, but the
-TurboVNC session will remain running on the TurboVNC server machine (as will
-any applications that you may have started within the session), and you can
+TurboVNC session will remain running on the TurboVNC host (as will any
+applications that you may have started within the session), and you can
 reconnect to the session at any time.
 
 To kill a TurboVNC session:
 
-	#. Using SSH, log into the server machine that is running the TurboVNC
-		session you want to kill.{nl} \
+	#. Using SSH, log into the host that is running the TurboVNC session you \
+		want to kill.{nl} \
 		... or ...{nl} \
 		Using the TurboVNC Viewer, connect to the TurboVNC session that you want to
 		kill, and open a new terminal in that TurboVNC session.
@@ -115,8 +114,8 @@ To kill a TurboVNC session:
 	want to kill.
 
 To list the X display numbers and process ID's of all TurboVNC sessions
-currently running under your user account on a particular server machine, type
-the following command:
+currently running under your user account on a particular host, type the
+following command:
 
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncserver -list
@@ -129,38 +128,37 @@ When a TurboVNC session is created, it can optionally start a miniature web
 server that serves up the TurboVNC Viewer as a Java Web Start app.  This allows
 you to easily connect to the TurboVNC session from a machine that does not have
 the TurboVNC Viewer installed locally.  If one of the official TurboVNC binary
-packages is installed on the server, then the miniature web server will
+packages is installed on the host, then the miniature web server will
 automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI library for
 Linux, OS X, or Windows clients when launching the TurboVNC Viewer. This
 provides most of the advantages of the standalone TurboVNC viewers, including
 native levels of performance on popular client platforms.
 
 To launch the TurboVNC Viewer from a web browser, pass ''-httpd'' to
-''/opt/TurboVNC/bin/vncserver'' when starting the server, then point your web
-browser to:
+''/opt/TurboVNC/bin/vncserver'' when starting a TurboVNC session, then point
+your web browser to:
 
-''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}''
+''http://''__''{host}''__'':{5800+''__''n''__''}''
 
-where __''{turbovnc_server}''__ is the hostname or IP address of the TurboVNC
-server machine, and __''n''__ is the X display number of the TurboVNC session
-to which you want to connect.
+where __''{host}''__ is the hostname or IP address of the TurboVNC host, and
+__''n''__ is the X display number of the TurboVNC session.
 
 __Example:__
-If the TurboVNC session is occupying X display ''my_server:1'', then point your
+If the TurboVNC session is occupying X display ''my_host:1'', then point your
 web browser to:
 
-''http://my_server:5801''
+''http://my_host:5801''
 
 This will download a JNLP file to your computer, which you can open in Java
 Web Start.
 
 You can add viewer parameters to the URL using the following format:
 
-''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}?''__''{param1}''__''=''__''{value1}''__''&''__''{param2}''__''=''__''{value2}''__
+''http://''__''{host}''__'':{5800+''__''n''__''}?''__''{param1}''__''=''__''{value1}''__''&''__''{param2}''__''=''__''{value2}''__
 
 Example:
 
-''http://my_server:5801?tunnel=1&samp=2x&quality=80''
+''http://my_host:5801?tunnel=1&samp=2x&quality=80''
 
 will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
 
@@ -168,8 +166,8 @@ will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
 	Java Web Start by default.  This is not an issue if you are using the
 	official TurboVNC binary packages, but if you are building a self-signed
 	version of the TurboVNC Viewer for development purposes, then you will need
-	to add ''http://{turbovnc_server}:{http_port}'' (for example,
-	''http://my_server:5801'') to Java's Exception Site List, which can be found
+	to add ''http://{host}:{http_port}'' (for example,
+	''http://my_host:5801'') to Java's Exception Site List, which can be found
 	under the "Security" tab in the Java Control Panel.
 
 	!!! NOTE: On some newer OS X systems, downloading a JNLP file may result
@@ -279,7 +277,7 @@ knowledge of web server administration.
 		---
 
 		!!! NOTE: ''{turbovnc_url}'' should be the absolute URL of the TurboVNC
-		Viewer directory on the web server, e.g. ''http://my_server/turbovnc''.
+		Viewer directory on the web server, e.g. ''http://my_host/turbovnc''.
 
 		!!! NOTE: Leave out the lines referring to ''tvnchelper-*.jar'' if you have
 		not installed the TurboVNC Helper JARs.
@@ -296,26 +294,24 @@ knowledge of web server administration.
 {anchor: Secure_TurboVNC_Usage}
 
 Normally, the connection between the TurboVNC Server and the TurboVNC Viewer is
-completely unencrypted, but securing that connection can be easily
-accomplished by using the port forwarding feature of Secure Shell (SSH.)  After
-you have started a TurboVNC session on the TurboVNC server machine, open a new
-SSH connection into the TurboVNC server machine using the following command
-line:
+completely unencrypted, but securing that connection can be easily accomplished
+by using the port forwarding feature of Secure Shell (SSH.)  After you have
+started a TurboVNC session on the TurboVNC host, open a new SSH connection into
+the TurboVNC host using the following command line:
 
 	#Verb: <<---
-	ssh -L {5900+n}:localhost:{5900+n} {user}@{server}
+	ssh -L {5900+n}:localhost:{5900+n} {user}@{host}
 	---
 
-Replace __''{user}''__ with your username on the TurboVNC server
-machine and __''{server}''__ with the hostname or IP address of that machine.
-Replace __''n''__ with the X display number of the TurboVNC session to which
-you want to connect.
+Replace __''{user}''__ with your username on the TurboVNC host and
+__''{host}''__ with the hostname or IP address of the host.  Replace __''n''__
+with the X display number of the TurboVNC session to which you want to connect.
 
-For instance, if you want to connect to display '':1'' on server ''my_server''
+For instance, if you want to connect to display '':1'' on host ''my_host''
 using user account ''my_user'', you would type:
 
 	#Verb: <<---
-	ssh -L 5901:localhost:5901 my_user@my_server
+	ssh -L 5901:localhost:5901 my_user@my_host
 	---
 
 After the SSH connection has been established, you can then launch the
@@ -331,19 +327,19 @@ options in the TurboVNC Viewer (or the equivalent GUI options, which are
 located under the "Security" tab in the Options dialog.)  For instance, running
 
 	#Verb: <<---
-	{vncviewer} -via {user}@{server} localhost:{n}
+	{vncviewer} -via {user}@{host} localhost:{n}
 	---
 
 or
 
 	#Verb: <<---
-	{vncviewer} -tunnel {user}@{server}
+	{vncviewer} -tunnel {user}@{host}
 	---
 
 is the equivalent of running
 
 	#Verb: <<---
-	ssh -L {fp}:localhost:{5900+n} {user}@{server}
+	ssh -L {fp}:localhost:{5900+n} {user}@{host}
 	{vncviewer} localhost::{fp}
 	---
 
@@ -354,7 +350,7 @@ automatically determined by the TurboVNC Viewer.)
 	TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Mac/Linux/Un*x
 	systems or ''c:\\Program Files\\TurboVNC\\vncviewer.bat'' on Windows systems.
 
-''-tunnel'' can be used as a shortcut whenever the SSH and VNC servers are the
+''-tunnel'' can be used as a shortcut whenever the SSH and VNC hosts are the
 same machine.  ''-via'' is more flexible, since it allows you to specify the
 VNC server to which to connect.  The VNC server is specified from the point of
 view of the SSH server, which is why we used ''localhost'' in the above
@@ -374,18 +370,17 @@ details.
 #OPT: noList! plain!
 
 Passing an argument of ''-localhost'' to ''vncserver'' will force the TurboVNC
-Server session to accept inbound connections only from the server machine.
-This effectively forces SSH tunneling to be used for remote connections.  If
-the ''no-remote-connections'' directive is set in the TurboVNC security
+session to accept inbound connections only from the TurboVNC host.  This
+effectively forces SSH tunneling to be used for remote connections.  If the
+''no-remote-connections'' directive is set in the TurboVNC security
 configuration file, then that has the effect of enabling the ''-localhost''
-option for all new TurboVNC sessions that are started on the machine.
+option for all new TurboVNC sessions that are started on the host.
 
 Passing an argument of ''-noreverse'' to ''vncserver'' will disable the ability
-to make outbound (reverse) connections from the TurboVNC Server session.
-If the ''no-reverse-connections'' directive is set in the TurboVNC
-security configuration file, then that has the effect of enabling the
-''-noreverse'' option for all new TurboVNC sessions that are started on
-the machine.
+to make outbound (reverse) connections from the TurboVNC session.  If the
+''no-reverse-connections'' directive is set in the TurboVNC security
+configuration file, then that has the effect of enabling the ''-noreverse''
+option for all new TurboVNC sessions that are started on the host.
 
 ** Running OpenGL Applications
 
@@ -396,7 +391,7 @@ GPU drivers installed, or on systems that provide a libglvnd-enabled build of
 Mesa, TurboVNC's software OpenGL implementation can use direct rendering.
 Otherwise, it falls back to indirect rendering, which is limited to the OpenGL
 1.4 API and which may perform sluggishly (particularly with continuous mouse
-input.)  In general, if the server machine has a GPU, then you should use
+input.)  In general, if the TurboVNC host has a GPU, then you should use
 [[#VGL][VirtualGL]] rather than relying on TurboVNC's software OpenGL
 implementation.
 

@@ -2,7 +2,7 @@
 
 ** Linux/x86 and Other x86 Un*x Operating Systems
 
-|| || Server (x86) || Server (x86-64) || Client ||
+|| || Host (x86) || Host (x86-64) || Client ||
 | Recommended CPU \
 	| {list type=ul: \
 			{item:For optimal performance, the CPU should support SSE2 \
