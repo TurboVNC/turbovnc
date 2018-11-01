@@ -44,9 +44,9 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "TurboVNC Authentication"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "VNC Host:",IDC_STATIC_HOST,7,8,36,10,SS_CENTERIMAGE |
+    LTEXT           "VNC server:",IDC_STATIC_HOST,7,8,40,10,SS_CENTERIMAGE |
                     NOT WS_GROUP
-    EDITTEXT        IDC_VNCHOST,46,7,95,12,ES_AUTOHSCROLL | ES_READONLY |
+    EDITTEXT        IDC_VNCHOST,50,7,91,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     CONTROL         108,IDC_STATIC_LOGO,"Static",SS_BITMAP,7,23,32,30
     RTEXT           "User name:",IDC_STATIC_LOGIN,41,25,39,10,SS_CENTERIMAGE
@@ -597,7 +597,7 @@ BEGIN
     ID_SHOWWINDOW           "Display a connection window"
     ID_NEWCONN              "Make a manual connection"
     IDS_HELP
-"vncviewer [options] [<server>[:<display>]]\r\n\
+"vncviewer [options] [<host>[:<display>]]\r\n\
 \r\n\
 Options:\r\n\
 (For options with GUI equivalents, please refer to the interactive help feature\r\n\
@@ -743,9 +743,8 @@ from the System Menu.\r\n\
     IDS_HELP18
 "/ipv6\r\n\
 When used with /listen, this causes vncviewer to accept connections from\r\n\
-IPv6-enabled servers.  If your system supports IPv4-mapped IPv6 addresses,\r\n\
-then connections from IPv4 servers can also be accepted when this option is\r\n\
-enabled.\r\n\
+IPv6-enabled hosts.  If your system supports IPv4-mapped IPv6 addresses, then\r\n\
+connections from IPv4 hosts can also be accepted when this option is enabled.\r\n\
 \r\n\
 When used without /listen, this causes vncviewer to favor the IPv6 loopback\r\n\
 address when connecting to localhost.\r\n
@@ -777,10 +776,10 @@ in the options dialog\r\n\
     IDS_HELP23
 "/nounixlogin\r\n\
 When connecting to TightVNC/TurboVNC servers, this disables the use of Unix\r\n\
-login authentication.  This is useful if the server is configured to prefer an\r\n\
-authentication method that supports Unix login authentication and you want to\r\n\
-override this preference for a particular connection (for instance, to use a\r\n\
-one-time password.)\r\n\
+login authentication.  This is useful if the server is configured to prefer a\r\n\
+security type that supports Unix login authentication and you want to override\r\n\
+this preference for a particular connection (for instance, to use a one-time\r\n\
+password.)\r\n\
 \r\n"
     IDS_HELP24
 "/password <clear text password>\r\n\
@@ -864,7 +863,7 @@ END
 STRINGTABLE DISCARDABLE
 BEGIN
     IDC_OK                  "Connect to the specified VNC server."
-    IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer from the Unix/Linux TurboVNC Server, use the vncconnect program."
+    IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer from the TurboVNC Server, use the vncconnect program."
     IDC_CHECK_MESSAGE       "If this option is set, the viewer will show a warning before switching to full-screen mode. The warning reminds you how to exit that mode."
     IDC_CHECK_TOOLBAR       "If this option is set, then new viewer windows will have a toolbar by default. You can always show/hide the toolbar using the system menu, but this option sets the default behavior."
     IDC_EDIT_AMOUNT_LIST    "The viewer automatically saves host names and settings for past connections. This option specifies how many connections to remember."
@@ -875,7 +874,7 @@ END
 
 STRINGTABLE DISCARDABLE
 BEGIN
-    IDC_HOSTNAME_EDIT       "The IP address or host name of the VNC server to which you want to connect. Append :<display number> or ::<port number> to the host name (for example, ""myhost:1"" or ""myhost::5901"") to connect to a specific display number or TCP port."
+    IDC_HOSTNAME_EDIT       "The IP address or host name of the VNC server to which you want to connect. Append :<display number> or ::<port number> to the host name (for example, ""my_host:1"" or ""my_host::5901"") to connect to a specific display number or TCP port."
     IDC_BELLDEICONIFY       "If this option is checked, a minimized viewer window will be restored upon receiving a remote ""Bell"" event."
     IDC_VIEWONLY            "If this option is checked, you will be able to see but not control the remote desktop."
 END
@@ -889,7 +888,7 @@ END
 STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EDIT_LOG_LEVEL      "Specifies the level of detail to include in the log file. Level 0 causes the viewer to log only the most important events, whereas Level 12 generates a lot of debugging output."
-    IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike some VNC flavors, TurboVNC uses shared sessions by default."
+    IDC_SHARED              "Enable multiple simultaneous viewer connections to the same VNC session. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike some VNC flavors, TurboVNC uses shared sessions by default."
     IDC_ENCODING            "Choose one of these encoding methods based on the type of network you are using and your desired image quality and performance."
     IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote desktop by the specified percentage.  ""Fixed Aspect Ratio"" automatically scales the remote desktop image to the size of the viewer window, preserving the aspect ratio of the remote desktop."
     IDC_DESKTOPSIZE_EDIT    "Resize the remote desktop to the specified size/screen layout (example: 1920x1200 or 1920x1200+0+0,1920x1200+1920+0).  ""Auto"" resizes the desktop as needed to fit in the viewer window without using scrollbars.  ""Server"" disables remote desktop resizing."
@@ -905,10 +904,10 @@ BEGIN
     IDC_STATIC_SPAN         "This option specifies whether the viewer window should span all monitors, only the primary monitor, or whether it should span all monitors only if it cannot fit on the primary monitor (automatic.)"
     IDC_DISABLECLIPBOARD    "If this option is checked, the viewer will not send local clipboard changes to the server."
     IDC_CSHAPE_DISABLE_RADIO
-                            "In this mode, the server draws the mouse cursor and continuously sends it to the client as an image. This can create performance problems on slow networks, but it allows you to see mouse movements from other users in a shared session."
+                            "In this mode, the server draws the mouse cursor and continuously sends it to the viewer as an image. This can create performance problems on slow networks, but it allows you to see mouse movements from other users in a shared session."
     IDC_QUALITYLEVEL        "Higher JPEG quality levels result in less compression but better image quality."
     IDC_SUBSAMPLEVEL        "Each pixel in a JPEG image is represented as a brightness (luminance) value and a color (chrominance) value. Chrominance subsampling discards some or all chrominance values to reduce the image size, but it can create visible artifacts."
-    IDC_COMPRESSLEVEL       "Enabling zlib compression will greatly reduce the bandwidth usage of the Lossless Tight encoding method, but zlib requires a lot of server CPU time (more than JPEG, even.)  Thus, zlib is only really useful on slow networks."
+    IDC_COMPRESSLEVEL       "Enabling zlib compression will greatly reduce the bandwidth usage of the Lossless Tight encoding method, but zlib requires a lot of host CPU time (more than JPEG, even.)  Thus, zlib is only really useful on slow networks."
     IDC_CSHAPE_ENABLE_RADIO "In this mode, the server sends only changes to the remote cursor's shape and position. This results in the best mouse responsiveness."
     IDC_CSHAPE_IGNORE_RADIO "In this mode, the remote mouse cursor will not be shown at all. Cursor shape updates and new coordinates received from the server will be ignored."
 END

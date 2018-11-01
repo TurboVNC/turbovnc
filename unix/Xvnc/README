@@ -5,9 +5,9 @@ Xvnc - the VNC X server
 This is the top-level directory for Xvnc, the VNC X server (or the X VNC
 server, depending on how you look at it.)
 
-TurboVNC's implementation of Xvnc is built upon the X.org 7.7 code base.  The
-VNC server portion of the code was originally based on TightVNC 1.3.x, but
-the current version also borrows code and/or algorithms from other VNC
+TurboVNC's implementation of Xvnc is built upon the X.org code base.  The VNC
+server portion of the code was originally based on TightVNC 1.3.x, but the
+current version also borrows code and/or algorithms from other VNC
 implementations (including xf4vnc and TigerVNC) and contains a great deal of
 original code.
 

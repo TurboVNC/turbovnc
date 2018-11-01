@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2013, 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2013, 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,15 +30,15 @@ static char *programName;
 
 static void usage()
 {
-  fprintf(stderr, "\nUSAGE: %s [-display <d>] [-disconnect] host[:port]\n\n",
+  fprintf(stderr, "\nUSAGE: %s [-display <d>] [-disconnect] client[:port]\n\n",
           programName);
-  fprintf(stderr, "-display <d> = specify the X display of the VNC server session that you wish to\n"
+  fprintf(stderr, "-display <d> = specify the X display of the TurboVNC session that you wish to\n"
                   "               connect to a listening viewer (for instance, :1).  If this is\n"
                   "               not specified, then the value of the DISPLAY environment\n"
                   "               variable is used.\n");
-  fprintf(stderr, "-id <id> = specify the ID number of the VNC server session, if connecting to an\n"
+  fprintf(stderr, "-id <id> = specify the ID number of the TurboVNC session, if connecting to an\n"
                   "           instance of the UltraVNC Repeater in Mode II.\n");
-  fprintf(stderr, "-disconnect = disconnect all listening viewers from the specified VNC server\n"
+  fprintf(stderr, "-disconnect = disconnect all listening viewers from the specified TurboVNC\n"
                   "              session.\n\n");
   exit(1);
 }

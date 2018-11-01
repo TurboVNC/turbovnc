@@ -1043,7 +1043,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "Start the viewer in \"listen mode.\"  The viewer will listen on port " +
   "5500 (or on the port specified by the Port parameter) for reverse " +
   "connections from a VNC server.  To connect to a listening viewer from " +
-  "the Unix/Linux TurboVNC Server, use the vncconnect program.", false);
+  "the TurboVNC Server, use the vncconnect program.", false);
 
   static IntParameter maxClipboard =
   new IntParameter("MaxClipboard",
@@ -1066,10 +1066,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static IntParameter vncServerPort =
   new IntParameter("Port",
-  "The TCP port number on which the VNC server session is listening.  For " +
-  "Unix VNC servers, this is typically 5900 + the X display number of the " +
-  "VNC session (example: 5901 if connecting to display :1.)  For Windows " +
-  "and Mac VNC servers, this is typically 5900.  (default = 5900)\n " +
+  "The TCP port number on which the VNC server is listening.  For Unix VNC " +
+  "servers, this is typically 5900 + the X display number of the VNC " +
+  "session (example: 5901 if connecting to display :1.)  For Windows and " +
+  "Mac VNC servers, this is typically 5900.  (default = 5900)\n " +
   "If listen mode is enabled, this parameter specifies the TCP port on " +
   "which the viewer will listen for connections from a VNC server.  " +
   "(default = 5500)", -1);
@@ -1100,19 +1100,19 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   static StringParameter vncServerName =
   new StringParameter("Server",
   "The VNC server to which to connect.  This can be specified in the " +
-  "format <host>[:<display number>] or <host>::<port>, where <host> is the " +
+  "format {host}[:{display_number}] or {host}::{port}, where {host} is the " +
   "host name or IP address of the machine on which the VNC server is " +
-  "running, <display number> is an optional X display number (default: 0), " +
-  "and <port> is a TCP port.", null);
+  "running (the \"VNC host\"), {display_number} is an optional X display " +
+  "number (default: 0), and {port} is a TCP port.", null);
 
   static BoolParameter shared =
   new BoolParameter("Shared",
   "When connecting, request a shared session.  When the session is shared, " +
   "other users can connect to the session (assuming they have the correct " +
   "authentication credentials) and collaborate with the user who started " +
-  "the session.  If this option is disabled and the TurboVNC Server is " +
+  "the session.  If this option is disabled and the TurboVNC session is " +
   "using default settings, then you will only be able to connect to the " +
-  "server if no one else is already connected.", true);
+  "session if no one else is already connected.", true);
 
   // INPUT PARAMETERS
 
@@ -1176,8 +1176,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static BoolParameter acceptBell =
   new BoolParameter("AcceptBell",
-  "Produce a system beep when a \"bell\" event is received from the server.",
-  true);
+  "Produce a system beep when a \"bell\" event is received from the VNC " +
+  "server.", true);
 
   static IntParameter colors =
   new IntParameter("Colors",
@@ -1219,7 +1219,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "mouse responsiveness.  Disabling this option causes the server to " +
   "instead draw the mouse cursor and send it to the viewer as an image " +
   "every time the cursor moves.  Thus, using a remote cursor can increase " +
-  "network \"chatter\" between server and client significantly, which may " +
+  "network \"chatter\" between host and client significantly, which may " +
   "cause performance problems on slow networks.  However, using a remote " +
   "cursor can be advantageous with shared sessions, since it will allow you " +
   "to see the cursor movements of other connected users.", true);
@@ -1396,7 +1396,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "Encrypted password to use when authenticating with the VNC server.  The " +
   "encrypted password should be in the same ASCII hex format used by " +
   "TurboVNC connection info (.vnc) files.  For instance, you can generate " +
-  "an ASCII hex VNC password on the TurboVNC server machine by executing\n " +
+  "an ASCII hex VNC password on the TurboVNC host by executing\n " +
   "'cat {VNC_password_file} | xxd -c 256 -ps' or\n " +
   "'echo {unencrypted_password} | /opt/TurboVNC/bin/vncpasswd -f | xxd -c 256 -ps'\n " +
   "This parameter is provided mainly so that web portals can embed a " +
@@ -1432,9 +1432,9 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "VeNCrypt-compatible servers.  Setting this parameter has the effect of " +
   "removing \"Plain\" (and its encrypted derivatives) and \"UnixLogin\" " +
   "from the SecurityTypes parameter.  This is useful if the server is " +
-  "configured to prefer an authentication method that supports " +
-  "Unix Login/Plain authentication and you want to override that preference " +
-  "for a particular connection (for instance, to use a one-time password.)",
+  "configured to prefer a security type that supports Unix Login/Plain " +
+  "authentication and you want to override that preference for a particular " +
+  "connection (for instance, to use a one-time password.)",
   false);
 
   static StringParameter password =
@@ -1447,7 +1447,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   new StringParameter("PasswordFile",
   "Password file from which to read the password for Standard VNC " +
   "authentication.  This is useful if your home directory is shared between " +
-  "the client and server machines.", null);
+  "the client machine and VNC host.", null);
 
   static AliasParameter passwd =
   new AliasParameter("passwd",
@@ -1498,12 +1498,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   static BoolParameter tunnel =
   new BoolParameter("Tunnel",
   "This is the same as using Via with an SSH gateway, except that the " +
-  "gateway is assumed to be the same as the VNC server host, so you do not " +
+  "gateway host is assumed to be the same as the VNC host, so you do not " +
   "need to specify it separately.  The VNC server must be specified on the " +
   "command line or in the Server parameter when using the Tunnel parameter. " +
-  "When using the Tunnel parameter, the VNC server host can be prefixed by " +
-  "<user>@ to indicate that user name <user> (default = local user name) " +
-  "should be used when authenticating with the SSH server.", false);
+  "When using the Tunnel parameter, the VNC host can be prefixed by {user}@ " +
+  "to indicate that user name {user} (default = local user name) should be " +
+  "used when authenticating with the SSH server.", false);
 
   static StringParameter user =
   new StringParameter("User",
@@ -1518,20 +1518,20 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   new StringParameter("Via",
   "This parameter specifies an SSH server or UltraVNC repeater " +
   "(\"gateway\") through which the VNC connection should be tunneled.  Note " +
-  "that when using the Via parameter, the VNC server host should be " +
-  "specified from the point of view of the gateway.  For example, " +
-  "specifying Via=gateway_machine Server=localhost:1 will connect to " +
-  "display :1 on gateway_machine using the SSH server running on that same " +
-  "machine.  Similarly, specifying Via=gateway_machine:0 Server=localhost:1 " +
-  "will connect to display :1 on gateway_machine using the UltraVNC " +
-  "repeater running on that same machine and listening on port 5900 (VNC " +
-  "display :0.)  The VNC server must be specified on the command line or in " +
-  "the Server parameter when using the Via parameter.  If using the " +
-  "UltraVNC Repeater in \"Mode II\", then specify ID:xxxx as the VNC server " +
-  "name, where xxxx is the ID number of the VNC server to which you want to " +
-  "connect.  If using an SSH server, then the Via parameter can be prefixed " +
-  "by <user>@ to indicate that user name <user> (default = local user name) " +
-  "should be used when authenticating with the SSH server.", null);
+  "that when using the Via parameter, the VNC host should be specified from " +
+  "the point of view of the gateway.  For example, specifying " +
+  "Via={gateway_host} Server=localhost:1 will connect to display :1 on " +
+  "{gateway_host} using the SSH server running on that same host.  " +
+  "Similarly, specifying Via={gateway_host}:0 Server=localhost:1 will " +
+  "connect to display :1 on {gateway_host} using the UltraVNC repeater " +
+  "running on that same host and listening on port 5900 (VNC display :0.)  " +
+  "The VNC server must be specified on the command line or in the Server " +
+  "parameter when using the Via parameter.  If using the UltraVNC Repeater " +
+  "in \"Mode II\", then specify ID:xxxx as the VNC server name, where xxxx " +
+  "is the ID number of the VNC server to which you want to connect.  If " +
+  "using an SSH server, then the Via parameter can be prefixed by {user}@ " +
+  "to indicate that user name {user} (default = local user name) should be " +
+  "used when authenticating with the SSH server.", null);
 
   // CHECKSTYLE Indentation:ON
 

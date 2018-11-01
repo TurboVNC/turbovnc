@@ -2,11 +2,11 @@
 {anchor: Compatibility}
 
 In order to realize the full performance benefits of TurboVNC, it is necessary
-to use a TurboVNC server and a TurboVNC viewer in concert.  However, TurboVNC
-is fully compatible with [[http://www.tigervnc.com][TigerVNC]], TightVNC,
-RealVNC, and other VNC flavors.  You can use the TurboVNC Viewer to connect to
-a non-TurboVNC server (or vice versa), although this will generally result in
-some decrease in performance.
+to use the TurboVNC Server and the TurboVNC Viewer in concert.  However,
+TurboVNC is fully compatible with [[http://www.tigervnc.com][TigerVNC]],
+TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC Viewer to
+connect to a non-TurboVNC server (or vice versa), although this will generally
+result in some decrease in performance.
 
 The following sections list additional things to bear in mind when mixing
 TurboVNC with other VNC flavors.
@@ -100,7 +100,7 @@ TurboVNC with other VNC flavors.
 		the framebuffer updates with no zlib compression, and the TightVNC and
 		TigerVNC viewers don't support this.
 		{nl}{nl}
-		A similar issue occurs when using more than four encoding threads on the
+		A similar issue occurs when using more than four encoding threads in the
 		server.  Since the Tight encoding type is limited to four zlib streams,
 		any encoding threads beyond the first four cannot use zlib compression.
 		{nl}{nl}

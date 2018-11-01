@@ -136,7 +136,7 @@ to be quite significant if the remote desktop size is relatively large.
 
 2D applications are most often the ones that generate duplicate framebuffer
 updates, so using interframe comparison with such applications can
-significantly reduce the network usage and the server CPU usage (since fewer
+significantly reduce the network usage and the host CPU usage (since fewer
 rectangles are actually being encoded.)  However, with 3D applications, the
 benefits of interframe comparison are less clear, since it is less common for
 those applications to generate duplicate framebuffer updates.  Interframe
@@ -149,14 +149,14 @@ other immersive applications that modify most of the pixels on the screen each
 time a frame is rendered, interframe comparison can actually increase both CPU
 usage and network usage.  Furthermore, the effects of duplicate framebuffer
 updates are not typically noticeable on high-speed networks, but an increase in
-server CPU usage might be.
+host CPU usage might be.
 
 For these reasons, interframe comparison is not enabled by default and should
 not generally be enabled except on bandwidth-constrained networks and with
 applications for which it can be shown to be beneficial.  Interframe comparison
 can be enabled by either passing an argument of ''-interframe'' to
-''vncserver'' when starting a TurboVNC Server session or by requesting a
-compression level of 5 or higher from the viewer (see below.)
+''vncserver'' when starting a TurboVNC session or by requesting a compression
+level of 5 or higher from the viewer (see below.)
 
 ** Advanced Compression Options
 {anchor: AdvancedCompression}
@@ -290,9 +290,9 @@ subset of regions that were drawn with ''X[Shm]PutImage()'' and CopyRect.
 
 You can override the default ALR behavior, thus making all screen regions
 eligible for ALR, by setting the ''TVNC_ALRALL'' environment variable to ''1''
-on the TurboVNC server machine prior to starting a TurboVNC session.  You can
-also set ''TVNC_ALRCOPYRECT'' to ''0'' to make CopyRect regions ALR-ineligible,
-which approximates the behavior of TurboVNC 1.2.1 and prior.
+on the TurboVNC host prior to starting a TurboVNC session.  You can also set
+''TVNC_ALRCOPYRECT'' to ''0'' to make CopyRect regions ALR-ineligible, which
+approximates the behavior of TurboVNC 1.2.1 and prior.
 
 ** Multithreading
 {anchor: Multithreading}
@@ -310,9 +310,9 @@ the server will not help.  Multithreading is also not currently implemented
 with non-Tight encoding types.
 
 To disable server-side multithreading, set the ''TVNC_MT'' environment variable
-to ''0'' on the server prior to starting ''vncserver'', or pass an argument of
+to ''0'' on the host prior to starting ''vncserver'', or pass an argument of
 ''-nomt'' to ''vncserver''.  The default behavior is to use as many threads as
-there are cores on the server machine (up to a maximum of 4), but you can set
+there are cores on the TurboVNC host (up to a maximum of 4), but you can set
 the ''TVNC_NTHREADS'' environment variable or pass an argument of ''-nthreads''
 to ''vncserver'' to override this.
 

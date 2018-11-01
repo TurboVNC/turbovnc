@@ -7,15 +7,15 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2006 Sun Microsystems, Inc.
-.\" Copyright (C) 2010-2013, 2015-2017 D. R. Commander
+.\" Copyright (C) 2010-2013, 2015-2018 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "August 2017" "" "TurboVNC"
+.TH vncserver 1 "November 2018" "" "TurboVNC"
 .SH NAME
-vncserver \- a wrapper to launch an X server for VNC.
+vncserver \- a wrapper to launch the TurboVNC Server
 .SH SYNOPSIS
 .nh
 .ad l
@@ -119,20 +119,21 @@ Otherwise, the \fBvncserver\fR script passes a default value of
 $vncUserDir/x509_private.pem to Xvnc.
 .TP
 \fB\-fg\fR
-Runs Xvnc as a foreground process.  This has two effects: (1) The VNC server
-can be aborted with CTRL-C, and (2) the VNC server will exit as soon as the
-user logs out of the window manager in the VNC session.  This may be necessary
-when launching TurboVNC from within certain grid computing environments.
+Runs Xvnc as a foreground process.  This has two effects: (1) The TurboVNC
+session can be aborted with CTRL-C, and (2) the TurboVNC session will exit as
+soon as the user logs out of the window manager in the session.  This may be
+necessary when launching TurboVNC from within certain grid computing
+environments.
 .TP
 \fB\-autokill\fR
-Automatically kill the VNC server when the startup script exits (which, in most
-cases, means that the VNC server will be killed automatically whenever the user
-logs out of the window manager running in the VNC session.)
+Automatically kill the TurboVNC session when the startup script exits (which,
+in most cases, means that the session will be killed automatically whenever the
+user logs out of the window manager running in the session.)
 .TP
 \fB\-noxstartup\fR
-Do not run the $vncUserDir/.vnc/xstartup.turbovnc script after launching Xvnc.  This
-option allows you to manually start a window manager in your TurboVNC session
-or to run a full-screen application without a window manager.
+Do not run the $vncUserDir/.vnc/xstartup.turbovnc script after launching Xvnc.
+This option allows you to manually start a window manager in your TurboVNC
+session or to run a full-screen application without a window manager.
 .TP
 \fB\-xstartup\fR \fIscript\fR
 Run a custom startup script, instead of xstartup.turbovnc, after launching
@@ -157,11 +158,11 @@ Redirect the output of Xvnc to \fIfile\fR, rather than to
 $vncUserDir/.vnc/{hostname}{display}.log.
 .TP
 \fB\-kill\fR \fB:\fR\fIdisplay\fR
-Stops the VNC server that is currently running on the specified display.
+Stops the VNC session that is currently running on the specified display.
 .TP
 \fB\-list\fR
-Lists the display numbers and process ID's of all VNC servers that are
-currently running under your account on this machine.
+Lists the display numbers and process ID's of all VNC sessions that are
+currently running under your account on this host.
 .TP
 \fB\-help\fR
 Prints a brief list of command line options
@@ -178,7 +179,7 @@ Starts \fBXvnc\fR on display :1.
 Starts \fBXvnc\fR on display :1 with desktop size of 1024x768 pixels.
 .TP
 \fBvncserver\fR -kill \fI:1\fR
-Shuts down the \fBXvnc\fR server running on display :1.
+Shuts down the VNC session running on display :1.
 .SH FILES
 .TP
 /etc/turbovncserver.conf

@@ -54,7 +54,7 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	smaller block sizes can decrease network usage if only a few pixels are
 	changing between updates, but using smaller block sizes can also interfere
 	with the Tight encoder's ability to efficiently split rectangles into
-	subrectangles, thus increasing server CPU usage (and sometimes increasing
+	subrectangles, thus increasing host CPU usage (and sometimes increasing
 	network usage as well, which runs counter to the purpose of interframe
 	comparison.)  Setting the block size to 0 causes the ICE to compare full
 	framebuffer update rectangles, as TurboVNC 1.2.x did.
@@ -154,8 +154,8 @@ along with the ''extssh'' parameter) is used, the TurboVNC Viewer reads the
 ''VNC_TUNNEL_CMD'' environment variable (the Java viewer can also read this
 information from the ''turbovnc.tunnel'' system property), expands patterns
 beginning with the "%" character, and uses the resulting command line to
-establish the secure tunnel to the VNC server.  If ''VNC_TUNNEL_CMD'' is not
-set, then this command line defaults to
+establish the secure tunnel to the VNC host.  If ''VNC_TUNNEL_CMD'' is not set,
+then this command line defaults to
 ''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20'' (or
 ''ssh.exe -f -L %L:localhost:%R %H sleep 20'' if using the Windows native
 viewer.)
@@ -166,9 +166,9 @@ must be present in the command template, and ''%G'' must also be present if
 using the ''-via'' option):
 
 | ''%%'' | A literal "%" |
-| ''%G'' | gateway machine name |
-| ''%H'' | remote VNC machine name (if using the ''-via'' option, then this \
-	is specified from the point of view of the gateway) |
+| ''%G'' | gateway host name or IP address |
+| ''%H'' | remote VNC host name or IP address (if using the ''-via'' option, \
+	then this is specified from the point of view of the gateway) |
 | ''%L'' | local TCP port number |
 | ''%R'' | remote TCP port number |
 
