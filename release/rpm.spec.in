@@ -265,7 +265,7 @@ fi
   %endif
  %endif
  %{javadir}/VncViewer.jar
- %{javadir}/README.txt
+ %{javadir}/README.md
  %if "%{jre}" == "1"
   %{javadir}/jre
  %endif
