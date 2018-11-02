@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-11-02T17:16:47">
+<meta name="date" content="2018-11-02T18:23:28">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -478,7 +478,9 @@ other VNC distributions without interference.</p>
 </li>
 <li class="Itemize-0">
     <span class="remote"><a href="http://www.java.com" class="remote">Oracle 
-    Java</a></span><a name="idx0013"></a> 8 or later, or OpenJDK 7 or later
+    Java</a></span><a name="idx0013"></a> 8 or later, or OpenJDK 7 or later 
+    (Oracle Java 8 or IcedTea-Web is required if using <a href="#JWS">Java 
+    Web Start</a><a name="idx0014"></a>.)
 </li></ul></td>
   </tr>
 </table>
@@ -507,7 +509,7 @@ other VNC distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard"><span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0014"></a> 8u40 or later, or <span class="remote"><a href="https://jdk.java.net" class="remote">OpenJDK</a></span><a name="idx0015"></a> 8 or later</td>
+    <td class="standard"><span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0015"></a> 8u40 or later, or <span class="remote"><a href="https://jdk.java.net" class="remote">OpenJDK</a></span><a name="idx0016"></a> 8 or later (Oracle Java 8 or <span class="remote"><a href="https://icedtea.classpath.org/wiki/IcedTea-Web" class="remote">IcedTea-Web</a></span><a name="idx0017"></a> is required if using <a href="#JWS">Java Web Start</a><a name="idx0018"></a>.)</td>
   </tr>
 </table>
 </div>
@@ -541,15 +543,22 @@ other VNC distributions without interference.</p>
 </li>
 <li class="Itemize-0">
     SSH client 
-    (<span class="remote"><a href="https://www.msys2.org" class="remote">MSYS2</a></span><a name="idx0016"></a> 
+    (<span class="remote"><a href="https://www.msys2.org" class="remote">MSYS2</a></span><a name="idx0019"></a> 
     or 
-    <span class="remote"><a href="http://cygwin.com" class="remote">Cygwin</a></span><a name="idx0017"></a> 
+    <span class="remote"><a href="http://cygwin.com" class="remote">Cygwin</a></span><a name="idx0020"></a> 
     implementation preferred, since those implementations work with the 
     <a href="#via"><code>-via</code> and <code>-tunnel</code> 
-    options</a><a name="idx0018"></a> in the native Windows TurboVNC Viewer, 
+    options</a><a name="idx0021"></a> in the native Windows TurboVNC Viewer, 
     but other SSH implementations will work without the <code>-via</code> 
     and <code>-tunnel</code> options.  <code>ssh.exe</code> should be in the 
     <code>PATH</code>.)
+</li>
+<li class="Itemize-0">
+    <span class="remote"><a href="http://www.java.com" class="remote">Oracle 
+    Java</a></span><a name="idx0022"></a> 8 or 
+    <span class="remote"><a href="https://icedtea.classpath.org/wiki/IcedTea-Web" class="remote">IcedTea-Web</a></span><a name="idx0023"></a> 
+    is required if using <a href="#JWS">Java Web 
+    Start</a><a name="idx0024"></a>.
 </li></ul></td>
   </tr>
 </table>
@@ -590,22 +599,22 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0019"></a> of the 
+        area</a></span><a name="idx0025"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0020"></a>. Packages are 
+        SourceForge project page</a></span><a name="idx0026"></a>. Packages are 
         provided for RPM-based and Debian-based Linux distributions that contain 
         GLIBC 2.5 or later (including 
-        <span class="remote"><a href="http://fedoraproject.org" class="remote">Fedora</a></span><a name="idx0021"></a> 
+        <span class="remote"><a href="http://fedoraproject.org" class="remote">Fedora</a></span><a name="idx0027"></a> 
         6 or later, 
         <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux" class="remote">Red 
         Hat Enterprise 
-        Linux</a></span><a name="idx0022"></a>/<span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0023"></a> 
+        Linux</a></span><a name="idx0028"></a>/<span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0029"></a> 
         5 or later, 
-        <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0024"></a> 
+        <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0030"></a> 
         Linux 
-        Enterprise/<span class="remote"><a href="http://www.opensuse.org" class="remote">openSUSE</a></span><a name="idx0025"></a> 
+        Enterprise/<span class="remote"><a href="http://www.opensuse.org" class="remote">openSUSE</a></span><a name="idx0031"></a> 
         11 or later, and 
-        <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0026"></a> 
+        <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0032"></a> 
         8.04 or later.) <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
@@ -691,11 +700,11 @@ TurboVNC is installed in this manner.</p>
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0027"></a> of the 
+        area</a></span><a name="idx0033"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0028"></a>.
+        SourceForge project page</a></span><a name="idx0034"></a>.
         <div class="important"><p class="important">
-        This package requires <span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0029"></a> or <span class="remote"><a href="https://jdk.java.net" class="remote">OpenJDK</a></span><a name="idx0030"></a>.
+        This package requires <span class="remote"><a href="http://www.java.com" class="remote">Oracle Java</a></span><a name="idx0035"></a> or <span class="remote"><a href="https://jdk.java.net" class="remote">OpenJDK</a></span><a name="idx0036"></a>.
         </p></div>
     </li>
     <li class="Ordered-1 Ordered">
@@ -716,9 +725,9 @@ TurboVNC is installed in this manner.</p>
         <code>TurboVNC-</code><em><code>{version}</code></em><code>-x64.exe</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0031"></a> of the 
+        area</a></span><a name="idx0037"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0032"></a>.
+        SourceForge project page</a></span><a name="idx0038"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -737,9 +746,9 @@ source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-area</a></span><a name="idx0033"></a> of the 
+area</a></span><a name="idx0039"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-SourceForge project page</a></span><a name="idx0034"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0040"></a>, uncompress 
 it, <code>cd&nbsp;turbovnc-</code><em><code>{version}</code></em>, and 
 read <code>BUILDING.md</code> for further instructions on how to build 
 TurboVNC from source.</p>
@@ -937,7 +946,7 @@ environment variable is set to <code>2d</code>.  For other systems that
 lack a 2D window manager, it is recommended that you install MATE.  
 Refer to 
 <span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility" class="remote">this 
-report</a></span><a name="idx0035"></a> for an up-to-date list of window 
+report</a></span><a name="idx0041"></a> for an up-to-date list of window 
 managers that have been tested with this version of the TurboVNC Server, 
 how to configure the TurboVNC Server to use those window managers, and a 
 list of known compatibility issues.</p>
@@ -1061,7 +1070,7 @@ knowledge of web server administration.</p>
         packages for Linux, or you can download 
         <code>libjpeg-turbo-{version}-jws.zip</code> from libjpeg-turbo 1.4.0 or 
         later (available at 
-        <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files" class="remote">http://sourceforge.net/projects/libjpeg-turbo/files</a></span><a name="idx0036"></a>.)  
+        <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files" class="remote">http://sourceforge.net/projects/libjpeg-turbo/files</a></span><a name="idx0042"></a>.)  
         Note that only the JARs included in the official TurboVNC packages are 
         signed using an official code signing certificate. <br /><br />
     </li>
@@ -1070,7 +1079,7 @@ knowledge of web server administration.</p>
         directory. You can obtain these from 
         <code>turbovnc-{version}-jws.zip</code>, which is supplied with official 
         releases of TurboVNC 2.1.2 and later (available at 
-        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files" class="remote">http://sourceforge.net/projects/turbovnc/files</a></span><a name="idx0037"></a>.) 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files" class="remote">http://sourceforge.net/projects/turbovnc/files</a></span><a name="idx0043"></a>.) 
         <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1149,7 +1158,7 @@ knowledge of web server administration.</p>
         </p></div>
         This is just a minimal example.  Refer to the 
         <span class="remote"><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/developersguide/syntax.html" class="remote">JNLP 
-        file syntax</a></span><a name="idx0038"></a> for additional fields that 
+        file syntax</a></span><a name="idx0044"></a> for additional fields that 
         you might want to add. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1240,7 +1249,7 @@ environment variables.  See Section
 <a href="#VNC_VIA_CMD" class="ref">11.2</a> for more details.</p>
 
 <div class="important"><p class="important">
-NOTE: Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>-via</code> and <code>-tunnel</code> command-line options can also be used when the viewer is deployed using <a href="#JWS">Java Web Start</a><a name="idx0039"></a>.  These options would be specified as <code>&lt;argument&gt;</code> elements under the <code>&lt;application-desc&gt;</code> element in the JNLP file.
+NOTE: Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>-via</code> and <code>-tunnel</code> command-line options can also be used when the viewer is deployed using <a href="#JWS">Java Web Start</a><a name="idx0045"></a>.  These options would be specified as <code>&lt;argument&gt;</code> elements under the <code>&lt;application-desc&gt;</code> element in the JNLP file.
 </p></div>
 
 <div class="important"><p class="important">
@@ -1279,7 +1288,7 @@ OpenGL implementation can use direct rendering. Otherwise, it falls back
 to indirect rendering, which is limited to the OpenGL 1.4 API and which 
 may perform sluggishly (particularly with continuous mouse input.)  In 
 general, if the TurboVNC host has a GPU, then you should use 
-<a href="#VGL">VirtualGL</a><a name="idx0040"></a> rather than relying 
+<a href="#VGL">VirtualGL</a><a name="idx0046"></a> rather than relying 
 on TurboVNC&rsquo;s software OpenGL implementation.</p>
 
 <p>Passing <code>-extension&nbsp;GLX</code> to <code>vncserver</code> 
@@ -1405,7 +1414,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0041"></a> should be used
+            comparison</a><a name="idx0047"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1457,7 +1466,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0042"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0048"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -2393,7 +2402,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use the TurboVNC Server and the TurboVNC Viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0043"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0049"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>

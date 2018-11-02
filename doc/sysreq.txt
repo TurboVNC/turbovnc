@@ -32,7 +32,8 @@
 			{item:For optimal performance, the X server should be configured to export \
 				True Color (24-bit or 32-bit) visuals.} \
 			{item:[[http://www.java.com][Oracle Java]] 8 or later, or OpenJDK 7 \
-				or later}} \
+				or later (Oracle Java 8 or IcedTea-Web is required if using \
+				[[#JWS][Java Web Start]].)}} \
 	|
 #OPT: hiCol=first
 
@@ -47,7 +48,9 @@
 	|
 | Other Software \
 	| [[http://www.java.com][Oracle Java]] 8u40 or later, or \
-		[[https://jdk.java.net][OpenJDK]] 8 or later \
+		[[https://jdk.java.net][OpenJDK]] 8 or later (Oracle Java 8 or \
+		[[https://icedtea.classpath.org/wiki/IcedTea-Web][IcedTea-Web]] is \
+		required if using [[#JWS][Java Web Start]].) \
 	|
 #OPT: hiCol=first
 
@@ -70,6 +73,9 @@
 				[[#via][''-via'' and ''-tunnel'' options]] in the native Windows \
 				TurboVNC Viewer, but other SSH implementations will work without the \
 				''-via'' and ''-tunnel'' options.  ''ssh.exe'' should be in the \
-				''PATH''.)}} \
+				''PATH''.)} \
+			{item:[[http://www.java.com][Oracle Java]] 8 or \
+				[[https://icedtea.classpath.org/wiki/IcedTea-Web][IcedTea-Web]] is \
+				required if using [[#JWS][Java Web Start]].}} \
 	|
 #OPT: hiCol=first
