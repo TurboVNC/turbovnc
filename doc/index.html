@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-11-01T15:28:00">
+<meta name="date" content="2018-11-02T17:16:47">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -131,10 +131,6 @@
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd007005" class="hd">7.5 Multithreading</a>
-            </li>
-            <li class="Itemize-3 hd">
-                <a href="#hd007006" class="hd">7.6 Maximizing the Performance of the 
-                Java TurboVNC Viewer</a>
             </li>
         </ul>
     </li>
@@ -410,8 +406,7 @@ include:</p>
         Java Web Start using TurboVNC&rsquo;s built-in web server or deployed on 
         a dedicated web server.  By calling libjpeg-turbo through JNI, the Java 
         TurboVNC Viewer achieves similar levels of performance to the native 
-        TurboVNC Viewer, and its performance is generally equal to or better 
-        than that of the TigerVNC native viewers.
+        TurboVNC Viewer.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         The TurboVNC Server and Java TurboVNC Viewer can be used with an 
@@ -1795,81 +1790,6 @@ can set the <code>TVNC_NTHREADS</code> environment variable or pass an
 argument of <code>-nthreads</code> to <code>vncserver</code> to override 
 this.</p>
 
-
-
-<h2 id="hd007006">7.6&nbsp;Maximizing the Performance of the Java TurboVNC Viewer</h2>
-
-
-<h3 id="hd007006001">Accelerated JPEG Decoding</h3>
-
-<p>The Java TurboVNC Viewer can access libjpeg-turbo through JNI to 
-accelerate JPEG decoding, which gives the viewer similar performance to 
-the native viewer in most cases.  In fact, the TurboVNC Viewer on Mac 
-and Linux/Un*x platforms is simply the Java TurboVNC Viewer packaged in 
-such a way that it behaves like a native viewer.  The libjpeg-turbo JNI 
-library is bundled with the official TurboVNC packages and will 
-automatically be loaded if the Java TurboVNC Viewer is launched using 
-the <code>vncviewer</code> script (Linux/Un*x), the 
-<code>vncviewer-java.bat</code> script or the Start Menu shortcut 
-(Windows), or the standalone TurboVNC Viewer app (Mac).  If the viewer 
-is launched with Java Web Start using the <a href="#JWS">recommended 
-procedure</a><a name="idx0043"></a> or the 
-<a href="#Zero_Install">TurboVNC Server&rsquo;s built-in web 
-server</a><a name="idx0044"></a>, then the appropriate libjpeg-turbo JNI 
-library will be downloaded along with it, assuming that the client 
-machine is running Windows, OS X, or Linux.  For other deployment 
-scenarios, the Java TurboVNC Viewer will find the libjpeg-turbo JNI 
-library if 
-<span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">one 
-of the official libjpeg-turbo packages</a></span><a name="idx0045"></a> 
-is installed on the client machine.</p>
-
-<p>If you suspect for whatever reason that JPEG decoding is not being 
-accelerated, then the easiest way to check is to open the 
-&ldquo;Connection Info&rdquo; dialog (after the connection to the server 
-has been established) and verify that the &ldquo;JPEG 
-decompression&rdquo; field says &ldquo;Turbo&rdquo;.  If you are 
-launching the Java TurboVNC Viewer from the command line, then it will 
-also print a warning if it is unable to load libjpeg-turbo.</p>
-
-
-
-<h3 id="hd007006002">Blitting Performance</h3>
-
-<p>The Java TurboVNC Viewer includes a benchmark that can be used to 
-diagnose performance problems with Java 2D.  In order to run the 
-benchmark, execute the following command in a Command Prompt/terminal 
-window:</p>
-
-<dl class="Description">
-    <dt class="Description-1 Description">Windows</dt>
-    <dd class="Description-1 Description">
-<pre class="verbatim">
-java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;&quot;c:\Program&nbsp;Files\TurboVNC\Java\VncViewer.jar&quot;&nbsp;com.turbovnc.vncviewer.ImageDrawTest
-</pre>
-
-    </dd>
-    <dt class="Description-1 Description">Mac</dt>
-    <dd class="Description-1 Description">
-<pre class="verbatim">
-java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;/Applications/TurboVNC/TurboVNC\&nbsp;Viewer.app/Contents/Resources/Java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
-</pre>
-
-    </dd>
-    <dt class="Description-1 Description">Linux/Un*x</dt>
-    <dd class="Description-1 Description">
-<pre class="verbatim">
-java&nbsp;-Dsun.java2d.trace=count&nbsp;-cp&nbsp;/opt/TurboVNC/java/VncViewer.jar&nbsp;com.turbovnc.vncviewer.ImageDrawTest
-</pre>
-
-    </dd>
-</dl>
-
-<p>Let the benchmark run until it produces stable results, then abort it 
-with CTRL-C.  Looking at the Java 2D trace output will reveal which 
-underlying API is being used to draw the images.  This should generally 
-be OpenGL on Mac platforms and Windows GDI on Windows platforms.</p>
-
 <p><br /></p>
 
 <hr class="break" />
@@ -2473,7 +2393,7 @@ vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use the TurboVNC Server and the TurboVNC Viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0046"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0043"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>

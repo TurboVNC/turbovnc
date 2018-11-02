@@ -262,7 +262,7 @@ fi
   %endif
  %endif
  %{javadir}/VncViewer.jar
- %{javadir}/README.txt
+ %{javadir}/README.md
 %endif
 %if "%{server}" == "1"
  %{mandir}/man1/Xvnc.1*

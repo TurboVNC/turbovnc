@@ -88,9 +88,7 @@ In addition to high performance, other notable features of TurboVNC include:
 	* High-performance zero-install Java viewer, which can be launched via Java
 		Web Start using TurboVNC's built-in web server or deployed on a dedicated
 		web server.  By calling libjpeg-turbo through JNI, the Java TurboVNC Viewer
-		achieves similar levels of performance to the native TurboVNC Viewer, and
-		its performance is generally equal to or better than that of the TigerVNC
-		native viewers.
+		achieves similar levels of performance to the native TurboVNC Viewer.
 
 	* The TurboVNC Server and Java TurboVNC Viewer can be used with an instance
 		of the UltraVNC Repeater in Mode I or II.
