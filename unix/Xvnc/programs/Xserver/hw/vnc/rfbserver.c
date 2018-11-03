@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -451,7 +451,6 @@ rfbNewClient(int sock)
     /* The TigerVNC Viewer won't enable remote desktop resize until it receives
        a desktop resize message from the server, so we give it one with the
        first FBU. */
-    cl->pendingDesktopResize = TRUE;
     cl->reason = rfbEDSReasonServer;
     cl->result = rfbEDSResultSuccess;
 
@@ -1220,6 +1219,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
             REGION_SUBTRACT(pScreen, &cl->copyRegion, &cl->copyRegion,
                             &tmpRegion);
             REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion, &tmpRegion);
+            cl->pendingDesktopResize = TRUE;
         }
 
         if (FB_UPDATE_PENDING(cl) &&

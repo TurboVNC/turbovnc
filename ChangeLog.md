@@ -68,6 +68,10 @@ is now the default, because of 2.2 beta1[8]) and the hostname of the TurboVNC
 server machine resolved to its external IP address rather than to its local IP
 address.
 
+16. Fixed a race condition in the TurboVNC Server that, under rare
+circumstances, caused the TurboVNC Viewer to incorrectly assume that the server
+did not support remote desktop resizing.
+
 
 2.1.2
 =====
