@@ -32,8 +32,7 @@
 			{item:For optimal performance, the X server should be configured to export \
 				True Color (24-bit or 32-bit) visuals.} \
 			{item:[[http://www.java.com][Oracle Java]] 8 or later, or OpenJDK 7 \
-				or later (Oracle Java 8 or IcedTea-Web is required if using \
-				[[#JWS][Java Web Start]].)}} \
+				or later}} \
 	|
 #OPT: hiCol=first
 
@@ -45,11 +44,6 @@
 	|
 | O/S \
 	| OS X 10.9 "Mavericks" or later \
-	|
-| Other Software \
-	| [[http://www.java.com][Oracle Java]] 8 or \
-		[[https://icedtea.classpath.org/wiki/IcedTea-Web][IcedTea-Web]] is \
-		required if using [[#JWS][Java Web Start]]. \
 	|
 #OPT: hiCol=first
 
@@ -73,9 +67,6 @@
 	| {list type=ul: \
 			{item:For optimal performance, the client display should have a 24-bit \
 				or 32-bit (True Color) color depth.} \
-			{item:SSH client (''ssh.exe'' should be in the ''PATH''.)} \
-			{item:[[http://www.java.com][Oracle Java]] 8 or \
-				[[https://icedtea.classpath.org/wiki/IcedTea-Web][IcedTea-Web]] is \
-				required if using [[#JWS][Java Web Start]].}} \
+			{item:SSH client (''ssh.exe'' should be in the ''PATH''.)}} \
 	|
 #OPT: hiCol=first

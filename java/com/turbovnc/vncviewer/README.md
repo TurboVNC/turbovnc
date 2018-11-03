@@ -80,6 +80,109 @@ is being used to draw the images.  This should generally be OpenGL on Mac
 platforms and Windows GDI on Windows platforms.
 
 
+Deploying the TurboVNC Viewer Using Java Web Start
+--------------------------------------------------
+
+__NOTE:__ [Oracle Java](http://www.java.com) 8 or [IcedTea-Web]
+(https://icedtea.classpath.org/wiki/IcedTea-Web) is required on the client if
+using Java Web Start.
+
+For the purposes of this guide, it is assumed that the reader has some
+knowledge of web server administration.
+
+* Copy the TurboVNC Viewer JAR file (`VncViewer.jar`) into a directory on
+  your web server.
+
+* Copy the libjpeg-turbo JNI JAR files into that same directory.  You can
+  obtain these from one of the official TurboVNC 2.0 or later binary packages
+  for Linux, or you can download `libjpeg-turbo-{version}-jws.zip` from
+  [libjpeg-turbo 1.4.0 or later]
+  (http://sourceforge.net/projects/libjpeg-turbo/files).  Note that only
+  the JARs included in the official TurboVNC packages are signed using an
+  official code signing certificate.
+
+* __OPTIONAL:__ Copy the TurboVNC Helper JAR files into that same directory.
+  You can obtain these from `turbovnc-{version}-jws.zip`, which is supplied
+  with official releases of [TurboVNC 2.1.2 and later]
+  (http://sourceforge.net/projects/turbovnc/files).
+
+* __OPTIONAL:__ For large organizations, it may be desirable to obtain your
+  own code signing certificate from a trusted certificate authority and use
+  `jarsigner` to sign all of the JARs with that certificate.  The specifics of
+  this are left as an exercise for the reader.
+
+* Create a file called `TurboVNC.jnlp` in the same directory as
+  `VncViewer.jar` on the web server, and give it the following contents:
+
+        <?xml version="1.0" encoding="utf-8"?>
+        <jnlp codebase="{turbovnc_url}">
+          <information>
+            <title>TurboVNC Viewer</title>
+            <vendor>The VirtualGL Project</vendor>
+          </information>
+
+          <resources>
+            <jar href="VncViewer.jar"/>
+          </resources>
+
+          <security>
+            <all-permissions/>
+          </security>
+
+          <resources os="Mac OS X">
+            <j2se version="1.8+" java-vm-args="-server"/>
+            <nativelib href="ljtosx.jar"/>
+            <!-- Enable drawing tablet support for OS X clients -->
+            <nativelib href="tvnchelper-osx.jar"/>
+          </resources>
+
+          <resources os="Windows" arch="x86">
+            <j2se version="1.8+" java-vm-args="-Dsun.java2d.d3d=false"/>
+            <nativelib href="ljtwin32.jar"/>
+            <!-- Enable keyboard grabbing for 32-bit Windows clients -->
+            <nativelib href="tvnchelper-win32.jar"/>
+          </resources>
+
+          <resources os="Windows" arch="amd64">
+            <j2se version="1.8+" java-vm-args="-Dsun.java2d.d3d=false"/>
+            <nativelib href="ljtwin64.jar"/>
+            <!-- Enable keyboard grabbing for 64-bit Windows clients -->
+            <nativelib href="tvnchelper-win64.jar"/>
+          </resources>
+
+          <resources os="Linux" arch="i386">
+            <j2se version="1.8+" java-vm-args="-server"/>
+            <nativelib href="ljtlinux32.jar"/>
+            <!-- Enable keyboard grabbing, multi-screen spanning, and extended
+                 input device support for 32-bit Linux clients -->
+            <nativelib href="tvnchelper-linux32.jar"/>
+          </resources>
+
+          <resources os="Linux" arch="amd64">
+            <j2se version="1.8+"/>
+            <nativelib href="ljtlinux64.jar"/>
+            <!-- Enable keyboard grabbing, multi-screen spanning, and extended
+                 input device support for 64-bit Linux clients -->
+            <nativelib href="tvnchelper-linux64.jar"/>
+          </resources>
+
+          <application-desc main-class="com.turbovnc.vncviewer.VncViewer"/>
+        </jnlp>
+
+    __NOTE:__ `{turbovnc_url}` should be the absolute URL of the TurboVNC
+    Viewer directory on the web server, e.g. `http://my_host/turbovnc`.
+
+    __NOTE:__ Leave out the lines referring to `tvnchelper-*.jar` if you have
+    not installed the TurboVNC Helper JARs.
+
+    This is just a minimal example.  Refer to the [JNLP file syntax]
+    (https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/developersguide/syntax.html)
+    for additional fields that you might want to add.
+
+* You should now be able to access `{turbovnc_url}/TurboVNC.jnlp` in your
+  browser to launch the TurboVNC Viewer with full performance.
+
+
 Acknowledgements
 ----------------
 
