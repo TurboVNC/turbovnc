@@ -23,7 +23,8 @@ vncserver \- a wrapper to launch the TurboVNC Server
 [:\fIdisplay\fR] [\-geometry\ \fIwidth\fRx\fIheight\fR]
 [\-geometry\ \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]]
 [\-depth\ \fIdepth\fR] [\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR]
-[\-fp\ \%\fIfont\-path\fR] [\-name\ \fIdesktop\-name\fR] [\-httpd] [\-otp]
+[\-fp\ \%\fIfont\-path\fR] [\-name\ \fIdesktop\-name\fR] [\-httpd]
+[\-novnc \fIscript\fR] [-novnccert \fIcert\fR] [\-otp]
 [\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-fg] [\-autokill]
 [\-noxstartup] [\-xstartup\ \fIscript\fR] [\-wm \fIscript\fR] [\-vgl]
 [\-log\ \fIfile\fR]
@@ -99,6 +100,26 @@ This specifies the name of the desktop.
 \fB\-httpd
 Enable the embedded web server in Xvnc, which serves up the TurboVNC Viewer via
 Java Web Start on a dedicated port.
+.TP
+\fB-novnc\fR \fIscript\fR
+Automatically start an instance of noVNC (an HTML 5/JavaScript VNC viewer),
+using noVNC launch script \fIscript\fR, when starting a TurboVNC session.
+\fBvncserver\fR passes appropriate arguments to the launch script, configuring
+the noVNC WebSockets proxy to connect to the RFB port for the TurboVNC session
+and to listen on the port that would normally be used by the TurboVNC Server's
+embedded web server.  \fBvncserver\fR also tracks the process ID of the noVNC
+WebSockets proxy instance and automatically kills that process along with the
+TurboVNC session.  noVNC works in any web browser (including on mobile
+devices), but since it only supports VNC Password authentication, it is
+strongly recommended that it be used only with one-time passwords unless the
+connection is encrypted using HTTPS (see below.)  The performance of noVNC will
+generally be much less than that of the TurboVNC Viewer.
+.TP
+\fB-novnccert\fR \fIcert\fR
+Specify the combined signed certificate/private key file (in PEM format) to use
+with noVNC.  If this certificate is valid, then the noVNC WebSockets proxy will
+use HTTPS rather than HTTP, which effectively encrypts the connection between
+the client and the host.
 .TP
 \fB\-otp\fR
 If the One-Time Password authentication method is enabled and permitted in

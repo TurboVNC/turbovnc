@@ -121,61 +121,38 @@ following command:
 	/opt/TurboVNC/bin/vncserver -list
 	---
 
-** Launching the TurboVNC Viewer from a Web Browser
-{anchor: Zero_Install}
+** Using TurboVNC in a Web Browser
 
-When a TurboVNC session is created, it can optionally start a miniature web
-server that serves up the TurboVNC Viewer as a Java Web Start app.  This allows
-you to easily connect to the TurboVNC session from a machine that does not have
-the TurboVNC Viewer installed locally.  If one of the official TurboVNC binary
-packages is installed on the host, then the miniature web server will
-automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI library for
-Linux, OS X, or Windows clients when launching the TurboVNC Viewer. This
-provides most of the advantages of the standalone TurboVNC viewers, including
-native levels of performance on popular client platforms.
+When a TurboVNC session is started, the ''vncserver'' script can optionally
+start an instance of [[https://novnc.com][noVNC]], an HTML 5/JavaScript VNC
+viewer that works in any web browser (with reduced performance and features
+relative to the TurboVNC Viewer.)  This allows you to easily connect to a
+TurboVNC session from a machine that does not have the TurboVNC Viewer
+installed (including mobile devices.)
 
-To launch the TurboVNC Viewer from a web browser, pass ''-httpd'' to
-''/opt/TurboVNC/bin/vncserver'' when starting a TurboVNC session, then point
-your web browser to:
+To launch noVNC along with a TurboVNC session, pass ''-novnc ''__''{script}''__
+to ''/opt/TurboVNC/bin/vncserver'' when starting the session, where
+__''{script}''__ is the launch script for the noVNC WebSockets proxy (setting
+the ''$noVNC'' variable in ''turbovncserver.conf'' has the same effect.)  The
+''vncserver'' script will print the noVNC URL, which will be of the form:
 
-''http://''__''{host}''__'':{5800+''__''n''__''}''
+''http://''__''{host}''__'':{5800+''__''n''__''}/vnc.html''
+
+or
+
+''https://''__''{host}''__'':{5800+''__''n''__''}/vnc.html''
 
 where __''{host}''__ is the hostname or IP address of the TurboVNC host, and
 __''n''__ is the X display number of the TurboVNC session.
 
-__Example:__
-If the TurboVNC session is occupying X display ''my_host:1'', then point your
-web browser to:
+Point your web browser to that URL in order to access the TurboVNC session.
+You can optionally pass ''-novnccert ''__''{combined_certificate_file}''__ to
+''vncserver'' to encrypt the client/host connection using HTTPS.  See the
+''vncserver'' man page for more details.
 
-''http://my_host:5801''
-
-This will download a JNLP file to your computer, which you can open in Java
-Web Start.
-
-You can add viewer parameters to the URL using the following format:
-
-''http://''__''{host}''__'':{5800+''__''n''__''}?''__''{param1}''__''=''__''{value1}''__''&''__''{param2}''__''=''__''{value2}''__
-
-Example:
-
-''http://my_host:5801?tunnel=1&samp=2x&quality=80''
-
-will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
-
-	!!! NOTE: As of Java 7 Update 51, self-signed JARs are not allowed to run in
-	Java Web Start by default.  This is not an issue if you are using the
-	official TurboVNC binary packages, but if you are building a self-signed
-	version of the TurboVNC Viewer for development purposes, then you will need
-	to add ''http://{host}:{http_port}'' (for example,
-	''http://my_host:5801'') to Java's Exception Site List, which can be found
-	under the "Security" tab in the Java Control Panel.
-
-	!!! NOTE: On some newer OS X systems, downloading a JNLP file may result
-	in an error: "xxxxxxxx.jnlp can't be opened because it it from an
-	unidentified developer."  To work around this, you can either open the JNLP
-	file directly from your Downloads folder, or you can change the application
-	security settings in the "Security & Privacy" section of System Preferences
-	to allow applications downloaded from anywhere.
+	!!! NOTE: noVNC only supports VNC Password authentication, so it is strongly
+	recommended that it be used only with one-time passwords unless the
+	connection is encrypted using HTTPS.
 
 ** Securing a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}
@@ -246,12 +223,6 @@ example.
 The command used to establish the SSH tunnel is configurable by way of
 environment variables.  See {ref prefix="Section ": VNC_VIA_CMD} for more
 details.
-
-	!!! NOTE: Since the TurboVNC Viewer contains an embedded SSH client, the
-	''-via'' and ''-tunnel'' command-line options can also be used when the
-	viewer is deployed using [[#JWS][Java Web Start]].  These options would be
-	specified as ''<argument>'' elements under the ''<application-desc>''
-	element in the JNLP file.
 
 *** Forcing Secure Connections
 #OPT: noList! plain!

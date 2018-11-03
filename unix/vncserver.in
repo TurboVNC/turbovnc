@@ -67,6 +67,7 @@ $pamSession = 0;
 $bits = @BITS@;
 $multiThread = 1;
 $numThreads = 0;
+$noVNC = "";
 
 # Read configuration from the system-wide and user files if present.
 
@@ -82,6 +83,10 @@ ReadAuthConfiguration("/etc/turbovncserver-security.conf");
 $passwdFile = "$vncUserDir/passwd" if (!$passwdFile);
 $x509CertFile = "$vncUserDir/x509_cert.pem" if (!$x509CertFile);
 $x509KeyFile = "$vncUserDir/x509_private.pem" if (!$x509KeyFile);
+if (!$noVNCCertFile) {
+  $noVNCCertFile = "$vncUserDir/noVNC_cert.pem";
+  $noVNCCertFile = "" if (! -r $noVNCCertFile);
+}
 
 # Done reading configuration.
 
@@ -338,7 +343,7 @@ foreach $_registrydir (@registrydirs) {
               "-xstartup", 1, "-log", 1, "-3dwm", 0, "-vgl", 0, "-debug", 0,
               "-x509cert", 1, "-x509key", 1, "-autokill", 0, "-quiet", 0,
               "-wm", 1, "-sessionlist", 0, "-sessionstart", 0, "-http", 0,
-              "-httpd", 0);
+              "-httpd", 0, "-novnc", 1, "-novnccert", 1);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -367,10 +372,19 @@ if ($opt{'-pixelformat'}) {
   $pixelformat = $opt{'-pixelformat'};
 }
 if ($opt{'-http'}) {
+  if ($opt{'-novnc'}) {
+    die "-http and -novnc cannot be used simultaneously.\n";
+  }
   $enableHTTP = 1;
 }
 if ($opt{'-httpd'}) {
+  if ($opt{'-novnc'}) {
+    die "-httpd and -novnc cannot be used simultaneously.\n";
+  }
   $enableHTTP = 1;
+}
+if ($opt{'-novnc'}) {
+  $noVNC = $opt{'-novnc'};
 }
 if ($opt{'-noxstartup'}) {
   $skipxstartup = 1;
@@ -459,6 +473,14 @@ if ($opt{'-x509key'}) {
     }
   }
 }
+if ($opt{'-novnccert'}) {
+  if ($noVNC) {
+    $noVNCCertFile = $opt{'-novnccert'};
+  } else {
+    warn "noVNC is not enabled.  Ignoring -novnccert.\n";
+  }
+}
+
 if ($opt{'-otp'}) {
   $generateOTP = 1;
 }
@@ -638,6 +660,37 @@ if ($generateOTP == 1) {
   }
 
   warn "Run '".$exedir."vncpasswd -o' from within the TurboVNC session or\n    '".$exedir."vncpasswd -o -display :$displayNumber' from within this shell\n    to generate additional OTPs\n";
+}
+
+# Start noVNC and record the process ID.
+
+if ($noVNC) {
+  $cmd = $noVNC;
+  $cmd .= " --listen " . (5800 + $displayNumber);
+  $cmd .= " --vnc :" . (5900 + $displayNumber);
+  $cmd .= " --cert $noVNCCertFile --ssl-only " if ($noVNCCertFile);
+  if (!$opt{'-debug'}) {
+    $cmd .= " >> " . &quotedString($desktopLog) . " 2>&1";
+  }
+
+  $noVNCPIDFile = "$vncUserDir/$host:$displayNumber-noVNC.pid";
+  system("$cmd & echo \$! >$noVNCPIDFile");
+  sleep(1);
+  unless (kill 0, `cat $noVNCPIDFile`) {
+    warn "Could not start noVNC.\n\n";
+    open(LOG, "<$desktopLog");
+    while (<LOG>) { print; }
+    close(LOG);
+    unlink $noVNCPIDFile;
+    $opt{'-kill'} = ':'.$displayNumber;
+    &Kill();
+  }
+
+  $msg = "noVNC URL:  ";
+  $msg .= "https://" if ($noVNCCertFile);
+  $msg .= "http://" if (!$noVNCCertFile);
+  $msg .= $host . ":" . (5800 + $displayNumber) . "/vnc.html\n";
+  warn $msg;
 }
 
 # Create the user's xstartup script if necessary.
@@ -911,6 +964,8 @@ sub Usage
       "        -fp <FONT-PATH>\n".
       "        -name <DESKTOP-NAME>\n".
       "        -httpd\n".
+      "        -novnc <SCRIPT>\n".
+      "        -novnccert <CERT-FILE>\n".
       "        -otp\n".
       "        -fg\n".
       "        -x509cert <CERT-FILE>\n".
@@ -984,12 +1039,35 @@ sub Kill
 
   if ($opt{'-kill'} =~ /^:\d+$/) {
     $pidFile = "$vncUserDir/$host$opt{'-kill'}.pid";
+    $noVNCPIDFile = "$vncUserDir/$host$opt{'-kill'}-noVNC.pid";
   } else {
     if ($opt{'-kill'} !~ /^$host:/) {
       die "\nCan't tell if $opt{'-kill'} is on $host\n".
           "Use -kill :<number> instead\n\n";
     }
     $pidFile = "$vncUserDir/$opt{'-kill'}.pid";
+    $noVNCPIDFile = "$vncUserDir/$opt{'-kill'}-noVNC.pid";
+  }
+
+  if (-r $noVNCPIDFile) {
+    $SIG{'HUP'} = 'IGNORE';
+    chop($pid = `cat $noVNCPIDFile`);
+    warn "Killing noVNC process ID $pid\n";
+
+    if (kill 0, $pid) {
+      system("kill $pid");
+      sleep(1);
+      if (kill 0, $pid) {
+        warn "noVNC seems to be deadlocked.  Kill the process manually and then re-run\n";
+        warn "    ".$0." -kill ".$opt{'-kill'}."\n";
+        warn "to clean up the PID file.\n";
+      } else {
+        unlink $noVNCPIDFile;
+      }
+    } else {
+      warn "noVNC process ID $pid already killed\n";
+      unlink $noVNCPIDFile;
+    }
   }
 
   unless (-r $pidFile) {
@@ -1198,6 +1276,8 @@ sub ReadConfiguration
        pamSession
        multiThread
        numThreads
+       noVNC
+       noVNCCertFile
        passwdFile
        x509CertFile
        x509KeyFile);

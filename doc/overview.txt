@@ -86,8 +86,11 @@ In addition to high performance, other notable features of TurboVNC include:
 		application for a certain period of time.
 
 	* High-performance feature-rich VNC viewer, which can optionally be
-		launched via Java Web Start using TurboVNC's built-in web server or
-		deployed on a dedicated web server
+		launched via Java Web Start
+
+	* The TurboVNC Server integrates with [[https://novnc.com][noVNC]] to provide
+		a zero-install viewer for TurboVNC sessions that works in any web browser
+		(with reduced performance and features relative to the TurboVNC Viewer)
 
 	* The TurboVNC Server and TurboVNC Viewer can be used with an instance of the
 		UltraVNC Repeater in Mode I or II.

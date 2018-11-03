@@ -63,6 +63,13 @@ Viewer (more specifically, the TurboVNC Helper library) for Windows.
 9. The TurboVNC Viewer authentication dialog will now indicate whether the
 connection is encrypted, unencrypted, or redundantly encrypted.
 
+10. The vncserver script can now optionally start an instance of noVNC (HTML
+5/JavaScript VNC viewer) along with each TurboVNC session, using new
+command-line options (`-novnc` and `-novnccert`) or turbovncserver.conf
+variables (`$noVNC` and `$noVNCCertFile`.)  The script also creates a unique
+PID file for the noVNC instance and kills the noVNC instance when the TurboVNC
+session is killed.
+
 
 2.2.1
 =====

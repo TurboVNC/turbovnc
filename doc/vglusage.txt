@@ -64,11 +64,9 @@ client machine without using VirtualGL's embedded VGL Transport.
 	* No X server is required on the client machine.  This reduces the deployment
 		complexity for Windows clients.
 
-	* Zero-install high-performance Java viewer can be launched from any machine
-		that has Java and a web browser installed.
-
-	* Any mobile device can be used as a TurboVNC client (with reduced
-		performance.)
+	* Any machine with a web browser, and any mobile device, can be used as a
+		TurboVNC client (with reduced performance and features relative to the
+		TurboVNC Viewer.)
 
 *** Disadvantages of TurboVNC (when compared to the VGL transport)
 #OPT: noList! plain!

@@ -80,12 +80,83 @@ is being used to draw the images.  This should generally be OpenGL on Mac
 platforms and Windows GDI on Windows platforms.
 
 
+Launching the TurboVNC Viewer from a Web Browser Using Java Web Start
+---------------------------------------------------------------------
+
+__NOTE:__ [Oracle Java](http://www.java.com) 8 or [IcedTea-Web]
+(https://icedtea.classpath.org/wiki/IcedTea-Web) is required on the client if
+using Java Web Start.
+
+__NOTE:__ This feature is deprecated and may be removed in a future release of
+TurboVNC.
+
+When a TurboVNC session is created, it can optionally start a miniature web
+server that serves up the TurboVNC Viewer as a Java Web Start app.  This allows
+you to connect to the TurboVNC session from a machine that does not have the
+TurboVNC Viewer installed locally.  If one of the official TurboVNC binary
+packages is installed on the host, then the miniature web server will
+automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI library for
+Linux, OS X, or Windows clients when launching the TurboVNC Viewer. This
+provides most of the advantages of the standalone TurboVNC viewers, including
+native levels of performance on popular client platforms.
+
+To launch the TurboVNC Viewer from a web browser, pass `-httpd` to
+`/opt/TurboVNC/bin/vncserver` when starting a TurboVNC session, then point
+your web browser to:
+
+    http://{host}:{5800+n}
+
+where `{host}` is the hostname or IP address of the TurboVNC host, and `n` is
+the X display number of the TurboVNC session.
+
+__Example:__ If the TurboVNC session is occupying X display `my_host:1`, then
+point your web browser to:
+
+    http://my_host:5801
+
+This will download a JNLP file to your computer, which you can open in Java
+Web Start.
+
+You can add viewer parameters to the URL using the following format:
+
+    http://{host}:{5800+n}?{param1}={value1}&{param2}={value2}
+
+Example:
+
+    http://my_host:5801?tunnel=1&samp=2x&quality=80
+
+will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
+
+__NOTE:__ As of Java 7 Update 51, self-signed JARs are not allowed to run in
+Java Web Start by default.  This is not an issue if you are using the official
+TurboVNC binary packages, but if you are building a self-signed version of the
+TurboVNC Viewer for development purposes, then you will need to add
+`http://{host}:{http_port}` (for example, `http://my_host:5801`) to Java's
+Exception Site List, which can be found under the "Security" tab in the Java
+Control Panel.
+
+__NOTE:__ On some newer OS X systems, downloading a JNLP file may result in an
+error: "xxxxxxxx.jnlp can't be opened because it it from an unidentified
+developer."  To work around this, you can either open the JNLP file directly
+from your Downloads folder, or you can change the application security settings
+in the "Security & Privacy" section of System Preferences to allow applications
+downloaded from anywhere.
+
+
 Deploying the TurboVNC Viewer Using Java Web Start
 --------------------------------------------------
 
 __NOTE:__ [Oracle Java](http://www.java.com) 8 or [IcedTea-Web]
 (https://icedtea.classpath.org/wiki/IcedTea-Web) is required on the client if
 using Java Web Start.
+
+Accessing the TurboVNC Viewer through TurboVNC's built-in HTTP server, as
+described above, is a straightforward way of running the TurboVNC Viewer on
+machines that have Java but not a VNC viewer installed (for instance, for the
+purpose of collaborating with colleagues who don't normally use TurboVNC.)
+
+To set up a large-scale deployment of the TurboVNC Viewer, however, it is
+desirable to serve up the JAR files from a dedicated web server.
 
 For the purposes of this guide, it is assumed that the reader has some
 knowledge of web server administration.

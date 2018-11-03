@@ -124,10 +124,6 @@ execute:
 
 to start the TurboVNC Viewer without JPEG acceleration.
 
-Refer to the default ''VncViewer.jnlp'' file installed with the TurboVNC Server
-for an example of how to specify Java command-line arguments in a Java Web
-Start environment.
-
 | Java System Property | ''turbovnc.forcealpha = ''__''0 \| 1''__ |
 | Summary | Disable/enable back buffer alpha channel |
 | Default Value | Enabled if using OpenGL Java 2D blitting, disabled otherwise |

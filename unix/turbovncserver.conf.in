@@ -35,6 +35,9 @@
 ##  $multiThread -- 0 to disable multithreaded encoding
 ##  $numThreads  -- number of threads to use with multithreaded encoding
 ##                  (0 = use the server's default thread count)
+##  $noVNC       -- path to noVNC launch script
+##  $noVNCCertFile -- path to combined signed certificate/private key file (in
+##                    PEM format) to use with noVNC
 ##  $passwdFile  -- path to VNC password file to use with VNC Password
 ##                  authentication
 ##  $x509CertFile -- path to X.509 signed certificate file (in PEM format) to
@@ -62,6 +65,7 @@
 # $pamSession = 0;
 # $multiThread = 1;
 # $numThreads = 0;
+# $noVNC = "";
 
 ## Uncomment this to use the X font server by default, rather than a static
 ## font path.
@@ -84,6 +88,7 @@
 
 ## These settings are the default.  Uncomment and edit to change.
 #
+# $noVNCCertFile = "$vncUserDir/noVNC_cert.pem";
 # $passwdFile = "$vncUserDir/passwd";
 # $x509CertFile = "$vncUserDir/x509_cert.pem";
 # $x509KeyFile = "$vncUserDir/x509_private.pem";
