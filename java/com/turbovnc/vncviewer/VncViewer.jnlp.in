@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     VncViewer.jnlp - default Java Web Start file for the Java TurboVNC Viewer,
-     to be used with Xvnc.  On any file ending in .jnlp, the HTTP server
-     embedded in Xvnc will substitute the following variables when preceded by
-     a dollar sign:
+     VncViewer.jnlp - default Java Web Start file for the TurboVNC Viewer, to
+     be used with Xvnc.  On any file ending in .jnlp, the HTTP server embedded
+     in Xvnc will substitute the following variables when preceded by a dollar
+     sign:
 
      USER - the user account under which the VNC session is running
      DESKTOP - the VNC session name

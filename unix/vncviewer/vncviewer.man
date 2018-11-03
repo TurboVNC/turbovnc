@@ -1,6 +1,6 @@
 '\" t
 .\" ** The above line should force tbl to be a preprocessor **
-.\" Man page for Java vncviewer
+.\" Man page for vncviewer
 .\"
 .\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
@@ -15,7 +15,7 @@
 .\"
 .TH vncviewer 1 "October 2018" "" "TurboVNC"
 .SH NAME
-vncviewer \- a Java viewer/client for TurboVNC
+vncviewer \- a wrapper to launch the TurboVNC Viewer
 .SH SYNOPSIS
 \fBvncviewer\fR [\fIoptions\fR] [\fIhost\fR][\fI:display\fR]
 .br
@@ -27,10 +27,10 @@ vncviewer \- a Java viewer/client for TurboVNC
 .br
 .SH DESCRIPTION
 .B vncviewer
-is a script that launches the Java TurboVNC Viewer, a client application for
-the VNC (Virtual Network Computing) system.  This VNC viewer can connect to any
-VNC server, allowing you to control the desktop environment of a different
-machine.
+is a script that launches the TurboVNC Viewer, a client application for the VNC
+(Virtual Network Computing) system that is written in Java and C.  This VNC
+viewer can connect to any VNC server, allowing you to control the desktop
+environment of a different machine.
 
 Once connected, you can press F8 to display a pop\-up menu with various options
 for controlling the behavior of the VNC viewer.  Press F8 twice to send an F8

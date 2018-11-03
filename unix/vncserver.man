@@ -96,8 +96,8 @@ on Solaris systems.
 This specifies the name of the desktop.
 .TP
 \fB\-httpd
-Enable the embedded web server in Xvnc, which serves up the Java TurboVNC
-Viewer on a dedicated port.
+Enable the embedded web server in Xvnc, which serves up the TurboVNC Viewer via
+Java Web Start on a dedicated port.
 .TP
 \fB\-otp\fR
 If the One-Time Password authentication method is enabled and permitted in

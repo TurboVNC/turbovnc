@@ -29,7 +29,7 @@
 %define javadir @CMAKE_INSTALL_FULL_JAVADIR@
 
 # Whether or not to include the TurboJPEG JNI JAR files (used when launching
-# the Java TurboVNC Viewer via Java Web Start)
+# the TurboVNC Viewer via Java Web Start)
 %define jnijars @TVNC_INCLUDEJNIJARS@
 
 # Directory in which the TurboJPEG JNI JARs can be found
