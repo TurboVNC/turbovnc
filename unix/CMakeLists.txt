@@ -90,7 +90,8 @@ install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vncserver.man
 	DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 RENAME vncserver.1)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver.conf
+configure_file(turbovncserver.conf.in turbovncserver.conf @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/turbovncserver.conf
 	DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-security.conf
 	DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR})

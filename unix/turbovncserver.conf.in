@@ -32,16 +32,23 @@
 ##  $multiThread -- 0 to disable multithreaded encoding
 ##  $numThreads  -- number of threads to use with multithreaded encoding
 ##                  (0 = use the server's default thread count)
+##  $passwdFile  -- path to VNC password file to use with VNC Password
+##                  authentication
+##  $x509CertFile -- path to X.509 signed certificate file (in PEM format) to
+##                   use with X.509 encryption
+##  $x509KeyFile -- path to X.509 private key file (in PEM format) to use with
+##                  X.509 encryption
 ##
 
 ## These settings are the default.  Uncomment and edit to change.
 #
 # $geometry = "1240x900";
 # $depth = 24;
-# $desktopName = "X";
-# $vncClasses = "/usr/local/vnc/classes";
+# $desktopName = "TurboVNC ($ENV{USER})";
+# $vncClasses = "@CMAKE_INSTALL_FULL_JAVADIR@";
 # $vncUserDir = "$ENV{HOME}/.vnc";
 # $fontPath = "";
+# $securityTypes = "TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin, Plain";
 # $colorPath = "/usr/lib/X11/rgb";
 # $generateOTP = 0;
 # $autoLosslessRefresh = 0.0;
@@ -69,3 +76,9 @@
 ## $vncUserDir/xstartup.turbovnc.
 #
 # $vncUserDir = "/tmp/$ENV{USER}-vnc";
+
+## These settings are the default.  Uncomment and edit to change.
+#
+# $passwdFile = "$vncUserDir/passwd";
+# $x509CertFile = "$vncUserDir/x509_cert.pem";
+# $x509KeyFile = "$vncUserDir/x509_private.pem";

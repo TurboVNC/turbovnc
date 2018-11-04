@@ -51,12 +51,9 @@ $xauth = "xauth";
 $geometry = "1240x900";
 $depth = 24;
 $vncUserDir = "$ENV{HOME}/.vnc";
-$passwdFile = "$vncUserDir/passwd";
 $authTypeVNC = 1;
 $authTypeOTP = 1;
 $generateOTP = 0;
-$x509CertFile = "$vncUserDir/x509_cert.pem";
-$x509KeyFile = "$vncUserDir/x509_private.pem";
 $securityTypes = "";
 $encTypeX509 = @USETLS@;
 $enableHTTP = 1;
@@ -77,6 +74,13 @@ ReadConfiguration();
 $configFile = "$ENV{HOME}/.vnc/turbovncserver.conf";
 ReadConfiguration();
 ReadAuthConfiguration("/etc/turbovncserver-security.conf");
+
+# We set these defaults after reading the configuration file, in case
+# $vncUserDir was modified.
+
+$passwdFile = "$vncUserDir/passwd" if (!$passwdFile);
+$x509CertFile = "$vncUserDir/x509_cert.pem" if (!$x509CertFile);
+$x509KeyFile = "$vncUserDir/x509_private.pem" if (!$x509KeyFile);
 
 # Done reading configuration.
 
@@ -1143,7 +1147,10 @@ sub ReadConfiguration
        autokill
        pamSession
        multiThread
-       numThreads);
+       numThreads
+       passwdFile
+       x509CertFile
+       x509KeyFile);
 
   if (open CONF, "<$configFile") {
     while (<CONF>) {
