@@ -1486,7 +1486,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   void showInfo() {
-    JOptionPane pane = new JOptionPane(
+    JOptionPane.showMessageDialog(viewport,
       "Desktop name:  " + cp.name() + "\n" +
       "Host:  " + sock.getPeerName() + ":" + sock.getPeerPort() + "\n" +
       "Size:  " + cp.width + "x" + cp.height + "\n" +
@@ -1502,9 +1502,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         (reader.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
       (VncViewer.osGrab() || VncViewer.osEID() ? "\nTurboVNC Helper:  " +
         (Viewport.isHelperAvailable() ? "Loaded" : "Not found") : ""),
-      JOptionPane.PLAIN_MESSAGE);
-    JDialog dlg = pane.createDialog(viewport, "VNC connection info");
-    dlg.setVisible(true);
+      "VNC connection info", JOptionPane.PLAIN_MESSAGE);
   }
 
   public void refresh() {

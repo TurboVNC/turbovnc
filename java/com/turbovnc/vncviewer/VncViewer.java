@@ -683,7 +683,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void showAbout(Component comp) {
-    JOptionPane pane = new JOptionPane(
+    JOptionPane.showMessageDialog(comp,
       VncViewer.PRODUCT_NAME + " v" + VncViewer.version +
         " (" + VncViewer.build + ")\n" +
       "[JVM: " + System.getProperty("java.vm.name") + " " +
@@ -692,10 +692,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "Built on " + VncViewer.pkgDate + " at " + VncViewer.pkgTime + "\n" +
       "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
         "\n" +
-      VncViewer.url, JOptionPane.INFORMATION_MESSAGE);
-    pane.setIcon(LOGO_ICON128);
-    JDialog dlg = pane.createDialog(comp, "About TurboVNC Viewer");
-    dlg.setVisible(true);
+      VncViewer.url,
+      "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE, LOGO_ICON128);
   }
 
   void showOptions() {
