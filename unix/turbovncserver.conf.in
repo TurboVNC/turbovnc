@@ -23,6 +23,8 @@
 ##                          or 0 to disable)
 ##  $enableHTTP  -- 1 to enable the embedded web server (which serves up the
 ##                  Java TurboVNC Viewer) or 0 to disable
+##  $wm          -- the window manager startup script to use (for instance,
+##                  "mate-session" or "2d")
 ##  $useVGL      -- 1 to run the window manager startup script using VirtualGL
 ##  $autokill    -- 1 to automatically kill the TurboVNC session when the
 ##                  startup script finishes or 0 to leave it running
@@ -54,6 +56,7 @@
 # $generateOTP = 0;
 # $autoLosslessRefresh = 0.0;
 # $enableHTTP = 1;
+# $wm = "";
 # $useVGL = 0;
 # $autokill = 0;
 # $pamSession = 0;

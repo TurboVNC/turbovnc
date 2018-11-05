@@ -57,6 +57,12 @@ all three files to be specified in turbovncserver.conf.
 8. The vncserver script now allows VirtualGL to be enabled using the
 turbovncserver.conf file.
 
+9. The vncserver script now allows the window manager startup script to be
+specified using a new command-line option (`-wm`) or turbovncserver.conf
+variable (`$wm`.)  This is useful when starting TurboVNC sessions at boot time,
+and for other situations in which setting the `TVNC_WM` environment variable is
+not possible.
+
 
 2.2
 ===

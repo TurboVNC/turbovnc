@@ -60,6 +60,7 @@ $enableHTTP = 1;
 $skipxstartup = 0;
 $autoLosslessRefresh = 0.0;
 $deferUpdate = 1;
+$wm = "";
 $useVGL = 0;
 $autokill = 0;
 $pamSession = 0;
@@ -335,7 +336,8 @@ foreach $_registrydir (@registrydirs) {
               "-list", 0, "-fp", 1, "-otp", 0, "-securitytypes", 1,
               "-nohttp", 0, "-nohttpd", 0, "-rfbauth", 1, "-noxstartup", 0,
               "-xstartup", 1, "-log", 1, "-3dwm", 0, "-vgl", 0, "-debug", 0,
-              "-x509cert", 1, "-x509key", 1, "-autokill", 0, "-quiet", 0);
+              "-x509cert", 1, "-x509key", 1, "-autokill", 0, "-quiet", 0,
+              "-wm", 1);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -368,6 +370,9 @@ if ($opt{'-noxstartup'}) {
 }
 if ($opt{'-xstartup'}) {
   $xstartup = $opt{'-xstartup'};
+}
+if ($opt{'-wm'}) {
+  $wm = $opt{'-wm'};
 }
 if ($opt{'-3dwm'} || $opt{'-vgl'}) {
   $useVGL = 1;
@@ -638,6 +643,9 @@ if (! $skipxstartup) {
   # Run the X startup script.
 
   warn "Starting applications specified in $xstartup\n";
+  if ($wm) {
+    $ENV{TVNC_WM} = $wm;
+  }
   if ($useVGL) {
     warn "(Enabling VirtualGL)\n";
     $ENV{TVNC_VGL} = "1";
@@ -899,6 +907,7 @@ sub Usage
       "        -autokill\n".
       "        -noxstartup\n".
       "        -xstartup <SCRIPT>\n".
+      "        -wm <SCRIPT>\n".
       "        -vgl\n".
       "        -log <FILE>\n".
       "\n".
@@ -1144,6 +1153,7 @@ sub ReadConfiguration
        generateOTP
        autoLosslessRefresh
        enableHTTP
+       wm
        useVGL
        autokill
        pamSession
