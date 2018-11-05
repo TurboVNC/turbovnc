@@ -26,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
+import javax.swing.*;
 
 import com.turbovnc.rfb.*;
 import com.turbovnc.rdr.*;
@@ -60,11 +61,28 @@ public final class SessionManager extends Tunnel {
             return startSession(opts.sshSession, host);
           else {
             if (VncViewer.sessMgrAuto.getValue())
-              generateOTP(opts.sshSession, host, dlg.getConnectSession());
+              generateOTP(opts.sshSession, host, dlg.getConnectSession(), true,
+                          dlg.getViewOnly());
             return dlg.getConnectSession();
           }
         } else if (dlg.getKillSession() != null) {
           killSession(opts.sshSession, host, dlg.getKillSession());
+        } else if (dlg.getNewOTPSession() != null) {
+          String otp = generateOTP(opts.sshSession, host,
+                                   dlg.getNewOTPSession(), false,
+                                   dlg.getViewOnly());
+          String msg = "New " +
+                       (dlg.getViewOnly() ? "view-only " : "full control ") +
+                       "one-time password:\n\n" + otp + "\n\n" +
+                       "Click OK to copy OTP to clipboard.";
+          int option =
+            JOptionPane.showConfirmDialog(dlg.getJDialog(), msg,
+                                          "New OTP for " + host +
+                                            dlg.getNewOTPSession(),
+                                          JOptionPane.OK_CANCEL_OPTION,
+                                          JOptionPane.INFORMATION_MESSAGE);
+          if (option == JOptionPane.OK_OPTION)
+            ClipboardDialog.setClipboard(otp);
         }
       }
       firstTime = false;
@@ -185,13 +203,14 @@ public final class SessionManager extends Tunnel {
       throw new ErrorException("Could not parse TurboVNC Server output");
 
     if (VncViewer.sessMgrAuto.getValue())
-      generateOTP(sshSession, host, sessions[0]);
+      generateOTP(sshSession, host, sessions[0], true, false);
 
     return sessions[0];
   }
 
-  private static void generateOTP(Session sshSession, String host,
-                                  String session) throws Exception {
+  private static String generateOTP(Session sshSession, String host,
+                                    String session, boolean setPassword,
+                                    boolean viewOnly) throws Exception {
     vlog.debug("Generating one-time password for session " + host + session);
 
     VncViewer.noExceptionDialog = true;
@@ -205,6 +224,7 @@ public final class SessionManager extends Tunnel {
       dir = "/opt/TurboVNC";
 
     String command = dir + "/bin/vncpasswd -o -display " + session;
+    if (viewOnly) command += " -v";
     channelExec.setCommand(command);
     InputStream stderr = channelExec.getErrStream();
     channelExec.connect();
@@ -214,6 +234,8 @@ public final class SessionManager extends Tunnel {
     int nLines = 0;
     while ((line = br.readLine()) != null && nLines < 20) {
       if (result == null) result = line;
+      if (viewOnly && result.matches("Full control one-time password:.*"))
+        result = null;
       if (error == null) error = line;
       if (nLines == 0) {
         vlog.debug("===============================================================================");
@@ -228,7 +250,7 @@ public final class SessionManager extends Tunnel {
     if (result != null) {
       result = result.replaceAll("\\s", "");
       result = result.replaceAll("^.*:", "");
-      VncViewer.password.setParam(result);
+      if (setPassword) VncViewer.password.setParam(result);
     }
 
     channelExec.disconnect();
@@ -245,6 +267,8 @@ public final class SessionManager extends Tunnel {
                                "on host " + host +
                                (error != null ? ":\n    " + error : ""));
     }
+
+    return result;
   }
 
   private static void killSession(Session sshSession, String host,

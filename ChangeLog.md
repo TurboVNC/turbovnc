@@ -33,13 +33,14 @@ TurboVNC host.  If no display number or port is specified in the "VNC server"
 field, the TurboVNC Viewer will connect to the specified TurboVNC host using
 SSH, list all TurboVNC sessions running under the user's account, and display a
 dialog that allows the user to choose a session to which to connect, kill any
-of the sessions, or start a new session.  Previously, the TurboVNC Viewer
-defaulted to Display :0/Port 5900 when no display number or port was specified,
-but it is now necessary to specify :0 or ::5900 in order to connect to Display
-:0/Port 5900.  The TurboVNC Session Manager uses the TurboVNC Viewer's built-in
-SSH client (it cannot use an external SSH client because of the need to leave
-the SSH session open and reuse it to run multiple commands), so it is affected
-by the `SSHKey`, `SSHKeyFile`, `SSHKeyPass`, and `SSHPort` parameters.
+of the sessions, generate a new OTP for any of the sessions, or start a new
+session.  Previously, the TurboVNC Viewer defaulted to Display :0/Port 5900
+when no display number or port was specified, but it is now necessary to
+specify :0 or ::5900 in order to connect to Display :0/Port 5900.  The TurboVNC
+Session Manager uses the TurboVNC Viewer's built-in SSH client (it cannot use
+an external SSH client because of the need to leave the SSH session open and
+reuse it to run multiple commands), so it is affected by the `SSHKey`,
+`SSHKeyFile`, `SSHKeyPass`, and `SSHPort` parameters.
 
 6. When generating a Mac package/disk image (for instance, by using `make dmg`)
 or a Windows installer (for instance, by using `nmake installer`), a custom JRE

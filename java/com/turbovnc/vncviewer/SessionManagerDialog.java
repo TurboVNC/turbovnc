@@ -46,6 +46,9 @@ class SessionManagerDialog extends Dialog implements ActionListener {
         JLabel displayLabel = new JLabel(host + sessions[i]);
         connectButton[i] = new JButton("Connect");
         connectButton[i].addActionListener(this);
+        newOTPButton[i] = new JButton("New OTP");
+        newOTPButton[i].addActionListener(this);
+        viewOnlyBox[i] = new JCheckBox("View-only");
         killButton[i] = new JButton("Kill");
         killButton[i].addActionListener(this);
 
@@ -59,8 +62,18 @@ class SessionManagerDialog extends Dialog implements ActionListener {
                               GridBagConstraints.HORIZONTAL,
                               GridBagConstraints.CENTER,
                               new Insets(0, 2, 0, 5));
-        Dialog.addGBComponent(killButton[i], sessionsPanel,
+        Dialog.addGBComponent(newOTPButton[i], sessionsPanel,
                               2, i, 1, 1, 0, 0, 1, 1,
+                              GridBagConstraints.HORIZONTAL,
+                              GridBagConstraints.CENTER,
+                              new Insets(0, 2, 0, 5));
+        Dialog.addGBComponent(viewOnlyBox[i], sessionsPanel,
+                              3, i, 1, 1, 0, 0, 1, 1,
+                              GridBagConstraints.HORIZONTAL,
+                              GridBagConstraints.CENTER,
+                              new Insets(0, 2, 0, 5));
+        Dialog.addGBComponent(killButton[i], sessionsPanel,
+                              4, i, 1, 1, 0, 0, 1, 1,
                               GridBagConstraints.HORIZONTAL,
                               GridBagConstraints.CENTER,
                               new Insets(0, 2, 0, 5));
@@ -138,9 +151,14 @@ class SessionManagerDialog extends Dialog implements ActionListener {
            i < Math.min(sessions.length, SessionManager.MAX_SESSIONS); i++) {
         if (s instanceof JButton && (JButton)s == connectButton[i]) {
           connectSession = sessions[i];
+          viewOnly = viewOnlyBox[i].isSelected();
           endDialog();
         } else if (s instanceof JButton && (JButton)s == killButton[i]) {
           killSession = sessions[i];
+          endDialog();
+        } else if (s instanceof JButton && (JButton)s == newOTPButton[i]) {
+          newOTPSession = sessions[i];
+          viewOnly = viewOnlyBox[i].isSelected();
           endDialog();
         }
       }
@@ -151,14 +169,21 @@ class SessionManagerDialog extends Dialog implements ActionListener {
 
   String getKillSession() { return killSession; }
 
+  String getNewOTPSession() { return newOTPSession; }
+
+  boolean getViewOnly() { return viewOnly; }
+
   JPanel sessionManagerPanel, sessionsPanel, scrollPanel;
   JScrollPane scrollPane;
   JButton[] connectButton = new JButton[SessionManager.MAX_SESSIONS];
   JButton[] killButton = new JButton[SessionManager.MAX_SESSIONS];
+  JButton[] newOTPButton = new JButton[SessionManager.MAX_SESSIONS];
+  JCheckBox[] viewOnlyBox = new JCheckBox[SessionManager.MAX_SESSIONS];
   JButton newSessionButton, refreshButton, cancelButton;
 
   String[] sessions;
-  String connectSession, killSession;
+  String connectSession, killSession, newOTPSession;
+  boolean viewOnly;
 
   static LogWriter vlog = new LogWriter("SessionManagerDialog");
 }

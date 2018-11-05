@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2014-2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2014-2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,10 @@ class ClipboardDialog extends Dialog implements ActionListener {
 
   public void serverCutText(String str, int len) {
     setContents(str);
+    setClipboard(str);
+  }
+
+  public static void setClipboard(String str) {
     SecurityManager sm = System.getSecurityManager();
     try {
       if (sm != null) sm.checkPermission(new AWTPermission("accessClipboard"));
