@@ -25,7 +25,8 @@ vncserver \- a wrapper to launch the TurboVNC Server
 [\-depth\ \fIdepth\fR] [\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR]
 [\-fp\ \%\fIfont\-path\fR] [\-name\ \fIdesktop\-name\fR] [\-httpd] [\-otp]
 [\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-fg] [\-autokill]
-[\-noxstartup] [\-xstartup\ \fIscript\fR] [\-vgl] [\-log\ \fIfile\fR]
+[\-noxstartup] [\-xstartup\ \fIscript\fR] [\-wm \fIscript\fR] [\-vgl]
+[\-log\ \fIfile\fR]
 \%[\fIXvnc\-options\fR...]
 .ad
 .hy
@@ -139,6 +140,12 @@ Xvnc.  This is useful in conjunction with the \fB-fg\fR option, since it
 allows for running a full-screen application (such as a game or a
 virtualization solution) in TurboVNC without a window manager and causes the
 TurboVNC session to terminate whenever the application exits.
+.TP
+\fB-wm\fR \fIscript\fR
+This sets the value of the \fBTVNC_WM\fR environment variable to \fIscript\fR.
+The default xstartup.turbovnc script that \fBvncserver\fR creates will launch
+the window manager startup script specified in the \fBTVNC_WM\fR environment
+variable, if it is set.
 .TP
 \fB\-vgl\fR
 This sets an environment variable (\fBTVNC_VGL\fR) to 1, and the default

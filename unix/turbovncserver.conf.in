@@ -23,6 +23,9 @@
 ##                          or 0 to disable)
 ##  $enableHTTP  -- 1 to enable the embedded web server (which serves up the
 ##                  TurboVNC Viewer via Java Web Start) or 0 to disable
+##  $wm          -- the window manager startup script to use (for instance,
+##                  "mate-session" or "2d")
+##  $useVGL      -- 1 to run the window manager startup script using VirtualGL
 ##  $autokill    -- 1 to automatically kill the TurboVNC session when the
 ##                  startup script finishes or 0 to leave it running
 ##  $pamSession  -- 1 to create a new PAM session for each viewer that
@@ -32,20 +35,29 @@
 ##  $multiThread -- 0 to disable multithreaded encoding
 ##  $numThreads  -- number of threads to use with multithreaded encoding
 ##                  (0 = use the server's default thread count)
+##  $passwdFile  -- path to VNC password file to use with VNC Password
+##                  authentication
+##  $x509CertFile -- path to X.509 signed certificate file (in PEM format) to
+##                   use with X.509 encryption
+##  $x509KeyFile -- path to X.509 private key file (in PEM format) to use with
+##                  X.509 encryption
 ##
 
 ## These settings are the default.  Uncomment and edit to change.
 #
 # $geometry = "1240x900";
 # $depth = 24;
-# $desktopName = "X";
-# $vncClasses = "/usr/local/vnc/classes";
+# $desktopName = "TurboVNC ($ENV{USER})";
+# $vncClasses = "@CMAKE_INSTALL_FULL_JAVADIR@";
 # $vncUserDir = "$ENV{HOME}/.vnc";
 # $fontPath = "";
+# $securityTypes = "TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin, Plain";
 # $colorPath = "/usr/lib/X11/rgb";
 # $generateOTP = 0;
 # $autoLosslessRefresh = 0.0;
 # $enableHTTP = 0;
+# $wm = "";
+# $useVGL = 0;
 # $autokill = 0;
 # $pamSession = 0;
 # $multiThread = 1;
@@ -69,3 +81,9 @@
 ## $vncUserDir/xstartup.turbovnc.
 #
 # $vncUserDir = "/tmp/$ENV{USER}-vnc";
+
+## These settings are the default.  Uncomment and edit to change.
+#
+# $passwdFile = "$vncUserDir/passwd";
+# $x509CertFile = "$vncUserDir/x509_cert.pem";
+# $x509KeyFile = "$vncUserDir/x509_private.pem";

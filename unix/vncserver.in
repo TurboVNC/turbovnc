@@ -51,18 +51,16 @@ $xauth = "xauth";
 $geometry = "1240x900";
 $depth = 24;
 $vncUserDir = "$ENV{HOME}/.vnc";
-$passwdFile = "$vncUserDir/passwd";
 $authTypeVNC = 1;
 $authTypeOTP = 1;
 $generateOTP = 0;
-$x509CertFile = "$vncUserDir/x509_cert.pem";
-$x509KeyFile = "$vncUserDir/x509_private.pem";
 $securityTypes = "";
 $encTypeX509 = @USETLS@;
 $enableHTTP = 0;
 $skipxstartup = 0;
 $autoLosslessRefresh = 0.0;
 $deferUpdate = 1;
+$wm = "";
 $useVGL = 0;
 $autokill = 0;
 $pamSession = 0;
@@ -77,6 +75,13 @@ ReadConfiguration();
 $configFile = "$ENV{HOME}/.vnc/turbovncserver.conf";
 ReadConfiguration();
 ReadAuthConfiguration("/etc/turbovncserver-security.conf");
+
+# We set these defaults after reading the configuration file, in case
+# $vncUserDir was modified.
+
+$passwdFile = "$vncUserDir/passwd" if (!$passwdFile);
+$x509CertFile = "$vncUserDir/x509_cert.pem" if (!$x509CertFile);
+$x509KeyFile = "$vncUserDir/x509_private.pem" if (!$x509KeyFile);
 
 # Done reading configuration.
 
@@ -332,7 +337,8 @@ foreach $_registrydir (@registrydirs) {
               "-nohttp", 0, "-nohttpd", 0, "-rfbauth", 1, "-noxstartup", 0,
               "-xstartup", 1, "-log", 1, "-3dwm", 0, "-vgl", 0, "-debug", 0,
               "-x509cert", 1, "-x509key", 1, "-autokill", 0, "-quiet", 0,
-              "-sessionlist", 0, "-sessionstart", 0, "-http", 0, "-httpd", 0);
+              "-wm", 1, "-sessionlist", 0, "-sessionstart", 0, "-http", 0,
+              "-httpd", 0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -371,6 +377,9 @@ if ($opt{'-noxstartup'}) {
 }
 if ($opt{'-xstartup'}) {
   $xstartup = $opt{'-xstartup'};
+}
+if ($opt{'-wm'}) {
+  $wm = $opt{'-wm'};
 }
 if ($opt{'-3dwm'} || $opt{'-vgl'}) {
   $useVGL = 1;
@@ -645,6 +654,9 @@ if (! $skipxstartup) {
   # Run the X startup script.
 
   warn "Starting applications specified in $xstartup\n";
+  if ($wm) {
+    $ENV{TVNC_WM} = $wm;
+  }
   if ($useVGL) {
     warn "(Enabling VirtualGL)\n";
     $ENV{TVNC_VGL} = "1";
@@ -906,6 +918,7 @@ sub Usage
       "        -autokill\n".
       "        -noxstartup\n".
       "        -xstartup <SCRIPT>\n".
+      "        -wm <SCRIPT>\n".
       "        -vgl\n".
       "        -log <FILE>\n".
       "\n".
@@ -1179,10 +1192,15 @@ sub ReadConfiguration
        generateOTP
        autoLosslessRefresh
        enableHTTP
+       wm
+       useVGL
        autokill
        pamSession
        multiThread
-       numThreads);
+       numThreads
+       passwdFile
+       x509CertFile
+       x509KeyFile);
 
   if (open CONF, "<$configFile") {
     while (<CONF>) {

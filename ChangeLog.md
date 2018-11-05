@@ -113,6 +113,22 @@ configuration file will take precedence over any TurboVNC Viewer parameters.
 circumstances, caused the TurboVNC Viewer to incorrectly assume that the server
 did not support remote desktop resizing.
 
+7. Fixed an issue in the vncserver script whereby changing the value of
+`$vncUserDir` in turbovncserver.conf did not change the default locations of
+the VNC password file, the X.509 certificate file, and the X.509 private key
+file.  The script now defers setting the default locations of those files until
+after turbovncserver.conf is read, and the script now allows the locations of
+all three files to be specified in turbovncserver.conf.
+
+8. The vncserver script now allows VirtualGL to be enabled using the
+turbovncserver.conf file.
+
+9. The vncserver script now allows the window manager startup script to be
+specified using a new command-line option (`-wm`) or turbovncserver.conf
+variable (`$wm`.)  This is useful when starting TurboVNC sessions at boot time,
+and for other situations in which setting the `TVNC_WM` environment variable is
+not possible.
+
 
 2.2
 ===
