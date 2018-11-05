@@ -161,6 +161,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
               Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
               Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
               Security.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
+              opts.tunnel = true;
             }
             opts.port = Hostname.getPort(session);
           } catch (Exception e) {
