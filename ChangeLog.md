@@ -54,6 +54,9 @@ file.  The script now defers setting the default locations of those files until
 after turbovncserver.conf is read, and the script now allows the locations of
 all three files to be specified in turbovncserver.conf.
 
+8. The vncserver script now allows VirtualGL to be enabled using the
+turbovncserver.conf file.
+
 
 2.2
 ===

@@ -1144,6 +1144,7 @@ sub ReadConfiguration
        generateOTP
        autoLosslessRefresh
        enableHTTP
+       useVGL
        autokill
        pamSession
        multiThread
