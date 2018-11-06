@@ -10,7 +10,7 @@ execute_process(COMMAND chmod +x vncviewer
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 
 set(HELPER_SOURCES turbovnchelper.m JRSwizzle.m)
-add_library(turbovnchelper SHARED ${HELPER_SOURCES})
+add_library(turbovnchelper SHARED ${HELPER_SOURCES} usocket.c)
 set_source_files_properties(${HELPER_SOURCES} PROPERTIES LANGUAGE C)
 set_target_properties(turbovnchelper PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
@@ -82,7 +82,7 @@ install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${CMAKE_INSTALL_JAVADIR}
 
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}
 	${CMAKE_SOURCE_DIR}/common/rfb)
-add_library(turbovnchelper SHARED turbovnchelper.c)
+add_library(turbovnchelper SHARED turbovnchelper.c usocket.c)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	set_target_properties(turbovnchelper PROPERTIES LINK_FLAGS "-lc -z defs")
 else()

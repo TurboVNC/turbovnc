@@ -32,10 +32,10 @@ import com.turbovnc.rfb.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
 
-import com.jcraft.jsch.ConfigRepository;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Logger;
-import com.jcraft.jsch.OpenSSHConfig;
+import com.jcraft.jsch.agentproxy.*;
+import com.jcraft.jsch.agentproxy.connector.*;
+import com.jcraft.jsch.agentproxy.usocket.*;
+import com.jcraft.jsch.*;
 
 public class Tunnel {
 
@@ -108,6 +108,19 @@ public class Tunnel {
     File knownHosts = new File(homeDir + "/.ssh/known_hosts");
     if (knownHosts.exists() && knownHosts.canRead())
       jsch.setKnownHosts(knownHosts.getAbsolutePath());
+
+    if (Helper.isAvailable()) {
+      Connector connector = null;
+      try {
+        connector = new SSHAgentConnector(new JNIUSocketFactory());
+        if (connector != null) {
+          IdentityRepository repo = new RemoteIdentityRepository(connector);
+          jsch.setIdentityRepository(repo);
+        }
+      } catch (Exception e) {
+        vlog.debug("Could not contact ssh-agent:\n        " + e.getMessage());
+      }
+    }
 
     ArrayList<File> privateKeys = new ArrayList<File>();
     String sshKeyFile = VncViewer.sshKeyFile.getValue();

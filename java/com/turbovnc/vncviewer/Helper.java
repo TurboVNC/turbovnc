@@ -54,6 +54,7 @@ public final class Helper {
       vlog.info("  - Extended input device support");
     if (VncViewer.isX11())
       vlog.info("  - Multi-screen spanning");
+    vlog.info("  - ssh-agent support");
   }
 
   public static synchronized void setAvailable(boolean avail) {
@@ -62,5 +63,6 @@ public final class Helper {
 
   static boolean triedInit, available;
 
+  protected Helper() {}
   static LogWriter vlog = new LogWriter("Helper");
 }

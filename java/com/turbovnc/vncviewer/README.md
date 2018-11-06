@@ -47,12 +47,14 @@ low-level platform-specific features by way of a bundled JNI library called the
 ### Mac
 
 * Drawing tablet support
+* ssh-agent support (for password-less SSH public key authentication)
 
 ### Linux/Un*x
 
 * Keyboard grabbing
 * Remote X Input/extended input device support
 * Multi-screen spanning in full-screen mode
+* ssh-agent support (for password-less SSH public key authentication)
 
 
 Blitting Performance

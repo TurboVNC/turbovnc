@@ -211,6 +211,9 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/turbovnc/rdr/*.class
 		com/turbovnc/network/*.class
 		com/jcraft/jzlib/*.class
+		com/jcraft/jsch/agentproxy/*.class
+		com/jcraft/jsch/agentproxy/connector/*.class
+		com/jcraft/jsch/agentproxy/usocket/*.class
 		com/jcraft/jsch/jgss/*.class
 		com/jcraft/jsch/jcraft/*.class
 		com/jcraft/jsch/jce/*.class
