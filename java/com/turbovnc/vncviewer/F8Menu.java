@@ -75,7 +75,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     tileWindows = addMenuItem("Tile All Viewer Windows   (Ctrl-Alt-Shift-X)",
                               KeyEvent.VK_X);
     addSeparator();
-    if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
+    if (VncViewer.osGrab() && Helper.isAvailable()) {
       grabKeyboard =
         new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
       grabKeyboard.setMnemonic(KeyEvent.VK_G);

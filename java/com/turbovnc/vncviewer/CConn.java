@@ -1235,7 +1235,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         // under X11 except for full-screen windows, and even then, the
         // appropriate WM hints must be set using C.)
         (VncViewer.isX11() && (!opts.fullScreen ||
-                               !Viewport.isHelperAvailable()))) {
+                               !Helper.isAvailable()))) {
       span = primary;
       viewport.leftMon = viewport.rightMon = viewport.topMon =
         viewport.bottomMon = primaryID;
@@ -1501,7 +1501,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       "JPEG decompression:  " +
         (reader.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
       (VncViewer.osGrab() || VncViewer.osEID() ? "\nTurboVNC Helper:  " +
-        (Viewport.isHelperAvailable() ? "Loaded" : "Not found") : ""),
+        (Helper.isAvailable() ? "Loaded" : "Not found") : ""),
       "VNC connection info", JOptionPane.PLAIN_MESSAGE);
   }
 
@@ -1570,7 +1570,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(
       KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
-    if (VncViewer.osGrab() && Viewport.isHelperAvailable())
+    if (VncViewer.osGrab() && Helper.isAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
     if (state() == RFBSTATE_NORMAL) {
@@ -1693,7 +1693,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
     menu.updateMenuKey(MenuKey.getMenuKeyCode());
 
-    if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
+    if (VncViewer.osGrab() && Helper.isAvailable()) {
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
       boolean isGrabbed = VncViewer.isKeyboardGrabbed(viewport);
       if (viewport != null &&

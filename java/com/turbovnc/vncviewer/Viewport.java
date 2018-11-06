@@ -382,43 +382,15 @@ public class Viewport extends JFrame {
     }
   }
 
-  public static boolean isHelperAvailable() {
-    if (!triedHelperInit) {
-      try {
-        System.loadLibrary("turbovnchelper");
-        helperAvailable = true;
-      } catch (java.lang.UnsatisfiedLinkError e) {
-        vlog.info("WARNING: Could not find TurboVNC Helper JNI library.  If it is in a");
-        vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
-        vlog.info("  to the Java command line to specify its location.");
-        if (VncViewer.isX11()) {
-          vlog.info("  Multi-screen spanning, keyboard grabbing, and extended input device");
-          vlog.info("  support will be disabled.");
-        } else if (VncViewer.osGrab())
-          vlog.info("  Keyboard grabbing will be disabled.");
-      } catch (java.lang.Exception e) {
-        vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
-        vlog.info("  " + e.toString());
-        if (VncViewer.isX11()) {
-          vlog.info("  Multi-screen spanning, keyboard grabbing, and extended input device");
-          vlog.info("  support will be disabled.");
-        } else if (VncViewer.osGrab())
-          vlog.info("  Keyboard grabbing will be disabled.");
-      }
-    }
-    triedHelperInit = true;
-    return helperAvailable;
-  }
-
   public void x11FullScreenHelper(boolean on) {
-    if (isHelperAvailable()) {
+    if (Helper.isAvailable()) {
       try {
         x11FullScreen(on);
         return;
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper.");
         vlog.info("  Multi-screen spanning may not work correctly.");
-        helperAvailable = false;
+        Helper.setAvailable(false);
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
@@ -434,7 +406,7 @@ public class Viewport extends JFrame {
   }
 
   public void grabKeyboardHelper(boolean on, boolean force) {
-    if (VncViewer.osGrab() && isHelperAvailable()) {
+    if (VncViewer.osGrab() && Helper.isAvailable()) {
       try {
         if (((on && VncViewer.isKeyboardGrabbed(this)) ||
              (!on && !VncViewer.isKeyboardGrabbed())) && !force)
@@ -444,7 +416,7 @@ public class Viewport extends JFrame {
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper.");
         vlog.info("  Keyboard grabbing will be disabled.");
-        helperAvailable = false;
+        Helper.setAvailable(false);
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
@@ -454,7 +426,7 @@ public class Viewport extends JFrame {
   }
 
   public void setupExtInputHelper() {
-    if (isHelperAvailable() && cc.cp.supportsGII && x11dpy == 0) {
+    if (Helper.isAvailable() && cc.cp.supportsGII && x11dpy == 0) {
       try {
         if (VncViewer.OS.startsWith("mac os x")) {
           synchronized(VncViewer.class) {
@@ -465,7 +437,7 @@ public class Viewport extends JFrame {
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
-        helperAvailable = false;
+        Helper.setAvailable(false);
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
@@ -548,7 +520,7 @@ public class Viewport extends JFrame {
   }
 
   public void cleanupExtInputHelper() {
-    if (isHelperAvailable() && x11dpy != 0) {
+    if (Helper.isAvailable() && x11dpy != 0) {
       try {
         if (VncViewer.OS.startsWith("mac os x")) {
           synchronized(VncViewer.class) {
@@ -559,7 +531,7 @@ public class Viewport extends JFrame {
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke cleanupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
-        helperAvailable = false;
+        Helper.setAvailable(false);
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke cleanupExtInput() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
@@ -594,7 +566,7 @@ public class Viewport extends JFrame {
 
   boolean processExtInputEventHelper(int type) {
     boolean retval = false;
-    if (isHelperAvailable() && cc.cp.supportsGII &&
+    if (Helper.isAvailable() && cc.cp.supportsGII &&
         !VncViewer.OS.startsWith("mac os x")) {
       boolean isExtEvent = false;
       try {
@@ -602,7 +574,7 @@ public class Viewport extends JFrame {
       } catch (java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
-        helperAvailable = false;
+        Helper.setAvailable(false);
       } catch (java.lang.Exception e) {
         vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
@@ -787,7 +759,6 @@ public class Viewport extends JFrame {
   int dx, dy = 0, adjustWidth, adjustHeight;
   MacMenuBar macMenu;
   boolean canDoLionFS;
-  static boolean triedHelperInit, helperAvailable;
   Timer timer;
   private long x11dpy, x11win;
   int buttonPressType, buttonReleaseType, motionType;

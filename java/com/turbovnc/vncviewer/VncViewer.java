@@ -720,7 +720,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(
       KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
-    if (VncViewer.osGrab() && Viewport.isHelperAvailable())
+    if (VncViewer.osGrab() && Helper.isAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
     options.shared.setSelected(opts.shared);
@@ -782,7 +782,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     VncViewer.menuKey.setParam(
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
 
-    if (VncViewer.osGrab() && Viewport.isHelperAvailable())
+    if (VncViewer.osGrab() && Helper.isAvailable())
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
 
     opts.shared = options.shared.isSelected();

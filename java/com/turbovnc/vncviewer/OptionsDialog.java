@@ -320,13 +320,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       "Primary monitor only", "All monitors", "Automatic"
     };
     JLabel spanLabel;
-    if (VncViewer.isX11() && Viewport.isHelperAvailable())
+    if (VncViewer.isX11() && Helper.isAvailable())
       spanLabel = new JLabel("Full-screen span mode:");
     else
       spanLabel = new JLabel("Span mode:");
     span = new JComboBox(spanOptions);
     span.addItemListener(this);
-    if (VncViewer.isX11() && !Viewport.isHelperAvailable()) {
+    if (VncViewer.isX11() && !Helper.isAvailable()) {
       spanLabel.setEnabled(false);
       span.setEnabled(false);
     }
@@ -382,7 +382,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
 
-    boolean enableGrab = VncViewer.osGrab() && Viewport.isHelperAvailable();
+    boolean enableGrab = VncViewer.osGrab() && Helper.isAvailable();
 
     if (enableGrab) {
       JLabel grabLabel;
@@ -710,7 +710,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "Shared", shared.isSelected());
 
     // INPUT
-    if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
+    if (VncViewer.osGrab() && Helper.isAvailable()) {
       String grabStr = (String)grabKeyboard.getSelectedItem();
       if (grabStr.equalsIgnoreCase("Full-screen only"))
         grabStr = "FS";
