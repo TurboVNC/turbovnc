@@ -149,9 +149,15 @@ public final class Tunnel {
       String repoUser = repo.getConfig(host).getUser();
       if (repoUser != null)
         user = repoUser;
-    } else
-      vlog.info("Could not parse SSH config file " +
-                VncViewer.sshConfig.getValue());
+    } else {
+      if (VncViewer.sshConfig.isDefault()) {
+        vlog.debug("Could not parse SSH config file " +
+                   VncViewer.sshConfig.getValue());
+      } else {
+        vlog.info("Could not parse SSH config file " +
+                  VncViewer.sshConfig.getValue());
+      }
+    }
 
     for (Iterator<File> i = privateKeys.iterator(); i.hasNext();) {
       File privateKey = (File)i.next();
