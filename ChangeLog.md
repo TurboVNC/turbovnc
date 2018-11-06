@@ -71,6 +71,11 @@ variables (`$noVNC` and `$noVNCCertFile`.)  The script also creates a unique
 PID file for the noVNC instance and kills the noVNC instance when the TurboVNC
 session is killed.
 
+11. The vncserver script now enables the `-autokill` option by default, which
+creates a more intuitive interface for new TurboVNC users.  A new command-line
+option (`-noautokill`), or the existing `$autokill` turbovncserver.conf
+variable, can be used to disable the feature.
+
 
 2.2.1
 =====

@@ -25,7 +25,7 @@ vncserver \- a wrapper to launch the TurboVNC Server
 [\-depth\ \fIdepth\fR] [\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR]
 [\-fp\ \%\fIfont\-path\fR] [\-name\ \fIdesktop\-name\fR] [\-httpd]
 [\-novnc \fIscript\fR] [-novnccert \fIcert\fR] [\-otp]
-[\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-fg] [\-autokill]
+[\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-fg] [\-noautokill]
 [\-noxstartup] [\-xstartup\ \fIscript\fR] [\-wm \fIscript\fR] [\-vgl]
 [\-log\ \fIfile\fR]
 \%[\fIXvnc\-options\fR...]
@@ -145,10 +145,11 @@ soon as the user logs out of the window manager in the session.  This may be
 necessary when launching TurboVNC from within certain grid computing
 environments.
 .TP
-\fB\-autokill\fR
-Automatically kill the TurboVNC session when the startup script exits (which,
-in most cases, means that the session will be killed automatically whenever the
-user logs out of the window manager running in the session.)
+\fB\-noautokill\fR
+Normally, \fBvncserver\fR automatically kills the TurboVNC session when the
+startup script exits (which, in most cases, means that the session will be
+killed automatically whenever the user logs out of the window manager running
+in the session.)  This option disables that behavior.
 .TP
 \fB\-noxstartup\fR
 Do not run the $vncUserDir/.vnc/xstartup.turbovnc script after launching Xvnc.

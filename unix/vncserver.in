@@ -62,7 +62,7 @@ $autoLosslessRefresh = 0.0;
 $deferUpdate = 1;
 $wm = "";
 $useVGL = 0;
-$autokill = 0;
+$autokill = 1;
 $pamSession = 0;
 $bits = @BITS@;
 $multiThread = 1;
@@ -343,7 +343,7 @@ foreach $_registrydir (@registrydirs) {
               "-xstartup", 1, "-log", 1, "-3dwm", 0, "-vgl", 0, "-debug", 0,
               "-x509cert", 1, "-x509key", 1, "-autokill", 0, "-quiet", 0,
               "-wm", 1, "-sessionlist", 0, "-sessionstart", 0, "-http", 0,
-              "-httpd", 0, "-novnc", 1, "-novnccert", 1);
+              "-httpd", 0, "-novnc", 1, "-novnccert", 1, "-noautokill", 0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -407,8 +407,8 @@ if ($opt{'-deferupdate'}) {
 if ($opt{'-debug'}) {
   $opt{'-fg'} = 1;
 }
-if ($opt{'-autokill'}) {
-  $autokill = 1;
+if ($opt{'-noautokill'}) {
+  $autokill = 0;
 }
 $authTypeVNCPermitted = $authTypeVNC;
 $encTypeX509Permitted = $encTypeX509;
@@ -970,7 +970,7 @@ sub Usage
       "        -fg\n".
       "        -x509cert <CERT-FILE>\n".
       "        -x509key <KEY-FILE>\n".
-      "        -autokill\n".
+      "        -noautokill\n".
       "        -noxstartup\n".
       "        -xstartup <SCRIPT>\n".
       "        -wm <SCRIPT>\n".

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-11-05T18:42:16">
+<meta name="date" content="2018-11-05T19:42:34">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -921,25 +921,17 @@ the TurboVNC session will remain running on the TurboVNC host (as will
 any applications that you may have started within the session), and you 
 can reconnect to the session at any time.</p>
 
-<p>To kill a TurboVNC session:</p>
+<p>If the TurboVNC session was created with default settings, then the 
+easiest way to kill it is to log out of the window manager running in 
+the session.  You can also type the following command:</p>
 
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered">
-        Using SSH, log into the host that is running the TurboVNC session you 
-        want to kill.<br /> &hellip; or &hellip;<br /> Using the TurboVNC 
-        Viewer, connect to the TurboVNC session that you want to kill, and open 
-        a new terminal in that TurboVNC session.
-    </li>
-    <li class="Ordered-1 Ordered">
-        Type the following command:
 <pre class="verbatim">
 /opt/TurboVNC/bin/vncserver&nbsp;-kill&nbsp;:{n}
 </pre>
 
-        Replace <em><code>{n}</code></em> with the X display number of the 
-        TurboVNC session you want to kill.
-    </li>
-</ol>
+<p>from a terminal in the TurboVNC session or from an SSH session on the 
+host. Replace <em><code>{n}</code></em> with the X display number of the 
+TurboVNC session you want to kill.</p>
 
 <p>To list the X display numbers and process ID&rsquo;s of all TurboVNC 
 sessions currently running under your user account on a particular host, 
