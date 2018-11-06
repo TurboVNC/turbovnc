@@ -1,4 +1,4 @@
-2.3 pre-beta
+3.0 pre-beta
 ============
 
 1. Since Java 11 introduced the ability to create a custom Java Runtime
