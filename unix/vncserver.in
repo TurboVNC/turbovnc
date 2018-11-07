@@ -70,11 +70,11 @@ $numThreads = 0;
 
 # Read configuration from the system-wide and user files if present.
 
-$configFile = "/etc/turbovncserver.conf";
+$configFile = "@CMAKE_INSTALL_FULL_SYSCONFDIR@/turbovncserver.conf";
 ReadConfiguration();
 $configFile = "$ENV{HOME}/.vnc/turbovncserver.conf";
 ReadConfiguration();
-ReadAuthConfiguration("/etc/turbovncserver-security.conf");
+ReadAuthConfiguration("@CMAKE_INSTALL_FULL_SYSCONFDIR@/turbovncserver-security.conf");
 
 # We set these defaults after reading the configuration file, in case
 # $vncUserDir was modified.

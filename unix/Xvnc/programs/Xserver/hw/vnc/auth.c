@@ -51,7 +51,8 @@ static void rfbSendAuthCaps(rfbClientPtr cl);
 static void rfbVncAuthSendChallenge(rfbClientPtr cl);
 static void rfbVeNCryptAuthenticate(rfbClientPtr cl);
 
-#define AUTH_DEFAULT_CONF_FILE "/etc/turbovncserver-security.conf"
+#define AUTH_DEFAULT_CONF_FILE  \
+  CMAKE_INSTALL_FULL_SYSCONFDIR "/turbovncserver-security.conf"
 #ifdef XVNC_AuthPAM
 #define AUTH_DEFAULT_PAM_SERVICE_NAME "turbovnc"
 #endif

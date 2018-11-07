@@ -5,7 +5,7 @@
 %define bindir @CMAKE_INSTALL_FULL_BINDIR@
 
 # Path under which configuration files should be installed
-%define sysconfdir %{_sysconfdir}
+%define sysconfdir @CMAKE_INSTALL_FULL_SYSCONFDIR@
 
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
@@ -159,13 +159,6 @@ if [ ! "$TVNC_DOCDIR" = "%{docdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
 fi
 
-%if "%{server}" == "1"
-TVNC_SYSCONFDIR=@CMAKE_INSTALL_FULL_SYSCONFDIR@
-if [ ! "$TVNC_SYSCONFDIR" = "%{sysconfdir}" ]; then
-	safedirmove $RPM_BUILD_ROOT/$TVNC_SYSCONFDIR $RPM_BUILD_ROOT/%{sysconfdir} $RPM_BUILD_ROOT/__tmpconf
-fi
-%endif
-
 #-->%endif
 
 %if "%{native}" == "1"
@@ -186,31 +179,42 @@ rm -rf %{buildroot}
 
 %if "%{server}" == "1"
 %post
+%if "%{sysconfdir}" == "%{_sysconfdir}"
 if [ "$1" = 1 ]; then
   if [ -f /etc/redhat-release ]; then /sbin/chkconfig --add tvncserver; fi
 fi
+%endif
 
 %preun
+%if "%{sysconfdir}" == "%{_sysconfdir}"
 if [ "$1" = 0 ]; then
-  if [ -x /etc/init.d/tvncserver ]; then
-    /etc/init.d/tvncserver stop >/dev/null 2>&1
+  if [ -x %{_sysconfdir}/init.d/tvncserver ]; then
+    %{_sysconfdir}/init.d/tvncserver stop >/dev/null 2>&1
   fi
-  if [ -f /etc/redhat-release -a -f /etc/init.d/tvncserver ]; then
+  if [ -f /etc/redhat-release -a -f %{_sysconfdir}/init.d/tvncserver ]; then
     /sbin/chkconfig --del tvncserver
   fi
 fi
+%endif
 
 %postun
+%if "%{sysconfdir}" == "%{_sysconfdir}"
 if [ "$1" -ge "1" ]; then
-  if [ -x /etc/init.d/tvncserver ]; then
-    /etc/init.d/tvncserver condrestart >/dev/null 2>&1
+  if [ -x %{_sysconfdir}/init.d/tvncserver ]; then
+    %{_sysconfdir}/init.d/tvncserver condrestart >/dev/null 2>&1
   fi
 fi
+%endif
 %endif
 
 %files
 %defattr(-,root,root)
 %if "%{server}" == "1"
+ %if "%{sysconfdir}" != "%{_sysconfdir}"
+  %dir %{sysconfdir}
+  %dir %{sysconfdir}/init.d
+  %dir %{sysconfdir}/sysconfig
+ %endif
  %attr(0755,root,root) %config %{sysconfdir}/init.d/tvncserver
  %config(noreplace) %{sysconfdir}/sysconfig/tvncservers
  %config(noreplace) %{sysconfdir}/turbovncserver.conf

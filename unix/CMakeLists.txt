@@ -88,7 +88,8 @@ execute_process(COMMAND chmod +x vncserver
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vncserver.man
+configure_file(vncserver.man.in vncserver.man @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/vncserver.man
 	DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 RENAME vncserver.1)
 configure_file(turbovncserver.conf.in turbovncserver.conf @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/turbovncserver.conf

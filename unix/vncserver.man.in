@@ -189,7 +189,7 @@ Starts \fBXvnc\fR on display :1 with desktop size of 1024x768 pixels.
 Shuts down the VNC session running on display :1.
 .SH FILES
 .TP
-/etc/turbovncserver.conf
+@CMAKE_INSTALL_FULL_SYSCONFDIR@/turbovncserver.conf
 System-wide configuration file for the TurboVNC Server.
 .TP
 $HOME/.vnc/turbovncserver.conf

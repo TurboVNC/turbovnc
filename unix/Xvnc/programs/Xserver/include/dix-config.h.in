@@ -90,4 +90,6 @@
 /* Have epoll_create1() */
 #cmakedefine01 HAVE_EPOLL_CREATE1
 
+#define CMAKE_INSTALL_FULL_SYSCONFDIR "@CMAKE_INSTALL_FULL_SYSCONFDIR@"
+
 #endif /* _DIX_CONFIG_H_ */
