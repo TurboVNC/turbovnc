@@ -21,16 +21,17 @@ if(JAVA_KEY_ALIAS)
   set(JAVA_SELF_SIGNED 0)
 else()
   message(STATUS "Signing ${JAR_FILE} using self-signed certificate")
-  file(REMOVE ${JAR_FILE}.keystore)
-  execute_process(COMMAND
-    ${KEYTOOL} -genkey -alias TurboVNC -keystore ${JAR_FILE}.keystore
-      -keyalg RSA -storepass turbovnc -keypass turbovnc -validity 7300
-      -dname "CN=TurboVNC, OU=Software Development, O=The VirtualGL Project, L=Austin, S=Texas, C=US"
-    RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_VARIABLE ERROR)
-  if(NOT RESULT EQUAL 0)
-    message(FATAL_ERROR "${KEYTOOL} failed:\n${ERROR}")
+  if(NOT EXISTS turbovnc.keystore)
+    execute_process(COMMAND
+      ${KEYTOOL} -genkey -alias TurboVNC -keystore turbovnc.keystore
+        -keyalg RSA -storepass turbovnc -keypass turbovnc -validity 7300
+        -dname "CN=TurboVNC, OU=Software Development, O=The VirtualGL Project, L=Austin, S=Texas, C=US"
+      RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_VARIABLE ERROR)
+    if(NOT RESULT EQUAL 0)
+      message(FATAL_ERROR "${KEYTOOL} failed:\n${ERROR}")
+    endif()
   endif()
-  set(JAVA_KEYSTORE "${JAR_FILE}.keystore")
+  set(JAVA_KEYSTORE "turbovnc.keystore")
   set(JAVA_KEYSTORE_PASS "turbovnc")
   set(JAVA_KEY_PASS "turbovnc")
   set(JAVA_KEY_ALIAS "TurboVNC")
