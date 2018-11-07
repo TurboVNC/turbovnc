@@ -91,7 +91,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     Object s = event.getSource();
     if (s instanceof JTextField && (JTextField)s == userEntry) {
       if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-        endDialog();
+        passwdEntry.requestFocusInWindow();
       }
     } else if (s instanceof JPasswordField &&
                (JPasswordField)s == passwdEntry) {
