@@ -142,14 +142,15 @@ JNIEXPORT void JNICALL Java_com_jcraft_jsch_agentproxy_connector_PageantConnecto
   memset(&cds, 0, sizeof(cds));
 
   HWND hwnd = FindWindow("Pageant", "Pageant");
-  if(!hwnd)
+  if (!hwnd)
     _throwe("Pageant is not runnning.",
             "com/jcraft/jsch/agentproxy/AgentProxyException");
 
   char mapName[30];
   snprintf(mapName, 30, "PageantRequest%08x", GetCurrentThreadId());
   sharedFile = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
-                                 0, 8192 /* AGENT_MAX_MSGLEN */, mapName);
+                                 0, 8192,  // AGENT_MAX_MSGLEN
+                                 mapName);
   if (!sharedFile) _throww32();
   sharedMemory = (char *)MapViewOfFile(sharedFile, SECTION_MAP_WRITE, 0, 0, 0);
   if (!sharedMemory) _throww32();

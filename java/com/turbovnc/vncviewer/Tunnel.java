@@ -124,7 +124,8 @@ public class Tunnel {
         if (VncViewer.OS.startsWith("windows"))
           vlog.debug("Could not contact Pageant:\n        " + e.getMessage());
         else
-          vlog.debug("Could not contact ssh-agent:\n        " + e.getMessage());
+          vlog.debug("Could not contact ssh-agent:\n        " +
+                     e.getMessage());
       }
     }
 
