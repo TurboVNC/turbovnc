@@ -112,13 +112,19 @@ public class Tunnel {
     if (Helper.isAvailable()) {
       Connector connector = null;
       try {
-        connector = new SSHAgentConnector(new JNIUSocketFactory());
+        if (VncViewer.OS.startsWith("windows"))
+          connector = new PageantConnector();
+        else
+          connector = new SSHAgentConnector(new JNIUSocketFactory());
         if (connector != null) {
           IdentityRepository repo = new RemoteIdentityRepository(connector);
           jsch.setIdentityRepository(repo);
         }
       } catch (Exception e) {
-        vlog.debug("Could not contact ssh-agent:\n        " + e.getMessage());
+        if (VncViewer.OS.startsWith("windows"))
+          vlog.debug("Could not contact Pageant:\n        " + e.getMessage());
+        else
+          vlog.debug("Could not contact ssh-agent:\n        " + e.getMessage());
       }
     }
 

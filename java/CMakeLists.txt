@@ -137,6 +137,9 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/turbovnc/rdr/*.java
 	${SRCDIR}/com/turbovnc/network/*.java
 	${SRCDIR}/com/jcraft/jsch/*.java
+	${SRCDIR}/com/jcraft/jsch/agentproxy/*.java
+	${SRCDIR}/com/jcraft/jsch/agentproxy/connector/*.java
+	${SRCDIR}/com/jcraft/jsch/agentproxy/usocket/*.java
 	${SRCDIR}/com/jcraft/jsch/jce/*.java
 	${SRCDIR}/com/jcraft/jsch/jcraft/*.java
 	${SRCDIR}/com/jcraft/jsch/jgss/*.java

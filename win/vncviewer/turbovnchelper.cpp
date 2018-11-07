@@ -1,4 +1,5 @@
 /*  Copyright (C)2015-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2011 ymnk, JCraft, Inc.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@
 #include "LowLevelHook.h"
 #include "jawt_md.h"
 #include "com_turbovnc_vncviewer_Viewport.h"
+#include "safestr.h"
 
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
@@ -36,12 +38,14 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 }
 
 
-#define _throw(msg) {  \
-  jclass _exccls=env->FindClass("java/lang/Exception");  \
+#define _throwe(msg, exceptionClass) {  \
+  jclass _exccls = env->FindClass(exceptionClass);  \
   if (!_exccls) goto bailout;  \
   env->ThrowNew(_exccls, msg);  \
   goto bailout;  \
 }
+
+#define _throw(msg) _throwe(msg, "java/lang/Exception");
 
 #define _throww32() {  \
   char message[256];  \
@@ -53,12 +57,20 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
   _throw(message);  \
 }
 
+#define bailif0(f) {  \
+  if (!(f) || env->ExceptionCheck()) {  \
+    goto bailout;  \
+  }  \
+}
+
 
 typedef jboolean (JNICALL *__JAWT_GetAWT_type)(JNIEnv *env, JAWT *awt);
 static __JAWT_GetAWT_type __JAWT_GetAWT = NULL;
 
 static HMODULE handle = NULL;
 
+
+extern "C" {
 
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
   (JNIEnv *env, jobject obj, jboolean on, jboolean pointer)
@@ -112,3 +124,70 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
     awt.FreeDrawingSurface(ds);
   }
 }
+
+
+JNIEXPORT void JNICALL Java_com_jcraft_jsch_agentproxy_connector_PageantConnector_queryPageant
+  (JNIEnv *env, jobject obj, jobject buffer)
+{
+  HANDLE sharedFile = 0;
+  char *buf = NULL, *sharedMemory = NULL;
+  COPYDATASTRUCT cds;
+  jclass bufferClass;
+  jfieldID fid;
+  jmethodID mid;
+  jbyteArray jbuf;
+  DWORD length;
+  jint len;
+
+  memset(&cds, 0, sizeof(cds));
+
+  HWND hwnd = FindWindow("Pageant", "Pageant");
+  if(!hwnd)
+    _throwe("Pageant is not runnning.",
+            "com/jcraft/jsch/agentproxy/AgentProxyException");
+
+  char mapName[30];
+  snprintf(mapName, 30, "PageantRequest%08x", GetCurrentThreadId());
+  sharedFile = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
+                                 0, 8192 /* AGENT_MAX_MSGLEN */, mapName);
+  if (!sharedFile) _throww32();
+  sharedMemory = (char *)MapViewOfFile(sharedFile, SECTION_MAP_WRITE, 0, 0, 0);
+  if (!sharedMemory) _throww32();
+
+  bailif0(bufferClass = env->GetObjectClass(buffer));
+  bailif0(fid = env->GetFieldID(bufferClass, "buffer", "[B"));
+  bailif0(jbuf = (jbyteArray)env->GetObjectField(buffer, fid));
+  bailif0(mid = env->GetMethodID(bufferClass, "getLength", "()I"));
+  len = env->CallIntMethod(buffer, mid);
+
+  bailif0(buf = (char *)env->GetPrimitiveArrayCritical(jbuf, 0));
+  memcpy(sharedMemory, buf, len);
+  env->ReleasePrimitiveArrayCritical(jbuf, buf, 0);
+
+  cds.dwData = 0x804e50ba;  // AGENT_COPYDATA_ID
+  cds.cbData = (DWORD)(strlen(mapName) + 1);
+  cds.lpData = _strdup(mapName);
+  if (!SendMessage(hwnd, WM_COPYDATA, NULL, (LPARAM)(LPVOID)&cds))
+    _throww32();
+
+  length = *(DWORD *)sharedMemory;
+  length = (length >> 24) | ((length & 0x00FF0000) >> 8) |
+           ((length & 0x0000FF00) << 8) | (length << 24);
+
+  bailif0(mid = env->GetMethodID(bufferClass, "rewind", "()V"));
+  env->CallVoidMethod(buffer, mid);
+  bailif0(mid = env->GetMethodID(bufferClass, "checkFreeSize", "(I)V"));
+  env->CallVoidMethod(buffer, mid, (jint)length);
+
+  bailif0(jbuf = (jbyteArray)env->GetObjectField(buffer, fid));
+  bailif0(buf = (char *)env->GetPrimitiveArrayCritical(jbuf, 0));
+  memcpy(buf, &sharedMemory[4], length);
+  env->ReleasePrimitiveArrayCritical(jbuf, buf, 0);
+
+  bailout:
+  if (cds.lpData) free(cds.lpData);
+  if (sharedMemory) UnmapViewOfFile(sharedMemory);
+  if (sharedFile) CloseHandle(sharedFile);
+}
+
+}  // extern "C"

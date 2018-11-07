@@ -43,6 +43,7 @@ low-level platform-specific features by way of a bundled JNI library called the
 
 * Keyboard grabbing (passing Alt-Tab and other special keystrokes to the
   server)
+* Pageant support (for password-less SSH public key authentication)
 
 ### Mac
 

@@ -77,7 +77,7 @@ option (`-noautokill`), or the existing `$autokill` turbovncserver.conf
 variable, can be used to disable the feature.
 
 12. The TurboVNC Viewer's built-in SSH client can now read SSH private keys
-from ssh-agent.
+from ssh-agent or Pageant.
 
 
 2.2.1
