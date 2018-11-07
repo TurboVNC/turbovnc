@@ -179,8 +179,8 @@ add_custom_target(index.vnc ALL
 		${SRCDIR}/${CLASSPATH}/index.vnc ${BINDIR}/index.vnc
 	DEPENDS ${SRCDIR}/${CLASSPATH}/index.vnc)
 
-set(TVNCJNIOPENCOMMENT "<!--")
-set(TVNCJNICLOSECOMMENT "-->")
+set(TVNCJNIOPENCOMMENT "<?comment")
+set(TVNCJNICLOSECOMMENT "?>")
 if(TVNC_INCLUDEJNIJARS)
 	set(TVNCJNIOPENCOMMENT "")
 	set(TVNCJNICLOSECOMMENT "")
@@ -198,7 +198,14 @@ endif()
 string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
 
-add_custom_command(OUTPUT VncViewer.jar
+if(NOT JAVA_KEY_ALIAS)
+	set(KEYSTORE_FILE turbovnc.keystore)
+	if(EXISTS ${KEYSTORE_FILE})
+		file(REMOVE ${KEYSTORE_FILE})
+	endif()
+endif()
+
+add_custom_command(OUTPUT VncViewer.jar ${KEYSTORE_FILE}
 	DEPENDS ${JAVA_CLASSES}
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
 		${BINDIR}/${CLASSPATH}/timestamp
