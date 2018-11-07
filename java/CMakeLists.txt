@@ -62,7 +62,7 @@ if(UNIX AND TVNC_BUILDSERVER)
 	set(DEFAULT_TVNC_INCLUDEJNIJARS 0)
 	option(TVNC_INCLUDEJNIJARS "Include TurboJPEG JNI JARs for common platforms when installing/packaging TurboVNC, sign the JARs using the same certificate as VncViewer.jar, and make them available through Java Web Start when using the built-in HTTP server."
 		${DEFAULT_TVNC_INCLUDEJNIJARS})
-	boolean_number(TVNC_INCLUDEJNIJARS)
+	boolean_number(TVNC_INCLUDEJNIJARS PARENT_SCOPE)
 endif()
 
 set(JAVA_SOURCES "")
