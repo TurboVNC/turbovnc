@@ -157,27 +157,12 @@ configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
 if(NOT "${SRCDIR}" STREQUAL "${BINDIR}")
 
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/toolbar.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/toolbar.png ${BINDIR}/${CLASSPATH}/toolbar.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/toolbar.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/turbovnc.png ${BINDIR}/${CLASSPATH}/turbovnc.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-sm.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/turbovnc-sm.png
-		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png)
-
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-128.png
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/turbovnc-128.png
-		${BINDIR}/${CLASSPATH}/turbovnc-128.png
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-128.png)
+foreach(icon toolbar.png turbovnc.png turbovnc-sm.png turbovnc-128.png)
+	add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/${icon}
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${SRCDIR}/${CLASSPATH}/${icon} ${BINDIR}/${CLASSPATH}/${icon}
+		DEPENDS ${SRCDIR}/${CLASSPATH}/${icon})
+endforeach()
 
 endif()
 
@@ -203,13 +188,24 @@ string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
 
 if(NOT JAVA_KEY_ALIAS)
-	set(KEYSTORE_FILE turbovnc.keystore)
-	if(EXISTS ${KEYSTORE_FILE})
-		file(REMOVE ${KEYSTORE_FILE})
-	endif()
+	set(KEYTOOL "${Java_PATH}/keytool")
+	add_custom_command(OUTPUT turbovnc.keystore
+		COMMAND ${KEYTOOL}
+		ARGS -genkey -alias TurboVNC -keystore turbovnc.keystore -keyalg RSA
+			-storepass turbovnc -keypass turbovnc -validity 7300
+			-dname "CN=TurboVNC, OU=Software Development, O=The VirtualGL Project, L=Austin, S=Texas, C=US")
+	set(JAVA_KEYSTORE "turbovnc.keystore")
+	set(JAVA_KEYSTORE_TYPE "jks")
+	set(JAVA_KEYSTORE_PASS "turbovnc")
+	set(JAVA_KEY_ALIAS "TurboVNC")
+	set(JAVA_KEY_PASS "turbovnc")
+	set(JAVA_TSA_URL "")
+	set(JAVA_TSA_ALG "")
+	add_custom_target(keystore DEPENDS turbovnc.keystore)
+	set(JAVA_KEYSTORE_DEPENDS keystore)
 endif()
 
-add_custom_command(OUTPUT VncViewer.jar ${KEYSTORE_FILE}
+add_custom_command(OUTPUT VncViewer.jar
 	DEPENDS ${JAVA_CLASSES}
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
 		${BINDIR}/${CLASSPATH}/timestamp
@@ -218,6 +214,7 @@ add_custom_command(OUTPUT VncViewer.jar ${KEYSTORE_FILE}
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
 		${TJPEG_JAR}
+		${JAVA_KEYSTORE_DEPENDS}
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
 		org/libjpegturbo/turbojpeg
@@ -279,6 +276,7 @@ if(TVNC_BUILDSERVER AND TVNC_INCLUDEJNIJARS)
 		ljtwin64.jar)
 	foreach(jarfile ${JNI_JAR_FILES})
 		add_custom_command(OUTPUT ${jarfile}
+			DEPENDS ${JAVA_KEYSTORE_DEPENDS}
 			COMMAND ${CMAKE_COMMAND}
 			ARGS -E copy_if_different ${TJPEG_JNIJARPATH}/${jarfile} ${jarfile}
 			COMMAND ${CMAKE_COMMAND}
