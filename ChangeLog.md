@@ -1,6 +1,8 @@
 3.0 pre-beta
 ============
 
+### Significant changes relative to 2.2.1:
+
 1. Since Java 11 introduced the ability to create a custom Java Runtime
 Environment (JRE) with only the modules that the TurboVNC Viewer needs, it has
 become possible to package the Windows/Java TurboVNC Viewer in such a way that
@@ -39,18 +41,19 @@ when no display number or port was specified, but it is now necessary to
 specify :0 or ::5900 in order to connect to Display :0/Port 5900.  The TurboVNC
 Session Manager uses the TurboVNC Viewer's built-in SSH client (it cannot use
 an external SSH client because of the need to leave the SSH session open and
-reuse it to run multiple commands), so it is affected by the `SSHKey`,
-`SSHKeyFile`, `SSHKeyPass`, and `SSHPort` parameters.
+reuse it to run multiple commands), so it is affected by the `SSHConfig`,
+`SSHKey`, `SSHKeyFile`, `SSHKeyPass`, and `SSHPort` parameters.
 
-6. When generating a Mac package/disk image (for instance, by using `make dmg`)
-or a Windows installer (for instance, by using `nmake installer`), a custom JRE
-based on OpenJDK can now optionally be included in the Mac TurboVNC Viewer app
-bundle or the Windows TurboVNC Viewer installation directory by setting the
-`TVNC_INCLUDEJRE` CMake variable to `1`.  When including a custom JRE, OpenJDK
-11 or later must be used.  When using an installation of the Mac TurboVNC
-Viewer or the Windows TurboVNC Viewer that contains a custom JRE (including the
-official TurboVNC Viewer packages), an external JRE can still be used at run
-time by setting the `JAVA_HOME` environment variable.
+6. When generating a Mac package/disk image (for instance, by invoking
+`make dmg`) or a Windows installer (for instance, by invoking
+`nmake installer`), a custom JRE based on OpenJDK can now optionally be
+included in the Mac TurboVNC Viewer app bundle or the Windows TurboVNC Viewer
+installation directory by setting the `TVNC_INCLUDEJRE` CMake variable to `1`.
+When including a custom JRE, OpenJDK 11 or later must be used.  When using an
+installation of the Mac TurboVNC Viewer or the Windows TurboVNC Viewer that
+contains a custom JRE (including the official TurboVNC Viewer packages), an
+external JRE can still be used at run time by setting the `JAVA_HOME`
+environment variable.
 
 7. The built-in HTTP server in the TurboVNC Server is no longer enabled by
 default.  This reflects the fact that Java Web Start is now a legacy
@@ -64,12 +67,12 @@ Viewer (more specifically, the TurboVNC Helper library) for Windows.
 9. The TurboVNC Viewer authentication dialog will now indicate whether the
 connection is encrypted, unencrypted, or redundantly encrypted.
 
-10. The vncserver script can now optionally start an instance of noVNC (HTML
+10. The vncserver script can now optionally start an instance of noVNC (an HTML
 5/JavaScript VNC viewer) along with each TurboVNC session, using new
 command-line options (`-novnc` and `-novnccert`) or turbovncserver.conf
-variables (`$noVNC` and `$noVNCCertFile`.)  The script also creates a unique
-PID file for the noVNC instance and kills the noVNC instance when the TurboVNC
-session is killed.
+variables (`$noVNC` and `$noVNCCertFile`.)  The vncserver script also creates a
+unique PID file for the noVNC instance and kills the noVNC instance when the
+TurboVNC session is killed.
 
 11. The vncserver script now enables the `-autokill` option by default, which
 creates a more intuitive interface for new TurboVNC users.  A new command-line
