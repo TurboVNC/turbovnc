@@ -96,6 +96,12 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/turbovncserver.conf
 	DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-security.conf
 	DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/xstartup.turbovnc
+	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+execute_process(COMMAND chmod +x xstartup.turbovnc
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/xstartup.turbovnc
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	configure_file(vncserver.init.in vncserver.init @ONLY)

@@ -78,9 +78,9 @@
 ## You might wish to create the TurboVNC user directories under /tmp, to
 ## ensure that VNC passwords are always kept on the local filesystem.  To do
 ## that, uncomment the line below.  Note that in this case, Xvnc will search
-## for the .Xauthority file in this same directory by default, and the TurboVNC
-## startup script will be stored in $ENV{HOME}/.turbovncstartup instead of in
-## $vncUserDir/xstartup.turbovnc.
+## for the .Xauthority file in this same directory by default, and the
+## vncserver script will look for the per-user xstartup.turbovnc script at
+## $ENV{HOME}/.turbovncstartup instead of $vncUserDir/xstartup.turbovnc.
 #
 # $vncUserDir = "/tmp/$ENV{USER}-vnc";
 

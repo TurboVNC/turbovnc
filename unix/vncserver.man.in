@@ -152,9 +152,9 @@ killed automatically whenever the user logs out of the window manager running
 in the session.)  This option disables that behavior.
 .TP
 \fB\-noxstartup\fR
-Do not run the $vncUserDir/.vnc/xstartup.turbovnc script after launching Xvnc.
-This option allows you to manually start a window manager in your TurboVNC
-session or to run a full-screen application without a window manager.
+Do not run the xstartup.turbovnc script after launching Xvnc.  This option
+allows you to manually start a window manager in your TurboVNC session or to
+run a full-screen application without a window manager.
 .TP
 \fB\-xstartup\fR \fIscript\fR
 Run a custom startup script, instead of xstartup.turbovnc, after launching
@@ -165,20 +165,19 @@ TurboVNC session to terminate whenever the application exits.
 .TP
 \fB-wm\fR \fIscript\fR
 This sets the value of the \fBTVNC_WM\fR environment variable to \fIscript\fR.
-The default xstartup.turbovnc script that \fBvncserver\fR creates will launch
-the window manager startup script specified in the \fBTVNC_WM\fR environment
-variable, if it is set.
+The default xstartup.turbovnc script will launch the window manager startup
+script specified in the \fBTVNC_WM\fR environment variable, if it is set.
 .TP
 \fB\-vgl\fR
 This sets an environment variable (\fBTVNC_VGL\fR) to 1, and the default
-xstartup.turbovnc script that \fBvncserver\fR creates will launch the window
-manager using VirtualGL if that environment variable is set.  More
-specifically, if \fBTVNC_VGL\fR is set, then the xstartup.turbovnc script will
-launch the window manager using a command specified in another environment
-variable (\fBTVNC_VGLRUN\fR.)  The default value of \fBTVNC_VGLRUN\fR is
-"vglrun +wm", but users can override that environment variable in order to pass
-additional arguments to vglrun, to specify the full path of vglrun, or to use
-another command to launch the window manager.
+xstartup.turbovnc script will launch the window manager using VirtualGL if that
+environment variable is set.  More specifically, if \fBTVNC_VGL\fR is set, then
+the xstartup.turbovnc script will launch the window manager using a command
+specified in another environment variable (\fBTVNC_VGLRUN\fR.)  The default
+value of \fBTVNC_VGLRUN\fR is "vglrun +wm", but users can override that
+environment variable in order to pass additional arguments to vglrun, to
+specify the full path of vglrun, or to use another command to launch the window
+manager.
 .TP
 \fB\-log\fR  \fIfile\fR
 Redirect the output of Xvnc to \fIfile\fR, rather than to

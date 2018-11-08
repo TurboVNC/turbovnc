@@ -253,6 +253,7 @@ fi
 %if "%{server}" == "1"
  %{bindir}/Xvnc
  %{bindir}/vncserver
+ %{bindir}/xstartup.turbovnc
  %{bindir}/vncpasswd
  %{bindir}/vncconnect
 %endif

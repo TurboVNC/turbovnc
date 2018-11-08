@@ -82,6 +82,13 @@ variable, can be used to disable the feature.
 12. The TurboVNC Viewer's built-in SSH client can now read SSH private keys
 from ssh-agent or Pageant.
 
+13. The TurboVNC Server now installs the default xstartup.turbovnc script into
+the same directory as vncserver, and vncserver uses that default script if the
+per-user xstartup.turbovnc script (usually ~/.vnc/xstartup.turbovnc) doesn't
+exist.  This facilitates upgrading xstartup.turbovnc on a system-wide basis
+when the TurboVNC Server is upgraded.  The per-user xstartup.turbovnc script
+will no longer automatically be created if it doesn't exist.
+
 
 2.2.1
 =====
