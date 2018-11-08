@@ -1,8 +1,6 @@
 ##
 ## Configuration of the TurboVNC Server.
 ##
-## *** Copy this file to /etc before editing it ***
-##
 ## This file uses Perl syntax, although only one-line assignments
 ## are allowed.  Assignments can be applied to the following variables:
 ##

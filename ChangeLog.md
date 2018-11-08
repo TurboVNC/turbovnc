@@ -145,6 +145,11 @@ variable (`$wm`.)  This is useful when starting TurboVNC sessions at boot time,
 and for other situations in which setting the `TVNC_WM` environment variable is
 not possible.
 
+10. The TurboVNC Server now properly handles installations in which the
+system-wide TurboVNC configuration file (turbovncserver.conf) and security
+configuration file (turbovncserver-security.conf) are located in a directory
+other than /etc.
+
 
 2.2
 ===

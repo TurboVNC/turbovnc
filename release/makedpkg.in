@@ -70,11 +70,6 @@ make install DESTDIR=$TMPDIR
 if [ ! "$DOCDIR" = "/usr/share/doc/$PKGNAME-$VERSION" ]; then
 	safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$PKGNAME-$VERSION $TMPDIR/__tmpdoc
 fi
-if [ "$BUILDSERVER" = "1" ]; then
-	if [ ! "$SYSCONFDIR" = "/etc" ]; then
-		safedirmove $TMPDIR/$SYSCONFDIR $TMPDIR/etc $TMPDIR/__tmpconf
-	fi
-fi
 
 mkdir -p $TMPDIR/usr/share/applications
 cat > $TMPDIR/usr/share/applications/tvncviewer.desktop <<EOF

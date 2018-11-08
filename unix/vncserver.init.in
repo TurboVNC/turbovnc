@@ -40,10 +40,8 @@ fi
 
 unset VNCSERVERARGS
 VNCSERVERS=""
-if [ -f /etc/sysconfig/tvncservers ]; then
-    . /etc/sysconfig/tvncservers
-elif [ -f @CMAKE_INSTALL_FULL_SYSCONFDIR@/sysconfig/tvncservers ]; then
-    . @CMAKE_INSTALL_FULL_SYSCONFDIR@/sysconfig/tvncservers ]
+if [ -f @CMAKE_INSTALL_FULL_SYSCONFDIR@/sysconfig/tvncservers ]; then
+    . @CMAKE_INSTALL_FULL_SYSCONFDIR@/sysconfig/tvncservers
 fi
 
 LOCKDIR=/var/lock

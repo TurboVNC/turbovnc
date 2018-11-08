@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "October 2018" "" "TurboVNC"
+.TH Xvnc 1 "November 2018" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -526,11 +526,11 @@ processing, including the authentication methods, RFB protocol versions,
 and security types that have been enabled.
 .SH SECURITY CONFIGURATION FILE
 At startup, Xvnc reads security configuration information from
-\fB/etc/turbovncserver-security.conf\fR.  For security reasons, this pathname
-is hard-coded into the Xvnc executable and cannot be changed without rebuilding
-Xvnc.  If present, the security configuration file must be owned by
-either root or by the user who started the TurboVNC session, and the file may
-not be writable by others.
+\fB@CMAKE_INSTALL_FULL_SYSCONFDIR@/turbovncserver-security.conf\fR.  For
+security reasons, this pathname is hard-coded into the Xvnc executable and
+cannot be changed without rebuilding Xvnc.  If present, the security
+configuration file must be owned by either root or by the user who started the
+TurboVNC session, and the file may not be writable by others.
 
 Comment lines start with a hash (#) character.  Spaces and tabs are
 ignored on lines containing configuration directives.  The configuration
