@@ -17,7 +17,7 @@
 %define viewer @TVNC_BUILDVIEWER@
 
 # Whether or not to include a custom JRE
-%define jre @TVNC_INCLUDEJRE@
+%{!?jre: %define jre @TVNC_INCLUDEJRE@}
 
 # Whether or not to include the native infrastructure for the Java viewer
 %define helper @TVNC_BUILDHELPER@

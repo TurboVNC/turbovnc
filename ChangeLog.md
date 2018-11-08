@@ -44,16 +44,12 @@ an external SSH client because of the need to leave the SSH session open and
 reuse it to run multiple commands), so it is affected by the `SSHConfig`,
 `SSHKey`, `SSHKeyFile`, `SSHKeyPass`, and `SSHPort` parameters.
 
-6. When generating a Mac package/disk image (for instance, by invoking
-`make dmg`) or a Windows installer (for instance, by invoking
-`nmake installer`), a custom JRE based on OpenJDK can now optionally be
-included in the Mac TurboVNC Viewer app bundle or the Windows TurboVNC Viewer
-installation directory by setting the `TVNC_INCLUDEJRE` CMake variable to `1`.
-When including a custom JRE, OpenJDK 11 or later must be used.  When using an
-installation of the Mac TurboVNC Viewer or the Windows TurboVNC Viewer that
-contains a custom JRE (including the official TurboVNC Viewer packages), an
-external JRE can still be used at run time by setting the `JAVA_HOME`
-environment variable.
+6. A custom JRE based on OpenJDK can now optionally be included in 64-bit
+TurboVNC installations and packages by setting the `TVNC_INCLUDEJRE` CMake
+variable to `1`.  When including a custom JRE, OpenJDK 11 or later must be
+used.  When using an installation of the TurboVNC Viewer that contains a custom
+JRE (including the official 64-bit TurboVNC packages), an external JRE can
+still be used at run time by setting the `JAVA_HOME` environment variable.
 
 7. The built-in HTTP server in the TurboVNC Server is no longer enabled by
 default.  This reflects the fact that Java Web Start is now a legacy

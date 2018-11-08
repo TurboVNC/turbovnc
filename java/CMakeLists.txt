@@ -305,7 +305,7 @@ if(TVNC_BUILDSERVER AND TVNC_INCLUDEJNIJARS)
 	add_custom_target(jnijars ALL DEPENDS ${JNI_JAR_FILES})
 endif()
 
-option(TVNC_INCLUDEJRE "Include a custom Java Runtime Environment (JRE) with the Mac TurboVNC Viewer and Windows TurboVNC Viewer"
+option(TVNC_INCLUDEJRE "Include a custom Java Runtime Environment (JRE) with the TurboVNC Viewer"
 	FALSE)
 boolean_number(TVNC_INCLUDEJRE)
 report_option(TVNC_INCLUDEJRE "Custom JRE")

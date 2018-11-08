@@ -40,7 +40,10 @@ Build Requirements
   * For systems that do not provide a JDK, download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
     or [OpenJDK](https://jdk.java.net)
-  * If using JDK 11 or later, CMake 3.10.x or later must also be used
+  * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
+    an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
+    set to `1`)
+  * If using JDK 11 or later, CMake 3.11.x or later must also be used
 
 
 ### Windows
@@ -81,7 +84,7 @@ Build Requirements
   * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
     an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
     set to `1`)
-  * If using JDK 11 or later, CMake 3.10.x or later must also be used
+  * If using JDK 11 or later, CMake 3.11.x or later must also be used
 
 
 ### Mac
@@ -95,7 +98,7 @@ Build Requirements
   * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
     a Mac package/disk image with a custom JRE (if the `TVNC_INCLUDEJRE` CMake
     variable is set to `1`)
-  * If using JDK 11 or later, CMake 3.10.x or later must also be used
+  * If using JDK 11 or later, CMake 3.11.x or later must also be used
 
 
 Out-of-Tree Builds
