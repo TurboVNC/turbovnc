@@ -19,6 +19,14 @@
 # Whether or not to include the native infrastructure for the Java viewer
 %define native @TVNC_BUILDNATIVE@
 
+# Work around "No build ID note found" error caused by some versions of RPM
+# trying in vain to extract debug info from libturbojpeg.so
+%if "%{java}" == "1"
+%if "%{native}" == "1"
+%undefine _missing_build_ids_terminate_build
+%endif
+%endif
+
 # Whether or not to include the server
 %define server @TVNC_BUILDSERVER@
 
