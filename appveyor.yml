@@ -27,7 +27,7 @@ install:
 
       set MSYSTEM=MINGW32
 
-      bash -c "pacman --noconfirm -S zip"
+      bash -c "pacman --noconfirm -S zip unzip"
 
       git clone --depth=1 https://github.com/TurboVNC/buildscripts.git -b %APPVEYOR_REPO_BRANCH% c:/buildscripts
 
