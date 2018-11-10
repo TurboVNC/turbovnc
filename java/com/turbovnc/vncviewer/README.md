@@ -16,13 +16,12 @@ TurboVNC packages and will automatically be loaded if the TurboVNC Viewer is
 launched using the `vncviewer` script (Linux/Un*x), the `vncviewer.bat` script
 or the Start Menu shortcut (Windows), or the TurboVNC Viewer app (Mac).  If the
 viewer is launched with Java Web Start using the recommended procedure or the
-TurboVNC Server's built-in web server (refer to the TurboVNC User's Guide),
-then the appropriate libjpeg-turbo JNI library will be downloaded along with
-it, assuming that the client machine is running Windows, OS X, or Linux.  For
-other deployment scenarios, the TurboVNC Viewer will find the libjpeg-turbo JNI
-library if [one of the official libjpeg-turbo packages]
-(http://www.sourceforge.net/projects/libjpeg-turbo/files) is installed on the
-client machine.
+TurboVNC Server's built-in web server (see below), then the appropriate
+libjpeg-turbo JNI library will be downloaded along with it, assuming that the
+client machine is running Windows, OS X, or Linux.  For other deployment
+scenarios, the TurboVNC Viewer will find the libjpeg-turbo JNI library if
+[one of the official libjpeg-turbo packages](http://www.sourceforge.net/projects/libjpeg-turbo/files)
+is installed on the client machine.
 
 If you suspect for whatever reason that JPEG decoding is not being accelerated,
 then the easiest way to check is to open the "Connection Info" dialog (after
@@ -86,9 +85,9 @@ platforms and Windows GDI on Windows platforms.
 Launching the TurboVNC Viewer from a Web Browser Using Java Web Start
 ---------------------------------------------------------------------
 
-__NOTE:__ [Oracle Java](http://www.java.com) 8 or [IcedTea-Web]
-(https://icedtea.classpath.org/wiki/IcedTea-Web) is required on the client if
-using Java Web Start.
+__NOTE:__ [Oracle Java](http://www.java.com) 8 or
+[IcedTea-Web](https://icedtea.classpath.org/wiki/IcedTea-Web) is required on
+the client if using Java Web Start.
 
 __NOTE:__ This feature is deprecated and may be removed in a future release of
 TurboVNC.
@@ -149,9 +148,9 @@ downloaded from anywhere.
 Deploying the TurboVNC Viewer Using Java Web Start
 --------------------------------------------------
 
-__NOTE:__ [Oracle Java](http://www.java.com) 8 or [IcedTea-Web]
-(https://icedtea.classpath.org/wiki/IcedTea-Web) is required on the client if
-using Java Web Start.
+__NOTE:__ [Oracle Java](http://www.java.com) 8 or
+[IcedTea-Web](https://icedtea.classpath.org/wiki/IcedTea-Web) is required on
+the client if using Java Web Start.
 
 Accessing the TurboVNC Viewer through TurboVNC's built-in HTTP server, as
 described above, is a straightforward way of running the TurboVNC Viewer on
@@ -170,15 +169,14 @@ knowledge of web server administration.
 * Copy the libjpeg-turbo JNI JAR files into that same directory.  You can
   obtain these from one of the official TurboVNC 2.0 or later binary packages
   for Linux, or you can download `libjpeg-turbo-{version}-jws.zip` from
-  [libjpeg-turbo 1.4.0 or later]
-  (http://sourceforge.net/projects/libjpeg-turbo/files).  Note that only
-  the JARs included in the official TurboVNC packages are signed using an
-  official code signing certificate.
+  [libjpeg-turbo 1.4.0 or later](http://sourceforge.net/projects/libjpeg-turbo/files).
+  Note that only the JARs included in the official TurboVNC packages are signed
+  using an official code signing certificate.
 
 * __OPTIONAL:__ Copy the TurboVNC Helper JAR files into that same directory.
   You can obtain these from `turbovnc-{version}-jws.zip`, which is supplied
-  with official releases of [TurboVNC 2.1.2 and later]
-  (http://sourceforge.net/projects/turbovnc/files).
+  with official releases of
+  [TurboVNC 2.1.2 and later](http://sourceforge.net/projects/turbovnc/files).
 
 * __OPTIONAL:__ For large organizations, it may be desirable to obtain your
   own code signing certificate from a trusted certificate authority and use
@@ -249,8 +247,8 @@ knowledge of web server administration.
     __NOTE:__ Leave out the lines referring to `tvnchelper-*.jar` if you have
     not installed the TurboVNC Helper JARs.
 
-    This is just a minimal example.  Refer to the [JNLP file syntax]
-    (https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/developersguide/syntax.html)
+    This is just a minimal example.  Refer to the
+    [JNLP file syntax](https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/developersguide/syntax.html)
     for additional fields that you might want to add.
 
 * You should now be able to access `{turbovnc_url}/TurboVNC.jnlp` in your
