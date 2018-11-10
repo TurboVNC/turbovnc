@@ -27,7 +27,6 @@ cp $SRCDIR/LICENSE.txt "$APP/Contents/Resources/Java/"
 cp $SRCDIR/release/turbovnc.icns "$APP/Contents/Resources/"
 cp $SRCDIR/release/vncviewer.icns "$APP/Contents/Resources/"
 cp @TJPEG_JNILIBRARY@ "$APP/Contents/Resources/Native/"
-cp @TJPEG_JNILIBRARY@ "$APP/Contents/Resources/Native/"
 cp java/libturbovnchelper.dylib "$APP/Contents/Resources/Native/"
 
 exit
