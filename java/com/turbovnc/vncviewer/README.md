@@ -6,34 +6,16 @@ contains numerous additional features and GUI modifications that make it behave
 and perform like a native VNC viewer.
 
 
-Accelerated JPEG Decoding
--------------------------
-
-The TurboVNC Viewer can access libjpeg-turbo through JNI to accelerate JPEG
-decoding, which gives the viewer similar performance to a native viewer in
-most cases.  The libjpeg-turbo JNI library is bundled with the official
-TurboVNC packages and will automatically be loaded if the TurboVNC Viewer is
-launched using the `vncviewer` script (Linux/Un*x), the `vncviewer.bat` script
-or the Start Menu shortcut (Windows), or the TurboVNC Viewer app (Mac).  For
-other deployment scenarios, the TurboVNC Viewer will find the libjpeg-turbo JNI
-library if
-[one of the official libjpeg-turbo packages](http://www.sourceforge.net/projects/libjpeg-turbo/files)
-is installed on the client machine.
-
-If you suspect for whatever reason that JPEG decoding is not being accelerated,
-then the easiest way to check is to open the "Connection Info" dialog (after
-the connection to the server has been established) and verify that the "JPEG
-decompression" field says "Turbo".  If you are launching the TurboVNC Viewer
-from the command line, then it will also print a warning if it is unable to
-load libjpeg-turbo.
-
-
 The TurboVNC Helper
 -------------------
 
 When run as a standalone application, the TurboVNC Viewer implements some
 low-level platform-specific features by way of a bundled JNI library called the
 "TurboVNC Helper."  The following features require the TurboVNC Helper:
+
+### All Platforms
+
+* Accelerated JPEG decompression using libjpeg-turbo
 
 ### Windows
 
@@ -52,6 +34,11 @@ low-level platform-specific features by way of a bundled JNI library called the
 * Remote X Input/extended input device support
 * Multi-screen spanning in full-screen mode
 * ssh-agent support (for password-less SSH public key authentication)
+
+You can verify that the TurboVNC Helper has been loaded by checking the
+"Connection Info" dialog (after the connection to the server has been
+established.)  If you are launching the TurboVNC Viewer from the command line,
+then it will also print a warning if it is unable to load the helper.
 
 
 Blitting Performance

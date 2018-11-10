@@ -26,11 +26,9 @@
 %define helper @TVNC_BUILDHELPER@
 
 # Work around "No build ID note found" error caused by some versions of RPM
-# trying in vain to extract debug info from libturbojpeg.so
-%if "%{viewer}" == "1"
-%if "%{helper}" == "1"
+# trying in vain to extract debug info from the custom JRE
+%if "%{jre}" == "1"
 %undefine _missing_build_ids_terminate_build
-%endif
 %endif
 
 # Whether or not to include the server
@@ -242,7 +240,6 @@ fi
   %{datadir}/icons/hicolor/128x128/apps/turbovnc.png
   %{datadir}/icons/hicolor/48x48/apps/turbovnc.png
   %{datadir}/icons/hicolor/16x16/apps/turbovnc.png
-  %{javadir}/libturbojpeg.so
   %{javadir}/libturbovnchelper.so
  %endif
 %endif

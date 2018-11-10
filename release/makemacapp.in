@@ -34,7 +34,6 @@ install -m 644 $SRCDIR/java/com/turbovnc/vncviewer/README.md "$APP/Contents/Reso
 install -m 644 $SRCDIR/LICENSE.txt "$APP/Contents/Resources/Java/"
 install -m 644 $SRCDIR/release/turbovnc.icns "$APP/Contents/Resources/"
 install -m 644 $SRCDIR/release/vncviewer.icns "$APP/Contents/Resources/"
-install -m 755 @TJPEG_JNILIBRARY@ "$APP/Contents/Resources/Native/"
 install -m 755 java/libturbovnchelper.dylib "$APP/Contents/Resources/Native/"
 
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then

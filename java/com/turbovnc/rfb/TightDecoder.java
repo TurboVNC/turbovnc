@@ -1,7 +1,7 @@
 /* Copyright (C) 2000-2003 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2011-2013, 2015, 2017-2018, 2020 D. R. Commander.
- *                                                All Rights Reserved.
+ * Copyright (C) 2011-2013, 2015, 2017-2018, 2020-2021 D. R. Commander.
+ *                                                     All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -27,7 +27,6 @@ import java.awt.image.*;
 import java.util.Arrays;
 import java.awt.*;
 import java.util.zip.*;
-import org.libjpegturbo.turbojpeg.*;
 
 public class TightDecoder extends Decoder {
 
@@ -36,31 +35,23 @@ public class TightDecoder extends Decoder {
 
   static final Toolkit TK = Toolkit.getDefaultToolkit();
 
+  static final int TJPF_RGB = 0;
+  static final int TJPF_RGBX = 2;
+  static final int TJPF_BGRX = 3;
+  static final int TJPF_XBGR = 4;
+  static final int TJPF_XRGB = 5;
+
   public TightDecoder(CMsgReader reader_) {
     reader = reader_;
     inflater = new Inflater[4];
     for (int i = 0; i < 4; i++)
       inflater[i] = new Inflater();
-    try {
-      if (Utils.getBooleanProperty("turbovnc.turbojpeg", true))
-        tjd = new TJDecompressor();
-      else {
-        vlog.info("Disabling TurboJPEG");
-        tjd = null;
+    if (Helper.isAvailable()) {
+      try {
+        tjhandle = tjInitDecompress();
+      } catch (Exception e) {
+        throw new SystemException(e);
       }
-    } catch (NoClassDefFoundError e) {
-      vlog.info("WARNING: Could not initialize libjpeg-turbo:");
-      vlog.info("  Class not found: " + e.getMessage());
-      vlog.info("  Using unaccelerated JPEG decompressor.");
-    } catch (UnsatisfiedLinkError e) {
-      vlog.info("WARNING: Could not find TurboJPEG JNI library.  If it is in a");
-      vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
-      vlog.info("  to the Java command line to specify its location.");
-      vlog.info("  Using unaccelerated JPEG decompressor.");
-    } catch (Exception e) {
-      vlog.info("WARNING: Could not initialize libjpeg-turbo:");
-      vlog.info("  " + e.getMessage());
-      vlog.info("  Using unaccelerated JPEG decompressor.");
     }
     tightPalette = new byte[256 * 3];
   }
@@ -78,16 +69,16 @@ public class TightDecoder extends Decoder {
       if (inflater[i] != null)
         inflater[i].end();
     }
-    if (tjd != null) {
+    if (tjhandle != 0) {
       try {
-        tjd.close();
-      } catch (TJException e) {}
-      tjd = null;
+        tjDestroy(tjhandle);
+      } catch (Exception e) {}
+      tjhandle = 0;
     }
   }
 
   public boolean isTurboJPEG() {
-    return tjd != null;
+    return tjhandle != 0;
   }
 
   short getShort(byte[] src, int srcPtr) {
@@ -439,55 +430,54 @@ public class TightDecoder extends Decoder {
     checkNetbuf(compressedLen);
     is.readBytes(netbuf, 0, compressedLen);
 
-    if (tjd != null) {
+    if (tjhandle != 0) {
 
       int[] stride = new int[1];
       Object data = handler.getRawPixelsRW(stride);
-      int tjpf = TJ.PF_RGB;
+      int tjpf = TJPF_RGB;
       PixelFormat pf = handler.cp.pf();
 
-      try {
-        tjd.setSourceImage(netbuf, compressedLen);
+      if (pf.is888()) {
+        int redShift, greenShift, blueShift;
 
-        if (pf.is888()) {
-          int redShift, greenShift, blueShift;
-
-          if (pf.bigEndian) {
-            redShift = 24 - pf.redShift;
-            greenShift = 24 - pf.greenShift;
-            blueShift = 24 - pf.blueShift;
-          } else {
-            redShift = pf.redShift;
-            greenShift = pf.greenShift;
-            blueShift = pf.blueShift;
-          }
-
-          if (redShift == 0 && greenShift == 8 && blueShift == 16)
-            tjpf = TJ.PF_RGBX;
-          if (redShift == 16 && greenShift == 8 && blueShift == 0)
-            tjpf = TJ.PF_BGRX;
-          if (redShift == 24 && greenShift == 16 && blueShift == 8)
-            tjpf = TJ.PF_XBGR;
-          if (redShift == 8 && greenShift == 16 && blueShift == 24)
-            tjpf = TJ.PF_XRGB;
-
-          tjd.decompress((int[])data, r.tl.x, r.tl.y, r.width(), stride[0],
-                         r.height(), tjpf, 0);
+        if (pf.bigEndian) {
+          redShift = 24 - pf.redShift;
+          greenShift = 24 - pf.greenShift;
+          blueShift = 24 - pf.blueShift;
         } else {
-          byte[] rgbBuf = new byte[r.width() * r.height() * 3];
-          tjd.decompress(rgbBuf, 0, 0, r.width(), 0, r.height(), TJ.PF_RGB, 0);
-          pf.bufferFromRGB(data, r.tl.x, r.tl.y, stride[0], rgbBuf,
-                           r.width(), r.height());
+          redShift = pf.redShift;
+          greenShift = pf.greenShift;
+          blueShift = pf.blueShift;
         }
-        handler.releaseRawPixels(r);
-        return;
-      } catch (Exception e) {
-        throw new ErrorException(e.getMessage());
-      } catch (UnsatisfiedLinkError e) {
-        vlog.info("WARNING: TurboJPEG JNI library is not new enough.");
-        vlog.info("  Using unaccelerated JPEG decompressor.");
-        tjd = null;
+
+        if (redShift == 0 && greenShift == 8 && blueShift == 16)
+          tjpf = TJPF_RGBX;
+        if (redShift == 16 && greenShift == 8 && blueShift == 0)
+          tjpf = TJPF_BGRX;
+        if (redShift == 24 && greenShift == 16 && blueShift == 8)
+          tjpf = TJPF_XBGR;
+        if (redShift == 8 && greenShift == 16 && blueShift == 24)
+          tjpf = TJPF_XRGB;
+
+        try {
+          tjDecompress(tjhandle, netbuf, compressedLen, (int[])data, r.tl.x,
+                       r.tl.y, r.width(), stride[0], r.height(), tjpf, 0);
+        } catch (Exception e) {
+          throw new SystemException(e);
+        }
+      } else {
+        byte[] rgbBuf = new byte[r.width() * r.height() * 3];
+        try {
+          tjDecompress(tjhandle, netbuf, compressedLen, rgbBuf, 0, 0,
+                       r.width(), 0, r.height(), TJPF_RGB, 0);
+        } catch (Exception e) {
+          throw new SystemException(e);
+        }
+        pf.bufferFromRGB(data, r.tl.x, r.tl.y, stride[0], rgbBuf,
+                         r.width(), r.height());
       }
+      handler.releaseRawPixels(r);
+      return;
     }
 
     // Create an Image object from the JPEG data.
@@ -595,13 +585,22 @@ public class TightDecoder extends Decoder {
   private CMsgReader reader;
   private Inflater[] inflater;
   private PixelFormat serverpf;
-  private TJDecompressor tjd;
+  private long tjhandle;
   private Object palette;
   private byte[] tightPalette;
   private byte[] netbuf;
   private int netbufSize;
   private byte[] decodebuf;
   private int decodebufSize;
+
+  private native long tjInitDecompress() throws Exception;
+  private native void tjDecompress(long tjhandle, byte[] srcBuf, int size,
+    byte[] dstBuf, int x, int y, int desiredWidth, int pitch,
+    int desiredHeight, int pixelFormat, int flags) throws Exception;
+  private native void tjDecompress(long tjhandle, byte[] srcBuf, int size,
+    int[] dstBuf, int x, int y, int desiredWidth, int pitch,
+    int desiredHeight, int pixelFormat, int flags) throws Exception;
+  private native void tjDestroy(long tjhandle) throws Exception;
 
   static LogWriter vlog = new LogWriter("TightDecoder");
 }

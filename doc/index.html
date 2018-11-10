@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-01-26T19:12:12">
+<meta name="date" content="2021-01-29T15:00:21">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2777,7 +2777,7 @@ specify Java command-line arguments even if you don&rsquo;t have access
 to the command line.  For instance, on Linux you could execute:</p>
 
 <pre class="verbatim">
-JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
+JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
 </pre>
 
 <p>to start the TurboVNC Viewer without JPEG acceleration.</p>
@@ -3128,35 +3128,6 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
         <code>turbovnc.swingdb</code> system property is provided as a fallback 
         in case issues are discovered when running it under a specific version 
         of Java.
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.turbojpeg = <em>0 | 1</em></code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable JPEG acceleration</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Enabled if the libjpeg-turbo JNI library is available</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        Normally, the TurboVNC Viewer will try to load the libjpeg-turbo JNI 
-        library and use it to accelerate the decompression of JPEG 
-        subrectangles.  If this property is disabled, then the viewer will 
-        revert to using unaccelerated JPEG decompression.  This is useful mainly 
-        for testing and benchmarking purposes.
     </dd>
 </dl>
 

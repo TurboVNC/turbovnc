@@ -120,7 +120,7 @@ you don't have access to the command line.  For instance, on Linux you could
 execute:
 
 	#Verb: <<---
-	JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0 /opt/TurboVNC/bin/vncviewer
+	JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1 /opt/TurboVNC/bin/vncviewer
 	---
 
 to start the TurboVNC Viewer without JPEG acceleration.
@@ -266,17 +266,6 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	Although the viewer has been thoroughly tested, the ''turbovnc.swingdb''
 	system property is provided as a fallback in case issues are discovered when
 	running it under a specific version of Java.
-
-| Java System Property | {pcode: turbovnc.turbojpeg = __0 \| 1__} |
-| Summary | Disable/enable JPEG acceleration |
-| Default Value | Enabled if the libjpeg-turbo JNI library is available |
-#OPT: hiCol=first
-
-	Description :: Normally, the TurboVNC Viewer will try to load the
-	libjpeg-turbo JNI library and use it to accelerate the decompression of JPEG
-	subrectangles.  If this property is disabled, then the viewer will revert to
-	using unaccelerated JPEG decompression.  This is useful mainly for testing
-	and benchmarking purposes.
 
 {anchor: VNC_VIA_CMD}
 | Environment Variable | ''VNC_VIA_CMD'', ''VNC_TUNNEL_CMD'' |

@@ -10,22 +10,18 @@ Build Requirements
 
 - [CMake](http://www.cmake.org) v2.8.12 or later
 
-- libjpeg-turbo SDK (v1.4 or later required if building the TurboVNC Viewer.)
+- libjpeg-turbo SDK v1.2 or later
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
-  * If building the TurboVNC Server, the build system will search for the
-    TurboJPEG header and library under __/opt/libjpeg-turbo__, but you can
+  * The TurboVNC build system will search for the TurboJPEG header and library
+    under __/opt/libjpeg-turbo__ on Un\*x or __c:\libjpeg-turbo[64]__ (Visual
+    C++) or __c:\libjpeg-turbo-gcc[64]__ (MinGW) on Windows, but you can
     override this by setting the `TJPEG_INCLUDE_DIR` CMake variable to the
     directory containing __turbojpeg.h__ and the `TJPEG_LIBRARY` CMake variable
     to either the full path of the TurboJPEG library against which you want to
     link or a set of link flags needed to link with the TurboJPEG library (for
-    instance, `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"`.)
-  * If building the TurboVNC Viewer, the build system will search for the
-    TurboJPEG JAR file and JNI library under __/opt/libjpeg-turbo__ on Unix or
-    __c:\libjpeg-turbo[64]__ on Windows, but you can override this by setting
-    the `TJPEG_JAR` CMake variable to the full path of __turbojpeg.jar__ and
-    the `TJPEG_JNILIBRARY` CMake variable to the full path of the TurboJPEG JNI
-    library.
+    instance, `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"` or
+    `-DTJPEG_LIBRARY="-libpath:c:/libjpeg-turbo64/lib turbojpeg.lib"`.)
 
 
 ### Linux and other Un*x O/S's (except Mac)

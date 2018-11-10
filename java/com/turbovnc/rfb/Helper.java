@@ -1,4 +1,5 @@
-/* Copyright (C) 2015, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2017-2018, 2020-2021 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +21,7 @@
  * Helper.java - TurboVNC Helper dispatcher
  */
 
-package com.turbovnc.vncviewer;
-
-import com.turbovnc.rfb.*;
+package com.turbovnc.rfb;
 
 public final class Helper {
 
@@ -48,6 +47,7 @@ public final class Helper {
 
   private static synchronized void printMissingFeatures() {
     vlog.info("  The following features will be disabled:");
+    vlog.info("  - Accelerated JPEG decompression");
     if (Utils.osGrab())
       vlog.info("  - Keyboard grabbing");
     if (Utils.osEID())

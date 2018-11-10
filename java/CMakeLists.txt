@@ -23,29 +23,6 @@ string(TIMESTAMP DEFAULT_JAVA_TIME "%H:%M:%S")
 set(JAVA_TIME ${DEFAULT_JAVA_TIME} CACHE STRING "Java time stamp")
 mark_as_advanced(JAVA_TIME)
 
-if(WIN32)
-	if(BITS EQUAL 64)
-		set(DEFAULT_TJPEG_JAR c:\\libjpeg-turbo64\\classes\\turbojpeg.jar)
-	else()
-		set(DEFAULT_TJPEG_JAR c:\\libjpeg-turbo\\classes\\turbojpeg.jar)
-	endif()
-else()
-	set(DEFAULT_TJPEG_JAR /opt/libjpeg-turbo/classes/turbojpeg.jar)
-endif()
-
-set(TJPEG_JAR ${DEFAULT_TJPEG_JAR} CACHE FILEPATH
-	"JAR file containing TurboJPEG Java classes (default: ${DEFAULT_TJPEG_JAR})")
-
-if(NOT EXISTS ${TJPEG_JAR})
-	message(FATAL_ERROR "Could not find TurboJPEG JAR file at ${TJPEG_JAR}.  Set TJPEG_JAR to the full pathname of turbojpeg.jar or install the libjpeg-turbo SDK.")
-endif()
-
-if(APPLE)
-	set(DEFAULT_TJPEG_JNILIBRARY /opt/libjpeg-turbo/lib/libturbojpeg.dylib)
-	set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE FILEPATH
-		"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
-endif()
-
 set(JAVA_SOURCES "")
 set(JAVA_CLASSES "")
 
@@ -138,9 +115,8 @@ string(REGEX REPLACE " " ";" CMAKE_JAVA_COMPILE_FLAGS
 add_custom_command(OUTPUT ${JAVA_CLASSES}
 	DEPENDS ${JAVA_SOURCES} ${DEPEND_SOURCES}
 	COMMAND ${JAVA_COMPILE}
-	ARGS ${CMAKE_JAVA_COMPILE_FLAGS} -cp ${TJPEG_JAR} -sourcepath ${SRCDIR}
-		-d ${BINDIR} ${CLASSPATH}/VncViewer.java ${CLASSPATH}/ImageDrawTest.java
-		${JAVA_SOURCES}
+	ARGS ${CMAKE_JAVA_COMPILE_FLAGS} -sourcepath ${SRCDIR} -d ${BINDIR}
+		${CLASSPATH}/VncViewer.java ${CLASSPATH}/ImageDrawTest.java ${JAVA_SOURCES}
 	WORKING_DIRECTORY ${SRCDIR})
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
@@ -170,10 +146,6 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
 		${BINDIR}/${CLASSPATH}/insecure.png
 		${BINDIR}/${CLASSPATH}/secure.png
-		${TJPEG_JAR}
-	COMMAND ${JAVA_ARCHIVE}
-	ARGS xf ${TJPEG_JAR}
-		org/libjpegturbo/turbojpeg
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS cfm VncViewer.jar
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
@@ -191,7 +163,6 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/jcraft/jsch/jce/*.class
 		com/jcraft/jsch/*.class
 		org/spf4j/base/*.class
-		org/libjpegturbo/turbojpeg/*.class
 		${CLASSPATH}/toolbar.png
 		${CLASSPATH}/turbovnc.png
 		${CLASSPATH}/turbovnc-sm.png
