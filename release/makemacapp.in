@@ -25,18 +25,18 @@ mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources/Java"
 mkdir -p "$APP/Contents/Resources/TurboJPEG"
 
-cp pkgscripts/Info$SUFFIX.plist "$APP/Contents/Info.plist"
+install -m 644 pkgscripts/Info$SUFFIX.plist "$APP/Contents/Info.plist"
 if [ "$SUFFIX" = "-AppleJava" ]; then
-  cp $LAUNCHER "$APP/Contents/MacOS/"
+  install -m 755 $LAUNCHER "$APP/Contents/MacOS/"
 else
-  cp $LAUNCHER "$APP/Contents/MacOS/@CMAKE_PROJECT_NAME@ Viewer"
+  install -m 755 $LAUNCHER "$APP/Contents/MacOS/@CMAKE_PROJECT_NAME@ Viewer"
 fi
 echo "APPL????" >"$APP/Contents/PkgInfo"
-cp java/VncViewer.jar "$APP/Contents/Resources/Java/"
-cp $SRCDIR/java/com/turbovnc/vncviewer/README.txt "$APP/Contents/Resources/Java/"
-cp $SRCDIR/LICENSE.txt "$APP/Contents/Resources/Java/"
-cp $SRCDIR/release/turbovnc.icns "$APP/Contents/Resources/"
-cp $SRCDIR/release/vncviewer.icns "$APP/Contents/Resources/"
-cp @TJPEG_JNILIBRARY@ "$APP/Contents/Resources/TurboJPEG/"
+install -m 644 java/VncViewer.jar "$APP/Contents/Resources/Java/"
+install -m 644 $SRCDIR/java/com/turbovnc/vncviewer/README.txt "$APP/Contents/Resources/Java/"
+install -m 644 $SRCDIR/LICENSE.txt "$APP/Contents/Resources/Java/"
+install -m 644 $SRCDIR/release/turbovnc.icns "$APP/Contents/Resources/"
+install -m 644 $SRCDIR/release/vncviewer.icns "$APP/Contents/Resources/"
+install -m 755 @TJPEG_JNILIBRARY@ "$APP/Contents/Resources/TurboJPEG/"
 
 exit
