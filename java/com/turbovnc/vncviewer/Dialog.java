@@ -30,7 +30,6 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.Dialog.*;
 import javax.swing.*;
-import java.lang.reflect.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.LogWriter;
@@ -65,7 +64,11 @@ class Dialog {
       throw new ErrorException("Unknown window type");
     }
 
-    setIcon();
+    // Under Java 6 and later, ownerless JDialogs in the TurboVNC Viewer are
+    // created with a null owner to ensure that they appear in the task
+    // switcher on Linux.  However, this necessitates using
+    // JDialog.setIconImage() to set the icon image.
+    dlg.setIconImage(VncViewer.FRAME_IMAGE);
 
     populateDialog(dlg);
     if (title != null)
@@ -106,23 +109,6 @@ class Dialog {
 
   public boolean isShown() {
     return (dlg != null && dlg.isVisible());
-  }
-
-  private void setIcon() {
-    // Under Java 6 and later, ownerless JDialogs in the TurboVNC Viewer are
-    // created with a null owner to ensure that they appear in the task
-    // switcher on Linux.  However, this necessitates using
-    // JDialog.setIconImage() to set the icon image, and since that method is
-    // only available in Java 6 and later, we have to use reflect to invoke it.
-    try {
-      Class[] argClasses = new Class[]{ Image.class };
-      Method setIconImage = Window.class.getMethod("setIconImage", argClasses);
-      setIconImage.invoke(dlg, VncViewer.FRAME_IMAGE);
-      return;
-    } catch (Exception e) {
-      vlog.debug("Could not set dialog icon:");
-      vlog.debug("  " + e.toString());
-    }
   }
 
   public void endDialog() {

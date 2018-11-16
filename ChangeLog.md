@@ -113,7 +113,7 @@ is now the default, because of 2.2 beta1[8]) and the hostname of the TurboVNC
 host resolved to its external IP address rather than to its local IP address.
 
 4. The Java TurboVNC Viewer will now display all informational messages and
-warnings from its built-in SSH client whenever the logging level is >= 100.
+warnings from its built-in SSH client whenever the logging level is >= 110.
 
 5. The built-in SSH client in the Java TurboVNC Viewer has been improved in the
 following ways:
@@ -155,6 +155,11 @@ not possible.
 system-wide TurboVNC configuration file (turbovncserver.conf) and security
 configuration file (turbovncserver-security.conf) are located in a directory
 other than /etc.
+
+11. Introduced a new turbovncserver.conf variable (`$serverArgs`) that can be
+used to specify additional arguments for Xvnc.  This allows any TurboVNC Server
+option to be enabled or disabled on a system-wide or per-user basis, even if
+that option has no corresponding turbovncserver.conf variable.
 
 
 2.2

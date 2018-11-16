@@ -14,7 +14,6 @@
 ##  $fontPath    -- X font path
 ##  $securityTypes -- comma-separated list of security types to enable
 ##                    (passed to Xvnc in the -securitytypes argument)
-##  $colorPath   -- optional path to X colors database
 ##  $generateOTP -- 1 to generate an initial one-time password.  (OTP
 ##                  authentication must be enabled and permitted)
 ##  $autoLosslessRefresh -- automatic lossless refresh timeout (in seconds,
@@ -42,6 +41,8 @@
 ##                   use with X.509 encryption
 ##  $x509KeyFile -- path to X.509 private key file (in PEM format) to use with
 ##                  X.509 encryption
+##  $serverArgs  -- additional arguments to pass to Xvnc (refer to the Xvnc man
+##                  page for a list of accepted arguments)
 ##
 
 ## These settings are the default.  Uncomment and edit to change.
@@ -53,7 +54,6 @@
 # $vncUserDir = "$ENV{HOME}/.vnc";
 # $fontPath = "";
 # $securityTypes = "TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin, Plain";
-# $colorPath = "/usr/lib/X11/rgb";
 # $generateOTP = 0;
 # $autoLosslessRefresh = 0.0;
 # $enableHTTP = 0;
@@ -64,6 +64,7 @@
 # $multiThread = 1;
 # $numThreads = 0;
 # $noVNC = "";
+# $serverArgs = "";
 
 ## Uncomment this to use the X font server by default, rather than a static
 ## font path.

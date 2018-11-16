@@ -183,14 +183,16 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
 
     GridBagConstraints gbc =
       new GridBagConstraints(0, 0, 1, 1, 1, 1,
-                             GridBagConstraints.NORTHWEST,
+                             GridBagConstraints.WEST,
                              GridBagConstraints.NONE,
                              new Insets(0, 0, 0, 0), 0, 0);
     gbc.weightx = 1.0;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 0;
-    panel.add(new JLabel(instruction), gbc);
-    gbc.gridy++;
+    if (instruction != null && instruction.length() > 0) {
+      panel.add(new JLabel(instruction), gbc);
+      gbc.gridy++;
+    }
 
     gbc.gridwidth = GridBagConstraints.RELATIVE;
 

@@ -196,6 +196,9 @@ public class Tunnel {
     if (opts.sshSession.getConfig("StrictHostKeyChecking") == null)
       opts.sshSession.setConfig("StrictHostKeyChecking", "ask");
     opts.sshSession.setConfig("MaxAuthTries", "3");
+    if (!VncViewer.getBooleanProperty("turbovnc.gssapi", false))
+      opts.sshSession.setConfig("PreferredAuthentications",
+                                "publickey,keyboard-interactive,password");
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                         true, user, false, true, -1);
     opts.sshSession.setUserInfo(dlg);
@@ -290,7 +293,7 @@ public class Tunnel {
       switch (level) {
         case Logger.DEBUG:
         case Logger.INFO:
-          vlogSSH.debug(message);
+          vlogSSH.sshdebug(message);
           return;
         case Logger.WARN:
           vlogSSH.status(message);
