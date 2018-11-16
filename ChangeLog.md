@@ -85,6 +85,10 @@ exist.  This facilitates upgrading xstartup.turbovnc on a system-wide basis
 when the TurboVNC Server is upgraded.  The per-user xstartup.turbovnc script
 will no longer automatically be created if it doesn't exist.
 
+14. The `$autoLosslessRefresh`, `$pamSession`, `$multiThread`, and
+`$numThreads` turbovncserver.conf variables are now deprecated, since
+`$serverArgs` can be used to accomplish the same thing.
+
 
 2.2.1
 =====

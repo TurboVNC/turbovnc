@@ -16,8 +16,6 @@
 ##                    (passed to Xvnc in the -securitytypes argument)
 ##  $generateOTP -- 1 to generate an initial one-time password.  (OTP
 ##                  authentication must be enabled and permitted)
-##  $autoLosslessRefresh -- automatic lossless refresh timeout (in seconds,
-##                          or 0 to disable)
 ##  $enableHTTP  -- 1 to enable the embedded web server (which serves up the
 ##                  TurboVNC Viewer via Java Web Start) or 0 to disable
 ##  $wm          -- the window manager startup script to use (for instance,
@@ -25,13 +23,6 @@
 ##  $useVGL      -- 1 to run the window manager startup script using VirtualGL
 ##  $autokill    -- 1 to automatically kill the TurboVNC session when the
 ##                  startup script finishes or 0 to leave it running
-##  $pamSession  -- 1 to create a new PAM session for each viewer that
-##                  authenticates using the username/password of the user who
-##                  owns the TurboVNC session, and leave the PAM session open
-##                  until the viewer disconnects
-##  $multiThread -- 0 to disable multithreaded encoding
-##  $numThreads  -- number of threads to use with multithreaded encoding
-##                  (0 = use the server's default thread count)
 ##  $noVNC       -- path to noVNC launch script
 ##  $noVNCCertFile -- path to combined signed certificate/private key file (in
 ##                    PEM format) to use with noVNC
@@ -55,14 +46,10 @@
 # $fontPath = "";
 # $securityTypes = "TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin, Plain";
 # $generateOTP = 0;
-# $autoLosslessRefresh = 0.0;
 # $enableHTTP = 0;
 # $wm = "";
 # $useVGL = 0;
 # $autokill = 1;
-# $pamSession = 0;
-# $multiThread = 1;
-# $numThreads = 0;
 # $noVNC = "";
 # $serverArgs = "";
 
