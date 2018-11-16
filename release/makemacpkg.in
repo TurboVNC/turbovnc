@@ -80,8 +80,8 @@ mkdir -p $PKGROOT/Library/Documentation
 safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tmpdoc
 
 mkdir -p $TMPDIR/pkg/
-cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
-cp pkgscripts/Distribution$SUFFIX.xml $TMPDIR/pkg/Distribution.xml
+install -m 644 $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
+install -m 644 pkgscripts/Distribution$SUFFIX.xml $TMPDIR/pkg/Distribution.xml
 mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
