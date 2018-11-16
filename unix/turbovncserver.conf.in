@@ -14,7 +14,6 @@
 ##  $fontPath    -- X font path
 ##  $securityTypes -- comma-separated list of security types to enable
 ##                    (passed to Xvnc in the -securitytypes argument)
-##  $colorPath   -- optional path to X colors database
 ##  $generateOTP -- 1 to generate an initial one-time password.  (OTP
 ##                  authentication must be enabled and permitted)
 ##  $autoLosslessRefresh -- automatic lossless refresh timeout (in seconds,
@@ -50,7 +49,6 @@
 # $vncUserDir = "$ENV{HOME}/.vnc";
 # $fontPath = "";
 # $securityTypes = "TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin, Plain";
-# $colorPath = "/usr/lib/X11/rgb";
 # $generateOTP = 0;
 # $autoLosslessRefresh = 0.0;
 # $enableHTTP = 1;
