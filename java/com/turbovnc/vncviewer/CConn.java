@@ -1798,9 +1798,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     JFileChooser fc =
       new JFileChooser(System.getProperty("user.home") + "/Desktop");
     SimpleDateFormat df =
-      new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+      new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
     fc.setDialogTitle("Save Remote Desktop Image");
-    fc.setSelectedFile(new File("TurboVNC Screenshot " +
+    fc.setSelectedFile(new File("TurboVNC_Screenshot_" +
                        df.format(Calendar.getInstance().getTime()) + ".png"));
     int ret = fc.showSaveDialog(null);
     if (ret == JFileChooser.APPROVE_OPTION)
