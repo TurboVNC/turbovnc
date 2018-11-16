@@ -38,6 +38,8 @@
 ##                   use with X.509 encryption
 ##  $x509KeyFile -- path to X.509 private key file (in PEM format) to use with
 ##                  X.509 encryption
+##  $serverArgs  -- additional arguments to pass to Xvnc (refer to the Xvnc man
+##                  page for a list of accepted arguments)
 ##
 
 ## These settings are the default.  Uncomment and edit to change.
@@ -58,6 +60,7 @@
 # $pamSession = 0;
 # $multiThread = 1;
 # $numThreads = 0;
+# $serverArgs = "";
 
 ## Uncomment this to use the X font server by default, rather than a static
 ## font path.

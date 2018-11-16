@@ -68,6 +68,11 @@ system-wide TurboVNC configuration file (turbovncserver.conf) and security
 configuration file (turbovncserver-security.conf) are located in a directory
 other than /etc.
 
+11. Introduced a new turbovncserver.conf variable (`$serverArgs`) that can be
+used to specify additional arguments for Xvnc.  This allows any TurboVNC Server
+option to be enabled or disabled on a system-wide or per-user basis, even if
+that option has no corresponding turbovncserver.conf variable.
+
 
 2.2
 ===
