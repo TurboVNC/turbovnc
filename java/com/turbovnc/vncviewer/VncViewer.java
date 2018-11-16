@@ -515,6 +515,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "                      10 = status messages\n" +
       "                      30 = informational messages (default)\n" +
       "                      100 = debugging messages\n" +
+      "                      110 = SSH debugging messages\n" +
+      "                      150 = extended input device debugging messages\n" +
       "\n" +
       "Specifying boolean parameters:\n" +
       "  On:   -<param>=1 or -<param>\n" +

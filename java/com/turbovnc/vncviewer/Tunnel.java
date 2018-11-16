@@ -272,7 +272,7 @@ public final class Tunnel {
       switch (level) {
         case Logger.DEBUG:
         case Logger.INFO:
-          vlogSSH.debug(message);
+          vlogSSH.sshdebug(message);
           return;
         case Logger.WARN:
           vlogSSH.status(message);

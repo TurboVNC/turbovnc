@@ -25,7 +25,7 @@ is now the default, because of 2.2 beta1[8]) and the hostname of the TurboVNC
 host resolved to its external IP address rather than to its local IP address.
 
 4. The Java TurboVNC Viewer will now display all informational messages and
-warnings from its built-in SSH client whenever the logging level is >= 100.
+warnings from its built-in SSH client whenever the logging level is >= 110.
 
 5. The built-in SSH client in the Java TurboVNC Viewer has been improved in the
 following ways:

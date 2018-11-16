@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2015 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2015, 2018 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ public class LogWriter {
   public void status(String str) { write(10, str); }
   public void info(String str) { write(30, str); }
   public void debug(String str) { write(100, str); }
+  public void sshdebug(String str) { write(110, str); }
   public void eidebug(String str) { write(150, str); }
 
   public static boolean setLogParams(String params) {
