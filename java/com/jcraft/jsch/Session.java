@@ -2744,6 +2744,13 @@ break;
           }
           if(ifile == null)
             continue;
+          if(jsch.getIdentityNames().contains(ifile)){
+            if(JSch.getLogger().isEnabled(Logger.INFO)){
+              JSch.getLogger().log(Logger.INFO,
+                                   "Ignoring duplicate private key "+ifile);
+            }
+            continue;
+          }
           Identity identity =
             IdentityFile.newInstance(ifile, null, jsch);
           ir.add(identity);

@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -364,7 +365,16 @@ public class JSch{
    * @see #addIdentity(String prvkey, String passphrase)
    */
   public void addIdentity(String prvkey) throws JSchException{
-    addIdentity(prvkey, (byte[])null);
+    /* Don't add identity without a passphrase if another identity with the
+       same name already exists. */
+    if(getIdentityNames().contains(prvkey)){
+      if(JSch.getLogger().isEnabled(Logger.INFO)){
+        JSch.getLogger().log(Logger.INFO,
+                             "Ignoring duplicate private key "+prvkey);
+      }
+    } else {
+      addIdentity(prvkey, (byte[])null);
+    }
   }
 
   /**
