@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -69,6 +70,14 @@ class IdentityFile implements Identity{
    */
   public byte[] getPublicKeyBlob(){
     return kpair.getPublicKeyBlob();
+  }
+
+  /**
+   * Returns the finger-print of the public key.
+   * @return finger print
+   */
+  public String getFingerPrint(){
+    return kpair.getFingerPrint();
   }
 
   /**

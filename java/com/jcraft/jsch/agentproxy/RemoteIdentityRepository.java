@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2011 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -30,8 +31,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.jcraft.jsch.agentproxy;
 
 import java.util.Vector;
+import com.jcraft.jsch.HASH;
 import com.jcraft.jsch.IdentityRepository;
+import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
+import com.jcraft.jsch.Util;
 
 public class RemoteIdentityRepository implements IdentityRepository {
 
@@ -53,10 +58,26 @@ public class RemoteIdentityRepository implements IdentityRepository {
       com.jcraft.jsch.Identity id = new com.jcraft.jsch.Identity(){
         byte[] blob = _identity.getBlob();
         String algname = new String((new Buffer(blob)).getString());
+        private HASH hash;
+        private HASH genHash(){
+          try{
+            Class c=Class.forName(JSch.getConfig("md5"));
+            hash=(HASH)(c.getDeclaredConstructor().newInstance());
+            hash.init();
+          }
+          catch(Exception e){
+          }
+          return hash;
+        }
         public boolean setPassphrase(byte[] passphrase) throws JSchException{
           return true;
         }
         public byte[] getPublicKeyBlob() { return blob; }
+        public String getFingerPrint() {
+          if(hash==null) hash=genHash();
+          if(blob==null) return null;
+          return Util.getFingerPrint(hash, blob);
+        }
         public byte[] getSignature(byte[] data){
           return agent.sign(blob, data);
         }

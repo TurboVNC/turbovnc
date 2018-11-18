@@ -118,6 +118,15 @@ public class Tunnel {
           connector = new SSHAgentConnector(new JNIUSocketFactory());
         if (connector != null) {
           IdentityRepository repo = new RemoteIdentityRepository(connector);
+          vlog.sshdebug("SSH private keys added from agent:");
+          Iterator<com.jcraft.jsch.Identity> iter =
+            repo.getIdentities().iterator();
+          while (iter.hasNext()) {
+            com.jcraft.jsch.Identity id = iter.next();
+            vlog.sshdebug("  " + id.getName());
+            if (id.getFingerPrint() != null)
+              vlog.sshdebug("    Fingerprint: " + id.getFingerPrint());
+          }
           jsch.setIdentityRepository(repo);
         }
       } catch (Exception e) {

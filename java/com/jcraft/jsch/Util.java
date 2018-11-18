@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -33,7 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-class Util{
+public class Util{
 
   private static final byte[] b64 =Util.str2byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=");
   private static byte val(byte foo){
@@ -309,7 +310,7 @@ class Util{
   private static String[] chars={
     "0","1","2","3","4","5","6","7","8","9", "a","b","c","d","e","f"
   };
-  static String getFingerPrint(HASH hash, byte[] data){
+  public static String getFingerPrint(HASH hash, byte[] data){
     try{
       hash.init();
       hash.update(data, 0, data.length);

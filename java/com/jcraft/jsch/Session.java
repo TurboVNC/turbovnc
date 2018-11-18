@@ -2744,15 +2744,31 @@ break;
           }
           if(ifile == null)
             continue;
-          if(jsch.getIdentityNames().contains(ifile)){
+          Identity identity =
+            IdentityFile.newInstance(ifile, null, jsch);
+          /* Don't add private key without a passphrase if another private key
+             with the same fingerprint already exists with a passphrase. */
+          if(jsch.decryptedIdentityExists(identity)){
             if(JSch.getLogger().isEnabled(Logger.INFO)){
               JSch.getLogger().log(Logger.INFO,
-                                   "Ignoring duplicate private key "+ifile);
+                                   "Ignoring duplicate private key "+
+                                   identity.getName());
+              JSch.getLogger().log(Logger.INFO,
+                                   "  Fingerprint: "+
+                                   identity.getFingerPrint());
             }
             continue;
           }
-          Identity identity =
-            IdentityFile.newInstance(ifile, null, jsch);
+          else if(JSch.getLogger().isEnabled(Logger.INFO)){
+            JSch.getLogger().log(Logger.INFO,
+                                 "Adding private key "+identity.getName()+
+                                 " without passphrase");
+            if(identity.getFingerPrint()!=null){
+              JSch.getLogger().log(Logger.INFO,
+                                   "  Fingerprint: "+
+                                   identity.getFingerPrint());
+            }
+          }
           ir.add(identity);
         }
         this.setIdentityRepository(ir);

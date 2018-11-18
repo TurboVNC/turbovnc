@@ -365,16 +365,7 @@ public class JSch{
    * @see #addIdentity(String prvkey, String passphrase)
    */
   public void addIdentity(String prvkey) throws JSchException{
-    /* Don't add identity without a passphrase if another identity with the
-       same name already exists. */
-    if(getIdentityNames().contains(prvkey)){
-      if(JSch.getLogger().isEnabled(Logger.INFO)){
-        JSch.getLogger().log(Logger.INFO,
-                             "Ignoring duplicate private key "+prvkey);
-      }
-    } else {
-      addIdentity(prvkey, (byte[])null);
-    }
+    addIdentity(prvkey, (byte[])null);
   }
 
   /**
@@ -476,6 +467,31 @@ public class JSch{
         Util.bzero(passphrase);
       }
     }
+    else{
+      /* Don't add private key without a passphrase if another private key with
+         the same fingerprint already exists with a passphrase. */
+      if(decryptedIdentityExists(identity)){
+        if(JSch.getLogger().isEnabled(Logger.INFO)){
+          JSch.getLogger().log(Logger.INFO,
+                               "Ignoring duplicate private key "+
+                               identity.getName());
+          JSch.getLogger().log(Logger.INFO,
+                               "  Fingerprint: "+identity.getFingerPrint());
+        }
+        return;
+      }
+    }
+
+    if(JSch.getLogger().isEnabled(Logger.INFO)){
+      JSch.getLogger().log(Logger.INFO,
+                           "Adding private key "+identity.getName()+
+                           (passphrase==null ? " without" : " with")+
+                           " passphrase");
+      if(identity.getFingerPrint()!=null){
+        JSch.getLogger().log(Logger.INFO,
+                             "  Fingerprint: "+identity.getFingerPrint());
+      }
+    }
 
     if(identityRepository instanceof LocalIdentityRepository){
       ((LocalIdentityRepository)identityRepository).add(identity);
@@ -491,6 +507,29 @@ public class JSch{
       }
       ((IdentityRepository.Wrapper)identityRepository).add(identity);
     }
+  }
+
+  /**
+   * Checks whether the given private key has already been added with a
+   * passphrase.
+   *
+   * @param identity private key.
+   *
+   * @return true if the given private key has already been added with a
+   * passphrase or false otherwise.
+   */
+  public boolean decryptedIdentityExists(Identity newIdentity){
+    Vector foo=new Vector();
+    Vector identities = identityRepository.getIdentities();
+    for(int i=0; i<identities.size(); i++){
+      Identity identity=(Identity)(identities.elementAt(i));
+      String oldFingerPrint=identity.getFingerPrint();
+      String newFingerPrint=newIdentity.getFingerPrint();
+      if(oldFingerPrint!=null && newFingerPrint!=null &&
+         newFingerPrint.equals(oldFingerPrint) && !identity.isEncrypted())
+        return true;
+    }
+    return false;
   }
 
   /**

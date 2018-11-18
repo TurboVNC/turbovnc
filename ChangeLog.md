@@ -76,7 +76,10 @@ option (`-noautokill`), or the existing `$autokill` turbovncserver.conf
 variable, can be used to disable the feature.
 
 12. The TurboVNC Viewer's built-in SSH client can now read SSH private keys
-from ssh-agent or Pageant.
+from ssh-agent or Pageant.  Note that the SSH client does not understand the
+`IdentitiesOnly` keyword in OpenSSH config files and behaves as if
+`IdentitiesOnly` is `yes`.  Otherwise, with the exception noted in 2.2.1[5],
+its behavior should be the same as that of OpenSSH.
 
 13. The TurboVNC Server now installs the default xstartup.turbovnc script into
 the same directory as vncserver, and vncserver uses that default script if the
