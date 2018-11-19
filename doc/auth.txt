@@ -48,7 +48,10 @@ uses the following terminology when referring to its security extensions:
 		reused.  OTP authentication can be used, for instance, to launch or connect
 		to TurboVNC sessions from an automated web portal or from a job scheduler.
 		OTP authentication is also useful for allowing temporary access to a
-		TurboVNC session for collaboration purposes.
+		TurboVNC session for collaboration purposes.  The
+		[[#TurboVNC_Session_Manager][TurboVNC Session Manager]] uses OTP
+		authentication by default, which allows it to securely authenticate with a
+		TurboVNC session without prompting for additional credentials.
 
 	PAM User/Password Authentication :: {:}
 		The VNC server uses Pluggable Authentication Modules (PAM) to validate a

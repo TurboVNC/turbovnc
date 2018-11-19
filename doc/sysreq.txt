@@ -29,7 +29,9 @@
 	| < \
 	|
 | Other \
-	| {:} | {:} \
+	| SSH server (if using the \
+		[[#TurboVNC_Session_Manager][TurboVNC Session Manager]]) \
+	| < \
 	| {list type=ul: \
 			{item:For optimal performance, the X server should be configured to export \
 				True Color (24-bit or 32-bit) visuals.} \
@@ -65,11 +67,8 @@
 	| {list type=ul: \
 			{item:For optimal performance, the client display should have a 24-bit \
 				or 32-bit (True Color) color depth.} \
-			{item:SSH client (''ssh.exe'' should be in the ''PATH''.)} \
 			{item:[[http://www.java.com][Oracle Java]] 8}} \
-	| {list type=ul: \
-			{item:For optimal performance, the client display should have a 24-bit \
-				or 32-bit (True Color) color depth.} \
-			{item:SSH client (''ssh.exe'' should be in the ''PATH''.)}} \
+	| For optimal performance, the client display should have a 24-bit or \
+		32-bit (True Color) color depth. \
 	|
 #OPT: hiCol=first

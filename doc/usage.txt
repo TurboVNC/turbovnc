@@ -1,7 +1,115 @@
 * Using TurboVNC
 {anchor: TurboVNC_Usage}
 
-** Starting and Connecting to a TurboVNC Session
+** The TurboVNC Session Manager
+{anchor: TurboVNC_Session_Manager}
+
+The TurboVNC Viewer, like any VNC viewer, can be used to connect to any VNC
+server.  However, the TurboVNC Viewer also includes the TurboVNC Session
+Manager, which can be used with the TurboVNC Server to remotely start or kill a
+TurboVNC session, list all TurboVNC sessions running under a particular user
+account on a particular host, and choose a TurboVNC session to which to
+connect.  The TurboVNC Session Manager uses the TurboVNC Viewer's built-in SSH
+client, which supports OpenSSH config files and password-less public key
+authentication (using ssh-agent or Pageant.)
+
+*** Procedure
+#OPT: noList! plain!
+
+	* On the client machine, start the TurboVNC Viewer.
+
+		Linux/Un*x clients :: {:}
+		Open a new terminal/xterm and type
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncviewer
+		---
+
+		Mac clients :: {:}
+		Open the "TurboVNC Viewer" application, located in the "TurboVNC"
+		Applications folder, or open a new terminal and type
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncviewer
+		---
+
+		Windows clients :: {:}
+		Select "TurboVNC Viewer" in the "TurboVNC" Start Menu group, or open a new
+		command prompt and type
+		#Verb: <<---
+		c:\Program Files\TurboVNC\vncviewer.bat
+		---
+
+	* A small dialog box will appear.
+		{nl}{nl}
+		{img:newconn-sessmgr.png}
+		{nl}{nl}
+		Enter the hostname or IP address of the TurboVNC host in the "VNC server"
+		field, then click "Connect".
+		{nl}{nl}
+
+	* The TurboVNC Session Manager will connect to the host using SSH, and it
+		will prompt for an SSH private key passphrase or an SSH password, if
+		necessary.  (The TurboVNC Viewer's built-in SSH client will first try to
+		fetch the private key passphrase from ssh-agent or Pageant, if either is
+		running.)
+
+		!!! You can specify the SSH user name, if it differs from your local user
+		name, by prefixing the hostname/IP address with ''{my_user}@'', where
+		''{my_user}'' is the SSH user name.
+
+	* If no TurboVNC sessions are currently running under your user account on
+		the TurboVNC host, then the session manager will:
+		{nl}{nl}
+		* start a new session
+		* generate a new one-time password (OTP) for the session
+		* automatically configure the TurboVNC Viewer so that it tunnels the VNC
+			connection through SSH (reusing the SSH channel that the session
+			manager already opened) and authenticates with the newly-generated OTP
+		* connect to the session
+
+	Once connected, a TurboVNC desktop window should appear on your client
+	machine.  This window contains a virtual desktop with which you can
+	interact to launch X-Windows applications on the TurboVNC host.
+	{nl}{nl}
+
+	* If one or more TurboVNC sessions are currently running under your user
+		account on the TurboVNC host, then the session manager will enumerate the
+		sessions and display a dialog similar to the following, allowing you to
+		manage the sessions remotely, to start a new session, or to choose a
+		session to which to connect:
+		{nl}{nl}
+		{img:sessmgr.png}
+		{nl}{nl}
+		Upon choosing a session to which to connect, the session manager will (as
+		described above) automatically generate a new OTP for the session and
+		configure the TurboVNC Viewer so that it tunnels the VNC connection through
+		SSH and authenticates with the newly-generated OTP.
+		{nl}{nl}
+		One-time passwords can be used with any VNC viewer, so generating a new OTP
+		for a TurboVNC session (using the "New OTP" button) is a convenient way of
+		allowing colleagues to temporarily access the session.  Generating a new
+		OTP for a TurboVNC session is also useful when using [[#noVNC][noVNC]].  If
+		"View-only" is checked, then users who authenticate with the new OTP will
+		not be able to remotely control the session.
+
+	!!! The TurboVNC Session Manager automatically uses SSH tunneling and OTP
+	authentication by default, but you can pass ''-nosessmgrauto'' on the
+	TurboVNC Viewer command line to disable this behavior, thus allowing any
+	authentication/encryption method to be used.  Additional command-line
+	parameters can be used to specify the port on which the SSH server is
+	listening and the location of the SSH private key file.  The OpenSSH config
+	file (~/.ssh/config by default) can also be used to specify those parameters
+	persistently for a given host.
+
+	!!! The ''TVNC_SERVERDIR'' and ''TVNC_SERVERARGS'' environment variables, and
+	their equivalent Java system properties (''turbovnc.serverdir'' and
+	''turbovnc.serverargs'') can be used to specify a non-default installation
+	path for the TurboVNC Server or additional arguments to pass to the TurboVNC
+	Server when starting new sessions (refer to
+	{ref prefix="Section " : TVNC_SERVERARGS}.)  These arguments can also be
+	specified on the server using the system-wide or per-user turbovncserver.conf
+	file.
+
+** Manually Starting a TurboVNC Session
 
 *** Procedure
 #OPT: noList! plain!
@@ -35,6 +143,11 @@
 
 	#. The SSH session can now be exited, if desired.
 
+** Manually Connecting to a VNC Server
+
+*** Procedure
+#OPT: noList! plain!
+
 	#. On the client machine, start the TurboVNC Viewer.
 
 		Linux/Un*x clients :: {:}
@@ -45,17 +158,25 @@
 
 		Mac clients :: {:}
 		Open the "TurboVNC Viewer" application, located in the "TurboVNC"
-		Applications folder.
+		Applications folder, or open a new terminal and type
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncviewer
+		---
 
 		Windows clients :: {:}
-		Select "TurboVNC Viewer" in the "TurboVNC" Start Menu group.
+		Select "TurboVNC Viewer" in the "TurboVNC" Start Menu group, or open a new
+		command prompt and type
+		#Verb: <<---
+		c:\Program Files\TurboVNC\vncviewer.bat
+		---
 
 	#. A small dialog box will appear.
 		{nl}{nl}
 		{img:newconn.png}
 		{nl}{nl}
 		Enter the X display name (hostname, or IP address, and display number) of
-		the TurboVNC session in the "VNC server" field, then click "Connect".
+		the VNC server or TurboVNC session in the "VNC server" field, then click
+		"Connect".
 
 	#. Another dialog box appears, prompting for the password (if Standard
 		VNC authentication is being used) or for the username and password (if
@@ -64,12 +185,22 @@
 		| Standard VNC Authentication Dialog | {img:vncauth.png} |
 		| Unix Login Authentication Dialog   | {img:unixauth.png} |
 		{nl}
-		Enter the VNC session password or the Unix username/password and press
+		Enter the VNC server password or the Unix username/password and press
 		Enter.
 		{nl}{nl}
-		A TurboVNC desktop window should appear on your client machine.  This
+		A VNC desktop window should appear on your client machine.  This
 		window contains a virtual desktop with which you can interact to launch
-		X-Windows applications on the TurboVNC host.
+		graphical applications on the VNC host.
+
+	!!! If you are connecting to a non-VeNCrypt-compatible VNC server, then
+	the authentication dialog will warn you that the connection is not
+	encrypted:
+	{nl}{nl}
+	{img:vncauth-insecure.png}
+	{nl}{nl}
+	You should never use Unix Login authentication with an unencrypted
+	connection.  Instead, tunnel the connection through SSH (see
+	{ref prefix="Section ": Secure_TurboVNC_Usage} below for more details.)
 
 *** Window Manager Compatibility
 
@@ -97,8 +228,9 @@ applications that you may have started within the session), and you can
 reconnect to the session at any time.
 
 If the TurboVNC session was created with default settings, then the easiest way
-to kill it is to log out of the window manager running in the session.  You
-can also type the following command:
+to kill it is to log out of the window manager running in the session.  You can
+also use the [[#TurboVNC_Session_Manager][TurboVNC Session Manager]] to
+remotely kill TurboVNC sessions, or you can type the following command:
 
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncserver -kill :{n}
@@ -116,7 +248,10 @@ following command:
 	/opt/TurboVNC/bin/vncserver -list
 	---
 
+from a terminal in the TurboVNC session or from an SSH session on the host.
+
 ** Using TurboVNC in a Web Browser
+{anchor: noVNC}
 
 When a TurboVNC session is started, the ''vncserver'' script can optionally
 start an instance of [[https://novnc.com][noVNC]], an HTML 5/JavaScript VNC
@@ -149,17 +284,18 @@ You can optionally pass ''-novnccert ''__''{combined_certificate_file}''__ to
 	recommended that it be used only with one-time passwords unless the
 	connection is encrypted using HTTPS.
 
-** Using SSH to Secure a TurboVNC Connection
+** Using SSH to Manually Secure a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}
 
-The connection between the TurboVNC Server and the TurboVNC Viewer is encrypted
-by default (refer to {ref prefix="Chapter ": Security_Extensions}.)  However,
-it may be preferable to secure the TurboVNC connection using SSH rather than
-TurboVNC's built-in encryption, particularly if one does not want to open
-additional ports in the host's firewall.  This can easily be accomplished by
-using the ''-via'' and ''-tunnel'' command-line options in the TurboVNC Viewer
-(or the equivalent GUI options, which are located under the "Security" tab in
-the Options dialog.)
+If the [[#TurboVNC_Session_Manager][TurboVNC Session Manager]] is not being
+used, then the connection between the TurboVNC Server and the TurboVNC Viewer
+will, by default, use Anonymous TLS encryption (refer to
+{ref prefix="Chapter ": Security_Extensions}.)  However, it may be preferable
+to secure the TurboVNC connection using SSH rather than Anonymous TLS
+encryption, particularly if one does not want to open additional ports in the
+host's firewall.  This can easily be accomplished by using the ''-via'' and
+''-tunnel'' command-line options in the TurboVNC Viewer (or the equivalent GUI
+options, which are located under the "Security" tab in the Options dialog.)
 
 The ''-via'' and ''-tunnel'' options in the TurboVNC Viewer take advantage of
 the port forwarding feature in SSH.  For instance, running
@@ -219,6 +355,8 @@ disallowing the TLS* security types on a system-wide basis (by setting the
 ''permitted-security-types'' directive in the TurboVNC security configuration
 file) is recommended.  Otherwise, when using the TurboVNC Viewer with default
 settings, the connection will have redundant encryption.
+
+{img:vncauth-redundant.png}
 
 ** Running OpenGL Applications
 

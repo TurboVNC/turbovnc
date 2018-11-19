@@ -3,10 +3,10 @@
 
 TurboVNC is a derivative of VNC (Virtual Network Computing) that is tuned to
 provide peak performance for 3D and video workloads.  TurboVNC was originally a
-fork of [[http://www.tightvnc.com][TightVNC]] 1.3.x, and on the surface, the X
-server still behaves similarly to its parent.  However, the current version of
-TurboVNC contains a much more modern X server code base (based on X.org) and a
-variety of other features and fixes, including a high-performance
+fork of [[http://www.tightvnc.com][TightVNC]] 1.3.x, and on the surface, the
+TurboVNC Server still behaves similarly to its parent.  However, the current
+version of TurboVNC contains a much more modern X server code base (based on
+X.org) and a variety of other features and fixes, including a high-performance
 cross-platform VNC viewer.  TurboVNC compresses 3D and video workloads
 significantly better than the "tightest" compression mode in TightVNC 1.3.x
 while using only typically 15-20% of the CPU time of the latter. Using
@@ -69,6 +69,14 @@ In addition to high performance, other notable features of TurboVNC include:
 	* Authentication with one-time passwords or Unix login credentials.  Access
 		control lists can be used to share TurboVNC sessions with only certain
 		users.
+
+	* Built-in SSH client (part of the TurboVNC Viewer) that supports OpenSSH
+		config files and password-less public key authentication (using ssh-agent
+		or Pageant)
+
+	* The TurboVNC Session Manager (part of the TurboVNC Viewer) allows users to
+		interactively choose a TurboVNC session to which to connect, as well as to
+		remotely start and kill TurboVNC sessions.
 
 	* TLS encryption support (VeNCrypt-compatible)
 

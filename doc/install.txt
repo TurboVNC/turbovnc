@@ -63,9 +63,16 @@ commands:
 	dpkg-deb --extract {full path of turbovnc*.deb} ~/turbovnc
 	---
 
-Add __~/turbovnc__ to any paths specified in this document.  Note that the
-TurboVNC security configuration file will not work when TurboVNC is installed
-in this manner.
+Add __~/turbovnc__ to any paths specified in this document.
+
+	!!! If using the TurboVNC Session Manager, set the ''turbovnc.serverdir''
+	Java system property in the TurboVNC Viewer to ''~/turbovnc/opt/TurboVNC'',
+	or set the ''TVNC_SERVERDIR'' environment variable on the client machine to
+	''\\~/turbovnc/opt/TurboVNC'' (note backslash.)  Refer to
+	{ref prefix="Section ": TVNC_SERVERDIR}.
+
+	!!! The TurboVNC security configuration file will not work when TurboVNC is
+	installed in this manner.
 
 ** Installing the TurboVNC Viewer on macOS
 
