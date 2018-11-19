@@ -214,7 +214,13 @@ class ServerDialog extends Dialog implements ActionListener {
     if (opts.via != null && opts.via.indexOf(':') >= 0) {
       opts.serverName = serverName;
     } else {
-      opts.serverName = Hostname.getHost(serverName);
+      int atIndex = serverName.lastIndexOf('@');
+      if (atIndex >= 0) {
+        opts.serverName = Hostname.getHost(serverName.substring(atIndex + 1));
+        opts.sshUser = serverName.substring(0, atIndex);
+      } else {
+        opts.serverName = Hostname.getHost(serverName);
+      }
       opts.port = Hostname.getPort(serverName);
     }
 

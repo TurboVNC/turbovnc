@@ -1051,7 +1051,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       String s = vncServerName.getValue();
       if (s != null) {
         int atIndex = s.lastIndexOf('@');
-        if (atIndex >= 0 && opts.tunnel) {
+        if (atIndex >= 0) {
           opts.serverName = s.substring(atIndex + 1);
           opts.sshUser = s.substring(0, atIndex);
         } else {
