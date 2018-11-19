@@ -132,9 +132,9 @@ allows you to easily connect to the TurboVNC session from a machine that does
 not have the TurboVNC Viewer installed locally.  If one of the official
 TurboVNC binary packages is installed on the host, then the miniature web
 server will automatically send the appropriate x86 or x86-64 libjpeg-turbo JNI
-library for Linux, OS X, or Windows clients when launching the TurboVNC Viewer.
-This provides most of the advantages of the standalone TurboVNC viewers,
-including native levels of performance on popular client platforms.
+library for Linux, macOS, or Windows clients when launching the TurboVNC
+Viewer.  This provides most of the advantages of the standalone TurboVNC
+viewers, including native levels of performance on popular client platforms.
 
 To launch the Java TurboVNC Viewer from a web browser, point your web browser
 to:
@@ -172,7 +172,7 @@ will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
 	''http://my_host:5801'') to Java's Exception Site List, which can be found
 	under the "Security" tab in the Java Control Panel.
 
-	!!! NOTE: On some newer OS X systems, downloading a JNLP file may result
+	!!! NOTE: On some newer macOS systems, downloading a JNLP file may result
 	in an error: "xxxxxxxx.jnlp can't be opened because it it from an
 	unidentified developer."  To work around this, you can either open the JNLP
 	file directly from your Downloads folder, or you can change the application
@@ -240,7 +240,7 @@ knowledge of web server administration.
 		  <resources os="Mac OS X">
 		    <j2se version="1.8+" java-vm-args="-server"/>
 		    <nativelib href="ljtosx.jar"/>
-		    <!-- Enable drawing tablet support for OS X clients -->
+		    <!-- Enable drawing tablet support for macOS clients -->
 		    <nativelib href="tvnchelper-osx.jar"/>
 		  </resources>
 
@@ -292,42 +292,20 @@ knowledge of web server administration.
 	* You should now be able to access ''{turbovnc_url}/TurboVNC.jnlp'' in your
 		browser to launch the Java TurboVNC Viewer with full performance.
 
-** Securing a TurboVNC Connection
+** Using SSH to Secure a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}
 
-Normally, the connection between the TurboVNC Server and the TurboVNC Viewer is
-completely unencrypted, but securing that connection can be easily accomplished
-by using the port forwarding feature of Secure Shell (SSH.)  After you have
-started a TurboVNC session on the TurboVNC host, open a new SSH connection into
-the TurboVNC host using the following command line:
-
-	#Verb: <<---
-	ssh -L {5900+n}:localhost:{5900+n} {user}@{host}
-	---
-
-Replace __''{user}''__ with your username on the TurboVNC host and
-__''{host}''__ with the hostname or IP address of the host.  Replace __''n''__
-with the X display number of the TurboVNC session to which you want to connect.
-
-For instance, if you want to connect to display '':1'' on host ''my_host''
-using user account ''my_user'', you would type:
-
-	#Verb: <<---
-	ssh -L 5901:localhost:5901 my_user@my_host
-	---
-
-After the SSH connection has been established, you can then launch the
-TurboVNC Viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
-above example.)
-
-*** The ''-via'' and ''-tunnel'' Command-Line Options
-#OPT: noList! plain!
-{anchor: via}
-
-You can simplify the above by using the ''-via'' and ''-tunnel'' command-line
+If you are using the Java TurboVNC Viewer, then the connection between the
+TurboVNC Server and the TurboVNC Viewer will be encrypted by default (refer to
+{ref prefix="Chapter ": Security_Extensions}.)  Otherwise, the connection can
+easily be secured with SSH by using the ''-via'' and ''-tunnel'' command-line
 options in the TurboVNC Viewer (or, if you are using the Java TurboVNC Viewer,
 the equivalent GUI options, which are located under the "Security" tab in the
-Options dialog.)  For instance, running
+Options dialog.)  SSH is also preferable to TurboVNC's built-in encryption if
+one does not want to open additional ports in the host's firewall.
+
+The ''-via'' and ''-tunnel'' options in the TurboVNC Viewer take advantage of
+the port forwarding feature in SSH.  For instance, running
 
 	#Verb: <<---
 	{vncviewer} -via {user}@{host} localhost:{n}
@@ -380,7 +358,7 @@ details.
 	Viewer (cvncviewer.exe) rather than vncviewer.exe.  Otherwise, a new console
 	window will pop up and remain for the duration of the VNC connection.
 
-*** Forcing Secure Connections
+*** Forcing SSH Connections
 #OPT: noList! plain!
 
 Passing an argument of ''-localhost'' to ''vncserver'' will force the TurboVNC
@@ -395,6 +373,12 @@ to make outbound (reverse) connections from the TurboVNC session.  If the
 ''no-reverse-connections'' directive is set in the TurboVNC security
 configuration file, then that has the effect of enabling the ''-noreverse''
 option for all new TurboVNC sessions that are started on the host.
+
+If the host is configured such that it only allows SSH connections, then
+disallowing the TLS* security types on a system-wide basis (by setting the
+''permitted-security-types'' directive in the TurboVNC security configuration
+file) is recommended.  Otherwise, when using the Java TurboVNC Viewer with
+default settings, the connection will have redundant encryption.
 
 ** Running OpenGL Applications
 

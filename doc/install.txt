@@ -2,20 +2,6 @@
 
 ** Installing TurboVNC on Linux
 
-*** Font Dependencies
-#OPT: noList! plain!
-
-On some Linux distributions, most notably Fedora 10 and later, the basic X11
-bitmap fonts are not installed by default.  Thus, it is necessary to install
-the ''xorg-x11-fonts-misc'' package on these distributions prior to starting a
-TurboVNC session for the first time.  Otherwise, TurboVNC will fail with the
-following error:
-
-	#Verb <<---
-	Fatal server error:
-	could not open default font 'fixed'
-	---
-
 *** Installing TurboVNC
 #OPT: noList! plain!
 
@@ -81,7 +67,7 @@ Add __~/turbovnc__ to any paths specified in this document.  Note that the
 TurboVNC security configuration file will not work when TurboVNC is installed
 in this manner.
 
-** Installing the TurboVNC Viewer on OS X
+** Installing the TurboVNC Viewer on macOS
 
 	#. Download the TurboVNC Mac disk image
 		(''TurboVNC-''__''{version}''__''.dmg'') from the
@@ -133,7 +119,7 @@ As root, issue one of the following commands:
 	dpkg -r turbovnc
 	---
 
-*** OS X
+*** macOS
 #OPT: noList! plain!
 
 Open the "Uninstall TurboVNC" application, located in the "TurboVNC"
@@ -147,5 +133,5 @@ sudo /opt/TurboVNC/bin/uninstall
 #OPT: noList! plain!
 
 Use the "Programs and Features" applet in the Control Panel (or the
-"Add or Remove Programs" applet if you are running Windows XP), or select
-"Uninstall TurboVNC" in the "TurboVNC" Start Menu group.
+"Apps & Features" applet if you are running Windows 10), or select "Uninstall
+TurboVNC" in the "TurboVNC" Start Menu group.
