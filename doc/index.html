@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-11-08T11:34:34">
+<meta name="date" content="2018-11-19T21:06:09">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -64,8 +64,8 @@
                 <a href="#hd005001" class="hd">5.1 Installing TurboVNC on Linux</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd005002" class="hd">5.2 Installing the TurboVNC Viewer on OS 
-                X</a>
+                <a href="#hd005002" class="hd">5.2 Installing the TurboVNC Viewer on 
+                macOS</a>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd005003" class="hd">5.3 Installing the TurboVNC Viewer on 
@@ -99,7 +99,8 @@
                 <a href="#hd006003" class="hd">6.3 Using TurboVNC in a Web Browser</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006004" class="hd">6.4 Securing a TurboVNC Connection</a>
+                <a href="#hd006004" class="hd">6.4 Using SSH to Secure a TurboVNC 
+                Connection</a>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd006005" class="hd">6.5 Running OpenGL Applications</a>
@@ -476,7 +477,7 @@ other VNC distributions without interference.</p>
 </li>
 <li class="Itemize-0">
     <span class="remote"><a href="http://www.java.com" class="remote">Oracle 
-    Java</a></span><a name="idx0014"></a> 8 or later, or OpenJDK 7 or later
+    Java</a></span><a name="idx0014"></a> or OpenJDK
 </li></ul></td>
     <td class="standard">For optimal performance, the X server should be configured to export True Color (24-bit or 32-bit) visuals.</td>
   </tr>
@@ -568,22 +569,7 @@ other VNC distributions without interference.</p>
 <h2 id="hd005001">5.1&nbsp;Installing TurboVNC on Linux</h2>
 
 
-<h3 id="hd005001001">Font Dependencies</h3>
-
-<p>On some Linux distributions, most notably Fedora 10 and later, the basic 
-X11 bitmap fonts are not installed by default.  Thus, it is necessary to 
-install the <code>xorg-x11-fonts-misc</code> package on these 
-distributions prior to starting a TurboVNC session for the first time.  
-Otherwise, TurboVNC will fail with the following error:</p>
-
-<pre class="verbatim">
-Fatal&nbsp;server&nbsp;error:
-could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
-</pre>
-
-
-
-<h3 id="hd005001002">Installing TurboVNC</h3>
+<h3 id="hd005001001">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">
@@ -653,7 +639,7 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 
 
 
-<h3 id="hd005001003">Installing TurboVNC for a Single User</h3>
+<h3 id="hd005001002">Installing TurboVNC for a Single User</h3>
 
 <p>Download the appropriate binary package, as above, then execute the 
 following commands:</p>
@@ -683,7 +669,7 @@ TurboVNC is installed in this manner.</p>
 
 
 
-<h2 id="hd005002">5.2&nbsp;Installing the TurboVNC Viewer on OS X</h2>
+<h2 id="hd005002">5.2&nbsp;Installing the TurboVNC Viewer on macOS</h2>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -769,7 +755,7 @@ dpkg&nbsp;-r&nbsp;turbovnc
 
 
 
-<h3 id="hd005005002">OS X</h3>
+<h3 id="hd005005002">macOS</h3>
 
 <p>Open the &ldquo;Uninstall TurboVNC&rdquo; application, located in the 
 &ldquo;TurboVNC&rdquo; Applications folder.  You can also open a 
@@ -784,8 +770,8 @@ sudo&nbsp;/opt/TurboVNC/bin/uninstall
 <h3 id="hd005005003">Windows</h3>
 
 <p>Use the &ldquo;Programs and Features&rdquo; applet in the Control Panel 
-(or the &ldquo;Add or Remove Programs&rdquo; applet if you are running 
-Windows XP), or select &ldquo;Uninstall TurboVNC&rdquo; in the 
+(or the &ldquo;Apps &amp; Features&rdquo; applet if you are running 
+Windows 10), or select &ldquo;Uninstall TurboVNC&rdquo; in the 
 &ldquo;TurboVNC&rdquo; Start Menu group.</p>
 
 <p><br /></p>
@@ -987,48 +973,24 @@ NOTE: noVNC only supports VNC Password authentication, so it is strongly recomme
 
 
 
-<h2 id="hd006004">6.4&nbsp;Securing a TurboVNC Connection</h2>
+<h2 id="hd006004">6.4&nbsp;Using SSH to Secure a TurboVNC Connection</h2>
 
 <p><a name="Secure_TurboVNC_Usage"></a></p>
 
-<p>Normally, the connection between the TurboVNC Server and the TurboVNC 
-Viewer is completely unencrypted, but securing that connection can be 
-easily accomplished by using the port forwarding feature of Secure Shell 
-(SSH.)  After you have started a TurboVNC session on the TurboVNC host, 
-open a new SSH connection into the TurboVNC host using the following 
-command line:</p>
+<p>The connection between the TurboVNC Server and the TurboVNC Viewer is 
+encrypted by default (refer to Chapter 
+<a href="#Security_Extensions" class="ref">8</a>.)  However, it may be 
+preferable to secure the TurboVNC connection using SSH rather than 
+TurboVNC&rsquo;s built-in encryption, particularly if one does not want 
+to open additional ports in the host&rsquo;s firewall.  This can easily 
+be accomplished by using the <code>-via</code> and <code>-tunnel</code> 
+command-line options in the TurboVNC Viewer (or the equivalent GUI 
+options, which are located under the &ldquo;Security&rdquo; tab in the 
+Options dialog.)</p>
 
-<pre class="verbatim">
-ssh&nbsp;-L&nbsp;{5900+n}:localhost:{5900+n}&nbsp;{user}@{host}
-</pre>
-
-<p>Replace <em><code>{user}</code></em> with your username on the TurboVNC 
-host and <em><code>{host}</code></em> with the hostname or IP address of 
-the host.  Replace <em><code>n</code></em> with the X display number of 
-the TurboVNC session to which you want to connect.</p>
-
-<p>For instance, if you want to connect to display <code>:1</code> on host 
-<code>my_host</code> using user account <code>my_user</code>, you would 
-type:</p>
-
-<pre class="verbatim">
-ssh&nbsp;-L&nbsp;5901:localhost:5901&nbsp;my_user@my_host
-</pre>
-
-<p>After the SSH connection has been established, you can then launch the 
-TurboVNC Viewer and point it to 
-<code>localhost:</code><em><code>{n}</code></em> 
-(<code>localhost:1</code> in the above example.)</p>
-
-
-<h3 id="hd006004001">The <code>-via</code> and <code>-tunnel</code> Command-Line Options</h3>
-
-<p><a name="via"></a></p>
-
-<p>You can simplify the above by using the <code>-via</code> and 
-<code>-tunnel</code> command-line options in the TurboVNC Viewer (or the 
-equivalent GUI options, which are located under the 
-&ldquo;Security&rdquo; tab in the Options dialog.)  For instance, running</p>
+<p>The <code>-via</code> and <code>-tunnel</code> options in the TurboVNC 
+Viewer take advantage of the port forwarding feature in SSH.  For 
+instance, running</p>
 
 <pre class="verbatim">
 {vncviewer}&nbsp;-via&nbsp;{user}@{host}&nbsp;localhost:{n}
@@ -1065,8 +1027,7 @@ environment variables.  See Section
 <a href="#VNC_VIA_CMD" class="ref">11.2</a> for more details.</p>
 
 
-
-<h3 id="hd006004002">Forcing Secure Connections</h3>
+<h3 id="hd006004001">Forcing SSH Connections</h3>
 
 <p>Passing an argument of <code>-localhost</code> to <code>vncserver</code> 
 will force the TurboVNC session to accept inbound connections only from 
@@ -1082,6 +1043,13 @@ TurboVNC session.  If the <code>no-reverse-connections</code> directive
 is set in the TurboVNC security configuration file, then that has the 
 effect of enabling the <code>-noreverse</code> option for all new 
 TurboVNC sessions that are started on the host.</p>
+
+<p>If the host is configured such that it only allows SSH connections, then 
+disallowing the TLS* security types on a system-wide basis (by setting 
+the <code>permitted-security-types</code> directive in the TurboVNC 
+security configuration file) is recommended.  Otherwise, when using the 
+TurboVNC Viewer with default settings, the connection will have 
+redundant encryption.</p>
 
 
 
@@ -1601,6 +1569,8 @@ this.</p>
 
 
 <h1 id="hd008"><a name="file008"></a>8&nbsp;TurboVNC Security Extensions</h1>
+
+<p><a name="Security_Extensions"></a></p>
 
 
 <h2 id="hd008001">8.1&nbsp;Terminology</h2>
@@ -2696,7 +2666,7 @@ java&nbsp;-Dmy.system.property={value}&nbsp;-jar&nbsp;MyClass.jar
 </pre>
 
 <p>However, since TurboVNC hides the Java command line inside of its 
-startup scripts (or inside of an application bundle on OS X), the 
+startup scripts (or inside of an application bundle on macOS), the 
 easiest way to set these properties is by using the 
 <code>JAVA_TOOL_OPTIONS</code> environment variable, which allows you to 
 specify Java command-line arguments even if you don&rsquo;t have access 
@@ -2752,7 +2722,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable the use of the OS X full-screen application feature</td>
+    <td class="standard">Disable/enable the use of the macOS full-screen application feature</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>

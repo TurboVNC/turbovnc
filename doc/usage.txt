@@ -149,41 +149,20 @@ You can optionally pass ''-novnccert ''__''{combined_certificate_file}''__ to
 	recommended that it be used only with one-time passwords unless the
 	connection is encrypted using HTTPS.
 
-** Securing a TurboVNC Connection
+** Using SSH to Secure a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}
 
-Normally, the connection between the TurboVNC Server and the TurboVNC Viewer is
-completely unencrypted, but securing that connection can be easily accomplished
-by using the port forwarding feature of Secure Shell (SSH.)  After you have
-started a TurboVNC session on the TurboVNC host, open a new SSH connection into
-the TurboVNC host using the following command line:
+The connection between the TurboVNC Server and the TurboVNC Viewer is encrypted
+by default (refer to {ref prefix="Chapter ": Security_Extensions}.)  However,
+it may be preferable to secure the TurboVNC connection using SSH rather than
+TurboVNC's built-in encryption, particularly if one does not want to open
+additional ports in the host's firewall.  This can easily be accomplished by
+using the ''-via'' and ''-tunnel'' command-line options in the TurboVNC Viewer
+(or the equivalent GUI options, which are located under the "Security" tab in
+the Options dialog.)
 
-	#Verb: <<---
-	ssh -L {5900+n}:localhost:{5900+n} {user}@{host}
-	---
-
-Replace __''{user}''__ with your username on the TurboVNC host and
-__''{host}''__ with the hostname or IP address of the host.  Replace __''n''__
-with the X display number of the TurboVNC session to which you want to connect.
-
-For instance, if you want to connect to display '':1'' on host ''my_host''
-using user account ''my_user'', you would type:
-
-	#Verb: <<---
-	ssh -L 5901:localhost:5901 my_user@my_host
-	---
-
-After the SSH connection has been established, you can then launch the
-TurboVNC Viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
-above example.)
-
-*** The ''-via'' and ''-tunnel'' Command-Line Options
-#OPT: noList! plain!
-{anchor: via}
-
-You can simplify the above by using the ''-via'' and ''-tunnel'' command-line
-options in the TurboVNC Viewer (or the equivalent GUI options, which are
-located under the "Security" tab in the Options dialog.)  For instance, running
+The ''-via'' and ''-tunnel'' options in the TurboVNC Viewer take advantage of
+the port forwarding feature in SSH.  For instance, running
 
 	#Verb: <<---
 	{vncviewer} -via {user}@{host} localhost:{n}
@@ -219,7 +198,7 @@ The command used to establish the SSH tunnel is configurable by way of
 environment variables.  See {ref prefix="Section ": VNC_VIA_CMD} for more
 details.
 
-*** Forcing Secure Connections
+*** Forcing SSH Connections
 #OPT: noList! plain!
 
 Passing an argument of ''-localhost'' to ''vncserver'' will force the TurboVNC
@@ -234,6 +213,12 @@ to make outbound (reverse) connections from the TurboVNC session.  If the
 ''no-reverse-connections'' directive is set in the TurboVNC security
 configuration file, then that has the effect of enabling the ''-noreverse''
 option for all new TurboVNC sessions that are started on the host.
+
+If the host is configured such that it only allows SSH connections, then
+disallowing the TLS* security types on a system-wide basis (by setting the
+''permitted-security-types'' directive in the TurboVNC security configuration
+file) is recommended.  Otherwise, when using the TurboVNC Viewer with default
+settings, the connection will have redundant encryption.
 
 ** Running OpenGL Applications
 

@@ -33,8 +33,7 @@
 	| {list type=ul: \
 			{item:For optimal performance, the X server should be configured to export \
 				True Color (24-bit or 32-bit) visuals.} \
-			{item:[[http://www.java.com][Oracle Java]] 8 or later, or OpenJDK 7 \
-				or later}} \
+			{item:[[http://www.java.com][Oracle Java]] or OpenJDK}} \
 	| For optimal performance, the X server should be configured to export True \
 		Color (24-bit or 32-bit) visuals. \
 	|

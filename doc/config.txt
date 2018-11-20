@@ -112,7 +112,7 @@ Java executable.  For example:
 	---
 
 However, since TurboVNC hides the Java command line inside of its startup
-scripts (or inside of an application bundle on OS X), the easiest way to
+scripts (or inside of an application bundle on macOS), the easiest way to
 set these properties is by using the ''JAVA_TOOL_OPTIONS'' environment
 variable, which allows you to specify Java command-line arguments even if
 you don't have access to the command line.  For instance, on Linux you could
@@ -142,7 +142,8 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	Mac platforms, because OpenGL Java 2D blitting is the only option available.
 
 | Java System Property | ''turbovnc.lionfs = ''__''0 \| 1''__ |
-| Summary | Disable/enable the use of the OS X full-screen application feature |
+| Summary | Disable/enable the use of the macOS full-screen application \
+	feature |
 | Default Value | Enabled |
 #OPT: hiCol=first
 
