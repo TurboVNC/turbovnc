@@ -15,16 +15,16 @@ in most cases.  In fact, the TurboVNC Viewer on Mac and Linux/Un\*x platforms
 is simply the Java TurboVNC Viewer packaged in such a way that it behaves like
 a native viewer.  The libjpeg-turbo JNI library is bundled with the official
 TurboVNC packages and will automatically be loaded if the Java TurboVNC Viewer
-is launched using the `vncviewer` script (Linux/Un*x), the `vncviewer-java.bat`
-script or the Start Menu shortcut (Windows), or the standalone TurboVNC Viewer
-app (Mac).  If the viewer is launched with Java Web Start using the recommended
-procedure or the TurboVNC Server's built-in web server (refer to the TurboVNC
-User's Guide), then the appropriate libjpeg-turbo JNI library will be
-downloaded along with it, assuming that the client machine is running Windows,
-OS X, or Linux.  For other deployment scenarios, the Java TurboVNC Viewer will
-find the libjpeg-turbo JNI library if [one of the official libjpeg-turbo
-packages](http://www.sourceforge.net/projects/libjpeg-turbo/files) is installed
-on the client machine.
+is launched using the __vncviewer__ script (Linux/Un*x), the
+__vncviewer-java.bat__ script or the Start Menu shortcut (Windows), or the
+standalone TurboVNC Viewer app (Mac).  If the viewer is launched with Java Web
+Start using the recommended procedure or the TurboVNC Server's built-in web
+server (refer to the TurboVNC User's Guide), then the appropriate libjpeg-turbo
+JNI library will be downloaded along with it, assuming that the client machine
+is running Windows, OS X, or Linux.  For other deployment scenarios, the Java
+TurboVNC Viewer will find the libjpeg-turbo JNI library if [one of the official
+libjpeg-turbo packages](http://www.sourceforge.net/projects/libjpeg-turbo/files)
+is installed on the client machine.
 
 If you suspect for whatever reason that JPEG decoding is not being accelerated,
 then the easiest way to check is to open the "Connection Info" dialog (after

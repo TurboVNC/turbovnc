@@ -10,17 +10,16 @@ Build Requirements
 
 - [CMake](http://www.cmake.org) v2.8.11 or later
 
-- libjpeg-turbo SDK v1.0.0 or later (v1.4 or later required if building the
-  Java viewer.)
+- libjpeg-turbo SDK (v1.4 or later required if building the Java viewer.)
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
     area of <http://sourceforge.net/projects/libjpeg-turbo>.
   * The TurboVNC build system will search for the TurboJPEG header and
-    library under **/opt/libjpeg-turbo** on Unix or **c:\libjpeg-turbo[64]** on
+    library under __/opt/libjpeg-turbo__ on Unix or __c:\libjpeg-turbo[64]__ on
     Windows, but you can override this by setting the `TJPEG_INCLUDE_DIR` CMake
-    variable to the directory containing turbojpeg.h and the `TJPEG_LIBRARY`
-    CMake variable to either the full path of the TurboJPEG library against
-    which you want to link or a set of link flags needed to link with the
-    TurboJPEG library (for instance,
+    variable to the directory containing __turbojpeg.h__ and the
+    `TJPEG_LIBRARY` CMake variable to either the full path of the TurboJPEG
+    library against which you want to link or a set of link flags needed to
+    link with the TurboJPEG library (for instance,
     `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"` or
     `-DTJPEG_LIBRARY="-libpath:c:/libjpeg-turbo64/lib turbojpeg.lib"`.)
 
@@ -56,11 +55,11 @@ Build Requirements
   * If you intend to build TurboVNC from the command line, then add the
     appropriate compiler and SDK directories to the `INCLUDE`, `LIB`, and
     `PATH` environment variables.  This is generally accomplished by executing
-    `vcvars32.bat` or `vcvars64.bat` and `SetEnv.cmd`.  `vcvars32.bat` and
-    `vcvars64.bat` are part of Visual C++ and are located in the same directory
-    as the compiler.  `SetEnv.cmd` is part of the Windows SDK.  You can pass
-    optional arguments to `SetEnv.cmd` to specify a 32-bit or 64-bit build
-    environment.
+    `vcvars32.bat` or `vcvars64.bat` and `SetEnv.cmd`.  __vcvars32.bat__ and
+    __vcvars64.bat__ are part of Visual C++ and are located in the same
+    directory as the compiler.  __SetEnv.cmd__ is part of the Windows SDK.  You
+    can pass optional arguments to `SetEnv.cmd` to specify a 32-bit or 64-bit
+    build environment.
 
 
 ### Mac
@@ -82,8 +81,8 @@ which CMake is executed (the "binary directory"), and this directory need not
 necessarily be the same as the TurboVNC source directory.  You can create
 multiple independent binary directories, in which different versions of
 TurboVNC can be built from the same source tree using different compilers or
-settings.  In the sections below, *{build_directory}* refers to the binary
-directory, whereas *{source_directory}* refers to the TurboVNC source
+settings.  In the sections below, __{build_directory}__ refers to the binary
+directory, whereas __{source_directory}__ refers to the TurboVNC source
 directory.  For in-tree builds, these directories are the same.
 
 
@@ -114,7 +113,7 @@ of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
     nmake
 
 This will build either a 32-bit or a 64-bit version of TurboVNC, depending on
-which version of **cl.exe** is in the `PATH`.
+which version of __cl.exe__ is in the `PATH`.
 
 
 ### Visual C++ (IDE)
@@ -126,11 +125,11 @@ instance:
     cd {build_directory}
     cmake -G"Visual Studio 10" [additional CMake flags] {source_directory}
 
-NOTE: Add "Win64" to the generator name (for example, "Visual Studio 10 Win64")
+NOTE: Add `Win64` to the generator name (for example, `Visual Studio 10 Win64`)
 to build a 64-bit version of TurboVNC.  A separate build directory must be
 used for 32-bit and 64-bit builds.
 
-You can then open **ALL_BUILD.vcproj** in Visual Studio and build one of the
+You can then open __ALL_BUILD.vcproj__ in Visual Studio and build one of the
 configurations in that project ("Debug", "Release", etc.) to generate a full
 build of TurboVNC.
 
@@ -168,7 +167,7 @@ Server.  Add `-DTVNC_USETLS=0` to the CMake command line to disable TLS
 encryption.
 
 The default when using OpenSSL is to dynamically load the OpenSSL symbols from
-libssl and libcrypto using dlopen() and dlsym().  This ensures maximum
+libssl and libcrypto using `dlopen()` and `dlsym()`.  This ensures maximum
 compatibility across different O/S distributions.  You can disable this
 behavior and link directly with libssl and libcrypto by adding
 `-DTVNC_DLOPENSSL=0` to the CMake command line.
@@ -233,19 +232,19 @@ The `CMAKE_INSTALL_PREFIX` CMake variable can be modified in order to install
 TurboVNC into a directory of your choosing.  If you don't specify
 `CMAKE_INSTALL_PREFIX`, then the default is:
 
-**c:\Program Files\TurboVNC**<br>
+__c:\Program Files\TurboVNC__<br>
 Windows
 
-**c:\Program Files (x86)\TurboVNC**<br>
+__c:\Program Files (x86)\TurboVNC__<br>
 32-bit build on 64-bit Windows
 
-**/opt/TurboVNC**<br>
+__/opt/TurboVNC__<br>
 Un*x
 
 The default value of `CMAKE_INSTALL_PREFIX` causes the TurboVNC files to be
 installed with a directory structure resembling that of the official TurboVNC
 binary packages.  Changing the value of `CMAKE_INSTALL_PREFIX` (for instance,
-to **/usr/local**) causes the TurboVNC files to be installed with a directory
+to `/usr/local`) causes the TurboVNC files to be installed with a directory
 structure that conforms to GNU standards.
 
 The `CMAKE_INSTALL_BINDIR`, `CMAKE_INSTALL_DATAROOTDIR`,
@@ -254,11 +253,11 @@ The `CMAKE_INSTALL_BINDIR`, `CMAKE_INSTALL_DATAROOTDIR`,
 where specific files in the TurboVNC distribution should be installed.  These
 directory variables can either be specified as absolute paths or as paths
 relative to `CMAKE_INSTALL_PREFIX` (for instance, setting
-`CMAKE_INSTALL_DOCDIR` to **doc** would cause the documentation to be installed
-in **${CMAKE\_INSTALL\_PREFIX}/doc**.)  If a directory variable contains the
+`CMAKE_INSTALL_DOCDIR` to `doc` would cause the documentation to be installed
+in __${CMAKE\_INSTALL\_PREFIX}/doc__.)  If a directory variable contains the
 name of another directory variable in angle brackets, then its final value will
 depend on the final value of that other variable.  For instance, the default
-value of `CMAKE_INSTALL_MANDIR` is **\<CMAKE\_INSTALL\_DATAROOTDIR\>/man**.
+value of `CMAKE_INSTALL_MANDIR` is `<CMAKE_INSTALL_DATAROOTDIR>/man`.
 
 NOTE: If setting one of these directory variables to a relative path using the
 CMake command line, you must specify that the variable is of type `PATH`.
@@ -294,10 +293,11 @@ Mac
 
     make dmg
 
-Create Mac package/disk image.  This requires pkgbuild and productbuild, which
-are installed by default on OS X 10.7 and later.  This command generates a
-package containing a Java app bundle that relies on Oracle Java or OpenJDK.
-The DMG built with this command can be installed on OS X 10.7 and later.
+Create Mac package/disk image.  This requires __pkgbuild__ and
+__productbuild__, which are installed by default on OS X 10.7 and later.  This
+command generates a package containing a Java app bundle that relies on Oracle
+Java or OpenJDK.  The DMG built with this command can be installed on OS X 10.7
+and later.
 
 
 Windows
@@ -310,12 +310,12 @@ If using NMake:
 
 If using the Visual Studio IDE, build the "installer" target.
 
-The installer package (TurboVNC[64]-{version}.exe) will be located under
-*{build_directory}*.  If building using the Visual Studio IDE, then the
+The installer package (__TurboVNC[64]-{version}.exe__) will be located under
+__{build_directory}__.  If building using the Visual Studio IDE, then the
 installer package will be located in a subdirectory with the same name as the
-configuration you built (such as *{build_directory}*\Debug\ or
-*{build_directory}*\Release\).
+configuration you built (such as __{build_directory}\Debug__ or
+__{build_directory}\Release__).
 
 Building a Windows installer requires
 [Inno Setup](http://www.jrsoftware.org/isinfo.php).
-iscc.exe should be in your `PATH`.
+__iscc.exe__ should be in your `PATH`.

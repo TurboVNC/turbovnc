@@ -15,6 +15,11 @@ a
 	text-decoration: none;
 }
 
+a code
+{
+	color: blue;
+}
+
 dt
 {
 	font-weight: bold;
@@ -38,11 +43,40 @@ pre
 	margin-right: 25px;
 }
 
-code
+pre em
 {
 	color: rgb(0, 0, 204);
+}
+
+code
+{
+	color: rgb(0, 0, 140);
+	padding-left: 2px;
+	padding-right: 2px;
+	padding-top: 1px;
+	padding-bottom: 1px;
 	font-family: courier,monospace;
 	font-size: 14px;
+	background-color: rgb(238, 238, 255);
+}
+
+em code, code em
+{
+	color: rgb(0, 0, 204);
+}
+
+strong.filename
+{
+	color: rgb(0, 0, 140);
+	padding-left: 2px;
+	padding-right: 2px;
+	font-size: 0.95em;
+	background-color: rgb(238, 238, 255);
+}
+
+strong.filename em
+{
+	color: rgb(0, 0, 204);
 }
 
 tr

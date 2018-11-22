@@ -11,8 +11,8 @@
 	#. In the new Command Prompt/terminal window, open a Secure Shell (SSH)
 		session into the TurboVNC host:
 
-		#Verb: <<---
-		ssh {user}@{host}
+		#Pverb: <<---
+		ssh __{user}__@__{host}__
 		---
 
 		Replace __''{user}''__ with your username on the TurboVNC host and
@@ -44,11 +44,11 @@
 		---
 
 		Mac clients :: {:}
-		Open the "TurboVNC Viewer" application, located in the "TurboVNC"
-		Applications folder.
+		Open the {file: TurboVNC Viewer} application, located in the
+		{file: TurboVNC} Applications folder.
 
 		Windows clients :: {:}
-		Select "TurboVNC Viewer" in the "TurboVNC" Start Menu group.
+		Select {file: TurboVNC Viewer} in the {file: TurboVNC} Start Menu group.
 
 	#. A small dialog box will appear.
 		{nl}{nl}
@@ -108,8 +108,8 @@ To kill a TurboVNC session:
 
 	#. Type the following command:
 
-		#Verb: <<---
-		/opt/TurboVNC/bin/vncserver -kill :{n}
+		#Pverb: <<---
+		/opt/TurboVNC/bin/vncserver -kill :__{n}__
 		---
 
 	Replace __''{n}''__ with the X display number of the TurboVNC session you
@@ -139,7 +139,9 @@ viewers, including native levels of performance on popular client platforms.
 To launch the Java TurboVNC Viewer from a web browser, point your web browser
 to:
 
-''http://''__''{host}''__'':{5800+''__''n''__''}''
+#Pverb: <<---
+{plain: http://}__{host}__:__{5800+n}__
+---
 
 where __''{host}''__ is the hostname or IP address of the TurboVNC host, and
 __''n''__ is the X display number of the TurboVNC session to which you want to
@@ -149,18 +151,24 @@ __Example:__
 If the TurboVNC session is occupying X display ''my_host:1'', then point your
 web browser to:
 
-''http://my_host:5801''
+#Verb: <<---
+http://my_host:5801
+---
 
 This will download a JNLP file to your computer, which you can open in Java
 Web Start.
 
 You can add viewer parameters to the URL using the following format:
 
-''http://''__''{host}''__'':{5800+''__''n''__''}?''__''{param1}''__''=''__''{value1}''__''&''__''{param2}''__''=''__''{value2}''__
+#Pverb: <<---
+{plain: http://}__{host}__:__{5800+n}__?__{param1}__=__{value1}__&__{param2}__=__{value2}__
+---
 
 Example:
 
-''http://my_host:5801?tunnel=1&samp=2x&quality=80''
+#Verb: <<---
+http://my_host:5801?tunnel=1&samp=2x&quality=80
+---
 
 will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
 
@@ -168,7 +176,7 @@ will tunnel the VNC connection through SSH and enable Medium-Quality JPEG.
 	Java Web Start by default.  This is not an issue if you are using the
 	official TurboVNC binary packages, but if you are building a self-signed
 	version of the Java TurboVNC Viewer for development purposes, then you will
-	need to add ''http://{host}:{http_port}'' (for example,
+	need to add {pcode: {plain: http://}__{host}__:__{http_port}__} (for example,
 	''http://my_host:5801'') to Java's Exception Site List, which can be found
 	under the "Security" tab in the Java Control Panel.
 
@@ -193,23 +201,27 @@ desirable to serve up the JAR files from a dedicated web server.
 For the purposes of this guide, it is assumed that the reader has some
 knowledge of web server administration.
 
-	* Copy the Java TurboVNC Viewer JAR file (''VncViewer.jar'') into a directory
-		on your web server.
+	* Copy the Java TurboVNC Viewer JAR file ({file: VncViewer.jar}) into a
+		directory on your web server.
 		{nl}{nl}
 
 	* Copy the libjpeg-turbo JNI JAR files into that same directory.  You can
 		obtain these from one of the official TurboVNC 2.0 or later binary packages
-		for Linux, or you can download ''libjpeg-turbo-{version}-jws.zip'' from
-		libjpeg-turbo 1.4.0 or later (available at
-		[[http://sourceforge.net/projects/libjpeg-turbo/files]].)  Note that only
-		the JARs included in the official TurboVNC packages are signed using an
-		official code signing certificate.
+		for Linux, or you can download
+		{file: libjpeg-turbo-__{version}__-jws.zip} from libjpeg-turbo 1.4.0 or
+		later (available in the
+		[[http://sourceforge.net/projects/libjpeg-turbo/files/][Files area]]
+		of the
+		[[http://sourceforge.net/projects/libjpeg-turbo][libjpeg-turbo SourceForge project page]].)
+		Note that only the JARs included in the official TurboVNC packages are
+		signed using an official code signing certificate.
 		{nl}{nl}
 
 	* __OPTIONAL:__ Copy the TurboVNC Helper JAR files into that same directory.
-		You can obtain these from ''turbovnc-{version}-jws.zip'', which is supplied
-		with official releases of TurboVNC 2.1.2 and later (available at
-		[[http://sourceforge.net/projects/turbovnc/files]].)
+		You can obtain these from {file: turbovnc-{val: _VERSION}-jws.zip}, which
+		is available in the
+		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
+		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 		{nl}{nl}
 
 	* __OPTIONAL:__ For large organizations, it may be desirable to obtain your
@@ -218,8 +230,9 @@ knowledge of web server administration.
 		of this are left as an exercise for the reader.
 		{nl}{nl}
 
-	* Create a file called ''TurboVNC.jnlp'' in the same directory as
-		''VncViewer.jar'' on the web server, and give it the following contents:
+	* Create a file called {file: TurboVNC.jnlp} in the same directory as
+		{file: VncViewer.jar} on the web server, and give it the following
+		contents:
 
 		#Verb: <<---
 		<?xml version="1.0" encoding="utf-8"?>
@@ -278,7 +291,7 @@ knowledge of web server administration.
 		</jnlp>
 		---
 
-		!!! NOTE: ''{turbovnc_url}'' should be the absolute URL of the TurboVNC
+		!!! NOTE: __''{turbovnc_url}''__ should be the absolute URL of the TurboVNC
 		Viewer directory on the web server, e.g. ''http://my_host/turbovnc''.
 
 		!!! NOTE: Leave out the lines referring to ''tvnchelper-*.jar'' if you have
@@ -289,8 +302,8 @@ knowledge of web server administration.
 		for additional fields that you might want to add.
 		{nl}{nl}
 
-	* You should now be able to access ''{turbovnc_url}/TurboVNC.jnlp'' in your
-		browser to launch the Java TurboVNC Viewer with full performance.
+	* You should now be able to access {pcode: __{turbovnc_url}__/TurboVNC.jnlp}
+		in your browser to launch the Java TurboVNC Viewer with full performance.
 
 ** Using SSH to Secure a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}
@@ -307,28 +320,28 @@ one does not want to open additional ports in the host's firewall.
 The ''-via'' and ''-tunnel'' options in the TurboVNC Viewer take advantage of
 the port forwarding feature in SSH.  For instance, running
 
-	#Verb: <<---
-	{vncviewer} -via {user}@{host} localhost:{n}
+	#Pverb: <<---
+	__{vncviewer}__ -via __{user}__@__{host}__ localhost:__{n}__
 	---
 
 or
 
-	#Verb: <<---
-	{vncviewer} -tunnel {user}@{host}
+	#Pverb: <<---
+	__{vncviewer}__ -tunnel __{user}__@__{host}__
 	---
 
 is the equivalent of running
 
-	#Verb: <<---
-	ssh -L {fp}:localhost:{5900+n} {user}@{host}
-	{vncviewer} localhost::{fp}
+	#Pverb: <<---
+	ssh -L __{fp}__:localhost:__{5900+n}__ __{user}__@__{host}__
+	__{vncviewer}__ localhost::__{fp}__
 	---
 
 where __''{fp}''__ is a free TCP port on the client machine (this is
 automatically determined by the TurboVNC Viewer.)
 
-	!!! In the above examples, ''{vncviewer}'' is the command used to launch the
-	TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Mac/Linux/Un*x
+	!!! In the above examples, __''{vncviewer}''__ is the command used to launch
+	the TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Mac/Linux/Un*x
 	systems, or ''c:\\Program Files\\TurboVNC\\vncviewer-java.bat'' if running
 	the Java TurboVNC Viewer on Windows systems, or
 	''c:\\Program Files\\TurboVNC\\cvncviewer.exe'' if running the native Windows
