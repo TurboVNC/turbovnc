@@ -10,7 +10,7 @@ Accelerated JPEG Decoding
 -------------------------
 
 The TurboVNC Viewer can access libjpeg-turbo through JNI to accelerate JPEG
-decoding, which gives the viewer similar performance to the native viewer in
+decoding, which gives the viewer similar performance to a native viewer in
 most cases.  The libjpeg-turbo JNI library is bundled with the official
 TurboVNC packages and will automatically be loaded if the TurboVNC Viewer is
 launched using the __vncviewer__ script (Linux/Un*x), the __vncviewer.bat__

@@ -300,6 +300,13 @@ Create Red Hat-style binary RPM package.  Requires RPM v4 or later.
 
 Create Debian-style binary package.  Requires dpkg.
 
+A custom JRE based on OpenJDK can be included in the Linux installer packages
+by setting the `TVNC_INCLUDEJRE` CMake variable to `1`.  If this variable is
+not set, then the TurboVNC Viewer will rely on a separate installation of
+Oracle Java or OpenJDK.  OpenJDK must be used when including a custom JRE, in
+order to avoid legal restrictions regarding the redistribution of Oracle JDK
+components.
+
 
 Mac
 ---
