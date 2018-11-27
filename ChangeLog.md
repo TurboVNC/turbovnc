@@ -72,6 +72,14 @@ address.
 circumstances, caused the TurboVNC Viewer to incorrectly assume that the server
 did not support remote desktop resizing.
 
+17. Fixed an issue in the Windows/Java and Un*x TurboVNC Viewers whereby, when
+pressing and releasing both the left and right locations of a particular
+modifier key (Shift, Ctrl, Alt, etc.), only one of the key releases was sent to
+the VNC server.  Fixed a similar issue in the Mac TurboVNC Viewer under Java 11
+whereby, when pressing and releasing both the left and right Alt keys in the
+same order, a left Alt key press and an AltGr key release (or vice versa) were
+sent to the VNC server.
+
 
 2.1.2
 =====

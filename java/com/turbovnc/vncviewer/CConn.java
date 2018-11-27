@@ -1803,7 +1803,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     if (!down) {
-      Integer sym = pressedKeys.get(keycode);
+      Integer hashedKey = keycode;
+      if (VncViewer.os.startsWith("mac os x")) {
+        if (hashedKey == KeyEvent.VK_ALT_GRAPH)
+          hashedKey = KeyEvent.VK_ALT;
+      } else
+        hashedKey |= (location << 16);
+      Integer sym = pressedKeys.get(hashedKey);
 
       if (sym == null) {
         // Note that dead keys will raise this sort of error falsely
@@ -1814,7 +1820,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
 
       writeKeyEvent(sym, false);
-      pressedKeys.remove(keycode);
+      pressedKeys.remove(hashedKey);
       debugStr += String.format(" => 0x%04x", sym);
       vlog.debug(debugStr);
       return;
@@ -2151,7 +2157,24 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
     debugStr += String.format(" => 0x%04x", keysym);
     vlog.debug(debugStr);
-    pressedKeys.put(keycode, keysym);
+    Integer hashedKey = keycode;
+    // On Mac platforms, Java 11 assigns KeyEvent.VK_ALT_GRAPH to the right Alt
+    // key, whereas previous versions of Java assigned KeyEvent.VK_ALT to the
+    // same key.  However, Java 11 still exhibits the behavior described below
+    // when LAlt and RAlt are pressed simultaneously, so for the purposes of
+    // matching key release events to key press events, it is necessary to
+    // treat the RAlt key as an Alt key rather than an AltGr key.
+    if (VncViewer.os.startsWith("mac os x")) {
+      if (hashedKey == KeyEvent.VK_ALT_GRAPH)
+        hashedKey = KeyEvent.VK_ALT;
+    // On Mac platforms, modifier key press/release events have a key code of 0
+    // if another location of the same modifier key is already pressed, so for
+    // the purposes of matching key release events to key press events, all
+    // locations of a modifier key have to be treated as if they are the same
+    // key.  On other platforms, we hash both the key code and location.
+    } else
+      hashedKey |= (location << 16);
+    pressedKeys.put(hashedKey, keysym);
     writeKeyEvent(keysym, down);
     if (winAltGr) {
       if (pressedKeys.containsValue(Keysyms.Control_L)) {
