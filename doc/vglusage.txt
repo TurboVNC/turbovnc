@@ -106,8 +106,8 @@ configuration.
 
 	#. In the terminal, start a 3D application using VirtualGL:
 
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		#Pverb: <<---
+		/opt/VirtualGL/bin/vglrun [vglrun options] __{application_executable_or_script}__ __{arguments}__
 		---
 
 ** Using VirtualGL on a Machine Other Than a TurboVNC Host
@@ -137,8 +137,8 @@ server and the TurboVNC host for this procedure to perform well.
 	#. In the same terminal window, open a Secure Shell (SSH) session into the
 		VirtualGL server:
 
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglconnect {user}@{server}
+		#Pverb: <<---
+		/opt/VirtualGL/bin/vglconnect __{user}__@__{server}__
 		---
 
 		Replace __''{user}''__ with your username on the VirtualGL server and
@@ -153,8 +153,8 @@ server and the TurboVNC host for this procedure to perform well.
 
 	#. In the SSH session, start a 3D application using VirtualGL:
 
-		#Verb: <<---
-		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}
+		#Pverb: <<---
+		/opt/VirtualGL/bin/vglrun [vglrun options] __{application_executable_or_script}__ __{arguments}__
 		---
 
 ** NV-CONTROL Emulation
@@ -166,14 +166,14 @@ and unfortunately the library (libXNVCtrl) used by applications to interact
 with the extension is static, making it impossible to interpose using
 VirtualGL.
 
-Passing an argument of ''-nvcontrol ''__''{display}''__ to ''vncserver'' will
+Passing an argument of {pcode: -nvcontrol __{display}__} to ''vncserver'' will
 set up a fake NV-CONTROL extension in the TurboVNC session and will redirect
 all NV-CONTROL requests to __''{display}''__.  __''{display}''__ should
-generally be the name of the 3D X server you plan to use with VirtualGL (":0",
-for instance.)  The TurboVNC Server does not attempt to open a connection to
-this display until an application uses the NV-CONTROL extension.  If a
-connection to the 3D X server cannot be opened, if the 3D X server does not
-have the NV-CONTROL extension, or if other issues are encountered when
+generally be the name of the 3D X server you plan to use with VirtualGL
+('':0'', for instance.)  The TurboVNC Server does not attempt to open a
+connection to this display until an application uses the NV-CONTROL extension.
+If a connection to the 3D X server cannot be opened, if the 3D X server does
+not have the NV-CONTROL extension, or if other issues are encountered when
 attempting to redirect NV-CONTROL requests, then a BadRequest X11 error will be
 returned to the application, and the TurboVNC session log will display an error
 message explaining why the request failed.  It is assumed that you have already
@@ -193,7 +193,7 @@ session has been started.  For instance, if you want to redirect both
 NV-CONTROL requests and OpenGL to a GPU attached to Screen 1 of Display :0,
 you would execute
 
-	#Verb: <<---
+	#Pverb: <<---
 	xprop -root -f VNC_NVCDISPLAY 8s -set VNC_NVCDISPLAY :0.1
-	vglrun -d :0.1 {3D application}
+	vglrun -d :0.1 __{3D application}__
 	---

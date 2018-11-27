@@ -13,10 +13,10 @@ The TurboVNC Viewer can access libjpeg-turbo through JNI to accelerate JPEG
 decoding, which gives the viewer similar performance to the native viewer in
 most cases.  The libjpeg-turbo JNI library is bundled with the official
 TurboVNC packages and will automatically be loaded if the TurboVNC Viewer is
-launched using the `vncviewer` script (Linux/Un*x), the `vncviewer.bat` script
-or the Start Menu shortcut (Windows), or the TurboVNC Viewer app (Mac).  If the
-viewer is launched with Java Web Start using the recommended procedure or the
-TurboVNC Server's built-in web server (see below), then the appropriate
+launched using the __vncviewer__ script (Linux/Un*x), the __vncviewer.bat__
+script or the Start Menu shortcut (Windows), or the TurboVNC Viewer app (Mac).
+If the viewer is launched with Java Web Start using the recommended procedure
+or the TurboVNC Server's built-in web server (see below), then the appropriate
 libjpeg-turbo JNI library will be downloaded along with it, assuming that the
 client machine is running Windows, OS X, or Linux.  For other deployment
 scenarios, the TurboVNC Viewer will find the libjpeg-turbo JNI library if
@@ -163,18 +163,18 @@ desirable to serve up the JAR files from a dedicated web server.
 For the purposes of this guide, it is assumed that the reader has some
 knowledge of web server administration.
 
-* Copy the TurboVNC Viewer JAR file (`VncViewer.jar`) into a directory on
+* Copy the TurboVNC Viewer JAR file (__VncViewer.jar__) into a directory on
   your web server.
 
 * Copy the libjpeg-turbo JNI JAR files into that same directory.  You can
   obtain these from one of the official TurboVNC 2.0 or later binary packages
-  for Linux, or you can download `libjpeg-turbo-{version}-jws.zip` from
+  for Linux, or you can download __libjpeg-turbo-{version}-jws.zip__ from
   [libjpeg-turbo 1.4.0 or later](http://sourceforge.net/projects/libjpeg-turbo/files).
   Note that only the JARs included in the official TurboVNC packages are signed
   using an official code signing certificate.
 
 * __OPTIONAL:__ Copy the TurboVNC Helper JAR files into that same directory.
-  You can obtain these from `turbovnc-{version}-jws.zip`, which is supplied
+  You can obtain these from __turbovnc-{version}-jws.zip__, which is supplied
   with official releases of
   [TurboVNC 2.1.2 and later](http://sourceforge.net/projects/turbovnc/files).
 
@@ -183,8 +183,8 @@ knowledge of web server administration.
   `jarsigner` to sign all of the JARs with that certificate.  The specifics of
   this are left as an exercise for the reader.
 
-* Create a file called `TurboVNC.jnlp` in the same directory as
-  `VncViewer.jar` on the web server, and give it the following contents:
+* Create a file called __TurboVNC.jnlp__ in the same directory as
+  __VncViewer.jar__ on the web server, and give it the following contents:
 
         <?xml version="1.0" encoding="utf-8"?>
         <jnlp codebase="{turbovnc_url}">

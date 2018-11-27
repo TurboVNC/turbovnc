@@ -52,18 +52,16 @@ Download the appropriate binary package, as above, then execute the following
 commands:
 
 	RPM-based systems :: {:}
-	#Verb <<---
-	mkdir ~/turbovnc
-	cd ~/turbovnc
-	rpm2cpio {full path of turbovnc*.rpm} | cpio -idv
+	#Pverb <<---
+	mkdir ~/turbovnc{nl}cd ~/turbovnc{nl}rpm2cpio __{full path of turbovnc*.rpm}__ | cpio -idv
 	---
 
 	Debian-based systems :: {:}
-	#Verb <<---
-	dpkg-deb --extract {full path of turbovnc*.deb} ~/turbovnc
+	#Pverb <<---
+	dpkg-deb --extract __{full path of turbovnc*.deb}__ ~/turbovnc
 	---
 
-Add __~/turbovnc__ to any paths specified in this document.
+Add {file: ~/turbovnc} to any paths specified in this document.
 
 	!!! If using the TurboVNC Session Manager, set the ''turbovnc.serverdir''
 	Java system property in the TurboVNC Viewer to ''~/turbovnc/opt/TurboVNC'',
@@ -77,18 +75,18 @@ Add __~/turbovnc__ to any paths specified in this document.
 ** Installing the TurboVNC Viewer on macOS
 
 	#. Download the TurboVNC Mac disk image
-		(''TurboVNC-''__''{version}''__''.dmg'') from the
+		({file: TurboVNC-{val: _VERSION}.dmg}) from the
 		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
-	#. Open the disk image, then open ''TurboVNC.pkg'' inside the
-		disk image.  Follow the instructions to install the Mac TurboVNC Viewer.
+	#. Open the disk image, then open {file: TurboVNC.pkg} inside the disk image.
+		Follow the instructions to install the Mac TurboVNC Viewer.
 
 ** Installing the TurboVNC Viewer on Windows
 
 	#. Download the TurboVNC Windows installer package
-		(''TurboVNC-''__''{version}''__''-x64.exe'' for 64-bit systems or
-		''TurboVNC-''__''{version}''__''-x86.exe'' for legacy 32-bit-only systems)
+		({file: TurboVNC-{val: _VERSION}-x64.exe} for 64-bit systems or
+		{file: TurboVNC-{val: _VERSION}-x86.exe} for legacy 32-bit-only systems)
 		from the [[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
@@ -100,11 +98,12 @@ Add __~/turbovnc__ to any paths specified in this document.
 
 If you are using a Linux/Un*x platform for which there is not a pre-built
 TurboVNC binary package available, then download the TurboVNC source tarball
-(''turbovnc-''__''{version}''__''.tar.gz'') from the
+({file: turbovnc-{val: _VERSION}.tar.gz}) from the
 [[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]],
-uncompress it, ''cd turbovnc-''__''{version}''__, and read ''BUILDING.md''
-for further instructions on how to build TurboVNC from source.
+uncompress it, {pcode: cd turbovnc-{val: _VERSION}}, and read
+{file: BUILDING.md} for further instructions on how to build TurboVNC from
+source.
 
 ** Uninstalling TurboVNC
 
@@ -126,8 +125,9 @@ As root, issue one of the following commands:
 *** macOS
 #OPT: noList! plain!
 
-Open the "Uninstall TurboVNC" application, located in the "TurboVNC"
-Applications folder.  You can also open a terminal and execute:
+Open the {file: Uninstall TurboVNC} application, located in the
+{file: TurboVNC} Applications folder.  You can also open a terminal and
+execute:
 
 #Verb: <<---
 sudo /opt/TurboVNC/bin/uninstall
@@ -136,6 +136,6 @@ sudo /opt/TurboVNC/bin/uninstall
 *** Windows
 #OPT: noList! plain!
 
-Use the "Programs and Features" applet in the Control Panel (or the
-"Apps & Features" applet if you are running Windows 10), or select "Uninstall
-TurboVNC" in the "TurboVNC" Start Menu group.
+Use the {file: Programs and Features} applet in the Control Panel (or the
+{file: Apps & Features} applet if you are running Windows 10), or select
+{file: Uninstall TurboVNC} in the {file: TurboVNC} Start Menu group.

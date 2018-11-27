@@ -1203,7 +1203,7 @@ blocks.)
 
 11. By default, the embedded HTTP server in the TurboVNC Server will now serve
 up a JNLP (Java Web Start) file for the session instead of an applet.  You can
-add /applet to the URL to instruct the HTTP server to serve up an applet
+add `/applet` to the URL to instruct the HTTP server to serve up an applet
 instead.  The official TurboVNC packages for Linux also include the native JAR
 files necessary to deliver the libjpeg-turbo JNI library to Windows, Linux, and
 OS X clients (when using Java Web Start.)
@@ -2166,7 +2166,7 @@ Sun platforms, and this doesn't work on OpenSolaris.  The `-nolisten local`
 option was necessary to get Xvnc to work on earlier versions of Solaris, but it
 is no longer necessary with Solaris 10.  If you are running TurboVNC on an
 older Solaris release, then you can pass `-nolisten local` to
-/opt/TurboVNC/bin/vncserver to get back the behavior of TurboVNC 0.5.x (or
+`/opt/TurboVNC/bin/vncserver` to get back the behavior of TurboVNC 0.5.x (or
 uncomment that line in the vncserver script.)
 
 
@@ -2196,8 +2196,8 @@ product.
 host's graphics card is configured for a 16-bit pixel depth.
 
 2. 0.4[12] was supposed to allow vncserver to work even if xauth was not in
-the PATH, but unfortunately there was a bug in that patch.  This bug has been
-fixed, so vncserver should now really work if xauth is not in the PATH.
+the `PATH`, but unfortunately there was a bug in that patch.  This bug has been
+fixed, so vncserver should now really work if xauth is not in the `PATH`.
 
 3. It was discovered that pure JPEG encoding was not the most efficient method
 of compression for all 3D image workloads.  Particularly, CAD applications and
@@ -2249,8 +2249,8 @@ used to scroll in both directions.
 
 14. Fixed an issue whereby GNOME would fail to start on SuSE 10 TurboVNC hosts
 if CSh was the default shell.  The issue was that /opt/gnome/bin was not being
-added to the PATH by /etc/csh.cshrc.  This was worked around by adding it to
-the PATH in ~/.vnc/xstartup.turbovnc.
+added to the `PATH` by /etc/csh.cshrc.  This was worked around by adding it to
+the `PATH` in ~/.vnc/xstartup.turbovnc.
 
 15. On Solaris machines, the TurboVNC Server will attempt to load the window
 manager startup script specified in ~/.dt/sessions/lastsession.  This caused
@@ -2290,7 +2290,7 @@ mathematically lossless (Zlib-encoded RGB) copy of the current screen.  This
 feature does not currently work with the Windows TurboVNC Server, because the
 Windows TurboVNC Server processes framebuffer update requests asynchronously.
 
-3. Modified /opt/TurboVNC/bin/vncserver so that it invokes Xvnc with the
+3. Modified /opt/TurboVNC/bin/vncserver so that it invokes `Xvnc` with the
 arguments `-deferupdate 1`.  This sets the deferred update timer to 1 ms rather
 than its default value of 40 ms, which has two effects:
 
@@ -2344,8 +2344,8 @@ boosts the performance of the Solaris TurboVNC Server and Viewer by as much as
 1280x1024 displays.
 
 12. vncserver now looks for xauth in /usr/X11R6/bin and /usr/openwin/bin before
-searching the PATH.  Those directories are sometimes not in the PATH on Linux
-and Solaris systems.
+searching the `PATH`.  Those directories are sometimes not in the `PATH` on
+Linux and Solaris systems.
 
 13. Modified Mac package such that /opt/TurboVNC/bin/vncviewer links to
 /opt/TurboVNC/lib/libturbojpeg.dylib rather than to

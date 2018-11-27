@@ -2,6 +2,22 @@
 #TITLE: User's Guide for TurboVNC {val: _DOCVERSION}
 #MAKETITLE
 
+#IF: fmt==html
+
+#DefMacroN id=file args=@body <<---
+<strong class="filename">{arg: @body}</strong>
+---
+
+#DefMacroN id=pcode args=@body <<---
+<code>{arg: @body}</code>
+---
+
+#DefRegionN id=Pverb args=@body <<---
+<pre class="verbatim">{arg: @body}</pre>
+---
+
+#ENDIF
+
 #LIST: contents
 {nl}
 ----8<--------------

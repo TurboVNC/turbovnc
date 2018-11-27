@@ -25,15 +25,15 @@ authentication (using ssh-agent or Pageant.)
 		---
 
 		Mac clients :: {:}
-		Open the "TurboVNC Viewer" application, located in the "TurboVNC"
-		Applications folder, or open a new terminal and type
+		Open the {file: TurboVNC Viewer} application, located in the
+		{file: TurboVNC} Applications folder, or open a new terminal and type
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncviewer
 		---
 
 		Windows clients :: {:}
-		Select "TurboVNC Viewer" in the "TurboVNC" Start Menu group, or open a new
-		command prompt and type
+		Select {file: TurboVNC Viewer} in the {file: TurboVNC} Start Menu group, or
+		open a new command prompt and type
 		#Verb: <<---
 		c:\Program Files\TurboVNC\vncviewer.bat
 		---
@@ -53,8 +53,8 @@ authentication (using ssh-agent or Pageant.)
 		running.)
 
 		!!! You can specify the SSH user name, if it differs from your local user
-		name, by prefixing the hostname/IP address with ''{my_user}@'', where
-		''{my_user}'' is the SSH user name.
+		name, by prefixing the hostname/IP address with __''{my_user}@''__, where
+		__''{my_user}''__ is the SSH user name.
 
 	* If no TurboVNC sessions are currently running under your user account on
 		the TurboVNC host, then the session manager will:
@@ -97,8 +97,8 @@ authentication (using ssh-agent or Pageant.)
 	authentication/encryption method to be used.  Additional command-line
 	parameters can be used to specify the port on which the SSH server is
 	listening and the location of the SSH private key file.  The OpenSSH config
-	file (~/.ssh/config by default) can also be used to specify those parameters
-	persistently for a given host.
+	file ({file: ~/.ssh/config} by default) can also be used to specify those
+	parameters persistently for a given host.
 
 	!!! The ''TVNC_SERVERDIR'' and ''TVNC_SERVERARGS'' environment variables, and
 	their equivalent Java system properties (''turbovnc.serverdir'' and
@@ -119,8 +119,8 @@ authentication (using ssh-agent or Pageant.)
 	#. In the new Command Prompt/terminal window, open a Secure Shell (SSH)
 		session into the TurboVNC host:
 
-		#Verb: <<---
-		ssh {user}@{host}
+		#Pverb: <<---
+		ssh __{user}__@__{host}__
 		---
 
 		Replace __''{user}''__ with your username on the TurboVNC host and
@@ -157,15 +157,15 @@ authentication (using ssh-agent or Pageant.)
 		---
 
 		Mac clients :: {:}
-		Open the "TurboVNC Viewer" application, located in the "TurboVNC"
-		Applications folder, or open a new terminal and type
+		Open the {file: TurboVNC Viewer} application, located in the
+		{file: TurboVNC} Applications folder, or open a new terminal and type
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncviewer
 		---
 
 		Windows clients :: {:}
-		Select "TurboVNC Viewer" in the "TurboVNC" Start Menu group, or open a new
-		command prompt and type
+		Select {file: TurboVNC Viewer} in the {file: TurboVNC} Start Menu group, or
+		open a new command prompt and type
 		#Verb: <<---
 		c:\Program Files\TurboVNC\vncviewer.bat
 		---
@@ -232,9 +232,9 @@ to kill it is to log out of the window manager running in the session.  You can
 also use the [[#TurboVNC_Session_Manager][TurboVNC Session Manager]] to
 remotely kill TurboVNC sessions, or you can type the following command:
 
-	#Verb: <<---
-	/opt/TurboVNC/bin/vncserver -kill :{n}
-	---
+		#Pverb: <<---
+		/opt/TurboVNC/bin/vncserver -kill :__{n}__
+		---
 
 from a terminal in the TurboVNC session or from an SSH session on the host.
 Replace __''{n}''__ with the X display number of the TurboVNC session you want
@@ -253,32 +253,37 @@ from a terminal in the TurboVNC session or from an SSH session on the host.
 ** Using TurboVNC in a Web Browser
 {anchor: noVNC}
 
-When a TurboVNC session is started, the ''vncserver'' script can optionally
+When a TurboVNC session is started, the {file: vncserver} script can optionally
 start an instance of [[https://novnc.com][noVNC]], an HTML 5/JavaScript VNC
 viewer that works in any web browser (with reduced performance and features
 relative to the TurboVNC Viewer.)  This allows you to easily connect to a
 TurboVNC session from a machine that does not have the TurboVNC Viewer
 installed (including mobile devices.)
 
-To launch noVNC along with a TurboVNC session, pass ''-novnc ''__''{script}''__
-to ''/opt/TurboVNC/bin/vncserver'' when starting the session, where
-__''{script}''__ is the launch script for the noVNC WebSockets proxy (setting
-the ''$noVNC'' variable in ''turbovncserver.conf'' has the same effect.)  The
-''vncserver'' script will print the noVNC URL, which will be of the form:
+To launch noVNC along with a TurboVNC session, pass
+{pcode: -novnc __{script}__} to ''/opt/TurboVNC/bin/vncserver'' when starting
+the session, where __''{script}''__ is the launch script for the noVNC
+WebSockets proxy (setting the ''$noVNC'' variable in
+{file: turbovncserver.conf} has the same effect.)  The {file: vncserver} script
+will print the noVNC URL, which will be of the form:
 
-''http://''__''{host}''__'':{5800+''__''n''__''}/vnc.html''
+#Pverb: <<---
+{plain: http://}__{host}__:__{5800+n}__/vnc.html
+---
 
 or
 
-''https://''__''{host}''__'':{5800+''__''n''__''}/vnc.html''
+#Pverb: <<---
+{plain: https://}__{host}__:__{5800+n}__/vnc.html
+---
 
 where __''{host}''__ is the hostname or IP address of the TurboVNC host, and
 __''n''__ is the X display number of the TurboVNC session.
 
 Point your web browser to that URL in order to access the TurboVNC session.
-You can optionally pass ''-novnccert ''__''{combined_certificate_file}''__ to
+You can optionally pass {pcode: -novnccert __{combined_certificate_file}__} to
 ''vncserver'' to encrypt the client/host connection using HTTPS.  See the
-''vncserver'' man page for more details.
+{file: vncserver} man page for more details.
 
 	!!! NOTE: noVNC only supports VNC Password authentication, so it is strongly
 	recommended that it be used only with one-time passwords unless the
@@ -300,28 +305,28 @@ options, which are located under the "Security" tab in the Options dialog.)
 The ''-via'' and ''-tunnel'' options in the TurboVNC Viewer take advantage of
 the port forwarding feature in SSH.  For instance, running
 
-	#Verb: <<---
-	{vncviewer} -via {user}@{host} localhost:{n}
+	#Pverb: <<---
+	__{vncviewer}__ -via __{user}__@__{host}__ localhost:__{n}__
 	---
 
 or
 
-	#Verb: <<---
-	{vncviewer} -tunnel {user}@{host}
+	#Pverb: <<---
+	__{vncviewer}__ -tunnel __{user}__@__{host}__
 	---
 
 is the equivalent of running
 
-	#Verb: <<---
-	ssh -L {fp}:localhost:{5900+n} {user}@{host}
-	{vncviewer} localhost::{fp}
+	#Pverb: <<---
+	ssh -L __{fp}__:localhost:__{5900+n}__ __{user}__@__{host}__
+	__{vncviewer}__ localhost::__{fp}__
 	---
 
 where __''{fp}''__ is a free TCP port on the client machine (this is
 automatically determined by the TurboVNC Viewer.)
 
-	!!! In the above examples, ''{vncviewer}'' is the command used to launch the
-	TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Mac/Linux/Un*x
+	!!! In the above examples, __''{vncviewer}''__ is the command used to launch
+	the TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Mac/Linux/Un*x
 	systems or ''c:\\Program Files\\TurboVNC\\vncviewer.bat'' on Windows systems.
 
 ''-tunnel'' can be used as a shortcut whenever the SSH and VNC hosts are the

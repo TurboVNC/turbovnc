@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-11-19T23:53:40">
+<meta name="date" content="2018-11-26T19:17:02">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -240,10 +240,11 @@ License, v2</a><a name="idx002"></a>.</p>
 <h1 id="hd002"><a name="file002"></a>2&nbsp;Conventions Used in This Document</h1>
 
 <p>This document assumes that TurboVNC will be installed in the default 
-directory (<code>/opt/TurboVNC</code> on Linux/Un*x and Mac systems and 
-<code>c:\Program&nbsp;Files\TurboVNC</code> on Windows systems.)  If 
-your installation of TurboVNC resides in a different directory, then 
-adjust the instructions accordingly.</p>
+directory (<strong class="filename">/opt/TurboVNC</strong> on Linux/Un*x 
+and Mac systems and <strong class="filename">c:\Program 
+Files\TurboVNC</strong> on Windows systems.)  If your installation of 
+TurboVNC resides in a different directory, then adjust the instructions 
+accordingly.</p>
 
 
 <h2 id="hd002001">2.1&nbsp;Terminology</h2>
@@ -654,23 +655,16 @@ following commands:</p>
 <dl class="Description">
     <dt class="Description-1 Description">RPM-based systems</dt>
     <dd class="Description-1 Description">
-<pre class="verbatim">
-mkdir&nbsp;~/turbovnc
-cd&nbsp;~/turbovnc
-rpm2cpio&nbsp;{full&nbsp;path&nbsp;of&nbsp;turbovnc*.rpm}&nbsp;|&nbsp;cpio&nbsp;-idv
-</pre>
-
+        <pre class="verbatim">mkdir ~/turbovnc<br />cd ~/turbovnc<br />rpm2cpio <em>{full path of turbovnc*.rpm}</em> | cpio -idv</pre>
     </dd>
     <dt class="Description-1 Description">Debian-based systems</dt>
     <dd class="Description-1 Description">
-<pre class="verbatim">
-dpkg-deb&nbsp;--extract&nbsp;{full&nbsp;path&nbsp;of&nbsp;turbovnc*.deb}&nbsp;~/turbovnc
-</pre>
-
+        <pre class="verbatim">dpkg-deb &ndash;extract <em>{full path of turbovnc*.deb}</em> ~/turbovnc</pre>
     </dd>
 </dl>
 
-<p>Add <em>~/turbovnc</em> to any paths specified in this document.</p>
+<p>Add <strong class="filename">~/turbovnc</strong> to any paths specified 
+in this document.</p>
 
 <div class="important"><p class="important">
 If using the TurboVNC Session Manager, set the <code>turbovnc.serverdir</code> Java system property in the TurboVNC Viewer to <code>~/turbovnc/opt/TurboVNC</code>, or set the <code>TVNC_SERVERDIR</code> environment variable on the client machine to <code>\~/turbovnc/opt/TurboVNC</code> (note backslash.)  Refer to Section <a href="#TVNC_SERVERDIR" class="ref">11.2</a>.
@@ -687,16 +681,16 @@ The TurboVNC security configuration file will not work when TurboVNC is installe
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the TurboVNC Mac disk image 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
-        from the 
+        (<strong class="filename">TurboVNC-2.2.80.dmg</strong>) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
         area</a></span><a name="idx0025"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
         SourceForge project page</a></span><a name="idx0026"></a>.
     </li>
     <li class="Ordered-1 Ordered">
-        Open the disk image, then open <code>TurboVNC.pkg</code> inside the disk 
-        image.  Follow the instructions to install the Mac TurboVNC Viewer.
+        Open the disk image, then open 
+        <strong class="filename">TurboVNC.pkg</strong> inside the disk image. 
+        Follow the instructions to install the Mac TurboVNC Viewer.
     </li>
 </ol>
 
@@ -707,10 +701,9 @@ The TurboVNC security configuration file will not work when TurboVNC is installe
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the TurboVNC Windows installer package 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-x64.exe</code> 
-        for 64-bit systems or 
-        <code>TurboVNC-</code><em><code>{version}</code></em><code>-x86.exe</code> 
-        for legacy 32-bit-only systems) from the 
+        (<strong class="filename">TurboVNC-2.2.80-x64.exe</strong> for 64-bit 
+        systems or <strong class="filename">TurboVNC-2.2.80-x86.exe</strong> for 
+        legacy 32-bit-only systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
         area</a></span><a name="idx0027"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
@@ -730,15 +723,14 @@ The TurboVNC security configuration file will not work when TurboVNC is installe
 <p>If you are using a Linux/Un*x platform for which there is not a 
 pre-built TurboVNC binary package available, then download the TurboVNC 
 source tarball 
-(<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
-from the 
+(<strong class="filename">turbovnc-2.2.80.tar.gz</strong>) from the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
 area</a></span><a name="idx0029"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
 SourceForge project page</a></span><a name="idx0030"></a>, uncompress 
-it, <code>cd&nbsp;turbovnc-</code><em><code>{version}</code></em>, and 
-read <code>BUILDING.md</code> for further instructions on how to build 
-TurboVNC from source.</p>
+it, <code>cd turbovnc-2.2.80</code>, and read 
+<strong class="filename">BUILDING.md</strong> for further instructions 
+on how to build TurboVNC from source.</p>
 
 
 
@@ -770,9 +762,9 @@ dpkg&nbsp;-r&nbsp;turbovnc
 
 <h3 id="hd005005002">macOS</h3>
 
-<p>Open the &ldquo;Uninstall TurboVNC&rdquo; application, located in the 
-&ldquo;TurboVNC&rdquo; Applications folder.  You can also open a 
-terminal and execute:</p>
+<p>Open the <strong class="filename">Uninstall TurboVNC</strong> 
+application, located in the <strong class="filename">TurboVNC</strong> 
+Applications folder.  You can also open a terminal and execute:</p>
 
 <pre class="verbatim">
 sudo&nbsp;/opt/TurboVNC/bin/uninstall
@@ -782,10 +774,11 @@ sudo&nbsp;/opt/TurboVNC/bin/uninstall
 
 <h3 id="hd005005003">Windows</h3>
 
-<p>Use the &ldquo;Programs and Features&rdquo; applet in the Control Panel 
-(or the &ldquo;Apps &amp; Features&rdquo; applet if you are running 
-Windows 10), or select &ldquo;Uninstall TurboVNC&rdquo; in the 
-&ldquo;TurboVNC&rdquo; Start Menu group.</p>
+<p>Use the <strong class="filename">Programs and Features</strong> applet 
+in the Control Panel (or the <strong class="filename">Apps &amp; 
+Features</strong> applet if you are running Windows 10), or select 
+<strong class="filename">Uninstall TurboVNC</strong> in the 
+<strong class="filename">TurboVNC</strong> Start Menu group.</p>
 
 <p><br /></p>
 
@@ -829,9 +822,9 @@ ssh-agent or Pageant.)</p>
             </dd>
             <dt class="Description-3 Description">Mac clients</dt>
             <dd class="Description-3 Description">
-                 Open the &ldquo;TurboVNC Viewer&rdquo; application, located in the 
-                 &ldquo;TurboVNC&rdquo; Applications folder, or open a new terminal and 
-                 type
+                 Open the <strong class="filename">TurboVNC Viewer</strong> application, 
+                 located in the <strong class="filename">TurboVNC</strong> Applications 
+                 folder, or open a new terminal and type
 <pre class="verbatim">
 /opt/TurboVNC/bin/vncviewer
 </pre>
@@ -839,8 +832,9 @@ ssh-agent or Pageant.)</p>
             </dd>
             <dt class="Description-3 Description">Windows clients</dt>
             <dd class="Description-3 Description">
-                 Select &ldquo;TurboVNC Viewer&rdquo; in the &ldquo;TurboVNC&rdquo; 
-                 Start Menu group, or open a new command prompt and type
+                 Select <strong class="filename">TurboVNC Viewer</strong> in the 
+                 <strong class="filename">TurboVNC</strong> Start Menu group, or open a 
+                 new command prompt and type
 <pre class="verbatim">
 c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
 </pre>
@@ -862,7 +856,7 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
         try to fetch the private key passphrase from ssh-agent or Pageant, if 
         either is running.)
         <div class="important"><p class="important">
-        You can specify the SSH user name, if it differs from your local user name, by prefixing the hostname/IP address with <code>{my_user}@</code>, where <code>{my_user}</code> is the SSH user name.
+        You can specify the SSH user name, if it differs from your local user name, by prefixing the hostname/IP address with <em><code>{my_user}@</code></em>, where <em><code>{my_user}</code></em> is the SSH user name.
         </p></div>
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -909,7 +903,7 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
         &ldquo;View-only&rdquo; is checked, then users who authenticate with the 
         new OTP will not be able to remotely control the session.
         <div class="important"><p class="important">
-        The TurboVNC Session Manager automatically uses SSH tunneling and OTP authentication by default, but you can pass <code>-nosessmgrauto</code> on the TurboVNC Viewer command line to disable this behavior, thus allowing any authentication/encryption method to be used.  Additional command-line parameters can be used to specify the port on which the SSH server is listening and the location of the SSH private key file.  The OpenSSH config file (~/.ssh/config by default) can also be used to specify those parameters persistently for a given host.
+        The TurboVNC Session Manager automatically uses SSH tunneling and OTP authentication by default, but you can pass <code>-nosessmgrauto</code> on the TurboVNC Viewer command line to disable this behavior, thus allowing any authentication/encryption method to be used.  Additional command-line parameters can be used to specify the port on which the SSH server is listening and the location of the SSH private key file.  The OpenSSH config file (<strong class="filename">~/.ssh/config</strong> by default) can also be used to specify those parameters persistently for a given host.
         </p></div>
         <div class="important"><p class="important">
         The <code>TVNC_SERVERDIR</code> and <code>TVNC_SERVERARGS</code> environment variables, and their equivalent Java system properties (<code>turbovnc.serverdir</code> and <code>turbovnc.serverargs</code>) can be used to specify a non-default installation path for the TurboVNC Server or additional arguments to pass to the TurboVNC Server when starting new sessions (refer to Section <a href="#TVNC_SERVERARGS" class="ref">11.2</a>.)  These arguments can also be specified on the server using the system-wide or per-user turbovncserver.conf file.
@@ -931,10 +925,7 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
     <li class="Ordered-1 Ordered">
         In the new Command Prompt/terminal window, open a Secure Shell (SSH) 
         session into the TurboVNC host:
-<pre class="verbatim">
-ssh&nbsp;{user}@{host}
-</pre>
-
+        <pre class="verbatim">ssh <em>{user}</em>@<em>{host}</em></pre>
         Replace <em><code>{user}</code></em> with your username on the TurboVNC 
         host and <em><code>{host}</code></em> with the hostname or IP address of 
         the host.
@@ -980,9 +971,9 @@ ssh&nbsp;{user}@{host}
             </dd>
             <dt class="Description-3 Description">Mac clients</dt>
             <dd class="Description-3 Description">
-                 Open the &ldquo;TurboVNC Viewer&rdquo; application, located in the 
-                 &ldquo;TurboVNC&rdquo; Applications folder, or open a new terminal and 
-                 type
+                 Open the <strong class="filename">TurboVNC Viewer</strong> application, 
+                 located in the <strong class="filename">TurboVNC</strong> Applications 
+                 folder, or open a new terminal and type
 <pre class="verbatim">
 /opt/TurboVNC/bin/vncviewer
 </pre>
@@ -990,8 +981,9 @@ ssh&nbsp;{user}@{host}
             </dd>
             <dt class="Description-3 Description">Windows clients</dt>
             <dd class="Description-3 Description">
-                 Select &ldquo;TurboVNC Viewer&rdquo; in the &ldquo;TurboVNC&rdquo; 
-                 Start Menu group, or open a new command prompt and type
+                 Select <strong class="filename">TurboVNC Viewer</strong> in the 
+                 <strong class="filename">TurboVNC</strong> Start Menu group, or open a 
+                 new command prompt and type
 <pre class="verbatim">
 c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
 </pre>
@@ -1073,10 +1065,7 @@ the session.  You can also use the
 Manager</a><a name="idx0033"></a> to remotely kill TurboVNC sessions, or 
 you can type the following command:</p>
 
-<pre class="verbatim">
-/opt/TurboVNC/bin/vncserver&nbsp;-kill&nbsp;:{n}
-</pre>
-
+<pre class="verbatim">/opt/TurboVNC/bin/vncserver -kill :<em>{n}</em></pre>
 <p>from a terminal in the TurboVNC session or from an SSH session on the 
 host. Replace <em><code>{n}</code></em> with the X display number of the 
 TurboVNC session you want to kill.</p>
@@ -1098,38 +1087,37 @@ host.</p>
 
 <p><a name="noVNC"></a></p>
 
-<p>When a TurboVNC session is started, the <code>vncserver</code> script 
-can optionally start an instance of 
+<p>When a TurboVNC session is started, the 
+<strong class="filename">vncserver</strong> script can optionally start 
+an instance of 
 <span class="remote"><a href="https://novnc.com" class="remote">noVNC</a></span><a name="idx0034"></a>, 
 an HTML 5/JavaScript VNC viewer that works in any web browser (with 
 reduced performance and features relative to the TurboVNC Viewer.)  This 
 allows you to easily connect to a TurboVNC session from a machine that 
 does not have the TurboVNC Viewer installed (including mobile devices.)</p>
 
-<p>To launch noVNC along with a TurboVNC session, pass 
-<code>-novnc&nbsp;</code><em><code>{script}</code></em> to 
-<code>/opt/TurboVNC/bin/vncserver</code> when starting the session, 
-where <em><code>{script}</code></em> is the launch script for the noVNC 
-WebSockets proxy (setting the <code>$noVNC</code> variable in 
-<code>turbovncserver.conf</code> has the same effect.)  The 
-<code>vncserver</code> script will print the noVNC URL, which will be of 
-the form:</p>
+<p>To launch noVNC along with a TurboVNC session, pass <code>-novnc 
+<em>{script}</em></code> to <code>/opt/TurboVNC/bin/vncserver</code> 
+when starting the session, where <em><code>{script}</code></em> is the 
+launch script for the noVNC WebSockets proxy (setting the 
+<code>$noVNC</code> variable in 
+<strong class="filename">turbovncserver.conf</strong> has the same 
+effect.)  The <strong class="filename">vncserver</strong> script will 
+print the noVNC URL, which will be of the form:</p>
 
-<p><code>http://</code><em><code>{host}</code></em><code>:{5800+</code><em><code>n</code></em><code>}/vnc.html</code></p>
-
+<pre class="verbatim">http://<em>{host}</em>:<em>{5800+n}</em>/vnc.html</pre>
 <p>or</p>
 
-<p><code>https://</code><em><code>{host}</code></em><code>:{5800+</code><em><code>n</code></em><code>}/vnc.html</code></p>
-
+<pre class="verbatim">https://<em>{host}</em>:<em>{5800+n}</em>/vnc.html</pre>
 <p>where <em><code>{host}</code></em> is the hostname or IP address of the 
 TurboVNC host, and <em><code>n</code></em> is the X display number of 
 the TurboVNC session.</p>
 
 <p>Point your web browser to that URL in order to access the TurboVNC 
-session. You can optionally pass 
-<code>-novnccert&nbsp;</code><em><code>{combined_certificate_file}</code></em> 
-to <code>vncserver</code> to encrypt the client/host connection using 
-HTTPS.  See the <code>vncserver</code> man page for more details.</p>
+session. You can optionally pass <code>-novnccert 
+<em>{combined_certificate_file}</em></code> to <code>vncserver</code> to 
+encrypt the client/host connection using HTTPS.  See the 
+<strong class="filename">vncserver</strong> man page for more details.</p>
 
 <div class="important"><p class="important">
 NOTE: noVNC only supports VNC Password authentication, so it is strongly recommended that it be used only with one-time passwords unless the connection is encrypted using HTTPS.
@@ -1158,28 +1146,19 @@ Options dialog.)</p>
 Viewer take advantage of the port forwarding feature in SSH.  For 
 instance, running</p>
 
-<pre class="verbatim">
-{vncviewer}&nbsp;-via&nbsp;{user}@{host}&nbsp;localhost:{n}
-</pre>
-
+<pre class="verbatim"><em>{vncviewer}</em> -via <em>{user}</em>@<em>{host}</em> localhost:<em>{n}</em></pre>
 <p>or</p>
 
-<pre class="verbatim">
-{vncviewer}&nbsp;-tunnel&nbsp;{user}@{host}
-</pre>
-
+<pre class="verbatim"><em>{vncviewer}</em> -tunnel <em>{user}</em>@<em>{host}</em></pre>
 <p>is the equivalent of running</p>
 
-<pre class="verbatim">
-ssh&nbsp;-L&nbsp;{fp}:localhost:{5900+n}&nbsp;{user}@{host}
-{vncviewer}&nbsp;localhost::{fp}
-</pre>
-
+<pre class="verbatim">ssh -L <em>{fp}</em>:localhost:<em>{5900+n}</em> <em>{user}</em>@<em>{host}</em>
+<em>{vncviewer}</em> localhost::<em>{fp}</em></pre>
 <p>where <em><code>{fp}</code></em> is a free TCP port on the client 
 machine (this is automatically determined by the TurboVNC Viewer.)</p>
 
 <div class="important"><p class="important">
-In the above examples, <code>{vncviewer}</code> is the command used to launch the TurboVNC Viewer&ndash; <code>/opt/TurboVNC/bin/vncviewer</code> on Mac/Linux/Un*x systems or <code>c:\Program&nbsp;Files\TurboVNC\vncviewer.bat</code> on Windows systems.
+In the above examples, <em><code>{vncviewer}</code></em> is the command used to launch the TurboVNC Viewer&ndash; <code>/opt/TurboVNC/bin/vncviewer</code> on Mac/Linux/Un*x systems or <code>c:\Program&nbsp;Files\TurboVNC\vncviewer.bat</code> on Windows systems.
 </p></div>
 
 <p><code>-tunnel</code> can be used as a shortcut whenever the SSH and VNC 
@@ -1652,8 +1631,7 @@ Lossless Refresh toolbar icon.</p>
 
 <p><a name="ALR"></a></p>
 
-<p>Passing an argument of 
-<code>-alr&nbsp;</code><em><code>{timeout}</code></em> to 
+<p>Passing an argument of <code>-alr <em>{timeout}</em></code> to 
 <code>vncserver</code> will enable the automatic lossless refresh (ALR) 
 feature for the TurboVNC session.  ALR will monitor all of the VNC 
 viewer connections, and if more than <em><code>{timeout}</code></em> 
@@ -1663,8 +1641,8 @@ mathematically lossless copy of any &ldquo;ALR-eligible&rdquo; screen
 regions that have been affected by lossy compression.  You can also pass 
 arguments of <code>-alrqual</code> and <code>-alrsamp</code> to 
 <code>vncserver</code> to specify that automatic lossless refreshes 
-should be sent using JPEG instead (see the <code>Xvnc</code> man page 
-for details.)</p>
+should be sent using JPEG instead (see the 
+<strong class="filename">Xvnc</strong> man page for details.)</p>
 
 <p>The ALR feature is designed mainly for use with interactive 
 visualization applications.  The idea is that, on a low-bandwidth 
@@ -1794,18 +1772,18 @@ extensions:</p>
     </dd>
     <dt class="Description-1 Description">One-Time Password (OTP) Authentication</dt>
     <dd class="Description-1 Description">
-         Using the <code>vncpasswd</code> program, a unique password is 
-         generated &ldquo;on the fly&rdquo; for the TurboVNC session, and the 
-         password is printed on the command line (see the man page for 
-         <code>vncpasswd</code> for more details.)  The user enters this 
-         password in the VNC viewer, and the VNC viewer sends the password to 
-         the server as if it were a VNC password.  However, once the OTP has 
-         been used to authenticate a viewer, the OTP is forgotten and cannot be 
-         reused.  OTP authentication can be used, for instance, to launch or 
-         connect to TurboVNC sessions from an automated web portal or from a job 
-         scheduler. OTP authentication is also useful for allowing temporary 
-         access to a TurboVNC session for collaboration purposes.  The 
-         <a href="#TurboVNC_Session_Manager">TurboVNC Session 
+         Using the <strong class="filename">vncpasswd</strong> program, a unique 
+         password is generated &ldquo;on the fly&rdquo; for the TurboVNC 
+         session, and the password is printed on the command line (see the man 
+         page for <strong class="filename">vncpasswd</strong> for more details.)  
+         The user enters this password in the VNC viewer, and the VNC viewer 
+         sends the password to the server as if it were a VNC password.  
+         However, once the OTP has been used to authenticate a viewer, the OTP 
+         is forgotten and cannot be reused.  OTP authentication can be used, for 
+         instance, to launch or connect to TurboVNC sessions from an automated 
+         web portal or from a job scheduler. OTP authentication is also useful 
+         for allowing temporary access to a TurboVNC session for collaboration 
+         purposes.  The <a href="#TurboVNC_Session_Manager">TurboVNC Session 
          Manager</a><a name="idx0039"></a> uses OTP authentication by default, 
          which allows it to securely authenticate with a TurboVNC session 
          without prompting for additional credentials.
@@ -2022,7 +2000,7 @@ authentication to be preferred over PAM User/Password authentication.
 However, the system administrator can disable one or more of the 
 security types or set the preferred order of the security types by 
 editing the TurboVNC security configuration file.  See the 
-<code>Xvnc</code> man page for more details.</p>
+<strong class="filename">Xvnc</strong> man page for more details.</p>
 
 <p>If the VNC server allows multiple security types, then the VNC 
 viewer&rsquo;s default security type will be determined by the 
@@ -2030,24 +2008,24 @@ server&rsquo;s preferred security type.  In this case, the user can
 override the default by passing command-line arguments to 
 <code>vncviewer</code>.  If the VNC server prefers a security type that 
 supports Standard VNC authentication, then the user can force the use of 
-Unix Login/Plain authentication by passing an argument of 
-<code>-user&nbsp;</code><em><code>{user_name}</code></em> to 
-<code>vncviewer</code> when connecting to the TurboVNC session.  
-Similarly, if the VNC server prefers a security type that supports Unix 
-Login/Plain authentication, then the user can force the use of Standard 
-VNC authentication by passing an argument of <code>-nounixlogin</code> 
-to <code>vncviewer</code>. You can also accomplish the same thing by 
-unchecking &ldquo;Unix Login&rdquo; or &ldquo;Plain&rdquo; or 
-&ldquo;Standard VNC&rdquo; in the &ldquo;Security&rdquo; tab of the 
-Options dialog or by limiting the available security types using the 
-<code>SecurityTypes</code>, <code>User</code>, or 
-<code>NoUnixLogin</code> arguments/parameters.</p>
+Unix Login/Plain authentication by passing an argument of <code>-user 
+<em>{user_name}</em></code> to <code>vncviewer</code> when connecting to 
+the TurboVNC session.  Similarly, if the VNC server prefers a security 
+type that supports Unix Login/Plain authentication, then the user can 
+force the use of Standard VNC authentication by passing an argument of 
+<code>-nounixlogin</code> to <code>vncviewer</code>. You can also 
+accomplish the same thing by unchecking &ldquo;Unix Login&rdquo; or 
+&ldquo;Plain&rdquo; or &ldquo;Standard VNC&rdquo; in the 
+&ldquo;Security&rdquo; tab of the Options dialog or by limiting the 
+available security types using the <code>SecurityTypes</code>, 
+<code>User</code>, or <code>NoUnixLogin</code> arguments/parameters.</p>
 
 <p>If the system administrator has not restricted any of the server 
 security types on a system-wide basis, then the user can choose to 
 disable some or all of them for a particular TurboVNC session by using 
 the <code>-SecurityTypes</code> command-line argument when starting the 
-session.  See the <code>Xvnc</code> man page for more details.</p>
+session.  See the <strong class="filename">Xvnc</strong> man page for 
+more details.</p>
 
 
 
@@ -2206,10 +2184,7 @@ this configuration.</p>
     </li>
     <li class="Ordered-1 Ordered">
         In the terminal, start a 3D application using VirtualGL:
-<pre class="verbatim">
-/opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
-</pre>
-
+        <pre class="verbatim">/opt/VirtualGL/bin/vglrun [vglrun options] <em>{application_executable_or_script}</em> <em>{arguments}</em></pre>
     </li>
 </ol>
 
@@ -2249,10 +2224,7 @@ TurboVNC host for this procedure to perform well.</p>
     <li class="Ordered-1 Ordered">
         In the same terminal window, open a Secure Shell (SSH) session into the 
         VirtualGL server:
-<pre class="verbatim">
-/opt/VirtualGL/bin/vglconnect&nbsp;{user}@{server}
-</pre>
-
+        <pre class="verbatim">/opt/VirtualGL/bin/vglconnect <em>{user}</em>@<em>{server}</em></pre>
         Replace <em><code>{user}</code></em> with your username on the VirtualGL 
         server and <em><code>{server}</code></em> with the hostname or IP 
         address of that server.  Refer to the VirtualGL User&rsquo;s Guide for 
@@ -2267,10 +2239,7 @@ TurboVNC host for this procedure to perform well.</p>
     </li>
     <li class="Ordered-1 Ordered">
         In the SSH session, start a 3D application using VirtualGL:
-<pre class="verbatim">
-/opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
-</pre>
-
+        <pre class="verbatim">/opt/VirtualGL/bin/vglrun [vglrun options] <em>{application_executable_or_script}</em> <em>{arguments}</em></pre>
     </li>
 </ol>
 
@@ -2285,15 +2254,14 @@ low-level GPU properties, and unfortunately the library (libXNVCtrl)
 used by applications to interact with the extension is static, making it 
 impossible to interpose using VirtualGL.</p>
 
-<p>Passing an argument of 
-<code>-nvcontrol&nbsp;</code><em><code>{display}</code></em> to 
+<p>Passing an argument of <code>-nvcontrol <em>{display}</em></code> to 
 <code>vncserver</code> will set up a fake NV-CONTROL extension in the 
 TurboVNC session and will redirect all NV-CONTROL requests to 
 <em><code>{display}</code></em>.  <em><code>{display}</code></em> should 
 generally be the name of the 3D X server you plan to use with VirtualGL 
-(&ldquo;:0&rdquo;, for instance.)  The TurboVNC Server does not attempt 
+(<code>:0</code>, for instance.)  The TurboVNC Server does not attempt 
 to open a connection to this display until an application uses the 
-NV-CONTROL extension.  If a connection to the 3D X server cannot be 
+NV-CONTROL extension. If a connection to the 3D X server cannot be 
 opened, if the 3D X server does not have the NV-CONTROL extension, or if 
 other issues are encountered when attempting to redirect NV-CONTROL 
 requests, then a BadRequest X11 error will be returned to the 
@@ -2315,11 +2283,8 @@ the session has been started.  For instance, if you want to redirect
 both NV-CONTROL requests and OpenGL to a GPU attached to Screen 1 of 
 Display :0, you would execute</p>
 
-<pre class="verbatim">
-xprop&nbsp;-root&nbsp;-f&nbsp;VNC_NVCDISPLAY&nbsp;8s&nbsp;-set&nbsp;VNC_NVCDISPLAY&nbsp;:0.1
-vglrun&nbsp;-d&nbsp;:0.1&nbsp;{3D&nbsp;application}
-</pre>
-
+<pre class="verbatim">xprop -root -f VNC_NVCDISPLAY 8s -set VNC_NVCDISPLAY :0.1
+vglrun -d :0.1 <em>{3D application}</em></pre>
 <p><br /></p>
 
 <hr class="break" />
@@ -2573,9 +2538,10 @@ ints in Java.)  Hextile uses very small tiles, which causes it to incur
 a large amount of computational overhead.  It compresses too poorly to 
 perform well on slow links but uses too much CPU time to perform well on 
 fast links.  ZRLE improves upon this, but it is still too 
-computationally intense for fast networks.  The <code>vncviewer</code> 
-man page in the TurboVNC Linux packages has some additional information 
-about how Hextile, RRE, and ZRLE work.</p>
+computationally intense for fast networks.  The 
+<strong class="filename">vncviewer</strong> man page in the TurboVNC 
+Linux packages has some additional information about how Hextile, RRE, 
+and ZRLE work.</p>
 
 <p><br /></p>
 
@@ -2592,7 +2558,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_ALRALL&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>TVNC_ALRALL = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2617,7 +2583,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_ALRCOPYRECT&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>TVNC_ALRCOPYRECT = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2642,7 +2608,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_COMBINERECT&nbsp;=&nbsp;</code><em><code>{c}</code></em></td>
+    <td class="standard"><code>TVNC_COMBINERECT = <em>{c}</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2681,7 +2647,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_ICEBLOCKSIZE&nbsp;=&nbsp;</code><em><code>{s}</code></em></td>
+    <td class="standard"><code>TVNC_ICEBLOCKSIZE = <em>{s}</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2724,7 +2690,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_ICEDEBUG&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>TVNC_ICEDEBUG = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2745,7 +2711,7 @@ about how Hextile, RRE, and ZRLE work.</p>
         <a href="#InterframeComparison" class="ref">7.1</a>), then setting this 
         environment variable to 1 will cause the interframe comparison engine 
         (ICE) to change the color of duplicate screen regions without culling 
-        them from the update stream.  This allows you to easily see which 
+        them from the update stream. This allows you to easily see which 
         applications are generating duplicate updates.
     </dd>
 </dl>
@@ -2754,7 +2720,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_MT&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>TVNC_MT = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2779,7 +2745,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_NTHREADS&nbsp;=&nbsp;</code><em><code>{n}</code></em></td>
+    <td class="standard"><code>TVNC_NTHREADS = <em>{n}</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2804,7 +2770,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_PROFILE&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>TVNC_PROFILE = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2834,10 +2800,7 @@ about how Hextile, RRE, and ZRLE work.</p>
 <p>Java system properties are normally specified as command-line arguments 
 to the Java executable.  For example:</p>
 
-<pre class="verbatim">
-java&nbsp;-Dmy.system.property={value}&nbsp;-jar&nbsp;MyClass.jar
-</pre>
-
+<pre class="verbatim">java -Dmy.system.property=<em>{value}</em> -jar MyClass.jar</pre>
 <p>However, since TurboVNC hides the Java command line inside of its 
 startup scripts (or inside of an application bundle on macOS), the 
 easiest way to set these properties is by using the 
@@ -2855,7 +2818,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.forcealpha&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>turbovnc.forcealpha = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2891,7 +2854,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.lionfs&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>turbovnc.lionfs = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2921,7 +2884,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.primary&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>turbovnc.primary = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -2962,7 +2925,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_PROFILE&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>TVNC_PROFILE = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -3009,9 +2972,10 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         The TurboVNC Session Manager will pass these command-line arguments to 
-        the <code>vncserver</code> script when starting a new TurboVNC session 
-        on the TurboVNC host.  This can be used, for instance, to enable 
-        <a href="#ALR">automatic lossless refresh</a><a name="idx0041"></a>.
+        the <strong class="filename">vncserver</strong> script when starting a 
+        new TurboVNC session on the TurboVNC host.  This can be used, for 
+        instance, to enable <a href="#ALR">automatic lossless 
+        refresh</a><a name="idx0041"></a>.
     </dd>
 </dl>
 
@@ -3051,11 +3015,11 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_SINGLESCREEN&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>TVNC_SINGLESCREEN = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.singlescreen&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>turbovnc.singlescreen = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -3089,7 +3053,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.swingdb&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>turbovnc.swingdb = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
@@ -3121,7 +3085,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <table class="standard">
   <tr class="standard">
     <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.turbojpeg&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+    <td class="standard"><code>turbovnc.turbojpeg = <em>0 | 1</em></code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
