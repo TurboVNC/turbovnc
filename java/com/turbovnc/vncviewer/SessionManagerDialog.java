@@ -30,9 +30,10 @@ import com.turbovnc.rfb.*;
 
 class SessionManagerDialog extends Dialog implements ActionListener {
 
-  SessionManagerDialog(String[] sessions_, String host) {
+  SessionManagerDialog(String[] sessions_, String host_) {
     super(true);
     sessions = sessions_;
+    host = host_;
 
     sessionManagerPanel = new JPanel(new GridBagLayout());
     sessionManagerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -154,8 +155,18 @@ class SessionManagerDialog extends Dialog implements ActionListener {
           viewOnly = viewOnlyBox[i].isSelected();
           endDialog();
         } else if (s instanceof JButton && (JButton)s == killButton[i]) {
-          killSession = sessions[i];
-          endDialog();
+          String message = "Are you sure you want to kill session\n" +
+                           host + sessions[i] + " ?";
+          String[] options = { "Yes", "No" };
+          if (JOptionPane.showOptionDialog(getJDialog(), message,
+                                           "Are you sure?",
+                                           JOptionPane.YES_NO_OPTION,
+                                           JOptionPane.WARNING_MESSAGE, null,
+                                           options, options[1]) ==
+              JOptionPane.YES_OPTION) {
+            killSession = sessions[i];
+            endDialog();
+          }
         } else if (s instanceof JButton && (JButton)s == newOTPButton[i]) {
           newOTPSession = sessions[i];
           viewOnly = viewOnlyBox[i].isSelected();
@@ -182,7 +193,7 @@ class SessionManagerDialog extends Dialog implements ActionListener {
   JButton newSessionButton, refreshButton, cancelButton;
 
   String[] sessions;
-  String connectSession, killSession, newOTPSession;
+  String connectSession, killSession, newOTPSession, host;
   boolean viewOnly;
 
   static LogWriter vlog = new LogWriter("SessionManagerDialog");
