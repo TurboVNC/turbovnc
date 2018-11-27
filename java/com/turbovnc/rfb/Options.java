@@ -130,14 +130,23 @@ public class Options {
         if (array.length < 2)
           return null;
 
-        int w = Integer.parseInt(array[0]);
-        int h = Integer.parseInt(array[1]);
+        int w = 0, h = 0;
+        try {
+          w = Integer.parseInt(array[0]);
+          h = Integer.parseInt(array[1]);
+        } catch (NumberFormatException e) {
+          return null;
+        }
         if (w < 1 || h < 1)
           return null;
 
         int x = 0, y = 0;
-        if (array.length > 2) x = Integer.parseInt(array[2]);
-        if (array.length > 3) y = Integer.parseInt(array[3]);
+        try {
+          if (array.length > 2) x = Integer.parseInt(array[2]);
+          if (array.length > 3) y = Integer.parseInt(array[3]);
+        } catch (NumberFormatException e) {
+          return null;
+        }
         if (x < 0 || y < 0)
           return null;
 

@@ -438,7 +438,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       if (argv[i].equalsIgnoreCase("-loglevel")) {
         if (++i >= argv.length) usage();
         System.err.println("Log setting: " + argv[i]);
-        LogWriter.setLogParams(argv[i]);
+        if (!LogWriter.setLogParams(argv[i])) {
+          reportException(
+            new WarningException("Invalid logging level specified"));
+          exit(1);
+        }
         continue;
       }
 

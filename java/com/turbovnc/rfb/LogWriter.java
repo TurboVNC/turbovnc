@@ -44,7 +44,11 @@ public class LogWriter {
   public void eidebug(String str) { write(150, str); }
 
   public static boolean setLogParams(String params) {
-    globalLogLevel = Integer.parseInt(params);
+    try {
+      globalLogLevel = Integer.parseInt(params);
+    } catch (NumberFormatException e) {
+      return false;
+    }
     LogWriter current = logWriters;
     while (current != null) {
       current.setLevel(globalLogLevel);
