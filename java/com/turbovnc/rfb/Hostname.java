@@ -48,7 +48,7 @@ public final class Hostname {
       return "localhost";
     if (colonPos == -1)
       colonPos = vncServerName.length();
-    return vncServerName.substring(0, colonPos);
+    return vncServerName.substring(0, colonPos).replaceAll("\\s", "");
   }
 
   public static int getPort(String vncServerName) {

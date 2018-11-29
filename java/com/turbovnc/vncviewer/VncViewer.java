@@ -968,6 +968,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         } else {
           opts.via = new String(v);
         }
+        if (opts.via != null) {
+          opts.via = opts.via.replaceAll("\\s", "");
+          if (opts.via.length() == 0)
+            opts.via = null;
+        }
       }
       opts.tunnel = tunnel.getValue();
       opts.extSSH = extSSH.getValue();
@@ -980,6 +985,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
           opts.sshUser = s.substring(0, atIndex);
         } else {
           opts.serverName = new String(s);
+        }
+        if (opts.serverName != null) {
+          opts.serverName = opts.serverName.replaceAll("\\s", "");
+          if (opts.serverName.length() == 0)
+            opts.serverName = null;
         }
       }
       vncServerName.setParam(null);

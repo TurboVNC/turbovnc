@@ -30,6 +30,7 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.Dialog.*;
 import javax.swing.*;
+import javax.swing.text.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.LogWriter;
@@ -152,6 +153,29 @@ class Dialog {
     gbc.weightx = gwx;
     gbc.weighty = gwy;
     cp.add(c, gbc);
+  }
+
+  class WhitespaceDocumentFilter extends DocumentFilter {
+    public void insertString(DocumentFilter.FilterBypass fb, int offset,
+                             String string, AttributeSet attr)
+                             throws BadLocationException {
+      if (string != null)
+        string = string.replaceAll("\\s", "");
+      super.insertString(fb, offset, string, attr);
+    }
+
+    public void replace(DocumentFilter.FilterBypass fb, int offset, int length,
+                        String text, AttributeSet attrs)
+                        throws BadLocationException {
+      if (text != null)
+        text = text.replaceAll("\\s", "");
+      super.replace(fb, offset, length, text, attrs);
+    }
+  };
+
+  public void filterWhitespace(JTextField textField) {
+    DocumentFilter filter = new WhitespaceDocumentFilter();
+    ((AbstractDocument)textField.getDocument()).setDocumentFilter(filter);
   }
 
   private JDialog dlg;
