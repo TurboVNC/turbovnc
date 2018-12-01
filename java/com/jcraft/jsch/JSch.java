@@ -470,22 +470,16 @@ public class JSch{
     else{
       /* Don't add private key without a passphrase if another private key with
          the same fingerprint already exists with a passphrase. */
-      if(decryptedIdentityExists(identity)){
-        if(JSch.getLogger().isEnabled(Logger.INFO)){
-          JSch.getLogger().log(Logger.INFO,
-                               "Ignoring duplicate private key "+
-                               identity.getName());
-          JSch.getLogger().log(Logger.INFO,
-                               "  Fingerprint: "+identity.getFingerPrint());
-        }
-        return;
+      Identity decryptedIdentity=findDecryptedIdentity(identity);
+      if(decryptedIdentity!=null){
+        identity=decryptedIdentity;
       }
     }
 
     if(JSch.getLogger().isEnabled(Logger.INFO)){
       JSch.getLogger().log(Logger.INFO,
                            "Adding private key "+identity.getName()+
-                           (passphrase==null ? " without" : " with")+
+                           (identity.isEncrypted() ? " without" : " with")+
                            " passphrase");
       if(identity.getFingerPrint()!=null){
         JSch.getLogger().log(Logger.INFO,
@@ -511,25 +505,25 @@ public class JSch{
 
   /**
    * Checks whether the given private key has already been added with a
-   * passphrase.
+   * passphrase and returns the previously decrypted version of the private key
+   * if so.
    *
    * @param identity private key.
    *
-   * @return true if the given private key has already been added with a
-   * passphrase or false otherwise.
+   * @return the previously decrypted version of the private key, or null if
+   * a decrypted version of the private key cannot be found.
    */
-  public boolean decryptedIdentityExists(Identity newIdentity){
-    Vector foo=new Vector();
+  public Identity findDecryptedIdentity(Identity identity){
     Vector identities = identityRepository.getIdentities();
     for(int i=0; i<identities.size(); i++){
-      Identity identity=(Identity)(identities.elementAt(i));
-      String oldFingerPrint=identity.getFingerPrint();
-      String newFingerPrint=newIdentity.getFingerPrint();
+      Identity oldIdentity=(Identity)(identities.elementAt(i));
+      String oldFingerPrint=oldIdentity.getFingerPrint();
+      String newFingerPrint=identity.getFingerPrint();
       if(oldFingerPrint!=null && newFingerPrint!=null &&
-         newFingerPrint.equals(oldFingerPrint) && !identity.isEncrypted())
-        return true;
+         newFingerPrint.equals(oldFingerPrint) && !oldIdentity.isEncrypted())
+        return oldIdentity;
     }
-    return false;
+    return null;
   }
 
   /**

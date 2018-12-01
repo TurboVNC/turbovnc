@@ -118,7 +118,7 @@ public class Tunnel {
           connector = new SSHAgentConnector(new JNIUSocketFactory());
         if (connector != null) {
           IdentityRepository repo = new RemoteIdentityRepository(connector);
-          vlog.sshdebug("SSH private keys added from agent:");
+          vlog.sshdebug("SSH private keys offered by agent:");
           Iterator<com.jcraft.jsch.Identity> iter =
             repo.getIdentities().iterator();
           while (iter.hasNext()) {
