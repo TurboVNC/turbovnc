@@ -27,6 +27,7 @@ import javax.swing.border.*;
 import javax.swing.WindowConstants.*;
 import java.util.*;
 
+import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 
 class ServerDialog extends Dialog implements ActionListener {
@@ -41,12 +42,7 @@ class ServerDialog extends Dialog implements ActionListener {
 
     JLabel serverLabel = new JLabel("VNC server:", JLabel.RIGHT);
     String valueStr = null;
-    if (opts.serverName != null) {
-      String[] s = new String[1];
-      s[0] = opts.serverName;
-      server = new JComboBox(s);
-    } else if ((valueStr = UserPreferences.get("ServerDialog", "history")) !=
-               null) {
+    if ((valueStr = UserPreferences.get("ServerDialog", "history")) != null) {
       server = new JComboBox(valueStr.split(","));
     } else {
       server = new JComboBox();
@@ -69,18 +65,20 @@ class ServerDialog extends Dialog implements ActionListener {
 
     server.setEditable(true);
     editor = server.getEditor();
+    filterWhitespace((JTextField)editor.getEditorComponent());
     editor.getEditorComponent().addKeyListener(new KeyListener() {
-      public void keyTyped(KeyEvent e) {}
-      public void keyReleased(KeyEvent e) {}
+      public void keyTyped(KeyEvent e) { updateConnectButton(); }
+      public void keyReleased(KeyEvent e) { updateConnectButton(); }
       public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          server.insertItemAt(editor.getItem(), 0);
-          server.setSelectedIndex(0);
-          commit();
-          endDialog();
+        updateConnectButton();
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && okButton.isEnabled()) {
+          if (commit())
+            endDialog();
         }
       }
     });
+    if (opts.serverName != null)
+      server.setSelectedItem(opts.serverName);
 
     topPanel = new JPanel(new GridBagLayout());
 
@@ -113,6 +111,7 @@ class ServerDialog extends Dialog implements ActionListener {
     optionsButton = new JButton("Options...");
     aboutButton = new JButton("About...");
     okButton = new JButton("Connect");
+    updateConnectButton();
     cancelButton = new JButton("Cancel");
     buttonPanel = new JPanel(new GridBagLayout());
     buttonPanel.setPreferredSize(new Dimension(350, 40));
@@ -178,11 +177,16 @@ class ServerDialog extends Dialog implements ActionListener {
     dlg.pack();
   }
 
+  private void updateConnectButton() {
+    okButton.setEnabled(editor.getItem() != null &&
+                        ((String)editor.getItem()).length() > 0);
+  }
+
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == okButton) {
-      commit();
-      endDialog();
+      if (commit())
+        endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       if (VncViewer.nViewers == 1)
         cc.viewer.exit(1);
@@ -190,55 +194,65 @@ class ServerDialog extends Dialog implements ActionListener {
       endDialog();
     } else if (s instanceof JButton && (JButton)s == optionsButton) {
       options.showDialog(getJDialog());
+      if (UserPreferences.get("ServerDialog", "history") == null) {
+        String serverStr = (String)editor.getItem();
+        server.removeAllItems();
+        if (serverStr != null && serverStr.length() > 0)
+          ((JTextField)editor.getEditorComponent()).setText(serverStr);
+        updateConnectButton();
+      }
     } else if (s instanceof JButton && (JButton)s == aboutButton) {
       VncViewer.showAbout(getJDialog());
     } else if (s instanceof JComboBox && (JComboBox)s == server) {
-      if (e.getActionCommand().equals("comboBoxEdited")) {
-        server.insertItemAt(editor.getItem(), 0);
-        server.setSelectedIndex(0);
-      }
+      if (e.getActionCommand().equals("comboBoxEdited") ||
+          e.getActionCommand().equals("comboBoxChanged"))
+        updateConnectButton();
     }
   }
 
-  private void commit() {
-    String serverName = (String)server.getSelectedItem();
-    if (serverName == null || serverName.equals("")) {
-      vlog.error("No server name specified!");
-      if (VncViewer.nViewers == 1)
-        cc.viewer.exit(1);
-      ret = false;
-      endDialog();
-    }
+  private boolean commit() {
+    try {
 
-    // set params
-    if (opts.via != null && opts.via.indexOf(':') >= 0) {
-      opts.serverName = serverName;
-    } else {
-      int atIndex = serverName.lastIndexOf('@');
-      if (atIndex >= 0) {
-        opts.serverName = Hostname.getHost(serverName.substring(atIndex + 1));
-        opts.sshUser = serverName.substring(0, atIndex);
+      String serverName = (String)editor.getItem();
+      if (serverName == null || serverName.equals(""))
+        throw new WarningException("No server name specified");
+
+      // set params
+      if (opts.via != null && opts.via.indexOf(':') >= 0) {
+        opts.serverName = serverName;
       } else {
-        opts.serverName = Hostname.getHost(serverName);
+        int atIndex = serverName.lastIndexOf('@');
+        if (atIndex >= 0) {
+          opts.serverName =
+            Hostname.getHost(serverName.substring(atIndex + 1));
+          opts.sshUser = serverName.substring(0, atIndex);
+        } else {
+          opts.serverName = Hostname.getHost(serverName);
+        }
+        opts.port = Hostname.getPort(serverName);
       }
-      opts.port = Hostname.getPort(serverName);
+
+      // Update the history list
+      String valueStr = UserPreferences.get("ServerDialog", "history");
+      String t = (valueStr == null) ? "" : valueStr;
+      StringTokenizer st = new StringTokenizer(t, ",");
+      StringBuffer sb = new StringBuffer().append(serverName);
+      while (st.hasMoreTokens()) {
+        String str = st.nextToken();
+        if (!str.equals(serverName) && !str.equals("")) {
+          sb.append(',');
+          sb.append(str);
+        }
+      }
+      UserPreferences.set("ServerDialog", "history", sb.toString());
+      UserPreferences.save("ServerDialog");
+
+    } catch (Exception e) {
+      cc.viewer.reportException(e, false);
+      return false;
     }
 
-    // Update the history list
-    String valueStr = UserPreferences.get("ServerDialog", "history");
-    String t = (valueStr == null) ? "" : valueStr;
-    StringTokenizer st = new StringTokenizer(t, ",");
-    StringBuffer sb =
-      new StringBuffer().append((String)server.getSelectedItem());
-    while (st.hasMoreTokens()) {
-      String str = st.nextToken();
-      if (!str.equals((String)server.getSelectedItem()) && !str.equals("")) {
-        sb.append(',');
-        sb.append(str);
-      }
-    }
-    UserPreferences.set("ServerDialog", "history", sb.toString());
-    UserPreferences.save("ServerDialog");
+    return true;
   }
 
   Window win;

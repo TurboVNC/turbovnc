@@ -590,6 +590,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     gatewayPanel.setBorder(
       BorderFactory.createTitledBorder("Gateway (SSH server or UltraVNC repeater)"));
     gateway = new JTextField("", 1);
+    filterWhitespace(gateway);
     JLabel gatewayLabel = new JLabel("Host:");
     sshUser = new JTextField("", 1);
     JLabel sshUserLabel = new JLabel("SSH user:");
