@@ -175,11 +175,10 @@ public final class Tunnel {
     if (opts.sshSession.getConfig("StrictHostKeyChecking") == null)
       opts.sshSession.setConfig("StrictHostKeyChecking", "ask");
     opts.sshSession.setConfig("MaxAuthTries", "3");
-    if (!VncViewer.getBooleanProperty("turbovnc.gssapi", false)) {
-      String auth = opts.sshSession.getConfig("PreferredAuthentications");
-      opts.sshSession.setConfig("PreferredAuthentications",
-                                auth.replaceAll("gssapi-with-mic,", ""));
-    }
+    String auth = System.getProperty("turbovnc.sshauth");
+    if (auth == null)
+      auth = "publickey,keyboard-interactive,password";
+    opts.sshSession.setConfig("PreferredAuthentications", auth);
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                         true, user, false);
     opts.sshSession.setUserInfo(dlg);

@@ -262,6 +262,16 @@ Web Start environment.
 	automatic desktop resize feature.  See the ''TVNC_SINGLESCREEN'' environment
 	variable above for more details.
 
+| Java System Property | ''turbovnc.sshauth'' |
+| Summary | Preferred authentication methods for the built-in SSH client |
+| Default Value | ''publickey,keyboard-interactive,password'' |
+#OPT: hiCol=first
+
+	Description :: This system property can be used to enable or disable
+	particular SSH authentication methods, as well as to specify their preferred
+	order.  The same thing can be accomplished by using the
+	''PreferredAuthentications'' directive in the OpenSSH config file.
+
 | Java System Property | {pcode: turbovnc.swingdb = __0 \| 1__} |
 | Summary | Disable/enable Swing double buffering |
 | Default Value | Disabled |

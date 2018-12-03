@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-12-03T16:27:36">
+<meta name="date" content="2018-12-03T16:28:24">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3158,6 +3158,35 @@ Java command-line arguments in a Java Web Start environment.</p>
         A more Java-friendly way of disabling the multi-screen-aware automatic 
         desktop resize feature.  See the <code>TVNC_SINGLESCREEN</code> 
         environment variable above for more details.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.sshauth</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Preferred authentication methods for the built-in SSH client</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>publickey,keyboard-interactive,password</code></td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        This system property can be used to enable or disable particular SSH 
+        authentication methods, as well as to specify their preferred order.  
+        The same thing can be accomplished by using the 
+        <code>PreferredAuthentications</code> directive in the OpenSSH config 
+        file.
     </dd>
 </dl>
 
