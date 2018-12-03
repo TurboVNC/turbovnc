@@ -282,7 +282,8 @@ Web Start environment.
 
 	Description :: A more Java-friendly way of specifying the command line to use
 	when establishing a secure tunnel with the ''Tunnel'' and ''ExtSSH''
-	parameters.  See the ''VNC_TUNNEL_CMD'' environment variable above for more
+	parameters.  See the
+	[[#VNC_VIA_CMD][''VNC_TUNNEL_CMD'' environment variable]] above for more
 	details.
 
 | Java System Property | {pcode: turbovnc.turbojpeg = __0 \| 1__} |
@@ -303,5 +304,5 @@ Web Start environment.
 
 	Description :: A more Java-friendly way of specifying the command line to use
 	when establishing a secure tunnel with the ''Via'' and ''ExtSSH''
-	parameters.  See the ''VNC_VIA_CMD'' environment variable above for more
-	details.
+	parameters.  See the [[#VNC_VIA_CMD][''VNC_VIA_CMD'' environment variable]]
+	above for more details.
