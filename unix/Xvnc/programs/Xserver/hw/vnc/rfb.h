@@ -664,7 +664,7 @@ extern void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len,
                         const char *data);
 extern void rfbInitFlowControl(rfbClientPtr cl);
 extern Bool rfbIsCongested(rfbClientPtr cl);
-extern void rfbSendEndOfCU(rfbClientPtr cl);
+extern Bool rfbSendEndOfCU(rfbClientPtr cl);
 extern Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
                          const char *data);
 extern Bool rfbSendRTTPing(rfbClientPtr cl);
