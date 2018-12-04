@@ -84,8 +84,8 @@ whereby, when pressing and releasing both the left and right Alt keys in the
 same order, a left Alt key press and an AltGr key release (or vice versa) were
 sent to the VNC server.
 
-13. Fixed a segfault in Xvnc that would occur, under rare circumstances, when a
-viewer disconnected.
+13. Fixed a segfault in the TurboVNC Server that occurred, under rare
+circumstances, when a viewer disconnected.
 
 
 2.2
