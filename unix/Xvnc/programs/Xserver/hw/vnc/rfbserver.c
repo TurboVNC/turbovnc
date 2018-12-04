@@ -1775,6 +1775,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   RegionRec _updateRegion, *updateRegion = &_updateRegion, updateCopyRegion,
     idRegion;
   Bool emptyUpdateRegion = FALSE;
+  rfbClientPtr cl2;
   int dx, dy;
   Bool sendCursorShape = FALSE;
   Bool sendCursorPos = FALSE;
@@ -2238,7 +2239,13 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   if (rfbInterframeDebug && !REGION_NIL(&idRegion))
     REGION_UNINIT(pScreen, &idRegion);
   if (emptyUpdateRegion) {
-    REGION_EMPTY(pScreen, updateRegion);
+    /* Make sure cl hasn't been freed */
+    for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+      if (cl2 == cl) {
+        REGION_EMPTY(pScreen, updateRegion);
+        break;
+      }
+    }
   } else if (!REGION_NIL(&_updateRegion)) {
     REGION_UNINIT(pScreen, &_updateRegion);
   }
