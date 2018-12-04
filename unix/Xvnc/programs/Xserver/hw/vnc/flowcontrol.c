@@ -200,8 +200,9 @@ Bool rfbSendRTTPing(rfbClientPtr cl)
 
   /* Let some data flow before we adjust the settings */
   if (!cl->congestionTimerRunning) {
-    TimerSet(cl->congestionTimer, 0, min(cl->baseRTT * 2, 100),
-             congestionCallback, cl);
+    cl->congestionTimer = TimerSet(cl->congestionTimer, 0,
+                                   min(cl->baseRTT * 2, 100),
+                                   congestionCallback, cl);
     cl->congestionTimerRunning = TRUE;
   }
   return TRUE;
