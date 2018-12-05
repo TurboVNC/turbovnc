@@ -137,6 +137,9 @@ authentication.
 configuration file stored in ~/.ssh/config (or the location specified in the
 `SSHConfig` parameter), if the file exists.  Parameters read from the OpenSSH
 configuration file will take precedence over any TurboVNC Viewer parameters.
+     - A new Java system property (`turbovnc.sshauth`) can be used to enable or
+disable SSH authentication methods, as well as to specify their preferred
+order.
 
 6. Fixed a race condition in the TurboVNC Server that, under rare
 circumstances, caused the TurboVNC Viewer to incorrectly assume that the server
@@ -175,6 +178,9 @@ the VNC server.  Fixed a similar issue in the Mac TurboVNC Viewer under Java 11
 whereby, when pressing and releasing both the left and right Alt keys in the
 same order, a left Alt key press and an AltGr key release (or vice versa) were
 sent to the VNC server.
+
+13. Fixed a segfault in the TurboVNC Server that occurred, under rare
+circumstances, when a viewer disconnected.
 
 
 2.2

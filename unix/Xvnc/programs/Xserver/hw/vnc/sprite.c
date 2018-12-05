@@ -961,8 +961,10 @@ rfbSpriteRestoreCursor(DeviceIntPtr pDev, ScreenPtr pScreen)
     rfbSpriteComputeSaved(pDev, pScreen);
     pCursor = pCursorInfo->pCursor;
 
-    if (rfbFB.cursorIsDrawn || !pCursor)
+    if (rfbFB.cursorIsDrawn || !pCursor) {
+        DamageDrawInternal(pScreen, FALSE);
         return;
+    }
 
     rfbFB.dontSendFramebufferUpdate = TRUE;
 

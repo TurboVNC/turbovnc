@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2018-11-26T19:17:02">
+<meta name="date" content="2018-12-05T13:34:48">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3046,6 +3046,35 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
         automatic desktop resizing behavior of previous versions of the TurboVNC 
         Viewer, thus forcing the server to use a single-screen layout even if it 
         supports multi-screen layouts.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.sshauth</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Preferred authentication methods for the built-in SSH client</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><code>publickey,keyboard-interactive,password</code></td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        This system property can be used to enable or disable particular SSH 
+        authentication methods, as well as to specify their preferred order.  
+        The same thing can be accomplished by using the 
+        <code>PreferredAuthentications</code> directive in the OpenSSH config 
+        file.
     </dd>
 </dl>
 

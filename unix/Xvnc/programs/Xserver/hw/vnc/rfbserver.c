@@ -621,7 +621,8 @@ void rfbProcessClientMessage(rfbClientPtr cl)
   if (cl2 == NULL) return;
 
   if (cl->syncFence) {
-    rfbSendFence(cl, cl->fenceFlags, cl->fenceDataLen, cl->fenceData);
+    if (!rfbSendFence(cl, cl->fenceFlags, cl->fenceDataLen, cl->fenceData))
+      return;
     cl->syncFence = FALSE;
   }
 
@@ -1123,11 +1124,15 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         cl->enableCursorPosUpdates = FALSE;
       }
 
-      if (cl->enableFence && firstFence)
-        rfbSendFence(cl, rfbFenceFlagRequest, 0, NULL);
+      if (cl->enableFence && firstFence) {
+        if (!rfbSendFence(cl, rfbFenceFlagRequest, 0, NULL))
+          return;
+      }
 
-      if (cl->enableCU && cl->enableFence && firstCU)
-        rfbSendEndOfCU(cl);
+      if (cl->enableCU && cl->enableFence && firstCU) {
+        if (!rfbSendEndOfCU(cl))
+          return;
+      }
 
       if (cl->enableGII && firstGII) {
         /* Send GII server version message to all clients */
@@ -1190,8 +1195,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           (!cl->deferredUpdateScheduled || rfbDeferUpdateTime == 0 ||
            gettime() - cl->deferredUpdateStart >=
            (double)rfbDeferUpdateTime)) {
-        rfbSendFramebufferUpdate(cl);
-        cl->deferredUpdateScheduled = FALSE;
+        if (rfbSendFramebufferUpdate(cl))
+          cl->deferredUpdateScheduled = FALSE;
       }
 
       REGION_UNINIT(pScreen, &tmpRegion);
@@ -1301,9 +1306,12 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       cl->continuousUpdates = msg.ecu.enable;
       if (cl->continuousUpdates) {
         REGION_EMPTY(pScreen, &cl->requestedRegion);
-        rfbSendFramebufferUpdate(cl);
-      } else
-        rfbSendEndOfCU(cl);
+        if (!rfbSendFramebufferUpdate(cl))
+          return;
+      } else {
+        if (!rfbSendEndOfCU(cl))
+          return;
+      }
 
       rfbLog("Continuous updates %s\n",
              cl->continuousUpdates ? "enabled" : "disabled");
@@ -1615,14 +1623,14 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                 if (eventSize > length) {
                   rfbLog("ERROR: Malformed GII event message\n");
                   rfbCloseClient(cl);
-                  break;
+                  return;
                 }
                 length -= eventSize;
                 if (b.deviceOrigin < 1 || b.deviceOrigin > cl->numDevices) {
                   rfbLog("ERROR: GII button event from non-existent device %d\n",
                          b.deviceOrigin);
                   rfbCloseClient(cl);
-                  break;
+                  return;
                 }
                 dev = &cl->devices[b.deviceOrigin - 1];
                 if ((eventType == rfbGIIButtonPress &&
@@ -1632,13 +1640,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                   rfbLog("ERROR: Device %d can't generate GII button events\n",
                          b.deviceOrigin);
                   rfbCloseClient(cl);
-                  break;
+                  return;
                 }
                 if (b.buttonNumber > dev->numButtons) {
                   rfbLog("ERROR: GII button %d event for device %d exceeds button count (%d)\n",
                          b.buttonNumber, b.deviceOrigin, dev->numButtons);
                   rfbCloseClient(cl);
-                  break;
+                  return;
                 }
 #ifdef GII_DEBUG
                 rfbLog("Device %d button %d %s\n", b.deviceOrigin,
@@ -1673,14 +1681,14 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                 if (eventSize > length) {
                   rfbLog("ERROR: Malformed GII event message\n");
                   rfbCloseClient(cl);
-                  break;
+                  return;
                 }
                 length -= eventSize;
                 if (v.deviceOrigin < 1 || v.deviceOrigin > cl->numDevices) {
                   rfbLog("ERROR: GII valuator event from non-existent device %d\n",
                          v.deviceOrigin);
                   rfbCloseClient(cl);
-                  break;
+                  return;
                 }
                 dev = &cl->devices[v.deviceOrigin - 1];
                 if ((eventType == rfbGIIValuatorRelative &&
@@ -1690,13 +1698,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                   rfbLog("ERROR: Device %d cannot generate GII valuator events\n",
                          v.deviceOrigin);
                   rfbCloseClient(cl);
-                  break;
+                  return;
                 }
                 if (v.first + v.count > dev->numValuators) {
                   rfbLog("ERROR: GII valuator event for device %d exceeds valuator count (%d)\n",
                          v.deviceOrigin, dev->numValuators);
                   rfbCloseClient(cl);
-                  break;
+                  return;
                 }
 #ifdef GII_DEBUG
                 rfbLog("Device %d Valuator %s first=%d count=%d:\n",
@@ -1766,6 +1774,8 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   rfbFramebufferUpdateMsg *fu = (rfbFramebufferUpdateMsg *)updateBuf;
   RegionRec _updateRegion, *updateRegion = &_updateRegion, updateCopyRegion,
     idRegion;
+  Bool emptyUpdateRegion = FALSE;
+  rfbClientPtr cl2;
   int dx, dy;
   Bool sendCursorShape = FALSE;
   Bool sendCursorPos = FALSE;
@@ -1935,6 +1945,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
 
   if (cl->compareFB) {
     updateRegion = &cl->ifRegion;
+    emptyUpdateRegion = TRUE;
     if (rfbInterframeDebug)
       REGION_INIT(pScreen, &idRegion, NullBox, 0);
     for (i = 0; i < REGION_NUM_RECTS(&_updateRegion); i++) {
@@ -2227,8 +2238,14 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
     REGION_UNINIT(pScreen, &updateCopyRegion);
   if (rfbInterframeDebug && !REGION_NIL(&idRegion))
     REGION_UNINIT(pScreen, &idRegion);
-  if (cl->compareFB) {
-    REGION_EMPTY(pScreen, updateRegion);
+  if (emptyUpdateRegion) {
+    /* Make sure cl hasn't been freed */
+    for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+      if (cl2 == cl) {
+        REGION_EMPTY(pScreen, updateRegion);
+        break;
+      }
+    }
   } else if (!REGION_NIL(&_updateRegion)) {
     REGION_UNINIT(pScreen, &_updateRegion);
   }
@@ -2561,6 +2578,7 @@ void rfbSendBell()
     if (WriteExact(cl, (char *)&b, sz_rfbBellMsg) < 0) {
       rfbLogPerror("rfbSendBell: write");
       rfbCloseClient(cl);
+      continue;
     }
     if (cl->captureFD >= 0)
       WriteCapture(cl->captureFD, (char *)&b, sz_rfbBellMsg);
@@ -2600,6 +2618,7 @@ void rfbSendServerCutText(char *str, int len)
     if (WriteExact(cl, str, len) < 0) {
       rfbLogPerror("rfbSendServerCutText: write");
       rfbCloseClient(cl);
+      continue;
     }
     if (cl->captureFD >= 0)
       WriteCapture(cl->captureFD, str, len);

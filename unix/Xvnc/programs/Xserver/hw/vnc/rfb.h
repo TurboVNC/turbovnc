@@ -465,11 +465,11 @@ typedef struct rfbClientRec {
  */
 
 #define SAFE_REGION_INIT(pscreen, preg, rect, size) {  \
-    if ( ( (rect)->x2 == (rect)->x1 ) || ( (rect)->y2 == (rect)->y1 ) ) {  \
-      REGION_INIT( (pscreen), (preg), NullBox, 0 );  \
-    } else {  \
-      REGION_INIT( (pscreen), (preg), (rect), (size) );  \
-    }  \
+  if ( ( (rect)->x2 == (rect)->x1 ) || ( (rect)->y2 == (rect)->y1 ) ) {  \
+    REGION_INIT( (pscreen), (preg), NullBox, 0 );  \
+  } else {  \
+    REGION_INIT( (pscreen), (preg), (rect), (size) );  \
+  }  \
 }
 
 /*
@@ -510,11 +510,11 @@ static const int rfbEndianTest = 1;
  */
 
 #define SetCapInfo(cap_ptr, code_sym, vendor) {  \
-    rfbCapabilityInfo *pcap;  \
-    pcap = (cap_ptr);  \
-    pcap->code = Swap32IfLE((CARD32)code_sym);  \
-    memcpy(pcap->vendorSignature, (vendor), sz_rfbCapabilityInfoVendor);  \
-    memcpy(pcap->nameSignature, sig_##code_sym, sz_rfbCapabilityInfoName);  \
+  rfbCapabilityInfo *pcap;  \
+  pcap = (cap_ptr);  \
+  pcap->code = Swap32IfLE((CARD32)code_sym);  \
+  memcpy(pcap->vendorSignature, (vendor), sz_rfbCapabilityInfoVendor);  \
+  memcpy(pcap->nameSignature, sig_##code_sym, sz_rfbCapabilityInfoName);  \
 }
 
 
@@ -686,7 +686,7 @@ extern void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len,
                         const char *data);
 extern void rfbInitFlowControl(rfbClientPtr cl);
 extern Bool rfbIsCongested(rfbClientPtr cl);
-extern void rfbSendEndOfCU(rfbClientPtr cl);
+extern Bool rfbSendEndOfCU(rfbClientPtr cl);
 extern Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
                          const char *data);
 extern Bool rfbSendRTTPing(rfbClientPtr cl);
