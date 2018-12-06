@@ -61,6 +61,7 @@ endif()
 
 add_library(vnc STATIC
 	auth.c
+	base64.c
 	cmap.c
 	corre.c
 	cursor.c
@@ -84,6 +85,8 @@ add_library(vnc STATIC
 	tight.c
 	translate.c
 	vncextinit.c
+	websockets.c
+	ws_decode.c
 	zlib.c
 	zrle.c
 	zrleoutstream.c

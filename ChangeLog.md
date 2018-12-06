@@ -129,6 +129,14 @@ device", "Authentication is required to access the PC/SC daemon",
 up when using the GNOME 3 window manager with the TurboVNC Server on various
 Linux distributions.
 
+20. The TurboVNC Server now supports the WebSocket protocol (more specifically,
+RFC 6455, AKA HyBi v13.)  The server will automatically detect WebSocket
+connections on the RFB port (5900 + {display number}) and tunnel the RFB
+protocol through the WebSocket protocol.  This allows browser-based VNC
+viewers, such as noVNC, to connect to the TurboVNC Server without using a
+proxy.  TLS encryption (WSS) is supported if an X.509 certificate is specified
+using the `-x509cert` and `-x509key` arguments to Xvnc.
+
 
 2.2.5
 =====

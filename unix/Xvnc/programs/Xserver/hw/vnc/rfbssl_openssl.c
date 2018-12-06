@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 2011 Gernot Tenchio
- *  Copyright (C) 2015, 2017, 2019 D. R. Commander
+ *  Copyright (C) 2015, 2017-2019 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -104,6 +104,7 @@ typedef const char *(*SSL_get_cipher_list_type) (const SSL *, int);
 typedef CONST SSL_CIPHER *(*SSL_get_current_cipher_type) (const SSL *);
 typedef int (*SSL_get_error_type) (const SSL *, int);
 typedef SSL *(*SSL_new_type) (SSL_CTX *);
+typedef int (*SSL_peek_type) (SSL *, void *, int);
 typedef int (*SSL_pending_type) (const SSL *);
 typedef int (*SSL_read_type) (SSL *, void *, int);
 typedef int (*SSL_set_fd_type) (SSL *, int);
@@ -130,6 +131,7 @@ struct rfbssl_functions {
   SSL_get_current_cipher_type SSL_get_current_cipher;
   SSL_get_error_type SSL_get_error;
   SSL_new_type SSL_new;
+  SSL_peek_type SSL_peek;
   SSL_pending_type SSL_pending;
   SSL_read_type SSL_read;
   SSL_set_fd_type SSL_set_fd;
@@ -157,8 +159,8 @@ static struct rfbssl_functions ssl = {
   NULL, SSL_library_init, SSL_load_error_strings,
 #endif
   SSL_free, SSL_get_cipher_list, SSL_get_current_cipher, SSL_get_error,
-  SSL_new, SSL_pending, SSL_read, SSL_set_fd, SSL_shutdown, SSL_write,
-  SSL_CIPHER_get_name, SSL_CTX_ctrl, SSL_CTX_free, SSL_CTX_new,
+  SSL_new, SSL_peek, SSL_pending, SSL_read, SSL_set_fd, SSL_shutdown,
+  SSL_write, SSL_CIPHER_get_name, SSL_CTX_ctrl, SSL_CTX_free, SSL_CTX_new,
   SSL_CTX_set_cipher_list,
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
   SSL_CTX_set_security_level,
@@ -244,6 +246,7 @@ static int loadFunctions(void)
     LOADSYM(ssl, SSL_get_current_cipher);
     LOADSYM(ssl, SSL_get_error);
     LOADSYM(ssl, SSL_new);
+    LOADSYM(ssl, SSL_peek);
     LOADSYM(ssl, SSL_pending);
     LOADSYM(ssl, SSL_read);
     LOADSYM(ssl, SSL_set_fd);
@@ -507,6 +510,25 @@ int rfbssl_write(rfbClientPtr cl, const char *buf, int bufsize)
 
   while ((ret = ssl.SSL_write(ctx->ssl, buf, bufsize)) <= 0) {
     if (ssl.SSL_get_error(ctx->ssl, ret) != SSL_ERROR_WANT_WRITE)
+      break;
+  }
+
+  return ret;
+}
+
+
+int rfbssl_peek(rfbClientPtr cl, char *buf, int bufsize)
+{
+  int ret;
+  struct rfbssl_ctx *ctx = (struct rfbssl_ctx *)cl->sslctx;
+
+#ifdef DLOPENSSL
+  if (loadFunctions() == -1)
+    return -1;
+#endif
+
+  while ((ret = ssl.SSL_peek(ctx->ssl, buf, bufsize)) <= 0) {
+    if (ssl.SSL_get_error(ctx->ssl, ret) != SSL_ERROR_WANT_READ)
       break;
   }
 

@@ -34,6 +34,7 @@ TurboVNC contains code from LibVNCServer, RealVNC, TigerVNC, and TightVNC,
 which are
 
     Copyright (C) 2011 Gernot Tenchio
+    Copyright (C) 2011 Joel Martin
     Copyright (C) 2010 TigerVNC Team
     Copyright (C) 2010 m-privacy GmbH
     Copyright (C) 2009-2016 Pierre Ossman for Cendio AB

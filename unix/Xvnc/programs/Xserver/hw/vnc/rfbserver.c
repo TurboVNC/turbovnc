@@ -4,6 +4,7 @@
 
 /*
  *  Copyright (C) 2009-2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -400,6 +401,16 @@ static rfbClientPtr rfbNewClient(int sock)
   rfbResetStats(cl);
 
   cl->zlibCompressLevel = 5;
+
+  /*
+   * Wait a few ms for the client to send WebSockets connection
+   * (TLS/SSL or plain)
+   */
+  if (!webSocketsCheck(cl)) {
+    /* Error reporting handled in webSocketsHandshake */
+    rfbCloseClient(cl);
+    return NULL;
+  }
 
   sprintf(pv, rfbProtocolVersionFormat, 3, 8);
 
