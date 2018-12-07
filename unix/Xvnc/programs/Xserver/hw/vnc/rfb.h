@@ -847,8 +847,6 @@ extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port, int id);
 extern void rfbClientConnectionGone(rfbClientPtr cl);
 extern void rfbProcessClientMessage(rfbClientPtr cl);
-extern void rfbNewUDPConnection(int sock);
-extern void rfbProcessUDPInput(int sock);
 extern Bool rfbSendFramebufferUpdate(rfbClientPtr cl);
 extern Bool rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w,
                                    int h);
@@ -885,15 +883,10 @@ extern Bool rfbSendRectEncodingRRE(rfbClientPtr cl, int x, int y, int w,
 
 extern int rfbMaxClientWait;
 
-extern int udpPort;
-extern int udpSock;
-extern Bool udpSockConnected;
-
 extern int rfbPort;
 extern int rfbListenSock;
 
 extern void rfbInitSockets(void);
-extern void rfbDisconnectUDPSock(void);
 extern void rfbCloseSock(int);
 extern void rfbCloseClient(rfbClientPtr cl);
 extern int rfbConnect(char *host, int port);
@@ -904,7 +897,6 @@ extern int ReadExact(rfbClientPtr cl, char *buf, int len);
 extern int SkipExact(rfbClientPtr cl, int len);
 extern int WriteExact(rfbClientPtr cl, char *buf, int len);
 extern int ListenOnTCPPort(int port);
-extern int ListenOnUDPPort(int port);
 extern int ConnectToTcpAddr(char *host, int port);
 
 extern const char *sockaddr_string(rfbSockAddr *addr, char *buf, int len);

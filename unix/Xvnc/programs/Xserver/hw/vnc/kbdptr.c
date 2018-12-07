@@ -1,5 +1,5 @@
 /*
- * kbdptr.c - deal with keyboard and pointer device over TCP & UDP.
+ * kbdptr.c - deal with keyboard and pointer device over TCP.
  *
  *
  */
@@ -95,13 +95,6 @@ void PtrDeviceOn(DeviceIntPtr pDev)
 void PtrDeviceControl(DevicePtr dev, PtrCtrl *ctrl)
 {
   ptrAcceleration = (char)ctrl->num;
-
-  if (udpSockConnected) {
-    if (write(udpSock, &ptrAcceleration, 1) <= 0) {
-      rfbLogPerror("PtrDeviceControl: UDP input: write");
-      rfbDisconnectUDPSock();
-    }
-  }
 }
 
 

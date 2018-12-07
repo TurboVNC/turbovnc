@@ -25,7 +25,7 @@ Xvnc \- the TurboVNC X server
 [\-geometry\ \fIwidth\fRx\fIheight\fR]
 [\-geometry\ \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]]
 [\-depth\ \fIdepth\fR] [\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR]
-[\-udpinputport\ \fIport\fR] [\-rfbport\ \fIport\fR] [\-rfbwait\ \fItime\fR]
+[\-rfbport\ \fIport\fR] [\-rfbwait\ \fItime\fR]
 [\-nocursor] [\-rfbauth\ \%\fIpasswd-file\fR]
 [\-securitytypes\ \%\fItype-list\fR] [\-x509cert\ \fIcert\fR]
 [\-x509key\ \fIkey\fR] [\-pamsession] [\-noreverse] [\-noclipboardsend]
@@ -81,9 +81,6 @@ format conversion prior to sending images to vncviewer.  This can slow
 performance.  The default pixel format, rgb888, is equivalent to BGRA on little
 endian systems or ARGB on big endian systems.  A pixel format of bgr888 is
 equivalent to RGBA on little endian systems or ABGR on big endian systems.
-.TP
-\fB\-udpinputport\fR \fIport\fR
-UDP port for keyboard/pointer data.
 .TP
 \fB\-rfbport\fR \fIport\fR
 TCP port that the server should use when listening for connections from normal

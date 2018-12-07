@@ -1,5 +1,5 @@
 /*
- * sockets.c - deal with TCP & UDP sockets.
+ * sockets.c - deal with TCP sockets.
  *
  * This code should be independent of any changes in the RFB protocol.  It just
  * deals with the X server scheduling stuff, calling rfbNewClientConnection and
@@ -73,11 +73,6 @@ int rfbMaxClientWait = 20000;   /* time (ms) after which we decide client has
 int rfbPort = 0;
 int rfbListenSock = -1;
 
-int udpPort = 0;
-int udpSock = -1;
-Bool udpSockConnected = FALSE;
-static rfbSockAddr udpRemoteAddr;
-
 extern unsigned long long sendBytes;
 
 static void rfbSockNotify(int fd, int ready, void *data);
@@ -108,8 +103,8 @@ const char *sockaddr_string(rfbSockAddr *addr, char *buf, int len)
 
 
 /*
- * rfbInitSockets sets up the TCP and UDP sockets to listen for RFB
- * connections.  It does nothing if called again.
+ * rfbInitSockets sets up the TCP sockets to listen for RFB connections.
+ * It does nothing if called again.
  */
 
 void rfbInitSockets()
@@ -150,16 +145,6 @@ void rfbInitSockets()
   }
 
   SetNotifyFd(rfbListenSock, rfbSockNotify, X_NOTIFY_READ, NULL);
-
-  if (udpPort != 0) {
-    rfbLog("rfbInitSockets: listening for input on UDP port %d\n", udpPort);
-
-    if ((udpSock = ListenOnUDPPort(udpPort)) < 0) {
-      rfbLogPerror("ListenOnUDPPort");
-      exit(1);
-    }
-    SetNotifyFd(udpSock, rfbSockNotify, X_NOTIFY_READ, NULL);
-  }
 }
 
 
@@ -168,7 +153,6 @@ static void rfbSockNotify(int fd, int ready, void *data)
   rfbSockAddr addr;
   socklen_t addrlen = sizeof(struct sockaddr_storage);
   char addrStr[INET6_ADDRSTRLEN];
-  char buf[6];
   const int one = 1;
   int sock;
   rfbClientPtr cl, nextCl;
@@ -212,36 +196,6 @@ static void rfbSockNotify(int fd, int ready, void *data)
     SetNotifyFd(sock, rfbSockNotify, X_NOTIFY_READ, NULL);
 
     rfbNewClientConnection(sock);
-    return;
-  }
-
-  if ((udpSock != -1) && fd == udpSock) {
-
-    if (recvfrom(udpSock, buf, 1, MSG_PEEK, &addr.u.sa, &addrlen) < 0) {
-
-      rfbLogPerror("rfbSockNotify: UDP: recvfrom");
-      rfbDisconnectUDPSock();
-
-    } else {
-
-      if (!udpSockConnected || (memcmp(&addr, &udpRemoteAddr, addrlen) != 0)) {
-        /* new remote end */
-        rfbLog("rfbSockNotify: UDP: got connection\n");
-
-        memcpy(&udpRemoteAddr, &addr, addrlen);
-        udpSockConnected = TRUE;
-
-        if (connect(udpSock, &addr.u.sa, addrlen) < 0) {
-          rfbLogPerror("rfbSockNotify: UDP: connect");
-          rfbDisconnectUDPSock();
-          return;
-        }
-
-        rfbNewUDPConnection(udpSock);
-      }
-
-      rfbProcessUDPInput(udpSock);
-    }
     return;
   }
 
@@ -305,12 +259,6 @@ void rfbUncorkSock(int sock)
     }
   }
 #endif
-}
-
-
-void rfbDisconnectUDPSock()
-{
-  udpSockConnected = FALSE;
 }
 
 
@@ -611,39 +559,5 @@ int ConnectToTcpAddr(char *host, int port)
   }
 
   freeaddrinfo(addr);
-  return sock;
-}
-
-
-int ListenOnUDPPort(int port)
-{
-  rfbSockAddr addr;
-  socklen_t addrlen;
-  int sock;
-  int one = 1;
-
-  memset(&addr, 0, sizeof(addr));
-  if (family == AF_INET6) {
-    addr.u.sin6.sin6_family = family;
-    addr.u.sin6.sin6_port = htons(port);
-    addr.u.sin6.sin6_addr = interface6;
-    addrlen = sizeof(struct sockaddr_in6);
-  } else {
-    family = AF_INET;
-    addr.u.sin.sin_family = family;
-    addr.u.sin.sin_port = htons(port);
-    addr.u.sin.sin_addr.s_addr = interface.s_addr;
-    addrlen = sizeof(struct sockaddr_in);
-  }
-
-  if ((sock = socket(family, SOCK_DGRAM, 0)) < 0)
-    return -1;
-
-  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
-                 sizeof(one)) < 0)
-    return -1;
-  if (bind(sock, &addr.u.sa, addrlen) < 0)
-    return -1;
-
   return sock;
 }

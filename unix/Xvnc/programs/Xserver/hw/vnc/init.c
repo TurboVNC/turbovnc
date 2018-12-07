@@ -360,12 +360,6 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     return 2;
   }
 
-  if (strcasecmp(argv[i], "-udpinputport") == 0) {  /* -udpinputport port */
-    if (i + 1 >= argc) UseMsg();
-    udpPort = atoi(argv[i + 1]);
-    return 2;
-  }
-
   /***** TurboVNC input options *****/
 
   if (strcasecmp(argv[i], "-compatiblekbd") == 0) {
@@ -1604,7 +1598,6 @@ void ddxUseMsg()
   ErrorF("-noreverse             disable reverse connections\n");
   ErrorF("-rfbport port          TCP port for RFB protocol\n");
   ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
-  ErrorF("-udpinputport port     UDP port for keyboard/pointer data\n");
 
   ErrorF("\nTurboVNC input options\n");
   ErrorF("======================\n");
