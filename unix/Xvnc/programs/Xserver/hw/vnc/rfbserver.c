@@ -2600,8 +2600,10 @@ void rfbSendServerCutText(char *str, int len)
       continue;
     if (cl->cutText)
       free(cl->cutText);
-    cl->cutText = strdup(str);
+    cl->cutText = rfbAlloc(len);
+    memcpy(cl->cutText, str, len);
     cl->cutTextLen = len;
+    memset(&sct, 0, sz_rfbServerCutTextMsg);
     sct.type = rfbServerCutText;
     sct.length = Swap32IfLE(len);
     if (WriteExact(cl, (char *)&sct, sz_rfbServerCutTextMsg) < 0) {
@@ -2618,7 +2620,7 @@ void rfbSendServerCutText(char *str, int len)
       WriteCapture(cl->captureFD, str, len);
   }
   LogMessage(X_DEBUG, "Sent server clipboard: '%.*s%s' (%d bytes)\n",
-             len <= 10 ? len : 20, str, len <= 20 ? "" : "...", len);
+             len <= 20 ? len : 20, str, len <= 20 ? "" : "...", len);
 }
 
 
@@ -2637,6 +2639,7 @@ Bool rfbSendDesktopSize(rfbClientPtr cl)
   if (!cl->enableExtDesktopSize && cl->result != rfbEDSResultSuccess)
     return TRUE;
 
+  memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
   fu.type = rfbFramebufferUpdate;
   fu.nRects = Swap16IfLE(1);
   if (WriteExact(cl, (char *)&fu, sz_rfbFramebufferUpdateMsg) < 0) {
