@@ -575,8 +575,6 @@ void rfbClientConnectionGone(rfbClientPtr cl)
 
 void rfbProcessClientMessage(rfbClientPtr cl)
 {
-  rfbClientPtr cl2;
-
   rfbCorkSock(cl->sock);
 
   if (cl->pendingSyncFence) {
@@ -613,12 +611,7 @@ void rfbProcessClientMessage(rfbClientPtr cl)
       rfbProcessClientNormalMessage(cl);
   }
 
-  /* Make sure cl hasn't been freed */
-  for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
-    if (cl2 == cl)
-      break;
-  }
-  if (cl2 == NULL) return;
+  CHECK_CLIENT_PTR(cl, return)
 
   if (cl->syncFence) {
     if (!rfbSendFence(cl, cl->fenceFlags, cl->fenceDataLen, cl->fenceData))
@@ -1934,8 +1927,9 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
     REGION_UNINIT(pScreen, &combinedUpdateRegion);
   }
 
-  if (updateRegion->extents.x2 > pScreen->width ||
-      updateRegion->extents.y2 > pScreen->height) {
+  if ((updateRegion->extents.x2 > pScreen->width ||
+       updateRegion->extents.y2 > pScreen->height) &&
+      REGION_NUM_RECTS(updateRegion) > 0) {
     rfbLog("WARNING: Framebuffer update at %d,%d with dimensions %dx%d has been clipped to the screen boundaries\n",
            updateRegion->extents.x1, updateRegion->extents.y1,
            updateRegion->extents.x2 - updateRegion->extents.x1,
@@ -2606,8 +2600,10 @@ void rfbSendServerCutText(char *str, int len)
       continue;
     if (cl->cutText)
       free(cl->cutText);
-    cl->cutText = strdup(str);
+    cl->cutText = rfbAlloc(len);
+    memcpy(cl->cutText, str, len);
     cl->cutTextLen = len;
+    memset(&sct, 0, sz_rfbServerCutTextMsg);
     sct.type = rfbServerCutText;
     sct.length = Swap32IfLE(len);
     if (WriteExact(cl, (char *)&sct, sz_rfbServerCutTextMsg) < 0) {
@@ -2624,7 +2620,7 @@ void rfbSendServerCutText(char *str, int len)
       WriteCapture(cl->captureFD, str, len);
   }
   LogMessage(X_DEBUG, "Sent server clipboard: '%.*s%s' (%d bytes)\n",
-             len <= 10 ? len : 20, str, len <= 20 ? "" : "...", len);
+             len <= 20 ? len : 20, str, len <= 20 ? "" : "...", len);
 }
 
 
@@ -2643,6 +2639,7 @@ Bool rfbSendDesktopSize(rfbClientPtr cl)
   if (!cl->enableExtDesktopSize && cl->result != rfbEDSResultSuccess)
     return TRUE;
 
+  memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
   fu.type = rfbFramebufferUpdate;
   fu.nRects = Swap16IfLE(1);
   if (WriteExact(cl, (char *)&fu, sz_rfbFramebufferUpdateMsg) < 0) {

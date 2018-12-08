@@ -473,6 +473,19 @@ typedef struct rfbClientRec {
 }
 
 /*
+ * This macro is used to test whether a particular client pointer has been
+ * freed and, if so, to take appropriate action.
+ */
+#define CHECK_CLIENT_PTR(cl, action) {  \
+  rfbClientPtr cl2;  \
+  for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {  \
+    if (cl2 == cl)  \
+      break;  \
+  }  \
+  if (cl2 == NULL) action;  \
+}
+
+/*
  * An rfbGCRec is where we store the pointers to the original GC funcs and ops
  * which we wrap (NULL means not wrapped).
  */
