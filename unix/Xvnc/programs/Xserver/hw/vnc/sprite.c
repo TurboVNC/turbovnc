@@ -6,7 +6,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012-2014, 2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2014, 2017-2018 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1040,14 +1040,15 @@ rfbSpriteComputeSaved(DeviceIntPtr pDev, ScreenPtr pScreen)
 static Bool
 rfbDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    rfbClientPtr        cl;
+    rfbClientPtr        cl, nextCl;
     rfbSpriteScreenPtr  pPriv;
     Bool                result;
 
     pPriv = GetSpriteScreen(pScreen);
     result = (*pPriv->DisplayCursor)(pDev, pScreen, pCursor);
 
-    for (cl = rfbClientHead; cl; cl = cl->next) {
+    for (cl = rfbClientHead; cl; cl = nextCl) {
+        nextCl = cl->next;
         if (cl->enableCursorShapeUpdates) {
             cl->cursorWasChanged = TRUE;
             if (!cl->deferredUpdateScheduled)

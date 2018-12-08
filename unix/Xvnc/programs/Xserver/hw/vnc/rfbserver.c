@@ -595,8 +595,6 @@ rfbClientConnectionGone(rfbClientPtr cl)
 void
 rfbProcessClientMessage(rfbClientPtr cl)
 {
-    rfbClientPtr cl2;
-
     rfbCorkSock(cl->sock);
 
     if (cl->pendingSyncFence) {
@@ -634,12 +632,7 @@ rfbProcessClientMessage(rfbClientPtr cl)
         rfbProcessClientNormalMessage(cl);
     }
 
-    /* Make sure cl hasn't been freed */
-    for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
-        if (cl2 == cl)
-            break;
-    }
-    if (cl2 == NULL) return;
+    CHECK_CLIENT_PTR(cl, return)
 
     if (cl->syncFence) {
       if (!rfbSendFence(cl, cl->fenceFlags, cl->fenceDataLen, cl->fenceData))

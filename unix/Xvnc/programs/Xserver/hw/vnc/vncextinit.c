@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011, 2013-2015, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011, 2013-2015, 2017-2018 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -287,8 +288,9 @@ static int ProcVncExtConnect(ClientPtr client)
   xVncExtConnectReply rep;
   rep.success = 0;
   if (stuff->strLen == 0) {
-    rfbClientPtr cl;
-    for (cl = rfbClientHead; cl; cl = cl->next) {
+    rfbClientPtr cl, nextCl;
+    for (cl = rfbClientHead; cl; cl = nextCl) {
+      nextCl = cl->next;
       if (cl->reverseConnection) {
         rfbCloseClient(cl);
         rep.success = 1;

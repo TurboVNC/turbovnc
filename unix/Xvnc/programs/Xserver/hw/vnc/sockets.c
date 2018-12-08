@@ -19,7 +19,7 @@
  */
 
 /*
- *  Copyright (C) 2012-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -196,7 +196,7 @@ rfbCheckFds()
     char buf[6];
     const int one = 1;
     int sock;
-    rfbClientPtr cl;
+    rfbClientPtr cl, nextCl;
     static Bool inetdInitDone = FALSE;
 
     if (!inetdInitDone && inetdSock != -1) {
@@ -301,26 +301,16 @@ rfbCheckFds()
             return;
     }
 
-    for (cl = rfbClientHead; cl; cl = cl->next) {
+    for (cl = rfbClientHead; cl; cl = nextCl) {
+        nextCl = cl->next;
         if (FD_ISSET(cl->sock, &fds) && FD_ISSET(cl->sock, &allFds)) {
-            rfbClientPtr cl2;
 #if USETLS
             do {
                 rfbProcessClientMessage(cl);
-                /* Make sure cl hasn't been freed */
-                for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
-                    if (cl2 == cl)
-                        break;
-                }
-                if (cl2 == NULL) return;
+                CHECK_CLIENT_PTR(cl, break)
             } while (cl->sslctx && rfbssl_pending(cl) > 0);
 #else
             rfbProcessClientMessage(cl);
-            for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
-                if (cl2 == cl)
-                    break;
-            }
-            if (cl2 == NULL) return;
 #endif
         }
     }

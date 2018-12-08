@@ -1,5 +1,5 @@
 /*
- *  Copyright (C)2013-2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2013-2018 D. R. Commander.  All Rights Reserved.
  *  Copyright 2012-2013 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
@@ -316,7 +316,7 @@ static Bool vncRRGetInfo(ScreenPtr pScreen, Rotation *rotations)
 static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
                             CARD32 mmWidth, CARD32 mmHeight)
 {
-  rfbClientPtr cl;
+  rfbClientPtr cl, nextCl;
   rfbScreenInfo newScreen = rfbScreen;
   PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
   int ret = rfbEDSResultSuccess;
@@ -382,9 +382,10 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
 
   rfbScreen.blockUpdates = FALSE;
 
-  for (cl = rfbClientHead; cl; cl = cl->next) {
+  for (cl = rfbClientHead; cl; cl = nextCl) {
     RegionRec tmpRegion;  BoxRec box;
     Bool reEnableInterframe = (cl->compareFB != NULL);
+    nextCl = cl->next;
     InterframeOff(cl);
     if (reEnableInterframe) {
       if (!InterframeOn(cl)) {
@@ -428,9 +429,11 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
 
 static Bool rfbSendDesktopSizeAll(rfbClientPtr reqClient, int reason)
 {
-  rfbClientPtr cl;
+  rfbClientPtr cl, nextCl;
+  Bool retval = TRUE;
 
-  for (cl = rfbClientHead; cl; cl = cl->next) {
+  for (cl = rfbClientHead; cl; cl = nextCl) {
+    nextCl = cl->next;
     cl->pendingDesktopResize = TRUE;
     if (cl != reqClient && reason == rfbEDSReasonClient)
       cl->reason = rfbEDSReasonOtherClient;
@@ -438,10 +441,10 @@ static Bool rfbSendDesktopSizeAll(rfbClientPtr reqClient, int reason)
       cl->reason = reason;
     cl->result = rfbEDSResultSuccess;
     if (!rfbSendFramebufferUpdate(cl))
-      return FALSE;
+      retval = FALSE;
   }
 
-  return TRUE;
+  return retval;
 }
 
 
@@ -449,9 +452,10 @@ static Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
                                CARD32 mmWidth, CARD32 mmHeight)
 {
   int result = vncScreenSetSize(pScreen, width, height, mmWidth, mmHeight);
-  if (result == rfbEDSResultSuccess)
-    return rfbSendDesktopSizeAll(NULL, rfbEDSReasonServer);
-  else
+  if (result == rfbEDSResultSuccess) {
+    rfbSendDesktopSizeAll(NULL, rfbEDSReasonServer);
+    return TRUE;
+  } else
     return FALSE;
 }
 
