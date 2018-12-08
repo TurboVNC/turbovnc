@@ -1918,8 +1918,9 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
         REGION_UNINIT(pScreen, &combinedUpdateRegion);
     }
 
-    if (updateRegion->extents.x2 > pScreen->width ||
-        updateRegion->extents.y2 > pScreen->height) {
+    if ((updateRegion->extents.x2 > pScreen->width ||
+         updateRegion->extents.y2 > pScreen->height) &&
+        REGION_NUM_RECTS(updateRegion) > 0) {
         rfbLog("WARNING: Framebuffer update at %d,%d with dimensions %dx%d has been clipped to the screen boundaries\n",
                updateRegion->extents.x1, updateRegion->extents.y1,
                updateRegion->extents.x2 - updateRegion->extents.x1,
