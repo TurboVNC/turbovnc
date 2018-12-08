@@ -284,6 +284,7 @@ Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
         return FALSE;
     }
 
+    memset(&f, 0, sz_rfbFenceMsg);
     f.type = rfbFence;
     f.flags = Swap32IfLE(flags);
     f.length = len;
