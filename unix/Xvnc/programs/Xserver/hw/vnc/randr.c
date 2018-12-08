@@ -398,7 +398,7 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
                             CARD32 mmWidth, CARD32 mmHeight)
 {
   rrScrPrivPtr rp = rrGetScrPriv(pScreen);
-  rfbClientPtr cl;
+  rfbClientPtr cl, nextCl;
   rfbFBInfo newFB = rfbFB;
   PixmapPtr rootPixmap = pScreen->GetScreenPixmap(pScreen);
   int ret = rfbEDSResultSuccess, i;
@@ -492,9 +492,10 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
 
   rfbFB.blockUpdates = FALSE;
 
-  for (cl = rfbClientHead; cl; cl = cl->next) {
+  for (cl = rfbClientHead; cl; cl = nextCl) {
     RegionRec tmpRegion;  BoxRec box;
     Bool reEnableInterframe = (cl->compareFB != NULL);
+    nextCl = cl->next;
     InterframeOff(cl);
     if (reEnableInterframe) {
       if (!InterframeOn(cl)) {
@@ -562,9 +563,11 @@ static void vncUpdateScreenLayout(struct xorg_list *list)
 
 static Bool rfbSendDesktopSizeAll(rfbClientPtr reqClient, int reason)
 {
-  rfbClientPtr cl;
+  rfbClientPtr cl, nextCl;
+  Bool retval = TRUE;
 
-  for (cl = rfbClientHead; cl; cl = cl->next) {
+  for (cl = rfbClientHead; cl; cl = nextCl) {
+    nextCl = cl->next;
     cl->pendingDesktopResize = TRUE;
     if (cl != reqClient && reason == rfbEDSReasonClient)
       cl->reason = rfbEDSReasonOtherClient;
@@ -572,10 +575,10 @@ static Bool rfbSendDesktopSizeAll(rfbClientPtr reqClient, int reason)
       cl->reason = reason;
     cl->result = rfbEDSResultSuccess;
     if (!rfbSendFramebufferUpdate(cl))
-      return FALSE;
+      retval = FALSE;
   }
 
-  return TRUE;
+  return retval;
 }
 
 
@@ -590,8 +593,9 @@ static Bool vncRRCrtcSet(ScreenPtr pScreen, RRCrtcPtr crtc, RRModePtr mode,
 
   vncUpdateScreenLayout(&rfbScreens);
   vncPrintScreenLayout(&rfbScreens);
+  rfbSendDesktopSizeAll(NULL, rfbEDSReasonServer);
 
-  return rfbSendDesktopSizeAll(NULL, rfbEDSReasonServer);
+  return TRUE;
 }
 
 
@@ -613,8 +617,9 @@ static Bool vncRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     return FALSE;
 
   vncUpdateScreenLayout(&rfbScreens);
+  rfbSendDesktopSizeAll(NULL, rfbEDSReasonServer);
 
-  return rfbSendDesktopSizeAll(NULL, rfbEDSReasonServer);
+  return TRUE;
 }
 
 
