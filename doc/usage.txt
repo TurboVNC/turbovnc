@@ -368,8 +368,9 @@ details.
 	only known Windows SSH implementations that support detaching the SSH process
 	once the tunnel has been established.  When using ''-via'' or ''-tunnel'', it
 	is recommended that you use the console version of the Windows TurboVNC
-	Viewer (cvncviewer.exe) rather than vncviewer.exe.  Otherwise, a new console
-	window will pop up and remain for the duration of the VNC connection.
+	Viewer ({file: cvncviewer.exe}) rather than {file: vncviewer.exe}.
+	Otherwise, a new console window will pop up and remain for the duration of
+	the VNC connection.
 
 *** Forcing SSH Connections
 #OPT: noList! plain!

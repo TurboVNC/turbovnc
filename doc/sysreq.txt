@@ -72,7 +72,7 @@
 				implementations work with the \
 				[[#via][''-via'' and ''-tunnel'' options]] in the native Windows \
 				TurboVNC Viewer, but other SSH implementations will work without the \
-				''-via'' and ''-tunnel'' options.  ''ssh.exe'' should be in the \
+				''-via'' and ''-tunnel'' options.  {file: ssh.exe} should be in the \
 				''PATH''.)} \
 			{item:[[http://www.java.com][Oracle Java]] 8 or \
 				[[https://icedtea.classpath.org/wiki/IcedTea-Web][IcedTea-Web]] is \
