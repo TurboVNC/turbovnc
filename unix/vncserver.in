@@ -928,9 +928,9 @@ sub Kill
       system("kill $pid");
       sleep(1);
       if (kill 0, $pid) {
-        warn "noVNC seems to be deadlocked.  Kill the process manually and then re-run\n";
-        warn "    ".$0." -kill ".$opt{'-kill'}."\n";
-        warn "to clean up the PID file.\n";
+        print "noVNC seems to be deadlocked.  Kill the process manually and then re-run\n";
+        print "    ".$0." -kill ".$opt{'-kill'}."\n";
+        print "to clean up the PID file.\n";
       } else {
         unlink $noVNCPIDFile;
       }
@@ -953,9 +953,9 @@ sub Kill
     system("kill $pid");
     sleep(1);
     if (kill 0, $pid) {
-      warn "Xvnc seems to be deadlocked.  Kill the process manually and then re-run\n";
-      warn "    ".$0." -kill ".$opt{'-kill'}."\n";
-      warn "to clean up the socket files.\n";
+      print "Xvnc seems to be deadlocked.  Kill the process manually and then re-run\n";
+      print "    ".$0." -kill ".$opt{'-kill'}."\n";
+      print "to clean up the socket files.\n";
       exit
     }
 
@@ -964,13 +964,13 @@ sub Kill
     $opt{'-kill'} =~ s/://;
 
     if (-e "/tmp/.X11-unix/X$opt{'-kill'}") {
-      warn "Xvnc did not appear to shut down cleanly.";
-      warn " Removing /tmp/.X11-unix/X$opt{'-kill'}\n";
+      print "Xvnc did not appear to shut down cleanly.";
+      print " Removing /tmp/.X11-unix/X$opt{'-kill'}\n";
       unlink "/tmp/.X11-unix/X$opt{'-kill'}";
     }
     if (-e "/tmp/.X$opt{'-kill'}-lock") {
-      warn "Xvnc did not appear to shut down cleanly.";
-      warn " Removing /tmp/.X$opt{'-kill'}-lock\n";
+      print "Xvnc did not appear to shut down cleanly.";
+      print " Removing /tmp/.X$opt{'-kill'}-lock\n";
       unlink "/tmp/.X$opt{'-kill'}-lock";
     }
   }

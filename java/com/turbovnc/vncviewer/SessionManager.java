@@ -297,7 +297,8 @@ public final class SessionManager extends Tunnel {
     br = new BufferedReader(new InputStreamReader(stderr));
     int nLines = 0;
     while ((result = br.readLine()) != null && nLines < 20) {
-      if (error == null) error = result;
+      if (error == null && result.length() > 0)
+        error = result;
       if (nLines == 0) {
         vlog.debug("===============================================================================");
         vlog.debug("SERVER WARNINGS/NOTIFICATIONS:");
