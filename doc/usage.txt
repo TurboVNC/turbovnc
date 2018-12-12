@@ -106,8 +106,8 @@ authentication (using ssh-agent or Pageant.)
 	path for the TurboVNC Server or additional arguments to pass to the TurboVNC
 	Server when starting new sessions (refer to
 	{ref prefix="Section " : TVNC_SERVERARGS}.)  These arguments can also be
-	specified on the server using the system-wide or per-user turbovncserver.conf
-	file.
+	specified on the server using the system-wide or per-user
+	{file: turbovncserver.conf} file.
 
 ** Manually Starting a TurboVNC Session
 

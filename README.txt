@@ -30,7 +30,7 @@ TurboVNC is
     Copyright (C) 2004-2008 Sun Microsystems, Inc.
     Copyright (C) 2004 Landmark Graphics Corporation
 
-TurboVNC contains code from libvncserver, RealVNC, TigerVNC, and TightVNC,
+TurboVNC contains code from LibVNCServer, RealVNC, TigerVNC, and TightVNC,
 which are
 
     Copyright (C) 2011 Gernot Tenchio
