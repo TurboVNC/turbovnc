@@ -22,7 +22,7 @@ drawn using CopyRect |
 | Summary | Combine framebuffer updates with more than __''{c}''__ rectangles \
 into a single rectangle spanning the bounding box of all of the constituent \
 rectangles |
-| Default Value | 100 |
+| Default Value | ''100'' |
 #OPT: hiCol=first
 
 	Description :: Applications can sometimes draw many thousands of points or
@@ -43,7 +43,7 @@ rectangles |
 | Summary | Set the block size for the interframe comparison engine (ICE) to \
 __''{s}''__ x __''{s}''__ pixels.  Setting __''{s}''__ to 0 causes the ICE to \
 compare full rectangles, as TurboVNC 1.2.x did. |
-| Default Value | 256 |
+| Default Value | ''256'' |
 #OPT: hiCol=first
 
 	Description :: If interframe comparison is enabled (see
