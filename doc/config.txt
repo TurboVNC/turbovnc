@@ -180,7 +180,7 @@ Java system properties are normally specified as command-line arguments to the
 Java executable.  For example:
 
 	#Pverb: <<---
-	java -Dmy.system.property=__{value}__ -jar MyClass.jar
+	java -Dmy.system.property=__value__ -jar MyClass.jar
 	---
 
 However, since TurboVNC hides the Java command line inside of its startup

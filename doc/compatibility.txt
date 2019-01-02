@@ -128,6 +128,6 @@ convert the pixels from bytes to ints in Java.)  Hextile uses very small tiles,
 which causes it to incur a large amount of computational overhead.  It
 compresses too poorly to perform well on slow links but uses too much CPU time
 to perform well on fast links.  ZRLE improves upon this, but it is still too
-computationally intense for fast networks.  The {file: vncviewer} man page
-in the TurboVNC Linux packages has some additional information about how
-Hextile, RRE, and ZRLE work.
+computationally intense for fast networks.  The ''vncviewer'' man page in the
+TurboVNC Linux packages has some additional information about how Hextile, RRE,
+and ZRLE work.
