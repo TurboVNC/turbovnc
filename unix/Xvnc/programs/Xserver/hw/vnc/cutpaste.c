@@ -5,7 +5,7 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2014, 2017-2018 D. R. Commander.  All Rights Reserved.
- *  Copyright 2016 Pierre Ossman for Cendio AB
+ *  Copyright 2016-2017 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -176,7 +176,7 @@ void vncClientCutText(const char *str, int len)
 
 
 int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
-                        Atom property, Window requestor, TimeStamp time)
+                        Atom property, Window requestor, CARD32 time)
 {
   Selection *pSel;
   WindowPtr pWin;
@@ -192,8 +192,9 @@ int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
   rc = dixLookupSelection(&pSel, selection, client, DixGetAttrAccess);
   if (rc != Success) return rc;
 
-  if (CompareTimeStamps(time, pSel->lastTimeChanged) != LATER)
-    return BadMatch;
+  /* We do not validate the time argument, because neither does
+     dix/selection.c, and some clients (e.g. Qt) rely on this lenient
+     behavior. */
 
   rc = dixLookupWindow(&pWin, requestor, client, DixSetAttrAccess);
   if (rc != Success) return rc;
@@ -238,7 +239,7 @@ int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
     return BadMatch;
 
   event.u.u.type = SelectionNotify;
-  event.u.selectionNotify.time = time.milliseconds;
+  event.u.selectionNotify.time = time;
   event.u.selectionNotify.requestor = requestor;
   event.u.selectionNotify.selection = selection;
   event.u.selectionNotify.target = target;
