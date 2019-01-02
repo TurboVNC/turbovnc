@@ -43,9 +43,14 @@ pre
 	margin-right: 25px;
 }
 
-pre em
+em
 {
 	color: rgb(0, 0, 204);
+}
+
+pre em
+{
+	color: rgb(192, 0, 192);
 }
 
 code
@@ -62,7 +67,7 @@ code
 
 em code, code em
 {
-	color: rgb(0, 0, 204);
+	color: rgb(192, 0, 192);
 }
 
 strong.filename
@@ -76,7 +81,7 @@ strong.filename
 
 strong.filename em
 {
-	color: rgb(0, 0, 204);
+	color: rgb(192, 0, 192);
 }
 
 tr

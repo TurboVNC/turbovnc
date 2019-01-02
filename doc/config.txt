@@ -109,7 +109,7 @@ Java system properties are normally specified as command-line arguments to the
 Java executable.  For example:
 
 	#Pverb: <<---
-	java -Dmy.system.property=__{value}__ -jar MyClass.jar
+	java -Dmy.system.property=__value__ -jar MyClass.jar
 	---
 
 However, since TurboVNC hides the Java command line inside of its startup
@@ -194,8 +194,8 @@ to start the TurboVNC Viewer without JPEG acceleration.
 #OPT: hiCol=first
 
 	Description :: The TurboVNC Session Manager will pass these command-line
-	arguments to the {file: vncserver} script when starting a new TurboVNC
-	session on the TurboVNC host.  This can be used, for instance, to enable
+	arguments to the ''vncserver'' script when starting a new TurboVNC session on
+	the TurboVNC host.  This can be used, for instance, to enable
 	[[#ALR][automatic lossless refresh]].
 
 {anchor: TVNC_SERVERDIR}

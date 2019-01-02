@@ -251,16 +251,16 @@ Refresh toolbar icon.
 ** Automatic Lossless Refresh
 {anchor: ALR}
 
-Passing an argument of {pcode: -alr __{timeout}__} to ''vncserver'' will
-enable the automatic lossless refresh (ALR) feature for the TurboVNC
-session.  ALR will monitor all of the VNC viewer connections, and if more than
-__''{timeout}''__ seconds have elapsed since the last framebuffer update was
-sent to a given viewer, then the TurboVNC Server will send to that viewer a
+Passing an argument of {pcode: -alr __timeout__} to ''vncserver'' will enable
+the automatic lossless refresh (ALR) feature for the TurboVNC session.  ALR
+will monitor all of the VNC viewer connections, and if more than
+__''timeout''__ seconds have elapsed since the last framebuffer update was sent
+to a given viewer, then the TurboVNC Server will send to that viewer a
 mathematically lossless copy of any "ALR-eligible" screen regions that have
 been affected by lossy compression.  You can also pass arguments of
 ''-alrqual'' and ''-alrsamp'' to ''vncserver'' to specify that automatic
-lossless refreshes should be sent using JPEG instead (see the {file: Xvnc} man
-page for details.)
+lossless refreshes should be sent using JPEG instead (see the ''Xvnc'' man page
+for details.)
 
 The ALR feature is designed mainly for use with interactive visualization
 applications.  The idea is that, on a low-bandwidth connection, low-quality

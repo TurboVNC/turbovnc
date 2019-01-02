@@ -182,6 +182,10 @@ sent to the VNC server.
 13. Fixed a segfault in the TurboVNC Server that occurred, under rare
 circumstances, when a viewer disconnected.
 
+14. Fixed an issue in the TurboVNC Server, introduced by 2.2 beta1[11], that
+prevented client-to-server clipboard transfers from working properly with some
+Qt applications.
+
 
 2.2
 ===

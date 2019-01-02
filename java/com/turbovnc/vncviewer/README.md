@@ -13,10 +13,10 @@ The TurboVNC Viewer can access libjpeg-turbo through JNI to accelerate JPEG
 decoding, which gives the viewer similar performance to a native viewer in
 most cases.  The libjpeg-turbo JNI library is bundled with the official
 TurboVNC packages and will automatically be loaded if the TurboVNC Viewer is
-launched using the __vncviewer__ script (Linux/Un*x), the __vncviewer.bat__
-script or the Start Menu shortcut (Windows), or the TurboVNC Viewer app (Mac).
-If the viewer is launched with Java Web Start using the recommended procedure
-or the TurboVNC Server's built-in web server (see below), then the appropriate
+launched using the `vncviewer` script (Linux/Un*x), the `vncviewer.bat` script
+or the Start Menu shortcut (Windows), or the TurboVNC Viewer app (Mac).  If the
+viewer is launched with Java Web Start using the recommended procedure or the
+TurboVNC Server's built-in web server (see below), then the appropriate
 libjpeg-turbo JNI library will be downloaded along with it, assuming that the
 client machine is running Windows, OS X, or Linux.  For other deployment
 scenarios, the TurboVNC Viewer will find the libjpeg-turbo JNI library if

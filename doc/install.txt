@@ -53,12 +53,12 @@ commands:
 
 	RPM-based systems :: {:}
 	#Pverb <<---
-	mkdir ~/turbovnc{nl}cd ~/turbovnc{nl}rpm2cpio __{full path of turbovnc*.rpm}__ | cpio -idv
+	mkdir ~/turbovnc{nl}cd ~/turbovnc{nl}rpm2cpio __full/path/of/turbovnc*.rpm__ | cpio -idv
 	---
 
 	Debian-based systems :: {:}
 	#Pverb <<---
-	dpkg-deb --extract __{full path of turbovnc*.deb}__ ~/turbovnc
+	dpkg-deb --extract __full/path/of/turbovnc*.deb__ ~/turbovnc
 	---
 
 Add {file: ~/turbovnc} to any paths specified in this document.

@@ -1,0 +1,22 @@
+* Formatting
+
+	- ''Terminal commands, arguments, and output''
+	- ''Executable filenames''
+	- ''Function names''
+	- ''Environment variable names and values''
+	- ''User and group names''
+	- ''Configuration file parameters and values''
+	- ''X11 and GLX extension names''
+	- __''Variable parts of any of the above''__
+{:}
+	- {file: Non-executable filenames}
+	- {file: Directory names}
+	- {file: Application shortcuts}
+	- {file: __Variable parts of any of the above__}
+{:}
+#Verb: <<---
+Terminal command sequences
+---
+#Pverb: <<---
+__Variable parts of terminal command sequences__
+---

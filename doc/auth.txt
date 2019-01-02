@@ -39,9 +39,9 @@ uses the following terminology when referring to its security extensions:
 		same.)
 
 	One-Time Password (OTP) Authentication :: {:}
-		Using the {file: vncpasswd} program, a unique password is generated "on the
+		Using the ''vncpasswd'' program, a unique password is generated "on the
 		fly" for the TurboVNC session, and the password is printed on the command
-		line (see the man page for {file: vncpasswd} for more details.)  The user
+		line (see the man page for ''vncpasswd'' for more details.)  The user
 		enters this password in the VNC viewer, and the VNC viewer sends the
 		password to the server as if it were a VNC password.  However, once the OTP
 		has been used to authenticate a viewer, the OTP is forgotten and cannot be
@@ -134,7 +134,7 @@ The default behavior of the TurboVNC Server is for all security types except
 authentication to be preferred over PAM User/Password authentication.  However,
 the system administrator can disable one or more of the security types or set
 the preferred order of the security types by editing the TurboVNC security
-configuration file.  See the {file: Xvnc} man page for more details.
+configuration file.  See the ''Xvnc'' man page for more details.
 
 If the VNC server allows multiple security types, then the VNC viewer's default
 security type will be determined by the server's preferred security type.  In
@@ -142,7 +142,7 @@ this case, the user can override the default by passing command-line arguments
 to ''vncviewer''.  If the VNC server prefers a security type that supports
 Standard VNC authentication, then the user can force the use of
 Unix Login/Plain authentication by passing an argument of
-{pcode: -user __{user_name}__} to ''vncviewer'' when connecting to the TurboVNC
+{pcode: -user __user-name__} to ''vncviewer'' when connecting to the TurboVNC
 session.  Similarly, if the VNC server prefers a security type that supports
 Unix Login/Plain authentication, then the user can force the use of Standard
 VNC authentication by passing an argument of ''-nounixlogin'' to ''vncviewer''.
@@ -154,7 +154,7 @@ available security types using the ''SecurityTypes'', ''User'', or
 If the system administrator has not restricted any of the server security types
 on a system-wide basis, then the user can choose to disable some or all of them
 for a particular TurboVNC session by using the ''-SecurityTypes'' command-line
-argument when starting the session.  See the {file: Xvnc} man page for more
+argument when starting the session.  See the ''Xvnc'' man page for more
 details.
 
 ** Further Reading
