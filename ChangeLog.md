@@ -93,6 +93,15 @@ will no longer automatically be created if it doesn't exist.
 `$serverArgs` can be used to accomplish the same thing.
 
 
+2.2.2
+=====
+
+1. Fixed an error ("javax.net.ssl.SSLHandshakeException: No appropriate
+protocol (protocol is disabled or cipher suites are inappropriate)") that
+occurred when attempting to use any of the TLS* security types with the Java
+TurboVNC Viewer running under Java 7u211, 8u201, 11.0.2, or later.
+
+
 2.2.1
 =====
 
