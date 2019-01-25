@@ -83,6 +83,11 @@ sent to the VNC server.
 18. Fixed a segfault in the TurboVNC Server that occurred, under rare
 circumstances, when a viewer disconnected.
 
+19. Fixed an error ("javax.net.ssl.SSLHandshakeException: No appropriate
+protocol (protocol is disabled or cipher suites are inappropriate)") that
+occurred when attempting to use any of the TLS* security types with the Java
+TurboVNC Viewer running under Java 7u211, 8u201, 11.0.2, or later.
+
 
 2.1.2
 =====

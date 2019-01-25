@@ -4,7 +4,7 @@
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012, 2015 Brian P. Hinz
- * Copyright (C) 2012, 2015-2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2017, 2019 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,14 @@ public class CSecurityTLS extends CSecurity {
 
     if (!globalInitDone) {
       try {
+        // Java 7u211, 8u201, and 11.0.2 now disable anonymous cipher suites in
+        // the java.security file, so we have to do this in order to re-enable
+        // them.
+        String disabledAlgorithms =
+          java.security.Security.getProperty("jdk.tls.disabledAlgorithms");
+        disabledAlgorithms = disabledAlgorithms.replaceAll("anon,", "");
+        java.security.Security.setProperty("jdk.tls.disabledAlgorithms",
+                                           disabledAlgorithms);
         ctx = SSLContext.getInstance("TLS");
       } catch (NoSuchAlgorithmException e) {
         throw new ErrorException(e.getMessage());
