@@ -96,10 +96,18 @@ will no longer automatically be created if it doesn't exist.
 2.2.2
 =====
 
+### Significant changes relative to 2.2.1:
+
 1. Fixed an error ("javax.net.ssl.SSLHandshakeException: No appropriate
 protocol (protocol is disabled or cipher suites are inappropriate)") that
 occurred when attempting to use any of the TLS* security types with the Java
 TurboVNC Viewer running under Java 7u211, 8u201, 11.0.2, or later.
+
+2. Fixed an issue in the Java TurboVNC Viewer's built-in SSH client whereby
+values for the `ServerAliveInterval` keyword in the OpenSSH config file were
+interpreted as milliseconds rather than seconds.  This caused the SSH
+connection to fail if the value specified for `ServerAliveInterval` was too
+low.
 
 
 2.2.1
