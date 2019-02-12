@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2019 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2002-2003 Constantin Kaplinsky.  All Rights Reserved.
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
   char *passwd2_ptr;
   char yesno[2];
   char passwdDir[256];
-  char passwdFile[256];
+  char passwdFile[263];
   int i;
 
   sprintf(passwdDir, "%s/.vnc", getenv_safe("HOME", 240));
