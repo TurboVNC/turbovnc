@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010, 2013 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2013, 2019 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ int vncEncryptAndStorePasswd2(char *passwd, char *passwdViewOnly, char *fname)
 
   strncpy((char *)encryptedPasswd, passwd, 8);
   if (passwdViewOnly != NULL)
-    strncpy((char *)encryptedPasswd + 8, passwdViewOnly, 8);
+    memcpy((char *)encryptedPasswd + 8, passwdViewOnly, 8);
 
   /* Do encryption in place - this way, we overwrite our copies of
      plain-text passwords. */

@@ -66,10 +66,9 @@ URL:       @PKGURL@
 #-->Source0: http://prdownloads.sourceforge.net/@CMAKE_PROJECT_NAME_LC@/@CMAKE_PROJECT_NAME_LC@-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
-Requires:  bash >= 2.0
-Prereq:    /sbin/chkconfig %{_sysconfdir}/init.d
+Requires:  bash >= 2.0 /sbin/chkconfig %{_sysconfdir}/init.d
 BuildRoot: %{_blddir}/%{name}-%{version}-root
-BuildPrereq: /usr/bin/perl libjpeg-turbo
+BuildRequires: /usr/bin/perl libjpeg-turbo
 
 %description
 Virtual Network Computing (VNC) is a remote display system that allows you to
