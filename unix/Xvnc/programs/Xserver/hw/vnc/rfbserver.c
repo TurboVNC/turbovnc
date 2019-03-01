@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2019 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -80,6 +80,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 Bool rfbSendDesktopSize(rfbClientPtr cl);
+Bool rfbSendExtDesktopSize(rfbClientPtr cl);
 
 
 /*
@@ -1217,7 +1218,7 @@ rfbProcessClientNormalMessage(rfbClientPtr cl)
             REGION_SUBTRACT(pScreen, &cl->copyRegion, &cl->copyRegion,
                             &tmpRegion);
             REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion, &tmpRegion);
-            cl->pendingDesktopResize = TRUE;
+            cl->pendingExtDesktopResize = TRUE;
         }
 
         if (FB_UPDATE_PENDING(cl) &&
@@ -1786,6 +1787,11 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
        congestion window. */
 
     rfbCorkSock(cl->sock);
+
+    if (cl->pendingExtDesktopResize) {
+        if (!rfbSendExtDesktopSize(cl)) return FALSE;
+        cl->pendingExtDesktopResize = FALSE;
+    }
 
     if (cl->pendingDesktopResize) {
         if (!rfbSendDesktopSize(cl)) return FALSE;
@@ -2634,10 +2640,7 @@ rfbSendDesktopSize(rfbClientPtr cl)
     rfbFramebufferUpdateRectHeader rh;
     rfbFramebufferUpdateMsg fu;
 
-    if (!cl->enableDesktopSize && !cl->enableExtDesktopSize)
-        return TRUE;
-    /* Error messages can only be sent with the EDS extension */
-    if (!cl->enableExtDesktopSize && cl->result != rfbEDSResultSuccess)
+    if (!cl->enableDesktopSize)
         return TRUE;
 
     memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
@@ -2649,43 +2652,75 @@ rfbSendDesktopSize(rfbClientPtr cl)
         return FALSE;
     }
 
-    if (cl->enableExtDesktopSize) {
-        /* Send the ExtendedDesktopSize message, if the client supports it.
-           The TigerVNC Viewer, in particular, requires this, or it won't
-           enable remote desktop resize. */
-        rh.encoding = Swap32IfLE(rfbEncodingExtendedDesktopSize);
-        rh.r.x = Swap16IfLE(cl->reason);
-        rh.r.y = Swap16IfLE(cl->result);
-    } else {
-        rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
-        rh.r.x = rh.r.y = 0;
-    }
+    rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
+    rh.r.x = rh.r.y = 0;
     rh.r.w = Swap16IfLE(rfbScreen.width);
     rh.r.h = Swap16IfLE(rfbScreen.height);
-    if (WriteExact(cl, (char *)&rh,
-        sz_rfbFramebufferUpdateRectHeader) < 0) {
+    if (WriteExact(cl, (char *)&rh, sz_rfbFramebufferUpdateRectHeader) < 0) {
         rfbLogPerror("rfbSendDesktopSize: write");
         rfbCloseClient(cl);
         return FALSE;
     }
 
-    if (cl->enableExtDesktopSize) {
-        char numScreens[4] = {1, 0, 0, 0};
-        rfbScreenDesc screen;
-        if (WriteExact(cl, numScreens, 4) < 0) {
-            rfbLogPerror("rfbSendDesktopSize: write");
-            rfbCloseClient(cl);
-            return FALSE;
-        }
-        screen.id = screen.flags = 0;
-        screen.x = screen.y = 0;
-        screen.w = rh.r.w;
-        screen.h = rh.r.h;
-        if (WriteExact(cl, (char *)&screen, sz_rfbScreenDesc) < 0) {
-            rfbLogPerror("rfbSendDesktopSize: write");
-            rfbCloseClient(cl);
-            return FALSE;
-        }
+    return TRUE;
+}
+
+
+/*
+ * rfbSendExtDesktopSize sends an extended desktop size message to a specific
+ * client.
+ */
+
+Bool
+rfbSendExtDesktopSize(rfbClientPtr cl)
+{
+    rfbFramebufferUpdateRectHeader rh;
+    rfbFramebufferUpdateMsg fu;
+    char numScreens[4] = {1, 0, 0, 0};
+    rfbScreenDesc screen;
+
+    if (!cl->enableExtDesktopSize)
+        return TRUE;
+    /* Error messages can only be sent with the EDS extension */
+    if (!cl->enableExtDesktopSize && cl->result != rfbEDSResultSuccess)
+        return TRUE;
+
+    memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
+    fu.type = rfbFramebufferUpdate;
+    fu.nRects = Swap16IfLE(1);
+    if (WriteExact(cl, (char *)&fu, sz_rfbFramebufferUpdateMsg) < 0) {
+        rfbLogPerror("rfbSendExtDesktopSize: write");
+        rfbCloseClient(cl);
+        return FALSE;
+    }
+
+    /* Send the ExtendedDesktopSize message, if the client supports it.
+       The TigerVNC Viewer, in particular, requires this, or it won't
+       enable remote desktop resize. */
+    rh.encoding = Swap32IfLE(rfbEncodingExtendedDesktopSize);
+    rh.r.x = Swap16IfLE(cl->reason);
+    rh.r.y = Swap16IfLE(cl->result);
+    rh.r.w = Swap16IfLE(rfbScreen.width);
+    rh.r.h = Swap16IfLE(rfbScreen.height);
+    if (WriteExact(cl, (char *)&rh, sz_rfbFramebufferUpdateRectHeader) < 0) {
+        rfbLogPerror("rfbSendExtDesktopSize: write");
+        rfbCloseClient(cl);
+        return FALSE;
+    }
+
+    if (WriteExact(cl, numScreens, 4) < 0) {
+        rfbLogPerror("rfbSendExtDesktopSize: write");
+        rfbCloseClient(cl);
+        return FALSE;
+    }
+    screen.id = screen.flags = 0;
+    screen.x = screen.y = 0;
+    screen.w = rh.r.w;
+    screen.h = rh.r.h;
+    if (WriteExact(cl, (char *)&screen, sz_rfbScreenDesc) < 0) {
+        rfbLogPerror("rfbSendExtDesktopSize: write");
+        rfbCloseClient(cl);
+        return FALSE;
     }
 
     return TRUE;
