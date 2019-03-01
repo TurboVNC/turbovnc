@@ -14,6 +14,9 @@ interpreted as milliseconds rather than seconds.  This caused the SSH
 connection to fail if the value specified for `ServerAliveInterval` was too
 low.
 
+3. Fixed a regression introduced by 2.2.1[6] that caused constant flickering in
+the UltraVNC Viewer when it was used with the TurboVNC Server.
+
 
 2.2.1
 =====

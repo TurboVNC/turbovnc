@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2019 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -427,7 +427,7 @@ typedef struct rfbClientRec {
   Bool congestionTimerRunning;
   struct timeval lastWrite;
 
-  Bool pendingDesktopResize;
+  Bool pendingDesktopResize, pendingExtDesktopResize;
   int reason, result;
 
 #if USETLS

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C)2013-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2013-2019 D. R. Commander.  All Rights Reserved.
  *  Copyright 2012-2015 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
@@ -568,7 +568,7 @@ static Bool rfbSendDesktopSizeAll(rfbClientPtr reqClient, int reason)
 
   for (cl = rfbClientHead; cl; cl = nextCl) {
     nextCl = cl->next;
-    cl->pendingDesktopResize = TRUE;
+    cl->pendingDesktopResize = cl->pendingExtDesktopResize = TRUE;
     if (cl != reqClient && reason == rfbEDSReasonClient)
       cl->reason = rfbEDSReasonOtherClient;
     else
