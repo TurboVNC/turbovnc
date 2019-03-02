@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2019 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -78,6 +78,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 Bool rfbSendDesktopSize(rfbClientPtr cl);
+Bool rfbSendExtDesktopSize(rfbClientPtr cl);
 
 
 /*
@@ -1181,7 +1182,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                      &tmpRegion);
         REGION_SUBTRACT(pScreen, &cl->copyRegion, &cl->copyRegion, &tmpRegion);
         REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion, &tmpRegion);
-        cl->pendingDesktopResize = TRUE;
+        cl->pendingExtDesktopResize = TRUE;
       }
 
       if (FB_UPDATE_PENDING(cl) &&
@@ -1401,7 +1402,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
          an error in ResizeDesktop(). */
       for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
         if (cl2 == cl) {
-          cl2->pendingDesktopResize = TRUE;
+          cl2->pendingExtDesktopResize = TRUE;
           cl2->reason = rfbEDSReasonClient;
           cl2->result = result;
           rfbSendFramebufferUpdate(cl2);
@@ -1805,6 +1806,11 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
 
   rfbCorkSock(cl->sock);
 
+  if (cl->pendingExtDesktopResize) {
+    if (!rfbSendExtDesktopSize(cl)) return FALSE;
+    cl->pendingExtDesktopResize = FALSE;
+  }
+
   if (cl->pendingDesktopResize) {
     if (!rfbSendDesktopSize(cl)) return FALSE;
     cl->pendingDesktopResize = FALSE;
@@ -1938,6 +1944,11 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   }
 
   if (cl->compareFB) {
+    if ((cl->ifRegion.extents.x2 > pScreen->width ||
+         cl->ifRegion.extents.y2 > pScreen->height) &&
+        REGION_NUM_RECTS(&cl->ifRegion) > 0)
+      ClipToScreen(pScreen, &cl->ifRegion);
+
     updateRegion = &cl->ifRegion;
     emptyUpdateRegion = TRUE;
     if (rfbInterframeDebug)
@@ -2633,10 +2644,7 @@ Bool rfbSendDesktopSize(rfbClientPtr cl)
   rfbFramebufferUpdateRectHeader rh;
   rfbFramebufferUpdateMsg fu;
 
-  if (!cl->enableDesktopSize && !cl->enableExtDesktopSize)
-    return TRUE;
-  /* Error messages can only be sent with the EDS extension */
-  if (!cl->enableExtDesktopSize && cl->result != rfbEDSResultSuccess)
+  if (!cl->enableDesktopSize)
     return TRUE;
 
   memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
@@ -2648,17 +2656,8 @@ Bool rfbSendDesktopSize(rfbClientPtr cl)
     return FALSE;
   }
 
-  if (cl->enableExtDesktopSize) {
-    /* Send the ExtendedDesktopSize message, if the client supports it.
-       The TigerVNC Viewer, in particular, requires this, or it won't
-       enable remote desktop resize. */
-    rh.encoding = Swap32IfLE(rfbEncodingExtendedDesktopSize);
-    rh.r.x = Swap16IfLE(cl->reason);
-    rh.r.y = Swap16IfLE(cl->result);
-  } else {
-    rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
-    rh.r.x = rh.r.y = 0;
-  }
+  rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
+  rh.r.x = rh.r.y = 0;
   rh.r.w = Swap16IfLE(rfbFB.width);
   rh.r.h = Swap16IfLE(rfbFB.height);
   if (WriteExact(cl, (char *)&rh, sz_rfbFramebufferUpdateRectHeader) < 0) {
@@ -2667,55 +2666,96 @@ Bool rfbSendDesktopSize(rfbClientPtr cl)
     return FALSE;
   }
 
-  if (cl->enableExtDesktopSize) {
-    CARD8 numScreens[4] = { 0, 0, 0, 0 };
-    rfbScreenInfo *iter;
-    BOOL fakeScreen = FALSE;
+  return TRUE;
+}
 
-    xorg_list_for_each_entry(iter, &rfbScreens, entry) {
-      if (iter->output->crtc && iter->output->crtc->mode)
-        numScreens[0]++;
-    }
-    if (numScreens[0] < 1) {
-      numScreens[0] = 1;
-      fakeScreen = TRUE;
-    }
 
-    if (WriteExact(cl, (char *)numScreens, 4) < 0) {
-      rfbLogPerror("rfbSendDesktopSize: write");
+/*
+ * rfbSendExtDesktopSize sends an extended desktop size message to a specific
+ * client.
+ */
+
+Bool rfbSendExtDesktopSize(rfbClientPtr cl)
+{
+  rfbFramebufferUpdateRectHeader rh;
+  rfbFramebufferUpdateMsg fu;
+
+  if (!cl->enableExtDesktopSize)
+    return TRUE;
+  /* Error messages can only be sent with the EDS extension */
+  if (!cl->enableExtDesktopSize && cl->result != rfbEDSResultSuccess)
+    return TRUE;
+
+  memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
+  fu.type = rfbFramebufferUpdate;
+  fu.nRects = Swap16IfLE(1);
+  if (WriteExact(cl, (char *)&fu, sz_rfbFramebufferUpdateMsg) < 0) {
+    rfbLogPerror("rfbSendExtDesktopSize: write");
+    rfbCloseClient(cl);
+    return FALSE;
+  }
+
+  /* Send the ExtendedDesktopSize message, if the client supports it.
+     The TigerVNC Viewer, in particular, requires this, or it won't
+     enable remote desktop resize. */
+  rh.encoding = Swap32IfLE(rfbEncodingExtendedDesktopSize);
+  rh.r.x = Swap16IfLE(cl->reason);
+  rh.r.y = Swap16IfLE(cl->result);
+  rh.r.w = Swap16IfLE(rfbFB.width);
+  rh.r.h = Swap16IfLE(rfbFB.height);
+  if (WriteExact(cl, (char *)&rh, sz_rfbFramebufferUpdateRectHeader) < 0) {
+    rfbLogPerror("rfbSendExtDesktopSize: write");
+    rfbCloseClient(cl);
+    return FALSE;
+  }
+
+  CARD8 numScreens[4] = { 0, 0, 0, 0 };
+  rfbScreenInfo *iter;
+  BOOL fakeScreen = FALSE;
+
+  xorg_list_for_each_entry(iter, &rfbScreens, entry) {
+    if (iter->output->crtc && iter->output->crtc->mode)
+      numScreens[0]++;
+  }
+  if (numScreens[0] < 1) {
+    numScreens[0] = 1;
+    fakeScreen = TRUE;
+  }
+
+  if (WriteExact(cl, (char *)numScreens, 4) < 0) {
+    rfbLogPerror("rfbSendExtDesktopSize: write");
+    rfbCloseClient(cl);
+    return FALSE;
+  }
+
+  if (fakeScreen) {
+    rfbScreenInfo screen = *xorg_list_first_entry(&rfbScreens, rfbScreenInfo,
+                                                  entry);
+    screen.s.id = Swap32IfLE(screen.s.id);
+    screen.s.x = screen.s.y = 0;
+    screen.s.w = Swap16IfLE(rfbFB.width);
+    screen.s.h = Swap16IfLE(rfbFB.height);
+    screen.s.flags = Swap32IfLE(screen.s.flags);
+    if (WriteExact(cl, (char *)&screen.s, sz_rfbScreenDesc) < 0) {
+      rfbLogPerror("rfbSendExtDesktopSize: write");
       rfbCloseClient(cl);
       return FALSE;
     }
+  } else {
+    xorg_list_for_each_entry(iter, &rfbScreens, entry) {
+      rfbScreenInfo screen = *iter;
 
-    if (fakeScreen) {
-      rfbScreenInfo screen = *xorg_list_first_entry(&rfbScreens, rfbScreenInfo,
-                                                    entry);
-      screen.s.id = Swap32IfLE(screen.s.id);
-      screen.s.x = screen.s.y = 0;
-      screen.s.w = Swap16IfLE(rfbFB.width);
-      screen.s.h = Swap16IfLE(rfbFB.height);
-      screen.s.flags = Swap32IfLE(screen.s.flags);
-      if (WriteExact(cl, (char *)&screen.s, sz_rfbScreenDesc) < 0) {
-        rfbLogPerror("rfbSendDesktopSize: write");
-        rfbCloseClient(cl);
-        return FALSE;
-      }
-    } else {
-      xorg_list_for_each_entry(iter, &rfbScreens, entry) {
-        rfbScreenInfo screen = *iter;
-
-        if (screen.output->crtc && screen.output->crtc->mode) {
-          screen.s.id = Swap32IfLE(screen.s.id);
-          screen.s.x = Swap16IfLE(screen.s.x);
-          screen.s.y = Swap16IfLE(screen.s.y);
-          screen.s.w = Swap16IfLE(screen.s.w);
-          screen.s.h = Swap16IfLE(screen.s.h);
-          screen.s.flags = Swap32IfLE(screen.s.flags);
-          if (WriteExact(cl, (char *)&screen.s, sz_rfbScreenDesc) < 0) {
-            rfbLogPerror("rfbSendDesktopSize: write");
-            rfbCloseClient(cl);
-            return FALSE;
-          }
+      if (screen.output->crtc && screen.output->crtc->mode) {
+        screen.s.id = Swap32IfLE(screen.s.id);
+        screen.s.x = Swap16IfLE(screen.s.x);
+        screen.s.y = Swap16IfLE(screen.s.y);
+        screen.s.w = Swap16IfLE(screen.s.w);
+        screen.s.h = Swap16IfLE(screen.s.h);
+        screen.s.flags = Swap32IfLE(screen.s.flags);
+        if (WriteExact(cl, (char *)&screen.s, sz_rfbScreenDesc) < 0) {
+          rfbLogPerror("rfbSendExtDesktopSize: write");
+          rfbCloseClient(cl);
+          return FALSE;
         }
       }
     }
