@@ -1928,6 +1928,11 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
     }
 
     if (cl->compareFB) {
+        if ((cl->ifRegion.extents.x2 > pScreen->width ||
+             cl->ifRegion.extents.y2 > pScreen->height) &&
+            REGION_NUM_RECTS(&cl->ifRegion) > 0)
+            ClipToScreen(pScreen, &cl->ifRegion);
+
         updateRegion = &cl->ifRegion;
         emptyUpdateRegion = TRUE;
         if (rfbInterframeDebug)

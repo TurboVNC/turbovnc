@@ -88,6 +88,11 @@ protocol (protocol is disabled or cipher suites are inappropriate)") that
 occurred when attempting to use any of the TLS* security types with the Java
 TurboVNC Viewer running under Java 7u211, 8u201, 11.0.2, or later.
 
+20. Fixed an issue in the TurboVNC Server whereby, if interframe comparison was
+enabled and the remote desktop was resized to a smaller size, the server would
+sometimes send a framebuffer update that exceeded the new desktop dimensions.
+This crashed the UltraVNC Viewer.
+
 
 2.1.2
 =====
