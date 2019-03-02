@@ -17,6 +17,11 @@ low.
 3. Fixed a regression introduced by 2.2.1[6] that caused constant flickering in
 the UltraVNC Viewer when it was used with the TurboVNC Server.
 
+4. Fixed an issue in the TurboVNC Server whereby, if interframe comparison was
+enabled and the remote desktop was resized to a smaller size, the server would
+sometimes send a framebuffer update that exceeded the new desktop dimensions.
+This crashed the UltraVNC Viewer.
+
 
 2.2.1
 =====
