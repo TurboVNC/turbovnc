@@ -19,7 +19,11 @@ if [ "$ARCH" = "x86_64" ]; then
 fi
 
 if [ "$JAVA_HOME" != "" ]; then
-	JAWT_PATH=$JAVA_HOME/lib/$ARCH
+	if [ -f "$JAVA_HOME/lib/$ARCH/libjawt.so" ]; then
+		JAWT_PATH=$JAVA_HOME/lib/$ARCH
+	elif [ -f "$JAVA_HOME/lib/libjawt.so" ]; then
+		JAWT_PATH=$JAVA_HOME/lib
+	fi
 fi
 
 if [ "$JAWT_PATH" = "" ]; then
