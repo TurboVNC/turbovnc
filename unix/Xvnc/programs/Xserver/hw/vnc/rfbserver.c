@@ -1996,9 +1996,10 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
             REGION_INIT(pScreen, &tmpRegion, &box, 1);
             if (!different && rfbInterframeDebug &&
                 !RECT_IN_REGION(pScreen, &cl->ifRegion, &box)) {
-              REGION_UNION(pScreen, &idRegion, &idRegion, &tmpRegion);
               int pad = pitch - compareWidth * ps;
               char *dstPtr = &dst[row * pitch + col * ps];
+
+              REGION_UNION(pScreen, &idRegion, &idRegion, &tmpRegion);
               rows = compareHeight;
 
               while (rows--) {
@@ -2679,6 +2680,9 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
 {
   rfbFramebufferUpdateRectHeader rh;
   rfbFramebufferUpdateMsg fu;
+  CARD8 numScreens[4] = { 0, 0, 0, 0 };
+  rfbScreenInfo *iter;
+  BOOL fakeScreen = FALSE;
 
   if (!cl->enableExtDesktopSize)
     return TRUE;
@@ -2708,10 +2712,6 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
     rfbCloseClient(cl);
     return FALSE;
   }
-
-  CARD8 numScreens[4] = { 0, 0, 0, 0 };
-  rfbScreenInfo *iter;
-  BOOL fakeScreen = FALSE;
 
   xorg_list_for_each_entry(iter, &rfbScreens, entry) {
     if (iter->output->crtc && iter->output->crtc->mode)
