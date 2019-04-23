@@ -664,12 +664,13 @@ static int numFormats = 6;
 void InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 {
   int i;
-
-  initOutputCalled = TRUE;
 #ifdef GLXEXT
   const ExtensionModule glxExtension =
     { GlxExtensionInit, "GLX", &noGlxExtension };
+#endif
 
+  initOutputCalled = TRUE;
+#ifdef GLXEXT
   if (serverGeneration == 1)
     LoadExtensionList(&glxExtension, 1, TRUE);
 #endif
