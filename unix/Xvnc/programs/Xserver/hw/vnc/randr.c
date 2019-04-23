@@ -118,10 +118,7 @@ static Res vncRRResolutions[] = {
   {  480,  320 },  /* HVGA     3:2 (iPhone and other mobile devices) */
 };
 
-extern int monitorResolution;
 extern char *rfbAllocateFramebufferMemory(rfbFBInfoPtr);
-extern Bool InterframeOn(rfbClientPtr cl);
-extern void InterframeOff(rfbClientPtr);
 
 static Bool vncCrtcSet(RRCrtcPtr crtc, RRModePtr mode, int x, int y,
                        Rotation rotation, int numOutputs,

@@ -112,7 +112,7 @@ const char *sockaddr_string(rfbSockAddr *addr, char *buf, int len)
  * connections.  It does nothing if called again.
  */
 
-void rfbInitSockets()
+void rfbInitSockets(void)
 {
   static Bool done = FALSE;
 
@@ -308,7 +308,7 @@ void rfbUncorkSock(int sock)
 }
 
 
-void rfbDisconnectUDPSock()
+void rfbDisconnectUDPSock(void)
 {
   udpSockConnected = FALSE;
 }

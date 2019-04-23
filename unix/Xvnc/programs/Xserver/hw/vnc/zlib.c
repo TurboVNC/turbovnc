@@ -7,7 +7,7 @@
 /*
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012, 2014, 2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2014, 2017, 2019 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,7 +55,8 @@ static int zlibAfterBufLen;
  *                              rectangle encoding.
  */
 
-Bool rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w, int h)
+static Bool rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
+                                       int h)
 {
   rfbFramebufferUpdateRectHeader rect;
   rfbZlibHeader hdr;

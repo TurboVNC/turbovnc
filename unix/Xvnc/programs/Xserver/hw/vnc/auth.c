@@ -94,9 +94,6 @@ static void AuthNoneRspFunc(rfbClientPtr cl)
 
 #include <pwd.h>
 
-Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
-                        const char *pwd, const char **emsg);
-
 static char *pamServiceName = AUTH_DEFAULT_PAM_SERVICE_NAME;
 
 typedef struct UserList {
@@ -674,7 +671,7 @@ static void ReadConfigFile(void)
 }
 
 
-void rfbAuthInit()
+void rfbAuthInit(void)
 {
   SecTypeData *s;
   int nSelected = 0;

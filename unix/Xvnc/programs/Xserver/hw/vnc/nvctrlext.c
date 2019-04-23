@@ -42,6 +42,8 @@ extern int rfbPort;
 static int ProcNVCTRLDispatch(ClientPtr client);
 static int SProcNVCTRLDispatch(ClientPtr client);
 
+void nvCtrlExtensionInit(void);
+
 static unsigned long nvCtrlGeneration = 0;
 
 char *nvCtrlDisplay = NULL;

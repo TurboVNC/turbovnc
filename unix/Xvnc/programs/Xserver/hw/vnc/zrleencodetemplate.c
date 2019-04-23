@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2002 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2003 Sun Microsystems, Inc.
- * Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2017, 2019 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -218,10 +218,12 @@ void ZRLE_ENCODE_TILE(PIXEL_T* data, int w, int h, zrleOutStream* os,
 
   if (useRle) {
 
-    PIXEL_T* ptr = data;
-    PIXEL_T* end = ptr + w * h;
     PIXEL_T* runStart;
     PIXEL_T pix;
+
+    ptr = data;
+    end = ptr + w * h;
+
     while (ptr < end) {
       int len;
       runStart = ptr;
@@ -256,7 +258,8 @@ void ZRLE_ENCODE_TILE(PIXEL_T* data, int w, int h, zrleOutStream* os,
 
     if (usePalette) {
       int bppp;
-      PIXEL_T* ptr = data;
+
+      ptr = data;
 
       /* packed pixels */
 
@@ -298,7 +301,6 @@ void ZRLE_ENCODE_TILE(PIXEL_T* data, int w, int h, zrleOutStream* os,
 #endif
       {
 #ifdef CPIXEL
-        PIXEL_T *ptr;
         for (ptr = data; ptr < data+w*h; ptr++)
           zrleOutStreamWRITE_PIXEL(os, *ptr);
 #else

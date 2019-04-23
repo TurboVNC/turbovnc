@@ -11,8 +11,8 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010-2012, 2014, 2016-2017 D. R. Commander.
- *                                           All Rights Reserved.
+ *  Copyright (C) 2010-2012, 2014, 2016-2017, 2019 D. R. Commander.
+ *                                                 All Rights Reserved.
  *  Copyright (C) 2012-2013, 2016 Pierre Ossman for Cendio AB.
  *                                All Rights Reserved.
  *
@@ -118,14 +118,14 @@ static inline Bool is_visible(DrawablePtr drawable)
    client */
 
 #define ADD_TO_MODIFIED_REGION(pScreen, reg) {  \
-  rfbClientPtr cl;  \
-  BoxRec *box = REGION_EXTENTS(pScreen, reg);  \
-  if ((box->x2 - box->x1) * (box->y2 - box->y1) != 0)  \
-    for (cl = rfbClientHead; cl; cl = cl->next) {  \
+  rfbClientPtr clTemp;  \
+  BoxRec *boxTemp = REGION_EXTENTS(pScreen, reg);  \
+  if ((boxTemp->x2 - boxTemp->x1) * (boxTemp->y2 - boxTemp->y1) != 0)  \
+    for (clTemp = rfbClientHead; clTemp; clTemp = clTemp->next) {  \
       if (!prfb->dontSendFramebufferUpdate ||  \
-          !cl->enableCursorShapeUpdates)  \
-        REGION_UNION((pScreen), &cl->modifiedRegion, &cl->modifiedRegion,  \
-                     reg);  \
+          !clTemp->enableCursorShapeUpdates)  \
+        REGION_UNION((pScreen), &clTemp->modifiedRegion,  \
+                     &clTemp->modifiedRegion, reg);  \
     }  \
 }
 
@@ -133,14 +133,14 @@ static inline Bool is_visible(DrawablePtr drawable)
    client */
 
 #define ADD_TO_ALR_REGION(pScreen, reg) {  \
-  rfbClientPtr cl;  \
-  BoxRec *box = REGION_EXTENTS(pScreen, reg);  \
-  if ((box->x2 - box->x1) * (box->y2 - box->y1) != 0)  \
-    for (cl = rfbClientHead; cl; cl = cl->next) {  \
+  rfbClientPtr clTemp;  \
+  BoxRec *boxTemp = REGION_EXTENTS(pScreen, reg);  \
+  if ((boxTemp->x2 - boxTemp->x1) * (boxTemp->y2 - boxTemp->y1) != 0)  \
+    for (clTemp = rfbClientHead; clTemp; clTemp = clTemp->next) {  \
       if (!prfb->dontSendFramebufferUpdate ||  \
-          !cl->enableCursorShapeUpdates)  \
-        REGION_UNION((pScreen), &cl->alrEligibleRegion,  \
-                     &cl->alrEligibleRegion, reg);  \
+          !clTemp->enableCursorShapeUpdates)  \
+        REGION_UNION((pScreen), &clTemp->alrEligibleRegion,  \
+                     &clTemp->alrEligibleRegion, reg);  \
     }  \
 }
 
@@ -150,11 +150,11 @@ static inline Bool is_visible(DrawablePtr drawable)
 
 #define SCHEDULE_FB_UPDATE(pScreen, prfb)  \
   if (!prfb->dontSendFramebufferUpdate && !prfb->blockUpdates) {  \
-    rfbClientPtr cl, nextCl;  \
-    for (cl = rfbClientHead; cl; cl = nextCl) {  \
-      nextCl = cl->next;  \
-      if (!cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl))  \
-        rfbScheduleDeferredUpdate(cl);  \
+    rfbClientPtr clTemp, nextCl;  \
+    for (clTemp = rfbClientHead; clTemp; clTemp = nextCl) {  \
+      nextCl = clTemp->next;  \
+      if (!clTemp->deferredUpdateScheduled && FB_UPDATE_PENDING(clTemp))  \
+        rfbScheduleDeferredUpdate(clTemp);  \
     }  \
   }
 
@@ -166,36 +166,65 @@ static void rfbCopyRegion(ScreenPtr pScreen, rfbClientPtr cl,
 
 /* GC funcs */
 
-static void rfbValidateGC(GCPtr, unsigned long changes, DrawablePtr);
-static void rfbChangeGC(GCPtr, unsigned long mask);
-static void rfbCopyGC(GCPtr src, unsigned long mask, GCPtr dst);
-static void rfbDestroyGC(GCPtr);
-static void rfbChangeClip(GCPtr, int type, pointer pValue, int nrects);
-static void rfbDestroyClip(GCPtr);
-static void rfbCopyClip(GCPtr dst, GCPtr src);
+static void rfbValidateGC(GCPtr pGC, unsigned long changes,
+                          DrawablePtr pDrawable);
+static void rfbChangeGC(GCPtr pGC, unsigned long mask);
+static void rfbCopyGC(GCPtr pGCSrc, unsigned long mask, GCPtr pGCDst);
+static void rfbDestroyGC(GCPtr pGC);
+static void rfbChangeClip(GCPtr pGC, int type, pointer pvalue, int nrects);
+static void rfbDestroyClip(GCPtr pGC);
+static void rfbCopyClip(GCPtr pgcDst, GCPtr pgcSrc);
 
 /* GC ops */
 
-static void rfbFillSpans();
-static void rfbSetSpans();
-static void rfbPutImage();
-static RegionPtr rfbCopyArea();
-static RegionPtr rfbCopyPlane();
-static void rfbPolyPoint();
-static void rfbPolylines();
-static void rfbPolySegment();
-static void rfbPolyRectangle();
-static void rfbPolyArc();
-static void rfbFillPolygon();
-static void rfbPolyFillRect();
-static void rfbPolyFillArc();
-static int rfbPolyText8();
-static int rfbPolyText16();
-static void rfbImageText8();
-static void rfbImageText16();
-static void rfbImageGlyphBlt();
-static void rfbPolyGlyphBlt();
-static void rfbPushPixels();
+static void rfbFillSpans(DrawablePtr pDrawable, GCPtr pGC, int nInit,
+                         DDXPointPtr pptInit, int *pwidthInit, int fSorted);
+static void rfbSetSpans(DrawablePtr pDrawable, GCPtr pGC, char *psrc,
+                        register DDXPointPtr ppt, int *pwidth, int nspans,
+                        int fSorted);
+static void rfbPutImage(DrawablePtr pDrawable, GCPtr pGC, int depth, int x,
+                        int y, int w, int h, int leftPad, int format,
+                        char *pBits);
+static RegionPtr rfbCopyArea(DrawablePtr pSrc, DrawablePtr pDst, GCPtr pGC,
+                             int srcx, int srcy, int w, int h, int dstx,
+                             int dsty);
+static RegionPtr rfbCopyPlane(DrawablePtr pSrc, DrawablePtr pDst,
+                              register GCPtr pGC, int srcx, int srcy, int w,
+                              int h, int dstx, int dsty, unsigned long plane);
+static void rfbPolyPoint(DrawablePtr pDrawable, GCPtr pGC, int mode, int npt,
+                         xPoint *pts);
+static void rfbPolylines(DrawablePtr pDrawable, GCPtr pGC, int mode, int npt,
+                         DDXPointPtr ppts);
+static void rfbPolySegment(DrawablePtr pDrawable, GCPtr pGC, int nseg,
+                           xSegment *segs);
+static void rfbPolyRectangle(DrawablePtr pDrawable, GCPtr pGC, int nrects,
+                             xRectangle *rects);
+static void rfbPolyArc(DrawablePtr pDrawable, register GCPtr pGC, int narcs,
+                       xArc *arcs);
+static void rfbFillPolygon(register DrawablePtr pDrawable, register GCPtr pGC,
+                           int shape, int mode, int count, DDXPointPtr pts);
+static void rfbPolyFillRect(DrawablePtr pDrawable, GCPtr pGC, int nrects,
+                            xRectangle *rects);
+static void rfbPolyFillArc(DrawablePtr pDrawable, GCPtr pGC, int narcs,
+                           xArc *arcs);
+static void GetTextBoundingBox(DrawablePtr pDrawable, FontPtr font, int x,
+                               int y, int n, BoxPtr pbox);
+static int rfbPolyText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y,
+                        int count, char *chars);
+static int rfbPolyText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y,
+                         int count, unsigned short *chars);
+static void rfbImageText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y,
+                          int count, char *chars);
+static void rfbImageText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y,
+                           int count, unsigned short *chars);
+static void rfbImageGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y,
+                             unsigned int nglyph, CharInfoPtr *ppci,
+                             pointer pglyphBase);
+static void rfbPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y,
+                            unsigned int nglyph, CharInfoPtr *ppci,
+                            pointer pglyphBase);
+static void rfbPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr pDrawable,
+                          int w, int h, int x, int y);
 
 
 static const GCFuncs rfbGCFuncs = {

@@ -65,7 +65,7 @@ int otpClear;
 char *displayname;
 
 
-int DoOTP()
+static int DoOTP(void)
 {
   unsigned int full;
   unsigned int view = 0;
@@ -157,7 +157,7 @@ char *user;
 
 #define MAXUSERLEN  63
 
-int DoUserList()
+static int DoUserList(void)
 {
   Display *dpy;
   Atom prop;

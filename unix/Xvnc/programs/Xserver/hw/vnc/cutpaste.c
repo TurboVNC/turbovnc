@@ -96,7 +96,6 @@ SOFTWARE.
 
 /* #define CLIPBOARD_DEBUG */
 
-extern Selection *CurrentSelections;
 extern int NumCurrentSelections;
 
 Bool rfbSyncPrimary = TRUE;
