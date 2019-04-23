@@ -1980,10 +1980,11 @@ rfbSendFramebufferUpdate(rfbClientPtr cl)
                         REGION_INIT(pScreen, &tmpRegion, &box, 1);
                         if (!different && rfbInterframeDebug &&
                             !RECT_IN_REGION(pScreen, &cl->ifRegion, &box)) {
-                            REGION_UNION(pScreen, &idRegion, &idRegion,
-                                         &tmpRegion);
                             int pad = pitch - compareWidth * ps;
                             char *dstPtr = &dst[row * pitch + col * ps];
+
+                            REGION_UNION(pScreen, &idRegion, &idRegion,
+                                         &tmpRegion);
                             rows = compareHeight;
 
                             while (rows--) {

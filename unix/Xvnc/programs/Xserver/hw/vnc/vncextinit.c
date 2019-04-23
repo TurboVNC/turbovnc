@@ -279,13 +279,14 @@ static int SProcVncExtSelectInput(ClientPtr client)
 static int ProcVncExtConnect(ClientPtr client)
 {
   char *str;
+  xVncExtConnectReply rep;
+
   REQUEST(xVncExtConnectReq);
   REQUEST_FIXED_SIZE(xVncExtConnectReq, stuff->strLen);
   str = (char *)rfbAlloc(stuff->strLen + 1);
   strncpy(str, (char*)&stuff[1], stuff->strLen);
   str[stuff->strLen] = 0;
 
-  xVncExtConnectReply rep;
   rep.success = 0;
   if (stuff->strLen == 0) {
     rfbClientPtr cl, nextCl;

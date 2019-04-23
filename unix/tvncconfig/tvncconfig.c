@@ -87,8 +87,10 @@ void FatalError(const char *format, ...)
 
 void debugprint(const char *format, ...)
 {
-  if (!debug) return;
   va_list arglist;
+
+  if (!debug) return;
+
   va_start(arglist, format);
   vfprintf(stderr, format, arglist);
   fprintf(stderr, "\n");
@@ -288,8 +290,9 @@ void handleEvent(XEvent* ev)
       selectionLen[0] = selectionLen[1] = 0;
     }
   } else if (ev->type == vncExtEventBase + VncExtSelectionChangeNotify) {
-    debugprint("selection change event");
     XVncExtSelectionChangeEvent* selEv = (XVncExtSelectionChangeEvent*)ev;
+
+    debugprint("selection change event");
     if (selEv->selection == xaCLIPBOARD ||
         (selEv->selection == XA_PRIMARY && syncPrimary)) {
       if (selectionOwner(selEv->selection) != win)
@@ -316,7 +319,9 @@ void usage(char *progName)
 
 int main(int argc, char** argv)
 {
-  int i;
+  int i, n;
+  fd_set rfds;
+
   for (i = 1; i < argc; i++) {
     if (!strncasecmp(argv[i], "-di", 3)) {
       if (i < argc - 1) displayname = argv[++i];
@@ -392,10 +397,9 @@ int main(int argc, char** argv)
     }
 
     // Wait for X events, VNC traffic, or the next timer expiration
-    fd_set rfds;
     FD_ZERO(&rfds);
     FD_SET(ConnectionNumber(dpy), &rfds);
-    int n = select(FD_SETSIZE, &rfds, 0, 0, tvp);
+    n = select(FD_SETSIZE, &rfds, 0, 0, tvp);
     if (n < 0)
       FatalError("select(): %s", strerror(errno));
   }
