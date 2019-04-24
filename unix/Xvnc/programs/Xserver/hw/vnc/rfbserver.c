@@ -345,16 +345,9 @@ static rfbClientPtr rfbNewClient(int sock)
   char *env = NULL;
   int np = sysconf(_SC_NPROCESSORS_CONF);
 
-  if (rfbClientHead == NULL) {
+  if (rfbClientHead == NULL)
     /* no other clients - make sure we don't think any keys are pressed */
     KbdReleaseAllKeys();
-  } else {
-    rfbLog("  (other clients");
-    for (cl = rfbClientHead; cl; cl = cl->next) {
-      fprintf(stderr, " %s", cl->host);
-    }
-    fprintf(stderr, ")\n");
-  }
 
   cl = (rfbClientPtr)rfbAlloc0(sizeof(rfbClientRec));
 

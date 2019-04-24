@@ -19,7 +19,7 @@
  */
 
 /*
- *  Copyright (C) 2012-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2019 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -72,6 +72,7 @@ int rfbMaxClientWait = 20000;   /* time (ms) after which we decide client has
 
 int rfbPort = 0;
 int rfbListenSock = -1;
+int rfbMaxClientConnections = DEFAULT_MAX_CONNECTIONS;
 
 int udpPort = 0;
 int udpSock = -1;
@@ -170,7 +171,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
   char addrStr[INET6_ADDRSTRLEN];
   char buf[6];
   const int one = 1;
-  int sock;
+  int sock, numClientConnections = 0;
   rfbClientPtr cl, nextCl;
 
   if (rfbListenSock != -1 && fd == rfbListenSock) {
@@ -205,6 +206,32 @@ static void rfbSockNotify(int fd, int ready, void *data)
       return;
     }
 #endif
+
+    for (cl = rfbClientHead; cl; cl = cl->next)
+      numClientConnections++;
+    if (numClientConnections >= rfbMaxClientConnections) {
+      rfbClientRec tempCl;
+      rfbProtocolVersionMsg pv;
+      const char *errMsg = "Connection limit reached";
+      CARD32 secType = rfbSecTypeInvalid;
+      CARD32 errMsgLen = strlen(errMsg), errMsgLenWire = Swap32IfLE(errMsgLen);
+
+      memset(&tempCl, 0, sizeof(rfbClientRec));
+      tempCl.sock = sock;
+      getpeername(sock, &addr.u.sa, &addrlen);
+      tempCl.host = strdup(sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
+      rfbLog("Limit of %d connections reached-- rejecting %s\n",
+             rfbMaxClientConnections, tempCl.host);
+
+      sprintf(pv, rfbProtocolVersionFormat, 3, 3);
+      if (WriteExact(&tempCl, pv, sz_rfbProtocolVersionMsg) >= 0 &&
+          WriteExact(&tempCl, (char *)&secType, sizeof(CARD32)) >= 0 &&
+          WriteExact(&tempCl, (char *)&errMsgLenWire, sizeof(CARD32)) >= 0 &&
+          WriteExact(&tempCl, (char *)errMsg, errMsgLen) >= 0) { }
+
+      close(sock);
+      return;
+    }
 
     rfbLog("Got connection from client %s\n",
            sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));

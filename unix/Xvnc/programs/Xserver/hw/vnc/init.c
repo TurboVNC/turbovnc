@@ -317,6 +317,15 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     return 2;
   }
 
+  if (strcasecmp(argv[i], "-maxconnections") == 0) {
+    if (i + 1 >= argc) UseMsg();
+    rfbMaxClientConnections = atoi(argv[i + 1]);
+    if (rfbMaxClientConnections < 1 ||
+        rfbMaxClientConnections > MAX_MAX_CONNECTIONS)
+      UseMsg();
+    return 2;
+  }
+
   if (strcasecmp(argv[i], "-nevershared") == 0) {
     rfbNeverShared = TRUE;
     return 1;
@@ -1593,6 +1602,10 @@ void ddxUseMsg(void)
   ErrorF("-localhost             only allow connections from localhost\n");
   ErrorF("-maxclipboard B        set max. clipboard transfer size to B bytes\n");
   ErrorF("                       (default: %d)\n", rfbMaxClipboard);
+  ErrorF("-maxconnections N      allow no more than N (1 <= N <= %d) simultaneous VNC\n",
+         MAX_MAX_CONNECTIONS);
+  ErrorF("                       viewer connections (default: %d)\n",
+         DEFAULT_MAX_CONNECTIONS);
   ErrorF("-nevershared           never treat new clients as shared\n");
   ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
   ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");

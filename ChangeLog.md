@@ -22,6 +22,23 @@ enabled and the remote desktop was resized to a smaller size, the server would
 sometimes send a framebuffer update that exceeded the new desktop dimensions.
 This crashed the UltraVNC Viewer.
 
+5. Fixed a denial-of-service (DoS) vulnerability in the TurboVNC Server that
+was exposed when many RFB connections were made to the server and never
+dropped, thus exceeding the Xvnc process's allotment of file descriptors.  When
+this occurred, it triggered an infinite loop whereby the TurboVNC Server's
+listener socket handler returned immediately with an EMFILE ("Too many open
+files") error, but the handler continued to be called by the X.Org code because
+the incoming RFB connection never succeeded.  This infinite loop prevented the
+TurboVNC session owner from launching any X11 programs in the session (since
+those require Unix domain socket connections) until one or more of the RFB
+connections dropped, and the continuous flood of error messages in the session
+log caused the log to grow by megabytes per second until all available disk
+space was exhausted.  The TurboVNC Server now sets a reasonable RFB connection
+limit (which can be adjusted using a new Xvnc argument, `-maxconnections`) and
+rejects all new connections once this limit has been reached.  The upper limit
+for `-maxconnections` should be low enough to avoid the aforementioned EMFILE
+error and infinite loop.
+
 
 2.2.1
 =====

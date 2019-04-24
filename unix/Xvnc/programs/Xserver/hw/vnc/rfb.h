@@ -81,6 +81,13 @@
    the CPU count */
 #define MAX_ENCODING_THREADS 8
 
+/* Maximum number of client connections.  The default of 100 should be more
+   than enough for most use cases.  The ceiling is set to 500 to give us plenty
+   of room to avoid exceeding the Xvnc process's allotment of file descriptors,
+   which is usually 1024 on Linux systems. */
+#define DEFAULT_MAX_CONNECTIONS 100
+#define MAX_MAX_CONNECTIONS 500
+
 
 /*
  * Per-screen (framebuffer) structure.  There is only one of these, since we
@@ -896,6 +903,7 @@ extern Bool rfbSendRectEncodingRRE(rfbClientPtr cl, int x, int y, int w,
 
 /* sockets.c */
 
+extern int rfbMaxClientConnections;
 extern int rfbMaxClientWait;
 
 extern int udpPort;
