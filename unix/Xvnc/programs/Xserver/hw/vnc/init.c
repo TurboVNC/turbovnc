@@ -1587,9 +1587,9 @@ void ddxUseMsg(void)
   ErrorF("===========================\n");
   ErrorF("-alwaysshared          always treat new clients as shared\n");
   ErrorF("-capture F             capture the data sent to the first connected viewer to\n");
-  ErrorF("                       a file (F).\n");
-  ErrorF("-deferupdate time      time in ms to defer updates (default 40)\n");
-  ErrorF("-desktop name          VNC desktop name (default x11)\n");
+  ErrorF("                       a file (F)\n");
+  ErrorF("-deferupdate time      time in ms to defer updates (default: 40)\n");
+  ErrorF("-desktop name          VNC desktop name (default: x11)\n");
   ErrorF("-disconnect            disconnect existing clients when a new non-shared\n"
          "                       connection comes in, rather than refusing the new\n"
          "                       connection\n");
