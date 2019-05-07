@@ -749,7 +749,7 @@ static InlineX void ZYWRLE_YUVRGB(int* pBuf, PIXEL_T* data, int width, int heigh
 #endif
 
 #ifdef ZYWRLE_ENCODE
-PIXEL_T* ZYWRLE_ANALYZE(PIXEL_T* dst, PIXEL_T* src, int w, int h, int scanline, int level, int* pBuf) {
+static PIXEL_T* ZYWRLE_ANALYZE(PIXEL_T* dst, PIXEL_T* src, int w, int h, int scanline, int level, int* pBuf) {
 	int l;
 	int uw = w;
 	int uh = h;

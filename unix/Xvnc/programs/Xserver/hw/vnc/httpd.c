@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2012, 2015, 2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2015, 2017, 2019 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
@@ -57,7 +57,7 @@
 #define OK_STR "HTTP/1.0 200 OK\r\n"
 #define CONTENT_STR "Content-Type: application/x-java-jnlp-file\r\n"
 
-static void httpProcessInput();
+static void httpProcessInput(void);
 static Bool compareAndSkip(char **ptr, const char *str);
 static Bool parseParams(const char *request, char *result, int max_bytes);
 static Bool validateString(char *str);
@@ -81,7 +81,7 @@ static void httpSockNotify(int fd, int ready, void *data);
  * httpInitSockets sets up the TCP socket to listen for HTTP connections.
  */
 
-void httpInitSockets()
+void httpInitSockets(void)
 {
   static Bool done = FALSE;
 
@@ -172,7 +172,7 @@ static void httpSockNotify(int fd, int ready, void *data)
 }
 
 
-static void httpCloseSock()
+static void httpCloseSock(void)
 {
   close(httpSock);
   RemoveNotifyFd(httpSock);
@@ -185,7 +185,7 @@ static void httpCloseSock()
  * httpProcessInput is called when input is received on the HTTP socket.
  */
 
-static void httpProcessInput()
+static void httpProcessInput(void)
 {
   rfbSockAddr addr;
   socklen_t addrlen = sizeof(struct sockaddr_storage);
@@ -348,8 +348,8 @@ static void httpProcessInput()
          BUF_SIZE, but it's reasonable to assume that .jnlp files will
          always be short. */
 
-      char *ptr = buf;
       char *dollar;
+      ptr = buf;
       buf[n] = 0;       /* make sure it's null-terminated */
 
       while ((dollar = strchr(ptr, '$'))) {

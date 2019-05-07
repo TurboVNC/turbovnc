@@ -2,6 +2,7 @@ include_directories(../Xi ../miext/sync ../randr ../render ../xfixes)
 
 add_definitions(-DHAVE_XORG_CONFIG_H)
 
+disable_compiler_warnings()
 handle_type_puns(
 	present_event.c
 	present_request.c)

@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2019 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -98,6 +98,13 @@ from the X Consortium.
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
 
+#ifdef GLXEXT
+extern char *dri_driver_path;
+#endif
+#ifdef X_REGISTRY_REQUEST
+extern char registry_path[PATH_MAX];
+#endif
+
 rfbFBInfo rfbFB;
 DevPrivateKeyRec rfbGCKey;
 
@@ -129,7 +136,7 @@ static int rfbMouseProc(DeviceIntPtr pDevice, int onoff);
 static int rfbExtInputProc(DeviceIntPtr pDevice, int onoff);
 static Bool CheckDisplayNumber(int n);
 
-static Bool rfbAlwaysTrue();
+static Bool rfbAlwaysTrue(void);
 char *rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb);
 static Bool rfbCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y);
 static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
@@ -152,8 +159,6 @@ static char inetdDisplayNumStr[10];
 struct in_addr interface;
 struct in6_addr interface6;
 int family = -1;
-
-extern char *stristr(const char *s1, const char *s2);
 
 
 static void PrintVersion(void)
@@ -312,6 +317,15 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     return 2;
   }
 
+  if (strcasecmp(argv[i], "-maxconnections") == 0) {
+    if (i + 1 >= argc) UseMsg();
+    rfbMaxClientConnections = atoi(argv[i + 1]);
+    if (rfbMaxClientConnections < 1 ||
+        rfbMaxClientConnections > MAX_MAX_CONNECTIONS)
+      UseMsg();
+    return 2;
+  }
+
   if (strcasecmp(argv[i], "-nevershared") == 0) {
     rfbNeverShared = TRUE;
     return 1;
@@ -338,7 +352,6 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 
   if (strcasecmp(argv[i], "-noprimarysync") == 0) {
-    extern Bool rfbSyncPrimary;
     rfbSyncPrimary = FALSE;
     return 1;
   }
@@ -429,7 +442,6 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   if (strcasecmp(argv[i], "-dridir") == 0) {
 #ifdef GLXEXT
-    extern char *dri_driver_path;
     if (i + 1 >= argc) UseMsg();
     dri_driver_path = strdup(argv[i + 1]);
 #endif
@@ -604,7 +616,6 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   if (strcasecmp(argv[i], "-registrydir") == 0) {
 #ifdef X_REGISTRY_REQUEST
-    extern char registry_path[PATH_MAX];
     if (i + 1 >= argc) UseMsg();
     snprintf(registry_path, PATH_MAX, "%s/protocol.txt", argv[i + 1]);
 #endif
@@ -731,7 +742,6 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
   int ret;
   char *pbits;
   VisualPtr vis;
-  extern int monitorResolution;
 #ifdef RENDER
   PictureScreenPtr ps;
 #endif
@@ -904,12 +914,12 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
   pScreen->UninstallColormap = rfbUninstallColormap;
   pScreen->ListInstalledColormaps = rfbListInstalledColormaps;
   pScreen->StoreColors = rfbStoreColors;
-  pScreen->SaveScreen = rfbAlwaysTrue;
+  pScreen->SaveScreen = (SaveScreenProcPtr)rfbAlwaysTrue;
 
   rfbDCInitialize(pScreen, &rfbPointerCursorFuncs);
 
   if (noCursor) {
-    pScreen->DisplayCursor = rfbAlwaysTrue;
+    pScreen->DisplayCursor = (DisplayCursorProcPtr)rfbAlwaysTrue;
     prfb->cursorIsDrawn = TRUE;
   }
 
@@ -1300,7 +1310,7 @@ Bool LegalModifier(unsigned int key, DeviceIntPtr pDev)
 }
 
 
-void ProcessInputEvents()
+void ProcessInputEvents(void)
 {
   static Bool inetdInitDone = FALSE;
 
@@ -1457,7 +1467,7 @@ int rfbBitsPerPixel(int depth)
 }
 
 
-static Bool rfbAlwaysTrue()
+static Bool rfbAlwaysTrue(void)
 {
   return TRUE;
 }
@@ -1524,7 +1534,7 @@ void DDXRingBell(int percent, int pitch, int duration)
 }
 
 
-void OsVendorInit()
+void OsVendorInit(void)
 {
   PrintVersion();
   rfbAuthInit();
@@ -1565,15 +1575,15 @@ void OsVendorFatalError(const char *f, va_list args)
 }
 
 
-void ddxUseMsg()
+void ddxUseMsg(void)
 {
   ErrorF("\nTurboVNC connection options\n");
   ErrorF("===========================\n");
   ErrorF("-alwaysshared          always treat new clients as shared\n");
   ErrorF("-capture F             capture the data sent to the first connected viewer to\n");
-  ErrorF("                       a file (F).\n");
-  ErrorF("-deferupdate time      time in ms to defer updates (default 40)\n");
-  ErrorF("-desktop name          VNC desktop name (default x11)\n");
+  ErrorF("                       a file (F)\n");
+  ErrorF("-deferupdate time      time in ms to defer updates (default: 40)\n");
+  ErrorF("-desktop name          VNC desktop name (default: x11)\n");
   ErrorF("-disconnect            disconnect existing clients when a new non-shared\n"
          "                       connection comes in, rather than refusing the new\n"
          "                       connection\n");
@@ -1586,6 +1596,10 @@ void ddxUseMsg()
   ErrorF("-localhost             only allow connections from localhost\n");
   ErrorF("-maxclipboard B        set max. clipboard transfer size to B bytes\n");
   ErrorF("                       (default: %d)\n", rfbMaxClipboard);
+  ErrorF("-maxconnections N      allow no more than N (1 <= N <= %d) simultaneous VNC\n",
+         MAX_MAX_CONNECTIONS);
+  ErrorF("                       viewer connections (default: %d)\n",
+         DEFAULT_MAX_CONNECTIONS);
   ErrorF("-nevershared           never treat new clients as shared\n");
   ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
   ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");

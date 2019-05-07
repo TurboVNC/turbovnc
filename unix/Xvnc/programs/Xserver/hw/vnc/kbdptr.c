@@ -9,7 +9,7 @@
  *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
  *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
  *  Copyright (C) 2013 Pierre Ossman for Cendio AB.  All Rights Reserved.
- *  Copyright (C) 2014-2016 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014-2016, 2019 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -353,7 +353,7 @@ void KeyEvent(CARD32 keysym, Bool down)
     PressKey(kbdDevice, shift_press, TRUE, "temp shift");
   } else if ((state & ShiftMask) && !(new_state & ShiftMask) && fakeShift) {
     int index = 0;
-    KeyCode *shift_release = ReleaseShift();
+    shift_release = ReleaseShift();
     if (!shift_release) {
       rfbLog("ERROR: Unable to find modifier key(s) for Shift key release\n");
       return;
@@ -564,7 +564,7 @@ void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 }
 
 
-void KbdReleaseAllKeys()
+void KbdReleaseAllKeys(void)
 {
   int i, j;
 

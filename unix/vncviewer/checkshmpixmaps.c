@@ -1,4 +1,4 @@
-/*  Copyright (C) 2013, 2015, 2018 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C) 2013, 2015, 2018-2019 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ XErrorHandler prevhandler = NULL;
 #endif
 
 
-int xhandler(Display *dpy, XErrorEvent *e)
+static int xhandler(Display *dpy, XErrorEvent *e)
 {
   if (e->serial == serial && (e->minor_code == X_ShmAttach &&
                               e->error_code == BadAccess)) {

@@ -107,7 +107,7 @@ void IdleTimerSet(void)
   idleTimeout = gettime() + (double)rfbIdleTimeout;
 }
 
-void IdleTimerCancel(void)
+static void IdleTimerCancel(void)
 {
   idleTimeout = -1.0;
 }
@@ -145,7 +145,7 @@ double gettime(void)
 
 static Bool putImageOnly = TRUE, alrCopyRect = TRUE;
 
-CARD32 alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
+static CARD32 alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
   RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave,
     ifRegionSave;
@@ -345,16 +345,9 @@ static rfbClientPtr rfbNewClient(int sock)
   char *env = NULL;
   int np = sysconf(_SC_NPROCESSORS_CONF);
 
-  if (rfbClientHead == NULL) {
+  if (rfbClientHead == NULL)
     /* no other clients - make sure we don't think any keys are pressed */
     KbdReleaseAllKeys();
-  } else {
-    rfbLog("  (other clients");
-    for (cl = rfbClientHead; cl; cl = cl->next) {
-      fprintf(stderr, " %s", cl->host);
-    }
-    fprintf(stderr, ")\n");
-  }
 
   cl = (rfbClientPtr)rfbAlloc0(sizeof(rfbClientRec));
 
@@ -991,8 +984,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               cl->enableCursorShapeUpdates = TRUE;
               cl->useRichCursorEncoding = FALSE;
               cl->cursorWasChanged = TRUE;
-              break;
             }
+            break;
           case rfbEncodingRichCursor:
             if (!cl->enableCursorShapeUpdates) {
               rfbLog("Enabling full-color cursor updates for client %s\n",
@@ -1997,8 +1990,8 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
             if (!different && rfbInterframeDebug &&
                 !RECT_IN_REGION(pScreen, &cl->ifRegion, &box)) {
               int pad = pitch - compareWidth * ps;
-              char *dstPtr = &dst[row * pitch + col * ps];
 
+              dstPtr = &dst[row * pitch + col * ps];
               REGION_UNION(pScreen, &idRegion, &idRegion, &tmpRegion);
               rows = compareHeight;
 
@@ -2571,7 +2564,7 @@ Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour, int nColours)
  * rfbSendBell sends a Bell message to all the clients.
  */
 
-void rfbSendBell()
+void rfbSendBell(void)
 {
   rfbClientPtr cl, nextCl;
   rfbBellMsg b;

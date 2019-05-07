@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2017, 2019 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ void rfbClipScreens(struct xorg_list *list, int w, int h)
 }
 
 
-rfbScreenInfo *rfbDupeScreen(rfbScreenInfo *screen)
+static rfbScreenInfo *rfbDupeScreen(rfbScreenInfo *screen)
 {
   rfbScreenInfo *newScreen;
 

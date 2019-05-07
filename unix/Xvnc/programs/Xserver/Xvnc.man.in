@@ -6,14 +6,14 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
-.\" Copyright (C) 2010, 2012, 2014-2018 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2019 D. R. Commander
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "November 2018" "" "TurboVNC"
+.TH Xvnc 1 "April 2019" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -21,25 +21,7 @@ Xvnc \- the TurboVNC X server
 .nh
 .ad l
 \fBXvnc\fR
-[:\fIdisplay\fR]
-[\-geometry\ \fIwidth\fRx\fIheight\fR]
-[\-geometry\ \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]]
-[\-depth\ \fIdepth\fR] [\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR]
-[\-rfbport\ \fIport\fR] [\-rfbwait\ \fItime\fR]
-[\-nocursor] [\-rfbauth\ \%\fIpasswd-file\fR]
-[\-securitytypes\ \%\fItype-list\fR] [\-x509cert\ \fIcert\fR]
-[\-x509key\ \fIkey\fR] [\-pamsession] [\-noreverse] [\-noclipboardsend]
-[\-noclipboardrecv] [\-maxclipboard\ \fIbytes\fR]
-[\-idletimeout\ \fItime\fR] [\-httpd\ \fIdir\fR]
-[\-httpport\ \fIport\fR] [\-deferupdate\ \fItime\fR] [\-noflowcontrol]
-[\-alr\ \fItime\fR]
-[\-alrqual\ \fIlevel\fR] [\-alrsamp\ 1X|2X|4X|gray]
-[\-interframe] [\-nointerframe] [\-virtualtablet]
-[\-economictranslate] [\-desktop\ \fIname\fR] [\-alwaysshared]
-[\-nevershared] [\-disconnect] [\-viewonly] [\-localhost]
-[\-interface\ ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
-[\-nomt] [\-nthreads\ \%\fIthread-count\fR]
-\%[\fIX-options\fR...]
+[:\fIdisplay\fR] [\fITurboVNC-options\fR...] [\fIX-options\fR...]
 .ad
 .hy
 .SH DESCRIPTION
@@ -63,88 +45,91 @@ supported, please look at the output of \fBXvnc\fR \fI\-help\fR and read
 the \fBXserver\fR(1) manual page.
 
 The VNC-specific options are as follows:
-.TP
-\fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
-Set width and height of the virtual X display (single-screen.)
-.TP
-\fB\-geometry\fR \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]
-Set multi-screen geometry of the virtual X display.  Wi and Hi are the width
-and height of Screen i, and Xi and Yi specify the offset of Screen i relative
-to the origin.  The framebuffer width and height are determined by the bounding
-box of all screens.
-.TP
-\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
-Specify the pixel format of the virtual X display.  Xvnc can use any pixel
-format you choose, but if this pixel format does not match the pixel format
-of the display on which vncviewer is running, then Xvnc will perform pixel
-format conversion prior to sending images to vncviewer.  This can slow
-performance.  The default pixel format, rgb888, is equivalent to BGRA on little
-endian systems or ARGB on big endian systems.  A pixel format of bgr888 is
-equivalent to RGBA on little endian systems or ABGR on big endian systems.
-.TP
-\fB\-rfbport\fR \fIport\fR
-TCP port that the server should use when listening for connections from normal
-VNC viewers.
-.TP
-\fB\-rfbwait\fR \fItime\fR
-Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
-.TP
-\fB\-nocursor\fR
-Don't display a mouse pointer on the remote desktop.
-.TP
-\fB\-rfbauth\fR \fIpasswd-file\fR
-Specify the password file to use with VNC Password authentication.
-\fIpasswd-file\fR can be created using the \fBvncpasswd\fR(1) utility.  This
-argument has no effect if \fIpermitted-security-types\fR is specified in the
-security configuration file and none of the VNC security types are listed as
-permitted security types.
-.TP
-\fB-securitytypes\fR \fItype-list\fR
-\fItype-list\fR is a comma-separated list of security types that should be
-enabled for this TurboVNC session.  Refer to the SECURITY OVERVIEW section
-below for a description of available security types.  Only security types that
-are permitted in the security configuration file will actually be enabled.  If
-\fItype-list\fR contains no permitted security types, then Xvnc will exit with
-an error.  If this argument is not specified, then Xvnc uses a default value of
-"TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin,
-Plain".  Security types are case-insensitive.
-.TP
-\fB\-x509cert\fR \fIcert\fR
-Specify the X.509 signed certificate file (in PEM format) to use with X.509
-encryption.  This argument has no effect if \fIpermitted-security-types\fR is
-specified in the security configuration file and none of the X.509 security
-types are listed as permitted security types.
-.TP
-\fB\-x509key\fR \fIkey\fR
-Specify the X.509 private key file (in PEM format) to use with X.509
-encryption.  This argument has no effect if \fIpermitted-security-types\fR is
-specified in the security configuration file and none of the X.509 security
-types are listed as permitted security types.
-.TP
-\fB\-pamsession\fR
-Create a new PAM session for each viewer that authenticates using the
-username/password of the user who owns the TurboVNC session, and leave the PAM
-session open until the viewer disconnects.  When using Kerberos, this causes
-pam_krb5 to create a Kerberos ticket for the TurboVNC session, which can be
-reused within the session to provide access to other services.
 
-This option can be disabled for all TurboVNC sessions on this system by using
-the \fIno-pam-sessions\fR directive in the security configuration file.  See
-the SECURITY CONFIGURATION FILE section for more details.
 .TP
-\fB\-noreverse\fR
-Do not allow reverse VNC connections to be made from this TurboVNC session.
-This option can be set for all TurboVNC sessions on this system by using the
-\fIno-reverse-connections\fR directive in the security configuration
-file.  See the SECURITY CONFIGURATION FILE section for more details.
+\fBTURBOVNC CONNECTION OPTIONS\fR
+
 .TP
-\fB-noclipboardsend\fR
-Disable outbound clipboard synchronization.  This prevents the clipboard of
-any connected viewers from being synchronized with the clipboard of the
-TurboVNC session whenever the latter changes.  This option can be set for all
-TurboVNC sessions on this system by using the \fIno-clipboard-send\fR
-directive in the security configuration file.  See the SECURITY
-CONFIGURATION FILE section for more details.
+\fB\-alwaysshared\fR
+Always treat new connections as shared.  Never disconnect existing users
+or deny new connections when a new user tries to connect to a TurboVNC session
+that is already occupied.
+
+.TP
+\fB\-deferupdate\fR \fItime\fR
+Amount of time, in milliseconds, for which to defer screen updates (default:
+40.)  Deferring updates helps to coalesce many small desktop changes into a few
+larger updates, thus saving network bandwidth.
+
+.TP
+\fB\-desktop\fR \fIname\fR
+Set VNC desktop name ("x11" by default.)
+
+.TP
+\fB\-disconnect\fR
+Disconnect existing users when a new non-shared connection is established,
+rather than refusing the new connection.
+
+.TP
+\fB\-httpd\fR \fIdir\fR
+Specify directory where the Java viewer classes are located.
+
+.TP
+\fB\-httpport\fR \fIport\fR
+TCP port that the server should use when listening for connections from
+web browsers.
+
+.TP
+\fB\-idletimeout\fR \fItime\fR
+Amount of time, in seconds, that the TurboVNC session can sit idle (with no VNC
+viewer connections) before it automatically exits (default: no timeout.)  This
+argument has no effect if the \fImax-idle-timeout\fR directive is specified in
+the security configuration file and if that value is lower than
+\fItime\fR.
+
+.TP
+\fB\-inetd\fR
+If Xvnc is launched by inetd, this option causes Xvnc to redirect
+network input/output to stdin/stdout.
+
+.TP
+\fB\-interface\fR \fIip-address\fR
+Listen only on the network interface with the specified IP address.
+
+.TP
+\fB\-ipv6\fR
+Enable IPv6 support.  If your system supports IPv4-mapped IPv6 addresses, then
+this option causes Xvnc to accept both local and remote connections from both
+IPv4 and IPv6 clients.  Otherwise, only connections from IPv6 clients will be
+accepted.  If \fB-localhost\fR is also specified, or if the
+\fIno-remote-connections\fR directive is specified in the security
+configuration file, then this option causes Xvnc to accept only local
+connections from IPv6 clients (the equivalent of specifying
+\fB-interface ::1\fR.)
+
+.TP
+\fB\-localhost\fR
+Only allow loopback connections from localhost.  This option is useful
+in conjunction with SSH tunneling.  This option can be set for all TurboVNC
+sessions on this system by using the \fIno-remote-connections\fR directive in
+the security configuration file.  See the SECURITY CONFIGURATION
+FILE section for more details.  Unless \fB-ipv6\fR is also specified, only
+IPv4 loopback connections are accepted.
+
+.TP
+\fB-maxclipboard\fR \fIbytes\fR
+Set the maximum clipboard transfer size to \fIbytes\fR.
+
+.TP
+\fB-maxconnections\fR \fIconnection-count\fR
+Allow no more than \fIconnection-count\fR simultaneous VNC viewer connections,
+where 1 <= \fIconnection-count\fR <= 500 (default: 100.)
+
+.TP
+\fB\-nevershared\fR
+Never treat new connections as shared.  Do not allow simultaneous user
+connections to the same TurboVNC session.
+
 .TP
 \fB-noclipboardrecv\fR
 Disable inbound clipboard synchronization.  This prevents the clipboard of
@@ -153,28 +138,16 @@ viewer whenever the latter changes.  This option can be set for all
 TurboVNC sessions on this system by using the \fIno-clipboard-recv\fR
 directive in the security configuration file.  See the SECURITY
 CONFIGURATION FILE section for more details.
+
 .TP
-\fB-maxclipboard\fR \fIbytes\fR
-Set the maximum clipboard transfer size to \fIbytes\fR.
-.TP
-\fB\-idletimeout\fR \fItime\fR
-Time, in seconds, which the TurboVNC session can sit idle (with no VNC viewer
-connections) before it automatically exits (default: no timeout.)  This
-argument has no effect if the \fImax-idle-timeout\fR directive is specified in
-the security configuration file and if that value is lower than
-\fItime\fR.
-.TP
-\fB\-httpd\fR \fIdir\fR
-Specify directory where the Java viewer classes are located.
-.TP
-\fB\-httpport\fR \fIport\fR
-TCP port that the server should use when listening for connections from
-web browsers.
-.TP
-\fB\-deferupdate\fR \fItime\fR
-Time, in milliseconds, for which to defer screen updates (default: 40).
-Deferring updates helps to coalesce many small desktop changes into a few
-larger updates, thus saving network bandwidth.
+\fB-noclipboardsend\fR
+Disable outbound clipboard synchronization.  This prevents the clipboard of
+any connected viewers from being synchronized with the clipboard of the
+TurboVNC session whenever the latter changes.  This option can be set for all
+TurboVNC sessions on this system by using the \fIno-clipboard-send\fR
+directive in the security configuration file.  See the SECURITY
+CONFIGURATION FILE section for more details.
+
 .TP
 \fB\-noflowcontrol\fR
 Normally, the TurboVNC Server will use the RFB flow control extensions
@@ -188,53 +161,40 @@ video and 3D applications, this may produce smoother animation on high-latency
 networks, although it will almost certainly also produce a noticeable lag
 between mouse movement and application response, since the TCP buffers will be
 100% full.
-.TP
-\fB\-alr\fR \fItime\fR
-Enable the automatic lossless refresh (ALR) feature for this TurboVNC session
-and set the timeout to \fItime\fR seconds.  If ALR is enabled and no
-framebuffer updates have been sent to a given viewer in the past \fItime\fR
-seconds, and if "eligible" areas of the screen have been transmitted to that
-viewer using JPEG since the last lossless refresh, then those areas of the
-screen are re-transmitted using mathematically lossless image compression
-(specifically, the Lossless Tight + Zlib encoding method.)
 
-The default behavior is to only allow regions drawn using X[Shm]PutImage() or
-CopyRect to be eligible for ALR.  The intent of this behavior is to restrict
-ALR mainly to the pixels drawn by VirtualGL, but it also prevents blinking
-cursors (which are usually drawn using XCopyArea()) from confusing the ALR
-algorithm.  You can, however, set the \fBTVNC_ALRALL\fR environment variable to
-\fB1\fR to make all screen regions eligible for ALR.  You can also set
-\fBTVNC_ALRCOPYRECT\fR to \fB0\fR to make screen regions drawn with CopyRect
-ineligible for ALR (approximating the behavior of TurboVNC 1.2.1 and prior.)
 .TP
-\fB\-alrqual\fR \fIlevel\fR
-Instead of sending a mathematically lossless image for an automatic lossless
-refresh, send a JPEG image with the specified JPEG quality (95 is a good
-choice, as this is the equivalent of the "Tight + Perceptually Lossless JPEG"
-preset.)
+\fB\-noreverse\fR
+Do not allow reverse VNC connections to be made from this TurboVNC session.
+This option can be set for all TurboVNC sessions on this system by using the
+\fIno-reverse-connections\fR directive in the security configuration
+file.  See the SECURITY CONFIGURATION FILE section for more details.
+
 .TP
-\fB\-alrsamp 1X\fR|\fB2X\fR|\fB4X\fR|\fBgray\fR
-Specify the level of chrominance subsampling to be used when sending an
-automatic lossless refresh (default: 1X.)  This has no effect unless
-\fI-alrqual\fR is also specified.
+\fB\-rfbport\fR \fIport\fR
+TCP port that the server should use when listening for connections from normal
+VNC viewers.
+
 .TP
-\fB\-interframe\fR
-Normally, the TurboVNC Server will enable interframe comparison whenever
-Compression Level 5 or above is requested (if using Tight encoding, compression
-levels 5-7 are equivalent to compression levels 0-2 with interframe comparison
-enabled.)  Specifying \fB-interframe\fR will enable interframe comparison all
-the time, regardless of the compression level that was requested by the viewer.
-Interframe comparison maintains a copy of the remote framebuffer for each
-connected viewer and compares each framebuffer update with the copy to ensure
-that redundant updates are not sent to the viewer.  This prevents unnecessary
-network traffic if an ill-behaved application draws the same thing over and
-over again, but interframe comparison also causes the TurboVNC Server to use
-more CPU time and much more memory, and thus it is recommended that this
-feature be used only when needed.
+\fB\-rfbwait\fR \fItime\fR
+Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
+
 .TP
-\fB\-nointerframe\fR
-Specifying this option will disable interframe comparison, regardless of the
-compression level that was requested by the viewer.
+\fBTURBOVNC INPUT OPTIONS\fR
+
+.TP
+\fB\-compatiblekbd\fR
+Set META and ALT keys to the same X modifier flag, as in the original
+version of Xvnc by AT&T labs (this option is specific to TightVNC/TurboVNC.)
+
+.TP
+\fB\-nocursor\fR
+Don't display a mouse pointer on the remote desktop.
+
+.TP
+\fB\-viewonly\fR
+Don't accept keyboard and pointer events from viewers.  All viewers will
+be able to see the desktop but won't be able to control it.
+
 .TP
 \fB\-virtualtablet\fR
 TurboVNC can handle extended input devices in one of two ways:
@@ -268,61 +228,94 @@ from xstartup.turbovnc, rather than a window manager.  Because applications
 usually check for the presence of X Input devices at startup, by the time the
 first viewer connects and requests that the client-side devices be cloned, it
 is too late.
+
+.TP
+\fBTURBOVNC DISPLAY OPTIONS\fR
+
+.TP
+\fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
+Set width and height of the virtual X display (single-screen.)
+
+.TP
+\fB\-geometry\fR \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]
+Set multi-screen geometry of the virtual X display.  Wi and Hi are the width
+and height of Screen i, and Xi and Yi specify the offset of Screen i relative
+to the origin.  The framebuffer width and height are determined by the bounding
+box of all screens.
+
+.TP
+\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
+Specify the pixel format of the virtual X display.  Xvnc can use any pixel
+format you choose, but if this pixel format does not match the pixel format
+of the display on which vncviewer is running, then Xvnc will perform pixel
+format conversion prior to sending images to vncviewer.  This can slow
+performance.  The default pixel format, rgb888, is equivalent to BGRA on little
+endian systems or ARGB on big endian systems.  A pixel format of bgr888 is
+equivalent to RGBA on little endian systems or ABGR on big endian systems.
+
+.TP
+\fBTURBOVNC ENCODING OPTIONS\fR
+
+.TP
+\fB\-alr\fR \fItime\fR
+Enable the automatic lossless refresh (ALR) feature for this TurboVNC session
+and set the timeout to \fItime\fR seconds.  If ALR is enabled and no
+framebuffer updates have been sent to a given viewer in the past \fItime\fR
+seconds, and if "eligible" areas of the screen have been transmitted to that
+viewer using JPEG since the last lossless refresh, then those areas of the
+screen are re-transmitted using mathematically lossless image compression
+(specifically, the Lossless Tight + Zlib encoding method.)
+
+The default behavior is to only allow regions drawn using X[Shm]PutImage() or
+CopyRect to be eligible for ALR.  The intent of this behavior is to restrict
+ALR mainly to the pixels drawn by VirtualGL, but it also prevents blinking
+cursors (which are usually drawn using XCopyArea()) from confusing the ALR
+algorithm.  You can, however, set the \fBTVNC_ALRALL\fR environment variable to
+\fB1\fR to make all screen regions eligible for ALR.  You can also set
+\fBTVNC_ALRCOPYRECT\fR to \fB0\fR to make screen regions drawn with CopyRect
+ineligible for ALR (approximating the behavior of TurboVNC 1.2.1 and prior.)
+
+.TP
+\fB\-alrqual\fR \fIlevel\fR
+Instead of sending a mathematically lossless image for an automatic lossless
+refresh, send a JPEG image with the specified JPEG quality (95 is a good
+choice, as this is the equivalent of the "Tight + Perceptually Lossless JPEG"
+preset.)
+
+.TP
+\fB\-alrsamp 1X\fR|\fB2X\fR|\fB4X\fR|\fBgray\fR
+Specify the level of chrominance subsampling to be used when sending an
+automatic lossless refresh (default: 1X.)  This has no effect unless
+\fB-alrqual\fR is also specified.
+
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.
+
 .TP
-\fB\-desktop\fR \fIname\fR
-Set VNC desktop name ("x11" by default).
+\fB\-interframe\fR
+Normally, the TurboVNC Server will enable interframe comparison whenever
+Compression Level 5 or above is requested (if using Tight encoding, compression
+levels 5-7 are equivalent to compression levels 0-2 with interframe comparison
+enabled.)  Specifying \fB-interframe\fR will enable interframe comparison all
+the time, regardless of the compression level that was requested by the viewer.
+Interframe comparison maintains a copy of the remote framebuffer for each
+connected viewer and compares each framebuffer update with the copy to ensure
+that redundant updates are not sent to the viewer.  This prevents unnecessary
+network traffic if an ill-behaved application draws the same thing over and
+over again, but interframe comparison also causes the TurboVNC Server to use
+more CPU time and much more memory, and thus it is recommended that this
+feature be used only when needed.
+
 .TP
-\fB\-alwaysshared\fR
-Always treat new connections as shared.  Never disconnect existing users
-or deny new connections when a new user tries to connect to a TurboVNC session
-that is already occupied.
-.TP
-\fB\-nevershared\fR
-Never treat new connections as shared.  Do not allow simultaneous user
-connections to the same TurboVNC session.
-.TP
-\fB\-disconnect\fR
-Disconnect existing users when a new non-shared connection is established,
-rather than refusing the new connection.
-.TP
-\fB\-viewonly\fR
-Don't accept keyboard and pointer events from viewers.  All viewers will
-be able to see the desktop but won't be able to control it.
-.TP
-\fB\-localhost\fR
-Only allow loopback connections from localhost.  This option is useful
-in conjunction with SSH tunneling.  This option can be set for all TurboVNC
-sessions on this system by using the \fIno-remote-connections\fR directive in
-the security configuration file.  See the SECURITY CONFIGURATION
-FILE section for more details.  Unless \fB-ipv6\fR is also specified, only
-connections from IPv4 clients are accepted.
-.TP
-\fB\-interface\fR \fIipaddr\fR
-Listen only on the network interface with the given \fIipaddr\fR.
-.TP
-\fB\-ipv6\fR
-Enable IPv6 support.  If your system supports IPv4-mapped IPv6 addresses, then
-this option causes Xvnc to accept both local and remote connections from both
-IPv4 and IPv6 clients.  Otherwise, only connections from IPv6 clients will be
-accepted.  If \fB-localhost\fR is also specified, or if the
-\fIno-remote-connections\fR directive is specified in the security
-configuration file, then this option causes Xvnc to accept only local
-connections from IPv6 clients (the equivalent of specifying
-\fB-interface ::1\fR).
-.TP
-\fB\-inetd\fR
-If Xvnc is launched by inetd, this option causes Xvnc to redirect
-network input/output to stdin/stdout.
-.TP
-\fB\-compatiblekbd\fR
-Set META and ALT keys to the same X modifier flag, as in the original
-version of Xvnc by AT&T labs (this option is specific to TightVNC/TurboVNC.)
+\fB\-nointerframe\fR
+Specifying this option will disable interframe comparison, regardless of the
+compression level that was requested by the viewer.
+
 .TP
 \fB\-nomt\fR
 Disable multithreaded Tight encoding
+
 .TP
 \fB\-nthreads\fR \fIthread-count\fR
 Specify the number of threads to use with multithreaded Tight encoding.  The
@@ -330,6 +323,55 @@ default is to use one thread per CPU core, up to a maximum of 4 (because using
 more than 4 encoding threads breaks compatibility with viewers other than the
 TurboVNC Viewer.)  The server will not allow the thread count to exceed 8, nor
 to exceed the number of CPU cores.
+
+.TP
+\fBTURBOVNC SECURITY AND AUTHENTICATION OPTIONS\fR
+
+.TP
+\fB\-pamsession\fR
+Create a new PAM session for each viewer that authenticates using the
+username/password of the user who owns the TurboVNC session, and leave the PAM
+session open until the viewer disconnects.  When using Kerberos, this causes
+pam_krb5 to create a Kerberos ticket for the TurboVNC session, which can be
+reused within the session to provide access to other services.
+
+This option can be disabled for all TurboVNC sessions on this system by using
+the \fIno-pam-sessions\fR directive in the security configuration file.  See
+the SECURITY CONFIGURATION FILE section for more details.
+
+.TP
+\fB\-rfbauth\fR \fIpasswd-file\fR
+Specify the password file to use with VNC Password authentication.
+\fIpasswd-file\fR can be created using the \fBvncpasswd\fR(1) utility.  This
+argument has no effect if \fIpermitted-security-types\fR is specified in the
+security configuration file and none of the VNC security types are listed as
+permitted security types.
+
+.TP
+\fB-securitytypes\fR \fItype-list\fR
+\fItype-list\fR is a comma-separated list of security types that should be
+enabled for this TurboVNC session.  Refer to the SECURITY EXTENSIONS section
+below for a description of available security types.  Only security types that
+are permitted in the security configuration file will actually be enabled.  If
+\fItype-list\fR contains no permitted security types, then Xvnc will exit with
+an error.  If this argument is not specified, then Xvnc uses a default value of
+"TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin,
+Plain".  Security types are case-insensitive.
+
+.TP
+\fB\-x509cert\fR \fIcert\fR
+Specify the X.509 signed certificate file (in PEM format) to use with X.509
+encryption.  This argument has no effect if \fIpermitted-security-types\fR is
+specified in the security configuration file and none of the X.509 security
+types are listed as permitted security types.
+
+.TP
+\fB\-x509key\fR \fIkey\fR
+Specify the X.509 private key file (in PEM format) to use with X.509
+encryption.  This argument has no effect if \fIpermitted-security-types\fR is
+specified in the security configuration file and none of the X.509 security
+types are listed as permitted security types.
+
 .SH SECURITY EXTENSIONS
 The TurboVNC Server supports 13 security types, each of which specifies an
 authentication scheme (a technique used to transmit authentication credentials
@@ -365,7 +407,7 @@ uses the Standard VNC authentication scheme to receive authentication
 credentials from a VNC viewer.
 
 .IP \fBPAM\ User/Password\fR
-Authenticate using Pluggable Authentication Modules (PAM).  This authentication
+Authenticate using Pluggable Authentication Modules (PAM.)  This authentication
 method is typically used to authenticate against Unix login credentials, but it
 can also be used to authenticate against any other user/password authentication
 credentials that can be accessed through PAM.  A valid PAM service
@@ -626,7 +668,7 @@ unencrypted over the network.
 \fBvncconnect\fR(1), \fBsshd\fR(1)
 .SH AUTHORS
 VNC was originally developed at AT&T Laboratories Cambridge.  TightVNC
-additions were implemented by Constantin Kaplinsky.  TurboVNC, based
+additions were implemented by Constantin Kaplinsky.  TurboVNC, based originally
 on TightVNC, is provided by The VirtualGL Project.  Many other people
 participated in development, testing and support.
 

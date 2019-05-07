@@ -81,7 +81,12 @@
    the CPU count */
 #define MAX_ENCODING_THREADS 8
 
-extern const char *display;
+/* Maximum number of client connections.  The default of 100 should be more
+   than enough for most use cases.  The ceiling is set to 500 to give us plenty
+   of room to avoid exceeding the Xvnc process's allotment of file descriptors,
+   which is usually 1024 on Linux systems. */
+#define DEFAULT_MAX_CONNECTIONS 100
+#define MAX_MAX_CONNECTIONS 500
 
 
 /*
@@ -628,6 +633,9 @@ extern void rfbPAMEnd(rfbClientPtr cl);
 
 extern Bool rfbAuthPAMSession;
 extern Bool rfbAuthDisablePAMSession;
+
+Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
+                        const char *pwd, const char **emsg);
 #endif
 
 
@@ -655,13 +663,21 @@ extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
 
 /* cutpaste.c */
 
+extern Bool rfbSyncPrimary;
+
 extern void rfbSetXCutText(char *str, int len);
 extern void rfbGotXCutText(char *str, int len);
 extern void vncClientCutText(const char *str, int len);
+extern int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
+                               Atom property, Window requestor, CARD32 time);
+extern Window vncGetSelectionWindow(void);
+extern void vncHandleSelection(Atom selection, Atom target, Atom property,
+                               Atom requestor, TimeStamp time);
 extern void vncSelectionInit(void);
 
 
 /* dispcur.c */
+
 extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
 
 
@@ -740,6 +756,7 @@ extern int family;
 extern int rfbBitsPerPixel(int depth);
 extern void rfbLog(char *format, ...);
 extern void rfbLogPerror(char *str);
+extern void rfbRootPropertyChange(PropertyPtr pProp);
 
 extern Bool AddExtInputDevice(rfbDevInfo *dev);
 extern void RemoveExtInputDevice(rfbClientPtr cl, int index);
@@ -763,10 +780,11 @@ extern void KbdDeviceInit(DeviceIntPtr);
 extern void KeyEvent(KeySym keySym, Bool down);
 extern void KbdReleaseAllKeys(void);
 
+extern char *stristr(const char *s1, const char *s2);
+
 
 /* nvctrlext.c */
 
-extern Bool noNVCTRLExtension;
 extern char *nvCtrlDisplay;
 
 
@@ -815,8 +833,10 @@ extern rfbClientPtr pointerClient;
 
 extern CARD32 rfbMaxIdleTimeout;
 extern CARD32 rfbIdleTimeout;
-extern void IdleTimerSet();
-extern void IdleTimerCheck();
+extern void IdleTimerSet(void);
+extern void IdleTimerCheck(void);
+extern Bool InterframeOn(rfbClientPtr cl);
+extern void InterframeOff(rfbClientPtr);
 
 extern int rfbMaxWidth, rfbMaxHeight;
 
@@ -881,6 +901,7 @@ extern Bool rfbSendRectEncodingRRE(rfbClientPtr cl, int x, int y, int w,
 
 /* sockets.c */
 
+extern int rfbMaxClientConnections;
 extern int rfbMaxClientWait;
 
 extern int rfbPort;

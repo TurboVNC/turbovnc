@@ -28,7 +28,7 @@
 static char *programName;
 
 
-static void usage()
+static void usage(void)
 {
   fprintf(stderr, "\nUSAGE: %s [-display <d>] [-disconnect] client[:port]\n\n",
           programName);
