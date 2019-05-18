@@ -54,6 +54,8 @@ BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
 DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 JAVADIR=@CMAKE_INSTALL_FULL_JAVADIR@
 MANDIR=@CMAKE_INSTALL_FULL_MANDIR@
+OSX_APP_CERT_NAME="@OSX_APP_CERT_NAME@"
+OSX_INST_CERT_NAME="@OSX_INST_CERT_NAME@"
 
 if [ -f $PKGNAME-$VERSION.dmg ]; then
 	rm -f $PKGNAME-$VERSION.dmg
@@ -101,11 +103,25 @@ mkdir $TMPDIR/dmg
 pkgbuild --root $PKGROOT --component-plist pkgscripts/Package.plist \
 	--version $VERSION.$BUILD --identifier @PKGID@ \
 	$TMPDIR/pkg/$PKGNAME.pkg
+SUFFIX=
+if [ "$OSX_INST_CERT_NAME" != "" ]; then
+	SUFFIX=-unsigned
+fi
 productbuild --distribution $TMPDIR/pkg/Distribution.xml --package-path \
-	$TMPDIR/pkg/ --resources $TMPDIR/pkg/ $TMPDIR/dmg/$PKGNAME.pkg
+	$TMPDIR/pkg/ --resources $TMPDIR/pkg/ $TMPDIR/dmg/$PKGNAME$SUFFIX.pkg
+if [ "$OSX_INST_CERT_NAME" != "" ]; then
+	productsign --sign "$OSX_INST_CERT_NAME" --timestamp \
+		$TMPDIR/dmg/$PKGNAME$SUFFIX.pkg $TMPDIR/dmg/$PKGNAME.pkg
+	rm -r $TMPDIR/dmg/$PKGNAME$SUFFIX.pkg
+	pkgutil --check-signature $TMPDIR/dmg/$PKGNAME.pkg
+fi
 mv "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/dmg/
 hdiutil create -fs HFS+ -volname $PKGNAME-$VERSION \
 	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION.dmg
+if [ "$OSX_APP_CERT_NAME" != "" ]; then
+	codesign -s "$OSX_APP_CERT_NAME" --timestamp $TMPDIR/$PKGNAME-$VERSION.dmg
+	codesign -vv $TMPDIR/$PKGNAME-$VERSION.dmg
+fi
 cp $TMPDIR/$PKGNAME-$VERSION.dmg .
 
 exit
