@@ -41,7 +41,6 @@ safedirmove ()
 	return 0
 }
 
-SUFFIX=
 VIEWER="@CMAKE_PROJECT_NAME@ Viewer"
 LAUNCHER="$VIEWER"
 
@@ -56,8 +55,8 @@ DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 JAVADIR=@CMAKE_INSTALL_FULL_JAVADIR@
 MANDIR=@CMAKE_INSTALL_FULL_MANDIR@
 
-if [ -f $PKGNAME-$VERSION$SUFFIX.dmg ]; then
-	rm -f $PKGNAME-$VERSION$SUFFIX.dmg
+if [ -f $PKGNAME-$VERSION.dmg ]; then
+	rm -f $PKGNAME-$VERSION.dmg
 fi
 
 umask 022
@@ -81,7 +80,7 @@ safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tm
 
 mkdir -p $TMPDIR/pkg/
 install -m 644 $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
-install -m 644 pkgscripts/Distribution$SUFFIX.xml $TMPDIR/pkg/Distribution.xml
+install -m 644 pkgscripts/Distribution.xml $TMPDIR/pkg/Distribution.xml
 mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
@@ -92,7 +91,7 @@ install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
 osacompile -t APPL -a i386 -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
-cp -RX "$VIEWER$SUFFIX.app" "$PKGROOT/Applications/$PROJECT/$VIEWER.app"
+cp -RX "$VIEWER.app" "$PKGROOT/Applications/$PROJECT/$VIEWER.app"
 cp -RX "$TMPDIR/$VIEWER (Listen Mode).app" "$PKGROOT/Applications/$PROJECT/"
 cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
 echo "\"/Applications/$PROJECT/$VIEWER.app/Contents/MacOS/$LAUNCHER\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
@@ -106,7 +105,7 @@ productbuild --distribution $TMPDIR/pkg/Distribution.xml --package-path \
 	$TMPDIR/pkg/ --resources $TMPDIR/pkg/ $TMPDIR/dmg/$PKGNAME.pkg
 mv "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/dmg/
 hdiutil create -fs HFS+ -volname $PKGNAME-$VERSION \
-	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION$SUFFIX.dmg
-cp $TMPDIR/$PKGNAME-$VERSION$SUFFIX.dmg .
+	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION.dmg
+cp $TMPDIR/$PKGNAME-$VERSION.dmg .
 
 exit
