@@ -1,4 +1,4 @@
-/*  Copyright (C)2015-2018 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2019 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -548,7 +548,7 @@ JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputE
         valuators[i] = e.button.axis_data[i];
       (*env)->SetIntArrayRegion(env, jvaluators, 0, e.button.axes_count,
                                 valuators);
-      retval = JNI_TRUE;
+      return JNI_TRUE;
 
     }
   }

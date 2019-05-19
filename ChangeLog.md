@@ -134,6 +134,15 @@ rejects all new connections once this limit has been reached.  The upper limit
 for `-maxconnections` should be low enough to avoid the aforementioned EMFILE
 error and infinite loop.
 
+6. Fixed an issue in the Linux/Un\*x TurboVNC Viewer whereby, if multiple
+buttons on an extended input device (such as a drawing tablet) were pressed or
+released in rapid succession, some of those button events could accidentally be
+discarded by the TurboVNC Helper under certain circumstances, leading to a loss
+of synchronization between the client's and the TurboVNC session's extended
+input device button state.  From the point of view of applications running in
+the TurboVNC session, the extended input device buttons appeared to stick in
+the down or up position.
+
 
 2.2.1
 =====

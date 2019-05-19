@@ -41,7 +41,6 @@ safedirmove ()
 	return 0
 }
 
-SUFFIX=
 VIEWER="@CMAKE_PROJECT_NAME@ Viewer"
 LAUNCHER="$VIEWER"
 
@@ -55,9 +54,11 @@ BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
 DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 JAVADIR=@CMAKE_INSTALL_FULL_JAVADIR@
 MANDIR=@CMAKE_INSTALL_FULL_MANDIR@
+OSX_APP_CERT_NAME="@OSX_APP_CERT_NAME@"
+OSX_INST_CERT_NAME="@OSX_INST_CERT_NAME@"
 
-if [ -f $PKGNAME-$VERSION$SUFFIX.dmg ]; then
-	rm -f $PKGNAME-$VERSION$SUFFIX.dmg
+if [ -f $PKGNAME-$VERSION.dmg ]; then
+	rm -f $PKGNAME-$VERSION.dmg
 fi
 
 umask 022
@@ -85,7 +86,7 @@ safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tm
 
 mkdir -p $TMPDIR/pkg/
 install -m 644 $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
-install -m 644 pkgscripts/Distribution$SUFFIX.xml $TMPDIR/pkg/Distribution.xml
+install -m 644 pkgscripts/Distribution.xml $TMPDIR/pkg/Distribution.xml
 mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
@@ -96,7 +97,7 @@ install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
 osacompile -t APPL -a i386 -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
-cp -RX "$VIEWER$SUFFIX.app" "$PKGROOT/Applications/$PROJECT/$VIEWER.app"
+cp -RX "$VIEWER.app" "$PKGROOT/Applications/$PROJECT/$VIEWER.app"
 cp -RX "$TMPDIR/$VIEWER (Listen Mode).app" "$PKGROOT/Applications/$PROJECT/"
 cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
 echo "\"/Applications/$PROJECT/$VIEWER.app/Contents/MacOS/$LAUNCHER\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
@@ -106,11 +107,25 @@ mkdir $TMPDIR/dmg
 pkgbuild --root $PKGROOT --component-plist pkgscripts/Package.plist \
 	--version $VERSION.$BUILD --identifier @PKGID@ \
 	$TMPDIR/pkg/$PKGNAME.pkg
+SUFFIX=
+if [ "$OSX_INST_CERT_NAME" != "" ]; then
+	SUFFIX=-unsigned
+fi
 productbuild --distribution $TMPDIR/pkg/Distribution.xml --package-path \
-	$TMPDIR/pkg/ --resources $TMPDIR/pkg/ $TMPDIR/dmg/$PKGNAME.pkg
+	$TMPDIR/pkg/ --resources $TMPDIR/pkg/ $TMPDIR/dmg/$PKGNAME$SUFFIX.pkg
+if [ "$OSX_INST_CERT_NAME" != "" ]; then
+	productsign --sign "$OSX_INST_CERT_NAME" --timestamp \
+		$TMPDIR/dmg/$PKGNAME$SUFFIX.pkg $TMPDIR/dmg/$PKGNAME.pkg
+	rm -r $TMPDIR/dmg/$PKGNAME$SUFFIX.pkg
+	pkgutil --check-signature $TMPDIR/dmg/$PKGNAME.pkg
+fi
 mv "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/dmg/
 hdiutil create -fs HFS+ -volname $PKGNAME-$VERSION \
-	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION$SUFFIX.dmg
-cp $TMPDIR/$PKGNAME-$VERSION$SUFFIX.dmg .
+	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION.dmg
+if [ "$OSX_APP_CERT_NAME" != "" ]; then
+	codesign -s "$OSX_APP_CERT_NAME" --timestamp $TMPDIR/$PKGNAME-$VERSION.dmg
+	codesign -vv $TMPDIR/$PKGNAME-$VERSION.dmg
+fi
+cp $TMPDIR/$PKGNAME-$VERSION.dmg .
 
 exit
