@@ -93,6 +93,10 @@ install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
 osacompile -t APPL -a i386 -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
+if [ "$OSX_APP_CERT_NAME" != "" ]; then
+	codesign -s "$OSX_APP_CERT_NAME" --timestamp "$TMPDIR/$VIEWER (Listen Mode).app"
+	codesign -vv "$TMPDIR/$VIEWER (Listen Mode).app"
+fi
 cp -RX "$VIEWER.app" "$PKGROOT/Applications/$PROJECT/$VIEWER.app"
 cp -RX "$TMPDIR/$VIEWER (Listen Mode).app" "$PKGROOT/Applications/$PROJECT/"
 cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
