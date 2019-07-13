@@ -1,3 +1,12 @@
+2.2.3
+=====
+
+### Significant changes relative to 2.2.2:
+
+1. The Elliptic Curve Diffie-Hellman (ECDH) key exchange algorithm is now
+supported by the TurboVNC Server when using OpenSSL 1.0.2 or later.
+
+
 2.2.2
 =====
 

@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 2011 Gernot Tenchio
- *  Copyright (C) 2015, 2017 D. R. Commander
+ *  Copyright (C) 2015, 2017, 2019 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,9 @@ static void rfbErr(const char *format, ...);
 
 #ifndef SSL_CTRL_OPTIONS
 #define SSL_CTRL_OPTIONS 32
+#endif
+#ifndef SSL_CTRL_SET_ECDH_AUTO
+#define SSL_CTRL_SET_ECDH_AUTO 94
 #endif
 #ifndef OPENSSL_INIT_LOAD_CRYPTO_STRINGS
 #define OPENSSL_INIT_LOAD_CRYPTO_STRINGS 0x00000002L
@@ -406,6 +409,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     }
     rfbLog("Using X.509 private key file %s\n", keyfile);
   }
+  ssl.SSL_CTX_ctrl(ctx->ssl_ctx, SSL_CTRL_SET_ECDH_AUTO, 1, NULL);
   if ((ctx->ssl = ssl.SSL_new(ctx->ssl_ctx)) == NULL) {
     rfbssl_error("SSL_new()");
     goto bailout;
