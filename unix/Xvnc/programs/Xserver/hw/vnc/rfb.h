@@ -605,6 +605,7 @@ extern char *rfbAuthPasswdFile;
 #if USETLS
 extern char *rfbAuthX509Cert;
 extern char *rfbAuthX509Key;
+extern char *rfbAuthCipherSuites;
 #endif
 
 extern void rfbAuthNewClient(rfbClientPtr cl);

@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2019 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -77,6 +77,7 @@ int rfbAuthOTPValueLen = 0;
 #if USETLS
 char *rfbAuthX509Cert = NULL;
 char *rfbAuthX509Key = NULL;
+char *rfbAuthCipherSuites = NULL;
 #endif
 
 
@@ -627,6 +628,20 @@ static void ReadConfigFile(void)
       setSecTypes(&buf2[n], FALSE);
       continue;
     }
+
+#ifdef USETLS
+    n = 24;
+    if (!strncmp(buf2, "permitted-cipher-suites=", n)) {
+      if (buf2[n] == '\0')
+        FatalError("ERROR in %s: permitted-cipher-suites is empty!",
+                   rfbAuthConfigFile);
+
+      if ((rfbAuthCipherSuites = strdup(&buf2[n])) == NULL)
+        FatalError("rfbAuthInit strdup: %s", strerror(errno));
+
+      continue;
+    }
+#endif
 
     n = 17;
     if (!strncmp(buf2, "max-idle-timeout=", n)) {
