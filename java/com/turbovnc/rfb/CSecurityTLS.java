@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -156,6 +157,8 @@ public class CSecurityTLS extends CSecurity {
     try {
       manager = new SSLEngineManager(engine, is, os);
       manager.doHandshake();
+      vlog.debug("Negotiated cipher suite: " +
+                 manager.getSession().getCipherSuite());
     } catch (java.lang.Exception e) {
       if (e.getMessage().equals("X.509 certificate not trusted"))
         throw new WarningException(e.getMessage());
@@ -198,8 +201,12 @@ public class CSecurityTLS extends CSecurity {
         enabled.add(supported[i]);
     engine.setEnabledProtocols(enabled.toArray(new String[0]));
 
-    if (anon) {
+    String cipherProperty = System.getProperty("turbovnc.ciphersuites");
+    if (cipherProperty != null)
+      supported = cipherProperty.split("\\s*,\\s*");
+    else
       supported = engine.getSupportedCipherSuites();
+    if (anon) {
       enabled = new ArrayList<String>();
       // prefer ECDH over DHE
       for (int i = 0; i < supported.length; i++)
@@ -210,8 +217,19 @@ public class CSecurityTLS extends CSecurity {
           enabled.add(supported[i]);
       engine.setEnabledCipherSuites(enabled.toArray(new String[0]));
     } else {
-      engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
+      engine.setEnabledCipherSuites(supported);
     }
+
+    supported = engine.getEnabledCipherSuites();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < supported.length; i++) {
+      sb.append(supported[i]);
+      if (i < supported.length - 1)
+        sb.append(", ");
+    }
+    vlog.debug("Available cipher suites: " + sb.toString());
+    if (cipherProperty == null)
+      vlog.debug("    (Set the turbovnc.ciphersuites system property to override.)");
   }
 
   class MyX509TrustManager implements X509TrustManager {

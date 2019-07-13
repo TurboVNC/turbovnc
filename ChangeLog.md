@@ -6,6 +6,11 @@
 1. The Elliptic Curve Diffie-Hellman (ECDH) key exchange algorithm is now
 supported by the TurboVNC Server when using OpenSSL 1.0.2 or later.
 
+2. A new security configuration file directive (`permitted-cipher-suites`) in
+the TurboVNC Server and a new Java system property (`turbovnc.ciphersuites`) in
+the Java TurboVNC Viewer can now be used to specify a list of permitted TLS
+cipher suites for the TLS* and X509* security types.
+
 
 2.2.2
 =====

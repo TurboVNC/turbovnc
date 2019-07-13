@@ -96,6 +96,8 @@ typedef int (*OPENSSL_init_ssl_type) (uint64_t, const OPENSSL_INIT_SETTINGS *);
 typedef int (*SSL_library_init_type) (void);
 typedef void (*SSL_load_error_strings_type) (void);
 typedef void (*SSL_free_type) (SSL *);
+typedef const char *(*SSL_get_cipher_list_type) (const SSL *, int);
+typedef CONST SSL_CIPHER *(*SSL_get_current_cipher_type) (const SSL *);
 typedef int (*SSL_get_error_type) (const SSL *, int);
 typedef SSL *(*SSL_new_type) (SSL_CTX *);
 typedef int (*SSL_pending_type) (const SSL *);
@@ -103,6 +105,7 @@ typedef int (*SSL_read_type) (SSL *, void *, int);
 typedef int (*SSL_set_fd_type) (SSL *, int);
 typedef int (*SSL_shutdown_type) (SSL *);
 typedef int (*SSL_write_type) (SSL *, const void *, int);
+typedef const char *(*SSL_CIPHER_get_name_type) (const SSL_CIPHER *);
 typedef long (*SSL_CTX_ctrl_type) (SSL_CTX *, int, long, void *);
 typedef void (*SSL_CTX_free_type) (SSL_CTX *);
 typedef SSL_CTX *(*SSL_CTX_new_type) (CONST SSL_METHOD *);
@@ -119,6 +122,8 @@ struct rfbssl_functions {
   SSL_library_init_type SSL_library_init;
   SSL_load_error_strings_type SSL_load_error_strings;
   SSL_free_type SSL_free;
+  SSL_get_cipher_list_type SSL_get_cipher_list;
+  SSL_get_current_cipher_type SSL_get_current_cipher;
   SSL_get_error_type SSL_get_error;
   SSL_new_type SSL_new;
   SSL_pending_type SSL_pending;
@@ -126,6 +131,7 @@ struct rfbssl_functions {
   SSL_set_fd_type SSL_set_fd;
   SSL_shutdown_type SSL_shutdown;
   SSL_write_type SSL_write;
+  SSL_CIPHER_get_name_type SSL_CIPHER_get_name;
   SSL_CTX_ctrl_type SSL_CTX_ctrl;
   SSL_CTX_free_type SSL_CTX_free;
   SSL_CTX_new_type SSL_CTX_new;
@@ -146,8 +152,9 @@ static struct rfbssl_functions ssl = {
 #else
   NULL, SSL_library_init, SSL_load_error_strings,
 #endif
-  SSL_free, SSL_get_error, SSL_new, SSL_pending, SSL_read, SSL_set_fd,
-  SSL_shutdown, SSL_write, SSL_CTX_ctrl, SSL_CTX_free, SSL_CTX_new,
+  SSL_free, SSL_get_cipher_list, SSL_get_current_cipher, SSL_get_error,
+  SSL_new, SSL_pending, SSL_read, SSL_set_fd, SSL_shutdown, SSL_write,
+  SSL_CIPHER_get_name, SSL_CTX_ctrl, SSL_CTX_free, SSL_CTX_new,
   SSL_CTX_set_cipher_list,
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
   SSL_CTX_set_security_level,
@@ -229,6 +236,8 @@ static int loadFunctions(void)
       LOADSYM(ssl, SSL_load_error_strings);
     }
     LOADSYM(ssl, SSL_free);
+    LOADSYM(ssl, SSL_get_cipher_list);
+    LOADSYM(ssl, SSL_get_current_cipher);
     LOADSYM(ssl, SSL_get_error);
     LOADSYM(ssl, SSL_new);
     LOADSYM(ssl, SSL_pending);
@@ -236,6 +245,7 @@ static int loadFunctions(void)
     LOADSYM(ssl, SSL_set_fd);
     LOADSYM(ssl, SSL_shutdown);
     LOADSYM(ssl, SSL_write);
+    LOADSYM(ssl, SSL_CIPHER_get_name);
     LOADSYM(ssl, SSL_CTX_ctrl);
     LOADSYM(ssl, SSL_CTX_free);
     LOADSYM(ssl, SSL_CTX_new);
@@ -335,7 +345,8 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
   struct rfbssl_ctx *ctx = NULL;
   DH *dh = NULL;
   DSA *dsa = NULL;
-  int flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3;
+  int flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3, priority = 0;
+  const char *list = NULL;
 
 #ifdef DLOPENSSL
   if (loadFunctions() == -1)
@@ -385,7 +396,9 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
       rfbssl_error("SSL_CTX_set_tmp_dh()");
       goto bailout;
     }
-    if (!ssl.SSL_CTX_set_cipher_list(ctx->ssl_ctx, "aNULL")) {
+    if (!ssl.SSL_CTX_set_cipher_list(ctx->ssl_ctx, rfbAuthCipherSuites ?
+                                                   rfbAuthCipherSuites :
+                                                   "aNULL")) {
       rfbssl_error("SSL_CTX_set_cipher_list()");
       goto bailout;
     }
@@ -408,12 +421,26 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
       goto bailout;
     }
     rfbLog("Using X.509 private key file %s\n", keyfile);
+    if (rfbAuthCipherSuites) {
+      if (!ssl.SSL_CTX_set_cipher_list(ctx->ssl_ctx, rfbAuthCipherSuites)) {
+        rfbssl_error("SSL_CTX_set_cipher_list()");
+        goto bailout;
+      }
+    }
   }
   ssl.SSL_CTX_ctrl(ctx->ssl_ctx, SSL_CTRL_SET_ECDH_AUTO, 1, NULL);
   if ((ctx->ssl = ssl.SSL_new(ctx->ssl_ctx)) == NULL) {
     rfbssl_error("SSL_new()");
     goto bailout;
   }
+  rfbLog("Available cipher suites: ");
+  list = ssl.SSL_get_cipher_list(ctx->ssl, priority++);
+  while (list) {
+    fprintf(stderr, "%s", list);
+    list = ssl.SSL_get_cipher_list(ctx->ssl, priority++);
+    if (list) fprintf(stderr, ":");
+  }
+  fprintf(stderr, "\n");
   if (!(ssl.SSL_set_fd(ctx->ssl, cl->sock))) {
     rfbssl_error("SSL_set_fd()");
     goto bailout;
@@ -455,6 +482,8 @@ int rfbssl_accept(rfbClientPtr cl)
       rfbssl_error("SSL_accept()");
     return -1;
   }
+  rfbLog("Negotiated cipher suite: %s\n",
+         ssl.SSL_CIPHER_get_name(ssl.SSL_get_current_cipher(ctx->ssl)));
 
   return 0;
 }
