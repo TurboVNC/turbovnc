@@ -1,4 +1,4 @@
-/*  Copyright (C)2015-2017 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2017, 2019 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -125,7 +125,8 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
     case NSOtherMouseDragged:  // 27
       if (!g_object || !g_methodID) break;
 
-      if ([event subtype] != NSTabletPointEventSubtype)
+      if ([event subtype] != NSTabletPointEventSubtype &&
+          [event type] <= NSRightMouseDragged)
         break;
       if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {
         NSLog(@"Couldn't attach to JVM");

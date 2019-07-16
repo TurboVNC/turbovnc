@@ -11,6 +11,9 @@ the TurboVNC Server and a new Java system property (`turbovnc.ciphersuites`) in
 the Java TurboVNC Viewer can now be used to specify a list of permitted TLS
 cipher suites for the TLS* and X509* security types.
 
+3. Fixed an issue in the Mac TurboVNC Viewer whereby drawing tablet stylus
+buttons were ignored or mapped to incorrect mouse button events.
+
 
 2.2.2
 =====

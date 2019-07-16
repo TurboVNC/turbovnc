@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2019 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -706,11 +706,11 @@ public class Viewport extends JFrame {
               lastEvent.buttonNumber = 0;
               if (type == NS_LEFT_MOUSE_DOWN || type == NS_LEFT_MOUSE_UP)
                 lastEvent.buttonNumber = 1;
-              else if (type == NS_RIGHT_MOUSE_DOWN ||
-                       type == NS_RIGHT_MOUSE_UP)
-                lastEvent.buttonNumber = 2;
               else if (type == NS_OTHER_MOUSE_DOWN ||
                        type == NS_OTHER_MOUSE_UP)
+                lastEvent.buttonNumber = 2;
+              else if (type == NS_RIGHT_MOUSE_DOWN ||
+                       type == NS_RIGHT_MOUSE_UP)
                 lastEvent.buttonNumber = 3;
 
               lastEvent.firstValuator = 0;
