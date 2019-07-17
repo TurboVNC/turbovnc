@@ -176,9 +176,9 @@ static void *sslHandle = NULL, *cryptoHandle = NULL;
 
 #ifndef __APPLE__
 #define SUFFIXES 20
-static const char *suffix[SUFFIXES] = { "0.9.8", "1.0.0", "1.0.1", "1.0.2",
-  "1.1", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17",
-  "18", "19", "20" };
+static const char *suffix[SUFFIXES] = { "1.1", "1.0.2", "1.0.1", "1.0.0",
+  "0.9.8", "20", "19", "18", "17", "16", "15", "14", "13", "12", "11", "10",
+  "9", "8", "7", "6" };
 #endif
 
 #define LOADSYM(lib, sym) {  \
