@@ -172,18 +172,14 @@ NMake.)
 
 ### TLS Encryption Support
 
-The TurboVNC Server provides TLS encryption using either OpenSSL or GnuTLS.
-OpenSSL is the default because it generally performs the best, but it may be
-desirable to use GnuTLS under certain circumstances.  To do this, add
-`-DTVNC_USETLS=GnuTLS` to the CMake command line when configuring the TurboVNC
-Server.  Add `-DTVNC_USETLS=0` to the CMake command line to disable TLS
-encryption.
+The TurboVNC Server provides TLS encryption using OpenSSL.  Add
+`-DTVNC_USETLS=0` to the CMake command line to disable TLS encryption.
 
-The default when using OpenSSL is to dynamically load the OpenSSL symbols from
-libssl and libcrypto using `dlopen()` and `dlsym()`.  This ensures maximum
-compatibility across different O/S distributions.  You can disable this
-behavior and link directly with libssl and libcrypto by adding
-`-DTVNC_DLOPENSSL=0` to the CMake command line.
+The default is to dynamically load the OpenSSL symbols from libssl and
+libcrypto using `dlopen()` and `dlsym()`.  This ensures maximum compatibility
+across different O/S distributions.  You can disable this behavior and link
+directly with libssl and libcrypto by adding `-DTVNC_DLOPENSSL=0` to the CMake
+command line.
 
 
 Build Recipes

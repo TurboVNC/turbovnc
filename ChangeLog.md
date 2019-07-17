@@ -92,6 +92,15 @@ will no longer automatically be created if it doesn't exist.
 `$numThreads` turbovncserver.conf variables are now deprecated, since
 `$serverArgs` can be used to accomplish the same thing.
 
+15. The TurboVNC Server can no longer be built using GnuTLS.  Supporting GnuTLS
+was a stopgap measure intended for power users who needed access to encryption
+features that, at the time, either OpenSSL or TurboVNC's OpenSSL wrapper did
+not provide.  However, that feature gap has since been closed, and given the
+fact that TurboVNC's OpenSSL wrapper has better performance and receives more
+attention from the TurboVNC developers and user community, there is no
+compelling reason to use the GnuTLS wrapper anymore.  The 2.2.x version of the
+TurboVNC Server will continue to support GnuTLS on a break/fix basis.
+
 
 2.2.3
 =====
