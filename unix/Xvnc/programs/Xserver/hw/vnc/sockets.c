@@ -229,6 +229,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
           WriteExact(&tempCl, (char *)&errMsgLenWire, sizeof(CARD32)) >= 0 &&
           WriteExact(&tempCl, (char *)errMsg, errMsgLen) >= 0) { }
 
+      free(tempCl.host);
       close(sock);
       return;
     }
