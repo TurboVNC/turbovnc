@@ -48,7 +48,8 @@ if(WIN32)
   set(SEP ";")
 endif()
 execute_process(COMMAND "${Java_PATH}/jlink"
-  -p "jretmp/VncViewer.jar${SEP}${Java_PATH}/../jmods" --add-modules VncViewer
+  -p "jretmp/VncViewer.jar${SEP}${Java_PATH}/../jmods"
+    --add-modules VncViewer,jdk.crypto.cryptoki,jdk.crypto.ec
     --limit-modules VncViewer --output ${JRE_OUTPUT_DIR}
     --ignore-signing-information --compress 2 --no-header-files --no-man-pages
   RESULT_VARIABLE RESULT)
