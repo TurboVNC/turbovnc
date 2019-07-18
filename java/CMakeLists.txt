@@ -307,7 +307,7 @@ endif()
 
 option(TVNC_INCLUDEJRE "Include a custom Java Runtime Environment (JRE) with the TurboVNC Viewer"
 	FALSE)
-boolean_number(TVNC_INCLUDEJRE)
+boolean_number(TVNC_INCLUDEJRE PARENT_SCOPE)
 report_option(TVNC_INCLUDEJRE "Custom JRE")
 
 if(TVNC_INCLUDEJRE)
