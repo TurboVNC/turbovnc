@@ -38,8 +38,30 @@ install -m 755 @TJPEG_JNILIBRARY@ "$APP/Contents/Resources/Native/"
 install -m 755 java/libturbovnchelper.dylib "$APP/Contents/Resources/Native/"
 
 if [ "$OSX_APP_CERT_NAME" != "" ]; then
-	codesign -s "$OSX_APP_CERT_NAME" --timestamp "$APP"
-	codesign -vv "$APP"
+	if [ "$INCLUDEJRE" = "1" ]; then
+		# codesign assumes that directories with dots are frameworks, so we have to
+		# rename those directories in the JRE.  Fortunately, all they contain is
+		# license documents.
+		pushd "$APP/Contents/Plugins/jre/Contents/Home/legal/"
+		for dir in *; do
+			mv "$dir" "`echo $dir | sed 's/\./_/g'`"
+		done
+		# We also need to temporarily make the license documents writeable.
+		find . -perm 444 -print | while read file; do
+			chmod 644 "$file"
+		done
+		popd
+	fi
+	codesign --deep -s "$OSX_APP_CERT_NAME" --timestamp "$APP"
+	if [ "$INCLUDEJRE" = "1" ]; then
+		# Re-apply read-only permissions to the license documents
+		pushd "$APP/Contents/Plugins/jre/Contents/Home/legal/"
+		find . -perm 644 -print | while read file; do
+			chmod 444 "$file"
+		done
+		popd
+	fi
+	codesign --deep -vv "$APP"
 fi
 
 exit
