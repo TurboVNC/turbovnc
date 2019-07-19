@@ -509,7 +509,8 @@ static Bool validateString(char *str)
   char *ptr;
 
   for (ptr = str; *ptr != '\0'; ptr++) {
-    if (!isalnum(*ptr) && *ptr != '_' && *ptr != '.') {
+    if (!isalnum(*ptr) && *ptr != '_' && *ptr != '.' && *ptr != '@' &&
+        *ptr != ':') {
       if (*ptr == '+')
         *ptr = ' ';
       else
