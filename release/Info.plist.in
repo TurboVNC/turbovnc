@@ -45,7 +45,7 @@
 	<string>com.turbovnc.vncviewer.VncViewer</string>
 	<key>JVMOptions</key>
 	<array>
-		<string>-server</string>
+		<string>-server</string>@EAWT_ADD_MODULES@
 	</array>
 </dict>
 </plist>

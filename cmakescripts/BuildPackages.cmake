@@ -119,6 +119,10 @@ string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "^:" "" CMAKE_INSTALL_MACPREFIX
 	${CMAKE_INSTALL_MACPREFIX})
 
+set(EAWT_ADD_MODULES "")
+if(TVNC_INCLUDEJRE)
+	set(EAWT_ADD_MODULES "\n\t\t<string>--add-exports</string>\n\t\t<string>java.desktop/com.apple.eawt=VncViewer</string>")
+endif()
 configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
 configure_file(release/makemacapp.in pkgscripts/makemacapp)
 configure_file(release/Distribution.xml.in pkgscripts/Distribution.xml)

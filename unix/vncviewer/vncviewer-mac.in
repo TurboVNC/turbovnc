@@ -4,7 +4,7 @@ set -e
 BINDIR=`dirname $0`
 if [ "$JAVA_HOME" = "" ]; then
 	if [ -d $BINDIR/../java/jre ]; then
-		JAVA=$BINDIR/../java/jre/bin/java
+		JAVA="$BINDIR/../java/jre/bin/java --add-exports java.desktop/com.apple.eawt=VncViewer"
 	else
 		JAVA=java
 	fi
