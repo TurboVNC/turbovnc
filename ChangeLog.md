@@ -1,7 +1,7 @@
 3.0 pre-beta
 ============
 
-### Significant changes relative to 2.2.1:
+### Significant changes relative to 2.2.3:
 
 1. Since Java 11 introduced the ability to create a custom Java Runtime
 Environment (JRE) with only the modules that the TurboVNC Viewer needs, it has
