@@ -118,6 +118,11 @@ cipher suites for the TLS* and X509* security types.
 3. Fixed an issue in the Mac TurboVNC Viewer whereby drawing tablet stylus
 buttons were ignored or mapped to incorrect mouse button events.
 
+4. The built-in HTTP server in the TurboVNC Server now accepts `:` and `@` in
+any TurboVNC Viewer parameters that are appended to the URL.  This allows for
+specifying an SSH user name in the `Via` parameter and an RFB display/port in
+the `Server` parameter.
+
 
 2.2.2
 =====
