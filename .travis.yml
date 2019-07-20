@@ -72,7 +72,7 @@ before_install:
         wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm &&
         popd;
       elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
-        export PATH=/Applications/CMake.app/Contents/bin:$PATH &&
+        export PATH=/Applications/CMake.app/Contents/bin:$PATH;
       fi &&
       git clone --depth=1 https://github.com/turbovnc/buildscripts.git -b $TRAVIS_BRANCH ~/src/buildscripts &&
       if [ -n "$encrypted_c6f652756c51_iv" ]; then
