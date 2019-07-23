@@ -19,6 +19,11 @@ any TurboVNC Viewer parameters that are appended to the URL.  This allows for
 specifying an SSH user name in the `Via` parameter and an RFB display/port in
 the `Server` parameter.
 
+5. The X RandR outputs in the TurboVNC Server have been renamed to "VNC-0",
+"VNC-1", etc.  This prevents a dialog ("Authentication is required to create a
+color managed device") from popping up when using the GNOME 3 window manager on
+recent Linux distributions, including Fedora, RHEL 8, and Ubuntu 18 and later.
+
 
 2.2.2
 =====

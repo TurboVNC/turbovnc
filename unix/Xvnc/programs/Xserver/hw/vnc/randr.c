@@ -228,7 +228,7 @@ static Bool vncCreateOutput(ScreenPtr pScreen, rfbScreenInfo *screen)
 
   if ((crtc = RRCrtcCreate(pScreen, NULL)) == NULL) return FALSE;
   RRCrtcGammaSetSize(crtc, 256);
-  snprintf(name, 80, "TurboVNC-%d", index++);
+  snprintf(name, 80, "VNC-%d", index++);
   if (!(screen->output = RROutputCreate(pScreen, name, strlen(name), NULL)))
     return FALSE;
   RROutputSetCrtcs(screen->output, &crtc, 1);
