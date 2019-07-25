@@ -23,7 +23,8 @@ target_link_libraries(turbovnchelper "-framework Cocoa")
 set(OSX_PLATFORMDIR /Applications/Xcode46.app/Contents/Developer)
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/JavaAppLauncher
 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/JavaAppLauncher.m
-	COMMAND ${OSX_PLATFORMDIR}/usr/bin/gcc -I${JAVA_INCLUDE_PATH}
+	COMMAND ${OSX_PLATFORMDIR}/usr/bin/gcc
+		-I${JAVA_INCLUDE_PATH} -I${JAVA_INCLUDE_PATH2}
 		-isysroot ${OSX_PLATFORMDIR}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
 		-mmacosx-version-min=10.7 -framework Cocoa
 		${CMAKE_CURRENT_SOURCE_DIR}/JavaAppLauncher.m
