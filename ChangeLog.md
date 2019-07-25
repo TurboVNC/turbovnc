@@ -24,6 +24,10 @@ the `Server` parameter.
 color managed device") from popping up when using the GNOME 3 window manager on
 recent Linux distributions, including Fedora, RHEL 8, and Ubuntu 18 and later.
 
+6. Fixed a packaging regression, introduced by 2.2 beta1[17], that prevented
+full-screen multi-screen spanning from working properly with the Mac TurboVNC
+Viewer app.
+
 
 2.2.2
 =====
