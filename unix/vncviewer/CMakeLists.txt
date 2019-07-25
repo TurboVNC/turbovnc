@@ -16,9 +16,21 @@ set_target_properties(turbovnchelper PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
 target_link_libraries(turbovnchelper "-framework Cocoa")
 
-add_executable(JavaAppLauncher JavaAppLauncher.m)
-set_source_files_properties(JavaAppLauncher.m PROPERTIES LANGUAGE C)
-target_link_libraries(JavaAppLauncher "-framework Cocoa")
+# This is nasty, but for reasons unexplained, full-screen multi-screen spanning
+# doesn't work with the Mac TurboVNC Viewer app unless JavaAppLauncher is built
+# with an older OS X SDK.  Thus, we include a binary of it in the source tree,
+# and it can only be rebuilt by building the "JavaAppLauncher" target.
+set(OSX_PLATFORMDIR /Applications/Xcode46.app/Contents/Developer)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/JavaAppLauncher
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/JavaAppLauncher.m
+	COMMAND ${OSX_PLATFORMDIR}/usr/bin/gcc
+		-I${JAVA_INCLUDE_PATH} -I${JAVA_INCLUDE_PATH2}
+		-isysroot ${OSX_PLATFORMDIR}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
+		-mmacosx-version-min=10.7 -framework Cocoa
+		${CMAKE_CURRENT_SOURCE_DIR}/JavaAppLauncher.m
+		-o ${CMAKE_CURRENT_SOURCE_DIR}/JavaAppLauncher)
+add_custom_target(JavaAppLauncher
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/JavaAppLauncher)
 
 install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
