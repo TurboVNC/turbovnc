@@ -1,6 +1,6 @@
 /*
  * Copyright 2012, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013, 2017-2018, D. R. Commander. All rights reserved.
+ * Copyright 2013, 2017-2019, D. R. Commander. All rights reserved.
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -97,27 +97,27 @@ int launch(char *commandName) {
 
   // Locate the JLI_Launch() function
   const char *libjliPath = NULL;
-  NSString *env =
-    [[[NSProcessInfo processInfo]environment]objectForKey:@"JAVA_HOME"];
-  if (env != nil && [env length] > 0) {
-    void *tmpLib;
-
-    libjliPath =
-      [[env stringByAppendingPathComponent:@"jre/lib/jli/libjli.dylib"]
-       fileSystemRepresentation];
-    if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil)
-      libjliPath =
-        [[env stringByAppendingPathComponent:@"lib/jli/libjli.dylib"]
-         fileSystemRepresentation];
-    else
-      dlclose(tmpLib);
+  NSString *runtime = [infoDictionary objectForKey:@JVM_RUNTIME_KEY];
+  if (runtime != nil) {
+    NSString *runtimePath = [[[NSBundle mainBundle] builtInPlugInsPath]
+                             stringByAppendingPathComponent:runtime];
+    libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/lib/jli/libjli.dylib"]
+                  fileSystemRepresentation];
   } else {
-    NSString *runtime = [infoDictionary objectForKey:@JVM_RUNTIME_KEY];
-    if (runtime != nil) {
-      NSString *runtimePath = [[[NSBundle mainBundle] builtInPlugInsPath]
-                               stringByAppendingPathComponent:runtime];
-      libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/lib/jli/libjli.dylib"]
-                    fileSystemRepresentation];
+    NSString *env =
+      [[[NSProcessInfo processInfo]environment]objectForKey:@"JAVA_HOME"];
+    if (env != nil && [env length] > 0) {
+      void *tmpLib;
+
+      libjliPath =
+        [[env stringByAppendingPathComponent:@"jre/lib/jli/libjli.dylib"]
+         fileSystemRepresentation];
+      if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil)
+        libjliPath =
+          [[env stringByAppendingPathComponent:@"lib/jli/libjli.dylib"]
+           fileSystemRepresentation];
+      else
+        dlclose(tmpLib);
     } else
       libjliPath = LIBJLI_DYLIB;
   }

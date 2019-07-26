@@ -2,14 +2,14 @@
 set -e
 
 BINDIR=`dirname $0`
-if [ "$JAVA_HOME" = "" ]; then
-	if [ -d $BINDIR/../java/jre ]; then
-		JAVA="$BINDIR/../java/jre/bin/java --add-exports java.desktop/com.apple.eawt=VncViewer"
-	else
-		JAVA=java
-	fi
+if [ -d $BINDIR/../java/jre ]; then
+	JAVA="$BINDIR/../java/jre/bin/java --add-exports java.desktop/com.apple.eawt=VncViewer"
 else
-	JAVA="$JAVA_HOME/bin/java"
+	if [ "$JAVA_HOME" = "" ]; then
+		JAVA=java
+	else
+		JAVA="$JAVA_HOME/bin/java"
+	fi
 fi
 TVNC_JAVADIR=@CMAKE_INSTALL_FULL_JAVADIR@
 if [ -d $BINDIR/../java ]; then

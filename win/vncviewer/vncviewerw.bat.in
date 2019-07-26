@@ -1,12 +1,14 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
-if DEFINED JAVA_HOME goto java_home_defined
 
 if exist "%~d0%~p0java\jre" (
 	set JAVAW=%~d0%~p0java\jre\bin\javaw
 	set JAWT_PATH=%~d0%~p0java\jre\bin
 	goto jawt_path_defined
 )
+
+if DEFINED JAVA_HOME goto java_home_defined
+
 set JAVAW=javaw
 goto java_home_undefined
 

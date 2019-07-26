@@ -47,9 +47,7 @@ reuse it to run multiple commands), so it is affected by the `SSHConfig`,
 6. A custom JRE based on OpenJDK can now optionally be included in 64-bit
 TurboVNC installations and packages by setting the `TVNC_INCLUDEJRE` CMake
 variable to `1`.  When including a custom JRE, OpenJDK 11 or later must be
-used.  When using an installation of the TurboVNC Viewer that contains a custom
-JRE (including the official 64-bit TurboVNC packages), an external JRE can
-still be used at run time by setting the `JAVA_HOME` environment variable.
+used.
 
 7. The built-in HTTP server in the TurboVNC Server is no longer enabled by
 default.  This reflects the fact that Java Web Start is now a legacy

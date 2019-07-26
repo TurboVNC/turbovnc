@@ -38,9 +38,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 		</dict>
-	</array>
-	<key>JVMRuntime</key>
-	<key>jre</key>
+	</array>@JVM_RUNTIME_KEY@
 	<key>JVMMainClassName</key>
 	<string>com.turbovnc.vncviewer.VncViewer</string>
 	<key>JVMOptions</key>
