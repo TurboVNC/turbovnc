@@ -107,7 +107,8 @@ script:
         mkdir $HOME/rpmkeys &&
         wget --no-check-certificate "$LJT_GPG_KEY" -O $HOME/rpmkeys/LJT-GPG-KEY &&
         wget --no-check-certificate http://www.turbovnc.org/key/VGLPR-GPG-KEY -O $HOME/rpmkeys/VGLPR-GPG-KEY &&
-        docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-jni:/opt/libjpeg-turbo-jni -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -t dcommander/buildvnc:$TRAVIS_BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvnc -d /root/src/turbovnc -v" &&
+        mkdir -p ~/.openjdk &&
+        docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $TRAVIS_BUILD_DIR:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-jni:/opt/libjpeg-turbo-jni -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -v $HOME/.openjdk:/root/.openjdk -t dcommander/buildvnc:$TRAVIS_BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvnc -d /root/src/turbovnc -v" &&
         sudo chown -R travis:travis ~/src/vnc.nightly;
       else
         ~/src/buildscripts/buildvnc -d $TRAVIS_BUILD_DIR -v;
