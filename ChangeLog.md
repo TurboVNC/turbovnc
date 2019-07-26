@@ -6,17 +6,16 @@
 1. Since Java 11 introduced the ability to create a custom Java Runtime
 Environment (JRE) with only the modules that the TurboVNC Viewer needs, it has
 become possible to package the Windows/Java TurboVNC Viewer in such a way that
-it does not require a separate installation of Java (except on 32-bit systems,
-for which Java 11 is not available.)  Thus, the native Windows TurboVNC Viewer
-has been retired and replaced with the Java TurboVNC Viewer, which means that
-the Java TurboVNC Viewer is now the only TurboVNC Viewer.  The native Windows
-viewer will continue to be maintained in the 2.2.x branch on a break/fix basis
-only.  The native Windows viewer, owing to its use of raw Win32 GUI code rather
-than a modern GUI framework, has become difficult to maintain and even more
-difficult to extend.  Meanwhile, the Java viewer provides similar levels of
-performance and more features, including some features (TLS encryption and SSH
-tunneling, most notably) that would have been difficult to implement in the
-native viewer.
+it does not require a separate installation of Java.  Thus, the native Windows
+TurboVNC Viewer has been retired and replaced with the Java TurboVNC Viewer,
+which means that the Java TurboVNC Viewer is now the only TurboVNC Viewer.  The
+native Windows viewer will continue to be maintained in the 2.2.x branch on a
+break/fix basis only.  The native Windows viewer, owing to its use of raw Win32
+GUI code rather than a modern GUI framework, has become difficult to maintain
+and even more difficult to extend.  Meanwhile, the Java viewer provides similar
+levels of performance and more features, including some features (TLS
+encryption and SSH tunneling, most notably) that would have been difficult to
+implement in the native viewer.
 
 2. Added a screenshot feature to the TurboVNC Viewer that allows an image of
 the remote desktop to be saved to the client machine.
@@ -44,10 +43,10 @@ an external SSH client because of the need to leave the SSH session open and
 reuse it to run multiple commands), so it is affected by the `SSHConfig`,
 `SSHKey`, `SSHKeyFile`, `SSHKeyPass`, and `SSHPort` parameters.
 
-6. A custom JRE based on OpenJDK can now optionally be included in 64-bit
-TurboVNC installations and packages by setting the `TVNC_INCLUDEJRE` CMake
-variable to `1`.  When including a custom JRE, OpenJDK 11 or later must be
-used.
+6. A custom JRE based on OpenJDK can now optionally be included in 32-bit
+Windows and 64-bit Linux, Mac, and Windows TurboVNC installations and packages
+by setting the `TVNC_INCLUDEJRE` CMake variable to `1`.  When including a
+custom JRE, OpenJDK 11 or later must be used.
 
 7. The built-in HTTP server in the TurboVNC Server is no longer enabled by
 default.  This reflects the fact that Java Web Start is now a legacy

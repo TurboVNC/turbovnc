@@ -7,7 +7,6 @@ ArchitecturesInstallIn64BitMode=x64
 AppName=@CMAKE_PROJECT_NAME@ 64-bit
 AppVerName=@CMAKE_PROJECT_NAME@ 64-bit v@VERSION@ (@BUILD@)
 #else
-ArchitecturesAllowed=x86
 AppName=@CMAKE_PROJECT_NAME@
 AppVerName=@CMAKE_PROJECT_NAME@ v@VERSION@ (@BUILD@)
 #endif
@@ -81,13 +80,3 @@ Root: HKCR; Subkey: ".vnc"; ValueType: string; ValueName: ""; ValueData: "VncVie
 Root: HKCR; Subkey: "VncViewer.Config"; ValueType: string; ValueName: ""; ValueData: "VNCviewer Config File"; Flags: uninsdeletekey; Tasks: associate
 Root: HKCR; Subkey: "VncViewer.Config\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\vncviewerw.bat,0"; Tasks: associate
 Root: HKCR; Subkey: "VncViewer.Config\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vncviewerw.bat"" -config ""%1"""; Tasks: associate
-
-#ifndef WIN64
-[Code]
-function InitializeSetup(): Boolean;
-begin
-	MsgBox('NOTE: This version of the TurboVNC Viewer is for legacy 32-bit Windows systems only and requires a 32-bit (x86) installation of Java.',
-		mbInformation, MB_OK);
-	Result := true;
-end;
-#endif

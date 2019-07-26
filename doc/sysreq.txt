@@ -48,26 +48,20 @@
 	| Any 64-bit Intel-based Mac \
 	|
 | O/S \
-	| OS X 10.9 "Mavericks" or later \
+	| OS X 10.10 "Yosemite" or later \
 	|
 #OPT: hiCol=first
 
 ** Windows
 
-|| || Client (x86) || Client (x64) ||
+|| || Client ||
 | Recommended CPU \
 	| For optimal performance, the CPU should support SSE2 extensions. \
-	| {:} \
 	|
 | O/S \
-	| Windows Vista or later \
 	| Windows 7 or later \
 	|
 | Other \
-	| {list type=ul: \
-			{item:For optimal performance, the client display should have a 24-bit \
-				or 32-bit (True Color) color depth.} \
-			{item:[[http://www.java.com][Oracle Java]] 8}} \
 	| For optimal performance, the client display should have a 24-bit or \
 		32-bit (True Color) color depth. \
 	|
