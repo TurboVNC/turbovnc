@@ -43,6 +43,7 @@ addons:
 cache:
   directories:
     - $HOME/Library/Caches/Homebrew
+    - $HOME/.openjdk
 
 before_cache:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
