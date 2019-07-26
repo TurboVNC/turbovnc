@@ -1,9 +1,10 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 
-if exist "%~d0%~p0java\jre" (
-	set JAVAW=%~d0%~p0java\jre\bin\javaw
-	set JAWT_PATH=%~d0%~p0java\jre\bin
+set CUSTOMJREPATH=%~d0%~p0java\jre
+if exist "%CUSTOMJREPATH%" (
+	set JAVAW=!CUSTOMJREPATH!\bin\javaw
+	set JAWT_PATH=!CUSTOMJREPATH!\bin
 	goto jawt_path_defined
 )
 
