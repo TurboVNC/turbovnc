@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2014, 2017-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014, 2017-2019 D. R. Commander.  All Rights Reserved.
  *  Copyright 2016-2017 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
@@ -221,12 +221,14 @@ int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
   } else if (target == xaUTF8_STRING) {
     size_t inbytesleft = clientCutTextLen, outbytesleft = clientCutTextLen * 2;
     char *in = clientCutText, *buffer = rfbAlloc(outbytesleft), *out = buffer;
-    iconv_t cd;
+    iconv_t cd = (iconv_t)-1;
 
     if ((cd = iconv_open("UTF-8", "ISO-8859-1")) == (iconv_t)-1 ||
         iconv(cd, &in, &inbytesleft, &out, &outbytesleft) == (size_t)-1)
       LogMessage(X_ERROR, "ISO-8859-1 to UTF-8 conversion failed: %s\n",
                  strerror(errno));
+    if (cd != (iconv_t)-1)
+      iconv_close(cd);
 
     rc = dixChangeWindowProperty(serverClient, pWin, realProperty,
                                  xaUTF8_STRING, 8, PropModeReplace,

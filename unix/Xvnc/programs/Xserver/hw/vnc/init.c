@@ -1505,9 +1505,9 @@ static void rfbClientStateChange(CallbackListPtr *cbl, pointer myData,
 
 void ddxGiveUp(enum ExitCode error)
 {
+#ifdef XVNC_AuthPAM
   rfbClientPtr cl;
 
-#ifdef XVNC_AuthPAM
   for (cl = rfbClientHead; cl; cl = cl->next)
     rfbPAMEnd(cl);
 #endif
