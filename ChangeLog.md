@@ -28,6 +28,11 @@ recent Linux distributions, including Fedora, RHEL 8, and Ubuntu 18 and later.
 full-screen multi-screen spanning from working properly with the Mac TurboVNC
 Viewer app.
 
+7. Fixed a regression introduced by 2.2 beta1[11] that caused the TurboVNC
+Server to leak memory when certain X11 applications or frameworks requested
+that clipboard updates from the X server be converted to UTF-8 (by calling
+`XConvertSelection()` with a target of `xaUTF8_STRING`.)
+
 
 2.2.2
 =====
