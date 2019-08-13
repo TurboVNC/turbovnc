@@ -101,7 +101,12 @@ public class CSecurityTLS extends CSecurity {
         // them.
         String disabledAlgorithms =
           Security.getProperty("jdk.tls.disabledAlgorithms");
-        disabledAlgorithms = disabledAlgorithms.replaceAll("anon,", "");
+        disabledAlgorithms =
+          disabledAlgorithms.replaceAll("(^\\s*ECDH_anon\\s*($|,))|((,|^)\\s*ECDH_anon\\s*)", "");
+        disabledAlgorithms =
+          disabledAlgorithms.replaceAll("(^\\s*DH_anon\\s*($|,))|((,|^)\\s*DH_anon\\s*)", "");
+        disabledAlgorithms =
+          disabledAlgorithms.replaceAll("(^\\s*anon\\s*($|,))|((,|^)\\s*anon\\s*)", "");
         Security.setProperty("jdk.tls.disabledAlgorithms", disabledAlgorithms);
         ctx = SSLContext.getInstance("TLS");
       } catch (NoSuchAlgorithmException e) {

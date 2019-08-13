@@ -33,6 +33,11 @@ Server to leak memory when certain X11 applications or frameworks requested
 that clipboard updates from the X server be converted to UTF-8 (by calling
 `XConvertSelection()` with a target of `xaUTF8_STRING`.)
 
+8. Fixed an error ("java.lang.IllegalArgumentException: Error in security
+property. Constraint unknown: ECDH_ DH_RSA") that occurred when attempting to
+use any of the TLS* security types with the Java TurboVNC Viewer running under
+Java 7u211, 8u201, 11.0.2, or later with OpenSSL 1.1.x.
+
 
 2.2.2
 =====
