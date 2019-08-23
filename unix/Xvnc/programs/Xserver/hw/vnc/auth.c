@@ -393,7 +393,7 @@ Bool rfbOptPamAuth(void)
 
   for (s = secTypes; s->name != NULL; s++) {
     if ((!strcmp(s->name, "unixlogin") ||
-         !strcmp(&s->name[strlen(s->name) - 5], "plain")) && s->enabled)
+         strstr(s->name, "plain")) && s->enabled)
       return TRUE;
   }
 
