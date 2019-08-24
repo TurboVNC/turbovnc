@@ -38,6 +38,9 @@ property. Constraint unknown: ECDH_ DH_RSA") that occurred when attempting to
 use any of the TLS* security types with the Java TurboVNC Viewer running under
 Java 7u211, 8u201, 11.0.2, or later with OpenSSL 1.1.x.
 
+9. Fixed various issues with remote mouse events that would occur when running
+the Linux TurboVNC Viewer in a Wayland session.
+
 
 2.2.2
 =====
