@@ -28,7 +28,7 @@
 
 
 #define BUFSIZE 1024
-#define DH_BITS 1024
+#define DH_BITS 2048
 
 
 static char errStr[BUFSIZE] = "No error";

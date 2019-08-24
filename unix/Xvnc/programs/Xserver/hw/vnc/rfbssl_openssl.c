@@ -378,7 +378,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
       rfbssl_error("DSA_new()");
       goto bailout;
     }
-    if (!crypto.DSA_generate_parameters_ex(dsa, 1024, NULL, 0, NULL, NULL,
+    if (!crypto.DSA_generate_parameters_ex(dsa, 2048, NULL, 0, NULL, NULL,
                                            NULL)) {
       rfbssl_error("DSA_generate_paramters_ex()");
       goto bailout;
