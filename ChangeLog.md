@@ -134,6 +134,23 @@ Server to leak memory when certain X11 applications or frameworks requested
 that clipboard updates from the X server be converted to UTF-8 (by calling
 `XConvertSelection()` with a target of `xaUTF8_STRING`.)
 
+8. Fixed an error ("java.lang.IllegalArgumentException: Error in security
+property. Constraint unknown: ECDH_ DH_RSA") that occurred when attempting to
+use any of the TLS* security types with the Java TurboVNC Viewer running under
+Java 7u211, 8u201, 11.0.2, or later with OpenSSL 1.1.x.
+
+9. Fixed various issues with remote mouse events that would occur when running
+the Linux TurboVNC Viewer in a Wayland session.
+
+10. The TurboVNC Server now generates a 2048-bit DSA key for use with the TLS*
+security types.  This fixed an error ("dh key too small") that occurred when
+attempting to connect, using one of those security types, to a TurboVNC session
+running on a RHEL 8 host.  It also fixed an error
+("javax.net.ssl.SSLHandshakeException: DHPublicKey does not comply to algorithm
+constraints") that occurred when attempting to connect, using one of the TLS*
+security types, to a TurboVNC session with the Linux TurboVNC Viewer running on
+a RHEL 8 client.
+
 
 2.2.2
 =====

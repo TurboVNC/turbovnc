@@ -1314,13 +1314,15 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
       flags = Swap32IfLE(msg.f.flags);
 
-      READ(data, msg.f.length)
-
-      if (msg.f.length > sizeof(data))
+      if (msg.f.length > sizeof(data)) {
         rfbLog("Ignoring fence.  Payload of %d bytes is too large.\n",
                msg.f.length);
-      else
+        SKIP(msg.f.length)
+      } else {
+        READ(data, msg.f.length)
         HandleFence(cl, flags, msg.f.length, data);
+      }
+
       return;
     }
 

@@ -334,7 +334,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
     if (devInfo[i].type == None)
       continue;
     type = XGetAtomName(dpy, devInfo[i].type);
-    if (!strcmp(type, "MOUSE") || !strcmp(type, "KEYBOARD")) {
+    if (!strcmp(type, "MOUSE") || !strcmp(type, "KEYBOARD") ||
+        !strcmp(type, "xwayland-pointer")) {
       XFree(type);
       continue;
     }
