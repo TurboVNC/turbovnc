@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 2011 Gernot Tenchio
- *  Copyright (C) 2015, 2017 D. R. Commander
+ *  Copyright (C) 2015, 2017, 2019 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ static void rfbErr(const char *format, ...)
 }
 
 
-void rfbssl_error(const char *function, int e)
+static void rfbssl_error(const char *function, int e)
 {
   rfbErr("%s failed: %s (%d)\n", function, gnutls_strerror(e), e);
   rfbLog("%s failed: %s (%d)\n", function, gnutls_strerror(e), e);
