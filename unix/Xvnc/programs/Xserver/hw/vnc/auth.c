@@ -641,6 +641,22 @@ static void ReadConfigFile(void)
 
       continue;
     }
+
+    n = 15;
+    if (!strncmp(buf2, "tls-key-length=", n)) {
+      int t;
+
+      if (buf2[n] == '\0')
+        FatalError("ERROR in %s: tls-key-length is empty!",
+                   rfbAuthConfigFile);
+
+      if (sscanf(&buf2[n], "%d", &t) < 1 || t <= 0)
+        FatalError("ERROR in %s: tls-key-length value must be > 0!",
+                   rfbAuthConfigFile);
+
+      rfbTLSKeyLength = (CARD32)t;
+      continue;
+    }
 #endif
 
     n = 17;

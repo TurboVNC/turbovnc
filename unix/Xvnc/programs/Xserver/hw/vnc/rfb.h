@@ -884,6 +884,8 @@ extern void rfbSendServerCutText(char *str, int len);
 
 /* rfbssl_*.c */
 
+extern CARD32 rfbTLSKeyLength;
+
 rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon);
 int rfbssl_accept(rfbClientPtr cl);
 int rfbssl_pending(rfbClientPtr cl);

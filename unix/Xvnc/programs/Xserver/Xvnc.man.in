@@ -662,6 +662,10 @@ order in which Xvnc will advertise the corresponding RFB security types and
 authentication schemes to the VNC viewer.  This ordering may affect which
 security type the VNC viewer chooses as its default.
 
+.IP \fItls-key-length\fR
+This specifies the length of the key, in bits, that the TurboVNC Server will
+generate for any of the TLS* (anonymous TLS) security types.
+
 .SH SECURITY CONCERNS
 .P
 Even when used with encryption, there are other security problems inherent in

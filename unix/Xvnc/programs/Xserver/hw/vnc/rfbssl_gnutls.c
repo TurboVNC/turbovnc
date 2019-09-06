@@ -26,9 +26,10 @@
 #include <gnutls/gnutls.h>
 #include <errno.h>
 
+CARD32 rfbTLSKeyLength = 2048;
+
 
 #define BUFSIZE 1024
-#define DH_BITS 2048
 
 
 static char errStr[BUFSIZE] = "No error";
@@ -88,7 +89,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     rfbssl_error("gnutls_dh_params_init()", ret);
     goto bailout;
   }
-  if ((ret = gnutls_dh_params_generate2(ctx->dh_params, DH_BITS)) !=
+  if ((ret = gnutls_dh_params_generate2(ctx->dh_params, rfbTLSKeyLength)) !=
       GNUTLS_E_SUCCESS) {
     rfbssl_error("gnutls_dh_params_generate2()", ret);
     goto bailout;
