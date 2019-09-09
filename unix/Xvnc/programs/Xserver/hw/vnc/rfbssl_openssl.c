@@ -34,6 +34,8 @@
 
 static void rfbErr(const char *format, ...);
 
+CARD32 rfbTLSKeyLength = 2048;
+
 
 #define BUFSIZE 1024
 
@@ -61,6 +63,7 @@ typedef struct ossl_init_settings_st OPENSSL_INIT_SETTINGS;
 
 typedef void (*DH_free_type) (DH *);
 typedef int (*DH_generate_key_type) (DH *);
+typedef int (*DH_size_type) (const DH *dh);
 typedef DH *(*DSA_dup_DH_type) (const DSA *);
 typedef void (*DSA_free_type) (DSA *);
 typedef int (*DSA_generate_parameters_ex_type) (DSA *, int,
@@ -74,6 +77,7 @@ typedef char *(*ERR_error_string_type) (unsigned long, char *);
 struct rfbcrypto_functions {
   DH_free_type DH_free;
   DH_generate_key_type DH_generate_key;
+  DH_size_type DH_size;
   DSA_dup_DH_type DSA_dup_DH;
   DSA_free_type DSA_free;
   DSA_generate_parameters_ex_type DSA_generate_parameters_ex;
@@ -86,8 +90,8 @@ static struct rfbcrypto_functions crypto = {
 #ifdef DLOPENSSL
   NULL
 #else
-  DH_free, DH_generate_key, DSA_dup_DH, DSA_free, DSA_generate_parameters_ex,
-  DSA_new, ERR_get_error, ERR_error_string
+  DH_free, DH_generate_key, DH_size, DSA_dup_DH, DSA_free,
+  DSA_generate_parameters_ex, DSA_new, ERR_get_error, ERR_error_string
 #endif
 };
 
@@ -290,6 +294,7 @@ static int loadFunctions(void)
     }
 #endif
     LOADSYM(crypto, DH_free);
+    LOADSYM(crypto, DH_size);
     LOADSYM(crypto, DSA_dup_DH);
     LOADSYM(crypto, DSA_free);
     LOADSYM(crypto, DSA_generate_parameters_ex);
@@ -378,8 +383,8 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
       rfbssl_error("DSA_new()");
       goto bailout;
     }
-    if (!crypto.DSA_generate_parameters_ex(dsa, 2048, NULL, 0, NULL, NULL,
-                                           NULL)) {
+    if (!crypto.DSA_generate_parameters_ex(dsa, rfbTLSKeyLength, NULL, 0, NULL,
+                                           NULL, NULL)) {
       rfbssl_error("DSA_generate_paramters_ex()");
       goto bailout;
     }
@@ -392,6 +397,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
       rfbssl_error("DH_generate_key()");
       goto bailout;
     }
+    rfbLog("Anonymous TLS key length: %d bits\n", crypto.DH_size(dh) * 8);
     if (!ssl.SSL_CTX_ctrl(ctx->ssl_ctx, SSL_CTRL_SET_TMP_DH, 0, (char *)dh)) {
       rfbssl_error("SSL_CTX_set_tmp_dh()");
       goto bailout;

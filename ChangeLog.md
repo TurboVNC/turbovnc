@@ -149,7 +149,10 @@ running on a RHEL 8 host.  It also fixed an error
 ("javax.net.ssl.SSLHandshakeException: DHPublicKey does not comply to algorithm
 constraints") that occurred when attempting to connect, using one of the TLS*
 security types, to a TurboVNC session with the Linux TurboVNC Viewer running on
-a RHEL 8 client.
+a RHEL 8 client.  A new security configuration file directive
+(`tls-key-length`) can be used to restore the behavior of previous releases of
+TurboVNC (generating a 1024-bit DSA key) or to increase the key length for
+additional security.
 
 
 2.2.2

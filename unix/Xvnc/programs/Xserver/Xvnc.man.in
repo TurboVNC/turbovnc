@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "April 2019" "" "TurboVNC"
+.TH Xvnc 1 "September 2019" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -583,6 +583,12 @@ PAM authentication.  Users can be added to or removed from this list using the
 \fBvncpasswd\fR(1) utility.  The user who started the TurboVNC session will
 automatically be added to the session's access control list.
 
+.IP \fImax-desktop-size\fR=\fIwidth\fRx\fIheight\fR
+This specifies the maximum desktop size for all TurboVNC sessions started on
+this host.  If a user attempts to start a session with a larger geometry than
+this or to use remote desktop resizing to increase the desktop size to a size
+larger than this, the desktop size will be clamped to \fIwidth\fRx\fIheight\fR.
+
 .IP \fImax-idle-timeout\fR=\fItime\fR
 This specifies the maximum idle timeout (in seconds) for all TurboVNC sessions
 started on this host.  The idle timeout is the amount of time that a TurboVNC
@@ -591,40 +597,38 @@ automatically exits.  If this value is set to a number greater than 0, then all
 TurboVNC sessions on this host will use this idle timeout value by default, and
 the user will only be allowed to override it with a lower value.
 
-.IP \fImax-desktop-size\fR=\fIwidth\fRx\fIheight\fR
-This specifies the maximum desktop size for all TurboVNC sessions started on
-this host.  If a user attempts to start a session with a larger geometry than
-this or to use remote desktop resizing to increase the desktop size to a size
-larger than this, the desktop size will be clamped to \fIwidth\fRx\fIheight\fR.
+.IP \fIno-clipboard-recv\fR
+This prevents any TurboVNC sessions started on this host from receiving
+clipboard changes from their connected viewers.
 
 .IP \fIno-clipboard-send\fR
 This prevents any TurboVNC sessions started on this host from sending clipboard
 changes to their connected viewers.
 
-.IP \fIno-clipboard-recv\fR
-This prevents any TurboVNC sessions started on this host from receiving
-clipboard changes from their connected viewers.
+.IP \fIno-httpd\fR
+Do not allow the built-in HTTP server to be enabled in any TurboVNC session
+started on this host.
 
-.IP \fIno-reverse-connections\fR
-Do not allow reverse connections to be made from any TurboVNC session started
-on this host.  This causes Xvnc to ignore requests from the \fBvncconnect\fR(1)
-utility.
+.IP \fIno-pam-sessions\fR
+Do not allow PAM sessions to be created for any TurboVNC sessions started on
+this host.
 
 .IP \fIno-remote-connections\fR
 Do not allow inbound remote connections to be made to any TurboVNC session
 started on this host.  Only connections from localhost can be made, which
 effectively forces the use of SSH tunneling to make inbound remote connections.
 
-.IP \fIno-httpd\fR
-Do not allow the built-in HTTP server to be enabled in any TurboVNC session
-started on this host.
+.IP \fIno-remote-resize\fR
+Do not allow remote desktop resizing with any TurboVNC session started on this
+host.
+
+.IP \fIno-reverse-connections\fR
+Do not allow reverse connections to be made from any TurboVNC session started
+on this host.  This causes Xvnc to ignore requests from the \fBvncconnect\fR(1)
+utility.
 
 .IP \fIno-x11-tcp-connections\fR
 Do not allow X11 TCP connections to any TurboVNC session started on this host.
-
-.IP \fIno-pam-sessions\fR
-Do not allow PAM sessions to be created for any TurboVNC sessions started on
-this host.
 
 .IP \fIpam-service-name\fR=\fIsvcname\fR
 Sets the service name to be used when Xvnc performs PAM authentication.  The
@@ -633,6 +637,16 @@ in \fB/etc/pam.d\fR or to a token in \fB/etc/pam.conf\fR.  For instance, if
 your system has a file named \fB/etc/pam.d/passwd\fR, then copying this file to
 \fB/etc/pam.d/{svcname}\fR would cause the username and password sent by the
 VNC viewer to be validated against \fB/etc/passwd\fR.
+
+.IP \fIpermitted-cipher-suites\fR=\fIsuite\fR[:\fIsuite\fR[...]]
+Defines the set of permitted TLS cipher suites for the TLS* and X509* security
+types.  Multiple colon-separated cipher suites may be specified.  (Run
+\fBopenssl ciphers aNULL\fR for a list of available cipher suites for the TLS*
+security types, and \fBopenssl ciphers\fR for a list of available cipher suites
+for the X509* security types.)  The order in which these cipher suites are
+specified defines the order in which Xvnc will advertise the cipher suites to
+the VNC viewer.  This directive is ignored if the TurboVNC Server was built
+with GnuTLS rather than OpenSSL.
 
 .IP \fIpermitted-security-types\fR=\fItype\fR[,\fItype\fR[...]]
 Defines the initial set of permitted security types.  Multiple comma-separated
@@ -644,6 +658,10 @@ case-insensitive.  The order in which these types are specified defines the
 order in which Xvnc will advertise the corresponding RFB security types and
 authentication schemes to the VNC viewer.  This ordering may affect which
 security type the VNC viewer chooses as its default.
+
+.IP \fItls-key-length\fR
+This specifies the length of the key, in bits, that the TurboVNC Server will
+generate for any of the TLS* (anonymous TLS) security types.
 
 .SH SECURITY CONCERNS
 .P
