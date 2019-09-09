@@ -27,16 +27,6 @@ public class ConnParams {
   static LogWriter vlog = new LogWriter("ConnParams");
 
   public ConnParams() {
-    majorVersion = 0;  minorVersion = 0;
-    width = 0;  height = 0;
-    supportsDesktopResize = false;  supportsExtendedDesktopSize = false;
-    supportsDesktopRename = false;  supportsLastRect = false;
-    supportsSetDesktopSize = false;  supportsFence = false;
-    supportsContinuousUpdates = false;
-    supportsClientRedirect = false;
-    supportsGII = false;
-    name = null;  nEncodings = 0;  encodings = null;
-    verStrPos = 0;
     screenLayout = new ScreenSet();
 
     setName("");
