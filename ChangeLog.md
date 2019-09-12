@@ -1,3 +1,15 @@
+2.2.4
+=====
+
+### Significant changes relative to 2.2.3:
+
+1. The Windows/Java TurboVNC Viewer now works around an issue whereby the
+operating system does not send a key release event to applications if one of
+the Shift keys is released while the other Shift key remains pressed.  This
+issue did not affect the native Windows TurboVNC Viewer, since it does not
+distinguish between the left and right Shift keys.
+
+
 2.2.3
 =====
 
