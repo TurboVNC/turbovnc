@@ -26,10 +26,10 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
 /*
  * Class:     com_turbovnc_vncviewer_Viewport
  * Method:    setupExtInput
- * Signature: ()V
+ * Signature: (Z)V
  */
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jboolean);
 
 /*
  * Class:     com_turbovnc_vncviewer_Viewport

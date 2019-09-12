@@ -467,6 +467,7 @@ typedef struct _rfbInteractionCapsMsg {
  */
 
 #define rfbFence 248
+#define rfbQEMU 255
 
 
 /*****************************************************************************
@@ -500,6 +501,7 @@ typedef struct _rfbInteractionCapsMsg {
 
 /*
  * Special encoding numbers:
+ *   0x574D5668               -- VMware LED state
  *   0xC0A1E5CE               -- extended clipboard
  *   0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level
  *         -768 .. -763
@@ -511,6 +513,10 @@ typedef struct _rfbInteractionCapsMsg {
  *         -308
  *   0xFFFFFECF               -- GII
  *         -305
+ *   0xFFFFFEFB               -- QEMU LED state
+ *         -261
+ *   0xFFFFFEFE               -- QEMU extended key event
+ *         -258
  *   0xFFFFFF00 .. 0xFFFFFF0F -- encoding-specific compression levels
  *         -256 .. -241
  *   0xFFFFFF10 .. 0xFFFFFF1F -- mouse cursor shape data
@@ -524,6 +530,8 @@ typedef struct _rfbInteractionCapsMsg {
  *   0xFFFFFFF0 .. 0xFFFFFFFF -- not allocated yet
  *          -16 .. -1
  */
+
+#define rfbEncodingVMwareLEDState       0x574D5668
 
 #define rfbEncodingExtendedClipboard    0xC0A1E5CE
 
@@ -542,6 +550,9 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbEncodingExtendedDesktopSize  0xFFFFFECC
 
 #define rfbEncodingGII                  0xFFFFFECF
+
+#define rfbEncodingQEMULEDState         0xFFFFFEFB
+#define rfbEncodingQEMUExtendedKeyEvent 0xFFFFFEFE
 
 #define rfbEncodingCompressLevel0       0xFFFFFF00
 #define rfbEncodingCompressLevel1       0xFFFFFF01
@@ -1022,6 +1033,16 @@ typedef struct {
 
 #define rfbZRLETileWidth 64
 #define rfbZRLETileHeight 64
+
+
+/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * LED states
+ */
+
+#define rfbLEDScrollLock (1 << 0)
+#define rfbLEDNumLock    (1 << 1)
+#define rfbLEDCapsLock   (1 << 2)
+#define rfbLEDUnknown    0xFFFFFFFF
 
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1673,6 +1694,24 @@ typedef struct _rfbGIIEventMsg {
 
 
 /*-----------------------------------------------------------------------------
+ * QEMU Extended Key Event
+ */
+
+/* message subtypes */
+#define rfbQEMUExtendedKeyEvent 0
+
+typedef struct _rfbQEMUExtendedKeyEventMsg {
+    CARD8 type;                 /* always rfbQEMU */
+    CARD8 subType;              /* always rfbQEMUExtendedKeyEvent */
+    CARD16 down;                /* true if down (press), false if up */
+    CARD32 keysym;              /* X11 keysym */
+    CARD32 keycode;             /* RFB keycode */
+} rfbQEMUExtendedKeyEventMsg;
+
+#define sz_rfbQEMUExtendedKeyEventMsg 12
+
+
+/*-----------------------------------------------------------------------------
  * Union of all client->server messages.
  */
 
@@ -1699,4 +1738,5 @@ typedef union _rfbClientToServerMsg {
     rfbGIIDeviceCreateMsg giidc;
     rfbGIIDeviceDestroyMsg giidd;
     rfbGIIEventMsg giie;
+    rfbQEMUExtendedKeyEventMsg qemueke;
 } rfbClientToServerMsg;

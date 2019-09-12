@@ -456,10 +456,10 @@ public class Viewport extends JFrame implements Runnable {
       try {
         if (Utils.isMac()) {
           synchronized(VncViewer.class) {
-            setupExtInput();
+            setupExtInput(cc.params.serverKeyMap.get());
           }
         } else
-          setupExtInput();
+          setupExtInput(false);
       } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
@@ -657,7 +657,45 @@ public class Viewport extends JFrame implements Runnable {
     vlog.eidebug("Multitouch listener exited");
   }
 
-  // At the moment, these two methods are used only by the Mac TurboVNC Helper.
+  static final int NS_SHIFT_KEY_MASK = 1 << 17;
+  static final int NS_CTRL_KEY_MASK = 1 << 18;
+  static final int NS_ALT_KEY_MASK = 1 << 19;
+  static final int NS_COMMAND_KEY_MASK = 1 << 20;
+
+  // At the moment, these four methods are used only by the Mac TurboVNC
+  // Helper.
+  boolean handleKeyPress(int keysym, int rfbKeyCode, int modifiers,
+                         long windowID) {
+    if (windowID != x11win || rfbKeyCode <= 0 || cc.isMenuVisible())
+      return false;
+
+    if (rfbKeyCode == cc.params.menuKey.getRFBKeyCode() &&
+        (modifiers & (NS_SHIFT_KEY_MASK | NS_CTRL_KEY_MASK |
+                      NS_ALT_KEY_MASK | NS_COMMAND_KEY_MASK)) == 0) {
+      cc.showMenu();
+      return true;
+    }
+
+    String debugStr = "key PRESS, RFB keycode 0x" +
+                      Integer.toHexString(rfbKeyCode);
+
+    cc.writeKeyPress(keysym, rfbKeyCode, debugStr);
+
+    return true;
+  }
+
+  boolean handleKeyRelease(int rfbKeyCode, long windowID) {
+    if (windowID != x11win || rfbKeyCode <= 0 || cc.isMenuVisible())
+      return false;
+
+    String debugStr = "key release, RFB keycode 0x" +
+                      Integer.toHexString(rfbKeyCode);
+
+    cc.writeKeyRelease(rfbKeyCode, debugStr);
+
+    return true;
+  }
+
   void handleTabletProximityEvent(final boolean enteringProximity,
                                   final int pointingDeviceType,
                                   long windowID) {
@@ -798,9 +836,11 @@ public class Viewport extends JFrame implements Runnable {
     return true;
   }
 
+  int getXkbRules() { return xkbRules; }
+
   private native void x11FullScreen(boolean on);
   private native void grabKeyboard(boolean on, boolean pointer);
-  private native void setupExtInput();
+  private native void setupExtInput(boolean serverKeyMap);
   private synchronized native boolean processExtInputEvent(int type);
   private native void cleanupExtInput();
 
@@ -824,6 +864,7 @@ public class Viewport extends JFrame implements Runnable {
   int buttonPressType, buttonReleaseType, motionType;
   ArrayList<ExtInputDevice> devices;
   ExtInputEvent lastEvent = new ExtInputEvent();
+  private int xkbRules;
   Point deferredPosition;
   int leftMon, rightMon, topMon, bottomMon;
 

@@ -172,6 +172,7 @@ public final class RFB {
   // Server -> Client and Client -> Server
   public static final int FENCE = 248;
   public static final int GII   = 253;
+  public static final int QEMU  = 255;
 
   //***************************************************************************
   // Encoding types
@@ -214,39 +215,44 @@ public final class RFB {
   // Pseudo-encodings
   //***************************************************************************
 
-  public static final int ENCODING_EXTENDED_CLIPBOARD     = 0xC0A1E5CE;
+  public static final int ENCODING_VMWARE_LED_STATE        = 0x574D5668;
 
-  public static final int ENCODING_SUBSAMP_1X             = -768;
-  public static final int ENCODING_SUBSAMP_4X             = -767;
-  public static final int ENCODING_SUBSAMP_2X             = -766;
-  public static final int ENCODING_SUBSAMP_GRAY           = -765;
-  public static final int ENCODING_SUBSAMP_8X             = -764;
-  public static final int ENCODING_SUBSAMP_16X            = -763;
-  public static final int ENCODING_FINE_QUALITY_LEVEL_0   = -512;
-  public static final int ENCODING_FINE_QUALITY_LEVEL_100 = -412;
+  public static final int ENCODING_EXTENDED_CLIPBOARD      = 0xC0A1E5CE;
 
-  public static final int ENCODING_CONTINUOUS_UPDATES     = -313;
-  public static final int ENCODING_FENCE                  = -312;
+  public static final int ENCODING_SUBSAMP_1X              = -768;
+  public static final int ENCODING_SUBSAMP_4X              = -767;
+  public static final int ENCODING_SUBSAMP_2X              = -766;
+  public static final int ENCODING_SUBSAMP_GRAY            = -765;
+  public static final int ENCODING_SUBSAMP_8X              = -764;
+  public static final int ENCODING_SUBSAMP_16X             = -763;
+  public static final int ENCODING_FINE_QUALITY_LEVEL_0    = -512;
+  public static final int ENCODING_FINE_QUALITY_LEVEL_100  = -412;
 
-  public static final int ENCODING_CLIENT_REDIRECT        = -311;
+  public static final int ENCODING_CONTINUOUS_UPDATES      = -313;
+  public static final int ENCODING_FENCE                   = -312;
 
-  public static final int ENCODING_EXTENDED_DESKTOP_SIZE  = -308;
+  public static final int ENCODING_CLIENT_REDIRECT         = -311;
 
-  public static final int ENCODING_DESKTOP_NAME           = -307;
+  public static final int ENCODING_EXTENDED_DESKTOP_SIZE   = -308;
 
-  public static final int ENCODING_GII                    = -305;
+  public static final int ENCODING_DESKTOP_NAME            = -307;
 
-  public static final int ENCODING_COMPRESS_LEVEL_0       = -256;
-  public static final int ENCODING_COMPRESS_LEVEL_9       = -247;
+  public static final int ENCODING_GII                     = -305;
 
-  public static final int ENCODING_X_CURSOR               = -240;
-  public static final int ENCODING_RICH_CURSOR            = -239;
+  public static final int ENCODING_QEMU_LED_STATE          = -261;
+  public static final int ENCODING_QEMU_EXTENDED_KEY_EVENT = -258;
 
-  public static final int ENCODING_LAST_RECT              = -224;
-  public static final int ENCODING_NEW_FB_SIZE            = -223;
+  public static final int ENCODING_COMPRESS_LEVEL_0        = -256;
+  public static final int ENCODING_COMPRESS_LEVEL_9        = -247;
 
-  public static final int ENCODING_QUALITY_LEVEL_0        = -32;
-  public static final int ENCODING_QUALITY_LEVEL_9        = -23;
+  public static final int ENCODING_X_CURSOR                = -240;
+  public static final int ENCODING_RICH_CURSOR             = -239;
+
+  public static final int ENCODING_LAST_RECT               = -224;
+  public static final int ENCODING_NEW_FB_SIZE             = -223;
+
+  public static final int ENCODING_QUALITY_LEVEL_0         = -32;
+  public static final int ENCODING_QUALITY_LEVEL_9         = -23;
 
   //***************************************************************************
   // Fence flags
@@ -325,6 +331,15 @@ public final class RFB {
   public static final int EDS_RESULT_INVALID      = 3;
 
   //***************************************************************************
+  // LED states
+  //***************************************************************************
+
+  public static final int LED_SCROLL_LOCK = 1 << 0;
+  public static final int LED_NUM_LOCK    = 1 << 1;
+  public static final int LED_CAPS_LOCK   = 1 << 2;
+  public static final int LED_UNKNOWN     = -1;
+
+  //***************************************************************************
   // Button masks for PointerEvent
   //***************************************************************************
 
@@ -400,6 +415,13 @@ public final class RFB {
   public static final int GII_DEVTYPE_ERASER = 3;
   public static final int GII_DEVTYPE_TOUCH  = 4;
   public static final int GII_DEVTYPE_PAD    = 5;
+
+  //***************************************************************************
+  // QEMU
+  //***************************************************************************
+
+  // Message subtypes
+  public static final int QEMU_EXTENDED_KEY_EVENT = 0;
 
   private RFB() {}
 };

@@ -1,5 +1,6 @@
 /*  Copyright (C)2015-2017, 2019, 2021-2022 D. R. Commander.
  *                                          All Rights Reserved.
+ *  Copyright 2014, 2017 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,8 +50,18 @@
 #include <unistd.h>
 #include "com_turbovnc_vncviewer_Viewport.h"
 #include <Cocoa/Cocoa.h>
+#import <Carbon/Carbon.h>
 #include "JRSwizzle.h"
 #import <objc/objc-class.h>
+#include "cocoa.h"
+
+#define XK_LATIN1
+#define XK_MISCELLANY
+#define XK_XKB_KEYS
+#include "keysymdef.h"
+#include "XF86keysym.h"
+
+#include "osx_to_qnum.h"
 
 
 #define BAILIF0(f) {  \
@@ -64,10 +75,13 @@
   (*env)->SetLongField(env, obj, fid, val);  \
 }
 
+#define NoSymbol 0
+
 
 static JavaVM *g_jvm = NULL;
 static jobject g_object = NULL;
-static jmethodID g_methodID = NULL, g_methodID_prox = NULL;
+static jmethodID g_methodID = NULL, g_methodID_prox = NULL,
+  g_methodID_keyPress = NULL, g_methodID_keyRelease = NULL;
 IMP origSendEvent = NULL;
 
 
@@ -89,6 +103,32 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 }
 
 
+#define HANDLE_KEY_PRESS(keysym, rfbKeyCode, modifiers, window) {  \
+  if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {  \
+    NSLog(@"Couldn't attach to JVM");  \
+    return;  \
+  }  \
+  success = (*env)->CallBooleanMethod(env, g_object, g_methodID_keyPress,  \
+                                      keysym, rfbKeyCode, modifiers,  \
+                                      window);  \
+  if (shouldDetach)  \
+    (*g_jvm)->DetachCurrentThread(g_jvm);  \
+  if (!success) break;  \
+}
+
+#define HANDLE_KEY_RELEASE(rfbKeyCode, window) {  \
+  if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {  \
+    NSLog(@"Couldn't attach to JVM");  \
+    return;  \
+  }  \
+  success = (*env)->CallBooleanMethod(env, g_object, g_methodID_keyRelease,  \
+                                      rfbKeyCode, window);  \
+  if (shouldDetach)  \
+    (*g_jvm)->DetachCurrentThread(g_jvm);  \
+  if (!success) break;  \
+}
+
+
 @interface NSApplication(TabletEvents)
 @end
 
@@ -100,6 +140,65 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
   bool shouldDetach = false, success = true;
 
   switch ([event type]) {
+    case NSKeyDown:
+    case NSKeyUp:
+    case NSFlagsChanged:
+    {
+      int rfbKeyCode = -1;
+
+      if (!g_object || !g_methodID_keyPress || !g_methodID_keyRelease)
+        break;
+
+      // Defer Ctrl-Alt-Shift-{key} and Command-{key} sequences to the Java key
+      // listener, because those sequences are used for hotkeys.
+      if ((([event modifierFlags] &
+            (NSControlKeyMask | NSAlternateKeyMask | NSShiftKeyMask)) ==
+           (NSControlKeyMask | NSAlternateKeyMask | NSShiftKeyMask) ||
+           ([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask) &&
+          [event keyCode] != kVK_Control &&
+          [event keyCode] != kVK_RightControl &&
+          [event keyCode] != kVK_Shift &&
+          [event keyCode] != kVK_RightShift &&
+          [event keyCode] != kVK_Option &&
+          [event keyCode] != kVK_RightOption &&
+          [event keyCode] != kVK_Command &&
+          [event keyCode] != kVK_RightCommand)
+        break;
+
+      rfbKeyCode = cocoa_event_keycode(event);
+      if ((unsigned)rfbKeyCode < code_map_osx_to_qnum_len)
+        rfbKeyCode = code_map_osx_to_qnum[rfbKeyCode];
+      // These keys don't actually exist on a Mac keyboard, but these are the
+      // correct mappings when a PC keyboard is plugged into a Mac.
+      if (rfbKeyCode == 0x5d)  // F13
+        rfbKeyCode = 0xb9;  // Print Screen
+      else if (rfbKeyCode == 0x5e)  // F14
+        rfbKeyCode = 0x46;  // Scroll Lock
+      else if (rfbKeyCode == 0x5f)  // F15
+        rfbKeyCode = 0xc6;  // Pause
+      else if (rfbKeyCode == 0xf5)  // Help
+        rfbKeyCode = 0xd2;  // Insert
+      if (rfbKeyCode <= 0) break;
+
+      if (cocoa_is_key_press(event)) {
+        unsigned int keysym;
+
+        keysym = cocoa_event_keysym(event);
+        if (keysym == NoSymbol) break;
+
+        HANDLE_KEY_PRESS(keysym, rfbKeyCode, [event modifierFlags],
+                         [event window]);
+
+        // We don't get any release events for CapsLock, so we have to
+        // send the release right away.
+        if (keysym == XK_Caps_Lock)
+          HANDLE_KEY_RELEASE(rfbKeyCode, [event window]);
+      } else {
+        HANDLE_KEY_RELEASE(rfbKeyCode, [event window]);
+      }
+      return;
+    }
+
     case NSTabletProximity:
       if (!g_object || !g_methodID_prox) break;
 
@@ -155,7 +254,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
 
 
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
-  (JNIEnv *env, jobject obj)
+  (JNIEnv *env, jobject obj, jboolean serverKeyMap)
 {
   jclass cls;
   jfieldID fid;
@@ -192,12 +291,21 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   BAILIF0(g_methodID_prox = (*env)->GetMethodID(env, cls,
                                                 "handleTabletProximityEvent",
                                                 "(ZIJ)V"));
+  if (serverKeyMap) {
+    BAILIF0(g_methodID_keyPress = (*env)->GetMethodID(env, cls,
+                                                      "handleKeyPress",
+                                                      "(IIIJ)Z"));
+    BAILIF0(g_methodID_keyRelease = (*env)->GetMethodID(env, cls,
+                                                        "handleKeyRelease",
+                                                        "(IJ)Z"));
+  }
 
   SET_LONG(cls, obj, x11dpy, 1);
   SET_LONG(cls, obj, x11win,
            (jlong)[[NSApplication sharedApplication] keyWindow]);
 
-  fprintf(stderr, "TurboVNC Helper: Intercepting tablet events for window 0x%.8lx\n",
+  fprintf(stderr, "TurboVNC Helper: Intercepting %s events for window 0x%.8lx\n",
+          serverKeyMap ? "tablet/keyboard" : "tablet",
           (unsigned long)[[NSApplication sharedApplication] keyWindow]);
   return;
 
@@ -214,6 +322,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   jclass cls;
   jfieldID fid;
   NSError *error = NULL;
+  bool serverKeyMap =
+    (g_methodID_keyPress != NULL && g_methodID_keyRelease != NULL);
 
   if (class_getMethodImplementation(objc_getClass("NSApplication"),
                                     @selector(sendEvent:)) != origSendEvent) {
@@ -229,12 +339,14 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
     (*env)->DeleteGlobalRef(env, g_object);  g_object = NULL;
   }
   g_methodID = g_methodID_prox = NULL;
+  g_methodID_keyPress = g_methodID_keyRelease = NULL;
   g_jvm = NULL;
 
   BAILIF0(cls = (*env)->GetObjectClass(env, obj));
   SET_LONG(cls, obj, x11dpy, 0);
 
-  fprintf(stderr, "TurboVNC Helper: Shutting down tablet event interceptor\n");
+  fprintf(stderr, "TurboVNC Helper: Shutting down %s event interceptor\n",
+          serverKeyMap ? "tablet/keyboard" : "tablet");
 
   bailout:
   return;

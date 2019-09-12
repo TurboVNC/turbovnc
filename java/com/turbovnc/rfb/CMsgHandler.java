@@ -112,6 +112,9 @@ public abstract class CMsgHandler {
   public abstract void enableGII();
   public abstract void giiDeviceCreated(int deviceOrigin);
 
+  public abstract void enableQEMUExtKeyEvent();
+  public abstract void setLEDState(int state);
+
   public abstract void clientRedirect(int port, String host,
                                       String x509subject);
 

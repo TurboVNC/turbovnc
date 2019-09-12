@@ -73,6 +73,8 @@ add_library(vnc STATIC
 	init.c
 	input-xkb.c
 	kbdptr.c
+	qnum_to_xorgevdev.c
+	qnum_to_xorgkbd.c
 	randr.c
 	rfbscreen.c
 	rfbserver.c

@@ -39,8 +39,9 @@ public final class MenuKeyParameter extends VoidParameter {
 
   public void reset() { set(defValue); }
 
-  public int getKeyCode() { return symbol.keycode; }
+  public int getVKeyCode() { return symbol.vKeyCode; }
   public int getKeySym() { return symbol.keysym; }
+  public int getRFBKeyCode() { return symbol.rfbKeyCode; }
 
   public String getDefaultStr() { return defValue; }
   public synchronized String getStr() { return symbol.name; }

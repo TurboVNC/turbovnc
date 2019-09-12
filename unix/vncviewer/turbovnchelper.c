@@ -1,4 +1,4 @@
-/*  Copyright (C)2015-2019, 2021 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2019, 2021-2022 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include <X11/Xatom.h>
 #include "com_turbovnc_vncviewer_Viewport.h"
 #include <X11/Xmd.h>
+#include <X11/Xatom.h>
 #include "rfbproto.h"
 #include "turbovnc_gii.h"
 
@@ -129,6 +130,10 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   JAWT_X11DrawingSurfaceInfo *x11dsi = NULL;
   jfieldID fid;
   jclass cls;
+  Atom rulesAtom = None, actualType = None;
+  int xkbRules = -1, actualFormat = 0;
+  unsigned long nItems = 0, bytesAfter;
+  unsigned char *data = NULL;
 
   awt.version = JAWT_VERSION_1_3;
   if (!handle) {
@@ -195,7 +200,25 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   fprintf(stderr, "TurboVNC Helper: %s X11 full-screen mode for window 0x%.8lx\n",
           on ? "Enabling" : "Disabling", x11dsi->drawable);
 
+  if (!(rulesAtom = XInternAtom(x11dsi->display, "_XKB_RULES_NAMES", True)))
+    THROW("Could not get Xkb rules atom");
+  if (XGetWindowProperty(x11dsi->display, DefaultRootWindow(x11dsi->display),
+                         rulesAtom, 0, 1024, False, XA_STRING, &actualType,
+                         &actualFormat, &nItems, &bytesAfter,
+                         &data) != Success ||
+      actualType != XA_STRING || actualFormat != 8 || nItems < 1 || !data)
+    THROW("Could not get Xkb rules");
+  if (!strcmp((char *)data, "base") || !strcmp((char *)data, "xorg"))
+    xkbRules = 0;
+  else if (!strcmp((char *)data, "evdev"))
+    xkbRules = 1;
+
+  if ((fid = (*env)->GetFieldID(env, cls, "xkbRules", "I")) == 0)
+    THROW("Could not store Xkb rules");
+  (*env)->SetIntField(env, obj, fid, xkbRules);
+
   bailout:
+  if (data) XFree(data);
   if (ds) {
     if (dsi) ds->FreeDrawingSurfaceInfo(dsi);
     ds->Unlock(ds);
@@ -301,7 +324,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
 
 
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
-  (JNIEnv *env, jobject obj)
+  (JNIEnv *env, jobject obj, jboolean unused)
 {
   jclass cls, eidcls;
   jfieldID fid;

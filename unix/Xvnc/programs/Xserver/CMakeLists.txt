@@ -105,7 +105,7 @@ message(STATUS "XKB_BIN_DIRECTORY = ${XKB_BIN_DIRECTORY}")
 if(APPLE)
 	set(DEFAULT_XKB_DFLT_RULES "base")
 else()
-	set(DEFAULT_XKB_DFLT_RULES "xorg")
+	set(DEFAULT_XKB_DFLT_RULES "evdev")
 endif()
 set(XKB_DFLT_RULES ${DEFAULT_XKB_DFLT_RULES} CACHE STRING
 	"Keyboard ruleset (default: ${DEFAULT_XKB_DFLT_RULES})")

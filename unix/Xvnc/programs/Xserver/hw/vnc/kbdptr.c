@@ -8,7 +8,8 @@
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
  *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
- *  Copyright (C) 2013, 2018 Pierre Ossman for Cendio AB.  All Rights Reserved.
+ *  Copyright (C) 2013, 2017-2018 Pierre Ossman for Cendio AB.
+ *                                All Rights Reserved.
  *  Copyright (C) 2014-2016, 2019, 2021-2022 D. R. Commander.
  *                                           All Rights Reserved.
  *
@@ -41,9 +42,12 @@
 #include <X11/keysym.h>
 #include "inputstr.h"
 #include "inpututils.h"
+#include "xkbsrv.h"
 #include "mi.h"
 #include "rfb.h"
 #include "input-xkb.h"
+#include "qnum_to_xorgevdev.h"
+#include "qnum_to_xorgkbd.h"
 
 DeviceIntPtr kbdDevice = NULL;
 static DeviceIntPtr ptrDevice = NULL;
@@ -55,6 +59,7 @@ Bool compatibleKbd = FALSE;
 Bool avoidShiftNumLock = TRUE;
 Bool ignoreLockModifiers = TRUE;
 Bool fakeShift = TRUE;
+Bool enableQEMUExtKeyEvent = TRUE;
 
 unsigned char ptrAcceleration = 50;
 
@@ -62,6 +67,9 @@ unsigned char ptrAcceleration = 50;
 #define NoSymbol16 NoSymbol4 NoSymbol4 NoSymbol4 NoSymbol4
 #define NoSymbol64 NoSymbol16 NoSymbol16 NoSymbol16 NoSymbol16
 KeySym pressedKeys[256] = { NoSymbol64 NoSymbol64 NoSymbol64 NoSymbol64 };
+
+static const unsigned short *codeMap;
+static unsigned int codeMapLen;
 
 
 void KbdDeviceInit(DeviceIntPtr pDevice)
@@ -77,6 +85,26 @@ void KbdDeviceInit(DeviceIntPtr pDevice)
     rfbLog("Allowing Caps Lock and other lock modifiers in XKEYBOARD handler\n");
     ignoreLockModifiers = FALSE;
   }
+}
+
+
+void QEMUExtKeyboardEventInit(void)
+{
+  XkbRMLVOSet rmlvo;
+
+  XkbGetRulesDflts(&rmlvo);
+  if (!strcmp(rmlvo.rules, "evdev")) {
+    codeMap = code_map_qnum_to_xorgevdev;
+    codeMapLen = code_map_qnum_to_xorgevdev_len;
+  } else if (!strcmp(rmlvo.rules, "base") || !strcmp(rmlvo.rules, "xorg")) {
+    codeMap = code_map_qnum_to_xorgkbd;
+    codeMapLen = code_map_qnum_to_xorgkbd_len;
+  } else {
+    rfbLog("WARNING: QEMU Extended Key Event protocol extension\n");
+    rfbLog("  requires evdev or xorg XKB rules.  Disabling extension\n");
+    enableQEMUExtKeyEvent = FALSE;
+  }
+  XkbFreeRMLVOSet(&rmlvo, FALSE);
 }
 
 
@@ -154,6 +182,38 @@ static struct altKeysym_t {
   { XK_KP_9, XK_9 },
   { XK_ISO_Level3_Shift, XK_Mode_switch },
 };
+
+
+/*
+ * ExtKeyEvent() - handle raw keycode from QEMU Extended Key Event extension
+ */
+
+void ExtKeyEvent(KeySym keysym, unsigned keycode, BOOL down)
+{
+  /* Simple case: the client has specified the keycode */
+  if (keycode && keycode < codeMapLen) {
+    keycode = codeMap[keycode];
+    if (!keycode) {
+      /* No code map entry found for the keycode.  Try to use the keysym
+         instead. */
+      if (keysym) KeyEvent(keysym, down);
+      return;
+    }
+
+    /* Update the pressed keys map in case we get a mix of events with and
+       without keycodes. */
+    if (down && keysym) pressedKeys[keycode] = keysym;
+    else pressedKeys[keycode] = NoSymbol;
+
+    PressKey(kbdDevice, keycode, down, "raw keycode");
+    mieqProcessInputEvents();
+    return;
+  }
+
+  /* The keycode is 0 (should never happen) or exceeds the code map length.
+     Try to use the keysym instead. */
+  if (keysym) KeyEvent(keysym, down);
+}
 
 
 /*

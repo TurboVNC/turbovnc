@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.cpp from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012, 2015, 2020 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2015, 2020, 2022 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -217,6 +217,16 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
           break;
         }
         case VK_APPS:
+        case VK_BROWSER_HOME:
+        case VK_BROWSER_SEARCH:
+        case VK_LAUNCH_MAIL:
+        case VK_VOLUME_MUTE:
+        case VK_VOLUME_DOWN:
+        case VK_VOLUME_UP:
+        case VK_MEDIA_PLAY_PAUSE:
+        case VK_LAUNCH_APP2:
+        case VK_BROWSER_BACK:
+        case VK_BROWSER_FORWARD:
           PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
                       MakeLParam(wParam, pkbdllhook));
           fHandled = TRUE;

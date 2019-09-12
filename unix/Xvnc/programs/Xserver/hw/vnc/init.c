@@ -6,6 +6,7 @@
 
 /*
  *  Copyright (C) 2009-2022 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2016-2017 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -114,6 +115,7 @@ static Bool initOutputCalled = FALSE;
 static Bool noCursor = FALSE;
 char *desktopName = DEFAULT_DESKTOP_NAME;
 int traceLevel = 0;
+int rfbLEDState = rfbLEDUnknown;
 
 char rfbThisHost[256];
 
@@ -1254,6 +1256,43 @@ void CloseInput(void)
 }
 
 
+static void rfbKeyboardBell(int volume, DeviceIntPtr pDev, void *ctrl,
+                            int feedbackClass)
+{
+  if (volume > 0)
+    rfbSendBell();
+}
+
+static void rfbKeyboardCtrl(DeviceIntPtr device, KeybdCtrl *ctrl)
+{
+  rfbClientPtr cl, nextCl;
+  int state = 0;
+
+  if (ctrl->leds & (1 << 0))
+    state |= rfbLEDCapsLock;
+  if (ctrl->leds & (1 << 1))
+    state |= rfbLEDNumLock;
+  if (ctrl->leds & (1 << 2))
+    state |= rfbLEDScrollLock;
+
+  if (state == rfbLEDState)
+    return;
+
+  rfbLEDState = state;
+
+  for (cl = rfbClientHead; cl; cl = nextCl) {
+    nextCl = cl->next;
+
+    if (cl->state != RFB_NORMAL || !SUPPORTS_LED_STATE(cl))
+      continue;
+
+    cl->ledState = rfbLEDState;
+    cl->pendingLEDState = TRUE;
+
+    rfbSendFramebufferUpdate(cl);
+  }
+}
+
 static int rfbKeybdProc(DeviceIntPtr pDevice, int onoff)
 {
   DevicePtr pDev = (DevicePtr)pDevice;
@@ -1261,8 +1300,9 @@ static int rfbKeybdProc(DeviceIntPtr pDevice, int onoff)
   switch (onoff) {
     case DEVICE_INIT:
       KbdDeviceInit(pDevice);
-      InitKeyboardDeviceStruct(pDevice, &rmlvo, (BellProcPtr)rfbSendBell,
-                               (KbdCtrlProcPtr)NoopDDA);
+      InitKeyboardDeviceStruct(pDevice, &rmlvo, rfbKeyboardBell,
+                               rfbKeyboardCtrl);
+      QEMUExtKeyboardEventInit();
       break;
     case DEVICE_ON:
       pDev->on = TRUE;

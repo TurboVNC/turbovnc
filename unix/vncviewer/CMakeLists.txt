@@ -10,13 +10,14 @@ execute_process(COMMAND chmod +x vncviewer
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}
 	${TJPEG_INCLUDE_DIR})
 
-set(HELPER_SOURCES turbovnchelper.m JRSwizzle.m
-	${CMAKE_SOURCE_DIR}/common/turbojpeg-jni/turbojpeg-jni.c)
-add_library(turbovnchelper SHARED ${HELPER_SOURCES} usocket.c)
+set(HELPER_SOURCES cocoa.m turbovnchelper.m JRSwizzle.m)
+add_library(turbovnchelper SHARED ${HELPER_SOURCES} keysym2ucs.c osx_to_qnum.c
+	${CMAKE_SOURCE_DIR}/common/turbojpeg-jni/turbojpeg-jni.c usocket.c)
 set_source_files_properties(${HELPER_SOURCES} PROPERTIES LANGUAGE C)
 set_target_properties(turbovnchelper PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
-target_link_libraries(turbovnchelper "-framework Cocoa" ${TJPEG_LIBRARY})
+target_link_libraries(turbovnchelper "-framework Carbon -framework Cocoa"
+	${TJPEG_LIBRARY})
 
 if(CPU_TYPE STREQUAL "x86_64")
 	# This is nasty, but for reasons unexplained, full-screen multi-screen

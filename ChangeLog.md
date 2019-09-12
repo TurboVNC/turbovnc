@@ -13,6 +13,14 @@ to their default values.
 3. The TurboVNC Viewer now maintains a different set of options for each unique
 TurboVNC host.
 
+4. The TurboVNC Server and Viewer now implement the QEMU Extended Key Event,
+QEMU LED State, and VMware LED State RFB extensions, which allow raw keyboard
+scancodes to be transmitted to the VNC server instead of X11 keysyms.
+Effectively, this means that the mapping of keycodes into keysyms is performed
+on the host rather than the client, which eliminates various system-specific
+and locale-specific key mapping issues (including issues with dead keys on
+international keyboards.)
+
 
 3.0.2
 =====

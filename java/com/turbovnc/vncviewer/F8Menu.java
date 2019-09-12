@@ -93,7 +93,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       add(grabKeyboard);
     }
     f8 = addMenuItem("Send " + cc.params.menuKey.getStr());
-    KeyStroke ks = KeyStroke.getKeyStroke(cc.params.menuKey.getKeyCode(), 0);
+    KeyStroke ks = KeyStroke.getKeyStroke(cc.params.menuKey.getVKeyCode(), 0);
     f8.setAccelerator(ks);
     if (!cc.params.restricted.get()) {
       ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
@@ -141,7 +141,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
 
   void updateMenuKey() {
     f8.setText("Send " + cc.params.menuKey.getStr());
-    KeyStroke ks = KeyStroke.getKeyStroke(cc.params.menuKey.getKeyCode(), 0);
+    KeyStroke ks = KeyStroke.getKeyStroke(cc.params.menuKey.getVKeyCode(), 0);
     f8.setAccelerator(ks);
   }
 

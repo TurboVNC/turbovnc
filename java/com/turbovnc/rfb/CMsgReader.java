@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012, 2017-2018, 2022 D. R. Commander.  All Rights Reserved.
- * Copyright 2019 Pierre Ossman for Cendio AB
+ * Copyright 2016, 2018-2019 Pierre Ossman for Cendio AB
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -352,6 +352,15 @@ public class CMsgReader {
         case RFB.ENCODING_CLIENT_REDIRECT:
           readClientRedirect(x, y, w, h);
           break;
+        case RFB.ENCODING_QEMU_EXTENDED_KEY_EVENT:
+          handler.enableQEMUExtKeyEvent();
+          break;
+        case RFB.ENCODING_QEMU_LED_STATE:
+          readQEMULEDState();
+          break;
+        case RFB.ENCODING_VMWARE_LED_STATE:
+          readVMwareLEDState();
+          break;
         default:
           readRect(new Rect(x, y, x + w, y + h), encoding);
           break;
@@ -360,6 +369,13 @@ public class CMsgReader {
       nUpdateRectsLeft--;
       if (nUpdateRectsLeft == 0) handler.framebufferUpdateEnd();
     }
+  }
+
+  private void readQEMULEDState()
+  {
+    int state = is.readU8();
+
+    handler.setLEDState(state);
   }
 
   private void readRect(Rect r, int encoding) {
@@ -536,6 +552,15 @@ public class CMsgReader {
     }
 
     handler.setCursor(width, height, hotspot, cursor, mask);
+  }
+
+  private void readVMwareLEDState()
+  {
+    int state = is.readU32();
+
+    // As luck would have it, this extension uses the same bit definitions as
+    // the QEMU LED State extension, so no conversion is required.
+    handler.setLEDState(state);
   }
 
   public final void reset() {

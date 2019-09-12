@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright 2009-2011, 2019 Pierre Ossman <ossman@cendio.se> for Cendio AB
+ * Copyright 2009-2011, 2016-2019 Pierre Ossman <ossman@cendio.se>
+ *                                      for Cendio AB
  * Copyright (C) 2011-2022 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
@@ -82,7 +83,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       alwaysProfile = true;
     firstUpdate = true;  pendingUpdate = false;  continuousUpdates = false;
     forceNonincremental = true;  supportsSyncFence = false;
-    pressedKeys = new HashMap<Integer, Integer>();
+    pressedVKeys = new HashMap<Integer, Integer>();
+    pressedRFBKeys = new HashMap<Integer, Integer>();
 
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
@@ -936,6 +938,97 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   // RFB thread
+  public void enableQEMUExtKeyEvent() {
+    if (params.serverKeyMap.get() && viewport.getXkbRules() >= 0 &&
+        viewport.getXkbRules() <= 1) {
+      vlog.info("Enabling QEMU Extended Key Event");
+      cp.supportsQEMUExtKeyEvent = true;
+    }
+  }
+
+  // Sync server's LED state with the client's
+  public void pushLEDState()
+  {
+    // Server support?
+    if (!cp.supportsQEMUExtKeyEvent || cp.ledState == RFB.LED_UNKNOWN)
+      return;
+
+    boolean serverCapsLockState = (cp.ledState & RFB.LED_CAPS_LOCK) != 0;
+    boolean serverNumLockState = (cp.ledState & RFB.LED_NUM_LOCK) != 0;
+    boolean serverScrollLockState = (cp.ledState & RFB.LED_SCROLL_LOCK) != 0;
+
+    boolean clientCapsLockState =
+      Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+    boolean clientNumLockState = Utils.isMac() ? serverNumLockState :
+      Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
+    boolean clientScrollLockState = Utils.isMac() ? serverScrollLockState :
+      Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_SCROLL_LOCK);
+
+    if (serverCapsLockState != clientCapsLockState) {
+      vlog.debug("Sending fake key events to sync server's Caps Lock state with client's");
+      writeKeyPress(Keysyms.CAPS_LOCK, 0x3a, "key PRESS, RFB keycode 0x3a");
+      writeKeyRelease(0x3a, "key release, RFB keycode 0x3a");
+    }
+    if (serverNumLockState != clientNumLockState) {
+      vlog.debug("Sending fake key events to sync server's Num Lock state with client's");
+      writeKeyPress(Keysyms.NUM_LOCK, 0x45, "key PRESS, RFB keycode 0x45");
+      writeKeyRelease(0x45, "key release, RFB keycode 0x45");
+    }
+    if (serverScrollLockState != clientScrollLockState) {
+      vlog.debug("Sending fake key events to sync server's Scroll Lock state with client's");
+      writeKeyPress(Keysyms.SCROLL_LOCK, 0x46, "key PRESS, RFB keycode 0x46");
+      writeKeyRelease(0x46, "key release, RFB keycode 0x46");
+    }
+  }
+
+  // RFB thread
+  public void setLEDState(int state)
+  {
+    if (firstLEDState)
+      vlog.info("Enabling LED State");
+
+    vlog.debug("Server's LED state: 0x" + Integer.toHexString(state));
+    cp.ledState = state;
+
+    // The first message is just the server announcing that it supports one of
+    // the LED state extensions.  When the viewer window gains focus, we will
+    // send fake lock key events, if necessary, in order to sync the server's
+    // LED state with the client's.  However, if we already have focus, then we
+    // need to do that here.
+    if (firstLEDState) {
+      firstLEDState = false;
+      if (viewport.hasFocus())
+        pushLEDState();
+      return;
+    }
+
+    if (!viewport.hasFocus())
+      return;
+
+    // Sync client's LED state with the server's
+    boolean serverCapsLockState = (state & RFB.LED_CAPS_LOCK) != 0;
+    boolean serverNumLockState = (state & RFB.LED_NUM_LOCK) != 0;
+    boolean serverScrollLockState = (state & RFB.LED_SCROLL_LOCK) != 0;
+
+    boolean clientCapsLockState =
+      Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+    boolean clientNumLockState = Utils.isMac() ? serverNumLockState :
+      Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
+    boolean clientScrollLockState = Utils.isMac() ? serverScrollLockState :
+      Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_SCROLL_LOCK);
+
+    if (serverCapsLockState != clientCapsLockState)
+      Toolkit.getDefaultToolkit().setLockingKeyState(KeyEvent.VK_CAPS_LOCK,
+                                                     serverCapsLockState);
+    if (serverNumLockState != clientNumLockState)
+      Toolkit.getDefaultToolkit().setLockingKeyState(KeyEvent.VK_NUM_LOCK,
+                                                     serverNumLockState);
+    if (serverScrollLockState != clientScrollLockState)
+      Toolkit.getDefaultToolkit().setLockingKeyState(KeyEvent.VK_SCROLL_LOCK,
+                                                     serverScrollLockState);
+  }
+
+  // RFB thread
   private void resizeFramebuffer() {
     if (desktop == null)
       return;
@@ -1509,6 +1602,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   public void close(boolean disposeViewport) {
     if (disposeViewport && !confirmClose()) return;
+    if (timer != null) {
+      timer.stop();
+      timer = null;
+    }
     deleteWindow(disposeViewport);
     shuttingDown = true;
     if (sock != null)
@@ -1531,15 +1628,23 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // Menu callbacks.  These are guaranteed only to be called after serverInit()
   // has been called, since the menu is only accessible from the DesktopWindow.
 
-  void showMenu(int x, int y) {
+  void showMenu() {
+    int sx = (desktop.scaleWidthRatio == 1.00) ?
+      desktop.lastX : (int)Math.floor(desktop.lastX * desktop.scaleWidthRatio);
+    int sy = (desktop.scaleHeightRatio == 1.00) ?
+      desktop.lastY :
+      (int)Math.floor(desktop.lastY * desktop.scaleHeightRatio);
+    java.awt.Point p = new java.awt.Point(desktop.lastX, desktop.lastY);
+    p.translate(sx - desktop.lastX, sy - desktop.lastY);
+
     if (Utils.isWindows())
       UIManager.put("Button.showMnemonics", true);
-    if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
-      x += viewport.dx;
-      y += viewport.dy;
-    }
-    menu.show(desktop, x, y);
+    if (viewport != null && (viewport.dx > 0 || viewport.dy > 0))
+      p.translate(viewport.dx, viewport.dy);
+    menu.show(desktop, (int)p.getX(), (int)p.getY());
   }
+
+  boolean isMenuVisible() { return menu.isVisible(); }
 
   void showAbout() {
     VncViewer.showAbout(viewport);
@@ -1929,10 +2034,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void writeKeyEvent(int keysym, boolean down) {
+    writeKeyEvent(keysym, 0, down);
+  }
+
+  public void writeKeyEvent(int keysym, int rfbKeyCode, boolean down) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
     try {
-      writer().writeKeyEvent(keysym, down);
+      writer().writeKeyEvent(keysym, rfbKeyCode, down);
     } catch (Exception e) {
       if (!shuttingDown) {
         vlog.error("Error writing key event:");
@@ -1941,28 +2050,33 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
+  boolean isKeyPressed(int keysym) {
+    return (pressedVKeys.containsValue(keysym) ||
+            pressedRFBKeys.containsValue(keysym));
+  }
+
   // KeyEvent.getKeyModifiersText() is unfortunately broken on some platforms.
   String getKeyModifiersText() {
     String str = "";
-    if (pressedKeys.containsValue(Keysyms.SHIFT_L))
+    if (isKeyPressed(Keysyms.SHIFT_L))
       str += " LShift";
-    if (pressedKeys.containsValue(Keysyms.SHIFT_R))
+    if (isKeyPressed(Keysyms.SHIFT_R))
       str += " RShift";
-    if (pressedKeys.containsValue(Keysyms.CONTROL_L))
+    if (isKeyPressed(Keysyms.CONTROL_L))
       str += " LCtrl";
-    if (pressedKeys.containsValue(Keysyms.CONTROL_R))
+    if (isKeyPressed(Keysyms.CONTROL_R))
       str += " RCtrl";
-    if (pressedKeys.containsValue(Keysyms.ALT_L))
+    if (isKeyPressed(Keysyms.ALT_L))
       str += " LAlt";
-    if (pressedKeys.containsValue(Keysyms.ALT_R))
+    if (isKeyPressed(Keysyms.ALT_R))
       str += " RAlt";
-    if (pressedKeys.containsValue(Keysyms.META_L))
+    if (isKeyPressed(Keysyms.META_L))
       str += " LMeta";
-    if (pressedKeys.containsValue(Keysyms.META_R))
+    if (isKeyPressed(Keysyms.META_R))
       str += " RMeta";
-    if (pressedKeys.containsValue(Keysyms.SUPER_L))
+    if (isKeyPressed(Keysyms.SUPER_L))
       str += " LSuper";
-    if (pressedKeys.containsValue(Keysyms.SUPER_R))
+    if (isKeyPressed(Keysyms.SUPER_R))
       str += " RSuper";
     return str;
   }
@@ -1978,9 +2092,144 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
+  // Convert scan codes or X11 keycodes into RFB keycodes
+  // (refer to https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html and
+  // https://github.com/rfbproto/rfbproto/blob/master/rfbproto.rst, under the
+  // "QEMU Extended Key Event Message" section.)
+  int getRFBKeyCode(KeyEvent ev) {
+    if (!cp.supportsQEMUExtKeyEvent || cp.ledState == RFB.LED_UNKNOWN)
+      return 0;
+
+    int rfbKeyCode = 0;
+    int vKeyCode = ev.getKeyCode();
+    int location = ev.getKeyLocation();
+    String[] tokens = ev.paramString().split(",");
+    if (tokens == null) return 0;
+
+    if (Utils.isWindows()) {
+      // On Windows, the "scancode" field in the parameter string contains the
+      // scan code from the WM_KEYDOWN/WM_KEYUP/WM_SYSKEYDOWN/WM_SYSKEYUP
+      // message.  For most keys, this is the same as the RFB keycode.
+      for (String token : tokens) {
+        if (token.startsWith("scancode=")) {
+          String[] tokens2 = token.split("=");
+          if (tokens2.length > 1) {
+            rfbKeyCode = Integer.parseInt(tokens2[1]);
+            break;
+          }
+        }
+      }
+      if (rfbKeyCode != 0 && (rfbKeyCode & ~0x7f) == 0) {
+        // These scan codes should be escaped, but Windows reports them in
+        // unescaped form, so we need to add 0x80, per the QEMU Extended Key
+        // Event spec.
+        if ((rfbKeyCode == 0x32 && vKeyCode == 0) ||  // Web/Home
+            (rfbKeyCode == 0x65 && vKeyCode == 0) ||  // Search
+            (rfbKeyCode == 0x6c && vKeyCode == 0) ||  // Mail
+            (rfbKeyCode == 0x20 && vKeyCode == 0) ||  // Mute
+            (rfbKeyCode == 0x2e && vKeyCode == 0) ||  // Volume Down
+            (rfbKeyCode == 0x30 && vKeyCode == 0) ||  // Volume Up
+            (rfbKeyCode == 0x22 && vKeyCode == 0) ||  // Play/Pause
+            (rfbKeyCode == 0x21 && vKeyCode == 0) ||  // Calculator
+            rfbKeyCode == 0x5b ||  // Windows
+            rfbKeyCode == 0x5d ||  // Menu
+            (rfbKeyCode == 0x38 &&
+             location == KeyEvent.KEY_LOCATION_RIGHT) ||  // Right Alt
+            (rfbKeyCode == 0x1d &&
+             location == KeyEvent.KEY_LOCATION_RIGHT) ||  // Right Ctrl
+            (rfbKeyCode == 0x52 &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Insert
+            (rfbKeyCode == 0x47 &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Home
+            (rfbKeyCode == 0x49 &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Page Up
+            (rfbKeyCode == 0x53 &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Delete
+            (rfbKeyCode == 0x4f &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // End
+            (rfbKeyCode == 0x51 &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Page Down
+            (rfbKeyCode == 0x48 &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Up
+            (rfbKeyCode == 0x4b &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Left
+            (rfbKeyCode == 0x50 &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Down
+            (rfbKeyCode == 0x4d &&
+             location != KeyEvent.KEY_LOCATION_NUMPAD) ||  // Right
+            (rfbKeyCode == 0x35 &&
+             location == KeyEvent.KEY_LOCATION_NUMPAD) ||  // KP Divide
+            (rfbKeyCode == 0x1c &&
+             location == KeyEvent.KEY_LOCATION_NUMPAD) ||  // KP Enter
+            (rfbKeyCode == 0x6a && vKeyCode == 0) ||  // Back
+            (rfbKeyCode == 0x69 && vKeyCode == 0))    // Forward
+          rfbKeyCode |= 0x80;
+        // Java on Windows reports the scan code for the Left Shift key when
+        // the Right Shift key is pressed or released.
+        else if (rfbKeyCode == 0x2a &&
+                 location == KeyEvent.KEY_LOCATION_RIGHT)
+          rfbKeyCode = 0x36;
+
+        return rfbKeyCode;
+      }
+    } else if (Utils.isX11()) {
+      // On Un*x, the "rawCode" field in the parameter string contains the X11
+      // keycode.  For most keys, this is the same as the RFB keycode + 8.
+      for (String token : tokens) {
+        if (token.startsWith("rawCode=")) {
+          String[] tokens2 = token.split("=");
+          if (tokens2.length > 1) {
+            rfbKeyCode = Integer.parseInt(tokens2[1]);
+            break;
+          }
+        }
+      }
+      if (rfbKeyCode != 0) {
+        if (viewport.getXkbRules() == 0 &&
+            rfbKeyCode < Keycodes.XORG_BASE_TO_RFB.length)
+          return Keycodes.XORG_BASE_TO_RFB[rfbKeyCode];
+        else if (viewport.getXkbRules() == 1 &&
+                 rfbKeyCode < Keycodes.XORG_EVDEV_TO_RFB.length)
+          return Keycodes.XORG_EVDEV_TO_RFB[rfbKeyCode];
+      }
+    }
+
+    return 0;
+  }
+
+  public void writeKeyPress(int keysym, int rfbKeyCode, String debugStr) {
+    if (shuttingDown || benchmark || rfbKeyCode <= 0)
+      return;
+
+    if (keysym < 0) keysym = 0;
+    if (keysym > 0)
+      debugStr += String.format(" => 0x%04x", keysym);
+    vlog.debug(debugStr);
+    pressedRFBKeys.put(rfbKeyCode, keysym);
+    writeKeyEvent(keysym, rfbKeyCode, true);
+  }
+
+  public void writeKeyRelease(int rfbKeyCode, String debugStr) {
+    if (shuttingDown || benchmark || rfbKeyCode <= 0)
+      return;
+
+    Integer sym = pressedRFBKeys.get(rfbKeyCode);
+
+    if (sym == null) {
+      debugStr += " UNEXPECTED/IGNORED";
+      vlog.debug(debugStr);
+      return;
+    }
+
+    writeKeyEvent(sym, rfbKeyCode, false);
+    pressedRFBKeys.remove(rfbKeyCode);
+    debugStr += String.format(" => 0x%04x", sym);
+    vlog.debug(debugStr);
+  }
+
   // EDT
   public void writeKeyEvent(KeyEvent ev) {
-    int keysym = -1, keycode, key, location;
+    int keysym = -1, vKeyCode, keyChar, location, rfbKeyCode;
     boolean winAltGr = false;
     String debugStr;
 
@@ -1989,36 +2238,57 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     boolean down = (ev.getID() == KeyEvent.KEY_PRESSED);
 
-    keycode = ev.getKeyCode();
-    key = ev.getKeyChar();
+    vKeyCode = ev.getKeyCode();
+    keyChar = ev.getKeyChar();
     location = ev.getKeyLocation();
+    rfbKeyCode = getRFBKeyCode(ev);
 
-    debugStr = ((ev.isActionKey() ? "action " : "") + "key " +
-                  (down ? "PRESS" : "release") +
-                ", code " + KeyEvent.getKeyText(keycode) +
-                  " (" + keycode + ")" +
-                ", loc " + getLocationText(location) +
-                ", char " +
-                  (key >= 32 && key <= 126 ? "'" + (char)key + "'" : key) +
-                getKeyModifiersText() + (ev.isAltGraphDown() ? " AltGr" : ""));
+    debugStr = (ev.isActionKey() ? "action " : "") + "key " +
+                 (down ? "PRESS" : "release") +
+               ", code " + KeyEvent.getKeyText(vKeyCode) +
+                 " (" + vKeyCode + ")" +
+               ", loc " + getLocationText(location);
+    if (keyChar != KeyEvent.CHAR_UNDEFINED)
+      debugStr += ", char " +
+                  (keyChar >= 32 && keyChar <= 126 ?
+                   "'" + (char)keyChar + "'" : keyChar);
+    if (rfbKeyCode != 0)
+      debugStr += ", RFB keycode 0x" + Integer.toHexString(rfbKeyCode);
+    debugStr += getKeyModifiersText() + (ev.isAltGraphDown() ? " AltGr" : "");
 
-    // If neither the key code nor key char is defined, then there's really
-    // nothing we can do with this.  The fn key on OS X fires events like this
-    // when pressed but does not fire a corresponding release event.
-    if (keycode == 0 && ev.getKeyChar() == KeyEvent.CHAR_UNDEFINED) {
+    // If neither the virtual key code nor key char is defined, then there's
+    // really nothing we can do with this.  The fn key on OS X fires events
+    // like this when pressed but does not fire a corresponding release event.
+    if (vKeyCode == 0 && ev.getKeyChar() == KeyEvent.CHAR_UNDEFINED &&
+        rfbKeyCode == 0) {
       debugStr += " IGNORED";
       vlog.debug(debugStr);
       return;
     }
 
     if (!down) {
-      Integer hashedKey = keycode;
+      // If a key release occurs in the middle of a potential Windows AltGr key
+      // sequence, then it must not be an AltGr key sequence.  Cancel the timer
+      // and send the deferred Left Ctrl key press event.
+      if (altGrArmed) {
+        altGrArmed = false;
+        if (timer != null) timer.stop();
+        pressedRFBKeys.put(0x1d, Keysyms.CONTROL_L);
+        writeKeyEvent(Keysyms.CONTROL_L, 0x1d, true);
+      }
+
+      if (rfbKeyCode != 0) {
+        writeKeyRelease(rfbKeyCode, debugStr);
+        return;
+      }
+
+      Integer hashedKey = vKeyCode;
       if (Utils.isMac()) {
         if (hashedKey == KeyEvent.VK_ALT_GRAPH)
           hashedKey = KeyEvent.VK_ALT;
       } else
         hashedKey |= (location << 16);
-      Integer sym = pressedKeys.get(hashedKey);
+      Integer sym = pressedVKeys.get(hashedKey);
 
       if (sym == null) {
         // Note that dead keys will raise this sort of error falsely
@@ -2034,30 +2304,46 @@ public class CConn extends CConnection implements UserPasswdGetter,
       // the pressed keys hash, we release both of them.
       if (Utils.isWindows()) {
         if (sym == Keysyms.SHIFT_R &&
-            pressedKeys.containsValue(Keysyms.SHIFT_L)) {
+            pressedVKeys.containsValue(Keysyms.SHIFT_L)) {
           writeKeyEvent(Keysyms.SHIFT_L, down);
-          pressedKeys.remove(Keysyms.SHIFT_L);
+          pressedVKeys.remove(Keysyms.SHIFT_L);
         }
         if (sym == Keysyms.SHIFT_L &&
-            pressedKeys.containsValue(Keysyms.SHIFT_R)) {
+            pressedVKeys.containsValue(Keysyms.SHIFT_R)) {
           writeKeyEvent(Keysyms.SHIFT_R, down);
-          pressedKeys.remove(Keysyms.SHIFT_R);
+          pressedVKeys.remove(Keysyms.SHIFT_R);
         }
       }
 
       writeKeyEvent(sym, false);
-      pressedKeys.remove(hashedKey);
+      pressedVKeys.remove(hashedKey);
       debugStr += String.format(" => 0x%04x", sym);
       vlog.debug(debugStr);
       return;
     }
 
-    if (!ev.isActionKey()) {
-      if (keycode >= KeyEvent.VK_0 && keycode <= KeyEvent.VK_9 &&
-        location == KeyEvent.KEY_LOCATION_NUMPAD)
-        keysym = Keysyms.KP_0 + keycode - KeyEvent.VK_0;
+    // Windows represents AltGr with a Left Ctrl + Right Alt key sequence, but
+    // the TurboVNC Server expects AltGr to be a single keystroke.  Thus, if we
+    // see a Left Ctrl key press, we defer sending that event to the server.
+    // If a Left Ctrl key press is followed quickly (within 50 ms) by a Right
+    // Alt key press, then we send only the Right Alt key press.
+    if (altGrArmed) {
+      altGrArmed = false;
+      if (timer != null) timer.stop();
+      if (rfbKeyCode != 0xb8 || Utils.getTime() - altGrArmedTime >= 0.05) {
+        // Not an AltGr key sequence, so send the deferred Left Ctrl key press
+        // event.
+        pressedRFBKeys.put(0x1d, Keysyms.CONTROL_L);
+        writeKeyEvent(Keysyms.CONTROL_L, 0x1d, true);
+      }
+    }
 
-      switch (keycode) {
+    if (!ev.isActionKey()) {
+      if (vKeyCode >= KeyEvent.VK_0 && vKeyCode <= KeyEvent.VK_9 &&
+        location == KeyEvent.KEY_LOCATION_NUMPAD)
+        keysym = Keysyms.KP_0 + vKeyCode - KeyEvent.VK_0;
+
+      switch (vKeyCode) {
         case KeyEvent.VK_BACK_SPACE:  keysym = Keysyms.BACKSPACE;  break;
         case KeyEvent.VK_TAB:         keysym = Keysyms.TAB;  break;
         case KeyEvent.VK_ENTER:
@@ -2081,7 +2367,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         case KeyEvent.VK_DECIMAL:
           // Use XK_KP_Separator instead of XK_KP_Decimal if the current key
           // map uses a comma rather than period as a decimal symbol.
-          if (key == ',')
+          if (keyChar == ',')
             keysym = Keysyms.KP_SEPARATOR;
           else
             keysym = Keysyms.KP_DECIMAL;
@@ -2142,53 +2428,52 @@ public class CConn extends CConnection implements UserPasswdGetter,
           // modifiers (and any other Ctrl and Alt modifiers that are pressed),
           // then send the key event for the modified key, then send fake key
           // press events for the same modifiers.
-          if (pressedKeys.containsValue(Keysyms.ALT_R) &&
-              pressedKeys.containsValue(Keysyms.CONTROL_L) &&
+          if (isKeyPressed(Keysyms.ALT_R) && isKeyPressed(Keysyms.CONTROL_L) &&
               Utils.isWindows()) {
             winAltGr = true;
           } else if (ev.isControlDown()) {
             // For CTRL-<letter>, CTRL is sent separately, so just send
             // <letter>.
-            if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
+            if ((keyChar >= 1 && keyChar <= 26 && !ev.isShiftDown()) ||
                 // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
-                (key >= 27 && key <= 29 && ev.isShiftDown()))
-              key += 96;
+                (keyChar >= 27 && keyChar <= 29 && ev.isShiftDown()))
+              keyChar += 96;
             // For CTRL-SHIFT-<letter>, send capital <letter> to emulate the
             // behavior of Linux.  For CTRL-@, send @.  For CTRL-_, send _.
             // For CTRL-^, send ^.
-            else if (key < 32)
-              key += 64;
+            else if (keyChar < 32)
+              keyChar += 64;
             // Windows and Mac sometimes return CHAR_UNDEFINED with CTRL-SHIFT
             // combinations.
-            else if (key == KeyEvent.CHAR_UNDEFINED) {
+            else if (keyChar == KeyEvent.CHAR_UNDEFINED) {
               // CTRL-SHIFT-Minus should generate an underscore key character
               // in almost all keyboard layouts.  Emacs, in particular, uses
               // CTRL-SHIFT-Underscore for its undo function.
-              if (keycode == KeyEvent.VK_MINUS && ev.isShiftDown())
-                key = '_';
-              // The best we can do for other keys is to send the key code if
-              // it is a valid ASCII symbol.
-              else if (keycode >= 0 && keycode <= 127)
-                key = keycode;
+              if (vKeyCode == KeyEvent.VK_MINUS && ev.isShiftDown())
+                keyChar = '_';
+              // The best we can do for other keys is to send the virtual key
+              // code if it is a valid ASCII symbol.
+              else if (vKeyCode >= 0 && vKeyCode <= 127)
+                keyChar = vKeyCode;
             }
-          } else if (pressedKeys.containsValue(Keysyms.ALT_L) &&
-                     Utils.isMac() && key > 127) {
+          } else if (isKeyPressed(Keysyms.ALT_L) &&
+                     Utils.isMac() && keyChar > 127) {
             // Un*x and Windows servers expect that, if Alt + an ASCII key is
             // pressed, the key event for the ASCII key will be the same as if
             // Alt had not been pressed.  On OS X, however, the Alt/Option keys
             // act like AltGr keys, so if Alt + an ASCII key is pressed, the
-            // key code is the ASCII key symbol, but the key char is the code
-            // for the alternate graphics symbol.
-            if (keycode >= 65 && keycode <= 90 &&
-                !pressedKeys.containsValue(Keysyms.SHIFT_L) &&
-                !pressedKeys.containsValue(Keysyms.SHIFT_R))
-              key = keycode + 32;
-            else if (keycode == KeyEvent.VK_QUOTE)
-              key = '\'';
-            else if (keycode >= 32 && keycode <= 126)
-              key = keycode;
+            // virtual key code is the ASCII key symbol, but the key char is
+            // the code for the alternate graphics symbol.
+            if (vKeyCode >= 65 && vKeyCode <= 90 &&
+                !isKeyPressed(Keysyms.SHIFT_L) &&
+                !isKeyPressed(Keysyms.SHIFT_R))
+              keyChar = vKeyCode + 32;
+            else if (vKeyCode == KeyEvent.VK_QUOTE)
+              keyChar = '\'';
+            else if (vKeyCode >= 32 && vKeyCode <= 126)
+              keyChar = vKeyCode;
           }
-          switch (keycode) {
+          switch (vKeyCode) {
             // NOTE: For keyboard layouts that produce a different symbol when
             // AltGr+{a dead key} is pressed, Java tends to send us the key
             // code for the dead key.  It is difficult to distinguish those key
@@ -2213,7 +2498,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
               break;
             case KeyEvent.VK_DEAD_ACUTE:
               if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-                  (key == '\'' || key == 180 || key > 255))
+                  (keyChar == '\'' || keyChar == 180 || keyChar > 255))
                 keysym = Keysyms.DEAD_ACUTE;
               break;
             case KeyEvent.VK_DEAD_BREVE:
@@ -2226,17 +2511,17 @@ public class CConn extends CConnection implements UserPasswdGetter,
               break;
             case KeyEvent.VK_DEAD_CEDILLA:
               if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-                  (key == 184 || key > 255))
+                  (keyChar == 184 || keyChar > 255))
                 keysym = Keysyms.DEAD_CEDILLA;
               break;
             case KeyEvent.VK_DEAD_CIRCUMFLEX:
               if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-                  (key == '^' || key > 255))
+                  (keyChar == '^' || keyChar > 255))
                 keysym = Keysyms.DEAD_CIRCUMFLEX;
               break;
             case KeyEvent.VK_DEAD_DIAERESIS:
               if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-                  (key == '\"' || key == 168 || key > 255))
+                  (keyChar == '\"' || keyChar == 168 || keyChar > 255))
                 keysym = Keysyms.DEAD_DIAERESIS;
               break;
             case KeyEvent.VK_DEAD_DOUBLEACUTE:
@@ -2245,7 +2530,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
               break;
             case KeyEvent.VK_DEAD_GRAVE:
               if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-                  (key == '`' || key > 255))
+                  (keyChar == '`' || keyChar > 255))
                 keysym = Keysyms.DEAD_GRAVE;
               break;
             case KeyEvent.VK_DEAD_IOTA:
@@ -2266,7 +2551,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
               break;
             case KeyEvent.VK_DEAD_TILDE:
               if (location != KeyEvent.KEY_LOCATION_UNKNOWN &&
-                  (key == '~' || key > 255))
+                  (keyChar == '~' || keyChar > 255))
                 keysym = Keysyms.DEAD_TILDE;
               break;
             case KeyEvent.VK_DEAD_VOICED_SOUND:
@@ -2275,16 +2560,18 @@ public class CConn extends CConnection implements UserPasswdGetter,
               break;
           }
           if (keysym == -1)
-            keysym = UnicodeToKeysym.ucs2keysym(key);
+            keysym = UnicodeToKeysym.ucs2keysym(keyChar);
           if (keysym == -1) {
             debugStr += " NO KEYSYM";
-            vlog.debug(debugStr);
-            return;
+            if (rfbKeyCode == 0) {
+              vlog.debug(debugStr);
+              return;
+            }
           }
       }
     } else {
       // KEY_ACTION
-      switch (keycode) {
+      switch (vKeyCode) {
         case KeyEvent.VK_HOME:
           if (location == KeyEvent.KEY_LOCATION_NUMPAD)
             keysym = Keysyms.KP_HOME;
@@ -2384,32 +2671,63 @@ public class CConn extends CConnection implements UserPasswdGetter,
           break;
         default:
           debugStr += " NO KEYSYM";
-          vlog.debug(debugStr);
-          return;
+          if (rfbKeyCode == 0) {
+            vlog.debug(debugStr);
+            return;
+          }
       }
     }
 
+    // Handle AltGr, which Windows represents with a Left Ctrl + Right Alt key
+    // sequence.
+    if (Utils.isWindows() && rfbKeyCode == 0x1d &&
+        keysym == Keysyms.CONTROL_L) {
+      if (timer != null) timer.stop();
+      ActionListener actionListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          altGrArmed = false;
+          pressedRFBKeys.put(0x1d, Keysyms.CONTROL_L);
+          writeKeyEvent(Keysyms.CONTROL_L, 0x1d, true);
+        }
+      };
+      timer = new javax.swing.Timer(100, actionListener);
+      timer.setRepeats(false);
+      altGrArmed = true;
+      altGrArmedTime = Utils.getTime();
+      timer.start();
+      debugStr += String.format(" => 0x%04x (Possible AltGr)", keysym);
+      vlog.debug(debugStr);
+      return;
+    }
+
+    if (rfbKeyCode != 0) {
+      writeKeyPress(keysym, rfbKeyCode, debugStr);
+      return;
+    }
+
     if (winAltGr) {
-      if (pressedKeys.containsValue(Keysyms.CONTROL_L)) {
+      if (pressedVKeys.containsValue(Keysyms.CONTROL_L)) {
         vlog.debug("Fake L Ctrl released");
         writeKeyEvent(Keysyms.CONTROL_L, false);
       }
-      if (pressedKeys.containsValue(Keysyms.ALT_L)) {
+      if (pressedVKeys.containsValue(Keysyms.ALT_L)) {
         vlog.debug("Fake L Alt released");
         writeKeyEvent(Keysyms.ALT_L, false);
       }
-      if (pressedKeys.containsValue(Keysyms.CONTROL_R)) {
+      if (pressedVKeys.containsValue(Keysyms.CONTROL_R)) {
         vlog.debug("Fake R Ctrl released");
         writeKeyEvent(Keysyms.CONTROL_R, false);
       }
-      if (pressedKeys.containsValue(Keysyms.ALT_R)) {
+      if (pressedVKeys.containsValue(Keysyms.ALT_R)) {
         vlog.debug("Fake R Alt released");
         writeKeyEvent(Keysyms.ALT_R, false);
       }
     }
-    debugStr += String.format(" => 0x%04x", keysym);
+    if (keysym < 0) keysym = 0;
+    if (keysym > 0)
+      debugStr += String.format(" => 0x%04x", keysym);
     vlog.debug(debugStr);
-    Integer hashedKey = keycode;
+    Integer hashedKey = vKeyCode;
     // On Mac platforms, Java 11 assigns KeyEvent.VK_ALT_GRAPH to the right Alt
     // key, whereas previous versions of Java assigned KeyEvent.VK_ALT to the
     // same key.  However, Java 11 still exhibits the behavior described below
@@ -2419,29 +2737,30 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (Utils.isMac()) {
       if (hashedKey == KeyEvent.VK_ALT_GRAPH)
         hashedKey = KeyEvent.VK_ALT;
-    // On Mac platforms, modifier key press/release events have a key code of 0
-    // if another location of the same modifier key is already pressed, so for
-    // the purposes of matching key release events to key press events, all
-    // locations of a modifier key have to be treated as if they are the same
-    // key.  On other platforms, we hash both the key code and location.
+    // On Mac platforms, modifier key press/release events have a virtual key
+    // code of 0 if another location of the same modifier key is already
+    // pressed, so for the purposes of matching key release events to key press
+    // events, all locations of a modifier key have to be treated as if they
+    // are the same key.  On other platforms, we hash both the virtual key code
+    // and location.
     } else
       hashedKey |= (location << 16);
-    pressedKeys.put(hashedKey, keysym);
+    pressedVKeys.put(hashedKey, keysym);
     writeKeyEvent(keysym, down);
     if (winAltGr) {
-      if (pressedKeys.containsValue(Keysyms.CONTROL_L)) {
+      if (pressedVKeys.containsValue(Keysyms.CONTROL_L)) {
         vlog.debug("Fake L Ctrl pressed");
         writeKeyEvent(Keysyms.CONTROL_L, true);
       }
-      if (pressedKeys.containsValue(Keysyms.ALT_L)) {
+      if (pressedVKeys.containsValue(Keysyms.ALT_L)) {
         vlog.debug("Fake L Alt pressed");
         writeKeyEvent(Keysyms.ALT_L, true);
       }
-      if (pressedKeys.containsValue(Keysyms.CONTROL_R)) {
+      if (pressedVKeys.containsValue(Keysyms.CONTROL_R)) {
         vlog.debug("Fake R Ctrl pressed");
         writeKeyEvent(Keysyms.CONTROL_R, true);
       }
-      if (pressedKeys.containsValue(Keysyms.ALT_R)) {
+      if (pressedVKeys.containsValue(Keysyms.ALT_R)) {
         vlog.debug("Fake R Alt pressed");
         writeKeyEvent(Keysyms.ALT_R, true);
       }
@@ -2556,12 +2875,18 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   synchronized void releasePressedKeys() {
-    for (Map.Entry<Integer, Integer> entry : pressedKeys.entrySet()) {
+    for (Map.Entry<Integer, Integer> entry : pressedVKeys.entrySet()) {
       vlog.debug(String.format("Lost focus.  Releasing key symbol 0x%04x",
                  entry.getValue()));
       writeKeyEvent(entry.getValue(), false);
     }
-    pressedKeys.clear();
+    pressedVKeys.clear();
+    for (Map.Entry<Integer, Integer> entry : pressedRFBKeys.entrySet()) {
+      vlog.debug(String.format("Lost focus.  Releasing key symbol 0x%04x",
+                 entry.getValue()));
+      writeKeyEvent(entry.getValue(), entry.getKey(), false);
+    }
+    pressedRFBKeys.clear();
   }
 
 
@@ -2622,7 +2947,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   private boolean supportsSyncFence;
 
-  private HashMap<Integer, Integer> pressedKeys;
+  // Hash of Java virtual key codes to X11 keysyms
+  private HashMap<Integer, Integer> pressedVKeys;
+  // Hash of RFB keycodes to X11 keysyms
+  private HashMap<Integer, Integer> pressedRFBKeys;
+  private boolean altGrArmed;
+  private double altGrArmedTime;
+  private javax.swing.Timer timer;
+  private boolean firstLEDState = true;
   Viewport viewport;
   Rectangle oldViewportBounds;
   boolean keyboardGrabbed;

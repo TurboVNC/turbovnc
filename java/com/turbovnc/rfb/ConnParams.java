@@ -148,6 +148,8 @@ public class ConnParams {
   public boolean supportsContinuousUpdates;
   public boolean supportsLastRect;
   public boolean supportsGII;
+  public boolean supportsQEMUExtKeyEvent;
+  public int ledState = RFB.LED_UNKNOWN;
 
   public boolean supportsSetDesktopSize;
   // CHECKSTYLE VisibilityModifier:ON

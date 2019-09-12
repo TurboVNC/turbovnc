@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2017-2018, 2020-2021 D. R. Commander.
+/* Copyright (C) 2015, 2017-2018, 2020-2022 D. R. Commander.
  *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -52,12 +52,15 @@ public final class Helper {
       vlog.info("  - Keyboard grabbing");
     if (Utils.osEID())
       vlog.info("  - Extended input device support");
-    if (Utils.isX11())
+    if (Utils.isX11()) {
       vlog.info("  - Multi-screen spanning");
+    }
     if (Utils.isWindows())
       vlog.info("  - Pageant support");
     else
       vlog.info("  - ssh-agent support");
+    if (Utils.isX11() || Utils.isMac())
+      vlog.info("  - Server-side keyboard mapping");
   }
 
   public static synchronized void setAvailable(boolean avail) {

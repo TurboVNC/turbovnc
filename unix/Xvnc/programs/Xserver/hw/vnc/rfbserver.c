@@ -5,7 +5,7 @@
 /*
  *  Copyright (C) 2009-2022 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2021 AnatoScope SA.  All Rights Reserved.
- *  Copyright (C) 2015-2016, 2020-2021 Pierre Ossman for Cendio AB.
+ *  Copyright (C) 2015-2017, 2020-2021 Pierre Ossman for Cendio AB.
  *                                     All Rights Reserved.
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -97,6 +97,8 @@ static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 Bool rfbSendDesktopSize(rfbClientPtr cl);
 Bool rfbSendExtDesktopSize(rfbClientPtr cl);
+static Bool rfbSendQEMUExtKeyEventRect(rfbClientPtr cl);
+static Bool rfbSendLEDState(rfbClientPtr cl);
 
 
 /*
@@ -402,6 +404,8 @@ static rfbClientPtr rfbNewClient(int sock)
   cl->tightQualityLevel = -1;
   cl->imageQualityLevel = -1;
 
+  cl->ledState = rfbLEDUnknown;
+
   cl->next = rfbClientHead;
   cl->prev = NULL;
   if (rfbClientHead)
@@ -635,6 +639,7 @@ void rfbProcessClientMessage(rfbClientPtr cl)
       rfbAuthProcessResponse(cl);
       break;
     case RFB_INITIALISATION:
+      cl->ledState = rfbLEDState;
       rfbInitFlowControl(cl);
       rfbProcessClientInitMessage(cl);
       break;
@@ -917,6 +922,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       Bool firstFence = !cl->enableFence;
       Bool firstCU = !cl->enableCU;
       Bool firstGII = !cl->enableGII;
+      Bool firstQEMUExtKeyEvent = !cl->enableQEMUExtKeyEvent;
+      Bool firstLEDState = !SUPPORTS_LED_STATE(cl);
       Bool logTightCompressLevel = FALSE;
 
       READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbSetEncodingsMsg - 1, return);
@@ -1071,6 +1078,24 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               cl->enableGII = TRUE;
             }
             break;
+          case rfbEncodingQEMUExtendedKeyEvent:
+            if (!cl->enableQEMUExtKeyEvent && enableQEMUExtKeyEvent) {
+              rfbLog("Enabling QEMU Extended Key Event protocol extension for client %s\n", cl->host);
+              cl->enableQEMUExtKeyEvent = TRUE;
+            }
+            break;
+          case rfbEncodingQEMULEDState:
+            if (!cl->enableQEMULEDState && enableQEMUExtKeyEvent) {
+              rfbLog("Enabling QEMU LED State protocol extension for client %s\n", cl->host);
+              cl->enableQEMULEDState = TRUE;
+            }
+            break;
+          case rfbEncodingVMwareLEDState:
+            if (!cl->enableVMwareLEDState && enableQEMUExtKeyEvent) {
+              rfbLog("Enabling VMware LED State protocol extension for client %s\n", cl->host);
+              cl->enableVMwareLEDState = TRUE;
+            }
+            break;
           default:
             if (enc >= (CARD32)rfbEncodingCompressLevel0 &&
                 enc <= (CARD32)rfbEncodingCompressLevel9) {
@@ -1161,6 +1186,25 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         svmsg.maximumVersion = svmsg.minimumVersion = Swap16IfLE(1);
 
         WRITE_OR_CLOSE(&svmsg, sz_rfbGIIServerVersionMsg, return);
+      }
+
+      if (cl->enableQEMUExtKeyEvent && firstQEMUExtKeyEvent) {
+        if (!SUPPORTS_LED_STATE(cl)) {
+          rfbLog("WARNING: Disabling QEMU Extended Key Event extension because neither LED state\n");
+          rfbLog("  extension is supported by the client.\n");
+          cl->enableQEMUExtKeyEvent = FALSE;
+        } else
+          cl->pendingQEMUExtKeyEventRect = TRUE;
+      }
+
+      if (SUPPORTS_LED_STATE(cl) && firstLEDState &&
+          cl->ledState != rfbLEDUnknown) {
+        if (!cl->enableQEMUExtKeyEvent) {
+          rfbLog("WARNING: Disabling LED state extensions because the QEMU Extended Key Event\n");
+          rfbLog("  extension is not supported by the client.\n");
+          cl->enableQEMULEDState = cl->enableVMwareLEDState = FALSE;
+        } else
+          cl->pendingLEDState = TRUE;
       }
 
       return;
@@ -1765,6 +1809,31 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       return;
     }  /* rfbGIIClient */
 
+    case rfbQEMU:
+    {
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbQEMUExtendedKeyEventMsg - 1,
+                    return);
+
+      if (msg.qemueke.subType != 0) {
+        rfbLog("ERROR: This server cannot handle QEMU message subtype %d\n",
+               msg.qemueke.subType);
+        rfbCloseClient(cl);
+        return;
+      }
+      msg.qemueke.down = Swap16IfLE(msg.qemueke.down);
+      msg.qemueke.keysym = Swap32IfLE(msg.qemueke.keysym);
+      msg.qemueke.keycode = Swap32IfLE(msg.qemueke.keycode);
+      if (!msg.qemueke.keycode) {
+        rfbLog("Ignoring QEMU extended key event without key code.\n");
+        return;
+      }
+
+      if (!rfbViewOnly && !cl->viewOnly)
+        ExtKeyEvent(msg.qemueke.keysym, msg.qemueke.keycode, msg.qemueke.down);
+
+      break;
+    }
+
     default:
 
       rfbLog("rfbProcessClientNormalMessage: unknown message type %d\n",
@@ -1890,7 +1959,8 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   REGION_INTERSECT(pScreen, updateRegion, &cl->requestedRegion, updateRegion);
 
   if (!REGION_NOTEMPTY(pScreen, updateRegion) && !sendCursorShape &&
-      !sendCursorPos) {
+      !sendCursorPos && !cl->pendingQEMUExtKeyEventRect &&
+      !cl->pendingLEDState) {
     REGION_UNINIT(pScreen, updateRegion);
     return TRUE;
   }
@@ -2111,7 +2181,9 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   if (nUpdateRegionRects != 0xFFFF) {
     fu->nRects = Swap16IfLE(REGION_NUM_RECTS(&updateCopyRegion) +
                             nUpdateRegionRects +
-                            !!sendCursorShape + !!sendCursorPos);
+                            !!sendCursorShape + !!sendCursorPos +
+                            !!cl->pendingQEMUExtKeyEventRect +
+                            !!cl->pendingLEDState);
   } else {
     fu->nRects = 0xFFFF;
   }
@@ -2129,6 +2201,18 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
     cl->cursorWasMoved = FALSE;
     if (!rfbSendCursorPos(cl, pScreen))
       goto abort;
+  }
+
+  if (cl->pendingQEMUExtKeyEventRect) {
+    if (!rfbSendQEMUExtKeyEventRect(cl))
+      goto abort;
+    cl->pendingQEMUExtKeyEventRect = FALSE;
+  }
+
+  if (cl->pendingLEDState) {
+    if (!rfbSendLEDState(cl))
+      goto abort;
+    cl->pendingLEDState = FALSE;
   }
 
   if (REGION_NOTEMPTY(pScreen, &updateCopyRegion)) {
@@ -2705,4 +2789,95 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
   }
 
   return TRUE;
+}
+
+
+/*
+ * rfbSendQEMUExtKeyEventRect sends a pseudo-rectangle to the client to
+ * acknowledge the server's support of the QEMU Extended Key Event extension.
+ */
+
+static Bool rfbSendQEMUExtKeyEventRect(rfbClientPtr cl)
+{
+  rfbFramebufferUpdateRectHeader rect;
+
+  if (!cl->enableQEMUExtKeyEvent)
+    return TRUE;
+
+  if (ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE) {
+    if (!rfbSendUpdateBuf(cl))
+      return FALSE;
+  }
+
+  rect.encoding = Swap32IfLE(rfbEncodingQEMUExtendedKeyEvent);
+  rect.r.x = 0;
+  rect.r.y = 0;
+  rect.r.w = 0;
+  rect.r.h = 0;
+
+  memcpy(&updateBuf[ublen], (char *)&rect, sz_rfbFramebufferUpdateRectHeader);
+  ublen += sz_rfbFramebufferUpdateRectHeader;
+
+  return rfbSendUpdateBuf(cl);
+}
+
+
+/*
+ * rfbSendLEDState sends a pseudo-rectangle to the client with the server's
+ * lock key state.
+ */
+
+static Bool rfbSendLEDState(rfbClientPtr cl)
+{
+  rfbFramebufferUpdateRectHeader rect;
+
+  if (!SUPPORTS_LED_STATE(cl))
+    return TRUE;
+  if (cl->ledState == rfbLEDUnknown)
+    return TRUE;
+
+  rect.r.x = 0;
+  rect.r.y = 0;
+  rect.r.w = 0;
+  rect.r.h = 0;
+
+  if (cl->enableQEMULEDState) {
+
+    CARD8 state = cl->ledState;
+
+    rect.encoding = Swap32IfLE(rfbEncodingQEMULEDState);
+
+    if (ublen + sz_rfbFramebufferUpdateRectHeader + sizeof(state) >
+        UPDATE_BUF_SIZE) {
+      if (!rfbSendUpdateBuf(cl))
+        return FALSE;
+    }
+
+    memcpy(&updateBuf[ublen], (char *)&rect,
+           sz_rfbFramebufferUpdateRectHeader);
+    ublen += sz_rfbFramebufferUpdateRectHeader;
+    memcpy(&updateBuf[ublen], (char *)&state, sizeof(state));
+    ublen += sizeof(state);
+
+  } else {
+
+    CARD32 state = Swap32IfLE(cl->ledState);
+
+    rect.encoding = Swap32IfLE((CARD32)rfbEncodingVMwareLEDState);
+
+    if (ublen + sz_rfbFramebufferUpdateRectHeader + sizeof(state) >
+        UPDATE_BUF_SIZE) {
+      if (!rfbSendUpdateBuf(cl))
+        return FALSE;
+    }
+
+    memcpy(&updateBuf[ublen], (char *)&rect,
+           sz_rfbFramebufferUpdateRectHeader);
+    ublen += sz_rfbFramebufferUpdateRectHeader;
+    memcpy(&updateBuf[ublen], (char *)&state, sizeof(state));
+    ublen += sizeof(state);
+
+  }
+
+  return rfbSendUpdateBuf(cl);
 }

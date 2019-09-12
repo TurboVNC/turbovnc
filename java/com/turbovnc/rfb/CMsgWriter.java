@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright 2009-2011, 2019 Pierre Ossman for Cendio AB
+ * Copyright 2009-2011, 2017-2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011, 2015 Brian P. Hinz
  * Copyright (C) 2012, 2015, 2017-2018, 2020-2022 D. R. Commander.
  *                                                All Rights Reserved.
@@ -312,13 +312,24 @@ public class CMsgWriter {
     endMsg();
   }
 
-  public synchronized void writeKeyEvent(int key, boolean down)
+  public synchronized void writeKeyEvent(int keysym, int rfbKeyCode,
+                                         boolean down)
   {
-    startMsg(RFB.KEY_EVENT);
-    os.writeU8(down ? 1 : 0);
-    os.pad(2);
-    os.writeU32(key);
-    endMsg();
+    if (!cp.supportsQEMUExtKeyEvent || cp.ledState == RFB.LED_UNKNOWN ||
+        rfbKeyCode == 0) {
+      startMsg(RFB.KEY_EVENT);
+      os.writeU8(down ? 1 : 0);
+      os.pad(2);
+      os.writeU32(keysym);
+      endMsg();
+    } else {
+      startMsg(RFB.QEMU);
+      os.writeU8(RFB.QEMU_EXTENDED_KEY_EVENT);
+      os.writeU16(down ? 1 : 0);
+      os.writeU32(keysym);
+      os.writeU32(rfbKeyCode);
+      endMsg();
+    }
   }
 
   public synchronized void writePointerEvent(Point pos, int buttonMask)
@@ -405,6 +416,11 @@ public class CMsgWriter {
     encodings[nEncodings++] = RFB.ENCODING_EXTENDED_CLIPBOARD;
     if (Utils.getBooleanProperty("turbovnc.gii", true))
       encodings[nEncodings++] = RFB.ENCODING_GII;
+    if (params.serverKeyMap.get()) {
+      encodings[nEncodings++] = RFB.ENCODING_QEMU_EXTENDED_KEY_EVENT;
+      encodings[nEncodings++] = RFB.ENCODING_QEMU_LED_STATE;
+      encodings[nEncodings++] = RFB.ENCODING_VMWARE_LED_STATE;
+    }
 
     if (Decoder.supported(preferredEncoding)) {
       encodings[nEncodings++] = preferredEncoding;

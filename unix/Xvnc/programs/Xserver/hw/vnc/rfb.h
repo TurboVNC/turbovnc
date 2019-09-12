@@ -414,6 +414,12 @@ typedef struct rfbClientRec {
   Bool enableExtDesktopSize;        /* client supports extended desktop size
                                        extension */
   Bool enableGII;                   /* client supports GII extension */
+  Bool enableQEMUExtKeyEvent;       /* client supports QEMU Extended Key Event
+                                       extension */
+  Bool enableQEMULEDState;          /* client supports QEMU LED State
+                                       extension */
+  Bool enableVMwareLEDState;        /* client supports VMware LED State
+                                       extension */
   Bool useRichCursorEncoding;       /* rfbEncodingRichCursor is preferred */
   Bool cursorWasChanged;            /* cursor shape update should be sent */
   Bool cursorWasMoved;              /* cursor position update should be sent */
@@ -462,6 +468,10 @@ typedef struct rfbClientRec {
 
   Bool pendingDesktopResize, pendingExtDesktopResize;
   int reason, result;
+
+  /* Server-side key mapping */
+  Bool pendingQEMUExtKeyEventRect, pendingLEDState;
+  unsigned int ledState;
 
 #if USETLS
   rfbSslCtx *sslctx;
@@ -518,6 +528,13 @@ typedef struct rfbClientRec {
   }  \
   if (cl2 == NULL) action;  \
 }
+
+/*
+ * This macro is used to test whether either LED state extension is supported
+ * by a given client.
+ */
+#define SUPPORTS_LED_STATE(cl)  \
+  (cl->enableQEMULEDState || cl->enableVMwareLEDState)
 
 /*
  * An rfbGCRec is where we store the pointers to the original GC funcs and ops
@@ -837,6 +854,8 @@ extern struct in_addr interface;
 extern struct in6_addr interface6;
 extern int family;
 
+extern int rfbLEDState;
+
 extern int rfbBitsPerPixel(int depth);
 extern void rfbLog(char *format, ...);
 extern void rfbLogPerror(char *str);
@@ -853,6 +872,7 @@ extern void *rfbRealloc(void *ptr, size_t size);
 /* kbdptr.c */
 
 extern Bool compatibleKbd;
+extern Bool enableQEMUExtKeyEvent;
 extern unsigned char ptrAcceleration;
 
 extern void PtrDeviceOn(DeviceIntPtr);
@@ -861,8 +881,10 @@ extern void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl);
 extern void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons);
 
 extern void KbdDeviceInit(DeviceIntPtr);
+extern void ExtKeyEvent(KeySym keySym, unsigned keycode, BOOL down);
 extern void KeyEvent(KeySym keySym, Bool down);
 extern void KbdReleaseAllKeys(void);
+extern void QEMUExtKeyboardEventInit(void);
 
 extern char *stristr(const char *s1, const char *s2);
 

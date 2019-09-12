@@ -90,6 +90,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
         if (cc.viewer.benchFile == null) checkClipboard();
+        cc.pushLEDState();
       }
       public void focusLost(FocusEvent e) {
         cc.releasePressedKeys();
@@ -572,15 +573,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // EDT: Handle the key pressed event.
   public void keyPressed(KeyEvent e) {
-    if (e.getKeyCode() == cc.params.menuKey.getKeyCode() &&
+    if (e.getKeyCode() == cc.params.menuKey.getVKeyCode() &&
         e.getModifiersEx() == 0) {
-      int sx = (scaleWidthRatio == 1.00) ?
-        lastX : (int)Math.floor(lastX * scaleWidthRatio);
-      int sy = (scaleHeightRatio == 1.00) ?
-        lastY : (int)Math.floor(lastY * scaleHeightRatio);
-      java.awt.Point ev = new java.awt.Point(lastX, lastY);
-      ev.translate(sx - lastX, sy - lastY);
-      cc.showMenu((int)ev.getX(), (int)ev.getY());
+      cc.showMenu();
       e.consume();
       return;
     }
@@ -713,8 +708,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       cc.toggleFullScreen();
       return;
     }
-    if (!cc.params.viewOnly.get())
+    if (!cc.params.viewOnly.get()) {
+      // For some reason, Java on Windows doesn't update the locking key state
+      // until another key is pressed.
+      if (Utils.isWindows())
+        cc.pushLEDState();
       cc.writeKeyEvent(e);
+    }
   }
 
   // EDT: Save screenshot

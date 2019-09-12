@@ -614,6 +614,10 @@ public final class Params {
   "VNC server.  This is useful when connecting from clients that have " +
   "\"natural scrolling\" enabled.", false);
 
+  public BoolParameter serverKeyMap =
+  new BoolParameter("ServerKeyMap", this, false,
+  null, true);
+
   public BoolParameter viewOnly =
   new BoolParameter("ViewOnly", this, true,
   "Ignore all keyboard and mouse events in the viewer window and do not " +
