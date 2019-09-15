@@ -1048,7 +1048,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
             break;
           case rfbEncodingGII:
             if (!cl->enableGII) {
-              rfbLog("Enabling GII extension for client %s\n", cl->host);
+              rfbLog("Enabling GII protocol extension for client %s\n", cl->host);
               cl->enableGII = TRUE;
             }
             break;
