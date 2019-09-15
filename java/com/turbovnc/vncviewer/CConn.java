@@ -1940,6 +1940,23 @@ public class CConn extends CConnection implements UserPasswdGetter,
         return;
       }
 
+      // Work around a Windows bug whereby the O/S does not send a WM_KEYUP
+      // message if both Shift keys are pressed and only one is released.  If
+      // we receive a key release event for one Shift key and the other is in
+      // the pressed keys hash, we release both of them.
+      if (VncViewer.OS.startsWith("windows")) {
+        if (sym == Keysyms.SHIFT_R &&
+            pressedKeys.containsValue(Keysyms.SHIFT_L)) {
+          writeKeyEvent(Keysyms.SHIFT_L, down);
+          pressedKeys.remove(Keysyms.SHIFT_L);
+        }
+        if (sym == Keysyms.SHIFT_L &&
+            pressedKeys.containsValue(Keysyms.SHIFT_R)) {
+          writeKeyEvent(Keysyms.SHIFT_R, down);
+          pressedKeys.remove(Keysyms.SHIFT_R);
+        }
+      }
+
       writeKeyEvent(sym, false);
       pressedKeys.remove(hashedKey);
       debugStr += String.format(" => 0x%04x", sym);

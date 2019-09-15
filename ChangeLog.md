@@ -1,7 +1,7 @@
 3.0 pre-beta
 ============
 
-### Significant changes relative to 2.2.3:
+### Significant changes relative to 2.2.4:
 
 1. Since Java 11 introduced the ability to create a custom Java Runtime
 Environment (JRE) with only the modules that the TurboVNC Viewer needs, it has
@@ -97,6 +97,18 @@ fact that TurboVNC's OpenSSL wrapper has better performance and receives more
 attention from the TurboVNC developers and user community, there is no
 compelling reason to use the GnuTLS wrapper anymore.  The 2.2.x version of the
 TurboVNC Server will continue to support GnuTLS on a break/fix basis.
+
+
+2.2.4
+=====
+
+### Significant changes relative to 2.2.3:
+
+1. The Windows/Java TurboVNC Viewer now works around an issue whereby the
+operating system does not send a key release event to applications if one of
+the Shift keys is released while the other Shift key remains pressed.  This
+issue did not affect the native Windows TurboVNC Viewer, since it does not
+distinguish between the left and right Shift keys.
 
 
 2.2.3
