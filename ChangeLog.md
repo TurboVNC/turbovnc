@@ -110,6 +110,11 @@ the Shift keys is released while the other Shift key remains pressed.  This
 issue did not affect the native Windows TurboVNC Viewer, since it does not
 distinguish between the left and right Shift keys.
 
+2. The TurboVNC Viewer now transmits an `XK_KP_Separator` (0xFFAC) key symbol
+rather than an `XK_KP_Decimal` (0xFFAE) key symbol for the keypad decimal key
+if the client's locale uses a comma rather than a period for a decimal symbol.
+This emulates the behavior of Linux.
+
 
 2.2.3
 =====

@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012-2013, 2016, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2016, 2018-2019 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,6 +136,7 @@ public final class Keysyms {
   public static final int KP_9 = 0xFFB9;
   public static final int KP_DECIMAL = 0xFFAE;
   public static final int KP_ADD = 0xFFAB;
+  public static final int KP_SEPARATOR = 0xFFAC;
   public static final int KP_SUBTRACT = 0xFFAD;
   public static final int KP_MULTIPLY = 0xFFAA;
   public static final int KP_DIVIDE = 0xFFAF;
