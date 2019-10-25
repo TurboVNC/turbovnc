@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2019 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.lang.reflect.*;
 import javax.swing.*;
+import java.text.*;
 import java.util.*;
 
 import com.turbovnc.rdr.*;
@@ -1900,7 +1901,19 @@ public class CConn extends CConnection implements UserPasswdGetter,
         case KeyEvent.VK_NUMPAD7:     keysym = Keysyms.KP_7;  break;
         case KeyEvent.VK_NUMPAD8:     keysym = Keysyms.KP_8;  break;
         case KeyEvent.VK_NUMPAD9:     keysym = Keysyms.KP_9;  break;
-        case KeyEvent.VK_DECIMAL:     keysym = Keysyms.KP_DECIMAL;  break;
+        case KeyEvent.VK_DECIMAL:
+          // Use XK_KP_Separator instead of XK_KP_Decimal if the current locale
+          // uses a comma rather than period as a decimal symbol.
+          java.awt.im.InputContext ic = java.awt.im.InputContext.getInstance();
+          DecimalFormat df =
+            (DecimalFormat)DecimalFormat.getInstance(ic.getLocale());
+          DecimalFormatSymbols dfs = df.getDecimalFormatSymbols();
+          char sep = dfs.getDecimalSeparator();
+          if (sep == ',')
+            keysym = Keysyms.KP_SEPARATOR;
+          else
+            keysym = Keysyms.KP_DECIMAL;
+          break;
         case KeyEvent.VK_ADD:         keysym = Keysyms.KP_ADD;  break;
         case KeyEvent.VK_SUBTRACT:    keysym = Keysyms.KP_SUBTRACT;  break;
         case KeyEvent.VK_MULTIPLY:    keysym = Keysyms.KP_MULTIPLY;  break;

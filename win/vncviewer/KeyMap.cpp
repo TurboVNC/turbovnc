@@ -1,5 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2013, 2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2013, 2016, 2019 D. R. Commander. All Rights Reserved.
 //  Copyright 2014 Pierre Ossman <ossman@cendio.se> for Cendio AB
 //
 //  This file is part of the VNC system.
@@ -211,6 +211,20 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
         kas.keycodes[numkeys - 1] = XK_Meta_L;
       else
         kas.keycodes[numkeys - 1] = XK_Meta_R;
+    }
+    // Use XK_KP_Separator instead of XK_KP_Decimal if the current locale uses
+    // a comma rather than a period as a decimal symbol.
+    if (key == XK_KP_Decimal) {
+      LCID locale = MAKELCID(GetKeyboardLayout(0), 0);
+      int bufLen = GetLocaleInfo(locale, LOCALE_SDECIMAL, NULL, 0);
+      if (bufLen) {
+        char *buf = new char[bufLen];
+        if (GetLocaleInfo(locale, LOCALE_SDECIMAL, buf, bufLen)) {
+          if (buf[0] == ',')
+            kas.keycodes[numkeys - 1] = XK_KP_Separator;
+        }
+        delete [] buf;
+      }
     }
     vnclog.Print(8, ": keymap gives %.4x", key);
 
