@@ -1,6 +1,6 @@
 /*
  * Copyright 2012, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013, 2017-2018, D. R. Commander. All rights reserved.
+ * Copyright 2013, 2017-2019, D. R. Commander. All rights reserved.
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -105,10 +105,17 @@ int launch(char *commandName) {
     libjliPath =
       [[env stringByAppendingPathComponent:@"jre/lib/jli/libjli.dylib"]
        fileSystemRepresentation];
-    if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil)
+    if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil) {
       libjliPath =
         [[env stringByAppendingPathComponent:@"lib/jli/libjli.dylib"]
          fileSystemRepresentation];
+      if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil)
+        libjliPath =
+          [[env stringByAppendingPathComponent:@"lib/libjli.dylib"]
+           fileSystemRepresentation];
+      else
+        dlclose(tmpLib);
+    }
     else
       dlclose(tmpLib);
   } else {

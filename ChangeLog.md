@@ -14,6 +14,9 @@ rather than an `XK_KP_Decimal` (0xFFAE) key symbol for the keypad decimal key
 if the client's locale uses a comma rather than a period for a decimal symbol.
 This emulates the behavior of Linux.
 
+3. Fixed an error ("JRELoadError") that occurred when attempting to use the Mac
+TurboVNC Viewer app with Java 13.
+
 
 2.2.3
 =====
