@@ -17,6 +17,9 @@ This emulates the behavior of Linux.
 3. Fixed an error ("JRELoadError") that occurred when attempting to use the Mac
 TurboVNC Viewer app with Java 13.
 
+4. It is no longer necessary to set the `JAVA_HOME` environment variable in
+order to use the Mac TurboVNC Viewer app with Java 11 and later.
+
 
 2.2.3
 =====
