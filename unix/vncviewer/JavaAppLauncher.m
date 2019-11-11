@@ -104,22 +104,52 @@ int launch(char *commandName) {
     libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/lib/jli/libjli.dylib"]
                   fileSystemRepresentation];
   } else {
+    FILE *file = NULL;
+    char path[1024] = "\0";
     NSString *env =
       [[[NSProcessInfo processInfo]environment]objectForKey:@"JAVA_HOME"];
+
     if (env != nil && [env length] > 0) {
-      void *tmpLib;
+      void *tmpLib = NULL;
 
       libjliPath =
         [[env stringByAppendingPathComponent:@"jre/lib/jli/libjli.dylib"]
          fileSystemRepresentation];
-      if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil)
+      if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil) {
         libjliPath =
           [[env stringByAppendingPathComponent:@"lib/jli/libjli.dylib"]
            fileSystemRepresentation];
-      else
-        dlclose(tmpLib);
+        if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil)
+          libjliPath =
+            [[env stringByAppendingPathComponent:@"lib/libjli.dylib"]
+             fileSystemRepresentation];
+      }
+      if (tmpLib) dlclose(tmpLib);
+    } else if ((file = popen("/usr/libexec/java_home", "r")) != NULL &&
+               fgets(path, 1024, file) != NULL && strlen(path) > 0) {
+      void *tmpLib = NULL;
+      NSString *nsPath;
+
+      if (path[strlen(path) - 1] == '\n') path[strlen(path) - 1] = 0;
+      nsPath = [NSString stringWithUTF8String:path];
+
+      libjliPath =
+        [[nsPath stringByAppendingPathComponent:@"jre/lib/jli/libjli.dylib"]
+         fileSystemRepresentation];
+      if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil) {
+        libjliPath =
+          [[nsPath stringByAppendingPathComponent:@"lib/jli/libjli.dylib"]
+           fileSystemRepresentation];
+        if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil)
+          libjliPath =
+            [[nsPath stringByAppendingPathComponent:@"lib/libjli.dylib"]
+             fileSystemRepresentation];
+      }
+      if (tmpLib) dlclose(tmpLib);
     } else
       libjliPath = LIBJLI_DYLIB;
+
+    if (file) pclose(file);
   }
 
   void *libJLI = dlopen(libjliPath, RTLD_LAZY);
