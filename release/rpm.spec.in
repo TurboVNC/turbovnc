@@ -175,10 +175,14 @@ cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 Name=@CMAKE_PROJECT_NAME@ Viewer
 Comment=@CMAKE_PROJECT_NAME@ client application
 Exec=%{bindir}/vncviewer
-Terminal=0
+Terminal=false
+Icon=turbovnc
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
+
+mkdir -p %{buildroot}/usr/share/icons/hicolor/128x128/
+cp -f @CMAKE_SOURCE_DIR@/release/turbovnc.png %{buildroot}/usr/share/icons/hicolor/128x128/
 %endif
 
 %clean
@@ -248,6 +252,7 @@ fi
  %{bindir}/checkshmpixmaps
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop
+ /usr/share/icons/hicolor/128x128/turbovnc.png
  %{mandir}/man1/vncviewer.1*
  %if "%{java}" == "1"
   %{javadir}/libturbojpeg.so

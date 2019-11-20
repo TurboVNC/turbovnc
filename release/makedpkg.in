@@ -77,10 +77,14 @@ cat > $TMPDIR/usr/share/applications/tvncviewer.desktop <<EOF
 Name=@CMAKE_PROJECT_NAME@ Viewer
 Comment=@CMAKE_PROJECT_NAME@ client application
 Exec=$BINDIR/vncviewer
-Terminal=0
+Terminal=false
+Icon=turbovnc
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
+
+mkdir -p "$TMPDIR/usr/share/icons/hicolor/128x128/"
+cp "$SRCDIR/release/turbovnc.png" "$TMPDIR/usr/share/icons/hicolor/128x128/"
 
 SIZE=`du -s $TMPDIR | cut -f1`
 cat pkgscripts/deb-control | sed s/{__SIZE}/$SIZE/g > $TMPDIR/DEBIAN/control
