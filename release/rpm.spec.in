@@ -10,6 +10,9 @@
 # Path under which docs should be installed
 %define docdir %{_defaultdocdir}/%{name}-%{version}
 
+# Path under which icons should be installed
+%define datadir %{_datarootdir}
+
 # Path under which man pages should be installed
 %define mandir @CMAKE_INSTALL_FULL_MANDIR@
 
@@ -112,8 +115,9 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->%endif
 #-->cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ \
 #-->  -DBUILD=%{release} -DCMAKE_INSTALL_BINDIR=%{bindir} \
-#-->  -DCMAKE_INSTALL_DOCDIR=%{docdir} -DCMAKE_INSTALL_JAVADIR=%{javadir} \
-#-->  -DCMAKE_INSTALL_MANDIR=%{mandir} -DCMAKE_INSTALL_PREFIX=%{prefix} \
+#-->  -DCMAKE_INSTALL_DATADIR=%{datadir} -DCMAKE_INSTALL_DOCDIR=%{docdir} \
+#-->  -DCMAKE_INSTALL_JAVADIR=%{javadir} -DCMAKE_INSTALL_MANDIR=%{mandir} \
+#-->  -DCMAKE_INSTALL_PREFIX=%{prefix} \
 #-->  -DCMAKE_INSTALL_SYSCONFDIR=%{sysconfdir} \
 #-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
 #-->  $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG \
@@ -165,6 +169,10 @@ TVNC_DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 if [ ! "$TVNC_DOCDIR" = "%{docdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
 fi
+TVNC_DATADIR=@CMAKE_INSTALL_FULL_DATADIR@
+if [ ! "$TVNC_DATADIR" = "%{datadir}" ]; then
+	safedirmove $RPM_BUILD_ROOT/$TVNC_DATADIR/icons $RPM_BUILD_ROOT/%{datadir}/icons $RPM_BUILD_ROOT/__tmpicons
+fi
 
 #-->%endif
 
@@ -175,7 +183,8 @@ cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 Name=@CMAKE_PROJECT_NAME@ Viewer
 Comment=@CMAKE_PROJECT_NAME@ client application
 Exec=%{bindir}/vncviewer
-Terminal=0
+Terminal=false
+Icon=turbovnc
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
@@ -248,6 +257,9 @@ fi
  %{bindir}/checkshmpixmaps
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop
+ %{datadir}/icons/hicolor/128x128/apps/turbovnc.png
+ %{datadir}/icons/hicolor/48x48/apps/turbovnc.png
+ %{datadir}/icons/hicolor/16x16/apps/turbovnc.png
  %{mandir}/man1/vncviewer.1*
  %if "%{java}" == "1"
   %{javadir}/libturbojpeg.so
