@@ -162,10 +162,20 @@ property. Constraint unknown: ECDH_ DH_RSA") that occurred when attempting to
 use any of the TLS* security types with the Java TurboVNC Viewer running under
 Java 7u211, 8u201, 11.0.2, or later with OpenSSL 1.1.x.
 
-9. Fixed various issues with remote mouse events that would occur when running
+9. Fixed an issue (CVE-2019-15683) in the TurboVNC Server whereby a
+specially-crafted VNC viewer could be used to remotely trigger a stack overflow
+in the server by sending it a malformed RFB Fence message.  This issue could
+never have been encountered when using any of the VNC viewers that currently
+support the RFB Fence message (TurboVNC and TigerVNC.)  Furthermore, since
+exploiting the issue would have first required successfully authenticating with
+a TurboVNC session, the issue did not generally provide an attack vector for
+anyone other than the session owner and any collaborators authorized by the
+owner.
+
+10. Fixed various issues with remote mouse events that would occur when running
 the Linux TurboVNC Viewer in a Wayland session.
 
-10. The TurboVNC Server now generates a 2048-bit DSA key for use with the TLS*
+11. The TurboVNC Server now generates a 2048-bit DSA key for use with the TLS*
 security types.  This fixed an error ("dh key too small") that occurred when
 attempting to connect, using one of those security types, to a TurboVNC session
 running on a RHEL 8 host.  It also fixed an error
