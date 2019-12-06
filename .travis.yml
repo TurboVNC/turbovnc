@@ -35,18 +35,6 @@ matrix:
           packages:
             - libxi-dev
 
-addons:
-  homebrew:
-    brewfile: true
-    update: true
-
-cache:
-  directories:
-    - $HOME/Library/Caches/Homebrew
-
-before_cache:
-  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
-
 before_install:
   - if [ "${BUILD_OFFICIAL:-}" != "" ]; then
       if [ "$TRAVIS_OS_NAME" = "linux" ]; then
@@ -90,6 +78,9 @@ before_install:
     fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
       pushd ~ &&
+      curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci &&
+      . ./macports-ci install &&
+      sudo /opt/local/bin/port -N install md5sha1sum &&
       wget --no-check-certificate $LJT_URL/libjpeg-turbo-$LJT_VERSION.dmg &&
       hdid libjpeg-turbo-$LJT_VERSION.dmg &&
       sudo installer -pkg /Volumes/libjpeg-turbo-$LJT_VERSION/libjpeg-turbo.pkg -target / &&
