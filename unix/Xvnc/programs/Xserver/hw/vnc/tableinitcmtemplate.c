@@ -50,7 +50,7 @@ static void rfbInitColourMapSingleTableOUT(char **table, rfbPixelFormat *in,
   EntryPtr pent;
   int nEntries = 1 << in->bitsPerPixel;
 
-  if (*table) free(*table);
+  free(*table);
   *table = (char *)rfbAlloc(nEntries * sizeof(OUT_T));
   t = (OUT_T *)*table;
 
