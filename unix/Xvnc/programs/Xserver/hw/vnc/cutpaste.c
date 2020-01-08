@@ -156,7 +156,7 @@ void vncSelectionInit(void)
 
 void vncClientCutText(const char *str, int len)
 {
-  if (clientCutText) free(clientCutText);
+  free(clientCutText);
   clientCutText = (char *)rfbAlloc(len);
   memcpy(clientCutText, str, len);
   clientCutTextLen = len;

@@ -245,13 +245,9 @@ void rfbFreeZrleData(rfbClientPtr cl)
   }
   cl->zrleData = NULL;
 
-  if (cl->zrleBeforeBuf) {
-    free(cl->zrleBeforeBuf);
-  }
+  free(cl->zrleBeforeBuf);
   cl->zrleBeforeBuf = NULL;
 
-  if (cl->paletteHelper) {
-    free(cl->paletteHelper);
-  }
+  free(cl->paletteHelper);
   cl->paletteHelper = NULL;
 }

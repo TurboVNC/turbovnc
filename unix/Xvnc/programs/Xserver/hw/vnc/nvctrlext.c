@@ -408,7 +408,7 @@ static int ProcNVCTRLQueryStringAttribute(ClientPtr client)
     XNVCTRLQueryTargetStringAttribute(dpy, stuff->target_type,
                                       stuff->target_id, stuff->display_mask,
                                       stuff->attribute, &ptr);
-  if (error_code != Success && ptr)
+  if (error_code != Success)
     free(ptr);
   X_DEINIT();
 
@@ -783,7 +783,7 @@ static int ProcNVCTRLQueryBinaryData(ClientPtr client)
     XNVCTRLQueryTargetBinaryData(dpy, stuff->target_type, stuff->target_id,
                                  stuff->display_mask, stuff->attribute, &ptr,
                                  &len);
-  if (error_code != Success && ptr)
+  if (error_code != Success)
     free(ptr);
   X_DEINIT();
 
@@ -833,7 +833,7 @@ static int ProcNVCTRLStringOperation(ClientPtr client)
     XNVCTRLStringOperation(dpy, stuff->target_type, stuff->target_id,
                            stuff->display_mask, stuff->attribute,
                            (char *)&stuff[1], &ptr);
-  if (error_code != Success && ptr)
+  if (error_code != Success)
     free(ptr);
   X_DEINIT();
 

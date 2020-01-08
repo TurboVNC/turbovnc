@@ -540,12 +540,11 @@ void rfbClientConnectionGone(rfbClientPtr cl)
 
   rfbPrintStats(cl);
 
-  if (cl->translateLookupTable) free(cl->translateLookupTable);
+  free(cl->translateLookupTable);
 
   rfbFreeZrleData(cl);
 
-  if (cl->cutText)
-    free(cl->cutText);
+  free(cl->cutText);
 
   InterframeOff(cl);
 
@@ -2605,8 +2604,7 @@ void rfbSendServerCutText(char *str, int len)
       continue;
     if (cl->cutTextLen == len && cl->cutText && !memcmp(cl->cutText, str, len))
       continue;
-    if (cl->cutText)
-      free(cl->cutText);
+    free(cl->cutText);
     cl->cutText = rfbAlloc(len);
     memcpy(cl->cutText, str, len);
     cl->cutTextLen = len;

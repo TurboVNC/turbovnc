@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2020 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -1179,12 +1179,10 @@ Bool AddExtInputDevice(rfbDevInfo *dev)
 
   bailout:
   if (dev->pDev) {
+    free(dev->pDev->name);
+    dev->pDev->name = NULL;
     RemoveDevice(dev->pDev, FALSE);
     dev->pDev = NULL;
-    if (dev->pDev->name) {
-      free(dev->pDev->name);
-      dev->pDev->name = NULL;
-    }
   }
   return FALSE;
 }
@@ -1412,9 +1410,7 @@ void rfbRootPropertyChange(PropertyPtr pProp)
       }
 
     } else if ((pProp->size == MAXPWLEN) || (pProp->size == (MAXPWLEN * 2))) {
-      if (rfbAuthOTPValue != NULL)
-        free(rfbAuthOTPValue);
-
+      free(rfbAuthOTPValue);
       rfbAuthOTPValueLen = pProp->size;
       rfbAuthOTPValue = (char *)rfbAlloc(pProp->size);
       memcpy(rfbAuthOTPValue, pProp->data, pProp->size);
@@ -1454,8 +1450,7 @@ void rfbRootPropertyChange(PropertyPtr pProp)
 #ifdef NVCONTROL
   if ((pProp->propertyName == VNC_NVCDISPLAY) && (pProp->type == XA_STRING) &&
       (pProp->format == 8) && (pProp->size > 1) && (pProp->size <= 1024)) {
-    if (nvCtrlDisplay)
-      free(nvCtrlDisplay);
+    free(nvCtrlDisplay);
     nvCtrlDisplay = (char *)rfbAlloc(pProp->size + 1);
     memcpy(nvCtrlDisplay, pProp->data, pProp->size);
     nvCtrlDisplay[pProp->size] = '\0';

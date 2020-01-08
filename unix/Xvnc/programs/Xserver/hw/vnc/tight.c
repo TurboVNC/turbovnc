@@ -334,9 +334,9 @@ void ShutdownTightThreads(void)
     }
   }
   for (i = 0; i < rfbNumThreads; i++) {
-    if (tparam[i].tightAfterBuf) free(tparam[i].tightAfterBuf);
-    if (tparam[i].tightBeforeBuf) free(tparam[i].tightBeforeBuf);
-    if (i != 0 && tparam[i].updateBuf) free(tparam[i].updateBuf);
+    free(tparam[i].tightAfterBuf);
+    free(tparam[i].tightBeforeBuf);
+    if (i != 0) free(tparam[i].updateBuf);
     if (tparam[i].j) tjDestroy(tparam[i].j);
     if (!REGION_NAR(&tparam[i].losslessRegion))
       REGION_UNINIT(pScreen, &tparam[i].losslessRegion);
@@ -1728,12 +1728,12 @@ static Bool SendJpegRect(threadparam *t, int x, int y, int w, int h,
                  (unsigned char *)t->tightAfterBuf, &size, subsamp, quality,
                  flags) == -1) {
     rfbLog("JPEG Error: %s\n", tjGetErrorStr());
-    if (tmpbuf) { free(tmpbuf);  tmpbuf = NULL; }
+    free(tmpbuf);  tmpbuf = NULL;
     return 0;
   }
   jpegDstDataLen = (int)size;
 
-  if (tmpbuf) { free(tmpbuf);  tmpbuf = NULL; }
+  free(tmpbuf);  tmpbuf = NULL;
 
   if (!CheckUpdateBuf(t, TIGHT_MIN_TO_COMPRESS + 1))
     return FALSE;

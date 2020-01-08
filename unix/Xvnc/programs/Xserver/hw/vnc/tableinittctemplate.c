@@ -62,7 +62,7 @@ static void rfbInitTrueColourSingleTableOUT(char **table, rfbPixelFormat *in,
   OUT_T *t;
   int nEntries = 1 << in->bitsPerPixel;
 
-  if (*table) free(*table);
+  free(*table);
   *table = (char *)rfbAlloc(nEntries * sizeof(OUT_T));
   t = (OUT_T *)*table;
 
@@ -98,7 +98,7 @@ static void rfbInitTrueColourRGBTablesOUT(char **table, rfbPixelFormat *in,
   OUT_T *greenTable;
   OUT_T *blueTable;
 
-  if (*table) free(*table);
+  free(*table);
   *table = (char *)rfbAlloc((in->redMax + in->greenMax + in->blueMax + 3) *
                             sizeof(OUT_T));
   redTable = (OUT_T *)*table;

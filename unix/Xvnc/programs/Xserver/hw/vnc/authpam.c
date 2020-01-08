@@ -100,9 +100,7 @@ static int conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response **resp,
   } else {
     rp = responses;
     for (i = 0; i < num_msg; i++) {
-      if (rp->resp != 0)
-        free(rp->resp);
-
+      free(rp->resp);
       rp++;
     }
 

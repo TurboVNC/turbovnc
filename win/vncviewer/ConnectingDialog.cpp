@@ -66,8 +66,7 @@ void ConnDialogThread::Init(HINSTANCE hInst, const char *vnchost)
 
 ConnDialogThread::~ConnDialogThread()
 {
-  if (m_vnchost != NULL)
-    free(m_vnchost);
+  free(m_vnchost);
 }
 
 
