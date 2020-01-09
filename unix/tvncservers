@@ -1,21 +1,20 @@
 # The VNCSERVERS variable is a list of display:user pairs, separated by
 # spaces.
 #
-# Uncomment the line below to start a VNC server on display :1 as 'myusername'
-# (adjust this to your own user name).  You will also need to configure a VNC
-# password (run 'man -M {TurboVNC_directory}/man vncpasswd' for instructions on
-# how to set this) or another form of authentication.  See the TurboVNC User's
-# Guide for more information about the authentication methods available in
-# TurboVNC.
-#
-# DO NOT RUN THIS SERVICE if your local area network is untrusted!  See the
-# TurboVNC User's Guide for information about tunneling TurboVNC over SSH.
-#
-# Use "-nohttpd" to prevent web-based VNC clients from connecting.
-#
-# Use "-localhost" to prevent remote VNC clients from connecting except when
-# doing so through a secure tunnel.  See the TurboVNC User's Guide and the
-# vncviewer and Xvnc man pages for more information.
+# Uncomment the first line below to start a TurboVNC session under the account
+# 'myusername' (adjust this to your own user name) and listening on Display :1.
+# You will also need to configure a VNC password (run
+# 'man -M {TurboVNC_directory}/man vncpasswd' for instructions) or another form
+# of authentication.  See the TurboVNC User's Guide for more information about
+# the authentication methods available in TurboVNC.  If you intend to connect
+# to the TurboVNC session over an untrusted network, then it is strongly
+# recommended that you configure the session to require TLS or SSH encryption.
+# Refer to the TurboVNC User's Guide and the Xvnc man page
+# ('man -M {TurboVNC_directory}/man Xvnc') for more information.  Set the
+# VNCSERVERARGS[n] variable in order to specify arguments that should be passed
+# to vncserver when creating the TurboVNC session for Display :n.  Refer to
+# the TurboVNC Server man pages ('man -M {TurboVNC_directory}/man vncserver'
+# and 'man -M {TurboVNC_directory}/man Xvnc') for a list of possible arguments.
 
 # VNCSERVERS="1:myusername"
-# VNCSERVERARGS[1]="-geometry 800x600 -nohttpd -localhost"
+# VNCSERVERARGS[1]=""
