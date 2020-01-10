@@ -172,11 +172,11 @@ macro(GNUInstallDirs_set_install_dir var docstring)
     set(_GNUInstallDirs_CMAKE_INSTALL_DEFAULT_${var} 1 CACHE INTERNAL
       "CMAKE_INSTALL_${var} has default value")
   elseif(DEFINED _GNUInstallDirs_CMAKE_INSTALL_LAST_DEFAULT_${var} AND
-    NOT "${_GNUInstallDirs_CMAKE_INSTALL_LAST_DEFAULT_${var}}" STREQUAL
-      "${CMAKE_INSTALL_DEFAULT_${var}}" AND
+    NOT _GNUInstallDirs_CMAKE_INSTALL_LAST_DEFAULT_${var} STREQUAL
+      CMAKE_INSTALL_DEFAULT_${var} AND
     _GNUInstallDirs_CMAKE_INSTALL_DEFAULT_${var} AND
-    "${_GNUInstallDirs_CMAKE_INSTALL_LAST_${var}}" STREQUAL
-      "${CMAKE_INSTALL_${var}}")
+    _GNUInstallDirs_CMAKE_INSTALL_LAST_${var} STREQUAL
+      CMAKE_INSTALL_${var})
     set(_GNUInstallDirs_CMAKE_INSTALL_FORCE_${var} "FORCE")
   endif()
 
