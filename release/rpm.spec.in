@@ -11,7 +11,7 @@
 %define docdir %{_defaultdocdir}/%{name}-%{version}
 
 # Path under which icons should be installed
-%define datadir %{_datarootdir}
+%define datadir %{_datadir}
 
 # Path under which man pages should be installed
 %define mandir @CMAKE_INSTALL_FULL_MANDIR@
