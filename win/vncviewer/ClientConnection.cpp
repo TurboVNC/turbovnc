@@ -1,4 +1,5 @@
-//  Copyright (C) 2009-2013, 2015-2018 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2013, 2015-2018, 2020 D. R. Commander.
+//                                           All Rights Reserved.
 //  Copyright 2009 Pierre Ossman for Cendio AB
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
@@ -200,6 +201,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   m_supportsSetDesktopSize = false;
   m_waitingOnResizeTimer = false;
   m_checkLayout = false;
+  m_serverXinerama = false;
 
   m_firstUpdate = true;
 
@@ -4059,6 +4061,21 @@ void ClientConnection::ReadExtendedDesktopSize(
 
     layout.add_screen(Screen(screen.id, screen.x, screen.y, screen.w, screen.h,
                              screen.flags));
+
+    // Normally, the TurboVNC Viewer will not create a multi-screen viewer
+    // window that extends beyond the unshared boundary of any physical screen
+    // on the client.  This ensures that the window position and scrollbars
+    // will be correct, regardless of the monitor layout.  However, if
+    // automatic desktop resizing is enabled and the server supports Xinerama,
+    // then the full-screen multi-screen viewer window should extend to the
+    // bounding box of all physical screens, even if it extends beyond the
+    // unshared boundary of some of them.  This ensures correct behavior if the
+    // screens have different resolutions or are offset.  TurboVNC 2.0.x-2.1.x
+    // supported the RFB extended desktop size message but not Xinerama, and
+    // those versions also sent a screen ID of 0.  Thus, we do not assume that
+    // the server supports Xinerama unless it sends a multi-screen layout or a
+    // non-zero screen ID.
+    if (i > 0 || screen.id != 0) m_serverXinerama = true;
   }
 
   layout.debugPrint("LAYOUT RECEIVED");

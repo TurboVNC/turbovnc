@@ -1,5 +1,6 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2010-2012, 2015, 2017 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2012, 2015, 2017, 2020 D. R. Commander.
+//                                            All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -269,7 +270,9 @@ ScreenSet ClientConnection::GetFullScreenMetrics(RECT &screenArea,
     workArea = fsm.workArea0;
     screenArea = fsm.screenArea0;
   } else {
-    if (fsm.equal) {
+    if (fsm.equal ||
+        (fsm.fullScreen && m_opts.m_desktopSize.mode == SIZE_AUTO &&
+         m_serverXinerama)) {
       // All monitors are equal in resolution and aligned in a perfect grid.
       // Thus, we can extend the viewer window to all of them, both
       // horizontally and vertically (otherwise, the viewer window can only

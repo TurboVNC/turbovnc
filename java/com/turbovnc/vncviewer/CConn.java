@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2019 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2020 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -382,6 +382,23 @@ public class CConn extends CConnection implements UserPasswdGetter,
       opts.desktopSize.width = w;
       opts.desktopSize.height = h;
     }
+
+    // Normally, the TurboVNC Viewer will not create a multi-screen viewer
+    // window that extends beyond the unshared boundary of any physical screen
+    // on the client.  This ensures that the window position and scrollbars
+    // will be correct, regardless of the monitor layout.  However, if
+    // automatic desktop resizing is enabled and the server supports Xinerama,
+    // then the full-screen multi-screen viewer window should extend to the
+    // bounding box of all physical screens, even if it extends beyond the
+    // unshared boundary of some of them.  This ensures correct behavior if the
+    // screens have different resolutions or are offset.  TurboVNC 2.0.x-2.1.x
+    // supported the RFB extended desktop size message but not Xinerama, and
+    // those versions also sent a screen ID of 0.  Thus, we do not assume that
+    // the server supports Xinerama unless it sends a multi-screen layout or a
+    // non-zero screen ID.
+    if (layout.numScreens() > 1 ||
+        (layout.numScreens() > 0 && layout.screens.get(0).id != 0))
+      serverXinerama = true;
   }
 
   // RFB thread: clientRedirect() migrates the client to another host/port.
@@ -1180,7 +1197,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
       span = primary;
       viewport.leftMon = viewport.rightMon = viewport.topMon =
         viewport.bottomMon = primaryID;
-    } else if (equal && fullScreenWindow)
+    } else if (equal ||
+               (fullScreenWindow && serverXinerama &&
+                opts.desktopSize.mode == Options.SIZE_AUTO &&
+                !VncViewer.isX11()))
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
 
     vlog.debug("Spanned " + (fullScreenWindow ? "FS " : "work ") + "area: " +
@@ -2447,6 +2467,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   private boolean pendingUpdate;
   private boolean continuousUpdates;
   boolean checkLayout;
+  boolean serverXinerama;
 
   private boolean forceNonincremental;
 
