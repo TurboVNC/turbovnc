@@ -29,6 +29,8 @@ install:
 
       bash -c "pacman --noconfirm -S zip"
 
+      mklink /d "%ProgramData%\Oracle\Java32" "c:\Program Files (x86)\Java\jdk1.6.0"
+
       git clone --depth=1 https://github.com/TurboVNC/buildscripts.git c:/buildscripts
 
 build_script:
