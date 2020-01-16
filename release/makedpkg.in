@@ -52,6 +52,7 @@ VERSION=@VERSION@
 DEBARCH=@DEBARCH@
 SRCDIR=@CMAKE_SOURCE_DIR@
 BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
+DATADIR=@CMAKE_INSTALL_FULL_DATADIR@
 DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 SYSCONFDIR=@CMAKE_INSTALL_FULL_SYSCONFDIR@
 BUILDSERVER=@TVNC_BUILDSERVER@
@@ -77,10 +78,15 @@ cat > $TMPDIR/usr/share/applications/tvncviewer.desktop <<EOF
 Name=@CMAKE_PROJECT_NAME@ Viewer
 Comment=@CMAKE_PROJECT_NAME@ client application
 Exec=$BINDIR/vncviewer
-Terminal=0
+Terminal=false
+Icon=turbovnc
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
+
+if [ ! "$DATADIR" = "/usr/share" ]; then
+	safedirmove $TMPDIR/$DATADIR/icons $TMPDIR/usr/share/icons $TMPDIR/__tmpicons
+fi
 
 SIZE=`du -s $TMPDIR | cut -f1`
 cat pkgscripts/deb-control | sed s/{__SIZE}/$SIZE/g > $TMPDIR/DEBIAN/control

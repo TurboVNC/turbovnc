@@ -121,6 +121,14 @@ TurboVNC Viewer app with Java 13.
 4. It is no longer necessary to set the `JAVA_HOME` environment variable in
 order to use the Mac TurboVNC Viewer app with Java 11 and later.
 
+5. Fixed an issue whereby, if the physical screens on the client had mismatched
+resolutions or were offset, the TurboVNC Viewer would not use all of the
+available screen real estate in full-screen mode with multi-screen spanning
+enabled.  The viewer now properly fills all screens in this case, as long as
+automatic desktop resizing is enabled and the VNC server supports Xinerama
+(multiple virtual screens), i.e. if the server's virtual screen layout is being
+set based on the client's physical screen layout.
+
 
 2.2.3
 =====
