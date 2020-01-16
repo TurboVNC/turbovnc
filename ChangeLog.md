@@ -129,6 +129,9 @@ automatic desktop resizing is enabled and the VNC server supports Xinerama
 (multiple virtual screens), i.e. if the server's virtual screen layout is being
 set based on the client's physical screen layout.
 
+6. The Windows TurboVNC Viewer should now build properly with Visual Studio
+2015.
+
 
 2.2.3
 =====

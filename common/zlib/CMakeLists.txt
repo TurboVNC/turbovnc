@@ -28,6 +28,7 @@ add_library(zlib STATIC
 	adler32.c
 	compress.c
 	crc32.c
+	crc_folding.c
 	deflate.c
 	gzclose.c
 	gzlib.c
