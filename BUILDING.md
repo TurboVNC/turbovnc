@@ -44,22 +44,18 @@ Build Requirements
 - Microsoft Visual C++ 2005 or later
 
   If you don't already have Visual C++, then the easiest way to get it is by
-  installing the
-  [Windows SDK](http://msdn.microsoft.com/en-us/windows/bb980924.aspx).
-  The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
-  everything necessary to build TurboVNC.
+  installing
+  [Visual Studio Community Edition](https://visualstudio.microsoft.com),
+  which includes everything necessary to build TurboVNC.
 
-  * You can also use Microsoft Visual Studio Express/Community Edition, which
-    is a free download.  (NOTE: versions prior to 2012 can only be used to
-    build 32-bit code.)
+  * You can also download and install the standalone Windows SDK (for Windows 7
+    or later), which includes command-line versions of the 32-bit and 64-bit
+    Visual C++ compilers.
   * If you intend to build TurboVNC from the command line, then add the
     appropriate compiler and SDK directories to the `INCLUDE`, `LIB`, and
     `PATH` environment variables.  This is generally accomplished by executing
-    `vcvars32.bat` or `vcvars64.bat` and `SetEnv.cmd`.  __vcvars32.bat__ and
-    __vcvars64.bat__ are part of Visual C++ and are located in the same
-    directory as the compiler.  __SetEnv.cmd__ is part of the Windows SDK.  You
-    can pass optional arguments to `SetEnv.cmd` to specify a 32-bit or 64-bit
-    build environment.
+    `vcvars32.bat` or `vcvars64.bat`, which are located in the same directory
+    as the compiler.
 
 
 ### Mac
