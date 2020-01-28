@@ -196,7 +196,7 @@ void _XSeqSyncFunction(
     register Display *dpy)
 {
     xGetInputFocusReply rep;
-    register xReq *req;
+    _X_UNUSED register xReq *req;
 
     if ((X_DPY_GET_REQUEST(dpy) - X_DPY_GET_LAST_REQUEST_READ(dpy)) >= (65535 - BUFSIZE/SIZEOF(xReq))) {
 	GetEmptyReq(GetInputFocus, req);
@@ -1238,7 +1238,7 @@ _XWireToEvent(
  * _XDefaultIOError - Default fatal system error reporting routine.  Called
  * when an X internal system error is encountered.
  */
-int _XDefaultIOError(
+_X_NORETURN int _XDefaultIOError(
 	Display *dpy)
 {
 	if (ECHECK(EPIPE)) {
@@ -1382,6 +1382,16 @@ int _XDefaultError(
 	XErrorEvent *event)
 {
     if (_XPrintDefaultError (dpy, event, stderr) == 0) return 0;
+
+    /*
+     * Store in dpy flags that the client is exiting on an unhandled XError
+     * (pretend it is an IOError, since the application is dying anyway it
+     * does not make a difference).
+     * This is useful for _XReply not to hang if the application makes Xlib
+     * calls in _fini as part of process termination.
+     */
+    dpy->flags |= XlibDisplayIOError;
+
     exit(1);
     /*NOTREACHED*/
 }
