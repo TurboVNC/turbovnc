@@ -1,6 +1,6 @@
 include_directories(../Xi ../render ../xfixes)
 
-handle_type_puns(damageext.c)
+disable_compiler_warnings()
 
 add_library(damageext STATIC
 	damageext.c)

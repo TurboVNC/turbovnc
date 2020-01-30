@@ -7,4 +7,7 @@ add_library(util OBJECT
 	miscutil.c
 	patcache.c
 	private.c
+	reallocarray.c
+	strlcat.c
+	strlcpy.c
 	utilbitmap.c)

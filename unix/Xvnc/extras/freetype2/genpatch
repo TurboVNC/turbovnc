@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT=freetype-2.9.1
+PROJECT=freetype-2.10.1
 FILE=$PROJECT.tar.gz
 URL=http://download.savannah.gnu.org/releases/freetype
 SRCDIR=`dirname $0`

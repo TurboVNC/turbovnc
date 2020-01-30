@@ -1,3 +1,53 @@
+commit 8287ebd7b752c33b0cabc4982606fe4831106f7e
+Author: Uli Schlachter <psychon@znc.in>
+Date:   Thu Sep 27 14:04:17 2018 +0200
+
+    Release libxcb 1.13.1
+
+commit bbda345a718ff73086437e51f03fcbb73e4365b9
+Author: Erik Kurzinger <ekurzinger@nvidia.com>
+Date:   Mon Aug 20 12:06:25 2018 -0700
+
+    don't flag extra reply in xcb_take_socket
+    
+    If any flags are specified in a call to xcb_take_socket,
+    they should only be applied to replies for requests sent
+    after that function returns (and until the socket is
+    re-acquired by XCB).
+    
+    Previously, they would also be incorrectly applied to the
+    reply for the last request sent before the socket was taken.
+    For instance, in this example program the reply for the
+    GetInputFocus request gets discarded, even though it was
+    sent before the socket was taken. This results in the
+    call to retrieve the reply hanging indefinitely.
+    
+    static void return_socket(void *closure) {}
+    
+    int main(void)
+    {
+        Display *dpy = XOpenDisplay(NULL);
+        xcb_connection_t *c = XGetXCBConnection(dpy);
+    
+        xcb_get_input_focus_cookie_t cookie = xcb_get_input_focus_unchecked(c);
+        xcb_flush(c);
+    
+        uint64_t seq;
+        xcb_take_socket(c, return_socket, dpy, XCB_REQUEST_DISCARD_REPLY, &seq);
+    
+        xcb_generic_error_t *err;
+        xcb_get_input_focus_reply(c, cookie, &err);
+    }
+    
+    In practice, this has been causing intermittent KWin crashes when
+    used in combination with the proprietary NVIDIA driver such as
+    https://bugs.kde.org/show_bug.cgi?id=386370 since when Xlib fails to
+    retrieve one of these incorrectly discarded replies it triggers
+    an IO error.
+    
+    Signed-off-by: Erik Kurzinger <ekurzinger@nvidia.com>
+    Signed-off-by: Uli Schlachter <psychon@znc.in>
+
 commit 7e0f166579672d71efd819c81f0c932b0acd542c
 Author: Daniel Stone <daniels@collabora.com>
 Date:   Wed Feb 28 01:26:55 2018 +0000

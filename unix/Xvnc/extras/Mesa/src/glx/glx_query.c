@@ -50,6 +50,9 @@ __glXQueryServerString(Display * dpy, int opcode, CARD32 screen, CARD32 name)
                                                                     name),
                                         NULL);
 
+   if (!reply)
+      return NULL;
+
    /* The spec doesn't mention this, but the Xorg server replies with
     * a string already terminated with '\0'. */
    uint32_t len = xcb_glx_query_server_string_string_length(reply);
@@ -73,6 +76,9 @@ __glXGetString(Display * dpy, int opcode, CARD32 contextTag, CARD32 name)
                                                                  contextTag,
                                                                  name),
                                                                 NULL);
+
+   if (!reply)
+      return NULL;
 
    /* The spec doesn't mention this, but the Xorg server replies with
     * a string already terminated with '\0'. */

@@ -41,7 +41,19 @@ proc_present_query_version(ClientPtr client)
     };
 
     REQUEST_SIZE_MATCH(xPresentQueryVersionReq);
-    (void) stuff;
+    /* From presentproto:
+     *
+     * The client sends the highest supported version to the server
+     * and the server sends the highest version it supports, but no
+     * higher than the requested version.
+     */
+
+    if (rep.majorVersion > stuff->majorVersion ||
+        rep.minorVersion > stuff->minorVersion) {
+        rep.majorVersion = stuff->majorVersion;
+        rep.minorVersion = stuff->minorVersion;
+    }
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -249,7 +261,7 @@ proc_present_dispatch(ClientPtr client)
     return (*proc_present_vector[stuff->data]) (client);
 }
 
-static int
+static int _X_COLD
 sproc_present_query_version(ClientPtr client)
 {
     REQUEST(xPresentQueryVersionReq);
@@ -261,7 +273,7 @@ sproc_present_query_version(ClientPtr client)
     return (*proc_present_vector[stuff->presentReqType]) (client);
 }
 
-static int
+static int _X_COLD
 sproc_present_pixmap(ClientPtr client)
 {
     REQUEST(xPresentPixmapReq);
@@ -281,7 +293,7 @@ sproc_present_pixmap(ClientPtr client)
     return (*proc_present_vector[stuff->presentReqType]) (client);
 }
 
-static int
+static int _X_COLD
 sproc_present_notify_msc(ClientPtr client)
 {
     REQUEST(xPresentNotifyMSCReq);
@@ -295,7 +307,7 @@ sproc_present_notify_msc(ClientPtr client)
     return (*proc_present_vector[stuff->presentReqType]) (client);
 }
 
-static int
+static int _X_COLD
 sproc_present_select_input (ClientPtr client)
 {
     REQUEST(xPresentSelectInputReq);
@@ -307,7 +319,7 @@ sproc_present_select_input (ClientPtr client)
     return (*proc_present_vector[stuff->presentReqType]) (client);
 }
 
-static int
+static int _X_COLD
 sproc_present_query_capabilities (ClientPtr client)
 {
     REQUEST(xPresentQueryCapabilitiesReq);
@@ -325,7 +337,7 @@ static int (*sproc_present_vector[PresentNumberRequests]) (ClientPtr) = {
     sproc_present_query_capabilities,      /* 4 */
 };
 
-int
+int _X_COLD
 sproc_present_dispatch(ClientPtr client)
 {
     REQUEST(xReq);

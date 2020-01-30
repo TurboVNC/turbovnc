@@ -318,6 +318,8 @@ InputThreadDoWork(void *arg)
     sigfillset(&set);
     pthread_sigmask(SIG_BLOCK, &set, NULL);
 
+    ddxInputThreadInit();
+
     inputThreadInfo->running = TRUE;
 
 #if defined(HAVE_PTHREAD_SETNAME_NP_WITH_TID)
@@ -409,6 +411,8 @@ InputThreadPreInit(void)
     inputThreadInfo = malloc(sizeof(InputThreadInfo));
     if (!inputThreadInfo)
         FatalError("input-thread: could not allocate memory");
+
+    inputThreadInfo->changed = FALSE;
 
     inputThreadInfo->thread = 0;
     xorg_list_init(&inputThreadInfo->devs);

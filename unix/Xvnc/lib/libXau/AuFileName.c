@@ -29,6 +29,7 @@ in this Software without prior written authorization from The Open Group.
 #endif
 #include <X11/Xauth.h>
 #include <X11/Xos.h>
+#include <assert.h>
 #include <stdlib.h>
 
 static char *buf = NULL;
@@ -66,12 +67,14 @@ XauFileName (void)
 	return NULL;
     }
     size = strlen (name) + strlen(&slashDotXauthority[1]) + 2;
-    if (size > bsize) {
-	if (buf)
-	    free (buf);
+    if ((size > bsize) || (buf == NULL)) {
+	free (buf);
+        assert(size > 0);
 	buf = malloc (size);
-	if (!buf)
+	if (!buf) {
+	    bsize = 0;
 	    return NULL;
+	}
 
         if (!atexit_registered) {
             atexit(free_filename_buffer);
@@ -81,6 +84,6 @@ XauFileName (void)
 	bsize = size;
     }
     snprintf (buf, bsize, "%s%s", name,
-              slashDotXauthority + (name[1] == '\0' ? 1 : 0));
+              slashDotXauthority + (name[0] == '/' && name[1] == '\0' ? 1 : 0));
     return buf;
 }

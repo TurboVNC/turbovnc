@@ -7,18 +7,14 @@ foreach(h ${HEADERS})
 endforeach()
 
 copy_X_header(include/GL/internal/dri_interface.h GL/internal)
+copy_X_header(include/KHR/khrplatform.h KHR)
 
 include_directories(include src src/mapi src/mapi/glapi)
 
-add_definitions(-DGLX_USE_TLS -DHAVE_PTHREAD -DMAPI_MODE_UTIL
-	-DGLX_INDIRECT_RENDERING)
+add_definitions(-DUSE_ELF_TLS -DHAVE_PTHREAD -DHAVE_TIMESPEC_GET
+	-DMAPI_MODE_UTIL -DGLX_INDIRECT_RENDERING)
 
 disable_compiler_warnings()
-handle_type_puns(src/mapi/u_current.c)
-handle_unused(
-	src/glx/glx_pbuffer.c
-	src/glx/glxcmds.c
-	src/glx/indirect.c)
 
 add_library(glapi-server STATIC
 	src/mapi/glapi/glapi_dispatch.c

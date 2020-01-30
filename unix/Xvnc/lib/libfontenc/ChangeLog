@@ -1,3 +1,86 @@
+commit 2baea13978759d1a011fc6d739465893b554d30a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Feb 19 17:31:57 2019 -0800
+
+    libfontenc 1.1.4
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d7f661849c18c354f1692d9859e057aa3a7ddf93
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Dec 7 19:29:22 2018 -0800
+
+    Update configure.ac bug URL for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b12b2d71f1547e832ac14b66a0d94d88b3675b25
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Nov 19 23:01:09 2018 -0800
+
+    Update README for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b28c2d111e9d02ea1a42ac27a1330b0ba1efb4a6
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Nov 11 13:58:34 2018 -0800
+
+    Fix iso8859-7 mappings for 0xA1, 0xA2, & 0xFF
+    
+    Fixes: https://gitlab.freedesktop.org/xorg/lib/libfontenc/issues/1
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8d30ca25b54934e29206da64e80c044d05b14470
+Author: Mihail Konev <k.mvc@ya.ru>
+Date:   Thu Jan 26 13:52:49 2017 +1000
+
+    autogen: add default patch prefix
+    
+    Signed-off-by: Mihail Konev <k.mvc@ya.ru>
+
+commit cc7e0f5529ab5c25aa2adc31a629a5e43cf1f319
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Mon Mar 9 12:00:52 2015 +0000
+
+    autogen.sh: use quoted string variables
+    
+    Place quotes around the $srcdir, $ORIGDIR and $0 variables to prevent
+    fall-outs, when they contain space.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 38aac013fcfd6e54a9fd9847ed798a5a20bd7139
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jan 24 10:32:07 2017 +1000
+
+    autogen.sh: use exec instead of waiting for configure to finish
+    
+    Syncs the invocation of configure with the one from the server.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit 8bbc9af3ef1160f16f176be07c917f9cccf229b2
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Sun Jul 26 18:32:23 2015 +0200
+
+    make FontEncDirectory return a const string
+    
+    Its comment already said "This string is static and should not be
+    modified".
+    
+    encparse.c: In function 'FontEncDirectory':
+    encparse.c:844:17: warning: assignment discards 'const' qualifier from pointer target type
+                 dir = FONT_ENCODINGS_DIRECTORY;
+                     ^
+    
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit 42f3a39c3085afd9ef904ae39102fd49bbc2e4a5
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Thu Apr 30 21:39:51 2015 -0700

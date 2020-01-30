@@ -88,7 +88,7 @@
 
 #define HASH_ALLOC malloc
 #define HASH_FREE  free
-#ifndef __GLIBC__
+#ifndef HAVE_RANDOM_R
 #define HASH_RANDOM_DECL	char *ps, rs[256]
 #define HASH_RANDOM_INIT(seed)	ps = initstate(seed, rs, sizeof(rs))
 #define HASH_RANDOM		random()

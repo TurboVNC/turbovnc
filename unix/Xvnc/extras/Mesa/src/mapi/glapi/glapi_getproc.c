@@ -34,7 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "glapi/glapi_priv.h"
-#include "glapi/glapitable.h"
+#include "glapitable.h"
 
 
 #define FIRST_DYNAMIC_OFFSET (sizeof(struct _glapi_table) / sizeof(void *))
@@ -49,7 +49,7 @@
 #if !defined(DISPATCH_FUNCTION_SIZE) 
 # define NEED_FUNCTION_POINTER
 #endif
-#include "glapi/glprocs.h"
+#include "glprocs.h"
 
 
 /**
@@ -510,11 +510,6 @@ _glapi_get_proc_address(const char *funcName)
    struct _glapi_function * entry;
 
    init_glapi_relocs_once();
-
-#ifdef USE_MGL_NAMESPACE
-   if (funcName && funcName[0] == 'm')
-      funcName++;
-#endif
 
   if (!funcName || funcName[0] != 'g' || funcName[1] != 'l')
       return NULL;

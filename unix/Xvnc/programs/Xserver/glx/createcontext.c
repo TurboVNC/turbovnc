@@ -28,6 +28,7 @@
 #include "glxserver.h"
 #include "glxext.h"
 #include "indirect_dispatch.h"
+#include "opaque.h"
 
 #define ALL_VALID_FLAGS \
     (GLX_CONTEXT_DEBUG_BIT_ARB | GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB \
@@ -37,29 +38,29 @@ static Bool
 validate_GL_version(int major_version, int minor_version)
 {
     if (major_version <= 0 || minor_version < 0)
-        return False;
+        return FALSE;
 
     switch (major_version) {
     case 1:
         if (minor_version > 5)
-            return False;
+            return FALSE;
         break;
 
     case 2:
         if (minor_version > 1)
-            return False;
+            return FALSE;
         break;
 
     case 3:
         if (minor_version > 3)
-            return False;
+            return FALSE;
         break;
 
     default:
         break;
     }
 
-    return True;
+    return TRUE;
 }
 
 static Bool
@@ -70,9 +71,9 @@ validate_render_type(uint32_t render_type)
     case GLX_COLOR_INDEX_TYPE:
     case GLX_RGBA_FLOAT_TYPE_ARB:
     case GLX_RGBA_UNSIGNED_FLOAT_TYPE_EXT:
-        return True;
+        return TRUE;
     default:
-        return False;
+        return FALSE;
     }
 }
 
@@ -93,7 +94,7 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
     __GLXcontext *ctx = NULL;
     __GLXcontext *shareCtx = NULL;
     __GLXscreen *glxScreen;
-    __GLXconfig *config;
+    __GLXconfig *config = NULL;
     int err;
 
     /* The GLX_ARB_create_context_robustness spec says:
@@ -123,8 +124,6 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
     if (req->length != expected_size)
         return BadLength;
 
-    LEGAL_NEW_RESOURCE(req->context, client);
-
     /* The GLX_ARB_create_context spec says:
      *
      *     "* If <config> is not a valid GLXFBConfig, GLXBadFBConfig is
@@ -136,8 +135,10 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
     if (!validGlxScreen(client, req->screen, &glxScreen, &err))
         return __glXError(GLXBadFBConfig);
 
-    if (!validGlxFBConfig(client, glxScreen, req->fbconfig, &config, &err))
-        return __glXError(GLXBadFBConfig);
+    if (req->fbconfig) {
+        if (!validGlxFBConfig(client, glxScreen, req->fbconfig, &config, &err))
+            return __glXError(GLXBadFBConfig);
+    }
 
     /* Validate the context with which the new context should share resources.
      */
@@ -182,6 +183,9 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
             break;
 
         case GLX_RENDER_TYPE:
+            /* Not valid for GLX_EXT_no_config_context */
+            if (!req->fbconfig)
+                return BadValue;
             render_type = attribs[2 * i + 1];
             break;
 
@@ -206,8 +210,23 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
             break;
 #endif
 
+        case GLX_SCREEN:
+            /* Only valid for GLX_EXT_no_config_context */
+            if (req->fbconfig)
+                return BadValue;
+            /* Must match the value in the request header */
+            if (attribs[2 * i + 1] != req->screen)
+                return BadValue;
+            break;
+
+        case GLX_CONTEXT_OPENGL_NO_ERROR_ARB:
+            /* ignore */
+            break;
+
         default:
-            return BadValue;
+            if (!req->isDirect)
+                return BadValue;
+            break;
         }
     }
 
@@ -302,6 +321,17 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
         err = BadAlloc;
     }
     else {
+        /* Only allow creating indirect GLX contexts if allowed by
+         * server command line.  Indirect GLX is of limited use (since
+         * it's only GL 1.4), it's slower than direct contexts, and
+         * it's a massive attack surface for buffer overflow type
+         * errors.
+         */
+        if (!enableIndirectGLX) {
+            client->errorValue = req->isDirect;
+            return BadValue;
+        }
+
         ctx = glxScreen->createContext(glxScreen, config, shareCtx,
                                        req->numAttribs, (uint32_t *) attribs,
                                        &err);
@@ -314,7 +344,7 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
     ctx->config = config;
     ctx->id = req->context;
     ctx->share_id = req->shareList;
-    ctx->idExists = True;
+    ctx->idExists = TRUE;
     ctx->isDirect = req->isDirect;
     ctx->renderMode = GL_RENDER;
     ctx->resetNotificationStrategy = reset;

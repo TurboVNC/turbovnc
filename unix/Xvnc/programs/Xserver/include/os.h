@@ -54,6 +54,12 @@ SOFTWARE.
 #ifdef MONOTONIC_CLOCK
 #include <time.h>
 #endif
+#if defined(HAVE_LIBBSD) && defined(HAVE_REALLOCARRAY)
+#include <bsd/stdlib.h>       /* for reallocarray */
+#endif
+#if defined(HAVE_LIBBSD) && defined(HAVE_STRLCPY)
+#include <bsd/string.h>       /* for strlcpy, strlcat */
+#endif
 
 #define SCREEN_SAVER_ON   0
 #define SCREEN_SAVER_OFF  1
@@ -100,11 +106,9 @@ extern _X_EXPORT Bool WaitForSomething(Bool clients_are_ready);
 
 extern _X_EXPORT int ReadRequestFromClient(ClientPtr /*client */ );
 
-#if XTRANS_SEND_FDS
 extern _X_EXPORT int ReadFdFromClient(ClientPtr client);
 
 extern _X_EXPORT int WriteFdToClient(ClientPtr client, int fd, Bool do_close);
-#endif
 
 extern _X_EXPORT Bool InsertFakeRequest(ClientPtr /*client */ ,
                                         char * /*data */ ,
@@ -362,6 +366,9 @@ System(const char *cmdline);
 #define Fclose(a) fclose(a)
 #endif
 
+extern _X_EXPORT Bool
+PrivsElevated(void);
+
 extern _X_EXPORT void
 CheckUserParameters(int argc, char **argv, char **envp);
 extern _X_EXPORT void
@@ -466,7 +473,7 @@ AccessUsingXdmcp(void);
 extern _X_EXPORT void
 DefineSelf(int /*fd */ );
 
-#if XDMCP
+#ifdef XDMCP
 extern _X_EXPORT void
 AugmentSelf(void *from, int len);
 
@@ -549,6 +556,8 @@ extern _X_EXPORT void
 AbortDDX(enum ExitCode error);
 extern _X_EXPORT void
 ddxGiveUp(enum ExitCode error);
+extern _X_EXPORT void
+ddxInputThreadInit(void);
 extern _X_EXPORT int
 TimeSinceLastInputEvent(void);
 

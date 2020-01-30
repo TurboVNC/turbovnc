@@ -464,8 +464,6 @@ static const int version_requests[] = {
     X_DamageAdd,                /* Version 1 */
 };
 
-#define NUM_VERSION_REQUESTS	(sizeof (version_requests) / sizeof (version_requests[0]))
-
 static int (*ProcDamageVector[XDamageNumberRequests]) (ClientPtr) = {
     /*************** Version 1 ******************/
     ProcDamageQueryVersion,
@@ -482,14 +480,14 @@ ProcDamageDispatch(ClientPtr client)
     REQUEST(xDamageReq);
     DamageClientPtr pDamageClient = GetDamageClient(client);
 
-    if (pDamageClient->major_version >= NUM_VERSION_REQUESTS)
+    if (pDamageClient->major_version >= ARRAY_SIZE(version_requests))
         return BadRequest;
     if (stuff->damageReqType > version_requests[pDamageClient->major_version])
         return BadRequest;
     return (*ProcDamageVector[stuff->damageReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcDamageQueryVersion(ClientPtr client)
 {
     REQUEST(xDamageQueryVersionReq);
@@ -501,7 +499,7 @@ SProcDamageQueryVersion(ClientPtr client)
     return (*ProcDamageVector[stuff->damageReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcDamageCreate(ClientPtr client)
 {
     REQUEST(xDamageCreateReq);
@@ -513,7 +511,7 @@ SProcDamageCreate(ClientPtr client)
     return (*ProcDamageVector[stuff->damageReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcDamageDestroy(ClientPtr client)
 {
     REQUEST(xDamageDestroyReq);
@@ -524,7 +522,7 @@ SProcDamageDestroy(ClientPtr client)
     return (*ProcDamageVector[stuff->damageReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcDamageSubtract(ClientPtr client)
 {
     REQUEST(xDamageSubtractReq);
@@ -537,7 +535,7 @@ SProcDamageSubtract(ClientPtr client)
     return (*ProcDamageVector[stuff->damageReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcDamageAdd(ClientPtr client)
 {
     REQUEST(xDamageAddReq);
@@ -559,7 +557,7 @@ static int (*SProcDamageVector[XDamageNumberRequests]) (ClientPtr) = {
     SProcDamageAdd,
 };
 
-static int
+static int _X_COLD
 SProcDamageDispatch(ClientPtr client)
 {
     REQUEST(xDamageReq);
@@ -584,7 +582,7 @@ FreeDamageExt(void *value, XID did)
     return Success;
 }
 
-static void
+static void _X_COLD
 SDamageNotifyEvent(xDamageNotifyEvent * from, xDamageNotifyEvent * to)
 {
     to->type = from->type;

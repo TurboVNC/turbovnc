@@ -57,6 +57,10 @@ SOFTWARE.
 #include "geext.h"
 #include "privates.h"
 
+extern _X_EXPORT void AssignTypeAndName(DeviceIntPtr dev,
+                                        Atom type,
+                                        const char *name);
+
 #define BitIsOn(ptr, bit) (!!(((const BYTE *) (ptr))[(bit)>>3] & (1 << ((bit) & 7))))
 #define SetBit(ptr, bit)  (((BYTE *) (ptr))[(bit)>>3] |= (1 << ((bit) & 7)))
 #define ClearBit(ptr, bit) (((BYTE *)(ptr))[(bit)>>3] &= ~(1 << ((bit) & 7)))
@@ -515,7 +519,6 @@ typedef struct _SpriteInfoRec {
         CursorPtr pCursor;
         ScreenPtr pScreen;
         int elt;
-        CARD32 time;
     } anim;
 } SpriteInfoRec, *SpriteInfoPtr;
 

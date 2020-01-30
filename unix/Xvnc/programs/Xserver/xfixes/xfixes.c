@@ -105,8 +105,6 @@ static const int version_requests[] = {
     X_XFixesDestroyPointerBarrier,      /* Version 5 */
 };
 
-#define NUM_VERSION_REQUESTS	(sizeof (version_requests) / sizeof (version_requests[0]))
-
 int (*ProcXFixesVector[XFixesNumberRequests]) (ClientPtr) = {
 /*************** Version 1 ******************/
     ProcXFixesQueryVersion,
@@ -149,14 +147,14 @@ ProcXFixesDispatch(ClientPtr client)
     REQUEST(xXFixesReq);
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
 
-    if (pXFixesClient->major_version >= NUM_VERSION_REQUESTS)
+    if (pXFixesClient->major_version >= ARRAY_SIZE(version_requests))
         return BadRequest;
     if (stuff->xfixesReqType > version_requests[pXFixesClient->major_version])
         return BadRequest;
     return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
 }
 
-static int
+static _X_COLD int
 SProcXFixesQueryVersion(ClientPtr client)
 {
     REQUEST(xXFixesQueryVersionReq);
@@ -204,7 +202,7 @@ static int (*SProcXFixesVector[XFixesNumberRequests]) (ClientPtr) = {
 /*************** Version 5 ****************/
 SProcXFixesCreatePointerBarrier, SProcXFixesDestroyPointerBarrier,};
 
-static int
+static _X_COLD int
 SProcXFixesDispatch(ClientPtr client)
 {
     REQUEST(xXFixesReq);

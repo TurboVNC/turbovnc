@@ -3,13 +3,13 @@ include_directories(../mi ../render)
 add_definitions(-DXINERAMA)
 
 disable_compiler_warnings()
-handle_type_puns()
 
 add_library(randr STATIC
 	randr.c
 	rrcrtc.c
 	rrdispatch.c
 	rrinfo.c
+	rrlease.c
 	rrmode.c
 	rrmonitor.c
 	rroutput.c

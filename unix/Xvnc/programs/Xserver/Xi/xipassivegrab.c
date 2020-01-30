@@ -46,7 +46,7 @@
 #include "misc.h"
 #include "inpututils.h"
 
-int
+int _X_COLD
 SProcXIPassiveGrabDevice(ClientPtr client)
 {
     int i;
@@ -88,7 +88,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     };
     int i, ret = Success;
     uint32_t *modifiers;
-    xXIGrabModifierInfo *modifiers_failed;
+    xXIGrabModifierInfo *modifiers_failed = NULL;
     GrabMask mask = { 0 };
     GrabParameters param;
     void *tmp;
@@ -203,8 +203,14 @@ ProcXIPassiveGrabDevice(ClientPtr client)
                                 &param, XI2, &mask);
             break;
         case XIGrabtypeKeycode:
-            status = GrabKey(client, dev, mod_dev, stuff->detail,
-                             &param, XI2, &mask);
+            /* XI2 allows 32-bit keycodes but thanks to XKB we can never
+             * implement this. Just return an error for all keycodes that
+             * cannot work anyway */
+            if (stuff->detail > 255)
+                status = XIAlreadyGrabbed;
+            else
+                status = GrabKey(client, dev, mod_dev, stuff->detail,
+                                 &param, XI2, &mask);
             break;
         case XIGrabtypeEnter:
         case XIGrabtypeFocusIn:
@@ -232,13 +238,13 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     if (rep.num_modifiers)
         WriteToClient(client, rep.length * 4, modifiers_failed);
 
-    free(modifiers_failed);
  out:
+    free(modifiers_failed);
     xi2mask_free(&mask.xi2mask);
     return ret;
 }
 
-void
+void _X_COLD
 SRepXIPassiveGrabDevice(ClientPtr client, int size,
                         xXIPassiveGrabDeviceReply * rep)
 {
@@ -249,7 +255,7 @@ SRepXIPassiveGrabDevice(ClientPtr client, int size,
     WriteToClient(client, size, rep);
 }
 
-int
+int _X_COLD
 SProcXIPassiveUngrabDevice(ClientPtr client)
 {
     int i;

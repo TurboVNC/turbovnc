@@ -1,12 +1,8 @@
 include_directories(../Xi ../mi ../render)
 
+add_definitions(-DXKM_OUTPUT_DIR=\"compiled/\")
+
 disable_compiler_warnings()
-handle_type_puns(
-	XKBGAlloc.c
-	xkb.c
-	xkbEvents.c
-	xkbSwap.c
-	xkbUtils.c)
 
 add_library(xkb STATIC
 	XKBAlloc.c

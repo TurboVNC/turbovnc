@@ -1,3 +1,104 @@
+commit 618b3ba5f826d930df2ca6a6a0ce212fa75cef42
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 16 09:19:02 2019 -0700
+
+    libXdmcp 1.1.3
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7d4c69183b9838c684c1bcedb4e6184301d2816f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Nov 19 21:51:24 2018 -0800
+
+    Update README for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6d1aee0310001eca8f6ded9814a2a70b3a774896
+Author: Benjamin Tissoires <benjamin.tissoires@gmail.com>
+Date:   Thu May 4 11:12:13 2017 +0200
+
+    Fix compilation error when arc4random_buf is not available
+    
+    Not sure how I missed that, but I did.
+    
+    Also rename emulate_getrandom_buf() into insecure_getrandom_buf() as
+    requested in the previous patch reviews.
+    
+    Last, getbits() expects an unsigned char, so remove the warning.
+    
+    Signed-off-by: Benjamin Tissoires <benjamin.tissoires@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 0554324ec6bbc2071f5d1f8ad211a1643e29eb1f
+Author: Benjamin Tissoires <benjamin.tissoires@gmail.com>
+Date:   Tue Apr 4 19:13:38 2017 +0200
+
+    Use getentropy() if arc4random_buf() is not available
+    
+    This allows to fix CVE-2017-2625 on Linux platforms without pulling in
+    libbsd.
+    The libc getentropy() is available since glibc 2.25 but also on OpenBSD.
+    For Linux, we need at least a v3.17 kernel. If the recommended
+    arc4random_buf() function is not available, emulate it by first trying
+    to use getentropy() on a supported glibc and kernel. If the call fails,
+    fall back to the current (vulnerable) code.
+    
+    Signed-off-by: Benjamin Tissoires <benjamin.tissoires@gmail.com>
+    Reviewed-by: Mark Kettenis <kettenis@openbsd.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit f1bf902c52884e35d48f4d03915f019337f84717
+Author: Mihail Konev <k.mvc@ya.ru>
+Date:   Thu Jan 26 13:52:49 2017 +1000
+
+    autogen: add default patch prefix
+    
+    Signed-off-by: Mihail Konev <k.mvc@ya.ru>
+
+commit 34ac12e5eb93ba1c4685bd25f5d9a25288d2d89e
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Mon Mar 9 12:00:52 2015 +0000
+
+    autogen.sh: use quoted string variables
+    
+    Place quotes around the $srcdir, $ORIGDIR and $0 variables to prevent
+    fall-outs, when they contain space.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 3d813e1a45fb5d1b4b566c35218b9bcf0261b74a
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jan 24 10:32:07 2017 +1000
+
+    autogen.sh: use exec instead of waiting for configure to finish
+    
+    Syncs the invocation of configure with the one from the server.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit 5021b93d68c499831ad65a2abf1bfb7e6ed2724f
+Author: Helmut Grohne <helmut@subdivi.de>
+Date:   Wed Nov 11 22:23:15 2015 +0100
+
+    do not use &fullrelvers; in xdmcp.xml (Debian bug 761628)
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b10f382e3aa2e86cd5a2bc27d6758da55f0ab1f6
+Author: Jon TURNEY <jon.turney@dronecode.org.uk>
+Date:   Sat Sep 13 20:28:38 2014 +0100
+
+    Link with winsock library for socket functions on MinGW
+    
+    Signed-off-by: Jon TURNEY <jon.turney@dronecode.org.uk>
+    Reviewed-by: David Macek <david.macek.0@gmail.com>
+
 commit 0c09444d276fbf46a0e8b427a4f6a325d0625742
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Sat Mar 21 09:39:14 2015 -0700

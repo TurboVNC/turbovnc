@@ -38,6 +38,7 @@ enum {
 /*   GLX_ARB_get_proc_address is implemented on the client. */
     ARB_context_flush_control_bit = 0,
     ARB_create_context_bit,
+    ARB_create_context_no_error_bit,
     ARB_create_context_profile_bit,
     ARB_create_context_robustness_bit,
     ARB_fbconfig_float_bit,
@@ -48,6 +49,7 @@ enum {
     EXT_fbconfig_packed_float_bit,
     EXT_import_context_bit,
     EXT_libglvnd_bit,
+    EXT_no_config_context_bit,
     EXT_stereo_tree_bit,
     EXT_texture_from_pixmap_bit,
     EXT_visual_info_bit,

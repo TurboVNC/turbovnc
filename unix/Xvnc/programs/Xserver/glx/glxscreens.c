@@ -38,12 +38,16 @@
 #include <os.h>
 #include <colormapst.h>
 
+#include "extinit.h"
 #include "privates.h"
 #include "glxserver.h"
 #include "glxutil.h"
 #include "glxext.h"
 #include "protocol-versions.h"
+
+#ifdef COMPOSITE
 #include "compositeext.h"
+#endif
 
 static DevPrivateKeyRec glxScreenPrivateKeyRec;
 
@@ -173,13 +177,6 @@ glxGetScreen(ScreenPtr pScreen)
     return dixLookupPrivate(&pScreen->devPrivates, glxScreenPrivateKey);
 }
 
-_X_EXPORT void
-GlxSetVisualConfigs(int nconfigs, void *configs, void **privates)
-{
-    /* We keep this stub around for the DDX drivers that still
-     * call it. */
-}
-
 GLint
 glxConvertToXVisualType(int visualType)
 {
@@ -284,11 +281,12 @@ pickFBConfig(__GLXscreen * pGlxScreen, VisualPtr visual)
         if (config->visualID != 0)
             continue;
 #ifdef COMPOSITE
-	/* Use only duplicated configs for compIsAlternateVisuals */
-        if (!noCompositeExtension &&
-	    !!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
-	    !!config->duplicatedForComp)
-            continue;
+        if (!noCompositeExtension) {
+            /* Use only duplicated configs for compIsAlternateVisuals */
+            if (!!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
+                !!config->duplicatedForComp)
+                continue;
+        }
 #endif
         /*
          * If possible, use the same swapmethod for all built-in visual
@@ -358,9 +356,10 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
             pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
             config->visualID = visual->vid;
 #ifdef COMPOSITE
-            if (!noCompositeExtension &&
-                compIsAlternateVisual(pScreen, visual->vid))
-                config->visualSelectGroup++;
+            if (!noCompositeExtension) {
+                if (compIsAlternateVisual(pScreen, visual->vid))
+                    config->visualSelectGroup++;
+            }
 #endif
         }
     }
@@ -382,10 +381,12 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
          */
         depth = config->redBits + config->greenBits + config->blueBits;
 #ifdef COMPOSITE
-	if (config->duplicatedForComp) {
-		depth += config->alphaBits;
-		config->visualSelectGroup++;
-	}
+        if (!noCompositeExtension) {
+            if (config->duplicatedForComp) {
+                    depth += config->alphaBits;
+                    config->visualSelectGroup++;
+            }
+        }
 #endif
         /* Make sure that our FBconfig's depth can actually be displayed
          * (corresponds to an existing visual).
@@ -410,8 +411,10 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
             continue;
 
 #ifdef COMPOSITE
-        if (config->duplicatedForComp)
-	    (void) CompositeRegisterAlternateVisuals(pScreen, &visual->vid, 1);
+        if (!noCompositeExtension) {
+            if (config->duplicatedForComp)
+                (void) CompositeRegisterAlternateVisuals(pScreen, &visual->vid, 1);
+        }
 #endif
         pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
         initGlxVisual(visual, config);
@@ -434,8 +437,15 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
 void
 __glXScreenDestroy(__GLXscreen * screen)
 {
+    __GLXconfig *config, *next;
+
     free(screen->glvnd);
     free(screen->GLXextensions);
     free(screen->GLextensions);
     free(screen->visuals);
+
+    for (config = screen->fbconfigs; config != NULL; config = next) {
+        next = config->next;
+        free(config);
+    }
 }

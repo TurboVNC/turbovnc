@@ -62,33 +62,6 @@ if(NOT TVNC_SYSTEMX11)
 	endfunction()
 endif()
 
-function(handle_type_puns)
-	# NOTE: For whatever reason, Clang doesn't need this
-	if(CMAKE_COMPILER_IS_GNUCC)
-		if(ARGC EQUAL 0)
-			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing" PARENT_SCOPE)
-		else()
-			foreach(file ${ARGV})
-				set_property(SOURCE ${file} APPEND_STRING PROPERTY COMPILE_FLAGS
-					" -fno-strict-aliasing")
-			endforeach()
-		endif()
-	endif()
-endfunction()
-
-function(handle_unused)
-	if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-		if(ARGC EQUAL 0)
-			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused" PARENT_SCOPE)
-		else()
-			foreach(file ${ARGV})
-				set_property(SOURCE ${file} APPEND_STRING PROPERTY COMPILE_FLAGS
-					" -Wno-unused")
-			endforeach()
-		endif()
-	endif()
-endfunction()
-
 if(TVNC_SYSTEMX11)
 	include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xau_INCLUDE_PATH}
 		${X11_Xdmcp_INCLUDE_PATH} ${X11_Xkbfile_INCLUDE_PATH})

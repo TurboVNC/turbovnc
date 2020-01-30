@@ -84,19 +84,7 @@ __stdcall unsigned long GetTickCount(void);
 #include <X11/fonts/libxfont2.h>
 #include "osdep.h"
 #include "extension.h"
-#ifdef X_POSIX_C_SOURCE
-#define _POSIX_C_SOURCE X_POSIX_C_SOURCE
 #include <signal.h>
-#undef _POSIX_C_SOURCE
-#else
-#if defined(_POSIX_SOURCE)
-#include <signal.h>
-#else
-#define _POSIX_SOURCE
-#include <signal.h>
-#undef _POSIX_SOURCE
-#endif
-#endif
 #ifndef WIN32
 #include <sys/wait.h>
 #endif
@@ -136,6 +124,7 @@ Bool noDamageExtension = FALSE;
 Bool noDbeExtension = FALSE;
 #endif
 #ifdef DPMSExtension
+#include "dpmsproc.h"
 Bool noDPMSExtension = FALSE;
 #endif
 #ifdef GLXEXT
@@ -501,19 +490,20 @@ GetTimeInMicros(void)
     struct timeval tv;
 #ifdef MONOTONIC_CLOCK
     struct timespec tp;
+    static clockid_t uclockid;
 
-    if (!clockid) {
+    if (!uclockid) {
         if (clock_gettime(CLOCK_MONOTONIC, &tp) == 0)
-            clockid = CLOCK_MONOTONIC;
+            uclockid = CLOCK_MONOTONIC;
         else
-            clockid = ~0L;
+            uclockid = ~0L;
     }
-    if (clockid != ~0L && clock_gettime(clockid, &tp) == 0)
+    if (uclockid != ~0L && clock_gettime(uclockid, &tp) == 0)
         return (CARD64) tp.tv_sec * (CARD64)1000000 + tp.tv_nsec / 1000;
 #endif
 
     X_GETTIMEOFDAY(&tv);
-    return (CARD64) tv.tv_sec * (CARD64)1000000000 + (CARD64) tv.tv_usec * 1000;
+    return (CARD64) tv.tv_sec * (CARD64)1000000 + (CARD64) tv.tv_usec;
 }
 #endif
 
@@ -1017,7 +1007,7 @@ ProcessCommandLine(int argc, char *argv[])
 #endif
         else if (strcmp(argv[i], "-dumbSched") == 0) {
             InputThreadEnable = FALSE;
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
             SmartScheduleSignalEnable = FALSE;
 #endif
         }
@@ -1219,7 +1209,7 @@ XNFstrdup(const char *s)
 void
 SmartScheduleStopTimer(void)
 {
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
     struct itimerval timer;
 
     if (!SmartScheduleSignalEnable)
@@ -1235,7 +1225,7 @@ SmartScheduleStopTimer(void)
 void
 SmartScheduleStartTimer(void)
 {
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
     struct itimerval timer;
 
     if (!SmartScheduleSignalEnable)
@@ -1248,7 +1238,7 @@ SmartScheduleStartTimer(void)
 #endif
 }
 
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
 static void
 SmartScheduleTimer(int sig)
 {
@@ -1267,9 +1257,7 @@ SmartScheduleEnable(void)
     memset((char *) &act, 0, sizeof(struct sigaction));
 
     /* Set up the timer signal function */
-#ifdef SA_RESTART
     act.sa_flags = SA_RESTART;
-#endif
     act.sa_handler = SmartScheduleTimer;
     sigemptyset(&act.sa_mask);
     sigaddset(&act.sa_mask, SIGALRM);
@@ -1298,7 +1286,7 @@ SmartSchedulePause(void)
 void
 SmartScheduleInit(void)
 {
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
     if (SmartScheduleEnable() < 0) {
         perror("sigaction for smart scheduler");
         SmartScheduleSignalEnable = FALSE;
@@ -1455,7 +1443,7 @@ Popen(const char *command, const char *type)
     }
 
     /* Ignore the smart scheduler while this is going on */
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
     if (SmartSchedulePause() < 0) {
         close(pdes[0]);
         close(pdes[1]);
@@ -1470,7 +1458,7 @@ Popen(const char *command, const char *type)
         close(pdes[0]);
         close(pdes[1]);
         free(cur);
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
         if (SmartScheduleEnable() < 0)
             perror("signal");
 #endif
@@ -1647,7 +1635,7 @@ Pclose(void *iop)
     /* allow EINTR again */
     OsReleaseSignals();
 
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
     if (SmartScheduleEnable() < 0) {
         perror("signal");
         return -1;
@@ -1742,6 +1730,69 @@ System(const char *cmdline)
 }
 #endif
 
+Bool
+PrivsElevated(void)
+{
+    static Bool privsTested = FALSE;
+    static Bool privsElevated = TRUE;
+
+    if (!privsTested) {
+#if defined(WIN32)
+        privsElevated = FALSE;
+#else
+        if ((getuid() != geteuid()) || (getgid() != getegid())) {
+            privsElevated = TRUE;
+        }
+        else {
+#if defined(HAVE_ISSETUGID)
+            privsElevated = issetugid();
+#elif defined(HAVE_GETRESUID)
+            uid_t ruid, euid, suid;
+            gid_t rgid, egid, sgid;
+
+            if ((getresuid(&ruid, &euid, &suid) == 0) &&
+                (getresgid(&rgid, &egid, &sgid) == 0)) {
+                privsElevated = (euid != suid) || (egid != sgid);
+            }
+            else {
+                printf("Failed getresuid or getresgid");
+                /* Something went wrong, make defensive assumption */
+                privsElevated = TRUE;
+            }
+#else
+            if (getuid() == 0) {
+                /* running as root: uid==euid==0 */
+                privsElevated = FALSE;
+            }
+            else {
+                /*
+                 * If there are saved ID's the process might still be privileged
+                 * even though the above test succeeded. If issetugid() and
+                 * getresgid() aren't available, test this by trying to set
+                 * euid to 0.
+                 */
+                unsigned int oldeuid;
+
+                oldeuid = geteuid();
+
+                if (seteuid(0) != 0) {
+                    privsElevated = FALSE;
+                }
+                else {
+                    if (seteuid(oldeuid) != 0) {
+                        FatalError("Failed to drop privileges.  Exiting\n");
+                    }
+                    privsElevated = TRUE;
+                }
+            }
+#endif
+        }
+#endif
+        privsTested = TRUE;
+    }
+    return privsElevated;
+}
+
 /*
  * CheckUserParameters: check for long command line arguments and long
  * environment variables.  By default, these checks are only done when
@@ -1823,7 +1874,7 @@ CheckUserParameters(int argc, char **argv, char **envp)
     char *a, *e = NULL;
 
 #if CHECK_EUID
-    if (geteuid() == 0 && getuid() != geteuid())
+    if (PrivsElevated())
 #endif
     {
         /* Check each argv[] */

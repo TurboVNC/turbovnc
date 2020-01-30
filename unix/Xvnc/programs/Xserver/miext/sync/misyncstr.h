@@ -28,29 +28,29 @@
 #ifndef _MISYNCSTR_H_
 #define _MISYNCSTR_H_
 
+#include <stdint.h>
 #include "dix.h"
 #include "misync.h"
 #include "scrnintstr.h"
 #include <X11/extensions/syncconst.h>
 
-#define CARD64 XSyncValue       /* XXX temporary! need real 64 bit values for Alpha */
-
 /* Sync object types */
 #define SYNC_COUNTER		0
 #define SYNC_FENCE		1
 
-typedef struct _SyncObject {
+struct _SyncObject {
     ClientPtr client;           /* Owning client. 0 for system counters */
     struct _SyncTriggerList *pTriglist; /* list of triggers */
     XID id;                     /* resource ID */
     unsigned char type;         /* SYNC_* */
+    unsigned char initialized;  /* FALSE if created but not initialized */
     Bool beingDestroyed;        /* in process of going away */
-} SyncObject;
+};
 
 typedef struct _SyncCounter {
     SyncObject sync;            /* Common sync object data */
-    CARD64 value;               /* counter value */
-    struct _SysCounterInfo *pSysCounterInfo;    /* NULL if not a system counter */
+    int64_t value;              /* counter value */
+    struct _SysCounterInfo *pSysCounterInfo; /* NULL if not a system counter */
 } SyncCounter;
 
 struct _SyncFence {
@@ -63,17 +63,14 @@ struct _SyncFence {
 
 struct _SyncTrigger {
     SyncObject *pSync;
-    CARD64 wait_value;          /* wait value */
+    int64_t wait_value;         /* wait value */
     unsigned int value_type;    /* Absolute or Relative */
     unsigned int test_type;     /* transition or Comparision type */
-    CARD64 test_value;          /* trigger event threshold value */
-    Bool (*CheckTrigger) (struct _SyncTrigger * /*pTrigger */ ,
-                          CARD64        /*newval */
-        );
-    void (*TriggerFired) (struct _SyncTrigger * /*pTrigger */
-        );
-    void (*CounterDestroyed) (struct _SyncTrigger *     /*pTrigger */
-        );
+    int64_t test_value;         /* trigger event threshold value */
+    Bool (*CheckTrigger)(struct _SyncTrigger *pTrigger,
+                         int64_t newval);
+    void (*TriggerFired)(struct _SyncTrigger *pTrigger);
+    void (*CounterDestroyed)(struct _SyncTrigger *pTrigger);
 };
 
 typedef struct _SyncTriggerList {

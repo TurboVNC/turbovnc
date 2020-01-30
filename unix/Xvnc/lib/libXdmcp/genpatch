@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT=libXdmcp-1.1.2
+PROJECT=libXdmcp-1.1.3
 FILE=$PROJECT.tar.gz
 URL=https://www.x.org/releases/individual/lib
 SRCDIR=`dirname $0`

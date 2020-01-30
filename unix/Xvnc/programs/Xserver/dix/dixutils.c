@@ -508,6 +508,19 @@ WorkQueuePtr workQueue;
 static WorkQueuePtr *workQueueLast = &workQueue;
 
 void
+ClearWorkQueue(void)
+{
+    WorkQueuePtr q, *p;
+
+    p = &workQueue;
+    while ((q = *p)) {
+        *p = q->next;
+        free(q);
+    }
+    workQueueLast = p;
+}
+
+void
 ProcessWorkQueue(void)
 {
     WorkQueuePtr q, *p;
@@ -649,14 +662,7 @@ ClientWakeup(ClientPtr client)
         if (q->client == client) {
             *prev = q->next;
             free(q);
-            if (client->clientGone)
-                /* Oops -- new zombie cleanup code ensures this only
-                 * happens from inside CloseDownClient; don't want to
-                 * recurse here...
-                 */
-                /* CloseDownClient(client) */ ;
-            else
-                AttendClient(client);
+            AttendClient(client);
             break;
         }
         prev = &q->next;

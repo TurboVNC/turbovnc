@@ -68,9 +68,6 @@ from the X Consortium.
 #include <sys/types.h>
 #include <netdb.h>
 #include "servermd.h"
-#ifdef GLXEXT
-#include "glx_extinit.h"
-#endif
 #include "extension.h"
 #include "fb.h"
 #include "dixstruct.h"
@@ -78,6 +75,9 @@ from the X Consortium.
 #include "xserver-properties.h"
 #include "exevents.h"
 #include <X11/Xatom.h>
+#ifdef GLXEXT
+#include "glx_extinit.h"
+#endif
 #include "micmap.h"
 #include "eventstr.h"
 #include "rfb.h"
@@ -669,16 +669,9 @@ static int numFormats = 6;
 void InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 {
   int i;
-#ifdef GLXEXT
-  const ExtensionModule glxExtension =
-    { GlxExtensionInit, "GLX", &noGlxExtension };
-#endif
 
   initOutputCalled = TRUE;
-#ifdef GLXEXT
-  if (serverGeneration == 1)
-    LoadExtensionList(&glxExtension, 1, TRUE);
-#endif
+  xorgGlxCreateVendor();
 
   rfbLog("Desktop name '%s' (%s:%s)\n", desktopName, rfbThisHost, display);
   rfbLog("Protocol versions supported: 3.3, 3.7, 3.8, 3.7t, 3.8t\n");
@@ -809,8 +802,6 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
         if (!fbSetupScreen(pScreen, pbits, prfb->width, prfb->height,
                            dpix, dpiy, prfb->paddedWidthInBytes / 4, 32))
           ret = FALSE;
-        fbGetScreenPrivate(pScreen)->win32bpp = 32;
-        fbGetScreenPrivate(pScreen)->pix32bpp = 32;
         if (!fbInitVisuals(&visuals, &depths, &nVisuals, &nDepths, &rootDepth,
                            &defaultVisual, ((unsigned long)1 << 31), 10))
           ret = FALSE;

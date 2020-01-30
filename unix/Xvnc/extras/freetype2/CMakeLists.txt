@@ -8,7 +8,6 @@ endif()
 add_definitions(-DFT2_BUILD_LIBRARY)
 
 disable_compiler_warnings()
-handle_type_puns(src/psaux/psaux.c)
 
 add_library(freetype2 STATIC
 	src/base/ftsystem.c

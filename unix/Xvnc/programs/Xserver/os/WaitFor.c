@@ -91,24 +91,6 @@ SOFTWARE.
 #define GetErrno() errno
 #endif
 
-/* like ffs, but uses fd_mask instead of int as argument, so it works
-   when fd_mask is longer than an int, such as common 64-bit platforms */
-/* modifications by raphael */
-int
-mffs(fd_mask mask)
-{
-    int i;
-
-    if (!mask)
-        return 0;
-    i = 1;
-    while (!(mask & 1)) {
-        i++;
-        mask >>= 1;
-    }
-    return i;
-}
-
 #ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
 #endif
@@ -214,13 +196,27 @@ WaitForSomething(Bool are_ready)
         /* deal with any blocked jobs */
         if (workQueue) {
             ProcessWorkQueue();
-            are_ready = clients_are_ready();
+#if defined(TURBOVNC) && defined(GLXEXT)
+            if (indirectGlxActive)
+                are_ready = clients_are_ready();
+#endif
         }
+
+#if defined(TURBOVNC) && defined(GLXEXT)
+        if (!indirectGlxActive) {
+#endif
+        timeout = check_timers();
+        are_ready = clients_are_ready();
+#if defined(TURBOVNC) && defined(GLXEXT)
+        }
+#endif
 
         if (are_ready)
             timeout = 0;
-        else
+#if defined(TURBOVNC) && defined(GLXEXT)
+        else if (indirectGlxActive)
             timeout = check_timers();
+#endif
 
         BlockHandler(&timeout);
         if (NewOutputPending)

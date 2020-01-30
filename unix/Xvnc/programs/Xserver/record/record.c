@@ -2362,9 +2362,9 @@ RecordDisableContext(RecordContextPtr pContext)
     if (!pContext->pRecordingClient->clientGone) {
         RecordAProtocolElement(pContext, NULL, XRecordEndOfData, NULL, 0, 0, 0);
         RecordFlushReplyBuffer(pContext, NULL, 0, NULL, 0);
-        /* Re-enable request processing on this connection. */
-        AttendClient(pContext->pRecordingClient);
     }
+    /* Re-enable request processing on this connection. */
+    AttendClient(pContext->pRecordingClient);
 
     for (pRCAP = pContext->pListOfRCAP; pRCAP; pRCAP = pRCAP->pNextRCAP) {
         RecordUninstallHooks(pRCAP, 0);
@@ -2486,7 +2486,7 @@ ProcRecordDispatch(ClientPtr client)
     }
 }                               /* ProcRecordDispatch */
 
-static int
+static int _X_COLD
 SProcRecordQueryVersion(ClientPtr client)
 {
     REQUEST(xRecordQueryVersionReq);
@@ -2498,7 +2498,7 @@ SProcRecordQueryVersion(ClientPtr client)
     return ProcRecordQueryVersion(client);
 }                               /* SProcRecordQueryVersion */
 
-static int
+static int _X_COLD
 SwapCreateRegister(xRecordRegisterClientsReq * stuff)
 {
     int i;
@@ -2522,7 +2522,7 @@ SwapCreateRegister(xRecordRegisterClientsReq * stuff)
     return Success;
 }                               /* SwapCreateRegister */
 
-static int
+static int _X_COLD
 SProcRecordCreateContext(ClientPtr client)
 {
     REQUEST(xRecordCreateContextReq);
@@ -2535,7 +2535,7 @@ SProcRecordCreateContext(ClientPtr client)
     return ProcRecordCreateContext(client);
 }                               /* SProcRecordCreateContext */
 
-static int
+static int _X_COLD
 SProcRecordRegisterClients(ClientPtr client)
 {
     REQUEST(xRecordRegisterClientsReq);
@@ -2548,7 +2548,7 @@ SProcRecordRegisterClients(ClientPtr client)
     return ProcRecordRegisterClients(client);
 }                               /* SProcRecordRegisterClients */
 
-static int
+static int _X_COLD
 SProcRecordUnregisterClients(ClientPtr client)
 {
     REQUEST(xRecordUnregisterClientsReq);
@@ -2561,7 +2561,7 @@ SProcRecordUnregisterClients(ClientPtr client)
     return ProcRecordUnregisterClients(client);
 }                               /* SProcRecordUnregisterClients */
 
-static int
+static int _X_COLD
 SProcRecordGetContext(ClientPtr client)
 {
     REQUEST(xRecordGetContextReq);
@@ -2572,7 +2572,7 @@ SProcRecordGetContext(ClientPtr client)
     return ProcRecordGetContext(client);
 }                               /* SProcRecordGetContext */
 
-static int
+static int _X_COLD
 SProcRecordEnableContext(ClientPtr client)
 {
     REQUEST(xRecordEnableContextReq);
@@ -2583,7 +2583,7 @@ SProcRecordEnableContext(ClientPtr client)
     return ProcRecordEnableContext(client);
 }                               /* SProcRecordEnableContext */
 
-static int
+static int _X_COLD
 SProcRecordDisableContext(ClientPtr client)
 {
     REQUEST(xRecordDisableContextReq);
@@ -2594,7 +2594,7 @@ SProcRecordDisableContext(ClientPtr client)
     return ProcRecordDisableContext(client);
 }                               /* SProcRecordDisableContext */
 
-static int
+static int _X_COLD
 SProcRecordFreeContext(ClientPtr client)
 {
     REQUEST(xRecordFreeContextReq);
@@ -2605,7 +2605,7 @@ SProcRecordFreeContext(ClientPtr client)
     return ProcRecordFreeContext(client);
 }                               /* SProcRecordFreeContext */
 
-static int
+static int _X_COLD
 SProcRecordDispatch(ClientPtr client)
 {
     REQUEST(xReq);

@@ -20,15 +20,6 @@ message(STATUS "DRI_DRIVER_PATH = ${DRI_DRIVER_PATH}")
 add_definitions(-DDRI_DRIVER_PATH=\"${DRI_DRIVER_PATH}\")
 
 disable_compiler_warnings()
-handle_type_puns(
-	glxcmds.c
-	glxdriswrast.c
-	indirect_dispatch_swap.c
-	indirect_program.c
-	indirect_texture_compression.c
-	singlepix.c
-	singlepixswap.c)
-handle_unused(indirect_dispatch_swap.c)
 
 add_library(glx-server STATIC
 	clientinfo.c
@@ -59,4 +50,8 @@ add_library(glx-server STATIC
 	singlepixswap.c
 	singlesize.c
 	swap_interval.c
+	vndcmds.c
+	vndext.c
+	vndservermapping.c
+	vndservervendor.c
 	xfont.c)

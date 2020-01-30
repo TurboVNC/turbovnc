@@ -274,6 +274,24 @@ ResFindAllRes(void *value, XID id, RESTYPE type, void *cdata)
     counts[(type & TypeMask) - 1]++;
 }
 
+static CARD32
+resourceTypeAtom(int i)
+{
+    CARD32 ret;
+
+    const char *name = LookupResourceName(i);
+    if (strcmp(name, XREGISTRY_UNKNOWN))
+        ret = MakeAtom(name, strlen(name), TRUE);
+    else {
+        char buf[40];
+
+        snprintf(buf, sizeof(buf), "Unregistered resource %i", i + 1);
+        ret = MakeAtom(buf, strlen(buf), TRUE);
+    }
+
+    return ret;
+}
+
 static int
 ProcXResQueryClientResources(ClientPtr client)
 {
@@ -318,22 +336,12 @@ ProcXResQueryClientResources(ClientPtr client)
 
     if (num_types) {
         xXResType scratch;
-        const char *name;
 
         for (i = 0; i < lastResourceType; i++) {
             if (!counts[i])
                 continue;
 
-            name = LookupResourceName(i + 1);
-            if (strcmp(name, XREGISTRY_UNKNOWN))
-                scratch.resource_type = MakeAtom(name, strlen(name), TRUE);
-            else {
-                char buf[40];
-
-                snprintf(buf, sizeof(buf), "Unregistered resource %i", i + 1);
-                scratch.resource_type = MakeAtom(buf, strlen(buf), TRUE);
-            }
-
+            scratch.resource_type = resourceTypeAtom(i + 1);
             scratch.count = counts[i];
 
             if (client->swapped) {
@@ -693,7 +701,7 @@ AddSubResourceSizeSpec(void *value,
                 sizeFunc(value, id, &size);
 
                 crossRef->spec.resource = id;
-                crossRef->spec.type = type;
+                crossRef->spec.type = resourceTypeAtom(type);
                 crossRef->bytes = size.resourceSize;
                 crossRef->refCount = size.refCnt;
                 crossRef->useCount = 1;
@@ -766,7 +774,7 @@ AddResourceSizeValue(void *ptr, XID id, RESTYPE type, void *cdata)
             sizeFunc(ptr, id, &size);
 
             value->size.spec.resource = id;
-            value->size.spec.type = type;
+            value->size.spec.type = resourceTypeAtom(type);
             value->size.bytes = size.resourceSize;
             value->size.refCount = size.refCnt;
             value->size.useCount = 1;
@@ -1009,14 +1017,14 @@ ProcResDispatch(ClientPtr client)
     return BadRequest;
 }
 
-static int
+static int _X_COLD
 SProcXResQueryVersion(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xXResQueryVersionReq);
     return ProcXResQueryVersion(client);
 }
 
-static int
+static int _X_COLD
 SProcXResQueryClientResources(ClientPtr client)
 {
     REQUEST(xXResQueryClientResourcesReq);
@@ -1025,7 +1033,7 @@ SProcXResQueryClientResources(ClientPtr client)
     return ProcXResQueryClientResources(client);
 }
 
-static int
+static int _X_COLD
 SProcXResQueryClientPixmapBytes(ClientPtr client)
 {
     REQUEST(xXResQueryClientPixmapBytesReq);
@@ -1034,7 +1042,7 @@ SProcXResQueryClientPixmapBytes(ClientPtr client)
     return ProcXResQueryClientPixmapBytes(client);
 }
 
-static int
+static int _X_COLD
 SProcXResQueryClientIds (ClientPtr client)
 {
     REQUEST(xXResQueryClientIdsReq);
@@ -1047,7 +1055,7 @@ SProcXResQueryClientIds (ClientPtr client)
 /** @brief Implements the XResQueryResourceBytes of XResProto v1.2.
     This variant byteswaps request contents before issuing the
     rest of the work to ProcXResQueryResourceBytes */
-static int
+static int _X_COLD
 SProcXResQueryResourceBytes (ClientPtr client)
 {
     REQUEST(xXResQueryResourceBytesReq);
@@ -1066,7 +1074,7 @@ SProcXResQueryResourceBytes (ClientPtr client)
     return ProcXResQueryResourceBytes(client);
 }
 
-static int
+static int _X_COLD
 SProcResDispatch (ClientPtr client)
 {
     REQUEST(xReq);

@@ -1,6 +1,37 @@
-diff --git a/xorg-server-1.19.7/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
-index 7286eff..d786951 100644
---- a/xorg-server-1.19.7/Xi/xichangehierarchy.c
+diff --git a/xorg-server-1.20.7/Xext/shm.c b/Xserver/Xext/shm.c
+index 24c6b10..be2be20 100644
+--- a/xorg-server-1.20.7/Xext/shm.c
++++ b/Xserver/Xext/shm.c
+@@ -1211,7 +1211,7 @@ shm_tmpfile(void)
+         "/var/tmp",
+         "/tmp",
+     };
+-    int	fd;
++    int	fd, i;
+ 
+ #ifdef HAVE_MEMFD_CREATE
+     fd = memfd_create("xorg", MFD_CLOEXEC|MFD_ALLOW_SEALING);
+@@ -1223,7 +1223,7 @@ shm_tmpfile(void)
+ #endif
+ 
+ #ifdef O_TMPFILE
+-    for (int i = 0; i < ARRAY_SIZE(shmdirs); i++) {
++    for (i = 0; i < ARRAY_SIZE(shmdirs); i++) {
+         fd = open(shmdirs[i], O_TMPFILE|O_RDWR|O_CLOEXEC|O_EXCL, 0666);
+         if (fd >= 0) {
+             DebugF ("Using O_TMPFILE\n");
+@@ -1233,7 +1233,7 @@ shm_tmpfile(void)
+     ErrorF ("Not using O_TMPFILE\n");
+ #endif
+ 
+-    for (int i = 0; i < ARRAY_SIZE(shmdirs); i++) {
++    for (i = 0; i < ARRAY_SIZE(shmdirs); i++) {
+         char template[PATH_MAX];
+         snprintf(template, ARRAY_SIZE(template), "%s/shmfd-XXXXXX", shmdirs[i]);
+ #ifdef HAVE_MKOSTEMP
+diff --git a/xorg-server-1.20.7/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
+index cbdd912..371f881 100644
+--- a/xorg-server-1.20.7/Xi/xichangehierarchy.c
 +++ b/Xserver/Xi/xichangehierarchy.c
 @@ -140,7 +140,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
  {
@@ -38,37 +69,9 @@ index 7286eff..d786951 100644
          XIBarrierRemoveMasterDevice(clients[i], ptr->id);
  
      /* disable the remove the devices, XTest devices must be done first
-diff --git a/xorg-server-1.19.7/dix/devices.c b/Xserver/dix/devices.c
-index 4a628af..08a5dca 100644
---- a/xorg-server-1.19.7/dix/devices.c
-+++ b/Xserver/dix/devices.c
-@@ -76,6 +76,11 @@ SOFTWARE.
- #include <X11/extensions/XI2.h>
- #include <X11/extensions/XIproto.h>
- #include <math.h>
-+#ifdef TURBOVNC
-+#ifdef HAVE_IEEEFP_H
-+#include <ieeefp.h>
-+#endif
-+#endif
- #include <pixman.h>
- #include "exglobals.h"
- #include "exevents.h"
-@@ -174,7 +179,11 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
-             return BadValue;
- 
-         for (i = 0; i < 9; i++)
-+#ifdef TURBOVNC
-+            if (!finite(f[i]))
-+#else
-             if (!isfinite(f[i]))
-+#endif
-                 return BadValue;
- 
-         if (!dev->valuator)
-diff --git a/xorg-server-1.19.7/dix/events.c b/Xserver/dix/events.c
-index 3faad53..45a91d8 100644
---- a/xorg-server-1.19.7/dix/events.c
+diff --git a/xorg-server-1.20.7/dix/events.c b/Xserver/dix/events.c
+index c02a059..f78973b 100644
+--- a/xorg-server-1.20.7/dix/events.c
 +++ b/Xserver/dix/events.c
 @@ -148,6 +148,12 @@ Equipment Corporation.
  #include "eventconvert.h"
@@ -83,7 +86,7 @@ index 3faad53..45a91d8 100644
  /* Extension events type numbering starts at EXTENSION_EVENT_BASE.  */
  #define NoSuchEvent 0x80000000  /* so doesn't match NoEventMask */
  #define StructureAndSubMask ( StructureNotifyMask | SubstructureNotifyMask )
-@@ -5356,6 +5362,18 @@ ProcSendEvent(ClientPtr client)
+@@ -5358,6 +5364,18 @@ ProcSendEvent(ClientPtr client)
  
      stuff->event.u.u.type &= ~(SEND_EVENT_BIT);
  
@@ -102,13 +105,13 @@ index 3faad53..45a91d8 100644
      /* The client's event type must be a core event type or one defined by an
         extension. */
  
-diff --git a/xorg-server-1.19.7/dix/property.c b/Xserver/dix/property.c
-index fa4da2d..c5f8ceb 100644
---- a/xorg-server-1.19.7/dix/property.c
+diff --git a/xorg-server-1.20.7/dix/property.c b/Xserver/dix/property.c
+index ff1d669..de83d00 100644
+--- a/xorg-server-1.20.7/dix/property.c
 +++ b/Xserver/dix/property.c
-@@ -353,6 +353,13 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
+@@ -362,6 +362,13 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
      if (sendevent)
-         deliverPropertyNotifyEvent(pWin, PropertyNewValue, pProp->propertyName);
+         deliverPropertyNotifyEvent(pWin, PropertyNewValue, pProp);
  
 +#ifdef TURBOVNC
 +    if (pWin->parent == NullWindow) {
@@ -120,9 +123,9 @@ index fa4da2d..c5f8ceb 100644
      return Success;
  }
  
-diff --git a/xorg-server-1.19.7/dix/registry.c b/Xserver/dix/registry.c
+diff --git a/xorg-server-1.20.7/dix/registry.c b/Xserver/dix/registry.c
 index 84d48b4..de4bf8e 100644
---- a/xorg-server-1.19.7/dix/registry.c
+--- a/xorg-server-1.20.7/dix/registry.c
 +++ b/Xserver/dix/registry.c
 @@ -1,6 +1,7 @@
  /************************************************************
@@ -170,9 +173,9 @@ index 84d48b4..de4bf8e 100644
  
      /* Add the core protocol */
      RegisterExtensionNames(&extEntry);
-diff --git a/xorg-server-1.19.7/dix/selection.c b/Xserver/dix/selection.c
+diff --git a/xorg-server-1.20.7/dix/selection.c b/Xserver/dix/selection.c
 index d46103f..af0e36e 100644
---- a/xorg-server-1.19.7/dix/selection.c
+--- a/xorg-server-1.20.7/dix/selection.c
 +++ b/Xserver/dix/selection.c
 @@ -54,6 +54,12 @@ SOFTWARE.
  #include "selection.h"
@@ -203,41 +206,33 @@ index d46103f..af0e36e 100644
      else if (rc == Success && pSel->window != None) {
          event.u.u.type = SelectionRequest;
          event.u.selectionRequest.owner = pSel->window;
-diff --git a/xorg-server-1.19.7/glx/glxdricommon.c b/Xserver/glx/glxdricommon.c
-index dbf199c..c7430c2 100644
---- a/xorg-server-1.19.7/glx/glxdricommon.c
+diff --git a/xorg-server-1.20.7/fb/fbimage.c b/Xserver/fb/fbimage.c
+index bd24728..801df20 100644
+--- a/xorg-server-1.20.7/fb/fbimage.c
++++ b/Xserver/fb/fbimage.c
+@@ -210,7 +210,7 @@ fbGetImage(DrawablePtr pDrawable,
+ {
+     FbBits *src;
+     FbStride srcStride;
+-    int srcBpp;
++    int i, srcBpp;
+     int srcXoff, srcYoff;
+     FbStip *dst;
+     FbStride dstStride;
+@@ -240,7 +240,7 @@ fbGetImage(DrawablePtr pDrawable,
+                   dst, dstStride, 0, w * srcBpp, h, GXcopy, FB_ALLONES, srcBpp);
+ 
+         if (pm != FB_ALLONES) {
+-            for (int i = 0; i < dstStride * h; i++)
++            for (i = 0; i < dstStride * h; i++)
+                 dst[i] &= pm;
+         }
+     }
+diff --git a/xorg-server-1.20.7/glx/glxdricommon.c b/Xserver/glx/glxdricommon.c
+index 1baf082..d846a6f 100644
+--- a/xorg-server-1.20.7/glx/glxdricommon.c
 +++ b/Xserver/glx/glxdricommon.c
-@@ -41,29 +41,6 @@
- #include "glxscreens.h"
- #include "glxdricommon.h"
- 
--static int
--getUST(int64_t * ust)
--{
--    struct timeval tv;
--
--    if (ust == NULL)
--        return -EFAULT;
--
--    if (gettimeofday(&tv, NULL) == 0) {
--        ust[0] = (tv.tv_sec * 1000000) + tv.tv_usec;
--        return 0;
--    }
--    else {
--        return -errno;
--    }
--}
--
--const __DRIsystemTimeExtension systemTimeExtension = {
--    {__DRI_SYSTEM_TIME, 1},
--    getUST,
--    NULL,
--};
--
- #define __ATTRIB(attrib, field) \
-     { attrib, offsetof(__GLXconfig, field) }
- 
-@@ -275,7 +252,11 @@ glxConvertConfigs(const __DRIcoreExtension * core,
+@@ -257,7 +257,11 @@ glxConvertConfigs(const __DRIcoreExtension * core,
      return head.next;
  }
  
@@ -249,34 +244,9 @@ index dbf199c..c7430c2 100644
  
  /* Temporary define to allow building without a dri_interface.h from
   * updated Mesa.  Some day when we don't care about Mesa that old any
-diff --git a/xorg-server-1.19.7/glx/glxdricommon.h b/Xserver/glx/glxdricommon.h
-index 2db46dc..6851f24 100644
---- a/xorg-server-1.19.7/glx/glxdricommon.h
-+++ b/Xserver/glx/glxdricommon.h
-@@ -35,8 +35,6 @@ struct __GLXDRIconfig {
- __GLXconfig *glxConvertConfigs(const __DRIcoreExtension * core,
-                                const __DRIconfig ** configs);
- 
--extern const __DRIsystemTimeExtension systemTimeExtension;
--
- void *glxProbeDriver(const char *name,
-                      void **coreExt, const char *coreName, int coreVersion,
-                      void **renderExt, const char *renderName,
-diff --git a/xorg-server-1.19.7/glx/glxdriswrast.c b/Xserver/glx/glxdriswrast.c
-index e310fda..b0b24ae 100644
---- a/xorg-server-1.19.7/glx/glxdriswrast.c
-+++ b/Xserver/glx/glxdriswrast.c
-@@ -367,7 +367,6 @@ static const __DRIswrastLoaderExtension swrastLoaderExtension = {
- };
- 
- static const __DRIextension *loader_extensions[] = {
--    &systemTimeExtension.base,
-     &swrastLoaderExtension.base,
-     NULL
- };
-diff --git a/xorg-server-1.19.7/glx/glxext.c b/Xserver/glx/glxext.c
-index d595a05..b81adad 100644
---- a/xorg-server-1.19.7/glx/glxext.c
+diff --git a/xorg-server-1.20.7/glx/glxext.c b/Xserver/glx/glxext.c
+index 99f8661..5e80788 100644
+--- a/xorg-server-1.20.7/glx/glxext.c
 +++ b/Xserver/glx/glxext.c
 @@ -1,6 +1,7 @@
  /*
@@ -286,9 +256,9 @@ index d595a05..b81adad 100644
   *
   * Permission is hereby granted, free of charge, to any person obtaining a
   * copy of this software and associated documentation files (the "Software"),
-@@ -47,6 +48,10 @@
- #include "indirect_table.h"
+@@ -48,6 +49,10 @@
  #include "indirect_util.h"
+ #include "glxvndabi.h"
  
 +#ifdef TURBOVNC
 +Bool indirectGlxActive = FALSE;
@@ -297,7 +267,7 @@ index d595a05..b81adad 100644
  /*
  ** X resources.
  */
-@@ -166,6 +171,12 @@ __glXAddContext(__GLXcontext * cx)
+@@ -144,6 +149,12 @@ __glXAddContext(__GLXcontext * cx)
  
      cx->next = glxAllContexts;
      glxAllContexts = cx;
@@ -307,10 +277,10 @@ index d595a05..b81adad 100644
 +        indirectGlxActive = TRUE;
 +    }
 +#endif
-     return True;
+     return TRUE;
  }
  
-@@ -173,6 +184,9 @@ static void
+@@ -151,6 +162,9 @@ static void
  __glXRemoveFromContextList(__GLXcontext * cx)
  {
      __GLXcontext *c, *prev;
@@ -320,7 +290,7 @@ index d595a05..b81adad 100644
  
      if (cx == glxAllContexts)
          glxAllContexts = cx->next;
-@@ -184,6 +198,18 @@ __glXRemoveFromContextList(__GLXcontext * cx)
+@@ -162,6 +176,18 @@ __glXRemoveFromContextList(__GLXcontext * cx)
              prev = c;
          }
      }
@@ -339,33 +309,50 @@ index d595a05..b81adad 100644
  }
  
  /*
-diff --git a/xorg-server-1.19.7/glx/glxscreens.c b/Xserver/glx/glxscreens.c
-index 62d66bc..abedb82 100644
---- a/xorg-server-1.19.7/glx/glxscreens.c
-+++ b/Xserver/glx/glxscreens.c
-@@ -285,7 +285,8 @@ pickFBConfig(__GLXscreen * pGlxScreen, VisualPtr visual)
-             continue;
- #ifdef COMPOSITE
- 	/* Use only duplicated configs for compIsAlternateVisuals */
--        if (!!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
-+        if (!noCompositeExtension &&
-+	    !!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
- 	    !!config->duplicatedForComp)
-             continue;
- #endif
-@@ -357,7 +358,8 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
-             pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
-             config->visualID = visual->vid;
- #ifdef COMPOSITE
--            if (compIsAlternateVisual(pScreen, visual->vid))
-+            if (!noCompositeExtension &&
-+                compIsAlternateVisual(pScreen, visual->vid))
-                 config->visualSelectGroup++;
- #endif
-         }
-diff --git a/xorg-server-1.19.7/include/extinit.h b/Xserver/include/extinit.h
-index 4ad4fca..08fa370 100644
---- a/xorg-server-1.19.7/include/extinit.h
+diff --git a/xorg-server-1.20.7/glx/glxscreens.h b/Xserver/glx/glxscreens.h
+index 40649f8..5f89e5d 100644
+--- a/xorg-server-1.20.7/glx/glxscreens.h
++++ b/Xserver/glx/glxscreens.h
+@@ -37,6 +37,7 @@
+ 
+ #include "extension_string.h"
+ #include "glxvndabi.h"
++#include "glx_extinit.h"
+ 
+ typedef struct __GLXconfig __GLXconfig;
+ struct __GLXconfig {
+@@ -116,7 +117,6 @@ GLint glxConvertToXVisualType(int visualType);
+ ** and DDX layers of the GLX server extension.  The methods provide an
+ ** interface for context management on a screen.
+ */
+-typedef struct __GLXscreen __GLXscreen;
+ struct __GLXscreen {
+     void (*destroy) (__GLXscreen * screen);
+ 
+diff --git a/xorg-server-1.20.7/glx/vndext.c b/Xserver/glx/vndext.c
+index 0513733..aa93900 100644
+--- a/xorg-server-1.20.7/glx/vndext.c
++++ b/Xserver/glx/vndext.c
+@@ -213,6 +213,7 @@ GlxExtensionInit(void)
+ {
+     ExtensionEntry *extEntry;
+     GlxExtensionEntry = NULL;
++    int i;
+ 
+     // Init private keys, per-screen data
+     if (!dixRegisterPrivateKey(&glvXGLVScreenPrivKey, PRIVATE_SCREEN, 0))
+@@ -244,7 +245,7 @@ GlxExtensionInit(void)
+     CallCallbacks(&vndInitCallbackListPtr, extEntry);
+ 
+     /* We'd better have found at least one vendor */
+-    for (int i = 0; i < screenInfo.numScreens; i++)
++    for (i = 0; i < screenInfo.numScreens; i++)
+         if (GlxGetVendorForScreen(serverClient, screenInfo.screens[i]))
+             return;
+     extEntry->base = 0;
+diff --git a/xorg-server-1.20.7/include/extinit.h b/Xserver/include/extinit.h
+index 46081ad..9b3a4d5 100644
+--- a/xorg-server-1.20.7/include/extinit.h
 +++ b/Xserver/include/extinit.h
 @@ -1,6 +1,7 @@
  /************************************************************
@@ -375,7 +362,7 @@ index 4ad4fca..08fa370 100644
  
                          All Rights Reserved
  
-@@ -181,4 +182,13 @@ extern void dri3_extension_init(void);
+@@ -161,4 +162,13 @@ extern void dri3_extension_init(void);
  #include "presentext.h"
  #endif
  
@@ -389,9 +376,9 @@ index 4ad4fca..08fa370 100644
 +#endif
 +
  #endif
-diff --git a/xorg-server-1.19.7/mi/miinitext.c b/Xserver/mi/miinitext.c
-index 5fc44e3..628e9f3 100644
---- a/xorg-server-1.19.7/mi/miinitext.c
+diff --git a/xorg-server-1.20.7/mi/miinitext.c b/Xserver/mi/miinitext.c
+index b7c7021..0e28272 100644
+--- a/xorg-server-1.20.7/mi/miinitext.c
 +++ b/Xserver/mi/miinitext.c
 @@ -1,6 +1,7 @@
  /***********************************************************
@@ -401,9 +388,9 @@ index 5fc44e3..628e9f3 100644
  
  Permission to use, copy, modify, distribute, and sell this software and its
  documentation for any purpose is hereby granted without fee, provided that
-@@ -306,6 +307,12 @@ static const ExtensionModule staticExtensions[] = {
- #ifdef XSELINUX
-     {SELinuxExtensionInit, SELINUX_EXTENSION_NAME, &noSELinuxExtension},
+@@ -180,6 +181,12 @@ static const ExtensionModule staticExtensions[] = {
+ #ifdef GLXEXT
+     {GlxExtensionInit, "GLX", &noGlxExtension},
  #endif
 +#ifdef TURBOVNC
 +    {vncExtensionInit, "VNC-EXTENSION", NULL},
@@ -413,10 +400,10 @@ index 5fc44e3..628e9f3 100644
 +#endif
  };
  
- static ExtensionModule *ExtensionModuleList = NULL;
-diff --git a/xorg-server-1.19.7/os/WaitFor.c b/Xserver/os/WaitFor.c
-index 613608f..66c5c69 100644
---- a/xorg-server-1.19.7/os/WaitFor.c
+ Bool
+diff --git a/xorg-server-1.20.7/os/WaitFor.c b/Xserver/os/WaitFor.c
+index dc33c16..b8d6ddb 100644
+--- a/xorg-server-1.20.7/os/WaitFor.c
 +++ b/Xserver/os/WaitFor.c
 @@ -1,6 +1,7 @@
  /***********************************************************
@@ -426,7 +413,7 @@ index 613608f..66c5c69 100644
  
  Permission to use, copy, modify, distribute, and sell this software and its
  documentation for any purpose is hereby granted without fee, provided that
-@@ -188,6 +189,11 @@ WaitForSomething(Bool are_ready)
+@@ -170,6 +171,11 @@ WaitForSomething(Bool are_ready)
      int pollerr;
      static Bool were_ready;
      Bool timer_is_running;
@@ -438,7 +425,35 @@ index 613608f..66c5c69 100644
  
      timer_is_running = were_ready;
  
-@@ -238,6 +244,26 @@ WaitForSomething(Bool are_ready)
+@@ -190,13 +196,27 @@ WaitForSomething(Bool are_ready)
+         /* deal with any blocked jobs */
+         if (workQueue) {
+             ProcessWorkQueue();
++#if defined(TURBOVNC) && defined(GLXEXT)
++            if (indirectGlxActive)
++                are_ready = clients_are_ready();
++#endif
+         }
+ 
++#if defined(TURBOVNC) && defined(GLXEXT)
++        if (!indirectGlxActive) {
++#endif
+         timeout = check_timers();
+         are_ready = clients_are_ready();
++#if defined(TURBOVNC) && defined(GLXEXT)
++        }
++#endif
+ 
+         if (are_ready)
+             timeout = 0;
++#if defined(TURBOVNC) && defined(GLXEXT)
++        else if (indirectGlxActive)
++            timeout = check_timers();
++#endif
+ 
+         BlockHandler(&timeout);
+         if (NewOutputPending)
+@@ -220,6 +240,26 @@ WaitForSomething(Bool are_ready)
          } else
              are_ready = clients_are_ready();
  
@@ -465,11 +480,11 @@ index 613608f..66c5c69 100644
          if (InputCheckPending())
              return FALSE;
  
-diff --git a/xorg-server-1.19.7/os/backtrace.c b/Xserver/os/backtrace.c
-index 9e3e38e..b9d2c0f 100644
---- a/xorg-server-1.19.7/os/backtrace.c
+diff --git a/xorg-server-1.20.7/os/backtrace.c b/Xserver/os/backtrace.c
+index 619bf14..08f1eeb 100644
+--- a/xorg-server-1.20.7/os/backtrace.c
 +++ b/Xserver/os/backtrace.c
-@@ -156,8 +156,10 @@ xorg_backtrace(void)
+@@ -157,8 +157,10 @@ xorg_backtrace(void)
  #else                           /* not glibc or glibc < 2.1 */
  
  #if defined(__sun) && defined(__SVR4)
@@ -480,11 +495,11 @@ index 9e3e38e..b9d2c0f 100644
  
  #if defined(HAVE_WALKCONTEXT)   /* Solaris 9 & later */
  
-diff --git a/xorg-server-1.19.7/os/log.c b/Xserver/os/log.c
-index 91e55a5..1705b0e 100644
---- a/xorg-server-1.19.7/os/log.c
+diff --git a/xorg-server-1.20.7/os/log.c b/Xserver/os/log.c
+index 803639e..e88ad58 100644
+--- a/xorg-server-1.20.7/os/log.c
 +++ b/Xserver/os/log.c
-@@ -645,7 +645,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
+@@ -647,7 +647,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
  void
  LogVWrite(int verb, const char *f, va_list args)
  {
@@ -493,9 +508,9 @@ index 91e55a5..1705b0e 100644
  }
  
  void
-diff --git a/xorg-server-1.19.7/os/utils.c b/Xserver/os/utils.c
-index 6dcf328..f0cdffa 100644
---- a/xorg-server-1.19.7/os/utils.c
+diff --git a/xorg-server-1.20.7/os/utils.c b/Xserver/os/utils.c
+index 2ba1c80..92b8a33 100644
+--- a/xorg-server-1.20.7/os/utils.c
 +++ b/Xserver/os/utils.c
 @@ -1,6 +1,7 @@
  /*
@@ -505,7 +520,7 @@ index 6dcf328..f0cdffa 100644
  
  Permission to use, copy, modify, distribute, and sell this software and its
  documentation for any purpose is hereby granted without fee, provided that
-@@ -194,7 +195,11 @@ Bool noGEExtension = FALSE;
+@@ -183,7 +184,11 @@ Bool noGEExtension = FALSE;
  
  Bool CoreDump;
  
@@ -517,7 +532,7 @@ index 6dcf328..f0cdffa 100644
  
  #ifdef PANORAMIX
  Bool PanoramiXExtensionDisabledHack = FALSE;
-@@ -540,8 +545,13 @@ UseMsg(void)
+@@ -530,8 +535,13 @@ UseMsg(void)
      ErrorF("-fn string             default font name\n");
      ErrorF("-fp string             default font path\n");
      ErrorF("-help                  prints message with these options\n");
@@ -531,19 +546,9 @@ index 6dcf328..f0cdffa 100644
      ErrorF("-I                     ignore all remaining arguments\n");
  #ifdef RLIMIT_DATA
      ErrorF("-ld int                limit data space to N Kb\n");
-@@ -1257,7 +1267,9 @@ SmartScheduleEnable(void)
-     memset((char *) &act, 0, sizeof(struct sigaction));
- 
-     /* Set up the timer signal function */
-+#ifdef SA_RESTART
-     act.sa_flags = SA_RESTART;
-+#endif
-     act.sa_handler = SmartScheduleTimer;
-     sigemptyset(&act.sa_mask);
-     sigaddset(&act.sa_mask, SIGALRM);
-diff --git a/xorg-server-1.19.7/randr/rrmode.c b/Xserver/randr/rrmode.c
-index a7aa433..149adb1 100644
---- a/xorg-server-1.19.7/randr/rrmode.c
+diff --git a/xorg-server-1.20.7/randr/rrmode.c b/Xserver/randr/rrmode.c
+index d34025b..d76a24d 100644
+--- a/xorg-server-1.20.7/randr/rrmode.c
 +++ b/Xserver/randr/rrmode.c
 @@ -1,5 +1,6 @@
  /*
@@ -568,11 +573,11 @@ index a7aa433..149adb1 100644
      mode = malloc(sizeof(RRModeRec) + modeInfo->nameLength + 1);
      if (!mode)
          return NULL;
-diff --git a/xorg-server-1.19.7/xfixes/xfixes.c b/Xserver/xfixes/xfixes.c
-index 8b45c53..40f5812 100644
---- a/xorg-server-1.19.7/xfixes/xfixes.c
+diff --git a/xorg-server-1.20.7/xfixes/xfixes.c b/Xserver/xfixes/xfixes.c
+index 53a6bd6..28248d4 100644
+--- a/xorg-server-1.20.7/xfixes/xfixes.c
 +++ b/Xserver/xfixes/xfixes.c
-@@ -223,7 +223,27 @@ XFixesExtensionInit(void)
+@@ -221,7 +221,27 @@ XFixesExtensionInit(void)
          return;
  
      if (XFixesSelectionInit() && XFixesCursorInit() && XFixesRegionInit() &&
@@ -600,11 +605,11 @@ index 8b45c53..40f5812 100644
                                   XFixesNumberErrors,
                                   ProcXFixesDispatch, SProcXFixesDispatch,
                                   NULL, StandardMinorOpcode)) != 0) {
-diff --git a/xorg-server-1.19.7/xkb/xkbInit.c b/Xserver/xkb/xkbInit.c
-index 9c772f5..8426e30 100644
---- a/xorg-server-1.19.7/xkb/xkbInit.c
+diff --git a/xorg-server-1.20.7/xkb/xkbInit.c b/Xserver/xkb/xkbInit.c
+index 9e45b4b..b63549f 100644
+--- a/xorg-server-1.20.7/xkb/xkbInit.c
 +++ b/Xserver/xkb/xkbInit.c
-@@ -758,6 +758,30 @@ XkbProcessArguments(int argc, char *argv[], int i)
+@@ -767,6 +767,30 @@ XkbProcessArguments(int argc, char *argv[], int i)
              return -1;
          }
      }

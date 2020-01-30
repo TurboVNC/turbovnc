@@ -15,18 +15,6 @@ message(STATUS "SERVER_MISC_CONFIG_PATH = ${SERVER_MISC_CONFIG_PATH}")
 add_definitions(-DSERVER_MISC_CONFIG_PATH=\"${SERVER_MISC_CONFIG_PATH}\")
 
 disable_compiler_warnings()
-handle_type_puns(
-	colormap.c
-	cursor.c
-	dispatch.c
-	dixfonts.c
-	dixutils.c
-	events.c
-	privates.c
-	registry.c
-	swaprep.c
-	swapreq.c
-	window.c)
 
 add_library(dix STATIC
 	atom.c
@@ -40,7 +28,6 @@ add_library(dix STATIC
 	eventconvert.c
 	events.c
 	extension.c
-	ffs.c
 	gc.c
 	getevents.c
 	globals.c

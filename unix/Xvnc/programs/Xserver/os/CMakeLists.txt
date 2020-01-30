@@ -44,11 +44,6 @@ if(NOT HAVE_EPOLL_CREATE1 AND NOT HAVE_POLL)
 endif()
 
 disable_compiler_warnings()
-handle_type_puns(
-	access.c
-	io.c
-	xdmcp.c
-	xstrans.c)
 
 add_library(os STATIC
 	WaitFor.c

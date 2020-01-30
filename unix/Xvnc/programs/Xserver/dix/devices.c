@@ -76,11 +76,6 @@ SOFTWARE.
 #include <X11/extensions/XI2.h>
 #include <X11/extensions/XIproto.h>
 #include <math.h>
-#ifdef TURBOVNC
-#ifdef HAVE_IEEEFP_H
-#include <ieeefp.h>
-#endif
-#endif
 #include <pixman.h>
 #include "exglobals.h"
 #include "exevents.h"
@@ -179,11 +174,7 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
             return BadValue;
 
         for (i = 0; i < 9; i++)
-#ifdef TURBOVNC
-            if (!finite(f[i]))
-#else
             if (!isfinite(f[i]))
-#endif
                 return BadValue;
 
         if (!dev->valuator)
@@ -1186,6 +1177,7 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
             flags[tmp->id] = IsMaster(tmp) ? XIMasterRemoved : XISlaveRemoved;
             CloseDevice(tmp);
             ret = Success;
+            break;
         }
     }
 
@@ -1202,6 +1194,7 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
                 prev->next = next;
 
             ret = Success;
+            break;
         }
     }
 

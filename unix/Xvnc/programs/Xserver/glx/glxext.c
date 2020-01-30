@@ -47,6 +47,7 @@
 #include "glxext.h"
 #include "indirect_table.h"
 #include "indirect_util.h"
+#include "glxvndabi.h"
 
 #ifdef TURBOVNC
 Bool indirectGlxActive = FALSE;
@@ -55,15 +56,12 @@ Bool indirectGlxActive = FALSE;
 /*
 ** X resources.
 */
+static int glxGeneration;
 RESTYPE __glXContextRes;
 RESTYPE __glXDrawableRes;
 
-/*
-** Reply for most singles.
-*/
-xGLXSingleReply __glXReply;
-
 static DevPrivateKeyRec glxClientPrivateKeyRec;
+static GlxServerVendor *glvnd_vendor = NULL;
 
 #define glxClientPrivateKey (&glxClientPrivateKeyRec)
 
@@ -74,45 +72,25 @@ static int __glXDispatch(ClientPtr);
 static GLboolean __glXFreeContext(__GLXcontext * cx);
 
 /*
-** Called when the extension is reset.
-*/
-static void
-ResetExtension(ExtensionEntry * extEntry)
-{
-    lastGLContext = NULL;
-}
-
-/*
-** Reset state used to keep track of large (multi-request) commands.
-*/
-void
-__glXResetLargeCommandStatus(__GLXclientState * cl)
-{
-    cl->largeCmdBytesSoFar = 0;
-    cl->largeCmdBytesTotal = 0;
-    cl->largeCmdRequestsSoFar = 0;
-    cl->largeCmdRequestsTotal = 0;
-}
-
-/*
  * This procedure is called when the client who created the context goes away
- * OR when glXDestroyContext is called.  In either case, all we do is flag that
- * the ID is no longer valid, and (maybe) free the context.
+ * OR when glXDestroyContext is called. If the context is current for a client
+ * the dispatch layer will have moved the context struct to a fake resource ID
+ * and cx here will be NULL. Otherwise we really free the context.
  */
 static int
 ContextGone(__GLXcontext * cx, XID id)
 {
-    cx->idExists = GL_FALSE;
-    if (!cx->currentClient) {
-        __glXFreeContext(cx);
-    }
+    if (!cx)
+        return TRUE;
 
-    return True;
+    if (!cx->currentClient)
+        __glXFreeContext(cx);
+
+    return TRUE;
 }
 
 static __GLXcontext *glxPendingDestroyContexts;
 static __GLXcontext *glxAllContexts;
-static int glxServerLeaveCount;
 static int glxBlockClients;
 
 /*
@@ -157,7 +135,7 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
 
     glxPriv->destroy(glxPriv);
 
-    return True;
+    return TRUE;
 }
 
 Bool
@@ -166,7 +144,7 @@ __glXAddContext(__GLXcontext * cx)
     /* Register this context as a resource.
      */
     if (!AddResource(cx->id, __glXContextRes, (void *)cx)) {
-	return False;
+	return FALSE;
     }
 
     cx->next = glxAllContexts;
@@ -177,7 +155,7 @@ __glXAddContext(__GLXcontext * cx)
         indirectGlxActive = TRUE;
     }
 #endif
-    return True;
+    return TRUE;
 }
 
 static void
@@ -225,6 +203,7 @@ __glXFreeContext(__GLXcontext * cx)
 
     free(cx->feedbackBuf);
     free(cx->selectBuf);
+    free(cx->largeCmdBuf);
     if (cx == lastGLContext) {
         lastGLContext = NULL;
     }
@@ -234,9 +213,7 @@ __glXFreeContext(__GLXcontext * cx)
      * the latter case we need to lift the DRI lock manually. */
 
     if (!glxBlockClients) {
-        __glXleaveServer(GL_FALSE);
         cx->destroy(cx);
-        __glXenterServer(GL_FALSE);
     }
     else {
         cx->next = glxPendingDestroyContexts;
@@ -305,28 +282,13 @@ glxClientCallback(CallbackListPtr *list, void *closure, void *data)
     NewClientInfoRec *clientinfo = (NewClientInfoRec *) data;
     ClientPtr pClient = clientinfo->client;
     __GLXclientState *cl = glxGetClient(pClient);
-    __GLXcontext *c, *next;
 
     switch (pClient->clientState) {
-    case ClientStateRunning:
-        cl->client = pClient;
-        break;
-
     case ClientStateGone:
-        /* detach from all current contexts */
-        for (c = glxAllContexts; c; c = next) {
-            next = c->next;
-            if (c->currentClient == pClient) {
-                c->loseCurrent(c);
-                lastGLContext = NULL;
-                c->currentClient = NULL;
-                FreeResourceByType(c->id, __glXContextRes, FALSE);
-            }
-        }
-
         free(cl->returnBuf);
-        free(cl->largeCmdBuf);
         free(cl->GLClientextensions);
+        cl->returnBuf = NULL;
+        cl->GLClientextensions = NULL;
         break;
 
     default:
@@ -336,7 +298,7 @@ glxClientCallback(CallbackListPtr *list, void *closure, void *data)
 
 /************************************************************************/
 
-static __GLXprovider *__glXProviderStack;
+static __GLXprovider *__glXProviderStack = &__glXDRISWRastProvider;
 
 void
 GlxPushProvider(__GLXprovider * provider)
@@ -353,13 +315,14 @@ checkScreenVisuals(void)
     for (i = 0; i < screenInfo.numScreens; i++) {
         ScreenPtr screen = screenInfo.screens[i];
         for (j = 0; j < screen->numVisuals; j++) {
-            if (screen->visuals[j].class == TrueColor ||
-                screen->visuals[j].class == DirectColor)
-                return True;
+            if ((screen->visuals[j].class == TrueColor ||
+                 screen->visuals[j].class == DirectColor) &&
+                screen->visuals[j].nplanes > 12)
+                return TRUE;
         }
     }
 
-    return False;
+    return FALSE;
 }
 
 static void
@@ -379,50 +342,238 @@ GetGLXDrawableBytes(void *value, XID id, ResourceSizePtr size)
     }
 }
 
-/*
-** Initialize the GLX extension.
-*/
-void
-GlxExtensionInit(void)
+static void
+xorgGlxCloseExtension(const ExtensionEntry *extEntry)
 {
-    ExtensionEntry *extEntry;
-    ScreenPtr pScreen;
-    int i;
-    __GLXprovider *p, **stack;
-    Bool glx_provided = False;
+    if (glvnd_vendor != NULL) {
+        glxServer.destroyVendor(glvnd_vendor);
+        glvnd_vendor = NULL;
+    }
+    lastGLContext = NULL;
+}
 
-    if (serverGeneration == 1) {
-        for (stack = &__glXProviderStack; *stack; stack = &(*stack)->next)
-            ;
-        *stack = &__glXDRISWRastProvider;
+static int
+xorgGlxHandleRequest(ClientPtr client)
+{
+    return __glXDispatch(client);
+}
+
+static ScreenPtr
+screenNumToScreen(int screen)
+{
+    if (screen < 0 || screen >= screenInfo.numScreens)
+        return NULL;
+
+    return screenInfo.screens[screen];
+}
+
+static int
+maybe_swap32(ClientPtr client, int x)
+{
+    return client->swapped ? bswap_32(x) : x;
+}
+
+static GlxServerVendor *
+vendorForScreen(ClientPtr client, int screen)
+{
+    screen = maybe_swap32(client, screen);
+
+    return glxServer.getVendorForScreen(client, screenNumToScreen(screen));
+}
+
+/* this ought to be generated */
+static int
+xorgGlxThunkRequest(ClientPtr client)
+{
+    REQUEST(xGLXVendorPrivateReq);
+    CARD32 vendorCode = maybe_swap32(client, stuff->vendorCode);
+    GlxServerVendor *vendor = NULL;
+    XID resource = 0;
+    int ret;
+
+    switch (vendorCode) {
+    case X_GLXvop_QueryContextInfoEXT: {
+        xGLXQueryContextInfoEXTReq *req = (void *)stuff;
+        REQUEST_AT_LEAST_SIZE(*req);
+        if (!(vendor = glxServer.getXIDMap(maybe_swap32(client, req->context))))
+            return __glXError(GLXBadContext);
+        break;
+        }
+
+    case X_GLXvop_GetFBConfigsSGIX: {
+        xGLXGetFBConfigsSGIXReq *req = (void *)stuff;
+        REQUEST_AT_LEAST_SIZE(*req);
+        if (!(vendor = vendorForScreen(client, req->screen)))
+            return BadValue;
+        break;
+        }
+
+    case X_GLXvop_CreateContextWithConfigSGIX: {
+        xGLXCreateContextWithConfigSGIXReq *req = (void *)stuff;
+        REQUEST_AT_LEAST_SIZE(*req);
+        resource = maybe_swap32(client, req->context);
+        if (!(vendor = vendorForScreen(client, req->screen)))
+            return BadValue;
+        break;
+        }
+
+    case X_GLXvop_CreateGLXPixmapWithConfigSGIX: {
+        xGLXCreateGLXPixmapWithConfigSGIXReq *req = (void *)stuff;
+        REQUEST_AT_LEAST_SIZE(*req);
+        resource = maybe_swap32(client, req->glxpixmap);
+        if (!(vendor = vendorForScreen(client, req->screen)))
+            return BadValue;
+        break;
+        }
+
+    case X_GLXvop_CreateGLXPbufferSGIX: {
+        xGLXCreateGLXPbufferSGIXReq *req = (void *)stuff;
+        REQUEST_AT_LEAST_SIZE(*req);
+        resource = maybe_swap32(client, req->pbuffer);
+        if (!(vendor = vendorForScreen(client, req->screen)))
+            return BadValue;
+        break;
+        }
+
+    /* same offset for the drawable for these three */
+    case X_GLXvop_DestroyGLXPbufferSGIX:
+    case X_GLXvop_ChangeDrawableAttributesSGIX:
+    case X_GLXvop_GetDrawableAttributesSGIX: {
+        xGLXGetDrawableAttributesSGIXReq *req = (void *)stuff;
+        REQUEST_AT_LEAST_SIZE(*req);
+        if (!(vendor = glxServer.getXIDMap(maybe_swap32(client,
+                                                        req->drawable))))
+            return __glXError(GLXBadDrawable);
+        break;
+        }
+
+    /* most things just use the standard context tag */
+    default: {
+        /* size checked by vnd layer already */
+        GLXContextTag tag = maybe_swap32(client, stuff->contextTag);
+        vendor = glxServer.getContextTag(client, tag);
+        if (!vendor)
+            return __glXError(GLXBadContextTag);
+        break;
+        }
     }
 
-    /* Mesa requires at least one True/DirectColor visual */
-    if (!checkScreenVisuals())
-        return;
+    /* If we're creating a resource, add the map now */
+    if (resource) {
+        LEGAL_NEW_RESOURCE(resource, client);
+        if (!glxServer.addXIDMap(resource, vendor))
+            return BadAlloc;
+    }
 
-    __glXContextRes = CreateNewResourceType((DeleteType) ContextGone,
-                                            "GLXContext");
-    __glXDrawableRes = CreateNewResourceType((DeleteType) DrawableGone,
-                                             "GLXDrawable");
-    if (!__glXContextRes || !__glXDrawableRes)
-        return;
+    ret = glxServer.forwardRequest(vendor, client);
 
-    SetResourceTypeSizeFunc(__glXDrawableRes, GetGLXDrawableBytes);
+    if (ret == Success && vendorCode == X_GLXvop_DestroyGLXPbufferSGIX) {
+        xGLXDestroyGLXPbufferSGIXReq *req = (void *)stuff;
+        glxServer.removeXIDMap(maybe_swap32(client, req->pbuffer));
+    }
 
-    if (!dixRegisterPrivateKey
-        (&glxClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(__GLXclientState)))
+    if (ret != Success)
+        glxServer.removeXIDMap(resource);
+
+    return ret;
+}
+
+static GlxServerDispatchProc
+xorgGlxGetDispatchAddress(CARD8 minorOpcode, CARD32 vendorCode)
+{
+    /* we don't support any other GLX opcodes */
+    if (minorOpcode != X_GLXVendorPrivate &&
+        minorOpcode != X_GLXVendorPrivateWithReply)
+        return NULL;
+
+    /* we only support some vendor private requests */
+    if (!__glXGetProtocolDecodeFunction(&VendorPriv_dispatch_info, vendorCode,
+                                        FALSE))
+        return NULL;
+
+    return xorgGlxThunkRequest;
+}
+
+static Bool
+xorgGlxServerPreInit(const ExtensionEntry *extEntry)
+{
+    if (glxGeneration != serverGeneration) {
+        /* Mesa requires at least one True/DirectColor visual */
+        if (!checkScreenVisuals())
+            return FALSE;
+
+        __glXContextRes = CreateNewResourceType((DeleteType) ContextGone,
+                                                "GLXContext");
+        __glXDrawableRes = CreateNewResourceType((DeleteType) DrawableGone,
+                                                 "GLXDrawable");
+        if (!__glXContextRes || !__glXDrawableRes)
+            return FALSE;
+
+        if (!dixRegisterPrivateKey
+            (&glxClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(__GLXclientState)))
+            return FALSE;
+        if (!AddCallback(&ClientStateCallback, glxClientCallback, 0))
+            return FALSE;
+
+        __glXErrorBase = extEntry->errorBase;
+        __glXEventBase = extEntry->eventBase;
+
+        SetResourceTypeSizeFunc(__glXDrawableRes, GetGLXDrawableBytes);
+#if PRESENT
+        __glXregisterPresentCompleteNotify();
+#endif
+
+        glxGeneration = serverGeneration;
+    }
+
+    return glxGeneration == serverGeneration;
+}
+
+static void
+xorgGlxInitGLVNDVendor(void)
+{
+    if (glvnd_vendor == NULL) {
+        GlxServerImports *imports = NULL;
+        imports = glxServer.allocateServerImports();
+
+        if (imports != NULL) {
+            imports->extensionCloseDown = xorgGlxCloseExtension;
+            imports->handleRequest = xorgGlxHandleRequest;
+            imports->getDispatchAddress = xorgGlxGetDispatchAddress;
+            imports->makeCurrent = xorgGlxMakeCurrent;
+            glvnd_vendor = glxServer.createVendor(imports);
+            glxServer.freeServerImports(imports);
+        }
+    }
+}
+
+static void
+xorgGlxServerInit(CallbackListPtr *pcbl, void *param, void *ext)
+{
+    const ExtensionEntry *extEntry = ext;
+    int i;
+
+    if (!xorgGlxServerPreInit(extEntry)) {
         return;
-    if (!AddCallback(&ClientStateCallback, glxClientCallback, 0))
+    }
+
+    xorgGlxInitGLVNDVendor();
+    if (!glvnd_vendor) {
         return;
+    }
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
+        ScreenPtr pScreen = screenInfo.screens[i];
+        __GLXprovider *p;
+
+        if (glxServer.getVendorForScreen(NULL, pScreen) != NULL) {
+            // There's already a vendor registered.
+            LogMessage(X_INFO, "GLX: Another vendor is already registered for screen %d\n", i);
+            continue;
+        }
 
         for (p = __glXProviderStack; p != NULL; p = p->next) {
-            __GLXscreen *glxScreen;
-
-            glxScreen = p->screenProbe(pScreen);
+            __GLXscreen *glxScreen = p->screenProbe(pScreen);
             if (glxScreen != NULL) {
                 LogMessage(X_INFO,
                            "GLX: Initialized %s GL provider for screen %d\n",
@@ -432,37 +583,19 @@ GlxExtensionInit(void)
 
         }
 
-        if (!p)
+        if (p) {
+            glxServer.setScreenVendor(pScreen, glvnd_vendor);
+        } else {
             LogMessage(X_INFO,
                        "GLX: no usable GL providers found for screen %d\n", i);
-        else
-            glx_provided = True;
+        }
     }
+}
 
-    /* don't register extension if GL is not provided on any screen */
-    if (!glx_provided)
-        return;
-
-    /*
-     ** Add extension to server extensions.
-     */
-    extEntry = AddExtension(GLX_EXTENSION_NAME, __GLX_NUMBER_EVENTS,
-                            __GLX_NUMBER_ERRORS, __glXDispatch,
-                            __glXDispatch, ResetExtension, StandardMinorOpcode);
-    if (!extEntry) {
-        FatalError("__glXExtensionInit: AddExtensions failed\n");
-        return;
-    }
-    if (!AddExtensionAlias(GLX_EXTENSION_ALIAS, extEntry)) {
-        ErrorF("__glXExtensionInit: AddExtensionAlias failed\n");
-        return;
-    }
-
-    __glXErrorBase = extEntry->errorBase;
-    __glXEventBase = extEntry->eventBase;
-#if PRESENT
-    __glXregisterPresentCompleteNotify();
-#endif
+Bool
+xorgGlxCreateVendor(void)
+{
+    return AddCallback(glxServer.extensionInitCallback, xorgGlxServerInit, NULL);
 }
 
 /************************************************************************/
@@ -476,6 +609,9 @@ GlxExtensionInit(void)
 __GLXcontext *
 __glXForceCurrent(__GLXclientState * cl, GLXContextTag tag, int *error)
 {
+    ClientPtr client = cl->client;
+    REQUEST(xGLXSingleReq);
+
     __GLXcontext *cx;
 
     /*
@@ -486,6 +622,13 @@ __glXForceCurrent(__GLXclientState * cl, GLXContextTag tag, int *error)
     if (!cx) {
         cl->client->errorValue = tag;
         *error = __glXError(GLXBadContextTag);
+        return 0;
+    }
+
+    /* If we're expecting a glXRenderLarge request, this better be one. */
+    if (cx->largeCmdRequestsSoFar != 0 && stuff->glxCode != X_GLXRenderLarge) {
+        client->errorValue = stuff->glxCode;
+        *error = __glXError(GLXBadLargeRequest);
         return 0;
     }
 
@@ -537,7 +680,7 @@ glxSuspendClients(void)
     int i;
 
     for (i = 1; i < currentMaxClients; i++) {
-        if (clients[i] && glxGetClient(clients[i])->inUse)
+        if (clients[i] && glxGetClient(clients[i])->client)
             IgnoreClient(clients[i]);
     }
 
@@ -553,57 +696,16 @@ glxResumeClients(void)
     glxBlockClients = FALSE;
 
     for (i = 1; i < currentMaxClients; i++) {
-        if (clients[i] && glxGetClient(clients[i])->inUse)
+        if (clients[i] && glxGetClient(clients[i])->client)
             AttendClient(clients[i]);
     }
 
-    __glXleaveServer(GL_FALSE);
     for (cx = glxPendingDestroyContexts; cx != NULL; cx = next) {
         next = cx->next;
 
         cx->destroy(cx);
     }
     glxPendingDestroyContexts = NULL;
-    __glXenterServer(GL_FALSE);
-}
-
-static void
-__glXnopEnterServer(GLboolean rendering)
-{
-}
-
-static void
-__glXnopLeaveServer(GLboolean rendering)
-{
-}
-
-static void (*__glXenterServerFunc) (GLboolean) = __glXnopEnterServer;
-static void (*__glXleaveServerFunc) (GLboolean) = __glXnopLeaveServer;
-
-void
-__glXsetEnterLeaveServerFuncs(void (*enter) (GLboolean),
-                              void (*leave) (GLboolean))
-{
-    __glXenterServerFunc = enter;
-    __glXleaveServerFunc = leave;
-}
-
-void
-__glXenterServer(GLboolean rendering)
-{
-    glxServerLeaveCount--;
-
-    if (glxServerLeaveCount == 0)
-        (*__glXenterServerFunc) (rendering);
-}
-
-void
-__glXleaveServer(GLboolean rendering)
-{
-    if (glxServerLeaveCount == 0)
-        (*__glXleaveServerFunc) (rendering);
-
-    glxServerLeaveCount++;
 }
 
 static glx_gpa_proc _get_proc_address;
@@ -631,20 +733,14 @@ __glXDispatch(ClientPtr client)
     CARD8 opcode;
     __GLXdispatchSingleProcPtr proc;
     __GLXclientState *cl;
-    int retval;
+    int retval = BadRequest;
 
     opcode = stuff->glxCode;
     cl = glxGetClient(client);
-    /* Mark it in use so we suspend it on VT switch. */
-    cl->inUse = TRUE;
 
-    /*
-     ** If we're expecting a glXRenderLarge request, this better be one.
-     */
-    if ((cl->largeCmdRequestsSoFar != 0) && (opcode != X_GLXRenderLarge)) {
-        client->errorValue = stuff->glxCode;
-        return __glXError(GLXBadLargeRequest);
-    }
+
+    if (!cl->client)
+        cl->client = client;
 
     /* If we're currently blocking GLX clients, just put this guy to
      * sleep, reset the request and return. */
@@ -660,18 +756,8 @@ __glXDispatch(ClientPtr client)
      */
     proc = __glXGetProtocolDecodeFunction(&Single_dispatch_info, opcode,
                                           client->swapped);
-    if (proc != NULL) {
-        GLboolean rendering = opcode <= X_GLXRenderLarge;
-
-        __glXleaveServer(rendering);
-
+    if (proc != NULL)
         retval = (*proc) (cl, (GLbyte *) stuff);
-
-        __glXenterServer(rendering);
-    }
-    else {
-        retval = BadRequest;
-    }
 
     return retval;
 }

@@ -1492,6 +1492,11 @@ ProcRenderCreateCursor(ClientPtr client)
         return BadAlloc;
     }
 
+    /* what kind of maniac creates a cursor from a window picture though */
+    if (pSrc->pDrawable->type == DRAWABLE_WINDOW)
+        pScreen->SourceValidate(pSrc->pDrawable, 0, 0, width, height,
+                                IncludeInferiors);
+
     if (pSrc->format == PICT_a8r8g8b8) {
         (*pScreen->GetImage) (pSrc->pDrawable,
                               0, 0, width, height, ZPixmap,
@@ -1985,7 +1990,7 @@ ProcRenderDispatch(ClientPtr client)
         return BadRequest;
 }
 
-static int
+static int _X_COLD
 SProcRenderQueryVersion(ClientPtr client)
 {
     REQUEST(xRenderQueryVersionReq);
@@ -1996,7 +2001,7 @@ SProcRenderQueryVersion(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderQueryPictFormats(ClientPtr client)
 {
     REQUEST(xRenderQueryPictFormatsReq);
@@ -2005,7 +2010,7 @@ SProcRenderQueryPictFormats(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderQueryPictIndexValues(ClientPtr client)
 {
     REQUEST(xRenderQueryPictIndexValuesReq);
@@ -2015,13 +2020,13 @@ SProcRenderQueryPictIndexValues(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderQueryDithers(ClientPtr client)
 {
     return BadImplementation;
 }
 
-static int
+static int _X_COLD
 SProcRenderCreatePicture(ClientPtr client)
 {
     REQUEST(xRenderCreatePictureReq);
@@ -2035,7 +2040,7 @@ SProcRenderCreatePicture(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderChangePicture(ClientPtr client)
 {
     REQUEST(xRenderChangePictureReq);
@@ -2047,7 +2052,7 @@ SProcRenderChangePicture(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderSetPictureClipRectangles(ClientPtr client)
 {
     REQUEST(xRenderSetPictureClipRectanglesReq);
@@ -2060,7 +2065,7 @@ SProcRenderSetPictureClipRectangles(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderFreePicture(ClientPtr client)
 {
     REQUEST(xRenderFreePictureReq);
@@ -2070,7 +2075,7 @@ SProcRenderFreePicture(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderComposite(ClientPtr client)
 {
     REQUEST(xRenderCompositeReq);
@@ -2090,13 +2095,13 @@ SProcRenderComposite(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderScale(ClientPtr client)
 {
     return BadImplementation;
 }
 
-static int
+static int _X_COLD
 SProcRenderTrapezoids(ClientPtr client)
 {
     REQUEST(xRenderTrapezoidsReq);
@@ -2112,7 +2117,7 @@ SProcRenderTrapezoids(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderTriangles(ClientPtr client)
 {
     REQUEST(xRenderTrianglesReq);
@@ -2128,7 +2133,7 @@ SProcRenderTriangles(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderTriStrip(ClientPtr client)
 {
     REQUEST(xRenderTriStripReq);
@@ -2144,7 +2149,7 @@ SProcRenderTriStrip(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderTriFan(ClientPtr client)
 {
     REQUEST(xRenderTriFanReq);
@@ -2160,25 +2165,25 @@ SProcRenderTriFan(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderColorTrapezoids(ClientPtr client)
 {
     return BadImplementation;
 }
 
-static int
+static int _X_COLD
 SProcRenderColorTriangles(ClientPtr client)
 {
     return BadImplementation;
 }
 
-static int
+static int _X_COLD
 SProcRenderTransform(ClientPtr client)
 {
     return BadImplementation;
 }
 
-static int
+static int _X_COLD
 SProcRenderCreateGlyphSet(ClientPtr client)
 {
     REQUEST(xRenderCreateGlyphSetReq);
@@ -2189,7 +2194,7 @@ SProcRenderCreateGlyphSet(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderReferenceGlyphSet(ClientPtr client)
 {
     REQUEST(xRenderReferenceGlyphSetReq);
@@ -2200,7 +2205,7 @@ SProcRenderReferenceGlyphSet(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderFreeGlyphSet(ClientPtr client)
 {
     REQUEST(xRenderFreeGlyphSetReq);
@@ -2210,7 +2215,7 @@ SProcRenderFreeGlyphSet(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderAddGlyphs(ClientPtr client)
 {
     register int i;
@@ -2244,13 +2249,13 @@ SProcRenderAddGlyphs(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderAddGlyphsFromPicture(ClientPtr client)
 {
     return BadImplementation;
 }
 
-static int
+static int _X_COLD
 SProcRenderFreeGlyphs(ClientPtr client)
 {
     REQUEST(xRenderFreeGlyphsReq);
@@ -2261,7 +2266,7 @@ SProcRenderFreeGlyphs(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderCompositeGlyphs(ClientPtr client)
 {
     xGlyphElt *elt;
@@ -2333,7 +2338,7 @@ SProcRenderCompositeGlyphs(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderFillRectangles(ClientPtr client)
 {
     REQUEST(xRenderFillRectanglesReq);
@@ -2349,7 +2354,7 @@ SProcRenderFillRectangles(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderCreateCursor(ClientPtr client)
 {
     REQUEST(xRenderCreateCursorReq);
@@ -2363,7 +2368,7 @@ SProcRenderCreateCursor(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderSetPictureTransform(ClientPtr client)
 {
     REQUEST(xRenderSetPictureTransformReq);
@@ -2383,7 +2388,7 @@ SProcRenderSetPictureTransform(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderQueryFilters(ClientPtr client)
 {
     REQUEST(xRenderQueryFiltersReq);
@@ -2394,7 +2399,7 @@ SProcRenderQueryFilters(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderSetPictureFilter(ClientPtr client)
 {
     REQUEST(xRenderSetPictureFilterReq);
@@ -2406,7 +2411,7 @@ SProcRenderSetPictureFilter(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderCreateAnimCursor(ClientPtr client)
 {
     REQUEST(xRenderCreateAnimCursorReq);
@@ -2418,7 +2423,7 @@ SProcRenderCreateAnimCursor(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderAddTraps(ClientPtr client)
 {
     REQUEST(xRenderAddTrapsReq);
@@ -2432,7 +2437,7 @@ SProcRenderAddTraps(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderCreateSolidFill(ClientPtr client)
 {
     REQUEST(xRenderCreateSolidFillReq);
@@ -2447,7 +2452,7 @@ SProcRenderCreateSolidFill(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static void
+static void _X_COLD
 swapStops(void *stuff, int num)
 {
     int i;
@@ -2466,7 +2471,7 @@ swapStops(void *stuff, int num)
     }
 }
 
-static int
+static int _X_COLD
 SProcRenderCreateLinearGradient(ClientPtr client)
 {
     int len;
@@ -2493,7 +2498,7 @@ SProcRenderCreateLinearGradient(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderCreateRadialGradient(ClientPtr client)
 {
     int len;
@@ -2522,7 +2527,7 @@ SProcRenderCreateRadialGradient(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderCreateConicalGradient(ClientPtr client)
 {
     int len;
@@ -2548,7 +2553,7 @@ SProcRenderCreateConicalGradient(ClientPtr client)
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
-static int
+static int _X_COLD
 SProcRenderDispatch(ClientPtr client)
 {
     REQUEST(xReq);

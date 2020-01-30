@@ -14,7 +14,6 @@ endif()
 
 set(NVCTRLSRC "")
 if(TVNC_NVCONTROL)
-	handle_type_puns(nvctrlext.c)
 	set(NVCTRLSRC nvctrlext.c)
 	include_directories(${CMAKE_SOURCE_DIR}/unix/libXNVCtrl ${X11_INCLUDE_DIR})
 endif()
@@ -59,8 +58,6 @@ if(NOT HAVE_STRSEP)
 else()
 	add_definitions(-DHAVE_STRSEP)
 endif()
-
-handle_type_puns(vncextinit.c)
 
 add_library(vnc STATIC
 	auth.c

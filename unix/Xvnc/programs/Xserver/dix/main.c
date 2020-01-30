@@ -148,11 +148,7 @@ dix_main(int argc, char *argv[], char *envp[])
         ScreenSaverInterval = defaultScreenSaverInterval;
         ScreenSaverBlanking = defaultScreenSaverBlanking;
         ScreenSaverAllowExposures = defaultScreenSaverAllowExposures;
-#ifdef DPMSExtension
-        DPMSStandbyTime = DPMSSuspendTime = DPMSOffTime = ScreenSaverTime;
-        DPMSEnabled = TRUE;
-        DPMSPowerLevel = 0;
-#endif
+
         InitBlockAndWakeupHandlers();
         /* Perform any operating system dependent initializations you'd like */
         OsInit();
@@ -238,13 +234,6 @@ dix_main(int argc, char *argv[], char *envp[])
             FatalError("could not open default cursor font '%s'",
                        defaultCursorFont);
         }
-
-#ifdef DPMSExtension
-        /* check all screens, looking for DPMS Capabilities */
-        DPMSCapableFlag = DPMSSupported();
-        if (!DPMSCapableFlag)
-            DPMSEnabled = FALSE;
-#endif
 
 #ifdef PANORAMIX
         /*
@@ -352,6 +341,8 @@ dix_main(int argc, char *argv[], char *envp[])
         FreeAuditTimer();
 
         DeleteCallbackManager();
+
+        ClearWorkQueue();
 
         if (dispatchException & DE_TERMINATE) {
             CloseWellKnownConnections();

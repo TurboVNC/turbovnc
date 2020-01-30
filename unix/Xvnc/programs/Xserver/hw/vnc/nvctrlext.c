@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -375,7 +375,7 @@ static int ProcNVCTRLQueryAttribute64(ClientPtr client)
   if (client->swapped) {
     swaps(&rep.sequenceNumber);
     swapl(&rep.flags);
-    swap_uint64((uint64_t *)&rep.value_64);
+    rep.value_64 = bswap_64(rep.value_64);
   }
   WriteToClient(client, sizeof(xnvCtrlQueryAttribute64Reply), (char *)&rep);
   return client->noClientException;
@@ -575,9 +575,9 @@ static int ProcNVCTRLQueryValidAttributeValues64(ClientPtr client)
     swapl(&rep.length);
     swapl(&rep.flags);
     swapl(&rep.attr_type);
-    swap_uint64((uint64_t *)&rep.min_64);
-    swap_uint64((uint64_t *)&rep.max_64);
-    swap_uint64(&rep.bits_64);
+    rep.min_64 = bswap_64(rep.min_64);
+    rep.max_64 = bswap_64(rep.max_64);
+    rep.bits_64 = bswap_64(rep.bits_64);
     swapl(&rep.perms);
   }
   WriteToClient(client, sizeof(xnvCtrlQueryValidAttributeValues64Reply),

@@ -222,8 +222,7 @@ UpdateCurrentTimeIf(void)
 #define SMART_SCHEDULE_MAX_SLICE	15
 
 #ifdef HAVE_SETITIMER
-#define SMART_SCHEDULE_DEFAULT_SIGNAL_ENABLE HAVE_SETITIMER
-Bool SmartScheduleSignalEnable = SMART_SCHEDULE_DEFAULT_SIGNAL_ENABLE;
+Bool SmartScheduleSignalEnable = TRUE;
 #endif
 
 long SmartScheduleSlice = SMART_SCHEDULE_DEFAULT_INTERVAL;
@@ -2197,8 +2196,11 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         return BadAlloc;
     WriteReplyToClient(client, sizeof(xGetImageReply), &xgi);
 
-    if (pDraw->type == DRAWABLE_WINDOW)
+    if (pDraw->type == DRAWABLE_WINDOW) {
         pVisibleRegion = &((WindowPtr) pDraw)->borderClip;
+        pDraw->pScreen->SourceValidate(pDraw, x, y, width, height,
+                                       IncludeInferiors);
+    }
 
     if (linesPerBuf == 0) {
         /* nothing to do */

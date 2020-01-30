@@ -1,6 +1,6 @@
-diff --git a/libxcb-1.13/src/xcb_out.c b/libxcb/src/xcb_out.c
-index 3601a5f..11a5cf7 100644
---- a/libxcb-1.13/src/xcb_out.c
+diff --git a/libxcb-1.13.1/src/xcb_out.c b/libxcb/src/xcb_out.c
+index c9593e5..4d190a6 100644
+--- a/libxcb-1.13.1/src/xcb_out.c
 +++ b/libxcb/src/xcb_out.c
 @@ -179,7 +179,8 @@ uint32_t xcb_get_maximum_request_length(xcb_connection_t *c)
  

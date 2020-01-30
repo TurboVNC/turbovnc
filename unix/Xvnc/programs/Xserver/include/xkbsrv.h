@@ -195,6 +195,8 @@ typedef struct _XkbSrvInfo {
     XkbFilterPtr filters;
 
     XkbSrvCheckRepeatPtr checkRepeat;
+
+    char overlay_perkey_state[256/8]; /* bitfield */
 } XkbSrvInfoRec, *XkbSrvInfoPtr;
 
 #define	XkbSLI_IsDefault	(1L<<0)
@@ -233,7 +235,8 @@ typedef struct _XkbSrvLedInfo {
  * Settings for xkbClientFlags field (used by DIX)
  * These flags _must_ not overlap with XkbPCF_*
  */
-#define	_XkbClientInitialized		(1<<15)
+#define _XkbClientInitialized           (1<<7)
+#define _XkbClientIsAncient             (1<<6)
 
 #define	_XkbWantsDetectableAutoRepeat(c)\
 	((c)->xkbClientFlags&XkbPCF_DetectableAutoRepeatMask)

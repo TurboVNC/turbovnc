@@ -33,9 +33,6 @@
 struct glx_config {
     struct glx_config * next;
 
-    GLboolean rgbMode;
-    GLboolean floatMode;
-    GLboolean colorIndexMode;
     GLuint doubleBufferMode;
     GLuint stereoMode;
 
@@ -51,8 +48,6 @@ struct glx_config {
     GLint numAuxBuffers;
 
     GLint level;
-
-    GLint pixmapMode;
 
     /* GLX */
     GLint visualID;

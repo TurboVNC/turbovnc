@@ -194,6 +194,8 @@ LogFilePrep(const char *fname, const char *backup, const char *idstring)
 {
     char *logFileName = NULL;
 
+    /* the format string below is controlled by the user,
+       this code should never be called with elevated privileges */
     if (asprintf(&logFileName, fname, idstring) == -1)
         FatalError("Cannot allocate space for the log file name\n");
 
@@ -296,7 +298,7 @@ LogInit(const char *fname, const char *backup)
 void
 LogSetDisplay(void)
 {
-    if (saved_log_fname) {
+    if (saved_log_fname && strstr(saved_log_fname, "%s")) {
         char *logFileName;
 
         logFileName = LogFilePrep(saved_log_fname, saved_log_backup, display);

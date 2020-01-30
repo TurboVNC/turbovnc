@@ -1,3 +1,121 @@
+commit ebb167f34a3514783966775fb12573c4ed209625
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 16 10:37:14 2019 -0700
+
+    libXext 1.3.4
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 97a5180793138498c046a7aa2ad061732e182645
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 16 10:36:21 2019 -0700
+
+    Add description of libXext to README.md
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 86b2e70648531f1af11e0541f69468212c3f2190
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 16 10:25:49 2019 -0700
+
+    Update configure.ac bug URL for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7ecd11d573a087e075036e0479c9e3f58ee9fa5d
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Nov 19 21:53:21 2018 -0800
+
+    Update README for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a07b4bb8290d0c1bba7bcecd5bb6896fbe1b169c
+Author: Mihail Konev <k.mvc@ya.ru>
+Date:   Thu Jan 26 13:52:49 2017 +1000
+
+    autogen: add default patch prefix
+    
+    Signed-off-by: Mihail Konev <k.mvc@ya.ru>
+
+commit df966fe1336c52d0e3a6800c31a608fdc0229cff
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Mon Mar 9 12:00:52 2015 +0000
+
+    autogen.sh: use quoted string variables
+    
+    Place quotes around the $srcdir, $ORIGDIR and $0 variables to prevent
+    fall-outs, when they contain space.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit cdbb04f29f48c3fd47c3db59e985e009457b62ef
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jan 24 10:32:07 2017 +1000
+
+    autogen.sh: use exec instead of waiting for configure to finish
+    
+    Syncs the invocation of configure with the one from the server.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit 490a25e6f8a4d2482af4364c700b68ad11a4d10b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Feb 25 23:36:50 2016 -0800
+
+    Use __builtin_popcountl if available to replace Ones() in XSecurity.c
+    
+    If the compiler knows of a better algorithm for counting the number of
+    bits set in a word for the target CPU, let it use that, instead of the
+    classic algorithm optimized for PDP-6.
+    
+    Tested for the range of values used in XSecurity.c and verified results
+    are the same from both:
+    
+    for (unsigned long i = 0; i <= XSecurityAllAuthorizationAttributes; i++) {
+        printf("ones: %d\tpopcnt: %d\n", Ones(i), __builtin_popcountl(i));
+    }
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 54ba591149f3a92c5a4a66e428ae2a33d1027053
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Feb 25 15:34:45 2016 -0800
+
+    Fix typos in man pages
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 82df003f36a405711ac41f2eb4e862f0878659e9
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Feb 25 14:12:14 2016 -0800
+
+    Assert that values buffer has enough room for provided values
+    
+    Catch if anyone ever defines more types again and forgets to increase
+    the size of the value buffer to match.
+    
+    v2: assert on the full set of possible values, regardless of which the
+        current caller passed in this call - more likely to be spotted during
+        testing, less likely to not be found until called in production.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 0744837f525d8ba103e807af7c44ad2bf5cbd6ca
+Author: Rob Wu <rob@robwu.nl>
+Date:   Thu Feb 25 18:05:50 2016 +0100
+
+    XSecurityGenerateAuthorization: Allocate enough space in values buffer
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=94292
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Seth Arnold <seth.arnold@canonical.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit efdcbb7634501e1117d422636a0a75d7ea84b16b
 Author: Peter Hutterer <peter.hutterer@who-t.net>
 Date:   Thu Jul 24 01:30:38 2014 +1000
@@ -1251,9 +1369,9 @@ Date:   Sat Jun 6 05:22:12 2009 +1000
     Don't export extra symbols
     
     Turns the following functions static
-    	_xgeFindDisplay
-    	_xgeCheckExtInit
-    	_xgeEventToWire
+            _xgeFindDisplay
+            _xgeCheckExtInit
+            _xgeEventToWire
     
     Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
 

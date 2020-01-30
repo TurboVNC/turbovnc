@@ -69,16 +69,6 @@ extern "C" {
 #endif /* _GLAPI_NO_EXPORTS */
 
 
-/* Is this needed?  It is incomplete anyway. */
-#ifdef USE_MGL_NAMESPACE
-#define _glapi_set_dispatch _mglapi_set_dispatch
-#define _glapi_get_dispatch _mglapi_get_dispatch
-#define _glapi_set_context _mglapi_set_context
-#define _glapi_get_context _mglapi_get_context
-#define _glapi_Dispatch _mglapi_Dispatch
-#define _glapi_Context _mglapi_Context
-#endif
-
 typedef void (*_glapi_proc)(void);
 
 typedef void (*_glapi_nop_handler_proc)(const char *name);
@@ -86,7 +76,7 @@ typedef void (*_glapi_nop_handler_proc)(const char *name);
 struct _glapi_table;
 
 
-#if defined (GLX_USE_TLS)
+#if defined (USE_ELF_TLS)
 
 _GLAPI_EXPORT extern __thread struct _glapi_table * _glapi_tls_Dispatch
     __attribute__((tls_model("initial-exec")));
@@ -111,7 +101,7 @@ _GLAPI_EXPORT extern void *_glapi_Context;
 #define GET_CURRENT_CONTEXT(C)  struct gl_context *C = (struct gl_context *) \
      (likely(_glapi_Context) ? _glapi_Context : _glapi_get_context())
 
-#endif /* defined (GLX_USE_TLS) */
+#endif /* defined (USE_ELF_TLS) */
 
 
 void

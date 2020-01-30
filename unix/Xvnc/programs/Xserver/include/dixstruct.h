@@ -100,10 +100,9 @@ typedef struct _Client {
     CARD32 req_len;             /* length of current request */
     unsigned int replyBytesRemaining;
     PrivateRec *devPrivates;
-    unsigned short xkbClientFlags;
     unsigned short mapNotifyMask;
     unsigned short newKeyboardNotifyMask;
-    unsigned short vMajor, vMinor;
+    unsigned char xkbClientFlags;
     KeyCode minKC, maxKC;
 
     int smart_start_tick;
@@ -111,19 +110,15 @@ typedef struct _Client {
 
     DeviceIntPtr clientPtr;
     ClientIdPtr clientIds;
-#if XTRANS_SEND_FDS
     int req_fds;
-#endif
 } ClientRec;
 
-#if XTRANS_SEND_FDS
 static inline void
 SetReqFds(ClientPtr client, int req_fds) {
     if (client->req_fds != 0 && req_fds != client->req_fds)
         LogMessage(X_ERROR, "Mismatching number of request fds %d != %d\n", req_fds, client->req_fds);
     client->req_fds = req_fds;
 }
-#endif
 
 /*
  * Scheduling interface
@@ -132,7 +127,7 @@ extern long SmartScheduleTime;
 extern long SmartScheduleInterval;
 extern long SmartScheduleSlice;
 extern long SmartScheduleMaxSlice;
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
 extern Bool SmartScheduleSignalEnable;
 #else
 #define SmartScheduleSignalEnable FALSE

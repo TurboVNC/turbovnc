@@ -74,6 +74,7 @@ static const struct extension_info known_glx_extensions[] = {
     /* *INDENT-OFF* */
     { GLX(ARB_context_flush_control),   VER(0,0), N, },
     { GLX(ARB_create_context),          VER(0,0), N, },
+    { GLX(ARB_create_context_no_error), VER(0,0), N, },
     { GLX(ARB_create_context_profile),  VER(0,0), N, },
     { GLX(ARB_create_context_robustness), VER(0,0), N, },
     { GLX(ARB_fbconfig_float),          VER(0,0), N, },
@@ -86,6 +87,7 @@ static const struct extension_info known_glx_extensions[] = {
     { GLX(EXT_framebuffer_sRGB),        VER(0,0), N, },
     { GLX(EXT_import_context),          VER(0,0), Y, },
     { GLX(EXT_libglvnd),                VER(0,0), N, },
+    { GLX(EXT_no_config_context),       VER(0,0), N, },
     { GLX(EXT_stereo_tree),             VER(0,0), N, },
     { GLX(EXT_texture_from_pixmap),     VER(0,0), N, },
     { GLX(EXT_visual_info),             VER(0,0), Y, },

@@ -377,7 +377,7 @@ typedef Bool (*SetSharedPixmapBackingProcPtr)(PixmapPtr, void *);
  */
 typedef void (*SyncSharedPixmapProcPtr)(PixmapDirtyUpdatePtr);
 
-typedef Bool (*StartPixmapTrackingProcPtr)(PixmapPtr, PixmapPtr,
+typedef Bool (*StartPixmapTrackingProcPtr)(DrawablePtr, PixmapPtr,
                                            int x, int y,
                                            int dst_x, int dst_y,
                                            Rotation rotation);
@@ -386,9 +386,9 @@ typedef Bool (*PresentSharedPixmapProcPtr)(PixmapPtr);
 
 typedef Bool (*RequestSharedPixmapNotifyDamageProcPtr)(PixmapPtr);
 
-typedef Bool (*StopPixmapTrackingProcPtr)(PixmapPtr, PixmapPtr);
+typedef Bool (*StopPixmapTrackingProcPtr)(DrawablePtr, PixmapPtr);
 
-typedef Bool (*StopFlippingPixmapTrackingProcPtr)(PixmapPtr,
+typedef Bool (*StopFlippingPixmapTrackingProcPtr)(DrawablePtr,
                                                   PixmapPtr, PixmapPtr);
 
 typedef Bool (*SharedPixmapNotifyDamageProcPtr)(PixmapPtr);
@@ -399,6 +399,8 @@ typedef WindowPtr (*XYToWindowProcPtr)(ScreenPtr pScreen,
                                        SpritePtr pSprite, int x, int y);
 
 typedef int (*NameWindowPixmapProcPtr)(WindowPtr, PixmapPtr, CARD32);
+
+typedef void (*DPMSProcPtr)(ScreenPtr pScreen, int level);
 
 /* Wrapping Screen procedures
 
@@ -504,14 +506,12 @@ typedef struct _Screen {
     char backingStoreSupport, saveUnderSupport;
     unsigned long whitePixel, blackPixel;
     GCPtr GCperDepth[MAXFORMATS + 1];
-    /* next field is a stipple to use as default in
-       a GC.  we don't build default tiles of all depths
-       because they are likely to be of a color
-       different from the default fg pixel, so
-       we don't win anything by building
-       a standard one.
+    /* next field is a stipple to use as default in a GC.  we don't build
+     * default tiles of all depths because they are likely to be of a color
+     * different from the default fg pixel, so we don't win anything by
+     * building a standard one.
      */
-    PixmapPtr PixmapPerDepth[1];
+    PixmapPtr defaultStipple;
     void *devPrivate;
     short numVisuals;
     VisualPtr visuals;
@@ -659,6 +659,7 @@ typedef struct _Screen {
 
     ReplaceScanoutPixmapProcPtr ReplaceScanoutPixmap;
     XYToWindowProcPtr XYToWindow;
+    DPMSProcPtr DPMS;
 } ScreenRec;
 
 static inline RegionPtr

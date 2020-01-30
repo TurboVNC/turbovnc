@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT=libXfont2-2.0.3
+PROJECT=libXfont2-2.0.4
 FILE=$PROJECT.tar.gz
 URL=https://www.x.org/releases/individual/lib
 SRCDIR=`dirname $0`

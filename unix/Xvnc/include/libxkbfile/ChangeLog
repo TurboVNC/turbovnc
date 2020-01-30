@@ -1,3 +1,127 @@
+commit 261992d42905f209cd5bf6afcf8a7ae3aa30b3ff
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 16 11:30:41 2019 -0700
+
+    libxkbfile 1.1.0
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 306087b60496d6493323433573ee9b9fb392dd7b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 16 11:22:06 2019 -0700
+
+    Add description of libxkbfile to README.md
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 28822317438b6800435145a0312dbce59a03eaa3
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Dec 7 19:44:24 2018 -0800
+
+    Update configure.ac bug URL for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 340581e83d57414b5f33fd2f9f22fdfebf0d4b8d
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Nov 19 23:07:00 2018 -0800
+
+    Update README for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b660c757e308b7c561dba16d45d18863bfa2973e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Nov 10 13:21:42 2018 -0800
+
+    Remove obsolete B16 & B32 tags in struct definitions
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d2ec504fec2550f4fd046e801b34317ef4a4bab9
+Author: Martin Burggraf <TSO@gmx.net>
+Date:   Thu Aug 13 21:16:40 2015 +0200
+
+    correcting mathematical nonsense
+    
+    V2: Fixing the issue with numbers between 0 -1
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 1c070d1153e293169909b0fc8e9ff65be9121fa0
+Author: Mihail Konev <k.mvc@ya.ru>
+Date:   Thu Jan 26 13:52:49 2017 +1000
+
+    autogen: add default patch prefix
+    
+    Signed-off-by: Mihail Konev <k.mvc@ya.ru>
+
+commit 9e39e36316f3dd28b1fd6f71562ec93bce2da35a
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Mon Mar 9 12:00:52 2015 +0000
+
+    autogen.sh: use quoted string variables
+    
+    Place quotes around the $srcdir, $ORIGDIR and $0 variables to prevent
+    fall-outs, when they contain space.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit cfea939bb7d61d51b74493d77294010ddef490f0
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jan 24 10:32:07 2017 +1000
+
+    autogen.sh: use exec instead of waiting for configure to finish
+    
+    Syncs the invocation of configure with the one from the server.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit 56fa447282c47bf23d05e18a42bbd0184dbd8302
+Author: Andreas Wettstein <wettstein509@solnet.ch>
+Date:   Sat Feb 15 17:35:50 2014 +0100
+
+    Fix mistyped argument of sizeof
+    
+    A pointer rather than the buffer was given to sizeof.  As the data to be
+    written is only one or two bytes, a pointer size is at least four bytes, and
+    the buffer has 32 bytes, this error did not have negative effects.
+    
+    Signed-off-by: Andreas Wettstein <wettstein509@solnet.ch>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a594dde52b7903feab839f5cfe08755753aca20e
+Author: Andreas Wettstein <wettstein509@solnet.ch>
+Date:   Sat Feb 15 17:35:29 2014 +0100
+
+    Add support for genKeyEvent flag
+    
+    ActionMessage has an optional flag genKeyEvent.  This change makes sure this
+    flag is printed when it is set.
+    
+    Signed-off-by: Andreas Wettstein <wettstein509@solnet.ch>
+    Reviewed-By: Ran Benita <ran234@gmail.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6223ec08213cb8cc546418690c27e0fdd4f0addd
+Author: Andreas Wettstein <wettstein509@solnet.ch>
+Date:   Sat Feb 15 17:35:09 2014 +0100
+
+    Add missing support for NoLock and NoUnlock flags
+    
+    The LockMods, ISOLock and LockControls support an "affect" flag to selectively
+    enable and disable locking and unlocking for these actions.  This change adds
+    output of these flags.
+    
+    Signed-off-by: Andreas Wettstein <wettstein509@solnet.ch>
+    Reviewed-By: Ran Benita <ran234@gmail.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit de4f2307448583988a55a587cb6a3f43e4868378
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Thu Apr 30 22:24:39 2015 -0700

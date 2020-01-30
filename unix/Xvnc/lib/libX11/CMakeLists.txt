@@ -14,15 +14,21 @@ endforeach()
 include_directories(include/X11)
 
 add_definitions(-DHAVE_UNISTD_H -DHAVE_SYS_SELECT_H)
+include(CheckIncludeFiles)
+check_include_files(sys/ioctl.h HAVE_SYS_IOCTL_H)
+if(HAVE_SYS_IOCTL_H)
+	add_definitions(-DHAVE_SYS_IOCTL_H)
+endif()
+check_include_files(sys/filio.h HAVE_SYS_FILIO_H)
+if(HAVE_SYS_FILIO_H)
+	add_definitions(-DHAVE_SYS_FILIO_H)
+endif()
 
 disable_compiler_warnings()
-handle_type_puns(src/XlibInt.c)
-handle_unused(
-	src/XlibInt.c
-	src/xcb_io.c)
 
 add_library(X11xcb STATIC
 	src/XlibInt.c
 	src/globals.c
+	src/reallocarray.c
 	src/x11_xcb.c
 	src/xcb_io.c)

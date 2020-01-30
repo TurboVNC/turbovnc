@@ -101,24 +101,29 @@ miSyncInitFence(ScreenPtr pScreen, SyncFence * pFence, Bool initially_triggered)
     pFence->funcs = miSyncFenceFuncs;
 
     pScreenPriv->funcs.CreateFence(pScreen, pFence, initially_triggered);
+
+    pFence->sync.initialized = TRUE;
 }
 
 void
 miSyncDestroyFence(SyncFence * pFence)
 {
-    ScreenPtr pScreen = pFence->pScreen;
-    SyncScreenPrivPtr pScreenPriv = SYNC_SCREEN_PRIV(pScreen);
-    SyncTriggerList *ptl, *pNext;
-
     pFence->sync.beingDestroyed = TRUE;
-    /* tell all the fence's triggers that the counter has been destroyed */
-    for (ptl = pFence->sync.pTriglist; ptl; ptl = pNext) {
-        (*ptl->pTrigger->CounterDestroyed) (ptl->pTrigger);
-        pNext = ptl->next;
-        free(ptl);              /* destroy the trigger list as we go */
-    }
 
-    pScreenPriv->funcs.DestroyFence(pScreen, pFence);
+    if (pFence->sync.initialized) {
+        ScreenPtr pScreen = pFence->pScreen;
+        SyncScreenPrivPtr pScreenPriv = SYNC_SCREEN_PRIV(pScreen);
+        SyncTriggerList *ptl, *pNext;
+
+        /* tell all the fence's triggers that the counter has been destroyed */
+        for (ptl = pFence->sync.pTriglist; ptl; ptl = pNext) {
+            (*ptl->pTrigger->CounterDestroyed) (ptl->pTrigger);
+            pNext = ptl->next;
+            free(ptl); /* destroy the trigger list as we go */
+        }
+
+        pScreenPriv->funcs.DestroyFence(pScreen, pFence);
+    }
 
     dixFreeObjectWithPrivates(pFence, PRIVATE_SYNC_FENCE);
 }
@@ -127,16 +132,13 @@ void
 miSyncTriggerFence(SyncFence * pFence)
 {
     SyncTriggerList *ptl, *pNext;
-    CARD64 unused;
 
     pFence->funcs.SetTriggered(pFence);
-
-    XSyncIntToValue(&unused, 0L);
 
     /* run through triggers to see if any fired */
     for (ptl = pFence->sync.pTriglist; ptl; ptl = pNext) {
         pNext = ptl->next;
-        if ((*ptl->pTrigger->CheckTrigger) (ptl->pTrigger, unused))
+        if ((*ptl->pTrigger->CheckTrigger) (ptl->pTrigger, 0))
             (*ptl->pTrigger->TriggerFired) (ptl->pTrigger);
     }
 }

@@ -1,3 +1,750 @@
+commit db7cca17ad7807e92a928da9d4c68a00f4836da2
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed Oct 9 13:41:29 2019 -0400
+
+    libX11 1.6.9
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit f5ba2c632a4c84279bdd48c687271292f5dc4f87
+Author: Dmitry Osipenko <digetx@gmail.com>
+Date:   Sat May 18 19:10:32 2019 +0300
+
+    Fix lockup in _XReply() caused by recursive synchronization
+    
+    This patch is based on a suggestion made by Uli Schlachter in a comment
+    to the bug report https://gitlab.freedesktop.org/xorg/lib/libx11/issues/93.
+    
+    Explanation of the bug (given by Uli Schlachter as well):
+    
+    An error was received and handled. Since there was an error callback set,
+    Xlib unlocks the display, runs the error callback, and then locks the display
+    again. This goes through _XLockDisplay and then calls _XSeqSyncFunction.
+    On this "lock the thing"-path, Xlib notices that sequence numbers are close to
+    wrap-around and tries to send a GetInputFocus request. However, the earlier
+    calls already registered themselves as "we are handling replies/errors, do
+    not interfere!" and so the code here waits for "that other thread" to be done
+    before it continues. Only that there is no other thread, but it is this thread
+    itself and thus a deadlock follows.
+    
+    The bug is relatively easy to reproduce on any desktop environment by
+    using actively a touchscreen input that supports multitouch, i.e. practically
+    all mobile devices are affected.
+    
+    Fixes: https://gitlab.freedesktop.org/xorg/lib/libx11/issues/93
+    Suggested-by: Uli Schlachter <psychon@znc.in>
+    Tested-by: Dmitry Osipenko <digetx@gmail.com>
+    Reported-by: Dmitry Osipenko <digetx@gmail.com>
+    Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+
+commit 1f1ca0863fd81fd0538b104eb9d9841ddbc7c905
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Fri Sep 13 16:44:32 2019 -0400
+
+    xkb: Provide <X11/extensions/XKBgeom.h> ourselves
+    
+    This header refers to libX11 types, it doesn't belong in xorgproto and
+    has been moved to legacy in 2019.2. Supply it ourselves.
+
+commit edc7680ed5a03cedb5facf14693823455e12c29c
+Author: Ross Burton <ross.burton@intel.com>
+Date:   Tue Aug 6 14:53:43 2019 +0100
+
+    src/util/Makefile: explicitly reset LINK to not use libtool
+    
+    Simply looking at libtool redefines LINK globally to use libtool, which when
+    you're trying to cross-compile to Windows can cause complications.
+    
+    As in src/util/ we're simply building a small binary for the build host, reset
+    LINK to the automake default so that the traditional compile/link steps occur
+    without libtool.
+    
+    Also remove -all-static from LDFLAGS as that is a libtool-specific argument
+    intended to solve this problem.
+    
+    Closes: #100
+    Signed-off-by: Ross Burton <ross.burton@intel.com>
+
+commit f111bf3ac091a3a6d1f094172621d9d033c3833c
+Author: Thomas E. Dickey <dickey@invisible-island.net>
+Date:   Tue Jul 30 16:53:27 2019 -0400
+
+    improve some formatting
+    
+    Signed-off-by: Thomas E. Dickey <dickey@invisible-island.net>
+
+commit 1d0a6fe9126c7ce61c6648cabf43b2de4d6d3ba9
+Author: Thomas E. Dickey <dickey@invisible-island.net>
+Date:   Tue Jul 30 15:49:09 2019 -0400
+
+    fix a substitution error from recent commit, e.g, "s/^\.EE/XDe/"
+    
+    Signed-off-by: Thomas E. Dickey <dickey@invisible-island.net>
+
+commit 8fe8aafe7e9beffaff0460fe08354dfcde1efe98
+Author: Thomas E. Dickey <dickey@invisible-island.net>
+Date:   Tue Jul 30 05:07:40 2019 -0400
+
+    split lines at sentence endings
+    
+    Signed-off-by: Thomas E. Dickey <dickey@invisible-island.net>
+
+commit 6f2cbcea5d6dcd1df7ef309481cad1663284c061
+Author: Thomas E. Dickey <dickey@invisible-island.net>
+Date:   Tue Jul 30 04:52:25 2019 -0400
+
+    trim trailing whitespace from manpages
+    
+    Signed-off-by: Thomas E. Dickey <dickey@invisible-island.net>
+
+commit 4abf482d8e6b0b1ae84e0f528e71066afd6d18b5
+Author: Thomas E. Dickey <dickey@invisible-island.net>
+Date:   Tue Jul 30 04:36:24 2019 -0400
+
+    another fake-quote fix
+    
+    Signed-off-by: Thomas E. Dickey <dickey@invisible-island.net>
+
+commit c0f0651f2b4dfa9fef86d1374689220125631993
+Author: Thomas E. Dickey <dickey@invisible-island.net>
+Date:   Tue Jul 30 04:34:54 2019 -0400
+
+    the last commit overlooked some fake-quote pairs
+    
+    Signed-off-by: Thomas E. Dickey <dickey@invisible-island.net>
+
+commit ef31143c9decda54b3ab2937d3300fcf5b493fd6
+Author: Walter Harms <wharms@bfs.de>
+Date:   Mon Jul 29 18:50:19 2019 +0200
+
+    fix ``fake quotes'' in text
+    
+    to remove the fake quotes replace them with propper
+    predefined macros \*(lq and \*(rq. this will allow
+    nroff to choose the propper characters when using ps etc.
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+
+commit 705027ea9b17d6552388d2067736ab4b0bf9dfb5
+Author: Walter Harms <wharms@bfs.de>
+Date:   Mon Jul 29 18:27:12 2019 +0200
+
+    get rid of ``fake quotes''
+    
+    these fake quotes are inside a comment and can be replaced with
+    some double quotes
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+
+commit fe46eb287106ad05538e896783a5cf877a4138df
+Author: Walter Harms <wharms@bfs.de>
+Date:   Mon Jul 29 17:57:02 2019 +0200
+
+    remove all private macro defines
+    
+    after converting everything to st. man page macros there is
+    no need to maintain X11 private nroff macros, so remove them.
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+
+commit b7f09ae19c9a098ecd545b4d4c45a6afe39a8764
+Author: Walter Harms <wharms@bfs.de>
+Date:   Mon Jul 29 17:47:35 2019 +0200
+
+    Replace home-grown .Ds .De macro with man page .EX/.EE macro
+    
+    Same pages use the man page .EX/.EE macro. Replace all occurences
+    of .De/.Ds with the std. macros to make the code better to maintain.
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+
+commit 951e772bc8d89bc62c4bbac14adc5d4f5027419f
+Author: Walter Harms <wharms@bfs.de>
+Date:   Wed Jul 3 18:23:51 2019 +0200
+
+    fix TBL format
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+
+commit 4eb167f5aca4cca05a230c728ffdb4fd382a4e1e
+Author: Walter Harms <wharms@bfs.de>
+Date:   Wed Jul 3 18:18:09 2019 +0200
+
+    replace home grown .ZN with std, .B and .BR
+    
+    Replace the home grown macro .ZN with std. macros
+    from man macro paket. So we can get rid of the
+    definition an get a clean header.
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+
+commit 08e6b36292ebf01ba2dcc4a48ec371c6f5d13458
+Author: Walter Harms <wharms@bfs.de>
+Date:   Sat Jun 22 18:33:48 2019 +0200
+
+    remove in-text macros
+    
+    remove in-text macros an fix a few typos on the way.
+    hopefuly that will make maintenance more easy.
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+
+commit cb0e894fe9927b07bd9d97c067fd0d007accb105
+Author: Walter Harms <wharms@bfs.de>
+Date:   Fri Jun 21 18:01:16 2019 +0200
+
+    note that we can handle kbd==NULL
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+
+commit 0327c427d62f671eced067c6d9b69f4e216a8cac
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Mon Jun 17 13:36:08 2019 -0400
+
+    makekeys: Detach ourselves from X headers entirely
+    
+    Subsequent to a121b7b0c210efe10bf93453b29050282324c906 we are no longer
+    building makekeys with enough -I/foo/bar to find the X11 headers, so if
+    they're not in a system include path, things fail. Since this utility is
+    only needed at build time, there's no real reason to demand the X
+    headers be installed for both the build and target machines if cross-
+    compiling, we can just assume a vaguely ANSI environment instead.
+    
+    Tested-by: Niclas Zeising <zeising@daemonic.se>
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Matt Turner <mattst88@gmail.com>
+
+commit 57f0d421a1320090d3a4948181fe228d86cc8977
+Author: Matt Turner <mattst88@gmail.com>
+Date:   Mon Jun 17 10:45:45 2019 -0400
+
+    libX11 1.6.8
+    
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+commit 5464b302bc0c4a055d3eac06c6ab15e209ff7668
+Author: Matt Turner <mattst88@gmail.com>
+Date:   Sun Jun 9 14:00:15 2019 -0700
+
+    Use AC_SYS_LARGEFILE
+    
+    ... and include config.h in makekeys.c to get the definition of
+    _FILE_OFFSET_BITS. Without it, libX11 can fail to build on a file
+    system with 64-bit inode numbers.
+    
+    Bug: https://bugs.gentoo.org/550502
+    Bug: https://bugs.gentoo.org/616140
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+commit 33b9148a833ab2ea46e44871da3c031bf1b78f77
+Author: Ran Benita <ran234@gmail.com>
+Date:   Thu Feb 13 20:55:08 2014 +0200
+
+    Compose.man: fix escaped hexadecimal char description
+    
+    The man page says:
+        Strings may be direct text encoded in the locale for which the
+        compose file is to be used, or an escaped octal or hexadecimal
+        character code.   Octal codes are specified as "\123" and
+        hexadecimal codes as "\0x123a".
+    
+    But the grammar in the parser and the implementation say:
+        ESCAPED_CHAR  ::= ('\\' | '\"' | OCTAL | HEX )
+        HEX           ::= '\' (x|X) HEX_CHAR [HEX_CHAR]]
+        HEX_CHAR      ::= (0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|a|b|c|d|e|f)
+    
+    So "\0x123a" -> "\x3a".
+    
+    Signed-off-by: Ran Benita <ran234@gmail.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit d9b2cc35edf01e4f751a9ccb5ac185745184cec0
+Author: ojab <ojab@ojab.ru>
+Date:   Mon Apr 24 20:12:17 2017 +0000
+
+    Compose sequences for rouble sign
+    
+    Cyrillic combinations mirror the Qwerty-Jcuken keyboard layout.
+    
+    Signed-off-by: Slava Kardakov <ojab@ojab.ru>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 3f211616f6414bd9958566c0ca137e87a2b6df95
+Author: Pavel Labath <pavelo@centrum.sk>
+Date:   Fri Nov 30 20:45:04 2012 +0100
+
+    Fix a leak in XCreateFontSet
+    
+    a simple snippet like XFreeFontSet(d, XCreateFontSet(d, ...)) will generate lots of memory leaks,
+    as evidenced by the following valgrind output:
+    ==983== HEAP SUMMARY:
+    ==983==     in use at exit: 39,409 bytes in 341 blocks
+    ==983==   total heap usage: 4,795 allocs, 4,454 frees, 489,086 bytes allocated
+    ==983==
+    ==983== 1,688 (136 direct, 1,552 indirect) bytes in 1 blocks are definitely lost in loss record
+    40 of 46
+    ==983==    at 0x4C2B042: realloc (in /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+    ==983==    by 0x56D5A93: add_codeset.clone.9 (in /usr/lib64/libX11.so.6.3.0)
+    ==983==    by 0x56D5FE0: load_generic (in /usr/lib64/libX11.so.6.3.0)
+    ==983==    by 0x56D7612: initialize (in /usr/lib64/libX11.so.6.3.0)
+    ==983==    by 0x56D7E75: _XlcCreateLC (in /usr/lib64/libX11.so.6.3.0)
+    ==983==    by 0x56F9A5F: _XlcUtf8Loader (in /usr/lib64/libX11.so.6.3.0)
+    ==983==    by 0x56DF815: _XOpenLC (in /usr/lib64/libX11.so.6.3.0)
+    ==983==    by 0x56B255A: XOpenOM (in /usr/lib64/libX11.so.6.3.0)
+    ==983==    by 0x56A665A: XCreateFontSet (in /usr/lib64/libX11.so.6.3.0)
+    ==983==    by 0x4FCA80: conky::x11_output::create_gc() (x11.cc:746)
+    ==983==    by 0x4FC3B4: conky::x11_output::use_own_window() (x11.cc:602)
+    ==983==    by 0x4FAD42: conky::priv::own_window_setting::set(bool const&, bool) (x11.cc:92)
+    ==983==
+    ==983== LEAK SUMMARY:
+    ==983==    definitely lost: 136 bytes in 1 blocks
+    ==983==    indirectly lost: 1,552 bytes in 34 blocks
+    ==983==      possibly lost: 0 bytes in 0 blocks
+    ==983==    still reachable: 37,721 bytes in 306 blocks
+    ==983==         suppressed: 0 bytes in 0 blocks
+    
+    This patch makes the leak dissappear (Well, at least the "definitely lost part". The "still
+    reachable" thingy remains). After some analysis, I've discovered that the XLCd structure is
+    destroyed improperly. The "constructor" is in lcGeneric.c, but the structure is destroyed using
+    code from lcPublic.c. I've found that changing the destructor call to _XlcDestroyLC executes the
+    correct code path, and I'm pretty sure this is correct (the object was constructed using
+    _XlcCreateLC, it make sense to destroy it using its conterpart).
+    
+    So far I haven't observed any strange behaviour on my system caused by this change (although, I'm
+    not sure, how many programs actually use this function).
+    
+    Signed-off-by: Pavel Labath <pavelo@centrum.sk>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 4645e219133458781e3fb48eaea6a74cccb1b9aa
+Author: Jon Turney <jon.turney@dronecode.org.uk>
+Date:   Tue Apr 30 14:39:06 2019 +0100
+
+    Avoid using libtool wrapper for makekeys
+    
+    For Windows targets, libtool uses a wrapper executable, not a wrapper
+    script (see [1]), which it compiles with the host compiler.  This
+    doesn't work when cross-compiling.
+    
+    Since we don't actually need to link with anything, use the libtool flag
+    -all-static to tell it to stay completely out of this.
+    
+    [1] https://www.gnu.org/software/libtool/manual/html_node/Wrapper-executables.html
+
+commit 6886d9ba06826785a8ccb312c04ea82b91bb6a25
+Author: Jon Turney <jon.turney@dronecode.org.uk>
+Date:   Wed Apr 24 12:50:41 2019 +0100
+
+    Use EXEEXT_FOR_BUILD for makekeys
+    
+    Use EXEXT_FOR_BUILD, to fix cross-compiling where EXEEXT differs from
+    EXEEXT_FOR_BUILD, such as when building for Windows from unix.
+    
+    (Note: As written, this assumes EXEEXT_FOR_BUILD is always empty when
+    cross-compiling.  There could be some elaborate autodetection for
+    EXEXT_FOR_BUILD, but for the moment, if you are cross-compiling from
+    Windows to Unix, you'll need to set EXEEXT_FOR_BUILD explicity...)
+
+commit a121b7b0c210efe10bf93453b29050282324c906
+Author: Jon Turney <jon.turney@dronecode.org.uk>
+Date:   Tue Apr 30 14:30:41 2019 +0100
+
+    Remove makekeys dependency on X headers
+    
+    This is the patch from https://bugs.freedesktop.org/show_bug.cgi?id=6669
+    by Pierre Ossman, reworked for master.
+    
+    Avoid using LIBS (which are for host, but we don't need) and rewrite
+    makekeys slightly to avoid needing to include any X headers, which
+    avoids potentially having -I with host paths in CFLAGS, which can cause
+    standard headers e.g. stdio.h for the host to also be used, which can
+    break things...
+
+commit cbb59d1727cb1bfcff91b54fd55f4139e360b7ab
+Author: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Date:   Fri Jun 7 23:35:33 2019 +0200
+
+    Braille: Fix typing quickly
+    
+    On finishing releasing Braille keys, we should clear the just-commited
+    pattern, to reset the state to initial state, and avoid having to wait for
+    0.3s before typing the next pattern.
+    
+    Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
+    Tested-by: Jean-Philippe Mengual <jpmengual@hypra.fr>
+
+commit 99a2cf1aa0b58391078d5d3edf0a7dab18c7745d
+Author: Tapani Pälli <tapani.palli@intel.com>
+Date:   Mon May 13 08:29:49 2019 +0300
+
+    Protect colormap add/removal with display lock
+    
+    This fixes a bug where concurrent threads call XCreateColormap and
+    XFreeColormap corrupting a linked list where colormap structures
+    are stored.
+    
+    Fixes: https://gitlab.freedesktop.org/xorg/lib/libx11/issues/94
+    
+    v2: handle XCopyColormapAndFree also (Adam Jackson)
+    
+    Signed-off-by: Tapani Pälli <tapani.palli@intel.com>
+
+commit fea80d03c381a4de379863c0d41f6d4c00f15e1e
+Author: Jon Turney <jon.turney@dronecode.org.uk>
+Date:   Wed Mar 13 13:12:20 2019 +0000
+
+    Add autoconf checks for headers we include for FIONREAD
+    
+    Add autoconf checks for the extra headers we include to define FIONREAD.
+    This needs sys/socket.h on Cygwin, and none of the alternatives on
+    Windows.
+
+commit 87c77a1e6d7034536e9d25ce24a667ebf53486a7
+Author: Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
+Date:   Mon Mar 11 14:19:52 2019 +0000
+
+    locale.alias.pre - add the de_IT locale
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 568f77f414072506bbe48646637c872987c97e63
+Author: Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
+Date:   Mon Mar 11 14:17:10 2019 +0000
+
+    locale.dir.pre - add the de_IT locale
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 38c0c92feaef7dc4a72920b1dd79872e6578086c
+Author: Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
+Date:   Mon Mar 11 14:12:07 2019 +0000
+
+    compose.dir.pre - add de_IT locale
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 49f835611ba6ab82e68b7b851507931c142db7a5
+Author: Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
+Date:   Tue Jan 29 15:34:34 2019 +0000
+
+    Update locale.alias.pre - introduce the de_LI aliases (equivalent to de_CH)
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ed669234d0cd5933618aa5fd2da697b59845b9be
+Author: Matthias Dieter Wallnöfer <matthias.wallnoefer@lugbz.org>
+Date:   Tue Jan 29 15:28:18 2019 +0000
+
+    locale.dir.pre - fix the de_LI latin15 locale
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 82b5c1454a49333b4d94984d40db79cff386d37f
+Author: Josh Triplett <josh@joshtriplett.org>
+Date:   Sun Feb 3 08:31:41 2019 +0100
+
+    compose.dir.pre: Give the C.UTF-8 locale a full set of UTF-8 compose sequences
+    
+    Signed-off-by: Josh Triplett <josh@joshtriplett.org>
+
+commit 603c3ab25a692194805fd4b0c62afac8093897fe
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 9 20:58:07 2019 -0800
+
+    Add missing close paren to XrmGetStringDatabase synopsis in man page
+    
+    Fixes: commit 0642e99ac05afb0c
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6590cc41e3c5c5c836a49a2c82774d7cc9ab3c85
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 23 11:12:27 2019 -0800
+
+    Include reallocarray.h in tarballs so "make distcheck" passes
+    
+    Fixes: commit bcf7b5aa06c23aee
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a4a7df06351ce9565d298a84547ff71f2d220fbf
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 23 11:04:41 2019 -0800
+
+    XlibInt.c: include headers needed for ioctl(...FIONREAD...) on Solaris
+    
+    Fixes: commit 5538b3e4ae6dee
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 38ec04de7e537dde6b7b1eaca46b1a24fcdbc044
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 23 10:48:26 2019 -0800
+
+    specs/XKB: Fix misprint in documentation of XkbFreeGeomOverlayKeys()
+    
+    Fixes: https://gitlab.freedesktop.org/xorg/lib/libx11/issues/86
+    aka: https://bugs.freedesktop.org/show_bug.cgi?id=23550
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 74f2f26811ae82b15dede31504b0eb541f7a3293
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 23 10:46:05 2019 -0800
+
+    specs/XKB: Fix misprint in documentation of XkbAllocGeomOverlayKeys()
+    
+    Fixes: https://gitlab.freedesktop.org/xorg/lib/libx11/issues/85
+    aka: https://bugs.freedesktop.org/show_bug.cgi?id=23549
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 66b039a41690f076e962ac6bd46cca017360a7d1
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 23 10:44:15 2019 -0800
+
+    specs/XKB: Fix misprint in documentation of XkbAllocGeomOverlayRows()
+    
+    Fixes: https://gitlab.freedesktop.org/xorg/lib/libx11/issues/84
+    aka: https://bugs.freedesktop.org/show_bug.cgi?id=23548
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit cdea0e840315171f8390adc63a2397ddf111eea4
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 23 10:38:08 2019 -0800
+
+    specs/XKB: Fix misprint in documentation of XkbGetNamedGeometry()
+    
+    Fixes: https://gitlab.freedesktop.org/xorg/lib/libx11/issues/82
+    aka: https://bugs.freedesktop.org/show_bug.cgi?id=23520
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c72d17ada98723cd9e03ddf06680a0e54b2c3089
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 23 10:30:32 2019 -0800
+
+    XkbAllocGeomOverlayKey man page should be named XkbAllocGeomOverlayKeys
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 05002b8aef9544c8545e0823a02cf14f335d2b68
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Feb 17 15:13:25 2019 -0800
+
+    Fix man page typo: XkbAllBellNotifyMask -> XkbAllBellEventsMask
+    
+    Reported-by: Daniel Hahler <git@thequod.de>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 5538b3e4ae6dee32c47db9dfc85b07bbe7b90f6c
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Fri Mar 24 11:07:36 2017 -0400
+
+    _XDefaultIOError: Do better at detecting explicit shutdown
+    
+    Currently, when the X server crashes or a client is disconnected with
+    XKillClient, you get a somewhat confusing error message from libX11
+    along the lines of:
+    
+    XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":0"
+          after 98 requests (40 known processed) with 0 events remaining.
+    
+    What's happening here is the previous recvmsg has thrown EAGAIN, since
+    the socket is non-blocking. In this case, check whether the socket has
+    any more data to read, and if not treat it like EPIPE.
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 6d2cde9633b5ee020cb60caea1cf61e090b86dd2
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Fri Mar 24 11:07:35 2017 -0400
+
+    _XDefaultIOError: Reformat to be less ugly
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 003e30a66a249f5c70b30d1c187385124cd4cdad
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Jan 1 14:34:04 2019 -0800
+
+    Avoid use-after-free in _XimProtoSetIMValues()
+    
+    Fixes gitlab issue #49
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 30656fd66ad47aeaca0bfc237a818f189554f07e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Jan 1 12:21:04 2019 -0800
+
+    Fix implicit conversion warnings in _XlcCreateDefaultCharSet
+    
+    lcCharSet.c:187:50: warning: implicit conversion changes signedness:
+          'int' to 'unsigned long' [-Wsign-conversion]
+        tmp = Xmalloc(name_len + 1 + ct_sequence_len + 1);
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+    ../../include/X11/Xlibint.h:453:32: note: expanded from macro 'Xmalloc'
+                           ~~~~~~  ^~~~
+    lcCharSet.c:192:31: warning: implicit conversion changes signedness:
+          'int' to 'unsigned long' [-Wsign-conversion]
+        memcpy(tmp, name, name_len+1);
+        ~~~~~~            ~~~~~~~~^~
+    lcCharSet.c:216:45: warning: implicit conversion changes signedness:
+          'int' to 'unsigned long' [-Wsign-conversion]
+        memcpy(tmp, ct_sequence, ct_sequence_len+1);
+        ~~~~~~                   ~~~~~~~~~~~~~~~^~
+    lcCharSet.c:183:16: warning: implicit conversion loses integer precision:
+          'unsigned long' to 'int' [-Wshorten-64-to-32]
+        name_len = strlen(name);
+                 ~ ^~~~~~~~~~~~
+    lcCharSet.c:184:23: warning: implicit conversion loses integer precision:
+          'unsigned long' to 'int' [-Wshorten-64-to-32]
+        ct_sequence_len = strlen(ct_sequence);
+                        ~ ^~~~~~~~~~~~~~~~~~~
+    lcCharSet.c:198:37: warning: implicit conversion loses integer precision:
+         'long' to 'unsigned int' [-Wshorten-64-to-32]
+            unsigned int length = colon - charset->name;
+                         ~~~~~~   ~~~~~~^~~~~~~~~~~~~~~
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 2e6300905784fa8adfcea019262ea58b3e1ed4ad
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Jan 1 11:41:47 2019 -0800
+
+    Remove no-longer-used name variable in _XGetAtomName
+    
+    Fixes gcc warning:
+    GetAtomNm.c: In function ‘_XGetAtomName’:
+    GetAtomNm.c:39:11: warning: unused variable ‘name’ [-Wunused-variable]
+         char *name;
+               ^~~~
+    
+    Introduced by commit 336c1e7a505698a8f3bcb6eb96dbbb8ed21ade96
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f077871c2a12cf098b0c50572e112c6dc5e04de0
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Dec 29 11:39:29 2018 -0800
+
+    Fix out-of-tree builds after commit 8a62e26515e528bb47917ec4a55cc2b492419eeb
+    
+    In-tree builds found reallocarray.h in $(top_builddir)/src but the
+    out-of-tree build didn't find it at all.
+    
+    Reported-by: Emmanuele Bassi <ebassi@gmail.com> from GNOME continuous integration pipeline
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit ba7f7cc783672784bebc6e69349b55c6c75c1973
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Sep 27 18:35:27 2015 -0700
+
+    Convert src/xlibi18n to use reallocarray()
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 336c1e7a505698a8f3bcb6eb96dbbb8ed21ade96
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Sep 26 11:12:47 2015 -0700
+
+    Replace Xmalloc+strcpy pairs with strdup calls
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 258a8ced681dc1bc50396be7439fce23f9807e2a
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jul 19 11:58:50 2015 -0700
+
+    Replace _XkbTypedRealloc & _XkbClearElems with new _XkbResizeArray
+    
+    Makes resizing & clearing more consistent and gets rid of some weird
+    quirks like always subtracting 1 from the size passed to _XkbClearElems
+    so it could always add 1 to the size passed in.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit f94273e2f4284040306b888e5ca0381ee00591af
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jul 19 09:47:29 2015 -0700
+
+    Add some missing allocation failure checks in src/xcms
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 76850471b4a5a6d30f5660234e87ec2772e7b426
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jul 19 09:33:21 2015 -0700
+
+    Convert src/xcms to use reallocarray()
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 8a62e26515e528bb47917ec4a55cc2b492419eeb
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Jul 19 09:24:02 2015 -0700
+
+    Convert src/XKB to use reallocarray()
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6d1dc1f6169ebf0ba71785d461bd98129c65c862
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Jun 4 23:30:43 2015 -0700
+
+    Convert main src directory to use reallocarray()
+
+commit bcf7b5aa06c23aee00af7999b58cb96a8571ac42
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Jun 4 23:18:23 2015 -0700
+
+    Import reallocarray() from OpenBSD
+    
+    Wrapper for realloc() that checks for overflow when multiplying
+    arguments together, so we don't have to add overflow checks to
+    every single call.  For documentation on usage, see:
+    http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man3/calloc.3
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 9bdfe9c9af11d77d66e5ff651e82b20e695cb460
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Nov 19 21:26:23 2018 -0800
+
+    Update README for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit c8bcc19970a2cc4ad337de1338c63a07325eefcd
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Nov 9 22:24:52 2018 +0100
+
+    locale.dir: Add ast_ES.UTF-8
+    
+    With this patch xev properly reports
+       XLookupString gives 2 bytes: (c2 b4) "´"
+    for the dead_acute key when using the Asturian locale
+
+commit 117bb310b44ce03802c91a70949eb58dcc702a3c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Nov 9 22:18:43 2018 +0100
+
+    compose.dir: Add ast_ES.UTF-8
+    
+    With this patch one can properly type dead keys like á when using the
+    Asturian locale
+
+commit d7e22252d68258a63ca537827c99d0ac0bc4b9d8
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Nov 10 13:30:47 2018 -0800
+
+    Remove documentation of obsolete B16 & B32 tags in specs/libX11
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit f3c978476e0be6813268af494efb7ac507451116
 Author: Matt Turner <mattst88@gmail.com>
 Date:   Tue Oct 9 10:26:05 2018 -0400

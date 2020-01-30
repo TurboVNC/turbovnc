@@ -27,24 +27,11 @@
 #define _GLAPI_PRIV_H
 
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#include "glapi/mesa.h"
-#else /* HAVE_DIX_CONFIG_H */
 #define GL_GLEXT_PROTOTYPES
 #include "GL/gl.h"
 #include "GL/glext.h"
 
-#ifndef GL_OES_fixed_point
-typedef int GLfixed;
-#endif
 typedef int GLclampx;
-
-#ifndef GL_OES_EGL_image
-typedef void *GLeglImageOES;
-#endif
-
-#endif /* HAVE_DIX_CONFIG_H */
 
 #include "glapi/glapi.h"
 
@@ -75,7 +62,7 @@ get_entrypoint_address(unsigned int functionOffset);
  * Size (in bytes) of dispatch function (entrypoint).
  */
 #if defined(USE_X86_ASM)
-# if defined(GLX_USE_TLS)
+# if defined(USE_ELF_TLS)
 #  define DISPATCH_FUNCTION_SIZE  16
 # else
 #  define DISPATCH_FUNCTION_SIZE  32
@@ -83,7 +70,7 @@ get_entrypoint_address(unsigned int functionOffset);
 #endif
 
 #if defined(USE_X64_64_ASM)
-# if defined(GLX_USE_TLS)
+# if defined(USE_ELF_TLS)
 #  define DISPATCH_FUNCTION_SIZE  16
 # endif
 #endif

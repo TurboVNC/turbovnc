@@ -9,9 +9,6 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H
 
-/* Define to 1 if you have the `ffs' function. */
-#cmakedefine HAVE_FFS
-
 /* Define to 1 if you have the `getdtablesize' function. */
 #cmakedefine HAVE_GETDTABLESIZE
 
@@ -26,9 +23,6 @@
 
 /* Define to 1 if you have the `getzoneid' function. */
 #cmakedefine HAVE_GETZONEID
-
-/* Define to 1 if you have the <ieeefp.h> header file. */
-#cmakedefine HAVE_IEEEFP_H
 
 /* Define to 1 if you have the `reallocarray' function. */
 #cmakedefine HAVE_REALLOCARRAY
@@ -82,13 +76,13 @@
 #define LISTEN_UNIX
 
 /* Have setitimer support */
-#cmakedefine01 HAVE_SETITIMER
+#cmakedefine HAVE_SETITIMER
 
 /* Have poll() */
-#cmakedefine01 HAVE_POLL
+#cmakedefine HAVE_POLL
 
 /* Have epoll_create1() */
-#cmakedefine01 HAVE_EPOLL_CREATE1
+#cmakedefine HAVE_EPOLL_CREATE1
 
 #define CMAKE_INSTALL_FULL_SYSCONFDIR "@CMAKE_INSTALL_FULL_SYSCONFDIR@"
 

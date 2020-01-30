@@ -108,15 +108,14 @@ static ConnectionOutputPtr FreeOutputs = (ConnectionOutputPtr) NULL;
 static OsCommPtr AvailableInput = (OsCommPtr) NULL;
 
 #define get_req_len(req,cli) ((cli)->swapped ? \
-			      lswaps((req)->length) : (req)->length)
+			      bswap_16((req)->length) : (req)->length)
 
 #include <X11/extensions/bigreqsproto.h>
 
 #define get_big_req_len(req,cli) ((cli)->swapped ? \
-				  lswapl(((xBigReq *)(req))->length) : \
+				  bswap_32(((xBigReq *)(req))->length) : \
 				  ((xBigReq *)(req))->length)
 
-#define MAX_TIMES_PER         10
 #define BUFSIZE 16384
 #define BUFWATERMARK 32768
 
@@ -184,10 +183,12 @@ YieldControl(void)
 }
 
 static void
-YieldControlNoInput(int fd)
+YieldControlNoInput(ClientPtr client)
 {
+    OsCommPtr oc = client->osPrivate;
     YieldControl();
-    ospoll_reset_events(server_poll, fd);
+    if (oc->trans_conn)
+        ospoll_reset_events(server_poll, oc->fd);
 }
 
 static void
@@ -227,7 +228,6 @@ ReadRequestFromClient(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
     ConnectionInputPtr oci = oc->input;
-    int fd = oc->fd;
     unsigned int gotnow, needed;
     int result;
     register xReq *request;
@@ -358,7 +358,7 @@ ReadRequestFromClient(ClientPtr client)
                 if (0)
 #endif
                 {
-                    YieldControlNoInput(fd);
+                    YieldControlNoInput(client);
                     return 0;
                 }
             }
@@ -395,7 +395,7 @@ ReadRequestFromClient(ClientPtr client)
         }
         if (gotnow < needed) {
             /* Still don't have enough; punt. */
-            YieldControlNoInput(fd);
+            YieldControlNoInput(client);
             return 0;
         }
     }
@@ -464,12 +464,12 @@ ReadRequestFromClient(ClientPtr client)
     return needed;
 }
 
-#if XTRANS_SEND_FDS
 int
 ReadFdFromClient(ClientPtr client)
 {
     int fd = -1;
 
+#if XTRANS_SEND_FDS
     if (client->req_fds > 0) {
         OsCommPtr oc = (OsCommPtr) client->osPrivate;
 
@@ -477,17 +477,22 @@ ReadFdFromClient(ClientPtr client)
         fd = _XSERVTransRecvFd(oc->trans_conn);
     } else
         LogMessage(X_ERROR, "Request asks for FD without setting req_fds\n");
+#endif
+
     return fd;
 }
 
 int
 WriteFdToClient(ClientPtr client, int fd, Bool do_close)
 {
+#if XTRANS_SEND_FDS
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
 
     return _XSERVTransSendFd(oc->trans_conn, fd, do_close);
-}
+#else
+    return -1;
 #endif
+}
 
 /*****************************************************************
  * InsertFakeRequest
@@ -500,7 +505,6 @@ InsertFakeRequest(ClientPtr client, char *data, int count)
 {
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
     ConnectionInputPtr oci = oc->input;
-    int fd = oc->fd;
     int gotnow, moveup;
 
     NextAvailableInput(oc);
@@ -539,7 +543,7 @@ InsertFakeRequest(ClientPtr client, char *data, int count)
         (gotnow >= (int) (get_req_len((xReq *) oci->bufptr, client) << 2)))
         mark_client_ready(client);
     else
-        YieldControlNoInput(fd);
+        YieldControlNoInput(client);
     return TRUE;
 }
 
@@ -554,7 +558,6 @@ ResetCurrentRequest(ClientPtr client)
 {
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
-    int fd = oc->fd;
     register xReq *request;
     int gotnow, needed;
 
@@ -563,7 +566,7 @@ ResetCurrentRequest(ClientPtr client)
     oci->lenLastReq = 0;
     gotnow = oci->bufcnt + oci->buffer - oci->bufptr;
     if (gotnow < sizeof(xReq)) {
-        YieldControlNoInput(fd);
+        YieldControlNoInput(client);
     }
     else {
         request = (xReq *) oci->bufptr;
@@ -582,7 +585,7 @@ ResetCurrentRequest(ClientPtr client)
             YieldControl();
         }
         else
-            YieldControlNoInput(fd);
+            YieldControlNoInput(client);
     }
 }
 
@@ -653,9 +656,7 @@ AbortClient(ClientPtr client)
     OsCommPtr oc = client->osPrivate;
 
     if (oc->trans_conn) {
-        _XSERVTransDisconnect(oc->trans_conn);
-        _XSERVTransClose(oc->trans_conn);
-        oc->trans_conn = NULL;
+        CloseDownFileDescriptor(oc);
         mark_client_ready(client);
     }
 }

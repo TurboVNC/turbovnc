@@ -36,8 +36,8 @@
 #include <pthread.h>
 
 #include "glxclient.h"
-
 #include "glapi.h"
+#include "glx_error.h"
 
 /*
 ** We setup some dummy structures here so that the API can be used
@@ -67,7 +67,7 @@ struct glx_context dummyContext = {
 
 _X_HIDDEN pthread_mutex_t __glXmutex = PTHREAD_MUTEX_INITIALIZER;
 
-# if defined( GLX_USE_TLS )
+# if defined( USE_ELF_TLS )
 
 /**
  * Per-thread GLX context pointer.
@@ -132,7 +132,7 @@ __glXGetCurrentContext(void)
    return (v == NULL) ? &dummyContext : (struct glx_context *) v;
 }
 
-# endif /* defined( GLX_USE_TLS ) */
+# endif /* defined( USE_ELF_TLS ) */
 
 
 _X_HIDDEN void
@@ -165,21 +165,6 @@ glXGetCurrentDrawable(void)
    return gc->currentDrawable;
 }
 
-static void
-__glXGenerateError(Display * dpy, XID resource,
-                   BYTE errorCode, CARD16 minorCode)
-{
-   xError error;
-
-   error.errorCode = errorCode;
-   error.resourceID = resource;
-   error.sequenceNumber = dpy->request;
-   error.type = X_Error;
-   error.majorCode = __glXSetupForCommand(dpy);
-   error.minorCode = minorCode;
-   _XError(dpy, &error);
-}
-
 /**
  * Make a particular context current.
  *
@@ -209,6 +194,13 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
       return True;
    }
 
+   /* can't have only one be 0 */
+   if (!!draw != !!read) {
+      __glXUnlock();
+      __glXSendError(dpy, BadMatch, None, X_GLXMakeContextCurrent, True);
+      return False;
+   }
+
    if (oldGC != &dummyContext) {
       if (--oldGC->thread_refcount == 0) {
 	 oldGC->vtable->unbind(oldGC, gc);
@@ -228,7 +220,8 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
       if (gc->vtable->bind(gc, oldGC, draw, read) != Success) {
          __glXSetCurrentContextNull();
          __glXUnlock();
-         __glXGenerateError(dpy, None, GLXBadContext, X_GLXMakeContextCurrent);
+         __glXSendError(dpy, GLXBadContext, None, X_GLXMakeContextCurrent,
+                        False);
          return GL_FALSE;
       }
 

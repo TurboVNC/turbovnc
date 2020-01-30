@@ -15,7 +15,6 @@ endif()
 add_definitions(-DXCB_QUEUE_BUFFER_SIZE=16384)
 
 disable_compiler_warnings()
-handle_unused(src/xcb_in.c)
 
 add_library(xcbglx STATIC
 	src/bigreq.c

@@ -12,9 +12,6 @@ if(FOUND_BSD44SOCKETS)
 	add_definitions(-DBSD44SOCKETS)
 endif()
 
-handle_type_puns(fstrans.c)
-handle_unused(fstrans.c)
-
 add_library(fc OBJECT
 	fsconvert.c
 	fserve.c

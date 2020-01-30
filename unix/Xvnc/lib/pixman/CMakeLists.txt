@@ -13,14 +13,6 @@ endif()
 add_definitions(-DHAVE_CONFIG_H -DPIXMAN_NO_TLS)
 
 disable_compiler_warnings()
-handle_type_puns(
-	pixman/pixman-access.c
-	pixman/pixman-access-accessors.c
-	pixman/pixman-fast-path.c)
-handle_unused(
-	pixman/pixman-access.c
-	pixman/pixman-fast-path.c
-	pixman/pixman.c)
 
 add_library(pixman STATIC
 	pixman/pixman-access-accessors.c

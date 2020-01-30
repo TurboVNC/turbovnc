@@ -1,3 +1,135 @@
+commit d9443b2c57b512cfb250b35707378654d86c7dea
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Feb 10 14:42:30 2019 -0800
+
+    libXau 1.0.9
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 6f0b6fcf699592d9ed284356571a2f4681726ac5
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Dec 7 19:38:53 2018 -0800
+
+    Update configure.ac bug URL for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7ba7085b4f01f3cd72008712a5333ea3f0edfd88
+Author: walter harms <wharms@bfs.de>
+Date:   Sat Oct 28 19:14:22 2017 +0200
+
+    AuRead.c: remove redundant null check on calling free()
+    
+    this removes simply unneeded code from XauReadAuth
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+    Reviewed-by: Daniel Martin <consume.noise@gmail.com>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit cf6cc845ba12dbfa7d29a4eab810888838a9749b
+Author: walter harms <wharms@bfs.de>
+Date:   Sat Oct 28 19:14:26 2017 +0200
+
+    Au FileName.c: remove redundant null check on calling free()
+    
+    remove redundant null check on calling free()
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+    Reviewed-by: Daniel Martin <consume.noise@gmail.com>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit fdbb21274a4e8af419b2581e05242f5058471f72
+Author: walter harms <wharms@bfs.de>
+Date:   Sat Oct 28 19:14:13 2017 +0200
+
+    AuDispose.c:remove redundant null check on calling free()
+    
+    redundant null check on auth->address calling free()
+    redundant null check on auth->number calling free()
+    redundant null check on auth->name calling free()
+    
+    Signed-off-by: Walter Harms <wharms@bfs.de>
+    Reviewed-by: Daniel Martin <consume.noise@gmail.com>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit 987fee49dc1750082cfe6e24833379233777a13b
+Author: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date:   Thu Oct 19 22:18:18 2017 +0200
+
+    Avoid out of boundary read access
+    
+    If the environment variable HOME is empty, XauFileName triggers an
+    out of boundary read access (name[1]). If HOME consists of a single
+    character relative path, the output becomes unexpected, because
+    "HOME=a" leads to "a.Xauthority" instead of "a/.Xauthority". Granted,
+    a relative HOME path leads to trouble in general, the code should
+    properly return "a/.Xauthority" nonetheless.
+    
+    Signed-off-by: Tobias Stoeckmann <tobias@stoeckmann.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 42e152c6f2d1bd839e77c5e97f3a509d890c3237
+Author: Mihail Konev <k.mvc@ya.ru>
+Date:   Thu Jan 26 13:52:49 2017 +1000
+
+    autogen: add default patch prefix
+    
+    Signed-off-by: Mihail Konev <k.mvc@ya.ru>
+
+commit fca98447c95ae0284b4f1b0c381011f8ccaf1ff0
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Mon Mar 9 12:00:52 2015 +0000
+
+    autogen.sh: use quoted string variables
+    
+    Place quotes around the $srcdir, $ORIGDIR and $0 variables to prevent
+    fall-outs, when they contain space.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 33f792eb48687793bbb92e62d7462828c7468b55
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jan 24 10:32:07 2017 +1000
+
+    autogen.sh: use exec instead of waiting for configure to finish
+    
+    Syncs the invocation of configure with the one from the server.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit 1e4635be11154dd8262f37b379511bd627defa2a
+Author: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date:   Thu Jan 2 01:07:41 2014 -0800
+
+    Silence a benign static analysis warning with an assert of allocation size
+    
+    AuFileName.c:72:8: warning: Call to 'malloc' has an allocation size of 0 bytes
+            buf = malloc (size);
+                  ^~~~~~~~~~~~~
+    
+    Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+
+commit 304a11be4727c5a7feeb2501e8e001466f8ce84e
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Sep 29 09:23:45 2013 -0700
+
+    XauFileName: always go through buf allocation if buf is NULL
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 67beb3d0bc41c3416902c858f595b35306f76704
+Author: Fuminobu TAKEYAMA <ftake@geeko.jp>
+Date:   Sun Sep 29 09:21:05 2013 -0700
+
+    XauFileName: reset bsize when malloc failed
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=69929
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit 899790011304c4029e15abf410e49ce7cec17e0a
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Fri May 24 15:04:00 2013 -0700

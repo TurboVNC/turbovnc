@@ -437,6 +437,12 @@ struct glx_context
     */
    unsigned long thread_refcount;
 
+   /**
+    * GLX_ARB_create_context_no_error setting for this context.
+    * This needs to be kept here to enforce shared context rules.
+    */
+   Bool noError;
+
    char gl_extension_bits[__GL_EXT_BYTES];
 };
 
@@ -646,8 +652,6 @@ extern void __glXSendLargeCommand(struct glx_context *, const GLvoid *, GLint,
 /* Initialize the GLX extension for dpy */
 extern struct glx_display *__glXInitialize(Display *);
 
-extern void __glXPreferEGL(int state);
-
 /************************************************************************/
 
 extern int __glXDebug;
@@ -656,7 +660,7 @@ extern int __glXDebug;
 
 extern void __glXSetCurrentContext(struct glx_context * c);
 
-# if defined( GLX_USE_TLS )
+# if defined( USE_ELF_TLS )
 
 extern __thread void *__glX_tls_Context
    __attribute__ ((tls_model("initial-exec")));
@@ -667,7 +671,7 @@ extern __thread void *__glX_tls_Context
 
 extern struct glx_context *__glXGetCurrentContext(void);
 
-# endif /* defined( GLX_USE_TLS ) */
+# endif /* defined( USE_ELF_TLS ) */
 
 extern void __glXSetCurrentContextNull(void);
 
@@ -840,6 +844,10 @@ indirect_create_context_attribs(struct glx_screen *base,
                                 unsigned num_attribs,
                                 const uint32_t *attribs,
                                 unsigned *error);
+
+
+extern int __glXGetDrawableAttribute(Display * dpy, GLXDrawable drawable,
+                                     int attribute, unsigned int *value);
 
 #ifdef __cplusplus
 }

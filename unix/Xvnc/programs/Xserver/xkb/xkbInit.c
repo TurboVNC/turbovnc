@@ -505,6 +505,13 @@ XkbInitControls(DeviceIntPtr pXDev, XkbSrvInfoPtr xkbi)
     return Success;
 }
 
+static Status
+XkbInitOverlayState(XkbSrvInfoPtr xkbi)
+{
+    memset(xkbi->overlay_perkey_state, 0, sizeof(xkbi->overlay_perkey_state));
+    return Success;
+}
+
 static Bool
 InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
                                  const char *keymap, int keymap_length,
@@ -607,6 +614,8 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     XkbInitControls(dev, xkbi);
 
     XkbInitIndicatorMap(xkbi);
+
+    XkbInitOverlayState(xkbi);
 
     XkbUpdateActions(dev, xkb->min_key_code, XkbNumKeys(xkb), &changes,
                      &check, &cause);
@@ -728,7 +737,7 @@ extern int XkbDfltRepeatInterval;
 extern unsigned short XkbDfltAccessXTimeout;
 extern unsigned int XkbDfltAccessXTimeoutMask;
 extern unsigned int XkbDfltAccessXFeedback;
-extern unsigned char XkbDfltAccessXOptions;
+extern unsigned short XkbDfltAccessXOptions;
 
 int
 XkbProcessArguments(int argc, char *argv[], int i)
@@ -813,7 +822,7 @@ XkbProcessArguments(int argc, char *argv[], int i)
                     j++;
                 }
                 if (((i + 1) < argc) && (isdigit(argv[i + 1][0]))) {
-                    XkbDfltAccessXOptions = (unsigned char)
+                    XkbDfltAccessXOptions = (unsigned short)
                         strtol(argv[++i], NULL, 16);
                     j++;
                 }

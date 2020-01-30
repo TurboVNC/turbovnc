@@ -1,6 +1,6 @@
-diff --git a/mesa-17.3.9/include/c99_math.h b/Mesa/include/c99_math.h
+diff --git a/mesa-19.2.8/include/c99_math.h b/Mesa/include/c99_math.h
 index e906c26..e14c6d9 100644
---- a/mesa-17.3.9/include/c99_math.h
+--- a/mesa-19.2.8/include/c99_math.h
 +++ b/Mesa/include/c99_math.h
 @@ -44,6 +44,7 @@
  #endif 
@@ -34,36 +34,39 @@ index e906c26..e14c6d9 100644
  
  
  /* Since C++11, the following functions are part of the std namespace. Their C
-diff --git a/mesa-17.3.9/src/util/debug.c b/Mesa/src/util/debug.c
-index 98b1853..867c833 100644
---- a/mesa-17.3.9/src/util/debug.c
+diff --git a/mesa-19.2.8/src/util/debug.c b/Mesa/src/util/debug.c
+index 7079c61..c3686bf 100644
+--- a/mesa-19.2.8/src/util/debug.c
 +++ b/Mesa/src/util/debug.c
-@@ -22,9 +22,12 @@
-  */
+@@ -23,10 +23,15 @@
  
+ #include <errno.h>
  #include <string.h>
 +#if 0 /* TURBOVNC */
  #include "main/macros.h"
 +#endif /* TURBOVNC */
  #include "debug.h"
++#if 0 /* TURBOVNC */
+ #include "u_string.h"
++#endif /* TURBOVNC */
  
 +#if 0 /* TURBOVNC */
  uint64_t
  parse_debug_string(const char *debug,
                     const struct debug_control *control)
-@@ -51,6 +54,7 @@ parse_debug_string(const char *debug,
+@@ -67,6 +72,7 @@ comma_separated_list_contains(const char *list, const char *s)
  
-    return flag;
+    return false;
  }
 +#endif /* TURBOVNC */
  
  /**
   * Reads an environment variable and interprets its value as a boolean.
-diff --git a/mesa-17.3.9/src/util/debug.h b/Mesa/src/util/debug.h
-index 75ebc2e..3c12cd8 100644
---- a/mesa-17.3.9/src/util/debug.h
+diff --git a/mesa-19.2.8/src/util/debug.h b/Mesa/src/util/debug.h
+index bbcc197..c91ac3c 100644
+--- a/mesa-19.2.8/src/util/debug.h
 +++ b/Mesa/src/util/debug.h
-@@ -36,9 +36,11 @@ struct debug_control {
+@@ -36,11 +36,13 @@ struct debug_control {
      uint64_t     flag;
  };
  
@@ -71,7 +74,9 @@ index 75ebc2e..3c12cd8 100644
  uint64_t
  parse_debug_string(const char *debug,
                     const struct debug_control *control);
+ bool
+ comma_separated_list_contains(const char *list, const char *s);
 +#endif /* TURBOVNC */
  bool
  env_var_as_boolean(const char *var_name, bool default_value);
- 
+ unsigned

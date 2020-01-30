@@ -64,6 +64,7 @@ DoGetProgramString(struct __GLXclientStateRec *cl, GLbyte * pc,
         GLenum pname;
         GLint compsize = 0;
         char *answer = NULL, answerBuffer[200];
+        xGLXSingleReply reply = { 0, };
 
         if (do_swap) {
             target = (GLenum) bswap_32(*(int *) (pc + 0));
@@ -92,7 +93,7 @@ DoGetProgramString(struct __GLXclientStateRec *cl, GLbyte * pc,
         }
         else {
             __GLX_BEGIN_REPLY(compsize);
-            ((xGLXGetTexImageReply *) &__glXReply)->width = compsize;
+            ((xGLXGetTexImageReply *) &reply)->width = compsize;
             __GLX_SEND_HEADER();
             __GLX_SEND_VOID_ARRAY(compsize);
         }
@@ -111,7 +112,7 @@ __glXDisp_GetProgramStringARB(struct __GLXclientStateRec *cl, GLbyte * pc)
     PFNGLGETPROGRAMSTRINGARBPROC get_program_string =
         __glGetProcAddress("glGetProgramStringARB");
 
-    return DoGetProgramString(cl, pc, get_program, get_program_string, False);
+    return DoGetProgramString(cl, pc, get_program, get_program_string, FALSE);
 }
 
 int
@@ -122,5 +123,5 @@ __glXDispSwap_GetProgramStringARB(struct __GLXclientStateRec *cl, GLbyte * pc)
     PFNGLGETPROGRAMSTRINGARBPROC get_program_string =
         __glGetProcAddress("glGetProgramStringARB");
 
-    return DoGetProgramString(cl, pc, get_program, get_program_string, True);
+    return DoGetProgramString(cl, pc, get_program, get_program_string, TRUE);
 }

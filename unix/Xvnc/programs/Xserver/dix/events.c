@@ -603,6 +603,8 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
 
     int x, y, off_x, off_y, i;
 
+    assert(!noPanoramiXExtension);
+
     if (!XineramaSetWindowPntrs(pDev, pWin))
         return;
 
@@ -3581,7 +3583,7 @@ ProcWarpPointer(ClientPtr client)
              winX + stuff->srcX + (int) stuff->srcWidth < x) ||
             (stuff->srcHeight != 0 &&
              winY + stuff->srcY + (int) stuff->srcHeight < y) ||
-            !PointInWindowIsVisible(source, x, y))
+            (source->parent && !PointInWindowIsVisible(source, x, y)))
             return Success;
     }
     if (dest) {

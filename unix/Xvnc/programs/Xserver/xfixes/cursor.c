@@ -134,8 +134,11 @@ Bool EnableCursor = TRUE;
 static CursorPtr
 CursorForDevice(DeviceIntPtr pDev)
 {
-    if (pDev && pDev->spriteInfo && pDev->spriteInfo->sprite)
+    if (pDev && pDev->spriteInfo && pDev->spriteInfo->sprite) {
+        if (pDev->spriteInfo->anim.pCursor)
+            return pDev->spriteInfo->anim.pCursor;
         return pDev->spriteInfo->sprite->current;
+    }
 
     return NULL;
 }
@@ -291,7 +294,7 @@ GetBit(unsigned char *line, int x)
     return 0;
 }
 
-int
+int _X_COLD
 SProcXFixesSelectCursorInput(ClientPtr client)
 {
     REQUEST(xXFixesSelectCursorInputReq);
@@ -303,7 +306,7 @@ SProcXFixesSelectCursorInput(ClientPtr client)
     return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
 }
 
-void
+void _X_COLD
 SXFixesCursorNotifyEvent(xXFixesCursorNotifyEvent * from,
                          xXFixesCursorNotifyEvent * to)
 {
@@ -412,7 +415,7 @@ ProcXFixesGetCursorImage(ClientPtr client)
     return Success;
 }
 
-int
+int _X_COLD
 SProcXFixesGetCursorImage(ClientPtr client)
 {
     REQUEST(xXFixesGetCursorImageReq);
@@ -440,7 +443,7 @@ ProcXFixesSetCursorName(ClientPtr client)
     return Success;
 }
 
-int
+int _X_COLD
 SProcXFixesSetCursorName(ClientPtr client)
 {
     REQUEST(xXFixesSetCursorNameReq);
@@ -489,7 +492,7 @@ ProcXFixesGetCursorName(ClientPtr client)
     return Success;
 }
 
-int
+int _X_COLD
 SProcXFixesGetCursorName(ClientPtr client)
 {
     REQUEST(xXFixesGetCursorNameReq);
@@ -569,7 +572,7 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     return Success;
 }
 
-int
+int _X_COLD
 SProcXFixesGetCursorImageAndName(ClientPtr client)
 {
     REQUEST(xXFixesGetCursorImageAndNameReq);
@@ -594,8 +597,6 @@ typedef struct {
 static const RESTYPE CursorRestypes[] = {
     RT_WINDOW, RT_PASSIVEGRAB, RT_CURSOR
 };
-
-#define NUM_CURSOR_RESTYPES (sizeof (CursorRestypes) / sizeof (CursorRestypes[0]))
 
 static Bool
 ReplaceCursorLookup(void *value, XID id, void *closure)
@@ -659,7 +660,7 @@ ReplaceCursor(CursorPtr pCursor, TestCursorFunc testCursor, void *closure)
     for (clientIndex = 0; clientIndex < currentMaxClients; clientIndex++) {
         if (!clients[clientIndex])
             continue;
-        for (resIndex = 0; resIndex < NUM_CURSOR_RESTYPES; resIndex++) {
+        for (resIndex = 0; resIndex < ARRAY_SIZE(CursorRestypes); resIndex++) {
             rcl.type = CursorRestypes[resIndex];
             /*
              * This function walks the entire client resource database
@@ -696,7 +697,7 @@ ProcXFixesChangeCursor(ClientPtr client)
     return Success;
 }
 
-int
+int _X_COLD
 SProcXFixesChangeCursor(ClientPtr client)
 {
     REQUEST(xXFixesChangeCursorReq);
@@ -735,7 +736,7 @@ ProcXFixesChangeCursorByName(ClientPtr client)
     return Success;
 }
 
-int
+int _X_COLD
 SProcXFixesChangeCursorByName(ClientPtr client)
 {
     REQUEST(xXFixesChangeCursorByNameReq);
@@ -895,7 +896,7 @@ ProcXFixesHideCursor(ClientPtr client)
     return ret;
 }
 
-int
+int _X_COLD
 SProcXFixesHideCursor(ClientPtr client)
 {
     REQUEST(xXFixesHideCursorReq);
@@ -946,7 +947,7 @@ ProcXFixesShowCursor(ClientPtr client)
     return Success;
 }
 
-int
+int _X_COLD
 SProcXFixesShowCursor(ClientPtr client)
 {
     REQUEST(xXFixesShowCursorReq);
@@ -1015,7 +1016,7 @@ ProcXFixesCreatePointerBarrier(ClientPtr client)
     return XICreatePointerBarrier(client, stuff);
 }
 
-int
+int _X_COLD
 SProcXFixesCreatePointerBarrier(ClientPtr client)
 {
     REQUEST(xXFixesCreatePointerBarrierReq);
@@ -1052,7 +1053,7 @@ ProcXFixesDestroyPointerBarrier(ClientPtr client)
     return XIDestroyPointerBarrier(client, stuff);
 }
 
-int
+int _X_COLD
 SProcXFixesDestroyPointerBarrier(ClientPtr client)
 {
     REQUEST(xXFixesDestroyPointerBarrierReq);

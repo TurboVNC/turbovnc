@@ -50,11 +50,14 @@
 #include <GL/glext.h>
 #include <GL/glxproto.h>
 
+#ifndef GLX_CONTEXT_OPENGL_NO_ERROR_ARB
+#define GLX_CONTEXT_OPENGL_NO_ERROR_ARB 0x31B3
+#endif
+
 /*
 ** GLX resources.
 */
 typedef XID GLXContextID;
-typedef XID GLXPixmap;
 typedef XID GLXDrawable;
 
 typedef struct __GLXclientStateRec __GLXclientState;
@@ -64,20 +67,12 @@ typedef struct __GLXcontext __GLXcontext;
 #include "glxscreens.h"
 #include "glxdrawable.h"
 #include "glxcontext.h"
-
-#ifndef True
-#define True 1
-#endif
-#ifndef False
-#define False 0
-#endif
+#include "glx_extinit.h"
 
 extern __GLXscreen *glxGetScreen(ScreenPtr pScreen);
 extern __GLXclientState *glxGetClient(ClientPtr pClient);
 
 /************************************************************************/
-
-void GlxSetVisualConfigs(int nconfigs, void *configs, void **privates);
 
 void __glXScreenInitVisuals(__GLXscreen * screen);
 
@@ -91,26 +86,11 @@ int __glXError(int error);
 
 /************************************************************************/
 
-typedef struct __GLXprovider __GLXprovider;
-struct __GLXprovider {
-    __GLXscreen *(*screenProbe) (ScreenPtr pScreen);
-    const char *name;
-    __GLXprovider *next;
-};
-extern __GLXprovider __glXDRISWRastProvider;
-
-void GlxPushProvider(__GLXprovider * provider);
-
 enum {
     GLX_MINIMAL_VISUALS,
     GLX_TYPICAL_VISUALS,
     GLX_ALL_VISUALS
 };
-
-void __glXsetEnterLeaveServerFuncs(void (*enter) (GLboolean),
-                                   void (*leave) (GLboolean));
-void __glXenterServer(GLboolean rendering);
-void __glXleaveServer(GLboolean rendering);
 
 void glxSuspendClients(void);
 void glxResumeClients(void);
@@ -134,25 +114,10 @@ __glXregisterPresentCompleteNotify(void);
 */
 struct __GLXclientStateRec {
     /*
-     ** Whether this structure is currently being used to support a client.
-     */
-    Bool inUse;
-
-    /*
      ** Buffer for returned data.
      */
     GLbyte *returnBuf;
     GLint returnBufSize;
-
-    /*
-     ** Keep track of large rendering commands, which span multiple requests.
-     */
-    GLint largeCmdBytesSoFar;   /* bytes received so far        */
-    GLint largeCmdBytesTotal;   /* total bytes expected         */
-    GLint largeCmdRequestsSoFar;        /* requests received so far     */
-    GLint largeCmdRequestsTotal;        /* total requests expected      */
-    GLbyte *largeCmdBuf;
-    GLint largeCmdBufSize;
 
     /* Back pointer to X client record */
     ClientPtr client;
@@ -168,11 +133,6 @@ struct __GLXclientStateRec {
 typedef void (*__GLXdispatchRenderProcPtr) (GLbyte *);
 typedef int (*__GLXdispatchSingleProcPtr) (__GLXclientState *, GLbyte *);
 typedef int (*__GLXdispatchVendorPrivProcPtr) (__GLXclientState *, GLbyte *);
-
-/*
- * Dispatch for GLX commands.
- */
-typedef int (*__GLXprocPtr) (__GLXclientState *, char *pc);
 
 /*
  * Tables for computing the size of each rendering command.
@@ -191,38 +151,9 @@ typedef struct {
 */
 extern RESTYPE __glXContextRes;
 extern RESTYPE __glXClientRes;
-extern RESTYPE __glXPixmapRes;
 extern RESTYPE __glXDrawableRes;
 
 /************************************************************************/
-
-/*
-** Prototypes.
-*/
-
-extern char *__glXcombine_strings(const char *, const char *);
-
-/*
-** Routines for sending swapped replies.
-*/
-
-extern void __glXSwapMakeCurrentReply(ClientPtr client,
-                                      xGLXMakeCurrentReply * reply);
-extern void __glXSwapIsDirectReply(ClientPtr client, xGLXIsDirectReply * reply);
-extern void __glXSwapQueryVersionReply(ClientPtr client,
-                                       xGLXQueryVersionReply * reply);
-extern void __glXSwapQueryContextInfoEXTReply(ClientPtr client,
-                                              xGLXQueryContextInfoEXTReply *
-                                              reply, int *buf);
-extern void __glXSwapGetDrawableAttributesReply(ClientPtr client,
-                                                xGLXGetDrawableAttributesReply *
-                                                reply, CARD32 *buf);
-extern void glxSwapQueryExtensionsStringReply(ClientPtr client,
-                                              xGLXQueryExtensionsStringReply *
-                                              reply, char *buf);
-extern void glxSwapQueryServerStringReply(ClientPtr client,
-                                          xGLXQueryServerStringReply * reply,
-                                          char *buf);
 
 /*
  * Routines for computing the size of variably-sized rendering commands.
