@@ -4,7 +4,7 @@ include_directories(Xext include miext/damage present ../../lib/pixman/pixman
 # Enable extensions
 add_definitions(-DCOMPOSITE -DDAMAGE -DDPMSExtension -DMITSHM -DPANORAMIX
 	-DPRESENT -DRANDR -DRENDER -DRES -DSCREENSAVER -DSHAPE -DXACE -DXCSECURITY
-	-DXFIXES -DXF86BIGFONT -DXINPUT -DXTEST -DXV -DTURBOVNC)
+	-DXFIXES -DXF86BIGFONT -DXINPUT -DXRECORD -DXTEST -DXV -DTURBOVNC)
 
 if(TVNC_NVCONTROL)
 	add_definitions(-DNVCONTROL)
@@ -145,6 +145,7 @@ add_subdirectory(miext)
 add_subdirectory(os)
 add_subdirectory(present)
 add_subdirectory(randr)
+add_subdirectory(record)
 add_subdirectory(render)
 add_subdirectory(xfixes)
 add_subdirectory(xkb)
@@ -174,10 +175,10 @@ if(HAVE_MONOTONIC_CLOCK)
 	set(EXTRA_LIB ${EXTRA_LIB} rt)
 endif()
 target_link_libraries(Xvnc dix mi vnc fb Xi composite mi damage damageext randr
-	render os present Xext-server sync xfixes xkb ${X11_Xau_LIB} ${X11_Xdmcp_LIB}
-	${X11_Xfont2_LIB} ${X11_Fontenc_LIB} ${FREETYPE_LIBRARIES} ${X11_Pixman_LIB}
-	sha1 ${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} vncauth m pthread
-	${PAM_LIB} ${EXTRA_LIB})
+	record render os present Xext-server sync xfixes xkb ${X11_Xau_LIB}
+	${X11_Xdmcp_LIB} ${X11_Xfont2_LIB} ${X11_Fontenc_LIB} ${FREETYPE_LIBRARIES}
+	${X11_Pixman_LIB} sha1 ${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
+	vncauth m pthread ${PAM_LIB} ${EXTRA_LIB})
 if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	find_library(ICONV_LIBRARIES NAMES iconv)
 	target_link_libraries(Xvnc ${ICONV_LIBRARIES})

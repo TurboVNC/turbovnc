@@ -1,3 +1,519 @@
+commit f3c978476e0be6813268af494efb7ac507451116
+Author: Matt Turner <mattst88@gmail.com>
+Date:   Tue Oct 9 10:26:05 2018 -0400
+
+    libX11 1.6.7
+    
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+commit 823a0f8a820247b6c1e092f679b49cbdc2ea5c95
+Author: Michel Dänzer <michel.daenzer@amd.com>
+Date:   Fri Sep 28 17:24:17 2018 +0200
+
+    poll_for_event: Allow using xcb_poll_for_queued_event
+    
+    It avoids reading from the display connection again in cases where that
+    was already done.
+    
+    Suggested-by: Uli Schlachter <psychon@znc.in>
+    Reviewed-by: Uli Schlachter <psychon@znc.in>
+
+commit 406afe4b0f1b655c0db19bbc9a0c48da9a46acf5
+Author: Michel Dänzer <michel.daenzer@amd.com>
+Date:   Tue Sep 25 17:10:58 2018 +0200
+
+    poll_for_response: Call poll_for_event again if xcb_poll_for_reply fails
+    
+    If xcb_poll_for_reply fails to find a reply, poll_for_response would
+    always return NULL. However, xcb_poll_for_reply may have read events
+    from the display connection while looking for a reply. In that case,
+    returning NULL from poll_for_response is wrong and can result in the
+    client hanging, e.g. because it returns to waiting for the display
+    connection file descriptor becoming readable after XPending incorrectly
+    returned 0 pending events.
+    
+    The solution is to call poll_for_event again after xcb_poll_for_reply
+    returned 0. This will return the first of any events read by
+    xcb_poll_for_reply.
+    
+    Fixes issue #79.
+    
+    Reported-by: Yuxuan Shui <yshuiv7@gmail.com>
+    Bugzilla: https://bugs.freedesktop.org/108008
+    Bugzilla: https://bugs.freedesktop.org/107992
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit d0416863d5bf75af54ce81f6c30d4c1476b5e04f
+Author: Bhavi Dhingra <b.dhingra@samsung.com>
+Date:   Mon Sep 28 08:33:40 2015 +0000
+
+    XcmsLookupColor: fully initialize XColor structs passed to _XColor_to_XcmsRGB
+    
+    Fixes https://gitlab.freedesktop.org/xorg/lib/libx11/issues/44
+    aka https://bugs.freedesktop.org/show_bug.cgi?id=92154
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 733f64bfeb311c1d040b2f751bfdef9c9d0f89ef
+Author: Matthieu Herrb <matthieu@herrb.eu>
+Date:   Tue Aug 21 16:54:50 2018 +0200
+
+    libX11 1.6.6
+    
+    Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>
+
+commit 173704243fbcbea0b6de2068b4fb403c7408fb54
+Author: Matthieu Herrb <matthieu@herrb.eu>
+Date:   Tue Aug 21 16:53:40 2018 +0200
+
+    Remove statement with no effect.
+    
+    Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>
+
+commit e83722768fd5c467ef61fa159e8c6278770b45c2
+Author: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date:   Fri Jul 27 16:38:00 2018 +0200
+
+    Fixed crash on invalid reply (CVE-2018-14598).
+    
+    If the server sends a reply in which even the first string would
+    overflow the transmitted bytes, list[0] (or flist[0]) will be set to
+    NULL and a count of 0 is returned.
+    
+    If the resulting list is freed with XFreeExtensionList or
+    XFreeFontPath later on, the first Xfree call:
+    
+        Xfree (list[0]-1)
+     turns into
+        Xfree (NULL-1)
+    
+    which will most likely trigger a segmentation fault.
+    
+    I have modified the code to return NULL if the first string would
+    overflow, thus protecting the freeing functions later on.
+    
+    Signed-off-by: Tobias Stoeckmann <tobias@stoeckmann.org>
+
+commit dbf72805fd9d7b1846fe9a11b46f3994bfc27fea
+Author: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date:   Fri Jul 27 16:37:17 2018 +0200
+
+    Fixed out of boundary write (CVE-2018-14600).
+    
+    The length value is interpreted as signed char on many systems
+    (depending on default signedness of char), which can lead to an out of
+    boundary write up to 128 bytes in front of the allocated storage, but
+    limited to NUL byte(s).
+    
+    Casting the length value to unsigned char fixes the problem and allows
+    string values with up to 255 characters.
+    
+    Signed-off-by: Tobias Stoeckmann <tobias@stoeckmann.org>
+
+commit b469da1430cdcee06e31c6251b83aede072a1ff0
+Author: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date:   Fri Jul 27 16:36:34 2018 +0200
+
+    Fixed off-by-one writes (CVE-2018-14599).
+    
+    The functions XGetFontPath, XListExtensions, and XListFonts are
+    vulnerable to an off-by-one override on malicious server responses.
+    
+    The server replies consist of chunks consisting of a length byte
+    followed by actual string, which is not NUL-terminated.
+    
+    While parsing the response, the length byte is overridden with '\0',
+    thus the memory area can be used as storage of C strings later on. To
+    be able to NUL-terminate the last string, the buffer is reserved with
+    an additional byte of space.
+    
+    For a boundary check, the variable chend (end of ch) was introduced,
+    pointing at the end of the buffer which ch initially points to.
+    Unfortunately there is a difference in handling "the end of ch".
+    
+    While chend points at the first byte that must not be written to,
+    the for-loop uses chend as the last byte that can be written to.
+    
+    Therefore, an off-by-one can occur.
+    
+    I have refactored the code so chend actually points to the last byte
+    that can be written to without an out of boundary access. As it is not
+    possible to achieve "ch + length < chend" and "ch + length + 1 > chend"
+    with the corrected chend meaning, I removed the inner if-check.
+    
+    Signed-off-by: Tobias Stoeckmann <tobias@stoeckmann.org>
+
+commit d81da209fd4d0c2c9ad0596a8078e58864479d0d
+Author: Tobias Stoeckmann <tobias@stoeckmann.org>
+Date:   Tue Jul 3 22:31:37 2018 +0200
+
+    Validation of server response in XListHosts.
+    
+    If a server sends an incorrect length in its response, a client is prone
+    to perform an out of boundary read while processing the data.
+    
+    The length field of xHostEntry is used to specify the amount of bytes
+    used to represent the address. It is 16 bit, which means that it is not
+    possible to perform an arbitrary memory access, but it might be enough
+    to read sensitive information, e.g. malloc-related pointers and offsets.
+    
+    Signed-off-by: Tobias Stoeckmann <tobias@stoeckmann.org>
+    Reviewed-by: Matthieu Herrb <matthieu@herrb.eu>
+
+commit b676e62377483df77bcb6472d26b24f901323fa9
+Author: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Date:   Wed Jun 13 15:46:58 2018 +0200
+
+    XkbOpenDisplay.3: fix typo
+    
+    XkbOpenDisplay returns a pointer to Display, not a Display.
+    
+    Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
+
+commit 9c5845ff0dc080ff10bd68af4fc40fcd805728ca
+Author: Martin Natano <natano@natano.net>
+Date:   Sat Oct 8 19:57:50 2016 +0200
+
+    Don't rebuild ks_tables.h if nothing changed.
+    
+    ks_tables.h is always considered out of date due to the forced rebuild
+    of the makekeys util. This means the file is also rebuilt during 'make
+    install', which is usually performed as root, which can to lead
+    permission problems later on.
+    
+    Signed-off-by: Martin Natano <natano@natano.net>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 796f754cba6d75b676a0fc39b97802198fceda4f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat May 5 14:43:30 2018 -0700
+
+    Change fall through comment in lcDB.c to match gcc's requirements
+    
+    Needs to match one of the regexps shown under
+    https://gcc.gnu.org/onlinedocs/gcc-7.3.0/gcc/Warning-Options.html#index-Wimplicit-fallthrough
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 82ca6308757126fa7ffc6588f1e5d8e3be04251b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 24 19:45:14 2018 -0700
+
+    Use size_t for buffer sizes in SetHints.c
+    
+    These variables store values returned from strlen() as a size_t
+    and are passed to Xmalloc, which expects a size_t, so lets stop
+    converting back and forth to int along the way.
+    
+    Reported by: Konstantin SKliarov
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Matthieu Herrb <matthieu@herrb.eu>
+
+commit 50a5a98984097d614227d22a49265e12b172cac7
+Author: Bhavi Dhingra <b.dhingra@samsung.com>
+Date:   Tue Jul 5 11:37:50 2016 +0530
+
+    Fix possible memory leak in cmsProp.c:140
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=96814
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a9dafdd57c71473fa3a2ec4887e973e4e9876d83
+Author: Michal Srb <msrb@suse.com>
+Date:   Thu Mar 15 09:50:58 2018 +0100
+
+    Use flexible array member instead of fake size.
+    
+    The _XimCacheStruct structure is followed in memory by two strings containing
+    fname and encoding. The memory was accessed using the last member of the
+    structure `char fname[1]`. That is a lie, prohibits us from using sizeof and
+    confuses checkers. Lets declare it properly as a flexible array, so compilers
+    don't complain about writing past that array. As bonus we can replace the
+    XOffsetOf with regular sizeof.
+    
+    Fixes GCC8 error:
+      In function 'strcpy',
+          inlined from '_XimWriteCachedDefaultTree' at imLcIm.c:479:5,
+          inlined from '_XimCreateDefaultTree' at imLcIm.c:616:2,
+          inlined from '_XimLocalOpenIM' at imLcIm.c:700:5:
+      /usr/include/bits/string_fortified.h:90:10: error: '__builtin_strcpy'
+      forming offset 2 is out of the bounds [0, 1] [-Werror=array-bounds]
+         return __builtin___strcpy_chk (__dest, __src, __bos (__dest));
+    
+    Caused by this line seemingly writing past the fname[1] array:
+      imLcIm.c:479:  strcpy (m->fname+strlen(name)+1, encoding);
+    
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 34f4464f69a4d6ff0d1042500a62f9a5ed7f3647
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Tue Mar 6 11:42:27 2018 -0800
+
+    If XGetImage fails to create image, don't dereference it to bounds check
+    
+    Reported by gcc 7.3:
+    
+    GetImage.c:110:25: warning: potential null pointer dereference [-Wnull-dereference]
+      if (planes < 1 || image->height < 1 || image->bytes_per_line < 1 ||
+                        ~~~~~^~~~~~~~
+    
+    Introduced by 8ea762f94f4c942d898fdeb590a1630c83235c17 in Xlib 1.6.4
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit e835a9dcc3362b5e92893be756dd7ae361e64ced
+Author: wharms <wharms@bfs.de>
+Date:   Sun Sep 3 14:17:45 2017 +0200
+
+    silence gcc warning assignment discards 'const' qualifier from pointer target type
+
+commit 36a1ac0253fea82ff79cc52ba56c5691cfd07a3b
+Author: wharms <wharms@bfs.de>
+Date:   Sun Aug 20 21:51:57 2017 +0200
+
+    remove empty line
+
+commit e02dfe54f32b4165351d2712a9d2e0584906a3ce
+Author: wharms <wharms@bfs.de>
+Date:   Sun Aug 20 21:50:33 2017 +0200
+
+    add _X_UNUSED to avoid unused variable warnings
+
+commit 2911c39cecd63ed3747072a5eeeb9eedffc881e9
+Author: walter harms <wharms@bfs.de>
+Date:   Sat Jun 4 17:19:59 2016 +0200
+
+    Fixes: warning: variable 'req' set but not,used
+    
+    Fixes: warning: variable 'req' set but not used [-Wunused-but-set-variable]
+           by marking req _X_UNUSED
+            Solution was discussed on xorg-devel ML
+           Peter Hutter, Alan Coopersmith
+            Re: [PATCH libX11 3/5] fix: warning: pointer targets in passing argument 2 of '_XSend' differ in signedness [-Wpointer-sign]
+    
+    Signed-off-by: harms wharms@bfs.de
+
+commit bf82ec0402479fd8399d69e7d62fc17d7956699a
+Author: walter harms <wharms@bfs.de>
+Date:   Sat Jun 4 17:22:07 2016 +0200
+
+    mark _XDefaultIOError as no_return
+    
+    mark _XDefaultIOError as no_return. No one comes back from exit() ...
+    
+    Signed-off-by: harms wharms@bfs.de
+
+commit 9abe8380074edea3ac4e72466ec47e921ca05e47
+Author: walter harms <wharms@bfs.de>
+Date:   Sat Jun 4 17:21:52 2016 +0200
+
+    no need to check XFree arguments
+    
+    You can save a bit of code. The is no need to check XFree arguments bring  free_fontdataOM in line with other free function and check for NULL arg
+    
+    Signed-off-by: harms wharms@bfs.de
+
+commit 433477fcb7e07d0c26a22ba78aae88827ed1f440
+Author: walter harms <wharms@bfs.de>
+Date:   Tue Apr 26 16:32:20 2016 +0200
+
+    fix memleak in error path
+    
+    free all mem on error
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit ed9f0d34abc645eee56e21863f23acb4d0bb8e9a
+Author: walter harms <wharms@bfs.de>
+Date:   Tue Apr 26 17:58:16 2016 +0200
+
+    fix memleak in error path
+    
+    V2: remove unneeded NULL (reported by eric.engestrom@imgtec.com)
+    
+    fix mem leak in error path
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit 7c78fc57693afa94cf26170f0f6276e3b7374ed0
+Author: walter harms <wharms@bfs.de>
+Date:   Tue Apr 26 16:34:11 2016 +0200
+
+    no need to check args for Xfree()
+    
+    simplify code
+    
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit c1c14af441ae73d1a8e67a971fafcf967e45ac48
+Author: walter harms <wharms@bfs.de>
+Date:   Tue Apr 26 16:23:46 2016 +0200
+
+    remove stray extern
+    
+    remove stray extern
+    
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit 714921f041a245dc5f37a689268b584226a2ccb9
+Author: walter harms <wharms@bfs.de>
+Date:   Mon Apr 11 18:26:52 2016 +0200
+
+    no need to check argument for _XkbFree()
+    
+    simplify code by removing unneeded checks
+    
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit d02c2466f65063a03c97dbcee05071c12a3676e6
+Author: walter harms <wharms@bfs.de>
+Date:   Mon Apr 11 18:22:38 2016 +0200
+
+    fix more shadow warning
+    
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit 0355c3926d5372f9762f235071dbd94a89bbbdad
+Author: walter harms <wharms@bfs.de>
+Date:   Thu Mar 31 19:16:33 2016 +0200
+
+    fix shadow char_size
+    
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit 916dffadf052135df3398651be873c353da629e1
+Author: walter harms <wharms@bfs.de>
+Date:   Thu Mar 31 19:14:32 2016 +0200
+
+    remove argument check for free() adjust one inden
+    
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit 6ec901ebca3fea6a762e22090dc35b1b90911133
+Author: walter harms <wharms@bfs.de>
+Date:   Thu Mar 31 19:12:17 2016 +0200
+
+    _XIOError(dpy); will never return so remore dead
+    
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit 83107a677b2ed458e4d62ea4a601e8181d3683d8
+Author: walter harms <wharms@bfs.de>
+Date:   Thu Mar 31 19:10:49 2016 +0200
+
+    fix shadow warning
+    
+    Signed-off-by: walter harms <wharms@bfs.de>
+
+commit 4fe66b1c5112b07bd09e28bbc021911d08a9621f
+Author: Ryan C. Gordon <icculus@icculus.org>
+Date:   Wed Aug 2 02:41:03 2017 -0400
+
+    Valgrind fix for XStoreColor and XStoreColors.
+    
+    If the "pad" field isn't set, Valgrind will report it as uninitialized
+    memory accesses when the struct is copied into the Display's send buffer.
+    
+    In practice, this is (probably) harmless, but Valgrind is correct in
+    believing it's a bug.
+    
+    https://bugs.freedesktop.org/attachment.cgi?id=133189
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7d2010fec25c2f52b873ad0572479eb43128b038
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Apr 7 00:13:03 2017 -0700
+
+    Improve table formatting in XkbChangeControls & XkbKeyNumGroups man pages
+    
+    Includes fix for Solaris Bug 24564279: "XkbKeyNumGroups.3x11 man page
+    contains some malformed text" caused by extra whitespace after .TE macros
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit b856d5d929047d1ea169814d56e43784ea404c83
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Thu Mar 16 00:05:49 2017 -0700
+
+    Clarify state parameter to XkbSetNamedDeviceIndicator
+    
+    Checking a Bool to see if it's NULL does not work well in C.
+    Also reported in https://bugs.freedesktop.org/show_bug.cgi?id=251
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit c6dadd4cebd994aafb37a58b3adbaa82507c2d18
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Wed Mar 15 23:50:26 2017 -0700
+
+    Make Xkb{Get,Set}NamedIndicator spec & manpages match code
+    
+    The XKB Library spec and the man pages for XkbGetNamedIndicator &
+    XkbSetNamedIndicator included a device_spec argument neither function
+    takes, and do not include the XkbGetNamedDeviceIndicator &
+    XkbSetNamedDeviceIndicator variants that do take it (along with two
+    other arguments).
+    
+    This updates them to match the interfaces the code has provided for
+    decades.
+    
+    This has been reported multiple times, so this fixes:
+    https://bugs.freedesktop.org/show_bug.cgi?id=251
+    https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=729812
+    Sun Bug 4528016 XkbSetNamedIndicator & XkbGetNamedIndicator man pages are wrong
+      (filed: alan.coopersmith@sun.com 2001-11-15 - now aka Oracle bug 15087506)
+    X.Org Group Defect Id #9418
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Adam Jackson <ajax@redhat.com>
+
+commit 2d20890e7ffd3ee88a9ceb25cdd2ac1fe7aaceb6
+Author: Arthur Huillet <ahuillet@nvidia.com>
+Date:   Wed Feb 1 15:02:41 2017 +0100
+
+    _XDefaultError: set XlibDisplayIOError flag before calling exit
+    
+    _XReply isn't reentrant, and it can lead to deadlocks when the default error
+    handler is called: _XDefaultError calls exit(1). It is called indirectly by
+    _XReply when a X protocol error comes in that isn't filtered/handled by an
+    extension or the application. This means that if the application (or one of its
+    loaded shared libraries such as the NVIDIA OpenGL driver) has registered any
+    _fini destructor, _fini will get called while still on the call stack of
+    _XReply. If the destructor interacts with the X server and calls _XReply, it
+    will hit a deadlock, looping on the following in _XReply:
+    
+        ConditionWait(dpy, dpy->xcb->reply_notify);
+    
+    It is legal for an application to make Xlib calls during _fini, and that is
+    useful for an OpenGL driver to avoid resource leaks on the X server side, for
+    example in the dlopen/dlclose case. However, the driver can not readily tell
+    whether its _fini is being called because Xlib called exit, or for another
+    reason (dlclose), so it is hard to cleanly work around this issue in the driver.
+    
+    This change makes it so _XReply effectively becomes a no-op when called after
+    _XDefaultError was called, as though an XIOError had happened. The dpy
+    connection isn't broken at that point, but any call to _XReply is going to hang.
+    This is a bit of a kludge, because the more correct solution would be to make
+    _XReply reentrant, maybe by broadcasting the reply_notify condition before
+    calling the default error handler. However, such a change would carry a grater
+    risk of introducing regressions in Xlib.
+    
+    This change will drop some valid requests on the floor, but this should not
+    matter, as it will only do so in the case where the application is dying: X will
+    clean up after it once exit() is done running. There is the case of
+    XSetCloseDownMode(RETAIN_PERMANENT), but an application using that and wishing
+    to clean up resources in _fini would currently be hitting a deadlock, which is
+    hardly a better situation.
+    
+    Signed-off-by: Aaron Plattner <aplattner@nvidia.com>
+    Reviewed-by: Jamey Sharp <jamey@minilop.net>
+
 commit 42f4d7af9cf6d1dbfa575552e057328b054a20c9
 Author: Matt Turner <mattst88@gmail.com>
 Date:   Sat Feb 25 21:54:22 2017 -0800
@@ -3959,9 +4475,9 @@ Date:   Sat May 21 07:29:38 2011 +0200
     
     Aliases to itself don't make much sense.
     This changes occurances of:
-    xy_UV.UTF-8:			xy_UV.UTF-8
+    xy_UV.UTF-8:                    xy_UV.UTF-8
     to
-    xy_UV:			xy_UV.UTF-8
+    xy_UV:                  xy_UV.UTF-8
     where applicable.
     
     Signed-off-by: Egbert Eich <eich@freedesktop.org>
@@ -4471,7 +4987,7 @@ Date:   Sun Feb 19 13:27:38 2012 +0100
     
     Conflicts:
     
-    	src/OpenDis.c
+            src/OpenDis.c
 
 commit f4378193619baa9bb973c1b5b718721bbcbe92c7
 Author: James Cloos <cloos@jhcloos.com>
@@ -4922,8 +5438,8 @@ Date:   Tue Oct 4 17:11:11 2011 -0400
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ┃ Clash with existing sequence in iso8859-1/Compose.pre
     ┃  on line 661: Ctrl<T> <A> <A>
-    ┃    line #661: Ctrl<T> <A> <A>		: "\305"	Aring
-    ┃    line #480: Ctrl<T> <A> <A>		: "@"	at
+    ┃    line #661: Ctrl<T> <A> <A>         : "\305"        Aring
+    ┃    line #480: Ctrl<T> <A> <A>         : "@"   at
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
     Signed-off-by: James Cloos <cloos@jhcloos.com>
@@ -7489,7 +8005,7 @@ Date:   Mon Jul 12 13:38:04 2010 -0700
     
     Translation performed by:
      perl -i -p -e 's{\<\!-- .hN (\S+) (\S+)?\s*-->}
-    	         {&lt;<filename class="headerfile">$1</filename>&gt;$2}' *.xml
+                     {&lt;<filename class="headerfile">$1</filename>&gt;$2}' *.xml
     
     Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
 
@@ -7966,7 +8482,7 @@ Date:   Wed May 12 16:42:18 2010 -0700
     Reviewed-by: Jamey Sharp <jamey@minilop.net>
 
 commit fd82552d5c0ce1931f29006a0c36f5e03cf8577e
-Merge: aae2a4a 933aee1
+Merge: aae2a4a7 933aee1d
 Author: Jamey Sharp <jamey@minilop.net>
 Date:   Mon May 10 16:51:24 2010 -0700
 
@@ -9988,7 +10504,7 @@ Date:   Thu Jan 29 20:25:15 2009 -0200
     Bug #17946, attachment #19443
     
     This patch avoids the gcc warning
-    	../../../../libX11-1.1.5/modules/im/ximcp/imDefLkup.c:223: warning: passing arg 1 of `_XimProcSyncReply' from incompatible pointer type
+            ../../../../libX11-1.1.5/modules/im/ximcp/imDefLkup.c:223: warning: passing arg 1 of `_XimProcSyncReply' from incompatible pointer type
     (same as already done at other places)
     
     BTW: what is the difference between XIM (the type of ic->core.im)
@@ -10004,8 +10520,8 @@ Date:   Thu Jan 29 20:22:21 2009 -0200
     Bug #17946, attachment #19441
     
     This patch avoids the two gcc warnings
-    	../../../../libX11-1.1.5/modules/im/ximcp/imRm.c:413: warning: assignment discards qualifiers from pointer target type
-    	../../../../libX11-1.1.5/modules/im/ximcp/imRm.c:450: warning: assignment discards qualifiers from pointer target type
+            ../../../../libX11-1.1.5/modules/im/ximcp/imRm.c:413: warning: assignment discards qualifiers from pointer target type
+            ../../../../libX11-1.1.5/modules/im/ximcp/imRm.c:450: warning: assignment discards qualifiers from pointer target type
     
     Note, that this as a rather crude fix of the problem (and it is really a
     shame to cast name_table to non-const).
@@ -10024,7 +10540,7 @@ Date:   Thu Jan 29 20:20:18 2009 -0200
     Bug #17946, attachment #19440
     
     Avoid a preprocessor message
-    	<stdin>:194: warning: no newline at end of file
+            <stdin>:194: warning: no newline at end of file
     
     Two more such warnings (in XkbSAGroup.man and XkbSASetGroup.man)
     seem to be caused by a truncated (or otherwise incomplete)
@@ -10043,10 +10559,10 @@ Date:   Thu Jan 29 20:12:24 2009 -0200
     option, e.g. -DX11_t, not as empty.
     
     This avoids the gcc (3.4.6) warnings:
-    	../../libX11-1.1.5/src/x11_trans.c:27:1: warning: "X11_t" redefined
-    	<command line>:7:1: warning: this is the location of the previous definition
-    	../../libX11-1.1.5/src/x11_trans.c:28:1: warning: "TRANS_CLIENT" redefined
-    	<command line>:8:1: warning: this is the location of the previous definition
+            ../../libX11-1.1.5/src/x11_trans.c:27:1: warning: "X11_t" redefined
+            <command line>:7:1: warning: this is the location of the previous definition
+            ../../libX11-1.1.5/src/x11_trans.c:28:1: warning: "TRANS_CLIENT" redefined
+            <command line>:8:1: warning: this is the location of the previous definition
     
     Similarly, follow the autoconf convention to define XTHREADS
     and XUSE_MTSAFE_API as one.
@@ -10662,7 +11178,7 @@ Date:   Tue Jun 10 20:07:30 2008 +0300
     Add some Khmer digraphs to all locales with a Compose.pre.
 
 commit e54cffb649b1622c17457e470cfab8cc56d38c97
-Merge: 19802cc 721b574
+Merge: 19802ccd 721b574d
 Author: Daniel Stone <daniel@fooishbar.org>
 Date:   Tue Jun 10 20:04:30 2008 +0300
 
@@ -10681,7 +11197,7 @@ Date:   Wed May 28 17:31:59 2008 +0930
     Require xproto 7.0.13 and libxcb 1.1.90 (for GenericEvents)
 
 commit e9195db7257e418f83707233baeeb84b225caf4f
-Merge: c34f76f a7f8556
+Merge: c34f76f4 a7f85567
 Author: Peter Hutterer <peter@cs.unisa.edu.au>
 Date:   Thu May 22 12:14:28 2008 +0930
 
@@ -10717,7 +11233,7 @@ Date:   Mon May 12 21:46:24 2008 +0930
     Build with xcb as transport layer highly recommended.
 
 commit c9b2ff1e6a607463993afa4a8d085857d97cc2f3
-Merge: 17d7dcb 9129057
+Merge: 17d7dcbf 9129057b
 Author: Peter Hutterer <peter@cs.unisa.edu.au>
 Date:   Mon May 12 17:58:37 2008 +0930
 
@@ -10924,7 +11440,7 @@ Date:   Sat Dec 22 21:45:23 2007 +0100
     X.Org bug#13786 <http://bugs.freedesktop.org/show_bug.cgi?id=13786>
 
 commit 32115c563b87d2f37e3f9de70fbd0f4d9e424aea
-Merge: 8f0bd3f e8d4cef
+Merge: 8f0bd3f4 e8d4cefa
 Author: James Cloos <cloos@jhcloos.com>
 Date:   Fri Dec 14 22:43:47 2007 -0500
 
@@ -10955,14 +11471,14 @@ Date:   Mon Dec 10 23:00:44 2007 -0800
     Added launchd support.
 
 commit 17d7dcbfced4a9417b33507bd3fd9b7dd8268242
-Merge: 5dfefd3 13ac804
+Merge: 5dfefd38 13ac8046
 Author: Peter Hutterer <peter@cs.unisa.edu.au>
 Date:   Thu Dec 6 14:08:29 2007 +1030
 
     Merge branch 'master' into xge
 
 commit 5dfefd3829d3ba7e41d5db0ad28e9dfee92fadd5
-Merge: a68a1cd eff33ae
+Merge: a68a1cd7 eff33ae5
 Author: Peter Hutterer <peter@cs.unisa.edu.au>
 Date:   Thu Dec 6 13:57:09 2007 +1030
 
@@ -10970,7 +11486,7 @@ Date:   Thu Dec 6 13:57:09 2007 +1030
     
     Conflicts:
     
-    	src/xcb_io.c
+            src/xcb_io.c
 
 commit 13ac80469f6958cabac596834e203bd9cb6d4c94
 Author: James Cloos <cloos@jhcloos.com>
@@ -11018,7 +11534,7 @@ Date:   Tue Dec 4 17:25:39 2007 -0500
     2] https://bugs.freedesktop.org/show_bug.cgi?id=5129
 
 commit 02e04059c89e175f51647e3b031344f743286b34
-Merge: 1254c57 b57129e
+Merge: 1254c57d b57129ef
 Author: James Cloos <cloos@jhcloos.com>
 Date:   Tue Dec 4 06:55:04 2007 -0500
 
@@ -11196,7 +11712,7 @@ Date:   Tue Jan 2 08:40:00 2007 -0800
     X.Org Bugzilla #9516 <https://bugs.freedesktop.org/show_bug.cgi?id=9516>
 
 commit d8fe979fc929833e8c754aed32641786d5a0622b
-Merge: 21ca953 4ec1723
+Merge: 21ca9533 4ec1723f
 Author: James Cloos <cloos@jhcloos.com>
 Date:   Mon Aug 20 15:34:50 2007 -0400
 
@@ -11816,7 +12332,7 @@ Date:   Sat Dec 16 00:45:19 2006 +0200
     Since XlibConf.h is built by configure, don't distribute it.
 
 commit dd1705ced2cac6b4b6b21e79272fcf9bed4bf376
-Merge: 129bbb9 769b985
+Merge: 129bbb9f 769b9854
 Author: Jeremy C. Reed <reed@glacier.reedmedia.net>
 Date:   Thu Dec 14 14:23:20 2006 -0600
 
@@ -12056,7 +12572,7 @@ Date:   Sat Oct 7 21:00:36 2006 -0700
     Release libX11 1.1 RC1 (1.0.99.1).
 
 commit bf237409c5fce32c557d298f62f44d456c2b5bc8
-Merge: ba47719 2d426d1
+Merge: ba477191 2d426d1f
 Author: Jamey Sharp <jamey@minilop.net>
 Date:   Sat Oct 7 21:07:16 2006 -0700
 
@@ -12493,7 +13009,7 @@ Date:   Sat Jun 3 13:51:51 2006 +0300
     (cherry picked from e3acee88cfcc4ef0fa8a7db39763a5ebe2e985cb commit)
 
 commit c336eb6b80a6f91da1d0b3d28634a2cfde324670
-Merge: 33556ca ad9ebbd
+Merge: 33556ca8 ad9ebbd2
 Author: Donnie Berkholz <donnie@comet.(none)>
 Date:   Thu Jun 22 14:25:35 2006 -0700
 
@@ -12506,14 +13022,14 @@ Date:   Thu Jun 22 17:20:59 2006 +0300
     Bump to 1.0.99.0 to avoid confusion.
 
 commit efedfd68e31bcee2d21ac340be8dc9e1825ec890
-Merge: e3acee8 4b8eb5d
+Merge: e3acee88 4b8eb5d4
 Author: Daniel Stone <daniel@fooishbar.org>
 Date:   Thu Jun 22 16:53:45 2006 +0300
 
     Merge branch 'master' of git+ssh://git.freedesktop.org/srv/git.freedesktop.org/git/xorg/lib/libX11
 
 commit 4b8eb5d4a1da73a94b5a6ab12e34784aae4c79c5
-Merge: 5169d0e eff50c9
+Merge: 5169d0e0 eff50c94
 Author: Matthieu Herrb <matthieu@deville.herrb.com>
 Date:   Tue Jun 20 21:05:15 2006 +0200
 
@@ -12846,7 +13362,7 @@ Date:   Wed May 10 14:51:37 2006 +0300
     Fix typo (be_BG.UTF-8 rather than bg_BG.UTF-8) in locale.alias.pre.
 
 commit 9cac8c9824874ca7d835f001a4efa910b7fdd822
-Merge: 19b8840 e514bc8
+Merge: 19b8840a e514bc87
 Author: Daniel Stone <daniels@preemptive.fooishbar.org>
 Date:   Wed May 10 14:50:37 2006 +0300
 
@@ -12939,7 +13455,7 @@ Date:   Fri Mar 17 15:58:39 2006 +0200
     Properly clip bounds when only one point is defining an outline.
 
 commit e876efb8aa410f2f5c87aaaa7042f847c4ff96f7
-Merge: be266b2 f71ea0b
+Merge: be266b20 f71ea0bc
 Author: Matthieu Herrb <matthieu@bluenote.herrb.com>
 Date:   Sat Mar 11 15:40:35 2006 +0100
 

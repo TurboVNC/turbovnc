@@ -132,6 +132,12 @@ set based on the client's physical screen layout.
 6. The Windows TurboVNC Viewer should now build properly with Visual Studio
 2015.
 
+7. The TurboVNC Server is now based on xorg-xserver 1.19.7, which fixes several
+minor X server bugs.
+
+8. The TurboVNC Server now supports the X Record Extension.  This extension can
+be disabled, if desired, by passing `-extension XTEST` to vncserver.
+
 
 2.2.3
 =====
