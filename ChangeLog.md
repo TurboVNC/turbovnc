@@ -101,6 +101,21 @@ TurboVNC Server will continue to support GnuTLS on a break/fix basis.
 16. The TurboVNC Server is now based on xorg-xserver 1.20.7, which fixes
 several minor X server bugs.
 
+17. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
+longer supports indirect rendering.  Indirect rendering is limited to the
+OpenGL 1.4 API, and it performed sluggishly in the TurboVNC Server due to the
+fact that X servers are single-threaded.  (On some platforms, the TurboVNC
+Server would become unresponsive for seconds at a time when users interacted
+with 3D applications that used indirect rendering.)  Indirect rendering was
+generally only necessary on older systems that lacked libglvnd and that had
+vendor-specific GPU drivers installed, but it has always been possible to use
+direct rendering on such systems-- either by using VirtualGL or by manipulating
+`LD_LIBRARY_PATH` or `LD_PRELOAD` to cause OpenGL applications to use the Mesa
+implementation of libGL rather than the vendor-specific implementation.
+Indirect rendering-- and the TurboVNC-specific X server modifications that
+allowed it to perform as well as possible-- will continue to be supported in
+TurboVNC 2.2.x on a break/fix basis.
+
 
 2.2.4
 =====

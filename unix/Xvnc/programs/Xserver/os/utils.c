@@ -1,7 +1,6 @@
 /*
 
 Copyright 1987, 1998  The Open Group
-Copyright 2017  D. R. Commander
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -184,11 +183,7 @@ Bool noGEExtension = FALSE;
 
 Bool CoreDump;
 
-#ifdef TURBOVNC
-Bool enableIndirectGLX = TRUE;
-#else
 Bool enableIndirectGLX = FALSE;
-#endif
 
 #ifdef PANORAMIX
 Bool PanoramiXExtensionDisabledHack = FALSE;
@@ -535,13 +530,8 @@ UseMsg(void)
     ErrorF("-fn string             default font name\n");
     ErrorF("-fp string             default font path\n");
     ErrorF("-help                  prints message with these options\n");
-#ifdef TURBOVNC
-    ErrorF("+iglx                  Allow creating indirect GLX contexts (default)\n");
-    ErrorF("-iglx                  Prohibit creating indirect GLX contexts\n");
-#else
     ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
     ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
-#endif
     ErrorF("-I                     ignore all remaining arguments\n");
 #ifdef RLIMIT_DATA
     ErrorF("-ld int                limit data space to N Kb\n");

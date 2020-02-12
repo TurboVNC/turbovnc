@@ -1,7 +1,6 @@
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
-Copyright 2017  D. R. Commander
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -171,11 +170,6 @@ WaitForSomething(Bool are_ready)
     int pollerr;
     static Bool were_ready;
     Bool timer_is_running;
-#if defined(TURBOVNC) && defined(GLXEXT)
-    CARD32 now = 0;
-    OsTimerPtr timer;
-    extern Bool indirectGlxActive;
-#endif
 
     timer_is_running = were_ready;
 
@@ -196,27 +190,13 @@ WaitForSomething(Bool are_ready)
         /* deal with any blocked jobs */
         if (workQueue) {
             ProcessWorkQueue();
-#if defined(TURBOVNC) && defined(GLXEXT)
-            if (indirectGlxActive)
-                are_ready = clients_are_ready();
-#endif
         }
 
-#if defined(TURBOVNC) && defined(GLXEXT)
-        if (!indirectGlxActive) {
-#endif
         timeout = check_timers();
         are_ready = clients_are_ready();
-#if defined(TURBOVNC) && defined(GLXEXT)
-        }
-#endif
 
         if (are_ready)
             timeout = 0;
-#if defined(TURBOVNC) && defined(GLXEXT)
-        else if (indirectGlxActive)
-            timeout = check_timers();
-#endif
 
         BlockHandler(&timeout);
         if (NewOutputPending)
@@ -240,26 +220,6 @@ WaitForSomething(Bool are_ready)
         } else
             are_ready = clients_are_ready();
 
-#if defined(TURBOVNC) && defined(GLXEXT)
-        if (indirectGlxActive) {
-            /* This basically restores the logic from xorg-server 1.18.x and
-               earlier.  Without it, the timers in the VNC server are never
-               invoked (and thus framebuffer updates are never sent) while
-               indirect OpenGL applications are running. */
-            if (i > 0) {
-                if (InputCheckPending())
-                    return FALSE;
-
-                if ((timer = first_timer()) != NULL) {
-                    now = GetTimeInMillis();
-                    if ((int) (timer->expires - now) <= 0) {
-                        DoTimers(now);
-                        return FALSE;
-                    }
-                }
-            }
-        } else
-#endif
         if (InputCheckPending())
             return FALSE;
 

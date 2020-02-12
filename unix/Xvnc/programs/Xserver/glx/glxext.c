@@ -1,7 +1,6 @@
 /*
  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
  * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.
- * Copyright (C) 2017 D. R. Commander. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -48,10 +47,6 @@
 #include "indirect_table.h"
 #include "indirect_util.h"
 #include "glxvndabi.h"
-
-#ifdef TURBOVNC
-Bool indirectGlxActive = FALSE;
-#endif
 
 /*
 ** X resources.
@@ -149,12 +144,6 @@ __glXAddContext(__GLXcontext * cx)
 
     cx->next = glxAllContexts;
     glxAllContexts = cx;
-#ifdef TURBOVNC
-    if (!indirectGlxActive && !cx->isDirect) {
-        LogMessage(X_INFO, "Activating indirect GLX ...\n");
-        indirectGlxActive = TRUE;
-    }
-#endif
     return TRUE;
 }
 
@@ -162,9 +151,6 @@ static void
 __glXRemoveFromContextList(__GLXcontext * cx)
 {
     __GLXcontext *c, *prev;
-#ifdef TURBOVNC
-    Bool indirectGlxStillActive = FALSE;
-#endif
 
     if (cx == glxAllContexts)
         glxAllContexts = cx->next;
@@ -176,18 +162,6 @@ __glXRemoveFromContextList(__GLXcontext * cx)
             prev = c;
         }
     }
-#ifdef TURBOVNC
-    for (c = glxAllContexts; c; c = c->next) {
-        if (!c->isDirect) {
-            indirectGlxStillActive = TRUE;
-            break;
-        }
-    }
-    if (indirectGlxActive && !indirectGlxStillActive) {
-        LogMessage(X_INFO, "Deactivating indirect GLX ...\n");
-        indirectGlxActive = FALSE;
-    }
-#endif
 }
 
 /*

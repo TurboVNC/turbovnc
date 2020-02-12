@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2019-07-26T14:29:30">
+<meta name="date" content="2020-02-12T10:32:16">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1191,22 +1191,19 @@ redundant encryption.</p>
 
 <p>The TurboVNC Server includes a software GLX/OpenGL implementation that 
 can be used for casual 3D rendering.  This implementation uses the 
-swrast DRI driver provided by Mesa 8.x and later.  On systems that do 
-not have vendor-specific GPU drivers installed, or on systems that 
-provide a libglvnd-enabled build of Mesa, TurboVNC&rsquo;s software 
-OpenGL implementation can use direct rendering. Otherwise, it falls back 
-to indirect rendering, which is limited to the OpenGL 1.4 API and which 
-may perform sluggishly (particularly with continuous mouse input.)  In 
-general, if the TurboVNC host has a GPU, then you should use 
+swrast DRI driver provided by Mesa 8.x and later, and it supports only 
+direct rendering.  Thus, it can only be used on systems that do not have 
+vendor-specific GPU drivers installed or on systems that provide a 
+libglvnd-enabled build of Mesa.  In general, if the TurboVNC host has a 
+GPU, then you should use 
 <a href="#VGL">VirtualGL</a><a name="idx0035"></a> rather than relying 
 on TurboVNC&rsquo;s software OpenGL implementation.</p>
 
 <p>Passing <code>-extension&nbsp;GLX</code> to <code>vncserver</code> 
 disables the built-in GLX/OpenGL implementation, thus restoring the 
 behavior of TurboVNC 2.1.x and earlier (which required VirtualGL in 
-order to run OpenGL applications.)  Passing <code>-iglx</code> to 
-<code>vncserver</code> disables indirect rendering.  If the built-in 
-GLX/OpenGL implementation is not functioning properly, then pass 
+order to run OpenGL applications.)  If the built-in GLX/OpenGL 
+implementation is not functioning properly, then pass 
 <code>-verbose</code> to <code>vncserver</code> to log informational 
 messages that may reveal the source of the problem.</p>
 
