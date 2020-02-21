@@ -1,3 +1,11 @@
+2.2.5
+=====
+
+### Significant changes relative to 2.2.4:
+
+1. The `MenuKey` parameter in the Java TurboVNC Viewer is now case-insensitive.
+
+
 2.2.4
 =====
 
