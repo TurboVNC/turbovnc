@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2013, 2015, 2017-2018 D. R. Commander.
- *                                          All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015, 2017-2018, 2020 D. R. Commander.
+ *                                                All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,37 +52,44 @@ public class Options {
   public Options() {}
 
   public Options(Options old) {
-    if (old.serverName != null)
-      serverName = new String(old.serverName);
+    continuousUpdates = old.continuousUpdates;
     port = old.port;
-    shared = old.shared;
-    viewOnly = old.viewOnly;
-    reverseScroll = old.reverseScroll;
-    grabKeyboard = old.grabKeyboard;
-    fullScreen = old.fullScreen;
-    span = old.span;
-    scalingFactor = old.scalingFactor;
-    desktopSize = new DesktopSize(old.desktopSize);
     recvClipboard = old.recvClipboard;
     sendClipboard = old.sendClipboard;
+    if (old.serverName != null)
+      serverName = new String(old.serverName);
+    shared = old.shared;
+
+    grabKeyboard = old.grabKeyboard;
+    menuKeyCode = old.menuKeyCode;
+    menuKeySym = old.menuKeySym;
+    reverseScroll = old.reverseScroll;
+    viewOnly = old.viewOnly;
+
     acceptBell = old.acceptBell;
-    preferredEncoding = old.preferredEncoding;
+    colors = old.colors;
+    cursorShape = old.cursorShape;
+    desktopSize = new DesktopSize(old.desktopSize);
+    fullScreen = old.fullScreen;
+    scalingFactor = old.scalingFactor;
+    span = old.span;
+    showToolbar = old.showToolbar;
+
+    compressLevel = old.compressLevel;
     copyRect = old.copyRect;
+    preferredEncoding = old.preferredEncoding;
     allowJpeg = old.allowJpeg;
     quality = old.quality;
     subsampling = old.subsampling;
-    compressLevel = old.compressLevel;
-    colors = old.colors;
-    cursorShape = old.cursorShape;
-    continuousUpdates = old.continuousUpdates;
-    if (old.user != null) user = new String(old.user);
-    sendLocalUsername = old.sendLocalUsername;
-    if (old.via != null) via = new String(old.via);
-    tunnel = old.tunnel;
-    sshTunnelActive = old.sshTunnelActive;
+
     extSSH = old.extSSH;
+    sendLocalUsername = old.sendLocalUsername;
     sshSession = old.sshSession;
+    sshTunnelActive = old.sshTunnelActive;
     if (old.sshUser != null) sshUser = new String(old.sshUser);
+    tunnel = old.tunnel;
+    if (old.user != null) user = new String(old.user);
+    if (old.via != null) via = new String(old.via);
   }
 
   public static int parseScalingFactor(String scaleString) {
@@ -200,37 +207,44 @@ public class Options {
   }
 
   public void print() {
-    printOpt("serverName", serverName);
+    printOpt("continuousUpdates", continuousUpdates);
     printOpt("port", port);
+    printOpt("recvClipboard", recvClipboard);
+    printOpt("sendClipboard", sendClipboard);
+    printOpt("serverName", serverName);
     printOpt("shared", shared);
-    printOpt("viewOnly", viewOnly);
-    printOpt("reverseScroll", reverseScroll);
+
     printOpt("grabKeyboard", grabKeyboard);
-    printOpt("fullScreen", fullScreen);
-    printOpt("span", span);
-    printOpt("scalingFactor", scalingFactor);
+    printOpt("menuKeyCode", menuKeyCode);
+    printOpt("menuKeySym", menuKeySym);
+    printOpt("reverseScroll", reverseScroll);
+    printOpt("viewOnly", viewOnly);
+
+    printOpt("acceptBell", acceptBell);
+    printOpt("colors", colors);
+    printOpt("cursorShape", cursorShape);
     if (desktopSize.mode == SIZE_MANUAL)
       printOpt("desktopSize", desktopSize.getString());
     else
       printOpt("desktopSize", desktopSize.mode);
-    printOpt("recvClipboard", recvClipboard);
-    printOpt("sendClipboard", sendClipboard);
-    printOpt("acceptBell", acceptBell);
-    printOpt("preferredEncoding", preferredEncoding);
+    printOpt("fullScreen", fullScreen);
+    printOpt("scalingFactor", scalingFactor);
+    printOpt("span", span);
+    printOpt("showToolbar", showToolbar);
+
+    printOpt("compressLevel", compressLevel);
     printOpt("copyRect", copyRect);
+    printOpt("preferredEncoding", preferredEncoding);
     printOpt("allowJpeg", allowJpeg);
     printOpt("quality", quality);
     printOpt("subsampling", subsampling);
-    printOpt("compressLevel", compressLevel);
-    printOpt("colors", colors);
-    printOpt("cursorShape", cursorShape);
-    printOpt("continuousUpdates", continuousUpdates);
-    printOpt("user", user);
-    printOpt("sendLocalUsername", sendLocalUsername);
-    printOpt("via", via);
-    printOpt("tunnel", tunnel);
+
     printOpt("extSSH", extSSH);
+    printOpt("sendLocalUsername", sendLocalUsername);
     printOpt("sshUser", sshUser);
+    printOpt("tunnel", tunnel);
+    printOpt("user", user);
+    printOpt("via", via);
   }
 
   public static class DesktopSize {
@@ -290,34 +304,41 @@ public class Options {
     public ScreenSet layout;
   }
 
-  public String serverName;
+  // CONNECTION OPTIONS
+  public boolean continuousUpdates;
   public int port;
-  public boolean shared;
-  public boolean viewOnly;
-  public boolean reverseScroll;
-  public int grabKeyboard;
-  public boolean fullScreen;
-  public int span;
-  public int scalingFactor;
-  public DesktopSize desktopSize = new DesktopSize();
   public boolean recvClipboard;
   public boolean sendClipboard;
+  public String serverName;
+  public boolean shared;
+  // INPUT OPTIONS
+  public int grabKeyboard;
+  public int menuKeyCode, menuKeySym;
+  public boolean reverseScroll;
+  public boolean viewOnly;
+  // DISPLAY OPTIONS
   public boolean acceptBell;
-  public int preferredEncoding;
+  public int colors;
+  public boolean cursorShape;
+  public DesktopSize desktopSize = new DesktopSize();
+  public boolean fullScreen;
+  public int scalingFactor;
+  public int span;
+  public boolean showToolbar;
+  // ENCODING OPTIONS
+  public int compressLevel;
   public boolean copyRect = true;
+  public int preferredEncoding;
   public boolean allowJpeg;
   public int quality;
   public int subsampling;
-  public int compressLevel;
-  public int colors;
-  public boolean cursorShape;
-  public boolean continuousUpdates;
-  public String user;
-  public boolean sendLocalUsername;
-  public String via;
-  public boolean tunnel;
-  public boolean sshTunnelActive;
+  // SECURITY AND AUTHENTICATION OPTIONS
   public boolean extSSH;
+  public boolean sendLocalUsername;
   public Session sshSession;
+  public boolean sshTunnelActive;
   public String sshUser;
+  public boolean tunnel;
+  public String user;
+  public String via;
 }

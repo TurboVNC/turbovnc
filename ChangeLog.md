@@ -5,6 +5,12 @@
 
 1. The `MenuKey` parameter in the Java TurboVNC Viewer is now case-insensitive.
 
+2. Fixed several issues in the Java TurboVNC Viewer that prevented the
+configuration hierarchy (Options dialog > command line > previous settings)
+from being honored for certain parameters in some cases (particularly when
+using listen mode or making multiple connections from the same viewer
+instance.)
+
 
 2.2.4
 =====

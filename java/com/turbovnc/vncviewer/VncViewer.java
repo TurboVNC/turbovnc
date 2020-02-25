@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2018, 2020 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -541,7 +541,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   public VncViewer(Socket sock_) {
     sock = sock_;
-    UserPreferences.load("global");
     opts.serverName = null;
     opts.port = -1;
   }
@@ -653,8 +652,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     options.reverseScroll.setSelected(opts.reverseScroll);
     options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
-    options.menuKey.setSelectedItem(
-      KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
     if (VncViewer.osGrab() && Viewport.isHelperAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
@@ -666,7 +664,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     options.span.setSelectedIndex(opts.span);
     options.cursorShape.setSelected(opts.cursorShape);
     options.acceptBell.setSelected(opts.acceptBell);
-    options.showToolbar.setSelected(VncViewer.showToolbar.getValue());
+    options.showToolbar.setSelected(opts.showToolbar);
     if (opts.scalingFactor == Options.SCALE_AUTO) {
       options.scalingFactor.setSelectedItem("Auto");
     } else if (opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -705,7 +703,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     opts.recvClipboard = options.recvClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
-    VncViewer.showToolbar.setParam(options.showToolbar.isSelected());
+    opts.showToolbar = options.showToolbar.isSelected();
 
     opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
     opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
@@ -714,8 +712,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     if (index >= 0 && index < Options.NUMSPANOPT)
       opts.span = index;
 
-    VncViewer.menuKey.setParam(
-      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
+    opts.menuKeyCode =
+      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keycode;
+    opts.menuKeySym =
+      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keysym;
 
     if (VncViewer.osGrab() && Viewport.isHelperAvailable())
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
@@ -873,14 +873,15 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       if (opts == null)
         opts = new Options();
 
+      // CONNECTION OPTIONS
+      opts.continuousUpdates = continuousUpdates.getValue();
       opts.port = vncServerPort.getValue();
       vncServerPort.setValue(-1);
-
+      opts.recvClipboard = recvClipboard.getValue();
+      opts.sendClipboard = sendClipboard.getValue();
       opts.shared = shared.getValue();
-      opts.viewOnly = viewOnly.getValue();
-      opts.reverseScroll = reverseScroll.getValue();
-      opts.fullScreen = fullScreen.getValue();
 
+      // INPUT OPTIONS
       if (osGrab()) {
         if (grabKeyboard.getValue().toLowerCase().startsWith("f"))
           opts.grabKeyboard = Options.GRAB_FS;
@@ -889,15 +890,20 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         else if (grabKeyboard.getValue().toLowerCase().startsWith("m"))
           opts.grabKeyboard = Options.GRAB_MANUAL;
       }
+      opts.menuKeyCode = MenuKey.getMenuKeyCode();
+      opts.menuKeySym = MenuKey.getMenuKeySym();
+      opts.reverseScroll = reverseScroll.getValue();
+      opts.viewOnly = viewOnly.getValue();
 
-      if (span.getValue().toLowerCase().startsWith("p"))
-        opts.span = Options.SPAN_PRIMARY;
-      else if (span.getValue().toLowerCase().startsWith("al"))
-        opts.span = Options.SPAN_ALL;
-      else
-        opts.span = Options.SPAN_AUTO;
-
-      opts.scalingFactor = Integer.parseInt(scalingFactor.getDefaultStr());
+      // DISPLAY OPTIONS
+      opts.acceptBell = acceptBell.getValue();
+      opts.colors = -1;
+      switch (colors.getValue()) {
+        case 8:  case 64:  case 256:  case 32768:  case 65536:
+          opts.colors = colors.getValue();
+          break;
+      }
+      opts.cursorShape = cursorShape.getValue();
 
       if (benchFile != null)
         opts.desktopSize.mode = Options.SIZE_SERVER;
@@ -909,6 +915,9 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         opts.desktopSize = size;
       }
 
+      opts.fullScreen = fullScreen.getValue();
+
+      opts.scalingFactor = Integer.parseInt(scalingFactor.getDefaultStr());
       opts.setScalingFactor(scalingFactor.getValue());
       if (opts.scalingFactor != 100 &&
           opts.desktopSize.mode == Options.SIZE_AUTO) {
@@ -916,9 +925,18 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         opts.desktopSize.mode = Options.SIZE_SERVER;
       }
 
-      opts.recvClipboard = recvClipboard.getValue();
-      opts.sendClipboard = sendClipboard.getValue();
-      opts.acceptBell = acceptBell.getValue();
+      if (span.getValue().toLowerCase().startsWith("p"))
+        opts.span = Options.SPAN_PRIMARY;
+      else if (span.getValue().toLowerCase().startsWith("al"))
+        opts.span = Options.SPAN_ALL;
+      else
+        opts.span = Options.SPAN_AUTO;
+
+      opts.showToolbar = showToolbar.getValue();
+
+      // ENCODING OPTIONS
+      opts.compressLevel = compressLevel.getValue();
+      opts.copyRect = copyRect.getValue();
 
       String encStr = preferredEncoding.getValue();
       int encNum = RFB.encodingNum(encStr);
@@ -944,20 +962,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
           break;
       }
 
-      opts.compressLevel = compressLevel.getValue();
-
-      opts.colors = -1;
-      switch (colors.getValue()) {
-        case 8:  case 64:  case 256:  case 32768:  case 65536:
-          opts.colors = colors.getValue();
-          break;
-      }
-
-      opts.cursorShape = cursorShape.getValue();
-      opts.continuousUpdates = continuousUpdates.getValue();
-      opts.copyRect = copyRect.getValue();
-      if (user.getValue() != null) opts.user = new String(user.getValue());
+      // SECURITY AND AUTHENTICATION OPTIONS
+      opts.extSSH = extSSH.getValue();
       opts.sendLocalUsername = sendLocalUsername.getValue();
+      opts.tunnel = tunnel.getValue();
+      if (user.getValue() != null) opts.user = new String(user.getValue());
 
       String v = via.getValue();
       if (v != null && !v.isEmpty()) {
@@ -974,8 +983,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
             opts.via = null;
         }
       }
-      opts.tunnel = tunnel.getValue();
-      opts.extSSH = extSSH.getValue();
 
       String s = vncServerName.getValue();
       if (s != null) {

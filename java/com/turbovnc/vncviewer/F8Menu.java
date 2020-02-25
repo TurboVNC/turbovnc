@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011, 2013 Brian P. Hinz
- * Copyright (C) 2012-2015, 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2017-2018, 2020 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,8 +78,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       grabKeyboard.addActionListener(this);
       add(grabKeyboard);
     }
-    f8 = addMenuItem("Send " + KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
-    KeyStroke ks = KeyStroke.getKeyStroke(MenuKey.getMenuKeyCode(), 0);
+    f8 = addMenuItem("Send " + KeyEvent.getKeyText(cc.opts.menuKeyCode));
+    KeyStroke ks = KeyStroke.getKeyStroke(cc.opts.menuKeyCode, 0);
     f8.setAccelerator(ks);
     if (!VncViewer.restricted.getValue()) {
       ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
@@ -151,8 +152,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       if (cc.viewport != null)
         cc.viewport.grabKeyboardHelper(grabKeyboard.isSelected());
     } else if (actionMatch(ev, f8)) {
-      cc.writeKeyEvent(MenuKey.getMenuKeySym(), true);
-      cc.writeKeyEvent(MenuKey.getMenuKeySym(), false);
+      cc.writeKeyEvent(cc.opts.menuKeySym, true);
+      cc.writeKeyEvent(cc.opts.menuKeySym, false);
       firePopupMenuCanceled();
     } else if (actionMatch(ev, ctrlAltDel)) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
