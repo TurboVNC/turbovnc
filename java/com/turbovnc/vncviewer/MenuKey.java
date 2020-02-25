@@ -1,7 +1,7 @@
 /* Copyright 2011 Martin Koegler <mkoegler@auto.tuwien.ac.at>
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright 2012 Brian P. Hinz
- * Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public final class MenuKey {
     menuKeyStr =
       Configuration.getParam("menuKey").getValueStr();
     for (int i = 0; i < getMenuKeySymbolCount(); i++)
-      if (MENU_SYMBOLS[i].name.equals(menuKeyStr))
+      if (MENU_SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))
         menuKeyCode = MENU_SYMBOLS[i].keycode;
 
     return menuKeyCode;
@@ -101,7 +101,7 @@ public final class MenuKey {
     menuKeyStr =
       Configuration.getParam("menuKey").getValueStr();
     for (int i = 0; i < getMenuKeySymbolCount(); i++)
-      if (MENU_SYMBOLS[i].name.equals(menuKeyStr))
+      if (MENU_SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))
         menuKeySym = MENU_SYMBOLS[i].keysym;
 
     return menuKeySym;

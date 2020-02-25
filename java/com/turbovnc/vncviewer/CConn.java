@@ -79,7 +79,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     formatChange = false;  encodingChange = false;
     currentEncoding = opts.preferredEncoding;
-    showToolbar = VncViewer.showToolbar.getValue() && !benchmark;
+    showToolbar = opts.showToolbar && !benchmark;
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
@@ -1588,8 +1588,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     options.reverseScroll.setSelected(opts.reverseScroll);
     options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
-    options.menuKey.setSelectedItem(
-      KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
     if (VncViewer.osGrab() && Helper.isAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
@@ -1631,7 +1630,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     options.span.setSelectedIndex(opts.span);
     options.cursorShape.setSelected(opts.cursorShape);
     options.acceptBell.setSelected(opts.acceptBell);
-    options.showToolbar.setSelected(VncViewer.showToolbar.getValue());
+    options.showToolbar.setSelected(opts.showToolbar);
     options.desktopSize.setEnabled(cp.supportsSetDesktopSize || firstUpdate);
     if (opts.scalingFactor == Options.SCALE_AUTO) {
       options.scalingFactor.setSelectedItem("Auto");
@@ -1676,7 +1675,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     opts.recvClipboard = options.recvClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
-    VncViewer.showToolbar.setParam(options.showToolbar.isSelected());
+    opts.showToolbar = options.showToolbar.isSelected();
+    if (state() != RFBSTATE_NORMAL)
+      showToolbar = opts.showToolbar && !benchmark;
 
     int oldScalingFactor = opts.scalingFactor;
     opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
@@ -1709,9 +1710,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     clipboardDialog.setSendingEnabled(opts.sendClipboard);
-    VncViewer.menuKey.setParam(
-      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
-    menu.updateMenuKey(MenuKey.getMenuKeyCode());
+    opts.menuKeyCode =
+      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keycode;
+    opts.menuKeySym =
+      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keysym;
+    menu.updateMenuKey(opts.menuKeyCode);
 
     if (VncViewer.osGrab() && Helper.isAvailable()) {
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
@@ -1765,6 +1768,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       forceNonincremental = true;
       requestNewUpdate();
     }
+
+    VncViewer.opts = new Options(opts);
   }
 
   public boolean supportsSetDesktopSize() {
