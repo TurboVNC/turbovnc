@@ -1,6 +1,7 @@
 /*  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
- *  Copyright (C) 2012-2015, 2017-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2015, 2017-2018, 2020 D. R. Commander.
+ *                                           All Rights Reserved.
  *  Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -104,8 +105,7 @@ public final class Tunnel {
     //       known_hosts file.
 
     File knownHosts = new File(homeDir + "/.ssh/known_hosts");
-    if (knownHosts.exists() && knownHosts.canRead())
-      jsch.setKnownHosts(knownHosts.getAbsolutePath());
+    jsch.setKnownHosts(knownHosts.getAbsolutePath());
 
     ArrayList<File> privateKeys = new ArrayList<File>();
     String sshKeyFile = VncViewer.sshKeyFile.getValue();

@@ -11,6 +11,10 @@ from being honored for certain parameters in some cases (particularly when
 using listen mode or making multiple connections from the same viewer
 instance.)
 
+3. Fixed an issue in the Java TurboVNC Viewer whereby the SSH host key for a
+given TurboVNC host was not added to the list of known hosts unless the SSH
+known hosts file (~/.ssh/known_hosts) already existed.
+
 
 2.2.4
 =====
