@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012, 2017 Brian P. Hinz
- * Copyright (C) 2012, 2014, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014, 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -156,10 +156,13 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   }
 
   public void showMessage(String message) {
-    JOptionPane pane = new JOptionPane(message);
-    JDialog dlg = pane.createDialog(null, "SSH Message");
-    dlg.setAlwaysOnTop(true);
-    dlg.setVisible(true);
+    if (VncViewer.getBooleanProperty("turbovnc.sshbannerdlg", true)) {
+      JOptionPane pane = new JOptionPane(message);
+      JDialog dlg = pane.createDialog(null, "SSH Message");
+      dlg.setAlwaysOnTop(true);
+      dlg.setVisible(true);
+    } else
+      System.out.print(message);
   }
 
   public boolean promptYesNo(String str) {

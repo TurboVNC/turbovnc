@@ -1,7 +1,7 @@
 3.0 pre-beta
 ============
 
-### Significant changes relative to 2.2.4:
+### Significant changes relative to 2.2.5:
 
 1. Since Java 11 introduced the ability to create a custom Java Runtime
 Environment (JRE) with only the modules that the TurboVNC Viewer needs, it has
@@ -116,14 +116,28 @@ Indirect rendering-- and the TurboVNC-specific X server modifications that
 allowed it to perform as well as possible-- will continue to be supported in
 TurboVNC 2.2.x on a break/fix basis.
 
-18. The `MenuKey` parameter in the Java TurboVNC Viewer is now
-case-insensitive.
 
-19. Fixed several issues in the Java TurboVNC Viewer that prevented the
+2.2.5
+=====
+
+### Significant changes relative to 2.2.4:
+
+1. The `MenuKey` parameter in the Java TurboVNC Viewer is now case-insensitive.
+
+2. Fixed several issues in the Java TurboVNC Viewer that prevented the
 configuration hierarchy (Options dialog > command line > previous settings)
 from being honored for certain parameters in some cases (particularly when
 using listen mode or making multiple connections from the same viewer
 instance.)
+
+3. Fixed an issue in the Java TurboVNC Viewer whereby the SSH host key for a
+given TurboVNC host was not added to the list of known hosts unless the SSH
+known hosts file (~/.ssh/known_hosts) already existed.
+
+4. Introduced a new Java system property (`turbovnc.sshbannerdlg`) that, when
+set to `0`, causes the Java TurboVNC Viewer's built-in SSH client to display
+the SSH server's banner message on the command line rather than in a dialog
+box.
 
 
 2.2.4

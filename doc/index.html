@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-02-12T10:32:16">
+<meta name="date" content="2020-02-27T00:38:40">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3060,6 +3060,34 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
         The same thing can be accomplished by using the 
         <code>PreferredAuthentications</code> directive in the OpenSSH config 
         file.
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.sshbannerdlg = <em>0 | 1</em></code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Display the banner message from the SSH server in a dialog box</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Enabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        The default behavior of the TurboVNC Viewer is to display the banner 
+        message from the SSH server in a dialog box.  Disabling this system 
+        property causes the viewer to display the banner message on the command 
+        line instead.
     </dd>
 </dl>
 
