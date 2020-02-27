@@ -156,7 +156,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   }
 
   public void showMessage(String message) {
-    if (VncViewer.getBooleanProperty("turbovnc.sshbannerdlg", true)) {
+    if (VncViewer.getBooleanProperty("turbovnc.sshbannerdlg", false)) {
       JOptionPane pane = new JOptionPane(message);
       JDialog dlg = pane.createDialog(null, "SSH Message");
       dlg.setAlwaysOnTop(true);

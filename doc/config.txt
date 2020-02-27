@@ -238,12 +238,12 @@ to start the TurboVNC Viewer without JPEG acceleration.
 
 | Java System Property | {pcode: turbovnc.sshbannerdlg = __0 \| 1__} |
 | Summary | Display the banner message from the SSH server in a dialog box |
-| Default Value | Enabled |
+| Default Value | Disabled |
 #OPT: hiCol=first
 
 	Description :: The default behavior of the TurboVNC Viewer is to display the
-	banner message from the SSH server in a dialog box.  Disabling this system
-	property causes the viewer to display the banner message on the command line
+	banner message from the SSH server on the command line.  Enabling this system
+	property causes the viewer to display the banner message in a dialog box
 	instead.
 
 | Java System Property | {pcode: turbovnc.swingdb = __0 \| 1__} |

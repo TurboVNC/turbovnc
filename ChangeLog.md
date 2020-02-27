@@ -116,6 +116,11 @@ Indirect rendering-- and the TurboVNC-specific X server modifications that
 allowed it to perform as well as possible-- will continue to be supported in
 TurboVNC 2.2.x on a break/fix basis.
 
+18. The TurboVNC Viewer's built-in SSH client now displays the SSH server's
+banner message on the command line by default.  Set the `turbovnc.sshbannerdlg`
+Java system property to `1` to display the banner message in a dialog box
+instead, thus restoring the default behavior of TurboVNC 2.2.x.
+
 
 2.2.5
 =====
