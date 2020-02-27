@@ -15,6 +15,11 @@ instance.)
 given TurboVNC host was not added to the list of known hosts unless the SSH
 known hosts file (~/.ssh/known_hosts) already existed.
 
+4. Introduced a new Java system property (`turbovnc.sshbannerdlg`) that, when
+set to `0`, causes the Java TurboVNC Viewer's built-in SSH client to display
+the SSH server's banner message on the command line rather than in a dialog
+box.
+
 
 2.2.4
 =====

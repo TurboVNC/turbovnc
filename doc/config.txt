@@ -272,6 +272,16 @@ Web Start environment.
 	order.  The same thing can be accomplished by using the
 	''PreferredAuthentications'' directive in the OpenSSH config file.
 
+| Java System Property | {pcode: turbovnc.sshbannerdlg = __0 \| 1__} |
+| Summary | Display the banner message from the SSH server in a dialog box |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: The default behavior of the Java TurboVNC Viewer is to display
+	the banner message from the SSH server in a dialog box.  Disabling this
+	system property causes the viewer to display the banner message on the
+	command line instead.
+
 | Java System Property | {pcode: turbovnc.swingdb = __0 \| 1__} |
 | Summary | Disable/enable Swing double buffering |
 | Default Value | Disabled |
