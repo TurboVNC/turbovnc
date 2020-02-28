@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -302,7 +302,7 @@ public abstract class KeyExchange{
 
       SignatureECDSA sig=null;
       try{
-        Class c=Class.forName(session.getConfig("signature.ecdsa"));
+        Class c=Class.forName(session.getConfig(alg));
         sig=(SignatureECDSA)(c.getDeclaredConstructor().newInstance());
         sig.init();
       }

@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -2679,9 +2679,11 @@ break;
 
     String value = null;
 
-    value = config.getUser();
-    if(value != null)
-      username = value;
+    if(username==null){
+      value = config.getUser();
+      if(value != null)
+        username = value;
+    }
 
     value = config.getHostname();
     if(value != null)

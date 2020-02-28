@@ -1,6 +1,24 @@
 ChangeLog of JSch
 ====================================================================
-Last modified: Tue Aug 30 06:47:52 UTC 2016
+Last modified: Thu Nov 22 01:06:27 UTC 2018
+
+
+Changes since version 0.1.54:
+- bugfix: fixed vulnerabilities in examples;
+          ScpTo.java, ScpFrom.java and ScpNoneCipher.java,
+          https://gist.github.com/ymnk/2318108/revisions#diff-a5ec82fe8ccb2efa64aa42a5592bb137
+          https://gist.github.com/ymnk/2318108/revisions#diff-c1b069ab3a670f4fd3270d0f57550007
+          https://gist.github.com/ymnk/2318108/revisions#diff-a20032aa3cc9119fa627ec948b9ada46
+          thanks to Dylan Katz(http://dylankatz.com).
+- bugfix: OpenSSHConfig#getUser() should not overwrite the given user-name.
+- bugfix: fixed 'Invalid encoding for signature' errors in ssh-dss.
+- bugfix: fixed bugs in the key-exchange for ecdsa-sha2-nistp384,
+          ecdsa-sha2-nistp521.
+- bugfix: failed to generate the key pair from private keys,
+          ecdsa 384 and 521.
+- bugfix: failed to load the ecdsa 521 key identity from ssh-add command.
+- change: updating copyright messages; 2016 -> 2018
+- feature: supporting key files on EBCDIC environment.
 
 
 Changes since version 0.1.53:

@@ -114,7 +114,10 @@ set(JSCH_CLASSNAMES
 	jce/SHA384
 	jce/SHA512
 	jce/SignatureDSA
-	jce/SignatureECDSA
+	jce/SignatureECDSA256
+	jce/SignatureECDSA384
+	jce/SignatureECDSA521
+	jce/SignatureECDSAN
 	jce/SignatureRSA
 	jce/TripleDESCBC
 	jce/TripleDESCTR

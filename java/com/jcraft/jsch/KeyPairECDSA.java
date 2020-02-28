@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2015-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2015-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,23 @@ public class KeyPairECDSA extends KeyPair{
 
   public KeyPairECDSA(JSch jsch){
     this(jsch, null, null, null, null);
+  }
+
+  public KeyPairECDSA(JSch jsch , byte[] pubkey){
+    this(jsch, null, null, null, null);
+
+    if(pubkey!=null){
+      byte[] name = new byte[8];
+      System.arraycopy(pubkey, 11, name, 0, 8);
+      if(Util.array_equals(name, Util.str2byte("nistp384"))){
+        key_size=384;
+        this.name=name;
+      }
+      if(Util.array_equals(name, Util.str2byte("nistp521"))){
+        key_size=521;
+        this.name=name;
+      }
+    }
   }
 
   public KeyPairECDSA(JSch jsch,
@@ -285,8 +302,8 @@ public class KeyPairECDSA extends KeyPair{
   }
 
   public byte[] getSignature(byte[] data){
-    try{      
-      Class c=Class.forName((String)JSch.getConfig("signature.ecdsa"));
+    try{
+      Class c=Class.forName((String)JSch.getConfig("ecdsa-sha2-"+new String(name)));
       SignatureECDSA ecdsa=
         (SignatureECDSA)(c.getDeclaredConstructor().newInstance());
       ecdsa.init();
@@ -307,8 +324,8 @@ public class KeyPairECDSA extends KeyPair{
   }
 
   public Signature getVerifier(){
-    try{      
-      Class c=Class.forName((String)JSch.getConfig("signature.ecdsa"));
+    try{
+      Class c=Class.forName((String)JSch.getConfig("ecdsa-sha2-"+new String(name)));
       final SignatureECDSA ecdsa=
         (SignatureECDSA)(c.getDeclaredConstructor().newInstance());
       ecdsa.init();

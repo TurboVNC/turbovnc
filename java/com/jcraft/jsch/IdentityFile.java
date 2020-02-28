@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018, D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,13 @@ class IdentityFile implements Identity{
    * @return "ssh-rsa" or "ssh-dss"
    */
   public String getAlgName(){
-    return new String(kpair.getKeyTypeName());
+    byte[] name = kpair.getKeyTypeName();
+    try {
+      return new String(name, "UTF-8");
+    }
+    catch (UnsupportedEncodingException e){
+      return new String(name);
+    }
   }
 
   /**
