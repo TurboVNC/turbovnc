@@ -1,4 +1,4 @@
-/*  Copyright (C) 2018 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C) 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -100,16 +100,22 @@ public final class SessionManager extends Tunnel {
       dir = "/opt/TurboVNC";
 
     String command = dir + "/bin/vncserver -sessionlist";
-    channelExec.setCommand(command);
+    channelExec.setCommand("bash -c \"set -o pipefail; " + command +
+                           " | sed \'s/^/[TURBOVNC] /g\'\"");
     InputStream stdout = channelExec.getInputStream();
     InputStream stderr = channelExec.getErrStream();
     channelExec.connect();
 
     BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
-    String result = br.readLine(), error = result;
+    String result, error = null;
     String[] sessions = null;
-    if (result != null)
+    while ((result = br.readLine()) != null) {
+      if (!result.startsWith("[TURBOVNC] ")) continue;
+      result = result.replace("[TURBOVNC] ", "");
+      if (error == null && result.length() > 0) error = result;
       sessions = result.split(" ");
+      break;
+    }
 
     br = new BufferedReader(new InputStreamReader(stderr));
     int nLines = 0;
@@ -161,16 +167,22 @@ public final class SessionManager extends Tunnel {
 
     String command = dir + "/bin/vncserver -sessionstart" +
                      (args != null ? " " + args : "");
-    channelExec.setCommand(command);
+    channelExec.setCommand("bash -c \"set -o pipefail; " + command +
+                           " | sed \'s/^/[TURBOVNC] /g\'\"");
     InputStream stdout = channelExec.getInputStream();
     InputStream stderr = channelExec.getErrStream();
     channelExec.connect();
 
     BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
-    String result = br.readLine(), error = result;
+    String result, error = null;
     String[] sessions = null;
-    if (result != null)
+    while ((result = br.readLine()) != null) {
+      if (!result.startsWith("[TURBOVNC] ")) continue;
+      result = result.replace("[TURBOVNC] ", "");
+      if (error == null && result.length() > 0) error = result;
       sessions = result.split(" ");
+      break;
+    }
 
     br = new BufferedReader(new InputStreamReader(stderr));
     int nLines = 0;
@@ -225,18 +237,22 @@ public final class SessionManager extends Tunnel {
 
     String command = dir + "/bin/vncpasswd -o -display " + session;
     if (viewOnly) command += " -v";
-    channelExec.setCommand(command);
+    channelExec.setCommand("bash -c \"set -o pipefail; " + command +
+                           " 2>&1 | sed \'s/^/[TURBOVNC] /g\'\"");
+    InputStream stdout = channelExec.getInputStream();
     InputStream stderr = channelExec.getErrStream();
     channelExec.connect();
 
-    BufferedReader br = new BufferedReader(new InputStreamReader(stderr));
+    BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
     String result = null, error = null, line;
     int nLines = 0;
     while ((line = br.readLine()) != null && nLines < 20) {
-      if (result == null) result = line;
+      if (!line.startsWith("[TURBOVNC] ")) continue;
+      line = line.replace("[TURBOVNC] ", "");
+      if (result == null && line.length() > 0) result = line;
       if (viewOnly && result.matches("Full control one-time password:.*"))
         result = null;
-      if (error == null) error = line;
+      if (error == null && line.length() > 0) error = line;
       if (nLines == 0) {
         vlog.debug("===============================================================================");
         vlog.debug("SERVER WARNINGS/NOTIFICATIONS:");
@@ -246,6 +262,11 @@ public final class SessionManager extends Tunnel {
     }
     if (nLines > 0)
       vlog.debug("===============================================================================");
+
+    // No idea why this is necessary, but we sometimes get an incorrect exit
+    // status from Solaris 11 hosts without it.
+    br = new BufferedReader(new InputStreamReader(stderr));
+    while ((line = br.readLine()) != null) { }
 
     if (result != null) {
       result = result.replaceAll("\\s", "");
@@ -286,13 +307,20 @@ public final class SessionManager extends Tunnel {
       dir = "/opt/TurboVNC";
 
     String command = dir + "/bin/vncserver -kill " + session;
-    channelExec.setCommand(command);
+    channelExec.setCommand("bash -c \"set -o pipefail; " + command +
+                           " | sed \'s/^/[TURBOVNC] /g\'\"");
     InputStream stdout = channelExec.getInputStream();
     InputStream stderr = channelExec.getErrStream();
     channelExec.connect();
 
     BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
-    String result = br.readLine(), error = result;
+    String result, error = null;
+    while ((result = br.readLine()) != null) {
+      if (!result.startsWith("[TURBOVNC] ")) continue;
+      result = result.replace("[TURBOVNC] ", "");
+      if (error == null && result.length() > 0) error = result;
+      break;
+    }
 
     br = new BufferedReader(new InputStreamReader(stderr));
     int nLines = 0;
