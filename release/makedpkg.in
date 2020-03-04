@@ -84,6 +84,16 @@ Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
 
+if [ "$SYSCONFDIR" = "/etc" ]; then
+mkdir -p $TMPDIR/etc/polkit-1/localauthority/50-local.d
+cat > $TMPDIR/etc/polkit-1/localauthority/50-local.d/45-turbovnc-gnome3.pkla << EOF
+[Eliminate GNOME 3 dialogs in TurboVNC]
+Identity=unix-user:*
+Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile;org.debian.pcsc-lite.access_pcsc;org.freedesktop.packagekit.system-sources-refresh
+ResultAny=no
+EOF
+fi
+
 if [ ! "$DATADIR" = "/usr/share" ]; then
 	safedirmove $TMPDIR/$DATADIR/icons $TMPDIR/usr/share/icons $TMPDIR/__tmpicons
 fi
