@@ -193,6 +193,20 @@ Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
 %endif
 
+%if "%{server}" == "1"
+%if "%{sysconfdir}" == "%{_sysconfdir}"
+mkdir -p %{buildroot}/%{sysconfdir}/polkit-1/localauthority/50-local.d
+cat > %{buildroot}/%{sysconfdir}/polkit-1/localauthority/50-local.d/45-turbovnc-gnome3.pkla << EOF
+[Eliminate GNOME 3 dialogs in TurboVNC]
+Identity=unix-user:*
+Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile;org.debian.pcsc-lite.access_pcsc;org.freedesktop.packagekit.system-sources-refresh
+ResultAny=no
+ResultInactive=no
+ResultActive=yes
+EOF
+%endif
+%endif
+
 %clean
 rm -rf %{buildroot}
 
@@ -238,6 +252,12 @@ fi
  %config(noreplace) %{sysconfdir}/sysconfig/tvncservers
  %config(noreplace) %{sysconfdir}/turbovncserver.conf
  %config(noreplace) %{sysconfdir}/turbovncserver-security.conf
+ %if "%{sysconfdir}" == "%{_sysconfdir}"
+  %dir %{sysconfdir}/polkit-1
+  %attr(0750,root,polkitd) %dir %{sysconfdir}/polkit-1/localauthority
+  %dir %{sysconfdir}/polkit-1/localauthority/50-local.d
+  %config %{sysconfdir}/polkit-1/localauthority/50-local.d/45-turbovnc-gnome3.pkla
+ %endif
 %endif
 
 %dir %{docdir}
