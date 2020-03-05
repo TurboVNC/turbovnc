@@ -9,7 +9,7 @@ become possible to package the Windows/Java TurboVNC Viewer in such a way that
 it does not require a separate installation of Java.  Thus, the native Windows
 TurboVNC Viewer has been retired and replaced with the Java TurboVNC Viewer,
 which means that the Java TurboVNC Viewer is now the only TurboVNC Viewer.  The
-native Windows viewer will continue to be maintained in the 2.2.x branch on a
+native Windows viewer will continue to be maintained in TurboVNC 2.2.x on a
 break/fix basis only.  The native Windows viewer, owing to its use of raw Win32
 GUI code rather than a modern GUI framework, has become difficult to maintain
 and even more difficult to extend.  Meanwhile, the Java viewer provides similar
