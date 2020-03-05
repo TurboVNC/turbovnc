@@ -209,6 +209,14 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	Description :: The TurboVNC Session Manager will execute ''bin/vncserver''
 	and ''bin/vncpasswd'' from this directory on the TurboVNC host.
 
+| Java System Property | {pcode: turbovnc.sessmgr = __0 \| 1__} |
+| Summary | Disable/enable the TurboVNC Session Manager |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: Disabling this property will completely disable the TurboVNC
+	Session Manager.
+
 | Environment Variable | {pcode: TVNC_SINGLESCREEN = __0 \| 1__} |
 | Java System Property | {pcode: turbovnc.singlescreen = __0 \| 1__} |
 | Summary | Disable/enable forcing a single-screen layout when using \

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2015, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,9 +48,11 @@ class ServerDialog extends Dialog implements ActionListener {
       server = new JComboBox();
     }
     JLabel sessionLabel =
-      new JLabel("host:displayNum, host::port = connect to VNC server");
+      new JLabel(VncViewer.getBooleanProperty("turbovnc.sessmgr", true) ?
+                 "host:displayNum, host::port = connect to VNC server" : "");
     JLabel sessionLabel2 =
-      new JLabel("host = start TurboVNC Session Manager for host");
+      new JLabel(VncViewer.getBooleanProperty("turbovnc.sessmgr", true) ?
+                 "host = start TurboVNC Session Manager for host" : "");
 
     // Hack to set the left inset on editable JComboBox
     if (UIManager.getLookAndFeel().getID().equals("Windows")) {

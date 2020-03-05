@@ -1168,7 +1168,9 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "The TCP port number on which the VNC server is listening.  For Unix VNC " +
   "servers, this is typically 5900 + the X display number of the VNC " +
   "session (example: 5901 if connecting to display :1.)  For Windows and " +
-  "Mac VNC servers, this is typically 5900.\n " +
+  "Mac VNC servers, this is typically 5900." +
+  (getBooleanProperty("turbovnc.sessmgr", true) ? "" : "  (default = 5900)") +
+  "\n " +
   "If listen mode is enabled, this parameter specifies the TCP port on " +
   "which the viewer will listen for connections from a VNC server.  " +
   "(default = 5500)", -1);
@@ -1202,10 +1204,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "format {host}[:{display_number}] or {host}::{port}, where {host} is the " +
   "host name or IP address of the machine on which the VNC server is " +
   "running (the \"VNC host\"), {display_number} is an optional X display " +
-  "number, and {port} is a TCP port.  If no port or display number is " +
-  "specified, then the viewer will enable the TurboVNC Session Manager, " +
-  "which allows you to remotely start a new TurboVNC session or to choose " +
-  "an existing TurboVNC session to which to connect.", null);
+  (getBooleanProperty("turbovnc.sessmgr", true) ?
+   "number, and {port} is a TCP port.  If no port or display number is " +
+   "specified, then the viewer will enable the TurboVNC Session Manager, " +
+   "which allows you to remotely start a new TurboVNC session or to choose " +
+   "an existing TurboVNC session to which to connect." :
+   "number (default: 0), and {port} is a TCP port."), null);
 
   static BoolParameter shared =
   new BoolParameter("Shared",
