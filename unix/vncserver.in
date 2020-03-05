@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  Copyright (C) 2009-2018 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2009-2018, 2020 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
@@ -890,10 +890,13 @@ sub SessionList
   }
   if (scalar(@sessions)) {
     @sessions = sort { $a <=> $b } @sessions;
+    print scalar(@sessions)."\t1\t";
     foreach my $session (@sessions) {
-      print ":".$session." ";
+      print ":".$session."\t";
     }
     print "\n";
+  } else {
+    print "0\t1\n";
   }
   exit;
 }
