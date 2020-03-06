@@ -27,7 +27,7 @@ install:
 
       set MSYSTEM=MINGW32
 
-      bash -c "pacman --noconfirm -S zip unzip"
+      bash -c "pacman --noconfirm -S unzip"
 
       git clone --depth=1 https://github.com/TurboVNC/buildscripts.git -b %APPVEYOR_REPO_BRANCH% c:/buildscripts
 
@@ -44,8 +44,6 @@ build_script:
 
       move c:\vnc.nightly\files\*.exe .
 
-      move c:\vnc.nightly\files\*.zip .
-
       move c:\vnc.nightly\log-windows.txt .
 
 artifacts:
@@ -54,9 +52,6 @@ artifacts:
 
   - path: '*.exe'
     name: TurboVNC Viewer
-
-  - path: '*.zip'
-    name: TurboVNC Helper JARs
 
   - path: 'log-windows.txt'
     name: Build log
