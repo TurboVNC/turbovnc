@@ -1,0 +1,61 @@
+#!@PYTHON_EXECUTABLE@
+#
+#  Copyright (C) 2020 D. R. Commander.  All Rights Reserved.
+#
+#  This is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This software is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this software; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
+#  USA.
+#
+
+import BaseHTTPServer, SimpleHTTPServer
+import os, ssl, sys
+
+dir = ''
+httpPort = 0
+x509CertFile = ''
+x509KeyFile = ''
+
+if __name__ == "__main__":
+  for i, arg in enumerate(sys.argv):
+    if sys.argv[i].lower() == "-dir" and i < len(sys.argv) - 1:
+      i += 1
+      dir = sys.argv[i]
+    elif sys.argv[i].lower() == "-httpport" and i < len(sys.argv) - 1:
+      i += 1
+      httpPort = int(sys.argv[i])
+    elif sys.argv[i].lower() == "-x509cert" and i < len(sys.argv) - 1:
+      i += 1
+      x509CertFile = sys.argv[i]
+    elif sys.argv[i].lower() == "-x509key" and i < len(sys.argv) - 1:
+      i += 1
+      x509KeyFile = sys.argv[i]
+
+if httpPort == 0 or dir == '':
+  print("USAGE: " + sys.argv[0] + " -dir <dir> -httpport <port> [-x509cert <certificate-file>] [-x509key <private-key-file>]")
+  exit(1)
+
+print("noVNC web server: Serving files from directory " + dir)
+os.chdir(dir)
+print("noVNC web server: Listening on Port " + str(httpPort))
+
+httpServer = \
+  BaseHTTPServer.HTTPServer(('', httpPort),
+                            SimpleHTTPServer.SimpleHTTPRequestHandler)
+if x509CertFile != '' and x509KeyFile != '':
+  print("noVNC web server: Using X.509 certificate file " + x509CertFile)
+  print("noVNC web server: Using X.509 private key file " + x509KeyFile)
+  httpServer.socket = ssl.wrap_socket(httpServer.socket, server_side = True,
+                                      certfile = x509CertFile,
+                                      keyfile = x509KeyFile)
+httpServer.serve_forever()

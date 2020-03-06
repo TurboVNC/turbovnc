@@ -20,9 +20,7 @@
 ##  $useVGL      -- 1 to run the window manager startup script using VirtualGL
 ##  $autokill    -- 1 to automatically kill the TurboVNC session when the
 ##                  startup script finishes or 0 to leave it running
-##  $noVNC       -- path to noVNC launch script
-##  $noVNCCertFile -- path to combined signed certificate/private key file (in
-##                    PEM format) to use with noVNC
+##  $noVNC       -- directory containing noVNC
 ##  $passwdFile  -- path to VNC password file to use with VNC Password
 ##                  authentication
 ##  $x509CertFile -- path to X.509 signed certificate file (in PEM format) to
@@ -69,7 +67,6 @@
 
 ## These settings are the default.  Uncomment and edit to change.
 #
-# $noVNCCertFile = "$vncUserDir/noVNC_cert.pem";
 # $passwdFile = "$vncUserDir/passwd";
 # $x509CertFile = "$vncUserDir/x509_cert.pem";
 # $x509KeyFile = "$vncUserDir/x509_private.pem";

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-03-05T16:43:24">
+<meta name="date" content="2020-03-06T01:57:14">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1076,7 +1076,7 @@ host.</p>
 <p><a name="noVNC"></a></p>
 
 <p>When a TurboVNC session is started, the <code>vncserver</code> script 
-can optionally start an instance of 
+can optionally start a simple web server that serves up 
 <span class="remote"><a href="https://novnc.com" class="remote">noVNC</a></span><a name="idx0033"></a>, 
 an HTML 5/JavaScript VNC viewer that works in any web browser (with 
 reduced performance and features relative to the TurboVNC Viewer.)  This 
@@ -1084,29 +1084,29 @@ allows you to easily connect to a TurboVNC session from a machine that
 does not have the TurboVNC Viewer installed (including mobile devices.)</p>
 
 <p>To launch noVNC along with a TurboVNC session, pass <code>-novnc 
-<em>script</em></code> to <code>/opt/TurboVNC/bin/vncserver</code> when 
-starting the session, where <em><code>script</code></em> is the launch 
-script for the noVNC WebSockets proxy (setting the <code>$noVNC</code> 
-variable in <strong class="filename">turbovncserver.conf</strong> has 
-the same effect.)  The <code>vncserver</code> script will print the 
-noVNC URL, which will be of the form:</p>
+<em>dir</em></code> to <code>/opt/TurboVNC/bin/vncserver</code> when 
+starting the session, where <em><code>dir</code></em> is the directory 
+containing noVNC (setting the <code>$noVNC</code> variable in 
+<strong class="filename">turbovncserver.conf</strong> has the same 
+effect.)  The <code>vncserver</code> script will print the noVNC URL, 
+which will be of the form:</p>
 
-<pre class="verbatim">http://<em>host</em>:<em>5800+n</em>/vnc.html</pre>
+<pre class="verbatim">http://<em>host</em>:<em>5800+n</em>/vnc.html?host=<em>host</em>&amp;port=<em>5900+n</em></pre>
 <p>or</p>
 
-<pre class="verbatim">https://<em>host</em>:<em>5800+n</em>/vnc.html</pre>
+<pre class="verbatim">https://<em>host</em>:<em>5800+n</em>/vnc.html?host=<em>host</em>&amp;port=<em>5900+n</em>&amp;encrypt=1</pre>
 <p>where <em><code>host</code></em> is the hostname or IP address of the 
 TurboVNC host, and <em><code>n</code></em> is the X display number of 
 the TurboVNC session.</p>
 
 <p>Point your web browser to that URL in order to access the TurboVNC 
-session. You can optionally pass <code>-novnccert 
-<em>combined-certificate-file</em></code> to <code>vncserver</code> to 
-encrypt the client/host connection using HTTPS.  See the 
-<code>vncserver</code> man page for more details.</p>
+session. You can optionally pass <code>-x509cert 
+<em>certificate-file</em> -x509key <em>private-key-file</em></code> to 
+<code>vncserver</code> to encrypt both the HTTP and RFB connections.  
+See the <code>vncserver</code> man page for more details.</p>
 
 <div class="important"><p class="important">
-NOTE: noVNC only supports VNC Password authentication, so it is strongly recommended that it be used only with one-time passwords unless the connection is encrypted using HTTPS.
+NOTE: noVNC only supports VNC Password authentication, so it is strongly recommended that it be used only with one-time passwords unless the connections are encrypted.
 </p></div>
 
 

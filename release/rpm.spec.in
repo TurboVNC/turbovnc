@@ -246,6 +246,7 @@ fi
  %{bindir}/xstartup.turbovnc
  %{bindir}/vncpasswd
  %{bindir}/vncconnect
+ %{bindir}/webserver
 %endif
 %if "%{viewer}" == "1"
  %{javadir}/VncViewer.jar

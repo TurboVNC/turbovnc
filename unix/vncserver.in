@@ -77,10 +77,6 @@ ReadAuthConfiguration("@CMAKE_INSTALL_FULL_SYSCONFDIR@/turbovncserver-security.c
 $passwdFile = "$vncUserDir/passwd" if (!$passwdFile);
 $x509CertFile = "$vncUserDir/x509_cert.pem" if (!$x509CertFile);
 $x509KeyFile = "$vncUserDir/x509_private.pem" if (!$x509KeyFile);
-if (!$noVNCCertFile) {
-  $noVNCCertFile = "$vncUserDir/noVNC_cert.pem";
-  $noVNCCertFile = "" if (! -r $noVNCCertFile);
-}
 
 # Done reading configuration.
 
@@ -215,7 +211,7 @@ foreach $_registrydir (@registrydirs) {
               "-3dwm", 0, "-vgl", 0, "-debug", 0, "-x509cert", 1,
               "-x509key", 1, "-autokill", 0, "-quiet", 0, "-wm", 1,
               "-sessionlist", 0, "-sessionstart", 0, "-novnc", 1,
-              "-novnccert", 1, "-noautokill", 0);
+              "-noautokill", 0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -245,6 +241,9 @@ if ($opt{'-pixelformat'}) {
 }
 if ($opt{'-novnc'}) {
   $noVNC = $opt{'-novnc'};
+  if (! -e "$noVNC/vnc.html") {
+    die $noVNC . " does not appear to contain an installation of noVNC.\n"
+  }
 }
 if ($opt{'-noxstartup'}) {
   $skipxstartup = 1;
@@ -271,12 +270,10 @@ if ($opt{'-noautokill'}) {
   $autokill = 0;
 }
 $authTypeVNCPermitted = $authTypeVNC;
-$encTypeX509Permitted = $encTypeX509;
 if ($opt{'-securitytypes'}) {
   $securityTypes = $opt{'-securitytypes'};
   my $enableVNC = 0;
   my $enableOTP = 0;
-  my $enableX509 = 0;
   my $secTypes = $securityTypes;
   $secTypes =~ s/[\t\ \r\n]//g;
   foreach $tok (split/[,=]/, $secTypes) {
@@ -286,18 +283,12 @@ if ($opt{'-securitytypes'}) {
     if (substr(lc $tok, -3) eq 'vnc') {
       $enableVNC = 1;
     }
-    if (substr(lc $tok, 0, 4) eq 'x509') {
-      $enableX509 = 1;
-    }
   }
   if ($enableVNC == 0) {
     $authTypeVNC = 0;
   }
   if ($enableOTP == 0) {
     $authTypeOTP = 0;
-  }
-  if ($enableX509 == 0) {
-    $encTypeX509 = 0;
   }
 }
 if ($opt{'-rfbauth'}) {
@@ -315,29 +306,14 @@ if ($opt{'-x509cert'}) {
   if ($encTypeX509) {
     $x509CertFile = $opt{'-x509cert'};
   } else {
-    if ($encTypeX509Permitted) {
-      warn "X509 encryption is not enabled.  Ignoring -x509cert.\n";
-    } else {
-      warn "X509 encryption is not permitted on this system.  Ignoring -x509cert.\n";
-    }
+    warn "Server was not built with TLS encryption.  Ignoring -x509cert.\n";
   }
 }
 if ($opt{'-x509key'}) {
   if ($encTypeX509) {
     $x509KeyFile = $opt{'-x509key'};
   } else {
-    if ($encTypeX509Permitted) {
-      warn "X509 encryption is not enabled.  Ignoring -x509key.\n";
-    } else {
-      warn "X509 encryption is not permitted on this system.  Ignoring -x509key.\n";
-    }
-  }
-}
-if ($opt{'-novnccert'}) {
-  if ($noVNC) {
-    $noVNCCertFile = $opt{'-novnccert'};
-  } else {
-    warn "noVNC is not enabled.  Ignoring -novnccert.\n";
+    warn "Server was not built with TLS encryption.  Ignoring -x509key.\n";
   }
 }
 
@@ -522,13 +498,27 @@ if ($generateOTP == 1) {
   warn "Run '".$exedir."vncpasswd -o' from within the TurboVNC session or\n    '".$exedir."vncpasswd -o -display :$displayNumber' from within this shell\n    to generate additional OTPs\n";
 }
 
-# Start noVNC and record the process ID.
+# Start noVNC web server and record the process ID.
 
 if ($noVNC) {
-  $cmd = $noVNC;
-  $cmd .= " --listen " . (5800 + $displayNumber);
-  $cmd .= " --vnc :" . (5900 + $displayNumber);
-  $cmd .= " --cert $noVNCCertFile --ssl-only " if ($noVNCCertFile);
+  $noVNCEncrypt = $encTypeX509;
+  $cmd = $exedir."webserver";
+  $cmd .= " -dir " . $noVNC;
+  $cmd .= " -httpport " . (5800 + $displayNumber);
+  if ($noVNCEncrypt) {
+    if (! -e $x509CertFile) {
+      warn $x509CertFile . " does not exist.  Disabling noVNC encryption.\n";
+      $noVNCEncrypt = 0;
+    } else {
+      $cmd .= " -x509cert " . $x509CertFile;
+    }
+    if (! -e $x509KeyFile) {
+      warn $x509KeyFile . " does not exist.  Disabling noVNC encryption.\n";
+      $noVNCEncrypt = 0;
+    } else {
+      $cmd .= " -x509key " . $x509KeyFile;
+    }
+  }
   if (!$opt{'-debug'}) {
     $cmd .= " >> " . &quotedString($desktopLog) . " 2>&1";
   }
@@ -537,7 +527,7 @@ if ($noVNC) {
   system("$cmd & echo \$! >$noVNCPIDFile");
   sleep(1);
   unless (kill 0, `cat $noVNCPIDFile`) {
-    warn "Could not start noVNC.\n\n";
+    warn "Could not start noVNC web server.\n\n";
     open(LOG, "<$desktopLog");
     while (<LOG>) { print; }
     close(LOG);
@@ -547,9 +537,12 @@ if ($noVNC) {
   }
 
   $msg = "noVNC URL:  ";
-  $msg .= "https://" if ($noVNCCertFile);
-  $msg .= "http://" if (!$noVNCCertFile);
-  $msg .= $host . ":" . (5800 + $displayNumber) . "/vnc.html\n";
+  $msg .= "https://" if ($noVNCEncrypt);
+  $msg .= "http://" if (!$noVNCEncrypt);
+  $msg .= $host . ":" . (5800 + $displayNumber) . "/vnc.html";
+  $msg .= "?host=" . $host . "&port=" . $vncPort;
+  $msg .= "&encrypt=1" if ($noVNCEncrypt);
+  $msg .= "\n";
   warn $msg;
 }
 
@@ -581,7 +574,7 @@ $ENV{VGL_COMPRESS} = "0";
 if (! $skipxstartup) {
   if ($opt{'-fg'}) {
     system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
-    if (kill 0, `cat $pidFile`) {
+    if (kill 0, `cat $pidFile` || kill 0, `cat $noVNCPIDFile`) {
       $opt{'-kill'} = ':'.$displayNumber;
       &Kill();
     }
@@ -671,6 +664,16 @@ sub CheckDisplayNumber
     return 0;
   }
   close(S);
+
+  if ($noVNC) {
+    socket(S, $AF_INET, $SOCK_STREAM, 0) || die "$prog: socket failed: $!\n";
+    eval 'setsockopt(S, &SOL_SOCKET, &SO_REUSEADDR, pack("l", 1))';
+    unless (bind(S, pack('S n x12', $AF_INET, 5800 + $n))) {
+      close(S);
+      return 0;
+    }
+    close(S);
+  }
 
   if (-e "/tmp/.X$n-lock") {
     warn "\nWarning: $host:$n is taken because of /tmp/.X$n-lock\n";
@@ -813,8 +816,7 @@ sub Usage
       "        -pixelformat bgr<NNN>\n".
       "        -fp <FONT-PATH>\n".
       "        -name <DESKTOP-NAME>\n".
-      "        -novnc <SCRIPT>\n".
-      "        -novnccert <CERT-FILE>\n".
+      "        -novnc <DIR>\n".
       "        -otp\n".
       "        -fg\n".
       "        -x509cert <CERT-FILE>\n".
@@ -904,7 +906,7 @@ sub Kill
   if (-r $noVNCPIDFile) {
     $SIG{'HUP'} = 'IGNORE';
     chop($pid = `cat $noVNCPIDFile`);
-    warn "Killing noVNC process ID $pid\n";
+    warn "Killing noVNC web server process ID $pid\n";
 
     if (kill 0, $pid) {
       system("kill $pid");
@@ -917,7 +919,7 @@ sub Kill
         unlink $noVNCPIDFile;
       }
     } else {
-      warn "noVNC process ID $pid already killed\n";
+      warn "noVNC web server process ID $pid already killed\n";
       unlink $noVNCPIDFile;
     }
   }
@@ -1051,14 +1053,10 @@ sub SanityCheck
     }
   }
 
-cmd2:
-  foreach $cmd ($exedir."Xvnc", $exedir."vncpasswd") {
-    for (split(/:/, $ENV{PATH})) {
-      if (-x "$cmd") {
-        next cmd2;
-      }
+  foreach $cmd ($exedir."Xvnc", $exedir."vncpasswd", $exedir."webserver") {
+    if (! -x "$cmd") {
+      die "$prog: couldn't find \"$cmd\".\n";
     }
-    die "$prog: couldn't find \"$cmd\".\n";
   }
 
   #
@@ -1124,7 +1122,6 @@ sub ReadConfiguration
        multiThread
        numThreads
        noVNC
-       noVNCCertFile
        passwdFile
        x509CertFile
        x509KeyFile
@@ -1150,7 +1147,6 @@ sub ReadAuthConfiguration($)
   my $acf = shift;
   my $enableVNC = 0;
   my $enableOTP = 0;
-  my $enableX509 = 0;
   my $permissionsSet = 0;
 
   return unless (open(ACF, $acf));
@@ -1178,9 +1174,6 @@ sub ReadAuthConfiguration($)
         if (substr(lc $tok, -3) eq 'vnc') {
           $enableVNC = 1;
         }
-        if (substr(lc $tok, 0, 4) eq 'x509') {
-          $enableX509 = 1;
-        }
       }
     }
   }
@@ -1192,9 +1185,6 @@ sub ReadAuthConfiguration($)
   }
   if ($enableOTP == 0) {
     $authTypeOTP = 0;
-  }
-  if ($enableX509 == 0) {
-    $encTypeX509 = 0;
   }
 
   close(ACF);

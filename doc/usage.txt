@@ -254,40 +254,40 @@ from a terminal in the TurboVNC session or from an SSH session on the host.
 {anchor: noVNC}
 
 When a TurboVNC session is started, the ''vncserver'' script can optionally
-start an instance of [[https://novnc.com][noVNC]], an HTML 5/JavaScript VNC
-viewer that works in any web browser (with reduced performance and features
-relative to the TurboVNC Viewer.)  This allows you to easily connect to a
-TurboVNC session from a machine that does not have the TurboVNC Viewer
-installed (including mobile devices.)
+start a simple web server that serves up [[https://novnc.com][noVNC]], an
+HTML 5/JavaScript VNC viewer that works in any web browser (with reduced
+performance and features relative to the TurboVNC Viewer.)  This allows you to
+easily connect to a TurboVNC session from a machine that does not have the
+TurboVNC Viewer installed (including mobile devices.)
 
 To launch noVNC along with a TurboVNC session, pass
-{pcode: -novnc __script__} to ''/opt/TurboVNC/bin/vncserver'' when starting
-the session, where __''script''__ is the launch script for the noVNC
-WebSockets proxy (setting the ''$noVNC'' variable in
-{file: turbovncserver.conf} has the same effect.)  The ''vncserver'' script
-will print the noVNC URL, which will be of the form:
+{pcode: -novnc __dir__} to ''/opt/TurboVNC/bin/vncserver'' when starting
+the session, where __''dir''__ is the directory containing noVNC (setting the
+''$noVNC'' variable in {file: turbovncserver.conf} has the same effect.)  The
+''vncserver'' script will print the noVNC URL, which will be of the form:
 
 #Pverb: <<---
-{plain: http://}__host__:__5800+n__/vnc.html
+{plain: http://}__host__:__5800+n__/vnc.html?host=__host__&port=__5900+n__
 ---
 
 or
 
 #Pverb: <<---
-{plain: https://}__host__:__5800+n__/vnc.html
+{plain: https://}__host__:__5800+n__/vnc.html?host=__host__&port=__5900+n__&encrypt=1
 ---
 
 where __''host''__ is the hostname or IP address of the TurboVNC host, and
 __''n''__ is the X display number of the TurboVNC session.
 
 Point your web browser to that URL in order to access the TurboVNC session.
-You can optionally pass {pcode: -novnccert __combined-certificate-file__} to
-''vncserver'' to encrypt the client/host connection using HTTPS.  See the
+You can optionally pass
+{pcode: -x509cert __certificate-file__ -x509key __private-key-file__} to
+''vncserver'' to encrypt both the HTTP and RFB connections.  See the
 ''vncserver'' man page for more details.
 
 	!!! NOTE: noVNC only supports VNC Password authentication, so it is strongly
 	recommended that it be used only with one-time passwords unless the
-	connection is encrypted using HTTPS.
+	connections are encrypted.
 
 ** Using SSH to Manually Secure a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}
