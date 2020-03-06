@@ -24,6 +24,9 @@
 /* Define to 1 if you have the `getzoneid' function. */
 #cmakedefine HAVE_GETZONEID
 
+/* Define to 1 if you have the <ieeefp.h> header file. */
+#cmakedefine HAVE_IEEEFP_H
+
 /* Define to 1 if you have the `reallocarray' function. */
 #cmakedefine HAVE_REALLOCARRAY
 
