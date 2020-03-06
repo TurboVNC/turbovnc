@@ -5,7 +5,7 @@
  *
  *  TurboVNC modifications:
  *
- *  Copyright (C) 2019 D. R. Commander
+ *  Copyright (C) 2019-2020 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,11 +40,28 @@
 
 #else
 
+#if !defined(__GLIBC__) || !defined(__GLIBC_MINOR__) || (__GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 9))
+
+#include <arpa/inet.h>
+#define WS_NTOH64(n)  \
+  ((uint64_t)ntohl((uint32_t)((uint64_t)(n) >> 32)) |  \
+   ((uint64_t)ntohl((uint32_t)(n)) << 32))
+#define WS_NTOH32(n) ntohl(n)
+#define WS_NTOH16(n) ntohs(n)
+#define WS_HTON64(n)  \
+  ((uint64_t)htonl((uint32_t)((uint64_t)(n) >> 32)) |  \
+   ((uint64_t)htonl((uint32_t)(n)) << 32))
+#define WS_HTON16(n) htons(n)
+
+#else
+
 #define WS_NTOH64(n) htobe64(n)
 #define WS_NTOH32(n) htobe32(n)
 #define WS_NTOH16(n) htobe16(n)
 #define WS_HTON64(n) htobe64(n)
 #define WS_HTON16(n) htobe16(n)
+
+#endif
 
 #endif
 
@@ -92,7 +109,7 @@ typedef union ws_mask_s {
  *      See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=4784
  */
 typedef struct
-#if __GNUC__
+#if defined(__GNUC__) || defined(__SUNPRO_C)
 __attribute__ ((__packed__))
 #endif
 ws_header_s {
@@ -100,7 +117,7 @@ ws_header_s {
   unsigned char b1;
   union {
     struct
-#if __GNUC__
+#if defined(__GNUC__) || defined(__SUNPRO_C)
     __attribute__ ((__packed__))
 #endif
            {
@@ -108,7 +125,7 @@ ws_header_s {
       ws_mask_t m16;
     } s16;
     struct
-#if __GNUC__
+#if defined(__GNUC__) || defined(__SUNPRO_C)
 __attribute__ ((__packed__))
 #endif
            {

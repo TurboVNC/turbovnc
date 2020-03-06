@@ -483,7 +483,6 @@ hybiReadAndDecode(ws_ctx_t *wsctx, char *dst, int len, int *sockRet, int nInBuf)
         errno = EAGAIN;
         return WS_HYBI_STATE_CLOSE_REASON_PENDING;
       }
-      break;
     case WS_OPCODE_TEXT_FRAME:
       data[toReturn] = '\0';
       ws_dbg("Initiate Base64 decoding in %p with max size %d and '\\0' at %p\n", data, bufsize, data + toReturn);
