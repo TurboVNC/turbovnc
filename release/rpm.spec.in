@@ -79,7 +79,9 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  -DCMAKE_INSTALL_SYSCONFDIR=%{sysconfdir} \
 #-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
 #-->  -DTVNC_BUILDVIEWER=%{viewer} -DTVNC_BUILDHELPER=%{helper} \
-#-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_INCLUDEJRE=%{jre} .
+#-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_INCLUDEJRE=%{jre} \
+#-->  -DPYTHON_EXECUTABLE=@PYTHON_EXECUTABLE@ \
+#-->  .
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 #-->make -j$NUMCPUS --load-average=$NUMCPUS
 
