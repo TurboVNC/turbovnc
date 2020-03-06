@@ -9,7 +9,7 @@
 
 /*
  *  Copyright (C) 2010 Joel Martin
- *  Copyright (C) 2018-2019 D. R. Commander
+ *  Copyright (C) 2018-2020 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -391,7 +391,7 @@ static int webSocketsEncodeHybi(rfbClientPtr cl, const char *src, int len,
   if (wsctx->base64) {
     if (-1 == (ret = rfbBase64NtoP((unsigned char *)src, len,
                                    wsctx->codeBufEncode + sz,
-                                   sizeof(wsctx->codeBufEncode) - sz))) {
+                                   wsctx->codeBufEncodeLen - sz))) {
       rfbLog("%s: Base 64 encode failed\n", __func__);
     } else {
       if (ret != blen)
