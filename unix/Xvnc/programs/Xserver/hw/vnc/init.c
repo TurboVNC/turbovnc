@@ -230,18 +230,6 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     return 1;
   }
 
-  if (strcasecmp(argv[i], "-httpd") == 0) {
-    if (i + 1 >= argc) UseMsg();
-    httpDir = argv[i + 1];
-    return 2;
-  }
-
-  if (strcasecmp(argv[i], "-httpport") == 0) {
-    if (i + 1 >= argc) UseMsg();
-    httpPort = atoi(argv[i + 1]);
-    return 2;
-  }
-
   if (strcasecmp(argv[i], "-idletimeout") == 0) {  /* -idletimeout sec */
     if (i + 1 >= argc) UseMsg();
     rfbIdleTimeout = atoi(argv[i + 1]);
@@ -692,8 +680,6 @@ void InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 #endif
 
   rfbInitSockets();
-  if (inetdSock == -1)
-    httpInitSockets();
 
   /* Initialize pixmap formats */
 
@@ -1573,8 +1559,6 @@ void ddxUseMsg(void)
   ErrorF("-disconnect            disconnect existing clients when a new non-shared\n"
          "                       connection comes in, rather than refusing the new\n"
          "                       connection\n");
-  ErrorF("-httpd dir             serve files from the specified directory using HTTP\n");
-  ErrorF("-httpport port         port for HTTP server\n");
   ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
   ErrorF("-inetd                 Xvnc is launched by inetd\n");
   ErrorF("-interface ipaddr      only bind to specified interface address\n");

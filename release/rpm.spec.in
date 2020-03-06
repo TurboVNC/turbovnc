@@ -39,27 +39,6 @@
 # Path under which the Java viewer should be installed
 %define javadir @CMAKE_INSTALL_FULL_JAVADIR@
 
-# Whether or not to include the TurboJPEG JNI JAR files (used when launching
-# the TurboVNC Viewer via Java Web Start)
-%define jnijars @TVNC_INCLUDEJNIJARS@
-
-# Directory in which the TurboJPEG JNI JARs can be found
-%if "%{jnijars}" == "1"
-%define jnijardir @TJPEG_JNIJARPATH@
-%endif
-
-# When building from a source RPM, these variables can be passed to rpmbuild in
-# order to sign the JAR file(s) using an official code signing certificate:
-#   java_keystore = value of CMake JAVA_KEYSTORE variable
-#   java_keystore_pass = value of CMake JAVA_KEYSTORE_PASS variable
-#   java_keystore_type = value of CMake JAVA_KEYSTORE_TYPE variable
-#   java_key_alias = value of CMake JAVA_KEY_ALIAS variable
-#   java_key_pass = value of CMake JAVA_KEY_PASS variable
-#   java_tsa_url = value of CMake JAVA_TSA_URL variable
-#   java_tsa_alg = value of CMake JAVA_TSA_ALG variable
-# The CMake variables in question are documented in java/CMakeLists.txt in the
-# TurboVNC source.
-
 Summary:   A highly-optimized version of VNC that can be used with performance-critical applications
 Name:      @PKGNAME@
 Version:   @VERSION@
@@ -92,30 +71,6 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->%setup -q -n @CMAKE_PROJECT_NAME_LC@-%{version}
 
 #-->%build
-#-->%if %{?java_keystore:1}%{!?java_keystore:0}
-#-->  JAVA_KEYSTORE_ARG="-DJAVA_KEYSTORE=%{java_keystore}"
-#-->%endif
-#-->%if %{?java_keystore_pass:1}%{!?java_keystore_pass:0}
-#-->  JAVA_KEYSTORE_PASS_ARG="-DJAVA_KEYSTORE_PASS=%{java_keystore_pass}"
-#-->%endif
-#-->%if %{?java_keystore_type:1}%{!?java_keystore_type:0}
-#-->  JAVA_KEYSTORE_TYPE_ARG="-DJAVA_KEYSTORE_TYPE=%{java_keystore_type}"
-#-->%endif
-#-->%if %{?java_key_alias:1}%{!?java_key_alias:0}
-#-->  JAVA_KEY_ALIAS_ARG="-DJAVA_KEY_ALIAS=%{java_key_alias}"
-#-->%endif
-#-->%if %{?java_key_pass:1}%{!?java_key_pass:0}
-#-->  JAVA_KEY_PASS_ARG="-DJAVA_KEY_PASS=%{java_key_pass}"
-#-->%endif
-#-->%if %{?java_tsa_url:1}%{!?java_tsa_url:0}
-#-->  JAVA_TSA_URL_ARG="-DJAVA_TSA_URL=%{java_tsa_url}"
-#-->%endif
-#-->%if %{?java_tsa_alg:1}%{!?java_tsa_alg:0}
-#-->  JAVA_TSA_ALG_ARG="-DJAVA_TSA_ALG=%{java_tsa_alg}"
-#-->%endif
-#-->%if "%{jnijars}" == "1"
-#-->  JNIJARS_ARGS="-DTVNC_INCLUDEJNIJARS=1 -DTJPEG_JNIJARPATH=%{jnijardir}"
-#-->%endif
 #-->cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=@CMAKE_BUILD_TYPE@ \
 #-->  -DBUILD=%{release} -DCMAKE_INSTALL_BINDIR=%{bindir} \
 #-->  -DCMAKE_INSTALL_DATADIR=%{datadir} -DCMAKE_INSTALL_DOCDIR=%{docdir} \
@@ -123,12 +78,8 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  -DCMAKE_INSTALL_PREFIX=%{prefix} \
 #-->  -DCMAKE_INSTALL_SYSCONFDIR=%{sysconfdir} \
 #-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
-#-->  $JAVA_KEYSTORE_ARG $JAVA_KEYSTORE_PASS_ARG $JAVA_KEYSTORE_TYPE_ARG \
-#-->  $JAVA_KEY_ALIAS_ARG $JAVA_KEY_PASS_ARG $JAVA_TSA_URL_ARG \
-#-->  $JAVA_TSA_ALG_ARG \
 #-->  -DTVNC_BUILDVIEWER=%{viewer} -DTVNC_BUILDHELPER=%{helper} \
-#-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_INCLUDEJRE=%{jre} \
-#-->  $JNIJARS_ARGS .
+#-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_INCLUDEJRE=%{jre} .
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 #-->make -j$NUMCPUS --load-average=$NUMCPUS
 
@@ -297,17 +248,6 @@ fi
  %{bindir}/vncconnect
 %endif
 %if "%{viewer}" == "1"
- %if "%{server}" == "1"
-  %config(noreplace) %{javadir}/VncViewer.jnlp
-  %{javadir}/favicon.ico
-  %if "%{jnijars}" == "1"
-   %{javadir}/ljtlinux32.jar
-   %{javadir}/ljtlinux64.jar
-   %{javadir}/ljtosx.jar
-   %{javadir}/ljtwin32.jar
-   %{javadir}/ljtwin64.jar
-  %endif
- %endif
  %{javadir}/VncViewer.jar
  %{javadir}/README.md
  %if "%{jre}" == "1"

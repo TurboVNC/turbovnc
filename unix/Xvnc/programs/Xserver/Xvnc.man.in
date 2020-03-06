@@ -71,15 +71,6 @@ Disconnect existing users when a new non-shared connection is established,
 rather than refusing the new connection.
 
 .TP
-\fB\-httpd\fR \fIdir\fR
-Specify directory where the Java viewer classes are located.
-
-.TP
-\fB\-httpport\fR \fIport\fR
-TCP port that the server should use when listening for connections from
-web browsers.
-
-.TP
 \fB\-idletimeout\fR \fItime\fR
 Amount of time, in seconds, that the TurboVNC session can sit idle (with no VNC
 viewer connections) before it automatically exits (default: no timeout.)  This
@@ -604,10 +595,6 @@ clipboard changes from their connected viewers.
 .IP \fIno-clipboard-send\fR
 This prevents any TurboVNC sessions started on this host from sending clipboard
 changes to their connected viewers.
-
-.IP \fIno-httpd\fR
-Do not allow the built-in HTTP server to be enabled in any TurboVNC session
-started on this host.
 
 .IP \fIno-pam-sessions\fR
 Do not allow PAM sessions to be created for any TurboVNC sessions started on

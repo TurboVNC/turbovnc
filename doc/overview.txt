@@ -93,8 +93,7 @@ In addition to high performance, other notable features of TurboVNC include:
 		a lossless refresh automatically if the user stops interacting with the
 		application for a certain period of time.
 
-	* High-performance feature-rich VNC viewer, which can optionally be
-		launched via Java Web Start
+	* High-performance feature-rich VNC viewer
 
 	* The TurboVNC Server integrates with [[https://novnc.com][noVNC]] to provide
 		a zero-install viewer for TurboVNC sessions that works in any web browser

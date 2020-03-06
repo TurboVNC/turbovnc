@@ -597,7 +597,6 @@ extern Bool  rfbAuthDisableRemoteResize;
 extern Bool  rfbAuthDisableRevCon;
 extern Bool  rfbAuthDisableCBSend;
 extern Bool  rfbAuthDisableCBRecv;
-extern Bool  rfbAuthDisableHTTP;
 extern Bool  rfbAuthDisableX11TCP;
 
 #ifdef XVNC_AuthPAM
@@ -730,14 +729,6 @@ extern Bool rfbSendRTTPing(rfbClientPtr cl);
 
 extern Bool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
                                        int h);
-
-
-/* httpd.c */
-
-extern int httpPort;
-extern char *httpDir;
-
-extern void httpInitSockets(void);
 
 
 /* init.c */

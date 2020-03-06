@@ -16,15 +16,6 @@ set(CLASSPATH com/turbovnc/vncviewer)
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 
-set(JAVA_KEYSTORE "" CACHE FILEPATH "URL or pathname of the Java keystore (Default: ~/.keystore)")
-set(DEFAULT_JAVA_KEYSTORE_TYPE "jks")
-set(JAVA_KEYSTORE_TYPE ${DEFAULT_JAVA_KEYSTORE_TYPE} CACHE STRING "Java keystore type (Default: ${DEFAULT_JAVA_KEYSTORE_TYPE})")
-set(JAVA_KEYSTORE_PASS "" CACHE STRING "Java keystore password (plain-text.)  Add a prefix of env: to specify an environment variable from which to read the password, or a prefix of file: to specify a file from which to read the password.")
-set(JAVA_KEY_ALIAS "" CACHE STRING "Alias for the signing certificate's entry in the Java keystore.  Leave this blank to sign the JAR file using a self-signed certificate.")
-set(JAVA_KEY_PASS "" CACHE STRING "Password for the signing certificate's entry in the Java keystore (plain-text.)  Add a prefix of env: to specify an environment variable from which to read the password, or a prefix of file: to specify a file from which to read the password.")
-set(JAVA_TSA_URL "" CACHE STRING "URL of Timestamp Authority (TSA)")
-set(JAVA_TSA_ALG "" CACHE STRING "Timestamp Authority (TSA) message digest algorithm")
-
 string(TIMESTAMP DEFAULT_JAVA_DATE "%Y-%m-%d")
 set(JAVA_DATE ${DEFAULT_JAVA_DATE} CACHE STRING "Java date stamp")
 mark_as_advanced(JAVA_DATE)
@@ -53,13 +44,6 @@ if(APPLE)
 	set(DEFAULT_TJPEG_JNILIBRARY /opt/libjpeg-turbo/lib/libturbojpeg.dylib)
 	set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE FILEPATH
 		"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
-endif()
-
-if(UNIX AND TVNC_BUILDSERVER)
-	set(DEFAULT_TVNC_INCLUDEJNIJARS 0)
-	option(TVNC_INCLUDEJNIJARS "Include TurboJPEG JNI JARs for common platforms when installing/packaging TurboVNC, sign the JARs using the same certificate as VncViewer.jar, and make them available through Java Web Start when using the built-in HTTP server."
-		${DEFAULT_TVNC_INCLUDEJNIJARS})
-	boolean_number(TVNC_INCLUDEJNIJARS PARENT_SCOPE)
 endif()
 
 set(JAVA_SOURCES "")
@@ -173,44 +157,8 @@ endforeach()
 
 endif()
 
-if(TVNC_BUILDSERVER)
-
-set(TVNCJNIOPENCOMMENT "<?comment")
-set(TVNCJNICLOSECOMMENT "?>")
-if(TVNC_INCLUDEJNIJARS)
-	set(TVNCJNIOPENCOMMENT "")
-	set(TVNCJNICLOSECOMMENT "")
-endif()
-configure_file(${SRCDIR}/${CLASSPATH}/VncViewer.jnlp.in
-	${BINDIR}/VncViewer.jnlp)
-
-add_custom_target(favicon.ico ALL
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/favicon.ico ${BINDIR}/favicon.ico
-	DEPENDS ${SRCDIR}/${CLASSPATH}/favicon.ico)
-
-endif()
-
 string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
-
-if(NOT JAVA_KEY_ALIAS)
-	set(KEYTOOL "${Java_PATH}/keytool")
-	add_custom_command(OUTPUT turbovnc.keystore
-		COMMAND ${KEYTOOL}
-		ARGS -genkey -alias TurboVNC -keystore turbovnc.keystore -keyalg RSA
-			-storepass turbovnc -keypass turbovnc -validity 7300
-			-dname "CN=TurboVNC, OU=Software Development, O=The VirtualGL Project, L=Austin, S=Texas, C=US")
-	set(JAVA_KEYSTORE "turbovnc.keystore")
-	set(JAVA_KEYSTORE_TYPE "jks")
-	set(JAVA_KEYSTORE_PASS "turbovnc")
-	set(JAVA_KEY_ALIAS "TurboVNC")
-	set(JAVA_KEY_PASS "turbovnc")
-	set(JAVA_TSA_URL "")
-	set(JAVA_TSA_ALG "")
-	add_custom_target(keystore DEPENDS turbovnc.keystore)
-	set(JAVA_KEYSTORE_DEPENDS keystore)
-endif()
 
 add_custom_command(OUTPUT VncViewer.jar
 	DEPENDS ${JAVA_CLASSES}
@@ -223,12 +171,11 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/insecure.png
 		${BINDIR}/${CLASSPATH}/secure.png
 		${TJPEG_JAR}
-		${JAVA_KEYSTORE_DEPENDS}
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
 		org/libjpegturbo/turbojpeg
 	COMMAND ${JAVA_ARCHIVE}
-	ARGS cfm VncViewer-unsigned.jar
+	ARGS cfm VncViewer.jar
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
 		${CLASSPATH}/timestamp
 		${CLASSPATH}/*.class
@@ -250,21 +197,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		${CLASSPATH}/turbovnc-sm.png
 		${CLASSPATH}/turbovnc-128.png
 		${CLASSPATH}/insecure.png
-		${CLASSPATH}/secure.png
-	COMMAND ${CMAKE_COMMAND}
-	ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/VncViewer-unsigned.jar
-		-DJAVA_KEYSTORE=${JAVA_KEYSTORE}
-		-DJAVA_KEYSTORE_TYPE=${JAVA_KEYSTORE_TYPE}
-		-DJAVA_KEYSTORE_PASS=${JAVA_KEYSTORE_PASS}
-		-DJAVA_KEY_ALIAS=${JAVA_KEY_ALIAS}
-		-DJAVA_KEY_PASS=${JAVA_KEY_PASS}
-		-DJAVA_TSA_URL=${JAVA_TSA_URL}
-		-DJAVA_TSA_ALG=${JAVA_TSA_ALG}
-		-P ${SRCDIR}/cmake/SignJar.cmake
-	COMMAND ${CMAKE_COMMAND}
-	ARGS -E copy_if_different VncViewer-unsigned.jar VncViewer.jar
-	COMMAND ${CMAKE_COMMAND}
-	ARGS -E remove VncViewer-unsigned.jar)
+		${CLASSPATH}/secure.png)
 
 add_custom_target(java ALL DEPENDS VncViewer.jar)
 
@@ -281,32 +214,6 @@ set(CMAKE_INSTALL_JAVADIR ${CMAKE_INSTALL_JAVADIR} PARENT_SCOPE)
 set(CMAKE_INSTALL_FULL_JAVADIR ${CMAKE_INSTALL_FULL_JAVADIR} PARENT_SCOPE)
 mark_as_advanced(CLEAR CMAKE_INSTALL_JAVADIR)
 report_directory(JAVADIR)
-
-if(TVNC_BUILDSERVER AND TVNC_INCLUDEJNIJARS)
-	set(DEFAULT_TJPEG_JNIJARPATH /opt/libjpeg-turbo-jni)
-	set(TJPEG_JNIJARPATH ${DEFAULT_TJPEG_JNIJARPATH} CACHE PATH
-		"Directory containing TurboJPEG JNI JARs (default: ${DEFAULT_TJPEG_JNIJARPATH})")
-	set(JNI_JAR_FILES ljtlinux32.jar ljtlinux64.jar ljtosx.jar ljtwin32.jar
-		ljtwin64.jar)
-	foreach(jarfile ${JNI_JAR_FILES})
-		add_custom_command(OUTPUT ${jarfile}
-			DEPENDS ${JAVA_KEYSTORE_DEPENDS}
-			COMMAND ${CMAKE_COMMAND}
-			ARGS -E copy_if_different ${TJPEG_JNIJARPATH}/${jarfile} ${jarfile}
-			COMMAND ${CMAKE_COMMAND}
-			ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/${jarfile}
-				-DJAVA_KEYSTORE=${JAVA_KEYSTORE}
-				-DJAVA_KEYSTORE_TYPE=${JAVA_KEYSTORE_TYPE}
-				-DJAVA_KEYSTORE_PASS=${JAVA_KEYSTORE_PASS}
-				-DJAVA_KEY_ALIAS=${JAVA_KEY_ALIAS}
-				-DJAVA_KEY_PASS=${JAVA_KEY_PASS}
-				-DJAVA_TSA_URL=${JAVA_TSA_URL}
-				-DJAVA_TSA_ALG=${JAVA_TSA_ALG}
-				-P ${SRCDIR}/cmake/SignJar.cmake)
-		install(FILES ${BINDIR}/${jarfile} DESTINATION ${CMAKE_INSTALL_JAVADIR})
-	endforeach()
-	add_custom_target(jnijars ALL DEPENDS ${JNI_JAR_FILES})
-endif()
 
 option(TVNC_INCLUDEJRE "Include a custom Java Runtime Environment (JRE) with the TurboVNC Viewer"
 	FALSE)
@@ -340,11 +247,6 @@ endif()
 install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${CMAKE_INSTALL_JAVADIR})
 install(FILES ${SRCDIR}/${CLASSPATH}/README.md
 	DESTINATION ${CMAKE_INSTALL_JAVADIR})
-if(TVNC_BUILDSERVER)
-	install(FILES ${BINDIR}/VncViewer.jnlp DESTINATION ${CMAKE_INSTALL_JAVADIR})
-	install(FILES ${SRCDIR}/${CLASSPATH}/favicon.ico
-		DESTINATION ${CMAKE_INSTALL_JAVADIR})
-endif()
 if(TVNC_INCLUDEJRE)
 	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/jre
 		DESTINATION ${CMAKE_INSTALL_JAVADIR} USE_SOURCE_PERMISSIONS)

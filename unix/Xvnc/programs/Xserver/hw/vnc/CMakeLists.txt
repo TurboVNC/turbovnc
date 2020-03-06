@@ -70,7 +70,6 @@ add_library(vnc STATIC
 	draw.c
 	flowcontrol.c
 	hextile.c
-	httpd.c
 	init.c
 	input-xkb.c
 	kbdptr.c

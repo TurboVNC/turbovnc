@@ -65,7 +65,6 @@ Bool rfbAuthDisableRemoteResize = FALSE;
 Bool rfbAuthDisableRevCon = FALSE;
 Bool rfbAuthDisableCBSend = FALSE;
 Bool rfbAuthDisableCBRecv = FALSE;
-Bool rfbAuthDisableHTTP = FALSE;
 Bool rfbAuthDisableX11TCP = FALSE;
 
 static int nSecTypesEnabled = 0;
@@ -568,11 +567,6 @@ static void ReadConfigFile(void)
 
     if (!strcmp(buf2, "no-clipboard-recv")) {
       rfbAuthDisableCBRecv = TRUE;
-      continue;
-    }
-
-    if (!strcmp(buf2, "no-httpd")) {
-      rfbAuthDisableHTTP = TRUE;
       continue;
     }
 

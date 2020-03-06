@@ -36,12 +36,6 @@ if ($slashndx >= 0) {
   $exedir = substr($0, 0, $slashndx + 1);
 }
 
-# The script looks for the Java classes in $exedir/../java first, then if
-# it can't find them there, it looks in the directory specified by
-# $vncClasses.
-
-$vncClasses = "@CMAKE_INSTALL_FULL_JAVADIR@";
-
 $xauth = "xauth";
 
 &SanityCheck();
@@ -56,7 +50,6 @@ $authTypeOTP = 1;
 $generateOTP = 0;
 $securityTypes = "";
 $encTypeX509 = @USETLS@;
-$enableHTTP = 0;
 $skipxstartup = 0;
 $autoLosslessRefresh = 0.0;
 $deferUpdate = 1;
@@ -218,11 +211,11 @@ foreach $_registrydir (@registrydirs) {
 &ParseOptions("-geometry", 1, "-depth", 1, "-pixelformat", 1, "-name", 1,
               "-kill", 1, "-help", 0, "-h", 0, "--help", 0, "-fg", 0,
               "-list", 0, "-fp", 1, "-otp", 0, "-securitytypes", 1,
-              "-nohttp", 0, "-nohttpd", 0, "-rfbauth", 1, "-noxstartup", 0,
-              "-xstartup", 1, "-log", 1, "-3dwm", 0, "-vgl", 0, "-debug", 0,
-              "-x509cert", 1, "-x509key", 1, "-autokill", 0, "-quiet", 0,
-              "-wm", 1, "-sessionlist", 0, "-sessionstart", 0, "-http", 0,
-              "-httpd", 0, "-novnc", 1, "-novnccert", 1, "-noautokill", 0);
+              "-rfbauth", 1, "-noxstartup", 0, "-xstartup", 1, "-log", 1,
+              "-3dwm", 0, "-vgl", 0, "-debug", 0, "-x509cert", 1,
+              "-x509key", 1, "-autokill", 0, "-quiet", 0, "-wm", 1,
+              "-sessionlist", 0, "-sessionstart", 0, "-novnc", 1,
+              "-novnccert", 1, "-noautokill", 0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -249,18 +242,6 @@ if ($opt{'-depth'}) {
 }
 if ($opt{'-pixelformat'}) {
   $pixelformat = $opt{'-pixelformat'};
-}
-if ($opt{'-http'}) {
-  if ($opt{'-novnc'}) {
-    die "-http and -novnc cannot be used simultaneously.\n";
-  }
-  $enableHTTP = 1;
-}
-if ($opt{'-httpd'}) {
-  if ($opt{'-novnc'}) {
-    die "-httpd and -novnc cannot be used simultaneously.\n";
-  }
-  $enableHTTP = 1;
 }
 if ($opt{'-novnc'}) {
   $noVNC = $opt{'-novnc'};
@@ -468,7 +449,6 @@ if ($vncUserDirUnderTmp) {
 $cmd = $exedir."Xvnc :$displayNumber";
 $cmd .= " -dpi $dpi" if ($dpi);
 $cmd .= " -desktop " . &quotedString($desktopName);
-$cmd .= " -httpd $vncClasses" if ($enableHTTP && $vncClasses);
 $cmd .= " -auth $xauthorityFile";
 $cmd .= " -geometry $geometry" if ($geometry);
 $cmd .= " -depth $depth" if ($depth);
@@ -833,7 +813,6 @@ sub Usage
       "        -pixelformat bgr<NNN>\n".
       "        -fp <FONT-PATH>\n".
       "        -name <DESKTOP-NAME>\n".
-      "        -httpd\n".
       "        -novnc <SCRIPT>\n".
       "        -novnccert <CERT-FILE>\n".
       "        -otp\n".
@@ -1076,9 +1055,6 @@ cmd2:
   foreach $cmd ($exedir."Xvnc", $exedir."vncpasswd") {
     for (split(/:/, $ENV{PATH})) {
       if (-x "$cmd") {
-        if (-d "$exedir/../java") {
-          $vncClasses = "$exedir/../java";
-        }
         next cmd2;
       }
     }
@@ -1136,13 +1112,11 @@ sub ReadConfiguration
        depth
        desktopName
        dpi
-       vncClasses
        vncUserDir
        fontPath
        securityTypes
        generateOTP
        autoLosslessRefresh
-       enableHTTP
        wm
        useVGL
        autokill

@@ -1505,13 +1505,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "an ASCII hex VNC password on the TurboVNC host by executing\n " +
   "'cat {VNC_password_file} | xxd -c 256 -ps' or\n " +
   "'echo {unencrypted_password} | /opt/TurboVNC/bin/vncpasswd -f | xxd -c 256 -ps'\n " +
-  "This parameter is provided mainly so that web portals can embed a " +
-  "password in automatically-generated Java Web Start (JNLP) files without " +
-  "exposing the password as plain text.  However, the encryption scheme " +
-  "(DES3) used for VNC passwords is not particularly strong, so encrypting " +
-  "the password guards against only the most casual of attacks.  It is thus " +
-  "recommended that this parameter be used only in conjunction with a " +
-  "one-time password or other disposable token.", null);
+  "This parameter allows a password to be supplied to the TurboVNC Viewer " +
+  "without exposing the password as plain text.  However, the encryption " +
+  "scheme (DES3) used for VNC passwords is not particularly strong, so " +
+  "encrypting the password guards against only the most casual of attacks.  " +
+  "It is thus recommended that this parameter be used only in conjunction " +
+  "with a one-time password or other disposable token.", null);
 
   static BoolParameter extSSH =
   new BoolParameter("ExtSSH",

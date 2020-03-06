@@ -8,7 +8,6 @@
 ##                  W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]
 ##  $depth       -- color depth in bits per pixel (between 8 and 32)
 ##  $desktopName -- X desktop name
-##  $vncClasses  -- directory containing the Java VNC viewer classes
 ##  $vncUserDir  -- path to TurboVNC user directory (session information,
 ##                  VNC passwords, and log files are stored here)
 ##  $fontPath    -- X font path
@@ -16,8 +15,6 @@
 ##                    (passed to Xvnc in the -securitytypes argument)
 ##  $generateOTP -- 1 to generate an initial one-time password.  (OTP
 ##                  authentication must be enabled and permitted)
-##  $enableHTTP  -- 1 to enable the embedded web server (which serves up the
-##                  TurboVNC Viewer via Java Web Start) or 0 to disable
 ##  $wm          -- the window manager startup script to use (for instance,
 ##                  "mate-session" or "2d")
 ##  $useVGL      -- 1 to run the window manager startup script using VirtualGL
@@ -41,12 +38,10 @@
 # $geometry = "1240x900";
 # $depth = 24;
 # $desktopName = "TurboVNC ($ENV{USER})";
-# $vncClasses = "@CMAKE_INSTALL_FULL_JAVADIR@";
 # $vncUserDir = "$ENV{HOME}/.vnc";
 # $fontPath = "";
 # $securityTypes = "TLSVnc, TLSOtp, TLSPlain, X509Vnc, X509Otp, X509Plain, VNC, OTP, UnixLogin, Plain";
 # $generateOTP = 0;
-# $enableHTTP = 0;
 # $wm = "";
 # $useVGL = 0;
 # $autokill = 1;
