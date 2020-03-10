@@ -191,7 +191,18 @@ public final class SessionManager extends Tunnel {
       if (!result.startsWith("[TURBOVNC] ")) continue;
       result = result.replace("[TURBOVNC] ", "");
       if (error == null && result.length() > 0) error = result;
-      sessions = result.split(" ");
+      String[] splitResult = result.split("\t");
+      if (splitResult.length >= 2) {
+        int numSessions = Integer.parseInt(splitResult[0]);
+        int numFields = Integer.parseInt(splitResult[1]);
+        if (numSessions > 0 && numFields > 0 &&
+            splitResult.length == numSessions * numFields + 2) {
+          ArrayList<String> sessionList = new ArrayList<String>();
+          for (int index = 2; index < splitResult.length; index += numFields)
+            sessionList.add(splitResult[index]);
+          sessions = sessionList.toArray(new String[numSessions]);
+        }
+      }
       break;
     }
 
