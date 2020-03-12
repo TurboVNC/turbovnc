@@ -20,6 +20,10 @@ set to `0`, causes the Java TurboVNC Viewer's built-in SSH client to display
 the SSH server's banner message on the command line rather than in a dialog
 box.
 
+5. Fixed an issue in the Java TurboVNC Viewer whereby, in listen mode, the
+full-screen mode setting did not take effect if it was changed in the Default
+Options dialog.
+
 
 2.2.4
 =====
