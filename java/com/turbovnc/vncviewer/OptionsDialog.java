@@ -724,8 +724,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "ViewOnly", viewOnly.isSelected());
 
     // DISPLAY
-    //   (no GUI equivalent)
     UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
+    //   (no GUI equivalent)
     if (VncViewer.colors.getValue() != -1)
       UserPreferences.set("global", "Colors", VncViewer.colors.getValue());
     UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
@@ -765,18 +765,15 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "Subsampling", subsamplingStr);
 
     // SECURITY AND AUTHENTICATION
-    UserPreferences.set("global", "secVeNCrypt", secVeNCrypt.isSelected());
     UserPreferences.set("global", "encNone", encNone.isSelected());
     UserPreferences.set("global", "encTLS", encTLS.isSelected());
     UserPreferences.set("global", "encX509", encX509.isSelected());
-    UserPreferences.set("global", "secNone", secNone.isSelected());
-    UserPreferences.set("global", "secVnc", secVnc.isSelected());
-    UserPreferences.set("global", "secUnixLogin", secUnixLogin.isSelected());
-    UserPreferences.set("global", "secPlain", secPlain.isSelected());
     UserPreferences.set("global", "secIdent", secIdent.isSelected());
-    UserPreferences.set("global", "x509ca", x509ca.getText());
-    UserPreferences.set("global", "x509crl", x509crl.getText());
-
+    UserPreferences.set("global", "secNone", secNone.isSelected());
+    UserPreferences.set("global", "secPlain", secPlain.isSelected());
+    UserPreferences.set("global", "secUnixLogin", secUnixLogin.isSelected());
+    UserPreferences.set("global", "secVeNCrypt", secVeNCrypt.isSelected());
+    UserPreferences.set("global", "secVnc", secVnc.isSelected());
     UserPreferences.set("global", "SendLocalUsername",
                         sendLocalUsername.isSelected());
     UserPreferences.set("global", "tunnel", tunnel.isSelected());
@@ -785,6 +782,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           gateway.getText());
     else
       UserPreferences.set("global", "via", gateway.getText());
+    UserPreferences.set("global", "x509ca", x509ca.getText());
+    UserPreferences.set("global", "x509crl", x509crl.getText());
   }
 
   JRadioButton addRadioCheckbox(String str, ButtonGroup group, JPanel panel) {
