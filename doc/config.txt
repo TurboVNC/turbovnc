@@ -148,8 +148,8 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	beginning with the "%" character, and uses the resulting command line to
 	establish the secure tunnel to the VNC gateway.  If ''VNC_VIA_CMD'' is not
 	set, then this command line defaults to
-	''/usr/bin/ssh -f -L %L:%H:%R %G sleep 20'' (or
-	''ssh.exe -f -L %L:%H:%R %G sleep 20'' if using the Windows native viewer.)
+	''/usr/bin/ssh -f -L %L:%H:%R %G sleep 20'' on Linux/Un*x and Mac systems and
+	''ssh.exe -f -L %L:%H:%R %G sleep 20'' on Windows systems.
 	{nl}{nl}
 	When the ''-tunnel'' option (or the ''tunnel'' parameter in the Java viewer,
 	along with the ''extssh'' parameter) is used, the TurboVNC Viewer reads the
@@ -158,9 +158,8 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	beginning with the "%" character, and uses the resulting command line to
 	establish the secure tunnel to the VNC host.  If ''VNC_TUNNEL_CMD'' is not
 	set, then this command line defaults to
-	''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20'' (or
-	''ssh.exe -f -L %L:localhost:%R %H sleep 20'' if using the Windows native
-	viewer.)
+	''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20'' on Linux/Un*x and Mac
+	systems and	''ssh.exe -f -L %L:localhost:%R %H sleep 20'' on Windows systems.
 	{nl}{nl}
 	The following patterns are recognized in the ''VNC_VIA_CMD'' and
 	''VNC_TUNNEL_CMD'' environment variables (note that ''%H'', ''%L'' and ''%R''

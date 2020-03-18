@@ -189,7 +189,8 @@ public final class Tunnel {
      VNC_TUNNEL_CMD and VNC_VIA_CMD environment variables as the native viewers
      do. */
 
-  private static final String DEFAULT_SSH_CMD = "/usr/bin/ssh";
+  private static final String DEFAULT_SSH_CMD =
+    (VncViewer.OS.startsWith("windows") ? "ssh.exe" : "/usr/bin/ssh");
   private static final String DEFAULT_TUNNEL_CMD =
     DEFAULT_SSH_CMD + " -f -L %L:localhost:%R %H sleep 20";
   private static final String DEFAULT_VIA_CMD =
@@ -206,9 +207,14 @@ public final class Tunnel {
                                     remotePort, localPort, opts);
 
     vlog.debug("SSH command line: " + command);
-    Process p = Runtime.getRuntime().exec(command);
-    if (p != null)
-      p.waitFor();
+    List<String> args = ArgumentTokenizer.tokenize(command);
+    ProcessBuilder pb = new ProcessBuilder(args);
+    pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
+    pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+    pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+    Process p = pb.start();
+    if (p == null || p.waitFor() != 0)
+      throw new ErrorException("External SSH error");
   }
 
   private static String fillCmdPattern(String pattern, String gatewayHost,

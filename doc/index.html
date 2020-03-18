@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-02-26T23:56:33">
+<meta name="date" content="2020-03-18T16:52:57">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2953,27 +2953,26 @@ about how Hextile, RRE, and ZRLE work.</p>
         to establish the secure tunnel to the VNC gateway.  If 
         <code>VNC_VIA_CMD</code> is not set, then this command line defaults to 
         <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
-        (or 
+        on Linux/Un*x and Mac systems and 
         <code>ssh.exe&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
-        if using the Windows native viewer.) <br /><br /> When the 
-        <code>-tunnel</code> option (or the <code>tunnel</code> parameter in the 
-        Java viewer, along with the <code>extssh</code> parameter) is used, the 
-        TurboVNC Viewer reads the <code>VNC_TUNNEL_CMD</code> environment 
-        variable (the Java viewer can also read this information from the 
-        <code>turbovnc.tunnel</code> system property), expands patterns 
-        beginning with the &ldquo;%&rdquo; character, and uses the resulting 
-        command line to establish the secure tunnel to the VNC host.  If 
-        <code>VNC_TUNNEL_CMD</code> is not set, then this command line defaults 
-        to 
+        on Windows systems. <br /><br /> When the <code>-tunnel</code> option 
+        (or the <code>tunnel</code> parameter in the Java viewer, along with the 
+        <code>extssh</code> parameter) is used, the TurboVNC Viewer reads the 
+        <code>VNC_TUNNEL_CMD</code> environment variable (the Java viewer can 
+        also read this information from the <code>turbovnc.tunnel</code> system 
+        property), expands patterns beginning with the &ldquo;%&rdquo; 
+        character, and uses the resulting command line to establish the secure 
+        tunnel to the VNC host.  If <code>VNC_TUNNEL_CMD</code> is not set, then 
+        this command line defaults to 
         <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
-        (or 
+        on Linux/Un*x and Mac systems and	
         <code>ssh.exe&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
-        if using the Windows native viewer.) <br /><br /> The following patterns 
-        are recognized in the <code>VNC_VIA_CMD</code> and 
-        <code>VNC_TUNNEL_CMD</code> environment variables (note that 
-        <code>%H</code>, <code>%L</code> and <code>%R</code> must be present in 
-        the command template, and <code>%G</code> must also be present if using 
-        the <code>-via</code> option): <br /><br />
+        on Windows systems. <br /><br /> The following patterns are recognized 
+        in the <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> 
+        environment variables (note that <code>%H</code>, <code>%L</code> and 
+        <code>%R</code> must be present in the command template, and 
+        <code>%G</code> must also be present if using the <code>-via</code> 
+        option): <br /><br />
         <div class="table">
         <table class="standard">
           <tr class="standard">
