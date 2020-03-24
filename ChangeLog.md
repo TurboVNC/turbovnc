@@ -161,6 +161,17 @@ set to `0`, causes the Java TurboVNC Viewer's built-in SSH client to display
 the SSH server's banner message on the command line rather than in a dialog
 box.
 
+5. Fixed an issue in the Java TurboVNC Viewer whereby, in listen mode, the
+full-screen mode setting did not take effect if it was changed in the Default
+Options dialog.
+
+6. The external SSH feature in the Java TurboVNC Viewer now redirects input and
+output from the SSH subprocess to the console that launched the viewer.  In
+addition to allowing external SSH issues to be diagnosed more easily, this also
+allows interactive SSH authentication methods to be used on Windows.
+Furthermore, the Java TurboVNC Viewer now throws an error if the SSH subprocess
+fails to launch for any reason.
+
 
 2.2.4
 =====

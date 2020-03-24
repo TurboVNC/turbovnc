@@ -774,6 +774,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
     opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
     opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
+    opts.fullScreen = options.fullScreen.isSelected();
 
     int index = options.span.getSelectedIndex();
     if (index >= 0 && index < Options.NUMSPANOPT)

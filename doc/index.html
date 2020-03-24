@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-03-06T01:57:14">
+<meta name="date" content="2020-03-23T21:04:03">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2099,7 +2099,7 @@ VGL Transport.</p>
     </li>
     <li class="Itemize-1 Itemize asterisk">
         From the point of view of the 3D application, the TurboVNC client/server 
-        connection is stateless.  If the network hiccups or the viewer is	
+        connection is stateless.  If the network hiccups or the viewer is 
         otherwise disconnected, the TurboVNC session continues to run on the 
         host and can be rejoined from any machine on the network.
     </li>
@@ -2127,7 +2127,7 @@ VGL Transport.</p>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC will generally require about 20% more host/server CPU cycles to 
         maintain the same frame rate as the VGL Transport, both because it has 
-        to compress more pixels in each frame	(an entire desktop rather than a 
+        to compress more pixels in each frame (an entire desktop rather than a 
         single window) and because it has to perform 2D (X11) rendering as well 
         as 3D rendering.
     </li>
@@ -2612,7 +2612,7 @@ about how Hextile, RRE, and ZRLE work.</p>
     <dd class="Description-1 Description">
         Applications can sometimes draw many thousands of points or tiny lines 
         using individual X11 calls, and this can cause the VNC server to send 
-        many	thousands of tiny rectangles to the VNC viewer.  The overhead 
+        many thousands of tiny rectangles to the VNC viewer.  The overhead 
         associated with this can bog down the viewer, and in extreme cases, the 
         number of rectangles may even exceed the maximum number that is allowed 
         in a single framebuffer update (65534.)  Thus, if a framebuffer update 
@@ -3210,23 +3210,27 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
         <code>turbovnc.via</code> system property, expands patterns beginning 
         with the &ldquo;%&rdquo; character, and uses the resulting command line 
         to establish the secure tunnel to the VNC gateway.  If 
-        <code>VNC_VIA_CMD</code> is not set, then this command line defaults to 
-        <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code>. 
-        <br /><br /> When the <code>-tunnel</code> option is used along with the 
-        <code>-extssh</code> option, the TurboVNC Viewer reads the 
-        <code>VNC_TUNNEL_CMD</code> environment variable or the 
+        <code>VNC_VIA_CMD</code> is not set, then this command line defaults to  
+        <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
+        on Linux/Un*x and Mac systems and 
+        <code>ssh.exe&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
+        on Windows systems. <br /><br /> When the <code>-tunnel</code> option is 
+        used along with the <code>-extssh</code> option, the TurboVNC Viewer 
+        reads the <code>VNC_TUNNEL_CMD</code> environment variable or the 
         <code>turbovnc.tunnel</code> system property, expands patterns beginning 
         with the &ldquo;%&rdquo; character, and uses the resulting command line 
         to establish the secure tunnel to the VNC host.  If 
         <code>VNC_TUNNEL_CMD</code> is not set, then this command line defaults 
         to 
-        <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>. 
-        <br /><br /> The following patterns are recognized in the 
-        <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> environment 
-        variables and their corresponding system properties (note that 
-        <code>%H</code>, <code>%L</code> and <code>%R</code> must be present in 
-        the command template, and <code>%G</code> must also be present if using 
-        the <code>-via</code> option): <br /><br />
+        <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
+        on Linux/Un*x and Mac systems and 
+        <code>ssh.exe&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
+        on Windows systems. <br /><br /> The following patterns are recognized 
+        in the <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> 
+        environment variables and their corresponding system properties (note 
+        that <code>%H</code>, <code>%L</code> and <code>%R</code> must be 
+        present in the command template, and <code>%G</code> must also be 
+        present if using the <code>-via</code> option): <br /><br />
         <div class="table">
         <table class="standard">
           <tr class="standard">

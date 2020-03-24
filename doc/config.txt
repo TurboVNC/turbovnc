@@ -27,7 +27,7 @@ rectangles |
 
 	Description :: Applications can sometimes draw many thousands of points or
 	tiny lines using individual X11 calls, and this can cause the VNC server to
-	send many	thousands of tiny rectangles to the VNC viewer.  The overhead
+	send many thousands of tiny rectangles to the VNC viewer.  The overhead
 	associated with this can bog down the viewer, and in extreme cases, the
 	number of rectangles may even exceed the maximum number that is allowed in a
 	single framebuffer update (65534.)  Thus, if a framebuffer update contains
@@ -291,14 +291,17 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	the ''turbovnc.via'' system property, expands patterns beginning with the "%"
 	character, and uses the resulting command line to establish the secure tunnel
 	to the VNC gateway.  If ''VNC_VIA_CMD'' is not set, then this command line
-	defaults to ''/usr/bin/ssh -f -L %L:%H:%R %G sleep 20''. \
+	defaults to  ''/usr/bin/ssh -f -L %L:%H:%R %G sleep 20'' on Linux/Un*x and
+	Mac systems and ''ssh.exe -f -L %L:%H:%R %G sleep 20'' on Windows systems.
 	{nl}{nl} \
 	When the ''-tunnel'' option is used along with the ''-extssh'' option, the
 	TurboVNC Viewer reads the ''VNC_TUNNEL_CMD'' environment variable or the
 	''turbovnc.tunnel'' system property, expands patterns beginning with the "%"
 	character, and uses the resulting command line to establish the secure tunnel
 	to the VNC host.  If ''VNC_TUNNEL_CMD'' is not set, then this command line
-	defaults to ''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20''. \
+	defaults to ''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20'' on Linux/Un*x
+	and Mac systems and ''ssh.exe -f -L %L:localhost:%R %H sleep 20'' on Windows
+	systems.
 	{nl}{nl} \
 	The following patterns are recognized in the ''VNC_VIA_CMD'' and
 	''VNC_TUNNEL_CMD'' environment variables and their corresponding system
