@@ -66,6 +66,6 @@ public final class Helper {
 
   static boolean triedInit, available;
 
-  protected Helper() {}
+  private Helper() {}
   static LogWriter vlog = new LogWriter("Helper");
 }
