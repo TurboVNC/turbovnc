@@ -64,10 +64,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
     new PixelFormat(16, 16, false, true, 31, 63, 31, 11, 5, 0);
   static final int SUPER_MASK = 1 << 16;
 
-  static final double getTime() {
-    return (double)System.nanoTime() / 1.0e9;
-  }
-
   // RFB thread
   public CConn(VncViewer viewer_, Socket sock_) {
     sock = sock_;  viewer = viewer_;
@@ -92,7 +88,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
     pressedKeys = new HashMap<Integer, Integer>();
 
     setShared(opts.shared);
-    upg = this;
 
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
@@ -244,6 +239,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // RFB thread: getUserPasswd() is called by the CSecurity object when it
   // needs us to read a password from the user.
+  @Override
   public final boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
     String title = ((user == null ? "Standard VNC Authentication" :
                                     "Unix Login Authentication") +
@@ -473,7 +469,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // update.  Here we try to send out a new framebuffer update request so that
   // the next update can be sent while we decode the current one.
   public void framebufferUpdateStart() {
-    tUpdateStart = getTime();
+    tUpdateStart = Utils.getTime();
     if (tStart < 0.) tStart = tUpdateStart;
 
     // Note: This might not be true if sync fences are supported.
@@ -524,9 +520,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       pendingPFChange = false;
     }
 
-    tUpdate += getTime() - tUpdateStart;
+    tUpdate += Utils.getTime() - tUpdateStart;
     updates++;
-    tElapsed = getTime() - tStart;
+    tElapsed = Utils.getTime() - tStart;
 
     if (tElapsed > (double)VncViewer.profileInt.getValue() && !benchmark) {
       if (profileDialog.isVisible()) {
@@ -606,7 +602,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       sock.inStream().resetReadTime();
       sock.inStream().resetBytesRead();
       decodePixels = decodeRect = blitPixels = blits = updates = 0;
-      tStart = getTime();
+      tStart = Utils.getTime();
     }
   }
 
@@ -616,7 +612,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     ScreenSet layout;
 
     String env = System.getenv("TVNC_SINGLESCREEN");
-    if (VncViewer.getBooleanProperty("turbovnc.singlescreen", false) ||
+    if (Utils.getBooleanProperty("turbovnc.singlescreen", false) ||
         (env != null && env.equals("1"))) {
       layout = cp.screenLayout;
 
@@ -748,7 +744,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void startDecodeTimer() {
-    tDecodeStart = getTime();
+    tDecodeStart = Utils.getTime();
     if (benchmark)
       tReadOld = viewer.benchFile.getReadTime();
     else
@@ -761,7 +757,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       tRead = viewer.benchFile.getReadTime();
     else
       tRead = sock.inStream().getReadTime();
-    tDecode += getTime() - tDecodeStart - (tRead - tReadOld);
+    tDecode += Utils.getTime() - tDecodeStart - (tRead - tReadOld);
   }
 
   public void beginRect(Rect r, int encoding) {
@@ -858,7 +854,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (viewport != null && !benchmark) {
       vlog.info("Enabling GII");
       writer().writeGIIVersion();
-      if (VncViewer.osEID())
+      if (Utils.osEID())
         viewport.setupExtInputHelper();
     }
   }
@@ -1040,7 +1036,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
-    if (VncViewer.isX11())
+    if (Utils.isX11())
       viewport.x11FullScreenHelper(opts.fullScreen);
     if (opts.fullScreen && viewport.lionFSSupported())
       viewport.toggleLionFS();
@@ -1048,7 +1044,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (shouldGrab())
       viewport.grabKeyboardHelper(true);
     selectGrab(VncViewer.isKeyboardGrabbed(viewport));
-    if (VncViewer.osEID())
+    if (Utils.osEID())
       viewport.setupExtInputHelper();
   }
 
@@ -1121,8 +1117,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // EDT
   public Rectangle getSpannedSize() {
     boolean fullScreenWindow = opts.fullScreen &&
-                               (!VncViewer.OS.startsWith("mac os x") ||
-                                viewport.lionFSSupported());
+                               (!Utils.isMac() || viewport.lionFSSupported());
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
     Rectangle primary = null, s0 = null;
@@ -1251,15 +1246,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
         // isn't available (multi-screen spanning doesn't even pretend to work
         // under X11 except for full-screen windows, and even then, the
         // appropriate WM hints must be set using C.)
-        (VncViewer.isX11() && (!opts.fullScreen ||
-                               !Helper.isAvailable()))) {
+        (Utils.isX11() && (!opts.fullScreen || !Helper.isAvailable()))) {
       span = primary;
       viewport.leftMon = viewport.rightMon = viewport.topMon =
         viewport.bottomMon = primaryID;
     } else if (equal ||
                (fullScreenWindow && serverXinerama &&
-                opts.desktopSize.mode == Options.SIZE_AUTO &&
-                !VncViewer.isX11()))
+                opts.desktopSize.mode == Options.SIZE_AUTO && !Utils.isX11()))
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
 
     vlog.debug("Spanned " + (fullScreenWindow ? "FS " : "work ") + "area: " +
@@ -1298,8 +1291,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (h >= span.height)
       h = span.height;
 
-    if (viewport.getExtendedState() != JFrame.ICONIFIED &&
-        !VncViewer.OS.startsWith("mac os x"))
+    if (viewport.getExtendedState() != JFrame.ICONIFIED && !Utils.isMac())
       viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
@@ -1484,7 +1476,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // has been called, since the menu is only accessible from the DesktopWindow.
 
   void showMenu(int x, int y) {
-    if (VncViewer.OS.startsWith("windows"))
+    if (Utils.isWindows())
       UIManager.put("Button.showMnemonics", true);
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       x += viewport.dx;
@@ -1520,7 +1512,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       "Encryption protocol:  " + getEncryptionProtocol() + "\n" +
       "JPEG decompression:  " +
         (reader.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
-      (VncViewer.osGrab() || VncViewer.osEID() ? "\nTurboVNC Helper:  " +
+      (Utils.osGrab() || Utils.osEID() ? "\nTurboVNC Helper:  " +
         (Helper.isAvailable() ? "Loaded" : "Not found") : ""),
       "VNC connection info", JOptionPane.PLAIN_MESSAGE);
   }
@@ -1589,7 +1581,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
-    if (VncViewer.osGrab() && Helper.isAvailable())
+    if (Utils.osGrab() && Helper.isAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
     if (state() == RFBSTATE_NORMAL) {
@@ -1716,7 +1708,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keysym;
     menu.updateMenuKey(opts.menuKeyCode);
 
-    if (VncViewer.osGrab() && Helper.isAvailable()) {
+    if (Utils.osGrab() && Helper.isAvailable()) {
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
       boolean isGrabbed = VncViewer.isKeyboardGrabbed(viewport);
       if (viewport != null &&
@@ -1833,7 +1825,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public boolean shouldGrab() {
-    return VncViewer.osGrab() &&
+    return Utils.osGrab() &&
            (opts.grabKeyboard == Options.GRAB_ALWAYS ||
             (opts.grabKeyboard == Options.GRAB_MANUAL && isGrabSelected()) ||
             (opts.grabKeyboard == Options.GRAB_FS && opts.fullScreen));
@@ -1950,7 +1942,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (!down) {
       Integer hashedKey = keycode;
-      if (VncViewer.OS.startsWith("mac os x")) {
+      if (Utils.isMac()) {
         if (hashedKey == KeyEvent.VK_ALT_GRAPH)
           hashedKey = KeyEvent.VK_ALT;
       } else
@@ -1969,7 +1961,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       // message if both Shift keys are pressed and only one is released.  If
       // we receive a key release event for one Shift key and the other is in
       // the pressed keys hash, we release both of them.
-      if (VncViewer.OS.startsWith("windows")) {
+      if (Utils.isWindows()) {
         if (sym == Keysyms.SHIFT_R &&
             pressedKeys.containsValue(Keysyms.SHIFT_L)) {
           writeKeyEvent(Keysyms.SHIFT_L, down);
@@ -2054,7 +2046,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
             // Mac has no AltGr key, but the Option/Alt keys serve the same
             // purpose.  Thus, we allow RAlt to be used as AltGr and LAlt to be
             // used as a regular Alt key.
-            if (VncViewer.OS.startsWith("mac os x"))
+            if (Utils.isMac())
               keysym = Keysyms.ISO_LEVEL3_SHIFT;
             else
               keysym = Keysyms.ALT_R;
@@ -2085,7 +2077,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           // press events for the same modifiers.
           if (pressedKeys.containsValue(Keysyms.ALT_R) &&
               pressedKeys.containsValue(Keysyms.CONTROL_L) &&
-              VncViewer.OS.startsWith("windows")) {
+              Utils.isWindows()) {
             winAltGr = true;
           } else if (ev.isControlDown()) {
             // For CTRL-<letter>, CTRL is sent separately, so just send
@@ -2113,7 +2105,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
                 key = keycode;
             }
           } else if (pressedKeys.containsValue(Keysyms.ALT_L) &&
-                     VncViewer.OS.startsWith("mac os x") && key > 127) {
+                     Utils.isMac() && key > 127) {
             // Un*x and Windows servers expect that, if Alt + an ASCII key is
             // pressed, the key event for the ASCII key will be the same as if
             // Alt had not been pressed.  On OS X, however, the Alt/Option keys
@@ -2357,7 +2349,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     // when LAlt and RAlt are pressed simultaneously, so for the purposes of
     // matching key release events to key press events, it is necessary to
     // treat the RAlt key as an Alt key rather than an AltGr key.
-    if (VncViewer.OS.startsWith("mac os x")) {
+    if (Utils.isMac()) {
       if (hashedKey == KeyEvent.VK_ALT_GRAPH)
         hashedKey = KeyEvent.VK_ALT;
     // On Mac platforms, modifier key press/release events have a key code of 0
@@ -2498,11 +2490,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
 
-  public Socket getSocket() {
-    return sock;
-  }
-
-
   ////////////////////////////////////////////////////////////////////
   // The following methods are called from both the RFB thread and EDT.
 
@@ -2520,8 +2507,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // The following need no synchronization:
   VncViewer viewer;
-  @SuppressWarnings("checkstyle:VisibilityModifier")
-  public static UserPasswdGetter upg;
 
   // shuttingDown is set in the EDT and is only ever tested by the RFB thread
   // after the window has been destroyed.
@@ -2538,8 +2523,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
   Options opts;
 
   int buttonMask;  // EDT only
-
-  private Socket sock;
 
   protected DesktopWindow desktop;
 

@@ -20,7 +20,6 @@
 package com.turbovnc.rfb;
 
 import com.turbovnc.rdr.*;
-import com.turbovnc.vncviewer.*;
 
 public final class Hostname {
 
@@ -74,7 +73,7 @@ public final class Hostname {
       }
     }
     if (colonPos == -1 || colonPos == vncServerName.length() - 1)
-      return VncViewer.getBooleanProperty("turbovnc.sessmgr", true) ? 0 : 5900;
+      return Utils.getBooleanProperty("turbovnc.sessmgr", true) ? 0 : 5900;
     if (vncServerName.charAt(colonPos + 1) == ':') {
       try {
         return Integer.parseInt(vncServerName.substring(colonPos + 2));

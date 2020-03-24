@@ -21,17 +21,13 @@
 
 package com.turbovnc.rfb;
 
-import com.turbovnc.vncviewer.CConn;
 import com.turbovnc.rdr.ErrorException;
-
-import com.turbovnc.vncviewer.*;
 
 public class SecurityClient extends Security {
 
   public SecurityClient() { super(secTypes); }
 
   public CSecurity getCSecurity(int secType) {
-    assert (CConn.upg != null);  // (upg == null) means bug in the viewer
     assert (msg != null);
 
     if (!isSupported(secType))
@@ -107,11 +103,11 @@ public class SecurityClient extends Security {
   new StringParameter("X509CA",
   "X.509 Certificate Authority certificate to use with the X509* security " +
   "types.  This is used to check the validity of the server's X.509 " +
-  "certificate.", FileUtils.getVncHomeDir() + "x509_ca.pem");
+  "certificate.", Utils.getVncHomeDir() + "x509_ca.pem");
 
   public static StringParameter x509crl =
   new StringParameter("X509CRL",
   "X.509 Certificate Revocation List to use with the X509* security types. " +
   "This is used to check the validity of the server's X.509 " +
-  "certificate.", FileUtils.getVncHomeDir() + "x509_crl.pem");
+  "certificate.", Utils.getVncHomeDir() + "x509_crl.pem");
 }

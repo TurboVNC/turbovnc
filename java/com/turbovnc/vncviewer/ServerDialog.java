@@ -48,10 +48,10 @@ class ServerDialog extends Dialog implements ActionListener {
       server = new JComboBox();
     }
     JLabel sessionLabel =
-      new JLabel(VncViewer.getBooleanProperty("turbovnc.sessmgr", true) ?
+      new JLabel(Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
                  "host:displayNum, host::port = connect to VNC server" : "");
     JLabel sessionLabel2 =
-      new JLabel(VncViewer.getBooleanProperty("turbovnc.sessmgr", true) ?
+      new JLabel(Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
                  "host = start TurboVNC Session Manager for host" : "");
 
     // Hack to set the left inset on editable JComboBox

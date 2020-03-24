@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2014, 2016, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014, 2016, 2018, 2020 D. R. Commander.
+ *                                            All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +25,6 @@ import java.util.*;
 
 import com.turbovnc.network.*;
 import com.turbovnc.rdr.*;
-import com.turbovnc.vncviewer.*;
 
 public abstract class CConnection extends CMsgHandler {
 
@@ -392,6 +392,14 @@ public abstract class CConnection extends CMsgHandler {
     throw new AuthFailureException(reason);
   }
 
+  public Socket getSocket() {
+    return sock;
+  }
+
+  public boolean getUserPasswd(StringBuffer user, StringBuffer password) {
+    throw new ErrorException("getUserPasswd() called in base class (this shouldn't happen.)");
+  }
+
   InStream is;
   OutStream os;
   protected CMsgReaderV3 reader;
@@ -405,6 +413,7 @@ public abstract class CConnection extends CMsgHandler {
   int serverPort;
   boolean useProtocol3_3;
   boolean clientSecTypeOrder;
+  protected Socket sock;
 
   static LogWriter vlog = new LogWriter("CConnection");
 }

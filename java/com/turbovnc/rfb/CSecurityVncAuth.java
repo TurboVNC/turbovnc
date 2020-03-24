@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 package com.turbovnc.rfb;
 
 import com.turbovnc.rdr.*;
-import com.turbovnc.vncviewer.*;
 
 public class CSecurityVncAuth extends CSecurity {
 
@@ -36,7 +35,7 @@ public class CSecurityVncAuth extends CSecurity {
     byte[] challenge = new byte[VNC_AUTH_CHALLENGE_SIZE];
     is.readBytes(challenge, 0, VNC_AUTH_CHALLENGE_SIZE);
     StringBuffer passwd = new StringBuffer();
-    CConn.upg.getUserPasswd(null, passwd);
+    cc.getUserPasswd(null, passwd);
 
     // Calculate the correct response
     byte[] key = new byte[8];

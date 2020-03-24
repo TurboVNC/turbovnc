@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2017-2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,13 +48,13 @@ public final class Helper {
 
   private static synchronized void printMissingFeatures() {
     vlog.info("  The following features will be disabled:");
-    if (VncViewer.osGrab())
+    if (Utils.osGrab())
       vlog.info("  - Keyboard grabbing");
-    if (VncViewer.osEID())
+    if (Utils.osEID())
       vlog.info("  - Extended input device support");
-    if (VncViewer.isX11())
+    if (Utils.isX11())
       vlog.info("  - Multi-screen spanning");
-    if (VncViewer.OS.startsWith("windows"))
+    if (Utils.isWindows())
       vlog.info("  - Pageant support");
     else
       vlog.info("  - ssh-agent support");

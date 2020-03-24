@@ -112,7 +112,7 @@ public class Tunnel {
     if (Helper.isAvailable()) {
       Connector connector = null;
       try {
-        if (VncViewer.OS.startsWith("windows"))
+        if (Utils.isWindows())
           connector = new PageantConnector();
         else
           connector = new SSHAgentConnector(new JNIUSocketFactory());
@@ -130,7 +130,7 @@ public class Tunnel {
           jsch.setIdentityRepository(repo);
         }
       } catch (Exception e) {
-        if (VncViewer.OS.startsWith("windows"))
+        if (Utils.isWindows())
           vlog.debug("Could not contact Pageant:\n        " + e.getMessage());
         else
           vlog.debug("Could not contact ssh-agent:\n        " +
@@ -220,7 +220,7 @@ public class Tunnel {
      do. */
 
   private static final String DEFAULT_SSH_CMD =
-    (VncViewer.OS.startsWith("windows") ? "ssh.exe" : "/usr/bin/ssh");
+    (Utils.isWindows() ? "ssh.exe" : "/usr/bin/ssh");
   private static final String DEFAULT_TUNNEL_CMD =
     DEFAULT_SSH_CMD + " -f -L %L:localhost:%R %H sleep 20";
   private static final String DEFAULT_VIA_CMD =

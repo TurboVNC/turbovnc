@@ -1,5 +1,5 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 
-import com.turbovnc.rfb.PixelFormat;
+import com.turbovnc.rfb.*;
 
 public class ImageDrawTest extends JFrame {
 
@@ -47,7 +47,7 @@ public class ImageDrawTest extends JFrame {
   public class MyPanel extends JPanel {
 
     public MyPanel(int w, int h, int colors) {
-      swingDB = VncViewer.getBooleanProperty("turbovnc.swingdb", false);
+      swingDB = Utils.getBooleanProperty("turbovnc.swingdb", false);
       setOpaque(!swingDB);
       GraphicsEnvironment ge =
         GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -148,13 +148,13 @@ public class ImageDrawTest extends JFrame {
 
       initImage(im1, width, height, 0);
       initImage(im2, width, height, 1);
-      t0 = getTime();
+      t0 = Utils.getTime();
       while (true) {
         if (!swingDB)
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         paintImmediately(0, 0, width, height);
         iter++;
-        t1 = getTime();
+        t1 = Utils.getTime();
         if (t1 - t0 > 5.0) {
           System.out.format("%f Mpixels/sec\n",
             (double)iter * (double)(width * height) / (1000000. * (t1 - t0)));
@@ -168,10 +168,6 @@ public class ImageDrawTest extends JFrame {
     byte[] rgbBuf;
     int preferredWidth, preferredHeight, width, height, iter;
     boolean swingDB;
-  }
-
-  private static double getTime() {
-    return (double)System.nanoTime() / 1.0e9;
   }
 
   public ImageDrawTest(int width, int height, int colors) {

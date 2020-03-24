@@ -1,5 +1,5 @@
 /* Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 package com.turbovnc.rfb;
 
 import com.turbovnc.rdr.*;
-import com.turbovnc.vncviewer.*;
 
 public class CSecurityIdent extends CSecurity {
 
@@ -31,7 +30,7 @@ public class CSecurityIdent extends CSecurity {
 
     StringBuffer username = new StringBuffer();
 
-    CConn.upg.getUserPasswd(username, null);
+    cc.getUserPasswd(username, null);
 
     // Return the response to the server
     os.writeU32(username.length());

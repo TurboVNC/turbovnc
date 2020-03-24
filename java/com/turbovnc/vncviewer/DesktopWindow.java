@@ -51,15 +51,11 @@ import com.turbovnc.rfb.Point;
 class DesktopWindow extends JPanel implements Runnable, MouseListener,
   MouseMotionListener, MouseWheelListener, KeyListener, InputMethodRequests {
 
-  static final double getTime() {
-    return (double)System.nanoTime() / 1.0e9;
-  }
-
   // RFB thread
   DesktopWindow(int width, int height, PixelFormat serverPF, CConn cc_) {
     cc = cc_;
     setSize(width, height);
-    swingDB = VncViewer.getBooleanProperty("turbovnc.swingdb", false);
+    swingDB = Utils.getBooleanProperty("turbovnc.swingdb", false);
     setOpaque(!swingDB);
     GraphicsEnvironment ge =
       GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -232,7 +228,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // RFB thread: Update the actual window with the changed parts of the
   // framebuffer.
   public void updateWindow() {
-    double tBlitStart = getTime();
+    double tBlitStart = Utils.getTime();
     Rect r = damage;
     cc.blitPixels += r.width() * r.height();
     if (!r.isEmpty()) {
@@ -280,7 +276,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       }
       damage.clear();
     }
-    cc.tBlit += getTime() - tBlitStart;
+    cc.tBlit += Utils.getTime() - tBlitStart;
     cc.blits += 1;
   }
 
@@ -424,7 +420,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     try {
       if (sm != null) sm.checkPermission(new AWTPermission("accessClipboard"));
       Clipboard cb = null;
-      if (VncViewer.getBooleanProperty("turbovnc.primary", true))
+      if (Utils.getBooleanProperty("turbovnc.primary", true))
         cb = Toolkit.getDefaultToolkit().getSystemSelection();
       if (cb == null)
         cb = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -457,7 +453,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly &&
-        (!VncViewer.osEID() ||
+        (!Utils.osEID() ||
          !cc.viewport.processExtInputEventHelper(cc.viewport.motionType)) &&
         e.getX() >= x &&
         e.getY() >= y &&
@@ -489,8 +485,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly &&
-        (!VncViewer.osEID() ||
-         !cc.viewport.processExtInputEventHelper(type)) &&
+        (!Utils.osEID() || !cc.viewport.processExtInputEventHelper(type)) &&
         (e.getID() == MouseEvent.MOUSE_RELEASED ||
          (e.getX() >= x &&
           e.getY() >= y &&
@@ -504,12 +499,12 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     mouseCB(e, cc.viewport.buttonReleaseType);
   }
   public void mousePressed(MouseEvent e) {
-    if (VncViewer.OS.startsWith("mac os x")) {
+    if (Utils.isMac()) {
       try {
         Class appClass;
         Object obj;
 
-        if (VncViewer.JAVA_VERSION >= 9) {
+        if (Utils.JAVA_VERSION >= 9) {
           appClass = Desktop.class;
           obj = Desktop.getDesktop();
         } else {
@@ -537,7 +532,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // EDT: Mouse wheel callback function
   private void mouseWheelCB(MouseWheelEvent e) {
     if (!cc.opts.viewOnly &&
-        (!VncViewer.osEID() ||
+        (!Utils.osEID() ||
          !cc.viewport.processExtInputEventHelper(cc.viewport.motionType)))
       cc.writeWheelEvent(e);
   }
@@ -631,7 +626,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         InputEvent.META_DOWN_MASK) {
       switch (e.getKeyCode()) {
         case KeyEvent.VK_P:
-          if (VncViewer.JAVA_VERSION >= 9 && VncViewer.JAVA_VERSION <= 11)
+          if (Utils.JAVA_VERSION >= 9 && Utils.JAVA_VERSION <= 11)
             e.consume();
           return;
         case KeyEvent.VK_COMMA:
@@ -811,7 +806,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   @Override
   public InputMethodRequests getInputMethodRequests() {
-    if (VncViewer.OS.startsWith("mac os x"))
+    if (Utils.isMac())
       return this;
     return null;
   }

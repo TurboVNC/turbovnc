@@ -4,7 +4,7 @@
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012, 2015 Brian P. Hinz
- * Copyright (C) 2012, 2015-2019 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,6 @@ import org.spf4j.base.Base64;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
-import com.turbovnc.vncviewer.*;
 
 public class CSecurityTLS extends CSecurity {
 
@@ -253,8 +252,7 @@ public class CSecurityTLS extends CSecurity {
             for (X509Certificate c :
                  ((X509TrustManager)m).getAcceptedIssuers())
               ks.setCertificateEntry(c.getSubjectX500Principal().getName(), c);
-        File castore = new File(FileUtils.getVncHomeDir() +
-                                "x509_savedcerts.pem");
+        File castore = new File(Utils.getVncHomeDir() + "x509_savedcerts.pem");
         if (castore.exists() && castore.canRead()) {
           InputStream caStream = new MyFileInputStream(castore);
           Collection<? extends Certificate> cacerts =
@@ -343,7 +341,7 @@ public class CSecurityTLS extends CSecurity {
             null, answer, answer[0]);
           if (ret == JOptionPane.YES_OPTION) {
             Collection<? extends X509Certificate> cacerts = null;
-            File vncDir = new File(FileUtils.getVncHomeDir());
+            File vncDir = new File(Utils.getVncHomeDir());
             File caFile = new File(vncDir, "x509_savedcerts.pem");
             try {
               if (!vncDir.exists())
@@ -407,8 +405,7 @@ public class CSecurityTLS extends CSecurity {
           LdapName ln = new LdapName(dn);
           for (Rdn rdn : ln.getRdns()) {
             if (rdn.getType().equalsIgnoreCase("CN")) {
-              String peer =
-                ((CConn)client).getSocket().getPeerName().toLowerCase();
+              String peer = client.getSocket().getPeerName().toLowerCase();
               if (peer.equals(((String)rdn.getValue()).toLowerCase()))
                 return;
             }
@@ -418,12 +415,11 @@ public class CSecurityTLS extends CSecurity {
           while (i.hasNext()) {
             List nxt = (List)i.next();
             if (((Integer)nxt.get(0)).intValue() == 2) {
-              String peer =
-                ((CConn)client).getSocket().getPeerName().toLowerCase();
+              String peer = client.getSocket().getPeerName().toLowerCase();
               if (peer.equals(((String)nxt.get(1)).toLowerCase()))
                 return;
             } else if (((Integer)nxt.get(0)).intValue() == 7) {
-              String peer = ((CConn)client).getSocket().getPeerAddress();
+              String peer = client.getSocket().getPeerAddress();
               if (peer.equals(((String)nxt.get(1)).toLowerCase()))
                 return;
             }

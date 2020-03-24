@@ -87,54 +87,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     }
   }
 
-  static final double getTime() {
-    return (double)System.nanoTime() / 1.0e9;
-  }
-
-  public static final boolean getBooleanProperty(String key, boolean def) {
-    String prop = System.getProperty(key, def ? "True" : "False");
-    if (prop != null && prop.length() > 0) {
-      if (prop.equalsIgnoreCase("true") || prop.equalsIgnoreCase("yes"))
-        return true;
-      if (prop.equalsIgnoreCase("false") || prop.equalsIgnoreCase("no"))
-        return false;
-      int i = -1;
-      try {
-        i = Integer.parseInt(prop);
-      } catch (NumberFormatException e) {}
-      if (i == 1)
-        return true;
-      if (i == 0)
-        return false;
-    }
-    return def;
-  }
-
-  public static final String OS = System.getProperty("os.name").toLowerCase();
-
-  public static boolean isX11() {
-    return !OS.startsWith("mac os x") && !OS.startsWith("windows");
-  }
-
-  public static boolean osEID() {
-    return !OS.startsWith("windows");
-  }
-
-  public static boolean osGrab() {
-    return !OS.startsWith("mac os x");
-  }
-
-  public static final int JAVA_VERSION =
-    Integer.parseInt(System.getProperty("java.version").split("\\.")[0]) <= 1 ?
-    Integer.parseInt(System.getProperty("java.version").split("\\.")[1]) :
-    Integer.parseInt(System.getProperty("java.version").split("\\.")[0]);
-
   public static int getMenuShortcutKeyMask() {
     Method getMenuShortcutKeyMask;
     Integer mask = null;
 
     try {
-      if (JAVA_VERSION >= 10)
+      if (Utils.JAVA_VERSION >= 10)
         getMenuShortcutKeyMask =
           Toolkit.class.getMethod("getMenuShortcutKeyMaskEx");
       else
@@ -160,8 +118,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       try {
         if (method.getName().equals("openFiles") && args[0] != null) {
           synchronized(VncViewer.class) {
-            Class ofEventClass =
-              JAVA_VERSION >= 9 ?
+            Class ofEventClass = Utils.JAVA_VERSION >= 9 ?
                 Class.forName("java.awt.desktop.OpenFilesEvent") :
                 Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
             Method getFiles = ofEventClass.getMethod("getFiles",
@@ -195,7 +152,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     Class appClass, fileHandlerClass;
     Object obj;
 
-    if (JAVA_VERSION >= 9) {
+    if (Utils.JAVA_VERSION >= 9) {
       appClass = Desktop.class;
       obj = Desktop.getDesktop();
       fileHandlerClass = Class.forName("java.awt.desktop.OpenFilesHandler");
@@ -218,7 +175,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static void setLookAndFeel() {
     try {
-      if (OS.startsWith("windows")) {
+      if (Utils.isWindows()) {
         String laf = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         UIManager.setLookAndFeel(laf);
       } else {
@@ -234,7 +191,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         }
       }
       UIManager.put("TitledBorder.titleColor", Color.blue);
-      if (OS.startsWith("mac os x")) {
+      if (Utils.isMac()) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         enableFileHandler();
 
@@ -242,7 +199,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
           Class appClass;
           Object obj;
 
-          if (JAVA_VERSION >= 9) {
+          if (Utils.JAVA_VERSION >= 9) {
             appClass = Class.forName("java.awt.Taskbar");
             Method getTaskbar =
               appClass.getMethod("getTaskbar", (Class[])null);
@@ -256,7 +213,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
           Class[] paramTypes = new Class[1];
           paramTypes[0] = Image.class;
-          Method setDockIconImage = JAVA_VERSION >= 9 ?
+          Method setDockIconImage = Utils.JAVA_VERSION >= 9 ?
             appClass.getMethod("setIconImage", paramTypes) :
             appClass.getMethod("setDockIconImage", paramTypes);
           setDockIconImage.invoke(obj, LOGO_ICON128.getImage());
@@ -306,7 +263,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       final JFrame frame = new JFrame();
       // Under certain Linux WM's, the insets aren't valid until
       // componentResized() is called (see above.)
-      if (isX11()) {
+      if (Utils.isX11()) {
         frame.addComponentListener(new ComponentAdapter() {
           public void componentResized(ComponentEvent e) {
             synchronized(frame) {
@@ -345,8 +302,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     // on certain models.)
     boolean defForceAlpha = false;
 
-    if (OS.startsWith("mac os x")) {
-      if (JAVA_VERSION >= 7)
+    if (Utils.isMac()) {
+      if (Utils.JAVA_VERSION >= 7)
         defForceAlpha = true;
     }
     // TYPE_INT_ARGB_PRE images are also faster when using OpenGL blitting on
@@ -356,7 +313,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     if (useOpenGL)
       defForceAlpha = true;
 
-    forceAlpha = getBooleanProperty("turbovnc.forcealpha", defForceAlpha);
+    forceAlpha =
+      Utils.getBooleanProperty("turbovnc.forcealpha", defForceAlpha);
 
     // Disable Direct3D Java 2D blitting unless the user specifically requests
     // it (by setting the sun.java2d.d3d property to true.)  GDI Java 2D
@@ -364,7 +322,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     // default.  Note that this doesn't work with Java 1.6 and earlier, for
     // unknown reasons.  Apparently it reads the Java 2D system properties
     // before our code can influence them.
-    if (OS.startsWith("windows")) {
+    if (Utils.isWindows()) {
       String prop = System.getProperty("sun.java2d.d3d");
       if (prop == null || prop.length() < 1 || !Boolean.parseBoolean(prop))
         System.setProperty("sun.java2d.d3d", "false");
@@ -382,7 +340,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static void startViewer(String[] argv) {
     VncViewer viewer = new VncViewer(argv);
-    if (OS.startsWith("mac os x")) {
+    if (Utils.isMac()) {
       synchronized(VncViewer.class) {
         if (fileName != null) {
           try {
@@ -720,7 +678,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
-    if (VncViewer.osGrab() && Helper.isAvailable())
+    if (Utils.osGrab() && Helper.isAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
     options.shared.setSelected(opts.shared);
@@ -785,7 +743,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     opts.menuKeySym =
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keysym;
 
-    if (VncViewer.osGrab() && Helper.isAvailable())
+    if (Utils.osGrab() && Helper.isAvailable())
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
 
     opts.shared = options.shared.isSelected();
@@ -871,12 +829,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
             System.out.format("Benchmark warmup run %d\n", i + 1);
           else
             System.out.format("Benchmark run %d:\n", i + 1 - benchWarmup);
-          tStart = getTime();
+          tStart = Utils.getTime();
           try {
             while (!cc.shuttingDown)
               cc.processMsg(true);
           } catch (EndOfStream e) {}
-          tTotal = getTime() - tStart - benchFile.getReadTime();
+          tTotal = Utils.getTime() - tStart - benchFile.getReadTime();
           if (i >= benchWarmup) {
             System.out.format("%f s (Decode = %f, Blit = %f)\n", tTotal,
                               cc.tDecode, cc.tBlit);
@@ -959,7 +917,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       opts.shared = shared.getValue();
 
       // INPUT OPTIONS
-      if (osGrab()) {
+      if (Utils.osGrab()) {
         if (grabKeyboard.getValue().toLowerCase().startsWith("f"))
           opts.grabKeyboard = Options.GRAB_FS;
         else if (grabKeyboard.getValue().toLowerCase().startsWith("a"))
@@ -1170,8 +1128,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "servers, this is typically 5900 + the X display number of the VNC " +
   "session (example: 5901 if connecting to display :1.)  For Windows and " +
   "Mac VNC servers, this is typically 5900." +
-  (getBooleanProperty("turbovnc.sessmgr", true) ? "" : "  (default = 5900)") +
-  "\n " +
+  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ? "" :
+   "  (default = 5900)") + "\n " +
   "If listen mode is enabled, this parameter specifies the TCP port on " +
   "which the viewer will listen for connections from a VNC server.  " +
   "(default = 5500)", -1);
@@ -1205,7 +1163,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "format {host}[:{display_number}] or {host}::{port}, where {host} is the " +
   "host name or IP address of the machine on which the VNC server is " +
   "running (the \"VNC host\"), {display_number} is an optional X display " +
-  (getBooleanProperty("turbovnc.sessmgr", true) ?
+  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "number, and {port} is a TCP port.  If no port or display number is " +
    "specified, then the viewer will enable the TurboVNC Session Manager, " +
    "which allows you to remotely start a new TurboVNC session or to choose " +
@@ -1228,13 +1186,13 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static StringParameter grabKeyboard =
   new StringParameter("GrabKeyboard",
-  osGrab() ? "When the keyboard is grabbed, special key sequences (such as " +
-  "Alt-Tab) that are used to switch windows and perform other window " +
-  "management functions are passed to the VNC server instead of being " +
-  "handled by the local window manager.  The default is to automatically " +
-  "grab the keyboard in full-screen mode and to ungrab it in windowed " +
-  "mode.  Setting this parameter to \"Always\" automatically grabs the " +
-  "keyboard in both full-screen mode and windowed mode.  When this " +
+  Utils.osGrab() ? "When the keyboard is grabbed, special key sequences " +
+  "(such as Alt-Tab) that are used to switch windows and perform other " +
+  "window management functions are passed to the VNC server instead of " +
+  "being handled by the local window manager.  The default is to " +
+  "automatically grab the keyboard in full-screen mode and to ungrab it in " +
+  "windowed mode.  Setting this parameter to \"Always\" automatically grabs " +
+  "the keyboard in both full-screen mode and windowed mode.  When this " +
   "parameter is set to \"Manual\", the keyboard is only grabbed or " +
   "ungrabbed when the \"Grab Keyboard\" option is selected in the F8 menu, " +
   "or when the Ctrl-Alt-Shift-G hotkey is pressed.  Regardless of the " +
@@ -1243,14 +1201,14 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static BoolParameter grabPointer =
   new BoolParameter("GrabPointer",
-  isX11() ? "If this option is enabled, then the pointer will be grabbed " +
-  "whenever the keyboard is grabbed.  This allows certain keyboard + " +
-  "pointer sequences, such as Alt-{drag}, to be passed to the server.  The " +
-  "downside, however, is that grabbing the pointer prevents any interaction " +
-  "with the local window manager whatsoever (for instance, the window can " +
-  "no longer be maximized or closed, and you cannot switch to other running " +
-  "applications.)  Thus, this option is primarily useful in conjunction " +
-  "with GrabKeyboard=FS." : null, true);
+  Utils.isX11() ? "If this option is enabled, then the pointer will be " +
+  "grabbed whenever the keyboard is grabbed.  This allows certain keyboard " +
+  "+ pointer sequences, such as Alt-{drag}, to be passed to the server.  " +
+  "The downside, however, is that grabbing the pointer prevents any " +
+  "interaction with the local window manager whatsoever (for instance, the " +
+  "window can no longer be maximized or closed, and you cannot switch to " +
+  "other running applications.)  Thus, this option is primarily useful in " +
+  "conjunction with GrabKeyboard=FS." : null, true);
 
   static StringParameter menuKey =
   new StringParameter("MenuKey",
@@ -1579,7 +1537,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "parameter specifies the path to an OpenSSH configuration file to use " +
   "when authenticating with the SSH server.  The OpenSSH configuration file " +
   "takes precedence over any TurboVNC Viewer parameters.",
-  FileUtils.getHomeDir() + ".ssh/config");
+  Utils.getHomeDir() + ".ssh/config");
 
   static StringParameter sshKey =
   new StringParameter("SSHKey",

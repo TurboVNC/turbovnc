@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -320,13 +320,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       "Primary monitor only", "All monitors", "Automatic"
     };
     JLabel spanLabel;
-    if (VncViewer.isX11() && Helper.isAvailable())
+    if (Utils.isX11() && Helper.isAvailable())
       spanLabel = new JLabel("Full-screen span mode:");
     else
       spanLabel = new JLabel("Span mode:");
     span = new JComboBox(spanOptions);
     span.addItemListener(this);
-    if (VncViewer.isX11() && !Helper.isAvailable()) {
+    if (Utils.isX11() && !Helper.isAvailable()) {
       spanLabel.setEnabled(false);
       span.setEnabled(false);
     }
@@ -382,7 +382,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
 
-    boolean enableGrab = VncViewer.osGrab() && Helper.isAvailable();
+    boolean enableGrab = Utils.osGrab() && Helper.isAvailable();
 
     if (enableGrab) {
       JLabel grabLabel;
@@ -711,7 +711,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "Shared", shared.isSelected());
 
     // INPUT
-    if (VncViewer.osGrab() && Helper.isAvailable()) {
+    if (Utils.osGrab() && Helper.isAvailable()) {
       String grabStr = (String)grabKeyboard.getSelectedItem();
       if (grabStr.equalsIgnoreCase("Full-screen only"))
         grabStr = "FS";

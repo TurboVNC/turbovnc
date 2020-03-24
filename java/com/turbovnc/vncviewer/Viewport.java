@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2019 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,10 +71,10 @@ public class Viewport extends JFrame {
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
     getContentPane().add(sp);
-    if (VncViewer.OS.startsWith("mac os x")) {
+    if (Utils.isMac()) {
       macMenu = new MacMenuBar(cc);
       setJMenuBar(macMenu);
-      if (VncViewer.getBooleanProperty("turbovnc.lionfs", true))
+      if (Utils.getBooleanProperty("turbovnc.lionfs", true))
         enableLionFS();
     }
     // NOTE: If Lion FS mode is enabled, then the viewport is only created once
@@ -95,7 +95,7 @@ public class Viewport extends JFrame {
           grabKeyboardHelper(cc.shouldGrab());
           cc.selectGrab(cc.shouldGrab());
         }
-        if (VncViewer.OS.startsWith("mac os x")) {
+        if (Utils.isMac()) {
           x11dpy = 0;
           setupExtInputHelper();
         }
@@ -106,8 +106,7 @@ public class Viewport extends JFrame {
           vlog.info("Keyboard focus lost. Temporarily ungrabbing keyboard.");
           grabKeyboardHelper(false);
         }
-        if (VncViewer.OS.startsWith("mac os x") &&
-            e.getOppositeWindow() == null)
+        if (Utils.isMac() && e.getOppositeWindow() == null)
           cleanupExtInputHelper();
       }
     });
@@ -282,7 +281,7 @@ public class Viewport extends JFrame {
       Class fsuClass = Class.forName("com.apple.eawt.FullScreenUtilities");
       Class[] argClasses = new Class[]{ Window.class, Boolean.TYPE };
 
-      if (VncViewer.JAVA_VERSION < 9) {
+      if (Utils.JAVA_VERSION < 9) {
         Method setWindowCanFullScreen =
           fsuClass.getMethod("setWindowCanFullScreen", argClasses);
         setWindowCanFullScreen.invoke(fsuClass, this, true);
@@ -343,7 +342,7 @@ public class Viewport extends JFrame {
     // work properly on OS X until the component is visible, so we store the
     // new position and call setLocation() again once the component is made
     // visible.
-    if (VncViewer.OS.startsWith("mac os x") && !isVisible())
+    if (Utils.isMac() && !isVisible())
       deferredPosition = new Point(x, y);
   }
 
@@ -406,7 +405,7 @@ public class Viewport extends JFrame {
   }
 
   public void grabKeyboardHelper(boolean on, boolean force) {
-    if (VncViewer.osGrab() && Helper.isAvailable()) {
+    if (Utils.osGrab() && Helper.isAvailable()) {
       try {
         if (((on && VncViewer.isKeyboardGrabbed(this)) ||
              (!on && !VncViewer.isKeyboardGrabbed())) && !force)
@@ -428,7 +427,7 @@ public class Viewport extends JFrame {
   public void setupExtInputHelper() {
     if (Helper.isAvailable() && cc.cp.supportsGII && x11dpy == 0) {
       try {
-        if (VncViewer.OS.startsWith("mac os x")) {
+        if (Utils.isMac()) {
           synchronized(VncViewer.class) {
             setupExtInput();
           }
@@ -443,7 +442,7 @@ public class Viewport extends JFrame {
         vlog.info("  " + e.toString());
         vlog.info("  Extended input device support may not work correctly.");
       }
-      if (VncViewer.OS.startsWith("mac os x") && devices == null) {
+      if (Utils.isMac() && devices == null) {
         // Create default devices for Wacom tablet
         for (int i = 0; i < 2; i++) {
           ExtInputDevice dev = new ExtInputDevice();
@@ -522,7 +521,7 @@ public class Viewport extends JFrame {
   public void cleanupExtInputHelper() {
     if (Helper.isAvailable() && x11dpy != 0) {
       try {
-        if (VncViewer.OS.startsWith("mac os x")) {
+        if (Utils.isMac()) {
           synchronized(VncViewer.class) {
             cleanupExtInput();
           }
@@ -566,8 +565,7 @@ public class Viewport extends JFrame {
 
   boolean processExtInputEventHelper(int type) {
     boolean retval = false;
-    if (Helper.isAvailable() && cc.cp.supportsGII &&
-        !VncViewer.OS.startsWith("mac os x")) {
+    if (Helper.isAvailable() && cc.cp.supportsGII && !Utils.isMac()) {
       boolean isExtEvent = false;
       try {
         isExtEvent = processExtInputEvent(type);
@@ -749,7 +747,7 @@ public class Viewport extends JFrame {
   @Override
   public void dispose() {
     super.dispose();
-    if (VncViewer.osEID())
+    if (Utils.osEID())
       cleanupExtInputHelper();
   }
 
