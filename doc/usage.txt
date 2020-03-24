@@ -208,7 +208,7 @@ knowledge of web server administration.
 	* Copy the libjpeg-turbo JNI JAR files into that same directory.  You can
 		obtain these from one of the official TurboVNC 2.0 or later binary packages
 		for Linux, or you can download
-		{file: libjpeg-turbo-__version__-jws.zip} from libjpeg-turbo 1.4.0 or	later
+		{file: libjpeg-turbo-__version__-jws.zip} from libjpeg-turbo 1.4.0 or later
 		(available in the
 		[[http://sourceforge.net/projects/libjpeg-turbo/files/][Files area]] of the
 		[[http://sourceforge.net/projects/libjpeg-turbo][libjpeg-turbo SourceForge project page]].)
