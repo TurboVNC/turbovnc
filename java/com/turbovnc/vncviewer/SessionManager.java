@@ -242,6 +242,7 @@ public final class SessionManager extends Tunnel {
     return sessions[0];
   }
 
+  @SuppressWarnings("checkstyle:EmptyBlock")
   private static String generateOTP(Session sshSession, String host,
                                     String session, boolean setPassword,
                                     boolean viewOnly) throws Exception {
