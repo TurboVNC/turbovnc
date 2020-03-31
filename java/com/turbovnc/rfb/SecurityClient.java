@@ -97,7 +97,7 @@ public class SecurityClient extends Security {
   "server's preferred order is always used.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
-  "set to \"VNC\" unless the \"SessMgrAuto\" option is disabled.",
+  "set to \"VNC\" unless the SessMgrAuto parameter is disabled.",
   "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VNC,Ident,Plain,UnixLogin,None");
 
   public static StringParameter x509ca =

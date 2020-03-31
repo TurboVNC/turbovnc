@@ -1580,7 +1580,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "used when authenticating with the SSH server.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
-  "set unless the \"SessMgrAuto\" parameter is disabled.", false);
+  "set unless the SessMgrAuto parameter is disabled.", false);
 
   static StringParameter user =
   new StringParameter("User",
