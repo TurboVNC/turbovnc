@@ -1572,12 +1572,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static BoolParameter tunnel =
   new BoolParameter("Tunnel",
-  "Setting this parameter is equivalent to using the Via parameter, except " +
-  "that the gateway host is assumed to be the same as the VNC host, so you " +
-  "do not need to specify it separately.  When using the Tunnel parameter, " +
-  "the VNC host can be prefixed with {user}@ to indicate that user name " +
-  "{user} (default = local user name) should be used when authenticating " +
-  "with the SSH server.\n " +
+  "Setting this parameter is equivalent to using the Via parameter with an " +
+  "SSH gateway, except that the gateway host is assumed to be the same as " +
+  "the VNC host, so you do not need to specify it separately.  When using " +
+  "the Tunnel parameter, the VNC host can be prefixed with {user}@ to " +
+  "indicate that user name {user} (default = local user name) should be " +
+  "used when authenticating with the SSH server.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
   "set unless the \"SessMgrAuto\" parameter is disabled.", false);
