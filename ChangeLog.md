@@ -31,6 +31,10 @@ allows interactive SSH authentication methods to be used on Windows.
 Furthermore, the Java TurboVNC Viewer now throws an error if the SSH subprocess
 fails to launch for any reason.
 
+7. Fixed visual artifacts that occurred when using Hextile encoding in the Java
+TurboVNC Viewer with OpenGL Java 2D blitting enabled (which is the default on
+Mac platforms.)
+
 
 2.2.4
 =====
