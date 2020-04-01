@@ -1357,7 +1357,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "should be no reason to use an encoding type other than Tight when " +
   "connecting to a TurboVNC session, but this parameter can be useful when " +
   "connecting to other types of VNC servers, such as RealVNC.",
-  "Tight", "Tight, ZRLE, Hextile, Raw, RRE");
+  "Tight", "Tight, ZRLE, Hextile, Raw");
 
   static BoolParameter allowJpeg =
   new BoolParameter("JPEG",

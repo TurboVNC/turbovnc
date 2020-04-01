@@ -29,7 +29,6 @@ public abstract class Decoder {
 
   public static boolean supported(int encoding) {
     return (encoding == RFB.ENCODING_RAW ||
-            encoding == RFB.ENCODING_RRE ||
             encoding == RFB.ENCODING_HEXTILE ||
             encoding == RFB.ENCODING_TIGHT ||
             encoding == RFB.ENCODING_ZRLE);
@@ -38,7 +37,6 @@ public abstract class Decoder {
   public static Decoder createDecoder(int encoding, CMsgReader reader) {
     switch (encoding) {
       case RFB.ENCODING_RAW:      return new RawDecoder(reader);
-      case RFB.ENCODING_RRE:      return new RREDecoder(reader);
       case RFB.ENCODING_HEXTILE:  return new HextileDecoder(reader);
       case RFB.ENCODING_TIGHT:    return new TightDecoder(reader);
       case RFB.ENCODING_ZRLE:     return new ZRLEDecoder(reader);
