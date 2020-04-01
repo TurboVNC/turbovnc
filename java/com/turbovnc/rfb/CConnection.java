@@ -31,7 +31,7 @@ public abstract class CConnection extends CMsgHandler {
   public CConnection() {
     csecurity = null;  is = null;  os = null;  reader = null;
     writer = null;  shared = false;
-    state = RFBSTATE_UNINITIALISED;  useProtocol3_3 = false;
+    state = RFBSTATE_UNINITIALISED;
     security = new SecurityClient();
   }
 
@@ -104,7 +104,7 @@ public abstract class CConnection extends CMsgHandler {
       vlog.error(msg);
       state = RFBSTATE_INVALID;
       throw new ErrorException(msg);
-    } else if (useProtocol3_3 || cp.beforeVersion(3, 7)) {
+    } else if (cp.beforeVersion(3, 7)) {
       cp.setVersion(3, 3);
     } else if (cp.afterVersion(3, 8)) {
       cp.setVersion(3, 8);
@@ -293,10 +293,6 @@ public abstract class CConnection extends CMsgHandler {
   // server upon initialisation.
   public final void setShared(boolean s) { shared = s; }
 
-  // setProtocol3_3 configures whether or not the CConnection should
-  // only ever support protocol version 3.3
-  public final void setProtocol3_3(boolean s) { useProtocol3_3 = s; }
-
   public void setServerPort(int port) {
     serverPort = port;
   }
@@ -403,7 +399,6 @@ public abstract class CConnection extends CMsgHandler {
   protected int state = RFBSTATE_UNINITIALISED;
   String serverName;
   int serverPort;
-  boolean useProtocol3_3;
   boolean clientSecTypeOrder;
 
   static LogWriter vlog = new LogWriter("CConnection");
