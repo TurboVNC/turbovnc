@@ -84,6 +84,7 @@
 #define IDC_COMPRESSLEVEL               1035
 #define IDC_CSHAPE_ENABLE_RADIO         1036
 #define IDC_CSHAPE_IGNORE_RADIO         1037
+#define IDC_FSALTENTER                  1038
 #define IDC_OK                          1044
 #define IDC_LIST_MODE                   1047
 #define IDC_CHECK_MESSAGE               1048

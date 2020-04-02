@@ -1529,6 +1529,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     options.viewOnly.setSelected(opts.viewOnly);
     options.reverseScroll.setSelected(opts.reverseScroll);
+    options.fsAltEnter.setSelected(opts.fsAltEnter);
     options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
@@ -1615,6 +1616,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       recreate = true;
     opts.viewOnly = options.viewOnly.isSelected();
     opts.reverseScroll = options.reverseScroll.isSelected();
+    opts.fsAltEnter = options.fsAltEnter.isSelected();
     opts.recvClipboard = options.recvClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();

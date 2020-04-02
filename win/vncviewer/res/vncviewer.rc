@@ -122,7 +122,7 @@ BEGIN
                     129,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
                     "Button",BS_AUTORADIOBUTTON,13,141,145,10
-    GROUPBOX        "Input",IDC_STATIC_MOUSE,171,4,160,67
+    GROUPBOX        "Input",IDC_STATIC_MOUSE,171,4,160,79
     CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,180,15,109,10
     LTEXT           "Keyboard grab mode:",IDC_STATIC_GRAB,180,29,70,10,
                     SS_CENTERIMAGE
@@ -133,11 +133,13 @@ BEGIN
                     WS_TABSTOP,180,43,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,180,55,145,10
-    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,171,76,160,39
+    CONTROL         "Toggle full-screen mode with Alt-Enter",IDC_FSALTENTER,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,180,67,145,10
+    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,171,88,160,39
     CONTROL         "Request shared session",IDC_SHARED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,180,86,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,98,145,10
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,180,98,109,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,110,109,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -722,7 +724,8 @@ as the primary monitor (as was the case in prior versions of TurboVNC.)\r\n\
     IDS_HELP15
 "/fsaltenter\r\n\
 /nofsaltenter\r\n\
-Allow/disallow the Alt+Enter key sequence to activate/deactivate full-screen mode\r\n\
+Equivalent of ""Connection-->Input-->Toggle full-screen mode with Alt-Enter"" in\r\n\
+the options dialog\r\n\
 \r\n"
     IDS_HELP16
 "/fullscreen\r\n\
@@ -900,6 +903,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EMULATECHECK        "If this option is checked, pressing the left and right mouse buttons simultaneously will emulate a middle button click. This is useful if your mouse lacks a middle button."
     IDC_FULLSCREEN          "In full-screen mode, the viewer will show only the remote desktop. The local desktop, toolbar, and window decorations will not be shown."
+    IDC_FSALTENTER          "If this option is checked, Alt-Enter can be used as an alternate hotkey for toggling full-screen mode."
     IDC_SPAN                "This option specifies whether the viewer window should span all monitors, only the primary monitor, or whether it should span all monitors only if it cannot fit on the primary monitor (automatic.)"
     IDC_STATIC_SPAN         "This option specifies whether the viewer window should span all monitors, only the primary monitor, or whether it should span all monitors only if it cannot fit on the primary monitor (automatic.)"
     IDC_DISABLECLIPBOARD    "If this option is checked, the viewer will not send local clipboard changes to the server."

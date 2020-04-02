@@ -650,6 +650,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
     options.viewOnly.setSelected(opts.viewOnly);
     options.reverseScroll.setSelected(opts.reverseScroll);
+    options.fsAltEnter.setSelected(opts.fsAltEnter);
     options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
@@ -700,6 +701,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     opts.sendLocalUsername = options.sendLocalUsername.isSelected();
     opts.viewOnly = options.viewOnly.isSelected();
     opts.reverseScroll = options.reverseScroll.isSelected();
+    opts.fsAltEnter = options.fsAltEnter.isSelected();
     opts.recvClipboard = options.recvClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
@@ -883,6 +885,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       opts.shared = shared.getValue();
 
       // INPUT OPTIONS
+      opts.fsAltEnter = fsAltEnter.getValue();
       if (osGrab()) {
         if (grabKeyboard.getValue().toLowerCase().startsWith("f"))
           opts.grabKeyboard = Options.GRAB_FS;
@@ -1142,6 +1145,14 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   static HeaderParameter inputHeader =
   new HeaderParameter("InputHeader", "INPUT PARAMETERS");
 
+  static BoolParameter fsAltEnter =
+  new BoolParameter("FSAltEnter",
+  "Normally, the viewer will switch into and out of full-screen mode when " +
+  "Ctrl-Alt-Shift-F is pressed or \"Full screen\" is selected from the " +
+  "popup menu.  Setting this parameter will additionally cause the viewer " +
+  "to switch into and out of full-screen mode when Alt-Enter is pressed.",
+  false);
+
   static StringParameter grabKeyboard =
   new StringParameter("GrabKeyboard",
   osGrab() ? "When the keyboard is grabbed, special key sequences (such as " +
@@ -1262,14 +1273,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "\"Server\" or \"0\" disables remote desktop resizing and uses the " +
   "desktop size and screen configuration set by the server.", "Auto",
   "WxH, W0xH0+X0+Y0[,W1xH1+X1+Y1,...], Auto, or Server");
-
-  static BoolParameter fsAltEnter =
-  new BoolParameter("FSAltEnter",
-  "Normally, the viewer will switch into and out of full-screen mode when " +
-  "Ctrl-Alt-Shift-F is pressed or \"Full screen\" is selected from the " +
-  "popup menu.  Setting this parameter will additionally cause the viewer " +
-  "to switch into and out of full-screen mode when Alt-Enter is pressed.",
-  false);
 
   static BoolParameter fullScreen =
   new BoolParameter("FullScreen",

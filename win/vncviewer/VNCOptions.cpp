@@ -1504,6 +1504,9 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       EnableWindow(hSwap, !_this->m_ViewOnly);
       EnableWindow(hEmulate, !_this->m_ViewOnly);
 
+      HWND hFSAltEnter = GetDlgItem(hwnd, IDC_FSALTENTER);
+      SendMessage(hFSAltEnter, BM_SETCHECK, _this->m_FSAltEnter, 0);
+
       HWND hRemoteCursor;
       if (_this->m_requestShapeUpdates && !_this->m_ignoreShapeUpdates)
         hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_ENABLE_RADIO);
@@ -1642,6 +1645,10 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
           _this->m_Emul3Buttons =
             (SendMessage(hEmulate, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
+          HWND hFSAltEnter = GetDlgItem(hwnd, IDC_FSALTENTER);
+          _this->m_FSAltEnter =
+            (SendMessage(hFSAltEnter, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
           _this->m_requestShapeUpdates = false;
           _this->m_ignoreShapeUpdates = false;

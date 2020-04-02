@@ -643,7 +643,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
     if ((e.getModifiersEx() & InputEvent.ALT_DOWN_MASK) ==
         InputEvent.ALT_DOWN_MASK && e.getKeyCode() == KeyEvent.VK_ENTER &&
-        VncViewer.fsAltEnter.getValue()) {
+        cc.opts.fsAltEnter) {
       cc.toggleFullScreen();
       return;
     }

@@ -39,6 +39,9 @@ Mac platforms.)
 8. Fixed an issue in the Windows TurboVNC Viewer whereby, in listen mode, the
 `/jpeg`, `/nojpeg`, and `/quality` command-line arguments did not take effect.
 
+9. The TurboVNC Viewer Options dialog can now be used to allow or disallow
+Alt-Enter as an alternate hotkey for toggling full-screen mode.
+
 
 2.2.4
 =====
