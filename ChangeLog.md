@@ -35,6 +35,9 @@ fails to launch for any reason.
 TurboVNC Viewer with OpenGL Java 2D blitting enabled (which is the default on
 Mac platforms.)
 
+8. Fixed an issue in the Windows TurboVNC Viewer whereby, in listen mode, the
+`/jpeg`, `/nojpeg`, and `/quality` command-line arguments did not take effect.
+
 
 2.2.4
 =====

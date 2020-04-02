@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2017 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2017, 2020 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -2183,12 +2183,13 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 
   m_scaling =             read(RegKey, "scaling", m_scaling) != 0;
 
-  m_enableJpegCompression = true;
-  level =                 read(RegKey, "quality", 95);
+  level =                 read(RegKey, "quality", -2);
   if (level == -1)
     m_enableJpegCompression = false;
-  else
+  else if (level != -2) {
+    m_enableJpegCompression = true;
     m_jpegQualityLevel = level;
+  }
   RegCloseKey(RegKey);
 }
 
