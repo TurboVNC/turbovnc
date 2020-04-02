@@ -3,7 +3,8 @@
 
 ### Significant changes relative to 2.2.4:
 
-1. The `MenuKey` parameter in the Java TurboVNC Viewer is now case-insensitive.
+1. The value of the `MenuKey` parameter in the Java TurboVNC Viewer is now
+case-insensitive.
 
 2. Fixed several issues in the Java TurboVNC Viewer that prevented the
 configuration hierarchy (Options dialog > command line > previous settings)
@@ -11,9 +12,9 @@ from being honored for certain parameters in some cases (particularly when
 using listen mode or making multiple connections from the same viewer
 instance.)
 
-3. Fixed an issue in the Java TurboVNC Viewer whereby the SSH host key for a
-given TurboVNC host was not added to the list of known hosts unless the SSH
-known hosts file (~/.ssh/known_hosts) already existed.
+3. Fixed an issue in the Java TurboVNC Viewer's built-in SSH client whereby the
+SSH host key for a given TurboVNC host was not added to the list of known hosts
+unless the SSH known hosts file (~/.ssh/known_hosts) already existed.
 
 4. Introduced a new Java system property (`turbovnc.sshbannerdlg`) that, when
 set to `0`, causes the Java TurboVNC Viewer's built-in SSH client to display
