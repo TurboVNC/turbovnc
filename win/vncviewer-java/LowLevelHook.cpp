@@ -43,8 +43,8 @@ void LowLevelHook::Initialize(HINSTANCE hInstance)
   // the hook callbacks via the message pump, so by using it on the main
   // connection thread, it could be delayed because of file transfers, etc.
   // Thus, we use a dedicated thread.
-  g_hThread = CreateThread(NULL, 0, HookThreadProc, hInstance, 0,
-    &g_nThreadID);
+  g_hThread =
+    CreateThread(NULL, 0, HookThreadProc, hInstance, 0, &g_nThreadID);
   if (!g_hThread)
     printf("Error %d from CreateThread()\n", GetLastError());
 }
@@ -89,7 +89,7 @@ DWORD WINAPI LowLevelHook::HookThreadProc(LPVOID lpParam)
 void LowLevelHook::Release()
 {
   // adzm 2009-09-25 - Post a message to the thread instructing it to
-    // terminate
+  // terminate
   if (g_hThread) {
     PostThreadMessage(g_nThreadID, WM_SHUTDOWNLLKBHOOK, 0, 0);
     WaitForSingleObject(g_hThread, INFINITE);
@@ -160,7 +160,7 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
 
   if (nCode == HC_ACTION) {
     KBDLLHOOKSTRUCT *pkbdllhook = (KBDLLHOOKSTRUCT *)lParam;
-    DWORD ProcessID ;
+    DWORD ProcessID;
 
     // Get the process ID of the Active Window (the window with the input
     // focus)
@@ -180,7 +180,6 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
                       MakeLParam(wParam, pkbdllhook));
           fHandled = TRUE;
           break;
-
 
         // For window switching sequences (ALT+TAB, ALT+ESC, CTRL+ESC),
         // we intercept the primary keypress when it occurs after the
@@ -245,5 +244,5 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
   }  // if (nCode == HT_ACTION)
 
   // Call the next hook, if we didn't handle this message
-  return (fHandled ? TRUE : CallNextHookEx(g_HookID, nCode, wParam, lParam));
+  return fHandled ? TRUE : CallNextHookEx(g_HookID, nCode, wParam, lParam);
 }
