@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.cpp from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2015, 2020 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -136,13 +136,13 @@ static LPARAM MakeLParam(WPARAM wParam, KBDLLHOOKSTRUCT *pkbdllhook)
 
   lParam &= (LPARAM)(pkbdllhook->scanCode << 16);
   if (extended)
-    lParam &= 0x01000000;
+    lParam |= 0x01000000;
   if (altDown && (wParam == WM_SYSKEYDOWN || wParam == WM_SYSKEYUP))
-    lParam &= 0x20000000;
+    lParam |= 0x20000000;
   if (keyWasDown || wParam == WM_SYSKEYUP || wParam == WM_KEYUP)
-    lParam &= 0x40000000;
+    lParam |= 0x40000000;
   if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
-    lParam &= 0x80000000;
+    lParam |= 0x80000000;
 
   return lParam;
 }

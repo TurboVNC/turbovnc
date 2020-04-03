@@ -47,6 +47,11 @@ was enabled, using the Windows-L key sequence to lock the computer caused the
 Windows key (or its Un*x equivalent, the left Super key) to become stuck in the
 pressed state on the server.
 
+11. Fixed an issue in the Windows/Java TurboVNC Viewer whereby, if keyboard
+grabbing was enabled, using Alt-Tab to select another window in the TurboVNC
+session sometimes caused the Tab key to become stuck in the pressed state on
+the server.
+
 
 2.2.4
 =====
