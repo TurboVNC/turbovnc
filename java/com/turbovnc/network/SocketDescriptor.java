@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -38,13 +38,13 @@ public class SocketDescriptor implements FileDescriptor {
       writeSelector = Selector.open();
       readSelector = Selector.open();
     } catch (IOException e) {
-      throw new SystemException(e.toString());
+      throw new SystemException(e);
     }
     try {
       channel.register(writeSelector, SelectionKey.OP_WRITE);
       channel.register(readSelector, SelectionKey.OP_READ);
     } catch (java.nio.channels.ClosedChannelException e) {
-      throw new SystemException(e.toString());
+      throw new SystemException(e);
     }
   }
 
@@ -53,7 +53,7 @@ public class SocketDescriptor implements FileDescriptor {
       channel.socket().shutdownInput();
       channel.socket().shutdownOutput();
     } catch (IOException e) {
-      throw new SystemException(e.toString());
+      throw new SystemException(e);
     }
   }
 
@@ -61,7 +61,7 @@ public class SocketDescriptor implements FileDescriptor {
     try {
       channel.close();
     } catch (IOException e) {
-      throw new SystemException(e.toString());
+      throw new SystemException(e);
     }
   }
 
@@ -129,7 +129,7 @@ public class SocketDescriptor implements FileDescriptor {
         }
       }
     } catch (IOException e) {
-      throw new SystemException(e.toString());
+      throw new SystemException(e);
     }
     return n;
   }
@@ -227,7 +227,7 @@ public class SocketDescriptor implements FileDescriptor {
       writeSelector = Selector.open();
       readSelector = Selector.open();
     } catch (IOException e) {
-      throw new SystemException(e.toString());
+      throw new SystemException(e);
     }
     try {
       channel.register(writeSelector, SelectionKey.OP_WRITE);

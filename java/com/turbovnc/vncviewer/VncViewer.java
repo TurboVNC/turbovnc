@@ -592,9 +592,15 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     } else if (e instanceof ErrorException) {
       title = "TurboVNC Viewer : Error";
       System.err.println(msg);
+    } else if (e instanceof SystemException) {
+      Throwable cause = e.getCause();
+      while (cause instanceof SystemException && cause.getCause() != null)
+        cause = cause.getCause();
+      msg = cause.toString();
+      title = "TurboVNC Viewer : Unexpected Error";
+      cause.printStackTrace();
     } else {
-      if (!(e instanceof SystemException))
-        msg = e.toString();
+      msg = e.toString();
       title = "TurboVNC Viewer : Unexpected Error";
       e.printStackTrace();
     }

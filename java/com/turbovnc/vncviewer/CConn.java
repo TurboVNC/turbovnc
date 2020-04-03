@@ -195,7 +195,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         wait(0, 50000);
       }
     } catch (InterruptedException e) {
-      throw new SystemException(e.toString());
+      throw new SystemException(e);
     }
   }
 
@@ -229,7 +229,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       try {
         autoPass = in.readLine();
       } catch (IOException e) {
-        throw new SystemException(e.toString());
+        throw new SystemException(e);
       }
       VncViewer.autoPass.setParam("0");
     } else
@@ -348,10 +348,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
       Throwable cause = e.getCause();
       if (cause instanceof ErrorException)
         throw (ErrorException)cause;
-      if (cause instanceof WarningException)
+      else if (cause instanceof WarningException)
         throw (WarningException)cause;
-      else if (cause != null)
-        throw new SystemException(cause.toString());
+      else if (cause instanceof SystemException)
+        throw (SystemException)cause;
+      else
+        throw new SystemException(e);
     }
   }
 
@@ -954,10 +956,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
       Throwable cause = e.getCause();
       if (cause instanceof ErrorException)
         throw (ErrorException)cause;
-      if (cause instanceof WarningException)
+      else if (cause instanceof WarningException)
         throw (WarningException)cause;
-      else if (cause != null)
-        throw new SystemException(cause.toString());
+      else if (cause instanceof SystemException)
+        throw (SystemException)cause;
+      else
+        throw new SystemException(e);
     }
   }
 

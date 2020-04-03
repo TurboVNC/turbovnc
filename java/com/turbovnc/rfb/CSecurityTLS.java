@@ -4,7 +4,7 @@
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012, 2015 Brian P. Hinz
- * Copyright (C) 2012, 2015-2019 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015-2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,10 +164,15 @@ public class CSecurityTLS extends CSecurity {
       vlog.debug("Negotiated cipher suite: " +
                  manager.getSession().getCipherSuite());
     } catch (java.lang.Exception e) {
-      if (e.getMessage().equals("X.509 certificate not trusted"))
-        throw new WarningException(e.getMessage());
+      Throwable cause = e.getCause();
+      if (cause instanceof ErrorException)
+        throw (ErrorException)cause;
+      else if (cause instanceof WarningException)
+        throw (WarningException)cause;
+      else if (cause instanceof SystemException)
+        throw (SystemException)cause;
       else
-        throw new SystemException(e.toString());
+        throw new SystemException(e);
     }
 
     cc.setStreams(new TLSInStream(is, manager),
@@ -298,7 +303,7 @@ public class CSecurityTLS extends CSecurity {
         tmf.init(new CertPathTrustManagerParameters(params));
         tm = (X509TrustManager)tmf.getTrustManagers()[0];
       } catch (java.lang.Exception e) {
-        throw new SystemException(e.getMessage());
+        throw new SystemException(e);
       }
     }
 
@@ -374,13 +379,13 @@ public class CSecurityTLS extends CSecurity {
                   fw.write(pem + "\n");
                   fw.write("-----END CERTIFICATE-----\n");
                 } catch (IOException ioe) {
-                  throw new SystemException(ioe.getMessage());
+                  throw new SystemException(ioe);
                 } finally {
                   try {
                     if (fw != null)
                       fw.close();
                   } catch (IOException ioe2) {
-                    throw new SystemException(ioe2.getMessage());
+                    throw new SystemException(ioe2);
                   }
                 }
               }
@@ -389,7 +394,7 @@ public class CSecurityTLS extends CSecurity {
             throw new WarningException("X.509 certificate not trusted");
           }
         } else {
-          throw new SystemException(e.getMessage());
+          throw new SystemException(e);
         }
       }
     }
@@ -438,9 +443,9 @@ public class CSecurityTLS extends CSecurity {
         if (ret != JOptionPane.YES_OPTION)
           throw new WarningException("X.509 certificate not trusted");
       } catch (CertificateParsingException e) {
-        throw new SystemException(e.getMessage());
+        throw new SystemException(e);
       } catch (InvalidNameException e) {
-        throw new SystemException(e.getMessage());
+        throw new SystemException(e);
       }
     }
 
@@ -464,13 +469,13 @@ public class CSecurityTLS extends CSecurity {
               sb.append(l + "\n");
           }
         } catch (java.lang.Exception e) {
-          throw new SystemException(e.toString());
+          throw new SystemException(e);
         } finally {
           try {
             if (reader != null)
               reader.close();
           } catch (IOException ioe) {
-            throw new SystemException(ioe.getMessage());
+            throw new SystemException(ioe);
           }
         }
         Charset utf8 = Charset.forName("UTF-8");
