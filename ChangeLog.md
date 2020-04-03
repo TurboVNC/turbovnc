@@ -42,6 +42,11 @@ Mac platforms.)
 9. The TurboVNC Viewer Options dialog can now be used to allow or disallow
 Alt-Enter as an alternate hotkey for toggling full-screen mode.
 
+10. Fixed an issue in the Windows TurboVNC Viewer whereby, if keyboard grabbing
+was enabled, using the Windows-L key sequence to lock the computer caused the
+Windows key (or its Un*x equivalent, the left Super key) to become stuck in the
+pressed state on the server.
+
 
 2.2.4
 =====
