@@ -144,7 +144,8 @@ using the `-x509cert` and `-x509key` arguments to Xvnc.
 
 ### Significant changes relative to 2.2.4:
 
-1. The `MenuKey` parameter in the Java TurboVNC Viewer is now case-insensitive.
+1. The value of the `MenuKey` parameter in the Java TurboVNC Viewer is now
+case-insensitive.
 
 2. Fixed several issues in the Java TurboVNC Viewer that prevented the
 configuration hierarchy (Options dialog > command line > previous settings)
@@ -152,9 +153,9 @@ from being honored for certain parameters in some cases (particularly when
 using listen mode or making multiple connections from the same viewer
 instance.)
 
-3. Fixed an issue in the Java TurboVNC Viewer whereby the SSH host key for a
-given TurboVNC host was not added to the list of known hosts unless the SSH
-known hosts file (~/.ssh/known_hosts) already existed.
+3. Fixed an issue in the Java TurboVNC Viewer's built-in SSH client whereby the
+SSH host key for a given TurboVNC host was not added to the list of known hosts
+unless the SSH known hosts file (~/.ssh/known_hosts) already existed.
 
 4. Introduced a new Java system property (`turbovnc.sshbannerdlg`) that, when
 set to `0`, causes the Java TurboVNC Viewer's built-in SSH client to display
@@ -171,6 +172,42 @@ addition to allowing external SSH issues to be diagnosed more easily, this also
 allows interactive SSH authentication methods to be used on Windows.
 Furthermore, the Java TurboVNC Viewer now throws an error if the SSH subprocess
 fails to launch for any reason.
+
+7. Fixed visual artifacts that occurred when using Hextile encoding in the Java
+TurboVNC Viewer with OpenGL Java 2D blitting enabled (which is the default on
+Mac platforms.)
+
+8. Fixed an issue in the Windows TurboVNC Viewer whereby, in listen mode, the
+`/jpeg`, `/nojpeg`, and `/quality` command-line arguments did not take effect.
+
+9. The TurboVNC Viewer Options dialog can now be used to allow or disallow
+Alt-Enter as an alternate hotkey for toggling full-screen mode.
+
+10. Fixed an issue in the Windows TurboVNC Viewer whereby, if keyboard grabbing
+was enabled, using the Windows-L key sequence to lock the computer caused the
+Windows key (or its Un*x equivalent, the left Super key) to become stuck in the
+pressed state on the server.
+
+11. Fixed an issue in the Windows/Java TurboVNC Viewer whereby, if keyboard
+grabbing was enabled, using Alt-Tab to select another window in the TurboVNC
+session sometimes caused the Tab key to become stuck in the pressed state on
+the server.
+
+12. Fixed multiple issues with the handling of X.509 certificates in the Java
+TurboVNC Viewer:
+
+     - Fixed an issue whereby the viewer would not save an untrusted
+certificate if a different certificate with the same Distinguished Name (DN)
+had already been saved.
+     - The viewer now throws an error if a certificate is not yet valid (i.e.
+if the start of its validity period is in the future), regardless of whether
+the certificate is trusted.
+     - The viewer now asks for confirmation from the user before accepting an
+expired certificate, regardless of whether the certificate is trusted.
+     - Fixed an issue whereby the viewer would not save an untrusted
+certificate if the saved certificates file already existed.
+     - The viewer no longer displays a confirmation dialog if hostname
+verification fails for a saved certificate.
 
 
 2.2.4

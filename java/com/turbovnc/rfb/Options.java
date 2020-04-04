@@ -60,6 +60,7 @@ public class Options {
       serverName = new String(old.serverName);
     shared = old.shared;
 
+    fsAltEnter = old.fsAltEnter;
     grabKeyboard = old.grabKeyboard;
     menuKeyCode = old.menuKeyCode;
     menuKeySym = old.menuKeySym;
@@ -205,6 +206,7 @@ public class Options {
     printOpt("serverName", serverName);
     printOpt("shared", shared);
 
+    printOpt("fsAltEnter", fsAltEnter);
     printOpt("grabKeyboard", grabKeyboard);
     printOpt("menuKeyCode", menuKeyCode);
     printOpt("menuKeySym", menuKeySym);
@@ -303,6 +305,7 @@ public class Options {
   public String serverName;
   public boolean shared;
   // INPUT OPTIONS
+  public boolean fsAltEnter;
   public int grabKeyboard;
   public int menuKeyCode, menuKeySym;
   public boolean reverseScroll;

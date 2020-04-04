@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ public class HextileDecoder extends Decoder {
         int tileType = is.readU8();
 
         if ((tileType & RFB.HEXTILE_RAW) != 0) {
-          is.readPixels(buf, t.area(), bytesPerPixel, bigEndian);
+          is.readPixels(buf, t.area(), bytesPerPixel, bigEndian, true);
           handler.imageRect(t, buf);
           continue;
         }

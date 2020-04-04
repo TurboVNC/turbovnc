@@ -90,21 +90,6 @@ be used to compress the indexed color, mono and raw subrectangles.  TurboVNC
 uses a modified version of the TightVNC encoder that has been optimized for
 maximum performance with 3D and video workloads.
 .TP
-.B RRE
-Rise\-and\-Run\-length\-Encoding is basically a 2D version of run\-length
-encoding (RLE).  With this encoding type, areas of solid color are represented
-as a fill color and a bounding box.  For each rectangle, the encoder determines
-the most common color (the "background color") and sends it first, then the
-encoder iterates over any regions that don't match the background and attempts
-to represent those regions with smaller solid subrectangles.  Any pixels that
-are not the same color as their neighbors must be sent as 1-pixel
-subrectangles, which is very inefficient.  In fact, if the rectangle has a lot
-of unique colors, then RRE encoding can actually produce an encoded image that
-is larger than the raw pixels.  In those cases, the RRE encoder simply uses Raw
-encoding instead.  RRE is obsolete (the Tight encoder includes a more
-sophisticated method of encoding solid-color regions in a rectangle), and thus
-RRE is included only for compatibility with older VNC servers.
-.TP
 .B Hextile
 Hextile splits rectangles into 16x16 tiles, which are sent in a predetermined
 order.  Each tile is encoded using either Raw encoding or a variant of RRE.

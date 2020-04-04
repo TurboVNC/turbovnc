@@ -908,8 +908,7 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
   rfbServerFormat.bigEndian = bigEndian;
 
   /* Find the root visual and set the server format */
-  for (vis = pScreen->visuals; vis->vid != pScreen->rootVisual; vis++)
-    ;
+  for (vis = pScreen->visuals; vis->vid != pScreen->rootVisual; vis++);
   rfbServerFormat.trueColour = (vis->class == TrueColor);
 
   if ((vis->class == TrueColor) || (vis->class == DirectColor)) {

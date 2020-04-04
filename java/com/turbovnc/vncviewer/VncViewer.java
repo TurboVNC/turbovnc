@@ -613,9 +613,15 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     } else if (e instanceof ErrorException) {
       title = "TurboVNC Viewer : Error";
       System.err.println(msg);
+    } else if (e instanceof SystemException) {
+      Throwable cause = e.getCause();
+      while (cause instanceof SystemException && cause.getCause() != null)
+        cause = cause.getCause();
+      msg = cause.toString();
+      title = "TurboVNC Viewer : Unexpected Error";
+      cause.printStackTrace();
     } else {
-      if (!(e instanceof SystemException))
-        msg = e.toString();
+      msg = e.toString();
       title = "TurboVNC Viewer : Unexpected Error";
       e.printStackTrace();
     }
@@ -675,6 +681,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
     options.viewOnly.setSelected(opts.viewOnly);
     options.reverseScroll.setSelected(opts.reverseScroll);
+    options.fsAltEnter.setSelected(opts.fsAltEnter);
     options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
@@ -725,6 +732,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     opts.sendLocalUsername = options.sendLocalUsername.isSelected();
     opts.viewOnly = options.viewOnly.isSelected();
     opts.reverseScroll = options.reverseScroll.isSelected();
+    opts.fsAltEnter = options.fsAltEnter.isSelected();
     opts.recvClipboard = options.recvClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
@@ -917,6 +925,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       opts.shared = shared.getValue();
 
       // INPUT OPTIONS
+      opts.fsAltEnter = fsAltEnter.getValue();
       if (Utils.osGrab()) {
         if (grabKeyboard.getValue().toLowerCase().startsWith("f"))
           opts.grabKeyboard = Options.GRAB_FS;
@@ -1183,6 +1192,14 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   static HeaderParameter inputHeader =
   new HeaderParameter("InputHeader", "INPUT PARAMETERS");
 
+  static BoolParameter fsAltEnter =
+  new BoolParameter("FSAltEnter",
+  "Normally, the viewer will switch into and out of full-screen mode when " +
+  "Ctrl-Alt-Shift-F is pressed or \"Full screen\" is selected from the " +
+  "popup menu.  Setting this parameter will additionally cause the viewer " +
+  "to switch into and out of full-screen mode when Alt-Enter is pressed.",
+  false);
+
   static StringParameter grabKeyboard =
   new StringParameter("GrabKeyboard",
   Utils.osGrab() ? "When the keyboard is grabbed, special key sequences " +
@@ -1305,14 +1322,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "desktop size and screen configuration set by the server.", "Auto",
   "WxH, W0xH0+X0+Y0[,W1xH1+X1+Y1,...], Auto, or Server");
 
-  static BoolParameter fsAltEnter =
-  new BoolParameter("FSAltEnter",
-  "Normally, the viewer will switch into and out of full-screen mode when " +
-  "Ctrl-Alt-Shift-F is pressed or \"Full screen\" is selected from the " +
-  "popup menu.  Setting this parameter will additionally cause the viewer " +
-  "to switch into and out of full-screen mode when Alt-Enter is pressed.",
-  false);
-
   static BoolParameter fullScreen =
   new BoolParameter("FullScreen",
   "Start the viewer in full-screen mode.", false);
@@ -1399,7 +1408,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "should be no reason to use an encoding type other than Tight when " +
   "connecting to a TurboVNC session, but this parameter can be useful when " +
   "connecting to other types of VNC servers, such as RealVNC.",
-  "Tight", "Tight, ZRLE, Hextile, Raw, RRE");
+  "Tight", "Tight, ZRLE, Hextile, Raw");
 
   static BoolParameter allowJpeg =
   new BoolParameter("JPEG",

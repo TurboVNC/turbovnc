@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.cpp from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2015, 2020 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -43,8 +43,8 @@ void LowLevelHook::Initialize(HINSTANCE hInstance)
   // the hook callbacks via the message pump, so by using it on the main
   // connection thread, it could be delayed because of file transfers, etc.
   // Thus, we use a dedicated thread.
-  g_hThread = CreateThread(NULL, 0, HookThreadProc, hInstance, 0,
-    &g_nThreadID);
+  g_hThread =
+    CreateThread(NULL, 0, HookThreadProc, hInstance, 0, &g_nThreadID);
   if (!g_hThread)
     printf("Error %d from CreateThread()\n", (int)GetLastError());
 }
@@ -89,7 +89,7 @@ DWORD WINAPI LowLevelHook::HookThreadProc(LPVOID lpParam)
 void LowLevelHook::Release()
 {
   // adzm 2009-09-25 - Post a message to the thread instructing it to
-    // terminate
+  // terminate
   if (g_hThread) {
     PostThreadMessage(g_nThreadID, WM_SHUTDOWNLLKBHOOK, 0, 0);
     WaitForSingleObject(g_hThread, INFINITE);
@@ -136,13 +136,13 @@ static LPARAM MakeLParam(WPARAM wParam, KBDLLHOOKSTRUCT *pkbdllhook)
 
   lParam &= (LPARAM)(pkbdllhook->scanCode << 16);
   if (extended)
-    lParam &= 0x01000000;
+    lParam |= 0x01000000;
   if (altDown && (wParam == WM_SYSKEYDOWN || wParam == WM_SYSKEYUP))
-    lParam &= 0x20000000;
+    lParam |= 0x20000000;
   if (keyWasDown || wParam == WM_SYSKEYUP || wParam == WM_KEYUP)
-    lParam &= 0x40000000;
+    lParam |= 0x40000000;
   if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
-    lParam &= 0x80000000;
+    lParam |= 0x80000000;
 
   return lParam;
 }
@@ -160,7 +160,7 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
 
   if (nCode == HC_ACTION) {
     KBDLLHOOKSTRUCT *pkbdllhook = (KBDLLHOOKSTRUCT *)lParam;
-    DWORD ProcessID ;
+    DWORD ProcessID;
 
     // Get the process ID of the Active Window (the window with the input
     // focus)
@@ -180,7 +180,6 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
                       MakeLParam(wParam, pkbdllhook));
           fHandled = TRUE;
           break;
-
 
         // For window switching sequences (ALT+TAB, ALT+ESC, CTRL+ESC),
         // we intercept the primary keypress when it occurs after the
@@ -245,5 +244,5 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
   }  // if (nCode == HT_ACTION)
 
   // Call the next hook, if we didn't handle this message
-  return (fHandled ? TRUE : CallNextHookEx(g_HookID, nCode, wParam, lParam));
+  return fHandled ? TRUE : CallNextHookEx(g_HookID, nCode, wParam, lParam);
 }

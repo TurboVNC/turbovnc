@@ -47,7 +47,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     grabKeyboard;
   JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
   JCheckBox viewOnly, recvClipboard, sendClipboard, acceptBell,
-    reverseScroll;
+    reverseScroll, fsAltEnter;
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
   JCheckBox secVeNCrypt, encNone, encTLS, encX509;
   JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent,
@@ -376,8 +376,18 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     reverseScroll = new JCheckBox("Reverse scroll wheel direction");
     reverseScroll.addItemListener(this);
+
     Dialog.addGBComponent(reverseScroll, inputPanel,
                           0, 1, 2, 1, 2, 2, 1, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.LINE_START,
+                          new Insets(4, 5, 0, 5));
+
+    fsAltEnter = new JCheckBox("Toggle full-screen mode with Alt-Enter");
+    fsAltEnter.addItemListener(this);
+
+    Dialog.addGBComponent(fsAltEnter, inputPanel,
+                          0, 2, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
@@ -731,9 +741,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
     UserPreferences.set("global", "DesktopSize",
                         desktopSize.getSelectedItem().toString());
-    //   (no GUI equivalent)
-    UserPreferences.set("global", "FSAltEnter",
-                        VncViewer.fsAltEnter.getValue());
+    UserPreferences.set("global", "FSAltEnter", fsAltEnter.isSelected());
     UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
     int sf =
       Options.parseScalingFactor(scalingFactor.getSelectedItem().toString());

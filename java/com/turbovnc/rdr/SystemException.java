@@ -2,7 +2,7 @@
  * Copyright (C) 2004 Red Hat Inc.
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 package com.turbovnc.rdr;
 
 public class SystemException extends RuntimeException {
-  public SystemException(String s) {
-    super(s);
+  public SystemException(Throwable e) {
+    super(e);
   }
 }

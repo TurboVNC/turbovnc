@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
 /* Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,6 +160,11 @@ public abstract class InStream {
 
   public final void readPixels(Object buf, int length, int bytesPerPixel,
                                boolean bigEndian) {
+    readPixels(buf, length, bytesPerPixel, bigEndian, false);
+  }
+
+  public final void readPixels(Object buf, int length, int bytesPerPixel,
+                               boolean bigEndian, boolean opaque) {
     int nbytes = length * bytesPerPixel;
     int dstPtr = 0, srcPtr = 0;
     byte[] pixels = new byte[nbytes];
@@ -194,7 +199,25 @@ public abstract class InStream {
                                    (pixels[srcPtr++] & 0xff) << 16 |
                                    0xff000000;
       }
-    } else if (bytesPerPixel == 4 && buf instanceof int[]) {
+    } else if (opaque && bytesPerPixel == 4 && buf instanceof int[]) {
+      if (bigEndian) {
+        while (length-- > 0) {
+          ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                   (pixels[srcPtr++] & 0xff) << 16 |
+                                   (pixels[srcPtr++] & 0xff) << 8 |
+                                   0x000000ff;
+          srcPtr++;
+        }
+      } else {
+        while (length-- > 0) {
+          ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) |
+                                   (pixels[srcPtr++] & 0xff) << 8 |
+                                   (pixels[srcPtr++] & 0xff) << 16 |
+                                   0xff000000;
+          srcPtr++;
+        }
+      }
+    } else if (!opaque && bytesPerPixel == 4 && buf instanceof int[]) {
       if (bigEndian) {
         while (length-- > 0)
           ((int[])buf)[dstPtr++] = (pixels[srcPtr++] & 0xff) << 24 |
