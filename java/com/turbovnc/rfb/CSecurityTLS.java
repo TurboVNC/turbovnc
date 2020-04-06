@@ -3,7 +3,7 @@
  * Copyright (C) 2005 Martin Koegler
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
- * Copyright (C) 2011-2012, 2015, 2017 Brian P. Hinz
+ * Copyright (C) 2011-2012, 2015, 2017, 2019 Brian P. Hinz
  * Copyright (C) 2012, 2015-2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -424,8 +424,7 @@ public class CSecurityTLS extends CSecurity {
           LdapName ln = new LdapName(dn);
           for (Rdn rdn : ln.getRdns()) {
             if (rdn.getType().equalsIgnoreCase("CN")) {
-              String peer =
-                ((CConn)client).getSocket().getPeerName().toLowerCase();
+              String peer = client.getServerName().toLowerCase();
               if (peer.equals(((String)rdn.getValue()).toLowerCase()))
                 return;
             }
@@ -435,8 +434,7 @@ public class CSecurityTLS extends CSecurity {
           while (i.hasNext()) {
             List nxt = (List)i.next();
             if (((Integer)nxt.get(0)).intValue() == 2) {
-              String peer =
-                ((CConn)client).getSocket().getPeerName().toLowerCase();
+              String peer = client.getServerName().toLowerCase();
               if (peer.equals(((String)nxt.get(1)).toLowerCase()))
                 return;
             } else if (((Integer)nxt.get(0)).intValue() == 7) {
