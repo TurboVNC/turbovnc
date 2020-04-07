@@ -154,7 +154,7 @@ public final class Configuration {
     } catch (java.security.AccessControlException e) {
       throw new WarningException("Cannot access connection info file:\n" +
                                  e.getMessage());
-    } catch (java.lang.Exception e) {
+    } catch (Exception e) {
       throw new WarningException("Cannot open connection info file:\n" +
                                  e.getMessage());
     }

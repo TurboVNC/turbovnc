@@ -31,12 +31,12 @@ public final class Helper {
       try {
         System.loadLibrary("turbovnchelper");
         available = true;
-      } catch (java.lang.UnsatisfiedLinkError e) {
+      } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not find TurboVNC Helper JNI library.  If it is in a");
         vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
         vlog.info("  to the Java command line to specify its location.");
         printMissingFeatures();
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
         printMissingFeatures();

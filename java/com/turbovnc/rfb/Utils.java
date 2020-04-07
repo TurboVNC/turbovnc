@@ -105,7 +105,7 @@ public final class Utils {
           vlog.error("  " + e.getMessage());
         }
       }
-    } catch (java.lang.Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
 

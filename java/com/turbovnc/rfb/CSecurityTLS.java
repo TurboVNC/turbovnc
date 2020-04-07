@@ -3,7 +3,7 @@
  * Copyright (C) 2005 Martin Koegler
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
- * Copyright (C) 2011-2012, 2015, 2017 Brian P. Hinz
+ * Copyright (C) 2011-2012, 2015, 2017, 2019 Brian P. Hinz
  * Copyright (C) 2012, 2015-2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -162,16 +162,9 @@ public class CSecurityTLS extends CSecurity {
       manager.doHandshake();
       vlog.debug("Negotiated cipher suite: " +
                  manager.getSession().getCipherSuite());
-    } catch (java.lang.Exception e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof ErrorException)
-        throw (ErrorException)cause;
-      else if (cause instanceof WarningException)
-        throw (WarningException)cause;
-      else if (cause instanceof SystemException)
-        throw (SystemException)cause;
-      else
-        throw new SystemException(e);
+    } catch (Exception e) {
+      SystemException.checkException(e);
+      throw new SystemException(e);
     }
 
     cc.setStreams(new TLSInStream(is, manager),
@@ -288,7 +281,8 @@ public class CSecurityTLS extends CSecurity {
         tmf = TrustManagerFactory.getInstance("PKIX");
         tmf.init(new CertPathTrustManagerParameters(params));
         tm = (X509TrustManager)tmf.getTrustManagers()[0];
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
+        SystemException.checkException(e);
         throw new SystemException(e);
       }
     }
@@ -346,7 +340,7 @@ public class CSecurityTLS extends CSecurity {
       try {
         verifyHostname(cert);
         tm.checkServerTrusted(chain, authType);
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         if (e.getCause() instanceof CertPathBuilderException) {
           Object[] answer = { "YES", "NO" };
           int ret = JOptionPane.showOptionDialog(null,
@@ -390,8 +384,10 @@ public class CSecurityTLS extends CSecurity {
         } else {
           Throwable cause = e.getCause();
           if (cause == null ||
-              !(cause instanceof CertPathValidatorException) || !expiredOK)
+              !(cause instanceof CertPathValidatorException) || !expiredOK) {
+            SystemException.checkException(e);
             throw new SystemException(e);
+          }
         }
       }
     }
@@ -427,7 +423,7 @@ public class CSecurityTLS extends CSecurity {
           LdapName ln = new LdapName(dn);
           for (Rdn rdn : ln.getRdns()) {
             if (rdn.getType().equalsIgnoreCase("CN")) {
-              String peer = client.getSocket().getPeerName().toLowerCase();
+              String peer = client.getServerName().toLowerCase();
               if (peer.equals(((String)rdn.getValue()).toLowerCase()))
                 return;
             }
@@ -437,7 +433,7 @@ public class CSecurityTLS extends CSecurity {
           while (i.hasNext()) {
             List nxt = (List)i.next();
             if (((Integer)nxt.get(0)).intValue() == 2) {
-              String peer = client.getSocket().getPeerName().toLowerCase();
+              String peer = client.getServerName().toLowerCase();
               if (peer.equals(((String)nxt.get(1)).toLowerCase()))
                 return;
             } else if (((Integer)nxt.get(0)).intValue() == 7) {
@@ -481,7 +477,7 @@ public class CSecurityTLS extends CSecurity {
             if (l.trim().length() > 0)
               sb.append(l + "\n");
           }
-        } catch (java.lang.Exception e) {
+        } catch (Exception e) {
           throw new SystemException(e);
         } finally {
           try {

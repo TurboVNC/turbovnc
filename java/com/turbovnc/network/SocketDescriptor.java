@@ -43,7 +43,7 @@ public class SocketDescriptor implements FileDescriptor {
     try {
       channel.register(writeSelector, SelectionKey.OP_WRITE);
       channel.register(readSelector, SelectionKey.OP_READ);
-    } catch (java.nio.channels.ClosedChannelException e) {
+    } catch (ClosedChannelException e) {
       throw new SystemException(e);
     }
   }
@@ -232,7 +232,7 @@ public class SocketDescriptor implements FileDescriptor {
     try {
       channel.register(writeSelector, SelectionKey.OP_WRITE);
       channel.register(readSelector, SelectionKey.OP_READ);
-    } catch (java.nio.channels.ClosedChannelException e) {
+    } catch (ClosedChannelException e) {
       System.err.println(e.toString());
     }
   }

@@ -386,16 +386,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
       });
     } catch (InterruptedException e) {
-    } catch (java.lang.reflect.InvocationTargetException e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof ErrorException)
-        throw (ErrorException)cause;
-      else if (cause instanceof WarningException)
-        throw (WarningException)cause;
-      else if (cause instanceof SystemException)
-        throw (SystemException)cause;
-      else
-        throw new SystemException(e);
+    } catch (InvocationTargetException e) {
+      SystemException.checkException(e);
+      throw new SystemException(e);
     }
     synchronized(viewer) {
       viewer.notify();
@@ -997,16 +990,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
       });
     } catch (InterruptedException e) {
-    } catch (java.lang.reflect.InvocationTargetException e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof ErrorException)
-        throw (ErrorException)cause;
-      else if (cause instanceof WarningException)
-        throw (WarningException)cause;
-      else if (cause instanceof SystemException)
-        throw (SystemException)cause;
-      else
-        throw new SystemException(e);
+    } catch (InvocationTargetException e) {
+      SystemException.checkException(e);
+      throw new SystemException(e);
     }
   }
 
