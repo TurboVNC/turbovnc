@@ -31,7 +31,6 @@ public class AliasParameter extends VoidParameter {
   public synchronized void reset() { param.reset(); }
 
   public String getDefaultStr() { return null; }
-  public String getValueStr() { return param.getValueStr(); }
   public String getValues() { return null; }
   public boolean isBool() { return param.isBool(); }
 

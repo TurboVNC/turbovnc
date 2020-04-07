@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@ public abstract class VoidParameter {
   public VoidParameter(String name_, String desc_) {
     name = name_;
     description = desc_;
-    if (Configuration.head == null)
-      Configuration.head = this;
-    if (Configuration.tail != null)
-      Configuration.tail.next = this;
-    Configuration.tail = this;
+    if (Params.head == null)
+      Params.head = this;
+    if (Params.tail != null)
+      Params.tail.next = this;
+    Params.tail = this;
   }
 
   public final String getName() { return name; }
@@ -39,7 +39,6 @@ public abstract class VoidParameter {
   public abstract void reset();
 
   public abstract String getDefaultStr();
-  public abstract String getValueStr();
   public abstract String getValues();
   public boolean isBool() { return false; }
 

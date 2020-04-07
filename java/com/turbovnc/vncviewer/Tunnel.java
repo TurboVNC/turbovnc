@@ -139,10 +139,10 @@ public class Tunnel {
     }
 
     ArrayList<File> privateKeys = new ArrayList<File>();
-    String sshKeyFile = VncViewer.sshKeyFile.getValue();
-    String sshKey = VncViewer.sshKey.getValue();
+    String sshKeyFile = Params.sshKeyFile.getValue();
+    String sshKey = Params.sshKey.getValue();
     if (sshKey != null) {
-      String sshKeyPass = VncViewer.sshKeyPass.getValue();
+      String sshKeyPass = Params.sshKeyPass.getValue();
       byte[] keyPass = null, key;
       if (sshKeyPass != null)
         keyPass = sshKeyPass.getBytes();
@@ -161,17 +161,17 @@ public class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    int port = VncViewer.sshPort.getValue();
+    int port = Params.sshPort.getValue();
     String user = opts.sshUser;
     if (user == null)
       user = (String)System.getProperties().get("user.name");
 
-    File sshConfigFile = new File(VncViewer.sshConfig.getValue());
+    File sshConfigFile = new File(Params.sshConfig.getValue());
     if (sshConfigFile.exists() && sshConfigFile.canRead()) {
       ConfigRepository repo =
         OpenSSHConfig.parseFile(sshConfigFile.getAbsolutePath());
       jsch.setConfigRepository(repo);
-      vlog.debug("Read OpenSSH config file " + VncViewer.sshConfig.getValue());
+      vlog.debug("Read OpenSSH config file " + Params.sshConfig.getValue());
       // This just ensures that the password dialog displays the correct
       // user name.  JSch will ignore the user name and port passed to
       // getSession() if the configuration has already been set using an
@@ -180,21 +180,21 @@ public class Tunnel {
       if (repoUser != null)
         user = repoUser;
     } else {
-      if (VncViewer.sshConfig.isDefault()) {
+      if (Params.sshConfig.isDefault()) {
         vlog.debug("Could not parse SSH config file " +
-                   VncViewer.sshConfig.getValue());
+                   Params.sshConfig.getValue());
       } else {
         vlog.info("Could not parse SSH config file " +
-                  VncViewer.sshConfig.getValue());
+                  Params.sshConfig.getValue());
       }
     }
 
     for (Iterator<File> i = privateKeys.iterator(); i.hasNext();) {
       File privateKey = (File)i.next();
       if (privateKey.exists() && privateKey.canRead()) {
-        if (VncViewer.sshKeyPass.getValue() != null)
+        if (Params.sshKeyPass.getValue() != null)
           jsch.addIdentity(privateKey.getAbsolutePath(),
-                           VncViewer.sshKeyPass.getValue());
+                           Params.sshKeyPass.getValue());
         else
           jsch.addIdentity(privateKey.getAbsolutePath());
       }

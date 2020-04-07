@@ -410,7 +410,7 @@ public class Viewport extends JFrame {
         if (((on && VncViewer.isKeyboardGrabbed(this)) ||
              (!on && !VncViewer.isKeyboardGrabbed())) && !force)
           return;
-        grabKeyboard(on, VncViewer.grabPointer.getValue());
+        grabKeyboard(on, Params.grabPointer.getValue());
         VncViewer.setGrabOwner(on ? this : null);
       } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper.");

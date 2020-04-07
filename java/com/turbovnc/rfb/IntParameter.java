@@ -64,7 +64,6 @@ public class IntParameter extends VoidParameter {
       return Integer.toString(defValue);
     return null;
   }
-  public synchronized String getValueStr() { return Integer.toString(value); }
   public String getValues() {
     if (useMinMax) {
       return minValue + "-" + maxValue;

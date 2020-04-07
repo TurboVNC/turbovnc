@@ -34,7 +34,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     setLightWeightPopupEnabled(false);
     cc = cc_;
 
-    if (!VncViewer.noNewConn.getValue()) {
+    if (!Params.noNewConn.getValue()) {
       exit = addMenuItem("Close Connection", KeyEvent.VK_C);
       addSeparator();
     }
@@ -87,14 +87,14 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     f8 = addMenuItem("Send " + KeyEvent.getKeyText(cc.opts.menuKeyCode));
     KeyStroke ks = KeyStroke.getKeyStroke(cc.opts.menuKeyCode, 0);
     f8.setAccelerator(ks);
-    if (!VncViewer.restricted.getValue()) {
+    if (!Params.restricted.getValue()) {
       ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
       ctrlEsc = addMenuItem("Send Ctrl-Esc");
     }
     addSeparator();
     clipboard = addMenuItem("Clipboard...");
     addSeparator();
-    if (!VncViewer.noNewConn.getValue()) {
+    if (!Params.noNewConn.getValue()) {
       newConn = addMenuItem("New Connection...   (Ctrl-Alt-Shift-N)",
                             KeyEvent.VK_N);
       addSeparator();
@@ -142,7 +142,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   }
 
   public void actionPerformed(ActionEvent ev) {
-    if (!VncViewer.noNewConn.getValue() && actionMatch(ev, exit)) {
+    if (!Params.noNewConn.getValue() && actionMatch(ev, exit)) {
       cc.close();
     } else if (actionMatch(ev, fullScreen)) {
       cc.toggleFullScreen();
@@ -185,7 +185,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       firePopupMenuCanceled();
     } else if (actionMatch(ev, screenshot)) {
       cc.screenshot();
-    } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
+    } else if (!Params.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
     } else if (actionMatch(ev, options)) {
       cc.options.showDialog(cc.viewport);

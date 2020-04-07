@@ -99,7 +99,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     setupAppMenu();
 
     JMenu connMenu = new JMenu("Connection");
-    if (!VncViewer.noNewConn.getValue()) {
+    if (!Params.noNewConn.getValue()) {
       newConn = addMenuItem(connMenu, "New Connection...");
       newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
                                                     acceleratorMask));
@@ -148,7 +148,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
                                                       acceleratorMask));
     connMenu.addSeparator();
-    if (!VncViewer.restricted.getValue()) {
+    if (!Params.restricted.getValue()) {
       ctrlAltDel = addMenuItem(connMenu, "Send Ctrl-Alt-Del");
       ctrlEsc = addMenuItem(connMenu, "Send Ctrl-Esc");
       connMenu.addSeparator();
@@ -206,9 +206,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.losslessRefresh();
     } else if (actionMatch(ev, screenshot)) {
       cc.screenshot();
-    } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
+    } else if (!Params.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
-    } else if (!VncViewer.noNewConn.getValue() && actionMatch(ev, closeConn)) {
+    } else if (!Params.noNewConn.getValue() && actionMatch(ev, closeConn)) {
       cc.close();
     } else if (actionMatch(ev, info)) {
       cc.showInfo();

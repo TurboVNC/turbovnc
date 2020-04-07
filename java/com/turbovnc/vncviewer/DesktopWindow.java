@@ -117,7 +117,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // RFB thread
   public void setCursor(int w, int h, Point hotspot,
                         int[] data, byte[] mask) {
-    if (!cc.opts.cursorShape || VncViewer.localCursor.getValue())
+    if (!cc.opts.cursorShape || Params.localCursor.getValue())
       return;
 
     hideLocalCursor();
@@ -431,7 +431,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         BufferedReader br =
           new BufferedReader(DataFlavor.stringFlavor.getReaderForText(t));
         CharBuffer cbuf =
-          CharBuffer.allocate(VncViewer.maxClipboard.getValue());
+          CharBuffer.allocate(Params.maxClipboard.getValue());
         br.read(cbuf);
         ((Buffer)cbuf).flip();
         String newContents = cbuf.toString();
@@ -684,7 +684,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // are called.
 
   private synchronized void hideLocalCursor() {
-    if (VncViewer.localCursor.getValue())
+    if (Params.localCursor.getValue())
       return;
     if (!cc.opts.cursorShape)
       setCursor(noCursor);
@@ -697,7 +697,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   }
 
   private synchronized void showLocalCursor() {
-    if (VncViewer.localCursor.getValue())
+    if (Params.localCursor.getValue())
       return;
     if (cursorAvailable && !cursorVisible) {
       if (!im.getPF().equal(cursor.getPF()) ||

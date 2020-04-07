@@ -250,9 +250,8 @@ public class CSecurityTLS extends CSecurity {
             for (X509Certificate c :
                  ((X509TrustManager)m).getAcceptedIssuers())
               ks.setCertificateEntry(getThumbprint((X509Certificate)c), c);
-        File cacert = new File(SecurityClient.x509ca.getValue());
-        vlog.debug("Using X.509 CA certificate " +
-                   SecurityClient.x509ca.getValue());
+        File cacert = new File(Params.x509ca.getValue());
+        vlog.debug("Using X.509 CA certificate " + Params.x509ca.getValue());
         if (cacert.exists() && cacert.canRead()) {
           InputStream caStream = new MyFileInputStream(cacert);
           Collection<? extends Certificate> cacerts =
@@ -264,14 +263,14 @@ public class CSecurityTLS extends CSecurity {
         }
         PKIXBuilderParameters params =
           new PKIXBuilderParameters(ks, new X509CertSelector());
-        File crlcert = new File(SecurityClient.x509crl.getValue());
+        File crlcert = new File(Params.x509crl.getValue());
         if (!crlcert.exists() || !crlcert.canRead()) {
           vlog.debug("Not using X.509 CRL");
           params.setRevocationEnabled(false);
         } else {
-          vlog.debug("Using X.509 CRL " + SecurityClient.x509crl.getValue());
+          vlog.debug("Using X.509 CRL " + Params.x509crl.getValue());
           InputStream crlStream =
-            new FileInputStream(SecurityClient.x509crl.getValue());
+            new FileInputStream(Params.x509crl.getValue());
           Collection<? extends CRL> crls = cf.generateCRLs(crlStream);
           CertStoreParameters csp = new CollectionCertStoreParameters(crls);
           CertStore store = CertStore.getInstance("Collection", csp);

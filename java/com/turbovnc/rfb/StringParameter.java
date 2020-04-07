@@ -45,7 +45,6 @@ public class StringParameter extends VoidParameter {
   }
 
   public String getDefaultStr() { return defValue; }
-  public synchronized String getValueStr() { return value; }
   public String getValues() { return values; }
   public boolean isDefault() { return isDefault; }
 

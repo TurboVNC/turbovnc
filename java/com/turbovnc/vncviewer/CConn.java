@@ -91,11 +91,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
-    cp.supportsClientRedirect = VncViewer.clientRedirect.getValue();
+    cp.supportsClientRedirect = Params.clientRedirect.getValue();
     cp.supportsDesktopRename = true;
     menu = new F8Menu(this);
 
-    if (VncViewer.noUnixLogin.getValue()) {
+    if (Params.noUnixLogin.getValue()) {
       Security.disableSecType(RFB.SECTYPE_PLAIN);
       Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
       Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
@@ -117,7 +117,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       int port = -1;
 
       if (opts.serverName != null &&
-          !VncViewer.alwaysShowConnectionDialog.getValue()) {
+          !Params.alwaysShowConnectionDialog.getValue()) {
         if (opts.via == null || opts.via.indexOf(':') < 0) {
           port = opts.port = Hostname.getPort(opts.serverName);
           serverName = opts.serverName = Hostname.getHost(opts.serverName);
@@ -137,7 +137,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         port = Hostname.getPort(opts.via);
         serverName = Hostname.getHost(opts.via);
       } else if (opts.via != null || opts.tunnel ||
-                 (opts.port == 0 && VncViewer.sessMgrAuto.getValue())) {
+                 (opts.port == 0 && Params.sessMgrAuto.getValue())) {
         if (opts.port == 0) {
           try {
             // TurboVNC Session Manager
@@ -146,7 +146,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
               close();
               return;
             }
-            if (VncViewer.sessMgrAuto.getValue()) {
+            if (Params.sessMgrAuto.getValue()) {
               Security.disableSecType(RFB.SECTYPE_NONE);
               Security.disableSecType(RFB.SECTYPE_TLS_NONE);
               Security.disableSecType(RFB.SECTYPE_X509_NONE);
@@ -244,13 +244,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
     String title = ((user == null ? "Standard VNC Authentication" :
                                     "Unix Login Authentication") +
                     " [" + csecurity.getDescription() + "]");
-    String passwordFileStr = VncViewer.passwordFile.getValue();
+    String passwordFileStr = Params.passwordFile.getValue();
     PasswdDialog dlg = null;
     String autoPass;
 
-    if (VncViewer.encPassword.getValue() != null) {
+    if (Params.encPassword.getValue() != null) {
       byte[] encryptedPassword = new byte[8];
-      String passwordString = VncViewer.encPassword.getValue();
+      String passwordString = Params.encPassword.getValue();
       if (passwordString.length() != 16)
         throw new ErrorException("Password specified in EncPassword parameter is invalid.");
       for (int c = 0; c < 16; c += 2) {
@@ -263,21 +263,21 @@ public class CConn extends CConnection implements UserPasswdGetter,
         else break;
       }
       autoPass = VncAuth.unobfuscatePasswd(encryptedPassword);
-    } else if (VncViewer.autoPass.getValue()) {
+    } else if (Params.autoPass.getValue()) {
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
       try {
         autoPass = in.readLine();
       } catch (IOException e) {
         throw new SystemException(e);
       }
-      VncViewer.autoPass.setParam("0");
+      Params.autoPass.setParam("0");
     } else
-      autoPass = VncViewer.password.getValue();
+      autoPass = Params.password.getValue();
 
     if (autoPass != null && passwd != null) {
       passwd.append(autoPass);
       passwd.setLength(autoPass.length());
-      VncViewer.password.setParam(null);
+      Params.password.setParam(null);
     }
 
     if (user == null && passwordFileStr != null && autoPass == null) {
@@ -309,7 +309,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       String userName = opts.user;
       if (opts.sendLocalUsername) {
         userName = (String)System.getProperties().get("user.name");
-        if (VncViewer.localUsernameLC.getValue())
+        if (Params.localUsernameLC.getValue())
           userName = userName.toLowerCase();
         if (passwd == null)
           return true;
@@ -519,7 +519,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     updates++;
     tElapsed = Utils.getTime() - tStart;
 
-    if (tElapsed > (double)VncViewer.profileInt.getValue() && !benchmark) {
+    if (tElapsed > (double)Params.profileInt.getValue() && !benchmark) {
       if (profileDialog.isVisible()) {
         String str;
         str = String.format("%.3f", (double)updates / tElapsed);
@@ -1013,7 +1013,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (viewport.timer != null)
         viewport.timer.stop();
       viewport.grabKeyboardHelper(false);
-      if (VncViewer.currentMonitorIsPrimary.getValue())
+      if (Params.currentMonitorIsPrimary.getValue())
         oldViewportBounds = viewport.getBounds();
       viewport.dispose();
     }
@@ -1157,7 +1157,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           primaryGD = gs;
           primaryID = i;
         }
-        if (VncViewer.currentMonitorIsPrimary.getValue() && viewport != null) {
+        if (Params.currentMonitorIsPrimary.getValue() && viewport != null) {
           Rectangle vpRect = oldViewportBounds != null ? oldViewportBounds :
                              viewport.getBounds();
           if (opts.fullScreen && savedRect.width > 0 && savedRect.height > 0)
@@ -1603,10 +1603,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (opts.sshUser != null)
         options.sshUser.setText(opts.sshUser);
       options.tunnel.setSelected(opts.tunnel);
-      if (SecurityClient.x509ca.getValue() != null)
-        options.x509ca.setText(SecurityClient.x509ca.getValue());
-      if (SecurityClient.x509crl.getValue() != null)
-        options.x509crl.setText(SecurityClient.x509crl.getValue());
+      if (Params.x509ca.getValue() != null)
+        options.x509ca.setText(Params.x509ca.getValue());
+      if (Params.x509crl.getValue() != null)
+        options.x509crl.setText(Params.x509crl.getValue());
     }
 
     options.fullScreen.setSelected(opts.fullScreen);
@@ -1730,8 +1730,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       String sshUser = options.sshUser.getText();
       opts.sshUser = (sshUser.isEmpty() ? null : sshUser);
       opts.tunnel = options.tunnel.isSelected();
-      SecurityClient.x509ca.setParam(options.x509ca.getText());
-      SecurityClient.x509crl.setParam(options.x509crl.getText());
+      Params.x509ca.setParam(options.x509ca.getText());
+      Params.x509crl.setParam(options.x509crl.getText());
     }
 
     if (options.fullScreen.isSelected() != opts.fullScreen)

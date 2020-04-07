@@ -19,23 +19,23 @@
  * USA.
  */
 
-package com.turbovnc.vncviewer;
+package com.turbovnc.rfb;
 
 import java.awt.event.KeyEvent;
 
-import com.turbovnc.rfb.*;
-
 public final class MenuKey {
 
-  static class MenuKeySymbol {
+  public static class MenuKeySymbol {
     MenuKeySymbol(String name_, int keycode_, int keysym_) {
       name = name_;
       keycode = keycode_;
       keysym = keysym_;
     }
-    String name;
-    int keycode;
-    int keysym;
+    // CHECKSTYLE VisibilityModifier:OFF
+    public String name;
+    public int keycode;
+    public int keysym;
+    // CHECKSTYLE VisibilityModifier:ON
   }
 
   private static final MenuKeySymbol[] MENU_SYMBOLS = {
@@ -63,7 +63,7 @@ public final class MenuKey {
     new MenuKeySymbol("PageDown", KeyEvent.VK_PAGE_DOWN, Keysyms.NEXT)
   };
 
-  static int getMenuKeySymbolCount() {
+  public static int getMenuKeySymbolCount() {
     return MENU_SYMBOLS.length;
   }
 
@@ -81,12 +81,9 @@ public final class MenuKey {
     return s;
   }
 
-  static int getMenuKeyCode() {
-    String menuKeyStr;
+  public static int getMenuKeyCode(String menuKeyStr) {
     int menuKeyCode = KeyEvent.VK_F8;
 
-    menuKeyStr =
-      Configuration.getParam("menuKey").getValueStr();
     for (int i = 0; i < getMenuKeySymbolCount(); i++)
       if (MENU_SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))
         menuKeyCode = MENU_SYMBOLS[i].keycode;
@@ -94,12 +91,9 @@ public final class MenuKey {
     return menuKeyCode;
   }
 
-  static int getMenuKeySym() {
-    String menuKeyStr;
+  public static int getMenuKeySym(String menuKeyStr) {
     int menuKeySym = Keysyms.F8;
 
-    menuKeyStr =
-      Configuration.getParam("menuKey").getValueStr();
     for (int i = 0; i < getMenuKeySymbolCount(); i++)
       if (MENU_SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))
         menuKeySym = MENU_SYMBOLS[i].keysym;

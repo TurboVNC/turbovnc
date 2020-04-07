@@ -33,13 +33,13 @@ public class TrayMenu extends PopupMenu implements ActionListener {
     super("TurboVNC Viewer");
     viewer = viewer_;
 
-    if (!VncViewer.noNewConn.getValue()) {
+    if (!Params.noNewConn.getValue()) {
       newConn = addMenuItem("New connection...");
     }
     options = addMenuItem("Default options...");
     addSeparator();
     about = addMenuItem("About TurboVNC Viewer...");
-    if (!VncViewer.noNewConn.getValue()) {
+    if (!Params.noNewConn.getValue()) {
       addSeparator();
       exit = addMenuItem("Close listener");
     }
@@ -104,7 +104,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
   }
 
   public void actionPerformed(ActionEvent ev) {
-    if (!VncViewer.noNewConn.getValue() && actionMatch(ev, newConn)) {
+    if (!Params.noNewConn.getValue() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(viewer);
     } else if (actionMatch(ev, options)) {
       viewer.showOptions();

@@ -366,7 +366,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     viewOnly = new JCheckBox("View only (ignore mouse & keyboard)");
     viewOnly.addItemListener(this);
-    viewOnly.setEnabled(VncViewer.viewOnlyControl.getValue());
+    viewOnly.setEnabled(Params.viewOnlyControl.getValue());
 
     Dialog.addGBComponent(viewOnly, inputPanel,
                           0, 0, 2, 1, 2, 2, 1, 0,
@@ -396,7 +396,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     if (enableGrab) {
       JLabel grabLabel;
-      if (Utils.isX11() && VncViewer.grabPointer.getValue())
+      if (Utils.isX11() && Params.grabPointer.getValue())
         grabLabel = new JLabel("Keyboard/pointer grab mode:");
       else
         grabLabel = new JLabel("Keyboard grab mode:");
@@ -714,7 +714,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     // CONNECTION
     //   (no GUI equivalent)
     UserPreferences.set("global", "AlwaysShowConnectionDialog",
-                        VncViewer.alwaysShowConnectionDialog.getValue());
+                        Params.alwaysShowConnectionDialog.getValue());
     UserPreferences.set("global", "RecvClipboard",
                         recvClipboard.isSelected());
     UserPreferences.set("global", "SendClipboard", sendClipboard.isSelected());
@@ -737,8 +737,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     // DISPLAY
     UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
     //   (no GUI equivalent)
-    if (VncViewer.colors.getValue() != -1)
-      UserPreferences.set("global", "Colors", VncViewer.colors.getValue());
+    if (Params.colors.getValue() != -1)
+      UserPreferences.set("global", "Colors", Params.colors.getValue());
     UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
     UserPreferences.set("global", "DesktopSize",
                         desktopSize.getSelectedItem().toString());
@@ -763,9 +763,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     // ENCODING
     UserPreferences.set("global", "CompressLevel", getCompressionLevel());
     //   (no GUI equivalent)
-    if (VncViewer.preferredEncoding.getValue() != null)
+    if (Params.preferredEncoding.getValue() != null)
       UserPreferences.set("global", "Encoding",
-                          VncViewer.preferredEncoding.getValue());
+                          Params.preferredEncoding.getValue());
     UserPreferences.set("global", "JPEG", allowJpeg.isSelected());
     UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
     String subsamplingStr =
@@ -1128,7 +1128,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       encMethodLabel.setText("Encoding type:");
       encMethodLabel.setEnabled(false);
     }
-    if (encoding != RFB.ENCODING_TIGHT || VncViewer.compatibleGUI.getValue()) {
+    if (encoding != RFB.ENCODING_TIGHT || Params.compatibleGUI.getValue()) {
       compressionLevel.setMinimum(0);
       compressionLevel.setMaximum(9);
       compressionLabelString = new String("Compression level: ");

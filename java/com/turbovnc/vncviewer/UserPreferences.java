@@ -1,5 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ public final class UserPreferences {
       String[] keys = node.keys();
       for (int i = 0; i < keys.length; i++) {
         String key = keys[i];
-        VoidParameter p = Configuration.getParam(key);
+        VoidParameter p = Params.get(key);
         if (p == null) {
           if (key.equalsIgnoreCase("secVeNCrypt")) {
             setSecVeNCrypt = true;
@@ -149,7 +149,7 @@ public final class UserPreferences {
 
         String valueStr = node.get(key, null);
         if (valueStr != null)
-          Configuration.setParam(key, valueStr);
+          Params.set(key, valueStr);
       }
     } catch (BackingStoreException e) {
       vlog.error("Could not get preferences:");

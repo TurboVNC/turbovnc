@@ -60,7 +60,7 @@ public final class SessionManager extends Tunnel {
           if (dlg.getConnectSession().equals("NEW"))
             return startSession(opts.sshSession, host);
           else {
-            if (VncViewer.sessMgrAuto.getValue())
+            if (Params.sessMgrAuto.getValue())
               generateOTP(opts.sshSession, host, dlg.getConnectSession(), true,
                           dlg.getViewOnly());
             return dlg.getConnectSession();
@@ -236,7 +236,7 @@ public final class SessionManager extends Tunnel {
     if (sessions == null)
       throw new ErrorException("Could not parse TurboVNC Server output");
 
-    if (VncViewer.sessMgrAuto.getValue())
+    if (Params.sessMgrAuto.getValue())
       generateOTP(sshSession, host, sessions[0], true, false);
 
     return sessions[0];
@@ -294,7 +294,7 @@ public final class SessionManager extends Tunnel {
     if (result != null) {
       result = result.replaceAll("\\s", "");
       result = result.replaceAll("^.*:", "");
-      if (setPassword) VncViewer.password.setParam(result);
+      if (setPassword) Params.password.setParam(result);
     }
 
     channelExec.disconnect();

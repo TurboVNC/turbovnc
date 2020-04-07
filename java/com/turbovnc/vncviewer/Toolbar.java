@@ -1,5 +1,6 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015, 2018, 2020 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,9 +61,9 @@ public class Toolbar extends JToolBar implements ActionListener {
     for (int i = 0; i < 12; i++) {
       if (i >= 6 && i <= 9 && cc.opts.viewOnly)
         continue;
-      if (i >= 10 && i <= 11 && VncViewer.noNewConn.getValue())
+      if (i >= 10 && i <= 11 && Params.noNewConn.getValue())
         continue;
-      if (i >= 6 && i <= 7 && VncViewer.restricted.getValue())
+      if (i >= 6 && i <= 7 && Params.restricted.getValue())
         continue;
       ImageIcon icon = new ImageIcon(
         tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
@@ -89,8 +90,8 @@ public class Toolbar extends JToolBar implements ActionListener {
       add(button);
       add(Box.createHorizontalStrut(2));
       if (i == 1 ||
-          (i == 5 && (!cc.opts.viewOnly || !VncViewer.noNewConn.getValue())) ||
-          (i == 9 && !VncViewer.noNewConn.getValue())) {
+          (i == 5 && (!cc.opts.viewOnly || !Params.noNewConn.getValue())) ||
+          (i == 9 && !Params.noNewConn.getValue())) {
         // ref http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4346610
         add(new JSeparator(JSeparator.VERTICAL) {
           public Dimension getMaximumSize() {

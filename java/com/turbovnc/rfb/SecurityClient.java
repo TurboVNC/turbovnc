@@ -26,7 +26,7 @@ import com.turbovnc.rdr.ErrorException;
 
 public class SecurityClient extends Security {
 
-  public SecurityClient() { super(secTypes); }
+  public SecurityClient() { super(Params.secTypes); }
 
   public CSecurity getCSecurity(int secType) {
     assert (msg != null);
@@ -73,42 +73,4 @@ public class SecurityClient extends Security {
   }
 
   String msg = null;
-
-  // CHECKSTYLE VisibilityModifier:OFF
-  // CHECKSTYLE Indentation:OFF
-
-  public static StringParameter secTypes =
-  new StringParameter("SecurityTypes",
-  "A comma-separated list of the security types that can be used, if the " +
-  "server supports them.  \"VNC\" and \"None\" are the standard VNC " +
-  "password and no-password authentication schemes supported by all VNC " +
-  "servers.  The ten supported VeNCrypt security types (\"Plain\", " +
-  "\"Ident\", \"TLSNone\", \"TLSVnc\", \"TLSPlain\", \"TLSIdent\", " +
-  "\"X509None\", \"X509Vnc\", \"X509Plain\", and \"X509Ident\") are " +
-  "combinations of three encryption methods (None, Anonymous TLS, and TLS " +
-  "with X.509 certificates) and four authentication schemes (None, Standard " +
-  "VNC, Plain, and Ident.)  The \"UnixLogin\" security type enables " +
-  "user/password authentication using the TightVNC security extensions " +
-  "rather than VeNCrypt.  \"Plain\" and \"UnixLogin\" authenticate using a " +
-  "plain-text user name and password, so it is strongly recommended that " +
-  "those types only be used with either TLS encryption or SSH tunneling.  " +
-  "\"Ident\", which is designed for use by VNC proxies, authenticates using " +
-  "only a user name.  The order of this list does not matter, since the " +
-  "server's preferred order is always used.\n " +
-
-  "When using the TurboVNC Session Manager, this parameter is effectively " +
-  "set to \"VNC\" unless the SessMgrAuto parameter is disabled.",
-  "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VNC,Ident,Plain,UnixLogin,None");
-
-  public static StringParameter x509ca =
-  new StringParameter("X509CA",
-  "X.509 Certificate Authority certificate to use with the X509* security " +
-  "types.  This is used to check the validity of the server's X.509 " +
-  "certificate.", Utils.getVncHomeDir() + "x509_ca.pem");
-
-  public static StringParameter x509crl =
-  new StringParameter("X509CRL",
-  "X.509 Certificate Revocation List to use with the X509* security types. " +
-  "This is used to check the validity of the server's X.509 " +
-  "certificate.", Utils.getVncHomeDir() + "x509_crl.pem");
 }

@@ -38,10 +38,6 @@ public class HeaderParameter extends VoidParameter {
     throw new ErrorException("Cannot get default string for header parameter");
   }
 
-  public final String getValueStr() {
-    throw new ErrorException("Cannot get value string for header parameter");
-  }
-
   public final String getValues() {
     throw new ErrorException("Cannot get values for header parameter");
   }
