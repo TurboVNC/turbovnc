@@ -163,7 +163,7 @@ public class CSecurityTLS extends CSecurity {
       manager.doHandshake();
       vlog.debug("Negotiated cipher suite: " +
                  manager.getSession().getCipherSuite());
-    } catch (java.lang.Exception e) {
+    } catch (Exception e) {
       Throwable cause = e.getCause();
       if (cause instanceof ErrorException)
         throw (ErrorException)cause;
@@ -289,7 +289,7 @@ public class CSecurityTLS extends CSecurity {
         tmf = TrustManagerFactory.getInstance("PKIX");
         tmf.init(new CertPathTrustManagerParameters(params));
         tm = (X509TrustManager)tmf.getTrustManagers()[0];
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         throw new SystemException(e);
       }
     }
@@ -347,7 +347,7 @@ public class CSecurityTLS extends CSecurity {
       try {
         verifyHostname(cert);
         tm.checkServerTrusted(chain, authType);
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         if (e.getCause() instanceof CertPathBuilderException) {
           Object[] answer = { "YES", "NO" };
           int ret = JOptionPane.showOptionDialog(null,
@@ -484,7 +484,7 @@ public class CSecurityTLS extends CSecurity {
             if (l.trim().length() > 0)
               sb.append(l + "\n");
           }
-        } catch (java.lang.Exception e) {
+        } catch (Exception e) {
           throw new SystemException(e);
         } finally {
           try {

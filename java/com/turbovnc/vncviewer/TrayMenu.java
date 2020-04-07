@@ -52,7 +52,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
       tray = SystemTray.getSystemTray();
       try {
         tray.add(trayIcon);
-      } catch (java.awt.AWTException e) {
+      } catch (AWTException e) {
         vlog.error(e.toString());
       }
     }

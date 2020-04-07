@@ -387,7 +387,7 @@ public class Viewport extends JFrame {
       try {
         System.loadLibrary("turbovnchelper");
         helperAvailable = true;
-      } catch (java.lang.UnsatisfiedLinkError e) {
+      } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not find TurboVNC Helper JNI library.  If it is in a");
         vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
         vlog.info("  to the Java command line to specify its location.");
@@ -396,7 +396,7 @@ public class Viewport extends JFrame {
           vlog.info("  support will be disabled.");
         } else if (VncViewer.osGrab())
           vlog.info("  Keyboard grabbing will be disabled.");
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
         if (VncViewer.isX11()) {
@@ -415,11 +415,11 @@ public class Viewport extends JFrame {
       try {
         x11FullScreen(on);
         return;
-      } catch (java.lang.UnsatisfiedLinkError e) {
+      } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper.");
         vlog.info("  Multi-screen spanning may not work correctly.");
         helperAvailable = false;
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         vlog.info("WARNING: Could not invoke x11FullScreen() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
         vlog.info("  Multi-screen spanning may not work correctly.");
@@ -441,11 +441,11 @@ public class Viewport extends JFrame {
           return;
         grabKeyboard(on, VncViewer.grabPointer.getValue());
         VncViewer.setGrabOwner(on ? this : null);
-      } catch (java.lang.UnsatisfiedLinkError e) {
+      } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper.");
         vlog.info("  Keyboard grabbing will be disabled.");
         helperAvailable = false;
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
         vlog.info("  Keyboard grabbing may not work correctly.");
@@ -462,11 +462,11 @@ public class Viewport extends JFrame {
           }
         } else
           setupExtInput();
-      } catch (java.lang.UnsatisfiedLinkError e) {
+      } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
         helperAvailable = false;
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         vlog.info("WARNING: Could not invoke setupExtInput() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
         vlog.info("  Extended input device support may not work correctly.");
@@ -556,11 +556,11 @@ public class Viewport extends JFrame {
           }
         } else
           cleanupExtInput();
-      } catch (java.lang.UnsatisfiedLinkError e) {
+      } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke cleanupExtInput() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
         helperAvailable = false;
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         vlog.info("WARNING: Could not invoke cleanupExtInput() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
       }
@@ -599,11 +599,11 @@ public class Viewport extends JFrame {
       boolean isExtEvent = false;
       try {
         isExtEvent = processExtInputEvent(type);
-      } catch (java.lang.UnsatisfiedLinkError e) {
+      } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper.");
         vlog.info("  Extended input device support will be disabled.");
         helperAvailable = false;
-      } catch (java.lang.Exception e) {
+      } catch (Exception e) {
         vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper:");
         vlog.info("  " + e.toString());
         vlog.info("  Extended input device support may not work correctly.");

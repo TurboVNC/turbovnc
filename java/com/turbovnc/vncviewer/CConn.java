@@ -344,7 +344,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
       });
     } catch (InterruptedException e) {
-    } catch (java.lang.reflect.InvocationTargetException e) {
+    } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
       if (cause instanceof ErrorException)
         throw (ErrorException)cause;
@@ -952,7 +952,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
       });
     } catch (InterruptedException e) {
-    } catch (java.lang.reflect.InvocationTargetException e) {
+    } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
       if (cause instanceof ErrorException)
         throw (ErrorException)cause;

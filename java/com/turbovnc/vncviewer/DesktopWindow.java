@@ -444,7 +444,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         br.close();
         System.gc();
       }
-    } catch (java.lang.Exception e) {
+    } catch (Exception e) {
       vlog.error("Error getting clipboard data:");
       vlog.error("  " + e.getMessage());
     }

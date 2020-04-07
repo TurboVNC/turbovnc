@@ -50,7 +50,7 @@ public final class FileUtils {
           vlog.error("  " + e.getMessage());
         }
       }
-    } catch (java.lang.Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
 
