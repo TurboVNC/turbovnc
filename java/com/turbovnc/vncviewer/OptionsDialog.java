@@ -721,6 +721,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "Shared", shared.isSelected());
 
     // INPUT
+    UserPreferences.set("global", "FSAltEnter", fsAltEnter.isSelected());
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       String grabStr = (String)grabKeyboard.getSelectedItem();
       if (grabStr.equalsIgnoreCase("Full-screen only"))
@@ -741,7 +742,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
     UserPreferences.set("global", "DesktopSize",
                         desktopSize.getSelectedItem().toString());
-    UserPreferences.set("global", "FSAltEnter", fsAltEnter.isSelected());
     UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
     int sf =
       Options.parseScalingFactor(scalingFactor.getSelectedItem().toString());
