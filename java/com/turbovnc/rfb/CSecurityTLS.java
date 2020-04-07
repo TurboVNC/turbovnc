@@ -164,15 +164,8 @@ public class CSecurityTLS extends CSecurity {
       vlog.debug("Negotiated cipher suite: " +
                  manager.getSession().getCipherSuite());
     } catch (Exception e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof ErrorException)
-        throw (ErrorException)cause;
-      else if (cause instanceof WarningException)
-        throw (WarningException)cause;
-      else if (cause instanceof SystemException)
-        throw (SystemException)cause;
-      else
-        throw new SystemException(e);
+      SystemException.checkException(e);
+      throw new SystemException(e);
     }
 
     cc.setStreams(new TLSInStream(is, manager),
@@ -290,6 +283,7 @@ public class CSecurityTLS extends CSecurity {
         tmf.init(new CertPathTrustManagerParameters(params));
         tm = (X509TrustManager)tmf.getTrustManagers()[0];
       } catch (Exception e) {
+        SystemException.checkException(e);
         throw new SystemException(e);
       }
     }
@@ -391,8 +385,10 @@ public class CSecurityTLS extends CSecurity {
         } else {
           Throwable cause = e.getCause();
           if (cause == null ||
-              !(cause instanceof CertPathValidatorException) || !expiredOK)
+              !(cause instanceof CertPathValidatorException) || !expiredOK) {
+            SystemException.checkException(e);
             throw new SystemException(e);
+          }
         }
       }
     }
