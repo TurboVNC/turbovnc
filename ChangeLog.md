@@ -68,6 +68,12 @@ certificate if the saved certificates file already existed.
      - The viewer no longer displays a confirmation dialog if hostname
 verification fails for a saved certificate.
 
+13. Fixed an issue in the Java TurboVNC Viewer whereby `None` and `VNC` were
+effectively removed from the security types list after clicking "OK" in the
+TurboVNC Viewer Options dialog, if one of those security types had been
+specified in the `SecurityTypes` parameter along with one of the TLS* or X509*
+security types.
+
 
 2.2.4
 =====

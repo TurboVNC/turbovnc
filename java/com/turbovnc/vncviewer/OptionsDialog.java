@@ -1165,6 +1165,14 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       secTypesExt = Security.getEnabledExtSecTypes();
       for (Iterator<Integer> iext = secTypesExt.iterator(); iext.hasNext();) {
         switch ((Integer)iext.next()) {
+          case RFB.SECTYPE_NONE:
+            secNone.setSelected(true);
+            encNone.setSelected(true);
+            break;
+          case RFB.SECTYPE_VNCAUTH:
+            secVnc.setSelected(true);
+            encNone.setSelected(true);
+            break;
           case RFB.SECTYPE_PLAIN:
             secVeNCrypt.setSelected(true);
             encNone.setSelected(true);
