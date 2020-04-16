@@ -54,7 +54,7 @@ check_symbol_exists(setitimer sys/time.h HAVE_SETITIMER)
 check_symbol_exists(poll poll.h HAVE_POLL)
 check_symbol_exists(epoll_create1 sys/epoll.h HAVE_EPOLL_CREATE1)
 foreach(typeof typeof __typeof__)
-	check_c_source_compiles("int main() { int value = 0;  ${typeof}(value) value2 = value;  return value2; }"
+	check_c_source_compiles("int main(void) { int value = 0;  ${typeof}(value) value2 = value;  return value2; }"
 		TYPEOF_WORKS)
 	if(TYPEOF_WORKS)
 		set(HAVE_TYPEOF 1)
