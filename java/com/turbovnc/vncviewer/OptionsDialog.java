@@ -396,7 +396,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     if (enableGrab) {
       JLabel grabLabel;
-      if (VncViewer.grabPointer.getValue())
+      if (VncViewer.isX11() && VncViewer.grabPointer.getValue())
         grabLabel = new JLabel("Keyboard/pointer grab mode:");
       else
         grabLabel = new JLabel("Keyboard grab mode:");
