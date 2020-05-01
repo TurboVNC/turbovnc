@@ -35,6 +35,7 @@ HHOOK LowLevelHook::g_HookID = 0;
 HANDLE LowLevelHook::g_hThread = NULL;
 DWORD LowLevelHook::g_nThreadID = 0;
 omni_mutex LowLevelHook::g_Mutex;
+std::map<UINT, HWND> LowLevelHook::g_PressedKeys;
 
 
 void LowLevelHook::Initialize(HINSTANCE hInstance)
@@ -116,6 +117,19 @@ void LowLevelHook::Activate(HWND win)
 void LowLevelHook::Deactivate(void)
 {
   omni_mutex_lock l(g_Mutex);
+
+  // If the VNC viewer window previously received a press event for the Windows
+  // key but hasn't yet received a release event for same (this can happen, for
+  // instance, when using WIN+L to lock the screen), then we need to clear the
+  // press event from the hash (the fake Windows key release event is handled
+  // in the viewer's focus listener, so we don't need to handle it here.)
+  for (UINT vkCode = VK_LWIN; vkCode <= VK_RWIN; vkCode++) {
+    std::map<UINT, HWND>::iterator iter = g_PressedKeys.find(vkCode);
+
+    if (iter != g_PressedKeys.end())
+      g_PressedKeys.erase(iter);
+  }
+
   g_hwndVNCViewer = NULL;
   g_VncProcessID = 0;
 }
@@ -175,6 +189,33 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
       switch (pkbdllhook->vkCode) {
         case VK_LWIN:
         case VK_RWIN:
+        {
+          // If the VNC viewer window is not active when switching virtual
+          // desktops using WIN+CTRL+LEFT or WIN+CTRL+RIGHT, then the viewer
+          // window may receive a release event for the Windows key that was
+          // not preceded by a press event.  Thus, we only handle the release
+          // event if the press event was also received by the viewer window.
+          HWND hwnd = 0;
+
+          if (fKeyDown)
+            g_PressedKeys[pkbdllhook->vkCode] = hwndCurrent;
+          else {
+            std::map<UINT, HWND>::iterator iter =
+              g_PressedKeys.find(pkbdllhook->vkCode);
+
+            if (iter != g_PressedKeys.end()) {
+              hwnd = iter->second;
+              g_PressedKeys.erase(iter);
+            }
+          }
+
+          if (fKeyDown || hwnd == g_hwndVNCViewer) {
+            PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
+                        MakeLParam(wParam, pkbdllhook));
+            fHandled = TRUE;
+          }
+          break;
+        }
         case VK_APPS:
           PostMessage(g_hwndVNCViewer, (UINT)wParam, pkbdllhook->vkCode,
                       MakeLParam(wParam, pkbdllhook));

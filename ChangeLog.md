@@ -45,7 +45,11 @@ Alt-Enter as an alternate hotkey for toggling full-screen mode.
 10. Fixed an issue in the Windows TurboVNC Viewer whereby, if keyboard grabbing
 was enabled, using the Windows-L key sequence to lock the computer caused the
 Windows key (or its Un*x equivalent, the left Super key) to become stuck in the
-pressed state on the server.
+pressed state on the server.  Fixed a similar issue in the Windows and
+Windows/Java TurboVNC Viewers whereby, if keyboard grabbing was enabled, using
+the Ctrl-Windows-Left or Ctrl-Windows-Right key sequence to switch virtual
+desktops caused the Windows key to become stuck in the pressed state on the
+client.
 
 11. Fixed an issue in the Windows/Java TurboVNC Viewer whereby, if keyboard
 grabbing was enabled, using Alt-Tab to select another window in the TurboVNC

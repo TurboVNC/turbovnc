@@ -32,6 +32,7 @@ HHOOK LowLevelHook::g_HookID = 0;
 HANDLE LowLevelHook::g_hThread = NULL;
 DWORD LowLevelHook::g_nThreadID = 0;
 omni_mutex LowLevelHook::g_Mutex;
+std::map<UINT, HWND> LowLevelHook::g_PressedKeys;
 
 
 void LowLevelHook::Initialize(HINSTANCE hInstance)
@@ -113,6 +114,22 @@ void LowLevelHook::Activate(HWND win)
 void LowLevelHook::Deactivate(void)
 {
   omni_mutex_lock l(g_Mutex);
+
+  // If the VNC viewer window previously received a press event for the Windows
+  // key but hasn't yet received a release event for same (this can happen, for
+  // instance, when using WIN+L to lock the screen), then we need to send a
+  // fake key release for the Windows key to the server.
+  for (UINT vkCode = VK_LWIN; vkCode <= VK_RWIN; vkCode++) {
+    int xkey = (vkCode == VK_LWIN ? XK_Super_L : XK_Super_R);
+    std::map<UINT, HWND>::iterator iter = g_PressedKeys.find(vkCode);
+
+    if (iter != g_PressedKeys.end()) {
+      if (iter->second == g_hwndVNCViewer)
+        PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND, ID_CONN_SENDKEYUP, xkey);
+      g_PressedKeys.erase(iter);
+    }
+  }
+
   g_hwndVNCViewer = NULL;
   g_VncProcessID = 0;
 }
@@ -190,6 +207,34 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
       switch (pkbdllhook->vkCode) {
         case VK_LWIN:
         case VK_RWIN:
+        {
+          // If the VNC viewer window is not active when switching virtual
+          // desktops using WIN+CTRL+LEFT or WIN+CTRL+RIGHT, then the viewer
+          // window may receive a release event for the Windows key that was
+          // not preceded by a press event.  Thus, we only handle the release
+          // event if the press event was also received by the viewer window.
+          HWND hwnd = 0;
+
+          if (fKeyDown)
+            g_PressedKeys[pkbdllhook->vkCode] = hwndCurrent;
+          else {
+            std::map<UINT, HWND>::iterator iter =
+              g_PressedKeys.find(pkbdllhook->vkCode);
+
+            if (iter != g_PressedKeys.end()) {
+              hwnd = iter->second;
+              g_PressedKeys.erase(iter);
+            }
+          }
+
+          if (fKeyDown || hwnd == g_hwndVNCViewer) {
+            PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND,
+                        fKeyDown ? ID_CONN_SENDKEYDOWN : ID_CONN_SENDKEYUP,
+                        xkey);
+            fHandled = TRUE;
+          }
+          break;
+        }
         case VK_APPS:
         case VK_BROWSER_HOME:
         case VK_BROWSER_SEARCH:

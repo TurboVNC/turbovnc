@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.h from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2015, 2020 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 
 #include <windows.h>
 #include "omnithread.h"
+#include <map>
 
 
 class LowLevelHook
@@ -52,4 +53,6 @@ class LowLevelHook
     static DWORD g_nThreadID;
 
     static omni_mutex g_Mutex;
+
+    static std::map<UINT, HWND> g_PressedKeys;
 };

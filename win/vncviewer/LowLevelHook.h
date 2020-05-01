@@ -52,4 +52,6 @@ class LowLevelHook
     static DWORD g_nThreadID;
 
     static omni_mutex g_Mutex;
+
+    static std::map<UINT, HWND> g_PressedKeys;
 };

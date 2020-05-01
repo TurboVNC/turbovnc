@@ -2487,12 +2487,6 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
           return 0;
         }
         case ID_CONN_SENDKEYDOWN:
-          KeyActionSpec kas;
-          kas.keycodes[0] = (CARD32)lParam;
-          kas.keycodes[1] = XK_VoidSymbol;
-          kas.releaseModifiers = 0;
-          if ((CARD32)lParam == XK_Super_L)
-            _this->pressedKeys[VK_LWIN] = kas;
           _this->SendKeyEvent((CARD32)lParam, true);
           return 0;
         case ID_CONN_SENDKEYUP:
