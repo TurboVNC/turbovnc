@@ -82,6 +82,10 @@ device", "Authentication is required to access the PC/SC daemon",
 up when using the GNOME 3 window manager with the TurboVNC Server on various
 Linux distributions.
 
+15. Fixed an issue in the Windows TurboVNC Viewer whereby keyboard grabbing was
+always initially disabled in the second and subsequent connections initiated by
+the viewer, regardless of the grab mode.
+
 
 2.2.4
 =====

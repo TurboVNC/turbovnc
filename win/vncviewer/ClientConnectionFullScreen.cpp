@@ -80,11 +80,8 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
                  screenArea.bottom - screenArea.top, SWP_FRAMECHANGED);
     CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN,
                   MF_BYCOMMAND | MF_CHECKED);
-    if (m_opts.m_GrabKeyboard == TVNC_FS) {
-      LowLevelHook::Activate(m_hwnd1);
-      CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
-                    MF_BYCOMMAND | MF_CHECKED);
-    }
+    if (m_opts.m_GrabKeyboard == TVNC_FS)
+      GrabKeyboard(true);
   } else {
     ShowWindow(m_hToolbar, SW_SHOW);
     EnableMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOOLBAR,
@@ -103,11 +100,8 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
                    SWP_NOMOVE | SWP_NOSIZE);
     CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN,
                   MF_BYCOMMAND | MF_UNCHECKED);
-    if (m_opts.m_GrabKeyboard == TVNC_FS) {
-      LowLevelHook::Deactivate();
-      CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
-                    MF_BYCOMMAND | MF_UNCHECKED);
-    }
+    if (m_opts.m_GrabKeyboard == TVNC_FS)
+      UngrabKeyboard(true);
   }
 }
 

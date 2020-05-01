@@ -151,9 +151,11 @@ class ClientConnection : public omni_thread
     void ProcessKeyEvent(int virtkey, DWORD keyData);
     void SendKeyEvent(CARD32 key, bool down);
     void SwitchOffKeys();
-    void GrabKeyboard();
-    void UngrabKeyboard();
+    void GrabKeyboard(bool changeMenu);
+    void UngrabKeyboard(bool changeMenu);
+    bool isGrabSelected();
     bool isKeyboardGrabbed();
+    bool shouldGrab();
 
     void ReadScreenUpdate();
     void Update(RECT *pRect);

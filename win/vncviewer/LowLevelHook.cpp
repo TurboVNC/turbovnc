@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.cpp from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012, 2016 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2016, 2020 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -121,6 +121,12 @@ void LowLevelHook::Deactivate(void)
 bool LowLevelHook::isActive(HWND win)
 {
   return win == g_hwndVNCViewer;
+}
+
+
+bool LowLevelHook::isActive(void)
+{
+  return g_hwndVNCViewer != 0;
 }
 
 

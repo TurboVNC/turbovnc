@@ -1,7 +1,7 @@
 //  Based on LowLevelHook.h from Ultr@VNC, written by Assaf Gordon
 //  (Assaf@mazleg.com), 10/9/2003 (original source lacks copyright attribution)
 //  Modifications:
-//  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2012, 2020 D. R. Commander.  All Rights Reserved.
 //
 //  The VNC system is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ class LowLevelHook
     static void Initialize(HINSTANCE);
     static void Activate(HWND);
     static bool isActive(HWND);
+    static bool isActive();
     static void Deactivate();
     static void Release();
 

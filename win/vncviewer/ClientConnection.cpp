@@ -552,7 +552,7 @@ void ClientConnection::CreateDisplay()
   hotkeys.SetWindow(m_hwnd1);
   ShowWindow(m_hwnd, SW_HIDE);
   if (m_opts.m_GrabKeyboard == TVNC_ALWAYS)
-    GrabKeyboard();
+    GrabKeyboard(true);
   if (m_pApp->m_wacom) {
     LOGCONTEXT lc;
     AXIS axisX, axisY;
@@ -2181,12 +2181,12 @@ LRESULT CALLBACK ClientConnection::ScrollProc(HWND hwnd, UINT iMsg,
 #define COND_UNGRAB_KEYBOARD  \
   bool regrab = false;  \
   if (_this->isKeyboardGrabbed()) {  \
-    _this->UngrabKeyboard();  \
+    _this->UngrabKeyboard(true);  \
     regrab = true;  \
   }
 
 #define COND_REGRAB_KEYBOARD  \
-  if (regrab) _this->GrabKeyboard();
+  if (regrab) _this->GrabKeyboard(true);
 
 
 LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
@@ -2391,9 +2391,9 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
           return 0;
         case ID_TOGGLE_GRAB:
           if (_this->isKeyboardGrabbed())
-            _this->UngrabKeyboard();
+            _this->UngrabKeyboard(true);
           else
-            _this->GrabKeyboard();
+            _this->GrabKeyboard(true);
           return 0;
         case ID_TOGGLE_VIEWONLY:
           _this->m_opts.m_ViewOnly = !_this->m_opts.m_ViewOnly;
@@ -2770,6 +2770,16 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
       if (_this->InFullScreenMode())
         SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 100, 100,
                      SWP_NOMOVE | SWP_NOSIZE);
+
+      if (IsWindowVisible(_this->m_hwnd1)) {
+        if (_this->shouldGrab() && !_this->isKeyboardGrabbed())
+          vnclog.Print(6, "Keyboard focus regained. Re-grabbing keyboard.\n");
+        else if (!_this->shouldGrab() && LowLevelHook::isActive())
+          vnclog.Print(6, "Keyboard focus regained. Ungrabbing keyboard.\n");
+        if (_this->shouldGrab()) _this->GrabKeyboard(true);
+        else _this->UngrabKeyboard(true);
+      }
+
       return 0;
     // Cancel modifiers when we lose focus
     case WM_KILLFOCUS:
@@ -2791,6 +2801,16 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
       }
       vnclog.Print(6, "Losing focus - cancelling modifiers\n");
       _this->SwitchOffKeys();
+
+      DWORD pid = 0;
+      GetWindowThreadProcessId((HWND)wParam, &pid);
+
+      if (LowLevelHook::isActive() && IsWindowVisible(_this->m_hwnd1) &&
+          pid != GetProcessId(GetCurrentProcess())) {
+        vnclog.Print(6, "Keyboard focus lost. Temporarily ungrabbing keyboard.\n");
+        _this->UngrabKeyboard(false);
+      }
+
       return 0;
     }
     case WM_QUERYNEWPALETTE:
@@ -3176,25 +3196,42 @@ inline void ClientConnection::SendKeyEvent(CARD32 key, bool down)
 }
 
 
-inline void ClientConnection::GrabKeyboard(void)
+inline void ClientConnection::GrabKeyboard(bool changeMenu)
 {
   LowLevelHook::Activate(m_hwnd1);
-  CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
-                MF_BYCOMMAND | MF_CHECKED);
+  if (changeMenu)
+    CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
+                  MF_BYCOMMAND | MF_CHECKED);
 }
 
 
-inline void ClientConnection::UngrabKeyboard(void)
+inline void ClientConnection::UngrabKeyboard(bool changeMenu)
 {
   LowLevelHook::Deactivate();
-  CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
-                MF_BYCOMMAND | MF_UNCHECKED);
+  if (changeMenu)
+    CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
+                  MF_BYCOMMAND | MF_UNCHECKED);
+}
+
+
+inline bool ClientConnection::isGrabSelected(void)
+{
+  return GetMenuState(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
+                      MF_BYCOMMAND) == MF_CHECKED;
 }
 
 
 inline bool ClientConnection::isKeyboardGrabbed(void)
 {
   return LowLevelHook::isActive(m_hwnd1);
+}
+
+
+inline bool ClientConnection::shouldGrab(void)
+{
+  return m_opts.m_GrabKeyboard == TVNC_ALWAYS ||
+         (m_opts.m_GrabKeyboard == TVNC_MANUAL && isGrabSelected()) ||
+         (m_opts.m_GrabKeyboard == TVNC_FS && InFullScreenMode());
 }
 
 
