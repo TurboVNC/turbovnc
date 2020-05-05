@@ -35,7 +35,7 @@ public class BoolParameter extends VoidParameter {
         v.equalsIgnoreCase("true") || v.equalsIgnoreCase("yes"))
       value = reverse_ ? false : true;
     else if (v.equals("0") || v.equalsIgnoreCase("off") ||
-        v.equalsIgnoreCase("false") || v.equalsIgnoreCase("no"))
+             v.equalsIgnoreCase("false") || v.equalsIgnoreCase("no"))
       value = reverse_ ? true : false;
     else
       return false;

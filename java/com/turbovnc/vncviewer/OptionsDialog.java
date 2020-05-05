@@ -396,7 +396,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     if (enableGrab) {
       JLabel grabLabel;
-      if (VncViewer.grabPointer.getValue())
+      if (Utils.isX11() && VncViewer.grabPointer.getValue())
         grabLabel = new JLabel("Keyboard/pointer grab mode:");
       else
         grabLabel = new JLabel("Keyboard grab mode:");
@@ -405,12 +405,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       grabKeyboard.addItemListener(this);
 
       Dialog.addGBComponent(grabLabel, inputPanel,
-                            0, 2, 1, 1, 2, 2, 1, 0,
+                            0, 3, 1, 1, 2, 2, 1, 0,
                             GridBagConstraints.NONE,
                             GridBagConstraints.FIRST_LINE_START,
                             new Insets(8, 8, 0, 5));
       Dialog.addGBComponent(grabKeyboard, inputPanel,
-                            1, 2, 1, 1, 2, 2, 25, 0,
+                            1, 3, 1, 1, 2, 2, 25, 0,
                             GridBagConstraints.NONE,
                             GridBagConstraints.FIRST_LINE_START,
                             new Insets(4, 5, 0, 5));
@@ -721,6 +721,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "Shared", shared.isSelected());
 
     // INPUT
+    UserPreferences.set("global", "FSAltEnter", fsAltEnter.isSelected());
     if (Utils.osGrab() && Helper.isAvailable()) {
       String grabStr = (String)grabKeyboard.getSelectedItem();
       if (grabStr.equalsIgnoreCase("Full-screen only"))
@@ -741,7 +742,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
     UserPreferences.set("global", "DesktopSize",
                         desktopSize.getSelectedItem().toString());
-    UserPreferences.set("global", "FSAltEnter", fsAltEnter.isSelected());
     UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
     int sf =
       Options.parseScalingFactor(scalingFactor.getSelectedItem().toString());
@@ -1165,6 +1165,14 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       secTypesExt = Security.getEnabledExtSecTypes();
       for (Iterator<Integer> iext = secTypesExt.iterator(); iext.hasNext();) {
         switch ((Integer)iext.next()) {
+          case RFB.SECTYPE_NONE:
+            secNone.setSelected(true);
+            encNone.setSelected(true);
+            break;
+          case RFB.SECTYPE_VNCAUTH:
+            secVnc.setSelected(true);
+            encNone.setSelected(true);
+            break;
           case RFB.SECTYPE_PLAIN:
             secVeNCrypt.setSelected(true);
             encNone.setSelected(true);

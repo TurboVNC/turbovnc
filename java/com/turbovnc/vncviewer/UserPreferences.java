@@ -143,14 +143,6 @@ public final class UserPreferences {
           } else if (key.equalsIgnoreCase("secUnixLogin")) {
             setSecUnixLogin = true;
             secUnixLogin = node.getBoolean(key, true);
-          } else if (!key.equalsIgnoreCase("x509ca")) {
-            String valueStr = node.get(key, null);
-            if (valueStr != null)
-              SecurityClient.x509ca.setParam(valueStr);
-          } else if (!key.equalsIgnoreCase("x509crl")) {
-            String valueStr = node.get(key, null);
-            if (valueStr != null)
-              SecurityClient.x509crl.setParam(valueStr);
           } else
             continue;
         }

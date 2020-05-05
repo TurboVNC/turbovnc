@@ -154,8 +154,6 @@ cat > %{buildroot}/%{sysconfdir}/polkit-1/localauthority/50-local.d/45-turbovnc-
 Identity=unix-user:*
 Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile;org.debian.pcsc-lite.access_pcsc;org.freedesktop.packagekit.system-sources-refresh
 ResultAny=no
-ResultInactive=no
-ResultActive=yes
 EOF
 %endif
 %endif
