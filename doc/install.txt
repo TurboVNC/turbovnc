@@ -9,12 +9,7 @@
 		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 		Packages are provided for RPM-based and Debian-based Linux distributions
-		that contain GLIBC 2.5 or later (including
-		[[http://fedoraproject.org][Fedora]] 6 or later,
-		[[http://www.redhat.com/products/enterprise-linux][Red Hat Enterprise Linux]]/[[http://www.centos.org/][CentOS]] \
-		5 or later,
-		[[http://www.suse.com][SuSE]] Linux Enterprise/[[http://www.opensuse.org][openSUSE]] 11 or later,
-		and [[http://www.ubuntu.com][Ubuntu]] 8.04 or later.)
+		that contain GLIBC 2.5 or later.
 		{nl}
 
 	2. cd to the directory where you downloaded the binary package, and issue
@@ -40,9 +35,10 @@
 		rpm -U turbovnc*.rpm
 		---
 
-		Debian-based systems (dependencies will not be installed automatically) :: {:}
+		Debian-based systems :: {:}
 		#Verb <<---
 		dpkg -i turbovnc*.deb
+		apt install -f
 		---
 
 *** Installing TurboVNC for a Single User
