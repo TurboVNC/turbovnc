@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-04-04T18:53:13">
+<meta name="date" content="2020-05-07T13:54:03">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -576,19 +576,7 @@ other VNC distributions without interference.</p>
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
         SourceForge project page</a></span><a name="idx0017"></a>. Packages are 
         provided for RPM-based and Debian-based Linux distributions that contain 
-        GLIBC 2.12 or later (including 
-        <span class="remote"><a href="http://fedoraproject.org" class="remote">Fedora</a></span><a name="idx0018"></a> 
-        13 or later, 
-        <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux" class="remote">Red 
-        Hat Enterprise 
-        Linux</a></span><a name="idx0019"></a>/<span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0020"></a> 
-        6 or later, 
-        <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0021"></a> 
-        Linux 
-        Enterprise/<span class="remote"><a href="http://www.opensuse.org" class="remote">openSUSE</a></span><a name="idx0022"></a> 
-        12 or later, and 
-        <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0023"></a> 
-        12.04 or later.) <br />
+        GLIBC 2.12 or later. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         cd to the directory where you downloaded the binary package, and issue 
@@ -622,10 +610,11 @@ rpm&nbsp;-U&nbsp;turbovnc*.rpm
 </pre>
 
             </dd>
-            <dt class="Description-3 Description">Debian-based systems (dependencies will not be installed automatically)</dt>
+            <dt class="Description-3 Description">Debian-based systems</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
 dpkg&nbsp;-i&nbsp;turbovnc*.deb
+apt&nbsp;install&nbsp;-f
 </pre>
 
             </dd>
@@ -671,9 +660,9 @@ The TurboVNC security configuration file will not work when TurboVNC is installe
         Download the TurboVNC Mac disk image 
         (<strong class="filename">TurboVNC-2.2.80.dmg</strong>) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0024"></a> of the 
+        area</a></span><a name="idx0018"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0025"></a>.
+        SourceForge project page</a></span><a name="idx0019"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -693,9 +682,9 @@ The TurboVNC security configuration file will not work when TurboVNC is installe
         systems or <strong class="filename">TurboVNC-2.2.80-x86.exe</strong> for 
         legacy 32-bit-only systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0026"></a> of the 
+        area</a></span><a name="idx0020"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0027"></a>.
+        SourceForge project page</a></span><a name="idx0021"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -713,9 +702,9 @@ pre-built TurboVNC binary package available, then download the TurboVNC
 source tarball 
 (<strong class="filename">turbovnc-2.2.80.tar.gz</strong>) from the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-area</a></span><a name="idx0028"></a> of the 
+area</a></span><a name="idx0022"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-SourceForge project page</a></span><a name="idx0029"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0023"></a>, uncompress 
 it, <code>cd turbovnc-2.2.80</code>, and read 
 <strong class="filename">BUILDING.md</strong> for further instructions 
 on how to build TurboVNC from source.</p>
@@ -887,7 +876,7 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
         OTP&rdquo; button) is a convenient way of allowing colleagues to 
         temporarily access the session.  Generating a new OTP for a TurboVNC 
         session is also useful when using 
-        <a href="#noVNC">noVNC</a><a name="idx0030"></a>.  If 
+        <a href="#noVNC">noVNC</a><a name="idx0024"></a>.  If 
         &ldquo;View-only&rdquo; is checked, then users who authenticate with the 
         new OTP will not be able to remotely control the session.
         <div class="important"><p class="important">
@@ -1032,7 +1021,7 @@ environment variable is set to <code>2d</code>.  For other systems that
 lack a 2D window manager, it is recommended that you install MATE.  
 Refer to 
 <span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility" class="remote">this 
-report</a></span><a name="idx0031"></a> for an up-to-date list of window 
+report</a></span><a name="idx0025"></a> for an up-to-date list of window 
 managers that have been tested with this version of the TurboVNC Server, 
 how to configure the TurboVNC Server to use those window managers, and a 
 list of known compatibility issues.</p>
@@ -1050,7 +1039,7 @@ can reconnect to the session at any time.</p>
 easiest way to kill it is to log out of the window manager running in 
 the session.  You can also use the 
 <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0032"></a> to remotely kill TurboVNC sessions, or 
+Manager</a><a name="idx0026"></a> to remotely kill TurboVNC sessions, or 
 you can type the following command:</p>
 
 <pre class="verbatim">/opt/TurboVNC/bin/vncserver -kill :<em>n</em></pre>
@@ -1077,7 +1066,7 @@ host.</p>
 
 <p>When a TurboVNC session is started, the <code>vncserver</code> script 
 can optionally start a simple web server that serves up 
-<span class="remote"><a href="https://novnc.com" class="remote">noVNC</a></span><a name="idx0033"></a>, 
+<span class="remote"><a href="https://novnc.com" class="remote">noVNC</a></span><a name="idx0027"></a>, 
 an HTML 5/JavaScript VNC viewer that works in any web browser (with 
 reduced performance and features relative to the TurboVNC Viewer.)  This 
 allows you to easily connect to a TurboVNC session from a machine that 
@@ -1116,7 +1105,7 @@ NOTE: noVNC only supports VNC Password authentication, so it is strongly recomme
 <p><a name="Secure_TurboVNC_Usage"></a></p>
 
 <p>If the <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0034"></a> is not being used, then the connection 
+Manager</a><a name="idx0028"></a> is not being used, then the connection 
 between the TurboVNC Server and the TurboVNC Viewer will, by default, 
 use Anonymous TLS encryption (refer to Chapter 
 <a href="#Security_Extensions" class="ref">8</a>.)  However, it may be 
@@ -1195,7 +1184,7 @@ direct rendering.  Thus, it can only be used on systems that do not have
 vendor-specific GPU drivers installed or on systems that provide a 
 libglvnd-enabled build of Mesa.  In general, if the TurboVNC host has a 
 GPU, then you should use 
-<a href="#VGL">VirtualGL</a><a name="idx0035"></a> rather than relying 
+<a href="#VGL">VirtualGL</a><a name="idx0029"></a> rather than relying 
 on TurboVNC&rsquo;s software OpenGL implementation.</p>
 
 <p>Passing <code>-extension&nbsp;GLX</code> to <code>vncserver</code> 
@@ -1308,7 +1297,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0036"></a> should be used
+            comparison</a><a name="idx0030"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1360,7 +1349,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0037"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0031"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce bandwidth for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1767,7 +1756,7 @@ extensions:</p>
          scheduler. OTP authentication is also useful for allowing temporary 
          access to a TurboVNC session for collaboration purposes.  The 
          <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-         Manager</a><a name="idx0038"></a> uses OTP authentication by default, 
+         Manager</a><a name="idx0032"></a> uses OTP authentication by default, 
          which allows it to securely authenticate with a TurboVNC session 
          without prompting for additional credentials.
     </dd>
@@ -2288,7 +2277,7 @@ VNC flavors.  You can use the TurboVNC Viewer to connect to a
 non-TurboVNC server (or vice versa), although this will generally result 
 in some decrease in performance, and features such as the 
 <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0039"></a> will not be available.</p>
+Manager</a><a name="idx0033"></a> will not be available.</p>
 
 <p>The following sections list additional things to bear in mind when 
 mixing TurboVNC with other VNC flavors.</p>
@@ -2959,7 +2948,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
         The TurboVNC Session Manager will pass these command-line arguments to 
         the <code>vncserver</code> script when starting a new TurboVNC session 
         on the TurboVNC host.  This can be used, for instance, to enable 
-        <a href="#ALR">automatic lossless refresh</a><a name="idx0040"></a>.
+        <a href="#ALR">automatic lossless refresh</a><a name="idx0034"></a>.
     </dd>
 </dl>
 
