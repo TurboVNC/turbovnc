@@ -1,4 +1,4 @@
-//  Copyright (C) 2012, 2015-2016 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2012, 2015-2016, 2020 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -56,20 +56,26 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
   RegisterSounds();
   LowLevelHook::Initialize(hInstance);
 
-  if (!LoadWintab()) {
-    vnclog.Print(-1, "WinTab library not available\n");
-    return;
+  char env[256];  size_t envlen;  bool useWintab = true;
+  if (getenv_s(&envlen, env, 256, "TVNC_WINTAB") == 0 && !strcmp(env, "0"))
+    useWintab = false;
+
+  if (useWintab) {
+    if (!LoadWintab()) {
+      vnclog.Print(-1, "WinTab library not available\n");
+      return;
+    }
+    if (!gpWTInfoA(0, 0, NULL)) {
+      vnclog.Print(-1, "WinTab services not available\n");
+      return;
+    }
+    char name[256];
+    if (!gpWTInfoA(WTI_DEVICES, DVC_NAME, name) || strncmp(name, "WACOM", 5)) {
+      vnclog.Print(-1, "Wacom tablet not installed\n");
+      return;
+    }
+    m_wacom = true;
   }
-  if (!gpWTInfoA(0, 0, NULL)) {
-    vnclog.Print(-1, "WinTab services not available\n");
-    return;
-  }
-  char name[256];
-  if (!gpWTInfoA(WTI_DEVICES, DVC_NAME, name) || strncmp(name, "WACOM", 5)) {
-    vnclog.Print(-1, "Wacom tablet not installed\n");
-    return;
-  }
-  m_wacom = true;
 }
 
 
