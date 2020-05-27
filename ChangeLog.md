@@ -99,7 +99,7 @@ attention from the TurboVNC developers and user community, there is no
 compelling reason to use the GnuTLS wrapper anymore.  The 2.2.x version of the
 TurboVNC Server will continue to support GnuTLS on a break/fix basis.
 
-16. The TurboVNC Server is now based on xorg-xserver 1.20.7, which fixes
+16. The TurboVNC Server is now based on xorg-xserver 1.20.8, which fixes
 several minor X server bugs.
 
 17. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
