@@ -80,6 +80,9 @@ set(JSCH_CLASSNAMES
 	jce/SignatureECDSA521
 	jce/SignatureECDSAN
 	jce/SignatureRSA
+	jce/SignatureRSAN
+	jce/SignatureRSASHA256
+	jce/SignatureRSASHA512
 	jce/TripleDESCBC
 	jce/TripleDESCTR
 	jcraft/Compression

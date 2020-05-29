@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2013-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2020 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -211,8 +212,16 @@ public class KeyPairPKCS8 extends KeyPair {
     return kpair.getSignature(data);
   }
 
+  public byte[] getSignature(byte[] data, String alg){
+    return kpair.getSignature(data, alg);
+  }
+
   public Signature getVerifier(){
     return kpair.getVerifier();
+  }
+
+  public Signature getVerifier(String alg){
+    return kpair.getVerifier(alg);
   }
 
   public byte[] forSSHAgent() throws JSchException {

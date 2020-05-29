@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2020 Jeremy Norris. All rights reserved.
 Copyright (c) 2020 Matthias Wiedemann. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -77,7 +78,9 @@ public abstract class KeyPair{
   abstract int getKeySize();
 
   public abstract byte[] getSignature(byte[] data);
+  public abstract byte[] getSignature(byte[] data, String alg);
   public abstract Signature getVerifier();
+  public abstract Signature getVerifier(String alg);
 
   public abstract byte[] forSSHAgent() throws JSchException;
 

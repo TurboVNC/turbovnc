@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2020 Jeremy Norris. All rights reserved.
 Copyright (c) 2020 Matthias Wiedemann. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -338,8 +339,12 @@ public class KeyPairRSA extends KeyPair{
   }
 
   public byte[] getSignature(byte[] data){
+    return getSignature(data, "ssh-rsa");
+  }
+
+  public byte[] getSignature(byte[] data, String alg){
     try{
-      Class c=Class.forName((String)JSch.getConfig("signature.rsa"));
+      Class c=Class.forName(JSch.getConfig(alg));
       SignatureRSA rsa=
         (SignatureRSA)(c.getDeclaredConstructor().newInstance());
       rsa.init();
@@ -348,7 +353,7 @@ public class KeyPairRSA extends KeyPair{
       rsa.update(data);
       byte[] sig = rsa.sign();
       byte[][] tmp = new byte[2][];
-      tmp[0] = sshrsa;
+      tmp[0] = Util.str2byte(alg);
       tmp[1] = sig;
       return Buffer.fromBytes(tmp).buffer;
     }
@@ -358,8 +363,12 @@ public class KeyPairRSA extends KeyPair{
   }
 
   public Signature getVerifier(){
+    return getVerifier("ssh-rsa");
+  }
+
+  public Signature getVerifier(String alg){
     try{
-      Class c=Class.forName((String)JSch.getConfig("signature.rsa"));
+      Class c=Class.forName(JSch.getConfig(alg));
       SignatureRSA rsa=
         (SignatureRSA)(c.getDeclaredConstructor().newInstance());
       rsa.init();

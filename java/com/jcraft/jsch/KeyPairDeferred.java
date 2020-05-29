@@ -119,8 +119,18 @@ public class KeyPairDeferred extends KeyPair {
     }
 
     @Override
+    public byte[] getSignature(byte[] data, String alg) {
+        return delegate.getSignature(data, alg);
+    }
+
+    @Override
     public Signature getVerifier() {
         return delegate.getVerifier();
+    }
+
+    @Override
+    public Signature getVerifier(String alg) {
+        return delegate.getVerifier(alg);
     }
 
     @Override

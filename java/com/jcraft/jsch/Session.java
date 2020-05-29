@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -2305,8 +2306,9 @@ break;
       if(config==null) 
         config=new java.util.Hashtable();
       for(java.util.Enumeration e=newconf.keys() ; e.hasMoreElements() ;) {
-        String key=(String)(e.nextElement());
-        config.put(key, (String)(newconf.get(key)));
+        String newkey=(String)(e.nextElement());
+        String key=(newkey.equals("PubkeyAcceptedKeyTypes") ? "PubkeyAcceptedAlgorithms" : newkey);
+        config.put(key, (String)(newconf.get(newkey)));
       }
     }
   }
@@ -2316,11 +2318,19 @@ break;
       if(config==null){
         config=new java.util.Hashtable();
       }
-      config.put(key, value);
+      if(key.equals("PubkeyAcceptedKeyTypes")){
+        config.put("PubkeyAcceptedAlgorithms", value);
+      }
+      else{
+        config.put(key, value);
+      }
     }
   }
 
   public String getConfig(String key){
+    if(key.equals("PubkeyAcceptedKeyTypes")){
+      key="PubkeyAcceptedAlgorithms";
+    }
     Object foo=null;
     if(config!=null){
       foo=config.get(key);
@@ -2707,6 +2717,7 @@ break;
     checkConfig(config, "StrictHostKeyChecking");
     checkConfig(config, "HashKnownHosts");
     checkConfig(config, "PreferredAuthentications");
+    checkConfig(config, "PubkeyAcceptedAlgorithms");
     checkConfig(config, "MaxAuthTries");
     checkConfig(config, "ClearAllForwardings");
 
@@ -2853,6 +2864,8 @@ break;
 
   private void checkConfig(ConfigRepository.Config config, String key){
     String value = config.getValue(key);
+    if(value == null && key.equals("PubkeyAcceptedAlgorithms"))
+      value = config.getValue("PubkeyAcceptedKeyTypes");
     if(value != null)
       this.setConfig(key, value);
   }

@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2020 Jeremy Norris. All rights reserved.
 Copyright (c) 2020 Matthias Wiedemann. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -294,6 +295,10 @@ public class KeyPairDSA extends KeyPair{
     return null;
   }
 
+  public byte[] getSignature(byte[] data, String alg){
+    return getSignature(data);
+  }
+
   public Signature getVerifier(){
     try{
       Class c=Class.forName((String)JSch.getConfig("signature.dss"));
@@ -317,6 +322,10 @@ public class KeyPairDSA extends KeyPair{
       //System.err.println("e "+e);
     }
     return null;
+  }
+
+  public Signature getVerifier(String alg){
+    return getVerifier();
   }
 
   static KeyPair fromSSHAgent(JSch jsch, Buffer buf) throws JSchException {

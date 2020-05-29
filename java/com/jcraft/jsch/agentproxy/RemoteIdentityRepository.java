@@ -1,7 +1,8 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2011 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2022 D. R. Commander. All rights reserved.
+Copyright (c) 2021 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -79,7 +80,10 @@ public class RemoteIdentityRepository implements IdentityRepository {
           return Util.getFingerPrint(hash, blob);
         }
         public byte[] getSignature(byte[] data){
-          return agent.sign(blob, data);
+          return agent.sign(blob, data, null);
+        }
+        public byte[] getSignature(byte[] data, String alg){
+          return agent.sign(blob, data, alg);
         }
         public boolean decrypt() { return true; }
         public String getAlgName() { return algname; }

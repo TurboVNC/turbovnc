@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2020 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -58,6 +59,14 @@ public interface Identity{
    * @return the signature
    */
   public byte[] getSignature(byte[] data);
+
+  /**
+   * Signs on data with this identity, and returns the result.
+   * @param data data to be signed
+   * @param alg signature algorithm to use
+   * @return the signature
+   */
+  public byte[] getSignature(byte[] data, String alg);
 
   /**
    * @deprecated The decryption should be done automatically in #setPassphase(byte[] passphrase)

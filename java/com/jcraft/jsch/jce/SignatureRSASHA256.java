@@ -35,8 +35,8 @@ import java.security.*;
 import java.security.spec.*;
 import com.jcraft.jsch.Buffer;
 
-public class SignatureRSA extends SignatureRSAN {
+public class SignatureRSASHA256 extends SignatureRSAN {
   String getName() {
-    return "ssh-rsa";
+    return "rsa-sha2-256";
   }
 }

@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -42,7 +43,7 @@ public class JSch{
   static java.util.Hashtable config=new java.util.Hashtable();
   static{
     config.put("kex", "ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
-    config.put("server_host_key", "ssh-rsa,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
+    config.put("server_host_key", "rsa-sha2-256,rsa-sha2-512,ssh-rsa,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
     config.put("cipher.s2c", 
                "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
     config.put("cipher.c2s",
@@ -94,7 +95,9 @@ public class JSch{
     config.put("sha-512",         "com.jcraft.jsch.jce.SHA512");
     config.put("md5",           "com.jcraft.jsch.jce.MD5");
     config.put("signature.dss", "com.jcraft.jsch.jce.SignatureDSA");
-    config.put("signature.rsa", "com.jcraft.jsch.jce.SignatureRSA");
+    config.put("ssh-rsa",       "com.jcraft.jsch.jce.SignatureRSA");
+    config.put("rsa-sha2-256",  "com.jcraft.jsch.jce.SignatureRSASHA256");
+    config.put("rsa-sha2-512",  "com.jcraft.jsch.jce.SignatureRSASHA512");
     config.put("keypairgen.dsa",   "com.jcraft.jsch.jce.KeyPairGenDSA");
     config.put("keypairgen.rsa",   "com.jcraft.jsch.jce.KeyPairGenRSA");
     config.put("keypairgen.ecdsa", "com.jcraft.jsch.jce.KeyPairGenECDSA");
@@ -130,10 +133,11 @@ public class JSch{
     config.put("HashKnownHosts",  "no");
 
     config.put("PreferredAuthentications", "gssapi-with-mic,publickey,keyboard-interactive,password");
+    config.put("PubkeyAcceptedAlgorithms", "rsa-sha2-256,rsa-sha2-512,ssh-rsa,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
 
     config.put("CheckCiphers", "aes256-ctr,aes192-ctr,aes128-ctr,aes256-cbc,aes192-cbc,aes128-cbc,3des-ctr,arcfour,arcfour128,arcfour256");
     config.put("CheckKexes", "diffie-hellman-group14-sha1,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521");
-    config.put("CheckSignatures", "ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
+    config.put("CheckSignatures", "rsa-sha2-256,rsa-sha2-512,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
 
     config.put("MaxAuthTries", "6");
     config.put("ClearAllForwardings", "no");
@@ -588,6 +592,9 @@ public class JSch{
    */
   public static String getConfig(String key){ 
     synchronized(config){
+      if(key.equals("PubkeyAcceptedKeyTypes")){
+        key="PubkeyAcceptedAlgorithms";
+      }
       return (String)(config.get(key));
     } 
   }
@@ -600,8 +607,9 @@ public class JSch{
   public static void setConfig(java.util.Hashtable newconf){
     synchronized(config){
       for(java.util.Enumeration e=newconf.keys() ; e.hasMoreElements() ;) {
-	String key=(String)(e.nextElement());
-	config.put(key, (String)(newconf.get(key)));
+	String newkey=(String)(e.nextElement());
+	String key=(newkey.equals("PubkeyAcceptedKeyTypes") ? "PubkeyAcceptedAlgorithms" : newkey);
+	config.put(key, (String)(newconf.get(newkey)));
       }
     }
   }
@@ -613,7 +621,12 @@ public class JSch{
    * @param value value for the configuration
    */
   public static void setConfig(String key, String value){
-    config.put(key, value);
+    if(key.equals("PubkeyAcceptedKeyTypes")){
+      config.put("PubkeyAcceptedAlgorithms", value);
+    }
+    else{
+      config.put(key, value);
+    }
   }
 
   /**

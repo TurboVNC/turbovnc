@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2012 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2021 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -66,7 +67,8 @@ public class AgentProxy {
 
   private static final byte SSH_COM_AGENT2_FAILURE = 102;
 
-  private static final byte SSH_AGENT_OLD_SIGNATURE = 0x01;
+  private static final int SSH_AGENT_RSA_SHA2_256 = 0x2;
+  private static final int SSH_AGENT_RSA_SHA2_512 = 0x4;
 
   private final byte[] buf = new byte[1024];
   private final Buffer buffer = new Buffer(buf);
@@ -115,20 +117,25 @@ public class AgentProxy {
     return identities;
   }
 
-  public synchronized byte[] sign(byte[] blob, byte[] data) {
-    byte[] result = null;
-
-    byte code1 = SSH2_AGENTC_SIGN_REQUEST;
-    byte code2 = SSH2_AGENT_SIGN_RESPONSE;
+  public synchronized byte[] sign(byte[] blob, byte[] data, String alg) {
+    int flags = 0x0;
+    if(alg != null) {
+      if(alg.equals("rsa-sha2-256")) {
+        flags = SSH_AGENT_RSA_SHA2_256;
+      }
+      else if(alg.equals("rsa-sha2-512")) {
+        flags = SSH_AGENT_RSA_SHA2_512;
+      }
+    }
 
     int required_size = 1 + 4*4 + blob.length + data.length;
     buffer.reset();
     buffer.checkFreeSize(required_size);
-    buffer.putByte(code1);
+    buffer.putInt(required_size - 4);
+    buffer.putByte(SSH2_AGENTC_SIGN_REQUEST);
     buffer.putString(blob);
     buffer.putString(data);
-    buffer.putInt(0);   // SSH_AGENT_OLD_SIGNATURE
-    buffer.insertLength();
+    buffer.putInt(flags);
 
     try {
       connector.query(buffer);
@@ -140,13 +147,13 @@ public class AgentProxy {
 
     int rcode = buffer.getByte();
 
-    check_reply(rcode);
+    //System.out.println(rcode == SSH2_AGENT_SIGN_RESPONSE);
 
-//System.out.println(rcode == code2);
+    if(rcode != SSH2_AGENT_SIGN_RESPONSE) {
+      return null;
+    }
 
-    result = buffer.getString();
-
-    return result;
+    return buffer.getString();
   }
 
   public synchronized boolean removeIdentity(byte[] blob) {
