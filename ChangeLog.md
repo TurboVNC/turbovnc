@@ -1,3 +1,14 @@
+2.2.6
+=====
+
+### Significant changes relative to 2.2.5:
+
+1. The TurboVNC Server, if started with the `-nevershared` argument, now
+rejects new connections more gracefully, by sending an RFB authentication
+failure message to the potential viewer to notify it of the reason behind the
+rejection.
+
+
 2.2.5
 =====
 
