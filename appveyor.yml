@@ -1,5 +1,5 @@
 environment:
-  LJT_VERSION: 2.0.4
+  LJT_VERSION: 2.0.5
   LJT_64BIT_SDK: "https://sourceforge.net/projects/libjpeg-turbo/files/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
   LJT_32BIT_SDK: "https://sourceforge.net/projects/libjpeg-turbo/files/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc.exe"
 
