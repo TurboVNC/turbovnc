@@ -90,13 +90,13 @@ mkdir -p "$PKGROOT/Applications/$PROJECT"
 sh pkgscripts/makemacapp
 ln -fs /Library/Documentation/$PKGNAME/index.html "$PKGROOT/Applications/$PROJECT/$PROJECT User's Guide.html"
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
+osacompile -t APPL -a x86_64 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 if [ "$OSX_APP_CERT_NAME" != "" ]; then
 	codesign -s "$OSX_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
 	codesign -vv "$TMPDIR/Uninstall $PROJECT.app"
 fi
 echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
-osacompile -t APPL -a i386 -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
+osacompile -t APPL -a x86_64 -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
 if [ "$OSX_APP_CERT_NAME" != "" ]; then
 	codesign -s "$OSX_APP_CERT_NAME" --timestamp "$TMPDIR/$VIEWER (Listen Mode).app"
 	codesign -vv "$TMPDIR/$VIEWER (Listen Mode).app"
