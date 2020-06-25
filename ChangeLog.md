@@ -138,6 +138,11 @@ viewers, such as noVNC, to connect to the TurboVNC Server without using a
 proxy.  TLS encryption (WSS) is supported if an X.509 certificate is specified
 using the `-x509cert` and `-x509key` arguments to Xvnc.
 
+21. The TurboVNC Server, if started with the `-nevershared` argument, now
+rejects new connections more gracefully, by sending an RFB authentication
+failure message to the potential viewer to notify it of the reason behind the
+rejection.
+
 
 2.2.5
 =====

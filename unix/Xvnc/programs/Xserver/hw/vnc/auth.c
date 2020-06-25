@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012-2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2020 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -1505,7 +1505,19 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
   }
 
   if (ok) {
+    rfbClientPtr otherCl;
+
     rfbAuthUnblock();
+    if (!cl->reverseConnection && rfbNeverShared && rfbDontDisconnect) {
+      for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
+        if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
+          rfbLog("-dontdisconnect: Not shared & existing client\n");
+          rfbLog("  refusing new client %s\n", cl->host);
+          rfbClientAuthFailed(cl, "Authentication failed.  The server is already in use.");
+          return;
+        }
+      }
+    }
     rfbClientAuthSucceeded(cl, rfbAuthVNC);
   } else {
     rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",

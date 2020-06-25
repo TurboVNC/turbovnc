@@ -8,7 +8,7 @@ branches:
 
 env:
   global:
-    - LJT_VERSION=2.0.4
+    - LJT_VERSION=2.0.5
     - LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION
     - LJT_GPG_KEY=https://sourceforge.net/projects/libjpeg-turbo/files/LJT-GPG-KEY
 
