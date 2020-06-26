@@ -236,9 +236,9 @@ static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
 
   if (rfbPAMAuthenticate(cl, pamServiceName, userBuf, pwdBuf, &emsg)){
     rfbClientAuthSucceeded(cl, rfbAuthUnixLogin);
-	rfbLog("Successful PAM authentication for user '%s'\n", userBuf); 
+    rfbLog("Successful PAM authentication for user '%s'\n", userBuf); 
   } else {
-	rfbLog("Failed PAM authentication for user '%s'\n", userBuf); 
+    rfbLog("Failed PAM authentication for user '%s'\n", userBuf); 
     rfbClientAuthFailed(cl, (char *)emsg);
   }
 }
