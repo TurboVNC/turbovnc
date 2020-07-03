@@ -2012,8 +2012,14 @@ RRReplaceScanoutPixmap(DrawablePtr pDrawable, PixmapPtr pPixmap, Bool enable)
 Bool
 RRHasScanoutPixmap(ScreenPtr pScreen)
 {
-    rrScrPriv(pScreen);
+    rrScrPrivPtr pScrPriv;
     int i;
+
+    /* Bail out if RandR wasn't initialized. */
+    if (!dixPrivateKeyRegistered(rrPrivKey))
+        return FALSE;
+
+    pScrPriv = rrGetScrPriv(pScreen);
 
     if (!pScreen->is_output_slave)
         return FALSE;
