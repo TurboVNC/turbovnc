@@ -3072,7 +3072,7 @@ inline void ClientConnection::SendPointerEvent(int x, int y, int buttonMask)
 //
 //    On German keyboards, @ is produced using AltGr-Q, which is
 //    Ctrl-Alt-Q.  But @ is a valid keysym in its own right, and when
-//    a German user types this combination, he doesn't mean Ctrl-@.
+//    a German user types this combination, the user doesn't mean Ctrl-@.
 //    So for this we will send, in total:
 //
 //      Ctrl-Down, Alt-Down,
