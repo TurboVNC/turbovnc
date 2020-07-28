@@ -42,6 +42,17 @@
 static void
 present_wnmd_execute(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc);
 
+static int
+present_wnmd_queue_vblank(ScreenPtr screen,
+                          WindowPtr window,
+                          RRCrtcPtr crtc,
+                          uint64_t event_id,
+                          uint64_t msc)
+{
+    present_screen_priv_ptr screen_priv = present_screen_priv(screen);
+    return (*screen_priv->wnmd_info->queue_vblank) (window, crtc, event_id, msc);
+}
+
 static void
 present_wnmd_create_event_id(present_window_priv_ptr window_priv, present_vblank_ptr vblank)
 {
@@ -509,17 +520,6 @@ present_wnmd_execute(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc)
     }
 
     present_execute_post(vblank, ust, crtc_msc);
-}
-
-static int
-present_wnmd_queue_vblank(ScreenPtr screen,
-                             WindowPtr window,
-                             RRCrtcPtr crtc,
-                             uint64_t event_id,
-                             uint64_t msc)
-{
-    present_screen_priv_ptr screen_priv = present_screen_priv(screen);
-    return (*screen_priv->wnmd_info->queue_vblank) (window, crtc, event_id, msc);
 }
 
 static uint64_t
