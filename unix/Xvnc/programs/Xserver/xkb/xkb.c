@@ -152,6 +152,19 @@ static RESTYPE RT_XKBCLIENT;
 #define	CHK_REQ_KEY_RANGE(err,first,num,r)  \
 	CHK_REQ_KEY_RANGE2(err,first,num,r,client->errorValue,BadValue)
 
+static Bool
+_XkbCheckRequestBounds(ClientPtr client, void *stuff, void *from, void *to) {
+    char *cstuff = (char *)stuff;
+    char *cfrom = (char *)from;
+    char *cto = (char *)to;
+
+    return cfrom < cto &&
+           cfrom >= cstuff &&
+           cfrom < cstuff + ((size_t)client->req_len << 2) &&
+           cto >= cstuff &&
+           cto <= cstuff + ((size_t)client->req_len << 2);
+}
+
 /***====================================================================***/
 
 int
@@ -4011,6 +4024,8 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
             client->errorValue = _XkbErrCode2(0x04, stuff->firstType);
             return BadAccess;
         }
+        if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + stuff->nTypes))
+            return BadLength;
         old = tmp;
         tmp = _XkbCheckAtoms(tmp, stuff->nTypes, client->swapped, &bad);
         if (!tmp) {
@@ -4040,6 +4055,8 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
         }
         width = (CARD8 *) tmp;
         tmp = (CARD32 *) (((char *) tmp) + XkbPaddedSize(stuff->nKTLevels));
+        if (!_XkbCheckRequestBounds(client, stuff, width, tmp))
+            return BadLength;
         type = &xkb->map->types[stuff->firstKTLevel];
         for (i = 0; i < stuff->nKTLevels; i++, type++) {
             if (width[i] == 0)
@@ -4049,6 +4066,8 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
                                                   type->num_levels, width[i]);
                 return BadMatch;
             }
+            if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + width[i]))
+                return BadLength;
             tmp = _XkbCheckAtoms(tmp, width[i], client->swapped, &bad);
             if (!tmp) {
                 client->errorValue = bad;
@@ -4061,6 +4080,9 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
             client->errorValue = 0x08;
             return BadMatch;
         }
+        if (!_XkbCheckRequestBounds(client, stuff, tmp,
+                                    tmp + Ones(stuff->indicators)))
+            return BadLength;
         tmp = _XkbCheckMaskedAtoms(tmp, XkbNumIndicators, stuff->indicators,
                                    client->swapped, &bad);
         if (!tmp) {
@@ -4073,6 +4095,9 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
             client->errorValue = 0x09;
             return BadMatch;
         }
+        if (!_XkbCheckRequestBounds(client, stuff, tmp,
+                                    tmp + Ones(stuff->virtualMods)))
+            return BadLength;
         tmp = _XkbCheckMaskedAtoms(tmp, XkbNumVirtualMods,
                                    (CARD32) stuff->virtualMods,
                                    client->swapped, &bad);
@@ -4086,6 +4111,9 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
             client->errorValue = 0x0a;
             return BadMatch;
         }
+        if (!_XkbCheckRequestBounds(client, stuff, tmp,
+                                    tmp + Ones(stuff->groupNames)))
+            return BadLength;
         tmp = _XkbCheckMaskedAtoms(tmp, XkbNumKbdGroups,
                                    (CARD32) stuff->groupNames,
                                    client->swapped, &bad);
@@ -4107,9 +4135,14 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
                              stuff->nKeys);
             return BadValue;
         }
+        if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + stuff->nKeys))
+            return BadLength;
         tmp += stuff->nKeys;
     }
     if ((stuff->which & XkbKeyAliasesMask) && (stuff->nKeyAliases > 0)) {
+        if (!_XkbCheckRequestBounds(client, stuff, tmp,
+                                    tmp + (stuff->nKeyAliases * 2)))
+            return BadLength;
         tmp += stuff->nKeyAliases * 2;
     }
     if (stuff->which & XkbRGNamesMask) {
@@ -4117,6 +4150,9 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
             client->errorValue = _XkbErrCode2(0x0d, stuff->nRadioGroups);
             return BadValue;
         }
+        if (!_XkbCheckRequestBounds(client, stuff, tmp,
+                                    tmp + stuff->nRadioGroups))
+            return BadLength;
         tmp = _XkbCheckAtoms(tmp, stuff->nRadioGroups, client->swapped, &bad);
         if (!tmp) {
             client->errorValue = bad;
@@ -4310,6 +4346,8 @@ ProcXkbSetNames(ClientPtr client)
     /* check device-independent stuff */
     tmp = (CARD32 *) &stuff[1];
 
+    if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + 1))
+        return BadLength;
     if (stuff->which & XkbKeycodesNameMask) {
         tmp = _XkbCheckAtoms(tmp, 1, client->swapped, &bad);
         if (!tmp) {
@@ -4317,6 +4355,8 @@ ProcXkbSetNames(ClientPtr client)
             return BadAtom;
         }
     }
+    if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + 1))
+        return BadLength;
     if (stuff->which & XkbGeometryNameMask) {
         tmp = _XkbCheckAtoms(tmp, 1, client->swapped, &bad);
         if (!tmp) {
@@ -4324,6 +4364,8 @@ ProcXkbSetNames(ClientPtr client)
             return BadAtom;
         }
     }
+    if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + 1))
+        return BadLength;
     if (stuff->which & XkbSymbolsNameMask) {
         tmp = _XkbCheckAtoms(tmp, 1, client->swapped, &bad);
         if (!tmp) {
@@ -4331,6 +4373,8 @@ ProcXkbSetNames(ClientPtr client)
             return BadAtom;
         }
     }
+    if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + 1))
+        return BadLength;
     if (stuff->which & XkbPhysSymbolsNameMask) {
         tmp = _XkbCheckAtoms(tmp, 1, client->swapped, &bad);
         if (!tmp) {
@@ -4338,6 +4382,8 @@ ProcXkbSetNames(ClientPtr client)
             return BadAtom;
         }
     }
+    if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + 1))
+        return BadLength;
     if (stuff->which & XkbTypesNameMask) {
         tmp = _XkbCheckAtoms(tmp, 1, client->swapped, &bad);
         if (!tmp) {
@@ -4345,6 +4391,8 @@ ProcXkbSetNames(ClientPtr client)
             return BadAtom;
         }
     }
+    if (!_XkbCheckRequestBounds(client, stuff, tmp, tmp + 1))
+        return BadLength;
     if (stuff->which & XkbCompatNameMask) {
         tmp = _XkbCheckAtoms(tmp, 1, client->swapped, &bad);
         if (!tmp) {
