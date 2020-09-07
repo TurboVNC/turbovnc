@@ -291,6 +291,10 @@ present_wnmd_check_flip(RRCrtcPtr           crtc,
     if ( !RegionEqual(&window->winSize, &toplvl_window->winSize) )
         return FALSE;
 
+    /* Can't flip if window clipped by children */
+    if (!RegionEqual(&window->clipList, &window->winSize))
+        return FALSE;
+
     /* Ask the driver for permission */
     if (screen_priv->wnmd_info->check_flip2) {
         if (!(*screen_priv->wnmd_info->check_flip2) (crtc, window, pixmap, sync_flip, reason)) {
