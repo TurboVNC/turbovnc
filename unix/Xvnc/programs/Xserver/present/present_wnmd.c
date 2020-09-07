@@ -270,10 +270,6 @@ present_wnmd_check_flip(RRCrtcPtr           crtc,
     if (!screen_priv->wnmd_info->flip)
         return FALSE;
 
-    /* Can't flip redirected child windows */
-    if (screen->GetWindowPixmap(window) != screen->GetWindowPixmap(toplvl_window))
-        return FALSE;
-
     /* Source pixmap must align with window exactly */
     if (x_off || y_off)
         return FALSE;
