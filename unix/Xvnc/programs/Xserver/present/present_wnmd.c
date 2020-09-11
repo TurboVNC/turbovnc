@@ -168,8 +168,8 @@ present_wnmd_flip_notify(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_
     WindowPtr                   window = vblank->window;
     present_window_priv_ptr     window_priv = present_window_priv(window);
 
-    DebugPresent(("\tn %" PRIu64 " %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
-                  vblank->event_id, vblank, vblank->target_msc,
+    DebugPresent(("\tn %" PRIu64 " %p %" PRIu64 " %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
+                  vblank->event_id, vblank, vblank->exec_msc, vblank->target_msc,
                   vblank->pixmap ? vblank->pixmap->drawable.id : 0,
                   vblank->window ? vblank->window->drawable.id : 0));
 
@@ -343,7 +343,7 @@ present_wnmd_check_flip_window (WindowPtr window)
             vblank->flip = FALSE;
             vblank->reason = reason;
             if (vblank->sync_flip)
-                vblank->requeue = TRUE;
+                vblank->exec_msc = vblank->target_msc;
         }
     }
 }
@@ -491,6 +491,7 @@ present_wnmd_execute(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc)
               */
             window_priv->flip_pending = NULL;
             vblank->flip = FALSE;
+            vblank->exec_msc = vblank->target_msc;
         }
         DebugPresent(("\tc %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
                       vblank, crtc_msc, vblank->pixmap->drawable.id, vblank->window->drawable.id));
@@ -632,12 +633,12 @@ present_wnmd_pixmap(WindowPtr window,
         return BadAlloc;
 
     if (vblank->flip && vblank->sync_flip)
-        target_msc--;
+        vblank->exec_msc--;
 
     xorg_list_append(&vblank->event_queue, &window_priv->exec_queue);
     vblank->queued = TRUE;
-    if (crtc_msc < target_msc) {
-        if (present_wnmd_queue_vblank(screen, window, target_crtc, vblank->event_id, target_msc) == Success) {
+    if (crtc_msc < vblank->exec_msc) {
+        if (present_wnmd_queue_vblank(screen, window, target_crtc, vblank->event_id, vblank->exec_msc) == Success) {
             return Success;
         }
         DebugPresent(("present_queue_vblank failed\n"));

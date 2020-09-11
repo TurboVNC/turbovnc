@@ -70,14 +70,14 @@ struct present_vblank {
     int16_t             y_off;
     CARD16              kind;
     uint64_t            event_id;
-    uint64_t            target_msc;
+    uint64_t            target_msc;     /* target MSC when present should complete */
+    uint64_t            exec_msc;       /* MSC at which present can be executed */
     uint64_t            msc_offset;
     present_fence_ptr   idle_fence;
     present_fence_ptr   wait_fence;
     present_notify_ptr  notifies;
     int                 num_notifies;
     Bool                queued;         /* on present_exec_queue */
-    Bool                requeue;        /* on queue, but target_msc has changed */
     Bool                flip;           /* planning on using flip */
     Bool                flip_ready;     /* wants to flip, but waiting for previous flip or unflip */
     Bool                flip_idler;     /* driver explicitly permitted idling */

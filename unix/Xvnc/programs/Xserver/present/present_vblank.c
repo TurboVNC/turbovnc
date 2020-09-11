@@ -101,6 +101,7 @@ present_vblank_create(WindowPtr window,
     vblank->x_off = x_off;
     vblank->y_off = y_off;
     vblank->target_msc = target_msc;
+    vblank->exec_msc = target_msc;
     vblank->crtc = target_crtc;
     vblank->msc_offset = window_priv->msc_offset;
     vblank->notifies = notifies;
@@ -152,8 +153,8 @@ no_mem:
 void
 present_vblank_scrap(present_vblank_ptr vblank)
 {
-    DebugPresent(("\tx %" PRIu64 " %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 " (crtc %p)\n",
-                  vblank->event_id, vblank, vblank->target_msc,
+    DebugPresent(("\tx %" PRIu64 " %p %" PRIu64 " %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 " (crtc %p)\n",
+                  vblank->event_id, vblank, vblank->exec_msc, vblank->target_msc,
                   vblank->pixmap->drawable.id, vblank->window->drawable.id,
                   vblank->crtc));
 
@@ -174,8 +175,8 @@ present_vblank_destroy(present_vblank_ptr vblank)
     /* Also make sure vblank is removed from event queue (wnmd) */
     xorg_list_del(&vblank->event_queue);
 
-    DebugPresent(("\td %" PRIu64 " %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
-                  vblank->event_id, vblank, vblank->target_msc,
+    DebugPresent(("\td %" PRIu64 " %p %" PRIu64 " %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 "\n",
+                  vblank->event_id, vblank, vblank->exec_msc, vblank->target_msc,
                   vblank->pixmap ? vblank->pixmap->drawable.id : 0,
                   vblank->window ? vblank->window->drawable.id : 0));
 
