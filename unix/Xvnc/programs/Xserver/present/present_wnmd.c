@@ -626,10 +626,13 @@ present_wnmd_pixmap(WindowPtr window,
                                    &screen_priv->wnmd_info->capabilities,
                                    notifies,
                                    num_notifies,
-                                   &target_msc,
+                                   target_msc,
                                    crtc_msc);
     if (!vblank)
         return BadAlloc;
+
+    if (vblank->flip && vblank->sync_flip)
+        target_msc--;
 
     xorg_list_append(&vblank->event_queue, &window_priv->exec_queue);
     vblank->queued = TRUE;

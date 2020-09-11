@@ -469,7 +469,7 @@ present_vblank_create(WindowPtr window,
                       const uint32_t *capabilities,
                       present_notify_ptr notifies,
                       int num_notifies,
-                      uint64_t *target_msc,
+                      uint64_t target_msc,
                       uint64_t crtc_msc);
 
 void

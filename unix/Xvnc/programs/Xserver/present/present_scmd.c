@@ -745,11 +745,14 @@ present_scmd_pixmap(WindowPtr window,
                                    screen_priv->info ? &screen_priv->info->capabilities : NULL,
                                    notifies,
                                    num_notifies,
-                                   &target_msc,
+                                   target_msc,
                                    crtc_msc);
 
     if (!vblank)
         return BadAlloc;
+
+    if (vblank->flip && vblank->sync_flip)
+        target_msc--;
 
     xorg_list_append(&vblank->event_queue, &present_exec_queue);
     vblank->queued = TRUE;

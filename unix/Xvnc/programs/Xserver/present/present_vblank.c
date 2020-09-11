@@ -57,7 +57,7 @@ present_vblank_create(WindowPtr window,
                       const uint32_t *capabilities,
                       present_notify_ptr notifies,
                       int num_notifies,
-                      uint64_t *target_msc,
+                      uint64_t target_msc,
                       uint64_t crtc_msc)
 {
     ScreenPtr                   screen = window->drawable.pScreen;
@@ -100,7 +100,7 @@ present_vblank_create(WindowPtr window,
 
     vblank->x_off = x_off;
     vblank->y_off = y_off;
-    vblank->target_msc = *target_msc;
+    vblank->target_msc = target_msc;
     vblank->crtc = target_crtc;
     vblank->msc_offset = window_priv->msc_offset;
     vblank->notifies = notifies;
@@ -111,12 +111,11 @@ present_vblank_create(WindowPtr window,
     if (pixmap != NULL &&
         !(options & PresentOptionCopy) &&
         capabilities) {
-        if (msc_is_after(*target_msc, crtc_msc) &&
+        if (msc_is_after(target_msc, crtc_msc) &&
             screen_priv->check_flip (target_crtc, window, pixmap, TRUE, valid, x_off, y_off, &reason))
         {
             vblank->flip = TRUE;
             vblank->sync_flip = TRUE;
-            *target_msc = *target_msc - 1;
         } else if ((*capabilities & PresentCapabilityAsync) &&
             screen_priv->check_flip (target_crtc, window, pixmap, FALSE, valid, x_off, y_off, &reason))
         {
@@ -139,7 +138,7 @@ present_vblank_create(WindowPtr window,
 
     if (pixmap)
         DebugPresent(("q %" PRIu64 " %p %" PRIu64 ": %08" PRIx32 " -> %08" PRIx32 " (crtc %p) flip %d vsync %d serial %d\n",
-                      vblank->event_id, vblank, *target_msc,
+                      vblank->event_id, vblank, target_msc,
                       vblank->pixmap->drawable.id, vblank->window->drawable.id,
                       target_crtc, vblank->flip, vblank->sync_flip, vblank->serial));
     return vblank;
