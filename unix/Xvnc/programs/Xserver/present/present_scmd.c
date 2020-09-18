@@ -82,6 +82,9 @@ present_check_flip(RRCrtcPtr            crtc,
     WindowPtr                   root = screen->root;
     present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
 
+    if (crtc) {
+       screen_priv = present_screen_priv(crtc->pScreen);
+    }
     if (reason)
         *reason = PRESENT_FLIP_REASON_UNKNOWN;
 
@@ -181,11 +184,14 @@ static int
 present_get_ust_msc(ScreenPtr screen, RRCrtcPtr crtc, uint64_t *ust, uint64_t *msc)
 {
     present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
+    present_screen_priv_ptr     crtc_screen_priv = screen_priv;
+    if (crtc)
+        crtc_screen_priv = present_screen_priv(crtc->pScreen);
 
     if (crtc == NULL)
         return present_fake_get_ust_msc(screen, ust, msc);
     else
-        return (*screen_priv->info->get_ust_msc)(crtc, ust, msc);
+        return (*crtc_screen_priv->info->get_ust_msc)(crtc, ust, msc);
 }
 
 static void
@@ -216,7 +222,7 @@ present_queue_vblank(ScreenPtr screen,
         ret = present_fake_queue_vblank(screen, event_id, msc);
     else
     {
-        present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
+        present_screen_priv_ptr     screen_priv = present_screen_priv(crtc->pScreen);
         ret = (*screen_priv->info->queue_vblank) (crtc, event_id, msc);
     }
     return ret;
@@ -541,6 +547,9 @@ present_execute(present_vblank_ptr vblank, uint64_t ust, uint64_t crtc_msc)
     WindowPtr                   window = vblank->window;
     ScreenPtr                   screen = window->drawable.pScreen;
     present_screen_priv_ptr     screen_priv = present_screen_priv(screen);
+    if (vblank && vblank->crtc) {
+        screen_priv=present_screen_priv(vblank->crtc->pScreen);
+    }
 
     if (present_execute_wait(vblank, crtc_msc))
         return;
