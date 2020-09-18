@@ -27,7 +27,7 @@
 
 #include <X11/Xatom.h>
 
-RESTYPE RRCrtcType;
+RESTYPE RRCrtcType = 0;
 
 /*
  * Notify the CRTC of some change
@@ -959,6 +959,47 @@ RRCrtcGammaGet(RRCrtcPtr crtc)
 #endif
     return ret;
 }
+
+static Bool RRCrtcInScreen(ScreenPtr pScreen, RRCrtcPtr findCrtc)
+{
+    rrScrPrivPtr pScrPriv;
+    int c;
+
+    if (pScreen == NULL)
+        return FALSE;
+
+    if (findCrtc == NULL)
+        return FALSE;
+
+    if (!dixPrivateKeyRegistered(rrPrivKey))
+        return FALSE;
+
+    pScrPriv = rrGetScrPriv(pScreen);
+    for (c = 0; c < pScrPriv->numCrtcs; c++) {
+        if (pScrPriv->crtcs[c] == findCrtc)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+Bool RRCrtcExists(ScreenPtr pScreen, RRCrtcPtr findCrtc)
+{
+    ScreenPtr slave= NULL;
+
+    if (RRCrtcInScreen(pScreen, findCrtc))
+        return TRUE;
+
+    xorg_list_for_each_entry(slave, &pScreen->slave_list, slave_head) {
+        if (!slave->is_output_slave)
+            continue;
+        if (RRCrtcInScreen(slave, findCrtc))
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 
 /*
  * Notify the extension that the Crtc gamma has been changed

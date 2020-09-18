@@ -239,11 +239,12 @@ present_window_to_crtc_msc(WindowPtr window, RRCrtcPtr crtc, uint64_t window_msc
         if (window_priv->crtc == PresentCrtcNeverSet) {
             window_priv->msc_offset = 0;
         } else {
-            /* The old CRTC may have been turned off, in which case
+            /* The old CRTC may have been turned off or be destroyed, in which case
              * we'll just use whatever previous MSC we'd seen from this CRTC
              */
 
-            if (present_get_ust_msc(window->drawable.pScreen, window_priv->crtc, &old_ust, &old_msc) != Success)
+            if (!RRCrtcExists(window->drawable.pScreen, window_priv->crtc) ||
+                present_get_ust_msc(window->drawable.pScreen, window_priv->crtc, &old_ust, &old_msc) != Success)
                 old_msc = window_priv->msc;
 
             window_priv->msc_offset += new_msc - old_msc;
