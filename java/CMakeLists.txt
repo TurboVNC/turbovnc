@@ -108,7 +108,8 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/jcraft/jsch/jcraft/*.java
 	${SRCDIR}/com/jcraft/jsch/jgss/*.java
 	${SRCDIR}/com/jcraft/jzlib/*.java
-	${SRCDIR}/org/spf4j/base/*.java)
+	${SRCDIR}/org/spf4j/base/*.java
+	${SRCDIR}/org/mindrot/jbcrypt/*.java)
 
 string(REGEX REPLACE " " ";" CMAKE_JAVA_COMPILE_FLAGS
 	"${CMAKE_JAVA_COMPILE_FLAGS}")
@@ -163,6 +164,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/jcraft/jsch/jce/*.class
 		com/jcraft/jsch/*.class
 		org/spf4j/base/*.class
+		org/mindrot/jbcrypt/*.class
 		${CLASSPATH}/toolbar.png
 		${CLASSPATH}/turbovnc.png
 		${CLASSPATH}/turbovnc-sm.png
