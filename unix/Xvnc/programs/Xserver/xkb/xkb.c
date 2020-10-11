@@ -6533,7 +6533,9 @@ SetDeviceIndicators(char *wire,
                     unsigned changed,
                     int num,
                     int *status_rtrn,
-                    ClientPtr client, xkbExtensionDeviceNotify * ev)
+                    ClientPtr client,
+                    xkbExtensionDeviceNotify * ev,
+                    xkbSetDeviceInfoReq * stuff)
 {
     xkbDeviceLedsWireDesc *ledWire;
     int i;
@@ -6554,6 +6556,11 @@ SetDeviceIndicators(char *wire,
         xkbIndicatorMapWireDesc *mapWire;
         XkbSrvLedInfoPtr sli;
 
+        if (!_XkbCheckRequestBounds(client, stuff, ledWire, ledWire + 1)) {
+            *status_rtrn = BadLength;
+            return (char *) ledWire;
+        }
+
         namec = mapc = statec = 0;
         sli = XkbFindSrvLedInfo(dev, ledWire->ledClass, ledWire->ledID,
                                 XkbXI_IndicatorMapsMask);
@@ -6572,6 +6579,10 @@ SetDeviceIndicators(char *wire,
             memset((char *) sli->names, 0, XkbNumIndicators * sizeof(Atom));
             for (n = 0, bit = 1; n < XkbNumIndicators; n++, bit <<= 1) {
                 if (ledWire->namesPresent & bit) {
+                    if (!_XkbCheckRequestBounds(client, stuff, atomWire, atomWire + 1)) {
+                        *status_rtrn = BadLength;
+                        return (char *) atomWire;
+                    }
                     sli->names[n] = (Atom) *atomWire;
                     if (sli->names[n] == None)
                         ledWire->namesPresent &= ~bit;
@@ -6589,6 +6600,10 @@ SetDeviceIndicators(char *wire,
         if (ledWire->mapsPresent) {
             for (n = 0, bit = 1; n < XkbNumIndicators; n++, bit <<= 1) {
                 if (ledWire->mapsPresent & bit) {
+                    if (!_XkbCheckRequestBounds(client, stuff, mapWire, mapWire + 1)) {
+                        *status_rtrn = BadLength;
+                        return (char *) mapWire;
+                    }
                     sli->maps[n].flags = mapWire->flags;
                     sli->maps[n].which_groups = mapWire->whichGroups;
                     sli->maps[n].groups = mapWire->groups;
@@ -6668,7 +6683,7 @@ _XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
     ed.deviceID = dev->id;
     wire = (char *) &stuff[1];
     if (stuff->change & XkbXI_ButtonActionsMask) {
-        int nBtns, sz, i;
+	int nBtns, sz, i;
         XkbAction *acts;
         DeviceIntPtr kbd;
 
@@ -6680,7 +6695,11 @@ _XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
                 return BadAlloc;
             dev->button->xkb_acts = acts;
         }
+        if (stuff->firstBtn + stuff->nBtns > nBtns)
+            return BadValue;
         sz = stuff->nBtns * SIZEOF(xkbActionWireDesc);
+        if (!_XkbCheckRequestBounds(client, stuff, wire, (char *) wire + sz))
+            return BadLength;
         memcpy((char *) &acts[stuff->firstBtn], (char *) wire, sz);
         wire += sz;
         ed.reason |= XkbXI_ButtonActionsMask;
@@ -6701,7 +6720,8 @@ _XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
         int status = Success;
 
         wire = SetDeviceIndicators(wire, dev, stuff->change,
-                                   stuff->nDeviceLedFBs, &status, client, &ed);
+                                   stuff->nDeviceLedFBs, &status, client, &ed,
+                                   stuff);
         if (status != Success)
             return status;
     }
