@@ -87,7 +87,7 @@ mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
 mkdir -p "$PKGROOT/Applications/$PROJECT"
-sh pkgscripts/makemacapp
+pkgscripts/makemacapp
 ln -fs /Library/Documentation/$PKGNAME/index.html "$PKGROOT/Applications/$PROJECT/$PROJECT User's Guide.html"
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a x86_64 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
