@@ -37,7 +37,9 @@
 %define server @TVNC_BUILDSERVER@
 
 # Path under which the Java viewer should be installed
+%if "%{viewer}" == "1"
 %define javadir @CMAKE_INSTALL_FULL_JAVADIR@
+%endif
 
 Summary:   A highly-optimized version of VNC that can be used with performance-critical applications
 Name:      @PKGNAME@
@@ -125,10 +127,14 @@ TVNC_DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 if [ ! "$TVNC_DOCDIR" = "%{docdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
 fi
+%if "%{viewer}" == "1"
+%if "%{helper}" == "1"
 TVNC_DATADIR=@CMAKE_INSTALL_FULL_DATADIR@
 if [ ! "$TVNC_DATADIR" = "%{datadir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_DATADIR/icons $RPM_BUILD_ROOT/%{datadir}/icons $RPM_BUILD_ROOT/__tmpicons
 fi
+%endif
+%endif
 
 #-->%endif
 
@@ -231,11 +237,11 @@ fi
  %{bindir}/checkshmpixmaps
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop
- %{datadir}/icons/hicolor/128x128/apps/turbovnc.png
- %{datadir}/icons/hicolor/48x48/apps/turbovnc.png
- %{datadir}/icons/hicolor/16x16/apps/turbovnc.png
  %{mandir}/man1/vncviewer.1*
  %if "%{viewer}" == "1"
+  %{datadir}/icons/hicolor/128x128/apps/turbovnc.png
+  %{datadir}/icons/hicolor/48x48/apps/turbovnc.png
+  %{datadir}/icons/hicolor/16x16/apps/turbovnc.png
   %{javadir}/libturbojpeg.so
   %{javadir}/libturbovnchelper.so
  %endif
