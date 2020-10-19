@@ -866,8 +866,7 @@ public abstract class KeyPair{
           Class c = Class.forName(JSch.getConfig(cipherName));
           cipher = (Cipher) c.getDeclaredConstructor().newInstance();
           data = buffer.getString();
-          // HMMM. Wir können hier nicht decrypten, weil wir das Passwort noch nicht haben
-          // aber wir können auch nicht den type bestimmen, weil es encrypted ist....
+          // the type can only be determined after encryption, so we take this intermediate here:
           type = DEFERRED;
       } else {
           throw new JSchException("cipher" + cipherName + " is not available");
