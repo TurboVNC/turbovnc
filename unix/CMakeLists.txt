@@ -21,6 +21,9 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
+	if(CPUTYPE STREQUAL "arm")
+		set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH};/usr/lib/arm-linux-gnueabihf)
+	endif()
 endif()
 
 if(NOT APPLE OR TVNC_BUILDSERVER)
