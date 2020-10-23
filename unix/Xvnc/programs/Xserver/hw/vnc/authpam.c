@@ -138,16 +138,27 @@ Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
     return FALSE;
   }
 
+  // Authenticate the user
   authStatus = pam_authenticate(pamHandle, PAM_DISALLOW_NULL_AUTHTOK);
+  // If authentication failed, log an error
   if (authStatus != PAM_SUCCESS) {
     rfbLog("PAMAuthenticate: pam_authenticate: %s\n",
            pam_strerror(pamHandle, authStatus));
-  } else if (pamSession) {
-    if ((authStatus = pam_open_session(pamHandle, 0)) != PAM_SUCCESS) {
-      rfbLog("PAMAuthenticate: pam_open_session: %s\n",
+  } else {
+    // If authentication successful, validate the user's account status
+    authStatus = pam_acct_mgmt(pamHandle, PAM_DISALLOW_NULL_AUTHTOK);
+    if ( authStatus != PAM_SUCCESS ) {
+      rfbLog("PAMAuthenticate: pam_acct_mgmt: %s\n",
              pam_strerror(pamHandle, authStatus));
+    // Open a PAM session for the user if applicable
+    } else if (pamSession) {
+      if ((authStatus = pam_open_session(pamHandle, 0)) != PAM_SUCCESS) {
+        rfbLog("PAMAuthenticate: pam_open_session: %s\n",
+               pam_strerror(pamHandle, authStatus));
+      } else {
+        rfbLog("Opened PAM session for client %s\n", cl->host);
+      }
     }
-    rfbLog("Opened PAM session for client %s\n", cl->host);
   }
 
   if (authStatus != PAM_SUCCESS || !pamSession) {
@@ -173,6 +184,14 @@ Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
 
     case PAM_AUTHINFO_UNAVAIL:
       *emsg = "Cannot authenticate at this time.  Try again later.";
+      break;
+
+    case PAM_ACCT_EXPIRED:
+      *emsg = "Access denied. User account is expired";
+      break;
+
+    case PAM_NEW_AUTHTOK_REQD:
+      *emsg = "Authentication token is expired";
       break;
 
     default:
