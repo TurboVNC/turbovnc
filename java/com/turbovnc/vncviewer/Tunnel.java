@@ -110,6 +110,7 @@ public final class Tunnel {
     ArrayList<File> privateKeys = new ArrayList<File>();
     String sshKeyFile = VncViewer.sshKeyFile.getValue();
     String sshKey = VncViewer.sshKey.getValue();
+    boolean useDefaultPrivateKeyFiles = false;
     if (sshKey != null) {
       String sshKeyPass = VncViewer.sshKeyPass.getValue();
       byte[] keyPass = null, key;
@@ -125,8 +126,7 @@ public final class Tunnel {
                                  sshKeyFile);
       privateKeys.add(f);
     } else {
-      privateKeys.add(new File(homeDir + "/.ssh/id_rsa"));
-      privateKeys.add(new File(homeDir + "/.ssh/id_dsa"));
+      useDefaultPrivateKeyFiles = true;
     }
 
     // username and passphrase will be given via UserInfo interface.
@@ -149,6 +149,13 @@ public final class Tunnel {
       String repoUser = repo.getConfig(host).getUser();
       if (repoUser != null)
         user = repoUser;
+      String[] identityFiles = repo.getConfig(host).getValues("IdentityFile");
+      if (identityFiles != null) {
+        for (String file : identityFiles) {
+          if (file != null && !file.isEmpty())
+            useDefaultPrivateKeyFiles = false;
+        }
+      }
     } else {
       if (VncViewer.sshConfig.isDefault()) {
         vlog.debug("Could not parse SSH config file " +
@@ -159,16 +166,27 @@ public final class Tunnel {
       }
     }
 
+    if (useDefaultPrivateKeyFiles) {
+      privateKeys.add(new File(homeDir + "/.ssh/id_rsa"));
+      privateKeys.add(new File(homeDir + "/.ssh/id_dsa"));
+    }
+
     for (Iterator<File> i = privateKeys.iterator(); i.hasNext();) {
       File privateKey = (File)i.next();
-      if (privateKey.exists() && privateKey.canRead()) {
-        if (VncViewer.sshKeyPass.getValue() != null)
-          jsch.addIdentity(privateKey.getAbsolutePath(),
-                           VncViewer.sshKeyPass.getValue());
-        else
-          jsch.addIdentity(privateKey.getAbsolutePath());
+      try {
+        if (privateKey.exists() && privateKey.canRead()) {
+          if (VncViewer.sshKeyPass.getValue() != null)
+            jsch.addIdentity(privateKey.getAbsolutePath(),
+                             VncViewer.sshKeyPass.getValue());
+          else
+            jsch.addIdentity(privateKey.getAbsolutePath());
+        }
+      } catch (Exception e) {
+        throw new ErrorException("Could not use SSH private key " +
+                                 privateKey.getAbsolutePath() + ":\n" +
+                                 e.getMessage());
       }
-    }
+   }
 
     opts.sshSession = jsch.getSession(user, host, port);
     // OpenSSHConfig doesn't recognize StrictHostKeyChecking

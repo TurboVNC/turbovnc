@@ -8,6 +8,10 @@ rejects new connections more gracefully, by sending an RFB authentication
 failure message to the potential viewer to notify it of the reason behind the
 rejection.
 
+2. Fixed an issue in the Java TurboVNC Viewer's built-in SSH client whereby the
+`IdentityFile` keyword in the OpenSSH config file was ignored if either
+**~/.ssh/id_dsa** or **~/.ssh/id_rsa** existed.
+
 
 2.2.5
 =====
