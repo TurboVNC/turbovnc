@@ -147,6 +147,10 @@ rejection.
 the `IdentityFile` keyword in the OpenSSH config file was ignored if either
 **~/.ssh/id_dsa** or **~/.ssh/id_rsa** existed.
 
+3. Fixed an issue with the TurboVNC Mac package whereby **TurboVNC Viewer.app**
+would not be installed into **/Applications/TurboVNC** if another app by the
+same name already existed elsewhere on the startup disk.
+
 
 2.2.5
 =====
