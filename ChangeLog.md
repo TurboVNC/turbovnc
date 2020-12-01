@@ -151,6 +151,17 @@ the `IdentityFile` keyword in the OpenSSH config file was ignored if either
 would not be installed into **/Applications/TurboVNC** if another app by the
 same name already existed elsewhere on the startup disk.
 
+4. The PAM User/Password authentication method in the TurboVNC Server (which is
+used with the Unix Login and VeNCrypt *Plain security types) will no longer
+succeed if a user's account or password is expired.
+
+5. Disabled multithreaded Tight encoding on FreeBSD and similar systems,
+because the feature segfaults for unknown reasons.
+
+6. Fixed an error ("Server TLS ERROR: Could not load libssl") that occurred
+when attempting to use TLS encryption with the TurboVNC Server (built with
+`TVNC_DLOPENSSL=1`, which is the default) running on FreeBSD 12.x.
+
 
 2.2.5
 =====

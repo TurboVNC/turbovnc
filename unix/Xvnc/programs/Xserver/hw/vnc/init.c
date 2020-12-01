@@ -547,16 +547,19 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     return 1;
   }
 
+#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
   if (strcasecmp(argv[i], "-nomt") == 0) {
     rfbMT = FALSE;
     return 1;
   }
+#endif
 
   if (strcasecmp(argv[i], "-nointerframe") == 0) {
     rfbInterframe = 0;
     return 1;
   }
 
+#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
   if (strcasecmp(argv[i], "-nthreads") == 0) {
     if (i + 1 >= argc) UseMsg();
     rfbNumThreads = atoi(argv[i + 1]);
@@ -564,6 +567,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
       UseMsg();
     return 2;
   }
+#endif
 
   /***** TurboVNC security and authentication options *****/
 
@@ -1627,10 +1631,12 @@ void ddxUseMsg(void)
   ErrorF("-economictranslate     less memory hungry translation\n");
   ErrorF("-interframe            always use interframe comparison\n");
   ErrorF("-nointerframe          never use interframe comparison\n");
+#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
   ErrorF("-nomt                  disable multithreaded encoding\n");
   ErrorF("-nthreads N            specify number of threads (1 <= N <= %d) to use with\n",
          MAX_ENCODING_THREADS);
   ErrorF("                       multithreaded encoding (default: 1 per CPU core, max. 4)\n");
+#endif
 
   ErrorF("\nTurboVNC security and authentication options\n");
   ErrorF("============================================\n");

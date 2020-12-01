@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2020 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
@@ -68,7 +68,12 @@ Bool rfbInterframeDebug = FALSE;
 int rfbMaxWidth = MAXSHORT, rfbMaxHeight = MAXSHORT;
 int rfbMaxClipboard = MAX_CUTTEXT_LEN;
 Bool rfbVirtualTablet = FALSE;
+#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
 Bool rfbMT = TRUE;
+#else
+/* Multithreaded Tight encoding segfaults on FreeBSD, for unknown reasons. */
+Bool rfbMT = FALSE;
+#endif
 int rfbNumThreads = 0;
 
 static rfbClientPtr rfbNewClient(int sock);

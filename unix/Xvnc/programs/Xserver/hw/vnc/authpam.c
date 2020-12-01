@@ -5,7 +5,8 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
- *  Copyright (C) 2015, 2017-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2015, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2020 Andrew Yoder.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -142,12 +143,20 @@ Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
   if (authStatus != PAM_SUCCESS) {
     rfbLog("PAMAuthenticate: pam_authenticate: %s\n",
            pam_strerror(pamHandle, authStatus));
-  } else if (pamSession) {
-    if ((authStatus = pam_open_session(pamHandle, 0)) != PAM_SUCCESS) {
-      rfbLog("PAMAuthenticate: pam_open_session: %s\n",
+  } else {
+    /* Authentication was successful.  Validate the user's account status. */
+    authStatus = pam_acct_mgmt(pamHandle, PAM_DISALLOW_NULL_AUTHTOK);
+    if (authStatus != PAM_SUCCESS) {
+      rfbLog("PAMAuthenticate: pam_acct_mgmt: %s\n",
              pam_strerror(pamHandle, authStatus));
+    } else if (pamSession) {
+      if ((authStatus = pam_open_session(pamHandle, 0)) != PAM_SUCCESS) {
+        rfbLog("PAMAuthenticate: pam_open_session: %s\n",
+               pam_strerror(pamHandle, authStatus));
+      } else {
+        rfbLog("Opened PAM session for client %s\n", cl->host);
+      }
     }
-    rfbLog("Opened PAM session for client %s\n", cl->host);
   }
 
   if (authStatus != PAM_SUCCESS || !pamSession) {
@@ -173,6 +182,14 @@ Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
 
     case PAM_AUTHINFO_UNAVAIL:
       *emsg = "Cannot authenticate at this time.  Try again later.";
+      break;
+
+    case PAM_ACCT_EXPIRED:
+      *emsg = "User account is expired";
+      break;
+
+    case PAM_NEW_AUTHTOK_REQD:
+      *emsg = "Authentication token/password is expired";
       break;
 
     default:
