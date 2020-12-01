@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 2011 Gernot Tenchio
- *  Copyright (C) 2015, 2017, 2019 D. R. Commander
+ *  Copyright (C) 2015, 2017, 2019-2020 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -179,10 +179,10 @@ static struct rfbssl_functions ssl = {
 static void *sslHandle = NULL, *cryptoHandle = NULL;
 
 #ifndef __APPLE__
-#define SUFFIXES 20
-static const char *suffix[SUFFIXES] = { "1.1", "1.0.2", "1.0.1", "1.0.0",
-  "0.9.8", "20", "19", "18", "17", "16", "15", "14", "13", "12", "11", "10",
-  "9", "8", "7", "6" };
+#define SUFFIXES 21
+static const char *suffix[SUFFIXES] = { "1.1", "111", "1.0.2", "1.0.1",
+  "1.0.0", "0.9.8", "20", "19", "18", "17", "16", "15", "14", "13", "12", "11",
+  "10", "9", "8", "7", "6" };
 #endif
 
 #define LOADSYM(lib, sym) {  \

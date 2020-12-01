@@ -23,6 +23,10 @@ succeed if a user's account or password is expired.
 5. Disabled multithreaded Tight encoding on FreeBSD and similar systems,
 because the feature segfaults for unknown reasons.
 
+6. Fixed an error ("Server TLS ERROR: Could not load libssl") that occurred
+when attempting to use TLS encryption with the TurboVNC Server (built with
+`TVNC_DLOPENSSL=1`, which is the default) running on FreeBSD 12.x.
+
 
 2.2.5
 =====
