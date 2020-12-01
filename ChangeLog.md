@@ -20,6 +20,9 @@ same name already existed elsewhere on the startup disk.
 used with the Unix Login and VeNCrypt *Plain security types) will no longer
 succeed if a user's account or password is expired.
 
+5. Disabled multithreaded Tight encoding on FreeBSD and similar systems,
+because the feature segfaults for unknown reasons.
+
 
 2.2.5
 =====
