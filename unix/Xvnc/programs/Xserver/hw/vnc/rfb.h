@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2020 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -77,6 +77,8 @@
 /* Protect ourself against a denial of service */
 #define MAX_CUTTEXT_LEN (1 * 1024 * 1024)
 
+#define DEFAULT_DEFER_UPDATE_TIME 40
+
 /* Maximum number of threads to use for multithreaded encoding, regardless of
    the CPU count */
 #define MAX_ENCODING_THREADS 8
@@ -87,6 +89,8 @@
    which is usually 1024 on Linux systems. */
 #define DEFAULT_MAX_CONNECTIONS 100
 #define MAX_MAX_CONNECTIONS 500
+
+#define DEFAULT_MAX_CLIENT_WAIT 20000
 
 
 /*

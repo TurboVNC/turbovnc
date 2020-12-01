@@ -98,6 +98,8 @@ from the X Consortium.
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
 
+#define DEFAULT_DESKTOP_NAME "x11"
+
 #ifdef GLXEXT
 extern char *dri_driver_path;
 #endif
@@ -110,7 +112,7 @@ DevPrivateKeyRec rfbGCKey;
 
 static Bool initOutputCalled = FALSE;
 static Bool noCursor = FALSE;
-char *desktopName = "x11";
+char *desktopName = DEFAULT_DESKTOP_NAME;
 int traceLevel = 0;
 
 char rfbThisHost[256];
@@ -1583,12 +1585,14 @@ void ddxUseMsg(void)
 {
   ErrorF("\nTurboVNC connection options\n");
   ErrorF("===========================\n");
-  ErrorF("-alwaysshared          always treat new clients as shared\n");
-  ErrorF("-capture F             capture the data sent to the first connected viewer to\n");
-  ErrorF("                       a file (F)\n");
-  ErrorF("-deferupdate time      time in ms to defer updates (default: 40)\n");
-  ErrorF("-desktop name          VNC desktop name (default: x11)\n");
-  ErrorF("-disconnect            disconnect existing clients when a new non-shared\n"
+  ErrorF("-alwaysshared          always treat new connections as shared\n");
+  ErrorF("-capture file          capture the data sent to the first connected viewer to\n");
+  ErrorF("                       the specified file\n");
+  ErrorF("-deferupdate time      time in ms to defer updates [default: %d]\n",
+         DEFAULT_DEFER_UPDATE_TIME);
+  ErrorF("-desktop name          VNC desktop name [default: %s]\n",
+         DEFAULT_DESKTOP_NAME);
+  ErrorF("-disconnect            disconnect existing viewers when a new non-shared\n"
          "                       connection comes in, rather than refusing the new\n"
          "                       connection\n");
   ErrorF("-httpd dir             serve files from the specified directory using HTTP\n");
@@ -1599,44 +1603,46 @@ void ddxUseMsg(void)
   ErrorF("-ipv6                  enable IPv6 support\n");
   ErrorF("-localhost             only allow connections from localhost\n");
   ErrorF("-maxclipboard B        set max. clipboard transfer size to B bytes\n");
-  ErrorF("                       (default: %d)\n", rfbMaxClipboard);
+  ErrorF("                       [default: %d]\n", MAX_CUTTEXT_LEN);
   ErrorF("-maxconnections N      allow no more than N (1 <= N <= %d) simultaneous VNC\n",
          MAX_MAX_CONNECTIONS);
-  ErrorF("                       viewer connections (default: %d)\n",
+  ErrorF("                       viewer connections [default: %d]\n",
          DEFAULT_MAX_CONNECTIONS);
-  ErrorF("-nevershared           never treat new clients as shared\n");
+  ErrorF("-nevershared           never treat new connections as shared\n");
   ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
   ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");
   ErrorF("-nocutbuffersync       disable clipboard synchronization for applications\n");
   ErrorF("                       that use the (obsolete) X cut buffer\n");
-  ErrorF("-noflowcontrol         when continuous updates are enabled, send updates whether\n");
-  ErrorF("                       or not the client is ready to receive them\n");
+  ErrorF("-noflowcontrol         when continuous updates are enabled, send updates\n");
+  ErrorF("                       whether or not the viewer is ready to receive them\n");
   ErrorF("-noprimarysync         disable clipboard synchronization with the PRIMARY\n");
   ErrorF("                       selection (typically used when pasting with the middle\n");
   ErrorF("                       mouse button)\n");
   ErrorF("-noreverse             disable reverse connections\n");
   ErrorF("-rfbport port          TCP port for RFB protocol\n");
-  ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
+  ErrorF("-rfbwait time          max time in ms to wait for a send/receive operation\n");
+  ErrorF("                       to/from a connected viewer to complete [default: %d]\n",
+         DEFAULT_MAX_CLIENT_WAIT);
   ErrorF("-udpinputport port     UDP port for keyboard/pointer data\n");
 
   ErrorF("\nTurboVNC input options\n");
   ErrorF("======================\n");
   ErrorF("-compatiblekbd         set META key = ALT key as in the original VNC\n");
   ErrorF("-nocursor              don't display a cursor\n");
-  ErrorF("-viewonly              only let clients view the remote desktop\n");
+  ErrorF("-viewonly              only let viewers view, not control, the remote desktop\n");
   ErrorF("-virtualtablet         set up virtual stylus and eraser devices for this\n");
   ErrorF("                       session, to emulate a Wacom tablet, and map all\n");
   ErrorF("                       extended input events from all viewers to these devices\n");
   ErrorF("                       (see man page)\n");
-  ErrorF("-xkblayout layout      set XKEYBOARD layout (default: %s)\n",
+  ErrorF("-xkblayout layout      set XKEYBOARD layout [default: %s]\n",
          XKB_DFLT_LAYOUT);
-  ErrorF("-xkbmodel model        set XKEYBOARD model (default: %s)\n",
+  ErrorF("-xkbmodel model        set XKEYBOARD model [default: %s]\n",
          XKB_DFLT_MODEL);
-  ErrorF("-xkboptions options    set XKEYBOARD options (default: %s)\n",
+  ErrorF("-xkboptions options    set XKEYBOARD options [default: %s]\n",
          XKB_DFLT_OPTIONS);
-  ErrorF("-xkbrules rules        set XKEYBOARD rules (default: %s)\n",
+  ErrorF("-xkbrules rules        set XKEYBOARD rules [default: %s]\n",
          XKB_DFLT_RULES);
-  ErrorF("-xkbvariant variant    set XKEYBOARD variant (default: %s)\n",
+  ErrorF("-xkbvariant variant    set XKEYBOARD variant [default: %s]\n",
          XKB_DFLT_VARIANT);
 
   ErrorF("\nTurboVNC display options\n");
@@ -1657,17 +1663,20 @@ void ddxUseMsg(void)
   ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
   ErrorF("                       seconds (S is floating point)\n");
   ErrorF("-alrqual Q             send automatic lossless refresh as a JPEG image with\n");
-  ErrorF("                       quality Q, rather than as a mathematically lossless image\n");
+  ErrorF("                       quality Q, rather than as a mathematically lossless\n");
+  ErrorF("                       image\n");
   ErrorF("-alrsamp S             specify chroma subsampling factor for automatic lossless\n");
   ErrorF("                       refresh JPEG images (S = 1x, 2x, 4x, or gray)\n");
-  ErrorF("-economictranslate     less memory hungry translation\n");
+  ErrorF("-economictranslate     use less memory-hungry pixel format translation if\n");
+  ErrorF("                       depth=16\n");
   ErrorF("-interframe            always use interframe comparison\n");
   ErrorF("-nointerframe          never use interframe comparison\n");
 #if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
-  ErrorF("-nomt                  disable multithreaded encoding\n");
+  ErrorF("-nomt                  disable multithreaded Tight encoding\n");
   ErrorF("-nthreads N            specify number of threads (1 <= N <= %d) to use with\n",
          MAX_ENCODING_THREADS);
-  ErrorF("                       multithreaded encoding (default: 1 per CPU core, max. 4)\n");
+  ErrorF("                       multithreaded Tight encoding [default: 1 per CPU core,\n");
+  ErrorF("                       max. 4]\n");
 #endif
 
   ErrorF("\nTurboVNC security and authentication options\n");
