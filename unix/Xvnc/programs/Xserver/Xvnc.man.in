@@ -350,6 +350,20 @@ to exceed the number of CPU cores.
 \fBTURBOVNC SECURITY AND AUTHENTICATION OPTIONS\fR
 
 .TP
+\fB\-maxauthfails\fR \fIfail-count\fR
+Specify the number of consecutive VNC password or OTP authentication failures
+allowed before connections to the TurboVNC session are temporarily blocked
+[default: 5].  0 = no limit.
+
+.TP
+\fB\-authfailtimeout\fR \fItime\fR
+Specify the initial length of time, in seconds, during which connections to the
+TurboVNC session are blocked after the maximum number of consecutive VNC
+password or OTP authentication failures has been exceeded [default: 10].  This
+timeout period automatically doubles with each subsequent consecutive VNC
+password or OTP authentication failure.
+
+.TP
 \fB\-pamsession\fR
 Create a new PAM session for each viewer that authenticates using the
 username/password of the user who owns the TurboVNC session, and leave the PAM

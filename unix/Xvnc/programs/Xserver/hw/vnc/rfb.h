@@ -74,6 +74,10 @@
 #define MAX_AUTH_CAPS 16
 #define MAX_VENCRYPT_SUBTYPES 16
 
+
+#define DEFAULT_AUTH_MAX_FAILS 5
+#define DEFAULT_AUTH_FAIL_TIMEOUT 10
+
 /* Protect ourself against a denial of service */
 #define MAX_CUTTEXT_LEN (1 * 1024 * 1024)
 
@@ -626,6 +630,9 @@ extern void rfbClientAuthFailed(rfbClientPtr cl, char *reason);
 extern void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType);
 
 /* Functions to prevent too many successive authentication failures */
+extern int rfbAuthMaxFails;
+extern CARD32 rfbAuthFailTimeout;
+
 extern Bool rfbAuthConsiderBlocking(void);
 extern void rfbAuthUnblock(void);
 extern Bool rfbAuthIsBlocked(void);

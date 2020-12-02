@@ -823,7 +823,7 @@ void rfbAuthNewClient(rfbClientPtr cl)
 
   if (rfbAuthIsBlocked()) {
     rfbLog("Too many authentication failures - client rejected\n");
-    rfbClientConnFailed(cl, "Too many authentication failures");
+    rfbClientConnFailed(cl, "Too many authentication failures.  Connections temporarily blocked");
     return;
   }
 
@@ -1532,7 +1532,7 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
     rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",
            cl->host);
     if (rfbAuthConsiderBlocking())
-      rfbClientAuthFailed(cl, "Authentication failed.  Too many tries");
+      rfbClientAuthFailed(cl, "Authentication failed.  Connections temporarily blocked");
     else
       rfbClientAuthFailed(cl, "Authentication failed");
   }
@@ -1625,13 +1625,13 @@ void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType)
  */
 
 /* Maximum authentication failures before blocking connections */
-#define MAX_AUTH_TRIES 5
+int rfbAuthMaxFails = DEFAULT_AUTH_MAX_FAILS;
 
-/* Delay in ms.  This doubles for each failure over MAX_AUTH_TRIES. */
-#define AUTH_TOO_MANY_BASE_DELAY 10 * 1000
+/* Delay in seconds.  This doubles for each failure over rfbAuthMaxFails. */
+CARD32 rfbAuthFailTimeout = DEFAULT_AUTH_FAIL_TIMEOUT;
 
-static int rfbAuthTries = 0;
-static Bool rfbAuthTooManyTries = FALSE;
+static int rfbAuthFails = 0;
+static Bool rfbAuthTooManyFails = FALSE;
 static OsTimerPtr timer = NULL;
 
 
@@ -1642,7 +1642,7 @@ static OsTimerPtr timer = NULL;
 
 static CARD32 rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
 {
-  rfbAuthTooManyTries = FALSE;
+  rfbAuthTooManyFails = FALSE;
   return 0;
 }
 
@@ -1656,15 +1656,18 @@ Bool rfbAuthConsiderBlocking(void)
 {
   int i;
 
-  rfbAuthTries++;
+  if (rfbAuthMaxFails == 0)
+    return FALSE;
 
-  if (rfbAuthTries >= MAX_AUTH_TRIES) {
-    CARD32 delay = AUTH_TOO_MANY_BASE_DELAY;
+  rfbAuthFails++;
 
-    for (i = MAX_AUTH_TRIES; i < rfbAuthTries; i++)
+  if (rfbAuthFails >= rfbAuthMaxFails) {
+    CARD32 delay = rfbAuthFailTimeout * 1000;
+
+    for (i = rfbAuthMaxFails; i < rfbAuthFails; i++)
       delay *= 2;
     timer = TimerSet(timer, 0, delay, rfbAuthReenable, NULL);
-    rfbAuthTooManyTries = TRUE;
+    rfbAuthTooManyFails = TRUE;
     return TRUE;
   }
 
@@ -1675,13 +1678,16 @@ Bool rfbAuthConsiderBlocking(void)
 /*
  * This function should be called after a successful authentication.  It
  * resets the counter of authentication failures.  Note that it's not necessary
- * to clear the rfbAuthTooManyTries flag, as it will be reset by the timer
+ * to clear the rfbAuthTooManyFails flag, as it will be reset by the timer
  * function.
  */
 
 void rfbAuthUnblock(void)
 {
-  rfbAuthTries = 0;
+  if (rfbAuthMaxFails == 0)
+    return;
+
+  rfbAuthFails = 0;
 }
 
 
@@ -1693,5 +1699,8 @@ void rfbAuthUnblock(void)
 
 Bool rfbAuthIsBlocked(void)
 {
-  return rfbAuthTooManyTries;
+  if (rfbAuthMaxFails == 0)
+    return FALSE;
+
+  return rfbAuthTooManyFails;
 }

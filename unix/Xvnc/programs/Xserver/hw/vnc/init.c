@@ -591,6 +591,20 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   /***** TurboVNC security and authentication options *****/
 
+  if (strcasecmp(argv[i], "-maxauthfails") == 0) {
+    if (i + 1 >= argc) UseMsg();
+    rfbAuthMaxFails = atoi(argv[i + 1]);
+    if (rfbAuthMaxFails < 0) UseMsg();
+    return 2;
+  }
+
+  if (strcasecmp(argv[i], "-authfailtimeout") == 0) {
+    if (i + 1 >= argc) UseMsg();
+    rfbAuthFailTimeout = atoi(argv[i + 1]);
+    if (rfbAuthFailTimeout < 1) UseMsg();
+    return 2;
+  }
+
 #ifdef XVNC_AuthPAM
   if (strcasecmp(argv[i], "-pamsession") == 0) {
     rfbAuthPAMSession = TRUE;
@@ -1681,6 +1695,14 @@ void ddxUseMsg(void)
 
   ErrorF("\nTurboVNC security and authentication options\n");
   ErrorF("============================================\n");
+  ErrorF("-maxauthfails N        allow N consecutive VNC/OTP auth failures (0 = no limit)\n");
+  ErrorF("                       before connections are temporarily blocked [default: %d]\n",
+         DEFAULT_AUTH_MAX_FAILS);
+  ErrorF("-authfailtimeout S     block connections initially for S seconds (doubling with\n");
+  ErrorF("                       each subsequent consecutive VNC/OTP auth failure) after\n");
+  ErrorF("                       the max number of consecutive VNC/OTP auth failures has\n");
+  ErrorF("                       been exceeded [default: %d]\n",
+         DEFAULT_AUTH_FAIL_TIMEOUT);
 #ifdef XVNC_AuthPAM
   ErrorF("-pamsession            create a new PAM session for each viewer that\n");
   ErrorF("                       authenticates using the username/password of the user\n");
