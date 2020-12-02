@@ -1,7 +1,7 @@
 3.0 pre-beta
 ============
 
-### Significant changes relative to 2.2.5:
+### Significant changes relative to 2.2.6:
 
 1. Since Java 11 introduced the ability to create a custom Java Runtime
 Environment (JRE) with only the modules that the TurboVNC Viewer needs, it has
@@ -138,13 +138,19 @@ viewers, such as noVNC, to connect to the TurboVNC Server without using a
 proxy.  TLS encryption (WSS) is supported if an X.509 certificate is specified
 using the `-x509cert` and `-x509key` arguments to Xvnc.
 
-21. The TurboVNC Server, if started with the `-nevershared` argument, now
+
+2.2.6
+=====
+
+### Significant changes relative to 2.2.5:
+
+1. The TurboVNC Server, if started with the `-nevershared` argument, now
 rejects new connections more gracefully, by sending an RFB authentication
 failure message to the potential viewer to notify it of the reason behind the
 rejection.
 
-22. Fixed an issue in the Java TurboVNC Viewer's built-in SSH client whereby
-the `IdentityFile` keyword in the OpenSSH config file was ignored if either
+2. Fixed an issue in the Java TurboVNC Viewer's built-in SSH client whereby the
+`IdentityFile` keyword in the OpenSSH config file was ignored if either
 **~/.ssh/id_dsa** or **~/.ssh/id_rsa** existed.
 
 3. Fixed an issue with the TurboVNC Mac package whereby **TurboVNC Viewer.app**
