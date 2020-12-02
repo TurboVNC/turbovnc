@@ -168,6 +168,14 @@ because the feature segfaults for unknown reasons.
 when attempting to use TLS encryption with the TurboVNC Server (built with
 `TVNC_DLOPENSSL=1`, which is the default) running on FreeBSD 12.x.
 
+7. Added two Xvnc command-line options (`-maxauthfails` and `-authfailtimeout`)
+that can be used to specify the maximum number of consecutive VNC password or
+OTP authentication failures allowed (0 = no limit) before connections to a
+TurboVNC session are temporarily blocked, as well as the initial length of time
+for which those connections are blocked.  (This timeout period automatically
+doubles with each subsequent consecutive VNC password or OTP authentication
+failure.)
+
 
 2.2.5
 =====

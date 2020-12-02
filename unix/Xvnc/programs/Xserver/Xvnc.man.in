@@ -56,24 +56,28 @@ or deny new connections when a new user tries to connect to a TurboVNC session
 that is already occupied.
 
 .TP
+\fB\-capture\fR \fIfile\fR
+Specify a file to which to capture the data sent to the first connected viewer.
+
+.TP
 \fB\-deferupdate\fR \fItime\fR
-Amount of time, in milliseconds, for which to defer screen updates (default:
-40.)  Deferring updates helps to coalesce many small desktop changes into a few
+Amount of time, in milliseconds, for which to defer screen updates [default:
+40].  Deferring updates helps to coalesce many small desktop changes into a few
 larger updates, thus saving network bandwidth.
 
 .TP
 \fB\-desktop\fR \fIname\fR
-Set VNC desktop name ("x11" by default.)
+Set VNC desktop name [default: "x11"].
 
 .TP
 \fB\-disconnect\fR
-Disconnect existing users when a new non-shared connection is established,
+Disconnect existing viewers when a new non-shared connection is established,
 rather than refusing the new connection.
 
 .TP
 \fB\-idletimeout\fR \fItime\fR
 Amount of time, in seconds, that the TurboVNC session can sit idle (with no VNC
-viewer connections) before it automatically exits (default: no timeout.)  This
+viewer connections) before it automatically exits [default: no timeout].  This
 argument has no effect if the \fImax-idle-timeout\fR directive is specified in
 the security configuration file and if that value is lower than
 \fItime\fR.
@@ -109,12 +113,12 @@ IPv4 loopback connections are accepted.
 
 .TP
 \fB-maxclipboard\fR \fIbytes\fR
-Set the maximum clipboard transfer size to \fIbytes\fR.
+Set the maximum clipboard transfer size to \fIbytes\fR [default: 1048576].
 
 .TP
 \fB-maxconnections\fR \fIconnection-count\fR
 Allow no more than \fIconnection-count\fR simultaneous VNC viewer connections,
-where 1 <= \fIconnection-count\fR <= 500 (default: 100.)
+where 1 <= \fIconnection-count\fR <= 500 [default: 100].
 
 .TP
 \fB\-nevershared\fR
@@ -154,6 +158,18 @@ between mouse movement and application response, since the TCP buffers will be
 100% full.
 
 .TP
+\fB\-noprimarysync\fR
+X servers typically have two clipboard mechanisms: the PRIMARY selection, which
+typically allows selected text to be pasted with the middle mouse button, and
+the CLIPBOARD selection, which typically allows selected text to be
+cut/copied/pasted using hotkeys or menu options.  The default behavior of the
+TurboVNC Server is to synchronize either selection with the clipboard of any
+connected viewers.  Specifying \fB-noprimarysync\fR prevents the TurboVNC
+Server from synchronizing the PRIMARY selection, thus requiring the use of
+hotkeys or menu options in order to transfer the clipboard between the TurboVNC
+session and connected viewers.
+
+.TP
 \fB\-noreverse\fR
 Do not allow reverse VNC connections to be made from this TurboVNC session.
 This option can be set for all TurboVNC sessions on this system by using the
@@ -167,7 +183,8 @@ VNC viewers.
 
 .TP
 \fB\-rfbwait\fR \fItime\fR
-Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
+Maximum time, in milliseconds, to wait for a send/receive operation to/from a
+connected viewer to complete [default: 20000].
 
 .TP
 \fBTURBOVNC INPUT OPTIONS\fR
@@ -175,7 +192,7 @@ Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
 .TP
 \fB\-compatiblekbd\fR
 Set META and ALT keys to the same X modifier flag, as in the original
-version of Xvnc by AT&T labs (this option is specific to TightVNC/TurboVNC.)
+version of Xvnc by AT&T labs.
 
 .TP
 \fB\-nocursor\fR
@@ -224,7 +241,7 @@ is too late.
 \fBTURBOVNC DISPLAY OPTIONS\fR
 
 .TP
-\fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
+\fB\-geometry\fR \fIwidth\fRx\fIheight\fR
 Set width and height of the virtual X display (single-screen.)
 
 .TP
@@ -235,7 +252,7 @@ to the origin.  The framebuffer width and height are determined by the bounding
 box of all screens.
 
 .TP
-\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
+\fB\-pixelformat\fR rgb\fINNN\fR|bgr\fINNN\fR
 Specify the pixel format of the virtual X display.  Xvnc can use any pixel
 format you choose, but if this pixel format does not match the pixel format
 of the display on which vncviewer is running, then Xvnc will perform pixel
@@ -274,14 +291,15 @@ choice, as this is the equivalent of the "Tight + Perceptually Lossless JPEG"
 preset.)
 
 .TP
-\fB\-alrsamp 1X\fR|\fB2X\fR|\fB4X\fR|\fBgray\fR
+\fB\-alrsamp\fR 1X|2X|4X|gray
 Specify the level of chrominance subsampling to be used when sending an
-automatic lossless refresh (default: 1X.)  This has no effect unless
+automatic lossless refresh [default: 1X].  This has no effect unless
 \fB-alrqual\fR is also specified.
 
 .TP
 \fB\-economictranslate\fR
-Use less memory-hungry pixel format translation.
+Use less memory-hungry pixel format translation if the TurboVNC session has a
+16-bit-per-pixel framebuffer (\fB\-depth\fR \fI16\fR.)
 
 .TP
 \fB\-interframe\fR
@@ -319,6 +337,20 @@ to exceed the number of CPU cores.
 \fBTURBOVNC SECURITY AND AUTHENTICATION OPTIONS\fR
 
 .TP
+\fB\-maxauthfails\fR \fIfail-count\fR
+Specify the number of consecutive VNC password or OTP authentication failures
+allowed before connections to the TurboVNC session are temporarily blocked
+[default: 5].  0 = no limit.
+
+.TP
+\fB\-authfailtimeout\fR \fItime\fR
+Specify the initial length of time, in seconds, during which connections to the
+TurboVNC session are blocked after the maximum number of consecutive VNC
+password or OTP authentication failures has been exceeded [default: 10].  This
+timeout period automatically doubles with each subsequent consecutive VNC
+password or OTP authentication failure.
+
+.TP
 \fB\-pamsession\fR
 Create a new PAM session for each viewer that authenticates using the
 username/password of the user who owns the TurboVNC session, and leave the PAM
@@ -335,7 +367,7 @@ the SECURITY CONFIGURATION FILE section for more details.
 Specify the password file to use with VNC Password authentication.
 \fIpasswd-file\fR can be created using the \fBvncpasswd\fR(1) utility.  This
 argument has no effect if \fIpermitted-security-types\fR is specified in the
-security configuration file and none of the VNC security types are listed as
+security configuration file and none of the *VNC security types are listed as
 permitted security types.
 
 .TP

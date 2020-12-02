@@ -11,8 +11,8 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010-2012, 2014, 2016-2017, 2019 D. R. Commander.
- *                                                 All Rights Reserved.
+ *  Copyright (C) 2010-2012, 2014, 2016-2017, 2019-2020 D. R. Commander.
+ *                                                      All Rights Reserved.
  *  Copyright (C) 2012-2013, 2016 Pierre Ossman for Cendio AB.
  *                                All Rights Reserved.
  *
@@ -74,7 +74,7 @@ in this Software without prior written authorization from the X Consortium.
 
 extern WindowPtr *WindowTable;  /* Why isn't this in a header file? */
 
-int rfbDeferUpdateTime = 40;  /* ms */
+int rfbDeferUpdateTime = DEFAULT_DEFER_UPDATE_TIME;  /* ms */
 
 
 static inline Bool is_visible(DrawablePtr drawable)

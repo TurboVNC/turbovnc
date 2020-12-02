@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2020 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -76,8 +76,14 @@
 #define MAX_AUTH_CAPS 16
 #define MAX_VENCRYPT_SUBTYPES 16
 
+
+#define DEFAULT_AUTH_MAX_FAILS 5
+#define DEFAULT_AUTH_FAIL_TIMEOUT 10
+
 /* Protect ourself against a denial of service */
 #define MAX_CUTTEXT_LEN (1 * 1024 * 1024)
+
+#define DEFAULT_DEFER_UPDATE_TIME 40
 
 /* Maximum number of threads to use for multithreaded encoding, regardless of
    the CPU count */
@@ -89,6 +95,8 @@
    which is usually 1024 on Linux systems. */
 #define DEFAULT_MAX_CONNECTIONS 100
 #define MAX_MAX_CONNECTIONS 500
+
+#define DEFAULT_MAX_CLIENT_WAIT 20000
 
 
 /*
@@ -625,6 +633,9 @@ extern void rfbClientAuthFailed(rfbClientPtr cl, char *reason);
 extern void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType);
 
 /* Functions to prevent too many successive authentication failures */
+extern int rfbAuthMaxFails;
+extern CARD32 rfbAuthFailTimeout;
+
 extern Bool rfbAuthConsiderBlocking(void);
 extern void rfbAuthUnblock(void);
 extern Bool rfbAuthIsBlocked(void);

@@ -68,8 +68,9 @@ int deny_severity = LOG_WARNING;
 #include "rfb.h"
 
 
-int rfbMaxClientWait = 20000;   /* time (ms) after which we decide client has
-                                   gone away - needed to stop us hanging */
+/* Maximum time (in ms) to wait before deciding that the client has gone away -
+   needed to prevent the server from hanging */
+int rfbMaxClientWait = DEFAULT_MAX_CLIENT_WAIT;
 
 int rfbPort = 0;
 int rfbListenSock = -1;
