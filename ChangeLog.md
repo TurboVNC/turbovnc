@@ -138,6 +138,11 @@ viewers, such as noVNC, to connect to the TurboVNC Server without using a
 proxy.  TLS encryption (WSS) is supported if an X.509 certificate is specified
 using the `-x509cert` and `-x509key` arguments to Xvnc.
 
+21. The TurboVNC Server now maintains a separate count of VNC password/OTP
+authentication failures for each client IP address and temporarily blocks
+connections only from IP addresses that have exceeded the maximum number of
+consecutive VNC password or OTP authentication failures.
+
 
 2.2.6
 =====

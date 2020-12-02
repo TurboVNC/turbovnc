@@ -187,6 +187,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     xorg_list_init(&rfbScreens);
     rfbAddScreen(&rfbScreens,
                  rfbNewScreen(0, 0, 0, rfbFB.width, rfbFB.height, 0));
+    xorg_list_init(&rfbAuthFails);
     rfbFB.depth = RFB_DEFAULT_DEPTH;
     rfbFB.blackPixel = RFB_DEFAULT_BLACKPIXEL;
     rfbFB.whitePixel = RFB_DEFAULT_WHITEPIXEL;
@@ -1664,12 +1665,13 @@ void ddxUseMsg(void)
   ErrorF("\nTurboVNC security and authentication options\n");
   ErrorF("============================================\n");
   ErrorF("-maxauthfails N        allow N consecutive VNC/OTP auth failures (0 = no limit)\n");
-  ErrorF("                       before connections are temporarily blocked [default: %d]\n",
+  ErrorF("                       from a client's IP address before connections from that\n");
+  ErrorF("                       address are temporarily blocked [default: %d]\n",
          DEFAULT_AUTH_MAX_FAILS);
   ErrorF("-authfailtimeout S     block connections initially for S seconds (doubling with\n");
-  ErrorF("                       each subsequent consecutive VNC/OTP auth failure) after\n");
-  ErrorF("                       the max number of consecutive VNC/OTP auth failures has\n");
-  ErrorF("                       been exceeded [default: %d]\n",
+  ErrorF("                       each subsequent consecutive VNC/OTP auth failure) from\n");
+  ErrorF("                       the IP address of a client that exceeds the max number\n");
+  ErrorF("                       of consecutive VNC/OTP auth failures [default: %d]\n",
          DEFAULT_AUTH_FAIL_TIMEOUT);
 #ifdef XVNC_AuthPAM
   ErrorF("-pamsession            create a new PAM session for each viewer that\n");

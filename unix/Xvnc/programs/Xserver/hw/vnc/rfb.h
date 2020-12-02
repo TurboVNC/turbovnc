@@ -636,9 +636,11 @@ extern void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType);
 extern int rfbAuthMaxFails;
 extern CARD32 rfbAuthFailTimeout;
 
-extern Bool rfbAuthConsiderBlocking(void);
-extern void rfbAuthUnblock(void);
-extern Bool rfbAuthIsBlocked(void);
+extern struct xorg_list rfbAuthFails;
+
+extern Bool rfbAuthConsiderBlocking(char *host);
+extern void rfbAuthUnblock(char *host);
+extern Bool rfbAuthIsBlocked(char *host);
 
 
 /* authpam.c */

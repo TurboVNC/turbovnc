@@ -815,9 +815,9 @@ void rfbAuthNewClient(rfbClientPtr cl)
   RFBSecTypeData **p;
   RFBSecTypeData *r;
 
-  if (rfbAuthIsBlocked()) {
+  if (rfbAuthIsBlocked(cl->host)) {
     rfbLog("Too many authentication failures - client rejected\n");
-    rfbClientConnFailed(cl, "Too many authentication failures.  Connections temporarily blocked");
+    rfbClientConnFailed(cl, "Too many authentication failures.  Client temporarily blocked");
     return;
   }
 
@@ -1510,7 +1510,7 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
   if (ok) {
     rfbClientPtr otherCl;
 
-    rfbAuthUnblock();
+    rfbAuthUnblock(cl->host);
     if (!cl->reverseConnection && rfbNeverShared && rfbDontDisconnect) {
       for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
         if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
@@ -1525,8 +1525,8 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
   } else {
     rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",
            cl->host);
-    if (rfbAuthConsiderBlocking())
-      rfbClientAuthFailed(cl, "Authentication failed.  Connections temporarily blocked");
+    if (rfbAuthConsiderBlocking(cl->host))
+      rfbClientAuthFailed(cl, "Authentication failed.  Client temporarily blocked");
     else
       rfbClientAuthFailed(cl, "Authentication failed");
   }
@@ -1614,8 +1614,6 @@ void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType)
 
 /*********************************************************************
  * Functions to prevent too many successive authentication failures.
- *
- * FIXME: This should be performed separately for each client.
  */
 
 /* Maximum authentication failures before blocking connections */
@@ -1624,9 +1622,15 @@ int rfbAuthMaxFails = DEFAULT_AUTH_MAX_FAILS;
 /* Delay in seconds.  This doubles for each failure over rfbAuthMaxFails. */
 CARD32 rfbAuthFailTimeout = DEFAULT_AUTH_FAIL_TIMEOUT;
 
-static int rfbAuthFails = 0;
-static Bool rfbAuthTooManyFails = FALSE;
-static OsTimerPtr timer = NULL;
+struct xorg_list rfbAuthFails;
+
+typedef struct {
+  char *host;
+  int numFails;
+  Bool tooManyFails;
+  OsTimerPtr timer;
+  struct xorg_list entry;
+} rfbFailInfo;
 
 
 /*
@@ -1636,7 +1640,9 @@ static OsTimerPtr timer = NULL;
 
 static CARD32 rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
 {
-  rfbAuthTooManyFails = FALSE;
+  rfbFailInfo *fail = (rfbFailInfo *)arg;
+
+  fail->tooManyFails = FALSE;
   return 0;
 }
 
@@ -1646,22 +1652,37 @@ static CARD32 rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
  * return value will be true if there were too many failures.
  */
 
-Bool rfbAuthConsiderBlocking(void)
+Bool rfbAuthConsiderBlocking(char *host)
 {
   int i;
+  rfbFailInfo *fail = NULL, *iter;
 
   if (rfbAuthMaxFails == 0)
     return FALSE;
 
-  rfbAuthFails++;
+  xorg_list_for_each_entry(iter, &rfbAuthFails, entry) {
+    if (!strcmp(iter->host, host)) {
+      fail = iter;
+      break;
+    }
+  }
+  if (!fail) {
+    fail = (rfbFailInfo *)rfbAlloc0(sizeof(rfbFailInfo));
+    memset(fail, 0, sizeof(rfbFailInfo));
+    fail->host = strdup(host);
+    xorg_list_append(&fail->entry, &rfbAuthFails);
+  }
 
-  if (rfbAuthFails >= rfbAuthMaxFails) {
+  fail->numFails++;
+
+  if (fail->numFails >= rfbAuthMaxFails) {
     CARD32 delay = rfbAuthFailTimeout * 1000;
 
-    for (i = rfbAuthMaxFails; i < rfbAuthFails; i++)
+    for (i = rfbAuthMaxFails; i < fail->numFails; i++)
       delay *= 2;
-    timer = TimerSet(timer, 0, delay, rfbAuthReenable, NULL);
-    rfbAuthTooManyFails = TRUE;
+    fail->timer = TimerSet(fail->timer, 0, delay, rfbAuthReenable,
+                           (pointer)fail);
+    fail->tooManyFails = TRUE;
     return TRUE;
   }
 
@@ -1676,12 +1697,22 @@ Bool rfbAuthConsiderBlocking(void)
  * function.
  */
 
-void rfbAuthUnblock(void)
+void rfbAuthUnblock(char *host)
 {
+  rfbFailInfo *iter, *tmp;
+
   if (rfbAuthMaxFails == 0)
     return;
 
-  rfbAuthFails = 0;
+  xorg_list_for_each_entry_safe(iter, tmp, &rfbAuthFails, entry) {
+    if (!strcmp(iter->host, host)) {
+      TimerFree(iter->timer);
+      xorg_list_del(&iter->entry);
+      free(iter->host);
+      free(iter);
+      return;
+    }
+  }
 }
 
 
@@ -1691,10 +1722,17 @@ void rfbAuthUnblock(void)
  * should not allow another try.
  */
 
-Bool rfbAuthIsBlocked(void)
+Bool rfbAuthIsBlocked(char *host)
 {
+  rfbFailInfo *iter;
+
   if (rfbAuthMaxFails == 0)
     return FALSE;
 
-  return rfbAuthTooManyFails;
+  xorg_list_for_each_entry(iter, &rfbAuthFails, entry) {
+    if (!strcmp(iter->host, host))
+      return iter->tooManyFails;
+  }
+
+  return FALSE;
 }

@@ -339,14 +339,14 @@ to exceed the number of CPU cores.
 .TP
 \fB\-maxauthfails\fR \fIfail-count\fR
 Specify the number of consecutive VNC password or OTP authentication failures
-allowed before connections to the TurboVNC session are temporarily blocked
-[default: 5].  0 = no limit.
+allowed from a client's IP address before connections from that IP address are
+temporarily blocked [default: 5].  0 = no limit.
 
 .TP
 \fB\-authfailtimeout\fR \fItime\fR
-Specify the initial length of time, in seconds, during which connections to the
-TurboVNC session are blocked after the maximum number of consecutive VNC
-password or OTP authentication failures has been exceeded [default: 10].  This
+Specify the initial length of time, in seconds, during which connections are
+blocked from the IP address of a client that has exceeded the maximum number of
+consecutive VNC password or OTP authentication failures [default: 10].  This
 timeout period automatically doubles with each subsequent consecutive VNC
 password or OTP authentication failure.
 
