@@ -2,7 +2,7 @@ add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0500 -DNTDDI_VERSION=0x05000100)
 
 include_directories(omnithread ${CMAKE_SOURCE_DIR}/common
 	${CMAKE_SOURCE_DIR}/common/d3des ${CMAKE_CURRENT_BINARY_DIR}/res
-	${CMAKE_SOURCE_DIR}/win/util)
+	${CMAKE_SOURCE_DIR}/win/util ${TJPEG_INCLUDE_DIR})
 
 if(BITS EQUAL 64)
 	set(APPNAME "TurboVNC Viewer 64-bit v${VERSION} (${BUILD})")

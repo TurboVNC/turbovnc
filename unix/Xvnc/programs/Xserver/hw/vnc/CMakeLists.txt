@@ -3,7 +3,7 @@ option(TVNC_USEPAM "Include PAM authentication support in the TurboVNC Server"
 	${DEFAULT_TVNC_USEPAM})
 
 include_directories(. ../../fb ../../mi ../../os ../../randr ../../render
-	${CMAKE_SOURCE_DIR}/common/rfb)
+	${CMAKE_SOURCE_DIR}/common/rfb ${TJPEG_INCLUDE_DIR})
 
 add_definitions(${ServerOSDefines})
 set(PAMSRC "")
