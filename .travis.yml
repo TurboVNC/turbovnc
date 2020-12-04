@@ -77,15 +77,16 @@ before_install:
       popd;
     fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      pushd ~ &&
-      curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci &&
-      . ./macports-ci install &&
+      curl -LO https://distfiles.macports.org/MacPorts/MacPorts-2.6.4-10.12-Sierra.pkg &&
+      sudo installer -pkg MacPorts-2.6.4-10.12-Sierra.pkg -target / &&
+      rm MacPorts-2.6.4-10.12-Sierra.pkg &&
       sudo /opt/local/bin/port -N install md5sha1sum &&
+      export PATH=/opt/local/bin:$PATH &&
       wget --no-check-certificate $LJT_URL/libjpeg-turbo-$LJT_VERSION.dmg &&
       hdid libjpeg-turbo-$LJT_VERSION.dmg &&
       sudo installer -pkg /Volumes/libjpeg-turbo-$LJT_VERSION/libjpeg-turbo.pkg -target / &&
       hdiutil detach /Volumes/libjpeg-turbo-$LJT_VERSION &&
-      popd;
+      rm libjpeg-turbo-$LJT_VERSION.dmg;
     fi
 
 script:
