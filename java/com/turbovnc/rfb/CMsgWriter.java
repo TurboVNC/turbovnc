@@ -1,7 +1,8 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011, 2015 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2017-2018, 2020 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +76,8 @@ public abstract class CMsgWriter {
       encodings[nEncodings++] = RFB.ENCODING_CONTINUOUS_UPDATES;
       encodings[nEncodings++] = RFB.ENCODING_FENCE;
     }
-    encodings[nEncodings++] = RFB.ENCODING_GII;
+    if (VncViewer.getBooleanProperty("turbovnc.gii", true))
+      encodings[nEncodings++] = RFB.ENCODING_GII;
 
     if (Decoder.supported(preferredEncoding)) {
       encodings[nEncodings++] = preferredEncoding;
