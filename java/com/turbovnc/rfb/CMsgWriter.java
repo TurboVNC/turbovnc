@@ -75,7 +75,8 @@ public abstract class CMsgWriter {
       encodings[nEncodings++] = RFB.ENCODING_CONTINUOUS_UPDATES;
       encodings[nEncodings++] = RFB.ENCODING_FENCE;
     }
-    encodings[nEncodings++] = RFB.ENCODING_GII;
+    if (Utils.getBooleanProperty("turbovnc.gii", true))
+      encodings[nEncodings++] = RFB.ENCODING_GII;
 
     if (Decoder.supported(preferredEncoding)) {
       encodings[nEncodings++] = preferredEncoding;
