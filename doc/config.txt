@@ -199,7 +199,6 @@ Refer to the default {file: VncViewer.jnlp} file installed with the TurboVNC
 Server for an example of how to specify Java command-line arguments in a Java
 Web Start environment.
 
-{anchor: turbovnc.forcealpha}
 | Java System Property | {pcode: turbovnc.forcealpha = __0 \| 1__} |
 | Summary | Disable/enable back buffer alpha channel |
 | Default Value | Enabled if using OpenGL Java 2D blitting, disabled otherwise |
@@ -258,8 +257,9 @@ Web Start environment.
 #OPT: hiCol=first
 
 	Description :: A more Java-friendly way of disabling the multi-screen-aware
-	automatic desktop resize feature.  See the ''TVNC_SINGLESCREEN'' environment
-	variable above for more details.
+	automatic desktop resize feature.  See the
+	[[#TVNC_SINGLESCREEN][''TVNC_SINGLESCREEN'' environment variable]] above for
+	more details.
 
 | Java System Property | ''turbovnc.sshauth'' |
 | Summary | Preferred authentication methods for the built-in SSH client |

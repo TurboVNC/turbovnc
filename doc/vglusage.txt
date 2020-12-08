@@ -86,7 +86,6 @@ machine without using VirtualGL's built-in VGL Transport.
 	* TurboVNC does not support quad-buffered stereo or transparent overlays.
 
 ** Using VirtualGL on a TurboVNC Host
-{anchor: TurboVNC_Usage_Local}
 
 The most common (and optimal) way to use VirtualGL with TurboVNC is to
 configure the same machine as a TurboVNC host and a VirtualGL server.  This
@@ -114,7 +113,6 @@ configuration.
 		---
 
 ** Using VirtualGL on a Machine Other Than a TurboVNC Host
-{anchor: TurboVNC_Usage_Remote}
 
 #IMG: vgltransportservernetwork.png
 #OPT fmt=latex: w=4cm

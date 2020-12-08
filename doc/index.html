@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-06-22T15:56:57">
+<meta name="date" content="2020-12-07T18:20:08">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -296,8 +296,6 @@ accordingly.</p>
 
 <h1 id="hd003"><a name="file003"></a>3&nbsp;Overview</h1>
 
-<p><a name="Overview"></a></p>
-
 <p>TurboVNC is a derivative of VNC (Virtual Network Computing) that is 
 tuned to provide peak performance for 3D and video workloads.  TurboVNC 
 was originally a fork of 
@@ -549,10 +547,10 @@ other VNC distributions without interference.</p>
     or 
     <span class="remote"><a href="http://cygwin.com" class="remote">Cygwin</a></span><a name="idx0020"></a> 
     implementation preferred, since those implementations work with the 
-    <a href="#via"><code>-via</code> and <code>-tunnel</code> 
-    options</a><a name="idx0021"></a> in the native Windows TurboVNC Viewer, 
-    but other SSH implementations will work without the <code>-via</code> 
-    and <code>-tunnel</code> options.  
+    <a href="#Secure_TurboVNC_Usage"><code>-via</code> and 
+    <code>-tunnel</code> options</a><a name="idx0021"></a> in the native 
+    Windows TurboVNC Viewer, but other SSH implementations will work without 
+    the <code>-via</code> and <code>-tunnel</code> options.  
     <strong class="filename">ssh.exe</strong> should be in the 
     <code>PATH</code>.)
 </li>
@@ -954,8 +952,6 @@ type the following command:</p>
 
 
 <h2 id="hd006003">6.3&nbsp;Launching the TurboVNC Viewer from a Web Browser</h2>
-
-<p><a name="Zero_Install"></a></p>
 
 <p>When a TurboVNC session is created, it automatically starts a miniature 
 web server that serves up the Java TurboVNC Viewer as a Java Web Start 
@@ -2193,8 +2189,6 @@ VGL Transport.</p>
 
 <h2 id="hd009001">9.1&nbsp;Using VirtualGL on a TurboVNC Host</h2>
 
-<p><a name="TurboVNC_Usage_Local"></a></p>
-
 <p>The most common (and optimal) way to use VirtualGL with TurboVNC is to 
 configure the same machine as a TurboVNC host and a VirtualGL server.  
 This allows VirtualGL to send rendered frames to TurboVNC through shared 
@@ -2228,8 +2222,6 @@ this configuration.</p>
 
 
 <h2 id="hd009002">9.2&nbsp;Using VirtualGL on a Machine Other Than a TurboVNC Host</h2>
-
-<p><a name="TurboVNC_Usage_Remote"></a></p>
 
 <div class="figure">
 <img src="vgltransportservernetwork.png" alt="vgltransportservernetwork" class="figure" id="imgid_8" name="imgid_8"/>
@@ -3015,8 +3007,6 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
 file installed with the TurboVNC Server for an example of how to specify 
 Java command-line arguments in a Java Web Start environment.</p>
 
-<p><a name="turbovnc.forcealpha"></a></p>
-
 <div class="table">
 <table class="standard">
   <tr class="standard">
@@ -3146,8 +3136,9 @@ Java command-line arguments in a Java Web Start environment.</p>
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         A more Java-friendly way of disabling the multi-screen-aware automatic 
-        desktop resize feature.  See the <code>TVNC_SINGLESCREEN</code> 
-        environment variable above for more details.
+        desktop resize feature.  See the 
+        <a href="#TVNC_SINGLESCREEN"><code>TVNC_SINGLESCREEN</code> environment 
+        variable</a><a name="idx0046"></a> above for more details.
     </dd>
 </dl>
 
@@ -3261,7 +3252,7 @@ Java command-line arguments in a Java Web Start environment.</p>
         establishing a secure tunnel with the <code>Tunnel</code> and 
         <code>ExtSSH</code> parameters.  See the 
         <a href="#VNC_VIA_CMD"><code>VNC_TUNNEL_CMD</code> environment 
-        variable</a><a name="idx0046"></a> above for more details.
+        variable</a><a name="idx0047"></a> above for more details.
     </dd>
 </dl>
 
@@ -3315,7 +3306,7 @@ Java command-line arguments in a Java Web Start environment.</p>
         establishing a secure tunnel with the <code>Via</code> and 
         <code>ExtSSH</code> parameters.  See the 
         <a href="#VNC_VIA_CMD"><code>VNC_VIA_CMD</code> environment 
-        variable</a><a name="idx0047"></a> above for more details.
+        variable</a><a name="idx0048"></a> above for more details.
     </dd>
 </dl>
 

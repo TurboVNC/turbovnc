@@ -70,10 +70,10 @@
 			{item:SSH client ([[https://www.msys2.org][MSYS2]] or \
 				[[http://cygwin.com][Cygwin]] implementation preferred, since those \
 				implementations work with the \
-				[[#via][''-via'' and ''-tunnel'' options]] in the native Windows \
-				TurboVNC Viewer, but other SSH implementations will work without the \
-				''-via'' and ''-tunnel'' options.  {file: ssh.exe} should be in the \
-				''PATH''.)} \
+				[[#Secure_TurboVNC_Usage][''-via'' and ''-tunnel'' options]] in the \
+				native Windows TurboVNC Viewer, but other SSH implementations will \
+				work without the ''-via'' and ''-tunnel'' options.  {file: ssh.exe} \
+				should be in the ''PATH''.)} \
 			{item:[[http://www.java.com][Oracle Java]] 8 or \
 				[[https://icedtea.classpath.org/wiki/IcedTea-Web][IcedTea-Web]] is \
 				required if using [[#JWS][Java Web Start]].}} \

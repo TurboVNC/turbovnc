@@ -124,7 +124,6 @@ following command:
 	---
 
 ** Launching the TurboVNC Viewer from a Web Browser
-{anchor: Zero_Install}
 
 When a TurboVNC session is created, it automatically starts a miniature web
 server that serves up the Java TurboVNC Viewer as a Java Web Start app.  This
