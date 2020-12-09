@@ -261,7 +261,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
             appClass.getMethod("setDockIconImage", paramTypes);
           setDockIconImage.invoke(obj, LOGO_ICON128.getImage());
         } catch (Exception e) {
-          vlog.debug("Could not set OS X dock icon:");
+          vlog.debug("Could not set dock icon:");
           vlog.debug("  " + e.toString());
         }
         // This allows us to trap Command-Q and shut things down properly.

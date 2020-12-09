@@ -224,9 +224,9 @@ Web Start environment.
 
 	Description :: When running in full-screen mode, the Java TurboVNC Viewer
 	will normally try to take advantage of the full-screen application feature
-	provided by OS X 10.7 and later, if available.  Disabling this property will
-	force the viewer to use its own built-in cross-platform "pseudo-full-screen"
-	feature instead.  This is useful mainly for testing.
+	provided by OS X/macOS 10.7 and later, if available.  Disabling this property
+	will force the viewer to use its own built-in cross-platform
+	"pseudo-full-screen" feature instead.  This is useful mainly for testing.
 
 | Java System Property | {pcode: turbovnc.primary = __0 \| 1__} |
 | Summary | Disable/enable the use of the X11 PRIMARY clipboard selection |

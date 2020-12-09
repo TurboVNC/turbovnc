@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2019 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2020 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -301,7 +301,7 @@ public class Viewport extends JFrame {
 
       canDoLionFS = true;
     } catch (Exception e) {
-      vlog.debug("Could not enable OS X 10.7+ full-screen mode:");
+      vlog.debug("Could not enable OS X/macOS 10.7+ full-screen mode:");
       vlog.debug("  " + e.toString());
     }
   }
@@ -316,7 +316,7 @@ public class Viewport extends JFrame {
         appClass.getMethod("requestToggleFullScreen", Window.class);
       requestToggleFullScreen.invoke(app, this);
     } catch (Exception e) {
-      vlog.debug("Could not toggle OS X 10.7+ full-screen mode:");
+      vlog.debug("Could not toggle OS X/macOS 10.7+ full-screen mode:");
       vlog.debug("  " + e.toString());
     }
   }

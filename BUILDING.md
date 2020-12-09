@@ -60,7 +60,7 @@ Build Requirements
 
 ### Mac
 
-- Xcode 4.1 or later (OS X 10.7.x or later SDK required)
+- Xcode 4.1 or later (OS X/macOS 10.7.x or later SDK required)
 
 - JDK 8 or OpenJDK 8 or later
   * Download the
@@ -290,10 +290,10 @@ Mac
     make dmg
 
 Create Mac package/disk image.  This requires __pkgbuild__ and
-__productbuild__, which are installed by default on OS X 10.7 and later.  This
-command generates a package containing a Java app bundle that relies on Oracle
-Java or OpenJDK.  The DMG built with this command can be installed on OS X 10.7
-and later.
+__productbuild__, which are installed by default on OS X/macOS 10.7 and later.
+This command generates a package containing a Java app bundle that relies on
+Oracle Java or OpenJDK.  The DMG built with this command can be installed on
+OS X/macOS 10.7 and later.
 
 
 Windows

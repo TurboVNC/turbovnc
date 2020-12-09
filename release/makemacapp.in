@@ -7,8 +7,8 @@ SRCDIR=@CMAKE_SOURCE_DIR@
 
 umask 022
 APP="@CMAKE_PROJECT_NAME@ Viewer.app"
-OSX_APP_CERT_NAME="@OSX_APP_CERT_NAME@"
-OSX_INST_CERT_NAME="@OSX_INST_CERT_NAME@"
+MACOS_APP_CERT_NAME="@MACOS_APP_CERT_NAME@"
+MACOS_INST_CERT_NAME="@MACOS_INST_CERT_NAME@"
 
 if [ -d "$APP" ]; then
 	rm -rf "$APP"
@@ -29,8 +29,8 @@ install -m 644 $SRCDIR/release/vncviewer.icns "$APP/Contents/Resources/"
 install -m 755 @TJPEG_JNILIBRARY@ "$APP/Contents/Resources/Native/"
 install -m 755 java/libturbovnchelper.dylib "$APP/Contents/Resources/Native/"
 
-if [ "$OSX_APP_CERT_NAME" != "" ]; then
-	codesign -s "$OSX_APP_CERT_NAME" --timestamp "$APP"
+if [ "$MACOS_APP_CERT_NAME" != "" ]; then
+	codesign -s "$MACOS_APP_CERT_NAME" --timestamp "$APP"
 	codesign -vv "$APP"
 fi
 
