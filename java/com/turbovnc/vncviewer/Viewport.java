@@ -300,7 +300,7 @@ public class Viewport extends JFrame {
 
       canDoLionFS = true;
     } catch (Exception e) {
-      vlog.debug("Could not enable OS X 10.7+ full-screen mode:");
+      vlog.debug("Could not enable OS X/macOS 10.7+ full-screen mode:");
       vlog.debug("  " + e.toString());
     }
   }
@@ -315,7 +315,7 @@ public class Viewport extends JFrame {
         appClass.getMethod("requestToggleFullScreen", Window.class);
       requestToggleFullScreen.invoke(app, this);
     } catch (Exception e) {
-      vlog.debug("Could not toggle OS X 10.7+ full-screen mode:");
+      vlog.debug("Could not toggle OS X/macOS 10.7+ full-screen mode:");
       vlog.debug("  " + e.toString());
     }
   }

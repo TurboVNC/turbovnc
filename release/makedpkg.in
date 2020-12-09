@@ -66,7 +66,7 @@ rm -f $PKGNAME\_$DEBARCH.deb
 TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
 mkdir $TMPDIR/DEBIAN
 
-make install DESTDIR=$TMPDIR
+DESTDIR=$TMPDIR @CMAKE_MAKE_PROGRAM@ install
 
 if [ ! "$DOCDIR" = "/usr/share/doc/$PKGNAME-$VERSION" ]; then
 	safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$PKGNAME-$VERSION $TMPDIR/__tmpdoc

@@ -1,0 +1,131 @@
+name: Build
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  LJT_VERSION: 2.0.6
+  LJT_GPG_KEY: https://sourceforge.net/projects/libjpeg-turbo/files/LJT-GPG-KEY
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set global environment variables
+        run: |
+          echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
+          echo "LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION" >>$GITHUB_ENV
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up build
+        run: |
+          mkdir -p $HOME/src/vnc.nightly
+          docker pull dcommander/buildvnc:$BRANCH
+          git clone --depth=1 https://github.com/turbovnc/buildscripts.git -b $BRANCH $HOME/src/buildscripts
+          mkdir $HOME/libjpeg-turbo-rpm
+          pushd $HOME/libjpeg-turbo-rpm
+          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm
+          popd
+          mkdir $HOME/rpmkeys
+          wget --no-check-certificate "$LJT_GPG_KEY" -O $HOME/rpmkeys/LJT-GPG-KEY
+          wget --no-check-certificate http://www.virtualgl.org/key/VGLPR-GPG-KEY -O $HOME/rpmkeys/VGLPR-GPG-KEY
+      - name: Configure GPG signing
+        if: ${{github.event_name != 'pull_request'}}
+        run: |
+          sudo apt install -y gnupg1
+          printf "${{secrets.GPG_KEY}}" | base64 --decode | gpg1 --batch --import -
+          chmod 600 $HOME/.gnupg/gpg.conf
+          echo "GPG_KEY_NAME=\"${{secrets.GPG_KEY_NAME}}\"" >$HOME/src/buildscripts/gpgsign
+          echo "GPG_KEY_ID=${{secrets.GPG_KEY_ID}}" >>$HOME/src/buildscripts/gpgsign
+          echo "GPG_KEY_PASS=${{secrets.GPG_KEY_PASS}}" >>$HOME/src/buildscripts/gpgsign
+      - name: Cache OpenJDK
+        uses: actions/cache@v2
+        with:
+          path: ~/.openjdk
+          key: openjdk-${{github.job}}-${{env.BRANCH}}
+      - name: Build
+        run: |
+          mkdir -p $HOME/.openjdk
+          docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -v $HOME/.openjdk:/root/.openjdk -t dcommander/buildvnc:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvnc -d /root/src/turbovnc -v"
+          sudo chown -R runner:runner $HOME/src/vnc.nightly
+          mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
+      - name: Configure AWS
+        if: ${{github.event_name != 'pull_request'}}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ${{secrets.AWS_REGION}}
+      - name: Deploy
+        if: ${{github.event_name != 'pull_request'}}
+        run: |
+          aws s3 sync --acl public-read --delete $HOME/src/vnc.nightly/latest/files/ s3://turbovnc-pr/${{env.BRANCH}}/${{github.job}}/
+  linux-non-default-options:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set global environment variables
+        run: |
+          echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
+          echo "LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION" >>$GITHUB_ENV
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up build
+        run: |
+          sudo apt install -y libxi-dev
+          mkdir $HOME/libjpeg-turbo-deb
+          pushd $HOME/libjpeg-turbo-deb
+          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official_$LJT_VERSION\_amd64.deb $LJT_URL/libjpeg-turbo-official32_$LJT_VERSION\_amd64.deb
+          sudo dpkg -i *.deb
+          rm *.deb
+          popd
+          rmdir $HOME/libjpeg-turbo-deb
+      - name: Build
+        run: |
+          mkdir build
+          pushd build
+          cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DTVNC_USEPAM=0 -DTVNC_USETLS=0 -DCMAKE_C_FLAGS="-Wall -Werror -Wformat-truncation=0" ..
+          export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
+          make -j$NUMCPUS --load-average=$NUMCPUS
+          popd
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: Set global environment variables
+        run: |
+          echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
+          echo "LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION" >>$GITHUB_ENV
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up build
+        run: |
+          brew install md5sha1sum
+          mkdir -p $HOME/src/vnc.nightly
+          git clone --depth=1 https://github.com/turbovnc/buildscripts.git -b $BRANCH $HOME/src/buildscripts
+          mkdir $HOME/libjpeg-turbo-dmg
+          pushd $HOME/libjpeg-turbo-dmg
+          wget --no-check-certificate $LJT_URL/libjpeg-turbo-$LJT_VERSION.dmg
+          hdid libjpeg-turbo-$LJT_VERSION.dmg
+          sudo installer -pkg /Volumes/libjpeg-turbo-$LJT_VERSION/libjpeg-turbo.pkg -target /
+          hdiutil detach /Volumes/libjpeg-turbo-$LJT_VERSION
+          rm *.dmg
+          popd
+          rmdir $HOME/libjpeg-turbo-dmg
+      - name: Cache OpenJDK
+        uses: actions/cache@v2
+        with:
+          path: ~/.openjdk
+          key: openjdk-${{github.job}}-${{env.BRANCH}}
+      - name: Build
+        run: |
+          $HOME/src/buildscripts/buildvnc -d $GITHUB_WORKSPACE -v
+          mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
+      - name: Configure AWS
+        if: ${{github.event_name != 'pull_request'}}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ${{secrets.AWS_REGION}}
+      - name: Deploy
+        if: ${{github.event_name != 'pull_request'}}
+        run: |
+          aws s3 sync --acl public-read --delete $HOME/src/vnc.nightly/latest/files/ s3://turbovnc-pr/${{env.BRANCH}}/${{github.job}}/

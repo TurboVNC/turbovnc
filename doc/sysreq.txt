@@ -48,7 +48,7 @@
 	| Any 64-bit Intel-based Mac \
 	|
 | O/S \
-	| OS X 10.10 "Yosemite" or later \
+	| OS X/macOS 10.10 "Yosemite" or later \
 	|
 #OPT: hiCol=first
 

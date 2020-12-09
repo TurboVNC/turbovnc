@@ -613,8 +613,8 @@ extension will use direct rendering, which improves performance and
 compatibility.
 
 4. Java 6 and earlier is no longer supported with the Java/Mac/Un*x TurboVNC
-Viewer.  This increases the Mac system requirements to OS X 10.7 "Lion" or
-later.  Apple's obsolete Java for OS X is no longer supported, and the
+Viewer.  This increases the Mac system requirements to OS X/macOS 10.7 "Lion"
+or later.  Apple's obsolete Java for OS X is no longer supported, and the
 standalone "AppleJava" version of the TurboVNC Viewer is no longer provided.
 Java SE 6 ceased receiving public updates in 2013 and, as of this writing,
 critical bug fixes and security fixes for that platform are only available with
@@ -733,8 +733,9 @@ encoded with one of the Tight + JPEG encoding methods, by approximately 20-40%.
 17. The Mac/Java TurboVNC Viewer now includes remote drawing tablet support.
 This feature is implemented using a TurboVNC Helper JNI library, which is
 similar to the TurboVNC Helper included with the Un*x TurboVNC Viewer.  This
-library connects the built-in drawing tablet drivers for OS X with the existing
-remote X Input feature in the Java TurboVNC Viewer and TurboVNC Server.
+library connects the built-in drawing tablet drivers for OS X/macOS with the
+existing remote X Input feature in the Java TurboVNC Viewer and TurboVNC
+Server.
 
 18. Fixed an issue in the Un*x/X11 TurboVNC Viewer and the Windows/Java
 TurboVNC Viewer whereby keyboard grabbing was always initially disabled in the

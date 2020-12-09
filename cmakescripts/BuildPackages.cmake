@@ -119,9 +119,9 @@ endif() # WIN32
 
 if(APPLE AND TVNC_BUILDVIEWER AND TVNC_BUILDHELPER)
 
-set(OSX_APP_CERT_NAME "" CACHE STRING
+set(MACOS_APP_CERT_NAME "" CACHE STRING
 	"Name of the Developer ID Application certificate (in the macOS keychain) that should be used to sign the TurboVNC Viewer app & DMG.  Leave this blank to generate an unsigned app/DMG.")
-set(OSX_INST_CERT_NAME "" CACHE STRING
+set(MACOS_INST_CERT_NAME "" CACHE STRING
 	"Name of the Developer ID Installer certificate (in the macOS keychain) that should be used to sign the TurboVNC installer package.  Leave this blank to generate an unsigned package.")
 
 string(REGEX REPLACE "/" ":" CMAKE_INSTALL_MACPREFIX ${CMAKE_INSTALL_PREFIX})
