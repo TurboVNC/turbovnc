@@ -101,6 +101,8 @@ of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
     cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
     make
 
+Replace `make` with `ninja` and `Unix Makefiles` with `Ninja` if using Ninja.
+
 
 ### Visual C++ (Command Line)
 
@@ -219,10 +221,10 @@ Installing TurboVNC
 ===================
 
 You can use the build system to install TurboVNC (as opposed to creating an
-installer package.)  To do this, run `make install` or `nmake install` (or
-build the "install" target in the Visual Studio IDE.)  Running `make uninstall`
-or `nmake uninstall` (or building the "uninstall" target in the Visual Studio
-IDE) will uninstall TurboVNC.
+installer package.)  To do this, run `make install` or `ninja install` or
+`nmake install` (or build the "install" target in the Visual Studio IDE.)
+Running `make uninstall` or `ninja uninstall` or `nmake uninstall` (or building
+the "uninstall" target in the Visual Studio IDE) will uninstall TurboVNC.
 
 The `CMAKE_INSTALL_PREFIX` CMake variable can be modified in order to install
 TurboVNC into a directory of your choosing.  If you don't specify
@@ -269,7 +271,7 @@ Creating Distribution Packages
 ==============================
 
 The following commands can be used to create various types of distribution
-packages:
+packages (replace `make` with `ninja` if using Ninja):
 
 
 Linux

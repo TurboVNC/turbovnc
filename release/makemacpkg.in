@@ -66,7 +66,7 @@ TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
 PKGROOT=$TMPDIR/pkg/Package_Root
 mkdir -p $PKGROOT
 
-make install DESTDIR=$PKGROOT
+DESTDIR=$PKGROOT @CMAKE_MAKE_PROGRAM@ install
 if [ -d $PKGROOT$BINDIR ]; then
 	rm $PKGROOT$BINDIR/*
 	rmdir $PKGROOT$BINDIR
