@@ -473,8 +473,15 @@ __glXGetDrawable(__GLXcontext * glxc, GLXDrawable drawId, ClientPtr client,
     __GLXscreen *pGlxScreen;
     int rc;
 
-    if (validGlxDrawable(client, drawId, GLX_DRAWABLE_ANY,
-                         DixWriteAccess, &pGlxDraw, &rc)) {
+    rc = dixLookupResourceByType((void **)&pGlxDraw, drawId,
+                                 __glXDrawableRes, client, DixWriteAccess);
+    if (rc == Success &&
+        /* If pGlxDraw->drawId == drawId, drawId is a valid GLX drawable.
+         * Otherwise, if pGlxDraw->type == GLX_DRAWABLE_WINDOW, drawId is
+         * an X window, but the client has already created a GLXWindow
+         * associated with it, so we don't want to create another one. */
+        (pGlxDraw->drawId == drawId ||
+         pGlxDraw->type == GLX_DRAWABLE_WINDOW)) {
         if (glxc != NULL &&
             glxc->config != NULL &&
             glxc->config != pGlxDraw->config) {
