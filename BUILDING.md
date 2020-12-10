@@ -8,7 +8,7 @@ Build Requirements
 
 ### All Systems
 
-- [CMake](http://www.cmake.org) v2.8.11 or later
+- [CMake](http://www.cmake.org) v2.8.12 or later
 
 - libjpeg-turbo SDK (v1.4 or later required if building the Java viewer.)
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"

@@ -2,7 +2,7 @@
 # SETUP
 ###############################################################################
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 # Shut up CMake 3.1 and later
 if(POLICY CMP0053)
 	cmake_policy(SET CMP0053 NEW)
