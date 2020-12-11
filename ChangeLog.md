@@ -181,6 +181,10 @@ for which those connections are blocked.  (This timeout period automatically
 doubles with each subsequent consecutive VNC password or OTP authentication
 failure.)
 
+8. The `vncserver` script now invokes `/usr/bin/env perl` rather than
+`/usr/bin/perl`, for compatibility with FreeBSD and other operating systems
+that install Perl into a directory other than **/usr/bin**.
+
 
 2.2.5
 =====
