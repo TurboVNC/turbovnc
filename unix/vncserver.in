@@ -217,9 +217,15 @@ foreach $_registrydir (@registrydirs) {
 
 &Kill() if ($opt{'-kill'});
 
-&List(1) if ($opt{'-list'});
+if ($opt{'-list'}) {
+  &List(1);
+  exit;
+}
 
-&List(0) if ($opt{'-sessionlist'});
+if ($opt{'-sessionlist'}) {
+  &List(0);
+  exit;
+}
 
 if ($opt{'-sessionstart'}) {
   $opt{'-quiet'} = 1;
@@ -891,7 +897,6 @@ sub List
   if (!$verbose) {
     print "\n";
   }
-  exit;
 }
 
 
