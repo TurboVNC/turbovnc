@@ -636,7 +636,7 @@ Server:
 corresponding Xvnc command-line options (`-mt` and `-nthreads`), which makes it
 easy to enable multithreaded Tight encoding in TurboVNC Server instances
 spawned by init.d/systemd.
-    - The **turbovncserver.conf** file, which is parsed by the vncserver
+    - The **turbovncserver.conf** file, which is parsed by the `vncserver`
 script, now includes two new variables (`$multiThread` and `$numThreads`) that
 can be used to configure multithreading on a system-wide basis or for all
 TurboVNC sessions started under a particular user account.
