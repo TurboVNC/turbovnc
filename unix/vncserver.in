@@ -145,12 +145,6 @@ if ($fontPath) {
   }
 }
 
-if ($os eq "SunOS") {
-  $defFontPath = "inet/:7100";
-} else {
-  $defFontPath = "unix/:7100";
-}
-
 if ($os eq "Darwin") {
   $fontPath = "$fontPath,/Library/Fonts,/System/Library/Fonts";
 }
@@ -472,16 +466,6 @@ system("$cmd & echo \$! >$pidFile");
 # Give Xvnc a chance to start up
 
 sleep(1);
-unless (kill 0, `cat $pidFile`) {
-  warn "\nWARNING: The first attempt to start Xvnc failed, possibly because the vncserver\n";
-  warn "script was not able to figure out an appropriate X11 font path for this system\n";
-  warn "or because the font path you specified with the -fp argument was not valid.\n";
-  warn "Attempting to restart Xvnc using the X Font Server (xfs) ...\n";
-  $cmd =~ s@-fp [^ ]+@@;
-  $cmd .= " -fp $defFontPath" if ($defFontPath);
-  system("$cmd & echo \$! >$pidFile");
-  sleep(1);
-}
 unless (kill 0, `cat $pidFile`) {
   warn "Could not start Xvnc.\n\n";
   open(LOG, "<$desktopLog");
