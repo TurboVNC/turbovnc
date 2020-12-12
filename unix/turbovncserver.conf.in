@@ -15,11 +15,10 @@
 ##                    (passed to Xvnc in the -securitytypes argument)
 ##  $generateOTP -- 1 to generate an initial one-time password.  (OTP
 ##                  authentication must be enabled and permitted)
-##  $wm          -- the window manager startup script to use (for instance,
-##                  "mate-session" or "2d")
-##  $useVGL      -- 1 to run the window manager startup script using VirtualGL
+##  $wm          -- the window manager to use (for instance, "mate" or "2d")
+##  $useVGL      -- 1 to run the window manager using VirtualGL
 ##  $autokill    -- 1 to automatically kill the TurboVNC session when the
-##                  startup script finishes or 0 to leave it running
+##                  X startup script finishes or 0 to leave it running
 ##  $noVNC       -- directory containing noVNC
 ##  $passwdFile  -- path to VNC password file to use with VNC Password
 ##                  authentication
@@ -59,9 +58,7 @@
 ## You might wish to create the TurboVNC user directories under /tmp, to
 ## ensure that VNC passwords are always kept on the local filesystem.  To do
 ## that, uncomment the line below.  Note that in this case, Xvnc will search
-## for the .Xauthority file in this same directory by default, and the
-## vncserver script will look for the per-user xstartup.turbovnc script at
-## $ENV{HOME}/.turbovncstartup instead of $vncUserDir/xstartup.turbovnc.
+## for the .Xauthority file in this same directory by default.
 #
 # $vncUserDir = "/tmp/$ENV{USER}-vnc";
 

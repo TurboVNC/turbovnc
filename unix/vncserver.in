@@ -82,14 +82,10 @@ $x509KeyFile = "$vncUserDir/x509_private.pem" if (!$x509KeyFile);
 
 $xauthorityFile = "$ENV{XAUTHORITY}";
 
-$vncUserDirUnderTmp = ($vncUserDir =~ m|^/tmp/.+|) ? 1 : 0;
 if (!$xstartup) {
-  $xstartup = ($vncUserDirUnderTmp) ?
-    "$ENV{HOME}/.turbovncstartup" : "$vncUserDir/xstartup.turbovnc";
-  if (! -x $xstartup) {
-    $xstartup = $exedir."xstartup.turbovnc";
-  }
+  $xstartup = $exedir."xstartup.turbovnc";
 }
+$vncUserDirUnderTmp = ($vncUserDir =~ m|^/tmp/.+|) ? 1 : 0;
 unless ($xauthorityFile) {
   if ($vncUserDirUnderTmp) {
     $xauthorityFile = "$vncUserDir/.Xauthority";

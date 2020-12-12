@@ -215,7 +215,7 @@ called "GNOME Fallback", "GNOME Flashback", or "GNOME Classic", which will
 automatically be used if it is installed and the ''TVNC_WM'' environment
 variable is set to ''2d''.  For other systems that lack a 2D window manager, it
 is recommended that you install MATE.  Refer to
-[[http://www.turbovnc.org/Documentation/Compatibility22][this report]] for an
+[[http://www.turbovnc.org/Documentation/Compatibility30][this report]] for an
 up-to-date list of window managers that have been tested with this version of
 the TurboVNC Server, how to configure the TurboVNC Server to use those window
 managers, and a list of known compatibility issues.

@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "September 2019" "" "TurboVNC"
+.TH Xvnc 1 "December 2020" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -232,7 +232,7 @@ corresponding virtual device in the TurboVNC session, and other events are
 ignored.)  This mode is less generic than Remote X Input Mode, and it probably
 will not work with devices other than tablets (perhaps not even with non-Wacom
 tablets.)  Virtual Tablet mode is useful when running specific applications
-from xstartup.turbovnc, rather than a window manager.  Because applications
+from the X startup script, rather than a window manager.  Because applications
 usually check for the presence of X Input devices at startup, by the time the
 first viewer connects and requests that the client-side devices be cloned, it
 is too late.

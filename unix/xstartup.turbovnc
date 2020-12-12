@@ -7,69 +7,98 @@ XDG_SESSION_TYPE=x11;  export XDG_SESSION_TYPE
 OS=`uname -s`
 
 # Emulate GDM
-USESTARTUP=0
-if [ -x /usr/bin/gnome-session ]; then
-  # Use Unity 2D on Ubuntu 12 if no WM is specified.  Unity 3D 5.20.x doesn't
-  # even pretend to work properly with our X server.
-  if [ -f /usr/share/gnome-session/sessions/ubuntu-2d.session -a -z "$TVNC_WM" ]; then
-    TVNC_WM=2d
-  fi
-  case "$TVNC_WM" in
-    2d)
-      # Ubuntu 12: ubuntu-2d
-      # Ubuntu 14: gnome-fallback
-      for SESSION in "gnome-fallback" "ubuntu-2d" "2d-gnome"; do
-        if [ -f /usr/share/gnome-session/sessions/$SESSION.session ]; then
+
+# Use Unity 2D on Ubuntu 12 if no WM is specified.  Unity 3D 5.20.x doesn't
+# even pretend to work properly with our X server.
+if [ -f /usr/share/gnome-session/sessions/ubuntu-2d.session -a -z "$TVNC_WM" ]; then
+  TVNC_WM=2d
+fi
+XSESSIONSDIR=
+if [ -d /usr/share/xsessions ]; then
+  XSESSIONSDIR=/usr/share/xsessions
+elif [ -d /usr/local/share/xsessions ]; then
+  XSESSIONSDIR=/usr/local/share/xsessions
+fi
+GREP=grep
+if [ -x /usr/bin/ggrep ]; then
+  GREP=ggrep
+fi
+SED=sed
+if [ -x /usr/bin/gsed ]; then
+  SED=gsed
+fi
+NOXSESSION=0
+case "$TVNC_WM" in
+  2d | 2d:noxsession)
+    # TODO: Automate this somehow
+    if [ "$TVNC_WM" = "2d:noxsession" ]; then
+      NOXSESSION=1
+      TVNC_WM=`echo $TVNC_WM | $SED -E 's/:noxsession$//g'`
+    fi
+    # RHEL 7, Fedora: gnome-classic
+    # Ubuntu 12: ubuntu-2d
+    # Ubuntu 14: gnome-fallback
+    # Ubuntu 16+: gnome-flashback-metacity
+    for SESSION in "gnome-classic" "gnome-fallback" "ubuntu-2d" "2d-gnome" \
+      "gnome-flashback-metacity"; do
+      if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
+        DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
+      fi
+    done
+    unset TVNC_WM
+    ;;
+  *)
+    # TODO: Automate this somehow
+    case "$TVNC_WM" in
+      *:noxsession)
+        NOXSESSION=1
+        TVNC_WM=`echo $TVNC_WM | $SED -E 's/:noxsession$//g'`
+        ;;
+      *)
+        ;;
+    esac
+    if [ "$TVNC_WM" = "" ]; then
+      for SESSION in "gnome" "ubuntu"; do
+        if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
           DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
-          XDG_CURRENT_DESKTOP=$SESSION;  export XDG_CURRENT_DESKTOP
         fi
       done
-      # RHEL 7, Fedora
-      if [ -f /usr/share/gnome-session/sessions/gnome-classic.session ]; then
-        DESKTOP_SESSION=gnome-classic;  export DESKTOP_SESSION
-        GNOME_SHELL_SESSION_MODE=classic;  export GNOME_SHELL_SESSION_MODE
-        XDG_CURRENT_DESKTOP="GNOME-Classic:GNOME";  export XDG_CURRENT_DESKTOP
-        USESTARTUP=1
+    else
+      # For backward compatibility with TurboVNC 2.2.x, we allow a window
+      # manager's startup script (e.g. mate-session, gnome-session) to be
+      # specified using -wm / $wm, but if there is a matching session desktop
+      # file for it, we use that instead.
+      SESSION=`echo $TVNC_WM | $SED -E 's/^.*\/|-session$//g'`
+      if [ "$XSESSIONSDIR" != "" -a -f "$XSESSIONSDIR/$SESSION.desktop" ]; then
+        DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
+        unset TVNC_WM
       fi
-      # Ubuntu 16+
-      if [ -f /usr/share/gnome-session/sessions/gnome-flashback-metacity.session ]; then
-        DESKTOP_SESSION=gnome-flashback-metacity;  export DESKTOP_SESSION
-        grep -q "unity" /usr/share/gnome-session/sessions/gnome-flashback-metacity.session && {
-          XDG_CURRENT_DESKTOP="GNOME-Flashback:Unity"
-          export XDG_CURRENT_DESKTOP
-        } || {
-          XDG_CURRENT_DESKTOP="GNOME-Flashback:GNOME"
-          export XDG_CURRENT_DESKTOP
-          GNOME_SHELL_SESSION_MODE=ubuntu;  export GNOME_SHELL_SESSION_MODE
-          USESTARTUP=1
-        }
+      unset SESSION
+    fi
+    ;;
+esac
+XSESSION=
+if [ "$DESKTOP_SESSION" != "" ]; then
+  GDMSESSION=$DESKTOP_SESSION;  export GDMSESSION
+  XDG_SESSION_DESKTOP=$DESKTOP_SESSION;  export XDG_SESSION_DESKTOP
+  echo "xstartup.turbovnc: Using '$DESKTOP_SESSION' window manager in"
+  echo "xstartup.turbovnc:   $XSESSIONSDIR/$DESKTOP_SESSION.desktop"
+  if $GREP -qE "^Exec\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop; then
+    TVNC_WM=`$GREP -E "^Exec\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop | $SED -E 's/^[^=]+=[[:space:]]*//g'`
+    if [ "$NOXSESSION" != "1" ]; then
+      if [ -x /etc/X11/xinit/Xsession ]; then
+        XSESSION=/etc/X11/xinit/Xsession
+      elif [ -x /etc/X11/Xsession ]; then
+        XSESSION=/etc/X11/Xsession
       fi
-      unset TVNC_WM
-      ;;
-    *)
-      # This is necessary to make Unity work on Ubuntu 16, and on Ubuntu 14, it
-      # ensures that the proper compiz profile is set up.  Otherwise, if you
-      # accidentally launch Unity in a TurboVNC session that lacks OpenGL
-      # support, compiz will automatically disable its OpenGL plugin, requiring
-      # you to reset the compiz plugin state before Unity will work again.
-      if [ -f /usr/share/gnome-session/sessions/ubuntu.session -a "$TVNC_WM" = "" ]; then
-        DESKTOP_SESSION=ubuntu;  export DESKTOP_SESSION
-        grep -qE "DesktopName\s*=\s*Unity" /usr/share/gnome-session/sessions/ubuntu.session && {
-          XDG_CURRENT_DESKTOP=Unity;  export XDG_CURRENT_DESKTOP
-        } || {
-          XDG_CURRENT_DESKTOP=ubuntu:GNOME;  export XDG_CURRENT_DESKTOP
-          GNOME_SHELL_SESSION_MODE=ubuntu;  export GNOME_SHELL_SESSION_MODE
-          USESTARTUP=1
-        }
-      fi
-      ;;
-  esac
-  if [ "$DESKTOP_SESSION" != "" ]; then
-    GDMSESSION=$DESKTOP_SESSION;  export GDMSESSION
-    SESSIONTYPE=gnome-session;  export SESSIONTYPE
-    STARTUP="/usr/bin/gnome-session --session=$DESKTOP_SESSION"
-    export STARTUP
+    fi
   fi
+  for KEY in DesktopNames X-LightDM-DesktopName; do
+    if $GREP -qE "^$KEY\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop; then
+      XDG_CURRENT_DESKTOP=`$GREP -E "^$KEY\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop | $SED -E 's/(^[^=]+=[[:space:]]*|;$)//g' | $SED -E 's/;/:/g'`
+      export XDG_CURRENT_DESKTOP
+    fi
+  done
 fi
 
 if [ "$TVNC_VGL" = "1" ]; then
@@ -81,9 +110,6 @@ if [ "$TVNC_VGL" = "1" ]; then
   fi
 fi
 
-if [ "$STARTUP" != "" -a "$USESTARTUP" = "1" ]; then
-  exec $TVNC_VGLRUN $STARTUP
-fi
 if [ "$TVNC_WM" = "" ]; then
   # Typical system-wide WM startup script on Linux and Solaris 11
   if [ -f /etc/X11/xinit/xinitrc ]; then
@@ -97,26 +123,24 @@ if [ "$TVNC_WM" = "" ]; then
   if [ $OS = 'SunOS' -a -f $HOME/.dt/sessions/lastsession ]; then
     TVNC_WM=`cat $HOME/.dt/sessions/lastsession`
   fi
-else
-  TVNC_WM=`which "$TVNC_WM" 2>/dev/null`
 fi
 if [ "$TVNC_WM" != "" ]; then
-  if [ -x "$TVNC_WM" ]; then
-    exec $TVNC_SSHAGENT $TVNC_VGLRUN "$TVNC_WM"
+  if [ "$XSESSION" != "" ]; then
+    echo xstartup.turbovnc: Executing $TVNC_SSHAGENT $TVNC_VGLRUN $XSESSION \"$TVNC_WM\"
+    exec $TVNC_SSHAGENT $TVNC_VGLRUN $XSESSION "$TVNC_WM"
   else
-    exec $TVNC_SSHAGENT $TVNC_VGLRUN sh "$TVNC_WM"
+    echo xstartup.turbovnc: Executing $TVNC_SSHAGENT $TVNC_VGLRUN $TVNC_WM
+    exec $TVNC_SSHAGENT $TVNC_VGLRUN $TVNC_WM
   fi
 else
-  echo "No window manager startup script found.  Use the TVNC_WM environment"
-  echo "variable to specify the path to a window manager startup script or"
-  echo "executable.  Falling back to TWM."
+  echo "xstartup.turbovnc: No window manager specified or found.  Falling back to TWM."
   which twm >/dev/null && {
     if [ -f $HOME/.Xresources ]; then xrdb $HOME/.Xresources; fi
     xsetroot -solid grey
     xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
     twm
   } || {
-    echo "TWM not found.  I give up."
+    echo "xstartup.turbovnc: TWM not found.  I give up."
     exit 1
   }
 fi

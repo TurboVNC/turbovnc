@@ -79,18 +79,26 @@ from `ssh-agent` or Pageant.  Note that the SSH client does not understand the
 its behavior should be the same as that of OpenSSH.
 
 12. The TurboVNC Server now installs the default `xstartup.turbovnc` script
-into the same directory as `vncserver`, and `vncserver` uses that default
-script if the per-user `xstartup.turbovnc` script (usually
-`~/.vnc/xstartup.turbovnc`) doesn't exist.  This facilitates upgrading
-`xstartup.turbovnc` on a system-wide basis when the TurboVNC Server is
-upgraded.  The per-user `xstartup.turbovnc` script will no longer automatically
-be created if it doesn't exist.
+into the same directory as `vncserver`, and `vncserver` always uses that
+default script rather than a per-user `xstartup.turbovnc` script.  This
+facilitates upgrading `xstartup.turbovnc` on a system-wide basis when the
+TurboVNC Server is upgraded.  A per-user X startup script can still be used by
+specifying it with the `-xstartup` command-line option.
 
-13. The `$autoLosslessRefresh`, `$pamSession`, `$multiThread`, and
+13. The default X startup script (`xstartup.turbovnc`) has been streamlined to
+improve cross-platform compatibility.  It now attempts to match the value of
+the `vncserver -wm` command-line option or the `$wm` **turbovncserver.conf**
+variable with a session desktop file under **/usr/share/xsessions** (or
+**/usr/local/share/xsessions** on *BSD systems.)  If a matching session desktop
+file exists, then `xstartup.turbovnc` populates the appropriate XDG environment
+variables from the entries in that file and then executes the window manager
+startup program/script specified in the file.
+
+14. The `$autoLosslessRefresh`, `$pamSession`, `$multiThread`, and
 `$numThreads` **turbovncserver.conf** variables are now deprecated, since
 `$serverArgs` can be used to accomplish the same thing.
 
-14. The TurboVNC Server can no longer be built using GnuTLS.  Supporting GnuTLS
+15. The TurboVNC Server can no longer be built using GnuTLS.  Supporting GnuTLS
 was a stopgap measure intended for power users who needed access to encryption
 features that, at the time, either OpenSSL or TurboVNC's OpenSSL wrapper did
 not provide.  However, that feature gap has since been closed, and given the
@@ -99,10 +107,10 @@ attention from the TurboVNC developers and user community, there is no
 compelling reason to use the GnuTLS wrapper anymore.  The 2.2.x version of the
 TurboVNC Server will continue to support GnuTLS on a break/fix basis.
 
-15. The TurboVNC Server is now based on xorg-xserver 1.20.8, which fixes
+16. The TurboVNC Server is now based on xorg-xserver 1.20.8, which fixes
 several minor X server bugs.
 
-16. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
+17. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
 longer supports indirect rendering.  Indirect rendering is limited to the
 OpenGL 1.4 API, and it performed sluggishly in the TurboVNC Server due to the
 fact that X servers are single-threaded.  (On some platforms, the TurboVNC
@@ -117,12 +125,12 @@ Indirect rendering-- and the TurboVNC-specific X server modifications that
 allowed it to perform as well as possible-- will continue to be supported in
 TurboVNC 2.2.x on a break/fix basis.
 
-17. The TurboVNC Viewer's built-in SSH client now displays the SSH server's
+18. The TurboVNC Viewer's built-in SSH client now displays the SSH server's
 banner message on the command line by default.  Set the `turbovnc.sshbannerdlg`
 Java system property to `1` to display the banner message in a dialog box
 instead, thus restoring the default behavior of TurboVNC 2.2.x.
 
-18. The TurboVNC Server now supports the WebSocket protocol (more specifically,
+19. The TurboVNC Server now supports the WebSocket protocol (more specifically,
 RFC 6455, AKA HyBi v13.)  The server will automatically detect WebSocket
 connections on the RFB port (5900 + {display number}) and tunnel the RFB
 protocol through the WebSocket protocol.  This allows browser-based VNC
@@ -130,7 +138,7 @@ viewers, such as noVNC, to connect to the TurboVNC Server without using a
 proxy.  TLS encryption (WSS) is supported if an X.509 certificate is specified
 using the `-x509cert` and `-x509key` arguments to Xvnc.
 
-19. The TurboVNC Server now maintains a separate count of VNC password/OTP
+20. The TurboVNC Server now maintains a separate count of VNC password/OTP
 authentication failures for each client IP address and temporarily blocks
 connections only from IP addresses that have exceeded the maximum number of
 consecutive VNC password or OTP authentication failures.
