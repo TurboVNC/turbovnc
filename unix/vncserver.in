@@ -83,7 +83,7 @@ $x509KeyFile = "$vncUserDir/x509_private.pem" if (!$x509KeyFile);
 $xauthorityFile = "$ENV{XAUTHORITY}";
 
 $vncUserDirUnderTmp = ($vncUserDir =~ m|^/tmp/.+|) ? 1 : 0;
-if (! $xstartup) {
+if (!$xstartup) {
   $xstartup = ($vncUserDirUnderTmp) ?
     "$ENV{HOME}/.turbovncstartup" : "$vncUserDir/xstartup.turbovnc";
   if (! -x $xstartup) {
@@ -343,18 +343,18 @@ unless (-e $vncUserDir) {
   }
 }
 ($z, $z, $mode) = lstat("$vncUserDir");
-if (!-d _ || !-o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
+if (! -d _ || ! -o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
   die "$prog: Wrong type or access mode of $vncUserDir.\n";
 }
 
 # Make sure the user has a password.
 if ($authTypeVNC && "$passwdFile" eq "$vncUserDir/passwd") {
   ($z, $z, $mode) = lstat("$vncUserDir/passwd");
-  if (-e _ && (!-f _ || !-o _ || ($mode & 077) != 0)) {
+  if (-e _ && (! -f _ || ! -o _ || ($mode & 077) != 0)) {
     die "$prog: Wrong type, ownership, or permissions on\n           $vncUserDir/passwd.\n";
   }
 
-  if (!-e _) {
+  if (! -e _) {
     if ($opt{'-quiet'}) {
       warn "$vncUserDir/passwd does not exist.\nRun ".$exedir."vncpasswd to create passwd file.\n";
       exit 1;
@@ -490,7 +490,7 @@ unless (kill 0, `cat $pidFile`) {
   die "\n";
 }
 
-if (! $opt{'-sessionstart'}) {
+if (!$opt{'-sessionstart'}) {
   warn "\nDesktop '$desktopName' started on display $host:$displayNumber\n\n";
 }
 
@@ -558,7 +558,7 @@ if ($opt{'-sessionstart'}) {
   &List(0, $displayNumber);
 }
 
-if (! $skipxstartup) {
+if (!$skipxstartup) {
   # Run the X startup script.
 
   warn "Starting applications specified in $xstartup\n";
@@ -583,7 +583,7 @@ if (-e "/tmp/.X11-unix/X$displayNumber") {
 $ENV{VNCDESKTOP} = $desktopName;
 $ENV{VGL_COMPRESS} = "0";
 
-if (! $skipxstartup) {
+if (!$skipxstartup) {
   if ($opt{'-fg'}) {
     system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
     if (kill 0, `cat $pidFile` || kill 0, `cat $noVNCPIDFile`) {
@@ -688,13 +688,13 @@ sub CheckDisplayNumber
   }
 
   if (-e "/tmp/.X$n-lock") {
-    warn "\nWarning: $host:$n is taken because of /tmp/.X$n-lock\n";
+    warn "\nWARNING: $host:$n is taken because of /tmp/.X$n-lock\n";
     warn "Remove this file if there is no X server $host:$n\n";
     return 0;
   }
 
   if (-e "/tmp/.X11-unix/X$n") {
-    warn "\nWarning: $host:$n is taken because of /tmp/.X11-unix/X$n\n";
+    warn "\nWARNING: $host:$n is taken because of /tmp/.X11-unix/X$n\n";
     warn "Remove this file if there is no X server $host:$n\n";
     return 0;
   }
@@ -863,7 +863,7 @@ sub List
   my @sessions = ();
   foreach my $file (@filelist) {
     if ($file =~ /$host:(\d+)$\.pid/ && !&CheckDisplayNumber($1) &&
-        ($1 == $displayNumber || ! $displayNumber)) {
+        ($1 == $displayNumber || !$displayNumber)) {
       my @session = ();
       push(@session, $1);
       chomp($pid = `cat $vncUserDir/$file`);
@@ -877,7 +877,7 @@ sub List
       push(@sessions, \@session);
     }
   }
-  if (! $verbose) {
+  if (!$verbose) {
     print scalar(@sessions)."\t3";
   }
   if (scalar(@sessions)) {
