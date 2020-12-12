@@ -3,19 +3,23 @@
 
 ### Significant changes relative to 2.2.6:
 
-1. Since Java 11 introduced the ability to create a custom Java Runtime
-Environment (JRE) with only the modules that the TurboVNC Viewer needs, it has
-become possible to package the Windows/Java TurboVNC Viewer in such a way that
-it does not require a separate installation of Java.  Thus, the native Windows
-TurboVNC Viewer has been retired and replaced with the Java TurboVNC Viewer,
-which means that the Java TurboVNC Viewer is now the only TurboVNC Viewer.  The
-native Windows viewer will continue to be maintained in TurboVNC 2.2.x on a
-break/fix basis only.  The native Windows viewer, owing to its use of raw Win32
-GUI code rather than a modern GUI framework, has become difficult to maintain
-and even more difficult to extend.  Meanwhile, the Java viewer provides similar
-levels of performance and more features, including some features (TLS
-encryption and SSH tunneling, most notably) that would have been difficult to
-implement in the native viewer.
+1. A custom JRE, based on OpenJDK and containing only the modules that the
+TurboVNC Viewer needs, can now optionally be included in 32-bit Windows and
+64-bit Linux, Mac, and Windows TurboVNC installations and packages by setting
+the `TVNC_INCLUDEJRE` CMake variable to `1`.  When including a custom JRE,
+OpenJDK 11 or later must be used.
+
+    Since it is now possible to package the Windows/Java TurboVNC Viewer in
+such a way that it does not require a separate installation of Java, the native
+Windows TurboVNC Viewer has been retired and replaced with the Java TurboVNC
+Viewer, which means that the Java TurboVNC Viewer is now the only TurboVNC
+Viewer.  The native Windows viewer will continue to be maintained in TurboVNC
+2.2.x on a break/fix basis only.  The native Windows viewer, owing to its use
+of raw Win32 GUI code rather than a modern GUI framework, has become difficult
+to maintain and even more difficult to extend.  Meanwhile, the Java viewer
+provides similar levels of performance and more features, including some
+features (TLS encryption and SSH tunneling, most notably) that would have been
+difficult to implement in the native viewer.
 
 2. Added a screenshot feature to the TurboVNC Viewer that allows an image of
 the remote desktop to be saved to the client machine.
@@ -43,54 +47,50 @@ an external SSH client because of the need to leave the SSH session open and
 reuse it to run multiple commands), so it is affected by the `SSHConfig`,
 `SSHKey`, `SSHKeyFile`, `SSHKeyPass`, and `SSHPort` parameters.
 
-6. A custom JRE based on OpenJDK can now optionally be included in 32-bit
-Windows and 64-bit Linux, Mac, and Windows TurboVNC installations and packages
-by setting the `TVNC_INCLUDEJRE` CMake variable to `1`.  When including a
-custom JRE, OpenJDK 11 or later must be used.
-
-7. The zero-install Java Web Start feature and built-in HTTP server in the
+6. The zero-install Java Web Start feature and built-in HTTP server in the
 TurboVNC Server have been removed.  This reflects the fact that Java Web Start
 is now a legacy technology.  JWS is no longer provided in Java 11 and later, so
 once Java 8 stops receiving public updates, the ability to deploy the TurboVNC
 Viewer using JWS will be limited.  These features will continue to be supported
 in TurboVNC 2.2.x on a break/fix basis.
 
-8. MinGW can now be used instead of Visual C++ when building the TurboVNC
+7. MinGW can now be used instead of Visual C++ when building the TurboVNC
 Viewer (more specifically, the TurboVNC Helper library) for Windows.
 
-9. The TurboVNC Viewer authentication dialog will now indicate whether the
+8. The TurboVNC Viewer authentication dialog will now indicate whether the
 connection is encrypted, unencrypted, or redundantly encrypted.
 
-10. The vncserver script can now optionally start a simple web server that
+9. The `vncserver` script can now optionally start a simple web server that
 serves up noVNC (an HTML 5/JavaScript VNC viewer) along with each TurboVNC
-session, using a new command-line option (`-novnc`) or turbovncserver.conf
-variable (`$noVNC`) to specify the noVNC installation directory.  The vncserver
-script also creates a unique PID file for the noVNC web server process and
-kills the process when the TurboVNC session is killed.
+session, using a new command-line option (`-novnc`) or **turbovncserver.conf**
+variable (`$noVNC`) to specify the noVNC installation directory.  The
+`vncserver` script also creates a unique PID file for the noVNC web server
+process and kills that process when the TurboVNC session is killed.
 
-11. The vncserver script now enables the `-autokill` option by default, which
+10. The `vncserver` script now enables the `-autokill` option by default, which
 creates a more intuitive interface for new TurboVNC users.  A new command-line
-option (`-noautokill`), or the existing `$autokill` turbovncserver.conf
+option (`-noautokill`), or the existing `$autokill` **turbovncserver.conf**
 variable, can be used to disable the feature.
 
-12. The TurboVNC Viewer's built-in SSH client can now read SSH private keys
-from ssh-agent or Pageant.  Note that the SSH client does not understand the
+11. The TurboVNC Viewer's built-in SSH client can now read SSH private keys
+from `ssh-agent` or Pageant.  Note that the SSH client does not understand the
 `IdentitiesOnly` keyword in OpenSSH config files and behaves as if
 `IdentitiesOnly` is `yes`.  Otherwise, with the exception noted in 2.2.1[5],
 its behavior should be the same as that of OpenSSH.
 
-13. The TurboVNC Server now installs the default xstartup.turbovnc script into
-the same directory as vncserver, and vncserver uses that default script if the
-per-user xstartup.turbovnc script (usually ~/.vnc/xstartup.turbovnc) doesn't
-exist.  This facilitates upgrading xstartup.turbovnc on a system-wide basis
-when the TurboVNC Server is upgraded.  The per-user xstartup.turbovnc script
-will no longer automatically be created if it doesn't exist.
+12. The TurboVNC Server now installs the default `xstartup.turbovnc` script
+into the same directory as `vncserver`, and `vncserver` uses that default
+script if the per-user `xstartup.turbovnc` script (usually
+`~/.vnc/xstartup.turbovnc`) doesn't exist.  This facilitates upgrading
+`xstartup.turbovnc` on a system-wide basis when the TurboVNC Server is
+upgraded.  The per-user `xstartup.turbovnc` script will no longer automatically
+be created if it doesn't exist.
 
-14. The `$autoLosslessRefresh`, `$pamSession`, `$multiThread`, and
-`$numThreads` turbovncserver.conf variables are now deprecated, since
+13. The `$autoLosslessRefresh`, `$pamSession`, `$multiThread`, and
+`$numThreads` **turbovncserver.conf** variables are now deprecated, since
 `$serverArgs` can be used to accomplish the same thing.
 
-15. The TurboVNC Server can no longer be built using GnuTLS.  Supporting GnuTLS
+14. The TurboVNC Server can no longer be built using GnuTLS.  Supporting GnuTLS
 was a stopgap measure intended for power users who needed access to encryption
 features that, at the time, either OpenSSL or TurboVNC's OpenSSL wrapper did
 not provide.  However, that feature gap has since been closed, and given the
@@ -99,10 +99,10 @@ attention from the TurboVNC developers and user community, there is no
 compelling reason to use the GnuTLS wrapper anymore.  The 2.2.x version of the
 TurboVNC Server will continue to support GnuTLS on a break/fix basis.
 
-16. The TurboVNC Server is now based on xorg-xserver 1.20.8, which fixes
+15. The TurboVNC Server is now based on xorg-xserver 1.20.8, which fixes
 several minor X server bugs.
 
-17. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
+16. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
 longer supports indirect rendering.  Indirect rendering is limited to the
 OpenGL 1.4 API, and it performed sluggishly in the TurboVNC Server due to the
 fact that X servers are single-threaded.  (On some platforms, the TurboVNC
@@ -117,20 +117,12 @@ Indirect rendering-- and the TurboVNC-specific X server modifications that
 allowed it to perform as well as possible-- will continue to be supported in
 TurboVNC 2.2.x on a break/fix basis.
 
-18. The TurboVNC Viewer's built-in SSH client now displays the SSH server's
+17. The TurboVNC Viewer's built-in SSH client now displays the SSH server's
 banner message on the command line by default.  Set the `turbovnc.sshbannerdlg`
 Java system property to `1` to display the banner message in a dialog box
 instead, thus restoring the default behavior of TurboVNC 2.2.x.
 
-19. The RPM and DEB packages generated by the TurboVNC build/packaging system
-now include a PolicyKit Local Authority (.pkla) file that prevents various
-authentication dialogs ("Authentication is required to create a color managed
-device", "Authentication is required to access the PC/SC daemon",
-"Authentication is required to refresh the system repositories") from popping
-up when using the GNOME 3 window manager with the TurboVNC Server on various
-Linux distributions.
-
-20. The TurboVNC Server now supports the WebSocket protocol (more specifically,
+18. The TurboVNC Server now supports the WebSocket protocol (more specifically,
 RFC 6455, AKA HyBi v13.)  The server will automatically detect WebSocket
 connections on the RFB port (5900 + {display number}) and tunnel the RFB
 protocol through the WebSocket protocol.  This allows browser-based VNC
@@ -138,7 +130,7 @@ viewers, such as noVNC, to connect to the TurboVNC Server without using a
 proxy.  TLS encryption (WSS) is supported if an X.509 certificate is specified
 using the `-x509cert` and `-x509key` arguments to Xvnc.
 
-21. The TurboVNC Server now maintains a separate count of VNC password/OTP
+19. The TurboVNC Server now maintains a separate count of VNC password/OTP
 authentication failures for each client IP address and temporarily blocks
 connections only from IP addresses that have exceeded the maximum number of
 consecutive VNC password or OTP authentication failures.
