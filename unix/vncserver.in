@@ -761,13 +761,13 @@ sub CheckDisplayNumber
   close(S);
 
   if (-e "/tmp/.X$n-lock") {
-    warn "\nWarning: $host:$n is taken because of /tmp/.X$n-lock\n";
+    warn "\nWARNING: $host:$n is taken because of /tmp/.X$n-lock\n";
     warn "Remove this file if there is no X server $host:$n\n";
     return 0;
   }
 
   if (-e "/tmp/.X11-unix/X$n") {
-    warn "\nWarning: $host:$n is taken because of /tmp/.X11-unix/X$n\n";
+    warn "\nWARNING: $host:$n is taken because of /tmp/.X11-unix/X$n\n";
     warn "Remove this file if there is no X server $host:$n\n";
     return 0;
   }
