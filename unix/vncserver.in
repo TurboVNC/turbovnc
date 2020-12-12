@@ -214,7 +214,7 @@ END_XSTARTUP
 $xauthorityFile = "$ENV{XAUTHORITY}";
 
 $vncUserDirUnderTmp = ($vncUserDir =~ m|^/tmp/.+|) ? 1 : 0;
-if (! $xstartup) {
+if (!$xstartup) {
   $xstartup = ($vncUserDirUnderTmp) ?
     "$ENV{HOME}/.turbovncstartup" : "$vncUserDir/xstartup.turbovnc";
 }
@@ -473,18 +473,18 @@ unless (-e $vncUserDir) {
   }
 }
 ($z, $z, $mode) = lstat("$vncUserDir");
-if (!-d _ || !-o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
+if (! -d _ || ! -o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
   die "$prog: Wrong type or access mode of $vncUserDir.\n";
 }
 
 # Make sure the user has a password.
 if ($authTypeVNC && "$passwdFile" eq "$vncUserDir/passwd") {
   ($z, $z, $mode) = lstat("$vncUserDir/passwd");
-  if (-e _ && (!-f _ || !-o _ || ($mode & 077) != 0)) {
+  if (-e _ && (! -f _ || ! -o _ || ($mode & 077) != 0)) {
     die "$prog: Wrong type, ownership, or permissions on\n           $vncUserDir/passwd.\n";
   }
 
-  if (!-e _) {
+  if (! -e _) {
     if ($opt{'-quiet'}) {
       warn "$vncUserDir/passwd does not exist.\nRun ".$exedir."vncpasswd to create passwd file.\n";
       exit 1;
@@ -633,7 +633,7 @@ if ($generateOTP == 1) {
 
 # Create the user's xstartup script if necessary.
 
-if (! $skipxstartup) {
+if (!$skipxstartup) {
   unless (-e "$xstartup" or $opt{'-xstartup'}) {
     warn "Creating default startup script $xstartup\n";
     open(XSTARTUP, ">$xstartup");
@@ -666,7 +666,7 @@ if (-e "/tmp/.X11-unix/X$displayNumber") {
 $ENV{VNCDESKTOP} = $desktopName;
 $ENV{VGL_COMPRESS} = "0";
 
-if (! $skipxstartup) {
+if (!$skipxstartup) {
   if ($opt{'-fg'}) {
     system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
     if (kill 0, `cat $pidFile`) {
