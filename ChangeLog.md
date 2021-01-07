@@ -86,9 +86,10 @@ TurboVNC Server is upgraded.  A per-user X startup script can still be used by
 specifying it with the `-xstartup` command-line option.
 
 13. The default X startup script (`xstartup.turbovnc`) has been streamlined to
-improve cross-platform compatibility.  It now attempts to match the value of
-the `vncserver -wm` command-line option or the `$wm` **turbovncserver.conf**
-variable with a session desktop file under **/usr/share/xsessions** (or
+improve cross-platform compatibility.  The script now attempts to match the
+value of the `TVNC_WM` environment variable, which is set by the
+`vncserver -wm` command-line option or the `$wm` **turbovncserver.conf**
+variable, with a session desktop file under **/usr/share/xsessions** (or
 **/usr/local/share/xsessions** on *BSD systems.)  If a matching session desktop
 file exists, then `xstartup.turbovnc` populates the appropriate XDG environment
 variables from the entries in that file and then executes the window manager
