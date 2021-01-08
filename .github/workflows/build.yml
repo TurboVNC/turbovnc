@@ -109,6 +109,13 @@ jobs:
           rm *.dmg
           popd
           rmdir $HOME/libjpeg-turbo-dmg
+      - name: Configure GPG signing
+        if: ${{github.event_name != 'pull_request'}}
+        run: |
+          printf "${{secrets.GPG_KEY}}" | base64 --decode | gpg --batch --import -
+          echo "GPG_KEY_NAME=\"${{secrets.GPG_KEY_NAME}}\"" >$HOME/src/buildscripts/gpgsign
+          echo "GPG_KEY_ID=${{secrets.GPG_KEY_ID}}" >>$HOME/src/buildscripts/gpgsign
+          echo "GPG_KEY_PASS=${{secrets.GPG_KEY_PASS}}" >>$HOME/src/buildscripts/gpgsign
       - name: Cache OpenJDK
         uses: actions/cache@v2
         with:
