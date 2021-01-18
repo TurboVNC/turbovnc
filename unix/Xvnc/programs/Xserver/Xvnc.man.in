@@ -6,14 +6,14 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
-.\" Copyright (C) 2010, 2012, 2014-2020 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2021 D. R. Commander
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "December 2020" "" "TurboVNC"
+.TH Xvnc 1 "January 2021" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -218,9 +218,7 @@ respective copies of the client-side devices.  If another viewer attempts to
 create a remote X Input device with the same name, then the existing
 server-side device is shared with the new viewer.  The server-side devices are
 deleted automatically when all viewers that use them have disconnected.  This
-is the most flexible way of handling extended input devices, because it allows
-any generic X Input pointer device (spaceballs, tablets, etc.) on the client
-machine to be used by the server.
+is the most flexible way of handling extended input devices.
 
 \fBVirtual\ Tablet\ Mode\fR (enabled with this command-line option)
 
@@ -229,13 +227,12 @@ touch, and pad devices designed to emulate a Wacom tablet, and it maps all
 extended input events from all viewers to these devices (events from
 client-side stylus, eraser, touch, and pad devices are mapped to the
 corresponding virtual device in the TurboVNC session, and other events are
-ignored.)  This mode is less generic than Remote X Input Mode, and it probably
-will not work with devices other than tablets (perhaps not even with non-Wacom
-tablets.)  Virtual Tablet mode is useful when running specific applications
-from the X startup script, rather than a window manager.  Because applications
-usually check for the presence of X Input devices at startup, by the time the
-first viewer connects and requests that the client-side devices be cloned, it
-is too late.
+ignored.)  This mode is less flexible than Remote X Input Mode, since it relies
+on Wacom-specific driver behavior that may change in the future.  Virtual
+Tablet mode is useful when running specific applications from the X startup
+script, rather than a window manager.  Because applications usually check for
+the presence of X Input devices at startup, by the time the first viewer
+connects and requests that the client-side devices be cloned, it is too late.
 
 .TP
 \fBTURBOVNC DISPLAY OPTIONS\fR

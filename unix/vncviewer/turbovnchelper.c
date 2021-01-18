@@ -1,4 +1,4 @@
-/*  Copyright (C)2015-2019 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2019, 2021 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,19 +22,17 @@
 #pragma error_messages(off, E_STATEMENT_NOT_REACHED)
 #endif
 
+#include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
 #include "jawt_md.h"
-#include <X11/extensions/XInput.h>
+#include <X11/extensions/XInput2.h>
+#include <X11/Xatom.h>
 #include "com_turbovnc_vncviewer_Viewport.h"
 #include <X11/Xmd.h>
 #include "rfbproto.h"
 #include "turbovnc_devtypes.h"
-
-#ifndef IsXExtensionPointer
-#define IsXExtensionPointer 4
-#endif
 
 
 /*
@@ -304,65 +302,95 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   jmethodID mid;
   Display *dpy = NULL;
   Window win = 0;
-  XDeviceInfo *devInfo = NULL;
-  XDevice *device = NULL;
-  int nDevices = 0, i, ci, ai, nEvents = 0;
-  int buttonPressType = -1, buttonReleaseType = -1, motionType = -1;
-  XEventClass events[100] = { (XEventClass)-1, (XEventClass)-1,
-    (XEventClass)-1, (XEventClass)-1, (XEventClass)-1, (XEventClass)-1,
-    (XEventClass)-1, (XEventClass)-1, (XEventClass)-1, (XEventClass)-1 };
+  XIDeviceInfo *devInfo = NULL;
+  int nDevices = 0, i, ci, nMasks = 0, xiOpcode = 0, dummy1, dummy2;
+  XIEventMask masks[100];
   jobject extInputDevice;
+
+  memset(masks, 0, sizeof(XIEventMask) * 100);
 
   if ((dpy = XOpenDisplay(NULL)) == NULL)
     _throw("Could not open X display");
+  if (!XQueryExtension(dpy, "XInputExtension", &xiOpcode, &dummy1, &dummy2))
+    _throw("X Input extension not available");
 
   bailif0(cls = (*env)->GetObjectClass(env, obj));
   bailif0(fid = (*env)->GetFieldID(env, cls, "x11win", "J"));
   if ((win = (Window)(*env)->GetLongField(env, obj, fid)) == 0)
     _throw("X window handle has not been initialized");
 
-  if ((devInfo = XListInputDevices(dpy, &nDevices)) == NULL)
+  if ((devInfo = XIQueryDevice(dpy, XIAllDevices, &nDevices)) == NULL)
     _throw("Could not list XI devices");
 
   for (i = 0; i < nDevices; i++) {
-    char *type;
-    XAnyClassPtr classInfo = devInfo[i].inputclassinfo;
+    Atom *props = NULL, propType = 0, atom;
+    int pi, nProps = 0, propFormat = 0;
+    unsigned long propNItems = 0, propBytesAfter = 0;
+    unsigned char *propData = NULL;
+    char *name;
     CARD32 canGenerate = 0, productID = 0;
 
-    if (devInfo[i].use != IsXExtensionPointer)
+    if (devInfo[i].use != XISlavePointer || !devInfo[i].enabled ||
+        devInfo[i].num_classes < 1)
       continue;
-    if (devInfo[i].type == None)
+    if ((props = XIListProperties(dpy, devInfo[i].deviceid,
+                                  &nProps)) == NULL || nProps < 1)
       continue;
-    type = XGetAtomName(dpy, devInfo[i].type);
-    if (!strcmp(type, "MOUSE") || !strcmp(type, "KEYBOARD") ||
-        !strcmp(type, "xwayland-pointer")) {
-      XFree(type);
+
+    /* We only handle Wacom devices at the moment. */
+    for (pi = 0; pi < nProps; pi++) {
+      if ((name = XGetAtomName(dpy, props[pi])) == NULL)
+        continue;
+      if (!strcmp(name, "Wacom Tool Type")) {
+        XFree(name);
+        break;
+      }
+      XFree(name);
+    }
+    if (pi >= nProps) {
+      XFree(props);
       continue;
     }
+
+    /* Determine Wacom device type. */
+    if (XIGetProperty(dpy, devInfo[i].deviceid, props[pi], 0, 1000, False,
+                      AnyPropertyType, &propType, &propFormat, &propNItems,
+                      &propBytesAfter, &propData) != Success ||
+        propType != XA_ATOM || propNItems < 1 || !propData) {
+      XFree(props);
+      continue;
+    }
+    XFree(props);
+    atom = *(Atom *)propData;
+    if ((name = XGetAtomName(dpy, atom)) == NULL)
+      continue;
     /* TurboVNC-specific:  we use productID to represent the device type, so
        we can recreate it on the server */
-    if (!strcmp(type, "CURSOR"))
+    if (!strcmp(name, "CURSOR"))
       productID = rfbGIIDevTypeCursor;
-    else if (!strcmp(type, "STYLUS"))
+    else if (!strcmp(name, "STYLUS"))
       productID = rfbGIIDevTypeStylus;
-    else if (!strcmp(type, "ERASER"))
+    else if (!strcmp(name, "ERASER"))
       productID = rfbGIIDevTypeEraser;
-    else if (!strcmp(type, "TOUCH"))
+    else if (!strcmp(name, "TOUCH"))
       productID = rfbGIIDevTypeTouch;
-    else if (!strcmp(type, "PAD"))
+    else if (!strcmp(name, "PAD"))
       productID = rfbGIIDevTypePad;
-    XFree(type);
+    else {
+      XFree(name);
+      continue;
+    }
+    XFree(name);
 
     /* FIXME: Relative valuators aren't supported (yet) */
     for (ci = 0; ci < devInfo[i].num_classes; ci++) {
-      if (classInfo->class == ValuatorClass &&
-          ((XValuatorInfoPtr)classInfo)->mode == Relative)
+      if (devInfo[i].classes[ci]->type == XIValuatorClass &&
+          (((XIValuatorClassInfo *)devInfo[i].classes[ci])->mode ==
+           XIModeRelative))
         break;
-      classInfo = (XAnyClassPtr)((char *)classInfo + classInfo->length);
     }
     if (ci < devInfo[i].num_classes)
       continue;
-    classInfo = devInfo[i].inputclassinfo;
 
     bailif0(eidcls =
             (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputDevice"));
@@ -371,190 +399,207 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
     SET_STRING(eidcls, extInputDevice, name, devInfo[i].name);
     SET_LONG(eidcls, extInputDevice, vendorID, 4242);
     SET_LONG(eidcls, extInputDevice, productID, productID);
-    SET_LONG(eidcls, extInputDevice, id, devInfo[i].id);
+    SET_LONG(eidcls, extInputDevice, id, devInfo[i].deviceid);
 
     for (ci = 0; ci < devInfo[i].num_classes; ci++) {
 
-      switch (classInfo->class) {
+      switch (devInfo[i].classes[ci]->type) {
 
-        case ButtonClass:
+        case XIButtonClass:
         {
-          XButtonInfoPtr b = (XButtonInfoPtr)classInfo;
+          XIButtonClassInfo *bi = (XIButtonClassInfo *)devInfo[i].classes[ci];
 
-          SET_INT(eidcls, extInputDevice, numButtons, b->num_buttons);
+          SET_INT(eidcls, extInputDevice, numButtons, bi->num_buttons);
           canGenerate |= rfbGIIButtonPressMask | rfbGIIButtonReleaseMask;
           break;
         }
 
-        case ValuatorClass:
+        case XIValuatorClass:
         {
-          XValuatorInfoPtr v = (XValuatorInfoPtr)classInfo;
+          XIValuatorClassInfo *vi =
+            (XIValuatorClassInfo *)devInfo[i].classes[ci];
           jclass valcls;
+          jobject valuator;
+          char longName[75], shortName[5];
 
           bailif0(valcls = (*env)->FindClass(env,
                   "com/turbovnc/rfb/ExtInputDevice$Valuator"));
 
-          if (v->mode == Absolute)
+          if (vi->mode == XIModeAbsolute)
             canGenerate |= rfbGIIValuatorAbsoluteMask;
-          else if (v->mode == Relative)
+          else if (vi->mode == XIModeRelative)
             canGenerate |= rfbGIIValuatorRelativeMask;
 
-          for (ai = 0; ai < v->num_axes; ai++) {
-            jobject valuator;
-            XAxisInfoPtr a = &v->axes[ai];
-            char longName[75], shortName[5];
+          bailif0(valuator = (*env)->AllocObject(env, valcls));
+          SET_INT(valcls, valuator, index, vi->number);
+          name = XGetAtomName(dpy, vi->label);
+          if (name) {
+            snprintf(longName, 75, "%s", name);
+            XFree(name);
+          } else
+            snprintf(longName, 75, "Valuator %d", vi->number);
+          SET_STRING(valcls, valuator, longName, longName);
+          snprintf(shortName, 5, "%d", vi->number);
+          SET_STRING(valcls, valuator, shortName, shortName);
+          SET_INT(valcls, valuator, rangeMin, (int)vi->min);
+          SET_INT(valcls, valuator, rangeCenter,
+                  ((int)vi->min + (int)vi->max) / 2);
+          SET_INT(valcls, valuator, rangeMax, (int)vi->max);
+          SET_INT(valcls, valuator, siUnit, rfbGIIUnitLength);
+          SET_INT(valcls, valuator, siDiv, vi->resolution);
 
-            bailif0(valuator = (*env)->AllocObject(env, valcls));
-            SET_INT(valcls, valuator, index, ai);
-            snprintf(longName, 75, "Valuator %d", ai);
-            SET_STRING(valcls, valuator, longName, longName);
-            snprintf(shortName, 5, "%d", ai);
-            SET_STRING(valcls, valuator, shortName, shortName);
-            SET_INT(valcls, valuator, rangeMin, a->min_value);
-            SET_INT(valcls, valuator, rangeCenter,
-                    (a->min_value + a->max_value) / 2);
-            SET_INT(valcls, valuator, rangeMax, a->max_value);
-            SET_INT(valcls, valuator, siUnit, rfbGIIUnitLength);
-            SET_INT(valcls, valuator, siDiv, a->resolution);
-
-            bailif0(mid = (*env)->GetMethodID(env, eidcls, "addValuator",
-                    "(Lcom/turbovnc/rfb/ExtInputDevice$Valuator;)V"));
-            (*env)->CallVoidMethod(env, extInputDevice, mid, valuator);
-          }
+          bailif0(mid = (*env)->GetMethodID(env, eidcls, "addValuator",
+                  "(Lcom/turbovnc/rfb/ExtInputDevice$Valuator;)V"));
+          (*env)->CallVoidMethod(env, extInputDevice, mid, valuator);
           break;
         }
       }
-      classInfo = (XAnyClassPtr)((char *)classInfo + classInfo->length);
+    }
+
+    if (canGenerate && nMasks < 100) {
+      masks[nMasks].deviceid = devInfo[i].deviceid;
+      masks[nMasks].mask_len = XIMaskLen(XI_LASTEVENT);
+      masks[nMasks].mask =
+        (unsigned char *)calloc(masks[nMasks].mask_len, sizeof(unsigned char));
+      if (canGenerate & rfbGIIButtonPressMask)
+        XISetMask(masks[nMasks].mask, XI_ButtonPress);
+      if (canGenerate & rfbGIIButtonReleaseMask)
+        XISetMask(masks[nMasks].mask, XI_ButtonRelease);
+      if (canGenerate & rfbGIIValuatorAbsoluteMask ||
+          canGenerate & rfbGIIValuatorRelativeMask)
+        XISetMask(masks[nMasks].mask, XI_Motion);
+      nMasks++;
     }
 
     SET_LONG(eidcls, extInputDevice, canGenerate, canGenerate);
     if (canGenerate & rfbGIIValuatorAbsoluteMask)
       SET_BOOL(eidcls, extInputDevice, absolute, 1);
 
-    if ((device = XOpenDevice(dpy, devInfo[i].id)) == NULL)
-      _throw("Could not open XI device");
-
-    for (ci = 0; ci < device->num_classes; ci++) {
-      if (device->classes[ci].input_class == ButtonClass) {
-        DeviceButtonPress(device, buttonPressType, events[nEvents]);
-        nEvents++;
-        DeviceButtonRelease(device, buttonReleaseType, events[nEvents]);
-        nEvents++;
-      } else if (device->classes[ci].input_class == ValuatorClass) {
-        DeviceMotionNotify(device, motionType, events[nEvents]);
-        nEvents++;
-      }
-    }
-    XCloseDevice(dpy, device);  device = NULL;
-
     bailif0(mid = (*env)->GetMethodID(env, cls, "addInputDevice",
             "(Lcom/turbovnc/rfb/ExtInputDevice;)V"));
     (*env)->CallVoidMethod(env, obj, mid, extInputDevice);
   }
 
-  XFreeDeviceList(devInfo);  devInfo = NULL;
-  if (nEvents == 0) {
+  XIFreeDeviceInfo(devInfo);  devInfo = NULL;
+  if (nMasks == 0) {
     printf("No extended input devices.\n");
     goto bailout;
   }
 
-  if (XSelectExtensionEvent(dpy, win, events, nEvents))
+  if (XISelectEvents(dpy, win, masks, nMasks))
     _throw("Could not select XI events");
+  XSync(dpy, False);
 
-  SET_INT(cls, obj, buttonPressType, buttonPressType);
-  SET_INT(cls, obj, buttonReleaseType, buttonReleaseType);
-  SET_INT(cls, obj, motionType, motionType);
+  SET_INT(cls, obj, buttonPressType, XI_ButtonPress);
+  SET_INT(cls, obj, buttonReleaseType, XI_ButtonRelease);
+  SET_INT(cls, obj, motionType, XI_Motion);
   SET_LONG(cls, obj, x11dpy, (jlong)(intptr_t)dpy);
 
   printf("TurboVNC Helper: Listening for XInput events on %s (window 0x%.8x)\n",
          DisplayString(dpy), (unsigned int)win);
 
   bailout:
-  if (dpy && device) XCloseDevice(dpy, device);
-  if (devInfo) XFreeDeviceList(devInfo);
+  if (nMasks) {
+    for (i = 0; i < nMasks; i++)
+      free(masks[i].mask);
+  }
+  if (devInfo) XIFreeDeviceInfo(devInfo);
 }
 
+
+struct isXIEventParams {
+  int xiType, xiOpcode;
+};
+
+static Bool IsXIEvent(Display *dpy, XEvent *xe, XPointer arg)
+{
+  struct isXIEventParams *params = (struct isXIEventParams *)arg;
+
+  if (xe->type == GenericEvent && xe->xgeneric.extension == params->xiOpcode &&
+      xe->xcookie.type == GenericEvent &&
+      xe->xcookie.extension == params->xiOpcode &&
+      xe->xcookie.evtype == params->xiType)
+    return True;
+  return False;
+}
 
 JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputEvent
   (JNIEnv *env, jobject obj, jint type)
 {
   jclass cls;
   jfieldID fid;
-
-  union {
-    int type;  XEvent xe;  XDeviceMotionEvent motion;
-    XDeviceButtonEvent button;
-  } e;
   Display *dpy;
-  int buttonPressType = -1, buttonReleaseType = -1, motionType = -1;
   jboolean retval = JNI_FALSE;
-  int i;
+  int dummy1, dummy2, i;
+  XEvent xe;
+  Bool freeXEventData = False;
+  struct isXIEventParams params;
 
   bailif0(cls = (*env)->GetObjectClass(env, obj));
-  bailif0(fid = (*env)->GetFieldID(env, cls, "buttonPressType", "I"));
-  buttonPressType = (*env)->GetIntField(env, obj, fid);
-  bailif0(fid = (*env)->GetFieldID(env, cls, "buttonReleaseType", "I"));
-  buttonReleaseType = (*env)->GetIntField(env, obj, fid);
-  bailif0(fid = (*env)->GetFieldID(env, cls, "motionType", "I"));
-  motionType = (*env)->GetIntField(env, obj, fid);
   bailif0(fid = (*env)->GetFieldID(env, cls, "x11dpy", "J"));
   bailif0(dpy = (Display *)(intptr_t)(*env)->GetLongField(env, obj, fid));
 
-  while (XCheckTypedEvent(dpy, type, &e.xe)) {
+  if (!XQueryExtension(dpy, "XInputExtension", &params.xiOpcode, &dummy1,
+                       &dummy2))
+    _throw("X Input extension not available");
 
-    if (e.type == motionType) {
+  params.xiType = type;
+  while (XCheckIfEvent(dpy, &xe, IsXIEvent, (XPointer)&params)) {
+    jclass eventcls;  jobject event, jvaluators;
+    jint valuators[6];
+    XIDeviceEvent *xide;
+    long buttonMask = 0;
+    int giiEventType = 0, numValuators = 0, firstValuator = -1;
 
-      jclass eventcls;  jobject event, jvaluators;
-      jint valuators[6];
+    if (!XGetEventData(dpy, &xe.xcookie))
+      continue;
+    freeXEventData = True;
+    xide = (XIDeviceEvent *)xe.xcookie.data;
 
-      bailif0(eventcls =
-              (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputEvent"));
-      bailif0(fid = (*env)->GetFieldID(env, cls, "lastEvent",
-                                       "Lcom/turbovnc/rfb/ExtInputEvent;"));
-      bailif0(event = (*env)->GetObjectField(env, obj, fid));
-      SET_INT(eventcls, event, type, rfbGIIValuatorRelative);
-      SET_LONG(eventcls, event, deviceID, e.motion.deviceid);
-      SET_LONG(eventcls, event, buttonMask, e.motion.state);
-      SET_INT(eventcls, event, numValuators, e.motion.axes_count);
-      SET_INT(eventcls, event, firstValuator, e.motion.first_axis);
-
-      bailif0(fid = (*env)->GetFieldID(env, eventcls, "valuators", "[I"));
-      bailif0(jvaluators = (jintArray)(*env)->GetObjectField(env, event, fid));
-      for (i = 0; i < e.motion.axes_count; i++)
-        valuators[i] = e.motion.axis_data[i];
-      (*env)->SetIntArrayRegion(env, jvaluators, 0, e.motion.axes_count,
-                                valuators);
-      retval = JNI_TRUE;
-
-    } else if (e.type == buttonPressType || e.type == buttonReleaseType) {
-
-      jclass eventcls;  jobject event, jvaluators;
-      jint valuators[6];
-
-      bailif0(eventcls =
-              (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputEvent"));
-      bailif0(fid = (*env)->GetFieldID(env, cls, "lastEvent",
-                                       "Lcom/turbovnc/rfb/ExtInputEvent;"));
-      bailif0(event = (*env)->GetObjectField(env, obj, fid));
-      SET_INT(eventcls, event, type, e.type == buttonPressType ?
-              rfbGIIButtonPress : rfbGIIButtonRelease);
-      SET_LONG(eventcls, event, deviceID, e.button.deviceid);
-      SET_LONG(eventcls, event, buttonMask, e.button.state);
-      SET_INT(eventcls, event, numValuators, e.button.axes_count);
-      SET_INT(eventcls, event, firstValuator, e.button.first_axis);
-      SET_INT(eventcls, event, buttonNumber, e.button.button);
-      bailif0(fid = (*env)->GetFieldID(env, eventcls, "valuators", "[I"));
-      bailif0(jvaluators = (jintArray)(*env)->GetObjectField(env, event, fid));
-      for (i = 0; i < e.button.axes_count; i++)
-        valuators[i] = e.button.axis_data[i];
-      (*env)->SetIntArrayRegion(env, jvaluators, 0, e.button.axes_count,
-                                valuators);
-      return JNI_TRUE;
-
+    bailif0(eventcls =
+    (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputEvent"));
+    bailif0(fid = (*env)->GetFieldID(env, cls, "lastEvent",
+                                     "Lcom/turbovnc/rfb/ExtInputEvent;"));
+    bailif0(event = (*env)->GetObjectField(env, obj, fid));
+    switch (type) {
+      case XI_ButtonPress:  giiEventType = rfbGIIButtonPress;  break;
+      case XI_ButtonRelease:  giiEventType = rfbGIIButtonRelease;  break;
+      case XI_Motion:  giiEventType = rfbGIIValuatorRelative;  break;
     }
+    SET_INT(eventcls, event, type, giiEventType);
+    SET_LONG(eventcls, event, deviceID, xide->deviceid);
+    for (i = 0; i < xide->buttons.mask_len * 8; i++)
+      if (XIMaskIsSet(xide->buttons.mask, i))
+        buttonMask |= (1 << (i + 7));
+    SET_LONG(eventcls, event, buttonMask, buttonMask);
+    for (i = 0; i < xide->valuators.mask_len * 8; i++) {
+      if (XIMaskIsSet(xide->valuators.mask, i) && numValuators < 6) {
+        if (firstValuator < 0) firstValuator = i;
+        valuators[numValuators] = (jint)xide->valuators.values[i];
+        numValuators++;
+      }
+    }
+    SET_INT(eventcls, event, numValuators, numValuators);
+    SET_INT(eventcls, event, firstValuator, firstValuator);
+    if (xe.xcookie.evtype == XI_ButtonPress ||
+        xe.xcookie.evtype == XI_ButtonRelease)
+      SET_INT(eventcls, event, buttonNumber, xide->detail);
+
+    bailif0(fid = (*env)->GetFieldID(env, eventcls, "valuators", "[I"));
+    bailif0(jvaluators = (jintArray)(*env)->GetObjectField(env, event, fid));
+    (*env)->SetIntArrayRegion(env, jvaluators, 0, numValuators, valuators);
+    if (freeXEventData) {
+      XFreeEventData(dpy, &xe.xcookie);
+      freeXEventData = False;
+    }
+    if (xe.xcookie.evtype == XI_ButtonPress ||
+        xe.xcookie.evtype == XI_ButtonRelease)
+      return JNI_TRUE;
+    else retval = JNI_TRUE;
   }
 
   bailout:
+  if (freeXEventData) XFreeEventData(dpy, &xe.xcookie);
   return retval;
 }
 

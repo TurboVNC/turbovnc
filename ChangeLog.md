@@ -144,6 +144,14 @@ authentication failures for each client IP address and temporarily blocks
 connections only from IP addresses that have exceeded the maximum number of
 consecutive VNC password or OTP authentication failures.
 
+21. The Linux/Un\*x TurboVNC Helper library now uses X Input v2, which allows
+the Linux/Un\*x TurboVNC Viewer to pass extended input device valuator names
+from the client to the TurboVNC session.  This eliminates the need to use
+Virtual Tablet Mode in the TurboVNC session when using Wacom tablets with Qt
+applications.  Furthermore, the Linux/Un\*x TurboVNC Viewer no longer clones
+extended input devices other than those associated with Wacom tablets, since
+only Wacom tablet devices have been tested.
+
 
 2.2.6
 =====
