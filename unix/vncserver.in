@@ -394,6 +394,8 @@ $authTypeVNCPermitted = $authTypeVNC;
 $encTypeX509Permitted = $encTypeX509;
 if ($opt{'-securitytypes'}) {
   $securityTypes = $opt{'-securitytypes'};
+}
+if ($securityTypes) {
   my $enableVNC = 0;
   my $enableOTP = 0;
   my $enableX509 = 0;
