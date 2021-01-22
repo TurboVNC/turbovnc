@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #
-#  Copyright (C) 2009-2018, 2020 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2009-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
@@ -570,7 +570,7 @@ $cmd .= " -rfbwait 120000";
 $cmd .= " -rfbauth $passwdFile" if ($authTypeVNC);
 $cmd .= " -x509cert $x509CertFile" if ($encTypeX509);
 $cmd .= " -x509key $x509KeyFile" if ($encTypeX509);
-$cmd .= " -securitytypes $securityTypes" if ($securityTypes);
+$cmd .= " -securitytypes \"$securityTypes\"" if ($securityTypes);
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);

@@ -24,7 +24,7 @@ Legal
 
 TurboVNC is
 
-    Copyright (C) 2009-2020 D. R. Commander
+    Copyright (C) 2009-2021 D. R. Commander
     Copyright (C) 2011-2016 Brian P. Hinz
     Copyright (C) 2010 University Corporation for Atmospheric Research
     Copyright (C) 2004-2008 Sun Microsystems, Inc.
