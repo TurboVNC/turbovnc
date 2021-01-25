@@ -212,7 +212,7 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
       else
         kas.keycodes[numkeys - 1] = XK_Meta_R;
     }
-    // Use XK_KP_Separator instead of XK_KP_Decimal if the current locale uses
+    // Use XK_KP_Separator instead of XK_KP_Decimal if the current key map uses
     // a comma rather than a period as a decimal symbol.
     if (key == XK_KP_Decimal &&
         MapVirtualKey(virtkey, MAPVK_VK_TO_CHAR) == ',')
