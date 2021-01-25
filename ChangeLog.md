@@ -46,6 +46,11 @@ numeric keypad decimal key was pressed or released, even though the
 corresponding keyboard layout on a Un*x system would have generated an
 `XK_KP_Decimal` (0xFFAE) key symbol for the same key.
 
+10. Fixed an issue in the Linux/Un*x TurboVNC Viewer whereby, if the current
+keyboard layout generated an `XK_KP_Separator` (0xFFAC) key symbol for the
+numeric keypad decimal key, an `XK_comma` (0x002C) key symbol was erroneously
+transmitted to the VNC server instead.
+
 
 2.2.5
 =====

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2021 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -1918,6 +1918,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         case KeyEvent.VK_NUMPAD7:     keysym = Keysyms.KP_7;  break;
         case KeyEvent.VK_NUMPAD8:     keysym = Keysyms.KP_8;  break;
         case KeyEvent.VK_NUMPAD9:     keysym = Keysyms.KP_9;  break;
+        case KeyEvent.VK_SEPARATOR:   keysym = Keysyms.KP_SEPARATOR;  break;
         case KeyEvent.VK_DECIMAL:
           // Use XK_KP_Separator instead of XK_KP_Decimal if the current locale
           // uses a comma rather than period as a decimal symbol.
