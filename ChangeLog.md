@@ -39,6 +39,13 @@ failure.)
 `/usr/bin/perl`, for compatibility with FreeBSD and other operating systems
 that install Perl into a directory other than **/usr/bin**.
 
+9. Fixed an issue in the Windows TurboVNC Viewer whereby, with certain
+client-side keyboard layouts (Spanish, for instance), an `XK_KP_Separator`
+(0xFFAC) key symbol was erroneously transmitted to the VNC server when the
+numeric keypad decimal key was pressed or released, even though the
+corresponding keyboard layout on a Un*x system would have generated an
+`XK_KP_Decimal` (0xFFAE) key symbol for the same key.
+
 
 2.2.5
 =====
