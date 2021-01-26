@@ -277,16 +277,18 @@ pixels from one location to another.)  When used with VirtualGL, this means
 that ALRs will mainly be sent for just the 3D screen regions.  This should be
 fine for most 3D applications, since the 3D regions are the ones that are
 quality-critical.  The default ALR behavior also prevents what might best be
-called the "blinking cursor dilemma."  Certain ill-behaved window managers
-update a small region of the taskbar continuously, even though none of the
-pixels in that region have changed.  Also, certain programs have a blinking
-cursor that may update more frequently than the ALR timeout.  Since an ALR is
+called the "blinking cursor dilemma."  Certain programs have a blinking cursor
+that may update more frequently than the ALR timeout.  Since an ALR is
 triggered based on a period of inactivity relative to the last framebuffer
 update, these continuous updates prevent an ALR from ever being sent.
-Fortunately, these ill-behaved window managers and blinking cursors do not
-typically use ''X[Shm]PutImage()'' to perform their updates, so the problem is
-effectively worked around by limiting the ALR-eligible regions to just the
-subset of regions that were drawn with ''X[Shm]PutImage()'' and CopyRect.
+Fortunately, blinking cursors are not typically drawn using
+''X[Shm]PutImage()'', so the problem is effectively worked around by limiting
+the ALR-eligible regions to just the subset of regions that were drawn with
+''X[Shm]PutImage()'' and CopyRect.
+
+	!!! NOTE: Ill-behaved applications that continuously render the same image
+	will cause a variation of the "blinking cursor dilemma" and thus defeat ALR
+	unless [[#InterframeComparison][interframe comparison]] is enabled.
 
 You can override the default ALR behavior, thus making all screen regions
 eligible for ALR, by setting the ''TVNC_ALRALL'' environment variable to ''1''

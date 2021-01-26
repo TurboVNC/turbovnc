@@ -51,6 +51,12 @@ keyboard layout generated an `XK_KP_Separator` (0xFFAC) key symbol for the
 numeric keypad decimal key, an `XK_comma` (0x002C) key symbol was erroneously
 transmitted to the VNC server instead.
 
+11. If interframe comparison is enabled, the automatic lossless refresh (ALR)
+feature in the TurboVNC Server now ignores redundant framebuffer updates
+(framebuffer updates whose contents are completely eliminated by interframe
+comparison.)  This prevents ALR from being defeated by ill-behaved applications
+that continuously render the same image.
+
 
 2.2.5
 =====

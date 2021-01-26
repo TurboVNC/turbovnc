@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2020 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -1772,6 +1772,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   int dx, dy;
   Bool sendCursorShape = FALSE;
   Bool sendCursorPos = FALSE;
+  Bool redundantUpdate = FALSE;
   double tUpdateStart = 0.0;
 
   TimerCancel(cl->updateTimer);
@@ -2036,6 +2037,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
       box.x2 = box.y2 = 1;
       REGION_UNINIT(pScreen, updateRegion);
       REGION_INIT(pScreen, updateRegion, &box, 1);
+      redundantUpdate = TRUE;
     }
   }
 
@@ -2223,7 +2225,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
     }
   }
 
-  if (rfbAutoLosslessRefresh > 0.0 &&
+  if (rfbAutoLosslessRefresh > 0.0 && !redundantUpdate &&
       (!putImageOnly || REGION_NOTEMPTY(pScreen, &cl->alrEligibleRegion) ||
        cl->firstUpdate)) {
     if (putImageOnly)

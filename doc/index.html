@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-12-12T05:59:06">
+<meta name="date" content="2021-01-26T18:48:30">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1688,18 +1688,18 @@ used with VirtualGL, this means that ALRs will mainly be sent for just
 the 3D screen regions.  This should be fine for most 3D applications, 
 since the 3D regions are the ones that are quality-critical.  The 
 default ALR behavior also prevents what might best be called the 
-&ldquo;blinking cursor dilemma.&rdquo;  Certain ill-behaved window 
-managers update a small region of the taskbar continuously, even though 
-none of the pixels in that region have changed.  Also, certain programs 
-have a blinking cursor that may update more frequently than the ALR 
-timeout.  Since an ALR is triggered based on a period of inactivity 
-relative to the last framebuffer update, these continuous updates 
-prevent an ALR from ever being sent. Fortunately, these ill-behaved 
-window managers and blinking cursors do not typically use 
-<code>X[Shm]PutImage()</code> to perform their updates, so the problem 
-is effectively worked around by limiting the ALR-eligible regions to 
-just the subset of regions that were drawn with 
-<code>X[Shm]PutImage()</code> and CopyRect.</p>
+&ldquo;blinking cursor dilemma.&rdquo;  Certain programs have a blinking 
+cursor that may update more frequently than the ALR timeout.  Since an 
+ALR is triggered based on a period of inactivity relative to the last 
+framebuffer update, these continuous updates prevent an ALR from ever 
+being sent. Fortunately, blinking cursors are not typically drawn using 
+<code>X[Shm]PutImage()</code>, so the problem is effectively worked 
+around by limiting the ALR-eligible regions to just the subset of 
+regions that were drawn with <code>X[Shm]PutImage()</code> and CopyRect.</p>
+
+<div class="important"><p class="important">
+NOTE: Ill-behaved applications that continuously render the same image will cause a variation of the &ldquo;blinking cursor dilemma&rdquo; and thus defeat ALR unless <a href="#InterframeComparison">interframe comparison</a><a name="idx0045"></a> is enabled.
+</p></div>
 
 <p>You can override the default ALR behavior, thus making all screen 
 regions eligible for ALR, by setting the <code>TVNC_ALRALL</code> 
@@ -2329,7 +2329,7 @@ vglrun -d :0.1 <em>3D-application-executable-or-script</em></pre>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use the TurboVNC Server and the TurboVNC Viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0045"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0046"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -3138,7 +3138,7 @@ Java command-line arguments in a Java Web Start environment.</p>
         A more Java-friendly way of disabling the multi-screen-aware automatic 
         desktop resize feature.  See the 
         <a href="#TVNC_SINGLESCREEN"><code>TVNC_SINGLESCREEN</code> environment 
-        variable</a><a name="idx0046"></a> above for more details.
+        variable</a><a name="idx0047"></a> above for more details.
     </dd>
 </dl>
 
@@ -3252,7 +3252,7 @@ Java command-line arguments in a Java Web Start environment.</p>
         establishing a secure tunnel with the <code>Tunnel</code> and 
         <code>ExtSSH</code> parameters.  See the 
         <a href="#VNC_VIA_CMD"><code>VNC_TUNNEL_CMD</code> environment 
-        variable</a><a name="idx0047"></a> above for more details.
+        variable</a><a name="idx0048"></a> above for more details.
     </dd>
 </dl>
 
@@ -3306,7 +3306,7 @@ Java command-line arguments in a Java Web Start environment.</p>
         establishing a secure tunnel with the <code>Via</code> and 
         <code>ExtSSH</code> parameters.  See the 
         <a href="#VNC_VIA_CMD"><code>VNC_VIA_CMD</code> environment 
-        variable</a><a name="idx0048"></a> above for more details.
+        variable</a><a name="idx0049"></a> above for more details.
     </dd>
 </dl>
 
