@@ -39,7 +39,6 @@ import java.awt.event.*;
 import java.io.*;
 import java.lang.reflect.*;
 import javax.swing.*;
-import java.text.*;
 import java.util.*;
 
 import com.turbovnc.rdr.*;
@@ -1922,12 +1921,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         case KeyEvent.VK_DECIMAL:
           // Use XK_KP_Separator instead of XK_KP_Decimal if the current key
           // map uses a comma rather than period as a decimal symbol.
-          java.awt.im.InputContext ic = java.awt.im.InputContext.getInstance();
-          DecimalFormat df =
-            (DecimalFormat)DecimalFormat.getInstance(ic.getLocale());
-          DecimalFormatSymbols dfs = df.getDecimalFormatSymbols();
-          char sep = dfs.getDecimalSeparator();
-          if (sep == ',')
+          if (key == ',')
             keysym = Keysyms.KP_SEPARATOR;
           else
             keysym = Keysyms.KP_DECIMAL;
