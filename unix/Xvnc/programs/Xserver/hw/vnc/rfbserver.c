@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2021 AnatoScope SA. All Rights Reserved.
  *  Copyright (C) 2009-2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -550,6 +551,9 @@ void rfbClientConnectionGone(rfbClientPtr cl)
 
   if (pointerClient == cl)
     pointerClient = NULL;
+
+  if (rfbFB.cursorOwner == cl)
+    rfbFB.cursorOwner = NULL;
 
   REGION_UNINIT(pScreen, &cl->copyRegion);
   REGION_UNINIT(pScreen, &cl->modifiedRegion);
@@ -1233,7 +1237,18 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       if (!rfbViewOnly && !cl->viewOnly) {
         cl->cursorX = (int)Swap16IfLE(msg.pe.x);
         cl->cursorY = (int)Swap16IfLE(msg.pe.y);
+
+        /* The client that has just moved the
+           cursor still needs an update of the
+           area of the cursor controlled by
+           another client. */
+
+        if (rfbFB.cursorOwner != cl)
+          rfbFB.cursorOwner = NULL;
+
         PtrAddEvent(msg.pe.buttonMask, cl->cursorX, cl->cursorY, cl);
+
+        rfbFB.cursorOwner = cl;
       }
       return;
 
@@ -1833,11 +1848,13 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   }
 
   /*
-   * If this client understands cursor shape updates, cursor should be
-   * removed from the framebuffer. Otherwise, make sure it's put up.
+   * If this client understands cursor shape updates and it controls
+   * the cursor, cursor should be removed from the framebuffer.
+   * Otherwise, make sure it's put up.
    */
 
-  if (cl->enableCursorShapeUpdates) {
+  if (cl->enableCursorShapeUpdates &&
+      (!rfbFB.cursorOwner || rfbFB.cursorOwner == cl)) {
     if (rfbFB.cursorIsDrawn)
       rfbSpriteRemoveCursorAllDev(pScreen);
     if (!rfbFB.cursorIsDrawn && cl->cursorWasChanged)

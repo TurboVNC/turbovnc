@@ -15,6 +15,7 @@
  *                                                      All Rights Reserved.
  *  Copyright (C) 2012-2013, 2016 Pierre Ossman for Cendio AB.
  *                                All Rights Reserved.
+ *  Copyright (C) 2021 AnatoScope SA. All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -122,7 +123,7 @@ static inline Bool is_visible(DrawablePtr drawable)
   BoxRec *boxTemp = REGION_EXTENTS(pScreen, reg);  \
   if ((boxTemp->x2 - boxTemp->x1) * (boxTemp->y2 - boxTemp->y1) != 0)  \
     for (clTemp = rfbClientHead; clTemp; clTemp = clTemp->next) {  \
-      if (!prfb->dontSendFramebufferUpdate ||  \
+      if (!prfb->dontSendFramebufferUpdate || prfb->cursorOwner != clTemp ||  \
           !clTemp->enableCursorShapeUpdates)  \
         REGION_UNION((pScreen), &clTemp->modifiedRegion,  \
                      &clTemp->modifiedRegion, reg);  \

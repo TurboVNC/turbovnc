@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2021 AnatoScope SA. All Rights Reserved.
  *  Copyright (C) 2010-2020 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 2011 Joel Martin
@@ -156,6 +157,8 @@ typedef struct {
                                         drawn */
   Bool dontSendFramebufferUpdate;    /* TRUE while removing or drawing the
                                         cursor */
+  struct rfbClientRec *cursorOwner;  /* The client that has moved the cursor
+                                        last */
   Bool blockUpdates;                 /* TRUE while resizing the screen */
 
   /* wrapped screen functions */
