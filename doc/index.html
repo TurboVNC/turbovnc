@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2020-12-12T09:37:37">
+<meta name="date" content="2021-01-26T19:12:12">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1629,18 +1629,18 @@ used with VirtualGL, this means that ALRs will mainly be sent for just
 the 3D screen regions.  This should be fine for most 3D applications, 
 since the 3D regions are the ones that are quality-critical.  The 
 default ALR behavior also prevents what might best be called the 
-&ldquo;blinking cursor dilemma.&rdquo;  Certain ill-behaved window 
-managers update a small region of the taskbar continuously, even though 
-none of the pixels in that region have changed.  Also, certain programs 
-have a blinking cursor that may update more frequently than the ALR 
-timeout.  Since an ALR is triggered based on a period of inactivity 
-relative to the last framebuffer update, these continuous updates 
-prevent an ALR from ever being sent. Fortunately, these ill-behaved 
-window managers and blinking cursors do not typically use 
-<code>X[Shm]PutImage()</code> to perform their updates, so the problem 
-is effectively worked around by limiting the ALR-eligible regions to 
-just the subset of regions that were drawn with 
-<code>X[Shm]PutImage()</code> and CopyRect.</p>
+&ldquo;blinking cursor dilemma.&rdquo;  Certain programs have a blinking 
+cursor that may update more frequently than the ALR timeout.  Since an 
+ALR is triggered based on a period of inactivity relative to the last 
+framebuffer update, these continuous updates prevent an ALR from ever 
+being sent. Fortunately, blinking cursors are not typically drawn using 
+<code>X[Shm]PutImage()</code>, so the problem is effectively worked 
+around by limiting the ALR-eligible regions to just the subset of 
+regions that were drawn with <code>X[Shm]PutImage()</code> and CopyRect.</p>
+
+<div class="important"><p class="important">
+NOTE: Ill-behaved applications that continuously render the same image will cause a variation of the &ldquo;blinking cursor dilemma&rdquo; and thus defeat ALR unless <a href="#InterframeComparison">interframe comparison</a><a name="idx0032"></a> is enabled.
+</p></div>
 
 <p>You can override the default ALR behavior, thus making all screen 
 regions eligible for ALR, by setting the <code>TVNC_ALRALL</code> 
@@ -1754,7 +1754,7 @@ extensions:</p>
          scheduler. OTP authentication is also useful for allowing temporary 
          access to a TurboVNC session for collaboration purposes.  The 
          <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-         Manager</a><a name="idx0032"></a> uses OTP authentication by default, 
+         Manager</a><a name="idx0033"></a> uses OTP authentication by default, 
          which allows it to securely authenticate with a TurboVNC session 
          without prompting for additional credentials.
     </dd>
@@ -2271,7 +2271,7 @@ VNC flavors.  You can use the TurboVNC Viewer to connect to a
 non-TurboVNC server (or vice versa), although this will generally result 
 in some decrease in performance, and features such as the 
 <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0033"></a> will not be available.</p>
+Manager</a><a name="idx0034"></a> will not be available.</p>
 
 <p>The following sections list additional things to bear in mind when 
 mixing TurboVNC with other VNC flavors.</p>
@@ -2942,7 +2942,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.turbojpeg=0&nbsp;/opt/TurboVNC/bin/vncviewer
         The TurboVNC Session Manager will pass these command-line arguments to 
         the <code>vncserver</code> script when starting a new TurboVNC session 
         on the TurboVNC host.  This can be used, for instance, to enable 
-        <a href="#ALR">automatic lossless refresh</a><a name="idx0034"></a>.
+        <a href="#ALR">automatic lossless refresh</a><a name="idx0035"></a>.
     </dd>
 </dl>
 

@@ -194,17 +194,23 @@ failure.)
 `/usr/bin/perl`, for compatibility with FreeBSD and other operating systems
 that install Perl into a directory other than **/usr/bin**.
 
-9. Fixed an issue in the Windows TurboVNC Viewer whereby, with certain
-client-side keyboard layouts (Spanish, for instance), an `XK_KP_Separator`
-(0xFFAC) key symbol was erroneously transmitted to the VNC server when the
-numeric keypad decimal key was pressed or released, even though the
-corresponding keyboard layout on a Un*x system would have generated an
-`XK_KP_Decimal` (0xFFAE) key symbol for the same key.
+9. Fixed an issue in the TurboVNC Viewer whereby, with certain client-side
+keyboard layouts (Spanish, for instance), an `XK_KP_Separator` (0xFFAC) key
+symbol was erroneously transmitted to the VNC server when the numeric keypad
+decimal key was pressed or released, even though the corresponding keyboard
+layout on a Un*x system would have generated an `XK_KP_Decimal` (0xFFAE) key
+symbol for the same key.
 
 10. Fixed an issue in the Linux/Un*x TurboVNC Viewer whereby, if the current
 keyboard layout generated an `XK_KP_Separator` (0xFFAC) key symbol for the
 numeric keypad decimal key, an `XK_comma` (0x002C) key symbol was erroneously
 transmitted to the VNC server instead.
+
+11. If interframe comparison is enabled, the automatic lossless refresh (ALR)
+feature in the TurboVNC Server now ignores redundant framebuffer updates
+(framebuffer updates whose contents are completely eliminated by interframe
+comparison.)  This prevents ALR from being defeated by ill-behaved applications
+that continuously render the same image.
 
 
 2.2.5

@@ -2000,14 +2000,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
         case KeyEvent.VK_NUMPAD9:     keysym = Keysyms.KP_9;  break;
         case KeyEvent.VK_SEPARATOR:   keysym = Keysyms.KP_SEPARATOR;  break;
         case KeyEvent.VK_DECIMAL:
-          // Use XK_KP_Separator instead of XK_KP_Decimal if the current locale
-          // uses a comma rather than period as a decimal symbol.
-          java.awt.im.InputContext ic = java.awt.im.InputContext.getInstance();
-          DecimalFormat df =
-            (DecimalFormat)DecimalFormat.getInstance(ic.getLocale());
-          DecimalFormatSymbols dfs = df.getDecimalFormatSymbols();
-          char sep = dfs.getDecimalSeparator();
-          if (sep == ',')
+          // Use XK_KP_Separator instead of XK_KP_Decimal if the current key
+          // map uses a comma rather than period as a decimal symbol.
+          if (key == ',')
             keysym = Keysyms.KP_SEPARATOR;
           else
             keysym = Keysyms.KP_DECIMAL;
