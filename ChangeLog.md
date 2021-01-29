@@ -21,6 +21,13 @@ provides similar levels of performance and more features, including some
 features (TLS encryption and SSH tunneling, most notably) that would have been
 difficult to implement in the native viewer.
 
+    Retiring the Windows TurboVNC Viewer has resulted in the following feature
+regressions for Windows clients, relative to TurboVNC 2.2.x:
+     - 3-button mouse emulation
+     - Bump scrolling in full-screen mode
+     - Wacom tablet support (although the Windows TurboVNC Viewer, owing to its
+use of the Wintab API, only supported older Wacom tablets)
+
 2. Added a screenshot feature to the TurboVNC Viewer that allows an image of
 the remote desktop to be saved to the client machine.
 
