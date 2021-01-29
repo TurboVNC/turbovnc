@@ -4,6 +4,7 @@
 
 /*
  *  Copyright (C) 2009-2021 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2021 AnatoScope SA.  All Rights Reserved.
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
@@ -51,7 +52,16 @@ char updateBuf[UPDATE_BUF_SIZE];
 int ublen;
 
 rfbClientPtr rfbClientHead = NULL;
-rfbClientPtr pointerClient = NULL;  /* Mutex for pointer events */
+/* The client that is currently dragging the pointer
+   This serves as a mutex for RFB pointer events. */
+rfbClientPtr pointerDragClient = NULL;
+/* The client that last moved the pointer
+   Other clients will automatically receive cursor updates via the traditional
+   mechanism of drawing the cursor into the framebuffer (AKA "server-side
+   cursor rendering") so they can track the pointer's movement regardless of
+   whether cursor shape updates (AKA "client-side cursor rendering") are
+   enabled. */
+rfbClientPtr pointerOwner = NULL;
 
 Bool rfbAlwaysShared = FALSE;
 Bool rfbNeverShared = FALSE;
@@ -548,8 +558,11 @@ void rfbClientConnectionGone(rfbClientPtr cl)
       deflateEnd(&cl->zsStruct[i]);
   }
 
-  if (pointerClient == cl)
-    pointerClient = NULL;
+  if (pointerDragClient == cl)
+    pointerDragClient = NULL;
+
+  if (pointerOwner == cl)
+    pointerOwner = NULL;
 
   REGION_UNINIT(pScreen, &cl->copyRegion);
   REGION_UNINIT(pScreen, &cl->modifiedRegion);
@@ -1222,18 +1235,29 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
       READ(((char *)&msg) + 1, sz_rfbPointerEventMsg - 1)
 
-      if (pointerClient && (pointerClient != cl))
+      if (pointerDragClient && (pointerDragClient != cl))
         return;
 
       if (msg.pe.buttonMask == 0)
-        pointerClient = NULL;
+        pointerDragClient = NULL;
       else
-        pointerClient = cl;
+        pointerDragClient = cl;
 
       if (!rfbViewOnly && !cl->viewOnly) {
         cl->cursorX = (int)Swap16IfLE(msg.pe.x);
         cl->cursorY = (int)Swap16IfLE(msg.pe.y);
+
+        /* If the pointer was most recently moved by another client, we set
+           pointerOwner to NULL here so that the client that is currently
+           moving the pointer (cl), assuming it understands cursor shape
+           updates, will receive a cursor shape update with the last known
+           pointer position. */
+        if (pointerOwner != cl)
+          pointerOwner = NULL;
+
         PtrAddEvent(msg.pe.buttonMask, cl->cursorX, cl->cursorY, cl);
+
+        pointerOwner = cl;
       }
       return;
 
@@ -1833,11 +1857,12 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   }
 
   /*
-   * If this client understands cursor shape updates, cursor should be
-   * removed from the framebuffer. Otherwise, make sure it's put up.
+   * If this client understands cursor shape updates and owns the pointer or is
+   * about to own the pointer, then the cursor should be removed from the
+   * framebuffer.  Otherwise, make sure it's drawn.
    */
 
-  if (cl->enableCursorShapeUpdates) {
+  if (cl->enableCursorShapeUpdates && (!pointerOwner || pointerOwner == cl)) {
     if (rfbFB.cursorIsDrawn)
       rfbSpriteRemoveCursorAllDev(pScreen);
     if (!rfbFB.cursorIsDrawn && cl->cursorWasChanged)

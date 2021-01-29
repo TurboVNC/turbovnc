@@ -585,9 +585,7 @@ public final class Params {
   "an image every time the cursor moves or changes shape.  Thus, using a " +
   "remotely rendered cursor can increase network \"chatter\" between host " +
   "and client significantly, which may cause performance problems on slow " +
-  "networks.  However, using a remotely rendered cursor can be advantageous " +
-  "with shared sessions, since it will allow you to see the cursor " +
-  "movements of other connected users.", true);
+  "networks.", true);
 
   public static StringParameter desktopSize =
   new StringParameter("DesktopSize",

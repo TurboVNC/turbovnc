@@ -152,6 +152,14 @@ applications.  Furthermore, the Linux/Un\*x TurboVNC Viewer no longer clones
 extended input devices other than those associated with Wacom tablets, since
 only Wacom tablet devices have been tested.
 
+22. If multiple VNC viewers are sharing a single TurboVNC session, the TurboVNC
+Server now automatically uses server-side cursor rendering to render and
+transmit cursor updates for all viewers other than the viewer that is moving
+the pointer (the "pointer owner"), thus allowing all viewers to track the
+pointer's position on the remote desktop.  (Previously, this was only possible
+if the viewers manually enabled server-side cursor rendering, i.e. if they
+disabled cursor shape updates.)
+
 
 2.2.6
 =====

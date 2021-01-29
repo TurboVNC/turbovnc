@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2020 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -838,7 +838,8 @@ extern int ublen;
 extern double gettime(void);
 
 extern rfbClientPtr rfbClientHead;
-extern rfbClientPtr pointerClient;
+extern rfbClientPtr pointerDragClient;
+extern rfbClientPtr pointerOwner;
 
 extern CARD32 rfbMaxIdleTimeout;
 extern CARD32 rfbIdleTimeout;
