@@ -23,11 +23,22 @@
  *  USA.
  */
 
-/* #define CONGESTION_DEBUG */
+/*
+ * This code implements congestion control in the same manner as TCP, in order
+ * to avoid excessive latency in the transport.  This is needed because "buffer
+ * bloat" is unfortunately still a very real problem.
+ *
+ * The basic principle is that described in RFC 5681 (TCP Congestion Control),
+ * with the addition of using the TCP Vegas algorithm.  The reason we use Vegas
+ * is that we run on top of a reliable transport, so we need a latency-based
+ * algorithm rather than a loss-based one.
+ */
 
 #include "rfb.h"
 #include <netinet/tcp.h>
 #include <sys/time.h>
+
+/* #define CONGESTION_DEBUG */
 
 
 /* This window should get us going fairly quickly on a network with decent
@@ -45,17 +56,8 @@ static const unsigned MAXIMUM_WINDOW = 4194304;
 
 
 static void HandleRTTPong(rfbClientPtr);
+static CARD32 congestionCallback(OsTimerPtr, CARD32, pointer);
 static void UpdateCongestion(rfbClientPtr);
-
-
-static CARD32 congestionCallback(OsTimerPtr timer, CARD32 time, pointer arg)
-{
-  rfbClientPtr cl = (rfbClientPtr)arg;
-
-  UpdateCongestion(cl);
-  cl->congestionTimerRunning = FALSE;
-  return 0;
-}
 
 
 static time_t msSince(const struct timeval *then)
@@ -81,51 +83,40 @@ void rfbInitFlowControl(rfbClientPtr cl)
 }
 
 
-/*
- * This is called whenever a client fence message is received.
- */
-void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len, const char *data)
+Bool rfbSendRTTPing(rfbClientPtr cl)
 {
-  unsigned char type;
+  struct RTTInfo *rttInfo;
+  char type;
 
-  if (flags & rfbFenceFlagRequest) {
+  if (!cl->enableFence)
+    return TRUE;
 
-    if (flags & rfbFenceFlagSyncNext) {
-      cl->pendingSyncFence = TRUE;
-      cl->fenceFlags = flags & (rfbFenceFlagBlockBefore |
-                                rfbFenceFlagBlockAfter |
-                                rfbFenceFlagSyncNext);
-      cl->fenceDataLen = len;
-      if (len > 0)
-        memcpy(cl->fenceData, data, len);
-      return;
-    }
+  /* We need to make sure that any old updates are already processed by the
+     time we get the response back.  This allows us to reliably throttle
+     back if the client or the network overloads. */
+  type = 1;
+  if (!rfbSendFence(cl, rfbFenceFlagRequest | rfbFenceFlagBlockBefore,
+                    sizeof(type), &type))
+    return FALSE;
 
-    /* We handle everything synchronously, so we trivially honor these
-       modes */
-    flags = flags & (rfbFenceFlagBlockBefore | rfbFenceFlagBlockAfter);
+  rttInfo = rfbAlloc0(sizeof(struct RTTInfo));
 
-    rfbSendFence(cl, flags, len, data);
-    return;
+  gettimeofday(&rttInfo->tv, NULL);
+  rttInfo->offset = cl->sockOffset;
+  rttInfo->inFlight = rttInfo->offset - cl->ackedOffset;
+
+  xorg_list_append(&rttInfo->entry, &cl->pings);
+
+  cl->sentOffset = rttInfo->offset;
+
+  /* Let some data flow before we adjust the settings */
+  if (!cl->congestionTimerRunning) {
+    cl->congestionTimer = TimerSet(cl->congestionTimer, 0,
+                                   min(cl->baseRTT * 2, 100),
+                                   congestionCallback, cl);
+    cl->congestionTimerRunning = TRUE;
   }
-
-  if (len < 1)
-    rfbLog("Fence of unusual size received\n");
-
-  type = data[0];
-
-  switch (type) {
-    case 0:
-      /* Initial dummy fence */
-      break;
-
-    case 1:
-      HandleRTTPong(cl);
-      break;
-
-    default:
-      rfbLog("Fence of unusual size received\n");
-  }
+  return TRUE;
 }
 
 
@@ -179,40 +170,67 @@ static void HandleRTTPong(rfbClientPtr cl)
 }
 
 
-Bool rfbSendRTTPing(rfbClientPtr cl)
+Bool rfbIsCongested(rfbClientPtr cl)
 {
+  int offset, count = 0;  time_t sockIdleTime;
   struct RTTInfo *rttInfo;
-  char type;
 
   if (!cl->enableFence)
-    return TRUE;
-
-  rttInfo = rfbAlloc0(sizeof(struct RTTInfo));
-
-  gettimeofday(&rttInfo->tv, NULL);
-  rttInfo->offset = cl->sockOffset;
-  rttInfo->inFlight = rttInfo->offset - cl->ackedOffset;
-
-  xorg_list_append(&rttInfo->entry, &cl->pings);
-
-  /* We need to make sure that any old updates are already processed by the
-     time we get the response back.  This allows us to reliably throttle
-     back if the client or the network overloads. */
-  type = 1;
-  if (!rfbSendFence(cl, rfbFenceFlagRequest | rfbFenceFlagBlockBefore,
-                    sizeof(type), &type))
     return FALSE;
 
-  cl->sentOffset = rttInfo->offset;
+  sockIdleTime = msSince(&cl->lastWrite);
 
-  /* Let some data flow before we adjust the settings */
-  if (!cl->congestionTimerRunning) {
-    cl->congestionTimer = TimerSet(cl->congestionTimer, 0,
-                                   min(cl->baseRTT * 2, 100),
-                                   congestionCallback, cl);
-    cl->congestionTimerRunning = TRUE;
+  /* Idle for too long? (and no data on the wire)
+
+     FIXME: This should really just be one baseRTT, but we're getting
+            problems with triggering the idle timeout on each update.
+            Maybe we need to use a moving average for the wire latency
+            instead of baseRTT. */
+  if ((cl->sentOffset == cl->ackedOffset) &&
+      (sockIdleTime > 2 * cl->baseRTT)) {
+
+#ifdef CONGESTION_DEBUG
+    if (cl->congWindow > INITIAL_WINDOW)
+      rfbLog("Reverting to initial window (%d KB) after %d ms\n",
+             INITIAL_WINDOW / 1024, sockIdleTime);
+#endif
+
+    /* Close congestion window and allow a transfer
+       FIXME: Reset baseRTT like Linux Vegas? */
+    cl->congWindow = min(INITIAL_WINDOW, cl->congWindow);
+    return FALSE;
   }
+
+  offset = cl->sockOffset;
+
+  /* FIXME: Should we compensate for non-update data?
+            (i.e. use sentOffset instead of offset) */
+  if ((offset - cl->ackedOffset) < cl->congWindow)
+    return FALSE;
+
+  /* If we just have one outstanding "ping", then that means the client has
+     started receiving our update.  In order to provide backward
+     compatibility with viewers that don't support the flow control
+     extensions, we allow another update here.  This could further clog up
+     the tubes, but if we reach this point, congestion control isn't really
+     working properly anyhow, as the wire would otherwise be idle for at
+     least RTT/2. */
+  xorg_list_for_each_entry(rttInfo, &cl->pings, entry)
+    count++;
+  if (count == 1)
+    return FALSE;
+
   return TRUE;
+}
+
+
+static CARD32 congestionCallback(OsTimerPtr timer, CARD32 time, pointer arg)
+{
+  rfbClientPtr cl = (rfbClientPtr)arg;
+
+  UpdateCongestion(cl);
+  cl->congestionTimerRunning = FALSE;
+  return 0;
 }
 
 
@@ -226,6 +244,10 @@ static void UpdateCongestion(rfbClientPtr cl)
 
   if (!cl->seenCongestion)
     return;
+
+  /* The goal is to have a congestion window that is slightly too large, since
+     a "perfect" congestion window cannot be distinguished from one that is too
+     small.  This translates to a goal of a few extra milliseconds of delay. */
 
   diff = cl->minRTT - cl->baseRTT;
 
@@ -311,57 +333,51 @@ Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
 }
 
 
-Bool rfbIsCongested(rfbClientPtr cl)
+/*
+ * This is called whenever a client fence message is received.
+ */
+void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len, const char *data)
 {
-  int offset, count = 0;  time_t sockIdleTime;
-  struct RTTInfo *rttInfo;
+  unsigned char type;
 
-  if (!cl->enableFence)
-    return FALSE;
+  if (flags & rfbFenceFlagRequest) {
 
-  sockIdleTime = msSince(&cl->lastWrite);
+    if (flags & rfbFenceFlagSyncNext) {
+      cl->pendingSyncFence = TRUE;
+      cl->fenceFlags = flags & (rfbFenceFlagBlockBefore |
+                                rfbFenceFlagBlockAfter |
+                                rfbFenceFlagSyncNext);
+      cl->fenceDataLen = len;
+      if (len > 0)
+        memcpy(cl->fenceData, data, len);
+      return;
+    }
 
-  /* Idle for too long? (and no data on the wire)
+    /* We handle everything synchronously, so we trivially honor these
+       modes */
+    flags = flags & (rfbFenceFlagBlockBefore | rfbFenceFlagBlockAfter);
 
-     FIXME: This should really just be one baseRTT, but we're getting
-            problems with triggering the idle timeout on each update.
-            Maybe we need to use a moving average for the wire latency
-            instead of baseRTT. */
-  if ((cl->sentOffset == cl->ackedOffset) &&
-      (sockIdleTime > 2 * cl->baseRTT)) {
-
-#ifdef CONGESTION_DEBUG
-    if (cl->congWindow > INITIAL_WINDOW)
-      rfbLog("Reverting to initial window (%d KB) after %d ms\n",
-             INITIAL_WINDOW / 1024, sockIdleTime);
-#endif
-
-    /* Close congestion window and allow a transfer
-       FIXME: Reset baseRTT like Linux Vegas? */
-    cl->congWindow = min(INITIAL_WINDOW, cl->congWindow);
-    return FALSE;
+    rfbSendFence(cl, flags, len, data);
+    return;
   }
 
-  offset = cl->sockOffset;
+  if (len < 1)
+    rfbLog("Fence of unusual size received\n");
 
-  /* FIXME: Should we compensate for non-update data?
-            (i.e. use sentOffset instead of offset) */
-  if ((offset - cl->ackedOffset) < cl->congWindow)
-    return FALSE;
+  type = data[0];
 
-  /* If we just have one outstanding "ping", then that means the client has
-     started receiving our update.  In order to provide backward
-     compatibility with viewers that don't support the flow control
-     extensions, we allow another update here.  This could further clog up
-     the tubes, but if we reach this point, congestion control isn't really
-     working properly anyhow, as the wire would otherwise be idle for at
-     least RTT/2. */
-  xorg_list_for_each_entry(rttInfo, &cl->pings, entry)
-    count++;
-  if (count == 1)
-    return FALSE;
+  switch (type) {
+    case 0:
+      /* Initial dummy fence */
+      break;
 
-  return TRUE;
+    case 1:
+      HandleRTTPong(cl);
+      break;
+
+    default:
+      rfbLog("Fence of unusual size received\n");
+  }
 }
 
 
