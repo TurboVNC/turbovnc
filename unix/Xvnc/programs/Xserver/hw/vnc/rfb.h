@@ -198,6 +198,13 @@ typedef struct {
   } u;
 } rfbSockAddr;
 
+struct RTTInfo {
+  struct timeval tv;
+  int offset;
+  unsigned inFlight;
+  struct xorg_list entry;
+};
+
 
 /*
  * rfbTranslateFnType is the type of translation functions.
@@ -437,7 +444,7 @@ typedef struct rfbClientRec {
   int ackedOffset, sentOffset, sockOffset;
   unsigned minRTT;
   Bool seenCongestion;
-  unsigned pingCounter;
+  struct xorg_list pings;
   OsTimerPtr updateTimer;
   OsTimerPtr congestionTimer;
   Bool congestionTimerRunning;

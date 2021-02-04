@@ -5,6 +5,7 @@
 /*
  *  Copyright (C) 2009-2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2021 AnatoScope SA.  All Rights Reserved.
+ *  Copyright (C) 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
@@ -496,6 +497,7 @@ static rfbClientPtr rfbNewClient(int sock)
   cl->baseRTT = cl->minRTT = (unsigned)-1;
   gettimeofday(&cl->lastWrite, NULL);
   REGION_INIT(pScreen, &cl->cuRegion, NullBox, 0);
+  xorg_list_init(&cl->pings);
 
   if (rfbInterframe == 1) {
     if (!InterframeOn(cl)) {
@@ -517,6 +519,7 @@ static rfbClientPtr rfbNewClient(int sock)
 void rfbClientConnectionGone(rfbClientPtr cl)
 {
   int i;
+  struct RTTInfo *rttInfo, *tmp;
 
   if (cl->prev)
     cl->prev->next = cl->next;
@@ -574,6 +577,11 @@ void rfbClientConnectionGone(rfbClientPtr cl)
   rfbFreeZrleData(cl);
 
   free(cl->cutText);
+
+  xorg_list_for_each_entry_safe(rttInfo, tmp, &cl->pings, entry) {
+    xorg_list_del(&rttInfo->entry);
+    free(rttInfo);
+  }
 
   InterframeOff(cl);
 
@@ -1140,7 +1148,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       }
 
       if (cl->enableFence && firstFence) {
-        if (!rfbSendFence(cl, rfbFenceFlagRequest, 0, NULL))
+        char type = 0;
+        if (!rfbSendFence(cl, rfbFenceFlagRequest, sizeof(type), &type))
           return;
       }
 

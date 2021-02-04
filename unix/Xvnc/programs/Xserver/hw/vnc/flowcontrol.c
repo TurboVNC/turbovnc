@@ -5,7 +5,7 @@
 /*
  *  Copyright (C) 2012, 2014, 2017-2018, 2021 D. R. Commander.
  *                                            All Rights Reserved.
- *  Copyright (C) 2011 Pierre Ossman for Cendio AB.  All Rights Reserved.
+ *  Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,14 +44,7 @@ static const unsigned MINIMUM_WINDOW = 4096;
 static const unsigned MAXIMUM_WINDOW = 4194304;
 
 
-typedef struct {
-  struct timeval tv;
-  int offset;
-  unsigned inFlight;
-} RTTInfo;
-
-
-static void HandleRTTPong(rfbClientPtr, RTTInfo *);
+static void HandleRTTPong(rfbClientPtr);
 static void UpdateCongestion(rfbClientPtr);
 
 
@@ -93,7 +86,7 @@ void rfbInitFlowControl(rfbClientPtr cl)
  */
 void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len, const char *data)
 {
-  RTTInfo rttInfo;
+  unsigned char type;
 
   if (flags & rfbFenceFlagRequest) {
 
@@ -116,14 +109,18 @@ void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len, const char *data)
     return;
   }
 
-  switch (len) {
+  if (len < 1)
+    rfbLog("Fence of unusual size received\n");
+
+  type = data[0];
+
+  switch (type) {
     case 0:
       /* Initial dummy fence */
       break;
 
-    case sizeof(RTTInfo):
-      memcpy(&rttInfo, data, sizeof(RTTInfo));
-      HandleRTTPong(cl, &rttInfo);
+    case 1:
+      HandleRTTPong(cl);
       break;
 
     default:
@@ -132,11 +129,16 @@ void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len, const char *data)
 }
 
 
-static void HandleRTTPong(rfbClientPtr cl, RTTInfo *rttInfo)
+static void HandleRTTPong(rfbClientPtr cl)
 {
+  struct RTTInfo *rttInfo;
   unsigned rtt, delay;
 
-  cl->pingCounter--;
+  if (xorg_list_is_empty(&cl->pings))
+    return;
+
+  rttInfo = xorg_list_first_entry(&cl->pings, struct RTTInfo, entry);
+  xorg_list_del(&rttInfo->entry);
 
   rtt = msSince(&rttInfo->tv);
   if (rtt < 1)
@@ -172,32 +174,36 @@ static void HandleRTTPong(rfbClientPtr cl, RTTInfo *rttInfo)
      (and even approve of) bursts. */
   if (rtt < cl->minRTT)
     cl->minRTT = rtt;
+
+  free(rttInfo);
 }
 
 
 Bool rfbSendRTTPing(rfbClientPtr cl)
 {
-  RTTInfo rttInfo;
+  struct RTTInfo *rttInfo;
+  char type;
 
   if (!cl->enableFence)
     return TRUE;
 
-  memset(&rttInfo, 0, sizeof(RTTInfo));
+  rttInfo = rfbAlloc0(sizeof(struct RTTInfo));
 
-  gettimeofday(&rttInfo.tv, NULL);
-  rttInfo.offset = cl->sockOffset;
-  rttInfo.inFlight = rttInfo.offset - cl->ackedOffset;
+  gettimeofday(&rttInfo->tv, NULL);
+  rttInfo->offset = cl->sockOffset;
+  rttInfo->inFlight = rttInfo->offset - cl->ackedOffset;
+
+  xorg_list_append(&rttInfo->entry, &cl->pings);
 
   /* We need to make sure that any old updates are already processed by the
      time we get the response back.  This allows us to reliably throttle
      back if the client or the network overloads. */
+  type = 1;
   if (!rfbSendFence(cl, rfbFenceFlagRequest | rfbFenceFlagBlockBefore,
-                    sizeof(RTTInfo), (const char *)&rttInfo))
+                    sizeof(type), &type))
     return FALSE;
 
-  cl->pingCounter++;
-
-  cl->sentOffset = rttInfo.offset;
+  cl->sentOffset = rttInfo->offset;
 
   /* Let some data flow before we adjust the settings */
   if (!cl->congestionTimerRunning) {
@@ -307,7 +313,8 @@ Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
 
 Bool rfbIsCongested(rfbClientPtr cl)
 {
-  int offset;  time_t sockIdleTime;
+  int offset, count = 0;  time_t sockIdleTime;
+  struct RTTInfo *rttInfo;
 
   if (!cl->enableFence)
     return FALSE;
@@ -349,7 +356,9 @@ Bool rfbIsCongested(rfbClientPtr cl)
      the tubes, but if we reach this point, congestion control isn't really
      working properly anyhow, as the wire would otherwise be idle for at
      least RTT/2. */
-  if (cl->pingCounter == 1)
+  xorg_list_for_each_entry(rttInfo, &cl->pings, entry)
+    count++;
+  if (count == 1)
     return FALSE;
 
   return TRUE;
