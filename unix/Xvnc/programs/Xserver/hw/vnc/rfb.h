@@ -4,6 +4,7 @@
 
 /*
  *  Copyright (C) 2010-2021 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -200,8 +201,8 @@ typedef struct {
 
 struct RTTInfo {
   struct timeval tv;
-  int offset;
-  unsigned inFlight;
+  unsigned pos, extra;
+  char congested;
   struct xorg_list entry;
 };
 
@@ -439,16 +440,18 @@ typedef struct rfbClientRec {
   unsigned fenceDataLen;
   char fenceData[64];
 
-  unsigned baseRTT;
-  unsigned congWindow;
-  int ackedOffset, sentOffset, sockOffset;
-  unsigned minRTT;
-  Bool seenCongestion;
+  unsigned lastPosition, extraBuffer;
+  struct timeval lastUpdate, lastSent;
+  unsigned baseRTT, congWindow;
+  Bool inSlowStart;
+  int sockOffset;
   struct xorg_list pings;
-  OsTimerPtr updateTimer;
   OsTimerPtr congestionTimer;
-  Bool congestionTimerRunning;
-  struct timeval lastWrite;
+  struct RTTInfo lastPong;
+  struct timeval lastPongArrival;
+  int measurements;
+  struct timeval lastAdjustment;
+  unsigned minRTT, minCongestedRTT;
 
   Bool pendingDesktopResize, pendingExtDesktopResize;
   int reason, result;
@@ -736,6 +739,7 @@ extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
 /* flowcontrol.c */
 
 extern void rfbInitFlowControl(rfbClientPtr cl);
+extern void rfbUpdatePosition(rfbClientPtr cl, unsigned pos);
 extern Bool rfbSendRTTPing(rfbClientPtr cl);
 extern Bool rfbIsCongested(rfbClientPtr cl);
 extern Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,

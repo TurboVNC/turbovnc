@@ -167,6 +167,10 @@ pointer's position on the remote desktop.  (Previously, this was only possible
 if the viewers manually enabled server-side cursor rendering, i.e. if they
 disabled cursor shape updates.)
 
+23. The TurboVNC Server now includes overhauled congestion control algorithms
+from TigerVNC v1.9.0 and later, for improved performance on
+high-latency/low-bandwidth networks.
+
 
 2.2.6
 =====

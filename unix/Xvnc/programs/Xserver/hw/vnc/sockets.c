@@ -590,7 +590,6 @@ int WriteExact(rfbClientPtr cl, char *buf, int len)
     }
   }
 
-  gettimeofday(&cl->lastWrite, NULL);
   cl->sockOffset += bytesWritten;
 
   return 1;

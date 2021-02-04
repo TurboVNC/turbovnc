@@ -236,15 +236,6 @@ static CARD32 alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 }
 
 
-static CARD32 updateCallback(OsTimerPtr timer, CARD32 time, pointer arg)
-{
-  rfbClientPtr cl = (rfbClientPtr)arg;
-
-  rfbSendFramebufferUpdate(cl);
-  return 0;
-}
-
-
 /*
  * Interframe comparison
  */
@@ -494,8 +485,7 @@ static rfbClientPtr rfbNewClient(int sock)
   if (rfbIdleTimeout > 0)
     IdleTimerCancel();
 
-  cl->baseRTT = cl->minRTT = (unsigned)-1;
-  gettimeofday(&cl->lastWrite, NULL);
+  cl->baseRTT = cl->minRTT = cl->minCongestedRTT = (unsigned)-1;
   REGION_INIT(pScreen, &cl->cuRegion, NullBox, 0);
   xorg_list_init(&cl->pings);
 
@@ -530,7 +520,6 @@ void rfbClientConnectionGone(rfbClientPtr cl)
 
   TimerFree(cl->alrTimer);
   TimerFree(cl->deferredUpdateTimer);
-  TimerFree(cl->updateTimer);
   TimerFree(cl->congestionTimer);
 
 #ifdef XVNC_AuthPAM
@@ -1819,7 +1808,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   Bool redundantUpdate = FALSE;
   double tUpdateStart = 0.0;
 
-  TimerCancel(cl->updateTimer);
+  rfbUpdatePosition(cl, cl->sockOffset);
 
   /*
    * We're in the middle of processing a command that's supposed to be
@@ -1839,10 +1828,8 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   /* Check that we actually have some space on the link and retry in a
      bit if things are congested. */
 
-  if (rfbCongestionControl && rfbIsCongested(cl)) {
-    cl->updateTimer = TimerSet(cl->updateTimer, 0, 50, updateCallback, cl);
+  if (rfbCongestionControl && rfbIsCongested(cl))
     return TRUE;
-  }
 
   /* In continuous mode, we will be outputting at least three distinct
      messages.  We need to aggregate these in order to not clog up TCP's
@@ -2283,6 +2270,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   }
 
   rfbUncorkSock(cl->sock);
+  rfbUpdatePosition(cl, cl->sockOffset);
   return TRUE;
 
   abort:
