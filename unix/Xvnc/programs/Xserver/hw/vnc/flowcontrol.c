@@ -3,7 +3,8 @@
  */
 
 /*
- *  Copyright (C) 2012, 2014, 2017-2018 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2014, 2017-2018, 2021 D. R. Commander.
+ *                                            All Rights Reserved.
  *  Copyright (C) 2011 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -212,6 +213,10 @@ Bool rfbSendRTTPing(rfbClientPtr cl)
 static void UpdateCongestion(rfbClientPtr cl)
 {
   unsigned diff;
+#if defined(CONGESTION_DEBUG) && defined(TCP_INFO)
+  struct tcp_info tcp_info;
+  socklen_t tcp_info_length;
+#endif
 
   if (!cl->seenCongestion)
     return;
@@ -243,9 +248,6 @@ static void UpdateCongestion(rfbClientPtr cl)
          cl->congWindow * 8.0 / cl->baseRTT / 1000.0);
 
 #ifdef TCP_INFO
-  struct tcp_info tcp_info;
-  socklen_t tcp_info_length;
-
   tcp_info_length = sizeof(tcp_info);
   if (getsockopt(cl->sock, SOL_TCP, TCP_INFO, (void *)&tcp_info,
                  &tcp_info_length) == 0) {
