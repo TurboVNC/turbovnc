@@ -1668,7 +1668,6 @@ Bool rfbAuthConsiderBlocking(char *host)
   }
   if (!fail) {
     fail = (rfbFailInfo *)rfbAlloc0(sizeof(rfbFailInfo));
-    memset(fail, 0, sizeof(rfbFailInfo));
     fail->host = strdup(host);
     xorg_list_append(&fail->entry, &rfbAuthFails);
   }
