@@ -198,7 +198,9 @@ static CARD32 alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
       REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion, &tmpRegion);
     }
 
+    cl->inALR = TRUE;
     if (!rfbSendFramebufferUpdate(cl)) return 0;
+    cl->inALR = FALSE;
 
     REGION_EMPTY(pScreen, &cl->lossyRegion);
     REGION_EMPTY(pScreen, &cl->alrRegion);
@@ -1795,7 +1797,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   /* Check that we actually have some space on the link and retry in a
      bit if things are congested. */
 
-  if (rfbCongestionControl && rfbIsCongested(cl)) {
+  if (rfbCongestionControl && rfbIsCongested(cl) && !cl->inALR) {
     cl->updateTimer = TimerSet(cl->updateTimer, 0, 50, updateCallback, cl);
     return TRUE;
   }
@@ -1943,7 +1945,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
     ClipToScreen(pScreen, updateRegion);
   }
 
-  if (cl->compareFB) {
+  if (cl->compareFB && !cl->inALR) {
     if ((cl->ifRegion.extents.x2 > pScreen->width ||
          cl->ifRegion.extents.y2 > pScreen->height) &&
         REGION_NUM_RECTS(&cl->ifRegion) > 0)
@@ -2162,7 +2164,7 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
     }
   }
 
-  if (cl->compareFB) {
+  if (cl->compareFB && !cl->inALR) {
     if (rfbInterframeDebug) {
       for (i = 0; i < REGION_NUM_RECTS(&idRegion); i++) {
         int x = REGION_RECTS(&idRegion)[i].x1;
@@ -2225,16 +2227,22 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
     }
   }
 
-  if (rfbAutoLosslessRefresh > 0.0 && !redundantUpdate &&
+  if (rfbAutoLosslessRefresh > 0.0 && !redundantUpdate && !cl->inALR &&
       (!putImageOnly || REGION_NOTEMPTY(pScreen, &cl->alrEligibleRegion) ||
        cl->firstUpdate)) {
+    CARD32 timeout = (CARD32)(rfbAutoLosslessRefresh * 1000.0);
+
     if (putImageOnly)
       REGION_UNION(pScreen, &cl->alrRegion, &cl->alrRegion,
                    &cl->alrEligibleRegion);
     REGION_EMPTY(pScreen, &cl->alrEligibleRegion);
-    cl->alrTimer = TimerSet(cl->alrTimer, 0,
-                            (CARD32)(rfbAutoLosslessRefresh * 1000.0),
-                            alrCallback, cl);
+    /* If the ALR timeout is less than the network round-trip time, then
+       temporarily increase the timeout to avoid thrashing. */
+    if (cl->minRTT != (unsigned)-1)
+      timeout = max(timeout, (CARD32)((double)cl->minRTT * 1.5));
+    else if (cl->baseRTT != (unsigned)-1)
+      timeout = max(timeout, (CARD32)((double)cl->baseRTT * 1.5));
+    cl->alrTimer = TimerSet(cl->alrTimer, 0, timeout, alrCallback, cl);
   }
 
   rfbUncorkSock(cl->sock);

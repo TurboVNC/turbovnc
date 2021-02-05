@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2020 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -405,7 +405,7 @@ typedef struct rfbClientRec {
 
   int cursorX, cursorY;             /* client's cursor position */
 
-  Bool firstUpdate;
+  Bool firstUpdate, inALR;
   OsTimerPtr alrTimer;
   RegionRec lossyRegion, alrRegion, alrEligibleRegion;
 

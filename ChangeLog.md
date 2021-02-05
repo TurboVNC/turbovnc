@@ -57,6 +57,16 @@ feature in the TurboVNC Server now ignores redundant framebuffer updates
 comparison.)  This prevents ALR from being defeated by ill-behaved applications
 that continuously render the same image.
 
+12. Fixed an issue in the TurboVNC Server whereby, when connecting over a
+high-latency or low-bandwidth network with the TurboVNC Viewer or another VNC
+viewer that supports the RFB flow control extensions, the automatic lossless
+refresh (ALR) feature sometimes failed to send an ALR.
+
+13. To prevent performance degradation on high-latency networks while using the
+automatic lossless refresh (ALR) feature, the TurboVNC Server now temporarily
+increases the ALR timeout to ensure that the timeout is always greater than the
+network round-trip time measured by the RFB flow control extensions.
+
 
 2.2.5
 =====
