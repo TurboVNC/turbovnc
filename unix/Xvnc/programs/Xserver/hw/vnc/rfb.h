@@ -416,7 +416,7 @@ typedef struct rfbClientRec {
 
   int cursorX, cursorY;             /* client's cursor position */
 
-  Bool firstUpdate;
+  Bool firstUpdate, inALR;
   OsTimerPtr alrTimer;
   RegionRec lossyRegion, alrRegion, alrEligibleRegion;
 
