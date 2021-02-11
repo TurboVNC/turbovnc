@@ -40,6 +40,8 @@
 ##                  X.509 encryption
 ##  $serverArgs  -- additional arguments to pass to Xvnc (refer to the Xvnc man
 ##                  page for a list of accepted arguments)
+##  $maxClients  -- Set the maximum number of clients allowed to connect to the 
+##                  server.  Acceptable values are 64, 128, 256, 512, 1024, or 2048
 ##
 
 ## These settings are the default.  Uncomment and edit to change.
@@ -60,6 +62,7 @@
 # $pamSession = 0;
 # $multiThread = 1;
 # $numThreads = 0;
+# $maxClients = 256;
 # $serverArgs = "";
 
 ## Uncomment this to use the X font server by default, rather than a static

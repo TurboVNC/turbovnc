@@ -584,6 +584,7 @@ $cmd .= " -dridir $dridir" if ($dridir);
 $cmd .= " -registrydir $registrydir" if ($registrydir);
 $cmd .= " -nomt" if (!$multiThread);
 $cmd .= " -nthreads $numThreads" if ($numThreads);
+$cmd .= " -maxclients $maxClients" if ($maxClients);
 $cmd .= " $serverArgs" if ($serverArgs);
 
 foreach $arg (@ARGV) {
@@ -1166,7 +1167,8 @@ sub ReadConfiguration
        passwdFile
        x509CertFile
        x509KeyFile
-       serverArgs);
+       serverArgs
+       maxClients);
 
   if (open CONF, "<$configFile") {
     while (<CONF>) {
