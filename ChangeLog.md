@@ -67,6 +67,13 @@ automatic lossless refresh (ALR) feature, the TurboVNC Server now temporarily
 increases the ALR timeout to ensure that the timeout is always greater than the
 network round-trip time measured by the RFB flow control extensions.
 
+14. The `vncserver` script now checks for the swrast DRI driver under
+**/usr/lib/aarch64-linux-gnu**, **/usr/lib/arm-linux-gnueabihf**, and
+**/usr/lib/arm-linux-gnueabi**, the system library paths used by Debian-based
+Arm Linux distributions.  This fixes an issue whereby the TurboVNC Server's
+built-in software OpenGL implementation failed to initialize on such systems,
+which prevented compositing window managers such as GNOME 3 from launching.
+
 
 2.2.5
 =====
