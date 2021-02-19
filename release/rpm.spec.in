@@ -109,7 +109,7 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  JAVA_KEY_PASS_ARG="-DJAVA_KEY_PASS=%{java_key_pass}"
 #-->%endif
 #-->%if %{?java_tsa_url:1}%{!?java_tsa_url:0}
-#-->  JAVA_TSA_URL_ARG="-DJAVA_TSA_URL=%{java_tsa_url}"
+#-->  JAVA_TSA_URL_ARG="-DJAVA_TSA_URL:STRING=%{java_tsa_url}"
 #-->%endif
 #-->%if %{?java_tsa_alg:1}%{!?java_tsa_alg:0}
 #-->  JAVA_TSA_ALG_ARG="-DJAVA_TSA_ALG=%{java_tsa_alg}"
