@@ -166,10 +166,12 @@ if ($bits eq "64") {
               '/usr/lib/x86_64-linux-gnu/dri',
               '/usr/lib/xorg/modules/dri/amd64',
               '/usr/lib/powerpc64-linux-gnu/dri',
-              '/usr/lib/powerpc64le-linux-gnu/dri');
+              '/usr/lib/powerpc64le-linux-gnu/dri',
+              '/usr/lib/aarch64-linux-gnu/dri');
 } else {
   @dridirs = ('/usr/lib/dri', '/usr/lib32/dri', '/usr/lib/i386-linux-gnu/dri',
-              '/usr/lib/xorg/modules/dri');
+              '/usr/lib/xorg/modules/dri', '/usr/lib/arm-linux-gnueabihf/dri',
+              '/usr/lib/arm-linux-gnueabi/dri');
 }
 push(@dridirs, '/usr/local/lib/dri');
 foreach $_dridir (@dridirs) {
