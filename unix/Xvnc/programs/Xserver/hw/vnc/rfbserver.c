@@ -2413,6 +2413,9 @@ Bool rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w, int h)
   char *fbptr =
     (cl->fb + (rfbFB.paddedWidthInBytes * y) + (x * (rfbFB.bitsPerPixel / 8)));
 
+  if (!h || !w)
+	  return TRUE; /* nothing to send */
+  
   /* Flush the buffer to guarantee correct alignment for translateFn(). */
   if (ublen > 0) {
     if (!rfbSendUpdateBuf(cl))
