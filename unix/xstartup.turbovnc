@@ -20,7 +20,21 @@
 #  USA.
 
 unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADDRESS
+DBUS_LAUNCH=
+if [ -x /usr/bin/dbus-launch ]; then
+  DBUS_LAUNCH=/usr/bin/dbus-launch
+elif [ -x /usr/local/bin/dbus-launch ]; then
+  DBUS_LAUNCH=/usr/local/bin/dbus-launch
+fi
+if [ "$DBUS_LAUNCH" != "" ]; then
+  eval `$DBUS_LAUNCH --sh-syntax --exit-with-session`
+  export DBUS_SESSION_BUS_ADDRESS
+  echo "xstartup.turbovnc: Creating new session bus instance:"
+  echo "xstartup.turbovnc:   $DBUS_SESSION_BUS_ADDRESS"
+else
+  unset DBUS_SESSION_BUS_ADDRESS
+fi
+unset DBUS_LAUNCH
 XDG_SESSION_TYPE=x11;  export XDG_SESSION_TYPE
 
 OS=`uname -s`
