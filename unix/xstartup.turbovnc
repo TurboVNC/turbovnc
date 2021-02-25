@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  Copyright (C) 2014-2018, 2020 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2014-2018, 2021 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
 #  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
 #
@@ -52,7 +52,7 @@ case "$TVNC_WM" in
     # TODO: Automate this somehow
     if [ "$TVNC_WM" = "2d:noxsession" ]; then
       NOXSESSION=1
-      TVNC_WM=`echo $TVNC_WM | $SED -E 's/:noxsession$//g'`
+      TVNC_WM=`echo $TVNC_WM | $SED -r 's/:noxsession$//g'`
     fi
     # RHEL 7, Fedora: gnome-classic
     # Ubuntu 12: ubuntu-2d
@@ -71,7 +71,7 @@ case "$TVNC_WM" in
     case "$TVNC_WM" in
       *:noxsession)
         NOXSESSION=1
-        TVNC_WM=`echo $TVNC_WM | $SED -E 's/:noxsession$//g'`
+        TVNC_WM=`echo $TVNC_WM | $SED -r 's/:noxsession$//g'`
         ;;
       *)
         ;;
@@ -87,7 +87,7 @@ case "$TVNC_WM" in
       # manager's startup script (e.g. mate-session, gnome-session) to be
       # specified using -wm / $wm, but if there is a matching session desktop
       # file for it, we use that instead.
-      SESSION=`echo $TVNC_WM | $SED -E 's/^.*\/|-session$//g'`
+      SESSION=`echo $TVNC_WM | $SED -r 's/^.*\/|-session$//g'`
       if [ "$XSESSIONSDIR" != "" -a -f "$XSESSIONSDIR/$SESSION.desktop" ]; then
         DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
         unset TVNC_WM
@@ -103,7 +103,7 @@ if [ "$DESKTOP_SESSION" != "" ]; then
   echo "xstartup.turbovnc: Using '$DESKTOP_SESSION' window manager in"
   echo "xstartup.turbovnc:   $XSESSIONSDIR/$DESKTOP_SESSION.desktop"
   if $GREP -qE "^Exec\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop; then
-    TVNC_WM=`$GREP -E "^Exec\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop | $SED -E 's/^[^=]+=[[:space:]]*//g'`
+    TVNC_WM=`$GREP -E "^Exec\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop | $SED -r 's/^[^=]+=[[:space:]]*//g'`
     if [ "$NOXSESSION" != "1" ]; then
       if [ -x /etc/X11/xinit/Xsession ]; then
         XSESSION=/etc/X11/xinit/Xsession
@@ -114,7 +114,7 @@ if [ "$DESKTOP_SESSION" != "" ]; then
   fi
   for KEY in DesktopNames X-LightDM-DesktopName; do
     if $GREP -qE "^$KEY\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop; then
-      XDG_CURRENT_DESKTOP=`$GREP -E "^$KEY\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop | $SED -E 's/(^[^=]+=[[:space:]]*|;$)//g' | $SED -E 's/;/:/g'`
+      XDG_CURRENT_DESKTOP=`$GREP -E "^$KEY\s*=" $XSESSIONSDIR/$DESKTOP_SESSION.desktop | $SED -r 's/(^[^=]+=[[:space:]]*|;$)//g' | $SED -r 's/;/:/g'`
       export XDG_CURRENT_DESKTOP
     fi
   done
