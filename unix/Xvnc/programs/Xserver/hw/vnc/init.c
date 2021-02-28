@@ -1722,7 +1722,6 @@ void ddxUseMsg(void)
   ErrorF("-registrydir dir       specify directory containing protocol.txt\n");
   ErrorF("-verbose               print all X.org errors, warnings, and messages\n");
   ErrorF("-version               report Xvnc version on stderr\n\n");
-  exit(1);
 }
 
 
