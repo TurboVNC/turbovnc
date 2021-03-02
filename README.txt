@@ -25,7 +25,7 @@ Legal
 TurboVNC is
 
     Copyright (C) 2009-2021 D. R. Commander
-    Copyright (C) 2011-2016 Brian P. Hinz
+    Copyright (C) 2011-2019 Brian P. Hinz
     Copyright (C) 2010 University Corporation for Atmospheric Research
     Copyright (C) 2004-2008 Sun Microsystems, Inc.
     Copyright (C) 2004 Landmark Graphics Corporation
@@ -36,7 +36,7 @@ which are
     Copyright (C) 2011 Gernot Tenchio
     Copyright (C) 2010 TigerVNC Team
     Copyright (C) 2010 m-privacy GmbH
-    Copyright (C) 2009-2016 Pierre Ossman for Cendio AB
+    Copyright (C) 2009-2018 Pierre Ossman for Cendio AB
     Copyright (C) 2006 OCCAM Financial Technology
     Copyright (C) 2005-2011 Martin Koegler
     Copyright (C) 2004-2009 Red Hat, Inc.
