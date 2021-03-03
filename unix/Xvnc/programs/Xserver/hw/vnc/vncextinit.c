@@ -182,9 +182,8 @@ static int ProcVncExtSetParam(ClientPtr client)
                 toupper(value[0]) == 'T' || toupper(value[0]) == 'Y') {
               *(Bool *)params[i].ptr = TRUE;
               rep.success = 1;
-            }
-            else if (!strcmp(value, "0") || !strncasecmp(value, "of", 2) ||
-                     toupper(value[0]) == 'F' || toupper(value[0]) == 'N') {
+            } else if (!strcmp(value, "0") || !strncasecmp(value, "of", 2) ||
+                       toupper(value[0]) == 'F' || toupper(value[0]) == 'N') {
               *(Bool *)params[i].ptr = FALSE;
               rep.success = 1;
             }
@@ -193,14 +192,12 @@ static int ProcVncExtSetParam(ClientPtr client)
             if (!strcmp(value, "-1") || toupper(value[0]) == 'A') {
               *(int *)params[i].ptr = -1;
               rep.success = 1;
-            }
-            else if (!strcmp(value, "1") || !strncasecmp(value, "on", 2) ||
-                     toupper(value[0]) == 'T' || toupper(value[0]) == 'Y') {
+            } else if (!strcmp(value, "1") || !strncasecmp(value, "on", 2) ||
+                       toupper(value[0]) == 'T' || toupper(value[0]) == 'Y') {
               *(int *)params[i].ptr = 1;
               rep.success = 1;
-            }
-            else if (!strcmp(value, "0") || !strncasecmp(value, "of", 2) ||
-                     toupper(value[0]) == 'F' || toupper(value[0]) == 'N') {
+            } else if (!strcmp(value, "0") || !strncasecmp(value, "of", 2) ||
+                       toupper(value[0]) == 'F' || toupper(value[0]) == 'N') {
               *(int *)params[i].ptr = 0;
               rep.success = 1;
             }
