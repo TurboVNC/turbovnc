@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2020 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -199,25 +199,32 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   /***** TurboVNC connection options *****/
 
+  #define REQUIRE_ARG() {  \
+    if (i + 1 >= argc) {  \
+      UseMsg();  \
+      exit(1);  \
+    }  \
+  }
+
   if (strcasecmp(argv[i], "-alwaysshared") == 0) {
     rfbAlwaysShared = TRUE;
     return 1;
   }
 
   if (strcasecmp(argv[i], "-capture") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     captureFile = strdup(argv[i + 1]);
     return 2;
   }
 
   if (strcasecmp(argv[i], "-deferupdate") == 0) {  /* -deferupdate ms */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbDeferUpdateTime = atoi(argv[i + 1]);
     return 2;
   }
 
   if (strcasecmp(argv[i], "-desktop") == 0) {  /* -desktop desktop-name */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     desktopName = argv[i + 1];
     return 2;
   }
@@ -233,19 +240,19 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 
   if (strcasecmp(argv[i], "-httpd") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     httpDir = argv[i + 1];
     return 2;
   }
 
   if (strcasecmp(argv[i], "-httpport") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     httpPort = atoi(argv[i + 1]);
     return 2;
   }
 
   if (strcasecmp(argv[i], "-idletimeout") == 0) {  /* -idletimeout sec */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbIdleTimeout = atoi(argv[i + 1]);
     return 2;
   }
@@ -277,10 +284,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   if (strcasecmp(argv[i], "-interface") == 0) {  /* -interface ipaddr */
     struct addrinfo hints, *addr;
-    if (i + 1 >= argc) {
-      UseMsg();
-      return 2;
-    }
+    REQUIRE_ARG();
     if (interface.s_addr != htonl(INADDR_ANY) ||
         memcmp(&interface6, &in6addr_any, sizeof(interface6))) {
       /* Already set (-localhost?) */
@@ -314,17 +318,19 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 
   if (strcasecmp(argv[i], "-maxclipboard") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbMaxClipboard = atoi(argv[i + 1]);
     return 2;
   }
 
   if (strcasecmp(argv[i], "-maxconnections") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbMaxClientConnections = atoi(argv[i + 1]);
     if (rfbMaxClientConnections < 1 ||
-        rfbMaxClientConnections > MAX_MAX_CONNECTIONS)
+        rfbMaxClientConnections > MAX_MAX_CONNECTIONS) {
       UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -364,19 +370,19 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 
   if (strcasecmp(argv[i], "-rfbport") == 0) {  /* -rfbport port */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbPort = atoi(argv[i + 1]);
     return 2;
   }
 
   if (strcasecmp(argv[i], "-rfbwait") == 0) {  /* -rfbwait ms */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbMaxClientWait = atoi(argv[i + 1]);
     return 2;
   }
 
   if (strcasecmp(argv[i], "-udpinputport") == 0) {  /* -udpinputport port */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     udpPort = atoi(argv[i + 1]);
     return 2;
   }
@@ -405,31 +411,31 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 
   if (strcasecmp(argv[i], "-xkblayout") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rmlvo.layout = argv[i + 1];
     return 2;
   }
 
   if (strcasecmp(argv[i], "-xkbmodel") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rmlvo.model = argv[i + 1];
     return 2;
   }
 
   if (strcasecmp(argv[i], "-xkboptions") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rmlvo.options = argv[i + 1];
     return 2;
   }
 
   if (strcasecmp(argv[i], "-xkbrules") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rmlvo.rules = argv[i + 1];
     return 2;
   }
 
   if (strcasecmp(argv[i], "-xkbvariant") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rmlvo.variant = argv[i + 1];
     return 2;
   }
@@ -437,20 +443,20 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   /***** TurboVNC display options *****/
 
   if (strcasecmp(argv[i], "-blackpixel") == 0) {  /* -blackpixel n */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbFB.blackPixel = atoi(argv[i + 1]);
     return 2;
   }
 
   if (strcasecmp(argv[i], "-depth") == 0) {  /* -depth D */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbFB.depth = atoi(argv[i + 1]);
     return 2;
   }
 
   if (strcasecmp(argv[i], "-dridir") == 0) {
 #ifdef GLXEXT
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     dri_driver_path = strdup(argv[i + 1]);
 #endif
     return 2;
@@ -461,7 +467,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     char *str, *token;
     int index = 0, w, h, x, y;
     int r = INT_MIN, b = INT_MIN;
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     str = argv[i + 1];
     while ((token = strsep(&str, ",")) != NULL) {
       x = y = 0;
@@ -491,7 +497,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
 #ifdef NVCONTROL
   if (strcasecmp(argv[i], "-nvcontrol") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     nvCtrlDisplay = strdup(argv[i + 1]);
     noNVCTRLExtension = FALSE;
     return 2;
@@ -499,11 +505,12 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 #endif
 
   if (strcasecmp(argv[i], "-pixelformat") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     if (sscanf(argv[i + 1], "%3s%1d%1d%1d", primaryOrder,
                &redBits, &greenBits, &blueBits) < 4) {
       ErrorF("Invalid pixel format %s\n", argv[i + 1]);
       UseMsg();
+      exit(1);
     }
 
     if (strcasecmp(primaryOrder, "bgr") == 0) {
@@ -513,13 +520,14 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     } else if (strcasecmp(primaryOrder, "rgb") != 0) {
       ErrorF("Invalid pixel format %s\n", argv[i + 1]);
       UseMsg();
+      exit(1);
     }
 
     return 2;
   }
 
   if (strcasecmp(argv[i], "-whitepixel") == 0) {  /* -whitepixel n */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbFB.whitePixel = atoi(argv[i + 1]);
     return 2;
   }
@@ -527,21 +535,27 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   /***** TurboVNC encoding options *****/
 
   if (strcasecmp(argv[i], "-alr") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbAutoLosslessRefresh = atof(argv[i + 1]);
-    if (rfbAutoLosslessRefresh <= 0.0) UseMsg();
+    if (rfbAutoLosslessRefresh <= 0.0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
   if (strcasecmp(argv[i], "-alrqual") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbALRQualityLevel = atoi(argv[i + 1]);
-    if (rfbALRQualityLevel < 1 || rfbALRQualityLevel > 100) UseMsg();
+    if (rfbALRQualityLevel < 1 || rfbALRQualityLevel > 100) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
   if (strcasecmp(argv[i], "-alrsamp") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     switch (toupper(argv[i + 1][0])) {
       case 'G': case '0':
         rfbALRSubsampLevel = TVNC_GRAY;  break;
@@ -553,6 +567,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
         rfbALRSubsampLevel = TVNC_4X;  break;
       default:
         UseMsg();
+        exit(1);
     }
     return 2;
   }
@@ -581,10 +596,12 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
 #if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
   if (strcasecmp(argv[i], "-nthreads") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbNumThreads = atoi(argv[i + 1]);
-    if (rfbNumThreads < 1 || rfbNumThreads > MAX_ENCODING_THREADS)
+    if (rfbNumThreads < 1 || rfbNumThreads > MAX_ENCODING_THREADS) {
       UseMsg();
+      exit(1);
+    }
     return 2;
   }
 #endif
@@ -592,16 +609,22 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   /***** TurboVNC security and authentication options *****/
 
   if (strcasecmp(argv[i], "-maxauthfails") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbAuthMaxFails = atoi(argv[i + 1]);
-    if (rfbAuthMaxFails < 0) UseMsg();
+    if (rfbAuthMaxFails < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
   if (strcasecmp(argv[i], "-authfailtimeout") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbAuthFailTimeout = atoi(argv[i + 1]);
-    if (rfbAuthFailTimeout < 1) UseMsg();
+    if (rfbAuthFailTimeout < 1) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -613,26 +636,26 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 #endif
 
   if (strcasecmp(argv[i], "-rfbauth") == 0) {  /* -rfbauth passwd-file */
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbAuthPasswdFile = argv[i + 1];
     return 2;
   }
 
   if (strcasecmp(argv[i], "-securitytypes") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbAuthParseCommandLine(argv[i + 1]);
     return 2;
   }
 
 #if USETLS
   if (strcasecmp(argv[i], "-x509cert") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbAuthX509Cert = argv[i + 1];
     return 2;
   }
 
   if (strcasecmp(argv[i], "-x509key") == 0) {
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     rfbAuthX509Key = argv[i + 1];
     return 2;
   }
@@ -642,7 +665,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   if (strcasecmp(argv[i], "-registrydir") == 0) {
 #ifdef X_REGISTRY_REQUEST
-    if (i + 1 >= argc) UseMsg();
+    REQUIRE_ARG();
     snprintf(registry_path, PATH_MAX, "%s/protocol.txt", argv[i + 1]);
 #endif
     return 2;
