@@ -40,7 +40,6 @@ class UserAuthPublicKey extends UserAuth{
 
     Vector identities=session.getIdentityRepository().getIdentities();
 
-    byte[] passphrase=null;
     byte[] _username=null;
 
     int command;
@@ -81,6 +80,10 @@ class UserAuthPublicKey extends UserAuth{
         }
 
         Identity identity=(Identity)(identities.elementAt(i));
+
+        //System.err.println("UserAuthPublicKey: identity.isEncrypted()="+identity.isEncrypted());
+        decryptKey(session, identity);
+        //System.err.println("UserAuthPublicKey: identity.isEncrypted()="+identity.isEncrypted());
 
         String ipkmethod=identity.getAlgName();
         String[] ipkmethoda=null;
@@ -174,43 +177,6 @@ class UserAuthPublicKey extends UserAuth{
             continue iloop;
           }
         }
-
-//System.err.println("UserAuthPublicKey: identity.isEncrypted()="+identity.isEncrypted());
-
-        int count=3;
-        while(true){
-          if((identity.isEncrypted() && passphrase==null)){
-            if(userinfo==null) throw new JSchException("USERAUTH fail");
-            if(identity.isEncrypted() &&
-               !userinfo.promptPassphrase("Passphrase for "+identity.getName())){
-              throw new JSchAuthCancelException("publickey");
-              //throw new JSchException("USERAUTH cancel");
-              //break;
-            }
-            String _passphrase=userinfo.getPassphrase();
-            if(_passphrase!=null){
-              passphrase=Util.str2byte(_passphrase);
-            }
-          }
-
-          if(!identity.isEncrypted() || passphrase!=null){
-            if(identity.setPassphrase(passphrase)){
-              if(passphrase!=null &&
-                 (session.getIdentityRepository() instanceof IdentityRepository.Wrapper)){
-                ((IdentityRepository.Wrapper)session.getIdentityRepository()).check();
-              }
-              break;
-            }
-          }
-          Util.bzero(passphrase);
-          passphrase=null;
-          count--;
-          if(count==0)break;
-        }
-
-        Util.bzero(passphrase);
-        passphrase=null;
-//System.err.println("UserAuthPublicKey: identity.isEncrypted()="+identity.isEncrypted());
 
         if(identity.isEncrypted()) continue;
         if(pubkeyblob==null) pubkeyblob=identity.getPublicKeyBlob();
@@ -314,5 +280,42 @@ class UserAuthPublicKey extends UserAuth{
       }
     }
     return false;
+  }
+
+  private void decryptKey(Session session, Identity identity) throws JSchException {
+    byte[] passphrase=null;
+    int count=3;
+    while(true){
+      if((identity.isEncrypted() && passphrase==null)){
+        if(userinfo==null) throw new JSchException("USERAUTH fail");
+        if(identity.isEncrypted() &&
+           !userinfo.promptPassphrase("Passphrase for "+identity.getName())){
+          throw new JSchAuthCancelException("publickey");
+          //throw new JSchException("USERAUTH cancel");
+          //break;
+        }
+        String _passphrase=userinfo.getPassphrase();
+        if(_passphrase!=null){
+          passphrase= Util.str2byte(_passphrase);
+        }
+      }
+
+      if(!identity.isEncrypted() || passphrase!=null){
+        if(identity.setPassphrase(passphrase)){
+          if(passphrase!=null &&
+             (session.getIdentityRepository() instanceof IdentityRepository.Wrapper)){
+            ((IdentityRepository.Wrapper)session.getIdentityRepository()).check();
+          }
+          break;
+        }
+      }
+      Util.bzero(passphrase);
+      passphrase=null;
+      count--;
+      if(count==0)break;
+    }
+
+    Util.bzero(passphrase);
+    passphrase=null;
   }
 }
