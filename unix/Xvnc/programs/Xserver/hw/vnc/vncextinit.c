@@ -70,7 +70,7 @@ typedef struct _VncParam {
   const char *desc;
 } VncParam;
 
-#define NUM_PARAMS 8
+#define NUM_PARAMS 9
 
 VncParam params[NUM_PARAMS] =
 {
@@ -93,7 +93,10 @@ VncParam params[NUM_PARAMS] =
     "Automatic lossless refresh JPEG chroma subsampling (1x, 2x, 4x, or "
     "gray)" },
   { "Interframe", (void *)&rfbInterframe, VNC_BOOL_AUTO, -1.0, 1.0,
-     "Use interframe comparison (Auto = determined by compression level)" }
+    "Use interframe comparison (Auto = determined by compression level)" },
+  { "Profile", (void *)&rfbProfile, VNC_BOOL, 0.0, 1.0,
+    "Enable profiling" }
+
 };
 
 

@@ -858,6 +858,7 @@ extern void IdleTimerSet(void);
 extern void IdleTimerCheck(void);
 extern Bool InterframeOn(rfbClientPtr cl);
 extern void InterframeOff(rfbClientPtr);
+extern BOOL rfbProfile;
 
 extern int rfbMaxWidth, rfbMaxHeight;
 

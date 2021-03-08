@@ -142,7 +142,7 @@ void IdleTimerCheck(void)
  * Profiling stuff
  */
 
-static BOOL rfbProfile = FALSE;
+BOOL rfbProfile = FALSE;
 static double tUpdate = 0., tStart = -1., tElapsed, mpixels = 0.,
   idmpixels = 0.;
 static unsigned long iter = 0;
