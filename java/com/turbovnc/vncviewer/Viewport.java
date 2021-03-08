@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2021 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
 import com.turbovnc.rfb.Point;
 
-public class Viewport extends JFrame {
+public class Viewport extends JFrame implements Runnable {
 
   public Viewport(CConn cc_) {
     cc = cc_;
@@ -515,11 +515,25 @@ public class Viewport extends JFrame {
           addInputDevice(dev);
         }
       }
+      if (multitouch) {
+        thread = new Thread(this);
+        thread.start();
+      }
     }
   }
 
   public void cleanupExtInputHelper() {
     if (Helper.isAvailable() && x11dpy != 0) {
+      try {
+        if (thread != null) {
+          multitouch = false;
+          thread.join();
+          thread = null;
+        }
+      } catch (InterruptedException e) {
+        vlog.info("WARNING: Could not stop multitouch listener:");
+        vlog.info("  " + e.toString());
+      }
       try {
         if (Utils.isMac()) {
           synchronized(VncViewer.class) {
@@ -567,34 +581,53 @@ public class Viewport extends JFrame {
     boolean retval = false;
     if (Helper.isAvailable() && cc.cp.supportsGII && !Utils.isMac()) {
       boolean isExtEvent = false;
-      try {
-        isExtEvent = processExtInputEvent(type);
-      } catch (UnsatisfiedLinkError e) {
-        vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper.");
-        vlog.info("  Extended input device support will be disabled.");
-        Helper.setAvailable(false);
-      } catch (Exception e) {
-        vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper:");
-        vlog.info("  " + e.toString());
-        vlog.info("  Extended input device support may not work correctly.");
-      }
-      if (!isExtEvent)
-        return false;
-      if (devices == null) {
-        vlog.error("ERROR: Attempted to send extended input event when no GII devices exist");
-        return false;
-      }
-      for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
-        ExtInputDevice dev = (ExtInputDevice)i.next();
-        if (lastEvent.deviceID == dev.id && dev.remoteID != 0) {
-          if (dev.absolute && lastEvent.type == RFB.GII_VALUATOR_RELATIVE)
-            lastEvent.type = RFB.GII_VALUATOR_ABSOLUTE;
-          cc.giiSendEvent(dev, lastEvent);
-          retval = true;
+      synchronized(lastEvent) {
+        try {
+          isExtEvent = processExtInputEvent(type);
+        } catch (UnsatisfiedLinkError e) {
+          vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper.");
+          vlog.info("  Extended input device support will be disabled.");
+          Helper.setAvailable(false);
+        } catch (Exception e) {
+          vlog.info("WARNING: Could not invoke processExtInputEvent() from TurboVNC Helper:");
+          vlog.info("  " + e.toString());
+          vlog.info("  Extended input device support may not work correctly.");
+        }
+        if (!isExtEvent)
+          return false;
+        if (devices == null) {
+          vlog.error("ERROR: Attempted to send extended input event when no GII devices exist");
+          return false;
+        }
+        for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
+          ExtInputDevice dev = (ExtInputDevice)i.next();
+          if (lastEvent.deviceID == dev.id && dev.remoteID != 0) {
+            if (dev.absolute && lastEvent.type == RFB.GII_VALUATOR_RELATIVE)
+              lastEvent.type = RFB.GII_VALUATOR_ABSOLUTE;
+            cc.giiSendEvent(dev, lastEvent);
+            retval = true;
+          }
         }
       }
     }
     return retval;
+  }
+
+  public void run() {
+    while (multitouch) {
+      try {
+        Thread.sleep(10);
+        processExtInputEventHelper(-1);
+      } catch (InterruptedException e) {
+        vlog.info("Multitouch listener interrupted");
+        return;
+      } catch (Exception e) {
+        vlog.info("WARNING: Exception caught in multitouch listener:");
+        vlog.info("  " + e.toString());
+        vlog.info("  Multitouch support may not work correctly.");
+      }
+    }
+    vlog.eidebug("Multitouch listener exited");
   }
 
   // At the moment, these two methods are used only by the Mac TurboVNC Helper.
@@ -741,7 +774,7 @@ public class Viewport extends JFrame {
   private native void x11FullScreen(boolean on);
   private native void grabKeyboard(boolean on, boolean pointer);
   private native void setupExtInput();
-  private native boolean processExtInputEvent(int type);
+  private native synchronized boolean processExtInputEvent(int type);
   private native void cleanupExtInput();
 
   @Override
@@ -759,6 +792,8 @@ public class Viewport extends JFrame {
   boolean canDoLionFS;
   Timer timer;
   private long x11dpy, x11win;
+  private boolean multitouch;
+  private Thread thread;
   int buttonPressType, buttonReleaseType, motionType;
   ArrayList<ExtInputDevice> devices;
   ExtInputEvent lastEvent = new ExtInputEvent();

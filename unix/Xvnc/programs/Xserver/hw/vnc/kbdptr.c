@@ -9,7 +9,7 @@
  *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
  *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
  *  Copyright (C) 2013, 2018 Pierre Ossman for Cendio AB.  All Rights Reserved.
- *  Copyright (C) 2014-2016, 2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014-2016, 2019, 2021 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -577,10 +577,27 @@ void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
   }
 
   if (dev->valCount > 0) {
-    valuator_mask_set_range(&mask, 0, dev->numValuators, dev->values);
-    QueuePointerEvents(dev->pDev, type, buttons,
-                       dev->mode == Absolute ? POINTER_ABSOLUTE : POINTER_RELATIVE,
+    if (type == MotionNotify && dev->multitouch &&
+        dev->valFirst + dev->valCount <= dev->numValuators) {
+      int touchID = dev->values[dev->numValuators - 2];
+      int touchType = dev->values[dev->numValuators - 1];
+      Bool touchEmulatingPointer = FALSE;
+
+      valuator_mask_set_range(&mask, 0, dev->numValuators - 2, dev->values);
+      if (touchType >= rfbGIITouchBeginEP) {
+        touchEmulatingPointer = TRUE;
+        touchType -= 3;
+      }
+      QueueTouchEvents(dev->pDev, XI_TouchBegin + touchType, touchID,
+                       touchEmulatingPointer ? TOUCH_POINTER_EMULATED : 0,
                        &mask);
+    } else {
+      valuator_mask_set_range(&mask, 0, dev->numValuators, dev->values);
+      QueuePointerEvents(dev->pDev, type, buttons,
+                         dev->mode == Absolute ? POINTER_ABSOLUTE :
+                                                 POINTER_RELATIVE,
+                         &mask);
+    }
   } else {
     valuator_mask_set_range(&mask, 0, 0, NULL);
     QueuePointerEvents(dev->pDev, type, buttons, POINTER_RELATIVE, &mask);

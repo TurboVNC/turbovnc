@@ -1,4 +1,4 @@
-/*  Copyright (C)2015 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015, 2021 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,3 +26,16 @@
 #define rfbGIIDevTypeEraser 3
 #define rfbGIIDevTypeTouch  4
 #define rfbGIIDevTypePad    5
+
+/* The TurboVNC implementation of the GII extension uses fake valuators to send
+   X Input multitouch events to the server.  This is not required by the GII
+   spec and is subject to change. */
+
+#define rfbGIITouchBegin    0
+#define rfbGIITouchUpdate   1
+#define rfbGIITouchEnd      2
+/* These event types signal to the server that pointer emulation should be
+   enabled. */
+#define rfbGIITouchBeginEP  3
+#define rfbGIITouchUpdateEP 4
+#define rfbGIITouchEndEP    5

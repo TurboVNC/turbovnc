@@ -1,7 +1,8 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009, 2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2011-2012, 2015-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015-2018, 2021 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -323,6 +324,16 @@ public final class RFB {
   public static final int GII_BUTTON_RELEASE    = 11;
   public static final int GII_VALUATOR_RELATIVE = 12;
   public static final int GII_VALUATOR_ABSOLUTE = 13;
+
+  public static String giiEventName(int num) {
+    switch (num) {
+      case GII_BUTTON_PRESS:       return "Button Press (" + num + ")";
+      case GII_BUTTON_RELEASE:     return "Button Release (" + num + ")";
+      case GII_VALUATOR_RELATIVE:  return "Relative Valuator (" + num + ")";
+      case GII_VALUATOR_ABSOLUTE:  return "Absolute Valuator (" + num + ")";
+      default:                     return Integer.toString(num);
+    }
+  }
 
   // Event masks
   public static final int GII_BUTTON_PRESS_MASK      = 0x00000400;

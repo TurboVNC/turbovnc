@@ -43,7 +43,7 @@
 #include "osdep.h"
 #include "list.h"
 #include <rfbproto.h>
-#include <turbovnc_devtypes.h>
+#include <turbovnc_gii.h>
 #include <vncauth.h>
 #include <zlib.h>
 #include <stdarg.h>
@@ -226,6 +226,8 @@ typedef void (*rfbTranslateFnType) (char *table, rfbPixelFormat *in,
 typedef struct {
   char name[32];
   int numButtons;
+  Bool multitouch;
+  int numTouches;
   int numValuators;
   int mode;
   CARD32 eventMask;

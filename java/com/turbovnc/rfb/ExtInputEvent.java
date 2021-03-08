@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2018, 2021 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public class ExtInputEvent {
 
   public void print() {
     vlog.eidebug("EVENT:");
-    vlog.eidebug("  type = " + type);
+    vlog.eidebug("  type = " + RFB.giiEventName(type));
     vlog.eidebug("  deviceID = " + deviceID);
     vlog.eidebug("  buttonMask = " + buttonMask);
     if (type == RFB.GII_BUTTON_PRESS || type == RFB.GII_BUTTON_RELEASE)

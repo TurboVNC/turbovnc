@@ -1526,6 +1526,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
           memcpy(&dev.name, msg.giidc.deviceName, 32);
           dev.numButtons = msg.giidc.numButtons;
+          dev.numTouches = msg.giidc.numRegisters;
           dev.numValuators = msg.giidc.numValuators;
           dev.eventMask = msg.giidc.canGenerate;
           dev.mode =

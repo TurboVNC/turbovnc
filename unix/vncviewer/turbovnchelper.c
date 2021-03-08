@@ -17,13 +17,14 @@
  */
 
 #ifdef __SUNPRO_C
-/* Oracle Developer Studio sometimes erroneously detects the _throw() macro
+/* Oracle Developer Studio sometimes erroneously detects the THROW() macro
    followed by a semicolon as an unreachable statement. */
 #pragma error_messages(off, E_STATEMENT_NOT_REACHED)
 #endif
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <dlfcn.h>
 #include <unistd.h>
 #include "jawt_md.h"
@@ -32,7 +33,55 @@
 #include "com_turbovnc_vncviewer_Viewport.h"
 #include <X11/Xmd.h>
 #include "rfbproto.h"
-#include "turbovnc_devtypes.h"
+#include "turbovnc_gii.h"
+
+
+#define THROW(msg) {  \
+  jclass _exccls = (*env)->FindClass(env, "java/lang/Exception");  \
+  if (!_exccls) goto bailout;  \
+  (*env)->ThrowNew(env, _exccls, msg);  \
+  goto bailout;  \
+}
+
+#define BAILIF0(f) {  \
+  if (!(f) || (*env)->ExceptionCheck(env)) {  \
+    goto bailout;  \
+  }  \
+}
+
+#define SET_STRING(cls, obj, fieldName, string) {  \
+  jstring str;  \
+  BAILIF0(fid = (*env)->GetFieldID(env, cls, #fieldName,  \
+                                   "Ljava/lang/String;"));  \
+  BAILIF0(str = (*env)->NewStringUTF(env, string));  \
+  (*env)->SetObjectField(env, obj, fid, (jobject)str);  \
+}
+
+#define SET_LONG(cls, obj, fieldName, val) {  \
+  BAILIF0(fid = (*env)->GetFieldID(env, cls, #fieldName, "J"));  \
+  (*env)->SetLongField(env, obj, fid, val);  \
+}
+
+#define SET_INT(cls, obj, fieldName, val) {  \
+  BAILIF0(fid = (*env)->GetFieldID(env, cls, #fieldName, "I"));  \
+  (*env)->SetIntField(env, obj, fid, val);  \
+}
+
+#define SET_BOOL(cls, obj, fieldName, val) {  \
+  BAILIF0(fid = (*env)->GetFieldID(env, cls, #fieldName, "Z"));  \
+  (*env)->SetBooleanField(env, obj, fid, val);  \
+}
+
+
+struct isXIEventParams {
+  int xiType, xiOpcode;
+};
+
+
+typedef jboolean JNICALL (*__JAWT_GetAWT_type) (JNIEnv *env, JAWT *awt);
+static __JAWT_GetAWT_type __JAWT_GetAWT = NULL;
+
+static void *handle = NULL;
 
 
 /*
@@ -71,25 +120,6 @@ static void netwm_fullscreen(Display *dpy, Window win, int state)
 }
 
 
-#define _throw(msg) {  \
-  jclass _exccls = (*env)->FindClass(env, "java/lang/Exception");  \
-  if (!_exccls) goto bailout;  \
-  (*env)->ThrowNew(env, _exccls, msg);  \
-  goto bailout;  \
-}
-
-#define bailif0(f) {  \
-  if (!(f) || (*env)->ExceptionCheck(env)) {  \
-    goto bailout;  \
-  }  \
-}
-
-typedef jboolean JNICALL (*__JAWT_GetAWT_type) (JNIEnv *env, JAWT *awt);
-static __JAWT_GetAWT_type __JAWT_GetAWT = NULL;
-
-static void *handle = NULL;
-
-
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   (JNIEnv *env, jobject obj, jboolean on)
 {
@@ -103,41 +133,41 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   awt.version = JAWT_VERSION_1_3;
   if (!handle) {
     if ((handle = dlopen("libjawt.so", RTLD_LAZY)) == NULL)
-      _throw(dlerror());
+      THROW(dlerror());
     if ((__JAWT_GetAWT =
          (__JAWT_GetAWT_type)dlsym(handle, "JAWT_GetAWT")) == NULL)
-      _throw(dlerror());
+      THROW(dlerror());
   }
 
   if (__JAWT_GetAWT(env, &awt) == JNI_FALSE)
-    _throw("Could not initialize AWT native interface");
+    THROW("Could not initialize AWT native interface");
 
   if ((ds = awt.GetDrawingSurface(env, obj)) == NULL)
-    _throw("Could not get drawing surface");
+    THROW("Could not get drawing surface");
 
   if ((ds->Lock(ds) & JAWT_LOCK_ERROR) != 0)
-    _throw("Could not lock surface");
+    THROW("Could not lock surface");
 
   if ((dsi = ds->GetDrawingSurfaceInfo(ds)) == NULL)
-    _throw("Could not get drawing surface info");
+    THROW("Could not get drawing surface info");
 
   if ((x11dsi = (JAWT_X11DrawingSurfaceInfo *)dsi->platformInfo) == NULL)
-    _throw("Could not get X11 drawing surface info");
+    THROW("Could not get X11 drawing surface info");
 
-  bailif0(cls = (*env)->GetObjectClass(env, obj));
+  BAILIF0(cls = (*env)->GetObjectClass(env, obj));
 
   netwm_fullscreen(x11dsi->display, x11dsi->drawable, on);
   if (on) {
     XEvent e;
     jint leftMon, rightMon, topMon, bottomMon;
 
-    bailif0(fid = (*env)->GetFieldID(env, cls, "leftMon", "I"));
+    BAILIF0(fid = (*env)->GetFieldID(env, cls, "leftMon", "I"));
     leftMon = (*env)->GetIntField(env, obj, fid);
-    bailif0(fid = (*env)->GetFieldID(env, cls, "rightMon", "I"));
+    BAILIF0(fid = (*env)->GetFieldID(env, cls, "rightMon", "I"));
     rightMon = (*env)->GetIntField(env, obj, fid);
-    bailif0(fid = (*env)->GetFieldID(env, cls, "topMon", "I"));
+    BAILIF0(fid = (*env)->GetFieldID(env, cls, "topMon", "I"));
     topMon = (*env)->GetIntField(env, obj, fid);
-    bailif0(fid = (*env)->GetFieldID(env, cls, "bottomMon", "I"));
+    BAILIF0(fid = (*env)->GetFieldID(env, cls, "bottomMon", "I"));
     bottomMon = (*env)->GetIntField(env, obj, fid);
 
     memset(&e, 0, sizeof(e));
@@ -159,7 +189,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
   XSync(x11dsi->display, False);
 
   if ((fid = (*env)->GetFieldID(env, cls, "x11win", "J")) == 0)
-    _throw("Could not store X window handle");
+    THROW("Could not store X window handle");
   (*env)->SetLongField(env, obj, fid, x11dsi->drawable);
 
   printf("TurboVNC Helper: %s X11 full-screen mode for window 0x%.8lx\n",
@@ -186,26 +216,26 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
   awt.version = JAWT_VERSION_1_3;
   if (!handle) {
     if ((handle = dlopen("libjawt.so", RTLD_LAZY)) == NULL)
-      _throw(dlerror());
+      THROW(dlerror());
     if ((__JAWT_GetAWT =
          (__JAWT_GetAWT_type)dlsym(handle, "JAWT_GetAWT")) == NULL)
-      _throw(dlerror());
+      THROW(dlerror());
   }
 
   if (__JAWT_GetAWT(env, &awt) == JNI_FALSE)
-    _throw("Could not initialize AWT native interface");
+    THROW("Could not initialize AWT native interface");
 
   if ((ds = awt.GetDrawingSurface(env, obj)) == NULL)
-    _throw("Could not get drawing surface");
+    THROW("Could not get drawing surface");
 
   if ((ds->Lock(ds) & JAWT_LOCK_ERROR) != 0)
-    _throw("Could not lock surface");
+    THROW("Could not lock surface");
 
   if ((dsi = ds->GetDrawingSurfaceInfo(ds)) == NULL)
-    _throw("Could not get drawing surface info");
+    THROW("Could not get drawing surface info");
 
   if ((x11dsi = (JAWT_X11DrawingSurfaceInfo *)dsi->platformInfo) == NULL)
-    _throw("Could not get X11 drawing surface info");
+    THROW("Could not get X11 drawing surface info");
 
   XSync(x11dsi->display, False);
   if (on) {
@@ -216,20 +246,20 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
                                 CurrentTime)) != GrabSuccess) {
       switch (ret) {
         case AlreadyGrabbed:
-          _throw("Could not grab keyboard: already grabbed by another application");
+          THROW("Could not grab keyboard: already grabbed by another application");
         case GrabInvalidTime:
-          _throw("Could not grab keyboard: invalid time");
+          THROW("Could not grab keyboard: invalid time");
         case GrabNotViewable:
           /* The window should theoretically be viewable by now, but in
              practice, sometimes a race condition occurs with Swing.  It is
              unclear why, since everything should be happening in the EDT. */
           if (count == 0)
-            _throw("Could not grab keyboard: window not viewable");
+            THROW("Could not grab keyboard: window not viewable");
           usleep(100000);
           count--;
           continue;
         case GrabFrozen:
-          _throw("Could not grab keyboard: keyboard frozen by another application");
+          THROW("Could not grab keyboard: keyboard frozen by another application");
       }
     }
 
@@ -240,13 +270,13 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
                          GrabModeAsync, None, None, CurrentTime);
       switch (ret) {
         case AlreadyGrabbed:
-          _throw("Could not grab pointer: already grabbed by another application");
+          THROW("Could not grab pointer: already grabbed by another application");
         case GrabInvalidTime:
-          _throw("Could not grab pointer: invalid time");
+          THROW("Could not grab pointer: invalid time");
         case GrabNotViewable:
-          _throw("Could not grab pointer: window not viewable");
+          THROW("Could not grab pointer: window not viewable");
         case GrabFrozen:
-          _throw("Could not grab pointer: pointer frozen by another application");
+          THROW("Could not grab pointer: pointer frozen by another application");
       }
     }
 
@@ -270,30 +300,6 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
 }
 
 
-#define SET_STRING(cls, obj, fieldName, string) {  \
-  jstring str;  \
-  bailif0(fid = (*env)->GetFieldID(env, cls, #fieldName,  \
-                                   "Ljava/lang/String;"));  \
-  bailif0(str = (*env)->NewStringUTF(env, string));  \
-  (*env)->SetObjectField(env, obj, fid, (jobject)str);  \
-}
-
-#define SET_LONG(cls, obj, fieldName, val) {  \
-  bailif0(fid = (*env)->GetFieldID(env, cls, #fieldName, "J"));  \
-  (*env)->SetLongField(env, obj, fid, val);  \
-}
-
-#define SET_INT(cls, obj, fieldName, val) {  \
-  bailif0(fid = (*env)->GetFieldID(env, cls, #fieldName, "I"));  \
-  (*env)->SetIntField(env, obj, fid, val);  \
-}
-
-#define SET_BOOL(cls, obj, fieldName, val) {  \
-  bailif0(fid = (*env)->GetFieldID(env, cls, #fieldName, "Z"));  \
-  (*env)->SetBooleanField(env, obj, fid, val);  \
-}
-
-
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   (JNIEnv *env, jobject obj)
 {
@@ -306,25 +312,26 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   int nDevices = 0, i, ci, nMasks = 0, xiOpcode = 0, dummy1, dummy2;
   XIEventMask masks[100];
   jobject extInputDevice;
+  Bool multitouch = False;
 
   memset(masks, 0, sizeof(XIEventMask) * 100);
 
   if ((dpy = XOpenDisplay(NULL)) == NULL)
-    _throw("Could not open X display");
+    THROW("Could not open X display");
   if (!XQueryExtension(dpy, "XInputExtension", &xiOpcode, &dummy1, &dummy2))
-    _throw("X Input extension not available");
+    THROW("X Input extension not available");
 
-  bailif0(cls = (*env)->GetObjectClass(env, obj));
-  bailif0(fid = (*env)->GetFieldID(env, cls, "x11win", "J"));
+  BAILIF0(cls = (*env)->GetObjectClass(env, obj));
+  BAILIF0(fid = (*env)->GetFieldID(env, cls, "x11win", "J"));
   if ((win = (Window)(*env)->GetLongField(env, obj, fid)) == 0)
-    _throw("X window handle has not been initialized");
+    THROW("X window handle has not been initialized");
 
   if ((devInfo = XIQueryDevice(dpy, XIAllDevices, &nDevices)) == NULL)
-    _throw("Could not list XI devices");
+    THROW("Could not list XI devices");
 
   for (i = 0; i < nDevices; i++) {
     Atom *props = NULL, propType = 0, atom;
-    int pi, nProps = 0, propFormat = 0;
+    int pi, nProps = 0, propFormat = 0, maxTouches = 0, maxValuatorNum = 0;
     unsigned long propNItems = 0, propBytesAfter = 0;
     unsigned char *propData = NULL;
     char *name;
@@ -347,54 +354,55 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
       }
       XFree(name);
     }
-    if (pi >= nProps) {
+    if (pi < nProps) {
+      /* Determine Wacom device type. */
+      if (XIGetProperty(dpy, devInfo[i].deviceid, props[pi], 0, 1000, False,
+                        AnyPropertyType, &propType, &propFormat, &propNItems,
+                        &propBytesAfter, &propData) != Success ||
+          propType != XA_ATOM || propNItems < 1 || !propData) {
+        XFree(props);
+        continue;
+      }
       XFree(props);
-      continue;
-    }
-
-    /* Determine Wacom device type. */
-    if (XIGetProperty(dpy, devInfo[i].deviceid, props[pi], 0, 1000, False,
-                      AnyPropertyType, &propType, &propFormat, &propNItems,
-                      &propBytesAfter, &propData) != Success ||
-        propType != XA_ATOM || propNItems < 1 || !propData) {
-      XFree(props);
-      continue;
-    }
-    XFree(props);
-    atom = *(Atom *)propData;
-    if ((name = XGetAtomName(dpy, atom)) == NULL)
-      continue;
-    /* TurboVNC-specific:  we use productID to represent the device type, so
-       we can recreate it on the server */
-    if (!strcmp(name, "CURSOR"))
-      productID = rfbGIIDevTypeCursor;
-    else if (!strcmp(name, "STYLUS"))
-      productID = rfbGIIDevTypeStylus;
-    else if (!strcmp(name, "ERASER"))
-      productID = rfbGIIDevTypeEraser;
-    else if (!strcmp(name, "TOUCH"))
-      productID = rfbGIIDevTypeTouch;
-    else if (!strcmp(name, "PAD"))
-      productID = rfbGIIDevTypePad;
-    else {
+      atom = *(Atom *)propData;
+      if ((name = XGetAtomName(dpy, atom)) == NULL)
+        continue;
+      /* TurboVNC-specific:  we use productID to represent the device type, so
+         we can recreate it on the server */
+      if (!strcmp(name, "CURSOR"))
+        productID = rfbGIIDevTypeCursor;
+      else if (!strcmp(name, "STYLUS"))
+        productID = rfbGIIDevTypeStylus;
+      else if (!strcmp(name, "ERASER"))
+        productID = rfbGIIDevTypeEraser;
+      else if (!strcmp(name, "TOUCH"))
+        productID = rfbGIIDevTypeTouch;
+      else if (!strcmp(name, "PAD"))
+        productID = rfbGIIDevTypePad;
+      else {
+        XFree(name);
+        continue;
+      }
       XFree(name);
-      continue;
+    } else {
+      /* Not a Wacom device.  We can only handle it if it's a touchscreen. */
+      XFree(props);
+      for (ci = 0; ci < devInfo[i].num_classes; ci++) {
+        if (devInfo[i].classes[ci]->type == XITouchClass &&
+            (((XITouchClassInfo *)devInfo[i].classes[ci])->mode ==
+             XIDirectTouch)) {
+          productID = rfbGIIDevTypeTouch;
+          multitouch = True;
+          break;
+        }
+      }
+      if (ci >= devInfo[i].num_classes)
+        continue;
     }
-    XFree(name);
 
-    /* FIXME: Relative valuators aren't supported (yet) */
-    for (ci = 0; ci < devInfo[i].num_classes; ci++) {
-      if (devInfo[i].classes[ci]->type == XIValuatorClass &&
-          (((XIValuatorClassInfo *)devInfo[i].classes[ci])->mode ==
-           XIModeRelative))
-        break;
-    }
-    if (ci < devInfo[i].num_classes)
-      continue;
-
-    bailif0(eidcls =
+    BAILIF0(eidcls =
             (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputDevice"));
-    bailif0(extInputDevice = (*env)->AllocObject(env, eidcls));
+    BAILIF0(extInputDevice = (*env)->AllocObject(env, eidcls));
 
     SET_STRING(eidcls, extInputDevice, name, devInfo[i].name);
     SET_LONG(eidcls, extInputDevice, vendorID, 4242);
@@ -422,16 +430,19 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
           jobject valuator;
           char longName[75], shortName[5];
 
-          bailif0(valcls = (*env)->FindClass(env,
+          BAILIF0(valcls = (*env)->FindClass(env,
                   "com/turbovnc/rfb/ExtInputDevice$Valuator"));
 
           if (vi->mode == XIModeAbsolute)
             canGenerate |= rfbGIIValuatorAbsoluteMask;
+          /* FIXME: Relative valuators aren't supported (yet) */
           else if (vi->mode == XIModeRelative)
-            canGenerate |= rfbGIIValuatorRelativeMask;
+            continue;
 
-          bailif0(valuator = (*env)->AllocObject(env, valcls));
+          BAILIF0(valuator = (*env)->AllocObject(env, valcls));
           SET_INT(valcls, valuator, index, vi->number);
+          if (vi->number > maxValuatorNum)
+            maxValuatorNum = vi->number;
           name = XGetAtomName(dpy, vi->label);
           if (name) {
             snprintf(longName, 75, "%s", name);
@@ -448,9 +459,73 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
           SET_INT(valcls, valuator, siUnit, rfbGIIUnitLength);
           SET_INT(valcls, valuator, siDiv, vi->resolution);
 
-          bailif0(mid = (*env)->GetMethodID(env, eidcls, "addValuator",
+          BAILIF0(mid = (*env)->GetMethodID(env, eidcls, "addValuator",
                   "(Lcom/turbovnc/rfb/ExtInputDevice$Valuator;)V"));
           (*env)->CallVoidMethod(env, extInputDevice, mid, valuator);
+          break;
+        }
+      }
+    }
+
+    for (ci = 0; ci < devInfo[i].num_classes; ci++) {
+
+      switch (devInfo[i].classes[ci]->type) {
+
+        case XITouchClass:
+        {
+          /* TurboVNC-specific:  we use fake valuators to transmit XI touch
+             events */
+          jclass valcls;
+          jobject valuator;
+          char longName[75], shortName[5];
+          int numTouches =
+            ((XITouchClassInfo *)devInfo[i].classes[ci])->num_touches;
+
+          if (!multitouch) continue;
+
+          if (numTouches > maxTouches)
+            maxTouches = numTouches;
+
+          BAILIF0(valcls = (*env)->FindClass(env,
+                  "com/turbovnc/rfb/ExtInputDevice$Valuator"));
+
+          canGenerate |= rfbGIIValuatorAbsoluteMask;
+
+          if (maxValuatorNum > 3)
+            THROW("Multitouch device has too many valuators")
+
+          BAILIF0(valuator = (*env)->AllocObject(env, valcls));
+          SET_INT(valcls, valuator, index, maxValuatorNum + 1);
+          snprintf(longName, 75, "__TURBOVNC FAKE TOUCH ID__");
+          SET_STRING(valcls, valuator, longName, longName);
+          snprintf(shortName, 5, "TFTI");
+          SET_STRING(valcls, valuator, shortName, shortName);
+          SET_INT(valcls, valuator, rangeMin, 0);
+          SET_INT(valcls, valuator, rangeCenter, INT_MAX / 2);
+          SET_INT(valcls, valuator, rangeMax, INT_MAX);
+          SET_INT(valcls, valuator, siUnit, rfbGIIUnitUnknown);
+          SET_INT(valcls, valuator, siDiv, 0);
+
+          BAILIF0(mid = (*env)->GetMethodID(env, eidcls, "addValuator",
+                  "(Lcom/turbovnc/rfb/ExtInputDevice$Valuator;)V"));
+          (*env)->CallVoidMethod(env, extInputDevice, mid, valuator);
+
+          BAILIF0(valuator = (*env)->AllocObject(env, valcls));
+          SET_INT(valcls, valuator, index, maxValuatorNum + 2);
+          snprintf(longName, 75, "__TURBOVNC FAKE TOUCH TYPE__");
+          SET_STRING(valcls, valuator, longName, longName);
+          snprintf(shortName, 5, "TFTT");
+          SET_STRING(valcls, valuator, shortName, shortName);
+          SET_INT(valcls, valuator, rangeMin, 0);
+          SET_INT(valcls, valuator, rangeCenter, 2);
+          SET_INT(valcls, valuator, rangeMax, 5);
+          SET_INT(valcls, valuator, siUnit, rfbGIIUnitUnknown);
+          SET_INT(valcls, valuator, siDiv, 0);
+
+          BAILIF0(mid = (*env)->GetMethodID(env, eidcls, "addValuator",
+                  "(Lcom/turbovnc/rfb/ExtInputDevice$Valuator;)V"));
+          (*env)->CallVoidMethod(env, extInputDevice, mid, valuator);
+
           break;
         }
       }
@@ -466,16 +541,23 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
       if (canGenerate & rfbGIIButtonReleaseMask)
         XISetMask(masks[nMasks].mask, XI_ButtonRelease);
       if (canGenerate & rfbGIIValuatorAbsoluteMask ||
-          canGenerate & rfbGIIValuatorRelativeMask)
+          canGenerate & rfbGIIValuatorRelativeMask) {
         XISetMask(masks[nMasks].mask, XI_Motion);
+        if (multitouch) {
+          XISetMask(masks[nMasks].mask, XI_TouchBegin);
+          XISetMask(masks[nMasks].mask, XI_TouchUpdate);
+          XISetMask(masks[nMasks].mask, XI_TouchEnd);
+        }
+      }
       nMasks++;
     }
 
     SET_LONG(eidcls, extInputDevice, canGenerate, canGenerate);
     if (canGenerate & rfbGIIValuatorAbsoluteMask)
       SET_BOOL(eidcls, extInputDevice, absolute, 1);
+    SET_INT(eidcls, extInputDevice, numRegisters, maxTouches);
 
-    bailif0(mid = (*env)->GetMethodID(env, cls, "addInputDevice",
+    BAILIF0(mid = (*env)->GetMethodID(env, cls, "addInputDevice",
             "(Lcom/turbovnc/rfb/ExtInputDevice;)V"));
     (*env)->CallVoidMethod(env, obj, mid, extInputDevice);
   }
@@ -487,13 +569,15 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   }
 
   if (XISelectEvents(dpy, win, masks, nMasks))
-    _throw("Could not select XI events");
+    THROW("Could not select XI events");
   XSync(dpy, False);
 
   SET_INT(cls, obj, buttonPressType, XI_ButtonPress);
   SET_INT(cls, obj, buttonReleaseType, XI_ButtonRelease);
   SET_INT(cls, obj, motionType, XI_Motion);
   SET_LONG(cls, obj, x11dpy, (jlong)(intptr_t)dpy);
+  if (multitouch)
+    SET_BOOL(cls, obj, multitouch, 1);
 
   printf("TurboVNC Helper: Listening for XInput events on %s (window 0x%.8x)\n",
          DisplayString(dpy), (unsigned int)win);
@@ -507,10 +591,6 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
 }
 
 
-struct isXIEventParams {
-  int xiType, xiOpcode;
-};
-
 static Bool IsXIEvent(Display *dpy, XEvent *xe, XPointer arg)
 {
   struct isXIEventParams *params = (struct isXIEventParams *)arg;
@@ -518,7 +598,9 @@ static Bool IsXIEvent(Display *dpy, XEvent *xe, XPointer arg)
   if (xe->type == GenericEvent && xe->xgeneric.extension == params->xiOpcode &&
       xe->xcookie.type == GenericEvent &&
       xe->xcookie.extension == params->xiOpcode &&
-      xe->xcookie.evtype == params->xiType)
+      (xe->xcookie.evtype == params->xiType ||
+       (xe->xcookie.evtype >= XI_TouchBegin &&
+        xe->xcookie.evtype <= XI_TouchEnd && params->xiType == -1)))
     return True;
   return False;
 }
@@ -532,16 +614,20 @@ JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputE
   jboolean retval = JNI_FALSE;
   int dummy1, dummy2, i;
   XEvent xe;
-  Bool freeXEventData = False;
+  Bool freeXEventData = False, monitorEntered = False;
   struct isXIEventParams params;
 
-  bailif0(cls = (*env)->GetObjectClass(env, obj));
-  bailif0(fid = (*env)->GetFieldID(env, cls, "x11dpy", "J"));
-  bailif0(dpy = (Display *)(intptr_t)(*env)->GetLongField(env, obj, fid));
+  if ((*env)->MonitorEnter(env, obj))
+    THROW("Could not enter monitor");
+  monitorEntered = True;
+
+  BAILIF0(cls = (*env)->GetObjectClass(env, obj));
+  BAILIF0(fid = (*env)->GetFieldID(env, cls, "x11dpy", "J"));
+  BAILIF0(dpy = (Display *)(intptr_t)(*env)->GetLongField(env, obj, fid));
 
   if (!XQueryExtension(dpy, "XInputExtension", &params.xiOpcode, &dummy1,
                        &dummy2))
-    _throw("X Input extension not available");
+    THROW("X Input extension not available");
 
   params.xiType = type;
   while (XCheckIfEvent(dpy, &xe, IsXIEvent, (XPointer)&params)) {
@@ -549,22 +635,34 @@ JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputE
     jint valuators[6];
     XIDeviceEvent *xide;
     long buttonMask = 0;
-    int giiEventType = 0, numValuators = 0, firstValuator = -1;
+    int giiEventType = 0, touchType = -1, numValuators = 0, firstValuator = -1;
 
     if (!XGetEventData(dpy, &xe.xcookie))
       continue;
     freeXEventData = True;
     xide = (XIDeviceEvent *)xe.xcookie.data;
 
-    bailif0(eventcls =
-    (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputEvent"));
-    bailif0(fid = (*env)->GetFieldID(env, cls, "lastEvent",
+    BAILIF0(eventcls =
+            (*env)->FindClass(env, "com/turbovnc/rfb/ExtInputEvent"));
+    BAILIF0(fid = (*env)->GetFieldID(env, cls, "lastEvent",
                                      "Lcom/turbovnc/rfb/ExtInputEvent;"));
-    bailif0(event = (*env)->GetObjectField(env, obj, fid));
+    BAILIF0(event = (*env)->GetObjectField(env, obj, fid));
+    type = xe.xcookie.evtype;
     switch (type) {
       case XI_ButtonPress:  giiEventType = rfbGIIButtonPress;  break;
       case XI_ButtonRelease:  giiEventType = rfbGIIButtonRelease;  break;
+      /* NOTE: If the event type is rfbGIIValuatorRelative, then the Java code
+         should change it to rfbGIIValuatorAbsolute.  We set the event type to
+         rbGIIValuatorRelative here in order to verify that. */
       case XI_Motion:  giiEventType = rfbGIIValuatorRelative;  break;
+      case XI_TouchBegin:
+      case XI_TouchEnd:
+      case XI_TouchUpdate:
+        giiEventType = rfbGIIValuatorRelative;
+        touchType = rfbGIITouchBegin + (type - XI_TouchBegin);
+        if (xide->flags & XITouchEmulatingPointer)
+          touchType += 3;
+        break;
     }
     SET_INT(eventcls, event, type, giiEventType);
     SET_LONG(eventcls, event, deviceID, xide->deviceid);
@@ -579,27 +677,37 @@ JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputE
         numValuators++;
       }
     }
+    if (touchType >= 0) {
+      valuators[numValuators++] = (jint)xide->detail;
+      valuators[numValuators++] = (jint)touchType;
+      SET_INT(eventcls, event, buttonNumber, 1);
+    }
     SET_INT(eventcls, event, numValuators, numValuators);
     SET_INT(eventcls, event, firstValuator, firstValuator);
     if (xe.xcookie.evtype == XI_ButtonPress ||
         xe.xcookie.evtype == XI_ButtonRelease)
       SET_INT(eventcls, event, buttonNumber, xide->detail);
 
-    bailif0(fid = (*env)->GetFieldID(env, eventcls, "valuators", "[I"));
-    bailif0(jvaluators = (jintArray)(*env)->GetObjectField(env, event, fid));
+    BAILIF0(fid = (*env)->GetFieldID(env, eventcls, "valuators", "[I"));
+    BAILIF0(jvaluators = (jintArray)(*env)->GetObjectField(env, event, fid));
     (*env)->SetIntArrayRegion(env, jvaluators, 0, numValuators, valuators);
     if (freeXEventData) {
       XFreeEventData(dpy, &xe.xcookie);
       freeXEventData = False;
     }
     if (xe.xcookie.evtype == XI_ButtonPress ||
-        xe.xcookie.evtype == XI_ButtonRelease)
+        xe.xcookie.evtype == XI_ButtonRelease ||
+        xe.xcookie.evtype == XI_TouchBegin ||
+        xe.xcookie.evtype == XI_TouchEnd) {
+      (*env)->MonitorExit(env, obj);
       return JNI_TRUE;
-    else retval = JNI_TRUE;
+    } else
+      retval = JNI_TRUE;
   }
 
   bailout:
   if (freeXEventData) XFreeEventData(dpy, &xe.xcookie);
+  if (monitorEntered) (*env)->MonitorExit(env, obj);
   return retval;
 }
 
@@ -611,12 +719,15 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   jfieldID fid;
   Display *dpy;
 
-  bailif0(cls = (*env)->GetObjectClass(env, obj));
-  bailif0(fid = (*env)->GetFieldID(env, cls, "x11dpy", "J"));
-  bailif0(dpy = (Display *)(intptr_t)(*env)->GetLongField(env, obj, fid));
-  printf("TurboVNC Helper: Shutting down XInput listener on display %s\n",
-         DisplayString(dpy));
-  XCloseDisplay(dpy);
+  BAILIF0(cls = (*env)->GetObjectClass(env, obj));
+  BAILIF0(fid = (*env)->GetFieldID(env, cls, "x11dpy", "J"));
+  dpy = (Display *)(intptr_t)(*env)->GetLongField(env, obj, fid);
+  if (dpy) {
+    printf("TurboVNC Helper: Shutting down XInput listener on display %s\n",
+           DisplayString(dpy));
+    XCloseDisplay(dpy);
+    SET_LONG(cls, obj, x11dpy, 0);
+  }
 
   bailout:
   return;

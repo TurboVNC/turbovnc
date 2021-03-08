@@ -163,8 +163,8 @@ the Linux/Un\*x TurboVNC Viewer to pass extended input device valuator names
 from the client to the TurboVNC session.  This eliminates the need to use
 Virtual Tablet Mode in the TurboVNC session when using Wacom tablets with Qt
 applications.  Furthermore, the Linux/Un\*x TurboVNC Viewer no longer clones
-extended input devices other than those associated with Wacom tablets, since
-only Wacom tablet devices have been tested.
+extended input devices other than those associated with Wacom tablets or
+touchscreens, since only those devices have been tested.
 
 23. If multiple VNC viewers are sharing a single TurboVNC session, the TurboVNC
 Server now automatically uses server-side cursor rendering to render and
@@ -188,6 +188,10 @@ and Java 2D if any TurboVNC Viewer dialog other than the profiling dialog has
 the keyboard focus.  This fixes various minor cosmetic issues with the TurboVNC
 Viewer Options dialog, particularly on Mac platforms, that occurred if the
 viewer was actively drawing framebuffer updates while the dialog was visible.
+
+27. The remote X Input feature in the Linux TurboVNC Viewer and the TurboVNC
+Server now supports touchscreens and can transmit X Input multitouch events
+from the client to the TurboVNC session.
 
 
 2.2.6

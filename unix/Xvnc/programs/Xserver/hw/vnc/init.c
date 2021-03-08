@@ -986,7 +986,7 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
  */
 
 rfbDevInfo virtualTabletTouch =
-  { "TurboVNC virtual tablet touch", 16, 6, Absolute, 0,
+  { "TurboVNC virtual tablet touch", 16, FALSE, 0, 6, Absolute, 0,
     rfbGIIDevTypeTouch, NULL,
     { { 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 2048, 4096, rfbGIIUnitLength,
         0, 1, 26000, 0 },
@@ -1003,7 +1003,7 @@ rfbDevInfo virtualTabletTouch =
   };
 
 rfbDevInfo virtualTabletStylus =
-  { "TurboVNC virtual tablet stylus", 16, 6, Absolute, 0,
+  { "TurboVNC virtual tablet stylus", 16, FALSE, 0, 6, Absolute, 0,
     rfbGIIDevTypeStylus, NULL,
     { { 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
         0, 1, 200000, 0 },
@@ -1020,7 +1020,7 @@ rfbDevInfo virtualTabletStylus =
   };
 
 rfbDevInfo virtualTabletEraser =
-  { "TurboVNC virtual tablet eraser", 16, 6, Absolute, 0,
+  { "TurboVNC virtual tablet eraser", 16, FALSE, 0, 6, Absolute, 0,
     rfbGIIDevTypeEraser, NULL,
     { { 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 15748, 31496, rfbGIIUnitLength,
         0, 1, 200000, 0 },
@@ -1037,7 +1037,7 @@ rfbDevInfo virtualTabletEraser =
   };
 
 rfbDevInfo virtualTabletPad =
-  { "TurboVNC virtual tablet pad", 16, 6, Absolute, 0,
+  { "TurboVNC virtual tablet pad", 16, FALSE, 0, 6, Absolute, 0,
     rfbGIIDevTypePad, NULL,
     { { 0, AXIS_LABEL_PROP_ABS_X, "0", 0, 0, 0, rfbGIIUnitLength,
         0, 1, 0, 0 },
@@ -1096,6 +1096,22 @@ Bool AddExtInputDevice(rfbDevInfo *dev)
   Atom btn_labels[MAX_BUTTONS], axes_labels[MAX_VALUATORS];
   BYTE map[MAX_BUTTONS + 1];
   DeviceIntPtr devtmp;
+  int numValuators = dev->numValuators;
+
+  if (numValuators > 2) {
+    rfbGIIValuator *idVal = &dev->valuators[dev->numValuators - 2];
+    rfbGIIValuator *typeVal = &dev->valuators[dev->numValuators - 1];
+
+    if (!strcmp((char *)idVal->longName, "__TURBOVNC FAKE TOUCH ID__") &&
+        !strcmp((char *)idVal->shortName, "TFTI") &&
+        idVal->rangeMin == 0 && idVal->rangeMax == INT_MAX &&
+        !strcmp((char *)typeVal->longName, "__TURBOVNC FAKE TOUCH TYPE__") &&
+        !strcmp((char *)typeVal->shortName, "TFTT") &&
+        typeVal->rangeMin == 0 && typeVal->rangeMax == 5) {
+      numValuators -= 2;
+      dev->multitouch = TRUE;
+    }
+  }
 
   for (devtmp = inputInfo.devices; devtmp; devtmp = devtmp->next) {
     if (!strcmp(devtmp->name, dev->name)) {
@@ -1162,16 +1178,18 @@ Bool AddExtInputDevice(rfbDevInfo *dev)
     btn_labels[i] = MakeAtom(name, strlen(name), TRUE);
   }
 
-  for (i = 0; i < dev->numValuators; i++) {
+  for (i = 0; i < numValuators; i++) {
     char *name = (char *)dev->valuators[i].longName;
     axes_labels[i] = MakeAtom(name, strlen(name), TRUE);
   }
   InitPointerDeviceStruct((DevicePtr)dev->pDev, map, dev->numButtons,
                           btn_labels, (PtrCtrlProcPtr)NoopDDA,
-                          GetMotionHistorySize(), dev->numValuators,
-                          axes_labels);
+                          GetMotionHistorySize(), numValuators, axes_labels);
+  if (dev->multitouch)
+    InitTouchClassDeviceStruct(dev->pDev, dev->numTouches, XIDirectTouch,
+                               numValuators);
   InitPointerAccelerationScheme(dev->pDev, PtrAccelNoOp);
-  for (i = 0; i < dev->numValuators; i++) {
+  for (i = 0; i < numValuators; i++) {
     int res = dev->valuators[i].siDiv;
     InitValuatorAxisStruct(dev->pDev, i, axes_labels[i],
                            dev->valuators[i].rangeMin,
