@@ -168,7 +168,7 @@ JNIEXPORT void JNICALL Java_com_jcraft_jsch_agentproxy_connector_PageantConnecto
   cds.dwData = 0x804e50ba;  // AGENT_COPYDATA_ID
   cds.cbData = (DWORD)(strlen(mapName) + 1);
   cds.lpData = _strdup(mapName);
-  if (!SendMessage(hwnd, WM_COPYDATA, NULL, (LPARAM)(LPVOID)&cds))
+  if (!SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(LPVOID)&cds))
     _throww32();
 
   length = *(DWORD *)sharedMemory;
