@@ -241,7 +241,7 @@ if(TVNC_INCLUDEJRE)
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 		DEPENDS VncViewer.jar
 		COMMENT "Generating Custom Java Runtime Environment (JRE)")
-	add_custom_target(jre ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/jrestamp java)
+	add_custom_target(jrebuild ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/jrestamp java)
 endif()
 
 install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${CMAKE_INSTALL_JAVADIR})
