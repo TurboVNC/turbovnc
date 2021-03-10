@@ -46,7 +46,8 @@ public class TightDecoder extends Decoder {
     inflater = new Inflater[4];
     for (int i = 0; i < 4; i++)
       inflater[i] = new Inflater();
-    if (Helper.isAvailable()) {
+    if (Helper.isAvailable() &&
+        Utils.getBooleanProperty("turbovnc.turbojpeg", true)) {
       try {
         tjhandle = tjInitDecompress();
       } catch (Exception e) {
