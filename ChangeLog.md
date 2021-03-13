@@ -1,3 +1,16 @@
+2.2.7
+=====
+
+### Significant changes relative to 2.2.6:
+
+1. The Java TurboVNC Viewer now temporarily re-enables double buffering in
+Swing and Java 2D if any TurboVNC Viewer dialog other than the profiling dialog
+has the keyboard focus.  This fixes various minor cosmetic issues with the
+TurboVNC Viewer Options dialog, particularly on Mac platforms, that occurred if
+the viewer was actively drawing framebuffer updates while the dialog was
+visible.
+
+
 2.2.6
 =====
 
