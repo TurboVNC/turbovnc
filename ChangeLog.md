@@ -176,6 +176,12 @@ profiling parameters can now be configured dynamically for a running TurboVNC
 session, using the newly repurposed `tvncconfig` program (or the `vncconfig`
 program from any RealVNC-compatible VNC implementation.)
 
+25. The TurboVNC Viewer now temporarily re-enables double buffering in Swing
+and Java 2D if any TurboVNC Viewer dialog other than the profiling dialog has
+the keyboard focus.  This fixes various minor cosmetic issues with the TurboVNC
+Viewer Options dialog, particularly on Mac platforms, that occurred if the
+viewer was actively drawing framebuffer updates while the dialog was visible.
+
 
 2.2.6
 =====

@@ -1,8 +1,8 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
- * Copyright (C) 2010, 2012-2013, 2015-2018, 2020 D. R. Commander.
-                                                  All Rights Reserved.
+ * Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2021 D. R. Commander.
+ *                                                     All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -252,7 +252,12 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         // because we're taking care of that ourselves.  This improves
         // performance on a lot of systems and allows the viewer to achieve
         // optimal performance under X11 without requiring MIT-SHM pixmaps.
-        if (!swingDB)
+        Window activeWindow =
+          javax.swing.FocusManager.getCurrentManager().getActiveWindow();
+        if (!swingDB &&
+            (activeWindow == null || activeWindow instanceof Viewport ||
+             (activeWindow instanceof JDialog &&
+              ((JDialog)activeWindow).getTitle().equals("TurboVNC profiling information"))))
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         if (cc.viewer.benchFile != null)
           paintImmediately(x, y, width, height);
@@ -267,7 +272,12 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           if (cc.viewport.dy > 0)
             y += cc.viewport.dy;
         }
-        if (!swingDB)
+        Window activeWindow =
+          javax.swing.FocusManager.getCurrentManager().getActiveWindow();
+        if (!swingDB &&
+            (activeWindow == null || activeWindow instanceof Viewport ||
+             (activeWindow instanceof JDialog &&
+              ((JDialog)activeWindow).getTitle().equals("TurboVNC profiling information"))))
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         if (cc.viewer.benchFile != null)
           paintImmediately(x, y, r.width(), r.height());
