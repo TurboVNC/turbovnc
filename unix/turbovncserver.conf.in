@@ -15,8 +15,11 @@
 ##                    (passed to Xvnc in the -securitytypes argument)
 ##  $generateOTP -- 1 to generate an initial one-time password.  (OTP
 ##                  authentication must be enabled and permitted)
-##  $wm          -- the window manager to use (for instance, "mate" or "2d")
-##  $useVGL      -- 1 to run the window manager using VirtualGL
+##  $wm          -- the window manager to use (for instance, "mate" or "2d".)
+##                  This variable is ignored if $xstartup or $noxstartup is
+##                  specified.
+##  $useVGL      -- 1 to run the window manager using VirtualGL.  This variable
+##                  is ignored if $xstartup or $noxstartup is specified.
 ##  $autokill    -- 1 to automatically kill the TurboVNC session when the
 ##                  X startup script finishes or 0 to leave it running
 ##  $noVNC       -- directory containing noVNC
@@ -26,6 +29,8 @@
 ##                   use with X.509 encryption
 ##  $x509KeyFile -- path to X.509 private key file (in PEM format) to use with
 ##                  X.509 encryption
+##  $xstartup -- path to alternative X startup script
+##  $noxstartup -- 1 to start the TurboVNC session with no X startup script
 ##  $serverArgs  -- additional arguments to pass to Xvnc (refer to the Xvnc man
 ##                  page for a list of accepted arguments)
 ##
@@ -43,6 +48,8 @@
 # $useVGL = 0;
 # $autokill = 1;
 # $noVNC = "";
+# $xstartup = "${exedir}xstartup.turbovnc";
+# $noxstartup = 0;
 # $serverArgs = "";
 
 ## Uncomment this to use the X font server by default, rather than a static

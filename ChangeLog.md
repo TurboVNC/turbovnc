@@ -85,14 +85,21 @@ from `ssh-agent` or Pageant.  Note that the SSH client does not understand the
 `IdentitiesOnly` is `yes`.  Otherwise, with the exception noted in 2.2.1[5],
 its behavior should be the same as that of OpenSSH.
 
-12. The TurboVNC Server now installs the default `xstartup.turbovnc` script
+12. The X startup script (which is used to launch a window manager or other
+applications in a TurboVNC session) can now be specified using two new
+**turbovncserver.conf** variables, `$xstartup` and `$noxstartup`, which are the
+equivalents of the `vncserver` `-xstartup` and `-noxstartup` command-line
+options.
+
+13. The TurboVNC Server now installs the default `xstartup.turbovnc` script
 into the same directory as `vncserver`, and `vncserver` always uses that
 default script rather than a per-user `xstartup.turbovnc` script.  This
 facilitates upgrading `xstartup.turbovnc` on a system-wide basis when the
 TurboVNC Server is upgraded.  A per-user X startup script can still be used by
-specifying it with the `-xstartup` command-line option.
+specifying it with the `-xstartup` command-line option or the `$xstartup`
+**turbovncserver.conf** variable.
 
-13. The default X startup script (`xstartup.turbovnc`) has been streamlined to
+14. The default X startup script (`xstartup.turbovnc`) has been streamlined to
 improve cross-platform compatibility.  The script now attempts to match the
 value of the `TVNC_WM` environment variable, which is set by the
 `vncserver -wm` command-line option or the `$wm` **turbovncserver.conf**
@@ -102,11 +109,11 @@ file exists, then `xstartup.turbovnc` populates the appropriate XDG environment
 variables from the entries in that file and then executes the window manager
 startup program/script specified in the file.
 
-14. The `$autoLosslessRefresh`, `$pamSession`, `$multiThread`, and
+15. The `$autoLosslessRefresh`, `$pamSession`, `$multiThread`, and
 `$numThreads` **turbovncserver.conf** variables are now deprecated, since
 `$serverArgs` can be used to accomplish the same thing.
 
-15. The TurboVNC Server can no longer be built using GnuTLS.  Supporting GnuTLS
+16. The TurboVNC Server can no longer be built using GnuTLS.  Supporting GnuTLS
 was a stopgap measure intended for power users who needed access to encryption
 features that, at the time, either OpenSSL or TurboVNC's OpenSSL wrapper did
 not provide.  However, that feature gap has since been closed, and given the
@@ -115,10 +122,10 @@ attention from the TurboVNC developers and user community, there is no
 compelling reason to use the GnuTLS wrapper anymore.  The 2.2.x version of the
 TurboVNC Server will continue to support GnuTLS on a break/fix basis.
 
-16. The TurboVNC Server is now based on xorg-xserver 1.20.8, which fixes
+17. The TurboVNC Server is now based on xorg-xserver 1.20.8, which fixes
 several minor X server bugs.
 
-17. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
+18. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
 longer supports indirect rendering.  Indirect rendering is limited to the
 OpenGL 1.4 API, and it performed sluggishly in the TurboVNC Server due to the
 fact that X servers are single-threaded.  (On some platforms, the TurboVNC
@@ -133,12 +140,12 @@ Indirect rendering-- and the TurboVNC-specific X server modifications that
 allowed it to perform as well as possible-- will continue to be supported in
 TurboVNC 2.2.x on a break/fix basis.
 
-18. The TurboVNC Viewer's built-in SSH client now displays the SSH server's
+19. The TurboVNC Viewer's built-in SSH client now displays the SSH server's
 banner message on the command line by default.  Set the `turbovnc.sshbannerdlg`
 Java system property to `1` to display the banner message in a dialog box
 instead, thus restoring the default behavior of TurboVNC 2.2.x.
 
-19. The TurboVNC Server now supports the WebSocket protocol (more specifically,
+20. The TurboVNC Server now supports the WebSocket protocol (more specifically,
 RFC 6455, AKA HyBi v13.)  The server will automatically detect WebSocket
 connections on the RFB port (5900 + {display number}) and tunnel the RFB
 protocol through the WebSocket protocol.  This allows browser-based VNC
@@ -146,12 +153,12 @@ viewers, such as noVNC, to connect to the TurboVNC Server without using a
 proxy.  TLS encryption (WSS) is supported if an X.509 certificate is specified
 using the `-x509cert` and `-x509key` arguments to Xvnc.
 
-20. The TurboVNC Server now maintains a separate count of VNC password/OTP
+21. The TurboVNC Server now maintains a separate count of VNC password/OTP
 authentication failures for each client IP address and temporarily blocks
 connections only from IP addresses that have exceeded the maximum number of
 consecutive VNC password or OTP authentication failures.
 
-21. The Linux/Un\*x TurboVNC Helper library now uses X Input v2, which allows
+22. The Linux/Un\*x TurboVNC Helper library now uses X Input v2, which allows
 the Linux/Un\*x TurboVNC Viewer to pass extended input device valuator names
 from the client to the TurboVNC session.  This eliminates the need to use
 Virtual Tablet Mode in the TurboVNC session when using Wacom tablets with Qt
@@ -159,7 +166,7 @@ applications.  Furthermore, the Linux/Un\*x TurboVNC Viewer no longer clones
 extended input devices other than those associated with Wacom tablets, since
 only Wacom tablet devices have been tested.
 
-22. If multiple VNC viewers are sharing a single TurboVNC session, the TurboVNC
+23. If multiple VNC viewers are sharing a single TurboVNC session, the TurboVNC
 Server now automatically uses server-side cursor rendering to render and
 transmit cursor updates for all viewers other than the viewer that is moving
 the pointer (the "pointer owner"), thus allowing all viewers to track the
@@ -167,16 +174,16 @@ pointer's position on the remote desktop.  (Previously, this was only possible
 if the viewers manually enabled server-side cursor rendering, i.e. if they
 disabled cursor shape updates.)
 
-23. The TurboVNC Server now includes overhauled congestion control algorithms
+24. The TurboVNC Server now includes overhauled congestion control algorithms
 from TigerVNC v1.9.0 and later, for improved performance on
 high-latency/low-bandwidth networks.
 
-24. The automatic lossless refresh (ALR), interframe comparison, sharing, and
+25. The automatic lossless refresh (ALR), interframe comparison, sharing, and
 profiling parameters can now be configured dynamically for a running TurboVNC
 session, using the newly repurposed `tvncconfig` program (or the `vncconfig`
 program from any RealVNC-compatible VNC implementation.)
 
-25. The TurboVNC Viewer now temporarily re-enables double buffering in Swing
+26. The TurboVNC Viewer now temporarily re-enables double buffering in Swing
 and Java 2D if any TurboVNC Viewer dialog other than the profiling dialog has
 the keyboard focus.  This fixes various minor cosmetic issues with the TurboVNC
 Viewer Options dialog, particularly on Mac platforms, that occurred if the

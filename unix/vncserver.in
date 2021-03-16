@@ -50,7 +50,7 @@ $authTypeOTP = 1;
 $generateOTP = 0;
 $securityTypes = "";
 $encTypeX509 = @USETLS@;
-$skipxstartup = 0;
+$noxstartup = 0;
 $autoLosslessRefresh = 0.0;
 $deferUpdate = 1;
 $wm = "";
@@ -244,7 +244,7 @@ if ($opt{'-novnc'}) {
   }
 }
 if ($opt{'-noxstartup'}) {
-  $skipxstartup = 1;
+  $noxstartup = 1;
 }
 if ($opt{'-xstartup'}) {
   $xstartup = $opt{'-xstartup'};
@@ -542,7 +542,7 @@ if ($opt{'-sessionstart'}) {
   &List(0, $displayNumber);
 }
 
-if (!$skipxstartup) {
+if (!$noxstartup) {
   # Run the X startup script.
 
   warn "Starting applications specified in $xstartup\n";
@@ -567,7 +567,7 @@ if (-e "/tmp/.X11-unix/X$displayNumber") {
 $ENV{VNCDESKTOP} = $desktopName;
 $ENV{VGL_COMPRESS} = "0";
 
-if (!$skipxstartup) {
+if (!$noxstartup) {
   if ($opt{'-fg'}) {
     system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
     if (kill 0, `cat $pidFile` || kill 0, `cat $noVNCPIDFile`) {
@@ -1126,6 +1126,8 @@ sub ReadConfiguration
        passwdFile
        x509CertFile
        x509KeyFile
+       xstartup
+       noxstartup
        serverArgs);
 
   if (open CONF, "<$configFile") {
