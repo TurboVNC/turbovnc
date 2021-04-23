@@ -1125,7 +1125,7 @@ work with other extended pointer devices as well.
 
     Additionally, the Windows TurboVNC Viewer provides specific support for
 Wacom drawing tablets by interfacing between the Wacom drivers for Windows and
-the afore-mentioned remote X Input interface.
+the aforementioned remote X Input interface.
 
 5. Keyboard grabbing has been implemented in the Java TurboVNC Viewer for
 Windows, thus allowing special keystrokes (such as Alt-Tab) to be sent to the
@@ -1499,7 +1499,7 @@ when run as a standalone application.  This allows special key sequences, such
 as Alt-Tab, to be sent to the server.  The pointer can also be optionally
 grabbed, which allows special keyboard + pointer sequences (such as
 Alt-{drag}), to be sent to the server as well.  This feature requires the
-afore-mentioned TurboVNC Helper library.
+aforementioned TurboVNC Helper library.
 
 17. The Java TurboVNC Viewer will now offer an option to reconnect if the
 connection fails for any reason.
@@ -2569,9 +2569,9 @@ connecting over a high-speed network incurred a severe performance penalty.
 Since this is no longer the case, the switch is left on all the time and is no
 longer configurable.
 
-    NOTE:  The afore-mentioned performance penalty will still be incurred
-when connecting a TurboVNC 0.4 viewer to an older (pre-0.4) TurboVNC server
-over a high-speed network.  Start the server with
+    NOTE:  The aforementioned performance penalty will still be incurred when
+connecting a TurboVNC 0.4 viewer to an older (pre-0.4) TurboVNC server over a
+high-speed network.  Start the server with
 `/opt/TurboVNC/bin/vncserver -deferupdate 1` to avoid this, or simply upgrade
 the server to 0.4.
 
