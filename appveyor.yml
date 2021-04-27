@@ -1,7 +1,7 @@
 environment:
-  LJT_VERSION: 2.0.90
-  LJT_64BIT_SDK: "https://sourceforge.net/projects/libjpeg-turbo/files/2.0.90 (2.1 beta1)/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
-  LJT_32BIT_SDK: "https://sourceforge.net/projects/libjpeg-turbo/files/2.0.90 (2.1 beta1)/libjpeg-turbo-%LJT_VERSION%-vc.exe"
+  LJT_VERSION: 2.1.0
+  LJT_64BIT_SDK: "https://sourceforge.net/projects/libjpeg-turbo/files/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
+  LJT_32BIT_SDK: "https://sourceforge.net/projects/libjpeg-turbo/files/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc.exe"
 
 install:
   - cmd: >-
