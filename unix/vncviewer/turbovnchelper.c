@@ -594,15 +594,55 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
 static Bool IsXIEvent(Display *dpy, XEvent *xe, XPointer arg)
 {
   struct isXIEventParams *params = (struct isXIEventParams *)arg;
+  Bool freeXEventData = False, touchEmulatingPointer = False;
+  XIDeviceEvent *xide;
 
-  if (xe->type == GenericEvent && xe->xgeneric.extension == params->xiOpcode &&
-      xe->xcookie.type == GenericEvent &&
-      xe->xcookie.extension == params->xiOpcode &&
-      (xe->xcookie.evtype == params->xiType ||
-       (xe->xcookie.evtype >= XI_TouchBegin &&
-        xe->xcookie.evtype <= XI_TouchEnd && params->xiType == -1)))
-    return True;
-  return False;
+  if (xe->type != GenericEvent || xe->xgeneric.extension != params->xiOpcode ||
+      xe->xcookie.type != GenericEvent ||
+      xe->xcookie.extension != params->xiOpcode)
+    return False;
+
+  /* The TurboVNC Viewer calls the native Viewport.processExtInputEvent()
+     method with the 'type' argument (--> params->xiType) set to
+     XI_ButtonPress, XI_ButtonRelease, or XI_Motion, corresponding to the type
+     of mouse event that the Swing mouse listener received.  For non-multitouch
+     events, this predicate function selects events from the queue only if they
+     match the specified event type exactly. */
+  if (xe->xcookie.evtype < XI_TouchBegin || xe->xcookie.evtype > XI_TouchEnd)
+    return (xe->xcookie.evtype == params->xiType);
+
+  if (!xe->xcookie.data) {
+    if (!XGetEventData(dpy, &xe->xcookie))
+      return False;
+    freeXEventData = True;
+  }
+  xide = (XIDeviceEvent *)xe->xcookie.data;
+  touchEmulatingPointer = !!(xide->flags & XITouchEmulatingPointer);
+  if (freeXEventData) XFreeEventData(dpy, &xe->xcookie);
+
+  if (params->xiType == -1) {
+    /* This predicate function is being called by the multitouch listener
+       thread, which only handles multitouch events for the second and
+       subsequent touches.  (Only the events for the first touch have pointer
+       emulation enabled.) */
+    return !touchEmulatingPointer;
+  } else {
+    /* Multitouch events for the first touch have corresponding Swing mouse
+       events, so we handle them similarly to non-multitouch events. */
+    if (!touchEmulatingPointer)
+      return False;
+    if (params->xiType == XI_ButtonPress &&
+        xe->xcookie.evtype != XI_TouchBegin)
+      return False;
+    if (params->xiType == XI_ButtonRelease &&
+        xe->xcookie.evtype != XI_TouchEnd)
+      return False;
+    if (params->xiType == XI_Motion &&
+        xe->xcookie.evtype != XI_TouchUpdate)
+      return False;
+  }
+
+  return True;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_turbovnc_vncviewer_Viewport_processExtInputEvent
