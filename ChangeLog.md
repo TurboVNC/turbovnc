@@ -10,6 +10,11 @@ TurboVNC Viewer Options dialog, particularly on Mac platforms, that occurred if
 the viewer was actively drawing framebuffer updates while the dialog was
 visible.
 
+2. Fixed an error ("java.nio.BufferOverflowException") that occurred in the
+Java TurboVNC Viewer when attempting to use one of the X509* security types
+with the `TLS_AES_128_GCM_SHA256` and `TLS_AES_256_GCM_SHA384` TLS 1.3 cipher
+suites, which are preferred by OpenSSL 1.1.x.
+
 
 2.2.6
 =====
