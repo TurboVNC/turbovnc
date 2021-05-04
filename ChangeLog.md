@@ -20,6 +20,9 @@ in the "Content-Length" HTTP header to accommodate variable substitutions in
 the JNLP template.  This fixes an issue whereby certain web browsers would
 refuse to download the automatically-generated JNLP file.
 
+4. The built-in HTTP server in the TurboVNC Server now handles HTTP 1.1 HEAD
+requests, which are sent by recent versions of Java Web Start.
+
 
 2.2.6
 =====

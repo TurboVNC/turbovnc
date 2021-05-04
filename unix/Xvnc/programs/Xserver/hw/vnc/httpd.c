@@ -243,8 +243,8 @@ static void httpProcessInput(void)
   }
 
   /* Process the request. */
-  if (strncmp(buf, "GET ", 4)) {
-    rfbLog("httpd: no GET line\n");
+  if (strncmp(buf, "GET ", 4) && strncmp(buf, "HEAD ", 5)) {
+    rfbLog("httpd: no GET or HEAD line\n");
     httpCloseSock();
     return;
   } else {
@@ -253,13 +253,14 @@ static void httpProcessInput(void)
   }
 
   if (strlen(buf) > maxFnameLen) {
-    rfbLog("httpd: GET line too long\n");
+    rfbLog("httpd: GET or HEAD line too long\n");
     httpCloseSock();
     return;
   }
 
-  if (sscanf(buf, "GET %s HTTP/1.0", fname) != 1) {
-    rfbLog("httpd: couldn't parse GET line\n");
+  if (sscanf(buf, "GET %s HTTP/1.0", fname) != 1 &&
+      sscanf(buf, "HEAD %s HTTP/1.1", fname) != 1) {
+    rfbLog("httpd: couldn't parse GET or HEAD line\n");
     httpCloseSock();
     return;
   }
