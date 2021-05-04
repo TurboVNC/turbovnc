@@ -3,7 +3,8 @@
  */
 
 /*
- *  Copyright (C) 2012, 2015, 2017, 2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012, 2015, 2017, 2019, 2021 D. R. Commander.
+ *                                             All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
@@ -200,6 +201,7 @@ static void httpProcessInput(void)
   char str[256];
   struct passwd *user;
   struct stat st;
+  off_t pos;
 
   cl.sock = httpSock;
 
@@ -321,6 +323,68 @@ static void httpProcessInput(void)
   }
 
   WriteExact(&cl, OK_STR, strlen(OK_STR));
+
+  /* Adjust the content length to accommodate the variable substitutions that
+     will be performed. */
+  if (performSubstitutions) {
+    if ((pos = lseek(fd, 0, SEEK_CUR)) < 0) {
+      rfbLogPerror("httpProcessInput: lseek");
+      close(fd);
+      httpCloseSock();
+      return;
+    }
+    while (1) {
+      char *dollar;
+      int n = read(fd, buf, BUF_SIZE - 1);
+
+      if (n < 0) {
+        rfbLogPerror("httpProcessInput: read");
+        close(fd);
+        httpCloseSock();
+        return;
+      }
+
+      if (n == 0)
+        break;
+
+      ptr = buf;
+      buf[n] = 0;
+
+      while ((dollar = strchr(ptr, '$'))) {
+        ptr = dollar;
+        if (compareAndSkip(&ptr, "$PORT")) {
+          sprintf(str, "%d", rfbPort);
+          st.st_size += strlen(str) - 5;
+        } else if (compareAndSkip(&ptr, "$HTTPPORT")) {
+          sprintf(str, "%d", httpPort);
+          st.st_size += strlen(str) - 9;
+        } else if (compareAndSkip(&ptr, "$DESKTOP")) {
+          st.st_size += strlen(desktopName) - 8;
+        } else if (compareAndSkip(&ptr, "$DISPLAY")) {
+          sprintf(str, "%s:%s", rfbThisHost, display);
+          st.st_size += strlen(str) - 8;
+        } else if (compareAndSkip(&ptr, "$SERVER")) {
+          sprintf(str, "%s", rfbThisHost);
+          st.st_size += strlen(str) - 7;
+        } else if (compareAndSkip(&ptr, "$USER")) {
+          if (user)
+            st.st_size += strlen(user->pw_name) - 5;
+          else
+            st.st_size -= 4;
+        } else if (compareAndSkip(&ptr, "$PARAMS")) {
+          st.st_size += strlen(params) - 7;
+        } else if (compareAndSkip(&ptr, "$$"))
+          st.st_size--;
+      }
+    }
+    if (lseek(fd, pos, SEEK_SET) < 0) {
+      rfbLogPerror("httpProcessInput: lseek");
+      close(fd);
+      httpCloseSock();
+      return;
+    }
+  }
+
   snprintf(str, 256, "Content-Length: %ld\r\n", (long)st.st_size);
   WriteExact(&cl, str, strlen(str));
   strftime(str, 256, "Last-Modified: %a, %d %b %Y %T GMT\r\n",

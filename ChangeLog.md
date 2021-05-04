@@ -15,6 +15,11 @@ Java TurboVNC Viewer when attempting to use one of the X509* security types
 with the `TLS_AES_128_GCM_SHA256` and `TLS_AES_256_GCM_SHA384` TLS 1.3 cipher
 suites, which are preferred by OpenSSL 1.1.x.
 
+3. The built-in HTTP server in the TurboVNC Server now adjusts the value sent
+in the "Content-Length" HTTP header to accommodate variable substitutions in
+the JNLP template.  This fixes an issue whereby certain web browsers would
+refuse to download the automatically-generated JNLP file.
+
 
 2.2.6
 =====
