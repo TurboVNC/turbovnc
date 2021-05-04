@@ -114,7 +114,6 @@ public class SSLEngineManager {
           // Check status
           switch (res.getStatus()) {
             case OK:
-              myAppData.compact();
               ((Buffer)myNetData).flip();
               os.writeBytes(myNetData.array(), 0, myNetData.remaining());
               os.flush();

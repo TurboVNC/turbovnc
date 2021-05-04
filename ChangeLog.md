@@ -193,6 +193,11 @@ viewer was actively drawing framebuffer updates while the dialog was visible.
 Server now supports touchscreens and can transmit X Input multitouch events
 from the client to the TurboVNC session.
 
+28. Fixed an error ("java.nio.BufferOverflowException") that occurred in the
+TurboVNC Viewer when attempting to use one of the X509* security types with the
+`TLS_AES_128_GCM_SHA256` and `TLS_AES_256_GCM_SHA384` TLS 1.3 cipher suites,
+which are preferred by OpenSSL 1.1.x.
+
 
 2.2.6
 =====
