@@ -1,4 +1,4 @@
-/*  Copyright (C) 2018, 2020 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C) 2018, 2020-2021 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -177,6 +177,8 @@ public final class SessionManager extends Tunnel {
       args = System.getenv("TVNC_SERVERARGS");
 
     String command = dir + "/bin/vncserver -sessionstart" +
+                     (Params.sessMgrAuto.getValue() ? " -securitytypes otp" :
+                      "") +
                      (args != null ? " " + args : "");
     channelExec.setCommand("bash -c \"set -o pipefail; " + command +
                            " | sed \'s/^/[TURBOVNC] /g\'\"");
