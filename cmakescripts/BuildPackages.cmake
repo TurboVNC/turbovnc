@@ -51,6 +51,14 @@ else()
 endif()
 message(STATUS "RPM architecture = ${RPMARCH}, DEB architecture = ${DEBARCH}")
 
+set(DEBDEPENDS "libxt6, libxext6")
+if(TVNC_BUILDSERVER)
+	if(TVNC_USEPAM)
+		set(DEBDEPENDS "libpam0g, ${DEBDEPENDS}")
+	endif()
+	set(DEBDEPENDS "${DEBDEPENDS}, xauth")
+endif()
+
 configure_file(release/makerpm.in pkgscripts/makerpm)
 configure_file(release/rpm.spec.in pkgscripts/rpm.spec @ONLY)
 
