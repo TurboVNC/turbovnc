@@ -34,6 +34,9 @@
 # Whether or not to include the server
 %define server @TVNC_BUILDSERVER@
 
+# Whether or not to include the web server
+%define webserver @TVNC_BUILDWEBSERVER@
+
 # Path under which the Java viewer should be installed
 %if "%{viewer}" == "1"
 %define javadir @CMAKE_INSTALL_FULL_JAVADIR@
@@ -82,8 +85,8 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  -DCMAKE_INSTALL_SYSCONFDIR=%{sysconfdir} \
 #-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
 #-->  -DTVNC_BUILDVIEWER=%{viewer} -DTVNC_BUILDHELPER=%{helper} \
-#-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_INCLUDEJRE=%{jre} \
-#-->  -DPYTHON_EXECUTABLE=@PYTHON_EXECUTABLE@ \
+#-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_BUILDWEBSERVER=%{webserver} \
+#-->  -DPYTHON_EXECUTABLE=@PYTHON_EXECUTABLE@ -DTVNC_INCLUDEJRE=%{jre} \
 #-->  .
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 #-->make -j$NUMCPUS --load-average=$NUMCPUS
@@ -253,7 +256,9 @@ fi
  %{bindir}/xstartup.turbovnc
  %{bindir}/vncpasswd
  %{bindir}/vncconnect
- %{bindir}/webserver
+ %if "%{webserver}" == "1"
+  %{bindir}/webserver
+ %endif
 %endif
 %if "%{viewer}" == "1"
  %{javadir}/VncViewer.jar
