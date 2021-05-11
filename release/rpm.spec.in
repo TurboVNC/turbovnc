@@ -48,9 +48,9 @@ URL:       @PKGURL@
 #-->Source0: http://prdownloads.sourceforge.net/@CMAKE_PROJECT_NAME_LC@/@CMAKE_PROJECT_NAME_LC@-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
-Requires:  bash >= 2.0 /sbin/chkconfig
+Requires:  bash >= 2.0
 %if "%{server}" == "1"
-Requires:  %{_sysconfdir}/init.d /usr/bin/xauth
+Requires:  /sbin/chkconfig %{_sysconfdir}/init.d /usr/bin/xauth
 %endif
 BuildRoot: %{_blddir}/%{name}-%{version}-root
 BuildRequires: /usr/bin/perl libjpeg-turbo
