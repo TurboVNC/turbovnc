@@ -412,6 +412,8 @@ static rfbClientPtr rfbNewClient(int sock)
 
   cl->zlibCompressLevel = 5;
 
+  xorg_list_init(&cl->pings);
+
   /*
    * Wait a few ms for the client to send WebSockets connection
    * (TLS/SSL or plain)
@@ -490,7 +492,6 @@ static rfbClientPtr rfbNewClient(int sock)
 
   cl->baseRTT = cl->minRTT = cl->minCongestedRTT = (unsigned)-1;
   REGION_INIT(pScreen, &cl->cuRegion, NullBox, 0);
-  xorg_list_init(&cl->pings);
 
   if (rfbInterframe == 1) {
     if (!InterframeOn(cl)) {
