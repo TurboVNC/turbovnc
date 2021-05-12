@@ -701,7 +701,9 @@ void InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
   int i;
 
   initOutputCalled = TRUE;
+#ifdef GLXEXT
   xorgGlxCreateVendor();
+#endif
 
   rfbLog("Desktop name '%s' (%s:%s)\n", desktopName, rfbThisHost, display);
   rfbLog("Protocol versions supported: 3.3, 3.7, 3.8, 3.7t, 3.8t\n");
