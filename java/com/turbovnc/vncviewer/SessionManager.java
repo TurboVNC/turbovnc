@@ -192,7 +192,9 @@ public final class SessionManager extends Tunnel {
     while ((result = br.readLine()) != null) {
       if (!result.startsWith("[TURBOVNC] ")) continue;
       result = result.replace("[TURBOVNC] ", "");
-      if (error == null && result.length() > 0) error = result;
+      if (error == null && result.length() > 0 &&
+          !result.startsWith("TurboVNC Server (Xvnc)"))
+        error = result;
       String[] splitResult = result.split("\t");
       if (splitResult.length >= 2) {
         int numSessions = Integer.parseInt(splitResult[0]);
