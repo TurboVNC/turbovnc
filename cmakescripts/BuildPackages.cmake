@@ -56,7 +56,7 @@ if(TVNC_BUILDSERVER)
 	if(TVNC_USEPAM)
 		set(DEBDEPENDS "libpam0g, ${DEBDEPENDS}")
 	endif()
-	set(DEBDEPENDS "${DEBDEPENDS}, xauth")
+	set(DEBDEPENDS "${DEBDEPENDS}, xauth, x11-xkb-utils, xkb-data")
 endif()
 
 configure_file(release/makerpm.in pkgscripts/makerpm)
