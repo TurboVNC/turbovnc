@@ -650,8 +650,9 @@ xorgGlxMakeCurrent(ClientPtr client, GLXContextTag tag, XID drawId, XID readId,
         }
 
         glxc->currentClient = client;
-        glxServer.setContextTagPrivate(client, newContextTag, glxc);
     }
+
+    glxServer.setContextTagPrivate(client, newContextTag, glxc);
 
     if (prevglxc) {
         prevglxc->currentClient = NULL;
