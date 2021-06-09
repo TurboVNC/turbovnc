@@ -55,7 +55,8 @@ BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
 DATADIR=@CMAKE_INSTALL_FULL_DATADIR@
 DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 SYSCONFDIR=@CMAKE_INSTALL_FULL_SYSCONFDIR@
-BUILDSERVER=@TVNC_BUILDSERVER@
+BUILDJAVA=@TVNC_BUILDJAVA@
+BUILDNATIVE=@TVNC_BUILDNATIVE@
 
 if [ ! `uid` -eq 0 ]; then
 	SUDO=sudo
@@ -94,7 +95,7 @@ ResultAny=no
 EOF
 fi
 
-if [ ! "$DATADIR" = "/usr/share" ]; then
+if [ "$BUILDJAVA" = "1" -a "$BUILDNATIVE" = "1" -a ! "$DATADIR" = "/usr/share" ]; then
 	safedirmove $TMPDIR/$DATADIR/icons $TMPDIR/usr/share/icons $TMPDIR/__tmpicons
 fi
 
