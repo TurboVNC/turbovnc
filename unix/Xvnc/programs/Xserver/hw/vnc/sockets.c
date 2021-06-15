@@ -19,6 +19,7 @@
  */
 
 /*
+ *  Copyright (C) 2021 Steffen Kieß
  *  Copyright (C) 2012-2020 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 2011 Joel Martin
@@ -46,8 +47,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <sys/un.h>
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
@@ -73,10 +76,18 @@ int deny_severity = LOG_WARNING;
 int rfbMaxClientWait = DEFAULT_MAX_CLIENT_WAIT;
 
 int rfbPort = 0;
+const char *rfbUnixPath = NULL;
+int rfbUnixMode = 0600;
+Bool rfbUnixSocketCreated = FALSE;
 int rfbListenSock = -1;
 int rfbMaxClientConnections = DEFAULT_MAX_CONNECTIONS;
 
 extern unsigned long long sendBytes;
+
+/* from log.c */
+void
+AbortServer(void)
+    _X_NORETURN;
 
 static void rfbSockNotify(int fd, int ready, void *data);
 
@@ -137,6 +148,24 @@ void rfbInitSockets(void)
     return;
   }
 
+  if (rfbUnixPath) {
+    rfbLog(
+        "Listening for VNC connections on unix domain socket %s (mode %04o)\n",
+        rfbUnixPath, rfbUnixMode);
+
+    if ((rfbListenSock = ListenOnUnixDomainSocket(rfbUnixPath, rfbUnixMode)) <
+        0) {
+      rfbLogPerror("ListenOnUnixDomainSocket");
+      AbortServer(); /* Clean up lock file and X11 socket file and exit */
+    }
+
+    /* Make sure that ddxGiveUp() will remove the socket */
+    rfbUnixSocketCreated = TRUE;
+
+    SetNotifyFd(rfbListenSock, rfbSockNotify, X_NOTIFY_READ, "UNIX");
+    return;
+  }
+
   if (rfbPort == 0)
     rfbPort = 5900 + atoi(display);
 
@@ -173,11 +202,13 @@ static void rfbSockNotify(int fd, int ready, void *data)
       return;
     }
 
-    if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *)&one,
-                   sizeof(one)) < 0) {
-      rfbLogPerror("rfbSockNotify: setsockopt");
-      close(sock);
-      return;
+    if (!data) {
+      if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *)&one,
+                     sizeof(one)) < 0) {
+        rfbLogPerror("rfbSockNotify: setsockopt");
+        close(sock);
+        return;
+      }
     }
 
     fprintf(stderr, "\n");
@@ -638,6 +669,60 @@ int ListenOnTCPPort(int port)
   if (getnameinfo(&addr.u.sa, addrlen, hostname, NI_MAXHOST, NULL, 0,
                   NI_NUMERICHOST) == 0)
     rfbLog("  Interface %s\n", hostname);
+
+  return sock;
+}
+
+
+int ListenOnUnixDomainSocket(const char *path, int mode)
+{
+  struct sockaddr_un addr;
+  mode_t saved_umask;
+  int sock;
+  int result;
+  int err;
+
+  if (strlen(path) >= sizeof(addr.sun_path)) {
+    rfbLog("socket path is too long");
+    errno = ENAMETOOLONG;
+    return -1;
+  }
+  memset(&addr, 0, sizeof(addr));
+  addr.sun_family = AF_UNIX;
+  strcpy(addr.sun_path, path);
+
+  /* Remove the socket if it exists and is stale */
+  if (access(path, F_OK) == 0) {
+    /* Check whether the socket is stale by trying to connect to it */
+    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+      return -1;
+
+    if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+      /* If the socket is stale, delete it */
+      if (errno == ECONNREFUSED)
+        unlink(path);
+    }
+
+    close(sock);
+  }
+
+  if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+    return -1;
+
+  saved_umask = umask(0777 & ~mode);
+  result = bind(sock, (struct sockaddr *)&addr, sizeof(addr));
+  err = errno;
+  umask(saved_umask);
+  if (result < 0) {
+    close(sock);
+    errno = err;
+    return -1;
+  }
+
+  if (listen(sock, 5) < 0) {
+    close(sock);
+    return -1;
+  }
 
   return sock;
 }

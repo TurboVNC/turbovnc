@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 #
+#  Copyright (C) 2021 Steffen Kieß
 #  Copyright (C) 2009-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
@@ -62,6 +63,7 @@ $multiThread = 1;
 $numThreads = 0;
 $noVNC = "";
 $serverArgs = "";
+$rfbUnixPath = "";
 
 # Read configuration from the system-wide and user files if present.
 
@@ -203,7 +205,7 @@ foreach $_registrydir (@registrydirs) {
               "-3dwm", 0, "-vgl", 0, "-debug", 0, "-x509cert", 1,
               "-x509key", 1, "-autokill", 0, "-quiet", 0, "-wm", 1,
               "-sessionlist", 0, "-sessionstart", 0, "-novnc", 1,
-              "-noautokill", 0, "-rfbport", 1);
+              "-noautokill", 0, "-rfbport", 1, "-rfbunixpath", 1);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -382,6 +384,10 @@ if ($opt{'-rfbport'}) {
   $vncPort = $opt{'-rfbport'};
 }
 
+if ($opt{'-rfbunixpath'}) {
+  $rfbUnixPath = $opt{'-rfbunixpath'};
+}
+
 if ($opt{'-log'}) {
   $desktopLog = $opt{'-log'};
 } else {
@@ -449,6 +455,7 @@ $cmd .= " -dridir $dridir" if ($dridir);
 $cmd .= " -registrydir $registrydir" if ($registrydir);
 $cmd .= " -nomt" if (!$multiThread);
 $cmd .= " -nthreads $numThreads" if ($numThreads);
+$cmd .= " -rfbunixpath " . &quotedString($rfbUnixPath) if ($rfbUnixPath);
 $cmd .= " $serverArgs" if ($serverArgs);
 
 foreach $arg (@ARGV) {
@@ -463,10 +470,26 @@ if (!$opt{'-debug'}) {
 $pidFile = "$vncUserDir/$host:$displayNumber.pid";
 system("$cmd & echo \$! >$pidFile");
 
+# Record the RFB unix socket path
+
+$sockPathFile = "$vncUserDir/$host:$displayNumber.sockpath";
+if ($rfbUnixPath) {
+  open(SOCK, '>', $sockPathFile);
+  print SOCK "$rfbUnixPath\n"
+} else {
+  unlink $sockPathFile;
+}
+
 # Give Xvnc a chance to start up
 
 sleep(1);
 unless (kill 0, `cat $pidFile`) {
+  # When Xvnc exits on startup the RFB socket might belong to another process.
+  # Remove the .sockpath file to prevent -kill from cleaning it up later.
+  if ($rfbUnixPath) {
+    unlink $sockPathFile;
+  }
+
   warn "Could not start Xvnc.\n\n";
   open(LOG, "<$desktopLog");
   while (<LOG>) { print; }
@@ -475,7 +498,11 @@ unless (kill 0, `cat $pidFile`) {
 }
 
 if (!$opt{'-sessionstart'}) {
-  warn "\nDesktop '$desktopName' started on display $host:$displayNumber\n\n";
+  warn "\nDesktop '$desktopName' started on display $host:$displayNumber\n";
+  if ($rfbUnixPath) {
+    warn "Listening on unix socket $rfbUnixPath\n";
+  }
+  warn "\n";
 }
 
 if ($generateOTP == 1) {
@@ -894,6 +921,7 @@ sub Kill
 
   if ($opt{'-kill'} =~ /^:\d+$/) {
     $pidFile = "$vncUserDir/$host$opt{'-kill'}.pid";
+    $sockPathFile = "$vncUserDir/$host$opt{'-kill'}.sockpath";
     $noVNCPIDFile = "$vncUserDir/$host$opt{'-kill'}-noVNC.pid";
   } else {
     if ($opt{'-kill'} !~ /^$host:/) {
@@ -901,6 +929,7 @@ sub Kill
           "Use -kill :<number> instead\n\n";
     }
     $pidFile = "$vncUserDir/$opt{'-kill'}.pid";
+    $sockPathFile = "$vncUserDir/$opt{'-kill'}.sockpath";
     $noVNCPIDFile = "$vncUserDir/$opt{'-kill'}-noVNC.pid";
   }
 
@@ -948,6 +977,14 @@ sub Kill
     warn "Xvnc process ID $pid already killed\n";
     $opt{'-kill'} =~ s/://;
 
+    if (-r $sockPathFile) {
+      chop($rfbUnixPath = `cat $sockPathFile`);
+      if (-e $rfbUnixPath) {
+        print "Xvnc did not appear to shut down cleanly.";
+        print " Removing $rfbUnixPath\n";
+        unlink $rfbUnixPath;
+      }
+    }
     if (-e "/tmp/.X11-unix/X$opt{'-kill'}") {
       print "Xvnc did not appear to shut down cleanly.";
       print " Removing /tmp/.X11-unix/X$opt{'-kill'}\n";
@@ -960,6 +997,7 @@ sub Kill
     }
   }
 
+  unlink $sockPathFile;
   unlink $pidFile;
   exit;
 }
