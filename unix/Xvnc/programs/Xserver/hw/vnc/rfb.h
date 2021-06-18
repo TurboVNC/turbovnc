@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2021 Steffen Kieß
  *  Copyright (C) 2010-2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
@@ -932,6 +933,9 @@ extern int rfbMaxClientConnections;
 extern int rfbMaxClientWait;
 
 extern int rfbPort;
+extern const char *rfbUnixPath;
+extern int rfbUnixMode;
+extern Bool rfbUnixSocketCreated;
 extern int rfbListenSock;
 
 extern void rfbInitSockets(void);
@@ -947,6 +951,7 @@ extern int ReadExactTimeout(rfbClientPtr cl, char *buf, int len, int timeout);
 extern int SkipExact(rfbClientPtr cl, int len);
 extern int WriteExact(rfbClientPtr cl, char *buf, int len);
 extern int ListenOnTCPPort(int port);
+extern int ListenOnUnixDomainSocket(const char *path, int mode);
 extern int ConnectToTcpAddr(char *host, int port);
 
 extern const char *sockaddr_string(rfbSockAddr *addr, char *buf, int len);

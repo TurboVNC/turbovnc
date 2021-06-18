@@ -5,6 +5,7 @@
  */
 
 /*
+ *  Copyright (C) 2021 Steffen Kieß
  *  Copyright (C) 2009-2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
@@ -361,6 +362,22 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-rfbport") == 0) {  /* -rfbport port */
     REQUIRE_ARG();
     rfbPort = atoi(argv[i + 1]);
+    return 2;
+  }
+
+  if (strcasecmp(argv[i], "-rfbunixpath") == 0) {  /* -rfbunixpath path */
+    REQUIRE_ARG();
+    rfbUnixPath = argv[i + 1];
+    return 2;
+  }
+
+  if (strcasecmp(argv[i], "-rfbunixmode") == 0) {  /* -rfbunixmode mode */
+    char *ptr;
+    REQUIRE_ARG();
+    rfbUnixMode = strtol(argv[i + 1], &ptr, 8);
+    if (argv[i + 1] + strlen(argv[i + 1]) != ptr || rfbUnixMode < 0 ||
+        rfbUnixMode > 0777)
+      FatalError("Invalid -rfbunixmode parameter\n");
     return 2;
   }
 
@@ -1551,6 +1568,9 @@ void ddxGiveUp(enum ExitCode error)
     sprintf(unixSocketName, "/tmp/.X11-unix/X%s", display);
     unlink(unixSocketName);
   }
+  if (rfbUnixPath && rfbUnixSocketCreated) {
+    unlink(rfbUnixPath);
+  }
 }
 
 
@@ -1645,6 +1665,8 @@ void ddxUseMsg(void)
   ErrorF("                       mouse button)\n");
   ErrorF("-noreverse             disable reverse connections\n");
   ErrorF("-rfbport port          TCP port for RFB protocol\n");
+  ErrorF("-rfbunixpath path      Unix domain socket path for RFB protocol\n");
+  ErrorF("-rfbunixmode mode      Mode for unix domain socket\n");
   ErrorF("-rfbwait time          max time in ms to wait for a send/receive operation\n");
   ErrorF("                       to/from a connected viewer to complete [default: %d]\n",
          DEFAULT_MAX_CLIENT_WAIT);

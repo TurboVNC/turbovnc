@@ -2,6 +2,7 @@
  * Copyright 2004-2005 Cendio AB.
  * Copyright (C) 2012-2018, 2020 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012, 2016 Brian P. Hinz
+ * Copyright (C) 2021 Steffen Kieß
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -450,7 +451,8 @@ public final class Params {
   public static StringParameter vncServerName =
   new StringParameter("Server",
   "The VNC server to which to connect.  This can be specified in the " +
-  "format {host}[:{display_number}] or {host}::{port}, where {host} is the " +
+  "format {host}[:{display_number}], {host}::{port} or" +
+  " {host}:/{unix_socket_path}, where {host} is the " +
   "host name or IP address of the machine on which the VNC server is " +
   "running (the \"VNC host\"), {display_number} is an optional X display " +
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
@@ -887,7 +889,9 @@ public final class Params {
   "the VNC host, so you do not need to specify it separately.  When using " +
   "the Tunnel parameter, the VNC host can be prefixed with {user}@ to " +
   "indicate that user name {user} (default = local user name) should be " +
-  "used when authenticating with the SSH server.\n " +
+  "used when authenticating with the SSH server. This parameter is implied " +
+  "if a connection to a unix socket path with a non-localhost server name is " +
+  "used and the Via parameter is not set.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
   "set unless the SessMgrAuto parameter is disabled.", false);

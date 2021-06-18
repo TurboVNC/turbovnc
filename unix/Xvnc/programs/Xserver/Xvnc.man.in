@@ -184,6 +184,17 @@ TCP port that the server should use when listening for connections from normal
 VNC viewers.
 
 .TP
+\fB\-rfbunixpath\fR \fIpath\fR
+Specifies the path of a Unix domain socket on which Xvnc listens for
+connections from viewers.  Specifying this option will disable listening for
+TCP connections.
+
+.TP
+\fB\-rfbunixmode\fR \fImode\fR
+Specifies the mode of the Unix domain socket.  The value has to be specified as
+an octal number.  The default is 0600.
+
+.TP
 \fB\-rfbwait\fR \fItime\fR
 Maximum time, in milliseconds, to wait for a send/receive operation to/from a
 connected viewer to complete [default: 20000].

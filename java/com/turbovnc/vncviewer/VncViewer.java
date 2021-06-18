@@ -2,6 +2,7 @@
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2018, 2020 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
+ * Copyright (C) 2021 Steffen Kieß
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -537,6 +538,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     sock = sock_;
     opts.serverName = null;
     opts.port = -1;
+    opts.unixDomainPath = null;
   }
 
   public static void newViewer(VncViewer oldViewer, Socket sock,
