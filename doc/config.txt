@@ -280,17 +280,30 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	the ''turbovnc.via'' system property, expands patterns beginning with the "%"
 	character, and uses the resulting command line to establish the secure tunnel
 	to the VNC gateway.  If ''VNC_VIA_CMD'' is not set, then this command line
-	defaults to  ''/usr/bin/ssh -f -L %L:%H:%R %G sleep 20'' on Linux/Un*x and
-	Mac systems and ''ssh.exe -f -L %L:%H:%R %G sleep 20'' on Windows systems.
+	defaults to ''/usr/bin/ssh -ax -f -L %L:%H:%R %G sleep 20'' on Linux/Un*x and
+	Mac systems and ''ssh.exe -ax -f -L %L:%H:%R %G sleep 20'' on Windows systems.
 	{nl}{nl} \
 	When the ''-tunnel'' option is used along with the ''-extssh'' option, the
 	TurboVNC Viewer reads the ''VNC_TUNNEL_CMD'' environment variable or the
 	''turbovnc.tunnel'' system property, expands patterns beginning with the "%"
 	character, and uses the resulting command line to establish the secure tunnel
 	to the VNC host.  If ''VNC_TUNNEL_CMD'' is not set, then this command line
-	defaults to ''/usr/bin/ssh -f -L %L:localhost:%R %H sleep 20'' on Linux/Un*x
-	and Mac systems and ''ssh.exe -f -L %L:localhost:%R %H sleep 20'' on Windows
-	systems.
+	defaults to ''/usr/bin/ssh -ax -f -L %L:localhost:%R %H sleep 20''
+	on Linux/Un*x and Mac systems and
+	''ssh.exe -ax -f -L %L:localhost:%R %H sleep 20'' on Windows systems.
+	{nl}{nl} \
+	If a connection to a unix domain socket is made, the default value for
+	''VNC_TUNNEL_CMD'' is
+	''/usr/bin/ssh -ax -- %H exec socat stdio unix-connect:%R''
+	on Linux/Un*x and Mac systems and
+	''ssh.exe -ax -- %H exec socat stdio unix-connect:%R'' on Windows and the
+	default	value for ''VNC_VIA_CMD'' is
+	''/usr/bin/ssh -ax -J %G -- %H exec socat stdio unix-connect:%R'' on
+	Linux/Un*x and Mac systems and
+	''ssh.exe -ax -J %G -- %H exec socat stdio unix-connect:%R'' on Windows.
+	When the value (like the default values) does not contain the pattern ''%L'',
+	the TurboVNC viewer expect the command to connect it's standard input /
+	output to the socket.
 	{nl}{nl} \
 	The following patterns are recognized in the ''VNC_VIA_CMD'' and
 	''VNC_TUNNEL_CMD'' environment variables and their corresponding system
@@ -303,4 +316,4 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	| ''%H'' | remote VNC host name or IP address (if using the ''-via'' \
 		option, then this is specified from the point of view of the gateway) |
 	| ''%L'' | local TCP port number |
-	| ''%R'' | remote TCP port number |
+	| ''%R'' | remote TCP port number or the escaped name of the unix domain socket |
