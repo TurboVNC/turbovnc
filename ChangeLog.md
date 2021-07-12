@@ -23,6 +23,10 @@ refuse to download the automatically-generated JNLP file.
 4. The built-in HTTP server in the TurboVNC Server now handles HTTP 1.1 HEAD
 requests, which are sent by recent versions of Java Web Start.
 
+5. `vncpasswd`, when invoked with no arguments, now creates the **~/.vnc**
+directory if it does not exist.  This makes the actual behavior of `vncpasswd`
+match its documented behavior.
+
 
 2.2.6
 =====
