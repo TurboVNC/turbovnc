@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010, 2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2019, 2021 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2002-2003 Constantin Kaplinsky.  All Rights Reserved.
@@ -199,7 +199,7 @@ static int DoUserList(void)
 int main(int argc, char *argv[])
 {
   int read_from_stdin = 0;
-  int make_directory = 0;
+  int make_directory = 1;
   int check_strictly = 0;
   char passwd1[9];
   char passwd2[9];
@@ -228,10 +228,12 @@ int main(int argc, char *argv[])
         break;
 
       case 'c':
+        make_directory = 0;
         otp = 1;  otpClear = 1;
         break;
 
       case 'o':
+        make_directory = 0;
         otp = 1;
         break;
 
@@ -240,6 +242,7 @@ int main(int argc, char *argv[])
           usage(argv);
 
         user = argv[i];
+        make_directory = 0;
         userList = 1;
         addUser = 1;
         break;
@@ -249,6 +252,7 @@ int main(int argc, char *argv[])
           usage(argv);
 
         user = argv[i];
+        make_directory = 0;
         userList = 1;
         addUser = 0;
         break;
@@ -284,7 +288,7 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
-    if (make_directory) {
+    if (!strncmp(passwdDir, "/tmp", 4)) {
       fprintf(stderr, "Error: -t is incompatible with -o\n");
       exit(1);
     }
@@ -303,7 +307,7 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
-    if (make_directory) {
+    if (!strncmp(passwdDir, "/tmp", 4)) {
       fprintf(stderr, "Error: -t is incompatible with -a and -r\n");
       exit(1);
     }

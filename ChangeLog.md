@@ -198,6 +198,10 @@ TurboVNC Viewer when attempting to use one of the X509* security types with the
 `TLS_AES_128_GCM_SHA256` and `TLS_AES_256_GCM_SHA384` TLS 1.3 cipher suites,
 which are preferred by OpenSSL 1.1.x.
 
+5. `vncpasswd`, when invoked with no arguments, now creates the **~/.vnc**
+directory if it does not exist.  This makes the actual behavior of `vncpasswd`
+match its documented behavior.
+
 
 2.2.6
 =====
