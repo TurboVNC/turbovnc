@@ -646,8 +646,6 @@ extern void __glXSendLargeCommand(struct glx_context *, const GLvoid *, GLint,
 /* Initialize the GLX extension for dpy */
 extern struct glx_display *__glXInitialize(Display *);
 
-extern void __glXPreferEGL(int state);
-
 /************************************************************************/
 
 extern int __glXDebug;
@@ -840,6 +838,10 @@ indirect_create_context_attribs(struct glx_screen *base,
                                 unsigned num_attribs,
                                 const uint32_t *attribs,
                                 unsigned *error);
+
+
+extern int __glXGetDrawableAttribute(Display * dpy, GLXDrawable drawable,
+                                     int attribute, unsigned int *value);
 
 #ifdef __cplusplus
 }

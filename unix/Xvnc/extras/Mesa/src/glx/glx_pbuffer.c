@@ -272,9 +272,9 @@ DestroyDRIDrawable(Display *dpy, GLXDrawable drawable, int destroy_xdrawable)
  * 10.  Given that, this routine should try to use an array on the stack to
  * capture the reply rather than always calling Xmalloc.
  */
-static int
-GetDrawableAttribute(Display * dpy, GLXDrawable drawable,
-                     int attribute, unsigned int *value)
+int
+__glXGetDrawableAttribute(Display * dpy, GLXDrawable drawable,
+                          int attribute, unsigned int *value)
 {
    struct glx_display *priv;
    xGLXGetDrawableAttributesReply reply;
@@ -825,7 +825,7 @@ glXQueryDrawable(Display * dpy, GLXDrawable drawable,
       }
    }
 #else
-   GetDrawableAttribute(dpy, drawable, attribute, value);
+   __glXGetDrawableAttribute(dpy, drawable, attribute, value);
 #endif
 }
 
@@ -838,7 +838,7 @@ _GLX_PUBLIC int
 glXQueryGLXPbufferSGIX(Display * dpy, GLXPbufferSGIX drawable,
                        int attribute, unsigned int *value)
 {
-   return GetDrawableAttribute(dpy, drawable, attribute, value);
+   return __glXGetDrawableAttribute(dpy, drawable, attribute, value);
 }
 #endif
 
@@ -909,7 +909,7 @@ glXGetSelectedEvent(Display * dpy, GLXDrawable drawable, unsigned long *mask)
     * we could just type-cast the pointer, but why?
     */
 
-   GetDrawableAttribute(dpy, drawable, GLX_EVENT_MASK_SGIX, &value);
+   __glXGetDrawableAttribute(dpy, drawable, GLX_EVENT_MASK_SGIX, &value);
    *mask = value;
 #endif
 }

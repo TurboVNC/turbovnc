@@ -47,9 +47,9 @@
 #    define GLAPI __declspec(dllimport)
 #  else /* for use with static link lib build of Win32 edition only */
 #    define GLAPI extern
-#  endif /* _STATIC_MESA support */
+#  endif
 #  if defined(__MINGW32__) && defined(GL_NO_STDCALL) || defined(UNDER_CE)  /* The generated DLLs by MingW with STDCALL are not compatible with the ones done by Microsoft's compilers */
-#    define GLAPIENTRY 
+#    define GLAPIENTRY
 #  else
 #    define GLAPIENTRY __stdcall
 #  endif
@@ -2086,7 +2086,7 @@ typedef void (APIENTRYP PFNGLBLENDEQUATIONSEPARATEATIPROC) (GLenum modeRGB, GLen
 
 
 /* GL_OES_EGL_image */
-#ifndef GL_OES_EGL_image
+#if !defined(GL_OES_EGL_image) && !defined(GL_EXT_EGL_image_storage)
 typedef void* GLeglImageOES;
 #endif
 

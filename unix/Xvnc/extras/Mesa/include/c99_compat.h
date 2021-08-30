@@ -36,8 +36,8 @@
  */
 #if defined(_MSC_VER)
 
-#  if _MSC_VER < 1800 || (_MSC_FULL_VER < 180031101 && !defined(__clang__))
-#    error "Microsoft Visual Studio 2013 Update 4 or higher required"
+#  if _MSC_VER < 1900
+#    error "Microsoft Visual Studio 2015 or higher required"
 #  endif
 
    /*
@@ -164,6 +164,7 @@ test_c99_compat_h(const void * restrict a,
 #    define HAVE_FUNC_ATTRIBUTE_FORMAT 1
 #    define HAVE_FUNC_ATTRIBUTE_PACKED 1
 #    define HAVE_FUNC_ATTRIBUTE_ALIAS 1
+#    define HAVE_FUNC_ATTRIBUTE_NORETURN 1
 
 #    if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
        /* https://gcc.gnu.org/onlinedocs/gcc-4.3.6/gcc/Other-Builtins.html */

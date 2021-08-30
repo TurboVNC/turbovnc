@@ -37,7 +37,8 @@ extern "C" {
 
 enum
 {
-   ARB_create_context_bit = 0,
+   ARB_context_flush_control_bit = 0,
+   ARB_create_context_bit,
    ARB_create_context_profile_bit,
    ARB_create_context_robustness_bit,
    ARB_fbconfig_float_bit,
@@ -66,8 +67,6 @@ enum
    SGIS_multisample_bit,
    SGIX_fbconfig_bit,
    SGIX_pbuffer_bit,
-   SGIX_swap_barrier_bit,
-   SGIX_swap_group_bit,
    SGIX_visual_select_group_bit,
    SGI_make_current_read_bit,
    SGI_swap_control_bit,
