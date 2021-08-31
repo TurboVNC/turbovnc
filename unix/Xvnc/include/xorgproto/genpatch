@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT=xorgproto-2019.2
+PROJECT=xorgproto-2020.1
 FILE=$PROJECT.tar.gz
 URL=https://www.x.org/releases/individual/proto
 SRCDIR=`dirname $0`

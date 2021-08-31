@@ -3,9 +3,6 @@
 #ifndef _DIX_CONFIG_H_
 #define _DIX_CONFIG_H_
 
-/* Define to 1 if you have the <byteswap.h> header file. */
-#cmakedefine01 HAVE_BYTESWAP_H
-
 /* Define to 1 if you have the `cbrt' function. */
 #cmakedefine HAVE_CBRT
 
@@ -21,32 +18,29 @@
 /* Define to 1 if you have the `getpeerucred' function. */
 #cmakedefine HAVE_GETPEERUCRED
 
+/* Define to 1 if you have the `getresuid' function. */
+#cmakedefine HAVE_GETRESUID
+
 /* Define to 1 if you have the `getzoneid' function. */
 #cmakedefine HAVE_GETZONEID
 
 /* Define to 1 if you have the <ieeefp.h> header file. */
 #cmakedefine HAVE_IEEEFP_H
 
-/* Define to 1 if you have the `reallocarray' function. */
-#cmakedefine HAVE_REALLOCARRAY
+/* Define to 1 if you have the `issetugid' function. */
+#cmakedefine HAVE_ISSETUGID
+
+/* Define to 1 if you have the `mkostemp' function. */
+#cmakedefine HAVE_MKOSTEMP
 
 /* Define to 1 if you have the `shmctl64' function. */
 #cmakedefine HAVE_SHMCTL64
-
-/* Define to 1 if you have the `strcasecmp' function. */
-#cmakedefine HAVE_STRCASECMP
 
 /* Define to 1 if you have the `strcasestr' function. */
 #cmakedefine HAVE_STRCASESTR
 
 /* Define to 1 if you have the `strncasecmp' function. */
 #cmakedefine HAVE_STRNCASECMP
-
-/* Define to 1 if you have the `strlcat' function. */
-#cmakedefine HAVE_STRLCAT
-
-/* Define to 1 if you have the `strlcpy' function. */
-#cmakedefine HAVE_STRLCPY
 
 /* Define to 1 if you have the `strndup' function. */
 #cmakedefine HAVE_STRNDUP

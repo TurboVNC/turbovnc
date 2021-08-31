@@ -72,7 +72,7 @@
  * Unreachable macro. Useful for suppressing "control reaches end of non-void
  * function" warnings.
  */
-#ifdef HAVE___BUILTIN_UNREACHABLE
+#if defined(HAVE___BUILTIN_UNREACHABLE) || __has_builtin(__builtin_unreachable)
 #define unreachable(str)    \
 do {                        \
    assert(!str);            \
@@ -219,12 +219,12 @@ do {                       \
  * inline a static function that we later use in an alias. - ajax
  */
 #ifndef PUBLIC
-#  if defined(__GNUC__)
-#    define PUBLIC __attribute__((visibility("default")))
-#    define USED __attribute__((used))
-#  elif defined(_MSC_VER)
+#  if defined(_WIN32)
 #    define PUBLIC __declspec(dllexport)
 #    define USED
+#  elif defined(__GNUC__)
+#    define PUBLIC __attribute__((visibility("default")))
+#    define USED __attribute__((used))
 #  else
 #    define PUBLIC
 #    define USED
@@ -264,6 +264,8 @@ do {                       \
 
 #if defined(__GNUC__)
 #define ATTRIBUTE_NOINLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+#define ATTRIBUTE_NOINLINE __declspec(noinline)
 #else
 #define ATTRIBUTE_NOINLINE
 #endif
@@ -290,6 +292,9 @@ do {                       \
 
 /** Clamp X to [MIN,MAX].  Turn NaN into MIN, arbitrarily. */
 #define CLAMP( X, MIN, MAX )  ( (X)>(MIN) ? ((X)>(MAX) ? (MAX) : (X)) : (MIN) )
+
+/* Syntax sugar occuring frequently in graphics code */
+#define SATURATE( X ) CLAMP(X, 0.0f, 1.0f)
 
 /** Minimum of two values: */
 #define MIN2( A, B )   ( (A)<(B) ? (A) : (B) )
@@ -331,5 +336,29 @@ do {                       \
 /** Set count bits starting from bit b  */
 #define BITFIELD64_RANGE(b, count) \
    (BITFIELD64_MASK((b) + (count)) & ~BITFIELD64_MASK(b))
+
+/* TODO: In future we should try to move this to u_debug.h once header
+ * dependencies are reorganised to allow this.
+ */
+enum pipe_debug_type
+{
+   PIPE_DEBUG_TYPE_OUT_OF_MEMORY = 1,
+   PIPE_DEBUG_TYPE_ERROR,
+   PIPE_DEBUG_TYPE_SHADER_INFO,
+   PIPE_DEBUG_TYPE_PERF_INFO,
+   PIPE_DEBUG_TYPE_INFO,
+   PIPE_DEBUG_TYPE_FALLBACK,
+   PIPE_DEBUG_TYPE_CONFORMANCE,
+};
+
+#if !defined(alignof) && !defined(__cplusplus)
+#if __STDC_VERSION__ >= 201112L
+#define alignof(t) _Alignof(t)
+#elif defined(_MSC_VER)
+#define alignof(t) __alignof(t)
+#else
+#define alignof(t) __alignof__(t)
+#endif
+#endif
 
 #endif /* UTIL_MACROS_H */

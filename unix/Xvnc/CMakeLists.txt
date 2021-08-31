@@ -60,6 +60,26 @@ if(USE_POLL)
 	add_definitions(-DUSE_POLL)
 endif()
 
+check_symbol_exists(reallocarray stdlib.h HAVE_REALLOCARRAY)
+if(HAVE_REALLOCARRAY)
+	add_definitions(-DHAVE_REALLOCARRAY)
+endif()
+
+check_symbol_exists(strcasecmp strings.h HAVE_STRCASECMP)
+if(HAVE_STRCASECMP)
+	add_definitions(-DHAVE_STRCASECMP)
+endif()
+
+check_symbol_exists(strlcat string.h HAVE_STRLCAT)
+if(HAVE_STRLCAT)
+	add_definitions(-DHAVE_STRLCAT)
+endif()
+
+check_symbol_exists(strlcpy string.h HAVE_STRLCPY)
+if(HAVE_STRLCPY)
+	add_definitions(-DHAVE_STRLCPY)
+endif()
+
 option(TVNC_SYSTEMX11
 	"Build the TurboVNC Server against the system-supplied X11 and OpenGL headers and libraries rather than the in-tree versions.  This will probably fail unless the system has xorg-server 1.19.x or later."
 	OFF)

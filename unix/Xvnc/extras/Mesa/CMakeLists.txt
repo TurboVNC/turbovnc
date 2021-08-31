@@ -11,6 +11,11 @@ copy_X_header(include/KHR/khrplatform.h KHR)
 
 include_directories(include src src/mapi src/mapi/glapi)
 
+check_symbol_exists(random_r stdlib.h HAVE_RANDOM_R)
+if(HAVE_RANDOM_R)
+	add_definitions(-DHAVE_RANDOM_R)
+endif()
+
 add_definitions(-DUSE_ELF_TLS -DHAVE_PTHREAD -DHAVE_TIMESPEC_GET
 	-DMAPI_MODE_UTIL -DGLX_INDIRECT_RENDERING)
 

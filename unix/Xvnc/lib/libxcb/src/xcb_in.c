@@ -1025,6 +1025,7 @@ int _xcb_in_read(xcb_connection_t *c)
             }
         }
 #endif
+        c->in.total_read += n;
         c->in.queue_len += n;
     }
     while(read_packet(c))
@@ -1051,7 +1052,7 @@ int _xcb_in_read(xcb_connection_t *c)
     }
 #endif
 #ifndef _WIN32
-    if((n > 0) || (n < 0 && errno == EAGAIN))
+    if((n > 0) || (n < 0 && (errno == EAGAIN || errno == EINTR)))
 #else
     if((n > 0) || (n < 0 && WSAGetLastError() == WSAEWOULDBLOCK))
 #endif /* !_WIN32 */

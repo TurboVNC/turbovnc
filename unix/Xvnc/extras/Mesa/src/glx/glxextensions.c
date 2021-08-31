@@ -34,6 +34,9 @@
 #include <string.h>
 #include "glxextensions.h"
 
+#if 0 /* TURBOVNC */
+#include "util/driconf.h"
+#endif /* TURBOVNC */
 
 #define SET_BIT(m,b)   (m[ (b) / 8 ] |=  (1U << ((b) % 8)))
 #define CLR_BIT(m,b)   (m[ (b) / 8 ] &= ~(1U << ((b) % 8)))
@@ -147,6 +150,8 @@ static const struct extension_info known_glx_extensions[] = {
    { GLX(EXT_fbconfig_packed_float),   VER(0,0), Y, Y, N, N },
    { GLX(EXT_framebuffer_sRGB),        VER(0,0), Y, Y, N, N },
    { GLX(EXT_import_context),          VER(0,0), Y, Y, N, N },
+   { GLX(EXT_swap_control),            VER(0,0), Y, N, N, Y },
+   { GLX(EXT_swap_control_tear),       VER(0,0), Y, N, N, Y },
    { GLX(EXT_texture_from_pixmap),     VER(0,0), Y, N, N, N },
    { GLX(EXT_visual_info),             VER(0,0), Y, Y, N, N },
    { GLX(EXT_visual_rating),           VER(0,0), Y, Y, N, N },
@@ -322,9 +327,9 @@ static const struct extension_info known_gl_extensions[] = {
 
 
 /* global bit-fields of available extensions and their characteristics */
-static unsigned char client_glx_support[8];
-static unsigned char client_glx_only[8];
-static unsigned char direct_glx_only[8];
+static unsigned char client_glx_support[__GLX_EXT_BYTES];
+static unsigned char client_glx_only[__GLX_EXT_BYTES];
+static unsigned char direct_glx_only[__GLX_EXT_BYTES];
 static unsigned char client_gl_support[__GL_EXT_BYTES];
 static unsigned char client_gl_only[__GL_EXT_BYTES];
 
@@ -332,7 +337,7 @@ static unsigned char client_gl_only[__GL_EXT_BYTES];
  * Bits representing the set of extensions that are enabled by default in all
  * direct rendering drivers.
  */
-static unsigned char direct_glx_support[8];
+static unsigned char direct_glx_support[__GLX_EXT_BYTES];
 
 /**
  * Highest core GL version that can be supported for indirect rendering.
@@ -350,6 +355,29 @@ static void __glXProcessServerString(const struct extension_info *ext,
                                      unsigned char *server_support);
 
 /**
+ * Find an extension in the list based on its name.
+ *
+ * \param ext       List of extensions where to search.
+ * \param name      Name of the extension.
+ * \param name_len  Length, in characters, of the extension name.
+ */
+static const struct extension_info *
+find_extension(const struct extension_info *ext, const char *name,
+               unsigned name_len)
+{
+   unsigned i;
+
+   for (i = 0; ext[i].name != NULL; i++) {
+      if ((name_len == ext[i].name_len)
+          && (strncmp(ext[i].name, name, name_len) == 0)) {
+         return &ext[i];
+      }
+   }
+
+   return NULL;
+}
+
+/**
  * Set the state of a GLX extension.
  *
  * \param name      Name of the extension.
@@ -358,25 +386,18 @@ static void __glXProcessServerString(const struct extension_info *ext,
  * \param supported Table in which the state of the extension is to be set.
  */
 static void
-set_glx_extension(const struct extension_info *ext,
+set_glx_extension(const struct extension_info *ext_list,
                   const char *name, unsigned name_len, GLboolean state,
                   unsigned char *supported)
 {
-   unsigned i;
+   const struct extension_info *ext = find_extension(ext_list, name, name_len);
+   if (!ext)
+       return;
 
-
-   for (i = 0; ext[i].name != NULL; i++) {
-      if ((name_len == ext[i].name_len)
-          && (strncmp(ext[i].name, name, name_len) == 0)) {
-         if (state) {
-            SET_BIT(supported, ext[i].bit);
-         }
-         else {
-            CLR_BIT(supported, ext[i].bit);
-         }
-
-         return;
-      }
+   if (state) {
+      SET_BIT(supported, ext->bit);
+   } else {
+      CLR_BIT(supported, ext->bit);
    }
 }
 
@@ -436,6 +457,95 @@ __glXEnableDirectExtension(struct glx_screen * psc, const char *name)
    set_glx_extension(known_glx_extensions,
                      name, strlen(name), GL_TRUE, psc->direct_support);
 }
+
+static void
+__ParseExtensionOverride(struct glx_screen *psc,
+                         const struct extension_info *ext_list,
+                         unsigned char *force_enable,
+                         unsigned char *force_disable,
+                         const char *override)
+{
+   const struct extension_info *ext;
+   char *env, *field;
+
+   if (override == NULL)
+       return;
+
+   /* Copy env_const because strtok() is destructive. */
+   env = strdup(override);
+   if (env == NULL)
+      return;
+
+   for (field = strtok(env, " "); field!= NULL; field = strtok(NULL, " ")) {
+      GLboolean enable;
+
+      switch (field[0]) {
+      case '+':
+         enable = GL_TRUE;
+         ++field;
+         break;
+      case '-':
+         enable = GL_FALSE;
+         ++field;
+         break;
+      default:
+         enable = GL_TRUE;
+         break;
+      }
+
+      ext = find_extension(ext_list, field, strlen(field));
+      if (ext) {
+         if (enable)
+            SET_BIT(force_enable, ext->bit);
+         else
+            SET_BIT(force_disable, ext->bit);
+      } else {
+         fprintf(stderr, "WARNING: Trying to %s the unknown extension '%s'\n",
+                 enable ? "enable" : "disable", field);
+      }
+   }
+
+   free(env);
+}
+
+/**
+ * \brief Parse the list of GLX extensions that the user wants to
+ * force-enable/disable by using \c override, and write the results to the
+ * screen's context.
+ *
+ * \param psc        Pointer to GLX per-screen record.
+ * \param override   A space-separated list of extensions to enable or disable.
+ * The list is processed thus:
+ *    - Enable recognized extension names that are prefixed with '+'.
+ *    - Disable recognized extension names that are prefixed with '-'.
+ *    - Enable recognized extension names that are not prefixed.
+ */
+void
+__glXParseExtensionOverride(struct glx_screen *psc, const char *override)
+{
+    __ParseExtensionOverride(psc, known_glx_extensions, psc->glx_force_enabled,
+                             psc->glx_force_disabled, override);
+}
+
+/**
+ * \brief Parse the list of GL extensions that the user wants to
+ * force-enable/disable by using \c override, and write the results to the
+ * screen's context.
+ *
+ * \param psc        Pointer to GLX per-screen record.
+ * \param override   A space-separated list of extensions to enable or disable.
+ * The list is processed thus:
+ *    - Enable recognized extension names that are prefixed with '+'.
+ *    - Disable recognized extension names that are prefixed with '-'.
+ *    - Enable recognized extension names that are not prefixed.
+ */
+void
+__IndirectGlParseExtensionOverride(struct glx_screen *psc, const char *override)
+{
+    __ParseExtensionOverride(psc, known_gl_extensions, psc->gl_force_enabled,
+                             psc->gl_force_disabled, override);
+}
+
 
 /**
  * Initialize global extension support tables.
@@ -512,6 +622,14 @@ __glXExtensionsCtrScreen(struct glx_screen * psc)
       psc->ext_list_first_time = GL_FALSE;
       (void) memcpy(psc->direct_support, direct_glx_support,
                     sizeof(direct_glx_support));
+      (void) memset(psc->glx_force_enabled, 0,
+                    sizeof(psc->glx_force_enabled));
+      (void) memset(psc->glx_force_disabled, 0,
+                    sizeof(psc->glx_force_disabled));
+      (void) memset(psc->gl_force_enabled, 0,
+                    sizeof(psc->gl_force_enabled));
+      (void) memset(psc->gl_force_disabled, 0,
+                    sizeof(psc->gl_force_disabled));
    }
 }
 
@@ -630,8 +748,8 @@ __glXCalculateUsableExtensions(struct glx_screen * psc,
                                GLboolean display_is_direct_capable,
                                int minor_version)
 {
-   unsigned char server_support[8];
-   unsigned char usable[8];
+   unsigned char server_support[__GLX_EXT_BYTES];
+   unsigned char usable[__GLX_EXT_BYTES];
    unsigned i;
 
    __glXExtensionsCtr();
@@ -676,18 +794,45 @@ __glXCalculateUsableExtensions(struct glx_screen * psc,
     */
 
    if (display_is_direct_capable) {
-      for (i = 0; i < 8; i++) {
-         usable[i] = (client_glx_support[i] & client_glx_only[i])
-            | (client_glx_support[i] & psc->direct_support[i] &
-               server_support[i])
-            | (client_glx_support[i] & psc->direct_support[i] &
-               direct_glx_only[i]);
+      for (i = 0; i < __GLX_EXT_BYTES; i++) {
+         /* Enable extensions that the client supports that only have a client-side
+          * component.
+          */
+         unsigned char u = client_glx_support[i] & client_glx_only[i];
+
+         /* Enable extensions that the client supports, are supported for direct
+          * rendering, and either are supported by the server or only have a
+          * direct-rendering component.
+          */
+         u |= client_glx_support[i] & psc->direct_support[i] &
+                 (server_support[i] | direct_glx_only[i]);
+
+         /* Finally, apply driconf options to force some extension bits either
+          * enabled or disabled.
+          */
+         u |= psc->glx_force_enabled[i];
+         u &= ~psc->glx_force_disabled[i];
+
+         usable[i] = u;
       }
    }
    else {
-      for (i = 0; i < 8; i++) {
-         usable[i] = (client_glx_support[i] & client_glx_only[i])
-            | (client_glx_support[i] & server_support[i]);
+      for (i = 0; i < __GLX_EXT_BYTES; i++) {
+         /* Enable extensions that the client supports that only have a
+          * client-side component.
+          */
+         unsigned char u = client_glx_support[i] & client_glx_only[i];
+
+         /* Enable extensions that the client and server both support */
+         u |= client_glx_support[i] & server_support[i];
+
+         /* Finally, apply driconf options to force some extension bits either
+          * enabled or disabled.
+          */
+         u |= psc->glx_force_enabled[i];
+         u &= ~psc->glx_force_disabled[i];
+
+         usable[i] = u;
       }
    }
 
@@ -711,6 +856,7 @@ __glXCalculateUsableGLExtensions(struct glx_context * gc,
                                  const char *server_string,
                                  int major_version, int minor_version)
 {
+   struct glx_screen *psc = gc->psc;
    unsigned char server_support[__GL_EXT_BYTES];
    unsigned char usable[__GL_EXT_BYTES];
    unsigned i;
@@ -744,8 +890,9 @@ __glXCalculateUsableGLExtensions(struct glx_context * gc,
     */
 
    for (i = 0; i < __GL_EXT_BYTES; i++) {
-      usable[i] = (client_gl_support[i] & client_gl_only[i])
-         | (client_gl_support[i] & server_support[i]);
+      usable[i] = ((client_gl_support[i] & client_gl_only[i])
+         | (client_gl_support[i] & server_support[i])
+         | psc->gl_force_enabled[i]) & ~psc->gl_force_disabled[i];
    }
 
    gc->extensions = (unsigned char *)

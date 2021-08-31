@@ -245,18 +245,6 @@ MakeContextCurrent(Display * dpy, GLXDrawable draw,
 
    __glXUnlock();
 
-   /* The indirect vertex array state must to be initialised after we
-    * have setup the context, as it needs to query server attributes.
-    */
-   if (gc && !gc->isDirect) {
-      __GLXattribute *state = gc->client_state_private;
-      if (state && state->array_state == NULL) {
-         glGetString(GL_EXTENSIONS);
-         glGetString(GL_VERSION);
-         __glXInitVertexArrayState(gc);
-      }
-   }
-
    return GL_TRUE;
 }
 

@@ -287,6 +287,7 @@ static int write_vec(xcb_connection_t *c, struct iovec **vector, int *count)
         return 0;
     }
 
+    c->out.total_written += n;
     for(; *count; --*count, ++*vector)
     {
         int cur = (*vector)->iov_len;
@@ -527,4 +528,31 @@ int _xcb_conn_wait(xcb_connection_t *c, pthread_cond_t *cond, struct iovec **vec
     --c->in.reading;
 
     return ret;
+}
+
+uint64_t xcb_total_read(xcb_connection_t *c)
+{
+    uint64_t n;
+
+    if (xcb_connection_has_error(c))
+        return 0;
+
+    pthread_mutex_lock(&c->iolock);
+    n = c->in.total_read;
+    pthread_mutex_unlock(&c->iolock);
+    return n;
+}
+
+uint64_t xcb_total_written(xcb_connection_t *c)
+{
+    uint64_t n;
+
+    if (xcb_connection_has_error(c))
+        return 0;
+
+    pthread_mutex_lock(&c->iolock);
+    n = c->out.total_written;
+    pthread_mutex_unlock(&c->iolock);
+
+    return n;
 }

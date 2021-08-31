@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT=mesa-19.2.8
+PROJECT=mesa-20.3.5
 FILE=$PROJECT.tar.xz
 URL=https://mesa.freedesktop.org/archive
 SRCDIR=`dirname $0`

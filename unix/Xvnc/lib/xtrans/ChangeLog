@@ -1,3 +1,213 @@
+commit c4262efc9688e495261d8b23a12f956ab38e006f
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Mar 16 14:25:35 2019 -0700
+
+    xtrans 1.4.0
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit faa42207a0653535ab80825b0acb50b417702ec4
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Fri Dec 7 19:52:43 2018 -0800
+
+    Update configure.ac bug URL for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit cd22de616c77328da3410b1eaab541c2d331ffdb
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Nov 19 23:12:07 2018 -0800
+
+    Update README for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 06cfa80fb3d03ca03fd92f9687a77958338e012c
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Sep 30 17:04:51 2018 -0700
+
+    Use fchmod() instead of chmod() when creating named pipes
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 7bd504f7ab7799ab77ad50eb39f6afdbaf2f9e50
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 25 11:18:52 2018 -0700
+
+    Use strcasecmp if it's available, instead of lowercasing strings
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 941cfa50bc2d45f20943fd21bab98e2eceeeb259
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Aug 25 10:45:04 2018 -0700
+
+    Set freeXLOCAL to NULL after freeing it to prevent double frees
+    
+    We shouldn't be calling the LocalEndTransports routine twice, but
+    just make sure if we do, we don't call free twice on the same pointer.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit a97e5fc6e4f294294d75500068892aea11952773
+Author: Rin Okuyama <rin@NetBSD.org>
+Date:   Tue Feb 21 06:18:37 2017 +0000
+
+    avoid -Wformat errors from clang
+    
+    https://bugs.freedesktop.org/show_bug.cgi?id=99882
+    
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 28366676effaa512e43bfd2276a317389a992511
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Mon Mar 9 12:00:52 2015 +0000
+
+    autogen.sh: use quoted string variables
+    
+    Place quotes around the $srcdir, $ORIGDIR and $0 variables to prevent
+    fall-outs, when they contain space.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+
+commit 8554cf05262ab6ad6e8da5f11022e5dc2a452e38
+Author: Peter Hutterer <peter.hutterer@who-t.net>
+Date:   Tue Jan 24 10:32:07 2017 +1000
+
+    autogen.sh: use exec instead of waiting for configure to finish
+    
+    Syncs the invocation of configure with the one from the server.
+    
+    Signed-off-by: Peter Hutterer <peter.hutterer@who-t.net>
+    Reviewed-by: Emil Velikov <emil.velikov@collabora.com>
+
+commit 560d7550e23e9b14056b4a9b2569c2f256015f8a
+Author: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date:   Sat Sep 10 22:09:51 2016 -0700
+
+    Update strlcpy macro check to also check HAVE_STRLCPY
+    
+    xorg-server moved from HAS_STRLCPY to HAVE_STRLCPY in 2011
+    
+    cf-xserver: d829a7c5cb42c979b58f3547136df5b05d906423
+    
+    Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+
+commit 2e4c338eda8ec6996b7bacc1d0c7dfe7de925864
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Thu Sep 1 09:28:58 2016 -0400
+
+    Revert "Make FreeConnInfo static"
+    
+    <anholt> ajax: 75419e6b6d985ea8796f05d1acb5e154b065c9b9 of xtrans also
+             seems to have broken xtest.
+    
+    And indeed it does, xts5 knows a fair amount about xlib internals for
+    some reason. Whether that's cromulent or not, we want to be able to run
+    automatic tests from top-of-tree, so we can't leave this broken.
+    
+    This reverts commit 75419e6b6d985ea8796f05d1acb5e154b065c9b9.
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 3810e026323210df6ec6cf818f01832a63e9fbb9
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed May 18 12:58:31 2016 -0400
+
+    Remove GetMyAddr
+    
+    Again, pre-xcb libX11 was the only consumer.
+    
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 75419e6b6d985ea8796f05d1acb5e154b065c9b9
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed May 18 12:50:48 2016 -0400
+
+    Make FreeConnInfo static
+    
+    libX11 used to need this in the XOpenDisplay code, but hasn't since xcb
+    became mandatory.
+    
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 0794b1b712a90b40e2b019c9edc6f96874493c52
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed May 18 12:41:41 2016 -0400
+
+    unifdef LBXPROXY_t and TEST_t
+    
+    LBX is dead, and TEST_t is unused.
+    
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit 473e77563b16fa7c42db9403c1382e9483e3666c
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed May 18 12:38:02 2016 -0400
+
+    Remove CLTS code
+    
+    Never been used, as far as I can tell.
+    
+    Reviewed-by: Keith Packard <keithp@keithp.com>
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit b167145a51153eccc16a3e43f7ed0faea7e6c762
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Wed May 18 15:19:50 2016 -0400
+
+    autogen: Add a default patch prefix
+    
+    Signed-off-by: Adam Jackson <ajax@redhat.com>
+
+commit cc29fbc1fe86ae4dfe2f4eaae7352ea86aa4acac
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Nov 28 13:04:21 2015 -0800
+
+    Remove support for SysV on x86 platforms other than Solaris & SCO
+    
+    No other x86 SysV platforms have ever been supported in the modular
+    build systems, so we don't need to keep carrying around a bunch of
+    ifdef's for them.
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Reviewed-by: Mark Kettenis <kettenis@openbsd.org>
+
+commit 3ba0b7a37b9053662ff42f0b4caa856856098475
+Author: Richard PALO <richard@NetBSD.org>
+Date:   Tue Nov 17 07:02:27 2015 +0100
+
+    Replace 'sun' with '__sun'
+    
+    Globally replace #ifdef and #if defined usage of 'sun' with '__sun' such
+    that strict ISO compiler modes such as -ansi or -std=c99 can be used.
+    
+    Signed-off-by: Richard PALO <richard@NetBSD.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 1d31b87e8045f3fc89b1914187a9a13861d35f2d
+Author: Julien Cristau <jcristau@debian.org>
+Date:   Wed Jul 29 20:36:13 2015 +0200
+
+    Make sure LONG64 is defined in Xtrans.h
+    
+    Xtrans.h defines BytesReadable_t as int or long depending on whether
+    LONG64 is defined.  We need to make sure Xmd.h is included so our idea
+    of BytesReadable_t is consistent across compilation units.
+    
+    Debian bug#749120
+    
+    Reported-by: Michael Tautschnig <mt@debian.org>
+    Signed-off-by: Julien Cristau <jcristau@debian.org>
+    Reviewed-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit 7cbad9fe2e61cd9d5caeaf361826a6f4bd320f03
 Author: Keith Packard <keithp@keithp.com>
 Date:   Sat Sep 20 10:02:05 2014 -0700

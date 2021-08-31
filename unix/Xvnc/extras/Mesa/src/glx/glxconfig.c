@@ -218,43 +218,54 @@ glx_config_get(struct glx_config * mode, int attribute, int *value_return)
 _X_HIDDEN struct glx_config *
 glx_config_create_list(unsigned count)
 {
-   struct glx_config *c = NULL;
+   const size_t size = sizeof(struct glx_config);
+   struct glx_config *base = NULL;
+   struct glx_config **next;
    unsigned i;
 
-   if (!(c = calloc(count, sizeof(struct glx_config))))
-      return NULL;
-
+   next = &base;
    for (i = 0; i < count; i++) {
-      c[i].visualID = GLX_DONT_CARE;
-      c[i].visualType = GLX_DONT_CARE;
-      c[i].visualRating = GLX_NONE;
-      c[i].transparentPixel = GLX_NONE;
-      c[i].transparentRed = GLX_DONT_CARE;
-      c[i].transparentGreen = GLX_DONT_CARE;
-      c[i].transparentBlue = GLX_DONT_CARE;
-      c[i].transparentAlpha = GLX_DONT_CARE;
-      c[i].transparentIndex = GLX_DONT_CARE;
-      c[i].xRenderable = GLX_DONT_CARE;
-      c[i].fbconfigID = GLX_DONT_CARE;
-      c[i].swapMethod = GLX_SWAP_UNDEFINED_OML;
-      c[i].bindToTextureRgb = GLX_DONT_CARE;
-      c[i].bindToTextureRgba = GLX_DONT_CARE;
-      c[i].bindToMipmapTexture = GLX_DONT_CARE;
-      c[i].bindToTextureTargets = GLX_DONT_CARE;
-      c[i].yInverted = GLX_DONT_CARE;
-      c[i].sRGBCapable = GLX_DONT_CARE;
+      *next = calloc(1, size);
+      if (*next == NULL) {
+	 glx_config_destroy_list(base);
+	 base = NULL;
+	 break;
+      }
 
-      if (i != count -1)
-         c[i].next = &(c[i+1]);
+      (*next)->visualID = GLX_DONT_CARE;
+      (*next)->visualType = GLX_DONT_CARE;
+      (*next)->visualRating = GLX_NONE;
+      (*next)->transparentPixel = GLX_NONE;
+      (*next)->transparentRed = GLX_DONT_CARE;
+      (*next)->transparentGreen = GLX_DONT_CARE;
+      (*next)->transparentBlue = GLX_DONT_CARE;
+      (*next)->transparentAlpha = GLX_DONT_CARE;
+      (*next)->transparentIndex = GLX_DONT_CARE;
+      (*next)->xRenderable = GLX_DONT_CARE;
+      (*next)->fbconfigID = GLX_DONT_CARE;
+      (*next)->swapMethod = GLX_SWAP_UNDEFINED_OML;
+      (*next)->bindToTextureRgb = GLX_DONT_CARE;
+      (*next)->bindToTextureRgba = GLX_DONT_CARE;
+      (*next)->bindToMipmapTexture = GLX_DONT_CARE;
+      (*next)->bindToTextureTargets = GLX_DONT_CARE;
+      (*next)->yInverted = GLX_DONT_CARE;
+      (*next)->sRGBCapable = GLX_DONT_CARE;
+
+      next = &((*next)->next);
    }
 
-   return c;
+   return base;
 }
 
 _X_HIDDEN void
 glx_config_destroy_list(struct glx_config *configs)
 {
-   free(configs);
+   while (configs != NULL) {
+      struct glx_config *const next = configs->next;
+
+      free(configs);
+      configs = next;
+   }
 }
 
 

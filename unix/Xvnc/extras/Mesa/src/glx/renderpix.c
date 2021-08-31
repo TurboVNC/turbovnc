@@ -92,8 +92,8 @@ __glXSendLargeImage(struct glx_context * gc, GLint compsize, GLint dim,
 
     /* Apply pixel store unpack modes to copy data into buf */
     if (src != NULL) {
-	(*gc->fillImage) (gc, dim, width, height, depth, format, type,
-			  src, buf, modes);
+	__glFillImage(gc, dim, width, height, depth, format, type,
+                      src, buf, modes);
     }
     else {
 	if (dim < 3) {
@@ -147,13 +147,12 @@ __indirect_glSeparableFilter2D(GLenum target, GLenum internalformat,
       __GLX_PUT_LONG(20, type);
       pc += hdrlen;
       if (compsize > 0) {
-         (*gc->fillImage) (gc, 1, width, 1, 1, format, type,
-                           row, pc, pixelHeaderPC);
+         __glFillImage(gc, 1, width, 1, 1, format, type, row, pc,
+                       pixelHeaderPC);
          pc += image1len;
       }
       if (compsize2 > 0) {
-         (*gc->fillImage) (gc, 1, height, 1, 1, format, type,
-                           column, pc, NULL);
+         __glFillImage(gc, 1, height, 1, 1, format, type, column, pc, NULL);
          pc += image2len;
       }
       if ((compsize == 0) && (compsize2 == 0)) {
@@ -183,11 +182,11 @@ __indirect_glSeparableFilter2D(GLenum target, GLenum internalformat,
          __glXSetError(gc, GL_OUT_OF_MEMORY);
          return;
       }
-      (*gc->fillImage) (gc, 1, width, 1, 1, format, type, row, buf,
-                        pixelHeaderPC);
+      __glFillImage(gc, 1, width, 1, 1, format, type, row, buf,
+                    pixelHeaderPC);
 
-      (*gc->fillImage) (gc, 1, height, 1, 1, format, type, column,
-                        buf + image1len, pixelHeaderPC);
+      __glFillImage(gc, 1, height, 1, 1, format, type, column,
+                    buf + image1len, pixelHeaderPC);
 
       /* Send large command */
       __glXSendLargeCommand(gc, gc->pc, (GLint) (pc - gc->pc), buf,

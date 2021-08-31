@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT=xtrans-1.3.5
+PROJECT=xtrans-1.4.0
 FILE=$PROJECT.tar.gz
 URL=https://www.x.org/releases/individual/lib
 SRCDIR=`dirname $0`

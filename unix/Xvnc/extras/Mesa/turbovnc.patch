@@ -1,6 +1,6 @@
-diff --git a/mesa-19.2.8/include/c99_math.h b/Mesa/include/c99_math.h
+diff --git a/mesa-20.3.5/include/c99_math.h b/Mesa/include/c99_math.h
 index e906c26..e14c6d9 100644
---- a/mesa-19.2.8/include/c99_math.h
+--- a/mesa-20.3.5/include/c99_math.h
 +++ b/Mesa/include/c99_math.h
 @@ -44,6 +44,7 @@
  #endif 
@@ -34,17 +34,43 @@ index e906c26..e14c6d9 100644
  
  
  /* Since C++11, the following functions are part of the std namespace. Their C
-diff --git a/mesa-19.2.8/src/util/debug.c b/Mesa/src/util/debug.c
-index 7079c61..c3686bf 100644
---- a/mesa-19.2.8/src/util/debug.c
-+++ b/Mesa/src/util/debug.c
-@@ -23,10 +23,15 @@
+diff --git a/mesa-20.3.5/src/glx/glxext.c b/Mesa/src/glx/glxext.c
+index 34e86ae..02ca7cf 100644
+--- a/mesa-20.3.5/src/glx/glxext.c
++++ b/Mesa/src/glx/glxext.c
+@@ -50,9 +50,11 @@
+ #include "glxextensions.h"
  
+ #include "util/debug.h"
++#if 0 /* TURBOVNC */
+ #ifndef GLX_USE_APPLEGL
+ #include "dri_common.h"
+ #endif
++#endif /* TURBOVNC */
+ 
+ #include <X11/Xlib-xcb.h>
+ #include <xcb/xcb.h>
+diff --git a/mesa-20.3.5/src/glx/glxextensions.c b/Mesa/src/glx/glxextensions.c
+index 10d4faf..cbce7d9 100644
+--- a/mesa-20.3.5/src/glx/glxextensions.c
++++ b/Mesa/src/glx/glxextensions.c
+@@ -34,7 +34,9 @@
+ #include <string.h>
+ #include "glxextensions.h"
+ 
++#if 0 /* TURBOVNC */
+ #include "util/driconf.h"
++#endif /* TURBOVNC */
+ 
+ #define SET_BIT(m,b)   (m[ (b) / 8 ] |=  (1U << ((b) % 8)))
+ #define CLR_BIT(m,b)   (m[ (b) / 8 ] &= ~(1U << ((b) % 8)))
+diff --git a/mesa-20.3.5/src/util/debug.c b/Mesa/src/util/debug.c
+index 89ae613..ebe9060 100644
+--- a/mesa-20.3.5/src/util/debug.c
++++ b/Mesa/src/util/debug.c
+@@ -24,8 +24,11 @@
  #include <errno.h>
  #include <string.h>
-+#if 0 /* TURBOVNC */
- #include "main/macros.h"
-+#endif /* TURBOVNC */
  #include "debug.h"
 +#if 0 /* TURBOVNC */
  #include "u_string.h"
@@ -54,7 +80,7 @@ index 7079c61..c3686bf 100644
  uint64_t
  parse_debug_string(const char *debug,
                     const struct debug_control *control)
-@@ -67,6 +72,7 @@ comma_separated_list_contains(const char *list, const char *s)
+@@ -66,6 +69,7 @@ comma_separated_list_contains(const char *list, const char *s)
  
     return false;
  }
@@ -62,9 +88,9 @@ index 7079c61..c3686bf 100644
  
  /**
   * Reads an environment variable and interprets its value as a boolean.
-diff --git a/mesa-19.2.8/src/util/debug.h b/Mesa/src/util/debug.h
+diff --git a/mesa-20.3.5/src/util/debug.h b/Mesa/src/util/debug.h
 index bbcc197..c91ac3c 100644
---- a/mesa-19.2.8/src/util/debug.h
+--- a/mesa-20.3.5/src/util/debug.h
 +++ b/Mesa/src/util/debug.h
 @@ -36,11 +36,13 @@ struct debug_control {
      uint64_t     flag;

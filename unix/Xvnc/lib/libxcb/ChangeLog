@@ -1,3 +1,141 @@
+commit 4b40b44cb6d088b6ffa2fb5cf3ad8f12da588cef
+Author: Matt Turner <mattst88@gmail.com>
+Date:   Sat Feb 22 12:10:53 2020 -0800
+
+    Release libxcb 1.14
+    
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+commit 78c492deaa7ae3aad0b0eeb4b126bb291cc637a7
+Author: Matt Turner <mattst88@gmail.com>
+Date:   Sat Feb 22 12:19:58 2020 -0800
+
+    Build xz tarballs instead of bzip2
+    
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+commit 8f7e4c4e9fc6ee6b5b5498a7d8af79150be0d26a
+Author: Matt Turner <mattst88@gmail.com>
+Date:   Sat Feb 22 11:24:11 2020 -0800
+
+    configure.ac: Depend on pthread-stubs only on not-Linux
+    
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+commit f9f4b00aad69ff36e81c63089b1b16660eaca900
+Author: Sam Varshavchik <mrsam@courier-mta.com>
+Date:   Sat Jan 4 10:43:59 2020 -0500
+
+    Implement xcb_total_read() and xcb_total_written().
+    
+    Returns raw byte counts that have been read or written to the
+    xcb_connection_t.
+    
+    I found it very useful when developing a high level widget toolkit, to
+    track down inefficient/sub-optimum code that generates a lot of X
+    protocol traffic.
+    
+    Signed-off-by: Sam Varshavchik <mrsam@courier-mta.com>
+
+commit 59e271e15bcecf0c461cd5c6c59081fb86b96c22
+Author: A. Wilcox <AWilcox@Wilcox-Tech.com>
+Date:   Mon Dec 23 21:49:29 2019 -0600
+
+    tests: Support Check 0.13.0 API
+    
+    [mattst88]: Keep compatibility  with old API via preprocessor
+    
+    Fixes: #43
+
+commit 21324989b7e121c008a2c4fdf98547541cbf7b83
+Author: Martin Dørum <martid0311@gmail.com>
+Date:   Sun May 19 16:05:08 2019 +0200
+
+    Handle EINTR from recvmsg in _xcb_in_read
+    
+    I have a GTK application which occasionally crashes with an "interrupted
+    system call" g_message from gdk. After a lot of debugging, I've found
+    that the call to recvmsg in _xcb_in_read occasionally fails with EINTR,
+    and instead of retrying the system call, xcb would just shut down the
+    connection.
+    
+    This change makes _xcb_in_read treat EINTR the same as it would treat
+    EAGAIN; it returns 1 and libX11 ends up calling xcb_poll_for_event
+    again (from what I have understood).
+    
+    I have spoken with a few people who think recvmsg failing with EINTR in
+    this case shouldn't ever happen, and I don't know enough to agree or
+    disagree with that. In case anyone wants to dig further and try to
+    figure out why the recvmsg call sometimes fails with EINTR, here's the
+    backtrace from inside of _xcb_in_read where that happened:
+    
+    Thread 1 "beanbar" hit Breakpoint 1, _xcb_in_read (c=c@entry=0x55ecbe4aba80) at xcb_in.c:1059
+    1059                fprintf(stderr, "Hello World am %s:%i, errno is %s\n", __FILE__, __LINE__, strerror(errno));
+    (gdb) bt
+    0  0x00007fa48fa48639 in _xcb_in_read (c=c@entry=0x55ecbe4aba80) at xcb_in.c:1059
+    1  0x00007fa48fa489d8 in poll_for_next_event (c=0x55ecbe4aba80, queued=queued@entry=0) at xcb_in.c:352
+    2  0x00007fa48fa48a3d in poll_for_next_event (queued=0, c=<optimized out>) at xcb_in.c:722
+    3  0x00007fa48fa48a3d in xcb_poll_for_event (c=<optimized out>) at xcb_in.c:722
+    4  0x00007fa4908d1b7e in poll_for_event (dpy=dpy@entry=0x55ecbe4a9730, queued_only=queued_only@entry=0) at xcb_io.c:245
+    5  0x00007fa4908d1cf0 in poll_for_response (dpy=dpy@entry=0x55ecbe4a9730) at xcb_io.c:303
+    6  0x00007fa4908d1fed in _XEventsQueued (mode=2, dpy=0x55ecbe4a9730) at xcb_io.c:363
+    7  0x00007fa4908d1fed in _XEventsQueued (dpy=dpy@entry=0x55ecbe4a9730, mode=mode@entry=2) at xcb_io.c:344
+    8  0x00007fa4908c3d47 in XPending (dpy=0x55ecbe4a9730) at Pending.c:55
+    9  0x00007fa493cadbc7 in  () at /usr/lib/libgdk-3.so.0
+    10 0x00007fa49234d08a in g_main_context_prepare () at /usr/lib/libglib-2.0.so.0
+    11 0x00007fa49234d6e6 in  () at /usr/lib/libglib-2.0.so.0
+    12 0x00007fa49234d8ae in g_main_context_iteration () at /usr/lib/libglib-2.0.so.0
+    13 0x00007fa4938b920e in g_application_run () at /usr/lib/libgio-2.0.so.0
+    14 0x000055ecbc820af4 in main (argc=1, argv=0x7ffd06238098) at src/main.c:190
+    
+    Signed-off-by: Martin Dørum <martid0311@gmail.com>
+
+commit 656c08c5429a3cf53e7abd7fc56cd3c3a79c0f64
+Author: Jon Turney <jon.turney@dronecode.org.uk>
+Date:   Sun Sep 14 00:05:27 2014 +0100
+
+    Include time.h before using time()
+    
+    Signed-off-by: Jon Turney <jon.turney@dronecode.org.uk>
+
+commit be1745c8eb00defcb31d336ccc142de056e92bd8
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Feb 17 12:06:10 2019 -0800
+
+    Add README.md to EXTRA_DIST
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 58f37377c851960cbf21fac1caf38ab1e66c7d6c
+Author: Eduardo Sánchez Muñoz <esm@eduardosm.net>
+Date:   Sun Feb 17 13:33:12 2019 +0100
+
+    Add "ge.*" to src/.gitignore
+
+commit 7bac366953005233fc3c8736e6f1cd5798e65e28
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 16 13:41:28 2019 -0800
+
+    Update README for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 02ff3eadf48e6affe3b59ef688312b4dab538e8b
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sat Feb 16 13:20:45 2019 -0800
+
+    Update configure.ac bug URL for gitlab migration
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit 542befe40a3a7c6a5d1dcb7f38fb9eb261b96b24
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Mon Jan 7 14:42:53 2019 -0800
+
+    c_client: fix "adress" typo
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
 commit 8287ebd7b752c33b0cabc4982606fe4831106f7e
 Author: Uli Schlachter <psychon@znc.in>
 Date:   Thu Sep 27 14:04:17 2018 +0200

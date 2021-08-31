@@ -1,3 +1,10 @@
+Release 1.14 (2020-02-22)
+=========================
+* Add xcb_total_read() and xcb_total_written() API
+* Support check >= 0.13 API (for make check)
+* Bug fix to handle EINTR from recvmsg
+* Only require pthread-stubs on non-Linux platforms
+
 Release 1.13.1 (2018-09-27)
 ===========================
 * Don't flag extra reply in xcb_take_socket

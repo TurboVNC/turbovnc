@@ -34,7 +34,7 @@
 
 #include "glapi.h"
 #include "glxclient.h"
-
+#include "indirect.h"
 #include "util/debug.h"
 
 #ifndef GLX_USE_APPLEGL
@@ -148,9 +148,27 @@ indirect_bind_context(struct glx_context *gc, struct glx_context *old,
    sent = SendMakeCurrentRequest(dpy, gc->xid, tag, draw, read,
 				 &gc->currentContextTag);
 
-   if (!IndirectAPI)
-      IndirectAPI = __glXNewIndirectAPI();
-   _glapi_set_dispatch(IndirectAPI);
+   if (sent) {
+      if (!IndirectAPI)
+         IndirectAPI = __glXNewIndirectAPI();
+      _glapi_set_dispatch(IndirectAPI);
+
+      /* The indirect vertex array state must to be initialised after we
+       * have setup the context, as it needs to query server attributes.
+       *
+       * At the point this is called gc->currentDpy is not initialized
+       * nor is the thread's current context actually set. Hence the
+       * cleverness before the GetString calls.
+       */
+      __GLXattribute *state = gc->client_state_private;
+      if (state && state->array_state == NULL) {
+         gc->currentDpy = gc->psc->dpy;
+         __glXSetCurrentContext(gc);
+         __indirect_glGetString(GL_EXTENSIONS);
+         __indirect_glGetString(GL_VERSION);
+         __glXInitVertexArrayState(gc);
+      }
+   }
 
    return !sent;
 }
@@ -399,10 +417,6 @@ indirect_create_context(struct glx_screen *psc,
 
    gc->attributes.stackPointer = &gc->attributes.stack[0];
 
-   /*
-    ** PERFORMANCE NOTE: A mode dependent fill image can speed things up.
-    */
-   gc->fillImage = __glFillImage;
    gc->pc = gc->buf;
    gc->bufEnd = gc->buf + bufSize;
    gc->isDirect = GL_FALSE;

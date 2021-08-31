@@ -78,7 +78,7 @@ from The Open Group.
 #if defined(SVR4) || defined(__SVR4)
 #include <sys/filio.h>
 #endif
-#ifdef sun
+#ifdef __sun
 # include <stropts.h>
 #else
 # include <sys/stropts.h>
@@ -104,7 +104,7 @@ from The Open Group.
  *  - named pipes
  *  - SCO
  */
-#if !defined(sun)
+#if !defined(__sun)
 # define LOCAL_TRANS_PTS
 #endif
 #if defined(SVR4) || defined(__SVR4)
@@ -243,7 +243,7 @@ static void _dummy(int sig _X_UNUSED)
 }
 #endif /* LOCAL_TRANS_PTS */
 
-#ifndef sun
+#ifndef __sun
 #define X_STREAMS_DIR	"/dev/X"
 #define DEV_SPX		"/dev/spx"
 #else
@@ -259,17 +259,17 @@ static void _dummy(int sig _X_UNUSED)
 #if defined(X11_t)
 
 #define PTSNODENAME "/dev/X/server."
-#ifdef sun
+#ifdef __sun
 #define NAMEDNODENAME "/tmp/.X11-pipe/X"
 #else
 #define NAMEDNODENAME "/dev/X/Nserver."
 
 #define SCORNODENAME	"/dev/X%1sR"
 #define SCOSNODENAME	"/dev/X%1sS"
-#endif /* !sun */
+#endif /* !__sun */
 #endif
 #if defined(XIM_t)
-#ifdef sun
+#ifdef __sun
 #define NAMEDNODENAME "/tmp/.XIM-pipe/XIM"
 #else
 #define PTSNODENAME	"/dev/X/XIM."
@@ -279,7 +279,7 @@ static void _dummy(int sig _X_UNUSED)
 #endif
 #endif
 #if defined(FS_t) || defined (FONT_t)
-#ifdef sun
+#ifdef __sun
 #define NAMEDNODENAME	"/tmp/.font-pipe/fs"
 #else
 /*
@@ -293,7 +293,7 @@ static void _dummy(int sig _X_UNUSED)
 #endif
 #endif
 #if defined(ICE_t)
-#ifdef sun
+#ifdef __sun
 #define NAMEDNODENAME	"/tmp/.ICE-pipe/"
 #else
 #define PTSNODENAME	"/dev/X/ICE."
@@ -303,7 +303,7 @@ static void _dummy(int sig _X_UNUSED)
 #endif
 #endif
 #if defined(TEST_t)
-#ifdef sun
+#ifdef __sun
 #define NAMEDNODENAME	"/tmp/.Test-unix/test"
 #endif
 #define PTSNODENAME	"/dev/X/transtest."
@@ -678,7 +678,7 @@ TRANS(NAMEDOpenClient)(XtransConnInfo ciptr, const char *port)
     int			fd;
     char		server_path[64];
     struct stat		filestat;
-# ifndef sun
+# ifndef __sun
     extern int		isastream(int);
 # endif
 #endif
@@ -773,11 +773,12 @@ TRANS(NAMEDOpenPipe)(const char *server_path)
 		prmsg(1, "NAMEDOpenPipe: Can't open %s\n", server_path);
 		return(-1);
 	    }
-	    close(fd);
-	    if (chmod(server_path, (mode_t)0666) < 0) {
-		prmsg(1, "NAMEDOpenPipe: Can't open %s\n", server_path);
+	    if (fchmod(fd, (mode_t)0666) < 0) {
+		prmsg(1, "NAMEDOpenPipe: Can't chmod %s\n", server_path);
+		close(fd);
 		return(-1);
 	    }
+	    close(fd);
 	} else {
 	    prmsg(1, "NAMEDOpenPipe: stat on %s failed\n", server_path);
 	    return(-1);
@@ -1610,7 +1611,7 @@ static LOCALtrans2dev LOCALtrans2devtab[] = {
 #endif /* TRANS_SERVER */
 },
 
-#ifdef sun /* Alias "pipe" to named, since that's what Solaris called it */
+#ifdef __sun /* Alias "pipe" to named, since that's what Solaris called it */
 {"pipe",
 #ifdef TRANS_CLIENT
      TRANS(NAMEDOpenClient),
@@ -1633,7 +1634,7 @@ static LOCALtrans2dev LOCALtrans2devtab[] = {
      TRANS(NAMEDAccept)
 #endif /* TRANS_SERVER */
 },
-#endif /* sun */
+#endif /* __sun */
 #endif /* LOCAL_TRANS_NAMED */
 
 
@@ -1673,7 +1674,7 @@ static	char	*freeXLOCAL=NULL;
 #define DEF_XLOCAL "SCO:UNIX:PTS"
 #elif defined(__UNIXWARE__)
 #define DEF_XLOCAL "UNIX:PTS:NAMED:SCO"
-#elif defined(sun)
+#elif defined(__sun)
 #define DEF_XLOCAL "UNIX:NAMED"
 #else
 #define DEF_XLOCAL "UNIX:PTS:NAMED:SCO"
@@ -1703,6 +1704,7 @@ TRANS(LocalEndTransports)(void)
 {
     prmsg(3,"LocalEndTransports()\n");
     free(freeXLOCAL);
+    freeXLOCAL = NULL;
 }
 
 #define TYPEBUFSIZE	32
@@ -1713,9 +1715,8 @@ static LOCALtrans2dev *
 TRANS(LocalGetNextTransport)(void)
 
 {
-    int	i,j;
+    int		i;
     char	*typetocheck;
-    char	typebuf[TYPEBUFSIZE];
     prmsg(3,"LocalGetNextTransport()\n");
 
     while(1)
@@ -1730,6 +1731,9 @@ TRANS(LocalGetNextTransport)(void)
 
 	for(i=0;i<NUMTRANSPORTS;i++)
 	{
+#ifndef HAVE_STRCASECMP
+	    int		j;
+	    char	typebuf[TYPEBUFSIZE];
 	    /*
 	     * This is equivalent to a case insensitive strcmp(),
 	     * but should be more portable.
@@ -1741,6 +1745,9 @@ TRANS(LocalGetNextTransport)(void)
 
 	    /* Now, see if they match */
 	    if(!strcmp(LOCALtrans2devtab[i].transname,typebuf))
+#else
+	    if(!strcasecmp(LOCALtrans2devtab[i].transname,typetocheck))
+#endif
 		return &LOCALtrans2devtab[i];
 	}
     }
@@ -1848,11 +1855,7 @@ TRANS(LocalOpenClient)(int type, const char *protocol,
 	case XTRANS_OPEN_COTS_CLIENT:
 	    ciptr->fd=transptr->devcotsopenclient(ciptr,port);
 	    break;
-	case XTRANS_OPEN_CLTS_CLIENT:
-	    ciptr->fd=transptr->devcltsopenclient(ciptr,port);
-	    break;
 	case XTRANS_OPEN_COTS_SERVER:
-	case XTRANS_OPEN_CLTS_SERVER:
 	    prmsg(1,
 		  "LocalOpenClient: Should not be opening a server with this function\n");
 	    break;
@@ -1917,15 +1920,11 @@ TRANS(LocalOpenServer)(int type, const char *protocol,
 	switch( type )
 	{
 	case XTRANS_OPEN_COTS_CLIENT:
-	case XTRANS_OPEN_CLTS_CLIENT:
 	    prmsg(1,
 		  "LocalOpenServer: Should not be opening a client with this function\n");
 	    break;
 	case XTRANS_OPEN_COTS_SERVER:
 	    ciptr->fd=LOCALtrans2devtab[i].devcotsopenserver(ciptr,port);
-	    break;
-	case XTRANS_OPEN_CLTS_SERVER:
-	    ciptr->fd=LOCALtrans2devtab[i].devcltsopenserver(ciptr,port);
 	    break;
 	default:
 	    prmsg(1,"LocalOpenServer: Unknown Open type %d\n",
@@ -1970,9 +1969,6 @@ TRANS(LocalReopenServer)(int type, int index, int fd, const char *port)
     {
     case XTRANS_OPEN_COTS_SERVER:
 	stat = LOCALtrans2devtab[index].devcotsreopenserver(ciptr,fd,port);
-	break;
-    case XTRANS_OPEN_CLTS_SERVER:
-	stat = LOCALtrans2devtab[index].devcltsreopenserver(ciptr,fd,port);
 	break;
     default:
 	prmsg(1,"LocalReopenServer: Unknown Open type %d\n",
@@ -2022,7 +2018,6 @@ TRANS(LocalOpenCOTSServer)(Xtransport *thistrans, const char *protocol,
 {
     char *typetocheck = NULL;
     int found = 0;
-    char typebuf[TYPEBUFSIZE];
 
     prmsg(2,"LocalOpenCOTSServer(%s,%s,%s)\n",protocol,host,port);
 
@@ -2030,16 +2025,23 @@ TRANS(LocalOpenCOTSServer)(Xtransport *thistrans, const char *protocol,
     TRANS(LocalInitTransports)("local");
     typetocheck = workingXLOCAL;
     while (typetocheck && !found) {
+#ifndef HAVE_STRCASECMP
 	int j;
+	char typebuf[TYPEBUFSIZE];
+#endif
 
 	workingXLOCAL = strchr(workingXLOCAL, ':');
 	if (workingXLOCAL && *workingXLOCAL)
 	    *workingXLOCAL++ = '\0';
+#ifndef HAVE_STRCASECMP
 	strncpy(typebuf, typetocheck, TYPEBUFSIZE);
 	for (j = 0; j < TYPEBUFSIZE; j++)
 	    if (isupper(typebuf[j]))
 		typebuf[j] = tolower(typebuf[j]);
 	if (!strcmp(thistrans->TransName, typebuf))
+#else
+	if (!strcasecmp(thistrans->TransName, typetocheck))
+#endif
 	    found = 1;
 	typetocheck = workingXLOCAL;
     }
@@ -2055,37 +2057,6 @@ TRANS(LocalOpenCOTSServer)(Xtransport *thistrans, const char *protocol,
 }
 
 #endif /* TRANS_SERVER */
-
-
-#ifdef TRANS_CLIENT
-
-static XtransConnInfo
-TRANS(LocalOpenCLTSClient)(Xtransport *thistrans _X_UNUSED, const char *protocol,
-			   const char *host, const char *port)
-
-{
-    prmsg(2,"LocalOpenCLTSClient(%s,%s,%s)\n",protocol,host,port);
-
-    return TRANS(LocalOpenClient)(XTRANS_OPEN_CLTS_CLIENT, protocol, host, port);
-}
-
-#endif /* TRANS_CLIENT */
-
-
-#ifdef TRANS_SERVER
-
-static XtransConnInfo
-TRANS(LocalOpenCLTSServer)(Xtransport *thistrans _X_UNUSED, const char *protocol,
-			   const char *host, const char *port)
-
-{
-    prmsg(2,"LocalOpenCLTSServer(%s,%s,%s)\n",protocol,host,port);
-
-    return TRANS(LocalOpenServer)(XTRANS_OPEN_CLTS_SERVER, protocol, host, port);
-}
-
-#endif /* TRANS_SERVER */
-
 
 #ifdef TRANS_REOPEN
 
@@ -2110,30 +2081,6 @@ TRANS(LocalReopenCOTSServer)(Xtransport *thistrans, int fd, const char *port)
     }
 
     return TRANS(LocalReopenServer)(XTRANS_OPEN_COTS_SERVER,
-	index, fd, port);
-}
-
-static XtransConnInfo
-TRANS(LocalReopenCLTSServer)(Xtransport *thistrans, int fd, const char *port)
-
-{
-    int index;
-
-    prmsg(2,"LocalReopenCLTSServer(%d,%s)\n", fd, port);
-
-    for(index=1;index<NUMTRANSPORTS;index++)
-    {
-	if( strcmp(thistrans->TransName,
-	    LOCALtrans2devtab[index].transname) == 0 )
-	    break;
-    }
-
-    if (index >= NUMTRANSPORTS)
-    {
-	return (NULL);
-    }
-
-    return TRANS(LocalReopenServer)(XTRANS_OPEN_CLTS_SERVER,
 	index, fd, port);
 }
 
@@ -2345,7 +2292,7 @@ static const char * local_aliases[] = {
                                   "pts",
 # endif
 				  "named",
-# ifdef sun
+# ifdef __sun
 				  "pipe", /* compatibility with Solaris Xlib */
 # endif
 # ifdef LOCAL_TRANS_SCO
@@ -2365,15 +2312,8 @@ Xtransport	TRANS(LocalFuncs) = {
 	local_aliases,
 	TRANS(LocalOpenCOTSServer),
 #endif /* TRANS_SERVER */
-#ifdef TRANS_CLIENT
-	TRANS(LocalOpenCLTSClient),
-#endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
-	TRANS(LocalOpenCLTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(LocalReopenCOTSServer),
-	TRANS(LocalReopenCLTSServer),
 #endif
 	TRANS(LocalSetOption),
 #ifdef TRANS_SERVER
@@ -2411,15 +2351,8 @@ Xtransport	TRANS(PTSFuncs) = {
 	NULL,
 	TRANS(LocalOpenCOTSServer),
 #endif /* TRANS_SERVER */
-#ifdef TRANS_CLIENT
-	TRANS(LocalOpenCLTSClient),
-#endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
-	TRANS(LocalOpenCLTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(LocalReopenCOTSServer),
-	TRANS(LocalReopenCLTSServer),
 #endif
 	TRANS(LocalSetOption),
 #ifdef TRANS_SERVER
@@ -2459,15 +2392,8 @@ Xtransport	TRANS(NAMEDFuncs) = {
 	NULL,
 	TRANS(LocalOpenCOTSServer),
 #endif /* TRANS_SERVER */
-#ifdef TRANS_CLIENT
-	TRANS(LocalOpenCLTSClient),
-#endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
-	TRANS(LocalOpenCLTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(LocalReopenCOTSServer),
-	TRANS(LocalReopenCLTSServer),
 #endif
 	TRANS(LocalSetOption),
 #ifdef TRANS_SERVER
@@ -2492,7 +2418,7 @@ Xtransport	TRANS(NAMEDFuncs) = {
 	TRANS(LocalCloseForCloning),
 };
 
-#ifdef sun
+#ifdef __sun
 Xtransport	TRANS(PIPEFuncs) = {
 	/* Local Interface */
 	"pipe",
@@ -2504,15 +2430,8 @@ Xtransport	TRANS(PIPEFuncs) = {
 	NULL,
 	TRANS(LocalOpenCOTSServer),
 #endif /* TRANS_SERVER */
-#ifdef TRANS_CLIENT
-	TRANS(LocalOpenCLTSClient),
-#endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
-	TRANS(LocalOpenCLTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(LocalReopenCOTSServer),
-	TRANS(LocalReopenCLTSServer),
 #endif
 	TRANS(LocalSetOption),
 #ifdef TRANS_SERVER
@@ -2536,7 +2455,7 @@ Xtransport	TRANS(PIPEFuncs) = {
 	TRANS(LocalClose),
 	TRANS(LocalCloseForCloning),
 };
-#endif /* sun */
+#endif /* __sun */
 #endif /* LOCAL_TRANS_NAMED */
 
 
@@ -2552,15 +2471,8 @@ Xtransport	TRANS(SCOFuncs) = {
 	NULL,
 	TRANS(LocalOpenCOTSServer),
 #endif /* TRANS_SERVER */
-#ifdef TRANS_CLIENT
-	TRANS(LocalOpenCLTSClient),
-#endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
-	TRANS(LocalOpenCLTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(LocalReopenCOTSServer),
-	TRANS(LocalReopenCLTSServer),
 #endif
 	TRANS(LocalSetOption),
 #ifdef TRANS_SERVER

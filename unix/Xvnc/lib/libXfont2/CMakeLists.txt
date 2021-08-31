@@ -14,16 +14,6 @@ endif()
 
 add_definitions(-DHAVE_CONFIG_H -DHAVE_READLINK -UUSE_POLL)
 
-check_symbol_exists(strlcat string.h HAVE_STRLCAT)
-check_symbol_exists(strlcpy string.h HAVE_STRLCPY)
-
-if(HAVE_STRLCAT)
-	add_definitions(-DHAVE_STRLCAT)
-endif()
-if(HAVE_STRLCPY)
-	add_definitions(-DHAVE_STRLCPY)
-endif()
-
 disable_compiler_warnings()
 
 add_subdirectory(src/FreeType)

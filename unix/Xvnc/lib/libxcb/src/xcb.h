@@ -600,6 +600,35 @@ uint32_t xcb_generate_id(xcb_connection_t *c);
 
 
 /**
+ * @brief Obtain number of bytes read from the connection.
+ * @param c The connection
+ * @return Number of bytes read from the server.
+ *
+ * Returns cumulative number of bytes received from the connection.
+ *
+ * This retrieves the total number of bytes read from this connection,
+ * to be used for diagnostic/monitoring/informative purposes.
+ */
+
+uint64_t
+xcb_total_read(xcb_connection_t *c);
+
+/**
+ *
+ * @brief Obtain number of bytes written to the connection.
+ * @param c The connection
+ * @return Number of bytes written to the server.
+ *
+ * Returns cumulative number of bytes sent to the connection.
+ *
+ * This retrieves the total number of bytes written to this connection,
+ * to be used for diagnostic/monitoring/informative purposes.
+ */
+
+uint64_t
+xcb_total_written(xcb_connection_t *c);
+
+/**
  * @}
  */
 

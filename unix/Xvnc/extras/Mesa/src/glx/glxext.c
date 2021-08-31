@@ -50,6 +50,11 @@
 #include "glxextensions.h"
 
 #include "util/debug.h"
+#if 0 /* TURBOVNC */
+#ifndef GLX_USE_APPLEGL
+#include "dri_common.h"
+#endif
+#endif /* TURBOVNC */
 
 #include <X11/Xlib-xcb.h>
 #include <xcb/xcb.h>
@@ -69,7 +74,7 @@ _X_HIDDEN int __glXDebug = 0;
 /* Extension required boiler plate */
 
 static const char __glXExtensionName[] = GLX_EXTENSION_NAME;
-  static struct glx_display *glx_displays;
+static struct glx_display *glx_displays;
 
 static /* const */ char *error_list[] = {
    "GLXBadContext",
@@ -714,7 +719,8 @@ static GLboolean
    LockDisplay(dpy);
 
    psc->configs = NULL;
-   if (atof(priv->serverGLXversion) >= 1.3) {
+   if (priv->majorVersion > 1 ||
+       (priv->majorVersion == 1 && priv->minorVersion >= 3)) {
       GetReq(GLXGetFBConfigs, fb_req);
       fb_req->reqType = priv->majorOpcode;
       fb_req->glxCode = X_GLXGetFBConfigs;
@@ -896,7 +902,7 @@ __glXInitialize(Display * dpy)
    }
 
    XESetCloseDisplay(dpy, dpyPriv->codes->extension, __glXCloseDisplay);
-   XESetErrorString (dpy, dpyPriv->codes->extension,__glXErrorString);
+   XESetErrorString (dpy, dpyPriv->codes->extension, __glXErrorString);
 
    dpyPriv->glXDrawHash = __glxHashCreate();
 
@@ -905,6 +911,11 @@ __glXInitialize(Display * dpy)
    glx_accel = !env_var_as_boolean("LIBGL_ALWAYS_SOFTWARE", false);
 
    dpyPriv->drawHash = __glxHashCreate();
+
+#ifndef GLX_USE_APPLEGL
+   /* Set the logger before the *CreateDisplay functions. */
+   loader_set_logger(dri_message);
+#endif
 
    /*
     ** Initialize the direct rendering per display data and functions.

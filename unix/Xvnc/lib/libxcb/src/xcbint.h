@@ -103,6 +103,7 @@ typedef struct _xcb_out {
 
     uint64_t request;
     uint64_t request_written;
+    uint64_t total_written;
 
     pthread_mutex_t reqlenlock;
     enum lazy_reply_tag maximum_request_length_tag;
@@ -135,6 +136,7 @@ typedef struct _xcb_in {
     uint64_t request_expected;
     uint64_t request_read;
     uint64_t request_completed;
+    uint64_t total_read;
     struct reply_list *current_reply;
     struct reply_list **current_reply_tail;
 

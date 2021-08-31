@@ -581,6 +581,15 @@ xcb_setup_request_sizeof (const void  *_buffer)
     xcb_block_len += _aux->authorization_protocol_name_len * sizeof(char);
     xcb_tmp += xcb_block_len;
     xcb_align_to = ALIGNOF(char);
+    xcb_align_to = 4;
+    /* insert padding */
+    xcb_pad = -xcb_block_len & (xcb_align_to - 1);
+    xcb_buffer_len += xcb_block_len + xcb_pad;
+    if (0 != xcb_pad) {
+        xcb_tmp += xcb_pad;
+        xcb_pad = 0;
+    }
+    xcb_block_len = 0;
     /* insert padding */
     xcb_pad = -xcb_block_len & (xcb_align_to - 1);
     xcb_buffer_len += xcb_block_len + xcb_pad;
@@ -593,6 +602,15 @@ xcb_setup_request_sizeof (const void  *_buffer)
     xcb_block_len += _aux->authorization_protocol_data_len * sizeof(char);
     xcb_tmp += xcb_block_len;
     xcb_align_to = ALIGNOF(char);
+    xcb_align_to = 4;
+    /* insert padding */
+    xcb_pad = -xcb_block_len & (xcb_align_to - 1);
+    xcb_buffer_len += xcb_block_len + xcb_pad;
+    if (0 != xcb_pad) {
+        xcb_tmp += xcb_pad;
+        xcb_pad = 0;
+    }
+    xcb_block_len = 0;
     /* insert padding */
     xcb_pad = -xcb_block_len & (xcb_align_to - 1);
     xcb_buffer_len += xcb_block_len + xcb_pad;
@@ -631,7 +649,7 @@ char *
 xcb_setup_request_authorization_protocol_data (const xcb_setup_request_t *R)
 {
     xcb_generic_iterator_t prev = xcb_setup_request_authorization_protocol_name_end(R);
-    return (char *) ((char *) prev.data + XCB_TYPE_PAD(char, prev.index) + 0);
+    return (char *) ((char *) prev.data + ((-prev.index) & (4 - 1)) + 0);
 }
 
 int
@@ -645,7 +663,7 @@ xcb_setup_request_authorization_protocol_data_end (const xcb_setup_request_t *R)
 {
     xcb_generic_iterator_t i;
     xcb_generic_iterator_t prev = xcb_setup_request_authorization_protocol_name_end(R);
-    i.data = ((char *) ((char*) prev.data + XCB_TYPE_PAD(char, prev.index))) + (R->authorization_protocol_data_len);
+    i.data = ((char *) ((char*) prev.data + ((-prev.index) & (4 - 1)))) + (R->authorization_protocol_data_len);
     i.rem = 0;
     i.index = (char *) i.data - (char *) R;
     return i;
@@ -6261,9 +6279,9 @@ xcb_set_font_path_checked (xcb_connection_t *c,
     struct iovec xcb_parts[6];
     xcb_void_cookie_t xcb_ret;
     xcb_set_font_path_request_t xcb_out;
-    unsigned int i;
     unsigned int xcb_tmp_len;
     char *xcb_tmp;
+    unsigned int i;
 
     xcb_out.pad0 = 0;
     xcb_out.font_qty = font_qty;
@@ -6304,9 +6322,9 @@ xcb_set_font_path (xcb_connection_t *c,
     struct iovec xcb_parts[6];
     xcb_void_cookie_t xcb_ret;
     xcb_set_font_path_request_t xcb_out;
-    unsigned int i;
     unsigned int xcb_tmp_len;
     char *xcb_tmp;
+    unsigned int i;
 
     xcb_out.pad0 = 0;
     xcb_out.font_qty = font_qty;

@@ -23,9 +23,6 @@
 
 #include <errno.h>
 #include <string.h>
-#if 0 /* TURBOVNC */
-#include "main/macros.h"
-#endif /* TURBOVNC */
 #include "debug.h"
 #if 0 /* TURBOVNC */
 #include "u_string.h"

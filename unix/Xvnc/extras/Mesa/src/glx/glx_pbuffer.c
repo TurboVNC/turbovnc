@@ -35,6 +35,7 @@
 #include <X11/extensions/Xext.h>
 #include <assert.h>
 #include <string.h>
+#include <limits.h>
 #include "glxextensions.h"
 
 #ifdef GLX_USE_APPLEGL
@@ -86,10 +87,10 @@ ChangeDrawableAttribute(Display * dpy, GLXDrawable drawable,
    struct glx_display *priv = __glXInitialize(dpy);
 #ifdef GLX_DIRECT_RENDERING
    __GLXDRIdrawable *pdraw;
+   int i;
 #endif
    CARD32 *output;
    CARD8 opcode;
-   int i;
 
    if ((priv == NULL) || (dpy == NULL) || (drawable == 0)) {
       return;
@@ -343,6 +344,20 @@ __glXGetDrawableAttribute(Display * dpy, GLXDrawable drawable,
 
       return 0;
    }
+
+   if (pdraw) {
+      if (attribute == GLX_SWAP_INTERVAL_EXT) {
+         *value = pdraw->psc->driScreen->getSwapInterval(pdraw);
+         return 0;
+      } else if (attribute == GLX_MAX_SWAP_INTERVAL_EXT) {
+         *value = INT_MAX;
+         return 0;
+      } else if (attribute == GLX_LATE_SWAPS_TEAR_EXT) {
+         *value = __glXExtensionBitIsEnabled(pdraw->psc,
+                                             EXT_swap_control_tear_bit);
+         return 0;
+      }
+   }
 #endif
 
    LockDisplay(dpy);
@@ -414,7 +429,7 @@ __glXGetDrawableAttribute(Display * dpy, GLXDrawable drawable,
    UnlockDisplay(dpy);
    SyncHandle();
 
-   return 0;
+   return 1;
 }
 
 static void
@@ -543,6 +558,7 @@ CreatePbuffer(Display * dpy, struct glx_config *config,
    unsigned int i;
    Pixmap pixmap;
    GLboolean glx_1_3 = GL_FALSE;
+   int depth = config->rgbBits;
 
    if (priv == NULL)
       return None;
@@ -607,8 +623,11 @@ CreatePbuffer(Display * dpy, struct glx_config *config,
    UnlockDisplay(dpy);
    SyncHandle();
 
+   if (depth == 30)
+      depth = 32;
+
    pixmap = XCreatePixmap(dpy, RootWindow(dpy, config->screen),
-			  width, height, config->rgbBits);
+			  width, height, depth);
 
    if (!CreateDRIDrawable(dpy, config, pixmap, id, attrib_list, i)) {
       CARD32 o = glx_1_3 ? X_GLXDestroyPbuffer : X_GLXvop_DestroyGLXPbufferSGIX;
@@ -834,11 +853,11 @@ glXQueryDrawable(Display * dpy, GLXDrawable drawable,
 /**
  * Query an attribute of a pbuffer.
  */
-_GLX_PUBLIC int
+_GLX_PUBLIC void
 glXQueryGLXPbufferSGIX(Display * dpy, GLXPbufferSGIX drawable,
                        int attribute, unsigned int *value)
 {
-   return __glXGetDrawableAttribute(dpy, drawable, attribute, value);
+   __glXGetDrawableAttribute(dpy, drawable, attribute, value);
 }
 #endif
 
