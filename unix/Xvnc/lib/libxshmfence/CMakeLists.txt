@@ -1,5 +1,10 @@
 add_definitions(-DHAVE_PTHREAD)
 
+check_symbol_exists(__NR_memfd_create asm/unistd.h HAVE_DECL___NR_MEMFD_CREATE)
+if(HAVE_DECL___NR_MEMFD_CREATE)
+	add_definitions(-DHAVE_DECL___NR_MEMFD_CREATE)
+endif()
+
 foreach(dir /run/shm /dev/shm /var/tmp /tmp)
 	if(EXISTS ${dir})
 		add_definitions(-DSHMDIR=\"${dir}\")

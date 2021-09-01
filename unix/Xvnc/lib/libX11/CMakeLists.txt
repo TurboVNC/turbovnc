@@ -13,7 +13,7 @@ endforeach()
 
 include_directories(include/X11)
 
-add_definitions(-DHAVE_UNISTD_H -DHAVE_SYS_SELECT_H)
+add_definitions(-DHAVE_SYS_SELECT_H)
 include(CheckIncludeFiles)
 check_include_files(sys/ioctl.h HAVE_SYS_IOCTL_H)
 if(HAVE_SYS_IOCTL_H)

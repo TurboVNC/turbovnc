@@ -1,4 +1,5 @@
 include(CheckCSourceCompiles)
+include(CheckIncludeFiles)
 include(CheckSymbolExists)
 
 set(GLIBC_SOURCE "\n
@@ -34,6 +35,11 @@ if(FOUND_SVR4)
 	add_definitions(-DSVR4)
 endif()
 
+check_include_files(unistd.h HAVE_UNISTD_H)
+if(HAVE_UNISTD_H)
+	add_definitions(-DHAVE_UNISTD_H)
+endif()
+
 if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	message(STATUS "BSD-like system detected")
 	add_definitions(-DCSRG_BASED)
@@ -43,6 +49,11 @@ elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
 endif()
 
 add_definitions(-DIPv6)
+
+check_symbol_exists(arc4random_buf stdlib.h HAVE_ARC4RANDOM_BUF)
+if(HAVE_ARC4RANDOM_BUF)
+	add_definitions(-DHAVE_ARC4RANDOM_BUF)
+endif()
 
 check_symbol_exists(poll poll.h USE_POLL)
 if(USE_POLL)

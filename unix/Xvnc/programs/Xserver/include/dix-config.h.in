@@ -3,14 +3,14 @@
 #ifndef _DIX_CONFIG_H_
 #define _DIX_CONFIG_H_
 
+/* Define to 1 if you have the <byteswap.h> header file. */
+#cmakedefine01 HAVE_BYTESWAP_H
+
 /* Define to 1 if you have the `cbrt' function. */
 #cmakedefine HAVE_CBRT
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H
-
-/* Define to 1 if you have the `getdtablesize' function. */
-#cmakedefine HAVE_GETDTABLESIZE
 
 /* Define to 1 if you have the `getifaddrs' function. */
 #cmakedefine HAVE_GETIFADDRS
@@ -29,9 +29,6 @@
 
 /* Define to 1 if you have the `reallocarray' function. */
 #cmakedefine HAVE_REALLOCARRAY
-
-/* Define to 1 if you have the `arc4random_buf' function. */
-#cmakedefine HAVE_ARC4RANDOM_BUF
 
 /* Define to 1 if you have the `shmctl64' function. */
 #cmakedefine HAVE_SHMCTL64
