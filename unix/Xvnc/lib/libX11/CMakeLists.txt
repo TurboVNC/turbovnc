@@ -13,7 +13,7 @@ endforeach()
 
 include_directories(include/X11)
 
-add_definitions(-DHAVE_UNISTD_H -DHAVE_SYS_SELECT_H)
+add_definitions(-DHAVE_SYS_SELECT_H)
 
 disable_compiler_warnings()
 handle_type_puns(src/XlibInt.c)
