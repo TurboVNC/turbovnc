@@ -186,7 +186,7 @@ public final class Tunnel {
                                  privateKey.getAbsolutePath() + ":\n" +
                                  e.getMessage());
       }
-   }
+    }
 
     opts.sshSession = jsch.getSession(user, host, port);
     // OpenSSHConfig doesn't recognize StrictHostKeyChecking
