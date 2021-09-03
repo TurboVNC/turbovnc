@@ -712,9 +712,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
   private void updatePreferences() {
     // CONNECTION
-    //   (no GUI equivalent)
-    UserPreferences.set("global", "AlwaysShowConnectionDialog",
-                        VncViewer.alwaysShowConnectionDialog.getValue());
     UserPreferences.set("global", "RecvClipboard",
                         recvClipboard.isSelected());
     UserPreferences.set("global", "SendClipboard", sendClipboard.isSelected());
@@ -736,9 +733,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     // DISPLAY
     UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
-    //   (no GUI equivalent)
-    if (VncViewer.colors.getValue() != -1)
-      UserPreferences.set("global", "Colors", VncViewer.colors.getValue());
     UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
     UserPreferences.set("global", "DesktopSize",
                         desktopSize.getSelectedItem().toString());
@@ -762,10 +756,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     // ENCODING
     UserPreferences.set("global", "CompressLevel", getCompressionLevel());
-    //   (no GUI equivalent)
-    if (VncViewer.preferredEncoding.getValue() != null)
-      UserPreferences.set("global", "Encoding",
-                          VncViewer.preferredEncoding.getValue());
     UserPreferences.set("global", "JPEG", allowJpeg.isSelected());
     UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
     String subsamplingStr =

@@ -27,6 +27,17 @@ requests, which are sent by recent versions of Java Web Start.
 directory if it does not exist.  This makes the actual behavior of `vncpasswd`
 match its documented behavior.
 
+6. The values of the `AlwaysShowConnectionDialog`, `Colors`, and `Encoding`
+parameters in the Java TurboVNC Viewer are no longer saved when "OK" is clicked
+to dismiss the TurboVNC Viewer Options dialog, nor are they restored when the
+viewer is launched.  Because those parameters can only be specified on the
+command line or in a connection info file, automatically restoring their
+previous values led to confusing behavior.  (That behavior made more sense
+prior to TurboVNC 2.2, because the Options dialog did not automatically save
+the current options.)  Since TurboVNC 1.2.2, the Windows TurboVNC Viewer has
+similarly avoided saving/restoring the values of command-line parameters that
+have no GUI equivalents.
+
 
 2.2.6
 =====
