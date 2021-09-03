@@ -1,7 +1,7 @@
 /*  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
- *  Copyright (C) 2012-2015, 2017-2018, 2020 D. R. Commander.
- *                                           All Rights Reserved.
+ *  Copyright (C) 2012-2015, 2017-2018, 2020-2021 D. R. Commander.
+ *                                                All Rights Reserved.
  *  Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -74,7 +74,7 @@ public class Tunnel {
         pattern = System.getenv("VNC_VIA_CMD");
     }
 
-    if (opts.extSSH || (pattern != null && pattern.length() > 0))
+    if (Params.extSSH.getValue() || (pattern != null && pattern.length() > 0))
       createTunnelExt(gatewayHost, remoteHost, remotePort, localPort, pattern,
                       opts);
     else {

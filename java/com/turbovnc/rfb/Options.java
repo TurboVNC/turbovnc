@@ -52,7 +52,6 @@ public class Options {
   public Options() {}
 
   public Options(Options old) {
-    continuousUpdates = old.continuousUpdates;
     port = old.port;
     recvClipboard = old.recvClipboard;
     sendClipboard = old.sendClipboard;
@@ -67,7 +66,6 @@ public class Options {
     viewOnly = old.viewOnly;
 
     acceptBell = old.acceptBell;
-    colors = old.colors;
     cursorShape = old.cursorShape;
     desktopSize = new DesktopSize(old.desktopSize);
     fullScreen = old.fullScreen;
@@ -76,13 +74,11 @@ public class Options {
     showToolbar = old.showToolbar;
 
     compressLevel = old.compressLevel;
-    copyRect = old.copyRect;
     preferredEncoding = old.preferredEncoding;
     allowJpeg = old.allowJpeg;
     quality = old.quality;
     subsampling = old.subsampling;
 
-    extSSH = old.extSSH;
     sendLocalUsername = old.sendLocalUsername;
     sshSession = old.sshSession;
     sshTunnelActive = old.sshTunnelActive;
@@ -198,7 +194,6 @@ public class Options {
   }
 
   public void print() {
-    printOpt("continuousUpdates", continuousUpdates);
     printOpt("port", port);
     printOpt("recvClipboard", recvClipboard);
     printOpt("sendClipboard", sendClipboard);
@@ -213,7 +208,6 @@ public class Options {
     printOpt("viewOnly", viewOnly);
 
     printOpt("acceptBell", acceptBell);
-    printOpt("colors", colors);
     printOpt("cursorShape", cursorShape);
     if (desktopSize.mode == SIZE_MANUAL)
       printOpt("desktopSize", desktopSize.getString());
@@ -225,13 +219,11 @@ public class Options {
     printOpt("showToolbar", showToolbar);
 
     printOpt("compressLevel", compressLevel);
-    printOpt("copyRect", copyRect);
     printOpt("preferredEncoding", preferredEncoding);
     printOpt("allowJpeg", allowJpeg);
     printOpt("quality", quality);
     printOpt("subsampling", subsampling);
 
-    printOpt("extSSH", extSSH);
     printOpt("sendLocalUsername", sendLocalUsername);
     printOpt("sshUser", sshUser);
     printOpt("tunnel", tunnel);
@@ -297,7 +289,6 @@ public class Options {
   }
 
   // CONNECTION OPTIONS
-  public boolean continuousUpdates;
   public int port;
   public boolean recvClipboard;
   public boolean sendClipboard;
@@ -311,7 +302,6 @@ public class Options {
   public boolean viewOnly;
   // DISPLAY OPTIONS
   public boolean acceptBell;
-  public int colors;
   public boolean cursorShape;
   public DesktopSize desktopSize = new DesktopSize();
   public boolean fullScreen;
@@ -320,13 +310,11 @@ public class Options {
   public boolean showToolbar;
   // ENCODING OPTIONS
   public int compressLevel;
-  public boolean copyRect = true;
   public int preferredEncoding;
   public boolean allowJpeg;
   public int quality;
   public int subsampling;
   // SECURITY AND AUTHENTICATION OPTIONS
-  public boolean extSSH;
   public boolean sendLocalUsername;
   public Session sshSession;
   public boolean sshTunnelActive;

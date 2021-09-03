@@ -354,20 +354,18 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (!benchmark)
       requestNewUpdate();
     else {
-      if (opts.colors < 0) {
-        pendingPF = fullColourPF;
+      if (Params.colors.getValue() == 8) {
+        pendingPF = VERY_LOW_COLOR_PF;
+      } else if (Params.colors.getValue() == 64) {
+        pendingPF = LOW_COLOR_PF;
+      } else if (Params.colors.getValue() == 256) {
+        pendingPF = MEDIUM_COLOR_PF;
+      } else if (Params.colors.getValue() == 32768) {
+        pendingPF = MEDIUMHIGH_COLOR_PF;
+      } else if (Params.colors.getValue() == 65536) {
+        pendingPF = HIGH_COLOR_PF;
       } else {
-        if (opts.colors == 8) {
-          pendingPF = VERY_LOW_COLOR_PF;
-        } else if (opts.colors == 64) {
-          pendingPF = LOW_COLOR_PF;
-        } else if (opts.colors == 256) {
-          pendingPF = MEDIUM_COLOR_PF;
-        } else if (opts.colors == 32768) {
-          pendingPF = MEDIUMHIGH_COLOR_PF;
-        } else {
-          pendingPF = HIGH_COLOR_PF;
-        }
+        pendingPF = fullColourPF;
       }
       pendingPFChange = true;
     }
@@ -1382,20 +1380,18 @@ public class CConn extends CConnection implements UserPasswdGetter,
       // Catch incorrect requestNewUpdate calls
       assert(!pendingUpdate || supportsSyncFence);
 
-      if (opts.colors < 0) {
-        pf = fullColourPF;
+      if (Params.colors.getValue() == 8) {
+        pf = VERY_LOW_COLOR_PF;
+      } else if (Params.colors.getValue() == 64) {
+        pf = LOW_COLOR_PF;
+      } else if (Params.colors.getValue() == 256) {
+        pf = MEDIUM_COLOR_PF;
+      } else if (Params.colors.getValue() == 32768) {
+        pf = MEDIUMHIGH_COLOR_PF;
+      } else if (Params.colors.getValue() == 65536) {
+        pf = HIGH_COLOR_PF;
       } else {
-        if (opts.colors == 8) {
-          pf = VERY_LOW_COLOR_PF;
-        } else if (opts.colors == 64) {
-          pf = LOW_COLOR_PF;
-        } else if (opts.colors == 256) {
-          pf = MEDIUM_COLOR_PF;
-        } else if (opts.colors == 32768) {
-          pf = MEDIUMHIGH_COLOR_PF;
-        } else {
-          pf = HIGH_COLOR_PF;
-        }
+        pf = fullColourPF;
       }
 
       if (supportsSyncFence) {

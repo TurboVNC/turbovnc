@@ -947,7 +947,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         opts = new Options();
 
       // CONNECTION OPTIONS
-      opts.continuousUpdates = Params.continuousUpdates.getValue();
       opts.port = Params.vncServerPort.getValue();
       Params.vncServerPort.setValue(-1);
       opts.recvClipboard = Params.recvClipboard.getValue();
@@ -971,12 +970,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
       // DISPLAY OPTIONS
       opts.acceptBell = Params.acceptBell.getValue();
-      opts.colors = -1;
-      switch (Params.colors.getValue()) {
-        case 8:  case 64:  case 256:  case 32768:  case 65536:
-          opts.colors = Params.colors.getValue();
-          break;
-      }
       opts.cursorShape = Params.cursorShape.getValue();
 
       if (benchFile != null)
@@ -1011,7 +1004,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
       // ENCODING OPTIONS
       opts.compressLevel = Params.compressLevel.getValue();
-      opts.copyRect = Params.copyRect.getValue();
 
       String encStr = Params.preferredEncoding.getValue();
       int encNum = RFB.encodingNum(encStr);
@@ -1038,7 +1030,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       }
 
       // SECURITY AND AUTHENTICATION OPTIONS
-      opts.extSSH = Params.extSSH.getValue();
       opts.sendLocalUsername = Params.sendLocalUsername.getValue();
       opts.tunnel = Params.tunnel.getValue();
       if (Params.user.getValue() != null)
