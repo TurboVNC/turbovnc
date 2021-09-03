@@ -56,8 +56,7 @@ public class Options {
     port = old.port;
     recvClipboard = old.recvClipboard;
     sendClipboard = old.sendClipboard;
-    if (old.serverName != null)
-      serverName = new String(old.serverName);
+    if (old.serverName != null) serverName = new String(old.serverName);
     shared = old.shared;
 
     fsAltEnter = old.fsAltEnter;
