@@ -25,48 +25,49 @@ import java.awt.event.*;
 import java.io.File;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.border.*;
+import javax.swing.event.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 
 class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
-  ItemListener {
+  ItemListener, DocumentListener {
 
   // Constants
   // Static variables
   static LogWriter vlog = new LogWriter("OptionsDialog");
 
-  OptionsDialogCallback callback;
-  JTabbedPane tabPane;
-  JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
-  JCheckBox allowJpeg, interframe;
-  JComboBox menuKey, scalingFactor, encMethodComboBox, span, desktopSize,
-    grabKeyboard;
-  JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
-  JCheckBox viewOnly, recvClipboard, sendClipboard, acceptBell,
+  private OptionsDialogCallback callback;
+  private JTabbedPane tabPane;
+  private JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
+  private JCheckBox allowJpeg, interframe;
+  private JComboBox menuKey, scalingFactor, encMethodComboBox, span,
+    desktopSize, grabKeyboard;
+  private JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
+  private JCheckBox viewOnly, recvClipboard, sendClipboard, acceptBell,
     reverseScroll, fsAltEnter;
-  JCheckBox fullScreen, shared, cursorShape, showToolbar;
-  JCheckBox secVeNCrypt, encNone, encTLS, encX509;
-  JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent,
-    sendLocalUsername, tunnel;
-  JTextField sshUser, gateway;
-  JLabel sshUserLabel, gatewayLabel;
-  JButton okButton, cancelButton;
-  JButton x509caButton, x509crlButton;
-  JLabel x509caLabel, x509crlLabel;
-  JTextField x509ca, x509crl;
-  JButton defClearButton;
-  JLabel encMethodLabel;
-  JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
-  JLabel subsamplingLabel, subsamplingLabelLo, subsamplingLabelHi;
-  JLabel compressionLabel, compressionLabelLo, compressionLabelHi;
-  String jpegQualityLabelString, subsamplingLabelString;
-  String compressionLabelString;
-  Hashtable<Integer, String> subsamplingLabelTable;
-  String oldScalingFactor, oldDesktopSize;
+  private JCheckBox fullScreen, shared, cursorShape, showToolbar;
+  private JCheckBox secNone, secVnc, secPlain, secIdent, secTLSNone, secTLSVnc,
+    secTLSPlain, secTLSIdent, secX509None, secX509Vnc, secX509Plain,
+    secX509Ident, secUnixLogin;
+  private JPanel encNonePanel, encTLSPanel, encX509Panel;
+  private JCheckBox sendLocalUsername, tunnel;
+  private JTextField username, sshUser, gateway;
+  private JLabel usernameLabel, sshUserLabel, gatewayLabel;
+  private JButton okButton, cancelButton;
+  private JButton x509caButton, x509crlButton;
+  private JLabel x509caLabel, x509crlLabel;
+  private JTextField x509ca, x509crl;
+  private JButton defClearButton;
+  private JLabel encMethodLabel;
+  private JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
+  private JLabel subsamplingLabel, subsamplingLabelLo, subsamplingLabelHi;
+  private JLabel compressionLabel, compressionLabelLo, compressionLabelHi;
+  private String jpegQualityLabelString, subsamplingLabelString;
+  private String compressionLabelString;
+  private Hashtable<Integer, String> subsamplingLabelTable;
+  private String oldScalingFactor, oldDesktopSize;
 
   OptionsDialog(OptionsDialogCallback callback_) {
     super(true);
@@ -363,6 +364,15 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
 
+    showToolbar = new JCheckBox("Show toolbar");
+    showToolbar.addItemListener(this);
+
+    Dialog.addGBComponent(showToolbar, displayPanel,
+                          0, 6, 2, 1, 2, 2, 1, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 5, 0, 5));
+
     JPanel inputPanel = new JPanel(new GridBagLayout());
     inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
 
@@ -394,6 +404,24 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
 
+    JLabel menuKeyLabel = new JLabel("Menu key:");
+    String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()];
+    for (int i = 0; i < MenuKey.getMenuKeySymbolCount(); i++)
+      menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
+    menuKey  = new JComboBox(menuKeys);
+    menuKey.addItemListener(this);
+
+    Dialog.addGBComponent(menuKeyLabel, inputPanel,
+                          0, 3, 1, 1, 2, 2, 1, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 8, 0, 5));
+    Dialog.addGBComponent(menuKey, inputPanel,
+                          1, 3, 1, 1, 2, 2, 25, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 5, 0, 5));
+
     boolean enableGrab = Utils.osGrab() && Helper.isAvailable();
 
     if (enableGrab) {
@@ -407,12 +435,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       grabKeyboard.addItemListener(this);
 
       Dialog.addGBComponent(grabLabel, inputPanel,
-                            0, 3, 1, 1, 2, 2, 1, 0,
+                            0, 4, 1, 1, 2, 2, 1, 0,
                             GridBagConstraints.NONE,
                             GridBagConstraints.FIRST_LINE_START,
                             new Insets(8, 8, 0, 5));
       Dialog.addGBComponent(grabKeyboard, inputPanel,
-                            1, 3, 1, 1, 2, 2, 25, 0,
+                            1, 4, 1, 1, 2, 2, 25, 0,
                             GridBagConstraints.NONE,
                             GridBagConstraints.FIRST_LINE_START,
                             new Insets(4, 5, 0, 5));
@@ -474,54 +502,126 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     // Global tab
     globalPanel = new JPanel(new GridBagLayout());
 
-    showToolbar = new JCheckBox("Show toolbar by default");
-    showToolbar.addItemListener(this);
-
-    JLabel menuKeyLabel = new JLabel("Menu key:");
-    String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()];
-    for (int i = 0; i < MenuKey.getMenuKeySymbolCount(); i++)
-      menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
-    menuKey  = new JComboBox(menuKeys);
-    menuKey.addItemListener(this);
-
     defClearButton = new JButton("Clear the list of saved connections");
     defClearButton.addActionListener(this);
 
-    Dialog.addGBComponent(showToolbar, globalPanel,
-                          0, 1, 2, 1, 2, 2, 1, 0,
-                          GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(4, 5, 0, 5));
-    Dialog.addGBComponent(menuKeyLabel, globalPanel,
-                          0, 2, 1, 1, 2, 2, 1, 0,
-                          GridBagConstraints.NONE,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(8, 8, 0, 5));
-    Dialog.addGBComponent(menuKey, globalPanel,
-                          1, 2, 1, 1, 2, 2, 25, 0,
-                          GridBagConstraints.NONE,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(4, 5, 0, 5));
     Dialog.addGBComponent(defClearButton, globalPanel,
-                          0, 3, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
+                          0, 0, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(8, 5, 0, 5));
 
-    // security tab
+    // Security tab
     secPanel = new JPanel(new GridBagLayout());
 
-    JPanel encryptionPanel = new JPanel(new GridBagLayout());
-    encryptionPanel.setBorder(
-      BorderFactory.createTitledBorder("Session encryption"));
-    encNone = addCheckbox("None", null, encryptionPanel);
-    encTLS = addCheckbox("Anonymous TLS", null, encryptionPanel);
-    encX509 = addJCheckBox("TLS with X.509 certificates", null,
-                           encryptionPanel,
-                           new GridBagConstraints(0, 2, 1, 1, 1, 1,
+    JPanel secTypesPanel = new JPanel(new GridBagLayout());
+    secTypesPanel.setBorder(
+      BorderFactory.createTitledBorder("Security types"));
+
+    encNonePanel = new JPanel(new GridBagLayout());
+    Border border = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+    TitledBorder tb = BorderFactory.createTitledBorder(border, "No encryption",
+      TitledBorder.CENTER, TitledBorder.TOP);
+    encNonePanel.setBorder(tb);
+
+    secNone = addJCheckBox("No authentication", null, encNonePanel,
+                           new GridBagConstraints(0, 0, 1, 1, 1, 1,
                              GridBagConstraints.LINE_START,
-                             GridBagConstraints.REMAINDER,
-                             new Insets(0, 0, 0, 60), 0, 0));
+                             GridBagConstraints.NONE,
+                             new Insets(0, 0, 0, 5), 0, 0));
+    secVnc = addJCheckBox("Standard VNC", null, encNonePanel,
+                          new GridBagConstraints(0, 1, 1, 1, 1, 1,
+                            GridBagConstraints.LINE_START,
+                            GridBagConstraints.NONE,
+                            new Insets(0, 0, 0, 5), 0, 0));
+    secPlain = addJCheckBox("Plain (VeNCrypt)", null, encNonePanel,
+                            new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                              GridBagConstraints.LINE_START,
+                              GridBagConstraints.NONE,
+                              new Insets(0, 0, 0, 5), 0, 0));
+    secIdent = addJCheckBox("Ident (VeNCrypt)", null, encNonePanel,
+                            new GridBagConstraints(1, 1, 1, 1, 1, 1,
+                              GridBagConstraints.LINE_START,
+                              GridBagConstraints.NONE,
+                              new Insets(0, 0, 0, 5), 0, 0));
+    secUnixLogin = addJCheckBox("Unix Login (TightVNC/TurboVNC)", null,
+                                encNonePanel,
+                                new GridBagConstraints(1, 2, 1, 1, 1, 1,
+                                  GridBagConstraints.LINE_START,
+                                  GridBagConstraints.NONE,
+                                  new Insets(0, 0, 0, 5), 0, 0));
+
+    encTLSPanel = new JPanel(new GridBagLayout());
+    border = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+    tb = BorderFactory.createTitledBorder(border,
+      "Anonymous TLS encryption (VeNCrypt)", TitledBorder.CENTER,
+      TitledBorder.TOP);
+    encTLSPanel.setBorder(tb);
+
+    secTLSNone = addJCheckBox("No authentication", null, encTLSPanel,
+                              new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                                GridBagConstraints.LINE_START,
+                                GridBagConstraints.NONE,
+                                new Insets(0, 0, 0, 5), 0, 0));
+    secTLSVnc = addJCheckBox("Standard VNC", null, encTLSPanel,
+                             new GridBagConstraints(0, 1, 1, 1, 1, 1,
+                               GridBagConstraints.LINE_START,
+                               GridBagConstraints.NONE,
+                               new Insets(0, 0, 0, 5), 0, 0));
+    secTLSPlain = addJCheckBox("Plain", null, encTLSPanel,
+                               new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                                 GridBagConstraints.LINE_START,
+                                 GridBagConstraints.NONE,
+                                 new Insets(0, 0, 0, 5), 0, 0));
+    secTLSIdent = addJCheckBox("Ident", null, encTLSPanel,
+                               new GridBagConstraints(1, 1, 1, 1, 1, 1,
+                                 GridBagConstraints.LINE_START,
+                                 GridBagConstraints.NONE,
+                                 new Insets(0, 0, 0, 5), 0, 0));
+
+    encX509Panel = new JPanel(new GridBagLayout());
+    border = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
+    tb = BorderFactory.createTitledBorder(border,
+      "TLS encryption with X.509 certificates (VeNCrypt)",
+      TitledBorder.CENTER, TitledBorder.TOP);
+    encX509Panel.setBorder(tb);
+
+    secX509None = addJCheckBox("No authentication", null, encX509Panel,
+                               new GridBagConstraints(0, 0, 1, 1, 1, 1,
+                                 GridBagConstraints.LINE_START,
+                                 GridBagConstraints.NONE,
+                                 new Insets(0, 0, 0, 5), 0, 0));
+    secX509Vnc = addJCheckBox("Standard VNC", null, encX509Panel,
+                              new GridBagConstraints(0, 1, 1, 1, 1, 1,
+                                GridBagConstraints.LINE_START,
+                                GridBagConstraints.NONE,
+                                new Insets(0, 0, 0, 5), 0, 0));
+    secX509Plain = addJCheckBox("Plain", null, encX509Panel,
+                                new GridBagConstraints(1, 0, 1, 1, 1, 1,
+                                  GridBagConstraints.LINE_START,
+                                  GridBagConstraints.NONE,
+                                  new Insets(0, 0, 0, 5), 0, 0));
+    secX509Ident = addJCheckBox("Ident", null, encX509Panel,
+                                new GridBagConstraints(1, 1, 1, 1, 1, 1,
+                                  GridBagConstraints.LINE_START,
+                                  GridBagConstraints.NONE,
+                                  new Insets(0, 0, 0, 5), 0, 0));
+
+    Dialog.addGBComponent(encNonePanel, secTypesPanel,
+                          0, 0, 1, 1, 2, 2, 1, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 10, 2, 5));
+    Dialog.addGBComponent(encTLSPanel, secTypesPanel,
+                          0, 1, 1, 1, 2, 2, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(2, 10, 2, 5));
+    Dialog.addGBComponent(encX509Panel, secTypesPanel,
+                          0, 2, 1, 1, 2, 2, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(2, 10, 2, 5));
 
     JPanel x509Panel = new JPanel(new GridBagLayout());
     x509Panel.setBorder(
@@ -565,38 +665,11 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 2, 0, 2));
 
-    JPanel authPanel = new JPanel(new GridBagLayout());
-    authPanel.setBorder(
-      BorderFactory.createTitledBorder("Authentication schemes"));
-    secNone = addCheckbox("None", null, authPanel);
-    secVnc = addCheckbox("Standard VNC", null, authPanel);
-    secUnixLogin = addJCheckBox("Unix Login (TightVNC/TurboVNC)", null,
-                                authPanel,
-                                new GridBagConstraints(0, 2, 1, 1, 1, 1,
-                                  GridBagConstraints.LINE_START,
-                                  GridBagConstraints.NONE,
-                                  new Insets(0, 0, 0, 5), 0, 0));
-    secPlain = addJCheckBox("Plain (VeNCrypt)", null, authPanel,
-                            new GridBagConstraints(0, 3, 1, 1, 1, 1,
-                              GridBagConstraints.LINE_START,
-                              GridBagConstraints.NONE,
-                              new Insets(0, 0, 0, 5), 0, 0));
-    secIdent = addJCheckBox("Ident (VeNCrypt)", null, authPanel,
-                            new GridBagConstraints(0, 4, 1, 1, 1, 1,
-                              GridBagConstraints.LINE_START,
-                              GridBagConstraints.NONE,
-                              new Insets(0, 0, 0, 5), 0, 0));
+    username = new JTextField("", 1);
+    username.getDocument().addDocumentListener(this);
+    usernameLabel = new JLabel("Username:");
     sendLocalUsername = new JCheckBox("Send local username");
     sendLocalUsername.addItemListener(this);
-    Dialog.addGBComponent(sendLocalUsername, authPanel,
-                          1, 3, 1, 2, 0, 0, 2, 1,
-                          GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.LINE_START,
-                          new Insets(0, 20, 0, 0));
-
-    secVeNCrypt =
-      new JCheckBox("Extended encryption and authentication (VeNCrypt)");
-    secVeNCrypt.addItemListener(this);
 
     JPanel gatewayPanel = new JPanel(new GridBagLayout());
     gatewayPanel.setBorder(
@@ -635,28 +708,33 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
 
-    Dialog.addGBComponent(secVeNCrypt, secPanel,
-                          0, 0, 1, 1, 2, 2, 1, 0,
+    Dialog.addGBComponent(secTypesPanel, secPanel,
+                          0, 0, 3, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
-                          new Insets(4, 5, 0, 30));
-    Dialog.addGBComponent(encryptionPanel, secPanel,
-                          0, 1, 1, 1, 2, 2, 1, 0,
+                          new Insets(8, 10, 2, 5));
+    Dialog.addGBComponent(usernameLabel, secPanel,
+                          0, 1, 1, 1, 0, 0, 0, 0,
                           GridBagConstraints.NONE,
-                          GridBagConstraints.LINE_START,
-                          new Insets(0, 10, 2, 5));
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 10, 0, 2));
+    Dialog.addGBComponent(username, secPanel,
+                          1, 1, 1, 1, 0, 0, 1, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(4, 2, 0, 2));
+    Dialog.addGBComponent(sendLocalUsername, secPanel,
+                          2, 1, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_END,
+                          new Insets(4, 2, 0, 2));
     Dialog.addGBComponent(x509Panel, secPanel,
-                          0, 2, 1, 1, 2, 2, 1, 1,
+                          0, 2, 3, 1, 2, 2, 1, 1,
                           GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(2, 10, 2, 5));
-    Dialog.addGBComponent(authPanel, secPanel,
-                          0, 3, 1, 1, 2, 2, 1, 0,
-                          GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(2, 10, 2, 5));
     Dialog.addGBComponent(gatewayPanel, secPanel,
-                          0, 4, 1, 1, 2, 2, 1, 1,
+                          0, 3, 3, 1, 2, 2, 1, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(2, 10, 2, 5));
@@ -712,80 +790,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     oldDesktopSize = desktopSize.getSelectedItem().toString();
   }
 
-  private void updatePreferences() {
-    // CONNECTION
-    UserPreferences.set("global", "RecvClipboard",
-                        recvClipboard.isSelected());
-    UserPreferences.set("global", "SendClipboard", sendClipboard.isSelected());
-    UserPreferences.set("global", "Shared", shared.isSelected());
-
-    // INPUT
-    UserPreferences.set("global", "FSAltEnter", fsAltEnter.isSelected());
-    if (Utils.osGrab() && Helper.isAvailable()) {
-      String grabStr = (String)grabKeyboard.getSelectedItem();
-      if (grabStr.equalsIgnoreCase("Full-screen only"))
-        grabStr = "FS";
-      UserPreferences.set("global", "GrabKeyboard", grabStr);
-    }
-    String menuKeyStr =
-      MenuKey.getMenuKeySymbols()[menuKey.getSelectedIndex()].name;
-    UserPreferences.set("global", "MenuKey", menuKeyStr);
-    UserPreferences.set("global", "ReverseScroll", reverseScroll.isSelected());
-    UserPreferences.set("global", "ViewOnly", viewOnly.isSelected());
-
-    // DISPLAY
-    UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
-    UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
-    UserPreferences.set("global", "DesktopSize",
-                        desktopSize.getSelectedItem().toString());
-    UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
-    int sf =
-      Options.parseScalingFactor(scalingFactor.getSelectedItem().toString());
-    if (sf == Options.SCALE_AUTO)
-      UserPreferences.set("global", "Scale", "Auto");
-    else if (sf == Options.SCALE_FIXEDRATIO)
-      UserPreferences.set("global", "Scale", "FixedRatio");
-    else
-      UserPreferences.set("global", "Scale", sf);
-    String spanString = ((String)span.getSelectedItem()).toLowerCase();
-    if (spanString.startsWith("p"))
-      UserPreferences.set("global", "Span", "Primary");
-    else if (spanString.startsWith("al"))
-      UserPreferences.set("global", "Span", "All");
-    else
-      UserPreferences.set("global", "Span", "Auto");
-    UserPreferences.set("global", "Toolbar", showToolbar.isSelected());
-
-    // ENCODING
-    UserPreferences.set("global", "CompressLevel", getCompressionLevel());
-    UserPreferences.set("global", "JPEG", allowJpeg.isSelected());
-    UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
-    String subsamplingStr =
-      subsamplingLabelTable.get(subsamplingLevel.getValue());
-    UserPreferences.set("global", "Subsampling", subsamplingStr);
-
-    // SECURITY AND AUTHENTICATION
-    UserPreferences.set("global", "encNone", encNone.isSelected());
-    UserPreferences.set("global", "encTLS", encTLS.isSelected());
-    UserPreferences.set("global", "encX509", encX509.isSelected());
-    UserPreferences.set("global", "secIdent", secIdent.isSelected());
-    UserPreferences.set("global", "secNone", secNone.isSelected());
-    UserPreferences.set("global", "secPlain", secPlain.isSelected());
-    UserPreferences.set("global", "secUnixLogin", secUnixLogin.isSelected());
-    UserPreferences.set("global", "secVeNCrypt", secVeNCrypt.isSelected());
-    UserPreferences.set("global", "secVnc", secVnc.isSelected());
-    UserPreferences.set("global", "SendLocalUsername",
-                        sendLocalUsername.isSelected());
-    UserPreferences.set("global", "tunnel", tunnel.isSelected());
-    if (!sshUser.getText().isEmpty())
-      UserPreferences.set("global", "via", sshUser.getText() + "@" +
-                          gateway.getText());
-    else
-      UserPreferences.set("global", "via", gateway.getText());
-    UserPreferences.set("global", "x509ca", x509ca.getText());
-    UserPreferences.set("global", "x509crl", x509crl.getText());
-  }
-
   JRadioButton addRadioCheckbox(String str, ButtonGroup group, JPanel panel) {
     JRadioButton c = new JRadioButton(str);
     GridBagConstraints gbc = new GridBagConstraints();
@@ -827,8 +831,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == okButton) {
-      updatePreferences();
-      UserPreferences.save();
       if (callback != null) callback.getOptions();
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
@@ -920,41 +922,21 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       setEncMethodComboBox();
       compressionLabel.setText(compressionLabelString + getCompressionLevel());
     }
-    if (s instanceof JCheckBox && (JCheckBox)s == secVeNCrypt) {
-      encNone.setEnabled(secVeNCrypt.isSelected());
-      encTLS.setEnabled(secVeNCrypt.isSelected());
-      encX509.setEnabled(secVeNCrypt.isSelected());
-      x509ca.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
-      x509caButton.setEnabled(encX509.isSelected() &&
-                              secVeNCrypt.isSelected());
-      x509caLabel.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
-      x509crl.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
-      x509crlButton.setEnabled(encX509.isSelected() &&
-                               secVeNCrypt.isSelected());
-      x509crlLabel.setEnabled(encX509.isSelected() &&
-                              secVeNCrypt.isSelected());
-      secIdent.setEnabled(secVeNCrypt.isSelected());
-      secPlain.setEnabled(secVeNCrypt.isSelected());
-    }
-    if (s instanceof JCheckBox && (JCheckBox)s == encX509) {
-      x509ca.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
-      x509caButton.setEnabled(encX509.isSelected() &&
-                              secVeNCrypt.isSelected());
-      x509caLabel.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
-      x509crl.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
-      x509crlButton.setEnabled(encX509.isSelected() &&
-                               secVeNCrypt.isSelected());
-      x509crlLabel.setEnabled(encX509.isSelected() &&
-                              secVeNCrypt.isSelected());
-    }
-    if (s instanceof JCheckBox && (JCheckBox)s == secIdent ||
+    if (s instanceof JCheckBox && (JCheckBox)s == secNone ||
+        s instanceof JCheckBox && (JCheckBox)s == secVnc ||
         s instanceof JCheckBox && (JCheckBox)s == secPlain ||
+        s instanceof JCheckBox && (JCheckBox)s == secIdent ||
         s instanceof JCheckBox && (JCheckBox)s == secUnixLogin ||
-        s instanceof JCheckBox && (JCheckBox)s == secVeNCrypt) {
-      sendLocalUsername.setEnabled(
-        (secIdent.isSelected() && secIdent.isEnabled()) ||
-        (secPlain.isSelected() && secPlain.isEnabled()) ||
-        (secUnixLogin.isSelected() && secUnixLogin.isEnabled()));
+        s instanceof JCheckBox && (JCheckBox)s == secTLSNone ||
+        s instanceof JCheckBox && (JCheckBox)s == secTLSVnc ||
+        s instanceof JCheckBox && (JCheckBox)s == secTLSPlain ||
+        s instanceof JCheckBox && (JCheckBox)s == secTLSIdent ||
+        s instanceof JCheckBox && (JCheckBox)s == secX509None ||
+        s instanceof JCheckBox && (JCheckBox)s == secX509Vnc ||
+        s instanceof JCheckBox && (JCheckBox)s == secX509Plain ||
+        s instanceof JCheckBox && (JCheckBox)s == secX509Ident ||
+        s instanceof JCheckBox && (JCheckBox)s == sendLocalUsername) {
+      updateSecurityPanel();
     }
     if (s instanceof JComboBox && (JComboBox)s == scalingFactor) {
       String newScalingFactor = scalingFactor.getSelectedItem().toString();
@@ -1002,6 +984,21 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       gateway.setEnabled(!tunnel.isSelected());
       gatewayLabel.setEnabled(!tunnel.isSelected());
     }
+  }
+
+  public void changedUpdate(DocumentEvent e) {
+    if (e.getDocument() == username.getDocument())
+      updateSecurityPanel();
+  }
+
+  public void insertUpdate(DocumentEvent e) {
+    if (e.getDocument() == username.getDocument())
+      updateSecurityPanel();
+  }
+
+  public void removeUpdate(DocumentEvent e) {
+    if (e.getDocument() == username.getDocument())
+      updateSecurityPanel();
   }
 
   private void setEncMethodComboBox() {
@@ -1137,103 +1134,149 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     }
   }
 
-  void setSecurityOptions() {
-    /* Process non-VeNCrypt sectypes */
-    java.util.List<Integer> secTypes = new ArrayList<Integer>();
-    secTypes = Security.getEnabledSecTypes();
-    boolean enableVeNCrypt = false;
-    for (Iterator<Integer> i = secTypes.iterator(); i.hasNext();) {
-      switch ((Integer)i.next()) {
-        case RFB.SECTYPE_VENCRYPT:
-          enableVeNCrypt = true;
-          break;
-        case RFB.SECTYPE_NONE:
-          secNone.setSelected(true);
-          break;
-        case RFB.SECTYPE_VNCAUTH:
-          secVnc.setSelected(true);
-          break;
-        case RFB.SECTYPE_UNIX_LOGIN:
-          secUnixLogin.setSelected(true);
-          break;
-      }
-    }
-
-    /* Process VeNCrypt subtypes */
-    if (enableVeNCrypt) {
-      java.util.List<Integer> secTypesExt = new ArrayList<Integer>();
-      secTypesExt = Security.getEnabledExtSecTypes();
-      for (Iterator<Integer> iext = secTypesExt.iterator(); iext.hasNext();) {
-        switch ((Integer)iext.next()) {
-          case RFB.SECTYPE_NONE:
-            secNone.setSelected(true);
-            encNone.setSelected(true);
-            break;
-          case RFB.SECTYPE_VNCAUTH:
-            secVnc.setSelected(true);
-            encNone.setSelected(true);
-            break;
-          case RFB.SECTYPE_PLAIN:
-            secVeNCrypt.setSelected(true);
-            encNone.setSelected(true);
-            secPlain.setSelected(true);
-            break;
-          case RFB.SECTYPE_IDENT:
-            secVeNCrypt.setSelected(true);
-            encNone.setSelected(true);
-            secIdent.setSelected(true);
-            break;
-          case RFB.SECTYPE_TLS_NONE:
-            secVeNCrypt.setSelected(true);
-            encTLS.setSelected(true);
-            secNone.setSelected(true);
-            break;
-          case RFB.SECTYPE_TLS_VNC:
-            secVeNCrypt.setSelected(true);
-            encTLS.setSelected(true);
-            secVnc.setSelected(true);
-            break;
-          case RFB.SECTYPE_TLS_PLAIN:
-            secVeNCrypt.setSelected(true);
-            encTLS.setSelected(true);
-            secPlain.setSelected(true);
-            break;
-          case RFB.SECTYPE_TLS_IDENT:
-            secVeNCrypt.setSelected(true);
-            encTLS.setSelected(true);
-            secIdent.setSelected(true);
-            break;
-          case RFB.SECTYPE_X509_NONE:
-            secVeNCrypt.setSelected(true);
-            encX509.setSelected(true);
-            secNone.setSelected(true);
-            break;
-          case RFB.SECTYPE_X509_VNC:
-            secVeNCrypt.setSelected(true);
-            encX509.setSelected(true);
-            secVnc.setSelected(true);
-            break;
-          case RFB.SECTYPE_X509_PLAIN:
-            secVeNCrypt.setSelected(true);
-            encX509.setSelected(true);
-            secPlain.setSelected(true);
-            break;
-          case RFB.SECTYPE_X509_IDENT:
-            secVeNCrypt.setSelected(true);
-            encX509.setSelected(true);
-            secIdent.setSelected(true);
-            break;
-        }
-      }
-    }
-    if (!secVeNCrypt.isSelected()) {
-      encNone.setEnabled(false);
-      encTLS.setEnabled(false);
-      encX509.setEnabled(false);
+  private void updateSecurityPanel() {
+    if (Params.noUnixLogin.getValue()) {
       secIdent.setEnabled(false);
       secPlain.setEnabled(false);
+      secTLSIdent.setEnabled(false);
+      secTLSPlain.setEnabled(false);
+      secX509Ident.setEnabled(false);
+      secX509Plain.setEnabled(false);
+      secUnixLogin.setEnabled(false);
+      sendLocalUsername.setEnabled(false);
+      usernameLabel.setEnabled(false);
+      username.setEnabled(false);
     }
-    if (!encX509.isSelected() || !secVeNCrypt.isSelected()) {
+
+    boolean unixLogin =
+      ((secIdent.isEnabled() && secIdent.isSelected()) ||
+       (secPlain.isEnabled() && secPlain.isSelected()) ||
+       (secTLSIdent.isEnabled() && secTLSIdent.isSelected()) ||
+       (secTLSPlain.isEnabled() && secTLSPlain.isSelected()) ||
+       (secX509Ident.isEnabled() && secX509Ident.isSelected()) ||
+       (secX509Plain.isEnabled() && secX509Plain.isSelected()) ||
+       (secUnixLogin.isEnabled() && secUnixLogin.isSelected()));
+    sendLocalUsername.setEnabled(unixLogin);
+    username.setEnabled(unixLogin && !sendLocalUsername.isSelected());
+    usernameLabel.setEnabled(unixLogin && !sendLocalUsername.isSelected());
+
+    boolean unixLoginForced =
+      (sendLocalUsername.isEnabled() && sendLocalUsername.isSelected()) ||
+      (username.isEnabled() && !username.getText().isEmpty());
+    secNone.setEnabled(!unixLoginForced);
+    secVnc.setEnabled(!unixLoginForced);
+    secTLSNone.setEnabled(!unixLoginForced);
+    secTLSVnc.setEnabled(!unixLoginForced);
+    secX509None.setEnabled(!unixLoginForced);
+    secX509Vnc.setEnabled(!unixLoginForced);
+
+    boolean x509 = (secX509None.isEnabled() && secX509None.isSelected()) ||
+      (secX509Vnc.isEnabled() && secX509Vnc.isSelected()) ||
+      (secX509Plain.isEnabled() && secX509Plain.isSelected()) ||
+      (secX509Ident.isEnabled() && secX509Ident.isSelected());
+    x509ca.setEnabled(x509);
+    x509caButton.setEnabled(x509);
+    x509caLabel.setEnabled(x509);
+    x509crl.setEnabled(x509);
+    x509crlButton.setEnabled(x509);
+    x509crlLabel.setEnabled(x509);
+  }
+
+  public void setOptions(Options opts, boolean enableDesktopSize,
+                         boolean disableShared, boolean disableSecurity,
+                         boolean disableSSH) {
+    // Encoding
+    allowJpeg.setSelected(opts.allowJpeg);
+    subsamplingLevel.setValue(opts.getSubsamplingOrdinal());
+    jpegQualityLevel.setValue(opts.quality);
+    setCompressionLevel(opts.compressLevel);
+
+    // Connection: Display
+    if (opts.scalingFactor == Options.SCALE_AUTO) {
+      scalingFactor.setSelectedItem("Auto");
+    } else if (opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+      scalingFactor.setSelectedItem("Fixed Aspect Ratio");
+    } else {
+      scalingFactor.setSelectedItem(opts.scalingFactor + "%");
+    }
+
+    desktopSize.setSelectedItem(opts.desktopSize.getString());
+    fullScreen.setSelected(opts.fullScreen);
+    span.setSelectedIndex(opts.span);
+    acceptBell.setSelected(opts.acceptBell);
+    cursorShape.setSelected(opts.cursorShape);
+    showToolbar.setSelected(opts.showToolbar);
+
+    // Connection: Input
+    viewOnly.setSelected(opts.viewOnly);
+    reverseScroll.setSelected(opts.reverseScroll);
+    fsAltEnter.setSelected(opts.fsAltEnter);
+    menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
+    if (Utils.osGrab() && Helper.isAvailable())
+      grabKeyboard.setSelectedIndex(opts.grabKeyboard);
+
+    // Connection: Restrictions
+    shared.setSelected(opts.shared);
+    recvClipboard.setSelected(opts.recvClipboard);
+    sendClipboard.setSelected(opts.sendClipboard);
+
+    // Security: Security types
+    secNone.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_NONE));
+    secVnc.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_VNCAUTH));
+    secPlain.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_PLAIN));
+    secIdent.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_IDENT));
+    secTLSNone.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_TLS_NONE));
+    secTLSVnc.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_TLS_VNC));
+    secTLSPlain.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_TLS_PLAIN));
+    secTLSIdent.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_TLS_IDENT));
+    secX509None.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_X509_NONE));
+    secX509Vnc.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_X509_VNC));
+    secX509Plain.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_X509_PLAIN));
+    secX509Ident.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_X509_IDENT));
+    secUnixLogin.setSelected(opts.isSecTypeSupported(RFB.SECTYPE_UNIX_LOGIN));
+
+    // Security
+    if (opts.user != null)
+      username.setText(opts.user);
+    sendLocalUsername.setSelected(opts.sendLocalUsername);
+
+    // Security: X.509 certificate validation
+    if (opts.x509ca != null)
+      x509ca.setText(opts.x509ca);
+    if (opts.x509crl != null)
+      x509crl.setText(opts.x509crl);
+
+    // Security: Gateway
+    if (opts.sshUser != null)
+      sshUser.setText(opts.sshUser);
+    if (opts.via != null)
+      gateway.setText(opts.via);
+    tunnel.setSelected(opts.tunnel);
+
+    desktopSize.setEnabled(enableDesktopSize);
+    if (opts.desktopSize.mode == Options.SIZE_AUTO)
+      scalingFactor.setEnabled(false);
+    else
+      scalingFactor.setEnabled(true);
+    if (disableShared) shared.setEnabled(false);
+    updateSecurityPanel();
+    if (disableSecurity) {
+      secNone.setEnabled(false);
+      secVnc.setEnabled(false);
+      secPlain.setEnabled(false);
+      secIdent.setEnabled(false);
+      secUnixLogin.setEnabled(false);
+      secTLSNone.setEnabled(false);
+      secTLSVnc.setEnabled(false);
+      secTLSPlain.setEnabled(false);
+      secTLSIdent.setEnabled(false);
+      secX509None.setEnabled(false);
+      secX509Vnc.setEnabled(false);
+      secX509Plain.setEnabled(false);
+      secX509Ident.setEnabled(false);
+      username.setEnabled(false);
+      usernameLabel.setEnabled(false);
+      sendLocalUsername.setEnabled(false);
       x509ca.setEnabled(false);
       x509caButton.setEnabled(false);
       x509caLabel.setEnabled(false);
@@ -1241,76 +1284,103 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       x509crlButton.setEnabled(false);
       x509crlLabel.setEnabled(false);
     }
-    sendLocalUsername.setEnabled(
-      (secIdent.isSelected() && secIdent.isEnabled()) ||
-      (secPlain.isSelected() && secPlain.isEnabled()) ||
-      (secUnixLogin.isSelected() && secUnixLogin.isEnabled()));
+    if (disableSSH) {
+      sshUser.setEnabled(false);
+      sshUserLabel.setEnabled(false);
+      gateway.setEnabled(false);
+      gatewayLabel.setEnabled(false);
+      tunnel.setEnabled(false);
+    }
   }
 
-  public void getSecurityOptions() {
-    Security.disableSecType(RFB.SECTYPE_NONE);
-    Security.disableSecType(RFB.SECTYPE_VNCAUTH);
-    Security.disableSecType(RFB.SECTYPE_PLAIN);
-    Security.disableSecType(RFB.SECTYPE_IDENT);
-    Security.disableSecType(RFB.SECTYPE_TLS_NONE);
-    Security.disableSecType(RFB.SECTYPE_TLS_VNC);
-    Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
-    Security.disableSecType(RFB.SECTYPE_TLS_IDENT);
-    Security.disableSecType(RFB.SECTYPE_X509_NONE);
-    Security.disableSecType(RFB.SECTYPE_X509_VNC);
-    Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
-    Security.disableSecType(RFB.SECTYPE_X509_IDENT);
-    Security.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
+  public void getOptions(Options opts) {
+    // Encoding
+    opts.allowJpeg = allowJpeg.isSelected();
+    opts.subsampling = getSubsamplingLevel();
+    opts.quality = jpegQualityLevel.getValue();
+    opts.compressLevel = getCompressionLevel();
 
-    /* Process security types which don't use encryption */
-    if (encNone.isSelected() || !secVeNCrypt.isSelected()) {
-      if (secNone.isSelected())
-        Security.enableSecType(RFB.SECTYPE_NONE);
+    // Connection: Display
+    opts.setScalingFactor(scalingFactor.getSelectedItem().toString());
+    opts.setDesktopSize(desktopSize.getSelectedItem().toString());
+    opts.fullScreen = fullScreen.isSelected();
+    int index = span.getSelectedIndex();
+    if (index >= 0 && index < Options.NUMSPANOPT)
+      opts.span = index;
+    opts.acceptBell = acceptBell.isSelected();
+    opts.cursorShape = cursorShape.isSelected();
+    opts.showToolbar = showToolbar.isSelected();
 
-      if (secVnc.isSelected())
-        Security.enableSecType(RFB.SECTYPE_VNCAUTH);
-    }
+    // Connection: Input
+    opts.viewOnly = viewOnly.isSelected();
+    opts.reverseScroll = reverseScroll.isSelected();
+    opts.fsAltEnter = fsAltEnter.isSelected();
+    opts.menuKeyCode =
+      MenuKey.getMenuKeySymbols()[menuKey.getSelectedIndex()].keycode;
+    opts.menuKeySym =
+      MenuKey.getMenuKeySymbols()[menuKey.getSelectedIndex()].keysym;
+    if (Utils.osGrab() && Helper.isAvailable())
+      opts.grabKeyboard = grabKeyboard.getSelectedIndex();
 
-    if (encNone.isSelected() && secVeNCrypt.isSelected()) {
-      if (secPlain.isSelected())
-        Security.enableSecType(RFB.SECTYPE_PLAIN);
+    // Connection: Restrictions
+    opts.shared = shared.isSelected();
+    opts.recvClipboard = recvClipboard.isSelected();
+    opts.sendClipboard = sendClipboard.isSelected();
 
-      if (secIdent.isSelected())
-        Security.enableSecType(RFB.SECTYPE_IDENT);
-    }
+    // Security: Security types
+    opts.disableSecType(RFB.SECTYPE_NONE);
+    opts.disableSecType(RFB.SECTYPE_VNCAUTH);
+    opts.disableSecType(RFB.SECTYPE_PLAIN);
+    opts.disableSecType(RFB.SECTYPE_IDENT);
+    opts.disableSecType(RFB.SECTYPE_TLS_NONE);
+    opts.disableSecType(RFB.SECTYPE_TLS_VNC);
+    opts.disableSecType(RFB.SECTYPE_TLS_PLAIN);
+    opts.disableSecType(RFB.SECTYPE_TLS_IDENT);
+    opts.disableSecType(RFB.SECTYPE_X509_NONE);
+    opts.disableSecType(RFB.SECTYPE_X509_VNC);
+    opts.disableSecType(RFB.SECTYPE_X509_PLAIN);
+    opts.disableSecType(RFB.SECTYPE_X509_IDENT);
+    opts.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
 
-    /* Process security types which use TLS encryption */
-    if (encTLS.isSelected() && secVeNCrypt.isSelected()) {
-      if (secNone.isSelected())
-        Security.enableSecType(RFB.SECTYPE_TLS_NONE);
-
-      if (secVnc.isSelected())
-        Security.enableSecType(RFB.SECTYPE_TLS_VNC);
-
-      if (secPlain.isSelected())
-        Security.enableSecType(RFB.SECTYPE_TLS_PLAIN);
-
-      if (secIdent.isSelected())
-        Security.enableSecType(RFB.SECTYPE_TLS_IDENT);
-    }
-
-    /* Process security types which use X509 encryption */
-    if (encX509.isSelected() && secVeNCrypt.isSelected()) {
-      if (secNone.isSelected())
-        Security.enableSecType(RFB.SECTYPE_X509_NONE);
-
-      if (secVnc.isSelected())
-        Security.enableSecType(RFB.SECTYPE_X509_VNC);
-
-      if (secPlain.isSelected())
-        Security.enableSecType(RFB.SECTYPE_X509_PLAIN);
-
-      if (secIdent.isSelected())
-        Security.enableSecType(RFB.SECTYPE_X509_IDENT);
-    }
-
+    if (secNone.isSelected())
+      opts.enableSecType(RFB.SECTYPE_NONE);
+    if (secVnc.isSelected())
+      opts.enableSecType(RFB.SECTYPE_VNCAUTH);
+    if (secPlain.isSelected())
+      opts.enableSecType(RFB.SECTYPE_PLAIN);
+    if (secIdent.isSelected())
+      opts.enableSecType(RFB.SECTYPE_IDENT);
+    if (secTLSNone.isSelected())
+      opts.enableSecType(RFB.SECTYPE_TLS_NONE);
+    if (secTLSVnc.isSelected())
+      opts.enableSecType(RFB.SECTYPE_TLS_VNC);
+    if (secTLSPlain.isSelected())
+      opts.enableSecType(RFB.SECTYPE_TLS_PLAIN);
+    if (secTLSIdent.isSelected())
+      opts.enableSecType(RFB.SECTYPE_TLS_IDENT);
+    if (secX509None.isSelected())
+      opts.enableSecType(RFB.SECTYPE_X509_NONE);
+    if (secX509Vnc.isSelected())
+      opts.enableSecType(RFB.SECTYPE_X509_VNC);
+    if (secX509Plain.isSelected())
+      opts.enableSecType(RFB.SECTYPE_X509_PLAIN);
+    if (secX509Ident.isSelected())
+      opts.enableSecType(RFB.SECTYPE_X509_IDENT);
     if (secUnixLogin.isSelected())
-      Security.enableSecType(RFB.SECTYPE_UNIX_LOGIN);
+      opts.enableSecType(RFB.SECTYPE_UNIX_LOGIN);
+
+    // Security
+    opts.user = (username.getText().isEmpty() ? null : username.getText());
+    opts.sendLocalUsername = sendLocalUsername.isSelected();
+
+    // Security: X.509 certificate validation
+    opts.x509ca = (x509ca.getText().isEmpty() ? null : x509ca.getText());
+    opts.x509crl = (x509crl.getText().isEmpty() ? null : x509crl.getText());
+
+    // Security: Gateway
+    opts.sshUser = (sshUser.getText().isEmpty() ? null : sshUser.getText());
+    opts.via = (gateway.getText().isEmpty() ? null : gateway.getText());
+    opts.tunnel = tunnel.isSelected();
   }
 
 }

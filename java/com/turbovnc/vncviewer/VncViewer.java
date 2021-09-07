@@ -672,124 +672,13 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   public void setOptions() {
-    options.allowJpeg.setSelected(opts.allowJpeg);
-    options.subsamplingLevel.setValue(opts.getSubsamplingOrdinal());
-    options.jpegQualityLevel.setValue(opts.quality);
-    options.setCompressionLevel(opts.compressLevel);
-
+    options.setOptions(opts, true, true, true, true);
     setTightOptions();
-
-    options.viewOnly.setSelected(opts.viewOnly);
-    options.reverseScroll.setSelected(opts.reverseScroll);
-    options.fsAltEnter.setSelected(opts.fsAltEnter);
-    options.recvClipboard.setSelected(opts.recvClipboard);
-    options.sendClipboard.setSelected(opts.sendClipboard);
-    options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
-    if (Utils.osGrab() && Helper.isAvailable())
-      options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
-
-    options.shared.setSelected(opts.shared);
-    options.sendLocalUsername.setSelected(opts.sendLocalUsername);
-    SecurityClient security = new SecurityClient();
-    options.setSecurityOptions();
-
-    options.fullScreen.setSelected(opts.fullScreen);
-    options.span.setSelectedIndex(opts.span);
-    options.cursorShape.setSelected(opts.cursorShape);
-    options.acceptBell.setSelected(opts.acceptBell);
-    options.showToolbar.setSelected(opts.showToolbar);
-    if (opts.scalingFactor == Options.SCALE_AUTO) {
-      options.scalingFactor.setSelectedItem("Auto");
-    } else if (opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
-      options.scalingFactor.setSelectedItem("Fixed Aspect Ratio");
-    } else {
-      options.scalingFactor.setSelectedItem(opts.scalingFactor + "%");
-    }
-    if (opts.desktopSize.mode == Options.SIZE_AUTO) {
-      options.desktopSize.setSelectedItem("Auto");
-      options.scalingFactor.setEnabled(false);
-    } else if (opts.desktopSize.mode == Options.SIZE_SERVER) {
-      options.desktopSize.setSelectedItem("Server");
-      options.scalingFactor.setEnabled(true);
-    } else {
-      options.desktopSize.setSelectedItem(opts.desktopSize.getString());
-      options.scalingFactor.setEnabled(true);
-    }
-
-    options.shared.setEnabled(false);
-    options.secVeNCrypt.setEnabled(false);
-    options.encNone.setEnabled(false);
-    options.encTLS.setEnabled(false);
-    options.encX509.setEnabled(false);
-    options.x509ca.setEnabled(false);
-    options.x509caButton.setEnabled(false);
-    options.x509caLabel.setEnabled(false);
-    options.x509crl.setEnabled(false);
-    options.x509crlButton.setEnabled(false);
-    options.x509crlLabel.setEnabled(false);
-    options.secIdent.setEnabled(false);
-    options.secNone.setEnabled(false);
-    options.secVnc.setEnabled(false);
-    options.secUnixLogin.setEnabled(false);
-    options.secPlain.setEnabled(false);
-    options.sendLocalUsername.setEnabled(false);
-    options.gateway.setEnabled(false);
-    options.gatewayLabel.setEnabled(false);
-    options.sshUser.setEnabled(false);
-    options.sshUserLabel.setEnabled(false);
-    options.tunnel.setEnabled(false);
-    if (opts.via != null)
-      options.gateway.setText(opts.via);
-    if (opts.sshUser != null)
-      options.sshUser.setText(opts.sshUser);
-    options.tunnel.setSelected(opts.tunnel);
-    if (Params.x509ca.getValue() != null)
-      options.x509ca.setText(Params.x509ca.getValue());
-    if (Params.x509crl.getValue() != null)
-      options.x509crl.setText(Params.x509crl.getValue());
   }
 
   public void getOptions() {
-    opts.allowJpeg = options.allowJpeg.isSelected();
-    opts.quality = options.jpegQualityLevel.getValue();
-    opts.compressLevel = options.getCompressionLevel();
-    opts.subsampling = options.getSubsamplingLevel();
-    opts.sendLocalUsername = options.sendLocalUsername.isSelected();
-    opts.viewOnly = options.viewOnly.isSelected();
-    opts.reverseScroll = options.reverseScroll.isSelected();
-    opts.fsAltEnter = options.fsAltEnter.isSelected();
-    opts.recvClipboard = options.recvClipboard.isSelected();
-    opts.sendClipboard = options.sendClipboard.isSelected();
-    opts.acceptBell = options.acceptBell.isSelected();
-    opts.showToolbar = options.showToolbar.isSelected();
-
-    opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
-    opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
-    opts.fullScreen = options.fullScreen.isSelected();
-
-    int index = options.span.getSelectedIndex();
-    if (index >= 0 && index < Options.NUMSPANOPT)
-      opts.span = index;
-
-    opts.menuKeyCode =
-      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keycode;
-    opts.menuKeySym =
-      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keysym;
-
-    if (Utils.osGrab() && Helper.isAvailable())
-      opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
-
-    opts.shared = options.shared.isSelected();
-    opts.cursorShape = options.cursorShape.isSelected();
-
-    options.getSecurityOptions();
-    String gateway = options.gateway.getText();
-    opts.via = (gateway.isEmpty() ? null : gateway);
-    String sshUser = options.sshUser.getText();
-    opts.sshUser = (sshUser.isEmpty() ? null : sshUser);
-    opts.tunnel = options.tunnel.isSelected();
-    Params.x509ca.setParam(options.x509ca.getText());
-    Params.x509crl.setParam(options.x509crl.getText());
+    options.getOptions(opts);
+    opts.save();
     options = null;
   }
 
@@ -1030,6 +919,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       }
 
       // SECURITY AND AUTHENTICATION OPTIONS
+      opts.setSecurityTypes(Params.secTypes.getValue());
       opts.sendLocalUsername = Params.sendLocalUsername.getValue();
       opts.tunnel = Params.tunnel.getValue();
       if (Params.user.getValue() != null)
@@ -1050,6 +940,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
             opts.via = null;
         }
       }
+
+      if (Params.x509ca.getValue() != null)
+        opts.x509ca = new String(Params.x509ca.getValue());
+      if (Params.x509crl.getValue() != null)
+        opts.x509crl = new String(Params.x509crl.getValue());
 
       String s = Params.vncServerName.getValue();
       if (s != null) {

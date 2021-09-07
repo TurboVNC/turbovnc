@@ -95,20 +95,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
     cp.supportsDesktopRename = true;
     menu = new F8Menu(this);
 
-    if (Params.noUnixLogin.getValue()) {
-      Security.disableSecType(RFB.SECTYPE_PLAIN);
-      Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
-      Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
-      Security.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
-    } else if (isUnixLoginForced()) {
-      Security.disableSecType(RFB.SECTYPE_VNCAUTH);
-      Security.disableSecType(RFB.SECTYPE_TLS_VNC);
-      Security.disableSecType(RFB.SECTYPE_X509_VNC);
-      Security.disableSecType(RFB.SECTYPE_NONE);
-      Security.disableSecType(RFB.SECTYPE_TLS_NONE);
-      Security.disableSecType(RFB.SECTYPE_X509_NONE);
-    }
-
     if (sock != null) {
       String name = sock.getPeerEndpoint();
       vlog.info("Accepted connection from " + name);
@@ -147,15 +133,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
               return;
             }
             if (Params.sessMgrAuto.getValue()) {
-              Security.disableSecType(RFB.SECTYPE_NONE);
-              Security.disableSecType(RFB.SECTYPE_TLS_NONE);
-              Security.disableSecType(RFB.SECTYPE_X509_NONE);
-              Security.disableSecType(RFB.SECTYPE_TLS_VNC);
-              Security.disableSecType(RFB.SECTYPE_X509_VNC);
-              Security.disableSecType(RFB.SECTYPE_PLAIN);
-              Security.disableSecType(RFB.SECTYPE_TLS_PLAIN);
-              Security.disableSecType(RFB.SECTYPE_X509_PLAIN);
-              Security.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
+              opts.disableSecType(RFB.SECTYPE_NONE);
+              opts.disableSecType(RFB.SECTYPE_TLS_NONE);
+              opts.disableSecType(RFB.SECTYPE_X509_NONE);
+              opts.disableSecType(RFB.SECTYPE_TLS_VNC);
+              opts.disableSecType(RFB.SECTYPE_X509_VNC);
+              opts.disableSecType(RFB.SECTYPE_PLAIN);
+              opts.disableSecType(RFB.SECTYPE_TLS_PLAIN);
+              opts.disableSecType(RFB.SECTYPE_X509_PLAIN);
+              opts.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
               opts.tunnel = true;
             }
             opts.port = Hostname.getPort(session);
@@ -1555,136 +1541,51 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void setOptions() {
-    options.allowJpeg.setSelected(opts.allowJpeg);
-    options.subsamplingLevel.setValue(opts.getSubsamplingOrdinal());
-    options.jpegQualityLevel.setValue(opts.quality);
-    options.setCompressionLevel(opts.compressLevel);
-
+    options.setOptions(opts, cp.supportsSetDesktopSize || firstUpdate,
+                       state() == RFBSTATE_NORMAL, state() == RFBSTATE_NORMAL,
+                       state() == RFBSTATE_NORMAL);
     setTightOptions();
-
-    options.viewOnly.setSelected(opts.viewOnly);
-    options.reverseScroll.setSelected(opts.reverseScroll);
-    options.fsAltEnter.setSelected(opts.fsAltEnter);
-    options.recvClipboard.setSelected(opts.recvClipboard);
-    options.sendClipboard.setSelected(opts.sendClipboard);
-    options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
-    if (Utils.osGrab() && Helper.isAvailable())
-      options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
-
-    if (state() == RFBSTATE_NORMAL) {
-      options.shared.setEnabled(false);
-      options.secVeNCrypt.setEnabled(false);
-      options.encNone.setEnabled(false);
-      options.encTLS.setEnabled(false);
-      options.encX509.setEnabled(false);
-      options.x509ca.setEnabled(false);
-      options.x509caButton.setEnabled(false);
-      options.x509caLabel.setEnabled(false);
-      options.x509crl.setEnabled(false);
-      options.x509crlButton.setEnabled(false);
-      options.x509crlLabel.setEnabled(false);
-      options.secIdent.setEnabled(false);
-      options.secNone.setEnabled(false);
-      options.secVnc.setEnabled(false);
-      options.secUnixLogin.setEnabled(false);
-      options.secPlain.setEnabled(false);
-      options.sendLocalUsername.setEnabled(false);
-      options.gateway.setEnabled(false);
-      options.gatewayLabel.setEnabled(false);
-      options.sshUser.setEnabled(false);
-      options.sshUserLabel.setEnabled(false);
-      options.tunnel.setEnabled(false);
-    } else {
-      options.shared.setSelected(opts.shared);
-      options.sendLocalUsername.setSelected(opts.sendLocalUsername);
-      options.setSecurityOptions();
-      if (opts.via != null)
-        options.gateway.setText(opts.via);
-      if (opts.sshUser != null)
-        options.sshUser.setText(opts.sshUser);
-      options.tunnel.setSelected(opts.tunnel);
-      if (Params.x509ca.getValue() != null)
-        options.x509ca.setText(Params.x509ca.getValue());
-      if (Params.x509crl.getValue() != null)
-        options.x509crl.setText(Params.x509crl.getValue());
-    }
-
-    options.fullScreen.setSelected(opts.fullScreen);
-    options.span.setSelectedIndex(opts.span);
-    options.cursorShape.setSelected(opts.cursorShape);
-    options.acceptBell.setSelected(opts.acceptBell);
-    options.showToolbar.setSelected(opts.showToolbar);
-    options.desktopSize.setEnabled(cp.supportsSetDesktopSize || firstUpdate);
-    if (opts.scalingFactor == Options.SCALE_AUTO) {
-      options.scalingFactor.setSelectedItem("Auto");
-    } else if (opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
-      options.scalingFactor.setSelectedItem("Fixed Aspect Ratio");
-    } else {
-      options.scalingFactor.setSelectedItem(opts.scalingFactor + "%");
-      if (desktop != null)
-        desktop.setScaledSize();
-    }
-    options.desktopSize.setSelectedItem(opts.desktopSize.getString());
-    if (opts.desktopSize.mode == Options.SIZE_AUTO)
-      options.scalingFactor.setEnabled(false);
-    else
-      options.scalingFactor.setEnabled(true);
+    if (opts.scalingFactor != Options.SCALE_AUTO &&
+        opts.scalingFactor != Options.SCALE_FIXEDRATIO && desktop != null)
+      desktop.setScaledSize();
   }
 
   public void getOptions() {
     boolean recreate = false, reconfigure = false, defaultSize = false;
     boolean deleteRestore = false;
 
-    if (opts.allowJpeg != options.allowJpeg.isSelected())
-      encodingChange = true;
-    opts.allowJpeg = options.allowJpeg.isSelected();
+    Options oldOpts = new Options(opts);
 
-    if (opts.quality != options.jpegQualityLevel.getValue())
-      encodingChange = true;
-    opts.quality = options.jpegQualityLevel.getValue();
+    options.getOptions(opts);
 
-    if (opts.compressLevel != options.getCompressionLevel())
+    if (opts.allowJpeg != oldOpts.allowJpeg ||
+        opts.quality != oldOpts.quality ||
+        opts.compressLevel != oldOpts.compressLevel ||
+        opts.subsampling != oldOpts.subsampling)
       encodingChange = true;
-    opts.compressLevel = options.getCompressionLevel();
 
-    if (opts.subsampling != options.getSubsamplingLevel())
-      encodingChange = true;
-    opts.subsampling = options.getSubsamplingLevel();
-
-    opts.sendLocalUsername = options.sendLocalUsername.isSelected();
-    if (opts.viewOnly != options.viewOnly.isSelected() && showToolbar &&
-        !options.fullScreen.isSelected())
+    if (opts.viewOnly != oldOpts.viewOnly && showToolbar && !opts.fullScreen)
       recreate = true;
-    opts.viewOnly = options.viewOnly.isSelected();
-    opts.reverseScroll = options.reverseScroll.isSelected();
-    opts.fsAltEnter = options.fsAltEnter.isSelected();
-    opts.recvClipboard = options.recvClipboard.isSelected();
-    opts.sendClipboard = options.sendClipboard.isSelected();
-    opts.acceptBell = options.acceptBell.isSelected();
-    opts.showToolbar = options.showToolbar.isSelected();
+
     if (state() != RFBSTATE_NORMAL)
       showToolbar = opts.showToolbar && !benchmark;
 
-    int oldScalingFactor = opts.scalingFactor;
-    opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
-    if (desktop != null && opts.scalingFactor != oldScalingFactor) {
+    if (desktop != null && opts.scalingFactor != oldOpts.scalingFactor) {
       deleteRestore = true;
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
-      if (!viewport.lionFSSupported() || !options.fullScreen.isSelected())
+      if (!viewport.lionFSSupported() || !opts.fullScreen)
         recreate = true;
       else
         reconfigure = true;
     }
 
-    Options.DesktopSize oldDesktopSize = opts.desktopSize;
-    opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
-    if (desktop != null && !opts.desktopSize.equals(oldDesktopSize)) {
+    if (desktop != null && !opts.desktopSize.equals(oldOpts.desktopSize)) {
       deleteRestore = true;
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
       if (opts.desktopSize.mode != Options.SIZE_SERVER) {
-        if (!viewport.lionFSSupported() || !options.fullScreen.isSelected())
+        if (!viewport.lionFSSupported() || !opts.fullScreen)
           recreate = true;
         else
           reconfigure = true;
@@ -1692,29 +1593,20 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
     }
 
-    int oldSpan = opts.span;
-    int index = options.span.getSelectedIndex();
-    if (index >= 0 && index < Options.NUMSPANOPT)
-      opts.span = index;
-    if (desktop != null && opts.span != oldSpan) {
+    if (desktop != null && opts.span != oldOpts.span) {
       deleteRestore = true;
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
-      if (!viewport.lionFSSupported() || !options.fullScreen.isSelected())
+      if (!viewport.lionFSSupported() || !opts.fullScreen)
         recreate = true;
       else
         reconfigure = true;
     }
 
     clipboardDialog.setSendingEnabled(opts.sendClipboard);
-    opts.menuKeyCode =
-      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keycode;
-    opts.menuKeySym =
-      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keysym;
     menu.updateMenuKey(opts.menuKeyCode);
 
     if (Utils.osGrab() && Helper.isAvailable()) {
-      opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
       boolean isGrabbed = VncViewer.isKeyboardGrabbed(viewport);
       if (viewport != null &&
           ((opts.grabKeyboard == Options.GRAB_ALWAYS && !isGrabbed) ||
@@ -1725,10 +1617,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
     }
 
-    opts.shared = options.shared.isSelected();
     setShared(opts.shared);
-    if (opts.cursorShape != options.cursorShape.isSelected()) {
-      opts.cursorShape = options.cursorShape.isSelected();
+    if (opts.cursorShape != oldOpts.cursorShape) {
       encodingChange = true;
       if (desktop != null)
         desktop.resetLocalCursor();
@@ -1736,18 +1626,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     checkEncodings();
 
-    if (state() != RFBSTATE_NORMAL) {
-      options.getSecurityOptions();
-      String gateway = options.gateway.getText();
-      opts.via = (gateway.isEmpty() ? null : gateway);
-      String sshUser = options.sshUser.getText();
-      opts.sshUser = (sshUser.isEmpty() ? null : sshUser);
-      opts.tunnel = options.tunnel.isSelected();
-      Params.x509ca.setParam(options.x509ca.getText());
-      Params.x509crl.setParam(options.x509crl.getText());
-    }
-
-    if (options.fullScreen.isSelected() != opts.fullScreen)
+    if (opts.fullScreen != oldOpts.fullScreen)
       toggleFullScreen();
     else if (recreate)
       recreateViewport();
@@ -1770,6 +1649,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       requestNewUpdate();
     }
 
+    opts.save();
     VncViewer.opts = new Options(opts);
   }
 
@@ -2519,8 +2399,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // clipboard sync issues?
   ClipboardDialog clipboardDialog;
-
-  Options opts;
 
   int buttonMask;  // EDT only
 

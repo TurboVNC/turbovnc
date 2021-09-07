@@ -3,7 +3,7 @@
  * Copyright (C) 2006 OCCAM Financial Technology
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018, 2021 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,7 +135,7 @@ public class CSecurityVeNCrypt extends CSecurity {
         Iterator<Integer> j;
         List<Integer> secTypes = new ArrayList<Integer>();
 
-        secTypes = Security.getEnabledExtSecTypes();
+        secTypes = cc.opts.getEnabledExtSecTypes();
 
         /* Honor server's security type order */
         for (i = 0; i < nAvailableTypes; i++) {
@@ -159,7 +159,7 @@ public class CSecurityVeNCrypt extends CSecurity {
             chosenType == RFB.SECTYPE_VENCRYPT)
           throw new AuthFailureException("No valid VeNCrypt sub-type");
 
-        csecurity = security.getCSecurity(chosenType);
+        csecurity = security.getCSecurity(cc.opts, chosenType);
 
         /* send chosen type to server */
         os.writeU32(chosenType);

@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2014, 2016, 2018, 2020 D. R. Commander.
- *                                            All Rights Reserved.
+ * Copyright (C) 2012, 2014, 2016, 2018, 2020-2021 D. R. Commander.
+ *                                                 All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,7 +123,7 @@ public abstract class CConnection extends CMsgHandler {
     int secType = RFB.SECTYPE_INVALID;
 
     List<Integer> secTypes = new ArrayList<Integer>();
-    secTypes = Security.getEnabledSecTypes();
+    secTypes = opts.getEnabledSecTypes();
 
     if (cp.isVersion(3, 3)) {
 
@@ -201,7 +201,7 @@ public abstract class CConnection extends CMsgHandler {
     }
 
     state = RFBSTATE_SECURITY;
-    csecurity = security.getCSecurity(secType);
+    csecurity = security.getCSecurity(opts, secType);
     processSecurityMsg();
   }
 
@@ -409,6 +409,9 @@ public abstract class CConnection extends CMsgHandler {
   int serverPort;
   boolean clientSecTypeOrder;
   protected Socket sock;
+  // CHECKSTYLE VisibilityModifier:OFF
+  public Options opts;
+  // CHECKSTYLE VisibilityModifier:ON
 
   static LogWriter vlog = new LogWriter("CConnection");
 }

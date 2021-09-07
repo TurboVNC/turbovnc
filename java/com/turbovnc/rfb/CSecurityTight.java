@@ -1,6 +1,6 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2017-2018, 2020 D. R. Commander.
- *                                           All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2017-2018, 2020-2021 D. R. Commander.
+ *                                                All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,27 +78,28 @@ public class CSecurityTight extends CSecurity {
       is.readBytes(s, 0, 8);
       String signature = new String(s);
 
+      Options opts = cc.opts;
       switch (code) {
         case CODE_NOAUTH:
-          if (!Security.getEnabledSecTypes().contains(RFB.SECTYPE_NONE))
+          if (!opts.getEnabledSecTypes().contains(RFB.SECTYPE_NONE))
             break;
           if (vendor.equals(VENDOR_STDV) && signature.equals(SIG_NOAUTH))
             supportedAuthTypes.add(code);
           break;
         case CODE_VNCAUTH:
-          if (!Security.getEnabledSecTypes().contains(RFB.SECTYPE_VNCAUTH))
+          if (!opts.getEnabledSecTypes().contains(RFB.SECTYPE_VNCAUTH))
             break;
           if (vendor.equals(VENDOR_STDV) && signature.equals(SIG_VNCAUTH))
             supportedAuthTypes.add(code);
           break;
         case CODE_ULGNAUTH:
-          if (!Security.getEnabledTightSecTypes().contains(RFB.SECTYPE_UNIX_LOGIN))
+          if (!opts.getEnabledTightSecTypes().contains(RFB.SECTYPE_UNIX_LOGIN))
             break;
           if (vendor.equals(VENDOR_TGHT) && signature.equals(SIG_ULGNAUTH))
             supportedAuthTypes.add(code);
           break;
         case CODE_VENCRYPT:
-          if (!Security.getEnabledSecTypes().contains(RFB.SECTYPE_VENCRYPT))
+          if (!opts.getEnabledSecTypes().contains(RFB.SECTYPE_VENCRYPT))
             break;
           if (vendor.equals(VENDOR_VENC) && signature.equals(SIG_VENCRYPT))
             supportedAuthTypes.add(code);

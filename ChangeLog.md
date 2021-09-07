@@ -187,6 +187,18 @@ program from any RealVNC-compatible VNC implementation.)
 Server now supports touchscreens and can transmit X Input multitouch events
 from the client to the TurboVNC session.
 
+27. The TurboVNC Viewer Options dialog has been improved in the following ways:
+
+     - The menu key and toolbar settings are now located under the "Connection"
+tab rather than the "Global" tab.
+     - The "Security" tab now has a separate check box for each security type.
+This fixes an issue whereby certain combinations of security types (such as
+VNC,TLSPlain) could not be specified using the TurboVNC Viewer Options dialog.
+     - The username for Plain and Unix Login authentication can now be
+specified in the "Security" tab.
+     - Settings under the "Security" tab are now automatically disabled when
+they are rendered irrelevant by other settings.
+
 
 2.2.7
 =====
