@@ -1533,8 +1533,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
       options.encX509.setEnabled(false);
       options.x509ca.setEnabled(false);
       options.x509caButton.setEnabled(false);
+      options.x509caLabel.setEnabled(false);
       options.x509crl.setEnabled(false);
       options.x509crlButton.setEnabled(false);
+      options.x509crlLabel.setEnabled(false);
       options.secIdent.setEnabled(false);
       options.secNone.setEnabled(false);
       options.secVnc.setEnabled(false);
@@ -1542,7 +1544,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       options.secPlain.setEnabled(false);
       options.sendLocalUsername.setEnabled(false);
       options.gateway.setEnabled(false);
+      options.gatewayLabel.setEnabled(false);
       options.sshUser.setEnabled(false);
+      options.sshUserLabel.setEnabled(false);
       options.tunnel.setEnabled(false);
     } else {
       options.shared.setSelected(opts.shared);

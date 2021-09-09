@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -691,7 +691,9 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     }
 
     options.gateway.setEnabled(false);
+    options.gatewayLabel.setEnabled(false);
     options.sshUser.setEnabled(false);
+    options.sshUserLabel.setEnabled(false);
     options.tunnel.setEnabled(false);
     if (SecurityClient.x509ca.getValue() != null)
       options.x509ca.setText(SecurityClient.x509ca.getValue());

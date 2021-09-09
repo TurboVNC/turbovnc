@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,8 +53,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent,
     sendLocalUsername, tunnel;
   JTextField sshUser, gateway;
+  JLabel sshUserLabel, gatewayLabel;
   JButton okButton, cancelButton;
   JButton x509caButton, x509crlButton;
+  JLabel x509caLabel, x509crlLabel;
   JTextField x509ca, x509crl;
   JButton defClearButton;
   JLabel encMethodLabel;
@@ -525,11 +527,11 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     x509Panel.setBorder(
       BorderFactory.createTitledBorder("X.509 certificate validation"));
     x509ca = new JTextField("", 1);
-    JLabel x509caLabel = new JLabel("CA cert:");
+    x509caLabel = new JLabel("CA cert:");
     x509caButton = new JButton("Load");
     x509caButton.addActionListener(this);
     x509crl = new JTextField("", 1);
-    JLabel x509crlLabel = new JLabel("CRL:");
+    x509crlLabel = new JLabel("CRL:");
     x509crlButton = new JButton("Load");
     x509crlButton.addActionListener(this);
     Dialog.addGBComponent(x509caLabel, x509Panel,
@@ -601,9 +603,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       BorderFactory.createTitledBorder("Gateway (SSH server or UltraVNC repeater)"));
     gateway = new JTextField("", 1);
     filterWhitespace(gateway);
-    JLabel gatewayLabel = new JLabel("Host:");
+    gatewayLabel = new JLabel("Host:");
     sshUser = new JTextField("", 1);
-    JLabel sshUserLabel = new JLabel("SSH user:");
+    sshUserLabel = new JLabel("SSH user:");
     tunnel = new JCheckBox("Use VNC server as gateway");
     tunnel.addItemListener(this);
 
@@ -925,9 +927,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       x509ca.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
       x509caButton.setEnabled(encX509.isSelected() &&
                               secVeNCrypt.isSelected());
+      x509caLabel.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
       x509crl.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
       x509crlButton.setEnabled(encX509.isSelected() &&
                                secVeNCrypt.isSelected());
+      x509crlLabel.setEnabled(encX509.isSelected() &&
+                              secVeNCrypt.isSelected());
       secIdent.setEnabled(secVeNCrypt.isSelected());
       secPlain.setEnabled(secVeNCrypt.isSelected());
     }
@@ -935,9 +940,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       x509ca.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
       x509caButton.setEnabled(encX509.isSelected() &&
                               secVeNCrypt.isSelected());
+      x509caLabel.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
       x509crl.setEnabled(encX509.isSelected() && secVeNCrypt.isSelected());
       x509crlButton.setEnabled(encX509.isSelected() &&
                                secVeNCrypt.isSelected());
+      x509crlLabel.setEnabled(encX509.isSelected() &&
+                              secVeNCrypt.isSelected());
     }
     if (s instanceof JCheckBox && (JCheckBox)s == secIdent ||
         s instanceof JCheckBox && (JCheckBox)s == secPlain ||
@@ -990,8 +998,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
           scalingFactor.setEnabled(true);
       }
     }
-    if (s instanceof JCheckBox && (JCheckBox)s == tunnel)
+    if (s instanceof JCheckBox && (JCheckBox)s == tunnel) {
       gateway.setEnabled(!tunnel.isSelected());
+      gatewayLabel.setEnabled(!tunnel.isSelected());
+    }
   }
 
   private void setEncMethodComboBox() {
@@ -1226,8 +1236,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     if (!encX509.isSelected() || !secVeNCrypt.isSelected()) {
       x509ca.setEnabled(false);
       x509caButton.setEnabled(false);
+      x509caLabel.setEnabled(false);
       x509crl.setEnabled(false);
       x509crlButton.setEnabled(false);
+      x509crlLabel.setEnabled(false);
     }
     sendLocalUsername.setEnabled(
       (secIdent.isSelected() && secIdent.isEnabled()) ||
