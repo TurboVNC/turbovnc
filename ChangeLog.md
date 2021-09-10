@@ -38,6 +38,12 @@ the current options.)  Since TurboVNC 1.2.2, the Windows TurboVNC Viewer has
 similarly avoided saving/restoring the values of command-line parameters that
 have no GUI equivalents.
 
+7. Fixed an issue in the Java TurboVNC Viewer whereby, in listen mode, clicking
+"OK" to dismiss the Default Options dialog caused all security types and SSH
+options to be disabled in or deleted from the saved defaults.  This led to
+unexpected behavior if a user subsequently attempted to make a forward RFB
+connection using the viewer.
+
 
 2.2.6
 =====
