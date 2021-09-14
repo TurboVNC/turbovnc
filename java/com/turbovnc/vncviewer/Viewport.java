@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2021 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -336,6 +336,13 @@ public class Viewport extends JFrame {
   }
 
   public void setGeometry(int x, int y, int w, int h) {
+    // Re-transmit full-screen multi-screen spanning information to the X
+    // server, in case it changed since the viewport was created.
+    if (VncViewer.isX11() && cc.opts.fullScreen && isVisible() &&
+        (x != getLocation().x || y != getLocation().y ||
+         w != getSize().width || h != getSize().height))
+      x11FullScreenHelper(true);
+
     setSize(w, h);
     setLocation(x, y);
     vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);

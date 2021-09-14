@@ -44,6 +44,20 @@ options to be disabled in or deleted from the saved defaults.  This led to
 unexpected behavior if a user subsequently attempted to make a forward RFB
 connection using the viewer.
 
+8. Worked around an issue in Java whereby changing the scaling factor or
+toggling view-only mode while the Mac TurboVNC Viewer was in full-screen mode
+sometimes caused the viewer to exit full-screen mode.
+
+9. Fixed an issue in the Mac TurboVNC Viewer whereby, after using Command+Tab
+to switch to another application while the viewer was in full-screen mode with
+multi-screen spanning enabled, switching back to the TurboVNC Viewer
+effectively disabled multi-screen spanning.
+
+10. Fixed an issue in the Linux/Un*x TurboVNC Viewer whereby automatic
+multi-screen spanning sometimes behaved incorrectly if the remote desktop size
+or the scaling factor was changed while the viewer was in full-screen mode or
+transitioning into full-screen mode.
+
 
 2.2.6
 =====
