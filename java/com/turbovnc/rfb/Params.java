@@ -774,9 +774,9 @@ public final class Params {
   public static BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC",
   "When the SendLocalUsername parameter is set, setting this parameter will " +
-  "cause the local user name to be sent in lowercase, which may be useful " +
+  "cause the local username to be sent in lowercase, which may be useful " +
   "when using the viewer on Windows machines (Windows allows mixed-case " +
-  "user names, whereas Un*x and Mac platforms generally don't.)", false);
+  "usernames, whereas Un*x and Mac platforms generally don't.)", false);
 
   public static BoolParameter noUnixLogin =
   new BoolParameter("NoUnixLogin",
@@ -819,10 +819,10 @@ public final class Params {
   "VNC, Plain, and Ident.)  The \"UnixLogin\" security type enables " +
   "user/password authentication using the TightVNC security extensions " +
   "rather than VeNCrypt.  \"Plain\" and \"UnixLogin\" authenticate using a " +
-  "plain-text user name and password, so it is strongly recommended that " +
+  "plain-text username and password, so it is strongly recommended that " +
   "those types only be used with either TLS encryption or SSH tunneling.  " +
   "\"Ident\", which is designed for use by VNC proxies, authenticates using " +
-  "only a user name.  The order of this list does not matter, since the " +
+  "only a username.  The order of this list does not matter, since the " +
   "server's preferred order is always used.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
@@ -831,10 +831,10 @@ public final class Params {
 
   public static BoolParameter sendLocalUsername =
   new BoolParameter("SendLocalUsername",
-  "Send the local user name when using user/password authentication schemes " +
+  "Send the local username when using user/password authentication schemes " +
   "(Unix Login, Plain, Ident) rather than prompting for it.  As with the " +
   "User parameter, setting this parameter has the effect of disabling any " +
-  "authentication schemes that don't require a user name.", false);
+  "authentication schemes that don't require a username.", false);
 
   public static BoolParameter sessMgrAuto =
   new BoolParameter("SessMgrAuto",
@@ -886,20 +886,20 @@ public final class Params {
   "SSH gateway, except that the gateway host is assumed to be the same as " +
   "the VNC host, so you do not need to specify it separately.  When using " +
   "the Tunnel parameter, the VNC host can be prefixed with {user}@ to " +
-  "indicate that user name {user} (default = local user name) should be " +
-  "used when authenticating with the SSH server.\n " +
+  "indicate that username {user} (default = local username) should be used " +
+  "when authenticating with the SSH server.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
   "set unless the SessMgrAuto parameter is disabled.", false);
 
   public static StringParameter user =
   new StringParameter("User",
-  "The user name to use for Unix Login authentication (TightVNC-compatible " +
+  "The username to use for Unix Login authentication (TightVNC-compatible " +
   "servers) or for Plain and Ident authentication (VeNCrypt-compatible " +
   "servers.)  Specifying this parameter has the effect of removing any " +
   "types from the SecurityTypes parameter except for \"Plain\" and " +
   "\"Ident\" (and their encrypted derivatives) and \"UnixLogin\", thus " +
-  "allowing only authentication schemes that require a user name.", null);
+  "allowing only authentication schemes that require a username.", null);
 
   public static StringParameter via =
   new StringParameter("Via",
@@ -916,8 +916,8 @@ public final class Params {
   "Repeater in \"Mode II\", then specify ID:xxxx as the VNC server name, " +
   "where xxxx is the ID number of the VNC server to which you want to " +
   "connect.  If using an SSH server, then the gateway host can be prefixed " +
-  "with {user}@ to indicate that user name {user} (default = local user " +
-  "name) should be used when authenticating with the SSH server.", null);
+  "with {user}@ to indicate that username {user} (default = local username) " +
+  "should be used when authenticating with the SSH server.", null);
 
   public static StringParameter x509ca =
   new StringParameter("X509CA",

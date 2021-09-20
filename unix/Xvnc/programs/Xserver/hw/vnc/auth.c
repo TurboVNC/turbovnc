@@ -173,7 +173,7 @@ static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
 
   pwdLen = Swap32IfLE(pwdLen);
   if ((userLen > MAX_USER_LEN) || (pwdLen > MAX_PWD_LEN)) {
-    rfbLogPerror("AuthPAMUserPwdRspFunc: excessively large user name or password in response");
+    rfbLogPerror("AuthPAMUserPwdRspFunc: excessively large username or password in response");
     rfbCloseClient(cl);
     return;
   }
@@ -181,7 +181,7 @@ static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
   n = ReadExact(cl, userBuf, userLen);
   if (n <= 0) {
     if (n != 0)
-      rfbLogPerror("AuthPAMUserPwdRspFunc: error reading user name");
+      rfbLogPerror("AuthPAMUserPwdRspFunc: error reading username");
     rfbCloseClient(cl);
     return;
   }

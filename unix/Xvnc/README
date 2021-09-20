@@ -32,7 +32,7 @@ method), the TVNC_USEPAM CMake variable must be enabled (this is the default.)
 To disable PAM support, pass -DTVNC_USEPAM=0 to CMake when configuring the
 build.
 
-NOTE: interaction with PAM is limited to supplying a user name and password.
+NOTE: interaction with PAM is limited to supplying a username and password.
 The exchange of any additional information is not supported.
 
 See the Xvnc man page for details on the security extensions.

@@ -173,7 +173,7 @@ public class Tunnel {
       jsch.setConfigRepository(repo);
       vlog.debug("Read OpenSSH config file " + Params.sshConfig.getValue());
       // This just ensures that the password dialog displays the correct
-      // user name.  JSch will ignore the user name and port passed to
+      // username.  JSch will ignore the username and port passed to
       // getSession() if the configuration has already been set using an
       // OpenSSH configuration file.
       String repoUser = repo.getConfig(host).getUser();

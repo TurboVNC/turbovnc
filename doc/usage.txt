@@ -52,9 +52,9 @@ authentication (using ssh-agent or Pageant.)
 		fetch the private key passphrase from ssh-agent or Pageant, if either is
 		running.)
 
-		!!! You can specify the SSH user name, if it differs from your local user
-		name, by prefixing the hostname/IP address with {pcode: __user__@}, where
-		__''user''__ is the SSH user name.
+		!!! You can specify the SSH username, if it differs from your local
+		username, by prefixing the hostname/IP address with {pcode: __user__@},
+		where __''user''__ is the SSH username.
 
 	* If no TurboVNC sessions are currently running under your user account on
 		the TurboVNC host, then the session manager will:

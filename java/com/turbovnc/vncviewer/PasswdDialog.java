@@ -68,7 +68,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     }
 
     p1 = new JPanel();
-    userLabel = new JLabel("User name:");
+    userLabel = new JLabel("Username:");
     p1.add(userLabel);
     userEntry = new JTextField(30);
     userEntry.setEnabled(!userDisabled);
