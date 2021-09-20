@@ -49,7 +49,7 @@ BEGIN
     EDITTEXT        IDC_VNCHOST,50,7,91,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     CONTROL         108,IDC_STATIC_LOGO,"Static",SS_BITMAP,7,23,32,30
-    RTEXT           "User name:",IDC_STATIC_LOGIN,41,25,39,10,SS_CENTERIMAGE
+    RTEXT           "Username:",IDC_STATIC_LOGIN,41,25,39,10,SS_CENTERIMAGE
     EDITTEXT        IDC_LOGIN_EDIT,84,24,57,12,ES_AUTOHSCROLL
     RTEXT           "Password:",IDC_STATIC_PASSWD,41,42,39,10,SS_CENTERIMAGE
     EDITTEXT        IDC_PASSWD_EDIT,84,41,57,12,ES_PASSWORD | ES_AUTOHSCROLL
@@ -838,8 +838,8 @@ Equivalent of ""Connection-->Mouse-->Swap mouse button 2 and 3"" in the options\
 dialog\r\n\
 \r\n"
     IDS_HELP34
-"/user <user name>\r\n\
-Specify user name for Unix login authentication.  This will force Unix login\r\n\
+"/user <username>\r\n\
+Specify username for Unix login authentication.  This will force Unix login\r\n\
 authentication to be used, if an authentication method that supports it is\r\n\
 enabled in the VNC server.\r\n\
 \r\n"

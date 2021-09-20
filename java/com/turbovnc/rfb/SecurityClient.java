@@ -94,10 +94,10 @@ public class SecurityClient extends Security {
   "VNC, Plain, and Ident.)  The \"UnixLogin\" security type enables " +
   "user/password authentication using the TightVNC security extensions " +
   "rather than VeNCrypt.  \"Plain\" and \"UnixLogin\" authenticate using a " +
-  "plain-text user name and password, so it is strongly recommended that " +
+  "plain-text username and password, so it is strongly recommended that " +
   "those types only be used with either TLS encryption or SSH tunneling.  " +
   "\"Ident\", which is designed for use by VNC proxies, authenticates using " +
-  "only a user name.  The order of this list does not matter, since the " +
+  "only a username.  The order of this list does not matter, since the " +
   "server's preferred order is always used.",
   "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VNC,Ident,Plain,UnixLogin,None");
 

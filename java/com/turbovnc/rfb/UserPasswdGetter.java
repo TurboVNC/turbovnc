@@ -18,7 +18,7 @@
 
 // getUserPasswd() gets the username and password.  This might involve a
 // dialog, getpass(), etc.  The user buffer pointer can be null, in which case
-// no user name will be retrieved.
+// no username will be retrieved.
 
 package com.turbovnc.rfb;
 

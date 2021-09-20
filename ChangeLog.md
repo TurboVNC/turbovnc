@@ -287,7 +287,7 @@ buttons were ignored or mapped to incorrect mouse button events.
 
 4. The built-in HTTP server in the TurboVNC Server now accepts `:` and `@` in
 any TurboVNC Viewer parameters that are appended to the URL.  This allows for
-specifying an SSH user name in the `Via` parameter and an RFB display/port in
+specifying an SSH username in the `Via` parameter and an RFB display/port in
 the `Server` parameter.
 
 5. The X RandR outputs in the TurboVNC Server have been renamed to "VNC-0",
@@ -979,9 +979,9 @@ platforms.
 
 1. Added a new parameter to the Java TurboVNC Viewer (`LocalUsernameLC`) that,
 when enabled along with the `SendLocalUsername` parameter, will cause the local
-user name to be sent to the server in lowercase.  This can be useful for
-Windows clients, since Windows allows mixed-case user names but Un*x machines
-generally don't.
+username to be sent to the server in lowercase.  This can be useful for Windows
+clients, since Windows allows mixed-case usernames but Un*x machines generally
+don't.
 
 2. Fixed a regression introduced in 2.0 beta1[1] whereby connecting to the
 TurboVNC Server with cursor shape updates (client-side cursor rendering)
@@ -1311,9 +1311,9 @@ local display but the other dimension wasn't.
 ### Significant changes relative to 2.0:
 
 1. When using an external SSH client with the `Via` or `Tunnel` parameters, the
-Java TurboVNC Viewer was not passing the SSH user name to the external SSH
+Java TurboVNC Viewer was not passing the SSH username to the external SSH
 client, which caused SSH authentication to fail unless the remote and local
-user names were the same.  This has been fixed.
+usernames were the same.  This has been fixed.
 
 2. Fixed an issue whereby the TurboVNC X server was erroneously generating X11
 MotionNotify events every time a mouse button was pressed or released,
@@ -1344,7 +1344,7 @@ similarly to other authentication schemes and VeNCrypt security types.
 Furthermore, the `NoUnixLogin` parameter now disables the VeNCrypt *Plain
 security types as well as the Unix Login security type, and the `User` and
 `SendLocalUserName` parameters now disable any of the VeNCrypt security types
-that don't require a user name.
+that don't require a username.
 
 8. The Java TurboVNC Viewer now supports (and prefers) elliptic curve ciphers
 when using the Anonymous TLS security types.  Additionally, the Java TurboVNC

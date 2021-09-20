@@ -1384,7 +1384,7 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
     ad.DoDialog();
     STRCPY(user, ad.m_username);
     if (strlen(user) == 0) {
-      snprintf(errBuf, errBufSize, "Empty user name");
+      snprintf(errBuf, errBufSize, "Empty username");
       return false;
     }
     STRCPY(m_opts.m_user, user);

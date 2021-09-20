@@ -2,7 +2,7 @@
 # spaces.
 #
 # Uncomment the first line below to start a TurboVNC session under the account
-# 'myusername' (adjust this to your own user name) and listening on Display :1.
+# 'myusername' (adjust this to your own username) and listening on Display :1.
 # You will also need to configure a VNC password (run
 # 'man -M {TurboVNC_directory}/man vncpasswd' for instructions) or another form
 # of authentication.  See the TurboVNC User's Guide for more information about

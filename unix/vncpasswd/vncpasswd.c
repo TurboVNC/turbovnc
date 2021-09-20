@@ -165,12 +165,12 @@ static int DoUserList(void)
   char bytes[MAXUSERLEN + 1];
 
   if ((user == NULL) || ((len = strlen(user)) == 0)) {
-    fprintf(stderr, "missing the user name!");
+    fprintf(stderr, "missing the username!");
     return 1;
   }
 
   if (len > MAXUSERLEN) {
-    fprintf(stderr, "user name is too large");
+    fprintf(stderr, "username is too large");
     return 1;
   }
 

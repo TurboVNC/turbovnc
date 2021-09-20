@@ -1485,9 +1485,9 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   static BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC",
   "When the SendLocalUsername parameter is set, setting this parameter will " +
-  "cause the local user name to be sent in lowercase, which may be useful " +
+  "cause the local username to be sent in lowercase, which may be useful " +
   "when using the viewer on Windows machines (Windows allows mixed-case " +
-  "user names, whereas Un*x and Mac platforms generally don't.)", false);
+  "usernames, whereas Un*x and Mac platforms generally don't.)", false);
 
   static BoolParameter noUnixLogin =
   new BoolParameter("NoUnixLogin",
@@ -1519,10 +1519,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   static BoolParameter sendLocalUsername =
   new BoolParameter("SendLocalUsername",
-  "Send the local user name when using user/password authentication schemes " +
+  "Send the local username when using user/password authentication schemes " +
   "(Unix Login, Plain, Ident) rather than prompting for it.  As with the " +
   "User parameter, setting this parameter has the effect of disabling any " +
-  "authentication schemes that don't require a user name.", false);
+  "authentication schemes that don't require a username.", false);
 
   static StringParameter sshConfig =
   new StringParameter("SSHConfig",
@@ -1565,17 +1565,17 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "SSH gateway, except that the gateway host is assumed to be the same as " +
   "the VNC host, so you do not need to specify it separately.  When using " +
   "the Tunnel parameter, the VNC host can be prefixed with {user}@ to " +
-  "indicate that user name {user} (default = local user name) should be " +
-  "used when authenticating with the SSH server.", false);
+  "indicate that username {user} (default = local username) should be used " +
+  "when authenticating with the SSH server.", false);
 
   static StringParameter user =
   new StringParameter("User",
-  "The user name to use for Unix Login authentication (TightVNC-compatible " +
+  "The username to use for Unix Login authentication (TightVNC-compatible " +
   "servers) or for Plain and Ident authentication (VeNCrypt-compatible " +
   "servers.)  Specifying this parameter has the effect of removing any " +
   "types from the SecurityTypes parameter except for \"Plain\" and " +
   "\"Ident\" (and their encrypted derivatives) and \"UnixLogin\", thus " +
-  "allowing only authentication schemes that require a user name.", null);
+  "allowing only authentication schemes that require a username.", null);
 
   static StringParameter via =
   new StringParameter("Via",
@@ -1592,8 +1592,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "Repeater in \"Mode II\", then specify ID:xxxx as the VNC server name, " +
   "where xxxx is the ID number of the VNC server to which you want to " +
   "connect.  If using an SSH server, then the gateway host can be prefixed " +
-  "with {user}@ to indicate that user name {user} (default = local user " +
-  "name) should be used when authenticating with the SSH server.", null);
+  "with {user}@ to indicate that username {user} (default = local username) " +
+  "should be used when authenticating with the SSH server.", null);
 
   // CHECKSTYLE Indentation:ON
 
