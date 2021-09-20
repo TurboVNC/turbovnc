@@ -1,7 +1,7 @@
 3.0 pre-beta
 ============
 
-### Significant changes relative to 2.2.6:
+### Significant changes relative to 2.2.7:
 
 1. A custom JRE, based on OpenJDK and containing only the modules that the
 TurboVNC Viewer needs, can now optionally be included in 32-bit Windows and
@@ -183,24 +183,70 @@ profiling parameters can now be configured dynamically for a running TurboVNC
 session, using the newly repurposed `tvncconfig` program (or the `vncconfig`
 program from any RealVNC-compatible VNC implementation.)
 
-26. The TurboVNC Viewer now temporarily re-enables double buffering in Swing
-and Java 2D if any TurboVNC Viewer dialog other than the profiling dialog has
-the keyboard focus.  This fixes various minor cosmetic issues with the TurboVNC
-Viewer Options dialog, particularly on Mac platforms, that occurred if the
-viewer was actively drawing framebuffer updates while the dialog was visible.
-
-27. The remote X Input feature in the Linux TurboVNC Viewer and the TurboVNC
+26. The remote X Input feature in the Linux TurboVNC Viewer and the TurboVNC
 Server now supports touchscreens and can transmit X Input multitouch events
 from the client to the TurboVNC session.
 
-28. Fixed an error ("java.nio.BufferOverflowException") that occurred in the
-TurboVNC Viewer when attempting to use one of the X509* security types with the
-`TLS_AES_128_GCM_SHA256` and `TLS_AES_256_GCM_SHA384` TLS 1.3 cipher suites,
-which are preferred by OpenSSL 1.1.x.
+
+2.2.7
+=====
+
+### Significant changes relative to 2.2.6:
+
+1. The Java TurboVNC Viewer now temporarily re-enables double buffering in
+Swing and Java 2D if any TurboVNC Viewer dialog other than the profiling dialog
+has the keyboard focus.  This fixes various minor cosmetic issues with the
+TurboVNC Viewer Options dialog, particularly on Mac platforms, that occurred if
+the viewer was actively drawing framebuffer updates while the dialog was
+visible.
+
+2. Fixed an error ("java.nio.BufferOverflowException") that occurred in the
+Java TurboVNC Viewer when attempting to use one of the X509* security types
+with the `TLS_AES_128_GCM_SHA256` and `TLS_AES_256_GCM_SHA384` TLS 1.3 cipher
+suites, which are preferred by OpenSSL 1.1.x.
+
+3. The built-in HTTP server in the TurboVNC Server now adjusts the value sent
+in the "Content-Length" HTTP header to accommodate variable substitutions in
+the JNLP template.  This fixes an issue whereby certain web browsers would
+refuse to download the automatically-generated JNLP file.
+
+4. The built-in HTTP server in the TurboVNC Server now handles HTTP 1.1 HEAD
+requests, which are sent by recent versions of Java Web Start.
 
 5. `vncpasswd`, when invoked with no arguments, now creates the **~/.vnc**
 directory if it does not exist.  This makes the actual behavior of `vncpasswd`
 match its documented behavior.
+
+6. The values of the `AlwaysShowConnectionDialog`, `Colors`, and `Encoding`
+parameters in the Java TurboVNC Viewer are no longer saved when "OK" is clicked
+to dismiss the TurboVNC Viewer Options dialog, nor are they restored when the
+viewer is launched.  Because those parameters can only be specified on the
+command line or in a connection info file, automatically restoring their
+previous values led to confusing behavior.  (That behavior made more sense
+prior to TurboVNC 2.2, because the Options dialog did not automatically save
+the current options.)  Since TurboVNC 1.2.2, the Windows TurboVNC Viewer has
+similarly avoided saving/restoring the values of command-line parameters that
+have no GUI equivalents.
+
+7. Fixed an issue in the Java TurboVNC Viewer whereby, in listen mode, clicking
+"OK" to dismiss the Default Options dialog caused all security types and SSH
+options to be disabled in or deleted from the saved defaults.  This led to
+unexpected behavior if a user subsequently attempted to make a forward RFB
+connection using the viewer.
+
+8. Worked around an issue in Java whereby changing the scaling factor or
+toggling view-only mode while the Mac TurboVNC Viewer was in full-screen mode
+sometimes caused the viewer to exit full-screen mode.
+
+9. Fixed an issue in the Mac TurboVNC Viewer whereby, after using Command+Tab
+to switch to another application while the viewer was in full-screen mode with
+multi-screen spanning enabled, switching back to the TurboVNC Viewer
+effectively disabled multi-screen spanning.
+
+10. Fixed an issue in the Linux/Un*x TurboVNC Viewer whereby automatic
+multi-screen spanning sometimes behaved incorrectly if the remote desktop size
+or the scaling factor was changed while the viewer was in full-screen mode or
+transitioning into full-screen mode.
 
 
 2.2.6

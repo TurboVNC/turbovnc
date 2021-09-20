@@ -192,8 +192,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
     THROW("Could not store X window handle");
   (*env)->SetLongField(env, obj, fid, x11dsi->drawable);
 
-  printf("TurboVNC Helper: %s X11 full-screen mode for window 0x%.8lx\n",
-         on ? "Enabling" : "Disabling", x11dsi->drawable);
+  fprintf(stderr, "TurboVNC Helper: %s X11 full-screen mode for window 0x%.8lx\n",
+          on ? "Enabling" : "Disabling", x11dsi->drawable);
 
   bailout:
   if (ds) {
@@ -280,14 +280,14 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
       }
     }
 
-    printf("TurboVNC Helper: Grabbed keyboard%s for window 0x%.8lx\n",
-           pointer ? " & pointer" : "", x11dsi->drawable);
+    fprintf(stderr, "TurboVNC Helper: Grabbed keyboard%s for window 0x%.8lx\n",
+            pointer ? " & pointer" : "", x11dsi->drawable);
   } else {
     XUngrabKeyboard(x11dsi->display, CurrentTime);
     if (pointer)
       XUngrabPointer(x11dsi->display, CurrentTime);
-    printf("TurboVNC Helper: Ungrabbed keyboard%s\n",
-           pointer ? " & pointer" : "");
+    fprintf(stderr, "TurboVNC Helper: Ungrabbed keyboard%s\n",
+            pointer ? " & pointer" : "");
   }
   XSync(x11dsi->display, False);
 
@@ -564,7 +564,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
 
   XIFreeDeviceInfo(devInfo);  devInfo = NULL;
   if (nMasks == 0) {
-    printf("No extended input devices.\n");
+    fprintf(stderr, "No extended input devices.\n");
     goto bailout;
   }
 
@@ -579,8 +579,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   if (multitouch)
     SET_BOOL(cls, obj, multitouch, 1);
 
-  printf("TurboVNC Helper: Listening for XInput events on %s (window 0x%.8x)\n",
-         DisplayString(dpy), (unsigned int)win);
+  fprintf(stderr, "TurboVNC Helper: Listening for XInput events on %s (window 0x%.8x)\n",
+          DisplayString(dpy), (unsigned int)win);
 
   bailout:
   if (nMasks) {
@@ -763,8 +763,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   BAILIF0(fid = (*env)->GetFieldID(env, cls, "x11dpy", "J"));
   dpy = (Display *)(intptr_t)(*env)->GetLongField(env, obj, fid);
   if (dpy) {
-    printf("TurboVNC Helper: Shutting down XInput listener on display %s\n",
-           DisplayString(dpy));
+    fprintf(stderr, "TurboVNC Helper: Shutting down XInput listener on display %s\n",
+            DisplayString(dpy));
     XCloseDisplay(dpy);
     SET_LONG(cls, obj, x11dpy, 0);
   }

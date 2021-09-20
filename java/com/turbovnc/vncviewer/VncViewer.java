@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -690,6 +690,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
     options.shared.setSelected(opts.shared);
     options.sendLocalUsername.setSelected(opts.sendLocalUsername);
+    SecurityClient security = new SecurityClient();
     options.setSecurityOptions();
 
     options.fullScreen.setSelected(opts.fullScreen);
@@ -715,9 +716,33 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       options.scalingFactor.setEnabled(true);
     }
 
+    options.shared.setEnabled(false);
+    options.secVeNCrypt.setEnabled(false);
+    options.encNone.setEnabled(false);
+    options.encTLS.setEnabled(false);
+    options.encX509.setEnabled(false);
+    options.x509ca.setEnabled(false);
+    options.x509caButton.setEnabled(false);
+    options.x509caLabel.setEnabled(false);
+    options.x509crl.setEnabled(false);
+    options.x509crlButton.setEnabled(false);
+    options.x509crlLabel.setEnabled(false);
+    options.secIdent.setEnabled(false);
+    options.secNone.setEnabled(false);
+    options.secVnc.setEnabled(false);
+    options.secUnixLogin.setEnabled(false);
+    options.secPlain.setEnabled(false);
+    options.sendLocalUsername.setEnabled(false);
     options.gateway.setEnabled(false);
+    options.gatewayLabel.setEnabled(false);
     options.sshUser.setEnabled(false);
+    options.sshUserLabel.setEnabled(false);
     options.tunnel.setEnabled(false);
+    if (opts.via != null)
+      options.gateway.setText(opts.via);
+    if (opts.sshUser != null)
+      options.sshUser.setText(opts.sshUser);
+    options.tunnel.setSelected(opts.tunnel);
     if (Params.x509ca.getValue() != null)
       options.x509ca.setText(Params.x509ca.getValue());
     if (Params.x509crl.getValue() != null)
@@ -758,6 +783,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     opts.cursorShape = options.cursorShape.isSelected();
 
     options.getSecurityOptions();
+    String gateway = options.gateway.getText();
+    opts.via = (gateway.isEmpty() ? null : gateway);
+    String sshUser = options.sshUser.getText();
+    opts.sshUser = (sshUser.isEmpty() ? null : sshUser);
+    opts.tunnel = options.tunnel.isSelected();
     Params.x509ca.setParam(options.x509ca.getText());
     Params.x509crl.setParam(options.x509crl.getText());
     options = null;

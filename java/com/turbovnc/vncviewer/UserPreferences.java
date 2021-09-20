@@ -1,5 +1,6 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018, 2020-2021 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,6 +116,10 @@ public final class UserPreferences {
       for (int i = 0; i < keys.length; i++) {
         String key = keys[i];
         VoidParameter p = Params.get(key);
+        if (key.equalsIgnoreCase("AlwaysShowConnectionDialog") ||
+            key.equalsIgnoreCase("Colors") ||
+            key.equalsIgnoreCase("Encoding"))
+          continue;
         if (p == null) {
           if (key.equalsIgnoreCase("secVeNCrypt")) {
             setSecVeNCrypt = true;

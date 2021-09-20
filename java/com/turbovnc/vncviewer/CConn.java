@@ -1020,8 +1020,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     viewport = new Viewport(this);
     // When in Lion full-screen mode, we need to create the viewport as if
     // full-screen mode was disabled.
-    boolean fullScreenWindow = opts.fullScreen && !viewport.lionFSSupported();
-    viewport.setUndecorated(fullScreenWindow);
+    viewport.setUndecorated(opts.fullScreen);
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
@@ -1119,6 +1118,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     boolean equal = true;
     int sw = desktop.scaledWidth;
     int sh = desktop.scaledHeight;
+
+    viewport.leftMon = viewport.rightMon = viewport.topMon =
+      viewport.bottomMon = 0;
 
     if (opts.scalingFactor == Options.SCALE_AUTO ||
         opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -1258,7 +1260,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void sizeWindow() { sizeWindow(true); }
 
   public void sizeWindow(boolean manual) {
-    boolean fullScreenWindow = opts.fullScreen && !viewport.lionFSSupported();
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
     Rectangle span = getSpannedSize();
@@ -1266,7 +1267,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if ((opts.scalingFactor == Options.SCALE_AUTO ||
          opts.scalingFactor == Options.SCALE_FIXEDRATIO) &&
-        !fullScreenWindow) {
+        !opts.fullScreen) {
       w = cp.width;
       h = cp.height;
     }
@@ -1285,7 +1286,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
-    if (fullScreenWindow) {
+    if (opts.fullScreen) {
       java.awt.Point vpPos = viewport.getLocation();
       boolean checkLayoutNow = false;
       vpSize = viewport.getSize();
@@ -1360,9 +1361,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   private void reconfigureViewport(boolean restore) {
-    boolean fullScreenWindow = opts.fullScreen && !viewport.lionFSSupported();
     desktop.setScaledSize();
-    if (!fullScreenWindow && savedRect.width > 0 && savedRect.height > 0 &&
+    if (!opts.fullScreen && savedRect.width > 0 && savedRect.height > 0 &&
         restore) {
       if (savedState >= 0)
         viewport.setExtendedState(savedState);
@@ -1583,8 +1583,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
       options.encX509.setEnabled(false);
       options.x509ca.setEnabled(false);
       options.x509caButton.setEnabled(false);
+      options.x509caLabel.setEnabled(false);
       options.x509crl.setEnabled(false);
       options.x509crlButton.setEnabled(false);
+      options.x509crlLabel.setEnabled(false);
       options.secIdent.setEnabled(false);
       options.secNone.setEnabled(false);
       options.secVnc.setEnabled(false);
@@ -1592,7 +1594,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       options.secPlain.setEnabled(false);
       options.sendLocalUsername.setEnabled(false);
       options.gateway.setEnabled(false);
+      options.gatewayLabel.setEnabled(false);
       options.sshUser.setEnabled(false);
+      options.sshUserLabel.setEnabled(false);
       options.tunnel.setEnabled(false);
     } else {
       options.shared.setSelected(opts.shared);
@@ -1633,6 +1637,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   public void getOptions() {
     boolean recreate = false, reconfigure = false, defaultSize = false;
+    boolean deleteRestore = false;
 
     if (opts.allowJpeg != options.allowJpeg.isSelected())
       encodingChange = true;
@@ -1651,7 +1656,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     opts.subsampling = options.getSubsamplingLevel();
 
     opts.sendLocalUsername = options.sendLocalUsername.isSelected();
-    if (opts.viewOnly != options.viewOnly.isSelected() && showToolbar)
+    if (opts.viewOnly != options.viewOnly.isSelected() && showToolbar &&
+        !options.fullScreen.isSelected())
       recreate = true;
     opts.viewOnly = options.viewOnly.isSelected();
     opts.reverseScroll = options.reverseScroll.isSelected();
@@ -1665,19 +1671,27 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     int oldScalingFactor = opts.scalingFactor;
     opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
-    if (desktop != null && opts.scalingFactor != oldScalingFactor)
-      recreate = true;
+    if (desktop != null && opts.scalingFactor != oldScalingFactor) {
+      deleteRestore = true;
+      savedState = -1;
+      savedRect = new Rectangle(-1, -1, 0, 0);
+      if (!viewport.lionFSSupported() || !options.fullScreen.isSelected())
+        recreate = true;
+      else
+        reconfigure = true;
+    }
 
     Options.DesktopSize oldDesktopSize = opts.desktopSize;
     opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
     if (desktop != null && !opts.desktopSize.equals(oldDesktopSize)) {
-      if (oldDesktopSize.mode != Options.SIZE_AUTO &&
-          opts.desktopSize.mode == Options.SIZE_AUTO &&
-          viewport.lionFSSupported() && opts.fullScreen &&
-          options.fullScreen.isSelected())
-        defaultSize = true;
+      deleteRestore = true;
+      savedState = -1;
+      savedRect = new Rectangle(-1, -1, 0, 0);
       if (opts.desktopSize.mode != Options.SIZE_SERVER) {
-        reconfigure = true;
+        if (!viewport.lionFSSupported() || !options.fullScreen.isSelected())
+          recreate = true;
+        else
+          reconfigure = true;
         firstUpdate = true;
       }
     }
@@ -1687,7 +1701,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (index >= 0 && index < Options.NUMSPANOPT)
       opts.span = index;
     if (desktop != null && opts.span != oldSpan) {
-      if (opts.fullScreen && !viewport.lionFSSupported())
+      deleteRestore = true;
+      savedState = -1;
+      savedRect = new Rectangle(-1, -1, 0, 0);
+      if (!viewport.lionFSSupported() || !options.fullScreen.isSelected())
         recreate = true;
       else
         reconfigure = true;
@@ -1744,6 +1761,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
       else
         reconfigureViewport(false);
     }
+    if (deleteRestore) {
+      savedState = -1;
+      savedRect = new Rectangle(-1, -1, 0, 0);
+    }
     // Force a framebuffer update if we're initiating a manual or auto remote
     // desktop resize.  Otherwise, it won't occur until the mouse is moved or
     // something changes on the server (manual) or until the window is resized
@@ -1776,13 +1797,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void toggleFullScreen() {
     opts.fullScreen = !opts.fullScreen;
     menu.fullScreen.setSelected(opts.fullScreen);
-    if (viewport != null) {
-      if (!viewport.lionFSSupported()) {
-        recreateViewport(true);
-      } else {
-        viewport.toggleLionFS();
-      }
-    }
+    if (viewport != null)
+      recreateViewport(true);
   }
 
   // EDT

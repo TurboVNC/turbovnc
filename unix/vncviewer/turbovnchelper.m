@@ -1,4 +1,4 @@
-/*  Copyright (C)2015-2017, 2019 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2017, 2019, 2021 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -196,8 +196,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   SET_LONG(cls, obj, x11win,
            (jlong)[[NSApplication sharedApplication] keyWindow]);
 
-  printf("TurboVNC Helper: Intercepting tablet events for window 0x%.8lx\n",
-         (unsigned long)[[NSApplication sharedApplication] keyWindow]);
+  fprintf(stderr, "TurboVNC Helper: Intercepting tablet events for window 0x%.8lx\n",
+          (unsigned long)[[NSApplication sharedApplication] keyWindow]);
   return;
 
   bailout:
@@ -233,7 +233,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   bailif0(cls = (*env)->GetObjectClass(env, obj));
   SET_LONG(cls, obj, x11dpy, 0);
 
-  printf("TurboVNC Helper: Shutting down tablet event interceptor\n");
+  fprintf(stderr, "TurboVNC Helper: Shutting down tablet event interceptor\n");
 
   bailout:
   return;
