@@ -57,6 +57,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   DesktopWindow(int width, int height, PixelFormat serverPF, CConn cc_) {
     cc = cc_;
     setSize(width, height);
+    setBackground(Color.BLACK);
     swingDB = VncViewer.getBooleanProperty("turbovnc.swingdb", false);
     setOpaque(!swingDB);
     GraphicsEnvironment ge =
