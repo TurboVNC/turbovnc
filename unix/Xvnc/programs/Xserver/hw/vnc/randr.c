@@ -1,5 +1,5 @@
 /*
- *  Copyright (C)2013-2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C)2013-2019, 2021 D. R. Commander.  All Rights Reserved.
  *  Copyright 2012-2015 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
@@ -16,31 +16,6 @@
  *  along with this software; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  *  USA.
- *
- * Copyright (c) 1997-2003 by The XFree86 Project, Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE COPYRIGHT HOLDER(S) OR AUTHOR(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- *
- * Except as contained in this notice, the name of the copyright holder(s)
- * and author(s) shall not be used in advertising or otherwise to promote
- * the sale, use or other dealings in this Software without prior written
- * authorization from the copyright holder(s) and author(s).
  *
  * Copyright © 2000, Compaq Computer Corporation,
  * Copyright © 2002, Hewlett Packard, Inc.
@@ -76,7 +51,6 @@
 #include "fb.h"
 #include "servermd.h"
 #include "rfb.h"
-#include "mivalidate.h"
 
 
 static Res vncRRResolutions[] = {
@@ -124,88 +98,6 @@ static Bool vncCrtcSet(RRCrtcPtr crtc, RRModePtr mode, int x, int y,
                        Rotation rotation, int numOutputs,
                        RROutputPtr *outputs);
 static RRModePtr vncSetModes(rfbScreenInfo *screen);
-
-
-/*
- * xf86SetRootClip --
- *        Enable or disable rendering to the screen by
- *        setting the root clip list and revalidating
- *        all of the windows
- */
-
-static void xf86SetRootClip(ScreenPtr pScreen, Bool enable)
-{
-  WindowPtr pWin = pScreen->root;
-  WindowPtr pChild;
-  Bool WasViewable = (Bool)(pWin->viewable);
-  Bool anyMarked = FALSE;
-  WindowPtr pLayerWin;
-  BoxRec box;
-
-  if (WasViewable) {
-    for (pChild = pWin->firstChild; pChild; pChild = pChild->nextSib) {
-      (void)(*pScreen->MarkOverlappedWindows) (pChild, pChild, &pLayerWin);
-    }
-    (*pScreen->MarkWindow) (pWin);
-    anyMarked = TRUE;
-    if (pWin->valdata) {
-      if (HasBorder(pWin)) {
-        RegionPtr borderVisible;
-
-        borderVisible = REGION_CREATE(pScreen, NullBox, 1);
-        REGION_SUBTRACT(pScreen, borderVisible, &pWin->borderClip,
-                        &pWin->winSize);
-        pWin->valdata->before.borderVisible = borderVisible;
-      }
-      pWin->valdata->before.resized = TRUE;
-    }
-  }
-
-  /*
-   * Use REGION_BREAK to avoid optimizations in ValidateTree
-   * that assume the root borderClip can't change well, normally
-   * it doesn't...)
-   */
-  if (enable) {
-    box.x1 = 0;
-    box.y1 = 0;
-    box.x2 = pScreen->width;
-    box.y2 = pScreen->height;
-    REGION_INIT(pScreen, &pWin->winSize, &box, 1);
-    REGION_INIT(pScreen, &pWin->borderSize, &box, 1);
-    if (WasViewable)
-      REGION_RESET(pScreen, &pWin->borderClip, &box);
-    pWin->drawable.width = pScreen->width;
-    pWin->drawable.height = pScreen->height;
-    REGION_BREAK(pWin->drawable.pScreen, &pWin->clipList);
-  } else {
-    REGION_EMPTY(pScreen, &pWin->borderClip);
-    REGION_BREAK(pWin->drawable.pScreen, &pWin->clipList);
-  }
-
-  ResizeChildrenWinSize(pWin, 0, 0, 0, 0);
-
-  if (WasViewable) {
-    if (pWin->firstChild) {
-      anyMarked |= (*pScreen->MarkOverlappedWindows) (pWin->firstChild,
-                                                      pWin->firstChild,
-                                                      (WindowPtr *)NULL);
-    } else {
-      (*pScreen->MarkWindow) (pWin);
-      anyMarked = TRUE;
-    }
-
-    if (anyMarked) {
-      (*pScreen->ValidateTree) (pWin, NullWindow, VTOther);
-      (*pScreen->HandleExposures) (pWin);
-      if (pScreen->PostValidateTree)
-        (*pScreen->PostValidateTree) (pWin, NullWindow, VTOther);
-    }
-  }
-  if (pWin->realized)
-    WindowsRestructured();
-  FlushAllOutput();
-}
 
 
 static int mm(int dimension)
@@ -417,7 +309,7 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   }
 
   rfbFB.blockUpdates = newFB.blockUpdates = TRUE;
-  xf86SetRootClip(pScreen, FALSE);
+  SetRootClip(pScreen, ROOT_CLIP_NONE);
 
   if (!pScreen->ModifyPixmapHeader(rootPixmap, newFB.width, newFB.height,
                                    newFB.depth, newFB.bitsPerPixel,
@@ -425,7 +317,7 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
                                    newFB.pfbMemory)) {
     rfbLog("ERROR: Could not modify root pixmap size\n");
     free(newFB.pfbMemory);
-    xf86SetRootClip(pScreen, TRUE);
+    SetRootClip(pScreen, ROOT_CLIP_FULL);
     rfbFB.blockUpdates = FALSE;
     return rfbEDSResultInvalid;
   }
@@ -436,7 +328,7 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
   pScreen->mmWidth = mmWidth;
   pScreen->mmHeight = mmHeight;
 
-  xf86SetRootClip(pScreen, TRUE);
+  SetRootClip(pScreen, ROOT_CLIP_FULL);
 
   RRScreenSizeNotify(pScreen);
   update_desktop_dimensions();
