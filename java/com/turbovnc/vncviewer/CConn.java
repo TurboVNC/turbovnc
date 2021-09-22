@@ -958,6 +958,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   private void recreateViewport() { recreateViewport(false); }
 
   private void recreateViewport(boolean restore) {
+    if (desktop == null) return;
+
     if (viewport != null) {
       if (opts.fullScreen) {
         savedState = viewport.getExtendedState();
