@@ -1628,9 +1628,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     checkEncodings();
 
-    if (opts.fullScreen != oldOpts.fullScreen)
+    if (opts.fullScreen != oldOpts.fullScreen) {
+      opts.fullScreen = !opts.fullScreen;
       toggleFullScreen();
-    else if (recreate)
+    } else if (recreate)
       recreateViewport();
     else if (reconfigure) {
       if (defaultSize)
