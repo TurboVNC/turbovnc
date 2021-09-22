@@ -260,6 +260,11 @@ multi-screen spanning sometimes behaved incorrectly if the remote desktop size
 or the scaling factor was changed while the viewer was in full-screen mode or
 transitioning into full-screen mode.
 
+11. Fixed an issue whereby the Java TurboVNC Viewer would throw a
+NullPointerException if view-only mode was toggled in the TurboVNC Viewer
+Options dialog, and full-screen mode was not also toggled, prior to connecting
+to a VNC server.
+
 
 2.2.6
 =====
