@@ -781,7 +781,7 @@ public class Viewport extends JFrame implements Runnable {
   private native void x11FullScreen(boolean on);
   private native void grabKeyboard(boolean on, boolean pointer);
   private native void setupExtInput();
-  private native synchronized boolean processExtInputEvent(int type);
+  private synchronized native boolean processExtInputEvent(int type);
   private native void cleanupExtInput();
 
   @Override

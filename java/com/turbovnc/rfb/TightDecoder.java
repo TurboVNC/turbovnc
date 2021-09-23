@@ -595,13 +595,13 @@ public class TightDecoder extends Decoder {
   private int decodebufSize;
 
   private native long tjInitDecompress() throws Exception;
-  private native void tjDecompress(long tjhandle, byte[] srcBuf, int size,
+  private native void tjDecompress(long handle, byte[] srcBuf, int size,
     byte[] dstBuf, int x, int y, int desiredWidth, int pitch,
     int desiredHeight, int pixelFormat, int flags) throws Exception;
-  private native void tjDecompress(long tjhandle, byte[] srcBuf, int size,
+  private native void tjDecompress(long handle, byte[] srcBuf, int size,
     int[] dstBuf, int x, int y, int desiredWidth, int pitch,
     int desiredHeight, int pixelFormat, int flags) throws Exception;
-  private native void tjDestroy(long tjhandle) throws Exception;
+  private native void tjDestroy(long handle) throws Exception;
 
   static LogWriter vlog = new LogWriter("TightDecoder");
 }
