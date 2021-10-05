@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012-2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2018, 2020-2021 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,7 +143,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     tileWindows.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
                                                       acceleratorMask));
     showToolbar = new JCheckBoxMenuItem("Show Toolbar");
-    showToolbar.setSelected(cc.showToolbar);
+    showToolbar.setSelected(cc.opts.showToolbar);
     showToolbar.addActionListener(this);
     connMenu.add(showToolbar);
     showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
@@ -185,7 +186,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       VncViewer.tileWindows();
     } else if (actionMatch(ev, showToolbar)) {
       cc.toggleToolbar();
-      showToolbar.setSelected(cc.showToolbar);
+      showToolbar.setSelected(cc.opts.showToolbar);
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, ctrlAltDel) && !cc.opts.viewOnly) {

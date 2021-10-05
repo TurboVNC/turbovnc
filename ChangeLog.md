@@ -191,6 +191,8 @@ from the client to the TurboVNC session.
 
      - The menu key and toolbar settings are now located under the "Connection"
 tab rather than the "Global" tab.
+     - The "Show toolbar" setting now takes effect immediately if "OK" is
+clicked to dismiss the TurboVNC Viewer Options dialog.
      - The "Security" tab now has a separate check box for each security type.
 This fixes an issue whereby certain combinations of security types (such as
 VNC,TLSPlain) could not be specified using the TurboVNC Viewer Options dialog.

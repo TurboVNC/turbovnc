@@ -889,7 +889,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       else
         opts.span = Options.SPAN_AUTO;
 
-      opts.showToolbar = Params.showToolbar.getValue();
+      opts.showToolbar = Params.showToolbar.getValue() && (benchFile == null);
 
       // ENCODING OPTIONS
       opts.compressLevel = Params.compressLevel.getValue();

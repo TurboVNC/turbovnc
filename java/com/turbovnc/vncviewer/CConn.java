@@ -75,7 +75,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     formatChange = false;  encodingChange = false;
     currentEncoding = opts.preferredEncoding;
-    showToolbar = opts.showToolbar && !benchmark;
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
@@ -621,7 +620,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     vpRect.x = vpPos.x;
     vpRect.y = vpPos.y;
-    if (showToolbar && !opts.fullScreen) {
+    if (opts.showToolbar && !opts.fullScreen) {
       vpRect.y += 22;
       vpRect.height -= 22;
     }
@@ -1566,11 +1565,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
         opts.subsampling != oldOpts.subsampling)
       encodingChange = true;
 
-    if (opts.viewOnly != oldOpts.viewOnly && showToolbar && !opts.fullScreen)
+    if (opts.viewOnly != oldOpts.viewOnly && opts.showToolbar &&
+        !opts.fullScreen)
       recreate = true;
 
     if (state() != RFBSTATE_NORMAL)
-      showToolbar = opts.showToolbar && !benchmark;
+      opts.showToolbar = opts.showToolbar && !benchmark;
+
+    if (opts.showToolbar != oldOpts.showToolbar && !opts.fullScreen)
+      recreate = true;
 
     if (desktop != null && opts.scalingFactor != oldOpts.scalingFactor) {
       deleteRestore = true;
@@ -1639,6 +1642,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
       else
         reconfigureViewport(false);
     }
+    if (opts.showToolbar != oldOpts.showToolbar) {
+      if (viewport != null)
+        viewport.showToolbar(opts.showToolbar);
+      menu.showToolbar.setSelected(opts.showToolbar);
+    }
     if (deleteRestore) {
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1664,12 +1672,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void toggleToolbar() {
     if (opts.fullScreen)
       return;
-    showToolbar = !showToolbar;
+    opts.showToolbar = !opts.showToolbar;
     if (viewport != null) {
       recreateViewport();
-      viewport.showToolbar(showToolbar);
+      viewport.showToolbar(opts.showToolbar);
     }
-    menu.showToolbar.setSelected(showToolbar);
+    menu.showToolbar.setSelected(opts.showToolbar);
   }
 
   // EDT
@@ -2433,7 +2441,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
   private HashMap<Integer, Integer> pressedKeys;
   Viewport viewport;
   Rectangle oldViewportBounds;
-  boolean showToolbar;
   boolean keyboardGrabbed;
   GraphicsDevice primaryGD;
 

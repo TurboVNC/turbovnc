@@ -80,7 +80,7 @@ public class Viewport extends JFrame implements Runnable {
     // NOTE: If Lion FS mode is enabled, then the viewport is only created once
     // as a non-full-screen viewport, so we tell showToolbar() to ignore the
     // full-screen state.
-    showToolbar(cc.showToolbar, canDoLionFS);
+    showToolbar(cc.opts.showToolbar, canDoLionFS);
 
     final Viewport vp = this;
     addWindowFocusListener(new WindowAdapter() {
@@ -238,7 +238,7 @@ public class Viewport extends JFrame implements Runnable {
     Insets vpInsets = VncViewer.insets;
     Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
                                          vpInsets.top + vpInsets.bottom);
-    if (cc.showToolbar)
+    if (cc.opts.showToolbar)
       borderSize.height += 22;
     return borderSize;
   }
@@ -253,12 +253,12 @@ public class Viewport extends JFrame implements Runnable {
         cc.opts.fullScreen = true;
         cc.menu.fullScreen.setSelected(cc.opts.fullScreen);
         updateMacMenuFS();
-        showToolbar(cc.showToolbar);
+        showToolbar(cc.opts.showToolbar);
       } else if (method.getName().equals("windowExitingFullScreen")) {
         cc.opts.fullScreen = false;
         cc.menu.fullScreen.setSelected(cc.opts.fullScreen);
         updateMacMenuFS();
-        showToolbar(cc.showToolbar);
+        showToolbar(cc.opts.showToolbar);
       } else if (method.getName().equals("windowEnteredFullScreen")) {
         cc.sizeWindow();
       }
