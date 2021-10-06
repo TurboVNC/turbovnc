@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2014, 2016, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014, 2016, 2018, 2021 D. R. Commander.
+ *                                            All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +71,11 @@ public abstract class CConnection extends CMsgHandler {
   }
 
   private void processVersionMsg() {
-    vlog.debug("reading protocol version");
+    if (!alreadyPrintedVersion) {
+      vlog.debug("reading protocol version");
+      alreadyPrintedVersion = true;
+    }
+
     if (!cp.readVersion(is)) {
       state = RFBSTATE_INVALID;
       throw new ErrorException("Reading version failed: not an RFB server?");
@@ -206,7 +211,11 @@ public abstract class CConnection extends CMsgHandler {
   }
 
   private void processSecurityMsg() {
-    vlog.debug("processing security message");
+    if (!alreadyPrintedSecurity) {
+      vlog.debug("processing security message");
+      alreadyPrintedSecurity = true;
+    }
+
     if (csecurity.processMsg(this)) {
       state = RFBSTATE_SECURITY_RESULT;
       processSecurityResultMsg();
@@ -400,6 +409,7 @@ public abstract class CConnection extends CMsgHandler {
   String serverName;
   int serverPort;
   boolean clientSecTypeOrder;
+  boolean alreadyPrintedVersion, alreadyPrintedSecurity;
 
   static LogWriter vlog = new LogWriter("CConnection");
 }
