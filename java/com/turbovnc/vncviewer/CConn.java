@@ -1588,8 +1588,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void getOptions() {
-    boolean recreate = false, reconfigure = false, defaultSize = false;
-    boolean deleteRestore = false;
+    boolean recreate = false, reconfigure = false, deleteRestore = false;
 
     if (opts.allowJpeg != options.allowJpeg.isSelected())
       encodingChange = true;
@@ -1707,12 +1706,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       toggleFullScreen();
     else if (recreate)
       recreateViewport();
-    else if (reconfigure) {
-      if (defaultSize)
-        sizeWindow(true);
-      else
-        reconfigureViewport(false);
-    }
+    else if (reconfigure)
+      reconfigureViewport(false);
     if (deleteRestore) {
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
