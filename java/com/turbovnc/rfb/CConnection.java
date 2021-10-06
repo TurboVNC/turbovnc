@@ -70,7 +70,11 @@ public abstract class CConnection extends CMsgHandler {
   }
 
   private void processVersionMsg() {
-    vlog.debug("reading protocol version");
+    if (!alreadyPrintedVersion) {
+      vlog.debug("reading protocol version");
+      alreadyPrintedVersion = true;
+    }
+
     if (!cp.readVersion(is)) {
       state = RFBSTATE_INVALID;
       throw new ErrorException("Reading version failed: not an RFB server?");
@@ -206,7 +210,11 @@ public abstract class CConnection extends CMsgHandler {
   }
 
   private void processSecurityMsg() {
-    vlog.debug("processing security message");
+    if (!alreadyPrintedSecurity) {
+      vlog.debug("processing security message");
+      alreadyPrintedSecurity = true;
+    }
+
     if (csecurity.processMsg(this)) {
       state = RFBSTATE_SECURITY_RESULT;
       processSecurityResultMsg();
@@ -409,6 +417,7 @@ public abstract class CConnection extends CMsgHandler {
   int serverPort;
   boolean clientSecTypeOrder;
   protected Socket sock;
+  boolean alreadyPrintedVersion, alreadyPrintedSecurity;
   // CHECKSTYLE VisibilityModifier:OFF
   public Options opts;
   // CHECKSTYLE VisibilityModifier:ON
