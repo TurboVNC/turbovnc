@@ -1642,6 +1642,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
         viewport.showToolbar(opts.showToolbar);
       menu.showToolbar.setSelected(opts.showToolbar);
     }
+    if (opts.viewOnly != oldOpts.viewOnly)
+      menu.viewOnly.setSelected(opts.viewOnly);
     if (deleteRestore) {
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1680,6 +1682,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
     opts.fullScreen = !opts.fullScreen;
     menu.fullScreen.setSelected(opts.fullScreen);
     if (viewport != null)
+      recreateViewport(true);
+  }
+
+  // EDT
+  public void toggleViewOnly() {
+    opts.viewOnly = !opts.viewOnly;
+    menu.viewOnly.setSelected(opts.viewOnly);
+    if (viewport != null && opts.showToolbar && !opts.fullScreen)
       recreateViewport(true);
   }
 

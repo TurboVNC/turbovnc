@@ -201,6 +201,11 @@ specified in the "Security" tab.
      - Settings under the "Security" tab are now automatically disabled when
 they are rendered irrelevant by other settings.
 
+28. Added an F8 menu option, a Mac menu option, and corresponding hotkeys
+(CTRL-ALT-SHIFT-V and Command-V) to the TurboVNC Viewer that allow view-only
+mode to be toggled more quickly.  This functionality previously only existed in
+the Windows TurboVNC Viewer.
+
 
 2.2.7
 =====

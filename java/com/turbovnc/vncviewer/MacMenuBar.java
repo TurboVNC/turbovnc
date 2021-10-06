@@ -149,6 +149,12 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
                                                       acceleratorMask));
     connMenu.addSeparator();
+    viewOnly = new JCheckBoxMenuItem("View Only");
+    viewOnly.setSelected(cc.opts.viewOnly);
+    viewOnly.addActionListener(this);
+    connMenu.add(viewOnly);
+    viewOnly.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
+                                                   acceleratorMask));
     if (!Params.restricted.getValue()) {
       ctrlAltDel = addMenuItem(connMenu, "Send Ctrl-Alt-Del");
       ctrlEsc = addMenuItem(connMenu, "Send Ctrl-Esc");
@@ -187,6 +193,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     } else if (actionMatch(ev, showToolbar)) {
       cc.toggleToolbar();
       showToolbar.setSelected(cc.opts.showToolbar);
+    } else if (actionMatch(ev, viewOnly)) {
+      cc.toggleViewOnly();
+      viewOnly.setSelected(cc.opts.viewOnly);
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, ctrlAltDel) && !cc.opts.viewOnly) {
@@ -234,6 +243,6 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
   JMenuItem defaultSize, tileWindows;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, closeConn, info, screenshot;
-  JCheckBoxMenuItem profile, fullScreen, showToolbar;
+  JCheckBoxMenuItem profile, fullScreen, showToolbar, viewOnly;
   static LogWriter vlog = new LogWriter("MacMenuBar");
 }

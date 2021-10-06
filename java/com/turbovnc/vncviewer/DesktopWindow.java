@@ -616,6 +616,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_T:
           cc.toggleToolbar();
           return;
+        case KeyEvent.VK_V:
+          cc.toggleViewOnly();
+          return;
         case KeyEvent.VK_X:
           VncViewer.tileWindows();
           return;

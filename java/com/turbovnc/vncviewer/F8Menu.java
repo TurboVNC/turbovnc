@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011, 2013 Brian P. Hinz
  * Copyright (C) 2012-2015, 2017-2018, 2020-2021 D. R. Commander.
- *                                          All Rights Reserved.
+ *                                               All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,11 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     tileWindows = addMenuItem("Tile All Viewer Windows   (Ctrl-Alt-Shift-X)",
                               KeyEvent.VK_X);
     addSeparator();
+    viewOnly = new JCheckBoxMenuItem("View Only   (Ctrl-Alt-Shift-V)");
+    viewOnly.setMnemonic(KeyEvent.VK_V);
+    viewOnly.setSelected(cc.opts.viewOnly);
+    viewOnly.addActionListener(this);
+    add(viewOnly);
     if (Utils.osGrab() && Helper.isAvailable()) {
       grabKeyboard =
         new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
@@ -156,6 +161,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       VncViewer.tileWindows();
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
+    } else if (actionMatch(ev, viewOnly)) {
+      cc.toggleViewOnly();
     } else if (actionMatch(ev, grabKeyboard)) {
       if (cc.viewport != null)
         cc.viewport.grabKeyboardHelper(grabKeyboard.isSelected());
@@ -209,7 +216,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, options, info, profile, screenshot, about, dismiss;
   static JMenuItem f8;
-  JCheckBoxMenuItem fullScreen, showToolbar, grabKeyboard;
+  JCheckBoxMenuItem fullScreen, showToolbar, viewOnly, grabKeyboard;
 
   static LogWriter vlog = new LogWriter("F8Menu");
 }
