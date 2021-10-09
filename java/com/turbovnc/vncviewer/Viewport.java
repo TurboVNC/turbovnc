@@ -332,6 +332,11 @@ public class Viewport extends JFrame implements Runnable {
       macMenu.updateProfile();
   }
 
+  public void updateMacMenuZoom() {
+    if (macMenu != null)
+      macMenu.updateZoom();
+  }
+
   public void setChild(DesktopWindow child) {
     sp.getViewport().setView(child);
   }
@@ -373,6 +378,11 @@ public class Viewport extends JFrame implements Runnable {
   }
 
   public void updateTitle() {
+    String scaleString = new String("");
+    if (cc.opts.scalingFactor != 100 &&
+        cc.opts.scalingFactor != Options.SCALE_AUTO &&
+        cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO)
+      scaleString = new String("- " + cc.opts.scalingFactor + "%");
     int enc = cc.lastServerEncoding;
     if (enc < 0) enc = cc.currentEncoding;
     if (enc == RFB.ENCODING_TIGHT) {
@@ -380,13 +390,14 @@ public class Viewport extends JFrame implements Runnable {
         String[] subsampStr = { "1X", "4X", "2X", "Gray" };
         setTitle(cc.cp.name() + " [Tight + JPEG " +
                  subsampStr[cc.opts.subsampling] + " Q" + cc.opts.quality +
-                 " + CL " + cc.opts.compressLevel + "]");
+                 " + CL " + cc.opts.compressLevel + "]" + scaleString);
       } else {
         setTitle(cc.cp.name() + " [Lossless Tight" +
-                 " + CL " + cc.opts.compressLevel + "]");
+                 " + CL " + cc.opts.compressLevel + "]" + scaleString);
       }
     } else {
-      setTitle(cc.cp.name() + " [" + RFB.encodingName(enc) + "]");
+      setTitle(cc.cp.name() + " [" + RFB.encodingName(enc) + "]" +
+               scaleString);
     }
   }
 

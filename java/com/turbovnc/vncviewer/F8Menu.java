@@ -68,6 +68,9 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     defaultSize =
       addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)",
                   KeyEvent.VK_Z);
+    zoomIn = addMenuItem("Zoom In   (Ctrl-Alt-Shift-9)", KeyEvent.VK_9);
+    zoomOut = addMenuItem("Zoom Out   (Ctrl-Alt-Shift-8)", KeyEvent.VK_8);
+    zoom100 = addMenuItem("Zoom 100%   (Ctrl-Alt-Shift-0)", KeyEvent.VK_0);
     showToolbar = new JCheckBoxMenuItem("Show Toolbar   (Ctrl-Alt-Shift-T)");
     showToolbar.setMnemonic(KeyEvent.VK_T);
     showToolbar.setSelected(cc.opts.showToolbar);
@@ -118,6 +121,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
       });
+
+    updateZoom();
   }
 
   JMenuItem addMenuItem(String str, int mnemonic) {
@@ -156,6 +161,15 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       showToolbar.setSelected(cc.opts.showToolbar);
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
+      firePopupMenuCanceled();
+    } else if (actionMatch(ev, zoomIn)) {
+      cc.zoomIn();
+      firePopupMenuCanceled();
+    } else if (actionMatch(ev, zoomOut)) {
+      cc.zoomOut();
+      firePopupMenuCanceled();
+    } else if (actionMatch(ev, zoom100)) {
+      cc.zoom100();
       firePopupMenuCanceled();
     } else if (actionMatch(ev, tileWindows)) {
       VncViewer.tileWindows();
@@ -211,8 +225,22 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     }
   }
 
+  void updateZoom() {
+    if (cc.opts.desktopSize.mode == Options.SIZE_AUTO ||
+        cc.opts.scalingFactor == Options.SCALE_AUTO ||
+        cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+      zoomIn.setEnabled(false);
+      zoomOut.setEnabled(false);
+      zoom100.setEnabled(false);
+    } else {
+      zoomIn.setEnabled(true);
+      zoomOut.setEnabled(true);
+      zoom100.setEnabled(true);
+    }
+  }
+
   CConn cc;
-  JMenuItem defaultSize, tileWindows;
+  JMenuItem defaultSize, zoomIn, zoomOut, zoom100, tileWindows;
   JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, options, info, profile, screenshot, about, dismiss;
   static JMenuItem f8;

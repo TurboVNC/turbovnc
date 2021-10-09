@@ -1700,6 +1700,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
     if (opts.viewOnly != oldOpts.viewOnly)
       menu.viewOnly.setSelected(opts.viewOnly);
+    if (opts.scalingFactor != oldOpts.scalingFactor ||
+        !opts.desktopSize.equalsIgnoreID(oldOpts.desktopSize)) {
+      if (viewport != null)
+        viewport.updateMacMenuZoom();
+      menu.updateZoom();
+    }
     if (deleteRestore) {
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1719,6 +1725,79 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   public boolean supportsSetDesktopSize() {
     return cp.supportsSetDesktopSize || firstUpdate;
+  }
+
+  // EDT
+  public void zoomIn() {
+    if (opts.desktopSize.mode == Options.SIZE_AUTO ||
+        opts.scalingFactor == Options.SCALE_AUTO ||
+        opts.scalingFactor == Options.SCALE_FIXEDRATIO)
+      return;
+
+    int sf = opts.scalingFactor;
+    if (sf < 100)
+      sf = ((sf / 10) + 1) * 10;
+    else if (sf >= 100 && sf <= 200)
+      sf = ((sf / 25) + 1) * 25;
+    else
+      sf = ((sf / 50) + 1) * 50;
+    if (sf > 400) sf = 400;
+    opts.scalingFactor = sf;
+
+    savedState = -1;
+    savedRect = new Rectangle(-1, -1, 0, 0);
+    if (!viewport.lionFSSupported() || !opts.fullScreen)
+      recreateViewport();
+    else
+      reconfigureAndRepaintViewport(false);
+    savedState = -1;
+    savedRect = new Rectangle(-1, -1, 0, 0);
+  }
+
+  // EDT
+  public void zoomOut() {
+    if (opts.desktopSize.mode == Options.SIZE_AUTO ||
+        opts.scalingFactor == Options.SCALE_AUTO ||
+        opts.scalingFactor == Options.SCALE_FIXEDRATIO)
+      return;
+
+    int sf = opts.scalingFactor;
+    if (sf <= 100)
+      sf = (((sf + 9) / 10) - 1) * 10;
+    else if (sf >= 100 && sf <= 200)
+      sf = (((sf + 24) / 25) - 1) * 25;
+    else
+      sf = (((sf + 49) / 50) - 1) * 50;
+    if (sf < 10) sf = 10;
+    opts.scalingFactor = sf;
+
+    savedState = -1;
+    savedRect = new Rectangle(-1, -1, 0, 0);
+    if (!viewport.lionFSSupported() || !opts.fullScreen)
+      recreateViewport();
+    else
+      reconfigureAndRepaintViewport(false);
+    savedState = -1;
+    savedRect = new Rectangle(-1, -1, 0, 0);
+  }
+
+  // EDT
+  public void zoom100() {
+    if (opts.desktopSize.mode == Options.SIZE_AUTO ||
+        opts.scalingFactor == Options.SCALE_AUTO ||
+        opts.scalingFactor == Options.SCALE_FIXEDRATIO)
+      return;
+
+    opts.scalingFactor = 100;
+
+    savedState = -1;
+    savedRect = new Rectangle(-1, -1, 0, 0);
+    if (!viewport.lionFSSupported() || !opts.fullScreen)
+      recreateViewport();
+    else
+      reconfigureAndRepaintViewport(false);
+    savedState = -1;
+    savedRect = new Rectangle(-1, -1, 0, 0);
   }
 
   // EDT

@@ -206,6 +206,14 @@ they are rendered irrelevant by other settings.
 mode to be toggled more quickly.  This functionality previously only existed in
 the Windows TurboVNC Viewer.
 
+29. Added F8 menu options, Mac menu options, and corresponding hotkeys
+(CTRL-ALT-SHIFT-9 and Command-9, CTRL-ALT-SHIFT-8 and Command-8,
+CTRL-ALT-SHIFT-0 and Command-0) to the TurboVNC Viewer that can be used to
+zoom in (increase the scaling factor), zoom out (decrease the scaling factor),
+or reset the scaling factor to 100% when automatic desktop resizing and
+automatic scaling are disabled.  This functionality previously only existed in
+the Windows TurboVNC Viewer.
+
 
 2.2.7
 =====

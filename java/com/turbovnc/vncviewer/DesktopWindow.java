@@ -625,6 +625,35 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_Z:
           cc.sizeWindow();
           return;
+        case KeyEvent.VK_9:
+        case KeyEvent.VK_NUMPAD9:
+        case KeyEvent.VK_ADD:
+          if (cc.opts.desktopSize.mode != Options.SIZE_AUTO &&
+              cc.opts.scalingFactor != Options.SCALE_AUTO &&
+              cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
+            cc.zoomIn();
+            return;
+          }
+          break;
+        case KeyEvent.VK_8:
+        case KeyEvent.VK_NUMPAD8:
+        case KeyEvent.VK_SUBTRACT:
+          if (cc.opts.desktopSize.mode != Options.SIZE_AUTO &&
+              cc.opts.scalingFactor != Options.SCALE_AUTO &&
+              cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
+            cc.zoomOut();
+            return;
+          }
+          break;
+        case KeyEvent.VK_0:
+        case KeyEvent.VK_NUMPAD0:
+          if (cc.opts.desktopSize.mode != Options.SIZE_AUTO &&
+              cc.opts.scalingFactor != Options.SCALE_AUTO &&
+              cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
+            cc.zoom100();
+            return;
+          }
+          break;
         case KeyEvent.VK_LEFT:
         case KeyEvent.VK_RIGHT:
         case KeyEvent.VK_UP:
@@ -656,6 +685,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_Z:
         case KeyEvent.VK_T:
           return;
+        case KeyEvent.VK_9:
+        case KeyEvent.VK_8:
+        case KeyEvent.VK_0:
+          if (cc.opts.desktopSize.mode != Options.SIZE_AUTO &&
+              cc.opts.scalingFactor != Options.SCALE_AUTO &&
+              cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO)
+            return;
       }
     }
     if ((e.getModifiersEx() & InputEvent.ALT_DOWN_MASK) ==

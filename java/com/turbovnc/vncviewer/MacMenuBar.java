@@ -171,6 +171,15 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     defaultSize = addMenuItem(connMenu, "Default Window Size/Position");
     defaultSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
                                                       acceleratorMask));
+    zoomIn = addMenuItem(connMenu, "Zoom In");
+    zoomIn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9,
+                                                 acceleratorMask));
+    zoomOut = addMenuItem(connMenu, "Zoom Out");
+    zoomOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
+                                                  acceleratorMask));
+    zoom100 = addMenuItem(connMenu, "Zoom 100%", KeyEvent.VK_0);
+    zoom100.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0,
+                                                  acceleratorMask));
     tileWindows = addMenuItem(connMenu, "Tile All Viewer Windows");
     tileWindows.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
                                                       acceleratorMask));
@@ -195,6 +204,8 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     clipboard = addMenuItem(connMenu, "Clipboard ...");
 
     add(connMenu);
+
+    updateZoom();
   }
 
   JMenuItem addMenuItem(JMenu menu, String str, int mnemonic) {
@@ -220,6 +231,12 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.toggleFullScreen();
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
+    } else if (actionMatch(ev, zoomIn)) {
+      cc.zoomIn();
+    } else if (actionMatch(ev, zoomOut)) {
+      cc.zoomOut();
+    } else if (actionMatch(ev, zoom100)) {
+      cc.zoom100();
     } else if (actionMatch(ev, tileWindows)) {
       VncViewer.tileWindows();
     } else if (actionMatch(ev, showToolbar)) {
@@ -271,8 +288,22 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     profile.setSelected(cc.profileDialog.isVisible());
   }
 
+  void updateZoom() {
+    if (cc.opts.desktopSize.mode == Options.SIZE_AUTO ||
+        cc.opts.scalingFactor == Options.SCALE_AUTO ||
+        cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+      zoomIn.setEnabled(false);
+      zoomOut.setEnabled(false);
+      zoom100.setEnabled(false);
+    } else {
+      zoomIn.setEnabled(true);
+      zoomOut.setEnabled(true);
+      zoom100.setEnabled(true);
+    }
+  }
+
   CConn cc;
-  JMenuItem defaultSize, tileWindows;
+  JMenuItem defaultSize, zoomIn, zoomOut, zoom100, tileWindows;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, closeConn, info, screenshot;
   JCheckBoxMenuItem profile, fullScreen, showToolbar, viewOnly;
