@@ -62,6 +62,7 @@ static const unsigned MINIMUM_WINDOW = 4096;
 static const unsigned MAXIMUM_WINDOW = 4194304;
 
 
+static Bool IsCongested(rfbClientPtr);
 static int GetUncongestedETA(rfbClientPtr);
 static unsigned GetExtraBuffer(rfbClientPtr);
 static unsigned GetInFlight(rfbClientPtr);
@@ -197,7 +198,7 @@ Bool rfbSendRTTPing(rfbClientPtr cl)
   gettimeofday(&rttInfo->tv, NULL);
   rttInfo->pos = cl->lastPosition;
   rttInfo->extra = GetExtraBuffer(cl);
-  rttInfo->congested = rfbIsCongested(cl);
+  rttInfo->congested = IsCongested(cl);
 
   xorg_list_append(&rttInfo->entry, &cl->pings);
 
@@ -269,6 +270,15 @@ static void HandleRTTPong(rfbClientPtr cl)
 }
 
 
+static Bool IsCongested(rfbClientPtr cl)
+{
+  if (GetInFlight(cl) < cl->congWindow)
+    return FALSE;
+
+  return TRUE;
+}
+
+
 /*
  * rfbIsCongested() determines if the transport is currently congested or if
  * more data can be sent.
@@ -284,7 +294,7 @@ Bool rfbIsCongested(rfbClientPtr cl)
   TimerCancel(cl->congestionTimer);
 
   rfbUpdatePosition(cl, cl->sockOffset);
-  if (GetInFlight(cl) < cl->congWindow)
+  if (!IsCongested(cl))
     return FALSE;
 
   eta = GetUncongestedETA(cl);
