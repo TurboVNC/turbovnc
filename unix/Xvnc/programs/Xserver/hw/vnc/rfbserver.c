@@ -2730,9 +2730,6 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
 
   if (!cl->enableExtDesktopSize)
     return TRUE;
-  /* Error messages can only be sent with the EDS extension */
-  if (!cl->enableExtDesktopSize && cl->result != rfbEDSResultSuccess)
-    return TRUE;
 
   memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
   fu.type = rfbFramebufferUpdate;

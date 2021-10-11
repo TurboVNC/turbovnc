@@ -233,7 +233,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
   CConn cc;
   JMenuItem defaultSize, tileWindows;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
-  JMenuItem newConn, closeConn, info, profile, showToolbar, screenshot;
-  JCheckBoxMenuItem fullScreen;
+  JMenuItem newConn, closeConn, info, screenshot;
+  JCheckBoxMenuItem profile, fullScreen, showToolbar;
   static LogWriter vlog = new LogWriter("MacMenuBar");
 }

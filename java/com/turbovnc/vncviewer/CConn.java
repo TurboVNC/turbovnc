@@ -1552,8 +1552,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void getOptions() {
-    boolean recreate = false, reconfigure = false, defaultSize = false;
-    boolean deleteRestore = false;
+    boolean recreate = false, reconfigure = false, deleteRestore = false;
 
     Options oldOpts = new Options(opts);
 
@@ -1636,12 +1635,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
       toggleFullScreen();
     } else if (recreate)
       recreateViewport();
-    else if (reconfigure) {
-      if (defaultSize)
-        sizeWindow(true);
-      else
-        reconfigureViewport(false);
-    }
+    else if (reconfigure)
+      reconfigureViewport(false);
     if (opts.showToolbar != oldOpts.showToolbar) {
       if (viewport != null)
         viewport.showToolbar(opts.showToolbar);
