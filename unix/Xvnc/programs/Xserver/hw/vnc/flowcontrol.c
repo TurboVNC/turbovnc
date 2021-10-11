@@ -177,7 +177,7 @@ void rfbUpdatePosition(rfbClientPtr cl, unsigned pos)
 
 Bool rfbSendRTTPing(rfbClientPtr cl)
 {
-  struct RTTInfo *rttInfo;
+  rfbRTTInfo *rttInfo;
   char type;
 
   if (!cl->enableFence)
@@ -193,7 +193,7 @@ Bool rfbSendRTTPing(rfbClientPtr cl)
                     sizeof(type), &type))
     return FALSE;
 
-  rttInfo = rfbAlloc0(sizeof(struct RTTInfo));
+  rttInfo = rfbAlloc0(sizeof(rfbRTTInfo));
 
   gettimeofday(&rttInfo->tv, NULL);
   rttInfo->pos = cl->lastPosition;
@@ -209,7 +209,7 @@ Bool rfbSendRTTPing(rfbClientPtr cl)
 static void HandleRTTPong(rfbClientPtr cl)
 {
   struct timeval now;
-  struct RTTInfo *rttInfo;
+  rfbRTTInfo *rttInfo;
   unsigned rtt, delay;
 
   if (xorg_list_is_empty(&cl->pings))
@@ -217,7 +217,7 @@ static void HandleRTTPong(rfbClientPtr cl)
 
   gettimeofday(&now, NULL);
 
-  rttInfo = xorg_list_first_entry(&cl->pings, struct RTTInfo, entry);
+  rttInfo = xorg_list_first_entry(&cl->pings, rfbRTTInfo, entry);
   xorg_list_del(&rttInfo->entry);
 
   cl->lastPong = *rttInfo;
@@ -316,11 +316,11 @@ static int GetUncongestedETA(rfbClientPtr cl)
 {
   unsigned targetAcked;
 
-  const struct RTTInfo *prevPing;
+  const rfbRTTInfo *prevPing;
   unsigned eta, elapsed;
   unsigned etaNext, delay;
 
-  struct RTTInfo *iter;
+  rfbRTTInfo *iter;
 
   targetAcked = cl->lastPosition - cl->congWindow;
 
@@ -339,12 +339,12 @@ static int GetUncongestedETA(rfbClientPtr cl)
   /* Walk the ping queue and figure out which ping we are waiting for in order
      to get to an uncongested state. */
   xorg_list_for_each_entry(iter, &cl->pings, entry) {
-    struct RTTInfo curPing;
+    rfbRTTInfo curPing;
 
     /* If we aren't waiting for a pong that will clear the congested state,
        then we have to estimate the final bit by pretending that we had a ping
        just after the last position update. */
-    if (iter == xorg_list_last_entry(&cl->pings, struct RTTInfo, entry)) {
+    if (iter == xorg_list_last_entry(&cl->pings, rfbRTTInfo, entry)) {
       curPing.tv = cl->lastUpdate;
       curPing.pos = cl->lastPosition;
       curPing.extra = cl->extraBuffer;
@@ -400,7 +400,7 @@ static unsigned GetExtraBuffer(rfbClientPtr cl)
 
 static unsigned GetInFlight(rfbClientPtr cl)
 {
-  struct RTTInfo nextPong;
+  rfbRTTInfo nextPong;
   unsigned etaNext, delay, elapsed, acked;
 
   /* Simple case? */
@@ -410,8 +410,8 @@ static unsigned GetInFlight(rfbClientPtr cl)
   /* No measurements yet? */
   if (cl->baseRTT == (unsigned)-1) {
     if (!xorg_list_is_empty(&cl->pings)) {
-      struct RTTInfo *rttInfo =
-        xorg_list_first_entry(&cl->pings, struct RTTInfo, entry);
+      rfbRTTInfo *rttInfo =
+        xorg_list_first_entry(&cl->pings, rfbRTTInfo, entry);
       return cl->lastPosition - rttInfo->pos;
     }
     return 0;
@@ -424,8 +424,7 @@ static unsigned GetInFlight(rfbClientPtr cl)
     nextPong.pos = cl->lastPosition;
     nextPong.extra = cl->extraBuffer;
   } else {
-    struct RTTInfo *rttInfo =
-      xorg_list_first_entry(&cl->pings, struct RTTInfo, entry);
+    rfbRTTInfo *rttInfo = xorg_list_first_entry(&cl->pings, rfbRTTInfo, entry);
     nextPong = *rttInfo;
   }
 

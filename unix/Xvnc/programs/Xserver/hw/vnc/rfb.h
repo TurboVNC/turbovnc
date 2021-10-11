@@ -199,12 +199,12 @@ typedef struct {
   } u;
 } rfbSockAddr;
 
-struct RTTInfo {
+typedef struct {
   struct timeval tv;
   unsigned pos, extra;
   char congested;
   struct xorg_list entry;
-};
+} rfbRTTInfo;
 
 
 /*
@@ -449,7 +449,7 @@ typedef struct rfbClientRec {
   int sockOffset;
   struct xorg_list pings;
   OsTimerPtr congestionTimer;
-  struct RTTInfo lastPong;
+  rfbRTTInfo lastPong;
   struct timeval lastPongArrival;
   int measurements;
   struct timeval lastAdjustment;

@@ -513,7 +513,7 @@ static rfbClientPtr rfbNewClient(int sock)
 void rfbClientConnectionGone(rfbClientPtr cl)
 {
   int i;
-  struct RTTInfo *rttInfo, *tmp;
+  rfbRTTInfo *rttInfo, *tmp;
 
   if (cl->prev)
     cl->prev->next = cl->next;
