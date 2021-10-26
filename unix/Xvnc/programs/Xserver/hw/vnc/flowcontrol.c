@@ -299,7 +299,7 @@ Bool rfbIsCongested(rfbClientPtr cl)
 
   eta = GetUncongestedETA(cl);
   if (eta >= 0)
-    cl->congestionTimer = TimerSet(cl->congestionTimer, 0, eta,
+    cl->congestionTimer = TimerSet(cl->congestionTimer, 0, eta <= 0 ? 1 : eta,
                                    congestionCallback, cl);
 
   return TRUE;
@@ -338,13 +338,14 @@ static int GetUncongestedETA(rfbClientPtr cl)
 
   /* Walk the ping queue and figure out which ping we are waiting for in order
      to get to an uncongested state. */
-  xorg_list_for_each_entry(iter, &cl->pings, entry) {
+  for (iter = NULL, iter = __container_of(cl->pings.next, iter, entry);;
+       iter = __container_of(iter->entry.next, iter, entry)) {
     rfbRTTInfo curPing;
 
     /* If we aren't waiting for a pong that will clear the congested state,
        then we have to estimate the final bit by pretending that we had a ping
        just after the last position update. */
-    if (iter == xorg_list_last_entry(&cl->pings, rfbRTTInfo, entry)) {
+    if (&iter->entry == &cl->pings) {
       curPing.tv = cl->lastUpdate;
       curPing.pos = cl->lastPosition;
       curPing.extra = cl->extraBuffer;
