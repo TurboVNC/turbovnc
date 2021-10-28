@@ -298,11 +298,13 @@ Bool rfbIsCongested(rfbClientPtr cl)
     return FALSE;
 
   eta = GetUncongestedETA(cl);
-  if (eta >= 0)
-    cl->congestionTimer = TimerSet(cl->congestionTimer, 0, eta <= 0 ? 1 : eta,
+  if (eta >= 1) {
+    cl->congestionTimer = TimerSet(cl->congestionTimer, 0, eta,
                                    congestionCallback, cl);
+    return TRUE;
+  }
 
-  return TRUE;
+  return FALSE;
 }
 
 
