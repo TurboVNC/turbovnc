@@ -1440,7 +1440,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   void showInfo() {
     JOptionPane pane = new JOptionPane(
       "Desktop name:  " + cp.name() + "\n" +
-      "Host:  " + sock.getPeerName() + ":" + sock.getPeerPort() + "\n" +
+      "Host:  " + sock.getPeerName() + "::" + sock.getPeerPort() + "\n" +
       "Size:  " + cp.width + "x" + cp.height + "\n" +
       "Pixel format:  " + desktop.getPF().print() + "\n" +
       "(server default " + serverPF.print() + ")\n" +
