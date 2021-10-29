@@ -45,6 +45,28 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       } else if (method.getName().equals("handlePreferences")) {
         if (!cc.options.isShown())
           cc.options.showDialog(cc.viewport);
+      } else if (method.getName().equals("handleQuitRequestWith")) {
+        try {
+          Class quitResponseClass;
+
+          if (Utils.JAVA_VERSION >= 9)
+            quitResponseClass = Class.forName("java.awt.desktop.QuitResponse");
+          else
+            quitResponseClass = Class.forName("com.apple.eawt.QuitResponse");
+
+          Method cancelQuit =
+            quitResponseClass.getMethod("cancelQuit", (Class[])null);
+          Method performQuit =
+            quitResponseClass.getMethod("performQuit", (Class[])null);
+
+          if (cc.confirmClose())
+            performQuit.invoke(args[1]);
+          else
+            cancelQuit.invoke(args[1]);
+        } catch (Exception e) {
+          vlog.info("Could not handle quit request:");
+          vlog.info("  " + e.toString());
+        }
       }
       return null;
     }
@@ -54,7 +76,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
 
   void setupAppMenu() {
     try {
-      Class appClass, aboutHandlerClass, prefsHandlerClass;
+      Class appClass, aboutHandlerClass, prefsHandlerClass, quitHandlerClass;
       Object obj;
 
       if (Utils.JAVA_VERSION >= 9) {
@@ -63,6 +85,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
         aboutHandlerClass = Class.forName("java.awt.desktop.AboutHandler");
         prefsHandlerClass =
           Class.forName("java.awt.desktop.PreferencesHandler");
+        quitHandlerClass = Class.forName("java.awt.desktop.QuitHandler");
       } else {
         appClass = Class.forName("com.apple.eawt.Application");
         Method getApplication = appClass.getMethod("getApplication",
@@ -70,6 +93,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
         obj = getApplication.invoke(appClass);
         aboutHandlerClass = Class.forName("com.apple.eawt.AboutHandler");
         prefsHandlerClass = Class.forName("com.apple.eawt.PreferencesHandler");
+        quitHandlerClass = Class.forName("com.apple.eawt.QuitHandler");
       }
 
       InvocationHandler aboutHandler = new MyInvocationHandler(cc);
@@ -87,6 +111,14 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       Method setPreferencesHandler =
         appClass.getMethod("setPreferencesHandler", prefsHandlerClass);
       setPreferencesHandler.invoke(obj, new Object[]{ proxy });
+
+      InvocationHandler quitHandler = new MyInvocationHandler(cc);
+      proxy = Proxy.newProxyInstance(quitHandlerClass.getClassLoader(),
+                                     new Class[]{ quitHandlerClass },
+                                     quitHandler);
+      Method setQuitHandler =
+        appClass.getMethod("setQuitHandler", quitHandlerClass);
+      setQuitHandler.invoke(obj, new Object[]{ proxy });
     } catch (Exception e) {
       vlog.info("Could not override About/Preferences menu items:");
       vlog.info("  " + e.toString());

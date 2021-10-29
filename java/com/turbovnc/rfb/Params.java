@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2012-2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012, 2016 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -378,6 +378,10 @@ public final class Params {
   "of the Windows TurboVNC Viewer.  Connection info files can also be " +
   "dragged & dropped onto the TurboVNC Viewer icon in order to initiate a " +
   "new connection.", null);
+
+  public static BoolParameter confirmClose =
+  new BoolParameter("ConfirmClose",
+  "Prompt for confirmation before closing a connection.", false);
 
   public static BoolParameter copyRect =
   new BoolParameter("CopyRect", null, true);

@@ -1422,10 +1422,36 @@ public class CConn extends CConnection implements UserPasswdGetter,
   ////////////////////////////////////////////////////////////////////
   // The following methods are all called from the EDT.
 
+  public boolean confirmClose() {
+    if (Params.confirmClose.getValue() && state() == RFBSTATE_NORMAL &&
+        !shuttingDown && sock != null) {
+      JOptionPane pane;
+      Object[] dlgOptions = { UIManager.getString("OptionPane.yesButtonText"),
+                              UIManager.getString("OptionPane.noButtonText") };
+
+      int port = sock.getPeerPort();
+      String name = (port >= 5900 && port <= 5999 ?
+                     sock.getPeerName() + ":" + (port - 5900) :
+                     sock.getPeerName() + "::" + port);
+      pane = new JOptionPane("Are you sure you want to close the\n" +
+                             "connection to " + name + "?",
+                             JOptionPane.WARNING_MESSAGE,
+                             JOptionPane.YES_NO_OPTION, null, dlgOptions,
+                             dlgOptions[1]);
+      JDialog dlg = pane.createDialog(null, "TurboVNC Viewer");
+      dlg.setAlwaysOnTop(true);
+      dlg.setVisible(true);
+      if (pane.getValue() == dlgOptions[1])
+        return false;
+    }
+    return true;
+  }
+
   // close() shuts down the socket, thus waking up the RFB thread.
   public void close() { close(true); }
 
   public void close(boolean disposeViewport) {
+    if (disposeViewport && !confirmClose()) return;
     deleteWindow(disposeViewport);
     shuttingDown = true;
     if (sock != null)
@@ -1473,7 +1499,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   void showInfo() {
     JOptionPane.showMessageDialog(viewport,
       "Desktop name:  " + cp.name() + "\n" +
-      "Host:  " + sock.getPeerName() + ":" + sock.getPeerPort() + "\n" +
+      "Host:  " + sock.getPeerName() + "::" + sock.getPeerPort() + "\n" +
       "Size:  " + cp.width + "x" + cp.height + "\n" +
       "Pixel format:  " + desktop.getPF().print() + "\n" +
       "(server default " + serverPF.print() + ")\n" +
