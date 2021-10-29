@@ -63,6 +63,10 @@ NullPointerException if view-only mode was toggled in the TurboVNC Viewer
 Options dialog, and full-screen mode was not also toggled, prior to connecting
 to a VNC server.
 
+12. Added a new parameter to the Java/Mac/Un\*x TurboVNC Viewer
+(`ConfirmClose`) that, when enabled, causes the viewer to prompt for
+confirmation before closing a connection.
+
 
 2.2.6
 =====

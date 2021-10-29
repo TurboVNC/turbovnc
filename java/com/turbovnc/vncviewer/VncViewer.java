@@ -1093,6 +1093,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "dragged & dropped onto the TurboVNC Viewer icon in order to initiate a " +
   "new connection.", null);
 
+  static BoolParameter confirmClose =
+  new BoolParameter("ConfirmClose",
+  "Prompt for confirmation before closing a connection.", false);
+
   static BoolParameter copyRect =
   new BoolParameter("CopyRect", null, true);
 

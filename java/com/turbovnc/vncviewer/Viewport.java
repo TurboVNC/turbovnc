@@ -43,6 +43,8 @@ public class Viewport extends JFrame {
     setIconImage(VncViewer.FRAME_IMAGE);
     UIManager.getDefaults().put("ScrollPane.ancestorInputMap",
       new UIDefaults.LazyInputMap(new Object[]{}));
+    if (VncViewer.confirmClose.getValue())
+      setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
     sp.getViewport().setBackground(Color.BLACK);
