@@ -1,6 +1,6 @@
 /* Copyright 2009 Pierre Ossman for Cendio AB
  * Copyright 2011 Brian P. Hinz
- * Copyright (C) 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2017-2018, 2021 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,25 @@ public class ScreenSet {
       Screen rscreen = (Screen)riter.next();
 
       if (!screen.equals(rscreen))
+        return false;
+    }
+
+    return true;
+  }
+
+  public final boolean equalsIgnoreID(ScreenSet ref) {
+    if (this == ref)
+      return true;
+    if (numScreens() != ref.numScreens())
+      return false;
+
+    Iterator<Screen> iter = screens.iterator();
+    Iterator<Screen> riter = ref.screens.iterator();
+    while (iter.hasNext() && riter.hasNext()) {
+      Screen screen = (Screen)iter.next();
+      Screen rscreen = (Screen)riter.next();
+
+      if (!screen.equalsIgnoreID(rscreen))
         return false;
     }
 

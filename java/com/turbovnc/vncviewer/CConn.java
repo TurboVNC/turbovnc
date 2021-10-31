@@ -1323,6 +1323,32 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
+  private void reconfigureAndRepaintViewport(boolean restore) {
+    reconfigureViewport(false);
+    // The viewport's componentResized() method isn't guaranteed to be called
+    // when reconfiguring the viewport, and it generally won't be called if
+    // only the scaling factor has changed while in full-screen mode.  Thus, we
+    // need to ensure that the appropriate scrollbar policy is set and the
+    // viewport is repainted.
+    if (desktop != null) {
+      if (opts.scalingFactor == Options.SCALE_AUTO ||
+          opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+        viewport.sp.setHorizontalScrollBarPolicy(
+          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        viewport.sp.setVerticalScrollBarPolicy(
+          ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+      } else {
+        viewport.sp.setHorizontalScrollBarPolicy(
+          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        viewport.sp.setVerticalScrollBarPolicy(
+          ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+      }
+      viewport.sp.validate();
+      desktop.resize();
+      desktop.paintImmediately(desktop.getBounds());
+    }
+  }
+
   // RFB thread: requestNewUpdate() requests an update from the server, having
   // set the format and encoding appropriately.
   private void requestNewUpdate() {
@@ -1652,6 +1678,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       deleteRestore = true;
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
+      // Ideally we could recreate the viewport on all platforms, but due to a
+      // Java bug, doing so on macOS causes the viewer to exit full-screen
+      // mode.
       if (!viewport.lionFSSupported() || !options.fullScreen.isSelected())
         recreate = true;
       else
@@ -1660,7 +1689,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     Options.DesktopSize oldDesktopSize = opts.desktopSize;
     opts.setDesktopSize(options.desktopSize.getSelectedItem().toString());
-    if (desktop != null && !opts.desktopSize.equals(oldDesktopSize)) {
+    if (desktop != null && !opts.desktopSize.equalsIgnoreID(oldDesktopSize)) {
       deleteRestore = true;
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1733,7 +1762,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     else if (recreate)
       recreateViewport();
     else if (reconfigure)
-      reconfigureViewport(false);
+      reconfigureAndRepaintViewport(false);
     if (deleteRestore) {
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1742,7 +1771,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     // desktop resize.  Otherwise, it won't occur until the mouse is moved or
     // something changes on the server (manual) or until the window is resized
     // (auto.)
-    if (firstUpdate && state() == RFBSTATE_NORMAL) {
+    if ((encodingChange || firstUpdate) && state() == RFBSTATE_NORMAL) {
       forceNonincremental = true;
       requestNewUpdate();
     }

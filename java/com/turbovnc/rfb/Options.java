@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2013, 2015, 2017-2018, 2020 D. R. Commander.
- *                                                All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015, 2017-2018, 2020-2021 D. R. Commander.
+ *                                                     All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -271,6 +271,11 @@ public class Options {
     public boolean equals(DesktopSize size) {
       return size.mode == mode && size.width == width &&
              size.height == height && size.layout.equals(layout);
+    }
+
+    public boolean equalsIgnoreID(DesktopSize size) {
+      return size.mode == mode && size.width == width &&
+             size.height == height && size.layout.equalsIgnoreID(layout);
     }
 
     public String getString() {
