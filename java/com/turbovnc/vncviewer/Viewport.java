@@ -332,6 +332,11 @@ public class Viewport extends JFrame implements Runnable {
       macMenu.updateProfile();
   }
 
+  public void updateMacMenuViewOnly() {
+    if (macMenu != null)
+      macMenu.viewOnly.setSelected(cc.opts.viewOnly);
+  }
+
   public void updateMacMenuZoom() {
     if (macMenu != null)
       macMenu.updateZoom();

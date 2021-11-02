@@ -1698,8 +1698,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
         viewport.showToolbar(opts.showToolbar);
       menu.showToolbar.setSelected(opts.showToolbar);
     }
-    if (opts.viewOnly != oldOpts.viewOnly)
+    if (opts.viewOnly != oldOpts.viewOnly) {
+      if (viewport != null)
+        viewport.updateMacMenuViewOnly();
       menu.viewOnly.setSelected(opts.viewOnly);
+    }
     if (opts.scalingFactor != oldOpts.scalingFactor ||
         !opts.desktopSize.equalsIgnoreID(oldOpts.desktopSize)) {
       if (viewport != null)
@@ -1824,8 +1827,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void toggleViewOnly() {
     opts.viewOnly = !opts.viewOnly;
     menu.viewOnly.setSelected(opts.viewOnly);
-    if (viewport != null && opts.showToolbar && !opts.fullScreen)
-      recreateViewport(true);
+    if (viewport != null) {
+      viewport.updateMacMenuViewOnly();
+      if (opts.showToolbar && !opts.fullScreen)
+        recreateViewport(true);
+    }
   }
 
   // EDT
