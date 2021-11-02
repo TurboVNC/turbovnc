@@ -1,6 +1,6 @@
 /* Copyright 2009 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2017-2018, 2021 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,10 @@ public class Screen {
   public final boolean equals(Screen r) {
     if (id != r.id)
       return false;
+    return equalsIgnoreID(r);
+  }
+
+  public final boolean equalsIgnoreID(Screen r) {
     if (!dimensions.equals(r.dimensions))
       return false;
     if (flags != r.flags)

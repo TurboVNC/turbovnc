@@ -476,6 +476,11 @@ public class Options {
              size.height == height && size.layout.equals(layout);
     }
 
+    public boolean equalsIgnoreID(DesktopSize size) {
+      return size.mode == mode && size.width == width &&
+             size.height == height && size.layout.equalsIgnoreID(layout);
+    }
+
     public String getString() {
       if (mode == Options.SIZE_AUTO)
         return "Auto";
