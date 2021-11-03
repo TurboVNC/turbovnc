@@ -2436,12 +2436,13 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
             int sf = (_this->m_opts.m_scale_num * 100) /
                      _this->m_opts.m_scale_den;
             if (sf <= 100)
-              sf = ((sf / 10) - 1) * 10;
+              sf = (((sf + 9) / 10) - 1) * 10;
             else if (sf >= 100 && sf <= 200)
-              sf = ((sf / 25) - 1) * 25;
+              sf = (((sf + 24) / 25) - 1) * 25;
             else
-              sf = ((sf / 50) - 1) * 50;
+              sf = (((sf + 49) / 50) - 1) * 50;
             if (sf < 10) sf = 10;
+            if (sf > 400) sf = 400;
             _this->m_opts.m_scale_num = sf;
             _this->m_opts.m_scale_den = 100;
             _this->m_opts.m_scaling = (sf != 100);
