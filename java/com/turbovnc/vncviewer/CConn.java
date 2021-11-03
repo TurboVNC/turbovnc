@@ -1772,6 +1772,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     else
       sf = (((sf + 49) / 50) - 1) * 50;
     if (sf < 10) sf = 10;
+    if (sf > 400) sf = 400;
     opts.scalingFactor = sf;
 
     savedState = -1;
