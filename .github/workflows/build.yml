@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  LJT_VERSION: 2.1.0
+  LJT_VERSION: 2.1.2
   LJT_GPG_KEY: https://sourceforge.net/projects/libjpeg-turbo/files/LJT-GPG-KEY
 
 jobs:
