@@ -21,8 +21,11 @@ provides similar levels of performance and more features, including some
 features (TLS encryption and SSH tunneling, most notably) that would have been
 difficult to implement in the native viewer.
 
-    Retiring the Windows TurboVNC Viewer has resulted in the following feature
-regressions for Windows clients, relative to TurboVNC 2.2.x:
+    Retiring the Windows TurboVNC Viewer has resulted in the following
+(hopefully temporary) feature regressions for Windows clients, relative to
+TurboVNC 2.2.x:
+     - The ability to set different viewer options for each VNC server
+     - The ability to save connection info files
      - 3-button mouse emulation
      - Bump scrolling in full-screen mode
      - Wacom tablet support (although the Windows TurboVNC Viewer, owing to its
