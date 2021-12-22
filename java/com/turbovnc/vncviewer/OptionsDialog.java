@@ -1327,6 +1327,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     opts.recvClipboard = recvClipboard.isSelected();
     opts.sendClipboard = sendClipboard.isSelected();
 
+    // Security
+    opts.user = (username.getText().isEmpty() ? null : username.getText());
+    opts.sendLocalUsername = sendLocalUsername.isSelected();
+
     // Security: Security types
     opts.disableSecType(RFB.SECTYPE_NONE);
     opts.disableSecType(RFB.SECTYPE_VNCAUTH);
@@ -1368,10 +1372,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       opts.enableSecType(RFB.SECTYPE_X509_IDENT);
     if (secUnixLogin.isSelected())
       opts.enableSecType(RFB.SECTYPE_UNIX_LOGIN);
-
-    // Security
-    opts.user = (username.getText().isEmpty() ? null : username.getText());
-    opts.sendLocalUsername = sendLocalUsername.isSelected();
 
     // Security: X.509 certificate validation
     opts.x509ca = (x509ca.getText().isEmpty() ? null : x509ca.getText());
