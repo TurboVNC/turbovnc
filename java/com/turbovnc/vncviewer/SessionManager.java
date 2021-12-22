@@ -155,7 +155,13 @@ public final class SessionManager extends Tunnel {
                                (error != null ? ":\n    " + error : ""));
     }
 
-    vlog.debug("Available sessions: " + (error != null ? error : "None"));
+    StringBuilder sb = null;
+    if (sessions != null) {
+      sb = new StringBuilder();
+      for (String s : sessions)
+        sb.append(s + " ");
+    }
+    vlog.debug("Available sessions: " + (sb != null ? sb.toString() : "None"));
 
     return sessions;
   }
