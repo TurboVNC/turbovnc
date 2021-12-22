@@ -1,5 +1,5 @@
-3.0 pre-beta
-============
+3.0 beta1
+=========
 
 ### Significant changes relative to 2.2.7:
 
