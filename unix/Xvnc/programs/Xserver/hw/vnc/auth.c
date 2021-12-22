@@ -898,6 +898,12 @@ static void rfbSendSecurityTypeList(rfbClientPtr cl)
       if (((s->preference != -1) && (i != s->preference)) || !s->enabled)
         continue;
 
+      if (cl->reverseConnection && !strncmp(s->name, "x509", 4)) {
+        rfbLog("Security type \'%s\' disabled for reverse connections\n",
+               s->name);
+        continue;
+      }
+
       r = s->rfbSecType;
 
       if (n > MAX_SECURITY_TYPES)
@@ -1049,6 +1055,9 @@ void rfbVeNCryptAuthenticate(rfbClientPtr cl)
     for (s = secTypes; s->name != NULL; s++) {
       if (((s->preference != -1) && (i != s->preference)) || !s->enabled ||
           s->subType == -1)
+        continue;
+
+      if (cl->reverseConnection && !strncmp(s->name, "x509", 4))
         continue;
 
       if (count > MAX_VENCRYPT_SUBTYPES)
@@ -1257,60 +1266,59 @@ static void rfbSendAuthCaps(rfbClientPtr cl)
   rfbAuthenticationCapsMsg caps;
   rfbCapabilityInfo caplist[MAX_AUTH_CAPS];
   int count = 0;
-  int j;
+  int i, j;
   SecTypeData *s;
   AuthCapData *c;
   rfbCapabilityInfo *pcap;
   char tempstr[9];
 
-  if (!cl->reverseConnection) {
-    int i;
+  /*
+   * When no preference order was set using "permitted-security-types",
+   * the default value of preferenceLimit (1) will cause us to execute
+   * the outer loop once.  In this case, the s->preference members will
+   * all be the default value (-1), and we skip the order testing.
+   */
+  for (i = 0; i < preferenceLimit; i++) {
+    for (s = secTypes; s->name != NULL; s++) {
+      if (((s->preference != -1) && (i != s->preference)) || !s->enabled)
+        continue;
 
-    /*
-     * When no preference order was set using "permitted-security-types",
-     * the default value of preferenceLimit (1) will cause us to execute
-     * the outer loop once.  In this case, the s->preference members will
-     * all be the default value (-1), and we skip the order testing.
-     */
-    for (i = 0; i < preferenceLimit; i++) {
-      for (s = secTypes; s->name != NULL; s++) {
-        if (((s->preference != -1) && (i != s->preference)) || !s->enabled)
-          continue;
+      if (cl->reverseConnection && !strncmp(s->name, "x509", 4))
+        continue;
 
-        c = s->authCap;
+      c = s->authCap;
 
-        if (count > MAX_AUTH_CAPS)
-          FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS");
+      if (count > MAX_AUTH_CAPS)
+        FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS");
 
-        /*
-         * Check to see if we have already advertised this auth cap.
-         * VNC password and OTP both use the VNC authentication cap.
-         */
-        for (j = 0; j < count; j++) {
-          if (cl->authCaps[j] == c->authType)
-            break;
-        }
-
-        if (j < count)
-          continue;
-
-        pcap = &caplist[count];
-        pcap->code = Swap32IfLE(c->authType);
-        memcpy(pcap->vendorSignature, c->vendorSignature,
-               sz_rfbCapabilityInfoVendor);
-        memcpy(pcap->nameSignature, c->nameSignature,
-               sz_rfbCapabilityInfoName);
-        cl->authCaps[count] = c->authType;
-        strncpy(tempstr, (char *)pcap->nameSignature, 8);
-        tempstr[8] = 0;
-        rfbLog("Advertising Tight auth cap '%s'\n", tempstr);
-        count++;
+      /*
+       * Check to see if we have already advertised this auth cap.
+       * VNC password and OTP both use the VNC authentication cap.
+       */
+      for (j = 0; j < count; j++) {
+        if (cl->authCaps[j] == c->authType)
+          break;
       }
-    }
 
-    if (count == 0)
-      FatalError("rfbSendAuthCaps: authentication required but no security types enabled! This should not have happened!");
+      if (j < count)
+        continue;
+
+      pcap = &caplist[count];
+      pcap->code = Swap32IfLE(c->authType);
+      memcpy(pcap->vendorSignature, c->vendorSignature,
+             sz_rfbCapabilityInfoVendor);
+      memcpy(pcap->nameSignature, c->nameSignature,
+             sz_rfbCapabilityInfoName);
+      cl->authCaps[count] = c->authType;
+      strncpy(tempstr, (char *)pcap->nameSignature, 8);
+      tempstr[8] = 0;
+      rfbLog("Advertising Tight auth cap '%s'\n", tempstr);
+      count++;
+    }
   }
+
+  if (count == 0)
+    FatalError("rfbSendAuthCaps: authentication required but no security types enabled! This should not have happened!");
 
   cl->nAuthCaps = count;
   caps.nAuthTypes = Swap32IfLE((CARD32)count);

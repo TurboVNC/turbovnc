@@ -672,7 +672,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   public void setOptions() {
-    options.setOptions(opts, true, true, true, true);
+    options.setX509Enabled(false);
+    options.setOptions(opts, true, true, false, true);
     setTightOptions();
   }
 

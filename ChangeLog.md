@@ -217,6 +217,9 @@ or reset the scaling factor to 100% when automatic desktop resizing and
 automatic scaling are disabled.  This functionality previously only existed in
 the Windows TurboVNC Viewer.
 
+30. Listen mode now supports authentication and encryption using any security
+type other than the X509* security types.
+
 
 2.2.7
 =====

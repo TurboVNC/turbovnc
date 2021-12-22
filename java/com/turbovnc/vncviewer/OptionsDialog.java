@@ -68,6 +68,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private String compressionLabelString;
   private Hashtable<Integer, String> subsamplingLabelTable;
   private String oldScalingFactor, oldDesktopSize;
+  private boolean enableX509 = true;
 
   OptionsDialog(OptionsDialogCallback callback_) {
     super(true);
@@ -1167,19 +1168,35 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     secVnc.setEnabled(!unixLoginForced);
     secTLSNone.setEnabled(!unixLoginForced);
     secTLSVnc.setEnabled(!unixLoginForced);
-    secX509None.setEnabled(!unixLoginForced);
-    secX509Vnc.setEnabled(!unixLoginForced);
+    secX509None.setEnabled(!unixLoginForced && enableX509);
+    secX509Vnc.setEnabled(!unixLoginForced && enableX509);
 
     boolean x509 = (secX509None.isEnabled() && secX509None.isSelected()) ||
       (secX509Vnc.isEnabled() && secX509Vnc.isSelected()) ||
       (secX509Plain.isEnabled() && secX509Plain.isSelected()) ||
       (secX509Ident.isEnabled() && secX509Ident.isSelected());
-    x509ca.setEnabled(x509);
-    x509caButton.setEnabled(x509);
-    x509caLabel.setEnabled(x509);
-    x509crl.setEnabled(x509);
-    x509crlButton.setEnabled(x509);
-    x509crlLabel.setEnabled(x509);
+    x509ca.setEnabled(x509 && enableX509);
+    x509caButton.setEnabled(x509 && enableX509);
+    x509caLabel.setEnabled(x509 && enableX509);
+    x509crl.setEnabled(x509 && enableX509);
+    x509crlButton.setEnabled(x509 && enableX509);
+    x509crlLabel.setEnabled(x509 && enableX509);
+  }
+
+  public void setX509Enabled(boolean enabled) {
+    enableX509 = enabled;
+    if (!enabled) {
+      secX509None.setEnabled(false);
+      secX509Vnc.setEnabled(false);
+      secX509Plain.setEnabled(false);
+      secX509Ident.setEnabled(false);
+      x509ca.setEnabled(false);
+      x509caButton.setEnabled(false);
+      x509caLabel.setEnabled(false);
+      x509crl.setEnabled(false);
+      x509crlButton.setEnabled(false);
+      x509crlLabel.setEnabled(false);
+    }
   }
 
   public void setOptions(Options opts, boolean enableDesktopSize,
