@@ -174,6 +174,9 @@ public abstract class CConnection extends CMsgHandler {
         if (serverSecType == RFB.SECTYPE_TIGHT)
           secType = RFB.SECTYPE_TIGHT;
 
+        if (opts.sessMgrActive && Params.sessMgrAuto.getValue())
+          secType = RFB.SECTYPE_VNCAUTH;
+
         /*
          * Use the first type sent by server which matches client's type.
          * It means server's order specifies priority.

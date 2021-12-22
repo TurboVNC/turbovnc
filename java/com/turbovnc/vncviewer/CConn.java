@@ -131,18 +131,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
               close();
               return;
             }
-            if (Params.sessMgrAuto.getValue()) {
-              opts.disableSecType(RFB.SECTYPE_NONE);
-              opts.disableSecType(RFB.SECTYPE_TLS_NONE);
-              opts.disableSecType(RFB.SECTYPE_X509_NONE);
-              opts.disableSecType(RFB.SECTYPE_TLS_VNC);
-              opts.disableSecType(RFB.SECTYPE_X509_VNC);
-              opts.disableSecType(RFB.SECTYPE_PLAIN);
-              opts.disableSecType(RFB.SECTYPE_TLS_PLAIN);
-              opts.disableSecType(RFB.SECTYPE_X509_PLAIN);
-              opts.disableSecType(RFB.SECTYPE_UNIX_LOGIN);
-              opts.tunnel = true;
-            }
+            opts.sessMgrActive = true;
             opts.port = Hostname.getPort(session);
           } catch (Exception e) {
             throw new ErrorException("Session Manager Error:\n" +

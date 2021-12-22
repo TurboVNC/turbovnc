@@ -544,6 +544,7 @@ public class Options {
   public boolean sendLocalUsername;
   public Session sshSession;
   public boolean sshTunnelActive;
+  public boolean sessMgrActive;
   public String sshUser;
   public boolean tunnel;
   public String user;

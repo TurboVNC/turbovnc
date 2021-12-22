@@ -46,11 +46,14 @@ public class Tunnel {
     String gatewayHost;
     String remoteHost;
 
+    boolean tunnel = opts.tunnel ||
+                     (opts.sessMgrActive && Params.sessMgrAuto.getValue());
+
     localPort = TcpSocket.findFreeTcpPort();
     if (localPort == 0)
       throw new ErrorException("Could not obtain free TCP port");
 
-    if (opts.tunnel) {
+    if (tunnel) {
       gatewayHost = Hostname.getHost(opts.serverName);
       remoteHost = "localhost";
     } else {
@@ -64,7 +67,7 @@ public class Tunnel {
       remotePort = Hostname.getPort(opts.serverName);
 
     String pattern = null;
-    if (opts.tunnel) {
+    if (tunnel) {
       pattern = System.getProperty("turbovnc.tunnel");
       if (pattern == null)
         pattern = System.getenv("VNC_TUNNEL_CMD");
@@ -244,10 +247,10 @@ public class Tunnel {
   private static final String DEFAULT_VIA_CMD =
     DEFAULT_SSH_CMD + " -f -L %L:%H:%R %G sleep 20";
 
-  public static void createTunnelExt(String gatewayHost, String remoteHost,
-                                     int remotePort, int localPort,
-                                     String pattern, Options opts)
-                                     throws Exception {
+  private static void createTunnelExt(String gatewayHost, String remoteHost,
+                                      int remotePort, int localPort,
+                                      String pattern, Options opts)
+                                      throws Exception {
     if (pattern == null || pattern.length() < 1)
       pattern = (opts.tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
 
