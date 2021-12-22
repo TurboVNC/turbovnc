@@ -3,6 +3,7 @@
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2012-2013, 2015-2018, 2020-2021 D. R. Commander.
  *                                               All Rights Reserved.
+ * Copyright (C) 2021 Steffen Kieß
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +28,8 @@ import java.util.*;
 import com.turbovnc.rdr.*;
 
 import com.jcraft.jsch.Session;
+
+import com.turbovnc.network.Socket;
 
 public class Options {
 
@@ -64,6 +67,8 @@ public class Options {
     sendClipboard = old.sendClipboard;
     if (old.serverName != null) serverName = new String(old.serverName);
     shared = old.shared;
+    if (old.unixDomainPath != null)
+      unixDomainPath = new String(old.unixDomainPath);
 
     fsAltEnter = old.fsAltEnter;
     grabKeyboard = old.grabKeyboard;
@@ -88,6 +93,7 @@ public class Options {
 
     enabledSecTypes = new ArrayList<Integer>(old.enabledSecTypes);
     sendLocalUsername = old.sendLocalUsername;
+    stdioSocket = old.stdioSocket;
     sshSession = old.sshSession;
     sshTunnelActive = old.sshTunnelActive;
     if (old.sshUser != null) sshUser = new String(old.sshUser);
@@ -289,6 +295,7 @@ public class Options {
     printOpt("sendClipboard", sendClipboard);
     printOpt("serverName", serverName);
     printOpt("shared", shared);
+    printOpt("unixDomainPath", unixDomainPath);
 
     printOpt("fsAltEnter", fsAltEnter);
     printOpt("grabKeyboard", grabKeyboard);
@@ -519,6 +526,7 @@ public class Options {
   public boolean sendClipboard;
   public String serverName;
   public boolean shared;
+  public String unixDomainPath;
   // INPUT OPTIONS
   public boolean fsAltEnter;
   public int grabKeyboard;
@@ -542,6 +550,7 @@ public class Options {
   // SECURITY AND AUTHENTICATION OPTIONS
   private List<Integer> enabledSecTypes;
   public boolean sendLocalUsername;
+  public Socket stdioSocket;
   public Session sshSession;
   public boolean sshTunnelActive;
   public boolean sessMgrActive;

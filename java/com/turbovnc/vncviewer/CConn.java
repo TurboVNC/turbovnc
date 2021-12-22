@@ -2,6 +2,7 @@
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2021 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
+ * Copyright (C) 2021 Steffen Kieß
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,6 +106,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           !Params.alwaysShowConnectionDialog.getValue()) {
         if (opts.via == null || opts.via.indexOf(':') < 0) {
           port = opts.port = Hostname.getPort(opts.serverName);
+          opts.unixDomainPath = Hostname.getUnixDomainPath(opts.serverName);
           serverName = opts.serverName = Hostname.getHost(opts.serverName);
         }
       } else {
@@ -118,7 +120,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
         serverName = opts.serverName;
       }
 
-      if (opts.via != null && opts.via.indexOf(':') >= 0) {
+      // A unix domain connection to non-localhost requires a tunnel
+      if (opts.unixDomainPath != null && opts.via == null && !opts.tunnel &&
+          !opts.serverName.equals("localhost"))
+        opts.tunnel = true;
+
+      if (opts.unixDomainPath != null && opts.via == null && !opts.tunnel) {
+        opts.stdioSocket = Tunnel.connectUnixDirect(opts.unixDomainPath);
+      } else if (opts.via != null && opts.via.indexOf(':') >= 0) {
         port = Hostname.getPort(opts.via);
         serverName = Hostname.getHost(opts.via);
       } else if (opts.via != null || opts.tunnel ||
@@ -140,15 +149,17 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
         try {
           Tunnel.createTunnel(opts);
-          port = Hostname.getPort(opts.serverName);
-          serverName = Hostname.getHost(opts.serverName);
+          if (opts.stdioSocket == null) {
+            port = Hostname.getPort(opts.serverName);
+            serverName = Hostname.getHost(opts.serverName);
+          }
         } catch (Exception e) {
           throw new ErrorException("Could not create SSH tunnel:\n" +
                                    e.getMessage());
         }
       }
 
-      if (port == 0) {
+      if (port == 0 && opts.stdioSocket == null) {
         try {
           // TurboVNC Session Manager
           String session = SessionManager.createSession(opts);
@@ -164,8 +175,16 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
       }
 
-      sock = new TcpSocket(serverName, port);
-      vlog.info("connected to host " + serverName + " port " + port);
+      if (opts.stdioSocket == null) {
+        sock = new TcpSocket(serverName, port);
+        vlog.info("connected to host " + serverName + " port " + port);
+      } else {
+        sock = opts.stdioSocket;
+        if (opts.serverName.equals("localhost"))
+          vlog.info("connected to socket " + opts.unixDomainPath);
+        else
+          vlog.info("connected over ssh to host " + opts.serverName + " socket " + opts.unixDomainPath);
+      }
     }
 
     if (benchmark) {
@@ -1474,6 +1493,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (opts.sshSession != null) {
       opts.sshSession.disconnect();
       opts.sshSession = null;
+    }
+    if (opts.stdioSocket != null) {
+      opts.stdioSocket.shutdown();
+      opts.stdioSocket = null;
     }
     if (reader != null)
       reader.close();
