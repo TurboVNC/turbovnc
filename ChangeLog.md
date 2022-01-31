@@ -1,3 +1,11 @@
+2.2.8
+=====
+
+1. Fixed an issue in the Java TurboVNC Viewer whereby scroll wheel events were
+transmitted to the VNC Server with incorrect coordinates if desktop scaling was
+enabled.
+
+
 2.2.7
 =====
 

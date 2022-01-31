@@ -2433,6 +2433,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
       wheelMask = buttonMask | RFB.BUTTON5_MASK;
     }
 
+    if (cp.width != desktop.scaledWidth ||
+        cp.height != desktop.scaledHeight) {
+      int sx = (desktop.scaleWidthRatio == 1.00) ?
+        ev.getX() : (int)Math.floor(ev.getX() / desktop.scaleWidthRatio);
+      int sy = (desktop.scaleHeightRatio == 1.00) ?
+        ev.getY() : (int)Math.floor(ev.getY() / desktop.scaleHeightRatio);
+      ev.translatePoint(sx - ev.getX(), sy - ev.getY());
+    }
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       int dx = (int)Math.floor(viewport.dx / desktop.scaleWidthRatio);
       int dy = (int)Math.floor(viewport.dy / desktop.scaleHeightRatio);
