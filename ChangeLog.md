@@ -1,3 +1,13 @@
+3.0 post-beta
+=============
+
+### Significant changes relative to 3.0 beta1:
+
+1. Fixed an issue in the TurboVNC Viewer whereby scroll wheel events were
+transmitted to the VNC Server with incorrect coordinates if desktop scaling was
+enabled.
+
+
 3.0 beta1
 =========
 
