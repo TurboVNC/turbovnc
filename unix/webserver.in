@@ -1,6 +1,7 @@
 #!@PYTHON_EXECUTABLE@
 #
 #  Copyright (C) 2020 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2022 G. Brandl.  All Rights Reserved.
 #
 #  This is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -18,7 +19,11 @@
 #  USA.
 #
 
-import BaseHTTPServer, SimpleHTTPServer
+try:
+  from http.server import HTTPServer, SimpleHTTPRequestHandler
+except ImportError:
+  from BaseHTTPServer import HTTPServer
+  from SimpleHTTPServer import SimpleHTTPRequestHandler
 import os, ssl, sys
 
 dir = ''
@@ -49,9 +54,7 @@ print("noVNC web server: Serving files from directory " + dir)
 os.chdir(dir)
 print("noVNC web server: Listening on Port " + str(httpPort))
 
-httpServer = \
-  BaseHTTPServer.HTTPServer(('', httpPort),
-                            SimpleHTTPServer.SimpleHTTPRequestHandler)
+httpServer = HTTPServer(('', httpPort), SimpleHTTPRequestHandler)
 if x509CertFile != '' and x509KeyFile != '':
   print("noVNC web server: Using X.509 certificate file " + x509CertFile)
   print("noVNC web server: Using X.509 private key file " + x509KeyFile)

@@ -98,7 +98,22 @@ execute_process(COMMAND chmod +x vncserver
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
 if(TVNC_BUILDWEBSERVER)
-	find_package(PythonInterp 2.6 REQUIRED)
+	if(CMAKE_VERSION VERSION_GREATER 3.12 OR
+		CMAKE_VERSION VERSION_EQUAL 3.12)
+		find_package(Python 3.0 REQUIRED)
+		if(CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
+			set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+		else()
+			string(REGEX REPLACE "\.[0-9]+$" "" PYTHON_EXECUTABLE
+				${Python_EXECUTABLE})
+			set(PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} PARENT_SCOPE)
+		endif()
+		message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+		set(PYTHON_VERSION ${Python_VERSION} PARENT_SCOPE)
+	else()
+		find_package(PythonInterp 2.6 REQUIRED)
+		set(PYTHON_VERSION ${PYTHON_VERSION_STRING} PARENT_SCOPE)
+	endif()
 	configure_file(webserver.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/webserver
 		@ONLY)
 	execute_process(COMMAND chmod +x webserver

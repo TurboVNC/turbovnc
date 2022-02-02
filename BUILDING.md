@@ -9,6 +9,9 @@ Build Requirements
 ### All Systems
 
 - [CMake](http://www.cmake.org) v2.8.12 or later
+  * CMake 3.12 or later is required if it is desirable or necessary to use
+    Python 3 to run the simple web server for noVNC (part of the TurboVNC
+    Server.)
 
 - libjpeg-turbo SDK v1.2 or later
   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"

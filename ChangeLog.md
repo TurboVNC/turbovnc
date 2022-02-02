@@ -7,6 +7,11 @@
 transmitted to the VNC Server with incorrect coordinates if desktop scaling was
 enabled.
 
+2. The simple web server for noVNC (part of the TurboVNC Server) now supports
+Python 3, and the official TurboVNC packages now require Python 3.  The
+TurboVNC Server must be built with CMake 3.12 or later in order for the
+simple web server to use Python 3.
+
 
 3.0 beta1
 =========
