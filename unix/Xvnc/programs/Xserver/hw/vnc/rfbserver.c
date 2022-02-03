@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2021 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2022 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2021 AnatoScope SA.  All Rights Reserved.
  *  Copyright (C) 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2011 Joel Martin
@@ -145,7 +145,7 @@ void IdleTimerCheck(void)
 BOOL rfbProfile = FALSE;
 static double tUpdate = 0., tStart = -1., tElapsed, mpixels = 0.,
   idmpixels = 0.;
-static unsigned long iter = 0;
+static unsigned long updates = 0;
 unsigned long long sendBytes = 0;
 
 double gettime(void)
@@ -318,13 +318,13 @@ rfbClientPtr rfbReverseConnection(char *host, int port, int id)
     return (rfbClientPtr)NULL;
 
   if (id > 0) {
-    rfbClientRec cl;
+    rfbClientRec clTemp;
     char temps[250];
     memset(temps, 0, 250);
     snprintf(temps, 250, "ID:%d", id);
     rfbLog("UltraVNC Repeater Mode II ID is %d\n", id);
-    cl.sock = sock;
-    if (WriteExact(&cl, temps, 250) < 0) {
+    clTemp.sock = sock;
+    if (WriteExact(&clTemp, temps, 250) < 0) {
       rfbLogPerror("rfbReverseConnection: write");
       rfbCloseSock(sock);
       return NULL;
@@ -1153,16 +1153,16 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
       if (cl->enableGII && firstGII) {
         /* Send GII server version message to all clients */
-        rfbGIIServerVersionMsg msg;
+        rfbGIIServerVersionMsg svmsg;
 
-        msg.type = rfbGIIServer;
+        svmsg.type = rfbGIIServer;
         /* We always send as big endian to make things easier on the Java
            viewer. */
-        msg.endianAndSubType = rfbGIIVersion | rfbGIIBE;
-        msg.length = Swap16IfLE(sz_rfbGIIServerVersionMsg - 4);
-        msg.maximumVersion = msg.minimumVersion = Swap16IfLE(1);
+        svmsg.endianAndSubType = rfbGIIVersion | rfbGIIBE;
+        svmsg.length = Swap16IfLE(sz_rfbGIIServerVersionMsg - 4);
+        svmsg.maximumVersion = svmsg.minimumVersion = Swap16IfLE(1);
 
-        if (WriteExact(cl, (char *)&msg, sz_rfbGIIServerVersionMsg) < 0) {
+        if (WriteExact(cl, (char *)&svmsg, sz_rfbGIIServerVersionMsg) < 0) {
           rfbLogPerror("rfbProcessClientNormalMessage: write");
           rfbCloseClient(cl);
           return;
@@ -2240,22 +2240,22 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
   if (rfbProfile) {
     tUpdate += gettime() - tUpdateStart;
     tElapsed = gettime() - tStart;
-    iter++;
+    updates++;
 
     if (tElapsed > 5.) {
       rfbLog("%.2f updates/sec,  %.2f Mpixels/sec,  %.3f Mbits/sec\n",
-             (double)iter / tElapsed, mpixels / tElapsed,
+             (double)updates / tElapsed, mpixels / tElapsed,
              (double)sendBytes / 125000. / tElapsed);
       rfbLog("Time/update:  Encode = %.3f ms,  Other = %.3f ms\n",
-             tUpdate / (double)iter * 1000.,
-             (tElapsed - tUpdate) / (double)iter * 1000.);
+             tUpdate / (double)updates * 1000.,
+             (tElapsed - tUpdate) / (double)updates * 1000.);
       if (cl->compareFB) {
         rfbLog("Identical Mpixels/sec:  %.2f  (%f %%)\n",
                (double)idmpixels / tElapsed, idmpixels / mpixels * 100.0);
         idmpixels = 0.;
       }
       tUpdate = 0.;
-      iter = 0;
+      updates = 0;
       mpixels = 0.;
       sendBytes = 0;
       tStart = gettime();

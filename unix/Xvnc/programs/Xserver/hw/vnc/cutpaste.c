@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2014, 2017-2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014, 2017-2019, 2022 D. R. Commander.  All Rights Reserved.
  *  Copyright 2016-2017 Pierre Ossman for Cendio AB
  *
  *  This is free software; you can redistribute it and/or modify
@@ -103,7 +103,7 @@ Bool rfbSyncPrimary = TRUE;
 static Bool inSetXCutText = FALSE;
 static char *clientCutText = 0;
 static int clientCutTextLen = 0;
-static WindowPtr pWin = NULL;
+static WindowPtr pSelectionWin = NULL;
 static Window win = 0;
 static Atom xaPRIMARY, xaCLIPBOARD, xaTARGETS, xaTIMESTAMP, xaSTRING, xaTEXT,
   xaUTF8_STRING;
@@ -255,15 +255,15 @@ static int vncCreateSelectionWindow(void)
   ScreenPtr pScreen;
   int result;
 
-  if (pWin) return Success;
+  if (pSelectionWin) return Success;
 
   pScreen = screenInfo.screens[0];
   win = FakeClientID(0);
-  pWin = CreateWindow(win, pScreen->root, 0, 0, 1, 1, 0, InputOnly, 0, NULL, 0,
-                      serverClient, CopyFromParent, &result);
-  if (!pWin) return result;
+  pSelectionWin = CreateWindow(win, pScreen->root, 0, 0, 1, 1, 0, InputOnly, 0,
+                               NULL, 0, serverClient, CopyFromParent, &result);
+  if (!pSelectionWin) return result;
 
-  if (!AddResource(pWin->drawable.id, RT_WINDOW, pWin))
+  if (!AddResource(pSelectionWin->drawable.id, RT_WINDOW, pSelectionWin))
     return BadAlloc;
 
   return Success;
@@ -279,7 +279,7 @@ void vncHandleSelection(Atom selection, Atom target, Atom property,
   PropertyPtr prop;
   int rc;
 
-  if ((rc = dixLookupProperty(&prop, pWin, property, serverClient,
+  if ((rc = dixLookupProperty(&prop, pSelectionWin, property, serverClient,
                               DixReadAccess)) != Success) {
     LogMessage(X_ERROR, "dixLookupProperty() failed: %d\n", rc);
     return;
@@ -398,7 +398,7 @@ static int vncOwnSelection(Atom selection)
 
   pSel->lastTimeChanged = currentTime;
   pSel->window = win;
-  pSel->pWin = pWin;
+  pSel->pWin = pSelectionWin;
   pSel->client = serverClient;
 
   info.selection = pSel;
