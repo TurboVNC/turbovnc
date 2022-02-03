@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012-2020 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2020, 2022 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -1632,7 +1632,7 @@ CARD32 rfbAuthFailTimeout = DEFAULT_AUTH_FAIL_TIMEOUT;
 
 static int rfbAuthFails = 0;
 static Bool rfbAuthTooManyFails = FALSE;
-static OsTimerPtr timer = NULL;
+static OsTimerPtr failTimer = NULL;
 
 
 /*
@@ -1666,7 +1666,7 @@ Bool rfbAuthConsiderBlocking(void)
 
     for (i = rfbAuthMaxFails; i < rfbAuthFails; i++)
       delay *= 2;
-    timer = TimerSet(timer, 0, delay, rfbAuthReenable, NULL);
+    failTimer = TimerSet(failTimer, 0, delay, rfbAuthReenable, NULL);
     rfbAuthTooManyFails = TRUE;
     return TRUE;
   }

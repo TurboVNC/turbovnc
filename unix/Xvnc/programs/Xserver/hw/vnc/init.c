@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2021 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2022 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -715,7 +715,7 @@ static int numFormats = 6;
 #endif
 
 
-void InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
+void InitOutput(ScreenInfo *pScreenInfo, int argc, char **argv)
 {
   int i;
 #ifdef GLXEXT
@@ -753,10 +753,10 @@ void InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
 
   /* Initialize pixmap formats */
 
-  screenInfo->imageByteOrder = IMAGE_BYTE_ORDER;
-  screenInfo->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
-  screenInfo->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
-  screenInfo->bitmapBitOrder = BITMAP_BIT_ORDER;
+  pScreenInfo->imageByteOrder = IMAGE_BYTE_ORDER;
+  pScreenInfo->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
+  pScreenInfo->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
+  pScreenInfo->bitmapBitOrder = BITMAP_BIT_ORDER;
   if (rfbFB.depth == 30) {
     numFormats++;
 #ifdef RENDER
@@ -768,9 +768,9 @@ void InitOutput(ScreenInfo *screenInfo, int argc, char **argv)
       .scanlinePad = BITMAP_SCANLINE_PAD
     };
   }
-  screenInfo->numPixmapFormats = numFormats;
+  pScreenInfo->numPixmapFormats = numFormats;
   for (i = 0; i < numFormats; i++)
-    screenInfo->formats[i] = formats[i];
+    pScreenInfo->formats[i] = formats[i];
 
   if (!AddCallback(&ClientStateCallback, rfbClientStateChange, NULL)) {
     rfbLog("InitOutput: AddCallback failed\n");
