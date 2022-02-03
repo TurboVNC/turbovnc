@@ -47,6 +47,7 @@ public class Viewport extends JFrame implements Runnable {
       setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    sp.setViewportBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
     sp.getViewport().setBackground(Color.BLACK);
     InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
