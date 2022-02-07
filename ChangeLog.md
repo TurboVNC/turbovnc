@@ -73,11 +73,15 @@ reuse it to run multiple commands), so it is affected by the `SSHConfig`,
 `SSHKey`, `SSHKeyFile`, `SSHKeyPass`, and `SSHPort` parameters.
 
 6. The zero-install Java Web Start feature and built-in HTTP server in the
-TurboVNC Server have been removed.  This reflects the fact that Java Web Start
-is now a legacy technology.  JWS is no longer provided in Java 11 and later, so
-once Java 8 stops receiving public updates, the ability to deploy the TurboVNC
-Viewer using JWS will be limited.  These features will continue to be supported
-in TurboVNC 2.2.x on a break/fix basis.
+TurboVNC Server have been removed, along with the corresponding `vncserver`
+command-line option (`-nohttpd`), Xvnc command-line options (`-httpd` and
+`-httpport`), security configuration file directive (`no-httpd`), and
+**turbovncserver.conf** variables (`$enableHTTP` and `$vncClasses`.)  This
+reflects the fact that Java Web Start is now a legacy technology.  JWS is no
+longer provided in Java 11 and later, so once Java 8 stops receiving public
+updates, the ability to deploy the TurboVNC Viewer using JWS will be limited.
+These features will continue to be supported in TurboVNC 2.2.x on a break/fix
+basis.
 
 7. MinGW can now be used instead of Visual C++ when building the TurboVNC
 Viewer (more specifically, the TurboVNC Helper library) for Windows.
