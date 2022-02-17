@@ -91,7 +91,7 @@ case "$TVNC_WM" in
         ;;
     esac
     if [ "$TVNC_WM" = "" ]; then
-      for SESSION in "gnome" "ubuntu"; do
+      for SESSION in "gnome" "ubuntu" "xfce"; do
         if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
           DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
         fi
