@@ -336,7 +336,7 @@ unless (-e $vncUserDir) {
     die "$prog: Could not create $vncUserDir.\n";
   }
 }
-($z, $z, $mode) = lstat("$vncUserDir");
+($z, $z, $mode) = stat("$vncUserDir");
 if (! -d _ || ! -o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
   die "$prog: Wrong type or access mode of $vncUserDir.\n";
 }
