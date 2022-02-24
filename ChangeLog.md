@@ -12,6 +12,10 @@ Python 3, and the official TurboVNC packages now require Python 3.  The
 TurboVNC Server must be built with CMake 3.12 or later in order for the
 simple web server to use Python 3.
 
+3. Fixed an error ("couldn't find '*/bin/webserver'") that occurred when
+attempting to run the `vncserver` script if TurboVNC was built without the
+optional noVNC web server.
+
 
 3.0 beta1
 =========

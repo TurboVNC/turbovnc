@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #
-#  Copyright (C) 2009-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2009-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
@@ -37,6 +37,7 @@ if ($slashndx >= 0) {
 }
 
 $xauth = "xauth";
+$buildWebServer = @TVNC_BUILDWEBSERVER@;
 
 &SanityCheck();
 
@@ -238,9 +239,13 @@ if ($opt{'-pixelformat'}) {
   $pixelformat = $opt{'-pixelformat'};
 }
 if ($opt{'-novnc'}) {
-  $noVNC = $opt{'-novnc'};
-  if (! -e "$noVNC/vnc.html") {
-    die $noVNC . " does not appear to contain an installation of noVNC.\n"
+  if (!$buildWebServer) {
+    warn "TurboVNC was not built with the noVNC web server.  Ignoring -novnc.\n";
+  } else {
+    $noVNC = $opt{'-novnc'};
+    if (! -e "$noVNC/vnc.html") {
+      die $noVNC . " does not appear to contain an installation of noVNC.\n"
+    }
   }
 }
 if ($opt{'-noxstartup'}) {
@@ -1054,9 +1059,16 @@ sub SanityCheck
     }
   }
 
-  foreach $cmd ($exedir."Xvnc", $exedir."vncpasswd", $exedir."webserver") {
+  foreach $cmd ($exedir."Xvnc", $exedir."vncpasswd") {
     if (! -x "$cmd") {
       die "$prog: couldn't find \"$cmd\".\n";
+    }
+  }
+  if ($buildWebServer) {
+    foreach $cmd ($exedir."webserver") {
+      if (! -x "$cmd") {
+        die "$prog: couldn't find \"$cmd\".\n";
+      }
     }
   }
 
