@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -920,11 +920,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       }
 
       // SECURITY AND AUTHENTICATION OPTIONS
-      opts.setSecurityTypes(Params.secTypes.getValue());
       opts.sendLocalUsername = Params.sendLocalUsername.getValue();
-      opts.tunnel = Params.tunnel.getValue();
       if (Params.user.getValue() != null)
         opts.user = new String(Params.user.getValue());
+      opts.setSecurityTypes(Params.secTypes.getValue());
+      opts.tunnel = Params.tunnel.getValue();
 
       String v = Params.via.getValue();
       if (v != null && !v.isEmpty()) {

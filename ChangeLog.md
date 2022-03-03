@@ -16,6 +16,10 @@ simple web server to use Python 3.
 attempting to run the `vncserver` script if TurboVNC was built without the
 optional noVNC web server.
 
+4. Fixed a regression in the TurboVNC Viewer whereby specifying the `User` or
+`SendLocalUserName` parameter did not automatically disable security types that
+do not use the Unix Login and Plain authentication schemes.
+
 
 3.0 beta1
 =========
