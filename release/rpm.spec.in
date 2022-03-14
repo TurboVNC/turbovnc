@@ -72,8 +72,8 @@ License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
 %if "%{server}" == "1"
-Requires:  /sbin/chkconfig %{_sysconfdir}/init.d /usr/bin/xauth
-Requires:  /usr/bin/xkbcomp xkeyboard-config
+Requires:  /sbin/chkconfig /usr/sbin/semanage %{_sysconfdir}/init.d
+Requires:  /usr/bin/xauth /usr/bin/xkbcomp xkeyboard-config
 %endif
 BuildRoot: %{_blddir}/%{name}-%{version}-root
 BuildRequires: /usr/bin/perl libjpeg-turbo
@@ -220,6 +220,13 @@ rm -rf %{buildroot}
 %if "%{server}" == "1"
 %post
 %if "%{sysconfdir}" == "%{_sysconfdir}"
+if [ -x %{_sysconfdir}/rc.d/init.d/tvncserver ]; then
+  semanage fcontext -a -t bin_t %{_sysconfdir}/rc.d/init.d/tvncserver
+  restorecon -R -v %{_sysconfdir}/rc.d/init.d/tvncserver
+else
+  semanage fcontext -a -t bin_t %{_sysconfdir}/init.d/tvncserver
+  restorecon -R -v %{_sysconfdir}/init.d/tvncserver
+fi
 if [ "$1" = 1 ]; then
   /sbin/chkconfig --add tvncserver
 fi
@@ -233,6 +240,13 @@ if [ "$1" = 0 ]; then
   fi
   if [ -f %{_sysconfdir}/init.d/tvncserver ]; then
     /sbin/chkconfig --del tvncserver
+  fi
+  if [ -x %{_sysconfdir}/rc.d/init.d/tvncserver ]; then
+    semanage fcontext -d %{_sysconfdir}/rc.d/init.d/tvncserver
+    restorecon -R -v %{_sysconfdir}/rc.d/init.d/tvncserver
+  else
+    semanage fcontext -d %{_sysconfdir}/init.d/tvncserver
+    restorecon -R -v %{_sysconfdir}/init.d/tvncserver
   fi
 fi
 %endif
