@@ -176,7 +176,7 @@ rm -rf %{buildroot}
 %post
 %if "%{sysconfdir}" == "%{_sysconfdir}"
 if [ "$1" = 1 ]; then
-  if [ -f /etc/redhat-release ]; then /sbin/chkconfig --add tvncserver; fi
+  /sbin/chkconfig --add tvncserver
 fi
 %endif
 
@@ -186,7 +186,7 @@ if [ "$1" = 0 ]; then
   if [ -x %{_sysconfdir}/init.d/tvncserver ]; then
     %{_sysconfdir}/init.d/tvncserver stop >/dev/null 2>&1
   fi
-  if [ -f /etc/redhat-release -a -f %{_sysconfdir}/init.d/tvncserver ]; then
+  if [ -f %{_sysconfdir}/init.d/tvncserver ]; then
     /sbin/chkconfig --del tvncserver
   fi
 fi
