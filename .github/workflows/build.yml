@@ -30,7 +30,7 @@ jobs:
           git clone --depth=1 https://github.com/turbovnc/buildscripts.git -b $BRANCH $HOME/src/buildscripts
           mkdir $HOME/libjpeg-turbo-rpm
           pushd $HOME/libjpeg-turbo-rpm
-          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm
+          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.x86_64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.aarch64.rpm $LJT_URL/libjpeg-turbo-official-$LJT_VERSION.i386.rpm
           popd
           mkdir $HOME/rpmkeys
           wget --no-check-certificate "$LJT_GPG_KEY" -O $HOME/rpmkeys/LJT-GPG-KEY
@@ -52,7 +52,7 @@ jobs:
       - name: Build
         run: |
           mkdir -p $HOME/.openjdk
-          docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -v $HOME/.openjdk:/root/.openjdk -t dcommander/buildvnc:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*.rpm && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvnc -d /root/src/turbovnc -v"
+          docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -v $HOME/.openjdk:/root/.openjdk -t dcommander/buildvnc:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*86*.rpm && pushd /opt/arm64 && rpm2cpio /rpms/*aarch64*.rpm | cpio -id && popd && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvnc -d /root/src/turbovnc -v"
           sudo chown -R runner:runner $HOME/src/vnc.nightly
           mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
       - name: Configure AWS
