@@ -1,5 +1,6 @@
 set(Java_JAR_EXECUTABLE "@Java_JAR_EXECUTABLE@")
 set(Java_JAVAC_EXECUTABLE "@Java_JAVAC_EXECUTABLE@")
+set(TVNC_JDK_MODULE_PATH "@TVNC_JDK_MODULE_PATH@")
 
 if(NOT JRE_OUTPUT_DIR)
   message(FATAL_ERROR "JRE_OUTPUT_DIR must be defined")
@@ -47,8 +48,11 @@ set(SEP ":")
 if(WIN32)
   set(SEP ";")
 endif()
+if(NOT TVNC_JDK_MODULE_PATH)
+  set(TVNC_JDK_MODULE_PATH "${Java_PATH}/../jmods")
+endif()
 execute_process(COMMAND "${Java_PATH}/jlink"
-  -p "jretmp/VncViewer.jar${SEP}${Java_PATH}/../jmods"
+  -p "jretmp/VncViewer.jar${SEP}${TVNC_JDK_MODULE_PATH}"
     --add-modules VncViewer,jdk.crypto.cryptoki,jdk.crypto.ec
     --limit-modules VncViewer --output ${JRE_OUTPUT_DIR}
     --ignore-signing-information --compress 2 --no-header-files --no-man-pages
