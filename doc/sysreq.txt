@@ -1,16 +1,16 @@
 * System Requirements
 
-** Linux/x86 and Other x86 Un*x Operating Systems
+** Linux and Other Un*x Operating Systems
 
-|| || Host (x86) || Host (x86-64) || Client (x86 or non-Linux) || Client (Linux/x86-64) ||
+|| || Host || Client (Linux/x86-64, Linux/AArch64) \
+	|| Client (x86 or non-Linux) ||
 | Recommended CPU \
 	| {list type=ul: \
-			{item:For optimal performance, the CPU should support SSE2 \
+			{item:(x86 only) For optimal performance, the CPU should support SSE2 \
 				extensions.} \
 			{item:Dual processors or dual cores recommended}} \
-	| Dual processors or dual cores recommended \
-	| For optimal performance, the CPU should support SSE2 extensions. \
 	| {:} \
+	| For optimal performance, the CPU should support SSE2 extensions. \
 	|
 | O/S \
 	| TurboVNC should work with a variety of Linux distributions, \
@@ -31,13 +31,12 @@
 | Other \
 	| SSH server (if using the \
 		[[#TurboVNC_Session_Manager][TurboVNC Session Manager]]) \
-	| < \
+	| For optimal performance, the X server should be configured to export True \
+		Color (24-bit or 32-bit) visuals. \
 	| {list type=ul: \
 			{item:For optimal performance, the X server should be configured to export \
 				True Color (24-bit or 32-bit) visuals.} \
 			{item:[[http://www.java.com][Oracle Java]] or OpenJDK}} \
-	| For optimal performance, the X server should be configured to export True \
-		Color (24-bit or 32-bit) visuals. \
 	|
 #OPT: hiCol=first
 

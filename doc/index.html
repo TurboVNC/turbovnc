@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2021-09-20T17:47:23">
+<meta name="date" content="2022-03-17T16:05:06">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -46,8 +46,8 @@
         <a href="#hd004" class="hd">4 System Requirements</a>
         <ul class="hd">
             <li class="Itemize-3 hd">
-                <a href="#hd004001" class="hd">4.1 Linux/x86 and Other x86 Un*x 
-                Operating Systems</a>
+                <a href="#hd004001" class="hd">4.1 Linux and Other Un*x Operating 
+                Systems</a>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd004002" class="hd">4.2 Mac/x86</a>
@@ -453,30 +453,29 @@ other VNC distributions without interference.</p>
 <h1 id="hd004"><a name="file004"></a>4&nbsp;System Requirements</h1>
 
 
-<h2 id="hd004001">4.1&nbsp;Linux/x86 and Other x86 Un*x Operating Systems</h2>
+<h2 id="hd004001">4.1&nbsp;Linux and Other Un*x Operating Systems</h2>
 
 <div class="table">
 <table class="standard">
   <thead class="standard">
   <tr class="head ">
     <th class="head standard"></th>
-    <th class="head standard">Host (x86)</th>
-    <th class="head standard">Host (x86-64)</th>
+    <th class="head standard">Host</th>
+    <th class="head standard">Client (Linux/x86-64, Linux/AArch64)</th>
     <th class="head standard">Client (x86 or non-Linux)</th>
-    <th class="head standard">Client (Linux/x86-64)</th>
   </tr>
   </thead>
   <tr class="standard">
     <td class="high standard">Recommended CPU</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
-    For optimal performance, the CPU should support SSE2 extensions.
+    (x86 only) For optimal performance, the CPU should support SSE2 
+    extensions.
 </li>
 <li class="Itemize-0">
     Dual processors or dual cores recommended
 </li></ul></td>
-    <td class="standard">Dual processors or dual cores recommended</td>
-    <td class="standard">For optimal performance, the CPU should support SSE2 extensions.</td>
     <td class="standard"></td>
+    <td class="standard">For optimal performance, the CPU should support SSE2 extensions.</td>
   </tr>
   <tr class="standard">
     <td class="high standard">O/S</td>
@@ -484,7 +483,8 @@ other VNC distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other</td>
-    <td class="standard" colspan="2">SSH server (if using the <a href="#TurboVNC_Session_Manager">TurboVNC Session Manager</a><a name="idx0014"></a>)</td>
+    <td class="standard">SSH server (if using the <a href="#TurboVNC_Session_Manager">TurboVNC Session Manager</a><a name="idx0014"></a>)</td>
+    <td class="standard">For optimal performance, the X server should be configured to export True Color (24-bit or 32-bit) visuals.</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     For optimal performance, the X server should be configured to export 
     True Color (24-bit or 32-bit) visuals.
@@ -493,7 +493,6 @@ other VNC distributions without interference.</p>
     <span class="remote"><a href="http://www.java.com" class="remote">Oracle 
     Java</a></span><a name="idx0015"></a> or OpenJDK
 </li></ul></td>
-    <td class="standard">For optimal performance, the X server should be configured to export True Color (24-bit or 32-bit) visuals.</td>
   </tr>
 </table>
 </div>
@@ -572,9 +571,10 @@ other VNC distributions without interference.</p>
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
         area</a></span><a name="idx0016"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0017"></a>. Packages are 
-        provided for RPM-based and Debian-based Linux distributions that contain 
-        GLIBC 2.12 or later. <br />
+        SourceForge project page</a></span><a name="idx0017"></a>. RPM and 
+        Debian packages are provided for x86 Linux distributions that contain 
+        GLIBC 2.12 or later and AArch64 Linux distributions that contain GLIBC 
+        2.17 or later. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         cd to the directory where you downloaded the binary package, and issue 
@@ -656,7 +656,7 @@ The TurboVNC security configuration file will not work when TurboVNC is installe
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the TurboVNC Mac disk image 
-        (<strong class="filename">TurboVNC-2.2.80.dmg</strong>) from the 
+        (<strong class="filename">TurboVNC-2.2.91.dmg</strong>) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
         area</a></span><a name="idx0018"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
@@ -676,8 +676,8 @@ The TurboVNC security configuration file will not work when TurboVNC is installe
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the TurboVNC Windows installer package 
-        (<strong class="filename">TurboVNC-2.2.80-x64.exe</strong> for 64-bit 
-        systems or <strong class="filename">TurboVNC-2.2.80-x86.exe</strong> for 
+        (<strong class="filename">TurboVNC-2.2.91-x64.exe</strong> for 64-bit 
+        systems or <strong class="filename">TurboVNC-2.2.91-x86.exe</strong> for 
         legacy 32-bit-only systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
         area</a></span><a name="idx0020"></a> of the 
@@ -698,12 +698,12 @@ The TurboVNC security configuration file will not work when TurboVNC is installe
 <p>If you are using a Linux/Un*x platform for which there is not a 
 pre-built TurboVNC binary package available, then download the TurboVNC 
 source tarball 
-(<strong class="filename">turbovnc-2.2.80.tar.gz</strong>) from the 
+(<strong class="filename">turbovnc-2.2.91.tar.gz</strong>) from the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
 area</a></span><a name="idx0022"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
 SourceForge project page</a></span><a name="idx0023"></a>, uncompress 
-it, <code>cd turbovnc-2.2.80</code>, and read 
+it, <code>cd turbovnc-2.2.91</code>, and read 
 <strong class="filename">BUILDING.md</strong> for further instructions 
 on how to build TurboVNC from source.</p>
 
