@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-03-31T11:52:49">
+<meta name="date" content="2022-03-31T16:08:31">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -92,11 +92,6 @@
             <li class="Itemize-3 hd">
                 <a href="#hd006003" class="hd">6.3 Manually Connecting to a VNC 
                 Server</a>
-                <ul class="hd">
-                    <li class="Itemize-5 hd">
-                        <a href="#hd006003002" class="hd">6.3.2 Window Manager Compatibility</a>
-                    </li>
-                </ul>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd006004" class="hd">6.4 Disconnecting and Killing a TurboVNC 
@@ -113,7 +108,10 @@
                 <a href="#hd006007" class="hd">6.7 Running OpenGL Applications</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006008" class="hd">6.8 Further Reading</a>
+                <a href="#hd006008" class="hd">6.8 Window Manager Compatibility</a>
+            </li>
+            <li class="Itemize-3 hd">
+                <a href="#hd006009" class="hd">6.9 Further Reading</a>
             </li>
         </ul>
     </li>
@@ -1002,30 +1000,6 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
 
 
 
-<h3 id="hd006003002">6.3.2&nbsp;Window Manager Compatibility</h3>
-
-<p>This version of the TurboVNC Server can run 3D (compositing) window 
-managers (such as Unity or GNOME 3+ or KDE 5+) using its built-in 
-software OpenGL implementation, and it also provides an option 
-(<code>-vgl</code>) that allows for running 3D window managers using 
-VirtualGL.  However, for performance reasons, it is generally 
-recommended that you use a 2D window manager with the TurboVNC Server 
-(even with VirtualGL, 3D window managers have a lot of overhead.)  As of 
-this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window 
-manager called &ldquo;GNOME Fallback&rdquo;, &ldquo;GNOME 
-Flashback&rdquo;, or &ldquo;GNOME Classic&rdquo;, which will 
-automatically be used if it is installed and the <code>TVNC_WM</code> 
-environment variable is set to <code>2d</code>.  For other systems that 
-lack a 2D window manager, it is recommended that you install MATE.  
-Refer to 
-<span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility30" class="remote">this 
-report</a></span><a name="idx0022"></a> for an up-to-date list of window 
-managers that have been tested with this version of the TurboVNC Server, 
-how to configure the TurboVNC Server to use those window managers, and a 
-list of known compatibility issues.</p>
-
-
-
 <h2 id="hd006004">6.4&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
 
 <p>Closing the TurboVNC Viewer disconnects from the TurboVNC session, but 
@@ -1037,7 +1011,7 @@ can reconnect to the session at any time.</p>
 easiest way to kill it is to log out of the window manager running in 
 the session.  You can also use the 
 <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0023"></a> to remotely kill TurboVNC sessions, or 
+Manager</a><a name="idx0022"></a> to remotely kill TurboVNC sessions, or 
 you can type the following command:</p>
 
 <pre class="verbatim">/opt/TurboVNC/bin/vncserver -kill :<em>n</em></pre>
@@ -1064,7 +1038,7 @@ host.</p>
 
 <p>When a TurboVNC session is started, the <code>vncserver</code> script 
 can optionally start a simple web server that serves up 
-<span class="remote"><a href="https://novnc.com" class="remote">noVNC</a></span><a name="idx0024"></a>, 
+<span class="remote"><a href="https://novnc.com" class="remote">noVNC</a></span><a name="idx0023"></a>, 
 an HTML 5/JavaScript VNC viewer that works in any web browser (with 
 reduced performance and features relative to the TurboVNC Viewer.)  This 
 allows you to easily connect to a TurboVNC session from a machine that 
@@ -1103,7 +1077,7 @@ NOTE: noVNC only supports VNC Password authentication, so it is strongly recomme
 <p><a name="Secure_TurboVNC_Usage"></a></p>
 
 <p>If the <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0025"></a> is not being used, then the connection 
+Manager</a><a name="idx0024"></a> is not being used, then the connection 
 between the TurboVNC Server and the TurboVNC Viewer will, by default, 
 use Anonymous TLS encryption (refer to Chapter 
 <a href="#Security_Extensions" class="ref">8</a>.)  However, it may be 
@@ -1182,7 +1156,7 @@ direct rendering.  Thus, it can only be used on systems that do not have
 vendor-specific GPU drivers installed or on systems that provide a 
 libglvnd-enabled build of Mesa.  In general, if the TurboVNC host has a 
 GPU, then you should use 
-<a href="#VGL">VirtualGL</a><a name="idx0026"></a> rather than relying 
+<a href="#VGL">VirtualGL</a><a name="idx0025"></a> rather than relying 
 on TurboVNC&rsquo;s software OpenGL implementation.</p>
 
 <p>Passing <code>-extension&nbsp;GLX</code> to <code>vncserver</code> 
@@ -1195,7 +1169,31 @@ messages that may reveal the source of the problem.</p>
 
 
 
-<h2 id="hd006008">6.8&nbsp;Further Reading</h2>
+<h2 id="hd006008">6.8&nbsp;Window Manager Compatibility</h2>
+
+<p>This version of the TurboVNC Server can run 3D (compositing) window 
+managers (such as Unity or GNOME 3+ or KDE 5+) using its built-in 
+software OpenGL implementation, and it also provides an option 
+(<code>-vgl</code>) that allows for running 3D window managers using 
+VirtualGL.  However, for performance reasons, it is generally 
+recommended that you use a 2D window manager with the TurboVNC Server 
+(even with VirtualGL, 3D window managers have a lot of overhead.)  As of 
+this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window 
+manager called &ldquo;GNOME Fallback&rdquo;, &ldquo;GNOME 
+Flashback&rdquo;, or &ldquo;GNOME Classic&rdquo;, which will 
+automatically be used if it is installed and the <code>TVNC_WM</code> 
+environment variable is set to <code>2d</code>.  For other systems that 
+lack a 2D window manager, it is recommended that you install MATE or 
+Xfce.  Refer to 
+<span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility30" class="remote">this 
+report</a></span><a name="idx0026"></a> for an up-to-date list of window 
+managers that have been tested with this version of the TurboVNC Server, 
+how to configure the TurboVNC Server to use those window managers, and a 
+list of known compatibility issues.</p>
+
+
+
+<h2 id="hd006009">6.9&nbsp;Further Reading</h2>
 
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 

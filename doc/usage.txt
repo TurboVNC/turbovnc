@@ -202,24 +202,6 @@ authentication (using ssh-agent or Pageant.)
 	connection.  Instead, tunnel the connection through SSH (see
 	{ref prefix="Section ": Secure_TurboVNC_Usage} below for more details.)
 
-*** Window Manager Compatibility
-
-This version of the TurboVNC Server can run 3D (compositing) window managers
-(such as Unity or GNOME 3+ or KDE 5+) using its built-in software OpenGL
-implementation, and it also provides an option (''-vgl'') that allows for
-running 3D window managers using VirtualGL.  However, for performance reasons,
-it is generally recommended that you use a 2D window manager with the TurboVNC
-Server (even with VirtualGL, 3D window managers have a lot of overhead.)  As of
-this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window manager
-called "GNOME Fallback", "GNOME Flashback", or "GNOME Classic", which will
-automatically be used if it is installed and the ''TVNC_WM'' environment
-variable is set to ''2d''.  For other systems that lack a 2D window manager, it
-is recommended that you install MATE.  Refer to
-[[http://www.turbovnc.org/Documentation/Compatibility30][this report]] for an
-up-to-date list of window managers that have been tested with this version of
-the TurboVNC Server, how to configure the TurboVNC Server to use those window
-managers, and a list of known compatibility issues.
-
 ** Disconnecting and Killing a TurboVNC Session
 
 Closing the TurboVNC Viewer disconnects from the TurboVNC session, but the
@@ -380,6 +362,24 @@ implementation, thus restoring the behavior of TurboVNC 2.1.x and earlier
 built-in GLX/OpenGL implementation is not functioning properly, then pass
 ''-verbose'' to ''vncserver'' to log informational messages that may reveal the
 source of the problem.
+
+** Window Manager Compatibility
+
+This version of the TurboVNC Server can run 3D (compositing) window managers
+(such as Unity or GNOME 3+ or KDE 5+) using its built-in software OpenGL
+implementation, and it also provides an option (''-vgl'') that allows for
+running 3D window managers using VirtualGL.  However, for performance reasons,
+it is generally recommended that you use a 2D window manager with the TurboVNC
+Server (even with VirtualGL, 3D window managers have a lot of overhead.)  As of
+this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window manager
+called "GNOME Fallback", "GNOME Flashback", or "GNOME Classic", which will
+automatically be used if it is installed and the ''TVNC_WM'' environment
+variable is set to ''2d''.  For other systems that lack a 2D window manager, it
+is recommended that you install MATE or Xfce.  Refer to
+[[http://www.turbovnc.org/Documentation/Compatibility30][this report]] for an
+up-to-date list of window managers that have been tested with this version of
+the TurboVNC Server, how to configure the TurboVNC Server to use those window
+managers, and a list of known compatibility issues.
 
 ** Further Reading
 
