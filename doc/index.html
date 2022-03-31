@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-03-31T17:44:46">
+<meta name="date" content="2022-03-31T17:45:07">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 2.2.8</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -83,35 +83,36 @@
         <a href="#hd006" class="hd">6 Using TurboVNC</a>
         <ul class="hd">
             <li class="Itemize-3 hd">
-                <a href="#hd006001" class="hd">6.1 Starting and Connecting to a TurboVNC 
-                Session</a>
-                <ul class="hd">
-                    <li class="Itemize-5 hd">
-                        <a href="#hd006001002" class="hd">6.1.2 Window Manager Compatibility</a>
-                    </li>
-                </ul>
+                <a href="#hd006001" class="hd">6.1 Starting a TurboVNC Session</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006002" class="hd">6.2 Disconnecting and Killing a TurboVNC 
+                <a href="#hd006002" class="hd">6.2 Connecting to a TurboVNC Session or 
+                VNC Server</a>
+            </li>
+            <li class="Itemize-3 hd">
+                <a href="#hd006003" class="hd">6.3 Disconnecting and Killing a TurboVNC 
                 Session</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006003" class="hd">6.3 Launching the TurboVNC Viewer from a 
+                <a href="#hd006004" class="hd">6.4 Launching the TurboVNC Viewer from a 
                 Web Browser</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006004" class="hd">6.4 Deploying the Java TurboVNC Viewer 
+                <a href="#hd006005" class="hd">6.5 Deploying the Java TurboVNC Viewer 
                 Using Java Web Start</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006005" class="hd">6.5 Using SSH to Secure a TurboVNC 
+                <a href="#hd006006" class="hd">6.6 Using SSH to Secure a TurboVNC 
                 Connection</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006006" class="hd">6.6 Running OpenGL Applications</a>
+                <a href="#hd006007" class="hd">6.7 Running OpenGL Applications</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006007" class="hd">6.7 Further Reading</a>
+                <a href="#hd006008" class="hd">6.8 Window Manager Compatibility</a>
+            </li>
+            <li class="Itemize-3 hd">
+                <a href="#hd006009" class="hd">6.9 Further Reading</a>
             </li>
         </ul>
     </li>
@@ -300,10 +301,10 @@ accordingly.</p>
 tuned to provide peak performance for 3D and video workloads.  TurboVNC 
 was originally a fork of 
 <span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx003"></a> 
-1.3.x, and on the surface, the X server and Windows viewer still behave 
-similarly to their parents.  However, the current version of TurboVNC 
-contains a much more modern X server code base (based on X.org) and a 
-variety of other features and fixes, including a high-performance 
+1.3.x, and on the surface, the TurboVNC Server and Windows viewer still 
+behave similarly to their parents. However, the current version of 
+TurboVNC contains a much more modern X server code base (based on X.org) 
+and a variety of other features and fixes, including a high-performance 
 zero-install Java viewer.  TurboVNC compresses 3D and video workloads 
 significantly better than the &ldquo;tightest&rdquo; compression mode in 
 TightVNC 1.3.x while using only typically 15-20% of the CPU time of the 
@@ -777,7 +778,7 @@ Features</strong> applet if you are running Windows 10), or select
 <p><a name="TurboVNC_Usage"></a></p>
 
 
-<h2 id="hd006001">6.1&nbsp;Starting and Connecting to a TurboVNC Session</h2>
+<h2 id="hd006001">6.1&nbsp;Starting a TurboVNC Session</h2>
 
 
 <h3 id="hd006001001">Procedure</h3>
@@ -812,6 +813,16 @@ Features</strong> applet if you are running Windows 10), or select
     <li class="Ordered-1 Ordered">
         The SSH session can now be exited, if desired.
     </li>
+</ol>
+
+
+
+<h2 id="hd006002">6.2&nbsp;Connecting to a TurboVNC Session or VNC Server</h2>
+
+
+<h3 id="hd006002001">Procedure</h3>
+
+<ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         On the client machine, start the TurboVNC Viewer.
         <dl class="Description">
@@ -854,8 +865,8 @@ Features</strong> applet if you are running Windows 10), or select
         </div>
         
         <br /> Enter the X display name (hostname, or IP address, and display 
-        number) of the TurboVNC session in the &ldquo;VNC server&rdquo; field, 
-        then click &ldquo;Connect&rdquo;.
+        number) of the VNC server or TurboVNC session in the &ldquo;VNC 
+        server&rdquo; field, then click &ldquo;Connect&rdquo;.
     </li>
     <li class="Ordered-1 Ordered">
         Another dialog box appears, prompting for the password (if Standard VNC 
@@ -883,44 +894,20 @@ Features</strong> applet if you are running Windows 10), or select
         </table>
         </div>
         
-        <br /> Enter the VNC session password or the Unix username/password and 
+        <br /> Enter the VNC server password or the Unix username/password and 
         click &ldquo;OK&rdquo; (Windows) or press Enter (Linux/Un*x/Mac.) 
-        <br /><br /> A TurboVNC desktop window should appear on your client 
-        machine.  This window contains a virtual desktop with which you can 
-        interact to launch X-Windows applications on the TurboVNC host.
+        <br /><br /> A VNC desktop window should appear on your client machine.  
+        This window contains a virtual desktop with which you can interact to 
+        launch graphical applications on the VNC host.
         <div class="important"><p class="important">
-        If you are connecting to a non-VeNCrypt-compatible VNC server using the Java TurboVNC Viewer, then the authentication dialog will warn you that the connection is not encrypted: <br /><br /> <img src="vncauth-insecure.png" alt="vncauth-insecure" class="inline" id="imgid_7" name="imgid_7"/> <br /><br /> You should never use Unix Login authentication with an unencrypted connection.  Instead, tunnel the connection through SSH (see Section <a href="#Secure_TurboVNC_Usage" class="ref">6.5</a> below for more details.)
+        If you are connecting to a non-VeNCrypt-compatible VNC server using the Java TurboVNC Viewer, then the authentication dialog will warn you that the connection is not encrypted: <br /><br /> <img src="vncauth-insecure.png" alt="vncauth-insecure" class="inline" id="imgid_7" name="imgid_7"/> <br /><br /> You should never use Unix Login authentication with an unencrypted connection.  Instead, tunnel the connection through SSH (see Section <a href="#Secure_TurboVNC_Usage" class="ref">6.6</a> below for more details.)
         </p></div>
     </li>
 </ol>
 
 
 
-<h3 id="hd006001002">6.1.2&nbsp;Window Manager Compatibility</h3>
-
-<p>This version of the TurboVNC Server can run 3D (compositing) window 
-managers (such as Unity or GNOME 3+ or KDE 5+) using its built-in 
-software OpenGL implementation, and it also provides an option 
-(<code>-vgl</code>) that allows for running 3D window managers using 
-VirtualGL.  However, for performance reasons, it is generally 
-recommended that you use a 2D window manager with the TurboVNC Server 
-(even with VirtualGL, 3D window managers have a lot of overhead.)  As of 
-this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window 
-manager called &ldquo;GNOME Fallback&rdquo;, &ldquo;GNOME 
-Flashback&rdquo;, or &ldquo;GNOME Classic&rdquo;, which will 
-automatically be used if it is installed and the <code>TVNC_WM</code> 
-environment variable is set to <code>2d</code>.  For other systems that 
-lack a 2D window manager, it is recommended that you install MATE.  
-Refer to 
-<span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility22" class="remote">this 
-report</a></span><a name="idx0035"></a> for an up-to-date list of window 
-managers that have been tested with this version of the TurboVNC Server, 
-how to configure the TurboVNC Server to use those window managers, and a 
-list of known compatibility issues.</p>
-
-
-
-<h2 id="hd006002">6.2&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
+<h2 id="hd006003">6.3&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
 
 <p>Closing the TurboVNC Viewer disconnects from the TurboVNC session, but 
 the TurboVNC session will remain running on the TurboVNC host (as will 
@@ -952,9 +939,12 @@ type the following command:</p>
 /opt/TurboVNC/bin/vncserver&nbsp;-list
 </pre>
 
+<p>from a terminal in the TurboVNC session or from an SSH session on the 
+host.</p>
 
 
-<h2 id="hd006003">6.3&nbsp;Launching the TurboVNC Viewer from a Web Browser</h2>
+
+<h2 id="hd006004">6.4&nbsp;Launching the TurboVNC Viewer from a Web Browser</h2>
 
 <p>When a TurboVNC session is created, it automatically starts a miniature 
 web server that serves up the Java TurboVNC Viewer as a Java Web Start 
@@ -1007,7 +997,7 @@ NOTE: On some newer macOS systems, downloading a JNLP file may result in an erro
 
 
 
-<h2 id="hd006004">6.4&nbsp;Deploying the Java TurboVNC Viewer Using Java Web Start</h2>
+<h2 id="hd006005">6.5&nbsp;Deploying the Java TurboVNC Viewer Using Java Web Start</h2>
 
 <p><a name="JWS"></a></p>
 
@@ -1036,9 +1026,9 @@ knowledge of web server administration.</p>
         <strong class="filename">libjpeg-turbo-<em>version</em>-jws.zip</strong> 
         from libjpeg-turbo 1.4.0 or later (available in the 
         <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo/files/" class="remote">Files 
-        area</a></span><a name="idx0036"></a> of the 
+        area</a></span><a name="idx0035"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/libjpeg-turbo" class="remote">libjpeg-turbo 
-        SourceForge project page</a></span><a name="idx0037"></a>.) Note that 
+        SourceForge project page</a></span><a name="idx0036"></a>.) Note that 
         only the JARs included in the official TurboVNC packages are signed 
         using an official code signing certificate. <br /><br />
     </li>
@@ -1048,9 +1038,9 @@ knowledge of web server administration.</p>
         <strong class="filename">turbovnc-2.2.8-jws.zip</strong>, which is 
         available in the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
-        area</a></span><a name="idx0038"></a> of the 
+        area</a></span><a name="idx0037"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
-        SourceForge project page</a></span><a name="idx0039"></a>. <br /><br />
+        SourceForge project page</a></span><a name="idx0038"></a>. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         <em>OPTIONAL:</em> For large organizations, it may be desirable to 
@@ -1128,7 +1118,7 @@ knowledge of web server administration.</p>
         </p></div>
         This is just a minimal example.  Refer to the 
         <span class="remote"><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/javaws/developersguide/syntax.html" class="remote">JNLP 
-        file syntax</a></span><a name="idx0040"></a> for additional fields that 
+        file syntax</a></span><a name="idx0039"></a> for additional fields that 
         you might want to add. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1140,7 +1130,7 @@ knowledge of web server administration.</p>
 
 
 
-<h2 id="hd006005">6.5&nbsp;Using SSH to Secure a TurboVNC Connection</h2>
+<h2 id="hd006006">6.6&nbsp;Using SSH to Secure a TurboVNC Connection</h2>
 
 <p><a name="Secure_TurboVNC_Usage"></a></p>
 
@@ -1185,7 +1175,7 @@ environment variables.  See Section
 <a href="#VNC_VIA_CMD" class="ref">11.2</a> for more details.</p>
 
 <div class="important"><p class="important">
-NOTE: Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>-via</code> and <code>-tunnel</code> command-line options can also be used when the viewer is deployed using <a href="#JWS">Java Web Start</a><a name="idx0041"></a>.  These options would be specified as <code>&lt;argument&gt;</code> elements under the <code>&lt;application-desc&gt;</code> element in the JNLP file.
+NOTE: Since the Java TurboVNC Viewer contains an embedded SSH client, the <code>-via</code> and <code>-tunnel</code> command-line options can also be used when the viewer is deployed using <a href="#JWS">Java Web Start</a><a name="idx0040"></a>.  These options would be specified as <code>&lt;argument&gt;</code> elements under the <code>&lt;application-desc&gt;</code> element in the JNLP file.
 </p></div>
 
 <div class="important"><p class="important">
@@ -1193,7 +1183,7 @@ Currently the use of the <code>-via</code> and <code>-tunnel</code> command-line
 </p></div>
 
 
-<h3 id="hd006005001">Forcing SSH Connections</h3>
+<h3 id="hd006006001">Forcing SSH Connections</h3>
 
 <p>Passing an argument of <code>-localhost</code> to <code>vncserver</code> 
 will force the TurboVNC session to accept inbound connections only from 
@@ -1221,7 +1211,7 @@ redundant encryption.</p>
 
 
 
-<h2 id="hd006006">6.6&nbsp;Running OpenGL Applications</h2>
+<h2 id="hd006007">6.7&nbsp;Running OpenGL Applications</h2>
 
 <p>The TurboVNC Server includes a software GLX/OpenGL implementation that 
 can be used for casual 3D rendering.  This implementation uses the 
@@ -1232,7 +1222,7 @@ OpenGL implementation can use direct rendering. Otherwise, it falls back
 to indirect rendering, which is limited to the OpenGL 1.4 API and which 
 may perform sluggishly (particularly with continuous mouse input.)  In 
 general, if the TurboVNC host has a GPU, then you should use 
-<a href="#VGL">VirtualGL</a><a name="idx0042"></a> rather than relying 
+<a href="#VGL">VirtualGL</a><a name="idx0041"></a> rather than relying 
 on TurboVNC&rsquo;s software OpenGL implementation.</p>
 
 <p>Passing <code>-extension&nbsp;GLX</code> to <code>vncserver</code> 
@@ -1246,7 +1236,31 @@ messages that may reveal the source of the problem.</p>
 
 
 
-<h2 id="hd006007">6.7&nbsp;Further Reading</h2>
+<h2 id="hd006008">6.8&nbsp;Window Manager Compatibility</h2>
+
+<p>This version of the TurboVNC Server can run 3D (compositing) window 
+managers (such as Unity or GNOME 3+ or KDE 5+) using its built-in 
+software OpenGL implementation, and it also provides an option 
+(<code>-vgl</code>) that allows for running 3D window managers using 
+VirtualGL.  However, for performance reasons, it is generally 
+recommended that you use a 2D window manager with the TurboVNC Server 
+(even with VirtualGL, 3D window managers have a lot of overhead.)  As of 
+this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window 
+manager called &ldquo;GNOME Fallback&rdquo;, &ldquo;GNOME 
+Flashback&rdquo;, or &ldquo;GNOME Classic&rdquo;, which will 
+automatically be used if it is installed and the <code>TVNC_WM</code> 
+environment variable is set to <code>2d</code>.  For other systems that 
+lack a 2D window manager, it is recommended that you install MATE or 
+Xfce.  Refer to 
+<span class="remote"><a href="http://www.turbovnc.org/Documentation/Compatibility22" class="remote">this 
+report</a></span><a name="idx0042"></a> for an up-to-date list of window 
+managers that have been tested with this version of the TurboVNC Server, 
+how to configure the TurboVNC Server to use those window managers, and a 
+list of known compatibility issues.</p>
+
+
+
+<h2 id="hd006009">6.9&nbsp;Further Reading</h2>
 
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 
@@ -1832,7 +1846,7 @@ extensions:</p>
          be used only with session encryption or if the session is restricted to 
          allow only loopback (SSH) connections and to disallow reverse 
          connections (see Section 
-         <a href="#Secure_TurboVNC_Usage" class="ref">6.5</a>.)
+         <a href="#Secure_TurboVNC_Usage" class="ref">6.6</a>.)
     </dd>
 </dl>
 
@@ -1859,7 +1873,7 @@ extensions:</p>
          text. Thus, it is <em>strongly</em> recommended that this 
          authentication scheme be used only with VNC connections that are 
          encrypted using TLS (see below) or SSH (see Section 
-         <a href="#Secure_TurboVNC_Usage" class="ref">6.5</a>.)  Per the RFB 
+         <a href="#Secure_TurboVNC_Usage" class="ref">6.6</a>.)  Per the RFB 
          spec, this authentication scheme is referred to as &ldquo;Unix 
          Login&rdquo; when used with a TightVNC-compatible server and 
          &ldquo;Plain&rdquo; when used with a VeNCrypt-compatible server.
@@ -2333,11 +2347,10 @@ vglrun -d :0.1 <em>3D-application-executable-or-script</em></pre>
 
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use the TurboVNC Server and the TurboVNC Viewer in concert.  
-However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0046"></a>, 
-TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
-Viewer to connect to a non-TurboVNC server (or vice versa), although 
-this will generally result in some decrease in performance.</p>
+However, TurboVNC is fully compatible with TigerVNC, TightVNC, RealVNC, 
+and other VNC flavors.  You can use the TurboVNC Viewer to connect to a 
+non-TurboVNC server (or vice versa), although this will generally result 
+in some decrease in performance.</p>
 
 <p>The following sections list additional things to bear in mind when 
 mixing TurboVNC with other VNC flavors.</p>
@@ -3143,7 +3156,7 @@ Java command-line arguments in a Java Web Start environment.</p>
         A more Java-friendly way of disabling the multi-screen-aware automatic 
         desktop resize feature.  See the 
         <a href="#TVNC_SINGLESCREEN"><code>TVNC_SINGLESCREEN</code> environment 
-        variable</a><a name="idx0047"></a> above for more details.
+        variable</a><a name="idx0046"></a> above for more details.
     </dd>
 </dl>
 
@@ -3257,7 +3270,7 @@ Java command-line arguments in a Java Web Start environment.</p>
         establishing a secure tunnel with the <code>Tunnel</code> and 
         <code>ExtSSH</code> parameters.  See the 
         <a href="#VNC_VIA_CMD"><code>VNC_TUNNEL_CMD</code> environment 
-        variable</a><a name="idx0048"></a> above for more details.
+        variable</a><a name="idx0047"></a> above for more details.
     </dd>
 </dl>
 
@@ -3311,7 +3324,7 @@ Java command-line arguments in a Java Web Start environment.</p>
         establishing a secure tunnel with the <code>Via</code> and 
         <code>ExtSSH</code> parameters.  See the 
         <a href="#VNC_VIA_CMD"><code>VNC_VIA_CMD</code> environment 
-        variable</a><a name="idx0049"></a> above for more details.
+        variable</a><a name="idx0048"></a> above for more details.
     </dd>
 </dl>
 

@@ -3,10 +3,10 @@
 
 In order to realize the full performance benefits of TurboVNC, it is necessary
 to use the TurboVNC Server and the TurboVNC Viewer in concert.  However,
-TurboVNC is fully compatible with [[http://www.tigervnc.com][TigerVNC]],
-TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC Viewer to
-connect to a non-TurboVNC server (or vice versa), although this will generally
-result in some decrease in performance.
+TurboVNC is fully compatible with TigerVNC, TightVNC, RealVNC, and other VNC
+flavors.  You can use the TurboVNC Viewer to connect to a non-TurboVNC server
+(or vice versa), although this will generally result in some decrease in
+performance.
 
 The following sections list additional things to bear in mind when mixing
 TurboVNC with other VNC flavors.

@@ -1,17 +1,17 @@
 * Overview
 
 TurboVNC is a derivative of VNC (Virtual Network Computing) that is tuned to
-provide peak performance for 3D and video workloads.  TurboVNC was originally
-a fork of [[http://www.tightvnc.com][TightVNC]] 1.3.x, and on the surface, the
-X server and Windows viewer still behave similarly to their parents.  However,
-the current version of TurboVNC contains a much more modern X server code base
-(based on X.org) and a variety of other features and fixes, including a
-high-performance zero-install Java viewer.  TurboVNC compresses 3D and video
+provide peak performance for 3D and video workloads.  TurboVNC was originally a
+fork of [[http://www.tightvnc.com][TightVNC]] 1.3.x, and on the surface, the
+TurboVNC Server and Windows viewer still behave similarly to their parents.
+However, the current version of TurboVNC contains a much more modern X server
+code base (based on X.org) and a variety of other features and fixes, including
+a high-performance zero-install Java viewer.  TurboVNC compresses 3D and video
 workloads significantly better than the "tightest" compression mode in TightVNC
 1.3.x while using only typically 15-20% of the CPU time of the latter.  Using
 non-default settings, TurboVNC can also match the best compression ratios
-produced by TightVNC 1.3.x for 2D workloads (see
-{ref prefix="Section ": AdvancedCompression}.)
+produced by TightVNC 1.3.x for 2D workloads (see {ref prefix="Section ":
+AdvancedCompression}.)
 
 All VNC implementations, including TurboVNC, use the RFB (remote framebuffer)
 protocol to send "framebuffer updates" from the VNC server to any connected
