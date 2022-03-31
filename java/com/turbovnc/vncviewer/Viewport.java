@@ -392,6 +392,16 @@ public class Viewport extends JFrame {
     }
   }
 
+  private static synchronized void printMissingFeatures() {
+    vlog.info("  The following features will be disabled:");
+    if (VncViewer.osGrab())
+      vlog.info("  - Keyboard grabbing");
+    if (VncViewer.osEID())
+      vlog.info("  - Extended input device support");
+    if (VncViewer.isX11())
+      vlog.info("  - Multi-screen spanning");
+  }
+
   public static boolean isHelperAvailable() {
     if (!triedHelperInit) {
       try {
@@ -401,19 +411,11 @@ public class Viewport extends JFrame {
         vlog.info("WARNING: Could not find TurboVNC Helper JNI library.  If it is in a");
         vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
         vlog.info("  to the Java command line to specify its location.");
-        if (VncViewer.isX11()) {
-          vlog.info("  Multi-screen spanning, keyboard grabbing, and extended input device");
-          vlog.info("  support will be disabled.");
-        } else if (VncViewer.osGrab())
-          vlog.info("  Keyboard grabbing will be disabled.");
+        printMissingFeatures();
       } catch (Exception e) {
         vlog.info("WARNING: Could not initialize TurboVNC Helper JNI library:");
         vlog.info("  " + e.toString());
-        if (VncViewer.isX11()) {
-          vlog.info("  Multi-screen spanning, keyboard grabbing, and extended input device");
-          vlog.info("  support will be disabled.");
-        } else if (VncViewer.osGrab())
-          vlog.info("  Keyboard grabbing will be disabled.");
+        printMissingFeatures();
       }
     }
     triedHelperInit = true;
