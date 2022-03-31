@@ -49,8 +49,8 @@
 | Other Software \
 	| [[http://www.java.com][Oracle Java]] 8u40 or later, or \
 		[[https://jdk.java.net][OpenJDK]] 8 or later (Oracle Java 8 or \
-		[[https://icedtea.classpath.org/wiki/IcedTea-Web][IcedTea-Web]] is \
-		required if using [[#JWS][Java Web Start]].) \
+		[[https://adoptopenjdk.net/icedtea-web.html][IcedTea-Web]] is required if \
+		using [[#JWS][Java Web Start]].) \
 	|
 #OPT: hiCol=first
 
@@ -75,7 +75,7 @@
 				work without the ''-via'' and ''-tunnel'' options.  {file: ssh.exe} \
 				should be in the ''PATH''.)} \
 			{item:[[http://www.java.com][Oracle Java]] 8 or \
-				[[https://icedtea.classpath.org/wiki/IcedTea-Web][IcedTea-Web]] is \
+				[[https://adoptopenjdk.net/icedtea-web.html][IcedTea-Web]] is \
 				required if using [[#JWS][Java Web Start]].}} \
 	|
 #OPT: hiCol=first
