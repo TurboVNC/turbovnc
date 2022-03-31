@@ -17,12 +17,9 @@
 		[[http://www.oracle.com/us/products/servers-storage/solaris][Solaris]], \
 		but currently-supported versions of \
 		[[http://www.redhat.com/products/enterprise-linux/][Red Hat Enterprise Linux]] \
-		(and its work-alikes, including [[http://www.centos.org][CentOS]], \
-		[[http://www.oracle.com/us/technologies/linux][Oracle Linux]], and \
-		[[https://www.scientificlinux.org][Scientific Linux]]), \
-		[[http://www.ubuntu.com][Ubuntu]] LTS, and [[http://www.suse.com][SuSE]] \
-		Linux Enterprise tend to receive the most attention from the TurboVNC \
-		community. \
+		and its derivatives, [[http://www.ubuntu.com][Ubuntu]] LTS, and \
+		[[http://www.suse.com][SuSE]] Linux Enterprise tend to receive the most \
+		attention from the TurboVNC community. \
 	| < \
 	| < \
 	|
