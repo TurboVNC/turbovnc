@@ -26,7 +26,7 @@ the TurboVNC Server init.d script to run in the `unconfined_service_t` SELinux
 domain rather than the `initrc_exec_t` SELinux domain.  This fixes an issue
 whereby either Xvnc or the window manager failed to launch when attempting to
 start a TurboVNC session from the TurboVNC Server init.d script on recent Red
-Hat/CentOS, Fedora, and SuSE releases.
+Hat Enterprise Linux (and derivative), Fedora, and SuSE releases.
 
 
 3.0 beta1
