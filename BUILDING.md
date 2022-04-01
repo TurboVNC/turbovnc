@@ -140,6 +140,8 @@ Replace `make` with `ninja` and `Unix Makefiles` with `Ninja` if using Ninja.
 This will build either a 32-bit or a 64-bit version of TurboVNC, depending on
 which version of __cl.exe__ is in the `PATH`.
 
+Replace `nmake` with `ninja` and `NMake Makefiles` with `Ninja` if using Ninja.
+
 
 ### Visual C++ (IDE)
 
@@ -325,6 +327,11 @@ If using NMake:
 
     cd {build_directory}
     nmake installer
+
+If using Ninja:
+
+    cd {build_directory}
+    ninja installer
 
 If using the Visual Studio IDE, build the "installer" target.
 
