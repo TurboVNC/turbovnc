@@ -28,6 +28,13 @@ whereby either Xvnc or the window manager failed to launch when attempting to
 start a TurboVNC session from the TurboVNC Server init.d script on recent Red
 Hat Enterprise Linux (and derivative), Fedora, and SuSE releases.
 
+6. When building the TurboVNC Viewer on Windows and including a custom JRE, the
+TurboVNC build system now modifies the manifests of the Java executables in the
+custom JRE so that upscaling for high DPI monitors is performed by the
+operating system rather than by Java.  This works around visual artifacts in
+Java's high DPI scaling algorithms when using fractional display scaling
+factors such as 125%.
+
 
 3.0 beta1
 =========
