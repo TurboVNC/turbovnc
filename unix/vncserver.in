@@ -571,6 +571,7 @@ if (-e "/tmp/.X11-unix/X$displayNumber") {
 }
 $ENV{VNCDESKTOP} = $desktopName;
 $ENV{VGL_COMPRESS} = "0";
+$ENV{VGL_PROBEGLX} = "0";
 
 if (!$noxstartup) {
   if ($opt{'-fg'}) {

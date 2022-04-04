@@ -32,6 +32,14 @@ Hat Enterprise Linux (and derivative), Fedora, and SuSE releases.
 algorithms on Windows.  This eliminates visual artifacts when using fractional
 display scaling factors such as 125%.
 
+7. The `vncserver` script now sets the `VGL_PROBEGLX` environment variable to
+`0`.  This prevents VirtualGL from probing the TurboVNC X Server for
+stereo-capable X visuals.  (Such visuals will never exist in an X proxy such as
+TurboVNC.)  On systems that support libglvnd, probing for stereo-capable
+visuals caused the Mesa GLX vendor library to be loaded into the 3D application
+process, which led to interaction issues with certain commercial 3D
+applications that provide their own Mesa back ends.
+
 
 3.0 beta1
 =========
