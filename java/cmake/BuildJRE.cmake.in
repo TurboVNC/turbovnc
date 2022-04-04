@@ -59,40 +59,4 @@ execute_process(COMMAND "${Java_PATH}/jlink"
   RESULT_VARIABLE RESULT)
 check_error(jlink)
 
-if(WIN32)
-  execute_process(COMMAND "mt"
-      -inputresource:${JRE_OUTPUT_DIR}/bin/java.exe
-      -out:jretmp/java.exe.manifest -nologo
-    RESULT_VARIABLE RESULT)
-  check_error(mt)
-  file(READ jretmp/java.exe.manifest JAVA_MANIFEST)
-  string(REGEX REPLACE "(<dpi1:dpiAware>)[^<]*(</dpi1:dpiAware>)" "\\1false\\2"
-    JAVA_MANIFEST ${JAVA_MANIFEST})
-  string(REGEX REPLACE "(<dpi2:dpiAwareness>)[^<]*(</dpi2:dpiAwareness>)"
-    "\\1unaware\\2" JAVA_MANIFEST ${JAVA_MANIFEST})
-  file(WRITE jretmp/java.exe.manifest ${JAVA_MANIFEST})
-  execute_process(COMMAND "mt"
-      -manifest jretmp/java.exe.manifest
-      -outputresource:${JRE_OUTPUT_DIR}/bin/java.exe\;1 -nologo
-    RESULT_VARIABLE RESULT)
-  check_error(mt)
-
-  execute_process(COMMAND "mt"
-      -inputresource:${JRE_OUTPUT_DIR}/bin/javaw.exe
-      -out:jretmp/javaw.exe.manifest -nologo
-    RESULT_VARIABLE RESULT)
-  check_error(mt)
-  file(READ jretmp/javaw.exe.manifest JAVAW_MANIFEST)
-  string(REGEX REPLACE "(<dpi1:dpiAware>)[^<]*(</dpi1:dpiAware>)" "\\1false\\2"
-    JAVAW_MANIFEST ${JAVAW_MANIFEST})
-  string(REGEX REPLACE "(<dpi2:dpiAwareness>)[^<]*(</dpi2:dpiAwareness>)"
-    "\\1unaware\\2" JAVAW_MANIFEST ${JAVAW_MANIFEST})
-  file(WRITE jretmp/javaw.exe.manifest ${JAVAW_MANIFEST})
-  execute_process(COMMAND "mt"
-      -manifest jretmp/javaw.exe.manifest
-      -outputresource:${JRE_OUTPUT_DIR}/bin/javaw.exe\;1 -nologo
-    RESULT_VARIABLE RESULT)
-  check_error(mt)
-endif()
-
 cleanup()

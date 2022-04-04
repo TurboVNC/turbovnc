@@ -1,6 +1,6 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015, 2018, 2020 D. R. Commander.
- *                                           All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015, 2018, 2020, 2022 D. R. Commander.
+ *                                                 All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,9 @@
 
 package com.turbovnc.vncviewer;
 
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.Graphics2D;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -197,6 +194,17 @@ public class Toolbar extends JToolBar implements ActionListener {
       b.setBorder(inactive);
       b.setBorderPainted(false);
     }
+  }
+
+  public void paintComponent(Graphics g) {
+    Graphics2D g2 = (Graphics2D)g;
+    if (Utils.isWindows()) {
+      double scalingFactor = g2.getTransform().getScaleX();
+      if (scalingFactor != 1.0)
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                            RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    }
+    super.paintComponent(g);
   }
 
   private CConn cc;
