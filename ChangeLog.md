@@ -18,6 +18,10 @@ Hat Enterprise Linux (and derivative), Fedora, and SuSE releases.
 3. The TurboVNC Viewer authentication dialog will now indicate whether the
 connection is encrypted, unencrypted, or redundantly encrypted.
 
+4. The Java TurboVNC Viewer now overrides Java's default choice of high DPI
+scaling algorithms on Windows.  This eliminates visual artifacts when using
+fractional display scaling factors such as 125%.
+
 
 2.2.7
 =====

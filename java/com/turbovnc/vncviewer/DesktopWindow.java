@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
- * Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2021 D. R. Commander.
+ * Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2022 D. R. Commander.
  *                                                     All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
@@ -413,6 +413,12 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       super.paintComponent(g);
     if (cc.viewport != null && (cc.viewport.dx > 0 || cc.viewport.dy > 0))
       g2.translate(cc.viewport.dx, cc.viewport.dy);
+    if (VncViewer.OS.startsWith("windows")) {
+      double scalingFactor = g2.getTransform().getScaleX();
+      if (scalingFactor != 1.0)
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                            RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    }
     if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
       g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                           RenderingHints.VALUE_INTERPOLATION_BILINEAR);
