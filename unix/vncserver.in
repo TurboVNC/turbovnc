@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #
-#  Copyright (C) 2009-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2009-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
@@ -669,6 +669,7 @@ if (-e "/tmp/.X11-unix/X$displayNumber") {
 }
 $ENV{VNCDESKTOP} = $desktopName;
 $ENV{VGL_COMPRESS} = "0";
+$ENV{VGL_PROBEGLX} = "0";
 
 if (!$skipxstartup) {
   if ($opt{'-fg'}) {
