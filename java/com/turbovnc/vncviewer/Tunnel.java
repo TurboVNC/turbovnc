@@ -1,6 +1,6 @@
 /*  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
- *  Copyright (C) 2012-2015, 2017-2018, 2020-2021 D. R. Commander.
+ *  Copyright (C) 2012-2015, 2017-2018, 2020-2022 D. R. Commander.
  *                                                All Rights Reserved.
  *  Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
  *
@@ -79,7 +79,7 @@ public class Tunnel {
 
     if (Params.extSSH.getValue() || (pattern != null && pattern.length() > 0))
       createTunnelExt(gatewayHost, remoteHost, remotePort, localPort, pattern,
-                      opts);
+                      opts, tunnel);
     else {
       vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
       if (opts.sshSession == null)
@@ -249,13 +249,14 @@ public class Tunnel {
 
   private static void createTunnelExt(String gatewayHost, String remoteHost,
                                       int remotePort, int localPort,
-                                      String pattern, Options opts)
+                                      String pattern, Options opts,
+                                      boolean tunnel)
                                       throws Exception {
     if (pattern == null || pattern.length() < 1)
-      pattern = (opts.tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
+      pattern = (tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
 
     String command = fillCmdPattern(pattern, gatewayHost, remoteHost,
-                                    remotePort, localPort, opts);
+                                    remotePort, localPort, opts, tunnel);
 
     vlog.debug("SSH command line: " + command);
     List<String> args = ArgumentTokenizer.tokenize(command);
@@ -270,7 +271,8 @@ public class Tunnel {
 
   private static String fillCmdPattern(String pattern, String gatewayHost,
                                        String remoteHost, int remotePort,
-                                       int localPort, Options opts) {
+                                       int localPort, Options opts,
+                                       boolean tunnel) {
     int i, j;
     boolean hFound = false, gFound = false, rFound = false, lFound = false;
     String command = "";
@@ -282,7 +284,7 @@ public class Tunnel {
       if (pattern.charAt(i) == '%') {
         switch (pattern.charAt(++i)) {
           case 'H':
-            command += (opts.tunnel ? gatewayHost : remoteHost);
+            command += (tunnel ? gatewayHost : remoteHost);
             hFound = true;
             continue;
           case 'G':
@@ -305,7 +307,7 @@ public class Tunnel {
     if (!hFound || !rFound || !lFound)
       throw new ErrorException("%H, %R or %L absent in tunneling command template.");
 
-    if (!opts.tunnel && !gFound)
+    if (!tunnel && !gFound)
       throw new ErrorException("%G pattern absent in tunneling command template.");
 
     return command;
