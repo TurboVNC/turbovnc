@@ -15,7 +15,7 @@ whereby either Xvnc or the window manager failed to launch when attempting to
 start a TurboVNC session from the TurboVNC Server init.d script on recent Red
 Hat Enterprise Linux (and derivative), Fedora, and SuSE releases.
 
-3. The TurboVNC Viewer authentication dialog will now indicate whether the
+3. The Java TurboVNC Viewer authentication dialog will now indicate whether the
 connection is encrypted, unencrypted, or redundantly encrypted.
 
 4. The Java TurboVNC Viewer now overrides Java's default choice of high DPI
