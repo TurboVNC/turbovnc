@@ -413,15 +413,17 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       super.paintComponent(g);
     if (cc.viewport != null && (cc.viewport.dx > 0 || cc.viewport.dy > 0))
       g2.translate(cc.viewport.dx, cc.viewport.dy);
+    Object scalingAlg = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+    String alg = System.getProperty("turbovnc.scalingalg");
+    if (alg != null && alg.equalsIgnoreCase("bicubic"))
+      scalingAlg = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
     if (VncViewer.OS.startsWith("windows")) {
       double scalingFactor = g2.getTransform().getScaleX();
       if (scalingFactor != 1.0)
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                            RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, scalingAlg);
     }
     if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
-      g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                          RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+      g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, scalingAlg);
       g2.drawImage(im.getImage(), 0, 0, scaledWidth, scaledHeight, null);
     } else {
       Rectangle r = g.getClipBounds();
