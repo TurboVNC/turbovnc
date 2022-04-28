@@ -40,6 +40,11 @@ visuals caused the Mesa GLX vendor library to be loaded into the 3D application
 process, which led to interaction issues with certain commercial 3D
 applications that provide their own Mesa back ends.
 
+8. Fixed an error ("Server TLS ERROR: Could not load libssl") that occurred
+when attempting to use TLS encryption with the TurboVNC Server (built with
+`TVNC_DLOPENSSL=1`, which is the default) running on a TurboVNC host with
+OpenSSL 3.
+
 
 3.0 beta1
 =========
