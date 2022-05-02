@@ -1,6 +1,6 @@
-diff --git a/libX11-1.6.9/src/XlibInt.c b/libX11/src/XlibInt.c
-index e4fb4e5..5b1c327 100644
---- a/libX11-1.6.9/src/XlibInt.c
+diff --git a/libX11-1.6.12/src/XlibInt.c b/libX11/src/XlibInt.c
+index 3f97d72..7d55cec 100644
+--- a/libX11-1.6.12/src/XlibInt.c
 +++ b/libX11/src/XlibInt.c
 @@ -62,13 +62,13 @@ from The Open Group.
  #include <unistd.h>

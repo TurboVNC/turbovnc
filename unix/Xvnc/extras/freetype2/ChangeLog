@@ -1,3 +1,1949 @@
+2020-10-20  Werner Lemberg  <wl@gnu.org>
+
+	* Version 2.10.4 released.
+	==========================
+
+
+	Tag sources with `VER-2-10-4'.
+
+	* docs/VERSION.TXT: Add entry for version 2.10.4.
+	* docs/CHANGES: Updated.
+
+	* README, src/base/ftver.rc, builds/windows/vc2010/index.html,
+	builds/windows/visualc/index.html,
+	builds/windows/visualce/index.html,
+	builds/wince/vc2005-ce/index.html,
+	builds/wince/vc2008-ce/index.html, docs/freetype-config.1:
+	s/2.10.3/2.10.4/, s/2103/2104/.
+
+	* include/freetype/freetype.h (FREETYPE_PATCH): Set to 4.
+
+	* builds/unix/configure.raw (version_info): Set to 23:4:17.
+	* CMakeLists.txt (VERSION_PATCH): Set to 4.
+
+2020-10-19  Werner Lemberg  <wl@gnu.org>
+
+	[sfnt] Fix heap buffer overflow (#59308).
+
+	This is CVE-2020-15999.
+
+	* src/sfnt/pngshim.c (Load_SBit_Png): Test bitmap size earlier.
+
+2020-10-17  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/sfnt/tt{colr,cpal}.c: Fix signedness warnings from VC++.
+
+2020-10-17  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/sfnt/sfwoff2.c (Read255UShort): Tweak types to please VC++.
+
+2020-10-10  Werner Lemberg  <wl@gnu.org>
+
+	* Version 2.10.3 released.
+	==========================
+
+
+	Tag sources with `VER-2-10-3'.
+
+	* docs/VERSION.TXT: Add entry for version 2.10.3.
+
+	* README, src/base/ftver.rc, builds/windows/vc2010/index.html,
+	builds/windows/visualc/index.html,
+	builds/windows/visualce/index.html,
+	builds/wince/vc2005-ce/index.html,
+	builds/wince/vc2008-ce/index.html, docs/freetype-config.1:
+	s/2.10.2/2.10.3/, s/2102/2103/.
+
+	* include/freetype/freetype.h (FREETYPE_PATCH): Set to 3.
+
+	* builds/unix/configure.raw (version_info): Set to 23:3:17.
+	* CMakeLists.txt (VERSION_PATCH): Set to 3.
+
+2020-09-25  Werner Lemberg  <wl@gnu.org>
+
+	[autofit] Synchronize with ttfautohint.
+
+	This corresponds to the following commits in the ttfautohint git
+	repository:
+
+	  bb6842bd3bd437b7b4a7921b0376c860f5e73d18  Typo, formatting.
+	  d5c91ddb1cb310257a3dfe9a8e20e1fc51335faa  Add Medefaidrin script.
+
+	* src/autofit/afblue.dat: Add blue zone data for Medefaidrin.
+	* src/autofit/afblue.c, src/autofit/afblue.h: Regenerated.
+
+	* src/autofit/afscript.h: Add Medefaidrin standard characters.
+
+	* src/autofit/afranges.c, src/autofit/afstyles.h: Add Medefaidrin
+	data.
+
+2020-09-25  Werner Lemberg  <wl@gnu.org>
+
+	Move `scripts/make_distribution_archives.py` to `src/tools`.
+
+	* scr/tools/scripts/make_distribution_archives.py: (_TOP_DIR,
+	_SCRIPT_DIR): Updated to new location.
+	(main): s/shutils.copyfile/shutils.copy/ to preserve file
+	permissions.
+	(main): Prefix source file paths with `git_dir` while copying files
+	to allow calls of the script from other places than the top-level
+	directory.
+
+2020-09-24  Werner Lemberg  <wl@gnu.org>
+
+	* src/cff/cffgload.c (cff_slot_load): Scale `vertBearingY`.
+
+	Towards the end of the the function there is a call to
+	`FT_Outline_Get_CBox` that retrieves the glyph bbox in scaled units.
+	That sets `horiBearing{X,Y}` and `vertBearingX` but `vertBearingY`
+	is left alone, and is not scaled.
+
+	Patch from Eric Muller <emuller@amazon.com>.
+
+2020-09-24  Werner Lemberg  <wl@gnu.org>
+
+	* src/base/ftobjs.c (FT_Load_Glyph): Trace glyph metrics.
+
+2020-09-22  Werner Lemberg  <wl@gnu.org>
+
+	[meson] Move auxiliary scripts to `builds/meson`.
+
+	Suggested by Alexei.
+
+	* scripts/*.py: Move meson scripts to...
+	* builds/meson/*.py: ... this new location.
+
+	* meson.build: Updated.
+
+2020-09-21  David Turner  <david@freetype.org>
+
+	Add python script for building tarballs.
+
+	* scripts/make_distribution_archives.py: New file.
+
+	This standalone Python script should be equivalent to running `make
+	dist` with the Make-based build system, with the following minor
+	differences:
+
+	- Since `make distclean` doesn't always clean up `objs/` properly,
+	  `make dist` archives may contain some stale binaries like
+	  `objs/.libs/libfreetype.so.6` or others.
+
+	- `config.guess` and `config.sub` are not updated unless option
+	  `--gnu-config-dir=DIR` is used to specify the location of these
+	  files.
+
+	- Some bits of the auto-generated reference documentation may
+	  appear in slightly different order, probably due to issues related
+	  to mkdocs and docwriter.
+
+	As an example, the call
+
+	  scripts/make_distribution_archives.py /tmp/freetype2-dist
+
+	creates the following files under `/tmp/freetype2-dist`:
+
+	  freetype-<version>.tar.gz
+	  freetype-<version>.tar.xz
+	  ft<winversion>.zip
+
+2020-09-21  Werner Lemberg  <wl@gnu.org>
+
+	* scripts/extract_freetype_version.py: Fix regex typos.
+
+2020-09-21  David Turner  <david@freetype.org>
+
+	Add Meson build project file.
+
+	Example usage:
+
+	  # Configure Meson build in directory `build-meson` to generate
+	  # release binaries comparable to to the ones from the
+	  # autotools/make build system.
+	  meson setup build-meson \
+	        --prefix=/usr/local \
+	        --buildtype=debugoptimized \
+	        --strip \
+	        -Db_ndebug=true
+
+	  # After configuring the Meson build with the above command,
+	  # compile and install to `/usr/local/`; this includes a pkg-config
+	  # file.
+	  ninja -C build-meson install
+
+	  # Alternatively, compile and install to `/tmp/aa/usr/local/...`
+	  # for packaging.
+	  DESTDIR=/tmp/aa ninja -C build-meson install
+
+	  # Generate documentation under `build-meson/docs`.
+	  ninja -C build-meson docs
+
+	Library size comparison for stripped `libfreetype.so` generated by
+	all three build systems:
+
+	  - Default build (autotools + libtool): 712 KiB
+	  - CMake build (RelWithDebInfo):        712 KiB
+	  - Meson build:                         712 KiB
+
+
+	* meson.build: New top-level Meson build file for the library.
+
+	* meson_options.txt: New file.  It holds user-selectable options for
+	the build, which can be printed with `meson configure`, and selected
+	at `meson setup` or `meson --reconfigure` time with
+	`-D<option>=<value>`.
+
+	* scripts/parse_modules_cfg.py: A script invoked by `meson.build` to
+	parse `modules.cfg` and extract important information out of it
+	(i.e., the list of modules).
+
+	* scripts/process_ftoption_h.py: New script invoked by `meson.build`
+	to process the original `ftoption.h` file.  It enables or disables
+	configuration macro variables based on the available dependencies.
+	This is similar to what other build systems are using (i.e., Meson's
+	`configure_file()` command is not used here).
+
+	* scripts/extract_freetype_version.py: New script invoked by
+	`meson.build` to extract the FreeType version number from
+	`<freetype/freetype.h>`.
+
+	* scripts/extract_libtool_version.py: New script invoked by
+	`meson.build` to extract the libtool `revision_info` data from
+	`builds/unix/configure.raw`, and to generate the corresponding
+	shared library suffix.
+
+	* scripts/generate_reference_docs.py: New script invoked by
+	`meson.build` to generate the FreeType 2 reference documentation
+	(using the `docwriter` and `mkdocs` packages, which must be already
+	installed).
+
+2020-09-11  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[raster] Improve the second pass (#58373).
+
+	Besides dropout control the second horizontal sweep is supposed to
+	clean up straight horizontal edges that are mishandled by the first
+	vertical sweep when a line passes through pixel centers.  This line
+	would present as perfectly aligned span edges in the second sweep.
+
+	* src/raster/ftraster.c (Horizontal_Sweep_Span): Replace the old
+	implementation with a better one focusing on aligned span edges only.
+
+2020-09-08  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[raster] Tune SMART macro (#58352).
+
+	Windows seems to perform smart dropout control at 26.6 precision.
+	To mimick Windows independent of increased precision, we need to tweak
+	the macro so that some close calls break down rather than up.
+
+	* src/raster/ftraster.c (SMART): Tweak the macro.
+
+2020-09-08  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[raster] Introduce SMART macro.
+
+	* src/raster/ftraster.c (SMART): New macro for smart dropout rounding.
+	(Verstical_Sweep_Drop, Horizontal_Sweep_Drop): Use it.
+
+2020-09-03  Boris Dalstein  <dalboris@gmail.com>
+
+	[build] Make CMake install basic version information.
+
+	* CMakeLists.txt: Do it.
+
+2020-09-02  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[truetype] Reduce Infinality footprint (cont'd).
+
+	* src/truetype/ttinterp.c (Ins_DELTAP): Shrink variable scope.
+	(Ins_SHPIX, Ins_MIRP): Revise if-logic.
+
+2020-09-02  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[truetype] Reduce Infinality footprint.
+
+	* src/truetype/ttinterp.c (Ins_SHPIX, Ins_MSIRP, Ins_MIAP, Ins_MDRP,
+	Ins_MIRP): Shrink variable scopes and consolidate ifdefs.
+
+2020-09-01  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[truetype] Refactor compensation color.
+
+	* src/truetype/ttinterp.h (TT_Round_Func): Change the last argument.
+	* src/truetype/ttinterp.c (Ins_ROUND, Ins_NROUND, Ins_MDAP, Ins_MIAP,
+	Ins_MDRP, Ins_MIRP): Move compensation retrieval from here...
+	(Round_*): ... to here.
+	* src/truetype/ttobjs.c (tt_size_init_bytecode): Reserve zero
+	compensation at color index 3.
+
+2020-08-28  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[smooth] Don't set target in direct mode.
+
+	* src/smooth/ftsmooth.c (ft_smooth_raster_overlap): Remove assignment.
+	(ft_smooth_raster_lcd) [!FT_CONFIG_OPTION_SUBPIXEL_RENDERING]: Ditto.
+
+2020-08-25  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/smooth/ftsmooth.c (ft_smooth_raster_overlap): Limit width.
+
+	Segmentation fault reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=24729
+
+2020-08-22  Werner Lemberg  <wl@gnu.org>
+
+	* src/truetype/ttgload.c (TT_Get_VMetrics): Add tracing message.
+
+2020-08-05  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[truetype] Retain OVERLAP_SIMPLE and OVERLAP_COMPOUND.
+
+	For glyphs with OVERLAP_SIMPLE or OVERLAP_COMPOUND, set
+	FT_OUTLINE_OVERLAP to render them with direct oversampling, which
+	mitigates artifacts (see 3bb512bc9f62).
+
+	* include/freetype/ftimage.h (FT_OUTLINE_OVERLAP): Redefine to rhyme
+	with OVERLAP_SIMPLE.
+	* src/base/ftgloadr.c (FT_GlyphLoader_Rewind): Reset outline flags.
+	* src/truetype/ttgload.c
+	(TT_Load_Simple_Glyph): Retain OVERLAP_SIMPLE.
+	(load_truetype_glyph): Retain OVERLAP_COMPOUND.
+
+2020-08-04  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/truetype/ttgload.c (TT_Load_Glyph): More tracing.
+
+2020-07-28  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	Hide internal functions with SunPro.
+
+	* include/freetype/internal/compiler-macros.h
+	(FT_INTERNAL_FUNCTION_ATTRIBUTE) <__SUNPRO_C>: Define as __hidden.
+
+2020-07-28  Anuj Verma  <anujv@iitbhilai.ac.in>
+
+	Fix static compilation with Visual C.
+
+	* include/freetype/internal/compiler-macros.h
+	(FT_INTERNAL_FUNCTION_ATTRIBUTE) <_WIN32>: Define as empty.
+
+2020-07-28  Priyesh Kumar  <priyeshkkumar@gmail.com>
+
+	Fix `-Wformat' compiler warnings.
+
+	* src/*: Fix format specifiers.
+
+	* builds/unix/ftsystem.c (FT_Stream_Open): Ditto.
+
+2020-07-25  Werner Lemberg  <wl@gnu.org>
+
+	Fix `-Wformat' compiler warnings.
+
+	Problem reported by Priyesh kumar <priyeshkkumar@gmail.com>
+
+	* src/base/ftoutln.c (FT_Outline_Decompose): Fix number of arguments
+	to tracing macro.
+
+	* src/bdf/bdfdrivr.c (bdf_cmap_char_next, bdf_get_bdf_property):
+	Ditto.
+
+	* src/cache/ftcbasic.c (ftc_basic_family_get_count): Ditto.
+	Reformulate message.
+
+	* src/pcf/pcfdrivr.c (pcf_get_bdf_property): Ditto.
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Ditto.
+	Trace table offset, too.
+
+	* src/truetype/ttgxvar.c (ft_var_apply_tuple): Ditto.
+
+2020-07-23  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (woff2_decompress): Fix compiler warning.
+
+	Reported by Hin-Tak.
+
+2020-07-12  Werner Lemberg  <wl@gnu.org>
+
+	* builds/unix/configure.raw: Fix inclusion of `ftoption.h'.
+
+2020-07-07  Werner Lemberg  <wl@gnu.org>
+
+	Fix clang warnings.
+
+	* include/freetype/internal/autohint.h
+	(FT_DECLARE_AUTOHINTER_INTERFACE): New macro.
+	* src/autofit/afmodule.h: Use it to declare
+	`af_autofitter_interface'.
+
+	* include/freetype/internal/ftobjs.h (FT_DECLARE_GLYPH): New macro.
+	* src/base/ftbase.h: Use it to declare `ft_bitmap_glyph_class' and
+	`ft_outline_glyph_class'.
+
+	* src/base/ftglyph.c: Include `ftbase.h'.
+
+	* src/cff/cffparse.c (cff_parser_run): Fix type of `t2_size'.
+
+	* src/pcf/pcfdrivr.c (pcf_cmap_char_next): Fix type of `result'.
+
+	* src/psaux/psauxmod.c (psaux_module_class): Use `FT_DEFINE_MODULE'.
+	* src/psaux/psauxmod.h: Declare `afm_parser_funcs',
+	`t1_cmap_classes', `cff_decoder_funcs', and `psaux_module_class'.
+
+	* src/pshinter/pshmod.c: Include `pshmod.h'.
+
+	* src/sfnt/sfwoff2.c (ROUND4, WRITE_SHORT): Fix implicit sign
+	conversion.
+	(compute_ULong_sum): Fix return type.
+	Fix implicit sign conversion.
+	(store_points): Fix type of `last_flag', `repeat_count', and `flag'.
+	Use casts to avoid warnings.
+	(reconstruct_glyf): Fix implicit sign conversion.
+	Use cast to avoid warning.
+	(get_x_mins): Fix implicit sign conversion.
+	* src/sfnt/ttcmap.c: Undef `TTCMAPCITEM'.
+	* src/sfnt/ttcmap.h: Define `TTCMAPCITEM' and include `ttcmapc.h' to
+	declare cmap classes.
+
+	* src/smooth/ftsmooth.c (ft_smooth_overlap_spans): Use cast.
+
+	* src/truetype/ttinterp.c (Ins_MIAP): Fix typo.
+
+2020-07-07  David Turner  <david@freetype.org>
+
+	[build] Really fix multi and C++ builds.
+
+	The following builds were still failing due to previous changes:
+
+	  make multi
+	  make multi CC="c++"
+	  make CC="c++"
+
+	This patch fixes the issues, which were missing includes to get the
+	right macro definitions in multi-build mode.
+
+	Also, `FT_UNUSED' is actually used by third-party code, so move it
+	back to `public-macros.h' to avoid breaking it.
+
+	* include/freetype/config/public-macros.h (FT_EXPORT): Remove
+	special definition for C++.
+	(FT_UNUSED): Define here instead of...
+	* include/freetype/config/compiler-macros.h: ... here.
+	(FT_FUNCTION_DECLARATION): Remove special definition for C++.
+	(FT_LOCAL_ARRAY_DEF): Fix definition.
+
+	* src/cache/ftccback.h, src/lzw/ftzopen.h, src/gxvalid/gxvmort.h,
+	src/gxvalid/gxvmorx.h: Add `FT_BEGIN_HEADER' and `FT_END_HEADER'.
+
+2020-07-06  David Turner  <david@freetype.org>
+
+	[build] Fix multi and C++ builds.
+
+	The following builds were failing due to previous changes:
+
+	  make multi
+	  make multi CC="c++"
+
+	* include/freetype/config/ftconfig.h: Remove `FT_END_HEADER'.
+
+	* include/freetype/config/ftheader.h (FT_BEGIN_HEADER,
+	FT_END_HEADER): Protect against redefinition.
+
+	* src/cache/ftccache.h, src/cache/ftcmru.h, src/pcf/pcfutil.h,
+	src/psaux/pserror.h, src/psaux/psft.h, src/psaux/psstack.h,
+	src/sfnt/woff2tags.h: Include `compiler-macros.h'.
+
+	* src/sfnt/woff2tags.c: Include `woff2tags.h'.
+
+2020-07-06  Werner Lemberg  <wl@gnu.org>
+
+	[psaux] Improve `t1_decoder_parse_metrics' (#58646).
+
+	* src/psaux/t1decode.c (t1_decoder_parse_metrics): Copy
+	corresponding code from old engine's `t1_decoder_parse_charstrings'
+	function to handle `op_callsubr' and `op_return'.
+
+2020-07-05  David Turner  <david@freetype.org>
+
+	[build] Improve visibility support of library function names.
+
+	* include/freetype/config/public-macros.h
+	(FT_PUBLIC_FUNCTION_ATTRIBUTE): New macro to tag functions as
+	public (and thus exportable).
+	(FT_EXPORT): Use it.
+
+	* include/freetype/config/compiler-macros.h
+	(FT_INTERNAL_FUNCTION_ATTRIBUTE): New macro to tag functions as
+	internal to the library (and thus hidden).  Note that on ELF
+	systems, all internal functions have hidden visibility, which avoids
+	the need to enforce this when invoking the compiler (e.g., with an
+	option like `-fvisibility=hidden').
+
+	(FT_FUNCTION_DECLARATION, FT_FUNCTION_DEFINITION): New base macros
+	to deal with C and C++ linkage issues at the same time.
+
+	(FT_LOCAL, FT_LOCAL_DEF, FT_LOCAL_ARRAY, FT_LOCAL_ARRAY_DEF,
+	FT_BASE, FT_BASE_DEF, FT_EXPORT_VAR, FT_BASE_CALLBACK,
+	FT_BASE_CALLBACK_DEF): Redefined using new macros.
+
+2020-07-05  David Turner  <david@freetype.org>
+
+	[build] Split off more stuff from `ftconfig.h'.
+
+	* builds/unix/ftconfig.h.in, builds/vms/ftconfig.h,
+	include/freetype/config/ftconfig.h: Split off macro definitions
+	required by the FreeType API headers to...
+	* include/freetype/config/public-macros.h: ...this new file.
+
+	* builds/unix/ftconfig.h.in, builds/vms/ftconfig.h,
+	include/freetype/config/ftconfig.h: Split off macro definitions used
+	by the library but not to be exposed to clients to...
+	* include/freetype/config/compiler-macros.h: ...this new file.
+
+	* include/freetype/internal/*.h, src/raster/ftraster.h: Include
+	`compiler-macros.h' where needed.
+
+2020-07-05  David Turner  <david@freetype.org>
+
+	[build] Move mac support code to `mac-support.h'.
+
+	* builds/unix/ftconfig.h.in, builds/vms/ftconfig.h,
+	include/freetype/config/ftconfig.h: Split off mac-specific stuff
+	to...
+	* include/freetype/config/mac-support.h: ...this new file.
+
+	* CMakeLists.txt, builds/unix/configure.raw: Remove `/undef ->
+	#undef' string replacement; the affected code is no longer part of
+	the `ftconfig.h' template.
+
+2020-07-05  David Turner  <david@freetype.org>
+
+	[build] Put integer type definitions into `integer-types.h'.
+
+	Refactor some of the `ftconfig.h' headers and template to move the
+	definition of the FreeType integer types (e.g., `FT_Int16') to a
+	common header file `freetype/config/integer-types.h'.
+
+	* builds/unix/ftconfig.h.in, builds/vms/ftconfig.h,
+	include/freetype/config/ftconfig.h: Split off integer type
+	definition stuff to...
+	* include/freetype/config/integer-types.h: ...this new file.
+
+	* builds/unix/ftconfig.h.in: Control the definition of
+	`FT_SIZEOF_INT' and `FT_SIZEOF_LONG' with macro
+	`FT_USE_AUTOCONF_SIZEOF_TYPES'.  If these are not defined, auto
+	detection happens in `integer-types.h' as usual based on `INTXX_MAX'
+	values.  Otherwise the autoconf-detected values are used.
+
+	* builds/unix/configure.raw (CPPFLAGS): Don't include path to
+	`config' directory.  Instead, ...
+	(FT_CONFIG_STANDARD_LIBRARY_H): Use complete path.
+
+2020-07-05  David Turner  <david@freetype.org>
+
+	[build] Rename `build/unix/ftconfig.in' to `ftconfig.h.in'.
+
+	Since we are no longer limited to 8.3 file names, it is simpler to
+	follow the usual conventions for template files.
+
+	* builds/unix/ftconfig.in: Renamed to...
+	* builds/unix/ftconfig.h.in: ...this.
+
+	* CMakeLists.txt, builds/unix/configure.raw: Updated.
+
+2020-07-03  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[smooth] Introduce direct oversampling for overlaps.
+
+	This implements oversampling to mitigate artifacts in pixels partially
+	covered by overlapping contours.  It turns out that the 4x4
+	oversampling is sufficient but, at least, quadruples the rendering
+	time.  The outline has to set FT_OUTLINE_OVERLAP to use this method.
+
+	* include/freetype/ftimage.h (FT_OUTLINE_OVERLAP): New flag.
+	* src/smooth/ftsmooth.c (ft_smooth_render): Check it to...
+	(ft_smooth_raster_overlap): ... inflate outline and set up direct
+	rendering for oversampling with...
+	(ft_smooth_overlap_spans): ... new span function that integrates them.
+
+2020-07-03  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[smooth] Use direct rendering mode in Harmony.
+
+	Instead of rendering 3 bitmaps side by side and reshuffling, we use
+	direct rendering to deliver the bitmaps on each third byte.
+
+	* src/smooth/ftsmooth.c (ft_smooth_raster_lcd)
+	[!FT_CONFIG_OPTION_SUBPIXEL_RENDERING]: Set up direct mode with...
+	(ft_smooth_lcd_spans): ... new span function.
+
+2020-07-03  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[smooth] Separate LCD paths from gray rendering.
+
+	This makes `ft_smooth_render' a lot smaller and easier to follow. It
+	also cleanly separates Harmony and ClearType-style LCD rendering
+	algorithms. Now I only wish to move LCD filtering and geometry from
+	FT_Library to FT_Renderer.
+
+	* src/smooth/ftsmooth.c (ft_smooth_render): Move LCD code from here...
+	(ft_smooth_raster_lcd, ft_smooth_raster_lcdv): ... to here.
+	[FT_CONFIG_OPTION_SUBPIXEL_RENDERING]: Reorganize #ifdef's.
+
+2020-06-20  Sebastian Rasmussen  <sebras@gmail.com>
+
+	[cff] Fix handling of `style_name == NULL' (#58630).
+
+	* src/cff/cffobjs.c (cff_face_init): If a call to `cff_strcpy' fails
+	by returning NULL in `cff_face_init', `remove_style' is still
+	called.  This means that the NULL pointer is dereferenced, causing a
+	crash.
+
+2020-06-19  Sebastian Rasmussen  <sebras@gmail.com>
+
+	[cff] Fix another two memory leaks (#58629).
+
+	* src/cff/cffobjs.c (cff_size_init): If a call to `funcs->create'
+	fails to allocate one of the `internal->subfont' variables, make
+	sure to free `internal->topfont' and any successfully allocated
+	subfonts.
+
+2020-06-19  Sebastian Rasmussen  <sebras@gmail.com>
+
+	[psaux] Fix memory leak (#58626).
+
+	* src/psaux/psstack.c (cf2_stack_init): If `cf2_stack_init' fails to
+	allocate the stack, return error early.
+
+2020-06-19  Sebastian Rasmussen  <sebras@gmail.com>
+
+	[base] Fix memory leak (#58624).
+
+	* src/base/ftobjs.c (FT_New_Size): Avoid trying to free
+	`size->internal' unless `size' has been allocated.  This mistake
+	appeared in the fix for issue #58611.
+
+2020-06-19  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[base] Rework d1180b5f9598 until further notice.
+
+	* src/base/ftoutln.c (FT_Outline_Get_Orientation): Reject large
+	outlines.
+
+2020-06-19  Sebastian Rasmussen  <sebras@gmail.com>
+
+	[cff, cid] Fix segfaults in case of error (#58621).
+
+	* src/cff/cffobjs.c (cff_slot_done), src/cid/cidobjs.c
+	(cid_slot_done): If `ft_glyphslot_init' fails to allocate
+	`internal', then the class' `done_slot' callback (called by
+	`ft_glyphslot_done') must not dereference the pointer to `internal'.
+
+2020-06-19  Werner Lemberg  <wl@gnu.org>
+
+	[base] Fix UBSAN error.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=23166
+
+	* src/base/ftoutln.c (FT_Outline_Get_Orientation): Avoid values
+	larger than 32 bits.
+
+2020-06-19  Werner Lemberg  <wl@gnu.org>
+
+	[woff2] Fix segfault.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=23402
+
+	* src/sfnt/sfwoff2.c (get_x_mins): Check whether `loca' table
+	exists.
+
+2020-06-19  Stephen McDowell  <svenevs.dev@gmail.com>
+
+	[sfnt] Support Intel compilers.
+
+	* src/sfnt/pngshim.c (premultiply_data): Intel compilers do not
+	currently support `__builtin_shuffle'.
+
+2020-06-19  Sebastian Rasmussen  <sebras@gmail.com>
+
+	[base] Fix memory leak (#58611).
+
+	* src/base/ftobjs.c (FT_New_Size): When the call to `clazz->init_size'
+	fails, make sure to free `size->internal'.
+
+2020-06-19  Sebastian Rasmussen  <sebras@gmail.com>
+
+	[cff] Fix memory leak (#58610).
+
+	* src/cff/cffobjs.c (cff_size_init): When the call to
+	`funcs->create' fails, make sure to free `internal'.
+
+2020-06-19  Werner Lemberg  <wl@gnu.org>
+
+	* src/cff/cffload.c (cff_index_get_pointers): Rename `t' to `tbl'.
+
+2020-06-19  Sebastian Rasmussen  <sebras@gmail.com>
+
+	[cff] Free table upon error allocating other data (#58609).
+
+	* src/cff/cffload.c (cff_index_get_pointers): When new_bytes fails
+	to allocate, make sure to free the table.  Do the same for both
+	allocations if there is a later error.
+
+2020-06-13  Werner Lemberg  <wl@gnu.org>
+
+	Remove redundant inclusion of `ft2build.h'.
+
+	* */*: Remove `#include <ft2build.h>' where possible.
+
+	* include/freetype/freetype.h: Remove cpp error about missing
+	inclusion of `ft2build.h'.
+
+2020-06-08  David Turner  <david@freetype.org>
+
+	Make macros for header file names optional.
+
+	We no longer have to take care of the 8.3 file name limit; this
+	allows us (a) to introduce longer, meaningful file names, and (b) to
+	avoid macro names in `#include' lines altogether since some
+	compilers (most notably Visual C++) doesn't support this properly.
+
+	*/*: Replace
+
+	   #include FOO_H
+
+	with
+
+	   #include <freetype/foo.h>
+
+	or something similar.  Also update the documentation.
+
+2020-06-02  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/ttcmap.c (tt_face_build_cmaps): Trace number of cmaps.
+
+2020-05-18  David Turner  <david@freetype.org>
+
+	Remove obsolete HAVE_STDINT_H probing macro.
+
+	This macro was updated by the unix configure script and the
+	`CMakeLists.txt' one, but is never used in the source tree (nor is
+	<stdint.h> included anywhere).
+
+	* CMakeLists.txt, builds/unix/ftconfig.in: Don't handle
+	`HAVE_STDINT_H'.
+
+2020-05-18  David Turner  <david@freetype.org>
+
+	Remove Jamfile files from the tree.
+
+	These have not been used in a very, very long time, so better remove
+	them.  A corresponding patch will be submitted to the
+	`freetype2-demos' repository.
+
+	* src/Jamfile, src/*/Jamfile, Jamrules: Delete.
+
+2020-05-12  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[smooth] Turn on LCD filtering during FreeType initialization.
+
+	* src/smooth/ftsmooth.c (ft_smooth_init): Enable LCD filtering.
+
+	* include/freetype/ftlcdfil.h: Document it, remove patent warnings.
+	* include/freetype/freetype.h (FT_Render_Mode): Updated.
+	* include/freetype/config/ftoption.h, devel/ftoption.h
+	[FT_CONFIG_OPTION_SUBPIXEL_RENDERING]: Do not mention patents.
+
+2020-05-11  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[smooth] Stop using dedicated LCD modules and classes.
+
+	The LCD modules were never truly independent. They mostly served as
+	a way to disable patented LCD rendering, which is no longer necessary.
+	The `smooth' module now handles LCD modes as well.
+
+	* src/smooth/ftsmooth.c (ft_smooth_lcd_renderer_class.
+	ft_smooth_lcdv_renderer_class): Deleted.
+	(ft_render_smooth): Reworked from `ft_render_smooth_generic'.
+	* src/smooth/ftsmooth.h: Remove dedicated LCD classes.
+	* src/smooth/module.mk: Remove dedicated LCD modules.
+	* include/freetype/config/ftmodule.h: Ditto.
+	* builds/amiga/include/config/ftmodule.h: Ditto.
+	* include/freetype/ftmodapi.h: Do not mention LCD modules.
+
+2020-05-09  Werner Lemberg  <wl@gnu.org>
+
+	* Version 2.10.2 released.
+	==========================
+
+
+	Tag sources with `VER-2-10-2'.
+
+	* docs/VERSION.TXT: Add entry for version 2.10.2.
+
+	* README, Jamfile (RefDoc), src/base/ftver.rc,
+	builds/windows/vc2010/index.html, builds/windows/visualc/index.html,
+	builds/windows/visualce/index.html,
+	builds/wince/vc2005-ce/index.html,
+	builds/wince/vc2008-ce/index.html, docs/freetype-config.1:
+	s/2.10.1/2.10.2/, s/2101/2102/.
+
+	* include/freetype/freetype.h (FREETYPE_PATCH): Set to 2.
+
+	* builds/unix/configure.raw (version_info): Set to 23:2:17.
+	* CMakeLists.txt (VERSION_PATCH): Set to 2.
+
+	* docs/CHANGES: Updated.
+
+2020-05-08  Jakub Alba  <jalba@vewd.com>
+
+	* src/truetype/ttinterp.c (TT_RunIns): Adjust loop counter (#58319).
+
+	The font that exceeds the old limit is Icono Regular, version
+	1.00000.
+
+2020-05-03  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* builds/freetype.mk: Refactor for readability.
+
+2020-05-02  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[builds] Clean up Windows CE project files.
+
+	Remove version from filenames that caused a lot of polution in the
+	release process. Use VERSIONINFO resource instead.
+
+	* builds/wince/vc2005-ce/freetype.vcproj,
+	builds/wince/vc2008-ce/freetype.vcproj,
+	builds/windows/visualce/freetype.vcproj,
+	builds/windows/visualce/freetype.dsp: s/2101//g, but add `ftver.rc'.
+	* builds/wince/vc2008-ce/index.html,
+	builds/wince/vc2005-ce/index.html,
+	builds/windows/visualce/index.html: s/2101//g.
+
+2020-05-01  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* devel/ft2build.h: Override FT_CONFIG_MODULES_H here as well.
+
+2020-05-01  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	[builds/unix] Consolidate marco overrides (for the demos to see them).
+
+	* builds/unix/unix-cc.in (FT_CONFIG_MODULES_H, FT_CONFIG_OPTIONS_H):
+	Override them here...
+	* builds/freetype.mk: ... instead of here.
+
+2020-04-08  Werner Lemberg  <wl@gnu.org>
+
+	Allow setting `CC' in Unix build (#58051).
+
+	* builds/unix/unix-cc.in (CC): Use `override'.  The command line
+	  value of `CC' (if any) is stored already in `CCraw'.
+
+2020-04-04  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Return if single stream operation fails.
+
+	* src/sfnt/sfwoff2.c (get_x_mins): Do it.
+
+	* src/sfnt/woff2tags.c: Remove unused include.
+
+2020-03-22  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[docs] Fix building docs if `srcdir' != `builddir'.
+
+	`docs/reference/*' was moved one directory up in commit 237fed6.
+
+	* builds/unix/unix-def.in (PIP): Remove variable.
+
+	* configure: Create `docs' directory and copy assets from
+	`docs/markdown'.
+
+	* docs/README: Output directory is `reference'.
+
+2020-03-21  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[docwriter] Drop support for Python < 3.5.
+
+	Python versions < 3.5 have reached end-of-life and as such, no
+	security or bug fixes will be provided for those versions.  See
+
+	  https://devguide.python.org/#status-of-python-branches
+	
+	for more information.
+
+	* Jamfile (RefDoc): Add `site' parameter.
+
+	* builds/detect.mk (std_setup): Update Python version requirement.
+
+	* builds/freetype.mk (refdoc-venv): Use pip as `python -m pip'.
+
+	* builds/unix/ax_compare_version.m4,
+	builds/unix/ax_prog_python_version.m4: Macros to detect Python
+	version.  New files.
+
+	* builds/unix/configure.raw: Check for Python >= 3.5 and remove
+	check for `pip'.
+
+	* docs/CHANGES, docs/INSTALL.GNU, docs/README: Updated.
+
+2020-03-02  Moazin Khatti  <moazinkhatri@gmail.com>
+
+	[gzip] Support `gzip' encoded header conditionally.
+
+	In order to support `gzip' encoded header the call to
+	`inflateInit2' was modified in commit 6a92b1fadde26477a9179.
+	However, this code breaks with the outdated internal version
+	of zlib.  This is a temporary fix to conditionally support
+	`gzip' encoded header whenever a system installation of zlib
+	is being used.
+
+	Problem report in
+
+	  https://lists.nongnu.org/archive/html/freetype-devel/2020-02/msg00023.html
+
+	* src/gzip/ftgzip.c (FT_Gzip_Uncompress): Change the the call to
+	`inflateInit2' depending on whether the system installation is
+	being used or the internal copy.
+
+2020-02-29  Ben Wagner  <bungeman@google.com>
+
+	[truetype] Fix state of `FT_Face' for buggy `gvar' tables (#57923).
+
+	By resetting the blend as implemented with this commit fonts with
+	invalid `gvar' tables may keep calling into `ft_var_load_gvar' from
+	`tt_set_mm_blend' and failing, but the font was invalid anyway and
+	we want to keep seeing the failure in `tt_set_mm_blend'.
+
+	* src/truetype/ttgxvar.c (ft_var_load_gvar): Calculate length of
+	offset array once.
+	Allocate arrays after `FT_FRAME_ENTER' (extra check before
+	allocating and avoid needing to free array later if error entering
+	frame).
+	Always call `FT_FRAME_EXIT'.
+	Consistently set counts immediately after array initialized.
+	Reset the blend (particularly `blend->glyphoffsets') on failure.
+
+2020-03-01  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[docs] Update docwriter stylesheet.
+
+	This change is required to support docwriter 1.2.1.
+
+	See
+
+	  https://github.com/freetype/docwriter/issues/36
+
+	for more information.
+
+	* docs/markdown/stylesheets/extra.css:
+	(.md-typeset code) -> (.md-typeset pre>code)
+	(pre) -> (pre>code)
+	(p, .md-typeset p, h4): Remove commented styles.
+	(table.index): Remove unused styles.
+
+2020-02-28  Ben Wagner  <bungeman@google.com>
+
+	[truetype] Add better checks for loading `gvar' table (#57905).
+
+	* src/truetype/ttgxvar.c (ft_var_load_gvar): Delay settings of any
+	`blend->xxxcount' values until the corresponding data has been
+	checked.
+	Also do some sanitizing to avoid a too early exit.
+
+	(TT_Vary_Apply_Glyph_Deltas): Improve tracing message.
+
+2020-02-27  Werner Lemberg  <wl@gnu.org>
+
+	Make `FT_HAS_*' and `FT_IS_*' really return true (#57906).
+
+	* include/freetype/freetype.h (FT_HAS_*, FT_IS_*): Implement it.
+
+2020-02-25  Dominik Röttsches  <drott@chromium.org>
+
+	Fix for CFF space glyph regression (#57541).
+
+	* src/psaux/psft.c (cf2_decoder_parse_substrings): Replace early-out
+	  with FT_OFFSET.
+
+2020-02-22  Werner Lemberg  <wl@gnu.org>
+
+	[woff2] Fix font table access.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=20778
+
+	* src/sfnt/sfwoff2.c (get_x_mins): Explicitly check for presence of
+	`head' table, which might not have been processed yet.
+
+2020-02-21  Werner Lemberg  <wl@gnu.org>
+
+	[psaux] Make `t1_decoder_parse_metrics' handle `op_div' (#57519).
+
+	* src/psaux/t1decode.c (t1_decoder_parse_metrics): Copy
+	corresponding code from old engine's `t1_decoder_parse_charstrings'
+	function.
+
+2020-02-19  Nikolaus Waxweiler  <nikolaus.waxweiler@daltonmaag.com>
+
+	[autofit] Add support for Hanifi Rohingya script.
+
+	* src/autofit/afblue.dat: Add blue zone data for Hanifi Rohingya.
+	* src/autofit/afblue.c, src/autofit/afblue.h: Regenerated.
+
+	* src/autofit/afscript.h: Add Hanifi Rohingya standard character.
+
+	* src/autofit/afranges.c, src/autofit/afstyles.h: Add Hanifi
+	  Rohingya data.
+
+2020-02-19  Werner Lemberg  <wl@gnu.org>
+
+	Require HarfBuzz 1.8.
+
+	* builds/unix/configure.raw, CMakeLists.txt: Request HarfBuzz 1.8.0
+	or newer.
+
+	We are going to add auto-hinter support for Hanifi Rohingya, which
+	was introduced in Unicode 11.0.
+
+2020-02-12  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/ttcmap.c (tt_face_build_cmaps): Ignore version (#57708).
+
+2020-02-04  Werner Lemberg  <wl@gnu.org>
+
+	* src/truetype/ttinterp.c (TT_RunIns): Adjust loop counter (#57732).
+
+	The font that exceeds the old limit is Constantine, version 1.001.
+
+2020-01-04  Werner Lemberg  <wl@gnu.org>
+
+	[base] Fix `FREETYPE_PROPERTIES=type1:hinting-engine=adobe`.
+
+	* src/base/ftpsprop.c (ps_property_set) [hinting-engine]: Avoid an
+	incorrect return value that caused a warning.  The function did the
+	right thing, though.
+
+2020-01-03  Werner Lemberg  <wl@gnu.org>
+
+	[woff2] Fix memory leaks and a runtime warning.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=19773
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=18101
+
+	* src/sfnt/sfwoff2.c (compute_ULong_sum): Add missing cast.
+	(reconstruct_hmtx): Add missing deallocation calls.
+
+2020-01-02  Dominik Röttsches  <drott@chromium.org>
+
+	[truetype] Fix UBSan warning on offset to nullptr (#57501).
+
+	* src/truetype/ttinterp.c (Ins_CALL): Fail if `exc->FDefs' is null.
+
+2019-12-31  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Allow bitmap-only fonts (#57394).
+
+	* src/sfnt/sfwoff2.c (reconstruct_font): Fix test for `glyf' and
+	`loca' tables.
+
+2019-12-21  Hugh McMaster  <hugh.mcmaster@outlook.com>
+
+	[docs] (2/2) Fix generation of API documentation (#56745).
+
+	Creating the API Reference in the (new) `reference' sub-directory is
+	consistent with other documentation sub-topics, such as `design',
+	`glyphs' and `tutorial'.
+
+	This patch fixes broken hyperlinks in the documentation pointing to
+	and from the API Reference.  It also allows web assets to load from
+	their relative paths.
+
+	* builds/freetype.mk (DOC_DIR): Adjust.
+	(refdoc, refdoc-venv): Add `--site' argument.
+
+	* builds/toplevel.mk (do-dist): Updated.
+
+2019-12-21  Hugh McMaster  <hugh.mcmaster@outlook.com>
+
+	[docs] (1/2) Move static web assets (#56745).
+
+	* docs/reference/*: Move ...
+	* docs: ... one directory up.
+
+2019-12-21  Dominik Röttsches  <drott@chromium.org>
+
+	Fix more UBSan warnings on adding offset to nullptr (#57432).
+
+	* src/truetype/ttinterp.c (Ins_LOOPCALL), src/psaux/psft.c
+	(cf2_initLocalRegionBuffer): Use `FT_OFFSET'.
+
+2019-12-16  Werner Lemberg  <wl@gnu.org>
+
+	[truetype] Fix UBSan warnings on adding offsets to nullptr.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/chromium/issues/detail?id=1032152
+
+	* src/truetype/ttinterp.c (Ins_FDEF, Ins_IDEF): Use `FT_OFFSET'.
+
+2019-12-14  Werner Lemberg  <wl@gnu.org>
+
+	[truetype] Fix integer overflow.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=19305
+
+	* src/truetype/ttinterp.c (Ins_MIRP): Use `ADD_LONG'.
+
+2019-12-13  Werner Lemberg  <wl@gnu.org>
+
+	Another bunch of UBSan warnings on adding offsets to nullptr.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=19427
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=19433
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=19441
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=19451
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=19452
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=19457
+
+	* src/autofit/aflatin.c (af_latin_hints_compute_segments,
+	af_latin_hints_compute_edges): Use `FT_OFFSET'.
+
+	* src/base/ftstream.c (FT_Stream_EnterFrame): Use `FT_OFFSET'.
+
+	* src/psaux/cffdecode.c (cff_decoder_parse_charstrings): Exit early
+	if there is no charstring.
+
+	* src/psaux/psobjs.c (t1_decrypt): Use `FT_OFFSET'.
+
+	* src/smooth/ftsmooth.c (ft_smooth_render_generic): Exit early for
+	zero bitmap dimensions.
+
+2019-12-09  Dominik Röttsches  <drott@chromium.org>
+
+	Fix more UBSan warnings on adding offset to nullptr (#57384).
+
+	* src/smooth/ftsmooth.c (ft_smooth_render_generic),
+	src/psaux/psobjs.c (ps_table_add): Use `FT_OFFSET'.
+
+2019-12-05  Werner Lemberg  <wl@gnu.org>
+
+	* src/truetype/ttinterp.c (TT_RunIns): Use `FT_OFFSET'.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/chromium/issues/detail?id=1030614
+
+2019-12-03  Werner Lemberg  <wl@gnu.org>
+
+	More nullptr offset UBSan warnings (#57331, #57347).
+
+	* src/autofit/afcjk.c (af_cjk_hints_compute_segments),
+	src/psaux/psft.c (cf2_getSeacComponent), src/truetype/ttinterp.c
+	(Ins_UNKNOWN): Use `FT_OFFSET'.
+
+2019-11-29  Dominik Röttsches  <drott@chromium.org>
+
+	Avoid more nullptr offset UBSan warnings (#57316).
+
+	* src/base/ftoutln.c (FT_Outline_Transform): Bail on empty points.
+	* src/cff/cffload.c (cff_subfont_load): Use `FT_OFFSET'.
+	* src/psaux/psft.c (cf2_decoder_parse_substrings): Early out if
+	`charstring_base' or `charstring_len' are null.
+	* src/sfnt/ttload.c (tt_face_load_name): Use `FT_OFFSET'.
+
+2019-11-23  John Stracke  <jstracke@Google.com>
+
+	[base] Really fix #57194.
+
+	Apply accidentally missed second part of patch.
+
+	* src/base/ftgloadr.c (FT_GlyphLoader_CheckPoints): Call
+	`FT_GlyphLoader_CreateExtra'.
+
+2019-11-23  Werner Lemberg  <wl@gnu.org>
+
+	[truetype] Avoid sanitizer warning (#57289).
+
+	* src/truetype/ttpload.c (tt_face_get_device_metrics): Use
+	`FT_OFFSET'.
+
+2019-11-23  Armin Hasitzka  <prince.cherusker@gmail.com>
+
+	[truetype] Fix integer overflow (#57287).
+
+	* src/truetype/ttgload.c (compute_glyph_metrics): Use `SUB_LONG'.
+
+2019-11-23  Ben Wagner  <bungeman@google.com>
+
+	[sfnt] Avoid sanitizer warning (#57286).
+
+	* src/sfnt/ttcmap.c (tt_face_build_cmaps): Avoid possible `NULL +
+	offset' computation.
+	Tag `table' as `const'.
+
+2019-11-23  John Stracke  <jstracke@Google.com>
+            Werner Lemberg  <wl@gnu.org>
+
+	[base] Fix `NULL + offset' sanitizer warnings (#57194).
+
+	* src/base/ftgloadr.c (FT_GlyphLoader_Adjust_Points,
+	FT_GlyphLoader_Adjust_Subglyphs): Use `FT_OFFSET'.
+	(FT_GlyphLoader_CreateExtra): Add short cut if some values are zero.
+
+2019-11-23  Werner Lemberg  <wl@gnu.org>
+
+	* include/freetype/internal/ftmemory.h (FT_OFFSET): New macro.
+
+	Use this for `base + offset' pointer calculations where `base' can
+	be NULL (triggering a sanitizer warning even if the resulting
+	pointer gets never dereferenced since it is undefined behaviour
+	in C).
+
+	Suggested by Ben Wagner.
+
+2019-11-23  Ben Wagner  <bungeman@google.com>
+
+	[sfnt] Ensure OTTO fonts have tables (#57285).
+
+	* src/sfnt/ttload.c (tt_face_load_font_dir): Add test.
+
+2019-11-23  Behdad Esfahbod  <behdad@behdad.org>
+
+	Minor fixes for recent compilers.
+
+	* src/gzip/infutil.h (inflate_mask): Add `const'.
+
+	* src/autofit/aflatin2.c: Include `ft2build.h'.
+
+2019-11-07  Nikolaus Waxweiler  <madigens@gmail.com>
+
+	* CMakeLists.txt: Minor additions to the notes, compile
+	  builds/unix/ftsystem.c instead of src/base/ftsystem.c on UNIX.
+
+	The latter change is based on the code proposed by rim in #55235.
+
+2019-10-25  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Check `num_fonts' for TTCs.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=18494
+
+2019-10-22  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Avoid undefined shift.
+
+	Also improve tracing.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=18390
+
+2019-10-10  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/sfnt/pngshim.c (premultiply_data): Optimize for __SSE__ only.
+
+2019-10-10  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (reconstruct_glyf): Check `triplet_size'.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=18108
+
+2019-10-09  John Tytgat  <John.Tytgat@esko.com>
+
+	[cff] Fix FT_FACE_FLAG_GLYPH_NAMES for CFF2 based fonts (#57023).
+
+	* src/cff/cffobjs.c (cff_face_init): Don't set
+	FT_FACE_FLAG_GLYPH_NAMES for CFF2 based fonts.
+
+2019-10-08  Werner Lemberg  <wl@gnu.org>
+
+	[woff2] Fix SFNT table checks.
+
+	Also reduce number of SFNT table lookups.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=18065
+
+	* include/freetype/internal/wofftypes.h (WOFF2_InfoRec): Add fields
+	`glyf_table', `loca_table', and `head_table'.
+
+	* src/sfnt/sfwoff2.c (reconstruct_glyf): Update signature.
+	Use table pointers in `info' parameter.
+	(get_x_mins): Check `maxp_table'
+	Use table pointers in `info' parameter.
+	(reconstruct_font):  Use and set table pointers in `info' parameter.
+	Fix check for `glyf' and `loca' tables.
+	Update call to `reconstruct_glyf'.
+	(woff2_open_font): Updated.
+
+2019-10-06  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (reconstruct_glyf): Fix reallocation.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=18046
+
+2019-10-06  Werner Lemberg  <wl@gnu.org>
+
+	Improve memory debugging.
+
+	* include/freetype/internal/ftmemory.h (FT_MEM_FREE): Use
+	`FT_DEBUG_INNER' to set source code file name and line.
+
+	* src/base/ftdbgmem.c (ft_mem_table_remove): Better formatting of
+	tracing message.
+
+2019-10-03  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2 (reconstruct_font): Fix reallocation.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=17966
+
+2019-10-01  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/base/ftstroke.c (ft_stroker_inside): Speed up.
+
+2019-10-01  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2 (woff2_open_font): Initialize `woff2.ttc_fonts'.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=17804
+
+2019-09-30  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (reconstruct_font): Fix memory leak.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=17812
+
+2019-09-30  Werner Lemberg  <wl@gnu.org>
+
+	[woff2] Reject fonts without `head' table.
+
+	Also fix memory deallocation in case of error.
+
+	`head' problem reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=17820
+
+	* src/sfnt/sfwoff2.c (reconstruct_glyf): Don't use `stream_close'.
+	Abort if `head_table' is NULL.
+	Don't free `transformed_buf' in case of error.
+	(woff2_open_font): Don't set `uncompressed_buf' to NULL.
+
+2019-09-29  Werner Lemberg  <wl@gnu.org>
+
+	[woff2] Fix compiler warnings.
+
+	Problem reported by Alexei.
+
+	* src/sfnt/sfwoff2.c (reconstruct_glyf): Initialize `x_min'.
+	(reconstruct_font): Initialize `num_hmetrics'.
+	(woff2_open_font): Initialize `info'.
+
+2019-09-28  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Fix sanity check.
+
+	Correct thinkos in patch from 2019-09-01.
+
+2019-09-28  Werner Lemberg  <wl@gnu.org>
+
+	[woff2] Fix memory leaks.
+
+	One of them reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=17766
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Free `info->x_mins' and
+	`woff2->ttc_fonts'.
+
+	(reconstruct_glyf): Initialize `info->x_mins'.
+
+2019-09-27  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/base/ftstroke.c (ft_stroker_cap): Speed up caps.
+
+2019-09-25  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/base/ftstroke.c (ft_stroker_outside): Speed up clipped miter.
+	* include/freetype/ftstroke.h: Wordsmith miter docs.
+
+2019-09-25  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Check (sum of) table sizes.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=17684
+
+2019-09-23  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/base/ftstroke.c (ft_stroke_border_arcto): Speed up calculations.
+
+2019-09-20  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Fix memory leaks.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=16896
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Fix error handling.
+	Free `uncompressed_buf'.
+	(reconstruct_font): Free `transformed_buf'.
+
+2019-09-17  Werner Lemberg  <wl@gnu.org>
+
+	* src/otvalid/otvcommon.c (otv_Coverage_get_last): Guard `count'.
+
+	Problem reported by Marc Schönefeld <marc.schoenefeld@gmx.org>.
+
+2019-09-17  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Check table index.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=17100
+
+2019-09-15  Avi Halachmi (:avih)  <avihpit@yahoo.com>
+
+	[cmake] Don't fail if brotli is missing (#56894).
+
+	The libs which cmake controls are commented out at
+
+	  include/freetype/config/ftoption.h
+
+	and cmake un-comment each enabled library, but the brotli option was
+	not commented out, therefore `FT_CONFIG_OPTION_USE_BROTLI' remained
+	defined even if brotli was missing/disabled/etc.
+
+	Comment it such that cmake can control it, which means leaving it
+	undefined if brotli is missing.
+
+	* include/freetype/config/ftoption.h: Fix typo.
+
+2019-09-05  Werner Lemberg  <wl@gnu.org>
+
+	[cmake] Add brotli support.
+
+	* CMakeLists.txt (FT_WITH_BROTLI): New option.
+
+	* builds/cmake/FindBrotliDec.cmake: New file.
+
+2019-09-05  Werner Lemberg  <wl@gnu.org>
+
+	Fix handling of `AF_CONFIG_OPTION_INDIC'.
+
+	* devel/ftoption.h, include/freetype/config/ftoption.h:
+	`AF_CONFIG_OPTION_INDIC' needs `AF_CONFIG_OPTION_CJK'.
+
+2019-09-05  Werner Lemberg  <wl@gnu.org>
+
+	CMakeLists.txt: Fix generation of DLL related stuff (#56852).
+
+	Extract `version_info' variable from `builds/unix/configure.raw' and
+	use the data to correctly set `LIBRARY_VERSION' and
+	`LIBRARY_SOVERSION'.
+
+	Also use the data to set `ft_version' field in `freetype2.pc'.
+	Also fix the needed minimum version of HarfBuzz in `freetype2.pc'.
+
+2019-09-03  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (compute_ULong_sum): Fix undefined shift.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=16933
+
+2019-09-01  Werner Lemberg  <wl@gnu.org>
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Add sanity check.
+
+	Don't trust `totalSfntSize' unconditionally.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=16893
+
+2019-08-27  Dominik Röttsches  <drott@chromium.org>
+
+	[woff2] Don't use `FT_UInt64' (#56815).
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Use `FT_UInt32' for
+	`file_offset'.  This fixes builds on platforms where `FT_LONG64' is
+	not defined while still being sufficient to store a file offset.
+
+2019-08-27  Werner Lemberg  <wl@gnu.org>
+
+	[truetype] Prevent crash in `TT_Set_Named_Instance' (#56813).
+
+	* src/truetype/ttgxvar.c (TT_Set_Named_Instance): Fix error
+	handling.
+
+2019-08-27  Werner Lemberg  <wl@gnu.org>
+
+	[woff2] Fix compiler warnings.
+
+	* src/sfnt/sfwoff2.c (read_num_hmetrics): Remove unused argument
+	`table_len'.
+	Update caller.
+	(triplet_decode, compute_bbox, store_loca, reconstruct_glyf): Make
+	`i' variable unsigned.
+	(reconstruct_glyph): Remove condition which is always false.
+	(reconstruct_html): Removed unused argument `transformed_size'.
+	Update caller.
+
+	* src/sfnt/woff2tags.c (woff2_known_tags): Remove condition which is
+	always false.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Check whether known tag is in array bounds.
+
+	If table tag is not 0x3f, we expect a value between 0 and 62.  If
+	this is not the case, exit with errors.
+
+	* src/sfnt/sfwoff2/c: Check whether table tag makes sense.
+
+	* src/sfnt/woff2tags.c: Return 0 if tag is out of bounds.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	* src/sfnt/sfwoff2.c: Improve trace comments.
+
+	Adjust tracing levels for comments, and more formatting.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Support `hmtx' reconstruction when `glyf' is untransformed.
+
+	`reconstruct_hmtx' requires `info->x_mins' and `info->num_glyphs' to
+	reconstruct the hmtx table.  In case glyf is not transformed, we
+	call `get_x_mins' which does the necessary work.
+
+	* src/sfnt/sfwoff2.c (get_x_mins): New function.
+	(reconstruct_font): Call get_x_mins.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[sfnt] Support `face->num_faces' for WOFF2 fonts.
+
+	Set correct value of `face->num_faces' for WOFF2 fonts.  This is
+	being handled separately because we only load the tables for the
+	requested font face in `woff2_open_font' and create a single-face
+	sfnt stream.
+
+	The full discussion is at:
+
+	  https://lists.gnu.org/archive/html/freetype-devel/2019-08/msg00000.html
+
+	* src/sfnt/sfobjs.c (sfnt_open_font): Add parameter
+	`woff2_num_faces'.
+	(sfnt_init_face): Introduce variable `woff2_num_faces', and change
+	`face->root.num_faces' if `woff2_num_faces' is set.
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Validate requested face
+	index and handle negative face indices.
+
+	* src/sfnt/sfwoff2.h (woff2_open_font): Add parameter `num_faces' to
+	declaration.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Improve memory and error handling.
+
+	Free up memory after use, and improve error handling.
+
+	* src/sfnt/sfwoff2.c (reconstruct_font, woff2_open_font): Implement
+	changes.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Avoid too many calls to `FT_REALLOC'.
+
+	We do this by using `totalSfntSize' as an initial reference, and
+	extending the buffer when required.  This reduces rendering time
+	considerably.
+
+	* include/freetype/internal/wofftypes.h (WOFF2_HeaderRec): Add
+	`totalSfntSize', rename `total_sfnt_size' to `actual_sfnt_size'.
+
+	* src/sfnt/sfwoff2.c (write_buf): Add parameter `dst_size' to keep
+	track of and update total size of stream.
+
+	(WRITE_SFNT_BUF, WRITE_SFNT_BUF_AT): Modify macros accordingly.
+
+	(pad4, store_loca, reconstruct_glyf, reconstruct_hmtx,
+	reconstruct_font): Update parameters to accept `sfnt_size'.
+
+	(woff2_open_font): Add variable `sfnt_size'.  Use WOFF2 header field
+	`totalSfntSize' as initial reference (if value makes sense) and
+	allocate `totalSfntSize' bytes for the sfnt stream.  `write_buf'
+	handles reallocation if and when required.  Also resize the stream
+	to `actual_sfnt_size' after reconstruction.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Reconstruct `loca', `hmtx', and swap out stream.
+
+	Add necessary functions to reconstruct loca and hmtx tables (the two
+	remaining tables that can have a transform).  `woff2_open_font' is
+	now capable of loading a woff2 font face.  This code may still need
+	more refining and better memory management.
+
+	* include/freetype/internal/wofftypes.h (WOFF2_HeaderRec): Add total
+	(final) size of sfnt stream.
+
+	(WOFF2_InfoRec): Add header checksum value.
+
+	* src/sfnt/sfobjs.c (sfnt_open_font): Change `face_instance_index'
+	parameter to its pointer so its value can be modified by
+	`woff2_open_font'.
+
+	* src/sfnt/sfwoff2.c: (WRITE_SFNT_BUF_AT): New macro to write into
+	sfnt buffer at given position.
+
+	(write_buf): Add parameter `extend_buf' which allows caller to
+	specify whether buffer should be reallocated before copying data.
+
+	(WRITE_SFNT_BUF): Updated.
+
+	(pad4, store_loca, reconstruct_htmx): New functions.
+
+	(reconstruct_glyf): Calculate loca values and store them.
+
+	(reconstruct_font): Call `reconstruct_hmtx', write table record
+	entries, and calculate table checksums.  Also calculate font
+	checksum and update `checksumAdjustment' entry in head table.
+
+	(woff2_open_font): Open stream for sfnt buffer, swap out input
+	stream and return.
+
+	* src/sfnt/sfwoff2.h (woff2_open_font): Modify parameter to accept
+	pointer to `face_index'.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Reconstruct transformed `glyf' table.
+
+	Reconstruct `glyf' table if it is transformed in the uncompressed
+	table stream.  Also add necessary structures, macros and functions.
+
+	* include/freetype/internal/wofftypes.h (WOFF2_InfoRec,
+	WOFF2_SubstreamRec, WOFF2_PointRec): New structures.
+	(WOFF2_TableRec): s/OrigLength/dst_length/.
+
+	* src/sfnt/sfwoff2.c (READ_255USHORT, READ_BASE128): Use
+	`FT_SET_ERROR' to set implicit `error' variable.
+
+	(WRITE_SHORT): New macro.
+
+	(N_CONTOUR_STREAM, N_POINTS_STREAM, FLAG_STREAM, GLYPH_STREAM,
+	COMPOSITE_STREAM, BBOX_STREAM, INSTRUCTION_STREAM): New macros to
+	refer to substreams of the transformed `glyf' tables.
+
+	(Read255UShort, ReadBase128): Return errors set by `FT_READ_XXX'
+	macros.
+
+	(with_sign, safe_int_addition): New functions to add sign to values
+	based on a flag and perform safe addition respectively.
+
+	(triplet_decode): Decode variable-length (flag, xCoordinate,
+	yCoordinate) triplet for a simple glyph.   See
+
+	  https://www.w3.org/TR/WOFF2/#triplet_decoding
+
+	(store_points, compute_bbox, composteGlyph_size, reconstruct_glyf):
+	New functions.
+
+	(reconstruct_font): Call `reconstruct_glyf'.
+
+	* src/sfnt/sfwoff2.h: Add required constants.
+
+	* src/sfnt/woff2tags.h: Move out constants to `sfwoff2.h'.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Copy un-transformed tables to sfnt stream.
+
+	Copy un-transformed tables to the sfnt stream.
+
+	* src/sfnt/sfwoff2.c: (WRITE_SFNT_BUF): New macro.
+	(write_buf): New function.  Extend memory of `dst' buffer and copy
+	bytes from `src'.
+	(compute_ULong_sum): New function.  Calculate checksum of table.
+	(reconstruct_font): Change `FT_Byte* sfnt' to `FT_Byte**
+	sfnt_bytes'.  This has been done because we reallocate memory to
+	`sfnt' multiple times, which may change the pointer value of `sfnt'.
+	This new pointer must be propogated back to the caller.  Same reason
+	for using a double pointer in `write_buf'.
+
+	* src/sfnt/woff2tags.h (WOFF2_DEFAULT_MAX_SIZE): New macro used for
+	overflow checking.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Create stream for uncompressed buffer.
+
+	Uncompressed buffer is now an `FT_Stream'.
+
+	Perform basic checks and start iterating over tables.
+
+	* src/sfnt/sfwoff2.c (stream_close, find_table, read_num_hmetrics):
+	New functions.
+	(reconstruct_font): Modify parameters and iterate over tables.
+	(woff2_open_font): Updated.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Handle TTCs and start reconstructing font.
+
+	We `handle' TTCs by modifying the `indices' array to point to only
+	those tables that are part of the requested `face_index'.
+
+	Set and use `num_tables' in `WOFF2_TtcFont'.
+
+	* src/sfnt/sfwoff2.c (reconstruct_font): New function.
+	(woff2_open_font): Start reconstruction of font.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Get known tags from function.
+
+	Change `KnownTags' to a function (`woff2_known_tags').  This avoids
+	introducing a global constant array.  This function returns the
+	specified index without *any* checks.  The caller must ensure that
+	`index' is within array limits.
+
+	* src/sfnt/sfwoff2.c (woff2_open_font): Change `KnownTags[...]'
+	notation to `woff2_known_tags( ...  )'.
+
+	* src/sfnt/woff2tags.c: Perform changes.
+
+	* src/sfnt/woff2tags.h: Update definitions.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Minor.
+
+	* src/sfnt/sfwoff2.c (woff2_uncompress): Add error message
+	(woff2_open_font): Free `uncompressed_buf'.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Uncompress Brotli streams and `face_index' support.
+
+	WOFF2 compressed stream is now uncompressed if Brotli is available.
+	This data is stored in a separate buffer (uncompressed_buf) because
+	it does not contain direct table data.  Certain tables have
+	transformations applied to them, and they must be reconstructed
+	before we can write those tables to the SFNT stream.
+
+	`face_index' is now being passed as a parameter to
+	`woff2_open_font'.
+
+	* src/sfnt/sfobjs.c (sfnt_open_font): Add parameter
+	`face_instance_index'.
+
+	* src/sfnt/sfwoff2.c (woff2_uncompress): New function.
+	(woff2_open_font): Call `woff2_uncompress'.
+	(compute_first_table_offset): Fix return type.
+
+	* src/sfnt/sfwoff2.h (woff2_open_font): Modify declaration.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	* builds/unix/configure.raw: Change argument name to `brotli'.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	Add Brotli dependency and required checks.
+
+	Brotli is required for decompressing WOFF2 font directory streams.
+	The library is thus being added as an optional dependency for
+	FreeType.
+
+	* builds/unix/configure.raw: Add checks for `libbrotlidec'.
+	(REQUIRES_PRIVATE, LIBS_PRIVATE, LIBSSTATIC_CONFIG): Updated.
+
+	* devel/ftoption.h, include/freetype/config/ftoption.h
+	(FT_CONFIG_OPTION_USE_BROTLI): New macro.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Write SFNT Offset table.
+
+	* src/sfnt/sfwoff2.c (WRITE_USHORT, WRITE_ULONG): New macros.
+	(compare_tags): New function.
+	(woff2_open_font): Implement it.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	* src/sfnt/sfwoff2.c: #undef macros.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[woff2] Read table and collection directory.
+
+	* include/freetype/internal/wofftypes.h (WOFF2_TtcFontRec): New
+	structure.
+	(WOFF2_HeaderRec): Add more fields.
+
+	* src/sfnt/sfwoff2.c (READ_255USHORT, READ_BASE128, ROUND4): New
+	macros.
+	(Read255UShort, CollectionHeaderSize, compute_first_table_offset):
+	New functions.
+	(ReadBase128): Use `FT_READ_BYTE'.
+	(woff2_open_font): Add functionality to read table directory and
+	collection directory (if present).
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[sfnt] Include `woff2tags.c' for building.
+
+	* src/sfnt/rules.mk (SFNT_DRV_SRC): Add `woff2tags.c'.
+
+	* src/sfnt/sfnt.c: Include `woff2tags.c'.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[sfnt] Add WOFF2 constants.
+
+	Add constants required for WOFF2, and known table tags as defined in
+	the specification.  See
+
+	  https://www.w3.org/TR/WOFF2/#table_dir_format
+
+	for details.
+
+	* src/sfnt/woff2tags.c, src/sfnt/woff2tags.h: New files.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	[sfnt] Read WOFF 2 header.
+
+	Check for WOFF2 tag, call `woff2_open_font', and implement it to read
+	header according to specification.
+
+	* include/freetype/internal/fttrace.h: Add `sfwoff2.c'.
+
+	* src/sfnt/rules.mk (SFNT_DRV_SRC): Add `sfwoff2.c'.
+
+	* src/sfnt/sfnt.c: Include `sfwoff2.c'.
+
+	* src/sfnt/sfobjs.c (sfnt_open_font): Check for `wOF2' tag and call
+	`woff2_open_font'.
+
+	* src/sfnt/sfwoff2.c, src/sfnt/sfwoff2.h: New files.
+
+2019-08-27  Nikhil Ramakrishnan  <ramakrishnan.nikhil@gmail.com>
+
+	Add structures for WOFF2.
+
+	Add structures and macro for WOFF 2 header and table directory.
+
+	* include/freetype/internal/wofftypes.h (WOFF2_HeaderRec,
+	WOFF2_TableRec_): New structures.
+
+	* include/freetype/tttags.h (TTAG_wOF2): New macro.
+
+2019-08-26  Werner Lemberg  <wl@gnu.org>
+
+	* src/psaux/cffdecode.c (cff_operator_seac): Fix numeric overflow.
+
+	Reported as
+
+	  https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=16470
+
+2019-08-26  Werner Lemberg  <wl@gnu.org>
+
+	[type1] Fix `FT_Get_Var_Axis_Flags' (#56804).
+
+	* src/type1/t1load.c (T1_Get_MM_Var): Allocate space for axis flags.
+	Also remove redundant assignment.
+
+2019-07-24  Alexei Podtelezhnikov  <apodtele@gmail.com>
+
+	* src/base/ftbbox.c (cubic_peak): Sanitize left shift (#56586).
+
+2019-07-22  Weiyi Wu  <w1w2y3@gmail.com>
+
+	* src/cid/cidload.c (cid_hex_to_binary): Fix typo (#56653).
+
+2019-07-12  Werner Lemberg  <wl@gnu.org>
+
+	[sfnt, winfonts] Avoid memory leaks in case of error (#56587).
+
+	* src/sfnt/sfwoff.c (woff_open_font): Call `FT_FRAME_EXIT' in case
+	of error.
+
+	* src/winfonts/winfnt.c (fnt_face_get_dll_font): Ditto.
+
+2019-07-12  Ben Wagner  <bungeman@google.com>
+
+	Properly handle phantom points for variation fonts (#56601).
+
+	* src/truetype/ttgload.c (TT_Process_Simple_Glyph): Scale phantom
+	points if HVAR and/or VVAR is present.
+
+2019-07-04  Werner Lemberg  <wl@gnu.org>
+
+	[psaux] (2/2) Handle fonts that use SEAC for ligatures (#56580).
+
+	The same as previous commit but for the old engine.
+
+	* src/psaux/t1decode.c (t1operator_seac): Implement it.
+
+2019-07-04  Chris Liddell <chris.liddell@artifex.com>
+
+	[psaux] (1/2) Handle fonts that use SEAC for ligatures (#56580).
+
+	As originally intended, a Type 1 SEAC charstring would be used for
+	an accented glyph (like `acaron' or `uumlaut'), where the advance
+	width of the SEAC glyph is the same as that of the `base' glyph
+	(like `a' or `u').  In this case it is not uncommon for the SEAC
+	glyph to not use an (H)SBW opcode of its own but to rely on the
+	value from the base glyph.
+
+	However, out-of-spec fonts also use SEAC glyphs for ligatures (like
+	`oe' or `fi'), and in those cases the overall advance width is
+	greater than that of the `base' glyph.  For this reason we have to
+	allow that the SEAC glyph can have an (H)SBW value of its own, and
+	if it has, retain this value, rather than the one from the base
+	glyph.
+
+	* src/psaux/psintrp.c (cf2_interpT2CharString) <cf2_escSEAC>:
+	Implement it.
+
 2019-07-01  Werner Lemberg  <wl@gnu.org>
 
 	* Version 2.10.1 released.
@@ -88,7 +2034,7 @@
 	* include/freetype/ftmodapi.h (FT_DebugHook_Func): Return error.
 
 	Fix a warning by adding a return value as in `TT_RunIns',
-	which should not be a compatibility issue. 
+	which should not be a compatibility issue.
 
 2019-06-11  Alexei Podtelezhnikov  <apodtele@gmail.com>
 
@@ -99,7 +2045,7 @@
 	[gzip] Add support for `gzip' encoded header.
 
 	* src/gzip/ftgzip.c (FT_Gzip_Uncompress): Modify the the call to
-	`inflateInit2' to enable support for `gzip' encoded headers. 
+	`inflateInit2' to enable support for `gzip' encoded headers.
 
 2019-06-10  Alexei Podtelezhnikov  <apodtele@gmail.com>
 
@@ -2912,7 +4858,7 @@
 2018-05-13  Shao Yu Zhang  <shaozhang@fb.com>
 	    Werner Lemberg  <wl@gnu.org>
 
-	[sfnt] Preliminary support of coloured layer outlines (#44689).
+	[sfnt] Preliminary support of colored layer outlines (#44689).
 
 	This commit enables OpenType's COLR/CPAL table handling; a typical
 	application are color emojis that can be scaled to any size.
@@ -3104,7 +5050,7 @@
 
 ----------------------------------------------------------------------------
 
-Copyright (C) 2018-2019 by
+Copyright (C) 2018-2020 by
 David Turner, Robert Wilhelm, and Werner Lemberg.
 
 This file is part of the FreeType project, and may only be used, modified,

@@ -45,6 +45,9 @@ when attempting to use TLS encryption with the TurboVNC Server (built with
 `TVNC_DLOPENSSL=1`, which is the default) running on a TurboVNC host with
 OpenSSL 3.
 
+9. The TurboVNC Server is now based on xorg-xserver 1.20.14, which fixes
+several minor X server bugs.
+
 
 3.0 beta1
 =========

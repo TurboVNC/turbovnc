@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT=xorg-server-1.20.13
+PROJECT=xorg-server-1.20.14
 FILE=$PROJECT.tar.gz
 URL=https://www.x.org/releases/individual/xserver
 SRCDIR=`dirname $0`

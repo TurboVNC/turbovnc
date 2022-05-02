@@ -1,3 +1,79 @@
+commit 3a4f68284c5aeea77789af1fe395cac35efc8562
+Author: Alan Coopersmith <alan.coopersmith@oracle.com>
+Date:   Sun Aug 1 17:36:43 2021 -0700
+
+    libXfont2 2.0.5
+    
+    Signed-off-by: Alan Coopersmith <alan.coopersmith@oracle.com>
+
+commit daff8876379c64c7bee126319af804896f83b5da
+Author: Alex Richardson <Alexander.Richardson@cl.cam.ac.uk>
+Date:   Wed Jul 14 17:23:48 2021 +0100
+
+    Fix out-of-bounds read in FontFileMakeDir()
+    
+    BuiltinReadDirectory() calls FontFileMakeDir ("", builtin_dir_count); and
+    this causes the `dirName[dirlen - 1]` access to read before the start of
+    the string. I found this while porting Xvnc to CHERI-RISC-V (which has
+    bounds and permissions on all pointers).
+
+commit ce7a3265019e4d66198c1581d9e8c859c34e8ef1
+Author: Bernd Kuhls <bernd.kuhls@t-online.de>
+Date:   Sat Oct 19 09:32:41 2019 +0200
+
+    configure: define HAVE_LIBBSD when libbsd was found
+
+commit 9529d2351fe52ffaaf9342343865073d5c5b6802
+Author: Peter Harris <pharris@opentext.com>
+Date:   Tue Mar 2 14:39:45 2021 -0500
+
+    Fix use after free when font server connection lost
+    
+    If there are multiple blocks waiting for the same font, only one of them
+    will have ->freeFont set. The rest will be in a state of FS_DEPENDING.
+    
+    If the font server dies before the font finishes opening, the block with
+    ->freeFont set will call ->unload_font, invalidating the pfont pointers
+    in the remaining FS_DEPENDING blocks.
+    
+    Avoid a use after free (and potential crash) by passing conn to
+    fs_cleanup_font instead of dereferencing pfont to find the conn.
+    
+    Signed-off-by: Peter Harris <pharris@opentext.com>
+
+commit e7b2cae1ad9f07c188bcad27767a2f4fa6e0c2a4
+Author: Peter Harris <pharris@opentext.com>
+Date:   Fri Mar 6 10:42:03 2020 -0500
+
+    Fix crash when font server connection lost
+    
+    Always initialize the return value of fs_new_block_rec. Even if the
+    conn->blockState is FS_BROKEN_CONNECTION | FS_RECONNECTING, we must not
+    return with an uninitialized blockrec on the block list. When the
+    blockrec times out, _fs_clean_aborted_blockrec calls fs_cleanup_bfont,
+    which will try to follow pointers in the blockrec (which has not been
+    initialized).
+    
+    Signed-off-by: Peter Harris <pharris@opentext.com>
+
+commit 608640b87dc47233940664632e3ab8f13972be2b
+Author: Jon Turney <jon.turney@dronecode.org.uk>
+Date:   Thu Oct 17 19:11:52 2019 +0100
+
+    Fix Win32 build since c4ed2e06 "Add some unit testing utilities"
+    
+    Provide Win32 replacements for realpath() and err.h
+
+commit 13ebb8f32f767c596b1b8bd16b90703a8135f20b
+Author: Adam Jackson <ajax@redhat.com>
+Date:   Mon Sep 16 10:47:27 2019 -0400
+
+    README: Remove mention of libXfont 1.5
+    
+    xfs was ported to libXfont2 in release 1.2, and bdftopcf 1.1 includes a
+    copy of enough of the old libXfont1 code to not need an external
+    libXfont at all.
+
 commit ed8b8e9fe544ec51ab1b1dfaea6fced35470ad6c
 Author: Alan Coopersmith <alan.coopersmith@oracle.com>
 Date:   Sat Sep 14 11:34:03 2019 -0700
@@ -2562,25 +2638,25 @@ Date:   Mon Jul 16 12:24:34 2007 +0200
     by the first call disappears.
 
 commit e3642d9b2c0819a607d4cce413b9f0541285545b
-Author: Kristian Høgsberg <krh@redhat.com>
+Author: Kristian Høgsberg  <krh@redhat.com>
 Date:   Mon Jul 2 15:01:05 2007 -0400
 
     Bump version to 1.3.0.
 
 commit f33f9361086db3cf1d09cec067f38fe751ed22eb
-Author: Kristian Høgsberg <krh@redhat.com>
+Author: Kristian Høgsberg  <krh@redhat.com>
 Date:   Mon Jul 2 14:59:11 2007 -0400
 
     Fix crash when no attributes are present for symlink.
 
 commit 8d47483711be6076e7bfefab14aa890c5f37e1aa
-Author: Kristian Høgsberg <krh@redhat.com>
+Author: Kristian Høgsberg  <krh@redhat.com>
 Date:   Thu Jun 21 21:44:02 2007 -0400
 
     Bump version to 1.2.9.
 
 commit c5ab59762c4ad5def68436d55937a2bd558d5c99
-Author: Kristian Høgsberg <krh@redhat.com>
+Author: Kristian Høgsberg  <krh@redhat.com>
 Date:   Tue Jun 19 10:38:02 2007 -0400
 
     Add a new 'catalogue' FPE, which takes font paths from symlinks in a dir.
@@ -2720,7 +2796,7 @@ Date:   Tue Feb 20 00:20:23 2007 -0800
     added -flat_namespace to CFLAGS for Darwin
 
 commit 9509d5c7ee5d5e78c6eef54e8faceede5ca5f24e
-Author: Kristian Høgsberg <krh@redhat.com>
+Author: Kristian Høgsberg  <krh@redhat.com>
 Date:   Mon Jan 22 18:24:19 2007 -0500
 
     Bump to 1.2.7.
@@ -2735,7 +2811,7 @@ Date:   Fri Jan 19 08:50:39 2007 +1100
     loaded), load it as a valid font path anyway.
 
 commit 931b777108526dd0761f948dcd9f1603ac02efc8
-Author: Kristian Høgsberg <krh@redhat.com>
+Author: Kristian Høgsberg  <krh@redhat.com>
 Date:   Wed Jan 17 17:19:53 2007 -0500
 
     Add stubs for the scalable renderer callbacks.
@@ -3230,7 +3306,7 @@ Date:   Fri Jul 1 21:24:31 2005 +0000
     Default --enable-fc to yes; minor formatting changes.
 
 commit 4534fa0c8adb77b7db47101318e0e863edb186ce
-Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Author: Søren Sandmann Pedersen  <sandmann@daimi.au.dk>
 Date:   Mon Jun 27 16:09:14 2005 +0000
 
     - Remove fontenc from Xfont
@@ -3242,26 +3318,26 @@ Date:   Mon Jun 27 16:09:14 2005 +0000
     - Fix xp.pc.in to add XPRINT_LIBS/CFLAGS instead of X_LIBS/CFLAGS
 
 commit fda7215c0783ad170eb14f7dda078fac3f134470
-Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Author: Søren Sandmann Pedersen  <sandmann@daimi.au.dk>
 Date:   Tue Jun 21 21:29:40 2005 +0000
 
     Add fontenc directory, update buildsystem
 
 commit db8fd7e670cbd901116344212217bee8001ab460
-Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Author: Søren Sandmann Pedersen  <sandmann@daimi.au.dk>
 Date:   Fri Jun 17 20:33:33 2005 +0000
 
     Add lbxutil to symlink.sh Add back accidentally removed include in Type1
         directory Disable Speedo by default
 
 commit e5525d268c6165318894f326be445b22a2523558
-Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Author: Søren Sandmann Pedersen  <sandmann@daimi.au.dk>
 Date:   Thu Jun 16 21:35:26 2005 +0000
 
     Add Speedo directory to Xfont
 
 commit b96f539005da57273dc7e2bee13651de4eedf087
-Author: Søren Sandmann Pedersen <sandmann@daimi.au.dk>
+Author: Søren Sandmann Pedersen  <sandmann@daimi.au.dk>
 Date:   Thu Jun 16 20:50:12 2005 +0000
 
     Add Type1 subdirectory to lib/Xfonts, update build system accordingly.

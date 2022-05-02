@@ -20,7 +20,7 @@ if(BITS EQUAL 64)
 endif()
 
 set(VENDOR_NAME "The X.Org Foundation")
-set(VENDOR_RELEASE "12013000")
+set(VENDOR_RELEASE "12014000")
 configure_file(include/version-config.h.in include/version-config.h)
 
 set(CMAKE_REQUIRED_LIBRARIES m)

@@ -124,14 +124,14 @@ static CARD32	fs_blockState;
 static int _fs_restart_connection ( FSFpePtr conn );
 static void fs_send_query_bitmaps ( FontPathElementPtr fpe,
 				   FSBlockDataPtr blockrec );
-static int fs_send_close_font ( FontPathElementPtr fpe, Font id );
+static int fs_send_close_font (FSFpePtr conn, Font id);
 static void fs_client_died ( pointer client, FontPathElementPtr fpe );
 static void _fs_client_access ( FSFpePtr conn, pointer client, Bool sync );
 static void _fs_client_resolution ( FSFpePtr conn );
 static fsGenericReply *fs_get_reply (FSFpePtr conn, int *error);
 static int fs_await_reply (FSFpePtr conn);
 static void _fs_do_blocked (FSFpePtr conn);
-static void fs_cleanup_bfont (FSBlockedFontPtr bfont);
+static void fs_cleanup_bfont (FSFpePtr conn, FSBlockedFontPtr bfont);
 
 char _fs_glyph_undefined;
 char _fs_glyph_requested;
@@ -546,7 +546,7 @@ _fs_clean_aborted_blockrec(FSFpePtr conn, FSBlockDataPtr blockrec)
     case FS_OPEN_FONT: {
 	FSBlockedFontPtr bfont = (FSBlockedFontPtr)blockrec->data;
 
-	fs_cleanup_bfont (bfont);
+	fs_cleanup_bfont (conn, bfont);
 	_fs_signal_clients_depending(&bfont->clients_depending);
 	break;
     }
@@ -585,16 +585,12 @@ fs_abort_blockrec(FSFpePtr conn, FSBlockDataPtr blockrec)
  * then unload the partially created font
  */
 static void
-fs_cleanup_bfont (FSBlockedFontPtr bfont)
+fs_cleanup_bfont (FSFpePtr conn, FSBlockedFontPtr bfont)
 {
-    FSFontDataRec *fsd;
-
     if (bfont->pfont)
     {
-	fsd = (FSFontDataRec *) bfont->pfont->fpePrivate;
-
 	/* make sure the FS knows we choked on it */
-	fs_send_close_font(bfont->pfont->fpe, bfont->fontid);
+	fs_send_close_font(conn, bfont->fontid);
 
 	/*
 	 * Either unload the font if it's being opened for
@@ -612,7 +608,10 @@ fs_cleanup_bfont (FSBlockedFontPtr bfont)
 	    bfont->pfont = 0;
 	}
 	else
+	{
+	    FSFontDataRec *fsd = (FSFontDataRec *)bfont->pfont->fpePrivate;
 	    fsd->generation = -1;
+	}
     }
 }
 
@@ -746,7 +745,7 @@ fs_read_open_font(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 	    return StillWorking;
 	if (rep)
 	    _fs_done_read (conn, rep->length << 2);
-	fs_cleanup_bfont (bfont);
+	fs_cleanup_bfont (conn, bfont);
 	_fs_reply_failed (rep, fsOpenBitmapFontReply, "!=");
 	return BadFontName;
     }
@@ -762,7 +761,7 @@ fs_read_open_font(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 
     if (rep->otherid && !(bfont->flags & FontReopen))
     {
-	fs_cleanup_bfont (bfont);
+	fs_cleanup_bfont (conn, bfont);
 
 	/* Find old font if we're completely done getting it from server. */
 	bfont->pfont = find_old_font(rep->otherid);
@@ -891,7 +890,7 @@ fs_read_query_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 	    return StillWorking;
 	if (rep)
 	    _fs_done_read (conn, rep->length << 2);
-	fs_cleanup_bfont (bfont);
+	fs_cleanup_bfont (conn, bfont);
 	_fs_reply_failed (rep, fsQueryXInfoReply, "<");
 	return BadFontName;
     }
@@ -964,7 +963,7 @@ fs_read_query_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 
     if (ret == -1)
     {
-	fs_cleanup_bfont (bfont);
+	fs_cleanup_bfont (conn, bfont);
 	return AllocError;
     }
 
@@ -983,7 +982,7 @@ fs_read_query_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 	}
 	else
 	{
-	    fs_cleanup_bfont (bfont);
+	    fs_cleanup_bfont (conn, bfont);
 	    err = BadFontName;
 	}
 	_fs_free_props (pInfo);
@@ -1056,7 +1055,7 @@ fs_read_extent_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
 	    return StillWorking;
 	if (rep)
 	    _fs_done_read (conn, rep->length << 2);
-	fs_cleanup_bfont (bfont);
+	fs_cleanup_bfont (conn, bfont);
 	_fs_reply_failed (rep, fsQueryXExtents16Reply, "<");
 	return BadFontName;
     }
@@ -1094,7 +1093,7 @@ fs_read_extent_info(FontPathElementPtr fpe, FSBlockDataPtr blockrec)
     if (!pCI)
     {
 	_fs_done_read (conn, rep->length << 2);
-	fs_cleanup_bfont(bfont);
+	fs_cleanup_bfont(conn, bfont);
 	return AllocError;
     }
     fsfont->encoding = pCI;
@@ -1697,16 +1696,6 @@ fs_send_open_font(pointer client, FontPathElementPtr fpe, Mask flags,
 	return AllocError;
     }
 
-    /*
-     * Must check this before generating any protocol, otherwise we'll
-     * mess up a reconnect in progress
-     */
-    if (conn->blockState & (FS_BROKEN_CONNECTION | FS_RECONNECTING))
-    {
-	_fs_pending_reply (conn);
-	return Suspended;
-    }
-
     fsd->generation = conn->generation;
 
     bfont = (FSBlockedFontPtr) blockrec->data;
@@ -1717,6 +1706,16 @@ fs_send_open_font(pointer client, FontPathElementPtr fpe, Mask flags,
     bfont->format = fsd->format;
     bfont->clients_depending = (FSClientsDependingPtr)0;
     bfont->freeFont = (flags & FontReopen) == 0;
+
+    /*
+     * Must check this before generating any protocol, otherwise we'll
+     * mess up a reconnect in progress
+     */
+    if (conn->blockState & (FS_BROKEN_CONNECTION | FS_RECONNECTING))
+    {
+	_fs_pending_reply (conn);
+	return Suspended;
+    }
 
     _fs_client_access (conn, client, (flags & FontOpenSync) != 0);
     _fs_client_resolution(conn);
@@ -1788,7 +1787,7 @@ fs_send_open_font(pointer client, FontPathElementPtr fpe, Mask flags,
 	if (err == Successful)
 	    *ppfont = bfont->pfont;
 	else
-	    fs_cleanup_bfont (bfont);
+	    fs_cleanup_bfont (conn, bfont);
 	bfont->freeFont = FALSE;
 	_fs_remove_block_rec (conn, blockrec);
     }
@@ -1845,7 +1844,7 @@ fs_open_font(pointer client, FontPathElementPtr fpe, Mask flags,
 	    if (err == Successful)
 		*ppfont = bfont->pfont;
 	    else
-		fs_cleanup_bfont (bfont);
+		fs_cleanup_bfont (conn, bfont);
 	    _fs_remove_block_rec (conn, blockrec);
 	    return err;
 	}
@@ -1856,9 +1855,8 @@ fs_open_font(pointer client, FontPathElementPtr fpe, Mask flags,
 
 /* ARGSUSED */
 static int
-fs_send_close_font(FontPathElementPtr fpe, Font id)
+fs_send_close_font(FSFpePtr conn, Font id)
 {
-    FSFpePtr    conn = (FSFpePtr) fpe->private;
     fsCloseReq  req;
 
     if (conn->blockState & FS_GIVE_UP)
@@ -1882,7 +1880,7 @@ fs_close_font(FontPathElementPtr fpe, FontPtr pfont)
     FSFpePtr	    conn = (FSFpePtr) fpe->private;
 
     if (conn->generation == fsd->generation)
-	fs_send_close_font(fpe, fsd->fontid);
+	fs_send_close_font(conn, fsd->fontid);
 
 #ifdef DEBUG
     {

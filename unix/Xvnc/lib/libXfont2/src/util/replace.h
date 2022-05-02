@@ -57,5 +57,21 @@ extern _X_HIDDEN size_t
 strlcat(char *dst, const char *src, size_t siz);
 #endif
 
+#ifndef HAVE_ERR_H
+#define err(eval, ...) do { \
+  fprintf(stderr, __VA_ARGS__); \
+  fprintf(stderr, "\n"); \
+  exit(eval); \
+  } while (0)
+#define vwarn(...) do { \
+  fprintf(stderr, __VA_ARGS__); \
+  fprintf(stderr, "\n"); \
+  } while (0)
+#endif
+
+#ifndef HAVE_REALPATH
+extern _X_HIDDEN char *
+realpath(const char *path, char *resolved_path);
+#endif
 
 #endif /* XFONT_REPLACE_H */

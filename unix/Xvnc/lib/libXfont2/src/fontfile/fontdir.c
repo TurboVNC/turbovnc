@@ -125,10 +125,7 @@ FontFileMakeDir(const char *dirName, int size)
 	dirlen = strlen(dirName);
 	attriblen = 0;
     }
-    if (dirName[dirlen - 1] != '/')
-#ifdef NCD
-    if (dirlen)     /* leave out slash for builtins */
-#endif
+    if (dirlen && dirName[dirlen - 1] != '/')
 	needslash = 1;
     dir = malloc(sizeof *dir + dirlen + needslash + 1 +
 		 (attriblen ? attriblen + 1 : 0));
