@@ -1,5 +1,5 @@
-3.0 post-beta
-=============
+3.0
+===
 
 ### Significant changes relative to 3.0 beta1:
 
