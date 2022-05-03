@@ -55,17 +55,6 @@ jobs:
           docker run -v $HOME/src/vnc.nightly:/root/src/vnc.nightly -v $HOME/src/buildscripts:/root/src/buildscripts -v $GITHUB_WORKSPACE:/root/src/turbovnc -v $HOME/.gnupg:/root/.gnupg -v $HOME/libjpeg-turbo-rpm:/rpms -v $HOME/rpmkeys:/rpmkeys -v $HOME/.openjdk:/root/.openjdk -t dcommander/buildvnc:$BRANCH bash -c "rpm --import /rpmkeys/LJT-GPG-KEY && rpm -K /rpms/*.rpm && rpm -i /rpms/*86*.rpm && pushd /opt/arm64 && rpm2cpio /rpms/*aarch64*.rpm | cpio -id && popd && rpm --import /rpmkeys/VGLPR-GPG-KEY && ~/src/buildscripts/buildvnc -d /root/src/turbovnc -v"
           sudo chown -R runner:runner $HOME/src/vnc.nightly
           mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
-      - name: Configure AWS
-        if: ${{github.event_name != 'pull_request'}}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-region: ${{secrets.AWS_REGION}}
-      - name: Deploy
-        if: ${{github.event_name != 'pull_request'}}
-        run: |
-          aws s3 sync --acl public-read --delete $HOME/src/vnc.nightly/latest/files/ s3://turbovnc-pr/${{env.BRANCH}}/${{github.job}}/
   linux-non-default-options:
     runs-on: ubuntu-latest
     steps:
@@ -133,14 +122,3 @@ jobs:
         run: |
           $HOME/src/buildscripts/buildvnc -d $GITHUB_WORKSPACE -v
           mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
-      - name: Configure AWS
-        if: ${{github.event_name != 'pull_request'}}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-region: ${{secrets.AWS_REGION}}
-      - name: Deploy
-        if: ${{github.event_name != 'pull_request'}}
-        run: |
-          aws s3 sync --acl public-read --delete $HOME/src/vnc.nightly/latest/files/ s3://turbovnc-pr/${{env.BRANCH}}/${{github.job}}/
