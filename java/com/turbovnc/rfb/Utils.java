@@ -1,5 +1,6 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2015, 2018, 2020, 2022 D. R. Commander.
+ *                                            All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +74,7 @@ public final class Utils {
     String separator = null;
     try {
       separator = Character.toString(java.io.File.separatorChar);
-    } catch (java.security.AccessControlException e) {
+    } catch (Exception e) {
       vlog.error("Cannot access file.separator system property:");
       vlog.error("  " + e.getMessage());
     }
@@ -84,23 +85,12 @@ public final class Utils {
     String homeDir = null;
     try {
       if (isWindows()) {
-        // JRE prior to 1.5 cannot reliably determine USERPROFILE.
-        // Return user.home and hope it's right.
-        if (JAVA_VERSION < 5) {
-          try {
-            homeDir = System.getProperty("user.home");
-          } catch (java.security.AccessControlException e) {
-            vlog.error("Cannot access user.home system property:");
-            vlog.error("  " + e.getMessage());
-          }
-        } else {
-          homeDir = System.getenv("USERPROFILE");
-        }
+        homeDir = System.getenv("USERPROFILE");
       } else {
         try {
           homeDir = FileSystemView.getFileSystemView().
                     getDefaultDirectory().getCanonicalPath();
-        } catch (java.security.AccessControlException e) {
+        } catch (Exception e) {
           vlog.error("Cannot access system property:");
           vlog.error("  " + e.getMessage());
         }

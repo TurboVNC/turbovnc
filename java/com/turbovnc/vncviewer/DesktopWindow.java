@@ -435,9 +435,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // EDT
   public synchronized void checkClipboard() {
-    SecurityManager sm = System.getSecurityManager();
     try {
-      if (sm != null) sm.checkPermission(new AWTPermission("accessClipboard"));
       Clipboard cb = null;
       if (Utils.getBooleanProperty("turbovnc.primary", true))
         cb = Toolkit.getDefaultToolkit().getSystemSelection();

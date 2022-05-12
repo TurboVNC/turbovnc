@@ -151,9 +151,6 @@ public final class Params {
     Properties props = new Properties();
     try {
       props.load(new FileInputStream(filename));
-    } catch (java.security.AccessControlException e) {
-      throw new WarningException("Cannot access connection info file:\n" +
-                                 e.getMessage());
     } catch (Exception e) {
       throw new WarningException("Cannot open connection info file:\n" +
                                  e.getMessage());

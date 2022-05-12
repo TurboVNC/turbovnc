@@ -84,9 +84,7 @@ class ClipboardDialog extends Dialog implements ActionListener {
   }
 
   public static void setClipboard(String str) {
-    SecurityManager sm = System.getSecurityManager();
     try {
-      if (sm != null) sm.checkPermission(new AWTPermission("accessClipboard"));
       Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
       if (cb != null) {
         StringSelection ss = new StringSelection(str);

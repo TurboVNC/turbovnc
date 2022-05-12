@@ -101,7 +101,7 @@ public class Tunnel {
     String homeDir = new String("");
     try {
       homeDir = System.getProperty("user.home");
-    } catch (java.security.AccessControlException e) {
+    } catch (Exception e) {
       System.err.println("Cannot access user.home system property");
     }
 
