@@ -1,3 +1,12 @@
+3.0.1
+=====
+
+### Significant changes relative to 3.0:
+
+1. Fixed an error ("JRELoadError") that occurred when attempting to use the Mac
+TurboVNC Viewer app with a custom JRE based on OpenJDK 17.
+
+
 3.0
 ===
 

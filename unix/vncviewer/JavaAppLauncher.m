@@ -1,6 +1,6 @@
 /*
  * Copyright 2012, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013, 2017-2019, D. R. Commander. All rights reserved.
+ * Copyright 2013, 2017-2019, 2022 D. R. Commander. All rights reserved.
  *
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -99,10 +99,16 @@ int launch(char *commandName) {
   const char *libjliPath = NULL;
   NSString *runtime = [infoDictionary objectForKey:@JVM_RUNTIME_KEY];
   if (runtime != nil) {
+    void *tmpLib = NULL;
     NSString *runtimePath = [[[NSBundle mainBundle] builtInPlugInsPath]
                              stringByAppendingPathComponent:runtime];
+
     libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/lib/jli/libjli.dylib"]
                   fileSystemRepresentation];
+    if ((tmpLib = dlopen(libjliPath, RTLD_LAZY)) == nil)
+      libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/lib/libjli.dylib"]
+                    fileSystemRepresentation];
+    if (tmpLib) dlclose(tmpLib);
   } else {
     FILE *file = NULL;
     char path[1024] = "\0";
