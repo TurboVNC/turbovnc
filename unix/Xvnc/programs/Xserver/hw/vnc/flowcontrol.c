@@ -3,8 +3,8 @@
  */
 
 /*
- *  Copyright (C) 2012, 2014, 2017-2018, 2021 D. R. Commander.
- *                                            All Rights Reserved.
+ *  Copyright (C) 2012, 2014, 2017-2018, 2021-2022 D. R. Commander.
+ *                                                 All Rights Reserved.
  *  Copyright (C) 2018 Peter Åstrand for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *
@@ -592,19 +592,11 @@ Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
   f.flags = Swap32IfLE(flags);
   f.length = len;
 
-  if (WriteExact(cl, (char *)&f, sz_rfbFenceMsg) < 0) {
-    rfbLogPerror("rfbSendFence: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE((char *)&f, sz_rfbFenceMsg, return FALSE);
 
-  if (len > 0) {
-    if (WriteExact(cl, (char *)data, len) < 0) {
-      rfbLogPerror("rfbSendFence: write");
-      rfbCloseClient(cl);
-      return FALSE;
-    }
-  }
+  if (len > 0)
+    WRITE_OR_CLOSE((char *)data, len, return FALSE);
+
   return TRUE;
 }
 
@@ -670,11 +662,7 @@ Bool rfbSendEndOfCU(rfbClientPtr cl)
     return FALSE;
   }
 
-  if (WriteExact(cl, (char *)&type, 1) < 0) {
-    rfbLogPerror("rfbSendEndOfCU: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE((char *)&type, 1, return FALSE);
 
   return TRUE;
 }

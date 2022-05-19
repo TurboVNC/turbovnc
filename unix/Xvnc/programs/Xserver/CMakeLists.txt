@@ -185,10 +185,8 @@ target_link_libraries(Xvnc dix mi vnc fb Xi composite mi damage damageext randr
 	${X11_Xdmcp_LIB} ${X11_Xfont2_LIB} ${X11_Fontenc_LIB} ${FREETYPE_LIBRARIES}
 	${X11_Pixman_LIB} sha1 ${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
 	vncauth m pthread ${PAM_LIB} ${EXTRA_LIB})
-if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
-	find_library(ICONV_LIBRARIES NAMES iconv)
-	target_link_libraries(Xvnc ${ICONV_LIBRARIES})
-else()
+if(NOT APPLE AND NOT
+	CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	target_link_libraries(Xvnc dl)
 endif()
 

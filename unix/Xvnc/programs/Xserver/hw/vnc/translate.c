@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2017 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2017, 2022 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -345,11 +345,7 @@ static Bool rfbSetClientColourMapBGR233(rfbClientPtr cl)
 
   len += 256 * 3 * 2;
 
-  if (WriteExact(cl, buf, len) < 0) {
-    rfbLogPerror("rfbSetClientColourMapBGR233: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE(buf, len, return FALSE);
   return TRUE;
 }
 

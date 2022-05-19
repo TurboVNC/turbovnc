@@ -214,7 +214,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   if (strcasecmp(argv[i], "-capture") == 0) {
     REQUIRE_ARG();
-    captureFile = strdup(argv[i + 1]);
+    rfbCaptureFile = strdup(argv[i + 1]);
     return 2;
   }
 
@@ -335,11 +335,6 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   if (strcasecmp(argv[i], "-noclipboardsend") == 0) {
     rfbAuthDisableCBSend = TRUE;
-    return 1;
-  }
-
-  if (strcasecmp(argv[i], "-nocutbuffersync") == 0) {
-    rfbSyncCutBuffer = FALSE;
     return 1;
   }
 
@@ -1403,17 +1398,6 @@ static Bool CheckDisplayNumber(int n)
 
 void rfbRootPropertyChange(PropertyPtr pProp)
 {
-  if ((pProp->propertyName == XA_CUT_BUFFER0) && (pProp->type == XA_STRING) &&
-      (pProp->format == 8) && rfbSyncCutBuffer) {
-    char *str;
-    str = (char *)rfbAlloc(pProp->size + 1);
-    strncpy(str, pProp->data, pProp->size);
-    str[pProp->size] = 0;
-    rfbGotXCutText(str, pProp->size);
-    free(str);
-    return;
-  }
-
   if (!rfbAuthDisableRevCon && (pProp->propertyName == VNC_CONNECT) &&
       (pProp->type == XA_STRING) && (pProp->format == 8)) {
     char *colonPos;
@@ -1636,8 +1620,6 @@ void ddxUseMsg(void)
   ErrorF("-nevershared           never treat new connections as shared\n");
   ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
   ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");
-  ErrorF("-nocutbuffersync       disable clipboard synchronization for applications\n");
-  ErrorF("                       that use the (obsolete) X cut buffer\n");
   ErrorF("-noflowcontrol         when continuous updates are enabled, send updates\n");
   ErrorF("                       whether or not the viewer is ready to receive them\n");
   ErrorF("-noprimarysync         disable clipboard synchronization with the PRIMARY\n");

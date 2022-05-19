@@ -56,8 +56,10 @@ SOFTWARE.
 
 #ifdef TURBOVNC
 extern int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
-                               Atom property, Window requestor, CARD32 time);
+                               Atom property, Window requestor, CARD32 time,
+                               const char *data);
 extern Window vncGetSelectionWindow(void);
+extern char *cachedData;
 #endif
 
 /*****************************************************************
@@ -298,7 +300,7 @@ ProcConvertSelection(ClientPtr client)
              pSel->window == vncGetSelectionWindow()) {
         rc = vncConvertSelection(client, stuff->selection, stuff->target,
                                  stuff->property, stuff->requestor,
-                                 stuff->time);
+                                 stuff->time, cachedData);
         if (rc == Success) return rc;
     }
 #endif

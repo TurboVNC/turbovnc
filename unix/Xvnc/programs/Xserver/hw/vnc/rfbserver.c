@@ -5,7 +5,8 @@
 /*
  *  Copyright (C) 2009-2022 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2021 AnatoScope SA.  All Rights Reserved.
- *  Copyright (C) 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
+ *  Copyright (C) 2015-2016, 2020-2021 Pierre Ossman for Cendio AB.
+ *                                     All Rights Reserved.
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
@@ -68,7 +69,6 @@ Bool rfbAlwaysShared = FALSE;
 Bool rfbNeverShared = FALSE;
 Bool rfbDisconnect = FALSE;
 Bool rfbViewOnly = FALSE;  /* run server in view only mode - Ehud Karni SW */
-Bool rfbSyncCutBuffer = TRUE;
 Bool rfbCongestionControl = TRUE;
 double rfbAutoLosslessRefresh = 0.0;
 Bool rfbALRAll = FALSE;
@@ -103,12 +103,12 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl);
  * Session capture
  */
 
-char *captureFile = NULL;
+char *rfbCaptureFile = NULL;
 
-static void WriteCapture(int captureFD, char *buf, int len)
+void rfbWriteCapture(int captureFD, char *buf, int len)
 {
   if (write(captureFD, buf, len) < len)
-    rfbLogPerror("WriteCapture: Could not write to capture file");
+    rfbLogPerror("rfbWriteCapture: Could not write to capture file");
 }
 
 
@@ -362,13 +362,13 @@ static rfbClientPtr rfbNewClient(int sock)
 
   cl = (rfbClientPtr)rfbAlloc0(sizeof(rfbClientRec));
 
-  if (rfbClientHead == NULL && captureFile) {
-    cl->captureFD = open(captureFile, O_CREAT | O_EXCL | O_WRONLY,
+  if (rfbClientHead == NULL && rfbCaptureFile) {
+    cl->captureFD = open(rfbCaptureFile, O_CREAT | O_EXCL | O_WRONLY,
                          S_IRUSR | S_IWUSR);
     if (cl->captureFD < 0)
       rfbLogPerror("Could not open capture file");
     else
-      rfbLog("Opened capture file %s\n", captureFile);
+      rfbLog("Opened capture file %s\n", rfbCaptureFile);
   } else
     cl->captureFD = -1;
 
@@ -426,11 +426,7 @@ static rfbClientPtr rfbNewClient(int sock)
 
   sprintf(pv, rfbProtocolVersionFormat, 3, 8);
 
-  if (WriteExact(cl, pv, sz_rfbProtocolVersionMsg) < 0) {
-    rfbLogPerror("rfbNewClient: write");
-    rfbCloseClient(cl);
-    return NULL;
-  }
+  WRITE_OR_CLOSE(pv, sz_rfbProtocolVersionMsg, return NULL);
 
   if ((env = getenv("TVNC_PROFILE")) != NULL && !strcmp(env, "1"))
     rfbProfile = TRUE;
@@ -501,6 +497,10 @@ static rfbClientPtr rfbNewClient(int sock)
   } else
     InterframeOff(cl);
 
+  cl->clipFlags = rfbExtClipUTF8 | rfbExtClipRTF | rfbExtClipHTML |
+                  rfbExtClipRequest | rfbExtClipNotify | rfbExtClipProvide;
+  cl->clipSizes[0] = 20 * 1024 * 1024;
+
   return cl;
 }
 
@@ -514,6 +514,8 @@ void rfbClientConnectionGone(rfbClientPtr cl)
 {
   int i;
   rfbRTTInfo *rttInfo, *tmp;
+  rfbClientPtr client;
+  Bool inList = FALSE;
 
   if (cl->prev)
     cl->prev->next = cl->next;
@@ -569,7 +571,13 @@ void rfbClientConnectionGone(rfbClientPtr cl)
 
   rfbFreeZrleData(cl);
 
-  free(cl->cutText);
+  rfbHandleClipboardAnnounce(cl, FALSE);
+
+  free(cl->clientClipboard);
+  xorg_list_for_each_entry(client, &clipboardRequestors, entry) {
+    if (client == cl) inList = TRUE;
+  }
+  if (inList) xorg_list_del(&cl->entry);
 
   xorg_list_for_each_entry_safe(rttInfo, tmp, &cl->pings, entry) {
     xorg_list_del(&rttInfo->entry);
@@ -737,11 +745,7 @@ static void rfbProcessClientInitMessage(rfbClientPtr cl)
   len = strlen(buf + sz_rfbServerInitMsg);
   si->nameLength = Swap32IfLE(len);
 
-  if (WriteExact(cl, buf, sz_rfbServerInitMsg + len) < 0) {
-    rfbLogPerror("rfbProcessClientInitMessage: write");
-    rfbCloseClient(cl);
-    return;
-  }
+  WRITE_OR_CLOSE(buf, sz_rfbServerInitMsg + len, return);
 
   if (cl->protocol_tightvnc)
     rfbSendInteractionCaps(cl);  /* protocol 3.7t */
@@ -855,14 +859,9 @@ void rfbSendInteractionCaps(rfbClientPtr cl)
   }
 
   /* Send header and capability lists */
-  if (WriteExact(cl, (char *)&intr_caps,
-                 sz_rfbInteractionCapsMsg) < 0 ||
-      WriteExact(cl, (char *)&enc_list[0],
-                 sz_rfbCapabilityInfo * N_ENC_CAPS) < 0) {
-    rfbLogPerror("rfbSendInteractionCaps: write");
-    rfbCloseClient(cl);
-    return;
-  }
+  WRITE_OR_CLOSE((char *)&intr_caps, sz_rfbInteractionCapsMsg, return);
+  WRITE_OR_CLOSE((char *)&enc_list[0], sz_rfbCapabilityInfo * N_ENC_CAPS,
+                 return);
 
   /* Dispatch client input to rfbProcessClientNormalMessage(). */
   cl->state = RFB_NORMAL;
@@ -874,35 +873,18 @@ void rfbSendInteractionCaps(rfbClientPtr cl)
  * protocol message.
  */
 
-#define READ(addr, numBytes)  \
-  if ((n = ReadExact(cl, addr, numBytes)) <= 0) {  \
-    if (n != 0)  \
-      rfbLogPerror("rfbProcessClientNormalMessage: read");  \
-    rfbCloseClient(cl);  \
-    return;  \
-  }
-
-#define SKIP(numBytes)  \
-  if ((n = SkipExact(cl, numBytes)) <= 0) {  \
-    if (n != 0)  \
-      rfbLogPerror("rfbProcessClientNormalMessage: skip");  \
-    rfbCloseClient(cl);  \
-    return;  \
-  }
-
 static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 {
-  int n;
   rfbClientToServerMsg msg;
   char *str;
 
-  READ((char *)&msg, 1)
+  READ_OR_CLOSE((char *)&msg, 1, return);
 
   switch (msg.type) {
 
     case rfbSetPixelFormat:
 
-      READ(((char *)&msg) + 1, sz_rfbSetPixelFormatMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbSetPixelFormatMsg - 1, return);
 
       cl->format.bitsPerPixel = msg.spf.format.bitsPerPixel;
       cl->format.depth = msg.spf.format.depth;
@@ -921,7 +903,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       return;
 
     case rfbFixColourMapEntries:
-      READ(((char *)&msg) + 1, sz_rfbFixColourMapEntriesMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbFixColourMapEntriesMsg - 1,
+                    return);
       rfbLog("rfbProcessClientNormalMessage: FixColourMapEntries unsupported\n");
       rfbCloseClient(cl);
       return;
@@ -930,12 +913,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
     {
       int i;
       CARD32 enc;
+      Bool firstExtClipboard = !cl->enableExtClipboard;
       Bool firstFence = !cl->enableFence;
       Bool firstCU = !cl->enableCU;
       Bool firstGII = !cl->enableGII;
       Bool logTightCompressLevel = FALSE;
 
-      READ(((char *)&msg) + 1, sz_rfbSetEncodingsMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbSetEncodingsMsg - 1, return);
 
       msg.se.nEncodings = Swap16IfLE(msg.se.nEncodings);
 
@@ -950,8 +934,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       cl->imageQualityLevel = -1;
 
       for (i = 0; i < msg.se.nEncodings; i++) {
-        READ((char *)&enc, 4)
-        enc = Swap32IfLE(enc);
+        READ32_OR_CLOSE(enc, return);
 
         switch (enc) {
 
@@ -1039,6 +1022,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               rfbLog("Enabling LastRect protocol extension for client %s\n",
                      cl->host);
               cl->enableLastRectEncoding = TRUE;
+            }
+            break;
+          case rfbEncodingExtendedClipboard:
+           if (!cl->enableExtClipboard) {
+              rfbLog("Enabling Extended Clipboard protocol extension for client %s\n",
+                     cl->host);
+              cl->enableExtClipboard = TRUE;
             }
             break;
           case rfbEncodingFence:
@@ -1140,6 +1130,14 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         cl->enableCursorPosUpdates = FALSE;
       }
 
+      if (cl->enableExtClipboard && firstExtClipboard) {
+        CARD32 sizes[] = { 0 };
+
+        rfbSendClipboardCaps(cl, rfbExtClipUTF8 | rfbExtClipRequest |
+                             rfbExtClipPeek | rfbExtClipNotify |
+                             rfbExtClipProvide, sizes);
+      }
+
       if (cl->enableFence && firstFence) {
         char type = 0;
         if (!rfbSendFence(cl, rfbFenceFlagRequest, sizeof(type), &type))
@@ -1162,11 +1160,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         svmsg.length = Swap16IfLE(sz_rfbGIIServerVersionMsg - 4);
         svmsg.maximumVersion = svmsg.minimumVersion = Swap16IfLE(1);
 
-        if (WriteExact(cl, (char *)&svmsg, sz_rfbGIIServerVersionMsg) < 0) {
-          rfbLogPerror("rfbProcessClientNormalMessage: write");
-          rfbCloseClient(cl);
-          return;
-        }
+        WRITE_OR_CLOSE(&svmsg, sz_rfbGIIServerVersionMsg, return);
       }
 
       return;
@@ -1177,7 +1171,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       RegionRec tmpRegion;
       BoxRec box;
 
-      READ(((char *)&msg) + 1, sz_rfbFramebufferUpdateRequestMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbFramebufferUpdateRequestMsg - 1,
+                    return);
 
       box.x1 = Swap16IfLE(msg.fur.x);
       box.y1 = Swap16IfLE(msg.fur.y);
@@ -1224,7 +1219,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
       cl->rfbKeyEventsRcvd++;
 
-      READ(((char *)&msg) + 1, sz_rfbKeyEventMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbKeyEventMsg - 1, return);
 
       if (!rfbViewOnly && !cl->viewOnly)
         KeyEvent((KeySym)Swap32IfLE(msg.ke.key), msg.ke.down);
@@ -1235,7 +1230,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
       cl->rfbPointerEventsRcvd++;
 
-      READ(((char *)&msg) + 1, sz_rfbPointerEventMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbPointerEventMsg - 1, return);
 
       if (pointerDragClient && (pointerDragClient != cl))
         return;
@@ -1267,9 +1262,16 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
     {
       int ignoredBytes = 0;
 
-      READ(((char *)&msg) + 1, sz_rfbClientCutTextMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbClientCutTextMsg - 1, return);
 
       msg.cct.length = Swap32IfLE(msg.cct.length);
+
+      if (cl->enableExtClipboard && msg.cct.length & 0x80000000) {
+        int len = -msg.cct.length;
+        rfbReadExtClipboard(cl, len);
+        return;
+      }
+
       if (msg.cct.length > rfbMaxClipboard) {
         rfbLog("Truncating %d-byte incoming clipboard update to %d bytes.\n",
                msg.cct.length, rfbMaxClipboard);
@@ -1278,36 +1280,16 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       }
 
       if (msg.cct.length <= 0) return;
-      str = (char *)malloc(msg.cct.length);
-      if (str == NULL) {
-        rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText out of memory");
-        rfbCloseClient(cl);
-        return;
-      }
+      str = (char *)rfbAlloc(msg.cct.length);
 
-      if ((n = ReadExact(cl, str, msg.cct.length)) <= 0) {
-        if (n != 0)
-          rfbLogPerror("rfbProcessClientNormalMessage: read");
-        free(str);
-        rfbCloseClient(cl);
-        return;
-      }
+      READ_OR_CLOSE(str, msg.cct.length, free(str);  return);
 
-      if (ignoredBytes > 0) {
-        if ((n = SkipExact(cl, ignoredBytes)) <= 0) {
-          if (n != 0)
-            rfbLogPerror("rfbProcessClientNormalMessage: read");
-          free(str);
-          rfbCloseClient(cl);
-          return;
-        }
-      }
+      if (ignoredBytes > 0)
+        SKIP_OR_CLOSE(ignoredBytes, free(str);  return);
 
       /* NOTE: We do not accept cut text from a view-only client */
-      if (!rfbViewOnly && !cl->viewOnly && !rfbAuthDisableCBRecv) {
-        vncClientCutText(str, msg.cct.length);
-        if (rfbSyncCutBuffer) rfbSetXCutText(str, msg.cct.length);
-      }
+      if (!rfbViewOnly && !cl->viewOnly && !rfbAuthDisableCBRecv)
+        rfbHandleClientCutText(cl, str, msg.cct.length);
 
       free(str);
       return;
@@ -1317,7 +1299,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
     {
       BoxRec box;
 
-      READ(((char *)&msg) + 1, sz_rfbEnableContinuousUpdatesMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbEnableContinuousUpdatesMsg - 1,
+                    return);
 
       if (!cl->enableFence || !cl->enableCU) {
         rfbLog("Ignoring request to enable continuous updates because the client does not\n");
@@ -1351,16 +1334,16 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       CARD32 flags;
       char data[64];
 
-      READ(((char *)&msg) + 1, sz_rfbFenceMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbFenceMsg - 1, return);
 
       flags = Swap32IfLE(msg.f.flags);
 
       if (msg.f.length > sizeof(data)) {
         rfbLog("Ignoring fence.  Payload of %d bytes is too large.\n",
                msg.f.length);
-        SKIP(msg.f.length)
+        SKIP_OR_CLOSE(msg.f.length, return)
       } else {
-        READ(data, msg.f.length)
+        READ_OR_CLOSE(data, msg.f.length, return);
         HandleFence(cl, flags, msg.f.length, data);
       }
 
@@ -1382,7 +1365,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       char errMsg[256] = "\0";
       ScreenPtr pScreen = screenInfo.screens[0];
 
-      READ(((char *)&msg) + 1, sz_rfbSetDesktopSizeMsg - 1)
+      READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbSetDesktopSizeMsg - 1, return);
 
       if (msg.sds.numScreens < 1)
         EDSERROR("Requested number of screens %d is invalid",
@@ -1398,7 +1381,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       for (i = 0; i < msg.sds.numScreens; i++) {
         rfbScreenInfo *screen = rfbNewScreen(0, 0, 0, 0, 0, 0);
 
-        READ((char *)&screen->s, sizeof(rfbScreenDesc))
+        READ_OR_CLOSE((char *)&screen->s, sizeof(rfbScreenDesc), return);
         screen->s.id = Swap32IfLE(screen->s.id);
         screen->s.x = Swap16IfLE(screen->s.x);
         screen->s.y = Swap16IfLE(screen->s.y);
@@ -1453,7 +1436,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
     {
       CARD8 endianAndSubType, littleEndian, subType;
 
-      READ((char *)&endianAndSubType, 1);
+      READ_OR_CLOSE((char *)&endianAndSubType, 1, return);
       littleEndian = (endianAndSubType & rfbGIIBE) ? 0 : 1;
       subType = endianAndSubType & ~rfbGIIBE;
 
@@ -1461,7 +1444,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
         case rfbGIIVersion:
 
-          READ((char *)&msg.giicv.length, sz_rfbGIIClientVersionMsg - 2);
+          READ_OR_CLOSE((char *)&msg.giicv.length,
+                        sz_rfbGIIClientVersionMsg - 2, return);
           if (littleEndian != *(const char *)&rfbEndianTest) {
             msg.giicv.length = Swap16(msg.giicv.length);
             msg.giicv.version = Swap16(msg.giicv.version);
@@ -1484,7 +1468,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           memset(&dev, 0, sizeof(dev));
           dcmsg.deviceOrigin = 0;
 
-          READ((char *)&msg.giidc.length, sz_rfbGIIDeviceCreateMsg - 2);
+          READ_OR_CLOSE((char *)&msg.giidc.length,
+                        sz_rfbGIIDeviceCreateMsg - 2, return);
           if (littleEndian != *(const char *)&rfbEndianTest) {
             msg.giidc.length = Swap16(msg.giidc.length);
             msg.giidc.vendorID = Swap32(msg.giidc.vendorID);
@@ -1515,13 +1500,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           if (msg.giidc.numButtons > MAX_BUTTONS) {
             rfbLog("GII device create ERROR: %d buttons exceeds max of %d\n",
                    msg.giidc.numButtons, MAX_BUTTONS);
-            SKIP(msg.giidc.numValuators * sz_rfbGIIValuator);
+            SKIP_OR_CLOSE(msg.giidc.numValuators * sz_rfbGIIValuator, return);
             goto sendMessage;
           }
           if (msg.giidc.numValuators > MAX_VALUATORS) {
             rfbLog("GII device create ERROR: %d valuators exceeds max of %d\n",
                    msg.giidc.numValuators, MAX_VALUATORS);
-            SKIP(msg.giidc.numValuators * sz_rfbGIIValuator);
+            SKIP_OR_CLOSE(msg.giidc.numValuators * sz_rfbGIIValuator, return);
             goto sendMessage;
           }
 
@@ -1536,13 +1521,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
           if (dev.mode == Relative) {
             rfbLog("GII device create ERROR: relative valuators not supported (yet)\n");
-            SKIP(msg.giidc.numValuators * sz_rfbGIIValuator);
+            SKIP_OR_CLOSE(msg.giidc.numValuators * sz_rfbGIIValuator, return);
             goto sendMessage;
           }
 
           for (i = 0; i < dev.numValuators; i++) {
             rfbGIIValuator *v = &dev.valuators[i];
-            READ((char *)v, sz_rfbGIIValuator);
+            READ_OR_CLOSE((char *)v, sz_rfbGIIValuator, return);
             if (littleEndian != *(const char *)&rfbEndianTest) {
               v->index = Swap32(v->index);
               v->rangeMin = Swap32((CARD32)v->rangeMin);
@@ -1592,18 +1577,15 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           dcmsg.endianAndSubType = rfbGIIDeviceCreate | rfbGIIBE;
           dcmsg.length = Swap16IfLE(sz_rfbGIIDeviceCreatedMsg - 4);
 
-          if (WriteExact(cl, (char *)&dcmsg, sz_rfbGIIDeviceCreatedMsg) < 0) {
-            rfbLogPerror("rfbProcessClientNormalMessage: write");
-            rfbCloseClient(cl);
-            return;
-          }
+          WRITE_OR_CLOSE(&dcmsg, sz_rfbGIIDeviceCreatedMsg, return);
 
           break;
         }
 
         case rfbGIIDeviceDestroy:
 
-          READ((char *)&msg.giidd.length, sz_rfbGIIDeviceDestroyMsg - 2);
+          READ_OR_CLOSE((char *)&msg.giidd.length,
+                        sz_rfbGIIDeviceDestroyMsg - 2, return);
           if (littleEndian != *(const char *)&rfbEndianTest) {
             msg.giidd.length = Swap16(msg.giidd.length);
             msg.giidd.deviceOrigin = Swap32(msg.giidd.deviceOrigin);
@@ -1622,15 +1604,15 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         {
           CARD16 length;
 
-          READ((char *)&length, sizeof(CARD16));
+          READ_OR_CLOSE((char *)&length, sizeof(CARD16), return);
           if (littleEndian != *(const char *)&rfbEndianTest)
             length = Swap16(length);
 
           while (length > 0) {
             CARD8 eventSize, eventType;
 
-            READ((char *)&eventSize, 1);
-            READ((char *)&eventType, 1);
+            READ_OR_CLOSE((char *)&eventSize, 1, return);
+            READ_OR_CLOSE((char *)&eventType, 1, return);
 
             switch (eventType) {
 
@@ -1640,7 +1622,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                 rfbGIIButtonEvent b;
                 rfbDevInfo *dev;
 
-                READ((char *)&b.pad, sz_rfbGIIButtonEvent - 2);
+                READ_OR_CLOSE((char *)&b.pad, sz_rfbGIIButtonEvent - 2,
+                              return);
                 if (littleEndian != *(const char *)&rfbEndianTest) {
                   b.deviceOrigin = Swap32(b.deviceOrigin);
                   b.buttonNumber = Swap32(b.buttonNumber);
@@ -1697,7 +1680,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                 int i;
                 rfbDevInfo *dev;
 
-                READ((char *)&v.pad, sz_rfbGIIValuatorEvent - 2);
+                READ_OR_CLOSE((char *)&v.pad, sz_rfbGIIValuatorEvent - 2,
+                              return);
                 if (littleEndian != *(const char *)&rfbEndianTest) {
                   v.deviceOrigin = Swap32(v.deviceOrigin);
                   v.first = Swap32(v.first);
@@ -1744,7 +1728,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                        v.first, v.count);
 #endif
                 for (i = v.first; i < v.first + v.count; i++) {
-                  READ((char *)&dev->values[i], sizeof(int));
+                  READ_OR_CLOSE((char *)&dev->values[i], sizeof(int), return);
                   if (littleEndian != *(const char *)&rfbEndianTest)
                     dev->values[i] = Swap32((CARD32)dev->values[i]);
 #ifdef GII_DEBUG
@@ -2549,14 +2533,11 @@ Bool rfbSendUpdateBuf(rfbClientPtr cl)
   fprintf(stderr, "\n");
   */
 
-  if (ublen > 0 && WriteExact(cl, updateBuf, ublen) < 0) {
-    rfbLogPerror("rfbSendUpdateBuf: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  if (ublen > 0)
+    WRITE_OR_CLOSE(updateBuf, ublen, return FALSE);
 
   if (cl->captureEnable && cl->captureFD >= 0 && ublen > 0)
-    WriteCapture(cl->captureFD, updateBuf, ublen);
+    rfbWriteCapture(cl->captureFD, updateBuf, ublen);
 
   ublen = 0;
   return TRUE;
@@ -2599,14 +2580,10 @@ Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour, int nColours)
 
   len += nColours * 3 * 2;
 
-  if (WriteExact(cl, buf, len) < 0) {
-    rfbLogPerror("rfbSendSetColourMapEntries: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE(buf, len, return FALSE);
 
   if (cl->captureFD >= 0)
-    WriteCapture(cl->captureFD, buf, len);
+    rfbWriteCapture(cl->captureFD, buf, len);
 
   return TRUE;
 }
@@ -2626,63 +2603,10 @@ void rfbSendBell(void)
     if (cl->state != RFB_NORMAL)
       continue;
     b.type = rfbBell;
-    if (WriteExact(cl, (char *)&b, sz_rfbBellMsg) < 0) {
-      rfbLogPerror("rfbSendBell: write");
-      rfbCloseClient(cl);
-      continue;
-    }
+    WRITE_OR_CLOSE((char *)&b, sz_rfbBellMsg, continue);
     if (cl->captureFD >= 0)
-      WriteCapture(cl->captureFD, (char *)&b, sz_rfbBellMsg);
+      rfbWriteCapture(cl->captureFD, (char *)&b, sz_rfbBellMsg);
   }
-}
-
-
-/*
- * rfbSendServerCutText sends a ServerCutText message to all the clients.
- */
-
-void rfbSendServerCutText(char *str, int len)
-{
-  rfbClientPtr cl, nextCl;
-  rfbServerCutTextMsg sct;
-
-  if (rfbViewOnly || rfbAuthDisableCBSend || !str || len <= 0)
-    return;
-
-  if (len > rfbMaxClipboard) {
-    rfbLog("Truncating %d-byte outgoing clipboard update to %d bytes.\n", len,
-           rfbMaxClipboard);
-    len = rfbMaxClipboard;
-  }
-
-  for (cl = rfbClientHead; cl; cl = nextCl) {
-    nextCl = cl->next;
-    if (cl->state != RFB_NORMAL || cl->viewOnly)
-      continue;
-    if (cl->cutTextLen == len && cl->cutText && !memcmp(cl->cutText, str, len))
-      continue;
-    free(cl->cutText);
-    cl->cutText = rfbAlloc(len);
-    memcpy(cl->cutText, str, len);
-    cl->cutTextLen = len;
-    memset(&sct, 0, sz_rfbServerCutTextMsg);
-    sct.type = rfbServerCutText;
-    sct.length = Swap32IfLE(len);
-    if (WriteExact(cl, (char *)&sct, sz_rfbServerCutTextMsg) < 0) {
-      rfbLogPerror("rfbSendServerCutText: write");
-      rfbCloseClient(cl);
-      continue;
-    }
-    if (WriteExact(cl, str, len) < 0) {
-      rfbLogPerror("rfbSendServerCutText: write");
-      rfbCloseClient(cl);
-      continue;
-    }
-    if (cl->captureFD >= 0)
-      WriteCapture(cl->captureFD, str, len);
-  }
-  LogMessage(X_DEBUG, "Sent server clipboard: '%.*s%s' (%d bytes)\n",
-             len <= 20 ? len : 20, str, len <= 20 ? "" : "...", len);
 }
 
 
@@ -2701,21 +2625,13 @@ Bool rfbSendDesktopSize(rfbClientPtr cl)
   memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
   fu.type = rfbFramebufferUpdate;
   fu.nRects = Swap16IfLE(1);
-  if (WriteExact(cl, (char *)&fu, sz_rfbFramebufferUpdateMsg) < 0) {
-    rfbLogPerror("rfbSendDesktopSize: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE((char *)&fu, sz_rfbFramebufferUpdateMsg, return FALSE);
 
   rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
   rh.r.x = rh.r.y = 0;
   rh.r.w = Swap16IfLE(rfbFB.width);
   rh.r.h = Swap16IfLE(rfbFB.height);
-  if (WriteExact(cl, (char *)&rh, sz_rfbFramebufferUpdateRectHeader) < 0) {
-    rfbLogPerror("rfbSendDesktopSize: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE((char *)&rh, sz_rfbFramebufferUpdateRectHeader, return FALSE);
 
   return TRUE;
 }
@@ -2740,11 +2656,7 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
   memset(&fu, 0, sz_rfbFramebufferUpdateMsg);
   fu.type = rfbFramebufferUpdate;
   fu.nRects = Swap16IfLE(1);
-  if (WriteExact(cl, (char *)&fu, sz_rfbFramebufferUpdateMsg) < 0) {
-    rfbLogPerror("rfbSendExtDesktopSize: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE((char *)&fu, sz_rfbFramebufferUpdateMsg, return FALSE);
 
   /* Send the ExtendedDesktopSize message, if the client supports it.
      The TigerVNC Viewer, in particular, requires this, or it won't
@@ -2754,11 +2666,7 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
   rh.r.y = Swap16IfLE(cl->result);
   rh.r.w = Swap16IfLE(rfbFB.width);
   rh.r.h = Swap16IfLE(rfbFB.height);
-  if (WriteExact(cl, (char *)&rh, sz_rfbFramebufferUpdateRectHeader) < 0) {
-    rfbLogPerror("rfbSendExtDesktopSize: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE((char *)&rh, sz_rfbFramebufferUpdateRectHeader, return FALSE);
 
   xorg_list_for_each_entry(iter, &rfbScreens, entry) {
     if (iter->output->crtc && iter->output->crtc->mode)
@@ -2769,11 +2677,7 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
     fakeScreen = TRUE;
   }
 
-  if (WriteExact(cl, (char *)numScreens, 4) < 0) {
-    rfbLogPerror("rfbSendExtDesktopSize: write");
-    rfbCloseClient(cl);
-    return FALSE;
-  }
+  WRITE_OR_CLOSE((char *)numScreens, 4, return FALSE);
 
   if (fakeScreen) {
     rfbScreenInfo screen = *xorg_list_first_entry(&rfbScreens, rfbScreenInfo,
@@ -2783,11 +2687,7 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
     screen.s.w = Swap16IfLE(rfbFB.width);
     screen.s.h = Swap16IfLE(rfbFB.height);
     screen.s.flags = Swap32IfLE(screen.s.flags);
-    if (WriteExact(cl, (char *)&screen.s, sz_rfbScreenDesc) < 0) {
-      rfbLogPerror("rfbSendExtDesktopSize: write");
-      rfbCloseClient(cl);
-      return FALSE;
-    }
+    WRITE_OR_CLOSE((char *)&screen.s, sz_rfbScreenDesc, return FALSE);
   } else {
     xorg_list_for_each_entry(iter, &rfbScreens, entry) {
       rfbScreenInfo screen = *iter;
@@ -2799,11 +2699,7 @@ Bool rfbSendExtDesktopSize(rfbClientPtr cl)
         screen.s.w = Swap16IfLE(screen.s.w);
         screen.s.h = Swap16IfLE(screen.s.h);
         screen.s.flags = Swap32IfLE(screen.s.flags);
-        if (WriteExact(cl, (char *)&screen.s, sz_rfbScreenDesc) < 0) {
-          rfbLogPerror("rfbSendExtDesktopSize: write");
-          rfbCloseClient(cl);
-          return FALSE;
-        }
+        WRITE_OR_CLOSE((char *)&screen.s, sz_rfbScreenDesc, return FALSE);
       }
     }
   }

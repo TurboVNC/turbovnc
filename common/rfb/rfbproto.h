@@ -1,6 +1,6 @@
 /*
- *  Copyright (C) 2009-2010, 2012-2013, 2015 D. R. Commander.
- *                                           All Rights Reserved.
+ *  Copyright (C) 2009-2010, 2012-2013, 2015, 2022 D. R. Commander.
+ *                                                 All Rights Reserved.
  *  Copyright (C) 2009 Vic Lee.  All Rights Reserved.
  *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
@@ -498,6 +498,23 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbGIIBE 128
 
 
+/* Extended Clipboard formats */
+
+#define rfbExtClipUTF8    0x00000001
+#define rfbExtClipRTF     0x00000002
+#define rfbExtClipHTML    0x00000004
+#define rfbExtClipDIB     0x00000008
+#define rfbExtClipFiles   0x00000010
+
+/* Extended Clipboard actions */
+
+#define rfbExtClipCaps    0x01000000
+#define rfbExtClipRequest 0x02000000
+#define rfbExtClipPeek    0x04000000
+#define rfbExtClipNotify  0x08000000
+#define rfbExtClipProvide 0x10000000
+
+
 /*****************************************************************************
  *
  * Encoding types
@@ -555,6 +572,8 @@ typedef struct _rfbInteractionCapsMsg {
 
 #define rfbEncodingExtendedDesktopSize 0xFFFFFECC
 
+#define rfbEncodingGII             0xFFFFFECF
+
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
 #define rfbEncodingCompressLevel2  0xFFFFFF02
@@ -584,7 +603,7 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbEncodingQualityLevel8   0xFFFFFFE8
 #define rfbEncodingQualityLevel9   0xFFFFFFE9
 
-#define rfbEncodingGII             0xFFFFFECF
+#define rfbEncodingExtendedClipboard 0xC0A1E5CE
 
 /* signatures for "fake" encoding types */
 #define sig_rfbEncodingCompressLevel0  "COMPRLVL"

@@ -445,12 +445,8 @@ Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
         return FALSE;
     }
     for (i = 1; i < nt; i++) {
-      if ((*tparam[i].ublen) > 0 &&
-          WriteExact(cl, tparam[i].updateBuf, *tparam[i].ublen) < 0) {
-        rfbLogPerror("rfbSendRectEncodingTight: write");
-        rfbCloseClient(cl);
-        return FALSE;
-      }
+      if ((*tparam[i].ublen) > 0)
+        WRITE_OR_CLOSE(tparam[i].updateBuf, *tparam[i].ublen, return FALSE);
       (*tparam[i].ublen) = 0;
       cl->rfbBytesSent[rfbEncodingTight] += tparam[i].bytessent;
       cl->rfbRectanglesSent[rfbEncodingTight] += tparam[i].rectsent;

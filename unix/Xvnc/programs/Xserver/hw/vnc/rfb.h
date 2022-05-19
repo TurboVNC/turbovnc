@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2021 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2022 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 2011 Joel Martin
@@ -405,6 +405,8 @@ typedef struct rfbClientRec {
   Bool enableLastRectEncoding;      /* client supports LastRect encoding */
   Bool enableCursorShapeUpdates;    /* client supports cursor shape updates */
   Bool enableCursorPosUpdates;      /* client supports PointerPos updates */
+  Bool enableExtClipboard;          /* client supports Extended Clipboard
+                                       extension */
   Bool enableCU;                    /* client supports Continuous Updates */
   Bool enableFence;                 /* client supports fence extension */
   Bool enableDesktopSize;           /* client supports desktop size
@@ -429,8 +431,11 @@ typedef struct rfbClientRec {
 
   struct rfbClientRec *prev, *next;
 
-  char *cutText;
-  int cutTextLen;
+  /* Clipboard */
+  char *clientClipboard;
+  CARD32 clipFlags, clipSizes[16];
+  Bool hasLocalClipboard, unsolicitedClipboardAttempt;
+  struct xorg_list entry;
 
   /* flow control extensions */
 
@@ -557,6 +562,59 @@ static const int rfbEndianTest = 1;
   pcap->code = Swap32IfLE((CARD32)code_sym);  \
   memcpy(pcap->vendorSignature, (vendor), sz_rfbCapabilityInfoVendor);  \
   memcpy(pcap->nameSignature, sig_##code_sym, sz_rfbCapabilityInfoName);  \
+}
+
+
+/*
+ * Macros for reading/writing data from/to clients
+ */
+
+#define READ_OR_CLOSE(addr, numBytes, failAction) {  \
+  int __n;  \
+  if ((__n = ReadExact(cl, addr, numBytes)) <= 0) {  \
+    if (__n != 0) {  \
+      char __temps[80];  \
+      snprintf(__temps, 80, "%s (%d): read error", __FUNCTION__, __LINE__);  \
+      rfbLogPerror(__temps);  \
+    }  \
+    rfbCloseClient(cl);  \
+    failAction;  \
+  }  \
+}
+
+#define READ32_OR_CLOSE(var, failAction) {  \
+  CARD32 __tmp;  \
+  READ_OR_CLOSE((char *)&__tmp, sizeof(CARD32), failAction);  \
+  var = Swap32IfLE(__tmp);  \
+}
+
+#define SKIP_OR_CLOSE(numBytes, failAction) {  \
+  int __n;  \
+  if ((__n = SkipExact(cl, numBytes)) <= 0) {  \
+    if (__n != 0) {  \
+      char __temps[80];  \
+      snprintf(__temps, 80, "%s (%d): skip error", __FUNCTION__, __LINE__);  \
+      rfbLogPerror(__temps);  \
+    }  \
+    rfbCloseClient(cl);  \
+    failAction;  \
+  }  \
+}
+
+#define WRITE_OR_CLOSE(addr, numBytes, failAction) {  \
+  if (WriteExact(cl, (char *)(addr), numBytes) < 0) {  \
+    char __temps[80];  \
+    snprintf(__temps, 80, "%s (%d): write error", __FUNCTION__, __LINE__);  \
+    rfbLogPerror(__temps);  \
+    rfbCloseClient(cl);  \
+    failAction;  \
+  }  \
+}
+
+#define WRITE32_OR_CLOSE(value, failAction) {  \
+  CARD32 __tmp = value;  \
+  __tmp = Swap32IfLE(__tmp);  \
+  WRITE_OR_CLOSE((char *)&__tmp, sizeof(CARD32), failAction);  \
 }
 
 
@@ -693,12 +751,16 @@ extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
 /* cutpaste.c */
 
 extern Bool rfbSyncPrimary;
+extern struct xorg_list clipboardRequestors;
 
-extern void rfbSetXCutText(char *str, int len);
-extern void rfbGotXCutText(char *str, int len);
-extern void vncClientCutText(const char *str, int len);
+extern void rfbHandleClientCutText(rfbClientPtr cl, const char *str, int len);
+extern void rfbHandleClipboardAnnounce(rfbClientPtr cl, Bool available);
+extern void rfbReadExtClipboard(rfbClientPtr cl, int len);
+extern void rfbSendClipboardCaps(rfbClientPtr cl, CARD32 caps,
+                                 const CARD32 *lengths);
 extern int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
-                               Atom property, Window requestor, CARD32 time);
+                               Atom property, Window requestor, CARD32 time,
+                               const char *data);
 extern Window vncGetSelectionWindow(void);
 extern void vncHandleSelection(Atom selection, Atom target, Atom property,
                                Atom requestor, TimeStamp time);
@@ -868,7 +930,6 @@ extern Bool rfbAlwaysShared;
 extern Bool rfbNeverShared;
 extern Bool rfbDisconnect;
 extern Bool rfbViewOnly;  /* run server in view-only mode - Ehud Karni SW */
-extern Bool rfbSyncCutBuffer;
 extern Bool rfbCongestionControl;
 extern double rfbAutoLosslessRefresh;
 extern Bool rfbALRAll;
@@ -882,7 +943,7 @@ extern Bool rfbVirtualTablet;
 extern Bool rfbMT;
 extern int rfbNumThreads;
 
-extern char *captureFile;
+extern char *rfbCaptureFile;
 
 #define debugregion(r, m)  \
   rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1,  \
@@ -899,7 +960,7 @@ extern Bool rfbSendUpdateBuf(rfbClientPtr cl);
 extern Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour,
                                        int nColours);
 extern void rfbSendBell(void);
-extern void rfbSendServerCutText(char *str, int len);
+extern void rfbWriteCapture(int captureFD, char *buf, int len);
 
 
 #if USETLS
