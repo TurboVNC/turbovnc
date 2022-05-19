@@ -309,7 +309,7 @@ void vncHandleSelection(Atom selection, Atom target, Atom property,
   } else if (target == xaUTF8_STRING) {
     size_t inbytesleft = prop->size, outbytesleft = prop->size;
     char *in = prop->data, *buffer, *out;
-    iconv_t cd;
+    iconv_t cd = (iconv_t)-1;
 
     if (prop->format != 8 || prop->type != xaUTF8_STRING)
       return;
@@ -320,6 +320,8 @@ void vncHandleSelection(Atom selection, Atom target, Atom property,
         iconv(cd, &in, &inbytesleft, &out, &outbytesleft) == (size_t)-1)
       LogMessage(X_ERROR, "UTF-8 to ISO-8859-1 conversion failed: %s\n",
                  strerror(errno));
+    if (cd != (iconv_t)-1)
+      iconv_close(cd);
 
     rfbSendServerCutText(buffer, prop->size - outbytesleft);
     free(buffer);
