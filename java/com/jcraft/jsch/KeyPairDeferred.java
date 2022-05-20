@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2020-2021 Matthias Wiedemann. All rights reserved.
+Copyright (c) 2022 D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -161,7 +162,8 @@ public class KeyPairDeferred extends KeyPair {
 
     @Override
     public byte[] getPublicKeyBlob() {
-        return delegate != null ? delegate.getPublicKeyBlob() : null;
+        return delegate != null ? delegate.getPublicKeyBlob() :
+                                  super.getPublicKeyBlob();
     }
 
     @Override
@@ -171,7 +173,8 @@ public class KeyPairDeferred extends KeyPair {
 
     @Override
     public String getFingerPrint() {
-        return requireDecrypted(delegate).getFingerPrint();
+        return delegate != null ? delegate.getFingerPrint() :
+                                  super.getFingerPrint();
     }
 
     @Override

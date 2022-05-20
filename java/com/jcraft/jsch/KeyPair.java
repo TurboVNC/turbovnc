@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2022 D. R. Commander. All rights reserved.
 Copyright (c) 2020 Jeremy Norris. All rights reserved.
 Copyright (c) 2020 Matthias Wiedemann. All rights reserved.
 
@@ -855,7 +855,9 @@ public abstract class KeyPair{
           throw new IOException("We don't support having more than 1 key in the file (yet).");
       }
 
-      pubkey = buffer.getString();
+      byte[] pubkeyTmp = buffer.getString();
+      if (pubkey == null)
+          pubkey = pubkeyTmp;
 
       if ("none".equals(cipherName)) {
           encrypted = false;
