@@ -3,7 +3,8 @@ set -e
 
 BINDIR=`dirname $0`
 if [ -d $BINDIR/../java/jre ]; then
-	JAVA="$BINDIR/../java/jre/bin/java --add-exports java.desktop/com.apple.eawt=VncViewer"
+	JAVA="$BINDIR/../java/jre/bin/java"
+	JAVAARGS="--add-exports java.desktop/com.apple.eawt=VncViewer"
 else
 	if [ "$JAVA_HOME" = "" ]; then
 		JAVA=java
@@ -17,7 +18,7 @@ if [ -d $BINDIR/../java ]; then
 fi
 
 if [ "@BITS@" = "32" ]; then
-	exec "$JAVA" -server -d@BITS@ -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
+	exec "$JAVA" $JAVAARGS -server -d@BITS@ -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
 else
-	exec "$JAVA" -server -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
+	exec "$JAVA" $JAVAARGS -server -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
 fi
