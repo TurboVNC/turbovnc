@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2021 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2022 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -170,7 +170,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (benchmark) {
       state = RFBSTATE_INITIALISATION;
-      reader = new CMsgReaderV3(this, viewer.benchFile);
+      reader = new CMsgReader(this, viewer.benchFile);
     } else {
       sock.inStream().setBlockCallback(this);
       setServerName(opts.serverName);

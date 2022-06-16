@@ -275,8 +275,8 @@ public abstract class CConnection extends CMsgHandler {
 
   private void securityCompleted() {
     state = RFBSTATE_INITIALISATION;
-    reader = new CMsgReaderV3(this, is);
-    writer = new CMsgWriterV3(cp, os);
+    reader = new CMsgReader(this, is);
+    writer = new CMsgWriter(cp, os);
     vlog.debug("Authentication success!");
     //authSuccess();
     writer.writeClientInit(shared);
@@ -352,8 +352,8 @@ public abstract class CConnection extends CMsgHandler {
 
   // Other methods
 
-  public CMsgReaderV3 reader() { return reader; }
-  public CMsgWriterV3 writer() { return writer; }
+  public CMsgReader reader() { return reader; }
+  public CMsgWriter writer() { return writer; }
 
   public InStream getInStream() { return is; }
   public OutStream getOutStream() { return os; }
@@ -412,8 +412,8 @@ public abstract class CConnection extends CMsgHandler {
 
   InStream is;
   OutStream os;
-  protected CMsgReaderV3 reader;
-  CMsgWriterV3 writer;
+  protected CMsgReader reader;
+  CMsgWriter writer;
   boolean shared;
   protected CSecurity csecurity;
   SecurityClient security;

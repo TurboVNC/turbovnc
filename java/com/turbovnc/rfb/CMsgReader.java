@@ -24,64 +24,252 @@
 
 package com.turbovnc.rfb;
 
+import java.util.*;
+
 import com.turbovnc.rdr.*;
 
-public abstract class CMsgReader {
+public class CMsgReader {
 
-  protected CMsgReader(CMsgHandler handler_, InStream is_) {
+  public CMsgReader(CMsgHandler handler_, InStream is_) {
     imageBufIdealSize = 0;
     handler = handler_;
     is = is_;
     imageBuf = null;
     imageBufSize = 0;
     decoders = new Decoder[RFB.ENCODING_MAX + 1];
+    nUpdateRectsLeft = 0;
   }
 
-  protected void readSetColourMapEntries() {
-    is.skip(1);
-    int firstColour = is.readU16();
-    int nColours = is.readU16();
-    int[] rgbs = new int[nColours * 3];
-    for (int i = 0; i < nColours * 3; i++)
-      rgbs[i] = is.readU16();
-    handler.setColourMapEntries(firstColour, nColours, rgbs);
+  public final int bpp() {
+    return handler.cp.pf().bpp;
   }
 
-  protected void readBell() {
+  public final void close() {
+    for (int i = 0; i < RFB.ENCODING_MAX; i++) {
+      if (decoders[i] != null)
+        decoders[i].close();
+    }
+  }
+
+  public int[] getImageBuf(int required) {
+    return getImageBuf(required, 0, 0);
+  }
+
+  private int[] getImageBuf(int required, int requested, int nPixels) {
+    int requiredBytes = required;
+    int requestedBytes = requested;
+    int size = requestedBytes;
+    if (size > imageBufIdealSize) size = imageBufIdealSize;
+
+    if (size < requiredBytes)
+      size = requiredBytes;
+
+    if (imageBufSize < size) {
+      imageBufSize = size;
+      imageBuf = new int[imageBufSize];
+    }
+    if (nPixels != 0)
+      nPixels = imageBufSize / (handler.cp.pf().bpp / 8);
+    return imageBuf;
+  }
+
+  public InStream getInStream() { return is; }
+
+  public final boolean isTurboJPEG() {
+    Decoder d = decoders[RFB.ENCODING_TIGHT];
+    if (d instanceof TightDecoder && d != null)
+      return ((TightDecoder)d).isTurboJPEG();
+    return false;
+  }
+
+  private void readBell() {
     handler.bell();
   }
 
-  protected void readServerCutText() {
-    int ignoredBytes = 0;
-    is.skip(3);
-    int len = is.readU32();
-    if (len > Params.maxClipboard.getValue()) {
-      ignoredBytes = len - Params.maxClipboard.getValue();
-      vlog.error("Truncating " + len + "-byte incoming clipboard update to " +
-                 Params.maxClipboard.getValue() + " bytes.");
-      len = Params.maxClipboard.getValue();
+  private void readClientRedirect(int x, int y, int w, int h) {
+    int port = is.readU16();
+    String host = is.readString();
+    String x509subject = is.readString();
+
+    if (x != 0 || y != 0 || w != 0 || h != 0) {
+      vlog.error("Ignoring ClientRedirect rect with non-zero position/size");
+    } else {
+      handler.clientRedirect(port, host, x509subject);
     }
-    byte[] buf = new byte[len];
-    is.readBytes(buf, 0, len);
-    is.skip(ignoredBytes);
-    String str = new String();
-    try {
-      str = new String(buf, "UTF8");
-    } catch (java.io.UnsupportedEncodingException e) {
-      e.printStackTrace();
-    }
-    handler.serverCutText(str, len);
   }
 
-  protected void readFramebufferUpdateStart() {
+  private void readCopyRect(Rect r) {
+    int srcX = is.readU16();
+    int srcY = is.readU16();
+    handler.copyRect(r, srcX, srcY);
+  }
+
+  private void readEndOfContinuousUpdates() {
+    handler.endOfContinuousUpdates();
+  }
+
+  private void readExtendedDesktopSize(int x, int y, int w, int h) {
+    int screens, i;
+    int id, flags;
+    int sx, sy, sw, sh;
+    ScreenSet layout = new ScreenSet();
+
+    screens = is.readU8();
+    is.skip(3);
+
+    for (i = 0; i < screens; i++) {
+      id = is.readU32();
+      sx = is.readU16();
+      sy = is.readU16();
+      sw = is.readU16();
+      sh = is.readU16();
+      flags = is.readU32();
+
+      layout.addScreen(new Screen(id, sx, sy, sw, sh, flags));
+    }
+    layout.debugPrint("LAYOUT RECEIVED");
+
+    handler.setExtendedDesktopSize(x, y, w, h, layout);
+  }
+
+  private void readFence() {
+    int flags;
+    int len;
+    byte[] data = new byte[64];
+
+    is.skip(3);
+
+    flags = is.readU32();
+
+    len = is.readU8();
+    if (len > data.length) {
+      System.err.println("Ignoring fence with too large payload\n");
+      is.skip(len);
+      return;
+    }
+
+    is.readBytes(data, 0, len);
+
+    handler.fence(flags, len, data);
+  }
+
+  private void readFramebufferUpdate() {
+    is.skip(1);
+    nUpdateRectsLeft = is.readU16();
     handler.framebufferUpdateStart();
   }
 
-  protected void readFramebufferUpdateEnd() {
-    handler.framebufferUpdateEnd();
+  private void readGII() {
+    int endianAndSubType = is.readU8();
+    int endian = endianAndSubType & RFB.GII_BE;
+    int subType = endianAndSubType & ~RFB.GII_BE;
+
+    if (endian != RFB.GII_BE) {
+      vlog.error("ERROR: don't know how to handle little endian GII messages");
+      is.skip(6);
+      return;
+    }
+
+    int length = is.readU16();
+    if (length != 4) {
+      vlog.error("ERROR: improperly formatted GII server message");
+      is.skip(4);
+      return;
+    }
+
+    switch (subType) {
+      case RFB.GII_VERSION:
+        int maximumVersion = is.readU16();
+        int minimumVersion = is.readU16();
+        if (maximumVersion < 1 || minimumVersion > 1) {
+          vlog.error("ERROR: GII version mismatch");
+          return;
+        }
+        if (minimumVersion != maximumVersion)
+          vlog.debug("Server supports GII versions " + minimumVersion + " - " +
+                     maximumVersion);
+        else
+          vlog.debug("Server supports GII version " + minimumVersion);
+        handler.enableGII();
+        break;
+
+      case RFB.GII_DEVICE_CREATE:
+        int deviceOrigin = is.readU32();
+        if (deviceOrigin == 0) {
+          vlog.error("ERROR: Could not create GII device");
+          return;
+        }
+        handler.giiDeviceCreated(deviceOrigin);
+        break;
+    }
   }
 
-  protected void readRect(Rect r, int encoding) {
+  // readMsg() reads a message, calling the handler as appropriate.
+  public void readMsg() {
+    if (nUpdateRectsLeft == 0) {
+
+      int type = is.readU8();
+      switch (type) {
+        case RFB.FRAMEBUFFER_UPDATE:
+          readFramebufferUpdate();  break;
+        case RFB.SET_COLOUR_MAP_ENTRIES:
+          readSetColourMapEntries();  break;
+        case RFB.BELL:
+          readBell();  break;
+        case RFB.SERVER_CUT_TEXT:
+          readServerCutText();  break;
+        case RFB.FENCE:
+          readFence();  break;
+        case RFB.END_OF_CONTINUOUS_UPDATES:
+          readEndOfContinuousUpdates();  break;
+        case RFB.GII:
+          readGII();  break;
+        default:
+          vlog.error("Unknown message type " + type);
+          throw new ErrorException("Unknown message type " + type);
+      }
+
+    } else {
+
+      int x = is.readU16();
+      int y = is.readU16();
+      int w = is.readU16();
+      int h = is.readU16();
+      int encoding = is.readS32();
+
+      switch (encoding) {
+        case RFB.ENCODING_NEW_FB_SIZE:
+          handler.setDesktopSize(w, h);
+          break;
+        case RFB.ENCODING_EXTENDED_DESKTOP_SIZE:
+          readExtendedDesktopSize(x, y, w, h);
+          break;
+        case RFB.ENCODING_DESKTOP_NAME:
+          readSetDesktopName(x, y, w, h);
+          break;
+        case RFB.ENCODING_X_CURSOR:
+          readSetXCursor(w, h, new Point(x, y));
+          break;
+        case RFB.ENCODING_RICH_CURSOR:
+          readSetCursor(w, h, new Point(x, y));
+          break;
+        case RFB.ENCODING_LAST_RECT:
+          nUpdateRectsLeft = 1;   // this rectangle is the last one
+          break;
+        case RFB.ENCODING_CLIENT_REDIRECT:
+          readClientRedirect(x, y, w, h);
+          break;
+        default:
+          readRect(new Rect(x, y, x + w, y + h), encoding);
+          break;
+      }
+
+      nUpdateRectsLeft--;
+      if (nUpdateRectsLeft == 0) handler.framebufferUpdateEnd();
+    }
+  }
+
+  private void readRect(Rect r, int encoding) {
     if ((r.br.x > handler.cp.width) || (r.br.y > handler.cp.height)) {
       vlog.error("Rect too big: " + r.width() + "x" + r.height() + " at " +
                   r.tl.x + "," + r.tl.y + " exceeds " + handler.cp.width +
@@ -113,13 +301,76 @@ public abstract class CMsgReader {
     handler.endRect(r, encoding);
   }
 
-  protected void readCopyRect(Rect r) {
-    int srcX = is.readU16();
-    int srcY = is.readU16();
-    handler.copyRect(r, srcX, srcY);
+  private void readServerCutText() {
+    int ignoredBytes = 0;
+    is.skip(3);
+    int len = is.readU32();
+    if (len > Params.maxClipboard.getValue()) {
+      ignoredBytes = len - Params.maxClipboard.getValue();
+      vlog.error("Truncating " + len + "-byte incoming clipboard update to " +
+                 Params.maxClipboard.getValue() + " bytes.");
+      len = Params.maxClipboard.getValue();
+    }
+    byte[] buf = new byte[len];
+    is.readBytes(buf, 0, len);
+    is.skip(ignoredBytes);
+    String str = new String();
+    try {
+      str = new String(buf, "UTF8");
+    } catch (java.io.UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
+    handler.serverCutText(str, len);
   }
 
-  protected void readSetCursor(int width, int height, Point hotspot) {
+  public void readServerInit(boolean benchmark) {
+    int width = is.readU16();
+    int height = is.readU16();
+    handler.setDesktopSize(width, height);
+    PixelFormat pf = new PixelFormat();
+    pf.read(is);
+    handler.setPixelFormat(pf);
+    String name = is.readString();
+    handler.setName(name);
+    if (!benchmark &&
+        handler.getCurrentCSecurity().getType() == RFB.SECTYPE_TIGHT) {
+      int nServerMsg = is.readU16();
+      int nClientMsg = is.readU16();
+      int nEncodings = is.readU16();
+      is.skip(2);
+      List<byte[]> serverMsgCaps = new ArrayList<byte[]>();
+      for (int i = 0; i < nServerMsg; i++) {
+        byte[] cap = new byte[16];
+        is.readBytes(cap, 0, 16);
+        serverMsgCaps.add(cap);
+      }
+      List<byte[]> clientMsgCaps = new ArrayList<byte[]>();
+      for (int i = 0; i < nClientMsg; i++) {
+        byte[] cap = new byte[16];
+        is.readBytes(cap, 0, 16);
+        clientMsgCaps.add(cap);
+      }
+      List<byte[]> supportedEncodings = new ArrayList<byte[]>();
+      for (int i = 0; i < nEncodings; i++) {
+        byte[] cap = new byte[16];
+        is.readBytes(cap, 0, 16);
+        supportedEncodings.add(cap);
+      }
+    }
+    handler.serverInit();
+  }
+
+  private void readSetColourMapEntries() {
+    is.skip(1);
+    int firstColour = is.readU16();
+    int nColours = is.readU16();
+    int[] rgbs = new int[nColours * 3];
+    for (int i = 0; i < nColours * 3; i++)
+      rgbs[i] = is.readU16();
+    handler.setColourMapEntries(firstColour, nColours, rgbs);
+  }
+
+  private void readSetCursor(int width, int height, Point hotspot) {
     int dataLen = width * height;
     int maskLen = ((width + 7) / 8) * height;
     int[] data = new int[dataLen];
@@ -132,7 +383,17 @@ public abstract class CMsgReader {
     handler.setCursor(width, height, hotspot, data, mask);
   }
 
-  protected void readSetXCursor(int width, int height, Point hotspot)
+  private void readSetDesktopName(int x, int y, int w, int h) {
+    String name = is.readString();
+
+    if (x != 0 || y != 0 || w != 0 || h != 0) {
+      vlog.error("Ignoring DesktopName rect with non-zero position/size");
+    } else {
+      handler.setName(name);
+    }
+  }
+
+  private void readSetXCursor(int width, int height, Point hotspot)
   {
     byte r, g, b;
     int x, y, n, bytesPerRow = ((width + 7) / 8), len = bytesPerRow * height;
@@ -175,39 +436,6 @@ public abstract class CMsgReader {
     handler.setCursor(width, height, hotspot, cursor, mask);
   }
 
-  public int[] getImageBuf(int required) {
-    return getImageBuf(required, 0, 0);
-  }
-
-  public int[] getImageBuf(int required, int requested, int nPixels) {
-    int requiredBytes = required;
-    int requestedBytes = requested;
-    int size = requestedBytes;
-    if (size > imageBufIdealSize) size = imageBufIdealSize;
-
-    if (size < requiredBytes)
-      size = requiredBytes;
-
-    if (imageBufSize < size) {
-      imageBufSize = size;
-      imageBuf = new int[imageBufSize];
-    }
-    if (nPixels != 0)
-      nPixels = imageBufSize / (handler.cp.pf().bpp / 8);
-    return imageBuf;
-  }
-
-  public final int bpp() {
-    return handler.cp.pf().bpp;
-  }
-
-  public final boolean isTurboJPEG() {
-    Decoder d = decoders[RFB.ENCODING_TIGHT];
-    if (d instanceof TightDecoder && d != null)
-      return ((TightDecoder)d).isTurboJPEG();
-    return false;
-  }
-
   public final void reset() {
     for (int i = 0; i < RFB.ENCODING_MAX; i++) {
       if (decoders[i] != null)
@@ -215,27 +443,14 @@ public abstract class CMsgReader {
     }
   }
 
-  public final void close() {
-    for (int i = 0; i < RFB.ENCODING_MAX; i++) {
-      if (decoders[i] != null)
-        decoders[i].close();
-    }
-  }
+  private int imageBufIdealSize;
 
-  public abstract void readServerInit(boolean benchmark);
-
-  // readMsg() reads a message, calling the handler as appropriate.
-  public abstract void readMsg();
-
-  public InStream getInStream() { return is; }
-
-  int imageBufIdealSize;
-
-  protected CMsgHandler handler;
-  protected InStream is;
-  protected Decoder[] decoders;
-  protected int[] imageBuf;
-  protected int imageBufSize;
+  private CMsgHandler handler;
+  private InStream is;
+  private Decoder[] decoders;
+  private int[] imageBuf;
+  private int imageBufSize;
+  private int nUpdateRectsLeft;
 
   static LogWriter vlog = new LogWriter("CMsgReader");
 }
