@@ -1271,7 +1271,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
       msg.cct.length = Swap32IfLE(msg.cct.length);
       if (msg.cct.length > rfbMaxClipboard) {
-        rfbLog("Truncating %d-byte clipboard update to %d bytes.\n",
+        rfbLog("Truncating %d-byte incoming clipboard update to %d bytes.\n",
                msg.cct.length, rfbMaxClipboard);
         ignoredBytes = msg.cct.length - rfbMaxClipboard;
         msg.cct.length = rfbMaxClipboard;
@@ -2648,6 +2648,12 @@ void rfbSendServerCutText(char *str, int len)
 
   if (rfbViewOnly || rfbAuthDisableCBSend || !str || len <= 0)
     return;
+
+  if (len > rfbMaxClipboard) {
+    rfbLog("Truncating %d-byte outgoing clipboard update to %d bytes.\n", len,
+           rfbMaxClipboard);
+    len = rfbMaxClipboard;
+  }
 
   for (cl = rfbClientHead; cl; cl = nextCl) {
     nextCl = cl->next;

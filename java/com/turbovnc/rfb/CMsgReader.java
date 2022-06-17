@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018, 2022 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,15 +52,18 @@ public abstract class CMsgReader {
   }
 
   protected void readServerCutText() {
+    int ignoredBytes = 0;
     is.skip(3);
     int len = is.readU32();
-    if (len > 256 * 1024) {
-      is.skip(len);
-      vlog.error("cut text too long (" + len + " bytes) - ignoring");
-      return;
+    if (len > Params.maxClipboard.getValue()) {
+      ignoredBytes = len - Params.maxClipboard.getValue();
+      vlog.error("Truncating " + len + "-byte incoming clipboard update to " +
+                 Params.maxClipboard.getValue() + " bytes.");
+      len = Params.maxClipboard.getValue();
     }
     byte[] buf = new byte[len];
     is.readBytes(buf, 0, len);
+    is.skip(ignoredBytes);
     String str = new String();
     try {
       str = new String(buf, "UTF8");

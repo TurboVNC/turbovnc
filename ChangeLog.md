@@ -20,6 +20,13 @@ algorithm.)  The built-in SSH client now also supports the
 `PubkeyAcceptedAlgorithms` keyword in OpenSSH config files, which can be used
 to disable specific signature schemes that both the client and server support.
 
+4. The TurboVNC Server and Viewer now truncate both incoming and outgoing
+clipboard updates to the number of bytes specified by the `-maxclipboard` Xvnc
+argument or the `MaxClipboard` TurboVNC Viewer parameter.  Previously the
+server only truncated incoming clipboard updates, and the viewer truncated
+outgoing clipboard updates while ignoring incoming clipboard updates larger
+than 256 kB.
+
 
 3.0
 ===
