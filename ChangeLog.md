@@ -1,3 +1,14 @@
+2.2.9 ESR
+=========
+
+1. The TurboVNC Server and Java TurboVNC Viewer now truncate both incoming and
+outgoing clipboard updates to the number of bytes specified by the
+`-maxclipboard` Xvnc argument or the `MaxClipboard` Java TurboVNC Viewer
+parameter.  Previously the server only truncated incoming clipboard updates,
+and the Java viewer truncated outgoing clipboard updates while ignoring
+incoming clipboard updates larger than 256 kB.
+
+
 2.2.8 ESR
 =========
 

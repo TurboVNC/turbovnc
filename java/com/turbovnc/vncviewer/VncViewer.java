@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -1110,10 +1110,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "connections from a VNC server.  To connect a TurboVNC session to a " +
   "listening viewer, use the vncconnect program on the TurboVNC host.", false);
 
-  static IntParameter maxClipboard =
+  public static IntParameter maxClipboard =
   new IntParameter("MaxClipboard",
-  "Maximum permitted length of an outgoing clipboard update (in bytes)",
-  1048576);
+  "Maximum permitted length of an incoming or outgoing clipboard update (in " +
+  "bytes)", 1048576);
 
   static BoolParameter noNewConn =
   new BoolParameter("NoNewConn",
