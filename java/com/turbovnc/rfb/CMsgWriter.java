@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright 2009-2011 Pierre Ossman for Cendio AB
+ * Copyright 2009-2011, 2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011, 2015 Brian P. Hinz
  * Copyright (C) 2012, 2015, 2017-2018, 2020-2022 D. R. Commander.
  *                                                All Rights Reserved.
@@ -23,7 +23,7 @@
 package com.turbovnc.rfb;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.*;
 import java.util.*;
 
 import com.turbovnc.rdr.*;
@@ -42,19 +42,117 @@ public class CMsgWriter {
     os.writeU8(type);
   }
 
-  public synchronized void writeClientCutText(String str, int len)
+  public synchronized void writeClientCutText(String str)
   {
+    int len = str.length();
+
     startMsg(RFB.CLIENT_CUT_TEXT);
     os.pad(3);
     os.writeU32(len);
-    Charset latin1 = Charset.forName("ISO-8859-1");
-    ByteBuffer bytes = latin1.encode(str);
+    ByteBuffer bytes = StandardCharsets.ISO_8859_1.encode(str);
     os.writeBytes(bytes.array(), 0, len);
     endMsg();
   }
 
   public synchronized void writeClientInit(boolean shared) {
     os.writeU8(shared ? 1 : 0);
+    endMsg();
+  }
+
+  public synchronized void writeClipboardCaps(int caps, int[] lengths)
+  {
+    int i, count;
+
+    if ((cp.clipboardFlags() & RFB.EXTCLIP_ACTION_CAPS) == 0)
+      throw new ErrorException("Server does not support Extended Clipboard caps message");
+
+    count = 0;
+    for (i = 0; i < 16; i++) {
+      if ((caps & (1 << i)) != 0)
+        count++;
+    }
+
+    startMsg(RFB.CLIENT_CUT_TEXT);
+    os.pad(3);
+    os.writeS32(-(4 + 4 * count));
+
+    os.writeU32(caps | RFB.EXTCLIP_ACTION_CAPS);
+
+    count = 0;
+    for (i = 0; i < 16; i++) {
+      if ((caps & (1 << i)) != 0)
+        os.writeU32(lengths[count++]);
+    }
+
+    endMsg();
+  }
+
+  public synchronized void writeClipboardNotify(int flags)
+  {
+    if ((cp.clipboardFlags() & RFB.EXTCLIP_ACTION_NOTIFY) == 0)
+      throw new ErrorException("Server does not support Extended Clipboard notify message");
+
+    startMsg(RFB.CLIENT_CUT_TEXT);
+    os.pad(3);
+    os.writeS32(-4);
+    os.writeU32(flags | RFB.EXTCLIP_ACTION_NOTIFY);
+    endMsg();
+  }
+
+  public synchronized void writeClipboardPeek(int flags)
+  {
+    if ((cp.clipboardFlags() & RFB.EXTCLIP_ACTION_PEEK) == 0)
+      throw new ErrorException("Server does not support Extended Clipboard peek message");
+
+    startMsg(RFB.CLIENT_CUT_TEXT);
+    os.pad(3);
+    os.writeS32(-4);
+    os.writeU32(flags | RFB.EXTCLIP_ACTION_PEEK);
+    endMsg();
+  }
+
+  public synchronized void writeClipboardProvide(int flags, int[] lengths,
+                                                 byte[][] data)
+  {
+    MemOutStream mos = new MemOutStream();
+    ZlibOutStream zos = new ZlibOutStream();
+
+    int i, count;
+
+    if ((cp.clipboardFlags() & RFB.EXTCLIP_ACTION_PROVIDE) == 0)
+      throw new ErrorException("Server does not support Extended Clipboard provide message");
+
+    zos.setUnderlying(mos);
+
+    count = 0;
+    for (i = 0; i < 16; i++) {
+      if ((flags & (1 << i)) == 0)
+        continue;
+      zos.writeU32(lengths[count]);
+      zos.writeBytes(data[count], 0, lengths[count]);
+      count++;
+    }
+
+    zos.flush();
+    zos.close();
+
+    startMsg(RFB.CLIENT_CUT_TEXT);
+    os.pad(3);
+    os.writeS32(-(4 + mos.length()));
+    os.writeU32(flags | RFB.EXTCLIP_ACTION_PROVIDE);
+    os.writeBytes(mos.data(), 0, mos.length());
+    endMsg();
+  }
+
+  public synchronized void writeClipboardRequest(int flags)
+  {
+    if ((cp.clipboardFlags() & RFB.EXTCLIP_ACTION_REQUEST) == 0)
+      throw new ErrorException("Server does not support Extended Clipboard request message");
+
+    startMsg(RFB.CLIENT_CUT_TEXT);
+    os.pad(3);
+    os.writeS32(-4);
+    os.writeU32(flags | RFB.EXTCLIP_ACTION_REQUEST);
     endMsg();
   }
 
@@ -304,6 +402,7 @@ public class CMsgWriter {
       encodings[nEncodings++] = RFB.ENCODING_CONTINUOUS_UPDATES;
       encodings[nEncodings++] = RFB.ENCODING_FENCE;
     }
+    encodings[nEncodings++] = RFB.ENCODING_EXTENDED_CLIPBOARD;
     if (Utils.getBooleanProperty("turbovnc.gii", true))
       encodings[nEncodings++] = RFB.ENCODING_GII;
 

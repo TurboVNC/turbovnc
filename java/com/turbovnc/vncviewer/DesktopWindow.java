@@ -454,7 +454,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         String newContents = cbuf.toString();
         if (!cc.clipboardDialog.compareContentsTo(newContents)) {
           cc.clipboardDialog.setContents(newContents);
-          cc.writeClientCutText(newContents, newContents.length());
+          vlog.debug("Local clipboard changed.  Notifying server.");
+          cc.announceClipboard(true);
         }
         br.close();
         System.gc();

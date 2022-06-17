@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2014-2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2014-2015, 2018, 2020, 2022 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +79,7 @@ class ClipboardDialog extends Dialog implements ActionListener {
     return textArea.getText();
   }
 
-  public void serverCutText(String str, int len) {
+  public void serverCutText(String str) {
     setContents(str);
     setClipboard(str);
   }
@@ -119,7 +120,7 @@ class ClipboardDialog extends Dialog implements ActionListener {
     if (s instanceof JButton && (JButton)s == clearButton) {
       textArea.setText(new String(""));
     } else if (s instanceof JButton && (JButton)s == sendButton) {
-      cc.writeClientCutText(textArea.getText(), textArea.getText().length());
+      cc.sendClipboardData(textArea.getText());
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       endDialog();

@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012, 2017-2018, 2022 D. R. Commander.  All Rights Reserved.
+ * Copyright 2019 Pierre Ossman for Cendio AB
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,6 +107,98 @@ public class CMsgReader {
 
   private void readEndOfContinuousUpdates() {
     handler.endOfContinuousUpdates();
+  }
+
+  private void readExtendedClipboard(int len)
+  {
+    int action, flags;
+
+    if (len < 4)
+      throw new ErrorException("Malformed Extended Clipboard message");
+    if (len > Params.maxClipboard.getValue()) {
+      vlog.error("Ignoring " + len +
+                 "-byte Extended Clipboard message (limit = " +
+                 Params.maxClipboard.getValue() + " bytes)");
+      is.skip(len);
+      return;
+    }
+
+    flags = is.readU32();
+    action = flags & RFB.EXTCLIP_ACTION_MASK;
+
+    if ((action & RFB.EXTCLIP_ACTION_CAPS) != 0) {
+      int i, num;
+      int[] lengths = new int[16];
+
+      num = 0;
+      for (i = 0; i < 16; i++) {
+        if ((flags & (1 << i)) != 0)
+          num++;
+      }
+
+      if (len < (4 + 4 * num))
+        throw new ErrorException("Malformed Extended Clipboard message");
+
+      num = 0;
+      for (i = 0; i < 16; i++) {
+        if ((flags & (1 << i)) != 0)
+          lengths[num++] = is.readU32();
+      }
+
+      handler.handleClipboardCaps(flags, lengths);
+    } else if (action == RFB.EXTCLIP_ACTION_PROVIDE) {
+      ZlibInStream zis = new ZlibInStream();
+
+      int i, num, ignoredBytes = 0;
+      int[] lengths = new int[16];
+      byte[][] buffers = new byte[16][];
+
+      zis.setUnderlying(is, len - 4);
+
+      num = 0;
+      for (i = 0; i < 16; i++) {
+        if ((flags & (1 << i)) == 0)
+          continue;
+
+        lengths[num] = zis.readU32();
+
+        if (lengths[num] > Params.maxClipboard.getValue()) {
+          vlog.error("Truncating " + lengths[num] +
+                     "-byte incoming clipboard update to " +
+                     Params.maxClipboard.getValue() + " bytes.");
+          ignoredBytes = lengths[num] - Params.maxClipboard.getValue();
+          lengths[num] = Params.maxClipboard.getValue();
+        }
+
+        buffers[num] = new byte[lengths[num]];
+        zis.readBytes(buffers[num], 0, lengths[num]);
+
+        if (ignoredBytes != 0)
+          zis.skip(ignoredBytes);
+
+        num++;
+      }
+
+      zis.reset();
+
+      handler.handleClipboardProvide(flags, lengths, buffers);
+    } else {
+      switch (action) {
+        case RFB.EXTCLIP_ACTION_REQUEST:
+          handler.handleClipboardRequest(flags);
+          break;
+        case RFB.EXTCLIP_ACTION_PEEK:
+          handler.handleClipboardPeek(flags);
+          break;
+        case RFB.EXTCLIP_ACTION_NOTIFY:
+          handler.handleClipboardNotify(flags);
+          break;
+        default:
+          throw new ErrorException("Invalid Extended Clipboard action");
+      }
+    }
+
+    return;
   }
 
   private void readExtendedDesktopSize(int x, int y, int w, int h) {
@@ -305,6 +398,13 @@ public class CMsgReader {
     int ignoredBytes = 0;
     is.skip(3);
     int len = is.readU32();
+
+    if ((len & 0x80000000) != 0) {
+      len = -len;
+      readExtendedClipboard(len);
+      return;
+    }
+
     if (len > Params.maxClipboard.getValue()) {
       ignoredBytes = len - Params.maxClipboard.getValue();
       vlog.error("Truncating " + len + "-byte incoming clipboard update to " +
@@ -314,13 +414,15 @@ public class CMsgReader {
     byte[] buf = new byte[len];
     is.readBytes(buf, 0, len);
     is.skip(ignoredBytes);
-    String str = new String();
+    String str = null;
     try {
       str = new String(buf, "UTF8");
     } catch (java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
+      return;
     }
-    handler.serverCutText(str, len);
+    str = Utils.convertLF(str);
+    handler.serverCutText(str);
   }
 
   public void readServerInit(boolean benchmark) {

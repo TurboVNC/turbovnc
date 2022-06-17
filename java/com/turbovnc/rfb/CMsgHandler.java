@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright 2009-2011 Pierre Ossman for Cendio AB
- * Copyright (C) 2011-2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright 2009-2011, 2019 Pierre Ossman for Cendio AB
+ * Copyright (C) 2011-2012, 2015, 2018, 2022 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -63,6 +64,47 @@ public abstract class CMsgHandler {
     cp.supportsFence = true;
   }
 
+  void handleClipboardCaps(int flags, int[] lengths)
+  {
+    int i, num;
+
+    vlog.debug("Server clipboard capabilities:");
+    num = 0;
+    for (i = 0; i < 16; i++) {
+      if ((flags & (1 << i)) != 0) {
+        switch (1 << i) {
+          case RFB.EXTCLIP_FORMAT_UTF8:
+            vlog.debug("- Plain text (limit = " + lengths[num] + " bytes)");
+            break;
+          case RFB.EXTCLIP_FORMAT_RTF:
+            vlog.debug("- Rich text (limit = " + lengths[num] + " bytes)");
+            break;
+          case RFB.EXTCLIP_FORMAT_HTML:
+            vlog.debug("- HTML (limit = " + lengths[num] + " bytes)");
+            break;
+          case RFB.EXTCLIP_FORMAT_DIB:
+            vlog.debug("- Images (limit = " + lengths[num] + " bytes)");
+            break;
+          case RFB.EXTCLIP_FORMAT_FILES:
+            vlog.debug("- Files (limit = " + lengths[num] + " bytes)");
+            break;
+          default:
+            vlog.debug("- Unknown format 0x" + Integer.toHexString(1 << i));
+            continue;
+        }
+        num++;
+      }
+    }
+
+    cp.setClipboardCaps(flags, lengths);
+  }
+
+  abstract void handleClipboardNotify(int flags);
+  abstract void handleClipboardPeek(int flags);
+  abstract void handleClipboardProvide(int flags, int[] lengths,
+                                       byte[][] buffers);
+  abstract void handleClipboardRequest(int flags);
+
   public void endOfContinuousUpdates() {
     cp.supportsContinuousUpdates = true;
   }
@@ -87,7 +129,7 @@ public abstract class CMsgHandler {
   public abstract void setColourMapEntries(int firstColour, int nColours,
                                            int[] rgbs);
   public abstract void bell();
-  public abstract void serverCutText(String str, int len);
+  public abstract void serverCutText(String str);
 
   public abstract void fillRect(Rect r, int pix);
   public abstract void imageRect(Rect r, Object pixels);

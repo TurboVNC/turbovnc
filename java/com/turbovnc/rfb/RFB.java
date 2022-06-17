@@ -1,8 +1,8 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright 2009, 2011 Pierre Ossman for Cendio AB
+ * Copyright 2009, 2011, 2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2011-2012, 2015-2018, 2021 D. R. Commander.
- *                                          All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015-2018, 2021-2022 D. R. Commander.
+ *                                               All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -271,6 +271,9 @@ public final class RFB {
   public static final int ENCODING_SUBSAMP_8X             = -764;
   public static final int ENCODING_SUBSAMP_16X            = -763;
 
+  // UltraVNC-specific
+  public static final int ENCODING_EXTENDED_CLIPBOARD = 0xC0A1E5CE;
+
   //***************************************************************************
   // Hextile subencoding types
   //***************************************************************************
@@ -373,6 +376,28 @@ public final class RFB {
   public static final int GII_DEVTYPE_ERASER = 3;
   public static final int GII_DEVTYPE_TOUCH  = 4;
   public static final int GII_DEVTYPE_PAD    = 5;
+
+  //***************************************************************************
+  // Extended Clipboard
+  //***************************************************************************
+
+  // Formats
+  public static final int EXTCLIP_FORMAT_UTF8  = 1 << 0;
+  public static final int EXTCLIP_FORMAT_RTF   = 1 << 1;
+  public static final int EXTCLIP_FORMAT_HTML  = 1 << 2;
+  public static final int EXTCLIP_FORMAT_DIB   = 1 << 3;
+  public static final int EXTCLIP_FORMAT_FILES = 1 << 4;
+
+  public static final int EXTCLIP_FORMAT_MASK  = 0x0000ffff;
+
+  // Actions
+  public static final int EXTCLIP_ACTION_CAPS    = 1 << 24;
+  public static final int EXTCLIP_ACTION_REQUEST = 1 << 25;
+  public static final int EXTCLIP_ACTION_PEEK    = 1 << 26;
+  public static final int EXTCLIP_ACTION_NOTIFY  = 1 << 27;
+  public static final int EXTCLIP_ACTION_PROVIDE = 1 << 28;
+
+  public static final int EXTCLIP_ACTION_MASK    = 0xff000000;
 
   private RFB() {}
 };

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
+ * Copyright 2009-2011, 2019 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2022 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
@@ -705,11 +705,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
       desktop.getToolkit().beep();
   }
 
-  public void serverCutText(String str, int len) {
-    if (opts.recvClipboard)
-      clipboardDialog.serverCutText(str, len);
-  }
-
   public void startDecodeTimer() {
     tDecodeStart = Utils.getTime();
     if (benchmark)
@@ -813,6 +808,43 @@ public class CConn extends CConnection implements UserPasswdGetter,
       desktop.setServerPF(pf);
       cp.setPF(pf);
     }
+  }
+
+  // RFB thread
+  public void handleClipboardAnnounce(boolean available)
+  {
+    if (!opts.recvClipboard)
+      return;
+
+    if (!available) {
+      vlog.debug("Clipboard is no longer available on the server.");
+      return;
+    }
+
+    vlog.debug("Requesting clipboard data from server");
+    requestClipboard();
+  }
+
+  // RFB thread
+  public void handleClipboardData(String data)
+  {
+    if (!opts.recvClipboard)
+      return;
+
+    vlog.debug("Got clipboard data (" + data.length() + " characters)");
+
+    clipboardDialog.serverCutText(data);
+  }
+
+  // RFB thread
+  public void handleClipboardRequest()
+  {
+    if (!opts.sendClipboard)
+      return;
+
+    String contents = clipboardDialog.getContents();
+
+    sendClipboardData(contents);
   }
 
   // RFB thread
@@ -1880,11 +1912,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
       viewport.updateMacMenuProfile();
   }
 
-  // EDT: writeClientCutText() is called from the clipboard dialog.
-  public void writeClientCutText(String str, int len) {
+  // EDT: sendClipboardData() is called from the clipboard dialog.
+  public void sendClipboardData(String str) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
-    writer().writeClientCutText(str, len);
+    vlog.debug("Sending clipboard data (" + str.length() + " characters)");
+    super.sendClipboardData(str);
   }
 
   // EDT

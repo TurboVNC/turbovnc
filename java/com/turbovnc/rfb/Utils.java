@@ -110,6 +110,14 @@ public final class Utils {
     return (double)System.nanoTime() / 1.0e9;
   }
 
+  public static String convertCRLF(String buf) {
+    return convertLF(buf).replaceAll("\\n", "\r\n");
+  }
+
+  public static String convertLF(String buf) {
+    return buf.replaceAll("\\r\\n?", "\n");
+  }
+
   private Utils() {}
   static LogWriter vlog = new LogWriter("Utils");
 }

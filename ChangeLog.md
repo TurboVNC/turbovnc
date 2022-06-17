@@ -1,3 +1,11 @@
+3.1
+===
+
+### Significant changes relative to 3.0.1:
+
+1. The TurboVNC Server and Viewer now support UTF-8 clipboard transfers.
+
+
 3.0.1
 =====
 
