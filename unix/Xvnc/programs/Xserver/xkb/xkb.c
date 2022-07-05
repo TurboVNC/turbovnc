@@ -5157,7 +5157,7 @@ _GetCountedString(char **wire_inout, ClientPtr client, char **str)
 }
 
 static Status
-_CheckSetDoodad(char **wire_inout,
+_CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
                 XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
 {
     char *wire;
@@ -5168,6 +5168,9 @@ _CheckSetDoodad(char **wire_inout,
     Status status;
 
     dWire = (xkbDoodadWireDesc *) (*wire_inout);
+    if (!_XkbCheckRequestBounds(client, req, dWire, dWire + 1))
+        return BadLength;
+
     any = dWire->any;
     wire = (char *) &dWire[1];
     if (client->swapped) {
@@ -5270,7 +5273,7 @@ _CheckSetDoodad(char **wire_inout,
 }
 
 static Status
-_CheckSetOverlay(char **wire_inout,
+_CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
                  XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
 {
     register int r;
@@ -5281,6 +5284,9 @@ _CheckSetOverlay(char **wire_inout,
 
     wire = *wire_inout;
     olWire = (xkbOverlayWireDesc *) wire;
+    if (!_XkbCheckRequestBounds(client, req, olWire, olWire + 1))
+        return BadLength;
+
     if (client->swapped) {
         swapl(&olWire->name);
     }
@@ -5292,6 +5298,9 @@ _CheckSetOverlay(char **wire_inout,
         xkbOverlayKeyWireDesc *kWire;
         XkbOverlayRowPtr row;
 
+        if (!_XkbCheckRequestBounds(client, req, rWire, rWire + 1))
+            return BadLength;
+
         if (rWire->rowUnder > section->num_rows) {
             client->errorValue = _XkbErrCode4(0x20, r, section->num_rows,
                                               rWire->rowUnder);
@@ -5300,6 +5309,9 @@ _CheckSetOverlay(char **wire_inout,
         row = XkbAddGeomOverlayRow(ol, rWire->rowUnder, rWire->nKeys);
         kWire = (xkbOverlayKeyWireDesc *) &rWire[1];
         for (k = 0; k < rWire->nKeys; k++, kWire++) {
+            if (!_XkbCheckRequestBounds(client, req, kWire, kWire + 1))
+                return BadLength;
+
             if (XkbAddGeomOverlayKey(ol, row,
                                      (char *) kWire->over,
                                      (char *) kWire->under) == NULL) {
@@ -5333,6 +5345,9 @@ _CheckSetSections(XkbGeometryPtr geom,
         register int r;
         xkbRowWireDesc *rWire;
 
+        if (!_XkbCheckRequestBounds(client, req, sWire, sWire + 1))
+            return BadLength;
+
         if (client->swapped) {
             swapl(&sWire->name);
             swaps(&sWire->top);
@@ -5358,6 +5373,9 @@ _CheckSetSections(XkbGeometryPtr geom,
             XkbRowPtr row;
             xkbKeyWireDesc *kWire;
 
+            if (!_XkbCheckRequestBounds(client, req, rWire, rWire + 1))
+                return BadLength;
+
             if (client->swapped) {
                 swaps(&rWire->top);
                 swaps(&rWire->left);
@@ -5371,6 +5389,9 @@ _CheckSetSections(XkbGeometryPtr geom,
             kWire = (xkbKeyWireDesc *) &rWire[1];
             for (k = 0; k < rWire->nKeys; k++, kWire++) {
                 XkbKeyPtr key;
+
+                if (!_XkbCheckRequestBounds(client, req, kWire, kWire + 1))
+                    return BadLength;
 
                 key = XkbAddGeomKey(row);
                 if (!key)
@@ -5397,7 +5418,7 @@ _CheckSetSections(XkbGeometryPtr geom,
             register int d;
 
             for (d = 0; d < sWire->nDoodads; d++) {
-                status = _CheckSetDoodad(&wire, geom, section, client);
+                status = _CheckSetDoodad(&wire, req, geom, section, client);
                 if (status != Success)
                     return status;
             }
@@ -5406,7 +5427,7 @@ _CheckSetSections(XkbGeometryPtr geom,
             register int o;
 
             for (o = 0; o < sWire->nOverlays; o++) {
-                status = _CheckSetOverlay(&wire, geom, section, client);
+                status = _CheckSetOverlay(&wire, req, geom, section, client);
                 if (status != Success)
                     return status;
             }
@@ -5440,6 +5461,9 @@ _CheckSetShapes(XkbGeometryPtr geom,
             xkbOutlineWireDesc *olWire;
             XkbOutlinePtr ol;
 
+            if (!_XkbCheckRequestBounds(client, req, shapeWire, shapeWire + 1))
+                return BadLength;
+
             shape =
                 XkbAddGeomShape(geom, shapeWire->name, shapeWire->nOutlines);
             if (!shape)
@@ -5450,12 +5474,18 @@ _CheckSetShapes(XkbGeometryPtr geom,
                 XkbPointPtr pt;
                 xkbPointWireDesc *ptWire;
 
+                if (!_XkbCheckRequestBounds(client, req, olWire, olWire + 1))
+                    return BadLength;
+
                 ol = XkbAddGeomOutline(shape, olWire->nPoints);
                 if (!ol)
                     return BadAlloc;
                 ol->corner_radius = olWire->cornerRadius;
                 ptWire = (xkbPointWireDesc *) &olWire[1];
                 for (p = 0, pt = ol->points; p < olWire->nPoints; p++, pt++, ptWire++) {
+                    if (!_XkbCheckRequestBounds(client, req, ptWire, ptWire + 1))
+                        return BadLength;
+
                     pt->x = ptWire->x;
                     pt->y = ptWire->y;
                     if (client->swapped) {
@@ -5561,12 +5591,15 @@ _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
         return status;
 
     for (i = 0; i < req->nDoodads; i++) {
-        status = _CheckSetDoodad(&wire, geom, NULL, client);
+        status = _CheckSetDoodad(&wire, req, geom, NULL, client);
         if (status != Success)
             return status;
     }
 
     for (i = 0; i < req->nKeyAliases; i++) {
+        if (!_XkbCheckRequestBounds(client, req, wire, wire + XkbKeyNameLength))
+                return BadLength;
+
         if (XkbAddGeomKeyAlias(geom, &wire[XkbKeyNameLength], wire) == NULL)
             return BadAlloc;
         wire += 2 * XkbKeyNameLength;
