@@ -5369,16 +5369,16 @@ _CheckSetSections(XkbGeometryPtr geom,
             row->left = rWire->left;
             row->vertical = rWire->vertical;
             kWire = (xkbKeyWireDesc *) &rWire[1];
-            for (k = 0; k < rWire->nKeys; k++) {
+            for (k = 0; k < rWire->nKeys; k++, kWire++) {
                 XkbKeyPtr key;
 
                 key = XkbAddGeomKey(row);
                 if (!key)
                     return BadAlloc;
-                memcpy(key->name.name, kWire[k].name, XkbKeyNameLength);
-                key->gap = kWire[k].gap;
-                key->shape_ndx = kWire[k].shapeNdx;
-                key->color_ndx = kWire[k].colorNdx;
+                memcpy(key->name.name, kWire->name, XkbKeyNameLength);
+                key->gap = kWire->gap;
+                key->shape_ndx = kWire->shapeNdx;
+                key->color_ndx = kWire->colorNdx;
                 if (key->shape_ndx >= geom->num_shapes) {
                     client->errorValue = _XkbErrCode3(0x10, key->shape_ndx,
                                                       geom->num_shapes);
@@ -5390,7 +5390,7 @@ _CheckSetSections(XkbGeometryPtr geom,
                     return BadMatch;
                 }
             }
-            rWire = (xkbRowWireDesc *) &kWire[rWire->nKeys];
+            rWire = (xkbRowWireDesc *)kWire;
         }
         wire = (char *) rWire;
         if (sWire->nDoodads > 0) {
@@ -5455,16 +5455,16 @@ _CheckSetShapes(XkbGeometryPtr geom,
                     return BadAlloc;
                 ol->corner_radius = olWire->cornerRadius;
                 ptWire = (xkbPointWireDesc *) &olWire[1];
-                for (p = 0, pt = ol->points; p < olWire->nPoints; p++, pt++) {
-                    pt->x = ptWire[p].x;
-                    pt->y = ptWire[p].y;
+                for (p = 0, pt = ol->points; p < olWire->nPoints; p++, pt++, ptWire++) {
+                    pt->x = ptWire->x;
+                    pt->y = ptWire->y;
                     if (client->swapped) {
                         swaps(&pt->x);
                         swaps(&pt->y);
                     }
                 }
                 ol->num_points = olWire->nPoints;
-                olWire = (xkbOutlineWireDesc *) (&ptWire[olWire->nPoints]);
+                olWire = (xkbOutlineWireDesc *)ptWire;
             }
             if (shapeWire->primaryNdx != XkbNoShape)
                 shape->primary = &shape->outlines[shapeWire->primaryNdx];
