@@ -1110,10 +1110,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   "connections from a VNC server.  To connect a TurboVNC session to a " +
   "listening viewer, use the vncconnect program on the TurboVNC host.", false);
 
+  // CHECKSTYLE VisibilityModifier:OFF
   public static IntParameter maxClipboard =
   new IntParameter("MaxClipboard",
   "Maximum permitted length of an incoming or outgoing clipboard update (in " +
   "bytes)", 1048576);
+  // CHECKSTYLE VisibilityModifier:ON
 
   static BoolParameter noNewConn =
   new BoolParameter("NoNewConn",
