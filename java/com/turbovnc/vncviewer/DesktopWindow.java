@@ -258,7 +258,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         if (!swingDB &&
             (activeWindow == null || activeWindow instanceof Viewport ||
              (activeWindow instanceof JDialog &&
-              ((JDialog)activeWindow).getTitle().equals("TurboVNC profiling information"))))
+              ((JDialog)activeWindow).getTitle().equals(
+                "TurboVNC profiling information"))))
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         if (cc.viewer.benchFile != null)
           paintImmediately(x, y, width, height);
@@ -278,7 +279,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         if (!swingDB &&
             (activeWindow == null || activeWindow instanceof Viewport ||
              (activeWindow instanceof JDialog &&
-              ((JDialog)activeWindow).getTitle().equals("TurboVNC profiling information"))))
+              ((JDialog)activeWindow).getTitle().equals(
+                "TurboVNC profiling information"))))
           RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
         if (cc.viewer.benchFile != null)
           paintImmediately(x, y, r.width(), r.height());
