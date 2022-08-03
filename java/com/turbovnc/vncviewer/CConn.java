@@ -65,17 +65,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
   static final int SUPER_MASK = 1 << 16;
 
   // RFB thread
-  public CConn(VncViewer viewer_, Socket sock_) {
-    sock = sock_;  viewer = viewer_;
+  public CConn(VncViewer viewer_, Socket sock_, Params params_) {
+    params = params_;  sock = sock_;  viewer = viewer_;
     benchmark = viewer.benchFile != null;
     pendingPFChange = false;
     lastServerEncoding = -1;
 
-    opts = new Options(VncViewer.opts);
-
     formatChange = false;  encodingChange = false;
-    currentEncoding = opts.preferredEncoding;
-    options = new OptionsDialog(this);
+    currentEncoding = params.encoding.get();
+    options = new OptionsDialog(this, params);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
     profileDialog = new ProfileDialog(this);
@@ -86,11 +84,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
     forceNonincremental = true;  supportsSyncFence = false;
     pressedKeys = new HashMap<Integer, Integer>();
 
-    setShared(opts.shared);
+    setShared(params.shared.get());
 
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
-    cp.supportsClientRedirect = Params.clientRedirect.getValue();
+    cp.supportsClientRedirect = params.clientRedirect.get();
     cp.supportsDesktopRename = true;
     menu = new F8Menu(this);
 
@@ -98,50 +96,52 @@ public class CConn extends CConnection implements UserPasswdGetter,
       String name = sock.getPeerEndpoint();
       vlog.info("Accepted connection from " + name);
     } else if (!benchmark) {
-      String serverName = null;
+      String server = null;
       int port = -1;
 
-      if (opts.serverName != null &&
-          !Params.alwaysShowConnectionDialog.getValue()) {
-        if (opts.via == null || opts.via.indexOf(':') < 0) {
-          port = opts.port = Hostname.getPort(opts.serverName);
-          serverName = opts.serverName = Hostname.getHost(opts.serverName);
+      if (params.server.get() != null &&
+          !params.alwaysShowConnectionDialog.get()) {
+        if (params.via.get() == null || params.via.get().indexOf(':') < 0) {
+          port = Hostname.getPort(params.server.get());
+          params.port.set(port);
+          server = Hostname.getHost(params.server.get());
+          params.server.set(server);
         }
       } else {
-        ServerDialog dlg = new ServerDialog(options, opts, this);
+        ServerDialog dlg = new ServerDialog(options, params, this);
         boolean ret = dlg.showDialog();
         if (!ret) {
           close();
           return;
         }
-        port = opts.port;
-        serverName = opts.serverName;
+        port = params.port.get();
+        server = params.server.get();
       }
 
-      if (opts.via != null && opts.via.indexOf(':') >= 0) {
-        port = Hostname.getPort(opts.via);
-        serverName = Hostname.getHost(opts.via);
-      } else if (opts.via != null || opts.tunnel ||
-                 (opts.port == 0 && Params.sessMgrAuto.getValue())) {
-        if (opts.port == 0) {
+      if (params.via.get() != null && params.via.get().indexOf(':') >= 0) {
+        port = Hostname.getPort(params.via.get());
+        server = Hostname.getHost(params.via.get());
+      } else if (params.via.get() != null || params.tunnel.get() ||
+                 (params.port.get() == 0 && params.sessMgrAuto.get())) {
+        if (params.port.get() == 0) {
           try {
             // TurboVNC Session Manager
-            String session = SessionManager.createSession(opts);
+            String session = SessionManager.createSession(params);
             if (session == null) {
               close();
               return;
             }
-            opts.sessMgrActive = true;
-            opts.port = Hostname.getPort(session);
+            params.sessMgrActive = true;
+            params.port.set(Hostname.getPort(session));
           } catch (Exception e) {
             throw new ErrorException("Session Manager Error:\n" +
                                      e.getMessage());
           }
         }
         try {
-          Tunnel.createTunnel(opts);
-          port = Hostname.getPort(opts.serverName);
-          serverName = Hostname.getHost(opts.serverName);
+          Tunnel.createTunnel(params);
+          port = Hostname.getPort(params.server.get());
+          server = Hostname.getHost(params.server.get());
         } catch (Exception e) {
           throw new ErrorException("Could not create SSH tunnel:\n" +
                                    e.getMessage());
@@ -151,21 +151,21 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (port == 0) {
         try {
           // TurboVNC Session Manager
-          String session = SessionManager.createSession(opts);
+          String session = SessionManager.createSession(params);
           if (session == null) {
             close();
             return;
           }
           port = Hostname.getPort(session);
-          opts.sshSession.disconnect();
+          params.sshSession.disconnect();
         } catch (Exception e) {
           throw new ErrorException("Session Manager Error:\n" +
                                    e.getMessage());
         }
       }
 
-      sock = new TcpSocket(serverName, port);
-      vlog.info("connected to host " + serverName + " port " + port);
+      sock = new TcpSocket(server, port);
+      vlog.info("connected to host " + server + " port " + port);
     }
 
     if (benchmark) {
@@ -173,7 +173,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       reader = new CMsgReader(this, viewer.benchFile);
     } else {
       sock.inStream().setBlockCallback(this);
-      setServerName(opts.serverName);
+      setServerName(params.server.get());
       setStreams(sock.inStream(), sock.outStream());
       initialiseProtocol();
     }
@@ -218,13 +218,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
     String title = ((user == null ? "Standard VNC Authentication" :
                                     "Unix Login Authentication") +
                     " [" + csecurity.getDescription() + "]");
-    String passwordFileStr = Params.passwordFile.getValue();
+    String passwordFileStr = params.passwordFile.get();
     PasswdDialog dlg = null;
     String autoPass;
 
-    if (Params.encPassword.getValue() != null) {
+    if (params.encPassword.get() != null) {
       byte[] encryptedPassword = new byte[8];
-      String passwordString = Params.encPassword.getValue();
+      String passwordString = params.encPassword.get();
       if (passwordString.length() != 16)
         throw new ErrorException("Password specified in EncPassword parameter is invalid.");
       for (int c = 0; c < 16; c += 2) {
@@ -237,21 +237,21 @@ public class CConn extends CConnection implements UserPasswdGetter,
         else break;
       }
       autoPass = VncAuth.unobfuscatePasswd(encryptedPassword);
-    } else if (Params.autoPass.getValue()) {
+    } else if (params.autoPass.get()) {
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
       try {
         autoPass = in.readLine();
       } catch (IOException e) {
         throw new SystemException(e);
       }
-      Params.autoPass.setParam("0");
+      params.autoPass.set("0");
     } else
-      autoPass = Params.password.getValue();
+      autoPass = params.password.get();
 
     if (autoPass != null && passwd != null) {
       passwd.append(autoPass);
       passwd.setLength(autoPass.length());
-      Params.password.setParam(null);
+      params.password.set(null);
     }
 
     if (user == null && passwordFileStr != null && autoPass == null) {
@@ -277,20 +277,20 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (user == null) {
       if (autoPass == null)
         dlg = new PasswdDialog(title, (user == null), null, (passwd == null),
-                               opts.sshTunnelActive,
+                               params.sshTunnelActive,
                                csecurity.getChosenType());
     } else {
-      String userName = opts.user;
-      if (opts.sendLocalUsername) {
+      String userName = params.user.get();
+      if (params.sendLocalUsername.get()) {
         userName = (String)System.getProperties().get("user.name");
-        if (Params.localUsernameLC.getValue())
+        if (params.localUsernameLC.get())
           userName = userName.toLowerCase();
         if (passwd == null)
           return true;
       }
       if (autoPass == null)
         dlg = new PasswdDialog(title, (userName != null), userName,
-                               (passwd == null), opts.sshTunnelActive,
+                               (passwd == null), params.sshTunnelActive,
                                csecurity.getChosenType());
       else
         user.append(userName);
@@ -328,15 +328,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (!benchmark)
       requestNewUpdate();
     else {
-      if (Params.colors.getValue() == 8) {
+      if (params.colors.get() == 8) {
         pendingPF = VERY_LOW_COLOR_PF;
-      } else if (Params.colors.getValue() == 64) {
+      } else if (params.colors.get() == 64) {
         pendingPF = LOW_COLOR_PF;
-      } else if (Params.colors.getValue() == 256) {
+      } else if (params.colors.get() == 256) {
         pendingPF = MEDIUM_COLOR_PF;
-      } else if (Params.colors.getValue() == 32768) {
+      } else if (params.colors.get() == 32768) {
         pendingPF = MEDIUMHIGH_COLOR_PF;
-      } else if (Params.colors.getValue() == 65536) {
+      } else if (params.colors.get() == 65536) {
         pendingPF = HIGH_COLOR_PF;
       } else {
         pendingPF = fullColourPF;
@@ -372,10 +372,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void setDesktopSize(int w, int h) {
     super.setDesktopSize(w, h);
     resizeFramebuffer();
-    if (opts.desktopSize.mode == Options.SIZE_MANUAL && !firstUpdate) {
-      opts.desktopSize.width = w;
-      opts.desktopSize.height = h;
-    }
+    if (params.desktopSize.getMode() == DesktopSize.MANUAL && !firstUpdate)
+      params.desktopSize.set(w, h);
   }
 
   // RFB thread: setExtendedDesktopSize() is a more advanced version of
@@ -390,10 +388,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     resizeFramebuffer();
-    if (opts.desktopSize.mode == Options.SIZE_MANUAL && !firstUpdate) {
-      opts.desktopSize.width = w;
-      opts.desktopSize.height = h;
-    }
+    if (params.desktopSize.getMode() == DesktopSize.MANUAL && !firstUpdate)
+      params.desktopSize.set(w, h);
 
     // Normally, the TurboVNC Viewer will not create a multi-screen viewer
     // window that extends beyond the unshared boundary of any physical screen
@@ -460,17 +456,17 @@ public class CConn extends CConnection implements UserPasswdGetter,
                             0, null);
 
       if (!cp.supportsSetDesktopSize) {
-        if (opts.desktopSize.mode == Options.SIZE_AUTO)
+        if (params.desktopSize.getMode() == DesktopSize.AUTO)
           vlog.info("Disabling automatic desktop resizing because the server doesn't support it.");
-        if (opts.desktopSize.mode == Options.SIZE_MANUAL)
+        if (params.desktopSize.getMode() == DesktopSize.MANUAL)
           vlog.info("Ignoring desktop resize request because the server doesn't support it.");
-        opts.desktopSize.mode = Options.SIZE_SERVER;
+        params.desktopSize.setMode(DesktopSize.SERVER);
       }
 
-      if (opts.desktopSize.mode == Options.SIZE_MANUAL)
-        sendDesktopSize(opts.desktopSize.width, opts.desktopSize.height,
-                        false);
-      else if (opts.desktopSize.mode == Options.SIZE_AUTO) {
+      if (params.desktopSize.getMode() == DesktopSize.MANUAL)
+        sendDesktopSize(params.desktopSize.getWidth(),
+                        params.desktopSize.getHeight(), false);
+      else if (params.desktopSize.getMode() == DesktopSize.AUTO) {
         Dimension availableSize = viewport.getAvailableSize();
         sendDesktopSize(availableSize.width, availableSize.height, false);
       }
@@ -491,7 +487,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     updates++;
     tElapsed = Utils.getTime() - tStart;
 
-    if (tElapsed > (double)Params.profileInt.getValue() && !benchmark) {
+    if (tElapsed > (double)params.profileInt.get() && !benchmark) {
       if (profileDialog.isVisible()) {
         String str;
         str = String.format("%.3f", (double)updates / tElapsed);
@@ -609,7 +605,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     vpRect.x = vpPos.x;
     vpRect.y = vpPos.y;
-    if (opts.showToolbar && !opts.fullScreen) {
+    if (params.toolbar.get() && !params.fullScreen.get()) {
       vpRect.y += 22;
       vpRect.height -= 22;
     }
@@ -660,15 +656,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (!cp.supportsSetDesktopSize)
       return;
 
-    if (opts.desktopSize.mode == Options.SIZE_AUTO)
+    if (params.desktopSize.getMode() == DesktopSize.AUTO)
       layout = computeScreenLayout(width, height);
     else {
-      if (opts.desktopSize.mode != Options.SIZE_MANUAL ||
-          opts.desktopSize.layout == null) {
+      if (params.desktopSize.getMode() != DesktopSize.MANUAL ||
+          params.desktopSize.getLayout() == null) {
         vlog.error("ERROR: Unexpected desktop size configuration");
         return;
       }
-      layout = opts.desktopSize.layout;
+      layout = params.desktopSize.getLayout();
       // Map client screens to server screen IDs in the server's preferred
       // order.  This allows us to control the server's screen order from the
       // client.
@@ -701,7 +697,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void bell() {
-    if (opts.acceptBell)
+    if (params.acceptBell.get())
       desktop.getToolkit().beep();
   }
 
@@ -813,7 +809,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // RFB thread
   public void handleClipboardAnnounce(boolean available)
   {
-    if (!opts.recvClipboard)
+    if (!params.recvClipboard.get())
       return;
 
     if (!available) {
@@ -828,7 +824,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // RFB thread
   public void handleClipboardData(String data)
   {
-    if (!opts.recvClipboard)
+    if (!params.recvClipboard.get())
       return;
 
     vlog.debug("Got clipboard data (" + data.length() + " characters)");
@@ -839,7 +835,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // RFB thread
   public void handleClipboardRequest()
   {
-    if (!opts.sendClipboard)
+    if (!params.sendClipboard.get())
       return;
 
     String contents = clipboardDialog.getContents();
@@ -980,16 +976,19 @@ public class CConn extends CConnection implements UserPasswdGetter,
           // following code thus sets a flag to temporarily disable the
           // component resize handler, then it resizes the full-screen viewport
           // accordingly.
-          if (opts.desktopSize.mode == Options.SIZE_AUTO && opts.fullScreen)
+          if (params.desktopSize.getMode() == DesktopSize.AUTO &&
+              params.fullScreen.get())
             pendingServerResize = true;
           desktop.resize();
-          if (opts.desktopSize.mode == Options.SIZE_AUTO && !opts.fullScreen)
+          if (params.desktopSize.getMode() == DesktopSize.AUTO &&
+              !params.fullScreen.get())
             // Have to do this in order to trigger the resize handler, even if
             // we're not actually changing the component size.
             recreateViewport(false);
           else
             reconfigureViewport(false);
-          if (opts.desktopSize.mode == Options.SIZE_AUTO && opts.fullScreen)
+          if (params.desktopSize.getMode() == DesktopSize.AUTO &&
+              params.fullScreen.get())
             pendingServerResize = false;
         }
       });
@@ -1011,7 +1010,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (desktop == null) return;
 
     if (viewport != null) {
-      if (opts.fullScreen) {
+      if (params.fullScreen.get()) {
         savedState = viewport.getExtendedState();
         viewport.setExtendedState(JFrame.NORMAL);
         savedRect = viewport.getBounds();
@@ -1019,21 +1018,21 @@ public class CConn extends CConnection implements UserPasswdGetter,
       if (viewport.timer != null)
         viewport.timer.stop();
       viewport.grabKeyboardHelper(false);
-      if (Params.currentMonitorIsPrimary.getValue())
+      if (params.currentMonitorIsPrimary.get())
         oldViewportBounds = viewport.getBounds();
       viewport.dispose();
     }
     viewport = new Viewport(this);
     // When in Lion full-screen mode, we need to create the viewport as if
     // full-screen mode was disabled.
-    viewport.setUndecorated(opts.fullScreen);
+    viewport.setUndecorated(params.fullScreen.get());
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
     if (Utils.isX11())
-      viewport.x11FullScreenHelper(opts.fullScreen);
-    if (opts.fullScreen && viewport.lionFSSupported())
+      viewport.x11FullScreenHelper(params.fullScreen.get());
+    if (params.fullScreen.get() && viewport.lionFSSupported())
       viewport.toggleLionFS();
     desktop.requestFocusInWindow();
     if (shouldGrab())
@@ -1111,7 +1110,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public Rectangle getSpannedSize() {
-    boolean fullScreenWindow = opts.fullScreen &&
+    boolean fullScreenWindow = params.fullScreen.get() &&
                                (!Utils.isMac() || viewport.lionFSSupported());
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
@@ -1128,8 +1127,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     viewport.leftMon = viewport.rightMon = viewport.topMon =
       viewport.bottomMon = 0;
 
-    if (opts.scalingFactor == Options.SCALE_AUTO ||
-        opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+    if (params.scale.get() == ScaleParameter.AUTO ||
+        params.scale.get() == ScaleParameter.FIXEDRATIO) {
       sw = cp.width;
       sh = cp.height;
     }
@@ -1165,10 +1164,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
           primaryGD = gs;
           primaryID = i;
         }
-        if (Params.currentMonitorIsPrimary.getValue() && viewport != null) {
+        if (params.currentMonitorIsPrimary.get() && viewport != null) {
           Rectangle vpRect = oldViewportBounds != null ? oldViewportBounds :
                              viewport.getBounds();
-          if (opts.fullScreen && savedRect.width > 0 && savedRect.height > 0)
+          if (params.fullScreen.get() && savedRect.width > 0 &&
+              savedRect.height > 0)
             vpRect = savedRect;
           vpRect = s.intersection(vpRect);
           int area = vpRect.isEmpty() ? 0 : vpRect.width * vpRect.height;
@@ -1229,28 +1229,31 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     // Enable Primary spanning if explicitly selected, or ...
-    if (opts.span == Options.SPAN_PRIMARY ||
+    if (params.span.get() == SpanParameter.PRIMARY ||
         // Automatic spanning + Manual or Server resizing is enabled and the
         // server desktop fits on the primary monitor, or ...
-        (opts.span == Options.SPAN_AUTO &&
-         opts.desktopSize.mode != Options.SIZE_AUTO &&
+        (params.span.get() == SpanParameter.AUTO &&
+         params.desktopSize.getMode() != DesktopSize.AUTO &&
          (sw <= primary.width || span.width <= primary.width) &&
          (sh <= primary.height || span.height <= primary.height)) ||
         // Automatic spanning + Auto resizing is enabled and we're in windowed
         // mode, or ...
-        (opts.span == Options.SPAN_AUTO &&
-         opts.desktopSize.mode == Options.SIZE_AUTO && !opts.fullScreen) ||
+        (params.span.get() == SpanParameter.AUTO &&
+         params.desktopSize.getMode() == DesktopSize.AUTO &&
+         !params.fullScreen.get()) ||
         // We're using X11, and we're in windowed mode or the helper library
         // isn't available (multi-screen spanning doesn't even pretend to work
         // under X11 except for full-screen windows, and even then, the
         // appropriate WM hints must be set using C.)
-        (Utils.isX11() && (!opts.fullScreen || !Helper.isAvailable()))) {
+        (Utils.isX11() &&
+         (!params.fullScreen.get() || !Helper.isAvailable()))) {
       span = primary;
       viewport.leftMon = viewport.rightMon = viewport.topMon =
         viewport.bottomMon = primaryID;
     } else if (equal ||
                (fullScreenWindow && serverXinerama &&
-                opts.desktopSize.mode == Options.SIZE_AUTO && !Utils.isX11()))
+                params.desktopSize.getMode() == DesktopSize.AUTO &&
+                !Utils.isX11()))
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
 
     vlog.debug("Spanned " + (fullScreenWindow ? "FS " : "work ") + "area: " +
@@ -1271,14 +1274,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
     Rectangle span = getSpannedSize();
     Dimension vpSize;
 
-    if ((opts.scalingFactor == Options.SCALE_AUTO ||
-         opts.scalingFactor == Options.SCALE_FIXEDRATIO) &&
-        !opts.fullScreen) {
+    if ((params.scale.get() == ScaleParameter.AUTO ||
+         params.scale.get() == ScaleParameter.FIXEDRATIO) &&
+        !params.fullScreen.get()) {
       w = cp.width;
       h = cp.height;
     }
 
-    if (opts.desktopSize.mode == Options.SIZE_AUTO && manual) {
+    if (params.desktopSize.getMode() == DesktopSize.AUTO && manual) {
       w = span.width;
       h = span.height;
     }
@@ -1292,14 +1295,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
       viewport.setExtendedState(JFrame.NORMAL);
     int x = (span.width - w) / 2 + span.x;
     int y = (span.height - h) / 2 + span.y;
-    if (opts.fullScreen) {
+    if (params.fullScreen.get()) {
       java.awt.Point vpPos = viewport.getLocation();
       boolean checkLayoutNow = false;
       vpSize = viewport.getSize();
 
       // If the window size is unchanged, check whether we need to force a
       // desktop resize message to inform the server of a new screen layout
-      if (opts.desktopSize.mode == Options.SIZE_AUTO && manual &&
+      if (params.desktopSize.getMode() == DesktopSize.AUTO && manual &&
           span.width == vpSize.width && span.height == vpSize.height) {
         if (vpPos.x != span.x || vpPos.y != span.y)
           checkLayout = true;
@@ -1339,9 +1342,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     // Attempt to prevent cases in which the presence of one scrollbar will
     // unnecessarily cause the other scrollbar to appear
-    if (opts.desktopSize.mode != Options.SIZE_AUTO &&
-        opts.scalingFactor != Options.SCALE_FIXEDRATIO &&
-        opts.scalingFactor != Options.SCALE_AUTO) {
+    if (params.desktopSize.getMode() != DesktopSize.AUTO &&
+        params.scale.get() != ScaleParameter.FIXEDRATIO &&
+        params.scale.get() != ScaleParameter.AUTO) {
       int clientw = w - vpBorder.width, clienth = h - vpBorder.height;
       int sbWidth = UIManager.getInt("ScrollBar.width");
       if (desktop.scaledWidth > clientw && h + sbWidth <= span.height) {
@@ -1358,7 +1361,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     vpSize = viewport.getSize();
     // If the window size is unchanged, check whether we need to force a
     // desktop resize message to inform the server of a new screen layout
-    if (opts.desktopSize.mode == Options.SIZE_AUTO && manual &&
+    if (params.desktopSize.getMode() == DesktopSize.AUTO && manual &&
         w == vpSize.width && h == vpSize.height)
       checkLayout = true;
 
@@ -1368,8 +1371,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // EDT
   private void reconfigureViewport(boolean restore) {
     desktop.setScaledSize();
-    if (!opts.fullScreen && savedRect.width > 0 && savedRect.height > 0 &&
-        restore) {
+    if (!params.fullScreen.get() && savedRect.width > 0 &&
+        savedRect.height > 0 && restore) {
       if (savedState >= 0)
         viewport.setExtendedState(savedState);
       viewport.setGeometry(savedRect.x, savedRect.y, savedRect.width,
@@ -1387,8 +1390,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     // need to ensure that the appropriate scrollbar policy is set and the
     // viewport is repainted.
     if (desktop != null) {
-      if (opts.scalingFactor == Options.SCALE_AUTO ||
-          opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+      if (params.scale.get() == ScaleParameter.AUTO ||
+          params.scale.get() == ScaleParameter.FIXEDRATIO) {
         viewport.sp.setHorizontalScrollBarPolicy(
           ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         viewport.sp.setVerticalScrollBarPolicy(
@@ -1414,15 +1417,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
       // Catch incorrect requestNewUpdate calls
       assert(!pendingUpdate || supportsSyncFence);
 
-      if (Params.colors.getValue() == 8) {
+      if (params.colors.get() == 8) {
         pf = VERY_LOW_COLOR_PF;
-      } else if (Params.colors.getValue() == 64) {
+      } else if (params.colors.get() == 64) {
         pf = LOW_COLOR_PF;
-      } else if (Params.colors.getValue() == 256) {
+      } else if (params.colors.get() == 256) {
         pf = MEDIUM_COLOR_PF;
-      } else if (Params.colors.getValue() == 32768) {
+      } else if (params.colors.get() == 32768) {
         pf = MEDIUMHIGH_COLOR_PF;
-      } else if (Params.colors.getValue() == 65536) {
+      } else if (params.colors.get() == 65536) {
         pf = HIGH_COLOR_PF;
       } else {
         pf = fullColourPF;
@@ -1470,7 +1473,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // The following methods are all called from the EDT.
 
   public boolean confirmClose() {
-    if (Params.confirmClose.getValue() && state() == RFBSTATE_NORMAL &&
+    if (params.confirmClose.get() && state() == RFBSTATE_NORMAL &&
         !shuttingDown && sock != null) {
       JOptionPane pane;
       Object[] dlgOptions = { UIManager.getString("OptionPane.yesButtonText"),
@@ -1503,9 +1506,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     shuttingDown = true;
     if (sock != null)
       sock.shutdown();
-    if (opts.sshSession != null) {
-      opts.sshSession.disconnect();
-      opts.sshSession = null;
+    if (params.sshSession != null) {
+      params.sshSession.disconnect();
+      params.sshSession = null;
     }
     if (reader != null)
       reader.close();
@@ -1537,10 +1540,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   String getEncryptionProtocol() {
     String protocol = csecurity.getProtocol();
-    if (protocol.equals("None") && opts.sshTunnelActive)
+    if (protocol.equals("None") && params.sshTunnelActive)
       return "SSH";
     else
-      return protocol + (opts.sshTunnelActive ? " (+ SSH)" : "");
+      return protocol + (params.sshTunnelActive ? " (+ SSH)" : "");
   }
 
   void showInfo() {
@@ -1571,29 +1574,26 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   public void losslessRefresh() {
     int currentEncodingSave = currentEncoding;
-    int compressLevelSave = opts.compressLevel;
-    int qualitySave = opts.quality;
-    boolean allowJpegSave = opts.allowJpeg;
+    int compressLevelSave = params.compressLevel.get();
+    boolean jpegSave = params.jpeg.get();
     boolean alreadyLossless = false;
 
-    if (currentEncoding == RFB.ENCODING_TIGHT && opts.compressLevel == 1 &&
-        opts.quality == -1 && !opts.allowJpeg)
+    if (currentEncoding == RFB.ENCODING_TIGHT &&
+        params.compressLevel.get() == 1 && !params.jpeg.get())
       alreadyLossless = true;
 
     if (!alreadyLossless) {
       currentEncoding = RFB.ENCODING_TIGHT;
-      opts.compressLevel = 1;
-      opts.quality = -1;
-      opts.allowJpeg = false;
+      params.compressLevel.set(1);
+      params.jpeg.set(false);
       encodingChange = true;
       checkEncodings();
     }
     refresh();
     if (!alreadyLossless) {
       currentEncoding = currentEncodingSave;
-      opts.compressLevel = compressLevelSave;
-      opts.quality = qualitySave;
-      opts.allowJpeg = allowJpegSave;
+      params.compressLevel.set(compressLevelSave);
+      params.jpeg.set(jpegSave);
       encodingChange = true;
       checkEncodings();
     }
@@ -1604,7 +1604,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // the EDT.
 
   public boolean isUnixLoginForced() {
-    return (opts.user != null || opts.sendLocalUsername);
+    return (params.user.get() != null || params.sendLocalUsername.get());
   }
 
   public void setTightOptions() {
@@ -1615,58 +1615,59 @@ public class CConn extends CConnection implements UserPasswdGetter,
   }
 
   public void setOptions() {
-    options.setOptions(opts, cp.supportsSetDesktopSize || firstUpdate,
+    options.setOptions(cp.supportsSetDesktopSize || firstUpdate,
                        state() == RFBSTATE_NORMAL, state() == RFBSTATE_NORMAL,
                        state() == RFBSTATE_NORMAL);
     setTightOptions();
-    if (opts.scalingFactor != Options.SCALE_AUTO &&
-        opts.scalingFactor != Options.SCALE_FIXEDRATIO && desktop != null)
+    if (params.scale.get() != ScaleParameter.AUTO &&
+        params.scale.get() != ScaleParameter.FIXEDRATIO && desktop != null)
       desktop.setScaledSize();
   }
 
   public void getOptions() {
     boolean recreate = false, reconfigure = false, deleteRestore = false;
 
-    Options oldOpts = new Options(opts);
+    Params oldParams = new Params(params);
 
-    options.getOptions(opts);
+    options.getOptions();
 
-    if (opts.allowJpeg != oldOpts.allowJpeg ||
-        opts.quality != oldOpts.quality ||
-        opts.compressLevel != oldOpts.compressLevel ||
-        opts.subsampling != oldOpts.subsampling)
+    if (params.jpeg.get() != oldParams.jpeg.get() ||
+        params.quality.get() != oldParams.quality.get() ||
+        params.compressLevel.get() != oldParams.compressLevel.get() ||
+        params.subsampling.get() != oldParams.subsampling.get())
       encodingChange = true;
 
-    if (opts.viewOnly != oldOpts.viewOnly && opts.showToolbar &&
-        !opts.fullScreen)
+    if (params.viewOnly.get() != oldParams.viewOnly.get() &&
+        params.toolbar.get() && !params.fullScreen.get())
       recreate = true;
 
     if (state() != RFBSTATE_NORMAL)
-      opts.showToolbar = opts.showToolbar && !benchmark;
+      params.toolbar.set(params.toolbar.get() && !benchmark);
 
-    if (opts.showToolbar != oldOpts.showToolbar && !opts.fullScreen)
+    if (params.toolbar.get() != oldParams.toolbar.get() &&
+        !params.fullScreen.get())
       recreate = true;
 
-    if (desktop != null && opts.scalingFactor != oldOpts.scalingFactor) {
+    if (desktop != null && params.scale.get() != oldParams.scale.get()) {
       deleteRestore = true;
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
       // Ideally we could recreate the viewport on all platforms, but due to a
       // Java bug, doing so on macOS causes the viewer to exit full-screen
       // mode.
-      if (!viewport.lionFSSupported() || !opts.fullScreen)
+      if (!viewport.lionFSSupported() || !params.fullScreen.get())
         recreate = true;
       else
         reconfigure = true;
     }
 
     if (desktop != null &&
-        !opts.desktopSize.equalsIgnoreID(oldOpts.desktopSize)) {
+        !params.desktopSize.equalsIgnoreID(oldParams.desktopSize)) {
       deleteRestore = true;
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
-      if (opts.desktopSize.mode != Options.SIZE_SERVER) {
-        if (!viewport.lionFSSupported() || !opts.fullScreen)
+      if (params.desktopSize.getMode() != DesktopSize.SERVER) {
+        if (!viewport.lionFSSupported() || !params.fullScreen.get())
           recreate = true;
         else
           reconfigure = true;
@@ -1674,32 +1675,32 @@ public class CConn extends CConnection implements UserPasswdGetter,
       }
     }
 
-    if (desktop != null && opts.span != oldOpts.span) {
+    if (desktop != null && params.span.get() != oldParams.span.get()) {
       deleteRestore = true;
       savedState = -1;
       savedRect = new Rectangle(-1, -1, 0, 0);
-      if (!viewport.lionFSSupported() || !opts.fullScreen)
+      if (!viewport.lionFSSupported() || !params.fullScreen.get())
         recreate = true;
       else
         reconfigure = true;
     }
 
-    clipboardDialog.setSendingEnabled(opts.sendClipboard);
-    menu.updateMenuKey(opts.menuKeyCode);
+    clipboardDialog.setSendingEnabled(params.sendClipboard.get());
+    menu.updateMenuKey(params.menuKey.getCode());
 
     if (Utils.osGrab() && Helper.isAvailable()) {
       boolean isGrabbed = VncViewer.isKeyboardGrabbed(viewport);
       if (viewport != null &&
-          ((opts.grabKeyboard == Options.GRAB_ALWAYS && !isGrabbed) ||
-           (opts.grabKeyboard == Options.GRAB_FS &&
-            opts.fullScreen != isGrabbed))) {
+          ((params.grabKeyboard.get() == GrabParameter.ALWAYS && !isGrabbed) ||
+           (params.grabKeyboard.get() == GrabParameter.FS &&
+            params.fullScreen.get() != isGrabbed))) {
         viewport.grabKeyboardHelper(!isGrabbed);
         selectGrab(!isGrabbed);
       }
     }
 
-    setShared(opts.shared);
-    if (opts.cursorShape != oldOpts.cursorShape) {
+    setShared(params.shared.get());
+    if (params.cursorShape.get() != oldParams.cursorShape.get()) {
       encodingChange = true;
       if (desktop != null)
         desktop.resetLocalCursor();
@@ -1707,25 +1708,25 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     checkEncodings();
 
-    if (opts.fullScreen != oldOpts.fullScreen) {
-      opts.fullScreen = !opts.fullScreen;
+    if (params.fullScreen.get() != oldParams.fullScreen.get()) {
+      params.fullScreen.set(!params.fullScreen.get());
       toggleFullScreen();
     } else if (recreate)
       recreateViewport();
     else if (reconfigure)
       reconfigureAndRepaintViewport(false);
-    if (opts.showToolbar != oldOpts.showToolbar) {
+    if (params.toolbar.get() != oldParams.toolbar.get()) {
       if (viewport != null)
-        viewport.showToolbar(opts.showToolbar);
-      menu.showToolbar.setSelected(opts.showToolbar);
+        viewport.showToolbar(params.toolbar.get());
+      menu.showToolbar.setSelected(params.toolbar.get());
     }
-    if (opts.viewOnly != oldOpts.viewOnly) {
+    if (params.viewOnly.get() != oldParams.viewOnly.get()) {
       if (viewport != null)
         viewport.updateMacMenuViewOnly();
-      menu.viewOnly.setSelected(opts.viewOnly);
+      menu.viewOnly.setSelected(params.viewOnly.get());
     }
-    if (opts.scalingFactor != oldOpts.scalingFactor ||
-        !opts.desktopSize.equalsIgnoreID(oldOpts.desktopSize)) {
+    if (params.scale.get() != oldParams.scale.get() ||
+        !params.desktopSize.equalsIgnoreID(oldParams.desktopSize)) {
       if (viewport != null)
         viewport.updateMacMenuZoom();
       menu.updateZoom();
@@ -1743,8 +1744,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       requestNewUpdate();
     }
 
-    opts.save();
-    VncViewer.opts = new Options(opts);
+    params.save();
   }
 
   public boolean supportsSetDesktopSize() {
@@ -1753,12 +1753,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void zoomIn() {
-    if (opts.desktopSize.mode == Options.SIZE_AUTO ||
-        opts.scalingFactor == Options.SCALE_AUTO ||
-        opts.scalingFactor == Options.SCALE_FIXEDRATIO)
+    if (params.desktopSize.getMode() == DesktopSize.AUTO ||
+        params.scale.get() == ScaleParameter.AUTO ||
+        params.scale.get() == ScaleParameter.FIXEDRATIO)
       return;
 
-    int sf = opts.scalingFactor;
+    int sf = params.scale.get();
     if (sf < 100)
       sf = ((sf / 10) + 1) * 10;
     else if (sf >= 100 && sf <= 200)
@@ -1766,11 +1766,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
     else
       sf = ((sf / 50) + 1) * 50;
     if (sf > 400) sf = 400;
-    opts.scalingFactor = sf;
+    params.scale.set(sf);
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
-    if (!viewport.lionFSSupported() || !opts.fullScreen)
+    if (!viewport.lionFSSupported() || !params.fullScreen.get())
       recreateViewport();
     else
       reconfigureAndRepaintViewport(false);
@@ -1780,12 +1780,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void zoomOut() {
-    if (opts.desktopSize.mode == Options.SIZE_AUTO ||
-        opts.scalingFactor == Options.SCALE_AUTO ||
-        opts.scalingFactor == Options.SCALE_FIXEDRATIO)
+    if (params.desktopSize.getMode() == DesktopSize.AUTO ||
+        params.scale.get() == ScaleParameter.AUTO ||
+        params.scale.get() == ScaleParameter.FIXEDRATIO)
       return;
 
-    int sf = opts.scalingFactor;
+    int sf = params.scale.get();
     if (sf <= 100)
       sf = (((sf + 9) / 10) - 1) * 10;
     else if (sf >= 100 && sf <= 200)
@@ -1794,11 +1794,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
       sf = (((sf + 49) / 50) - 1) * 50;
     if (sf < 10) sf = 10;
     if (sf > 400) sf = 400;
-    opts.scalingFactor = sf;
+    params.scale.set(sf);
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
-    if (!viewport.lionFSSupported() || !opts.fullScreen)
+    if (!viewport.lionFSSupported() || !params.fullScreen.get())
       recreateViewport();
     else
       reconfigureAndRepaintViewport(false);
@@ -1808,16 +1808,16 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void zoom100() {
-    if (opts.desktopSize.mode == Options.SIZE_AUTO ||
-        opts.scalingFactor == Options.SCALE_AUTO ||
-        opts.scalingFactor == Options.SCALE_FIXEDRATIO)
+    if (params.desktopSize.getMode() == DesktopSize.AUTO ||
+        params.scale.get() == ScaleParameter.AUTO ||
+        params.scale.get() == ScaleParameter.FIXEDRATIO)
       return;
 
-    opts.scalingFactor = 100;
+    params.scale.set(100);
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
-    if (!viewport.lionFSSupported() || !opts.fullScreen)
+    if (!viewport.lionFSSupported() || !params.fullScreen.get())
       recreateViewport();
     else
       reconfigureAndRepaintViewport(false);
@@ -1827,31 +1827,31 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void toggleToolbar() {
-    if (opts.fullScreen)
+    if (params.fullScreen.get())
       return;
-    opts.showToolbar = !opts.showToolbar;
+    params.toolbar.set(!params.toolbar.get());
     if (viewport != null) {
       recreateViewport();
-      viewport.showToolbar(opts.showToolbar);
+      viewport.showToolbar(params.toolbar.get());
     }
-    menu.showToolbar.setSelected(opts.showToolbar);
+    menu.showToolbar.setSelected(params.toolbar.get());
   }
 
   // EDT
   public void toggleFullScreen() {
-    opts.fullScreen = !opts.fullScreen;
-    menu.fullScreen.setSelected(opts.fullScreen);
+    params.fullScreen.set(!params.fullScreen.get());
+    menu.fullScreen.setSelected(params.fullScreen.get());
     if (viewport != null)
       recreateViewport(true);
   }
 
   // EDT
   public void toggleViewOnly() {
-    opts.viewOnly = !opts.viewOnly;
-    menu.viewOnly.setSelected(opts.viewOnly);
+    params.viewOnly.set(!params.viewOnly.get());
+    menu.viewOnly.setSelected(params.viewOnly.get());
     if (viewport != null) {
       viewport.updateMacMenuViewOnly();
-      if (opts.showToolbar && !opts.fullScreen)
+      if (params.toolbar.get() && !params.fullScreen.get())
         recreateViewport(true);
     }
   }
@@ -1859,15 +1859,15 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // EDT
   public void resize(int x, int y, int w, int h) {
     if (viewport != null) {
-      if (opts.fullScreen)
+      if (params.fullScreen.get())
         toggleFullScreen();
 
       Dimension vpSize = viewport.getSize();
 
       // If the window size is unchanged, check whether we need to force a
       // desktop resize message to inform the server of a new screen layout
-      if (opts.desktopSize.mode == Options.SIZE_AUTO && w == vpSize.width &&
-          h == vpSize.height)
+      if (params.desktopSize.getMode() == DesktopSize.AUTO &&
+          w == vpSize.width && h == vpSize.height)
         checkLayout = true;
       viewport.setGeometry(x, y, w, h);
     }
@@ -1889,9 +1889,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
   public boolean shouldGrab() {
     return Utils.osGrab() &&
-           (opts.grabKeyboard == Options.GRAB_ALWAYS ||
-            (opts.grabKeyboard == Options.GRAB_MANUAL && isGrabSelected()) ||
-            (opts.grabKeyboard == Options.GRAB_FS && opts.fullScreen));
+           (params.grabKeyboard.get() == GrabParameter.ALWAYS ||
+            (params.grabKeyboard.get() == GrabParameter.MANUAL &&
+             isGrabSelected()) ||
+            (params.grabKeyboard.get() == GrabParameter.FS &&
+             params.fullScreen.get()));
   }
 
   public void selectGrab(boolean on) {
@@ -2509,7 +2511,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       return;
     int x, y, wheelMask;
     int clicks = ev.getWheelRotation();
-    if (opts.reverseScroll) {
+    if (params.reverseScroll.get()) {
       clicks = -clicks;
     }
     if (clicks < 0) {
@@ -2566,7 +2568,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (encodingChange && (writer() != null)) {
       vlog.info("Requesting " + RFB.encodingName(currentEncoding) +
                 " encoding");
-      writer().writeSetEncodings(currentEncoding, lastServerEncoding, opts);
+      writer().writeSetEncodings(currentEncoding, lastServerEncoding, params);
       encodingChange = false;
       if (viewport != null)
         viewport.updateTitle();

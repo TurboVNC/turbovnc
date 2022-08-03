@@ -82,7 +82,7 @@ public final class MenuKey {
   }
 
   public static int getMenuKeyCode(String menuKeyStr) {
-    int menuKeyCode = KeyEvent.VK_F8;
+    int menuKeyCode = -1;
 
     for (int i = 0; i < getMenuKeySymbolCount(); i++)
       if (MENU_SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))
@@ -92,7 +92,7 @@ public final class MenuKey {
   }
 
   public static int getMenuKeySym(String menuKeyStr) {
-    int menuKeySym = Keysyms.F8;
+    int menuKeySym = -1;
 
     for (int i = 0; i < getMenuKeySymbolCount(); i++)
       if (MENU_SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))

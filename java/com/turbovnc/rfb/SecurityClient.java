@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2015-2016, 2018, 2020-2021 D. R. Commander.
+ * Copyright (C) 2012, 2015-2016, 2018, 2020-2022 D. R. Commander.
  *                                                All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -26,10 +26,10 @@ import com.turbovnc.rdr.ErrorException;
 
 public class SecurityClient {
 
-  public CSecurity getCSecurity(Options opts, int secType) {
+  public CSecurity getCSecurity(Params params, int secType) {
     assert (msg != null);
 
-    if (!opts.isSecTypeSupported(secType))
+    if (!params.secTypes.isSupported(secType))
       throw new ErrorException("Security type not supported");
 
     switch (secType) {

@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018, 2020-2022 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,29 +21,36 @@
 package com.turbovnc.rfb;
 
 public abstract class VoidParameter {
-  public VoidParameter(String name_, String desc_) {
+
+  public VoidParameter(String name_, Params params_, boolean isGUI_,
+                       String desc_) {
     name = name_;
-    description = desc_;
-    if (Params.head == null)
-      Params.head = this;
-    if (Params.tail != null)
-      Params.tail.next = this;
-    Params.tail = this;
+    params = params_;
+    desc = desc_;
+    isGUI = isGUI_;
+    if (params.head == null)
+      params.head = this;
+    if (params.tail != null)
+      params.tail.next = this;
+    params.tail = this;
   }
 
   public final String getName() { return name; }
-  public final String getDescription() { return description; }
+  public final String getDescription() { return desc; }
 
-  public abstract boolean setParam(String value);
-  public boolean setParam() { return false; }
+  public abstract boolean set(String str);
+  public boolean set() { return false; }
 
   public abstract void reset();
 
+  public abstract String getStr();
   public abstract String getDefaultStr();
   public abstract String getValues();
   public boolean isBool() { return false; }
+  public boolean isGUI() { return isGUI; }
 
   VoidParameter next;
-  protected final String name;
-  protected final String description;
+  private final String name, desc;
+  final Params params;
+  private final boolean isGUI;
 }

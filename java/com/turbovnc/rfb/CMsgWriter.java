@@ -379,11 +379,11 @@ public class CMsgWriter {
   // encoding numbers are more desirable.
 
   public synchronized void writeSetEncodings(int preferredEncoding,
-                                             int lastEncoding, Options opts)
+                                             int lastEncoding, Params params)
   {
     int nEncodings = 0;
     int[] encodings = new int[RFB.ENCODING_MAX + 3];
-    if (opts.cursorShape) {
+    if (params.cursorShape.get()) {
       if (!Utils.getBooleanProperty("turbovnc.forcexcursor", false))
         encodings[nEncodings++] = RFB.ENCODING_RICH_CURSOR;
       encodings[nEncodings++] = RFB.ENCODING_X_CURSOR;
@@ -398,7 +398,7 @@ public class CMsgWriter {
       encodings[nEncodings++] = RFB.ENCODING_CLIENT_REDIRECT;
 
     encodings[nEncodings++] = RFB.ENCODING_LAST_RECT;
-    if (Params.continuousUpdates.getValue()) {
+    if (params.continuousUpdates.get()) {
       encodings[nEncodings++] = RFB.ENCODING_CONTINUOUS_UPDATES;
       encodings[nEncodings++] = RFB.ENCODING_FENCE;
     }
@@ -410,7 +410,7 @@ public class CMsgWriter {
       encodings[nEncodings++] = preferredEncoding;
     }
 
-    if (Params.copyRect.getValue()) {
+    if (params.copyRect.get()) {
       encodings[nEncodings++] = RFB.ENCODING_COPYRECT;
     }
 
@@ -446,19 +446,21 @@ public class CMsgWriter {
     }
 
     encodings[nEncodings++] = RFB.ENCODING_LAST_RECT;
-    if (opts.compressLevel >= 0 && opts.compressLevel <= 9)
+    if (params.compressLevel.get() >= 0 && params.compressLevel.get() <= 9)
       encodings[nEncodings++] = RFB.ENCODING_COMPRESS_LEVEL_0 +
-        opts.compressLevel;
-    if (opts.allowJpeg && opts.preferredEncoding == RFB.ENCODING_TIGHT) {
-      int qualityLevel = opts.quality / 10;
+        params.compressLevel.get();
+    if (params.jpeg.get() &&
+        params.encoding.get() == RFB.ENCODING_TIGHT) {
+      int qualityLevel = params.quality.get() / 10;
       if (qualityLevel > 9) qualityLevel = 9;
       encodings[nEncodings++] = RFB.ENCODING_QUALITY_LEVEL_0 + qualityLevel;
       encodings[nEncodings++] = RFB.ENCODING_FINE_QUALITY_LEVEL_0 +
-        opts.quality;
-      encodings[nEncodings++] = RFB.ENCODING_SUBSAMP_1X + opts.subsampling;
-    } else if (opts.preferredEncoding != RFB.ENCODING_TIGHT ||
+        params.quality.get();
+      encodings[nEncodings++] = RFB.ENCODING_SUBSAMP_1X +
+        params.subsampling.get();
+    } else if (params.encoding.get() != RFB.ENCODING_TIGHT ||
                (lastEncoding >= 0 && lastEncoding != RFB.ENCODING_TIGHT)) {
-      int qualityLevel = opts.quality;
+      int qualityLevel = params.quality.get();
       if (qualityLevel > 9) qualityLevel = 9;
       encodings[nEncodings++] = RFB.ENCODING_QUALITY_LEVEL_0 + qualityLevel;
     }

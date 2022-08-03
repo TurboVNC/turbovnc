@@ -40,31 +40,31 @@ import com.jcraft.jsch.*;
 
 public class Tunnel {
 
-  public static void createTunnel(Options opts) throws Exception {
+  public static void createTunnel(Params params) throws Exception {
     int localPort;
     int remotePort;
     String gatewayHost;
     String remoteHost;
 
-    boolean tunnel = opts.tunnel ||
-                     (opts.sessMgrActive && Params.sessMgrAuto.getValue());
+    boolean tunnel = params.tunnel.get() ||
+                     (params.sessMgrActive && params.sessMgrAuto.get());
 
     localPort = TcpSocket.findFreeTcpPort();
     if (localPort == 0)
       throw new ErrorException("Could not obtain free TCP port");
 
     if (tunnel) {
-      gatewayHost = Hostname.getHost(opts.serverName);
+      gatewayHost = Hostname.getHost(params.server.get());
       remoteHost = "localhost";
     } else {
-      gatewayHost = opts.via;
-      remoteHost = Hostname.getHost(opts.serverName);
+      gatewayHost = params.via.get();
+      remoteHost = Hostname.getHost(params.server.get());
     }
-    if (opts.serverName != null && opts.serverName.indexOf(':') < 0 &&
-        opts.port > 0)
-      remotePort = opts.port;
+    if (params.server.get() != null && params.server.get().indexOf(':') < 0 &&
+        params.port.get() > 0)
+      remotePort = params.port.get();
     else
-      remotePort = Hostname.getPort(opts.serverName);
+      remotePort = Hostname.getPort(params.server.get());
 
     String pattern = null;
     if (tunnel) {
@@ -77,24 +77,24 @@ public class Tunnel {
         pattern = System.getenv("VNC_VIA_CMD");
     }
 
-    if (Params.extSSH.getValue() || (pattern != null && pattern.length() > 0))
+    if (params.extSSH.get() || (pattern != null && pattern.length() > 0))
       createTunnelExt(gatewayHost, remoteHost, remotePort, localPort, pattern,
-                      opts, tunnel);
+                      params, tunnel);
     else {
       vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
-      if (opts.sshSession == null)
-        createTunnelJSch(gatewayHost, opts);
+      if (params.sshSession == null)
+        createTunnelJSch(gatewayHost, params);
       vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
                  ":" + remotePort + " (relative to gateway)");
-      opts.sshSession.setPortForwardingL(localPort, remoteHost, remotePort);
+      params.sshSession.setPortForwardingL(localPort, remoteHost, remotePort);
     }
-    opts.serverName = "localhost::" + localPort;
-    opts.sshTunnelActive = true;
+    params.server.set("localhost::" + localPort);
+    params.sshTunnelActive = true;
   }
 
   /* Create a tunnel using the builtin JSch SSH client */
 
-  protected static void createTunnelJSch(String host, Options opts)
+  protected static void createTunnelJSch(String host, Params params)
                                          throws Exception {
     JSch jsch = new JSch();
     JSch.setLogger(LOGGER);
@@ -142,11 +142,11 @@ public class Tunnel {
     }
 
     ArrayList<File> privateKeys = new ArrayList<File>();
-    String sshKeyFile = Params.sshKeyFile.getValue();
-    String sshKey = Params.sshKey.getValue();
+    String sshKeyFile = params.sshKeyFile.get();
+    String sshKey = params.sshKey.get();
     boolean useDefaultPrivateKeyFiles = false;
     if (sshKey != null) {
-      String sshKeyPass = Params.sshKeyPass.getValue();
+      String sshKeyPass = params.sshKeyPass.get();
       byte[] keyPass = null, key;
       if (sshKeyPass != null)
         keyPass = sshKeyPass.getBytes();
@@ -164,17 +164,17 @@ public class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    int port = Params.sshPort.getValue();
-    String user = opts.sshUser;
+    int port = params.sshPort.get();
+    String user = params.sshUser;
     if (user == null)
       user = (String)System.getProperties().get("user.name");
 
-    File sshConfigFile = new File(Params.sshConfig.getValue());
+    File sshConfigFile = new File(params.sshConfig.get());
     if (sshConfigFile.exists() && sshConfigFile.canRead()) {
       ConfigRepository repo =
         OpenSSHConfig.parseFile(sshConfigFile.getAbsolutePath());
       jsch.setConfigRepository(repo);
-      vlog.debug("Read OpenSSH config file " + Params.sshConfig.getValue());
+      vlog.debug("Read OpenSSH config file " + params.sshConfig.get());
       // This just ensures that the password dialog displays the correct
       // username.  JSch will ignore the username and port passed to
       // getSession() if the configuration has already been set using an
@@ -190,12 +190,11 @@ public class Tunnel {
         }
       }
     } else {
-      if (Params.sshConfig.isDefault()) {
+      if (params.sshConfig.isDefault()) {
         vlog.debug("Could not parse SSH config file " +
-                   Params.sshConfig.getValue());
+                   params.sshConfig.get());
       } else {
-        vlog.info("Could not parse SSH config file " +
-                  Params.sshConfig.getValue());
+        vlog.info("Could not parse SSH config file " + params.sshConfig.get());
       }
     }
 
@@ -208,9 +207,9 @@ public class Tunnel {
       File privateKey = (File)i.next();
       try {
         if (privateKey.exists() && privateKey.canRead()) {
-          if (Params.sshKeyPass.getValue() != null)
+          if (params.sshKeyPass.get() != null)
             jsch.addIdentity(privateKey.getAbsolutePath(),
-                             Params.sshKeyPass.getValue());
+                             params.sshKeyPass.get());
           else
             jsch.addIdentity(privateKey.getAbsolutePath());
         }
@@ -221,19 +220,19 @@ public class Tunnel {
       }
     }
 
-    opts.sshSession = jsch.getSession(user, host, port);
+    params.sshSession = jsch.getSession(user, host, port);
     // OpenSSHConfig doesn't recognize StrictHostKeyChecking
-    if (opts.sshSession.getConfig("StrictHostKeyChecking") == null)
-      opts.sshSession.setConfig("StrictHostKeyChecking", "ask");
-    opts.sshSession.setConfig("MaxAuthTries", "3");
+    if (params.sshSession.getConfig("StrictHostKeyChecking") == null)
+      params.sshSession.setConfig("StrictHostKeyChecking", "ask");
+    params.sshSession.setConfig("MaxAuthTries", "3");
     String auth = System.getProperty("turbovnc.sshauth");
     if (auth == null)
       auth = "publickey,keyboard-interactive,password";
-    opts.sshSession.setConfig("PreferredAuthentications", auth);
+    params.sshSession.setConfig("PreferredAuthentications", auth);
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                         true, user, false, true, -1);
-    opts.sshSession.setUserInfo(dlg);
-    opts.sshSession.connect();
+    params.sshSession.setUserInfo(dlg);
+    params.sshSession.connect();
   }
 
   /* Create a tunnel using an external SSH client.  This supports the same
@@ -249,14 +248,14 @@ public class Tunnel {
 
   private static void createTunnelExt(String gatewayHost, String remoteHost,
                                       int remotePort, int localPort,
-                                      String pattern, Options opts,
+                                      String pattern, Params params,
                                       boolean tunnel)
                                       throws Exception {
     if (pattern == null || pattern.length() < 1)
       pattern = (tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
 
     String command = fillCmdPattern(pattern, gatewayHost, remoteHost,
-                                    remotePort, localPort, opts, tunnel);
+                                    remotePort, localPort, params, tunnel);
 
     vlog.debug("SSH command line: " + command);
     List<String> args = ArgumentTokenizer.tokenize(command);
@@ -271,14 +270,14 @@ public class Tunnel {
 
   private static String fillCmdPattern(String pattern, String gatewayHost,
                                        String remoteHost, int remotePort,
-                                       int localPort, Options opts,
+                                       int localPort, Params params,
                                        boolean tunnel) {
     int i, j;
     boolean hFound = false, gFound = false, rFound = false, lFound = false;
     String command = "";
 
-    if (opts.sshUser != null)
-      gatewayHost = opts.sshUser + "@" + gatewayHost;
+    if (params.sshUser != null)
+      gatewayHost = params.sshUser + "@" + gatewayHost;
 
     for (i = 0; i < pattern.length(); i++) {
       if (pattern.charAt(i) == '%') {

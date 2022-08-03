@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2021 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2022 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public class Viewport extends JFrame implements Runnable {
     setIconImage(VncViewer.FRAME_IMAGE);
     UIManager.getDefaults().put("ScrollPane.ancestorInputMap",
       new UIDefaults.LazyInputMap(new Object[]{}));
-    if (Params.confirmClose.getValue())
+    if (cc.params.confirmClose.get())
       setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -83,7 +83,7 @@ public class Viewport extends JFrame implements Runnable {
     // NOTE: If Lion FS mode is enabled, then the viewport is only created once
     // as a non-full-screen viewport, so we tell showToolbar() to ignore the
     // full-screen state.
-    showToolbar(cc.opts.showToolbar, canDoLionFS);
+    showToolbar(cc.params.toolbar.get(), canDoLionFS);
 
     final Viewport vp = this;
     addWindowFocusListener(new WindowAdapter() {
@@ -122,8 +122,8 @@ public class Viewport extends JFrame implements Runnable {
 
     addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
-        if (cc.opts.scalingFactor == Options.SCALE_AUTO ||
-            cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+        if (cc.params.scale.get() == ScaleParameter.AUTO ||
+            cc.params.scale.get() == ScaleParameter.FIXEDRATIO) {
           if ((sp.getSize().width != cc.desktop.scaledWidth) ||
               (sp.getSize().height != cc.desktop.scaledHeight)) {
             cc.desktop.setScaledSize();
@@ -133,7 +133,7 @@ public class Viewport extends JFrame implements Runnable {
               ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             sp.validate();
             if (getExtendedState() != JFrame.MAXIMIZED_BOTH &&
-                !cc.opts.fullScreen) {
+                !cc.params.fullScreen.get()) {
               sp.setSize(new Dimension(cc.desktop.scaledWidth,
                                        cc.desktop.scaledHeight));
               int w = cc.desktop.scaledWidth + VncViewer.insets.left +
@@ -142,11 +142,11 @@ public class Viewport extends JFrame implements Runnable {
                       VncViewer.insets.bottom;
               if (tb.isVisible())
                 h += tb.getHeight();
-              if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
+              if (cc.params.scale.get() == ScaleParameter.FIXEDRATIO)
                 setSize(w, h);
             }
           }
-        } else if (cc.opts.desktopSize.mode == Options.SIZE_AUTO &&
+        } else if (cc.params.desktopSize.getMode() == DesktopSize.AUTO &&
                    !cc.firstUpdate && !cc.pendingServerResize) {
           Dimension availableSize = cc.viewport.getAvailableSize();
           if (availableSize.width >= 1 && availableSize.height >= 1 &&
@@ -189,7 +189,7 @@ public class Viewport extends JFrame implements Runnable {
         }
         if (((sp.getSize().width > cc.desktop.scaledWidth) ||
              (sp.getSize().height > cc.desktop.scaledHeight)) &&
-            cc.opts.desktopSize.mode != Options.SIZE_AUTO) {
+            cc.params.desktopSize.getMode() != DesktopSize.AUTO) {
           int w = sp.getSize().width - adjustWidth;
           int h = sp.getSize().height - adjustHeight;
           dx = (w <= cc.desktop.scaledWidth) ? 0 :
@@ -203,7 +203,7 @@ public class Viewport extends JFrame implements Runnable {
       }
 
       public void componentMoved(ComponentEvent e) {
-        if (cc.opts.desktopSize.mode == Options.SIZE_AUTO &&
+        if (cc.params.desktopSize.getMode() == DesktopSize.AUTO &&
             !cc.firstUpdate && !cc.pendingServerResize && cc.checkLayout) {
           Dimension availableSize = cc.viewport.getAvailableSize();
           int w = availableSize.width, h = availableSize.height;
@@ -221,7 +221,7 @@ public class Viewport extends JFrame implements Runnable {
 
   public Dimension getAvailableSize() {
     Dimension availableSize = getSize();
-    if (!cc.opts.fullScreen) {
+    if (!cc.params.fullScreen.get()) {
       Insets vpInsets = VncViewer.insets;
       availableSize.width -= vpInsets.left + vpInsets.right;
       availableSize.height -= vpInsets.top + vpInsets.bottom;
@@ -236,12 +236,12 @@ public class Viewport extends JFrame implements Runnable {
   }
 
   public Dimension getBorderSize() {
-    if (cc.opts.fullScreen)
+    if (cc.params.fullScreen.get())
       return new Dimension(0, 0);
     Insets vpInsets = VncViewer.insets;
     Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
                                          vpInsets.top + vpInsets.bottom);
-    if (cc.opts.showToolbar)
+    if (cc.params.toolbar.get())
       borderSize.height += 22;
     return borderSize;
   }
@@ -253,15 +253,15 @@ public class Viewport extends JFrame implements Runnable {
 
     public Object invoke(Object proxy, Method method, Object[] args) {
       if (method.getName().equals("windowEnteringFullScreen")) {
-        cc.opts.fullScreen = true;
-        cc.menu.fullScreen.setSelected(cc.opts.fullScreen);
+        cc.params.fullScreen.set(true);
+        cc.menu.fullScreen.setSelected(cc.params.fullScreen.get());
         updateMacMenuFS();
-        showToolbar(cc.opts.showToolbar);
+        showToolbar(cc.params.toolbar.get());
       } else if (method.getName().equals("windowExitingFullScreen")) {
-        cc.opts.fullScreen = false;
-        cc.menu.fullScreen.setSelected(cc.opts.fullScreen);
+        cc.params.fullScreen.set(false);
+        cc.menu.fullScreen.setSelected(cc.params.fullScreen.get());
         updateMacMenuFS();
-        showToolbar(cc.opts.showToolbar);
+        showToolbar(cc.params.toolbar.get());
       } else if (method.getName().equals("windowEnteredFullScreen")) {
         cc.sizeWindow();
       }
@@ -335,7 +335,7 @@ public class Viewport extends JFrame implements Runnable {
 
   public void updateMacMenuViewOnly() {
     if (macMenu != null)
-      macMenu.viewOnly.setSelected(cc.opts.viewOnly);
+      macMenu.viewOnly.setSelected(cc.params.viewOnly.get());
   }
 
   public void updateMacMenuZoom() {
@@ -350,7 +350,7 @@ public class Viewport extends JFrame implements Runnable {
   public void setGeometry(int x, int y, int w, int h) {
     // Re-transmit full-screen multi-screen spanning information to the X
     // server, in case it changed since the viewport was created.
-    if (Utils.isX11() && cc.opts.fullScreen && isVisible() &&
+    if (Utils.isX11() && cc.params.fullScreen.get() && isVisible() &&
         (x != getLocation().x || y != getLocation().y ||
          w != getSize().width || h != getSize().height))
       x11FullScreenHelper(true);
@@ -380,26 +380,27 @@ public class Viewport extends JFrame implements Runnable {
   public void showToolbar(boolean show) { showToolbar(show, false); }
 
   private void showToolbar(boolean show, boolean force) {
-    tb.setVisible(show && (!cc.opts.fullScreen || force));
+    tb.setVisible(show && (!cc.params.fullScreen.get() || force));
   }
 
   public void updateTitle() {
     String scaleString = new String("");
-    if (cc.opts.scalingFactor != 100 &&
-        cc.opts.scalingFactor != Options.SCALE_AUTO &&
-        cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO)
-      scaleString = new String("- " + cc.opts.scalingFactor + "%");
+    if (cc.params.scale.get() != 100 &&
+        cc.params.scale.get() != ScaleParameter.AUTO &&
+        cc.params.scale.get() != ScaleParameter.FIXEDRATIO)
+      scaleString = new String("- " + cc.params.scale.get() + "%");
     int enc = cc.lastServerEncoding;
     if (enc < 0) enc = cc.currentEncoding;
     if (enc == RFB.ENCODING_TIGHT) {
-      if (cc.opts.allowJpeg) {
+      if (cc.params.jpeg.get()) {
         String[] subsampStr = { "1X", "4X", "2X", "Gray" };
         setTitle(cc.cp.name() + " [Tight + JPEG " +
-                 subsampStr[cc.opts.subsampling] + " Q" + cc.opts.quality +
-                 " + CL " + cc.opts.compressLevel + "]" + scaleString);
+                 subsampStr[cc.params.subsampling.get()] +
+                 " Q" + cc.params.quality.get() +
+                 " + CL " + cc.params.compressLevel.get() + "]" + scaleString);
       } else {
         setTitle(cc.cp.name() + " [Lossless Tight" +
-                 " + CL " + cc.opts.compressLevel + "]" + scaleString);
+                 " + CL " + cc.params.compressLevel.get() + "]" + scaleString);
       }
     } else {
       setTitle(cc.cp.name() + " [" + RFB.encodingName(enc) + "]" +
@@ -436,7 +437,7 @@ public class Viewport extends JFrame implements Runnable {
         if (((on && VncViewer.isKeyboardGrabbed(this)) ||
              (!on && !VncViewer.isKeyboardGrabbed())) && !force)
           return;
-        grabKeyboard(on, Params.grabPointer.getValue());
+        grabKeyboard(on, cc.params.grabPointer.get());
         VncViewer.setGrabOwner(on ? this : null);
       } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper.");

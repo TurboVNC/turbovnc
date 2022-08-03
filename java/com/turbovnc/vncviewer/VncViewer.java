@@ -130,12 +130,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
             else {
               VncViewer viewer = new VncViewer(new String[]{});
               try {
-                Params.load(fName);
+                viewer.getParams().load(fName);
               } catch (Exception e) {
                 viewer.reportException(e);
                 return null;
               }
-              viewer.setGlobalOptions();
+              setGlobalInsets();
               viewer.start();
             }
           }
@@ -344,12 +344,12 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       synchronized(VncViewer.class) {
         if (fileName != null) {
           try {
-            Params.load(fileName);
+            viewer.getParams().load(fileName);
           } catch (Exception e) {
             viewer.reportException(e);
             return;
           }
-          viewer.setGlobalOptions();
+          setGlobalInsets();
           fileName = null;
         }
       }
@@ -375,8 +375,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       if (argv[i].equals("--")) {
         newArgv = new String[i - index];
         System.arraycopy(argv, index, newArgv, 0, i - index);
-        if (index > 0)
-          Params.reset();
         startViewer(newArgv);
         index = i + 1;
       }
@@ -387,113 +385,115 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         newArgv = new String[i - index];
         System.arraycopy(argv, index, newArgv, 0, i - index);
         argv = newArgv;
-        Params.reset();
       }
       startViewer(argv);
     }
   }
 
   public VncViewer(String[] argv) {
-    UserPreferences.load("global");
+    params = new Params();
+    UserPreferences.load("global", params);
 
     setVersion();
 
-    // Override defaults with command-line options
-    for (int i = 0; i < argv.length; i++) {
-      if (argv[i].length() == 0)
-        continue;
+    try {
+      // Override defaults with command-line options
+      for (int i = 0; i < argv.length; i++) {
+        if (argv[i].length() == 0)
+          continue;
 
-      // The following is primarily included so we can ensure that we're
-      // running either a 32-bit or a 64-bit JRE from the Windows .bat file
-      if (argv[i].equalsIgnoreCase("-reqarch")) {
-        if (++i < argv.length) {
-          if (!argv[i].equalsIgnoreCase(System.getProperty("os.arch"))) {
-            reportException(new WarningException("You must use a " +
-              argv[i] +
-              " Java Runtime Environment with this version of TurboVNC."));
-            exit(1);
+        // The following is primarily included so we can ensure that we're
+        // running either a 32-bit or a 64-bit JRE from the Windows .bat file
+        if (argv[i].equalsIgnoreCase("-reqarch")) {
+          if (++i < argv.length) {
+            if (!argv[i].equalsIgnoreCase(System.getProperty("os.arch"))) {
+              reportException(new WarningException("You must use a " +
+                argv[i] +
+                " Java Runtime Environment with this version of TurboVNC."));
+              exit(1);
+            }
           }
+          continue;
         }
-        continue;
-      }
 
-      if (argv[i].equalsIgnoreCase("-config")) {
-        if (++i >= argv.length) usage();
-        try {
-          Params.load(argv[i]);
-        } catch (Exception e) {
-          reportException(e);
-          exit(1);
-        }
-        continue;
-      }
-
-      if (argv[i].equalsIgnoreCase("-loglevel")) {
-        if (++i >= argv.length) usage();
-        System.err.println("Log setting: " + argv[i]);
-        LogWriter.setLogParams(argv[i]);
-        continue;
-      }
-
-      if (argv[i].equalsIgnoreCase("-bench")) {
-        if (i < argv.length - 1) {
+        if (argv[i].equalsIgnoreCase("-config")) {
+          if (++i >= argv.length) usage();
           try {
-            benchFile = new FileInStream(argv[++i]);
+            params.load(argv[i]);
           } catch (Exception e) {
-            reportException(
-              new WarningException("Could not open session capture:\n" +
-                                   e.getMessage()));
+            reportException(e);
             exit(1);
           }
+          continue;
         }
-        continue;
-      }
 
-      if (argv[i].equalsIgnoreCase("-benchiter")) {
-        if (i < argv.length - 1) {
-          int iter = Integer.parseInt(argv[++i]);
-          if (iter > 0) benchIter = iter;
+        if (argv[i].equalsIgnoreCase("-loglevel")) {
+          if (++i >= argv.length) usage();
+          System.err.println("Log setting: " + argv[i]);
+          LogWriter.setLogParams(argv[i]);
+          continue;
         }
-        continue;
-      }
 
-      if (argv[i].equalsIgnoreCase("-benchwarmup")) {
-        if (i < argv.length - 1) {
-          int warmup = Integer.parseInt(argv[++i]);
-          if (warmup > 0) benchWarmup = warmup;
-        }
-        continue;
-      }
-
-      if (Params.set(argv[i]))
-        continue;
-
-      if (argv[i].charAt(0) == '-') {
-        if (i + 1 < argv.length) {
-          if (Params.set(argv[i].substring(1), argv[i + 1])) {
-            i++;
-            continue;
+        if (argv[i].equalsIgnoreCase("-bench")) {
+          if (i < argv.length - 1) {
+            try {
+              benchFile = new FileInStream(argv[++i]);
+            } catch (Exception e) {
+              reportException(
+                new WarningException("Could not open session capture:\n" +
+                                     e.getMessage()));
+              exit(1);
+            }
           }
+          continue;
         }
-        usage();
+
+        if (argv[i].equalsIgnoreCase("-benchiter")) {
+          if (i < argv.length - 1) {
+            int iter = Integer.parseInt(argv[++i]);
+            if (iter > 0) benchIter = iter;
+          }
+          continue;
+        }
+
+        if (argv[i].equalsIgnoreCase("-benchwarmup")) {
+          if (i < argv.length - 1) {
+            int warmup = Integer.parseInt(argv[++i]);
+            if (warmup > 0) benchWarmup = warmup;
+          }
+          continue;
+        }
+
+        if (params.set(argv[i]))
+          continue;
+
+        if (argv[i].charAt(0) == '-') {
+          if (i + 1 < argv.length) {
+            if (params.set(argv[i].substring(1), argv[i + 1])) {
+              i++;
+              continue;
+            }
+          }
+          usage();
+        }
+
+        if (argv[i].toLowerCase().endsWith(".vnc")) {
+          params.load(argv[i]);
+          continue;
+        }
+
+        if (params.server.get() != null)
+          usage();
+        params.server.set(argv[i]);
       }
 
-      if (argv[i].toLowerCase().endsWith(".vnc")) {
-        try {
-          Params.load(argv[i]);
-        } catch (Exception e) {
-          reportException(e);
-          exit(1);
-        }
-        continue;
-      }
-
-      if (Params.vncServerName.getValue() != null)
-        usage();
-      Params.vncServerName.setParam(argv[i]);
+      params.reconcile();
+    } catch (Exception e) {
+      reportException(e);
+      exit(1);
     }
 
-    setGlobalOptions();
+    setGlobalInsets();
   }
 
   public static void usage() {
@@ -529,26 +529,24 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     System.out.println("Copyright (C) " + copyrightYear + " " + copyright);
     System.out.println(url);
     System.out.print(usage);
-    Params.list(80);
+    (new Params()).list(80);
     System.exit(1);
   }
 
-  public VncViewer(Socket sock_) {
-    sock = sock_;
-    opts.serverName = null;
-    opts.port = -1;
+  public VncViewer(Socket sock_, Params params_) {
+    params = params_;  sock = sock_;
   }
 
   public static void newViewer(VncViewer oldViewer, Socket sock,
                                boolean close) {
-    VncViewer viewer = new VncViewer(sock);
+    VncViewer viewer = new VncViewer(sock, new Params(oldViewer.getParams()));
     viewer.start();
     if (close)
       oldViewer.exit(0);
   }
 
   public static void newViewer(VncViewer oldViewer) {
-    if (!Params.noNewConn.getValue())
+    if (!oldViewer.getParams().noNewConn.get())
       newViewer(oldViewer, null, false);
   }
 
@@ -581,11 +579,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   public void start() {
     vlog.debug("start called");
-    String host = opts.serverName;
-    if (host != null && host.indexOf(':') < 0 &&
-        opts.port > 0) {
-      opts.serverName = host + ((opts.port >= 5900 && opts.port <= 5999) ?
-                         (":" + (opts.port - 5900)) : ("::" + opts.port));
+    String host = params.server.get();
+    int port = params.port.get();
+    if (host != null && host.indexOf(':') < 0 && port > 0) {
+      params.server.set(host + ((port >= 5900 && port <= 5999) ?
+                                (":" + (port - 5900)) : ("::" + port)));
     }
     nViewers++;
     thread = new Thread(this);
@@ -662,24 +660,24 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   void showOptions() {
-    options = new OptionsDialog(this);
+    options = new OptionsDialog(this, params);
     options.initDialog();
     options.showDialog();
   }
 
   public void setTightOptions() {
-    options.setTightOptions(opts.preferredEncoding);
+    options.setTightOptions(params.encoding.get());
   }
 
   public void setOptions() {
     options.setX509Enabled(false);
-    options.setOptions(opts, true, true, false, true);
+    options.setOptions(true, true, false, true);
     setTightOptions();
   }
 
   public void getOptions() {
-    options.getOptions(opts);
-    opts.save();
+    options.getOptions();
+    params.save();
     options = null;
   }
 
@@ -696,15 +694,15 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     CConn cc = null;
     int exitStatus = 0;
 
-    if (Params.listenMode.getValue()) {
+    if (params.listenMode.get()) {
       int port = 5500;
 
-      Params.listenMode.setParam(false);
-      if (opts.serverName != null &&
-          Character.isDigit(opts.serverName.charAt(0)))
-        port = Integer.parseInt(opts.serverName);
-      else if (opts.port > 0)
-        port = opts.port;
+      params.listenMode.set(false);
+      String server = params.server.get();
+      if (server != null && Character.isDigit(server.charAt(0)))
+        port = Integer.parseInt(server);
+      else if (params.port.get() > 0)
+        port = params.port.get();
 
       if (TrayMenu.isSupported()) {
         try {
@@ -728,7 +726,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       while (true) {
         Socket newSock = listener.accept();
         if (newSock != null)
-          newViewer(this, newSock, Params.noNewConn.getValue());
+          newViewer(this, newSock, params.noNewConn.get());
         else {
           listener.shutdown();
           vlog.info("Listener exiting ...");
@@ -745,7 +743,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
       try {
         if (cc == null) {
-          cc = new CConn(this, sock);
+          cc = new CConn(this, sock, params);
           if (benchFile == null) {
             synchronized(conns) {
               conns.add(cc);
@@ -753,6 +751,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
           }
         }
         if (benchFile != null) {
+          params.desktopSize.setMode(DesktopSize.SERVER);
+          params.toolbar.set(false);
           if (i < benchWarmup)
             System.out.format("Benchmark warmup run %d\n", i + 1);
           else
@@ -802,7 +802,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         if (cc == null || !cc.shuttingDown) {
           reportException(e, cc != null &&
                           cc.state() == CConnection.RFBSTATE_NORMAL &&
-                          !Params.noReconnect.getValue());
+                          !params.noReconnect.get());
           exitStatus = 1;
           if (cc != null) {
             cc.deleteWindow(true);
@@ -830,149 +830,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     exit(exitStatus);
   }
 
-  void setGlobalOptions() {
-    try {
-
-      if (opts == null)
-        opts = new Options();
-
-      // CONNECTION OPTIONS
-      opts.port = Params.vncServerPort.getValue();
-      Params.vncServerPort.setValue(-1);
-      opts.recvClipboard = Params.recvClipboard.getValue();
-      opts.sendClipboard = Params.sendClipboard.getValue();
-      opts.shared = Params.shared.getValue();
-
-      // INPUT OPTIONS
-      opts.fsAltEnter = Params.fsAltEnter.getValue();
-      if (Utils.osGrab()) {
-        if (Params.grabKeyboard.getValue().toLowerCase().startsWith("f"))
-          opts.grabKeyboard = Options.GRAB_FS;
-        else if (Params.grabKeyboard.getValue().toLowerCase().startsWith("a"))
-          opts.grabKeyboard = Options.GRAB_ALWAYS;
-        else if (Params.grabKeyboard.getValue().toLowerCase().startsWith("m"))
-          opts.grabKeyboard = Options.GRAB_MANUAL;
-      }
-      opts.menuKeyCode = MenuKey.getMenuKeyCode(Params.menuKey.getValue());
-      opts.menuKeySym = MenuKey.getMenuKeySym(Params.menuKey.getValue());
-      opts.reverseScroll = Params.reverseScroll.getValue();
-      opts.viewOnly = Params.viewOnly.getValue();
-
-      // DISPLAY OPTIONS
-      opts.acceptBell = Params.acceptBell.getValue();
-      opts.cursorShape = Params.cursorShape.getValue();
-
-      if (benchFile != null)
-        opts.desktopSize.mode = Options.SIZE_SERVER;
-      else {
-        Options.DesktopSize size =
-          Options.parseDesktopSize(Params.desktopSize.getValue());
-        if (size == null)
-          throw new ErrorException("DesktopSize parameter is incorrect");
-        opts.desktopSize = size;
-      }
-
-      opts.fullScreen = Params.fullScreen.getValue();
-
-      opts.scalingFactor =
-        Integer.parseInt(Params.scalingFactor.getDefaultStr());
-      opts.setScalingFactor(Params.scalingFactor.getValue());
-      if (opts.scalingFactor != 100 &&
-          opts.desktopSize.mode == Options.SIZE_AUTO) {
-        vlog.info("Desktop scaling enabled.  Disabling automatic desktop resizing.");
-        opts.desktopSize.mode = Options.SIZE_SERVER;
-      }
-
-      if (Params.span.getValue().toLowerCase().startsWith("p"))
-        opts.span = Options.SPAN_PRIMARY;
-      else if (Params.span.getValue().toLowerCase().startsWith("al"))
-        opts.span = Options.SPAN_ALL;
-      else
-        opts.span = Options.SPAN_AUTO;
-
-      opts.showToolbar = Params.showToolbar.getValue() && (benchFile == null);
-
-      // ENCODING OPTIONS
-      opts.compressLevel = Params.compressLevel.getValue();
-
-      String encStr = Params.preferredEncoding.getValue();
-      int encNum = RFB.encodingNum(encStr);
-      if (encNum != -1)
-        opts.preferredEncoding = encNum;
-      else
-        opts.preferredEncoding =
-          RFB.encodingNum(Params.preferredEncoding.getDefaultStr());
-
-      opts.allowJpeg = Params.allowJpeg.getValue();
-      opts.quality = Params.quality.getValue();
-
-      opts.subsampling = Options.SUBSAMP_NONE;
-      switch (Params.subsampling.getValue().toUpperCase().charAt(0)) {
-        case '2':
-          opts.subsampling = Options.SUBSAMP_2X;
-          break;
-        case '4':
-          opts.subsampling = Options.SUBSAMP_4X;
-          break;
-        case 'G':
-          opts.subsampling = Options.SUBSAMP_GRAY;
-          break;
-      }
-
-      // SECURITY AND AUTHENTICATION OPTIONS
-      opts.sendLocalUsername = Params.sendLocalUsername.getValue();
-      if (Params.user.getValue() != null)
-        opts.user = new String(Params.user.getValue());
-      opts.setSecurityTypes(Params.secTypes.getValue());
-      opts.tunnel = Params.tunnel.getValue();
-
-      String v = Params.via.getValue();
-      if (v != null && !v.isEmpty()) {
-        int atIndex = v.lastIndexOf('@');
-        if (atIndex >= 0) {
-          opts.via = v.substring(atIndex + 1);
-          opts.sshUser = v.substring(0, atIndex);
-        } else {
-          opts.via = new String(v);
-        }
-        if (opts.via != null) {
-          opts.via = opts.via.replaceAll("\\s", "");
-          if (opts.via.length() == 0)
-            opts.via = null;
-        }
-      }
-
-      if (Params.x509ca.getValue() != null)
-        opts.x509ca = new String(Params.x509ca.getValue());
-      if (Params.x509crl.getValue() != null)
-        opts.x509crl = new String(Params.x509crl.getValue());
-
-      String s = Params.vncServerName.getValue();
-      if (s != null) {
-        int atIndex = s.lastIndexOf('@');
-        if (atIndex >= 0) {
-          opts.serverName = s.substring(atIndex + 1);
-          opts.sshUser = s.substring(0, atIndex);
-        } else {
-          opts.serverName = new String(s);
-        }
-        if (opts.serverName != null) {
-          opts.serverName = opts.serverName.replaceAll("\\s", "");
-          if (opts.serverName.length() == 0)
-            opts.serverName = null;
-        }
-      }
-      Params.vncServerName.setParam(null);
-
-    } catch (Exception e) {
-      reportException(new WarningException("Could not set global options:\n" +
-                                           e.getMessage()));
-      exit(1);
-    }
-
-    setGlobalInsets();
-  }
-
   // Is the keyboard grabbed by any TurboVNC Viewer window?
   public static boolean isKeyboardGrabbed() {
     synchronized(VncViewer.class) {
@@ -993,6 +850,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     }
   }
 
+  public Params getParams() { return params; }
+
   Thread thread;
   Socket sock;
   static int nViewers;
@@ -1000,7 +859,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   FileInStream benchFile;
   int benchIter = 1;
   int benchWarmup = 0;
-  static Options opts;
+  private Params params;
   static boolean forceAlpha;
   OptionsDialog options;
   TrayMenu trayMenu;

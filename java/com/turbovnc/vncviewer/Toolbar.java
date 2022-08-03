@@ -56,11 +56,11 @@ public class Toolbar extends JToolBar implements ActionListener {
     setFloatable(false);
     setBorder(new EmptyBorder(1, 2, 1, 0));
     for (int i = 0; i < 12; i++) {
-      if (i >= 6 && i <= 9 && cc.opts.viewOnly)
+      if (i >= 6 && i <= 9 && cc.params.viewOnly.get())
         continue;
-      if (i >= 10 && i <= 11 && Params.noNewConn.getValue())
+      if (i >= 10 && i <= 11 && cc.params.noNewConn.get())
         continue;
-      if (i >= 6 && i <= 7 && Params.restricted.getValue())
+      if (i >= 6 && i <= 7 && cc.params.restricted.get())
         continue;
       ImageIcon icon = new ImageIcon(
         tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
@@ -87,8 +87,9 @@ public class Toolbar extends JToolBar implements ActionListener {
       add(button);
       add(Box.createHorizontalStrut(2));
       if (i == 1 ||
-          (i == 5 && (!cc.opts.viewOnly || !Params.noNewConn.getValue())) ||
-          (i == 9 && !Params.noNewConn.getValue())) {
+          (i == 5 && (!cc.params.viewOnly.get() ||
+                      !cc.params.noNewConn.get())) ||
+          (i == 9 && !cc.params.noNewConn.get())) {
         // ref http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4346610
         add(new JSeparator(JSeparator.VERTICAL) {
           public Dimension getMaximumSize() {
@@ -116,7 +117,7 @@ public class Toolbar extends JToolBar implements ActionListener {
     } else if (((AbstractButton)s).getName() == BUTTONS[5]) {
       cc.screenshot();
     } else if (((AbstractButton)s).getName() == BUTTONS[6] &&
-               !cc.opts.viewOnly) {
+               !cc.params.viewOnly.get()) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       cc.writeKeyEvent(Keysyms.ALT_L, true);
       cc.writeKeyEvent(Keysyms.DELETE, true);
@@ -124,20 +125,20 @@ public class Toolbar extends JToolBar implements ActionListener {
       cc.writeKeyEvent(Keysyms.ALT_L, false);
       cc.writeKeyEvent(Keysyms.CONTROL_L, false);
     } else if (((AbstractButton)s).getName() == BUTTONS[7] &&
-               !cc.opts.viewOnly) {
+               !cc.params.viewOnly.get()) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       cc.writeKeyEvent(Keysyms.ESCAPE, true);
       cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       cc.writeKeyEvent(Keysyms.ESCAPE, false);
     } else if (((AbstractButton)s).getName() == BUTTONS[8] &&
-               !cc.opts.viewOnly) {
+               !cc.params.viewOnly.get()) {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       } else {
         cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       }
     } else if (((AbstractButton)s).getName() == BUTTONS[9] &&
-               !cc.opts.viewOnly) {
+               !cc.params.viewOnly.get()) {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.ALT_L, true);
       } else {

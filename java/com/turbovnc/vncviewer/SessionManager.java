@@ -1,4 +1,4 @@
-/*  Copyright (C) 2018, 2020-2021 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C) 2018, 2020-2022 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,18 +39,18 @@ public final class SessionManager extends Tunnel {
 
   public static final int MAX_SESSIONS = 256;
 
-  public static String createSession(Options opts) throws Exception {
-    String host =  Hostname.getHost(opts.serverName);
+  public static String createSession(Params params) throws Exception {
+    String host =  Hostname.getHost(params.server.get());
 
     vlog.debug("Opening SSH connection to host " + host);
-    createTunnelJSch(host, opts);
+    createTunnelJSch(host, params);
 
     boolean firstTime = true;
     while (true) {
-      String[] sessions = getSessions(opts.sshSession, host);
+      String[] sessions = getSessions(params.sshSession, host);
 
       if ((sessions == null || sessions.length <= 0) && firstTime) {
-        return startSession(opts.sshSession, host);
+        return startSession(params, host);
       } else {
         SessionManagerDialog dlg = new SessionManagerDialog(sessions, host);
         dlg.initDialog();
@@ -58,18 +58,17 @@ public final class SessionManager extends Tunnel {
         if (!ret) return null;
         else if (dlg.getConnectSession() != null) {
           if (dlg.getConnectSession().equals("NEW"))
-            return startSession(opts.sshSession, host);
+            return startSession(params, host);
           else {
-            if (Params.sessMgrAuto.getValue())
-              generateOTP(opts.sshSession, host, dlg.getConnectSession(), true,
+            if (params.sessMgrAuto.get())
+              generateOTP(params, host, dlg.getConnectSession(), true,
                           dlg.getViewOnly());
             return dlg.getConnectSession();
           }
         } else if (dlg.getKillSession() != null) {
-          killSession(opts.sshSession, host, dlg.getKillSession());
+          killSession(params.sshSession, host, dlg.getKillSession());
         } else if (dlg.getNewOTPSession() != null) {
-          String otp = generateOTP(opts.sshSession, host,
-                                   dlg.getNewOTPSession(), false,
+          String otp = generateOTP(params, host, dlg.getNewOTPSession(), false,
                                    dlg.getViewOnly());
           String msg = "New " +
                        (dlg.getViewOnly() ? "view-only " : "full control ") +
@@ -166,11 +165,12 @@ public final class SessionManager extends Tunnel {
     return sessions;
   }
 
-  private static String startSession(Session sshSession, String host)
+  private static String startSession(Params params, String host)
                                      throws Exception {
     vlog.debug("Starting new TurboVNC session on host " + host);
 
-    ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
+    ChannelExec channelExec =
+      (ChannelExec)params.sshSession.openChannel("exec");
 
     String dir = System.getProperty("turbovnc.serverdir");
     if (dir == null)
@@ -183,8 +183,7 @@ public final class SessionManager extends Tunnel {
       args = System.getenv("TVNC_SERVERARGS");
 
     String command = dir + "/bin/vncserver -sessionstart" +
-                     (Params.sessMgrAuto.getValue() ? " -securitytypes otp" :
-                      "") +
+                     (params.sessMgrAuto.get() ? " -securitytypes otp" : "") +
                      (args != null ? " " + args : "");
     channelExec.setCommand("bash -c \"set -o pipefail; " + command +
                            " | sed \'s/^/[TURBOVNC] /g\'\"");
@@ -246,21 +245,22 @@ public final class SessionManager extends Tunnel {
     if (sessions == null)
       throw new ErrorException("Could not parse TurboVNC Server output");
 
-    if (Params.sessMgrAuto.getValue())
-      generateOTP(sshSession, host, sessions[0], true, false);
+    if (params.sessMgrAuto.get())
+      generateOTP(params, host, sessions[0], true, false);
 
     return sessions[0];
   }
 
   @SuppressWarnings("checkstyle:EmptyBlock")
-  private static String generateOTP(Session sshSession, String host,
-                                    String session, boolean setPassword,
-                                    boolean viewOnly) throws Exception {
+  private static String generateOTP(Params params, String host, String session,
+                                    boolean setPassword, boolean viewOnly)
+                                    throws Exception {
     vlog.debug("Generating one-time password for session " + host + session);
 
     VncViewer.noExceptionDialog = true;
 
-    ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
+    ChannelExec channelExec =
+      (ChannelExec)params.sshSession.openChannel("exec");
 
     String dir = System.getProperty("turbovnc.serverdir");
     if (dir == null)
@@ -304,7 +304,7 @@ public final class SessionManager extends Tunnel {
     if (result != null) {
       result = result.replaceAll("\\s", "");
       result = result.replaceAll("^.*:", "");
-      if (setPassword) Params.password.setParam(result);
+      if (setPassword) params.password.set(result);
     }
 
     channelExec.disconnect();

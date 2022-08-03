@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018, 2022 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,49 +21,53 @@ package com.turbovnc.rfb;
 
 public class IntParameter extends VoidParameter {
 
-  public IntParameter(String name_, String desc_, int v) {
-    super(name_, desc_);
-    value = v;
-    defValue = v;
+  public IntParameter(String name, Params params, boolean isGUI, String desc,
+                      int defValue_) {
+    super(name, params, isGUI, desc);
+    value = defValue = defValue_;
     minValue = Integer.MIN_VALUE;
     maxValue = Integer.MAX_VALUE;
     useMinMax = false;
   }
 
-  public IntParameter(String name_, String desc_, int v, int minValue_,
-    int maxValue_) {
-    super(name_, desc_);
-    value = v;
-    defValue = v;
+  public IntParameter(String name, Params params, boolean isGUI, String desc,
+                      int defValue_, int minValue_, int maxValue_) {
+    super(name, params, isGUI, desc);
+    value = defValue = defValue_;
     maxValue = maxValue_;
     minValue = minValue_;
     useMinMax = true;
   }
 
-  public boolean setParam(String v) {
+  public boolean set(String str) {
     int i;
     try {
-      i = Integer.parseInt(v);
+      i = Integer.parseInt(str);
     } catch (NumberFormatException e) {
       return false;
     }
-    return setValue(i);
+    return set(i);
   }
 
-  public synchronized boolean setValue(int v) {
-    if (useMinMax && (v < minValue || v > maxValue))
+  public final synchronized boolean set(int value_) {
+    if (useMinMax && (value_ < minValue || value_ > maxValue))
       return false;
-    value = v;
+    value = value_;
     return true;
   }
 
-  public synchronized void reset() { value = defValue; }
+  public final synchronized void reset() { value = defValue; }
+
+  public synchronized int get() { return value; }
 
   public String getDefaultStr() {
     if (defValue >= 0)
       return Integer.toString(defValue);
     return null;
   }
+
+  public synchronized String getStr() { return Integer.toString(value); }
+
   public String getValues() {
     if (useMinMax) {
       return minValue + "-" + maxValue;
@@ -71,11 +75,7 @@ public class IntParameter extends VoidParameter {
     return null;
   }
 
-  public synchronized int getValue() { return value; }
-
-  protected int value;
-  protected final int defValue;
-  protected final int minValue;
-  protected final int maxValue;
-  final boolean useMinMax;
+  int value;
+  final int defValue, minValue, maxValue;
+  private final boolean useMinMax;
 }

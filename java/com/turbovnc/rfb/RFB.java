@@ -212,7 +212,7 @@ public final class RFB {
   public static final int ENCODING_HEXTILE  = 5;
   public static final int ENCODING_TIGHT    = 7;
   public static final int ENCODING_ZRLE     = 16;
-  public static final int ENCODING_LAST     = ENCODING_TIGHT;
+  public static final int ENCODING_LAST     = ENCODING_ZRLE;
 
   public static final int ENCODING_MAX      = 255;
 

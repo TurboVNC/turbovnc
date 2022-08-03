@@ -32,20 +32,40 @@ import com.turbovnc.rdr.*;
 
 public final class Params {
 
+  public static final int DEFQUAL = 95;
+
+  public Params() {}
+
+  // Deep copy
+  public Params(Params oldParams) {
+    VoidParameter current = head;
+
+    while (current != null) {
+      if (!(current instanceof HeaderParameter) &&
+          !(current instanceof AliasParameter) &&
+          !current.getName().equalsIgnoreCase("server") &&
+          !current.getName().equalsIgnoreCase("port")) {
+        VoidParameter oldCurrent = oldParams.get(current.getName());
+        current.set(oldCurrent.getStr());
+      }
+      current = current.next;
+    }
+  }
+
   // - Set named parameter to value
-  public static boolean set(String name, String value) {
+  public boolean set(String name, String value) {
     VoidParameter param = get(name);
     if (param == null) return false;
     if (param instanceof BoolParameter && ((BoolParameter)param).reverse) {
       ((BoolParameter)param).reverse = false;
-      ((BoolParameter)param).setParam(value, true);
+      ((BoolParameter)param).set(value, true);
       return true;
     }
-    return param.setParam(value);
+    return param.set(value);
   }
 
   // - Set parameter to value (separated by "=")
-  public static boolean set(String arg) {
+  public boolean set(String arg) {
     boolean hyphen = false;
     if (arg.charAt(0) == '-' && arg.length() > 1) {
       hyphen = true;
@@ -62,16 +82,16 @@ public final class Params {
       if (param == null) return false;
       if (param instanceof BoolParameter && ((BoolParameter)param).reverse) {
         ((BoolParameter)param).reverse = false;
-        ((BoolParameter)param).setParam(false);
+        ((BoolParameter)param).set(false);
         return true;
       }
-      return param.setParam();
+      return param.set();
     }
     return false;
   }
 
   // - Get named parameter
-  public static VoidParameter get(String name) {
+  public VoidParameter get(String name) {
     VoidParameter current = head;
     while (current != null) {
       if (name.equalsIgnoreCase(current.getName()))
@@ -90,7 +110,7 @@ public final class Params {
     return null;
   }
 
-  public static void list(int width) {
+  public void list(int width) {
     VoidParameter current = head;
 
     while (current != null) {
@@ -143,7 +163,7 @@ public final class Params {
     }
   }
 
-  public static void load(String filename) {
+  public void load(String filename) {
     if (filename == null)
       return;
 
@@ -175,12 +195,12 @@ public final class Params {
       } else if (name.equalsIgnoreCase("user")) {
         set("User", props.getProperty(name));
       } else if (name.equalsIgnoreCase("preferred_encoding")) {
-        int encoding = -1;
+        int encodingNum = -1;
         try {
-          encoding = Integer.parseInt(props.getProperty(name));
+          encodingNum = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
-        if (encoding >= 0 && encoding <= RFB.ENCODING_LAST)
-          set("Encoding", RFB.encodingName(encoding));
+        if (encodingNum >= 0 && encodingNum <= RFB.ENCODING_LAST)
+          set("Encoding", RFB.encodingName(encodingNum));
       } else if (name.equalsIgnoreCase("restricted")) {
         set("Restricted", props.getProperty(name));
       } else if (name.equalsIgnoreCase("viewonly")) {
@@ -197,11 +217,11 @@ public final class Params {
           grabKeyboardValue = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         switch (grabKeyboardValue) {
-          case Options.GRAB_FS:
+          case GrabParameter.FS:
             set("GrabKeyboard", "FS");  break;
-          case Options.GRAB_ALWAYS:
+          case GrabParameter.ALWAYS:
             set("GrabKeyboard", "Always");  break;
-          case Options.GRAB_MANUAL:
+          case GrabParameter.MANUAL:
             set("GrabKeyboard", "Manual");  break;
         }
       } else if (name.equalsIgnoreCase("span")) {
@@ -283,10 +303,10 @@ public final class Params {
           subsamplingValue = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         switch (subsamplingValue) {
-          case Options.SUBSAMP_NONE:  set("Subsampling", "1X");  break;
-          case Options.SUBSAMP_4X:    set("Subsampling", "4X");  break;
-          case Options.SUBSAMP_2X:    set("Subsampling", "2X");  break;
-          case Options.SUBSAMP_GRAY:  set("Subsampling", "Gray");  break;
+          case SubsampParameter.NONE:  set("Subsampling", "1X");  break;
+          case SubsampParameter.FOURX: set("Subsampling", "4X");  break;
+          case SubsampParameter.TWOX:  set("Subsampling", "2X");  break;
+          case SubsampParameter.GRAY:  set("Subsampling", "Gray");  break;
         }
       } else if (name.equalsIgnoreCase("quality")) {
         int qualityValue = -2;
@@ -317,19 +337,50 @@ public final class Params {
       set("DesktopSize", desktopSizeStr);
     else {
       switch (resizeMode) {
-        case Options.SIZE_SERVER:
+        case DesktopSize.SERVER:
           set("DesktopSize", "Server");  break;
-        case Options.SIZE_MANUAL:
+        case DesktopSize.MANUAL:
           if (desktopWidth > 0 && desktopHeight > 0)
             set("DesktopSize", desktopWidth + "x" + desktopHeight);
           break;
-        case Options.SIZE_AUTO:
+        case DesktopSize.AUTO:
           set("DesktopSize", "Auto");  break;
       }
     }
+
+    reconcile();
   }
 
-  public static void reset() {
+  public void print(String message) {
+    VoidParameter current = head;
+
+    System.out.println("\nParameters (" + message + "):");
+
+    while (current != null) {
+      if (!(current instanceof HeaderParameter)) {
+        String str = current.getStr();
+        if (tunnel.get() && current.getName().equalsIgnoreCase("Server") &&
+            str != null && sshUser != null)
+          System.out.println(current.getName() + " = " + sshUser + "@" + str);
+        else if (!tunnel.get() && current.getName().equalsIgnoreCase("Via") &&
+                 str != null && sshUser != null)
+          System.out.println(current.getName() + " = " + sshUser + "@" + str);
+        else
+          System.out.println(current.getName() + " = " +
+                             (str == null ? "" : str));
+      }
+      current = current.next;
+    }
+  }
+
+  public void reconcile() {
+    if (scale.get() != 100 && desktopSize.getMode() == DesktopSize.AUTO) {
+      vlog.info("Desktop scaling enabled.  Disabling automatic desktop resizing.");
+      desktopSize.setMode(DesktopSize.SERVER);
+    }
+  }
+
+  public void reset() {
     VoidParameter current = head;
 
     while (current != null) {
@@ -339,54 +390,95 @@ public final class Params {
     }
   }
 
+  public void save() {
+    VoidParameter current = head;
+
+    while (current != null) {
+      if (current.isGUI()) {
+        String name = current.getName();
+        String value = current.getStr();
+
+        // NOTE: We use key names of "SecTypes" rather than "SecurityTypes" and
+        // "Username" rather than "User".  This is to prevent older versions of
+        // the TurboVNC Viewer from automatically loading these values into
+        // parameters, since older versions of the TurboVNC Viewer did not
+        // provide a way to configure the values of those parameters using the
+        // GUI.
+        if (name.equalsIgnoreCase("User"))
+          name = "Username";
+        else if (name.equalsIgnoreCase("SecurityTypes"))
+          name = "SecTypes";
+
+        // Java Preferences keys are case-sensitive, and previous versions of
+        // TurboVNC used lowercase key names for these parameters.
+        else if (name.equalsIgnoreCase("Tunnel") ||
+                 name.equalsIgnoreCase("Via") ||
+                 name.equalsIgnoreCase("X509CA") ||
+                 name.equalsIgnoreCase("X509CRL"))
+          name = name.toLowerCase();
+
+        if (name.equalsIgnoreCase("Via") && value != null && sshUser != null)
+          UserPreferences.set("global", name, sshUser + "@" + value);
+        else
+          UserPreferences.set("global", name, value);
+      }
+      current = current.next;
+    }
+
+    UserPreferences.save();
+  }
+
   // CHECKSTYLE Indentation:OFF
   // CHECKSTYLE VisibilityModifier:OFF
 
   // CONNECTION PARAMETERS
 
-  private static HeaderParameter connHeader =
-  new HeaderParameter("ConnHeader", "CONNECTION PARAMETERS");
+  private HeaderParameter connHeader =
+  new HeaderParameter("ConnHeader", this, "CONNECTION PARAMETERS");
 
-  public static BoolParameter alwaysShowConnectionDialog =
-  new BoolParameter("AlwaysShowConnectionDialog",
+  public BoolParameter alwaysShowConnectionDialog =
+  new BoolParameter("AlwaysShowConnectionDialog", this, false,
   "Always show the \"New TurboVNC Connection\" dialog even if the server " +
   "has been specified on the command line.", false);
 
-  public static BoolParameter clientRedirect =
-  new BoolParameter("ClientRedirect", null, false);
+  public BoolParameter clientRedirect =
+  new BoolParameter("ClientRedirect", this, false,
+  null, false);
 
-  public static StringParameter config =
-  new StringParameter("Config",
+  public StringParameter config =
+  new StringParameter("Config", this, false,
   "File from which to read connection information.  This file can be " +
   "generated by selecting \"Save connection info as...\" in the system menu " +
   "of the Windows TurboVNC Viewer.  Connection info files can also be " +
   "dragged & dropped onto the TurboVNC Viewer icon in order to initiate a " +
   "new connection.", null);
 
-  public static BoolParameter confirmClose =
-  new BoolParameter("ConfirmClose",
+  public BoolParameter confirmClose =
+  new BoolParameter("ConfirmClose", this, false,
   "Prompt for confirmation before closing a connection.", false);
 
-  public static BoolParameter copyRect =
-  new BoolParameter("CopyRect", null, true);
+  public BoolParameter copyRect =
+  new BoolParameter("CopyRect", this, false,
+  null, true);
 
-  public static BoolParameter continuousUpdates =
-  new BoolParameter("CU", null, true);
+  public BoolParameter continuousUpdates =
+  new BoolParameter("CU", this, false,
+  null, true);
 
-  public static BoolParameter listenMode =
-  new BoolParameter("Listen",
+  public BoolParameter listenMode =
+  new BoolParameter("Listen", this, false,
   "Start the viewer in \"listen mode.\"  The viewer will listen on port " +
   "5500 (or on the port specified by the Port parameter) for reverse " +
   "connections from a VNC server.  To connect a TurboVNC session to a " +
   "listening viewer, use the vncconnect program on the TurboVNC host.", false);
 
-  public static IntParameter maxClipboard =
-  new IntParameter("MaxClipboard",
+  public IntParameter maxClipboard =
+  new IntParameter("MaxClipboard", this, false,
   "Maximum permitted length of an incoming or outgoing clipboard update (in " +
   "bytes)", 1048576);
 
-  public static BoolParameter noNewConn =
-  new BoolParameter("NoNewConn",
+  public BoolParameter noNewConn =
+  new BoolParameter("NoNewConn", this, false,
   "Always exit after the first connection closes, and do not allow new " +
   "connections to be made without restarting the viewer.  This is useful in " +
   "portal environments that need to control when and how the viewer is " +
@@ -394,14 +486,14 @@ public final class Params {
   "option in the F8 menu and the \"Disconnect\" button in the toolbar.",
   false);
 
-  public static BoolParameter noReconnect =
-  new BoolParameter("NoReconnect",
+  public BoolParameter noReconnect =
+  new BoolParameter("NoReconnect", this, false,
   "Normally, if the viewer is disconnected from the server unexpectedly, " +
   "the viewer will ask whether you want to reconnect.  Setting this " +
   "parameter disables that behavior.", false);
 
-  public static IntParameter vncServerPort =
-  new IntParameter("Port",
+  public IntParameter port =
+  new IntParameter("Port", this, false,
   "The TCP port number on which the VNC server is listening.  For Un*x VNC " +
   "servers, this is typically 5900 + the X display number of the VNC " +
   "session (example: 5901 if connecting to display :1.)  For Windows and " +
@@ -412,8 +504,8 @@ public final class Params {
   "which the viewer will listen for reverse connections from a VNC server.  " +
   "(default = 5500)", -1);
 
-  public static IntParameter profileInt =
-  new IntParameter("ProfileInterval",
+  public IntParameter profileInt =
+  new IntParameter("ProfileInterval", this, false,
   "TurboVNC includes an internal profiling system that can be used to " +
   "display performance statistics about the connection, such as how many " +
   "updates per second are being received and how much network bandwidth is " +
@@ -425,18 +517,18 @@ public final class Params {
   "updated in the dialog or on the console.  The statistics are averaged " +
   "over this interval.", 5);
 
-  public static BoolParameter recvClipboard =
-  new BoolParameter("RecvClipboard",
+  public BoolParameter recvClipboard =
+  new BoolParameter("RecvClipboard", this, true,
   "Synchronize the local clipboard with the clipboard of the TurboVNC " +
   "session whenever the latter changes.", true);
 
-  public static BoolParameter sendClipboard =
-  new BoolParameter("SendClipboard",
+  public BoolParameter sendClipboard =
+  new BoolParameter("SendClipboard", this, true,
   "Synchronize the TurboVNC session clipboard with the local clipboard " +
   "whenever the latter changes.", true);
 
-  public static StringParameter vncServerName =
-  new StringParameter("Server",
+  public ServerNameParameter server =
+  new ServerNameParameter("Server", this, false,
   "The VNC server to which to connect.  This can be specified in the " +
   "format {host}[:{display_number}] or {host}::{port}, where {host} is the " +
   "host name or IP address of the machine on which the VNC server is " +
@@ -448,8 +540,8 @@ public final class Params {
    "an existing TurboVNC session to which to connect." :
    "number (default: 0), and {port} is a TCP port."), null);
 
-  public static BoolParameter shared =
-  new BoolParameter("Shared",
+  public BoolParameter shared =
+  new BoolParameter("Shared", this, true,
   "Request a shared VNC session.  When the session is shared, other users " +
   "can connect to the session (assuming they have the correct " +
   "authentication credentials) and collaborate with the user who started " +
@@ -459,35 +551,34 @@ public final class Params {
 
   // INPUT PARAMETERS
 
-  private static HeaderParameter inputHeader =
-  new HeaderParameter("InputHeader", "INPUT PARAMETERS");
+  private HeaderParameter inputHeader =
+  new HeaderParameter("InputHeader", this, "INPUT PARAMETERS");
 
-  public static BoolParameter fsAltEnter =
-  new BoolParameter("FSAltEnter",
+  public BoolParameter fsAltEnter =
+  new BoolParameter("FSAltEnter", this, true,
   "Normally, the viewer will switch into and out of full-screen mode when " +
   "Ctrl-Alt-Shift-F is pressed or \"Full screen\" is selected from the " +
   "popup menu.  Setting this parameter will additionally cause the viewer " +
   "to switch into and out of full-screen mode when Alt-Enter is pressed.",
   false);
 
-  public static StringParameter grabKeyboard =
-  new StringParameter("GrabKeyboard",
-  Utils.osGrab() ? "When the keyboard is grabbed, special key sequences " +
-  "(such as Alt-Tab) that are used to switch windows and perform other " +
-  "window management functions are passed to the VNC server instead of " +
-  "being handled by the local window manager.  The default behavior " +
-  "(\"FS\") is to automatically grab the keyboard in full-screen mode and " +
-  "ungrab it in windowed mode.  When this parameter is set to \"Always\", " +
-  "the keyboard is automatically grabbed in both full-screen mode and " +
-  "windowed mode.  When this parameter is set to \"Manual\", the keyboard " +
-  "is only grabbed or ungrabbed when the \"Grab Keyboard\" option is " +
-  "selected in the F8 menu, or when the Ctrl-Alt-Shift-G hotkey is " +
-  "pressed.  Regardless of the grabbing mode, the F8 menu option and hotkey " +
-  "can always be used to grab or ungrab the keyboard." : null, "FS",
-  "Always, FS, Manual");
+  public GrabParameter grabKeyboard =
+  new GrabParameter("GrabKeyboard", this, true,
+  "When the keyboard is grabbed, special key sequences (such as Alt-Tab) " +
+  "that are used to switch windows and perform other window management " +
+  "functions are passed to the VNC server instead of being handled by the " +
+  "local window manager.  The default behavior (\"FS\") is to automatically " +
+  "grab the keyboard in full-screen mode and ungrab it in windowed mode.  " +
+  "When this parameter is set to \"Always\", the keyboard is automatically " +
+  "grabbed in both full-screen mode and windowed mode.  When this parameter " +
+  "is set to \"Manual\", the keyboard is only grabbed or ungrabbed when the " +
+  "\"Grab Keyboard\" option is selected in the F8 menu, or when the " +
+  "Ctrl-Alt-Shift-G hotkey is pressed.  Regardless of the grabbing mode, " +
+  "the F8 menu option and hotkey can always be used to grab or ungrab the " +
+  "keyboard.", GrabParameter.FS);
 
-  public static BoolParameter grabPointer =
-  new BoolParameter("GrabPointer",
+  public BoolParameter grabPointer =
+  new BoolParameter("GrabPointer", this, false,
   Utils.isX11() ? "If this parameter is set, then the pointer will be " +
   "grabbed whenever the keyboard is grabbed.  This allows certain keyboard " +
   "+ pointer sequences, such as Alt-{drag}, to be passed to the server.  " +
@@ -497,42 +588,43 @@ public final class Params {
   "other running applications.)  Thus, this parameter is primarily useful " +
   "in conjunction with GrabKeyboard=FS." : null, true);
 
-  public static StringParameter menuKey =
-  new StringParameter("MenuKey",
-  "The key used to display the popup menu", "F8",
-  MenuKey.getMenuKeyValueStr());
+  public MenuKeyParameter menuKey =
+  new MenuKeyParameter("MenuKey", this, true,
+  "The key used to display the popup menu", "F8");
 
   // Prevent the viewer from sending Ctrl-Alt-Del and Ctrl-Esc to the server
-  public static BoolParameter restricted =
-  new BoolParameter("Restricted", null, false);
+  public BoolParameter restricted =
+  new BoolParameter("Restricted", this, false,
+  null, false);
 
-  public static BoolParameter reverseScroll =
-  new BoolParameter("ReverseScroll",
+  public BoolParameter reverseScroll =
+  new BoolParameter("ReverseScroll", this, true,
   "Reverse the direction of mouse scroll wheel events that are sent to the " +
   "VNC server.  This is useful when connecting from clients that have " +
   "\"natural scrolling\" enabled.", false);
 
-  public static BoolParameter viewOnly =
-  new BoolParameter("ViewOnly",
+  public BoolParameter viewOnly =
+  new BoolParameter("ViewOnly", this, true,
   "Ignore all keyboard and mouse events in the viewer window and do not " +
   "pass those events to the VNC server.", false);
 
   // Set to 0 to disable the view-only checkbox in the Options dialog
-  public static BoolParameter viewOnlyControl =
-  new BoolParameter("ViewOnlyControl", null, true);
+  public BoolParameter viewOnlyControl =
+  new BoolParameter("ViewOnlyControl", this, false,
+  null, true);
 
   // DISPLAY PARAMETERS
 
-  private static HeaderParameter displayHeader =
-  new HeaderParameter("DisplayHeader", "DISPLAY PARAMETERS");
+  private HeaderParameter displayHeader =
+  new HeaderParameter("DisplayHeader", this, "DISPLAY PARAMETERS");
 
-  public static BoolParameter acceptBell =
-  new BoolParameter("AcceptBell",
+  public BoolParameter acceptBell =
+  new BoolParameter("AcceptBell", this, true,
   "Produce a system beep when a \"bell\" event is received from the VNC " +
   "server.", true);
 
-  public static IntParameter colors =
-  new IntParameter("Colors",
+  public IntParameter colors =
+  new IntParameter("Colors", this, false,
   "The color depth to use for the viewer's window.  Setting this parameter " +
   "to 8 specifies a BGR111 pixel format (1 bit for each red, green, and " +
   "blue component), 64 specifies a BGR222 pixel format, 256 specifies a " +
@@ -546,8 +638,8 @@ public final class Params {
   "viewer is running, which is usually true color (8 bits per component.)",
   -1);
 
-  public static BoolParameter compatibleGUI =
-  new BoolParameter("CompatibleGUI",
+  public BoolParameter compatibleGUI =
+  new BoolParameter("CompatibleGUI", this, false,
   "Normally, the TurboVNC Viewer GUI exposes only the settings that are " +
   "useful for TurboVNC servers.  Setting this parameter changes the " +
   "compression level slider such that it can be used to select any " +
@@ -556,16 +648,16 @@ public final class Params {
   "encoding type other than Tight or when selecting a compression level " +
   "that the GUI normally does not expose.", false);
 
-  public static BoolParameter currentMonitorIsPrimary =
-  new BoolParameter("CurrentMonitorIsPrimary",
+  public BoolParameter currentMonitorIsPrimary =
+  new BoolParameter("CurrentMonitorIsPrimary", this, false,
   "If this parameter is set, then the monitor that contains the largest " +
   "number of pixels from the viewer window will be treated as the primary " +
   "monitor for the purposes of spanning.  Otherwise, the left-most and " +
   "top-most monitor will always be the primary monitor (as was the case in " +
   "TurboVNC 2.0 and prior versions.)", true);
 
-  public static BoolParameter cursorShape =
-  new BoolParameter("CursorShape",
+  public BoolParameter cursorShape =
+  new BoolParameter("CursorShape", this, true,
   "Normally, the TurboVNC Server and compatible VNC servers will send only " +
   "changes to the remote mouse cursor's shape and position.  This results " +
   "in the best mouse responsiveness.  Disabling this parameter causes the " +
@@ -575,8 +667,8 @@ public final class Params {
   "and client significantly, which may cause performance problems on slow " +
   "networks.", true);
 
-  public static StringParameter desktopSize =
-  new StringParameter("DesktopSize",
+  public DesktopSizeParameter desktopSize =
+  new DesktopSizeParameter("DesktopSize", this, true,
   "If the VNC server supports remote desktop resizing, then attempt to " +
   "resize the remote desktop to the specified size (example: 1920x1200) or " +
   "reconfigure the server's virtual screens with a specified layout " +
@@ -587,15 +679,14 @@ public final class Params {
   "the client's screen boundaries when the viewer window is in its default " +
   "position (this is the default behavior.)  Setting this parameter to " +
   "\"Server\" or \"0\" disables remote desktop resizing and uses the " +
-  "desktop size and screen configuration set by the server.", "Auto",
-  "WxH, W0xH0+X0+Y0[,W1xH1+X1+Y1,...], Auto, or Server");
+  "desktop size and screen configuration set by the server.", "Auto");
 
-  public static BoolParameter fullScreen =
-  new BoolParameter("FullScreen",
+  public BoolParameter fullScreen =
+  new BoolParameter("FullScreen", this, true,
   "Start the viewer in full-screen mode.", false);
 
-  public static BoolParameter localCursor =
-  new BoolParameter("LocalCursor",
+  public BoolParameter localCursor =
+  new BoolParameter("LocalCursor", this, false,
   "The default behavior of the TurboVNC Viewer is to hide the local cursor " +
   "and show only the remote cursor, which can be rendered either by the " +
   "VNC server or on the client, depending on the value of the CursorShape " +
@@ -605,8 +696,8 @@ public final class Params {
   "parameter is set, then any cursor shape updates from the server are " +
   "ignored, and the local cursor is always displayed.", false);
 
-  public static StringParameter scalingFactor =
-  new StringParameter("Scale",
+  public ScaleParameter scale =
+  new ScaleParameter("Scale", this, true,
   "Reduce or enlarge the remote desktop image.  The value is interpreted as " +
   "a scaling factor in percent.  The default value of 100% corresponds to " +
   "the original remote desktop size.  Values below 100 reduce the image " +
@@ -616,11 +707,10 @@ public final class Params {
   "the entire image will fit in the viewer window without using " +
   "scrollbars.  If this parameter is set to \"FixedRatio\", then automatic " +
   "scaling is performed, but the original aspect ratio is preserved.  " +
-  "Enabling scaling disables automatic desktop resizing.", "100",
-  "1-1000, Auto, or FixedRatio");
+  "Enabling scaling disables automatic desktop resizing.", 100);
 
-  public static StringParameter span =
-  new StringParameter("Span",
+  public SpanParameter span =
+  new SpanParameter("Span", this, true,
   "This parameter specifies whether the viewer window should span only the " +
   "primary monitor (\"Primary\"), all monitors (\"All\"), or all monitors " +
   "only if the window cannot fit on the primary monitor (\"Auto\".)  When " +
@@ -629,19 +719,19 @@ public final class Params {
   "full-screen mode.  Due to general issues with spanning windows across " +
   "multiple monitors in X11, this parameter does not work on Un*x/X11 " +
   "platforms except in full-screen mode, and it requires the TurboVNC " +
-  "Helper library.", "Auto", "Primary, All, Auto");
+  "Helper library.", SpanParameter.AUTO);
 
-  public static BoolParameter showToolbar =
-  new BoolParameter("Toolbar",
+  public BoolParameter toolbar =
+  new BoolParameter("Toolbar", this, true,
   "Show the toolbar by default.", true);
 
   // ENCODING PARAMETERS
 
-  private static HeaderParameter encHeader =
-  new HeaderParameter("EncHeader", "ENCODING PARAMETERS");
+  private HeaderParameter encHeader =
+  new HeaderParameter("EncHeader", this, "ENCODING PARAMETERS");
 
-  public static IntParameter compressLevel =
-  new IntParameter("CompressLevel",
+  public IntParameter compressLevel =
+  new IntParameter("CompressLevel", this, true,
   "When Tight encoding is used, the compression level specifies the amount " +
   "of zlib compression to apply to subrectangles encoded using the indexed " +
   "color, mono, and raw subencoding types.  If the JPEG subencoding type is " +
@@ -669,17 +759,17 @@ public final class Params {
   "interframe comparison also causes the TurboVNC Server to use more CPU " +
   "time and much more memory.", 1, 0, 9);
 
-  public static StringParameter preferredEncoding =
-  new StringParameter("Encoding",
+  public EncodingParameter encoding =
+  new EncodingParameter("Encoding", this, false,
   "Preferred encoding type to use.  If the server does not support the " +
   "preferred encoding type, then the next best one will be chosen.  There " +
   "should be no reason to use an encoding type other than Tight when " +
   "connecting to a TurboVNC session, but this parameter can be useful when " +
   "connecting to other types of VNC servers, such as RealVNC.",
-  "Tight", "Tight, ZRLE, Hextile, Raw");
+  RFB.ENCODING_TIGHT);
 
-  public static BoolParameter allowJpeg =
-  new BoolParameter("JPEG",
+  public BoolParameter jpeg =
+  new BoolParameter("JPEG", this, true,
   "Enable the JPEG subencoding type when using Tight encoding.  This causes " +
   "the Tight encoder to use JPEG compression for subrectangles that have a " +
   "high number of unique colors and indexed color subencoding for " +
@@ -688,18 +778,18 @@ public final class Params {
   "indexed color or raw subencoding, depending on the size of the " +
   "subrectangle and its color count.", true);
 
-  public static IntParameter quality =
-  new IntParameter("Quality",
+  public IntParameter quality =
+  new IntParameter("Quality", this, true,
   "Specifies the JPEG quality to use when compressing JPEG images with the " +
   "Tight+JPEG encoding methods.  Lower quality values produce grainier JPEG " +
   "images with more noticeable compression artifacts, but lower quality " +
   "values also use less network bandwidth and CPU time.  The default value " +
-  "of " + Options.DEFQUAL + " should be perceptually lossless (that is, any " +
-  "image compression artifacts it produces should be imperceptible to the " +
-  "human eye under most viewing conditions.)", Options.DEFQUAL, 1, 100);
+  "of " + DEFQUAL + " should be perceptually lossless (that is, any image " +
+  "compression artifacts it produces should be imperceptible to the human " +
+  "eye under most viewing conditions.)", DEFQUAL, 1, 100);
 
-  public static StringParameter subsampling =
-  new StringParameter("Subsampling",
+  public SubsampParameter subsampling =
+  new SubsampParameter("Subsampling", this, true,
   "When compressing an image using JPEG, the RGB pixels are first converted " +
   "to the YCbCr colorspace, a colorspace in which each pixel is represented " +
   "as a brightness (Y, or \"luminance\") value and a pair of color (Cb and " +
@@ -715,26 +805,27 @@ public final class Params {
   "leaving only luminance.  2X and 4X subsampling will typically produce " +
   "noticeable aliasing of lines and other sharp features, but with " +
   "photographic or other \"smooth\" image content, it may be difficult to " +
-  "detect any difference between 1X, 2X, and 4X.", "1X", "1X, 2X, 4X, Gray");
+  "detect any difference between 1X, 2X, and 4X.", SubsampParameter.NONE);
 
-  private static AliasParameter samp =
-  new AliasParameter("Samp",
+  private AliasParameter samp =
+  new AliasParameter("Samp", this,
   "Alias for Subsampling", subsampling);
 
   // SECURITY AND AUTHENTICATION PARAMETERS
 
-  private static HeaderParameter secHeader =
-  new HeaderParameter("SecHeader", "SECURITY AND AUTHENTICATION PARAMETERS");
+  private HeaderParameter secHeader =
+  new HeaderParameter("SecHeader", this,
+  "SECURITY AND AUTHENTICATION PARAMETERS");
 
-  public static BoolParameter autoPass =
-  new BoolParameter("AutoPass",
+  public BoolParameter autoPass =
+  new BoolParameter("AutoPass", this, false,
   "Read a plain-text password from stdin and use this password when " +
   "authenticating with the VNC server.  It is strongly recommended that " +
   "this parameter be used only in conjunction with a one-time password or " +
   "other disposable token.", false);
 
-  public static StringParameter encPassword =
-  new StringParameter("EncPassword",
+  public StringParameter encPassword =
+  new StringParameter("EncPassword", this, false,
   "Encrypted password to use when authenticating with the VNC server.  The " +
   "encrypted password should be in the same ASCII hex format used by " +
   "TurboVNC connection info (.vnc) files.  For instance, you can generate " +
@@ -748,8 +839,8 @@ public final class Params {
   "It is thus recommended that this parameter be used only in conjunction " +
   "with a one-time password or other disposable token.", null);
 
-  public static BoolParameter extSSH =
-  new BoolParameter("ExtSSH",
+  public BoolParameter extSSH =
+  new BoolParameter("ExtSSH", this, false,
   "Use an external SSH client instead of the built-in SSH client.  The " +
   "external client defaults to /usr/bin/ssh on Un*x and Mac systems and " +
   "ssh.exe on Windows systems, but you can use the VNC_VIA_CMD and " +
@@ -759,15 +850,15 @@ public final class Params {
   "system properties is set, then an external SSH client is automatically " +
   "used.  See the TurboVNC User's Guide for more details.", false);
 
-  public static BoolParameter localUsernameLC =
-  new BoolParameter("LocalUsernameLC",
+  public BoolParameter localUsernameLC =
+  new BoolParameter("LocalUsernameLC", this, false,
   "When the SendLocalUsername parameter is set, setting this parameter will " +
   "cause the local username to be sent in lowercase, which may be useful " +
   "when using the viewer on Windows machines (Windows allows mixed-case " +
   "usernames, whereas Un*x and Mac platforms generally don't.)", false);
 
-  public static BoolParameter noUnixLogin =
-  new BoolParameter("NoUnixLogin",
+  public BoolParameter noUnixLogin =
+  new BoolParameter("NoUnixLogin", this, false,
   "This disables the use of Unix Login authentication when connecting to " +
   "TightVNC-compatible servers and Plain authentication when connecting to " +
   "VeNCrypt-compatible servers.  Setting this parameter has the effect of " +
@@ -778,24 +869,24 @@ public final class Params {
   "connection (for instance, to use a one-time password.)",
   false);
 
-  public static StringParameter password =
-  new StringParameter("Password",
+  public StringParameter password =
+  new StringParameter("Password", this, false,
   "Plain-text password to use when authenticating with the VNC server.  It " +
   "is strongly recommended that this parameter be used only in conjunction " +
   "with a one-time password or other disposable token.", null);
 
-  public static StringParameter passwordFile =
-  new StringParameter("PasswordFile",
+  public StringParameter passwordFile =
+  new StringParameter("PasswordFile", this, false,
   "Password file from which to read the password for Standard VNC " +
   "authentication.  This is useful if your home directory is shared between " +
   "the client machine and VNC host.", null);
 
-  private static AliasParameter passwd =
-  new AliasParameter("passwd",
+  private AliasParameter passwd =
+  new AliasParameter("passwd", this,
   "Alias for PasswordFile", passwordFile);
 
-  public static StringParameter secTypes =
-  new StringParameter("SecurityTypes",
+  public SecTypesParameter secTypes =
+  new SecTypesParameter("SecurityTypes", this, true,
   "A comma-separated list of the security types that can be used, if the " +
   "server supports them.  \"VNC\" and \"None\" are the standard VNC " +
   "password and no-password authentication schemes supported by all VNC " +
@@ -817,37 +908,37 @@ public final class Params {
   "set to \"VNC\" unless the SessMgrAuto parameter is disabled.",
   "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VNC,Ident,Plain,UnixLogin,None");
 
-  public static BoolParameter sendLocalUsername =
-  new BoolParameter("SendLocalUsername",
+  public BoolParameter sendLocalUsername =
+  new BoolParameter("SendLocalUsername", this, true,
   "Send the local username when using user/password authentication schemes " +
   "(Unix Login, Plain, Ident) rather than prompting for it.  As with the " +
   "User parameter, setting this parameter has the effect of disabling any " +
   "authentication schemes that don't require a username.", false);
 
-  public static BoolParameter sessMgrAuto =
-  new BoolParameter("SessMgrAuto",
+  public BoolParameter sessMgrAuto =
+  new BoolParameter("SessMgrAuto", this, false,
   "When using the TurboVNC Session Manager, the default behavior is to " +
   "automatically enable OTP authentication and SSH tunneling.  Disabling " +
   "this parameter overrides that behavior and allows any security " +
   "configuration to be used.", true);
 
-  public static StringParameter sshConfig =
-  new StringParameter("SSHConfig",
+  public StringParameter sshConfig =
+  new StringParameter("SSHConfig", this, false,
   "When using the Via or Tunnel parameters with the built-in SSH client, " +
   "this parameter specifies the path to an OpenSSH configuration file to " +
   "use when authenticating with the SSH server.  The OpenSSH configuration " +
   "file takes precedence over any TurboVNC Viewer parameters.",
   Utils.getHomeDir() + ".ssh/config");
 
-  public static StringParameter sshKey =
-  new StringParameter("SSHKey",
+  public StringParameter sshKey =
+  new StringParameter("SSHKey", this, false,
   "When using the Via or Tunnel parameters with the built-in SSH client, or " +
   "when using the TurboVNC Session Manager, this parameter specifies the " +
   "text of the SSH private key to use when authenticating with the SSH " +
   "server.  You can use \\n within the string to specify a new line.", null);
 
-  public static StringParameter sshKeyFile =
-  new StringParameter("SSHKeyFile",
+  public StringParameter sshKeyFile =
+  new StringParameter("SSHKeyFile", this, false,
   "When using the Via or Tunnel parameters with the built-in SSH client, or " +
   "when using the TurboVNC Session Manager, this parameter specifies a file " +
   "that contains an SSH private key (or keys) to use when authenticating " +
@@ -856,20 +947,20 @@ public final class Params {
   "It will fall back to asking for an SSH password if private key " +
   "authentication fails.", null);
 
-  public static StringParameter sshKeyPass =
-  new StringParameter("SSHKeyPass",
+  public StringParameter sshKeyPass =
+  new StringParameter("SSHKeyPass", this, false,
   "When using the Via or Tunnel parameters with the built-in SSH client, or " +
   "when using the TurboVNC Session Manager, this parameter specifies the " +
   "passphrase for the SSH key.", null);
 
-  public static IntParameter sshPort =
-  new IntParameter("SSHPort",
+  public IntParameter sshPort =
+  new IntParameter("SSHPort", this, false,
   "When using the Via or Tunnel parameters with the built-in SSH client, or " +
   "when using the TurboVNC Session Manager, this parameter specifies the " +
   "TCP port on which the SSH server is listening.", 22);
 
-  public static BoolParameter tunnel =
-  new BoolParameter("Tunnel",
+  public BoolParameter tunnel =
+  new BoolParameter("Tunnel", this, true,
   "Setting this parameter is equivalent to using the Via parameter with an " +
   "SSH gateway, except that the gateway host is assumed to be the same as " +
   "the VNC host, so you do not need to specify it separately.  When using " +
@@ -880,8 +971,8 @@ public final class Params {
   "When using the TurboVNC Session Manager, this parameter is effectively " +
   "set unless the SessMgrAuto parameter is disabled.", false);
 
-  public static StringParameter user =
-  new StringParameter("User",
+  public StringParameter user =
+  new StringParameter("User", this, true,
   "The username to use for Unix Login authentication (TightVNC-compatible " +
   "servers) or for Plain and Ident authentication (VeNCrypt-compatible " +
   "servers.)  Specifying this parameter has the effect of removing any " +
@@ -889,8 +980,8 @@ public final class Params {
   "\"Ident\" (and their encrypted derivatives) and \"UnixLogin\", thus " +
   "allowing only authentication schemes that require a username.", null);
 
-  public static StringParameter via =
-  new StringParameter("Via",
+  public ServerNameParameter via =
+  new ServerNameParameter("Via", this, true,
   "This parameter specifies an SSH server or UltraVNC repeater " +
   "(\"gateway\") through which the VNC connection should be tunneled.  Note " +
   "that when using the Via parameter, the VNC host should be specified from " +
@@ -907,23 +998,27 @@ public final class Params {
   "with {user}@ to indicate that username {user} (default = local username) " +
   "should be used when authenticating with the SSH server.", null);
 
-  public static StringParameter x509ca =
-  new StringParameter("X509CA",
+  public StringParameter x509ca =
+  new StringParameter("X509CA", this, true,
   "X.509 Certificate Authority certificate to use with the X509* security " +
   "types.  This is used to check the validity of the server's X.509 " +
   "certificate.", Utils.getVncHomeDir() + "x509_ca.pem");
 
-  public static StringParameter x509crl =
-  new StringParameter("X509CRL",
+  public StringParameter x509crl =
+  new StringParameter("X509CRL", this, true,
   "X.509 Certificate Revocation List to use with the X509* security types. " +
   "This is used to check the validity of the server's X.509 " +
   "certificate.", Utils.getVncHomeDir() + "x509_crl.pem");
 
   // CHECKSTYLE Indentation:ON
+
+  public boolean sessMgrActive, sshTunnelActive;
+  public com.jcraft.jsch.Session sshSession;
+  public String sshUser;
+
   // CHECKSTYLE VisibilityModifier:ON
 
-  private Params() {}
-  static VoidParameter head;
-  static VoidParameter tail;
-  static LogWriter vlog = new LogWriter("Params");
+  VoidParameter head;
+  VoidParameter tail;
+  LogWriter vlog = new LogWriter("Params");
 }

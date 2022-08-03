@@ -64,7 +64,7 @@ public abstract class CConnection extends CMsgHandler {
       case RFBSTATE_SECURITY:          processSecurityMsg();        break;
       case RFBSTATE_SECURITY_RESULT:   processSecurityResultMsg();  break;
       case RFBSTATE_INITIALISATION:    processInitMsg(benchmark);   break;
-      case RFBSTATE_NORMAL:            reader.readMsg();            break;
+      case RFBSTATE_NORMAL:            reader.readMsg(params);      break;
       case RFBSTATE_UNINITIALISED:
         throw new ErrorException("CConnection.processMsg: not initialised yet?");
       default:
@@ -130,7 +130,7 @@ public abstract class CConnection extends CMsgHandler {
     int secType = RFB.SECTYPE_INVALID;
 
     List<Integer> secTypes = new ArrayList<Integer>();
-    secTypes = opts.getEnabledSecTypes();
+    secTypes = params.secTypes.getEnabled();
 
     if (cp.isVersion(3, 3)) {
 
@@ -177,7 +177,7 @@ public abstract class CConnection extends CMsgHandler {
         if (serverSecType == RFB.SECTYPE_TIGHT)
           secType = RFB.SECTYPE_TIGHT;
 
-        if (opts.sessMgrActive && Params.sessMgrAuto.getValue())
+        if (params.sessMgrActive && params.sessMgrAuto.get())
           secType = RFB.SECTYPE_VNCAUTH;
 
         /*
@@ -211,7 +211,7 @@ public abstract class CConnection extends CMsgHandler {
     }
 
     state = RFBSTATE_SECURITY;
-    csecurity = security.getCSecurity(opts, secType);
+    csecurity = security.getCSecurity(params, secType);
     processSecurityMsg();
   }
 
@@ -438,7 +438,7 @@ public abstract class CConnection extends CMsgHandler {
 
   public void announceClipboard(boolean available)
   {
-    if (!opts.sendClipboard)
+    if (!params.sendClipboard.get())
       return;
 
     hasLocalClipboard = available;
@@ -477,7 +477,7 @@ public abstract class CConnection extends CMsgHandler {
 
   void handleClipboardNotify(int flags)
   {
-    if (!opts.recvClipboard)
+    if (!params.recvClipboard.get())
       return;
 
     serverClipboard = null;
@@ -492,7 +492,7 @@ public abstract class CConnection extends CMsgHandler {
 
   void handleClipboardPeek(int flags)
   {
-    if (!opts.sendClipboard)
+    if (!params.sendClipboard.get())
       return;
 
     if ((cp.clipboardFlags() & RFB.EXTCLIP_ACTION_NOTIFY) != 0)
@@ -502,7 +502,7 @@ public abstract class CConnection extends CMsgHandler {
 
   void handleClipboardProvide(int flags, int[] lengths, byte[][] buffers)
   {
-    if (!opts.recvClipboard)
+    if (!params.recvClipboard.get())
       return;
 
     if ((flags & RFB.EXTCLIP_FORMAT_UTF8) == 0) {
@@ -522,7 +522,7 @@ public abstract class CConnection extends CMsgHandler {
 
   void handleClipboardRequest(int flags)
   {
-    if (!opts.sendClipboard)
+    if (!params.sendClipboard.get())
       return;
 
     if ((flags & RFB.EXTCLIP_FORMAT_UTF8) == 0) {
@@ -542,7 +542,7 @@ public abstract class CConnection extends CMsgHandler {
 
   public void requestClipboard()
   {
-    if (!opts.recvClipboard)
+    if (!params.recvClipboard.get())
       return;
 
     if (serverClipboard != null) {
@@ -560,7 +560,7 @@ public abstract class CConnection extends CMsgHandler {
 
   public void sendClipboardData(String data)
   {
-    if (!opts.sendClipboard)
+    if (!params.sendClipboard.get())
       return;
 
     if ((cp.clipboardFlags() & RFB.EXTCLIP_ACTION_PROVIDE) != 0) {
@@ -592,7 +592,7 @@ public abstract class CConnection extends CMsgHandler {
 
   public void serverCutText(String str)
   {
-    if (!opts.recvClipboard)
+    if (!params.recvClipboard.get())
       return;
 
     hasLocalClipboard = false;
@@ -622,7 +622,7 @@ public abstract class CConnection extends CMsgHandler {
   private String serverClipboard;
 
   // CHECKSTYLE VisibilityModifier:OFF
-  public Options opts;
+  public Params params;
   // CHECKSTYLE VisibilityModifier:ON
 
   static LogWriter vlog = new LogWriter("CConnection");

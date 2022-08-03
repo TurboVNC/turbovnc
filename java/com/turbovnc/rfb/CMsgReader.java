@@ -109,16 +109,16 @@ public class CMsgReader {
     handler.endOfContinuousUpdates();
   }
 
-  private void readExtendedClipboard(int len)
+  private void readExtendedClipboard(int len, Params params)
   {
     int action, flags;
 
     if (len < 4)
       throw new ErrorException("Malformed Extended Clipboard message");
-    if (len > Params.maxClipboard.getValue()) {
+    if (len > params.maxClipboard.get()) {
       vlog.error("Ignoring " + len +
                  "-byte Extended Clipboard message (limit = " +
-                 Params.maxClipboard.getValue() + " bytes)");
+                 params.maxClipboard.get() + " bytes)");
       is.skip(len);
       return;
     }
@@ -162,12 +162,12 @@ public class CMsgReader {
 
         lengths[num] = zis.readU32();
 
-        if (lengths[num] > Params.maxClipboard.getValue()) {
+        if (lengths[num] > params.maxClipboard.get()) {
           vlog.error("Truncating " + lengths[num] +
                      "-byte incoming clipboard update to " +
-                     Params.maxClipboard.getValue() + " bytes.");
-          ignoredBytes = lengths[num] - Params.maxClipboard.getValue();
-          lengths[num] = Params.maxClipboard.getValue();
+                     params.maxClipboard.get() + " bytes.");
+          ignoredBytes = lengths[num] - params.maxClipboard.get();
+          lengths[num] = params.maxClipboard.get();
         }
 
         buffers[num] = new byte[lengths[num]];
@@ -298,7 +298,7 @@ public class CMsgReader {
   }
 
   // readMsg() reads a message, calling the handler as appropriate.
-  public void readMsg() {
+  public void readMsg(Params params) {
     if (nUpdateRectsLeft == 0) {
 
       int type = is.readU8();
@@ -310,7 +310,7 @@ public class CMsgReader {
         case RFB.BELL:
           readBell();  break;
         case RFB.SERVER_CUT_TEXT:
-          readServerCutText();  break;
+          readServerCutText(params);  break;
         case RFB.FENCE:
           readFence();  break;
         case RFB.END_OF_CONTINUOUS_UPDATES:
@@ -394,22 +394,22 @@ public class CMsgReader {
     handler.endRect(r, encoding);
   }
 
-  private void readServerCutText() {
+  private void readServerCutText(Params params) {
     int ignoredBytes = 0;
     is.skip(3);
     int len = is.readU32();
 
     if ((len & 0x80000000) != 0) {
       len = -len;
-      readExtendedClipboard(len);
+      readExtendedClipboard(len, params);
       return;
     }
 
-    if (len > Params.maxClipboard.getValue()) {
-      ignoredBytes = len - Params.maxClipboard.getValue();
+    if (len > params.maxClipboard.get()) {
+      ignoredBytes = len - params.maxClipboard.get();
       vlog.error("Truncating " + len + "-byte incoming clipboard update to " +
-                 Params.maxClipboard.getValue() + " bytes.");
-      len = Params.maxClipboard.getValue();
+                 params.maxClipboard.get() + " bytes.");
+      len = params.maxClipboard.get();
     }
     byte[] buf = new byte[len];
     is.readBytes(buf, 0, len);

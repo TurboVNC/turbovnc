@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2018, 2020, 2022 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +33,11 @@ import com.turbovnc.rfb.*;
 
 class ServerDialog extends Dialog implements ActionListener {
 
-  ServerDialog(OptionsDialog options_, Options opts_, CConn cc_) {
+  ServerDialog(OptionsDialog options_, Params params_, CConn cc_) {
 
     super(true);
     cc = cc_;
-    opts = opts_;
+    params = params_;
 
     options = options_;
 
@@ -79,8 +80,8 @@ class ServerDialog extends Dialog implements ActionListener {
         }
       }
     });
-    if (opts.serverName != null)
-      server.setSelectedItem(opts.serverName);
+    if (params.server.get() != null)
+      server.setSelectedItem(params.server.get());
 
     topPanel = new JPanel(new GridBagLayout());
 
@@ -220,18 +221,11 @@ class ServerDialog extends Dialog implements ActionListener {
         throw new WarningException("No server name specified");
 
       // set params
-      if (opts.via != null && opts.via.indexOf(':') >= 0) {
-        opts.serverName = serverName;
+      if (params.via.get() != null && params.via.get().indexOf(':') >= 0) {
+        params.server.set(serverName);
       } else {
-        int atIndex = serverName.lastIndexOf('@');
-        if (atIndex >= 0) {
-          opts.serverName =
-            Hostname.getHost(serverName.substring(atIndex + 1));
-          opts.sshUser = serverName.substring(0, atIndex);
-        } else {
-          opts.serverName = Hostname.getHost(serverName);
-        }
-        opts.port = Hostname.getPort(serverName);
+        params.server.set(Hostname.getHost(serverName));
+        params.port.set(Hostname.getPort(serverName));
       }
 
       // Update the history list
@@ -259,7 +253,7 @@ class ServerDialog extends Dialog implements ActionListener {
 
   Window win;
   CConn cc;
-  Options opts;
+  Params params;
   JComboBox server;
   ComboBoxEditor editor;
   JPanel topPanel, buttonPanel;

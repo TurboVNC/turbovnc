@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012-2015, 2018, 2020-2021 D. R. Commander.
+ * Copyright (C) 2012-2015, 2018, 2020-2022 D. R. Commander.
  *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -132,7 +132,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     setupAppMenu();
 
     JMenu connMenu = new JMenu("Connection");
-    if (!Params.noNewConn.getValue()) {
+    if (!cc.params.noNewConn.get()) {
       newConn = addMenuItem(connMenu, "New Connection...");
       newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
                                                     acceleratorMask));
@@ -163,7 +163,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
                                                      acceleratorMask));
     connMenu.addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen");
-    fullScreen.setSelected(cc.opts.fullScreen);
+    fullScreen.setSelected(cc.params.fullScreen.get());
     fullScreen.addActionListener(this);
     connMenu.add(fullScreen);
     fullScreen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
@@ -184,19 +184,19 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     tileWindows.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
                                                       acceleratorMask));
     showToolbar = new JCheckBoxMenuItem("Show Toolbar");
-    showToolbar.setSelected(cc.opts.showToolbar);
+    showToolbar.setSelected(cc.params.toolbar.get());
     showToolbar.addActionListener(this);
     connMenu.add(showToolbar);
     showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
                                                       acceleratorMask));
     connMenu.addSeparator();
     viewOnly = new JCheckBoxMenuItem("View Only");
-    viewOnly.setSelected(cc.opts.viewOnly);
+    viewOnly.setSelected(cc.params.viewOnly.get());
     viewOnly.addActionListener(this);
     connMenu.add(viewOnly);
     viewOnly.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
                                                    acceleratorMask));
-    if (!Params.restricted.getValue()) {
+    if (!cc.params.restricted.get()) {
       ctrlAltDel = addMenuItem(connMenu, "Send Ctrl-Alt-Del");
       ctrlEsc = addMenuItem(connMenu, "Send Ctrl-Esc");
       connMenu.addSeparator();
@@ -241,20 +241,20 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       VncViewer.tileWindows();
     } else if (actionMatch(ev, showToolbar)) {
       cc.toggleToolbar();
-      showToolbar.setSelected(cc.opts.showToolbar);
+      showToolbar.setSelected(cc.params.toolbar.get());
     } else if (actionMatch(ev, viewOnly)) {
       cc.toggleViewOnly();
-      viewOnly.setSelected(cc.opts.viewOnly);
+      viewOnly.setSelected(cc.params.viewOnly.get());
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
-    } else if (actionMatch(ev, ctrlAltDel) && !cc.opts.viewOnly) {
+    } else if (actionMatch(ev, ctrlAltDel) && !cc.params.viewOnly.get()) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       cc.writeKeyEvent(Keysyms.ALT_L, true);
       cc.writeKeyEvent(Keysyms.DELETE, true);
       cc.writeKeyEvent(Keysyms.DELETE, false);
       cc.writeKeyEvent(Keysyms.ALT_L, false);
       cc.writeKeyEvent(Keysyms.CONTROL_L, false);
-    } else if (actionMatch(ev, ctrlEsc) && !cc.opts.viewOnly) {
+    } else if (actionMatch(ev, ctrlEsc) && !cc.params.viewOnly.get()) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       cc.writeKeyEvent(Keysyms.ESCAPE, true);
       cc.writeKeyEvent(Keysyms.ESCAPE, false);
@@ -265,9 +265,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.losslessRefresh();
     } else if (actionMatch(ev, screenshot)) {
       cc.screenshot();
-    } else if (!Params.noNewConn.getValue() && actionMatch(ev, newConn)) {
+    } else if (!cc.params.noNewConn.get() && actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
-    } else if (!Params.noNewConn.getValue() && actionMatch(ev, closeConn)) {
+    } else if (!cc.params.noNewConn.get() && actionMatch(ev, closeConn)) {
       cc.close();
     } else if (actionMatch(ev, info)) {
       cc.showInfo();
@@ -281,7 +281,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
   }
 
   void updateFullScreen() {
-    fullScreen.setSelected(cc.opts.fullScreen);
+    fullScreen.setSelected(cc.params.fullScreen.get());
   }
 
   void updateProfile() {
@@ -289,9 +289,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
   }
 
   void updateZoom() {
-    if (cc.opts.desktopSize.mode == Options.SIZE_AUTO ||
-        cc.opts.scalingFactor == Options.SCALE_AUTO ||
-        cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+    if (cc.params.desktopSize.getMode() == DesktopSize.AUTO ||
+        cc.params.scale.get() == ScaleParameter.AUTO ||
+        cc.params.scale.get() == ScaleParameter.FIXEDRATIO) {
       zoomIn.setEnabled(false);
       zoomOut.setEnabled(false);
       zoom100.setEnabled(false);

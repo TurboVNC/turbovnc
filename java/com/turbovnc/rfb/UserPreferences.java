@@ -1,5 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012, 2015, 2018, 2020-2021 D. R. Commander.
+ * Copyright (C) 2012, 2015, 2018, 2020-2022 D. R. Commander.
  *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -98,7 +98,7 @@ public final class UserPreferences {
     }
   }
 
-  public static void load(String nName) {
+  public static void load(String nName, Params params) {
     // Sets the value of any corresponding Configuration parameters
     try {
       Preferences node = root.node(nName);
@@ -110,7 +110,7 @@ public final class UserPreferences {
           paramName = "SecurityTypes";
         else if (key.equalsIgnoreCase("Username"))
           paramName = "User";
-        VoidParameter p = Params.get(paramName);
+        VoidParameter p = params.get(paramName);
         if (p == null ||
             key.equalsIgnoreCase("AlwaysShowConnectionDialog") ||
             key.equalsIgnoreCase("Colors") ||
@@ -119,12 +119,13 @@ public final class UserPreferences {
 
         String valueStr = node.get(key, null);
         if (valueStr != null)
-          Params.set(paramName, valueStr);
+          params.set(paramName, valueStr);
       }
     } catch (BackingStoreException e) {
       vlog.error("Could not get preferences:");
       vlog.error("  " + e.getMessage());
     }
+    params.reconcile();
   }
 
   private UserPreferences() {}

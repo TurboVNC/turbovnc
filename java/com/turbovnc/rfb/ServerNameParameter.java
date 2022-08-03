@@ -1,5 +1,5 @@
-/* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2018, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2013, 2015, 2018, 2020-2022 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,22 +19,23 @@
 
 package com.turbovnc.rfb;
 
-public final class AliasParameter extends VoidParameter {
+public final class ServerNameParameter extends StringParameter {
 
-  public AliasParameter(String name, Params params, String desc,
-                        VoidParameter param_) {
-    super(name, params, false, desc);
-    param = param_;
+  public ServerNameParameter(String name, Params params, boolean isGUI,
+                             String desc, String defValue) {
+    super(name, params, isGUI, desc, defValue);
+    set(defValue);
   }
 
-  public boolean set(String str) { return param.set(str); }
-
-  public void reset() { param.reset(); }
-
-  public String getDefaultStr() { return null; }
-  public String getStr() { return null; }
-  public String getValues() { return null; }
-  public boolean isBool() { return param.isBool(); }
-
-  private final VoidParameter param;
+  public synchronized boolean set(String str) {
+    if (str != null && !str.isEmpty()) {
+      str = str.replaceAll("\\s", "");
+      int atIndex = str.lastIndexOf('@');
+      if (atIndex >= 0) {
+        params.sshUser = str.substring(0, atIndex);
+        return super.set(str.substring(atIndex + 1));
+      }
+    }
+    return super.set(str);
+  }
 }

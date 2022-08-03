@@ -81,7 +81,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     noCursor = tk.createCustomCursor(cursorImage, new java.awt.Point(0, 0),
                                      "noCursor");
     cursorImage.flush();
-    if (!cc.opts.cursorShape && !bestSize.equals(new Dimension(0, 0)))
+    if (!cc.params.cursorShape.get() && !bestSize.equals(new Dimension(0, 0)))
       setCursor(noCursor);
     addMouseListener(this);
     addMouseWheelListener(this);
@@ -118,7 +118,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // RFB thread
   public void setCursor(int w, int h, Point hotspot,
                         int[] data, byte[] mask) {
-    if (!cc.opts.cursorShape || Params.localCursor.getValue())
+    if (!cc.params.cursorShape.get() || cc.params.localCursor.get())
       return;
 
     hideLocalCursor();
@@ -370,12 +370,12 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // Mostly called from the EDT, except for a couple of instances in
   // CConn.resizeFramebuffer().
   public void setScaledSize() {
-    if (cc.opts.scalingFactor != Options.SCALE_AUTO &&
-        cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
+    if (cc.params.scale.get() != ScaleParameter.AUTO &&
+        cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
       scaledWidth = (int)Math.floor((float)cc.cp.width *
-                                    (float)cc.opts.scalingFactor / 100.0);
+                                    (float)cc.params.scale.get() / 100.0);
       scaledHeight = (int)Math.floor((float)cc.cp.height *
-                                     (float)cc.opts.scalingFactor / 100.0);
+                                     (float)cc.params.scale.get() / 100.0);
     } else {
       if (cc.viewport == null) {
         scaledWidth = cc.cp.width;
@@ -386,7 +386,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           availableSize.width = cc.cp.width;
           availableSize.height = cc.cp.height;
         }
-        if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+        if (cc.params.scale.get() == ScaleParameter.FIXEDRATIO) {
           float widthRatio = (float)availableSize.width / (float)cc.cp.width;
           float heightRatio =
             (float)availableSize.height / (float)cc.cp.height;
@@ -443,14 +443,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         cb = Toolkit.getDefaultToolkit().getSystemSelection();
       if (cb == null)
         cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-      if (cb != null && cc.opts.sendClipboard) {
+      if (cb != null && cc.params.sendClipboard.get()) {
         Transferable t = cb.getContents(null);
         if (t == null || !t.isDataFlavorSupported(DataFlavor.stringFlavor))
           return;
         BufferedReader br =
           new BufferedReader(DataFlavor.stringFlavor.getReaderForText(t));
-        CharBuffer cbuf =
-          CharBuffer.allocate(Params.maxClipboard.getValue());
+        CharBuffer cbuf = CharBuffer.allocate(cc.params.maxClipboard.get());
         br.read(cbuf);
         ((Buffer)cbuf).flip();
         String newContents = cbuf.toString();
@@ -472,7 +471,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   private void mouseMotionCB(MouseEvent e) {
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
-    if (!cc.opts.viewOnly &&
+    if (!cc.params.viewOnly.get() &&
         (!Utils.osEID() ||
          !cc.viewport.processExtInputEventHelper(cc.viewport.motionType)) &&
         e.getX() >= x &&
@@ -504,7 +503,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   private void mouseCB(MouseEvent e, int type) {
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
     int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
-    if (!cc.opts.viewOnly &&
+    if (!cc.params.viewOnly.get() &&
         (!Utils.osEID() || !cc.viewport.processExtInputEventHelper(type)) &&
         (e.getID() == MouseEvent.MOUSE_RELEASED ||
          (e.getX() >= x &&
@@ -551,7 +550,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // EDT: Mouse wheel callback function
   private void mouseWheelCB(MouseWheelEvent e) {
-    if (!cc.opts.viewOnly &&
+    if (!cc.params.viewOnly.get() &&
         (!Utils.osEID() ||
          !cc.viewport.processExtInputEventHelper(cc.viewport.motionType)))
       cc.writeWheelEvent(e);
@@ -566,13 +565,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // EDT: Handle the key released event.
   public void keyReleased(KeyEvent e) {
-    if (!cc.opts.viewOnly)
+    if (!cc.params.viewOnly.get())
       cc.writeKeyEvent(e);
   }
 
   // EDT: Handle the key pressed event.
   public void keyPressed(KeyEvent e) {
-    if (e.getKeyCode() == cc.opts.menuKeyCode) {
+    if (e.getKeyCode() == cc.params.menuKey.getCode()) {
       int sx = (scaleWidthRatio == 1.00) ?
         lastX : (int)Math.floor(lastX * scaleWidthRatio);
       int sy = (scaleHeightRatio == 1.00) ?
@@ -637,9 +636,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_9:
         case KeyEvent.VK_NUMPAD9:
         case KeyEvent.VK_ADD:
-          if (cc.opts.desktopSize.mode != Options.SIZE_AUTO &&
-              cc.opts.scalingFactor != Options.SCALE_AUTO &&
-              cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
+          if (cc.params.desktopSize.getMode() != DesktopSize.AUTO &&
+              cc.params.scale.get() != ScaleParameter.AUTO &&
+              cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
             cc.zoomIn();
             return;
           }
@@ -647,18 +646,18 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_8:
         case KeyEvent.VK_NUMPAD8:
         case KeyEvent.VK_SUBTRACT:
-          if (cc.opts.desktopSize.mode != Options.SIZE_AUTO &&
-              cc.opts.scalingFactor != Options.SCALE_AUTO &&
-              cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
+          if (cc.params.desktopSize.getMode() != DesktopSize.AUTO &&
+              cc.params.scale.get() != ScaleParameter.AUTO &&
+              cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
             cc.zoomOut();
             return;
           }
           break;
         case KeyEvent.VK_0:
         case KeyEvent.VK_NUMPAD0:
-          if (cc.opts.desktopSize.mode != Options.SIZE_AUTO &&
-              cc.opts.scalingFactor != Options.SCALE_AUTO &&
-              cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
+          if (cc.params.desktopSize.getMode() != DesktopSize.AUTO &&
+              cc.params.scale.get() != ScaleParameter.AUTO &&
+              cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
             cc.zoom100();
             return;
           }
@@ -699,19 +698,19 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_9:
         case KeyEvent.VK_8:
         case KeyEvent.VK_0:
-          if (cc.opts.desktopSize.mode != Options.SIZE_AUTO &&
-              cc.opts.scalingFactor != Options.SCALE_AUTO &&
-              cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO)
+          if (cc.params.desktopSize.getMode() != DesktopSize.AUTO &&
+              cc.params.scale.get() != ScaleParameter.AUTO &&
+              cc.params.scale.get() != ScaleParameter.FIXEDRATIO)
             return;
       }
     }
     if ((e.getModifiersEx() & InputEvent.ALT_DOWN_MASK) ==
         InputEvent.ALT_DOWN_MASK && e.getKeyCode() == KeyEvent.VK_ENTER &&
-        cc.opts.fsAltEnter) {
+        cc.params.fsAltEnter.get()) {
       cc.toggleFullScreen();
       return;
     }
-    if (!cc.opts.viewOnly)
+    if (!cc.params.viewOnly.get())
       cc.writeKeyEvent(e);
   }
 
@@ -745,9 +744,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   // are called.
 
   private synchronized void hideLocalCursor() {
-    if (Params.localCursor.getValue())
+    if (cc.params.localCursor.get())
       return;
-    if (!cc.opts.cursorShape)
+    if (!cc.params.cursorShape.get())
       setCursor(noCursor);
     // Blit the cursor backing store over the cursor.
     if (cursorVisible) {
@@ -758,7 +757,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   }
 
   private synchronized void showLocalCursor() {
-    if (Params.localCursor.getValue())
+    if (cc.params.localCursor.get())
       return;
     if (cursorAvailable && !cursorVisible) {
       if (!im.getPF().equal(cursor.getPF()) ||

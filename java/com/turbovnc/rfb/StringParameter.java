@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012, 2017-2018, 2021 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2017-2018, 2021-2022 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,41 +22,39 @@ package com.turbovnc.rfb;
 
 public class StringParameter extends VoidParameter {
 
-  public StringParameter(String name_, String desc_, String v) {
-    this(name_, desc_, v, null);
+  public StringParameter(String name, Params params, boolean isGUI,
+                         String desc, String defValue_) {
+    this(name, params, isGUI, desc, defValue_, null);
   }
 
-  public StringParameter(String name_, String desc_, String v,
-                         String values_) {
-    super(name_, desc_);
-    value = v;
-    defValue = v;
+  public StringParameter(String name, Params params, boolean isGUI,
+                         String desc, String defValue_, String values_) {
+    super(name, params, isGUI, desc);
+    value = defValue = defValue_;
     values = values_;
   }
 
-  public synchronized boolean setParam(String v) {
-    if (v != null && v.isEmpty())
-      v = null;
-    value = v;
+  public synchronized boolean set(String str) {
+    if (str != null && str.isEmpty())
+      str = null;
+    value = str;
     isDefault = false;
     return value != null;
   }
 
-  public synchronized void reset() {
+  public final synchronized void reset() {
     value = defValue;
     isDefault = true;
   }
 
-  public String getDefaultStr() { return defValue; }
-  public String getValues() { return values; }
-  public boolean isDefault() { return isDefault; }
+  public final synchronized String get() { return value; }
+  public final String getDefaultStr() { return defValue; }
+  public final synchronized String getStr() { return value; }
+  public final String getValues() { return values; }
+  public final synchronized boolean isDefault() { return isDefault; }
 
-  public synchronized String getValue() { return value; }
-  public synchronized String getData() { return value; }
+  private boolean isDefault = true;
 
-  boolean isDefault = true;
-
-  protected String value;
-  protected final String defValue;
-  protected final String values;
+  String value;
+  private final String defValue, values;
 }
