@@ -218,7 +218,6 @@ public final class RFB {
 
   public static int encodingNum(String name) {
     if (name.equalsIgnoreCase("Raw"))      return ENCODING_RAW;
-    if (name.equalsIgnoreCase("CopyRect")) return ENCODING_COPYRECT;
     if (name.equalsIgnoreCase("RRE"))      return ENCODING_RRE;
     if (name.equalsIgnoreCase("CoRRE"))    return ENCODING_CORRE;
     if (name.equalsIgnoreCase("Hextile"))  return ENCODING_HEXTILE;
@@ -230,7 +229,6 @@ public final class RFB {
   public static String encodingName(int num) {
     switch (num) {
       case ENCODING_RAW:       return "Raw";
-      case ENCODING_COPYRECT:  return "CopyRect";
       case ENCODING_RRE:       return "RRE";
       case ENCODING_CORRE:     return "CoRRE";
       case ENCODING_HEXTILE:   return "Hextile";
