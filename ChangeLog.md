@@ -8,6 +8,11 @@ parameter.  Previously the server only truncated incoming clipboard updates,
 and the Java viewer truncated outgoing clipboard updates while ignoring
 incoming clipboard updates larger than 256 kB.
 
+2. Fixed an issue in the Java TurboVNC Viewer whereby specifying a key other
+than a function key (`F1` through `F12`) using the `MenuKey` parameter caused
+"F1" to be selected in the "Menu key" combo box in the TurboVNC Viewer Options
+dialog.
+
 
 2.2.8 ESR
 =========

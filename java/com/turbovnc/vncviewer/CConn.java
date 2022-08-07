@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2021 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2022 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -1578,7 +1578,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     options.fsAltEnter.setSelected(opts.fsAltEnter);
     options.recvClipboard.setSelected(opts.recvClipboard);
     options.sendClipboard.setSelected(opts.sendClipboard);
-    options.menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
+    String menuKeyStr =
+      MenuKey.getMenuKeyName(opts.menuKeyCode, opts.menuKeySym);
+    if (menuKeyStr != null)
+      options.menuKey.setSelectedItem(menuKeyStr);
     if (VncViewer.osGrab() && Viewport.isHelperAvailable())
       options.grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 
