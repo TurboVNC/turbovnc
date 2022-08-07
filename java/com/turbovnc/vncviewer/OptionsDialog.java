@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2018, 2020-2021 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1228,7 +1228,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     viewOnly.setSelected(opts.viewOnly);
     reverseScroll.setSelected(opts.reverseScroll);
     fsAltEnter.setSelected(opts.fsAltEnter);
-    menuKey.setSelectedItem(KeyEvent.getKeyText(opts.menuKeyCode));
+    String menuKeyStr =
+      MenuKey.getMenuKeyName(opts.menuKeyCode, opts.menuKeySym);
+    if (menuKeyStr != null)
+      menuKey.setSelectedItem(menuKeyStr);
     if (Utils.osGrab() && Helper.isAvailable())
       grabKeyboard.setSelectedIndex(opts.grabKeyboard);
 

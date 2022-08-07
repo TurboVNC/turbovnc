@@ -35,6 +35,10 @@ server only truncated incoming clipboard updates, and the viewer truncated
 outgoing clipboard updates while ignoring incoming clipboard updates larger
 than 256 kB.
 
+5. Fixed an issue in the TurboVNC Viewer whereby specifying a key other than a
+function key (`F1` through `F12`) using the `MenuKey` parameter caused "F1" to
+be selected in the "Menu key" combo box in the TurboVNC Viewer Options dialog.
+
 
 3.0
 ===
