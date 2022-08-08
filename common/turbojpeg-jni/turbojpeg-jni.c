@@ -33,6 +33,12 @@
   } \
 }
 
+#define BAILIF0NOEC(f) { \
+  if (!(f)) { \
+    goto bailout; \
+  } \
+}
+
 #define THROW(msg) {  \
   jclass _exccls = (*env)->FindClass(env, "java/lang/Exception");  \
   BAILIF0(_exccls);  \
@@ -79,8 +85,8 @@ static void decompress
   if ((*env)->GetArrayLength(env, dst) * dstElementSize < arraySize)
     THROW("Destination buffer is not large enough");
 
-  BAILIF0(jpegBuf = (*env)->GetPrimitiveArrayCritical(env, src, 0));
-  BAILIF0(dstBuf = (*env)->GetPrimitiveArrayCritical(env, dst, 0));
+  BAILIF0NOEC(jpegBuf = (*env)->GetPrimitiveArrayCritical(env, src, 0));
+  BAILIF0NOEC(dstBuf = (*env)->GetPrimitiveArrayCritical(env, dst, 0));
 
   if (tjDecompress2((tjhandle)handle, jpegBuf, (unsigned long)jpegSize,
                     &dstBuf[y * actualPitch + x * tjPixelSize[pf]], width,
