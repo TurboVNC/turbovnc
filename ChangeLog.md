@@ -31,6 +31,13 @@ than 256 kB.
 function key (`F1` through `F12`) using the `MenuKey` parameter caused "F1" to
 be selected in the "Menu key" combo box in the TurboVNC Viewer Options dialog.
 
+6. Fixed an error ("Security type not supported") that occurred when attempting
+to connect to a TurboVNC session using the TurboVNC Session Manager if the
+"VNC" security type was disabled in the TurboVNC Viewer (by way of the
+`SecurityTypes`, `SendLocalUserName`, or `User` parameter or a corresponding
+check box in the TurboVNC Viewer Options dialog) and the `SessMgrAuto`
+parameter was enabled.
+
 
 3.0
 ===
