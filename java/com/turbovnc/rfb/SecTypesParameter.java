@@ -143,6 +143,10 @@ public final class SecTypesParameter extends VoidParameter {
     if (enabledSecTypes == null)
       set(defValue);
 
+    if (params.sessMgrActive && params.sessMgrAuto.get() &&
+        secType == RFB.SECTYPE_VNCAUTH)
+      return true;
+
     for (i = enabledSecTypes.iterator(); i.hasNext();)
       if ((Integer)i.next() == secType)
         return true;
