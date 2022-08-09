@@ -45,7 +45,7 @@ public final class SecTypesParameter extends VoidParameter {
     return true;
   }
 
-  public synchronized void reset() { set(defValue); }
+  public synchronized void reset() { enabledSecTypes = null; }
 
   public synchronized List<Integer> getEnabled() {
     List<Integer> result = new ArrayList<Integer>();

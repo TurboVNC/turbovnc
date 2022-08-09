@@ -60,7 +60,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private JButton x509caButton, x509crlButton;
   private JLabel x509caLabel, x509crlLabel;
   private JTextField x509ca, x509crl;
-  private JButton defClearButton;
+  private JButton defClearButton, resetButton;
   private JLabel encMethodLabel;
   private JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
   private JLabel subsamplingLabel, subsamplingLabelLo, subsamplingLabelHi;
@@ -507,9 +507,16 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     defClearButton = new JButton("Clear the list of saved connections");
     defClearButton.addActionListener(this);
+    resetButton = new JButton("Reset all options to defaults");
+    resetButton.addActionListener(this);
 
     Dialog.addGBComponent(defClearButton, globalPanel,
-                          0, 0, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
+                          0, 0, 2, 1, 2, 2, 1, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 5, 0, 5));
+    Dialog.addGBComponent(resetButton, globalPanel,
+                          0, 1, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(8, 5, 0, 5));
@@ -840,6 +847,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       endDialog();
     } else if (s instanceof JButton && (JButton)s == defClearButton) {
       UserPreferences.clear();
+    } else if (s instanceof JButton && (JButton)s == resetButton) {
+      params.resetGUI();
+      setOptions(desktopSize.isEnabled(), !shared.isEnabled(), false, false);
     } else if (s instanceof JButton && (JButton)s == x509caButton) {
       File file = new File(x509ca.getText());
       JFileChooser fc = new JFileChooser(file.getParent());
@@ -1263,21 +1273,16 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       params.secTypes.isSupported(RFB.SECTYPE_UNIX_LOGIN));
 
     // Security
-    if (params.user.get() != null)
-      username.setText(params.user.get());
+    username.setText(params.user.get());
     sendLocalUsername.setSelected(params.sendLocalUsername.get());
 
     // Security: X.509 certificate validation
-    if (params.x509ca.get() != null)
-      x509ca.setText(params.x509ca.get());
-    if (params.x509crl.get() != null)
-      x509crl.setText(params.x509crl.get());
+    x509ca.setText(params.x509ca.get());
+    x509crl.setText(params.x509crl.get());
 
     // Security: Gateway
-    if (params.sshUser != null)
-      sshUser.setText(params.sshUser);
-    if (params.via.get() != null)
-      gateway.setText(params.via.get());
+    sshUser.setText(params.sshUser);
+    gateway.setText(params.via.get());
     tunnel.setSelected(params.tunnel.get());
 
     desktopSize.setEnabled(enableDesktopSize);

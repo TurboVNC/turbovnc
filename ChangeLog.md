@@ -5,6 +5,11 @@
 
 1. The TurboVNC Server and Viewer now support UTF-8 clipboard transfers.
 
+2. The TurboVNC Viewer Options dialog has been improved in the following ways:
+
+     - The "Global" tab now has a button that can be used to reset all options
+to their default values.
+
 
 3.0.1
 =====

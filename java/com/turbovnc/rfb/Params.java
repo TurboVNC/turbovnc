@@ -380,14 +380,17 @@ public final class Params {
     }
   }
 
-  public void reset() {
+  public void resetGUI() {
     VoidParameter current = head;
 
     while (current != null) {
-      if (!(current instanceof HeaderParameter))
+      if (current.isGUI())
         current.reset();
       current = current.next;
     }
+    sshUser = null;
+
+    reconcile();
   }
 
   public void save() {
