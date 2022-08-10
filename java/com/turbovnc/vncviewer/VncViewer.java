@@ -469,8 +469,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         continue;
 
       if (argv[i].charAt(0) == '-') {
+        int index = 1;
+        if (argv[i].charAt(1) == '-' && argv[i].length() > 2)
+          index = 2;
         if (i + 1 < argv.length) {
-          if (Params.set(argv[i].substring(1), argv[i + 1])) {
+          if (Params.set(argv[i].substring(index), argv[i + 1])) {
             i++;
             continue;
           }
@@ -517,10 +520,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "                      150 = extended input device debugging messages\n" +
       "\n" +
       "Specifying boolean parameters:\n" +
-      "  On:   -<param>=1 or -<param>\n" +
-      "  Off:  -<param>=0 or -no<param>\n" +
+      "  On:   -<param> or --<param> or <param>=1 or -<param>=1 or --<param>=1\n" +
+      "  Off:  -no<param> or --no<param> or <param>=0 or -<param>=0 or --<param>=0\n" +
       "Parameters that take a value can be specified as:\n" +
-      "  -<param> <value> or <param>=<value> or -<param>=<value> or --<param>=<value>\n" +
+      "  -<param> <value> or --<param> <value> or\n" +
+      "  <param>=<value> or -<param>=<value> or --<param>=<value>\n" +
       "Parameter names and values are case-insensitive (except for the value of\n" +
       "Password.)\n\n" +
       "The parameters are:\n\n";
