@@ -48,11 +48,11 @@ public final class Params {
         VoidParameter oldCurrent = oldParams.get(current.getName());
         current.set(oldCurrent.getStr());
       }
-      current = current.next;
+      current = current.next();
     }
   }
 
-  // - Set named parameter to value
+  // Set named parameter to value
   public boolean set(String name, String value) {
     VoidParameter param = get(name);
     if (param == null) return false;
@@ -64,7 +64,7 @@ public final class Params {
     return param.set(value);
   }
 
-  // - Set parameter to value (separated by "=")
+  // Set parameter to value (separated by "=")
   public boolean set(String arg) {
     boolean hyphen = false;
     if (arg.charAt(0) == '-' && arg.length() > 1) {
@@ -80,17 +80,19 @@ public final class Params {
     } else if (hyphen) {
       VoidParameter param = get(arg);
       if (param == null) return false;
-      if (param instanceof BoolParameter && ((BoolParameter)param).reverse) {
-        ((BoolParameter)param).reverse = false;
-        ((BoolParameter)param).set(false);
+      if (param instanceof BoolParameter) {
+        if (((BoolParameter)param).reverse) {
+          ((BoolParameter)param).reverse = false;
+          ((BoolParameter)param).set(false);
+        } else
+          ((BoolParameter)param).set(true);
         return true;
       }
-      return param.set();
     }
     return false;
   }
 
-  // - Get named parameter
+  // Get named parameter
   public VoidParameter get(String name) {
     VoidParameter current = head;
     while (current != null) {
@@ -105,7 +107,7 @@ public final class Params {
           }
         }
       }
-      current = current.next;
+      current = current.next();
     }
     return null;
   }
@@ -116,7 +118,7 @@ public final class Params {
     while (current != null) {
       String desc = current.getDescription();
       if (desc == null) {
-        current = current.next;
+        current = current.next();
         continue;
       }
       desc = desc.trim();
@@ -124,7 +126,7 @@ public final class Params {
         System.out.println(desc);
         for (int i = 0; i < desc.length(); i++)
           System.out.print("-");
-        current = current.next;
+        current = current.next();
         System.out.print("\n\n");
         continue;
       }
@@ -158,7 +160,7 @@ public final class Params {
         if (s == -1) break;
         desc = desc.substring(wordLen + 1);
       }
-      current = current.next;
+      current = current.next();
       System.out.print("\n\n");
     }
   }
@@ -369,7 +371,7 @@ public final class Params {
           System.out.println(current.getName() + " = " +
                              (str == null ? "" : str));
       }
-      current = current.next;
+      current = current.next();
     }
   }
 
@@ -412,7 +414,7 @@ public final class Params {
         else
           UserPreferences.set("global", name, value);
       }
-      current = current.next;
+      current = current.next();
     }
 
     UserPreferences.save();

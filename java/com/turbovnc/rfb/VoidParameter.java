@@ -39,7 +39,6 @@ public abstract class VoidParameter {
   public final String getDescription() { return desc; }
 
   public abstract boolean set(String str);
-  public boolean set() { return false; }
 
   public abstract void reset();
 
@@ -47,9 +46,10 @@ public abstract class VoidParameter {
   public abstract String getDefaultStr();
   public abstract String getValues();
   public boolean isBool() { return false; }
-  public boolean isGUI() { return isGUI; }
+  public final boolean isGUI() { return isGUI; }
+  public final VoidParameter next() { return next; }
 
-  VoidParameter next;
+  private VoidParameter next;
   private final String name, desc;
   final Params params;
   private final boolean isGUI;

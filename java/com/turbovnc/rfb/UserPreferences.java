@@ -33,29 +33,9 @@ public final class UserPreferences {
     node.put(key, val);
   }
 
-  public static void set(String nName, String key, int val) {
-    Preferences node = root.node(nName);
-    node.putInt(key, val);
-  }
-
-  public static void set(String nName, String key, boolean val) {
-    Preferences node = root.node(nName);
-    node.putBoolean(key, val);
-  }
-
   public static String get(String nName, String key) {
     Preferences node = root.node(nName);
     return node.get(key, null);
-  }
-
-  public static boolean getBool(String nName, String key, boolean defval) {
-    Preferences node = root.node(nName);
-    return node.getBoolean(key, defval);
-  }
-
-  public static int getInt(String nName, String key, int defval) {
-    Preferences node = root.node(nName);
-    return node.getInt(key, defval);
   }
 
   public static void save() {

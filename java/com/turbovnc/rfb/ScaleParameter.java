@@ -54,8 +54,7 @@ public final class ScaleParameter extends IntParameter {
     int sf = parse(scaleString);
     if (sf == 0)
       throw new ErrorException(getName() + " parameter is incorrect");
-    boolean retval = set(sf);
-    return retval;
+    return set(sf);
   }
 
   public synchronized String getStr() {

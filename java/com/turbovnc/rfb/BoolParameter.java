@@ -43,7 +43,6 @@ public final class BoolParameter extends VoidParameter {
     return true;
   }
 
-  public boolean set() { set(true);  return true; }
   public synchronized void set(boolean value_) { value = value_; }
 
   public synchronized void reset() {
