@@ -848,8 +848,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     } else if (s instanceof JButton && (JButton)s == defClearButton) {
       UserPreferences.clear();
     } else if (s instanceof JButton && (JButton)s == resetButton) {
-      params.resetGUI();
+      Params oldParams = params;
+      params = new Params();
       setOptions(desktopSize.isEnabled(), !shared.isEnabled(), false, false);
+      params = oldParams;
     } else if (s instanceof JButton && (JButton)s == x509caButton) {
       File file = new File(x509ca.getText());
       JFileChooser fc = new JFileChooser(file.getParent());
