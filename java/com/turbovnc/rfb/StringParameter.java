@@ -39,12 +39,14 @@ public class StringParameter extends VoidParameter {
       str = null;
     value = str;
     isDefault = false;
+    setCommandLine(false);
     return value != null;
   }
 
   public final synchronized void reset() {
     value = defValue;
     isDefault = true;
+    setCommandLine(false);
   }
 
   public final synchronized String get() { return value; }

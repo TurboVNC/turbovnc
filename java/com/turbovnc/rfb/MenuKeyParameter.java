@@ -34,6 +34,7 @@ public final class MenuKeyParameter extends VoidParameter {
     sym = MenuKey.getMenuKeySym(menuKeyString);
     if (code < 0 || sym < 0)
       throw new ErrorException(getName() + " parameter is incorrect");
+    setCommandLine(false);
     return true;
   }
 

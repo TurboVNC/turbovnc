@@ -40,12 +40,23 @@ public abstract class VoidParameter {
 
   public abstract boolean set(String str);
 
+  public final boolean set(String str, boolean commandLine_) {
+    boolean retval = set(str);
+    setCommandLine(commandLine_);
+    return retval;
+  }
+
+  public final void setCommandLine(boolean commandLine_) {
+    commandLine = commandLine_;
+  }
+
   public abstract void reset();
 
   public abstract String getStr();
   public abstract String getDefaultStr();
   public abstract String getValues();
   public boolean isBool() { return false; }
+  public boolean isCommandLine() { return commandLine; }
   public final boolean isGUI() { return isGUI; }
   public final VoidParameter next() { return next; }
 
@@ -53,4 +64,5 @@ public abstract class VoidParameter {
   private final String name, desc;
   final Params params;
   private final boolean isGUI;
+  private boolean commandLine;
 }

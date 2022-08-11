@@ -34,18 +34,21 @@ public final class DesktopSizeParameter extends VoidParameter {
     if (size == null)
       throw new ErrorException(getName() + " parameter is incorrect");
     desktopSize = size;
+    setCommandLine(false);
     return true;
   }
 
   public synchronized void set(int width, int height) {
     desktopSize.width = width;
     desktopSize.height = height;
+    setCommandLine(false);
   }
 
   public synchronized void reset() { set(defValue); }
 
   public synchronized void setMode(int mode) {
     desktopSize.mode = mode;
+    setCommandLine(false);
   }
 
   public synchronized boolean equalsIgnoreID(DesktopSizeParameter sizeParam) {

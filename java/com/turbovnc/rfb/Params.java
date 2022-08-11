@@ -46,22 +46,22 @@ public final class Params {
           !current.getName().equalsIgnoreCase("server") &&
           !current.getName().equalsIgnoreCase("port")) {
         VoidParameter oldCurrent = oldParams.get(current.getName());
-        current.set(oldCurrent.getStr());
+        current.set(oldCurrent.getStr(), oldCurrent.isCommandLine());
       }
       current = current.next();
     }
   }
 
   // Set named parameter to value
-  public boolean set(String name, String value) {
+  public boolean set(String name, String value, boolean commandLine) {
     VoidParameter param = get(name);
     if (param == null) return false;
     if (param instanceof BoolParameter && ((BoolParameter)param).reverse) {
       ((BoolParameter)param).reverse = false;
-      ((BoolParameter)param).set(value, true);
+      ((BoolParameter)param).set(value, true, commandLine);
       return true;
     }
-    return param.set(value);
+    return param.set(value, commandLine);
   }
 
   // Set parameter to value (separated by "=")
@@ -76,7 +76,7 @@ public final class Params {
     }
     int equal = arg.indexOf('=');
     if (equal != -1) {
-      return set(arg.substring(0, equal), arg.substring(equal + 1));
+      return set(arg.substring(0, equal), arg.substring(equal + 1), true);
     } else if (hyphen) {
       VoidParameter param = get(arg);
       if (param == null) return false;
@@ -86,6 +86,7 @@ public final class Params {
           ((BoolParameter)param).set(false);
         } else
           ((BoolParameter)param).set(true);
+        param.setCommandLine(true);
         return true;
       }
     }
@@ -189,30 +190,30 @@ public final class Params {
         // skip the section delimiters
         continue;
       } else if (name.equalsIgnoreCase("host")) {
-        set("Server", props.getProperty(name));
+        set("Server", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("port")) {
-        set("Port", props.getProperty(name));
+        set("Port", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("password")) {
-        set("EncPassword", props.getProperty(name));
+        set("EncPassword", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("user")) {
-        set("User", props.getProperty(name));
+        set("User", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("preferred_encoding")) {
         int encodingNum = -1;
         try {
           encodingNum = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         if (encodingNum >= 0 && encodingNum <= RFB.ENCODING_LAST)
-          set("Encoding", RFB.encodingName(encodingNum));
+          set("Encoding", RFB.encodingName(encodingNum), true);
       } else if (name.equalsIgnoreCase("restricted")) {
-        set("Restricted", props.getProperty(name));
+        set("Restricted", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("viewonly")) {
-        set("ViewOnly", props.getProperty(name));
+        set("ViewOnly", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("reversescroll")) {
-        set("ReverseScroll", props.getProperty(name));
+        set("ReverseScroll", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("fullscreen")) {
-        set("FullScreen", props.getProperty(name));
+        set("FullScreen", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("fsaltenter")) {
-        set("FSAltEnter", props.getProperty(name));
+        set("FSAltEnter", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("grabkeyboard")) {
         int grabKeyboardValue = -1;
         try {
@@ -220,42 +221,42 @@ public final class Params {
         } catch (NumberFormatException e) {}
         switch (grabKeyboardValue) {
           case GrabParameter.FS:
-            set("GrabKeyboard", "FS");  break;
+            set("GrabKeyboard", "FS", true);  break;
           case GrabParameter.ALWAYS:
-            set("GrabKeyboard", "Always");  break;
+            set("GrabKeyboard", "Always", true);  break;
           case GrabParameter.MANUAL:
-            set("GrabKeyboard", "Manual");  break;
+            set("GrabKeyboard", "Manual", true);  break;
         }
       } else if (name.equalsIgnoreCase("span")) {
         int spanValue = -1;
         try {
           spanValue = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
-        if (spanValue == 0) set("Span", "Primary");
-        else if (spanValue == 1) set("Span", "All");
-        else if (spanValue == 2) set("Span", "Auto");
+        if (spanValue == 0) set("Span", "Primary", true);
+        else if (spanValue == 1) set("Span", "All", true);
+        else if (spanValue == 2) set("Span", "Auto", true);
       } else if (name.equalsIgnoreCase("8bit")) {
         int _8bit = -1;
         try {
           _8bit = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         if (_8bit >= 1)
-          set("Colors", "256");
+          set("Colors", "256", true);
         else if (_8bit == 0)
-          set("Colors", "-1");
+          set("Colors", "-1", true);
       } else if (name.equalsIgnoreCase("shared")) {
-        set("Shared", props.getProperty(name));
+        set("Shared", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("disableclipboard")) {
         int disableclipboard = -1;
         try {
           disableclipboard = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         if (disableclipboard >= 1) {
-          set("RecvClipboard", "0");
-          set("SendClipboard", "0");
+          set("RecvClipboard", "0", true);
+          set("SendClipboard", "0", true);
         } else if (disableclipboard == 0) {
-          set("RecvClipboard", "1");
-          set("SendClipboard", "1");
+          set("RecvClipboard", "1", true);
+          set("SendClipboard", "1", true);
         }
       } else if (name.equalsIgnoreCase("fitwindow")) {
         try {
@@ -294,35 +295,39 @@ public final class Params {
       } else if (name.equalsIgnoreCase("desktopsize")) {
         desktopSizeStr = props.getProperty(name);
       } else if (name.equalsIgnoreCase("cursorshape")) {
-        set("CursorShape", props.getProperty(name));
+        set("CursorShape", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("noremotecursor")) {
-        set("LocalCursor", props.getProperty(name));
+        set("LocalCursor", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("compresslevel")) {
-        set("CompressLevel", props.getProperty(name));
+        set("CompressLevel", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("subsampling")) {
         int subsamplingValue = -1;
         try {
           subsamplingValue = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         switch (subsamplingValue) {
-          case SubsampParameter.NONE:  set("Subsampling", "1X");  break;
-          case SubsampParameter.FOURX: set("Subsampling", "4X");  break;
-          case SubsampParameter.TWOX:  set("Subsampling", "2X");  break;
-          case SubsampParameter.GRAY:  set("Subsampling", "Gray");  break;
+          case SubsampParameter.NONE:
+            set("Subsampling", "1X", true);  break;
+          case SubsampParameter.FOURX:
+            set("Subsampling", "4X", true);  break;
+          case SubsampParameter.TWOX:
+            set("Subsampling", "2X", true);  break;
+          case SubsampParameter.GRAY:
+            set("Subsampling", "Gray", true);  break;
         }
       } else if (name.equalsIgnoreCase("quality")) {
         int qualityValue = -2;
         try {
           qualityValue = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
-        if (qualityValue == -1) set("JPEG", "0");
+        if (qualityValue == -1) set("JPEG", "0", true);
         else if (qualityValue >= 1 && qualityValue <= 100) {
-          set("Quality", props.getProperty(name));
+          set("Quality", props.getProperty(name), true);
         }
       } else if (name.equalsIgnoreCase("continuousupdates")) {
-        set("CU", props.getProperty(name));
+        set("CU", props.getProperty(name), true);
       } else if (name.equalsIgnoreCase("nounixlogin")) {
-        set("NoUnixLogin", props.getProperty(name));
+        set("NoUnixLogin", props.getProperty(name), true);
       }
     }
 
@@ -330,23 +335,23 @@ public final class Params {
       if (scaleNum < 1) scaleNum = 1;
       if (scaleDenom < 1) scaleDenom = 1;
       int scalingFactorValue = scaleNum * 100 / scaleDenom;
-      set("Scale", Integer.toString(scalingFactorValue));
+      set("Scale", Integer.toString(scalingFactorValue), true);
     } else if (fitWindow >= 1) {
-      set("Scale", "FixedRatio");
+      set("Scale", "FixedRatio", true);
     }
 
     if (desktopSizeStr != null)
-      set("DesktopSize", desktopSizeStr);
+      set("DesktopSize", desktopSizeStr, true);
     else {
       switch (resizeMode) {
         case DesktopSize.SERVER:
-          set("DesktopSize", "Server");  break;
+          set("DesktopSize", "Server", true);  break;
         case DesktopSize.MANUAL:
           if (desktopWidth > 0 && desktopHeight > 0)
-            set("DesktopSize", desktopWidth + "x" + desktopHeight);
+            set("DesktopSize", desktopWidth + "x" + desktopHeight, true);
           break;
         case DesktopSize.AUTO:
-          set("DesktopSize", "Auto");  break;
+          set("DesktopSize", "Auto", true);  break;
       }
     }
 

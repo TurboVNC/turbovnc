@@ -99,7 +99,7 @@ public final class UserPreferences {
 
         String valueStr = node.get(key, null);
         if (valueStr != null)
-          params.set(paramName, valueStr);
+          params.set(paramName, valueStr, false);
       }
     } catch (BackingStoreException e) {
       vlog.error("Could not get preferences:");

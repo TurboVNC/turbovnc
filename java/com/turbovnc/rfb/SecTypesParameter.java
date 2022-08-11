@@ -42,6 +42,7 @@ public final class SecTypesParameter extends VoidParameter {
       enabledSecTypes = new ArrayList<Integer>();
     else
       enabledSecTypes = parse(secTypesString);
+    setCommandLine(false);
     return true;
   }
 
@@ -114,6 +115,8 @@ public final class SecTypesParameter extends VoidParameter {
 
     if (isAllowed(secType))
       enabledSecTypes.add(secType);
+
+    setCommandLine(false);
   }
 
   public synchronized void disable(int secType) {
@@ -121,6 +124,8 @@ public final class SecTypesParameter extends VoidParameter {
       set(defValue);
 
     enabledSecTypes.remove((Object)secType);
+
+    setCommandLine(false);
   }
 
   private boolean isAllowed(int secType) {

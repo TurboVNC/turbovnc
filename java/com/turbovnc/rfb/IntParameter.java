@@ -53,10 +53,11 @@ public class IntParameter extends VoidParameter {
     if (useMinMax && (value_ < minValue || value_ > maxValue))
       return false;
     value = value_;
+    setCommandLine(false);
     return true;
   }
 
-  public final synchronized void reset() { value = defValue; }
+  public final synchronized void reset() { set(defValue); }
 
   public synchronized int get() { return value; }
 
