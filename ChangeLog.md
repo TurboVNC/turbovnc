@@ -1,6 +1,8 @@
 2.2.9 ESR
 =========
 
+### Significant changes relative to 2.2.8 ESR:
+
 1. The TurboVNC Server and Java TurboVNC Viewer now truncate both incoming and
 outgoing clipboard updates to the number of bytes specified by the
 `-maxclipboard` Xvnc argument or the `MaxClipboard` Java TurboVNC Viewer
