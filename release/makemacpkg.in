@@ -48,6 +48,7 @@ PKGNAME=@PKGNAME@
 PROJECT=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
+CPU_TYPE=@CPU_TYPE@
 SRCDIR=@CMAKE_SOURCE_DIR@
 PREFIX=@CMAKE_INSTALL_PREFIX@
 BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
@@ -57,8 +58,8 @@ MANDIR=@CMAKE_INSTALL_FULL_MANDIR@
 MACOS_APP_CERT_NAME="@MACOS_APP_CERT_NAME@"
 MACOS_INST_CERT_NAME="@MACOS_INST_CERT_NAME@"
 
-if [ -f $PKGNAME-$VERSION.dmg ]; then
-	rm -f $PKGNAME-$VERSION.dmg
+if [ -f $PKGNAME-$VERSION-$CPU_TYPE.dmg ]; then
+	rm -f $PKGNAME-$VERSION-$CPU_TYPE.dmg
 fi
 
 umask 022
@@ -85,7 +86,7 @@ mkdir -p $PKGROOT/Library/Documentation
 safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PKGNAME $TMPDIR/__tmpdoc
 
 mkdir -p $TMPDIR/pkg/
-install -m 644 $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
+install -m 644 $SRCDIR/release/License.rtf pkgscripts/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/
 install -m 644 pkgscripts/Distribution.xml $TMPDIR/pkg/Distribution.xml
 mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
@@ -94,13 +95,13 @@ mkdir -p "$PKGROOT/Applications/$PROJECT"
 pkgscripts/makemacapp
 ln -fs /Library/Documentation/$PKGNAME/index.html "$PKGROOT/Applications/$PROJECT/$PROJECT User's Guide.html"
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-osacompile -t APPL -a x86_64 -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
+osacompile -t APPL -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
 	codesign -f -s "$MACOS_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
 	codesign -vv "$TMPDIR/Uninstall $PROJECT.app"
 fi
 echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
-osacompile -t APPL -a x86_64 -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
+osacompile -t APPL -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
 	codesign -f -s "$MACOS_APP_CERT_NAME" --timestamp "$TMPDIR/$VIEWER (Listen Mode).app"
 	codesign -vv "$TMPDIR/$VIEWER (Listen Mode).app"
@@ -129,11 +130,11 @@ if [ "$MACOS_INST_CERT_NAME" != "" ]; then
 fi
 mv "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/dmg/
 hdiutil create -fs HFS+ -volname $PKGNAME-$VERSION \
-	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION.dmg
+	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
-	codesign -s "$MACOS_APP_CERT_NAME" --timestamp $TMPDIR/$PKGNAME-$VERSION.dmg
-	codesign -vv $TMPDIR/$PKGNAME-$VERSION.dmg
+	codesign -s "$MACOS_APP_CERT_NAME" --timestamp $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg
+	codesign -vv $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg
 fi
-cp $TMPDIR/$PKGNAME-$VERSION.dmg .
+cp $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg .
 
 exit

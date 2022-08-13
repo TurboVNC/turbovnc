@@ -72,7 +72,8 @@ Add {file: ~/turbovnc} to any paths specified in this document.
 ** Installing the TurboVNC Viewer on macOS
 
 	#. Download the TurboVNC Mac disk image
-		({file: TurboVNC-{val: _VERSION}.dmg}) from the
+		({file: TurboVNC-{val: _VERSION}-x86_64.dmg} for Intel CPUs or
+		{file: TurboVNC-{val: _VERSION}-arm64.dmg} for Apple silicon CPUs) from the
 		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
