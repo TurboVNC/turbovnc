@@ -38,6 +38,8 @@ to connect to a TurboVNC session using the TurboVNC Session Manager if the
 check box in the TurboVNC Viewer Options dialog) and the `SessMgrAuto`
 parameter was enabled.
 
+7. The TurboVNC Viewer now builds and runs on Apple silicon-based Macs.
+
 
 3.0
 ===

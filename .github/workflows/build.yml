@@ -94,7 +94,7 @@ jobs:
           make -j$NUMCPUS --load-average=$NUMCPUS
           popd
   macos:
-    runs-on: macos-latest
+    runs-on: macos-10.15
     steps:
       - name: Set global environment variables
         run: |

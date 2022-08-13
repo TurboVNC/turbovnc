@@ -23,7 +23,7 @@
 	<key>CFBundleIconFile</key>
 	<string>turbovnc.icns</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.7.0</string>
+	<string>@MINSYSVERSION@</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>

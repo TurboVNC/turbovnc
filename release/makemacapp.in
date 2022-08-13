@@ -7,6 +7,7 @@ SRCDIR=@CMAKE_SOURCE_DIR@
 BINDIR=@CMAKE_BINARY_DIR@
 CMAKE_COMMAND=@CMAKE_COMMAND@
 INCLUDEJRE=@TVNC_INCLUDEJRE@
+CPU_TYPE=@CPU_TYPE@
 
 umask 022
 APP="@CMAKE_PROJECT_NAME@ Viewer.app"
@@ -27,7 +28,11 @@ if [ "$INCLUDEJRE" = "1" ]; then
 fi
 
 install -m 644 pkgscripts/Info.plist "$APP/Contents/Info.plist"
-install -m 755 $SRCDIR/unix/vncviewer/JavaAppLauncher "$APP/Contents/MacOS/@CMAKE_PROJECT_NAME@ Viewer"
+if [ "$CPU_TYPE" = "x86_64" ]; then
+	install -m 755 $SRCDIR/unix/vncviewer/JavaAppLauncher "$APP/Contents/MacOS/@CMAKE_PROJECT_NAME@ Viewer"
+else
+	install -m 755 bin/JavaAppLauncher "$APP/Contents/MacOS/@CMAKE_PROJECT_NAME@ Viewer"
+fi
 echo "APPL????" >"$APP/Contents/PkgInfo"
 install -m 644 java/VncViewer.jar "$APP/Contents/Resources/Java/"
 install -m 644 $SRCDIR/java/com/turbovnc/vncviewer/README.md "$APP/Contents/Resources/Java/"

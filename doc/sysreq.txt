@@ -37,14 +37,15 @@
 	|
 #OPT: hiCol=first
 
-** Mac/x86
+** Mac
 
 || || Client ||
-| Recommended CPU \
-	| Any 64-bit Intel-based Mac \
+| Required CPU \
+	| 64-bit Intel or Apple silicon \
 	|
 | O/S \
-	| OS X/macOS 10.10 "Yosemite" or later \
+	| OS X/macOS 10.10 "Yosemite" or later (Intel); macOS 11 "Big Sur" or later \
+		(Apple silicon) \
 	|
 #OPT: hiCol=first
 

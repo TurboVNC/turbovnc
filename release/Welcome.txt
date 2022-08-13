@@ -1,1 +1,0 @@
-This package will install the TurboVNC Viewer for Intel-based Macintosh computers.  To remove TurboVNC, use the "Uninstall TurboVNC" application.
