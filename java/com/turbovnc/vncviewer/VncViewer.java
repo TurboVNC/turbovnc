@@ -392,7 +392,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   public VncViewer(String[] argv) {
     params = new Params();
-    UserPreferences.load("global", params);
 
     setVersion();
 
@@ -499,7 +498,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     setGlobalInsets();
   }
 
-  public static void usage() {
+  public void usage() {
     String usage = "\n" +
       "USAGE: VncViewer [options/parameters] [host] [options/parameters]\n" +
       "       VncViewer [options/parameters] [host:displayNum] [options/parameters]\n" +
@@ -533,7 +532,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     System.out.println("Copyright (C) " + copyrightYear + " " + copyright);
     System.out.println(url);
     System.out.print(usage);
-    (new Params()).list(80);
+    params.list(80);
     System.exit(1);
   }
 
@@ -674,6 +673,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   public void setOptions() {
+    UserPreferences.load(".listen", params);
+    options.setNode(".listen");
     options.setX509Enabled(false);
     options.setOptions(true, true, false, true);
     setTightOptions();
@@ -681,7 +682,6 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   public void getOptions() {
     options.getOptions();
-    params.save();
     options = null;
   }
 

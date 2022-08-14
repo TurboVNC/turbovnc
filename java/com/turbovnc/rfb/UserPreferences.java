@@ -38,18 +38,6 @@ public final class UserPreferences {
     return node.get(key, null);
   }
 
-  public static void save() {
-    try {
-      root.sync();
-      String[] keys = root.keys();
-      for (int i = 0; i < keys.length; i++)
-        vlog.debug(keys[i] + " = " + root.get(keys[i], null));
-    } catch (BackingStoreException e) {
-      vlog.error("Could not save preferences:");
-      vlog.error("  " + e.getMessage());
-    }
-  }
-
   public static void save(String nName) {
     try {
       Preferences node = root.node(nName);
@@ -79,27 +67,17 @@ public final class UserPreferences {
   }
 
   public static void load(String nName, Params params) {
-    // Sets the value of any corresponding Configuration parameters
+    // Load the value of any parameters that have not already been set on the
+    // command line or in a connection info file
     try {
       Preferences node = root.node(nName);
       String[] keys = node.keys();
+      params.resetGUI();
       for (int i = 0; i < keys.length; i++) {
         String key = keys[i], paramName = key;
-
-        if (key.equalsIgnoreCase("SecTypes"))
-          paramName = "SecurityTypes";
-        else if (key.equalsIgnoreCase("Username"))
-          paramName = "User";
-        VoidParameter p = params.get(paramName);
-        if (p == null ||
-            key.equalsIgnoreCase("AlwaysShowConnectionDialog") ||
-            key.equalsIgnoreCase("Colors") ||
-            key.equalsIgnoreCase("Encoding"))
-          continue;
-
         String valueStr = node.get(key, null);
         if (valueStr != null)
-          params.set(paramName, valueStr, false);
+          params.setGUI(paramName, valueStr);
       }
     } catch (BackingStoreException e) {
       vlog.error("Could not get preferences:");

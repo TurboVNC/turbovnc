@@ -70,10 +70,10 @@ class ServerDialog extends Dialog implements ActionListener {
     editor = server.getEditor();
     filterWhitespace((JTextField)editor.getEditorComponent());
     editor.getEditorComponent().addKeyListener(new KeyListener() {
-      public void keyTyped(KeyEvent e) { updateConnectButton(); }
-      public void keyReleased(KeyEvent e) { updateConnectButton(); }
+      public void keyTyped(KeyEvent e) { updateButtons(); }
+      public void keyReleased(KeyEvent e) { updateButtons(); }
       public void keyPressed(KeyEvent e) {
-        updateConnectButton();
+        updateButtons();
         if (e.getKeyCode() == KeyEvent.VK_ENTER && okButton.isEnabled()) {
           if (commit())
             endDialog();
@@ -114,7 +114,7 @@ class ServerDialog extends Dialog implements ActionListener {
     optionsButton = new JButton("Options...");
     aboutButton = new JButton("About...");
     okButton = new JButton("Connect");
-    updateConnectButton();
+    updateButtons();
     cancelButton = new JButton("Cancel");
     buttonPanel = new JPanel(new GridBagLayout());
     buttonPanel.setPreferredSize(new Dimension(350, 40));
@@ -180,9 +180,11 @@ class ServerDialog extends Dialog implements ActionListener {
     dlg.pack();
   }
 
-  private void updateConnectButton() {
+  private void updateButtons() {
     okButton.setEnabled(editor.getItem() != null &&
                         ((String)editor.getItem()).length() > 0);
+    optionsButton.setEnabled(editor.getItem() != null &&
+                             ((String)editor.getItem()).length() > 0);
   }
 
   public void actionPerformed(ActionEvent e) {
@@ -196,20 +198,29 @@ class ServerDialog extends Dialog implements ActionListener {
       ret = false;
       endDialog();
     } else if (s instanceof JButton && (JButton)s == optionsButton) {
-      options.showDialog(getJDialog());
+      if (editor.getItem() != null &&
+          ((String)editor.getItem()).length() > 0) {
+        String serverStr = (String)editor.getItem();
+        int atIndex = serverStr.lastIndexOf('@');
+        if (atIndex >= 0) serverStr = serverStr.substring(atIndex + 1);
+        serverStr = Hostname.getHost(serverStr);
+        UserPreferences.load(serverStr, params);
+        options.setNode(serverStr);
+        options.showDialog(getJDialog());
+      }
       if (UserPreferences.get("ServerDialog", "history") == null) {
         String serverStr = (String)editor.getItem();
         server.removeAllItems();
         if (serverStr != null && serverStr.length() > 0)
           ((JTextField)editor.getEditorComponent()).setText(serverStr);
-        updateConnectButton();
+        updateButtons();
       }
     } else if (s instanceof JButton && (JButton)s == aboutButton) {
       VncViewer.showAbout(getJDialog());
     } else if (s instanceof JComboBox && (JComboBox)s == server) {
       if (e.getActionCommand().equals("comboBoxEdited") ||
           e.getActionCommand().equals("comboBoxChanged"))
-        updateConnectButton();
+        updateButtons();
     }
   }
 

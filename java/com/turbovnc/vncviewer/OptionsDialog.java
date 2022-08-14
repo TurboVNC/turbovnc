@@ -39,6 +39,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   static LogWriter vlog = new LogWriter("OptionsDialog");
 
   private OptionsDialogCallback callback;
+  private String node;
   private Params params;
   private JTabbedPane tabPane;
   private JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
@@ -778,9 +779,18 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
   }
 
+  public void setNode(String node_) { node = node_; }
+
+  public String getNode() { return node; }
+
   protected void populateDialog(JDialog dlg) {
     dlg.setResizable(false);
-    dlg.setTitle("TurboVNC Viewer Options");
+    String nodeString = "";
+    if (node != null) {
+      nodeString = (node.equalsIgnoreCase(".listen") ?
+                    " (listen mode defaults)" : " (" + node + ")");
+    }
+    dlg.setTitle("TurboVNC Viewer Options" + nodeString);
     dlg.getContentPane().setLayout(
       new BoxLayout(dlg.getContentPane(), BoxLayout.PAGE_AXIS));
     dlg.getContentPane().add(tabPane);
@@ -842,6 +852,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == okButton) {
       if (callback != null) callback.getOptions();
+      params.save(node);
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       endDialog();

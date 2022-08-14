@@ -10,6 +10,9 @@
      - The "Global" tab now has a button that can be used to reset all options
 to their default values.
 
+3. The TurboVNC Viewer now maintains a different set of options for each unique
+TurboVNC host.
+
 
 3.0.1
 =====

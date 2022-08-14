@@ -95,6 +95,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (sock != null) {
       String name = sock.getPeerEndpoint();
       vlog.info("Accepted connection from " + name);
+      options.setNode(".listen");
     } else if (!benchmark) {
       String server = null;
       int port = -1;
@@ -106,6 +107,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           params.port.set(port);
           server = Hostname.getHost(params.server.get());
           params.server.set(server);
+          options.setNode(server);
         }
       } else {
         ServerDialog dlg = new ServerDialog(options, params, this);
@@ -116,11 +118,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
         }
         port = params.port.get();
         server = params.server.get();
+        options.setNode(Hostname.getHost(server));
       }
 
       if (params.via.get() != null && params.via.get().indexOf(':') >= 0) {
         port = Hostname.getPort(params.via.get());
         server = Hostname.getHost(params.via.get());
+        options.setNode(Hostname.getHost(params.server.get()));
       } else if (params.via.get() != null || params.tunnel.get() ||
                  (params.port.get() == 0 && params.sessMgrAuto.get())) {
         if (params.port.get() == 0) {
@@ -174,6 +178,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
     } else {
       sock.inStream().setBlockCallback(this);
       setServerName(params.server.get());
+      String node = options.getNode();
+      if (node != null)
+        UserPreferences.load(node, params);
       setStreams(sock.inStream(), sock.outStream());
       initialiseProtocol();
     }
@@ -1743,8 +1750,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
       forceNonincremental = true;
       requestNewUpdate();
     }
-
-    params.save();
   }
 
   public boolean supportsSetDesktopSize() {

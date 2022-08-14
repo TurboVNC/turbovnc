@@ -93,6 +93,20 @@ public final class Params {
     return false;
   }
 
+  // Set named parameter to value, but only if it is configurable in the
+  // Options dialog and has not already been set on the command line or in a
+  // connection info file.  This allows us to merge per-host options saved by
+  // the Options dialog with parameters set on the command line or in a
+  // connection info file without overwriting the parameters.  (The TurboVNC
+  // Viewer always gives precedence to command-line/connection info file
+  // parameters.)
+  public boolean setGUI(String name, String value) {
+    VoidParameter param = get(name);
+    if (param == null) return false;
+    if (param.isCommandLine() || !param.isGUI()) return false;
+    return set(name, value, false);
+  }
+
   // Get named parameter
   public VoidParameter get(String name) {
     VoidParameter current = head;
@@ -387,42 +401,42 @@ public final class Params {
     }
   }
 
-  public void save() {
+  // Reset any parameter that is configurable in the Options dialog to its
+  // default value, if is has not already been set on the command line or in a
+  // connection info file.
+  public void resetGUI() {
     VoidParameter current = head;
+
+    while (current != null) {
+      if (current.isGUI() && !current.isCommandLine())
+        current.reset();
+      current = current.next();
+    }
+    if (!via.isCommandLine() && !server.isCommandLine())
+      sshUser = null;
+
+    reconcile();
+  }
+
+  public void save(String node) {
+    VoidParameter current = head;
+
+    if (node == null) return;
 
     while (current != null) {
       if (current.isGUI()) {
         String name = current.getName();
         String value = current.getStr();
 
-        // NOTE: We use key names of "SecTypes" rather than "SecurityTypes" and
-        // "Username" rather than "User".  This is to prevent older versions of
-        // the TurboVNC Viewer from automatically loading these values into
-        // parameters, since older versions of the TurboVNC Viewer did not
-        // provide a way to configure the values of those parameters using the
-        // GUI.
-        if (name.equalsIgnoreCase("User"))
-          name = "Username";
-        else if (name.equalsIgnoreCase("SecurityTypes"))
-          name = "SecTypes";
-
-        // Java Preferences keys are case-sensitive, and previous versions of
-        // TurboVNC used lowercase key names for these parameters.
-        else if (name.equalsIgnoreCase("Tunnel") ||
-                 name.equalsIgnoreCase("Via") ||
-                 name.equalsIgnoreCase("X509CA") ||
-                 name.equalsIgnoreCase("X509CRL"))
-          name = name.toLowerCase();
-
         if (name.equalsIgnoreCase("Via") && value != null && sshUser != null)
-          UserPreferences.set("global", name, sshUser + "@" + value);
+          UserPreferences.set(node, name, sshUser + "@" + value);
         else
-          UserPreferences.set("global", name, value);
+          UserPreferences.set(node, name, value);
       }
       current = current.next();
     }
 
-    UserPreferences.save();
+    UserPreferences.save(node);
   }
 
   // CHECKSTYLE Indentation:OFF
