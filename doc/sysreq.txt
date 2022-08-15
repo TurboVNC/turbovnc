@@ -44,7 +44,7 @@
 	| 64-bit Intel or Apple silicon \
 	|
 | O/S \
-	| OS X/macOS 10.10 "Yosemite" or later (Intel); macOS 11 "Big Sur" or later \
+	| macOS 10.12 "Sierra" or later (Intel); macOS 11 "Big Sur" or later \
 		(Apple silicon) \
 	|
 #OPT: hiCol=first
