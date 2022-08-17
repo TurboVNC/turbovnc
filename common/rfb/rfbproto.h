@@ -1,6 +1,6 @@
 /*
- *  Copyright (C) 2009-2010, 2012-2013, 2015 D. R. Commander.
- *                                           All Rights Reserved.
+ *  Copyright (C) 2009-2010, 2012-2013, 2015, 2022 D. R. Commander.
+ *                                                 All Rights Reserved.
  *  Copyright (C) 2009 Vic Lee.  All Rights Reserved.
  *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
@@ -149,12 +149,12 @@ typedef struct _rfbCapabilityInfo {
  * TurboVNC, VeNCrypt
  */
 
-#define rfbStandardVendor "STDV"
+#define rfbStandardVendor  "STDV"
 #define rfbTridiaVncVendor "TRDV"
-#define rfbTightVncVendor "TGHT"
-#define rfbTurboVncVendor "TRBO"
-#define rfbVeNCryptVendor "VENC"
-#define rfbGIIVendor      "GGI_"
+#define rfbTightVncVendor  "TGHT"
+#define rfbTurboVncVendor  "TRBO"
+#define rfbVeNCryptVendor  "VENC"
+#define rfbGIIVendor       "GGI_"
 
 
 /*****************************************************************************
@@ -529,74 +529,87 @@ typedef struct _rfbInteractionCapsMsg {
 
 /*
  * Special encoding numbers:
- *   0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level;
- *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale);
- *   0xFFFFFEC7 .. 0xFFFFFEC8 -- flow control extensions;
- *   0xFFFFFECC               -- extended desktop size;
- *   0xFFFFFF00 .. 0xFFFFFF0F -- encoding-specific compression levels;
- *   0xFFFFFF10 .. 0xFFFFFF1F -- mouse cursor shape data;
- *   0xFFFFFF20 .. 0xFFFFFF2F -- various protocol extensions;
- *   0xFFFFFF30 .. 0xFFFFFFDF -- not allocated yet;
- *   0xFFFFFFE0 .. 0xFFFFFFEF -- quality level for JPEG compressor;
- *   0xFFFFFFF0 .. 0xFFFFFFFF -- not allocated yet.
+ *   0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level
+ *         -768 .. -763
+ *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale)
+ *         -512 .. -412
+ *   0xFFFFFEC7 .. 0xFFFFFEC8 -- flow control extensions
+ *         -313 .. -312
+ *   0xFFFFFECC               -- extended desktop size
+ *         -308
+ *   0xFFFFFECF               -- GII
+ *         -305
+ *   0xFFFFFF00 .. 0xFFFFFF0F -- encoding-specific compression levels
+ *         -256 .. -241
+ *   0xFFFFFF10 .. 0xFFFFFF1F -- mouse cursor shape data
+ *         -240 .. -225
+ *   0xFFFFFF20 .. 0xFFFFFF2F -- various protocol extensions
+ *         -224 .. -209
+ *   0xFFFFFF30 .. 0xFFFFFFDF -- not allocated yet
+ *         -208 .. -33
+ *   0xFFFFFFE0 .. 0xFFFFFFEF -- quality level for JPEG compressor
+ *          -32 .. -17
+ *   0xFFFFFFF0 .. 0xFFFFFFFF -- not allocated yet
+ *          -16 .. -1
  */
 
-#define rfbEncodingFineQualityLevel0   0xFFFFFE00
-#define rfbEncodingFineQualityLevel100 0xFFFFFE64
-#define rfbEncodingSubsamp1X           0xFFFFFD00
-#define rfbEncodingSubsamp4X           0xFFFFFD01
-#define rfbEncodingSubsamp2X           0xFFFFFD02
-#define rfbEncodingSubsampGray         0xFFFFFD03
-#define rfbEncodingSubsamp8X           0xFFFFFD04
-#define rfbEncodingSubsamp16X          0xFFFFFD05
+#define rfbEncodingSubsamp1X            0xFFFFFD00
+#define rfbEncodingSubsamp4X            0xFFFFFD01
+#define rfbEncodingSubsamp2X            0xFFFFFD02
+#define rfbEncodingSubsampGray          0xFFFFFD03
+#define rfbEncodingSubsamp8X            0xFFFFFD04
+#define rfbEncodingSubsamp16X           0xFFFFFD05
+#define rfbEncodingFineQualityLevel0    0xFFFFFE00
+#define rfbEncodingFineQualityLevel100  0xFFFFFE64
 
-#define rfbEncodingContinuousUpdates   0xFFFFFEC7
-#define rfbEncodingFence               0xFFFFFEC8
+#define rfbEncodingContinuousUpdates    0xFFFFFEC7
+#define rfbEncodingFence                0xFFFFFEC8
 
-#define rfbEncodingExtendedDesktopSize 0xFFFFFECC
+#define rfbEncodingExtendedDesktopSize  0xFFFFFECC
 
-#define rfbEncodingCompressLevel0  0xFFFFFF00
-#define rfbEncodingCompressLevel1  0xFFFFFF01
-#define rfbEncodingCompressLevel2  0xFFFFFF02
-#define rfbEncodingCompressLevel3  0xFFFFFF03
-#define rfbEncodingCompressLevel4  0xFFFFFF04
-#define rfbEncodingCompressLevel5  0xFFFFFF05
-#define rfbEncodingCompressLevel6  0xFFFFFF06
-#define rfbEncodingCompressLevel7  0xFFFFFF07
-#define rfbEncodingCompressLevel8  0xFFFFFF08
-#define rfbEncodingCompressLevel9  0xFFFFFF09
+#define rfbEncodingGII                  0xFFFFFECF
 
-#define rfbEncodingXCursor         0xFFFFFF10
-#define rfbEncodingRichCursor      0xFFFFFF11
-#define rfbEncodingPointerPos      0xFFFFFF18
+#define rfbEncodingCompressLevel0       0xFFFFFF00
+#define rfbEncodingCompressLevel1       0xFFFFFF01
+#define rfbEncodingCompressLevel2       0xFFFFFF02
+#define rfbEncodingCompressLevel3       0xFFFFFF03
+#define rfbEncodingCompressLevel4       0xFFFFFF04
+#define rfbEncodingCompressLevel5       0xFFFFFF05
+#define rfbEncodingCompressLevel6       0xFFFFFF06
+#define rfbEncodingCompressLevel7       0xFFFFFF07
+#define rfbEncodingCompressLevel8       0xFFFFFF08
+#define rfbEncodingCompressLevel9       0xFFFFFF09
 
-#define rfbEncodingLastRect        0xFFFFFF20
-#define rfbEncodingNewFBSize       0xFFFFFF21
+#define rfbEncodingXCursor              0xFFFFFF10
+#define rfbEncodingRichCursor           0xFFFFFF11
+#define rfbEncodingPointerPos           0xFFFFFF18
 
-#define rfbEncodingQualityLevel0   0xFFFFFFE0
-#define rfbEncodingQualityLevel1   0xFFFFFFE1
-#define rfbEncodingQualityLevel2   0xFFFFFFE2
-#define rfbEncodingQualityLevel3   0xFFFFFFE3
-#define rfbEncodingQualityLevel4   0xFFFFFFE4
-#define rfbEncodingQualityLevel5   0xFFFFFFE5
-#define rfbEncodingQualityLevel6   0xFFFFFFE6
-#define rfbEncodingQualityLevel7   0xFFFFFFE7
-#define rfbEncodingQualityLevel8   0xFFFFFFE8
-#define rfbEncodingQualityLevel9   0xFFFFFFE9
+#define rfbEncodingLastRect             0xFFFFFF20
+#define rfbEncodingNewFBSize            0xFFFFFF21
 
-#define rfbEncodingGII             0xFFFFFECF
+#define rfbEncodingQualityLevel0        0xFFFFFFE0
+#define rfbEncodingQualityLevel1        0xFFFFFFE1
+#define rfbEncodingQualityLevel2        0xFFFFFFE2
+#define rfbEncodingQualityLevel3        0xFFFFFFE3
+#define rfbEncodingQualityLevel4        0xFFFFFFE4
+#define rfbEncodingQualityLevel5        0xFFFFFFE5
+#define rfbEncodingQualityLevel6        0xFFFFFFE6
+#define rfbEncodingQualityLevel7        0xFFFFFFE7
+#define rfbEncodingQualityLevel8        0xFFFFFFE8
+#define rfbEncodingQualityLevel9        0xFFFFFFE9
 
 /* signatures for "fake" encoding types */
-#define sig_rfbEncodingCompressLevel0  "COMPRLVL"
-#define sig_rfbEncodingXCursor         "X11CURSR"
-#define sig_rfbEncodingRichCursor      "RCHCURSR"
-#define sig_rfbEncodingPointerPos      "POINTPOS"
-#define sig_rfbEncodingLastRect        "LASTRECT"
-#define sig_rfbEncodingNewFBSize       "NEWFBSIZ"
+#define sig_rfbEncodingCompressLevel0    "COMPRLVL"
+#define sig_rfbEncodingXCursor           "X11CURSR"
+#define sig_rfbEncodingRichCursor        "RCHCURSR"
+#define sig_rfbEncodingPointerPos        "POINTPOS"
+#define sig_rfbEncodingLastRect          "LASTRECT"
+#define sig_rfbEncodingNewFBSize         "NEWFBSIZ"
 #define sig_rfbEncodingFineQualityLevel0 "FINEQLVL"
-#define sig_rfbEncodingSubsamp1X       "SSAMPLVL"
-#define sig_rfbEncodingQualityLevel0   "JPEGQLVL"
-#define sig_rfbEncodingGII             "GII_____"
+#define sig_rfbEncodingSubsamp1X         "SSAMPLVL"
+#define sig_rfbEncodingQualityLevel0     "JPEGQLVL"
+#define sig_rfbEncodingGII               "GII_____"
+
 
 /*****************************************************************************
  *
@@ -887,16 +900,16 @@ typedef struct _rfbZlibHeader {
  *
  */
 
-#define rfbTightExplicitFilter         0x04
-#define rfbTightFill                   0x08
-#define rfbTightJpeg                   0x09
-#define rfbTightNoZlib                 0x0A
-#define rfbTightMaxSubencoding         0x09
+#define rfbTightExplicitFilter  0x04
+#define rfbTightFill            0x08
+#define rfbTightJpeg            0x09
+#define rfbTightNoZlib          0x0A
+#define rfbTightMaxSubencoding  0x09
 
 /* Filters to improve compression efficiency */
-#define rfbTightFilterCopy             0x00
-#define rfbTightFilterPalette          0x01
-#define rfbTightFilterGradient         0x02
+#define rfbTightFilterCopy      0x00
+#define rfbTightFilterPalette   0x01
+#define rfbTightFilterGradient  0x02
 
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -909,8 +922,8 @@ typedef struct _rfbZlibHeader {
  * values, if they are also set.
  */
 
-#define rfbHextileZlibRaw               (1 << 5)
-#define rfbHextileZlibHex               (1 << 6)
+#define rfbHextileZlibRaw       (1 << 5)
+#define rfbHextileZlibHex       (1 << 6)
 
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
