@@ -99,6 +99,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     });
     setFocusTraversalKeysEnabled(false);
     setFocusable(true);
+    enableInputMethods(false);
   }
 
   // RFB thread

@@ -1,3 +1,13 @@
+2.2.10 ESR
+==========
+
+### Significant changes relative to 2.2.9 ESR:
+
+1. The Linux/Un\*x TurboVNC Viewer now works around an issue whereby Java on
+Un*x platforms generates a key release event without a corresponding key press
+event for dead keys on international keyboards.
+
+
 2.2.9 ESR
 =========
 
