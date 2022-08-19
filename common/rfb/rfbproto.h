@@ -305,7 +305,6 @@ typedef struct _rfbAuthenticationCapsMsg {
 #define rfbAuthVeNCrypt 19
 #define sig_rfbAuthVeNCrypt "VENCRYPT"
 
-
 /*-----------------------------------------------------------------------------
  * Authentication result codes (all protocol versions, but rfbAuthTooMany is
  * not used in protocol versions above 3.3)
@@ -395,27 +394,15 @@ typedef struct _rfbInteractionCapsMsg {
  */
 
 
-/*-----------------------------------------------------------------------------
- * Extended desktop size reason and result codes
- */
-
-#define rfbEDSReasonServer 0
-#define rfbEDSReasonClient 1
-#define rfbEDSReasonOtherClient 2
-
-#define rfbEDSResultSuccess 0
-#define rfbEDSResultProhibited 1
-#define rfbEDSResultNoResources 2
-#define rfbEDSResultInvalid 3
-
-
 /*****************************************************************************
  *
  * Message types
  *
  *****************************************************************************/
 
-/* server -> client */
+/*-----------------------------------------------------------------------------
+ * server -> client
+ */
 
 #define rfbFramebufferUpdate 0
 #define rfbSetColourMapEntries 1
@@ -437,7 +424,9 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbGIIServer "GII_SERV"
 
 
-/* client -> server */
+/*-----------------------------------------------------------------------------
+ * client -> server
+ */
 
 #define rfbSetPixelFormat 0
 #define rfbFixColourMapEntries 1        /* not currently supported */
@@ -473,29 +462,11 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbGIIClient "GII_CLNT"
 
 
-/* server -> client and client -> server */
+/*-----------------------------------------------------------------------------
+ * server -> client and client -> server
+ */
 
 #define rfbFence 248
-
-/* fence flags */
-#define rfbFenceFlagBlockBefore 1
-#define rfbFenceFlagBlockAfter 2
-#define rfbFenceFlagSyncNext 4
-#define rfbFenceFlagRequest 0x80000000
-#define rfbFenceFlagsSupported (rfbFenceFlagBlockBefore | \
-                                rfbFenceFlagBlockAfter | \
-                                rfbFenceFlagSyncNext | \
-                                rfbFenceFlagRequest)
-
-
-/* GII sub-types */
-
-#define rfbGIIEvent 0
-#define rfbGIIVersion 1
-#define rfbGIIDeviceCreate 2
-#define rfbGIIDeviceDestroy 3
-
-#define rfbGIIBE 128
 
 
 /*****************************************************************************
@@ -613,10 +584,52 @@ typedef struct _rfbInteractionCapsMsg {
 
 /*****************************************************************************
  *
- * Server -> client message definitions
+ * Message definitions (server -> client and client -> server)
  *
  *****************************************************************************/
 
+/*-----------------------------------------------------------------------------
+ * Fence
+ */
+
+/* flags */
+#define rfbFenceFlagBlockBefore 1
+#define rfbFenceFlagBlockAfter 2
+#define rfbFenceFlagSyncNext 4
+#define rfbFenceFlagRequest 0x80000000
+#define rfbFenceFlagsSupported (rfbFenceFlagBlockBefore | \
+                                rfbFenceFlagBlockAfter | \
+                                rfbFenceFlagSyncNext | \
+                                rfbFenceFlagRequest)
+
+typedef struct _rfbFenceMsg {
+    CARD8 type;                 /* always rfbFence */
+    CARD8 pad[3];
+    CARD32 flags;
+    CARD8 length;
+    /* Followed by char data[length] */
+} rfbFenceMsg;
+
+#define sz_rfbFenceMsg 9
+
+
+/*-----------------------------------------------------------------------------
+ * GII message subtypes
+ */
+
+#define rfbGIIEvent 0
+#define rfbGIIVersion 1
+#define rfbGIIDeviceCreate 2
+#define rfbGIIDeviceDestroy 3
+
+#define rfbGIIBE 128
+
+
+/*****************************************************************************
+ *
+ * Message definitions (server -> client)
+ *
+ *****************************************************************************/
 
 /*-----------------------------------------------------------------------------
  * FramebufferUpdate - a block of rectangles to be copied to the framebuffer.
@@ -754,6 +767,7 @@ typedef struct _rfbCoRRERectangle {
 #define rfbHextileExtractY(byte) ((byte) & 0xf)
 #define rfbHextileExtractW(byte) (((byte) >> 4) + 1)
 #define rfbHextileExtractH(byte) (((byte) & 0xf) + 1)
+
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * ZLIB - zlib compression Encoding.  We have an rfbZlibHeader structure
@@ -986,6 +1000,20 @@ typedef struct {
 #define rfbZRLETileHeight 64
 
 
+/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Extended desktop size reason and result codes
+ */
+
+#define rfbEDSReasonServer 0
+#define rfbEDSReasonClient 1
+#define rfbEDSReasonOtherClient 2
+
+#define rfbEDSResultSuccess 0
+#define rfbEDSResultProhibited 1
+#define rfbEDSResultNoResources 2
+#define rfbEDSResultInvalid 3
+
+
 /*-----------------------------------------------------------------------------
  * SetColourMapEntries - these messages are only sent if the pixel
  * format uses a "colour map" (i.e. trueColour false) and the client has not
@@ -1009,7 +1037,6 @@ typedef struct _rfbSetColourMapEntriesMsg {
 #define sz_rfbSetColourMapEntriesMsg 6
 
 
-
 /*-----------------------------------------------------------------------------
  * Bell - ring a bell on the client if it has one.
  */
@@ -1019,7 +1046,6 @@ typedef struct _rfbBellMsg {
 } rfbBellMsg;
 
 #define sz_rfbBellMsg 1
-
 
 
 /*-----------------------------------------------------------------------------
@@ -1036,6 +1062,7 @@ typedef struct _rfbServerCutTextMsg {
 
 #define sz_rfbServerCutTextMsg 8
 
+
 /*-----------------------------------------------------------------------------
  * FileListData
  */
@@ -1051,6 +1078,7 @@ typedef struct _rfbFileListDataMsg {
 } rfbFileListDataMsg;
 
 #define sz_rfbFileListDataMsg 8
+
 
 /*-----------------------------------------------------------------------------
  * FileDownloadData
@@ -1081,6 +1109,7 @@ typedef struct _rfbFileUploadCancelMsg {
 
 #define sz_rfbFileUploadCancelMsg 4
 
+
 /*-----------------------------------------------------------------------------
  * FileDownloadFailed
  */
@@ -1094,19 +1123,6 @@ typedef struct _rfbFileDownloadFailedMsg {
 
 #define sz_rfbFileDownloadFailedMsg 4
 
-/*-----------------------------------------------------------------------------
- * Fence
- */
-
-typedef struct _rfbFenceMsg {
-    CARD8 type;                 /* always rfbFence */
-    CARD8 pad[3];
-    CARD32 flags;
-    CARD8 length;
-    /* Followed by char data[length] */
-} rfbFenceMsg;
-
-#define sz_rfbFenceMsg 9
 
 /*-----------------------------------------------------------------------------
  * GII Server Version
@@ -1122,6 +1138,7 @@ typedef struct _rfbGIIServerVersionMsg {
 
 #define sz_rfbGIIServerVersionMsg 8
 
+
 /*-----------------------------------------------------------------------------
  * GII Device Creation Response
  */
@@ -1134,6 +1151,7 @@ typedef struct _rfbGIIDeviceCreatedMsg {
 } rfbGIIDeviceCreatedMsg;
 
 #define sz_rfbGIIDeviceCreatedMsg 8
+
 
 /*-----------------------------------------------------------------------------
  * Union of all server->client messages.
@@ -1155,13 +1173,11 @@ typedef union _rfbServerToClientMsg {
 } rfbServerToClientMsg;
 
 
-
 /*****************************************************************************
  *
  * Message definitions (client -> server)
  *
  *****************************************************************************/
-
 
 /*-----------------------------------------------------------------------------
  * SetPixelFormat - tell the RFB server the format in which the client wants
@@ -1294,7 +1310,6 @@ typedef struct _rfbPointerEventMsg {
 #define sz_rfbPointerEventMsg 6
 
 
-
 /*-----------------------------------------------------------------------------
  * ClientCutText - the client has new text in its cut buffer.
  */
@@ -1309,6 +1324,7 @@ typedef struct _rfbClientCutTextMsg {
 
 #define sz_rfbClientCutTextMsg 8
 
+
 /*-----------------------------------------------------------------------------
  * FileListRequest
  */
@@ -1321,6 +1337,7 @@ typedef struct _rfbFileListRequestMsg {
 } rfbFileListRequestMsg;
 
 #define sz_rfbFileListRequestMsg 4
+
 
 /*-----------------------------------------------------------------------------
  * FileDownloadRequest
@@ -1335,6 +1352,7 @@ typedef struct _rfbFileDownloadRequestMsg {
 } rfbFileDownloadRequestMsg;
 
 #define sz_rfbFileDownloadRequestMsg 8
+
 
 /*-----------------------------------------------------------------------------
  * FileUploadRequest
@@ -1366,6 +1384,7 @@ typedef struct _rfbFileUploadDataMsg {
 
 #define sz_rfbFileUploadDataMsg 6
 
+
 /*-----------------------------------------------------------------------------
  * FileDownloadCancel
  */
@@ -1378,6 +1397,7 @@ typedef struct _rfbFileDownloadCancelMsg {
 } rfbFileDownloadCancelMsg;
 
 #define sz_rfbFileDownloadCancelMsg 4
+
 
 /*-----------------------------------------------------------------------------
  * FileUploadFailed
@@ -1392,6 +1412,7 @@ typedef struct _rfbFileUploadFailedMsg {
 
 #define sz_rfbFileUploadFailedMsg 4
 
+
 /*-----------------------------------------------------------------------------
  * FileCreateDirRequest
  */
@@ -1404,6 +1425,7 @@ typedef struct _rfbFileCreateDirRequestMsg {
 } rfbFileCreateDirRequestMsg;
 
 #define sz_rfbFileCreateDirRequestMsg 4
+
 
 /*-----------------------------------------------------------------------------
  * EnableContinuousUpdates
@@ -1419,6 +1441,7 @@ typedef struct _rfbEnableContinuousUpdatesMsg {
 } rfbEnableContinuousUpdatesMsg;
 
 #define sz_rfbEnableContinuousUpdatesMsg 10
+
 
 /*-----------------------------------------------------------------------------
  * SetDesktopSize
@@ -1447,6 +1470,7 @@ typedef struct _rfbSetDesktopSizeMsg {
 
 #define sz_rfbSetDesktopSizeMsg 8
 
+
 /*-----------------------------------------------------------------------------
  * GII Client Version
  */
@@ -1460,10 +1484,12 @@ typedef struct _rfbGIIClientVersionMsg {
 
 #define sz_rfbGIIClientVersionMsg 6
 
+
 /*-----------------------------------------------------------------------------
  * GII Device Creation
  */
 
+/* unit types */
 #define rfbGIIUnitUnknown          0
 #define rfbGIIUnitTime             1
 #define rfbGIIUnitFreq             2
@@ -1495,7 +1521,7 @@ typedef struct _rfbGIIValuator {
     INT32 rangeMin;
     INT32 rangeCenter;
     INT32 rangeMax;
-    CARD32 siUnit;
+    CARD32 siUnit;              /* unit type */
     INT32 siAdd;
     INT32 siMul;
     INT32 siDiv;
@@ -1504,6 +1530,7 @@ typedef struct _rfbGIIValuator {
 
 #define sz_rfbGIIValuator 116
 
+/* event type masks */
 #define rfbGIIKeyPressMask         0x00000020
 #define rfbGIIKeyReleaseMask       0x00000040
 #define rfbGIIKeyRepeatMask        0x00000080
@@ -1522,7 +1549,7 @@ typedef struct _rfbGIIDeviceCreateMsg {
     CARD8 deviceName[32];       /* Must be NULL-terminated */
     CARD32 vendorID;
     CARD32 productID;
-    CARD32 canGenerate;
+    CARD32 canGenerate;         /* event type mask */
     CARD32 numRegisters;
     CARD32 numValuators;
     CARD32 numButtons;
@@ -1530,6 +1557,7 @@ typedef struct _rfbGIIDeviceCreateMsg {
 } rfbGIIDeviceCreateMsg;
 
 #define sz_rfbGIIDeviceCreateMsg 60
+
 
 /*-----------------------------------------------------------------------------
  * GII Device Destruction
@@ -1543,6 +1571,7 @@ typedef struct _rfbGIIDeviceDestroyMsg {
 } rfbGIIDeviceDestroyMsg;
 
 #define sz_rfbGIIDeviceDestroyMsg 8
+
 
 /*-----------------------------------------------------------------------------
  * GII Event
@@ -1609,7 +1638,7 @@ typedef struct _rfbGIIValuatorEvent {
 #define sz_rfbGIIValuatorEvent 16
 
 typedef struct _rfbGIIEventMsg {
-    CARD8 type;                 /* always rfbGII */
+    CARD8 type;                 /* always rfbGIIClient */
     CARD8 endianAndSubType;     /* rfbGIIEvent | (rfbGIIBE or 0) */
     CARD16 length;
     /* Followed by any number of rfbGII*Event structures, totaling length
@@ -1617,6 +1646,7 @@ typedef struct _rfbGIIEventMsg {
 } rfbGIIEventMsg;
 
 #define sz_rfbGIIEventMsg 4
+
 
 /*-----------------------------------------------------------------------------
  * Union of all client->server messages.
