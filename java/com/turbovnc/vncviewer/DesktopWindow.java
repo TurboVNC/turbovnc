@@ -97,6 +97,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     });
     setFocusTraversalKeysEnabled(false);
     setFocusable(true);
+    enableInputMethods(false);
   }
 
   // RFB thread
@@ -571,7 +572,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // EDT: Handle the key pressed event.
   public void keyPressed(KeyEvent e) {
-    if (e.getKeyCode() == cc.params.menuKey.getCode()) {
+    if (e.getKeyCode() == cc.params.menuKey.getCode() &&
+        e.getModifiersEx() == 0) {
       int sx = (scaleWidthRatio == 1.00) ?
         lastX : (int)Math.floor(lastX * scaleWidthRatio);
       int sy = (scaleHeightRatio == 1.00) ?

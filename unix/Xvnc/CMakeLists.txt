@@ -94,8 +94,9 @@ if(NOT TVNC_SYSTEMX11)
 endif()
 
 if(TVNC_SYSTEMX11)
-	include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xau_INCLUDE_PATH}
-		${X11_Xdmcp_INCLUDE_PATH} ${X11_Xkbfile_INCLUDE_PATH})
+	include_directories(${X11_X11_INCLUDE_PATH} ${X11_X11_INCLUDE_PATH}/pixman-1
+		${X11_Xau_INCLUDE_PATH} ${X11_Xdmcp_INCLUDE_PATH}
+		${X11_Xkbfile_INCLUDE_PATH})
 	string(REGEX REPLACE "X11" "Xfont2" X11_Xfont2_LIB ${X11_X11_LIB})
 	string(REGEX REPLACE "X11" "fontenc" X11_Fontenc_LIB ${X11_X11_LIB})
 	string(REGEX REPLACE "X11" "pixman-1" X11_Pixman_LIB ${X11_X11_LIB})

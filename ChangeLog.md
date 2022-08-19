@@ -14,6 +14,16 @@ to their default values.
 TurboVNC host.
 
 
+3.0.2
+=====
+
+### Significant changes relative to 3.0.1:
+
+1. The Linux/Un\*x TurboVNC Viewer now works around an issue whereby Java on
+Un*x platforms generates a key release event without a corresponding key press
+event for dead keys on international keyboards.
+
+
 3.0.1
 =====
 
