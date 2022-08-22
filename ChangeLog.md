@@ -7,6 +7,9 @@
 Un*x platforms generates a key release event without a corresponding key press
 event for dead keys on international keyboards.
 
+2. The TurboVNC Viewer no longer pops up the F8 menu if a modifier key (Shift,
+Ctrl, Alt, etc.) is pressed along with the menu key.
+
 
 3.0.1
 =====
