@@ -10,6 +10,10 @@ event for dead keys on international keyboards.
 2. The Java TurboVNC Viewer no longer pops up the F8 menu if a modifier key
 (Shift, Ctrl, Alt, etc.) is pressed along with the menu key.
 
+3. Hotkeys in the Windows/Java TurboVNC Viewer can no longer be triggered using
+the RCtrl-LAlt-Shift modifier sequence, because Windows uses RCtrl-LAlt to
+represent AltGr on international keyboards.
+
 
 2.2.9 ESR
 =========
