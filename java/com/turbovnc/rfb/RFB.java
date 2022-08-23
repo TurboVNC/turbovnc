@@ -146,34 +146,6 @@ public final class RFB {
   public static final int AUTH_TOO_MANY = 2;  // deprecated
 
   //***************************************************************************
-  // Extended desktop size reason and result codes
-  //***************************************************************************
-
-  public static final int EDS_REASON_SERVER       = 0;
-  public static final int EDS_REASON_CLIENT       = 1;
-  public static final int EDS_REASON_OTHER_CLIENT = 2;
-
-  public static final int EDS_RESULT_SUCCESS      = 0;
-  public static final int EDS_RESULT_PROHIBITED   = 1;
-  public static final int EDS_RESULT_NO_RESOURCES = 2;
-  public static final int EDS_RESULT_INVALID      = 3;
-
-  //***************************************************************************
-  // Fence flags
-  //***************************************************************************
-
-  public static final int FENCE_FLAG_BLOCK_BEFORE = 1 << 0;
-  public static final int FENCE_FLAG_BLOCK_AFTER  = 1 << 1;
-  public static final int FENCE_FLAG_SYNC_NEXT    = 1 << 2;
-
-  public static final int FENCE_FLAG_REQUEST      = 1 << 31;
-
-  public static final int FENCE_FLAGS_SUPPORTED   = (FENCE_FLAG_BLOCK_BEFORE |
-                                                     FENCE_FLAG_BLOCK_AFTER |
-                                                     FENCE_FLAG_SYNC_NEXT |
-                                                     FENCE_FLAG_REQUEST);
-
-  //***************************************************************************
   // Message types
   //***************************************************************************
 
@@ -242,35 +214,76 @@ public final class RFB {
   // Pseudo-encodings
   //***************************************************************************
 
-  public static final int ENCODING_CONTINUOUS_UPDATES    = -313;
-  public static final int ENCODING_FENCE                 = -312;
-  public static final int ENCODING_CLIENT_REDIRECT       = -311;
-  public static final int ENCODING_EXTENDED_DESKTOP_SIZE = -308;
-  public static final int ENCODING_DESKTOP_NAME          = -307;
-  public static final int ENCODING_GII                   = -305;
-  public static final int ENCODING_X_CURSOR              = -240;
-  public static final int ENCODING_RICH_CURSOR           = -239;
-  public static final int ENCODING_NEW_FB_SIZE           = -223;
+  public static final int ENCODING_EXTENDED_CLIPBOARD     = 0xC0A1E5CE;
 
-  // TightVNC-specific
-  public static final int ENCODING_COMPRESS_LEVEL_0 = -256;
-  public static final int ENCODING_COMPRESS_LEVEL_9 = -247;
-  public static final int ENCODING_LAST_RECT        = -224;
-  public static final int ENCODING_QUALITY_LEVEL_0  = -32;
-  public static final int ENCODING_QUALITY_LEVEL_9  = -23;
-
-  // TurboVNC-specific
-  public static final int ENCODING_FINE_QUALITY_LEVEL_0   = -512;
-  public static final int ENCODING_FINE_QUALITY_LEVEL_100 = -412;
   public static final int ENCODING_SUBSAMP_1X             = -768;
   public static final int ENCODING_SUBSAMP_4X             = -767;
   public static final int ENCODING_SUBSAMP_2X             = -766;
   public static final int ENCODING_SUBSAMP_GRAY           = -765;
   public static final int ENCODING_SUBSAMP_8X             = -764;
   public static final int ENCODING_SUBSAMP_16X            = -763;
+  public static final int ENCODING_FINE_QUALITY_LEVEL_0   = -512;
+  public static final int ENCODING_FINE_QUALITY_LEVEL_100 = -412;
 
-  // UltraVNC-specific
-  public static final int ENCODING_EXTENDED_CLIPBOARD = 0xC0A1E5CE;
+  public static final int ENCODING_CONTINUOUS_UPDATES     = -313;
+  public static final int ENCODING_FENCE                  = -312;
+
+  public static final int ENCODING_CLIENT_REDIRECT        = -311;
+
+  public static final int ENCODING_EXTENDED_DESKTOP_SIZE  = -308;
+
+  public static final int ENCODING_DESKTOP_NAME           = -307;
+
+  public static final int ENCODING_GII                    = -305;
+
+  public static final int ENCODING_COMPRESS_LEVEL_0       = -256;
+  public static final int ENCODING_COMPRESS_LEVEL_9       = -247;
+
+  public static final int ENCODING_X_CURSOR               = -240;
+  public static final int ENCODING_RICH_CURSOR            = -239;
+
+  public static final int ENCODING_LAST_RECT              = -224;
+  public static final int ENCODING_NEW_FB_SIZE            = -223;
+
+  public static final int ENCODING_QUALITY_LEVEL_0        = -32;
+  public static final int ENCODING_QUALITY_LEVEL_9        = -23;
+
+  //***************************************************************************
+  // Fence flags
+  //***************************************************************************
+
+  public static final int FENCE_FLAG_BLOCK_BEFORE = 1 << 0;
+  public static final int FENCE_FLAG_BLOCK_AFTER  = 1 << 1;
+  public static final int FENCE_FLAG_SYNC_NEXT    = 1 << 2;
+
+  public static final int FENCE_FLAG_REQUEST      = 1 << 31;
+
+  public static final int FENCE_FLAGS_SUPPORTED   = (FENCE_FLAG_BLOCK_BEFORE |
+                                                     FENCE_FLAG_BLOCK_AFTER |
+                                                     FENCE_FLAG_SYNC_NEXT |
+                                                     FENCE_FLAG_REQUEST);
+
+  //***************************************************************************
+  // Extended Clipboard
+  //***************************************************************************
+
+  // Formats
+  public static final int EXTCLIP_FORMAT_UTF8  = 1 << 0;
+  public static final int EXTCLIP_FORMAT_RTF   = 1 << 1;
+  public static final int EXTCLIP_FORMAT_HTML  = 1 << 2;
+  public static final int EXTCLIP_FORMAT_DIB   = 1 << 3;
+  public static final int EXTCLIP_FORMAT_FILES = 1 << 4;
+
+  public static final int EXTCLIP_FORMAT_MASK  = 0x0000ffff;
+
+  // Actions
+  public static final int EXTCLIP_ACTION_CAPS    = 1 << 24;
+  public static final int EXTCLIP_ACTION_REQUEST = 1 << 25;
+  public static final int EXTCLIP_ACTION_PEEK    = 1 << 26;
+  public static final int EXTCLIP_ACTION_NOTIFY  = 1 << 27;
+  public static final int EXTCLIP_ACTION_PROVIDE = 1 << 28;
+
+  public static final int EXTCLIP_ACTION_MASK    = 0xff000000;
 
   //***************************************************************************
   // Hextile subencoding types
@@ -297,6 +310,19 @@ public final class RFB {
   public static final int TIGHT_FILTER_COPY     = 0x00;
   public static final int TIGHT_FILTER_PALETTE  = 0x01;
   public static final int TIGHT_FILTER_GRADIENT = 0x02;
+
+  //***************************************************************************
+  // Extended desktop size reason and result codes
+  //***************************************************************************
+
+  public static final int EDS_REASON_SERVER       = 0;
+  public static final int EDS_REASON_CLIENT       = 1;
+  public static final int EDS_REASON_OTHER_CLIENT = 2;
+
+  public static final int EDS_RESULT_SUCCESS      = 0;
+  public static final int EDS_RESULT_PROHIBITED   = 1;
+  public static final int EDS_RESULT_NO_RESOURCES = 2;
+  public static final int EDS_RESULT_INVALID      = 3;
 
   //***************************************************************************
   // Button masks for PointerEvent
@@ -374,28 +400,6 @@ public final class RFB {
   public static final int GII_DEVTYPE_ERASER = 3;
   public static final int GII_DEVTYPE_TOUCH  = 4;
   public static final int GII_DEVTYPE_PAD    = 5;
-
-  //***************************************************************************
-  // Extended Clipboard
-  //***************************************************************************
-
-  // Formats
-  public static final int EXTCLIP_FORMAT_UTF8  = 1 << 0;
-  public static final int EXTCLIP_FORMAT_RTF   = 1 << 1;
-  public static final int EXTCLIP_FORMAT_HTML  = 1 << 2;
-  public static final int EXTCLIP_FORMAT_DIB   = 1 << 3;
-  public static final int EXTCLIP_FORMAT_FILES = 1 << 4;
-
-  public static final int EXTCLIP_FORMAT_MASK  = 0x0000ffff;
-
-  // Actions
-  public static final int EXTCLIP_ACTION_CAPS    = 1 << 24;
-  public static final int EXTCLIP_ACTION_REQUEST = 1 << 25;
-  public static final int EXTCLIP_ACTION_PEEK    = 1 << 26;
-  public static final int EXTCLIP_ACTION_NOTIFY  = 1 << 27;
-  public static final int EXTCLIP_ACTION_PROVIDE = 1 << 28;
-
-  public static final int EXTCLIP_ACTION_MASK    = 0xff000000;
 
   private RFB() {}
 };

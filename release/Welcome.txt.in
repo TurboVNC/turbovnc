@@ -1,1 +1,1 @@
-This package will install the TurboVNC Viewer for @FORMAL_CPU_NAME@-based Macs.  To remove TurboVNC, use the "Uninstall TurboVNC" application.
+This package will install the TurboVNC Viewer for Macs with @FORMAL_CPU_NAME@ CPUs.  To remove TurboVNC, use the "Uninstall TurboVNC" application.
