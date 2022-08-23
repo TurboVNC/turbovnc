@@ -182,9 +182,10 @@ if(HAVE_MONOTONIC_CLOCK)
 endif()
 target_link_libraries(Xvnc dix mi vnc fb Xi composite mi damage damageext randr
 	record render os present Xext-server sync xfixes xkb ${X11_Xau_LIB}
-	${X11_Xdmcp_LIB} ${X11_Xfont2_LIB} ${X11_Fontenc_LIB} ${FREETYPE_LIBRARIES}
-	${X11_Pixman_LIB} sha1 ${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES}
-	vncauth m pthread ${PAM_LIB} ${EXTRA_LIB})
+	${X11_Xdmcp_LIB} ${X11_Xfont2_LDFLAGS} ${X11_Fontenc_LDFLAGS}
+	${FREETYPE_LIBRARIES} ${X11_Pixman_LDFLAGS} sha1 ${TJPEG_LIBRARY}
+	${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} vncauth m pthread ${PAM_LIB}
+	${EXTRA_LIB})
 if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	find_library(ICONV_LIBRARIES NAMES iconv)
 	target_link_libraries(Xvnc ${ICONV_LIBRARIES})
