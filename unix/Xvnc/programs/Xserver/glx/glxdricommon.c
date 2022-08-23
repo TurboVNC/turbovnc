@@ -258,7 +258,7 @@ glxConvertConfigs(const __DRIcoreExtension * core,
     return head.next;
 }
 
-#ifdef TURBOVNC
+#if defined(TURBOVNC) && !defined(TURBOVNC_STATIC_XORG_PATH)
 char *dri_driver_path = DRI_DRIVER_PATH;
 #else
 static const char dri_driver_path[] = DRI_DRIVER_PATH;

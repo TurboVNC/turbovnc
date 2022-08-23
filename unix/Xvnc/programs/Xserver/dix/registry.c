@@ -33,7 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifdef X_REGISTRY_REQUEST
 #define CORE "X11"
-#ifdef TURBOVNC
+#if defined(TURBOVNC) && !defined(TURBOVNC_STATIC_XORG_PATHS)
 char registry_path[PATH_MAX] = SERVER_MISC_CONFIG_PATH "/protocol.txt";
 #define FILENAME registry_path
 #else

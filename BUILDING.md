@@ -181,6 +181,31 @@ directly with libssl and libcrypto by adding `-DTVNC_DLOPENSSL=0` to the CMake
 command line.
 
 
+### Distribution-Specific Build
+
+By default, the build system builds TurboVNC binaries that can run on multiple
+O/S distributions.  This involves building some of the X.org dependencies,
+which are included in the TurboVNC source tree, and statically linking TurboVNC
+with those and other dependencies.  Distribution-specific dynamically-linked
+TurboVNC binaries can instead be built by changing the values of the following
+CMake variables:
+
+- `TJPEG_INCLUDE_DIR`
+- `TJPEG_LIBRARY`
+- `TVNC_DLOPENSSL`
+- `TVNC_STATIC_XORG_PATHS`
+- `TVNC_SYSTEMLIBS`
+- `TVNC_SYSTEMX11`
+- `XKB_BASE_DIRECTORY`
+- `XKB_BIN_DIRECTORY`
+- `XORG_DRI_DRIVER_PATH`
+- `XORG_FONT_PATH`
+- `XORG_REGISTRY_PATH`
+
+Use `ccmake` or `cmake-gui`, as described below, to view documentation for
+those variables.
+
+
 Build Recipes
 -------------
 

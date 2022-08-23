@@ -767,7 +767,7 @@ XkbProcessArguments(int argc, char *argv[], int i)
             return -1;
         }
     }
-#ifdef TURBOVNC
+#if defined(TURBOVNC) && !defined(TURBOVNC_XORG_STATIC_PATHS)
     else if (strncmp(argv[i], "-xkbcompdir", 11) == 0) {
         if (++i < argc) {
 #if !defined(WIN32) && !defined(__CYGWIN__)

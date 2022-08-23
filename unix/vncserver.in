@@ -38,6 +38,7 @@ if ($slashndx >= 0) {
 
 $xauth = "xauth";
 $buildWebServer = @TVNC_BUILDWEBSERVER@;
+$staticXorgPaths = @TVNC_STATIC_XORG_PATHS@;
 
 &SanityCheck();
 
@@ -97,6 +98,8 @@ unless ($xauthorityFile) {
 
 chop($host = `uname -n`);
 chop($os = `uname`);
+
+if (!$staticXorgPaths) {
 
 if (-d "/etc/X11/fontpath.d") {
   $fontPath = "catalogue:/etc/X11/fontpath.d";
@@ -194,6 +197,8 @@ foreach $_registrydir (@registrydirs) {
     last;
   }
 }
+
+} # !$staticXorgPaths
 
 # Check command line options
 
@@ -447,11 +452,11 @@ $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
 $cmd .= " -deferupdate $deferUpdate";
-$cmd .= " -xkbdir $xkbdir" if ($xkbdir);
-$cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir);
+$cmd .= " -xkbdir $xkbdir" if ($xkbdir && !$staticXorgPaths);
+$cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir && !$staticXorgPaths);
 $cmd .= " -pamsession" if ($pamSession);
-$cmd .= " -dridir $dridir" if ($dridir);
-$cmd .= " -registrydir $registrydir" if ($registrydir);
+$cmd .= " -dridir $dridir" if ($dridir && !$staticXorgPaths);
+$cmd .= " -registrydir $registrydir" if ($registrydir && !$staticXorgPaths);
 $cmd .= " -nomt" if (!$multiThread);
 $cmd .= " -nthreads $numThreads" if ($numThreads);
 $cmd .= " $serverArgs" if ($serverArgs);
