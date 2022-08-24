@@ -10,14 +10,14 @@ if(HAVE_BACKTRACE)
 endif()
 
 if(BITS EQUAL 64)
-	set(DEFAULT_DRI_DRIVER_PATH "/usr/lib64/dri")
+	set(DEFAULT_XORG_DRI_DRIVER_PATH "/usr/lib64/dri")
 else()
-	set(DEFAULT_DRI_DRIVER_PATH "/usr/lib/dri")
+	set(DEFAULT_XORG_DRI_DRIVER_PATH "/usr/lib/dri")
 endif()
-set(DRI_DRIVER_PATH ${DEFAULT_DRI_DRIVER_PATH} CACHE PATH
-	"Path to DRI drivers (default: ${DEFAULT_DRI_DRIVER_PATH})")
-message(STATUS "DRI_DRIVER_PATH = ${DRI_DRIVER_PATH}")
-add_definitions(-DDRI_DRIVER_PATH=\"${DRI_DRIVER_PATH}\")
+set(XORG_DRI_DRIVER_PATH ${DEFAULT_XORG_DRI_DRIVER_PATH} CACHE PATH
+	"X.org DRI driver path, which contains swrast_dri.so (default: ${DEFAULT_XORG_DRI_DRIVER_PATH})")
+message(STATUS "XORG_DRI_DRIVER_PATH = ${XORG_DRI_DRIVER_PATH}")
+add_definitions(-DDRI_DRIVER_PATH=\"${XORG_DRI_DRIVER_PATH}\")
 
 disable_compiler_warnings()
 

@@ -94,19 +94,20 @@ if(NOT TVNC_SYSTEMX11)
 endif()
 
 if(TVNC_SYSTEMX11)
-	include_directories(${X11_X11_INCLUDE_PATH} ${X11_X11_INCLUDE_PATH}/pixman-1
-		${X11_Xau_INCLUDE_PATH} ${X11_Xdmcp_INCLUDE_PATH}
-		${X11_Xkbfile_INCLUDE_PATH})
-	string(REGEX REPLACE "X11" "Xfont2" X11_Xfont2_LIB ${X11_X11_LIB})
-	string(REGEX REPLACE "X11" "fontenc" X11_Fontenc_LIB ${X11_X11_LIB})
-	string(REGEX REPLACE "X11" "pixman-1" X11_Pixman_LIB ${X11_X11_LIB})
+	include(FindPkgConfig)
+	pkg_check_modules(X11_Xfont2 REQUIRED xfont2)
+	pkg_check_modules(X11_Fontenc REQUIRED fontenc)
+	pkg_check_modules(X11_Pixman REQUIRED pixman-1)
+	include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xau_INCLUDE_PATH}
+		${X11_Xdmcp_INCLUDE_PATH} ${X11_Xkbfile_INCLUDE_PATH}
+		${X11_Xfont2_INCLUDEDIR} ${X11_Pixman_INCLUDEDIR}/pixman-1)
 else()
 	include_directories(${CMAKE_CURRENT_BINARY_DIR}/X_include)
 	set(X11_Xau_LIB Xau)
 	set(X11_Xdmcp_LIB Xdmcp)
-	set(X11_Xfont2_LIB Xfont2)
-	set(X11_Fontenc_LIB fontenc)
-	set(X11_Pixman_LIB pixman)
+	set(X11_Xfont2_LDFLAGS Xfont2)
+	set(X11_Fontenc_LDFLAGS fontenc)
+	set(X11_Pixman_LDFLAGS pixman)
 endif()
 
 if(TVNC_SYSTEMLIBS)

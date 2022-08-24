@@ -30,6 +30,10 @@ Ctrl, Alt, etc.) is pressed along with the menu key.
 RCtrl-LAlt-Shift modifier sequence, because Windows uses RCtrl-LAlt to
 represent AltGr on international keyboards.
 
+4. The `vncserver` script now searches **/usr/local/share/fonts** for X11
+fonts, which fixes an issue whereby the TurboVNC X server had few available
+fonts when running on recent FreeBSD releases.
+
 
 3.0.1
 =====

@@ -74,6 +74,15 @@ option(TVNC_SYSTEMLIBS
 boolean_number(TVNC_SYSTEMLIBS)
 report_option(TVNC_SYSTEMLIBS "System zlib/bzip2/FreeType")
 
+option(TVNC_STATIC_XORG_PATHS
+	"Force vncserver and Xvnc to use the XKB base directory, XKB binary directory, X.org DRI driver path, X.org font path, and X.org registry path specified in the XKB_BASE_DIRECTORY, XKB_BIN_DIRECTORY, XORG_DRI_DRIVER_PATH, XORG_FONT_PATH, and XORG_REGISTRY_PATH CMake variables rather than detecting the appropriate paths at run time"
+	OFF)
+boolean_number(TVNC_STATIC_XORG_PATHS)
+report_option(TVNC_STATIC_XORG_PATHS "Static X.org paths")
+if(TVNC_STATIC_XORG_PATHS)
+	add_definitions(-DTURBOVNC_STATIC_XORG_PATHS)
+endif()
+
 if(NOT TVNC_SYSTEMLIBS)
 	add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
 endif()

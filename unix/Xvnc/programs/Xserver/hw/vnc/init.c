@@ -103,7 +103,7 @@ from the X Consortium.
 #ifdef GLXEXT
 extern char *dri_driver_path;
 #endif
-#ifdef X_REGISTRY_REQUEST
+#if defined(X_REGISTRY_REQUEST) && !defined(TURBOVNC_STATIC_XORG_PATHS)
 extern char registry_path[PATH_MAX];
 #endif
 
@@ -432,6 +432,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     return 2;
   }
 
+#ifndef TURBOVNC_STATIC_XORG_PATHS
   if (strcasecmp(argv[i], "-dridir") == 0) {
 #ifdef GLXEXT
     REQUIRE_ARG();
@@ -439,6 +440,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 #endif
     return 2;
   }
+#endif
 
   if (strcasecmp(argv[i], "-geometry") == 0) {
     /* -geometry WxH or W0xH0+X0+Y0[,W1xH1+X1+Y1,...] */
@@ -639,6 +641,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   /***** TurboVNC miscellaneous options *****/
 
+#ifndef TURBOVNC_STATIC_XORG_PATHS
   if (strcasecmp(argv[i], "-registrydir") == 0) {
 #ifdef X_REGISTRY_REQUEST
     REQUIRE_ARG();
@@ -646,6 +649,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 #endif
     return 2;
   }
+#endif
 
   if (strcasecmp(argv[i], "-verbose") == 0) {
     LogSetParameter(XLOG_VERBOSITY, X_DEBUG);
@@ -1654,7 +1658,9 @@ void ddxUseMsg(void)
   ErrorF("\nTurboVNC display options\n");
   ErrorF("========================\n");
   ErrorF("-depth D               set framebuffer depth\n");
+#ifndef TURBOVNC_STATIC_XORG_PATHS
   ErrorF("-dridir dir            specify directory containing the swrast Mesa driver\n");
+#endif
   ErrorF("-geometry WxH          set framebuffer width & height (single-screen)\n");
   ErrorF("-geometry W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]\n");
   ErrorF("                       set multi-screen geometry (see man page)\n");
@@ -1712,7 +1718,9 @@ void ddxUseMsg(void)
 
   ErrorF("\nTurboVNC miscellaneous options\n");
   ErrorF("==============================\n");
+#ifndef TURBOVNC_STATIC_XORG_PATHS
   ErrorF("-registrydir dir       specify directory containing protocol.txt\n");
+#endif
   ErrorF("-verbose               print all X.org errors, warnings, and messages\n");
   ErrorF("-version               report Xvnc version on stderr\n\n");
 }
