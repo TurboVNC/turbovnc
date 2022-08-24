@@ -14,6 +14,10 @@ event for dead keys on international keyboards.
 the RCtrl-LAlt-Shift modifier sequence, because Windows uses RCtrl-LAlt to
 represent AltGr on international keyboards.
 
+4. The `vncserver` script now searches **/usr/local/share/fonts** for X11
+fonts, which fixes an issue whereby the TurboVNC X server had few available
+fonts when running on recent FreeBSD releases.
+
 
 2.2.9 ESR
 =========

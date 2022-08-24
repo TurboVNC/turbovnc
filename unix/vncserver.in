@@ -234,7 +234,8 @@ if (-d "/etc/X11/fontpath.d") {
 }
 
 @fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts',
-              '/usr/share/fonts/X11', '/usr/local/lib/X11/fonts');
+              '/usr/share/fonts/X11', '/usr/local/lib/X11/fonts',
+              '/usr/local/share/fonts');
 if (! -l "/usr/lib/X11") { push(@fontpaths, '/usr/lib/X11/fonts'); }
 if (! -l "/usr/X11") { push(@fontpaths, '/usr/X11/lib/X11/fonts'); }
 if (! -l "/usr/openwin") { push(@fontpaths, '/usr/openwin/lib/X11/fonts'); }
