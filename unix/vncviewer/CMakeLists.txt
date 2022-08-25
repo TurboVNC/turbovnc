@@ -1,4 +1,4 @@
-if(APPLE AND TVNC_BUILDVIEWER)
+if(APPLE)
 
 find_package(JNI REQUIRED)
 
@@ -42,15 +42,13 @@ endif()
 
 install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
-else() # APPLE AND TVNC_BUILDVIEWER
+else() # APPLE
 
 include_directories(${X11_INCLUDE_DIR})
 
 configure_file(vncviewer.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer @ONLY)
 execute_process(COMMAND chmod +x vncviewer
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-if(TVNC_BUILDVIEWER)
 
 find_package(JNI REQUIRED)
 
@@ -82,9 +80,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/java/com/turbovnc/vncviewer/turbovnc-sm.png
 	DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/icons/hicolor/16x16/apps
 	RENAME turbovnc.png)
 
-endif()
-
-endif() # APPLE AND TVNC_BUILDVIEWER
+endif() # APPLE
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
 	DESTINATION ${CMAKE_INSTALL_BINDIR})

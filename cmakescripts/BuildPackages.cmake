@@ -23,8 +23,7 @@ set(PKGID "com.virtualgl.${PKGNAME_LC}" CACHE STRING
 # Linux RPM and DEB
 ###############################################################################
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
-	(TVNC_BUILDHELPER OR TVNC_BUILDSERVER))
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 set(RPMARCH ${CMAKE_SYSTEM_PROCESSOR})
 if(CPU_TYPE STREQUAL "x86_64")
@@ -100,11 +99,7 @@ else()
 	set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION}-x86)
 endif()
 
-set(INST_DEPENDS java)
-if(TVNC_BUILDHELPER)
-	set(INST_DEFS ${INST_DEFS} "-DTURBOVNCHELPER")
-	set(INST_DEPENDS ${INST_DEPENDS} turbovnchelper)
-endif()
+set(INST_DEPENDS java turbovnchelper)
 if(TVNC_INCLUDEJRE)
 	set(INST_DEFS ${INST_DEFS} "-DINCLUDEJRE")
 	set(INST_DEPENDS ${INST_DEPENDS} jrebuild)
@@ -132,7 +127,7 @@ endif() # WIN32
 # Mac DMG
 ###############################################################################
 
-if(APPLE AND TVNC_BUILDVIEWER AND TVNC_BUILDHELPER)
+if(APPLE AND TVNC_BUILDVIEWER)
 
 set(MACOS_APP_CERT_NAME "" CACHE STRING
 	"Name of the Developer ID Application certificate (in the macOS keychain) that should be used to sign the TurboVNC Viewer app & DMG.  Leave this blank to generate an unsigned app/DMG.")

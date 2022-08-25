@@ -14,8 +14,6 @@ install(PROGRAMS ${CMAKE_BINARY_DIR}/vncviewer.bat
 install(PROGRAMS ${CMAKE_BINARY_DIR}/vncviewerw.bat
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-if(TVNC_BUILDHELPER)
-
 find_package(JNI REQUIRED)
 
 add_definitions(-D_WINSTATIC)
@@ -33,5 +31,3 @@ set_target_properties(turbovnchelper PROPERTIES PREFIX ""
 target_link_libraries(turbovnchelper ${TJPEG_LIBRARY})
 
 install(TARGETS turbovnchelper RUNTIME DESTINATION ${CMAKE_INSTALL_JAVADIR})
-
-endif()

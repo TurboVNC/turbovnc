@@ -22,9 +22,6 @@
 # Whether or not to include a custom JRE
 %{!?jre: %define jre @TVNC_INCLUDEJRE@}
 
-# Whether or not to include the native infrastructure for the Java viewer
-%define helper @TVNC_BUILDHELPER@
-
 # Work around "No build ID note found" error caused by some versions of RPM
 # trying in vain to extract debug info from the custom JRE
 %if "%{jre}" == "1"
@@ -85,7 +82,7 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  -DCMAKE_INSTALL_PREFIX=%{prefix} \
 #-->  -DCMAKE_INSTALL_SYSCONFDIR=%{sysconfdir} \
 #-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
-#-->  -DTVNC_BUILDVIEWER=%{viewer} -DTVNC_BUILDHELPER=%{helper} \
+#-->  -DTVNC_BUILDVIEWER=%{viewer} \
 #-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_BUILDWEBSERVER=%{webserver} \
 #-->  -DPYTHON_EXECUTABLE=@PYTHON_EXECUTABLE@ -DTVNC_INCLUDEJRE=%{jre} \
 #-->  .
@@ -133,17 +130,15 @@ if [ ! "$TVNC_DOCDIR" = "%{docdir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
 fi
 %if "%{viewer}" == "1"
-%if "%{helper}" == "1"
 TVNC_DATADIR=@CMAKE_INSTALL_FULL_DATADIR@
 if [ ! "$TVNC_DATADIR" = "%{datadir}" ]; then
 	safedirmove $RPM_BUILD_ROOT/$TVNC_DATADIR/icons $RPM_BUILD_ROOT/%{datadir}/icons $RPM_BUILD_ROOT/__tmpicons
 fi
 %endif
-%endif
 
 #-->%endif
 
-%if "%{helper}" == "1"
+%if "%{viewer}" == "1"
 mkdir -p %{buildroot}/usr/share/applications
 cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
@@ -252,16 +247,14 @@ fi
 %else
   %{docdir}/README.txt
 %endif
-%if "%{helper}" == "1"
+%if "%{viewer}" == "1"
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop
  %{mandir}/man1/vncviewer.1*
- %if "%{viewer}" == "1"
-  %{datadir}/icons/hicolor/128x128/apps/turbovnc.png
-  %{datadir}/icons/hicolor/48x48/apps/turbovnc.png
-  %{datadir}/icons/hicolor/16x16/apps/turbovnc.png
-  %{javadir}/libturbovnchelper.so
- %endif
+ %{datadir}/icons/hicolor/128x128/apps/turbovnc.png
+ %{datadir}/icons/hicolor/48x48/apps/turbovnc.png
+ %{datadir}/icons/hicolor/16x16/apps/turbovnc.png
+ %{javadir}/libturbovnchelper.so
 %endif
 %if "%{server}" == "1"
  %{bindir}/Xvnc

@@ -56,7 +56,6 @@ DATADIR=@CMAKE_INSTALL_FULL_DATADIR@
 DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 SYSCONFDIR=@CMAKE_INSTALL_FULL_SYSCONFDIR@
 BUILDVIEWER=@TVNC_BUILDVIEWER@
-BUILDHELPER=@TVNC_BUILDHELPER@
 
 if [ ! `uid` -eq 0 ]; then
 	SUDO=sudo
@@ -95,7 +94,7 @@ ResultAny=no
 EOF
 fi
 
-if [ "$BUILDVIEWER" = "1" -a "$BUILDHELPER" = "1" -a ! "$DATADIR" = "/usr/share" ]; then
+if [ "$BUILDVIEWER" = "1" -a ! "$DATADIR" = "/usr/share" ]; then
 	safedirmove $TMPDIR/$DATADIR/icons $TMPDIR/usr/share/icons $TMPDIR/__tmpicons
 fi
 

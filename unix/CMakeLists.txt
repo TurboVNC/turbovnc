@@ -44,7 +44,7 @@ message(STATUS "Linker flags = ${EFFECTIVE_LD_FLAGS}")
 # VIEWER BUILD
 ###############################################################################
 
-if(TVNC_BUILDHELPER)
+if(TVNC_BUILDVIEWER)
 	add_subdirectory(vncviewer)
 endif()
 
