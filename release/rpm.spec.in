@@ -253,7 +253,6 @@ fi
   %{docdir}/README.txt
 %endif
 %if "%{helper}" == "1"
- %{bindir}/checkshmpixmaps
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop
  %{mandir}/man1/vncviewer.1*

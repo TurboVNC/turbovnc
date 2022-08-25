@@ -46,13 +46,6 @@ else() # APPLE AND TVNC_BUILDVIEWER
 
 include_directories(${X11_INCLUDE_DIR})
 
-add_executable(checkshmpixmaps
-	checkshmpixmaps.c)
-
-target_link_libraries(checkshmpixmaps ${X11_LIBRARIES})
-
-install(TARGETS checkshmpixmaps DESTINATION ${CMAKE_INSTALL_BINDIR})
-
 configure_file(vncviewer.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer @ONLY)
 execute_process(COMMAND chmod +x vncviewer
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
