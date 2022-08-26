@@ -44,8 +44,6 @@ install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
 else() # APPLE AND TVNC_BUILDVIEWER
 
-include(CheckCSourceCompiles)
-
 include_directories(${X11_INCLUDE_DIR})
 
 add_executable(checkshmpixmaps

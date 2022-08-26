@@ -152,7 +152,7 @@ index ff1d669..de83d00 100644
  }
  
 diff --git a/xorg-server-1.20.14/dix/registry.c b/Xserver/dix/registry.c
-index 84d48b4..de4bf8e 100644
+index 84d48b4..3e80392 100644
 --- a/xorg-server-1.20.14/dix/registry.c
 +++ b/Xserver/dix/registry.c
 @@ -1,6 +1,7 @@
@@ -168,7 +168,7 @@ index 84d48b4..de4bf8e 100644
  
  #ifdef X_REGISTRY_REQUEST
  #define CORE "X11"
-+#ifdef TURBOVNC
++#if defined(TURBOVNC) && !defined(TURBOVNC_STATIC_XORG_PATHS)
 +char registry_path[PATH_MAX] = SERVER_MISC_CONFIG_PATH "/protocol.txt";
 +#define FILENAME registry_path
 +#else
@@ -257,14 +257,14 @@ index bd24728..801df20 100644
          }
      }
 diff --git a/xorg-server-1.20.14/glx/glxdricommon.c b/Xserver/glx/glxdricommon.c
-index 2e00bab..be9352b 100644
+index 2e00bab..a16e1bc 100644
 --- a/xorg-server-1.20.14/glx/glxdricommon.c
 +++ b/Xserver/glx/glxdricommon.c
 @@ -258,7 +258,11 @@ glxConvertConfigs(const __DRIcoreExtension * core,
      return head.next;
  }
  
-+#ifdef TURBOVNC
++#if defined(TURBOVNC) && !defined(TURBOVNC_STATIC_XORG_PATH)
 +char *dri_driver_path = DRI_DRIVER_PATH;
 +#else
  static const char dri_driver_path[] = DRI_DRIVER_PATH;
@@ -452,14 +452,14 @@ index 53a6bd6..28248d4 100644
                                   ProcXFixesDispatch, SProcXFixesDispatch,
                                   NULL, StandardMinorOpcode)) != 0) {
 diff --git a/xorg-server-1.20.14/xkb/xkbInit.c b/Xserver/xkb/xkbInit.c
-index 9e45b4b..b63549f 100644
+index 9e45b4b..ddd5ef7 100644
 --- a/xorg-server-1.20.14/xkb/xkbInit.c
 +++ b/Xserver/xkb/xkbInit.c
 @@ -767,6 +767,30 @@ XkbProcessArguments(int argc, char *argv[], int i)
              return -1;
          }
      }
-+#ifdef TURBOVNC
++#if defined(TURBOVNC) && !defined(TURBOVNC_XORG_STATIC_PATHS)
 +    else if (strncmp(argv[i], "-xkbcompdir", 11) == 0) {
 +        if (++i < argc) {
 +#if !defined(WIN32) && !defined(__CYGWIN__)
