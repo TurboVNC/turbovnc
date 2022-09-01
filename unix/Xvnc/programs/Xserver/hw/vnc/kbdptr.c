@@ -9,7 +9,8 @@
  *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
  *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
  *  Copyright (C) 2013, 2018 Pierre Ossman for Cendio AB.  All Rights Reserved.
- *  Copyright (C) 2014-2016, 2019, 2021 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014-2016, 2019, 2021-2022 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,8 +45,6 @@
 #include "rfb.h"
 #include "input-xkb.h"
 
-Bool xkbDebug = FALSE;
-
 DeviceIntPtr kbdDevice = NULL;
 static DeviceIntPtr ptrDevice = NULL;
 
@@ -70,10 +69,6 @@ void KbdDeviceInit(DeviceIntPtr pDevice)
   char *env;
 
   kbdDevice = pDevice;
-  if ((env = getenv("TVNC_XKBDEBUG")) != NULL && !strcmp(env, "1")) {
-    rfbLog("XKEYBOARD handler debugging messages enabled\n");
-    xkbDebug = TRUE;
-  }
   if ((env = getenv("TVNC_XKBFAKESHIFT")) != NULL && !strcmp(env, "0")) {
     rfbLog("Disabling fake shift key event generation in XKEYBOARD handler\n");
     fakeShift = FALSE;
@@ -103,8 +98,8 @@ static inline void PressKey(DeviceIntPtr dev, int kc, Bool down,
 {
   int action;
 
-  if (msg != NULL && xkbDebug)
-    rfbLog("PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
+  if (msg != NULL)
+    LogMessage(X_DEBUG, "PressKey: %s %d %s\n", msg, kc, down ? "down" : "up");
 
   action = down ? KeyPress : KeyRelease;
   QueueKeyboardEvents(dev, action, kc);
@@ -200,8 +195,7 @@ void KeyEvent(CARD32 keysym, Bool down)
      * This can happen quite often as we ignore some
      * key presses.
      */
-    if (xkbDebug)
-      rfbLog("Unexpected release of keysym 0x%x\n", keysym);
+    LogMessage(X_DEBUG, "Unexpected release of keysym 0x%x\n", keysym);
 
     return;
   }
@@ -236,8 +230,7 @@ void KeyEvent(CARD32 keysym, Bool down)
     }
 
     if ((meta != 0) && (alt == meta)) {
-      if (xkbDebug)
-        rfbLog("Replacing Shift+Alt with Shift+Meta\n");
+      LogMessage(X_DEBUG, "Replacing Shift+Alt with Shift+Meta\n");
       keycode = meta;
       new_state = state;
     }
@@ -263,8 +256,7 @@ void KeyEvent(CARD32 keysym, Bool down)
 
   /* We don't have lock synchronisation... */
   if (IsLockModifier(keycode, new_state) && ignoreLockModifiers) {
-    if (xkbDebug)
-      rfbLog("Ignoring lock key (e.g. caps lock)\n");
+    LogMessage(X_DEBUG, "Ignoring lock key (e.g. caps lock)\n");
     return;
   }
 
@@ -307,9 +299,8 @@ void KeyEvent(CARD32 keysym, Bool down)
     KeyCode keycode2 = 0;
     unsigned new_state2;
 
-    if (xkbDebug)
-      rfbLog("Finding alternative to keysym 0x%x to avoid fake shift for numpad\n",
-             keysym);
+    LogMessage(X_DEBUG, "Finding alternative to keysym 0x%x to avoid fake shift for numpad\n",
+               keysym);
 
     for (i = 0; i < sizeof(altKeysym) / sizeof(altKeysym[0]); i++) {
       KeySym altsym;
@@ -333,8 +324,7 @@ void KeyEvent(CARD32 keysym, Bool down)
     }
 
     if (i == sizeof(altKeysym) / sizeof(altKeysym[0])) {
-      if (xkbDebug)
-        rfbLog("No alternative keysym found\n");
+      LogMessage(X_DEBUG, "No alternative keysym found\n");
     } else {
       keycode = keycode2;
       new_state = new_state2;
