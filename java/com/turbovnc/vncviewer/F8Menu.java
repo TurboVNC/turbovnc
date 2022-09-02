@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011, 2013 Brian P. Hinz
- * Copyright (C) 2012-2015, 2017-2018, 2020-2021 D. R. Commander.
+ * Copyright (C) 2012-2015, 2017-2018, 2020-2022 D. R. Commander.
  *                                               All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -92,7 +92,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       grabKeyboard.addActionListener(this);
       add(grabKeyboard);
     }
-    f8 = addMenuItem("Send " + KeyEvent.getKeyText(cc.opts.menuKeyCode));
+    f8 = addMenuItem("Send " + MenuKey.getMenuKeyName(cc.opts.menuKeyCode,
+                                                      cc.opts.menuKeySym));
     KeyStroke ks = KeyStroke.getKeyStroke(cc.opts.menuKeyCode, 0);
     f8.setAccelerator(ks);
     if (!Params.restricted.getValue()) {
@@ -139,8 +140,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     return item;
   }
 
-  void updateMenuKey(int keyCode) {
-    f8.setText("Send " + KeyEvent.getKeyText(keyCode));
+  void updateMenuKey(int keyCode, int keySym) {
+    f8.setText("Send " + MenuKey.getMenuKeyName(keyCode, keySym));
     KeyStroke ks = KeyStroke.getKeyStroke(keyCode, 0);
     f8.setAccelerator(ks);
   }
