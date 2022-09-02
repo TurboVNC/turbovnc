@@ -1,4 +1,5 @@
-/*  Copyright (C)2015-2017, 2019, 2021 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2017, 2019, 2021-2022 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,14 +53,14 @@
 #import <objc/objc-class.h>
 
 
-#define bailif0(f) {  \
+#define BAILIF0(f) {  \
   if (!(f) || (*env)->ExceptionCheck(env)) {  \
     goto bailout;  \
   }  \
 }
 
 #define SET_LONG(cls, obj, fieldName, val) {  \
-  bailif0(fid = (*env)->GetFieldID(env, cls, #fieldName, "J"));  \
+  BAILIF0(fid = (*env)->GetFieldID(env, cls, #fieldName, "J"));  \
   (*env)->SetLongField(env, obj, fid, val);  \
 }
 
@@ -181,14 +182,14 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
   if (g_object) {
     (*env)->DeleteGlobalRef(env, g_object);  g_object = NULL;
   }
-  bailif0(g_object = (*env)->NewGlobalRef(env, obj));
+  BAILIF0(g_object = (*env)->NewGlobalRef(env, obj));
 
-  bailif0(cls = (*env)->GetObjectClass(env, obj));
+  BAILIF0(cls = (*env)->GetObjectClass(env, obj));
 
-  bailif0(g_methodID = (*env)->GetMethodID(env, cls,
+  BAILIF0(g_methodID = (*env)->GetMethodID(env, cls,
                                            "handleTabletEvent",
                                            "(IDDFFFJ)Z"));
-  bailif0(g_methodID_prox = (*env)->GetMethodID(env, cls,
+  BAILIF0(g_methodID_prox = (*env)->GetMethodID(env, cls,
                                                 "handleTabletProximityEvent",
                                                 "(ZIJ)V"));
 
@@ -230,7 +231,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
   g_methodID = g_methodID_prox = NULL;
   g_jvm = NULL;
 
-  bailif0(cls = (*env)->GetObjectClass(env, obj));
+  BAILIF0(cls = (*env)->GetObjectClass(env, obj));
   SET_LONG(cls, obj, x11dpy, 0);
 
   fprintf(stderr, "TurboVNC Helper: Shutting down tablet event interceptor\n");
