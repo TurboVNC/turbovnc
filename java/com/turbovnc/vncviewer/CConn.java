@@ -180,7 +180,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       sock.inStream().setBlockCallback(this);
       setServerName(params.server.get());
       setShared(params.shared.get());
-      menu.updateMenuKey(params.menuKey.getCode(), params.menuKey.getSym());
+      menu.updateMenuKey();
       setStreams(sock.inStream(), sock.outStream());
       initialiseProtocol();
     }
@@ -1693,7 +1693,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     clipboardDialog.setSendingEnabled(params.sendClipboard.get());
-    menu.updateMenuKey(params.menuKey.getCode(), params.menuKey.getSym());
+    menu.updateMenuKey();
 
     if (Utils.osGrab() && Helper.isAvailable()) {
       boolean isGrabbed = VncViewer.isKeyboardGrabbed(viewport);

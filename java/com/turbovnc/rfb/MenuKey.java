@@ -25,8 +25,8 @@ import java.awt.event.KeyEvent;
 
 public final class MenuKey {
 
-  public static class MenuKeySymbol {
-    MenuKeySymbol(String name_, int keycode_, int keysym_) {
+  public static class Symbol {
+    Symbol(String name_, int keycode_, int keysym_) {
       name = name_;
       keycode = keycode_;
       keysym = keysym_;
@@ -38,74 +38,53 @@ public final class MenuKey {
     // CHECKSTYLE VisibilityModifier:ON
   }
 
-  private static final MenuKeySymbol[] MENU_SYMBOLS = {
-    new MenuKeySymbol("F1", KeyEvent.VK_F1, Keysyms.F1),
-    new MenuKeySymbol("F2", KeyEvent.VK_F2, Keysyms.F2),
-    new MenuKeySymbol("F3", KeyEvent.VK_F3, Keysyms.F3),
-    new MenuKeySymbol("F4", KeyEvent.VK_F4, Keysyms.F4),
-    new MenuKeySymbol("F5", KeyEvent.VK_F5, Keysyms.F5),
-    new MenuKeySymbol("F6", KeyEvent.VK_F6, Keysyms.F6),
-    new MenuKeySymbol("F7", KeyEvent.VK_F7, Keysyms.F7),
-    new MenuKeySymbol("F8", KeyEvent.VK_F8, Keysyms.F8),
-    new MenuKeySymbol("F9", KeyEvent.VK_F9, Keysyms.F9),
-    new MenuKeySymbol("F10", KeyEvent.VK_F10, Keysyms.F10),
-    new MenuKeySymbol("F11", KeyEvent.VK_F11, Keysyms.F11),
-    new MenuKeySymbol("F12", KeyEvent.VK_F12, Keysyms.F12),
-    new MenuKeySymbol("Pause", KeyEvent.VK_PAUSE, Keysyms.PAUSE),
-    new MenuKeySymbol("Print", KeyEvent.VK_PRINTSCREEN, Keysyms.PRINT),
-    new MenuKeySymbol("ScrollLock", KeyEvent.VK_SCROLL_LOCK,
-                      Keysyms.SCROLL_LOCK),
-    new MenuKeySymbol("Escape", KeyEvent.VK_ESCAPE, Keysyms.ESCAPE),
-    new MenuKeySymbol("Insert", KeyEvent.VK_INSERT, Keysyms.INSERT),
-    new MenuKeySymbol("Delete", KeyEvent.VK_DELETE, Keysyms.DELETE),
-    new MenuKeySymbol("Home", KeyEvent.VK_HOME, Keysyms.HOME),
-    new MenuKeySymbol("PageUp", KeyEvent.VK_PAGE_UP, Keysyms.PRIOR),
-    new MenuKeySymbol("PageDown", KeyEvent.VK_PAGE_DOWN, Keysyms.NEXT)
+  private static final Symbol[] SYMBOLS = {
+    new Symbol("F1", KeyEvent.VK_F1, Keysyms.F1),
+    new Symbol("F2", KeyEvent.VK_F2, Keysyms.F2),
+    new Symbol("F3", KeyEvent.VK_F3, Keysyms.F3),
+    new Symbol("F4", KeyEvent.VK_F4, Keysyms.F4),
+    new Symbol("F5", KeyEvent.VK_F5, Keysyms.F5),
+    new Symbol("F6", KeyEvent.VK_F6, Keysyms.F6),
+    new Symbol("F7", KeyEvent.VK_F7, Keysyms.F7),
+    new Symbol("F8", KeyEvent.VK_F8, Keysyms.F8),
+    new Symbol("F9", KeyEvent.VK_F9, Keysyms.F9),
+    new Symbol("F10", KeyEvent.VK_F10, Keysyms.F10),
+    new Symbol("F11", KeyEvent.VK_F11, Keysyms.F11),
+    new Symbol("F12", KeyEvent.VK_F12, Keysyms.F12),
+    new Symbol("Pause", KeyEvent.VK_PAUSE, Keysyms.PAUSE),
+    new Symbol("Print", KeyEvent.VK_PRINTSCREEN, Keysyms.PRINT),
+    new Symbol("ScrollLock", KeyEvent.VK_SCROLL_LOCK, Keysyms.SCROLL_LOCK),
+    new Symbol("Escape", KeyEvent.VK_ESCAPE, Keysyms.ESCAPE),
+    new Symbol("Insert", KeyEvent.VK_INSERT, Keysyms.INSERT),
+    new Symbol("Delete", KeyEvent.VK_DELETE, Keysyms.DELETE),
+    new Symbol("Home", KeyEvent.VK_HOME, Keysyms.HOME),
+    new Symbol("PageUp", KeyEvent.VK_PAGE_UP, Keysyms.PRIOR),
+    new Symbol("PageDown", KeyEvent.VK_PAGE_DOWN, Keysyms.NEXT)
   };
 
-  public static int getMenuKeySymbolCount() {
-    return MENU_SYMBOLS.length;
+  public static int getSymbolCount() {
+    return SYMBOLS.length;
   }
 
-  public static MenuKeySymbol[] getMenuKeySymbols() {
-    return MENU_SYMBOLS;
+  public static Symbol[] getSymbols() {
+    return SYMBOLS;
   }
 
-  public static String getMenuKeyValueStr() {
+  public static String getValueStr() {
     String s = "";
-    for (int i = 0; i < getMenuKeySymbolCount(); i++) {
-      s += MENU_SYMBOLS[i].name;
-      if (i < getMenuKeySymbolCount() - 1)
+    for (int i = 0; i < getSymbolCount(); i++) {
+      s += SYMBOLS[i].name;
+      if (i < getSymbolCount() - 1)
         s += ", ";
     }
     return s;
   }
 
-  public static int getMenuKeyCode(String menuKeyStr) {
-    int menuKeyCode = -1;
+  public static Symbol getSymbol(String menuKeyStr) {
+    for (int i = 0; i < getSymbolCount(); i++)
+      if (SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))
+        return SYMBOLS[i];
 
-    for (int i = 0; i < getMenuKeySymbolCount(); i++)
-      if (MENU_SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))
-        menuKeyCode = MENU_SYMBOLS[i].keycode;
-
-    return menuKeyCode;
-  }
-
-  public static int getMenuKeySym(String menuKeyStr) {
-    int menuKeySym = -1;
-
-    for (int i = 0; i < getMenuKeySymbolCount(); i++)
-      if (MENU_SYMBOLS[i].name.equalsIgnoreCase(menuKeyStr))
-        menuKeySym = MENU_SYMBOLS[i].keysym;
-
-    return menuKeySym;
-  }
-
-  public static String getMenuKeyName(int menuKeyCode, int menuKeySym) {
-    for (int i = 0; i < getMenuKeySymbolCount(); i++)
-      if (MENU_SYMBOLS[i].keycode == menuKeyCode &&
-          MENU_SYMBOLS[i].keysym == menuKeySym)
-        return MENU_SYMBOLS[i].name;
     return null;
   }
 

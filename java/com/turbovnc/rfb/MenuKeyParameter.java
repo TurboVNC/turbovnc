@@ -30,9 +30,8 @@ public final class MenuKeyParameter extends VoidParameter {
   }
 
   public synchronized boolean set(String menuKeyString) {
-    code = MenuKey.getMenuKeyCode(menuKeyString);
-    sym = MenuKey.getMenuKeySym(menuKeyString);
-    if (code < 0 || sym < 0)
+    symbol = MenuKey.getSymbol(menuKeyString);
+    if (symbol == null)
       throw new ErrorException(getName() + " parameter is incorrect");
     setCommandLine(false);
     return true;
@@ -40,21 +39,14 @@ public final class MenuKeyParameter extends VoidParameter {
 
   public void reset() { set(defValue); }
 
-  public int getCode() { return code; }
-  public int getSym() { return sym; }
+  public int getKeyCode() { return symbol.keycode; }
+  public int getKeySym() { return symbol.keysym; }
 
   public String getDefaultStr() { return defValue; }
+  public synchronized String getStr() { return symbol.name; }
 
-  public synchronized String getStr() {
-    for (MenuKey.MenuKeySymbol mks : MenuKey.getMenuKeySymbols()) {
-      if (mks.keycode == code && mks.keysym == sym)
-        return mks.name;
-    }
-    return null;
-  }
-
-  public String getValues() { return MenuKey.getMenuKeyValueStr(); }
+  public String getValues() { return MenuKey.getValueStr(); }
 
   private final String defValue;
-  private int code, sym;
+  private MenuKey.Symbol symbol;
 };

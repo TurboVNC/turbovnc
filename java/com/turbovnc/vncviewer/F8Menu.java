@@ -93,7 +93,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       add(grabKeyboard);
     }
     f8 = addMenuItem("Send " + cc.params.menuKey.getStr());
-    KeyStroke ks = KeyStroke.getKeyStroke(cc.params.menuKey.getCode(), 0);
+    KeyStroke ks = KeyStroke.getKeyStroke(cc.params.menuKey.getKeyCode(), 0);
     f8.setAccelerator(ks);
     if (!cc.params.restricted.get()) {
       ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
@@ -139,9 +139,9 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     return item;
   }
 
-  void updateMenuKey(int keyCode, int keySym) {
-    f8.setText("Send " + MenuKey.getMenuKeyName(keyCode, keySym));
-    KeyStroke ks = KeyStroke.getKeyStroke(keyCode, 0);
+  void updateMenuKey() {
+    f8.setText("Send " + cc.params.menuKey.getStr());
+    KeyStroke ks = KeyStroke.getKeyStroke(cc.params.menuKey.getKeyCode(), 0);
     f8.setAccelerator(ks);
   }
 
@@ -181,8 +181,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       if (cc.viewport != null)
         cc.viewport.grabKeyboardHelper(grabKeyboard.isSelected());
     } else if (actionMatch(ev, f8)) {
-      cc.writeKeyEvent(cc.params.menuKey.getSym(), true);
-      cc.writeKeyEvent(cc.params.menuKey.getSym(), false);
+      cc.writeKeyEvent(cc.params.menuKey.getKeySym(), true);
+      cc.writeKeyEvent(cc.params.menuKey.getKeySym(), false);
       firePopupMenuCanceled();
     } else if (actionMatch(ev, ctrlAltDel)) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);

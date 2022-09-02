@@ -409,9 +409,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           new Insets(4, 5, 0, 5));
 
     JLabel menuKeyLabel = new JLabel("Menu key:");
-    String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()];
-    for (int i = 0; i < MenuKey.getMenuKeySymbolCount(); i++)
-      menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
+    String[] menuKeys = new String[MenuKey.getSymbolCount()];
+    for (int i = 0; i < MenuKey.getSymbolCount(); i++)
+      menuKeys[i] = MenuKey.getSymbols()[i].name;
     menuKey  = new JComboBox(menuKeys);
     menuKey.addItemListener(this);
 
@@ -1252,8 +1252,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     viewOnly.setSelected(params.viewOnly.get());
     reverseScroll.setSelected(params.reverseScroll.get());
     fsAltEnter.setSelected(params.fsAltEnter.get());
-    String menuKeyStr = MenuKey.getMenuKeyName(params.menuKey.getCode(),
-                                               params.menuKey.getSym());
+    String menuKeyStr = params.menuKey.getStr();
     if (menuKeyStr != null)
       menuKey.setSelectedItem(menuKeyStr);
     if (Utils.osGrab() && Helper.isAvailable())
@@ -1358,8 +1357,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     params.viewOnly.set(viewOnly.isSelected());
     params.reverseScroll.set(reverseScroll.isSelected());
     params.fsAltEnter.set(fsAltEnter.isSelected());
-    params.menuKey.set(
-      MenuKey.getMenuKeySymbols()[menuKey.getSelectedIndex()].name);
+    params.menuKey.set(MenuKey.getSymbols()[menuKey.getSelectedIndex()].name);
     if (Utils.osGrab() && Helper.isAvailable())
       params.grabKeyboard.set(grabKeyboard.getSelectedIndex());
 
