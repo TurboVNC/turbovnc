@@ -1727,7 +1727,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keycode;
     opts.menuKeySym =
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].keysym;
-    menu.updateMenuKey(opts.menuKeyCode);
+    menu.updateMenuKey(opts.menuKeyCode, opts.menuKeySym);
 
     if (VncViewer.osGrab() && Viewport.isHelperAvailable()) {
       opts.grabKeyboard = options.grabKeyboard.getSelectedIndex();
