@@ -284,6 +284,18 @@ class ProfileDialog extends Dialog {
       KeyEvent.SHIFT_DOWN_MASK);
     dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
+    // macOS always treats the RAlt key as an AltGr key.  For reasons that
+    // aren't clearly understood, after RAlt is pressed for the first time,
+    // the modifier mask will always contain KeyEvent.ALT_GRAPH_DOWN_MASK
+    // and KeyEvent.ALT_DOWN_MASK whenever LAlt is pressed, so we need to
+    // register a separate keyboard action to handle that situation.
+    if (Utils.isMac()) {
+      ks = KeyStroke.getKeyStroke(KeyEvent.VK_P,
+        KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_GRAPH_DOWN_MASK |
+        KeyEvent.SHIFT_DOWN_MASK | KeyEvent.ALT_DOWN_MASK);
+      dlg.getRootPane().registerKeyboardAction(actionListener, ks,
+        JComponent.WHEN_IN_FOCUSED_WINDOW);
+    }
     if (Utils.isMac() && (Utils.JAVA_VERSION < 9 || Utils.JAVA_VERSION > 11)) {
       int appleKey = VncViewer.getMenuShortcutKeyMask();
       ks = KeyStroke.getKeyStroke(KeyEvent.VK_P, appleKey);
