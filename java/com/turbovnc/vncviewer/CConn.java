@@ -84,8 +84,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
     forceNonincremental = true;  supportsSyncFence = false;
     pressedKeys = new HashMap<Integer, Integer>();
 
-    setShared(params.shared.get());
-
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
     cp.supportsClientRedirect = params.clientRedirect.get();
@@ -108,6 +106,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
           server = Hostname.getHost(params.server.get());
           params.server.set(server);
           options.setNode(server);
+          UserPreferences.load(server, params);
         }
       } else {
         ServerDialog dlg = new ServerDialog(options, params, this);
@@ -119,12 +118,14 @@ public class CConn extends CConnection implements UserPasswdGetter,
         port = params.port.get();
         server = params.server.get();
         options.setNode(Hostname.getHost(server));
+        UserPreferences.load(Hostname.getHost(server), params);
       }
 
       if (params.via.get() != null && params.via.get().indexOf(':') >= 0) {
         port = Hostname.getPort(params.via.get());
         server = Hostname.getHost(params.via.get());
         options.setNode(Hostname.getHost(params.server.get()));
+        UserPreferences.load(Hostname.getHost(params.server.get()), params);
       } else if (params.via.get() != null || params.tunnel.get() ||
                  (params.port.get() == 0 && params.sessMgrAuto.get())) {
         if (params.port.get() == 0) {
@@ -178,9 +179,8 @@ public class CConn extends CConnection implements UserPasswdGetter,
     } else {
       sock.inStream().setBlockCallback(this);
       setServerName(params.server.get());
-      String node = options.getNode();
-      if (node != null)
-        UserPreferences.load(node, params);
+      setShared(params.shared.get());
+      menu.updateMenuKey(params.menuKey.getCode(), params.menuKey.getSym());
       setStreams(sock.inStream(), sock.outStream());
       initialiseProtocol();
     }
