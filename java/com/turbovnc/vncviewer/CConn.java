@@ -1693,7 +1693,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
 
     clipboardDialog.setSendingEnabled(params.sendClipboard.get());
-    menu.updateMenuKey(params.menuKey.getCode());
+    menu.updateMenuKey(params.menuKey.getCode(), params.menuKey.getSym());
 
     if (Utils.osGrab() && Helper.isAvailable()) {
       boolean isGrabbed = VncViewer.isKeyboardGrabbed(viewport);

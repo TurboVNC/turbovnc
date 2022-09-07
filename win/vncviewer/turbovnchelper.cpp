@@ -1,4 +1,4 @@
-/*  Copyright (C)2015-2017 D. R. Commander.  All Rights Reserved.
+/*  Copyright (C)2015-2017, 2022 D. R. Commander.  All Rights Reserved.
  *  Copyright (C)2011 ymnk, JCraft, Inc.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -57,7 +57,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
   _throw(message);  \
 }
 
-#define bailif0(f) {  \
+#define BAILIF0(f) {  \
   if (!(f) || env->ExceptionCheck()) {  \
     goto bailout;  \
   }  \
@@ -155,13 +155,13 @@ JNIEXPORT void JNICALL Java_com_jcraft_jsch_agentproxy_connector_PageantConnecto
   sharedMemory = (char *)MapViewOfFile(sharedFile, SECTION_MAP_WRITE, 0, 0, 0);
   if (!sharedMemory) _throww32();
 
-  bailif0(bufferClass = env->GetObjectClass(buffer));
-  bailif0(fid = env->GetFieldID(bufferClass, "buffer", "[B"));
-  bailif0(jbuf = (jbyteArray)env->GetObjectField(buffer, fid));
-  bailif0(mid = env->GetMethodID(bufferClass, "getLength", "()I"));
+  BAILIF0(bufferClass = env->GetObjectClass(buffer));
+  BAILIF0(fid = env->GetFieldID(bufferClass, "buffer", "[B"));
+  BAILIF0(jbuf = (jbyteArray)env->GetObjectField(buffer, fid));
+  BAILIF0(mid = env->GetMethodID(bufferClass, "getLength", "()I"));
   len = env->CallIntMethod(buffer, mid);
 
-  bailif0(buf = (char *)env->GetPrimitiveArrayCritical(jbuf, 0));
+  BAILIF0(buf = (char *)env->GetPrimitiveArrayCritical(jbuf, 0));
   memcpy(sharedMemory, buf, len);
   env->ReleasePrimitiveArrayCritical(jbuf, buf, 0);
 
@@ -175,13 +175,13 @@ JNIEXPORT void JNICALL Java_com_jcraft_jsch_agentproxy_connector_PageantConnecto
   length = (length >> 24) | ((length & 0x00FF0000) >> 8) |
            ((length & 0x0000FF00) << 8) | (length << 24);
 
-  bailif0(mid = env->GetMethodID(bufferClass, "rewind", "()V"));
+  BAILIF0(mid = env->GetMethodID(bufferClass, "rewind", "()V"));
   env->CallVoidMethod(buffer, mid);
-  bailif0(mid = env->GetMethodID(bufferClass, "checkFreeSize", "(I)V"));
+  BAILIF0(mid = env->GetMethodID(bufferClass, "checkFreeSize", "(I)V"));
   env->CallVoidMethod(buffer, mid, (jint)length);
 
-  bailif0(jbuf = (jbyteArray)env->GetObjectField(buffer, fid));
-  bailif0(buf = (char *)env->GetPrimitiveArrayCritical(jbuf, 0));
+  BAILIF0(jbuf = (jbyteArray)env->GetObjectField(buffer, fid));
+  BAILIF0(buf = (char *)env->GetPrimitiveArrayCritical(jbuf, 0));
   memcpy(buf, &sharedMemory[4], length);
   env->ReleasePrimitiveArrayCritical(jbuf, buf, 0);
 

@@ -92,8 +92,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       grabKeyboard.addActionListener(this);
       add(grabKeyboard);
     }
-    f8 = addMenuItem("Send " +
-                     KeyEvent.getKeyText(cc.params.menuKey.getCode()));
+    f8 = addMenuItem("Send " + cc.params.menuKey.getStr());
     KeyStroke ks = KeyStroke.getKeyStroke(cc.params.menuKey.getCode(), 0);
     f8.setAccelerator(ks);
     if (!cc.params.restricted.get()) {
@@ -140,8 +139,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     return item;
   }
 
-  void updateMenuKey(int keyCode) {
-    f8.setText("Send " + KeyEvent.getKeyText(keyCode));
+  void updateMenuKey(int keyCode, int keySym) {
+    f8.setText("Send " + MenuKey.getMenuKeyName(keyCode, keySym));
     KeyStroke ks = KeyStroke.getKeyStroke(keyCode, 0);
     f8.setAccelerator(ks);
   }

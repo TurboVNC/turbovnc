@@ -94,7 +94,7 @@ jobs:
           make -j$NUMCPUS --load-average=$NUMCPUS
           popd
   macos:
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - name: Set global environment variables
         run: |
@@ -105,6 +105,7 @@ jobs:
       - name: Set up build
         run: |
           brew install md5sha1sum
+          sudo xcode-select -s /Applications/Xcode_12.4.app
           mkdir -p $HOME/src/vnc.nightly
           git clone --depth=1 https://github.com/turbovnc/buildscripts.git -b $BRANCH $HOME/src/buildscripts
           mkdir $HOME/libjpeg-turbo-dmg
