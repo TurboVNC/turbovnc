@@ -63,6 +63,32 @@
 
 #include "osx_to_qnum.h"
 
+#if !defined(MAC_OS_X_VERSION_10_12) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12
+#define NSEventTypeLeftMouseDown NSLeftMouseDown
+#define NSEventTypeLeftMouseUp NSLeftMouseUp
+#define NSEventTypeRightMouseDown NSRightMouseDown
+#define NSEventTypeRightMouseUp NSRightMouseUp
+#define NSEventTypeMouseMoved NSMouseMoved
+#define NSEventTypeLeftMouseDragged NSLeftMouseDragged
+#define NSEventTypeRightMouseDragged NSRightMouseDragged
+#define NSEventTypeKeyDown NSKeyDown
+#define NSEventTypeKeyUp NSKeyUp
+#define NSEventTypeFlagsChanged NSFlagsChanged
+#define NSEventTypeTabletProximity NSTabletProximity
+#define NSEventTypeOtherMouseDown NSOtherMouseDown
+#define NSEventTypeOtherMouseUp NSOtherMouseUp
+#define NSEventTypeOtherMouseDragged NSOtherMouseDragged
+
+#define NSEventSubtypeTabletPoint NSTabletPointEventSubtype
+
+#define kVK_RightCommand 0x36
+
+#define NSEventModifierFlagShift NSShiftKeyMask
+#define NSEventModifierFlagControl NSControlKeyMask
+#define NSEventModifierFlagOption NSAlternateKeyMask
+#define NSEventModifierFlagCommand NSCommandKeyMask
+#endif
+
 
 #define BAILIF0(f) {  \
   if (!(f) || (*env)->ExceptionCheck(env)) {  \
@@ -140,9 +166,9 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
   bool shouldDetach = false, success = true;
 
   switch ([event type]) {
-    case NSKeyDown:
-    case NSKeyUp:
-    case NSFlagsChanged:
+    case NSEventTypeKeyDown:
+    case NSEventTypeKeyUp:
+    case NSEventTypeFlagsChanged:
     {
       int rfbKeyCode = -1;
 
@@ -152,9 +178,12 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
       // Defer Ctrl-Alt-Shift-{key} and Command-{key} sequences to the Java key
       // listener, because those sequences are used for hotkeys.
       if ((([event modifierFlags] &
-            (NSControlKeyMask | NSAlternateKeyMask | NSShiftKeyMask)) ==
-           (NSControlKeyMask | NSAlternateKeyMask | NSShiftKeyMask) ||
-           ([event modifierFlags] & NSCommandKeyMask) == NSCommandKeyMask) &&
+            (NSEventModifierFlagControl | NSEventModifierFlagOption |
+             NSEventModifierFlagShift)) ==
+           (NSEventModifierFlagControl | NSEventModifierFlagOption |
+            NSEventModifierFlagShift) ||
+           ([event modifierFlags] & NSEventModifierFlagCommand) ==
+           NSEventModifierFlagCommand) &&
           [event keyCode] != kVK_Control &&
           [event keyCode] != kVK_RightControl &&
           [event keyCode] != kVK_Shift &&
@@ -199,7 +228,7 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
       return;
     }
 
-    case NSTabletProximity:
+    case NSEventTypeTabletProximity:
       if (!g_object || !g_methodID_prox) break;
 
       if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {
@@ -213,20 +242,20 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
         (*g_jvm)->DetachCurrentThread(g_jvm);
       return;
 
-    case NSLeftMouseDown:      // 1
-    case NSLeftMouseUp:        // 2
-    case NSRightMouseDown:     // 3
-    case NSRightMouseUp:       // 4
-    case NSMouseMoved:         // 5
-    case NSLeftMouseDragged:   // 6
-    case NSRightMouseDragged:  // 7
-    case NSOtherMouseDown:     // 25
-    case NSOtherMouseUp:       // 26
-    case NSOtherMouseDragged:  // 27
+    case NSEventTypeLeftMouseDown:      // 1
+    case NSEventTypeLeftMouseUp:        // 2
+    case NSEventTypeRightMouseDown:     // 3
+    case NSEventTypeRightMouseUp:       // 4
+    case NSEventTypeMouseMoved:         // 5
+    case NSEventTypeLeftMouseDragged:   // 6
+    case NSEventTypeRightMouseDragged:  // 7
+    case NSEventTypeOtherMouseDown:     // 25
+    case NSEventTypeOtherMouseUp:       // 26
+    case NSEventTypeOtherMouseDragged:  // 27
       if (!g_object || !g_methodID) break;
 
-      if ([event subtype] != NSTabletPointEventSubtype &&
-          [event type] <= NSRightMouseDragged)
+      if ([event subtype] != NSEventSubtypeTabletPoint &&
+          [event type] <= NSEventTypeRightMouseDragged)
         break;
       if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {
         NSLog(@"Couldn't attach to JVM");

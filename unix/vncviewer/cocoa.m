@@ -32,7 +32,15 @@
 
 // This wasn't added until 10.12
 #if !defined(MAC_OS_X_VERSION_10_12) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12
-const int kVK_RightCommand = 0x36;
+#define NSEventTypeKeyDown NSKeyDown
+#define NSEventTypeKeyUp NSKeyUp
+#define NSEventTypeFlagsChanged NSFlagsChanged
+
+#define kVK_RightCommand 0x36
+
+#define NSEventModifierFlagCapsLock NSAlphaShiftKeyMask
+#define NSEventModifierFlagShift NSShiftKeyMask
+#define NSEventModifierFlagOption NSAlternateKeyMask
 #endif
 // And this is still missing
 const int kVK_Menu = 0x6E;
@@ -44,10 +52,10 @@ int cocoa_is_key_press(const void *event)
 
   nsevent = (NSEvent *)event;
 
-  if ([nsevent type] == NSKeyDown)
+  if ([nsevent type] == NSEventTypeKeyDown)
     return 1;
 
-  if ([nsevent type] == NSFlagsChanged) {
+  if ([nsevent type] == NSEventTypeFlagsChanged) {
     UInt32 mask;
 
     // We don't see any event on release of CapsLock
@@ -289,11 +297,11 @@ int cocoa_event_keysym(const void *event)
   // other platforms.
 
   modifiers = 0;
-  if ([nsevent modifierFlags] & NSAlphaShiftKeyMask)
+  if ([nsevent modifierFlags] & NSEventModifierFlagCapsLock)
     modifiers |= alphaLock;
-  if ([nsevent modifierFlags] & NSShiftKeyMask)
+  if ([nsevent modifierFlags] & NSEventModifierFlagShift)
     modifiers |= shiftKey;
-  if ([nsevent modifierFlags] & NSAlternateKeyMask)
+  if ([nsevent modifierFlags] & NSEventModifierFlagOption)
     modifiers |= optionKey;
 
   chars = key_translate(key_code, modifiers);
