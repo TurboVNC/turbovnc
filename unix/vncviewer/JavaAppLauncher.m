@@ -29,6 +29,10 @@
 #include <dlfcn.h>
 #include <jni.h>
 
+#if !defined(MAC_OS_X_VERSION_10_12) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12
+#define NSAlertStyleCritical NSCriticalAlertStyle
+#endif
+
 #define JAVA_LAUNCH_ERROR "JavaLaunchError"
 
 #define JVM_RUNTIME_KEY "JVMRuntime"
@@ -73,7 +77,7 @@ int main(int argc, char *argv[]) {
     result = 0;
   } @catch (NSException *exception) {
     NSAlert *alert = [[NSAlert alloc] init];
-    [alert setAlertStyle:NSCriticalAlertStyle];
+    [alert setAlertStyle:NSAlertStyleCritical];
     [alert setMessageText:[exception reason]];
     [alert runModal];
 
