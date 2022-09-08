@@ -115,7 +115,7 @@ static Bool initOutputCalled = FALSE;
 static Bool noCursor = FALSE;
 char *desktopName = DEFAULT_DESKTOP_NAME;
 int traceLevel = 0;
-int rfbLEDState = rfbLEDUnknown;
+int rfbLEDState = (int)rfbLEDUnknown;
 
 char rfbThisHost[256];
 
