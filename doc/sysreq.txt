@@ -15,8 +15,8 @@
 | O/S \
 	| TurboVNC should work with a variety of Linux distributions, \
 		[[http://www.freebsd.org][FreeBSD]], and \
-		[[http://www.oracle.com/us/products/servers-storage/solaris][Solaris]], \
-		but currently-supported versions of \
+		[[http://www.oracle.com/us/products/servers-storage/solaris][Solaris]] \
+		11, but currently-supported versions of \
 		[[http://www.redhat.com/products/enterprise-linux/][Red Hat Enterprise Linux]] \
 		and its derivatives, [[http://www.ubuntu.com][Ubuntu]] LTS, and \
 		[[http://www.suse.com][SuSE]] Linux Enterprise tend to receive the most \

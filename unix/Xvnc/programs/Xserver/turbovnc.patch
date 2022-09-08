@@ -69,34 +69,6 @@ index 504defe..ad89a31 100644
          XIBarrierRemoveMasterDevice(clients[i], ptr->id);
  
      /* disable the remove the devices, XTest devices must be done first
-diff --git a/xorg-server-1.20.14/dix/devices.c b/Xserver/dix/devices.c
-index e7c74d7..e0c93b6 100644
---- a/xorg-server-1.20.14/dix/devices.c
-+++ b/Xserver/dix/devices.c
-@@ -76,6 +76,11 @@ SOFTWARE.
- #include <X11/extensions/XI2.h>
- #include <X11/extensions/XIproto.h>
- #include <math.h>
-+#ifdef TURBOVNC
-+#ifdef HAVE_IEEEFP_H
-+#include <ieeefp.h>
-+#endif
-+#endif
- #include <pixman.h>
- #include "exglobals.h"
- #include "exevents.h"
-@@ -174,7 +179,11 @@ DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
-             return BadValue;
- 
-         for (i = 0; i < 9; i++)
-+#ifdef TURBOVNC
-+            if (!finite(f[i]))
-+#else
-             if (!isfinite(f[i]))
-+#endif
-                 return BadValue;
- 
-         if (!dev->valuator)
 diff --git a/xorg-server-1.20.14/dix/events.c b/Xserver/dix/events.c
 index 427b891..0f32bd8 100644
 --- a/xorg-server-1.20.14/dix/events.c

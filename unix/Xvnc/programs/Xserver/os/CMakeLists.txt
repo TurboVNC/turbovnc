@@ -2,9 +2,7 @@ include_directories(../render ../../../lib/libsha1)
 
 add_definitions(-DUNIXCONN -DTCPCONN -DHASXDMAUTH ${ServerOSDefines} -DXDMCP
 	-DHAVE_SHA1_IN_LIBSHA1)
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-	add_definitions(-DLOCALCONN)
-elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# This is already defined for Linux
 	add_definitions(-DHAVE_ABSTRACT_SOCKETS)
 endif()
@@ -14,10 +12,6 @@ if(FOUND_BSD44SOCKETS)
 endif()
 
 set(EXTRASRCS "")
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-	add_definitions(-DSECURE_RPC)
-	set(EXTRASRCS ${EXTRASRCS} rpcauth.c)
-endif()
 if(NOT HAVE_REALLOCARRAY)
 	set(EXTRASRCS ${EXTRASRCS} reallocarray.c)
 endif()

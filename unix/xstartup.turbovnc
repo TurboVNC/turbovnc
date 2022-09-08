@@ -188,14 +188,6 @@ if [ "$TVNC_WM" = "" ]; then
   if [ -f /etc/X11/xinit/xinitrc ]; then
     TVNC_WM=/etc/X11/xinit/xinitrc
   fi
-  # Typical system-wide WM startup script on Solaris 10
-  if [ $OS = 'SunOS' -a -f /usr/dt/config/Xinitrc.jds ]; then
-    TVNC_WM=/usr/dt/config/Xinitrc.jds
-  fi
-  # Typical per-user WM startup script on Solaris 10
-  if [ $OS = 'SunOS' -a -f $HOME/.dt/sessions/lastsession ]; then
-    TVNC_WM=`cat $HOME/.dt/sessions/lastsession`
-  fi
 fi
 if [ "$TVNC_WM" != "" ]; then
   # Start the window manager.

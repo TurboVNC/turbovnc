@@ -1,9 +1,7 @@
 include_directories(../../../xtrans)
 
 add_definitions(-DUNIXCONN -DTCPCONN)
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-	add_definitions(-DLOCALCONN)
-elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# This is already defined for Linux
 	add_definitions(-DHAVE_ABSTRACT_SOCKETS)
 endif()
