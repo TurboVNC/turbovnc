@@ -52,12 +52,7 @@
 # $noxstartup = 0;
 # $serverArgs = "";
 
-## Uncomment this to use the X font server by default, rather than a static
-## font path.
-#
-# $fontPath = "unix/:7100";
-
-## Here is another example of setting the font path:
+## Here is an example of setting the font path:
 #
 # $fontPath = "/usr/lib/X11/fonts/misc/"
 # $fontPath = "$fontPath,/usr/lib/X11/fonts/75dpi/";
