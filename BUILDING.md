@@ -121,8 +121,8 @@ TurboVNC Server build is enabled (which is the default on Un*x platforms other
 than Mac), then this procedure will build the TurboVNC Server and a handful of
 C applications that are used to interface with it.  On most 64-bit systems
 (Solaris being a notable exception), this will build a 64-bit version of
-TurboVNC.  See "Build Recipes" for specific instructions on how to build a
-32-bit or 64-bit version of TurboVNC on systems that support both.
+TurboVNC.  (See "Build Recipes" for specific instructions on how to build a
+64-bit version of TurboVNC on Solaris.)
 
     cd {build_directory}
     cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
@@ -208,15 +208,6 @@ those variables.
 
 Build Recipes
 -------------
-
-
-### 32-bit Build on 64-bit Linux/Unix (including Mac)
-
-Use export/setenv to set the following environment variables before running
-CMake:
-
-    CFLAGS=-m32
-    LDFLAGS=-m32
 
 
 ### 64-bit Build on Solaris
