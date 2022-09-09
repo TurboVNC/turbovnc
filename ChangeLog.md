@@ -21,6 +21,10 @@ on the host rather than the client, which eliminates various system-specific
 and locale-specific key mapping issues (including issues with dead keys on
 international keyboards.)
 
+5. If the `NoReconnect` parameter is unset (which it is by default), the
+TurboVNC Viewer will now offer to reconnect if the initial connection or
+authentication fails.
+
 
 3.0.2
 =====

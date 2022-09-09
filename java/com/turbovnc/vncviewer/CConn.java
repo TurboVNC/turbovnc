@@ -141,8 +141,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
             params.sessMgrActive = true;
             params.port.set(Hostname.getPort(session));
           } catch (Exception e) {
-            throw new ErrorException("Session Manager Error:\n" +
-                                     e.getMessage());
+            if (e instanceof com.jcraft.jsch.JSchException)
+              throw new WarningException("Session Manager Error:\n" +
+                                         e.getMessage());
+            else
+              throw new ErrorException("Session Manager Error:\n" +
+                                       e.getMessage());
           }
         }
         try {
@@ -150,8 +154,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
           port = Hostname.getPort(params.server.get());
           server = Hostname.getHost(params.server.get());
         } catch (Exception e) {
-          throw new ErrorException("Could not create SSH tunnel:\n" +
-                                   e.getMessage());
+          if (e instanceof com.jcraft.jsch.JSchException)
+            throw new WarningException("Could not create SSH tunnel:\n" +
+                                       e.getMessage());
+          else
+            throw new ErrorException("Could not create SSH tunnel:\n" +
+                                     e.getMessage());
         }
       }
 
@@ -166,8 +174,12 @@ public class CConn extends CConnection implements UserPasswdGetter,
           port = Hostname.getPort(session);
           params.sshSession.disconnect();
         } catch (Exception e) {
-          throw new ErrorException("Session Manager Error:\n" +
-                                   e.getMessage());
+          if (e instanceof com.jcraft.jsch.JSchException)
+            throw new WarningException("Session Manager Error:\n" +
+                                       e.getMessage());
+          else
+            throw new ErrorException("Session Manager Error:\n" +
+                                     e.getMessage());
         }
       }
 

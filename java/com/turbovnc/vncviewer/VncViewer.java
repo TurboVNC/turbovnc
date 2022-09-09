@@ -631,7 +631,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     Object[] dlgOptions = { UIManager.getString("OptionPane.yesButtonText"),
                             UIManager.getString("OptionPane.noButtonText") };
     if (reconnect)
-      pane = new JOptionPane(msg + "\nReconnect?", msgType,
+      pane = new JOptionPane(msg + "\nAttempt to reconnect?", msgType,
                              JOptionPane.YES_NO_OPTION, null, dlgOptions,
                              dlgOptions[1]);
     else
@@ -639,8 +639,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     JDialog dlg = pane.createDialog(null, title);
     dlg.setAlwaysOnTop(true);
     dlg.setVisible(true);
-    if (reconnect && pane.getValue() == dlgOptions[0])
+    if (reconnect && pane.getValue() == dlgOptions[0]) {
+      if (!(e instanceof AuthFailureException))
+        params.server.set(null);
       start();
+    }
     else {
       synchronized(this) {
         this.notify();
@@ -804,9 +807,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         }
       } catch (Exception e) {
         if (cc == null || !cc.shuttingDown) {
-          reportException(e, cc != null &&
-                          cc.state() == CConnection.RFBSTATE_NORMAL &&
-                          !params.noReconnect.get());
+          reportException(e, !params.noReconnect.get() &&
+                             ((cc != null &&
+                               cc.state() == CConnection.RFBSTATE_NORMAL) ||
+                              e instanceof WarningException));
           exitStatus = 1;
           if (cc != null) {
             cc.deleteWindow(true);
