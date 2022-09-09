@@ -709,7 +709,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       return;
     }
     if (!cc.params.viewOnly.get()) {
-      // For some reason, Java on Windows doesn't update the locking key state
+      // For some reason, Java on Windows doesn't update the lock key state
       // until another key is pressed.
       if (Utils.isWindows())
         cc.pushLEDState();
