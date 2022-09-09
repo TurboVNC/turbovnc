@@ -19,7 +19,8 @@ scancodes to be transmitted to the VNC server instead of X11 keysyms.
 Effectively, this means that the mapping of keycodes into keysyms is performed
 on the host rather than the client, which eliminates various system-specific
 and locale-specific key mapping issues (including issues with dead keys on
-international keyboards.)
+international keyboards.)  This feature also fixes lock key synchronization
+issues when using the TurboVNC Viewer with VMware's VNC server.
 
 5. If the `NoReconnect` parameter is unset (which it is by default), the
 TurboVNC Viewer will now offer to reconnect if the initial connection or

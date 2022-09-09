@@ -962,7 +962,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void pushLEDState()
   {
     // Server support?
-    if (!cp.supportsQEMUExtKeyEvent || cp.ledState == RFB.LED_UNKNOWN)
+    if (cp.ledState == RFB.LED_UNKNOWN)
       return;
 
     boolean serverCapsLockState = (cp.ledState & RFB.LED_CAPS_LOCK) != 0;
