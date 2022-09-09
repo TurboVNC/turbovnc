@@ -452,7 +452,8 @@ public class Viewport extends JFrame implements Runnable {
   }
 
   public void setupExtInputHelper() {
-    if (Helper.isAvailable() && cc.cp.supportsGII && x11dpy == 0) {
+    if (Helper.isAvailable() && x11dpy == 0 &&
+        (cc.cp.supportsGII || Utils.isMac())) {
       try {
         if (Utils.isMac()) {
           synchronized(VncViewer.class) {
@@ -469,7 +470,7 @@ public class Viewport extends JFrame implements Runnable {
         vlog.info("  " + e.toString());
         vlog.info("  Extended input device support may not work correctly.");
       }
-      if (Utils.isMac() && devices == null) {
+      if (Utils.isMac() && devices == null && cc.cp.supportsGII) {
         // Create default devices for Wacom tablet
         for (int i = 0; i < 2; i++) {
           ExtInputDevice dev = new ExtInputDevice();
@@ -699,7 +700,7 @@ public class Viewport extends JFrame implements Runnable {
   void handleTabletProximityEvent(final boolean enteringProximity,
                                   final int pointingDeviceType,
                                   long windowID) {
-    if (devices == null)
+    if (devices == null || !cc.cp.supportsGII)
       return;
 
     synchronized(lastEvent) {
@@ -731,7 +732,7 @@ public class Viewport extends JFrame implements Runnable {
   boolean handleTabletEvent(final int type, final double x, final double y,
                             final float pressure, final float tiltX,
                             final float tiltY, long windowID) {
-    if (devices == null || windowID != x11win)
+    if (devices == null || windowID != x11win || !cc.cp.supportsGII)
       return false;
 
     synchronized(lastEvent) {
