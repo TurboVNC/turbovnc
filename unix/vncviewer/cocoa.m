@@ -191,7 +191,7 @@ static const int kvk_map[][2] = {
   { kVK_Option,         XK_Alt_L },
   { kVK_Control,        XK_Control_L },
   { kVK_RightShift,     XK_Shift_R },
-  { kVK_RightOption,    XK_Alt_R },
+  { kVK_RightOption,    XK_ISO_Level3_Shift },
   { kVK_RightControl,   XK_Control_R },
   { kVK_F17,            XK_F17 },
   { kVK_VolumeUp,       XF86XK_AudioRaiseVolume },
