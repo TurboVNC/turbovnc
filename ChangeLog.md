@@ -18,6 +18,16 @@ represent AltGr on international keyboards.
 fonts, which fixes an issue whereby the TurboVNC X server had few available
 fonts when running on recent FreeBSD releases.
 
+5. The Windows TurboVNC Viewer no longer overrides Java's default choice of
+high DPI scaling algorithms (nearest-neighbor interpolation) when using
+integral display scaling factors such as 200%.  The viewer now emulates the
+behavior of Windows, using bilinear interpolation with fractional display
+scaling factors (per 3.0[6]) and nearest-neighbor interpolation with integral
+display scaling factors.  This improves the sharpness of text when using the
+Windows TurboVNC Viewer with integral display scaling factors.  The
+`turbovnc.scalingalg` system property can be set to `bicubic`, `bilinear`, or
+`nearestneighbor` to override the TurboVNC Viewer's default algorithm choice.
+
 
 3.0.1
 =====
