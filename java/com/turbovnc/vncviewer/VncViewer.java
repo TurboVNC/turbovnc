@@ -643,8 +643,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       if (!(e instanceof AuthFailureException))
         params.server.set(null);
       start();
-    }
-    else {
+    } else {
       synchronized(this) {
         this.notify();
       }
