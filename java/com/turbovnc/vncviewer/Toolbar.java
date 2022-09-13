@@ -197,12 +197,20 @@ public class Toolbar extends JToolBar implements ActionListener {
   public void paintComponent(Graphics g) {
     Graphics2D g2 = (Graphics2D)g;
     if (VncViewer.OS.startsWith("windows")) {
+      double displayScalingFactor = g2.getTransform().getScaleX();
       Object scalingAlg = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+      if ((displayScalingFactor % 1.0) == 0.0)
+        scalingAlg = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
       String alg = System.getProperty("turbovnc.scalingalg");
-      if (alg != null && alg.equalsIgnoreCase("bicubic"))
-        scalingAlg = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-      double scalingFactor = g2.getTransform().getScaleX();
-      if (scalingFactor != 1.0)
+      if (alg != null) {
+        if (alg.equalsIgnoreCase("bicubic"))
+          scalingAlg = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+        else if (alg.equalsIgnoreCase("bilinear"))
+          scalingAlg = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+        else if (alg.equalsIgnoreCase("nearestneighbor"))
+          scalingAlg = RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+      }
+      if (displayScalingFactor != 1.0)
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, scalingAlg);
     }
     super.paintComponent(g);
