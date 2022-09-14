@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 #
 # Copyright (C) 2009-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
+# Copyright (C) 2021 Steffen Kieß
 # Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                    All Rights Reserved.
 # Copyright (C) 2002-2009 Constantin Kaplinsky.  All Rights Reserved.
@@ -63,6 +64,8 @@ $multiThread = 1;
 $numThreads = 0;
 $noVNC = "";
 $serverArgs = "";
+$useUDS = 0;
+$udsPath = "";
 
 # Read configuration from the system-wide and user files if present.
 
@@ -209,7 +212,7 @@ foreach $_registrydir (@registrydirs) {
               "-3dwm", 0, "-vgl", 0, "-debug", 0, "-x509cert", 1,
               "-x509key", 1, "-autokill", 0, "-quiet", 0, "-wm", 1,
               "-sessionlist", 0, "-sessionstart", 0, "-novnc", 1,
-              "-noautokill", 0, "-rfbport", 1);
+              "-noautokill", 0, "-rfbport", 1, "-rfbunixpath", 1, "-uds", 0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -392,6 +395,16 @@ if ($opt{'-rfbport'}) {
   $vncPort = $opt{'-rfbport'};
 }
 
+if ($opt{'-uds'}) {
+  $useUDS = 1;
+}
+
+if ($opt{'-rfbunixpath'}) {
+  $udsPath = $opt{'-rfbunixpath'};
+} elsif ($useUDS) {
+  $udsPath = "$vncUserDir/$host\_$displayNumber.uds";
+}
+
 if ($opt{'-log'}) {
   $desktopLog = $opt{'-log'};
 } else {
@@ -449,6 +462,7 @@ $cmd .= " -x509cert $x509CertFile" if ($encTypeX509);
 $cmd .= " -x509key $x509KeyFile" if ($encTypeX509);
 $cmd .= " -securitytypes \"$securityTypes\"" if ($securityTypes);
 $cmd .= " -rfbport $vncPort";
+$cmd .= " -rfbunixpath " . &quotedString($udsPath) if ($udsPath);
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
 $cmd .= " -deferupdate $deferUpdate";
@@ -473,10 +487,27 @@ if (!$opt{'-debug'}) {
 $pidFile = "$vncUserDir/$host:$displayNumber.pid";
 system("$cmd & echo \$! >$pidFile");
 
+# Record the RFB Unix domain socket path
+
+$udsPathFile = "$vncUserDir/$host:$displayNumber.udspath";
+if ($udsPath) {
+  open(UDSPATHFILE, '>', $udsPathFile);
+  print UDSPATHFILE "$udsPath\n"
+} else {
+  unlink $udsPathFile;
+}
+
 # Give Xvnc a chance to start up
 
 sleep(1);
 unless (kill 0, `cat $pidFile`) {
+  # If Xvnc exits on startup, it might be because the RFB Unix domain socket
+  # belongs to another process.  Remove the .udspath file to prevent -kill from
+  # attempting to remove the Unix domain socket later.
+  if ($udsPath) {
+    unlink $udsPathFile;
+  }
+
   warn "Could not start Xvnc.\n\n";
   open(LOG, "<$desktopLog");
   while (<LOG>) { print; }
@@ -485,7 +516,11 @@ unless (kill 0, `cat $pidFile`) {
 }
 
 if (!$opt{'-sessionstart'}) {
-  warn "\nDesktop '$desktopName' started on display $host:$displayNumber\n\n";
+  warn "\nDesktop '$desktopName' started on display $host:$displayNumber\n";
+  if ($udsPath) {
+    warn "Listening on Unix domain socket $udsPath\n";
+  }
+  warn "\n";
 }
 
 if ($generateOTP == 1) {
@@ -833,6 +868,7 @@ sub Usage
       "        -xstartup <SCRIPT>\n".
       "        -wm <SCRIPT>\n".
       "        -vgl\n".
+      "        -uds\n".
       "        -log <FILE>\n".
       "\n".
       "See vncserver and Xvnc manual pages for more information.\n");
@@ -905,6 +941,7 @@ sub Kill
 
   if ($opt{'-kill'} =~ /^:\d+$/) {
     $pidFile = "$vncUserDir/$host$opt{'-kill'}.pid";
+    $udsPathFile = "$vncUserDir/$host$opt{'-kill'}.udspath";
     $noVNCPIDFile = "$vncUserDir/$host$opt{'-kill'}-noVNC.pid";
   } else {
     if ($opt{'-kill'} !~ /^$host:/) {
@@ -912,6 +949,7 @@ sub Kill
           "Use -kill :<number> instead\n\n";
     }
     $pidFile = "$vncUserDir/$opt{'-kill'}.pid";
+    $udsPathFile = "$vncUserDir/$opt{'-kill'}.udspath";
     $noVNCPIDFile = "$vncUserDir/$opt{'-kill'}-noVNC.pid";
   }
 
@@ -959,6 +997,14 @@ sub Kill
     warn "Xvnc process ID $pid already killed\n";
     $opt{'-kill'} =~ s/://;
 
+    if (-r $udsPathFile) {
+      chop($udsPath = `cat $udsPathFile`);
+      if (-e $udsPath) {
+        print "Xvnc did not appear to shut down cleanly.";
+        print " Removing $udsPath\n";
+        unlink $udsPath;
+      }
+    }
     if (-e "/tmp/.X11-unix/X$opt{'-kill'}") {
       print "Xvnc did not appear to shut down cleanly.";
       print " Removing /tmp/.X11-unix/X$opt{'-kill'}\n";
@@ -972,6 +1018,7 @@ sub Kill
   }
 
   unlink $pidFile;
+  unlink $udsPathFile;
   exit;
 }
 
@@ -1146,7 +1193,8 @@ sub ReadConfiguration
        x509KeyFile
        xstartup
        noxstartup
-       serverArgs);
+       serverArgs
+       useUDS);
 
   if (open CONF, "<$configFile") {
     while (<CONF>) {

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-10-04T14:16:48">
+<meta name="date" content="2022-10-04T14:17:20">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -279,9 +279,10 @@ accordingly.</p>
         A specific instance of a Un*x VNC server (Xvnc.)  Each instance of an 
         Xvnc server, including the TurboVNC Server, acts as an independent 
         virtual X server, listening on a unique X11 display number for 
-        connections from X11 clients and listening on a unique RFB port number 
-        for connections from VNC viewers.  Multiple simultaneous VNC sessions 
-        can exist on a given host, under any number of different user accounts.
+        connections from X11 clients and listening on a unique TCP port number 
+        or Unix domain socket for connections from VNC viewers.  Multiple 
+        simultaneous VNC sessions can exist on a given host, under any number of 
+        different user accounts.
     </dd>
 </dl>
 
@@ -3162,27 +3163,96 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
         <code>turbovnc.via</code> system property, expands patterns beginning 
         with the &ldquo;%&rdquo; character, and uses the resulting command line 
         to establish the secure tunnel to the VNC gateway.  If 
-        <code>VNC_VIA_CMD</code> is not set, then this command line defaults to 
-        <code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
-        on Linux/Un*x and Mac systems and 
-        <code>ssh.exe&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
-        on Windows systems. <br /><br /> When the <code>-tunnel</code> option is 
-        used along with the <code>-extssh</code> option, the TurboVNC Viewer 
-        reads the <code>VNC_TUNNEL_CMD</code> environment variable or the 
+        <code>VNC_VIA_CMD</code> and <code>turbovnc.via</code> are not set, then 
+        this command-line template defaults to one of the following values: 
+        <br /><br />
+        <div class="table">
+        <table class="standard">
+          <thead class="standard">
+          <tr class="head ">
+            <th class="head standard">System Type</th>
+            <th class="head standard">Connection Type</th>
+            <th class="head standard">Default <code>VNC_VIA_CMD</code>/<code>turbovnc.via</code> Value</th>
+          </tr>
+          </thead>
+          <tr class="standard">
+            <td class="standard">Linux/Un*x and Mac</td>
+            <td class="standard">TCP port</td>
+            <td class="standard"><code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code></td>
+          </tr>
+          <tr class="standard">
+            <td class="standard">Windows</td>
+            <td class="standard">TCP port</td>
+            <td class="standard"><code>ssh.exe&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code></td>
+          </tr>
+          <tr class="standard">
+            <td class="standard">Linux/Un*x and Mac</td>
+            <td class="standard">Unix domain socket</td>
+            <td class="standard"><code>/usr/bin/ssh&nbsp;-ax&nbsp;-J&nbsp;%G&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
+          </tr>
+          <tr class="standard">
+            <td class="standard">Windows</td>
+            <td class="standard">Unix domain socket</td>
+            <td class="standard"><code>ssh.exe&nbsp;-ax&nbsp;-J&nbsp;%G&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
+          </tr>
+        </table>
+        </div>
+        
+        <br /> When the <code>-tunnel</code> option is used along with the 
+        <code>-extssh</code> option, the TurboVNC Viewer reads the 
+        <code>VNC_TUNNEL_CMD</code> environment variable or the 
         <code>turbovnc.tunnel</code> system property, expands patterns beginning 
         with the &ldquo;%&rdquo; character, and uses the resulting command line 
         to establish the secure tunnel to the VNC host.  If 
-        <code>VNC_TUNNEL_CMD</code> is not set, then this command line defaults 
-        to 
-        <code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
-        on Linux/Un*x and Mac systems and 
-        <code>ssh.exe&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
-        on Windows systems. <br /><br /> The following patterns are recognized 
-        in the <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> 
-        environment variables and their corresponding system properties (note 
-        that <code>%H</code>, <code>%L</code> and <code>%R</code> must be 
-        present in the command template, and <code>%G</code> must also be 
-        present if using the <code>-via</code> option): <br /><br />
+        <code>VNC_TUNNEL_CMD</code> and <code>turbovnc.tunnel</code> are not 
+        set, then this command-line template defaults to one of the following 
+        values: <br /><br />
+        <div class="table">
+        <table class="standard">
+          <thead class="standard">
+          <tr class="head ">
+            <th class="head standard">System Type</th>
+            <th class="head standard">Connection Type</th>
+            <th class="head standard">Default <code>VNC_TUNNEL_CMD</code>/<code>turbovnc.tunnel</code> Value</th>
+          </tr>
+          </thead>
+          <tr class="standard">
+            <td class="standard">Linux/Un*x and Mac</td>
+            <td class="standard">TCP port</td>
+            <td class="standard"><code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code></td>
+          </tr>
+          <tr class="standard">
+            <td class="standard">Windows</td>
+            <td class="standard">TCP port</td>
+            <td class="standard"><code>ssh.exe&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code></td>
+          </tr>
+          <tr class="standard">
+            <td class="standard">Linux/Un*x and Mac</td>
+            <td class="standard">Unix domain socket</td>
+            <td class="standard"><code>/usr/bin/ssh&nbsp;-ax&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
+          </tr>
+          <tr class="standard">
+            <td class="standard">Windows</td>
+            <td class="standard">Unix domain socket</td>
+            <td class="standard"><code>ssh.exe&nbsp;-ax&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
+          </tr>
+        </table>
+        </div>
+        
+        <br /> The following patterns are recognized in the 
+        <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> environment 
+        variables and their corresponding system properties.  Note that 
+        <code>%H</code> and <code>%R</code> must be present in the command-line 
+        template, and <code>%G</code> must also be present if using the 
+        <code>-via</code> option.  If the VNC server is listening on a TCP port, 
+        then <code>%L</code> must also be present. If the VNC server is 
+        listening on a Unix domain socket, then <code>%L</code> can optionally 
+        be used to forward a local TCP port to the remote Unix domain socket 
+        (for instance, by setting <code>VNC_TUNNEL_CMD</code> to 
+        <code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>.)  
+        If <code>%L</code> is not present, then the TurboVNC Viewer expects the 
+        SSH command line to connect standard input and standard output to the 
+        remote Unix domain socket. <br /><br />
         <div class="table">
         <table class="standard">
           <tr class="standard">
@@ -3203,7 +3273,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
           </tr>
           <tr class="standard">
             <td class="standard"><code>%R</code></td>
-            <td class="standard">remote TCP port number</td>
+            <td class="standard">remote TCP port number or the escaped name of a Unix domain socket on the VNC host</td>
           </tr>
         </table>
         </div>

@@ -32,7 +32,7 @@ accordingly.
 	VNC session (sometimes just "session") :: A specific instance of a Un*x VNC
 	server (Xvnc.)  Each instance of an Xvnc server, including the TurboVNC
 	Server, acts as an independent virtual X server, listening on a unique X11
-	display number for connections from X11 clients and listening on a unique RFB
-	port number for connections from VNC viewers.  Multiple simultaneous VNC
-	sessions can exist on a given host, under any number of different user
-	accounts.
+	display number for connections from X11 clients and listening on a unique TCP
+	port number or Unix domain socket for connections from VNC viewers.  Multiple
+	simultaneous VNC sessions can exist on a given host, under any number of
+	different user accounts.

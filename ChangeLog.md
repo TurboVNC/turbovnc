@@ -26,6 +26,25 @@ issues when using the TurboVNC Viewer with VMware's VNC server.
 TurboVNC Viewer will now offer to reconnect if the initial connection or
 authentication fails.
 
+6. The TurboVNC Server can now listen on a Unix domain socket, rather than a
+TCP port, for connections from VNC viewers.  This is useful in conjunction with
+SSH tunneling, and it also allows the Unix domain socket permissions to act as
+an authentication mechanism for a TurboVNC session.  Two new Xvnc arguments,
+`-rfbunixpath` and `-rfbunixmode`, can be used to specify the Unix domain
+socket path and, optionally, the permissions.  A new `vncserver` argument,
+`-uds`, causes the script to automatically choose an appropriate Unix domain
+socket path under the TurboVNC user directory.  See the `Xvnc` and `vncserver`
+man pages for more details.
+
+7. The TurboVNC Viewer can now connect to a VNC server that is listening on a
+Unix domain socket.  This is accomplished by specifying `{host}::{uds_path}` as
+the VNC server, where `{host}` is the hostname or IP address of the VNC host
+and `{uds_path}` is the path to the Unix domain socket on the host.  If
+`{host}` is not `localhost`, then SSH tunneling with an external SSH client is
+implied.  Refer to the TurboVNC Viewer's usage screen (specifically, the
+documentation of the `Server` parameter) and the TurboVNC User's Guide for more
+details.
+
 
 3.0.2
 =====

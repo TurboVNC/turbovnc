@@ -50,7 +50,8 @@ class ServerDialog extends Dialog implements ActionListener {
     }
     JLabel sessionLabel =
       new JLabel(Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
-                 "host:displayNum, host::port = connect to VNC server" : "");
+                 "host:displayNum, host::port, host::uds_path = " +
+                 "connect to VNC server" : "");
     JLabel sessionLabel2 =
       new JLabel(Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
                  "[user@]host = start TurboVNC Session Manager for host" : "");
@@ -237,6 +238,7 @@ class ServerDialog extends Dialog implements ActionListener {
       } else {
         params.server.set(Hostname.getHost(serverName));
         params.port.set(Hostname.getPort(serverName));
+        params.udsPath = Hostname.getUDSPath(serverName);
       }
 
       // Update the history list

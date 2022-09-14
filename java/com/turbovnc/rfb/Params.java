@@ -1,4 +1,5 @@
 /* Copyright (C) 2012-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2011-2012, 2016 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
@@ -28,6 +29,7 @@ package com.turbovnc.rfb;
 import java.io.FileInputStream;
 import java.util.*;
 
+import com.turbovnc.network.Socket;
 import com.turbovnc.rdr.*;
 
 public final class Params {
@@ -541,15 +543,26 @@ public final class Params {
   public ServerNameParameter server =
   new ServerNameParameter("Server", this, false,
   "The VNC server to which to connect.  This can be specified in the " +
-  "format {host}[:{display_number}] or {host}::{port}, where {host} is the " +
-  "host name or IP address of the machine on which the VNC server is " +
-  "running (the \"VNC host\"), {display_number} is an optional X display " +
+  "format {host}[:{display_number}], {host}::{port}, or {host}::{uds_path}, " +
+  "where {host} is the host name or IP address of the machine on which the " +
+  "VNC server is running (the \"VNC host\"), {display_number} is an " +
+  "optional X display " +
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
-   "number, and {port} is a TCP port.  If no port or display number is " +
-   "specified, then the viewer will enable the TurboVNC Session Manager, " +
-   "which allows you to remotely start a new TurboVNC session or to choose " +
-   "an existing TurboVNC session to which to connect." :
-   "number (default: 0), and {port} is a TCP port."), null);
+   "number, " : "number (default: 0), ") +
+  "{port} is a TCP port, and {uds_path} is the path (which must begin with " +
+  "/ or ~) to a Unix domain socket on the VNC host." +
+  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
+   "  If no port, Unix domain socket path, or display number is specified, " +
+   "then the viewer will enable the TurboVNC Session Manager, which allows " +
+   "you to remotely start a new TurboVNC session or to choose an existing " +
+   "TurboVNC session to which to connect.\n " : "\n ") +
+
+  "In Unix domain socket paths, ~ is expanded to the user's home directory " +
+  "on the VNC host, %h is expanded to the VNC host name (from the point of " +
+  "view of the VNC host), %i is expanded to the numeric user ID on the VNC " +
+  "host, and %u is expanded to the username on the VNC host.  When " +
+  "listening on a Unix domain socket, the TurboVNC Server chooses a Unix " +
+  "domain socket path of ~/.vnc/%h_{display_number}.uds by default.", null);
 
   public BoolParameter shared =
   new BoolParameter("Shared", this, true,
@@ -863,7 +876,10 @@ public final class Params {
   "turbovnc.tunnel system properties to specify the exact command line to " +
   "use when creating the tunnel.  If one of those environment variables or " +
   "system properties is set, then an external SSH client is automatically " +
-  "used.  See the TurboVNC User's Guide for more details.", false);
+  "used.  See the TurboVNC User's Guide for more details.\n " +
+
+  "This parameter is effectively set if the Server parameter specifies a " +
+  "Unix domain socket connection to a remote host.", false);
 
   public BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC", this, false,
@@ -984,7 +1000,11 @@ public final class Params {
   "when authenticating with the SSH server.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
-  "set unless the SessMgrAuto parameter is disabled.", false);
+  "set unless the SessMgrAuto parameter is disabled.\n " +
+
+  "This parameter is effectively set if the Server parameter specifies a " +
+  "Unix domain socket connection to a remote host and the Via parameter is " +
+  "not specified.", false);
 
   public StringParameter user =
   new StringParameter("User", this, true,
@@ -1030,6 +1050,8 @@ public final class Params {
   public boolean sessMgrActive, sshTunnelActive;
   public com.jcraft.jsch.Session sshSession;
   public String sshUser;
+  public Socket stdioSocket;
+  public String udsPath;
 
   // CHECKSTYLE VisibilityModifier:ON
 

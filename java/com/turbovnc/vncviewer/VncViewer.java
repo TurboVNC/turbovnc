@@ -503,6 +503,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "USAGE: VncViewer [options/parameters] [host] [options/parameters]\n" +
       "       VncViewer [options/parameters] [host:displayNum] [options/parameters]\n" +
       "       VncViewer [options/parameters] [host::port] [options/parameters]\n" +
+      "       VncViewer [options/parameters] [host::uds_path] [options/parameters]\n" +
       "       VncViewer [options/parameters] -listen [port] [options/parameters]\n" +
       "\n" +
       "Multiple VNC servers and associated options/parameters can be specified by\n" +

@@ -2,7 +2,8 @@
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for Xvnc
 .\"
-.\" Copyright (C) 2010, 2012, 2014-2021 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2022 D. R. Commander
+.\" Copyright (C) 2021 Steffen Kieß
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
@@ -182,6 +183,18 @@ file.  See the SECURITY CONFIGURATION FILE section for more details.
 \fB\-rfbport\fR \fIport\fR
 TCP port that the server should use when listening for connections from normal
 VNC viewers.
+
+.TP
+\fB\-rfbunixpath\fR \fIpath\fR
+The path of a Unix domain socket that the server should create and use when
+listening for connections from normal VNC viewers.  Specifying this option will
+disable the use of TCP for such connections, which forces SSH tunneling to be
+used for remote connections.
+
+.TP
+\fB\-rfbunixmode\fR \fImode\fR
+The permissions of the aforementioned Unix domain socket.  \fImode\fR must be
+an octal number [default: 0600].
 
 .TP
 \fB\-rfbwait\fR \fItime\fR

@@ -33,6 +33,8 @@
 ##  $noxstartup  -- 1 to start the TurboVNC session with no X startup script
 ##  $serverArgs  -- additional arguments to pass to Xvnc (refer to the Xvnc man
 ##                  page for a list of accepted arguments)
+##  $useUDS      -- listen on a Unix domain socket rather than a TCP port for
+##                  connections from VNC viewers
 ##
 
 ## These settings are the default.  Uncomment and edit to change.
@@ -51,6 +53,7 @@
 # $xstartup = "${exedir}xstartup.turbovnc";
 # $noxstartup = 0;
 # $serverArgs = "";
+# $useUDS = 0;
 
 ## Here is an example of setting the font path:
 #

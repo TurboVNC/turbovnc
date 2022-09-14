@@ -1,4 +1,5 @@
-/* Copyright (C) 2012, 2016, 2018, 2020 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2016, 2018, 2020, 2022 D. R. Commander.
+ *                                            All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -51,7 +52,7 @@ public final class Hostname {
     return vncServerName.substring(0, colonPos).replaceAll("\\s", "");
   }
 
-  public static int getPort(String vncServerName) {
+  private static int getColonPos(String vncServerName) {
     int colonPos = vncServerName.lastIndexOf(':');
     int bracketPos = vncServerName.lastIndexOf(']');
     boolean doubleColon = false;
@@ -72,8 +73,20 @@ public final class Hostname {
         }
       }
     }
+
+    return colonPos;
+  }
+
+  public static int getPort(String vncServerName) {
+    int colonPos = getColonPos(vncServerName);
+
     if (colonPos == -1 || colonPos == vncServerName.length() - 1)
       return Utils.getBooleanProperty("turbovnc.sessmgr", true) ? 0 : 5900;
+
+    String substring = vncServerName.substring(colonPos);
+    if (substring.startsWith("::/") || substring.startsWith("::~/"))
+      return -1;
+
     if (vncServerName.charAt(colonPos + 1) == ':') {
       try {
         return Integer.parseInt(vncServerName.substring(colonPos + 2));
@@ -89,6 +102,19 @@ public final class Hostname {
     } catch (NumberFormatException e) {
       throw new ErrorException("Invalid VNC server specified.");
     }
+  }
+
+  public static String getUDSPath(String vncServerName) {
+    int colonPos = getColonPos(vncServerName);
+
+    if (colonPos == -1 || colonPos == vncServerName.length() - 1)
+      return null;
+
+    String substring = vncServerName.substring(colonPos);
+    if (!substring.startsWith("::/") && !substring.startsWith("::~/"))
+      return null;
+
+    return vncServerName.substring(colonPos + 2);
   }
 
   private Hostname() {}

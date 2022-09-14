@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncserver 1 "December 2020" "" "TurboVNC"
+.TH vncserver 1 "October 2022" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch the TurboVNC Server
 .SH SYNOPSIS
@@ -27,7 +27,7 @@ vncserver \- a wrapper to launch the TurboVNC Server
 [\-novnc \fInovnc\-dir\fR] [\-otp]
 [\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-fg] [\-noautokill]
 [\-noxstartup] [\-xstartup\ \fIscript\fR] [\-wm \fIwindow-manager\fR] [\-vgl]
-[\-log\ \fIfile\fR]
+[\-uds] [\-log\ \fIfile\fR]
 \%[\fIXvnc\-options\fR...]
 .ad
 .hy
@@ -155,6 +155,10 @@ value of \fBTVNC_VGLRUN\fR is "vglrun +wm", but users can override that
 environment variable in order to pass additional arguments to vglrun, to
 specify the full path of vglrun, or to use another command to launch the window
 manager.
+.TP
+\fB\-uds\fR
+Listen on a Unix domain socket rather than a TCP port for connections from VNC
+viewers.
 .TP
 \fB\-log\fR  \fIfile\fR
 Redirect the output of Xvnc to \fIfile\fR, rather than to
