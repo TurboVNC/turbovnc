@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2022-09-08T14:11:13">
+<meta name="date" content="2022-09-15T14:45:53">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3162,10 +3162,10 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
         <code>turbovnc.via</code> system property, expands patterns beginning 
         with the &ldquo;%&rdquo; character, and uses the resulting command line 
         to establish the secure tunnel to the VNC gateway.  If 
-        <code>VNC_VIA_CMD</code> is not set, then this command line defaults to  
-        <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
+        <code>VNC_VIA_CMD</code> is not set, then this command line defaults to 
+        <code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
         on Linux/Un*x and Mac systems and 
-        <code>ssh.exe&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
+        <code>ssh.exe&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code> 
         on Windows systems. <br /><br /> When the <code>-tunnel</code> option is 
         used along with the <code>-extssh</code> option, the TurboVNC Viewer 
         reads the <code>VNC_TUNNEL_CMD</code> environment variable or the 
@@ -3174,9 +3174,9 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
         to establish the secure tunnel to the VNC host.  If 
         <code>VNC_TUNNEL_CMD</code> is not set, then this command line defaults 
         to 
-        <code>/usr/bin/ssh&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
+        <code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
         on Linux/Un*x and Mac systems and 
-        <code>ssh.exe&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
+        <code>ssh.exe&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code> 
         on Windows systems. <br /><br /> The following patterns are recognized 
         in the <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> 
         environment variables and their corresponding system properties (note 

@@ -242,9 +242,9 @@ public class Tunnel {
   private static final String DEFAULT_SSH_CMD =
     (Utils.isWindows() ? "ssh.exe" : "/usr/bin/ssh");
   private static final String DEFAULT_TUNNEL_CMD =
-    DEFAULT_SSH_CMD + " -f -L %L:localhost:%R %H sleep 20";
+    DEFAULT_SSH_CMD + " -axf -L %L:localhost:%R %H sleep 20";
   private static final String DEFAULT_VIA_CMD =
-    DEFAULT_SSH_CMD + " -f -L %L:%H:%R %G sleep 20";
+    DEFAULT_SSH_CMD + " -axf -L %L:%H:%R %G sleep 20";
 
   private static void createTunnelExt(String gatewayHost, String remoteHost,
                                       int remotePort, int localPort,
