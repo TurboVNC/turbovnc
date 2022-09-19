@@ -64,6 +64,7 @@ Requires:  bash >= 2.0
 %if "%{server}" == "1"
 Requires:  /sbin/chkconfig /usr/sbin/semanage %{_sysconfdir}/init.d
 Requires:  /usr/bin/xauth /usr/bin/xkbcomp xkeyboard-config
+Requires:  /usr/bin/dbus-launch
 %endif
 BuildRoot: %{_blddir}/%{name}-%{version}-root
 BuildRequires: /usr/bin/perl libjpeg-turbo
