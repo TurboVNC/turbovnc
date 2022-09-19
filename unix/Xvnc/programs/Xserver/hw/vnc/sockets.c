@@ -19,7 +19,7 @@
  */
 
 /*
- *  Copyright (C) 2012-2020 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2020, 2022 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2011 Gernot Tenchio
  *  Copyright (C) 2011 Joel Martin
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -122,16 +122,12 @@ void rfbInitSockets(void)
   if (inetdSock != -1) {
     const int one = 1;
 
-    if (fcntl(inetdSock, F_SETFL, O_NONBLOCK) < 0) {
-      rfbLogPerror("fcntl");
-      exit(1);
-    }
+    if (fcntl(inetdSock, F_SETFL, O_NONBLOCK) < 0)
+      FatalError("fcntl() failed: %s", strerror(errno));
 
     if (setsockopt(inetdSock, IPPROTO_TCP, TCP_NODELAY, (char *)&one,
-                   sizeof(one)) < 0) {
-      rfbLogPerror("setsockopt");
-      exit(1);
-    }
+                   sizeof(one)) < 0)
+      FatalError("setsockopt() failed: %s", strerror(errno));
 
     SetNotifyFd(inetdSock, rfbSockNotify, X_NOTIFY_READ, NULL);
     return;
@@ -142,10 +138,8 @@ void rfbInitSockets(void)
 
   rfbLog("Listening for VNC connections on TCP port %d\n", rfbPort);
 
-  if ((rfbListenSock = ListenOnTCPPort(rfbPort)) < 0) {
-    rfbLogPerror("ListenOnTCPPort");
-    exit(1);
-  }
+  if ((rfbListenSock = ListenOnTCPPort(rfbPort)) < 0)
+    FatalError("ListenOnTCPPort() failed: %s", strerror(errno));
 
   SetNotifyFd(rfbListenSock, rfbSockNotify, X_NOTIFY_READ, NULL);
 }

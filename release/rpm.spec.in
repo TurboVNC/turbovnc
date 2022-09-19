@@ -39,6 +39,15 @@
 %define javadir @CMAKE_INSTALL_FULL_JAVADIR@
 %endif
 
+# Exclude the custom JRE from automatic dependency processing
+%if "%{viewer}" == "1"
+%if "%{jre}" == "1"
+%define __find_provides %{_tmppath}/%{name}-%{version}-%{release}-find-provides
+%define __find_requires %{_tmppath}/%{name}-%{version}-%{release}-find-requires
+%define _use_internal_dependency_generator 0
+%endif
+%endif
+
 Summary:   A highly-optimized version of VNC that can be used with performance-critical applications
 Name:      @PKGNAME@
 Version:   @VERSION@
@@ -52,6 +61,7 @@ Requires:  bash >= 2.0
 %if "%{server}" == "1"
 Requires:  /sbin/chkconfig /usr/sbin/semanage %{_sysconfdir}/init.d
 Requires:  /usr/bin/xauth /usr/bin/xkbcomp xkeyboard-config
+Requires:  /usr/bin/dbus-launch
 %endif
 BuildRoot: %{_blddir}/%{name}-%{version}-root
 BuildRequires: /usr/bin/perl libjpeg-turbo
@@ -161,6 +171,15 @@ Identity=unix-user:*
 Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile;org.debian.pcsc-lite.access_pcsc;org.freedesktop.packagekit.system-sources-refresh;org.freedesktop.packagekit.system-network-proxy-configure
 ResultAny=no
 EOF
+%endif
+%endif
+
+%if "%{viewer}" == "1"
+%if "%{jre}" == "1"
+echo 'grep -v %{buildroot}%{javadir}/jre|/usr/lib/rpm/find-provides' >%{_tmppath}/%{name}-%{version}-%{release}-find-provides
+echo 'grep -v %{buildroot}%{javadir}/jre|/usr/lib/rpm/find-requires' >%{_tmppath}/%{name}-%{version}-%{release}-find-requires
+chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-provides
+chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %endif
 %endif
 

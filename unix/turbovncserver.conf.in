@@ -29,8 +29,8 @@
 ##                   use with X.509 encryption
 ##  $x509KeyFile -- path to X.509 private key file (in PEM format) to use with
 ##                  X.509 encryption
-##  $xstartup -- path to alternative X startup script
-##  $noxstartup -- 1 to start the TurboVNC session with no X startup script
+##  $xstartup    -- path to alternative X startup script
+##  $noxstartup  -- 1 to start the TurboVNC session with no X startup script
 ##  $serverArgs  -- additional arguments to pass to Xvnc (refer to the Xvnc man
 ##                  page for a list of accepted arguments)
 ##

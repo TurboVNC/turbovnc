@@ -1540,7 +1540,7 @@ char *rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb)
 
   prfb->sizeInBytes = (prfb->paddedWidthInBytes * prfb->height);
 
-  prfb->pfbMemory = (char *)malloc(prfb->sizeInBytes);
+  prfb->pfbMemory = rfbAlloc0(prfb->sizeInBytes);
 
   return prfb->pfbMemory;
 }
