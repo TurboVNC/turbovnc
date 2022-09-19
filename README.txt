@@ -37,7 +37,7 @@ which are
     Copyright (C) 2010-2011 Joel Martin
     Copyright (C) 2010 TigerVNC Team
     Copyright (C) 2010 m-privacy GmbH
-    Copyright (C) 2009-2018 Pierre Ossman for Cendio AB
+    Copyright (C) 2009-2021 Pierre Ossman for Cendio AB
     Copyright (C) 2009 TightVNC Team
     Copyright (C) 2006 OCCAM Financial Technology
     Copyright (C) 2005-2011 Martin Koegler
