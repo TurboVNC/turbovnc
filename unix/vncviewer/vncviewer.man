@@ -2,12 +2,12 @@
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for vncviewer
 .\"
-.\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
-.\" Copyright (C) 2000, 2001 Red Hat, Inc.
-.\" Copyright (C) 2001-2003 Constantin Kaplinsky
-.\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
-.\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\" Copyright (C) 2010-2013, 2018 D. R. Commander
+.\" Copyright (C) 2010 University Corporation for Atmospheric Research
+.\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
+.\" Copyright (C) 2001-2003 Constantin Kaplinsky
+.\" Copyright (C) 2000, 2001 Red Hat, Inc.
+.\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the

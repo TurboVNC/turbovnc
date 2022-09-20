@@ -2,10 +2,10 @@
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for tvncconfig
 .\"
-.\" Copyright (C) 2001-2003 Constantin Kaplinsky
+.\" Copyright (C) 2021 D. R. Commander.
 .\" Copyright (C) 2002-2005 RealVNC Ltd
 .\" Copyright (C) 2005 Sun Microsystems, Inc.
-.\" Copyright (C) 2021 D. R. Commander.
+.\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the

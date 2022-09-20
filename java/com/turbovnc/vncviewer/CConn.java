@@ -1,8 +1,8 @@
-/* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+/* Copyright (C) 2011-2022 D. R. Commander.  All Rights Reserved.
  * Copyright 2009-2011, 2016-2019 Pierre Ossman <ossman@cendio.se>
- *                                      for Cendio AB
- * Copyright (C) 2011-2022 D. R. Commander.  All Rights Reserved.
+ *                                for Cendio AB
  * Copyright (C) 2011-2015 Brian P. Hinz
+ * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
