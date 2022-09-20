@@ -1,10 +1,9 @@
-/*
- * Copyright (C) 2004 Red Hat Inc.
- * Copyright (C) 2005 Martin Koegler
+/* Copyright (C) 2012, 2015-2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015, 2017, 2019 Brian P. Hinz
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
- * Copyright (C) 2011-2012, 2015, 2017, 2019 Brian P. Hinz
- * Copyright (C) 2012, 2015-2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2005 Martin Koegler
+ * Copyright (C) 2004 Red Hat Inc.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

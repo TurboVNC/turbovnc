@@ -1,6 +1,6 @@
-/* Copyright 2009 Pierre Ossman for Cendio AB
+/* Copyright (C) 2017-2018, 2021 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2017-2018, 2021 D. R. Commander.  All Rights Reserved.
+ * Copyright 2009 Pierre Ossman for Cendio AB
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

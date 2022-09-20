@@ -1,8 +1,8 @@
-/* Copyright (C) 2000-2003 Constantin Kaplinsky.  All Rights Reserved.
- * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2011-2013, 2015, 2017-2018, 2020-2021 D. R. Commander.
+/* Copyright (C) 2011-2013, 2015, 2017-2018, 2020-2021 D. R. Commander.
  *                                                     All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright 2004-2005 Cendio AB.
+ * Copyright (C) 2000-2003 Constantin Kaplinsky.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

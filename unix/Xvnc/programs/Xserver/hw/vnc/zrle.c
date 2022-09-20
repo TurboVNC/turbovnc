@@ -1,7 +1,6 @@
-/*
- * Copyright (C) 2002 RealVNC Ltd.  All Rights Reserved.
+/* Copyright (C) 2012, 2014, 2017 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2003 Sun Microsystems, Inc.
- * Copyright (C) 2012, 2014, 2017 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2002 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

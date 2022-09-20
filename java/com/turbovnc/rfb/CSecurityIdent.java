@@ -1,5 +1,5 @@
-/* Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

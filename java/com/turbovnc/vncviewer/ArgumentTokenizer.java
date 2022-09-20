@@ -1,5 +1,5 @@
-/* Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
- * Copyright (c) 2020, D. R. Commander
+/* Copyright (c) 2020, D. R. Commander
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
