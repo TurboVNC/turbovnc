@@ -194,8 +194,6 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     viewOnly.setSelected(cc.params.viewOnly.get());
     viewOnly.addActionListener(this);
     connMenu.add(viewOnly);
-    viewOnly.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
-                                                   acceleratorMask));
     if (!cc.params.restricted.get()) {
       ctrlAltDel = addMenuItem(connMenu, "Send Ctrl-Alt-Del");
       ctrlEsc = addMenuItem(connMenu, "Send Ctrl-Esc");

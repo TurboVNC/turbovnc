@@ -79,6 +79,13 @@ Windows TurboVNC Viewer with integral display scaling factors.  The
 6. The TurboVNC Server now handles multitouch events sent by the UltraVNC
 Viewer from touchscreen-equipped Windows clients.
 
+7. The Mac TurboVNC Viewer no longer uses Command-V as a hotkey to toggle
+view-only mode.  Mac applications typically use Command-V for pasting from the
+clipboard.  Even though Un*x applications do not typically respond to that key
+sequence, Mac users sometimes attempt to use Command-V with TurboVNC out of
+habit, which caused view-only mode to be activated accidentally because of
+3.0 beta1[28].  CTRL-ALT-SHIFT-V can still be used to toggle view-only mode.
+
 
 3.0.1
 =====
