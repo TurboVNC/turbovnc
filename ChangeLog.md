@@ -76,6 +76,9 @@ Windows TurboVNC Viewer with integral display scaling factors.  The
 `turbovnc.scalingalg` system property can be set to `bicubic`, `bilinear`, or
 `nearestneighbor` to override the TurboVNC Viewer's default algorithm choice.
 
+6. The TurboVNC Server now handles multitouch events sent by the UltraVNC
+Viewer from touchscreen-equipped Windows clients.
+
 
 3.0.1
 =====

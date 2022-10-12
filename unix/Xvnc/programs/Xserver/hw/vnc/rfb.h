@@ -98,6 +98,16 @@
 
 #define DEFAULT_MAX_CLIENT_WAIT 20000
 
+/* Constants for handling the UltraVNC Viewer's multitouch GII valuator event
+   format */
+#define UVNCGII_MAX_TOUCHES 10
+#define UVNCGII_HC_FLAG 0x800000    /* High-performance counter flag */
+#define UVNCGII_TI_FLAG 0x1000000   /* Timestamp flag */
+#define UVNCGII_PR_FLAG 0x2000000   /* Pressure flag */
+#define UVNCGII_S1_FLAG 0x10000000  /* Size flag */
+#define UVNCGII_IF_FLAG 0x20000000  /* Primary flag */
+#define UVNCGII_PF_FLAG 0x80000000  /* Pressed flag */
+
 
 /*
  * Per-screen (framebuffer) structure.  There is only one of these, since we
@@ -235,6 +245,8 @@ typedef struct {
   rfbGIIValuator valuators[MAX_VALUATORS];
   int values[MAX_VALUATORS];
   CARD32 valFirst, valCount;
+  Bool multitouch_uvnc;
+  int active_touches_uvnc[UVNCGII_MAX_TOUCHES][4];
 } rfbDevInfo, *rfbDevInfoPtr;
 
 
@@ -956,6 +968,7 @@ extern double rfbAutoLosslessRefresh;
 extern Bool rfbALRAll;
 extern int rfbALRQualityLevel;
 extern int rfbALRSubsampLevel;
+extern Bool rfbGIIDebug;
 extern int rfbInterframe;
 extern int rfbMaxClipboard;
 extern Bool rfbVirtualTablet;

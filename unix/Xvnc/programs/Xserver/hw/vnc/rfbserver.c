@@ -47,8 +47,6 @@
 #include "rfb.h"
 #include "sprite.h"
 
-/* #define GII_DEBUG */
-
 char updateBuf[UPDATE_BUF_SIZE];
 int ublen;
 
@@ -76,6 +74,7 @@ int rfbALRSubsampLevel = TVNC_1X;
 int rfbCombineRect = 100;
 int rfbICEBlockSize = 256;
 Bool rfbInterframeDebug = FALSE;
+Bool rfbGIIDebug = FALSE;
 int rfbMaxWidth = MAXSHORT, rfbMaxHeight = MAXSHORT;
 int rfbMaxClipboard = MAX_CUTTEXT_LEN;
 Bool rfbVirtualTablet = FALSE;
@@ -1504,11 +1503,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
         case rfbGIIDeviceCreate:
         {
-          int i;
+          int i, t;
           rfbDevInfo dev;
           rfbGIIDeviceCreatedMsg dcmsg;
 
           memset(&dev, 0, sizeof(dev));
+          for (t = 0; t < UVNCGII_MAX_TOUCHES; t++)
+            dev.active_touches_uvnc[t][2] = -1;
           dcmsg.deviceOrigin = 0;
 
           READ_OR_CLOSE((char *)&msg.giidc.length,
@@ -1524,14 +1525,14 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           }
 
           rfbLog("GII Device Create: %s\n", msg.giidc.deviceName);
-#ifdef GII_DEBUG
-          rfbLog("    Vendor ID: %d\n", msg.giidc.vendorID);
-          rfbLog("    Product ID: %d\n", msg.giidc.productID);
-          rfbLog("    Event mask: %.8x\n", msg.giidc.canGenerate);
-          rfbLog("    Registers: %d\n", msg.giidc.numRegisters);
-          rfbLog("    Valuators: %d\n", msg.giidc.numValuators);
-          rfbLog("    Buttons: %d\n", msg.giidc.numButtons);
-#endif
+          if (rfbGIIDebug) {
+            rfbLog("    Vendor ID: %d\n", msg.giidc.vendorID);
+            rfbLog("    Product ID: %d\n", msg.giidc.productID);
+            rfbLog("    Event mask: %.8x\n", msg.giidc.canGenerate);
+            rfbLog("    Registers: %d\n", msg.giidc.numRegisters);
+            rfbLog("    Valuators: %d\n", msg.giidc.numValuators);
+            rfbLog("    Buttons: %d\n", msg.giidc.numButtons);
+          }
 
           if (msg.giidc.length != sz_rfbGIIDeviceCreateMsg - 4 +
               msg.giidc.numValuators * sz_rfbGIIValuator) {
@@ -1583,17 +1584,17 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               v->siShift = Swap32((CARD32)v->siShift);
             }
 
-#ifdef GII_DEBUG
-            rfbLog("    Valuator: %s (%s)\n", v->longName, v->shortName);
-            rfbLog("        Index: %d\n", v->index);
-            rfbLog("        Range: min = %d, center = %d, max = %d\n",
-                   v->rangeMin, v->rangeCenter, v->rangeMax);
-            rfbLog("        SI unit: %d\n", v->siUnit);
-            rfbLog("        SI add: %d\n", v->siAdd);
-            rfbLog("        SI multiply: %d\n", v->siMul);
-            rfbLog("        SI divide: %d\n", v->siDiv);
-            rfbLog("        SI shift: %d\n", v->siShift);
-#endif
+            if (rfbGIIDebug) {
+              rfbLog("    Valuator: %s (%s)\n", v->longName, v->shortName);
+              rfbLog("        Index: %d\n", v->index);
+              rfbLog("        Range: min = %d, center = %d, max = %d\n",
+                     v->rangeMin, v->rangeCenter, v->rangeMax);
+              rfbLog("        SI unit: %d\n", v->siUnit);
+              rfbLog("        SI add: %d\n", v->siAdd);
+              rfbLog("        SI multiply: %d\n", v->siMul);
+              rfbLog("        SI divide: %d\n", v->siDiv);
+              rfbLog("        SI shift: %d\n", v->siShift);
+            }
           }
 
           for (i = 0; i < cl->numDevices; i++) {
@@ -1603,6 +1604,60 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               dcmsg.deviceOrigin = Swap32IfLE(i + 1);
               goto sendMessage;
             }
+          }
+
+          /* The UltraVNC Viewer sends multitouch events by way of the GII RFB
+             extension, but it uses a different GII valuator event format than
+             that of the TurboVNC Viewer.  Thus, we create fake valuators
+             similar to those used by the TurboVNC Viewer, and we map the
+             UltraVNC Viewer's multitouch GII valuator events to those fake
+             valuators. */
+          if (!strcmp(dev.name, "TCVNC-MT") &&
+              !strcmp((char *)dev.valuators[0].longName,
+                      "TCVNC Multitouch Device") &&
+              !strcmp((char *)dev.valuators[0].shortName, "TMD") &&
+              msg.giidc.vendorID == 0x0908 && dev.productID == 0x000b) {
+            dev.multitouch_uvnc = TRUE;
+            dev.numTouches = dev.numButtons;
+            if (dev.numTouches > UVNCGII_MAX_TOUCHES) {
+              rfbLog("WARNING: Requested number of simultaneous touches (%d) exceeds maximum of 10.\n",
+                     dev.numTouches);
+              rfbLog("    Additional touches will be ignored.\n");
+            }
+            dev.numButtons = 7;
+            dev.numValuators = 4;
+            dev.mode = Absolute;
+            dev.productID = rfbGIIDevTypeTouch;
+
+            dev.valuators[0].index = 0;
+            snprintf((char *)dev.valuators[0].longName, 75,
+                     "Abs MT Position X");
+            snprintf((char *)dev.valuators[0].shortName, 5, "0");
+            dev.valuators[0].rangeMax = 65535;
+            dev.valuators[0].rangeCenter = dev.valuators[0].rangeMax / 2;
+            dev.valuators[0].siUnit = rfbGIIUnitLength;
+
+            dev.valuators[1].index = 1;
+            snprintf((char *)dev.valuators[1].longName, 75,
+                     "Abs MT Position Y");
+            snprintf((char *)dev.valuators[1].shortName, 5, "1");
+            dev.valuators[1].rangeMax = 65535;
+            dev.valuators[1].rangeCenter = dev.valuators[1].rangeMax / 2;
+            dev.valuators[1].siUnit = rfbGIIUnitLength;
+
+            dev.valuators[2].index = 2;
+            snprintf((char *)dev.valuators[2].longName, 75,
+                     "__TURBOVNC FAKE TOUCH ID__");
+            snprintf((char *)dev.valuators[2].shortName, 5, "TFTI");
+            dev.valuators[2].rangeMax = INT_MAX;
+            dev.valuators[2].rangeCenter = dev.valuators[2].rangeMax / 2;
+
+            dev.valuators[3].index = 3;
+            snprintf((char *)dev.valuators[3].longName, 75,
+                     "__TURBOVNC FAKE TOUCH TYPE__");
+            snprintf((char *)dev.valuators[3].shortName, 5, "TFTT");
+            dev.valuators[3].rangeMax = 5;
+            dev.valuators[3].rangeCenter = dev.valuators[3].rangeMax / 2;
           }
 
           if (rfbVirtualTablet || AddExtInputDevice(&dev)) {
@@ -1705,12 +1760,12 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                   rfbCloseClient(cl);
                   return;
                 }
-#ifdef GII_DEBUG
-                rfbLog("Device %d button %d %s\n", b.deviceOrigin,
-                       b.buttonNumber,
-                       eventType == rfbGIIButtonPress ? "PRESS" : "release");
-                fflush(stderr);
-#endif
+                if (rfbGIIDebug) {
+                  rfbLog("Device %d button %d %s\n", b.deviceOrigin,
+                         b.buttonNumber,
+                         eventType == rfbGIIButtonPress ? "PRESS" : "release");
+                  fflush(stderr);
+                }
                 ExtInputAddEvent(dev, eventType == rfbGIIButtonPress ?
                                  ButtonPress : ButtonRelease, b.buttonNumber);
                 break;
@@ -1720,7 +1775,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               case rfbGIIValuatorAbsolute:
               {
                 rfbGIIValuatorEvent v;
-                int i;
+                int i, t;
                 rfbDevInfo *dev;
 
                 READ_OR_CLOSE((char *)&v.pad, sz_rfbGIIValuatorEvent - 2,
@@ -1749,6 +1804,11 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                   return;
                 }
                 dev = &cl->devices[v.deviceOrigin - 1];
+                /* The UltraVNC Viewer sends absolute valuator events but
+                   labels them as relative valuator events. */
+                if (dev->multitouch_uvnc &&
+                    eventType == rfbGIIValuatorRelative)
+                  eventType = rfbGIIValuatorAbsolute;
                 if ((eventType == rfbGIIValuatorRelative &&
                      (dev->eventMask & rfbGIIValuatorRelativeMask) == 0) ||
                     (eventType == rfbGIIValuatorAbsolute &&
@@ -1758,29 +1818,186 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                   rfbCloseClient(cl);
                   return;
                 }
+
+                /* Parse the UltraVNC Viewer's multitouch GII valuator event
+                   format */
+                if (dev->multitouch_uvnc) {
+                  CARD32 numTouchEvents = v.first, numValues = v.count;
+                  static const char *touch_type_string[6] = {
+                    "TouchBegin", "TouchUpdate", "TouchEnd",
+                    "TouchBegin (pointer emulation)",
+                    "TouchUpdate (pointer emulation)",
+                    "TouchEnd (pointer emulation)"
+                  };
+
+                  if (rfbGIIDebug)
+                    rfbLog("Device %d count=%d:\n", v.deviceOrigin,
+                           numTouchEvents);
+                  for (i = 0; i < numTouchEvents; i++) {
+                    CARD32 formatFlags, expectedValues = 1, dummy;
+                    CARD64 dummy64;
+
+                    READ_OR_CLOSE((char *)&formatFlags, sizeof(CARD32),
+                                  return);
+                    if (littleEndian != *(const char *)&rfbEndianTest)
+                      formatFlags = Swap32(formatFlags);
+                    if (rfbGIIDebug)
+                      rfbLog("  %d: format flags = 0x%.8x\n", i, formatFlags);
+                    if ((formatFlags & 0xFF) == 0x11) expectedValues++;
+                    if (formatFlags & UVNCGII_S1_FLAG) expectedValues++;
+                    if (formatFlags & UVNCGII_PR_FLAG) expectedValues++;
+                    if (formatFlags & UVNCGII_TI_FLAG) expectedValues++;
+                    if (formatFlags & UVNCGII_HC_FLAG) expectedValues += 2;
+                    if (expectedValues * numTouchEvents != numValues) {
+                      rfbLog("ERROR: Malformed GII valuator event\n");
+                      rfbCloseClient(cl);
+                      return;
+                    }
+
+                    if ((formatFlags & 0xFF) == 0x1F) {
+                      /* Empty multitouch event received.  End all active
+                         touches. */
+                      for (t = 0; t < numValues - 1; t++)
+                        READ_OR_CLOSE((char *)&dummy, sizeof(CARD32), return);
+                      for (t = 0; t < UVNCGII_MAX_TOUCHES; t++) {
+                        if (dev->active_touches_uvnc[t][2] != -1) {
+                          dev->valFirst = 0;
+                          dev->valCount = 4;
+                          dev->values[0] =
+                            dev->active_touches_uvnc[t][0];  /* X */
+                          dev->values[1] =
+                            dev->active_touches_uvnc[t][1];  /* Y */
+                          dev->values[2] =
+                            dev->active_touches_uvnc[t][2];  /* ID */
+                          if (dev->active_touches_uvnc[t][3] >=
+                              rfbGIITouchBeginEP)
+                            dev->values[3] = rfbGIITouchEndEP;  /* Type */
+                          else
+                            dev->values[3] = rfbGIITouchEnd;
+                          if (rfbGIIDebug) {
+                            rfbLog("  %d: touch ID = %d\n", i, dev->values[2]);
+                            rfbLog("  %d: touch position = %d, %d\n", i,
+                                   dev->values[0], dev->values[1]);
+                            rfbLog("  %d: touch type = %d [%s]\n", i,
+                                   dev->values[3],
+                                   dev->values[3] >= 0 && dev->values[3] < 6 ?
+                                   touch_type_string[dev->values[3]] : "");
+                          }
+                          ExtInputAddEvent(dev, MotionNotify, 0);
+                          dev->active_touches_uvnc[t][2] = -1;
+                        }
+                      }
+                      continue;
+                    } else if ((formatFlags & 0xFF) != 0x11) {
+                      rfbLog("ERROR: Unsupported multitouch event format\n");
+                      rfbCloseClient(cl);
+                      return;
+                    }
+
+                    READ_OR_CLOSE((char *)&dev->values[2], sizeof(int),
+                                  return);  /* ID */
+                    if (littleEndian != *(const char *)&rfbEndianTest)
+                      dev->values[2] = Swap32(dev->values[2]);
+                    if (rfbGIIDebug)
+                      rfbLog("  %d: touch ID = %d\n", i, dev->values[2]);
+
+                    if (formatFlags & 0x10) {
+                      CARD32 touchPos;
+
+                      READ_OR_CLOSE((char *)&touchPos, sizeof(CARD32), return);
+                      if (littleEndian != *(const char *)&rfbEndianTest)
+                        touchPos = Swap32(touchPos);
+                      dev->values[0] = touchPos >> 16;  /* X */
+                      dev->values[0] =
+                        (int)round((double)dev->values[0] * 65535.0 /
+                                   (double)rfbFB.width);
+                      dev->values[1] = touchPos & 0xFFFF;  /* Y */
+                      dev->values[1] =
+                        (int)round((double)dev->values[1] * 65535.0 /
+                                   (double)rfbFB.height);
+                      if (rfbGIIDebug)
+                        rfbLog("  %d: touch position = %d, %d\n", i,
+                               dev->values[0], dev->values[1]);
+                    }
+
+                    /* Ignore touch area */
+                    if (formatFlags & UVNCGII_S1_FLAG)
+                      READ_OR_CLOSE((char *)&dummy, sizeof(CARD32), return);
+                    /* Ignore touch pressure */
+                    if (formatFlags & UVNCGII_PR_FLAG)
+                      READ_OR_CLOSE((char *)&dummy, sizeof(CARD32), return);
+                    /* Ignore timestamp */
+                    if (formatFlags & UVNCGII_TI_FLAG)
+                      READ_OR_CLOSE((char *)&dummy, sizeof(CARD32), return);
+                    /* Ignore high-resolution timestamp */
+                    if (formatFlags & UVNCGII_HC_FLAG)
+                      READ_OR_CLOSE((char *)&dummy64, sizeof(CARD64), return);
+
+                    dev->values[3] = -1;
+                    for (t = 0; t < UVNCGII_MAX_TOUCHES; t++) {
+                      if (dev->active_touches_uvnc[t][2] == dev->values[2]) {
+                        if (formatFlags & UVNCGII_PF_FLAG) {
+                          if (formatFlags & UVNCGII_IF_FLAG)
+                            dev->values[3] = rfbGIITouchUpdateEP;
+                          else
+                            dev->values[3] = rfbGIITouchUpdate;
+                          memcpy(dev->active_touches_uvnc[t], dev->values,
+                                 4 * sizeof(int));
+                        } else {
+                          if (formatFlags & UVNCGII_IF_FLAG)
+                            dev->values[3] = rfbGIITouchEndEP;
+                          else
+                            dev->values[3] = rfbGIITouchEnd;
+                          dev->active_touches_uvnc[t][2] = -1;
+                        }
+                        break;
+                      }
+                    }
+                    if (dev->values[3] == -1) {
+                      if (formatFlags & UVNCGII_IF_FLAG)
+                        dev->values[3] = rfbGIITouchBeginEP;
+                      else
+                        dev->values[3] = rfbGIITouchBegin;
+                      for (t = 0; t < UVNCGII_MAX_TOUCHES; t++) {
+                        if (dev->active_touches_uvnc[t][2] == -1) {
+                          memcpy(dev->active_touches_uvnc[t], dev->values,
+                                 4 * sizeof(int));
+                          break;
+                        }
+                      }
+                    }
+                    if (rfbGIIDebug)
+                      rfbLog("  %d: touch type = %d [%s]\n", i, dev->values[3],
+                             dev->values[3] >= 0 && dev->values[3] < 6 ?
+                             touch_type_string[dev->values[3]] : "");
+
+                    dev->valFirst = 0;
+                    dev->valCount = 4;
+                    ExtInputAddEvent(dev, MotionNotify, 0);
+                  }
+                  break;
+                }
+
                 if (v.first + v.count > dev->numValuators) {
                   rfbLog("ERROR: GII valuator event for device %d exceeds valuator count (%d)\n",
                          v.deviceOrigin, dev->numValuators);
                   rfbCloseClient(cl);
                   return;
                 }
-#ifdef GII_DEBUG
-                rfbLog("Device %d Valuator %s first=%d count=%d:\n",
-                       v.deviceOrigin,
-                       eventType == rfbGIIValuatorRelative ? "rel" : "ABS",
-                       v.first, v.count);
-#endif
+                if (rfbGIIDebug)
+                  rfbLog("Device %d Valuator %s first=%d count=%d:\n",
+                         v.deviceOrigin,
+                         eventType == rfbGIIValuatorRelative ? "rel" : "ABS",
+                         v.first, v.count);
                 for (i = v.first; i < v.first + v.count; i++) {
                   READ_OR_CLOSE((char *)&dev->values[i], sizeof(int), return);
                   if (littleEndian != *(const char *)&rfbEndianTest)
                     dev->values[i] = Swap32((CARD32)dev->values[i]);
-#ifdef GII_DEBUG
-                  fprintf(stderr, "v[%d]=%d ", i, dev->values[i]);
-#endif
+                  if (rfbGIIDebug)
+                    fprintf(stderr, "v[%d]=%d ", i, dev->values[i]);
                 }
-#ifdef GII_DEBUG
-                fprintf(stderr, "\n");
-#endif
+                if (rfbGIIDebug)
+                  fprintf(stderr, "\n");
                 if (v.count > 0) {
                   dev->valFirst = v.first;
                   dev->valCount = v.count;

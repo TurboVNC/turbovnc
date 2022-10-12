@@ -659,6 +659,11 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   /***** TurboVNC miscellaneous options *****/
 
+  if (strcasecmp(argv[i], "-giidebug") == 0) {
+    rfbGIIDebug = TRUE;
+    return 1;
+  }
+
 #ifndef TURBOVNC_STATIC_XORG_PATHS
   if (strcasecmp(argv[i], "-registrydir") == 0) {
 #ifdef X_REGISTRY_REQUEST
