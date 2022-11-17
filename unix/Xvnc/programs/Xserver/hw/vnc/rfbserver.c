@@ -1821,7 +1821,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                       formatFlags = Swap32(formatFlags);
                     if (rfbGIIDebug)
                       rfbLog("  %d: format flags = 0x%.8x\n", i, formatFlags);
-                    if ((formatFlags & 0xFF) == 0x11) expectedValues++;
+                    if ((formatFlags & 0xFF) == 0x11) expectedValues += 2;
                     if (formatFlags & UVNCGII_S1_FLAG) expectedValues++;
                     if (formatFlags & UVNCGII_PR_FLAG) expectedValues++;
                     if (formatFlags & UVNCGII_TI_FLAG) expectedValues++;
