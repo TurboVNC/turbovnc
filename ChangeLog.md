@@ -38,6 +38,12 @@ sequence, Mac users sometimes attempt to use Command-V with TurboVNC out of
 habit, which caused view-only mode to be activated accidentally because of
 3.0 beta1[28].  CTRL-ALT-SHIFT-V can still be used to toggle view-only mode.
 
+8. The TurboVNC Viewer normally reserves CTRL-ALT-SHIFT-{arrow keys} as hotkeys
+to move the horizontal and vertical scrollbars.  However, those key sequences
+are also used by Emacs and GNOME.  Thus, the TurboVNC Viewer now sends those
+key sequences to the server if no scrollbars are visible or if keyboard
+grabbing is enabled.
+
 
 3.0.1
 =====

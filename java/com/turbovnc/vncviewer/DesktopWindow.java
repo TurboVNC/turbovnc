@@ -684,7 +684,11 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_PAGE_DOWN:
         case KeyEvent.VK_HOME:
         case KeyEvent.VK_END:
-          return;
+          if (cc.viewport != null &&
+              (cc.viewport.sp.getHorizontalScrollBar().isVisible() ||
+               cc.viewport.sp.getVerticalScrollBar().isVisible()) &&
+              !VncViewer.isKeyboardGrabbed(cc.viewport))
+            return;
       }
     }
     if ((e.getModifiersEx() & InputEvent.META_DOWN_MASK) ==
