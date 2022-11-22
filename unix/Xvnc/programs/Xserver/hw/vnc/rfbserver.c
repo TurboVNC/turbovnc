@@ -1611,12 +1611,19 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
              that of the TurboVNC Viewer.  Thus, we create fake valuators
              similar to those used by the TurboVNC Viewer, and we map the
              UltraVNC Viewer's multitouch GII valuator events to those fake
-             valuators. */
-          if (!strcmp(dev.name, "TCVNC-MT") &&
-              !strcmp((char *)dev.valuators[0].longName,
-                      "TCVNC Multitouch Device") &&
-              !strcmp((char *)dev.valuators[0].shortName, "TMD") &&
-              msg.giidc.vendorID == 0x0908 && dev.productID == 0x000b) {
+             valuators.  "TCVNC-MT" is the stock UltraVNC Viewer, and
+             "HMI_Emb_VNC_Viewer" is the SINUMERIK VNC client, which is based
+             on UltraVNC. */
+          if ((!strcmp(dev.name, "TCVNC-MT") &&
+               !strcmp((char *)dev.valuators[0].longName,
+                       "TCVNC Multitouch Device") &&
+               !strcmp((char *)dev.valuators[0].shortName, "TMD") &&
+               msg.giidc.vendorID == 0x0908 && dev.productID == 0x000b) ||
+              (!strcmp(dev.name, "HMI_Emb_VNC_Viewer") &&
+               !strcmp((char *)dev.valuators[0].longName,
+                       "HMI Embedded VNC Viewer Redirection") &&
+               !strcmp((char *)dev.valuators[0].shortName, "EmbV") &&
+               msg.giidc.vendorID == 0x0908 && dev.productID == 0x00737772)) {
             dev.multitouch_uvnc = TRUE;
             dev.numTouches = dev.numButtons;
             if (dev.numTouches > UVNCGII_MAX_TOUCHES) {
@@ -1843,15 +1850,26 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                       formatFlags = Swap32(formatFlags);
                     if (rfbGIIDebug)
                       rfbLog("  %d: format flags = 0x%.8x\n", i, formatFlags);
-                    if ((formatFlags & 0xFF) == 0x11) expectedValues++;
+                    if ((formatFlags & 0xFF) == 0x11) expectedValues += 2;
                     if (formatFlags & UVNCGII_S1_FLAG) expectedValues++;
                     if (formatFlags & UVNCGII_PR_FLAG) expectedValues++;
                     if (formatFlags & UVNCGII_TI_FLAG) expectedValues++;
                     if (formatFlags & UVNCGII_HC_FLAG) expectedValues += 2;
+                    /* Some implementations of the UltraVNC Viewer hard-code
+                       rfbGIIValuatorEvent.count to
+                       6 * rfbGIIValuatorEvent.first regardless of the number
+                       of DWORDs actually sent, so we have to be lenient here.
+                       As long as the viewer sends the number of DWORDs
+                       specified by the format flags, everything should still
+                       work. */
                     if (expectedValues * numTouchEvents != numValues) {
-                      rfbLog("ERROR: Malformed GII valuator event\n");
-                      rfbCloseClient(cl);
-                      return;
+                      static int alreadyWarned = 0;
+                      if (!alreadyWarned) {
+                        rfbLog("WARNING: Malformed GII valuator event\n");
+                        rfbLog("    (Count should be %d, not %d.)\n",
+                               expectedValues * numTouchEvents, numValues);
+                        alreadyWarned = 1;
+                      }
                     }
 
                     if ((formatFlags & 0xFF) == 0x1F) {
