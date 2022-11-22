@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2013, 2015-2021 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013, 2015-2022 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,28 +49,7 @@ public class Viewport extends JFrame {
     sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
     sp.setViewportBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
     sp.getViewport().setBackground(Color.BLACK);
-    InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-    int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
-                           InputEvent.CTRL_DOWN_MASK |
-                           InputEvent.ALT_DOWN_MASK;
-    if (im != null) {
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask),
-             "unitScrollUp");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask),
-             "unitScrollDown");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask),
-             "unitScrollLeft");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask),
-             "unitScrollRight");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask),
-             "scrollUp");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, ctrlAltShiftMask),
-             "scrollDown");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, ctrlAltShiftMask),
-             "scrollLeft");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, ctrlAltShiftMask),
-             "scrollRight");
-    }
+    setScrollBarHotkeysEnabled(true);
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
     getContentPane().add(sp);
@@ -180,6 +159,9 @@ public class Viewport extends JFrame {
             ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
           sp.validate();
         }
+        setScrollBarHotkeysEnabled((sp.getHorizontalScrollBar().isVisible() ||
+                                    sp.getVerticalScrollBar().isVisible()) &&
+                                   !VncViewer.isKeyboardGrabbed(cc.viewport));
         if (cc.desktop.cursor != null) {
           Cursor cursor = cc.desktop.cursor;
           if (cursor.hotspot != null)
@@ -218,6 +200,42 @@ public class Viewport extends JFrame {
     });
 
     lastEvent.deviceID = -1;
+  }
+
+  private void setScrollBarHotkeysEnabled(boolean enable) {
+    InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
+                           InputEvent.CTRL_DOWN_MASK |
+                           InputEvent.ALT_DOWN_MASK;
+    if (im == null) return;
+    if (enable) {
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask),
+             "unitScrollUp");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask),
+             "unitScrollDown");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask),
+             "unitScrollLeft");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask),
+             "unitScrollRight");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask),
+             "scrollUp");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, ctrlAltShiftMask),
+             "scrollDown");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, ctrlAltShiftMask),
+             "scrollLeft");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, ctrlAltShiftMask),
+             "scrollRight");
+    } else {
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
+                                       ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_END, ctrlAltShiftMask));
+    }
   }
 
   public Dimension getAvailableSize() {
@@ -453,6 +471,9 @@ public class Viewport extends JFrame {
           return;
         grabKeyboard(on, VncViewer.grabPointer.getValue());
         VncViewer.setGrabOwner(on ? this : null);
+        setScrollBarHotkeysEnabled((sp.getHorizontalScrollBar().isVisible() ||
+                                    sp.getVerticalScrollBar().isVisible()) &&
+                                   !on);
       } catch (UnsatisfiedLinkError e) {
         vlog.info("WARNING: Could not invoke grabKeyboard() from TurboVNC Helper.");
         vlog.info("  Keyboard grabbing will be disabled.");

@@ -28,6 +28,12 @@ Windows/Java TurboVNC Viewer with integral display scaling factors.  The
 `turbovnc.scalingalg` system property can be set to `bicubic`, `bilinear`, or
 `nearestneighbor` to override the TurboVNC Viewer's default algorithm choice.
 
+6. The Java TurboVNC Viewer normally reserves CTRL-ALT-SHIFT-{arrow keys} as
+hotkeys to move the horizontal and vertical scrollbars.  However, those key
+sequences are also used by Emacs and GNOME.  Thus, the Java TurboVNC Viewer now
+sends those key sequences to the server if no scrollbars are visible or if
+keyboard grabbing is enabled.
+
 
 2.2.9 ESR
 =========
