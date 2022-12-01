@@ -267,7 +267,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     if (n >= 100)
       FatalError("-inetd: couldn't find free display number");
 
-    sprintf(inetdDisplayNumStr, "%d", n);
+    snprintf(inetdDisplayNumStr, 10, "%d", n);
     display = inetdDisplayNumStr;
 
     /* fds 0, 1 and 2 (stdin, out and err) are all the same socket to the
