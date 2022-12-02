@@ -87,14 +87,46 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     addMouseWheelListener(this);
     addMouseMotionListener(this);
     addKeyListener(this);
+
     addFocusListener(new FocusAdapter() {
+      // On Windows, Swing redirects keyboard focus to the default JMenu (or
+      // the system menu, if the component has no JMenu) when LAlt is pressed
+      // and subsequently released.  When that happens, subsequent keystrokes
+      // are consumed by the system menu and not sent to the server until Esc
+      // or LAlt is pressed to dismiss the menu.  In order to bypass that
+      // behavior, we install a custom key event dispatcher into the keyboard
+      // focus manager whenever the component gains focus.
+      private final KeyEventDispatcher keyEventDispatcher =
+        new KeyEventDispatcher() {
+        public boolean dispatchKeyEvent(KeyEvent e) {
+          if (e.getKeyCode() == 18 &&
+              e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
+            if (e.getID() == KeyEvent.KEY_PRESSED)
+              cc.desktop.keyPressed(e);
+            else if (e.getID() == KeyEvent.KEY_RELEASED)
+              cc.desktop.keyReleased(e);
+            return true;
+          }
+          return false;
+        }
+      };
+
       public void focusGained(FocusEvent e) {
+        KeyboardFocusManager kfm =
+          KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        if (Utils.isWindows()) kfm.addKeyEventDispatcher(keyEventDispatcher);
         if (cc.viewer.benchFile == null) checkClipboard();
       }
+
       public void focusLost(FocusEvent e) {
+        KeyboardFocusManager kfm =
+          KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        if (Utils.isWindows())
+          kfm.removeKeyEventDispatcher(keyEventDispatcher);
         cc.releasePressedKeys();
       }
     });
+
     setFocusTraversalKeysEnabled(false);
     setFocusable(true);
     enableInputMethods(false);
