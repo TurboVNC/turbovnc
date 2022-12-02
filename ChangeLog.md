@@ -34,6 +34,11 @@ sequences are also used by Emacs and GNOME.  Thus, the Java TurboVNC Viewer now
 sends those key sequences to the server if no scrollbars are visible or if
 keyboard grabbing is enabled.
 
+7. Fixed an issue in the Windows/Java TurboVNC Viewer whereby a left Alt key
+press, followed by a left Alt key release, caused the keyboard focus to be
+redirected to the system menu, and subsequent keystrokes were consumed by the
+system menu until left Alt or Esc was pressed to dismiss the menu.
+
 
 2.2.9 ESR
 =========
