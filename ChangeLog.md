@@ -46,6 +46,17 @@ documentation of the `Server` parameter) and the TurboVNC User's Guide for more
 details.
 
 
+3.0.3
+=====
+
+### Significant changes relative to 3.0.2:
+
+1. Fixed an issue in the Windows TurboVNC Viewer whereby a left Alt key press,
+followed by a left Alt key release, caused the keyboard focus to be redirected
+to the system menu, and subsequent keystrokes were consumed by the system menu
+until left Alt or Esc was pressed to dismiss the menu.
+
+
 3.0.2
 =====
 
