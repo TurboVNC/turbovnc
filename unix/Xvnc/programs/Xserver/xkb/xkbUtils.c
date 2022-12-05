@@ -1327,6 +1327,7 @@ _XkbCopyNames(XkbDescPtr src, XkbDescPtr dst)
         }
         else {
             free(dst->names->radio_groups);
+            dst->names->radio_groups = NULL;
         }
         dst->names->num_rg = src->names->num_rg;
 
