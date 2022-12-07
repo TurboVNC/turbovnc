@@ -147,6 +147,9 @@ static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
 static void rfbClientStateChange(CallbackListPtr *, pointer myData,
                                  pointer client);
 
+static void rfbBlockHandler(void *blockData, void *timeout);
+static void rfbWakeupHandler(void *blockData, int result);
+
 static miPointerScreenFuncRec rfbPointerCursorFuncs = {
   rfbCursorOffScreen,
   rfbCrossScreen,
@@ -777,6 +780,8 @@ void InitOutput(ScreenInfo *pScreenInfo, int argc, char **argv)
 
   if (AddScreen(rfbScreenInit, argc, argv) == -1)
     FatalError("Couldn't add screen");
+
+  RegisterBlockAndWakeupHandlers(rfbBlockHandler, rfbWakeupHandler, 0);
 }
 
 
@@ -1415,7 +1420,18 @@ void ProcessInputEvents(void)
     inetdInitDone = TRUE;
   }
   mieqProcessInputEvents();
+}
+
+
+static void
+rfbBlockHandler(void *blockData, void *timeout)
+{
   IdleTimerCheck();
+}
+
+static void
+rfbWakeupHandler(void *blockData, int result)
+{
 }
 
 

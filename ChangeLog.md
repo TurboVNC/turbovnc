@@ -56,6 +56,12 @@ followed by a left Alt key release, caused the keyboard focus to be redirected
 to the system menu, and subsequent keystrokes were consumed by the system menu
 until left Alt or Esc was pressed to dismiss the menu.
 
+2. Fixed an issue whereby Rosetta was required in order to install the
+TurboVNC package for Macs with Apple silicon CPUs.
+
+3. Fixed a regression introduced by 2.2 beta1[7] that prevented the idle
+timeout feature in the TurboVNC Server from working properly.
+
 
 3.0.2
 =====

@@ -21,7 +21,7 @@
 		enable_localSystem="true"
 	/>
 	<installation-check script="installationCheck()" />
-	<options customize="never" />
+	<options customize="never" hostArchitectures="@CPU_TYPE@" />
 	<choices-outline>
 		<line choice="default">
 			<line choice="@PKGID@"/>
