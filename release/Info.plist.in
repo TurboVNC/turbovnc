@@ -45,5 +45,7 @@
 	<array>
 		<string>-server</string>@EAWT_ADD_MODULES@
 	</array>
+	<key>NSHighResolutionCapable</key>
+	<true/>
 </dict>
 </plist>

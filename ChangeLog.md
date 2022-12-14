@@ -14,6 +14,10 @@ TurboVNC package for Macs with Apple silicon CPUs.
 3. Fixed a regression introduced by 2.2 beta1[7] that prevented the idle
 timeout feature in the TurboVNC Server from working properly.
 
+4. The Mac TurboVNC Viewer app now informs macOS that it supports HiDPI
+monitors.  This improves the sharpness of the remote desktop and TurboVNC
+Viewer GUI when using a Retina display.
+
 
 3.0.2
 =====
