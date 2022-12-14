@@ -145,9 +145,6 @@ static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
 static void rfbClientStateChange(CallbackListPtr *, pointer myData,
                                  pointer client);
 
-static void rfbBlockHandler(void *blockData, void *timeout);
-static void rfbWakeupHandler(void *blockData, int result);
-
 static miPointerScreenFuncRec rfbPointerCursorFuncs = {
   rfbCursorOffScreen,
   rfbCrossScreen,
@@ -716,6 +713,16 @@ static int numFormats = 7;
 #else
 static int numFormats = 6;
 #endif
+
+
+static void rfbBlockHandler(void *blockData, void *timeout)
+{
+  IdleTimerCheck();
+}
+
+static void rfbWakeupHandler(void *blockData, int result)
+{
+}
 
 
 void InitOutput(ScreenInfo *pScreenInfo, int argc, char **argv)
@@ -1370,18 +1377,6 @@ void ProcessInputEvents(void)
     inetdInitDone = TRUE;
   }
   mieqProcessInputEvents();
-}
-
-
-static void
-rfbBlockHandler(void *blockData, void *timeout)
-{
-  IdleTimerCheck();
-}
-
-static void
-rfbWakeupHandler(void *blockData, int result)
-{
 }
 
 
