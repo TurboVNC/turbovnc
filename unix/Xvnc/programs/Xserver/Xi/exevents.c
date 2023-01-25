@@ -575,8 +575,10 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
             memcpy(to->button->xkb_acts, from->button->xkb_acts,
                    sizeof(XkbAction));
         }
-        else
+        else {
             free(to->button->xkb_acts);
+            to->button->xkb_acts = NULL;
+        }
 
         memcpy(to->button->labels, from->button->labels,
                from->button->numButtons * sizeof(Atom));
