@@ -8,8 +8,7 @@
 	1. Download the appropriate TurboVNC binary package for your system from the
 		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
 		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
-		RPM and Debian packages are provided for x86 Linux distributions that
-		contain GLIBC 2.12 or later and AArch64 Linux distributions that contain
+		RPM and Debian packages are provided for Linux distributions that contain
 		GLIBC 2.17 or later.
 		{nl}
 
