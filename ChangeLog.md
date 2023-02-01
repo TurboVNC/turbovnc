@@ -18,6 +18,11 @@ timeout feature in the TurboVNC Server from working properly.
 monitors.  This improves the sharpness of the remote desktop and TurboVNC
 Viewer GUI when using a Retina display.
 
+5. By default, the TurboVNC Viewer's built-in SSH client now accepts public key
+algorithms that support certificates, such as
+`rsa-sha2-256-cert-v01@openssh.com`.  This can be changed by specifying the
+`PubkeyAcceptedAlgorithms` keyword in an OpenSSH config file.
+
 
 3.0.2
 =====
