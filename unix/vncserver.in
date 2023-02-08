@@ -443,7 +443,6 @@ $cmd .= " -auth $xauthorityFile";
 $cmd .= " -geometry $geometry" if ($geometry);
 $cmd .= " -depth $depth" if ($depth);
 $cmd .= " -pixelformat $pixelformat" if ($pixelformat);
-$cmd .= " -rfbwait 120000";
 $cmd .= " -rfbauth $passwdFile" if ($authTypeVNC);
 $cmd .= " -x509cert $x509CertFile" if ($encTypeX509);
 $cmd .= " -x509key $x509KeyFile" if ($encTypeX509);

@@ -27,6 +27,13 @@ algorithms that support certificates, such as
 Server to become unresponsive if the network connection dropped and a VNC
 viewer disconnected before the network connection was restored.
 
+7. The `vncserver` script no longer passes `-rfbwait 120000` to Xvnc.
+Effectively, that hard-coded the TurboVNC Server's send/receive timeout to 120
+seconds, which doesn't make sense for most modern systems and networks.  (The
+default value if `-rfbwait` is not passed to Xvnc is 20 seconds, which makes
+more sense.)  The previous behavior can be restored by adding `-rfbwait 120000`
+to the `$serverArgs` variable in **turbovncserver.conf**.
+
 
 3.0.2
 =====
