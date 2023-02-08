@@ -23,6 +23,10 @@ algorithms that support certificates, such as
 `rsa-sha2-256-cert-v01@openssh.com`.  This can be changed by specifying the
 `PubkeyAcceptedAlgorithms` keyword in an OpenSSH config file.
 
+6. Fixed a regression introduced by 3.0 beta1[24] that caused the TurboVNC
+Server to become unresponsive if the network connection dropped and a VNC
+viewer disconnected before the network connection was restored.
+
 
 3.0.2
 =====

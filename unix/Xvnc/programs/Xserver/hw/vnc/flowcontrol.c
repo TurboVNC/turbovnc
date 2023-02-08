@@ -2,8 +2,8 @@
  * flowcontrol.c - implement RFB flow control extensions
  */
 
-/* Copyright (C) 2012, 2014, 2017-2018, 2021 D. R. Commander.
- *                                           All Rights Reserved.
+/* Copyright (C) 2012, 2014, 2017-2018, 2021, 2023 D. R. Commander.
+ *                                                 All Rights Reserved.
  * Copyright (C) 2018 Peter Åstrand for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *
@@ -297,13 +297,9 @@ Bool rfbIsCongested(rfbClientPtr cl)
     return FALSE;
 
   eta = GetUncongestedETA(cl);
-  if (eta >= 1) {
-    cl->congestionTimer = TimerSet(cl->congestionTimer, 0, eta,
-                                   congestionCallback, cl);
-    return TRUE;
-  }
-
-  return FALSE;
+  cl->congestionTimer = TimerSet(cl->congestionTimer, 0, eta <= 0 ? 1 : eta,
+                                 congestionCallback, cl);
+  return TRUE;
 }
 
 
