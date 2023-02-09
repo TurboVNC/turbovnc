@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012, 2014, 2016, 2018, 2021 D. R. Commander.
- *                                            All Rights Reserved.
+ * Copyright (C) 2012, 2014, 2016, 2018, 2021, 2023 D. R. Commander.
+ *                                                  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public abstract class CConnection extends CMsgHandler {
 
   // processMsg() should be called whenever there is data to read on the
   // InStream.  You must have called initialiseProtocol() first.
-  public void processMsg(boolean benchmark) {
+  public synchronized void processMsg(boolean benchmark) {
     switch (state) {
       case RFBSTATE_PROTOCOL_VERSION:  processVersionMsg();         break;
       case RFBSTATE_SECURITY_TYPES:    processSecurityTypesMsg();   break;

@@ -46,6 +46,10 @@ timeout feature in the TurboVNC Server from working properly.
 monitors.  This improves the sharpness of the remote desktop and TurboVNC
 Viewer GUI when using a Retina display.
 
+10. Fixed an issue in the Java TurboVNC Viewer that sometimes caused the Java
+process to crash when closing the viewer window, particularly if multiple
+connections were open.
+
 
 2.2.9 ESR
 =========
