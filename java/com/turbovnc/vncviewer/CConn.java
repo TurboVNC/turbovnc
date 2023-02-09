@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2023 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright 2009-2011, 2016-2019 Pierre Ossman <ossman@cendio.se>
  *                                for Cendio AB
@@ -1635,7 +1635,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // close() shuts down the socket, thus waking up the RFB thread.
   public void close() { close(true); }
 
-  public void close(boolean disposeViewport) {
+  public synchronized void close(boolean disposeViewport) {
     if (disposeViewport && !confirmClose()) return;
     if (timer != null) {
       timer.stop();
