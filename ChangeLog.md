@@ -34,6 +34,10 @@ default value if `-rfbwait` is not passed to Xvnc is 20 seconds, which makes
 more sense.)  The previous behavior can be restored by adding `-rfbwait 120000`
 to the `$serverArgs` variable in **turbovncserver.conf**.
 
+8. Fixed an issue in the TurboVNC Viewer that sometimes caused the Java process
+to crash when closing the viewer window, particularly if multiple connections
+were open.
+
 
 3.0.2
 =====
