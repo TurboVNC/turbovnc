@@ -37,6 +37,11 @@
 # Whether or not to include the web server
 %define webserver @TVNC_BUILDWEBSERVER@
 
+# Whether or not to include the TurboVNC Server init script
+%if "%{server}" == "1"
+%define initscript @TVNC_BUILDINITSCRIPT@
+%endif
+
 # Path under which the Java viewer should be installed
 %if "%{viewer}" == "1"
 %define javadir @CMAKE_INSTALL_FULL_JAVADIR@
@@ -62,7 +67,9 @@ License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
 %if "%{server}" == "1"
+%if "%{initscript}" == "1"
 Requires:  /sbin/chkconfig /usr/sbin/semanage %{_sysconfdir}/init.d
+%endif
 Requires:  /usr/bin/xauth /usr/bin/xkbcomp xkeyboard-config
 Requires:  /usr/bin/dbus-launch
 %endif
@@ -97,6 +104,7 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
 #-->  -DTVNC_BUILDVIEWER=%{viewer} -DTVNC_BUILDHELPER=%{helper} \
 #-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_BUILDWEBSERVER=%{webserver} \
+#-->  -DTVNC_BUILDINITSCRIPT=%{initscript} \
 #-->  -DPYTHON_EXECUTABLE=@PYTHON_EXECUTABLE@ -DTVNC_INCLUDEJRE=%{jre} \
 #-->  .
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
@@ -191,7 +199,7 @@ chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %clean
 rm -rf %{buildroot}
 
-%if "%{server}" == "1"
+%if "%{initscript}" == "1"
 %post
 %if "%{sysconfdir}" == "%{_sysconfdir}"
 if [ -x %{_sysconfdir}/rc.d/init.d/tvncserver ]; then
@@ -240,11 +248,15 @@ fi
 %if "%{server}" == "1"
  %if "%{sysconfdir}" != "%{_sysconfdir}"
   %dir %{sysconfdir}
-  %dir %{sysconfdir}/init.d
-  %dir %{sysconfdir}/sysconfig
+  %if "%{initscript}" == "1"
+   %dir %{sysconfdir}/init.d
+   %dir %{sysconfdir}/sysconfig
+  %endif
  %endif
- %attr(0755,root,root) %config %{sysconfdir}/init.d/tvncserver
- %config(noreplace) %{sysconfdir}/sysconfig/tvncservers
+ %if "%{initscript}" == "1"
+  %attr(0755,root,root) %config %{sysconfdir}/init.d/tvncserver
+  %config(noreplace) %{sysconfdir}/sysconfig/tvncservers
+ %endif
  %config(noreplace) %{sysconfdir}/turbovncserver.conf
  %config(noreplace) %{sysconfdir}/turbovncserver-security.conf
  %if "%{sysconfdir}" == "%{_sysconfdir}"
