@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2022 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2023 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -172,12 +172,7 @@ static void PrintVersion(void)
 }
 
 
-/*
- * ddxProcessArgument is our first entry point and will be called at the
- * very start for each argument.  It is not called again on server reset.
- */
-
-int ddxProcessArgument(int argc, char *argv[], int i)
+static void InitRFB(void)
 {
   static Bool firstTime = TRUE;
 
@@ -196,6 +191,17 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     interface6 = in6addr_any;
     firstTime = FALSE;
   }
+}
+
+
+/*
+ * ddxProcessArgument is our first entry point and will be called at the
+ * very start for each argument.  It is not called again on server reset.
+ */
+
+int ddxProcessArgument(int argc, char *argv[], int i)
+{
+  InitRFB();
 
   /***** TurboVNC connection options *****/
 
@@ -1590,6 +1596,7 @@ void DDXRingBell(int percent, int pitch, int duration)
 
 void OsVendorInit(void)
 {
+  InitRFB();
   PrintVersion();
   rfbAuthInit();
   if (rfbAuthDisableX11TCP) {
