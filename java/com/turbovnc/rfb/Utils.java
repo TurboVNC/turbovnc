@@ -1,5 +1,5 @@
-/* Copyright (C) 2012, 2015, 2018, 2020, 2022 D. R. Commander.
- *                                            All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2018, 2020, 2022-2023 D. R. Commander.
+ *                                                 All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -24,10 +24,16 @@ import javax.swing.filechooser.FileSystemView;
 
 public final class Utils {
 
-  public static final int JAVA_VERSION =
-    Integer.parseInt(System.getProperty("java.version").split("\\.")[0]) <= 1 ?
-    Integer.parseInt(System.getProperty("java.version").split("\\.")[1]) :
-    Integer.parseInt(System.getProperty("java.version").split("\\.")[0]);
+  private static int getJavaVersion() {
+    String javaVersionString = System.getProperty("java.version");
+    javaVersionString = javaVersionString.split("-")[0];
+    String[] javaVersionStrings = javaVersionString.split("\\.");
+    int majorVersion = Integer.parseInt(javaVersionStrings[0]);
+    return (majorVersion <= 1 && javaVersionStrings.length > 1 ?
+            Integer.parseInt(javaVersionStrings[1]) : majorVersion);
+  }
+
+  public static final int JAVA_VERSION = getJavaVersion();
 
   private static final String OS = System.getProperty("os.name").toLowerCase();
 
