@@ -38,6 +38,13 @@ to the `$serverArgs` variable in **turbovncserver.conf**.
 to crash when closing the viewer window, particularly if multiple connections
 were open.
 
+9. Fixed a regression introduced by 3.0.1[3] whereby the TurboVNC Viewer's
+built-in SSH client tried the `ssh-rsa`, `rsa-sha2-256`, and `rsa-sha2-512`
+signature schemes in sequence for every RSA private key stored in the SSH
+agent, even if the SSH server did not support one or more of those signature
+schemes.  This caused the SSH client to prematurely exceed the SSH server's
+maximum number of authentication attempts.
+
 
 3.0.2
 =====

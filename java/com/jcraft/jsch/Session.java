@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2023 D. R. Commander. All rights reserved.
 Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,7 @@ public class Session implements Runnable{
   private int seqo=0;
 
   String[] guess=null;
+  Vector supportedRSAMethods=new Vector();
   private Cipher s2ccipher;
   private Cipher c2scipher;
   private MAC s2cmac;
@@ -590,6 +591,11 @@ public class Session implements Runnable{
     guess=KeyExchange.guess(I_S, I_C);
     if(guess==null){
       throw new JSchException("Algorithm negotiation fail");
+    }
+    for(String method : guess){
+      if(method.equals("ssh-rsa") || method.equals("rsa-sha2-256") || method.equals("rsa-sha2-512")){
+        supportedRSAMethods.addElement(method);
+      }
     }
 
     if(!isAuthed &&

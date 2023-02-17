@@ -3,6 +3,7 @@
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2020 Jeremy Norris. All rights reserved.
 Copyright (c) 2020-2021 Matthias Wiedemann. All rights reserved.
+Copyright (c) 2023 D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -59,8 +60,10 @@ class UserAuthPublicKey extends UserAuth{
       String nonrsamethods=null;
       for(int i=0; i<pkmethoda.length; i++){
         if(pkmethoda[i].equals("ssh-rsa") || pkmethoda[i].equals("rsa-sha2-256") || pkmethoda[i].equals("rsa-sha2-512")){
-          if(rsamethods==null) rsamethods=pkmethoda[i];
-          else rsamethods+=","+pkmethoda[i];
+          if(session.supportedRSAMethods.contains(pkmethoda[i])){
+            if(rsamethods==null) rsamethods=pkmethoda[i];
+            else rsamethods+=","+pkmethoda[i];
+          }
         }
         else{
           if(nonrsamethods==null) nonrsamethods=pkmethoda[i];
