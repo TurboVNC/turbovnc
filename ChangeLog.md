@@ -45,6 +45,29 @@ agent, even if the SSH server did not support one or more of those signature
 schemes.  This caused the SSH client to prematurely exceed the SSH server's
 maximum number of authentication attempts.
 
+10. Fixed an issue in the TurboVNC Viewer's built-in SSH client whereby SSH
+private keys specified using the `SSHKey` and `SSHKeyFile` parameters or the
+`IdentityFile` OpenSSH config file keyword were added to the SSH agent's
+persistent keychain.  The SSH client now maintains its own temporary keychain
+rather than modifying the agent's keychain.
+
+11. To better emulate the behavior of OpenSSH, the TurboVNC Viewer's built-in
+SSH client has been improved in the following ways:
+
+     - If the SSH agent already has a copy of an SSH private key that was
+specified using the `SSHKey` or `SSHKeyFile` parameter or the `IdentityFile`
+OpenSSH config file keyword, then the SSH client now promotes the agent's copy
+of the key to the head of the SSH client's keychain rather than adding a
+duplicate key to the end of the keychain.  If the SSH agent does not have a
+copy of the specified SSH private key, then the SSH client now adds the new key
+to the head of its keychain if a valid passphrase for the key was specified or
+to the end of its keychain if a valid passphrase for the key was not specified.
+     - The TurboVNC Viewer now treats **~/.ssh/id_ecdsa** as a default private
+key.  Each of the default private keys **~/.ssh/id_rsa**, **~/.ssh/id_dsa**,
+and **~/.ssh/id_ecdsa**, in that order, will be added to the SSH client's
+keychain using the rules described above if the file exists and the `SSHKey`
+and `SSHKeyFile` parameters are not specified.
+
 
 3.0.2
 =====

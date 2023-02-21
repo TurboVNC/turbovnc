@@ -2615,7 +2615,7 @@ break;
    *
    * @see JSch#getIdentityRepository()
    */
-  IdentityRepository getIdentityRepository(){
+  public IdentityRepository getIdentityRepository(){
     if(identityRepository == null)
       return jsch.getIdentityRepository();
     return identityRepository;
@@ -2751,8 +2751,16 @@ break;
         global = new String[0];
       }
       if(values.length - global.length > 0){
-        IdentityRepository.Wrapper ir =
-          new IdentityRepository.Wrapper(jsch.getIdentityRepository(), true);
+        IdentityRepository globalRepo = jsch.getIdentityRepository();
+        IdentityRepository ir = null;
+
+        if(globalRepo instanceof LocalIdentityRepository) {
+          ir = new LocalIdentityRepository(jsch);
+          ((LocalIdentityRepository)ir).copyFrom(globalRepo);
+        }
+        else {
+          ir = new IdentityRepository.Wrapper(globalRepo, true);
+        }
         for(int i = 0; i < values.length; i++){
           String ifile = values[i];
           for(int j = 0; j < global.length; j++){
@@ -2765,12 +2773,6 @@ break;
             continue;
           Identity identity =
             IdentityFile.newInstance(ifile, null, jsch);
-          /* Don't add private key without a passphrase if another private key
-             with the same fingerprint already exists with a passphrase. */
-          Identity decryptedIdentity=jsch.findDecryptedIdentity(identity);
-          if(decryptedIdentity!=null){
-            identity=decryptedIdentity;
-          }
           if(JSch.getLogger().isEnabled(Logger.INFO)){
             JSch.getLogger().log(Logger.INFO,
                                  "Adding private key "+identity.getName()+
@@ -2782,7 +2784,10 @@ break;
                                    identity.getFingerPrint());
             }
           }
-          ir.add(identity);
+          if(globalRepo instanceof LocalIdentityRepository)
+            ((LocalIdentityRepository)ir).add(identity);
+          else
+            ((IdentityRepository.Wrapper)ir).add(identity);
         }
         this.setIdentityRepository(ir);
       }

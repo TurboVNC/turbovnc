@@ -84,6 +84,13 @@ class UserAuthPublicKey extends UserAuth{
 
         Identity identity=(Identity)(identities.elementAt(i));
 
+        if(JSch.getLogger().isEnabled(Logger.DEBUG)){
+          JSch.getLogger().log(Logger.DEBUG,
+                               "Trying private key: " + identity.getName() +
+                               (identity.isEncrypted() ? " (ENCRYPTED)" :
+                                " (decrypted)"));
+        }
+
         //System.err.println("UserAuthPublicKey: identity.isEncrypted()="+identity.isEncrypted());
         decryptKey(session, identity);
         //System.err.println("UserAuthPublicKey: identity.isEncrypted()="+identity.isEncrypted());

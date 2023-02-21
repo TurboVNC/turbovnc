@@ -470,14 +470,6 @@ public class JSch{
         Util.bzero(passphrase);
       }
     }
-    else{
-      /* Don't add private key without a passphrase if another private key with
-         the same fingerprint already exists with a passphrase. */
-      Identity decryptedIdentity=findDecryptedIdentity(identity);
-      if(decryptedIdentity!=null){
-        identity=decryptedIdentity;
-      }
-    }
 
     if(JSch.getLogger().isEnabled(Logger.INFO)){
       JSch.getLogger().log(Logger.INFO,
@@ -504,29 +496,6 @@ public class JSch{
       }
       ((IdentityRepository.Wrapper)identityRepository).add(identity);
     }
-  }
-
-  /**
-   * Checks whether the given private key has already been added with a
-   * passphrase and returns the previously decrypted version of the private key
-   * if so.
-   *
-   * @param identity private key.
-   *
-   * @return the previously decrypted version of the private key, or null if
-   * a decrypted version of the private key cannot be found.
-   */
-  public Identity findDecryptedIdentity(Identity identity){
-    Vector identities = identityRepository.getIdentities();
-    for(int i=0; i<identities.size(); i++){
-      Identity oldIdentity=(Identity)(identities.elementAt(i));
-      String oldFingerPrint=oldIdentity.getFingerPrint();
-      String newFingerPrint=identity.getFingerPrint();
-      if(oldFingerPrint!=null && newFingerPrint!=null &&
-         newFingerPrint.equals(oldFingerPrint) && !oldIdentity.isEncrypted())
-        return oldIdentity;
-    }
-    return null;
   }
 
   /**

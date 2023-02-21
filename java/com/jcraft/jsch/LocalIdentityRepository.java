@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2012-2018 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2018, 2023 D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -31,7 +32,7 @@ package com.jcraft.jsch;
 
 import java.util.Vector;
 
-class LocalIdentityRepository implements IdentityRepository {
+public class LocalIdentityRepository implements IdentityRepository {
   private static final String name = "Local Identity Repository";
 
   private Vector identities = new Vector();
@@ -58,26 +59,38 @@ class LocalIdentityRepository implements IdentityRepository {
     return v;
   }
 
+  public synchronized void copyFrom(IdentityRepository sourceRepo) {
+    Vector sourceIdentities = sourceRepo.getIdentities();
+    for(int i=0; i<sourceIdentities.size(); i++){
+      Identity sourceIdentity = (Identity)sourceIdentities.elementAt(i);
+      identities.addElement(sourceIdentity);
+    }
+  }
+
   public synchronized void add(Identity identity) {
-    if(!identities.contains(identity)) {
-      byte[] blob1 = identity.getPublicKeyBlob();
-      if(blob1 == null) {
-        identities.addElement(identity);
-        return;
-      }
-      for(int i = 0; i<identities.size(); i++){
-        byte[] blob2 = ((Identity)identities.elementAt(i)).getPublicKeyBlob();
-        if(blob2 != null && Util.array_equals(blob1, blob2)){
-          if(!identity.isEncrypted() && 
-             ((Identity)identities.elementAt(i)).isEncrypted()){
-            remove(blob2);
-          }
-          else {  
-            return;
-          }
+    /* If a decrypted private key already exists with the same fingerprint as
+       the new private key, then promote it to the head of the chain.
+       Otherwise, add the new private key to the head of the chain if it is
+       decrypted or to the end of the chain if it is encrypted.  This emulates
+       the behavior of OpenSSH. */
+    String newFingerPrint = identity.getFingerPrint();
+    if(newFingerPrint != null) {
+      for(int i=0; i<identities.size(); i++){
+        Identity oldIdentity = (Identity)identities.elementAt(i);
+        String oldFingerPrint = oldIdentity.getFingerPrint();
+        if(oldFingerPrint != null && newFingerPrint.equals(oldFingerPrint) &&
+           !oldIdentity.isEncrypted()) {
+          identities.removeElement(oldIdentity);
+          identities.insertElementAt(oldIdentity, 0);
+          return;
         }
       }
-      identities.addElement(identity);
+    }
+    if(!identities.contains(identity)) {
+      if(identity.isEncrypted())
+        identities.addElement(identity);
+      else
+        identities.insertElementAt(identity, 0);
     }
   }
 
