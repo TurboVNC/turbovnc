@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2022 D. R. Commander.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2023 D. R. Commander.
  *                                               All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
@@ -37,6 +37,7 @@ import com.turbovnc.network.*;
 import com.jcraft.jsch.agentproxy.*;
 import com.jcraft.jsch.agentproxy.connector.*;
 import com.jcraft.jsch.agentproxy.usocket.*;
+import com.jcraft.jsch.Identity;
 import com.jcraft.jsch.*;
 
 public class Tunnel {
@@ -131,15 +132,16 @@ public class Tunnel {
         if (connector != null) {
           IdentityRepository repo = new RemoteIdentityRepository(connector);
           vlog.sshdebug("SSH private keys offered by agent:");
-          Iterator<com.jcraft.jsch.Identity> iter =
-            repo.getIdentities().iterator();
+          Iterator<Identity> iter = repo.getIdentities().iterator();
           while (iter.hasNext()) {
-            com.jcraft.jsch.Identity id = iter.next();
+            Identity id = iter.next();
             vlog.sshdebug("  " + id.getName());
             if (id.getFingerPrint() != null)
               vlog.sshdebug("    Fingerprint: " + id.getFingerPrint());
           }
-          jsch.setIdentityRepository(repo);
+          LocalIdentityRepository localRepo =
+            (LocalIdentityRepository)jsch.getIdentityRepository();
+          localRepo.copyFrom(repo);
         }
       } catch (Exception e) {
         if (Utils.isWindows())
@@ -210,6 +212,7 @@ public class Tunnel {
     if (useDefaultPrivateKeyFiles) {
       privateKeys.add(new File(homeDir + "/.ssh/id_rsa"));
       privateKeys.add(new File(homeDir + "/.ssh/id_dsa"));
+      privateKeys.add(new File(homeDir + "/.ssh/id_ecdsa"));
     }
 
     for (Iterator<File> i = privateKeys.iterator(); i.hasNext();) {
@@ -230,6 +233,17 @@ public class Tunnel {
     }
 
     params.sshSession = jsch.getSession(user, host, port);
+
+    vlog.sshdebug("Attempting to use the following SSH private keys:");
+    Iterator<Identity> iter =
+      params.sshSession.getIdentityRepository().getIdentities().iterator();
+    while (iter.hasNext()) {
+      Identity id = iter.next();
+      vlog.sshdebug("  " + id.getName());
+      if (id.getFingerPrint() != null)
+        vlog.sshdebug("    Fingerprint: " + id.getFingerPrint());
+    }
+
     // OpenSSHConfig doesn't recognize StrictHostKeyChecking
     if (params.sshSession.getConfig("StrictHostKeyChecking") == null)
       params.sshSession.setConfig("StrictHostKeyChecking", "ask");
@@ -240,7 +254,8 @@ public class Tunnel {
     params.sshSession.setConfig("PreferredAuthentications", auth);
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                         true, user, false, true, -1);
-    params.sshSession.setUserInfo(dlg);
+    if (!Utils.getBooleanProperty("turbovnc.sshkeytest", false))
+      params.sshSession.setUserInfo(dlg);
     params.sshSession.connect();
   }
 

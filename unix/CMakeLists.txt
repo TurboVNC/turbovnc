@@ -147,11 +147,18 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/xstartup.turbovnc
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	configure_file(vncserver.init.in vncserver.init @ONLY)
-	install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver.init
-		DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/init.d RENAME tvncserver)
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tvncservers
-		DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/sysconfig)
+	option(TVNC_BUILDINITSCRIPT "Build TurboVNC Server init script" 1)
+	boolean_number(TVNC_BUILDINITSCRIPT)
+	boolean_number(TVNC_BUILDINITSCRIPT PARENT_SCOPE)
+	report_option(TVNC_BUILDINITSCRIPT "TurboVNC Server init script")
+
+	if(TVNC_BUILDINITSCRIPT)
+		configure_file(vncserver.init.in vncserver.init @ONLY)
+		install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver.init
+			DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/init.d RENAME tvncserver)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tvncservers
+			DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/sysconfig)
+	endif()
 endif()
 
 endif() # TVNC_BUILDSERVER
