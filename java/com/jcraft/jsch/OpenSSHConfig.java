@@ -3,6 +3,7 @@
 Copyright (c) 2013-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2019 D. R. Commander. All rights reserved.
 Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
+Copyright (c) 2021 Matthias Wiedemann. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -31,14 +32,17 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.jcraft.jsch;
 
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class implements ConfigRepository interface, and parses
@@ -72,6 +76,9 @@ import java.util.Vector;
  * @see ConfigRepository
  */
 public class OpenSSHConfig implements ConfigRepository {
+
+  private static final List<String> keysWithListAdoption = Stream.of("KexAlgorithms", "Ciphers", "HostbasedAcceptedAlgorithms",
+  "HostKeyAlgorithms", "MACs", "PubkeyAcceptedAlgorithms", "PubkeyAcceptedKeyTypes", "CASignatureAlgorithms").map(String::toUpperCase).collect(Collectors.toList());
 
   /**
    * Parses the given string, and returns an instance of ConfigRepository.
@@ -211,6 +218,7 @@ public class OpenSSHConfig implements ConfigRepository {
     }
 
     private String find(String key) {
+      String originalKey=key;
       if(keymap.get(key)!=null) {
         key = (String)keymap.get(key);
       }
@@ -242,6 +250,24 @@ public class OpenSSHConfig implements ConfigRepository {
         }
       }
       */
+
+      if (keysWithListAdoption.contains(key) && value != null && (value.startsWith("+") || value.startsWith("-") || value.startsWith("^"))) {
+
+        String origConfig = JSch.getConfig(originalKey).trim();
+
+        if (value.startsWith("+")) {
+          value=origConfig + "," + value.substring(1);
+        } else if (value.startsWith("-")) {
+          List<String> algList = Arrays.stream(origConfig.split(",")).collect(Collectors.toList());
+          for (String alg : value.substring(1).split(",")) {
+            algList.remove(alg.trim());
+          }
+          value = String.join(",", algList);
+        } else if (value.startsWith("^")) {
+          value = value.substring(1).trim() + "," + origConfig;
+        }
+      }
+
       return value;
     }
 

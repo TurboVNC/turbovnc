@@ -62,6 +62,10 @@ key.  Each of the default private keys **~/.ssh/id_rsa**, **~/.ssh/id_dsa**,
 and **~/.ssh/id_ecdsa**, in that order, will be added to the SSH client's
 keychain using the rules described above if the file exists and the `SSHKey`
 and `SSHKeyFile` parameters are not specified.
+     - `+`, `^`, and `-` can now be used at the beginning of the
+`PubkeyAcceptedAlgorithms` OpenSSH config file keyword to specify a set of
+algorithms that should be appended to, prepended to, or removed from the
+default list.
 
 
 3.0.2
