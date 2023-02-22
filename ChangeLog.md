@@ -18,40 +18,35 @@ timeout feature in the TurboVNC Server from working properly.
 monitors.  This improves the sharpness of the remote desktop and TurboVNC
 Viewer GUI when using a Retina display.
 
-5. By default, the TurboVNC Viewer's built-in SSH client now accepts public key
-algorithms that support certificates, such as
-`rsa-sha2-256-cert-v01@openssh.com`.  This can be changed by specifying the
-`PubkeyAcceptedAlgorithms` keyword in an OpenSSH config file.
-
-6. Fixed a regression introduced by 3.0 beta1[24] that caused the TurboVNC
+5. Fixed a regression introduced by 3.0 beta1[24] that caused the TurboVNC
 Server to become unresponsive if the network connection dropped and a VNC
 viewer disconnected before the network connection was restored.
 
-7. The `vncserver` script no longer passes `-rfbwait 120000` to Xvnc.
+6. The `vncserver` script no longer passes `-rfbwait 120000` to Xvnc.
 Effectively, that hard-coded the TurboVNC Server's send/receive timeout to 120
 seconds, which doesn't make sense for most modern systems and networks.  (The
 default value if `-rfbwait` is not passed to Xvnc is 20 seconds, which makes
 more sense.)  The previous behavior can be restored by adding `-rfbwait 120000`
 to the `$serverArgs` variable in **turbovncserver.conf**.
 
-8. Fixed an issue in the TurboVNC Viewer that sometimes caused the Java process
+7. Fixed an issue in the TurboVNC Viewer that sometimes caused the Java process
 to crash when closing the viewer window, particularly if multiple connections
 were open.
 
-9. Fixed a regression introduced by 3.0.1[3] whereby the TurboVNC Viewer's
+8. Fixed a regression introduced by 3.0.1[3] whereby the TurboVNC Viewer's
 built-in SSH client tried the `ssh-rsa`, `rsa-sha2-256`, and `rsa-sha2-512`
 signature schemes in sequence for every RSA private key stored in the SSH
 agent, even if the SSH server did not support one or more of those signature
 schemes.  This caused the SSH client to prematurely exceed the SSH server's
 maximum number of authentication attempts.
 
-10. Fixed an issue in the TurboVNC Viewer's built-in SSH client whereby SSH
+9. Fixed an issue in the TurboVNC Viewer's built-in SSH client whereby SSH
 private keys specified using the `SSHKey` and `SSHKeyFile` parameters or the
 `IdentityFile` OpenSSH config file keyword were added to the SSH agent's
 persistent keychain.  The SSH client now maintains its own temporary keychain
 rather than modifying the agent's keychain.
 
-11. To better emulate the behavior of OpenSSH, the TurboVNC Viewer's built-in
+10. To better emulate the behavior of OpenSSH, the TurboVNC Viewer's built-in
 SSH client has been improved in the following ways:
 
      - If the SSH agent already has a copy of an SSH private key that was
