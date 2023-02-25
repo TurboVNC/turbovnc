@@ -50,6 +50,9 @@ Viewer GUI when using a Retina display.
 process to crash when closing the viewer window, particularly if multiple
 connections were open.
 
+11. Fixed a regression introduced by 2.2.1[5] that caused the
+`PreferredAuthentications` OpenSSH config file keyword to be ignored.
+
 
 2.2.9 ESR
 =========

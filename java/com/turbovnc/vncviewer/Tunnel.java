@@ -1,7 +1,7 @@
 /*  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *  Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
- *  Copyright (C) 2012-2015, 2017-2018, 2020 D. R. Commander.
- *                                           All Rights Reserved.
+ *  Copyright (C) 2012-2015, 2017-2018, 2020, 2023 D. R. Commander.
+ *                                                 All Rights Reserved.
  *  Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -194,9 +194,8 @@ public final class Tunnel {
       opts.sshSession.setConfig("StrictHostKeyChecking", "ask");
     opts.sshSession.setConfig("MaxAuthTries", "3");
     String auth = System.getProperty("turbovnc.sshauth");
-    if (auth == null)
-      auth = "publickey,keyboard-interactive,password";
-    opts.sshSession.setConfig("PreferredAuthentications", auth);
+    if (auth != null)
+      opts.sshSession.setConfig("PreferredAuthentications", auth);
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                         true, user, false, true, -1);
     opts.sshSession.setUserInfo(dlg);

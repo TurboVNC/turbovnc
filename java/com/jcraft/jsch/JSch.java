@@ -129,7 +129,7 @@ public class JSch{
     config.put("StrictHostKeyChecking",  "ask");
     config.put("HashKnownHosts",  "no");
 
-    config.put("PreferredAuthentications", "gssapi-with-mic,publickey,keyboard-interactive,password");
+    config.put("PreferredAuthentications", "publickey,keyboard-interactive,password");
 
     config.put("CheckCiphers", "aes256-ctr,aes192-ctr,aes128-ctr,aes256-cbc,aes192-cbc,aes128-cbc,3des-ctr,arcfour,arcfour128,arcfour256");
     config.put("CheckKexes", "diffie-hellman-group14-sha1,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521");
