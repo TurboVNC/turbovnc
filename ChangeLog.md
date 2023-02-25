@@ -66,6 +66,8 @@ and `SSHKeyFile` parameters are not specified.
 `PubkeyAcceptedAlgorithms` OpenSSH config file keyword to specify a set of
 algorithms that should be appended to, prepended to, or removed from the
 default list.
+     - Fixed a regression introduced by 2.2.1[5] that caused the
+`PreferredAuthentications` OpenSSH config file keyword to be ignored.
 
 
 3.0.2
