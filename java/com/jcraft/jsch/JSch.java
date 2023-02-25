@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2023 D. R. Commander. All rights reserved.
 Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -561,7 +561,7 @@ public class JSch{
    */
   public static String getConfig(String key){ 
     synchronized(config){
-      if(key.equals("PubkeyAcceptedKeyTypes")){
+      if(key.equalsIgnoreCase("PubkeyAcceptedKeyTypes")){
         key="PubkeyAcceptedAlgorithms";
       }
       return (String)(config.get(key));
@@ -577,7 +577,7 @@ public class JSch{
     synchronized(config){
       for(java.util.Enumeration e=newconf.keys() ; e.hasMoreElements() ;) {
 	String newkey=(String)(e.nextElement());
-	String key=(newkey.equals("PubkeyAcceptedKeyTypes") ? "PubkeyAcceptedAlgorithms" : newkey);
+	String key=(newkey.equalsIgnoreCase("PubkeyAcceptedKeyTypes") ? "PubkeyAcceptedAlgorithms" : newkey);
 	config.put(key, (String)(newconf.get(newkey)));
       }
     }
@@ -590,7 +590,7 @@ public class JSch{
    * @param value value for the configuration
    */
   public static void setConfig(String key, String value){
-    if(key.equals("PubkeyAcceptedKeyTypes")){
+    if(key.equalsIgnoreCase("PubkeyAcceptedKeyTypes")){
       config.put("PubkeyAcceptedAlgorithms", value);
     }
     else{

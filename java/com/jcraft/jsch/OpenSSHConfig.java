@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2013-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2019 D. R. Commander. All rights reserved.
+Copyright (c) 2019, 2023 D. R. Commander. All rights reserved.
 Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
 Copyright (c) 2021 Matthias Wiedemann. All rights reserved.
 
@@ -138,13 +138,13 @@ public class OpenSSHConfig implements ConfigRepository {
       if(key_value.length <= 1)
         continue;
 
-      if(key_value[0].equals("Host")){
+      if(key_value[0].equalsIgnoreCase("Host")){
         config.put(host, kv);
         hosts.addElement(host);
         host = key_value[1];
         kv = new Vector();
       }
-      else if(key_value[0].equals("ServerAliveInterval")){
+      else if(key_value[0].equalsIgnoreCase("ServerAliveInterval")){
         int serverAliveInterval = -1;
         try {
           serverAliveInterval = Integer.parseInt(key_value[1]);

@@ -736,7 +736,7 @@ public class Session implements Runnable{
     HostKeyRepository hkr=getHostKeyRepository();
 
     String hkh=getConfig("HashKnownHosts");
-    if(hkh.equals("yes") && (hkr instanceof KnownHosts)){
+    if(hkh.equalsIgnoreCase("yes") && (hkr instanceof KnownHosts)){
       hostkey=((KnownHosts)hkr).createHashedHostKey(chost, K_S);
     }
     else{
@@ -749,7 +749,7 @@ public class Session implements Runnable{
     }
 
     boolean insert=false;
-    if((shkc.equals("ask") || shkc.equals("yes")) &&
+    if((shkc.equalsIgnoreCase("ask") || shkc.equalsIgnoreCase("yes")) &&
        i==HostKeyRepository.CHANGED){
       String file=null;
       synchronized(hkr){
@@ -770,7 +770,7 @@ key_fprint+".\n"+
 "Please contact your system administrator.\n"+
 "Add correct host key in "+file+" to get rid of this message.";
 
-        if(shkc.equals("ask")){
+        if(shkc.equalsIgnoreCase("ask")){
           b=userinfo.promptYesNo(message+
                                  "\nDo you want to delete the old key and insert the new key?");
         }
@@ -791,9 +791,9 @@ key_fprint+".\n"+
       }
     }
 
-    if((shkc.equals("ask") || shkc.equals("yes")) &&
+    if((shkc.equalsIgnoreCase("ask") || shkc.equalsIgnoreCase("yes")) &&
        (i!=HostKeyRepository.OK) && !insert){
-      if(shkc.equals("yes")){
+      if(shkc.equalsIgnoreCase("yes")){
 	throw new JSchException("reject HostKey: "+host);
       }
       //System.err.println("finger-print: "+key_fprint);
@@ -816,7 +816,7 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
       }
     }
 
-    if(shkc.equals("no") && 
+    if(shkc.equalsIgnoreCase("no") && 
        HostKeyRepository.NOT_INCLUDED==i){
       insert=true;
     }
@@ -2313,7 +2313,7 @@ break;
         config=new java.util.Hashtable();
       for(java.util.Enumeration e=newconf.keys() ; e.hasMoreElements() ;) {
         String newkey=(String)(e.nextElement());
-        String key=(newkey.equals("PubkeyAcceptedKeyTypes") ? "PubkeyAcceptedAlgorithms" : newkey);
+        String key=(newkey.equalsIgnoreCase("PubkeyAcceptedKeyTypes") ? "PubkeyAcceptedAlgorithms" : newkey);
         config.put(key, (String)(newconf.get(newkey)));
       }
     }
@@ -2324,7 +2324,7 @@ break;
       if(config==null){
         config=new java.util.Hashtable();
       }
-      if(key.equals("PubkeyAcceptedKeyTypes")){
+      if(key.equalsIgnoreCase("PubkeyAcceptedKeyTypes")){
         config.put("PubkeyAcceptedAlgorithms", value);
       }
       else{
@@ -2334,7 +2334,7 @@ break;
   }
 
   public String getConfig(String key){
-    if(key.equals("PubkeyAcceptedKeyTypes")){
+    if(key.equalsIgnoreCase("PubkeyAcceptedKeyTypes")){
       key="PubkeyAcceptedAlgorithms";
     }
     Object foo=null;
@@ -2836,18 +2836,18 @@ break;
 
     value = config.getValue("ForwardAgent");
     if(value != null){
-      channel.setAgentForwarding(value.equals("yes"));
+      channel.setAgentForwarding(value.equalsIgnoreCase("yes"));
     }
 
     value = config.getValue("RequestTTY");
     if(value != null){
-      channel.setPty(value.equals("yes"));
+      channel.setPty(value.equalsIgnoreCase("yes"));
     }
   }
 
   private void requestPortForwarding() throws JSchException {
 
-    if(getConfig("ClearAllForwardings").equals("yes"))
+    if(getConfig("ClearAllForwardings").equalsIgnoreCase("yes"))
       return;
 
     ConfigRepository configRepository = jsch.getConfigRepository();
@@ -2875,7 +2875,7 @@ break;
 
   private void checkConfig(ConfigRepository.Config config, String key){
     String value = config.getValue(key);
-    if(value == null && key.equals("PubkeyAcceptedAlgorithms"))
+    if(value == null && key.equalsIgnoreCase("PubkeyAcceptedAlgorithms"))
       value = config.getValue("PubkeyAcceptedKeyTypes");
     if(value != null)
       this.setConfig(key, value);
