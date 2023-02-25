@@ -249,9 +249,8 @@ public class Tunnel {
       params.sshSession.setConfig("StrictHostKeyChecking", "ask");
     params.sshSession.setConfig("MaxAuthTries", "3");
     String auth = System.getProperty("turbovnc.sshauth");
-    if (auth == null)
-      auth = "publickey,keyboard-interactive,password";
-    params.sshSession.setConfig("PreferredAuthentications", auth);
+    if (auth != null)
+      params.sshSession.setConfig("PreferredAuthentications", auth);
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                         true, user, false, true, -1);
     if (!Utils.getBooleanProperty("turbovnc.sshkeytest", false))

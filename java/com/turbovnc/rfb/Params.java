@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2023 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2011-2012, 2016 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -869,14 +869,16 @@ public final class Params {
 
   public BoolParameter extSSH =
   new BoolParameter("ExtSSH", this, false,
-  "Use an external SSH client instead of the built-in SSH client.  The " +
-  "external client defaults to /usr/bin/ssh on Un*x and Mac systems and " +
-  "ssh.exe on Windows systems, but you can use the VNC_VIA_CMD and " +
-  "VNC_TUNNEL_CMD environment variables or the turbovnc.via and " +
-  "turbovnc.tunnel system properties to specify the exact command line to " +
-  "use when creating the tunnel.  If one of those environment variables or " +
-  "system properties is set, then an external SSH client is automatically " +
-  "used.  See the TurboVNC User's Guide for more details.\n " +
+  "When using the Via or Tunnel parameters, use an external SSH client " +
+  "instead of the built-in SSH client.  (The built-in SSH client is always " +
+  "used with the TurboVNC Session Manager.)  The external client defaults " +
+  "to /usr/bin/ssh on Un*x and Mac systems and ssh.exe on Windows systems, " +
+  "but you can use the VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables " +
+  "or the turbovnc.via and turbovnc.tunnel system properties to specify the " +
+  "exact command line to use when creating the tunnel.  If one of those " +
+  "environment variables or system properties is set, then an external SSH " +
+  "client is automatically used.  See the TurboVNC User's Guide for more " +
+  "details.\n " +
 
   "This parameter is effectively set if the Server parameter specifies a " +
   "Unix domain socket connection to a remote host.", false);
@@ -955,40 +957,52 @@ public final class Params {
 
   public StringParameter sshConfig =
   new StringParameter("SSHConfig", this, false,
-  "When using the Via or Tunnel parameters with the built-in SSH client, " +
-  "this parameter specifies the path to an OpenSSH configuration file to " +
-  "use when authenticating with the SSH server.  The OpenSSH configuration " +
-  "file takes precedence over any TurboVNC Viewer parameters.",
-  Utils.getHomeDir() + ".ssh/config");
+  "When using the built-in SSH client, this parameter specifies the path to " +
+  "an OpenSSH configuration file to use when authenticating with the SSH " +
+  "server.  The OpenSSH configuration file takes precedence over any " +
+  "TurboVNC Viewer parameters.", Utils.getHomeDir() + ".ssh/config");
 
   public StringParameter sshKey =
   new StringParameter("SSHKey", this, false,
-  "When using the Via or Tunnel parameters with the built-in SSH client, or " +
-  "when using the TurboVNC Session Manager, this parameter specifies the " +
-  "text of the SSH private key to use when authenticating with the SSH " +
-  "server.  You can use \\n within the string to specify a new line.", null);
+  "When using the built-in SSH client with the publickey SSH authentication " +
+  "method, this parameter specifies the text of an SSH private key to use " +
+  "when authenticating with the SSH server.  You can use \\n within the " +
+  "string to specify a new line.", null);
 
   public StringParameter sshKeyFile =
   new StringParameter("SSHKeyFile", this, false,
-  "When using the Via or Tunnel parameters with the built-in SSH client, or " +
-  "when using the TurboVNC Session Manager, this parameter specifies a file " +
-  "that contains an SSH private key (or keys) to use when authenticating " +
-  "with the SSH server.  If not specified, then the built-in SSH client " +
-  "will attempt to read private keys from ~/.ssh/id_dsa and ~/.ssh/id_rsa.  " +
-  "It will fall back to asking for an SSH password if private key " +
-  "authentication fails.", null);
+  "When using the built-in SSH client with the publickey SSH authentication " +
+  "method, this parameter specifies a file that contains an SSH private key " +
+  "(or keys) to use when authenticating with the SSH server.  This " +
+  "parameter and the SSHKey parameter behave like the OpenSSH -i option and " +
+  "IdentityFile configuration keyword.  The SSH client will attempt to use " +
+  "the following private keys, in order, when authenticating with the SSH " +
+  "server:\n " +
+  "1. Any key specified with this parameter or the SSHKey parameter, if the " +
+  "key is already provided by the SSH agent (ssh-agent or Pageant) or a " +
+  "valid passphrase is supplied for the key using the SSHKeyPass " +
+  "parameter\n " +
+  "2. Any key specified with the IdentityFile OpenSSH configuration " +
+  "keyword, if the key is already provided by the SSH agent\n " +
+  "3. Any other keys provided by the SSH agent, in the order provided\n " +
+  "4. Any key specified with this parameter, the SSHKey parameter, or the " +
+  "IdentityFile OpenSSH configuration keyword, if a valid passphrase is not " +
+  "supplied for the key\n " +
+  "5. " + Utils.getHomeDir() + ".ssh/id_rsa, " + Utils.getHomeDir() +
+  ".ssh/id_dsa, and " + Utils.getHomeDir() + ".ssh/id_ecdsa (in that " +
+  "order), if this parameter, the SSHKey parameter, and the IdentityFile " +
+  "OpenSSH configuration keyword are not specified", null);
 
   public StringParameter sshKeyPass =
   new StringParameter("SSHKeyPass", this, false,
-  "When using the Via or Tunnel parameters with the built-in SSH client, or " +
-  "when using the TurboVNC Session Manager, this parameter specifies the " +
-  "passphrase for the SSH key.", null);
+  "When using the built-in SSH client with the publickey SSH authentication " +
+  "method, this parameter specifies the passphrase for the SSH key(s) " +
+  "specified with the SSHKey or SSHKeyFile parameter.", null);
 
   public IntParameter sshPort =
   new IntParameter("SSHPort", this, false,
-  "When using the Via or Tunnel parameters with the built-in SSH client, or " +
-  "when using the TurboVNC Session Manager, this parameter specifies the " +
-  "TCP port on which the SSH server is listening.", 22);
+  "When using the built-in SSH client, this parameter specifies the TCP " +
+  "port on which the SSH server is listening.", 22);
 
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true,
