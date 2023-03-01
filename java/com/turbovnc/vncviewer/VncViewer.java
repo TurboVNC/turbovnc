@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2018, 2020-2023 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -108,8 +108,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
     return (mask != null ? mask.intValue() : 0);
   }
 
-  // This allows the Mac app to handle .vnc files opened or dragged onto its
-  // icon from the Finder.
+  // This allows the Mac app to handle .turbovnc or .vnc files opened or
+  // dragged onto its icon from the Finder.
 
   static String fileName;
 
@@ -130,7 +130,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
             else {
               VncViewer viewer = new VncViewer(new String[]{});
               try {
-                viewer.getParams().load(fName);
+                if (fName.toLowerCase().endsWith(".vnc"))
+                  viewer.getParams().loadLegacy(fName);
+                else
+                  viewer.getParams().load(fName);
               } catch (Exception e) {
                 viewer.reportException(e);
                 return null;
@@ -344,7 +347,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       synchronized(VncViewer.class) {
         if (fileName != null) {
           try {
-            viewer.getParams().load(fileName);
+            if (fileName.toLowerCase().endsWith(".vnc"))
+              viewer.getParams().loadLegacy(fileName);
+            else
+              viewer.getParams().load(fileName);
           } catch (Exception e) {
             viewer.reportException(e);
             return;
@@ -418,7 +424,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         if (argv[i].equalsIgnoreCase("-config")) {
           if (++i >= argv.length) usage();
           try {
-            params.load(argv[i]);
+            if (argv[i].toLowerCase().endsWith(".vnc"))
+              params.loadLegacy(argv[i]);
+            else
+              params.load(argv[i]);
           } catch (Exception e) {
             reportException(e);
             exit(1);
@@ -480,6 +489,11 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
         }
 
         if (argv[i].toLowerCase().endsWith(".vnc")) {
+          params.loadLegacy(argv[i]);
+          continue;
+        }
+
+        if (argv[i].toLowerCase().endsWith(".turbovnc")) {
           params.load(argv[i]);
           continue;
         }

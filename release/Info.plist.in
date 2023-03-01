@@ -30,6 +30,7 @@
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>vnc</string>
+				<string>turbovnc</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>vncviewer.icns</string>

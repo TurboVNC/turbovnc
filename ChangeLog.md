@@ -45,6 +45,11 @@ implied.  Refer to the TurboVNC Viewer's usage screen (specifically, the
 documentation of the `Server` parameter) and the TurboVNC User's Guide for more
 details.
 
+8. The TurboVNC Viewer now supports a new TurboVNC-specific connection info
+file format.  TurboVNC connection info files have an extension of .turbovnc,
+and each line of these files contains a TurboVNC Viewer parameter name and
+value separated by an equals sign (`=`).
+
 
 3.0.4
 =====

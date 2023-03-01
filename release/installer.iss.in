@@ -70,10 +70,15 @@ Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Web Site";      FileName: "{ap
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Change Log";    FileName: "write.exe";           Parameters: "ChangeLog.md";     WorkingDir: "{app}";      Flags: "useapppaths"
 
 [Tasks]
-Name: associate; Description: "&Associate .vnc files with @CMAKE_PROJECT_NAME@ Viewer"; GroupDescription: "File associations:"; Components: viewer
+Name: associateturbovnc; Description: "&Associate .turbovnc files with @CMAKE_PROJECT_NAME@ Viewer"; GroupDescription: "File associations:"; Components: viewer
+Name: associatevnc; Description: "&Associate .vnc files with @CMAKE_PROJECT_NAME@ Viewer"; GroupDescription: "File associations:"; Components: viewer
 
 [Registry]
-Root: HKCR; Subkey: ".vnc"; ValueType: string; ValueName: ""; ValueData: "VncViewer.Config"; Flags: uninsdeletevalue; Tasks: associate
-Root: HKCR; Subkey: "VncViewer.Config"; ValueType: string; ValueName: ""; ValueData: "VNCviewer Config File"; Flags: uninsdeletekey; Tasks: associate
-Root: HKCR; Subkey: "VncViewer.Config\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\vncviewerw.bat,0"; Tasks: associate
-Root: HKCR; Subkey: "VncViewer.Config\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vncviewerw.bat"" -config ""%1"""; Tasks: associate
+Root: HKCR; Subkey: ".turbovnc"; ValueType: string; ValueName: ""; ValueData: "TurboVNCViewer.Config"; Flags: uninsdeletevalue; Tasks: associateturbovnc
+Root: HKCR; Subkey: "TurboVNCViewer.Config"; ValueType: string; ValueName: ""; ValueData: "TurboVNC Viewer Config File"; Flags: uninsdeletekey; Tasks: associateturbovnc
+Root: HKCR; Subkey: "TurboVNCViewer.Config\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\vncviewerw.bat,0"; Tasks: associateturbovnc
+Root: HKCR; Subkey: "TurboVNCViewer.Config\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vncviewerw.bat"" -config ""%1"""; Tasks: associateturbovnc
+Root: HKCR; Subkey: ".vnc"; ValueType: string; ValueName: ""; ValueData: "VncViewer.Config"; Flags: uninsdeletevalue; Tasks: associatevnc
+Root: HKCR; Subkey: "VncViewer.Config"; ValueType: string; ValueName: ""; ValueData: "VNCviewer Config File"; Flags: uninsdeletekey; Tasks: associatevnc
+Root: HKCR; Subkey: "VncViewer.Config\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\vncviewerw.bat,0"; Tasks: associatevnc
+Root: HKCR; Subkey: "VncViewer.Config\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vncviewerw.bat"" -config ""%1"""; Tasks: associatevnc
