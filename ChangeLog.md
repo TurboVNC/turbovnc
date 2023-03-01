@@ -1,7 +1,7 @@
 3.1
 ===
 
-### Significant changes relative to 3.0.1:
+### Significant changes relative to 3.0.4:
 
 1. The TurboVNC Server and Viewer now support UTF-8 clipboard transfers.
 
@@ -44,6 +44,15 @@ and `{uds_path}` is the path to the Unix domain socket on the host.  If
 implied.  Refer to the TurboVNC Viewer's usage screen (specifically, the
 documentation of the `Server` parameter) and the TurboVNC User's Guide for more
 details.
+
+
+3.0.4
+=====
+
+### Significant changes relative to 3.0.3:
+
+1. The TurboVNC Viewer now asks for confirmation before overwriting an existing
+screenshot file.
 
 
 3.0.3
