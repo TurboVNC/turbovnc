@@ -1851,8 +1851,25 @@ public class CConn extends CConnection implements UserPasswdGetter,
     fc.setSelectedFile(new File("TurboVNC_Screenshot_" +
                        df.format(Calendar.getInstance().getTime()) + ".png"));
     int ret = fc.showSaveDialog(null);
-    if (ret == JFileChooser.APPROVE_OPTION)
-      desktop.screenshot(fc.getSelectedFile());
+    if (ret == JFileChooser.APPROVE_OPTION) {
+      File file = fc.getSelectedFile();
+      if (file.exists()) {
+        JOptionPane pane;
+        Object[] dlgOptions =
+          { UIManager.getString("OptionPane.yesButtonText"),
+            UIManager.getString("OptionPane.noButtonText") };
+        pane = new JOptionPane("Overwrite the existing file?",
+                               JOptionPane.WARNING_MESSAGE,
+                               JOptionPane.YES_NO_OPTION, null, dlgOptions,
+                               dlgOptions[1]);
+        JDialog dlg = pane.createDialog(viewport, "TurboVNC Viewer");
+        dlg.setAlwaysOnTop(true);
+        dlg.setVisible(true);
+        if (pane.getValue() == dlgOptions[1])
+          return;
+      }
+      desktop.screenshot(file);
+    }
   }
 
   public boolean shouldGrab() {

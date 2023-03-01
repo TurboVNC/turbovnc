@@ -1,3 +1,12 @@
+3.0.4
+=====
+
+### Significant changes relative to 3.0.3:
+
+1. The TurboVNC Viewer now asks for confirmation before overwriting an existing
+screenshot file.
+
+
 3.0.3
 =====
 
