@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018, 2021-2022 D. R. Commander.
+/* Copyright (C) 2012, 2017-2018, 2021-2023 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -49,8 +49,16 @@ public class StringParameter extends VoidParameter {
     setCommandLine(false);
   }
 
+  public synchronized boolean setDefault(String str) {
+    if (str != null && str.isEmpty())
+      str = null;
+    value = defValue = str;
+    isDefault = true;
+    return true;
+  }
+
   public final synchronized String get() { return value; }
-  public final String getDefaultStr() { return defValue; }
+  public final synchronized String getDefaultStr() { return defValue; }
   public final synchronized String getStr() { return value; }
   public final String getValues() { return values; }
   public final synchronized boolean isDefault() { return isDefault; }
@@ -58,5 +66,6 @@ public class StringParameter extends VoidParameter {
   private boolean isDefault = true;
 
   String value;
-  private final String defValue, values;
+  private String defValue;
+  private final String values;
 }

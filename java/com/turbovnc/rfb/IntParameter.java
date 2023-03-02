@@ -70,9 +70,26 @@ public class IntParameter extends VoidParameter {
 
   public final synchronized void reset() { set(defValue); }
 
+  public final synchronized boolean setDefault(int defValue_) {
+    if ((useMin && defValue_ < minValue) || (useMax && defValue_ > maxValue))
+      return false;
+    value = defValue = defValue_;
+    return true;
+  }
+
+  public boolean setDefault(String str) {
+    int i;
+    try {
+      i = Integer.parseInt(str);
+    } catch (NumberFormatException e) {
+      return false;
+    }
+    return setDefault(i);
+  }
+
   public synchronized int get() { return value; }
 
-  public String getDefaultStr() {
+  public synchronized String getDefaultStr() {
     if (defValue >= 0)
       return Integer.toString(defValue);
     return null;
@@ -87,7 +104,7 @@ public class IntParameter extends VoidParameter {
     return null;
   }
 
-  int value;
-  final int defValue, minValue, maxValue;
+  int value, defValue;
+  final int minValue, maxValue;
   private final boolean useMin, useMax;
 }

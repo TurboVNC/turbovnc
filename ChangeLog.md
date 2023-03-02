@@ -50,6 +50,10 @@ file format.  TurboVNC connection info files have an extension of .turbovnc,
 and each line of these files contains a TurboVNC Viewer parameter name and
 value separated by an equals sign (`=`).
 
+9. The default values of all TurboVNC Viewer parameters can now be modified by
+specifying the values in **~/.vnc/default.turbovnc** using the connection info
+file syntax described above.
+
 
 3.0.4
 =====

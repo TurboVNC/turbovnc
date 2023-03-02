@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2022-2023 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,17 @@ public final class GrabParameter extends IntParameter {
       throw new ErrorException(getName() + " parameter is incorrect");
   }
 
+  public boolean setDefault(String grabString) {
+    if (grabString.toLowerCase().startsWith("f"))
+      return super.setDefault(FS);
+    else if (grabString.toLowerCase().startsWith("a"))
+      return super.setDefault(ALWAYS);
+    else if (grabString.toLowerCase().startsWith("m"))
+      return super.setDefault(MANUAL);
+    else
+      return false;
+  }
+
   private static String getStr(int value) {
     if (value == FS)
       return "FS";
@@ -56,7 +67,7 @@ public final class GrabParameter extends IntParameter {
       return null;
   }
 
-  public String getDefaultStr() { return getStr(defValue); }
+  public synchronized String getDefaultStr() { return getStr(defValue); }
   public synchronized String getStr() { return getStr(value); };
   public String getValues() { return "Always, FS, Manual"; }
 };

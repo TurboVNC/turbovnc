@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2022-2023 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,15 +39,24 @@ public final class MenuKeyParameter extends VoidParameter {
 
   public void reset() { set(defValue); }
 
+  public synchronized boolean setDefault(String menuKeyString) {
+    symbol = MenuKey.getSymbol(menuKeyString);
+    if (symbol == null)
+      return false;
+    defValue = symbol.name;
+    set(defValue);
+    return true;
+  }
+
   public int getVKeyCode() { return symbol.vKeyCode; }
   public int getKeySym() { return symbol.keysym; }
   public int getRFBKeyCode() { return symbol.rfbKeyCode; }
 
-  public String getDefaultStr() { return defValue; }
+  public synchronized String getDefaultStr() { return defValue; }
   public synchronized String getStr() { return symbol.name; }
 
   public String getValues() { return MenuKey.getValueStr(); }
 
-  private final String defValue;
+  private String defValue;
   private MenuKey.Symbol symbol;
 };

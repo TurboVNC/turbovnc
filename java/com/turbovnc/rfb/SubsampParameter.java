@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2022-2023 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,22 @@ public final class SubsampParameter extends IntParameter {
     }
   }
 
+  public boolean setDefault(String subsampString) {
+    switch (subsampString.toUpperCase().charAt(0)) {
+      case '1':
+      case 'N':
+        return super.setDefault(NONE);
+      case '4':
+        return super.setDefault(FOURX);
+      case '2':
+        return super.setDefault(TWOX);
+      case 'G':
+        return super.setDefault(GRAY);
+      default:
+        return false;
+    }
+  }
+
   public synchronized int getOrdinal() {
     switch (value) {
       case TWOX:
@@ -62,7 +78,7 @@ public final class SubsampParameter extends IntParameter {
     return 0;
   }
 
-  private synchronized String getStr(int value) {
+  private String getStr(int value) {
     if (value == NONE)
       return "1X";
     else if (value == FOURX)
@@ -75,8 +91,8 @@ public final class SubsampParameter extends IntParameter {
       return null;
   }
 
-  public String getDefaultStr() { return getStr(defValue); }
-  public String getStr() { return getStr(value); }
+  public synchronized String getDefaultStr() { return getStr(defValue); }
+  public synchronized String getStr() { return getStr(value); }
 
   public String getValues() { return "1X, 2X, 4X, Gray"; }
 };

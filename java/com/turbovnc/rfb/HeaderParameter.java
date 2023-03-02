@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2018, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2017-2018, 2022-2023 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@ public final class HeaderParameter extends VoidParameter {
 
   public boolean set(String str) {
     throw new ErrorException("Cannot set header parameter");
+  }
+
+  public boolean setDefault(String str) {
+    throw new ErrorException("Cannot set default value for header parameter");
   }
 
   public void reset() {

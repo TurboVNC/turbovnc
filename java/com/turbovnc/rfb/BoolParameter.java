@@ -1,4 +1,5 @@
-/* Copyright (C) 2012, 2017-2018, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2017-2018, 2022-2023 D. R. Commander.
+ *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -55,8 +56,20 @@ public final class BoolParameter extends VoidParameter {
     reverse = false;
   }
 
+  public synchronized boolean setDefault(String str) {
+    if (str.equals("1") || str.equalsIgnoreCase("on") ||
+        str.equalsIgnoreCase("true") || str.equalsIgnoreCase("yes"))
+      value = defValue = true;
+    else if (str.equals("0") || str.equalsIgnoreCase("off") ||
+             str.equalsIgnoreCase("false") || str.equalsIgnoreCase("no"))
+      value = defValue = false;
+    else
+      return false;
+    return true;
+  }
+
   public synchronized boolean get() { return value; }
-  public String getDefaultStr() { return defValue ? "1" : "0"; }
+  public synchronized String getDefaultStr() { return defValue ? "1" : "0"; }
   public synchronized String getStr() { return Boolean.toString(value); }
   public String getValues() { return "0, 1"; }
   public boolean isBool() { return true; }
@@ -64,6 +77,5 @@ public final class BoolParameter extends VoidParameter {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public boolean reverse;
 
-  private boolean value;
-  private final boolean defValue;
+  private boolean value, defValue;
 }

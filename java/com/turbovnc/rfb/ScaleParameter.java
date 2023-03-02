@@ -1,4 +1,5 @@
-/* Copyright (C) 2012, 2015, 2018, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2018, 2022-2023 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +58,14 @@ public final class ScaleParameter extends IntParameter {
     return set(sf);
   }
 
-  public synchronized String getStr() {
+  public boolean setDefault(String scaleString) {
+    int sf = parse(scaleString);
+    if (sf == 0)
+      return false;
+    return super.setDefault(sf);
+  }
+
+  private String getStr(int value) {
     if (value == AUTO)
       return "Auto";
     else if (value == FIXEDRATIO)
@@ -65,6 +73,9 @@ public final class ScaleParameter extends IntParameter {
     else
       return Integer.toString(value);
   }
+
+  public synchronized String getDefaultStr() { return getStr(defValue); }
+  public synchronized String getStr() { return getStr(value); }
 
   public String getValues() {
     return "1-" + maxValue + ", Auto, or FixedRatio";

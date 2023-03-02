@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2015, 2018, 2020-2022 D. R. Commander.
+/* Copyright (C) 2013, 2015, 2018, 2020-2023 D. R. Commander.
  *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@ public final class ServerNameParameter extends StringParameter {
   public ServerNameParameter(String name, Params params, boolean isGUI,
                              String desc, String defValue) {
     super(name, params, isGUI, desc, defValue);
-    set(defValue);
+    setDefault(defValue);
   }
 
   public synchronized boolean set(String str) {
@@ -37,5 +37,11 @@ public final class ServerNameParameter extends StringParameter {
       }
     }
     return super.set(str);
+  }
+
+  public synchronized boolean setDefault(String str) {
+    boolean retval = set(str);
+    retval &= super.setDefault(value);
+    return retval;
   }
 }

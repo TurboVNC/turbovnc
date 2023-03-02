@@ -398,6 +398,7 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
 
   public VncViewer(String[] argv) {
     params = new Params();
+    params.loadDefaults();
 
     setVersion();
 
@@ -554,6 +555,10 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "  <param>=<value> or -<param>=<value> or --<param>=<value>\n" +
       "Parameter names and values are case-insensitive (except for hostnames,\n" +
       "unencrypted passwords/passphrases, filenames, SSH keys, and usernames.)\n\n" +
+      "Default values for all parameters can be specified in\n" +
+      "  " + Utils.getHomeDir() + ".vnc" + Utils.getFileSeparator() +
+      "default.turbovnc\n" +
+      "using the connection info file syntax described above.\n\n" +
       "The parameters are:\n\n";
     System.out.println("\nTurboVNC Viewer v" + version + " (build " + build +
                        ") [JVM: " + System.getProperty("os.arch") + "]");

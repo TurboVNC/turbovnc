@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2022-2023 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,13 @@ public final class EncodingParameter extends IntParameter {
     if (encNum == -1)
       throw new ErrorException(getName() + " parameter is incorrect");
     return set(encNum);
+  }
+
+  public boolean setDefault(String encString) {
+    int encNum = RFB.encodingNum(encString);
+    if (encNum == -1)
+      return false;
+    return super.setDefault(encNum);
   }
 
   public synchronized String getDefaultStr() {

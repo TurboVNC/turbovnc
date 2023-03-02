@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2022-2023 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,18 @@ public final class SpanParameter extends IntParameter {
       throw new ErrorException(getName() + " parameter is incorrect");
   }
 
-  private synchronized String getStr(int value) {
+  public boolean setDefault(String spanString) {
+    if (spanString.toLowerCase().startsWith("p"))
+      return super.setDefault(PRIMARY);
+    else if (spanString.toLowerCase().startsWith("al"))
+      return super.setDefault(ALL);
+    else if (spanString.toLowerCase().startsWith("au"))
+      return super.setDefault(AUTO);
+    else
+      return false;
+  }
+
+  private String getStr(int value) {
     if (value == PRIMARY)
       return "Primary";
     else if (value == ALL)
@@ -53,8 +64,8 @@ public final class SpanParameter extends IntParameter {
       return null;
   }
 
-  public String getDefaultStr() { return getStr(defValue); }
-  public String getStr() { return getStr(value); }
+  public synchronized String getDefaultStr() { return getStr(defValue); }
+  public synchronized String getStr() { return getStr(value); }
 
   public String getValues() { return "Primary, All, Auto"; }
 };

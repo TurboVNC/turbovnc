@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018, 2020-2022 D. R. Commander.
+/* Copyright (C) 2012, 2017-2018, 2020-2023 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -51,6 +51,8 @@ public abstract class VoidParameter {
   }
 
   public abstract void reset();
+
+  public abstract boolean setDefault(String str);
 
   public abstract String getStr();
   public abstract String getDefaultStr();

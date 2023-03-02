@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2018, 2021-2022 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2018, 2021-2023 D. R. Commander.
  *                                           All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2010 TigerVNC Team
@@ -41,12 +41,28 @@ public final class SecTypesParameter extends VoidParameter {
     if (secTypesString == null)
       enabledSecTypes = new ArrayList<Integer>();
     else
-      enabledSecTypes = parse(secTypesString);
+      enabledSecTypes = parse(secTypesString, false);
     setCommandLine(false);
     return true;
   }
 
   public synchronized void reset() { enabledSecTypes = null; }
+
+  public synchronized boolean setDefault(String secTypesString) {
+    if (secTypesString != null) {
+      try {
+        List<Integer> result = parse(secTypesString, true);
+        if (result.size() > 0)
+          defValue = getStr(result);
+        else
+          defValue = null;
+      } catch (Exception e) {
+        return false;
+      }
+    } else
+      defValue = null;
+    return true;
+  }
 
   public synchronized List<Integer> getEnabled() {
     List<Integer> result = new ArrayList<Integer>();
@@ -165,14 +181,14 @@ public final class SecTypesParameter extends VoidParameter {
     return false;
   }
 
-  private List<Integer> parse(String types_) {
+  private List<Integer> parse(String types_, boolean force) {
     List<Integer> result = new ArrayList<Integer>();
     String[] types = types_.split(",");
     for (int i = 0; i < types.length; i++) {
       if (types[i].length() < 1) continue;
       int typeNum = RFB.secTypeNum(types[i]);
       if (typeNum != RFB.SECTYPE_INVALID) {
-        if (isAllowed(typeNum))
+        if (isAllowed(typeNum) || force)
           result.add(typeNum);
       } else
         throw new WarningException("Security type \'" + types[i] +
@@ -181,14 +197,11 @@ public final class SecTypesParameter extends VoidParameter {
     return result;
   }
 
-  public String getDefaultStr() { return defValue; }
+  public synchronized String getDefaultStr() { return defValue; }
 
-  public synchronized String getStr() {
-    if (enabledSecTypes == null)
-      set(defValue);
-
+  private String getStr(List<Integer> secTypes) {
     StringBuilder sb = new StringBuilder();
-    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
+    for (Iterator<Integer> i = secTypes.iterator(); i.hasNext();) {
       int refType = ((Integer)i.next());
       if (refType != RFB.SECTYPE_VENCRYPT && refType != RFB.SECTYPE_TIGHT &&
           refType != RFB.SECTYPE_TLS) {
@@ -199,8 +212,15 @@ public final class SecTypesParameter extends VoidParameter {
     return sb.toString();
   }
 
+  public synchronized String getStr() {
+    if (enabledSecTypes == null)
+      set(defValue);
+
+    return getStr(enabledSecTypes);
+  }
+
   public String getValues() { return null; }
 
   private List<Integer> enabledSecTypes;
-  private final String defValue;
+  private String defValue;
 }

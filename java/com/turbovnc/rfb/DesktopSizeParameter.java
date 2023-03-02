@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2022-2023 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,11 +51,20 @@ public final class DesktopSizeParameter extends VoidParameter {
     setCommandLine(false);
   }
 
+  public synchronized boolean setDefault(String sizeString) {
+    DesktopSize size = DesktopSize.parse(sizeString);
+    if (size == null)
+      return false;
+    defValue = size.getString();
+    set(defValue);
+    return true;
+  }
+
   public synchronized boolean equalsIgnoreID(DesktopSizeParameter sizeParam) {
     return sizeParam.desktopSize.equalsIgnoreID(desktopSize);
   }
 
-  public String getDefaultStr() { return defValue; }
+  public synchronized String getDefaultStr() { return defValue; }
   public synchronized int getHeight() { return desktopSize.height; }
   public synchronized ScreenSet getLayout() { return desktopSize.layout; }
   public synchronized int getMode() { return desktopSize.mode; }
@@ -67,5 +76,5 @@ public final class DesktopSizeParameter extends VoidParameter {
   }
 
   private DesktopSize desktopSize;
-  private final String defValue;
+  private String defValue;
 };

@@ -26,7 +26,7 @@
 
 package com.turbovnc.rfb;
 
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.*;
 
 import com.turbovnc.network.Socket;
@@ -391,6 +391,40 @@ public final class Params {
     reconcile();
   }
 
+  public void loadDefaults() {
+    String filename = Utils.getHomeDir() + ".vnc" + Utils.getFileSeparator() +
+                      "default.turbovnc";
+    File file = new File(filename);
+    if (!file.exists())
+      return;
+
+    vlog.info("Loading parameter defaults from " + filename);
+
+    /* Read parameters from file */
+    Properties props = new Properties();
+    try {
+      props.load(new FileInputStream(file));
+    } catch (Exception e) {
+      vlog.info("Could not load parameter defaults:");
+      vlog.info("  " + e.getMessage());
+    }
+
+    for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
+      String name = (String)i.nextElement();
+
+      VoidParameter param = get(name);
+      if (param == null) {
+        vlog.info("Invalid parameter name " + name);
+        continue;
+      }
+      if (!param.setDefault(props.getProperty(name)))
+        vlog.info("Invalid default value for " + param.getName() +
+                  " parameter");
+    }
+
+    reconcile();
+  }
+
   public void print(String message) {
     VoidParameter current = head;
 
@@ -524,7 +558,7 @@ public final class Params {
    "  (default = 5900)") + "\n " +
   "If listen mode is enabled, this parameter specifies the TCP port on " +
   "which the viewer will listen for reverse connections from a VNC server.  " +
-  "(default = 5500)", -1);
+  "(default = 5500)", -1, 0, 65535);
 
   public IntParameter profileInt =
   new IntParameter("ProfileInterval", this, false,
@@ -1009,7 +1043,7 @@ public final class Params {
   public IntParameter sshPort =
   new IntParameter("SSHPort", this, false,
   "When using the built-in SSH client, this parameter specifies the TCP " +
-  "port on which the SSH server is listening.", 22);
+  "port on which the SSH server is listening.", 22, 0, 65535);
 
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true,
