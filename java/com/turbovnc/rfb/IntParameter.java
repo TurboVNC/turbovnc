@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2017-2018, 2023 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -27,17 +27,27 @@ public class IntParameter extends VoidParameter {
     defValue = v;
     minValue = Integer.MIN_VALUE;
     maxValue = Integer.MAX_VALUE;
-    useMinMax = false;
+    useMin = useMax = false;
   }
 
-  public IntParameter(String name_, String desc_, int v, int minValue_,
-    int maxValue_) {
+  public IntParameter(String name_, String desc_, int v, int minValue_) {
     super(name_, desc_);
     value = v;
     defValue = v;
-    maxValue = maxValue_;
     minValue = minValue_;
-    useMinMax = true;
+    maxValue = Integer.MAX_VALUE;
+    useMin = true;
+    useMax = false;
+  }
+
+  public IntParameter(String name_, String desc_, int v, int minValue_,
+                      int maxValue_) {
+    super(name_, desc_);
+    value = v;
+    defValue = v;
+    minValue = minValue_;
+    maxValue = maxValue_;
+    useMin = useMax = true;
   }
 
   public boolean setParam(String v) {
@@ -51,7 +61,7 @@ public class IntParameter extends VoidParameter {
   }
 
   public synchronized boolean setValue(int v) {
-    if (useMinMax && (v < minValue || v > maxValue))
+    if ((useMin && v < minValue) || (useMax && v > maxValue))
       return false;
     value = v;
     return true;
@@ -65,8 +75,8 @@ public class IntParameter extends VoidParameter {
     return null;
   }
   public String getValues() {
-    if (useMinMax) {
-      return minValue + "-" + maxValue;
+    if (useMin || useMax) {
+      return (useMin ? minValue : "") + "-" + (useMax ? maxValue : "");
     }
     return null;
   }
@@ -77,5 +87,5 @@ public class IntParameter extends VoidParameter {
   protected final int defValue;
   protected final int minValue;
   protected final int maxValue;
-  final boolean useMinMax;
+  final boolean useMin, useMax;
 }

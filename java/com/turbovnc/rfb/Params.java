@@ -383,7 +383,7 @@ public final class Params {
   public static IntParameter maxClipboard =
   new IntParameter("MaxClipboard",
   "Maximum permitted length of an incoming or outgoing clipboard update (in " +
-  "bytes)", 1048576);
+  "bytes)", 1048576, 0);
 
   public static BoolParameter noNewConn =
   new BoolParameter("NoNewConn",
