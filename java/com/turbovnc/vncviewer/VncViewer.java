@@ -534,8 +534,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "Parameters that take a value can be specified as:\n" +
       "  -<param> <value> or --<param> <value> or\n" +
       "  <param>=<value> or -<param>=<value> or --<param>=<value>\n" +
-      "Parameter names and values are case-insensitive (except for the value of\n" +
-      "Password.)\n\n" +
+      "Parameter names and values are case-insensitive (except for hostnames,\n" +
+      "unencrypted passwords/passphrases, filenames, SSH keys, and usernames.)\n\n" +
       "The parameters are:\n\n";
     System.out.println("\nTurboVNC Viewer v" + version + " (build " + build +
                        ") [JVM: " + System.getProperty("os.arch") + "]");
