@@ -383,7 +383,7 @@ public final class Params {
       if (name.startsWith("[")) {
         // skip the section delimiters
         continue;
-      } else if (!name.equalsIgnoreCase("Config")) {
+      } else {
         set(name, props.getProperty(name), true);
       }
     }
@@ -475,21 +475,6 @@ public final class Params {
   new BoolParameter("ClientRedirect", this, false,
   null, false);
 
-  public StringParameter config =
-  new StringParameter("Config", this, false,
-  "File from which to read connection information.  Each line of this file " +
-  "should contain a TurboVNC Viewer parameter name and value separated by " +
-  "an equals sign (=).  (Any whitespace before the value is ignored.)  If " +
-  "the connection info file has an extension of .vnc, then it is assumed to " +
-  "be a connection info file from TurboVNC 2.2 and prior, which used a " +
-  "format based on the TightVNC connection info file format.\n " +
-
-  "Connection info files with extensions of .turbovnc and .vnc will, when " +
-  "opened on Windows or macOS, launch the TurboVNC Viewer and initiate a " +
-  "new connection.  Connection info files can also be dragged & dropped " +
-  "onto the TurboVNC Viewer icon in order to initiate a new connection.",
-  null);
-
   public BoolParameter confirmClose =
   new BoolParameter("ConfirmClose", this, false,
   "Prompt for confirmation before closing a connection.", false);
@@ -512,7 +497,7 @@ public final class Params {
   public IntParameter maxClipboard =
   new IntParameter("MaxClipboard", this, false,
   "Maximum permitted length of an incoming or outgoing clipboard update (in " +
-  "bytes)", 1048576);
+  "bytes)", 1048576, 0);
 
   public BoolParameter noNewConn =
   new BoolParameter("NoNewConn", this, false,

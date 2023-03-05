@@ -1,4 +1,5 @@
-/* Copyright (C) 2012, 2017-2018, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2017-2018, 2022-2023 D. R. Commander.
+ *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -27,16 +28,26 @@ public class IntParameter extends VoidParameter {
     value = defValue = defValue_;
     minValue = Integer.MIN_VALUE;
     maxValue = Integer.MAX_VALUE;
-    useMinMax = false;
+    useMin = useMax = false;
+  }
+
+  public IntParameter(String name, Params params, boolean isGUI, String desc,
+                      int defValue_, int minValue_) {
+    super(name, params, isGUI, desc);
+    value = defValue = defValue_;
+    minValue = minValue_;
+    maxValue = Integer.MAX_VALUE;
+    useMin = true;
+    useMax = false;
   }
 
   public IntParameter(String name, Params params, boolean isGUI, String desc,
                       int defValue_, int minValue_, int maxValue_) {
     super(name, params, isGUI, desc);
     value = defValue = defValue_;
-    maxValue = maxValue_;
     minValue = minValue_;
-    useMinMax = true;
+    maxValue = maxValue_;
+    useMin = useMax = true;
   }
 
   public boolean set(String str) {
@@ -50,7 +61,7 @@ public class IntParameter extends VoidParameter {
   }
 
   public final synchronized boolean set(int value_) {
-    if (useMinMax && (value_ < minValue || value_ > maxValue))
+    if ((useMin && value_ < minValue) || (useMax && value_ > maxValue))
       return false;
     value = value_;
     setCommandLine(false);
@@ -70,13 +81,13 @@ public class IntParameter extends VoidParameter {
   public synchronized String getStr() { return Integer.toString(value); }
 
   public String getValues() {
-    if (useMinMax) {
-      return minValue + "-" + maxValue;
+    if (useMin || useMax) {
+      return (useMin ? minValue : "") + "-" + (useMax ? maxValue : "");
     }
     return null;
   }
 
   int value;
   final int defValue, minValue, maxValue;
-  private final boolean useMinMax;
+  private final boolean useMin, useMax;
 }

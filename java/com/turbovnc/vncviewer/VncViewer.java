@@ -525,13 +525,26 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "Viewer will connect to the VNC servers serially and in the specified order.\n" +
       "\n" +
       "Options:\n" +
-      "  -loglevel <level>   configure logging level\n" +
-      "                      0 = errors only\n" +
-      "                      10 = status messages\n" +
-      "                      30 = informational messages (default)\n" +
-      "                      100 = debugging messages\n" +
-      "                      110 = SSH debugging messages\n" +
-      "                      150 = extended input device debugging messages\n" +
+      "  -loglevel <level>\n" +
+      "      Set logging level to <level>\n" +
+      "      0 = errors only\n" +
+      "      10 = status messages\n" +
+      "      30 = informational messages (default)\n" +
+      "      100 = debugging messages\n" +
+      "      110 = SSH debugging messages\n" +
+      "      150 = extended input device debugging messages\n" +
+      "\n" +
+      "  [-config] <connection_info_file>\n" +
+      "      Read connection information from <connection_info_file>.  A connection\n" +
+      "      info file has an extension of .turbovnc, and each line of the file\n" +
+      "      contains a TurboVNC Viewer parameter name and value separated by an\n" +
+      "      equals sign (=).  (Any whitespace before the value is ignored.)  If the\n" +
+      "      connection info file has an extension of .vnc, then it is assumed to be a\n" +
+      "      connection info file from TurboVNC 2.2.x and prior, which used a format\n" +
+      "      based on the TightVNC connection info file format.  Connection info files\n" +
+      "      will, when opened on Windows or macOS or dragged & dropped onto the\n" +
+      "      TurboVNC Viewer icon, launch the TurboVNC Viewer and initiate a new\n" +
+      "      connection.\n" +
       "\n" +
       "Specifying boolean parameters:\n" +
       "  On:   -<param> or --<param> or <param>=1 or -<param>=1 or --<param>=1\n" +
@@ -539,8 +552,8 @@ public class VncViewer implements Runnable, OptionsDialogCallback {
       "Parameters that take a value can be specified as:\n" +
       "  -<param> <value> or --<param> <value> or\n" +
       "  <param>=<value> or -<param>=<value> or --<param>=<value>\n" +
-      "Parameter names and values are case-insensitive (except for the value of\n" +
-      "Password.)\n\n" +
+      "Parameter names and values are case-insensitive (except for hostnames,\n" +
+      "unencrypted passwords/passphrases, filenames, SSH keys, and usernames.)\n\n" +
       "The parameters are:\n\n";
     System.out.println("\nTurboVNC Viewer v" + version + " (build " + build +
                        ") [JVM: " + System.getProperty("os.arch") + "]");
