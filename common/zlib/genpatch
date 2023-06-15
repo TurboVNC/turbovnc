@@ -1,8 +1,0 @@
-#!/bin/bash
-
-PROJECT=zlib-4b9e3f0c56ce0a354bcb11f048f870f2d0fc544e
-FILE=4b9e3f0c56ce0a354bcb11f048f870f2d0fc544e.tar.gz
-URL=https://github.com/jtkukunas/zlib/archive
-SRCDIR=`dirname $0`
-
-. $SRCDIR/../../unix/Xvnc/genpatch | filterdiff -p1 -x zlib/CMakeLists.txt >$SRCDIR/turbovnc.patch

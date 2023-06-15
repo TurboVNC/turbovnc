@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROJECT=zlib-d9c2508ff9493514b1ef9851eb9623a7fae3a4c0
+FILE=d9c2508ff9493514b1ef9851eb9623a7fae3a4c0.tar.gz
+URL=https://github.com/intel/zlib/archive
+SRCDIR=`dirname $0`
+
+. $SRCDIR/../../genpatch | filterdiff -p1 -x zlib/CMakeLists.txt >$SRCDIR/turbovnc.patch
