@@ -53,8 +53,4 @@ else
 	LD_LIBRARY_PATH=$JAWT_PATH:$LD_LIBRARY_PATH
 	export LD_LIBRARY_PATH
 fi
-if [ "@BITS@" = "32" ]; then
-	exec $JAVA -server -d@BITS@ -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
-else
-	exec $JAVA -server -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
-fi
+exec $JAVA -server -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
