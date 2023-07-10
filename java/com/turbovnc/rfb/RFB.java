@@ -54,9 +54,6 @@ public final class RFB {
   public static final int SECTYPE_X509_NONE  = 260;
   public static final int SECTYPE_X509_VNC   = 261;
   public static final int SECTYPE_X509_PLAIN = 262;
-  public static final int SECTYPE_IDENT      = 265;
-  public static final int SECTYPE_TLS_IDENT  = 266;
-  public static final int SECTYPE_X509_IDENT = 267;
 
   public static int secTypeNum(String name) {
     if (name.equalsIgnoreCase("None"))      return SECTYPE_NONE;
@@ -76,15 +73,12 @@ public final class RFB {
 
     // VeNCrypt subtypes
     if (name.equalsIgnoreCase("Plain"))     return SECTYPE_PLAIN;
-    if (name.equalsIgnoreCase("Ident"))     return SECTYPE_IDENT;
     if (name.equalsIgnoreCase("TLSNone"))   return SECTYPE_TLS_NONE;
     if (name.equalsIgnoreCase("TLSVnc"))    return SECTYPE_TLS_VNC;
     if (name.equalsIgnoreCase("TLSPlain"))  return SECTYPE_TLS_PLAIN;
-    if (name.equalsIgnoreCase("TLSIdent"))  return SECTYPE_TLS_IDENT;
     if (name.equalsIgnoreCase("X509None"))  return SECTYPE_X509_NONE;
     if (name.equalsIgnoreCase("X509Vnc"))   return SECTYPE_X509_VNC;
     if (name.equalsIgnoreCase("X509Plain")) return SECTYPE_X509_PLAIN;
-    if (name.equalsIgnoreCase("X509Ident")) return SECTYPE_X509_IDENT;
 
     return SECTYPE_INVALID;
   }
@@ -107,15 +101,12 @@ public final class RFB {
 
       // VeNCrypt subtypes
       case SECTYPE_PLAIN:       return "Plain";
-      case SECTYPE_IDENT:       return "Ident";
       case SECTYPE_TLS_NONE:    return "TLSNone";
       case SECTYPE_TLS_VNC:     return "TLSVnc";
       case SECTYPE_TLS_PLAIN:   return "TLSPlain";
-      case SECTYPE_TLS_IDENT:   return "TLSIdent";
       case SECTYPE_X509_NONE:   return "X509None";
       case SECTYPE_X509_VNC:    return "X509Vnc";
       case SECTYPE_X509_PLAIN:  return "X509Plain";
-      case SECTYPE_X509_IDENT:  return "X509Ident";
       default:                  return "[unknown SecType]";
     }
   }
@@ -126,11 +117,9 @@ public final class RFB {
       case SECTYPE_TLS_NONE:
       case SECTYPE_TLS_VNC:
       case SECTYPE_TLS_PLAIN:
-      case SECTYPE_TLS_IDENT:
       case SECTYPE_X509_NONE:
       case SECTYPE_X509_VNC:
       case SECTYPE_X509_PLAIN:
-      case SECTYPE_X509_IDENT:
         return true;
       default:
         return false;

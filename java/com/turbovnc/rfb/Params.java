@@ -505,10 +505,6 @@ public final class Params {
   "Always show the \"New TurboVNC Connection\" dialog even if the server " +
   "has been specified on the command line.", false);
 
-  public BoolParameter clientRedirect =
-  new BoolParameter("ClientRedirect", this, false,
-  null, false);
-
   public BoolParameter confirmClose =
   new BoolParameter("ConfirmClose", this, false,
   "Prompt for confirmation before closing a connection.", false);
@@ -964,29 +960,27 @@ public final class Params {
   "A comma-separated list of the security types that can be used, if the " +
   "server supports them.  \"VNC\" and \"None\" are the standard VNC " +
   "password and no-password authentication schemes supported by all VNC " +
-  "servers.  The ten supported VeNCrypt security types (\"Plain\", " +
-  "\"Ident\", \"TLSNone\", \"TLSVnc\", \"TLSPlain\", \"TLSIdent\", " +
-  "\"X509None\", \"X509Vnc\", \"X509Plain\", and \"X509Ident\") are " +
-  "combinations of three encryption methods (None, Anonymous TLS, and TLS " +
-  "with X.509 certificates) and four authentication schemes (None, Standard " +
-  "VNC, Plain, and Ident.)  The \"UnixLogin\" security type enables " +
-  "user/password authentication using the TightVNC security extensions " +
-  "rather than VeNCrypt.  \"Plain\" and \"UnixLogin\" authenticate using a " +
-  "plain-text username and password, so it is strongly recommended that " +
-  "those types only be used with either TLS encryption or SSH tunneling.  " +
-  "\"Ident\", which is designed for use by VNC proxies, authenticates using " +
-  "only a username.  The order of this list does not matter, since the " +
+  "servers.  The seven supported VeNCrypt security types (\"Plain\", " +
+  "\"TLSNone\", \"TLSVnc\", \"TLSPlain\", \"X509None\", \"X509Vnc\", and " +
+  "\"X509Plain\") are combinations of three encryption methods (None, " +
+  "Anonymous TLS, and TLS with X.509 certificates) and three authentication " +
+  "schemes (None, Standard VNC, and Plain.)  The \"UnixLogin\" security " +
+  "type enables user/password authentication using the TightVNC security " +
+  "extensions rather than VeNCrypt.  \"Plain\" and \"UnixLogin\" " +
+  "authenticate using a plain-text username and password, so it is strongly " +
+  "recommended that those types only be used with either TLS encryption or " +
+  "SSH tunneling.  The order of this list does not matter, since the " +
   "server's preferred order is always used.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
   "set to \"VNC\" unless the SessMgrAuto parameter is disabled.",
-  "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VNC,Ident,Plain,UnixLogin,None");
+  "X509Plain,X509Vnc,X509None,TLSPlain,TLSVnc,TLSNone,VNC,Plain,UnixLogin,None");
 
   public BoolParameter sendLocalUsername =
   new BoolParameter("SendLocalUsername", this, true,
   "Send the local username when using user/password authentication schemes " +
-  "(Unix Login, Plain, Ident) rather than prompting for it.  As with the " +
-  "User parameter, setting this parameter has the effect of disabling any " +
+  "(Unix Login, Plain) rather than prompting for it.  As with the User " +
+  "parameter, setting this parameter has the effect of disabling any " +
   "authentication schemes that don't require a username.", false);
 
   public BoolParameter sessMgrAuto =
@@ -1064,11 +1058,11 @@ public final class Params {
   public StringParameter user =
   new StringParameter("User", this, true,
   "The username to use for Unix Login authentication (TightVNC-compatible " +
-  "servers) or for Plain and Ident authentication (VeNCrypt-compatible " +
-  "servers.)  Specifying this parameter has the effect of removing any " +
-  "types from the SecurityTypes parameter except for \"Plain\" and " +
-  "\"Ident\" (and their encrypted derivatives) and \"UnixLogin\", thus " +
-  "allowing only authentication schemes that require a username.", null);
+  "servers) or Plain authentication (VeNCrypt-compatible servers.)  " +
+  "Specifying this parameter has the effect of removing any types from the " +
+  "SecurityTypes parameter except for \"Plain\" (and its encrypted " +
+  "derivatives) and \"UnixLogin\", thus allowing only authentication " +
+  "schemes that require a username.", null);
 
   public ServerNameParameter via =
   new ServerNameParameter("Via", this, true,

@@ -89,7 +89,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
-    cp.supportsClientRedirect = params.clientRedirect.get();
     cp.supportsDesktopRename = true;
     menu = new F8Menu(this);
 
@@ -451,16 +450,6 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (layout.numScreens() > 1 ||
         (layout.numScreens() > 0 && layout.screens.get(0).id != 0))
       serverXinerama = true;
-  }
-
-  // RFB thread: clientRedirect() migrates the client to another host/port.
-  public void clientRedirect(int port, String host,
-                             String x509subject) {
-    sock.close();
-    setServerPort(port);
-    sock = new TcpSocket(host, port);
-    vlog.info("Redirected to " + host + ":" + port);
-    VncViewer.newViewer(viewer, sock, true);
   }
 
   // RFB thread: setName() is called when the desktop name changes.

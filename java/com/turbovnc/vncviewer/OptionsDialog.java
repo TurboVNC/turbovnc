@@ -50,9 +50,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private JCheckBox viewOnly, recvClipboard, sendClipboard, acceptBell,
     reverseScroll, fsAltEnter;
   private JCheckBox fullScreen, shared, cursorShape, showToolbar;
-  private JCheckBox secNone, secVnc, secPlain, secIdent, secTLSNone, secTLSVnc,
-    secTLSPlain, secTLSIdent, secX509None, secX509Vnc, secX509Plain,
-    secX509Ident, secUnixLogin;
+  private JCheckBox secNone, secVnc, secPlain, secTLSNone, secTLSVnc,
+    secTLSPlain, secX509None, secX509Vnc, secX509Plain, secUnixLogin;
   private JPanel encNonePanel, encTLSPanel, encX509Panel;
   private JCheckBox sendLocalUsername, tunnel;
   private JTextField username, sshUser, gateway;
@@ -550,14 +549,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                               GridBagConstraints.LINE_START,
                               GridBagConstraints.NONE,
                               new Insets(0, 0, 0, 5), 0, 0));
-    secIdent = addJCheckBox("Ident (VeNCrypt)", null, encNonePanel,
-                            new GridBagConstraints(1, 1, 1, 1, 1, 1,
-                              GridBagConstraints.LINE_START,
-                              GridBagConstraints.NONE,
-                              new Insets(0, 0, 0, 5), 0, 0));
     secUnixLogin = addJCheckBox("Unix Login (TightVNC/TurboVNC)", null,
                                 encNonePanel,
-                                new GridBagConstraints(1, 2, 1, 1, 1, 1,
+                                new GridBagConstraints(1, 1, 1, 1, 1, 1,
                                   GridBagConstraints.LINE_START,
                                   GridBagConstraints.NONE,
                                   new Insets(0, 0, 0, 5), 0, 0));
@@ -584,11 +578,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                                  GridBagConstraints.LINE_START,
                                  GridBagConstraints.NONE,
                                  new Insets(0, 0, 0, 5), 0, 0));
-    secTLSIdent = addJCheckBox("Ident", null, encTLSPanel,
-                               new GridBagConstraints(1, 1, 1, 1, 1, 1,
-                                 GridBagConstraints.LINE_START,
-                                 GridBagConstraints.NONE,
-                                 new Insets(0, 0, 0, 5), 0, 0));
 
     encX509Panel = new JPanel(new GridBagLayout());
     border = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
@@ -609,11 +598,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                                 new Insets(0, 0, 0, 5), 0, 0));
     secX509Plain = addJCheckBox("Plain", null, encX509Panel,
                                 new GridBagConstraints(1, 0, 1, 1, 1, 1,
-                                  GridBagConstraints.LINE_START,
-                                  GridBagConstraints.NONE,
-                                  new Insets(0, 0, 0, 5), 0, 0));
-    secX509Ident = addJCheckBox("Ident", null, encX509Panel,
-                                new GridBagConstraints(1, 1, 1, 1, 1, 1,
                                   GridBagConstraints.LINE_START,
                                   GridBagConstraints.NONE,
                                   new Insets(0, 0, 0, 5), 0, 0));
@@ -951,16 +935,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     if (s instanceof JCheckBox && (JCheckBox)s == secNone ||
         s instanceof JCheckBox && (JCheckBox)s == secVnc ||
         s instanceof JCheckBox && (JCheckBox)s == secPlain ||
-        s instanceof JCheckBox && (JCheckBox)s == secIdent ||
         s instanceof JCheckBox && (JCheckBox)s == secUnixLogin ||
         s instanceof JCheckBox && (JCheckBox)s == secTLSNone ||
         s instanceof JCheckBox && (JCheckBox)s == secTLSVnc ||
         s instanceof JCheckBox && (JCheckBox)s == secTLSPlain ||
-        s instanceof JCheckBox && (JCheckBox)s == secTLSIdent ||
         s instanceof JCheckBox && (JCheckBox)s == secX509None ||
         s instanceof JCheckBox && (JCheckBox)s == secX509Vnc ||
         s instanceof JCheckBox && (JCheckBox)s == secX509Plain ||
-        s instanceof JCheckBox && (JCheckBox)s == secX509Ident ||
         s instanceof JCheckBox && (JCheckBox)s == sendLocalUsername) {
       updateSecurityPanel();
     }
@@ -1162,11 +1143,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
   private void updateSecurityPanel() {
     if (params.noUnixLogin.get()) {
-      secIdent.setEnabled(false);
       secPlain.setEnabled(false);
-      secTLSIdent.setEnabled(false);
       secTLSPlain.setEnabled(false);
-      secX509Ident.setEnabled(false);
       secX509Plain.setEnabled(false);
       secUnixLogin.setEnabled(false);
       sendLocalUsername.setEnabled(false);
@@ -1175,11 +1153,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     }
 
     boolean unixLogin =
-      ((secIdent.isEnabled() && secIdent.isSelected()) ||
-       (secPlain.isEnabled() && secPlain.isSelected()) ||
-       (secTLSIdent.isEnabled() && secTLSIdent.isSelected()) ||
+      ((secPlain.isEnabled() && secPlain.isSelected()) ||
        (secTLSPlain.isEnabled() && secTLSPlain.isSelected()) ||
-       (secX509Ident.isEnabled() && secX509Ident.isSelected()) ||
        (secX509Plain.isEnabled() && secX509Plain.isSelected()) ||
        (secUnixLogin.isEnabled() && secUnixLogin.isSelected()));
     sendLocalUsername.setEnabled(unixLogin);
@@ -1198,8 +1173,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     boolean x509 = (secX509None.isEnabled() && secX509None.isSelected()) ||
       (secX509Vnc.isEnabled() && secX509Vnc.isSelected()) ||
-      (secX509Plain.isEnabled() && secX509Plain.isSelected()) ||
-      (secX509Ident.isEnabled() && secX509Ident.isSelected());
+      (secX509Plain.isEnabled() && secX509Plain.isSelected());
     x509ca.setEnabled(x509 && enableX509);
     x509caButton.setEnabled(x509 && enableX509);
     x509caLabel.setEnabled(x509 && enableX509);
@@ -1214,7 +1188,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       secX509None.setEnabled(false);
       secX509Vnc.setEnabled(false);
       secX509Plain.setEnabled(false);
-      secX509Ident.setEnabled(false);
       x509ca.setEnabled(false);
       x509caButton.setEnabled(false);
       x509caLabel.setEnabled(false);
@@ -1267,20 +1240,15 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     secNone.setSelected(params.secTypes.isSupported(RFB.SECTYPE_NONE));
     secVnc.setSelected(params.secTypes.isSupported(RFB.SECTYPE_VNCAUTH));
     secPlain.setSelected(params.secTypes.isSupported(RFB.SECTYPE_PLAIN));
-    secIdent.setSelected(params.secTypes.isSupported(RFB.SECTYPE_IDENT));
     secTLSNone.setSelected(params.secTypes.isSupported(RFB.SECTYPE_TLS_NONE));
     secTLSVnc.setSelected(params.secTypes.isSupported(RFB.SECTYPE_TLS_VNC));
     secTLSPlain.setSelected(
       params.secTypes.isSupported(RFB.SECTYPE_TLS_PLAIN));
-    secTLSIdent.setSelected(
-      params.secTypes.isSupported(RFB.SECTYPE_TLS_IDENT));
     secX509None.setSelected(
       params.secTypes.isSupported(RFB.SECTYPE_X509_NONE));
     secX509Vnc.setSelected(params.secTypes.isSupported(RFB.SECTYPE_X509_VNC));
     secX509Plain.setSelected(
       params.secTypes.isSupported(RFB.SECTYPE_X509_PLAIN));
-    secX509Ident.setSelected(
-      params.secTypes.isSupported(RFB.SECTYPE_X509_IDENT));
     secUnixLogin.setSelected(
       params.secTypes.isSupported(RFB.SECTYPE_UNIX_LOGIN));
 
@@ -1308,16 +1276,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       secNone.setEnabled(false);
       secVnc.setEnabled(false);
       secPlain.setEnabled(false);
-      secIdent.setEnabled(false);
       secUnixLogin.setEnabled(false);
       secTLSNone.setEnabled(false);
       secTLSVnc.setEnabled(false);
       secTLSPlain.setEnabled(false);
-      secTLSIdent.setEnabled(false);
       secX509None.setEnabled(false);
       secX509Vnc.setEnabled(false);
       secX509Plain.setEnabled(false);
-      secX509Ident.setEnabled(false);
       username.setEnabled(false);
       usernameLabel.setEnabled(false);
       sendLocalUsername.setEnabled(false);
@@ -1374,15 +1339,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     params.secTypes.disable(RFB.SECTYPE_NONE);
     params.secTypes.disable(RFB.SECTYPE_VNCAUTH);
     params.secTypes.disable(RFB.SECTYPE_PLAIN);
-    params.secTypes.disable(RFB.SECTYPE_IDENT);
     params.secTypes.disable(RFB.SECTYPE_TLS_NONE);
     params.secTypes.disable(RFB.SECTYPE_TLS_VNC);
     params.secTypes.disable(RFB.SECTYPE_TLS_PLAIN);
-    params.secTypes.disable(RFB.SECTYPE_TLS_IDENT);
     params.secTypes.disable(RFB.SECTYPE_X509_NONE);
     params.secTypes.disable(RFB.SECTYPE_X509_VNC);
     params.secTypes.disable(RFB.SECTYPE_X509_PLAIN);
-    params.secTypes.disable(RFB.SECTYPE_X509_IDENT);
     params.secTypes.disable(RFB.SECTYPE_UNIX_LOGIN);
 
     if (secNone.isSelected())
@@ -1391,24 +1353,18 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       params.secTypes.enable(RFB.SECTYPE_VNCAUTH);
     if (secPlain.isSelected())
       params.secTypes.enable(RFB.SECTYPE_PLAIN);
-    if (secIdent.isSelected())
-      params.secTypes.enable(RFB.SECTYPE_IDENT);
     if (secTLSNone.isSelected())
       params.secTypes.enable(RFB.SECTYPE_TLS_NONE);
     if (secTLSVnc.isSelected())
       params.secTypes.enable(RFB.SECTYPE_TLS_VNC);
     if (secTLSPlain.isSelected())
       params.secTypes.enable(RFB.SECTYPE_TLS_PLAIN);
-    if (secTLSIdent.isSelected())
-      params.secTypes.enable(RFB.SECTYPE_TLS_IDENT);
     if (secX509None.isSelected())
       params.secTypes.enable(RFB.SECTYPE_X509_NONE);
     if (secX509Vnc.isSelected())
       params.secTypes.enable(RFB.SECTYPE_X509_VNC);
     if (secX509Plain.isSelected())
       params.secTypes.enable(RFB.SECTYPE_X509_PLAIN);
-    if (secX509Ident.isSelected())
-      params.secTypes.enable(RFB.SECTYPE_X509_IDENT);
     if (secUnixLogin.isSelected())
       params.secTypes.enable(RFB.SECTYPE_UNIX_LOGIN);
 

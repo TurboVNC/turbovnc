@@ -87,18 +87,6 @@ public class CMsgReader {
     handler.bell();
   }
 
-  private void readClientRedirect(int x, int y, int w, int h) {
-    int port = is.readU16();
-    String host = is.readString();
-    String x509subject = is.readString();
-
-    if (x != 0 || y != 0 || w != 0 || h != 0) {
-      vlog.error("Ignoring ClientRedirect rect with non-zero position/size");
-    } else {
-      handler.clientRedirect(port, host, x509subject);
-    }
-  }
-
   private void readCopyRect(Rect r) {
     int srcX = is.readU16();
     int srcY = is.readU16();
@@ -348,9 +336,6 @@ public class CMsgReader {
           break;
         case RFB.ENCODING_LAST_RECT:
           nUpdateRectsLeft = 1;   // this rectangle is the last one
-          break;
-        case RFB.ENCODING_CLIENT_REDIRECT:
-          readClientRedirect(x, y, w, h);
           break;
         case RFB.ENCODING_QEMU_EXTENDED_KEY_EVENT:
           handler.enableQEMUExtKeyEvent();

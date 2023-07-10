@@ -143,7 +143,6 @@ public class ConnParams {
   public boolean supportsDesktopResize;
   public boolean supportsExtendedDesktopSize;
   public boolean supportsDesktopRename;
-  public boolean supportsClientRedirect;
   public boolean supportsFence;
   public boolean supportsContinuousUpdates;
   public boolean supportsLastRect;

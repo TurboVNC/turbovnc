@@ -115,9 +115,6 @@ public abstract class CMsgHandler {
   public abstract void enableQEMUExtKeyEvent();
   public abstract void setLEDState(int state);
 
-  public abstract void clientRedirect(int port, String host,
-                                      String x509subject);
-
   public abstract void setCursor(int width, int height, Point hotspot,
                                  int[] data, byte[] mask);
   public abstract void serverInit();

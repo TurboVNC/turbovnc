@@ -190,7 +190,9 @@ public final class SecTypesParameter extends VoidParameter {
       if (typeNum != RFB.SECTYPE_INVALID) {
         if (isAllowed(typeNum) || force)
           result.add(typeNum);
-      } else
+      } else if (!types[i].equalsIgnoreCase("Ident") &&
+                 !types[i].equalsIgnoreCase("TLSIdent") &&
+                 !types[i].equalsIgnoreCase("X509Ident"))
         throw new WarningException("Security type \'" + types[i] +
                                    "\' is not valid");
     }

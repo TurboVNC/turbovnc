@@ -405,8 +405,6 @@ public class CMsgWriter {
       encodings[nEncodings++] = RFB.ENCODING_EXTENDED_DESKTOP_SIZE;
     if (cp.supportsDesktopRename)
       encodings[nEncodings++] = RFB.ENCODING_DESKTOP_NAME;
-    if (cp.supportsClientRedirect)
-      encodings[nEncodings++] = RFB.ENCODING_CLIENT_REDIRECT;
 
     encodings[nEncodings++] = RFB.ENCODING_LAST_RECT;
     if (params.continuousUpdates.get()) {

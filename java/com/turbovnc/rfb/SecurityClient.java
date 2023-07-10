@@ -39,7 +39,6 @@ public class SecurityClient {
       case RFB.SECTYPE_TLS:       return (new CSecurityRFBTLS(this));
       case RFB.SECTYPE_VENCRYPT:  return (new CSecurityVeNCrypt(this));
       case RFB.SECTYPE_PLAIN:     return (new CSecurityPlain());
-      case RFB.SECTYPE_IDENT:     return (new CSecurityIdent());
       case RFB.SECTYPE_TLS_NONE:
         return (new CSecurityStack(RFB.SECTYPE_TLS_NONE, "TLSNone",
                 new CSecurityTLS(true), null));
@@ -49,9 +48,6 @@ public class SecurityClient {
       case RFB.SECTYPE_TLS_PLAIN:
         return (new CSecurityStack(RFB.SECTYPE_TLS_PLAIN, "TLSPlain",
                 new CSecurityTLS(true), new CSecurityPlain()));
-      case RFB.SECTYPE_TLS_IDENT:
-        return (new CSecurityStack(RFB.SECTYPE_TLS_IDENT, "TLSIdent",
-                new CSecurityTLS(true), new CSecurityIdent()));
       case RFB.SECTYPE_X509_NONE:
         return (new CSecurityStack(RFB.SECTYPE_X509_NONE, "X509None",
                 new CSecurityTLS(false), null));
@@ -61,9 +57,6 @@ public class SecurityClient {
       case RFB.SECTYPE_X509_PLAIN:
         return (new CSecurityStack(RFB.SECTYPE_X509_PLAIN, "X509Plain",
                 new CSecurityTLS(false), new CSecurityPlain()));
-      case RFB.SECTYPE_X509_IDENT:
-        return (new CSecurityStack(RFB.SECTYPE_X509_IDENT, "X509Ident",
-                new CSecurityTLS(false), new CSecurityIdent()));
       default:
         throw new ErrorException("Security type not supported");
     }
