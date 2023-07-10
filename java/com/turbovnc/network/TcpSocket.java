@@ -143,10 +143,6 @@ public class TcpSocket extends Socket {
     return true;
   }
 
-  public static boolean isSocket(java.net.Socket sock) {
-    return sock.getClass().toString().equals("com.turbovnc.net.Socket");
-  }
-
   public boolean isConnected() {
     return ((SocketDescriptor)getFd()).isConnected();
   }
