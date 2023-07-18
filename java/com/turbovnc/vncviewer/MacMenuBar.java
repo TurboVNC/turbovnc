@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2015, 2018, 2020-2021 D. R. Commander.
- *                                          All Rights Reserved.
+/* Copyright (C) 2012-2015, 2018, 2020-2021, 2023 D. R. Commander.
+ *                                                All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -134,61 +134,75 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     JMenu connMenu = new JMenu("Connection");
     if (!Params.noNewConn.getValue()) {
       newConn = addMenuItem(connMenu, "New Connection...");
-      newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
-                                                    acceleratorMask));
-      closeConn = addMenuItem(connMenu, "Close Connection");
-      closeConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+      if (Params.macHotkeys.getValue())
+        newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
                                                       acceleratorMask));
+      closeConn = addMenuItem(connMenu, "Close Connection");
+      if (Params.macHotkeys.getValue())
+        closeConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                                                        acceleratorMask));
       connMenu.addSeparator();
     }
     info = addMenuItem(connMenu, "Connection Info...");
-    info.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
-                                               acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      info.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
+                                                 acceleratorMask));
     profile = new JCheckBoxMenuItem("Performance Info...");
     profile.setSelected(cc.profileDialog.isVisible());
     profile.addActionListener(this);
     connMenu.add(profile);
-    profile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
-                                                  acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      profile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+                                                    acceleratorMask));
 
     connMenu.addSeparator();
     refresh = addMenuItem(connMenu, "Request Screen Refresh");
-    refresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
-                                                  acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      refresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+                                                    acceleratorMask));
     losslessRefresh = addMenuItem(connMenu, "Request Lossless Refresh");
-    losslessRefresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
-                                                          acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      losslessRefresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
+                                                            acceleratorMask));
     screenshot = addMenuItem(connMenu, "Save Remote Desktop Image");
-    screenshot.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
-                                                     acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      screenshot.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
+                                                       acceleratorMask));
     connMenu.addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen");
     fullScreen.setSelected(cc.opts.fullScreen);
     fullScreen.addActionListener(this);
     connMenu.add(fullScreen);
-    fullScreen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
-                                                     acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      fullScreen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
+                                                       acceleratorMask));
     defaultSize = addMenuItem(connMenu, "Default Window Size/Position");
-    defaultSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-                                                      acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      defaultSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+                                                        acceleratorMask));
     zoomIn = addMenuItem(connMenu, "Zoom In");
-    zoomIn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9,
-                                                 acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      zoomIn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9,
+                                                   acceleratorMask));
     zoomOut = addMenuItem(connMenu, "Zoom Out");
-    zoomOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
-                                                  acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      zoomOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
+                                                    acceleratorMask));
     zoom100 = addMenuItem(connMenu, "Zoom 100%", KeyEvent.VK_0);
-    zoom100.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0,
-                                                  acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      zoom100.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0,
+                                                    acceleratorMask));
     tileWindows = addMenuItem(connMenu, "Tile All Viewer Windows");
-    tileWindows.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
-                                                      acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      tileWindows.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
+                                                        acceleratorMask));
     showToolbar = new JCheckBoxMenuItem("Show Toolbar");
     showToolbar.setSelected(cc.opts.showToolbar);
     showToolbar.addActionListener(this);
     connMenu.add(showToolbar);
-    showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
-                                                      acceleratorMask));
+    if (Params.macHotkeys.getValue())
+      showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
+                                                        acceleratorMask));
     connMenu.addSeparator();
     viewOnly = new JCheckBoxMenuItem("View Only");
     viewOnly.setSelected(cc.opts.viewOnly);

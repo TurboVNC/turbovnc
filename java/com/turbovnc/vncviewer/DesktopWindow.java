@@ -1,4 +1,4 @@
-/* Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2022 D. R. Commander.
+/* Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2023 D. R. Commander.
  *                                                     All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
@@ -723,8 +723,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
             return;
       }
     }
-    if ((e.getModifiersEx() & InputEvent.META_DOWN_MASK) ==
-        InputEvent.META_DOWN_MASK) {
+    if (Params.macHotkeys.getValue() &&
+        (e.getModifiersEx() & InputEvent.META_DOWN_MASK) ==
+         InputEvent.META_DOWN_MASK) {
       switch (e.getKeyCode()) {
         case KeyEvent.VK_P:
           if (Utils.JAVA_VERSION >= 9 && Utils.JAVA_VERSION <= 11)
