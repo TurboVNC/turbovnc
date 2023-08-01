@@ -1,7 +1,7 @@
 3.1
 ===
 
-### Significant changes relative to 3.0.4:
+### Significant changes relative to 3.0.3:
 
 1. The TurboVNC Server and Viewer now support UTF-8 clipboard transfers.
 
@@ -43,23 +43,17 @@ implied.  Refer to the TurboVNC Viewer's usage screen (specifically, the
 documentation of the `Server` parameter) and the TurboVNC User's Guide for more
 details.
 
-8. The TurboVNC Viewer now supports a new TurboVNC-specific connection info
+8. The TurboVNC Viewer now asks for confirmation before overwriting an existing
+screenshot file.
+
+9. The TurboVNC Viewer now supports a new TurboVNC-specific connection info
 file format.  TurboVNC connection info files have an extension of .turbovnc,
 and each line of these files contains a TurboVNC Viewer parameter name and
 value separated by an equals sign (`=`).
 
-9. The default values of all TurboVNC Viewer parameters can now be modified by
+10. The default values of all TurboVNC Viewer parameters can now be modified by
 specifying the values in **~/.vnc/default.turbovnc** using the connection info
 file syntax described above.
-
-
-3.0.4
-=====
-
-### Significant changes relative to 3.0.3:
-
-1. The TurboVNC Viewer now asks for confirmation before overwriting an existing
-screenshot file.
 
 
 3.0.3
