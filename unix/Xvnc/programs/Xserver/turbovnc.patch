@@ -174,23 +174,25 @@ index 84d48b4..3e80392 100644
      /* Add the core protocol */
      RegisterExtensionNames(&extEntry);
 diff --git a/xorg-server-1.20.14/dix/selection.c b/Xserver/dix/selection.c
-index d46103f..af0e36e 100644
+index d46103f..67509d4 100644
 --- a/xorg-server-1.20.14/dix/selection.c
 +++ b/Xserver/dix/selection.c
-@@ -54,6 +54,12 @@ SOFTWARE.
+@@ -54,6 +54,14 @@ SOFTWARE.
  #include "selection.h"
  #include "xace.h"
  
 +#ifdef TURBOVNC
 +extern int vncConvertSelection(ClientPtr client, Atom selection, Atom target,
-+                               Atom property, Window requestor, CARD32 time);
++                               Atom property, Window requestor, CARD32 time,
++                               const char *data);
 +extern Window vncGetSelectionWindow(void);
++extern char *cachedData;
 +#endif
 +
  /*****************************************************************
   * Selection Stuff
   *
-@@ -287,6 +293,15 @@ ProcConvertSelection(ClientPtr client)
+@@ -287,6 +295,15 @@ ProcConvertSelection(ClientPtr client)
      memset(&event, 0, sizeof(xEvent));
      if (rc != Success && rc != BadMatch)
          return rc;
@@ -199,7 +201,7 @@ index d46103f..af0e36e 100644
 +             pSel->window == vncGetSelectionWindow()) {
 +        rc = vncConvertSelection(client, stuff->selection, stuff->target,
 +                                 stuff->property, stuff->requestor,
-+                                 stuff->time);
++                                 stuff->time, cachedData);
 +        if (rc == Success) return rc;
 +    }
 +#endif
