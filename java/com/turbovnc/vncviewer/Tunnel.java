@@ -263,7 +263,7 @@ public class Tunnel {
      do. */
 
   private static final String DEFAULT_SSH_CMD =
-    (Utils.isWindows() ? "ssh.exe" : "/usr/bin/ssh");
+    (Utils.isWindows() ? "ssh.exe" : "/usr/bin/env ssh");
   private static final String DEFAULT_TUNNEL_CMD =
     DEFAULT_SSH_CMD + " -axf -L %L:localhost:%R %H sleep 20";
   private static final String DEFAULT_VIA_CMD =

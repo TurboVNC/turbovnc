@@ -285,11 +285,11 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	|| System Type || Connection Type || \
 		Default ''VNC_VIA_CMD''/''turbovnc.via'' Value ||
 	| Linux/Un*x and Mac | TCP port | \
-		''/usr/bin/ssh -axf -L %L:%H:%R %G sleep 20'' |
+		''/usr/bin/env ssh -axf -L %L:%H:%R %G sleep 20'' |
 	| Windows | TCP port | \
 		''ssh.exe -axf -L %L:%H:%R %G sleep 20'' |
 	| Linux/Un*x and Mac | Unix domain socket | \
-		''/usr/bin/ssh -ax -J %G -- %H exec socat stdio unix-connect:%R'' |
+		''/usr/bin/env ssh -ax -J %G -- %H exec socat stdio unix-connect:%R'' |
 	| Windows | Unix domain socket | \
 		''ssh.exe -ax -J %G -- %H exec socat stdio unix-connect:%R'' |
 	{nl} \
@@ -303,11 +303,11 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	|| System Type || Connection Type || \
 		Default ''VNC_TUNNEL_CMD''/''turbovnc.tunnel'' Value ||
 	| Linux/Un*x and Mac | TCP port | \
-		''/usr/bin/ssh -axf -L %L:localhost:%R %H sleep 20'' |
+		''/usr/bin/env ssh -axf -L %L:localhost:%R %H sleep 20'' |
 	| Windows | TCP port | \
 		''ssh.exe -axf -L %L:localhost:%R %H sleep 20'' |
 	| Linux/Un*x and Mac | Unix domain socket | \
-		''/usr/bin/ssh -ax -- %H exec socat stdio unix-connect:%R'' |
+		''/usr/bin/env ssh -ax -- %H exec socat stdio unix-connect:%R'' |
 	| Windows | Unix domain socket | \
 		''ssh.exe -ax -- %H exec socat stdio unix-connect:%R'' |
 	{nl} \
@@ -319,9 +319,9 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	If the VNC server is listening on a Unix domain socket, then ''%L'' can
 	optionally be used to forward a local TCP port to the remote Unix domain
 	socket (for instance, by setting ''VNC_TUNNEL_CMD'' to
-	''/usr/bin/ssh -axf -L %L:%R %H sleep 20''.)  If ''%L'' is not present, then
-	the TurboVNC Viewer expects the SSH command line to connect standard input
-	and standard output to the remote Unix domain socket.
+	''/usr/bin/env ssh -axf -L %L:%R %H sleep 20''.)  If ''%L'' is not present,
+	then the TurboVNC Viewer expects the SSH command line to connect standard
+	input and standard output to the remote Unix domain socket.
 	{nl}{nl}
 	| ''%%'' | A literal "%" |
 	| ''%G'' | gateway host name or IP address |

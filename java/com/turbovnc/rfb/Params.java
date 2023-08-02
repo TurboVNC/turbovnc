@@ -922,13 +922,13 @@ public final class Params {
   "When using the Via or Tunnel parameters, use an external SSH client " +
   "instead of the built-in SSH client.  (The built-in SSH client is always " +
   "used with the TurboVNC Session Manager.)  The external client defaults " +
-  "to /usr/bin/ssh on Un*x and Mac systems and ssh.exe on Windows systems, " +
-  "but you can use the VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables " +
-  "or the turbovnc.via and turbovnc.tunnel system properties to specify the " +
-  "exact command line to use when creating the tunnel.  If one of those " +
-  "environment variables or system properties is set, then an external SSH " +
-  "client is automatically used.  See the TurboVNC User's Guide for more " +
-  "details.\n " +
+  "to '/usr/bin/env ssh' on Un*x and Mac systems and ssh.exe on Windows " +
+  "systems, but you can use the VNC_VIA_CMD and VNC_TUNNEL_CMD environment " +
+  "variables or the turbovnc.via and turbovnc.tunnel system properties to " +
+  "specify the exact command line to use when creating the tunnel.  If one " +
+  "of those environment variables or system properties is set, then an " +
+  "external SSH client is automatically used.  See the TurboVNC User's " +
+  "Guide for more details.\n " +
 
   "This parameter is effectively set if the Server parameter specifies a " +
   "Unix domain socket connection to a remote host.", false);

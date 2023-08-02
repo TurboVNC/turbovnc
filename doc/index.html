@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2023-08-01T17:47:36">
+<meta name="date" content="2023-08-02T12:35:19">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3177,7 +3177,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
           <tr class="standard">
             <td class="standard">Linux/Un*x and Mac</td>
             <td class="standard">TCP port</td>
-            <td class="standard"><code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code></td>
+            <td class="standard"><code>/usr/bin/env&nbsp;ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code></td>
           </tr>
           <tr class="standard">
             <td class="standard">Windows</td>
@@ -3187,7 +3187,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
           <tr class="standard">
             <td class="standard">Linux/Un*x and Mac</td>
             <td class="standard">Unix domain socket</td>
-            <td class="standard"><code>/usr/bin/ssh&nbsp;-ax&nbsp;-J&nbsp;%G&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
+            <td class="standard"><code>/usr/bin/env&nbsp;ssh&nbsp;-ax&nbsp;-J&nbsp;%G&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
           </tr>
           <tr class="standard">
             <td class="standard">Windows</td>
@@ -3218,7 +3218,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
           <tr class="standard">
             <td class="standard">Linux/Un*x and Mac</td>
             <td class="standard">TCP port</td>
-            <td class="standard"><code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code></td>
+            <td class="standard"><code>/usr/bin/env&nbsp;ssh&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code></td>
           </tr>
           <tr class="standard">
             <td class="standard">Windows</td>
@@ -3228,7 +3228,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
           <tr class="standard">
             <td class="standard">Linux/Un*x and Mac</td>
             <td class="standard">Unix domain socket</td>
-            <td class="standard"><code>/usr/bin/ssh&nbsp;-ax&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
+            <td class="standard"><code>/usr/bin/env&nbsp;ssh&nbsp;-ax&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
           </tr>
           <tr class="standard">
             <td class="standard">Windows</td>
@@ -3248,7 +3248,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
         listening on a Unix domain socket, then <code>%L</code> can optionally 
         be used to forward a local TCP port to the remote Unix domain socket 
         (for instance, by setting <code>VNC_TUNNEL_CMD</code> to 
-        <code>/usr/bin/ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>.)  
+        <code>/usr/bin/env&nbsp;ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>.)  
         If <code>%L</code> is not present, then the TurboVNC Viewer expects the 
         SSH command line to connect standard input and standard output to the 
         remote Unix domain socket. <br /><br />
