@@ -514,7 +514,8 @@ public abstract class CConnection extends CMsgHandler {
     if (buffers[0][lengths[0] - 1] == 0)
       lengths[0]--;
     serverClipboard =
-      Utils.convertLF(new String(buffers[0], 0, lengths[0]));
+      Utils.convertLF(new String(buffers[0], 0, lengths[0],
+                                 StandardCharsets.UTF_8));
 
     // FIXME: Should probably verify that this data was actually requested
     handleClipboardData(serverClipboard);
@@ -568,7 +569,7 @@ public abstract class CConnection extends CMsgHandler {
       int[] lengths = new int[1];
       byte[][] datas = new byte[1][];
 
-      byte[] filteredBytes = filtered.getBytes();
+      byte[] filteredBytes = filtered.getBytes(StandardCharsets.UTF_8);
       lengths[0] = filteredBytes.length + 1;
       datas[0] = new byte[filteredBytes.length + 1];
       System.arraycopy(filteredBytes, 0, datas[0], 0, filteredBytes.length);

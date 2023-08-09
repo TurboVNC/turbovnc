@@ -1,3 +1,12 @@
+3.1
+===
+
+### Significant changes relative to 3.1 beta1:
+
+1. Fixed an issue in the Windows TurboVNC Viewer that prevented certain UTF-8
+characters in the clipboard from being transfered properly.
+
+
 3.1 beta1
 =========
 
