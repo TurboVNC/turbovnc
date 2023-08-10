@@ -274,9 +274,9 @@ fi
 %endif
 
 %if "%{prefix}" == "@CMAKE_INSTALL_DEFAULT_PREFIX@"
-  %{prefix}/README.txt
+  %{prefix}/README.md
 %else
-  %{docdir}/README.txt
+  %{docdir}/README.md
 %endif
 %if "%{viewer}" == "1"
  %{bindir}/vncviewer

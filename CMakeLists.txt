@@ -17,7 +17,7 @@ string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 set(VERSION 3.0.91)
 set(DOCVERSION 3.1)
 set(COPYRIGHT_YEAR "1999-2023")
-set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
+set(COPYRIGHT "The VirtualGL Project and many others (see README.md)")
 set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
 
 macro(boolean_number var)
@@ -190,7 +190,7 @@ configure_file("${CMAKE_SOURCE_DIR}/cmakescripts/cmake_uninstall.cmake.in"
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P cmake_uninstall.cmake)
 
 if(CMAKE_INSTALL_PREFIX STREQUAL "${CMAKE_INSTALL_DEFAULT_PREFIX}" OR WIN32)
-	install(FILES README.txt DESTINATION .)
+	install(FILES README.md DESTINATION .)
 else()
-	install(FILES README.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
+	install(FILES README.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
 endif()
