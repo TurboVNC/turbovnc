@@ -27,7 +27,7 @@ install:
 
       set MSYSTEM=MINGW32
 
-      bash -c "pacman --noconfirm -S unzip"
+      bash -c "pacman --noconfirm -S unzip zip"
 
       git clone --depth=1 https://github.com/TurboVNC/buildscripts.git -b %APPVEYOR_REPO_BRANCH% c:/buildscripts
 
@@ -48,12 +48,17 @@ build_script:
 
       move c:\vnc.nightly\log-windows.txt .
 
+      zip TurboVNC-installers.zip *.exe
+
 artifacts:
   - path: '*.tar.gz'
     name: Source tarball
 
   - path: '*.exe'
     name: TurboVNC Viewer
+
+  - path: '*.zip'
+    name: All TurboVNC installers
 
   - path: 'log-windows.txt'
     name: Build log
@@ -64,14 +69,18 @@ artifacts:
 test: off
 
 deploy:
-  provider: S3
-  access_key_id:
-    secure: Z74OYogQ6bNV/I+6b5ZEXig74+6MW2WLER0v/bPM/uk=
-  secret_access_key:
-    secure: cyGZhHVCFwZ9jgf5lXoW69mVtECmqwx3eLo61ha8ueWbMYlHho7lwDXwVvxOFiCa
-  bucket: turbovnc-pr
-  region:
-    secure: qSElYBgBRcEUf88M6Osthw==
-  folder: $(APPVEYOR_REPO_BRANCH)/windows
-  set_public: true
-  remove_files: true
+  - provider: Webhook
+    url: https://app.signpath.io/API/v1/616cafe1-280b-4605-ab3b-da1345d91f61/Integrations/AppVeyor?ProjectSlug=turbovnc&SigningPolicySlug=test-signing
+    authorization:
+      secure: 9vGndT9f79l6UdZ//rXtN7BURC6thUsokKoz9TfyRyfSU7pkTHEciklDMG2ScC/8NJlBweGH2D4jwegU1iTYBQ==
+  - provider: S3
+    access_key_id:
+      secure: Z74OYogQ6bNV/I+6b5ZEXig74+6MW2WLER0v/bPM/uk=
+    secret_access_key:
+      secure: cyGZhHVCFwZ9jgf5lXoW69mVtECmqwx3eLo61ha8ueWbMYlHho7lwDXwVvxOFiCa
+    bucket: turbovnc-pr
+    region:
+      secure: qSElYBgBRcEUf88M6Osthw==
+    folder: $(APPVEYOR_REPO_BRANCH)/windows
+    set_public: true
+    remove_files: true
