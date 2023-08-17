@@ -70,9 +70,11 @@ test: off
 
 deploy:
   - provider: Webhook
-    url: https://app.signpath.io/API/v1/616cafe1-280b-4605-ab3b-da1345d91f61/Integrations/AppVeyor?ProjectSlug=turbovnc&SigningPolicySlug=test-signing
+    url: https://app.signpath.io/API/v1/616cafe1-280b-4605-ab3b-da1345d91f61/Integrations/AppVeyor?ProjectSlug=turbovnc&SigningPolicySlug=release-signing
     authorization:
       secure: 9vGndT9f79l6UdZ//rXtN7BURC6thUsokKoz9TfyRyfSU7pkTHEciklDMG2ScC/8NJlBweGH2D4jwegU1iTYBQ==
+    on:
+      appveyor_repo_tag: true
   - provider: S3
     access_key_id:
       secure: Z74OYogQ6bNV/I+6b5ZEXig74+6MW2WLER0v/bPM/uk=
