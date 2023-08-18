@@ -1,5 +1,5 @@
-3.1
-===
+3.1 beta2
+=========
 
 ### Significant changes relative to 3.1 beta1:
 
