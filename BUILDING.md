@@ -119,10 +119,8 @@ The following procedure will build the TurboVNC Viewer and some native glueware
 to support running it as a standalone application.  Additionally, if the
 TurboVNC Server build is enabled (which is the default on Un*x platforms other
 than Mac), then this procedure will build the TurboVNC Server and a handful of
-C applications that are used to interface with it.  On most 64-bit systems
-(Solaris being a notable exception), this will build a 64-bit version of
-TurboVNC.  (See "Build Recipes" for specific instructions on how to build a
-64-bit version of TurboVNC on Solaris.)
+C applications that are used to interface with it.  On most 64-bit systems,
+this will build a 64-bit version of TurboVNC.
 
     cd {build_directory}
     cmake -G"Unix Makefiles" [additional CMake flags] {source_directory}
@@ -193,9 +191,8 @@ CMake variables:
 - `TJPEG_INCLUDE_DIR`
 - `TJPEG_LIBRARY`
 - `TVNC_DLOPENSSL`
+- `TVNC_INTELZLIB`
 - `TVNC_STATIC_XORG_PATHS`
-- `TVNC_SYSTEMLIBS`
-- `TVNC_SYSTEMX11`
 - `XKB_BASE_DIRECTORY`
 - `XKB_BIN_DIRECTORY`
 - `XORG_DRI_DRIVER_PATH`
@@ -208,15 +205,6 @@ those variables.
 
 Build Recipes
 -------------
-
-
-### 64-bit Build on Solaris
-
-Use export/setenv to set the following environment variables before running
-CMake:
-
-    CFLAGS=-m64
-    LDFLAGS=-m64
 
 
 ### Other Compilers

@@ -1,8 +1,0 @@
-#!/bin/bash
-
-PROJECT=bzip2-1.0.8
-FILE=$PROJECT.tar.gz
-URL=https://sourceware.org/pub/bzip2
-SRCDIR=`dirname $0`
-
-. $SRCDIR/../../genpatch

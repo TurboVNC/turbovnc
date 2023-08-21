@@ -1,3 +1,18 @@
+3.2
+===
+
+### Significant changes relative to 3.1 beta2:
+
+1. Since all supported TurboVNC host platforms now contain new enough libraries
+to build xorg-server 1.20.x, the TurboVNC Server is now dynamically linked
+against the system-supplied versions of these libraries rather than statically
+linked against in-tree versions.  The `TVNC_SYSTEMLIBS` and `TVNC_SYSTEMX11`
+CMake variables have been removed, and the build system now behaves as if those
+variables are always on.  A new CMake variable (`TVNC_INTELZLIB`) can be used
+on x86 platforms to disable the in-tree SIMD-accelerated Intel zlib
+implementation and build against the system-supplied zlib implementation.
+
+
 3.1 beta2
 =========
 

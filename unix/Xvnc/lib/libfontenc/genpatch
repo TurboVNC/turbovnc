@@ -1,8 +1,0 @@
-#!/bin/bash
-
-PROJECT=libfontenc-1.1.4
-FILE=$PROJECT.tar.gz
-URL=https://www.x.org/releases/individual/lib
-SRCDIR=`dirname $0`
-
-. $SRCDIR/../../genpatch

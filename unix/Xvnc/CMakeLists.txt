@@ -43,8 +43,7 @@ endif()
 if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	message(STATUS "BSD-like system detected")
 	add_definitions(-DCSRG_BASED)
-elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
-	NOT CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	message(WARNING "TurboVNC Server build has not been tested on this platform.  Chaos may ensue.")
 endif()
 
@@ -80,88 +79,38 @@ if(HAVE_STRLCPY)
 	add_definitions(-DHAVE_STRLCPY)
 endif()
 
-option(TVNC_SYSTEMX11
-	"Build the TurboVNC Server against the system-supplied X11 and OpenGL headers and libraries rather than the in-tree versions.  This will probably fail unless the system has xorg-server 1.19.x or later."
-	OFF)
-boolean_number(TVNC_SYSTEMX11)
-report_option(TVNC_SYSTEMX11 "System X11 headers/libs")
+include(FindPkgConfig)
+pkg_check_modules(X11_Xfont2 REQUIRED xfont2)
+pkg_check_modules(X11_Fontenc REQUIRED fontenc)
+pkg_check_modules(X11_Pixman REQUIRED pixman-1)
+include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xau_INCLUDE_PATH}
+	${X11_Xdmcp_INCLUDE_PATH} ${X11_Xkbfile_INCLUDE_PATH}
+	${X11_Xfont2_INCLUDEDIR} ${X11_Pixman_INCLUDEDIR}/pixman-1)
 
-if(NOT TVNC_SYSTEMX11)
-	function(copy_X_header file dir)
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/unix/Xvnc/X_include/${dir})
-		file(COPY ${file} DESTINATION ${CMAKE_BINARY_DIR}/unix/Xvnc/X_include/${dir})
-	endfunction()
-endif()
-
-if(TVNC_SYSTEMX11)
-	include(FindPkgConfig)
-	pkg_check_modules(X11_Xfont2 REQUIRED xfont2)
-	pkg_check_modules(X11_Fontenc REQUIRED fontenc)
-	pkg_check_modules(X11_Pixman REQUIRED pixman-1)
-	include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xau_INCLUDE_PATH}
-		${X11_Xdmcp_INCLUDE_PATH} ${X11_Xkbfile_INCLUDE_PATH}
-		${X11_Xfont2_INCLUDEDIR} ${X11_Pixman_INCLUDEDIR}/pixman-1)
-else()
-	include_directories(${CMAKE_CURRENT_BINARY_DIR}/X_include)
-	set(X11_Xau_LIB Xau)
-	set(X11_Xdmcp_LIB Xdmcp)
-	set(X11_Xfont2_LDFLAGS Xfont2)
-	set(X11_Fontenc_LDFLAGS fontenc)
-	set(X11_Pixman_LDFLAGS pixman)
-endif()
-
-set(USE_INTEL_ZLIB 0)
 if((CPU_TYPE STREQUAL "x86_64" OR CPU_TYPE STREQUAL "i386") AND
-	NOT TVNC_SYSTEMLIBS AND NOT CMAKE_C_COMPILER_ID MATCHES SunPro)
-	set(USE_INTEL_ZLIB 1)
+	NOT CMAKE_C_COMPILER_ID MATCHES SunPro)
+	option(TVNC_INTELZLIB
+		"Build the TurboVNC Server against the SIMD-accelerated Intel zlib implementation in the TurboVNC source tree rather than the system-supplied zlib implementation"
+		ON)
+	boolean_number(TVNC_INTELZLIB)
+	report_option(TVNC_INTELZLIB "Intel zlib")
 endif()
-if(NOT USE_INTEL_ZLIB)
+if(NOT TVNC_INTELZLIB)
 	include(FindZLIB)
 else()
 	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib)
 	set(ZLIB_LIBRARIES zlib)
 endif()
-if(TVNC_SYSTEMLIBS)
-	include(FindBZip2)
-else()
-	set(BZIP2_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/bzip2)
-	set(BZIP2_LIBRARIES bzip2)
-endif()
+include(FindBZip2)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
 configure_file(include/tvnc_version.h.in
 	programs/Xserver/include/tvnc_version.h)
 
-if(NOT APPLE)
-	option(TVNC_GLX
-		"Include GLX extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"
-		ON)
-	boolean_number(TVNC_GLX)
-	report_option(TVNC_GLX "GLX extension")
-endif()
+include(FindFreetype)
+set(OpenGL_GL_PREFERENCE LEGACY)
+include(FindOpenGL)
+include_directories(${OPENGL_INCLUDE_DIR})
 
-if(NOT TVNC_SYSTEMX11)
-	add_subdirectory(include)
-endif()
-if(TVNC_SYSTEMLIBS)
-	include(FindFreetype)
-else()
-	add_subdirectory(extras/freetype2)
-	set(FREETYPE_INCLUDE_DIRS
-		${CMAKE_CURRENT_SOURCE_DIR}/extras/freetype2/include
-		${CMAKE_CURRENT_SOURCE_DIR}/extras/freetype2/src/truetype)
-	set(FREETYPE_LIBRARIES freetype2)
-endif()
-if(TVNC_GLX)
-	if(TVNC_SYSTEMX11)
-		if(POLICY CMP0072)
-			cmake_policy(SET CMP0072 OLD)
-		endif()
-		include(FindOpenGL)
-		include_directories(${OPENGL_INCLUDE_DIR})
-	else()
-		add_subdirectory(extras/Mesa)
-	endif()
-endif()
 add_subdirectory(lib)
 add_subdirectory(programs/Xserver)

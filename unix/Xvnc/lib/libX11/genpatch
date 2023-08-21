@@ -1,8 +1,0 @@
-#!/bin/bash
-
-PROJECT=libX11-1.6.12
-FILE=$PROJECT.tar.gz
-URL=https://www.x.org/releases/individual/lib
-SRCDIR=`dirname $0`
-
-. $SRCDIR/../../genpatch >turbovnc.patch

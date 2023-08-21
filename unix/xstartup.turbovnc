@@ -27,8 +27,8 @@
 unset SESSION_MANAGER
 # If each TurboVNC session will run a (reasonably modern) window manager, then
 # each TurboVNC session must have a separate D-Bus session bus instance.  On
-# Red Hat/Fedora (and derivatives), SuSE/openSUSE, FreeBSD, and Solaris 11,
-# xinitrc and Xsession automatically create a new session bus instance if the
+# Red Hat/Fedora (and derivatives), SuSE/openSUSE, and FreeBSD, xinitrc and
+# Xsession automatically create a new session bus instance if the
 # DBUS_SESSION_BUS_ADDRESS environment variable is empty, so we used to unset
 # that variable at this point in the script.  However, on other operating
 # systems (particularly Debian 10+ and Ubuntu 18.04+), it is necessary to
@@ -184,7 +184,7 @@ if [ "$TVNC_WM" = "" ]; then
   # startup script.  (This is mostly for the benefit of legacy operating
   # systems.  Modern operating systems typically do not use xinitrc.)
 
-  # Typical system-wide WM startup script on Linux and Solaris 11
+  # Typical system-wide WM startup script on Linux
   if [ -f /etc/X11/xinit/xinitrc ]; then
     TVNC_WM=/etc/X11/xinit/xinitrc
   fi

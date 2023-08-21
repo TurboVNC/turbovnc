@@ -1,5 +1,0 @@
-add_subdirectory(libxkbfile)
-add_subdirectory(xorgproto)
-if(TVNC_GLX)
-	add_subdirectory(libXext)
-endif()

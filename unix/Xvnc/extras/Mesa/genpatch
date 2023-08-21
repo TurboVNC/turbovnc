@@ -1,8 +1,0 @@
-#!/bin/bash
-
-PROJECT=mesa-20.3.5
-FILE=$PROJECT.tar.xz
-URL=https://mesa.freedesktop.org/archive
-SRCDIR=`dirname $0`
-
-. $SRCDIR/../../genpatch >$SRCDIR/turbovnc.patch
