@@ -274,8 +274,8 @@ when attempting to use TLS encryption with the TurboVNC Server (built with
 `TVNC_DLOPENSSL=1`, which is the default) running on a TurboVNC host with
 OpenSSL 3.
 
-9. The TurboVNC Server is now based on xorg-xserver 1.20.14, which fixes
-several minor X server bugs.
+9. The TurboVNC Server is now based on xorg-server 1.20.14, which fixes several
+minor X server bugs.
 
 
 3.0 beta1
@@ -409,7 +409,7 @@ attention from the TurboVNC developers and user community, there is no
 compelling reason to use the GnuTLS wrapper anymore.  The 2.2.x version of the
 TurboVNC Server will continue to support GnuTLS on a break/fix basis.
 
-17. The TurboVNC Server is now based on xorg-xserver 1.20.13, which fixes
+17. The TurboVNC Server is now based on xorg-server 1.20.13, which fixes
 several minor X server bugs.
 
 18. The TurboVNC Server's built-in unaccelerated GLX/OpenGL implementation no
@@ -778,7 +778,7 @@ set based on the client's physical screen layout.
 6. The Windows TurboVNC Viewer should now build properly with Visual Studio
 2015.
 
-7. The TurboVNC Server is now based on xorg-xserver 1.19.7, which fixes several
+7. The TurboVNC Server is now based on xorg-server 1.19.7, which fixes several
 minor X server bugs.
 
 8. The TurboVNC Server now supports the X Record Extension.  This extension can
@@ -1013,7 +1013,7 @@ dialog), {key} was unintentionally transmitted to the VNC server.
 
 3. Fixed a segfault in the TurboVNC Server that occurred when attempting to
 disable the Composite extension.  This was a regression caused by a bug in the
-xorg-xserver 1.19.6 code.
+xorg-server 1.19.6 code.
 
 4. The default `xstartup.turbovnc` script that the TurboVNC Server creates now
 works around an issue whereby the desktop contents would not be displayed when
@@ -1146,7 +1146,7 @@ system property to `1`.
 (`xrandr`) or through the window manager's display configuration applet, to
 modify the server's screen layout.
 
-7. The TurboVNC Server is now based on xorg-xserver 1.19.6, which improves
+7. The TurboVNC Server is now based on xorg-server 1.19.6, which improves
 compatibility with newer window managers.
 
 8. By default, the TurboVNC Server will no longer listen on a TCP socket for
