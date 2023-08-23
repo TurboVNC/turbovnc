@@ -2,7 +2,7 @@
  * rfb.h - header file for RFB DDX implementation.
  */
 
-/* Copyright (C) 2010-2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2011 Gernot Tenchio
@@ -826,6 +826,17 @@ extern void rfbCopyWindow(WindowPtr, DDXPointRec, RegionPtr);
 extern void rfbClearToBackground(WindowPtr, int x, int y, int w, int h,
                                  Bool generateExposures);
 extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
+
+
+/* dri3.c */
+
+#ifdef DRI3
+extern const char *driNode;
+
+extern void xvnc_dri3_init(void);
+extern void xvnc_dri3_sync_bo_to_pixmap(PixmapPtr pixmap);
+extern void xvnc_dri3_sync_pixmaps_to_bos(void);
+#endif
 
 
 /* flowcontrol.c */

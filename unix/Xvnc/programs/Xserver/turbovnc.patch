@@ -217,6 +217,41 @@ index 54b4e6a..8db9d03 100644
  /*    compCheckTree (pWin->drawable.pScreen); can't check -- tree isn't good*/
      return ret;
  }
+diff --git a/xorg-server-1.20.14/damageext/damageext.c b/Xserver/damageext/damageext.c
+index ce490cb..168585e 100644
+--- a/xorg-server-1.20.14/damageext/damageext.c
++++ b/Xserver/damageext/damageext.c
+@@ -1,6 +1,8 @@
+ /*
+  * Copyright © 2002 Keith Packard
+  * Copyright 2013 Red Hat, Inc.
++ * Copyright © 2023 Kasm
++ * Copyright © 2024 D. R. Commander
+  *
+  * Permission to use, copy, modify, distribute, and sell this software and its
+  * documentation for any purpose is hereby granted without fee, provided that
+@@ -30,6 +32,10 @@
+ #include "protocol-versions.h"
+ #include "extinit.h"
+ 
++#if defined(DRI3) && defined(TURBOVNC)
++extern void xvnc_sync_dri3_textures(void);
++#endif
++
+ #ifdef PANORAMIX
+ #include "panoramiX.h"
+ #include "panoramiXsrv.h"
+@@ -97,6 +103,10 @@ DamageExtNotify(DamageExtPtr pDamageExt, BoxPtr pBoxes, int nBoxes)
+ 
+     damageGetGeometry(pDrawable, &x, &y, &w, &h);
+ 
++#if defined(DRI3) && defined(TURBOVNC)
++    xvnc_dri3_sync_pixmaps_to_bos();
++#endif
++
+     UpdateCurrentTimeIf();
+     ev = (xDamageNotifyEvent) {
+         .type = DamageEventBase + XDamageNotify,
 diff --git a/xorg-server-1.20.14/dix/events.c b/Xserver/dix/events.c
 index 427b891..0f32bd8 100644
 --- a/xorg-server-1.20.14/dix/events.c
@@ -366,6 +401,36 @@ index d46103f..67509d4 100644
      else if (rc == Success && pSel->window != None) {
          event.u.u.type = SelectionRequest;
          event.u.selectionRequest.owner = pSel->window;
+diff --git a/xorg-server-1.20.14/dri3/dri3_request.c b/Xserver/dri3/dri3_request.c
+index 958877e..98d2e7d 100644
+--- a/xorg-server-1.20.14/dri3/dri3_request.c
++++ b/Xserver/dri3/dri3_request.c
+@@ -49,6 +49,8 @@ dri3_screen_can_one_point_two(ScreenPtr screen)
+ static int
+ proc_dri3_query_version(ClientPtr client)
+ {
++    int i;
++
+     REQUEST(xDRI3QueryVersionReq);
+     xDRI3QueryVersionReply rep = {
+         .type = X_Reply,
+@@ -60,14 +62,14 @@ proc_dri3_query_version(ClientPtr client)
+ 
+     REQUEST_SIZE_MATCH(xDRI3QueryVersionReq);
+ 
+-    for (int i = 0; i < screenInfo.numScreens; i++) {
++    for (i = 0; i < screenInfo.numScreens; i++) {
+         if (!dri3_screen_can_one_point_two(screenInfo.screens[i])) {
+             rep.minorVersion = 0;
+             break;
+         }
+     }
+ 
+-    for (int i = 0; i < screenInfo.numGPUScreens; i++) {
++    for (i = 0; i < screenInfo.numGPUScreens; i++) {
+         if (!dri3_screen_can_one_point_two(screenInfo.gpuscreens[i])) {
+             rep.minorVersion = 0;
+             break;
 diff --git a/xorg-server-1.20.14/fb/fbimage.c b/Xserver/fb/fbimage.c
 index bd24728..801df20 100644
 --- a/xorg-server-1.20.14/fb/fbimage.c
@@ -524,6 +589,40 @@ index cc82191..f5d2891 100644
  }
  
  void
+diff --git a/xorg-server-1.20.14/present/present.c b/Xserver/present/present.c
+index d810953..9c11266 100644
+--- a/xorg-server-1.20.14/present/present.c
++++ b/Xserver/present/present.c
+@@ -1,5 +1,7 @@
+ /*
+  * Copyright © 2013 Keith Packard
++ * Copyright © 2023 Kasm
++ * Copyright © 2024 D. R. Commander
+  *
+  * Permission to use, copy, modify, distribute, and sell this software and its
+  * documentation for any purpose is hereby granted without fee, provided that
+@@ -27,6 +29,10 @@
+ #include "present_priv.h"
+ #include <gcstruct.h>
+ 
++#if defined(DRI3) && defined(TURBOVNC)
++extern void xvnc_dri3_sync_bo_to_pixmap(PixmapPtr pixmap);
++#endif
++
+ /*
+  * Returns:
+  * TRUE if the first MSC value is equal to or after the second one
+@@ -87,6 +93,10 @@ present_copy_region(DrawablePtr drawable,
+     ScreenPtr   screen = drawable->pScreen;
+     GCPtr       gc;
+ 
++#if defined(DRI3) && defined(TURBOVNC)
++    xvnc_dri3_sync_bo_to_pixmap(pixmap);
++#endif
++
+     gc = GetScratchGC(drawable->depth, screen);
+     if (update) {
+         ChangeGCVal     changes[2];
 diff --git a/xorg-server-1.20.14/randr/rrmode.c b/Xserver/randr/rrmode.c
 index d34025b..d76a24d 100644
 --- a/xorg-server-1.20.14/randr/rrmode.c

@@ -2,7 +2,7 @@
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for Xvnc
 .\"
-.\" Copyright (C) 2010, 2012, 2014-2022 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2023 D. R. Commander
 .\" Copyright (C) 2021 Steffen Kieß
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
@@ -14,7 +14,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH Xvnc 1 "March 2021" "" "TurboVNC"
+.TH Xvnc 1 "August 2023" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -251,6 +251,13 @@ connects and requests that the client-side devices be cloned, it is too late.
 
 .TP
 \fBTURBOVNC DISPLAY OPTIONS\fR
+
+.TP
+\fB-drinode\fR \fIrender-node\fR
+Enable the DRI3 X extension, which provides GPU acceleration for OpenGL and
+other rendering APIs when using open source GPU drivers.  \fIrender-node\fR is
+the path of the DRM render node for the GPU that you wish to use (for example,
+\fB/dev/dri/renderD128\fR).
 
 .TP
 \fB\-geometry\fR \fIwidth\fRx\fIheight\fR

@@ -105,6 +105,13 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 configure_file(include/tvnc_version.h.in
 	programs/Xserver/include/tvnc_version.h)
 
+option(TVNC_DRI3
+	"Include DRI3 extension in Xvnc (enables GPU acceleration when using open source drivers)"
+	ON)
+boolean_number(TVNC_DRI3)
+boolean_number(TVNC_DRI3 PARENT_SCOPE)
+report_option(TVNC_DRI3 "DRI3 extension")
+
 set(OpenGL_GL_PREFERENCE LEGACY)
 include(FindOpenGL)
 

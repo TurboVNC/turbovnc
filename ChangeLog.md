@@ -12,6 +12,11 @@ variables are always on.  A new CMake variable (`TVNC_INTELZLIB`) can be used
 on x86 platforms to disable the in-tree SIMD-accelerated Intel zlib
 implementation and build against the system-supplied zlib implementation.
 
+2. The TurboVNC Server now supports the DRI3 X extension when using open source
+GPU drivers.  This enables GPU acceleration in a TurboVNC session without
+VirtualGL, although the performance will be better with VirtualGL.  Refer to
+the description of the `-drinode` option in the Xvnc man page for more details.
+
 
 3.1.1
 =====

@@ -24,6 +24,12 @@ if(TVNC_NVCONTROL)
 	include_directories(${CMAKE_SOURCE_DIR}/unix/libXNVCtrl ${X11_INCLUDE_DIR})
 endif()
 
+set(DRI3SRC "")
+if(TVNC_DRI3)
+	set(DRI3SRC dri3.c)
+	include_directories(../../dri3 ../../miext/sync)
+endif()
+
 set(TVNC_USETLS_DESC
 	"Implement server-side TLS encryption using the specified library [Options: OpenSSL (default), None]")
 set(TVNC_USETLS "OpenSSL" CACHE STRING ${TVNC_USETLS_DESC})
@@ -66,6 +72,7 @@ add_library(vnc STATIC
 	cutpaste.c
 	dispcur.c
 	draw.c
+	${DRI3SRC}
 	flowcontrol.c
 	hextile.c
 	init.c
@@ -94,6 +101,9 @@ add_library(vnc STATIC
 	${NVCTRLSRC}
 	${RFBSSLSRC})
 
+if(TVNC_DRI3)
+	target_link_libraries(vnc PkgConfig::DRM)
+endif()
 if(TVNC_USETLS STREQUAL "openssl" AND NOT TVNC_DLOPENSSL)
 	target_link_libraries(vnc OpenSSL::SSL)
 endif()

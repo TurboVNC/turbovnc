@@ -92,6 +92,14 @@ from the X Consortium.
 #define TRANS_REOPEN
 #include <X11/Xtrans/Xtrans.h>
 #include <xkb-config.h>
+#ifdef DRI3
+#ifdef MITSHM
+#include "shmint.h"
+#endif
+#ifdef HAVE_XSHMFENCE
+#include <misyncshm.h>
+#endif
+#endif
 
 #define RFB_DEFAULT_WIDTH  1024
 #define RFB_DEFAULT_HEIGHT 768
@@ -466,6 +474,14 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 #endif
 
+  if (strcasecmp(argv[i], "-drinode") == 0) {
+#ifdef DRI3
+    REQUIRE_ARG();
+    driNode = argv[i + 1];
+#endif
+    return 2;
+  }
+
   if (strcasecmp(argv[i], "-geometry") == 0) {
     /* -geometry WxH or W0xH0+X0+Y0[,W1xH1+X1+Y1,...] */
     char *str, *token;
@@ -794,6 +810,11 @@ void InitOutput(ScreenInfo *pScreenInfo, int argc, char **argv)
   if (AddScreen(rfbScreenInit, argc, argv) == -1)
     FatalError("Couldn't add screen");
 
+#ifdef DRI3
+  if (driNode)
+    xvnc_dri3_init();
+#endif
+
   RegisterBlockAndWakeupHandlers(rfbBlockHandler, rfbWakeupHandler, 0);
 }
 
@@ -937,6 +958,16 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 
   if (prfb->bitsPerPixel > 4)
     fbPictureInit(pScreen, 0, 0);
+
+#ifdef DRI3
+#ifdef MITSHM
+  ShmRegisterFbFuncs(pScreen);
+#endif
+#ifdef HAVE_XSHMFENCE
+  if (!miSyncShmScreenInit(pScreen))
+    return FALSE;
+#endif
+#endif
 
   if (!dixRegisterPrivateKey(&rfbGCKey, PRIVATE_GC, sizeof(rfbGCRec)))
     FatalError("rfbScreenInit: dixRegisterPrivateKey failed");
@@ -1742,7 +1773,12 @@ void ddxUseMsg(void)
   ErrorF("========================\n");
   ErrorF("-depth D               set framebuffer depth\n");
 #ifndef TURBOVNC_STATIC_XORG_PATHS
-  ErrorF("-dridir dir            specify directory containing the swrast Mesa driver\n");
+  ErrorF("-dridir dir            specify directory containing the Mesa DRI drivers\n");
+#endif
+#ifdef DRI3
+  ErrorF("-drinode render-node   enable the DRI3 X extension with the GPU corresponding to\n");
+  ErrorF("                       the specified DRM render node (open source GPU drivers\n");
+  ErrorF("                       only)\n");
 #endif
   ErrorF("-geometry WxH          set framebuffer width & height (single-screen)\n");
   ErrorF("-geometry W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]\n");
