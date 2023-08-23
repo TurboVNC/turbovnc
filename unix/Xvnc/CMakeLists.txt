@@ -136,6 +136,7 @@ if(NOT APPLE)
 	option(TVNC_GLX
 		"Include GLX extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"
 		ON)
+	boolean_number(TVNC_GLX)
 	report_option(TVNC_GLX "GLX extension")
 endif()
 
