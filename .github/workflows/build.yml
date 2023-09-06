@@ -77,7 +77,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up build
         run: |
-          sudo apt install -y libxi-dev
+          sudo apt install -y libxi-dev xserver-xorg-dev
           mkdir $HOME/libjpeg-turbo-deb
           pushd $HOME/libjpeg-turbo-deb
           wget --no-check-certificate $LJT_URL/libjpeg-turbo-official_$LJT_VERSION\_amd64.deb $LJT_URL/libjpeg-turbo-official32_$LJT_VERSION\_amd64.deb
