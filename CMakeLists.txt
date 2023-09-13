@@ -14,7 +14,7 @@ endif()
 
 project(TurboVNC NONE)
 string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
-set(VERSION 3.0.91)
+set(VERSION 3.0.92)
 set(DOCVERSION 3.1)
 set(COPYRIGHT_YEAR "1999-2023")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.md)")
