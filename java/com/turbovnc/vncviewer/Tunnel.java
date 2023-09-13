@@ -168,8 +168,6 @@ public class Tunnel {
     // username and passphrase will be given via UserInfo interface.
     int port = Params.sshPort.getValue();
     String user = opts.sshUser;
-    if (user == null)
-      user = (String)System.getProperties().get("user.name");
 
     File sshConfigFile = new File(Params.sshConfig.getValue());
     if (sshConfigFile.exists() && sshConfigFile.canRead()) {
@@ -182,7 +180,7 @@ public class Tunnel {
       // getSession() if the configuration has already been set using an
       // OpenSSH configuration file.
       String repoUser = repo.getConfig(host).getUser();
-      if (repoUser != null)
+      if (repoUser != null && user == null)
         user = repoUser;
       String[] identityFiles = repo.getConfig(host).getValues("IdentityFile");
       if (identityFiles != null) {
@@ -199,6 +197,12 @@ public class Tunnel {
         vlog.info("Could not parse SSH config file " +
                   Params.sshConfig.getValue());
       }
+    }
+
+    if (user == null) {
+      user = (String)System.getProperties().get("user.name");
+      if (Params.localUsernameLC.getValue())
+        user = user.toLowerCase();
     }
 
     if (useDefaultPrivateKeyFiles) {

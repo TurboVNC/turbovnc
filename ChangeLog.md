@@ -6,6 +6,16 @@
 1. The TurboVNC Viewer now asks for confirmation before overwriting an existing
 screenshot file.
 
+2. Improved the TurboVNC Viewer's handling of SSH usernames in the following
+ways:
+
+     - To better emulate the behavior of OpenSSH, the TurboVNC Viewer's
+built-in SSH client now allows an SSH username specified on the command line or
+in a connection info file to override an SSH username specified in the OpenSSH
+config file.
+     - The `LocalUsernameLC` parameter now affects the SSH username if the SSH
+username is unspecified.
+
 
 3.0.3
 =====

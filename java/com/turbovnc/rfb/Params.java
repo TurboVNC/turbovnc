@@ -767,7 +767,8 @@ public final class Params {
 
   public static BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC",
-  "When the SendLocalUsername parameter is set, setting this parameter will " +
+  "When the SendLocalUsername parameter is set, or when using SSH " +
+  "tunneling without a specified SSH username, setting this parameter will " +
   "cause the local username to be sent in lowercase, which may be useful " +
   "when using the viewer on Windows machines (Windows allows mixed-case " +
   "usernames, whereas Un*x and Mac platforms generally don't.)", false);
