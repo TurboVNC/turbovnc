@@ -176,9 +176,7 @@ public class Tunnel {
 
     // username and passphrase will be given via UserInfo interface.
     int port = params.sshPort.get();
-    String user = params.sshUser;
-    if (user == null)
-      user = (String)System.getProperties().get("user.name");
+    String user = params.sshUser.get();
 
     File sshConfigFile = new File(params.sshConfig.get());
     if (sshConfigFile.exists() && sshConfigFile.canRead()) {
@@ -191,7 +189,7 @@ public class Tunnel {
       // getSession() if the configuration has already been set using an
       // OpenSSH configuration file.
       String repoUser = repo.getConfig(host).getUser();
-      if (repoUser != null)
+      if (repoUser != null && user == null)
         user = repoUser;
       String[] identityFiles = repo.getConfig(host).getValues("IdentityFile");
       if (identityFiles != null) {
@@ -207,6 +205,12 @@ public class Tunnel {
       } else {
         vlog.info("Could not parse SSH config file " + params.sshConfig.get());
       }
+    }
+
+    if (user == null) {
+      user = (String)System.getProperties().get("user.name");
+      if (params.localUsernameLC.get())
+        user = user.toLowerCase();
     }
 
     if (useDefaultPrivateKeyFiles) {
@@ -348,8 +352,8 @@ public class Tunnel {
     boolean hFound = false, gFound = false, rFound = false, lFound = false;
     String command = "";
 
-    if (params.sshUser != null)
-      gatewayHost = params.sshUser + "@" + gatewayHost;
+    if (params.sshUser.get() != null)
+      gatewayHost = params.sshUser.get() + "@" + gatewayHost;
 
     for (i = 0; i < pattern.length(); i++) {
       if (pattern.charAt(i) == '%') {

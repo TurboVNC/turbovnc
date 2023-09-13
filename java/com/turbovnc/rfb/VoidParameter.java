@@ -41,6 +41,7 @@ public abstract class VoidParameter {
   public abstract boolean set(String str);
 
   public final boolean set(String str, boolean commandLine_) {
+    setCommandLine(commandLine_);
     boolean retval = set(str);
     setCommandLine(commandLine_);
     return retval;

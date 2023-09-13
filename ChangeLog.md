@@ -1,3 +1,31 @@
+3.1
+===
+
+### Significant changes relative to 3.1 beta2:
+
+1. Improved the TurboVNC Viewer's handling of SSH usernames in the following
+ways:
+
+     - Fixed a regression introduced in 3.1 beta1[3] whereby the SSH username
+was ignored if it was specified in the `Server` parameter or if it was
+specified in the TurboVNC Viewer Options dialog without also specifying the
+gateway host.
+     - Fixed an issue whereby the SSH username was not saved and restored if it
+was specified in the TurboVNC Viewer Options dialog without also specifying the
+gateway host.
+     - Fixed an issue whereby the SSH username was ignored if it was specified
+in the `Server` or `Via` parameter in **~/.vnc/default.turbovnc**.
+     - Added a new parameter (`SSHUser`) that can optionally be used to specify
+the SSH username.  This parameter is set automatically from an SSH username
+specified in the `Server` or `Via` parameter, or it can be set manually.
+     - To better emulate the behavior of OpenSSH, the TurboVNC Viewer's
+built-in SSH client now allows an SSH username specified on the command line or
+in a connection info file to override an SSH username specified in the OpenSSH
+config file.
+     - The `LocalUsernameLC` parameter now affects the SSH username if the SSH
+username is unspecified.
+
+
 3.1 beta2
 =========
 

@@ -32,7 +32,9 @@ public final class ServerNameParameter extends StringParameter {
       str = str.replaceAll("\\s", "");
       int atIndex = str.lastIndexOf('@');
       if (atIndex >= 0) {
-        params.sshUser = str.substring(0, atIndex);
+        params.sshUser.set(str.substring(0, atIndex));
+        if (isCommandLine() || getName().equalsIgnoreCase("Server"))
+          params.sshUser.setCommandLine(true);
         return super.set(str.substring(atIndex + 1));
       }
     }
@@ -40,8 +42,14 @@ public final class ServerNameParameter extends StringParameter {
   }
 
   public synchronized boolean setDefault(String str) {
-    boolean retval = set(str);
-    retval &= super.setDefault(value);
-    return retval;
+    if (str != null && !str.isEmpty()) {
+      str = str.replaceAll("\\s", "");
+      int atIndex = str.lastIndexOf('@');
+      if (atIndex >= 0) {
+        params.sshUser.setDefault(str.substring(0, atIndex));
+        return super.setDefault(str.substring(atIndex + 1));
+      }
+    }
+    return super.setDefault(str);
   }
 }

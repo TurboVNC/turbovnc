@@ -433,15 +433,8 @@ public final class Params {
     while (current != null) {
       if (!(current instanceof HeaderParameter)) {
         String str = current.getStr();
-        if (tunnel.get() && current.getName().equalsIgnoreCase("Server") &&
-            str != null && sshUser != null)
-          System.out.println(current.getName() + " = " + sshUser + "@" + str);
-        else if (!tunnel.get() && current.getName().equalsIgnoreCase("Via") &&
-                 str != null && sshUser != null)
-          System.out.println(current.getName() + " = " + sshUser + "@" + str);
-        else
-          System.out.println(current.getName() + " = " +
-                             (str == null ? "" : str));
+        System.out.println(current.getName() + " = " +
+                           (str == null ? "" : str));
       }
       current = current.next();
     }
@@ -465,8 +458,6 @@ public final class Params {
         current.reset();
       current = current.next();
     }
-    if (!via.isCommandLine() && !server.isCommandLine())
-      sshUser = null;
 
     reconcile();
   }
@@ -481,10 +472,7 @@ public final class Params {
         String name = current.getName();
         String value = current.getStr();
 
-        if (name.equalsIgnoreCase("Via") && value != null && sshUser != null)
-          UserPreferences.set(node, name, sshUser + "@" + value);
-        else
-          UserPreferences.set(node, name, value);
+        UserPreferences.set(node, name, value);
       }
       current = current.next();
     }
@@ -935,7 +923,8 @@ public final class Params {
 
   public BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC", this, false,
-  "When the SendLocalUsername parameter is set, setting this parameter will " +
+  "When the SendLocalUsername parameter is set, or when using SSH " +
+  "tunneling without a specified SSH username, setting this parameter will " +
   "cause the local username to be sent in lowercase, which may be useful " +
   "when using the viewer on Windows machines (Windows allows mixed-case " +
   "usernames, whereas Un*x and Mac platforms generally don't.)", false);
@@ -1052,14 +1041,20 @@ public final class Params {
   "When using the built-in SSH client, this parameter specifies the TCP " +
   "port on which the SSH server is listening.", 22, 0, 65535);
 
+  public StringParameter sshUser =
+  new StringParameter("SSHUser", this, true,
+  "The username (default = local username) that should be used when " +
+  "authenticating with the SSH server.  When using the Tunnel parameter or " +
+  "the TurboVNC Session Manager, the SSH username can also be specified by " +
+  "prefixing the VNC host with the username followed by @.  When using the " +
+  "Via parameter with an SSH server, the SSH username can also be specified " +
+  "by prefixing the gateway host with the username followed by @.", null);
+
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true,
   "Setting this parameter is equivalent to using the Via parameter with an " +
   "SSH gateway, except that the gateway host is assumed to be the same as " +
-  "the VNC host, so you do not need to specify it separately.  When using " +
-  "the Tunnel parameter, the VNC host can be prefixed with {user}@ to " +
-  "indicate that username {user} (default = local username) should be used " +
-  "when authenticating with the SSH server.\n " +
+  "the VNC host, so you do not need to specify it separately.\n " +
 
   "When using the TurboVNC Session Manager, this parameter is effectively " +
   "set unless the SessMgrAuto parameter is disabled.\n " +
@@ -1091,9 +1086,7 @@ public final class Params {
   "and listening on port 5900 (VNC display :0.)  If using the UltraVNC " +
   "Repeater in \"Mode II\", then specify ID:xxxx as the VNC server name, " +
   "where xxxx is the ID number of the VNC server to which you want to " +
-  "connect.  If using an SSH server, then the gateway host can be prefixed " +
-  "with {user}@ to indicate that username {user} (default = local username) " +
-  "should be used when authenticating with the SSH server.", null);
+  "connect.", null);
 
   public StringParameter x509ca =
   new StringParameter("X509CA", this, true,
@@ -1111,7 +1104,6 @@ public final class Params {
 
   public boolean sessMgrActive, sshTunnelActive;
   public com.jcraft.jsch.Session sshSession;
-  public String sshUser;
   public Socket stdioSocket;
   public String udsPath;
 
