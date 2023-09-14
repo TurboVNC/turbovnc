@@ -53,6 +53,13 @@ connections were open.
 11. Fixed a regression introduced by 2.2.1[5] that caused the
 `PreferredAuthentications` OpenSSH config file keyword to be ignored.
 
+12. The TurboVNC Server now includes various security fixes (CVE-2020-14345,
+CVE-2020-14346, CVE-2020-14360, CVE-2020-14361, CVE-2020-14362, CVE-2020-25712,
+CVE-2021-4008, CVE-2021-4009, CVE-2021-4011, CVE-2022-2319, CVE-2022-2320,
+CVE-2022-4283, CVE-2022-46340, CVE-2022-46341, CVE-2022-46342, CVE-2022-46343,
+CVE-2022-46344, CVE-2023-0494, and CVE-2023-1393) from the xorg-server 1.20.x
+and 21.1.x code bases.
+
 
 2.2.9 ESR
 =========
