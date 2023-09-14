@@ -1,3 +1,16 @@
+diff --git a/xorg-server-1.20.14/Xext/saver.c b/Xserver/Xext/saver.c
+index c23907d..05b9ca3 100644
+--- a/xorg-server-1.20.14/Xext/saver.c
++++ b/Xserver/Xext/saver.c
+@@ -1051,7 +1051,7 @@ ScreenSaverSetAttributes(ClientPtr client)
+         pVlist++;
+     }
+     if (pPriv->attr)
+-        FreeScreenAttr(pPriv->attr);
++        FreeResource(pPriv->attr->resource, AttrType);
+     pPriv->attr = pAttr;
+     pAttr->resource = FakeClientID(client->index);
+     if (!AddResource(pAttr->resource, AttrType, (void *) pAttr))
 diff --git a/xorg-server-1.20.14/Xext/shm.c b/Xserver/Xext/shm.c
 index 24c6b10..be2be20 100644
 --- a/xorg-server-1.20.14/Xext/shm.c
@@ -29,6 +42,56 @@ index 24c6b10..be2be20 100644
          char template[PATH_MAX];
          snprintf(template, ARRAY_SIZE(template), "%s/shmfd-XXXXXX", shmdirs[i]);
  #ifdef HAVE_MKOSTEMP
+diff --git a/xorg-server-1.20.14/Xext/xtest.c b/Xserver/Xext/xtest.c
+index 38b8012..bf11789 100644
+--- a/xorg-server-1.20.14/Xext/xtest.c
++++ b/Xserver/Xext/xtest.c
+@@ -501,10 +501,11 @@ XTestSwapFakeInput(ClientPtr client, xReq * req)
+ 
+     nev = ((req->length << 2) - sizeof(xReq)) / sizeof(xEvent);
+     for (ev = (xEvent *) &req[1]; --nev >= 0; ev++) {
++        int evtype = ev->u.u.type & 0x177;
+         /* Swap event */
+-        proc = EventSwapVector[ev->u.u.type & 0177];
++        proc = EventSwapVector[evtype];
+         /* no swapping proc; invalid event type? */
+-        if (!proc || proc == NotImplemented) {
++        if (!proc || proc == NotImplemented || evtype == GenericEvent) {
+             client->errorValue = ev->u.u.type;
+             return BadValue;
+         }
+diff --git a/xorg-server-1.20.14/Xext/xvmain.c b/Xserver/Xext/xvmain.c
+index c520c7d..5f4c174 100644
+--- a/xorg-server-1.20.14/Xext/xvmain.c
++++ b/Xserver/Xext/xvmain.c
+@@ -811,8 +811,10 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
+         tpn = pn;
+         while (tpn) {
+             if (tpn->client == client) {
+-                if (!onoff)
++                if (!onoff) {
+                     tpn->client = NULL;
++                    FreeResource(tpn->id, XvRTVideoNotify);
++                }
+                 return Success;
+             }
+             if (!tpn->client)
+diff --git a/xorg-server-1.20.14/Xi/exevents.c b/Xserver/Xi/exevents.c
+index 659816a..0cb8d78 100644
+--- a/xorg-server-1.20.14/Xi/exevents.c
++++ b/Xserver/Xi/exevents.c
+@@ -575,8 +575,10 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
+             memcpy(to->button->xkb_acts, from->button->xkb_acts,
+                    sizeof(XkbAction));
+         }
+-        else
++        else {
+             free(to->button->xkb_acts);
++            to->button->xkb_acts = NULL;
++        }
+ 
+         memcpy(to->button->labels, from->button->labels,
+                from->button->numButtons * sizeof(Atom));
 diff --git a/xorg-server-1.20.14/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
 index 504defe..ad89a31 100644
 --- a/xorg-server-1.20.14/Xi/xichangehierarchy.c
@@ -69,6 +132,91 @@ index 504defe..ad89a31 100644
          XIBarrierRemoveMasterDevice(clients[i], ptr->id);
  
      /* disable the remove the devices, XTest devices must be done first
+diff --git a/xorg-server-1.20.14/Xi/xipassivegrab.c b/Xserver/Xi/xipassivegrab.c
+index d30f51f..89a5910 100644
+--- a/xorg-server-1.20.14/Xi/xipassivegrab.c
++++ b/Xserver/Xi/xipassivegrab.c
+@@ -133,6 +133,12 @@ ProcXIPassiveGrabDevice(ClientPtr client)
+         return BadValue;
+     }
+ 
++    /* XI2 allows 32-bit keycodes but thanks to XKB we can never
++     * implement this. Just return an error for all keycodes that
++     * cannot work anyway, same for buttons > 255. */
++    if (stuff->detail > 255)
++        return XIAlreadyGrabbed;
++
+     if (XICheckInvalidMaskBits(client, (unsigned char *) &stuff[1],
+                                stuff->mask_len * 4) != Success)
+         return BadValue;
+@@ -203,14 +209,8 @@ ProcXIPassiveGrabDevice(ClientPtr client)
+                                 &param, XI2, &mask);
+             break;
+         case XIGrabtypeKeycode:
+-            /* XI2 allows 32-bit keycodes but thanks to XKB we can never
+-             * implement this. Just return an error for all keycodes that
+-             * cannot work anyway */
+-            if (stuff->detail > 255)
+-                status = XIAlreadyGrabbed;
+-            else
+-                status = GrabKey(client, dev, mod_dev, stuff->detail,
+-                                 &param, XI2, &mask);
++            status = GrabKey(client, dev, mod_dev, stuff->detail,
++                             &param, XI2, &mask);
+             break;
+         case XIGrabtypeEnter:
+         case XIGrabtypeFocusIn:
+@@ -319,6 +319,12 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
+         return BadValue;
+     }
+ 
++    /* We don't allow passive grabs for details > 255 anyway */
++    if (stuff->detail > 255) {
++        client->errorValue = stuff->detail;
++        return BadValue;
++    }
++
+     rc = dixLookupWindow(&win, stuff->grab_window, client, DixSetAttrAccess);
+     if (rc != Success)
+         return rc;
+diff --git a/xorg-server-1.20.14/Xi/xiproperty.c b/Xserver/Xi/xiproperty.c
+index 6ec419e..0cfa6e3 100644
+--- a/xorg-server-1.20.14/Xi/xiproperty.c
++++ b/Xserver/Xi/xiproperty.c
+@@ -890,7 +890,7 @@ ProcXChangeDeviceProperty(ClientPtr client)
+     REQUEST(xChangeDevicePropertyReq);
+     DeviceIntPtr dev;
+     unsigned long len;
+-    int totalSize;
++    uint64_t totalSize;
+     int rc;
+ 
+     REQUEST_AT_LEAST_SIZE(xChangeDevicePropertyReq);
+@@ -1128,7 +1128,7 @@ ProcXIChangeProperty(ClientPtr client)
+ {
+     int rc;
+     DeviceIntPtr dev;
+-    int totalSize;
++    uint64_t totalSize;
+     unsigned long len;
+ 
+     REQUEST(xXIChangePropertyReq);
+diff --git a/xorg-server-1.20.14/composite/compwindow.c b/Xserver/composite/compwindow.c
+index 54b4e6a..8db9d03 100644
+--- a/xorg-server-1.20.14/composite/compwindow.c
++++ b/Xserver/composite/compwindow.c
+@@ -613,6 +613,11 @@ compDestroyWindow(WindowPtr pWin)
+     ret = (*pScreen->DestroyWindow) (pWin);
+     cs->DestroyWindow = pScreen->DestroyWindow;
+     pScreen->DestroyWindow = compDestroyWindow;
++
++    /* Did we just destroy the overlay window? */
++    if (pWin == cs->pOverlayWin)
++        cs->pOverlayWin = NULL;
++
+ /*    compCheckTree (pWin->drawable.pScreen); can't check -- tree isn't good*/
+     return ret;
+ }
 diff --git a/xorg-server-1.20.14/dix/events.c b/Xserver/dix/events.c
 index 427b891..0f32bd8 100644
 --- a/xorg-server-1.20.14/dix/events.c
@@ -106,10 +254,20 @@ index 427b891..0f32bd8 100644
         extension. */
  
 diff --git a/xorg-server-1.20.14/dix/property.c b/Xserver/dix/property.c
-index ff1d669..de83d00 100644
+index ff1d669..9381c4d 100644
 --- a/xorg-server-1.20.14/dix/property.c
 +++ b/Xserver/dix/property.c
-@@ -362,6 +362,13 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
+@@ -205,7 +205,8 @@ ProcChangeProperty(ClientPtr client)
+     WindowPtr pWin;
+     char format, mode;
+     unsigned long len;
+-    int sizeInBytes, totalSize, err;
++    int sizeInBytes, err;
++    uint64_t totalSize;
+ 
+     REQUEST(xChangePropertyReq);
+ 
+@@ -362,6 +363,13 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
      if (sendevent)
          deliverPropertyNotifyEvent(pWin, PropertyNewValue, pProp);
  
@@ -425,6 +583,332 @@ index 53a6bd6..28248d4 100644
                                   XFixesNumberErrors,
                                   ProcXFixesDispatch, SProcXFixesDispatch,
                                   NULL, StandardMinorOpcode)) != 0) {
+diff --git a/xorg-server-1.20.14/xkb/xkb.c b/Xserver/xkb/xkb.c
+index 68c59df..3363b1d 100644
+--- a/xorg-server-1.20.14/xkb/xkb.c
++++ b/Xserver/xkb/xkb.c
+@@ -5157,7 +5157,7 @@ _GetCountedString(char **wire_inout, ClientPtr client, char **str)
+ }
+ 
+ static Status
+-_CheckSetDoodad(char **wire_inout,
++_CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
+                 XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
+ {
+     char *wire;
+@@ -5168,6 +5168,9 @@ _CheckSetDoodad(char **wire_inout,
+     Status status;
+ 
+     dWire = (xkbDoodadWireDesc *) (*wire_inout);
++    if (!_XkbCheckRequestBounds(client, req, dWire, dWire + 1))
++        return BadLength;
++
+     any = dWire->any;
+     wire = (char *) &dWire[1];
+     if (client->swapped) {
+@@ -5270,7 +5273,7 @@ _CheckSetDoodad(char **wire_inout,
+ }
+ 
+ static Status
+-_CheckSetOverlay(char **wire_inout,
++_CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
+                  XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
+ {
+     register int r;
+@@ -5281,6 +5284,9 @@ _CheckSetOverlay(char **wire_inout,
+ 
+     wire = *wire_inout;
+     olWire = (xkbOverlayWireDesc *) wire;
++    if (!_XkbCheckRequestBounds(client, req, olWire, olWire + 1))
++        return BadLength;
++
+     if (client->swapped) {
+         swapl(&olWire->name);
+     }
+@@ -5292,6 +5298,9 @@ _CheckSetOverlay(char **wire_inout,
+         xkbOverlayKeyWireDesc *kWire;
+         XkbOverlayRowPtr row;
+ 
++        if (!_XkbCheckRequestBounds(client, req, rWire, rWire + 1))
++            return BadLength;
++
+         if (rWire->rowUnder > section->num_rows) {
+             client->errorValue = _XkbErrCode4(0x20, r, section->num_rows,
+                                               rWire->rowUnder);
+@@ -5300,6 +5309,9 @@ _CheckSetOverlay(char **wire_inout,
+         row = XkbAddGeomOverlayRow(ol, rWire->rowUnder, rWire->nKeys);
+         kWire = (xkbOverlayKeyWireDesc *) &rWire[1];
+         for (k = 0; k < rWire->nKeys; k++, kWire++) {
++            if (!_XkbCheckRequestBounds(client, req, kWire, kWire + 1))
++                return BadLength;
++
+             if (XkbAddGeomOverlayKey(ol, row,
+                                      (char *) kWire->over,
+                                      (char *) kWire->under) == NULL) {
+@@ -5333,6 +5345,9 @@ _CheckSetSections(XkbGeometryPtr geom,
+         register int r;
+         xkbRowWireDesc *rWire;
+ 
++        if (!_XkbCheckRequestBounds(client, req, sWire, sWire + 1))
++            return BadLength;
++
+         if (client->swapped) {
+             swapl(&sWire->name);
+             swaps(&sWire->top);
+@@ -5358,6 +5373,9 @@ _CheckSetSections(XkbGeometryPtr geom,
+             XkbRowPtr row;
+             xkbKeyWireDesc *kWire;
+ 
++            if (!_XkbCheckRequestBounds(client, req, rWire, rWire + 1))
++                return BadLength;
++
+             if (client->swapped) {
+                 swaps(&rWire->top);
+                 swaps(&rWire->left);
+@@ -5369,16 +5387,19 @@ _CheckSetSections(XkbGeometryPtr geom,
+             row->left = rWire->left;
+             row->vertical = rWire->vertical;
+             kWire = (xkbKeyWireDesc *) &rWire[1];
+-            for (k = 0; k < rWire->nKeys; k++) {
++            for (k = 0; k < rWire->nKeys; k++, kWire++) {
+                 XkbKeyPtr key;
+ 
++                if (!_XkbCheckRequestBounds(client, req, kWire, kWire + 1))
++                    return BadLength;
++
+                 key = XkbAddGeomKey(row);
+                 if (!key)
+                     return BadAlloc;
+-                memcpy(key->name.name, kWire[k].name, XkbKeyNameLength);
+-                key->gap = kWire[k].gap;
+-                key->shape_ndx = kWire[k].shapeNdx;
+-                key->color_ndx = kWire[k].colorNdx;
++                memcpy(key->name.name, kWire->name, XkbKeyNameLength);
++                key->gap = kWire->gap;
++                key->shape_ndx = kWire->shapeNdx;
++                key->color_ndx = kWire->colorNdx;
+                 if (key->shape_ndx >= geom->num_shapes) {
+                     client->errorValue = _XkbErrCode3(0x10, key->shape_ndx,
+                                                       geom->num_shapes);
+@@ -5390,14 +5411,14 @@ _CheckSetSections(XkbGeometryPtr geom,
+                     return BadMatch;
+                 }
+             }
+-            rWire = (xkbRowWireDesc *) &kWire[rWire->nKeys];
++            rWire = (xkbRowWireDesc *)kWire;
+         }
+         wire = (char *) rWire;
+         if (sWire->nDoodads > 0) {
+             register int d;
+ 
+             for (d = 0; d < sWire->nDoodads; d++) {
+-                status = _CheckSetDoodad(&wire, geom, section, client);
++                status = _CheckSetDoodad(&wire, req, geom, section, client);
+                 if (status != Success)
+                     return status;
+             }
+@@ -5406,7 +5427,7 @@ _CheckSetSections(XkbGeometryPtr geom,
+             register int o;
+ 
+             for (o = 0; o < sWire->nOverlays; o++) {
+-                status = _CheckSetOverlay(&wire, geom, section, client);
++                status = _CheckSetOverlay(&wire, req, geom, section, client);
+                 if (status != Success)
+                     return status;
+             }
+@@ -5440,6 +5461,9 @@ _CheckSetShapes(XkbGeometryPtr geom,
+             xkbOutlineWireDesc *olWire;
+             XkbOutlinePtr ol;
+ 
++            if (!_XkbCheckRequestBounds(client, req, shapeWire, shapeWire + 1))
++                return BadLength;
++
+             shape =
+                 XkbAddGeomShape(geom, shapeWire->name, shapeWire->nOutlines);
+             if (!shape)
+@@ -5450,21 +5474,27 @@ _CheckSetShapes(XkbGeometryPtr geom,
+                 XkbPointPtr pt;
+                 xkbPointWireDesc *ptWire;
+ 
++                if (!_XkbCheckRequestBounds(client, req, olWire, olWire + 1))
++                    return BadLength;
++
+                 ol = XkbAddGeomOutline(shape, olWire->nPoints);
+                 if (!ol)
+                     return BadAlloc;
+                 ol->corner_radius = olWire->cornerRadius;
+                 ptWire = (xkbPointWireDesc *) &olWire[1];
+-                for (p = 0, pt = ol->points; p < olWire->nPoints; p++, pt++) {
+-                    pt->x = ptWire[p].x;
+-                    pt->y = ptWire[p].y;
++                for (p = 0, pt = ol->points; p < olWire->nPoints; p++, pt++, ptWire++) {
++                    if (!_XkbCheckRequestBounds(client, req, ptWire, ptWire + 1))
++                        return BadLength;
++
++                    pt->x = ptWire->x;
++                    pt->y = ptWire->y;
+                     if (client->swapped) {
+                         swaps(&pt->x);
+                         swaps(&pt->y);
+                     }
+                 }
+                 ol->num_points = olWire->nPoints;
+-                olWire = (xkbOutlineWireDesc *) (&ptWire[olWire->nPoints]);
++                olWire = (xkbOutlineWireDesc *)ptWire;
+             }
+             if (shapeWire->primaryNdx != XkbNoShape)
+                 shape->primary = &shape->outlines[shapeWire->primaryNdx];
+@@ -5561,12 +5591,15 @@ _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
+         return status;
+ 
+     for (i = 0; i < req->nDoodads; i++) {
+-        status = _CheckSetDoodad(&wire, geom, NULL, client);
++        status = _CheckSetDoodad(&wire, req, geom, NULL, client);
+         if (status != Success)
+             return status;
+     }
+ 
+     for (i = 0; i < req->nKeyAliases; i++) {
++        if (!_XkbCheckRequestBounds(client, req, wire, wire + XkbKeyNameLength))
++                return BadLength;
++
+         if (XkbAddGeomKeyAlias(geom, &wire[XkbKeyNameLength], wire) == NULL)
+             return BadAlloc;
+         wire += 2 * XkbKeyNameLength;
+@@ -6551,7 +6584,8 @@ ProcXkbGetDeviceInfo(ClientPtr client)
+ static char *
+ CheckSetDeviceIndicators(char *wire,
+                          DeviceIntPtr dev,
+-                         int num, int *status_rtrn, ClientPtr client)
++                         int num, int *status_rtrn, ClientPtr client,
++                         xkbSetDeviceInfoReq * stuff)
+ {
+     xkbDeviceLedsWireDesc *ledWire;
+     int i;
+@@ -6559,6 +6593,11 @@ CheckSetDeviceIndicators(char *wire,
+ 
+     ledWire = (xkbDeviceLedsWireDesc *) wire;
+     for (i = 0; i < num; i++) {
++        if (!_XkbCheckRequestBounds(client, stuff, ledWire, ledWire + 1)) {
++            *status_rtrn = BadLength;
++            return (char *) ledWire;
++        }
++
+         if (client->swapped) {
+             swaps(&ledWire->ledClass);
+             swaps(&ledWire->ledID);
+@@ -6586,6 +6625,11 @@ CheckSetDeviceIndicators(char *wire,
+             atomWire = (CARD32 *) &ledWire[1];
+             if (nNames > 0) {
+                 for (n = 0; n < nNames; n++) {
++                    if (!_XkbCheckRequestBounds(client, stuff, atomWire, atomWire + 1)) {
++                        *status_rtrn = BadLength;
++                        return (char *) atomWire;
++                    }
++
+                     if (client->swapped) {
+                         swapl(atomWire);
+                     }
+@@ -6597,6 +6641,10 @@ CheckSetDeviceIndicators(char *wire,
+             mapWire = (xkbIndicatorMapWireDesc *) atomWire;
+             if (nMaps > 0) {
+                 for (n = 0; n < nMaps; n++) {
++                    if (!_XkbCheckRequestBounds(client, stuff, mapWire, mapWire + 1)) {
++                        *status_rtrn = BadLength;
++                        return (char *) mapWire;
++                    }
+                     if (client->swapped) {
+                         swaps(&mapWire->virtualMods);
+                         swapl(&mapWire->ctrls);
+@@ -6648,11 +6696,6 @@ SetDeviceIndicators(char *wire,
+         xkbIndicatorMapWireDesc *mapWire;
+         XkbSrvLedInfoPtr sli;
+ 
+-        if (!_XkbCheckRequestBounds(client, stuff, ledWire, ledWire + 1)) {
+-            *status_rtrn = BadLength;
+-            return (char *) ledWire;
+-        }
+-
+         namec = mapc = statec = 0;
+         sli = XkbFindSrvLedInfo(dev, ledWire->ledClass, ledWire->ledID,
+                                 XkbXI_IndicatorMapsMask);
+@@ -6671,10 +6714,6 @@ SetDeviceIndicators(char *wire,
+             memset((char *) sli->names, 0, XkbNumIndicators * sizeof(Atom));
+             for (n = 0, bit = 1; n < XkbNumIndicators; n++, bit <<= 1) {
+                 if (ledWire->namesPresent & bit) {
+-                    if (!_XkbCheckRequestBounds(client, stuff, atomWire, atomWire + 1)) {
+-                        *status_rtrn = BadLength;
+-                        return (char *) atomWire;
+-                    }
+                     sli->names[n] = (Atom) *atomWire;
+                     if (sli->names[n] == None)
+                         ledWire->namesPresent &= ~bit;
+@@ -6692,10 +6731,6 @@ SetDeviceIndicators(char *wire,
+         if (ledWire->mapsPresent) {
+             for (n = 0, bit = 1; n < XkbNumIndicators; n++, bit <<= 1) {
+                 if (ledWire->mapsPresent & bit) {
+-                    if (!_XkbCheckRequestBounds(client, stuff, mapWire, mapWire + 1)) {
+-                        *status_rtrn = BadLength;
+-                        return (char *) mapWire;
+-                    }
+                     sli->maps[n].flags = mapWire->flags;
+                     sli->maps[n].which_groups = mapWire->whichGroups;
+                     sli->maps[n].groups = mapWire->groups;
+@@ -6731,13 +6766,17 @@ SetDeviceIndicators(char *wire,
+ }
+ 
+ static int
+-_XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
++_XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
+                   xkbSetDeviceInfoReq * stuff)
+ {
+     char *wire;
+ 
+     wire = (char *) &stuff[1];
+     if (stuff->change & XkbXI_ButtonActionsMask) {
++        int sz = stuff->nBtns * SIZEOF(xkbActionWireDesc);
++        if (!_XkbCheckRequestBounds(client, stuff, wire, (char *) wire + sz))
++            return BadLength;
++
+         if (!dev->button) {
+             client->errorValue = _XkbErrCode2(XkbErr_BadClass, ButtonClass);
+             return XkbKeyboardErrorCode;
+@@ -6748,13 +6787,13 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
+                              dev->button->numButtons);
+             return BadMatch;
+         }
+-        wire += (stuff->nBtns * SIZEOF(xkbActionWireDesc));
++        wire += sz;
+     }
+     if (stuff->change & XkbXI_IndicatorsMask) {
+         int status = Success;
+ 
+         wire = CheckSetDeviceIndicators(wire, dev, stuff->nDeviceLedFBs,
+-                                        &status, client);
++                                        &status, client, stuff);
+         if (status != Success)
+             return status;
+     }
+@@ -6765,8 +6804,8 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
+ }
+ 
+ static int
+-_XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
+-                       xkbSetDeviceInfoReq * stuff)
++_XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
++                  xkbSetDeviceInfoReq * stuff)
+ {
+     char *wire;
+     xkbExtensionDeviceNotify ed;
+@@ -6790,8 +6829,6 @@ _XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
+         if (stuff->firstBtn + stuff->nBtns > nBtns)
+             return BadValue;
+         sz = stuff->nBtns * SIZEOF(xkbActionWireDesc);
+-        if (!_XkbCheckRequestBounds(client, stuff, wire, (char *) wire + sz))
+-            return BadLength;
+         memcpy((char *) &acts[stuff->firstBtn], (char *) wire, sz);
+         wire += sz;
+         ed.reason |= XkbXI_ButtonActionsMask;
 diff --git a/xorg-server-1.20.14/xkb/xkbInit.c b/Xserver/xkb/xkbInit.c
 index 9e45b4b..ddd5ef7 100644
 --- a/xorg-server-1.20.14/xkb/xkbInit.c
@@ -460,3 +944,15 @@ index 9e45b4b..ddd5ef7 100644
      else if ((strncmp(argv[i], "-accessx", 8) == 0) ||
               (strncmp(argv[i], "+accessx", 8) == 0)) {
          int j = 1;
+diff --git a/xorg-server-1.20.14/xkb/xkbUtils.c b/Xserver/xkb/xkbUtils.c
+index 8975ade..9bc51fc 100644
+--- a/xorg-server-1.20.14/xkb/xkbUtils.c
++++ b/Xserver/xkb/xkbUtils.c
+@@ -1327,6 +1327,7 @@ _XkbCopyNames(XkbDescPtr src, XkbDescPtr dst)
+         }
+         else {
+             free(dst->names->radio_groups);
++            dst->names->radio_groups = NULL;
+         }
+         dst->names->num_rg = src->names->num_rg;
+ 
