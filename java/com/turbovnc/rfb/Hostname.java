@@ -1,5 +1,5 @@
-/* Copyright (C) 2012, 2016, 2018, 2020, 2022 D. R. Commander.
- *                                            All Rights Reserved.
+/* Copyright (C) 2012, 2016, 2018, 2020, 2022-2023 D. R. Commander.
+ *                                                 All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -24,34 +24,6 @@ import com.turbovnc.rdr.*;
 
 public final class Hostname {
 
-  public static String getHost(String vncServerName) {
-    int colonPos = vncServerName.lastIndexOf(':');
-    int bracketPos = vncServerName.lastIndexOf(']');
-    boolean doubleColon = false;
-
-    if (bracketPos != -1 && colonPos < bracketPos)
-      colonPos = -1;
-    while (colonPos > 0 && vncServerName.charAt(colonPos - 1) == ':') {
-      colonPos--;
-      doubleColon = true;
-    }
-    if (doubleColon) {
-      // Check for preceding single colon, indicating an IPv6 address
-      for (int p = colonPos - 1; p >= 0; p--) {
-        if (vncServerName.charAt(p) == ':') {
-          if (p == 0 || vncServerName.charAt(p - 1) != ':')
-            colonPos = -1;
-          break;
-        }
-      }
-    }
-    if (colonPos == 0)
-      return "localhost";
-    if (colonPos == -1)
-      colonPos = vncServerName.length();
-    return vncServerName.substring(0, colonPos).replaceAll("\\s", "");
-  }
-
   private static int getColonPos(String vncServerName) {
     int colonPos = vncServerName.lastIndexOf(':');
     int bracketPos = vncServerName.lastIndexOf(']');
@@ -75,6 +47,16 @@ public final class Hostname {
     }
 
     return colonPos;
+  }
+
+  public static String getHost(String vncServerName) {
+    int colonPos = getColonPos(vncServerName);
+
+    if (colonPos == 0)
+      return "localhost";
+    if (colonPos == -1)
+      colonPos = vncServerName.length();
+    return vncServerName.substring(0, colonPos).replaceAll("\\s", "");
   }
 
   public static int getPort(String vncServerName) {

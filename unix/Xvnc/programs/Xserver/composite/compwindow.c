@@ -613,6 +613,11 @@ compDestroyWindow(WindowPtr pWin)
     ret = (*pScreen->DestroyWindow) (pWin);
     cs->DestroyWindow = pScreen->DestroyWindow;
     pScreen->DestroyWindow = compDestroyWindow;
+
+    /* Did we just destroy the overlay window? */
+    if (pWin == cs->pOverlayWin)
+        cs->pOverlayWin = NULL;
+
 /*    compCheckTree (pWin->drawable.pScreen); can't check -- tree isn't good*/
     return ret;
 }

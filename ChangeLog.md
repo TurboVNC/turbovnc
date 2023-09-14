@@ -1,7 +1,7 @@
 3.2
 ===
 
-### Significant changes relative to 3.1 beta2:
+### Significant changes relative to 3.1:
 
 1. Since all supported TurboVNC host platforms now contain new enough libraries
 to build xorg-server 1.20.x, the TurboVNC Server is now dynamically linked
@@ -11,6 +11,39 @@ CMake variables have been removed, and the build system now behaves as if those
 variables are always on.  A new CMake variable (`TVNC_INTELZLIB`) can be used
 on x86 platforms to disable the in-tree SIMD-accelerated Intel zlib
 implementation and build against the system-supplied zlib implementation.
+
+
+3.1
+===
+
+### Significant changes relative to 3.1 beta2:
+
+1. Improved the TurboVNC Viewer's handling of SSH usernames in the following
+ways:
+
+     - Fixed a regression introduced in 3.1 beta1[3] whereby the SSH username
+was ignored if it was specified in the `Server` parameter or if it was
+specified in the TurboVNC Viewer Options dialog without also specifying the
+gateway host.
+     - Fixed an issue whereby the SSH username was not saved and restored if it
+was specified in the TurboVNC Viewer Options dialog without also specifying the
+gateway host.
+     - Fixed an issue whereby the SSH username was ignored if it was specified
+in the `Server` or `Via` parameter in **~/.vnc/default.turbovnc**.
+     - Added a new parameter (`SSHUser`) that can optionally be used to specify
+the SSH username.  This parameter is set automatically from an SSH username
+specified in the `Server` or `Via` parameter, or it can be set manually.
+     - To better emulate the behavior of OpenSSH, the TurboVNC Viewer's
+built-in SSH client now allows an SSH username specified on the command line or
+in a connection info file to override an SSH username specified in the OpenSSH
+config file.
+     - The `LocalUsernameLC` parameter now affects the SSH username if the SSH
+username is unspecified.
+
+2. The TurboVNC Server now includes various security fixes (CVE-2022-2319,
+CVE-2022-2320, CVE-2022-4283, CVE-2022-46340, CVE-2022-46341, CVE-2022-46342,
+CVE-2022-46343, CVE-2022-46344, CVE-2023-0494, and CVE-2023-1393) from the
+xorg-server 21.1.x code base.
 
 
 3.1 beta2

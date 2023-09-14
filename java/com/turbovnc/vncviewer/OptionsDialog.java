@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2023 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -1261,7 +1261,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     x509crl.setText(params.x509crl.get());
 
     // Security: Gateway
-    sshUser.setText(params.sshUser);
+    sshUser.setText(params.sshUser.get());
     gateway.setText(params.via.get());
     tunnel.setSelected(params.tunnel.get());
 
@@ -1373,7 +1373,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     params.x509crl.set(x509crl.getText().isEmpty() ? null : x509crl.getText());
 
     // Security: Gateway
-    params.sshUser = sshUser.getText().isEmpty() ? null : sshUser.getText();
+    params.sshUser.set(sshUser.getText().isEmpty() ? null : sshUser.getText());
     params.via.set(gateway.getText().isEmpty() ? null : gateway.getText());
     params.tunnel.set(tunnel.isSelected());
 
