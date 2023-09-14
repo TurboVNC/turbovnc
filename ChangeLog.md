@@ -16,6 +16,11 @@ config file.
      - The `LocalUsernameLC` parameter now affects the SSH username if the SSH
 username is unspecified.
 
+3. The TurboVNC Server now includes various security fixes (CVE-2022-2319,
+CVE-2022-2320, CVE-2022-4283, CVE-2022-46340, CVE-2022-46341, CVE-2022-46342,
+CVE-2022-46343, CVE-2022-46344, CVE-2023-0494, and CVE-2023-1393) from the
+xorg-server 21.1.x code base.
+
 
 3.0.3
 =====
