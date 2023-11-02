@@ -30,6 +30,15 @@ CVE-2022-2320, CVE-2022-4283, CVE-2022-46340, CVE-2022-46341, CVE-2022-46342,
 CVE-2022-46343, CVE-2022-46344, CVE-2023-0494, and CVE-2023-1393) from the
 xorg-server 21.1.x code base.
 
+3. The TurboVNC Viewer no longer requires that the VNC server support the QEMU
+LED State or VMware LED State RFB extension in order to use the QEMU Extended
+Key Event RFB extension.  This fixes various key mapping issues when using the
+TurboVNC Viewer with wayvnc.  However, it should be noted that, if the QEMU
+Extended Key Event extension is used without one of the LED State extensions,
+the lock key state on the client will lose synchronization with the lock key
+state on the remote desktop if a lock key is pressed outside of the TurboVNC
+Viewer window.
+
 
 3.1 beta2
 =========
