@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2017-2018, 2020-2022 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2017-2018, 2020-2023 D. R. Commander.
  *                                                All Rights Reserved.
  * Copyright 2009-2011, 2017-2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011, 2015 Brian P. Hinz
@@ -315,8 +315,7 @@ public class CMsgWriter {
   public synchronized void writeKeyEvent(int keysym, int rfbKeyCode,
                                          boolean down)
   {
-    if (!cp.supportsQEMUExtKeyEvent || cp.ledState == RFB.LED_UNKNOWN ||
-        rfbKeyCode == 0) {
+    if (!cp.supportsQEMUExtKeyEvent || rfbKeyCode == 0) {
       startMsg(RFB.KEY_EVENT);
       os.writeU8(down ? 1 : 0);
       os.pad(2);
