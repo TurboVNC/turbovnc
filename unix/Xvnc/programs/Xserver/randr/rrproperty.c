@@ -530,7 +530,7 @@ ProcRRChangeOutputProperty(ClientPtr client)
     char format, mode;
     unsigned long len;
     int sizeInBytes;
-    int totalSize;
+    uint64_t totalSize;
     int err;
 
     REQUEST_AT_LEAST_SIZE(xRRChangeOutputPropertyReq);
