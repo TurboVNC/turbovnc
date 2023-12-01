@@ -11,7 +11,7 @@ on:
 
 env:
   LJT_VERSION: 3.0.1
-  LJT_GPG_KEY: https://sourceforge.net/projects/libjpeg-turbo/files/LJT-GPG-KEY
+  LJT_GPG_KEY: https://raw.githubusercontent.com/libjpeg-turbo/repo/main/LJT-GPG-KEY
 
 jobs:
   linux:
@@ -20,7 +20,7 @@ jobs:
       - name: Set global environment variables
         run: |
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
-          echo "LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION" >>$GITHUB_ENV
+          echo "LJT_URL=https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$LJT_VERSION" >>$GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v3
       - name: Set up build
@@ -72,7 +72,7 @@ jobs:
       - name: Set global environment variables
         run: |
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
-          echo "LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION" >>$GITHUB_ENV
+          echo "LJT_URL=https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$LJT_VERSION" >>$GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v3
       - name: Set up build
@@ -99,7 +99,7 @@ jobs:
       - name: Set global environment variables
         run: |
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
-          echo "LJT_URL=https://sourceforge.net/projects/libjpeg-turbo/files/$LJT_VERSION" >>$GITHUB_ENV
+          echo "LJT_URL=https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$LJT_VERSION" >>$GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v3
       - name: Set up build
