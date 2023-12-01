@@ -11,8 +11,8 @@ Build Requirements
 - [CMake](http://www.cmake.org) v2.8.12 or later
 
 - libjpeg-turbo SDK (v1.4 or later required if building the Java viewer.)
-  * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
-    area of <http://sourceforge.net/projects/libjpeg-turbo>.
+  * The libjpeg-turbo SDK binary packages can be downloaded from
+    <https://github.com/libjpeg-turbo/libjpeg-turbo/releases>.
   * The TurboVNC build system will search for the TurboJPEG header and
     library under __/opt/libjpeg-turbo__ on Unix or __c:\libjpeg-turbo[64]__ on
     Windows, but you can override this by setting the `TJPEG_INCLUDE_DIR` CMake
