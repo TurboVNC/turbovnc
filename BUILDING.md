@@ -14,8 +14,8 @@ Build Requirements
     Server.)
 
 - libjpeg-turbo SDK v1.2 or later
-  * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
-    area of <http://sourceforge.net/projects/libjpeg-turbo>.
+  * The libjpeg-turbo SDK binary packages can be downloaded from
+    <https://github.com/libjpeg-turbo/libjpeg-turbo/releases>.
   * The TurboVNC build system will search for the TurboJPEG header and library
     under __/opt/libjpeg-turbo__ on Un\*x or __c:\libjpeg-turbo[64]__ (Visual
     C++) or __c:\libjpeg-turbo-gcc[64]__ (MinGW) on Windows, but you can
