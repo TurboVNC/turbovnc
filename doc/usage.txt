@@ -209,8 +209,8 @@ knowledge of web server administration.
 		for Linux, or you can download
 		{file: libjpeg-turbo-__version__-jws.zip} from libjpeg-turbo 1.4.0 or later
 		(available in the
-		[[http://sourceforge.net/projects/libjpeg-turbo/files/][Files area]] of the
-		[[http://sourceforge.net/projects/libjpeg-turbo][libjpeg-turbo SourceForge project page]].)
+		[[https://github.com/libjpeg-turbo/libjpeg-turbo/releases][Releases area]]
+		of the [[https://github.com/libjpeg-turbo/libjpeg-turbo][libjpeg-turbo GitHub project page]].)
 		Note that only the JARs included in the official TurboVNC packages are
 		signed using an official code signing certificate.
 		{nl}{nl}
@@ -218,8 +218,8 @@ knowledge of web server administration.
 	* __OPTIONAL:__ Copy the TurboVNC Helper JAR files into that same directory.
 		You can obtain these from {file: turbovnc-{val: _VERSION}-jws.zip}, which
 		is available in the
-		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
-		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
+		[[https://github.com/TurboVNC/turbovnc/releases][Releases area]]
+		of the [[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]].
 		{nl}{nl}
 
 	* __OPTIONAL:__ For large organizations, it may be desirable to obtain your
