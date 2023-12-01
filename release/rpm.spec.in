@@ -62,7 +62,7 @@ Version:   @VERSION@
 Release:   @BUILD@
 Vendor:    @PKGVENDOR@
 URL:       @PKGURL@
-#-->Source0: http://prdownloads.sourceforge.net/@CMAKE_PROJECT_NAME_LC@/@CMAKE_PROJECT_NAME_LC@-%{version}.tar.gz
+#-->Source0: https://github.com/TurboVNC/turbovnc/releases/download/%{version}/turbovnc-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
