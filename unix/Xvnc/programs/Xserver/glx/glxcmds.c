@@ -48,6 +48,7 @@
 #include "indirect_util.h"
 #include "protocol-versions.h"
 #include "glxvndabi.h"
+#include "xace.h"
 
 static char GLXServerVendorName[] = "SGI";
 
@@ -1378,6 +1379,13 @@ DoCreatePbuffer(ClientPtr client, int screenNum, XID fbconfigId,
                                                     config->rgbBits, 0);
     if (!pPixmap)
         return BadAlloc;
+
+    err = XaceHook(XACE_RESOURCE_ACCESS, client, glxDrawableId, RT_PIXMAP,
+                   pPixmap, RT_NONE, NULL, DixCreateAccess);
+    if (err != Success) {
+        (*pGlxScreen->pScreen->DestroyPixmap) (pPixmap);
+        return err;
+    }
 
     /* Assign the pixmap the same id as the pbuffer and add it as a
      * resource so it and the DRI2 drawable will be reclaimed when the
