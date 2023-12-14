@@ -784,8 +784,9 @@ DeviceFocusEvent(DeviceIntPtr dev, int type, int mode, int detail,
 
     mouse = IsFloating(dev) ? dev : GetMaster(dev, MASTER_POINTER);
 
-    /* XI 2 event */
-    btlen = (mouse->button) ? bits_to_bytes(mouse->button->numButtons) : 0;
+    /* XI 2 event contains the logical button map - maps are CARD8
+     * so we need 256 bits for the possibly maximum mapping */
+    btlen = (mouse->button) ? bits_to_bytes(256) : 0;
     btlen = bytes_to_int32(btlen);
     len = sizeof(xXIFocusInEvent) + btlen * 4;
 
