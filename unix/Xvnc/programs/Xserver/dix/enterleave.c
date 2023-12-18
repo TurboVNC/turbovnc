@@ -675,7 +675,8 @@ static void
 DeliverStateNotifyEvent(DeviceIntPtr dev, WindowPtr win)
 {
     int evcount = 1;
-    deviceStateNotify *ev, *sev;
+    deviceStateNotify sev[6 + (MAX_VALUATORS + 2)/3];
+    deviceStateNotify *ev;
     deviceKeyStateNotify *kev;
     deviceButtonStateNotify *bev;
 
@@ -714,7 +715,7 @@ DeliverStateNotifyEvent(DeviceIntPtr dev, WindowPtr win)
         }
     }
 
-    sev = ev = xallocarray(evcount, sizeof(xEvent));
+    ev = sev;
     FixDeviceStateNotify(dev, ev, NULL, NULL, NULL, first);
 
     if (b != NULL) {
@@ -770,7 +771,6 @@ DeliverStateNotifyEvent(DeviceIntPtr dev, WindowPtr win)
 
     DeliverEventsToWindow(dev, win, (xEvent *) sev, evcount,
                           DeviceStateNotifyMask, NullGrab);
-    free(sev);
 }
 
 void
