@@ -561,6 +561,7 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
                 to->button = calloc(1, sizeof(ButtonClassRec));
                 if (!to->button)
                     FatalError("[Xi] no memory for class shift.\n");
+                to->button->numButtons = from->button->numButtons;
             }
             else
                 classes->button = NULL;
