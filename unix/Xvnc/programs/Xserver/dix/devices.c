@@ -480,6 +480,13 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
                 flags[other->id] |= XISlaveDetached;
             }
         }
+
+        for (other = inputInfo.off_devices; other; other = other->next) {
+            if (!IsMaster(other) && GetMaster(other, MASTER_ATTACHED) == dev) {
+                AttachDevice(NULL, other, NULL);
+                flags[other->id] |= XISlaveDetached;
+            }
+        }
     }
     else {
         for (other = inputInfo.devices; other; other = other->next) {
@@ -1072,6 +1079,11 @@ CloseDownDevices(void)
      * to NULL and pretend nothing happened.
      */
     for (dev = inputInfo.devices; dev; dev = dev->next) {
+        if (!IsMaster(dev) && !IsFloating(dev))
+            dev->master = NULL;
+    }
+
+    for (dev = inputInfo.off_devices; dev; dev = dev->next) {
         if (!IsMaster(dev) && !IsFloating(dev))
             dev->master = NULL;
     }
