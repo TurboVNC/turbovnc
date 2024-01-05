@@ -21,6 +21,19 @@ CVE-2022-2320, CVE-2022-4283, CVE-2022-46340, CVE-2022-46341, CVE-2022-46342,
 CVE-2022-46343, CVE-2022-46344, CVE-2023-0494, and CVE-2023-1393) from the
 xorg-server 21.1.x code base.
 
+4. By default, each instance of the Linux TurboVNC Server now listens on the
+abstract Unix domain socket, in addition to the pathname Unix domain socket
+(under **/tmp/.X11-unix**), associated with its X display number.  This
+prevents recent versions of GDM, when configured with `WaylandEnable=false`,
+from attempting to use Display :1 for the local session if a TurboVNC session
+is already using Display :1.  The previous behavior can be restored by passing
+`-nolisten local` to `vncserver` or adding `-nolisten local` to the
+`$serverArgs` variable in **turbovncserver.conf**.
+
+5. The `vncserver` script now checks whether the abstract Unix domain socket
+associated with an X display number is in use before assuming that the display
+number is available.
+
 
 3.0.3
 =====

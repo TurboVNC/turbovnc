@@ -82,6 +82,9 @@ else()
 	set(XTRANS_SEND_FDS 1)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	set(LISTEN_LOCAL 1)
+endif()
 configure_file(include/dix-config.h.in include/dix-config.h)
 
 if(APPLE)

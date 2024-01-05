@@ -69,6 +69,9 @@
 /* Listen on Unix socket */
 #define LISTEN_UNIX
 
+/* Listen on abstract socket */
+#cmakedefine LISTEN_LOCAL
+
 /* Have setitimer support */
 #cmakedefine HAVE_SETITIMER
 
