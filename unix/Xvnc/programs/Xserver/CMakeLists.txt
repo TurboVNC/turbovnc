@@ -73,6 +73,9 @@ if(FOUND_GLIBC)
 	set(CMAKE_REQUIRED_DEFINITIONS)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	set(LISTEN_LOCAL 1)
+endif()
 configure_file(include/dix-config.h.in include/dix-config.h)
 
 if(APPLE)
