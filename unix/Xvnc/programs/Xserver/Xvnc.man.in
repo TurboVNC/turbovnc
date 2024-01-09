@@ -674,8 +674,7 @@ types.  Multiple colon-separated cipher suites may be specified.  (Run
 security types, and \fBopenssl ciphers\fR for a list of available cipher suites
 for the X509* security types.)  The order in which these cipher suites are
 specified defines the order in which Xvnc will advertise the cipher suites to
-the VNC viewer.  This directive is ignored if the TurboVNC Server was built
-with GnuTLS rather than OpenSSL.
+the VNC viewer.
 
 .IP \fIpermitted-security-types\fR=\fItype\fR[,\fItype\fR[...]]
 Defines the initial set of permitted security types.  Multiple comma-separated
