@@ -34,6 +34,11 @@ is already using Display :1.  The previous behavior can be restored by passing
 associated with an X display number is in use before assuming that the display
 number is available.
 
+6. Fixed an issue in the Windows TurboVNC Viewer whereby an F10 key press,
+followed by an F10 key release, caused the keyboard focus to be redirected to
+the system menu, and subsequent keystrokes were consumed by the system menu
+until F10, left Alt, or Esc was pressed to dismiss the menu.
+
 
 3.0.3
 =====
