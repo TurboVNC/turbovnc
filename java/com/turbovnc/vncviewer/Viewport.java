@@ -1,4 +1,5 @@
-/* Copyright (C) 2012-2013, 2015-2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015-2022, 2024 D. R. Commander.
+ *                                          All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -210,11 +211,19 @@ public class Viewport extends JFrame implements Runnable {
     if (enable) {
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask),
              "unitScrollUp");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, ctrlAltShiftMask),
+             "unitScrollUp");
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask),
+             "unitScrollDown");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, ctrlAltShiftMask),
              "unitScrollDown");
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask),
              "unitScrollLeft");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, ctrlAltShiftMask),
+             "unitScrollLeft");
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask),
+             "unitScrollRight");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, ctrlAltShiftMask),
              "unitScrollRight");
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask),
              "scrollUp");
@@ -226,9 +235,14 @@ public class Viewport extends JFrame implements Runnable {
              "scrollRight");
     } else {
       im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, ctrlAltShiftMask));
       im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, ctrlAltShiftMask));
       im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, ctrlAltShiftMask));
       im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT,
+                                       ctrlAltShiftMask));
       im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask));
       im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
                                        ctrlAltShiftMask));
