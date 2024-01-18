@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 #
-# Copyright (C) 2009-2018, 2020-2022 D. R. Commander.  All Rights Reserved.
+# Copyright (C) 2009-2018, 2020-2022, 2024 D. R. Commander.
+#                                          All Rights Reserved.
 # Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                    All Rights Reserved.
 # Copyright (C) 2002-2009 Constantin Kaplinsky.  All Rights Reserved.
@@ -223,6 +224,11 @@ if ($opt{'-list'}) {
 if ($opt{'-sessionlist'}) {
   &List(0);
   exit;
+}
+
+if (defined($ENV{WAYLAND_DISPLAY})) {
+  warn "\nWARNING: Some window managers will not work in a TurboVNC session if the\n";
+  warn "TurboVNC session is started from a Wayland session.\n";
 }
 
 if ($opt{'-sessionstart'}) {

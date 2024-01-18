@@ -39,6 +39,10 @@ followed by an F10 key release, caused the keyboard focus to be redirected to
 the system menu, and subsequent keystrokes were consumed by the system menu
 until F10, left Alt, or Esc was pressed to dismiss the menu.
 
+7. Fixed an issue whereby GTK applications (including the GNOME window manager)
+running in a TurboVNC session attempted to display to a local Wayland session
+if one was active.
+
 
 3.0.3
 =====
