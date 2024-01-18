@@ -1,6 +1,7 @@
 #!/bin/sh
 
-#  Copyright (C) 2014-2018, 2021-2022 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2014-2018, 2021-2022, 2024 D. R. Commander.
+#                                           All Rights Reserved.
 #  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
 #  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
 #
@@ -19,12 +20,21 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 #  USA.
 
-# If a TurboVNC session running GNOME or MATE is started from an existing GNOME
-# or MATE instance on the TurboVNC host, then the SESSION_MANAGER environment
+# If a TurboVNC session running GNOME or MATE is started from a local GNOME or
+# MATE session on the TurboVNC host, then the SESSION_MANAGER environment
 # variable will be set.  We must unset that environment variable in order to
 # prevent interference between the host's window manager instance and the
 # TurboVNC session's window manager instance.
 unset SESSION_MANAGER
+# Similarly, if a TurboVNC session is started from a local Wayland session on
+# the TurboVNC host, then the WAYLAND_DISPLAY environment variable will be set.
+# We must unset that environment variable in order to prevent applications in
+# the TurboVNC session from using Wayland instead of X11.
+unset WAYLAND_DISPLAY
+# By default, GTK applications (including the GNOME window manager) will
+# attempt to display to a local Wayland session if one is active.  This forces
+# those applications to display to the TurboVNC session.
+GDK_BACKEND=x11;  export GDK_BACKEND
 # If each TurboVNC session will run a (reasonably modern) window manager, then
 # each TurboVNC session must have a separate D-Bus session bus instance.  On
 # Red Hat/Fedora (and derivatives), SuSE/openSUSE, FreeBSD, and Solaris 11,
