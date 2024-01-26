@@ -22,7 +22,7 @@ jobs:
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
           echo "LJT_URL=https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$LJT_VERSION" >>$GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up build
         run: |
           mkdir -p $HOME/src/vnc.nightly
@@ -45,7 +45,7 @@ jobs:
           echo "GPG_KEY_ID=${{secrets.GPG_KEY_ID}}" >>$HOME/src/buildscripts/gpgsign
           echo "GPG_KEY_PASS=${{secrets.GPG_KEY_PASS}}" >>$HOME/src/buildscripts/gpgsign
       - name: Cache OpenJDK
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.openjdk
           key: openjdk-${{github.job}}-${{env.BRANCH}}
@@ -57,7 +57,7 @@ jobs:
           mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
       - name: Configure AWS
         if: ${{github.event_name != 'pull_request'}}
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -74,7 +74,7 @@ jobs:
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
           echo "LJT_URL=https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$LJT_VERSION" >>$GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up build
         run: |
           sudo apt install -y libxi-dev
@@ -101,7 +101,7 @@ jobs:
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
           echo "LJT_URL=https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$LJT_VERSION" >>$GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up build
         run: |
           brew install md5sha1sum
@@ -125,7 +125,7 @@ jobs:
           echo "GPG_KEY_ID=${{secrets.GPG_KEY_ID}}" >>$HOME/src/buildscripts/gpgsign
           echo "GPG_KEY_PASS=${{secrets.GPG_KEY_PASS}}" >>$HOME/src/buildscripts/gpgsign
       - name: Cache OpenJDK
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.openjdk
           key: openjdk-${{github.job}}-${{env.BRANCH}}
@@ -135,7 +135,7 @@ jobs:
           mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
       - name: Configure AWS
         if: ${{github.event_name != 'pull_request'}}
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
