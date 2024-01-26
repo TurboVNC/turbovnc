@@ -31,6 +31,15 @@ is already using Display :1.  The previous behavior can be restored by passing
 associated with an X display number is in use before assuming that the display
 number is available.
 
+3. Fixed an issue in the Windows TurboVNC Viewer whereby an F10 key press,
+followed by an F10 key release, caused the keyboard focus to be redirected to
+the system menu, and subsequent keystrokes were consumed by the system menu
+until F10, left Alt, or Esc was pressed to dismiss the menu.
+
+4. Fixed an issue whereby GTK applications (including the GNOME window manager)
+running in a TurboVNC session attempted to display to a local Wayland session
+if one was active.
+
 
 3.1
 ===

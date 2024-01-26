@@ -1,4 +1,4 @@
-/* Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2023 D. R. Commander.
+/* Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2024 D. R. Commander.
  *                                                     All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
@@ -99,8 +99,9 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       private final KeyEventDispatcher keyEventDispatcher =
         new KeyEventDispatcher() {
         public boolean dispatchKeyEvent(KeyEvent e) {
-          if (e.getKeyCode() == 18 &&
-              e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
+          if ((e.getKeyCode() == 18 &&
+               e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) ||
+              e.getKeyCode() == 121) {
             if (e.getID() == KeyEvent.KEY_PRESSED)
               cc.desktop.keyPressed(e);
             else if (e.getID() == KeyEvent.KEY_RELEASED)
@@ -705,9 +706,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           }
           break;
         case KeyEvent.VK_LEFT:
+        case KeyEvent.VK_KP_LEFT:
         case KeyEvent.VK_RIGHT:
+        case KeyEvent.VK_KP_RIGHT:
         case KeyEvent.VK_UP:
+        case KeyEvent.VK_KP_UP:
         case KeyEvent.VK_DOWN:
+        case KeyEvent.VK_KP_DOWN:
         case KeyEvent.VK_PAGE_UP:
         case KeyEvent.VK_PAGE_DOWN:
         case KeyEvent.VK_HOME:
