@@ -10,18 +10,25 @@ Build Requirements
 
 - [CMake](http://www.cmake.org) v3.16 or later
 
-- libjpeg-turbo SDK v1.2 or later
-  * The libjpeg-turbo SDK binary packages can be downloaded from
-    <https://github.com/libjpeg-turbo/libjpeg-turbo/releases>.
-  * The TurboVNC build system will search for the TurboJPEG header and library
-    under __/opt/libjpeg-turbo__ on Un\*x or __c:\libjpeg-turbo[64]__ (Visual
-    C++) or __c:\libjpeg-turbo-gcc[64]__ (MinGW) on Windows, but you can
-    override this by setting the `TJPEG_INCLUDE_DIR` CMake variable to the
-    directory containing __turbojpeg.h__ and the `TJPEG_LIBRARY` CMake variable
-    to either the full path of the TurboJPEG library against which you want to
-    link or a set of link flags needed to link with the TurboJPEG library (for
-    instance, `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"` or
-    `-DTJPEG_LIBRARY="-libpath:c:/libjpeg-turbo64/lib turbojpeg.lib"`.)
+- The TurboJPEG SDK from
+  [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo/releases) v1.2
+  or later
+
+  * The build system uses libjpeg-turbo's CMake package config file to find the
+    TurboJPEG API library and header.  You can set the `CMAKE_PREFIX_PATH`
+    CMake variable to specify an alternate search location for the CMake
+    package config file (for example, **/opt/libjpeg-turbo/lib64/cmake**.)
+
+  * The following advanced CMake variables also control finding and linking
+    with the TurboJPEG API library:
+
+      - `TURBOJPEG_VERSION`
+      - `TURBOJPEG_EXACT`
+      - `TURBOJPEG_PATH`
+      - `TURBOJPEG_STATIC`
+
+      Use `ccmake` or `cmake-gui`, as described below, to view documentation
+    for those variables.
 
 
 ### Linux and other Un*x O/S's (except Mac)
@@ -174,8 +181,6 @@ with those and other dependencies.  Distribution-specific dynamically-linked
 TurboVNC binaries can instead be built by changing the values of the following
 CMake variables:
 
-- `TJPEG_INCLUDE_DIR`
-- `TJPEG_LIBRARY`
 - `TVNC_DLOPENSSL`
 - `TVNC_ZLIBNG`
 - `TVNC_STATIC_XORG_PATHS`

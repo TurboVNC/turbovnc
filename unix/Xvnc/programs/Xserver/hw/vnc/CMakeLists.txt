@@ -3,7 +3,10 @@ option(TVNC_USEPAM "Include PAM authentication support in the TurboVNC Server"
 	${DEFAULT_TVNC_USEPAM})
 
 include_directories(. ../../fb ../../mi ../../os ../../randr ../../render
-	${CMAKE_SOURCE_DIR}/common/rfb ${TJPEG_INCLUDE_DIR})
+	${CMAKE_SOURCE_DIR}/common/rfb)
+if(DEFINED TJPEG_INCLUDE_DIR)
+	include_directories(${TJPEG_INCLUDE_DIR})
+endif()
 
 add_definitions(${ServerOSDefines})
 set(PAMSRC "")
@@ -101,4 +104,7 @@ if(TVNC_DRI3)
 endif()
 if(TVNC_USETLS STREQUAL "openssl" AND NOT TVNC_DLOPENSSL)
 	target_link_libraries(vnc OpenSSL::SSL)
+endif()
+if(TURBOJPEG_TARGET)
+	target_link_libraries(vnc ${TURBOJPEG_TARGET})
 endif()

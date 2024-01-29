@@ -1,90 +1,92 @@
-include(CheckCSourceCompiles)
+if(DEFINED TJPEG_INCLUDE_DIR OR DEFINED TJPEG_LIBRARY)
 
-if(WIN32)
-	if(MINGW)
-		if(BITS EQUAL 64)
-			set(DEFAULT_TJPEG_INCLUDE_DIR c:/libjpeg-turbo-gcc64/include)
-		else()
-			set(DEFAULT_TJPEG_INCLUDE_DIR c:/libjpeg-turbo-gcc/include)
-		endif()
+	unset(TURBOJPEG_VERSION CACHE)
+	unset(TURBOJPEG_EXACT CACHE)
+	unset(TURBOJPEG_PATH CACHE)
+	unset(TURBOJPEG_STATIC CACHE)
+	unset(libjpeg-turbo_DIR CACHE)
+
+	if(TJPEG_INCLUDE_DIR)
+		set(TJPEG_INCLUDE_DIR_HINTS ${TJPEG_INCLUDE_DIR})
+		unset(TJPEG_INCLUDE_DIR)
+		unset(TJPEG_INCLUDE_DIR CACHE)
+	endif()
+
+	find_path(TJPEG_INCLUDE_DIR turbojpeg.h DOC "TurboJPEG include directory"
+		HINTS ${TJPEG_INCLUDE_DIR_HINTS})
+	if(TJPEG_INCLUDE_DIR STREQUAL "TJPEG_INCLUDE_DIR-NOTFOUND")
+		unset(TURBOJPEG_WORKS CACHE)
+		set(TJPEG_INCLUDE_DIR ${TJPEG_INCLUDE_DIR_HINTS} CACHE PATH
+			"TurboJPEG include directory" FORCE)
+		message(FATAL_ERROR "Could not find turbojpeg.h in ${TJPEG_INCLUDE_DIR_HINTS}.  If it is installed in a different place, then set TJPEG_INCLUDE_DIR accordingly.")
 	else()
-		if(BITS EQUAL 64)
-			set(DEFAULT_TJPEG_INCLUDE_DIR c:/libjpeg-turbo64/include)
-		else()
-			set(DEFAULT_TJPEG_INCLUDE_DIR c:/libjpeg-turbo/include)
-		endif()
+		message(STATUS "TJPEG_INCLUDE_DIR = ${TJPEG_INCLUDE_DIR}")
 	endif()
-else()
-	set(DEFAULT_TJPEG_INCLUDE_DIR /opt/libjpeg-turbo/include)
-endif()
-if(NOT TJPEG_INCLUDE_DIR)
-	set(TJPEG_INCLUDE_DIR_HINTS ${DEFAULT_TJPEG_INCLUDE_DIR})
-else()
-	set(TJPEG_INCLUDE_DIR_HINTS ${TJPEG_INCLUDE_DIR})
-	unset(TJPEG_INCLUDE_DIR)
-	unset(TJPEG_INCLUDE_DIR CACHE)
-endif()
 
-find_path(TJPEG_INCLUDE_DIR turbojpeg.h
-	DOC "TurboJPEG include directory (default: ${DEFAULT_TJPEG_INCLUDE_DIR})"
-	HINTS ${TJPEG_INCLUDE_DIR_HINTS})
-if(TJPEG_INCLUDE_DIR STREQUAL "TJPEG_INCLUDE_DIR-NOTFOUND")
-	message(FATAL_ERROR "Could not find turbojpeg.h in ${TJPEG_INCLUDE_DIR_HINTS}.  If it is installed in a different place, then set TJPEG_INCLUDE_DIR accordingly.")
-else()
-	message(STATUS "TJPEG_INCLUDE_DIR = ${TJPEG_INCLUDE_DIR}")
-endif()
+	set(TJPEG_LIBRARY "" CACHE STRING
+		"Path to TurboJPEG library or flags necessary to link with it")
 
-if(WIN32)
-	if(MINGW)
-		if(BITS EQUAL 64)
-			set(DEFAULT_TJPEG_LIBRARY c:/libjpeg-turbo-gcc64/lib/libturbojpeg.a)
-		else()
-			set(DEFAULT_TJPEG_LIBRARY c:/libjpeg-turbo-gcc/lib/libturbojpeg.a)
-		endif()
-	else()
-		if(BITS EQUAL 64)
-			set(DEFAULT_TJPEG_LIBRARY c:/libjpeg-turbo64/lib/turbojpeg-static.lib)
-		else()
-			set(DEFAULT_TJPEG_LIBRARY c:/libjpeg-turbo/lib/turbojpeg-static.lib)
-		endif()
+	include(CheckCSourceCompiles)
+	if(MSVC)
+		set(CMAKE_REQUIRED_DEFINITIONS -MT)
 	endif()
-else()
-	set(DEFAULT_TJPEG_LIBRARY /opt/libjpeg-turbo/lib${BITS}/libturbojpeg.a)
-endif()
-
-set(TJPEG_LIBRARY_OVERRIDE 0)
-if(TJPEG_LIBRARY)
-	set(TJPEG_LIBRARY_OVERRIDE 1)
-endif()
-
-set(TJPEG_LIBRARY ${DEFAULT_TJPEG_LIBRARY} CACHE STRING
-	"Path to TurboJPEG library or flags necessary to link with it (default: ${DEFAULT_TJPEG_LIBRARY})")
-
-if(MSVC)
-	set(CMAKE_REQUIRED_DEFINITIONS -MT)
-endif()
-set(CMAKE_REQUIRED_INCLUDES ${TJPEG_INCLUDE_DIR})
-set(CMAKE_REQUIRED_LIBRARIES ${TJPEG_LIBRARY})
-check_c_source_compiles("#include <turbojpeg.h>\nint main(void) { tjhandle h = tjInitCompress();  return h != 0 ? 0 : 1; }" TURBOJPEG_WORKS)
-if(NOT TURBOJPEG_WORKS AND NOT TJPEG_LIBRARY_OVERRIDE AND UNIX)
-	message(STATUS "Could not link with official TurboJPEG library ${TJPEG_LIBRARY}.  Checking whether the operating system supplies it ...")
-	set(CMAKE_REQUIRED_LIBRARIES turbojpeg)
-	check_c_source_compiles("#include <turbojpeg.h>\nint main(void) { tjhandle h = tjInitCompress();  return h != 0 ? 0 : 1; }" SYSTEM_TURBOJPEG_WORKS)
-	if(SYSTEM_TURBOJPEG_WORKS)
-		set(TJPEG_LIBRARY turbojpeg CACHE STRING
-			"Path to TurboJPEG library or flags necessary to link with it (default: ${DEFAULT_TJPEG_LIBRARY})"
-			FORCE)
+	set(CMAKE_REQUIRED_INCLUDES ${TJPEG_INCLUDE_DIR})
+	set(CMAKE_REQUIRED_LIBRARIES ${TJPEG_LIBRARY})
+	check_c_source_compiles("#include <turbojpeg.h>\nint main(void) { tjhandle h = tjInitCompress();  return h != 0 ? 0 : 1; }" TURBOJPEG_WORKS)
+	if(NOT TURBOJPEG_WORKS)
+		unset(TURBOJPEG_WORKS CACHE)
+		if(NOT TJPEG_LIBRARY)
+			unset(TJPEG_LIBRARY CACHE)
+		endif()
+		message(FATAL_ERROR "Could not link with TurboJPEG library ${TJPEG_LIBRARY}.  If it is installed in a different place, then set TJPEG_LIBRARY accordingly.")
 	endif()
-endif()
-set(CMAKE_REQUIRED_DEFINITIONS)
-set(CMAKE_REQUIRED_INCLUDES)
-set(CMAKE_REQUIRED_LIBRARIES)
-if(NOT TURBOJPEG_WORKS AND NOT SYSTEM_TURBOJPEG_WORKS)
-	unset(TURBOJPEG_WORKS)
-	unset(TURBOJPEG_WORKS CACHE)
-	unset(SYSTEM_TURBOJPEG_WORKS)
-	unset(SYSTEM_TURBOJPEG_WORKS CACHE)
-	message(FATAL_ERROR "Could not link with TurboJPEG library ${TJPEG_LIBRARY}.  If it is installed in a different place, then set TJPEG_LIBRARY accordingly.")
+
+	message(STATUS "TJPEG_LIBRARY = ${TJPEG_LIBRARY}")
+
+	return()
+
 endif()
 
-message(STATUS "TJPEG_LIBRARY = ${TJPEG_LIBRARY}")
+unset(TURBOJPEG_WORKS CACHE)
+
+# Use the CMake package config file in libjpeg-turbo v2.1 or later to find the
+# TurboJPEG API library and header.
+
+set(TURBOJPEG_VERSION "1.1.90" CACHE STRING
+	"Minimum version of libjpeg-turbo containing the desired TurboJPEG API functionality")
+option(TURBOJPEG_EXACT
+	"Require the exact version of libjpeg-turbo specified in TURBOJPEG_VERSION"
+	FALSE)
+boolean_number(TURBOJPEG_EXACT)
+set(TURBOJPEG_PATH "" CACHE PATH
+	"Search only this path for libjpeg-turbo")
+option(TURBOJPEG_STATIC
+	"Link with the static TurboJPEG API library rather than the shared TurboJPEG API library"
+	FALSE)
+boolean_number(TURBOJPEG_STATIC)
+
+set(EXACT "")
+if(TURBOJPEG_EXACT AND TURBOJPEG_VERSION)
+	set(EXACT EXACT)
+endif()
+
+if(TURBOJPEG_PATH)
+	find_package(libjpeg-turbo ${TURBOJPEG_VERSION} ${EXACT} REQUIRED
+		PATHS ${TURBOJPEG_PATH} NO_DEFAULT_PATH)
+else()
+	find_package(libjpeg-turbo ${TURBOJPEG_VERSION} ${EXACT} REQUIRED)
+endif()
+
+set(TURBOJPEG_TARGET libjpeg-turbo::turbojpeg)
+if(TURBOJPEG_STATIC)
+	set(TURBOJPEG_TARGET libjpeg-turbo::turbojpeg-static)
+endif()
+if(NOT TARGET ${TURBOJPEG_TARGET})
+	message(FATAL_ERROR "Target ${TURBOJPEG_TARGET} does not exist in libjpeg-turbo package")
+endif()
+get_target_property(TURBOJPEG_LIB ${TURBOJPEG_TARGET}
+	IMPORTED_LOCATION_RELEASE)
+if(TURBOJPEG_LIB STREQUAL "TURBOJPEG_LIB-NOTFOUND")
+	get_target_property(TURBOJPEG_LIB ${TURBOJPEG_TARGET} IMPORTED_LOCATION_NONE)
+endif()
+message(STATUS "Found TurboJPEG: ${TURBOJPEG_LIB} (found version \"${libjpeg-turbo_VERSION}\")")

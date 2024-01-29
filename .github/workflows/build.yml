@@ -78,15 +78,8 @@ jobs:
       - name: Set up build
         run: |
           sudo apt update
-          sudo apt install -y libxi-dev xserver-xorg-dev
+          sudo apt install -y libjpeg62-dev libturbojpeg0-dev libxi-dev xserver-xorg-dev
           sudo update-java-alternatives --set $JAVA_HOME_21_X64
-          mkdir $HOME/libjpeg-turbo-deb
-          pushd $HOME/libjpeg-turbo-deb
-          wget --no-check-certificate $LJT_URL/libjpeg-turbo-official_$LJT_VERSION\_amd64.deb $LJT_URL/libjpeg-turbo-official32_$LJT_VERSION\_amd64.deb
-          sudo dpkg -i *.deb
-          rm *.deb
-          popd
-          rmdir $HOME/libjpeg-turbo-deb
       - name: Build
         run: |
           mkdir build

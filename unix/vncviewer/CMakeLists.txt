@@ -7,8 +7,10 @@ configure_file(vncviewer-mac.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
 execute_process(COMMAND chmod +x vncviewer
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}
-	${TJPEG_INCLUDE_DIR})
+include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+if(DEFINED TJPEG_INCLUDE_DIR)
+	include_directories(${TJPEG_INCLUDE_DIR})
+endif()
 
 enable_language(OBJC)
 
@@ -17,8 +19,12 @@ add_library(turbovnchelper SHARED ${HELPER_SOURCES} keysym2ucs.c osx_to_qnum.c
 	${CMAKE_SOURCE_DIR}/common/turbojpeg-jni/turbojpeg-jni.c)
 set_target_properties(turbovnchelper PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
-target_link_libraries(turbovnchelper "-framework Carbon -framework Cocoa"
-	${TJPEG_LIBRARY})
+target_link_libraries(turbovnchelper "-framework Carbon -framework Cocoa")
+if(DEFINED TJPEG_LIBRARY)
+	target_link_libraries(turbovnchelper ${TJPEG_LIBRARY})
+elseif(TURBOJPEG_TARGET)
+	target_link_libraries(turbovnchelper ${TURBOJPEG_TARGET})
+endif()
 
 if(CPU_TYPE STREQUAL "x86_64")
 	# This is nasty, but for reasons unexplained, full-screen multi-screen
@@ -55,7 +61,10 @@ execute_process(COMMAND chmod +x vncviewer
 find_package(JNI REQUIRED)
 
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}
-	${CMAKE_SOURCE_DIR}/common/rfb ${TJPEG_INCLUDE_DIR})
+	${CMAKE_SOURCE_DIR}/common/rfb)
+if(DEFINED TJPEG_INCLUDE_DIR)
+	include_directories(${TJPEG_INCLUDE_DIR})
+endif()
 add_library(turbovnchelper SHARED turbovnchelper.c
 	${CMAKE_SOURCE_DIR}/common/turbojpeg-jni/turbojpeg-jni.c)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
@@ -68,8 +77,12 @@ set_target_properties(turbovnchelper PROPERTIES
 if(NOT CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	set(LIBDL dl)
 endif()
-target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${X11_Xi_LIB} ${LIBDL}
-	${TJPEG_LIBRARY})
+target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${X11_Xi_LIB} ${LIBDL})
+if(DEFINED TJPEG_LIBRARY)
+	target_link_libraries(turbovnchelper ${TJPEG_LIBRARY})
+elseif(TURBOJPEG_TARGET)
+	target_link_libraries(turbovnchelper ${TURBOJPEG_TARGET})
+endif()
 
 install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_FULL_JAVADIR})
 

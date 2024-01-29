@@ -180,8 +180,10 @@ endif()
 target_link_libraries(Xvnc dix mi vnc fb Xi composite mi damage damageext randr
 	record render os present Xext-server sync xfixes xkb ${X11_Xau_LIB}
 	${X11_Xdmcp_LIB} ${X11_Xfont2_LDFLAGS} ${X11_Pixman_LDFLAGS} sha1
-	${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} vncauth m pthread ${PAM_LIB} glx-server
-	${EXTRA_LIB})
+	${ZLIB_LIBRARIES} vncauth m pthread ${PAM_LIB} glx-server ${EXTRA_LIB})
+if(DEFINED TJPEG_LIBRARY)
+	target_link_libraries(Xvnc ${TJPEG_LIBRARY})
+endif()
 if(NOT APPLE AND NOT
 	CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	target_link_libraries(Xvnc dl)
