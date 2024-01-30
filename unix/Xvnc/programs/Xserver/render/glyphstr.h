@@ -109,6 +109,8 @@ extern GlyphPtr FindGlyph(GlyphSetPtr glyphSet, Glyph id);
 
 extern GlyphPtr AllocateGlyph(xGlyphInfo * gi, int format);
 
+extern void FreeGlyph(GlyphPtr glyph, int format);
+
 extern Bool
  ResizeGlyphSet(GlyphSetPtr glyphSet, CARD32 change);
 
