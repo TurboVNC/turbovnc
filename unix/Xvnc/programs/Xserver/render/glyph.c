@@ -245,10 +245,11 @@ FreeGlyphPicture(GlyphPtr glyph)
     }
 }
 
-static void
+void
 FreeGlyph(GlyphPtr glyph, int format)
 {
     CheckDuplicates(&globalGlyphs[format], "FreeGlyph");
+    BUG_RETURN(glyph->refcnt == 0);
     if (--glyph->refcnt == 0) {
         GlyphRefPtr gr;
         int i;
@@ -354,7 +355,7 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     glyph = (GlyphPtr) malloc(size);
     if (!glyph)
         return 0;
-    glyph->refcnt = 0;
+    glyph->refcnt = 1;
     glyph->size = size + sizeof(xGlyphInfo);
     glyph->info = *gi;
     dixInitPrivates(glyph, (char *) glyph + head_size, PRIVATE_GLYPH);
