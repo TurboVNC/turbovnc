@@ -38,6 +38,7 @@ jobs:
       - name: Configure GPG signing
         if: ${{github.event_name != 'pull_request'}}
         run: |
+          sudo apt update
           sudo apt install -y gnupg1
           printf "${{secrets.GPG_KEY}}" | base64 --decode | gpg1 --batch --import -
           chmod 600 $HOME/.gnupg/gpg.conf
@@ -77,6 +78,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up build
         run: |
+          sudo apt update
           sudo apt install -y libxi-dev
           mkdir $HOME/libjpeg-turbo-deb
           pushd $HOME/libjpeg-turbo-deb
