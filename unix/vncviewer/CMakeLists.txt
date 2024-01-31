@@ -10,16 +10,11 @@ execute_process(COMMAND chmod +x vncviewer
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}
 	${TJPEG_INCLUDE_DIR})
 
-if(CMAKE_VERSION VERSION_EQUAL "3.16" OR CMAKE_VERSION VERSION_GREATER "3.16")
-	enable_language(OBJC)
-endif()
+enable_language(OBJC)
 
 set(HELPER_SOURCES cocoa.m turbovnchelper.m JRSwizzle.m)
 add_library(turbovnchelper SHARED ${HELPER_SOURCES} keysym2ucs.c osx_to_qnum.c
 	${CMAKE_SOURCE_DIR}/common/turbojpeg-jni/turbojpeg-jni.c usocket.c)
-if(CMAKE_VERSION VERSION_LESS "3.16")
-	set_source_files_properties(${HELPER_SOURCES} PROPERTIES LANGUAGE C)
-endif()
 set_target_properties(turbovnchelper PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
 target_link_libraries(turbovnchelper "-framework Carbon -framework Cocoa"

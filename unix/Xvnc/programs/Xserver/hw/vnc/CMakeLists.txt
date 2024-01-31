@@ -39,8 +39,6 @@ if(TVNC_USETLS STREQUAL "openssl")
 		set(RFBSSLSRC rfbssl_openssl.c)
 		message(STATUS "Enabling TLS encryption using OpenSSL")
 		add_definitions(-DUSETLS)
-		set_property(SOURCE ${RFBSSLSRC} APPEND_STRING PROPERTY COMPILE_FLAGS
-			" -I${OPENSSL_INCLUDE_DIR}")
 	endif()
 	set(DEFAULT_TVNC_DLOPENSSL 1)
 	option(TVNC_DLOPENSSL "Load OpenSSL using dlopen()/dlsym() instead of linking directly with it"
@@ -97,5 +95,5 @@ add_library(vnc STATIC
 	${RFBSSLSRC})
 
 if(TVNC_USETLS STREQUAL "openssl" AND NOT TVNC_DLOPENSSL)
-	target_link_libraries(vnc ${OPENSSL_LIBRARIES})
+	target_link_libraries(vnc OpenSSL::SSL)
 endif()

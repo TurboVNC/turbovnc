@@ -8,10 +8,8 @@ Build Requirements
 
 ### All Systems
 
-- [CMake](http://www.cmake.org) v2.8.12 or later
-  * CMake 3.12 or later is required if it is desirable or necessary to use
-    Python 3 to run the simple web server for noVNC (part of the TurboVNC
-    Server.)
+- [CMake](http://www.cmake.org) v3.16 or later
+  * CMake 3.21 or later is required if building the TurboVNC Viewer.
 
 - libjpeg-turbo SDK v1.2 or later
   * The libjpeg-turbo SDK binary packages can be downloaded from
@@ -42,7 +40,6 @@ Build Requirements
   * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
     an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
     set to `1`)
-  * If using JDK 11 or later, CMake 3.11.x or later must also be used
 
 
 ### Windows
@@ -79,7 +76,6 @@ Build Requirements
   * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
     an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
     set to `1`)
-  * If using JDK 11 or later, CMake 3.11.x or later must also be used
 
 
 ### Mac
@@ -93,7 +89,6 @@ Build Requirements
   * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
     a Mac package/disk image with a custom JRE (if the `TVNC_INCLUDEJRE` CMake
     variable is set to `1`)
-  * If using JDK 11 or later, CMake 3.11.x or later must also be used
 
 
 Out-of-Tree Builds

@@ -1,3 +1,5 @@
+image: Visual Studio 2022
+
 environment:
   LJT_VERSION: 3.0.2
   LJT_64BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
@@ -19,11 +21,9 @@ install:
 
       c:\installers\libjpeg-turbo-vc.exe /S
 
-      set INCLUDE=c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include;c:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;c:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\ucrt;c:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\um
+      call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 
-      set LIB=c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\amd64;c:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;c:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\x64
-
-      set PATH=c:\Program Files (x86)\Inno Setup 6;c:\msys64\usr\bin;c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64;c:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE;c:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64;%PATH%
+      set PATH=c:\Program Files (x86)\Inno Setup 6;c:\msys64\usr\bin;%PATH%
 
       set MSYSTEM=MINGW32
 

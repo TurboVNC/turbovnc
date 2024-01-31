@@ -107,7 +107,6 @@ configure_file(include/tvnc_version.h.in
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 include(FindOpenGL)
-include_directories(${OPENGL_INCLUDE_DIR})
 
 add_subdirectory(lib)
 add_subdirectory(programs/Xserver)

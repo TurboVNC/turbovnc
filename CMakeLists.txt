@@ -2,15 +2,7 @@
 # SETUP
 ###############################################################################
 
-cmake_minimum_required(VERSION 2.8.12...3.28)
-# Shut up CMake 3.1 and later
-if(POLICY CMP0053)
-	cmake_policy(SET CMP0053 NEW)
-endif()
-# Shut up CMake 3.0 and later
-if(POLICY CMP0042)
-	cmake_policy(SET CMP0042 NEW)
-endif()
+cmake_minimum_required(VERSION 3.16...3.28)
 
 project(TurboVNC NONE)
 string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)

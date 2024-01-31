@@ -55,3 +55,5 @@ add_library(glx-server STATIC
 	vndservermapping.c
 	vndservervendor.c
 	xfont.c)
+
+target_link_libraries(glx-server OpenGL::GL)

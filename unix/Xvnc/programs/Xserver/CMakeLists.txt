@@ -156,14 +156,14 @@ set(EXTRA_LIB "")
 if(TVNC_NVCONTROL)
 	set(EXTRA_LIB ${EXTRA_LIB} XNVCtrl)
 endif()
-set(EXTRA_LIB ${EXTRA_LIB} glx-server ${OPENGL_gl_LIBRARY})
 if(HAVE_MONOTONIC_CLOCK)
 	set(EXTRA_LIB ${EXTRA_LIB} rt)
 endif()
 target_link_libraries(Xvnc dix mi vnc fb Xi composite mi damage damageext randr
 	record render os present Xext-server sync xfixes xkb ${X11_Xau_LIB}
 	${X11_Xdmcp_LIB} ${X11_Xfont2_LDFLAGS} ${X11_Pixman_LDFLAGS} sha1
-	${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} vncauth m pthread ${PAM_LIB} ${EXTRA_LIB})
+	${TJPEG_LIBRARY} ${ZLIB_LIBRARIES} vncauth m pthread ${PAM_LIB} glx-server
+	${EXTRA_LIB})
 if(NOT APPLE AND NOT
 	CMAKE_SYSTEM_NAME MATCHES "(OpenBSD|FreeBSD|NetBSD|DragonFly)")
 	target_link_libraries(Xvnc dl)
