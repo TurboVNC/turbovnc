@@ -96,7 +96,6 @@ endif()
 if(TVNC_SYSTEMX11)
 	include(FindPkgConfig)
 	pkg_check_modules(X11_Xfont2 REQUIRED xfont2)
-	pkg_check_modules(X11_Fontenc REQUIRED fontenc)
 	pkg_check_modules(X11_Pixman REQUIRED pixman-1)
 	include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xau_INCLUDE_PATH}
 		${X11_Xdmcp_INCLUDE_PATH} ${X11_Xkbfile_INCLUDE_PATH}
@@ -112,7 +111,6 @@ endif()
 
 if(TVNC_SYSTEMLIBS)
 	include(FindZLIB)
-	include(FindBZip2)
 else()
 	set(ZLIB_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/common/zlib)
 	set(ZLIB_LIBRARIES zlib)
@@ -135,9 +133,7 @@ endif()
 if(NOT TVNC_SYSTEMX11)
 	add_subdirectory(include)
 endif()
-if(TVNC_SYSTEMLIBS)
-	include(FindFreetype)
-else()
+if(NOT TVNC_SYSTEMLIBS)
 	add_subdirectory(extras/freetype2)
 	set(FREETYPE_INCLUDE_DIRS
 		${CMAKE_CURRENT_SOURCE_DIR}/extras/freetype2/include
