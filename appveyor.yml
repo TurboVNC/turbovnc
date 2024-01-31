@@ -3,7 +3,6 @@ image: Visual Studio 2022
 environment:
   LJT_VERSION: 3.0.2
   LJT_64BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
-  LJT_32BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc.exe"
 
 install:
   - cmd: >-
@@ -16,10 +15,6 @@ install:
       curl -fSL -o c:\installers\libjpeg-turbo-vc64.exe "%LJT_64BIT_SDK%"
 
       c:\installers\libjpeg-turbo-vc64.exe /S
-
-      curl -fSL -o c:\installers\libjpeg-turbo-vc.exe "%LJT_32BIT_SDK%"
-
-      c:\installers\libjpeg-turbo-vc.exe /S
 
       call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 

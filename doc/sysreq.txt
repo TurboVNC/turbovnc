@@ -49,7 +49,7 @@
 
 || || Client ||
 | CPU \
-	| For optimal performance, the CPU should support SSE2 extensions. \
+	| x86-64 required \
 	|
 | O/S \
 	| Windows 7 or later \

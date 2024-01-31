@@ -4,23 +4,16 @@
 [Setup]
 #ifdef WIN64
 ArchitecturesInstallIn64BitMode=x64
-AppName=@CMAKE_PROJECT_NAME@ 64-bit
-AppVerName=@CMAKE_PROJECT_NAME@ 64-bit v@VERSION@ (@BUILD@)
-#else
+#endif
 AppName=@CMAKE_PROJECT_NAME@
 AppVerName=@CMAKE_PROJECT_NAME@ v@VERSION@ (@BUILD@)
-#endif
 AppVersion=@VERSION@
 AppPublisher=@PKGVENDOR@
 AppPublisherURL=@PKGURL@
 AppSupportURL=@PKGURL@
 AppUpdatesURL=@PKGURL@
 DefaultDirName={pf}\@CMAKE_PROJECT_NAME@
-#ifdef WIN64
-DefaultGroupName=@CMAKE_PROJECT_NAME@ 64-bit
-#else
 DefaultGroupName=@CMAKE_PROJECT_NAME@
-#endif
 AllowNoIcons=yes
 InfoBeforeFile=@CMAKE_SOURCE_DIR@\release\InstInfo.rtf
 Compression=zip/9

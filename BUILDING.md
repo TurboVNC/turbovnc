@@ -52,13 +52,12 @@ Build Requirements
   which includes everything necessary to build TurboVNC.
 
   * You can also download and install the standalone Windows SDK (for Windows 7
-    or later), which includes command-line versions of the 32-bit and 64-bit
-    Visual C++ compilers.
+    or later), which includes a command-line version of the Visual C++
+    compiler.
   * If you intend to build TurboVNC from the command line, then add the
     appropriate compiler and SDK directories to the `INCLUDE`, `LIB`, and
     `PATH` environment variables.  This is generally accomplished by executing
-    `vcvars32.bat` or `vcvars64.bat`, which are located in the same directory
-    as the compiler.
+    `vcvars64.bat`, which is located in the same directory as the compiler.
 
    ... OR ...
 
@@ -130,9 +129,6 @@ Replace `make` with `ninja` and `Unix Makefiles` with `Ninja` if using Ninja.
     cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
     nmake
 
-This will build either a 32-bit or a 64-bit version of TurboVNC, depending on
-which version of __cl.exe__ is in the `PATH`.
-
 Replace `nmake` with `ninja` and `NMake Makefiles` with `Ninja` if using Ninja.
 
 
@@ -143,13 +139,9 @@ Choose the appropriate CMake generator option for your version of Visual Studio
 instance:
 
     cd {build_directory}
-    cmake -G"Visual Studio 10" [additional CMake flags] {source_directory}
+    cmake -G "Visual Studio 17 2022" [additional CMake flags] {source_directory}
 
-NOTE: Add `Win64` to the generator name (for example, `Visual Studio 10 Win64`)
-to build a 64-bit version of TurboVNC.  A separate build directory must be
-used for 32-bit and 64-bit builds.
-
-You can then open __ALL_BUILD.vcproj__ in Visual Studio and build one of the
+You can then open __ALL_BUILD.vcxproj__ in Visual Studio and build one of the
 configurations in that project ("Debug", "Release", etc.) to generate a full
 build of TurboVNC.
 
@@ -241,9 +233,6 @@ TurboVNC into a directory of your choosing.  If you don't specify
 
 __c:\Program Files\TurboVNC__<br>
 Windows
-
-__c:\Program Files (x86)\TurboVNC__<br>
-32-bit build on 64-bit Windows
 
 __/opt/TurboVNC__<br>
 Un*x

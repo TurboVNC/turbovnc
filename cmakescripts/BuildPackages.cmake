@@ -88,11 +88,9 @@ endif() # Linux
 
 if(WIN32)
 
+set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
 if(BITS EQUAL 64)
-	set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION}-x64)
 	set(INST_DEFS -DWIN64)
-else()
-	set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION}-x86)
 endif()
 
 set(INST_DEPENDS java turbovnchelper)
