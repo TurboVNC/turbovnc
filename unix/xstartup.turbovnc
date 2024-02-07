@@ -43,26 +43,38 @@ GDK_BACKEND=x11;  export GDK_BACKEND
 # that variable at this point in the script.  However, on other operating
 # systems (particularly Debian 10+ and Ubuntu 18.04+), it is necessary to
 # explicitly create a new session bus instance by invoking dbus-launch.
-DBUS_LAUNCH=
-if [ -x /usr/bin/dbus-launch ]; then
-  DBUS_LAUNCH=/usr/bin/dbus-launch
-elif [ -x /usr/local/bin/dbus-launch ]; then
-  DBUS_LAUNCH=/usr/local/bin/dbus-launch
+#
+# Using a separate D-Bus session bus instance for each TurboVNC session is
+# necessary in order to run multiple TurboVNC sessions (or a local session and
+# a TurboVNC session) simultaneously under the same user account, but this also
+# causes issues with cgroup v2 on some systems.  We allow users to set
+# TVNC_SHAREDDBUS=1 in the environment (currently undocumented except here) to
+# forego a separate D-Bus session bus instance and use the D-Bus session bus
+# instance provided by systemd, which improves cgroup v2 compatibility at the
+# expense of multi-session capability.
+if [ "$TVNC_SHAREDDBUS" != "1" ]; then
+  DBUS_LAUNCH=
+  if [ -x /usr/bin/dbus-launch ]; then
+    DBUS_LAUNCH=/usr/bin/dbus-launch
+  elif [ -x /usr/local/bin/dbus-launch ]; then
+    DBUS_LAUNCH=/usr/local/bin/dbus-launch
+  fi
+  if [ "$DBUS_LAUNCH" != "" ]; then
+    eval `$DBUS_LAUNCH --sh-syntax --exit-with-session`
+    export DBUS_SESSION_BUS_ADDRESS
+    echo "xstartup.turbovnc: Creating new session bus instance:"
+    echo "xstartup.turbovnc:   $DBUS_SESSION_BUS_ADDRESS"
+  else
+    # If we get here, then dbus-launch was not found, DBUS_SESSION_BUS_ADDRESS
+    # is unlikely to be set, and xinitrc or Xsession would subsequently fail on
+    # the aforementioned operating systems.  Thus, unsetting
+    # DBUS_SESSION_BUS_ADDRESS here is just a belt-and-suspenders measure to
+    # help ensure that any window manager that requires D-Bus will fail sooner
+    # rather than later.
+    unset DBUS_SESSION_BUS_ADDRESS
+  fi
+  unset DBUS_LAUNCH
 fi
-if [ "$DBUS_LAUNCH" != "" ]; then
-  eval `$DBUS_LAUNCH --sh-syntax --exit-with-session`
-  export DBUS_SESSION_BUS_ADDRESS
-  echo "xstartup.turbovnc: Creating new session bus instance:"
-  echo "xstartup.turbovnc:   $DBUS_SESSION_BUS_ADDRESS"
-else
-  # If we get here, then dbus-launch was not found, DBUS_SESSION_BUS_ADDRESS is
-  # unlikely to be set, and xinitrc or Xsession would subsequently fail on the
-  # aforementioned operating systems.  Thus, unsetting DBUS_SESSION_BUS_ADDRESS
-  # here is just a belt-and-suspenders measure to help ensure that any window
-  # manager that requires D-Bus will fail sooner rather than later.
-  unset DBUS_SESSION_BUS_ADDRESS
-fi
-unset DBUS_LAUNCH
 # Specify that the window manager should use X11 rather than Wayland.
 XDG_SESSION_TYPE=x11;  export XDG_SESSION_TYPE
 
