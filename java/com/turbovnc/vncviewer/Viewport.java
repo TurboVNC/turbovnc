@@ -628,7 +628,7 @@ public class Viewport extends JFrame implements Runnable {
       return;
     }
     for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
-      ExtInputDevice dev = (ExtInputDevice)i.next();
+      ExtInputDevice dev = i.next();
       if (dev.remoteID == 0) {
         dev.remoteID = deviceOrigin;
         vlog.info("Successfully created device " + deviceOrigin + " (" +
@@ -661,7 +661,7 @@ public class Viewport extends JFrame implements Runnable {
           return false;
         }
         for (Iterator<ExtInputDevice> i = devices.iterator(); i.hasNext();) {
-          ExtInputDevice dev = (ExtInputDevice)i.next();
+          ExtInputDevice dev = i.next();
           if (lastEvent.deviceID == dev.id && dev.remoteID != 0) {
             if (dev.absolute && lastEvent.type == RFB.GII_VALUATOR_RELATIVE)
               lastEvent.type = RFB.GII_VALUATOR_ABSOLUTE;
@@ -780,7 +780,7 @@ public class Viewport extends JFrame implements Runnable {
               lastEvent.firstValuator = 0;
               lastEvent.numValuators = 5;
 
-              double xtmp = (double)x;
+              double xtmp = x;
               if (dx > 0)
                 xtmp -= (double)dx;
               xtmp += spOffset.x;
@@ -788,8 +788,7 @@ public class Viewport extends JFrame implements Runnable {
                 xtmp = (cc.desktop.scaleWidthRatio == 1.00) ? xtmp :
                         xtmp / cc.desktop.scaleWidthRatio;
               }
-              ExtInputDevice.Valuator v =
-                (ExtInputDevice.Valuator)dev.valuators.get(0);
+              ExtInputDevice.Valuator v = dev.valuators.get(0);
               lastEvent.valuators[0] = (int)(xtmp / (double)(cc.cp.width - 1) *
                                        (double)(v.rangeMax - v.rangeMin) +
                                        (double)v.rangeMin + 0.5);
@@ -806,7 +805,7 @@ public class Viewport extends JFrame implements Runnable {
                 ytmp = (cc.desktop.scaleHeightRatio == 1.00) ? ytmp :
                        ytmp / cc.desktop.scaleHeightRatio;
               }
-              v = (ExtInputDevice.Valuator)dev.valuators.get(1);
+              v = dev.valuators.get(1);
               lastEvent.valuators[1] =
                 (int)(ytmp / (double)(cc.cp.height - 1) *
                         (double)(v.rangeMax - v.rangeMin) +

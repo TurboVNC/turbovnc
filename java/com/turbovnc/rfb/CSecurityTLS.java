@@ -248,7 +248,7 @@ public class CSecurityTLS extends CSecurity {
           if (m instanceof X509TrustManager)
             for (X509Certificate c :
                  ((X509TrustManager)m).getAcceptedIssuers())
-              ks.setCertificateEntry(getThumbprint((X509Certificate)c), c);
+              ks.setCertificateEntry(getThumbprint(c), c);
         File cacert = new File(Params.x509ca.getValue());
         vlog.debug("Using X.509 CA certificate " + Params.x509ca.getValue());
         if (cacert.exists() && cacert.canRead()) {

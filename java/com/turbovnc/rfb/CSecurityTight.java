@@ -115,7 +115,7 @@ public class CSecurityTight extends CSecurity {
       throw new WarningException("No supported auth types!");
 
     for (Iterator<Integer> i = supportedAuthTypes.iterator(); i.hasNext();) {
-      int authType = (Integer)i.next();
+      int authType = i.next();
       if (authType == CODE_ULGNAUTH || authType == CODE_NOAUTH ||
           authType == CODE_VNCAUTH || authType == CODE_VENCRYPT)
         vlog.debug("Choosing security type " + RFB.secTypeName(authType) +

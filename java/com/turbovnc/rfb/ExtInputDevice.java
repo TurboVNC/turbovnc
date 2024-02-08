@@ -69,7 +69,7 @@ public class ExtInputDevice {
     vlog.eidebug("  absolute = " + absolute);
     if (valuators != null) {
       for (Iterator<Valuator> i = valuators.iterator(); i.hasNext();) {
-        Valuator v = (Valuator)i.next();
+        Valuator v = i.next();
         vlog.eidebug("  VALUATOR:");
         vlog.eidebug("    index = " + v.index);
         vlog.eidebug("    longName = " + v.longName);

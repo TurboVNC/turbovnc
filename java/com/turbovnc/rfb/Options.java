@@ -335,7 +335,7 @@ public class Options {
     List<Integer> result = new ArrayList<Integer>();
 
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
-      int refType = (Integer)i.next();
+      int refType = i.next();
       if (refType >= 0x100) {
         result.add(RFB.SECTYPE_VENCRYPT);
         break;
@@ -344,7 +344,7 @@ public class Options {
     result.add(RFB.SECTYPE_TIGHT);
     result.add(RFB.SECTYPE_TLS);
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
-      int refType = (Integer)i.next();
+      int refType = i.next();
       if (refType < 0x100 && refType != RFB.SECTYPE_TIGHT &&
           refType != RFB.SECTYPE_TLS)
         result.add(refType);
@@ -357,7 +357,7 @@ public class Options {
     List<Integer> result = new ArrayList<Integer>();
 
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
-      int refType = (Integer)i.next();
+      int refType = i.next();
       if (refType != RFB.SECTYPE_VENCRYPT && refType != RFB.SECTYPE_UNIX_LOGIN)
         /* ^^ Do not include VeNCrypt to avoid loops */
         result.add(refType);
@@ -370,7 +370,7 @@ public class Options {
     List<Integer> result = new ArrayList<Integer>();
 
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
-      int refType = (Integer)i.next();
+      int refType = i.next();
       if (refType < 0x100 && refType != RFB.SECTYPE_VENCRYPT &&
           refType != RFB.SECTYPE_TIGHT && refType != RFB.SECTYPE_TLS)
         result.add(refType);
@@ -382,7 +382,7 @@ public class Options {
   private String getSecTypesString() {
     StringBuilder sb = new StringBuilder();
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
-      int refType = ((Integer)i.next());
+      int refType = i.next();
       if (refType != RFB.SECTYPE_VENCRYPT && refType != RFB.SECTYPE_TIGHT &&
           refType != RFB.SECTYPE_TLS) {
         sb.append(RFB.secTypeName(refType));
@@ -394,7 +394,7 @@ public class Options {
 
   public void enableSecType(int secType) {
     for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();)
-      if ((Integer)i.next() == secType)
+      if (i.next() == secType)
         return;
 
     if (isSecTypeAllowed(secType))
@@ -409,7 +409,7 @@ public class Options {
       return true;
 
     for (i = enabledSecTypes.iterator(); i.hasNext();)
-      if ((Integer)i.next() == secType)
+      if (i.next() == secType)
         return true;
     if (secType == RFB.SECTYPE_VENCRYPT)
       return true;

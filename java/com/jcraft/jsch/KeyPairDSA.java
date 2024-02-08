@@ -276,7 +276,7 @@ public class KeyPairDSA extends KeyPair{
 
   public byte[] getSignature(byte[] data){
     try{
-      Class c=Class.forName((String)JSch.getConfig("signature.dss"));
+      Class c=Class.forName(JSch.getConfig("signature.dss"));
       SignatureDSA dsa=
         (SignatureDSA)(c.getDeclaredConstructor().newInstance());
       dsa.init();
@@ -301,7 +301,7 @@ public class KeyPairDSA extends KeyPair{
 
   public Signature getVerifier(){
     try{
-      Class c=Class.forName((String)JSch.getConfig("signature.dss"));
+      Class c=Class.forName(JSch.getConfig("signature.dss"));
       SignatureDSA dsa=
         (SignatureDSA)(c.getDeclaredConstructor().newInstance());
       dsa.init();

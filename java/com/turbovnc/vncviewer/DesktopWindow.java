@@ -203,16 +203,16 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     Graphics2D g2 = cursorImage.createGraphics();
     g2.setRenderingHint(RenderingHints.KEY_RENDERING,
                         RenderingHints.VALUE_RENDER_SPEED);
-    g2.drawImage(srcImage, 0, 0, (int)Math.min(cw, bestSize.width),
-                 (int)Math.min(ch, bestSize.height), 0, 0, cursor.width(),
+    g2.drawImage(srcImage, 0, 0, Math.min(cw, bestSize.width),
+                 Math.min(ch, bestSize.height), 0, 0, cursor.width(),
                  cursor.height(), null);
     g2.dispose();
     srcImage.flush();
 
     int x = (int)Math.floor((float)hotspot.x * scaleWidthRatio);
     int y = (int)Math.floor((float)hotspot.y * scaleHeightRatio);
-    x = (int)Math.min(x, Math.max(bestSize.width - 1, 0));
-    y = (int)Math.min(y, Math.max(bestSize.height - 1, 0));
+    x = Math.min(x, Math.max(bestSize.width - 1, 0));
+    y = Math.min(y, Math.max(bestSize.height - 1, 0));
     java.awt.Point hs = new java.awt.Point(x, y);
     if (!bestSize.equals(new Dimension(0, 0)))
       softCursor = tk.createCustomCursor(cursorImage, hs, "softCursor");

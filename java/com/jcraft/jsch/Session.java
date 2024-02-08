@@ -2575,7 +2575,7 @@ break;
     String[] _sigs=Util.split(sigs, ",");
     for(int i=0; i<_sigs.length; i++){
       try{      
-        Class c=Class.forName((String)JSch.getConfig(_sigs[i]));
+        Class c=Class.forName(JSch.getConfig(_sigs[i]));
         final Signature sig=
           (Signature)(c.getDeclaredConstructor().newInstance());
         sig.init();
