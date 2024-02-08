@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2018, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@ import com.turbovnc.rdr.ErrorException;
 
 public class PixelBuffer {
 
+  @SuppressWarnings("this-escape")
   public PixelBuffer() {
     setPF(new PixelFormat());
   }

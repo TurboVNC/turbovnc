@@ -44,6 +44,7 @@
 // The rest is:
 //
 // Copyright (C) 1996 by Jef Poskanzer <jef@acme.com>.  All rights reserved.
+// Copyright (C) 2024 by D. R. Commander.  All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
@@ -71,7 +72,7 @@
 
 package com.turbovnc.rfb;
 
-public class DesCipher {
+public final class DesCipher {
 
   // Constructor, byte-array key.
   public DesCipher(byte[] key) {

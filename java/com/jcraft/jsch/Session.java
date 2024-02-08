@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018, 2023 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2023-2024 D. R. Commander. All rights reserved.
 Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1314,7 +1314,7 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
           }
 	  command=packet.buffer.getCommand();
 	  recipient=c.getRecipient();
-	  length-=len;
+	  length-=(int)len;
 	  c.rwsize-=len;
 	  sendit=true;
 	}

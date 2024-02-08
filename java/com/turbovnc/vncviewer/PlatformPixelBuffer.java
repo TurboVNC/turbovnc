@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -28,6 +28,7 @@ import com.turbovnc.rfb.*;
 
 public abstract class PlatformPixelBuffer extends PixelBuffer {
 
+  @SuppressWarnings("this-escape")
   public PlatformPixelBuffer(int w, int h, CConn cc_, DesktopWindow desktop_) {
     cc = cc_;
     desktop = desktop_;

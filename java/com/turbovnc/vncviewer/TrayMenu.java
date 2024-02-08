@@ -1,4 +1,5 @@
-/* Copyright (C) 2014, 2018, 2020, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2014, 2018, 2020, 2022, 2024 D. R. Commander.
+ *                                            All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -27,7 +28,7 @@ import java.lang.reflect.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 
-public class TrayMenu extends PopupMenu implements ActionListener {
+public final class TrayMenu extends PopupMenu implements ActionListener {
 
   public TrayMenu(VncViewer viewer_) {
     super("TurboVNC Viewer");
