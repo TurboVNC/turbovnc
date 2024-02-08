@@ -223,7 +223,7 @@ public class CMsgWriter {
 
     for (Iterator<ExtInputDevice.Valuator> i = dev.valuators.iterator();
          i.hasNext();) {
-      ExtInputDevice.Valuator v = (ExtInputDevice.Valuator)i.next();
+      ExtInputDevice.Valuator v = i.next();
 
       os.writeU32(v.index);
       os.writePaddedString(v.longName, 75);
@@ -361,7 +361,7 @@ public class CMsgWriter {
     os.pad(1);
 
     for (Iterator<Screen> iter = layout.screens.iterator(); iter.hasNext();) {
-      Screen refScreen = (Screen)iter.next();
+      Screen refScreen = iter.next();
       os.writeU32(refScreen.id);
       os.writeU16(refScreen.dimensions.tl.x);
       os.writeU16(refScreen.dimensions.tl.y);

@@ -101,7 +101,7 @@ public class TcpListener  {
         Set<SelectionKey> keys = selector.selectedKeys();
         Iterator<SelectionKey> iter = keys.iterator();
         while (iter.hasNext()) {
-          SelectionKey key = (SelectionKey)iter.next();
+          SelectionKey key = iter.next();
           iter.remove();
           if (key.isAcceptable()) {
             newSock = channel.accept();

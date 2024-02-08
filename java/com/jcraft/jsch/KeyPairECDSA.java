@@ -343,7 +343,7 @@ public class KeyPairECDSA extends KeyPair{
 
   public byte[] getSignature(byte[] data){
     try{
-      Class c=Class.forName((String)JSch.getConfig("ecdsa-sha2-"+new String(name)));
+      Class c=Class.forName(JSch.getConfig("ecdsa-sha2-"+new String(name)));
       SignatureECDSA ecdsa=
         (SignatureECDSA)(c.getDeclaredConstructor().newInstance());
       ecdsa.init();
@@ -369,7 +369,7 @@ public class KeyPairECDSA extends KeyPair{
 
   public Signature getVerifier(){
     try{
-      Class c=Class.forName((String)JSch.getConfig("ecdsa-sha2-"+new String(name)));
+      Class c=Class.forName(JSch.getConfig("ecdsa-sha2-"+new String(name)));
       final SignatureECDSA ecdsa=
         (SignatureECDSA)(c.getDeclaredConstructor().newInstance());
       ecdsa.init();

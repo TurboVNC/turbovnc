@@ -140,7 +140,7 @@ public class CSecurityVeNCrypt extends CSecurity {
         /* Honor server's security type order */
         for (i = 0; i < nAvailableTypes; i++) {
           for (j = secTypes.iterator(); j.hasNext();) {
-            int refType = (Integer)j.next();
+            int refType = j.next();
             if (refType == availableTypes[i]) {
               chosenType = refType;
               break;

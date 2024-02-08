@@ -144,7 +144,7 @@ public abstract class CConnection extends CMsgHandler {
                  secType == RFB.SECTYPE_VNCAUTH) {
         Iterator<Integer> i;
         for (i = secTypes.iterator(); i.hasNext();) {
-          int refType = (Integer)i.next();
+          int refType = i.next();
           if (refType == secType) {
             secType = refType;
             break;
@@ -186,7 +186,7 @@ public abstract class CConnection extends CMsgHandler {
          */
         if (secType == RFB.SECTYPE_INVALID && secType != RFB.SECTYPE_TIGHT) {
           for (Iterator<Integer> j = secTypes.iterator(); j.hasNext();) {
-            int refType = (Integer)j.next();
+            int refType = j.next();
             if (refType == serverSecType) {
               secType = refType;
               break;

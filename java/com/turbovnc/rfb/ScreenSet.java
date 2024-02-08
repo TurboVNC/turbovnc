@@ -49,8 +49,8 @@ public class ScreenSet {
     Iterator<Screen> iter = screens.iterator();
     Iterator<Screen> riter = ref.screens.iterator();
     while (iter.hasNext() && riter.hasNext()) {
-      Screen screen = (Screen)iter.next();
-      Screen rscreen = (Screen)riter.next();
+      Screen screen = iter.next();
+      Screen rscreen = riter.next();
 
       if (!screen.equals(rscreen))
         return false;
@@ -68,8 +68,8 @@ public class ScreenSet {
     Iterator<Screen> iter = screens.iterator();
     Iterator<Screen> riter = ref.screens.iterator();
     while (iter.hasNext() && riter.hasNext()) {
-      Screen screen = (Screen)iter.next();
-      Screen rscreen = (Screen)riter.next();
+      Screen screen = iter.next();
+      Screen rscreen = riter.next();
 
       if (!screen.equalsIgnoreID(rscreen))
         return false;
@@ -100,7 +100,7 @@ public class ScreenSet {
 
   public final void removeScreen(int id) {
     for (Iterator<Screen> iter = screens.iterator(); iter.hasNext();) {
-      Screen refScreen = (Screen)iter.next();
+      Screen refScreen = iter.next();
       if (refScreen.id == id)
         iter.remove();
     }
@@ -119,7 +119,7 @@ public class ScreenSet {
     fbRect.setXYWH(0, 0, fbWidth, fbHeight);
 
     for (Iterator<Screen> iter = screens.iterator(); iter.hasNext();) {
-      Screen refScreen = (Screen)iter.next();
+      Screen refScreen = iter.next();
       if (refScreen.dimensions.isEmpty())
         return false;
       if (!refScreen.dimensions.enclosedBy(fbRect))
@@ -149,7 +149,7 @@ public class ScreenSet {
   public final void debugPrint(String msg) {
     vlog.debug(msg + ":");
     for (Iterator<Screen> iter = screens.iterator(); iter.hasNext();) {
-      Screen refScreen = (Screen)iter.next();
+      Screen refScreen = iter.next();
       vlog.debug("    " + refScreen.id + " (0x" +
                  Integer.toHexString(refScreen.id) + "): " +
                  refScreen.dimensions.width() + "x" +
