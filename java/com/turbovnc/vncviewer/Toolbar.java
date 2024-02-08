@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2013, 2015, 2018, 2020, 2022 D. R. Commander.
- *                                                 All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015, 2018, 2020, 2022, 2024 D. R. Commander.
+ *                                                       All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ import javax.swing.border.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 
-public class Toolbar extends JToolBar implements ActionListener {
+public final class Toolbar extends JToolBar implements ActionListener {
 
   static final String[] BUTTONS = {
     "Connection options...", "Connection info...", "Full screen",

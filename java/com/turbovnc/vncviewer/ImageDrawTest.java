@@ -1,4 +1,5 @@
-/* Copyright (C) 2012, 2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2018, 2020, 2024 D. R. Commander.
+ *                                            All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -28,7 +29,7 @@ import java.awt.image.*;
 
 import com.turbovnc.rfb.*;
 
-public class ImageDrawTest extends JFrame {
+public final class ImageDrawTest extends JFrame {
 
   static final PixelFormat VERY_LOW_COLOR_PF =
     new PixelFormat(8, 3, false, true, 1, 1, 1, 2, 1, 0);
@@ -44,7 +45,7 @@ public class ImageDrawTest extends JFrame {
   public static final int DEFAULT_WIDTH = 1240;
   public static final int DEFAULT_HEIGHT = 900;
 
-  public class MyPanel extends JPanel {
+  public final class MyPanel extends JPanel {
 
     public MyPanel(int w, int h, int colors) {
       swingDB = Utils.getBooleanProperty("turbovnc.swingdb", false);

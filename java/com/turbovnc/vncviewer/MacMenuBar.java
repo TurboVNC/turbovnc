@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2015, 2018, 2020-2021, 2023 D. R. Commander.
- *                                                All Rights Reserved.
+/* Copyright (C) 2012-2015, 2018, 2020-2021, 2023-2024 D. R. Commander.
+ *                                                     All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -31,7 +31,7 @@ import java.lang.reflect.*;
 
 import com.turbovnc.rfb.*;
 
-public class MacMenuBar extends JMenuBar implements ActionListener {
+public final class MacMenuBar extends JMenuBar implements ActionListener {
 
   // The following code allows us to pop up our own dialogs whenever "About"
   // and "Preferences" are selected from the application menu.

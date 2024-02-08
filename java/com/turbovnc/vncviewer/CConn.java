@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -48,10 +48,10 @@ import com.turbovnc.rfb.Point;
 import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
 
-public class CConn extends CConnection implements UserPasswdGetter,
+public final class CConn extends CConnection implements UserPasswdGetter,
   OptionsDialogCallback, FdInStreamBlockCallback {
 
-  public final PixelFormat getPreferredPF() { return fullColourPF; }
+  public PixelFormat getPreferredPF() { return fullColourPF; }
   static final PixelFormat VERY_LOW_COLOR_PF =
     new PixelFormat(8, 3, false, true, 1, 1, 1, 2, 1, 0);
   static final PixelFormat LOW_COLOR_PF =
@@ -214,7 +214,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // RFB thread: getUserPasswd() is called by the CSecurity object when it
   // needs us to read a password from the user.
   @Override
-  public final boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
+  public boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
     String title = ((user == null ? "Standard VNC Authentication" :
                                     "Unix Login Authentication") +
                     " [" + csecurity.getDescription() + "]");
@@ -572,7 +572,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
-  public final ScreenSet computeScreenLayout(int width, int height) {
+  public ScreenSet computeScreenLayout(int width, int height) {
     java.awt.Point vpPos = viewport.getContentPane().getLocationOnScreen();
     Rectangle vpRect = viewport.getContentPane().getBounds();
     ScreenSet layout;

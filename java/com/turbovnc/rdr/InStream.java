@@ -1,4 +1,5 @@
-/* Copyright (C) 2012, 2015, 2018, 2020 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2018, 2020, 2024 D. R. Commander.
+ *                                            All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -177,12 +178,12 @@ public abstract class InStream {
       if (bigEndian) {
         while (length-- > 0) {
           ((short[])buf)[dstPtr] = (short)((pixels[srcPtr++] & 0xff) << 8);
-          ((short[])buf)[dstPtr++] |= (pixels[srcPtr++] & 0xff);
+          ((short[])buf)[dstPtr++] |= (short)(pixels[srcPtr++] & 0xff);
         }
       } else {
         while (length-- > 0) {
           ((short[])buf)[dstPtr] = (short)(pixels[srcPtr++] & 0xff);
-          ((short[])buf)[dstPtr++] |= (pixels[srcPtr++] & 0xff) << 8;
+          ((short[])buf)[dstPtr++] |= (short)((pixels[srcPtr++] & 0xff) << 8);
         }
       }
     } else if (bytesPerPixel == 3 && buf instanceof int[]) {
@@ -281,7 +282,7 @@ public abstract class InStream {
           int endOfRow = dstPtr + w;
           while (dstPtr < endOfRow) {
             ((short[])buf)[dstPtr] = (short)((pixels[srcPtr++] & 0xff) << 8);
-            ((short[])buf)[dstPtr++] |= (pixels[srcPtr++] & 0xff);
+            ((short[])buf)[dstPtr++] |= (short)(pixels[srcPtr++] & 0xff);
           }
           dstPtr += pad;
           h--;
@@ -291,7 +292,8 @@ public abstract class InStream {
           int endOfRow = dstPtr + w;
           while (dstPtr < endOfRow) {
             ((short[])buf)[dstPtr] = (short)(pixels[srcPtr++] & 0xff);
-            ((short[])buf)[dstPtr++] |= (pixels[srcPtr++] & 0xff) << 8;
+            ((short[])buf)[dstPtr++] |=
+              (short)((pixels[srcPtr++] & 0xff) << 8);
           }
           dstPtr += pad;
           h--;

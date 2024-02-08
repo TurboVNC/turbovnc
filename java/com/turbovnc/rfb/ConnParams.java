@@ -1,4 +1,5 @@
-/* Copyright (C) 2011-2012, 2015, 2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2012, 2015, 2018, 2024 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -22,7 +23,7 @@ package com.turbovnc.rfb;
 
 import com.turbovnc.rdr.*;
 
-public class ConnParams {
+public final class ConnParams {
 
   static LogWriter vlog = new LogWriter("ConnParams");
 

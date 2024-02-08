@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2018, 2020-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2018, 2020-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -37,7 +37,7 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
 
-public class VncViewer implements Runnable, OptionsDialogCallback {
+public final class VncViewer implements Runnable, OptionsDialogCallback {
   static final String PRODUCT_NAME = "TurboVNC Viewer";
   static String copyrightYear = null;
   static String copyright = null;

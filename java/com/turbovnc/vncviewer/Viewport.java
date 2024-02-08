@@ -34,7 +34,7 @@ import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
 import com.turbovnc.rfb.Point;
 
-public class Viewport extends JFrame implements Runnable {
+public final class Viewport extends JFrame implements Runnable {
 
   public Viewport(CConn cc_) {
     cc = cc_;
