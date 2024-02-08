@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018, 2023 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2023-2024 D. R. Commander. All rights reserved.
 Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ package com.jcraft.jsch;
 import java.io.InputStream;
 import java.util.Vector;
 
-public class JSch{
+public final class JSch{
   /**
    * The version number.
    */

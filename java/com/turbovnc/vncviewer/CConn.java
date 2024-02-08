@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright 2009-2011, 2016-2019 Pierre Ossman <ossman@cendio.se>
  *                                for Cendio AB
@@ -50,10 +50,10 @@ import com.turbovnc.rfb.Point;
 import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
 
-public class CConn extends CConnection implements UserPasswdGetter,
+public final class CConn extends CConnection implements UserPasswdGetter,
   OptionsDialogCallback, FdInStreamBlockCallback {
 
-  public final PixelFormat getPreferredPF() { return fullColourPF; }
+  public PixelFormat getPreferredPF() { return fullColourPF; }
   static final PixelFormat VERY_LOW_COLOR_PF =
     new PixelFormat(8, 3, false, true, 1, 1, 1, 2, 1, 0);
   static final PixelFormat LOW_COLOR_PF =
@@ -257,7 +257,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
   // RFB thread: getUserPasswd() is called by the CSecurity object when it
   // needs us to read a password from the user.
   @Override
-  public final boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
+  public boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
     String title = ((user == null ? "Standard VNC Authentication" :
                                     "Unix Login Authentication") +
                     " [" + csecurity.getDescription() + "]");
@@ -523,10 +523,10 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (tElapsed > (double)params.profileInt.get() && !benchmark) {
       if (profileDialog.isVisible()) {
         String str;
-        str = String.format("%.3f", (double)updates / tElapsed);
+        str = String.format("%.3f", updates / tElapsed);
         profileDialog.upsVal.setText(str);
-        str = String.format("%.3f", (double)sock.inStream().getBytesRead() /
-                            125000. / tElapsed);
+        str = String.format("%.3f", sock.inStream().getBytesRead() / 125000. /
+                            tElapsed);
         profileDialog.tpVal.setText(str);
 
         str = String.format("%.3f", sock.inStream().getReadTime() /
@@ -570,8 +570,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         System.out.format("Total:   %.3f updates/sec,  %.3f Mpixels/sec,  %.3f Mbits/sec\n",
                           (double)updates / tElapsed,
                           (double)decodePixels / 1000000. / tElapsed,
-                          (double)sock.inStream().getBytesRead() / 125000. /
-                            tElapsed);
+                          sock.inStream().getBytesRead() / 125000. / tElapsed);
         System.out.format("Decode:  %.3f Mpixels,  %.3f Mpixels/sec,  %d rect,\n",
                           (double)decodePixels / 1000000.,
                           (double)decodePixels / 1000000. / tDecode,
@@ -602,7 +601,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
-  public final ScreenSet computeScreenLayout(int width, int height) {
+  public ScreenSet computeScreenLayout(int width, int height) {
     java.awt.Point vpPos = viewport.getContentPane().getLocationOnScreen();
     Rectangle vpRect = viewport.getContentPane().getBounds();
     ScreenSet layout;
@@ -619,13 +618,13 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
         for (Iterator<Screen> iter = layout.screens.iterator(); iter.hasNext();
              i++) {
-          Screen screen = (Screen)iter.next();
+          Screen screen = iter.next();
           if (i > 0)
             iter.remove();
         }
       }
 
-      Screen screen0 = (Screen)layout.screens.iterator().next();
+      Screen screen0 = layout.screens.iterator().next();
       screen0.dimensions.tl.x = 0;
       screen0.dimensions.tl.y = 0;
       screen0.dimensions.br.x = width;
@@ -914,8 +913,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
     if (dev.valuators.size() > 0) {
       for (int i = e.firstValuator; i < e.firstValuator + e.numValuators;
            i++) {
-        ExtInputDevice.Valuator v =
-          (ExtInputDevice.Valuator)dev.valuators.get(i);
+        ExtInputDevice.Valuator v = dev.valuators.get(i);
         if (i == 0) {
           double x = (double)(e.valuators[i] - v.rangeMin) /
                      (double)(v.rangeMax - v.rangeMin) *
@@ -946,7 +944,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
                 y / desktop.scaleHeightRatio;
           }
           e.valuators[i - e.firstValuator] =
-            (int)((double)y / (double)(cp.height - 1) *
+            (int)(y / (double)(cp.height - 1) *
                   (double)(v.rangeMax - v.rangeMin) +
                   (double)v.rangeMin + 0.5);
           if (e.valuators[i - e.firstValuator] > v.rangeMax)
@@ -1564,7 +1562,7 @@ public class CConn extends CConnection implements UserPasswdGetter,
         pf.write(memStream);
 
         writer().writeFence(RFB.FENCE_FLAG_REQUEST | RFB.FENCE_FLAG_SYNC_NEXT,
-                            memStream.length(), (byte[])memStream.data());
+                            memStream.length(), memStream.data());
       } else {
         // New update requests are sent out before processing the last update,
         // so we cannot switch our internal format right now (doing so would

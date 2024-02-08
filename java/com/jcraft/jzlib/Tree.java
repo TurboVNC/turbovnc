@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; -*- */
 /*
 Copyright (c) 2000,2001,2002,2003 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2024 D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -218,7 +219,7 @@ final class Tree{
 	m = s.heap[--h];
 	if (m > max_code) continue;
 	if (tree[m*2+1] != bits) {
-	  s.opt_len += ((long)bits - (long)tree[m*2+1])*(long)tree[m*2];
+	  s.opt_len += (int)(((long)bits - (long)tree[m*2+1])*(long)tree[m*2]);
 	  tree[m*2+1] = (short)bits;
 	}
 	n--;

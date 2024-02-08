@@ -6,7 +6,7 @@ if(NOT DEFINED CMAKE_JAVA_COMPILE_FLAGS AND DEFINED ENV{JAVAFLAGS})
 	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS $ENV{JAVAFLAGS})
 else()
 	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS
-		"-Xlint:all,-serial,-cast,-unchecked,-rawtypes")
+		"-Xlint:all,-serial,-unchecked,-rawtypes")
 endif()
 set(CMAKE_JAVA_COMPILE_FLAGS ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS} CACHE STRING
 	"Java compiler flags (Default: ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS})")

@@ -465,7 +465,7 @@ public abstract class KeyPair{
 	System.arraycopy(hn, 0, key, 0, key.length); 
       }
       else if(vendor==VENDOR_PUTTY){
-        Class c=Class.forName((String)JSch.getConfig("sha-1"));
+        Class c=Class.forName(JSch.getConfig("sha-1"));
         HASH sha1=(HASH)(c.getDeclaredConstructor().newInstance());
         tmp = new byte[4];
         key = new byte[20*2];
@@ -688,8 +688,8 @@ public abstract class KeyPair{
         if(buf[i]=='A'&& i+7<len && buf[i+1]=='E'&& buf[i+2]=='S'&& buf[i+3]=='-' && 
            buf[i+4]=='2'&& buf[i+5]=='5'&& buf[i+6]=='6'&& buf[i+7]=='-'){
           i+=8;
-          if(Session.checkCipher((String)JSch.getConfig("aes256-cbc"))){
-            Class c=Class.forName((String)JSch.getConfig("aes256-cbc"));
+          if(Session.checkCipher(JSch.getConfig("aes256-cbc"))){
+            Class c=Class.forName(JSch.getConfig("aes256-cbc"));
             cipher=(Cipher)(c.getDeclaredConstructor().newInstance());
             // key=new byte[cipher.getBlockSize()];
             iv=new byte[cipher.getIVSize()];
@@ -702,8 +702,8 @@ public abstract class KeyPair{
         if(buf[i]=='A'&& i+7<len && buf[i+1]=='E'&& buf[i+2]=='S'&& buf[i+3]=='-' && 
            buf[i+4]=='1'&& buf[i+5]=='9'&& buf[i+6]=='2'&& buf[i+7]=='-'){
           i+=8;
-          if(Session.checkCipher((String)JSch.getConfig("aes192-cbc"))){
-            Class c=Class.forName((String)JSch.getConfig("aes192-cbc"));
+          if(Session.checkCipher(JSch.getConfig("aes192-cbc"))){
+            Class c=Class.forName(JSch.getConfig("aes192-cbc"));
             cipher=(Cipher)(c.getDeclaredConstructor().newInstance());
             // key=new byte[cipher.getBlockSize()];
             iv=new byte[cipher.getIVSize()];
@@ -716,8 +716,8 @@ public abstract class KeyPair{
         if(buf[i]=='A'&& i+7<len && buf[i+1]=='E'&& buf[i+2]=='S'&& buf[i+3]=='-' && 
            buf[i+4]=='1'&& buf[i+5]=='2'&& buf[i+6]=='8'&& buf[i+7]=='-'){
           i+=8;
-          if(Session.checkCipher((String)JSch.getConfig("aes128-cbc"))){
-            Class c=Class.forName((String)JSch.getConfig("aes128-cbc"));
+          if(Session.checkCipher(JSch.getConfig("aes128-cbc"))){
+            Class c=Class.forName(JSch.getConfig("aes128-cbc"));
             cipher=(Cipher)(c.getDeclaredConstructor().newInstance());
             // key=new byte[cipher.getBlockSize()];
             iv=new byte[cipher.getIVSize()];
@@ -1169,9 +1169,9 @@ public abstract class KeyPair{
     kpair.vendor = VENDOR_PUTTY;
     kpair.publicKeyComment = (String)v.get("Comment");
     if(kpair.encrypted){
-      if(Session.checkCipher((String)JSch.getConfig("aes256-cbc"))){
+      if(Session.checkCipher(JSch.getConfig("aes256-cbc"))){
         try {
-          Class c=Class.forName((String)JSch.getConfig("aes256-cbc"));
+          Class c=Class.forName(JSch.getConfig("aes256-cbc"));
           kpair.cipher=(Cipher)(c.getDeclaredConstructor().newInstance());
           kpair.iv=new byte[kpair.cipher.getIVSize()];
         }

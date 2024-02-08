@@ -220,7 +220,7 @@ public class Tunnel {
     }
 
     for (Iterator<File> i = privateKeys.iterator(); i.hasNext();) {
-      File privateKey = (File)i.next();
+      File privateKey = i.next();
       try {
         if (privateKey.exists() && privateKey.canRead()) {
           if (params.sshKeyPass.get() != null)

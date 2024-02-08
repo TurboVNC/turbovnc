@@ -1,4 +1,5 @@
 // Copyright (c) 2006 Damien Miller <djm@mindrot.org>
+// Copyright (c) 2024 D. R. Commander
 //
 // Permission to use, copy, modify, and distribute this software for any
 // purpose with or without fee is hereby granted, provided that the above
@@ -463,7 +464,7 @@ public class BCrypt {
             if (c1 == -1 || c2 == -1)
                 break;
             o = (byte)(c1 << 2);
-            o |= (c2 & 0x30) >> 4;
+            o |= (byte)((c2 & 0x30) >> 4);
             rs.append((char)o);
             if (++olen >= maxolen || off >= slen)
                 break;
@@ -471,7 +472,7 @@ public class BCrypt {
             if (c3 == -1)
                 break;
             o = (byte)((c2 & 0x0f) << 4);
-            o |= (c3 & 0x3c) >> 2;
+            o |= (byte)((c3 & 0x3c) >> 2);
             rs.append((char)o);
             if (++olen >= maxolen || off >= slen)
                 break;
@@ -542,8 +543,8 @@ public class BCrypt {
      * Initialise the Blowfish key schedule
      */
     private void init_key() {
-        P = (int[])P_orig.clone();
-        S = (int[])S_orig.clone();
+        P = P_orig.clone();
+        S = S_orig.clone();
     }
 
     /**
@@ -774,7 +775,7 @@ public class BCrypt {
 
         B = new BCrypt();
         hashed = B.crypt_raw(passwordb, saltb, rounds,
-                (int[])bf_crypt_ciphertext.clone());
+                bf_crypt_ciphertext.clone());
 
         rs.append("$2");
         if (minor >= 'a')
@@ -863,7 +864,7 @@ public class BCrypt {
             return false;
         byte ret = 0;
         for (int i = 0; i < try_bytes.length; i++)
-            ret |= hashed_bytes[i] ^ try_bytes[i];
+            ret |= (byte)(hashed_bytes[i] ^ try_bytes[i]);
         return ret == 0;
     }
 }

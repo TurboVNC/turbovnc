@@ -66,7 +66,7 @@ public class CSecurityRFBTLS extends CSecurityTLS {
        */
       if (secType == RFB.SECTYPE_INVALID) {
         for (Iterator<Integer> j = secTypes.iterator(); j.hasNext();) {
-          int refType = (Integer)j.next();
+          int refType = j.next();
           if ((refType == RFB.SECTYPE_TLS_VNC &&
                serverSecType == RFB.SECTYPE_VNCAUTH) ||
               (refType == RFB.SECTYPE_TLS_NONE &&

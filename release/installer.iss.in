@@ -38,7 +38,7 @@ Source: "@CMAKE_BINARY_DIR@\vncviewerw.bat"; DestDir: "{app}"; Flags: ignorevers
 Source: "@CMAKE_BINARY_DIR@\vncviewer.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: viewer
 Source: "@CMAKE_SOURCE_DIR@\win\vncviewer\vncviewer.ico"; DestDir: "{app}"; Flags: ignoreversion; Components: viewer
 Source: "@CMAKE_SOURCE_DIR@\java\com\turbovnc\vncviewer\README.md"; DestDir: "{app}\java"; Flags: ignoreversion; Components: viewer
-Source: "@CMAKE_BINARY_DIR@\java\turbovnchelper.dll"; DestDir: "{app}\java"; Flags: ignoreversion; Components: viewer
+Source: "@CMAKE_BINARY_DIR@\java\{#BUILDDIR}turbovnchelper.dll"; DestDir: "{app}\java"; Flags: ignoreversion; Components: viewer
 #ifdef INCLUDEJRE
 Source: "@CMAKE_BINARY_DIR@\java\jre\*"; DestDir: "{app}\java\jre"; Flags: ignoreVersion recursesubdirs; Components: viewer
 #endif

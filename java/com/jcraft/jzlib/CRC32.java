@@ -71,7 +71,7 @@ final public class CRC32 implements Checksum {
   }
 
   public long getValue(){
-    return (long)(v&0xffffffffL);
+    return v&0xffffffffL;
   }
 
   // The following logic has come from zlib.1.2.

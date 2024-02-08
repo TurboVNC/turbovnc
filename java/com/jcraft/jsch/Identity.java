@@ -69,10 +69,9 @@ public interface Identity{
   public byte[] getSignature(byte[] data, String alg);
 
   /**
-   * @deprecated The decryption should be done automatically in #setPassphase(byte[] passphrase)
+   * The decryption should be done automatically in #setPassphase(byte[] passphrase)
    * @see #setPassphrase(byte[] passphrase)
    */
-  @Deprecated
   public boolean decrypt();
 
   /**

@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2022 D. R. Commander.
- *                                               All Rights Reserved.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2022, 2024 D. R. Commander.
+ *                                                     All Rights Reserved.
  * Copyright (C) 2011, 2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -28,7 +28,7 @@ import javax.swing.event.*;
 
 import com.turbovnc.rfb.*;
 
-public class F8Menu extends JPopupMenu implements ActionListener {
+public final class F8Menu extends JPopupMenu implements ActionListener {
   public F8Menu(CConn cc_) {
     super("VNC Menu");
     setLightWeightPopupEnabled(false);

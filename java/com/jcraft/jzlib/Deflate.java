@@ -1,6 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; -*- */
 /*
 Copyright (c) 2000-2011 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2024 D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -436,7 +437,7 @@ final class Deflate implements Cloneable {
 	continue;
       }
       else if(count < min_count) {
-	bl_tree[curlen*2] += count;
+	bl_tree[curlen*2] += (short)count;
       }
       else if(curlen != 0) {
 	if(curlen != prevlen) bl_tree[curlen*2]++;
@@ -581,16 +582,16 @@ final class Deflate implements Cloneable {
 
   void send_bits(int value, int length){
     int len = length;
-    if (bi_valid > (int)Buf_size - len) {
+    if (bi_valid > Buf_size - len) {
       int val = value;
 //      bi_buf |= (val << bi_valid);
-      bi_buf |= ((val << bi_valid)&0xffff);
+      bi_buf |= (short)((val << bi_valid)&0xffff);
       put_short(bi_buf);
       bi_buf = (short)(val >>> (Buf_size - bi_valid));
       bi_valid += len - Buf_size;
     } else {
 //      bi_buf |= (value) << bi_valid;
-      bi_buf |= (((value) << bi_valid)&0xffff);
+      bi_buf |= (short)(((value) << bi_valid)&0xffff);
       bi_valid += len;
     }
   }
@@ -653,7 +654,7 @@ final class Deflate implements Cloneable {
       int dcode;
       for (dcode = 0; dcode < D_CODES; dcode++) {
 	out_length += (int)dyn_dtree[dcode*2] *
-	  (5L+Tree.extra_dbits[dcode]);
+	  (int)(5L+Tree.extra_dbits[dcode]);
       }
       out_length >>>= 3;
       if ((matches < (last_lit/2)) && out_length < in_length/2) return true;
@@ -815,8 +816,8 @@ final class Deflate implements Cloneable {
       max_start=block_start+max_block_size;
       if(strstart==0|| strstart>=max_start) {
 	// strstart == 0 is possible when wraparound on 16-bit machine
-	lookahead = (int)(strstart-max_start);
-	strstart = (int)max_start;
+	lookahead = strstart-max_start;
+	strstart = max_start;
       
 	flush_block_only(false);
 	if(strm.avail_out==0) return NeedMore;
@@ -1299,7 +1300,7 @@ final class Deflate implements Cloneable {
 	       window[++scan] == window[++match] &&
 	       scan < strend);
 
-      len = MAX_MATCH - (int)(strend - scan);
+      len = MAX_MATCH - strend - scan;
       scan = strend - MAX_MATCH;
 
       if(len>best_len) {
@@ -1361,7 +1362,7 @@ final class Deflate implements Cloneable {
       return Z_STREAM_ERROR;
     }
 
-    strm.dstate = (Deflate)this;
+    strm.dstate = this;
 
     this.wrap = wrap;
     w_bits = windowBits;
