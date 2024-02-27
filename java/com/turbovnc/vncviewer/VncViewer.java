@@ -515,15 +515,35 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
 
   public void usage() {
     String usage = "\n" +
-      "USAGE: VncViewer [options/parameters] [host] [options/parameters]\n" +
-      "       VncViewer [options/parameters] [host:displayNum] [options/parameters]\n" +
-      "       VncViewer [options/parameters] [host::port] [options/parameters]\n" +
-      "       VncViewer [options/parameters] [host::uds_path] [options/parameters]\n" +
-      "       VncViewer [options/parameters] -listen [port] [options/parameters]\n" +
+      "USAGE\n" +
+      "-----\n" +
+      "\n" +
+      "vncviewer [options/parameters] [host] [options/parameters]\n" +
+      "\n" +
+      "Connect to the specified TurboVNC host using the TurboVNC Session Manager,\n" +
+      "which uses the TurboVNC Viewer's built-in SSH client to remotely start a new\n" +
+      "TurboVNC session or to list all sessions running under your user account on the\n" +
+      "host, allowing you to choose a session to which to connect.  The TurboVNC\n" +
+      "Session Manager requires the TurboVNC Server (v3.0 or later), and by default,\n" +
+      "it expects the TurboVNC Server to be installed under /opt/TurboVNC on the host.\n" +
+      "Refer to the TurboVNC User's Guide for more details.\n" +
+      "\n" +
+      "vncviewer [options/parameters] [host:displayNum] [options/parameters]\n" +
+      "vncviewer [options/parameters] [host::port] [options/parameters]\n" +
+      "vncviewer [options/parameters] [host::uds_path] [options/parameters]\n" +
+      "\n" +
+      "Connect directly to the VNC server that is listening on the specified VNC\n" +
+      "display number, TCP port, or Unix domain socket path on the specified host.\n" +
+      "This mode of operation does not require the TurboVNC Server.\n" +
       "\n" +
       "Multiple VNC servers and associated options/parameters can be specified by\n" +
       "separating the command-line arguments for each server with --.  The TurboVNC\n" +
       "Viewer will connect to the VNC servers serially and in the specified order.\n" +
+      "\n" +
+      "vncviewer [options/parameters] -listen [port] [options/parameters]\n" +
+      "\n" +
+      "Start the TurboVNC Viewer in \"listen mode.\"  Refer to the description of the\n" +
+      "Listen parameter below.\n" +
       "\n" +
       "Options:\n" +
       "  -loglevel <level>\n" +
@@ -561,7 +581,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       "using the connection info file syntax described above.\n\n" +
       "The parameters are:\n\n";
     System.out.println("\nTurboVNC Viewer v" + version + " (build " + build +
-                       ") [JVM: " + System.getProperty("os.arch") + "]");
+                       ") [" + System.getProperty("os.arch") + "]");
     System.out.println("Copyright (C) " + copyrightYear + " " + copyright);
     System.out.println(url);
     System.out.print(usage);
