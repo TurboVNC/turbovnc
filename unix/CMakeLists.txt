@@ -65,7 +65,7 @@ report_option(TVNC_BUILDWEBSERVER "Web server for noVNC")
 include_directories(include)
 
 option(TVNC_NVCONTROL
-	"Include fake NV-CONTROL extension in Xvnc (causes Xvnc to depend on the system's libX11 and libXext)"
+	"Include fake NV-CONTROL extension in Xvnc"
 	ON)
 
 option(TVNC_STATIC_XORG_PATHS
