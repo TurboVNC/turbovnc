@@ -1,7 +1,7 @@
-3.2
-===
+3.2 Evolving
+============
 
-### Significant changes relative to 3.1:
+### Significant changes relative to 3.1.1:
 
 1. Since all supported TurboVNC host platforms now contain new enough libraries
 to build xorg-server 1.20.x, the TurboVNC Server is now dynamically linked
