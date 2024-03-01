@@ -42,7 +42,7 @@
 
 #include "rfb.h"
 
-const char *driNode;
+const char *driNode = NULL;
 
 static struct gbm_device *gbm = NULL;
 static int dri_fd = 0;
@@ -281,6 +281,10 @@ void xvnc_dri3_sync_pixmaps_to_bos(void)
   uint32_t srcstride, dststride;
   void *opaque = NULL;
   dri3_pixmap *dri3pm, *tmp;
+
+  /* No-op if no DRM render node was specified */
+  if (!driNode)
+    return;
 
   xorg_list_for_each_entry_safe(dri3pm, tmp, &dri3_pixmaps, entry) {
     struct gbm_bo *bo;
