@@ -699,7 +699,8 @@ sub GetDisplayNumber
 
 sub CheckDisplayNumber
 {
-  local ($n) = @_;
+  local ($n) = $_[0];
+  local ($silent) = $_[1];
 
   socket(S, $AF_INET, $SOCK_STREAM, 0) || die "$prog: socket failed: $!\n";
   eval 'setsockopt(S, &SOL_SOCKET, &SO_REUSEADDR, pack("l", 1))';
@@ -730,7 +731,9 @@ sub CheckDisplayNumber
   if ($os eq "Linux") {
     socket(S, $AF_UNIX, $SOCK_STREAM, 0) || die "$prog: socket failed: $!\n";
     unless (bind(S, pack_sockaddr_un("\0/tmp/.X11-unix/X$n"))) {
-      warn "\nWARNING: $host:$n is taken because abstract socket \\0/tmp/.X11-unix/X$n is in use.\n";
+      if (!$silent) {
+        warn "\nWARNING: $host:$n is taken because abstract socket \\0/tmp/.X11-unix/X$n is in use.\n";
+      }
       close(S);
       return 0;
     }
@@ -738,14 +741,18 @@ sub CheckDisplayNumber
   }
 
   if (-e "/tmp/.X$n-lock") {
-    warn "\nWARNING: $host:$n is taken because of /tmp/.X$n-lock\n";
-    warn "Remove this file if there is no X server $host:$n\n";
+    if (!$silent) {
+      warn "\nWARNING: $host:$n is taken because of /tmp/.X$n-lock\n";
+      warn "Remove this file if there is no X server $host:$n\n";
+    }
     return 0;
   }
 
   if (-e "/tmp/.X11-unix/X$n") {
-    warn "\nWARNING: $host:$n is taken because of /tmp/.X11-unix/X$n\n";
-    warn "Remove this file if there is no X server $host:$n\n";
+    if (!$silent) {
+      warn "\nWARNING: $host:$n is taken because of /tmp/.X11-unix/X$n\n";
+      warn "Remove this file if there is no X server $host:$n\n";
+    }
     return 0;
   }
 
@@ -913,7 +920,7 @@ sub List
   }
   my @sessions = ();
   foreach my $file (@filelist) {
-    if ($file =~ /$host:(\d+)$\.pid/ && !&CheckDisplayNumber($1) &&
+    if ($file =~ /$host:(\d+)$\.pid/ && !&CheckDisplayNumber($1, 1) &&
         ($1 == $displayNumber || !$displayNumber)) {
       my @session = ();
       push(@session, $1);
