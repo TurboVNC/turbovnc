@@ -297,6 +297,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
     InputClientsPtr others = NULL;
     xXIEventMask *evmask = NULL;
     DeviceIntPtr dev;
+    uint32_t length;
 
     REQUEST(xXIGetSelectedEventsReq);
     REQUEST_SIZE_MATCH(xXIGetSelectedEventsReq);
@@ -366,10 +367,12 @@ ProcXIGetSelectedEvents(ClientPtr client)
         }
     }
 
+    /* save the value before SRepXIGetSelectedEvents swaps it */
+    length = reply.length;
     WriteReplyToClient(client, sizeof(xXIGetSelectedEventsReply), &reply);
 
     if (reply.num_masks)
-        WriteToClient(client, reply.length * 4, buffer);
+        WriteToClient(client, length * 4, buffer);
 
     free(buffer);
     return Success;
