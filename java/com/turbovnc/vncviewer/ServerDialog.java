@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012-2015, 2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2015, 2018, 2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.WindowConstants.*;
 import java.util.*;
+import java.util.prefs.Preferences;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
@@ -223,7 +224,16 @@ class ServerDialog extends Dialog implements ActionListener {
           sb.append(str);
         }
       }
-      UserPreferences.set("ServerDialog", "history", sb.toString());
+      String history = sb.toString();
+      if (history.length() > Preferences.MAX_VALUE_LENGTH) {
+        int lastComma =
+          history.lastIndexOf(',', Preferences.MAX_VALUE_LENGTH);
+        if (lastComma <= 0)
+          history = "";
+        else
+          history = history.substring(0, lastComma);
+      }
+      UserPreferences.set("ServerDialog", "history", history);
       UserPreferences.save("ServerDialog");
 
     } catch (Exception e) {
