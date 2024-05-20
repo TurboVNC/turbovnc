@@ -33,7 +33,7 @@
 #include "extinit.h"
 
 #if defined(DRI3) && defined(TURBOVNC)
-extern void xvnc_sync_dri3_textures(void);
+extern void xvnc_dri3_sync_pixmaps_to_bos(void);
 #endif
 
 #ifdef PANORAMIX

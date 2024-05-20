@@ -218,7 +218,7 @@ index 54b4e6a..8db9d03 100644
      return ret;
  }
 diff --git a/xorg-server-1.20.14/damageext/damageext.c b/Xserver/damageext/damageext.c
-index ce490cb..168585e 100644
+index ce490cb..d905b0f 100644
 --- a/xorg-server-1.20.14/damageext/damageext.c
 +++ b/Xserver/damageext/damageext.c
 @@ -1,6 +1,8 @@
@@ -235,7 +235,7 @@ index ce490cb..168585e 100644
  #include "extinit.h"
  
 +#if defined(DRI3) && defined(TURBOVNC)
-+extern void xvnc_sync_dri3_textures(void);
++extern void xvnc_dri3_sync_pixmaps_to_bos(void);
 +#endif
 +
  #ifdef PANORAMIX
