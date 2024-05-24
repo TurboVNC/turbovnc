@@ -12,6 +12,11 @@ if(HAVE_STDINT_H)
 	add_definitions(-DHAVE_STDINT_H)
 endif()
 
+check_symbol_exists(realpath stdlib.h HAVE_REALPATH)
+if(HAVE_REALPATH)
+	add_definitions(-DHAVE_REALPATH)
+endif()
+
 add_definitions(-DHAVE_CONFIG_H -DHAVE_READLINK -UUSE_POLL)
 
 disable_compiler_warnings()

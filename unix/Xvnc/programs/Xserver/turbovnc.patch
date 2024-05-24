@@ -254,10 +254,21 @@ index 427b891..0f32bd8 100644
         extension. */
  
 diff --git a/xorg-server-1.20.14/dix/property.c b/Xserver/dix/property.c
-index ff1d669..9381c4d 100644
+index ff1d669..5f493af 100644
 --- a/xorg-server-1.20.14/dix/property.c
 +++ b/Xserver/dix/property.c
-@@ -205,7 +205,8 @@ ProcChangeProperty(ClientPtr client)
+@@ -57,6 +57,10 @@ SOFTWARE.
+ #include "swaprep.h"
+ #include "xace.h"
+ 
++#ifdef TURBOVNC
++extern void rfbRootPropertyChange(PropertyPtr pProp);
++#endif
++
+ /*****************************************************************
+  * Property Stuff
+  *
+@@ -205,7 +209,8 @@ ProcChangeProperty(ClientPtr client)
      WindowPtr pWin;
      char format, mode;
      unsigned long len;
@@ -267,15 +278,13 @@ index ff1d669..9381c4d 100644
  
      REQUEST(xChangePropertyReq);
  
-@@ -362,6 +363,13 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
+@@ -362,6 +367,11 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
      if (sendevent)
          deliverPropertyNotifyEvent(pWin, PropertyNewValue, pProp);
  
 +#ifdef TURBOVNC
-+    if (pWin->parent == NullWindow) {
-+        extern void rfbRootPropertyChange();
++    if (pWin->parent == NullWindow)
 +        rfbRootPropertyChange(pProp);
-+    }
 +#endif
 +
      return Success;
