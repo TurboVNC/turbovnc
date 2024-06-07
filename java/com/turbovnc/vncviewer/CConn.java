@@ -2881,10 +2881,12 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     if (params.reverseScroll.get()) {
       clicks = -clicks;
     }
+    boolean isHorizontal = Utils.isMac() && ev.isShiftDown();
+
     if (clicks < 0) {
-      wheelMask = buttonMask | RFB.BUTTON4_MASK;
+      wheelMask = buttonMask | (isHorizontal ? RFB.BUTTON6_MASK : RFB.BUTTON4_MASK);
     } else {
-      wheelMask = buttonMask | RFB.BUTTON5_MASK;
+      wheelMask = buttonMask | (isHorizontal ? RFB.BUTTON7_MASK : RFB.BUTTON5_MASK);
     }
 
     if (cp.width != desktop.scaledWidth ||

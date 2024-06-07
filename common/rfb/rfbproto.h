@@ -1350,6 +1350,8 @@ typedef struct _rfbPointerEventMsg {
 #define rfbButton3Mask 4
 #define rfbButton4Mask 8
 #define rfbButton5Mask 16
+#define rfbButton6Mask 32
+#define rfbButton7Mask 64
 
 #define sz_rfbPointerEventMsg 6
 
