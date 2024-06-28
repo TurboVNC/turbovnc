@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <string.h>
 #include "debug.h"
+#include <stdlib.h>
 #if 0 /* TURBOVNC */
 #include "u_string.h"
 #endif /* TURBOVNC */
