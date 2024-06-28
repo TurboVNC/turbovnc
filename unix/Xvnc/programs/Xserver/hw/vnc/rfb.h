@@ -2,7 +2,7 @@
  * rfb.h - header file for RFB DDX implementation.
  */
 
-/* Copyright (C) 2010-2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010-2022, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2011 Gernot Tenchio
@@ -813,7 +813,7 @@ extern void KbdDeviceInit(DeviceIntPtr);
 extern void KeyEvent(KeySym keySym, Bool down);
 extern void KbdReleaseAllKeys(void);
 
-extern char *stristr(const char *s1, const char *s2);
+extern Bool stristr(const char *s1, const char *s2);
 
 
 /* nvctrlext.c */

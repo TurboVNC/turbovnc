@@ -65,13 +65,14 @@ index 10d4faf..cbce7d9 100644
  #define SET_BIT(m,b)   (m[ (b) / 8 ] |=  (1U << ((b) % 8)))
  #define CLR_BIT(m,b)   (m[ (b) / 8 ] &= ~(1U << ((b) % 8)))
 diff --git a/mesa-20.3.5/src/util/debug.c b/Mesa/src/util/debug.c
-index 89ae613..ebe9060 100644
+index 89ae613..de919e9 100644
 --- a/mesa-20.3.5/src/util/debug.c
 +++ b/Mesa/src/util/debug.c
-@@ -24,8 +24,11 @@
+@@ -24,8 +24,12 @@
  #include <errno.h>
  #include <string.h>
  #include "debug.h"
++#include <stdlib.h>
 +#if 0 /* TURBOVNC */
  #include "u_string.h"
 +#endif /* TURBOVNC */
@@ -80,7 +81,7 @@ index 89ae613..ebe9060 100644
  uint64_t
  parse_debug_string(const char *debug,
                     const struct debug_control *control)
-@@ -66,6 +69,7 @@ comma_separated_list_contains(const char *list, const char *s)
+@@ -66,6 +70,7 @@ comma_separated_list_contains(const char *list, const char *s)
  
     return false;
  }
