@@ -9,7 +9,7 @@
  *  Copyright (C) 2009 TightVNC Team.  All Rights Reserved.
  *  Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
  *  Copyright (C) 2013, 2018 Pierre Ossman for Cendio AB.  All Rights Reserved.
- *  Copyright (C) 2014-2016, 2019 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2014-2016, 2019, 2024 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -506,13 +506,13 @@ void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
 }
 
 
-char *stristr(const char *s1, const char *s2)
+Bool stristr(const char *s1, const char *s2)
 {
   char *str1, *str2, *ret;
   int i;
 
   if (!s1 || !s2 || strlen(s1) < 1 || strlen(s2) < 1)
-    return NULL;
+    return FALSE;
 
   str1 = strdup(s1);
   for (i = 0; i < strlen(str1); i++)
@@ -523,7 +523,7 @@ char *stristr(const char *s1, const char *s2)
 
   ret = strstr(str1, str2);
   free(str1);  free(str2);
-  return ret;
+  return ret != NULL;
 }
 
 

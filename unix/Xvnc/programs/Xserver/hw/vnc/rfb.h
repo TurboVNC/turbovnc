@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2021 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2021, 2024 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -792,7 +792,7 @@ extern void KbdDeviceInit(DeviceIntPtr);
 extern void KeyEvent(KeySym keySym, Bool down);
 extern void KbdReleaseAllKeys(void);
 
-extern char *stristr(const char *s1, const char *s2);
+extern Bool stristr(const char *s1, const char *s2);
 
 
 /* nvctrlext.c */
