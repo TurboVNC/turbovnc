@@ -1263,15 +1263,15 @@ Bool AddExtInputDevice(rfbDevInfo *dev)
       dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
       break;
     default:
-      if (stristr(dev->name, "cursor"))
+      if (strcasestr(dev->name, "cursor"))
         dev->pDev->xinput_type = XA_CURSOR;
-      else if (stristr(dev->name, "stylus"))
+      else if (strcasestr(dev->name, "stylus"))
         dev->pDev->xinput_type = MakeAtom("STYLUS", strlen("STYLUS"), 1);
-      else if (stristr(dev->name, "eraser"))
+      else if (strcasestr(dev->name, "eraser"))
         dev->pDev->xinput_type = MakeAtom("ERASER", strlen("ERASER"), 1);
-      else if (stristr(dev->name, "touch"))
+      else if (strcasestr(dev->name, "touch"))
         dev->pDev->xinput_type = MakeAtom("TOUCH", strlen("TOUCH"), 1);
-      else if (stristr(dev->name, "pad"))
+      else if (strcasestr(dev->name, "pad"))
         dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
       break;
   }
