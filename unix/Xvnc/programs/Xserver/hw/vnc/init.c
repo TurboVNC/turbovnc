@@ -4,7 +4,7 @@
  * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
-/* Copyright (C) 2009-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2009-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2016-2017 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -1231,15 +1231,15 @@ Bool AddExtInputDevice(rfbDevInfo *dev)
       dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
       break;
     default:
-      if (stristr(dev->name, "cursor"))
+      if (strcasestr(dev->name, "cursor"))
         dev->pDev->xinput_type = XA_CURSOR;
-      else if (stristr(dev->name, "stylus"))
+      else if (strcasestr(dev->name, "stylus"))
         dev->pDev->xinput_type = MakeAtom("STYLUS", strlen("STYLUS"), 1);
-      else if (stristr(dev->name, "eraser"))
+      else if (strcasestr(dev->name, "eraser"))
         dev->pDev->xinput_type = MakeAtom("ERASER", strlen("ERASER"), 1);
-      else if (stristr(dev->name, "touch"))
+      else if (strcasestr(dev->name, "touch"))
         dev->pDev->xinput_type = MakeAtom("TOUCH", strlen("TOUCH"), 1);
-      else if (stristr(dev->name, "pad"))
+      else if (strcasestr(dev->name, "pad"))
         dev->pDev->xinput_type = MakeAtom("PAD", strlen("PAD"), 1);
       break;
   }

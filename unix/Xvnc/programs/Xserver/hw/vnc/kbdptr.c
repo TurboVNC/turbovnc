@@ -548,27 +548,6 @@ void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
 }
 
 
-Bool stristr(const char *s1, const char *s2)
-{
-  char *str1, *str2, *ret;
-  int i;
-
-  if (!s1 || !s2 || strlen(s1) < 1 || strlen(s2) < 1)
-    return FALSE;
-
-  str1 = strdup(s1);
-  for (i = 0; i < strlen(str1); i++)
-    str1[i] = tolower(str1[i]);
-  str2 = strdup(s2);
-  for (i = 0; i < strlen(str2); i++)
-    str2[i] = tolower(str2[i]);
-
-  ret = strstr(str1, str2);
-  free(str1);  free(str2);
-  return ret != NULL;
-}
-
-
 void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
 {
   ValuatorMask mask;
@@ -594,13 +573,13 @@ void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons)
         vtDev = &virtualTabletPad;
         break;
       default:
-        if (stristr(dev->name, "stylus"))
+        if (strcasestr(dev->name, "stylus"))
           vtDev = &virtualTabletStylus;
-        else if (stristr(dev->name, "eraser"))
+        else if (strcasestr(dev->name, "eraser"))
           vtDev = &virtualTabletEraser;
-        else if (stristr(dev->name, "touch"))
+        else if (strcasestr(dev->name, "touch"))
           vtDev = &virtualTabletTouch;
-        else if (stristr(dev->name, "pad"))
+        else if (strcasestr(dev->name, "pad"))
           vtDev = &virtualTabletPad;
         else
           return;

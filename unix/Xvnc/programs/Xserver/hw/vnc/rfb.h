@@ -908,8 +908,6 @@ extern void KeyEvent(KeySym keySym, Bool down);
 extern void KbdReleaseAllKeys(void);
 extern void QEMUExtKeyboardEventInit(void);
 
-extern Bool stristr(const char *s1, const char *s2);
-
 
 /* nvctrlext.c */
 
