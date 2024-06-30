@@ -98,6 +98,17 @@ Bool rfbSendDesktopSize(rfbClientPtr cl);
 Bool rfbSendExtDesktopSize(rfbClientPtr cl);
 
 
+int rfbClientCount(void)
+{
+  rfbClientPtr cl;
+  int count = 0;
+
+  for (cl = rfbClientHead; cl; cl = cl->next)
+    count++;
+  return count;
+}
+
+
 /*
  * Session capture
  */
@@ -582,6 +593,8 @@ void rfbClientConnectionGone(rfbClientPtr cl)
 
   free(cl);
 
+  rfbLog("Number of connected clients: %d\n", rfbClientCount());
+
   if (rfbClientHead == NULL && rfbIdleTimeout > 0)
     IdleTimerSet();
 }
@@ -768,6 +781,8 @@ static void rfbProcessClientInitMessage(rfbClientPtr cl)
       }
     }
   }
+
+  rfbLog("Number of connected clients: %d\n", rfbClientCount());
 }
 
 
