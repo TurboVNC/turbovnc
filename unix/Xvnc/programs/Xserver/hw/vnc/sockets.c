@@ -171,7 +171,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
   socklen_t addrlen = sizeof(struct sockaddr_storage);
   char addrStr[INET6_ADDRSTRLEN];
   const int one = 1;
-  int sock, numClientConnections = 0;
+  int sock;
   rfbClientPtr cl, nextCl;
 
   if (rfbListenSock != -1 && fd == rfbListenSock) {
@@ -209,9 +209,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
     }
 #endif
 
-    for (cl = rfbClientHead; cl; cl = cl->next)
-      numClientConnections++;
-    if (numClientConnections >= rfbMaxClientConnections) {
+    if (rfbClientCount() >= rfbMaxClientConnections) {
       rfbClientRec tempCl;
       rfbProtocolVersionMsg pv;
       const char *errMsg = "Connection limit reached";
