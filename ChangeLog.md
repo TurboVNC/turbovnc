@@ -43,6 +43,13 @@ until F10, left Alt, or Esc was pressed to dismiss the menu.
 running in a TurboVNC session attempted to display to a local Wayland session
 if one was active.
 
+8. The TurboVNC Server now assigns an ordinal ID to every VNC viewer after the
+viewer successfully connects, and the viewer's ID is reported in the TurboVNC
+session log along with the IP address from which the viewer connection
+originated.  This makes it easier to distinguish log entries related to a
+specific viewer, especially when using SSH tunneling (which makes it appear as
+if all viewer connections originate from the loopback IP address.)
+
 
 3.0.3
 =====

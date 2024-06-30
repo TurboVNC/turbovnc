@@ -4,7 +4,7 @@
  * This file implements authentication when setting up an RFB connection.
  */
 
-/* Copyright (C) 2010, 2012-2021 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010, 2012-2021, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                    All Rights Reserved.
  * Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -1428,12 +1428,14 @@ static Bool CheckResponse(rfbClientPtr cl, int numPasswords,
   memset(passwdViewOnly, 0, MAXPWLEN + 1);
 
   if (memcmp(encryptedChallenge1, response, CHALLENGESIZE) == 0) {
-    rfbLog("Full-control authentication enabled for %s\n", cl->host);
+    rfbLog("Full-control authentication enabled for Client %d (%s)\n", cl->id,
+           cl->host);
     ok = TRUE;
     cl->viewOnly = FALSE;
 
   } else if (memcmp(encryptedChallenge2, response, CHALLENGESIZE) == 0) {
-    rfbLog("View-only authentication enabled for %s\n", cl->host);
+    rfbLog("View-only authentication enabled for Client %d (%s)\n", cl->id,
+           cl->host);
     ok = TRUE;
     cl->viewOnly = TRUE;
   }
@@ -1522,7 +1524,7 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
       for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
         if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
           rfbLog("-dontdisconnect: Not shared & existing client\n");
-          rfbLog("  refusing new client %s\n", cl->host);
+          rfbLog("  refusing new client %d (%s)\n", cl->id, cl->host);
           rfbClientAuthFailed(cl, "Authentication failed.  The server is already in use.");
           return;
         }
@@ -1530,8 +1532,8 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
     }
     rfbClientAuthSucceeded(cl, rfbAuthVNC);
   } else {
-    rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",
-           cl->host);
+    rfbLog("rfbVncAuthProcessResponse: authentication failed from Client %d (%s)\n",
+           cl->id, cl->host);
     if (rfbAuthConsiderBlocking(cl->host))
       rfbClientAuthFailed(cl, "Authentication failed.  Client temporarily blocked");
     else
