@@ -2,7 +2,8 @@
  * authpam.c - deal with PAM authentication.
  */
 
-/* Copyright (C) 2015, 2017-2018, 2020 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2017-2018, 2020, 2024 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright (C) 2020 Andrew Yoder.  All Rights Reserved.
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                    All Rights Reserved.
@@ -153,7 +154,7 @@ Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
         rfbLog("PAMAuthenticate: pam_open_session: %s\n",
                pam_strerror(pamHandle, authStatus));
       } else {
-        rfbLog("Opened PAM session for client %s\n", cl->host);
+        rfbLog("Opened PAM session for Client %d (%s)\n", cl->id, cl->host);
       }
     }
   }
@@ -212,7 +213,7 @@ void rfbPAMEnd(rfbClientPtr cl)
     if ((r = pam_end(cl->pamHandle, PAM_SUCCESS)) != PAM_SUCCESS)
       rfbLog("PAMEnd: pam_end: %s\n", pam_strerror(cl->pamHandle, r));
 
-    rfbLog("Closed PAM session for client %s\n", cl->host);
+    rfbLog("Closed PAM session for Client %d (%s)\n", cl->id, cl->host);
     cl->pamHandle = 0;
   }
 }

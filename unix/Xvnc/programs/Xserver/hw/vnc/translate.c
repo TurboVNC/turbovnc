@@ -2,7 +2,7 @@
  * translate.c - translate between different pixel formats
  */
 
-/* Copyright (C) 2017, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2017, 2022, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -178,7 +178,7 @@ void rfbTranslateNone(char *table, rfbPixelFormat *in, rfbPixelFormat *out,
 
 Bool rfbSetTranslateFunction(rfbClientPtr cl)
 {
-  rfbLog("Pixel format for client %s:\n", cl->host);
+  rfbLog("Pixel format for Client %d (%s):\n", cl->id, cl->host);
   PrintPixelFormat(&cl->format);
 
   /*

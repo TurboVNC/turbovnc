@@ -18,7 +18,7 @@
  * not EWOULDBLOCK.
  */
 
-/* Copyright (C) 2012-2020, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2020, 2022, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2011 Gernot Tenchio
@@ -236,7 +236,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
       return;
     }
 
-    rfbLog("Got connection from client %s\n",
+    rfbLog("Got connection from client (%s)\n",
            sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
     SetNotifyFd(sock, rfbSockNotify, X_NOTIFY_READ, NULL);
@@ -316,6 +316,10 @@ void rfbCloseSock(int sock)
 void rfbCloseClient(rfbClientPtr cl)
 {
   int sock = cl->sock;
+
+  /* Reuse the client number if initialization failed. */
+  if (cl->state < RFB_NORMAL)
+    rfbClientNumber--;
 
 #if USETLS
   if (cl->sslctx) {
