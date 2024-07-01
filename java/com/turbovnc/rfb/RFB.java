@@ -309,6 +309,8 @@ public final class RFB {
   public static final int BUTTON3_MASK = 4;
   public static final int BUTTON4_MASK = 8;
   public static final int BUTTON5_MASK = 16;
+  public static final int BUTTON6_MASK = 32;
+  public static final int BUTTON7_MASK = 64;
 
   //***************************************************************************
   // GII

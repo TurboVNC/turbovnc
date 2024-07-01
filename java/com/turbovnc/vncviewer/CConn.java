@@ -2438,11 +2438,20 @@ public final class CConn extends CConnection implements UserPasswdGetter,
             buttonMask |= RFB.BUTTON2_MASK;  break;
           case 3:
             buttonMask |= RFB.BUTTON3_MASK;  break;
+          case 4:
+            // X11 uses Buttons 6 and 7 for (respectively) left and right
+            // scroll wheel events, but Java/X11 uses Buttons 4 and 5.
+            if (!Utils.isX11()) return;
+            buttonMask |= RFB.BUTTON6_MASK;  break;
+          case 5:
+            if (!Utils.isX11()) return;
+            buttonMask |= RFB.BUTTON7_MASK;  break;
           default:
             return;
         }
-        vlog.debug("mouse PRESS, button " + ev.getButton() +
-                   ", coords " + ev.getX() + "," + ev.getY());
+        if (ev.getButton() <= 3)
+          vlog.debug("mouse PRESS, button " + ev.getButton() +
+                     ", coords " + ev.getX() + "," + ev.getY());
         break;
       case MouseEvent.MOUSE_RELEASED:
         switch (ev.getButton()) {
@@ -2452,11 +2461,18 @@ public final class CConn extends CConnection implements UserPasswdGetter,
             buttonMask &= ~RFB.BUTTON2_MASK;  break;
           case 3:
             buttonMask &= ~RFB.BUTTON3_MASK;  break;
+          case 4:
+            if (!Utils.isX11()) return;
+            buttonMask &= ~RFB.BUTTON6_MASK;  break;
+          case 5:
+            if (!Utils.isX11()) return;
+            buttonMask &= ~RFB.BUTTON7_MASK;  break;
           default:
             return;
         }
-        vlog.debug("mouse release, button " + ev.getButton() +
-                   ", coords " + ev.getX() + "," + ev.getY());
+        if (ev.getButton() <= 3)
+          vlog.debug("mouse release, button " + ev.getButton() +
+                     ", coords " + ev.getX() + "," + ev.getY());
         break;
     }
 
@@ -2494,10 +2510,20 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     if (opts.reverseScroll) {
       clicks = -clicks;
     }
+    // On macOS and Windows, horizontal scroll wheel events are simply vertical
+    // scroll wheel events with the Shift key held down.  (The operating system
+    // acts as if the Shift key is held down, but no Shift key press/release
+    // events are actually fired.)
+    boolean isHorizontal =
+      (Utils.isMac() || Utils.isWindows()) && ev.isShiftDown();
+    // X11 uses Buttons 4, 5, 6, and 7 for (respectively) up, down, left, and
+    // right scroll wheel events.
     if (clicks < 0) {
-      wheelMask = buttonMask | RFB.BUTTON4_MASK;
+      wheelMask = buttonMask |
+                  (isHorizontal ? RFB.BUTTON6_MASK : RFB.BUTTON4_MASK);
     } else {
-      wheelMask = buttonMask | RFB.BUTTON5_MASK;
+      wheelMask = buttonMask |
+                  (isHorizontal ? RFB.BUTTON7_MASK : RFB.BUTTON5_MASK);
     }
 
     if (cp.width != desktop.scaledWidth ||
