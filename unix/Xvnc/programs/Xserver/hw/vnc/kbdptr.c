@@ -529,7 +529,7 @@ void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
     cursorPosY = y;
   }
 
-  for (i = 0; i < 5; i++) {
+  for (i = 0; i < 7; i++) {
     if ((buttonMask ^ oldButtonMask) & (1 << i)) {
       if (buttonMask & (1 << i)) {
         valuator_mask_set_range(&mask, 0, 0, NULL);
