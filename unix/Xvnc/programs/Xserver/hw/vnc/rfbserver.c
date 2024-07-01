@@ -78,7 +78,7 @@ Bool rfbGIIDebug = FALSE;
 int rfbMaxWidth = MAXSHORT, rfbMaxHeight = MAXSHORT;
 int rfbMaxClipboard = MAX_CUTTEXT_LEN;
 Bool rfbVirtualTablet = FALSE;
-int rfbClientNumber = 1;
+CARD16 rfbClientNumber = 1;
 #if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
 Bool rfbMT = TRUE;
 #else
@@ -388,6 +388,7 @@ static rfbClientPtr rfbNewClient(int sock)
   getpeername(sock, &addr.u.sa, &addrlen);
   cl->host = strdup(sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
   cl->id = rfbClientNumber++;
+  if (rfbClientNumber == 0) rfbClientNumber = 1;
 
   /* Dispatch client input to rfbProcessClientProtocolVersion(). */
   cl->state = RFB_PROTOCOL_VERSION;
