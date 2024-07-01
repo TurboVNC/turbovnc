@@ -2,7 +2,7 @@
  * rfbserver.c - deal with server-side of the RFB protocol.
  */
 
-/* Copyright (C) 2009-2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2009-2022, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2015-2017, 2020-2021 Pierre Ossman for Cendio AB.
  *                                    All Rights Reserved.
  * Copyright (C) 2021 AnatoScope SA.  All Rights Reserved.
@@ -78,6 +78,7 @@ Bool rfbGIIDebug = FALSE;
 int rfbMaxWidth = MAXSHORT, rfbMaxHeight = MAXSHORT;
 int rfbMaxClipboard = MAX_CUTTEXT_LEN;
 Bool rfbVirtualTablet = FALSE;
+int rfbClientNumber = 1;
 #if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__DragonFly__)
 Bool rfbMT = TRUE;
 #else
@@ -97,6 +98,17 @@ Bool rfbSendDesktopSize(rfbClientPtr cl);
 Bool rfbSendExtDesktopSize(rfbClientPtr cl);
 static Bool rfbSendQEMUExtKeyEventRect(rfbClientPtr cl);
 static Bool rfbSendLEDState(rfbClientPtr cl);
+
+
+int rfbClientCount(void)
+{
+  rfbClientPtr cl;
+  int count = 0;
+
+  for (cl = rfbClientHead; cl; cl = cl->next)
+    count++;
+  return count;
+}
 
 
 /*
@@ -375,6 +387,7 @@ static rfbClientPtr rfbNewClient(int sock)
   cl->sock = sock;
   getpeername(sock, &addr.u.sa, &addrlen);
   cl->host = strdup(sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
+  cl->id = rfbClientNumber++;
 
   /* Dispatch client input to rfbProcessClientProtocolVersion(). */
   cl->state = RFB_PROTOCOL_VERSION;
@@ -533,12 +546,7 @@ void rfbClientConnectionGone(rfbClientPtr cl)
 #ifdef XVNC_AuthPAM
   rfbPAMEnd(cl);
 #endif
-  if (cl->login != NULL) {
-    rfbLog("Client %s (%s) gone\n", cl->login, cl->host);
-    free(cl->login);
-  } else {
-    rfbLog("Client %s gone\n", cl->host);
-  }
+  rfbLog("Client %d (%s) gone\n", cl->id, cl->host);
   free(cl->host);
 
   ShutdownTightThreads();
@@ -596,6 +604,8 @@ void rfbClientConnectionGone(rfbClientPtr cl)
     close(cl->captureFD);
 
   free(cl);
+
+  rfbLog("Number of connected clients: %d\n", rfbClientCount());
 
   if (rfbClientHead == NULL && rfbIdleTimeout > 0)
     IdleTimerSet();
@@ -763,8 +773,9 @@ static void rfbProcessClientInitMessage(rfbClientPtr cl)
       for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
         if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
           rfbLog("-dontdisconnect: Not shared & existing client\n");
-          rfbLog("  refusing new client %s\n", cl->host);
+          rfbLog("  refusing new client %d (%s)\n", cl->id, cl->host);
           rfbCloseClient(cl);
+          rfbClientNumber--;
           return;
         }
       }
@@ -772,13 +783,15 @@ static void rfbProcessClientInitMessage(rfbClientPtr cl)
       for (otherCl = rfbClientHead; otherCl; otherCl = nextCl) {
         nextCl = otherCl->next;
         if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
-          rfbLog("Not shared - closing connection to client %s\n",
-                 otherCl->host);
+          rfbLog("Not shared - closing connection to Client %d (%s)\n",
+                 otherCl->id, otherCl->host);
           rfbCloseClient(otherCl);
         }
       }
     }
   }
+
+  rfbLog("Number of connected clients: %d\n", rfbClientCount());
 }
 
 
@@ -949,55 +962,63 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           case rfbEncodingRaw:
             if (cl->preferredEncoding == -1) {
               cl->preferredEncoding = enc;
-              rfbLog("Using raw encoding for client %s\n", cl->host);
+              rfbLog("Using raw encoding for Client %d (%s)\n", cl->id,
+                     cl->host);
             }
             break;
           case rfbEncodingRRE:
             if (cl->preferredEncoding == -1) {
               cl->preferredEncoding = enc;
-              rfbLog("Using rre encoding for client %s\n", cl->host);
+              rfbLog("Using rre encoding for Client %d (%s)\n", cl->id,
+                     cl->host);
             }
             break;
           case rfbEncodingCoRRE:
             if (cl->preferredEncoding == -1) {
               cl->preferredEncoding = enc;
-              rfbLog("Using CoRRE encoding for client %s\n", cl->host);
+              rfbLog("Using CoRRE encoding for Client %d (%s)\n", cl->id,
+                     cl->host);
             }
             break;
           case rfbEncodingHextile:
             if (cl->preferredEncoding == -1) {
               cl->preferredEncoding = enc;
-              rfbLog("Using hextile encoding for client %s\n", cl->host);
+              rfbLog("Using hextile encoding for Client %d (%s)\n", cl->id,
+                     cl->host);
             }
             break;
           case rfbEncodingZlib:
             if (cl->preferredEncoding == -1) {
               cl->preferredEncoding = enc;
-              rfbLog("Using zlib encoding for client %s\n", cl->host);
+              rfbLog("Using zlib encoding for Client %d (%s)\n", cl->id,
+                     cl->host);
             }
             break;
           case rfbEncodingZRLE:
             if (cl->preferredEncoding == -1) {
               cl->preferredEncoding = enc;
-              rfbLog("Using ZRLE encoding for client %s\n", cl->host);
+              rfbLog("Using ZRLE encoding for Client %d (%s)\n", cl->id,
+                     cl->host);
             }
             break;
           case rfbEncodingZYWRLE:
             if (cl->preferredEncoding == -1) {
               cl->preferredEncoding = enc;
-              rfbLog("Using ZYWRLE encoding for client %s\n", cl->host);
+              rfbLog("Using ZYWRLE encoding for Client %d (%s)\n", cl->id,
+                     cl->host);
             }
             break;
           case rfbEncodingTight:
             if (cl->preferredEncoding == -1) {
               cl->preferredEncoding = enc;
-              rfbLog("Using tight encoding for client %s\n", cl->host);
+              rfbLog("Using tight encoding for Client %d (%s)\n", cl->id,
+                     cl->host);
             }
             break;
           case rfbEncodingXCursor:
             if (!cl->enableCursorShapeUpdates) {
-              rfbLog("Enabling X-style cursor updates for client %s\n",
-                     cl->host);
+              rfbLog("Enabling X-style cursor updates for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableCursorShapeUpdates = TRUE;
               cl->useRichCursorEncoding = FALSE;
               cl->cursorWasChanged = TRUE;
@@ -1005,8 +1026,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
             break;
           case rfbEncodingRichCursor:
             if (!cl->enableCursorShapeUpdates) {
-              rfbLog("Enabling full-color cursor updates for client %s\n",
-                     cl->host);
+              rfbLog("Enabling full-color cursor updates for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableCursorShapeUpdates = TRUE;
               cl->useRichCursorEncoding = TRUE;
               cl->cursorWasChanged = TRUE;
@@ -1014,8 +1035,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
             break;
           case rfbEncodingPointerPos:
             if (!cl->enableCursorPosUpdates) {
-              rfbLog("Enabling cursor position updates for client %s\n",
-                     cl->host);
+              rfbLog("Enabling cursor position updates for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableCursorPosUpdates = TRUE;
               cl->cursorWasMoved = TRUE;
               cl->cursorX = -1;
@@ -1024,37 +1045,37 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
             break;
           case rfbEncodingLastRect:
             if (!cl->enableLastRectEncoding) {
-              rfbLog("Enabling LastRect protocol extension for client %s\n",
-                     cl->host);
+              rfbLog("Enabling LastRect protocol extension for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableLastRectEncoding = TRUE;
             }
             break;
           case rfbEncodingExtendedClipboard:
            if (!cl->enableExtClipboard) {
-              rfbLog("Enabling Extended Clipboard protocol extension for client %s\n",
-                     cl->host);
+              rfbLog("Enabling Extended Clipboard protocol extension for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableExtClipboard = TRUE;
             }
             break;
           case rfbEncodingFence:
             if (!cl->enableFence) {
-              rfbLog("Enabling Fence protocol extension for client %s\n",
-                     cl->host);
+              rfbLog("Enabling Fence protocol extension for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableFence = TRUE;
             }
             break;
           case rfbEncodingContinuousUpdates:
             if (!cl->enableCU) {
-              rfbLog("Enabling Continuous Updates protocol extension for client %s\n",
-                     cl->host);
+              rfbLog("Enabling Continuous Updates protocol extension for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableCU = TRUE;
             }
             break;
           case rfbEncodingNewFBSize:
             if (!cl->enableDesktopSize) {
               if (!rfbAuthDisableRemoteResize) {
-                rfbLog("Enabling Desktop Size protocol extension for client %s\n",
-                       cl->host);
+                rfbLog("Enabling Desktop Size protocol extension for Client %d (%s)\n",
+                       cl->id, cl->host);
                 cl->enableDesktopSize = TRUE;
               } else
                 rfbLog("WARNING: Remote desktop resizing disabled per system policy.\n");
@@ -1063,8 +1084,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           case rfbEncodingExtendedDesktopSize:
             if (!cl->enableExtDesktopSize) {
               if (!rfbAuthDisableRemoteResize) {
-                rfbLog("Enabling Extended Desktop Size protocol extension for client %s\n",
-                       cl->host);
+                rfbLog("Enabling Extended Desktop Size protocol extension for Client %d (%s)\n",
+                       cl->id, cl->host);
                 cl->enableExtDesktopSize = TRUE;
               } else
                 rfbLog("WARNING: Remote desktop resizing disabled per system policy.\n");
@@ -1072,25 +1093,29 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
             break;
           case rfbEncodingGII:
             if (!cl->enableGII) {
-              rfbLog("Enabling GII protocol extension for client %s\n", cl->host);
+              rfbLog("Enabling GII protocol extension for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableGII = TRUE;
             }
             break;
           case rfbEncodingQEMUExtendedKeyEvent:
             if (!cl->enableQEMUExtKeyEvent && enableQEMUExtKeyEvent) {
-              rfbLog("Enabling QEMU Extended Key Event protocol extension for client %s\n", cl->host);
+              rfbLog("Enabling QEMU Extended Key Event protocol extension for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableQEMUExtKeyEvent = TRUE;
             }
             break;
           case rfbEncodingQEMULEDState:
             if (!cl->enableQEMULEDState && enableQEMUExtKeyEvent) {
-              rfbLog("Enabling QEMU LED State protocol extension for client %s\n", cl->host);
+              rfbLog("Enabling QEMU LED State protocol extension for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableQEMULEDState = TRUE;
             }
             break;
           case rfbEncodingVMwareLEDState:
             if (!cl->enableVMwareLEDState && enableQEMUExtKeyEvent) {
-              rfbLog("Enabling VMware LED State protocol extension for client %s\n", cl->host);
+              rfbLog("Enabling VMware LED State protocol extension for Client %d (%s)\n",
+                     cl->id, cl->host);
               cl->enableVMwareLEDState = TRUE;
             }
             break;
@@ -1102,8 +1127,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               if (cl->preferredEncoding == rfbEncodingTight)
                 logTightCompressLevel = TRUE;
               else
-                rfbLog("Using compression level %d for client %s\n",
-                       cl->tightCompressLevel, cl->host);
+                rfbLog("Using compression level %d for Client %d (%s)\n",
+                       cl->tightCompressLevel, cl->id, cl->host);
               if (rfbInterframe == -1) {
                 if (cl->tightCompressLevel >= 5) {
                   if (!InterframeOn(cl)) {
@@ -1116,24 +1141,25 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
             } else if (enc >= (CARD32)rfbEncodingSubsamp1X &&
                        enc <= (CARD32)rfbEncodingSubsampGray) {
               cl->tightSubsampLevel = enc & 0xFF;
-              rfbLog("Using JPEG subsampling %d for client %s\n",
-                     cl->tightSubsampLevel, cl->host);
+              rfbLog("Using JPEG subsampling %d for Client %d (%s)\n",
+                     cl->tightSubsampLevel, cl->id, cl->host);
             } else if (enc >= (CARD32)rfbEncodingQualityLevel0 &&
                        enc <= (CARD32)rfbEncodingQualityLevel9) {
               cl->tightQualityLevel = JPEG_QUAL[enc & 0x0F];
               cl->tightSubsampLevel = JPEG_SUBSAMP[enc & 0x0F];
               cl->imageQualityLevel = enc & 0x0F;
               if (cl->preferredEncoding == rfbEncodingTight)
-                rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
-                       cl->tightSubsampLevel, cl->tightQualityLevel, cl->host);
+                rfbLog("Using JPEG subsampling %d, Q%d for Client %d (%s)\n",
+                       cl->tightSubsampLevel, cl->tightQualityLevel, cl->id,
+                       cl->host);
               else
-                rfbLog("Using image quality level %d for client %s\n",
-                       cl->imageQualityLevel, cl->host);
+                rfbLog("Using image quality level %d for Client %d (%s)\n",
+                       cl->imageQualityLevel, cl->id, cl->host);
             } else if (enc >= (CARD32)rfbEncodingFineQualityLevel0 + 1 &&
                        enc <= (CARD32)rfbEncodingFineQualityLevel100) {
               cl->tightQualityLevel = enc & 0xFF;
-              rfbLog("Using JPEG quality %d for client %s\n",
-                     cl->tightQualityLevel, cl->host);
+              rfbLog("Using JPEG quality %d for Client %d (%s)\n",
+                     cl->tightQualityLevel, cl->id, cl->host);
             } else {
               rfbLog("rfbProcessClientNormalMessage: ignoring unknown encoding %d (%x)\n",
                      (int)enc, (int)enc);
@@ -1145,11 +1171,12 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         cl->preferredEncoding = rfbEncodingTight;
 
       if (cl->preferredEncoding == rfbEncodingTight && logTightCompressLevel)
-        rfbLog("Using Tight compression level %d for client %s\n",
-               rfbTightCompressLevel(cl), cl->host);
+        rfbLog("Using Tight compression level %d for Client %d (%s)\n",
+               rfbTightCompressLevel(cl), cl->id, cl->host);
 
       if (cl->enableCursorPosUpdates && !cl->enableCursorShapeUpdates) {
-        rfbLog("Disabling cursor position updates for client %s\n", cl->host);
+        rfbLog("Disabling cursor position updates for Client %d (%s)\n",
+               cl->id, cl->host);
         cl->enableCursorPosUpdates = FALSE;
       }
 

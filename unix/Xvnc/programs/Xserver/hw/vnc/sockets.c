@@ -18,7 +18,7 @@
  * not EWOULDBLOCK.
  */
 
-/* Copyright (C) 2012-2020, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2020, 2022, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2011 Gernot Tenchio
@@ -171,7 +171,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
   socklen_t addrlen = sizeof(struct sockaddr_storage);
   char addrStr[INET6_ADDRSTRLEN];
   const int one = 1;
-  int sock, numClientConnections = 0;
+  int sock;
   rfbClientPtr cl, nextCl;
 
   if (rfbListenSock != -1 && fd == rfbListenSock) {
@@ -209,9 +209,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
     }
 #endif
 
-    for (cl = rfbClientHead; cl; cl = cl->next)
-      numClientConnections++;
-    if (numClientConnections >= rfbMaxClientConnections) {
+    if (rfbClientCount() >= rfbMaxClientConnections) {
       rfbClientRec tempCl;
       rfbProtocolVersionMsg pv;
       const char *errMsg = "Connection limit reached";
@@ -236,7 +234,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
       return;
     }
 
-    rfbLog("Got connection from client %s\n",
+    rfbLog("Got connection from client (%s)\n",
            sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
     SetNotifyFd(sock, rfbSockNotify, X_NOTIFY_READ, NULL);
@@ -316,6 +314,10 @@ void rfbCloseSock(int sock)
 void rfbCloseClient(rfbClientPtr cl)
 {
   int sock = cl->sock;
+
+  /* Reuse the client number if initialization failed. */
+  if (cl->state < RFB_NORMAL)
+    rfbClientNumber--;
 
 #if USETLS
   if (cl->sslctx) {

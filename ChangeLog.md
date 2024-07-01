@@ -18,6 +18,21 @@ VirtualGL, although the performance will be better with VirtualGL.  Refer to
 the description of the `-drinode` option in the Xvnc man page for more details.
 
 
+3.1.2
+=====
+
+### Significant changes relative to 3.1.1:
+
+1. The TurboVNC Server now assigns an ordinal ID to every VNC viewer after the
+viewer successfully connects, and the viewer's ID is reported in the TurboVNC
+session log along with the IP address from which the viewer connection
+originated.  This makes it easier to distinguish log entries related to a
+specific viewer, especially when using SSH tunneling (which makes it appear as
+if all viewer connections originate from the loopback IP address.)  The
+TurboVNC Server now also logs the total number of simultaneously connected
+viewers.
+
+
 3.1.1
 =====
 

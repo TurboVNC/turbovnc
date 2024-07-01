@@ -263,7 +263,7 @@ typedef struct rfbClientRec {
 
   int sock;
   char *host;
-  char *login;
+  int id;
 
   int protocol_minor_ver;       /* RFB protocol minor version in use */
   Bool protocol_tightvnc;       /* TightVNC protocol extensions enabled */
@@ -981,6 +981,7 @@ extern Bool rfbGIIDebug;
 extern int rfbInterframe;
 extern int rfbMaxClipboard;
 extern Bool rfbVirtualTablet;
+extern int rfbClientNumber;
 
 /* Multithreading params specified on the command line or in the environment */
 extern Bool rfbMT;
@@ -992,6 +993,7 @@ extern char *rfbCaptureFile;
   rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1,  \
          (r).extents.x2 - (r).extents.x1, (r).extents.y2 - (r).extents.y1)
 
+extern int rfbClientCount(void);
 extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port, int id);
 extern void rfbClientConnectionGone(rfbClientPtr cl);
