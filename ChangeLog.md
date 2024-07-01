@@ -32,6 +32,10 @@ if all viewer connections originate from the loopback IP address.)  The
 TurboVNC Server now also logs the total number of simultaneously connected
 viewers.
 
+2. The TurboVNC Viewer now sends horizontal scroll wheel events to the VNC
+server.  (These events can be generated with horizontal scroll gestures on a
+trackpad or, with certain mice, by side-clicking the scroll wheel.)
+
 
 3.1.1
 =====
