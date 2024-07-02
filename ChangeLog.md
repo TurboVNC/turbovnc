@@ -43,14 +43,10 @@ until F10, left Alt, or Esc was pressed to dismiss the menu.
 running in a TurboVNC session attempted to display to a local Wayland session
 if one was active.
 
-8. The TurboVNC Server now assigns an ordinal ID to every VNC viewer after the
-viewer successfully connects, and the viewer's ID is reported in the TurboVNC
-session log along with the IP address from which the viewer connection
-originated.  This makes it easier to distinguish log entries related to a
-specific viewer, especially when using SSH tunneling (which makes it appear as
-if all viewer connections originate from the loopback IP address.)  The
-TurboVNC Server now also logs the total number of simultaneously connected
-viewers.
+8. The TurboVNC Server now assigns an ordinal ID to every VNC viewer when the
+viewer connects, and when possible, log entries related to a specific viewer
+are prefixed by the viewer's ID.  The TurboVNC Server now also logs the total
+number of simultaneously connected viewers.
 
 9. The TurboVNC Viewer now sends horizontal scroll wheel events to the VNC
 server.  (These events can be generated with horizontal scroll gestures on a

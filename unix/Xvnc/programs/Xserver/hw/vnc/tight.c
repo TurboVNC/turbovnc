@@ -4,8 +4,8 @@
  * Routines to implement Tight Encoding
  */
 
-/* Copyright (C) 2010-2012, 2014, 2017, 2022 D. R. Commander.
- *                                           All Rights Reserved.
+/* Copyright (C) 2010-2012, 2014, 2017, 2022, 2024 D. R. Commander.
+ *                                                 All Rights Reserved.
  * Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  * Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  * Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
@@ -1691,7 +1691,7 @@ static Bool SendJpegRect(threadparam *t, int x, int y, int w, int h,
   }
   if (!t->j) {
     if ((t->j = tjInitCompress()) == NULL) {
-      rfbLog("JPEG Error: %s\n", tjGetErrorStr());
+      RFBLOGID("JPEG Error: %s\n", tjGetErrorStr());
       return 0;
     }
   }
@@ -1727,7 +1727,7 @@ static Bool SendJpegRect(threadparam *t, int x, int y, int w, int h,
   if (tjCompress(t->j, srcbuf, w, pitch, h, ps,
                  (unsigned char *)t->tightAfterBuf, &size, subsamp, quality,
                  flags) == -1) {
-    rfbLog("JPEG Error: %s\n", tjGetErrorStr());
+    RFBLOGID("JPEG Error: %s\n", tjGetErrorStr());
     free(tmpbuf);  tmpbuf = NULL;
     return 0;
   }

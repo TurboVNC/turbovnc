@@ -199,7 +199,7 @@ static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
     UserList *p = userACL;
 
     if (p == NULL)
-      rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix Login authentication.\n");
+      RFBLOGID("WARNING: User ACL is empty.  No users will be allowed to log in with Unix Login authentication.\n");
 
     while (p != NULL) {
       if (!strcmp(p->name, userBuf))
@@ -208,8 +208,8 @@ static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
     }
 
     if (p == NULL) {
-      rfbLog("User '%s' is not in the ACL and has been denied access\n",
-             userBuf);
+      RFBLOGID("User '%s' is not in the ACL and has been denied access\n",
+               userBuf);
       rfbClientAuthFailed(cl, "User denied access");
       return;
     }
@@ -225,8 +225,8 @@ static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
                  strerror(errno));
 
     if (strcmp(pbuf.pw_name, userBuf)) {
-      rfbLog("User '%s' denied access (not the session owner)\n", userBuf);
-      rfbLog("  Enable user ACL to grant access to other users.\n");
+      RFBLOGID("User '%s' denied access (not the session owner)\n", userBuf);
+      RFBLOGID("  Enable user ACL to grant access to other users.\n");
       rfbClientAuthFailed(cl, "User denied access");
       return;
     }
@@ -234,9 +234,9 @@ static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
 
   if (rfbPAMAuthenticate(cl, pamServiceName, userBuf, pwdBuf, &emsg)) {
     rfbClientAuthSucceeded(cl, rfbAuthUnixLogin);
-    rfbLog("PAM authentication succeeded for user '%s'\n", userBuf);
+    RFBLOGID("PAM authentication succeeded for user '%s'\n", userBuf);
   } else {
-    rfbLog("PAM authentication failed for user '%s'\n", userBuf);
+    RFBLOGID("PAM authentication failed for user '%s'\n", userBuf);
     rfbClientAuthFailed(cl, (char *)emsg);
   }
 }
@@ -797,7 +797,7 @@ void rfbAuthProcessResponse(rfbClientPtr cl)
     }
   }
 
-  rfbLog("rfbAuthProcessResponse: authType assertion failed\n");
+  RFBLOGID("rfbAuthProcessResponse: authType assertion failed\n");
   rfbCloseClient(cl);
 }
 
@@ -815,7 +815,7 @@ void rfbAuthNewClient(rfbClientPtr cl)
   RFBSecTypeData *r;
 
   if (rfbAuthIsBlocked(cl->host)) {
-    rfbLog("Too many authentication failures - client rejected\n");
+    RFBLOGID("Too many authentication failures - client rejected\n");
     rfbClientConnFailed(cl, "Too many authentication failures.  Client temporarily blocked");
     return;
   }
@@ -833,7 +833,7 @@ void rfbAuthNewClient(rfbClientPtr cl)
   }
 
   if (*p == NULL) {
-    rfbLog("VNC authentication disabled - RFB 3.3 client rejected\n");
+    RFBLOGID("VNC authentication disabled - RFB 3.3 client rejected\n");
     rfbClientConnFailed(cl, "Your viewer cannot handle required security types");
     return;
   }
@@ -898,8 +898,8 @@ static void rfbSendSecurityTypeList(rfbClientPtr cl)
         continue;
 
       if (cl->reverseConnection && !strncmp(s->name, "x509", 4)) {
-        rfbLog("Security type \'%s\' disabled for reverse connections\n",
-               s->name);
+        RFBLOGID("Security type \'%s\' disabled for reverse connections\n",
+                 s->name);
         continue;
       }
 
@@ -939,7 +939,7 @@ static void rfbSendSecurityTypeList(rfbClientPtr cl)
     if (n > MAX_SECURITY_TYPES)
       FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES");
 
-    rfbLog("rfbSendSecurityTypeList: advertise sectype tight\n");
+    RFBLOGID("rfbSendSecurityTypeList: advertise sectype tight\n");
     cl->securityTypes[++n] = rfbSecTypeTight;
   }
 
@@ -986,7 +986,7 @@ static void rfbSendSecurityTypeList(rfbClientPtr cl)
     rfbCloseClient(cl);  \
     return;  \
   } else if (ret == 1) {  \
-    rfbLog("Deferring TLS handshake\n");  \
+    RFBLOGID("Deferring TLS handshake\n");  \
     cl->state = RFB_TLS_HANDSHAKE;  \
     return;  \
   }
@@ -1091,9 +1091,9 @@ void rfbVeNCryptAuthenticate(rfbClientPtr cl)
     if (chosenType == subTypes[i])
       break;
   }
-  rfbLog("Client requested VeNCrypt sub-type %d\n", chosenType);
+  RFBLOGID("Client requested VeNCrypt sub-type %d\n", chosenType);
   if (chosenType == 0 || chosenType == rfbSecTypeVeNCrypt || i >= count) {
-    rfbLog("Requested VeNCrypt sub-type not supported\n");
+    RFBLOGID("Requested VeNCrypt sub-type not supported\n");
     rfbCloseClient(cl);
     return;
   }
@@ -1166,7 +1166,7 @@ void rfbProcessClientSecurityType(rfbClientPtr cl)
   n = ReadExact(cl, (char *)&chosenType, 1);
   if (n <= 0) {
     if (n == 0)
-      rfbLog("rfbProcessClientSecurityType: client gone\n");
+      RFBLOGID("rfbProcessClientSecurityType: client gone\n");
     else
       rfbLogPerror("rfbProcessClientSecurityType: read");
     rfbCloseClient(cl);
@@ -1180,7 +1180,7 @@ void rfbProcessClientSecurityType(rfbClientPtr cl)
       break;
   }
   if (i > count) {
-    rfbLog("rfbProcessClientSecurityType: wrong security type requested\n");
+    RFBLOGID("rfbProcessClientSecurityType: wrong security type requested\n");
     rfbCloseClient(cl);
     return;
   }
@@ -1197,7 +1197,7 @@ void rfbProcessClientSecurityType(rfbClientPtr cl)
       break;
     case rfbSecTypeTight:
       /* The viewer supports TightVNC extensions */
-      rfbLog("Enabling TightVNC protocol extensions\n");
+      RFBLOGID("Enabling TightVNC protocol extensions\n");
       /* Switch to protocol 3.7t/3.8t */
       cl->protocol_tightvnc = TRUE;
       /* Advertise our tunneling capabilities */
@@ -1205,11 +1205,11 @@ void rfbProcessClientSecurityType(rfbClientPtr cl)
       break;
     case rfbSecTypeVeNCrypt:
       /* The viewer supports VeNCrypt extensions */
-      rfbLog("Enabling VeNCrypt protocol extensions\n");
+      RFBLOGID("Enabling VeNCrypt protocol extensions\n");
       rfbVeNCryptAuthenticate(cl);
       break;
     default:
-      rfbLog("rfbProcessClientSecurityType: unknown authentication scheme\n");
+      RFBLOGID("rfbProcessClientSecurityType: unknown authentication scheme\n");
       rfbCloseClient(cl);
       break;
   }
@@ -1250,7 +1250,7 @@ static void rfbSendTunnelingCaps(rfbClientPtr cl)
 void rfbProcessClientTunnelingType(rfbClientPtr cl)
 {
   /* If we were called, then something's really wrong. */
-  rfbLog("rfbProcessClientTunnelingType: not implemented\n");
+  RFBLOGID("rfbProcessClientTunnelingType: not implemented\n");
   rfbCloseClient(cl);
 }
 
@@ -1311,7 +1311,7 @@ static void rfbSendAuthCaps(rfbClientPtr cl)
       cl->authCaps[count] = c->authType;
       strncpy(tempstr, (char *)pcap->nameSignature, 8);
       tempstr[8] = 0;
-      rfbLog("Advertising Tight auth cap '%s'\n", tempstr);
+      RFBLOGID("Advertising Tight auth cap '%s'\n", tempstr);
       count++;
     }
   }
@@ -1358,7 +1358,7 @@ void rfbProcessClientAuthType(rfbClientPtr cl)
   n = ReadExact(cl, (char *)&auth_type, sizeof(auth_type));
   if (n <= 0) {
     if (n == 0)
-      rfbLog("rfbProcessClientAuthType: client gone\n");
+      RFBLOGID("rfbProcessClientAuthType: client gone\n");
     else
       rfbLogPerror("rfbProcessClientAuthType: read");
     rfbCloseClient(cl);
@@ -1372,7 +1372,7 @@ void rfbProcessClientAuthType(rfbClientPtr cl)
       break;
   }
   if (i >= cl->nAuthCaps) {
-    rfbLog("rfbProcessClientAuthType: wrong authentication type requested\n");
+    RFBLOGID("rfbProcessClientAuthType: wrong authentication type requested\n");
     rfbCloseClient(cl);
     return;
   }
@@ -1386,7 +1386,7 @@ void rfbProcessClientAuthType(rfbClientPtr cl)
     }
   }
 
-  rfbLog("rfbProcessClientAuthType: unknown authentication scheme\n");
+  RFBLOGID("rfbProcessClientAuthType: unknown authentication scheme\n");
   rfbCloseClient(cl);
 }
 
@@ -1428,14 +1428,12 @@ static Bool CheckResponse(rfbClientPtr cl, int numPasswords,
   memset(passwdViewOnly, 0, MAXPWLEN + 1);
 
   if (memcmp(encryptedChallenge1, response, CHALLENGESIZE) == 0) {
-    rfbLog("Full-control authentication enabled for Client %d (%s)\n", cl->id,
-           cl->host);
+    RFBLOGID("Full-control authentication enabled\n");
     ok = TRUE;
     cl->viewOnly = FALSE;
 
   } else if (memcmp(encryptedChallenge2, response, CHALLENGESIZE) == 0) {
-    rfbLog("View-only authentication enabled for Client %d (%s)\n", cl->id,
-           cl->host);
+    RFBLOGID("View-only authentication enabled\n");
     ok = TRUE;
     cl->viewOnly = TRUE;
   }
@@ -1503,8 +1501,8 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
                                              passwdFullControl,
                                              passwdViewOnly);
     if (numPasswords == 0) {
-      rfbLog("rfbVncAuthProcessResponse: could not get password from %s\n",
-             rfbAuthPasswdFile);
+      RFBLOGID("rfbVncAuthProcessResponse: could not get password from %s\n",
+               rfbAuthPasswdFile);
 
       if (nSecTypesEnabled == 1) {
         rfbClientAuthFailed(cl, "The server could not read the VNC password file");
@@ -1523,8 +1521,8 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
     if (!cl->reverseConnection && rfbNeverShared && !rfbDisconnect) {
       for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
         if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
-          rfbLog("-dontdisconnect: Not shared & existing client\n");
-          rfbLog("  refusing new client %d (%s)\n", cl->id, cl->host);
+          RFBLOGID("-dontdisconnect: Not shared & existing client\n");
+          RFBLOGID("  refusing new client\n");
           rfbClientAuthFailed(cl, "Authentication failed.  The server is already in use.");
           return;
         }
@@ -1532,8 +1530,7 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
     }
     rfbClientAuthSucceeded(cl, rfbAuthVNC);
   } else {
-    rfbLog("rfbVncAuthProcessResponse: authentication failed from Client %d (%s)\n",
-           cl->id, cl->host);
+    RFBLOGID("rfbVncAuthProcessResponse: authentication failed\n");
     if (rfbAuthConsiderBlocking(cl->host))
       rfbClientAuthFailed(cl, "Authentication failed.  Client temporarily blocked");
     else

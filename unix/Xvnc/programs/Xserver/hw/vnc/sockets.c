@@ -179,7 +179,7 @@ static void rfbSockNotify(int fd, int ready, void *data)
     if (!hosts_ctl("Xvnc", STRING_UNKNOWN,
                    sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN),
                    STRING_UNKNOWN)) {
-      rfbLog("Rejected connection from client %s\n",
+      rfbLog("Rejected connection from %s\n",
              sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN))
       close(sock);
       return;
@@ -210,9 +210,6 @@ static void rfbSockNotify(int fd, int ready, void *data)
       close(sock);
       return;
     }
-
-    rfbLog("Got connection from client (%s)\n",
-           sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
     SetNotifyFd(sock, rfbSockNotify, X_NOTIFY_READ, NULL);
 
@@ -291,10 +288,6 @@ void rfbCloseSock(int sock)
 void rfbCloseClient(rfbClientPtr cl)
 {
   int sock = cl->sock;
-
-  /* Reuse the client number if initialization failed. */
-  if (cl->state < RFB_NORMAL)
-    rfbClientNumber--;
 
 #if USETLS
   if (cl->sslctx) {
@@ -526,7 +519,7 @@ int WriteExact(rfbClientPtr cl, char *buf, int len)
   if (cl->wsctx) {
     char *tmp = NULL;
     if ((len = webSocketsEncode(cl, buf, len, &tmp)) < 0) {
-      rfbLog("WriteExact: WebSockets encode error\n");
+      RFBLOGID("WriteExact: WebSockets encode error\n");
       return -1;
     }
     buf = tmp;
