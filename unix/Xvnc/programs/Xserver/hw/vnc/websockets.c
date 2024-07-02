@@ -6,7 +6,7 @@
  *   http://www.whatwg.org/specs/web-socket-protocol/
  */
 
-/* Copyright (C) 2018-2020 D. R. Commander
+/* Copyright (C) 2018-2020, 2024 D. R. Commander
  * Copyright (C) 2010 Joel Martin
  *
  * This is free software; you can redistribute it and/or modify
@@ -108,29 +108,30 @@ Bool webSocketsCheck(rfbClientPtr cl)
 
   ret = PeekExactTimeout(cl, bbuf, 4, WEBSOCKETS_CLIENT_CONNECT_WAIT_MS);
   if ((ret < 0) && (errno == ETIMEDOUT)) {
-    rfbLog("Normal socket connection\n");
+    RFBLOGID("Normal socket connection\n");
     return TRUE;
   } else if (ret <= 0) {
-    rfbLog("webSocketsHandshake: unknown connection error\n");
+    RFBLOGID("webSocketsHandshake: unknown connection error\n");
     return FALSE;
   }
 
   if (strncmp(bbuf, "RFB ", 4) == 0) {
-    rfbLog("Normal socket connection\n");
+    RFBLOGID("Normal socket connection\n");
     return TRUE;
 #ifdef USETLS
   } else if (strncmp(bbuf, "\x16", 1) == 0 || strncmp(bbuf, "\x80", 1) == 0) {
     rfbSslCtx *ctx = NULL;
 
-    rfbLog("Got TLS/SSL WebSockets connection\n");
+    RFBLOGID("Got TLS/SSL WebSockets connection\n");
     if (!(ctx = rfbssl_init(cl, FALSE))) {
-      rfbLog("webSocketsHandshake: rfbssl_init failed: %s\n", rfbssl_geterr());
+      RFBLOGID("webSocketsHandshake: rfbssl_init failed: %s\n",
+               rfbssl_geterr());
       return FALSE;
     }
     cl->sslctx = ctx;
     if ((ret = rfbssl_accept(cl)) < 0) {
-      rfbLog("webSocketsHandshake: rfbssl_accept failed: %s\n",
-             rfbssl_geterr());
+      RFBLOGID("webSocketsHandshake: rfbssl_accept failed: %s\n",
+               rfbssl_geterr());
       return FALSE;
     }
     ret = PeekExactTimeout(cl, bbuf, 4, WEBSOCKETS_CLIENT_CONNECT_WAIT_MS);
@@ -141,11 +142,11 @@ Bool webSocketsCheck(rfbClientPtr cl)
   }
 
   if (strncmp(bbuf, "GET ", 4) != 0) {
-    rfbLog("webSocketsHandshake: invalid client header\n");
+    RFBLOGID("webSocketsHandshake: invalid client header\n");
     return FALSE;
   }
 
-  rfbLog("Got '%s' WebSockets handshake\n", scheme);
+  RFBLOGID("Got '%s' WebSockets handshake\n", scheme);
 
   if (!webSocketsHandshake(cl, scheme))
     return FALSE;
@@ -176,7 +177,7 @@ static Bool webSocketsHandshake(rfbClientPtr cl, char *scheme)
       if ((n < 0) && (errno == ETIMEDOUT))
         break;
       if (n == 0)
-        rfbLog("webSocketsHandshake: client gone\n");
+        RFBLOGID("webSocketsHandshake: client gone\n");
       else
         rfbLogPerror("webSocketsHandshake: read");
       free(response);
@@ -194,14 +195,14 @@ static Bool webSocketsHandshake(rfbClientPtr cl, char *scheme)
             if ((n < 0) && (errno == ETIMEDOUT))
               break;
             if (n == 0)
-              rfbLog("webSocketsHandshake: client gone\n");
+              RFBLOGID("webSocketsHandshake: client gone\n");
             else
               rfbLogPerror("webSocketsHandshake: read");
             free(response);
             free(buf);
             return FALSE;
           }
-          rfbLog("Got key3\n");
+          RFBLOGID("Got key3\n");
           len += 8;
         } else {
           buf[len] = '\0';
@@ -232,7 +233,7 @@ static Bool webSocketsHandshake(rfbClientPtr cl, char *scheme)
                               min(llen, 24))) == 0) {
         protocol = line + 24;
         buf[len - 2] = '\0';
-        rfbLog("Got protocol: %s\n", protocol);
+        RFBLOGID("Got protocol: %s\n", protocol);
       } else if ((strncasecmp("sec-websocket-origin: ", line,
                               min(llen, 22))) == 0) {
         sec_ws_origin = line + 22;
@@ -254,25 +255,25 @@ static Bool webSocketsHandshake(rfbClientPtr cl, char *scheme)
   /* older hixie handshake, this could be removed if
    * a final standard is established -- removed now */
   if (!sec_ws_version) {
-    rfbLog("Hixie no longer supported\n");
+    RFBLOGID("Hixie no longer supported\n");
     free(response);
     free(buf);
     return FALSE;
   }
 
   if (!(path && host && (origin || sec_ws_origin))) {
-    rfbLog("webSocketsHandshake: incomplete client handshake\n");
+    RFBLOGID("webSocketsHandshake: incomplete client handshake\n");
     free(response);
     free(buf);
     return FALSE;
   }
 
   if ((protocol) && (strstr(protocol, "base64"))) {
-    rfbLog("  - webSocketsHandshake: using base64 encoding\n");
+    RFBLOGID("  - webSocketsHandshake: using base64 encoding\n");
     base64 = TRUE;
     protocol = "base64";
   } else {
-    rfbLog("  - webSocketsHandshake: using binary/raw encoding\n");
+    RFBLOGID("  - webSocketsHandshake: using binary/raw encoding\n");
     if ((protocol) && (strstr(protocol, "binary")))
       protocol = "binary";
     else
@@ -283,7 +284,7 @@ static Bool webSocketsHandshake(rfbClientPtr cl, char *scheme)
    * Generate the WebSockets server response based on the the headers sent
    * by the client.
    */
-  rfbLog("  - WebSockets client version hybi-%02d\n", sec_ws_version);
+  RFBLOGID("  - WebSockets client version hybi-%02d\n", sec_ws_version);
   webSocketsGenSha1Key(accept, sizeof(accept), sec_ws_key);
 
   if (strlen(protocol) > 0)
@@ -294,12 +295,12 @@ static Bool webSocketsHandshake(rfbClientPtr cl, char *scheme)
                    SERVER_HANDSHAKE_HYBI_NO_PROTOCOL, accept);
 
   if (WriteExact(cl, response, len) < 0) {
-    rfbLog("webSocketsHandshake: failed sending WebSockets response\n");
+    RFBLOGID("webSocketsHandshake: failed sending WebSockets response\n");
     free(response);
     free(buf);
     return FALSE;
   }
-  /* rfbLog("webSocketsHandshake: %s\n", response); */
+  /* RFBLOGID("webSocketsHandshake: %s\n", response); */
   free(response);
   free(buf);
 
@@ -390,10 +391,10 @@ static int webSocketsEncodeHybi(rfbClientPtr cl, const char *src, int len,
     if (-1 == (ret = rfbBase64NtoP((unsigned char *)src, len,
                                    wsctx->codeBufEncode + sz,
                                    wsctx->codeBufEncodeLen - sz))) {
-      rfbLog("%s: Base 64 encode failed\n", __func__);
+      RFBLOGID("%s: Base 64 encode failed\n", __func__);
     } else {
       if (ret != blen)
-        rfbLog("%s: Base 64 encode; something weird happened\n", __func__);
+        RFBLOGID("%s: Base 64 encode; something weird happened\n", __func__);
       ret += sz;
     }
   } else {

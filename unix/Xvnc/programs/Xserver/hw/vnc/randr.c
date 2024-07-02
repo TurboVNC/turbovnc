@@ -1,4 +1,4 @@
-/* Copyright (C) 2013-2019, 2021 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2013-2019, 2021, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright 2012-2015 Pierre Ossman for Cendio AB
  *
  * This is free software; you can redistribute it and/or modify
@@ -551,13 +551,13 @@ int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
   rfbClientPtr cl2;
 
   if (rfbAuthDisableRemoteResize) {
-    rfbLog("WARNING: Remote desktop resizing disabled per system policy.\n");
+    RFBLOGID("WARNING: Remote desktop resizing disabled per system policy.\n");
     return rfbEDSResultProhibited;
   }
 
   for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
     if (!cl2->enableDesktopSize && !cl2->enableExtDesktopSize) {
-      rfbLog("ERROR: Not resizing desktop because one or more clients doesn't support it.\n");
+      RFBLOGID("ERROR: Not resizing desktop because one or more clients doesn't support it.\n");
       return rfbEDSResultProhibited;
     }
   }
@@ -565,19 +565,19 @@ int ResizeDesktop(ScreenPtr pScreen, rfbClientPtr cl, int w, int h,
   /* First check that we don't have any active clone modes.  That's just
      too messy to deal with. */
   if (vncHasOutputClones(pScreen)) {
-    rfbLog("Desktop resize ERROR: Cannot change screen layout when clone mode is active\n");
+    RFBLOGID("Desktop resize ERROR: Cannot change screen layout when clone mode is active\n");
     return rfbEDSResultInvalid;
   }
 
   if (w > rfbMaxWidth || h > rfbMaxHeight) {
     w = min(w, rfbMaxWidth);
     h = min(h, rfbMaxHeight);
-    rfbLog("NOTICE: desktop size clamped to %dx%d per system policy\n", w, h);
+    RFBLOGID("NOTICE: desktop size clamped to %dx%d per system policy\n", w, h);
   }
   rfbClipScreens(clientScreens, w, h);
   if (xorg_list_is_empty(clientScreens)) {
-    rfbLog("Desktop resize ERROR: All screens are outside of the framebuffer (%dx%d)\n",
-           w, h);
+    RFBLOGID("Desktop resize ERROR: All screens are outside of the framebuffer (%dx%d)\n",
+             w, h);
     return rfbEDSResultInvalid;
   }
 

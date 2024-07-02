@@ -2,7 +2,7 @@
  * stats.c
  */
 
-/* Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2014, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -61,11 +61,11 @@ void rfbPrintStats(rfbClientPtr cl)
   int totalRectanglesSent = 0;
   long long totalBytesSent = 0;
 
-  rfbLog("Statistics:\n");
+  RFBLOGID("Statistics:\n");
 
   if ((cl->rfbKeyEventsRcvd != 0) || (cl->rfbPointerEventsRcvd != 0))
-    rfbLog("  key events received %d, pointer events %d\n",
-           cl->rfbKeyEventsRcvd, cl->rfbPointerEventsRcvd);
+    RFBLOGID("  key events received %d, pointer events %d\n",
+             cl->rfbKeyEventsRcvd, cl->rfbPointerEventsRcvd);
 
   for (i = 0; i < MAX_ENCODINGS; i++) {
     totalRectanglesSent += cl->rfbRectanglesSent[i];
@@ -78,34 +78,34 @@ void rfbPrintStats(rfbClientPtr cl)
                      cl->rfbCursorPosBytesSent +
                      cl->rfbLastRectBytesSent);
 
-  rfbLog("  framebuffer updates %d, rectangles %d, bytes %d\n",
-         cl->rfbFramebufferUpdateMessagesSent, totalRectanglesSent,
-         totalBytesSent);
+  RFBLOGID("  framebuffer updates %d, rectangles %d, bytes %d\n",
+           cl->rfbFramebufferUpdateMessagesSent, totalRectanglesSent,
+           totalBytesSent);
 
   if (cl->rfbLastRectMarkersSent != 0)
-    rfbLog("    LastRect markers %d, bytes %d\n", cl->rfbLastRectMarkersSent,
-           cl->rfbLastRectBytesSent);
+    RFBLOGID("    LastRect markers %d, bytes %d\n", cl->rfbLastRectMarkersSent,
+             cl->rfbLastRectBytesSent);
 
   if (cl->rfbCursorShapeUpdatesSent != 0)
-    rfbLog("    cursor shape updates %d, bytes %d\n",
-           cl->rfbCursorShapeUpdatesSent, cl->rfbCursorShapeBytesSent);
+    RFBLOGID("    cursor shape updates %d, bytes %d\n",
+             cl->rfbCursorShapeUpdatesSent, cl->rfbCursorShapeBytesSent);
 
   if (cl->rfbCursorPosUpdatesSent != 0)
-    rfbLog("    cursor position updates %d, bytes %d\n",
-           cl->rfbCursorPosUpdatesSent, cl->rfbCursorPosBytesSent);
+    RFBLOGID("    cursor position updates %d, bytes %d\n",
+             cl->rfbCursorPosUpdatesSent, cl->rfbCursorPosBytesSent);
 
   for (i = 0; i < MAX_ENCODINGS; i++) {
     if (cl->rfbRectanglesSent[i] != 0)
-      rfbLog("    %s rectangles %d, bytes %d\n", encNames[i],
-             cl->rfbRectanglesSent[i], cl->rfbBytesSent[i]);
+      RFBLOGID("    %s rectangles %d, bytes %d\n", encNames[i],
+               cl->rfbRectanglesSent[i], cl->rfbBytesSent[i]);
   }
 
   if ((totalBytesSent - cl->rfbBytesSent[rfbEncodingCopyRect]) != 0) {
-    rfbLog("  raw equivalent %f Mbytes, compression ratio %f\n",
-           (double)cl->rfbRawBytesEquivalent / 1000000.,
-           (double)cl->rfbRawBytesEquivalent /
-           (double)(totalBytesSent - cl->rfbBytesSent[rfbEncodingCopyRect] -
-                    cl->rfbCursorShapeBytesSent - cl->rfbCursorPosBytesSent -
-                    cl->rfbLastRectBytesSent));
+    RFBLOGID("  raw equivalent %f Mbytes, compression ratio %f\n",
+             (double)cl->rfbRawBytesEquivalent / 1000000.,
+             (double)cl->rfbRawBytesEquivalent /
+             (double)(totalBytesSent - cl->rfbBytesSent[rfbEncodingCopyRect] -
+                      cl->rfbCursorShapeBytesSent - cl->rfbCursorPosBytesSent -
+                      cl->rfbLastRectBytesSent));
   }
 }

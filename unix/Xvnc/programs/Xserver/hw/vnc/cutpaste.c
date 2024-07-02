@@ -2,7 +2,8 @@
  * cutpaste.c - routines to deal with cut & paste buffers / selection.
  */
 
-/* Copyright (C) 2014, 2017-2019, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2014, 2017-2019, 2022, 2024 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright 2016-2017, 2019-2021 Pierre Ossman for Cendio AB
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -141,11 +142,11 @@ static Bool vncWeAreOwner(Atom selection);
 
 #define ZLIB_ERROR(zlibStream, zlibErr, zlibFunc) {  \
   if (zlibStream.msg)  \
-    rfbLog("%s (%d): zlib %s error (%s)\n", __FUNCTION__, __LINE__,  \
-           #zlibFunc, zlibStream.msg);  \
+    RFBLOGID("%s (%d): zlib %s error (%s)\n", __FUNCTION__, __LINE__,  \
+             #zlibFunc, zlibStream.msg);  \
   else  \
-    rfbLog("%s (%d): zlib %s error (%d)\n", __FUNCTION__, __LINE__,  \
-           #zlibFunc, zlibErr);  \
+    RFBLOGID("%s (%d): zlib %s error (%d)\n", __FUNCTION__, __LINE__,  \
+             #zlibFunc, zlibErr);  \
 }
 
 
@@ -442,28 +443,28 @@ static void HandleClipboardCaps(rfbClientPtr cl, CARD32 flags, CARD32 *lengths)
 {
   int i, num;
 
-  rfbLog("Client clipboard capabilities:\n");
+  RFBLOGID("Client clipboard capabilities:\n");
   num = 0;
   for (i = 0; i < 16; i++) {
     if (flags & (1 << i)) {
       switch (1 << i) {
         case rfbExtClipUTF8:
-          rfbLog("- Plain text (limit = %d bytes)\n", lengths[num]);
+          RFBLOGID("- Plain text (limit = %d bytes)\n", lengths[num]);
           break;
         case rfbExtClipRTF:
-          rfbLog("- Rich text (limit = %d bytes)\n", lengths[num]);
+          RFBLOGID("- Rich text (limit = %d bytes)\n", lengths[num]);
           break;
         case rfbExtClipHTML:
-          rfbLog("- HTML (limit = %d bytes)\n", lengths[num]);
+          RFBLOGID("- HTML (limit = %d bytes)\n", lengths[num]);
           break;
         case rfbExtClipDIB:
-          rfbLog("- Images (limit = %d bytes)\n", lengths[num]);
+          RFBLOGID("- Images (limit = %d bytes)\n", lengths[num]);
           break;
         case rfbExtClipFiles:
-          rfbLog("- Files (limit = %d bytes)\n", lengths[num]);
+          RFBLOGID("- Files (limit = %d bytes)\n", lengths[num]);
           break;
         default:
-          rfbLog("- Unknown format 0x%x\n", 1 << i);
+          RFBLOGID("- Unknown format 0x%x\n", 1 << i);
           continue;
       }
       num++;
@@ -675,7 +676,7 @@ void rfbReadExtClipboard(rfbClientPtr cl, int len)
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
   if (len < 4) {
-    rfbLog("ERROR: Malformed Extended Clipboard message\n");
+    RFBLOGID("ERROR: Malformed Extended Clipboard message\n");
     goto bailout;
   }
 
@@ -690,8 +691,8 @@ void rfbReadExtClipboard(rfbClientPtr cl, int len)
      clipboard update is larger than rfbMaxClipboard bytes, then the
      uncompressed clipboard update will be larger still. */
   if (len > rfbMaxClipboard) {
-    rfbLog("Ignoring %d-byte Extended Clipboard message (limit = %d bytes)\n",
-           len, rfbMaxClipboard);
+    RFBLOGID("Ignoring %d-byte Extended Clipboard message (limit = %d bytes)\n",
+             len, rfbMaxClipboard);
     SKIP_OR_CLOSE(len, goto bailout);
     return;
   }
@@ -705,7 +706,7 @@ void rfbReadExtClipboard(rfbClientPtr cl, int len)
     }
 
     if (len < 4 * num) {
-      rfbLog("ERROR: Malformed Extended Clipboard message\n");
+      RFBLOGID("ERROR: Malformed Extended Clipboard message\n");
       goto bailout;
     }
 
@@ -760,8 +761,8 @@ void rfbReadExtClipboard(rfbClientPtr cl, int len)
          be contained in the same clipboard update, but we don't currently
          support those formats anyhow. */
       if (lengths[num] > rfbMaxClipboard) {
-        rfbLog("Truncating %d-byte incoming clipboard update to %d bytes.\n",
-               lengths[num], rfbMaxClipboard);
+        RFBLOGID("Truncating %d-byte incoming clipboard update to %d bytes.\n",
+                 lengths[num], rfbMaxClipboard);
         ignoredBytes = lengths[num] - rfbMaxClipboard;
         lengths[num] = rfbMaxClipboard;
       }
@@ -800,7 +801,7 @@ void rfbReadExtClipboard(rfbClientPtr cl, int len)
         HandleClipboardNotify(cl, flags);
         break;
       default:
-        rfbLog("ERROR: Invalid Extended Clipboard action\n");
+        RFBLOGID("ERROR: Invalid Extended Clipboard action\n");
     }
   }
   return;
@@ -1411,8 +1412,8 @@ void vncHandleSelection(Atom selection, Atom target, Atom property,
       return;
 
     if (len > rfbMaxClipboard) {
-      rfbLog("Truncating %d-byte outgoing clipboard update to %d bytes.\n", len,
-             rfbMaxClipboard);
+      rfbLog("Truncating %d-byte outgoing clipboard update to %d bytes.\n",
+             len, rfbMaxClipboard);
       len = rfbMaxClipboard;
     }
 
@@ -1431,8 +1432,8 @@ void vncHandleSelection(Atom selection, Atom target, Atom property,
       return;
 
     if (len > rfbMaxClipboard) {
-      rfbLog("Truncating %d-byte outgoing clipboard update to %d bytes.\n", len,
-             rfbMaxClipboard);
+      rfbLog("Truncating %d-byte outgoing clipboard update to %d bytes.\n",
+             len, rfbMaxClipboard);
       len = rfbMaxClipboard;
     }
 
