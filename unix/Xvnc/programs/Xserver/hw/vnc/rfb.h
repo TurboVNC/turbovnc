@@ -806,7 +806,7 @@ extern unsigned char ptrAcceleration;
 
 extern void PtrDeviceOn(DeviceIntPtr);
 extern void PtrDeviceControl(DevicePtr, PtrCtrl *);
-extern void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl);
+extern void PtrAddEvent(int buttonMask, int x, int y);
 extern void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons);
 
 extern void KbdDeviceInit(DeviceIntPtr);

@@ -1280,7 +1280,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         if (pointerOwner != cl)
           pointerOwner = NULL;
 
-        PtrAddEvent(msg.pe.buttonMask, cl->cursorX, cl->cursorY, cl);
+        PtrAddEvent(msg.pe.buttonMask, cl->cursorX, cl->cursorY);
 
         pointerOwner = cl;
       }

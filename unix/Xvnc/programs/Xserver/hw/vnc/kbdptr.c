@@ -460,7 +460,7 @@ void KeyEvent(CARD32 keysym, Bool down)
 static int cursorPosX = -1, cursorPosY = -1;
 
 
-void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl)
+void PtrAddEvent(int buttonMask, int x, int y)
 {
   int i;
   int valuators[2];
