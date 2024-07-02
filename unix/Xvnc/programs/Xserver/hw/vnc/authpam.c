@@ -129,39 +129,39 @@ Bool rfbPAMAuthenticate(rfbClientPtr cl, const char *svc, const char *user,
   pamConv.conv = conv;
   pamConv.appdata_ptr = 0;
   if ((r = pam_start(svc, user, &pamConv, &pamHandle)) != PAM_SUCCESS) {
-    rfbLog("PAMAuthenticate: pam_start: %s\n", pam_strerror(pamHandle, r));
+    RFBLOGID("PAMAuthenticate: pam_start: %s\n", pam_strerror(pamHandle, r));
     return FALSE;
   }
 
   if ((r = pam_set_item(pamHandle, PAM_RHOST, cl->host)) != PAM_SUCCESS) {
-    rfbLog("PAMAuthenticate: pam_set_item PAM_RHOST: %s\n",
-           pam_strerror(pamHandle, r));
+    RFBLOGID("PAMAuthenticate: pam_set_item PAM_RHOST: %s\n",
+             pam_strerror(pamHandle, r));
     return FALSE;
   }
 
   authStatus = pam_authenticate(pamHandle, PAM_DISALLOW_NULL_AUTHTOK);
   if (authStatus != PAM_SUCCESS) {
-    rfbLog("PAMAuthenticate: pam_authenticate: %s\n",
-           pam_strerror(pamHandle, authStatus));
+    RFBLOGID("PAMAuthenticate: pam_authenticate: %s\n",
+             pam_strerror(pamHandle, authStatus));
   } else {
     /* Authentication was successful.  Validate the user's account status. */
     authStatus = pam_acct_mgmt(pamHandle, PAM_DISALLOW_NULL_AUTHTOK);
     if (authStatus != PAM_SUCCESS) {
-      rfbLog("PAMAuthenticate: pam_acct_mgmt: %s\n",
-             pam_strerror(pamHandle, authStatus));
+      RFBLOGID("PAMAuthenticate: pam_acct_mgmt: %s\n",
+               pam_strerror(pamHandle, authStatus));
     } else if (pamSession) {
       if ((authStatus = pam_open_session(pamHandle, 0)) != PAM_SUCCESS) {
-        rfbLog("PAMAuthenticate: pam_open_session: %s\n",
-               pam_strerror(pamHandle, authStatus));
+        RFBLOGID("PAMAuthenticate: pam_open_session: %s\n",
+                 pam_strerror(pamHandle, authStatus));
       } else {
-        rfbLog("Opened PAM session for Client %d (%s)\n", cl->id, cl->host);
+        RFBLOGID("Opened PAM session\n");
       }
     }
   }
 
   if (authStatus != PAM_SUCCESS || !pamSession) {
     if ((r = pam_end(pamHandle, authStatus)) != PAM_SUCCESS)
-      rfbLog("PAMAuthenticate: pam_end: %s\n", pam_strerror(pamHandle, r));
+      RFBLOGID("PAMAuthenticate: pam_end: %s\n", pam_strerror(pamHandle, r));
   } else
     cl->pamHandle = pamHandle;
 
@@ -207,13 +207,13 @@ void rfbPAMEnd(rfbClientPtr cl)
 
   if (cl->pamHandle) {
     if ((r = pam_close_session(cl->pamHandle, 0)) != PAM_SUCCESS)
-      rfbLog("PAMEnd: pam_close_session: %s\n",
-             pam_strerror(cl->pamHandle, r));
+      RFBLOGID("PAMEnd: pam_close_session: %s\n",
+               pam_strerror(cl->pamHandle, r));
 
     if ((r = pam_end(cl->pamHandle, PAM_SUCCESS)) != PAM_SUCCESS)
-      rfbLog("PAMEnd: pam_end: %s\n", pam_strerror(cl->pamHandle, r));
+      RFBLOGID("PAMEnd: pam_end: %s\n", pam_strerror(cl->pamHandle, r));
 
-    rfbLog("Closed PAM session for Client %d (%s)\n", cl->id, cl->host);
+    RFBLOGID("Closed PAM session\n");
     cl->pamHandle = 0;
   }
 }

@@ -2,7 +2,7 @@
  * flowcontrol.c - implement RFB flow control extensions
  */
 
-/* Copyright (C) 2012, 2014, 2017-2018, 2021-2023 D. R. Commander.
+/* Copyright (C) 2012, 2014, 2017-2018, 2021-2024 D. R. Commander.
  *                                                All Rights Reserved.
  * Copyright (C) 2018 Peter Åstrand for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
@@ -143,8 +143,8 @@ void rfbUpdatePosition(rfbClientPtr cl, unsigned pos)
   if (msBetween(&cl->lastSent, &now) > max(cl->baseRTT * 2, 100)) {
 
 #ifdef CONGESTION_DEBUG
-    rfbLog("Connection idle for %d ms.  Resetting congestion control.\n",
-           msBetween(&cl->lastSent, &now));
+    RFBLOGID("Connection idle for %d ms.  Resetting congestion control.\n",
+             msBetween(&cl->lastSent, &now));
 #endif
 
     /* Close congestion window and redo wire latency measurement. */
@@ -487,7 +487,7 @@ static void UpdateCongestion(rfbClientPtr cl)
        means packet loss.  Adjust the window and go directly to congestion
        avoidance. */
 #ifdef CONGESTION_DEBUG
-    rfbLog("Latency spike!  Backing off...\n");
+    RFBLOGID("Latency spike!  Backing off...\n");
 #endif
     cl->congWindow = cl->congWindow * cl->baseRTT / cl->minRTT;
     cl->inSlowStart = FALSE;
@@ -538,18 +538,18 @@ static void UpdateCongestion(rfbClientPtr cl)
     cl->congWindow = MAXIMUM_WINDOW;
 
 #ifdef CONGESTION_DEBUG
-  rfbLog("RTT: %d/%d ms (%d ms), Window: %d KB, Offset: %d KB, Bandwidth: %g Mbps%s\n",
-         cl->minRTT, cl->minCongestedRTT, cl->baseRTT, cl->congWindow / 1024,
-         cl->sockOffset / 1024, cl->congWindow * 8.0 / cl->baseRTT / 1000.0,
-         cl->inSlowStart ? " (slow start)" : "");
+  RFBLOGID("RTT: %d/%d ms (%d ms), Window: %d KB, Offset: %d KB, Bandwidth: %g Mbps%s\n",
+           cl->minRTT, cl->minCongestedRTT, cl->baseRTT, cl->congWindow / 1024,
+           cl->sockOffset / 1024, cl->congWindow * 8.0 / cl->baseRTT / 1000.0,
+           cl->inSlowStart ? " (slow start)" : "");
 
 #ifdef TCP_INFO
   tcp_info_length = sizeof(tcp_info);
   if (getsockopt(cl->sock, SOL_TCP, TCP_INFO, (void *)&tcp_info,
                  &tcp_info_length) == 0) {
-    rfbLog("Socket: RTT: %d ms (+/- %d ms) Window %d KB\n",
-           tcp_info.tcpi_rtt / 1000, tcp_info.tcpi_rttvar / 1000,
-           tcp_info.tcpi_snd_mss * tcp_info.tcpi_snd_cwnd / 1024);
+    RFBLOGID("Socket: RTT: %d ms (+/- %d ms) Window %d KB\n",
+             tcp_info.tcpi_rtt / 1000, tcp_info.tcpi_rttvar / 1000,
+             tcp_info.tcpi_snd_mss * tcp_info.tcpi_snd_cwnd / 1024);
   }
 #endif
 
@@ -570,15 +570,15 @@ Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
   rfbFenceMsg f;
 
   if (!cl->enableFence) {
-    rfbLog("ERROR in rfbSendFence: Client does not support fence extension\n");
+    RFBLOGID("ERROR in rfbSendFence: Client does not support fence extension\n");
     return FALSE;
   }
   if (len > 64) {
-    rfbLog("ERROR in rfbSendFence: Fence payload is too large\n");
+    RFBLOGID("ERROR in rfbSendFence: Fence payload is too large\n");
     return FALSE;
   }
   if ((flags & ~rfbFenceFlagsSupported) != 0) {
-    rfbLog("ERROR in rfbSendFence: Unknown fence flags\n");
+    RFBLOGID("ERROR in rfbSendFence: Unknown fence flags\n");
     return FALSE;
   }
 
@@ -625,7 +625,7 @@ void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len, const char *data)
   }
 
   if (len < 1)
-    rfbLog("Fence of unusual size received\n");
+    RFBLOGID("Fence of unusual size received\n");
 
   type = data[0];
 
@@ -639,7 +639,7 @@ void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len, const char *data)
       break;
 
     default:
-      rfbLog("Fence of unusual size received\n");
+      RFBLOGID("Fence of unusual size received\n");
   }
 }
 
@@ -653,7 +653,7 @@ Bool rfbSendEndOfCU(rfbClientPtr cl)
   CARD8 type = rfbEndOfContinuousUpdates;
 
   if (!cl->enableCU) {
-    rfbLog("ERROR in rfbSendEndOfCU: Client does not support Continuous Updates\n");
+    RFBLOGID("ERROR in rfbSendEndOfCU: Client does not support Continuous Updates\n");
     return FALSE;
   }
 

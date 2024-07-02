@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include "rfb.h"
 
-static void PrintPixelFormat(rfbPixelFormat *pf);
+static void PrintPixelFormat(rfbClientPtr cl);
 static Bool rfbSetClientColourMapBGR233(rfbClientPtr cl);
 
 Bool rfbEconomicTranslate = FALSE;
@@ -178,8 +178,8 @@ void rfbTranslateNone(char *table, rfbPixelFormat *in, rfbPixelFormat *out,
 
 Bool rfbSetTranslateFunction(rfbClientPtr cl)
 {
-  rfbLog("Pixel format for Client %d (%s):\n", cl->id, cl->host);
-  PrintPixelFormat(&cl->format);
+  RFBLOGID("Pixel format:\n");
+  PrintPixelFormat(cl);
 
   /*
    * Check that bits per pixel values are valid
@@ -188,7 +188,7 @@ Bool rfbSetTranslateFunction(rfbClientPtr cl)
   if ((rfbServerFormat.bitsPerPixel != 8) &&
       (rfbServerFormat.bitsPerPixel != 16) &&
       (rfbServerFormat.bitsPerPixel != 32)) {
-    rfbLog("rfbSetTranslateFunction: server bits per pixel not 8, 16 or 32\n");
+    RFBLOGID("rfbSetTranslateFunction: server bits per pixel not 8, 16 or 32\n");
     rfbCloseClient(cl);
     return FALSE;
   }
@@ -196,23 +196,23 @@ Bool rfbSetTranslateFunction(rfbClientPtr cl)
   if ((cl->format.bitsPerPixel != 8) &&
       (cl->format.bitsPerPixel != 16) &&
       (cl->format.bitsPerPixel != 32)) {
-    rfbLog("rfbSetTranslateFunction: client bits per pixel not 8, 16 or 32\n");
+    RFBLOGID("rfbSetTranslateFunction: client bits per pixel not 8, 16 or 32\n");
     rfbCloseClient(cl);
     return FALSE;
   }
 
   if (!rfbServerFormat.trueColour && (rfbServerFormat.bitsPerPixel != 8)) {
-    rfbLog("rfbSetTranslateFunction: server has colour map "
-           "but %d-bit - can only cope with 8-bit colour maps\n",
-           rfbServerFormat.bitsPerPixel);
+    RFBLOGID("rfbSetTranslateFunction: server has colour map "
+             "but %d-bit - can only cope with 8-bit colour maps\n",
+             rfbServerFormat.bitsPerPixel);
     rfbCloseClient(cl);
     return FALSE;
   }
 
   if (!cl->format.trueColour && (cl->format.bitsPerPixel != 8)) {
-    rfbLog("rfbSetTranslateFunction: client has colour map "
-           "but %d-bit - can only cope with 8-bit colour maps\n",
-           cl->format.bitsPerPixel);
+    RFBLOGID("rfbSetTranslateFunction: client has colour map "
+             "but %d-bit - can only cope with 8-bit colour maps\n",
+             cl->format.bitsPerPixel);
     rfbCloseClient(cl);
     return FALSE;
   }
@@ -229,8 +229,8 @@ Bool rfbSetTranslateFunction(rfbClientPtr cl)
 
       /* colour map -> colour map */
 
-      rfbLog("rfbSetTranslateFunction: both 8-bit colour map: "
-             "no translation needed\n");
+      RFBLOGID("rfbSetTranslateFunction: both 8-bit colour map: "
+               "no translation needed\n");
       cl->translateFn = rfbTranslateNone;
       return rfbSetClientColourMap(cl, 0, 0);
     }
@@ -254,8 +254,8 @@ Bool rfbSetTranslateFunction(rfbClientPtr cl)
 
     /* colour map -> truecolour */
 
-    rfbLog("rfbSetTranslateFunction: client is %d-bit trueColour,"
-           " server has colour map\n", cl->format.bitsPerPixel);
+    RFBLOGID("rfbSetTranslateFunction: client is %d-bit trueColour,"
+             " server has colour map\n", cl->format.bitsPerPixel);
 
     cl->translateFn = rfbTranslateWithSingleTableFns
                         [rfbServerFormat.bitsPerPixel / 16]
@@ -270,7 +270,7 @@ Bool rfbSetTranslateFunction(rfbClientPtr cl)
 
     /* client & server the same */
 
-    rfbLog("  no translation needed\n");
+    RFBLOGID("  no translation needed\n");
     cl->translateFn = rfbTranslateNone;
     return TRUE;
   }
@@ -318,7 +318,7 @@ static Bool rfbSetClientColourMapBGR233(rfbClientPtr cl)
   int r, g, b;
 
   if (cl->format.bitsPerPixel != 8) {
-    rfbLog("rfbSetClientColourMapBGR233: client not 8 bits per pixel\n");
+    RFBLOGID("rfbSetClientColourMapBGR233: client not 8 bits per pixel\n");
     rfbCloseClient(cl);
     return FALSE;
   }
@@ -397,20 +397,22 @@ void rfbSetClientColourMaps(int firstColour, int nColours)
 }
 
 
-static void PrintPixelFormat(rfbPixelFormat *pf)
+static void PrintPixelFormat(rfbClientPtr cl)
 {
+  rfbPixelFormat *pf = &cl->format;
+
   if (pf->bitsPerPixel == 1) {
-    rfbLog("  1 bpp, %s sig bit in each byte is leftmost on the screen.\n",
-           (pf->bigEndian ? "most" : "least"));
+    RFBLOGID("  1 bpp, %s sig bit in each byte is leftmost on the screen.\n",
+             (pf->bigEndian ? "most" : "least"));
   } else {
-    rfbLog("  %d bpp, depth %d%s\n", pf->bitsPerPixel, pf->depth,
-           ((pf->bitsPerPixel == 8) ? "" :
-            (pf->bigEndian ? ", big endian" : ", little endian")));
+    RFBLOGID("  %d bpp, depth %d%s\n", pf->bitsPerPixel, pf->depth,
+             ((pf->bitsPerPixel == 8) ? "" :
+              (pf->bigEndian ? ", big endian" : ", little endian")));
     if (pf->trueColour)
-      rfbLog("  true colour: max r %d g %d b %d, shift r %d g %d b %d\n",
-             pf->redMax, pf->greenMax, pf->blueMax,
-             pf->redShift, pf->greenShift, pf->blueShift);
+      RFBLOGID("  true colour: max r %d g %d b %d, shift r %d g %d b %d\n",
+               pf->redMax, pf->greenMax, pf->blueMax,
+               pf->redShift, pf->greenShift, pf->blueShift);
     else
-      rfbLog("  uses a colour map (not true colour).\n");
+      RFBLOGID("  uses a colour map (not true colour).\n");
   }
 }

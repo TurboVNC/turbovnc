@@ -4,7 +4,7 @@
  * Routines to implement Hextile Encoding
  */
 
-/* Copyright (C) 2012, 2017 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2017, 2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -65,7 +65,7 @@ Bool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w, int h)
       return sendHextiles32(cl, x, y, w, h);
   }
 
-  rfbLog("rfbSendRectEncodingHextile: bpp %d?\n", cl->format.bitsPerPixel);
+  RFBLOGID("rfbSendRectEncodingHextile: bpp %d?\n", cl->format.bitsPerPixel);
   return FALSE;
 }
 

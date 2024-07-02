@@ -685,6 +685,13 @@ extern int traceLevel;
 }
 
 
+/*
+ * Print a time-stamped message, prefixed by the client ID, to the log file
+ * (stderr.)
+ */
+#define RFBLOGID(format, ...)  rfbLog("[%u] " format, cl->id, ##__VA_ARGS__)
+
+
 /* auth.c */
 
 void rfbAuthInit(void);
@@ -899,7 +906,7 @@ extern unsigned char ptrAcceleration;
 
 extern void PtrDeviceOn(DeviceIntPtr);
 extern void PtrDeviceControl(DevicePtr, PtrCtrl *);
-extern void PtrAddEvent(int buttonMask, int x, int y, rfbClientPtr cl);
+extern void PtrAddEvent(int buttonMask, int x, int y);
 extern void ExtInputAddEvent(rfbDevInfoPtr dev, int type, int buttons);
 
 extern void KbdDeviceInit(DeviceIntPtr);
@@ -981,7 +988,6 @@ extern Bool rfbGIIDebug;
 extern int rfbInterframe;
 extern int rfbMaxClipboard;
 extern Bool rfbVirtualTablet;
-extern CARD16 rfbClientNumber;
 
 /* Multithreading params specified on the command line or in the environment */
 extern Bool rfbMT;

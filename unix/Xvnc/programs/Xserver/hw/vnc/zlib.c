@@ -4,7 +4,8 @@
  * Routines to implement zlib based encoding (deflate).
  */
 
-/* Copyright (C) 2012, 2014, 2017, 2019 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2014, 2017, 2019, 2024 D. R. Commander.
+ *                                            All Rights Reserved.
  * Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -155,7 +156,7 @@ static Bool rfbSendOneRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
   zlibAfterBufLen = cl->compStream.total_out - previousOut;
 
   if (deflateResult != Z_OK) {
-    rfbLog("zlib deflation error: %s\n", cl->compStream.msg);
+    RFBLOGID("zlib deflation error: %s\n", cl->compStream.msg);
     return FALSE;
   }
 
