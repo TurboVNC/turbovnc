@@ -2,7 +2,7 @@
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for Xvnc
 .\"
-.\" Copyright (C) 2010, 2012, 2014-2022 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2022, 2024 D. R. Commander
 .\" Copyright (C) 2021 Steffen Kieß
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
@@ -14,7 +14,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH Xvnc 1 "March 2021" "" "TurboVNC"
+.TH Xvnc 1 "July 2024" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -212,6 +212,17 @@ version of Xvnc by AT&T labs.
 .TP
 \fB\-nocursor\fR
 Don't display a mouse pointer on the remote desktop.
+
+.TP
+\fB\-pointerlocktimeout \fItime\fR
+Maximum amount of time, in milliseconds, to wait for a new pointer event from a
+connected viewer that is dragging the mouse (moving the mouse with one or more
+mouse buttons held down) and thus has exclusive control over the pointer
+[default: 3000].  0 = indefinitely.
+
+This prevents other viewers connected to the same session from being locked out
+of pointer control indefinitely if a viewer's network connection drops while it
+is dragging the mouse.
 
 .TP
 \fB\-viewonly\fR

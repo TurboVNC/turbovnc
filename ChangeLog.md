@@ -12,6 +12,14 @@ number of simultaneously connected viewers.
 server.  (These events can be generated with horizontal scroll gestures on a
 trackpad or, with certain mice, by side-clicking the scroll wheel.)
 
+3. By default, the TurboVNC Server now limits the amount of time that it will
+wait for a new pointer event from a connected viewer that is dragging the mouse
+(and thus has exclusive control over the pointer.)  This prevents other viewers
+connected to the same session from being locked out of pointer control
+indefinitely if a viewer's network connection drops while it is dragging the
+mouse.  A new Xvnc command-line option (`-pointerlocktimeout`) can be used to
+specify the time limit.
+
 
 3.1.1
 =====
