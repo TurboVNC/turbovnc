@@ -4,7 +4,7 @@
  * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
-/* Copyright (C) 2009-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2009-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2016-2017 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -229,6 +229,10 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-deferupdate") == 0) {  /* -deferupdate ms */
     REQUIRE_ARG();
     rfbDeferUpdateTime = atoi(argv[i + 1]);
+    if (rfbDeferUpdateTime < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -317,6 +321,10 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-maxclipboard") == 0) {
     REQUIRE_ARG();
     rfbMaxClipboard = atoi(argv[i + 1]);
+    if (rfbMaxClipboard < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -364,6 +372,10 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-rfbport") == 0) {  /* -rfbport port */
     REQUIRE_ARG();
     rfbPort = atoi(argv[i + 1]);
+    if (rfbPort < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -386,6 +398,10 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-rfbwait") == 0) {  /* -rfbwait ms */
     REQUIRE_ARG();
     rfbMaxClientWait = atoi(argv[i + 1]);
+    if (rfbMaxClientWait < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
