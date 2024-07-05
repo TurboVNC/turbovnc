@@ -98,6 +98,8 @@
 
 #define DEFAULT_MAX_CLIENT_WAIT 20000
 
+#define DEFAULT_POINTER_LOCK_TIMEOUT 3000
+
 /* Constants for handling the UltraVNC Viewer's multitouch GII valuator event
    format */
 #define UVNCGII_MAX_TOUCHES 10
@@ -902,6 +904,9 @@ extern Bool rfbMT;
 extern int rfbNumThreads;
 
 extern char *captureFile;
+
+extern int rfbPointerLockTimeout;
+extern OsTimerPtr pointerLockTimer;
 
 #define debugregion(r, m)  \
   rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1,  \
