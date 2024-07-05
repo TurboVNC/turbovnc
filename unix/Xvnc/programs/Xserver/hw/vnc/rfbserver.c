@@ -3,9 +3,9 @@
  */
 
 /* Copyright (C) 2009-2022, 2024 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2021, 2024 AnatoScope SA.  All Rights Reserved.
  * Copyright (C) 2015-2017, 2020-2021 Pierre Ossman for Cendio AB.
  *                                    All Rights Reserved.
- * Copyright (C) 2021 AnatoScope SA.  All Rights Reserved.
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                    All Rights Reserved.
@@ -54,6 +54,13 @@ rfbClientPtr rfbClientHead = NULL;
 /* The client that is currently dragging the pointer
    This serves as a mutex for RFB pointer events. */
 rfbClientPtr pointerDragClient = NULL;
+/* Pointer lock timeout (in milliseconds)
+   Maximum amount of time, in milliseconds, to wait for a new pointer event
+   from a connected viewer that is dragging the mouse (and thus has exclusive
+   control over the pointer.)  This prevents other viewers connected to the
+   same session from being locked out of pointer control indefinitely if a
+   viewer's network connection drops while it is dragging the mouse. */
+int rfbPointerLockTimeout = DEFAULT_POINTER_LOCK_TIMEOUT;
 /* The client that last moved the pointer
    Other clients will automatically receive cursor updates via the traditional
    mechanism of drawing the cursor into the framebuffer (AKA "server-side
@@ -121,6 +128,23 @@ void rfbWriteCapture(int captureFD, char *buf, int len)
 {
   if (write(captureFD, buf, len) < len)
     rfbLogPerror("rfbWriteCapture: Could not write to capture file");
+}
+
+
+/*
+ * Pointer lock timeout
+ */
+
+OsTimerPtr pointerLockTimer;
+
+static CARD32 PointerLockTimerCallback(OsTimerPtr timer, CARD32 time,
+                                       void *arg)
+{
+  if (pointerDragClient != NULL)
+    rfbLog("[%u] Timeout expired.  Releasing pointer lock\n",
+           pointerDragClient->id);
+  pointerDragClient = NULL;
+  return 0;
 }
 
 
@@ -570,8 +594,11 @@ void rfbClientConnectionGone(rfbClientPtr cl)
       deflateEnd(&cl->zsStruct[i]);
   }
 
-  if (pointerDragClient == cl)
+  if (pointerDragClient == cl) {
+    RFBLOGID("Releasing pointer lock\n");
     pointerDragClient = NULL;
+    TimerCancel(pointerLockTimer);
+  }
 
   if (pointerOwner == cl)
     pointerOwner = NULL;
@@ -1282,10 +1309,18 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       if (pointerDragClient && (pointerDragClient != cl))
         return;
 
-      if (msg.pe.buttonMask == 0)
-        pointerDragClient = NULL;
-      else
+      if (msg.pe.buttonMask == 0) {
+        if (pointerDragClient != NULL) {
+          pointerDragClient = NULL;
+          TimerCancel(pointerLockTimer);
+        }
+      } else {
         pointerDragClient = cl;
+        if (rfbPointerLockTimeout)
+          pointerLockTimer = TimerSet(pointerLockTimer, 0,
+                                      rfbPointerLockTimeout,
+                                      PointerLockTimerCallback, NULL);
+      }
 
       if (!rfbViewOnly && !cl->viewOnly) {
         cl->cursorX = (int)Swap16IfLE(msg.pe.x);

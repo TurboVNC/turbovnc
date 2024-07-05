@@ -237,6 +237,10 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-deferupdate") == 0) {  /* -deferupdate ms */
     REQUIRE_ARG();
     rfbDeferUpdateTime = atoi(argv[i + 1]);
+    if (rfbDeferUpdateTime < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -325,6 +329,10 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-maxclipboard") == 0) {
     REQUIRE_ARG();
     rfbMaxClipboard = atoi(argv[i + 1]);
+    if (rfbMaxClipboard < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -372,6 +380,10 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-rfbport") == 0) {  /* -rfbport port */
     REQUIRE_ARG();
     rfbPort = atoi(argv[i + 1]);
+    if (rfbPort < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -394,6 +406,10 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-rfbwait") == 0) {  /* -rfbwait ms */
     REQUIRE_ARG();
     rfbMaxClientWait = atoi(argv[i + 1]);
+    if (rfbMaxClientWait < 0) {
+      UseMsg();
+      exit(1);
+    }
     return 2;
   }
 
@@ -407,6 +423,16 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   if (strcasecmp(argv[i], "-nocursor") == 0) {
     noCursor = TRUE;
     return 1;
+  }
+
+  if (strcasecmp(argv[i], "-pointerlocktimeout") == 0) {
+    REQUIRE_ARG();
+    rfbPointerLockTimeout = atoi(argv[i + 1]);
+    if (rfbPointerLockTimeout < 0) {
+      UseMsg();
+      exit(1);
+    }
+    return 2;
   }
 
   /* Run server in view-only mode - Ehud Karni SW */
@@ -1642,6 +1668,7 @@ void ddxGiveUp(enum ExitCode error)
     rfbPAMEnd(cl);
 #endif
   ShutdownTightThreads();
+  TimerFree(pointerLockTimer);
   free(rfbFB.pfbMemory);
   if (initOutputCalled) {
     char unixSocketName[32];
@@ -1753,6 +1780,12 @@ void ddxUseMsg(void)
   ErrorF("======================\n");
   ErrorF("-compatiblekbd         set META key = ALT key as in the original VNC\n");
   ErrorF("-nocursor              don't display a cursor\n");
+  ErrorF("-pointerlocktimeout time\n");
+  ErrorF("                       max time in ms (0 = indefinitely) to wait for a new\n");
+  ErrorF("                       pointer event from a connected viewer that is dragging\n");
+  ErrorF("                       the mouse (and thus has exclusive control over the\n");
+  ErrorF("                       pointer) [default: %d]\n",
+         DEFAULT_POINTER_LOCK_TIMEOUT);
   ErrorF("-viewonly              only let viewers view, not control, the remote desktop\n");
   ErrorF("-virtualtablet         set up virtual stylus and eraser devices for this\n");
   ErrorF("                       session, to emulate a Wacom tablet, and map all\n");
