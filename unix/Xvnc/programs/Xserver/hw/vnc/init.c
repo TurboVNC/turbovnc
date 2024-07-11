@@ -92,14 +92,6 @@ from the X Consortium.
 #define TRANS_REOPEN
 #include <X11/Xtrans/Xtrans.h>
 #include <xkb-config.h>
-#ifdef DRI3
-#ifdef MITSHM
-#include "shmint.h"
-#endif
-#ifdef HAVE_XSHMFENCE
-#include <misyncshm.h>
-#endif
-#endif
 
 #define RFB_DEFAULT_WIDTH  1024
 #define RFB_DEFAULT_HEIGHT 768
@@ -836,11 +828,6 @@ void InitOutput(ScreenInfo *pScreenInfo, int argc, char **argv)
   if (AddScreen(rfbScreenInit, argc, argv) == -1)
     FatalError("Couldn't add screen");
 
-#ifdef DRI3
-  if (driNode)
-    xvnc_dri3_init();
-#endif
-
   RegisterBlockAndWakeupHandlers(rfbBlockHandler, rfbWakeupHandler, 0);
 }
 
@@ -986,13 +973,8 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
     fbPictureInit(pScreen, 0, 0);
 
 #ifdef DRI3
-#ifdef MITSHM
-  ShmRegisterFbFuncs(pScreen);
-#endif
-#ifdef HAVE_XSHMFENCE
-  if (!miSyncShmScreenInit(pScreen))
+  if (driNode && !rfbDRI3Initialize(pScreen))
     return FALSE;
-#endif
 #endif
 
   if (!dixRegisterPrivateKey(&rfbGCKey, PRIVATE_GC, sizeof(rfbGCRec)))
@@ -1002,6 +984,9 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
   prfb->dontSendFramebufferUpdate = FALSE;
 
   prfb->CloseScreen = pScreen->CloseScreen;
+#ifdef DRI3
+  prfb->SourceValidate = pScreen->SourceValidate;
+#endif
   prfb->CreateGC = pScreen->CreateGC;
   prfb->CopyWindow = pScreen->CopyWindow;
   prfb->ClearToBackground = pScreen->ClearToBackground;
@@ -1010,6 +995,13 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
   if (ps) {
     prfb->Composite = ps->Composite;
     prfb->Glyphs = ps->Glyphs;
+#ifdef DRI3
+    prfb->CompositeRects = ps->CompositeRects;
+    prfb->Trapezoids = ps->Trapezoids;
+    prfb->Triangles = ps->Triangles;
+    prfb->TriStrip = ps->TriStrip;
+    prfb->TriFan = ps->TriFan;
+#endif
   }
 #endif
   prfb->InstallColormap = pScreen->InstallColormap;
@@ -1019,6 +1011,9 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
   prfb->SaveScreen = pScreen->SaveScreen;
 
   pScreen->CloseScreen = rfbCloseScreen;
+#ifdef DRI3
+  pScreen->SourceValidate = rfbSourceValidate;
+#endif
   pScreen->CreateGC = rfbCreateGC;
   pScreen->CopyWindow = rfbCopyWindow;
   pScreen->ClearToBackground = rfbClearToBackground;
@@ -1026,6 +1021,13 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
   if (ps) {
     ps->Composite = rfbComposite;
     ps->Glyphs = rfbGlyphs;
+#ifdef DRI3
+    ps->CompositeRects = rfbCompositeRects;
+    ps->Trapezoids = rfbTrapezoids;
+    ps->Triangles = rfbTriangles;
+    ps->TriStrip = rfbTriStrip;
+    ps->TriFan = rfbTriFan;
+#endif
   }
 #endif
   pScreen->InstallColormap = rfbInstallColormap;

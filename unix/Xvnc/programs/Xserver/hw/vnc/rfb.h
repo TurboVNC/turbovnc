@@ -173,12 +173,22 @@ typedef struct {
   /* wrapped screen functions */
 
   CloseScreenProcPtr                    CloseScreen;
+#ifdef DRI3
+  SourceValidateProcPtr                 SourceValidate;
+#endif
   CreateGCProcPtr                       CreateGC;
   CopyWindowProcPtr                     CopyWindow;
   ClearToBackgroundProcPtr              ClearToBackground;
 #ifdef RENDER
   CompositeProcPtr                      Composite;
   GlyphsProcPtr                         Glyphs;
+#ifdef DRI3
+  CompositeRectsProcPtr                 CompositeRects;
+  TrapezoidsProcPtr                     Trapezoids;
+  TrianglesProcPtr                      Triangles;
+  TriStripProcPtr                       TriStrip;
+  TriFanProcPtr                         TriFan;
+#endif
 #endif
   InstallColormapProcPtr                InstallColormap;
   UninstallColormapProcPtr              UninstallColormap;
@@ -821,13 +831,32 @@ extern void rfbComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask,
                          PicturePtr pDst, INT16 xSrc, INT16 ySrc, INT16 xMask,
                          INT16 yMask, INT16 xDst, INT16 yDst, CARD16 width,
                          CARD16 height);
-
 extern void rfbGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
                       PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
                       int nlists, GlyphListPtr lists, GlyphPtr *glyphs);
+#ifdef DRI3
+extern void rfbCompositeRects(CARD8 op, PicturePtr pDst, xRenderColor *color,
+                              int nRect, xRectangle *rects);
+extern void rfbTrapezoids(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                          PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                          int ntrap, xTrapezoid *traps);
+extern void rfbTriangles(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                         PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                         int ntri, xTriangle *tris);
+extern void rfbTriStrip(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                        PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                        int npoint, xPointFixed *points);
+extern void rfbTriFan(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                      PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                      int npoint, xPointFixed *points);
+#endif
 #endif
 
 extern Bool rfbCloseScreen(ScreenPtr);
+#ifdef DRI3
+extern void rfbSourceValidate(DrawablePtr pDrawable, int x, int y, int width,
+                              int height, unsigned int subWindowMode);
+#endif
 extern Bool rfbCreateGC(GCPtr);
 extern void rfbPaintWindowBackground(WindowPtr, RegionPtr, int what);
 extern void rfbPaintWindowBorder(WindowPtr, RegionPtr, int what);
@@ -842,9 +871,9 @@ extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
 #ifdef DRI3
 extern const char *driNode;
 
-extern void xvnc_dri3_init(void);
-extern void xvnc_dri3_sync_bo_to_pixmap(PixmapPtr pixmap);
-extern void xvnc_dri3_sync_pixmaps_to_bos(void);
+extern Bool rfbDRI3Initialize(ScreenPtr pScreen);
+extern void rfbDRI3SyncBOToDrawable(DrawablePtr drawable);
+extern void rfbDRI3SyncDrawableToBO(DrawablePtr drawable);
 #endif
 
 

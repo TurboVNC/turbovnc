@@ -1,8 +1,6 @@
 /*
  * Copyright © 2002 Keith Packard
  * Copyright 2013 Red Hat, Inc.
- * Copyright © 2023 Kasm
- * Copyright © 2024 D. R. Commander
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -31,10 +29,6 @@
 #include "damagestr.h"
 #include "protocol-versions.h"
 #include "extinit.h"
-
-#if defined(DRI3) && defined(TURBOVNC)
-extern void xvnc_dri3_sync_pixmaps_to_bos(void);
-#endif
 
 #ifdef PANORAMIX
 #include "panoramiX.h"
@@ -102,10 +96,6 @@ DamageExtNotify(DamageExtPtr pDamageExt, BoxPtr pBoxes, int nBoxes)
     int i, x, y, w, h;
 
     damageGetGeometry(pDrawable, &x, &y, &w, &h);
-
-#if defined(DRI3) && defined(TURBOVNC)
-    xvnc_dri3_sync_pixmaps_to_bos();
-#endif
 
     UpdateCurrentTimeIf();
     ev = (xDamageNotifyEvent) {

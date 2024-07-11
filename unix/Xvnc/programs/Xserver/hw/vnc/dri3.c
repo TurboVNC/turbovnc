@@ -1,5 +1,6 @@
-/* Copyright (C) 2023 Kasm
- * Copyright (C) 2023-2024 D. R. Commander
+/* Copyright (C) 2023-2024 D. R. Commander
+ * Copyright 2024 Pierre Ossman for Cendio AB
+ * Copyright (C) 2023 Kasm
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,28 +40,40 @@
 #include <fb.h>
 #include <gcstruct.h>
 #include <gbm.h>
+#ifdef MITSHM
+#include "shmint.h"
+#endif
+#ifdef HAVE_XSHMFENCE
+#include <misyncshm.h>
+#endif
 
 #include "rfb.h"
 
+
+#define DRI3_WRAP(field, function)  \
+  pScreenPriv->field = pScreen->field;  \
+  pScreen->field = function;
+
+#define DRI3_UNWRAP(field)  \
+  pScreen->field = pScreenPriv->field;
+
+
 const char *driNode = NULL;
 
-static struct gbm_device *gbm = NULL;
-static int dri_fd = 0;
-
-static DevPrivateKeyRec dri3_pixmap_private_key;
-
 typedef struct {
-  PixmapPtr pixmap;
-  struct xorg_list entry;
-} dri3_pixmap;
+  struct gbm_device *gbm;
+  int fd;
+  CloseScreenProcPtr CloseScreen;
+  DestroyPixmapProcPtr DestroyPixmap;
+} rfbDRI3ScreenRec, *rfbDRI3ScreenPtr;
 
-struct xorg_list dri3_pixmaps;
-static CARD32 update_dri3_pixmaps(OsTimerPtr timer, CARD32 time, void *arg);
-static OsTimerPtr dri3_pixmap_timer;
+static DevPrivateKeyRec rfbDRI3PixmapKey, rfbDRI3ScreenKey;
+
+static void rfbDRI3SyncBOToPixmap(PixmapPtr pixmap);
+static void rfbDRI3SyncPixmapToBO(PixmapPtr pixmap);
 
 
-static int xvnc_dri3_open_client(ClientPtr client, ScreenPtr screen,
-                                 RRProviderPtr provider, int *pfd)
+static int rfbDRI3Open(ScreenPtr screen, RRProviderPtr provider, int *pfd)
 {
   int fd = open(driNode, O_RDWR | O_CLOEXEC);
   if (fd < 0)
@@ -88,280 +101,370 @@ static uint32_t gbm_format_for_depth(CARD8 depth)
 }
 
 
-static void add_dri3_pixmap(PixmapPtr pixmap)
+static PixmapPtr rfbDRI3PixmapFromFD(ScreenPtr screen, int fd, CARD16 width,
+                                      CARD16 height, CARD16 stride,
+                                      CARD8 depth, CARD8 bpp)
 {
-  dri3_pixmap *dri3pm;
-
-  xorg_list_for_each_entry(dri3pm, &dri3_pixmaps, entry) {
-    if (dri3pm->pixmap == pixmap) {
-      return;
-    }
-  }
-
-  dri3pm = (dri3_pixmap *)rfbAlloc0(sizeof(dri3_pixmap));
-  dri3pm->pixmap = pixmap;
-  pixmap->refcnt++;
-  xorg_list_append(&dri3pm->entry, &dri3_pixmaps);
-
-  /* Start timer if it isn't already started */
-  if (!dri3_pixmap_timer)
-    dri3_pixmap_timer = TimerSet(NULL, 0, 16, update_dri3_pixmaps, NULL);
-}
-
-
-static PixmapPtr xvnc_dri3_pixmap_from_fds(ScreenPtr screen, CARD8 num_fds,
-                                           const int *fds, CARD16 width,
-                                           CARD16 height,
-                                           const CARD32 *strides,
-                                           const CARD32 *offsets, CARD8 depth,
-                                           CARD8 bpp, uint64_t modifier)
-{
+  struct gbm_import_fd_data data;
   struct gbm_bo *bo = NULL;
   PixmapPtr pixmap;
+  rfbDRI3ScreenPtr pScreenPriv =
+    dixLookupPrivate(&screen->devPrivates, &rfbDRI3ScreenKey);
 
-  if (width == 0 || height == 0 || num_fds == 0 || depth < 15 ||
-      bpp != BitsPerPixel(depth) || strides[0] < width * bpp / 8)
+  if (width == 0 || height == 0 || depth < 15 || bpp != BitsPerPixel(depth) ||
+      stride < width * bpp / 8 || bpp != sizeof(FbBits) * 8 ||
+      stride % sizeof(FbBits) != 0 || !pScreenPriv)
     return NULL;
 
-  if (num_fds == 1) {
-    struct gbm_import_fd_data data;
-
-    data.fd = fds[0];
-    data.width = width;
-    data.height = height;
-    data.stride = strides[0];
-    data.format = gbm_format_for_depth(depth);
-    bo = gbm_bo_import(gbm, GBM_BO_IMPORT_FD, &data, GBM_BO_USE_RENDERING);
-    if (!bo)
-      return NULL;
-  } else {
+  data.fd = fd;
+  data.width = width;
+  data.height = height;
+  data.stride = stride;
+  data.format = gbm_format_for_depth(depth);
+  bo = gbm_bo_import(pScreenPriv->gbm, GBM_BO_IMPORT_FD, &data,
+                     GBM_BO_USE_RENDERING | GBM_BO_USE_LINEAR);
+  if (!bo)
     return NULL;
-  }
 
-  pixmap = screen->CreatePixmap(screen, gbm_bo_get_width(bo),
-                                gbm_bo_get_height(bo), depth,
-                                CREATE_PIXMAP_USAGE_SCRATCH);
-  if (pixmap == NULL) {
-    gbm_bo_destroy(bo);
+  pixmap = screen->CreatePixmap(screen, width, height, depth, 0);
+  if (pixmap == NULL)
     return NULL;
-  }
 
-  dixSetPrivate(&pixmap->devPrivates, &dri3_pixmap_private_key, bo);
+  dixSetPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey, bo);
+
+  rfbDRI3SyncBOToPixmap(pixmap);
 
   return pixmap;
 }
 
 
-static int xvnc_dri3_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
-                                     int *fds, uint32_t *strides,
-                                     uint32_t *offsets, uint64_t *modifier)
+static int rfbDRI3FdFromPixmapVisitWindow(WindowPtr window, void *data)
+{
+  ScreenPtr pScreen = window->drawable.pScreen;
+  PixmapPtr pixmap = data;
+
+  if ((*pScreen->GetWindowPixmap) (window) == pixmap)
+    window->drawable.serialNumber = NEXT_SERIAL_NUMBER;
+
+  return WT_WALKCHILDREN;
+}
+
+
+static int rfbDRI3FDFromPixmap(ScreenPtr screen, PixmapPtr pixmap,
+                               CARD16 *stride, CARD32 *size)
 {
   struct gbm_bo *bo =
-    dixLookupPrivate(&pixmap->devPrivates, &dri3_pixmap_private_key);
+    dixLookupPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey);
+  rfbDRI3ScreenPtr pScreenPriv =
+    dixLookupPrivate(&screen->devPrivates, &rfbDRI3ScreenKey);
 
-  if (!bo) {
-    bo = gbm_bo_create(gbm, pixmap->drawable.width, pixmap->drawable.height,
-                       gbm_format_for_depth(pixmap->drawable.depth),
-                       (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
-                        GBM_BO_USE_LINEAR : 0) |
-                       GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
-    if (!bo) {
-      ErrorF("Failed to create GBM buffer object from pixmap");
-      return 0;
-    }
+  if (!pScreenPriv) return -1;
 
-    dixSetPrivate(&pixmap->devPrivates, &dri3_pixmap_private_key, bo);
+  if (pixmap->drawable.bitsPerPixel != sizeof(FbBits) * 8) {
+    ErrorF("rfbDRI3FDFromPixmap: Unexpected pixmap bits/pixel\n");
+    return -1;
   }
 
-  fds[0] = gbm_bo_get_fd(bo);
-  strides[0] = gbm_bo_get_stride(bo);
-  offsets[0] = 0;
-  *modifier = DRM_FORMAT_MOD_INVALID;
+  if (!bo) {
+    bo = gbm_bo_create(pScreenPriv->gbm, pixmap->drawable.width,
+                       pixmap->drawable.height,
+                       gbm_format_for_depth(pixmap->drawable.depth),
+                       GBM_BO_USE_RENDERING | GBM_BO_USE_LINEAR);
+    if (!bo) {
+      ErrorF("rfbDRI3FDFromPixmap: Failed to create GBM buffer object from pixmap\n");
+      return -1;
+    }
 
-  add_dri3_pixmap(pixmap);
+    if ((gbm_bo_get_stride(bo) % sizeof(FbBits)) != 0) {
+      ErrorF("rfbDRI3FDFromPixmap: Unexpected GBM buffer object stride\n");
+      gbm_bo_destroy(bo);
+      return -1;
+    }
 
-  return 1;
+    dixSetPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey, bo);
+
+    /* Force re-validation of any GCs */
+    pixmap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
+    WalkTree(screen, rfbDRI3FdFromPixmapVisitWindow, pixmap);
+  }
+
+  rfbDRI3SyncPixmapToBO(pixmap);
+
+  *stride = gbm_bo_get_stride(bo);
+  *size = *stride * gbm_bo_get_height(bo);
+
+  return gbm_bo_get_fd(bo);
 }
-
-
-static Bool xvnc_dri3_get_formats(ScreenPtr screen, CARD32 *num_formats,
-                                  CARD32 **formats)
-{
-  ErrorF("xvnc_dri3_get_formats() not implemented\n");
-  return FALSE;
-}
-
-
-static Bool xvnc_dri3_get_modifiers(ScreenPtr screen, uint32_t format,
-                                    uint32_t *num_modifiers,
-                                    uint64_t **modifiers)
-{
-  ErrorF("xvnc_dri3_get_modifiers() not implemented\n");
-  return FALSE;
-}
-
-
-static Bool xvnc_dri3_get_drawable_modifiers(DrawablePtr draw, uint32_t format,
-                                             uint32_t *num_modifiers,
-                                             uint64_t **modifiers)
-{
-  ErrorF("xvnc_dri3_get_drawable_modifiers() not implemented\n");
-  return FALSE;
-}
-
-
-static const dri3_screen_info_rec xvnc_dri3_info = {
-  .version = 2,
-  .open = NULL,
-  .pixmap_from_fds = xvnc_dri3_pixmap_from_fds,
-  .fds_from_pixmap = xvnc_dri3_fds_from_pixmap,
-  .open_client = xvnc_dri3_open_client,
-  .get_formats = xvnc_dri3_get_formats,
-  .get_modifiers = xvnc_dri3_get_modifiers,
-  .get_drawable_modifiers = xvnc_dri3_get_drawable_modifiers,
-};
 
 
 /* This function synchronizes pixels from a pixmap's corresponding GBM buffer
-   object into the pixmap itself.  There doesn't seem to be a good hook or sync
-   point, so we do it manually, right before Present copies from the pixmap. */
+   object into the pixmap itself. */
 
-void xvnc_dri3_sync_bo_to_pixmap(PixmapPtr pixmap)
+static void rfbDRI3SyncBOToPixmap(PixmapPtr pixmap)
 {
-  DrawablePtr pDraw;
-  GCPtr gc;
-  void *ptr;
-  uint32_t stride;
-  int w, h;
-  void *opaque = NULL;
   struct gbm_bo *bo;
+  int w, h;
+  FbBits *bo_ptr, *pixmap_ptr;
+  uint32_t bo_stride, bo_bpp;
+  void *opaque_ptr = NULL;
+  int pixmap_stride, pixmap_bpp;
+  pixman_bool_t ret;
 
   /* No-op if no DRM render node was specified */
   if (!driNode)
     return;
 
   /* Also a no-op if the pixmap wasn't created by our DRI3 implementation */
-  bo = dixLookupPrivate(&pixmap->devPrivates, &dri3_pixmap_private_key);
+  bo = dixLookupPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey);
   if (!bo)
     return;
 
   w = gbm_bo_get_width(bo);
   h = gbm_bo_get_height(bo);
 
-  ptr = gbm_bo_map(bo, 0, 0, w, h, GBM_BO_TRANSFER_READ, &stride, &opaque);
-  if (!ptr) {
-    ErrorF("xvnc_dri3_sync_bo_to_pixmap: gbm_bo_map() failed (errno %d)\n",
-           errno);
-    return;
+  bo_ptr = gbm_bo_map(bo, 0, 0, w, h, GBM_BO_TRANSFER_READ, &bo_stride,
+                      &opaque_ptr);
+  if (!bo_ptr) {
+    ErrorF("rfbDRI3SyncBOToPixmap: gbm_bo_map() failed (errno %d)\n", errno);
+    goto bailout;
+  }
+  bo_bpp = gbm_bo_get_bpp(bo);
+  if (bo_bpp != sizeof(FbBits) * 8) {
+    ErrorF("rfbDRI3SyncBOToPixmap: Unexpected GBM buffer object bits/pixel\n");
+    goto bailout;
+  }
+  if (bo_stride % (bo_bpp / 8) != 0) {
+    ErrorF("rfbDRI3SyncBOToPixmap: Unexpected GBM buffer object stride\n");
+    goto bailout;
   }
 
-  pDraw = &pixmap->drawable;
-  if ((gc = GetScratchGC(pDraw->depth, pDraw->pScreen))) {
-    ValidateGC(pDraw, gc);
-    fbPutZImage(pDraw, fbGetCompositeClip(gc), gc->alu, fbGetGCPrivate(gc)->pm,
-                0, 0, w, h, ptr, stride / sizeof(FbStip));
-    FreeScratchGC(gc);
+  fbGetPixmapBitsData(pixmap, pixmap_ptr, pixmap_stride, pixmap_bpp);
+  if (!pixmap_ptr) {
+    ErrorF("rfbDRI3SyncBOToPixmap: fbGetPixmapBitsData() failed\n");
+    goto bailout;
+  }
+  if (pixmap_bpp != sizeof(FbBits) * 8 || pixmap_bpp != bo_bpp) {
+    ErrorF("rfbDRI3SyncBOToPixmap: Unexpected pixmap bits/pixel\n");
+    goto bailout;
   }
 
-  gbm_bo_unmap(bo, opaque);
+  /* Try accelerated pixel copy first */
+  ret = pixman_blt((uint32_t *)bo_ptr, (uint32_t *)pixmap_ptr,
+                   bo_stride / (bo_bpp / 8), pixmap_stride, bo_bpp, pixmap_bpp,
+                   0, 0, 0, 0, w, h);
+  if (!ret)
+    /* Fall back to slow, pure C version */
+    fbBlt(bo_ptr, bo_stride / (bo_bpp / 8), 0, pixmap_ptr, pixmap_stride, 0,
+          w * bo_bpp, h, GXcopy, FB_ALLONES, bo_bpp, FALSE, FALSE);
+
+bailout:
+  if (opaque_ptr) gbm_bo_unmap(bo, opaque_ptr);
 }
 
 
-/* This function synchronizes pixels from all DRI3-created pixmaps into their
-   corresponding GBM buffer objects.  Since we don't know when the pixmaps have
-   changed or when the buffer objects will be read, we call this function both
-   from the X Damage Extension's notification handler as well as from a
-   timer (to account for applications that don't use the X Damage
-   Extension.) */
-
-void xvnc_dri3_sync_pixmaps_to_bos(void)
+void rfbDRI3SyncBOToDrawable(DrawablePtr drawable)
 {
-  uint32_t y;
-  uint8_t *src, *dst;
-  uint32_t srcstride, dststride;
-  void *opaque = NULL;
-  dri3_pixmap *dri3pm, *tmp;
+  PixmapPtr pixmap;
+  int xoff, yoff;
+  struct gbm_bo *bo;
+
+  fbGetDrawablePixmap(drawable, pixmap, xoff, yoff);
+  (void)xoff;
+  (void)yoff;
+
+  bo = dixLookupPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey);
+  if (!bo)
+    return;
+
+  rfbDRI3SyncBOToPixmap(pixmap);
+}
+
+
+/* This function synchronizes pixels from a pixmap into its corresponding GBM
+   buffer object. */
+
+static void rfbDRI3SyncPixmapToBO(PixmapPtr pixmap)
+{
+  struct gbm_bo *bo;
+  int w, h;
+  FbBits *bo_ptr, *pixmap_ptr;
+  uint32_t bo_stride, bo_bpp;
+  void *opaque_ptr = NULL;
+  int pixmap_stride, pixmap_bpp;
+  pixman_bool_t ret;
 
   /* No-op if no DRM render node was specified */
   if (!driNode)
     return;
 
-  xorg_list_for_each_entry_safe(dri3pm, tmp, &dri3_pixmaps, entry) {
-    struct gbm_bo *bo;
+  /* Also a no-op if the pixmap wasn't created by our DRI3 implementation */
+  bo = dixLookupPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey);
+  if (!bo)
+    return;
 
-    if (dri3pm->pixmap->refcnt == 1) {
-      /* We are the only user left, so delete the pixmap */
-      dri3pm->pixmap->drawable.pScreen->DestroyPixmap(dri3pm->pixmap);
-      xorg_list_del(&dri3pm->entry);
-      free(dri3pm);
-      continue;
-    }
+  w = gbm_bo_get_width(bo);
+  h = gbm_bo_get_height(bo);
 
-    bo =
-      dixLookupPrivate(&dri3pm->pixmap->devPrivates, &dri3_pixmap_private_key);
-    opaque = NULL;
-    dst = gbm_bo_map(bo, 0, 0, dri3pm->pixmap->drawable.width,
-                     dri3pm->pixmap->drawable.height, GBM_BO_TRANSFER_WRITE,
-                     &dststride, &opaque);
-    if (!dst) {
-      ErrorF("xvnc_dri3_sync_pixmaps_to_bos: gbm_bo_map() failed (errno %d)\n",
-             errno);
-      continue;
-    }
-
-    srcstride = dri3pm->pixmap->devKind;
-    src = dri3pm->pixmap->devPrivate.ptr;
-
-    for (y = 0; y < dri3pm->pixmap->drawable.height; y++) {
-      memcpy(dst, src, srcstride);
-      dst += dststride;
-      src += srcstride;
-    }
-
-    gbm_bo_unmap(bo, opaque);
+  bo_ptr = gbm_bo_map(bo, 0, 0, w, h, GBM_BO_TRANSFER_WRITE, &bo_stride,
+                      &opaque_ptr);
+  if (!bo_ptr) {
+    ErrorF("rfbDRI3SyncPixmapToBO: gbm_bo_map() failed (errno %d)\n", errno);
+    goto bailout;
   }
+  bo_bpp = gbm_bo_get_bpp(bo);
+  if (bo_bpp != sizeof(FbBits) * 8) {
+    ErrorF("rfbDRI3SyncPixmapToBO: Unexpected GBM buffer object bits/pixel\n");
+    goto bailout;
+  }
+  if (bo_stride % (bo_bpp / 8) != 0) {
+    ErrorF("rfbDRI3SyncPixmapToBO: Unexpected GBM buffer object stride\n");
+    goto bailout;
+  }
+
+  fbGetPixmapBitsData(pixmap, pixmap_ptr, pixmap_stride, pixmap_bpp);
+  if (!pixmap_ptr) {
+    ErrorF("rfbDRI3SyncPixmapToBO: fbGetPixmapBitsData() failed\n");
+    goto bailout;
+  }
+  if (pixmap_bpp != sizeof(FbBits) * 8 || pixmap_bpp != bo_bpp) {
+    ErrorF("rfbDRI3SyncPixmapToBO: Unexpected pixmap bits/pixel\n");
+    goto bailout;
+  }
+
+  /* Try accelerated pixel copy first */
+  ret = pixman_blt((uint32_t *)pixmap_ptr, (uint32_t *)bo_ptr,
+                   pixmap_stride, bo_stride / (bo_bpp / 8), pixmap_bpp,
+                   bo_bpp, 0, 0, 0, 0, w, h);
+  if (!ret)
+    /* Fall back to slow, pure C version */
+    fbBlt(pixmap_ptr, pixmap_stride, 0, bo_ptr, bo_stride / (bo_bpp / 8), 0,
+          w * bo_bpp, h, GXcopy, FB_ALLONES, bo_bpp, FALSE, FALSE);
+
+bailout:
+  if (opaque_ptr) gbm_bo_unmap(bo, opaque_ptr);
 }
 
 
-static CARD32 update_dri3_pixmaps(OsTimerPtr timer, CARD32 time, void *arg)
+void rfbDRI3SyncDrawableToBO(DrawablePtr drawable)
 {
-  int num_dri3_pixmaps = 0;
-  dri3_pixmap *dri3pm;
+  PixmapPtr pixmap;
+  int xoff, yoff;
+  struct gbm_bo *bo;
 
-  xvnc_dri3_sync_pixmaps_to_bos();
+  fbGetDrawablePixmap(drawable, pixmap, xoff, yoff);
+  (void)xoff;
+  (void)yoff;
 
-  xorg_list_for_each_entry(dri3pm, &dri3_pixmaps, entry)
-    num_dri3_pixmaps++;
-  if (!num_dri3_pixmaps) {
-    TimerFree(dri3_pixmap_timer);
-    dri3_pixmap_timer = NULL;
-    return 0;
-  }
+  bo = dixLookupPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey);
+  if (!bo)
+    return;
 
-  return 16;  /* Re-schedule the timer */
+  rfbDRI3SyncPixmapToBO(pixmap);
 }
 
 
-void xvnc_dri3_init(void)
+static Bool rfbDRI3CloseScreen(ScreenPtr pScreen)
 {
-  if (!dixRegisterPrivateKey(&dri3_pixmap_private_key, PRIVATE_PIXMAP, 0))
-    FatalError("xvnc_dri3_init: dixRegisterPrivateKey failed");
+  rfbDRI3ScreenPtr pScreenPriv =
+    dixLookupPrivate(&pScreen->devPrivates, &rfbDRI3ScreenKey);
+
+  DRI3_UNWRAP(CloseScreen)
+  DRI3_UNWRAP(DestroyPixmap)
+
+  if (pScreenPriv->gbm) {
+    gbm_device_destroy(pScreenPriv->gbm);
+    pScreenPriv->gbm = NULL;
+  }
+  if (pScreenPriv->fd >= 0) {
+    close(pScreenPriv->fd);
+    pScreenPriv->fd = -1;
+  }
+
+  return (*pScreen->CloseScreen) (pScreen);
+}
+
+
+static Bool rfbDRI3DestroyPixmap(PixmapPtr pixmap)
+{
+  ScreenPtr pScreen = pixmap->drawable.pScreen;
+  rfbDRI3ScreenPtr pScreenPriv =
+    dixLookupPrivate(&pScreen->devPrivates, &rfbDRI3ScreenKey);
+  Bool ret;
+
+  if (pixmap->refcnt == 1) {
+    struct gbm_bo *bo =
+      dixLookupPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey);
+
+    if (bo) {
+      gbm_bo_destroy(bo);
+      dixSetPrivate(&pixmap->devPrivates, &rfbDRI3PixmapKey, NULL);
+    }
+  }
+
+  DRI3_UNWRAP(DestroyPixmap)
+
+  ret = pScreen->DestroyPixmap(pixmap);
+
+  DRI3_WRAP(DestroyPixmap, rfbDRI3DestroyPixmap)
+
+  return ret;
+}
+
+
+static const dri3_screen_info_rec rfbDRI3ScreenInfo = {
+  .version = 1,
+  .open = rfbDRI3Open,
+  .pixmap_from_fd = rfbDRI3PixmapFromFD,
+  .fd_from_pixmap = rfbDRI3FDFromPixmap,
+};
+
+
+Bool rfbDRI3Initialize(ScreenPtr pScreen)
+{
+  rfbDRI3ScreenPtr pScreenPriv;
 
   if (!driNode)
     FatalError("DRM render node not specified");
 
-  dri_fd = open(driNode, O_RDWR | O_CLOEXEC);
-  if (!dri_fd)
-    FatalError("Failed to open DRM render node %s", driNode);
+#ifdef MITSHM
+  ShmRegisterFbFuncs(pScreen);
+#endif
+#ifdef HAVE_XSHMFENCE
+  if (!miSyncShmScreenInit(pScreen))
+    return FALSE;
+#endif
 
-  gbm = gbm_create_device(dri_fd);
-  if (!gbm)
-    FatalError("Failed to create GBM device from DRM render node");
+  if (!dixRegisterPrivateKey(&rfbDRI3ScreenKey, PRIVATE_SCREEN,
+                             sizeof(rfbDRI3ScreenRec))) {
+    ErrorF("rfbDRI3Initialize: dixRegisterPrivateKey failed\n");
+    return FALSE;
+  }
 
-  xorg_list_init(&dri3_pixmaps);
+  if (!dixRegisterPrivateKey(&rfbDRI3PixmapKey, PRIVATE_PIXMAP, 0)) {
+    ErrorF("rfbDRI3Initialize: dixRegisterPrivateKey failed\n");
+    return FALSE;
+  }
 
-  if (!dri3_screen_init(screenInfo.screens[0], &xvnc_dri3_info))
-    FatalError("Cannot initialize DRI3 extension");
+  pScreenPriv = dixLookupPrivate(&pScreen->devPrivates, &rfbDRI3ScreenKey);
+  pScreenPriv->gbm = NULL;
+  pScreenPriv->fd = -1;
+
+  pScreenPriv->fd = open(driNode, O_RDWR | O_CLOEXEC);
+  if (pScreenPriv->fd < 0) {
+    ErrorF("Failed to open DRM render node %s\n", driNode);
+    return FALSE;
+  }
+
+  pScreenPriv->gbm = gbm_create_device(pScreenPriv->fd);
+  if (!pScreenPriv->gbm) {
+    ErrorF("Failed to create GBM device from DRM render node\n");
+    return FALSE;
+  }
+
+  DRI3_WRAP(CloseScreen, rfbDRI3CloseScreen)
+  DRI3_WRAP(DestroyPixmap, rfbDRI3DestroyPixmap)
+
+  return dri3_screen_init(pScreen, &rfbDRI3ScreenInfo);
 }
 
 #endif  /* DRI3 */

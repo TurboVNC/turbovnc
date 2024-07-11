@@ -1,7 +1,5 @@
 /*
  * Copyright © 2013 Keith Packard
- * Copyright © 2023 Kasm
- * Copyright © 2024 D. R. Commander
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -28,10 +26,6 @@
 
 #include "present_priv.h"
 #include <gcstruct.h>
-
-#if defined(DRI3) && defined(TURBOVNC)
-extern void xvnc_dri3_sync_bo_to_pixmap(PixmapPtr pixmap);
-#endif
 
 /*
  * Returns:
@@ -92,10 +86,6 @@ present_copy_region(DrawablePtr drawable,
 {
     ScreenPtr   screen = drawable->pScreen;
     GCPtr       gc;
-
-#if defined(DRI3) && defined(TURBOVNC)
-    xvnc_dri3_sync_bo_to_pixmap(pixmap);
-#endif
 
     gc = GetScratchGC(drawable->depth, screen);
     if (update) {
