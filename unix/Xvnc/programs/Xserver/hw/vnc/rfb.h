@@ -814,7 +814,8 @@ extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
 extern int rfbDeferUpdateTime;
 
 extern void ClipToScreen(ScreenPtr pScreen, RegionPtr pRegion);
-void PrintRegion(ScreenPtr pScreen, RegionPtr reg, const char *msg);
+void PrintRegion(ScreenPtr pScreen, RegionPtr reg, const char *msg,
+                 Bool printRects);
 
 #ifdef RENDER
 extern void rfbComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask,
