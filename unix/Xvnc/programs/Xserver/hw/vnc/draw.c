@@ -330,8 +330,8 @@ void rfbSourceValidate(DrawablePtr pDrawable, int x, int y, int width,
 {
   SCREEN_PROLOGUE(pDrawable->pScreen, SourceValidate);
 
-  TRC("rfbSourceValidate() x=%d y=%d width=%d height=%d subWindowMode=%u\n",
-      x, y, width, height, subWindowMode);
+  TRC("rfbSourceValidate() Drawable=0x%.8x x=%d y=%d width=%d height=%d subWindowMode=%u\n",
+      XID(pDrawable), x, y, width, height, subWindowMode);
 
   rfbDRI3SyncBOToDrawable(pDrawable);
 
