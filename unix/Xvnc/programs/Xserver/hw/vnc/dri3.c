@@ -426,6 +426,12 @@ Bool rfbDRI3Initialize(ScreenPtr pScreen)
   if (!driNode)
     FatalError("DRM render node not specified");
 
+  /* An empty render node string disables DRI3 */
+  if (strlen(driNode) == 0) {
+    driNode = NULL;
+    return TRUE;
+  }
+
 #ifdef MITSHM
   ShmRegisterFbFuncs(pScreen);
 #endif
