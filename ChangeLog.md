@@ -17,6 +17,10 @@ GPU drivers.  This enables GPU acceleration in a TurboVNC session without
 VirtualGL, although the performance will be better with VirtualGL.  Refer to
 the description of the `-drinode` option in the Xvnc man page for more details.
 
+3. The default X startup script (`xstartup.turbovnc`) now throws an error,
+rather than trying to execute **xinitrc** or twm, if a session desktop file for
+the specified or default window manager cannot be found.
+
 
 3.1.2
 =====

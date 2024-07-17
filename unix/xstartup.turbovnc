@@ -66,8 +66,8 @@ if [ "$TVNC_SHAREDDBUS" != "1" ]; then
     echo "xstartup.turbovnc:   $DBUS_SESSION_BUS_ADDRESS"
   else
     # If we get here, then dbus-launch was not found, DBUS_SESSION_BUS_ADDRESS
-    # is unlikely to be set, and xinitrc or Xsession would subsequently fail on
-    # the aforementioned operating systems.  Thus, unsetting
+    # is unlikely to be set, and Xsession would subsequently fail on the
+    # aforementioned operating systems.  Thus, unsetting
     # DBUS_SESSION_BUS_ADDRESS here is just a belt-and-suspenders measure to
     # help ensure that any window manager that requires D-Bus will fail sooner
     # rather than later.
@@ -82,12 +82,29 @@ OS=`uname -s`
 
 # Emulate GDM
 
-# Use Unity 2D on Ubuntu 12 if no WM is specified.  Historically, Unity 3D
-# 5.20.x didn't even pretend to work properly with our X server, although it
-# probably would now.
-if [ -f /usr/share/gnome-session/sessions/ubuntu-2d.session -a -z "$TVNC_WM" ]; then
-  TVNC_WM=2d
-fi
+find_session()
+{
+  for SESSION in $SESSIONS; do
+    if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
+      DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
+    fi
+  done
+  if [ "$DESKTOP_SESSION" = "" ]; then
+    if [ "$TVNC_WM" = "" ]; then
+      echo "xstartup.turbovnc: The session desktop file for the default window manager was"
+      echo "xstartup.turbovnc:   not found at:"
+    else
+      echo "xstartup.turbovnc: The session desktop file for the '$TVNC_WM'"
+      echo "xstartup.turbovnc:   window manager was not found at:"
+    fi
+    for SESSION in $SESSIONS; do
+      echo "xstartup.turbovnc:   $XSESSIONSDIR/$SESSION.desktop"
+    done
+    exit 1
+  fi
+  unset SESSIONS
+}
+
 XSESSIONSDIR=
 if [ -d /usr/share/xsessions ]; then
   XSESSIONSDIR=/usr/share/xsessions
@@ -113,16 +130,12 @@ case "$TVNC_WM" in
       NOXSESSION=1
       TVNC_WM=`echo $TVNC_WM | $SED -r 's/:noxsession$//g'`
     fi
-    # RHEL 7, Fedora: gnome-classic
+    # RHEL 7+, Fedora: gnome-classic
     # Ubuntu 12: ubuntu-2d
     # Ubuntu 14: gnome-fallback
     # Ubuntu 16+: gnome-flashback-metacity
-    for SESSION in "gnome-classic" "gnome-fallback" "ubuntu-2d" "2d-gnome" \
-      "gnome-flashback-metacity"; do
-      if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
-        DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
-      fi
-    done
+    SESSIONS="gnome-classic gnome-fallback ubuntu-2d 2d-gnome gnome-flashback-metacity"
+    find_session
     unset TVNC_WM
     ;;
   *)
@@ -136,22 +149,16 @@ case "$TVNC_WM" in
     esac
     if [ "$TVNC_WM" = "" ]; then
       # No window manager was specified.  Use GNOME or Unity if it exists.
-      for SESSION in "gnome" "ubuntu"; do
-        if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
-          DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
-        fi
-      done
+      SESSIONS="gnome ubuntu"
+      find_session
     else
       # For backward compatibility with TurboVNC 2.2.x, we allow a window
       # manager's startup script (e.g. mate-session, gnome-session) to be
       # specified using -wm / $wm, but if there is a matching session desktop
       # file for it, we use that instead.
-      SESSION=`echo $TVNC_WM | $SED -r 's/^.*\/|-session$//g'`
-      if [ "$XSESSIONSDIR" != "" -a -f "$XSESSIONSDIR/$SESSION.desktop" ]; then
-        DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
-        unset TVNC_WM
-      fi
-      unset SESSION
+      SESSIONS="`echo $TVNC_WM | $SED -r 's/^.*\/|-session$//g'`"
+      find_session
+      unset TVNC_WM
     fi
     ;;
 esac
@@ -188,10 +195,10 @@ fi
 
 if [ "$TVNC_VGL" = "1" ]; then
   # If launching the window manager using VirtualGL, invoke vglrun through
-  # ssh-agent.  On some operating systems, xinitrc and Xsession launch the
-  # window manager using ssh-agent if there is no active ssh-agent session, and
-  # ssh-agent clobbers LD_PRELOAD.  Thus, we explicitly create an ssh-agent
-  # session for VirtualGL.
+  # ssh-agent.  On some operating systems, Xsession launches the window manager
+  # using ssh-agent if there is no active ssh-agent session, and ssh-agent
+  # clobbers LD_PRELOAD.  Thus, we explicitly create an ssh-agent session for
+  # VirtualGL.
   if [ -z "$SSH_AGENT_PID" -a -x /usr/bin/ssh-agent ]; then
     TVNC_SSHAGENT=/usr/bin/ssh-agent
   fi
@@ -201,37 +208,16 @@ if [ "$TVNC_VGL" = "1" ]; then
 fi
 
 if [ "$TVNC_WM" = "" ]; then
-  # No window manager was specified, and the default window manager is
-  # unavailable.  Try to launch the window manager via the system-wide WM
-  # startup script.  (This is mostly for the benefit of legacy operating
-  # systems.  Modern operating systems typically do not use xinitrc.)
-
-  # Typical system-wide WM startup script on Linux
-  if [ -f /etc/X11/xinit/xinitrc ]; then
-    TVNC_WM=/etc/X11/xinit/xinitrc
-  fi
+  echo "xstartup.turbovnc: No window manager was specified, and the default window"
+  echo "xstartup.turbovnc:   manager is unavailable."
+  exit 1
 fi
-if [ "$TVNC_WM" != "" ]; then
-  # Start the window manager.
-  if [ "$XSESSION" != "" ]; then
-    echo xstartup.turbovnc: Executing $TVNC_SSHAGENT $TVNC_VGLRUN $XSESSION \"$TVNC_WM\"
-    exec $TVNC_SSHAGENT $TVNC_VGLRUN $XSESSION "$TVNC_WM"
-  else
-    echo xstartup.turbovnc: Executing $TVNC_SSHAGENT $TVNC_VGLRUN $TVNC_WM
-    exec $TVNC_SSHAGENT $TVNC_VGLRUN $TVNC_WM
-  fi
+
+# Start the window manager.
+if [ "$XSESSION" != "" ]; then
+  echo xstartup.turbovnc: Executing $TVNC_SSHAGENT $TVNC_VGLRUN $XSESSION \"$TVNC_WM\"
+  exec $TVNC_SSHAGENT $TVNC_VGLRUN $XSESSION "$TVNC_WM"
 else
-  # No window manager was specified, the default window manager is unavailable,
-  # and no known system-wide WM startup script was found.  Start TWM if it
-  # exists.
-  echo "xstartup.turbovnc: No window manager specified or found.  Falling back to TWM."
-  which twm >/dev/null && {
-    if [ -f $HOME/.Xresources ]; then xrdb $HOME/.Xresources; fi
-    xsetroot -solid grey
-    xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
-    twm
-  } || {
-    echo "xstartup.turbovnc: TWM not found.  I give up."
-    exit 1
-  }
+  echo xstartup.turbovnc: Executing $TVNC_SSHAGENT $TVNC_VGLRUN $TVNC_WM
+  exec $TVNC_SSHAGENT $TVNC_VGLRUN $TVNC_WM
 fi
