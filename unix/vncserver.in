@@ -620,7 +620,11 @@ $ENV{VGL_PROBEGLX} = "0";
 
 if (!$noxstartup) {
   if ($opt{'-fg'}) {
-    system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
+    $cmd = "$xstartup";
+    if (!$opt{'-debug'}) {
+      $cmd .= " >> " . &quotedString($desktopLog) . " 2>&1";
+    }
+    system($cmd);
     if (kill 0, `cat $pidFile` || kill 0, `cat $noVNCPIDFile`) {
       $opt{'-kill'} = ':'.$displayNumber;
       &Kill();
