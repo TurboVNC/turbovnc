@@ -1,6 +1,6 @@
-diff --git a/xorg-server-1.20.14/Xext/saver.c b/Xserver/Xext/saver.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/saver.c b/Xserver/Xext/saver.c
 index c23907d..05b9ca3 100644
---- a/xorg-server-1.20.14/Xext/saver.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/saver.c
 +++ b/Xserver/Xext/saver.c
 @@ -1051,7 +1051,7 @@ ScreenSaverSetAttributes(ClientPtr client)
          pVlist++;
@@ -11,9 +11,9 @@ index c23907d..05b9ca3 100644
      pPriv->attr = pAttr;
      pAttr->resource = FakeClientID(client->index);
      if (!AddResource(pAttr->resource, AttrType, (void *) pAttr))
-diff --git a/xorg-server-1.20.14/Xext/shm.c b/Xserver/Xext/shm.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/shm.c b/Xserver/Xext/shm.c
 index 24c6b10..be2be20 100644
---- a/xorg-server-1.20.14/Xext/shm.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/shm.c
 +++ b/Xserver/Xext/shm.c
 @@ -1211,7 +1211,7 @@ shm_tmpfile(void)
          "/var/tmp",
@@ -42,9 +42,9 @@ index 24c6b10..be2be20 100644
          char template[PATH_MAX];
          snprintf(template, ARRAY_SIZE(template), "%s/shmfd-XXXXXX", shmdirs[i]);
  #ifdef HAVE_MKOSTEMP
-diff --git a/xorg-server-1.20.14/Xext/xtest.c b/Xserver/Xext/xtest.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/xtest.c b/Xserver/Xext/xtest.c
 index 38b8012..bf11789 100644
---- a/xorg-server-1.20.14/Xext/xtest.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/xtest.c
 +++ b/Xserver/Xext/xtest.c
 @@ -501,10 +501,11 @@ XTestSwapFakeInput(ClientPtr client, xReq * req)
  
@@ -60,9 +60,9 @@ index 38b8012..bf11789 100644
              client->errorValue = ev->u.u.type;
              return BadValue;
          }
-diff --git a/xorg-server-1.20.14/Xext/xvmain.c b/Xserver/Xext/xvmain.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/xvmain.c b/Xserver/Xext/xvmain.c
 index c520c7d..5f4c174 100644
---- a/xorg-server-1.20.14/Xext/xvmain.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/xvmain.c
 +++ b/Xserver/Xext/xvmain.c
 @@ -811,8 +811,10 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
          tpn = pn;
@@ -76,9 +76,9 @@ index c520c7d..5f4c174 100644
                  return Success;
              }
              if (!tpn->client)
-diff --git a/xorg-server-1.20.14/Xi/exevents.c b/Xserver/Xi/exevents.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/exevents.c b/Xserver/Xi/exevents.c
 index 659816a..0cb8d78 100644
---- a/xorg-server-1.20.14/Xi/exevents.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/exevents.c
 +++ b/Xserver/Xi/exevents.c
 @@ -575,8 +575,10 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
              memcpy(to->button->xkb_acts, from->button->xkb_acts,
@@ -92,9 +92,9 @@ index 659816a..0cb8d78 100644
  
          memcpy(to->button->labels, from->button->labels,
                 from->button->numButtons * sizeof(Atom));
-diff --git a/xorg-server-1.20.14/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
 index 504defe..ad89a31 100644
---- a/xorg-server-1.20.14/Xi/xichangehierarchy.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xichangehierarchy.c
 +++ b/Xserver/Xi/xichangehierarchy.c
 @@ -140,7 +140,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
  {
@@ -132,9 +132,9 @@ index 504defe..ad89a31 100644
          XIBarrierRemoveMasterDevice(clients[i], ptr->id);
  
      /* disable the remove the devices, XTest devices must be done first
-diff --git a/xorg-server-1.20.14/Xi/xipassivegrab.c b/Xserver/Xi/xipassivegrab.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xipassivegrab.c b/Xserver/Xi/xipassivegrab.c
 index d30f51f..89a5910 100644
---- a/xorg-server-1.20.14/Xi/xipassivegrab.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xipassivegrab.c
 +++ b/Xserver/Xi/xipassivegrab.c
 @@ -133,6 +133,12 @@ ProcXIPassiveGrabDevice(ClientPtr client)
          return BadValue;
@@ -179,9 +179,9 @@ index d30f51f..89a5910 100644
      rc = dixLookupWindow(&win, stuff->grab_window, client, DixSetAttrAccess);
      if (rc != Success)
          return rc;
-diff --git a/xorg-server-1.20.14/Xi/xiproperty.c b/Xserver/Xi/xiproperty.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xiproperty.c b/Xserver/Xi/xiproperty.c
 index 6ec419e..0cfa6e3 100644
---- a/xorg-server-1.20.14/Xi/xiproperty.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xiproperty.c
 +++ b/Xserver/Xi/xiproperty.c
 @@ -890,7 +890,7 @@ ProcXChangeDeviceProperty(ClientPtr client)
      REQUEST(xChangeDevicePropertyReq);
@@ -201,9 +201,9 @@ index 6ec419e..0cfa6e3 100644
      unsigned long len;
  
      REQUEST(xXIChangePropertyReq);
-diff --git a/xorg-server-1.20.14/composite/compwindow.c b/Xserver/composite/compwindow.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/composite/compwindow.c b/Xserver/composite/compwindow.c
 index 54b4e6a..8db9d03 100644
---- a/xorg-server-1.20.14/composite/compwindow.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/composite/compwindow.c
 +++ b/Xserver/composite/compwindow.c
 @@ -613,6 +613,11 @@ compDestroyWindow(WindowPtr pWin)
      ret = (*pScreen->DestroyWindow) (pWin);
@@ -217,9 +217,9 @@ index 54b4e6a..8db9d03 100644
  /*    compCheckTree (pWin->drawable.pScreen); can't check -- tree isn't good*/
      return ret;
  }
-diff --git a/xorg-server-1.20.14/dix/devices.c b/Xserver/dix/devices.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/devices.c b/Xserver/dix/devices.c
 index e7c74d7..e0c93b6 100644
---- a/xorg-server-1.20.14/dix/devices.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/devices.c
 +++ b/Xserver/dix/devices.c
 @@ -76,6 +76,11 @@ SOFTWARE.
  #include <X11/extensions/XI2.h>
@@ -245,9 +245,9 @@ index e7c74d7..e0c93b6 100644
                  return BadValue;
  
          if (!dev->valuator)
-diff --git a/xorg-server-1.20.14/dix/events.c b/Xserver/dix/events.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/events.c b/Xserver/dix/events.c
 index 427b891..0f32bd8 100644
---- a/xorg-server-1.20.14/dix/events.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/events.c
 +++ b/Xserver/dix/events.c
 @@ -148,6 +148,12 @@ Equipment Corporation.
  #include "eventconvert.h"
@@ -281,9 +281,9 @@ index 427b891..0f32bd8 100644
      /* The client's event type must be a core event type or one defined by an
         extension. */
  
-diff --git a/xorg-server-1.20.14/dix/property.c b/Xserver/dix/property.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/property.c b/Xserver/dix/property.c
 index ff1d669..9381c4d 100644
---- a/xorg-server-1.20.14/dix/property.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/property.c
 +++ b/Xserver/dix/property.c
 @@ -205,7 +205,8 @@ ProcChangeProperty(ClientPtr client)
      WindowPtr pWin;
@@ -309,9 +309,9 @@ index ff1d669..9381c4d 100644
      return Success;
  }
  
-diff --git a/xorg-server-1.20.14/dix/registry.c b/Xserver/dix/registry.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/registry.c b/Xserver/dix/registry.c
 index 84d48b4..3e80392 100644
---- a/xorg-server-1.20.14/dix/registry.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/registry.c
 +++ b/Xserver/dix/registry.c
 @@ -1,6 +1,7 @@
  /************************************************************
@@ -359,9 +359,9 @@ index 84d48b4..3e80392 100644
  
      /* Add the core protocol */
      RegisterExtensionNames(&extEntry);
-diff --git a/xorg-server-1.20.14/dix/selection.c b/Xserver/dix/selection.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/selection.c b/Xserver/dix/selection.c
 index d46103f..af0e36e 100644
---- a/xorg-server-1.20.14/dix/selection.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/selection.c
 +++ b/Xserver/dix/selection.c
 @@ -54,6 +54,12 @@ SOFTWARE.
  #include "selection.h"
@@ -392,9 +392,9 @@ index d46103f..af0e36e 100644
      else if (rc == Success && pSel->window != None) {
          event.u.u.type = SelectionRequest;
          event.u.selectionRequest.owner = pSel->window;
-diff --git a/xorg-server-1.20.14/fb/fbimage.c b/Xserver/fb/fbimage.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/fb/fbimage.c b/Xserver/fb/fbimage.c
 index bd24728..801df20 100644
---- a/xorg-server-1.20.14/fb/fbimage.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/fb/fbimage.c
 +++ b/Xserver/fb/fbimage.c
 @@ -210,7 +210,7 @@ fbGetImage(DrawablePtr pDrawable,
  {
@@ -414,9 +414,9 @@ index bd24728..801df20 100644
                  dst[i] &= pm;
          }
      }
-diff --git a/xorg-server-1.20.14/glx/glxdricommon.c b/Xserver/glx/glxdricommon.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/glxdricommon.c b/Xserver/glx/glxdricommon.c
 index 2e00bab..a16e1bc 100644
---- a/xorg-server-1.20.14/glx/glxdricommon.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/glxdricommon.c
 +++ b/Xserver/glx/glxdricommon.c
 @@ -258,7 +258,11 @@ glxConvertConfigs(const __DRIcoreExtension * core,
      return head.next;
@@ -430,9 +430,9 @@ index 2e00bab..a16e1bc 100644
  
  /* Temporary define to allow building without a dri_interface.h from
   * updated Mesa.  Some day when we don't care about Mesa that old any
-diff --git a/xorg-server-1.20.14/glx/glxscreens.h b/Xserver/glx/glxscreens.h
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/glxscreens.h b/Xserver/glx/glxscreens.h
 index 40649f8..5f89e5d 100644
---- a/xorg-server-1.20.14/glx/glxscreens.h
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/glxscreens.h
 +++ b/Xserver/glx/glxscreens.h
 @@ -37,6 +37,7 @@
  
@@ -450,9 +450,9 @@ index 40649f8..5f89e5d 100644
  struct __GLXscreen {
      void (*destroy) (__GLXscreen * screen);
  
-diff --git a/xorg-server-1.20.14/glx/vndext.c b/Xserver/glx/vndext.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/vndext.c b/Xserver/glx/vndext.c
 index 0513733..aa93900 100644
---- a/xorg-server-1.20.14/glx/vndext.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/vndext.c
 +++ b/Xserver/glx/vndext.c
 @@ -213,6 +213,7 @@ GlxExtensionInit(void)
  {
@@ -471,9 +471,9 @@ index 0513733..aa93900 100644
          if (GlxGetVendorForScreen(serverClient, screenInfo.screens[i]))
              return;
      extEntry->base = 0;
-diff --git a/xorg-server-1.20.14/include/extinit.h b/Xserver/include/extinit.h
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/extinit.h b/Xserver/include/extinit.h
 index 46081ad..9b3a4d5 100644
---- a/xorg-server-1.20.14/include/extinit.h
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/extinit.h
 +++ b/Xserver/include/extinit.h
 @@ -1,6 +1,7 @@
  /************************************************************
@@ -497,9 +497,9 @@ index 46081ad..9b3a4d5 100644
 +#endif
 +
  #endif
-diff --git a/xorg-server-1.20.14/mi/miinitext.c b/Xserver/mi/miinitext.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/mi/miinitext.c b/Xserver/mi/miinitext.c
 index b7c7021..0e28272 100644
---- a/xorg-server-1.20.14/mi/miinitext.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/mi/miinitext.c
 +++ b/Xserver/mi/miinitext.c
 @@ -1,6 +1,7 @@
  /***********************************************************
@@ -522,9 +522,9 @@ index b7c7021..0e28272 100644
  };
  
  Bool
-diff --git a/xorg-server-1.20.14/os/backtrace.c b/Xserver/os/backtrace.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/os/backtrace.c b/Xserver/os/backtrace.c
 index 2aad0e3..d0447d7 100644
---- a/xorg-server-1.20.14/os/backtrace.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/os/backtrace.c
 +++ b/Xserver/os/backtrace.c
 @@ -160,8 +160,10 @@ xorg_backtrace(void)
  #else                           /* not glibc or glibc < 2.1 */
@@ -537,9 +537,9 @@ index 2aad0e3..d0447d7 100644
  
  #if defined(HAVE_WALKCONTEXT)   /* Solaris 9 & later */
  
-diff --git a/xorg-server-1.20.14/os/log.c b/Xserver/os/log.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/os/log.c b/Xserver/os/log.c
 index cc82191..f5d2891 100644
---- a/xorg-server-1.20.14/os/log.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/os/log.c
 +++ b/Xserver/os/log.c
 @@ -640,7 +640,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
  void
@@ -550,9 +550,9 @@ index cc82191..f5d2891 100644
  }
  
  void
-diff --git a/xorg-server-1.20.14/randr/rrmode.c b/Xserver/randr/rrmode.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/randr/rrmode.c b/Xserver/randr/rrmode.c
 index d34025b..d76a24d 100644
---- a/xorg-server-1.20.14/randr/rrmode.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/randr/rrmode.c
 +++ b/Xserver/randr/rrmode.c
 @@ -1,5 +1,6 @@
  /*
@@ -577,9 +577,9 @@ index d34025b..d76a24d 100644
      mode = malloc(sizeof(RRModeRec) + modeInfo->nameLength + 1);
      if (!mode)
          return NULL;
-diff --git a/xorg-server-1.20.14/xfixes/xfixes.c b/Xserver/xfixes/xfixes.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xfixes/xfixes.c b/Xserver/xfixes/xfixes.c
 index 53a6bd6..28248d4 100644
---- a/xorg-server-1.20.14/xfixes/xfixes.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xfixes/xfixes.c
 +++ b/Xserver/xfixes/xfixes.c
 @@ -221,7 +221,27 @@ XFixesExtensionInit(void)
          return;
@@ -609,9 +609,9 @@ index 53a6bd6..28248d4 100644
                                   XFixesNumberErrors,
                                   ProcXFixesDispatch, SProcXFixesDispatch,
                                   NULL, StandardMinorOpcode)) != 0) {
-diff --git a/xorg-server-1.20.14/xkb/xkb.c b/Xserver/xkb/xkb.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkb.c b/Xserver/xkb/xkb.c
 index 68c59df..3363b1d 100644
---- a/xorg-server-1.20.14/xkb/xkb.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkb.c
 +++ b/Xserver/xkb/xkb.c
 @@ -5157,7 +5157,7 @@ _GetCountedString(char **wire_inout, ClientPtr client, char **str)
  }
@@ -935,9 +935,9 @@ index 68c59df..3363b1d 100644
          memcpy((char *) &acts[stuff->firstBtn], (char *) wire, sz);
          wire += sz;
          ed.reason |= XkbXI_ButtonActionsMask;
-diff --git a/xorg-server-1.20.14/xkb/xkbInit.c b/Xserver/xkb/xkbInit.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbInit.c b/Xserver/xkb/xkbInit.c
 index 9e45b4b..ddd5ef7 100644
---- a/xorg-server-1.20.14/xkb/xkbInit.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbInit.c
 +++ b/Xserver/xkb/xkbInit.c
 @@ -767,6 +767,30 @@ XkbProcessArguments(int argc, char *argv[], int i)
              return -1;
@@ -970,9 +970,9 @@ index 9e45b4b..ddd5ef7 100644
      else if ((strncmp(argv[i], "-accessx", 8) == 0) ||
               (strncmp(argv[i], "+accessx", 8) == 0)) {
          int j = 1;
-diff --git a/xorg-server-1.20.14/xkb/xkbUtils.c b/Xserver/xkb/xkbUtils.c
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbUtils.c b/Xserver/xkb/xkbUtils.c
 index 8975ade..9bc51fc 100644
---- a/xorg-server-1.20.14/xkb/xkbUtils.c
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbUtils.c
 +++ b/Xserver/xkb/xkbUtils.c
 @@ -1327,6 +1327,7 @@ _XkbCopyNames(XkbDescPtr src, XkbDescPtr dst)
          }

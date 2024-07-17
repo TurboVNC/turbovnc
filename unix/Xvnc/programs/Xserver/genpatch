@@ -1,8 +1,7 @@
 #!/bin/bash
-
-PROJECT=xorg-server-1.20.14
+PROJECT=xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f
 FILE=$PROJECT.tar.gz
-URL=https://www.x.org/releases/individual/xserver
+URL=https://gitlab.freedesktop.org/xorg/xserver/-/archive/dbf6d1c24a00a1f598756c71028876ff2b3db17f/
 SRCDIR=`dirname $0`
 
 . $SRCDIR/../../genpatch | filterdiff -p1 -x Xserver/include/dix-config.h.in -x Xserver/include/version-config.h.in -x Xserver/include/xkb-config.h.in >$SRCDIR/turbovnc.patch
