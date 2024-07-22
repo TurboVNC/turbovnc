@@ -892,7 +892,6 @@ extern void *rfbRealloc(void *ptr, size_t size);
 
 /* kbdptr.c */
 
-extern Bool compatibleKbd;
 extern Bool enableQEMUExtKeyEvent;
 extern unsigned char ptrAcceleration;
 

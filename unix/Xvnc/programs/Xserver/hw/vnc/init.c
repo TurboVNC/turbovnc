@@ -407,11 +407,6 @@ int ddxProcessArgument(int argc, char *argv[], int i)
 
   /***** TurboVNC input options *****/
 
-  if (strcasecmp(argv[i], "-compatiblekbd") == 0) {
-    compatibleKbd = TRUE;
-    return 1;
-  }
-
   if (strcasecmp(argv[i], "-nocursor") == 0) {
     noCursor = TRUE;
     return 1;
@@ -1747,7 +1742,6 @@ void ddxUseMsg(void)
 
   ErrorF("\nTurboVNC input options\n");
   ErrorF("======================\n");
-  ErrorF("-compatiblekbd         set META key = ALT key as in the original VNC\n");
   ErrorF("-nocursor              don't display a cursor\n");
   ErrorF("-pointerlocktimeout time\n");
   ErrorF("                       max time in ms (0 = indefinitely) to wait for a new\n");

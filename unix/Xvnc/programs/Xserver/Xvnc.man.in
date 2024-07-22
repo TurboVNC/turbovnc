@@ -205,11 +205,6 @@ connected viewer to complete [default: 20000].
 \fBTURBOVNC INPUT OPTIONS\fR
 
 .TP
-\fB\-compatiblekbd\fR
-Set META and ALT keys to the same X modifier flag, as in the original
-version of Xvnc by AT&T labs.
-
-.TP
 \fB\-nocursor\fR
 Don't display a mouse pointer on the remote desktop.
 
