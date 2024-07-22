@@ -836,26 +836,26 @@ sub Usage
       "\n".
       "<OPTIONS> are Xvnc options, or:\n".
       "\n".
+      "        -depth <DEPTH>\n".
+      "        -fg\n".
+      "        -fp <FONT-PATH>\n".
       "        -geometry <WIDTH>x<HEIGHT> or\n".
       "        -geometry <W0>x<H0>+<X0>+<Y0>[,<W1>x<H1>+<X1>+<Y1>,...]\n".
-      "        -depth <DEPTH>\n".
+      "        -log <FILE>\n".
+      "        -name <DESKTOP-NAME>\n".
+      "        -noautokill\n".
+      "        -novnc <DIR>\n".
+      "        -noxstartup\n".
+      "        -otp\n".
       "        -pixelformat rgb<NNN>\n".
       "        -pixelformat bgr<NNN>\n".
-      "        -fp <FONT-PATH>\n".
-      "        -name <DESKTOP-NAME>\n".
-      "        -novnc <DIR>\n".
-      "        -otp\n".
-      "        -fg\n".
+      "        -vgl\n".
+      "        -wm <SCRIPT>\n".
       "        -x509cert <CERT-FILE>\n".
       "        -x509key <KEY-FILE>\n".
-      "        -noautokill\n".
-      "        -noxstartup\n".
       "        -xstartup <SCRIPT>\n".
-      "        -wm <SCRIPT>\n".
-      "        -vgl\n".
-      "        -log <FILE>\n".
       "\n".
-      "See vncserver and Xvnc manual pages for more information.\n");
+      "See the vncserver and Xvnc man pages for more information.\n");
 }
 
 
