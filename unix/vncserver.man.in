@@ -2,7 +2,7 @@
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for vncserver
 .\"
-.\" Copyright (C) 2010-2013, 2015-2018, 2020, 2022 D. R. Commander
+.\" Copyright (C) 2010-2013, 2015-2018, 2020, 2022, 2024 D. R. Commander
 .\" Copyright (C) 2005-2006 Sun Microsystems, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
@@ -13,22 +13,14 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncserver 1 "October 2022" "" "TurboVNC"
+.TH vncserver 1 "July 2024" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch the TurboVNC Server
 .SH SYNOPSIS
 .nh
 .ad l
 \fBvncserver\fR
-[:\fIdisplay\fR] [\-geometry\ \fIwidth\fRx\fIheight\fR]
-[\-geometry\ \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]]
-[\-depth\ \fIdepth\fR] [\-pixelformat\ rgb\fINNN\fR|bgr\fINNN\fR]
-[\-fp\ \%\fIfont\-path\fR] [\-name\ \fIdesktop\-name\fR]
-[\-novnc \fInovnc\-dir\fR] [\-otp]
-[\-x509cert\ \fIcert\fR] [\-x509key\ \fIkey\fR] [\-fg] [\-noautokill]
-[\-noxstartup] [\-xstartup\ \fIscript\fR] [\-wm \fIwindow-manager\fR] [\-vgl]
-[\-uds] [\-log\ \fIfile\fR]
-\%[\fIXvnc\-options\fR...]
+[:\fIdisplay\fR] \%[\fIvncserver-options\fR...] \%[\fIXvnc\-options\fR...]
 .ad
 .hy
 .TP
@@ -38,22 +30,39 @@ vncserver \- a wrapper to launch the TurboVNC Server
 .TP
 \fBvncserver\fR \-help
 .SH DESCRIPTION
-\fBvncserver\fR is a wrapper script for \fBXvnc\fR, the VNC (Virtual Network
-Computing) X server. Xvnc provides all of the capabilities of a standard X
-server, but it does not connect to a physical display. Instead, \fBXvnc\fR
-creates a virtual X display that you can view or control remotely using a VNC
-viewer.
+\fBvncserver\fR is a wrapper script for \fBXvnc\fR(1), the VNC (Virtual Network
+Computing) X server.  Xvnc provides all of the capabilities of a standard X
+server, but it does not connect to a physical display.  Instead, Xvnc creates a
+virtual X display that you can view or control remotely using a VNC viewer.
 .SH OPTIONS
-You can add \fBXvnc\fR options to the \fBvncserver\fR command line. They will be
-passed through to Xvnc without modification. The options provided by
-\fBvncserver\fR itself are as follows:
+You can add Xvnc options to the vncserver command line.  They will be passed
+through to Xvnc without modification.  The options provided by vncserver itself
+are as follows:
 .TP
 \fB:\fR\fIdisplay\fR
-The X display number that Xvnc should occupy. If omitted, the next free display number
-is used.
+The X display number that Xvnc should occupy.  If omitted, the next free
+display number is used.
+.TP
+\fB\-depth\fR \fIdepth\fR
+Set the color depth of the virtual X display, in bits per pixel.  Must be 8,
+16, 24, 30, or 32 [default: 24].
+.TP
+\fB\-fg\fR
+Run the X startup script as a foreground process.  This has two effects:
+(1) The TurboVNC session can be aborted with CTRL-C, and (2) the TurboVNC
+session will exit as soon as the user logs out of the window manager in the
+session.  This may be necessary when launching TurboVNC from within certain
+grid computing environments.
+.TP
+\fB\-fp\fR \fIfont-path\fR
+The vncserver script will normally examine your system to figure out where it
+stores its X11 fonts and then generate an appropriate font path for Xvnc based
+on this.  If your system stores its X11 fonts in a location that vncserver does
+not know about, however, then this may fail.  In that case, you can manually
+specify a font path by using the \fB-fp\fR argument to vncserver.
 .TP
 \fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
-Set width and height of the virtual X display.
+Set width and height of the virtual X display [default: 1240x900].
 .TP
 \fB\-geometry\fR \fIW0\fRx\fIH0\fR+\fIX0\fR+\fIY0\fR[,\fIW1\fRx\fIH1\fR+\fIX1\fR+\fIY1\fR,...,\fIWn\fRx\fIHn\fR+\fIXn\fR+\fIYn\fR]
 Set multi-screen geometry of the virtual X display.  Wi and Hi are the width
@@ -61,76 +70,97 @@ and height of Screen i, and Xi and Yi specify the offset of Screen i relative
 to the origin.  The total width and height are determined by the bounding box
 of all screens.
 .TP
-\fB\-depth\fR \fIdepth\fR
-Set the color depth of the virtual X display, in bits per pixel. Must
-be a value between 8 and 32.
+\fB\-help\fR
+Print a brief list of command-line options.
 .TP
-\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
-Specify the pixel format of the virtual X display. Xvnc can use any pixel
-format you choose, but if this pixel format does not match the pixel format
-of the display on which vncviewer is running, then Xvnc will perform pixel
-format conversion prior to sending images to vncviewer. This can slow
-performance. The default pixel format, rgb888, is equivalent to BGRA on little
-endian systems or ARGB on big endian systems.  A pixel format of bgr888 is
-equivalent to RGBA on little endian systems or ABGR on big endian systems.
+\fB\-kill\fR \fB:\fR\fIdisplay\fR
+Stop the TurboVNC session that is currently running on the specified display.
 .TP
-\fB\-fp\fR \fIfont-path\fR
-The vncserver script will normally examine your system to figure out where it
-stores its X11 fonts and then generate an appropriate font path for Xvnc based
-on this.  If your system stores its X11 fonts in a location that vncserver does
-not know about, however, then this may fail.  In that case, you can manually
-specify a font path by using the -fp argument to vncserver.
+\fB\-list\fR
+List the display numbers and process ID's of all TurboVNC sessions that are
+currently running under your account on this host.
+.TP
+\fB\-log\fR  \fIfile\fR
+Redirect the output of Xvnc to \fIfile\fR rather than to
+\fB$vncUserDir/.vnc/{hostname}{display}.log\fR.
 .TP
 \fB\-name\fR \fIstring\fR
-This specifies the name of the desktop.
+Specify the name of the remote desktop.
+.TP
+\fB\-noautokill\fR
+Normally, vncserver automatically kills the TurboVNC session when the X startup
+script exits (which, in most cases, means that the session will be killed
+automatically whenever the user logs out of the window manager running in the
+session.)  This option disables that behavior.
 .TP
 \fB-novnc\fR \fInovnc\-dir\fR
 Automatically start a simple web server that serves up noVNC (an
 HTML 5/JavaScript VNC viewer) from directory \fInovnc\-dir\fR when starting a
-TurboVNC session.  \fBvncserver\fR tracks the process ID of the noVNC web
-server and automatically kills that process along with the TurboVNC session.
-noVNC works in any web browser (including on mobile devices), but since it only
-supports VNC Password authentication, it is strongly recommended that it be
-used only with one-time passwords unless the connections are encrypted (see
+TurboVNC session.  vncserver tracks the process ID of the noVNC web server and
+automatically kills that process along with the TurboVNC session.  noVNC works
+in any web browser (including on mobile devices), but since it only supports
+VNC Password authentication, it is strongly recommended that it be used only
+with one-time passwords unless the connections are encrypted (see
 \fB-x509cert\fR and \fB-x509key\fR below.)  The performance of noVNC will
 generally be much less than that of the TurboVNC Viewer.
+.TP
+\fB\-noxstartup\fR
+Do not run the default X startup script (\fBxstartup.turbovnc\fR) after
+launching Xvnc.  This option allows you to manually start a window manager in
+your TurboVNC session or to run a full-screen application without a window
+manager.
 .TP
 \fB\-otp\fR
 If the One-Time Password authentication method is enabled and permitted in
 Xvnc, then this generates an initial one-time password and prints it to the
 console prior to starting Xvnc.
 .TP
+\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
+Specify the pixel format of the virtual X display.  Xvnc can use any pixel
+format you choose, but if this pixel format does not match the pixel format of
+the display on which the VNC viewer is running, then Xvnc will perform pixel
+format conversion prior to sending images to the VNC viewer.  This can slow
+performance.  The default pixel format, rgb888, is equivalent to BGRA on little
+endian systems or ARGB on big endian systems.  A pixel format of bgr888 is
+equivalent to RGBA on little endian systems or ABGR on big endian systems.
+.TP
+\fB\-uds\fR
+Listen on a Unix domain socket rather than a TCP port for connections from VNC
+viewers.
+.TP
+\fB\-vgl\fR
+This sets an environment variable (\fBTVNC_VGL\fR) to 1, which causes the
+default X startup script to launch the window manager using VirtualGL.  More
+specifically, if \fBTVNC_VGL\fR is set, then the default X startup script will
+launch the window manager using a command specified in another environment
+variable (\fBTVNC_VGLRUN\fR.)  The default value of \fBTVNC_VGLRUN\fR is
+"vglrun +wm", but users can override that environment variable in order to pass
+additional arguments to vglrun, to specify the full path of vglrun, or to use
+another command to launch the window manager.
+.TP
+\fB-wm\fR \fIwindow-manager\fR
+This sets the value of the \fBTVNC_WM\fR environment variable to
+\fIwindow-manager\fR.  The default X startup script will launch the window
+manager specified in the \fBTVNC_WM\fR environment variable, if it is set and a
+corresponding session desktop file exists under \fB/usr/share/xsessions\fR
+(\fB/usr/local/share/xsessions\fR on *BSD systems.)  If the window manager is
+not specified, then the default X startup script will launch the "gnome" or
+"ubuntu" window manager if a corresponding session desktop file exists and
+execute \fB/etc/X11/xinit/xinitrc\fR otherwise.
+.TP
 \fB\-x509cert\fR \fIcert\fR
 Specify the X.509 signed certificate file (in PEM format) to use with X.509
 encryption, the built-in WebSocket proxy, and the noVNC web server.  If this
 argument is specified, then it is passed to Xvnc and the noVNC web server.
-Otherwise, the \fBvncserver\fR script passes a default value of
-$vncUserDir/x509_cert.pem.
+Otherwise, the vncserver script passes a default value of
+\fB$vncUserDir/x509_cert.pem\fR.
 .TP
 \fB\-x509key\fR \fIkey\fR
 Specify the X.509 private key file (in PEM format) to use with X.509
 encryption, the built-in WebSocket proxy, and the noVNC web server.  If this
 argument is specified, then it is passed to Xvnc and the noVNC web server.
-Otherwise, the \fBvncserver\fR script passes a default value of
-$vncUserDir/x509_private.pem.
-.TP
-\fB\-fg\fR
-Runs the X startup script as a foreground process.  This has two effects:
-(1) The TurboVNC session can be aborted with CTRL-C, and (2) the TurboVNC
-session will exit as soon as the user logs out of the window manager in the
-session.  This may be necessary when launching TurboVNC from within certain
-grid computing environments.
-.TP
-\fB\-noautokill\fR
-Normally, \fBvncserver\fR automatically kills the TurboVNC session when the
-X startup script exits (which, in most cases, means that the session will be
-killed automatically whenever the user logs out of the window manager running
-in the session.)  This option disables that behavior.
-.TP
-\fB\-noxstartup\fR
-Do not run the default X startup script (xstartup.turbovnc) after launching
-Xvnc.  This option allows you to manually start a window manager in your
-TurboVNC session or to run a full-screen application without a window manager.
+Otherwise, the vncserver script passes a default value of
+\fB$vncUserDir/x509_private.pem\fR.
 .TP
 \fB\-xstartup\fR \fIscript\fR
 Run a custom X startup script, instead of the default X startup script, after
@@ -138,70 +168,39 @@ launching Xvnc.  This is useful in conjunction with the \fB-fg\fR option, since
 it allows for running a full-screen application (such as a game or a
 virtualization solution) in TurboVNC without a window manager and causes the
 TurboVNC session to terminate whenever the application exits.
-.TP
-\fB-wm\fR \fIwindow-manager\fR
-This sets the value of the \fBTVNC_WM\fR environment variable to
-\fIwindow-manager\fR.  The default X startup script will launch the window
-manager specified in the \fBTVNC_WM\fR environment variable, if it is set and
-a corresponding session desktop file exists under /usr/share/xsessions.
-.TP
-\fB\-vgl\fR
-This sets an environment variable (\fBTVNC_VGL\fR) to 1, and the default
-X startup script will launch the window manager using VirtualGL if that
-environment variable is set.  More specifically, if \fBTVNC_VGL\fR is set, then
-the default X startup script will launch the window manager using a command
-specified in another environment variable (\fBTVNC_VGLRUN\fR.)  The default
-value of \fBTVNC_VGLRUN\fR is "vglrun +wm", but users can override that
-environment variable in order to pass additional arguments to vglrun, to
-specify the full path of vglrun, or to use another command to launch the window
-manager.
-.TP
-\fB\-uds\fR
-Listen on a Unix domain socket rather than a TCP port for connections from VNC
-viewers.
-.TP
-\fB\-log\fR  \fIfile\fR
-Redirect the output of Xvnc to \fIfile\fR, rather than to
-$vncUserDir/.vnc/{hostname}{display}.log.
-.TP
-\fB\-kill\fR \fB:\fR\fIdisplay\fR
-Stops the VNC session that is currently running on the specified display.
-.TP
-\fB\-list\fR
-Lists the display numbers and process ID's of all VNC sessions that are
-currently running under your account on this host.
-.TP
-\fB\-help\fR
-Prints a brief list of command line options
 .SH EXAMPLES
 .TP
 \fBvncserver\fR
-Starts \fBXvnc\fR on the next available display and uses suitable
-defaults.
+Start Xvnc on the next available X display number and use suitable defaults.
 .TP
 \fBvncserver\fR \fI:1\fR
-Starts \fBXvnc\fR on display :1.
+Start Xvnc on Display :1.
 .TP
 \fBvncserver\fR -geometry \fI1024x768 :1\fR
-Starts \fBXvnc\fR on display :1 with desktop size of 1024x768 pixels.
+Start Xvnc on Display :1 with a desktop size of 1024x768 pixels.
 .TP
 \fBvncserver\fR -kill \fI:1\fR
-Shuts down the VNC session running on display :1.
-.SH FILES
+Shut down the TurboVNC session running on Display :1.
+.SH CONFIGURATION FILES
 .TP
-@CMAKE_INSTALL_FULL_SYSCONFDIR@/turbovncserver.conf
+\fB@CMAKE_INSTALL_FULL_SYSCONFDIR@/turbovncserver.conf\fR
 System-wide configuration file for the TurboVNC Server.
 .TP
-$HOME/.vnc/turbovncserver.conf
-User configuration file for the TurboVNC Server. Settings in this file
+\fB$HOME/.vnc/turbovncserver.conf\fR
+Per-user configuration file for the TurboVNC Server.  Settings in this file
 override the system-wide configuration.
+.P
+These files allow the vncserver defaults to be configured persistently on a
+per-user or system-wide basis using Perl variables.  See
+\fB@CMAKE_INSTALL_FULL_SYSCONFDIR@/turbovncserver.conf\fR for a description
+of each variable.
 .SH SEE ALSO
 \fBXvnc\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1), \fBvncconnect\fR(1)
 .SH AUTHORS
-VNC was originally developed at AT&T Laboratories Cambridge. TightVNC
-additions were implemented by Constantin Kaplinsky. TurboVNC, based
-on TightVNC, is provided by The VirtualGL Project. Many other people
-participated in development, testing and support.
+VNC was originally developed at AT&T Laboratories Cambridge.  TightVNC
+additions were implemented by Constantin Kaplinsky.  TurboVNC, based on
+TightVNC, is provided by The VirtualGL Project.  Many other people participated
+in development, testing and support.
 
 \fBMan page authors:\fR
 .br

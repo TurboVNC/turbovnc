@@ -2,7 +2,7 @@
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for X vncpasswd
 .\"
-.\" Copyright (C) 2010, 2015, 2018 D. R. Commander
+.\" Copyright (C) 2010, 2015, 2018, 2024 D. R. Commander
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncpasswd 1 "October 2018" "" "TurboVNC"
+.TH vncpasswd 1 "July 2024" "" "TurboVNC"
 .SH NAME
 vncpasswd \- set passwords for TurboVNC sessions
 .SH SYNOPSIS
@@ -34,7 +34,7 @@ vncpasswd \- set passwords for TurboVNC sessions
 .SH DESCRIPTION
 The \fBvncpasswd\fR utility can be used to create and change
 passwords for Xvnc (the TurboVNC virtual X server.)  \fBXvnc\fR uses these
-passwords when started with the \fB\-rfbauth\fR command line option
+passwords when started with the \fB\-rfbauth\fR command-line option
 (or when started from the \fBvncserver\fR script.)
 
 \fBvncpasswd\fR allows one to enter a primary VNC password and an
@@ -42,12 +42,12 @@ optional view-only password.  \fBXvnc\fR will ignore mouse and keyboard
 input from viewers that authenticate with the view-only password.
 
 The password filename defaults to \fB$HOME/.vnc/passwd\fR, unless the
-\fB\-t\fR command line option was used (see the OPTIONS section
+\fB\-t\fR command-line option was used (see the OPTIONS section
 below.)  The \fB$HOME/.vnc/\fR directory will be created if it does not
 exist.
 
 Each password has to be longer than five characters (unless the
-\fB\-f\fR command line option was used-- see its description below.)
+\fB\-f\fR command-line option was used-- see its description below.)
 Only the first eight characters are significant.  If the primary
 password is too short, then vncpasswd will abort.  If the view-only
 password is too short, then only the primary password will be saved.
