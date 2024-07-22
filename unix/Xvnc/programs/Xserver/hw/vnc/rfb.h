@@ -810,7 +810,6 @@ extern void *rfbRealloc(void *ptr, size_t size);
 
 /* kbdptr.c */
 
-extern Bool compatibleKbd;
 extern unsigned char ptrAcceleration;
 
 extern void PtrDeviceOn(DeviceIntPtr);
