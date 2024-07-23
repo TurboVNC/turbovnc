@@ -909,6 +909,39 @@ sub Usage
 #
 # List
 #
+# If -sessionlist is passed to vncserver instead of -list, then this subroutine
+# prints the TurboVNC session list in a machine-readable format that the
+# TurboVNC Session Manager can easily parse through its SSH connection.  The
+# machine-readable session list contains the following fields, in the following
+# order, separated by a single space and on the same line:
+#
+# - The total number of TurboVNC sessions that are currently running on this
+#   host under the user account that invoked vncserver
+# - The number of parameters to be listed for each session (currently 3 but may
+#   increase in the future)
+# - The X display number for Session 1
+# - The Xvnc process ID for Session 1
+# - The noVNC web server process ID for Session 1 (or 0 if a noVNC web server
+#   was not started with the session)
+#   ...
+# - The X display number for Session N
+# - The Xvnc process ID for Session N
+# - The noVNC web server process ID for Session N (or 0 if a noVNC web server
+#   was not started with the session)
+#
+# If -sessionstart is passed to vncserver, then vncserver starts a new TurboVNC
+# session and calls this subroutine with a second argument (the X display
+# number of the new session), which causes the subroutine to use the format
+# described above to list only the new session.  (Thus, the first field will
+# always be 1 in that case.)
+#
+# Since the TurboVNC Session Manager relies upon these interfaces, they are
+# considered stable and (barring some unforeseen dire need) will not change in
+# a backward-incompatible manner.  The number of parameters will likely
+# increase in the future (for instance, to support Unix domain sockets with the
+# TurboVNC Session Manager), but the meaning of the existing parameters should
+# stay the same.
+#
 
 sub List
 {
