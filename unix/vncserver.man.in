@@ -136,13 +136,13 @@ another command to launch the window manager.
 .TP
 \fB-wm\fR \fIwindow-manager\fR
 This sets the value of the \fBTVNC_WM\fR environment variable to
-\fIwindow-manager\fR.  The default X startup script will launch the window
-manager specified in the \fBTVNC_WM\fR environment variable, if it is set and a
+\fIwindow-manager\fR.  If the \fBTVNC_WM\fR environment variable is set, then
+the default X startup script will launch the specified window manager if a
 corresponding session desktop file exists under \fB/usr/share/xsessions\fR
-(\fB/usr/local/share/xsessions\fR on *BSD systems.)  If the window manager is
-not specified, then the default X startup script will launch the "gnome" or
-"ubuntu" window manager if a corresponding session desktop file exists and
-execute \fB/etc/X11/xinit/xinitrc\fR otherwise.
+(\fB/usr/local/share/xsessions\fR on *BSD systems) and fail otherwise.  If the
+window manager is not specified, then the default X startup script will launch
+the "gnome" or "ubuntu" window manager if a corresponding session desktop file
+exists and execute \fB/etc/X11/xinit/xinitrc\fR otherwise.
 .TP
 \fB\-x509cert\fR \fIcert\fR
 Specify the X.509 signed certificate file (in PEM format) to use with X.509
