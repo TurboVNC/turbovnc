@@ -29,6 +29,10 @@ with the TurboVNC Server on Ubuntu 23.10 and later (if the `polkitd-pkla`
 package is not installed) and on RHEL 7 and Fedora 19 and later (if the
 `polkit-pkla-compat` package is not installed.)
 
+5. The default X startup script (`xstartup.turbovnc`) now throws an error,
+rather than trying to execute **xinitrc** or twm, if a window manager is
+specified and the session desktop file for the window manager cannot be found.
+
 
 3.1.1
 =====

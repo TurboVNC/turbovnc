@@ -82,6 +82,31 @@ OS=`uname -s`
 
 # Emulate GDM
 
+find_session()
+{
+  for SESSION in $SESSIONS; do
+    if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
+      DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
+    fi
+  done
+  if [ "$DESKTOP_SESSION" = "" ]; then
+    if [ "$TVNC_WM" = "" ]; then
+      echo "xstartup.turbovnc: The session desktop file for the default window manager was"
+      echo "xstartup.turbovnc:   not found at:"
+    else
+      echo "xstartup.turbovnc: The session desktop file for the '$TVNC_WM'"
+      echo "xstartup.turbovnc:   window manager was not found at:"
+    fi
+    for SESSION in $SESSIONS; do
+      echo "xstartup.turbovnc:   $XSESSIONSDIR/$SESSION.desktop"
+    done
+    if [ "$TVNC_WM" != "" ]; then
+      exit 1
+    fi
+  fi
+  unset SESSIONS
+}
+
 # Use Unity 2D on Ubuntu 12 if no WM is specified.  Historically, Unity 3D
 # 5.20.x didn't even pretend to work properly with our X server, although it
 # probably would now.
@@ -113,16 +138,12 @@ case "$TVNC_WM" in
       NOXSESSION=1
       TVNC_WM=`echo $TVNC_WM | $SED -r 's/:noxsession$//g'`
     fi
-    # RHEL 7, Fedora: gnome-classic
+    # RHEL 7+, Fedora: gnome-classic
     # Ubuntu 12: ubuntu-2d
     # Ubuntu 14: gnome-fallback
     # Ubuntu 16+: gnome-flashback-metacity
-    for SESSION in "gnome-classic" "gnome-fallback" "ubuntu-2d" "2d-gnome" \
-      "gnome-flashback-metacity"; do
-      if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
-        DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
-      fi
-    done
+    SESSIONS="gnome-classic gnome-fallback ubuntu-2d 2d-gnome gnome-flashback-metacity"
+    find_session
     unset TVNC_WM
     ;;
   *)
@@ -136,22 +157,16 @@ case "$TVNC_WM" in
     esac
     if [ "$TVNC_WM" = "" ]; then
       # No window manager was specified.  Use GNOME or Unity if it exists.
-      for SESSION in "gnome" "ubuntu"; do
-        if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
-          DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
-        fi
-      done
+      SESSIONS="gnome ubuntu"
+      find_session
     else
       # For backward compatibility with TurboVNC 2.2.x, we allow a window
       # manager's startup script (e.g. mate-session, gnome-session) to be
       # specified using -wm / $wm, but if there is a matching session desktop
       # file for it, we use that instead.
-      SESSION=`echo $TVNC_WM | $SED -r 's/^.*\/|-session$//g'`
-      if [ "$XSESSIONSDIR" != "" -a -f "$XSESSIONSDIR/$SESSION.desktop" ]; then
-        DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
-        unset TVNC_WM
-      fi
-      unset SESSION
+      SESSIONS="`echo $TVNC_WM | $SED -r 's/^.*\/|-session$//g'`"
+      find_session
+      unset TVNC_WM
     fi
     ;;
 esac
