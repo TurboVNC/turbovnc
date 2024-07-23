@@ -118,8 +118,7 @@ endif()
 configure_file(vncserver.man.in vncserver.man @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/vncserver.man
 	DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 RENAME vncserver.1)
-configure_file(turbovncserver.conf.in turbovncserver.conf @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/turbovncserver.conf
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver.conf
 	DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-security.conf
 	DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR})

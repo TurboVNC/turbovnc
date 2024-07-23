@@ -51,9 +51,6 @@
 DeviceIntPtr kbdDevice = NULL;
 static DeviceIntPtr ptrDevice = NULL;
 
-/* If TRUE, then keys META == ALT as in the original AT&T version. */
-Bool compatibleKbd = FALSE;
-
 /* Avoid fake Shift presses for keys affected by NumLock */
 Bool avoidShiftNumLock = TRUE;
 Bool ignoreLockModifiers = TRUE;
