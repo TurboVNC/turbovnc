@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-06-30T11:52:09">
+<meta name="date" content="2024-07-24T12:29:09">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3169,35 +3169,24 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
         <table class="standard">
           <thead class="standard">
           <tr class="head ">
-            <th class="head standard">System Type</th>
             <th class="head standard">Connection Type</th>
             <th class="head standard">Default <code>VNC_VIA_CMD</code>/<code>turbovnc.via</code> Value</th>
           </tr>
           </thead>
           <tr class="standard">
-            <td class="standard">Linux/Un*x and Mac</td>
             <td class="standard">TCP port</td>
-            <td class="standard"><code>/usr/bin/env&nbsp;ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code></td>
+            <td class="standard"><code><em>{ssh}</em> -f -L %L:%H:%R %G sleep 20</code></td>
           </tr>
           <tr class="standard">
-            <td class="standard">Windows</td>
-            <td class="standard">TCP port</td>
-            <td class="standard"><code>ssh.exe&nbsp;-axf&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code></td>
-          </tr>
-          <tr class="standard">
-            <td class="standard">Linux/Un*x and Mac</td>
             <td class="standard">Unix domain socket</td>
-            <td class="standard"><code>/usr/bin/env&nbsp;ssh&nbsp;-ax&nbsp;-J&nbsp;%G&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
-          </tr>
-          <tr class="standard">
-            <td class="standard">Windows</td>
-            <td class="standard">Unix domain socket</td>
-            <td class="standard"><code>ssh.exe&nbsp;-ax&nbsp;-J&nbsp;%G&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
+            <td class="standard"><code><em>{ssh}</em> -J %G &ndash; %H exec socat stdio unix-connect:%R</code></td>
           </tr>
         </table>
         </div>
         
-        <br /> When the <code>-tunnel</code> option is used along with the 
+        <br /> <em><code>{ssh}</code></em> is the external SSH client command, 
+        which can be configured using the <code>-extsshcommand</code> option. 
+        <br /><br /> When the <code>-tunnel</code> option is used along with the 
         <code>-extssh</code> option, the TurboVNC Viewer reads the 
         <code>VNC_TUNNEL_CMD</code> environment variable or the 
         <code>turbovnc.tunnel</code> system property, expands patterns beginning 
@@ -3210,35 +3199,24 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1&nbsp;/opt/TurboVNC/bin/vncviewer
         <table class="standard">
           <thead class="standard">
           <tr class="head ">
-            <th class="head standard">System Type</th>
             <th class="head standard">Connection Type</th>
             <th class="head standard">Default <code>VNC_TUNNEL_CMD</code>/<code>turbovnc.tunnel</code> Value</th>
           </tr>
           </thead>
           <tr class="standard">
-            <td class="standard">Linux/Un*x and Mac</td>
             <td class="standard">TCP port</td>
-            <td class="standard"><code>/usr/bin/env&nbsp;ssh&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code></td>
+            <td class="standard"><code><em>{ssh}</em> -f -L %L:localhost:%R %H sleep 20</code></td>
           </tr>
           <tr class="standard">
-            <td class="standard">Windows</td>
-            <td class="standard">TCP port</td>
-            <td class="standard"><code>ssh.exe&nbsp;-axf&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code></td>
-          </tr>
-          <tr class="standard">
-            <td class="standard">Linux/Un*x and Mac</td>
             <td class="standard">Unix domain socket</td>
-            <td class="standard"><code>/usr/bin/env&nbsp;ssh&nbsp;-ax&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
-          </tr>
-          <tr class="standard">
-            <td class="standard">Windows</td>
-            <td class="standard">Unix domain socket</td>
-            <td class="standard"><code>ssh.exe&nbsp;-ax&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
+            <td class="standard"><code><em>{ssh}</em> &ndash; %H exec socat stdio unix-connect:%R</code></td>
           </tr>
         </table>
         </div>
         
-        <br /> The following patterns are recognized in the 
+        <br /> <em><code>{ssh}</code></em> is the external SSH client command, 
+        which can be configured using the <code>-extsshcommand</code> option. 
+        <br /><br /> The following patterns are recognized in the 
         <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> environment 
         variables and their corresponding system properties.  Note that 
         <code>%H</code> and <code>%R</code> must be present in the command-line 

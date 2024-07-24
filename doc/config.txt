@@ -282,17 +282,16 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	to the VNC gateway.  If ''VNC_VIA_CMD'' and ''turbovnc.via'' are not set,
 	then this command-line template defaults to one of the following values:
 	{nl}{nl}
-	|| System Type || Connection Type || \
+	|| Connection Type || \
 		Default ''VNC_VIA_CMD''/''turbovnc.via'' Value ||
-	| Linux/Un*x and Mac | TCP port | \
-		''/usr/bin/env ssh -axf -L %L:%H:%R %G sleep 20'' |
-	| Windows | TCP port | \
-		''ssh.exe -axf -L %L:%H:%R %G sleep 20'' |
-	| Linux/Un*x and Mac | Unix domain socket | \
-		''/usr/bin/env ssh -ax -J %G -- %H exec socat stdio unix-connect:%R'' |
-	| Windows | Unix domain socket | \
-		''ssh.exe -ax -J %G -- %H exec socat stdio unix-connect:%R'' |
+	| TCP port | \
+		{pcode: __{ssh}__ -f -L %L:%H:%R %G sleep 20} |
+	| Unix domain socket | \
+		{pcode: __{ssh}__ -J %G -- %H exec socat stdio unix-connect:%R} |
 	{nl} \
+	__''{ssh}''__ is the external SSH client command, which can be configured
+	using the ''-extsshcommand'' option.
+	{nl}{nl} \
 	When the ''-tunnel'' option is used along with the ''-extssh'' option, the
 	TurboVNC Viewer reads the ''VNC_TUNNEL_CMD'' environment variable or the
 	''turbovnc.tunnel'' system property, expands patterns beginning with the "%"
@@ -300,17 +299,16 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	to the VNC host.  If ''VNC_TUNNEL_CMD'' and ''turbovnc.tunnel'' are not set,
 	then this command-line template defaults to one of the following values:
 	{nl}{nl}
-	|| System Type || Connection Type || \
+	|| Connection Type || \
 		Default ''VNC_TUNNEL_CMD''/''turbovnc.tunnel'' Value ||
-	| Linux/Un*x and Mac | TCP port | \
-		''/usr/bin/env ssh -axf -L %L:localhost:%R %H sleep 20'' |
-	| Windows | TCP port | \
-		''ssh.exe -axf -L %L:localhost:%R %H sleep 20'' |
-	| Linux/Un*x and Mac | Unix domain socket | \
-		''/usr/bin/env ssh -ax -- %H exec socat stdio unix-connect:%R'' |
-	| Windows | Unix domain socket | \
-		''ssh.exe -ax -- %H exec socat stdio unix-connect:%R'' |
+	| TCP port | \
+		{pcode: __{ssh}__ -f -L %L:localhost:%R %H sleep 20} |
+	| Unix domain socket | \
+		{pcode: __{ssh}__ -- %H exec socat stdio unix-connect:%R} |
 	{nl} \
+	__''{ssh}''__ is the external SSH client command, which can be configured
+	using the ''-extsshcommand'' option.
+	{nl}{nl} \
 	The following patterns are recognized in the ''VNC_VIA_CMD'' and
 	''VNC_TUNNEL_CMD'' environment variables and their corresponding system
 	properties.  Note that ''%H'' and ''%R'' must be present in the command-line

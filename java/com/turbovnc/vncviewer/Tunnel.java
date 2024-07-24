@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2023 D. R. Commander.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2024 D. R. Commander.
  *                                               All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
@@ -85,7 +85,8 @@ public class Tunnel {
       if (localPort == 0)
         throw new ErrorException("Could not obtain free TCP port");
 
-      if (params.extSSH.get() || (pattern != null && pattern.length() > 0))
+      if (params.extSSH.get() || params.extSSHCommand.get() != null ||
+          (pattern != null && pattern.length() > 0))
         createTunnelExt(gatewayHost, remoteHost, remotePort, localPort,
                         pattern, params, tunnel);
       else {
@@ -266,12 +267,10 @@ public class Tunnel {
      VNC_TUNNEL_CMD and VNC_VIA_CMD environment variables as the native viewers
      do. */
 
-  private static final String DEFAULT_SSH_CMD =
-    (Utils.isWindows() ? "ssh.exe" : "/usr/bin/env ssh");
-  private static final String DEFAULT_TUNNEL_CMD =
-    DEFAULT_SSH_CMD + " -axf -L %L:localhost:%R %H sleep 20";
-  private static final String DEFAULT_VIA_CMD =
-    DEFAULT_SSH_CMD + " -axf -L %L:%H:%R %G sleep 20";
+  private static final String DEFAULT_TUNNEL_ARGS =
+    " -f -L %L:localhost:%R %H sleep 20";
+  private static final String DEFAULT_VIA_ARGS =
+    " -f -L %L:%H:%R %G sleep 20";
 
   private static void createTunnelExt(String gatewayHost, String remoteHost,
                                       int remotePort, int localPort,
@@ -279,7 +278,8 @@ public class Tunnel {
                                       boolean tunnel)
                                       throws Exception {
     if (pattern == null || pattern.length() < 1)
-      pattern = (tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
+      pattern = (tunnel ? params.extSSHCommand.get() + DEFAULT_TUNNEL_ARGS :
+                          params.extSSHCommand.get() + DEFAULT_VIA_ARGS);
 
     String command = fillCmdPattern(pattern, gatewayHost, remoteHost,
                                     remotePort, params.udsPath, localPort,
@@ -296,17 +296,19 @@ public class Tunnel {
       throw new ErrorException("External SSH error");
   }
 
-  private static final String DEFAULT_TUNNEL_CMD_UDS =
-    DEFAULT_SSH_CMD + " -ax -- %H exec socat stdio unix-connect:%R";
-  private static final String DEFAULT_VIA_CMD_UDS =
-    DEFAULT_SSH_CMD + " -ax -J %G -- %H exec socat stdio unix-connect:%R";
+  private static final String DEFAULT_TUNNEL_ARGS_UDS =
+    " -- %H exec socat stdio unix-connect:%R";
+  private static final String DEFAULT_VIA_ARGS_UDS =
+    " -J %G -- %H exec socat stdio unix-connect:%R";
 
   private static Socket createTunnelExtUDS(String gatewayHost,
                                            String remoteHost, String pattern,
                                            Params params, boolean tunnel)
                                            throws Exception {
     if (pattern == null || pattern.length() < 1)
-      pattern = (tunnel ? DEFAULT_TUNNEL_CMD_UDS : DEFAULT_VIA_CMD_UDS);
+      pattern = (tunnel ?
+                 params.extSSHCommand.get() + DEFAULT_TUNNEL_ARGS_UDS :
+                 params.extSSHCommand.get() + DEFAULT_VIA_ARGS_UDS);
 
     // Escape the Unix domain socket path twice, since it will be interpreted
     // once by ArgumentTokenizer.tokenize() and again by the remote shell.
