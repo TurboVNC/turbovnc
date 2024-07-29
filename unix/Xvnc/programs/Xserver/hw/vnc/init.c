@@ -980,7 +980,8 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 
   prfb->CloseScreen = pScreen->CloseScreen;
 #ifdef DRI3
-  prfb->SourceValidate = pScreen->SourceValidate;
+  if (driNode)
+    prfb->SourceValidate = pScreen->SourceValidate;
 #endif
   prfb->CreateGC = pScreen->CreateGC;
   prfb->CopyWindow = pScreen->CopyWindow;
@@ -991,11 +992,13 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
     prfb->Composite = ps->Composite;
     prfb->Glyphs = ps->Glyphs;
 #ifdef DRI3
-    prfb->CompositeRects = ps->CompositeRects;
-    prfb->Trapezoids = ps->Trapezoids;
-    prfb->Triangles = ps->Triangles;
-    prfb->TriStrip = ps->TriStrip;
-    prfb->TriFan = ps->TriFan;
+    if (driNode) {
+      prfb->CompositeRects = ps->CompositeRects;
+      prfb->Trapezoids = ps->Trapezoids;
+      prfb->Triangles = ps->Triangles;
+      prfb->TriStrip = ps->TriStrip;
+      prfb->TriFan = ps->TriFan;
+    }
 #endif
   }
 #endif
@@ -1007,7 +1010,8 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 
   pScreen->CloseScreen = rfbCloseScreen;
 #ifdef DRI3
-  pScreen->SourceValidate = rfbSourceValidate;
+  if (driNode)
+    pScreen->SourceValidate = rfbSourceValidate;
 #endif
   pScreen->CreateGC = rfbCreateGC;
   pScreen->CopyWindow = rfbCopyWindow;
@@ -1017,11 +1021,13 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
     ps->Composite = rfbComposite;
     ps->Glyphs = rfbGlyphs;
 #ifdef DRI3
-    ps->CompositeRects = rfbCompositeRects;
-    ps->Trapezoids = rfbTrapezoids;
-    ps->Triangles = rfbTriangles;
-    ps->TriStrip = rfbTriStrip;
-    ps->TriFan = rfbTriFan;
+    if (driNode) {
+      ps->CompositeRects = rfbCompositeRects;
+      ps->Trapezoids = rfbTrapezoids;
+      ps->Triangles = rfbTriangles;
+      ps->TriStrip = rfbTriStrip;
+      ps->TriFan = rfbTriFan;
+    }
 #endif
   }
 #endif

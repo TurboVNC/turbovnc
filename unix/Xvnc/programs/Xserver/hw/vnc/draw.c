@@ -292,7 +292,8 @@ Bool rfbCloseScreen(ScreenPtr pScreen)
 
   pScreen->CloseScreen = prfb->CloseScreen;
 #ifdef DRI3
-  pScreen->SourceValidate = prfb->SourceValidate;
+  if (driNode)
+    pScreen->SourceValidate = prfb->SourceValidate;
 #endif
   pScreen->CreateGC = prfb->CreateGC;
   pScreen->CopyWindow = prfb->CopyWindow;
@@ -303,11 +304,13 @@ Bool rfbCloseScreen(ScreenPtr pScreen)
     ps->Composite = prfb->Composite;
     ps->Glyphs = prfb->Glyphs;
 #ifdef DRI3
-    ps->CompositeRects = prfb->CompositeRects;
-    ps->Trapezoids = prfb->Trapezoids;
-    ps->Triangles = prfb->Triangles;
-    ps->TriStrip = prfb->TriStrip;
-    ps->TriFan = prfb->TriFan;
+    if (driNode) {
+      ps->CompositeRects = prfb->CompositeRects;
+      ps->Trapezoids = prfb->Trapezoids;
+      ps->Triangles = prfb->Triangles;
+      ps->TriStrip = prfb->TriStrip;
+      ps->TriFan = prfb->TriFan;
+    }
 #endif
   }
 #endif

@@ -268,6 +268,8 @@ void rfbDRI3SyncBOToDrawable(DrawablePtr drawable)
   int xoff, yoff;
   struct gbm_bo *bo;
 
+  if (!driNode) return;
+
   fbGetDrawablePixmap(drawable, pixmap, xoff, yoff);
   (void)xoff;
   (void)yoff;
@@ -350,6 +352,8 @@ void rfbDRI3SyncDrawableToBO(DrawablePtr drawable)
   PixmapPtr pixmap;
   int xoff, yoff;
   struct gbm_bo *bo;
+
+  if (!driNode) return;
 
   fbGetDrawablePixmap(drawable, pixmap, xoff, yoff);
   (void)xoff;
