@@ -266,7 +266,8 @@ Set the color depth of the virtual X display, in bits per pixel.  Must be 8,
 Enable the DRI3 X extension, which provides GPU acceleration for OpenGL and
 other rendering APIs when using open source GPU drivers.  \fIrender-node\fR is
 the path of the DRM render node for the GPU that you wish to use (for example,
-\fB/dev/dri/renderD128\fR).
+\fB/dev/dri/renderD128\fR).  If \fIrender-node\fR is \fBauto\fR, then the first
+available DRM render node will be used.
 
 .TP
 \fB\-geometry\fR \fIwidth\fRx\fIheight\fR

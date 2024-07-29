@@ -26,6 +26,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <glob.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -459,6 +460,37 @@ Bool rfbDRI3Initialize(ScreenPtr pScreen)
   pScreenPriv->gbm = NULL;
   pScreenPriv->fd = -1;
 
+  if (strcasecmp(driNode, "auto") == 0) {
+    glob_t globbuf;
+    int ret;
+    size_t i;
+
+    ret = glob("/dev/dri/renderD*", 0, NULL, &globbuf);
+    if (ret == GLOB_NOMATCH) {
+      ErrorF("Could not find any DRM render nodes\n");
+      return FALSE;
+    }
+    if (ret != 0) {
+      ErrorF("Could not enumerate DRM render nodes\n");
+      return FALSE;
+    }
+
+    driNode = NULL;
+    for (i = 0; i < globbuf.gl_pathc; i++) {
+      if (access(globbuf.gl_pathv[i], R_OK | W_OK) == 0) {
+        driNode = strdup(globbuf.gl_pathv[i]);
+        break;
+      }
+    }
+
+    globfree(&globbuf);
+
+    if (driNode == NULL) {
+      ErrorF("Could not find any available DRM render nodes\n");
+      return FALSE;
+    }
+  }
+
   pScreenPriv->fd = open(driNode, O_RDWR | O_CLOEXEC);
   if (pScreenPriv->fd < 0) {
     ErrorF("Failed to open DRM render node %s\n", driNode);
@@ -473,6 +505,8 @@ Bool rfbDRI3Initialize(ScreenPtr pScreen)
 
   DRI3_WRAP(CloseScreen, rfbDRI3CloseScreen)
   DRI3_WRAP(DestroyPixmap, rfbDRI3DestroyPixmap)
+
+  rfbLog("Using DRM render node %s for DRI3\n", driNode);
 
   return dri3_screen_init(pScreen, &rfbDRI3ScreenInfo);
 }
