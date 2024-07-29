@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-07-29T13:58:01">
+<meta name="date" content="2024-07-29T14:04:15">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -3166,26 +3166,24 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
           </thead>
           <tr class="standard">
             <td class="standard">TCP port</td>
-            <td class="standard"><code><em>{ssh}</em> -f -L %L:%H:%R %G sleep 20</code></td>
+            <td class="standard"><code>%S&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code></td>
           </tr>
           <tr class="standard">
             <td class="standard">Unix domain socket</td>
-            <td class="standard"><code><em>{ssh}</em> -J %G &ndash; %H exec socat stdio unix-connect:%R</code></td>
+            <td class="standard"><code>%S&nbsp;-J&nbsp;%G&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
           </tr>
         </table>
         </div>
         
-        <br /> <em><code>{ssh}</code></em> is the external SSH client command, 
-        which can be configured using the TurboVNC Viewer&rsquo;s 
-        <code>ExtSSHCommand</code> parameter. <br /><br /> When the 
-        <code>Tunnel</code> parameter is used along with the <code>ExtSSH</code> 
-        parameter, the TurboVNC Viewer reads the <code>VNC_TUNNEL_CMD</code> 
-        environment variable or the <code>turbovnc.tunnel</code> property, 
-        expands patterns beginning with the &ldquo;%&rdquo; character, and uses 
-        the resulting command line to establish the secure tunnel to the VNC 
-        host.  If <code>VNC_TUNNEL_CMD</code> and <code>turbovnc.tunnel</code> 
-        are not set, then this command-line template defaults to one of the 
-        following values: <br /><br />
+        <br /> When the <code>Tunnel</code> parameter is used along with the 
+        <code>ExtSSH</code> parameter, the TurboVNC Viewer reads the 
+        <code>VNC_TUNNEL_CMD</code> environment variable or the 
+        <code>turbovnc.tunnel</code> property, expands patterns beginning with 
+        the &ldquo;%&rdquo; character, and uses the resulting command line to 
+        establish the secure tunnel to the VNC host.  If 
+        <code>VNC_TUNNEL_CMD</code> and <code>turbovnc.tunnel</code> are not 
+        set, then this command-line template defaults to one of the following 
+        values: <br /><br />
         <div class="table">
         <table class="standard">
           <thead class="standard">
@@ -3196,29 +3194,26 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
           </thead>
           <tr class="standard">
             <td class="standard">TCP port</td>
-            <td class="standard"><code><em>{ssh}</em> -f -L %L:localhost:%R %H sleep 20</code></td>
+            <td class="standard"><code>%S&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code></td>
           </tr>
           <tr class="standard">
             <td class="standard">Unix domain socket</td>
-            <td class="standard"><code><em>{ssh}</em> &ndash; %H exec socat stdio unix-connect:%R</code></td>
+            <td class="standard"><code>%S&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
           </tr>
         </table>
         </div>
         
-        <br /> <em><code>{ssh}</code></em> is the external SSH client command, 
-        which can be configured using the TurboVNC Viewer&rsquo;s 
-        <code>ExtSSHCommand</code> parameter. <br /><br /> The following 
-        patterns are recognized in the <code>VNC_VIA_CMD</code> and 
-        <code>VNC_TUNNEL_CMD</code> environment variables and their 
-        corresponding properties. Note that <code>%H</code> and <code>%R</code> 
-        must be present in the command-line template, and <code>%G</code> must 
-        also be present if using the <code>Via</code> parameter.  If the VNC 
-        server is listening on a TCP port, then <code>%L</code> must also be 
-        present.  If the VNC server is listening on a Unix domain socket, then 
-        <code>%L</code> can optionally be used to forward a local TCP port to 
-        the remote Unix domain socket (for instance, by setting 
-        <code>VNC_TUNNEL_CMD</code> to 
-        <code>/usr/bin/env&nbsp;ssh&nbsp;-axf&nbsp;-L&nbsp;%L:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>.)  
+        <br /> The following patterns are recognized in the 
+        <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> environment 
+        variables and their corresponding properties. Note that <code>%H</code> 
+        and <code>%R</code> must be present in the command-line template, and 
+        <code>%G</code> must also be present if using the <code>Via</code> 
+        parameter.  If the VNC server is listening on a TCP port, then 
+        <code>%L</code> must also be present.  If the VNC server is listening on 
+        a Unix domain socket, then <code>%L</code> can optionally be used to 
+        forward a local TCP port to the remote Unix domain socket (for instance, 
+        by setting <code>VNC_TUNNEL_CMD</code> to 
+        <code>%S&nbsp;-f&nbsp;-L&nbsp;%L:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>.) 
         If <code>%L</code> is not present, then the TurboVNC Viewer expects the 
         SSH command line to connect standard input and standard output to the 
         remote Unix domain socket. <br /><br />
@@ -3243,6 +3238,10 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
           <tr class="standard">
             <td class="standard"><code>%R</code></td>
             <td class="standard">remote TCP port number or the escaped name of a Unix domain socket on the VNC host</td>
+          </tr>
+          <tr class="standard">
+            <td class="standard"><code>%S</code></td>
+            <td class="standard">the external SSH client command, which can be specified using the TurboVNC Viewer&rsquo;s <code>ExtSSHCommand</code> parameter</td>
           </tr>
         </table>
         </div>

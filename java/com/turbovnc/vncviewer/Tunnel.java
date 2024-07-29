@@ -267,10 +267,10 @@ public class Tunnel {
      VNC_TUNNEL_CMD and VNC_VIA_CMD environment variables as the native viewers
      do. */
 
-  private static final String DEFAULT_TUNNEL_ARGS =
-    " -f -L %L:localhost:%R %H sleep 20";
-  private static final String DEFAULT_VIA_ARGS =
-    " -f -L %L:%H:%R %G sleep 20";
+  private static final String DEFAULT_TUNNEL_CMD =
+    "%S -f -L %L:localhost:%R %H sleep 20";
+  private static final String DEFAULT_VIA_CMD =
+    "%S -f -L %L:%H:%R %G sleep 20";
 
   private static void createTunnelExt(String gatewayHost, String remoteHost,
                                       int remotePort, int localPort,
@@ -278,8 +278,7 @@ public class Tunnel {
                                       boolean tunnel)
                                       throws Exception {
     if (pattern == null || pattern.length() < 1)
-      pattern = (tunnel ? params.extSSHCommand.get() + DEFAULT_TUNNEL_ARGS :
-                          params.extSSHCommand.get() + DEFAULT_VIA_ARGS);
+      pattern = (tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
 
     String command = fillCmdPattern(pattern, gatewayHost, remoteHost,
                                     remotePort, params.udsPath, localPort,
@@ -296,19 +295,17 @@ public class Tunnel {
       throw new ErrorException("External SSH error");
   }
 
-  private static final String DEFAULT_TUNNEL_ARGS_UDS =
-    " -- %H exec socat stdio unix-connect:%R";
-  private static final String DEFAULT_VIA_ARGS_UDS =
-    " -J %G -- %H exec socat stdio unix-connect:%R";
+  private static final String DEFAULT_TUNNEL_CMD_UDS =
+    "%S -- %H exec socat stdio unix-connect:%R";
+  private static final String DEFAULT_VIA_CMD_UDS =
+    "%S -J %G -- %H exec socat stdio unix-connect:%R";
 
   private static Socket createTunnelExtUDS(String gatewayHost,
                                            String remoteHost, String pattern,
                                            Params params, boolean tunnel)
                                            throws Exception {
     if (pattern == null || pattern.length() < 1)
-      pattern = (tunnel ?
-                 params.extSSHCommand.get() + DEFAULT_TUNNEL_ARGS_UDS :
-                 params.extSSHCommand.get() + DEFAULT_VIA_ARGS_UDS);
+      pattern = (tunnel ? DEFAULT_TUNNEL_CMD_UDS : DEFAULT_VIA_CMD_UDS);
 
     // Escape the Unix domain socket path twice, since it will be interpreted
     // once by ArgumentTokenizer.tokenize() and again by the remote shell.
@@ -360,6 +357,9 @@ public class Tunnel {
     for (i = 0; i < pattern.length(); i++) {
       if (pattern.charAt(i) == '%') {
         switch (pattern.charAt(++i)) {
+          case 'S':
+            command += params.extSSHCommand.get();
+            continue;
           case 'H':
             command += (tunnel ? gatewayHost : remoteHost);
             hFound = true;

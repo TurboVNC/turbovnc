@@ -320,16 +320,10 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 	to the VNC gateway.  If ''VNC_VIA_CMD'' and ''turbovnc.via'' are not set,
 	then this command-line template defaults to one of the following values:
 	{nl}{nl}
-	|| Connection Type || \
-		Default ''VNC_VIA_CMD''/''turbovnc.via'' Value ||
-	| TCP port | \
-		{pcode: __{ssh}__ -f -L %L:%H:%R %G sleep 20} |
-	| Unix domain socket | \
-		{pcode: __{ssh}__ -J %G -- %H exec socat stdio unix-connect:%R} |
+	|| Connection Type || Default ''VNC_VIA_CMD''/''turbovnc.via'' Value ||
+	| TCP port | ''%S -f -L %L:%H:%R %G sleep 20'' |
+	| Unix domain socket | ''%S -J %G -- %H exec socat stdio unix-connect:%R'' |
 	{nl} \
-	__''{ssh}''__ is the external SSH client command, which can be configured
-	using the TurboVNC Viewer's ''ExtSSHCommand'' parameter.
-	{nl}{nl} \
 	When the ''Tunnel'' parameter is used along with the ''ExtSSH'' parameter,
 	the TurboVNC Viewer reads the ''VNC_TUNNEL_CMD'' environment variable or the
 	''turbovnc.tunnel'' property, expands patterns beginning with the "%"
@@ -337,16 +331,10 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 	to the VNC host.  If ''VNC_TUNNEL_CMD'' and ''turbovnc.tunnel'' are not set,
 	then this command-line template defaults to one of the following values:
 	{nl}{nl}
-	|| Connection Type || \
-		Default ''VNC_TUNNEL_CMD''/''turbovnc.tunnel'' Value ||
-	| TCP port | \
-		{pcode: __{ssh}__ -f -L %L:localhost:%R %H sleep 20} |
-	| Unix domain socket | \
-		{pcode: __{ssh}__ -- %H exec socat stdio unix-connect:%R} |
+	|| Connection Type || Default ''VNC_TUNNEL_CMD''/''turbovnc.tunnel'' Value ||
+	| TCP port | ''%S -f -L %L:localhost:%R %H sleep 20'' |
+	| Unix domain socket | ''%S -- %H exec socat stdio unix-connect:%R'' |
 	{nl} \
-	__''{ssh}''__ is the external SSH client command, which can be configured
-	using the TurboVNC Viewer's ''ExtSSHCommand'' parameter.
-	{nl}{nl} \
 	The following patterns are recognized in the ''VNC_VIA_CMD'' and
 	''VNC_TUNNEL_CMD'' environment variables and their corresponding properties.
 	Note that ''%H'' and ''%R'' must be present in the command-line template, and
@@ -354,10 +342,10 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 	server is listening on a TCP port, then ''%L'' must also be present.  If the
 	VNC server is listening on a Unix domain socket, then ''%L'' can optionally
 	be used to forward a local TCP port to the remote Unix domain socket (for
-	instance, by setting ''VNC_TUNNEL_CMD'' to
-	''/usr/bin/env ssh -axf -L %L:%R %H sleep 20''.)  If ''%L'' is not present,
-	then the TurboVNC Viewer expects the SSH command line to connect standard
-	input and standard output to the remote Unix domain socket.
+	instance, by setting ''VNC_TUNNEL_CMD'' to ''%S -f -L %L:%R %H sleep 20''.)
+	If ''%L'' is not present, then the TurboVNC Viewer expects the SSH command
+	line to connect standard input and standard output to the remote Unix domain
+	socket.
 	{nl}{nl}
 	| ''%%'' | A literal "%" |
 	| ''%G'' | gateway host name or IP address |
@@ -366,3 +354,5 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 	| ''%L'' | local TCP port number |
 	| ''%R'' | remote TCP port number or the escaped name of a Unix domain \
 		socket on the VNC host |
+	| ''%S'' | the external SSH client command, which can be specified using \
+		the TurboVNC Viewer's ''ExtSSHCommand'' parameter |
