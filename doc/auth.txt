@@ -3,8 +3,8 @@
 
 ** Terminology
 
-In an attempt to maintain consistency with other VNC implementations, TurboVNC
-uses the following terminology when referring to its security extensions:
+In an attempt to be consistent with other VNC implementations, TurboVNC uses
+the following terminology when referring to its security extensions:
 
 	Authentication Method :: {:}
 		A technique that the VNC server uses to validate authentication credentials
@@ -41,12 +41,12 @@ uses the following terminology when referring to its security extensions:
 	One-Time Password (OTP) Authentication :: {:}
 		Using the ''vncpasswd'' program, a unique password is generated "on the
 		fly" for the TurboVNC session, and the password is printed on the command
-		line (see the man page for ''vncpasswd'' for more details.)  The user
-		enters this password in the VNC viewer, and the VNC viewer sends the
-		password to the server as if it were a VNC password.  However, once the OTP
-		has been used to authenticate a viewer, the OTP is forgotten and cannot be
-		reused.  OTP authentication can be used, for instance, to launch or connect
-		to TurboVNC sessions from an automated web portal or from a job scheduler.
+		line.  (See the ''vncpasswd'' man page for more details.)  The user enters
+		this password into the VNC viewer, and the VNC viewer sends the password to
+		the server as if it were a VNC password.  However, once the OTP has been
+		used to authenticate a viewer, the OTP is forgotten and cannot be reused.
+		OTP authentication can be used, for instance, to launch or connect to
+		TurboVNC sessions from an automated web portal or from a job scheduler.
 		OTP authentication is also useful for allowing temporary access to a
 		TurboVNC session for collaboration purposes.  The
 		[[#TurboVNC_Session_Manager][TurboVNC Session Manager]] uses OTP
@@ -76,8 +76,8 @@ uses the following terminology when referring to its security extensions:
 		A password is sent to the server using a DES-encrypted
 		challenge/response scheme.  The password can be up to 8 characters long,
 		so the DES key length is 56 bits.  This is not a particularly strong form
-		of encryption by today's standards (56-bit DES was broken by brute force
-		attack in the late 90's.)
+		of encryption by today's standards.  (56-bit DES was broken by brute force
+		attack in the late 1990s.)
 
 	Unix Login/Plain Authentication :: {:}
 		Both the username and password are sent to the VNC server as plain text.
@@ -108,54 +108,71 @@ TurboVNC supports the following security types:
 
 || Server Security Type || Authentication Method || Encryption Method || \
 	Viewer Security Type || Authentication Scheme || Compatibility ||
-| None | None | None | None | None | RFB 3.3+ |
-| VNC | VNC Password | None | VNC | Standard VNC | RFB 3.3+ |
-| OTP | One-Time Password | None | VNC | Standard VNC | RFB 3.3+ |
-| Plain | PAM User/Password | None | Plain | Plain | RFB 3.7+ with VeNCrypt extensions |
-| TLSNone | None | Anonymous TLS | TLSNone | None | RFB 3.7+ with VeNCrypt extensions |
-| TLSVnc | VNC Password | Anonymous TLS | TLSVnc | Standard VNC | RFB 3.7+ with VeNCrypt extensions |
-| TLSOtp | One-Time Password | Anonymous TLS | TLSVnc | Standard VNC | RFB 3.7+ with VeNCrypt extensions |
-| TLSPlain | PAM User/Password | Anonymous TLS | TLSPlain | Plain | RFB 3.7+ with VeNCrypt extensions |
-| X509None | None | TLS/X.509 | X509None | None | RFB 3.7+ with VeNCrypt extensions |
-| X509Vnc | VNC Password | TLS/X.509 | X509Vnc | Standard VNC | RFB 3.7+ with VeNCrypt extensions |
-| X509Otp | One-Time Password | TLS/X.509 | X509Vnc | Standard VNC | RFB 3.7+ with VeNCrypt extensions |
-| X509Plain | PAM User/Password | TLS/X.509 | X509Plain | Plain | RFB 3.7+ with VeNCrypt extensions |
-| UnixLogin | PAM User/Password | None | UnixLogin | Unix Login | RFB 3.7+ with TightVNC extensions |
+| None | None | None | \
+	None | None | RFB 3.3+ |
+| VNC | VNC Password | None | \
+	VNC | Standard VNC | RFB 3.3+ |
+| OTP | One-Time Password | None | \
+	^ | ^ | ^ |
+| Plain | PAM User/Password | None | \
+	Plain | Plain | RFB 3.7+ with VeNCrypt extensions |
+| TLSNone | None | Anonymous TLS | \
+	TLSNone | None | RFB 3.7+ with VeNCrypt extensions |
+| TLSVnc | VNC Password | Anonymous TLS | \
+	TLSVnc | Standard VNC | RFB 3.7+ with VeNCrypt extensions |
+| TLSOtp | One-Time Password | Anonymous TLS | \
+	^ | ^ | ^ |
+| TLSPlain | PAM User/Password | Anonymous TLS | \
+	TLSPlain | Plain | RFB 3.7+ with VeNCrypt extensions |
+| X509None | None | TLS/X.509 | X509None | \
+	None | RFB 3.7+ with VeNCrypt extensions |
+| X509Vnc | VNC Password | TLS/X.509 | \
+	X509Vnc | Standard VNC | RFB 3.7+ with VeNCrypt extensions |
+| X509Otp | One-Time Password | TLS/X.509 | \
+	^ | ^ | ^ |
+| X509Plain | PAM User/Password | TLS/X.509 | \
+	X509Plain | Plain | RFB 3.7+ with VeNCrypt extensions |
+| UnixLogin | PAM User/Password | None | \
+	UnixLogin | Unix Login | RFB 3.7+ with TightVNC extensions |
 #OPT: hiCol=1,4
 
 	!!! NOTE: The security type names are case-insensitive.  The capitalization
-	conventions above are used in order to maintain consistency with the RFB
-	protocol specification.
+	conventions above are used for consistency with the RFB protocol
+	specification.
 
 ** Enabling Security Types
 
 The default behavior of the TurboVNC Server is for all security types except
-"TLSNone", "X509None", and "None" to be enabled and for VNC Password and OTP
+TLSNone, X509None, and None to be enabled and for VNC Password and OTP
 authentication to be preferred over PAM User/Password authentication.  However,
-the system administrator can disable one or more of the security types or set
-the preferred order of the security types by editing the TurboVNC security
-configuration file.  See the ''Xvnc'' man page for more details.
+the system administrator can disable one or more of the security types or
+change their preferred order by editing the TurboVNC security configuration
+file.  See the ''Xvnc'' man page for more details.  Note that only the OTP
+security type is needed when using the
+[[#TurboVNC_Session_Manager][TurboVNC Session Manager]] with its default
+settings.
 
-If the VNC server allows multiple security types, then the VNC viewer's default
-security type will be determined by the server's preferred security type.  In
-this case, the user can override the default by passing command-line arguments
-to ''vncviewer''.  If the VNC server prefers a security type that supports
-Standard VNC authentication, then the user can force the use of
-Unix Login/Plain authentication by passing an argument of
-{pcode: -user __user-name__} to ''vncviewer'' when connecting to the TurboVNC
-session.  Similarly, if the VNC server prefers a security type that supports
-Unix Login/Plain authentication, then the user can force the use of Standard
-VNC authentication by passing an argument of ''-nounixlogin'' to ''vncviewer''.
-You can also accomplish the same thing by unchecking "Unix Login" or "Plain" or
-"Standard VNC" in the "Security" tab of the Options dialog or by limiting the
-available security types using the ''SecurityTypes'', ''User'', or
-''NoUnixLogin'' arguments/parameters.
+If the VNC server allows multiple security types, then the TurboVNC Viewer's
+default security type will be determined by the server's preferred security
+type.  In this case, the user can override the default by using the TurboVNC
+Viewer's ''SecurityTypes'', ''User'', and ''NoUnixLogin'' parameters.  If the
+VNC server prefers a security type that supports Standard VNC authentication,
+then the user can force the use of Unix Login/Plain authentication by setting
+the TurboVNC Viewer's ''User'' parameter to __''user-name''__ when connecting
+to the VNC server.  Similarly, if the VNC server prefers a security type that
+supports Unix Login/Plain authentication, then the user can force the use of
+Standard VNC authentication by setting the ''NoUnixLogin'' parameter.  The same
+thing can also be accomplished by unchecking specific security types in the
+"Security" tab of the TurboVNC Viewer Options dialog or by using the
+''SecurityTypes'' parameter to limit the available security types or change
+their preferred order.
 
 If the system administrator has not restricted any of the server security types
-on a system-wide basis, then the user can choose to disable some or all of them
-for a particular TurboVNC session by using the ''-SecurityTypes'' command-line
-argument when starting the session.  See the ''Xvnc'' man page for more
-details.
+on a system-wide basis, then the user can disable some of them, or change their
+preferred order, for a particular TurboVNC session by using the
+''-securitytypes'' command-line argument when starting the session (or by
+setting the ''$securityTypes'' variable in {file: turbovncserver.conf}.)  See
+the ''Xvnc'' man page for more details.
 
 ** Further Reading
 

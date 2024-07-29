@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2023 D. R. Commander.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2024 D. R. Commander.
  *                                               All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
@@ -85,7 +85,8 @@ public class Tunnel {
       if (localPort == 0)
         throw new ErrorException("Could not obtain free TCP port");
 
-      if (params.extSSH.get() || (pattern != null && pattern.length() > 0))
+      if (params.extSSH.get() || params.extSSHCommand.get() != null ||
+          (pattern != null && pattern.length() > 0))
         createTunnelExt(gatewayHost, remoteHost, remotePort, localPort,
                         pattern, params, tunnel);
       else {
@@ -266,12 +267,10 @@ public class Tunnel {
      VNC_TUNNEL_CMD and VNC_VIA_CMD environment variables as the native viewers
      do. */
 
-  private static final String DEFAULT_SSH_CMD =
-    (Utils.isWindows() ? "ssh.exe" : "/usr/bin/env ssh");
   private static final String DEFAULT_TUNNEL_CMD =
-    DEFAULT_SSH_CMD + " -axf -L %L:localhost:%R %H sleep 20";
+    "%S -f -L %L:localhost:%R %H sleep 20";
   private static final String DEFAULT_VIA_CMD =
-    DEFAULT_SSH_CMD + " -axf -L %L:%H:%R %G sleep 20";
+    "%S -f -L %L:%H:%R %G sleep 20";
 
   private static void createTunnelExt(String gatewayHost, String remoteHost,
                                       int remotePort, int localPort,
@@ -297,9 +296,9 @@ public class Tunnel {
   }
 
   private static final String DEFAULT_TUNNEL_CMD_UDS =
-    DEFAULT_SSH_CMD + " -ax -- %H exec socat stdio unix-connect:%R";
+    "%S -- %H exec socat stdio unix-connect:%R";
   private static final String DEFAULT_VIA_CMD_UDS =
-    DEFAULT_SSH_CMD + " -ax -J %G -- %H exec socat stdio unix-connect:%R";
+    "%S -J %G -- %H exec socat stdio unix-connect:%R";
 
   private static Socket createTunnelExtUDS(String gatewayHost,
                                            String remoteHost, String pattern,
@@ -358,6 +357,9 @@ public class Tunnel {
     for (i = 0; i < pattern.length(); i++) {
       if (pattern.charAt(i) == '%') {
         switch (pattern.charAt(++i)) {
+          case 'S':
+            command += params.extSSHCommand.get();
+            continue;
           case 'H':
             command += (tunnel ? gatewayHost : remoteHost);
             hFound = true;

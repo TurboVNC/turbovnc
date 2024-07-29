@@ -565,7 +565,10 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       "      based on the TightVNC connection info file format.  Connection info files\n" +
       "      will, when opened on Windows or macOS or dragged & dropped onto the\n" +
       "      TurboVNC Viewer icon, launch the TurboVNC Viewer and initiate a new\n" +
-      "      connection.\n" +
+      "      connection.  Parameter values specified in a connection info file\n" +
+      "      override parameter values specified on the command line prior to the\n" +
+      "      connection info file but not parameter values specified on the command\n" +
+      "      line after the connection info file.\n" +
       "\n" +
       "Specifying boolean parameters:\n" +
       "  On:   -<param> or --<param> or <param>=1 or -<param>=1 or --<param>=1\n" +

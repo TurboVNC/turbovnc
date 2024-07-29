@@ -57,6 +57,11 @@ package is not installed) and on RHEL 7 and Fedora 19 and later (if the
 rather than trying to execute **xinitrc** or twm, if a window manager is
 specified and the session desktop file for the window manager cannot be found.
 
+6. Added a new parameter (`ExtSSHCommand`) to the TurboVNC Viewer that can be
+used to specify the external SSH client command.  In `Via`/`Tunnel` SSH
+command-line templates, including the default ones, `%S` is now replaced with
+the value of this new parameter.
+
 
 3.1.1
 =====

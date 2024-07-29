@@ -2,7 +2,7 @@
 {anchor: Compatibility}
 
 In order to realize the full benefits of TurboVNC, it is necessary to use the
-TurboVNC Server and the TurboVNC Viewer in concert.  However, TurboVNC is fully
+TurboVNC Server and the TurboVNC Viewer together.  However, TurboVNC is
 compatible with TigerVNC, TightVNC, RealVNC, and other VNC flavors.  You can
 use the TurboVNC Viewer to connect to a non-TurboVNC server (or vice versa),
 although this will generally result in some decrease in performance, and
@@ -34,19 +34,19 @@ TurboVNC with other VNC flavors.
 		!!! * Experimentally determined by compressing every 10th frame in the
 		SPECviewperf 9 benchmark suite
 
-	TurboVNC, on the other hand, includes extensions to Tight encoding that
-	allow the JPEG quality to be specified on the standard 1-100 scale and
-	allow the JPEG chrominance subsampling to be specified seperately.
-	TigerVNC 1.2 (and later) includes the same extensions on the server side, so
-	the TigerVNC 1.2+ Server will behave like the TurboVNC Server when a
-	TurboVNC viewer is connected to it.
+	TurboVNC, on the other hand, includes extensions to Tight encoding that allow
+	the JPEG quality to be specified on the standard 1-100 scale and that allow
+	the JPEG chrominance subsampling to be specified seperately.  TigerVNC 1.2
+	and later includes the same extensions on the server side, so in this regard,
+	the TigerVNC 1.2+ Server behaves like the TurboVNC Server when a TurboVNC
+	viewer is connected to it.
 	{nl}{nl}
 	When a TurboVNC viewer is connected to a TightVNC or TigerVNC 1.0/1.1 server,
 	setting the JPEG quality to N in the TurboVNC Viewer sets the JPEG quality
-	level to N/10 on the TightVNC or TigerVNC server.  For instance, if you set
+	level to N/10 in the TightVNC or TigerVNC server.  For instance, if you set
 	the JPEG quality to 95 in the TurboVNC Viewer, this would translate to a JPEG
 	quality level of 9, which would set the actual JPEG quality/subsampling to
-	80/2X if connected to a TightVNC server or 100/1X if connected to a TigerVNC
+	80/2X if connected to a TightVNC server and 100/1X if connected to a TigerVNC
 	1.0/1.1 server.
 	{nl}{nl}
 
@@ -54,30 +54,30 @@ TurboVNC with other VNC flavors.
 		no effect when connected to a TightVNC or TigerVNC 1.0/1.1 server.
 		{nl}{nl}
 
-	* Normally, the TurboVNC Viewer GUI only allows you to select the compression
-		levels that are useful for TurboVNC servers, but you can specify
-		additional compression levels on the TurboVNC Viewer command line.  You
-		can also pass an argument of ''-compatiblegui'' to the viewer to expose all
-		10 compression levels in the GUI, which is useful when connecting to
+	* Normally, the TurboVNC Viewer Options dialog only allows you to select the
+		compression levels that are useful for the TurboVNC Server, but you can use
+		the TurboVNC Viewer's ''CompressLevel'' parameter to specify additional
+		compression levels.  You can also set the TurboVNC Viewer's
+		''CompatibleGUI'' parameter to expose all 10 compression levels in the
+		TurboVNC Viewer Options dialog, which is useful when connecting to
 		non-TurboVNC servers.  It should be noted, however, that our experiments
 		have shown that compression levels higher than 5 are generally not useful
-		in the TightVNC or TigerVNC Servers.  They increase CPU usage exponentially
-		without providing any significant savings in bandwidth relative to
+		in the TightVNC and TigerVNC Servers.  They increase CPU usage
+		exponentially without significantly reducing network usage relative to
 		Compression Level 5.
 		{nl}{nl}
 
 	* TurboVNC supports an extension to Tight encoding that allows the
-		server to tell the viewer not to use zlib to decompress a particular
+		server to tell the viewer to bypass zlib when decompressing a particular
 		subrectangle.  Zlib introduces a tremendous amount of performance overhead,
 		even when zlib compression level 0 (no compression) is used.  Thus, when a
 		TurboVNC viewer requests Compression Level 0 from the TurboVNC Server,
 		the TurboVNC Server bypasses zlib altogether.  TightVNC and TigerVNC
-		servers do not support this extension, and thus they will still use zlib to
-		"compress" the framebuffer updates even if you request Compression Level 0
-		using the TurboVNC Viewer.
+		servers do not support this extension, so they will still use zlib to
+		"compress" framebuffer updates even if you request Compression Level 0.
 		{nl}{nl}
 
-	* When properly configured, version 1.2 and later (except for versions
+	* When properly configured, version 1.2 and later (except versions
 		1.4.0 - 1.4.2, which contained a performance regression) of the TigerVNC
 		Server can be made to perform similarly to a single-threaded instance of
 		the TurboVNC Server.  However, all other versions of TigerVNC and TightVNC
@@ -89,45 +89,47 @@ TurboVNC with other VNC flavors.
 
 ** TightVNC or TigerVNC Viewers
 
-	* The TurboVNC Server will attempt to emulate the behavior of a TigerVNC
-		server and will translate JPEG quality levels into actual JPEG quality and
-		subsampling, as specified in {ref prefix="Section ": TigerVNC_JPEG_Qual}.
+	* When either a TightVNC or TigerVNC viewer is connected to a TurboVNC
+		session, the TurboVNC Server emulates the behavior of a TigerVNC server,
+		translating JPEG quality levels into actual JPEG quality and subsampling as
+		specified in {ref prefix="Section ": TigerVNC_JPEG_Qual}.
 		{nl}{nl}
 
 	* When either a TightVNC or TigerVNC viewer is connected to a TurboVNC
-		server and JPEG subencoding is disabled, setting the compression level to 0
-		in the viewer will cause the connection to abort with a "bad subencoding
-		value" error.  This is because the TurboVNC Server is attempting to send
-		the framebuffer updates with no zlib compression, and the TightVNC and
-		TigerVNC viewers don't support this.
+		session and JPEG subencoding is disabled, setting the compression level to
+		0 in the viewer will cause the connection to abort with a "bad subencoding
+		value" error.  This is because the TurboVNC Server attempts to send
+		framebuffer updates with no zlib compression, and the TightVNC and TigerVNC
+		viewers don't support that.
 		{nl}{nl}
 		A similar issue occurs when using more than four encoding threads in the
-		server.  Since the Tight encoding type is limited to four zlib streams,
-		any encoding threads beyond the first four cannot use zlib compression.
+		TurboVNC session.  Since the Tight encoding type is limited to four zlib
+		streams, any encoding threads beyond the first four cannot use zlib
+		compression.
 		{nl}{nl}
 
 	* Refer to {ref prefix="Section ": AdvancedCompression} for a description of
-		how the TurboVNC Server responds to requests for Compression Levels 0-9.
+		how the TurboVNC Server implements Compression Levels 0-9.
 		{nl}{nl}
 
 ** RealVNC
 
 The TurboVNC Viewer supports the Hextile, Raw, and ZRLE encoding types, which
-are compatible with RealVNC.  None of these encoding types can be selected from
-the TurboVNC Viewer GUI, but Hextile or ZRLE will be selected automatically
-when connecting to a RealVNC server.  Non-Tight encoding types, such as Hextile
-and Raw, can also be manually selected from the TurboVNC Viewer command line.
-In addition to Hextile, Raw, and ZRLE, the TurboVNC Server also supports the
-RRE, CoRRE, and Zlib legacy encoding types, for compatibility with older VNC
-viewers.
+are compatible with RealVNC.  None of those encoding types can be selected from
+the TurboVNC Viewer Options dialog, but Hextile or ZRLE will be selected
+automatically when connecting to a RealVNC server.  Non-Tight encoding types,
+such as Hextile and Raw, can also be specified using the TurboVNC Viewer's
+''Encoding'' parameter.  In addition to Hextile, Raw, and ZRLE, the TurboVNC
+Server also supports the RRE, CoRRE, and Zlib legacy encoding types, for
+compatibility with older VNC viewers.
 
 All of the non-Tight encoding types have performance drawbacks.  Raw encoding
-requires gigabit in order to achieve decent performance, and it can easily take
-up an entire gigabit connection's worth of bandwidth (it also doesn't perform
-particularly well with the TurboVNC Viewer, because of the need to convert the
-pixels from bytes to ints in Java.)  Hextile uses very small tiles, which
-causes it to incur a large amount of computational overhead.  It compresses too
-poorly to perform well on slow links but uses too much CPU time to perform well
-on fast links.  ZRLE improves upon this, but it is still too computationally
-intense for fast networks.  The ''vncviewer'' man page in the TurboVNC Linux
-packages has some additional information about how Hextile and ZRLE work.
+requires a gigabit or faster network in order to achieve decent performance,
+and it can easily take up all of the bandwidth on a gigabit network.  (It also
+doesn't perform particularly well in the TurboVNC Viewer, because of the need
+to convert pixels from bytes to ints in Java.)  Hextile uses very small tiles,
+which causes it to incur a large amount of computational overhead.  It
+compresses too poorly to perform well on slow networks but uses too much CPU
+time to perform well on fast networks.  ZRLE improves upon this, but it is
+still too computationally intense for fast networks.  The ''vncviewer'' man
+page contains additional information about how Hextile and ZRLE work.

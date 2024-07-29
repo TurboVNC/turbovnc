@@ -63,7 +63,7 @@ authentication (using ssh-agent or Pageant.)
 		* generate a new one-time password (OTP) for the session
 		* automatically configure the TurboVNC Viewer so that it tunnels the VNC
 			connection through SSH (reusing the SSH channel that the session
-			manager already opened) and authenticates with the newly-generated OTP
+			manager already opened) and authenticates using the newly-generated OTP
 		* connect to the session
 
 	Once connected, a TurboVNC desktop window should appear on your client
@@ -82,31 +82,31 @@ authentication (using ssh-agent or Pageant.)
 		Upon choosing a session to which to connect, the session manager will (as
 		described above) automatically generate a new OTP for the session and
 		configure the TurboVNC Viewer so that it tunnels the VNC connection through
-		SSH and authenticates with the newly-generated OTP.
+		SSH and authenticates using the newly-generated OTP.
 		{nl}{nl}
 		One-time passwords can be used with any VNC viewer, so generating a new OTP
 		for a TurboVNC session (using the "New OTP" button) is a convenient way of
 		allowing colleagues to temporarily access the session.  Generating a new
 		OTP for a TurboVNC session is also useful when using [[#noVNC][noVNC]].  If
-		"View-only" is checked, then users who authenticate with the new OTP will
+		"View-only" is checked, then users who authenticate using the new OTP will
 		not be able to remotely control the session.
 
 	!!! The TurboVNC Session Manager automatically uses SSH tunneling and OTP
-	authentication by default, but you can pass ''-nosessmgrauto'' on the
-	TurboVNC Viewer command line to disable this behavior, thus allowing any
-	authentication/encryption method to be used.  Additional command-line
-	parameters can be used to specify the port on which the SSH server is
-	listening and the location of the SSH private key file.  The OpenSSH config
-	file ({file: ~/.ssh/config} by default) can also be used to specify those
+	authentication by default, but you can set the TurboVNC Viewer's
+	''NoSessMgrAuto'' parameter to disable this behavior, thus allowing any
+	authentication/encryption method to be used.  Additional parameters can be
+	used to specify the port on which the SSH server is listening and the
+	location of the SSH private key file.  The OpenSSH config file
+	({file: ~/.ssh/config} by default) can also be used to specify those
 	parameters persistently for a given host.
 
 	!!! The ''TVNC_SERVERDIR'' and ''TVNC_SERVERARGS'' environment variables, and
 	their equivalent Java system properties (''turbovnc.serverdir'' and
 	''turbovnc.serverargs'') can be used to specify a non-default installation
 	path for the TurboVNC Server or additional arguments to pass to the TurboVNC
-	Server when starting new sessions (refer to
-	{ref prefix="Section " : TVNC_SERVERARGS}.)  These arguments can also be
-	specified on the server using the system-wide or per-user
+	Server when starting new sessions.  (Refer to
+	{ref prefix="Section " : TVNC_SERVERARGS}.)  TurboVNC Server arguments can
+	also be specified on the host using the system-wide or per-user
 	{file: turbovncserver.conf} file.
 
 ** Manually Starting a TurboVNC Session
@@ -199,7 +199,7 @@ authentication (using ssh-agent or Pageant.)
 	{img:vncauth-insecure.png}
 	{nl}{nl}
 	You should never use Unix Login authentication with an unencrypted
-	connection.  Instead, tunnel the connection through SSH (see
+	connection.  Instead, tunnel the connection through SSH.  (See
 	{ref prefix="Section ": Secure_TurboVNC_Usage} below for more details.)
 
 ** Disconnecting and Killing a TurboVNC Session
@@ -236,17 +236,17 @@ from a terminal in the TurboVNC session or from an SSH session on the host.
 {anchor: noVNC}
 
 When a TurboVNC session is started, the ''vncserver'' script can optionally
-start a simple web server that serves up [[https://novnc.com][noVNC]], an
+start a simple web server that serves up [[https://novnc.com][noVNC]*], an
 HTML 5/JavaScript VNC viewer that works in any web browser (with reduced
 performance and features relative to the TurboVNC Viewer.)  This allows you to
 easily connect to a TurboVNC session from a machine that does not have the
 TurboVNC Viewer installed (including mobile devices.)
 
-To launch noVNC along with a TurboVNC session, pass
-{pcode: -novnc __dir__} to ''/opt/TurboVNC/bin/vncserver'' when starting
-the session, where __''dir''__ is the directory containing noVNC (setting the
-''$noVNC'' variable in {file: turbovncserver.conf} has the same effect.)  The
-''vncserver'' script will print the noVNC URL, which will be of the form:
+To launch noVNC along with a TurboVNC session, pass {pcode: -novnc __dir__} to
+''vncserver'' when starting the session, where __''dir''__ is the directory
+containing noVNC.  (Setting the ''$noVNC'' variable in
+{file: turbovncserver.conf} has the same effect.)  The ''vncserver'' script
+will print the noVNC URL, which will be of the form:
 
 #Pverb: <<---
 {plain: http://}__host__:__5800+n__/vnc.html?host=__host__&port=__5900+n__
@@ -258,14 +258,15 @@ or
 {plain: https://}__host__:__5800+n__/vnc.html?host=__host__&port=__5900+n__&encrypt=1
 ---
 
-where __''host''__ is the hostname or IP address of the TurboVNC host, and
+where __''host''__ is the hostname or IP address of the TurboVNC host and
 __''n''__ is the X display number of the TurboVNC session.
 
 Point your web browser to that URL in order to access the TurboVNC session.
 You can optionally pass
 {pcode: -x509cert __certificate-file__ -x509key __private-key-file__} to
-''vncserver'' to encrypt both the HTTP and RFB connections.  See the
-''vncserver'' man page for more details.
+''vncserver'' (or set the ''$x509CertFile'' and ''$x509KeyFile'' variables in
+{file: turbovncserver.conf}) to encrypt both the HTTP and RFB connections.  See
+the ''vncserver'' man page for more details.
 
 	!!! NOTE: noVNC only supports VNC Password authentication, so it is strongly
 	recommended that it be used only with one-time passwords unless the
@@ -276,16 +277,16 @@ You can optionally pass
 
 If the [[#TurboVNC_Session_Manager][TurboVNC Session Manager]] is not being
 used, then the connection between the TurboVNC Server and the TurboVNC Viewer
-will, by default, use Anonymous TLS encryption (refer to
+will, by default, use Anonymous TLS encryption.  (Refer to
 {ref prefix="Chapter ": Security_Extensions}.)  However, it may be preferable
 to secure the TurboVNC connection using SSH rather than Anonymous TLS
 encryption, particularly if one does not want to open additional ports in the
-host's firewall.  This can easily be accomplished by using the ''-via'' and
-''-tunnel'' command-line options in the TurboVNC Viewer (or the equivalent GUI
-options, which are located under the "Security" tab in the Options dialog.)
+host's firewall.  This can easily be accomplished using the TurboVNC Viewer's
+''Via'' and ''Tunnel'' parameters (or the equivalent GUI options, which are
+located under the "Security" tab in the TurboVNC Viewer Options dialog.)
 
-The ''-via'' and ''-tunnel'' options in the TurboVNC Viewer take advantage of
-the port forwarding feature in SSH.  For instance, running
+The TurboVNC Viewer's ''Via'' and ''Tunnel'' parameters take advantage of the
+port forwarding feature in SSH.  For instance, running
 
 	#Pverb: <<---
 	__vncviewer__ -via __user__@__host__ localhost:__n__
@@ -308,21 +309,21 @@ where __''fp''__ is a free TCP port on the client machine (this is
 automatically determined by the TurboVNC Viewer.)
 
 	!!! In the above examples, __''vncviewer''__ is the command used to launch
-	the TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Mac/Linux/Un*x
-	systems or ''c:\\Program Files\\TurboVNC\\vncviewer.bat'' on Windows systems.
+	the TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Linux/Un*x and Mac
+	systems and ''c:\\Program Files\\TurboVNC\\vncviewer.bat'' on Windows
+	systems.
 
-''-tunnel'' can be used as a shortcut whenever the SSH and VNC hosts are the
-same machine.  ''-via'' is more flexible, since it allows you to specify the
-VNC server to which to connect.  The VNC server is specified from the point of
-view of the SSH server, which is why we used ''localhost'' in the above
-example.
+The ''Tunnel'' parameter can be used as a shortcut whenever the SSH and VNC
+hosts are the same machine.  ''Via'' is more flexible, since it allows you to
+specify the VNC server to which to connect.  The VNC server is specified from
+the point of view of the SSH server, which is why we used ''localhost'' in the
+above example.
 
-The command used to establish the SSH tunnel is configurable by way of
-environment variables.  See {ref prefix="Section ": VNC_VIA_CMD} for more
-details.
+The command used to establish the SSH tunnel is configurable by way of a
+TurboVNC Viewer parameter and environment variables or Java system properties.
+See {ref prefix="Section ": VNC_VIA_CMD} for more details.
 
-*** Forcing SSH Connections
-#OPT: noList! plain!
+** Requiring SSH Tunneling
 
 Passing an argument of ''-localhost'' to ''vncserver'' will force the TurboVNC
 session to accept inbound connections only from the TurboVNC host.  This
@@ -345,6 +346,10 @@ settings, the connection will have redundant encryption.
 
 {img:vncauth-redundant.png}
 
+Note that only the OTP security type is needed when using the
+[[#TurboVNC_Session_Manager][TurboVNC Session Manager]] with its default
+settings.
+
 ** Running OpenGL Applications
 
 The TurboVNC Server includes a software GLX/OpenGL implementation that can be
@@ -365,18 +370,20 @@ source of the problem.
 
 ** Window Manager Compatibility
 
-This version of the TurboVNC Server can run 3D (compositing) window managers
-(such as Unity or GNOME 3+ or KDE 5+) using its built-in software OpenGL
-implementation, and it also provides an option (''-vgl'') that allows for
-running 3D window managers using VirtualGL.  However, for performance reasons,
-it is generally recommended that you use a 2D window manager with the TurboVNC
-Server (even with VirtualGL, 3D window managers have a lot of overhead.)  As of
-this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window manager
-called "GNOME Fallback", "GNOME Flashback", or "GNOME Classic", which will
-automatically be used if it is installed and the ''TVNC_WM'' environment
-variable is set to ''2d''.  For other systems that lack a 2D window manager, it
-is recommended that you install MATE or Xfce.  Refer to
-[[http://www.turbovnc.org/Documentation/Compatibility30][this report]] for an
+This version of the TurboVNC Server can run 3D (compositing) window managers,
+such as Unity or GNOME 3+ or KDE 5+, using its built-in software OpenGL
+implementation.  It also provides a command-line option (''-vgl'') and a
+{file: turbovncserver.conf} variable (''$useVGL'') that allow for running 3D
+window managers using VirtualGL.  However, for performance reasons, it is
+generally recommended that you use a 2D (non-compositing) window manager with
+the TurboVNC Server.  (Even with VirtualGL, 3D window managers have a lot of
+overhead.)  As of this writing, Ubuntu, RHEL 7+, and Fedora provide an optional
+2D window manager called "GNOME Fallback", "GNOME Flashback", or "GNOME
+Classic", which will be used if it is installed and the TurboVNC window manager
+is set to ''2d'' (by passing ''-wm 2d'' to ''vncserver'' or setting
+''$wm = "2d";'' in {file: turbovncserver.conf}.)  For other systems that lack a
+2D window manager, it is recommended that you install MATE or Xfce.  Refer to
+[[https://www.turbovnc.org/Documentation/Compatibility30][this report]*] for an
 up-to-date list of window managers that have been tested with this version of
 the TurboVNC Server, how to configure the TurboVNC Server to use those window
 managers, and a list of known compatibility issues.
@@ -391,15 +398,16 @@ For more detailed instructions on the usage of TurboVNC:
 	man -M /opt/TurboVNC/man Xvnc
 	man -M /opt/TurboVNC/man vncconnect
 	man -M /opt/TurboVNC/man vncpasswd
+	man -M /opt/TurboVNC/man tvncconfig
 	---
 
 	TurboVNC Viewer :: Run
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncviewer -?
 	---
-	on Un*x or
+	on Linux/Un*x and Mac systems or
 	#Verb: <<---
 	c:\Program Files\TurboVNC\vncviewer.bat -?
 	---
-	on Windows to display a full list of supported command-line
+	on Windows systems to display a full list of supported command-line
 	options/parameters and their descriptions.

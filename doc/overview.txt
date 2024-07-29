@@ -2,16 +2,18 @@
 
 TurboVNC is a derivative of VNC (Virtual Network Computing) that is tuned to
 provide peak performance for 3D and video workloads.  TurboVNC was originally a
-fork of [[http://www.tightvnc.com][TightVNC]] 1.3.x, and on the surface, the
-TurboVNC Server still behaves similarly to its parent.  However, the current
-version of TurboVNC contains a much more modern X server code base (based on
-X.org) and a variety of other features and fixes, including a high-performance
-cross-platform VNC viewer.  TurboVNC compresses 3D and video workloads
-significantly better than the "tightest" compression mode in TightVNC 1.3.x
-while using only typically 15-20% of the CPU time of the latter. Using
-non-default settings, TurboVNC can also match the best compression ratios
-produced by TightVNC 1.3.x for 2D workloads (see
-{ref prefix="Section ": AdvancedCompression}.)
+fork of [[https://tightvnc.com][TightVNC]*] 1.3.x.  However, the current
+version of TurboVNC contains a modern X server code base (based on X.org) and a
+variety of other [[https://turbovnc.org/About/Features][notable features]*] and
+fixes relative to TightVNC 1.3.x, including a high-performance cross-platform
+VNC viewer with session management capabilities, as well as some unique
+features designed specifically for visualization applications.  Some of those
+features are not available in any other open source Linux/Un*x remote display
+solutions.  TurboVNC compresses 3D and video workloads significantly better
+than the "tightest" compression mode in TightVNC 1.3.x while using only
+typically 15-20% of the CPU time of the latter.  Using non-default settings,
+TurboVNC can also match the best compression ratios produced by TightVNC 1.3.x
+for 2D workloads.  (See {ref prefix="Section ": AdvancedCompression}.)
 
 All VNC implementations, including TurboVNC, use the RFB (remote framebuffer)
 protocol to send "framebuffer updates" from the VNC server to any connected
@@ -32,79 +34,29 @@ or arrays of RGB pixels ("Raw subencoding"), depending on the encoding method.
 zlib can optionally be used to compress the indexed color, mono and raw
 subrectangles.
 
-Part of TurboVNC's speedup comes from the use of libjpeg-turbo, the same
-high-speed SIMD-optimized JPEG codec used by VirtualGL.  However, TurboVNC also
-eliminates the CPU-hungry smoothness detection routines that TightVNC uses to
-determine whether a subrectangle is a good candidate for JPEG compression, and
-TurboVNC's encoding methods tend to favor the use of JPEG more, since it is now
-generally the fastest subencoding type.  Furthermore, TurboVNC eliminates
-buffer copies, it maximizes network efficiency by splitting framebuffer updates
-into relatively large subrectangles, and it uses only the zlib compression
-levels that can be shown to have a measurable performance benefit.
+Part of TurboVNC's speedup comes from the use of
+[[https://libjpeg-turbo.org][libjpeg-turbo]*], a SIMD-accelerated JPEG codec.
+However, TurboVNC also eliminates the CPU-hungry smoothness detection routines
+that TightVNC uses to determine whether a subrectangle is a good candidate for
+JPEG compression, and TurboVNC's encoding methods tend to favor the use of JPEG
+more, since it is now generally the fastest subencoding type.  Furthermore,
+TurboVNC eliminates buffer copies, it maximizes network efficiency by splitting
+framebuffer updates into relatively large subrectangles, and it uses only the
+zlib compression levels that can be shown to have a measurable performance
+benefit.
 
-TurboVNC is the product of extensive research, in which many different
-permutations of the TightVNC encoder were benchmarked at the low level against
-a variety of RFB session captures that simulate real-world application
-workloads, both 2D and 3D.  For more information on the research leading to
-TurboVNC's encoder design, see
-[[http://www.TurboVNC.org/pmwiki/uploads/About/tighttoturbo.pdf][this report]].
+TurboVNC is the product of
+[[https://TurboVNC.org/pmwiki/uploads/About/tighttoturbo.pdf][extensive research]*],
+in which many different permutations of the TightVNC encoder were benchmarked
+at the low level against a variety of RFB session captures that simulate
+real-world application workloads, both 2D and 3D.  TurboVNC's encoding methods
+have been adopted by [[https://tigervnc.org][TigerVNC]*],
+[[https://libvnc.github.io][LibVNC]*], [[https://uvnc.com/][UltraVNC]*],
+and other projects.
 
-In addition to high performance, other notable features of TurboVNC include:
-
-	* Fine-grained control over the JPEG image quality and the level of
-		chrominance subsampling
-
-	* Double buffering on the client side to reduce tearing artifacts in 3D and
-		video applications
-
-	* Flexible and configurable full-screen/multi-screen support
-
-	* Full support for IPv6
-
-	* Advanced flow control and continuous updates.  This allows viewers
-		to receive framebuffer updates without specifically requesting them, which
-		can improve performance dramatically on high-latency connections.
-
-	* Authentication with one-time passwords or Unix login credentials.  Access
-		control lists can be used to share TurboVNC sessions with only certain
-		users.
-
-	* Built-in SSH client (part of the TurboVNC Viewer) that supports OpenSSH
-		config files and password-less public key authentication (using ssh-agent
-		or Pageant)
-
-	* The TurboVNC Session Manager (part of the TurboVNC Viewer) allows users to
-		interactively choose a TurboVNC session to which to connect, as well as to
-		remotely start and kill TurboVNC sessions.
-
-	* TLS encryption support (VeNCrypt-compatible)
-
-	* TurboVNC allows security/authentication policies to be set globally for a
-		particular host.
-
-	* Multithreaded Tight encoding
-
-	* "Lossless refresh" allows a viewer to request a lossless copy of the
-		current screen image.  This is useful in situations in which image quality
-		is critical but the network is too slow to support sending a high-quality
-		image for every frame.  Lossless refreshes can be performed manually when a
-		certain hotkey is pressed, or the TurboVNC Server can be configured to send
-		a lossless refresh automatically if the user stops interacting with the
-		application for a certain period of time.
-
-	* High-performance feature-rich VNC viewer
-
-	* The TurboVNC Server integrates with [[https://novnc.com][noVNC]] to provide
-		a zero-install viewer for TurboVNC sessions that works in any web browser
-		(with reduced performance and features relative to the TurboVNC Viewer)
-
-	* The TurboVNC Server and TurboVNC Viewer can be used with an instance of the
-		UltraVNC Repeater in Mode I or II.
-
-	* Remote extended input device support
-
-TurboVNC, when used with VirtualGL, provides a highly performant and robust
-solution for remotely displaying 3D applications over all types of networks.
+TurboVNC, when used with [[https://VirtualGL.org][VirtualGL]*], provides a
+highly performant and robust solution for remotely displaying 3D applications
+over all types of networks.
 
 On "modern" hardware, TurboVNC is capable of streaming 50+ Megapixels/second
 over a 100 Megabit/second local area network with perceptually lossless image

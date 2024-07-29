@@ -1813,7 +1813,7 @@ void ddxUseMsg(void)
   ErrorF("-geometry W0xH0+X0+Y0[,W1xH1+X1+Y1,...,WnxHn+Xn+Yn]\n");
   ErrorF("                       set multi-screen geometry (see man page)\n");
 #ifdef NVCONTROL
-  ErrorF("-nvcontrol display     set up a virtual NV-CONTROL extension and redirect\n");
+  ErrorF("-nvcontrol display     create a fake NV-CONTROL extension and redirect\n");
   ErrorF("                       NV-CONTROL requests to the specified X display\n");
 #endif
   ErrorF("-pixelformat format    set pixel format (BGRnnn or RGBnnn)\n");

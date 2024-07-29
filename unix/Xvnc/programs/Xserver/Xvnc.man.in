@@ -257,6 +257,11 @@ connects and requests that the client-side devices be cloned, it is too late.
 \fBTURBOVNC DISPLAY OPTIONS\fR
 
 .TP
+\fB\-depth\fR \fIdepth\fR
+Set the color depth of the virtual X display, in bits per pixel.  Must be 8,
+16, 24, 30, or 32 [default: 24].
+
+.TP
 \fB-drinode\fR \fIrender-node\fR
 Enable the DRI3 X extension, which provides GPU acceleration for OpenGL and
 other rendering APIs when using open source GPU drivers.  \fIrender-node\fR is
@@ -273,6 +278,11 @@ Set multi-screen geometry of the virtual X display.  Wi and Hi are the width
 and height of Screen i, and Xi and Yi specify the offset of Screen i relative
 to the origin.  The framebuffer width and height are determined by the bounding
 box of all screens.
+
+.TP
+\fB-nvcontrol \fIdisplay\fR
+Create a fake NV-CONTROL extension and redirect NV-CONTROL requests to
+\fIdisplay\fR.
 
 .TP
 \fB\-pixelformat\fR rgb\fINNN\fR|bgr\fINNN\fR

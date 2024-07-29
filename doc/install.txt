@@ -5,14 +5,14 @@
 *** Installing TurboVNC
 #OPT: noList! plain!
 
-	1. Download the appropriate TurboVNC binary package for your system from the
-		[[https://github.com/TurboVNC/turbovnc/releases][Releases area]]
-		of the [[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]].
+	#. Download the appropriate TurboVNC binary package for your system from the
+		[[https://github.com/TurboVNC/turbovnc/releases][Releases area]*] of the
+		[[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]*].
 		RPM and Debian packages are provided for Linux distributions that contain
 		GLIBC 2.17 or later.
 		{nl}
 
-	2. cd to the directory where you downloaded the binary package, and issue
+	#. ''cd'' to the directory where you downloaded the binary package, and issue
 		one of the following commands as root:
 
 		RPM-based systems using YUM :: {:}
@@ -73,8 +73,8 @@ Add {file: ~/turbovnc} to any paths specified in this document.
 	#. Download the TurboVNC Mac disk image
 		({file: TurboVNC-{val: _VERSION}-x86_64.dmg} for Intel CPUs or
 		{file: TurboVNC-{val: _VERSION}-arm64.dmg} for Apple silicon CPUs) from the
-		[[https://github.com/TurboVNC/turbovnc/releases][Releases area]]
-		of the [[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]].
+		[[https://github.com/TurboVNC/turbovnc/releases][Releases area]*] of the
+		[[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]*].
 
 	#. Open the disk image, then open {file: TurboVNC.pkg} inside the disk image.
 		Follow the instructions to install the Mac TurboVNC Viewer.
@@ -83,8 +83,8 @@ Add {file: ~/turbovnc} to any paths specified in this document.
 
 	#. Download the TurboVNC Windows installer package
 		({file: TurboVNC-{val: _VERSION}.exe}) from the
-		[[https://github.com/TurboVNC/turbovnc/releases][Releases area]] of the
-		[[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]].
+		[[https://github.com/TurboVNC/turbovnc/releases][Releases area]*] of the
+		[[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]*].
 
 	#. Run the TurboVNC installer.  The installation of TurboVNC should be
 		self-explanatory.  The only configuration option is the directory into
@@ -95,8 +95,8 @@ Add {file: ~/turbovnc} to any paths specified in this document.
 If you are using a Linux/Un*x platform for which there is not a pre-built
 TurboVNC binary package available, then download the TurboVNC source tarball
 ({file: turbovnc-{val: _VERSION}.tar.gz}) from the
-[[https://github.com/TurboVNC/turbovnc/releases][Releases area]]
-of the [[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]],
+[[https://github.com/TurboVNC/turbovnc/releases][Releases area]*] of the
+[[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]*],
 uncompress it, {pcode: cd turbovnc-{val: _VERSION}}, and read
 {file: BUILDING.md} for further instructions on how to build TurboVNC from
 source.
