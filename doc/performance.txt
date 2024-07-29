@@ -30,13 +30,12 @@ images:
 		for all pixels, and thus it provides the best image quality but also uses
 		the most network bandwidth and CPU time.  2X subsampling retains the
 		chrominance components for every other pixel, and 4X subsampling retains
-		the chrominance components for every fourth pixel (this is typically
+		the chrominance components for every fourth pixel.  (This is typically
 		implemented as 2X subsampling in both X and Y directions.)  Grayscale
 		throws out all of the chrominance components, leaving only luminance.  2X
-		and 4X subsampling will typically produce noticeable blurring of lines and
-		other sharp features, but with photographic or other "smooth" image
-		content, it may be difficult to detect any difference between 1X, 2X, and
-		4X.
+		and 4X subsampling typically produce noticeable blurring of lines and other
+		sharp features, but with photographic or other "smooth" image content, it
+		may be difficult to detect any difference between 1X, 2X, and 4X.
 
 	Compression level :: {:}
 		In TurboVNC, the compression level specifies:
@@ -52,13 +51,12 @@ images:
 		See {ref prefix="Section ": AdvancedCompression} below for more details.
 
 These parameters can be adjusted by accessing the TurboVNC Viewer Options
-dialog box (click on the "Options" button in the "TurboVNC Connection" dialog
-box or, after connecting to the server, click on the Connection Options button
-in the toolbar.)
+dialog box.  (Click on the "Options" button in the New TurboVNC Connection
+dialog box or, after connecting to the server, click on the Connection Options
+button in the toolbar.)
 
-The TurboVNC Viewer provides five preset "encoding methods", corresponding
-to the most useful combinations of the image compression options described
-above:
+The TurboVNC Viewer provides five preset "encoding methods" corresponding to
+the most useful combinations of the image compression options described above:
 
 || Encoding method || Allow JPEG || JPEG image quality || \
 	JPEG chrominance subsampling || Compression level || Notes ||
@@ -69,50 +67,50 @@ above:
 	deal of network bandwidth, however, and is generally not recommended except \
 	on 50 Megabit/second and faster networks. |
 | "Tight + Medium-Quality JPEG" | Yes | 80 | 2x | 6 | \
-	For subrectangles that have a high number of unique colors, this encoding method \
-	produces some minor, but generally not very noticeable, image compression \
-	artifacts.  All else being equal, this encoding method typically uses about \
-	twice the network bandwidth of the "Tight + Low-Quality JPEG" encoding \
-	method and about half the bandwidth of the "Tight + Perceptually Lossless \
-	JPEG" encoding method, making it appropriate for medium-speed networks such \
-	as 10 Megabit Ethernet.  Interframe comparison is enabled with this \
-	encoding method (Compression Level 6 = Compression Level 1 + interframe \
-	comparison.) |
+	For subrectangles that have a high number of unique colors, this encoding \
+	method produces some minor, but generally not very noticeable, image \
+	compression artifacts.  All else being equal, this encoding method \
+	typically uses about twice the network bandwidth of the \
+	"Tight + Low-Quality JPEG" encoding method and about half the bandwidth of \
+	the "Tight + Perceptually Lossless JPEG" encoding method, making it \
+	appropriate for medium-speed networks such as 10 Megabit Ethernet. \
+	Interframe comparison is enabled with this encoding method.  (Compression \
+	Level 6 = Compression Level 1 + interframe comparison.) |
 | "Tight + Low-Quality JPEG" | Yes | 30 | 4x | 7 | \
-	For subrectangles that have a high number of unique colors, this encoding method \
-	produces very noticeable image compression artifacts.  However, it performs \
-	optimally on low-bandwidth connections.  If image quality is more critical \
-	than performance, then use one of the other encoding methods or take \
-	advantage of the [[#LR][Lossless Refresh feature]].  In addition to \
+	For subrectangles that have a high number of unique colors, this encoding \
+	method produces very noticeable image compression artifacts.  However, it \
+	performs optimally on low-bandwidth connections.  If image quality is more \
+	critical than performance, then use one of the other encoding methods or \
+	take advantage of the [[#LR][Lossless Refresh feature]].  In addition to \
 	reducing the JPEG quality to a "minimum usable" level, this encoding method \
-	also enables interframe comparison and Compression Level 2 (CL 7 = CL 2 + \
+	also enables interframe comparison and Compression Level 2.  (CL 7 = CL 2 + \
 	interframe comparison.)  Compression Level 2 can reduce bandwidth for \
 	low-color application workloads that are not good candidates for JPEG \
 	compression. |
 | "Lossless Tight" | No | N/A | N/A | 0 | \
-	This encoding method uses indexed color subencoding for subrectangles that have \
-	a low number of unique colors, but it otherwise does not perform any image \
-	compression at all.  Lossless Tight is thus suitable only for gigabit and faster \
-	networks.  This encoding method uses significantly less CPU time than any \
-	of the JPEG-based encoding methods.  Lossless Tight requires an RFB \
-	protocol extension that is, as of this writing, only supported by the \
+	This encoding method uses indexed color subencoding for subrectangles that \
+	have a low number of unique colors, but it otherwise does not perform any \
+	image compression at all.  Lossless Tight is thus suitable only for gigabit \
+	and faster networks.  This encoding method uses significantly less CPU time \
+	than any of the JPEG-based encoding methods.  Lossless Tight requires an \
+	RFB protocol extension that is, as of this writing, only supported by the \
 	TurboVNC Viewer. |
 | "Lossless Tight + Zlib" | No | N/A | N/A | 6 | \
-	This encoding method uses indexed color subencoding for subrectangles that have \
-	a low number of unique colors and raw subencoding for subrectangles that have a \
-	high number of unique colors.  It compresses all subrectangles using zlib \
-	with zlib compression level 1.  For certain types of low-color workloads (CAD \
-	applications, in particular), this encoding method may use less network \
-	bandwidth than the "Tight + Perceptually Lossless JPEG" encoding method, \
-	but it also uses significantly more CPU time than any of the JPEG-based \
-	encoding methods.  Interframe comparison is enabled with this encoding \
-	method (Compression Level 6 = Compression Level 1 + interframe \
-	comparison.) |
+	This encoding method uses indexed color subencoding for subrectangles that \
+	have a low number of unique colors and raw subencoding for subrectangles \
+	that have a high number of unique colors.  It compresses all subrectangles \
+	using zlib with zlib compression level 1.  For certain types of low-color \
+	workloads (CAD applications, in particular), this encoding method may use \
+	less network bandwidth than the "Tight + Perceptually Lossless JPEG" \
+	encoding method, but it also uses significantly more CPU time than any of \
+	the JPEG-based encoding methods.  Interframe comparison is enabled with \
+	this encoding method.  (Compression Level 6 = Compression Level 1 + \
+	interframe comparison.) |
 #CAP: TurboVNC Encoding Methods
 
-The encoding method can be set in the TurboVNC Viewer Options dialog box (click
-on the "Options" button in the "TurboVNC Connection" dialog box or, after
-connecting to the server, click on the Connection Options button in the
+The encoding method can be set in the TurboVNC Viewer Options dialog box.
+(Click on the "Options" button in the New TurboVNC Connection dialog box or,
+after connecting to the server, click on the Connection Options button in the
 toolbar.)
 
 ** Interframe Comparison
@@ -122,89 +120,92 @@ Certain ill-behaved applications can sometimes draw the same thing over and
 over again, and this can cause redundant framebuffer updates to be sent to the
 VNC viewer.  Additionally, modern GUI toolkits often use image-based drawing
 methods (the X Rendering Extension, for instance), which can result in an
-entire window being redrawn, even if only a few pixels in the window have
+entire window being redrawn even if only a few pixels in the window have
 changed.  The TurboVNC Server can guard against this by maintaining a copy of
 the remote framebuffer for each connected viewer, comparing each new
 framebuffer update rectangle against the pixels in the framebuffer copy, and
 discarding any redundant portions of the rectangle before they are sent to the
 viewer.
 
-Interframe comparison has some tradeoffs associated with it.  Perhaps the most
-important of these is that it increases the memory usage of the TurboVNC Server
-by a factor of N, where N is the number of connected viewers.  This can prove
-to be quite significant if the remote desktop size is relatively large.
-
-2D applications are most often the ones that generate duplicate framebuffer
-updates, so using interframe comparison with such applications can
-significantly reduce the network usage and the host CPU usage (since fewer
-rectangles are actually being encoded.)  However, with 3D applications, the
-benefits of interframe comparison are less clear, since it is less common for
-those applications to generate duplicate framebuffer updates.  Interframe
-comparison may benefit certain classes of 3D applications, such as design
-applications that render a model against a static background-- particularly
-when the model is not zoomed in enough to fill the entire window.  In
-real-world tests, however, interframe comparison rarely reduces the network
-usage for 3D applications by more than 5-10%.  Furthermore, with games and
-other immersive applications that modify most of the pixels on the screen each
-time a frame is rendered, interframe comparison can actually increase both CPU
-usage and network usage.  Furthermore, the effects of duplicate framebuffer
-updates are not typically noticeable on high-speed networks, but an increase in
-host CPU usage might be.
+Interframe comparison has some tradeoffs.  Perhaps the most important of these
+is that it increases the memory usage of the TurboVNC Server by a factor of N,
+where N is the number of connected viewers.  This can prove to be quite
+significant if the remote desktop size is relatively large.  2D applications
+are most often the ones that generate duplicate framebuffer updates, so using
+interframe comparison with such applications can significantly reduce the
+network usage and the host CPU usage (since fewer rectangles are actually being
+encoded.)  However, with 3D applications, the benefits of interframe comparison
+are less clear, since it is less common for those applications to generate
+duplicate framebuffer updates.  Interframe comparison may benefit certain
+classes of 3D applications, such as design applications that render a model
+against a static background-- particularly when the model is not zoomed in
+enough to fill the entire window.  In real-world tests, however, interframe
+comparison rarely reduces the network usage for 3D applications by more than
+5-10%.  Furthermore, with games and other immersive applications that modify
+most of the pixels on the screen each time a frame is rendered, interframe
+comparison can actually increase both CPU usage and network usage.
+Furthermore, the effects of duplicate framebuffer updates are not typically
+noticeable on high-speed networks, but an increase in host CPU usage might be.
 
 For these reasons, interframe comparison is not enabled by default and should
 not generally be enabled except on bandwidth-constrained networks and with
 applications for which it can be shown to be beneficial.  Interframe comparison
-can be enabled by either passing an argument of ''-interframe'' to
-''vncserver'' when starting a TurboVNC session or by requesting a compression
-level of 5 or higher from the viewer (see below.)
+can be enabled by passing an argument of ''-interframe'' to ''vncserver'' when
+starting a TurboVNC session, by using ''tvncconfig'' to set the ''Interframe''
+parameter for a running TurboVNC session, or by requesting a compression level
+of 5 or higher from the viewer (see below.)
 
 ** Advanced Compression Options
 {anchor: AdvancedCompression}
 
 One of the underlying principles of TurboVNC's design is to expose only the
 options that have proven to be useful (that is, the options that have proven to
-have good performance tradeoffs.)  Thus, the TurboVNC Viewer GUI will normally
-only allow you to select Compression Levels 1-2 if JPEG subencoding is enabled
-(6-7 if interframe comparison is also enabled) or Compression Levels 0-1 if
-JPEG subencoding is disabled (5-6 if interframe comparison is enabled.)  Other
-compression levels can, however, be specified on the command line, and doing so
-will enable a compatibility mode in the TurboVNC Viewer GUI that allows any
-compression level from 0 to 9 to be requested.
+have good performance tradeoffs.)  Thus, the TurboVNC Viewer Options dialog
+normally only allows you to select Compression Levels 1-2 if JPEG subencoding
+is enabled (6-7 if interframe comparison is also enabled) or Compression Levels
+0-1 if JPEG subencoding is disabled (5-6 if interframe comparison is enabled.)
+Other compression levels can, however, be specified using the TurboVNC Viewer's
+''CompressLevel'' parameter, and doing so will enable a compatibility mode in
+the TurboVNC Viewer Options dialog that allows any compression level from 0 to
+9 to be requested.
 
-When connecting to a TurboVNC server, requesting a particular compression level
+When connected to a TurboVNC session, requesting a particular compression level
 has the following effect:
 
-|| Compression level || Zlib compression level (non-JPEG subrectangles) || \
-	Palette threshold || Interframe comparison || Notes ||
-| 0 | 1 | 24 | No | Same as Compression Level 1.  Bypassing zlib when JPEG is \
-	enabled would only reduce the CPU usage for non-JPEG subrectangles, which \
-	is of limited usefulness.  Further, bypassing zlib requires an RFB protocol \
-	extension that is not supported by non-TurboVNC viewers.  It is presumed \
-	that, if one wants to reduce the CPU usage, then one wants to do so for all \
+|| Compression level || Zlib compression level (non-JPEG subrectangles) \
+	|| Palette threshold || Interframe comparison || Notes ||
+| 0 | 1 | 24 | No | \
+	Same as Compression Level 1.  Bypassing zlib when JPEG is enabled would \
+	only reduce the CPU usage for non-JPEG subrectangles, which is of limited \
+	usefulness.  Furthermore, bypassing zlib requires an RFB protocol extension \
+	that is not supported by non-TurboVNC viewers.  It is presumed that, if one \
+	wants to reduce the CPU usage, then one wants to do so for all \
 	subrectangles, so CL 0 without JPEG (AKA "Lossless Tight") should be used. |
-| 1 | 1 | 24 | No | See the description of the "Tight + JPEG" encoding \
-	methods above. |
-| 2 | 3 | 96 | No | A higher palette threshold causes indexed color \
-	subencoding to be used more often than with CL 1, and indexed color \
-	subrectangles are compressed using a higher zlib compression level.  This \
-	can provide typically 20-40% better compression than CL 1 (with a \
-	commensurate increase in CPU usage) for workloads that have a low number of \
-	unique colors.  However, Compression Level 2 can increase the CPU usage \
-	for some high-color workloads without providing significantly better \
-	compression. |
-| 3-4 | 3 | 96 | No | Same as Compression Level 2 (reserved for future expansion) |
-| 5-6 | 1 | 24 | Yes | Same as Compression Level 1, but with interframe \
-	comparison enabled |
-| 7-8 | 3 | 96 | Yes | Same as Compression Level 2, but with interframe \
-	comparison enabled |
-| 9 | 7 | 256 | Yes | This mode is included only for backward compatibility \
-	with TightVNC.  It provides approximately the same level of compression for \
-	2D applications as Compression Level 9 in TightVNC 1.3.x, while using much less \
-	CPU time.  It also provides much better compression than TightVNC for 3D \
-	and video applications.  However, relative to Compression Level 2, this \
-	mode uses approximately twice as much CPU time and only achieves about \
-	10-20% better average compression for 2D apps (and has no noticeable \
-	benefit for 3D and video apps.)  Thus, its usefulness is generally very \
+| 1 | 1 | 24 | No | \
+	See the description of the "Tight + JPEG" encoding methods above. |
+| 2 | 3 | 96 | No | \
+	A higher palette threshold causes indexed color subencoding to be used more \
+	often than with CL 1, and indexed color subrectangles are compressed using \
+	a higher zlib compression level.  This can provide typically 20-40% better \
+	compression than CL 1 (with a commensurate increase in CPU usage) for \
+	workloads that have a low number of unique colors.  However, Compression \
+	Level 2 can increase the CPU usage for some high-color workloads without \
+	providing significantly better compression. |
+| 3-4 | 3 | 96 | No | \
+	Same as Compression Level 2 (reserved for future expansion) |
+| 5-6 | 1 | 24 | Yes | \
+	Same as Compression Level 1 but with interframe comparison enabled |
+| 7-8 | 3 | 96 | Yes | \
+	Same as Compression Level 2 but with interframe comparison enabled |
+| 9 | 7 | 256 | Yes | \
+	This mode is included only for backward compatibility with TightVNC.  It \
+	provides approximately the same level of compression for 2D applications as \
+	Compression Level 9 in TightVNC 1.3.x while using much less CPU time.  It \
+	also provides much better compression than TightVNC for 3D and video \
+	applications.  However, relative to Compression Level 2, this mode uses \
+	approximately twice as much CPU time and only achieves about 10-20% better \
+	average compression for 2D applications (and has no noticeable benefit for \
+	3D and video applications.)  Thus, its usefulness is generally very \
 	limited. |
 #CAP: Compression Levels Supported by the TurboVNC Server (JPEG Enabled)
 
@@ -213,24 +214,26 @@ has the following effect:
 || Compression Level || Zlib compression level (indexed color subrectangles) \
 	|| Zlib compression level (raw subrectangles) || Palette threshold \
 	|| Interframe comparison || Notes ||
-| 0 | None | None | Subrectangle size / 4 | No | See the description \
-	of the "Lossless Tight" encoding method above. |
-| 1 | 1 | 1 | Subrectangle size / 96 | No | See the description of the \
-	"Lossless Tight + Zlib" encoding method above. |
-| 2-4 | 1 | 1 | Subrectangle size / 96 | No | Same as Compression Level 1 (reserved for future expansion) |
-| 5 | None | None | Subrectangle size / 4 | Yes | Same as Compression Level \
-	0, but with interframe comparison enabled |
-| 6-8 | 1 | 1 | Subrectangle size / 96 | Yes | Same as Compression Level 1, \
-	but with interframe comparison enabled |
-| 9 | 7 | 5 | Subrectangle size / 96 | Yes | This mode is included only for \
-	backward compatibility with TightVNC.  It provides approximately the same \
-	level of compression for 2D applications as Compression Level 9 in \
-	TightVNC 1.3.x, while using much less CPU time.  It also provides much better \
-	compression than TightVNC for 3D and video applications.  However, relative \
-	to Compression Level 1, this mode uses approximately twice as much CPU time \
-	and only achieves about 10% better average compression for 2D apps (and \
-	has no noticeable benefit for 3D and video apps.)  Thus, its usefulness is \
-	generally very limited. |
+| 0 | None | None | Subrectangle size / 4 | No | \
+	See the description of the "Lossless Tight" encoding method above. |
+| 1 | 1 | 1 | Subrectangle size / 96 | No | \
+	See the description of the "Lossless Tight + Zlib" encoding method above. |
+| 2-4 | 1 | 1 | Subrectangle size / 96 | No | \
+	Same as Compression Level 1 (reserved for future expansion) |
+| 5 | None | None | Subrectangle size / 4 | Yes | \
+	Same as Compression Level 0 but with interframe comparison enabled |
+| 6-8 | 1 | 1 | Subrectangle size / 96 | Yes | \
+	Same as Compression Level 1 but with interframe comparison enabled |
+| 9 | 7 | 5 | Subrectangle size / 96 | Yes | \
+	This mode is included only for backward compatibility with TightVNC.  It \
+	provides approximately the same level of compression for 2D applications as \
+	Compression Level 9 in TightVNC 1.3.x, while using much less CPU time.  It \
+	also provides much better compression than TightVNC for 3D and video \
+	applications.  However, relative to Compression Level 1, this mode uses \
+	approximately twice as much CPU time and only achieves about 10% better \
+	average compression for 2D applications (and has no noticeable benefit for \
+	3D and video applications.)  Thus, its usefulness is generally very \
+	limited. |
 #CAP: Compression Levels Supported by the TurboVNC Server (JPEG Disabled)
 
 ** Lossless Refresh
@@ -238,12 +241,13 @@ has the following effect:
 
 Since both of TurboVNC's mathematically lossless encoding methods have
 performance drawbacks, another option for image-quality-critical applications
-is the "Lossless Refresh" feature.  When a lossless refresh is requested by a
-TurboVNC viewer, the server will send a mathematically lossless image of the
-current TurboVNC desktop to the requesting viewer.  So, for instance, a user
-can rotate/pan/zoom an object in their 3D application using a very low-quality
-JPEG setting, then when that user is ready to interpret or analyze the object,
-they can request a lossless refresh of TurboVNC's virtual screen.
+is the Lossless Refresh feature.  When a lossless refresh is requested by a
+TurboVNC viewer, the VNC server will send a mathematically lossless image of
+the remote desktop to the requesting viewer.  A user could, for instance, use
+the "Tight + Low-Quality JPEG" encoding method on a low-bandwidth network to
+improve the performance of rotating/panning/zooming an object in a 3D
+application, then the user could request a lossless refresh when they are ready
+to interpret or analyze the object.
 
 To perform a lossless refresh, press CTRL-ALT-SHIFT-L or click on the Lossless
 Refresh toolbar icon.
@@ -251,16 +255,18 @@ Refresh toolbar icon.
 ** Automatic Lossless Refresh
 {anchor: ALR}
 
-Passing an argument of {pcode: -alr __timeout__} to ''vncserver'' will enable
-the automatic lossless refresh (ALR) feature for the TurboVNC session.  ALR
-will monitor all of the VNC viewer connections, and if more than
+Passing an argument of {pcode: -alr __timeout__} to ''vncserver'' (or using
+''tvncconfig'' to set the ''ALR'' parameter for a running TurboVNC session)
+enables the Automatic Lossless Refresh (ALR) feature for the TurboVNC
+session.  ALR monitors all of the VNC viewer connections, and if more than
 __''timeout''__ seconds have elapsed since the last framebuffer update was sent
-to a given viewer, then the TurboVNC Server will send to that viewer a
-mathematically lossless copy of any "ALR-eligible" screen regions that have
-been affected by lossy compression.  You can also pass arguments of
-''-alrqual'' and ''-alrsamp'' to ''vncserver'' to specify that automatic
-lossless refreshes should be sent using JPEG instead (see the ''Xvnc'' man page
-for details.)
+to a given viewer, then the TurboVNC Server sends that viewer a mathematically
+lossless copy of any "ALR-eligible" screen regions that have been affected by
+lossy compression.  You can also pass arguments of ''-alrqual'' and
+''-alrsamp'' to ''vncserver'' (or use ''tvncconfig'' to set the ''ALRQual'' and
+''ALRSamp'' parameters for a running TurboVNC session) to specify that
+automatic lossless refreshes should be sent using JPEG instead.  (See the
+''Xvnc'' man page for details.)
 
 The ALR feature is designed mainly for use with interactive visualization
 applications.  The idea is that, on a low-bandwidth connection, low-quality
@@ -269,21 +275,21 @@ motion stops, a fully lossless copy of the 3D image is sent and can be studied
 in detail.
 
 The default is for any regions drawn with ''X[Shm]PutImage()'' to be
-ALR-eligible, as well as any regions drawn with CopyRect, if the source of the
-CopyRect operation was affected by lossy compression (CopyRect is an RFB
-encoding that allows the server to request that the viewer move a rectangle of
-pixels from one location to another.)  When used with VirtualGL, this means
-that ALRs will mainly be sent for just the 3D screen regions.  This should be
-fine for most 3D applications, since the 3D regions are the ones that are
-quality-critical.  The default ALR behavior also prevents what might best be
-called the "blinking cursor dilemma."  Certain programs have a blinking cursor
-that may update more frequently than the ALR timeout.  Since an ALR is
-triggered based on a period of inactivity relative to the last framebuffer
-update, these continuous updates prevent an ALR from ever being sent.
-Fortunately, blinking cursors are not typically drawn using
-''X[Shm]PutImage()'', so the problem is effectively worked around by limiting
-the ALR-eligible regions to just the subset of regions that were drawn with
-''X[Shm]PutImage()'' and CopyRect.
+ALR-eligible-- as well as any regions drawn with CopyRect, if the source of the
+CopyRect operation was affected by lossy compression.  (CopyRect is an RFB
+encoding that allows the VNC server to request that a VNC viewer move a
+rectangle of pixels from one location to another.)  When used with VirtualGL,
+this means that ALRs will mainly just be sent for the OpenGL-rendered regions
+of the remote desktop.  That should be fine for most 3D applications, since the
+OpenGL-rendered regions are the ones that are quality-critical.  The default
+ALR behavior also prevents what might best be called the "blinking cursor
+dilemma."  Certain programs have a blinking cursor that may update more
+frequently than the ALR timeout.  Since an ALR is triggered based on a period
+of inactivity relative to the last framebuffer update, these frequent updates
+prevent an ALR from ever being sent.  Fortunately, blinking cursors are not
+typically drawn using ''X[Shm]PutImage()'', so the problem is effectively
+worked around by limiting the ALR-eligible regions to just the subset of
+regions that were drawn using ''X[Shm]PutImage()'' and CopyRect.
 
 	!!! NOTE: Ill-behaved applications that continuously render the same image
 	will cause a variation of the "blinking cursor dilemma" and thus defeat ALR
@@ -291,9 +297,8 @@ the ALR-eligible regions to just the subset of regions that were drawn with
 
 You can override the default ALR behavior, thus making all screen regions
 eligible for ALR, by setting the ''TVNC_ALRALL'' environment variable to ''1''
-on the TurboVNC host prior to starting a TurboVNC session.  You can also set
-''TVNC_ALRCOPYRECT'' to ''0'' to make CopyRect regions ALR-ineligible, which
-approximates the behavior of TurboVNC 1.2.1 and prior.
+on the TurboVNC host prior to starting a TurboVNC session or by using
+''tvncconfig'' to set the ''ALRAll'' parameter for a running TurboVNC session.
 
 ** Multithreading
 {anchor: Multithreading}

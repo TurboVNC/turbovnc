@@ -3,12 +3,13 @@
 {img: somerights20.png}
 
 This document and all associated illustrations are licensed under the
-[[http://creativecommons.org/licenses/by/2.5/]\
-[Creative Commons Attribution 2.5 License]].  Any works that contain
+[[https://creativecommons.org/licenses/by/2.5]\
+[Creative Commons Attribution 2.5 License]*].  Any works that contain
 material derived from this document must cite The VirtualGL Project as the
 source of the material and list the current URL for the TurboVNC web site.
 
 The official TurboVNC binaries contain libjpeg-turbo, which is based in part on
 the work of the Independent JPEG Group.
 
-TurboVNC is licensed under the [[LICENSE.txt][GNU General Public License, v2]!].
+TurboVNC is licensed under the
+[[LICENSE.txt][GNU General Public License, v2]!*].

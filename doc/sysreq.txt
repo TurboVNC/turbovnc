@@ -12,12 +12,12 @@
 	|
 | O/S \
 	| TurboVNC should work with a variety of Linux distributions, \
-		[[http://www.freebsd.org][FreeBSD]], and \
-		[[http://www.oracle.com/us/products/servers-storage/solaris][Solaris]] \
-		11, but currently-supported versions of \
-		[[http://www.redhat.com/products/enterprise-linux/][Red Hat Enterprise Linux]] \
-		and its derivatives, [[http://www.ubuntu.com][Ubuntu]] LTS, and \
-		[[http://www.suse.com][SuSE]] Linux Enterprise tend to receive the most \
+		[[https://freebsd.org][FreeBSD]*], and \
+		[[https://oracle.com/solaris][Solaris]*] 11, but currently-supported \
+		versions of \
+		[[https://redhat.com/products/enterprise-linux][Red Hat Enterprise Linux]*] \
+		and its derivatives, [[https://ubuntu.com][Ubuntu]*] LTS, and \
+		[[https://suse.com][SUSE]*] Linux Enterprise tend to receive the most \
 		attention from the TurboVNC community. \
 	| < \
 	| < \
@@ -31,7 +31,7 @@
 	| {list type=ul: \
 			{item:For optimal performance, the X server should be configured to export \
 				True Color (24-bit or 32-bit) visuals.} \
-			{item:[[http://www.java.com][Oracle Java]] or OpenJDK}} \
+			{item:[[https://www.java.com][Oracle Java]*] or OpenJDK}} \
 	|
 #OPT: hiCol=first
 

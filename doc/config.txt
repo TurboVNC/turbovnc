@@ -2,7 +2,39 @@
 
 ** Server Settings
 
+The TurboVNC Server is normally configured in the following ways, in increasing
+order of precedence:
+
+	#. A system-wide configuration file ({file: /etc/turbovncserver.conf}), which
+		can be used to modify the default values of certain ''vncserver'' and
+		''Xvnc'' command-line options
+	#. A per-user configuration file ({file: ~/.vnc/turbovncserver.conf}), which
+		can be used to modify the default values of certain ''vncserver'' and
+		''Xvnc'' command-line options
+	#. ''vncserver'' and ''Xvnc'' command-line options
+	#. ''tvncconfig'', which can be used to modify certain TurboVNC Server
+		parameters in a running TurboVNC session
+	#. A system-wide security configuration file
+		({file: /etc/turbovncserver-security.conf}), which can be used to configure
+		certain TurboVNC Server security features as well as restrict the scope of
+		TurboVNC Server features that users are allowed to configure
+
+Refer to the TurboVNC man pages for more information:
+
+	#Verb: <<---
+	man -M /opt/TurboVNC/man vncserver
+	man -M /opt/TurboVNC/man Xvnc
+	man -M /opt/TurboVNC/man vncconnect
+	man -M /opt/TurboVNC/man vncpasswd
+	man -M /opt/TurboVNC/man tvncconfig
+	---
+
+{nl}
+This section documents rarely-used advanced TurboVNC Server settings that can
+be configured using environment variables.
+
 | Environment Variable | {pcode: TVNC_ALRALL = __0 \| 1__} |
+| TurboVNC Server Parameter | {pcode: ALRAll = __False \| True__} |
 | Summary | Disable/Enable automatic lossless refresh for regions that were \
 drawn using X11 functions other than ''X[Shm]PutImage()'' |
 | Default Value | Disabled |
@@ -31,13 +63,14 @@ rectangles |
 	associated with this can bog down the viewer, and in extreme cases, the
 	number of rectangles may even exceed the maximum number that is allowed in a
 	single framebuffer update (65534.)  Thus, if a framebuffer update contains
-	more than __''{c}''__ rectangles, TurboVNC will coalesce it into a single
-	rectangle that covers all of the rectangles in the update.  For applications
-	that generate many tiny rectangles, increasing ''TVNC_COMBINERECT'' may
-	significantly increase the number of pixels sent to the viewer, which will
-	increase network usage.  However, for those same applications, lowering
-	''TVNC_COMBINERECT'' will increase the number of rectangles sent to the
-	viewer, which will increase the CPU usage of both the server and the viewer.
+	more than __''{c}''__ rectangles, the TurboVNC Server will coalesce it into a
+	single rectangle that covers all of the rectangles in the update.  For
+	applications that generate many tiny rectangles, increasing the value of
+	''TVNC_COMBINERECT'' may significantly increase the number of pixels sent to
+	the viewer, which will increase network usage.  However, for those same
+	applications, lowering the value of ''TVNC_COMBINERECT'' will increase the
+	number of rectangles sent to the viewer, which will increase the CPU usage of
+	both the server and the viewer.
 
 | Environment Variable | {pcode: TVNC_ICEBLOCKSIZE = __{s}__} |
 | Summary | Set the block size for the interframe comparison engine (ICE) to \
@@ -47,24 +80,24 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 #OPT: hiCol=first
 
 	Description :: If interframe comparison is enabled (see
-	{ref prefix="Section ": InterframeComparison}), then TurboVNC will compare
-	each rectangle of each framebuffer update on a block-by-block basis and send
-	only the blocks that have changed.  This prevents large rectangles from being
-	re-transmitted if only a few pixels in the rectangle have changed.  Using
-	smaller block sizes can decrease network usage if only a few pixels are
-	changing between updates, but using smaller block sizes can also interfere
-	with the Tight encoder's ability to efficiently split rectangles into
-	subrectangles, thus increasing host CPU usage (and sometimes increasing
-	network usage as well, which runs counter to the purpose of interframe
-	comparison.)  Setting the block size to 0 causes the ICE to compare full
-	framebuffer update rectangles, as TurboVNC 1.2.x did.
+	{ref prefix="Section ": InterframeComparison}), then the TurboVNC Server
+	compares each rectangle of each framebuffer update on a block-by-block basis
+	and sends only the blocks that have changed.  This prevents large rectangles
+	from being re-transmitted if only a few pixels in the rectangle have changed.
+	Using smaller block sizes can decrease network usage if only a few pixels
+	have changed between updates.  However, using smaller block sizes can also
+	interfere with the Tight encoder's ability to efficiently split rectangles
+	into subrectangles, thus increasing host CPU usage (and sometimes increasing
+	network usage as well, which defeats the purpose of interframe comparison.)
+	Setting the block size to 0 causes the ICE to compare full framebuffer update
+	rectangles, as TurboVNC 1.2.x did.
 	{nl}{nl}
 	The default block size of 256x256 was chosen based on extensive low-level
 	experiments using the same set of RFB session captures that were used when
 	designing the TurboVNC encoder.  For most of those datasets, 256x256 blocks
 	produced the lowest network and CPU usage, but actual mileage may vary.
-	There were rare cases in which using 64x64 blocks or full-rectangle
-	comparison produced better network and CPU usage.
+	There were rare cases in which 64x64 blocks or full-rectangle comparison
+	produced better network and CPU usage.
 
 | Environment Variable | {pcode: TVNC_ICEDEBUG = __0 \| 1__} |
 | Summary | Disable/Enable the ICE debugger |
@@ -73,10 +106,10 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 
 	Description :: If interframe comparison is enabled (see
 	{ref prefix="Section ": InterframeComparison}), then setting this environment
-	variable to 1 will cause the interframe comparison engine (ICE) to change the
-	color of duplicate screen regions without culling them from the update stream.
-	This allows you to easily see which applications are generating duplicate
-	updates.
+	variable to ''1'' will cause the interframe comparison engine (ICE) to change
+	the color of duplicate screen regions without culling them from the
+	framebuffer update stream.  This allows you to easily see which applications
+	are generating duplicate updates.
 
 | Environment Variable | {pcode: TVNC_MT = __0 \| 1__} |
 | Summary | Disable/Enable multithreaded image encoding |
@@ -95,35 +128,64 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	Description :: See {ref prefix="Section ": Multithreading}
 
 | Environment Variable | {pcode: TVNC_PROFILE = __0 \| 1__} |
+| TurboVNC Server Parameter | {pcode: Profile = __False \| True__} |
 | Summary | Disable/enable profiling output |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
 	Description :: If profiling output is enabled, then the TurboVNC Server will
 	continuously benchmark itself and periodically print the throughput of
-	various stages in its image pipeline to the Xvnc log file.
+	various stages in its image pipeline to the TurboVNC session log.
 
 ** Viewer Settings
 
-Java system properties are normally specified as command-line arguments to the
-Java executable.  For example:
+The TurboVNC Viewer is normally configured in the following ways, in increasing
+order of precedence:
 
-	#Pverb: <<---
-	java -Dmy.system.property=__value__ -jar MyClass.jar
-	---
+	#. A per-user configuration file ({file: ~/.vnc/default.turbovnc}), which can
+		be used to modify the default values of TurboVNC Viewer parameters
+	#. TurboVNC Viewer parameters, which can be set on the command line or in a
+		connection info file
 
-However, since TurboVNC hides the Java command line inside of its startup
-scripts (or inside of an application bundle on macOS), the easiest way to
-set these properties is by using the ''JAVA_TOOL_OPTIONS'' environment
-variable, which allows you to specify Java command-line arguments even if
-you don't have access to the command line.  For instance, on Linux you could
-execute:
+Run
 
 	#Verb: <<---
-	JAVA_TOOL_OPTIONS=-Dturbovnc.profile=1 /opt/TurboVNC/bin/vncviewer
+	/opt/TurboVNC/bin/vncviewer -?
 	---
 
-to start the TurboVNC Viewer without JPEG acceleration.
+on Linux/Un*x and Mac systems or
+
+	#Verb: <<---
+	c:\Program Files\TurboVNC\vncviewer.bat -?
+	---
+
+on Windows systems to display a full list of supported command-line
+options/parameters and their descriptions.
+
+{nl}
+This section documents rarely-used advanced TurboVNC Viewer settings that can
+be configured using environment variables or Java system properties.
+
+Java system properties can be set using the ''JAVA_TOOL_OPTIONS'' environment
+variable.  For instance, on Linux/Un*x and Mac systems, you could execute:
+
+	#Verb: <<---
+	JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0 /opt/TurboVNC/bin/vncviewer
+	---
+
+to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
+
+| Java System Property | ''turbovnc.ciphersuites'' |
+| Summary | Available cipher suites for TLS encryption |
+| Default Value | System-dependent |
+#OPT: hiCol=first
+
+	Description :: If the logging level is 100 or higher, then the TurboVNC
+	Viewer will print a list of cipher suites that are available for use with the
+	current TLS encryption method.  (This occurs during RFB authentication if one
+	of the TLS* or X509* security types is selected.)  You can then use this
+	property to further restrict the list of available cipher suites or change
+	their preferred order.
 
 | Java System Property | {pcode: turbovnc.forcealpha = __0 \| 1__} |
 | Summary | Disable/enable back buffer alpha channel |
@@ -131,28 +193,16 @@ to start the TurboVNC Viewer without JPEG acceleration.
 #OPT: hiCol=first
 
 	Description :: If this property is enabled, then the TurboVNC Viewer will use
-	a TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel) BufferedImage as
+	a TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel) BufferedImage for
 	its back buffer instead of a TYPE_INT_RGB (BGRX) BufferedImage.  When using
-	OpenGL blitting in Java 2D (normally accomplished by passing an argument of
-	''-Dsun.java2d.opengl=true'' to ''java''), it is generally faster to draw an
-	alpha-enabled BufferedImage to the screen, because otherwise glDrawPixels()
-	has to set all of the alpha values itself (which can cause it to revert to an
-	unaccelerated code path in some cases.)
+	OpenGL blitting in Java 2D, which is normally accomplished by setting the
+	''sun.java2d.opengl'' Java system property to ''true'', it is generally
+	faster to draw an alpha-enabled BufferedImage to the screen.  (Otherwise
+	''glDrawPixels()'' has to set all of the alpha values itself, which can cause
+	it to revert to an unaccelerated code path in some cases.)
 
-	!!! NOTE: this property is enabled by default when using Java 7 or later on
-	Mac platforms, because OpenGL Java 2D blitting is the only option available.
-
-| Java System Property | {pcode: turbovnc.lionfs = __0 \| 1__} |
-| Summary | Disable/enable the use of the macOS full-screen application \
-	feature |
-| Default Value | Enabled |
-#OPT: hiCol=first
-
-	Description :: When running in full-screen mode, the TurboVNC Viewer will
-	normally try to take advantage of the full-screen application feature
-	provided by OS X/macOS 10.7 and later, if available.  Disabling this property
-	will force the viewer to use its own built-in cross-platform
-	"pseudo-full-screen" feature instead.  This is useful mainly for testing.
+	!!! NOTE: This property is enabled by default on Mac systems, because OpenGL
+	Java 2D blitting is the only option available.
 
 | Java System Property | {pcode: turbovnc.primary = __0 \| 1__} |
 | Summary | Disable/enable the use of the X11 PRIMARY clipboard selection |
@@ -160,21 +210,21 @@ to start the TurboVNC Viewer without JPEG acceleration.
 #OPT: hiCol=first
 
 	Description :: X11 has two ways of copying/pasting text.  When text is
-	selected in most X11 applications, it is copied to the PRIMARY selection,
-	and it can be pasted by pressing the middle mouse button.  When text is
-	explicitly copied using a "Copy" menu option or a hotkey (such as CTRL-C), it
-	is copied to the CLIPBOARD selection, and it can only be pasted by explicitly
-	selecting a "Paste" menu option or pressing a hotkey (such as CTRL-V.)
-	Normally, on X11 platforms, the TurboVNC Viewer transfers the PRIMARY
-	selection from client to server and, when receiving a clipboard update from
-	the server, it sets both the PRIMARY and CLIPBOARD selections with the
-	server's clipboard contents.  Disabling this property will cause only the
-	the CLIPBOARD selection to be transferred from client to server (in other
-	words, the clipboard will not be transferred unless you explicitly copy
-	something by using a menu option or hotkey), and clipboard changes from the
-	server will only affect the client's CLIPBOARD selection (in other words, you
-	will have to explicitly paste the server's clipboard contents by using a menu
-	option or hotkey on the client.)
+	selected in most X11 applications, it is copied to the PRIMARY
+	selection, and it can be pasted by pressing the middle mouse button.  When
+	text is explicitly copied using a "Copy" menu option or a hotkey (such as
+	CTRL-C), it is copied to the CLIPBOARD selection, and it can only be pasted
+	using a "Paste" menu option or a hotkey (such as CTRL-V.)  Normally, on X11
+	platforms, the TurboVNC Viewer transfers the PRIMARY selection from client to
+	server, and when receiving a clipboard update from the server, it sets both
+	the PRIMARY and CLIPBOARD selections with the server's clipboard contents.
+	Disabling this property causes only the CLIPBOARD selection to be transferred
+	from client to server.  (In other words, the clipboard will not be
+	transferred unless you explicitly copy something using a menu option or a
+	hotkey.)  Also, if this property is disabled, then clipboard changes from the
+	server will only affect the client's CLIPBOARD selection.  (In other words,
+	you will have to use a menu option or a hotkey to paste the server's
+	clipboard contents.)
 
 | Environment Variable | {pcode: TVNC_PROFILE = __0 \| 1__} |
 | Summary | Disable/enable profiling output |
@@ -183,7 +233,9 @@ to start the TurboVNC Viewer without JPEG acceleration.
 
 	Description :: If profiling output is enabled, then the TurboVNC Viewer will
 	continuously benchmark itself and periodically print the throughput of
-	various stages in its image pipeline to the console.
+	various stages in its image pipeline to the console.  The TurboVNC Viewer's
+	''ProfileInterval'' parmeter can be used to specify the time period over
+	which performance statistics are averaged and reported.
 
 {anchor: TVNC_SERVERARGS}
 | Environment Variable | ''TVNC_SERVERARGS'' |
@@ -224,25 +276,24 @@ to start the TurboVNC Viewer without JPEG acceleration.
 | Default Value | Disabled |
 #OPT: hiCol=first
 
-	Description :: The default behavior of the TurboVNC Viewer, when automatic
-	desktop resizing is enabled, is to request a desktop size from the server
-	that will fit within the viewer window without using scrollbars, and (if
-	multi-screen spanning is enabled) to request a screen layout from the server
-	that will align the server's screen boundaries with the client's when the
-	viewer window is in its default position.  Setting this environment variable
-	or property to 1 will restore the automatic desktop resizing behavior of
-	previous versions of the TurboVNC Viewer, thus forcing the server to use a
-	single-screen layout even if it supports multi-screen layouts.
+	Description :: If automatic desktop resizing and multi-screen spanning are
+	enabled, then the TurboVNC Viewer normally requests a screen layout from the
+	server that fits within the viewer window without using scrollbars and that
+	aligns the server's screen boundaries with the client's when the viewer
+	window is in its default position.  Setting this environment variable or
+	property to ''1'' restores the automatic desktop resizing behavior of version
+	2.1.x and prior of the TurboVNC Viewer, requesting a single-screen layout
+	from the server even if it supports multi-screen layouts.
 
 | Java System Property | ''turbovnc.sshauth'' |
 | Summary | Preferred authentication methods for the built-in SSH client |
 | Default Value | ''publickey,keyboard-interactive,password'' |
 #OPT: hiCol=first
 
-	Description :: This system property can be used to enable or disable
-	particular SSH authentication methods, as well as to specify their preferred
-	order.  The same thing can be accomplished by using the
-	''PreferredAuthentications'' directive in the OpenSSH config file.
+	Description :: This property can be used to enable or disable particular SSH
+	authentication methods, as well as to specify their preferred order.  The
+	same thing can be accomplished using the ''PreferredAuthentications''
+	directive in the OpenSSH config file.
 
 | Java System Property | {pcode: turbovnc.sshbannerdlg = __0 \| 1__} |
 | Summary | Display the banner message from the SSH server in a dialog box |
@@ -250,34 +301,21 @@ to start the TurboVNC Viewer without JPEG acceleration.
 #OPT: hiCol=first
 
 	Description :: The default behavior of the TurboVNC Viewer is to display the
-	banner message from the SSH server on the command line.  Enabling this system
+	banner message from the SSH server on the command line.  Enabling this
 	property causes the viewer to display the banner message in a dialog box
 	instead.
-
-| Java System Property | {pcode: turbovnc.swingdb = __0 \| 1__} |
-| Summary | Disable/enable Swing double buffering |
-| Default Value | Disabled |
-#OPT: hiCol=first
-
-	Description :: The TurboVNC Viewer has its own double buffering mechanism, so
-	it normally disables the double buffering mechanism in Swing and Java 2D in
-	order to increase performance.  This also allows the viewer to achieve
-	optimal performance under X11 without requiring MIT-SHM pixmap support.
-	Although the viewer has been thoroughly tested, the ''turbovnc.swingdb''
-	system property is provided as a fallback in case issues are discovered when
-	running it under a specific version of Java.
 
 {anchor: VNC_VIA_CMD}
 | Environment Variable | ''VNC_VIA_CMD'', ''VNC_TUNNEL_CMD'' |
 | Java System Property | ''turbovnc.via'', ''turbovnc.tunnel'' |
-| Summary | SSH command-line templates for use with the ''via'' and \
-	''tunnel'' options (respectively) |
+| Summary | SSH command-line templates for use with the ''Via'' and \
+	''Tunnel'' parameters (respectively) |
 | Default Value | See below |
 #OPT: hiCol=first
 
-	Description :: When the ''-via'' option is used along with the ''-extssh''
-	option, the TurboVNC Viewer reads the ''VNC_VIA_CMD'' environment variable or
-	the ''turbovnc.via'' system property, expands patterns beginning with the "%"
+	Description :: When the ''Via'' parameter is used along with the ''ExtSSH''
+	parameter, the TurboVNC Viewer reads the ''VNC_VIA_CMD'' environment variable
+	or the ''turbovnc.via'' property, expands patterns beginning with the "%"
 	character, and uses the resulting command line to establish the secure tunnel
 	to the VNC gateway.  If ''VNC_VIA_CMD'' and ''turbovnc.via'' are not set,
 	then this command-line template defaults to one of the following values:
@@ -290,11 +328,11 @@ to start the TurboVNC Viewer without JPEG acceleration.
 		{pcode: __{ssh}__ -J %G -- %H exec socat stdio unix-connect:%R} |
 	{nl} \
 	__''{ssh}''__ is the external SSH client command, which can be configured
-	using the ''-extsshcommand'' option.
+	using the TurboVNC Viewer's ''ExtSSHCommand'' parameter.
 	{nl}{nl} \
-	When the ''-tunnel'' option is used along with the ''-extssh'' option, the
-	TurboVNC Viewer reads the ''VNC_TUNNEL_CMD'' environment variable or the
-	''turbovnc.tunnel'' system property, expands patterns beginning with the "%"
+	When the ''Tunnel'' parameter is used along with the ''ExtSSH'' parameter,
+	the TurboVNC Viewer reads the ''VNC_TUNNEL_CMD'' environment variable or the
+	''turbovnc.tunnel'' property, expands patterns beginning with the "%"
 	character, and uses the resulting command line to establish the secure tunnel
 	to the VNC host.  If ''VNC_TUNNEL_CMD'' and ''turbovnc.tunnel'' are not set,
 	then this command-line template defaults to one of the following values:
@@ -307,24 +345,24 @@ to start the TurboVNC Viewer without JPEG acceleration.
 		{pcode: __{ssh}__ -- %H exec socat stdio unix-connect:%R} |
 	{nl} \
 	__''{ssh}''__ is the external SSH client command, which can be configured
-	using the ''-extsshcommand'' option.
+	using the TurboVNC Viewer's ''ExtSSHCommand'' parameter.
 	{nl}{nl} \
 	The following patterns are recognized in the ''VNC_VIA_CMD'' and
-	''VNC_TUNNEL_CMD'' environment variables and their corresponding system
-	properties.  Note that ''%H'' and ''%R'' must be present in the command-line
-	template, and ''%G'' must also be present if using the ''-via'' option.  If
-	the VNC server is listening on a TCP port, then ''%L'' must also be present.
-	If the VNC server is listening on a Unix domain socket, then ''%L'' can
-	optionally be used to forward a local TCP port to the remote Unix domain
-	socket (for instance, by setting ''VNC_TUNNEL_CMD'' to
+	''VNC_TUNNEL_CMD'' environment variables and their corresponding properties.
+	Note that ''%H'' and ''%R'' must be present in the command-line template, and
+	''%G'' must also be present if using the ''Via'' parameter.  If the VNC
+	server is listening on a TCP port, then ''%L'' must also be present.  If the
+	VNC server is listening on a Unix domain socket, then ''%L'' can optionally
+	be used to forward a local TCP port to the remote Unix domain socket (for
+	instance, by setting ''VNC_TUNNEL_CMD'' to
 	''/usr/bin/env ssh -axf -L %L:%R %H sleep 20''.)  If ''%L'' is not present,
 	then the TurboVNC Viewer expects the SSH command line to connect standard
 	input and standard output to the remote Unix domain socket.
 	{nl}{nl}
 	| ''%%'' | A literal "%" |
 	| ''%G'' | gateway host name or IP address |
-	| ''%H'' | remote VNC host name or IP address (if using the ''-via'' \
-		option, then this is specified from the point of view of the gateway) |
+	| ''%H'' | remote VNC host name or IP address (if using the ''Via'' \
+		parameter, then this is specified from the point of view of the gateway) |
 	| ''%L'' | local TCP port number |
 	| ''%R'' | remote TCP port number or the escaped name of a Unix domain \
 		socket on the VNC host |
