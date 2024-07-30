@@ -59,11 +59,9 @@ commands:
 
 Add {file: ~/turbovnc} to any paths specified in this document.
 
-	!!! If using the TurboVNC Session Manager, set the ''turbovnc.serverdir''
-	Java system property in the TurboVNC Viewer to ''~/turbovnc/opt/TurboVNC'',
-	or set the ''TVNC_SERVERDIR'' environment variable on the client machine to
-	''\\~/turbovnc/opt/TurboVNC'' (note backslash.)  Refer to
-	{ref prefix="Section ": TVNC_SERVERDIR}.
+	!!! If using the TurboVNC Session Manager, set the TurboVNC Viewer's
+	''ServerDir'' parameter to ''"~/turbovnc/opt/TurboVNC"''.  (''~'' must be
+	quoted or escaped if the parameter is specified on the command line.)
 
 	!!! The TurboVNC security configuration file will not work when TurboVNC is
 	installed in this manner.

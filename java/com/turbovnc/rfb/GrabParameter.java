@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2022-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2022-2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,8 @@ public final class GrabParameter extends IntParameter {
   public static final int ALWAYS = 1;
   public static final int MANUAL = 2;
 
-  public GrabParameter(String name, Params params, boolean isGUI, String desc,
-                       int defValue) {
-    super(name, params, Utils.osGrab(), Utils.osGrab() ? desc : null,
+  public GrabParameter(String name, Params params, String desc, int defValue) {
+    super(name, params, Utils.osGrab(), false, Utils.osGrab() ? desc : null,
           defValue, FS, MANUAL);
   }
 

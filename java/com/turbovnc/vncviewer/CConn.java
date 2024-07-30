@@ -80,7 +80,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     clipboardDialog = new ClipboardDialog(this);
     profileDialog = new ProfileDialog(this);
     String env = System.getenv("TVNC_PROFILE");
-    if (env != null && env.equals("1"))
+    if (params.profile.get() || (env != null && env.equals("1")))
       alwaysProfile = true;
     firstUpdate = true;  pendingUpdate = false;  continuousUpdates = false;
     forceNonincremental = true;  supportsSyncFence = false;

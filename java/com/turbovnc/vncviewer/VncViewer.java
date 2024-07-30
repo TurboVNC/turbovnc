@@ -473,6 +473,12 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
           continue;
         }
 
+        if (argv[i].equals("-??")) {
+          System.out.print("\nThe advanced parameters are:\n\n");
+          params.list(80, true);
+          System.exit(1);
+        }
+
         if (params.set(argv[i]))
           continue;
 
@@ -571,6 +577,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       "      connection info file but not parameter values specified on the command\n" +
       "      line after the connection info file.\n" +
       "\n" +
+      "  -??\n" +
+      "      List rarely-used advanced parameters and their descriptions.\n" +
+      "\n" +
       "Specifying boolean parameters:\n" +
       "  On:   -<param> or --<param> or <param>=1 or -<param>=1 or --<param>=1\n" +
       "  Off:  -no<param> or --no<param> or <param>=0 or -<param>=0 or --<param>=0\n" +
@@ -589,7 +598,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     System.out.println("Copyright (C) " + copyrightYear + " " + copyright);
     System.out.println(url);
     System.out.print(usage);
-    params.list(80);
+    params.list(80, false);
     System.exit(1);
   }
 

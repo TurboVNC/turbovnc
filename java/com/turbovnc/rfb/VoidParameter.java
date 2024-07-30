@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018, 2020-2023 D. R. Commander.
+/* Copyright (C) 2012, 2017-2018, 2020-2024 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -23,11 +23,12 @@ package com.turbovnc.rfb;
 public abstract class VoidParameter {
 
   public VoidParameter(String name_, Params params_, boolean isGUI_,
-                       String desc_) {
+                       boolean advanced_, String desc_) {
     name = name_;
     params = params_;
     desc = desc_;
     isGUI = isGUI_;
+    advanced = advanced_;
     if (params.head == null)
       params.head = this;
     if (params.tail != null)
@@ -61,11 +62,13 @@ public abstract class VoidParameter {
   public boolean isBool() { return false; }
   public boolean isCommandLine() { return commandLine; }
   public final boolean isGUI() { return isGUI; }
+  public final boolean isAdvanced() { return advanced; }
   public final VoidParameter next() { return next; }
 
   private VoidParameter next;
   private final String name, desc;
   final Params params;
   private final boolean isGUI;
+  private final boolean advanced;
   private boolean commandLine;
 }

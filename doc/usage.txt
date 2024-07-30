@@ -100,14 +100,11 @@ authentication (using ssh-agent or Pageant.)
 	({file: ~/.ssh/config} by default) can also be used to specify those
 	parameters persistently for a given host.
 
-	!!! The ''TVNC_SERVERDIR'' and ''TVNC_SERVERARGS'' environment variables, and
-	their equivalent Java system properties (''turbovnc.serverdir'' and
-	''turbovnc.serverargs'') can be used to specify a non-default installation
-	path for the TurboVNC Server or additional arguments to pass to the TurboVNC
-	Server when starting new sessions.  (Refer to
-	{ref prefix="Section " : TVNC_SERVERARGS}.)  TurboVNC Server arguments can
-	also be specified on the host using the system-wide or per-user
-	{file: turbovncserver.conf} file.
+	!!! The TurboVNC Viewer's ''ServerDir'' and ''ServerArgs'' parameters can be
+	used to specify a non-default installation path for the TurboVNC Server or
+	additional arguments to pass to the TurboVNC Server when starting new
+	sessions.  TurboVNC Server arguments can also be specified on the host using
+	the system-wide or per-user {file: turbovncserver.conf} file.
 
 ** Manually Starting a TurboVNC Session
 
@@ -405,5 +402,6 @@ For more detailed instructions on the usage of TurboVNC:
 	#Verb: <<---
 	c:\Program Files\TurboVNC\vncviewer.bat -?
 	---
-	on Windows systems to display a full list of supported command-line
-	options/parameters and their descriptions.
+	on Windows systems to display a list of command-line options and
+	commonly-used parameters and their descriptions.  Replace ''-?'' with ''-??''
+	to display a list of advanced parameters and their descriptions.

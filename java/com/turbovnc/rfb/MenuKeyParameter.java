@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2022-2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@ import com.turbovnc.rdr.*;
 
 public final class MenuKeyParameter extends VoidParameter {
 
-  public MenuKeyParameter(String name, Params params, boolean isGUI,
-                          String desc, String defValue_) {
-    super(name, params, isGUI, desc);
+  public MenuKeyParameter(String name, Params params, String desc,
+                          String defValue_) {
+    super(name, params, true, false, desc);
     defValue = defValue_;
     set(defValue);
   }

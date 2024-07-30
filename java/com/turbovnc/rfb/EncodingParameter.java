@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2022-2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@ import com.turbovnc.rdr.*;
 
 public final class EncodingParameter extends IntParameter {
 
-  public EncodingParameter(String name, Params params, boolean isGUI,
-                           String desc, int defValue) {
-    super(name, params, isGUI, desc, defValue, 0, RFB.ENCODING_LAST);
+  public EncodingParameter(String name, Params params, String desc,
+                           int defValue) {
+    super(name, params, false, false, desc, defValue, 0, RFB.ENCODING_LAST);
   }
 
   public boolean set(String encString) {

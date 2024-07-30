@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2018, 2021-2023 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2018, 2021-2024 D. R. Commander.
  *                                           All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2010 TigerVNC Team
@@ -28,9 +28,9 @@ import com.turbovnc.rdr.*;
 
 public final class SecTypesParameter extends VoidParameter {
 
-  public SecTypesParameter(String name, Params params, boolean isGUI,
-                           String desc, String defValue_) {
-    super(name, params, isGUI, desc);
+  public SecTypesParameter(String name, Params params, String desc,
+                           String defValue_) {
+    super(name, params, true, false, desc);
     defValue = defValue_;
     // NOTE: We defer initialization of enabledSecTypes until first use,
     // because the initialization depends on other parameters that may not yet

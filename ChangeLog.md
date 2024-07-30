@@ -21,6 +21,28 @@ the description of the `-drinode` option in the Xvnc man page for more details.
 rather than trying to execute **xinitrc** or twm, if a session desktop file for
 the default window manager cannot be found.
 
+4. Configuration of the TurboVNC Viewer has been improved in the following
+ways:
+
+     - Advanced parameters (those that are rarely needed by end users) are now
+listed on a separate usage screen, which can be displayed by passing `-??` to
+`/opt/TurboVNC/bin/vncviewer` or `c:\Program Files\TurboVNC\vncviewer.bat`.
+     - TurboVNC-specific Java system properties can now be specified in
+**~/.vnc/default.turbovnc**.
+     - The `turbovnc.ciphersuites` Java system property has been deprecated and
+replaced with a new advanced parameter (`CipherSuites`.)
+     - The `TVNC_PROFILE` environment variable has been deprecated and replaced
+with a new advanced parameter (`Profile`.)
+     - The `TVNC_SERVERARGS` environment variable and the `turbovnc.serverargs`
+Java system property have been deprecated and replaced with a new advanced
+parameter (`ServerArgs`.)
+     - The `TVNC_SERVERDIR` environment variable and the `turbovnc.serverdir`
+Java system property have been deprecated and replaced with a new advanced
+parameter (`ServerDir`.)
+     - The `VNC_VIA_CMD` and `VNC_TUNNEL_CMD` environment variables and the
+`turbovnc.via` and `turbovnc.tunnel` Java system properties have been
+deprecated and replaced with a new advanced parameter (`ExtSSHTemplate`.)
+
 
 3.1.2
 =====

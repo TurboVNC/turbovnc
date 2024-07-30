@@ -1,4 +1,5 @@
-/* Copyright (C) 2012, 2015-2020, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2015-2020, 2022, 2024 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright (C) 2011-2012, 2015, 2017, 2019 Brian P. Hinz
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
@@ -201,9 +202,11 @@ public class CSecurityTLS extends CSecurity {
         enabled.add(supported[i]);
     engine.setEnabledProtocols(enabled.toArray(new String[0]));
 
-    String cipherProperty = System.getProperty("turbovnc.ciphersuites");
-    if (cipherProperty != null)
-      supported = cipherProperty.split("\\s*,\\s*");
+    String cipherSuites = client.params.cipherSuites.get();
+    if (cipherSuites == null)
+      cipherSuites = System.getProperty("turbovnc.ciphersuites");
+    if (cipherSuites != null)
+      supported = cipherSuites.split("\\s*,\\s*");
     else
       supported = engine.getSupportedCipherSuites();
     if (anon) {
@@ -228,8 +231,8 @@ public class CSecurityTLS extends CSecurity {
         sb.append(", ");
     }
     vlog.debug("Available cipher suites: " + sb.toString());
-    if (cipherProperty == null)
-      vlog.debug("    (Set the turbovnc.ciphersuites system property to override.)");
+    if (cipherSuites == null)
+      vlog.debug("    (Set the CipherSuites parameter to override.)");
   }
 
   class MyX509TrustManager implements X509TrustManager {

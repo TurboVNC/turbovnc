@@ -159,8 +159,9 @@ on Linux/Un*x and Mac systems or
 	c:\Program Files\TurboVNC\vncviewer.bat -?
 	---
 
-on Windows systems to display a full list of supported command-line
-options/parameters and their descriptions.
+on Windows systems to display a list of command-line options and commonly-used
+parameters and their descriptions.  Replace ''-?'' with ''-??'' to display a
+list of advanced parameters and their descriptions.
 
 {nl}
 This section documents rarely-used advanced TurboVNC Viewer settings that can
@@ -173,19 +174,9 @@ variable.  For instance, on Linux/Un*x and Mac systems, you could execute:
 	JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0 /opt/TurboVNC/bin/vncviewer
 	---
 
-to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
-
-| Java System Property | ''turbovnc.ciphersuites'' |
-| Summary | Available cipher suites for TLS encryption |
-| Default Value | System-dependent |
-#OPT: hiCol=first
-
-	Description :: If the logging level is 100 or higher, then the TurboVNC
-	Viewer will print a list of cipher suites that are available for use with the
-	current TLS encryption method.  (This occurs during RFB authentication if one
-	of the TLS* or X509* security types is selected.)  You can then use this
-	property to further restrict the list of available cipher suites or change
-	their preferred order.
+to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.  The
+Java system properties listed below can also be specified in
+{file: ~/.vnc/default.turbovnc}.
 
 | Java System Property | {pcode: turbovnc.primary = __0 \| 1__} |
 | Summary | Disable/enable the use of the X11 PRIMARY clipboard selection |
@@ -208,41 +199,6 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 	server will only affect the client's CLIPBOARD selection.  (In other words,
 	you will have to use a menu option or a hotkey to paste the server's
 	clipboard contents.)
-
-| Environment Variable | {pcode: TVNC_PROFILE = __0 \| 1__} |
-| Summary | Disable/enable profiling output |
-| Default Value | Disabled |
-#OPT: hiCol=first
-
-	Description :: If profiling output is enabled, then the TurboVNC Viewer will
-	continuously benchmark itself and periodically print the throughput of
-	various stages in its image pipeline to the console.  The TurboVNC Viewer's
-	''ProfileInterval'' parmeter can be used to specify the time period over
-	which performance statistics are averaged and reported.
-
-{anchor: TVNC_SERVERARGS}
-| Environment Variable | ''TVNC_SERVERARGS'' |
-| Java System Property | ''turbovnc.serverargs'' |
-| Summary | Additional arguments that the TurboVNC Session Manager will pass \
-	to ''vncserver'' when starting a new TurboVNC session \
-|
-#OPT: hiCol=first
-
-	Description :: The TurboVNC Session Manager will pass these command-line
-	arguments to the ''vncserver'' script when starting a new TurboVNC session on
-	the TurboVNC host.  This can be used, for instance, to enable
-	[[#ALR][automatic lossless refresh]].
-
-{anchor: TVNC_SERVERDIR}
-| Environment Variable | ''TVNC_SERVERDIR'' |
-| Java System Property | ''turbovnc.serverdir'' |
-| Summary | The directory in which the TurboVNC Server is installed on the \
-	TurboVNC host |
-| Default Value | ''/opt/TurboVNC'' |
-#OPT: hiCol=first
-
-	Description :: The TurboVNC Session Manager will execute ''bin/vncserver''
-	and ''bin/vncpasswd'' from this directory on the TurboVNC host.
 
 | Java System Property | {pcode: turbovnc.sessmgr = __0 \| 1__} |
 | Summary | Disable/enable the TurboVNC Session Manager |
@@ -287,54 +243,3 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 	banner message from the SSH server on the command line.  Enabling this
 	property causes the viewer to display the banner message in a dialog box
 	instead.
-
-| Environment Variable | ''VNC_VIA_CMD'', ''VNC_TUNNEL_CMD'' |
-| Java System Property | ''turbovnc.via'', ''turbovnc.tunnel'' |
-| Summary | SSH command-line templates for use with the ''Via'' and \
-	''Tunnel'' parameters (respectively) |
-| Default Value | See below |
-#OPT: hiCol=first
-
-	Description :: When the ''Via'' parameter is used along with the ''ExtSSH''
-	parameter, the TurboVNC Viewer reads the ''VNC_VIA_CMD'' environment variable
-	or the ''turbovnc.via'' property, expands patterns beginning with the "%"
-	character, and uses the resulting command line to establish the secure tunnel
-	to the VNC gateway.  If ''VNC_VIA_CMD'' and ''turbovnc.via'' are not set,
-	then this command-line template defaults to one of the following values:
-	{nl}{nl}
-	|| Connection Type || Default ''VNC_VIA_CMD''/''turbovnc.via'' Value ||
-	| TCP port | ''%S -f -L %L:%H:%R %G sleep 20'' |
-	| Unix domain socket | ''%S -J %G -- %H exec socat stdio unix-connect:%R'' |
-	{nl} \
-	When the ''Tunnel'' parameter is used along with the ''ExtSSH'' parameter,
-	the TurboVNC Viewer reads the ''VNC_TUNNEL_CMD'' environment variable or the
-	''turbovnc.tunnel'' property, expands patterns beginning with the "%"
-	character, and uses the resulting command line to establish the secure tunnel
-	to the VNC host.  If ''VNC_TUNNEL_CMD'' and ''turbovnc.tunnel'' are not set,
-	then this command-line template defaults to one of the following values:
-	{nl}{nl}
-	|| Connection Type || Default ''VNC_TUNNEL_CMD''/''turbovnc.tunnel'' Value ||
-	| TCP port | ''%S -f -L %L:localhost:%R %H sleep 20'' |
-	| Unix domain socket | ''%S -- %H exec socat stdio unix-connect:%R'' |
-	{nl} \
-	The following patterns are recognized in the ''VNC_VIA_CMD'' and
-	''VNC_TUNNEL_CMD'' environment variables and their corresponding properties.
-	Note that ''%H'' and ''%R'' must be present in the command-line template, and
-	''%G'' must also be present if using the ''Via'' parameter.  If the VNC
-	server is listening on a TCP port, then ''%L'' must also be present.  If the
-	VNC server is listening on a Unix domain socket, then ''%L'' can optionally
-	be used to forward a local TCP port to the remote Unix domain socket (for
-	instance, by setting ''VNC_TUNNEL_CMD'' to ''%S -f -L %L:%R %H sleep 20''.)
-	If ''%L'' is not present, then the TurboVNC Viewer expects the SSH command
-	line to connect standard input and standard output to the remote Unix domain
-	socket.
-	{nl}{nl}
-	| ''%%'' | A literal "%" |
-	| ''%G'' | gateway host name or IP address |
-	| ''%H'' | remote VNC host name or IP address (if using the ''Via'' \
-		parameter, then this is specified from the point of view of the gateway) |
-	| ''%L'' | local TCP port number |
-	| ''%R'' | remote TCP port number or the escaped name of a Unix domain \
-		socket on the VNC host |
-	| ''%S'' | the external SSH client command, which can be specified using \
-		the TurboVNC Viewer's ''ExtSSHCommand'' parameter |

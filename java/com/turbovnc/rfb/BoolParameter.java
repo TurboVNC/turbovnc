@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018, 2022-2023 D. R. Commander.
+/* Copyright (C) 2012, 2017-2018, 2022-2024 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -23,8 +23,8 @@ package com.turbovnc.rfb;
 public final class BoolParameter extends VoidParameter {
 
   public BoolParameter(String name, Params params, boolean isGUI,
-                       String desc, boolean defValue_) {
-    super(name, params, isGUI, desc);
+                       boolean advanced, String desc, boolean defValue_) {
+    super(name, params, isGUI, advanced, desc);
     value = defValue = defValue_;
   }
 

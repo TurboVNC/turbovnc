@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2018, 2022-2023 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2018, 2022-2024 D. R. Commander.
  *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -28,9 +28,9 @@ public final class ScaleParameter extends IntParameter {
 
   private static final int MAX_SCALE = 1000;
 
-  public ScaleParameter(String name, Params params, boolean isGUI, String desc,
+  public ScaleParameter(String name, Params params, String desc,
                         int defValue) {
-    super(name, params, isGUI, desc, defValue, FIXEDRATIO, MAX_SCALE);
+    super(name, params, true, false, desc, defValue, FIXEDRATIO, MAX_SCALE);
   }
 
   public static int parse(String scaleString) {

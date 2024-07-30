@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2018, 2022-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2017-2018, 2022-2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,9 @@ import com.turbovnc.rdr.ErrorException;
 
 public final class HeaderParameter extends VoidParameter {
 
-  public HeaderParameter(String name, Params params, String desc) {
-    super(name, params, false, desc);
+  public HeaderParameter(String name, Params params, boolean advanced,
+                         String desc) {
+    super(name, params, false, advanced, desc);
   }
 
   public boolean set(String str) {

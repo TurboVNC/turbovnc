@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2022-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2022-2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ public final class SubsampParameter extends IntParameter {
   public static final int TWOX = 2;
   public static final int GRAY = 3;
 
-  public SubsampParameter(String name, Params params, boolean isGUI,
-                          String desc, int defValue) {
-    super(name, params, isGUI, desc, defValue, NONE, GRAY);
+  public SubsampParameter(String name, Params params, String desc,
+                          int defValue) {
+    super(name, params, true, false, desc, defValue, NONE, GRAY);
   }
 
   public synchronized boolean set(String subsampString) {

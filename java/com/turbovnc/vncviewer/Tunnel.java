@@ -64,15 +64,17 @@ public class Tunnel {
     else
       remotePort = Hostname.getPort(params.server.get());
 
-    String pattern = null;
-    if (tunnel) {
-      pattern = System.getProperty("turbovnc.tunnel");
-      if (pattern == null)
-        pattern = System.getenv("VNC_TUNNEL_CMD");
-    } else {
-      pattern = System.getProperty("turbovnc.via");
-      if (pattern == null)
-        pattern = System.getenv("VNC_VIA_CMD");
+    String pattern = params.extSSHTemplate.get();
+    if (pattern == null) {
+      if (tunnel) {
+        pattern = System.getProperty("turbovnc.tunnel");
+        if (pattern == null)
+          pattern = System.getenv("VNC_TUNNEL_CMD");
+      } else {
+        pattern = System.getProperty("turbovnc.via");
+        if (pattern == null)
+          pattern = System.getenv("VNC_VIA_CMD");
+      }
     }
 
     if (params.udsPath != null &&
@@ -262,13 +264,11 @@ public class Tunnel {
     params.sshSession.connect();
   }
 
-  /* Create a tunnel using an external SSH client.  This supports the same
-     VNC_TUNNEL_CMD and VNC_VIA_CMD environment variables as the native viewers
-     do. */
+  /* Create a tunnel using an external SSH client. */
 
-  private static final String DEFAULT_TUNNEL_CMD =
+  public static final String DEFAULT_TUNNEL_CMD =
     "%S -f -L %L:localhost:%R %H sleep 20";
-  private static final String DEFAULT_VIA_CMD =
+  public static final String DEFAULT_VIA_CMD =
     "%S -f -L %L:%H:%R %G sleep 20";
 
   private static void createTunnelExt(String gatewayHost, String remoteHost,
@@ -294,9 +294,9 @@ public class Tunnel {
       throw new ErrorException("External SSH error");
   }
 
-  private static final String DEFAULT_TUNNEL_CMD_UDS =
+  public static final String DEFAULT_TUNNEL_CMD_UDS =
     "%S -- %H exec socat stdio unix-connect:%R";
-  private static final String DEFAULT_VIA_CMD_UDS =
+  public static final String DEFAULT_VIA_CMD_UDS =
     "%S -J %G -- %H exec socat stdio unix-connect:%R";
 
   private static Socket createTunnelExtUDS(String gatewayHost,

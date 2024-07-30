@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-08-01T14:09:28">
+<meta name="date" content="2024-08-03T10:35:39">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -574,7 +574,7 @@ following commands:</p>
 in this document.</p>
 
 <div class="important"><p class="important">
-If using the TurboVNC Session Manager, set the <code>turbovnc.serverdir</code> Java system property in the TurboVNC Viewer to <code>~/turbovnc/opt/TurboVNC</code>, or set the <code>TVNC_SERVERDIR</code> environment variable on the client machine to <code>\~/turbovnc/opt/TurboVNC</code> (note backslash.)  Refer to Section <a href="#TVNC_SERVERDIR" class="ref">11.2</a>.
+If using the TurboVNC Session Manager, set the TurboVNC Viewer&rsquo;s <code>ServerDir</code> parameter to <code>&quot;~/turbovnc/opt/TurboVNC&quot;</code>.  (<code>~</code> must be quoted or escaped if the parameter is specified on the command line.)
 </p></div>
 
 <div class="important"><p class="important">
@@ -813,7 +813,7 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
         The TurboVNC Session Manager automatically uses SSH tunneling and OTP authentication by default, but you can set the TurboVNC Viewer&rsquo;s <code>NoSessMgrAuto</code> parameter to disable this behavior, thus allowing any authentication/encryption method to be used.  Additional parameters can be used to specify the port on which the SSH server is listening and the location of the SSH private key file.  The OpenSSH config file (<strong class="filename">~/.ssh/config</strong> by default) can also be used to specify those parameters persistently for a given host.
         </p></div>
         <div class="important"><p class="important">
-        The <code>TVNC_SERVERDIR</code> and <code>TVNC_SERVERARGS</code> environment variables, and their equivalent Java system properties (<code>turbovnc.serverdir</code> and <code>turbovnc.serverargs</code>) can be used to specify a non-default installation path for the TurboVNC Server or additional arguments to pass to the TurboVNC Server when starting new sessions.  (Refer to Section <a href="#TVNC_SERVERARGS" class="ref">11.2</a>.)  TurboVNC Server arguments can also be specified on the host using the system-wide or per-user <strong class="filename">turbovncserver.conf</strong> file.
+        The TurboVNC Viewer&rsquo;s <code>ServerDir</code> and <code>ServerArgs</code> parameters can be used to specify a non-default installation path for the TurboVNC Server or additional arguments to pass to the TurboVNC Server when starting new sessions.  TurboVNC Server arguments can also be specified on the host using the system-wide or per-user <strong class="filename">turbovncserver.conf</strong> file.
         </p></div>
     </li>
 </ul>
@@ -1165,8 +1165,10 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;tvncconfig
 c:\Program&nbsp;Files\TurboVNC\vncviewer.bat&nbsp;-?
 </pre>
 
-        on Windows systems to display a full list of supported command-line 
-        options/parameters and their descriptions.
+        on Windows systems to display a list of command-line options and 
+        commonly-used parameters and their descriptions.  Replace 
+        <code>-?</code> with <code>-??</code> to display a list of advanced 
+        parameters and their descriptions.
     </dd>
 </dl>
 
@@ -2778,8 +2780,10 @@ increasing order of precedence:</p>
 c:\Program&nbsp;Files\TurboVNC\vncviewer.bat&nbsp;-?
 </pre>
 
-<p>on Windows systems to display a full list of supported command-line 
-options/parameters and their descriptions.</p>
+<p>on Windows systems to display a list of command-line options and 
+commonly-used parameters and their descriptions.  Replace 
+<code>-?</code> with <code>-??</code> to display a list of advanced 
+parameters and their descriptions.</p>
 
 <p><br /> This section documents rarely-used advanced TurboVNC Viewer 
 settings that can be configured using environment variables or Java 
@@ -2793,37 +2797,9 @@ Linux/Un*x and Mac systems, you could execute:</p>
 JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
 </pre>
 
-<p>to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.</p>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.ciphersuites</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Available cipher suites for TLS encryption</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">System-dependent</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        If the logging level is 100 or higher, then the TurboVNC Viewer will 
-        print a list of cipher suites that are available for use with the 
-        current TLS encryption method.  (This occurs during RFB authentication 
-        if one of the TLS* or X509* security types is selected.)  You can then 
-        use this property to further restrict the list of available cipher 
-        suites or change their preferred order.
-    </dd>
-</dl>
+<p>to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.  
+The Java system properties listed below can also be specified in 
+<strong class="filename">~/.vnc/default.turbovnc</strong>.</p>
 
 <div class="table">
 <table class="standard">
@@ -2863,98 +2839,6 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
         from the server will only affect the client&rsquo;s CLIPBOARD selection.  
         (In other words, you will have to use a menu option or a hotkey to paste 
         the server&rsquo;s clipboard contents.)
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_PROFILE = <em>0 | 1</em></code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable profiling output</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        If profiling output is enabled, then the TurboVNC Viewer will 
-        continuously benchmark itself and periodically print the throughput of 
-        various stages in its image pipeline to the console.  The TurboVNC 
-        Viewer&rsquo;s <code>ProfileInterval</code> parmeter can be used to 
-        specify the time period over which performance statistics are averaged 
-        and reported.
-    </dd>
-</dl>
-
-<p><a name="TVNC_SERVERARGS"></a></p>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_SERVERARGS</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.serverargs</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Additional arguments that the TurboVNC Session Manager will pass to <code>vncserver</code> when starting a new TurboVNC session</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        The TurboVNC Session Manager will pass these command-line arguments to 
-        the <code>vncserver</code> script when starting a new TurboVNC session 
-        on the TurboVNC host.  This can be used, for instance, to enable 
-        <a href="#ALR">automatic lossless refresh</a><a name="idx0038"></a>.
-    </dd>
-</dl>
-
-<p><a name="TVNC_SERVERDIR"></a></p>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_SERVERDIR</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.serverdir</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">The directory in which the TurboVNC Server is installed on the TurboVNC host</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard"><code>/opt/TurboVNC</code></td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        The TurboVNC Session Manager will execute <code>bin/vncserver</code> and 
-        <code>bin/vncpasswd</code> from this directory on the TurboVNC host.
     </dd>
 </dl>
 
@@ -3074,133 +2958,6 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
         The default behavior of the TurboVNC Viewer is to display the banner 
         message from the SSH server on the command line.  Enabling this property 
         causes the viewer to display the banner message in a dialog box instead.
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>VNC_VIA_CMD</code>, <code>VNC_TUNNEL_CMD</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.via</code>, <code>turbovnc.tunnel</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">SSH command-line templates for use with the <code>Via</code> and <code>Tunnel</code> parameters (respectively)</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">See below</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        When the <code>Via</code> parameter is used along with the 
-        <code>ExtSSH</code> parameter, the TurboVNC Viewer reads the 
-        <code>VNC_VIA_CMD</code> environment variable or the 
-        <code>turbovnc.via</code> property, expands patterns beginning with the 
-        &ldquo;%&rdquo; character, and uses the resulting command line to 
-        establish the secure tunnel to the VNC gateway.  If 
-        <code>VNC_VIA_CMD</code> and <code>turbovnc.via</code> are not set, then 
-        this command-line template defaults to one of the following values: 
-        <br /><br />
-        <div class="table">
-        <table class="standard">
-          <thead class="standard">
-          <tr class="head ">
-            <th class="head standard">Connection Type</th>
-            <th class="head standard">Default <code>VNC_VIA_CMD</code>/<code>turbovnc.via</code> Value</th>
-          </tr>
-          </thead>
-          <tr class="standard">
-            <td class="standard">TCP port</td>
-            <td class="standard"><code>%S&nbsp;-f&nbsp;-L&nbsp;%L:%H:%R&nbsp;%G&nbsp;sleep&nbsp;20</code></td>
-          </tr>
-          <tr class="standard">
-            <td class="standard">Unix domain socket</td>
-            <td class="standard"><code>%S&nbsp;-J&nbsp;%G&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
-          </tr>
-        </table>
-        </div>
-        
-        <br /> When the <code>Tunnel</code> parameter is used along with the 
-        <code>ExtSSH</code> parameter, the TurboVNC Viewer reads the 
-        <code>VNC_TUNNEL_CMD</code> environment variable or the 
-        <code>turbovnc.tunnel</code> property, expands patterns beginning with 
-        the &ldquo;%&rdquo; character, and uses the resulting command line to 
-        establish the secure tunnel to the VNC host.  If 
-        <code>VNC_TUNNEL_CMD</code> and <code>turbovnc.tunnel</code> are not 
-        set, then this command-line template defaults to one of the following 
-        values: <br /><br />
-        <div class="table">
-        <table class="standard">
-          <thead class="standard">
-          <tr class="head ">
-            <th class="head standard">Connection Type</th>
-            <th class="head standard">Default <code>VNC_TUNNEL_CMD</code>/<code>turbovnc.tunnel</code> Value</th>
-          </tr>
-          </thead>
-          <tr class="standard">
-            <td class="standard">TCP port</td>
-            <td class="standard"><code>%S&nbsp;-f&nbsp;-L&nbsp;%L:localhost:%R&nbsp;%H&nbsp;sleep&nbsp;20</code></td>
-          </tr>
-          <tr class="standard">
-            <td class="standard">Unix domain socket</td>
-            <td class="standard"><code>%S&nbsp;--&nbsp;%H&nbsp;exec&nbsp;socat&nbsp;stdio&nbsp;unix-connect:%R</code></td>
-          </tr>
-        </table>
-        </div>
-        
-        <br /> The following patterns are recognized in the 
-        <code>VNC_VIA_CMD</code> and <code>VNC_TUNNEL_CMD</code> environment 
-        variables and their corresponding properties. Note that <code>%H</code> 
-        and <code>%R</code> must be present in the command-line template, and 
-        <code>%G</code> must also be present if using the <code>Via</code> 
-        parameter.  If the VNC server is listening on a TCP port, then 
-        <code>%L</code> must also be present.  If the VNC server is listening on 
-        a Unix domain socket, then <code>%L</code> can optionally be used to 
-        forward a local TCP port to the remote Unix domain socket (for instance, 
-        by setting <code>VNC_TUNNEL_CMD</code> to 
-        <code>%S&nbsp;-f&nbsp;-L&nbsp;%L:%R&nbsp;%H&nbsp;sleep&nbsp;20</code>.) 
-        If <code>%L</code> is not present, then the TurboVNC Viewer expects the 
-        SSH command line to connect standard input and standard output to the 
-        remote Unix domain socket. <br /><br />
-        <div class="table">
-        <table class="standard">
-          <tr class="standard">
-            <td class="standard"><code>%%</code></td>
-            <td class="standard">A literal &ldquo;%&rdquo;</td>
-          </tr>
-          <tr class="standard">
-            <td class="standard"><code>%G</code></td>
-            <td class="standard">gateway host name or IP address</td>
-          </tr>
-          <tr class="standard">
-            <td class="standard"><code>%H</code></td>
-            <td class="standard">remote VNC host name or IP address (if using the <code>Via</code> parameter, then this is specified from the point of view of the gateway)</td>
-          </tr>
-          <tr class="standard">
-            <td class="standard"><code>%L</code></td>
-            <td class="standard">local TCP port number</td>
-          </tr>
-          <tr class="standard">
-            <td class="standard"><code>%R</code></td>
-            <td class="standard">remote TCP port number or the escaped name of a Unix domain socket on the VNC host</td>
-          </tr>
-          <tr class="standard">
-            <td class="standard"><code>%S</code></td>
-            <td class="standard">the external SSH client command, which can be specified using the TurboVNC Viewer&rsquo;s <code>ExtSSHCommand</code> parameter</td>
-          </tr>
-        </table>
-        </div>
-        
     </dd>
 </dl>
 

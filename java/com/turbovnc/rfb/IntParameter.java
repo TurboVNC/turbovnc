@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018, 2022-2023 D. R. Commander.
+/* Copyright (C) 2012, 2017-2018, 2022-2024 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -22,18 +22,19 @@ package com.turbovnc.rfb;
 
 public class IntParameter extends VoidParameter {
 
-  public IntParameter(String name, Params params, boolean isGUI, String desc,
-                      int defValue_) {
-    super(name, params, isGUI, desc);
+  public IntParameter(String name, Params params, boolean isGUI,
+                      boolean advanced, String desc, int defValue_) {
+    super(name, params, isGUI, advanced, desc);
     value = defValue = defValue_;
     minValue = Integer.MIN_VALUE;
     maxValue = Integer.MAX_VALUE;
     useMin = useMax = false;
   }
 
-  public IntParameter(String name, Params params, boolean isGUI, String desc,
-                      int defValue_, int minValue_) {
-    super(name, params, isGUI, desc);
+  public IntParameter(String name, Params params, boolean isGUI,
+                      boolean advanced, String desc, int defValue_,
+                      int minValue_) {
+    super(name, params, isGUI, advanced, desc);
     value = defValue = defValue_;
     minValue = minValue_;
     maxValue = Integer.MAX_VALUE;
@@ -41,9 +42,10 @@ public class IntParameter extends VoidParameter {
     useMax = false;
   }
 
-  public IntParameter(String name, Params params, boolean isGUI, String desc,
-                      int defValue_, int minValue_, int maxValue_) {
-    super(name, params, isGUI, desc);
+  public IntParameter(String name, Params params, boolean isGUI,
+                      boolean advanced, String desc, int defValue_,
+                      int minValue_, int maxValue_) {
+    super(name, params, isGUI, advanced, desc);
     value = defValue = defValue_;
     minValue = minValue_;
     maxValue = maxValue_;

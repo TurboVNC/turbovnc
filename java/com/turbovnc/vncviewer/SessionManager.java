@@ -1,4 +1,4 @@
-/* Copyright (C) 2018, 2020-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2018, 2020-2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
 
 import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.Session;
 
 public final class SessionManager extends Tunnel {
 
@@ -53,7 +52,7 @@ public final class SessionManager extends Tunnel {
 
     boolean firstTime = true;
     while (true) {
-      String[] sessions = getSessions(params.sshSession, host);
+      String[] sessions = getSessions(params, host);
 
       if ((sessions == null || sessions.length <= 0) && firstTime) {
         return startSession(params, host);
@@ -72,7 +71,7 @@ public final class SessionManager extends Tunnel {
             return dlg.getConnectSession();
           }
         } else if (dlg.getKillSession() != null) {
-          killSession(params.sshSession, host, dlg.getKillSession());
+          killSession(params, host, dlg.getKillSession());
         } else if (dlg.getNewOTPSession() != null) {
           String otp = generateOTP(params, host, dlg.getNewOTPSession(), false,
                                    dlg.getViewOnly());
@@ -94,17 +93,18 @@ public final class SessionManager extends Tunnel {
     }
   }
 
-  private static String[] getSessions(Session sshSession, String host)
+  private static String[] getSessions(Params params, String host)
                                       throws Exception {
-    ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
+    ChannelExec channelExec =
+      (ChannelExec)params.sshSession.openChannel("exec");
 
-    String dir = System.getProperty("turbovnc.serverdir");
+    String dir = params.serverDir.get();
+    if (dir == null)
+      dir = System.getProperty("turbovnc.serverdir");
     if (dir == null)
       dir = System.getenv("TVNC_SERVERDIR");
-    if (dir == null)
-      dir = "/opt/TurboVNC";
 
-    String command = dir + "/bin/vncserver -sessionlist";
+    String command = (dir != null ? dir : "") + "/bin/vncserver -sessionlist";
     channelExec.setCommand("bash -c \"set -o pipefail; " + command +
                            " | sed \'s/^/[TURBOVNC] /g\'\"");
     InputStream stdout = channelExec.getInputStream();
@@ -178,17 +178,20 @@ public final class SessionManager extends Tunnel {
     ChannelExec channelExec =
       (ChannelExec)params.sshSession.openChannel("exec");
 
-    String dir = System.getProperty("turbovnc.serverdir");
+    String dir = params.serverDir.get();
+    if (dir == null)
+      dir = System.getProperty("turbovnc.serverdir");
     if (dir == null)
       dir = System.getenv("TVNC_SERVERDIR");
-    if (dir == null)
-      dir = "/opt/TurboVNC";
 
-    String args = System.getProperty("turbovnc.serverargs");
+    String args = params.serverArgs.get();
+    if (args == null)
+      args = System.getProperty("turbovnc.serverargs");
     if (args == null)
       args = System.getenv("TVNC_SERVERARGS");
 
-    String command = dir + "/bin/vncserver -sessionstart" +
+    String command = (dir != null ? dir : "") +
+                     "/bin/vncserver -sessionstart" +
                      (params.sessMgrAuto.get() ? " -securitytypes otp" : "") +
                      (args != null ? " " + args : "");
     channelExec.setCommand("bash -c \"set -o pipefail; " + command +
@@ -268,13 +271,14 @@ public final class SessionManager extends Tunnel {
     ChannelExec channelExec =
       (ChannelExec)params.sshSession.openChannel("exec");
 
-    String dir = System.getProperty("turbovnc.serverdir");
+    String dir = params.serverDir.get();
+    if (dir == null)
+      dir = System.getProperty("turbovnc.serverdir");
     if (dir == null)
       dir = System.getenv("TVNC_SERVERDIR");
-    if (dir == null)
-      dir = "/opt/TurboVNC";
 
-    String command = dir + "/bin/vncpasswd -o -display " + session;
+    String command = (dir != null ? dir : "") + "/bin/vncpasswd -o -display " +
+                     session;
     if (viewOnly) command += " -v";
     channelExec.setCommand("bash -c \"set -o pipefail; " + command +
                            " 2>&1 | sed \'s/^/[TURBOVNC] /g\'\"");
@@ -331,21 +335,23 @@ public final class SessionManager extends Tunnel {
     return result;
   }
 
-  private static void killSession(Session sshSession, String host,
-                                  String session) throws Exception {
+  private static void killSession(Params params, String host, String session)
+                                  throws Exception {
     vlog.debug("Killing TurboVNC session " + host + session);
 
     VncViewer.noExceptionDialog = true;
 
-    ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
+    ChannelExec channelExec =
+      (ChannelExec)params.sshSession.openChannel("exec");
 
-    String dir = System.getProperty("turbovnc.serverdir");
+    String dir = params.serverDir.get();
+    if (dir == null)
+      dir = System.getProperty("turbovnc.serverdir");
     if (dir == null)
       dir = System.getenv("TVNC_SERVERDIR");
-    if (dir == null)
-      dir = "/opt/TurboVNC";
 
-    String command = dir + "/bin/vncserver -kill " + session;
+    String command = (dir != null ? dir : "") + "/bin/vncserver -kill " +
+                     session;
     channelExec.setCommand("bash -c \"set -o pipefail; " + command +
                            " | sed \'s/^/[TURBOVNC] /g\'\"");
     InputStream stdout = channelExec.getInputStream();

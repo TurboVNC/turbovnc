@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2022-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2022-2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,8 @@ public final class SpanParameter extends IntParameter {
   public static final int ALL = 1;
   public static final int AUTO = 2;
 
-  public SpanParameter(String name, Params params, boolean isGUI, String desc,
-                       int defValue) {
-    super(name, params, isGUI, desc, defValue, PRIMARY, AUTO);
+  public SpanParameter(String name, Params params, String desc, int defValue) {
+    super(name, params, true, false, desc, defValue, PRIMARY, AUTO);
   }
 
   public synchronized boolean set(String spanString) {

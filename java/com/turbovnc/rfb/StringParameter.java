@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018, 2021-2023 D. R. Commander.
+/* Copyright (C) 2012, 2017-2018, 2021-2024 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -23,13 +23,14 @@ package com.turbovnc.rfb;
 public class StringParameter extends VoidParameter {
 
   public StringParameter(String name, Params params, boolean isGUI,
-                         String desc, String defValue_) {
-    this(name, params, isGUI, desc, defValue_, null);
+                         boolean advanced, String desc, String defValue_) {
+    this(name, params, isGUI, advanced, desc, defValue_, null);
   }
 
   public StringParameter(String name, Params params, boolean isGUI,
-                         String desc, String defValue_, String values_) {
-    super(name, params, isGUI, desc);
+                         boolean advanced, String desc, String defValue_,
+                         String values_) {
+    super(name, params, isGUI, advanced, desc);
     value = defValue = defValue_;
     values = values_;
   }

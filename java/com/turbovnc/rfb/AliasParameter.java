@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2018, 2022-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2018, 2022-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@ public final class AliasParameter extends VoidParameter {
 
   public AliasParameter(String name, Params params, String desc,
                         VoidParameter param_) {
-    super(name, params, false, desc);
+    super(name, params, false, param_.isAdvanced(), desc);
     param = param_;
   }
 
