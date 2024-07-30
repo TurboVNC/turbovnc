@@ -998,6 +998,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
           case rfbEncodingCopyRect:
             cl->useCopyRect = TRUE;
+            RFBLOGID("Enabling CopyRect encoding\n");
             break;
           case rfbEncodingRaw:
             if (cl->preferredEncoding == -1) {
