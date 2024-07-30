@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2011-2012, 2016 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -908,15 +908,19 @@ public final class Params {
   public BoolParameter extSSH =
   new BoolParameter("ExtSSH", this, false,
   "When using the Via or Tunnel parameters, use an external SSH client " +
-  "instead of the built-in SSH client.  (The built-in SSH client is always " +
-  "used with the TurboVNC Session Manager.)  The external SSH client " +
-  "command can be specified using the ExtSSHCommand parameter, and you can " +
-  "also use the VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables or the " +
-  "turbovnc.via and turbovnc.tunnel system properties to specify the SSH " +
-  "command-line templates to use when creating the tunnel.  If any one of " +
-  "those parameters, environment variables, or system properties is set, " +
-  "then an external SSH client is automatically used.  See the TurboVNC " +
-  "User's Guide for more details.\n " +
+  "instead of the built-in SSH client.  The external SSH client command can " +
+  "be specified using the ExtSSHCommand parameter, and you can also use the " +
+  "VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables or the turbovnc.via " +
+  "and turbovnc.tunnel system properties to specify the SSH command-line " +
+  "templates to use when creating the tunnel.  If any one of those " +
+  "parameters, environment variables, or system properties is set, then an " +
+  "external SSH client is automatically used.  See the TurboVNC User's " +
+  "Guide for more details.\n " +
+
+  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
+   "When using the TurboVNC Session Manager, this parameter is effectively " +
+   "unset.  (The built-in SSH client is always used with the TurboVNC " +
+   "Session Manager.)\n " : "") +
 
   "This parameter is effectively set if the Server parameter specifies a " +
   "Unix domain socket connection to a remote host.", false);
@@ -980,8 +984,9 @@ public final class Params {
   "SSH tunneling.  The order of this list does not matter, since the " +
   "server's preferred order is always used.\n " +
 
-  "When using the TurboVNC Session Manager, this parameter is effectively " +
-  "set to \"VNC\" unless the SessMgrAuto parameter is disabled.",
+  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
+   "When using the TurboVNC Session Manager, this parameter is effectively " +
+   "set to \"VNC\" unless the SessMgrAuto parameter is disabled." : ""),
   "X509Plain,X509Vnc,X509None,TLSPlain,TLSVnc,TLSNone,VNC,Plain,UnixLogin,None");
 
   public BoolParameter sendLocalUsername =
@@ -993,10 +998,11 @@ public final class Params {
 
   public BoolParameter sessMgrAuto =
   new BoolParameter("SessMgrAuto", this, false,
+  Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
   "When using the TurboVNC Session Manager, the default behavior is to " +
   "automatically enable OTP authentication and SSH tunneling.  Disabling " +
   "this parameter overrides that behavior and allows any security " +
-  "configuration to be used.", true);
+  "configuration to be used." : null, true);
 
   public StringParameter sshConfig =
   new StringParameter("SSHConfig", this, false,
@@ -1050,11 +1056,13 @@ public final class Params {
   public StringParameter sshUser =
   new StringParameter("SSHUser", this, true,
   "The username (default = local username) that should be used when " +
-  "authenticating with the SSH server.  When using the Tunnel parameter or " +
-  "the TurboVNC Session Manager, the SSH username can also be specified by " +
-  "prefixing the VNC host with the username followed by @.  When using the " +
-  "Via parameter with an SSH server, the SSH username can also be specified " +
-  "by prefixing the gateway host with the username followed by @.", null);
+  "authenticating with the SSH server.  When using the Tunnel parameter" +
+  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
+   " or the TurboVNC Session Manager, " : ", ") +
+  "the SSH username can also be specified by prefixing the VNC host with " +
+  "the username followed by @.  When using the Via parameter with an SSH " +
+  "server, the SSH username can also be specified by prefixing the gateway " +
+  "host with the username followed by @.", null);
 
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true,
@@ -1062,8 +1070,9 @@ public final class Params {
   "SSH gateway, except that the gateway host is assumed to be the same as " +
   "the VNC host, so you do not need to specify it separately.\n " +
 
-  "When using the TurboVNC Session Manager, this parameter is effectively " +
-  "set unless the SessMgrAuto parameter is disabled.\n " +
+  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
+   "When using the TurboVNC Session Manager, this parameter is effectively " +
+   "set unless the SessMgrAuto parameter is disabled.\n " : "") +
 
   "This parameter is effectively set if the Server parameter specifies a " +
   "Unix domain socket connection to a remote host and the Via parameter is " +
