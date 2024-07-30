@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-07-29T14:04:15">
+<meta name="date" content="2024-07-30T16:11:25">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2829,42 +2829,6 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
         if one of the TLS* or X509* security types is selected.)  You can then 
         use this property to further restrict the list of available cipher 
         suites or change their preferred order.
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.forcealpha = <em>0 | 1</em></code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable back buffer alpha channel</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Enabled if using OpenGL Java 2D blitting, disabled otherwise</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        If this property is enabled, then the TurboVNC Viewer will use a 
-        TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel) BufferedImage 
-        for its back buffer instead of a TYPE_INT_RGB (BGRX) BufferedImage.  
-        When using OpenGL blitting in Java 2D, which is normally accomplished by 
-        setting the <code>sun.java2d.opengl</code> Java system property to 
-        <code>true</code>, it is generally faster to draw an alpha-enabled 
-        BufferedImage to the screen.  (Otherwise <code>glDrawPixels()</code> has 
-        to set all of the alpha values itself, which can cause it to revert to 
-        an unaccelerated code path in some cases.)
-        <div class="important"><p class="important">
-        NOTE: This property is enabled by default on Mac systems, because OpenGL Java 2D blitting is the only option available.
-        </p></div>
     </dd>
 </dl>
 

@@ -187,23 +187,6 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 	property to further restrict the list of available cipher suites or change
 	their preferred order.
 
-| Java System Property | {pcode: turbovnc.forcealpha = __0 \| 1__} |
-| Summary | Disable/enable back buffer alpha channel |
-| Default Value | Enabled if using OpenGL Java 2D blitting, disabled otherwise |
-#OPT: hiCol=first
-
-	Description :: If this property is enabled, then the TurboVNC Viewer will use
-	a TYPE_INT_ARGB_PRE (BGRA with pre-computed alpha channel) BufferedImage for
-	its back buffer instead of a TYPE_INT_RGB (BGRX) BufferedImage.  When using
-	OpenGL blitting in Java 2D, which is normally accomplished by setting the
-	''sun.java2d.opengl'' Java system property to ''true'', it is generally
-	faster to draw an alpha-enabled BufferedImage to the screen.  (Otherwise
-	''glDrawPixels()'' has to set all of the alpha values itself, which can cause
-	it to revert to an unaccelerated code path in some cases.)
-
-	!!! NOTE: This property is enabled by default on Mac systems, because OpenGL
-	Java 2D blitting is the only option available.
-
 | Java System Property | {pcode: turbovnc.primary = __0 \| 1__} |
 | Summary | Disable/enable the use of the X11 PRIMARY clipboard selection |
 | Default Value | Enabled |
