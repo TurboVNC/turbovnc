@@ -381,7 +381,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     viewOnly = new JCheckBox("View only (ignore mouse & keyboard)");
     viewOnly.addItemListener(this);
-    viewOnly.setEnabled(params.viewOnlyControl.get());
 
     Dialog.addGBComponent(viewOnly, inputPanel,
                           0, 0, 2, 1, 2, 2, 1, 0,

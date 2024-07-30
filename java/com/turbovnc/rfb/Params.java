@@ -679,11 +679,6 @@ public final class Params {
   "Ignore all keyboard and mouse events in the viewer window and do not " +
   "pass those events to the VNC server.", false);
 
-  // Set to 0 to disable the view-only checkbox in the Options dialog
-  public BoolParameter viewOnlyControl =
-  new BoolParameter("ViewOnlyControl", this, false,
-  null, true);
-
   // DISPLAY PARAMETERS
 
   private HeaderParameter displayHeader =
