@@ -288,7 +288,6 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 	property causes the viewer to display the banner message in a dialog box
 	instead.
 
-{anchor: VNC_VIA_CMD}
 | Environment Variable | ''VNC_VIA_CMD'', ''VNC_TUNNEL_CMD'' |
 | Java System Property | ''turbovnc.via'', ''turbovnc.tunnel'' |
 | Summary | SSH command-line templates for use with the ''Via'' and \

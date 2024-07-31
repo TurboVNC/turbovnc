@@ -319,10 +319,6 @@ specify the VNC server to which to connect.  The VNC server is specified from
 the point of view of the SSH server, which is why we used ''localhost'' in the
 above example.
 
-The command used to establish the SSH tunnel is configurable by way of a
-TurboVNC Viewer parameter and environment variables or Java system properties.
-See {ref prefix="Section ": VNC_VIA_CMD} for more details.
-
 ** Requiring SSH Tunneling
 
 Passing an argument of ''-localhost'' to ''vncserver'' will force the TurboVNC
