@@ -1,5 +1,4 @@
 find_package(Java REQUIRED)
-include(UseJava)
 
 # Allow the default Java compiler flags to be set using an environment variable
 if(NOT DEFINED CMAKE_JAVA_COMPILE_FLAGS AND DEFINED ENV{JAVAFLAGS})
@@ -14,6 +13,8 @@ set(CMAKE_JAVA_COMPILE_FLAGS "${CMAKE_JAVA_COMPILE_FLAGS} -J-Dfile.encoding=UTF8
 message(STATUS "CMAKE_JAVA_COMPILE_FLAGS = ${CMAKE_JAVA_COMPILE_FLAGS}")
 
 set(CLASSPATH com/turbovnc/vncviewer)
+set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 
 string(TIMESTAMP DEFAULT_JAVA_DATE "%Y-%m-%d")
 set(JAVA_DATE ${DEFAULT_JAVA_DATE} CACHE STRING "Java date stamp")
@@ -22,91 +23,159 @@ string(TIMESTAMP DEFAULT_JAVA_TIME "%H:%M:%S")
 set(JAVA_TIME ${DEFAULT_JAVA_TIME} CACHE STRING "Java time stamp")
 mark_as_advanced(JAVA_TIME)
 
+set(JAVA_SOURCES "")
+set(JAVA_CLASSES "")
+
 # We have to explicitly specify some of the JSch classes because it dynamically
 # loads them.
 
-set(JSCH_SOURCES
-	com/jcraft/jsch/CipherNone.java
-	com/jcraft/jsch/DHEC256.java
-	com/jcraft/jsch/DHEC384.java
-	com/jcraft/jsch/DHEC521.java
-	com/jcraft/jsch/DHG1.java
-	com/jcraft/jsch/DHG14.java
-	com/jcraft/jsch/DHGEX.java
-	com/jcraft/jsch/DHGEX256.java
-	com/jcraft/jsch/UserAuthGSSAPIWithMIC.java
-	com/jcraft/jsch/UserAuthKeyboardInteractive.java
-	com/jcraft/jsch/UserAuthNone.java
-	com/jcraft/jsch/UserAuthPassword.java
-	com/jcraft/jsch/UserAuthPublicKey.java
-	com/jcraft/jsch/jce/AES128CBC.java
-	com/jcraft/jsch/jce/AES128CTR.java
-	com/jcraft/jsch/jce/AES192CBC.java
-	com/jcraft/jsch/jce/AES192CTR.java
-	com/jcraft/jsch/jce/AES256CBC.java
-	com/jcraft/jsch/jce/AES256CTR.java
-	com/jcraft/jsch/jce/ARCFOUR.java
-	com/jcraft/jsch/jce/ARCFOUR128.java
-	com/jcraft/jsch/jce/ARCFOUR256.java
-	com/jcraft/jsch/jce/BlowfishCBC.java
-	com/jcraft/jsch/jce/DH.java
-	com/jcraft/jsch/jce/ECDH256.java
-	com/jcraft/jsch/jce/ECDH384.java
-	com/jcraft/jsch/jce/ECDH521.java
-	com/jcraft/jsch/jce/ECDHN.java
-	com/jcraft/jsch/jce/HMACMD5.java
-	com/jcraft/jsch/jce/HMACMD596.java
-	com/jcraft/jsch/jce/HMACSHA1.java
-	com/jcraft/jsch/jce/HMACSHA196.java
-	com/jcraft/jsch/jce/HMACSHA256.java
-	com/jcraft/jsch/jce/HMACSHA512.java
-	com/jcraft/jsch/jce/KeyPairGenDSA.java
-	com/jcraft/jsch/jce/KeyPairGenECDSA.java
-	com/jcraft/jsch/jce/KeyPairGenRSA.java
-	com/jcraft/jsch/jce/MD5.java
-	com/jcraft/jsch/jce/PBKDF.java
-	com/jcraft/jsch/jce/Random.java
-	com/jcraft/jsch/jce/SHA1.java
-	com/jcraft/jsch/jce/SHA256.java
-	com/jcraft/jsch/jce/SHA384.java
-	com/jcraft/jsch/jce/SHA512.java
-	com/jcraft/jsch/jce/SignatureDSA.java
-	com/jcraft/jsch/jce/SignatureECDSA256.java
-	com/jcraft/jsch/jce/SignatureECDSA384.java
-	com/jcraft/jsch/jce/SignatureECDSA521.java
-	com/jcraft/jsch/jce/SignatureECDSAN.java
-	com/jcraft/jsch/jce/SignatureRSA.java
-	com/jcraft/jsch/jce/SignatureRSAN.java
-	com/jcraft/jsch/jce/SignatureRSASHA256.java
-	com/jcraft/jsch/jce/SignatureRSASHA512.java
-	com/jcraft/jsch/jce/TripleDESCBC.java
-	com/jcraft/jsch/jce/TripleDESCTR.java
-	com/jcraft/jsch/jcraft/Compression.java
-	com/jcraft/jsch/jcraft/HMACMD5.java
-	com/jcraft/jsch/jcraft/HMACMD596.java
-	com/jcraft/jsch/jcraft/HMACSHA1.java
-	com/jcraft/jsch/jcraft/HMACSHA196.java
-	com/jcraft/jsch/jgss/GSSContextKrb5.java)
+set(JSCH_CLASSNAMES
+	CipherNone
+	DHEC256
+	DHEC384
+	DHEC521
+	DHG1
+	DHG14
+	DHGEX
+	DHGEX256
+	UserAuthGSSAPIWithMIC
+	UserAuthKeyboardInteractive
+	UserAuthNone
+	UserAuthPassword
+	UserAuthPublicKey
+	jce/AES128CBC
+	jce/AES128CTR
+	jce/AES192CBC
+	jce/AES192CTR
+	jce/AES256CBC
+	jce/AES256CTR
+	jce/ARCFOUR
+	jce/ARCFOUR128
+	jce/ARCFOUR256
+	jce/BlowfishCBC
+	jce/DH
+	jce/ECDH256
+	jce/ECDH384
+	jce/ECDH521
+	jce/ECDHN
+	jce/HMACMD5
+	jce/HMACMD596
+	jce/HMACSHA1
+	jce/HMACSHA196
+	jce/HMACSHA256
+	jce/HMACSHA512
+	jce/KeyPairGenDSA
+	jce/KeyPairGenECDSA
+	jce/KeyPairGenRSA
+	jce/MD5
+	jce/PBKDF
+	jce/Random
+	jce/SHA1
+	jce/SHA256
+	jce/SHA384
+	jce/SHA512
+	jce/SignatureDSA
+	jce/SignatureECDSA256
+	jce/SignatureECDSA384
+	jce/SignatureECDSA521
+	jce/SignatureECDSAN
+	jce/SignatureRSA
+	jce/SignatureRSAN
+	jce/SignatureRSASHA256
+	jce/SignatureRSASHA512
+	jce/TripleDESCBC
+	jce/TripleDESCTR
+	jcraft/Compression
+	jcraft/HMACMD5
+	jcraft/HMACMD596
+	jcraft/HMACSHA1
+	jcraft/HMACSHA196
+	jgss/GSSContextKrb5)
+
+foreach(class ${JSCH_CLASSNAMES})
+	set(JAVA_SOURCES ${JAVA_SOURCES} com/jcraft/jsch/${class}.java)
+	set(JAVA_CLASSES ${JAVA_CLASSES}
+		${BINDIR}/com/jcraft/jsch/${class}.class)
+endforeach()
+
+file(GLOB DEPEND_SOURCES
+	${SRCDIR}/${CLASSPATH}/*.java
+	${SRCDIR}/com/turbovnc/rfb/*.java
+	${SRCDIR}/com/turbovnc/rdr/*.java
+	${SRCDIR}/com/turbovnc/network/*.java
+	${SRCDIR}/com/jcraft/jsch/*.java
+	${SRCDIR}/com/jcraft/jsch/agentproxy/*.java
+	${SRCDIR}/com/jcraft/jsch/agentproxy/connector/*.java
+	${SRCDIR}/com/jcraft/jsch/agentproxy/usocket/*.java
+	${SRCDIR}/com/jcraft/jsch/jce/*.java
+	${SRCDIR}/com/jcraft/jsch/jcraft/*.java
+	${SRCDIR}/com/jcraft/jsch/jgss/*.java
+	${SRCDIR}/com/jcraft/jzlib/*.java
+	${SRCDIR}/org/spf4j/base/*.java
+	${SRCDIR}/org/mindrot/jbcrypt/*.java)
 
 string(REGEX REPLACE " " ";" CMAKE_JAVA_COMPILE_FLAGS
 	"${CMAKE_JAVA_COMPILE_FLAGS}")
+add_custom_command(OUTPUT ${JAVA_CLASSES}
+	DEPENDS ${JAVA_SOURCES} ${DEPEND_SOURCES}
+	COMMAND ${JAVA_COMPILE}
+	ARGS ${CMAKE_JAVA_COMPILE_FLAGS} -sourcepath ${SRCDIR} -d ${BINDIR}
+		${CLASSPATH}/VncViewer.java ${CLASSPATH}/ImageDrawTest.java ${JAVA_SOURCES}
+	WORKING_DIRECTORY ${SRCDIR})
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
-cmake_minimum_required(VERSION 3.21)
-add_jar(VncViewer
-	${CLASSPATH}/VncViewer.java
-	${CLASSPATH}/ImageDrawTest.java
-	${JSCH_SOURCES}
-	MANIFEST ${CLASSPATH}/MANIFEST.MF
-	RESOURCES
-	NAMESPACE ${CLASSPATH} ${CMAKE_BINARY_DIR}/java/${CLASSPATH}/timestamp
-	NAMESPACE ${CLASSPATH} ${CLASSPATH}/toolbar.png
-	NAMESPACE ${CLASSPATH} ${CLASSPATH}/turbovnc.png
-	NAMESPACE ${CLASSPATH} ${CLASSPATH}/turbovnc-sm.png
-	NAMESPACE ${CLASSPATH} ${CLASSPATH}/turbovnc-128.png
-	NAMESPACE ${CLASSPATH} ${CLASSPATH}/insecure.png
-	NAMESPACE ${CLASSPATH} ${CLASSPATH}/secure.png)
+if(NOT "${SRCDIR}" STREQUAL "${BINDIR}")
+
+foreach(icon toolbar.png turbovnc.png turbovnc-sm.png turbovnc-128.png
+	insecure.png secure.png)
+	add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/${icon}
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${SRCDIR}/${CLASSPATH}/${icon} ${BINDIR}/${CLASSPATH}/${icon}
+		DEPENDS ${SRCDIR}/${CLASSPATH}/${icon})
+endforeach()
+
+endif()
+
+string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
+string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
+
+add_custom_command(OUTPUT VncViewer.jar
+	DEPENDS ${JAVA_CLASSES}
+		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
+		${BINDIR}/${CLASSPATH}/timestamp
+		${BINDIR}/${CLASSPATH}/toolbar.png
+		${BINDIR}/${CLASSPATH}/turbovnc.png
+		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
+		${BINDIR}/${CLASSPATH}/turbovnc-128.png
+		${BINDIR}/${CLASSPATH}/insecure.png
+		${BINDIR}/${CLASSPATH}/secure.png
+	COMMAND ${JAVA_ARCHIVE}
+	ARGS cfm VncViewer.jar
+		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
+		${CLASSPATH}/timestamp
+		${CLASSPATH}/*.class
+		com/turbovnc/rfb/*.class
+		com/turbovnc/rdr/*.class
+		com/turbovnc/network/*.class
+		com/jcraft/jzlib/*.class
+		com/jcraft/jsch/agentproxy/*.class
+		com/jcraft/jsch/agentproxy/connector/*.class
+		com/jcraft/jsch/agentproxy/usocket/*.class
+		com/jcraft/jsch/jgss/*.class
+		com/jcraft/jsch/jcraft/*.class
+		com/jcraft/jsch/jce/*.class
+		com/jcraft/jsch/*.class
+		org/spf4j/base/*.class
+		org/mindrot/jbcrypt/*.class
+		${CLASSPATH}/toolbar.png
+		${CLASSPATH}/turbovnc.png
+		${CLASSPATH}/turbovnc-sm.png
+		${CLASSPATH}/turbovnc-128.png
+		${CLASSPATH}/insecure.png
+		${CLASSPATH}/secure.png)
+
+add_custom_target(java ALL DEPENDS VncViewer.jar)
 
 if(CMAKE_INSTALL_PREFIX STREQUAL "${CMAKE_INSTALL_DEFAULT_PREFIX}" OR WIN32)
 	set(CMAKE_INSTALL_DEFAULT_JAVADIR "<CMAKE_INSTALL_DATAROOTDIR>/java")
@@ -147,14 +216,13 @@ if(TVNC_INCLUDEJRE)
 			-P ${CMAKE_CURRENT_BINARY_DIR}/cmake/BuildJRE.cmake
 		COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/jrestamp
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-		DEPENDS VncViewer
+		DEPENDS VncViewer.jar
 		COMMENT "Generating Custom Java Runtime Environment (JRE)")
-	add_custom_target(jrebuild ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/jrestamp
-		VncViewer)
+	add_custom_target(jrebuild ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/jrestamp java)
 endif()
 
-install_jar(VncViewer DESTINATION ${CMAKE_INSTALL_JAVADIR})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${CLASSPATH}/README.md
+install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${CMAKE_INSTALL_JAVADIR})
+install(FILES ${SRCDIR}/${CLASSPATH}/README.md
 	DESTINATION ${CMAKE_INSTALL_JAVADIR})
 if(TVNC_INCLUDEJRE)
 	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/jre

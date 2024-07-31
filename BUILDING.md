@@ -9,7 +9,6 @@ Build Requirements
 ### All Systems
 
 - [CMake](http://www.cmake.org) v3.16 or later
-  * CMake 3.21 or later is required if building the TurboVNC Viewer.
 
 - libjpeg-turbo SDK v1.2 or later
   * The libjpeg-turbo SDK binary packages can be downloaded from
