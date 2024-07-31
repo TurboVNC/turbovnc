@@ -912,10 +912,9 @@ public final class Params {
   "be specified using the ExtSSHCommand parameter, and you can also use the " +
   "VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables or the turbovnc.via " +
   "and turbovnc.tunnel system properties to specify the SSH command-line " +
-  "templates to use when creating the tunnel.  If any one of those " +
-  "parameters, environment variables, or system properties is set, then an " +
-  "external SSH client is automatically used.  See the TurboVNC User's " +
-  "Guide for more details.\n " +
+  "templates to use when creating the tunnel.  If one of those environment " +
+  "variables or system properties is set, then an external SSH client is " +
+  "automatically used.  See the TurboVNC User's Guide for more details.\n " +
 
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
@@ -928,8 +927,8 @@ public final class Params {
   public StringParameter extSSHCommand =
   new StringParameter("ExtSSHCommand", this, false,
   "This parameter specifies the command that should be used to start the " +
-  "external SSH client.  Setting this parameter effectively sets the ExtSSH " +
-  "parameter.", (Utils.isWindows() ? "ssh.exe -ax" : "/usr/bin/env ssh -ax"));
+  "external SSH client.",
+  (Utils.isWindows() ? "ssh.exe -ax" : "/usr/bin/env ssh -ax"));
 
   public BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC", this, false,
