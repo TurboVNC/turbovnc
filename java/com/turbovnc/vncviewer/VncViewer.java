@@ -855,8 +855,14 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
           cc.reset();
           System.gc();
         } else {
-          while (!cc.shuttingDown)
+          if (Utils.getBooleanProperty("turbovnc.autotest", false))
+            noExceptionDialog = true;
+          while (!cc.shuttingDown) {
             cc.processMsg(false);
+            if (Utils.getBooleanProperty("turbovnc.autotest", false) &&
+                cc.state() == CConnection.RFBSTATE_INITIALISATION)
+              cc.close(true);
+          }
           synchronized(conns) {
             conns.remove(cc);
           }
