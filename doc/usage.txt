@@ -317,10 +317,6 @@ VNC server to which to connect.  The VNC server is specified from the point of
 view of the SSH server, which is why we used ''localhost'' in the above
 example.
 
-The command used to establish the SSH tunnel is configurable by way of
-environment variables.  See {ref prefix="Section ": VNC_VIA_CMD} for more
-details.
-
 *** Forcing SSH Connections
 #OPT: noList! plain!
 

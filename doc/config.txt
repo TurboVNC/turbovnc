@@ -267,7 +267,6 @@ to start the TurboVNC Viewer without JPEG acceleration.
 	system property is provided as a fallback in case issues are discovered when
 	running it under a specific version of Java.
 
-{anchor: VNC_VIA_CMD}
 | Environment Variable | ''VNC_VIA_CMD'', ''VNC_TUNNEL_CMD'' |
 | Java System Property | ''turbovnc.via'', ''turbovnc.tunnel'' |
 | Summary | SSH command-line templates for use with the ''via'' and \
