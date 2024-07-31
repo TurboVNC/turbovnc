@@ -134,38 +134,38 @@ public final class MacMenuBar extends JMenuBar implements ActionListener {
     JMenu connMenu = new JMenu("Connection");
     if (!cc.params.noNewConn.get()) {
       newConn = addMenuItem(connMenu, "New Connection...");
-      if (cc.params.macHotkeys.get())
+      if (!cc.params.noMacHotkeys.get())
         newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
                                                       acceleratorMask));
       closeConn = addMenuItem(connMenu, "Close Connection");
-      if (cc.params.macHotkeys.get())
+      if (!cc.params.noMacHotkeys.get())
         closeConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
                                                         acceleratorMask));
       connMenu.addSeparator();
     }
     info = addMenuItem(connMenu, "Connection Info...");
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       info.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
                                                  acceleratorMask));
     profile = new JCheckBoxMenuItem("Performance Info...");
     profile.setSelected(cc.profileDialog.isVisible());
     profile.addActionListener(this);
     connMenu.add(profile);
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       profile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
                                                     acceleratorMask));
 
     connMenu.addSeparator();
     refresh = addMenuItem(connMenu, "Request Screen Refresh");
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       refresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
                                                     acceleratorMask));
     losslessRefresh = addMenuItem(connMenu, "Request Lossless Refresh");
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       losslessRefresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
                                                             acceleratorMask));
     screenshot = addMenuItem(connMenu, "Save Remote Desktop Image");
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       screenshot.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
                                                        acceleratorMask));
     connMenu.addSeparator();
@@ -173,34 +173,34 @@ public final class MacMenuBar extends JMenuBar implements ActionListener {
     fullScreen.setSelected(cc.params.fullScreen.get());
     fullScreen.addActionListener(this);
     connMenu.add(fullScreen);
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       fullScreen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
                                                        acceleratorMask));
     defaultSize = addMenuItem(connMenu, "Default Window Size/Position");
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       defaultSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
                                                         acceleratorMask));
     zoomIn = addMenuItem(connMenu, "Zoom In");
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       zoomIn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9,
                                                    acceleratorMask));
     zoomOut = addMenuItem(connMenu, "Zoom Out");
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       zoomOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8,
                                                     acceleratorMask));
     zoom100 = addMenuItem(connMenu, "Zoom 100%", KeyEvent.VK_0);
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       zoom100.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0,
                                                     acceleratorMask));
     tileWindows = addMenuItem(connMenu, "Tile All Viewer Windows");
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       tileWindows.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
                                                         acceleratorMask));
     showToolbar = new JCheckBoxMenuItem("Show Toolbar");
     showToolbar.setSelected(cc.params.toolbar.get());
     showToolbar.addActionListener(this);
     connMenu.add(showToolbar);
-    if (cc.params.macHotkeys.get())
+    if (!cc.params.noMacHotkeys.get())
       showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
                                                         acceleratorMask));
     connMenu.addSeparator();

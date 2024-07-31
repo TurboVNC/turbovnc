@@ -639,22 +639,22 @@ public final class Params {
   "other running applications.)  Thus, this parameter is primarily useful " +
   "in conjunction with GrabKeyboard=FS." : null, true);
 
-  // In order to provide a more Mac-like application experience, the TurboVNC
-  // Viewer normally assigns an equivalent Command hotkey for most of the
-  // Ctrl-Alt-Shift hotkeys.  However, since the Command key maps to the
-  // Super/Meta key on Un*x systems, those Command hotkeys interfere with
-  // certain Emacs hotkeys on the remote system.  Disabling this parameter
-  // allows as many Command key combinations as possible to be transmitted to
-  // the VNC server as Super/Meta key combinations, although some Command key
-  // combinations (notably Command-F5, Command-Tab, Command-H, Command-Q,
-  // Command-Comma, and Command-Space) will still be hijacked by macOS.
-  public BoolParameter macHotkeys =
-  new BoolParameter("MacHotkeys", this, false,
-  null, true);
-
   public MenuKeyParameter menuKey =
   new MenuKeyParameter("MenuKey", this, true,
   "The key used to display the popup menu", "F8");
+
+  public BoolParameter noMacHotkeys =
+  new BoolParameter("NoMacHotkeys", this, false,
+  Utils.isMac() ? "On macOS, the TurboVNC Viewer normally assigns " +
+  "equivalent Command hotkeys for most of its Ctrl-Alt-Shift hotkeys.  " +
+  "However, since the Command key maps to the Super/Meta key on Un*x " +
+  "systems, those Command hotkeys may interfere with hotkeys used by " +
+  "certain applications (such as Emacs) on the remote system.  Setting this " +
+  "parameter allows as many Command key combinations as possible to be " +
+  "transmitted to the VNC server as Super/Meta key combinations, although " +
+  "some Command key combinations (notably Command-F5, Command-Tab, " +
+  "Command-H, Command-Q, Command-Comma, and Command-Space) will still be " +
+  "intercepted by macOS." : null, false);
 
   // Prevent the viewer from sending Ctrl-Alt-Del and Ctrl-Esc to the server
   public BoolParameter restricted =
