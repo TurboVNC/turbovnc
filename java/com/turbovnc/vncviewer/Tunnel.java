@@ -85,8 +85,7 @@ public class Tunnel {
       if (localPort == 0)
         throw new ErrorException("Could not obtain free TCP port");
 
-      if (params.extSSH.get() || params.extSSHCommand.get() != null ||
-          (pattern != null && pattern.length() > 0))
+      if (params.extSSH.get() || (pattern != null && pattern.length() > 0))
         createTunnelExt(gatewayHost, remoteHost, remotePort, localPort,
                         pattern, params, tunnel);
       else {

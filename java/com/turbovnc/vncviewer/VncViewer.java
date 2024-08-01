@@ -518,16 +518,17 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       "USAGE\n" +
       "-----\n" +
       "\n" +
-      "vncviewer [options/parameters] [host] [options/parameters]\n" +
-      "\n" +
-      "Connect to the specified TurboVNC host using the TurboVNC Session Manager,\n" +
-      "which uses the TurboVNC Viewer's built-in SSH client to remotely start a new\n" +
-      "TurboVNC session or to list all sessions running under your user account on the\n" +
-      "host, allowing you to choose a session to which to connect.  The TurboVNC\n" +
-      "Session Manager requires the TurboVNC Server (v3.0 or later), and by default,\n" +
-      "it expects the TurboVNC Server to be installed under /opt/TurboVNC on the host.\n" +
-      "Refer to the TurboVNC User's Guide for more details.\n" +
-      "\n" +
+      (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
+       "vncviewer [options/parameters] [host] [options/parameters]\n" +
+       "\n" +
+       "Connect to the specified TurboVNC host using the TurboVNC Session Manager,\n" +
+       "which uses the TurboVNC Viewer's built-in SSH client to remotely start a new\n" +
+       "TurboVNC session or to list all sessions running under your user account on the\n" +
+       "host, allowing you to choose a session to which to connect.  The TurboVNC\n" +
+       "Session Manager requires the TurboVNC Server (v3.0 or later), and by default,\n" +
+       "it expects the TurboVNC Server to be installed under /opt/TurboVNC on the host.\n" +
+       "Refer to the TurboVNC User's Guide for more details.\n" +
+       "\n" : "") +
       "vncviewer [options/parameters] [host:displayNum] [options/parameters]\n" +
       "vncviewer [options/parameters] [host::port] [options/parameters]\n" +
       "vncviewer [options/parameters] [host::uds_path] [options/parameters]\n" +
@@ -854,8 +855,14 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
           cc.reset();
           System.gc();
         } else {
-          while (!cc.shuttingDown)
+          if (Utils.getBooleanProperty("turbovnc.autotest", false))
+            noExceptionDialog = true;
+          while (!cc.shuttingDown) {
             cc.processMsg(false);
+            if (Utils.getBooleanProperty("turbovnc.autotest", false) &&
+                cc.state() == CConnection.RFBSTATE_INITIALISATION)
+              cc.close(true);
+          }
           synchronized(conns) {
             conns.remove(cc);
           }

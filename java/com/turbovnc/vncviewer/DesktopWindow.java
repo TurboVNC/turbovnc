@@ -724,7 +724,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
             return;
       }
     }
-    if (cc.params.macHotkeys.get() &&
+    if (!cc.params.noMacHotkeys.get() &&
         (e.getModifiersEx() & InputEvent.META_DOWN_MASK) ==
          InputEvent.META_DOWN_MASK) {
       switch (e.getKeyCode()) {
