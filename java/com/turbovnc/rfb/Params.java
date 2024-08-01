@@ -167,9 +167,16 @@ public final class Params {
           System.out.print("\n   ");
           column = 4;
         }
-        System.out.format(" %" + wordLen + "s", desc.substring(0, wordLen));
-        column += wordLen + 1;
-        if (wordLen >= 1 && desc.charAt(wordLen - 1) == '\n') {
+        if (wordLen >= 1 && desc.charAt(wordLen - 1) == '\r') {
+          System.out.format("%" + wordLen + "s",
+                            desc.substring(0, wordLen - 1));
+          column += wordLen;
+        } else {
+          System.out.format(" %" + wordLen + "s", desc.substring(0, wordLen));
+          column += wordLen + 1;
+        }
+        if (wordLen >= 1 && (desc.charAt(wordLen - 1) == '\n' ||
+                             desc.charAt(wordLen - 1) == '\r')) {
           System.out.print("\n   ");
           column = 4;
         }
@@ -528,9 +535,8 @@ public final class Params {
 
   public BoolParameter noReconnect =
   new BoolParameter("NoReconnect", this, false,
-  "Normally, if the viewer is disconnected from the server unexpectedly, " +
-  "the viewer will ask whether you want to reconnect.  Setting this " +
-  "parameter disables that behavior.", false);
+  "If the viewer is disconnected from the server unexpectedly, exit rather " +
+  "than ask whether you want to reconnect.", false);
 
   public IntParameter port =
   new IntParameter("Port", this, false,
@@ -540,32 +546,32 @@ public final class Params {
   "Mac VNC servers, this is typically 5900." +
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ? "" :
    "  (default = 5900)") + "\n " +
+
   "If listen mode is enabled, this parameter specifies the TCP port on " +
   "which the viewer will listen for reverse connections from a VNC server.  " +
   "(default = 5500)", -1, 0, 65535);
 
   public IntParameter profileInt =
   new IntParameter("ProfileInterval", this, false,
-  "TurboVNC includes an internal profiling system that can be used to " +
-  "display performance statistics about the connection, such as how many " +
-  "updates per second are being received and how much network bandwidth is " +
-  "being used.  Profiling is activated by selecting \"Performance Info...\" " +
-  "in the F8 menu, which pops up a dialog that displays the statistics.  " +
-  "Profiling can also be enabled on the console only by setting the " +
-  "environment variable TVNC_PROFILE to 1.  The ProfileInterval parameter " +
-  "specifies how often (in seconds) that the performance statistics are " +
-  "updated in the dialog or on the console.  The statistics are averaged " +
-  "over this interval.", 5);
+  "How often (in seconds) that performance statistics are updated in the " +
+  "profiling dialog or on the console when profiling is enabled.  The " +
+  "statistics are averaged over this interval.  Setting the TVNC_PROFILE " +
+  "environment variable to 1 causes the viewer to display performance " +
+  "statistics about the connection, such as how many updates per second are " +
+  "being received and how much network bandwidth is being used, to the " +
+  "console.  Profiling can also be activated by selecting \"Performance " +
+  "Info...\" in the F8 menu, which pops up a dialog that displays the same " +
+  "statistics.", 5);
 
   public BoolParameter recvClipboard =
   new BoolParameter("RecvClipboard", this, true,
-  "Synchronize the local clipboard with the clipboard of the TurboVNC " +
-  "session whenever the latter changes.", true);
+  "Synchronize the local clipboard with the TurboVNC session's clipboard " +
+  "when the latter changes.", true);
 
   public BoolParameter sendClipboard =
   new BoolParameter("SendClipboard", this, true,
-  "Synchronize the TurboVNC session clipboard with the local clipboard " +
-  "whenever the latter changes.", true);
+  "Synchronize the TurboVNC session's clipboard with the local clipboard " +
+  "when the latter changes.", true);
 
   public ServerNameParameter server =
   new ServerNameParameter("Server", this, false,
@@ -582,7 +588,7 @@ public final class Params {
    "  If no port, Unix domain socket path, or display number is specified, " +
    "then the viewer will enable the TurboVNC Session Manager, which allows " +
    "you to remotely start a new TurboVNC session or to choose an existing " +
-   "TurboVNC session to which to connect.\n " : "\n ") +
+   "session to which to connect.\n " : "\n ") +
 
   "In Unix domain socket paths, ~ is expanded to the user's home directory " +
   "on the VNC host, %h is expanded to the VNC host name (from the point of " +
@@ -607,37 +613,34 @@ public final class Params {
 
   public BoolParameter fsAltEnter =
   new BoolParameter("FSAltEnter", this, true,
-  "Normally, the viewer will switch into and out of full-screen mode when " +
-  "Ctrl-Alt-Shift-F is pressed or \"Full screen\" is selected from the " +
-  "popup menu.  Setting this parameter will additionally cause the viewer " +
-  "to switch into and out of full-screen mode when Alt-Enter is pressed.",
-  false);
+  "Toggle full-screen mode when Alt-Enter is pressed.", false);
 
   public GrabParameter grabKeyboard =
   new GrabParameter("GrabKeyboard", this, true,
-  "When the keyboard is grabbed, special key sequences (such as Alt-Tab) " +
-  "that are used to switch windows and perform other window management " +
-  "functions are passed to the VNC server instead of being handled by the " +
-  "local window manager.  The default behavior (\"FS\") is to automatically " +
-  "grab the keyboard in full-screen mode and ungrab it in windowed mode.  " +
-  "When this parameter is set to \"Always\", the keyboard is automatically " +
-  "grabbed in both full-screen mode and windowed mode.  When this parameter " +
-  "is set to \"Manual\", the keyboard is only grabbed or ungrabbed when the " +
-  "\"Grab Keyboard\" option is selected in the F8 menu, or when the " +
-  "Ctrl-Alt-Shift-G hotkey is pressed.  Regardless of the grabbing mode, " +
-  "the F8 menu option and hotkey can always be used to grab or ungrab the " +
-  "keyboard.", GrabParameter.FS);
+  "Intercept special key sequences, such as Alt-Tab, that are used to " +
+  "switch windows and perform other window management functions, and pass " +
+  "those key sequences to the VNC server.\n " +
+
+  "Values:\r " +
+  "\"FS\" = Automatically grab the keyboard in full-screen mode and ungrab " +
+  "it in windowed mode.\r " +
+  "\"Always\" = Automatically grab the keyboard in both full-screen mode " +
+  "and windowed mode.\r " +
+  "\"Manual\" = Only grab/ungrab the keyboard when the \"Grab Keyboard\" F8 " +
+  "menu option is selected or the Ctrl-Alt-Shift-G hotkey is pressed.\n " +
+
+  "Regardless of the grabbing mode, the F8 menu option and hotkey can " +
+  "always be used to grab or ungrab the keyboard.", GrabParameter.FS);
 
   public BoolParameter grabPointer =
   new BoolParameter("GrabPointer", this, false,
-  Utils.isX11() ? "If this parameter is set, then the pointer will be " +
-  "grabbed whenever the keyboard is grabbed.  This allows certain keyboard " +
-  "+ pointer sequences, such as Alt-{drag}, to be passed to the server.  " +
-  "The downside, however, is that grabbing the pointer prevents any " +
-  "interaction with the local window manager whatsoever (for instance, the " +
-  "window can no longer be maximized or closed, and you cannot switch to " +
-  "other running applications.)  Thus, this parameter is primarily useful " +
-  "in conjunction with GrabKeyboard=FS." : null, true);
+  Utils.isX11() ? "Grab the pointer whenever the keyboard is grabbed.  This " +
+  "allows certain keyboard + pointer sequences, such as Alt-{drag}, to be " +
+  "passed to the server.  The downside, however, is that grabbing the " +
+  "pointer prevents any interaction with the local window manager.  (For " +
+  "instance, the window can no longer be maximized or closed, and you " +
+  "cannot switch to other running applications.)  Thus, this parameter is " +
+  "primarily useful with GrabKeyboard=FS." : null, true);
 
   public MenuKeyParameter menuKey =
   new MenuKeyParameter("MenuKey", this, true,
@@ -693,47 +696,50 @@ public final class Params {
 
   public IntParameter colors =
   new IntParameter("Colors", this, false,
-  "The color depth to use for the viewer's window.  Setting this parameter " +
-  "to 8 specifies a BGR111 pixel format (1 bit for each red, green, and " +
-  "blue component), 64 specifies a BGR222 pixel format, 256 specifies a " +
-  "BGR233 pixel format, 32768 specifies a BGR555 pixel format, and 65536 " +
-  "specifies a BGR565 pixel format.  Lowering the color depth can " +
-  "significantly reduce bandwidth when using encoding types other than " +
-  "Tight or when using Tight encoding without JPEG.  However, colors will " +
-  "not be represented accurately, and CPU usage will increase substantially " +
-  "(causing a corresponding decrease in performance on fast networks.)  The " +
-  "default is to use the native color depth of the display on which the " +
-  "viewer is running, which is usually true color (8 bits per component.)",
-  -1);
+  "Color depth to use for the viewer's window\n " +
+
+  "Values:\r " +
+  "8 = BGR111 pixel format (1 bit for each red, green, and blue " +
+  "component)\r " +
+  "64 = BGR222 pixel format\r " +
+  "256 = BGR233 pixel format\r " +
+  "32768 = BGR555 pixel format\r " +
+  "65536 = BGR565 pixel format\n " +
+
+  "Lowering the color depth can significantly reduce network usage when " +
+  "using encoding types other than Tight or when using Tight encoding " +
+  "without JPEG.  However, colors will not be represented accurately, and " +
+  "CPU usage will increase substantially (causing a corresponding decrease " +
+  "in performance on fast networks.)  The default is to use the native " +
+  "color depth of the display on which the viewer is running, which is " +
+  "usually true color (8 bits per component.)", -1);
 
   public BoolParameter compatibleGUI =
   new BoolParameter("CompatibleGUI", this, false,
-  "Normally, the TurboVNC Viewer GUI exposes only the settings that are " +
-  "useful for TurboVNC servers.  Setting this parameter changes the " +
-  "compression level slider such that it can be used to select any " +
-  "compression level from 0-9, which is useful when connecting to other " +
-  "types of VNC servers.  This parameter is effectively set when using any " +
-  "encoding type other than Tight or when selecting a compression level " +
-  "that the GUI normally does not expose.", false);
+  "Expose all compression levels (0-9) in the TurboVNC Viewer Options " +
+  "dialog (useful when connecting to non-TurboVNC servers.)  This parameter " +
+  "is effectively set when using any encoding type other than Tight or when " +
+  "selecting a compression level that is not useful for TurboVNC servers.",
+  false);
 
   public BoolParameter currentMonitorIsPrimary =
   new BoolParameter("CurrentMonitorIsPrimary", this, false,
-  "If this parameter is set, then the monitor that contains the largest " +
-  "number of pixels from the viewer window will be treated as the primary " +
-  "monitor for the purposes of spanning.  Otherwise, the left-most and " +
+  "For the purposes of multi-screen spanning, treat the monitor that " +
+  "contains the largest number of pixels from the viewer window as the " +
+  "primary monitor.  If this parameter is disabled, then the left-most and " +
   "top-most monitor will always be the primary monitor (as was the case in " +
-  "TurboVNC 2.0 and prior versions.)", true);
+  "TurboVNC 2.0 and prior.)", true);
 
   public BoolParameter cursorShape =
   new BoolParameter("CursorShape", this, true,
-  "Normally, the TurboVNC Server and compatible VNC servers will send only " +
+  "Normally, the TurboVNC Server and compatible VNC servers send only " +
   "changes to the remote mouse cursor's shape and position.  This results " +
   "in the best mouse responsiveness.  Disabling this parameter causes the " +
   "server to instead render the mouse cursor and send it to the viewer as " +
-  "an image every time the cursor moves or changes shape.  Thus, using a " +
-  "remotely rendered cursor can increase network \"chatter\" between host " +
-  "and client significantly, which may cause performance problems on slow " +
-  "networks.", true);
+  "an image every time the cursor moves or changes shape.  Using a remotely " +
+  "rendered cursor can increase network \"chatter\" between host and client " +
+  "significantly, which may cause performance problems on slow networks.",
+  true);
 
   public DesktopSizeParameter desktopSize =
   new DesktopSizeParameter("DesktopSize", this, true,
@@ -745,9 +751,9 @@ public final class Params {
   "window without using scrollbars, and it causes the server's virtual " +
   "screens to be reconfigured such that their screen boundaries align with " +
   "the client's screen boundaries when the viewer window is in its default " +
-  "position (this is the default behavior.)  Setting this parameter to " +
-  "\"Server\" or \"0\" disables remote desktop resizing and uses the " +
-  "desktop size and screen configuration set by the server.", "Auto");
+  "position.  Setting this parameter to \"Server\" or \"0\" disables remote " +
+  "desktop resizing and uses the desktop size and screen configuration set " +
+  "by the server.", "Auto");
 
   public BoolParameter fullScreen =
   new BoolParameter("FullScreen", this, true,
@@ -779,15 +785,19 @@ public final class Params {
 
   public SpanParameter span =
   new SpanParameter("Span", this, true,
-  "This parameter specifies whether the viewer window should span only the " +
-  "primary monitor (\"Primary\"), all monitors (\"All\"), or all monitors " +
-  "only if the window cannot fit on the primary monitor (\"Auto\".)  When " +
-  "using automatic desktop resizing, \"Auto\" has the same effect as " +
+  "Multi-screen spanning mode\n " +
+
+  "Values:\r " +
+  "\"Primary\" = The viewer window should span only the primary monitor.\r " +
+  "\"All\" = The viewer window should span all monitors.\r " +
+  "\"Auto\" = The viewer window should span all monitors only if the window " +
+  "cannot fit on the primary monitor.\n " +
+
+  "When using automatic desktop resizing, \"Auto\" has the same effect as " +
   "\"Primary\" when in windowed mode and the same effect as \"All\" when in " +
   "full-screen mode.  Due to general issues with spanning windows across " +
   "multiple monitors in X11, this parameter does not work on Un*x/X11 " +
-  "platforms except in full-screen mode, and it requires the TurboVNC " +
-  "Helper library.", SpanParameter.AUTO);
+  "platforms except in full-screen mode.", SpanParameter.AUTO);
 
   public BoolParameter toolbar =
   new BoolParameter("Toolbar", this, true,
@@ -804,18 +814,18 @@ public final class Params {
   "of zlib compression to apply to subrectangles encoded using the indexed " +
   "color, mono, and raw subencoding types.  If the JPEG subencoding type is " +
   "enabled, then the compression level also defines the \"palette " +
-  "threshold\", or the minimum number of colors that a subrectangle must " +
-  "have before it is encoded using JPEG.  Higher compression levels have " +
-  "higher palette thresholds and thus favor the use of indexed color " +
+  "threshold\", or the minimum number of unique colors that a subrectangle " +
+  "must have before it is encoded using JPEG.  Higher compression levels " +
+  "have higher palette thresholds and thus favor the use of indexed color " +
   "subencoding, whereas lower compression levels favor the use of JPEG.\n " +
 
-  "Compression Level 1 is usually the default whenever JPEG is enabled, " +
-  "because extensive experimentation has revealed little or no benefit to " +
-  "using higher compression levels with most 3D and video workloads.  " +
-  "However, v1.1 and later of the TurboVNC Server also supports Compression " +
-  "Level 2 when JPEG is enabled.  Compression Level 2 can be shown to " +
-  "reduce the bandwidth of certain types of low-color workloads by " +
-  "typically 20-40% (with a commensurate increase in CPU usage.)\n " +
+  "Compression Level 1 is usually the default when JPEG is enabled, because " +
+  "extensive experimentation has revealed little or no benefit to using " +
+  "higher compression levels with most 3D and video workloads.  However, " +
+  "v1.1 and later of the TurboVNC Server also supports Compression Level 2 " +
+  "when JPEG is enabled.  Compression Level 2 can reduce the network usage " +
+  "of certain types of low-color workloads by about 20-40% (with a " +
+  "commensurate increase in CPU usage.)\n " +
 
   "In v1.2 or later of the TurboVNC Server, compression levels 5-7 map to " +
   "compression levels 0-2, but they also enable the interframe comparison " +
@@ -829,7 +839,7 @@ public final class Params {
 
   public EncodingParameter encoding =
   new EncodingParameter("Encoding", this, false,
-  "Preferred encoding type to use.  If the server does not support the " +
+  "Preferred RFB encoding type to use.  If the server does not support the " +
   "preferred encoding type, then the next best one will be chosen.  There " +
   "should be no reason to use an encoding type other than Tight when " +
   "connecting to a TurboVNC session, but this parameter can be useful when " +
@@ -848,32 +858,39 @@ public final class Params {
 
   public IntParameter quality =
   new IntParameter("Quality", this, true,
-  "Specifies the JPEG quality to use when compressing JPEG images with the " +
-  "Tight+JPEG encoding methods.  Lower quality values produce grainier JPEG " +
-  "images with more noticeable compression artifacts, but lower quality " +
-  "values also use less network bandwidth and CPU time.  The default value " +
-  "of " + DEFQUAL + " should be perceptually lossless (that is, any image " +
+  "JPEG quality to use when compressing JPEG images with the Tight+JPEG " +
+  "encoding methods.  Lower quality values produce grainier JPEG images " +
+  "with more noticeable compression artifacts, but lower quality values " +
+  "also use less network bandwidth and CPU time.  The default value of " +
+  DEFQUAL + " should be perceptually lossless (that is, any image " +
   "compression artifacts it produces should be imperceptible to the human " +
   "eye under most viewing conditions.)", DEFQUAL, 1, 100);
 
   public SubsampParameter subsampling =
   new SubsampParameter("Subsampling", this, true,
+  "Chrominance subsampling level to use when compressing JPEG images with " +
+  "the Tight+JPEG encoding methods\n " +
+
   "When compressing an image using JPEG, the RGB pixels are first converted " +
   "to the YCbCr colorspace, a colorspace in which each pixel is represented " +
   "as a brightness (Y, or \"luminance\") value and a pair of color (Cb and " +
   "Cr, or \"chrominance\") values.  After this colorspace conversion, " +
   "chrominance subsampling can be used to discard some of the chrominance " +
-  "components in order to save bandwidth.  1X subsampling retains the " +
-  "chrominance components for all pixels, and thus it provides the best " +
-  "image quality but also uses the most network bandwidth and CPU time.  " +
-  "2X subsampling retains the chrominance components for every other pixel, " +
-  "and 4X subsampling retains the chrominance components for every fourth " +
-  "pixel (this is typically implemented as 2X subsampling in both X and Y " +
-  "directions.)  Grayscale throws out all of the chrominance components, " +
-  "leaving only luminance.  2X and 4X subsampling will typically produce " +
-  "noticeable aliasing of lines and other sharp features, but with " +
-  "photographic or other \"smooth\" image content, it may be difficult to " +
-  "detect any difference between 1X, 2X, and 4X.", SubsampParameter.NONE);
+  "components in order to save bandwidth.\n " +
+
+  "Values:\r " +
+  "\"1X\" = Retain the chrominance components for all pixels (best image " +
+  "quality but highest network and CPU usage.)\r " +
+  "\"2X\" = Retain the chrominance components for every other pixel.\r " +
+  "\"4X\" = Retain the chrominance components for every fourth pixel " +
+  "(typically implemented as 2X subsampling in both X and Y directions.)\r " +
+  "\"Grayscale\" = Discard all chrominance components, leaving only " +
+  "luminance.\n " +
+
+  "2X and 4X subsampling typically produce noticeable aliasing of lines and " +
+  "other sharp features, but with photographic or other \"smooth\" image " +
+  "content, it may be difficult to detect any difference between 1X, 2X, " +
+  "and 4X.", SubsampParameter.NONE);
 
   private AliasParameter samp =
   new AliasParameter("Samp", this,
@@ -889,21 +906,23 @@ public final class Params {
   new BoolParameter("AutoPass", this, false,
   "Read a plain-text password from stdin and use this password when " +
   "authenticating with the VNC server.  It is strongly recommended that " +
-  "this parameter be used only in conjunction with a one-time password or " +
-  "other disposable token.", false);
+  "this parameter be used only with a one-time password or other disposable " +
+  "token.", false);
 
   public StringParameter encPassword =
   new StringParameter("EncPassword", this, false,
   "Encrypted password, in ASCII hex format, to use when authenticating with " +
   "the VNC server.  You can generate an ASCII hex encrypted password on a " +
   "TurboVNC host by executing\n " +
+
   "'echo {unencrypted_password} | /opt/TurboVNC/bin/vncpasswd -f | xxd -c 256 -ps'\n " +
+
   "This parameter allows a password to be supplied to the TurboVNC Viewer " +
   "without exposing the password as plain text.  However, the encryption " +
   "scheme (DES) used for VNC passwords is not particularly strong, so " +
   "encrypting the password guards against only the most casual of attacks.  " +
-  "It is thus recommended that this parameter be used only in conjunction " +
-  "with a one-time password or other disposable token.", null);
+  "Thus, it is recommended that this parameter be used only with a one-time " +
+  "password or other disposable token.", null);
 
   public BoolParameter extSSH =
   new BoolParameter("ExtSSH", this, false,
@@ -912,13 +931,13 @@ public final class Params {
   "be specified using the ExtSSHCommand parameter, and you can also use the " +
   "VNC_VIA_CMD and VNC_TUNNEL_CMD environment variables or the turbovnc.via " +
   "and turbovnc.tunnel system properties to specify the SSH command-line " +
-  "templates to use when creating the tunnel.  If one of those environment " +
+  "templates for creating the tunnel.  If one of those environment " +
   "variables or system properties is set, then an external SSH client is " +
   "automatically used.  See the TurboVNC User's Guide for more details.\n " +
 
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
-   "unset.  (The built-in SSH client is always used with the TurboVNC " +
+   "disabled.  (The built-in SSH client is always used with the TurboVNC " +
    "Session Manager.)\n " : "") +
 
   "This parameter is effectively set if the Server parameter specifies a " +
@@ -926,35 +945,33 @@ public final class Params {
 
   public StringParameter extSSHCommand =
   new StringParameter("ExtSSHCommand", this, false,
-  "This parameter specifies the command that should be used to start the " +
-  "external SSH client.",
+  "The command that should be used to start the external SSH client",
   (Utils.isWindows() ? "ssh.exe -ax" : "/usr/bin/env ssh -ax"));
 
   public BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC", this, false,
   "When the SendLocalUsername parameter is set, or when using SSH " +
-  "tunneling without a specified SSH username, setting this parameter will " +
-  "cause the local username to be sent in lowercase, which may be useful " +
-  "when using the viewer on Windows machines (Windows allows mixed-case " +
-  "usernames, whereas Un*x and Mac platforms generally don't.)", false);
+  "tunneling without a specified SSH username, convert the local username " +
+  "to lowercase before using it for authentication.  This may be useful " +
+  "with Windows clients, since Windows allows mixed-case usernames but Un*x " +
+  "and Mac systems generally don't.", false);
 
   public BoolParameter noUnixLogin =
   new BoolParameter("NoUnixLogin", this, false,
-  "This disables the use of Unix Login authentication when connecting to " +
-  "TightVNC-compatible servers and Plain authentication when connecting to " +
-  "VeNCrypt-compatible servers.  Setting this parameter has the effect of " +
-  "removing \"Plain\" (and its encrypted derivatives) and \"UnixLogin\" " +
-  "from the SecurityTypes parameter.  This is useful if the server is " +
-  "configured to prefer a security type that supports Unix Login/Plain " +
-  "authentication and you want to override that preference for a particular " +
-  "connection (for instance, to use a one-time password.)",
-  false);
+  "Disable Unix Login authentication when connecting to TightVNC-compatible " +
+  "servers and Plain authentication when connecting to VeNCrypt-compatible " +
+  "servers.  Setting this parameter effectively removes \"Plain\" (and its " +
+  "encrypted derivatives) and \"UnixLogin\" from the value of the " +
+  "SecurityTypes parameter.  This is useful if the server is configured to " +
+  "prefer a security type that supports Unix Login/Plain authentication and " +
+  "you want to override that preference for a particular connection (for " +
+  "instance, to use a one-time password.)", false);
 
   public StringParameter password =
   new StringParameter("Password", this, false,
   "Plain-text password to use when authenticating with the VNC server.  It " +
-  "is strongly recommended that this parameter be used only in conjunction " +
-  "with a one-time password or other disposable token.", null);
+  "is strongly recommended that this parameter be used only with a one-time " +
+  "password or other disposable token.", null);
 
   public StringParameter passwordFile =
   new StringParameter("PasswordFile", this, false,
@@ -968,7 +985,7 @@ public final class Params {
 
   public SecTypesParameter secTypes =
   new SecTypesParameter("SecurityTypes", this, true,
-  "A comma-separated list of the security types that can be used, if the " +
+  "A comma-separated list of the security types that can be used if the " +
   "server supports them.  \"VNC\" and \"None\" are the standard VNC " +
   "password and no-password authentication schemes supported by all VNC " +
   "servers.  The seven supported VeNCrypt security types (\"Plain\", " +
@@ -979,9 +996,9 @@ public final class Params {
   "type enables user/password authentication using the TightVNC security " +
   "extensions rather than VeNCrypt.  \"Plain\" and \"UnixLogin\" " +
   "authenticate using a plain-text username and password, so it is strongly " +
-  "recommended that those types only be used with either TLS encryption or " +
-  "SSH tunneling.  The order of this list does not matter, since the " +
-  "server's preferred order is always used.\n " +
+  "recommended that those types be used only with TLS encryption or SSH " +
+  "tunneling.  The order of this list does not matter, since the server's " +
+  "preferred order is always used.\n " +
 
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
@@ -990,24 +1007,24 @@ public final class Params {
 
   public BoolParameter sendLocalUsername =
   new BoolParameter("SendLocalUsername", this, true,
-  "Send the local username when using user/password authentication schemes " +
-  "(Unix Login, Plain) rather than prompting for it.  As with the User " +
-  "parameter, setting this parameter has the effect of disabling any " +
-  "authentication schemes that don't require a username.", false);
+  "When using user/password authentication schemes (Unix Login, Plain), " +
+  "authenticate using the local username rather than prompt for a " +
+  "username.  As with the User parameter, setting this parameter " +
+  "effectively disables any authentication schemes that don't require a " +
+  "username.", false);
 
   public BoolParameter sessMgrAuto =
   new BoolParameter("SessMgrAuto", this, false,
   Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
-  "When using the TurboVNC Session Manager, the default behavior is to " +
-  "automatically enable OTP authentication and SSH tunneling.  Disabling " +
-  "this parameter overrides that behavior and allows any security " +
-  "configuration to be used." : null, true);
+  "When using the TurboVNC Session Manager, automatically enable OTP " +
+  "authentication and SSH tunneling.  Disabling this parameter allows any " +
+  "security configuration to be used with the TurboVNC Session Manager." :
+  null, true);
 
   public StringParameter sshConfig =
   new StringParameter("SSHConfig", this, false,
-  "When using the built-in SSH client, this parameter specifies the path to " +
-  "an OpenSSH configuration file to use when authenticating with the SSH " +
-  "server.  The OpenSSH configuration file takes precedence over any " +
+  "Path to an OpenSSH configuration file to use with the built-in SSH " +
+  "client.  The OpenSSH configuration file takes precedence over any " +
   "TurboVNC Viewer parameters.", Utils.getHomeDir() + ".ssh/config");
 
   public StringParameter sshKey =
@@ -1026,16 +1043,17 @@ public final class Params {
   "IdentityFile configuration keyword.  The SSH client will attempt to use " +
   "the following private keys, in order, when authenticating with the SSH " +
   "server:\n " +
+
   "1. Any key specified with this parameter or the SSHKey parameter, if the " +
   "key is already provided by the SSH agent (ssh-agent or Pageant) or a " +
   "valid passphrase is supplied for the key using the SSHKeyPass " +
-  "parameter\n " +
+  "parameter\r " +
   "2. Any key specified with the IdentityFile OpenSSH configuration " +
-  "keyword, if the key is already provided by the SSH agent\n " +
-  "3. Any other keys provided by the SSH agent, in the order provided\n " +
+  "keyword, if the key is already provided by the SSH agent\r " +
+  "3. Any other keys provided by the SSH agent, in the order provided\r " +
   "4. Any key specified with this parameter, the SSHKey parameter, or the " +
   "IdentityFile OpenSSH configuration keyword, if a valid passphrase is not " +
-  "supplied for the key\n " +
+  "supplied for the key\r " +
   "5. " + Utils.getHomeDir() + ".ssh/id_rsa, " + Utils.getHomeDir() +
   ".ssh/id_dsa, and " + Utils.getHomeDir() + ".ssh/id_ecdsa (in that " +
   "order), if this parameter, the SSHKey parameter, and the IdentityFile " +
@@ -1081,25 +1099,24 @@ public final class Params {
   new StringParameter("User", this, true,
   "The username to use for Unix Login authentication (TightVNC-compatible " +
   "servers) or Plain authentication (VeNCrypt-compatible servers.)  " +
-  "Specifying this parameter has the effect of removing any types from the " +
-  "SecurityTypes parameter except for \"Plain\" (and its encrypted " +
+  "Specifying this parameter effectively removes any types from the value " +
+  "of the SecurityTypes parameter except for \"Plain\" (and its encrypted " +
   "derivatives) and \"UnixLogin\", thus allowing only authentication " +
   "schemes that require a username.", null);
 
   public ServerNameParameter via =
   new ServerNameParameter("Via", this, true,
-  "This parameter specifies an SSH server or UltraVNC repeater " +
-  "(\"gateway\") through which the VNC connection should be tunneled.  Note " +
-  "that when using the Via parameter, the VNC host should be specified from " +
-  "the point of view of the gateway.  For example, specifying " +
-  "Via={gateway_host} Server=localhost:1 will cause the viewer to connect " +
-  "to display :1 on {gateway_host} through the SSH server running on that " +
-  "same host.  Similarly, specifying Via={gateway_host}:0 " +
-  "Server=localhost:1 will cause the viewer to connect to display :1 on " +
-  "{gateway_host} through the UltraVNC repeater running on that same host " +
-  "and listening on port 5900 (VNC display :0.)  If using the UltraVNC " +
-  "Repeater in \"Mode II\", then specify ID:xxxx as the VNC server name, " +
-  "where xxxx is the ID number of the VNC server to which you want to " +
+  "SSH server or UltraVNC repeater (\"gateway\") through which the VNC " +
+  "connection should be tunneled.  Note that when using the Via parameter, " +
+  "the VNC host should be specified from the point of view of the gateway.  " +
+  "For example, specifying Via={gateway_host} Server=localhost:1 will cause " +
+  "the viewer to connect to display :1 on {gateway_host} through the SSH " +
+  "server running on the same host.  Similarly, specifying " +
+  "Via={gateway_host}:0 Server=localhost:1 will cause the viewer to connect " +
+  "to display :1 on {gateway_host} through the UltraVNC repeater running on " +
+  "the same host and listening on port 5900 (VNC display :0.)  If using the " +
+  "UltraVNC Repeater in \"Mode II\", specify ID:xxxx as the VNC server " +
+  "name, where xxxx is the ID number of the VNC server to which you want to " +
   "connect.", null);
 
   public StringParameter x509ca =
