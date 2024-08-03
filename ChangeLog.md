@@ -84,6 +84,9 @@ used to specify the external SSH client command.  In `Via`/`Tunnel` SSH
 command-line templates, including the default ones, `%S` is now replaced with
 the value of this new parameter.
 
+7. Fixed a regression introduced by 3.0 beta1[24] that caused the TurboVNC
+Server to leak memory when the RFB flow control extensions were used.
+
 
 3.1.1
 =====
