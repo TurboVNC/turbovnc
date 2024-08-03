@@ -35,10 +35,10 @@ unset WAYLAND_DISPLAY
 # attempt to display to a local Wayland session if one is active.  This forces
 # those applications to display to the TurboVNC session.
 GDK_BACKEND=x11;  export GDK_BACKEND
-# If each TurboVNC session will run a (reasonably modern) window manager, then
-# each TurboVNC session must have a separate D-Bus session bus instance.  On
-# Red Hat/Fedora (and derivatives), SuSE/openSUSE, FreeBSD, and Solaris 11,
-# xinitrc and Xsession automatically create a new session bus instance if the
+# If a TurboVNC session will run a (reasonably modern) window manager, then the
+# session must have a D-Bus session bus instance.  On Red Hat/Fedora (and
+# derivatives), SuSE/openSUSE, FreeBSD, and Solaris 11, xinitrc and Xsession
+# automatically create a new session bus instance if the
 # DBUS_SESSION_BUS_ADDRESS environment variable is empty, so we used to unset
 # that variable at this point in the script.  However, on other operating
 # systems (particularly Debian 10+ and Ubuntu 18.04+), it is necessary to
@@ -47,12 +47,20 @@ GDK_BACKEND=x11;  export GDK_BACKEND
 # Using a separate D-Bus session bus instance for each TurboVNC session is
 # necessary in order to run multiple TurboVNC sessions (or a local session and
 # a TurboVNC session) simultaneously under the same user account, but this also
-# causes issues with cgroup v2 on some systems.  We allow users to set
-# TVNC_SHAREDDBUS=1 in the environment (currently undocumented except here) to
-# forego a separate D-Bus session bus instance and use the D-Bus session bus
-# instance provided by systemd, which improves cgroup v2 compatibility at the
-# expense of multi-session capability.
-if [ "$TVNC_SHAREDDBUS" != "1" ]; then
+# causes issues with Control Group (cgroup) v2 on some systems.  If
+# TVNC_USERDBUS is set to 1 in the environment (currently undocumented except
+# here), then we forego creating a unique D-Bus session bus instance for the
+# TurboVNC session and use the per-user D-Bus session bus instance provided by
+# systemd instead.  That improves cgroup v2 compatibility at the expense of
+# multi-session capability.
+case "$DBUS_SESSION_BUS_ADDRESS" in
+unix:path=/run/user/*)
+  ;;
+*)
+  unset TVNC_USERDBUS
+  ;;
+esac
+if [ "$TVNC_USERDBUS" != "1" ]; then
   DBUS_LAUNCH=
   if [ -x /usr/bin/dbus-launch ]; then
     DBUS_LAUNCH=/usr/bin/dbus-launch
