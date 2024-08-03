@@ -208,7 +208,7 @@ Bool rfbSendRTTPing(rfbClientPtr cl)
 static void HandleRTTPong(rfbClientPtr cl)
 {
   struct timeval now;
-  rfbRTTInfo *rttInfo;
+  rfbRTTInfo *rttInfo = NULL;
   unsigned rtt, delay;
 
   if (xorg_list_is_empty(&cl->pings))
@@ -233,7 +233,7 @@ static void HandleRTTPong(rfbClientPtr cl)
   /* Pings sent before the last adjustment aren't interesting, as they aren't a
      measure of the current congestion window. */
   if (isBefore(&rttInfo->tv, &cl->lastAdjustment))
-    return;
+    goto bailout;
 
   /* Estimate added delay because of overtaxed buffers (see above.) */
   delay = rttInfo->extra * cl->baseRTT / cl->congWindow;
@@ -265,6 +265,7 @@ static void HandleRTTPong(rfbClientPtr cl)
   cl->measurements++;
   UpdateCongestion(cl);
 
+bailout:
   free(rttInfo);
 }
 
