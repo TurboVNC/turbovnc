@@ -1633,6 +1633,7 @@ void ddxGiveUp(enum ExitCode error)
 #endif
   ShutdownTightThreads();
   TimerFree(pointerLockTimer);
+  rfbRemoveScreens(&rfbScreens);
   free(rfbFB.pfbMemory);
   if (initOutputCalled) {
     char unixSocketName[32];
