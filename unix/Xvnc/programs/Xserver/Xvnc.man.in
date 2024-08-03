@@ -14,7 +14,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH Xvnc 1 "July 2024" "" "TurboVNC"
+.TH Xvnc 1 "August 2024" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -682,10 +682,16 @@ Do not allow X11 TCP connections to any TurboVNC session started on this host.
 .IP \fIpam-service-name\fR=\fIsvcname\fR
 Sets the service name to be used when Xvnc performs PAM authentication.  The
 default service name is \fIturbovnc\fR.  This typically corresponds to a file
-in \fB/etc/pam.d\fR or to a token in \fB/etc/pam.conf\fR.  For instance, if
-your system has a file named \fB/etc/pam.d/passwd\fR, then copying this file to
-\fB/etc/pam.d/{svcname}\fR would cause the username and password sent by the
-VNC viewer to be validated against \fB/etc/passwd\fR.
+in \fB/etc/pam.d\fR or to a token in \fB/etc/pam.conf\fR.  For instance, adding
+
+\fBauth substack password-auth\fR
+.br
+\fBaccount substack password-auth\fR
+
+to \fB/etc/pam.d/{svcname}\fR on Red Hat Enterprise Linux (and derivative)
+systems or copying \fB/etc/pam.d/passwd\fR to \fB/etc/pam.d/{svcname}\fR on
+Debian and SUSE (and derivative) systems would cause the username and password
+sent by the VNC viewer to be validated against \fB/etc/passwd\fR.
 
 .IP \fIpermitted-cipher-suites\fR=\fIsuite\fR[:\fIsuite\fR[...]]
 Defines the set of permitted TLS cipher suites for the TLS* and X509* security
