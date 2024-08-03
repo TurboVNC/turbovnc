@@ -404,6 +404,8 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
       rfbssl_error("SSL_CTX_set_tmp_dh()");
       goto bailout;
     }
+    crypto.DH_free(dh);
+    dh = NULL;
     if (!ssl.SSL_CTX_set_cipher_list(ctx->ssl_ctx, rfbAuthCipherSuites ?
                                                    rfbAuthCipherSuites :
                                                    "aNULL")) {
