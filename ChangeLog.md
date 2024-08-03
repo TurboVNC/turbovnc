@@ -73,6 +73,9 @@ package is not installed) and on RHEL 7 and Fedora 19 and later (if the
 rather than trying to execute **xinitrc** or twm, if a window manager is
 specified and the session desktop file for the window manager cannot be found.
 
+13. Fixed a regression introduced by 3.0 beta1[24] that caused the TurboVNC
+Server to leak memory when the RFB flow control extensions were used.
+
 
 3.0.3
 =====
