@@ -1,4 +1,5 @@
-/* Copyright (C) 2018, 2020-2021, 2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2018, 2020-2021, 2023-2024 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +55,19 @@ public final class SessionManager extends Tunnel {
     boolean firstTime = true;
     while (true) {
       String[] sessions = getSessions(opts.sshSession, host);
+
+      if (Utils.getBooleanProperty("turbovnc.autotest", false)) {
+        int autotestSession =
+          Utils.getIntProperty("turbovnc.autotestsession");
+        if (autotestSession >= 0) {
+          if (autotestSession >= sessions.length)
+            throw new ErrorException("turbovnc.autotestsession is out of range");
+          if (Params.sessMgrAuto.getValue())
+            generateOTP(opts.sshSession, host, sessions[autotestSession], true,
+                        opts.viewOnly);
+          return sessions[autotestSession];
+        }
+      }
 
       if ((sessions == null || sessions.length <= 0) && firstTime) {
         return startSession(opts.sshSession, host);
@@ -264,7 +278,8 @@ public final class SessionManager extends Tunnel {
                                     boolean viewOnly) throws Exception {
     vlog.debug("Generating one-time password for session " + host + session);
 
-    VncViewer.noExceptionDialog = true;
+    if (!Utils.getBooleanProperty("turbovnc.autotest", false))
+      VncViewer.noExceptionDialog = true;
 
     ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
 
@@ -335,7 +350,8 @@ public final class SessionManager extends Tunnel {
                                   String session) throws Exception {
     vlog.debug("Killing TurboVNC session " + host + session);
 
-    VncViewer.noExceptionDialog = true;
+    if (!Utils.getBooleanProperty("turbovnc.autotest", false))
+      VncViewer.noExceptionDialog = true;
 
     ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
 

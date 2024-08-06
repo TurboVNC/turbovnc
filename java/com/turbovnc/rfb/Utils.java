@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2018, 2020, 2022-2023 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2018, 2020, 2022-2024 D. R. Commander.
  *                                                 All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
@@ -74,6 +74,18 @@ public final class Utils {
         return false;
     }
     return def;
+  }
+
+  public static int getIntProperty(String key) {
+    String prop = System.getProperty(key);
+    if (prop != null && prop.length() > 0) {
+      int i = -1;
+      try {
+        i = Integer.parseInt(prop);
+      } catch (NumberFormatException e) {}
+      return i;
+    }
+    return -1;
   }
 
   public static String getFileSeparator() {
