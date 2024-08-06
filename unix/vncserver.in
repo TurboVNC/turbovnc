@@ -54,15 +54,11 @@ $generateOTP = 0;
 $securityTypes = "";
 $encTypeX509 = @USETLS@;
 $noxstartup = 0;
-$autoLosslessRefresh = 0.0;
 $deferUpdate = 1;
 $wm = "";
 $useVGL = 0;
 $autokill = 1;
-$pamSession = 0;
 $bits = @BITS@;
-$multiThread = 1;
-$numThreads = 0;
 $noVNC = "";
 $serverArgs = "";
 $useUDS = 0;
@@ -456,7 +452,6 @@ if ($vncUserDirUnderTmp) {
 # Now start the TurboVNC X server
 
 $cmd = $exedir."Xvnc :$displayNumber";
-$cmd .= " -dpi $dpi" if ($dpi);
 $cmd .= " -desktop " . &quotedString($desktopName);
 $cmd .= " -auth $xauthorityFile";
 $cmd .= " -geometry $geometry" if ($geometry);
@@ -469,15 +464,11 @@ $cmd .= " -securitytypes \"$securityTypes\"" if ($securityTypes);
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -rfbunixpath " . &quotedString($udsPath) if ($udsPath);
 $cmd .= " -fp $fontPath" if ($fontPath);
-$cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
 $cmd .= " -deferupdate $deferUpdate";
 $cmd .= " -xkbdir $xkbdir" if ($xkbdir && !$staticXorgPaths);
 $cmd .= " -xkbcompdir $xkbcompdir" if ($xkbcompdir && !$staticXorgPaths);
-$cmd .= " -pamsession" if ($pamSession);
 $cmd .= " -dridir $dridir" if ($dridir && !$staticXorgPaths);
 $cmd .= " -registrydir $registrydir" if ($registrydir && !$staticXorgPaths);
-$cmd .= " -nomt" if (!$multiThread);
-$cmd .= " -nthreads $numThreads" if ($numThreads);
 $cmd .= " $serverArgs" if ($serverArgs);
 
 foreach $arg (@ARGV) {
@@ -1240,29 +1231,24 @@ sub SanityCheck
 sub ReadConfiguration
 {
   my @configurableVariables =
-    qw(geometry
+    qw(autokill
        depth
        desktopName
-       dpi
-       vncUserDir
        fontPath
-       securityTypes
        generateOTP
-       autoLosslessRefresh
-       wm
-       useVGL
-       autokill
-       pamSession
-       multiThread
-       numThreads
+       geometry
        noVNC
+       noxstartup
        passwdFile
+       securityTypes
+       serverArgs
+       useUDS
+       useVGL
+       vncUserDir
+       wm
        x509CertFile
        x509KeyFile
-       xstartup
-       noxstartup
-       serverArgs
-       useUDS);
+       xstartup);
 
   if (open CONF, "<$configFile") {
     while (<CONF>) {
