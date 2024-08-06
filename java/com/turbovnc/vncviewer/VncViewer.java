@@ -177,6 +177,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void setLookAndFeel() {
+    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+      return;
+
     try {
       if (Utils.isWindows()) {
         String laf = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
@@ -251,6 +254,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void setGlobalInsets() {
+    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+      return;
+
     try {
       // To make a short story long:
       // -- Swing can't determine the proper inset values for a JFrame until it
@@ -298,6 +304,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   public static void setBlitterDefaults() {
+    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+      return;
+
     // Java 1.7 and later do not include hardware-accelerated 2D blitting
     // routines on Mac platforms.  They only support OpenGL blitting, and using
     // TYPE_INT_ARGB_PRE BufferedImages with OpenGL blitting is much faster
@@ -757,6 +766,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     CConn cc = null;
     int exitStatus = 0;
 
+    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+      noExceptionDialog = true;
+
     if (params.listenMode.get()) {
       int port = 5500;
 
@@ -855,8 +867,6 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
           cc.reset();
           System.gc();
         } else {
-          if (Utils.getBooleanProperty("turbovnc.autotest", false))
-            noExceptionDialog = true;
           while (!cc.shuttingDown) {
             cc.processMsg(false);
             if (Utils.getBooleanProperty("turbovnc.autotest", false) &&

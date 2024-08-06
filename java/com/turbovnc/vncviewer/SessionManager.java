@@ -1,4 +1,4 @@
-/* Copyright (C) 2018, 2020-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2018, 2020-2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +54,19 @@ public final class SessionManager extends Tunnel {
     boolean firstTime = true;
     while (true) {
       String[] sessions = getSessions(params.sshSession, host);
+
+      if (Utils.getBooleanProperty("turbovnc.autotest", false)) {
+        int autotestSession =
+          Utils.getIntProperty("turbovnc.autotestsession");
+        if (autotestSession >= 0) {
+          if (autotestSession >= sessions.length)
+            throw new ErrorException("turbovnc.autotestsession is out of range");
+          if (params.sessMgrAuto.get())
+            generateOTP(params, host, sessions[autotestSession], true,
+                        params.viewOnly.get());
+          return sessions[autotestSession];
+        }
+      }
 
       if ((sessions == null || sessions.length <= 0) && firstTime) {
         return startSession(params, host);
@@ -263,7 +276,8 @@ public final class SessionManager extends Tunnel {
                                     throws Exception {
     vlog.debug("Generating one-time password for session " + host + session);
 
-    VncViewer.noExceptionDialog = true;
+    if (!Utils.getBooleanProperty("turbovnc.autotest", false))
+      VncViewer.noExceptionDialog = true;
 
     ChannelExec channelExec =
       (ChannelExec)params.sshSession.openChannel("exec");
@@ -335,7 +349,8 @@ public final class SessionManager extends Tunnel {
                                   String session) throws Exception {
     vlog.debug("Killing TurboVNC session " + host + session);
 
-    VncViewer.noExceptionDialog = true;
+    if (!Utils.getBooleanProperty("turbovnc.autotest", false))
+      VncViewer.noExceptionDialog = true;
 
     ChannelExec channelExec = (ChannelExec)sshSession.openChannel("exec");
 
