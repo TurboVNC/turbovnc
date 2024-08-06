@@ -222,7 +222,7 @@ class ServerDialog extends Dialog implements ActionListener {
         throw new WarningException("No server name specified");
 
       // set params
-      if (opts.via != null && opts.via.indexOf(':') >= 0) {
+      if (opts.via != null && Hostname.getColonPos(opts.via) >= 0) {
         opts.serverName = serverName;
       } else {
         int atIndex = serverName.lastIndexOf('@');

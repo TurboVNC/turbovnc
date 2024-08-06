@@ -76,6 +76,9 @@ specified and the session desktop file for the window manager cannot be found.
 13. Fixed a regression introduced by 3.0 beta1[24] that caused the TurboVNC
 Server to leak memory when the RFB flow control extensions were used.
 
+14. Fixed several issues in the TurboVNC Viewer that prevented IPv6 addresses
+from being used as VNC hostnames.
+
 
 3.0.3
 =====

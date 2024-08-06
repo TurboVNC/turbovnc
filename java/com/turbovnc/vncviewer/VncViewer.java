@@ -625,8 +625,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   public void start() {
     vlog.debug("start called");
     String host = opts.serverName;
-    if (host != null && host.indexOf(':') < 0 &&
-        opts.port > 0) {
+    if (host != null && Hostname.getColonPos(host) < 0 && opts.port > 0) {
       opts.serverName = host + ((opts.port >= 5900 && opts.port <= 5999) ?
                          (":" + (opts.port - 5900)) : ("::" + opts.port));
     }

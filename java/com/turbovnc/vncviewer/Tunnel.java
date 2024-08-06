@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2023 D. R. Commander.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2024 D. R. Commander.
  *                                               All Rights Reserved.
  * Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
  * Copyright (C) 2000 Const Kaplinsky.  All Rights Reserved.
@@ -61,7 +61,7 @@ public class Tunnel {
       gatewayHost = opts.via;
       remoteHost = Hostname.getHost(opts.serverName);
     }
-    if (opts.serverName != null && opts.serverName.indexOf(':') < 0 &&
+    if (opts.serverName != null && Hostname.getColonPos(opts.serverName) < 0 &&
         opts.port > 0)
       remotePort = opts.port;
     else
@@ -85,6 +85,7 @@ public class Tunnel {
       vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
       if (opts.sshSession == null)
         createTunnelJSch(gatewayHost, opts);
+      remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
       vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
                  ":" + remotePort + " (relative to gateway)");
       opts.sshSession.setPortForwardingL(localPort, remoteHost, remotePort);

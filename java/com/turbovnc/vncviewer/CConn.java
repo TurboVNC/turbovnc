@@ -103,7 +103,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
       if (opts.serverName != null &&
           !Params.alwaysShowConnectionDialog.getValue()) {
-        if (opts.via == null || opts.via.indexOf(':') < 0) {
+        if (opts.via == null || Hostname.getColonPos(opts.via) < 0) {
           port = opts.port = Hostname.getPort(opts.serverName);
           serverName = opts.serverName = Hostname.getHost(opts.serverName);
         }
@@ -118,7 +118,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         serverName = opts.serverName;
       }
 
-      if (opts.via != null && opts.via.indexOf(':') >= 0) {
+      if (opts.via != null && Hostname.getColonPos(opts.via) >= 0) {
         port = Hostname.getPort(opts.via);
         serverName = Hostname.getHost(opts.via);
       } else if (opts.via != null || opts.tunnel ||
