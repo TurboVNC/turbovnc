@@ -1,5 +1,5 @@
-/* Copyright (C) 2012, 2015, 2018, 2020-2022 D. R. Commander.
- *                                           All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2018, 2020-2022, 2024 D. R. Commander.
+ *                                                 All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -70,7 +70,7 @@ public final class UserPreferences {
     // Load the value of any parameters that have not already been set on the
     // command line or in a connection info file
     try {
-      Preferences node = root.node(nName);
+      Preferences node = root.node(nName.replaceAll("[\\[\\]]", ""));
       String[] keys = node.keys();
       params.resetGUI();
       for (int i = 0; i < keys.length; i++) {

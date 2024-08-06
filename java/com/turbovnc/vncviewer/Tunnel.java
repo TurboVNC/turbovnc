@@ -58,8 +58,8 @@ public class Tunnel {
       gatewayHost = params.via.get();
       remoteHost = Hostname.getHost(params.server.get());
     }
-    if (params.server.get() != null && params.server.get().indexOf(':') < 0 &&
-        params.port.get() > 0)
+    if (params.server.get() != null &&
+        Hostname.getColonPos(params.server.get()) < 0 && params.port.get() > 0)
       remotePort = params.port.get();
     else
       remotePort = Hostname.getPort(params.server.get());
@@ -92,6 +92,7 @@ public class Tunnel {
         vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
         if (params.sshSession == null)
           createTunnelJSch(gatewayHost, params);
+        remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
         vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
                    ":" + remotePort + " (relative to gateway)");
         params.sshSession.setPortForwardingL(localPort, remoteHost,

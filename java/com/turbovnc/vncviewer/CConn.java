@@ -102,7 +102,8 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
       if (params.server.get() != null &&
           !params.alwaysShowConnectionDialog.get()) {
-        if (params.via.get() == null || params.via.get().indexOf(':') < 0) {
+        if (params.via.get() == null ||
+            Hostname.getColonPos(params.via.get()) < 0) {
           port = Hostname.getPort(params.server.get());
           params.port.set(port);
           params.udsPath = Hostname.getUDSPath(params.server.get());
@@ -134,7 +135,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
           !params.tunnel.get())
         params.stdioSocket = Tunnel.connectUDSDirect(params.udsPath);
       else if (params.via.get() != null &&
-               params.via.get().indexOf(':') >= 0) {
+               Hostname.getColonPos(params.via.get()) >= 0) {
         port = Hostname.getPort(params.via.get());
         server = Hostname.getHost(params.via.get());
         options.setNode(Hostname.getHost(params.server.get()));

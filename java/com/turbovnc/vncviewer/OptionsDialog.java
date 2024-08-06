@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2023 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2024 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -763,7 +763,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
   }
 
-  public void setNode(String node_) { node = node_; }
+  public void setNode(String node_) {
+    node = node_.replaceAll("[\\[\\]]", "");
+  }
 
   public String getNode() { return node; }
 
