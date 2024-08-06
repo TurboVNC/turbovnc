@@ -470,7 +470,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
 
       if (argv[i].charAt(0) == '-') {
         int index = 1;
-        if (argv[i].charAt(1) == '-' && argv[i].length() > 2)
+        if (argv[i].length() > 2 && argv[i].charAt(1) == '-')
           index = 2;
         if (i + 1 < argv.length) {
           if (Params.set(argv[i].substring(index), argv[i + 1])) {
