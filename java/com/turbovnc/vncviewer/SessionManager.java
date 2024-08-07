@@ -40,7 +40,7 @@ public final class SessionManager extends Tunnel {
   public static final int MAX_SESSIONS = 256;
 
   public static String createSession(Params params) throws Exception {
-    String host =  Hostname.getHost(params.server.get());
+    String host = Hostname.getHost(params.server.get());
 
     vlog.debug("Opening SSH connection to host " + host);
     VncViewer.noExceptionDialog =

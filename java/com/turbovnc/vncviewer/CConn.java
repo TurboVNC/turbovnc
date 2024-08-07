@@ -129,7 +129,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       // tunnel.
       if (params.udsPath != null && params.via.get() == null &&
           !params.tunnel.get() && !server.equals("localhost"))
-          params.tunnel.set(true);
+        params.tunnel.set(true);
 
       if (params.udsPath != null && params.via.get() == null &&
           !params.tunnel.get())
