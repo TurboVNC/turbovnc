@@ -233,15 +233,7 @@ class ServerDialog extends Dialog implements ActionListener {
       if (serverName == null || serverName.equals(""))
         throw new WarningException("No server name specified");
 
-      // set params
-      if (params.via.get() != null &&
-          Hostname.getColonPos(params.via.get()) >= 0) {
-        params.server.set(serverName);
-      } else {
-        params.server.set(Hostname.getHost(serverName));
-        params.port.set(Hostname.getPort(serverName));
-        params.udsPath = Hostname.getUDSPath(serverName);
-      }
+      params.server.set(serverName);
 
       // Update the history list
       String valueStr = UserPreferences.get("ServerDialog", "history");

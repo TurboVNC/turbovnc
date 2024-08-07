@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2014, 2016, 2018, 2020-2023 D. R. Commander.
+/* Copyright (C) 2012, 2014, 2016, 2018, 2020-2024 D. R. Commander.
  *                                                 All Rights Reserved.
  * Copyright 2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011-2012 Brian P. Hinz
@@ -91,13 +91,18 @@ public abstract class CConnection extends CMsgHandler {
     // indicates that it is waiting for either a VNC server name (Mode I) or
     // a VNC server ID (Mode II).
     if (cp.majorVersion == 0 && cp.minorVersion == 0) {
-      if (serverName == null)
+      String server = params.server.get();
+
+      if (server == null)
         throw new ErrorException("UltraVNC Repeater detected but VNC server name has not been specified");
-      vlog.info("Connecting to " + serverName + " via UltraVNC repeater");
-      os.writeBytes(serverName.getBytes(), 0,
-                    Math.min(serverName.length(), 250));
-      if (serverName.length() < 250) {
-        byte[] pad = new byte[250 - serverName.length()];
+      int port = params.port.get();
+      if (Hostname.getColonPos(server) < 0 && port > 0)
+        server = server + ((port >= 5900 && port <= 5999) ?
+                           (":" + (port - 5900)) : ("::" + port));
+      vlog.info("Connecting to " + server + " via UltraVNC repeater");
+      os.writeBytes(server.getBytes(), 0, Math.min(server.length(), 250));
+      if (server.length() < 250) {
+        byte[] pad = new byte[250 - server.length()];
         os.writeBytes(pad, 0, pad.length);
       }
       os.flush();

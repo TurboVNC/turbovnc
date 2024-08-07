@@ -97,21 +97,14 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       vlog.info("Accepted connection from " + name);
       options.setNode(".listen");
     } else if (!benchmark) {
-      String server = null;
+      String host = null;
       int port = -1;
 
       if (params.server.get() != null &&
           !params.alwaysShowConnectionDialog.get()) {
-        if (params.via.get() == null ||
-            Hostname.getColonPos(params.via.get()) < 0) {
+        port = params.port.get();
+        if (port <= 0 || Hostname.getColonPos(params.server.get()) >= 0)
           port = Hostname.getPort(params.server.get());
-          params.port.set(port);
-          params.udsPath = Hostname.getUDSPath(params.server.get());
-          server = Hostname.getHost(params.server.get());
-          params.server.set(server);
-          options.setNode(server);
-          UserPreferences.load(server, params);
-        }
       } else {
         ServerDialog dlg = new ServerDialog(options, params, this);
         boolean ret = dlg.showDialog();
@@ -119,16 +112,17 @@ public final class CConn extends CConnection implements UserPasswdGetter,
           close();
           return;
         }
-        port = params.port.get();
-        server = params.server.get();
-        options.setNode(Hostname.getHost(server));
-        UserPreferences.load(Hostname.getHost(server), params);
+        port = Hostname.getPort(params.server.get());
       }
+      host = Hostname.getHost(params.server.get());
+      params.udsPath = Hostname.getUDSPath(params.server.get());
+      options.setNode(host);
+      UserPreferences.load(host, params);
 
       // A Unix domain socket connection to a remote host requires an SSH
       // tunnel.
       if (params.udsPath != null && params.via.get() == null &&
-          !params.tunnel.get() && !server.equals("localhost"))
+          !params.tunnel.get() && !host.equals("localhost"))
         params.tunnel.set(true);
 
       if (params.udsPath != null && params.via.get() == null &&
@@ -136,13 +130,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         params.stdioSocket = Tunnel.connectUDSDirect(params.udsPath);
       else if (params.via.get() != null &&
                Hostname.getColonPos(params.via.get()) >= 0) {
+        host = Hostname.getHost(params.via.get());
         port = Hostname.getPort(params.via.get());
-        server = Hostname.getHost(params.via.get());
-        options.setNode(Hostname.getHost(params.server.get()));
-        UserPreferences.load(Hostname.getHost(params.server.get()), params);
       } else if (params.via.get() != null || params.tunnel.get() ||
-                 (params.port.get() == 0 && params.sessMgrAuto.get())) {
-        if (params.port.get() == 0) {
+                 (port == 0 && params.sessMgrAuto.get())) {
+        if (port == 0) {
           try {
             // TurboVNC Session Manager
             String session = SessionManager.createSession(params);
@@ -164,8 +156,8 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         try {
           Tunnel.createTunnel(params);
           if (params.stdioSocket == null) {
+            host = Hostname.getHost(params.server.get());
             port = Hostname.getPort(params.server.get());
-            server = Hostname.getHost(params.server.get());
           }
         } catch (Exception e) {
           if (e instanceof com.jcraft.jsch.JSchException)
@@ -198,16 +190,18 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       }
 
       if (params.stdioSocket == null) {
-        sock = new TcpSocket(server, port);
-        vlog.info("connected to host " + server + " port " + port);
+        sock = new TcpSocket(host, port);
+        vlog.info("connected to host " + host + " port " + port);
       } else {
         sock = params.stdioSocket;
-        if (server.equals("localhost"))
+        if (host.equals("localhost"))
           vlog.info("connected to Unix domain socket " + params.udsPath);
         else
-          vlog.info("connected to host " + server + ", Unix domain socket " +
+          vlog.info("connected to host " + host + ", Unix domain socket " +
                     params.udsPath);
       }
+
+      setServerName(host);
     }
 
     if (benchmark) {
@@ -215,7 +209,6 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       reader = new CMsgReader(this, viewer.benchFile);
     } else {
       sock.inStream().setBlockCallback(this);
-      setServerName(params.server.get());
       setShared(params.shared.get());
       menu.updateMenuKey();
       setStreams(sock.inStream(), sock.outStream());
