@@ -234,7 +234,8 @@ class ServerDialog extends Dialog implements ActionListener {
         throw new WarningException("No server name specified");
 
       // set params
-      if (params.via.get() != null && params.via.get().indexOf(':') >= 0) {
+      if (params.via.get() != null &&
+          Hostname.getColonPos(params.via.get()) >= 0) {
         params.server.set(serverName);
       } else {
         params.server.set(Hostname.getHost(serverName));

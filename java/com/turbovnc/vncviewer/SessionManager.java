@@ -39,7 +39,7 @@ public final class SessionManager extends Tunnel {
   public static final int MAX_SESSIONS = 256;
 
   public static String createSession(Params params) throws Exception {
-    String host =  Hostname.getHost(params.server.get());
+    String host = Hostname.getHost(params.server.get());
 
     vlog.debug("Opening SSH connection to host " + host);
     VncViewer.noExceptionDialog =
@@ -53,6 +53,19 @@ public final class SessionManager extends Tunnel {
     boolean firstTime = true;
     while (true) {
       String[] sessions = getSessions(params, host);
+
+      if (Utils.getBooleanProperty("turbovnc.autotest", false)) {
+        int autotestSession =
+          Utils.getIntProperty("turbovnc.autotestsession");
+        if (autotestSession >= 0) {
+          if (autotestSession >= sessions.length)
+            throw new ErrorException("turbovnc.autotestsession is out of range");
+          if (params.sessMgrAuto.get())
+            generateOTP(params, host, sessions[autotestSession], true,
+                        params.viewOnly.get());
+          return sessions[autotestSession];
+        }
+      }
 
       if ((sessions == null || sessions.length <= 0) && firstTime) {
         return startSession(params, host);
@@ -266,7 +279,8 @@ public final class SessionManager extends Tunnel {
                                     throws Exception {
     vlog.debug("Generating one-time password for session " + host + session);
 
-    VncViewer.noExceptionDialog = true;
+    if (!Utils.getBooleanProperty("turbovnc.autotest", false))
+      VncViewer.noExceptionDialog = true;
 
     ChannelExec channelExec =
       (ChannelExec)params.sshSession.openChannel("exec");
@@ -339,7 +353,8 @@ public final class SessionManager extends Tunnel {
                                   throws Exception {
     vlog.debug("Killing TurboVNC session " + host + session);
 
-    VncViewer.noExceptionDialog = true;
+    if (!Utils.getBooleanProperty("turbovnc.autotest", false))
+      VncViewer.noExceptionDialog = true;
 
     ChannelExec channelExec =
       (ChannelExec)params.sshSession.openChannel("exec");

@@ -177,6 +177,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void setLookAndFeel() {
+    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+      return;
+
     try {
       if (Utils.isWindows()) {
         String laf = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
@@ -251,6 +254,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void setGlobalInsets() {
+    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+      return;
+
     try {
       // To make a short story long:
       // -- Swing can't determine the proper inset values for a JFrame until it
@@ -298,6 +304,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   public static void setBlitterDefaults() {
+    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+      return;
+
     // Java 1.7 and later do not include hardware-accelerated 2D blitting
     // routines on Mac platforms.  They only support OpenGL blitting, and using
     // TYPE_INT_ARGB_PRE BufferedImages with OpenGL blitting is much faster
@@ -484,7 +493,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
 
         if (argv[i].charAt(0) == '-') {
           int index = 1;
-          if (argv[i].charAt(1) == '-' && argv[i].length() > 2)
+          if (argv[i].length() > 2 && argv[i].charAt(1) == '-')
             index = 2;
           if (i + 1 < argv.length) {
             if (params.set(argv[i].substring(index), argv[i + 1], true)) {
@@ -650,7 +659,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     vlog.debug("start called");
     String host = params.server.get();
     int port = params.port.get();
-    if (host != null && host.indexOf(':') < 0 && port > 0) {
+    if (host != null && Hostname.getColonPos(host) < 0 && port > 0) {
       params.server.set(host + ((port >= 5900 && port <= 5999) ?
                                 (":" + (port - 5900)) : ("::" + port)));
     }
@@ -766,6 +775,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     CConn cc = null;
     int exitStatus = 0;
 
+    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+      noExceptionDialog = true;
+
     if (params.listenMode.get()) {
       int port = 5500;
 
@@ -864,8 +876,6 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
           cc.reset();
           System.gc();
         } else {
-          if (Utils.getBooleanProperty("turbovnc.autotest", false))
-            noExceptionDialog = true;
           while (!cc.shuttingDown) {
             cc.processMsg(false);
             if (Utils.getBooleanProperty("turbovnc.autotest", false) &&

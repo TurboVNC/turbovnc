@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2016, 2018, 2020, 2022-2023 D. R. Commander.
+/* Copyright (C) 2012, 2016, 2018, 2020, 2022-2024 D. R. Commander.
  *                                                 All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -24,28 +24,50 @@ import com.turbovnc.rdr.*;
 
 public final class Hostname {
 
-  private static int getColonPos(String vncServerName) {
+  // Find the position of the first colon in the display number/port/UDS
+  // portion of the VNC server name.
+
+  public static int getColonPos(String vncServerName) {
     int colonPos = vncServerName.lastIndexOf(':');
     int bracketPos = vncServerName.lastIndexOf(']');
-    boolean doubleColon = false;
 
+    // No colon = hostname only
+    if (colonPos == -1)
+      return -1;
+    // Last colon is inside square brackets = IPv6 address only
     if (bracketPos != -1 && colonPos < bracketPos)
-      colonPos = -1;
-    while (colonPos > 0 && vncServerName.charAt(colonPos - 1) == ':') {
+      return -1;
+    // If the last colon is part of a series, then find the first colon in the
+    // series.
+    while (colonPos > 0 && vncServerName.charAt(colonPos - 1) == ':')
       colonPos--;
-      doubleColon = true;
+    if (colonPos == 0) {
+      // IPv6 loopback address only (special case)
+      if (vncServerName.equals("::1"))
+        return -1;
+      // Display number/port/UDS specified without host
+      return colonPos;
     }
-    if (doubleColon) {
-      // Check for preceding single colon, indicating an IPv6 address
-      for (int p = colonPos - 1; p >= 0; p--) {
-        if (vncServerName.charAt(p) == ':') {
-          if (p == 0 || vncServerName.charAt(p - 1) != ':')
-            colonPos = -1;
-          break;
-        }
-      }
-    }
+    // Display number/port/UDS specified with bracketed IPv6 address
+    if (bracketPos != -1 && colonPos - 1 == bracketPos)
+      return colonPos;
 
+    // Check for preceding colons, indicating an IPv6 address.
+    int colonCount = 0, p = colonPos;
+    while ((p = vncServerName.lastIndexOf(':', p - 1)) > 0) {
+      // Double colon = abbreviated IPv6 address
+      if (vncServerName.charAt(p - 1) == ':')
+        return colonPos;
+      colonCount++;
+      // 7 colons = full IPv6 address
+      if (colonCount >= 7)
+        return colonPos;
+    }
+    // Invalid format (IPv6 address is incomplete or hostname contains colons)
+    if (colonCount > 0)
+      return -1;
+
+    // Display number/port/UDS specified with hostname
     return colonPos;
   }
 
