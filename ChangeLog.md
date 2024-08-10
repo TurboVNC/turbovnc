@@ -3,25 +3,32 @@
 
 ### Significant changes relative to 3.1.1:
 
-1. Since all supported TurboVNC host platforms now contain new enough libraries
+1. The TurboVNC Server now incorporates zlib-ng, which accelerates zlib
+encoding significantly on x86, Arm, and PowerPC CPUs.  Relative to TurboVNC
+3.1.x, this improves the encoding performance of the Lossless Tight + Zlib
+encoding method, and of non-JPEG (low-color-depth) subrectangles encoded with
+one of the Tight + JPEG encoding methods, by approximately 10-15% on reasonably
+modern x86-64 CPUs and 25-30% on reasonably modern AArch64 CPUs.
+
+2. Since all supported TurboVNC host platforms now contain new enough libraries
 to build xorg-server 1.20.x, the TurboVNC Server is now dynamically linked
 against the system-supplied versions of these libraries rather than statically
 linked against in-tree versions.  The `TVNC_SYSTEMLIBS` and `TVNC_SYSTEMX11`
 CMake variables have been removed, and the build system now behaves as if those
-variables are always on.  A new CMake variable (`TVNC_INTELZLIB`) can be used
-on x86 platforms to disable the in-tree SIMD-accelerated Intel zlib
-implementation and build against the system-supplied zlib implementation.
+variables are always on.  A new CMake variable (`TVNC_ZLIBNG`) can be used on
+x86 platforms to disable the in-tree SIMD-accelerated zlib-ng implementation
+and build against the system-supplied zlib implementation.
 
-2. The TurboVNC Server now supports the DRI3 X extension when using open source
+3. The TurboVNC Server now supports the DRI3 X extension when using open source
 GPU drivers.  This enables GPU acceleration in a TurboVNC session without
 VirtualGL, although the performance will be better with VirtualGL.  Refer to
 the description of the `-drinode` option in the Xvnc man page for more details.
 
-3. The default X startup script (`xstartup.turbovnc`) now throws an error,
+4. The default X startup script (`xstartup.turbovnc`) now throws an error,
 rather than trying to execute **xinitrc** or twm, if a session desktop file for
 the default window manager cannot be found.
 
-4. Configuration of the TurboVNC Viewer has been improved in the following
+5. Configuration of the TurboVNC Viewer has been improved in the following
 ways:
 
      - Advanced parameters (those that are rarely needed by end users) are now

@@ -86,19 +86,16 @@ include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xau_INCLUDE_PATH}
 	${X11_Xdmcp_INCLUDE_PATH} ${X11_Xkbfile_INCLUDE_PATH}
 	${X11_Xfont2_INCLUDEDIR} ${X11_Pixman_INCLUDEDIR}/pixman-1)
 
-if((CPU_TYPE STREQUAL "x86_64" OR CPU_TYPE STREQUAL "i386") AND
-	NOT CMAKE_C_COMPILER_ID MATCHES SunPro)
-	option(TVNC_INTELZLIB
-		"Build the TurboVNC Server against the SIMD-accelerated Intel zlib implementation in the TurboVNC source tree rather than the system-supplied zlib implementation"
-		ON)
-	boolean_number(TVNC_INTELZLIB)
-	report_option(TVNC_INTELZLIB "Intel zlib")
-endif()
-if(NOT TVNC_INTELZLIB)
+option(TVNC_ZLIBNG
+	"Build the TurboVNC Server against the SIMD-accelerated zlib-ng implementation in the TurboVNC source tree rather than the system-supplied zlib implementation"
+	ON)
+boolean_number(TVNC_ZLIBNG)
+report_option(TVNC_ZLIBNG "zlib-ng")
+if(NOT TVNC_ZLIBNG)
 	include(FindZLIB)
 else()
-	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib)
-	set(ZLIB_LIBRARIES zlib)
+	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib-ng)
+	set(ZLIB_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/lib/zlib-ng/libz.a)
 endif()
 include_directories(${ZLIB_INCLUDE_DIRS})
 
