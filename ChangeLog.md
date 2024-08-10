@@ -1,7 +1,7 @@
 3.2 Evolving
 ============
 
-### Significant changes relative to 3.1.1:
+### Significant changes relative to 3.1.2:
 
 1. The TurboVNC Server now incorporates zlib-ng, which accelerates zlib
 encoding significantly on x86, Arm, and PowerPC CPUs.  Relative to TurboVNC
