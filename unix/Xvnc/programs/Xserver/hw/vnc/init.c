@@ -412,6 +412,11 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     return 1;
   }
 
+  if (strcasecmp(argv[i], "-noserverkeymap") == 0) {
+    enableQEMUExtKeyEvent = FALSE;
+    return 1;
+  }
+
   if (strcasecmp(argv[i], "-pointerlocktimeout") == 0) {
     REQUIRE_ARG();
     rfbPointerLockTimeout = atoi(argv[i + 1]);
@@ -1744,6 +1749,9 @@ void ddxUseMsg(void)
   ErrorF("\nTurboVNC input options\n");
   ErrorF("======================\n");
   ErrorF("-nocursor              don't display a cursor\n");
+  ErrorF("-noserverkeymap        disable QEMU Extended Key Event, QEMU LED State, and\n");
+  ErrorF("                       VMware LED State RFB extensions, which cause keycode to\n");
+  ErrorF("                       keysym mapping to be performed on the host\n");
   ErrorF("-pointerlocktimeout time\n");
   ErrorF("                       max time in ms (0 = indefinitely) to wait for a new\n");
   ErrorF("                       pointer event from a connected viewer that is dragging\n");
