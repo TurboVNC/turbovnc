@@ -207,6 +207,17 @@ connected viewer to complete [default: 20000].
 Don't display a mouse pointer on the remote desktop.
 
 .TP
+\fB\-noserverkeymap\fR
+Disable the QEMU Extended Key Event, QEMU LED State, and VMware LED State RFB
+extensions, which allow raw keyboard scancodes to be transmitted to the VNC
+server instead of X11 keysyms.  Those extensions cause the mapping of keycodes
+into keysyms to be performed on the host rather than on the client, which
+eliminates various system-specific and locale-specific key mapping issues
+(including issues with dead keys on international keyboards.)  Disabling the
+extensions causes TurboVNC to behave like TurboVNC 3.0.x and prior, mapping
+keycodes to keysyms on the client.
+
+.TP
 \fB\-pointerlocktimeout \fItime\fR
 Maximum amount of time, in milliseconds, to wait for a new pointer event from a
 connected viewer that is dragging the mouse (moving the mouse with one or more

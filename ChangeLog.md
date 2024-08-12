@@ -51,6 +51,15 @@ parameter (`ServerDir`.)
 deprecated and replaced with a new advanced parameter (`ExtSSHTemplate`.)
 
 
+3.1.3
+=====
+
+### Significant changes relative to 3.1.2:
+
+1. Added a new Xvnc command-line option (`-noserverkeymap`) that can be used to
+disable the server-side key mapping feature introduced in 3.1 beta1[4].
+
+
 3.1.2
 =====
 
