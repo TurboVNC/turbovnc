@@ -10,6 +10,9 @@ disable the server-side key mapping feature introduced in 3.1 beta1[4].
 redirect all TurboVNC Server and X.org errors, warnings, and messages to the
 system log.
 
+3. Fixed a regression introduced by 2.2 beta1[7] that prevented the TurboVNC
+Server from being used as an inetd service.
+
 
 3.1.2
 =====
