@@ -263,7 +263,8 @@ int ddxProcessArgument(int argc, char *argv[], int i)
   }
 
   if (strcasecmp(argv[i], "-inetd") == 0) {  /* -inetd */
-    int n;
+    int n, nullFD;
+
     for (n = 1; n < 100; n++) {
       if (CheckDisplayNumber(n))
         break;
@@ -275,14 +276,26 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     snprintf(inetdDisplayNumStr, 10, "%d", n);
     display = inetdDisplayNumStr;
 
-    /* fds 0, 1 and 2 (stdin, out and err) are all the same socket to the
-       RFB client.  OsInit() closes stdout and stdin, and we don't want
-       stderr to go to the RFB client, so make the client socket 3 and
-       close stderr.  OsInit() will redirect stderr logging to an
-       appropriate log file or /dev/null if that doesn't work. */
-    dup2(0, 3);
-    inetdSock = 3;
-    close(2);
+    /* FDs 0, 1, and 2 (stdin, stdout, and stderr) are all redirected to the
+       same socket, which is connected to the RFB client.  OsInit() closes
+       stdin and stdout, so we obtain a new file descriptor for the socket by
+       duplicating stdin. */
+    if ((inetdSock = dup(0)) == -1)
+      FatalError("-inetd: couldn't allocate a new file descriptor: %s",
+                 strerror(errno));
+
+    /* We don't want stderr to be redirected to the RFB client, since stderr is
+       used for logging.  (NOTE: The -syslog option redirects most of the
+       logging to the system log, but it isn't foolproof.)  We explicitly
+       redirect stderr (FD 2) to /dev/null rather than simply closing it.
+       Otherwise, OsInit() (more specifically ospoll_create()) will obtain the
+       first free file descriptor (2) to use for polling, then it will check
+       whether FD 2 (which it assumes is still stderr) is writable.  Since
+       polling file descriptors aren't writable, OsInit() will redirect FD 2 to
+       /dev/null, thus breaking the polling subsystem. */
+    nullFD = open("/dev/null", O_WRONLY);
+    dup2(nullFD, 2);
+    close(nullFD);
 
     return 1;
   }
@@ -1125,6 +1138,7 @@ rfbDevInfo virtualTabletPad =
 void InitInput(int argc, char *argv[])
 {
   DeviceIntPtr p, k;
+  static Bool inetdInitDone = FALSE;
 
   if (AllocDevicePair(serverClient, "TurboVNC", &p, &k, rfbMouseProc,
                       rfbKeybdProc, FALSE) != Success)
@@ -1149,6 +1163,11 @@ void InitInput(int argc, char *argv[])
       FatalError("Could not create TurboVNC virtual tablet eraser device");
     if (!AddExtInputDevice(&virtualTabletPad))
       FatalError("Could not create TurboVNC virtual tablet pad device");
+  }
+
+  if (!inetdInitDone && inetdSock != -1) {
+    rfbNewClientConnection(inetdSock);
+    inetdInitDone = TRUE;
   }
 }
 
@@ -1409,12 +1428,6 @@ Bool LegalModifier(unsigned int key, DeviceIntPtr pDev)
 
 void ProcessInputEvents(void)
 {
-  static Bool inetdInitDone = FALSE;
-
-  if (!inetdInitDone && inetdSock != -1) {
-    rfbNewClientConnection(inetdSock);
-    inetdInitDone = TRUE;
-  }
   mieqProcessInputEvents();
 }
 

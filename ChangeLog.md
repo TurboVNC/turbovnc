@@ -83,6 +83,9 @@ from being used as VNC hostnames.
 redirect all TurboVNC Server and X.org errors, warnings, and messages to the
 system log.
 
+16. Fixed a regression introduced by 2.2 beta1[7] that prevented the TurboVNC
+Server from being used as an inetd service.
+
 
 3.0.3
 =====
