@@ -335,7 +335,7 @@ static void rfbErr(const char *format, ...)
 
 static void rfbssl_error(const char *function)
 {
-  char buf[1024];
+  char buf[BUFSIZE];
   unsigned long e = crypto.ERR_get_error();
 
   while (e) {
@@ -354,6 +354,7 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
   DSA *dsa = NULL;
   int flags = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3, priority = 0;
   const char *list = NULL;
+  char buf[BUFSIZE];
 
 #ifdef DLOPENSSL
   if (loadFunctions() == -1)
@@ -443,14 +444,15 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     rfbssl_error("SSL_new()");
     goto bailout;
   }
-  RFBLOGID("Available cipher suites: ");
+  snprintf(buf, BUFSIZE, "Available cipher suites: ");
   list = ssl.SSL_get_cipher_list(ctx->ssl, priority++);
   while (list) {
-    fprintf(stderr, "%s", list);
+    snprintf(&buf[strlen(buf)], BUFSIZE - strlen(buf), "%s", list);
     list = ssl.SSL_get_cipher_list(ctx->ssl, priority++);
-    if (list) fprintf(stderr, ":");
+    if (list) snprintf(&buf[strlen(buf)], BUFSIZE - strlen(buf), ":");
   }
-  fprintf(stderr, "\n");
+  snprintf(&buf[strlen(buf)], BUFSIZE - strlen(buf), "\n");
+  RFBLOGID("%s", buf);
   if (!(ssl.SSL_set_fd(ctx->ssl, cl->sock))) {
     rfbssl_error("SSL_set_fd()");
     goto bailout;
