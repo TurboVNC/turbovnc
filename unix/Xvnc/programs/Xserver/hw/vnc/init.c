@@ -65,6 +65,10 @@ from the X Consortium.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#ifdef DDXOSVERRORF
+#include <syslog.h>
+#endif
 #include <unistd.h>
 #include <sys/types.h>
 #include <netdb.h>
@@ -116,6 +120,9 @@ static Bool noCursor = FALSE;
 char *desktopName = DEFAULT_DESKTOP_NAME;
 int traceLevel = 0;
 int rfbLEDState = (int)rfbLEDUnknown;
+#ifdef DDXOSVERRORF
+static Bool sysLog = FALSE;
+#endif
 
 char rfbThisHost[256];
 
@@ -703,6 +710,13 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     snprintf(registry_path, PATH_MAX, "%s/protocol.txt", argv[i + 1]);
 #endif
     return 2;
+  }
+#endif
+
+#ifdef DDXOSVERRORF
+  if (strcasecmp(argv[i], "-syslog") == 0) {
+    sysLog = TRUE;
+    return 1;
   }
 #endif
 
@@ -1663,6 +1677,15 @@ void DDXRingBell(int percent, int pitch, int duration)
 }
 
 
+#ifdef DDXOSVERRORF
+static void OsVendorVErrorF(const char *f, va_list args)
+{
+  if (sysLog)
+    vsyslog(LOG_ERR, f, args);
+}
+#endif
+
+
 void OsVendorInit(void)
 {
   InitRFB();
@@ -1697,11 +1720,21 @@ void OsVendorInit(void)
     rfbAuthPAMSession = FALSE;
   }
 #endif
+#ifdef DDXOSVERRORF
+  if (!OsVendorVErrorFProc && sysLog)
+    OsVendorVErrorFProc = OsVendorVErrorF;
+#endif
 }
 
 
 void OsVendorFatalError(const char *f, va_list args)
 {
+#ifdef DDXOSVERRORF
+  if (sysLog) {
+    syslog(LOG_ERR, "Fatal server error:");
+    vsyslog(LOG_ERR, f, args);
+  }
+#endif
 }
 
 
@@ -1840,13 +1873,17 @@ void ddxUseMsg(void)
 #ifndef TURBOVNC_STATIC_XORG_PATHS
   ErrorF("-registrydir dir       specify directory containing protocol.txt\n");
 #endif
+#ifdef DDXOSVERRORF
+  ErrorF("-syslog                redirect all errors/warnings/messages to the system log\n");
+#endif
   ErrorF("-verbose               print all X.org errors, warnings, and messages\n");
   ErrorF("-version               report Xvnc version on stderr\n\n");
 }
 
 
 /*
- * rfbLog prints a time-stamped message to the log file (stderr.)
+ * rfbLog prints a time-stamped message to the log file (stderr or the system
+ * log.)
  */
 
 void rfbLog(char *format, ...)
@@ -1858,14 +1895,22 @@ void rfbLog(char *format, ...)
 
   va_start(args, format);
 
-  time(&clock);
-  strftime(buf, 255, "%d/%m/%Y %H:%M:%S ", localtime(&clock));
-  for (i = 0; i < traceLevel; i++)
-    snprintf(&buf[strlen(buf)], 256 - strlen(buf), "  ");
-  fputs(buf, stderr);
+#ifdef DDXOSVERRORF
+  if (sysLog)
+    /* NOTE: System log entries already have a timestamp. */
+    vsyslog(LOG_INFO, format, args);
+  else
+#endif
+  {
+    time(&clock);
+    strftime(buf, 255, "%d/%m/%Y %H:%M:%S ", localtime(&clock));
+    for (i = 0; i < traceLevel; i++)
+      snprintf(&buf[strlen(buf)], 256 - strlen(buf), "  ");
+    fputs(buf, stderr);
 
-  vfprintf(stderr, format, args);
-  fflush(stderr);
+    vfprintf(stderr, format, args);
+    fflush(stderr);
+  }
 
   va_end(args);
 }
@@ -1873,8 +1918,18 @@ void rfbLog(char *format, ...)
 
 void rfbLogPerror(char *str)
 {
-  rfbLog("");
-  perror(str);
+#ifdef DDXOSVERRORF
+  if (sysLog) {
+    if (str && strlen(str) > 0)
+      syslog(LOG_ERR, "%s: %s\n", str, strerror(errno));
+    else
+      syslog(LOG_ERR, "%s\n", strerror(errno));
+  } else
+#endif
+  {
+    rfbLog("");
+    perror(str);
+  }
 }
 
 

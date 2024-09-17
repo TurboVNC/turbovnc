@@ -689,7 +689,7 @@ extern int traceLevel;
 
 /*
  * Print a time-stamped message, prefixed by the client ID, to the log file
- * (stderr.)
+ * (stderr or the system log.)
  */
 #define RFBLOGID(format, ...)  rfbLog("[%u] " format, cl->id, ##__VA_ARGS__)
 

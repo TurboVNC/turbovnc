@@ -6,6 +6,10 @@
 1. Added a new Xvnc command-line option (`-noserverkeymap`) that can be used to
 disable the server-side key mapping feature introduced in 3.1 beta1[4].
 
+2. Added a new Xvnc command-line option (`-syslog`) that can be used to
+redirect all TurboVNC Server and X.org errors, warnings, and messages to the
+system log.
+
 
 3.1.2
 =====
