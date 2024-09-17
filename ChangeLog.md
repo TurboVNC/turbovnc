@@ -79,6 +79,10 @@ Server to leak memory when the RFB flow control extensions were used.
 14. Fixed several issues in the TurboVNC Viewer that prevented IPv6 addresses
 from being used as VNC hostnames.
 
+15. Added a new Xvnc command-line option (`-syslog`) that can be used to
+redirect all TurboVNC Server and X.org errors, warnings, and messages to the
+system log.
+
 
 3.0.3
 =====
