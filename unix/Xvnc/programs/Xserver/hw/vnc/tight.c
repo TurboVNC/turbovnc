@@ -91,6 +91,11 @@ static TIGHT_CONF tightConf[4] = {
   { 65536, 2048,  32, 7, 7, 5,  96, 256 }  /* 9 */
 };
 
+int rfbMaxTightRectSize = 0;
+#define MAXRECTSIZE  \
+  (rfbMaxTightRectSize ? rfbMaxTightRectSize :  \
+                         tightConf[compressLevel].maxRectSize)
+
 static int compressLevel;
 static int qualityLevel;
 static int subsampLevel;
@@ -220,7 +225,7 @@ int rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h)
   if (cl->enableLastRectEncoding && w * h >= MIN_SPLIT_RECT_SIZE)
     return 0;
 
-  maxRectSize = tightConf[compressLevel].maxRectSize;
+  maxRectSize = MAXRECTSIZE;
   maxRectWidth = tightConf[compressLevel].maxRectWidth;
 
   if (w > maxRectWidth || w * h > maxRectSize) {
@@ -400,7 +405,7 @@ Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
   else
     usePixelFormat24 = FALSE;
 
-  nt = min(rfbNumThreads, w * h / tightConf[compressLevel].maxRectSize);
+  nt = min(rfbNumThreads, w * h / MAXRECTSIZE);
   if (nt < 1) nt = 1;
 
   for (i = 0; i < nt; i++) {
@@ -497,7 +502,7 @@ static Bool SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
   {
     int maxRectSize, maxRectWidth, nMaxWidth;
 
-    maxRectSize = tightConf[compressLevel].maxRectSize;
+    maxRectSize = MAXRECTSIZE;
     maxRectWidth = tightConf[compressLevel].maxRectWidth;
     nMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
     nMaxRows = maxRectSize / nMaxWidth;
@@ -741,7 +746,7 @@ static Bool SendRectSimple(threadparam *t, int x, int y, int w, int h)
   int rw, rh;
   rfbClientPtr cl = t->cl;
 
-  maxRectSize = tightConf[compressLevel].maxRectSize;
+  maxRectSize = MAXRECTSIZE;
   maxRectWidth = tightConf[compressLevel].maxRectWidth;
 
   maxBeforeSize = maxRectSize * (cl->format.bitsPerPixel / 8);

@@ -487,6 +487,15 @@ static rfbClientPtr rfbNewClient(int sock)
     if (combine > 0 && combine <= 65000) rfbCombineRect = combine;
   }
 
+  if ((env = getenv("TVNC_MAXTIGHTRECTSIZE")) != NULL) {
+    int maxTightRectSize = atoi(env);
+    if (maxTightRectSize > 0) {
+      RFBLOGID("Maximum Tight subrectangle size: %d pixels\n",
+               maxTightRectSize);
+      rfbMaxTightRectSize = maxTightRectSize;
+    }
+  }
+
   cl->firstUpdate = TRUE;
   /* The TigerVNC Viewer won't enable remote desktop resize until it receives
      a desktop resize message from the server, so we give it one with the

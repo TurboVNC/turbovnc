@@ -1121,6 +1121,8 @@ static const char subsampStr[TVNC_SAMPOPT][5] = { "1X", "4X", "2X", "Gray" };
 #define TIGHT_DEFAULT_SUBSAMP      TVNC_1X
 #define TIGHT_DEFAULT_QUALITY      95
 
+extern int rfbMaxTightRectSize;
+
 extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h);
 extern Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w,
                                      int h);
