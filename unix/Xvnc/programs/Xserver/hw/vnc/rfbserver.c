@@ -1138,6 +1138,12 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               cl->enableVMwareLEDState = TRUE;
             }
             break;
+          case rfbEncodingTightWithoutZlib:
+            if (!cl->enableTightWithoutZlib) {
+              RFBLOGID("Enabling Tight Encoding Without Zlib protocol extension\n");
+              cl->enableTightWithoutZlib = TRUE;
+            }
+            break;
           default:
             if (enc >= (CARD32)rfbEncodingCompressLevel0 &&
                 enc <= (CARD32)rfbEncodingCompressLevel9) {

@@ -87,7 +87,7 @@
 
 /* Maximum number of threads to use for multithreaded encoding, regardless of
    the CPU count */
-#define MAX_ENCODING_THREADS 8
+#define MAX_ENCODING_THREADS 4
 
 /* Maximum number of client connections.  The default of 100 should be more
    than enough for most use cases.  The ceiling is set to 500 to give us plenty
@@ -443,6 +443,8 @@ typedef struct rfbClientRec {
                                        extension */
   Bool enableVMwareLEDState;        /* client supports VMware LED State
                                        extension */
+  Bool enableTightWithoutZlib;      /* client supports Tight Encoding Without
+                                       Zlib extension */
   Bool useRichCursorEncoding;       /* rfbEncodingRichCursor is preferred */
   Bool cursorWasChanged;            /* cursor shape update should be sent */
   Bool cursorWasMoved;              /* cursor position update should be sent */

@@ -128,7 +128,7 @@ typedef struct PALETTE_s {
 /* Globals for multi-threading */
 
 static Bool threadInit = FALSE;
-static pthread_t thnd[MAX_ENCODING_THREADS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static pthread_t thnd[MAX_ENCODING_THREADS] = { 0, 0, 0, 0 };
 
 typedef struct _threadparam {
   rfbClientPtr cl;
@@ -420,6 +420,12 @@ Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w, int h)
       REGION_INIT(pScreen, &tparam[i].lossyRegion, NullBox, 0);
       REGION_INIT(pScreen, &tparam[i].losslessRegion, NullBox, 0);
     }
+    /* Tight encoding has only a limited number of zlib streams (4).  The
+       streams must all be left open as long as the client is connected, or
+       performance suffers.  Thus, multiple threads can't use the same zlib
+       stream.  We divide the pool of 4 evenly among the available threads (up
+       to the first 4 threads), and if each thread has more than one stream, it
+       cycles between them in a round-robin fashion. */
     if (i < 4) {
       int n = min(nt, 4);
       tparam[i].baseStreamId = 4 / n * i;
@@ -964,7 +970,8 @@ static Bool SendMonoRect(threadparam *t, int w, int h)
   dataLen = (w + 7) / 8;
   dataLen *= h;
 
-  if (tightConf[compressLevel].monoZlibLevel == 0 || t->id > 3)
+  if (tightConf[compressLevel].monoZlibLevel == 0 &&
+      cl->enableTightWithoutZlib)
     t->updateBuf[(*t->ublen)++] =
       (char)((rfbTightNoZlib | rfbTightExplicitFilter) << 4);
   else
@@ -1032,7 +1039,7 @@ static Bool SendIndexedRect(threadparam *t, int w, int h)
   }
 
   /* Prepare tight encoding header. */
-  if (tightConf[compressLevel].idxZlibLevel == 0 || t->id > 3)
+  if (tightConf[compressLevel].idxZlibLevel == 0 && cl->enableTightWithoutZlib)
     t->updateBuf[(*t->ublen)++] =
       (char)((rfbTightNoZlib | rfbTightExplicitFilter) << 4);
   else
@@ -1098,7 +1105,7 @@ static Bool SendFullColorRect(threadparam *t, int w, int h)
       t->streamId = t->baseStreamId;
   }
 
-  if (tightConf[compressLevel].rawZlibLevel == 0 || t->id > 3)
+  if (tightConf[compressLevel].rawZlibLevel == 0 && cl->enableTightWithoutZlib)
     t->updateBuf[(*t->ublen)++] = (char)(rfbTightNoZlib << 4);
   else
     t->updateBuf[(*t->ublen)++] = streamId << 4;
@@ -1130,15 +1137,7 @@ static Bool CompressData(threadparam *t, int streamId, int dataLen,
     return TRUE;
   }
 
-  /* Tight encoding has only a limited number of Zlib streams (4).  The
-     streams must all be left open as long as the client is connected, or
-     performance suffers.  Thus, multiple threads can't use the same Zlib
-     stream.  We divide the pool of 4 evenly among the available threads (up
-     to the first 4 threads), and if each thread has more than one stream, it
-     cycles between them in a round-robin fashion.  If we have more than 4
-     threads, then threads 5 and beyond must encode their data without Zlib
-     compression. */
-  if (zlibLevel == 0 || t->id > 3)
+  if (zlibLevel == 0 && cl->enableTightWithoutZlib)
     return SendCompressedData(t, t->tightBeforeBuf, dataLen);
 
   pz = &cl->zsStruct[streamId];

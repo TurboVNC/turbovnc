@@ -67,14 +67,14 @@ TurboVNC with other VNC flavors.
 		Compression Level 5.
 		{nl}{nl}
 
-	* TurboVNC supports an extension to Tight encoding that allows the
-		server to tell the viewer to bypass zlib when decompressing a particular
-		subrectangle.  Zlib introduces a tremendous amount of performance overhead,
-		even when zlib compression level 0 (no compression) is used.  Thus, when a
-		TurboVNC viewer requests Compression Level 0 from the TurboVNC Server,
-		the TurboVNC Server bypasses zlib altogether.  TightVNC and TigerVNC
-		servers do not support this extension, so they will still use zlib to
-		"compress" framebuffer updates even if you request Compression Level 0.
+	* Zlib introduces a significant amount of performance overhead, even when
+		zlib compression level 0 (no compression) is used, so TurboVNC supports a
+		Tight encoding extension that allows the server to bypass zlib when
+		encoding a particular subrectangle.  The extension is enabled when a VNC
+		viewer advertises support for it and requests Compression Level 0.  As of
+		this writing, TightVNC and TigerVNC do not support the extension, so the
+		TightVNC and TigerVNC servers will use zlib to "compress" framebuffer
+		updates if you request Compression Level 0 using the TurboVNC Viewer.
 		{nl}{nl}
 
 	* When properly configured, version 1.2 and later (except versions
@@ -95,17 +95,14 @@ TurboVNC with other VNC flavors.
 		specified in {ref prefix="Section ": TigerVNC_JPEG_Qual}.
 		{nl}{nl}
 
-	* When either a TightVNC or TigerVNC viewer is connected to a TurboVNC
-		session and JPEG subencoding is disabled, setting the compression level to
-		0 in the viewer will cause the connection to abort with a "bad subencoding
-		value" error.  This is because the TurboVNC Server attempts to send
-		framebuffer updates with no zlib compression, and the TightVNC and TigerVNC
-		viewers don't support that.
-		{nl}{nl}
-		A similar issue occurs when using more than four encoding threads in the
-		TurboVNC session.  Since the Tight encoding type is limited to four zlib
-		streams, any encoding threads beyond the first four cannot use zlib
-		compression.
+	* Zlib introduces a significant amount of performance overhead, even when
+		zlib compression level 0 (no compression) is used, so TurboVNC supports a
+		Tight encoding extension that allows the server to bypass zlib when
+		encoding a particular subrectangle.  The extension is enabled when a VNC
+		viewer advertises support for it and requests Compression Level 0.  As of
+		this writing, TightVNC and TigerVNC do not support the extension, so the
+		TurboVNC Server will use zlib to "compress" framebuffer updates if you
+		request Compression Level 0 using the TightVNC or TigerVNC Viewer.
 		{nl}{nl}
 
 	* Refer to {ref prefix="Section ": AdvancedCompression} for a description of

@@ -506,6 +506,7 @@ typedef struct _rfbInteractionCapsMsg {
  *         -768 .. -763
  *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale)
  *         -512 .. -412
+ *   0xFFFFFEC3               -- Tight encoding without zlib
  *   0xFFFFFEC7 .. 0xFFFFFEC8 -- flow control extensions
  *         -313 .. -312
  *   0xFFFFFECC               -- extended desktop size
@@ -542,6 +543,8 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbEncodingSubsamp16X           0xFFFFFD05  /* -763 */
 #define rfbEncodingFineQualityLevel0    0xFFFFFE00  /* -512 */
 #define rfbEncodingFineQualityLevel100  0xFFFFFE64  /* -412 */
+
+#define rfbEncodingTightWithoutZlib     0xFFFFFEC3  /* -317 */
 
 #define rfbEncodingContinuousUpdates    0xFFFFFEC7  /* -313 */
 #define rfbEncodingFence                0xFFFFFEC8  /* -312 */

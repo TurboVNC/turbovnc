@@ -89,12 +89,17 @@ the most useful combinations of the image compression options described above:
 	compression. |
 | "Lossless Tight" | No | N/A | N/A | 0 | \
 	This encoding method uses indexed color subencoding for subrectangles that \
-	have a low number of unique colors, but it otherwise does not perform any \
-	image compression at all.  Lossless Tight is thus suitable only for gigabit \
-	and faster networks.  This encoding method uses significantly less CPU time \
-	than any of the JPEG-based encoding methods.  Lossless Tight requires an \
-	RFB protocol extension that is, as of this writing, only supported by the \
-	TurboVNC Viewer. |
+	have a low number of unique colors and raw subencoding for subrectangles \
+	that have a high number of unique colors.  If the VNC viewer supports the \
+	"Tight Encoding Without Zlib" RFB extension, then zlib is bypassed, and all \
+	subrectangles are sent without compression.  Otherwise, all subrectangles \
+	are "compressed" using zlib with zlib compression level 0.  (Zlib \
+	compression level 0 maintains the zlib state but does not perform any \
+	actual compression.  However, the overhead of maintaining the zlib state \
+	reduces overall Tight encoding performance by 10-60% vs. bypassing zlib, \
+	depending on the zlib implementation.)  Lossless Tight uses significantly \
+	less CPU time than any of the JPEG-based encoding methods, but it is \
+	suitable only for gigabit and faster networks. |
 | "Lossless Tight + Zlib" | No | N/A | N/A | 6 | \
 	This encoding method uses indexed color subencoding for subrectangles that \
 	have a low number of unique colors and raw subencoding for subrectangles \
@@ -178,9 +183,10 @@ has the following effect:
 	Same as Compression Level 1.  Bypassing zlib when JPEG is enabled would \
 	only reduce the CPU usage for non-JPEG subrectangles, which is of limited \
 	usefulness.  Furthermore, bypassing zlib requires an RFB protocol extension \
-	that is not supported by non-TurboVNC viewers.  It is presumed that, if one \
-	wants to reduce the CPU usage, then one wants to do so for all \
-	subrectangles, so CL 0 without JPEG (AKA "Lossless Tight") should be used. |
+	that is not supported by non-TurboVNC viewers (as of this writing.)  It is \
+	presumed that, if one wants to reduce the CPU usage, then one wants to do \
+	so for all subrectangles, so CL 0 without JPEG (AKA "Lossless Tight") \
+	should be used. |
 | 1 | 1 | 24 | No | \
 	See the description of the "Tight + JPEG" encoding methods above. |
 | 2 | 3 | 96 | No | \

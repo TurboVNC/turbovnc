@@ -50,6 +50,12 @@ parameter (`ServerDir`.)
 `turbovnc.via` and `turbovnc.tunnel` Java system properties have been
 deprecated and replaced with a new advanced parameter (`ExtSSHTemplate`.)
 
+6. The TurboVNC Server no longer enables the "Tight Encoding Without Zlib" RFB
+extension unless the VNC viewer advertises support for it.  This prevents a
+fatal error that occurred in TightVNC-compatible VNC viewers (other than the
+TurboVNC Viewer) when attempting to select Compression Level 0 without JPEG
+while connected to a TurboVNC session.
+
 
 3.1.3
 =====
