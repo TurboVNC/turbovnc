@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2017-2018, 2020-2023 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2017-2018, 2020-2024 D. R. Commander.
  *                                                All Rights Reserved.
  * Copyright 2009-2011, 2017-2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011, 2015 Brian P. Hinz
@@ -418,6 +418,7 @@ public class CMsgWriter {
       encodings[nEncodings++] = RFB.ENCODING_QEMU_LED_STATE;
       encodings[nEncodings++] = RFB.ENCODING_VMWARE_LED_STATE;
     }
+    encodings[nEncodings++] = RFB.ENCODING_TIGHT_WITHOUT_ZLIB;
 
     if (Decoder.supported(preferredEncoding)) {
       encodings[nEncodings++] = preferredEncoding;

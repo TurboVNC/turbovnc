@@ -13,6 +13,13 @@ system log.
 3. Fixed a regression introduced by 2.2 beta1[7] that prevented the TurboVNC
 Server from being used as an inetd service.
 
+4. The "Tight Encoding Without Zlib" RFB extension, which was used unofficially
+by the Lossless Tight encoding method since TurboVNC v0.5, has been officially
+registered with IANA as an RFB pseudo-encoding.  The TurboVNC Viewer now
+advertises support for the pseudo-encoding.  (The next major release of the
+TurboVNC Server will forego using the extension unless the VNC viewer
+advertises support for it.)
+
 
 3.1.2
 =====
