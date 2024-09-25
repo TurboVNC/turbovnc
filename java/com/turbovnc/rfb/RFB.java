@@ -1,7 +1,8 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009, 2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2011-2012, 2015-2018 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012, 2015-2018, 2024 D. R. Commander.
+ *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -267,6 +268,8 @@ public final class RFB {
   public static final int ENCODING_SUBSAMP_GRAY           = -765;
   public static final int ENCODING_SUBSAMP_8X             = -764;
   public static final int ENCODING_SUBSAMP_16X            = -763;
+
+  public static final int ENCODING_TIGHT_WITHOUT_ZLIB     = -317;
 
   //***************************************************************************
   // Hextile subencoding types
