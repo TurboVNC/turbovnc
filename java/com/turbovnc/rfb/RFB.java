@@ -1,5 +1,5 @@
-/* Copyright (C) 2011-2012, 2015-2018, 2021-2022 D. R. Commander.
- *                                               All Rights Reserved.
+/* Copyright (C) 2011-2012, 2015-2018, 2021-2022, 2024 D. R. Commander.
+ *                                                     All Rights Reserved.
  * Copyright 2009, 2011, 2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -216,6 +216,8 @@ public final class RFB {
   public static final int ENCODING_SUBSAMP_16X             = -763;
   public static final int ENCODING_FINE_QUALITY_LEVEL_0    = -512;
   public static final int ENCODING_FINE_QUALITY_LEVEL_100  = -412;
+
+  public static final int ENCODING_TIGHT_WITHOUT_ZLIB      = -317;
 
   public static final int ENCODING_CONTINUOUS_UPDATES      = -313;
   public static final int ENCODING_FENCE                   = -312;
