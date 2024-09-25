@@ -1,5 +1,5 @@
-/* Copyright (C) 2012, 2015, 2017-2018, 2020-2021 D. R. Commander.
- *                                                All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2017-2018, 2020-2021, 2024 D. R. Commander.
+ *                                                      All Rights Reserved.
  * Copyright (C) 2011, 2015 Brian P. Hinz
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -77,6 +77,7 @@ public abstract class CMsgWriter {
     }
     if (Utils.getBooleanProperty("turbovnc.gii", true))
       encodings[nEncodings++] = RFB.ENCODING_GII;
+    encodings[nEncodings++] = RFB.ENCODING_TIGHT_WITHOUT_ZLIB;
 
     if (Decoder.supported(preferredEncoding)) {
       encodings[nEncodings++] = preferredEncoding;
