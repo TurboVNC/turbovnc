@@ -84,7 +84,7 @@ the most useful combinations of the image compression options described above:
 	take advantage of the [[#LR][Lossless Refresh feature]].  In addition to \
 	reducing the JPEG quality to a "minimum usable" level, this encoding method \
 	also enables interframe comparison and Compression Level 2.  (CL 7 = CL 2 + \
-	interframe comparison.)  Compression Level 2 can reduce bandwidth for \
+	interframe comparison.)  Compression Level 2 can reduce network usage for \
 	low-color application workloads that are not good candidates for JPEG \
 	compression. |
 | "Lossless Tight" | No | N/A | N/A | 0 | \
