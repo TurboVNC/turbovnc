@@ -2,6 +2,7 @@
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2020 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -35,6 +36,7 @@ public class HostKey{
   private static final byte[][] names = {
     Util.str2byte("ssh-dss"),
     Util.str2byte("ssh-rsa"),
+    Util.str2byte("ssh-ed25519"),
     Util.str2byte("ecdsa-sha2-nistp256"),
     Util.str2byte("ecdsa-sha2-nistp384"),
     Util.str2byte("ecdsa-sha2-nistp521")
@@ -47,6 +49,7 @@ public class HostKey{
   public static final int ECDSA384=4;
   public static final int ECDSA521=5;
   static final int UNKNOWN=6;
+  public static final int ED25519=7;
 
   protected String marker;
   protected String host;
@@ -70,6 +73,7 @@ public class HostKey{
     if(type==GUESS){
       if(key[8]=='d'){ this.type=SSHDSS; }
       else if(key[8]=='r'){ this.type=SSHRSA; }
+      else if(key[8]=='e'){ this.type=ED25519; }
       else if(key[8]=='a' && key[20]=='2'){ this.type=ECDSA256; }
       else if(key[8]=='a' && key[20]=='3'){ this.type=ECDSA384; }
       else if(key[8]=='a' && key[20]=='5'){ this.type=ECDSA521; }
@@ -86,6 +90,7 @@ public class HostKey{
   public String getType(){
     if(type==SSHDSS ||
        type==SSHRSA ||
+       type==ED25519 ||
        type==ECDSA256 ||
        type==ECDSA384 ||
        type==ECDSA521){

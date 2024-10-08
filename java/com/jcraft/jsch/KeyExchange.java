@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2024 D. R. Commander. All rights reserved.
 Copyright (c) 2020 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -78,12 +78,14 @@ public abstract class KeyExchange{
   protected final int RSA=0;
   protected final int DSS=1;
   protected final int ECDSA=2;
+  protected final int EDDSA=3;
   private int type=0;
   private String key_alg_name = "";
 
   public String getKeyType() {
     if(type==DSS) return "DSA";
     if(type==RSA) return "RSA";
+    if(type==EDDSA) return "EDDSA";
     return "ECDSA";
   }
 
@@ -318,6 +320,38 @@ public abstract class KeyExchange{
       sig.update(H);
 
       result=sig.verify(sig_of_H);
+    }
+    else if(alg.equals("ssh-ed25519")) {
+      byte[] tmp;
+
+      // RFC 8709,
+      type=EDDSA;
+      key_alg_name=alg;
+
+      j=((K_S[i++]<<24)&0xff000000)|((K_S[i++]<<16)&0x00ff0000)|
+        ((K_S[i++]<<8)&0x0000ff00)|((K_S[i++])&0x000000ff);
+      tmp=new byte[j]; System.arraycopy(K_S, i, tmp, 0, j); i+=j;
+
+      SignatureEdDSA sig=null;
+      try{
+        Class c=Class.forName(session.getConfig(alg));
+        sig=(SignatureEdDSA)(c.getDeclaredConstructor().newInstance());
+        sig.init();
+      }
+      catch(Exception e){
+        System.err.println(e);
+      }
+
+      sig.setPubKey(tmp);
+
+      sig.update(H);
+
+      result=sig.verify(sig_of_H);
+
+      if(JSch.getLogger().isEnabled(Logger.INFO)){
+        JSch.getLogger().log(Logger.INFO,
+                             "ssh_eddsa_verify: "+alg+" signature "+result);
+      }
     }
     else{
       System.err.println("unknown alg");

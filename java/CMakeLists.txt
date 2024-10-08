@@ -66,6 +66,7 @@ set(JSCH_CLASSNAMES
 	jce/HMACSHA512
 	jce/KeyPairGenDSA
 	jce/KeyPairGenECDSA
+	jce/KeyPairGenEdDSA
 	jce/KeyPairGenRSA
 	jce/MD5
 	jce/PBKDF
@@ -79,6 +80,8 @@ set(JSCH_CLASSNAMES
 	jce/SignatureECDSA384
 	jce/SignatureECDSA521
 	jce/SignatureECDSAN
+	jce/SignatureEd25519
+	jce/SignatureEdDSA
 	jce/SignatureRSA
 	jce/SignatureRSAN
 	jce/SignatureRSASHA256

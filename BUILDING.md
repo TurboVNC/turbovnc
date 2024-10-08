@@ -32,11 +32,11 @@ Build Requirements
 
 - PAM development kit [if building the TurboVNC Server]
 
-- JDK 8 or OpenJDK 1.7 or later [if building the TurboVNC Viewer]
+- JDK/OpenJDK 15 or later [if building the TurboVNC Viewer]
   * For systems that do not provide a JDK, download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
     or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
+  * [OpenJDK](https://jdk.java.net) 15 or later must be used if building
     an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
     set to `1`)
 
@@ -67,11 +67,11 @@ Build Requirements
   Start Menu link that can be used to launch a command prompt with the
   appropriate compiler paths automatically set.
 
-- JDK 8 or OpenJDK 1.8 or later
+- JDK/OpenJDK 15 or later
   * Download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
     or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
+  * [OpenJDK](https://jdk.java.net) 15 or later must be used if building
     an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
     set to `1`)
 
@@ -80,11 +80,11 @@ Build Requirements
 
 - Xcode 4.1 or later (OS X/macOS 10.7.x or later SDK required)
 
-- JDK 8 or OpenJDK 8 or later
+- JDK/OpenJDK 15 or later
   * Download the
     [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
     or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
+  * [OpenJDK](https://jdk.java.net) 15 or later must be used if building
     a Mac package/disk image with a custom JRE (if the `TVNC_INCLUDEJRE` CMake
     variable is set to `1`)
 

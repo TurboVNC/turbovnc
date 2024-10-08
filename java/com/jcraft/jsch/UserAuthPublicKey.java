@@ -51,6 +51,14 @@ class UserAuthPublicKey extends UserAuth{
       }
 
       String pkmethods=session.getConfig("PubkeyAcceptedAlgorithms");
+      String[] not_available_pks = session.getUnavailableSignatures();
+      if(not_available_pks!=null && not_available_pks.length>0){
+        pkmethods=Util.diffString(pkmethods, not_available_pks);
+        if(pkmethods==null){
+          throw new JSchException("There are not any available sig algorithm.");
+        }
+      }
+
       String[] pkmethoda=Util.split(pkmethods, ",");
       if(pkmethoda.length==0){
         return false;

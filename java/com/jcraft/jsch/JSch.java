@@ -43,7 +43,7 @@ public final class JSch{
   static java.util.Hashtable config=new java.util.Hashtable();
   static{
     config.put("kex", "ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
-    config.put("server_host_key", "rsa-sha2-256,rsa-sha2-512,ssh-rsa,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
+    config.put("server_host_key", "ssh-ed25519,rsa-sha2-256,rsa-sha2-512,ssh-rsa,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
     config.put("cipher.s2c", 
                "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-ctr,aes192-cbc,aes256-ctr,aes256-cbc");
     config.put("cipher.c2s",
@@ -78,6 +78,8 @@ public final class JSch{
 
     config.put("ecdh-sha2-nistp", "com.jcraft.jsch.jce.ECDHN");
 
+    config.put("ssh-ed25519", "com.jcraft.jsch.jce.SignatureEd25519");
+
     config.put("dh",            "com.jcraft.jsch.jce.DH");
     config.put("3des-cbc",      "com.jcraft.jsch.jce.TripleDESCBC");
     config.put("blowfish-cbc",  "com.jcraft.jsch.jce.BlowfishCBC");
@@ -101,6 +103,7 @@ public final class JSch{
     config.put("keypairgen.dsa",   "com.jcraft.jsch.jce.KeyPairGenDSA");
     config.put("keypairgen.rsa",   "com.jcraft.jsch.jce.KeyPairGenRSA");
     config.put("keypairgen.ecdsa", "com.jcraft.jsch.jce.KeyPairGenECDSA");
+    config.put("keypairgen.eddsa", "com.jcraft.jsch.jce.KeyPairGenEdDSA");
     config.put("random",        "com.jcraft.jsch.jce.Random");
 
     config.put("none",           "com.jcraft.jsch.CipherNone");
@@ -133,11 +136,11 @@ public final class JSch{
     config.put("HashKnownHosts",  "no");
 
     config.put("PreferredAuthentications", "publickey,keyboard-interactive,password");
-    config.put("PubkeyAcceptedAlgorithms", "rsa-sha2-256,rsa-sha2-512,ssh-rsa,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
+    config.put("PubkeyAcceptedAlgorithms", "ssh-ed25519,rsa-sha2-256,rsa-sha2-512,ssh-rsa,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
 
     config.put("CheckCiphers", "aes256-ctr,aes192-ctr,aes128-ctr,aes256-cbc,aes192-cbc,aes128-cbc,3des-ctr,arcfour,arcfour128,arcfour256");
     config.put("CheckKexes", "diffie-hellman-group14-sha1,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521");
-    config.put("CheckSignatures", "rsa-sha2-256,rsa-sha2-512,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
+    config.put("CheckSignatures", "ssh-ed25519,rsa-sha2-256,rsa-sha2-512,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
 
     config.put("MaxAuthTries", "6");
     config.put("ClearAllForwardings", "no");

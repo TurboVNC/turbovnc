@@ -56,6 +56,9 @@ fatal error that occurred in TightVNC-compatible VNC viewers (other than the
 TurboVNC Viewer) when attempting to select Compression Level 0 without JPEG
 while connected to a TurboVNC session.
 
+7. The TurboVNC Viewer's built-in SSH client now supports the Ed25519 signature
+scheme.  This improves compatibility with recent OpenSSH releases.
+
 
 3.1.3
 =====
