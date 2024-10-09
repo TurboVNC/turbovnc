@@ -74,12 +74,14 @@ jobs:
         run: |
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
           echo "LJT_URL=https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$LJT_VERSION" >>$GITHUB_ENV
+          echo "JAVA_HOME=$JAVA_HOME_17_X64" >>$GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v4
       - name: Set up build
         run: |
           sudo apt update
           sudo apt install -y libxi-dev xserver-xorg-dev
+          sudo update-java-alternatives --set $JAVA_HOME_17_X64
           mkdir $HOME/libjpeg-turbo-deb
           pushd $HOME/libjpeg-turbo-deb
           wget --no-check-certificate $LJT_URL/libjpeg-turbo-official_$LJT_VERSION\_amd64.deb $LJT_URL/libjpeg-turbo-official32_$LJT_VERSION\_amd64.deb
