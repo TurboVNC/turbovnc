@@ -218,8 +218,9 @@ public class Tunnel {
 
     if (useDefaultPrivateKeyFiles) {
       privateKeys.add(new File(homeDir + "/.ssh/id_rsa"));
-      privateKeys.add(new File(homeDir + "/.ssh/id_dsa"));
       privateKeys.add(new File(homeDir + "/.ssh/id_ecdsa"));
+      privateKeys.add(new File(homeDir + "/.ssh/id_ed25519"));
+      privateKeys.add(new File(homeDir + "/.ssh/id_dsa"));
     }
 
     for (Iterator<File> i = privateKeys.iterator(); i.hasNext();) {

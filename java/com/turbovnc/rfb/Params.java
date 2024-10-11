@@ -1128,9 +1128,10 @@ public final class Params {
   "IdentityFile OpenSSH configuration keyword, if a valid passphrase is not " +
   "supplied for the key\r " +
   "5. " + Utils.getHomeDir() + ".ssh/id_rsa, " + Utils.getHomeDir() +
-  ".ssh/id_dsa, and " + Utils.getHomeDir() + ".ssh/id_ecdsa (in that " +
-  "order), if this parameter, the SSHKey parameter, and the IdentityFile " +
-  "OpenSSH configuration keyword are not specified", null);
+  ".ssh/id_ecdsa, " + Utils.getHomeDir() + ".ssh/id_ed25519, and " +
+  Utils.getHomeDir() + ".ssh/id_dsa (in that order), if this parameter, the " +
+  "SSHKey parameter, and the IdentityFile OpenSSH configuration keyword are " +
+  "not specified", null);
 
   public StringParameter sshKeyPass =
   new StringParameter("SSHKeyPass", this, false, false,
