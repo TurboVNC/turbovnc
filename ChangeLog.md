@@ -93,6 +93,11 @@ Viewer now advertises support for the pseudo-encoding.  (The next major release
 of the TurboVNC Server will forego using the extension unless the VNC viewer
 advertises support for it.)
 
+18. Fixed an issue in the TurboVNC Viewer's built-in SSH client whereby the
+`ssh-rsa` and `rsa-sha2-512` signature schemes could not be used unless they
+were specified as the first argument for the `HostKeyAlgorithms` OpenSSH config
+file keyword or the server did not support `rsa-sha2-256`.
+
 
 3.0.3
 =====
