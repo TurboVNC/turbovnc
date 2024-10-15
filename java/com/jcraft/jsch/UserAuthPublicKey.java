@@ -3,7 +3,7 @@
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
 Copyright (c) 2020 Jeremy Norris. All rights reserved.
 Copyright (c) 2020-2021 Matthias Wiedemann. All rights reserved.
-Copyright (c) 2023 D. R. Commander. All rights reserved.
+Copyright (c) 2023-2024 D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -56,23 +56,20 @@ class UserAuthPublicKey extends UserAuth{
         return false;
       }
 
-      String rsamethods=null;
+      String rsamethod=null;
       String nonrsamethods=null;
       for(int i=0; i<pkmethoda.length; i++){
         if(pkmethoda[i].equals("ssh-rsa") || pkmethoda[i].equals("rsa-sha2-256") || pkmethoda[i].equals("rsa-sha2-512")){
-          if(session.supportedRSAMethods.contains(pkmethoda[i])){
-            if(rsamethods==null) rsamethods=pkmethoda[i];
-            else rsamethods+=","+pkmethoda[i];
-          }
+          if(session.supportedRSAMethods.contains(pkmethoda[i]) &&
+             rsamethod==null)
+            rsamethod=pkmethoda[i];
         }
         else{
           if(nonrsamethods==null) nonrsamethods=pkmethoda[i];
           else nonrsamethods+=","+pkmethoda[i];
         }
       }
-      String[] rsamethoda=Util.split(rsamethods, ",");
       String[] nonrsamethoda=Util.split(nonrsamethods, ",");
-
       _username=Util.str2byte(username);
 
       iloop:
@@ -97,8 +94,8 @@ class UserAuthPublicKey extends UserAuth{
 
         String ipkmethod=identity.getAlgName();
         String[] ipkmethoda=null;
-        if(ipkmethod.equals("ssh-rsa")){
-          ipkmethoda=rsamethoda;
+        if(ipkmethod.equals("ssh-rsa") && rsamethod!=null){
+          ipkmethoda=new String[]{rsamethod};
         }
         else if(nonrsamethoda!=null && nonrsamethoda.length>0){
           for(int j=0; j<nonrsamethoda.length; j++){

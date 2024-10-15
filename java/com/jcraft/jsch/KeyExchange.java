@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2024 D. R. Commander. All rights reserved.
 Copyright (c) 2020 Jeremy Norris. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 package com.jcraft.jsch;
+
+import java.util.Vector;
 
 public abstract class KeyExchange{
 
@@ -91,7 +93,7 @@ public abstract class KeyExchange{
     return key_alg_name;
   }
 
-  protected static String[] guess(byte[]I_S, byte[]I_C){
+  protected static String[] guess(Session session, byte[]I_S, byte[]I_C){
     String[] guess=new String[PROPOSAL_MAX];
     Buffer sb=new Buffer(I_S); sb.setOffSet(17);
     Buffer cb=new Buffer(I_C); cb.setOffSet(17);
@@ -114,6 +116,17 @@ public abstract class KeyExchange{
       byte[] cp=cb.getString();  // client proposal
       int j=0;
       int k=0;
+
+      if(i==PROPOSAL_SERVER_HOST_KEY_ALGS) {
+        String smethods=new String(sp);
+
+        if(smethods.matches("(^|.*,)ssh-rsa(,.*|$)"))
+          session.supportedRSAMethods.addElement("ssh-rsa");
+        if(smethods.matches("(^|.*,)rsa-sha2-256(,.*|$)"))
+          session.supportedRSAMethods.addElement("rsa-sha2-256");
+        if(smethods.matches("(^|.*,)rsa-sha2-512(,.*|$)"))
+          session.supportedRSAMethods.addElement("rsa-sha2-512");
+      }
 
       loop:
       while(j<cp.length){

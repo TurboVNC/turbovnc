@@ -588,14 +588,9 @@ public class Session implements Runnable{
      send_kexinit();
    }
 
-    guess=KeyExchange.guess(I_S, I_C);
+    guess=KeyExchange.guess(this, I_S, I_C);
     if(guess==null){
       throw new JSchException("Algorithm negotiation fail");
-    }
-    for(String method : guess){
-      if(method.equals("ssh-rsa") || method.equals("rsa-sha2-256") || method.equals("rsa-sha2-512")){
-        supportedRSAMethods.addElement(method);
-      }
     }
 
     if(!isAuthed &&
