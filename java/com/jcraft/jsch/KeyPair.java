@@ -46,7 +46,7 @@ public abstract class KeyPair{
   public static final int ED25519=5;
 
   // at the moment of loading the key, it is not clear which type it is, because it still needs to be decrypted
-  private static final int DEFERRED = 5;
+  private static final int DEFERRED = -1;
   static final int VENDOR_OPENSSH=0;
   static final int VENDOR_FSECURE=1;
   static final int VENDOR_PUTTY=2;
