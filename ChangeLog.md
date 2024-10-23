@@ -87,6 +87,10 @@ advertises support for it.)
 were specified as the first argument for the `HostKeyAlgorithms` OpenSSH config
 file keyword or the server did not support `rsa-sha2-256`.
 
+6. Fixed an error ("ZlibInStream: inflate failed") that occurred in the
+TurboVNC Viewer when it attempted to receive a clipboard update from QEMU's VNC
+server.
+
 
 3.1.2
 =====
