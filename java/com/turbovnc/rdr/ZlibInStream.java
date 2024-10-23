@@ -102,6 +102,9 @@ public class ZlibInStream extends InStream {
   // stream.
 
   private boolean decompress(boolean wait) {
+    if (zs.inflateFinished())
+      throw new ErrorException("ZlibInStream: end of zlib stream");
+
     zs.next_out = b;
     zs.next_out_index = end;
     zs.avail_out = start + bufSize - end;
@@ -115,7 +118,8 @@ public class ZlibInStream extends InStream {
       zs.avail_in = bytesIn;
 
     int rc = zs.inflate(JZlib.Z_SYNC_FLUSH);
-    if (rc != JZlib.Z_OK) {
+
+    if (rc != JZlib.Z_OK && rc != JZlib.Z_STREAM_END) {
       throw new ErrorException("ZlibInStream: inflate failed");
     }
 
