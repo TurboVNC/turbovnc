@@ -28,113 +28,80 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 package com.jcraft.jsch.jcraft;
-import com.jcraft.jzlib.*;
 import com.jcraft.jsch.*;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
+import java.util.zip.DataFormatException;
 
 public class Compression implements com.jcraft.jsch.Compression {
   static private final int BUF_SIZE=4096;
   private final int buffer_margin=32+20; // AES256 + HMACSHA1
   private int type;
-  private ZStream stream;
+  private Inflater inflater=new Inflater();
+  private Deflater deflater=new Deflater();
   private byte[] tmpbuf=new byte[BUF_SIZE];
-
-  public Compression(){
-    stream=new ZStream();
-  }
 
   public void init(int type, int level){
     if(type==DEFLATER){
-      stream.deflateInit(level);
+      deflater = new Deflater(level);
       this.type=DEFLATER;
     }
     else if(type==INFLATER){
-      stream.inflateInit();
-      inflated_buf=new byte[BUF_SIZE];
+      inflater = new Inflater();
       this.type=INFLATER;
     }
   }
 
-  private byte[] inflated_buf;
-
   public byte[] compress(byte[] buf, int start, int[] len){
-    stream.next_in=buf;
-    stream.next_in_index=start;
-    stream.avail_in=len[0]-start;
-    int status;
-    int outputlen=start;
-    byte[] outputbuf=buf;
-    int tmp=0;
+    int tmpbuflen = 0;
+    deflater.setInput(buf, start, len[0] - start);
 
-    do{
-      stream.next_out=tmpbuf;
-      stream.next_out_index=0;
-      stream.avail_out=BUF_SIZE;
-      status=stream.deflate(JZlib.Z_PARTIAL_FLUSH);
-      switch(status){
-        case JZlib.Z_OK:
-          tmp=BUF_SIZE-stream.avail_out;
-          if(outputbuf.length<outputlen+tmp+buffer_margin){
-            byte[] foo=new byte[(outputlen+tmp+buffer_margin)*2];
-            System.arraycopy(outputbuf, 0, foo, 0, outputbuf.length);
-            outputbuf=foo;
-          }
-          System.arraycopy(tmpbuf, 0, outputbuf, outputlen, tmp);
-          outputlen+=tmp;
-          break;
-        default:
-	    System.err.println("compress: deflate returnd "+status);
-      }
+    while (true) {
+      tmpbuflen += deflater.deflate(tmpbuf, tmpbuflen, tmpbuf.length - tmpbuflen, Deflater.SYNC_FLUSH);
+      if (tmpbuflen < tmpbuf.length)
+        break;
+      byte[] foo = new byte[tmpbuf.length * 2];
+      System.arraycopy(tmpbuf, 0, foo, 0, tmpbuf.length);
+      tmpbuf = foo;
     }
-    while(stream.avail_out==0);
-
-    len[0]=outputlen;
-    return outputbuf;
+    if (buf.length < start + tmpbuflen + buffer_margin) {
+      byte[] foo = new byte[start + tmpbuflen + buffer_margin];
+      System.arraycopy(buf, 0, foo, 0, buf.length);
+      buf = foo;
+    }
+    System.arraycopy(tmpbuf, 0, buf, start, tmpbuflen);
+    len[0] = start + tmpbuflen;
+    return buf;
   }
 
   public byte[] uncompress(byte[] buffer, int start, int[] length){
-    int inflated_end=0;
+    int tmpbuflen = 0;
+    inflater.setInput(buffer, start, length[0]);
 
-    stream.next_in=buffer;
-    stream.next_in_index=start;
-    stream.avail_in=length[0];
-
-    while(true){
-      stream.next_out=tmpbuf;
-      stream.next_out_index=0;
-      stream.avail_out=BUF_SIZE;
-      int status=stream.inflate(JZlib.Z_PARTIAL_FLUSH);
-      switch(status){
-        case JZlib.Z_OK:
-	  if(inflated_buf.length<inflated_end+BUF_SIZE-stream.avail_out){
-            int len=inflated_buf.length*2;
-            if(len<inflated_end+BUF_SIZE-stream.avail_out)
-              len=inflated_end+BUF_SIZE-stream.avail_out;
-            byte[] foo=new byte[len];
-	    System.arraycopy(inflated_buf, 0, foo, 0, inflated_end);
-	    inflated_buf=foo;
-	  }
-	  System.arraycopy(tmpbuf, 0,
-			   inflated_buf, inflated_end,
-			   BUF_SIZE-stream.avail_out);
-	  inflated_end+=(BUF_SIZE-stream.avail_out);
-          length[0]=inflated_end;
-	  break;
-        case JZlib.Z_BUF_ERROR:
-          if(inflated_end>buffer.length-start){
-            byte[] foo=new byte[inflated_end+start];
-            System.arraycopy(buffer, 0, foo, 0, start);
-            System.arraycopy(inflated_buf, 0, foo, start, inflated_end);
-	    buffer=foo;
-	  }
-	  else{
-            System.arraycopy(inflated_buf, 0, buffer, start, inflated_end);
-	  }
-          length[0]=inflated_end;
-	  return buffer;
-	default:
-	  System.err.println("uncompress: inflate returnd "+status);
-          return null;
+    try {
+      while (true) {
+        tmpbuflen += inflater.inflate(tmpbuf, tmpbuflen, tmpbuf.length - tmpbuflen);
+        if (tmpbuflen < tmpbuf.length)
+          break;
+        byte[] foo = new byte[tmpbuf.length * 2];
+        System.arraycopy(tmpbuf, 0, foo, 0, tmpbuf.length);
+        tmpbuf = foo;
       }
+    } catch (DataFormatException e) {
+      System.err.println("uncompress: invalid zlib stream.");
+      return null;
     }
+    if (inflater.finished()) {
+      System.err.println("uncompress: unexpected end of zlib stream.");
+      return null;
+    }
+    if (buffer.length < start + tmpbuflen) {
+      byte[] foo = new byte[start + tmpbuflen];
+      System.arraycopy(buffer, 0, foo, 0, start);
+      buffer = foo;
+    }
+    System.arraycopy(tmpbuf, 0, buffer, start, tmpbuflen);
+    length[0] = tmpbuflen;
+    return buffer;
   }
 }
