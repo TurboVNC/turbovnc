@@ -20,7 +20,7 @@
 
 package com.turbovnc.rdr;
 
-import com.jcraft.jzlib.*;
+import java.util.zip.Deflater;
 
 import com.turbovnc.rfb.LogWriter;
 
@@ -31,25 +31,21 @@ public class ZlibOutStream extends OutStream {
   public ZlibOutStream(OutStream os, int bufSize_, int compressLevel)
   {
     underlying = os;
-    compressionLevel = newLevel = compressLevel;
     bufSize = (bufSize_ != 0 ? bufSize_ : DEFAULT_BUF_SIZE);
 
-    zs = new ZStream();
-    if (zs.deflateInit(compressLevel) != JZlib.Z_OK) {
-      zs = null;
-      throw new ErrorException("ZlibOutStream: deflateInit failed");
-    }
+    compressionLevel = newLevel = compressLevel;
+    deflater = new Deflater(compressLevel);
 
     b = new byte[bufSize];
     ptr = start = 0;
     end = bufSize;
   }
 
-  public ZlibOutStream() { this(null, 0, JZlib.Z_DEFAULT_COMPRESSION); }
+  public ZlibOutStream() { this(null, 0, Deflater.DEFAULT_COMPRESSION); }
 
   public void close() {
     b = null;
-    zs.deflateEnd();
+    deflater.end();
   }
 
   public void setUnderlying(OutStream os)
@@ -59,8 +55,8 @@ public class ZlibOutStream extends OutStream {
 
   public void setCompressionLevel(int level)
   {
-    if (level < -1 || level > 9)
-      level = JZlib.Z_DEFAULT_COMPRESSION;
+    if (level < Deflater.NO_COMPRESSION || level > Deflater.BEST_COMPRESSION)
+      level = Deflater.DEFAULT_COMPRESSION;
 
     newLevel = level;
   }
@@ -73,14 +69,13 @@ public class ZlibOutStream extends OutStream {
   {
     checkCompressionLevel();
 
-    zs.next_in = b;
-    zs.next_in_index = start;
-    zs.avail_in = ptr - start;
+    if (ptr - start > 0)
+      deflater.setInput(b, start, ptr - start);
 
     // Force out everything from the zlib encoder
-    deflate(JZlib.Z_SYNC_FLUSH);
+    deflate(Deflater.SYNC_FLUSH);
 
-    offset += ptr - start;
+    offset = deflater.getTotalIn();
     ptr = start;
   }
 
@@ -92,26 +87,21 @@ public class ZlibOutStream extends OutStream {
     checkCompressionLevel();
 
     while ((end - ptr) < itemSize) {
-      zs.next_in = b;
-      zs.next_in_index = start;
-      zs.avail_in = ptr - start;
 
-      deflate(JZlib.Z_NO_FLUSH);
+      deflater.setInput(b, start, ptr - start);
+      deflate(Deflater.NO_FLUSH);
 
       // output buffer not full
+      int consumed = deflater.getTotalIn() - offset;
 
-      if (zs.avail_in == 0) {
-        offset += ptr - start;
+      if (consumed == ptr - start) {
         ptr = start;
       } else {
-        // but didn't consume all the data?  try shifting what's left to the
-        // start of the buffer.
         vlog.info("z out buf not full, but in data not consumed");
-        System.arraycopy(b, zs.next_in_index, b, start,
-                         ptr - zs.next_in_index);
-        offset += zs.next_in_index - start;
-        ptr -= zs.next_in_index - start;
+        System.arraycopy(b, start + consumed, b, start, ptr - start - consumed);
+        ptr -= consumed;
       }
+      offset += consumed;
     }
 
     int nAvail = (end - ptr) / itemSize;
@@ -123,55 +113,44 @@ public class ZlibOutStream extends OutStream {
 
   void deflate(int flush)
   {
-    int rc;
+    int n, outbufptr, outbuflen;
 
     if (underlying == null)
       throw new ErrorException("ZlibOutStream: underlying OutStream has not been set");
 
-    if ((flush == JZlib.Z_NO_FLUSH) && (zs.avail_in == 0))
-      return;
-
     do {
-      underlying.check(1);
-      zs.next_out = underlying.getbuf();
-      zs.next_out_index = underlying.getptr();
-      zs.avail_out = underlying.getend() - underlying.getptr();
+      // According to zlib manual, the avail_out should be greater than 6 when
+      // the flush marker begins. This is to avoid repeated flush markers if
+      // deflate() needs to be called again when avail_out == 0.
+      //
+      // Therefore, we make sure that there is enough space in the output buffer.
+      underlying.check(16);
 
-      rc = zs.deflate(flush);
-      if (rc < 0) {
-        // zlib returns an error if you try to flush something twice
-        if ((rc == JZlib.Z_BUF_ERROR) && (flush != JZlib.Z_NO_FLUSH))
-          break;
+      outbufptr = underlying.getptr();
+      outbuflen = underlying.getend() - outbufptr;
 
-        throw new ErrorException("ZlibOutStream: deflate failed");
-      }
-
-      underlying.setptr(zs.next_out_index);
-    } while (zs.avail_out == 0);
+      n = deflater.deflate(underlying.getbuf(), outbufptr, outbuflen, flush);
+      underlying.setptr(outbufptr + n);
+    } while (n == outbuflen);
   }
 
   public void checkCompressionLevel()
   {
-    int rc;
-
     if (newLevel != compressionLevel) {
-      // zlib performs an implicit flush when the parameters are changed, but
-      // the flush it performs does not force out all of the data.  Since
-      // multiple flushes cannot be performed, we cannot force out the data
-      // after the parameters are changed.  Hence we must explicitly trigger a
-      // proper flush here.
-      zs.deflate(JZlib.Z_SYNC_FLUSH);
+      deflater.setLevel(newLevel);
 
-      rc = zs.deflateParams(newLevel, JZlib.Z_DEFAULT_STRATEGY);
-      if (rc < 0) {
-        // The implicit flush can result in this error, caused by the
-        // explicit flush we triggered above.  It should be safe to ignore,
-        // however, as the first flush should have left things in a stable
-        // state.
-        if (rc != JZlib.Z_BUF_ERROR)
-          throw new ErrorException("ZlibOutStream: deflateParams failed");
-      }
-
+      // The Deflater.setLevel() method does not immediately invoke
+      // deflateParam() to adjust the compression level. Instead, it sets a
+      // flag to signal that the deflater’s parameters should be changed.
+      //
+      // The deflateParam() function in zlib will be called during subsequent
+      // invocations of Deflater.deflate() until it returns Z_OK, indicating
+      // the parameter update is successful.
+      //
+      // To ensure that the compression level change is fully applied, we need
+      // to call deflate() here. This ensures that deflate(Deflater.SYNC_FLUSH)
+      // operates correctly after the compression level adjustment.
+      deflate(Deflater.NO_FLUSH);
       compressionLevel = newLevel;
     }
   }
@@ -181,7 +160,7 @@ public class ZlibOutStream extends OutStream {
   private int newLevel;
   private int bufSize;
   private int offset;
-  private com.jcraft.jzlib.ZStream zs;
+  private Deflater deflater;
   private int start;
 
   static LogWriter vlog = new LogWriter("ZlibOutStream");
