@@ -110,7 +110,6 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/jcraft/jsch/jce/*.java
 	${SRCDIR}/com/jcraft/jsch/jcraft/*.java
 	${SRCDIR}/com/jcraft/jsch/jgss/*.java
-	${SRCDIR}/com/jcraft/jzlib/*.java
 	${SRCDIR}/org/spf4j/base/*.java
 	${SRCDIR}/org/mindrot/jbcrypt/*.java)
 
