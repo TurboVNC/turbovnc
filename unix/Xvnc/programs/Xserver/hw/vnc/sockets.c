@@ -449,7 +449,10 @@ int PeekExactTimeout(rfbClientPtr cl, char *buf, int len, int timeout)
   int n;
   fd_set readfds, exceptfds;
   struct timeval tv;
+  CARD32 start, now;
   int sock = cl->sock;
+
+  start = GetTimeInMillis();
 
   while (len > 0) {
     do {
@@ -495,6 +498,21 @@ int PeekExactTimeout(rfbClientPtr cl, char *buf, int len, int timeout)
       if (n == 0) {
         errno = ETIMEDOUT;
         return -1;
+      }
+      /* If the client has sent less than len bytes and is waiting for the
+         server before sending more bytes, then we need to enforce the timeout
+         ourselves in order to prevent an infinite loop and subsequent denial
+         of service.  Otherwise recv() will keep returning n < len with errno
+         set to EAGAIN, and select() will keep returning 1, since recv() has
+         not removed any data from the queue.  We need to loop back in order to
+         give the client an opportunity to send more data, but we can't do that
+         forever. */
+      if (errno == EWOULDBLOCK || errno == EAGAIN) {
+        now = GetTimeInMillis();
+        if (now - start >= (CARD32)timeout) {
+          errno = ETIMEDOUT;
+          return -1;
+        }
       }
     }
   }

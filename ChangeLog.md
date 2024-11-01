@@ -98,6 +98,12 @@ advertises support for it.)
 were specified as the first argument for the `HostKeyAlgorithms` OpenSSH config
 file keyword or the server did not support `rsa-sha2-256`.
 
+19. Fixed a denial-of-service (DoS) vulnerability in the TurboVNC Server,
+introduced by 3.0 beta1[20], that triggered an infinite loop in the server's
+automatic WebSocket detection code if an ill-behaved client sent 3 or fewer
+bytes of data immediately after connecting.  Certain versions of Apache
+Guacamole were known to trigger this issue sporadically.
+
 
 3.0.3
 =====
