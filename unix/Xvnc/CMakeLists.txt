@@ -92,7 +92,7 @@ option(TVNC_ZLIBNG
 boolean_number(TVNC_ZLIBNG)
 report_option(TVNC_ZLIBNG "zlib-ng")
 if(NOT TVNC_ZLIBNG)
-	include(FindZLIB)
+	find_package(ZLIB REQUIRED)
 else()
 	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib-ng)
 	set(ZLIB_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/lib/zlib-ng/libz.a)
