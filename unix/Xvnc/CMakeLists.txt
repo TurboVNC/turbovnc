@@ -115,12 +115,18 @@ if((CPU_TYPE STREQUAL "x86_64" OR CPU_TYPE STREQUAL "i386") AND
 	set(USE_INTEL_ZLIB 1)
 endif()
 if(NOT USE_INTEL_ZLIB)
-	include(FindZLIB)
+	find_package(ZLIB REQUIRED)
 else()
 	set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib)
 	set(ZLIB_LIBRARIES zlib)
 endif()
-if(NOT TVNC_SYSTEMLIBS)
+if(TVNC_SYSTEMLIBS)
+	# If TVNC_SYSTEMX11 is set, then the bzip2 dependency will be implicitly
+	# satisfied by the XFont2 dependency.
+	if(NOT TVNC_SYSTEMX11)
+		find_package(BZip2 REQUIRED)
+	endif()
+else()
 	set(BZIP2_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/bzip2)
 	set(BZIP2_LIBRARIES bzip2)
 endif()
@@ -140,7 +146,13 @@ endif()
 if(NOT TVNC_SYSTEMX11)
 	add_subdirectory(include)
 endif()
-if(NOT TVNC_SYSTEMLIBS)
+if(TVNC_SYSTEMLIBS)
+	# If TVNC_SYSTEMX11 is set, then the FreeType dependency will be implicitly
+	# satisfied by the XFont2 dependency.
+	if(NOT TVNC_SYSTEMX11)
+		find_package(Freetype REQUIRED)
+	endif()
+else()
 	add_subdirectory(extras/freetype2)
 	set(FREETYPE_INCLUDE_DIRS
 		${CMAKE_CURRENT_SOURCE_DIR}/extras/freetype2/include
