@@ -110,7 +110,12 @@ else()
 endif()
 
 if(TVNC_SYSTEMLIBS)
-	include(FindZLIB)
+	find_package(ZLIB REQUIRED)
+	# If TVNC_SYSTEMX11 is set, then the bzip2 dependency will be implicitly
+	# satisfied by the XFont2 dependency.
+	if(NOT TVNC_SYSTEMX11)
+		find_package(BZip2 REQUIRED)
+	endif()
 else()
 	set(ZLIB_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/common/zlib)
 	set(ZLIB_LIBRARIES zlib)
@@ -133,7 +138,13 @@ endif()
 if(NOT TVNC_SYSTEMX11)
 	add_subdirectory(include)
 endif()
-if(NOT TVNC_SYSTEMLIBS)
+if(TVNC_SYSTEMLIBS)
+	# If TVNC_SYSTEMX11 is set, then the FreeType dependency will be implicitly
+	# satisfied by the XFont2 dependency.
+	if(NOT TVNC_SYSTEMX11)
+		find_package(Freetype REQUIRED)
+	endif()
+else()
 	add_subdirectory(extras/freetype2)
 	set(FREETYPE_INCLUDE_DIRS
 		${CMAKE_CURRENT_SOURCE_DIR}/extras/freetype2/include
