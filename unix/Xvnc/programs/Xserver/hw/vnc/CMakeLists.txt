@@ -31,17 +31,12 @@ set_property(CACHE TVNC_USETLS PROPERTY STRINGS OpenSSL None)
 string(TOLOWER "${TVNC_USETLS}" TVNC_USETLS)
 
 if(TVNC_USETLS STREQUAL "openssl")
-	include(FindOpenSSL)
-	if(NOT OPENSSL_FOUND)
-		message(STATUS "OpenSSL not found.  Disabling TLS encryption")
-		set(TVNC_USETLS "None" CACHE STRING ${TVNC_USETLS_DESC} FORCE)
-	else()
-		set(RFBSSLSRC rfbssl_openssl.c)
-		message(STATUS "Enabling TLS encryption using OpenSSL")
-		add_definitions(-DUSETLS)
-		set_property(SOURCE ${RFBSSLSRC} APPEND_STRING PROPERTY COMPILE_FLAGS
-			" -I${OPENSSL_INCLUDE_DIR}")
-	endif()
+	message(STATUS "Enabling TLS encryption using OpenSSL")
+	find_package(OpenSSL REQUIRED)
+	set(RFBSSLSRC rfbssl_openssl.c)
+	add_definitions(-DUSETLS)
+	set_property(SOURCE ${RFBSSLSRC} APPEND_STRING PROPERTY COMPILE_FLAGS
+		" -I${OPENSSL_INCLUDE_DIR}")
 	set(DEFAULT_TVNC_DLOPENSSL 1)
 	option(TVNC_DLOPENSSL "Load OpenSSL using dlopen()/dlsym() instead of linking directly with it"
 		${DEFAULT_TVNC_DLOPENSSL})
