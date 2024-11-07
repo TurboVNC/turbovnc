@@ -110,7 +110,7 @@ boolean_number(TVNC_DRI3 PARENT_SCOPE)
 report_option(TVNC_DRI3 "DRI3 extension")
 
 set(OpenGL_GL_PREFERENCE LEGACY)
-include(FindOpenGL)
+find_package(OpenGL REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(programs/Xserver)

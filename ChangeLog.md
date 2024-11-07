@@ -97,6 +97,9 @@ automatic WebSocket detection code if an ill-behaved client sent 3 or fewer
 bytes of data immediately after connecting.  Certain versions of Apache
 Guacamole were known to trigger this issue sporadically.
 
+8. The TurboVNC Viewer now works around an issue that prevented keyboard
+grabbing from working when running the viewer in a GNOME/Wayland session.
+
 
 3.1.2
 =====
