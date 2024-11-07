@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2019, 2021 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015-2019, 2021, 2024 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -204,6 +204,28 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_x11FullScreen
 }
 
 
+/*
+ * Allow/disallow keyboard grabbing when using GNOME/Wayland.
+ */
+
+static void xwayland_grab_keyboard(Display *dpy, Window win, int on)
+{
+  XEvent e;
+  Atom _XWAYLAND_MAY_GRAB_KEYBOARD =
+    XInternAtom(dpy, "_XWAYLAND_MAY_GRAB_KEYBOARD", False);
+
+  memset(&e, 0, sizeof(e));
+  e.xclient.type = ClientMessage;
+  e.xclient.message_type = _XWAYLAND_MAY_GRAB_KEYBOARD;
+  e.xclient.display = dpy;
+  e.xclient.window = win;
+  e.xclient.format = 32;
+  e.xclient.data.l[0] = on;
+
+  XSendEvent(dpy, DefaultRootWindow(dpy), False, SubstructureRedirectMask, &e);
+}
+
+
 JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
   (JNIEnv *env, jobject obj, jboolean on, jboolean pointer)
 {
@@ -238,6 +260,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
     THROW("Could not get X11 drawing surface info");
 
   XSync(x11dsi->display, False);
+  xwayland_grab_keyboard(x11dsi->display, x11dsi->drawable, on);
   if (on) {
     int count = 5;
 
