@@ -403,6 +403,34 @@ public final class Params {
     reconcile();
   }
 
+  public static void loadSystemProperties() {
+    String filename = Utils.getHomeDir() + ".vnc" + Utils.getFileSeparator() +
+                      "default.turbovnc";
+    File file = new File(filename);
+    if (!file.exists())
+      return;
+
+    /* Read system properties from file */
+    Properties props = new Properties();
+    try {
+      props.load(new FileInputStream(file));
+    } catch (Exception e) {
+      return;
+    }
+
+    LogWriter vlog = new LogWriter("Params");
+
+    for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
+      String name = (String)i.nextElement();
+
+      if (name.startsWith("turbovnc.")) {
+        vlog.info("Setting Java system property " + name + "=" +
+                  props.getProperty(name));
+        System.setProperty(name, props.getProperty(name));
+      }
+    }
+  }
+
   public void loadDefaults() {
     String filename = Utils.getHomeDir() + ".vnc" + Utils.getFileSeparator() +
                       "default.turbovnc";
@@ -424,12 +452,8 @@ public final class Params {
     for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
       String name = (String)i.nextElement();
 
-      if (name.startsWith("turbovnc.")) {
-        vlog.info("Setting Java system property " + name + "=" +
-                  props.getProperty(name));
-        System.setProperty(name, props.getProperty(name));
+      if (name.startsWith("turbovnc."))
         continue;
-      }
 
       VoidParameter param = get(name);
       if (param == null) {

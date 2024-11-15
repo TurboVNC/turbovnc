@@ -348,6 +348,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
 
   static {
     setBlitterDefaults();
+    Params.loadSystemProperties();
   }
 
   static void startViewer(String[] argv) {
