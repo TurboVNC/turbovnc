@@ -243,3 +243,21 @@ Java system properties listed below can also be specified in
 	banner message from the SSH server on the command line.  Enabling this
 	property causes the viewer to display the banner message in a dialog box
 	instead.
+
+| Java System Property | {pcode: turbovnc.viajump = __0 \| 1__} |
+| Summary | Disable/enable multi-level SSH tunneling with the ''Via'' \
+	parameter |
+| Default Value | Enabled |
+#OPT: hiCol=first
+
+	Description :: By default, the TurboVNC Viewer's ''Via'' parameter creates an
+	intermediate SSH tunnel to the gateway host and uses that tunnel to create
+	the final SSH tunnel to the VNC host.  This eliminates the need to open RFB
+	ports in the VNC host's firewall, it ensures that the RFB connection is
+	encrypted on the server-area network, and it allows the TurboVNC Session
+	Manager to be used with TurboVNC hosts that are behind an SSH gateway.
+	Disabling this property restores the behavior of version 3.1.x and prior of
+	the TurboVNC Viewer, whereby the ''Via'' parameter creates an SSH tunnel to
+	the gateway host and forwards the RFB connection directly to the VNC host
+	from the gateway host.  Note that this property is effectively always enabled
+	when using the TurboVNC Session Manager.

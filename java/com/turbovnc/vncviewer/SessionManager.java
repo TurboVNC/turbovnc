@@ -1,4 +1,4 @@
-/* Copyright (C) 2018, 2020-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2018, 2020-2025 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,10 @@ public final class SessionManager extends Tunnel {
     vlog.debug("Opening SSH connection to host " + host);
     VncViewer.noExceptionDialog =
       Utils.getBooleanProperty("turbovnc.sshkeytest", false);
-    createTunnelJSch(Hostname.getSSHUser(params.server.get()), host, params);
+    params.sshSession =
+      createTunnelJSch(Hostname.getSSHUser(params.server.get()), host, -1,
+                       Hostname.getSSHUser(params.via.get()),
+                       Hostname.getHost(params.via.get()), params);
     if (Utils.getBooleanProperty("turbovnc.sshkeytest", false)) {
       System.out.println("SSH SUCCEEDED");
       System.exit(0);

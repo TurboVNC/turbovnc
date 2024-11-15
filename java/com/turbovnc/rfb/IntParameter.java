@@ -111,6 +111,10 @@ public class IntParameter extends VoidParameter {
     return null;
   }
 
+  public final synchronized void setDefault(boolean isDefault_) {
+    isDefault = isDefault_;
+  }
+
   public final synchronized boolean isDefault() { return isDefault; }
 
   private boolean isDefault = true;

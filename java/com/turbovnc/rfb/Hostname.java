@@ -28,6 +28,9 @@ public final class Hostname {
   // portion of the VNC server name.
 
   public static int getColonPos(String vncServerName) {
+    if (vncServerName == null)
+      return -1;
+
     int colonPos = vncServerName.lastIndexOf(':');
     int bracketPos = vncServerName.lastIndexOf(']');
     int atPos = vncServerName.lastIndexOf('@');
@@ -73,6 +76,9 @@ public final class Hostname {
   }
 
   public static String getSSHUser(String vncServerName) {
+    if (vncServerName == null)
+      return null;
+
     int atPos = vncServerName.lastIndexOf('@');
     String sshUser = null;
 
@@ -82,6 +88,9 @@ public final class Hostname {
   }
 
   public static String getHost(String vncServerName) {
+    if (vncServerName == null)
+      return null;
+
     int colonPos = getColonPos(vncServerName);
     int atPos = vncServerName.lastIndexOf('@');
 

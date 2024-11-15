@@ -49,6 +49,15 @@ public final class Params {
           !current.getName().equalsIgnoreCase("port")) {
         VoidParameter oldCurrent = oldParams.get(current.getName());
         current.set(oldCurrent.getStr(), oldCurrent.isCommandLine());
+        if (oldCurrent instanceof IntParameter &&
+            current instanceof IntParameter) {
+          boolean isDefault = ((IntParameter)oldCurrent).isDefault();
+          ((IntParameter)current).setDefault(isDefault);
+        } else if (oldCurrent instanceof StringParameter &&
+                   current instanceof StringParameter) {
+          boolean isDefault = ((StringParameter)oldCurrent).isDefault();
+          ((StringParameter)current).setDefault(isDefault);
+        }
       }
       current = current.next();
     }
@@ -630,6 +639,8 @@ public final class Params {
    "session to which to connect.\n " : "\n ") +
 
   "When using the Tunnel parameter" +
+  (Utils.getBooleanProperty("turbovnc.viajump", true) ?
+   " or the Via parameter with an SSH gateway" : "") +
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    " or the TurboVNC Session Manager, " : ", ") +
   "the SSH username (default = local username) can be specified by " +
@@ -1179,13 +1190,15 @@ public final class Params {
 
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true, false,
-  "Setting this parameter is equivalent to using the Via parameter with an " +
-  "SSH gateway, except that the gateway host is assumed to be the same as " +
-  "the VNC host, so you do not need to specify it separately.\n " +
+  "Setting this parameter is functionally equivalent to using the Via " +
+  "parameter with an SSH gateway, except that the gateway host is assumed " +
+  "to be the same as the VNC host, so you do not need to specify it " +
+  "separately.\n " +
 
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
-   "set unless the SessMgrAuto parameter is disabled.\n " : "") +
+   "set unless the SessMgrAuto parameter is disabled or the Via parameter " +
+   "is specified.\n " : "") +
 
   "This parameter is effectively set if the Server parameter specifies a " +
   "Unix domain socket connection to a remote host and the Via parameter is " +
@@ -1203,21 +1216,29 @@ public final class Params {
   public ServerNameParameter via =
   new ServerNameParameter("Via", this, true,
   "SSH server or UltraVNC repeater (\"gateway\") through which the VNC " +
-  "connection should be tunneled.  Note that when using the Via parameter, " +
-  "the VNC host should be specified from the point of view of the gateway.  " +
-  "For example, specifying Via={gateway_host} Server=localhost:1 will cause " +
-  "the viewer to connect to display :1 on {gateway_host} through the SSH " +
-  "server running on the same host.  Similarly, specifying " +
-  "Via={gateway_host}:0 Server=localhost:1 will cause the viewer to connect " +
-  "to display :1 on {gateway_host} through the UltraVNC repeater running on " +
-  "the same host and listening on port 5900 (VNC display :0.)  If using the " +
-  "UltraVNC Repeater in \"Mode II\", specify ID:xxxx as the VNC server " +
-  "name, where xxxx is the ID number of the VNC server to which you want to " +
-  "connect.\n " +
+  "connection should be tunneled.  This can be specified in the format " +
+  "[{ssh_user}@]{gateway_host}, {gateway_host}:{repeater_display_number}, " +
+  "or {gateway_host}::{repeater_port}.  Note that when using the Via " +
+  "parameter, the VNC host should be specified from the point of view of " +
+  "the gateway.  For example, specifying Via={gateway_host} " +
+  "Server=localhost:1 will cause the viewer to connect to display :1 on " +
+  "{gateway_host} through the SSH server running on the same host.  " +
+  "Similarly, specifying Via={gateway_host}:0 Server=localhost:1 will cause " +
+  "the viewer to connect to display :1 on {gateway_host} through the " +
+  "UltraVNC repeater running on the same host and listening on port 5900 " +
+  "(VNC display :0.)  If using the UltraVNC Repeater in \"Mode II\", " +
+  "specify ID:xxxx as the VNC server name, where xxxx is the ID number of " +
+  "the VNC server to which you want to connect.\n " +
 
   "When using an SSH gateway, the SSH username (default = local username) " +
   "can be specified by prefixing the gateway host with the username " +
-  "followed by @.", null);
+  "followed by @." +
+
+  (Utils.getBooleanProperty("turbovnc.viajump", true) ?
+   "\n Note that the Tunnel parameter produces better performance than the " +
+   "Via parameter when the gateway host is the same as the VNC host, since " +
+   "the Tunnel parameter avoids an unnecessary two-level SSH tunnel." : ""),
+  null);
 
   public StringParameter x509ca =
   new StringParameter("X509CA", this, true, false,

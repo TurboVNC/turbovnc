@@ -58,6 +58,10 @@ public class StringParameter extends VoidParameter {
     return true;
   }
 
+  public final synchronized void setDefault(boolean isDefault_) {
+    isDefault = isDefault_;
+  }
+
   public final synchronized String get() { return value; }
   public final synchronized String getDefaultStr() { return defValue; }
   public final synchronized String getStr() { return value; }

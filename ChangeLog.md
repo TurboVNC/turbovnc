@@ -78,6 +78,25 @@ CVE-2023-6377, CVE-2023-6478, CVE-2023-6816, CVE-2024-0229, CVE-2024-0408,
 CVE-2024-9632, CVE-2024-21885, CVE-2024-21886, CVE-2024-31080, CVE-2024-31081,
 and CVE-2024-31083) from the xorg-server 21.1.x code base.
 
+12. The TurboVNC Viewer's built-in SSH client now supports jump hosts, i.e.
+multi-hop/multi-level SSH tunneling.  If the `Via` parameter or the `ProxyJump`
+OpenSSH config file keyword is specified, the viewer now creates an
+intermediate SSH tunnel to the gateway host and uses that tunnel to create the
+final SSH tunnel to the VNC host.  This eliminates the need to open RFB ports
+in the VNC host's firewall, it ensures that the RFB connection is encrypted on
+the server-area network, and it allows the TurboVNC Session Manager to be used
+with TurboVNC hosts that are behind an SSH gateway.  The OpenSSH config file
+can be used to specify more than two levels of SSH tunneling or to specify the
+SSH username and TCP port for a jump host.  Setting the `turbovnc.viajump` Java
+system property to `0` restores the previous behavior of the `Via` parameter
+(using SSH tunneling between the client and the gateway host but using a direct
+RFB connection between the gateway host and the VNC host.)
+
+    Similarly, when using an external SSH client, the default SSH command-line
+template for TCP connections with the `Via` parameter now takes advantage of
+OpenSSH's ProxyJump feature.  As with the built-in SSH client, setting the
+`turbovnc.viajump` Java system property to `0` restores the previous behavior.
+
 
 3.1.3
 =====

@@ -286,12 +286,6 @@ The TurboVNC Viewer's ''Via'' and ''Tunnel'' parameters take advantage of the
 port forwarding feature in SSH.  For instance, running
 
 	#Pverb: <<---
-	__vncviewer__ -via __user__@__host__ localhost:__n__
-	---
-
-or
-
-	#Pverb: <<---
 	__vncviewer__ -tunnel __user__@__host__:__n__
 	---
 
@@ -299,6 +293,19 @@ is the equivalent of running
 
 	#Pverb: <<---
 	ssh -L __fp__:localhost:__5900+n__ __user__@__host__
+	__vncviewer__ localhost::__fp__
+	---
+
+and running
+
+	#Pverb: <<---
+	__vncviewer__ -via __gateway-user__@__gateway-host__ __vnc-user__@__vnc-host__:__n__
+	---
+
+is the equivalent of running
+
+	#Pverb: <<---
+	ssh -J __gateway-user__@__gateway-host__ -L __fp__:localhost:__5900+n__ __vnc-user__@__vnc-host__
 	__vncviewer__ localhost::__fp__
 	---
 
@@ -310,11 +317,12 @@ automatically determined by the TurboVNC Viewer.)
 	systems and ''c:\\Program Files\\TurboVNC\\vncviewer.bat'' on Windows
 	systems.
 
-The ''Tunnel'' parameter can be used as a shortcut whenever the SSH and VNC
-hosts are the same machine.  ''Via'' is more flexible, since it allows you to
-specify the VNC server to which to connect.  The VNC server is specified from
-the point of view of the SSH server, which is why we used ''localhost'' in the
-above example.
+	!!! The ''Tunnel'' parameter produces better performance than the ''Via''
+	parameter when the SSH and VNC hosts are the same machine, since the
+	''Tunnel'' parameter avoids an unnecessary two-level SSH tunnel.
+
+	!!! When using the ''Via'' parameter, the VNC host is specified from the
+	point of view of the gateway host.
 
 ** Requiring SSH Tunneling
 

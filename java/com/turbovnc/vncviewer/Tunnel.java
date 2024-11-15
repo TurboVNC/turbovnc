@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2024 D. R. Commander.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2025 D. R. Commander.
  *                                               All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
@@ -94,12 +94,26 @@ public class Tunnel {
         createTunnelExt(gatewaySSHUser, gatewayHost, remoteSSHUser, remoteHost,
                         remotePort, localPort, pattern, params, tunnel);
       else {
-        vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
-        if (params.sshSession == null)
-          createTunnelJSch(gatewaySSHUser, gatewayHost, params);
-        remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
+        String gatewayStr = remoteHost;
+        if (Utils.getBooleanProperty("turbovnc.viajump", true) && !tunnel) {
+          if (params.sshSession == null) {
+            vlog.debug("Opening SSH connection to host " + remoteHost);
+            params.sshSession = createTunnelJSch(remoteSSHUser, remoteHost, -1,
+                                                 gatewaySSHUser, gatewayHost,
+                                                 params);
+          }
+          remoteHost = "localhost";
+        } else {
+          if (params.sshSession == null) {
+            vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
+            params.sshSession = createTunnelJSch(gatewaySSHUser, gatewayHost,
+                                                 -1, null, null, params);
+          }
+          remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
+          gatewayStr = gatewayHost;
+        }
         vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
-                   "::" + remotePort + " (relative to gateway)");
+                   "::" + remotePort + " (relative to " + gatewayStr + ")");
         params.sshSession.setPortForwardingL(localPort, remoteHost,
                                              remotePort);
       }
@@ -110,8 +124,55 @@ public class Tunnel {
 
   /* Create a tunnel using the built-in JSch SSH client */
 
-  protected static void createTunnelJSch(String user, String host,
-                                         Params params) throws Exception {
+  private static class JumpProxy implements Proxy {
+    Session jumpSSHSession;
+    ChannelDirectTCPIP channel;
+    PipedOutputStream osToRemote;
+    PipedInputStream isFromRemote;
+
+    JumpProxy(Session jumpSSHSession_) {
+      jumpSSHSession = jumpSSHSession_;
+    }
+
+    public void connect(SocketFactory socket_factory, String host, int port,
+                        int timeout) throws Exception {
+      channel = (ChannelDirectTCPIP)jumpSSHSession.openChannel("direct-tcpip");
+      channel.setHost(host);
+      channel.setPort(port);
+      PipedInputStream isToRemote = new PipedInputStream();
+      osToRemote = new PipedOutputStream(isToRemote);
+      isFromRemote = new PipedInputStream();
+      PipedOutputStream osFromRemote = new PipedOutputStream(isFromRemote);
+      channel.setInputStream(isToRemote);
+      channel.setOutputStream(osFromRemote);
+      channel.connect();
+    }
+
+    public InputStream getInputStream() {
+      return isFromRemote;
+    }
+
+    public OutputStream getOutputStream() {
+      return osToRemote;
+    }
+
+    public java.net.Socket getSocket() {
+      return null;
+    }
+
+    public void close() {
+      if (channel != null)
+        channel.disconnect();
+      channel = null;
+      isFromRemote = null;
+      osToRemote = null;
+      jumpSSHSession.disconnect();
+    }
+  }
+
+  protected static Session createTunnelJSch(String user, String host, int port,
+                                            String jumpUser, String jumpHost,
+                                            Params params) throws Exception {
     JSch jsch = new JSch();
     JSch.setLogger(LOGGER);
     String homeDir = new String("");
@@ -181,7 +242,9 @@ public class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    int port = params.sshPort.isDefault() ? -1 : params.sshPort.get();
+    if (!params.sshPort.isDefault())
+      port = params.sshPort.get();
+    int jumpPort = -1;
 
     File sshConfigFile = new File(params.sshConfig.get());
     if (sshConfigFile.exists() && sshConfigFile.canRead()) {
@@ -197,6 +260,28 @@ public class Tunnel {
         for (String file : identityFiles) {
           if (file != null && !file.isEmpty())
             useDefaultPrivateKeyFiles = false;
+        }
+      }
+
+      String repoJumpHost = repo.getConfig(host).getValue("ProxyJump");
+      if (repoJumpHost != null && jumpHost == null) {
+        jumpHost = repoJumpHost.replaceAll("\\s", "");
+        int atPos = jumpHost.lastIndexOf('@');
+        if (jumpUser == null && atPos > 0)
+          jumpUser = jumpHost.substring(0, atPos);
+        int colonPos = Hostname.getColonPos(jumpHost);
+        if (colonPos >= 0) {
+          if (colonPos != jumpHost.length() - 1) {
+            try {
+              int tempPort =
+                Integer.parseInt(jumpHost.substring(colonPos + 1));
+              if (tempPort >= 0 && tempPort <= 65535)
+                jumpPort = tempPort;
+            } catch (NumberFormatException e) {
+            }
+          }
+          if (atPos + 1 < colonPos)
+            jumpHost = jumpHost.substring(atPos + 1, colonPos);
         }
       }
     } else {
@@ -238,11 +323,22 @@ public class Tunnel {
       }
     }
 
-    params.sshSession = jsch.getSession(user, host, port);
+    Session sshSession = null, jumpSSHSession = null;
+
+    if (jumpHost != null) {
+      vlog.debug("Opening SSH connection to jump host " + jumpHost);
+      jumpSSHSession = createTunnelJSch(jumpUser, jumpHost, jumpPort, null,
+                                        null, params);
+    }
+    sshSession = jsch.getSession(user, host, port);
+    if (jumpSSHSession != null) {
+      JumpProxy proxy = new JumpProxy(jumpSSHSession);
+      sshSession.setProxy(proxy);
+    }
 
     vlog.sshdebug("Attempting to use the following SSH private keys:");
     Iterator<Identity> iter =
-      params.sshSession.getIdentityRepository().getIdentities().iterator();
+      sshSession.getIdentityRepository().getIdentities().iterator();
     while (iter.hasNext()) {
       Identity id = iter.next();
       vlog.sshdebug("  " + id.getName());
@@ -251,17 +347,19 @@ public class Tunnel {
     }
 
     // OpenSSHConfig doesn't recognize StrictHostKeyChecking
-    if (params.sshSession.getConfig("StrictHostKeyChecking") == null)
-      params.sshSession.setConfig("StrictHostKeyChecking", "ask");
-    params.sshSession.setConfig("MaxAuthTries", "3");
+    if (sshSession.getConfig("StrictHostKeyChecking") == null)
+      sshSession.setConfig("StrictHostKeyChecking", "ask");
+    sshSession.setConfig("MaxAuthTries", "3");
     String auth = System.getProperty("turbovnc.sshauth");
     if (auth != null)
-      params.sshSession.setConfig("PreferredAuthentications", auth);
+      sshSession.setConfig("PreferredAuthentications", auth);
     PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
                                         true, user, false, true, -1);
     if (!Utils.getBooleanProperty("turbovnc.sshkeytest", false))
-      params.sshSession.setUserInfo(dlg);
-    params.sshSession.connect();
+      sshSession.setUserInfo(dlg);
+    sshSession.connect();
+
+    return sshSession;
   }
 
   /* Create a tunnel using an external SSH client. */
@@ -269,6 +367,8 @@ public class Tunnel {
   public static final String DEFAULT_TUNNEL_CMD =
     "%S -f -L %L:localhost:%R %H sleep 20";
   public static final String DEFAULT_VIA_CMD =
+    Utils.getBooleanProperty("turbovnc.viajump", true) ?
+    "%S -J %G -f -L %L:localhost:%R %H sleep 20" :
     "%S -f -L %L:%H:%R %G sleep 20";
 
   private static void createTunnelExt(String gatewaySSHUser,
