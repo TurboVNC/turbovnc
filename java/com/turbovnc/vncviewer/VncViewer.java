@@ -528,7 +528,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       "-----\n" +
       "\n" +
       (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
-       "vncviewer [options/parameters] [host] [options/parameters]\n" +
+       "vncviewer [options/parameters] [user@]host [options/parameters]\n" +
        "\n" +
        "Connect to the specified TurboVNC host using the TurboVNC Session Manager,\n" +
        "which uses the TurboVNC Viewer's built-in SSH client to remotely start a new\n" +
@@ -538,9 +538,9 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
        "it expects the TurboVNC Server to be installed under /opt/TurboVNC on the host.\n" +
        "Refer to the TurboVNC User's Guide for more details.\n" +
        "\n" : "") +
-      "vncviewer [options/parameters] [host:displayNum] [options/parameters]\n" +
-      "vncviewer [options/parameters] [host::port] [options/parameters]\n" +
-      "vncviewer [options/parameters] [host::uds_path] [options/parameters]\n" +
+      "vncviewer [options/parameters] host:displayNum [options/parameters]\n" +
+      "vncviewer [options/parameters] host::port [options/parameters]\n" +
+      "vncviewer [options/parameters] host::uds_path [options/parameters]\n" +
       "\n" +
       "Connect directly to the VNC server that is listening on the specified VNC\n" +
       "display number, TCP port, or Unix domain socket path on the specified host.\n" +
