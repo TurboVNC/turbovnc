@@ -182,8 +182,13 @@ class ServerDialog extends Dialog implements ActionListener {
   }
 
   private void updateConnectButton() {
-    okButton.setEnabled(editor.getItem() != null &&
-                        ((String)editor.getItem()).length() > 0);
+    String serverStr = (String)editor.getItem();
+    if (serverStr != null) {
+      int atIndex = serverStr.lastIndexOf('@');
+      if (atIndex >= 0) serverStr = serverStr.substring(atIndex + 1);
+      serverStr = Hostname.getHost(serverStr);
+    }
+    okButton.setEnabled(serverStr != null && serverStr.length() > 0);
   }
 
   public void actionPerformed(ActionEvent e) {
