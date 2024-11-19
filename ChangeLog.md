@@ -1,3 +1,13 @@
+3.1.4
+=====
+
+### Significant changes relative to 3.1.3:
+
+1. Fixed an issue whereby the TurboVNC Viewer threw a NullPointerException if
+a user clicked the "Connect" button in the New TurboVNC Connection dialog after
+entering an SSH username with a blank VNC host into the "VNC server" field.
+
+
 3.1.3
 =====
 

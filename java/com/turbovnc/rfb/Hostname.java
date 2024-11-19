@@ -30,9 +30,10 @@ public final class Hostname {
   public static int getColonPos(String vncServerName) {
     int colonPos = vncServerName.lastIndexOf(':');
     int bracketPos = vncServerName.lastIndexOf(']');
+    int atPos = vncServerName.lastIndexOf('@');
 
     // No colon = hostname only
-    if (colonPos == -1)
+    if (colonPos == -1 || colonPos < atPos)
       return -1;
     // Last colon is inside square brackets = IPv6 address only
     if (bracketPos != -1 && colonPos < bracketPos)
@@ -41,9 +42,9 @@ public final class Hostname {
     // series.
     while (colonPos > 0 && vncServerName.charAt(colonPos - 1) == ':')
       colonPos--;
-    if (colonPos == 0) {
+    if (colonPos == atPos + 1) {
       // IPv6 loopback address only (special case)
-      if (vncServerName.equals("::1"))
+      if (vncServerName.regionMatches(atPos + 1, "::1", 0, 3))
         return -1;
       // Display number/port/UDS specified without host
       return colonPos;
@@ -71,14 +72,27 @@ public final class Hostname {
     return colonPos;
   }
 
+  public static String getSSHUser(String vncServerName) {
+    int atPos = vncServerName.lastIndexOf('@');
+    String sshUser = null;
+
+    if (atPos >= 0) {
+      sshUser = vncServerName.substring(0, atPos).replaceAll("\\s", "");
+      if (sshUser.length() > 0)
+        return sshUser;
+    }
+    return null;
+  }
+
   public static String getHost(String vncServerName) {
     int colonPos = getColonPos(vncServerName);
+    int atPos = vncServerName.lastIndexOf('@');
 
-    if (colonPos == 0)
+    if (colonPos == atPos + 1)
       return "localhost";
-    if (colonPos == -1)
+    if (colonPos == -1 || colonPos < atPos)
       colonPos = vncServerName.length();
-    return vncServerName.substring(0, colonPos).replaceAll("\\s", "");
+    return vncServerName.substring(atPos + 1, colonPos).replaceAll("\\s", "");
   }
 
   public static int getPort(String vncServerName) {

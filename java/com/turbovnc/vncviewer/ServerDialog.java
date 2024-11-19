@@ -183,10 +183,11 @@ class ServerDialog extends Dialog implements ActionListener {
   }
 
   private void updateButtons() {
-    okButton.setEnabled(editor.getItem() != null &&
-                        ((String)editor.getItem()).length() > 0);
-    optionsButton.setEnabled(editor.getItem() != null &&
-                             ((String)editor.getItem()).length() > 0);
+    String serverStr = (String)editor.getItem();
+    if (serverStr != null)
+      serverStr = Hostname.getHost(serverStr);
+    okButton.setEnabled(serverStr != null && serverStr.length() > 0);
+    optionsButton.setEnabled(serverStr != null && serverStr.length() > 0);
   }
 
   public void actionPerformed(ActionEvent e) {
@@ -202,10 +203,7 @@ class ServerDialog extends Dialog implements ActionListener {
     } else if (s instanceof JButton && (JButton)s == optionsButton) {
       if (editor.getItem() != null &&
           ((String)editor.getItem()).length() > 0) {
-        String serverStr = (String)editor.getItem();
-        int atIndex = serverStr.lastIndexOf('@');
-        if (atIndex >= 0) serverStr = serverStr.substring(atIndex + 1);
-        serverStr = Hostname.getHost(serverStr);
+        String serverStr = Hostname.getHost((String)editor.getItem());
         UserPreferences.load(serverStr, params);
         options.setNode(serverStr);
         options.showDialog(getJDialog());
@@ -229,28 +227,29 @@ class ServerDialog extends Dialog implements ActionListener {
   private boolean commit() {
     try {
 
-      String serverName = (String)editor.getItem();
-      if (serverName == null || serverName.equals(""))
+      String serverStr = (String)editor.getItem();
+      if (serverStr == null || serverStr.equals(""))
         throw new WarningException("No server name specified");
 
       // set params
       if (params.via.get() != null &&
           Hostname.getColonPos(params.via.get()) >= 0) {
-        params.server.set(serverName);
+        params.server.set(serverStr);
       } else {
-        params.server.set(Hostname.getHost(serverName));
-        params.port.set(Hostname.getPort(serverName));
-        params.udsPath = Hostname.getUDSPath(serverName);
+        params.sshUser.set(Hostname.getSSHUser(serverStr));
+        params.server.set(Hostname.getHost(serverStr));
+        params.port.set(Hostname.getPort(serverStr));
+        params.udsPath = Hostname.getUDSPath(serverStr);
       }
 
       // Update the history list
       String valueStr = UserPreferences.get("ServerDialog", "history");
       String t = (valueStr == null) ? "" : valueStr;
       StringTokenizer st = new StringTokenizer(t, ",");
-      StringBuffer sb = new StringBuffer().append(serverName);
+      StringBuffer sb = new StringBuffer().append(serverStr);
       while (st.hasMoreTokens()) {
         String str = st.nextToken();
-        if (!str.equals(serverName) && !str.equals("")) {
+        if (!str.equals(serverStr) && !str.equals("")) {
           sb.append(',');
           sb.append(str);
         }
