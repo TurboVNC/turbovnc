@@ -629,6 +629,12 @@ public final class Params {
    "you to remotely start a new TurboVNC session or to choose an existing " +
    "session to which to connect.\n " : "\n ") +
 
+  "When using the Tunnel parameter" +
+  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
+   " or the TurboVNC Session Manager, " : ", ") +
+  "the SSH username (default = local username) can be specified by " +
+  "prefixing the VNC host with the username followed by @.\n " +
+
   "In Unix domain socket paths, ~ is expanded to the user's home directory " +
   "on the VNC host, %h is expanded to the VNC host name (from the point of " +
   "view of the VNC host), %i is expanded to the numeric user ID on the VNC " +
@@ -999,9 +1005,11 @@ public final class Params {
 
   "Patterns beginning with the \"%\" character are expanded as follows:\r " +
   "%% --> a literal \"%\" character\r " +
-  "%G --> gateway host name or IP address\r " +
-  "%H --> remote VNC host name or IP address (if using the Via parameter, " +
-  "then this is specified from the point of view of the gateway)\r " +
+  "%G --> gateway host name or IP address, including the SSH username if " +
+  "specified\r " +
+  "%H --> remote VNC host name or IP address, including the SSH username if " +
+  "specified (if using the Via parameter, then the VNC host is specified " +
+  "from the point of view of the gateway)\r " +
   "%L --> local TCP port number\r " +
   "%R --> remote TCP port number or the escaped name of a Unix domain " +
   "socket on the VNC host\r " +
@@ -1169,17 +1177,6 @@ public final class Params {
   "When using the built-in SSH client, this parameter specifies the TCP " +
   "port on which the SSH server is listening.", 22, 0, 65535);
 
-  public StringParameter sshUser =
-  new StringParameter("SSHUser", this, true, false,
-  "The username (default = local username) that should be used when " +
-  "authenticating with the SSH server.  When using the Tunnel parameter" +
-  (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
-   " or the TurboVNC Session Manager, " : ", ") +
-  "the SSH username can also be specified by prefixing the VNC host with " +
-  "the username followed by @.  When using the Via parameter with an SSH " +
-  "server, the SSH username can also be specified by prefixing the gateway " +
-  "host with the username followed by @.", null);
-
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true, false,
   "Setting this parameter is equivalent to using the Via parameter with an " +
@@ -1216,7 +1213,11 @@ public final class Params {
   "the same host and listening on port 5900 (VNC display :0.)  If using the " +
   "UltraVNC Repeater in \"Mode II\", specify ID:xxxx as the VNC server " +
   "name, where xxxx is the ID number of the VNC server to which you want to " +
-  "connect.", null);
+  "connect.\n " +
+
+  "When using an SSH gateway, the SSH username (default = local username) " +
+  "can be specified by prefixing the gateway host with the username " +
+  "followed by @.", null);
 
   public StringParameter x509ca =
   new StringParameter("X509CA", this, true, false,

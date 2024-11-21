@@ -44,16 +44,20 @@ public class Tunnel {
 
   public static void createTunnel(Params params) throws Exception {
     int localPort, remotePort;
-    String gatewayHost, remoteHost;
+    String gatewaySSHUser, gatewayHost, remoteSSHUser, remoteHost;
 
     boolean tunnel = params.tunnel.get() ||
                      (params.sessMgrActive && params.sessMgrAuto.get());
 
     if (tunnel) {
+      gatewaySSHUser = Hostname.getSSHUser(params.server.get());
       gatewayHost = Hostname.getHost(params.server.get());
+      remoteSSHUser = null;
       remoteHost = "localhost";
     } else {
-      gatewayHost = params.via.get();
+      gatewaySSHUser = Hostname.getSSHUser(params.via.get());
+      gatewayHost = Hostname.getHost(params.via.get());
+      remoteSSHUser = Hostname.getSSHUser(params.server.get());
       remoteHost = Hostname.getHost(params.server.get());
     }
     if (params.server.get() != null &&
@@ -78,20 +82,21 @@ public class Tunnel {
     if (params.udsPath != null &&
         (pattern == null || pattern.indexOf("%L") < 0)) {
       // Connect to Unix domain socket using stdio-based forwarding
-      params.stdioSocket = createTunnelExtUDS(gatewayHost, remoteHost, pattern,
-                                              params, tunnel);
+      params.stdioSocket = createTunnelExtUDS(gatewaySSHUser, gatewayHost,
+                                              remoteSSHUser, remoteHost,
+                                              pattern, params, tunnel);
     } else {
       localPort = TcpSocket.findFreeTcpPort();
       if (localPort == 0)
         throw new ErrorException("Could not obtain free TCP port");
 
       if (params.extSSH.get() || (pattern != null && pattern.length() > 0))
-        createTunnelExt(gatewayHost, remoteHost, remotePort, localPort,
-                        pattern, params, tunnel);
+        createTunnelExt(gatewaySSHUser, gatewayHost, remoteSSHUser, remoteHost,
+                        remotePort, localPort, pattern, params, tunnel);
       else {
         vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
         if (params.sshSession == null)
-          createTunnelJSch(gatewayHost, params);
+          createTunnelJSch(gatewaySSHUser, gatewayHost, params);
         remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
         vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
                    "::" + remotePort + " (relative to gateway)");
@@ -105,8 +110,8 @@ public class Tunnel {
 
   /* Create a tunnel using the built-in JSch SSH client */
 
-  protected static void createTunnelJSch(String host, Params params)
-                                         throws Exception {
+  protected static void createTunnelJSch(String user, String host,
+                                         Params params) throws Exception {
     JSch jsch = new JSch();
     JSch.setLogger(LOGGER);
     String homeDir = new String("");
@@ -177,7 +182,6 @@ public class Tunnel {
 
     // username and passphrase will be given via UserInfo interface.
     int port = params.sshPort.isDefault() ? -1 : params.sshPort.get();
-    String user = params.sshUser.get();
 
     File sshConfigFile = new File(params.sshConfig.get());
     if (sshConfigFile.exists() && sshConfigFile.canRead()) {
@@ -267,17 +271,18 @@ public class Tunnel {
   public static final String DEFAULT_VIA_CMD =
     "%S -f -L %L:%H:%R %G sleep 20";
 
-  private static void createTunnelExt(String gatewayHost, String remoteHost,
-                                      int remotePort, int localPort,
-                                      String pattern, Params params,
-                                      boolean tunnel)
+  private static void createTunnelExt(String gatewaySSHUser,
+                                      String gatewayHost, String remoteSSHUser,
+                                      String remoteHost, int remotePort,
+                                      int localPort, String pattern,
+                                      Params params, boolean tunnel)
                                       throws Exception {
     if (pattern == null || pattern.length() < 1)
       pattern = (tunnel ? DEFAULT_TUNNEL_CMD : DEFAULT_VIA_CMD);
 
-    String command = fillCmdPattern(pattern, gatewayHost, remoteHost,
-                                    remotePort, params.udsPath, localPort,
-                                    params, tunnel);
+    String command = fillCmdPattern(pattern, gatewaySSHUser, gatewayHost,
+                                    remoteSSHUser, remoteHost, remotePort,
+                                    params.udsPath, localPort, params, tunnel);
 
     vlog.debug("SSH command line: " + command);
     List<String> args = ArgumentTokenizer.tokenize(command);
@@ -295,7 +300,9 @@ public class Tunnel {
   public static final String DEFAULT_VIA_CMD_UDS =
     "%S -J %G -- %H exec socat stdio unix-connect:%R";
 
-  private static Socket createTunnelExtUDS(String gatewayHost,
+  private static Socket createTunnelExtUDS(String gatewaySSHUser,
+                                           String gatewayHost,
+                                           String remoteSSHUser,
                                            String remoteHost, String pattern,
                                            Params params, boolean tunnel)
                                            throws Exception {
@@ -307,8 +314,9 @@ public class Tunnel {
     String udsPath = escapeUDSPath(params.udsPath, true);
     udsPath = escapeUDSPath(udsPath, false);
 
-    String command = fillCmdPattern(pattern, gatewayHost, remoteHost, -1,
-                                    udsPath, -1, params, tunnel);
+    String command = fillCmdPattern(pattern, gatewaySSHUser, gatewayHost,
+                                    remoteSSHUser, remoteHost, -1, udsPath, -1,
+                                    params, tunnel);
 
     vlog.debug("SSH command line (stdio): " + command);
     List<String> args = ArgumentTokenizer.tokenize(command);
@@ -338,16 +346,15 @@ public class Tunnel {
     }
   }
 
-  private static String fillCmdPattern(String pattern, String gatewayHost,
-                                       String remoteHost, int remotePort,
-                                       String udsPath, int localPort,
-                                       Params params, boolean tunnel) {
+  private static String fillCmdPattern(String pattern, String gatewaySSHUser,
+                                       String gatewayHost,
+                                       String remoteSSHUser, String remoteHost,
+                                       int remotePort, String udsPath,
+                                       int localPort, Params params,
+                                       boolean tunnel) {
     int i, j;
     boolean hFound = false, gFound = false, rFound = false, lFound = false;
     String command = "";
-
-    if (params.sshUser.get() != null)
-      gatewayHost = params.sshUser.get() + "@" + gatewayHost;
 
     for (i = 0; i < pattern.length(); i++) {
       if (pattern.charAt(i) == '%') {
@@ -356,11 +363,18 @@ public class Tunnel {
             command += params.extSSHCommand.get();
             continue;
           case 'H':
-            command += (tunnel ? gatewayHost : remoteHost);
+            String sshUser = (tunnel ? gatewaySSHUser : remoteSSHUser);
+            if (sshUser != null)
+              command += sshUser + "@" + (tunnel ? gatewayHost : remoteHost);
+            else
+              command += (tunnel ? gatewayHost : remoteHost);
             hFound = true;
             continue;
           case 'G':
-            command += gatewayHost;
+            if (gatewaySSHUser != null)
+              command += gatewaySSHUser + "@" + gatewayHost;
+            else
+              command += gatewayHost;
             gFound = true;
             continue;
           case 'R':
@@ -524,12 +538,12 @@ public class Tunnel {
           vlogSSH.error(message);
           return;
         case Logger.FATAL:
-          throw new ErrorException("JSch: " + message);
+          throw new ErrorException("SSH: " + message);
       }
     }
   };
 
   protected Tunnel() {}
   static LogWriter vlog = new LogWriter("Tunnel");
-  static LogWriter vlogSSH = new LogWriter("JSch");
+  static LogWriter vlogSSH = new LogWriter("SSH");
 }

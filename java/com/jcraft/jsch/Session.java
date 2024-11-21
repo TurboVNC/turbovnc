@@ -203,8 +203,8 @@ public class Session implements Runnable{
     }
     Packet.setRandom(random);
 
-    if(JSch.getLogger().isEnabled(Logger.INFO)){
-      JSch.getLogger().log(Logger.INFO, 
+    if(JSch.getLogger().isEnabled(Logger.ERROR)){
+      JSch.getLogger().log(Logger.ERROR,
                            "Connecting to "+host+" port "+port+" with username "+username);
     }
 

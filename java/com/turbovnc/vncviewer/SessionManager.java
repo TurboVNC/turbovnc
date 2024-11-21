@@ -44,7 +44,7 @@ public final class SessionManager extends Tunnel {
     vlog.debug("Opening SSH connection to host " + host);
     VncViewer.noExceptionDialog =
       Utils.getBooleanProperty("turbovnc.sshkeytest", false);
-    createTunnelJSch(host, params);
+    createTunnelJSch(Hostname.getSSHUser(params.server.get()), host, params);
     if (Utils.getBooleanProperty("turbovnc.sshkeytest", false)) {
       System.out.println("SSH SUCCEEDED");
       System.exit(0);

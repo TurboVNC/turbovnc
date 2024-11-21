@@ -68,6 +68,11 @@ SSH client now allows the value of the `SSHPort` parameter, if specified on the
 command line or in a connection info file, to override any SSH ports specified
 in the OpenSSH config file.
 
+10. The TurboVNC Viewer's `SSHUser` parameter has been removed.  SSH usernames
+should now be specified by prefixing the VNC host or the gateway host with the
+username followed by @.  This fixes an issue whereby separate SSH usernames
+could not be specified for the `Server` and `Via` parameters.
+
 
 3.1.3
 =====

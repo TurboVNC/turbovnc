@@ -28,28 +28,14 @@ public final class ServerNameParameter extends StringParameter {
   }
 
   public synchronized boolean set(String str) {
-    if (str != null && !str.isEmpty()) {
+    if (str != null && !str.isEmpty())
       str = str.replaceAll("\\s", "");
-      int atIndex = str.lastIndexOf('@');
-      if (atIndex >= 0) {
-        params.sshUser.set(str.substring(0, atIndex));
-        if (isCommandLine() || getName().equalsIgnoreCase("Server"))
-          params.sshUser.setCommandLine(true);
-        return super.set(str.substring(atIndex + 1));
-      }
-    }
     return super.set(str);
   }
 
   public synchronized boolean setDefault(String str) {
-    if (str != null && !str.isEmpty()) {
+    if (str != null && !str.isEmpty())
       str = str.replaceAll("\\s", "");
-      int atIndex = str.lastIndexOf('@');
-      if (atIndex >= 0) {
-        params.sshUser.setDefault(str.substring(0, atIndex));
-        return super.setDefault(str.substring(atIndex + 1));
-      }
-    }
     return super.setDefault(str);
   }
 }

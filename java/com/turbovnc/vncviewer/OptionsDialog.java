@@ -54,8 +54,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     secTLSPlain, secX509None, secX509Vnc, secX509Plain, secUnixLogin;
   private JPanel encNonePanel, encTLSPanel, encX509Panel;
   private JCheckBox sendLocalUsername, tunnel;
-  private JTextField username, sshUser, gateway;
-  private JLabel usernameLabel, sshUserLabel, gatewayLabel;
+  private JTextField username, gateway;
+  private JLabel usernameLabel, gatewayLabel, gatewayLabel2;
   private JButton okButton, cancelButton;
   private JButton x509caButton, x509crlButton;
   private JLabel x509caLabel, x509crlLabel;
@@ -667,37 +667,33 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     JPanel gatewayPanel = new JPanel(new GridBagLayout());
     gatewayPanel.setBorder(
-      BorderFactory.createTitledBorder("Gateway (SSH server or UltraVNC repeater)"));
+      BorderFactory.createTitledBorder("Gateway"));
+    gatewayLabel =
+      new JLabel("host:displayNum, host::port = UltraVNC repeater");
+    gatewayLabel2 =
+      new JLabel("[user@]host = SSH server");
     gateway = new JTextField("", 1);
     filterWhitespace(gateway);
-    gatewayLabel = new JLabel("Host:");
-    sshUser = new JTextField("", 1);
-    sshUserLabel = new JLabel("SSH user:");
     tunnel = new JCheckBox("Use VNC server as gateway");
     tunnel.addItemListener(this);
 
-    Dialog.addGBComponent(sshUserLabel, gatewayPanel,
-                          0, 0, 1, 1, 2, 2, 0, 0,
-                          GridBagConstraints.NONE,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(8, 8, 0, 2));
-    Dialog.addGBComponent(sshUser, gatewayPanel,
-                          1, 0, 1, 1, 2, 2, 0.7, 0,
-                          GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(4, 2, 0, 2));
     Dialog.addGBComponent(gatewayLabel, gatewayPanel,
-                          2, 0, 1, 1, 2, 2, 0, 0,
-                          GridBagConstraints.NONE,
-                          GridBagConstraints.FIRST_LINE_START,
-                          new Insets(8, 2, 0, 2));
+                          0, 0, 1, 1, 0, 0, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(0, 5, 0, 5));
+    Dialog.addGBComponent(gatewayLabel2, gatewayPanel,
+                          0, 1, 1, 1, 0, 0, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(0, 5, 0, 5));
     Dialog.addGBComponent(gateway, gatewayPanel,
-                          3, 0, 1, 1, 2, 2, 1, 0,
+                          0, 2, 1, 1, 2, 2, 1, 0,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 2, 0, 5));
     Dialog.addGBComponent(tunnel, gatewayPanel,
-                          0, 1, 4, 1, 2, 2, 1, 1,
+                          0, 3, 4, 1, 2, 2, 1, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
@@ -991,6 +987,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     if (s instanceof JCheckBox && (JCheckBox)s == tunnel) {
       gateway.setEnabled(!tunnel.isSelected());
       gatewayLabel.setEnabled(!tunnel.isSelected());
+      gatewayLabel2.setEnabled(!tunnel.isSelected());
     }
   }
 
@@ -1262,7 +1259,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     x509crl.setText(params.x509crl.get());
 
     // Security: Gateway
-    sshUser.setText(params.sshUser.get());
     gateway.setText(params.via.get());
     tunnel.setSelected(params.tunnel.get());
 
@@ -1295,10 +1291,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       x509crlLabel.setEnabled(false);
     }
     if (disableSSH) {
-      sshUser.setEnabled(false);
-      sshUserLabel.setEnabled(false);
-      gateway.setEnabled(false);
       gatewayLabel.setEnabled(false);
+      gatewayLabel2.setEnabled(false);
+      gateway.setEnabled(false);
       tunnel.setEnabled(false);
     }
   }
@@ -1374,7 +1369,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     params.x509crl.set(x509crl.getText().isEmpty() ? null : x509crl.getText());
 
     // Security: Gateway
-    params.sshUser.set(sshUser.getText().isEmpty() ? null : sshUser.getText());
     params.via.set(gateway.getText().isEmpty() ? null : gateway.getText());
     params.tunnel.set(tunnel.isSelected());
 

@@ -77,7 +77,7 @@ public final class Hostname {
     String sshUser = null;
 
     if (atPos >= 0) {
-      sshUser = vncServerName.substring(0, atPos).replaceAll("\\s", "");
+      sshUser = vncServerName.substring(0, atPos);
       if (sshUser.length() > 0)
         return sshUser;
     }
@@ -92,7 +92,7 @@ public final class Hostname {
       return "localhost";
     if (colonPos == -1 || colonPos < atPos)
       colonPos = vncServerName.length();
-    return vncServerName.substring(atPos + 1, colonPos).replaceAll("\\s", "");
+    return vncServerName.substring(atPos + 1, colonPos);
   }
 
   public static int getPort(String vncServerName) {
