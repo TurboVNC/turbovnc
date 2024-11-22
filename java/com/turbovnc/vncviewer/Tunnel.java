@@ -42,10 +42,8 @@ import com.jcraft.jsch.*;
 public class Tunnel {
 
   public static void createTunnel(Options opts) throws Exception {
-    int localPort;
-    int remotePort;
-    String gatewayHost;
-    String remoteHost;
+    int localPort, remotePort;
+    String gatewayHost, remoteHost;
 
     boolean tunnel = opts.tunnel ||
                      (opts.sessMgrActive && Params.sessMgrAuto.getValue());
@@ -87,14 +85,14 @@ public class Tunnel {
         createTunnelJSch(gatewayHost, opts);
       remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
       vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
-                 ":" + remotePort + " (relative to gateway)");
+                 "::" + remotePort + " (relative to gateway)");
       opts.sshSession.setPortForwardingL(localPort, remoteHost, remotePort);
     }
     opts.serverName = "localhost::" + localPort;
     opts.sshTunnelActive = true;
   }
 
-  /* Create a tunnel using the builtin JSch SSH client */
+  /* Create a tunnel using the built-in JSch SSH client */
 
   protected static void createTunnelJSch(String host, Options opts)
                                          throws Exception {
