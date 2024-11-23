@@ -2700,9 +2700,11 @@ break;
     if(value != null)
       host = value;
 
-    int port = config.getPort();
-    if(port != -1)
-      this.port = port;
+    if(port == -1) {
+      int port = config.getPort();
+      if(port != -1)
+        this.port = port;
+    }
 
     checkConfig(config, "kex");
     checkConfig(config, "server_host_key");

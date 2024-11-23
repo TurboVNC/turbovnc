@@ -174,7 +174,7 @@ public class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    int port = params.sshPort.get();
+    int port = params.sshPort.isDefault() ? -1 : params.sshPort.get();
     String user = params.sshUser.get();
 
     File sshConfigFile = new File(params.sshConfig.get());
@@ -183,10 +183,6 @@ public class Tunnel {
         OpenSSHConfig.parseFile(sshConfigFile.getAbsolutePath());
       jsch.setConfigRepository(repo);
       vlog.debug("Read OpenSSH config file " + params.sshConfig.get());
-      // This just ensures that the password dialog displays the correct
-      // username.  JSch will ignore the username and port passed to
-      // getSession() if the configuration has already been set using an
-      // OpenSSH configuration file.
       String repoUser = repo.getConfig(host).getUser();
       if (repoUser != null && user == null)
         user = repoUser;

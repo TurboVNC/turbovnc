@@ -7,6 +7,11 @@
 a user clicked the "Connect" button in the New TurboVNC Connection dialog after
 entering an SSH username with a blank VNC host into the "VNC server" field.
 
+2. To better emulate the behavior of OpenSSH, the TurboVNC Viewer's built-in
+SSH client now allows the value of the `SSHPort` parameter, if specified on the
+command line or in a connection info file, to override any SSH ports specified
+in the OpenSSH config file.
+
 
 3.1.3
 =====
