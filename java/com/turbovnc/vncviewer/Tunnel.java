@@ -43,10 +43,8 @@ import com.jcraft.jsch.*;
 public class Tunnel {
 
   public static void createTunnel(Params params) throws Exception {
-    int localPort;
-    int remotePort;
-    String gatewayHost;
-    String remoteHost;
+    int localPort, remotePort;
+    String gatewayHost, remoteHost;
 
     boolean tunnel = params.tunnel.get() ||
                      (params.sessMgrActive && params.sessMgrAuto.get());
@@ -96,7 +94,7 @@ public class Tunnel {
           createTunnelJSch(gatewayHost, params);
         remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
         vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
-                   ":" + remotePort + " (relative to gateway)");
+                   "::" + remotePort + " (relative to gateway)");
         params.sshSession.setPortForwardingL(localPort, remoteHost,
                                              remotePort);
       }
@@ -105,7 +103,7 @@ public class Tunnel {
     params.sshTunnelActive = true;
   }
 
-  /* Create a tunnel using the builtin JSch SSH client */
+  /* Create a tunnel using the built-in JSch SSH client */
 
   protected static void createTunnelJSch(String host, Params params)
                                          throws Exception {
@@ -178,7 +176,7 @@ public class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    int port = params.sshPort.get();
+    int port = params.sshPort.isDefault() ? -1 : params.sshPort.get();
     String user = params.sshUser.get();
 
     File sshConfigFile = new File(params.sshConfig.get());
@@ -187,10 +185,6 @@ public class Tunnel {
         OpenSSHConfig.parseFile(sshConfigFile.getAbsolutePath());
       jsch.setConfigRepository(repo);
       vlog.debug("Read OpenSSH config file " + params.sshConfig.get());
-      // This just ensures that the password dialog displays the correct
-      // username.  JSch will ignore the username and port passed to
-      // getSession() if the configuration has already been set using an
-      // OpenSSH configuration file.
       String repoUser = repo.getConfig(host).getUser();
       if (repoUser != null && user == null)
         user = repoUser;

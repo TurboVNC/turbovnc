@@ -205,7 +205,7 @@ public class Session implements Runnable{
 
     if(JSch.getLogger().isEnabled(Logger.INFO)){
       JSch.getLogger().log(Logger.INFO, 
-                           "Connecting to "+host+" port "+port);
+                           "Connecting to "+host+" port "+port+" with username "+username);
     }
 
     try	{
@@ -2706,9 +2706,11 @@ break;
     if(value != null)
       host = value;
 
-    int port = config.getPort();
-    if(port != -1)
-      this.port = port;
+    if(port == -1) {
+      int port = config.getPort();
+      if(port != -1)
+        this.port = port;
+    }
 
     checkConfig(config, "kex");
     checkConfig(config, "server_host_key");

@@ -66,16 +66,21 @@ public class IntParameter extends VoidParameter {
     if ((useMin && value_ < minValue) || (useMax && value_ > maxValue))
       return false;
     value = value_;
+    isDefault = false;
     setCommandLine(false);
     return true;
   }
 
-  public final synchronized void reset() { set(defValue); }
+  public final synchronized void reset() {
+    set(defValue);
+    isDefault = true;
+  }
 
   public final synchronized boolean setDefault(int defValue_) {
     if ((useMin && defValue_ < minValue) || (useMax && defValue_ > maxValue))
       return false;
     value = defValue = defValue_;
+    isDefault = true;
     return true;
   }
 
@@ -105,6 +110,10 @@ public class IntParameter extends VoidParameter {
     }
     return null;
   }
+
+  public final synchronized boolean isDefault() { return isDefault; }
+
+  private boolean isDefault = true;
 
   int value, defValue;
   final int minValue, maxValue;

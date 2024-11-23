@@ -1097,8 +1097,9 @@ public final class Params {
   public StringParameter sshConfig =
   new StringParameter("SSHConfig", this, false, false,
   "Path to an OpenSSH configuration file to use with the built-in SSH " +
-  "client.  The OpenSSH configuration file takes precedence over any " +
-  "TurboVNC Viewer parameters.", Utils.getHomeDir() + ".ssh/config");
+  "client.  If specified on the command line or in a connection info file, " +
+  "TurboVNC Viewer parameters take precedence over the OpenSSH " +
+  "configuration file.", Utils.getHomeDir() + ".ssh/config");
 
   public StringParameter sshKey =
   new StringParameter("SSHKey", this, false, false,
