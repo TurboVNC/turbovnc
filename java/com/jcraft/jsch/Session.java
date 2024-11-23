@@ -205,7 +205,7 @@ public class Session implements Runnable{
 
     if(JSch.getLogger().isEnabled(Logger.INFO)){
       JSch.getLogger().log(Logger.INFO, 
-                           "Connecting to "+host+" port "+port);
+                           "Connecting to "+host+" port "+port+" with username "+username);
     }
 
     try	{
