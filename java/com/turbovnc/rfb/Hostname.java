@@ -76,11 +76,8 @@ public final class Hostname {
     int atPos = vncServerName.lastIndexOf('@');
     String sshUser = null;
 
-    if (atPos >= 0) {
-      sshUser = vncServerName.substring(0, atPos);
-      if (sshUser.length() > 0)
-        return sshUser;
-    }
+    if (atPos > 0)
+      return vncServerName.substring(0, atPos);
     return null;
   }
 
