@@ -3039,6 +3039,10 @@ ProcFreeCursor(ClientPtr client)
     rc = dixLookupResourceByType((void **) &pCursor, stuff->id, RT_CURSOR,
                                  client, DixDestroyAccess);
     if (rc == Success) {
+        if (pCursor == rootCursor) {
+            client->errorValue = stuff->id;
+            return BadCursor;
+        }
         FreeResource(stuff->id, RT_NONE);
         return Success;
     }
