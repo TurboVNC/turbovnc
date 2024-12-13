@@ -129,6 +129,13 @@ endforeach()
 # Detect CPU type and word size
 math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} CMAKE_SYSTEM_PROCESSOR_LC)
+set(COUNT 1)
+foreach(ARCH ${CMAKE_OSX_ARCHITECTURES})
+	if(COUNT GREATER 1)
+		message(FATAL_ERROR "TurboVNC contains JNI code, so it cannot be built with multiple values in CMAKE_OSX_ARCHITECTURES.")
+	endif()
+	math(EXPR COUNT "${COUNT}+1")
+endforeach()
 if(CMAKE_SYSTEM_PROCESSOR_LC MATCHES "x86_64" OR
 	CMAKE_SYSTEM_PROCESSOR_LC MATCHES "amd64" OR
 	CMAKE_SYSTEM_PROCESSOR_LC MATCHES "i[0-9]86" OR
