@@ -1,7 +1,7 @@
 environment:
-  LJT_VERSION: 2.1.6
-  LJT_64BIT_SDK: "https://s3.amazonaws.com/libjpeg-turbo-pr/2.1.x/windows/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
-  LJT_32BIT_SDK: "https://s3.amazonaws.com/libjpeg-turbo-pr/2.1.x/windows/libjpeg-turbo-%LJT_VERSION%-vc.exe"
+  LJT_VERSION: 3.0.5
+  LJT_64BIT_SDK: "https://s3.amazonaws.com/libjpeg-turbo-pr/3.0.x/windows/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
+  LJT_32BIT_SDK: "https://s3.amazonaws.com/libjpeg-turbo-pr/3.0.x/windows/libjpeg-turbo-%LJT_VERSION%-vc.exe"
 
 install:
   - cmd: >-

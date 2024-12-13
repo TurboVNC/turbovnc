@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  LJT_VERSION: 2.1.6
+  LJT_VERSION: 3.0.5
   LJT_GPG_KEY: https://raw.githubusercontent.com/libjpeg-turbo/repo/main/LJTPR-GPG-KEY
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
       - name: Set global environment variables
         run: |
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
-          echo "LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/2.1.x/linux" >>$GITHUB_ENV
+          echo "LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/3.0.x/linux" >>$GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v4
       - name: Set up build
@@ -72,7 +72,7 @@ jobs:
       - name: Set global environment variables
         run: |
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
-          echo "LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/2.1.x/linux" >>$GITHUB_ENV
+          echo "LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/3.0.x/linux" >>$GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v4
       - name: Set up build
@@ -99,7 +99,7 @@ jobs:
       - name: Set global environment variables
         run: |
           echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
-          echo "LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/2.1.x/macos" >>$GITHUB_ENV
+          echo "LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/3.0.x/macos" >>$GITHUB_ENV
       - name: Check out code
         uses: actions/checkout@v4
       - name: Set up build
