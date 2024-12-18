@@ -1,5 +1,5 @@
-/* Copyright (C) 2011-2012, 2014-2015, 2017-2019, 2021 D. R. Commander.
- *                                                     All Rights Reserved.
+/* Copyright (C) 2011-2012, 2014-2015, 2017-2019, 2021, 2024
+ *           D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ JNIEXPORT jlong JNICALL Java_com_turbovnc_rfb_TightDecoder_tjInitDecompress
     THROW(tjGetErrorStr());
 
 bailout:
-  return (jlong)handle;
+  return (jlong)(size_t)handle;
 }
 
 
@@ -88,7 +88,7 @@ static void decompress
   BAILIF0NOEC(jpegBuf = (*env)->GetPrimitiveArrayCritical(env, src, 0));
   BAILIF0NOEC(dstBuf = (*env)->GetPrimitiveArrayCritical(env, dst, 0));
 
-  if (tjDecompress2((tjhandle)handle, jpegBuf, (unsigned long)jpegSize,
+  if (tjDecompress2((tjhandle)(size_t)handle, jpegBuf, (unsigned long)jpegSize,
                     &dstBuf[y * actualPitch + x * tjPixelSize[pf]], width,
                     pitch, height, pf, flags) == -1) {
     SAFE_RELEASE(dst, dstBuf);
@@ -128,7 +128,7 @@ JNIEXPORT void JNICALL Java_com_turbovnc_rfb_TightDecoder_tjDestroy
   if (!handle)
     THROW("Invalid argument in tjDestroy()");
 
-  if (tjDestroy((tjhandle)handle) == -1) THROW(tjGetErrorStr());
+  if (tjDestroy((tjhandle)(size_t)handle) == -1) THROW(tjGetErrorStr());
 
 bailout:
   return;
