@@ -46,12 +46,33 @@ index c9b11d4..7c85710 100644
              }
              if (!tpn->client)
 diff --git a/xorg-server-1.19.7/Xi/exevents.c b/Xserver/Xi/exevents.c
-index 17d751e..16015e9 100644
+index 17d751e..accc810 100644
 --- a/xorg-server-1.19.7/Xi/exevents.c
 +++ b/Xserver/Xi/exevents.c
-@@ -575,8 +575,10 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
+@@ -561,22 +561,25 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
+                 to->button = calloc(1, sizeof(ButtonClassRec));
+                 if (!to->button)
+                     FatalError("[Xi] no memory for class shift.\n");
++                to->button->numButtons = from->button->numButtons;
+             }
+             else
+                 classes->button = NULL;
+         }
+ 
+         if (from->button->xkb_acts) {
+-            if (!to->button->xkb_acts) {
+-                to->button->xkb_acts = calloc(1, sizeof(XkbAction));
+-                if (!to->button->xkb_acts)
+-                    FatalError("[Xi] not enough memory for xkb_acts.\n");
+-            }
++            size_t maxbuttons = max(to->button->numButtons, from->button->numButtons);
++            to->button->xkb_acts = xnfreallocarray(to->button->xkb_acts,
++                                                   maxbuttons,
++                                                   sizeof(XkbAction));
++            memset(to->button->xkb_acts, 0, maxbuttons * sizeof(XkbAction));
              memcpy(to->button->xkb_acts, from->button->xkb_acts,
-                    sizeof(XkbAction));
+-                   sizeof(XkbAction));
++                   from->button->numButtons * sizeof(XkbAction));
          }
 -        else
 +        else {
@@ -62,7 +83,7 @@ index 17d751e..16015e9 100644
          memcpy(to->button->labels, from->button->labels,
                 from->button->numButtons * sizeof(Atom));
 diff --git a/xorg-server-1.19.7/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
-index 7286eff..6b15beb 100644
+index 7286eff..bf68bac 100644
 --- a/xorg-server-1.19.7/Xi/xichangehierarchy.c
 +++ b/Xserver/Xi/xichangehierarchy.c
 @@ -140,7 +140,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
@@ -101,7 +122,19 @@ index 7286eff..6b15beb 100644
          XIBarrierRemoveMasterDevice(clients[i], ptr->id);
  
      /* disable the remove the devices, XTest devices must be done first
-@@ -423,7 +423,7 @@ ProcXIChangeHierarchy(ClientPtr client)
+@@ -416,6 +416,11 @@ ProcXIChangeHierarchy(ClientPtr client)
+     size_t len;			/* length of data remaining in request */
+     int rc = Success;
+     int flags[MAXDEVICES] = { 0 };
++    enum {
++        NO_CHANGE,
++        FLUSH,
++        CHANGED,
++    } changes = NO_CHANGE;
+ 
+     REQUEST(xXIChangeHierarchyReq);
+     REQUEST_AT_LEAST_SIZE(xXIChangeHierarchyReq);
+@@ -423,7 +428,7 @@ ProcXIChangeHierarchy(ClientPtr client)
      if (!stuff->num_changes)
          return rc;
  
@@ -110,11 +143,80 @@ index 7286eff..6b15beb 100644
  
      any = (xXIAnyHierarchyChangeInfo *) &stuff[1];
      while (stuff->num_changes--) {
+@@ -465,8 +470,9 @@ ProcXIChangeHierarchy(ClientPtr client)
+             rc = add_master(client, c, flags);
+             if (rc != Success)
+                 goto unwind;
+-        }
++            changes = FLUSH;
+             break;
++        }
+         case XIRemoveMaster:
+         {
+             xXIRemoveMasterInfo *r = (xXIRemoveMasterInfo *) any;
+@@ -475,8 +481,9 @@ ProcXIChangeHierarchy(ClientPtr client)
+             rc = remove_master(client, r, flags);
+             if (rc != Success)
+                 goto unwind;
+-        }
++            changes = FLUSH;
+             break;
++        }
+         case XIDetachSlave:
+         {
+             xXIDetachSlaveInfo *c = (xXIDetachSlaveInfo *) any;
+@@ -485,8 +492,9 @@ ProcXIChangeHierarchy(ClientPtr client)
+             rc = detach_slave(client, c, flags);
+             if (rc != Success)
+                 goto unwind;
+-        }
++            changes = CHANGED;
+             break;
++        }
+         case XIAttachSlave:
+         {
+             xXIAttachSlaveInfo *c = (xXIAttachSlaveInfo *) any;
+@@ -495,16 +503,25 @@ ProcXIChangeHierarchy(ClientPtr client)
+             rc = attach_slave(client, c, flags);
+             if (rc != Success)
+                 goto unwind;
++            changes = CHANGED;
++            break;
+         }
++        default:
+             break;
+         }
+ 
++        if (changes == FLUSH) {
++            XISendDeviceHierarchyEvent(flags);
++            memset(flags, 0, sizeof(flags));
++            changes = NO_CHANGE;
++        }
++
+         len -= any->length * 4;
+         any = (xXIAnyHierarchyChangeInfo *) ((char *) any + any->length * 4);
+     }
+ 
+  unwind:
+-
+-    XISendDeviceHierarchyEvent(flags);
++    if (changes != NO_CHANGE)
++        XISendDeviceHierarchyEvent(flags);
+     return rc;
+ }
 diff --git a/xorg-server-1.19.7/Xi/xipassivegrab.c b/Xserver/Xi/xipassivegrab.c
-index 9241ffd..412da16 100644
+index 9241ffd..c702d6b 100644
 --- a/xorg-server-1.19.7/Xi/xipassivegrab.c
 +++ b/Xserver/Xi/xipassivegrab.c
-@@ -133,6 +133,12 @@ ProcXIPassiveGrabDevice(ClientPtr client)
+@@ -93,6 +93,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
+     GrabParameters param;
+     void *tmp;
+     int mask_len;
++    uint32_t length;
+ 
+     REQUEST(xXIPassiveGrabDeviceReq);
+     REQUEST_FIXED_SIZE(xXIPassiveGrabDeviceReq,
+@@ -133,6 +134,12 @@ ProcXIPassiveGrabDevice(ClientPtr client)
          return BadValue;
      }
  
@@ -127,7 +229,20 @@ index 9241ffd..412da16 100644
      if (XICheckInvalidMaskBits(client, (unsigned char *) &stuff[1],
                                 stuff->mask_len * 4) != Success)
          return BadValue;
-@@ -313,6 +319,12 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
+@@ -228,9 +235,11 @@ ProcXIPassiveGrabDevice(ClientPtr client)
+         }
+     }
+ 
++    /* save the value before SRepXIPassiveGrabDevice swaps it */
++    length = rep.length;
+     WriteReplyToClient(client, sizeof(rep), &rep);
+     if (rep.num_modifiers)
+-        WriteToClient(client, rep.length * 4, modifiers_failed);
++        WriteToClient(client, length * 4, modifiers_failed);
+ 
+     free(modifiers_failed);
+  out:
+@@ -313,6 +322,12 @@ ProcXIPassiveUngrabDevice(ClientPtr client)
          return BadValue;
      }
  
@@ -141,9 +256,27 @@ index 9241ffd..412da16 100644
      if (rc != Success)
          return rc;
 diff --git a/xorg-server-1.19.7/Xi/xiproperty.c b/Xserver/Xi/xiproperty.c
-index b7a1f59..b75936a 100644
+index b7a1f59..f499d02 100644
 --- a/xorg-server-1.19.7/Xi/xiproperty.c
 +++ b/Xserver/Xi/xiproperty.c
+@@ -732,7 +732,7 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
+                 XIDestroyDeviceProperty(prop);
+             return BadAlloc;
+         }
+-        new_value.size = len;
++        new_value.size = total_len;
+         new_value.type = type;
+         new_value.format = format;
+ 
+@@ -749,7 +749,7 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
+         case PropModePrepend:
+             new_data = new_value.data;
+             old_data = (void *) (((char *) new_value.data) +
+-                                  (prop_value->size * size_in_bytes));
++                                  (len * size_in_bytes));
+             break;
+         }
+         if (new_data)
 @@ -892,7 +892,7 @@ ProcXChangeDeviceProperty(ClientPtr client)
      REQUEST(xChangeDevicePropertyReq);
      DeviceIntPtr dev;
@@ -162,6 +295,46 @@ index b7a1f59..b75936a 100644
      unsigned long len;
  
      REQUEST(xXIChangePropertyReq);
+diff --git a/xorg-server-1.19.7/Xi/xiquerypointer.c b/Xserver/Xi/xiquerypointer.c
+index c5b0ba7..e82c44f 100644
+--- a/xorg-server-1.19.7/Xi/xiquerypointer.c
++++ b/Xserver/Xi/xiquerypointer.c
+@@ -149,8 +149,7 @@ ProcXIQueryPointer(ClientPtr client)
+     if (pDev->button) {
+         int i;
+ 
+-        rep.buttons_len =
+-            bytes_to_int32(bits_to_bytes(pDev->button->numButtons));
++        rep.buttons_len = bytes_to_int32(bits_to_bytes(256)); /* button map up to 255 */
+         rep.length += rep.buttons_len;
+         buttons = calloc(rep.buttons_len, 4);
+         if (!buttons)
+diff --git a/xorg-server-1.19.7/Xi/xiselectev.c b/Xserver/Xi/xiselectev.c
+index 168579f..3352ee4 100644
+--- a/xorg-server-1.19.7/Xi/xiselectev.c
++++ b/Xserver/Xi/xiselectev.c
+@@ -297,6 +297,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
+     InputClientsPtr others = NULL;
+     xXIEventMask *evmask = NULL;
+     DeviceIntPtr dev;
++    uint32_t length;
+ 
+     REQUEST(xXIGetSelectedEventsReq);
+     REQUEST_SIZE_MATCH(xXIGetSelectedEventsReq);
+@@ -366,10 +367,12 @@ ProcXIGetSelectedEvents(ClientPtr client)
+         }
+     }
+ 
++    /* save the value before SRepXIGetSelectedEvents swaps it */
++    length = reply.length;
+     WriteReplyToClient(client, sizeof(xXIGetSelectedEventsReply), &reply);
+ 
+     if (reply.num_masks)
+-        WriteToClient(client, reply.length * 4, buffer);
++        WriteToClient(client, length * 4, buffer);
+ 
+     free(buffer);
+     return Success;
 diff --git a/xorg-server-1.19.7/composite/compwindow.c b/Xserver/composite/compwindow.c
 index e74ce66..db940ec 100644
 --- a/xorg-server-1.19.7/composite/compwindow.c
@@ -179,7 +352,7 @@ index e74ce66..db940ec 100644
      return ret;
  }
 diff --git a/xorg-server-1.19.7/dix/devices.c b/Xserver/dix/devices.c
-index 4a628af..08a5dca 100644
+index 4a628af..1109475 100644
 --- a/xorg-server-1.19.7/dix/devices.c
 +++ b/Xserver/dix/devices.c
 @@ -76,6 +76,11 @@ SOFTWARE.
@@ -206,6 +379,287 @@ index 4a628af..08a5dca 100644
                  return BadValue;
  
          if (!dev->valuator)
+@@ -451,14 +460,20 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
+ {
+     DeviceIntPtr *prev, other;
+     BOOL enabled;
++    BOOL dev_in_devices_list = FALSE;
+     int flags[MAXDEVICES] = { 0 };
+ 
+     if (!dev->enabled)
+         return TRUE;
+ 
+-    for (prev = &inputInfo.devices;
+-         *prev && (*prev != dev); prev = &(*prev)->next);
+-    if (*prev != dev)
++    for (other = inputInfo.devices; other; other = other->next) {
++        if (other == dev) {
++            dev_in_devices_list = TRUE;
++            break;
++        }
++    }
++
++    if (!dev_in_devices_list)
+         return FALSE;
+ 
+     TouchEndPhysicallyActiveTouches(dev);
+@@ -474,6 +489,13 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
+                 flags[other->id] |= XISlaveDetached;
+             }
+         }
++
++        for (other = inputInfo.off_devices; other; other = other->next) {
++            if (!IsMaster(other) && GetMaster(other, MASTER_ATTACHED) == dev) {
++                AttachDevice(NULL, other, NULL);
++                flags[other->id] |= XISlaveDetached;
++            }
++        }
+     }
+     else {
+         for (other = inputInfo.devices; other; other = other->next) {
+@@ -508,6 +530,9 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
+     LeaveWindow(dev);
+     SetFocusOut(dev);
+ 
++    for (prev = &inputInfo.devices;
++         *prev && (*prev != dev); prev = &(*prev)->next);
++
+     *prev = dev->next;
+     dev->next = inputInfo.off_devices;
+     inputInfo.off_devices = dev;
+@@ -1067,6 +1092,11 @@ CloseDownDevices(void)
+             dev->master = NULL;
+     }
+ 
++    for (dev = inputInfo.off_devices; dev; dev = dev->next) {
++        if (!IsMaster(dev) && !IsFloating(dev))
++            dev->master = NULL;
++    }
++
+     CloseDeviceList(&inputInfo.devices);
+     CloseDeviceList(&inputInfo.off_devices);
+ 
+@@ -2497,6 +2527,8 @@ RecalculateMasterButtons(DeviceIntPtr slave)
+ 
+     if (master->button && master->button->numButtons != maxbuttons) {
+         int i;
++        int last_num_buttons = master->button->numButtons;
++
+         DeviceChangedEvent event = {
+             .header = ET_Internal,
+             .type = ET_DeviceChanged,
+@@ -2507,6 +2539,14 @@ RecalculateMasterButtons(DeviceIntPtr slave)
+         };
+ 
+         master->button->numButtons = maxbuttons;
++        if (last_num_buttons < maxbuttons) {
++            master->button->xkb_acts = xnfreallocarray(master->button->xkb_acts,
++                                                       maxbuttons,
++                                                       sizeof(XkbAction));
++            memset(&master->button->xkb_acts[last_num_buttons],
++                   0,
++                   (maxbuttons - last_num_buttons) * sizeof(XkbAction));
++        }
+ 
+         memcpy(&event.buttons.names, master->button->labels, maxbuttons *
+                sizeof(Atom));
+diff --git a/xorg-server-1.19.7/dix/enterleave.c b/Xserver/dix/enterleave.c
+index 1b341f2..99381a2 100644
+--- a/xorg-server-1.19.7/dix/enterleave.c
++++ b/Xserver/dix/enterleave.c
+@@ -615,9 +615,15 @@ FixDeviceValuator(DeviceIntPtr dev, deviceValuator * ev, ValuatorClassPtr v,
+ 
+     ev->type = DeviceValuator;
+     ev->deviceid = dev->id;
+-    ev->num_valuators = nval < 3 ? nval : 3;
++    ev->num_valuators = nval < 6 ? nval : 6;
+     ev->first_valuator = first;
+     switch (ev->num_valuators) {
++    case 6:
++        ev->valuator2 = v->axisVal[first + 5];
++    case 5:
++        ev->valuator2 = v->axisVal[first + 4];
++    case 4:
++        ev->valuator2 = v->axisVal[first + 3];
+     case 3:
+         ev->valuator2 = v->axisVal[first + 2];
+     case 2:
+@@ -626,7 +632,6 @@ FixDeviceValuator(DeviceIntPtr dev, deviceValuator * ev, ValuatorClassPtr v,
+         ev->valuator0 = v->axisVal[first];
+         break;
+     }
+-    first += ev->num_valuators;
+ }
+ 
+ static void
+@@ -646,7 +651,7 @@ FixDeviceStateNotify(DeviceIntPtr dev, deviceStateNotify * ev, KeyClassPtr k,
+         ev->num_buttons = b->numButtons;
+         memcpy((char *) ev->buttons, (char *) b->down, 4);
+     }
+-    else if (k) {
++    if (k) {
+         ev->classes_reported |= (1 << KeyClass);
+         ev->num_keys = k->xkbInfo->desc->max_key_code -
+             k->xkbInfo->desc->min_key_code;
+@@ -670,14 +675,26 @@ FixDeviceStateNotify(DeviceIntPtr dev, deviceStateNotify * ev, KeyClassPtr k,
+     }
+ }
+ 
+-
++/**
++ * The device state notify event is split across multiple 32-byte events.
++ * The first one contains the first 32 button state bits, the first 32
++ * key state bits, and the first 3 valuator values.
++ *
++ * If a device has more than that, the server sends out:
++ * - one deviceButtonStateNotify for buttons 32 and above
++ * - one deviceKeyStateNotify for keys 32 and above
++ * - one deviceValuator event per 6 valuators above valuator 4
++ *
++ * All events but the last one have the deviceid binary ORed with MORE_EVENTS,
++ */
+ static void
+ DeliverStateNotifyEvent(DeviceIntPtr dev, WindowPtr win)
+ {
++    /* deviceStateNotify, deviceKeyStateNotify, deviceButtonStateNotify
++     * and one deviceValuator for each 6 valuators */
++    deviceStateNotify sev[3 + (MAX_VALUATORS + 6)/6];
+     int evcount = 1;
+-    deviceStateNotify *ev, *sev;
+-    deviceKeyStateNotify *kev;
+-    deviceButtonStateNotify *bev;
++    deviceStateNotify *ev = sev;
+ 
+     KeyClassPtr k;
+     ButtonClassPtr b;
+@@ -690,87 +707,53 @@ DeliverStateNotifyEvent(DeviceIntPtr dev, WindowPtr win)
+ 
+     if ((b = dev->button) != NULL) {
+         nbuttons = b->numButtons;
+-        if (nbuttons > 32)
++        if (nbuttons > 32) /* first 32 are encoded in deviceStateNotify */
+             evcount++;
+     }
+     if ((k = dev->key) != NULL) {
+         nkeys = k->xkbInfo->desc->max_key_code - k->xkbInfo->desc->min_key_code;
+-        if (nkeys > 32)
++        if (nkeys > 32) /* first 32 are encoded in deviceStateNotify */
+             evcount++;
+-        if (nbuttons > 0) {
+-            evcount++;
+-        }
+     }
+     if ((v = dev->valuator) != NULL) {
+         nval = v->numAxes;
+-
+-        if (nval > 3)
+-            evcount++;
+-        if (nval > 6) {
+-            if (!(k && b))
+-                evcount++;
+-            if (nval > 9)
+-                evcount += ((nval - 7) / 3);
+-        }
++        /* first three are encoded in deviceStateNotify, then
++         * it's 6 per deviceValuator event */
++        evcount += ((nval - 3) + 6)/6;
+     }
+ 
+-    sev = ev = xallocarray(evcount, sizeof(xEvent));
+-    FixDeviceStateNotify(dev, ev, NULL, NULL, NULL, first);
+-
+-    if (b != NULL) {
+-        FixDeviceStateNotify(dev, ev++, NULL, b, v, first);
+-        first += 3;
+-        nval -= 3;
+-        if (nbuttons > 32) {
+-            (ev - 1)->deviceid |= MORE_EVENTS;
+-            bev = (deviceButtonStateNotify *) ev++;
+-            bev->type = DeviceButtonStateNotify;
+-            bev->deviceid = dev->id;
+-            memcpy((char *) &bev->buttons[4], (char *) &b->down[4],
+-                   DOWN_LENGTH - 4);
+-        }
+-        if (nval > 0) {
+-            (ev - 1)->deviceid |= MORE_EVENTS;
+-            FixDeviceValuator(dev, (deviceValuator *) ev++, v, first);
+-            first += 3;
+-            nval -= 3;
+-        }
++    BUG_RETURN(evcount <= ARRAY_SIZE(sev));
++
++    FixDeviceStateNotify(dev, ev, k, b, v, first);
++
++    if (b != NULL && nbuttons > 32) {
++        deviceButtonStateNotify *bev = (deviceButtonStateNotify *) ++ev;
++        (ev - 1)->deviceid |= MORE_EVENTS;
++        bev->type = DeviceButtonStateNotify;
++        bev->deviceid = dev->id;
++        memcpy((char *) &bev->buttons[4], (char *) &b->down[4],
++               DOWN_LENGTH - 4);
+     }
+ 
+-    if (k != NULL) {
+-        FixDeviceStateNotify(dev, ev++, k, NULL, v, first);
+-        first += 3;
+-        nval -= 3;
+-        if (nkeys > 32) {
+-            (ev - 1)->deviceid |= MORE_EVENTS;
+-            kev = (deviceKeyStateNotify *) ev++;
+-            kev->type = DeviceKeyStateNotify;
+-            kev->deviceid = dev->id;
+-            memmove((char *) &kev->keys[0], (char *) &k->down[4], 28);
+-        }
+-        if (nval > 0) {
+-            (ev - 1)->deviceid |= MORE_EVENTS;
+-            FixDeviceValuator(dev, (deviceValuator *) ev++, v, first);
+-            first += 3;
+-            nval -= 3;
+-        }
++    if (k != NULL && nkeys > 32) {
++        deviceKeyStateNotify *kev = (deviceKeyStateNotify *) ++ev;
++        (ev - 1)->deviceid |= MORE_EVENTS;
++        kev->type = DeviceKeyStateNotify;
++        kev->deviceid = dev->id;
++        memmove((char *) &kev->keys[0], (char *) &k->down[4], 28);
+     }
+ 
++    first = 3;
++    nval -= 3;
+     while (nval > 0) {
+-        FixDeviceStateNotify(dev, ev++, NULL, NULL, v, first);
+-        first += 3;
+-        nval -= 3;
+-        if (nval > 0) {
+-            (ev - 1)->deviceid |= MORE_EVENTS;
+-            FixDeviceValuator(dev, (deviceValuator *) ev++, v, first);
+-            first += 3;
+-            nval -= 3;
+-        }
++        ev->deviceid |= MORE_EVENTS;
++        FixDeviceValuator(dev, (deviceValuator *) ++ev, v, first);
++        first += 6;
++        nval -= 6;
+     }
+ 
+     DeliverEventsToWindow(dev, win, (xEvent *) sev, evcount,
+                           DeviceStateNotifyMask, NullGrab);
+-    free(sev);
+ }
+ 
+ void
+@@ -784,8 +767,9 @@ DeviceFocusEvent(DeviceIntPtr dev, int type, int mode, int detail,
+ 
+     mouse = IsFloating(dev) ? dev : GetMaster(dev, MASTER_POINTER);
+ 
+-    /* XI 2 event */
+-    btlen = (mouse->button) ? bits_to_bytes(mouse->button->numButtons) : 0;
++    /* XI 2 event contains the logical button map - maps are CARD8
++     * so we need 256 bits for the possibly maximum mapping */
++    btlen = (mouse->button) ? bits_to_bytes(256) : 0;
+     btlen = bytes_to_int32(btlen);
+     len = sizeof(xXIFocusInEvent) + btlen * 4;
+ 
 diff --git a/xorg-server-1.19.7/dix/events.c b/Xserver/dix/events.c
 index 3faad53..45a91d8 100644
 --- a/xorg-server-1.19.7/dix/events.c
@@ -353,6 +807,32 @@ index d46103f..af0e36e 100644
      else if (rc == Success && pSel->window != None) {
          event.u.u.type = SelectionRequest;
          event.u.selectionRequest.owner = pSel->window;
+diff --git a/xorg-server-1.19.7/glx/glxcmds.c b/Xserver/glx/glxcmds.c
+index 295857b..0b5e4c9 100644
+--- a/xorg-server-1.19.7/glx/glxcmds.c
++++ b/Xserver/glx/glxcmds.c
+@@ -46,6 +46,7 @@
+ #include "indirect_table.h"
+ #include "indirect_util.h"
+ #include "protocol-versions.h"
++#include "xace.h"
+ 
+ static char GLXServerVendorName[] = "SGI";
+ 
+@@ -1455,6 +1456,13 @@ DoCreatePbuffer(ClientPtr client, int screenNum, XID fbconfigId,
+     if (!pPixmap)
+         return BadAlloc;
+ 
++    err = XaceHook(XACE_RESOURCE_ACCESS, client, glxDrawableId, RT_PIXMAP,
++                   pPixmap, RT_NONE, NULL, DixCreateAccess);
++    if (err != Success) {
++        (*pGlxScreen->pScreen->DestroyPixmap) (pPixmap);
++        return err;
++    }
++
+     /* Assign the pixmap the same id as the pbuffer and add it as a
+      * resource so it and the DRI2 drawable will be reclaimed when the
+      * pbuffer is destroyed. */
 diff --git a/xorg-server-1.19.7/glx/glxdricommon.c b/Xserver/glx/glxdricommon.c
 index dbf199c..c7430c2 100644
 --- a/xorg-server-1.19.7/glx/glxdricommon.c
@@ -718,6 +1198,50 @@ index a7aa433..149adb1 100644
      mode = malloc(sizeof(RRModeRec) + modeInfo->nameLength + 1);
      if (!mode)
          return NULL;
+diff --git a/xorg-server-1.19.7/randr/rrproperty.c b/Xserver/randr/rrproperty.c
+index e56626c..1a2deaf 100644
+--- a/xorg-server-1.19.7/randr/rrproperty.c
++++ b/Xserver/randr/rrproperty.c
+@@ -185,7 +185,7 @@ RRChangeOutputProperty(RROutputPtr output, Atom property, Atom type,
+                 RRDestroyOutputProperty(prop);
+             return BadAlloc;
+         }
+-        new_value.size = len;
++        new_value.size = total_len;
+         new_value.type = type;
+         new_value.format = format;
+ 
+@@ -202,7 +202,7 @@ RRChangeOutputProperty(RROutputPtr output, Atom property, Atom type,
+         case PropModePrepend:
+             new_data = new_value.data;
+             old_data = (void *) (((char *) new_value.data) +
+-                                  (prop_value->size * size_in_bytes));
++                                  (len * size_in_bytes));
+             break;
+         }
+         if (new_data)
+@@ -500,7 +500,7 @@ ProcRRChangeOutputProperty(ClientPtr client)
+     char format, mode;
+     unsigned long len;
+     int sizeInBytes;
+-    int totalSize;
++    uint64_t totalSize;
+     int err;
+ 
+     REQUEST_AT_LEAST_SIZE(xRRChangeOutputPropertyReq);
+diff --git a/xorg-server-1.19.7/randr/rrproviderproperty.c b/Xserver/randr/rrproviderproperty.c
+index b79c17f..90c5a9a 100644
+--- a/xorg-server-1.19.7/randr/rrproviderproperty.c
++++ b/Xserver/randr/rrproviderproperty.c
+@@ -498,7 +498,7 @@ ProcRRChangeProviderProperty(ClientPtr client)
+     char format, mode;
+     unsigned long len;
+     int sizeInBytes;
+-    int totalSize;
++    uint64_t totalSize;
+     int err;
+ 
+     REQUEST_AT_LEAST_SIZE(xRRChangeProviderPropertyReq);
 diff --git a/xorg-server-1.19.7/record/record.c b/Xserver/record/record.c
 index 600d55f..bc72507 100644
 --- a/xorg-server-1.19.7/record/record.c
@@ -767,11 +1291,87 @@ index 600d55f..bc72507 100644
          return status;
      return ProcRecordRegisterClients(client);
  }                               /* SProcRecordRegisterClients */
+diff --git a/xorg-server-1.19.7/render/glyph.c b/Xserver/render/glyph.c
+index ea865af..41c11b6 100644
+--- a/xorg-server-1.19.7/render/glyph.c
++++ b/Xserver/render/glyph.c
+@@ -245,10 +245,11 @@ FreeGlyphPicture(GlyphPtr glyph)
+     }
+ }
+ 
+-static void
++void
+ FreeGlyph(GlyphPtr glyph, int format)
+ {
+     CheckDuplicates(&globalGlyphs[format], "FreeGlyph");
++    BUG_RETURN(glyph->refcnt == 0);
+     if (--glyph->refcnt == 0) {
+         GlyphRefPtr gr;
+         int i;
+@@ -354,7 +355,7 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
+     glyph = (GlyphPtr) malloc(size);
+     if (!glyph)
+         return 0;
+-    glyph->refcnt = 0;
++    glyph->refcnt = 1;
+     glyph->size = size + sizeof(xGlyphInfo);
+     glyph->info = *gi;
+     dixInitPrivates(glyph, (char *) glyph + head_size, PRIVATE_GLYPH);
+diff --git a/xorg-server-1.19.7/render/glyphstr.h b/Xserver/render/glyphstr.h
+index 2f51bd2..e803455 100644
+--- a/xorg-server-1.19.7/render/glyphstr.h
++++ b/Xserver/render/glyphstr.h
+@@ -109,6 +109,8 @@ extern GlyphPtr FindGlyph(GlyphSetPtr glyphSet, Glyph id);
+ 
+ extern GlyphPtr AllocateGlyph(xGlyphInfo * gi, int format);
+ 
++extern void FreeGlyph(GlyphPtr glyph, int format);
++
+ extern Bool
+  ResizeGlyphSet(GlyphSetPtr glyphSet, CARD32 change);
+ 
 diff --git a/xorg-server-1.19.7/render/render.c b/Xserver/render/render.c
-index 3a41e33..19e4b03 100644
+index 3a41e33..53defbb 100644
 --- a/xorg-server-1.19.7/render/render.c
 +++ b/Xserver/render/render.c
-@@ -2304,6 +2304,9 @@ SProcRenderCompositeGlyphs(ClientPtr client)
+@@ -1076,6 +1076,7 @@ ProcRenderAddGlyphs(ClientPtr client)
+ 
+         if (glyph_new->glyph && glyph_new->glyph != DeletedGlyph) {
+             glyph_new->found = TRUE;
++            ++glyph_new->glyph->refcnt;
+         }
+         else {
+             GlyphPtr glyph;
+@@ -1168,8 +1169,10 @@ ProcRenderAddGlyphs(ClientPtr client)
+         err = BadAlloc;
+         goto bail;
+     }
+-    for (i = 0; i < nglyphs; i++)
++    for (i = 0; i < nglyphs; i++) {
+         AddGlyph(glyphSet, glyphs[i].glyph, glyphs[i].id);
++        FreeGlyph(glyphs[i].glyph, glyphSet->fdepth);
++    }
+ 
+     if (glyphsBase != glyphsLocal)
+         free(glyphsBase);
+@@ -1179,9 +1182,13 @@ ProcRenderAddGlyphs(ClientPtr client)
+         FreePicture((void *) pSrc, 0);
+     if (pSrcPix)
+         FreeScratchPixmapHeader(pSrcPix);
+-    for (i = 0; i < nglyphs; i++)
+-        if (glyphs[i].glyph && !glyphs[i].found)
+-            free(glyphs[i].glyph);
++    for (i = 0; i < nglyphs; i++) {
++        if (glyphs[i].glyph) {
++            --glyphs[i].glyph->refcnt;
++            if (!glyphs[i].found)
++                free(glyphs[i].glyph);
++        }
++    }
+     if (glyphsBase != glyphsLocal)
+         free(glyphsBase);
+     return err;
+@@ -2304,6 +2311,9 @@ SProcRenderCompositeGlyphs(ClientPtr client)
  
          i = elt->len;
          if (i == 0xff) {
@@ -781,7 +1381,7 @@ index 3a41e33..19e4b03 100644
              swapl((int *) buffer);
              buffer += 4;
          }
-@@ -2314,12 +2317,18 @@ SProcRenderCompositeGlyphs(ClientPtr client)
+@@ -2314,12 +2324,18 @@ SProcRenderCompositeGlyphs(ClientPtr client)
                  buffer += i;
                  break;
              case 2:
@@ -857,7 +1457,7 @@ index 8b45c53..40f5812 100644
                                   ProcXFixesDispatch, SProcXFixesDispatch,
                                   NULL, StandardMinorOpcode)) != 0) {
 diff --git a/xorg-server-1.19.7/xkb/xkb.c b/Xserver/xkb/xkb.c
-index 678f823..48d9e1a 100644
+index 678f823..0cd084b 100644
 --- a/xorg-server-1.19.7/xkb/xkb.c
 +++ b/Xserver/xkb/xkb.c
 @@ -152,6 +152,19 @@ static RESTYPE RT_XKBCLIENT;
@@ -986,6 +1586,24 @@ index 678f823..48d9e1a 100644
      tmp = (char *) &stuff[1];
  
      /* Check if we can to the SetMap on the requested device. If this
+@@ -2854,13 +2959,13 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
+         XkbSymInterpretPtr sym;
+         unsigned int skipped = 0;
+ 
+-        if ((unsigned) (req->firstSI + req->nSI) > compat->num_si) {
+-            compat->num_si = req->firstSI + req->nSI;
++        if ((unsigned) (req->firstSI + req->nSI) > compat->size_si) {
++            compat->num_si = compat->size_si = req->firstSI + req->nSI;
+             compat->sym_interpret = reallocarray(compat->sym_interpret,
+-                                                 compat->num_si,
++                                                 compat->size_si,
+                                                  sizeof(XkbSymInterpretRec));
+             if (!compat->sym_interpret) {
+-                compat->num_si = 0;
++                compat->num_si = compat->size_si = 0;
+                 return BadAlloc;
+             }
+         }
 @@ -4011,6 +4116,8 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
              client->errorValue = _XkbErrCode2(0x04, stuff->firstType);
              return BadAccess;
