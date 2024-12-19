@@ -11,8 +11,10 @@ username if the SSH username is unspecified.
 
 3. The TurboVNC Server now includes various security fixes (CVE-2022-2319,
 CVE-2022-2320, CVE-2022-4283, CVE-2022-46340, CVE-2022-46341, CVE-2022-46342,
-CVE-2022-46343, CVE-2022-46344, CVE-2023-0494, and CVE-2023-1393) from the
-xorg-server 21.1.x code base.
+CVE-2022-46343, CVE-2022-46344, CVE-2023-0494, CVE-2023-1393, CVE-2023-5367,
+CVE-2023-6377, CVE-2023-6478, CVE-2023-6816, CVE-2024-0229, CVE-2024-0408,
+CVE-2024-9632, CVE-2024-21885, CVE-2024-21886, CVE-2024-31080, CVE-2024-31081,
+and CVE-2024-31083) from the xorg-server 21.1.x code base.
 
 4. By default, each instance of the Linux TurboVNC Server now listens on the
 abstract Unix domain socket, in addition to the pathname Unix domain socket
