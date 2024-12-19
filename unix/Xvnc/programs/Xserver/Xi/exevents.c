@@ -561,19 +561,20 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
                 to->button = calloc(1, sizeof(ButtonClassRec));
                 if (!to->button)
                     FatalError("[Xi] no memory for class shift.\n");
+                to->button->numButtons = from->button->numButtons;
             }
             else
                 classes->button = NULL;
         }
 
         if (from->button->xkb_acts) {
-            if (!to->button->xkb_acts) {
-                to->button->xkb_acts = calloc(1, sizeof(XkbAction));
-                if (!to->button->xkb_acts)
-                    FatalError("[Xi] not enough memory for xkb_acts.\n");
-            }
+            size_t maxbuttons = max(to->button->numButtons, from->button->numButtons);
+            to->button->xkb_acts = xnfreallocarray(to->button->xkb_acts,
+                                                   maxbuttons,
+                                                   sizeof(XkbAction));
+            memset(to->button->xkb_acts, 0, maxbuttons * sizeof(XkbAction));
             memcpy(to->button->xkb_acts, from->button->xkb_acts,
-                   sizeof(XkbAction));
+                   from->button->numButtons * sizeof(XkbAction));
         }
         else {
             free(to->button->xkb_acts);
