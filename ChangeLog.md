@@ -12,6 +12,11 @@ SSH client now allows the value of the `SSHPort` parameter, if specified on the
 command line or in a connection info file, to override any SSH ports specified
 in the OpenSSH config file.
 
+3. The TurboVNC Server now includes various security fixes (CVE-2023-5367,
+CVE-2023-6377, CVE-2023-6478, CVE-2023-6816, CVE-2024-0229, CVE-2024-0408,
+CVE-2024-9632, CVE-2024-21885, CVE-2024-21886, CVE-2024-31080, CVE-2024-31081,
+and CVE-2024-31083) from the xorg-server 21.1.x code base.
+
 
 3.1.3
 =====
