@@ -150,7 +150,8 @@ public class Session implements Runnable{
 
   String host="127.0.0.1";
   String org_host="127.0.0.1";
-  int port=22;
+  int defaultPort=22;
+  int port=defaultPort;
 
   String username=null;
   byte[] password=null;
@@ -2701,9 +2702,11 @@ break;
       host = value;
 
     if(port == -1) {
-      int port = config.getPort();
-      if(port != -1)
-        this.port = port;
+      int configPort = config.getPort();
+      if(configPort != -1)
+        port = configPort;
+      else
+        port = defaultPort;
     }
 
     checkConfig(config, "kex");
