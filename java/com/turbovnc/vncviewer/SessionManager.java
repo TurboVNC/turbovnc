@@ -60,7 +60,7 @@ public final class SessionManager extends Tunnel {
         int autotestSession =
           Utils.getIntProperty("turbovnc.autotestsession");
         if (autotestSession >= 0) {
-          if (autotestSession >= sessions.length)
+          if (sessions == null || autotestSession >= sessions.length)
             throw new ErrorException("turbovnc.autotestsession is out of range");
           if (Params.sessMgrAuto.getValue())
             generateOTP(opts.sshSession, host, sessions[autotestSession], true,
