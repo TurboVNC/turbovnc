@@ -1,4 +1,5 @@
-/* Copyright (C) 2013-2019, 2021, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2013-2019, 2021, 2024-2025 D. R. Commander.
+ *                                          All Rights Reserved.
  * Copyright 2012-2015 Pierre Ossman for Cendio AB
  *
  * This is free software; you can redistribute it and/or modify
@@ -54,8 +55,9 @@
 
 static Res vncRRResolutions[] = {
   {   -1,   -1 },  /* Original resolution of the VNC server          */
-  { 3200, 1800 },  /* WQXGA+  16:9                                   */
-  { 2880, 1800 },  /*          8:5 (Mac)                             */
+  { 3840, 2160 },  /* 4K UHD  16:9                                   */
+  { 3200, 1800 },  /* QHD+    16:9                                   */
+  { 2880, 1800 },  /* WQXGA+   8:5                                   */
   { 2560, 1600 },  /* WQXGA    8:5                                   */
   { 2560, 1440 },  /* QHD     16:9                                   */
   { 2048, 1536 },  /* QXGA     4:3 (iPad)                            */

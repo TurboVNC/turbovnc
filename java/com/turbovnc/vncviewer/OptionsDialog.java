@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -294,7 +294,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       "2560x1440", "2560x1440+0+0,2560x1440+2560+0",
       "2560x1600", "2560x1600+0+0,2560x1600+2560+0",
       "2880x1800", "2880x1800+0+0,2880x1800+2880+0",
-      "3200x1800", "3200x1800+0+0,3200x1800+3200+0"
+      "3200x1800", "3200x1800+0+0,3200x1800+3200+0",
+      "3840x2160", "3840x2160+0+0,3840x2160+3840+0"
     };
     JLabel desktopSizeLabel = new JLabel("Remote desktop size:");
     desktopSize = new JComboBox(desktopSizeOptions);
