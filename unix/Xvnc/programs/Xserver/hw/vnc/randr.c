@@ -363,6 +363,7 @@ static int vncScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
     for (j = 0; j < crtc->numOutputs; j++) {
       rfbScreenInfo screen;
 
+      memset(&screen, 0, sizeof(rfbScreenInfo));
       screen.output = crtc->outputs[j];
       screen.s.w = min(crtc->mode->mode.width, width - crtc->x);
       screen.s.h = min(crtc->mode->mode.height, height - crtc->y);
