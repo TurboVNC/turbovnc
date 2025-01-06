@@ -17,6 +17,10 @@ CVE-2023-6377, CVE-2023-6478, CVE-2023-6816, CVE-2024-0229, CVE-2024-0408,
 CVE-2024-9632, CVE-2024-21885, CVE-2024-21886, CVE-2024-31080, CVE-2024-31081,
 and CVE-2024-31083) from the xorg-server 21.1.x code base.
 
+4. Worked around an issue whereby recent versions of GNOME failed to launch in
+a TurboVNC session if the initial resolution of any of the screens in the
+session matched one of the default X RandR modes.
+
 
 3.1.3
 =====
