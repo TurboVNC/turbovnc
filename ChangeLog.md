@@ -102,6 +102,10 @@ Guacamole were known to trigger this issue sporadically.
 20. The TurboVNC Viewer now works around an issue that prevented keyboard
 grabbing from working when running the viewer in a GNOME/Wayland session.
 
+21. Worked around an issue whereby recent versions of GNOME failed to launch in
+a TurboVNC session if the initial resolution of any of the screens in the
+session matched one of the default X RandR modes.
+
 
 3.0.3
 =====

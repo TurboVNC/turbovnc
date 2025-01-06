@@ -243,44 +243,27 @@ static Bool vncReconfigureOutput(rfbScreenInfo *screen)
 
 static RRModePtr vncSetModes(rfbScreenInfo *screen)
 {
-  Bool found = FALSE;
   int i;
   int numModes = sizeof(vncRRResolutions) / sizeof(Res);
-  int preferred = 0;
   RRModePtr modes[numModes];
   Res resolutions[numModes];
 
   memcpy(resolutions, vncRRResolutions, sizeof(Res) * numModes);
-  resolutions[0].w = screen->prefRes.w;
-  resolutions[0].h = screen->prefRes.h;
+  resolutions[0].w = screen->s.w;
+  resolutions[0].h = screen->s.h;
 
-  if (screen->prefRes.w < 1 || screen->prefRes.h < 1) {
-    resolutions[0].w = screen->prefRes.w = screen->s.w;
-    resolutions[0].h = screen->prefRes.h = screen->s.h;
-  }
-
-  for (i = 0; i < numModes; i++) {
-    if (resolutions[i].w == screen->s.w && resolutions[i].h == screen->s.h) {
-      found = TRUE;
-      preferred = i;
-      break;
-    }
-  }
-
-  if (!found) {
-    resolutions[0].w = screen->prefRes.w = screen->s.w;
-    resolutions[0].h = screen->prefRes.h = screen->s.h;
-    preferred = 0;
-  }
-
-  for (i = 0; i < numModes; i++) {
-    if (!(modes[i] = vncModeGet(resolutions[i].w, resolutions[i].h)))
+  numModes = 0;
+  for (i = 0; i < sizeof(vncRRResolutions) / sizeof(Res); i++) {
+    if (i > 0 && resolutions[i].w == resolutions[0].w &&
+        resolutions[i].h == resolutions[0].h)
+      continue;
+    if (!(modes[numModes++] = vncModeGet(resolutions[i].w, resolutions[i].h)))
       return FALSE;
   }
 
   if (!RROutputSetModes(screen->output, modes, numModes, 1)) return NULL;
 
-  return modes[preferred];
+  return modes[0];
 }
 
 
