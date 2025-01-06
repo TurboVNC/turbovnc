@@ -97,6 +97,10 @@ template for TCP connections with the `Via` parameter now takes advantage of
 OpenSSH's ProxyJump feature.  As with the built-in SSH client, setting the
 `turbovnc.viajump` Java system property to `0` restores the previous behavior.
 
+13. Worked around an issue whereby recent versions of GNOME failed to launch in
+a TurboVNC session if the initial resolution of any of the screens in the
+session matched one of the default X RandR modes.
+
 
 3.1.3
 =====

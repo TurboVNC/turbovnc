@@ -206,7 +206,6 @@ typedef struct _Res {
 typedef struct {
   RROutputPtr output;
   Bool idAssigned, used;
-  Res prefRes;
   rfbScreenDesc s;
   struct xorg_list entry;
 } rfbScreenInfo, *rfbScreenInfoPtr;
