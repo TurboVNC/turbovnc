@@ -1,4 +1,4 @@
-/* Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2024 D. R. Commander.
+/* Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2025 D. R. Commander.
  *                                                     All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
@@ -50,6 +50,9 @@ import com.turbovnc.rfb.Point;
 
 class DesktopWindow extends JPanel implements Runnable, MouseListener,
   MouseMotionListener, MouseWheelListener, KeyListener, InputMethodRequests {
+
+  private static final int BUMP_SCROLL_PIXELS = 16;
+  private static final int BUMP_SCROLL_MS = 17;
 
   // RFB thread
   DesktopWindow(int width, int height, PixelFormat serverPF, CConn cc_) {
@@ -542,6 +545,58 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
     lastX = e.getX();
     lastY = e.getY();
+
+    if (cc.params.fullScreen.get() && cc.params.bumpScroll.get()) {
+      Rectangle viewRect = cc.viewport.sp.getViewport().getViewRect();
+      lastScreenX = e.getXOnScreen() - cc.viewport.getLocation().x;
+      lastScreenY = e.getYOnScreen() - cc.viewport.getLocation().y;
+      int bumpScrollMarginX = (int)((double)viewRect.width / 16 + 0.5);
+      int bumpScrollMarginY = (int)((double)viewRect.height / 16 + 0.5);
+
+      if ((scaledWidth > viewRect.width &&
+           (viewRect.x > 0 && lastScreenX < bumpScrollMarginX) ||
+           (viewRect.x < scaledWidth - viewRect.width &&
+            lastScreenX > viewRect.width - bumpScrollMarginX)) ||
+          (scaledHeight > viewRect.height &&
+           (viewRect.y > 0 && lastScreenY < bumpScrollMarginY) ||
+           (viewRect.y < scaledHeight - viewRect.height &&
+            lastScreenY > viewRect.height - bumpScrollMarginY))) {
+        if (bumpScrollTimer == null || !bumpScrollTimer.isRunning()) {
+          ActionListener actionListener = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              Rectangle viewRect = cc.viewport.sp.getViewport().getViewRect();
+              int bumpScrollMarginX = (int)((double)viewRect.width / 16 + 0.5);
+              int bumpScrollMarginY =
+                (int)((double)viewRect.height / 16 + 0.5);
+              int dx = 0, dy = 0;
+              java.awt.Point viewPos =
+                cc.viewport.sp.getViewport().getViewPosition();
+
+              if (viewRect.x > 0 && lastScreenX < bumpScrollMarginX)
+                dx = -Math.min(viewRect.x, BUMP_SCROLL_PIXELS);
+              if (viewRect.x < scaledWidth - viewRect.width &&
+                  lastScreenX > viewRect.width - bumpScrollMarginX)
+                dx = Math.min(scaledWidth - viewRect.width - viewRect.x,
+                              BUMP_SCROLL_PIXELS);
+              if (viewRect.y > 0 && lastScreenY < bumpScrollMarginY)
+                dy = -Math.min(viewRect.y, BUMP_SCROLL_PIXELS);
+              if (viewRect.y < scaledHeight - viewRect.height &&
+                  lastScreenY > viewRect.height - bumpScrollMarginY)
+                dy = Math.min(scaledHeight - viewRect.height - viewRect.y,
+                              BUMP_SCROLL_PIXELS);
+              if (dx != 0 || dy != 0) {
+                viewPos.translate(dx, dy);
+                cc.viewport.sp.getViewport().setViewPosition(viewPos);
+              } else
+                ((Timer)e.getSource()).stop();
+            }
+          };
+          bumpScrollTimer = new Timer(BUMP_SCROLL_MS, actionListener);
+          bumpScrollTimer.start();
+        }
+      } else if (bumpScrollTimer != null && bumpScrollTimer.isRunning())
+        bumpScrollTimer.stop();
+    }
   }
   public void mouseDragged(MouseEvent e) { mouseMotionCB(e); }
   public void mouseMoved(MouseEvent e) { mouseMotionCB(e); }
@@ -970,8 +1025,10 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   int scaledWidth = 0, scaledHeight = 0;
   float scaleWidthRatio, scaleHeightRatio;
 
-  int lastX, lastY;  // EDT only
+  int lastX, lastY, lastScreenX, lastScreenY;  // EDT only
   Rect damage = new Rect();
+
+  Timer bumpScrollTimer;
 
   static LogWriter vlog = new LogWriter("DesktopWindow");
 }

@@ -226,6 +226,8 @@ public final class CConn extends CConnection implements UserPasswdGetter,
   // EDT: deleteWindow() is called when the user closes the window or selects
   // "Close Connection" from the F8 menu.
   void deleteWindow(boolean disposeViewport) {
+    if (desktop != null && desktop.bumpScrollTimer != null)
+      desktop.bumpScrollTimer.stop();
     if (viewport != null) {
       if (viewport.timer != null)
         viewport.timer.stop();
@@ -1516,8 +1518,12 @@ public final class CConn extends CConnection implements UserPasswdGetter,
           ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
       } else {
         viewport.sp.setHorizontalScrollBarPolicy(
+          params.fullScreen.get() && params.bumpScroll.get() ?
+          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER :
           ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         viewport.sp.setVerticalScrollBarPolicy(
+          params.fullScreen.get() && params.bumpScroll.get() ?
+          ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER :
           ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
       }
       viewport.sp.validate();

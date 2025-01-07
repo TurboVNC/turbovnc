@@ -747,6 +747,15 @@ public final class Params {
   "Produce a system beep when a \"bell\" event is received from the VNC " +
   "server.", true);
 
+  public BoolParameter bumpScroll =
+  new BoolParameter("BumpScroll", this, false, true,
+  "In full-screen mode, if the scaled remote desktop is larger than the " +
+  "viewer window, then automatically scroll the remote desktop as the mouse " +
+  "pointer approaches one of the edges of the viewer window.  If this " +
+  "parameter is disabled, then the full-screen viewer window will have " +
+  "scrollbars if the scaled remote desktop is larger than the viewer " +
+  "window.", true);
+
   public IntParameter colors =
   new IntParameter("Colors", this, false, true,
   "Color depth to use for the viewer's window\n " +

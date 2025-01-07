@@ -83,6 +83,11 @@ template for TCP connections with the `Via` parameter now takes advantage of
 OpenSSH's ProxyJump feature.  As with the built-in SSH client, setting the
 `turbovnc.viajump` Java system property to `0` restores the previous behavior.
 
+10. The TurboVNC Viewer now supports bump scrolling in full-screen mode, which
+addresses a feature regression relative to the native Windows TurboVNC Viewer
+in TurboVNC 2.2.x.  A new parameter (`BumpScroll`) can be used to disable bump
+scrolling and use scrollbars instead.
+
 
 3.1.4
 =====

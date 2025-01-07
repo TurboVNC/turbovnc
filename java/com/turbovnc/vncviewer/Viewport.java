@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2013, 2015-2022, 2024 D. R. Commander.
- *                                          All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015-2022, 2024-2025 D. R. Commander.
+ *                                               All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -133,8 +133,12 @@ public final class Viewport extends JFrame implements Runnable {
               (availableSize.width != cc.desktop.scaledWidth ||
                availableSize.height != cc.desktop.scaledHeight)) {
             sp.setHorizontalScrollBarPolicy(
+              cc.params.fullScreen.get() && cc.params.bumpScroll.get() ?
+              ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER :
               ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             sp.setVerticalScrollBarPolicy(
+              cc.params.fullScreen.get() && cc.params.bumpScroll.get() ?
+              ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER :
               ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
             sp.validate();
             if (timer != null)
@@ -154,8 +158,12 @@ public final class Viewport extends JFrame implements Runnable {
           }
         } else {
           sp.setHorizontalScrollBarPolicy(
+            cc.params.fullScreen.get() && cc.params.bumpScroll.get() ?
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER :
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
           sp.setVerticalScrollBarPolicy(
+            cc.params.fullScreen.get() && cc.params.bumpScroll.get() ?
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER :
             ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
           sp.validate();
         }
