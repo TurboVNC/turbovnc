@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -36,9 +36,9 @@ public class AgentProxy {
   private static final byte SSH_AGENT_RSA_IDENTITIES_ANSWER = 2;
   private static final byte SSH_AGENTC_RSA_CHALLENGE = 3;
   private static final byte SSH_AGENT_RSA_RESPONSE = 4;
-  private static final byte SSH_AGENT_FAILURE =	5;
-  private static final byte SSH_AGENT_SUCCESS =	6;
-  private static final byte SSH_AGENTC_ADD_RSA_IDENTITY	= 7;
+  private static final byte SSH_AGENT_FAILURE = 5;
+  private static final byte SSH_AGENT_SUCCESS = 6;
+  private static final byte SSH_AGENTC_ADD_RSA_IDENTITY = 7;
   private static final byte SSH_AGENTC_REMOVE_RSA_IDENTITY = 8;
   private static final byte SSH_AGENTC_REMOVE_ALL_RSA_IDENTITIES = 9;
 
@@ -47,21 +47,21 @@ public class AgentProxy {
   private static final byte SSH2_AGENTC_SIGN_REQUEST = 13;
   private static final byte SSH2_AGENT_SIGN_RESPONSE = 14;
   private static final byte SSH2_AGENTC_ADD_IDENTITY = 17;
-  private static final byte SSH2_AGENTC_REMOVE_IDENTITY	= 18;
+  private static final byte SSH2_AGENTC_REMOVE_IDENTITY = 18;
   private static final byte SSH2_AGENTC_REMOVE_ALL_IDENTITIES = 19;
 
   private static final byte SSH_AGENTC_ADD_SMARTCARD_KEY = 20;
   private static final byte SSH_AGENTC_REMOVE_SMARTCARD_KEY = 21;
 
   private static final byte SSH_AGENTC_LOCK = 22;
-  private static final byte SSH_AGENTC_UNLOCK =	23;
+  private static final byte SSH_AGENTC_UNLOCK = 23;
 
   private static final byte SSH_AGENTC_ADD_RSA_ID_CONSTRAINED = 24;
   private static final byte SSH2_AGENTC_ADD_ID_CONSTRAINED = 25;
   private static final byte SSH_AGENTC_ADD_SMARTCARD_KEY_CONSTRAINED = 26;
 
   private static final byte SSH_AGENT_CONSTRAIN_LIFETIME = 1;
-  private static final byte SSH_AGENT_CONSTRAIN_CONFIRM	= 2;
+  private static final byte SSH_AGENT_CONSTRAIN_CONFIRM = 2;
 
   private static final byte SSH2_AGENT_FAILURE = 30;
 

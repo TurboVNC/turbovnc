@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -36,11 +36,11 @@ import javax.crypto.spec.*;
 public class ARCFOUR implements Cipher{
   private static final int ivsize=8;
   private static final int bsize=16;
-  private javax.crypto.Cipher cipher;    
-  public int getIVSize(){return ivsize;} 
+  private javax.crypto.Cipher cipher;
+  public int getIVSize(){return ivsize;}
   public int getBlockSize(){return bsize;}
   public void init(int mode, byte[] key, byte[] iv) throws Exception{
-    String pad="NoPadding";      
+    String pad="NoPadding";
     byte[] tmp;
     if(key.length>bsize){
       tmp=new byte[bsize];
@@ -55,7 +55,7 @@ public class ARCFOUR implements Cipher{
         cipher.init((mode==ENCRYPT_MODE?
                      javax.crypto.Cipher.ENCRYPT_MODE:
                      javax.crypto.Cipher.DECRYPT_MODE),
-		    _key);
+                    _key);
       }
     }
     catch(Exception e){

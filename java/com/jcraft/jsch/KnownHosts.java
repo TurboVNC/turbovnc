@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -57,7 +57,7 @@ class KnownHosts implements HostKeyRepository{
     }
     catch(FileNotFoundException e){
       // The non-existing file should be allowed.
-    } 
+    }
   }
   void setKnownHosts(InputStream input) throws JSchException{
     pool.removeAllElements();
@@ -74,15 +74,15 @@ class KnownHosts implements HostKeyRepository{
       int bufl=0;
 loop:
       while(true){
-	bufl=0;
+        bufl=0;
         while(true){
           j=fis.read();
           if(j==-1){
             if(bufl==0){ break loop; }
             else{ break; }
           }
-	  if(j==0x0d){ continue; }
-	  if(j==0x0a){ break; }
+          if(j==0x0d){ continue; }
+          if(j==0x0a){ break; }
           if(buf.length<=bufl){
             if(bufl>1024*10) break;   // too long...
             byte[] newbuf=new byte[buf.length*2];
@@ -90,38 +90,38 @@ loop:
             buf=newbuf;
           }
           buf[bufl++]=(byte)j;
-	}
+        }
 
-	j=0;
+        j=0;
         while(j<bufl){
           i=buf[j];
-	  if(i==' '||i=='\t'){ j++; continue; }
-	  if(i=='#'){
-	    addInvalidLine(Util.byte2str(buf, 0, bufl));
-	    continue loop;
-	  }
-	  break;
-	}
-	if(j>=bufl){ 
-	  addInvalidLine(Util.byte2str(buf, 0, bufl));
-	  continue loop; 
-	}
+          if(i==' '||i=='\t'){ j++; continue; }
+          if(i=='#'){
+            addInvalidLine(Util.byte2str(buf, 0, bufl));
+            continue loop;
+          }
+          break;
+        }
+        if(j>=bufl){
+          addInvalidLine(Util.byte2str(buf, 0, bufl));
+          continue loop;
+        }
 
         sb.setLength(0);
         while(j<bufl){
           i=buf[j++];
           if(i==0x20 || i=='\t'){ break; }
           sb.append((char)i);
-	}
-	host=sb.toString();
-	if(j>=bufl || host.length()==0){
-	  addInvalidLine(Util.byte2str(buf, 0, bufl));
-	  continue loop; 
-	}
+        }
+        host=sb.toString();
+        if(j>=bufl || host.length()==0){
+          addInvalidLine(Util.byte2str(buf, 0, bufl));
+          continue loop;
+        }
 
         while(j<bufl){
           i=buf[j];
-	  if(i==' '||i=='\t'){ j++; continue; }
+          if(i==' '||i=='\t'){ j++; continue; }
           break;
         }
 
@@ -138,7 +138,7 @@ loop:
           host=sb.toString();
           if(j>=bufl || host.length()==0){
             addInvalidLine(Util.byte2str(buf, 0, bufl));
-            continue loop; 
+            continue loop;
           }
 
           while(j<bufl){
@@ -149,25 +149,25 @@ loop:
         }
 
         sb.setLength(0);
-	type=-1;
+        type=-1;
         while(j<bufl){
           i=buf[j++];
           if(i==0x20 || i=='\t'){ break; }
           sb.append((char)i);
-	}
-	String tmp = sb.toString();
-	if(HostKey.name2type(tmp)!=HostKey.UNKNOWN){
-	  type=HostKey.name2type(tmp);
-	}
-	else { j=bufl; }
-	if(j>=bufl){
-	  addInvalidLine(Util.byte2str(buf, 0, bufl));
-	  continue loop; 
-	}
+        }
+        String tmp = sb.toString();
+        if(HostKey.name2type(tmp)!=HostKey.UNKNOWN){
+          type=HostKey.name2type(tmp);
+        }
+        else { j=bufl; }
+        if(j>=bufl){
+          addInvalidLine(Util.byte2str(buf, 0, bufl));
+          continue loop;
+        }
 
         while(j<bufl){
           i=buf[j];
-	  if(i==' '||i=='\t'){ j++; continue; }
+          if(i==' '||i=='\t'){ j++; continue; }
           break;
         }
 
@@ -178,16 +178,16 @@ loop:
           if(i==0x0a){ break; }
           if(i==0x20 || i=='\t'){ break; }
           sb.append((char)i);
-	}
-	key=sb.toString();
-	if(key.length()==0){
-	  addInvalidLine(Util.byte2str(buf, 0, bufl));
-	  continue loop; 
-	}
+        }
+        key=sb.toString();
+        if(key.length()==0){
+          addInvalidLine(Util.byte2str(buf, 0, bufl));
+          continue loop;
+        }
 
         while(j<bufl){
           i=buf[j];
-	  if(i==' '||i=='\t'){ j++; continue; }
+          if(i==' '||i=='\t'){ j++; continue; }
           break;
         }
 
@@ -213,22 +213,22 @@ loop:
           comment=sb.toString();
         }
 
-	//System.err.println(host);
-	//System.err.println("|"+key+"|");
+        //System.err.println(host);
+        //System.err.println("|"+key+"|");
 
-	HostKey hk = null;
-        hk = new HashedHostKey(marker, host, type, 
-                               Util.fromBase64(Util.str2byte(key), 0, 
+        HostKey hk = null;
+        hk = new HashedHostKey(marker, host, type,
+                               Util.fromBase64(Util.str2byte(key), 0,
                                                key.length()), comment);
-	pool.addElement(hk);
+        pool.addElement(hk);
       }
       if(error){
-	throw new JSchException("KnownHosts: invalid format");
+        throw new JSchException("KnownHosts: invalid format");
       }
     }
     catch(Exception e){
       if(e instanceof JSchException)
-	throw (JSchException)e;         
+        throw (JSchException)e;
       if(e instanceof Throwable)
         throw new JSchException(e.toString(), (Throwable)e);
       throw new JSchException(e.toString());
@@ -270,7 +270,7 @@ loop:
           }
           else{
             result=CHANGED;
-	  }
+          }
         }
       }
     }
@@ -296,15 +296,15 @@ loop:
         hk=(HostKey)(pool.elementAt(i));
         if(hk.isMatched(host) && hk.type==type){
 /*
-	  if(Util.array_equals(hk.key, key)){ return; }
-	  if(hk.host.equals(host)){
-	    hk.key=key;
-	    return;
-	  }
-	  else{
-	    hk.host=deleteSubString(hk.host, host);
-	    break;
-	  }
+          if(Util.array_equals(hk.key, key)){ return; }
+          if(hk.host.equals(host)){
+            hk.key=key;
+            return;
+          }
+          else{
+            hk.host=deleteSubString(hk.host, host);
+            break;
+          }
 */
         }
       }
@@ -343,8 +343,8 @@ loop:
         }
       }
       if(foo){
-        try{ 
-          sync(bar); 
+        try{
+          sync(bar);
         }
         catch(Exception e){ System.err.println("sync known_hosts: "+e); }
       }
@@ -358,13 +358,13 @@ loop:
     synchronized(pool){
       java.util.ArrayList v = new java.util.ArrayList();
       for(int i=0; i<pool.size(); i++){
-	HostKey hk=(HostKey)pool.elementAt(i);
-	if(hk.type==HostKey.UNKNOWN) continue;
-	if(host==null || 
-	   (hk.isMatched(host) && 
-	    (type==null || hk.getType().equals(type)))){
+        HostKey hk=(HostKey)pool.elementAt(i);
+        if(hk.type==HostKey.UNKNOWN) continue;
+        if(host==null ||
+           (hk.isMatched(host) &&
+            (type==null || hk.getType().equals(type)))){
           v.add(hk);
-	}
+        }
       }
       HostKey[] foo = new HostKey[v.size()];
       for(int i=0; i<v.size(); i++){
@@ -392,11 +392,11 @@ loop:
     for(int i=0; i<pool.size(); i++){
       HostKey hk=(HostKey)(pool.elementAt(i));
       if(host==null ||
-	 (hk.isMatched(host) && 
-	  (type==null || (hk.getType().equals(type) &&
-			  (key==null || Util.array_equals(key, hk.key)))))){
+         (hk.isMatched(host) &&
+          (type==null || (hk.getType().equals(type) &&
+                          (key==null || Util.array_equals(key, hk.key)))))){
         String hosts=hk.getHost();
-        if(hosts.equals(host) || 
+        if(hosts.equals(host) ||
            ((hk instanceof HashedHostKey) &&
             ((HashedHostKey)hk).isHashed())){
           pool.removeElement(hk);
@@ -404,7 +404,7 @@ loop:
         else{
           hk.host=deleteSubString(hosts, host);
         }
-	sync=true;
+        sync=true;
       }
     }
     }
@@ -413,9 +413,9 @@ loop:
     }
   }
 
-  protected void sync() throws IOException { 
+  protected void sync() throws IOException {
     if(known_hosts!=null)
-      sync(known_hosts); 
+      sync(known_hosts);
   }
   protected synchronized void sync(String foo) throws IOException {
     if(foo==null) return;
@@ -433,29 +433,29 @@ loop:
       for(int i=0; i<pool.size(); i++){
         hk=(HostKey)(pool.elementAt(i));
         //hk.dump(out);
-	String marker=hk.getMarker();
-	String host=hk.getHost();
-	String type=hk.getType();
+        String marker=hk.getMarker();
+        String host=hk.getHost();
+        String type=hk.getType();
         String comment = hk.getComment();
-	if(type.equals("UNKNOWN")){
-	  out.write(Util.str2byte(host));
-	  out.write(cr);
-	  continue;
-	}
+        if(type.equals("UNKNOWN")){
+          out.write(Util.str2byte(host));
+          out.write(cr);
+          continue;
+        }
         if(marker.length()!=0){
           out.write(Util.str2byte(marker));
           out.write(space);
         }
-	out.write(Util.str2byte(host));
-	out.write(space);
-	out.write(Util.str2byte(type));
-	out.write(space);
-	out.write(Util.str2byte(hk.getKey()));
+        out.write(Util.str2byte(host));
+        out.write(space);
+        out.write(Util.str2byte(type));
+        out.write(space);
+        out.write(Util.str2byte(hk.getKey()));
         if(comment!=null){
           out.write(space);
           out.write(Util.str2byte(comment));
         }
-	out.write(cr);
+        out.write(cr);
       }
       }
     }
@@ -473,7 +473,7 @@ loop:
       j=hosts.indexOf(',', i);
       if(j==-1) break;
       if(!host.equals(hosts.substring(i, j))){
-        i=j+1;	  
+        i=j+1;
         continue;
       }
       return hosts.substring(0, i)+hosts.substring(j+1);
@@ -490,8 +490,8 @@ loop:
         Class c=Class.forName(JSch.getConfig("hmac-sha1"));
         hmacsha1=(MAC)(c.getDeclaredConstructor().newInstance());
       }
-      catch(Exception e){ 
-        System.err.println("hmacsha1: "+e); 
+      catch(Exception e){
+        System.err.println("hmacsha1: "+e);
       }
     }
     return hmacsha1;
@@ -501,7 +501,7 @@ loop:
     HashedHostKey hhk=new HashedHostKey(host, key);
     hhk.hash();
     return hhk;
-  } 
+  }
   class HashedHostKey extends HostKey{
     private static final String HASH_MAGIC="|1|";
     private static final String HASH_DELIM="|";

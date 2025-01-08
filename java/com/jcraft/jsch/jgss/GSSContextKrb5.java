@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -43,9 +43,9 @@ import org.ietf.jgss.Oid;
 
 public class GSSContextKrb5 implements com.jcraft.jsch.GSSContext{
 
-  private static final String pUseSubjectCredsOnly = 
+  private static final String pUseSubjectCredsOnly =
     "javax.security.auth.useSubjectCredsOnly";
-  private static String useSubjectCredsOnly = 
+  private static String useSubjectCredsOnly =
     getSystemProperty(pUseSubjectCredsOnly);
 
   private GSSContext context=null;
@@ -162,15 +162,15 @@ public class GSSContextKrb5 implements com.jcraft.jsch.GSSContext{
 
   private static String getSystemProperty(String key){
     try{ return System.getProperty(key); }
-    catch(Exception e){ 
+    catch(Exception e){
       // We are not allowed to get the System properties.
-      return null; 
-    } 
+      return null;
+    }
   }
 
   private static void setSystemProperty(String key, String value){
     try{ System.setProperty(key, value); }
-    catch(Exception e){ 
+    catch(Exception e){
       // We are not allowed to set the System properties.
     }
   }

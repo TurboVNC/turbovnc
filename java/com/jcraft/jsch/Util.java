@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -68,7 +68,7 @@ public class Util{
 
     byte[] tmp=new byte[length*2];
     int i,j,k;
-    
+
     int foo=(length/3)*3+start;
     i=0;
     for(j=start; j<foo; j+=3){
@@ -117,9 +117,9 @@ public class Util{
     while(true){
       index=foo.indexOf(split, start);
       if(index>=0){
-	bar.addElement(Util.byte2str(buf, start, index-start));
-	start=index+1;
-	continue;
+        bar.addElement(Util.byte2str(buf, start, index-start));
+        start=index+1;
+        continue;
       }
       bar.addElement(Util.byte2str(buf, start, buf.length-start));
       break;
@@ -134,7 +134,7 @@ public class Util{
     return glob0(pattern, 0, name, 0);
   }
   static private boolean glob0(byte[] pattern, int pattern_index,
-			      byte[] name, int name_index){
+                               byte[] name, int name_index){
     if(name.length>0 && name[0]=='.'){
       if(pattern.length>0 && pattern[0]=='.'){
         if(pattern.length==2 && pattern[1]=='*') return true;
@@ -145,7 +145,7 @@ public class Util{
     return glob(pattern, pattern_index, name, name_index);
   }
   static private boolean glob(byte[] pattern, int pattern_index,
-			      byte[] name, int name_index){
+                              byte[] name, int name_index){
     //System.err.println("glob: "+new String(pattern)+", "+pattern_index+" "+new String(name)+", "+name_index);
 
     int patternlen=pattern.length;
@@ -158,14 +158,14 @@ public class Util{
 
     while(i<patternlen && j<namelen){
       if(pattern[i]=='\\'){
-	if(i+1==patternlen)
-	  return false;
-	i++;
-	if(pattern[i]!=name[j]) 
+        if(i+1==patternlen)
+          return false;
+        i++;
+        if(pattern[i]!=name[j])
           return false;
         i+=skipUTF8Char(pattern[i]);
         j+=skipUTF8Char(name[j]);
-	continue;
+        continue;
       }
 
       if(pattern[i]=='*'){
@@ -176,14 +176,14 @@ public class Util{
           }
           break;
         }
-	if(patternlen==i)
+        if(patternlen==i)
           return true;
 
-	byte foo=pattern[i];
+        byte foo=pattern[i];
         if(foo=='?'){
           while(j<namelen){
-	    if(glob(pattern, i, name, j)){
-	      return true;
+            if(glob(pattern, i, name, j)){
+              return true;
             }
             j+=skipUTF8Char(name[j]);
           }
@@ -206,21 +206,21 @@ public class Util{
           return false;
         }
 
-	while(j<namelen){
-	  if(foo==name[j]){
-	    if(glob(pattern, i, name, j)){
-	      return true;
-	    }
-	  }
+        while(j<namelen){
+          if(foo==name[j]){
+            if(glob(pattern, i, name, j)){
+              return true;
+            }
+          }
           j+=skipUTF8Char(name[j]);
-	}
-	return false;
+        }
+        return false;
       }
 
       if(pattern[i]=='?'){
         i++;
         j+=skipUTF8Char(name[j]);
-	continue;
+        continue;
       }
 
       if(pattern[i]!=name[j])
@@ -231,16 +231,16 @@ public class Util{
 
       if(!(j<namelen)){         // name is end
         if(!(i<patternlen)){    // pattern is end
-	  return true;
-	}
-	if(pattern[i]=='*'){    
+          return true;
+        }
+        if(pattern[i]=='*'){
           break;
-	}
+        }
       }
       continue;
     }
 
-    if(i==patternlen && j==namelen) 
+    if(i==patternlen && j==namelen)
       return true;
 
     if(!(j<namelen) &&  // name is end
@@ -376,7 +376,7 @@ public class Util{
       });
     tmp.setName("Opening Socket "+host);
     tmp.start();
-    try{ 
+    try{
       tmp.join(timeout);
       message="timeout: ";
     }
@@ -395,10 +395,10 @@ public class Util{
       throw new JSchException(message, ee[0]);
     }
     return socket;
-  } 
+  }
 
   static byte[] str2byte(String str, String encoding){
-    if(str==null) 
+    if(str==null)
       return null;
     try{ return str.getBytes(encoding); }
     catch(java.io.UnsupportedEncodingException e){

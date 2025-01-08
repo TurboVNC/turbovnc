@@ -11,8 +11,8 @@ Last modified: Thu Mar 18 13:58:16 UTC 2015
 
 Description
 ===========
-JSch is a pure Java implementation of SSH2.  JSch allows you to 
-connect to an sshd server and use port forwarding, X11 forwarding, 
+JSch is a pure Java implementation of SSH2.  JSch allows you to
+connect to an sshd server and use port forwarding, X11 forwarding,
 file transfer, etc., and you can integrate its functionality
 into your own Java programs. JSch is licensed under BSD style license.
 
@@ -20,7 +20,7 @@ into your own Java programs. JSch is licensed under BSD style license.
 Documentation
 =============
 * README files all over the source tree have info related to the stuff
-  in the directories. 
+  in the directories.
 * ChangeLog: what changed from the previous version?
 
 
@@ -36,7 +36,7 @@ Why JSch?
 Our intension in developing this stuff is to enable users of our pure
 java X servers, WiredX(http://wiredx.net/) and WeirdX, to enjoy secure X
 sessions.  Our efforts have mostly targeted the SSH2 protocol in relation
-to X Window System and X11 forwarding.  Of course, we are also interested in 
+to X Window System and X11 forwarding.  Of course, we are also interested in
 adding other functionality - port forward, file transfer, terminal emulation, etc.
 
 
@@ -96,16 +96,16 @@ This archive does not include java byte code, so please compile
 the source code by your self.
   $ cd jsch-?.?.?/src
   $ javac com/jcraft/jsch/*java com/jcraft/jsch/jce/*java com/jcraft/jzlib/*.java
-'/examples/' directory has included some samples to demonstrate what 
+'/examples/' directory has included some samples to demonstrate what
 JSch can do.  Please refer to '/examples/README' file.
 
 
 AES cipher
 ==========
 JSch supports aes128-cbc,aes192-cbc,aes256-cbc,aes128-ctr,aes192-ctr,
-aes256-ctr but you require AES support in your J2SE to choose some of them.  
-If you are using Sun's J2SE, J2SE 1.4.2 or later is required.  
-And then, J2SE 1.4.2(or later) does not support aes256 by the default, 
+aes256-ctr but you require AES support in your J2SE to choose some of them.
+If you are using Sun's J2SE, J2SE 1.4.2 or later is required.
+And then, J2SE 1.4.2(or later) does not support aes256 by the default,
 because of 'import control restrictions of some countries'.
 We have confirmed that by applying
   "Java Cryptography Extension (JCE)
@@ -174,11 +174,11 @@ Current release has supported following properties,
   If this property is set to ``yes'', jsch will never automatically add
   host keys to the $HOME/.ssh/known_hosts file, and refuses to connect
   to hosts whose host key has changed.  This property forces the user
-  to manually add all new hosts.  If this property is set to ``no'', 
+  to manually add all new hosts.  If this property is set to ``no'',
   jsch will automatically add new host keys to the user known hosts
   files.  If this property is set to ``ask'', new  host keys will be
-  added to the user known host files only after the user has confirmed 
-  that is what they really want to do, and jsch will refuse to connect 
+  added to the user known host files only after the user has confirmed
+  that is what they really want to do, and jsch will refuse to connect
   to hosts whose host key has changed.
 
 
@@ -207,7 +207,7 @@ without several help.
   Thanks to newly added functionalities to J2SE 1.4.0, we could
   start this project.
 * We appreciate the OpenSSH project.
-  The options '-ddd' of sshd, '---vvv' of ssh and the compile options 
+  The options '-ddd' of sshd, '---vvv' of ssh and the compile options
   '-DPACKET_DEBUG', '-DDEBUG_KEXDH' and  '-DDEBUG_KEX' were very
   useful in debugging JSch.
 * We appreciate IETF sesch working group and SSH Communications Security Corp.
@@ -217,11 +217,11 @@ without several help.
   who are interpreting drafts of SSH2 protocol in Japanese.
   His works were very useful for us to understand the technical terms
   in our native language.
-* We also appreciate SourceForge.net's awesome service to the 
+* We also appreciate SourceForge.net's awesome service to the
   Open Source Community.
 
 
-If you have any comments, suggestions and questions, write us 
+If you have any comments, suggestions and questions, write us
 at jsch@jcraft.com
 
 

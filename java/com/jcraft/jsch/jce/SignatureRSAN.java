@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -49,23 +49,23 @@ public abstract class SignatureRSAN implements com.jcraft.jsch.SignatureRSA{
     else if(name.equals("rsa-sha2-512")) foo="SHA512withRSA";
     signature=java.security.Signature.getInstance(foo);
     keyFactory=KeyFactory.getInstance("RSA");
-  }     
+  }
   public void setPubKey(byte[] e, byte[] n) throws Exception{
-    RSAPublicKeySpec rsaPubKeySpec = 
-	new RSAPublicKeySpec(new BigInteger(n),
-			     new BigInteger(e));
+    RSAPublicKeySpec rsaPubKeySpec =
+        new RSAPublicKeySpec(new BigInteger(n),
+                             new BigInteger(e));
     PublicKey pubKey=keyFactory.generatePublic(rsaPubKeySpec);
     signature.initVerify(pubKey);
   }
   public void setPrvKey(byte[] d, byte[] n) throws Exception{
-    RSAPrivateKeySpec rsaPrivKeySpec = 
-	new RSAPrivateKeySpec(new BigInteger(n),
-			      new BigInteger(d));
+    RSAPrivateKeySpec rsaPrivKeySpec =
+        new RSAPrivateKeySpec(new BigInteger(n),
+                              new BigInteger(d));
     PrivateKey prvKey = keyFactory.generatePrivate(rsaPrivKeySpec);
     signature.initSign(prvKey);
   }
   public byte[] sign() throws Exception{
-    byte[] sig=signature.sign();      
+    byte[] sig=signature.sign();
     return sig;
   }
   public void update(byte[] foo) throws Exception{

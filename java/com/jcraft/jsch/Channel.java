@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -47,7 +47,7 @@ public abstract class Channel implements Runnable{
   static final int SSH_OPEN_UNKNOWN_CHANNEL_TYPE=           3;
   static final int SSH_OPEN_RESOURCE_SHORTAGE=              4;
 
-  static int index=0; 
+  static int index=0;
   private static java.util.Vector pool=new java.util.Vector();
   static Channel getChannel(String type){
     if(type.equals("session")){
@@ -104,7 +104,7 @@ public abstract class Channel implements Runnable{
   volatile long rwsize=0;         // remote initial window size
   volatile int rmpsize=0;        // remote maximum packet size
 
-  IO io=null;    
+  IO io=null;
   Thread thread=null;
 
   volatile boolean eof_local=false;
@@ -116,12 +116,12 @@ public abstract class Channel implements Runnable{
 
   volatile int exitstatus=-1;
 
-  volatile int reply=0; 
+  volatile int reply=0;
   volatile int connectTimeout=0;
 
   private Session session;
 
-  int notifyme=0; 
+  int notifyme=0;
 
   Channel(){
     synchronized(pool){
@@ -154,7 +154,7 @@ public abstract class Channel implements Runnable{
     catch(Exception e){
       connected=false;
       disconnect();
-      if(e instanceof JSchException) 
+      if(e instanceof JSchException)
         throw (JSchException)e;
       throw new JSchException(e.toString(), e);
     }
@@ -372,7 +372,7 @@ public abstract class Channel implements Runnable{
         else size = out - in;
       }
       return size;
-    } 
+    }
     synchronized void checkSpace(int len) throws IOException {
       int size = freeSpace();
       if(size<len){
@@ -396,7 +396,7 @@ public abstract class Channel implements Runnable{
           }
           else {
             System.arraycopy(buffer, 0, tmp, 0, in);
-            System.arraycopy(buffer, out, 
+            System.arraycopy(buffer, out,
                              tmp, tmp.length-(buffer.length-out),
                              (buffer.length-out));
             out = tmp.length-(buffer.length-out);
@@ -408,7 +408,7 @@ public abstract class Channel implements Runnable{
         }
         buffer=tmp;
       }
-      else if(buffer.length == size && size > BUFFER_SIZE) { 
+      else if(buffer.length == size && size > BUFFER_SIZE) {
         int  i = size/2;
         if(i<BUFFER_SIZE) i = BUFFER_SIZE;
         byte[] tmp = new byte[i];
@@ -420,8 +420,8 @@ public abstract class Channel implements Runnable{
   void setLocalWindowSize(int foo){ this.lwsize=foo; }
   void setLocalPacketSize(int foo){ this.lmpsize=foo; }
   synchronized void setRemoteWindowSize(long foo){ this.rwsize=foo; }
-  synchronized void addRemoteWindowSize(long foo){ 
-    this.rwsize+=foo; 
+  synchronized void addRemoteWindowSize(long foo){
+    this.rwsize+=foo;
     if(notifyme>0)
       notifyAll();
   }
@@ -546,15 +546,15 @@ public abstract class Channel implements Runnable{
     synchronized(pool){
       channels=new Channel[pool.size()];
       for(int i=0; i<pool.size(); i++){
-	try{
-	  Channel c=((Channel)(pool.elementAt(i)));
-	  if(c.session==session){
-	    channels[count++]=c;
-	  }
-	}
-	catch(Exception e){
-	}
-      } 
+        try{
+          Channel c=((Channel)(pool.elementAt(i)));
+          if(c.session==session){
+            channels[count++]=c;
+          }
+        }
+        catch(Exception e){
+        }
+      }
     }
     for(int i=0; i<count; i++){
       channels[i].disconnect();
@@ -657,7 +657,7 @@ public abstract class Channel implements Runnable{
       if(_sink != null) {
         _sink.checkSpace(len);
       }
-      super.write(b, off, len); 
+      super.write(b, off, len);
     }
   }
 
@@ -668,7 +668,7 @@ public abstract class Channel implements Runnable{
     this.session=session;
   }
 
-  public Session getSession() throws JSchException{ 
+  public Session getSession() throws JSchException{
     Session _session=session;
     if(_session==null){
       throw new JSchException("session is not available");

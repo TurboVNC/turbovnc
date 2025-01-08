@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -43,27 +43,27 @@ public class SignatureDSA implements com.jcraft.jsch.SignatureDSA{
   public void init() throws Exception{
     signature=java.security.Signature.getInstance("SHA1withDSA");
     keyFactory=KeyFactory.getInstance("DSA");
-  }     
+  }
   public void setPubKey(byte[] y, byte[] p, byte[] q, byte[] g) throws Exception{
-    DSAPublicKeySpec dsaPubKeySpec = 
-	new DSAPublicKeySpec(new BigInteger(y),
-			     new BigInteger(p),
-			     new BigInteger(q),
-			     new BigInteger(g));
+    DSAPublicKeySpec dsaPubKeySpec =
+        new DSAPublicKeySpec(new BigInteger(y),
+                             new BigInteger(p),
+                             new BigInteger(q),
+                             new BigInteger(g));
     PublicKey pubKey=keyFactory.generatePublic(dsaPubKeySpec);
     signature.initVerify(pubKey);
   }
   public void setPrvKey(byte[] x, byte[] p, byte[] q, byte[] g) throws Exception{
-    DSAPrivateKeySpec dsaPrivKeySpec = 
-	new DSAPrivateKeySpec(new BigInteger(x),
-			      new BigInteger(p),
-			      new BigInteger(q),
-			      new BigInteger(g));
+    DSAPrivateKeySpec dsaPrivKeySpec =
+        new DSAPrivateKeySpec(new BigInteger(x),
+                              new BigInteger(p),
+                              new BigInteger(q),
+                              new BigInteger(g));
     PrivateKey prvKey = keyFactory.generatePrivate(dsaPrivKeySpec);
     signature.initSign(prvKey);
   }
   public byte[] sign() throws Exception{
-    byte[] sig=signature.sign();      
+    byte[] sig=signature.sign();
 /*
 System.err.print("sign["+sig.length+"] ");
 for(int i=0; i<sig.length;i++){
@@ -73,7 +73,7 @@ System.err.println("");
 */
     // sig is in ASN.1
     // SEQUENCE::={ r INTEGER, s INTEGER }
-    int len=0;	
+    int len=0;
     int index=3;
     len=sig[index++]&0xff;
 //System.err.println("! len="+len);
@@ -87,15 +87,15 @@ System.err.println("");
 
     byte[] result=new byte[40];
 
-    // result must be 40 bytes, but length of r and s may not be 20 bytes  
+    // result must be 40 bytes, but length of r and s may not be 20 bytes
 
     System.arraycopy(r, (r.length>20)?1:0,
-		     result, (r.length>20)?0:20-r.length,
-		     (r.length>20)?20:r.length);
+                     result, (r.length>20)?0:20-r.length,
+                     (r.length>20)?20:r.length);
     System.arraycopy(s, (s.length>20)?1:0,
-		     result, (s.length>20)?20:40-s.length,
-		     (s.length>20)?20:s.length);
- 
+                     result, (s.length>20)?20:40-s.length,
+                     (s.length>20)?20:s.length);
+
 //  System.arraycopy(sig, (sig[3]==20?4:5), result, 0, 20);
 //  System.arraycopy(sig, sig.length-20, result, 20, 20);
 
