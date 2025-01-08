@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2024 D. R. Commander.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2025 D. R. Commander.
  *                                               All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
@@ -174,7 +174,7 @@ public class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    int port = params.sshPort.isDefault() ? -1 : params.sshPort.get();
+    int port = params.sshPort.get();
     String user = params.sshUser.get();
 
     File sshConfigFile = new File(params.sshConfig.get());
@@ -186,6 +186,9 @@ public class Tunnel {
       String repoUser = repo.getConfig(host).getUser();
       if (repoUser != null && user == null)
         user = repoUser;
+      int repoPort = repo.getConfig(host).getPort();
+      if (repoPort != -1 && params.sshPort.isDefault())
+        port = repoPort;
       String[] identityFiles = repo.getConfig(host).getValues("IdentityFile");
       if (identityFiles != null) {
         for (String file : identityFiles) {
