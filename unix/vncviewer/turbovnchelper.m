@@ -1,5 +1,5 @@
-/* Copyright (C) 2015-2017, 2019, 2021-2022 D. R. Commander.
- *                                          All Rights Reserved.
+/* Copyright (C) 2015-2017, 2019, 2021-2022, 2025 D. R. Commander.
+ *                                                All Rights Reserved.
  * Copyright 2014, 2017 Pierre Ossman for Cendio AB
  *
  * This is free software; you can redistribute it and/or modify
@@ -48,6 +48,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#include "com_turbovnc_rfb_Utils.h"
 #include "com_turbovnc_vncviewer_Viewport.h"
 #include <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
@@ -379,4 +380,11 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
 
   bailout:
   return;
+}
+
+
+JNIEXPORT jboolean JNICALL Java_com_turbovnc_rfb_Utils_displaysHaveSeparateSpaces
+  (JNIEnv *env, jobject obj)
+{
+  return (jboolean)[NSScreen screensHaveSeparateSpaces];
 }

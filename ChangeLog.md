@@ -21,6 +21,12 @@ and CVE-2024-31083) from the xorg-server 21.1.x code base.
 a TurboVNC session if the initial resolution of any of the screens in the
 session matched one of the default X RandR modes.
 
+5. Fixed an issue in the Mac TurboVNC Viewer whereby the viewer window did not
+display a vertical scrollbar, and the horizontal scrollbar was incorrectly
+sized, if multi-screen spanning was enabled, the scaled remote desktop was
+larger than the viewer window, and "Displays have separate Spaces" was enabled
+in the system settings.
+
 
 3.1.3
 =====
