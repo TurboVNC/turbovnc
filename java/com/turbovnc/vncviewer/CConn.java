@@ -1139,8 +1139,6 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       viewport.dispose();
     }
     viewport = new Viewport(this);
-    // When in Lion full-screen mode, we need to create the viewport as if
-    // full-screen mode was disabled.
     viewport.setUndecorated(params.fullScreen.get());
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
