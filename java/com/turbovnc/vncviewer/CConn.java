@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -1208,7 +1208,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         // isn't available (multi-screen spanning doesn't even pretend to work
         // under X11 except for full-screen windows, and even then, the
         // appropriate WM hints must be set using C.)
-        (Utils.isX11() && (!opts.fullScreen || !Helper.isAvailable()))) {
+        (Utils.isX11() && (!opts.fullScreen || !Helper.isAvailable())) ||
+        // We're using macOS, and "Displays have separate Spaces" is enabled in
+        // the system settings (or the state of "Displays have separate Spaces"
+        // cannot be determined because the helper library isn't available.)
+        (Utils.isMac() && Utils.displaysHaveSeparateSpacesHelper())) {
       span = primary;
       viewport.leftMon = viewport.rightMon = viewport.topMon =
         viewport.bottomMon = primaryID;

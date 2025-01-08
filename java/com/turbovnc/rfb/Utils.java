@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2018, 2020, 2022-2024 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2018, 2020, 2022-2025 D. R. Commander.
  *                                                 All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
@@ -55,6 +55,12 @@ public final class Utils {
 
   public static boolean osGrab() {
     return !isMac();
+  }
+
+  private static native boolean displaysHaveSeparateSpaces();
+
+  public static boolean displaysHaveSeparateSpacesHelper() {
+    return isMac() && (!Helper.isAvailable() || displaysHaveSeparateSpaces());
   }
 
   public static boolean getBooleanProperty(String key, boolean def) {

@@ -106,6 +106,12 @@ grabbing from working when running the viewer in a GNOME/Wayland session.
 a TurboVNC session if the initial resolution of any of the screens in the
 session matched one of the default X RandR modes.
 
+22. Fixed an issue in the Mac TurboVNC Viewer whereby the viewer window did not
+display a vertical scrollbar, and the horizontal scrollbar was incorrectly
+sized, if multi-screen spanning was enabled, the scaled remote desktop was
+larger than the viewer window, and "Displays have separate Spaces" was enabled
+in the system settings.
+
 
 3.0.3
 =====

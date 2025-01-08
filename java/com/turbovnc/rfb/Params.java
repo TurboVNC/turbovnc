@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012, 2016 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
@@ -630,10 +630,13 @@ public final class Params {
   "only if the window cannot fit on the primary monitor (\"Auto\".)  When " +
   "using automatic desktop resizing, \"Auto\" has the same effect as " +
   "\"Primary\" when in windowed mode and the same effect as \"All\" when in " +
-  "full-screen mode.  Due to general issues with spanning windows across " +
-  "multiple monitors in X11, this parameter does not work on Un*x/X11 " +
-  "platforms except in full-screen mode, and it requires the TurboVNC " +
-  "Helper library.", "Auto", "Primary, All, Auto");
+  "full-screen mode." +
+  (Utils.isX11() ? "  Due to general issues with spanning windows across " +
+   "multiple monitors in X11, this parameter has no effect on Un*x/X11 " +
+   "platforms except in full-screen mode." : "") +
+  (Utils.isMac() ? "  This parameter has no effect on macOS unless " +
+   "\"Displays have separate Spaces\" is disabled in the system settings." :
+   ""), "Auto", "Primary, All, Auto");
 
   public static BoolParameter showToolbar =
   new BoolParameter("Toolbar",

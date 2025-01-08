@@ -1,5 +1,5 @@
-/* Copyright (C) 2015, 2017-2018, 2020-2021 D. R. Commander.
- *                                          All Rights Reserved.
+/* Copyright (C) 2015, 2017-2018, 2020-2021, 2025 D. R. Commander.
+ *                                                All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,8 @@ public final class Helper {
     if (Utils.osEID())
       vlog.info("  - Extended input device support");
     if (Utils.isX11())
+      vlog.info("  - Multi-screen spanning in full-screen mode");
+    if (Utils.isMac())
       vlog.info("  - Multi-screen spanning");
     if (Utils.isWindows())
       vlog.info("  - Pageant support");
