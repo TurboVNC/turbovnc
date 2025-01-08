@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -51,7 +51,7 @@ class UserAuthKeyboardInteractive extends UserAuth{
     while(true){
 
       if(session.auth_failures >= session.max_auth_tries){
-	return false;
+        return false;
       }
 
       // send
@@ -77,55 +77,55 @@ class UserAuthKeyboardInteractive extends UserAuth{
         buf=session.read(buf);
         int command=buf.getCommand()&0xff;
 
-	if(command==SSH_MSG_USERAUTH_SUCCESS){
-	  return true;
-	}
-	if(command==SSH_MSG_USERAUTH_BANNER){
-	  buf.getInt(); buf.getByte(); buf.getByte();
-	  byte[] _message=buf.getString();
-	  byte[] lang=buf.getString();
-	  String message=Util.byte2str(_message);
-	  if(userinfo!=null){
-	    userinfo.showMessage(message);
-	  }
-	  continue loop;
-	}
-	if(command==SSH_MSG_USERAUTH_FAILURE){
-	  buf.getInt(); buf.getByte(); buf.getByte(); 
-	  byte[] foo=buf.getString();
-	  int partial_success=buf.getByte();
-//	  System.err.println(new String(foo)+
-//			     " partial_success:"+(partial_success!=0));
+        if(command==SSH_MSG_USERAUTH_SUCCESS){
+          return true;
+        }
+        if(command==SSH_MSG_USERAUTH_BANNER){
+          buf.getInt(); buf.getByte(); buf.getByte();
+          byte[] _message=buf.getString();
+          byte[] lang=buf.getString();
+          String message=Util.byte2str(_message);
+          if(userinfo!=null){
+            userinfo.showMessage(message);
+          }
+          continue loop;
+        }
+        if(command==SSH_MSG_USERAUTH_FAILURE){
+          buf.getInt(); buf.getByte(); buf.getByte();
+          byte[] foo=buf.getString();
+          int partial_success=buf.getByte();
+//        System.err.println(new String(foo)+
+//                           " partial_success:"+(partial_success!=0));
 
-	  if(partial_success!=0){
-	    throw new JSchPartialAuthException(Util.byte2str(foo));
-	  }
+          if(partial_success!=0){
+            throw new JSchPartialAuthException(Util.byte2str(foo));
+          }
 
-	  if(firsttime){
-	    return false;
-	    //throw new JSchException("USERAUTH KI is not supported");
-	    //cancel=true;  // ??
-	  }
+          if(firsttime){
+            return false;
+            //throw new JSchException("USERAUTH KI is not supported");
+            //cancel=true;  // ??
+          }
           session.auth_failures++;
-	  break;
-	}
-	if(command==SSH_MSG_USERAUTH_INFO_REQUEST){
-	  firsttime=false;
-	  buf.getInt(); buf.getByte(); buf.getByte();
-	  String name=Util.byte2str(buf.getString());
-	  String instruction=Util.byte2str(buf.getString());
-	  String languate_tag=Util.byte2str(buf.getString());
-	  int num=buf.getInt();
-	  String[] prompt=new String[num];
-	  boolean[] echo=new boolean[num];
-	  for(int i=0; i<num; i++){
-	    prompt[i]=Util.byte2str(buf.getString());
-	    echo[i]=(buf.getByte()!=0);
-	  }
+          break;
+        }
+        if(command==SSH_MSG_USERAUTH_INFO_REQUEST){
+          firsttime=false;
+          buf.getInt(); buf.getByte(); buf.getByte();
+          String name=Util.byte2str(buf.getString());
+          String instruction=Util.byte2str(buf.getString());
+          String languate_tag=Util.byte2str(buf.getString());
+          int num=buf.getInt();
+          String[] prompt=new String[num];
+          boolean[] echo=new boolean[num];
+          for(int i=0; i<num; i++){
+            prompt[i]=Util.byte2str(buf.getString());
+            echo[i]=(buf.getByte()!=0);
+          }
 
-	  byte[][] response=null;
+          byte[][] response=null;
 
-          if(password!=null && 
+          if(password!=null &&
              prompt.length==1 &&
              !echo[0] &&
              prompt[0].toLowerCase().indexOf("password:") >= 0){
@@ -134,9 +134,9 @@ class UserAuthKeyboardInteractive extends UserAuth{
             password=null;
           }
           else if(num>0
-	     ||(name.length()>0 || instruction.length()>0)
-	     ){
-	    if(userinfo!=null){
+             ||(name.length()>0 || instruction.length()>0)
+             ){
+            if(userinfo!=null){
               UIKeyboardInteractive kbi=(UIKeyboardInteractive)userinfo;
               String[] _response=kbi.promptKeyboardInteractive(dest,
                                                                name,
@@ -149,21 +149,21 @@ class UserAuthKeyboardInteractive extends UserAuth{
                   response[i]=Util.str2byte(_response[i]);
                 }
               }
-	    }
-	  }
+            }
+          }
 
-	  // byte      SSH_MSG_USERAUTH_INFO_RESPONSE(61)
-	  // int       num-responses
-	  // string    response[1] (ISO-10646 UTF-8)
-	  // ...
-	  // string    response[num-responses] (ISO-10646 UTF-8)
-	  packet.reset();
-	  buf.putByte((byte)SSH_MSG_USERAUTH_INFO_RESPONSE);
-	  if(num>0 &&
-	     (response==null ||  // cancel
-	      num!=response.length)){
+          // byte      SSH_MSG_USERAUTH_INFO_RESPONSE(61)
+          // int       num-responses
+          // string    response[1] (ISO-10646 UTF-8)
+          // ...
+          // string    response[num-responses] (ISO-10646 UTF-8)
+          packet.reset();
+          buf.putByte((byte)SSH_MSG_USERAUTH_INFO_RESPONSE);
+          if(num>0 &&
+             (response==null ||  // cancel
+              num!=response.length)){
 
-            if(response==null){  
+            if(response==null){
               // working around the bug in OpenSSH ;-<
               buf.putInt(num);
               for(int i=0; i<num; i++){
@@ -174,28 +174,28 @@ class UserAuthKeyboardInteractive extends UserAuth{
               buf.putInt(0);
             }
 
-	    if(response==null)
-	      cancel=true;
-	  }
-	  else{
-	    buf.putInt(num);
-	    for(int i=0; i<num; i++){
-	      buf.putString(response[i]);
-	    }
-	  }
-	  session.write(packet);
+            if(response==null)
+              cancel=true;
+          }
+          else{
+            buf.putInt(num);
+            for(int i=0; i<num; i++){
+              buf.putString(response[i]);
+            }
+          }
+          session.write(packet);
           /*
-	  if(cancel)
-	    break;
+          if(cancel)
+            break;
           */
-	  continue loop;
-	}
-	//throw new JSchException("USERAUTH fail ("+command+")");
-	return false;
+          continue loop;
+        }
+        //throw new JSchException("USERAUTH fail ("+command+")");
+        return false;
       }
       if(cancel){
-	throw new JSchAuthCancelException("keyboard-interactive");
-	//break;
+        throw new JSchAuthCancelException("keyboard-interactive");
+        //break;
       }
     }
     //return false;

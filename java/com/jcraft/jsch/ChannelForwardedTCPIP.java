@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -58,7 +58,7 @@ public class ChannelForwardedTCPIP extends Channel{
   }
 
   public void run(){
-    try{ 
+    try{
       if(config instanceof ConfigDaemon){
         ConfigDaemon _config = (ConfigDaemon)config;
         Class c=Class.forName(_config.target);
@@ -75,8 +75,8 @@ public class ChannelForwardedTCPIP extends Channel{
       }
       else{
         ConfigLHost _config = (ConfigLHost)config;
-        socket=(_config.factory==null) ? 
-           Util.createSocket(_config.target, _config.lport, TIMEOUT) : 
+        socket=(_config.factory==null) ?
+           Util.createSocket(_config.target, _config.lport, TIMEOUT) :
           _config.factory.createSocket(_config.target, _config.lport);
         socket.setTcpNoDelay(true);
         io.setInputStream(socket.getInputStream());
@@ -88,7 +88,7 @@ public class ChannelForwardedTCPIP extends Channel{
       sendOpenFailure(SSH_OPEN_ADMINISTRATIVELY_PROHIBITED);
       close=true;
       disconnect();
-      return; 
+      return;
     }
 
     thread=Thread.currentThread();
@@ -97,11 +97,11 @@ public class ChannelForwardedTCPIP extends Channel{
     int i=0;
     try{
       Session _session = getSession();
-      while(thread!=null && 
-            io!=null && 
+      while(thread!=null &&
+            io!=null &&
             io.in!=null){
-        i=io.in.read(buf.buffer, 
-                     14, 
+        i=io.in.read(buf.buffer,
+                     14,
                      buf.buffer.length-14
                      -Session.buffer_margin
                      );
@@ -159,7 +159,7 @@ public class ChannelForwardedTCPIP extends Channel{
 
     if(this.config == null){
       if(JSch.getLogger().isEnabled(Logger.ERROR)){
-        JSch.getLogger().log(Logger.ERROR, 
+        JSch.getLogger().log(Logger.ERROR,
                              "ChannelForwardedTCPIP: "+Util.byte2str(addr)+":"+port+" is not registered.");
       }
     }
@@ -264,7 +264,7 @@ public class ChannelForwardedTCPIP extends Channel{
       pool.removeElement(foo);
       if(address_to_bind==null){
         address_to_bind=foo.address_to_bind;
-      }	
+      }
       if(address_to_bind==null){
         address_to_bind="0.0.0.0";
       }

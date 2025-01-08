@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -66,7 +66,7 @@ public class HostKey{
   }
   public HostKey(String marker, String host, int type, byte[] key, String comment) throws JSchException {
     this.marker=marker;
-    this.host=host; 
+    this.host=host;
     if(type==GUESS){
       if(key[8]=='d'){ this.type=SSHDSS; }
       else if(key[8]=='r'){ this.type=SSHRSA; }
@@ -76,7 +76,7 @@ public class HostKey{
       else { throw new JSchException("invalid key type");}
     }
     else{
-      this.type=type; 
+      this.type=type;
     }
     this.key=key;
     this.comment=comment;
@@ -122,7 +122,7 @@ public class HostKey{
 
   private boolean isIncluded(String _host){
     int i=0;
-    String hosts=this.host; 
+    String hosts=this.host;
     int hostslen=hosts.length();
     int hostlen=_host.length();
     int j;
@@ -133,7 +133,7 @@ public class HostKey{
        return hosts.regionMatches(true, i, _host, 0, hostlen);
       }
       if(hostlen==(j-i)){
-	if(hosts.regionMatches(true, i, _host, 0, hostlen)) return true;
+        if(hosts.regionMatches(true, i, _host, 0, hostlen)) return true;
       }
       i=j+1;
     }

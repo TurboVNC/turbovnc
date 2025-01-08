@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -145,7 +145,7 @@ public class Buffer{
     getByte(foo, 0, foo.length);
   }
   void getByte(byte[] foo, int start, int len) {
-    System.arraycopy(buffer, s, foo, start, len); 
+    System.arraycopy(buffer, s, foo, start, len);
     s+=len;
   }
   public int getByte(int len) {
@@ -271,15 +271,15 @@ public class Buffer{
     int foo;
     for(int i=0; i<tmp_buffer_index; i++){
         foo=tmp_buffer[i]&0xff;
-	System.err.print(chars[(foo>>>4)&0xf]);
-	System.err.print(chars[foo&0xf]);
+        System.err.print(chars[(foo>>>4)&0xf]);
+        System.err.print(chars[foo&0xf]);
         if(i%16==15){
           System.err.println("");
-	  continue;
-	}
+          continue;
+        }
         if(i>0 && i%2==1){
           System.err.print(" ");
-	}
+        }
     }
     System.err.println("");
   }

@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -32,9 +32,9 @@ package com.jcraft.jsch;
 public interface Cipher{
   static int ENCRYPT_MODE=0;
   static int DECRYPT_MODE=1;
-  int getIVSize(); 
-  int getBlockSize(); 
-  void init(int mode, byte[] key, byte[] iv) throws Exception; 
+  int getIVSize();
+  int getBlockSize();
+  void init(int mode, byte[] key, byte[] iv) throws Exception;
   void update(byte[] foo, int s1, int len, byte[] bar, int s2) throws Exception;
   boolean isCBC();
 }

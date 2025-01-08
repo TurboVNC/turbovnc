@@ -11,8 +11,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -155,14 +155,14 @@ public class KeyPairRSA extends KeyPair{
       }
 
       if(vendor==VENDOR_FSECURE){
-	if(plain[index]!=0x30){                  // FSecure
-	  Buffer buf=new Buffer(plain);
-	  pub_array=buf.getMPIntBits();
-	  prv_array=buf.getMPIntBits();
-	  n_array=buf.getMPIntBits();
-	  byte[] u_array=buf.getMPIntBits();
-	  p_array=buf.getMPIntBits();
-	  q_array=buf.getMPIntBits();
+        if(plain[index]!=0x30){                  // FSecure
+          Buffer buf=new Buffer(plain);
+          pub_array=buf.getMPIntBits();
+          prv_array=buf.getMPIntBits();
+          n_array=buf.getMPIntBits();
+          byte[] u_array=buf.getMPIntBits();
+          p_array=buf.getMPIntBits();
+          q_array=buf.getMPIntBits();
           if(n_array!=null){
             key_size = (new java.math.BigInteger(n_array)).bitLength();
           }
@@ -171,9 +171,9 @@ public class KeyPairRSA extends KeyPair{
           getEQArray();
           getCArray();
 
-	  return true;
-	}
-	return false;
+          return true;
+        }
+        return false;
       }
 
             // OPENSSH Key v1 Format

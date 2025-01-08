@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -35,7 +35,7 @@ public class DHG1 extends KeyExchange{
   static final byte[] g={ 2 };
   static final byte[] p={
 (byte)0x00,
-(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF, 
+(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,
 (byte)0xC9,(byte)0x0F,(byte)0xDA,(byte)0xA2,(byte)0x21,(byte)0x68,(byte)0xC2,(byte)0x34,
 (byte)0xC4,(byte)0xC6,(byte)0x62,(byte)0x8B,(byte)0x80,(byte)0xDC,(byte)0x1C,(byte)0xD1,
 (byte)0x29,(byte)0x02,(byte)0x4E,(byte)0x08,(byte)0x8A,(byte)0x67,(byte)0xCC,(byte)0x74,
@@ -71,12 +71,12 @@ public class DHG1 extends KeyExchange{
   private Packet packet;
 
   public void init(Session session,
-		   byte[] V_S, byte[] V_C, byte[] I_S, byte[] I_C) throws Exception{
+                   byte[] V_S, byte[] V_C, byte[] I_S, byte[] I_C) throws Exception{
     this.session=session;
-    this.V_S=V_S;      
-    this.V_C=V_C;      
-    this.I_S=I_S;      
-    this.I_C=I_C;      
+    this.V_S=V_S;
+    this.V_C=V_C;
+    this.I_S=I_S;
+    this.I_C=I_C;
 
     try{
       Class c=Class.forName(session.getConfig("sha-1"));
@@ -116,9 +116,9 @@ public class DHG1 extends KeyExchange{
     session.write(packet);
 
     if(JSch.getLogger().isEnabled(Logger.INFO)){
-      JSch.getLogger().log(Logger.INFO, 
+      JSch.getLogger().log(Logger.INFO,
                            "SSH_MSG_KEXDH_INIT sent");
-      JSch.getLogger().log(Logger.INFO, 
+      JSch.getLogger().log(Logger.INFO,
                            "expecting SSH_MSG_KEXDH_REPLY");
     }
 
@@ -139,8 +139,8 @@ public class DHG1 extends KeyExchange{
       j=_buf.getByte();
       j=_buf.getByte();
       if(j!=31){
-	System.err.println("type: must be 31 "+j);
-	return false;
+        System.err.println("type: must be 31 "+j);
+        return false;
       }
 
       K_S=_buf.getString();
@@ -181,7 +181,7 @@ public class DHG1 extends KeyExchange{
       i=0;
       j=0;
       j=((K_S[i++]<<24)&0xff000000)|((K_S[i++]<<16)&0x00ff0000)|
-	((K_S[i++]<<8)&0x0000ff00)|((K_S[i++])&0x000000ff);
+        ((K_S[i++]<<8)&0x0000ff00)|((K_S[i++])&0x000000ff);
       String alg=Util.byte2str(K_S, i, j);
       i+=j;
 

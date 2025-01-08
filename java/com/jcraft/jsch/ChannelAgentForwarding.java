@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -43,7 +43,7 @@ class ChannelAgentForwarding extends Channel{
   private final byte SSH_AGENT_RSA_RESPONSE = 4;
   private final byte SSH_AGENT_FAILURE = 5;
   private final byte SSH_AGENT_SUCCESS = 6;
-  private final byte SSH_AGENTC_ADD_RSA_IDENTITY	= 7;
+  private final byte SSH_AGENTC_ADD_RSA_IDENTITY = 7;
   private final byte SSH_AGENTC_REMOVE_RSA_IDENTITY = 8;
   private final byte SSH_AGENTC_REMOVE_ALL_RSA_IDENTITIES = 9;
 
@@ -126,7 +126,7 @@ class ChannelAgentForwarding extends Channel{
 
     mbuf.reset();
 
-    if(typ==SSH2_AGENTC_REQUEST_IDENTITIES){ 
+    if(typ==SSH2_AGENTC_REQUEST_IDENTITIES){
       mbuf.putByte(SSH2_AGENT_IDENTITIES_ANSWER);
       Vector identities = irepo.getIdentities();
       synchronized(identities){

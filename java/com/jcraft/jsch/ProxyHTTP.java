@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -48,8 +48,8 @@ public class ProxyHTTP implements Proxy{
     String host=proxy_host;
     if(proxy_host.indexOf(':')!=-1){
       try{
-	host=proxy_host.substring(0, proxy_host.indexOf(':'));
-	port=Integer.parseInt(proxy_host.substring(proxy_host.indexOf(':')+1));
+        host=proxy_host.substring(0, proxy_host.indexOf(':'));
+        port=Integer.parseInt(proxy_host.substring(proxy_host.indexOf(':')+1));
       }
       catch(Exception e){
       }
@@ -68,7 +68,7 @@ public class ProxyHTTP implements Proxy{
   public void connect(SocketFactory socket_factory, String host, int port, int timeout) throws JSchException{
     try{
       if(socket_factory==null){
-        socket=Util.createSocket(proxy_host, proxy_port, timeout);    
+        socket=Util.createSocket(proxy_host, proxy_port, timeout);
         in=socket.getInputStream();
         out=socket.getOutputStream();
       }
@@ -85,11 +85,11 @@ public class ProxyHTTP implements Proxy{
       out.write(Util.str2byte("CONNECT "+host+":"+port+" HTTP/1.0\r\n"));
 
       if(user!=null && passwd!=null){
-	byte[] code=Util.str2byte(user+":"+passwd);
-	code=Util.toBase64(code, 0, code.length);
-	out.write(Util.str2byte("Proxy-Authorization: Basic "));
-	out.write(code);
-	out.write(Util.str2byte("\r\n"));
+        byte[] code=Util.str2byte(user+":"+passwd);
+        code=Util.toBase64(code, 0, code.length);
+        out.write(Util.str2byte("Proxy-Authorization: Basic "));
+        out.write(code);
+        out.write(Util.str2byte("\r\n"));
       }
 
       out.write(Util.str2byte("\r\n"));
@@ -107,7 +107,7 @@ public class ProxyHTTP implements Proxy{
         throw new IOException();
       }
 
-      String response=sb.toString(); 
+      String response=sb.toString();
       String reason="Unknow reason";
       int code=-1;
       try{
@@ -126,7 +126,7 @@ public class ProxyHTTP implements Proxy{
       while(foo>=0){
         foo=in.read(); if(foo!=13) continue;
         foo=in.read(); if(foo!=10) continue;
-        foo=in.read(); if(foo!=13) continue;      
+        foo=in.read(); if(foo!=13) continue;
         foo=in.read(); if(foo!=10) continue;
         break;
       }

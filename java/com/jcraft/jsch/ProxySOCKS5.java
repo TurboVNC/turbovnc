@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -29,8 +29,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*
  This file depends on following documents,
-   - RFC 1928  SOCKS Protocol Verseion 5  
-   - RFC 1929  Username/Password Authentication for SOCKS V5. 
+   - RFC 1928  SOCKS Protocol Verseion 5
+   - RFC 1929  Username/Password Authentication for SOCKS V5.
  */
 
 package com.jcraft.jsch;
@@ -53,8 +53,8 @@ public class ProxySOCKS5 implements Proxy{
     String host=proxy_host;
     if(proxy_host.indexOf(':')!=-1){
       try{
-	host=proxy_host.substring(0, proxy_host.indexOf(':'));
-	port=Integer.parseInt(proxy_host.substring(proxy_host.indexOf(':')+1));
+        host=proxy_host.substring(0, proxy_host.indexOf(':'));
+        port=Integer.parseInt(proxy_host.substring(proxy_host.indexOf(':')+1));
       }
       catch(Exception e){
       }
@@ -74,7 +74,7 @@ public class ProxySOCKS5 implements Proxy{
     try{
       if(socket_factory==null){
         socket=Util.createSocket(proxy_host, proxy_port, timeout);
-        //socket=new Socket(proxy_host, proxy_port);    
+        //socket=new Socket(proxy_host, proxy_port);
         in=socket.getInputStream();
         out=socket.getOutputStream();
       }
@@ -132,7 +132,7 @@ public class ProxySOCKS5 implements Proxy{
 */
       //in.read(buf, 0, 2);
       fill(in, buf, 2);
- 
+
       boolean check=false;
       switch((buf[1])&0xff){
         case 0:                // NO AUTHENTICATION REQUIRED
@@ -163,11 +163,11 @@ public class ProxySOCKS5 implements Proxy{
           index=0;
           buf[index++]=1;
           buf[index++]=(byte)(user.length());
-	  System.arraycopy(Util.str2byte(user), 0, buf, index, user.length());
-	  index+=user.length();
+          System.arraycopy(Util.str2byte(user), 0, buf, index, user.length());
+          index+=user.length();
           buf[index++]=(byte)(passwd.length());
-	  System.arraycopy(Util.str2byte(passwd), 0, buf, index, passwd.length());
-	  index+=passwd.length();
+          System.arraycopy(Util.str2byte(passwd), 0, buf, index, passwd.length());
+          index+=passwd.length();
 
           out.write(buf, 0, index);
 
@@ -195,8 +195,8 @@ public class ProxySOCKS5 implements Proxy{
 
       if(!check){
         try{ socket.close(); }
-	catch(Exception eee){
-	}
+        catch(Exception eee){
+        }
         throw new JSchException("fail in SOCKS5 proxy");
       }
 
@@ -225,7 +225,7 @@ public class ProxySOCKS5 implements Proxy{
       o  DST.PORT desired destination port in network octet
          order
 */
-     
+
       index=0;
       buf[index++]=5;
       buf[index++]=1;       // CONNECT
@@ -282,8 +282,8 @@ public class ProxySOCKS5 implements Proxy{
 
       if(buf[1]!=0){
         try{ socket.close(); }
-	catch(Exception eee){
-	}
+        catch(Exception eee){
+        }
         throw new JSchException("ProxySOCKS5: server returns "+buf[1]);
       }
 
@@ -291,13 +291,13 @@ public class ProxySOCKS5 implements Proxy{
         case 1:
           //in.read(buf, 0, 6);
           fill(in, buf, 6);
-	  break;
+          break;
         case 3:
           //in.read(buf, 0, 1);
           fill(in, buf, 1);
           //in.read(buf, 0, buf[0]+2);
           fill(in, buf, (buf[0]&0xff)+2);
-	  break;
+          break;
         case 4:
           //in.read(buf, 0, 18);
           fill(in, buf, 18);

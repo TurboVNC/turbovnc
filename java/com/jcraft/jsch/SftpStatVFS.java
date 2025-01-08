@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -36,7 +36,7 @@ public class SftpStatVFS {
 
   /*
    It seems data is serializsed according to sys/statvfs.h; for example,
-   http://pubs.opengroup.org/onlinepubs/009604499/basedefs/sys/statvfs.h.html  
+   http://pubs.opengroup.org/onlinepubs/009604499/basedefs/sys/statvfs.h.html
   */
 
   private long bsize;
@@ -84,7 +84,7 @@ public class SftpStatVFS {
       (flag & 2/*SSH2_FXE_STATVFS_ST_NOSUID*/) != 0 ? 2/*ST_NOSUID*/ : 0;
 
     return statvfs;
-  } 
+  }
 
   public long getBlockSize() { return bsize; }
   public long getFragmentSize() { return frsize; }
@@ -115,7 +115,7 @@ public class SftpStatVFS {
   }
 
   public int getCapacity(){
-    return (int)(100*(getBlocks()-getFreeBlocks())/getBlocks()); 
+    return (int)(100*(getBlocks()-getFreeBlocks())/getBlocks());
   }
 
 //  public String toString() { return ""; }

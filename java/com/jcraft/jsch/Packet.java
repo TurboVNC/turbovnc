@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -35,7 +35,7 @@ public class Packet{
   static void setRandom(Random foo){ random=foo;}
 
   Buffer buffer;
-  byte[] ba4=new byte[4]; 
+  byte[] ba4=new byte[4];
   public Packet(Buffer buffer){
     this.buffer=buffer;
   }
@@ -90,9 +90,9 @@ System.err.println("");
 //if(buffer.buffer.length<s)
 //  System.err.println("buffer.buffer.length="+buffer.buffer.length+" s="+(s));
 
-    System.arraycopy(buffer.buffer, 
-		     len+5+9, 
-		     buffer.buffer, s, buffer.index-5-9-len);
+    System.arraycopy(buffer.buffer,
+                     len+5+9,
+                     buffer.buffer, s, buffer.index-5-9-len);
 
     buffer.index=10;
     buffer.putInt(len);
@@ -100,9 +100,9 @@ System.err.println("");
     return s;
   }
   void unshift(byte command, int recipient, int s, int len){
-    System.arraycopy(buffer.buffer, 
-		     s, 
-		     buffer.buffer, 5+9, len);
+    System.arraycopy(buffer.buffer,
+                     s,
+                     buffer.buffer, 5+9, len);
     buffer.buffer[5]=command;
     buffer.index=6;
     buffer.putInt(recipient);
