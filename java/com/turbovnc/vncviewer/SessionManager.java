@@ -1,4 +1,4 @@
-/* Copyright (C) 2018, 2020-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2018, 2020-2025 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
