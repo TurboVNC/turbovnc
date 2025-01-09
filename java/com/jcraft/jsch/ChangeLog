@@ -91,12 +91,12 @@ Changes since version 0.1.50:
 - bugfix: resource leaks at the failure of making local port forwarding. FIXED.
 - bugfix: NPE in connecting to the non-standard TCP port.  FIXED.
           This problem had appeared if a host-key does not exist in
-	  "known_host" file.
+          "known_host" file.
 - bugfix: TCP connection may not be dropped if error messages from
-	  the remote are too long.                          FIXED.
+          the remote are too long.                          FIXED.
 - bugfix: SftpATTRS#getAtimeString() returns the wrong string. FIXED.
 - bugfix: bytes to be added by SSH_MSG_CHANNEL_WINDOW_ADJUST must be in
-	  unsigned integer. FIXED.
+          unsigned integer. FIXED.
 - bugfix: Util#checkTilde() should not convert a tilde in
           "C:\PROGRA~1\". FIXED.
 - bugfix: A long long command for ChannelExec will cause
@@ -117,7 +117,7 @@ Changes since version 0.1.50:
           to close the given stream.  FIXED
 - change: com.jcraft.jsch.jcraft.HMAC* will not be used.
           It seems Java6 on Mac OS X has fixed some memory leak bug in JCE,
-	  so there is no reason to use c.j.j.j.HMAC* introduced at 0.1.30.
+          so there is no reason to use c.j.j.j.HMAC* introduced at 0.1.30.
 - change: updating copyright messages; 2013 -> 2014
 - change: allowed to create the symbolic/hard link to the relative path by
           ChannelSftp#symlink(String oldpath, String newpath)
@@ -137,28 +137,28 @@ Changes since version 0.1.49:
           http://stackoverflow.com/questions/12279836/ssh-using-jschexception-verify-false-sometimes-fails
           https://issues.apache.org/jira/browse/IVY-1374
 - bugfix: Session#setPortForwardingL(String bind_address,
-	                             int lport, String host, int rport)
-	  will not work for the long host name.         FIXED.
+                                     int lport, String host, int rport)
+          will not work for the long host name.         FIXED.
 - change: changed JSch#getIdentityRepository() to be public.
 - feature: added the following method to choose a canceled remote
-	   port-forwarding with the specified bind address,
+           port-forwarding with the specified bind address,
              Session#delPortForwardingR(String bind_address, int rport)
 - feature: added support for following OpenSSH's sftp extensions,
              posix-rename@openssh.com,
              statvfs@openssh.com,
              hardlink@openssh.com,
-	   and some methods and a class to use those functionalities,
+           and some methods and a class to use those functionalities,
              ChannelSftp#hardlink(String oldpath, String newpath),
-	     ChannelSftp#statVFS(String path)
+             ChannelSftp#statVFS(String path)
              SftpStatVFS
 - feature: added support for OpenSSH's configuration file,
-	     JSch#setConfigRepository(ConfigRepository configRepository)
-	     JSch#getConfigRepository()
+             JSch#setConfigRepository(ConfigRepository configRepository)
+             JSch#getConfigRepository()
              OpenSSHConfig class
              Session#getSession(String host)
-	   and added an example to demonstrate how to use it,
-	     examples/OpenSSHConfig.java
-	   OpenSSHConfig class will recognize the following keywords,
+           and added an example to demonstrate how to use it,
+             examples/OpenSSHConfig.java
+           OpenSSHConfig class will recognize the following keywords,
              Host
              User
              Hostname
@@ -186,7 +186,7 @@ Changes since version 0.1.49:
              JSch#setIdentity(String prvkey, String pubkey)
              JSch#setKnownHosts(String prvkey, String pubkey)
 - feature: added support for known_hosts file, which may include
-	   markers(@revoke) and comments.
+           markers(@revoke) and comments.
              HostKey(String host, int type, byte[] key, String comment)
              HostKey(String marker, String host, int type,
                      byte[] key, String comment)
@@ -196,14 +196,14 @@ Changes since version 0.1.49:
              writePrivateKey(java.io.OutputStream out, byte[] passphrase)
              writePrivateKey(String name, byte[] passphrase)
 - feature: allowed to set the connection timeout for the local port-forwarding,
-	   and added following methods,
+           and added following methods,
              Session#setPortForwardingL(String bind_address,
                                         int lport, String host, int rport,
                                         ServerSocketFactory ssf,
                                         int connectTimeout)
              ChannelDirectTCPIP#connect(int connectTimeout)
 - feature: added the following method to Session class
-	     getStreamForwarder(String host, int port)
+             getStreamForwarder(String host, int port)
            and updated example/StreamForwarding.java to use that method.
 - feature: added following methods to Session class,
              setPortForwardingL(String conf)
@@ -212,39 +212,39 @@ Changes since version 0.1.49:
              Session#setHostKeyRepository(HostKeyRepository hostkeyRepository)
              Session#getHostKeyRepository()
 - feature: added support for OpenSSH's local extension,
-	   "no-more-sessions@openssh.com" and the method,
+           "no-more-sessions@openssh.com" and the method,
              Session#noMoreSessionChannels()
 
 
 Changes since version 0.1.48:
 - bugfix: Some sftp servers will sometimes fail to handle bulk requests,
-	  and whenever detecting such failures, we should re-send
+          and whenever detecting such failures, we should re-send
           requests again and again.                                    FIXED
 - bugfix: KeyPair#getFingerPrint() should return a fingerprint instead
-	  of keysize + " " + fingerprint.                              FIXED
+          of keysize + " " + fingerprint.                              FIXED
 - bugfix: KeyPair#getKeySize() should return its key size.             FIXED
 - bugfix: SftpATTRS#isDir() should return false for unix domain
-	  socket files.                                                FIXED
+          socket files.                                                FIXED
 - change: improved the heuristics for the password prompt in
-	  the keyboard-interactive authentication.  It may not be
-	  started with "password:".
+          the keyboard-interactive authentication.  It may not be
+          started with "password:".
 - change: ChannelSftp#put(InputStream src, String dst) will not check
-	  if dst is directory or not, and if an exception is thrown,
-	  the check will be done.
+          if dst is directory or not, and if an exception is thrown,
+          the check will be done.
 - change: if the compression is enabled without jzlib.jar,
-	  an exception will be thrown.
+          an exception will be thrown.
 - feature: JSch#addIdentity() and KeyPair#load() methods will accept
-	   Putty's private key files.
-	   Note that Putty encrypts its private key with "aes256-cbc".
-	   So, to handle such key files, "Java Cryptography
-	   Extension (JCE) Unlimited Strength Jurisdiction Policy Files"
-	   must be installed.
+           Putty's private key files.
+           Note that Putty encrypts its private key with "aes256-cbc".
+           So, to handle such key files, "Java Cryptography
+           Extension (JCE) Unlimited Strength Jurisdiction Policy Files"
+           must be installed.
 - feature: hmac-sha2-256 defined in RFC6668 is supported.
 - feature: added following methods to KeyPair class,
-	   byte[] getSignature(byte[] data)
-	   Signature getVerifier()
-	   byte[] forSSHAgent()
-	   void setPublicKeyComment(String comment)
+           byte[] getSignature(byte[] data)
+           Signature getVerifier()
+           byte[] forSSHAgent()
+           void setPublicKeyComment(String comment)
 - feature: added following methods to SftpATTR class,
            boolean isChr()
            boolean isBlk()
@@ -263,7 +263,7 @@ Changes since version 0.1.47:
 Changes since version 0.1.46:
 - bugfix: failed to initialize channels for the stream forwarding.     FIXED
 - change: Session#getHostKey() will return the given hostkey
-	  even if session is not established.
+          even if session is not established.
 - change: Logger will record additional messages about algorithm negotiations.
 - feature: added ChannelSftp#ls(String path, LsEntrySelector selector) method.
 - feature: added IdentityRepository#{getName(),getStatus()} methods.
@@ -281,33 +281,33 @@ Changes since version 0.1.45:
 - change: authentication trials will be failed at 6 failures by the default.
 - change: updating copyright messages; 2011 -> 2012
 - feature: added JSch#setIdentityRepository(IdentityRepository irepo) to
-	   integrate with jsch-agent-proxy.
+           integrate with jsch-agent-proxy.
 
 
 Changes since version 0.1.44:
 - bugfix: fields referred by multiple threads simultaneously should be
-	  volatile.                                                    FIXED
+          volatile.                                                    FIXED
 - bugfix: use local window size offered by the remote in sftp put.
                                                                        FIXED
 - bugfix: SftpProgressMonitor#init was not invoked in sftp-put
-	  for input-stream.                                            FIXED
+          for input-stream.                                            FIXED
 - bugfix: sftp protocol version 3, 4 and 5 should allow only
-	  UTF-8 encoding.                                              FIXED
+          UTF-8 encoding.                                              FIXED
 - bugfix: Channel Subsystem had failed to set X forwarding flag.
                                                                        FIXED
 - bugfix: Channel X11 had leaked some resources.
                                                                        FIXED
 - bugfix: packet compression may break sessions
-	  in some case(transferring deflated data).                    FIXED
+          in some case(transferring deflated data).                    FIXED
 - bugfix: failed to set dev-null for logger
                                                                        FIXED
 - bugfix: even in sftp protocol version 3 session, some sftpd sends data
-	  packets defined in sftp protocol 6 ;-( working around it.    FIXED
+          packets defined in sftp protocol 6 ;-( working around it.    FIXED
 - bugfix: ChannelSftp file globbing logic had missed
-	  the string "foo\\\*bar" as a pattern.                        FIXED
+          the string "foo\\\*bar" as a pattern.                        FIXED
 - bugfix: sequential accesses to ChannelSftp by multiple threads may
-	  break its I/O channel.
-	  https://bugs.eclipse.org/bugs/show_bug.cgi?id=359184         FIXED
+          break its I/O channel.
+          https://bugs.eclipse.org/bugs/show_bug.cgi?id=359184         FIXED
 - bugfix: KeyPair.load can not handle private keys cyphered with AES.  FIXED
 - change: to improve sftp-put performance, send multiple packet at one time.
 - change: wait/notify will be used instead of sleep loop
@@ -316,7 +316,7 @@ Changes since version 0.1.44:
 - change: updating copyright messages; 2010 -> 2011
 - change: src/com -> src/main/java/com
 - feature: key-exchange method "diffie-hellman-group14-sha1"
-	  (RFC4253#section-8.2)
+          (RFC4253#section-8.2)
 - feature: KeyPair#getPlulicKeyCommment() is added.
 
 
@@ -325,7 +325,7 @@ Changes since version 0.1.43:
 - bugfix: working around OOME in parsing broken data from the remote. FIXED.
 - bugfix: failed to send very long command for exec channels. FIXED.
 - bugfix: in some case, failed to get the response
-	  for remote port-forwarding request.  FIXED.
+          for remote port-forwarding request.  FIXED.
 - feature: support for private keys ciphered with aes192-cbc and aes128-cbc.
 
 
@@ -347,26 +347,26 @@ Changes since version 0.1.42:
 
 Changes since version 0.1.41:
 - bugfix: making exec request during re-keying process will cause
-	  the dead lock for the session.                        FIXED.
+          the dead lock for the session.                        FIXED.
           Many thanks for PanLi at Prominic dot NET and www.prominic.net,
-	  US based hosting company.  Without their testing JSch with
-  	  hundreds of hosts and their bug reports, this problem
-	  was not fixed.
+          US based hosting company.  Without their testing JSch with
+          hundreds of hosts and their bug reports, this problem
+          was not fixed.
 - change: updating copyright messages; 2008 -> 2009
 
 
 Changes since version 0.1.40:
 - bugfix: canceling the remote port-forwarding with the incorrect
-	  bind-address.                                         FIXED.
+          bind-address.                                         FIXED.
 - bugfix: sftp had missed to close the file in some case.       FIXED.
 - bugfix: ls(sftp) will throw an exception for the empty directory
-	  in connecting to some sftpd server.                   FIXED.
+          in connecting to some sftpd server.                   FIXED.
 - change: dropping the session gently in accepting incorrect packets.
 - change: by the default, aes128-ctr will be chosen if it is available
-	  on the local and the remote.
+          on the local and the remote.
 - feature: adding the support for the private key ciphered in AES256.
 - feature: new ciphers: aes128-ctr,aes192-ctr,aes256-ctr,
-	   3des-ctr,arcfour,arcfour128 ,arcfour256
+           3des-ctr,arcfour,arcfour128 ,arcfour256
 
 
 Changes since version 0.1.39:
@@ -385,22 +385,22 @@ Changes since version 0.1.37:
 - bugfix: NPE should not be thrown at unexpected session drop.  FIXED.
 - bugfix: AIOOBE at Session#connect().                         FIXED.
 - bugfix: Even if 'true' is given for
-	    Channel#setOutputStream(OutputStream out, boolean dontclose)
-	  as the second paramter, 'out' will be closed.        FIXED.
+            Channel#setOutputStream(OutputStream out, boolean dontclose)
+          as the second paramter, 'out' will be closed.        FIXED.
 - change: 'examples/Sftp.java' has been modified to demonstrate
           ChannelSftp#reaplpath(String path)
 - change: setEnv(Hashtable env) for exec and shell channels have been
-	  marked as @deprecated
+          marked as @deprecated
 - feature: setEnv(String name, String value) has been added to exec
-	   and shell channels.
+           and shell channels.
 - feature: setEnv(byte[] name, byte[] value) has been added to exec
-	   and shell channels.
+           and shell channels.
 - feature: ChannelSftp#realpath(String path) has been added.
 - feature: ChannelExec#setCommand(byte[] command) has been added.
 - feature: com.jcraft.jsch.ChannelSftp.LsEntry has implemented
-	   java.lang.Comparable
+           java.lang.Comparable
 - feature: Session#getServerAliveInterval(), Session#getServerAliveCountMaX()
-	   have been added.
+           have been added.
 
 
 Changes since version 0.1.36:
@@ -409,7 +409,7 @@ Changes since version 0.1.36:
 - bugfix: the stream forwarding had been broken since 0.1.30.  FIXED.
 - bugfix: failed to detect 'SSH_MSG_CHANNEL_OPEN_FAILURE'.     FIXED.
 - bugfix: ChannelSftp will generate the unfavorable absolute pathname
-	  in some case.                                        FIXED.
+          in some case.                                        FIXED.
 - bugfix: failed to ignore the invalid public-key file.        FIXED.
 - change: ignoring empty data sent by 'SSH_MSG_CHANNEL_DATA' and
            'SSH_MSG_CHANNEL_EXTENDED_DATA'.
@@ -417,148 +417,148 @@ Changes since version 0.1.36:
 - change: build.xml will enable 'javac.debug' option by the default.
 - change: added logging messages to IndentityFile and Session class.
 - change: followings are deprecated methods,
-	   InputStream ChannelSftp#get(String src,
-	                               int mode)
-	   InputStream ChannelSftp#get(String src,
-	                               SftpProgressMonitor,
-	                               int mode)
+           InputStream ChannelSftp#get(String src,
+                                       int mode)
+           InputStream ChannelSftp#get(String src,
+                                       SftpProgressMonitor,
+                                       int mode)
 - feature: following method is added,
-	   InputStream ChannelSftp#get(String src,
-	                               SftpProgressMonitor monitor,
-	                               long skip)
+           InputStream ChannelSftp#get(String src,
+                                       SftpProgressMonitor monitor,
+                                       long skip)
 
 
 Changes since version 0.1.35:
 - bugfix: ChannelSftp can not handle the local filenames correctly on Windows. FIXED.
 - bugfix: '/' must be handled as the file separator on JVM for Windows.  FIXED.
 - change: the system property
-	    "javax.security.auth.useSubjectCredsOnly"
-	  will be set to "false" for "gssapi-with-mic"
-	  if that property is not given explicitly.
+            "javax.security.auth.useSubjectCredsOnly"
+          will be set to "false" for "gssapi-with-mic"
+          if that property is not given explicitly.
 - change: added changes about ChannelSftp#{pwd(), home()} to
-	  ChangeLog; 'Changes since version 0.1.34:' section.
+          ChangeLog; 'Changes since version 0.1.34:' section.
 
 
 Changes since version 0.1.34:
 - bugfix: the OutputStream from the channel may make the JVM
-	  lockup in some case.                                 FIXED.
-	  There was a possibility that Channel#connect() may be failed
-	  to initialize its internal without throwing the JSchException.
-	  On such case, the write operation for OutputStream from
-	  that channel will cause the system(JVM) to lock up.
+          lockup in some case.                                 FIXED.
+          There was a possibility that Channel#connect() may be failed
+          to initialize its internal without throwing the JSchException.
+          On such case, the write operation for OutputStream from
+          that channel will cause the system(JVM) to lock up.
 - bugfix: ChannelSftp had problems filename globbing.              FIXED.
 - bugfix: the message included in SSH_FXP_STATUS must be UTF-8.    FIXED.
 - change: ChannelSftp supports the filename globbing for
-	  the filename in multi-byte characters.
+          the filename in multi-byte characters.
 - change: ChannelSftp will internally handle filenames in UTF-8 encoding.
 - change: ChannelSftp#pwd() may throw an SftpException.
 - change: ChannelSftp#home() may throw an SftpException.
 - feature: following methods have been added in ChannelSftp
-	   String getServerVersion()
-	   String getClientVersion()
-	   void setFilenameEncoding(String encoding)
-	   String getExtension(String key)
+           String getServerVersion()
+           String getClientVersion()
+           void setFilenameEncoding(String encoding)
+           String getExtension(String key)
 
 Changes since version 0.1.33:
 - bugfix: there had a possibility that the session may be broken
-	  if ciphers for upward/downward streams are different.    FIXED.
+          if ciphers for upward/downward streams are different.    FIXED.
 - bugfix: the authentication method "keyboard-interactive" had
-	  not been tried without UserInfo.                         FIXED.
+          not been tried without UserInfo.                         FIXED.
 - bugfix: ChannelShell#setTerminalMode(byte[] terminal_mode) had
-	  not been functional.                                     FIXED.
+          not been functional.                                     FIXED.
 - bugfix: the remote port-forwarding to the daemon had been broken
-	  since 0.1.30.                                            FIXED.
+          since 0.1.30.                                            FIXED.
 - change: the cipher "aes128-cbc" will be used if AES is available.
 - change: the interface 'com.jcraft.jsch.ForwardedTCPIPDaemon' has been changed.
 - change: the data transfer rate will be improved on some environment.
 - feature: ChannelExec can control the size of pty;
-	   ChannelExec#setPtySize(int col, int row, int wp, int hp) is
+           ChannelExec#setPtySize(int col, int row, int wp, int hp) is
            added.
 - feature: the property "CheckCiphers" has been added.
-	   Refer to 'examples/AES.java'.
+           Refer to 'examples/AES.java'.
 - feature: Session#setConfig(String key, String value),
-	   JSch#setConfig(String key, String value) have been added.
+           JSch#setConfig(String key, String value) have been added.
 
 
 Changes since version 0.1.32:
 - bugfix: freeze in 'diffie-hellman-group-exchange-sha1'.          FIXED.
           By the default, 'diffie-hellman-group1-sha1' will be used
-	  and if you have not chosen 'diffie-hellman-group-exchange-sha1'
-	  explicitly, you don't have to worry about it.
+          and if you have not chosen 'diffie-hellman-group-exchange-sha1'
+          explicitly, you don't have to worry about it.
 - bugfix: there should be timeout mechanism in opening a socket
-	  for remote port forwarding.                              FIXED.
-	  At the failure or timeout, 'SSH_MSG_CHANNEL_OPEN_FAILURE'
-	  will be sent to sshd.
+          for remote port forwarding.                              FIXED.
+          At the failure or timeout, 'SSH_MSG_CHANNEL_OPEN_FAILURE'
+          will be sent to sshd.
 - bugfix: there should be timeout mechanism in opening a socket
-	  for X11 forwarding.                                      FIXED.
-	  At the failure or timeout, 'SSH_MSG_CHANNEL_OPEN_FAILURE'
+          for X11 forwarding.                                      FIXED.
+          At the failure or timeout, 'SSH_MSG_CHANNEL_OPEN_FAILURE'
           will be sent to sshd.
 
 
 Changes since version 0.1.31:
 - bugfix: remote port forwarding will be hanged at its closing.    FIXED.
 - bugfix: X forwarding channels will be hanged and some resources
-	  will be leaked whenever they are closed.                 FIXED.
+          will be leaked whenever they are closed.                 FIXED.
 - bugfix: failed to detect "Connection refused".                   FIXED.
 - bugfix: at the failure for keyboard-interactive auth method,
-	a session will be terminated.                              FIXED.
+        a session will be terminated.                              FIXED.
 - bugfix: due to the cancel for keyboard-interactive auth method,
-	a session will be terminated.                              FIXED.
+        a session will be terminated.                              FIXED.
 - change: com.jcraft.jsch.jcraft.Compression#uncompress will respect
-	the argument "start".
+        the argument "start".
 - change: "gssapi-with-mic" will choose the default credential.
 - feature: Session#setPortForwardingL will return the assigned local
-	TCP port number; TCP port will be assigned dynamically if lport==0.
+        TCP port number; TCP port will be assigned dynamically if lport==0.
 - feature: support for SSH_MSG_UNIMPLEMENTED.
 - feature: support for PASSWD_CHANGEREQ.
 
 
 Changes since version 0.1.30:
 - bugfix: a problem in padding for ciphered private key.
-	PKCS#5 padding should be used.                             FIXED.
+        PKCS#5 padding should be used.                             FIXED.
 - bugfix: crash in parsing invalid public key file.                FIXED.
 - bugfix: a public key may not have a comment.                     FIXED.
 - bugfix: output stream from ChannelSftp#put will hang if it is closed
-	  twice.                                                   FIXED.
+          twice.                                                   FIXED.
 - feature: agent forwarding. To enable this functionality,
-	Channel{Exec,Shell,Sftp}#setAgentForwarding(boolean enable) are added.
+        Channel{Exec,Shell,Sftp}#setAgentForwarding(boolean enable) are added.
 - feature: ChannelShell#setTerminalMode(byte[] terminal_mode) is added.
 - feature: Session#setDaemonThread(boolean true) to run internal threads as
-	   daemon threads.
+           daemon threads.
 - feature: an option "PreferredAuthentications" is added.
-	   The default value is "gssapi-with-mic,publickey,keyboard-interactive,password".
+           The default value is "gssapi-with-mic,publickey,keyboard-interactive,password".
 - change: if alias-name is given, non-standard TCP port number will not be
-	  saved in 'known_hosts' file.
+          saved in 'known_hosts' file.
 
 
 Changes since version 0.1.29:
 - bugfix: ChannelSftp#cd() will not throw an exception even if
-	  a file is given.                                           FIXED.
+          a file is given.                                           FIXED.
 - bugfix: ChannelSftp#put() has a bug which will appear in using
-	  on the slow network.                                       FIXED.
+          on the slow network.                                       FIXED.
 - bugfix: ChannelSftp#ls() has a bug which will appear in using
-	  on the slow network.                                       FIXED.
+          on the slow network.                                       FIXED.
 - bugfix: a bug had sneaked in the remote port forwarding.           FIXED.
 - bugfix: some APIs from JCE have the memory leak on Mac OS X,
-	  so we have re-written the code(com.jcraft.jsch.jcraft.HMAC*
-	  classes) without them.  On Mac OS X, such new classes will
-	  be used automatically.                                     FIXED.
+          so we have re-written the code(com.jcraft.jsch.jcraft.HMAC*
+          classes) without them.  On Mac OS X, such new classes will
+          be used automatically.                                     FIXED.
 - bugfix: the session will be crashed by the long banner message.    FIXED.
 - change: '/dev/random' will not be referred on Gnu/Linux.
 - change: if non-standard TCP port number is used, that number will
-	  be saved in known_hosts file as recent OpenSSH's ssh client does.
+          be saved in known_hosts file as recent OpenSSH's ssh client does.
 - change: Channel#getOutputStream will not use Piped{Output,Input}Stream.
 - change: com.jcraft.jsch.HostKeyRepository interface has been
-	  slightly modified.
+          slightly modified.
 - feature: Session#setPortForwardingR(String bind_address, ...) has been added.
 - feature: the packet compression method 'zlib@openssh.com' has been supported.
 - feature: the hashed known_hosts file has been supported.
-	   Refer to 'examples/KnownHosts.java'.
+           Refer to 'examples/KnownHosts.java'.
 - feature: the authentication method 'gssapi-with-mic' has been
- 	   experimentally supported.
+           experimentally supported.
 - feature: com.jcraft.jsch.Logger interface and
-	   JSch#setLogger(Logger logger) have been added.
-	   Refer to 'examples/Logger.java' for the usage.
+           JSch#setLogger(Logger logger) have been added.
+           Refer to 'examples/Logger.java' for the usage.
 
 
 Changes since version 0.1.28:
@@ -575,10 +575,10 @@ Changes since version 0.1.28:
 - bugfix: ProxySOCKS5 did not carefully read file input-streams.     FIXED.
 - bugfix: ForwardedTCPIPDaemom may fail in some situation.           FIXED.
 - bugfix: X forwarding failed to handle the magic-cookie
-	  in some case                                               FIXED.
+          in some case                                               FIXED.
           Thanks to Walter Pfannenmller.
 - bugfix: setKnownHosts in KnownHosts.java doesn't read the last
-	  line if linefeed is missing                                FIXED.
+          line if linefeed is missing                                FIXED.
           Thanks to Henrik Langos.
 - bugfix: With StrictHostKeyChecking set to yes connect()
           shouldn't ask.                                             FIXED.
@@ -595,7 +595,7 @@ Changes since version 0.1.28:
           explicitly Session.setServerAliveCountMax(0)
 - change: PortWatcher stops to use InetAddress.getByAddress().
 - change: in the user authentication, username, password and passphrase
-	  will be encoded in UTF-8.
+          will be encoded in UTF-8.
 - change: JSch#addIdentity will check duplicate keys.
 - change: SftpException#message has been deleted.
 - change: SftpException#getMessage() will return the detailed message.
@@ -613,8 +613,8 @@ Changes since version 0.1.28:
 - feature: Session#setPassword(byte[] password) is added.
 - feature: Session#setHostKeyAlias(String alias) is added.
 - feature: KeepAlive is implemented and
-	   Session#setServerAliveInterval(int interval) and
-	   Session#setServerAliveCountMax(int count) are added.
+           Session#setServerAliveInterval(int interval) and
+           Session#setServerAliveCountMax(int count) are added.
 - feature: Session#sendKeepAliveMsg() is added.
 - feature: JSchException#getCause() may return a reason.
 - feature: SftpException#getCause() may return a reason.
@@ -637,7 +637,7 @@ Changes since version 0.1.26:
 - bugfix: problems in handling cancel operations for sftp.  FIXED.
 - bugfix: ChannelX11s were not terminated for a wrong cookie.  FIXED.
 - bugfix: NoSuchAlgorithmException should be thrown if JCE is not
-	  accessible.  FIXED.
+          accessible.  FIXED.
 - bugfix: ProxyHTTP should check the return code from proxy.  FIXED.
 - bugfix: server's version string should be checked carefully.  FIXED.
 - feature: some more improvements on sftp uploading.
@@ -655,7 +655,7 @@ Changes since version 0.1.25:
 Changes since version 0.1.24:
 - bugfix: remote port forwarding is not established. FIXED.
 - bugfix: failed to parse known_hosts file if it has a long public key blob.
- 	  FIXED.
+          FIXED.
 - bugfix: sftp put/get operations keep failing.  FIXED.
 - bugfix: ChannelShell.setXForwarding always set xforwarding to be true. FIXED.
 - change: ChannelShell.setPty is added.
@@ -667,61 +667,61 @@ Changes since version 0.1.24:
 
 Changes since version 0.1.23:
 - bugfix: there was resource leak problems in closing local port forwardings.
-  	  FIXED.
+          FIXED.
 - bugfix: there was a session crash problems in using aes-cbc cipher.  FIXED.
 - change: ChannelSession.setPtySize was redefined.
 - feature: added SocketFactory for remote port forwarding.
-	   Session.setPortForwardingR(int rport, String host, int lport,
-	                              SocketFactory sf)
+           Session.setPortForwardingR(int rport, String host, int lport,
+                                      SocketFactory sf)
 - feature: added ServerSocketFactory for local port forwarding.
-	   Session.setPortForwardingL(String boundaddress,
-	                              int lport, String host, int rport,
-	                              ServerSocketFactory ssf)
+           Session.setPortForwardingL(String boundaddress,
+                                      int lport, String host, int rport,
+                                      ServerSocketFactory ssf)
 
 Changes since version 0.1.22:
 - bugfix: there was a freeze problem at fails on key-exchanging. FIXED.
 - bugfix: race-condition forcefully disconnects session in closing channels.
-	  FIXED.
+          FIXED.
 
 
 Changes since version 0.1.21:
 - bugfix: there is a bug in read() method implementation for the
           input-stream returned from ChannelSftp.get().  FIXED.
 - bugfix: at fail on requesting for the remote port forwarding,
-	  an exception should be thrown. FIXED.
+          an exception should be thrown. FIXED.
 - bugfix: SSH_MSG_CHANNEL_OPEN request for the X11 forwarding should not
-	  be accepted if clients don not expect it. FIXED.
+          be accepted if clients don not expect it. FIXED.
 - bugfix: there is a problem in transferring large data(mote than 1GB)
-	  to sshd from recent OpenSSH(3.6.1 or later). FIXED.
-	  For security concerns, those sshd will re-key periodically and
-	  jsch had failed to handle it.
+          to sshd from recent OpenSSH(3.6.1 or later). FIXED.
+          For security concerns, those sshd will re-key periodically and
+          jsch had failed to handle it.
 - bugfix: 'exec', 'shell' and 'sftp' channels will fail if the acceptable
-	  packet size by remote sshd is not so large. FIXED.
+          packet size by remote sshd is not so large. FIXED.
 - bugfix: there are problems in 'InputStream ChannelSftp.get(String)'
-   	  and 'OutputStream put(String)'.  FIXED.
+          and 'OutputStream put(String)'.  FIXED.
 - feature: added boolean flag 'dontclose' to
-	   * setInputStream(),
-	   * setOutputStream() and
-	   * setExtOutputStream()
+           * setInputStream(),
+           * setOutputStream() and
+           * setExtOutputStream()
            methods of Channel class.
 - feature: added 'com.jcraft.jsch.ChannelSubsystem'
 - feature: allowed to control the compression level in the packet compression.
- 	   Refer to 'examples/Compression.java'.
+           Refer to 'examples/Compression.java'.
 - change: modified 'com/jcraft/jsch/jce/KeyPairGenRSA.java' to be complied
-	  on JDK 1.2.
+          on JDK 1.2.
 - change: 'examples/ScpTo.java' and 'examples/ScpFrom.java' will use
-	  'long' type for the file size instead of 'int'.
+          'long' type for the file size instead of 'int'.
 - change: 'Identity.getSignature' method will not expect 'session'.
 - change: while waiting for socket connection establishment, Thread.join
-	  will be used instead of Thread.sleep.
+          will be used instead of Thread.sleep.
 
 
 Changes since version 0.1.20:
 - known issue: there are problems in 'InputStream ChannelSftp.get(String)'
-   	       and 'OutputStream put(String)'.  They will be re-implemented
-  	       in the next release.
+               and 'OutputStream put(String)'.  They will be re-implemented
+               in the next release.
 - bugfix: EOF packets should not be sent twice. This bug had crashed
-	  the session on every channel close. FIXED.
+          the session on every channel close. FIXED.
 - bugfix: at the fail on opening connection to remote sshd,
           a misleading exception "invalid server's version string"
           had been thrown. FIXED.
@@ -731,16 +731,16 @@ Changes since version 0.1.20:
 - change: to transfer packets efficiently, the size of internal buffer
           for each channel has been increased.
 - change: ChannelSftp.ls will return a vector of
-	  com.jcraft.jsch.ChannelSftp.LsEntry.  Sorry for inconveniences.
+          com.jcraft.jsch.ChannelSftp.LsEntry.  Sorry for inconveniences.
 - feature: added ForwardedTCPIPDaemon.  Refer to 'examples/Daemon.java',
            which demonstrates to provide network services like inetd.
 - feature: ChannelExec.setPty() method to request for assigning pseudo tty.
 - feature: added ciphers "aes128-cbc", "aes192-cbc" and "aes256-cbc".
-	   Refer to 'examples/AES.java'.
+           Refer to 'examples/AES.java'.
 - feature: local port-forwarding settings can be dynamically deleted
            by the bound address.
 - feature: added 'Channel.isClosed()'. Channel.getExitStatus() should be
-	   invoked after Channel.isClosed()==true.
+           invoked after Channel.isClosed()==true.
 
 
 Changes since version 0.1.19:
@@ -862,7 +862,7 @@ Changes since version 0.1.8:
 Changes since version 0.1.7:
 - added APIs for sftp resume downloads and uploads.
   The author greatly appreciates
-	elpernotador(webmaster at unlix dot com dot ar),
+        elpernotador(webmaster at unlix dot com dot ar),
   who motivated him to hack this functionality.
 - 'examples/Sftp.java' demonstrates sftp resume functionality.
   Please refer to "put-resume", "put-append", "get-resume" and

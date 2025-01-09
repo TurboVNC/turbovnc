@@ -9,8 +9,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -60,12 +60,12 @@ public class DHGEX extends KeyExchange{
   protected String hash="sha-1";
 
   public void init(Session session,
-		   byte[] V_S, byte[] V_C, byte[] I_S, byte[] I_C) throws Exception{
+                   byte[] V_S, byte[] V_C, byte[] I_S, byte[] I_C) throws Exception{
     this.session=session;
-    this.V_S=V_S;      
-    this.V_C=V_C;      
-    this.I_S=I_S;      
-    this.I_C=I_C;      
+    this.V_S=V_S;
+    this.V_C=V_C;
+    this.I_S=I_S;
+    this.I_C=I_C;
 
     try{
       Class c=Class.forName(session.getConfig(hash));
@@ -83,7 +83,7 @@ public class DHGEX extends KeyExchange{
       Class c=Class.forName(session.getConfig("dh"));
       // Since JDK8, SunJCE has lifted the keysize restrictions
       // from 1024 to 2048 for DH.
-      preferred = max = check2048(c, max); 
+      preferred = max = check2048(c, max);
       dh=(com.jcraft.jsch.DH)(c.getDeclaredConstructor().newInstance());
       dh.init();
     }
@@ -96,12 +96,12 @@ public class DHGEX extends KeyExchange{
     buf.putInt(min);
     buf.putInt(preferred);
     buf.putInt(max);
-    session.write(packet); 
+    session.write(packet);
 
     if(JSch.getLogger().isEnabled(Logger.INFO)){
-      JSch.getLogger().log(Logger.INFO, 
+      JSch.getLogger().log(Logger.INFO,
                            "SSH_MSG_KEX_DH_GEX_REQUEST("+min+"<"+preferred+"<"+max+") sent");
-      JSch.getLogger().log(Logger.INFO, 
+      JSch.getLogger().log(Logger.INFO,
                            "expecting SSH_MSG_KEX_DH_GEX_GROUP");
     }
 
@@ -119,8 +119,8 @@ public class DHGEX extends KeyExchange{
       _buf.getByte();
       j=_buf.getByte();
       if(j!=SSH_MSG_KEX_DH_GEX_GROUP){
-	System.err.println("type: must be SSH_MSG_KEX_DH_GEX_GROUP "+j);
-	return false;
+        System.err.println("type: must be SSH_MSG_KEX_DH_GEX_GROUP "+j);
+        return false;
       }
 
       p=_buf.getMPInt();
@@ -141,9 +141,9 @@ public class DHGEX extends KeyExchange{
       session.write(packet);
 
       if(JSch.getLogger().isEnabled(Logger.INFO)){
-        JSch.getLogger().log(Logger.INFO, 
+        JSch.getLogger().log(Logger.INFO,
                              "SSH_MSG_KEX_DH_GEX_INIT sent");
-        JSch.getLogger().log(Logger.INFO, 
+        JSch.getLogger().log(Logger.INFO,
                              "expecting SSH_MSG_KEX_DH_GEX_REPLY");
       }
 
@@ -161,8 +161,8 @@ public class DHGEX extends KeyExchange{
       j=_buf.getByte();
       j=_buf.getByte();
       if(j!=SSH_MSG_KEX_DH_GEX_REPLY){
-	System.err.println("type: must be SSH_MSG_KEX_DH_GEX_REPLY "+j);
-	return false;
+        System.err.println("type: must be SSH_MSG_KEX_DH_GEX_REPLY "+j);
+        return false;
       }
 
       K_S=_buf.getString();
@@ -213,7 +213,7 @@ public class DHGEX extends KeyExchange{
       i=0;
       j=0;
       j=((K_S[i++]<<24)&0xff000000)|((K_S[i++]<<16)&0x00ff0000)|
-	((K_S[i++]<<8)&0x0000ff00)|((K_S[i++])&0x000000ff);
+        ((K_S[i++]<<8)&0x0000ff00)|((K_S[i++])&0x000000ff);
       String alg=Util.byte2str(K_S, i, j);
       i+=j;
 

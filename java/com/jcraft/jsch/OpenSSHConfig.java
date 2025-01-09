@@ -11,8 +11,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -67,7 +67,7 @@ import java.util.stream.Stream;
  *   <li>CompressionLevel</li>
  *   <li>ForwardAgent</li>
  *   <li>RequestTTY</li>
- *   <li>ServerAliveInterval</li>  
+ *   <li>ServerAliveInterval</li>
  *   <li>LocalForward</li>
  *   <li>RemoteForward</li>
  *   <li>ClearAllForwardings</li>
@@ -287,7 +287,7 @@ public class OpenSSHConfig implements ConfigRepository {
           }
         }
       }
-      String[] result = new String[value.size()]; 
+      String[] result = new String[value.size()];
       value.toArray(result);
       return result;
     }

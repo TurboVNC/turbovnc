@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -46,7 +46,7 @@ class UserAuthNone extends UserAuth{
     session.write(packet);
 
     if(JSch.getLogger().isEnabled(Logger.INFO)){
-      JSch.getLogger().log(Logger.INFO, 
+      JSch.getLogger().log(Logger.INFO,
                            "SSH_MSG_SERVICE_REQUEST sent");
     }
 
@@ -59,7 +59,7 @@ class UserAuthNone extends UserAuth{
     boolean result=(command==SSH_MSG_SERVICE_ACCEPT);
 
     if(JSch.getLogger().isEnabled(Logger.INFO)){
-      JSch.getLogger().log(Logger.INFO, 
+      JSch.getLogger().log(Logger.INFO,
                            "SSH_MSG_SERVICE_ACCEPT received");
     }
     if(!result)
@@ -86,41 +86,41 @@ class UserAuthNone extends UserAuth{
       command=buf.getCommand()&0xff;
 
       if(command==SSH_MSG_USERAUTH_SUCCESS){
-	return true;
+        return true;
       }
       if(command==SSH_MSG_USERAUTH_BANNER){
-	buf.getInt(); buf.getByte(); buf.getByte();
-	byte[] _message=buf.getString();
-	byte[] lang=buf.getString();
-	String message=Util.byte2str(_message);
-	if(userinfo!=null){
+        buf.getInt(); buf.getByte(); buf.getByte();
+        byte[] _message=buf.getString();
+        byte[] lang=buf.getString();
+        String message=Util.byte2str(_message);
+        if(userinfo!=null){
           try{
             userinfo.showMessage(message);
           }
           catch(RuntimeException ee){
           }
-	}
-	continue loop;
+        }
+        continue loop;
       }
       if(command==SSH_MSG_USERAUTH_FAILURE){
-	buf.getInt(); buf.getByte(); buf.getByte(); 
-	byte[] foo=buf.getString();
-	int partial_success=buf.getByte();
-	methods=Util.byte2str(foo);
-//System.err.println("UserAuthNONE: "+methods+
-//		   " partial_success:"+(partial_success!=0));
-//	if(partial_success!=0){
-//	  throw new JSchPartialAuthException(new String(foo));
-//	}
+        buf.getInt(); buf.getByte(); buf.getByte();
+        byte[] foo=buf.getString();
+        int partial_success=buf.getByte();
+        methods=Util.byte2str(foo);
+//      System.err.println("UserAuthNONE: "+methods+
+//                         " partial_success:"+(partial_success!=0));
+//      if(partial_success!=0){
+//        throw new JSchPartialAuthException(new String(foo));
+//      }
 
         break;
       }
       else{
 //      System.err.println("USERAUTH fail ("+command+")");
-	throw new JSchException("USERAUTH fail ("+command+")");
+        throw new JSchException("USERAUTH fail ("+command+")");
       }
     }
-   //throw new JSchException("USERAUTH fail");
+    //throw new JSchException("USERAUTH fail");
     return false;
   }
   String getMethods(){

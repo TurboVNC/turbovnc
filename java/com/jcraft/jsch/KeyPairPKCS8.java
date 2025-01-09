@@ -10,8 +10,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -47,27 +47,27 @@ public class KeyPairPKCS8 extends KeyPair {
 
   private static final byte[] pbes2 = {
     (byte)0x2a, (byte)0x86, (byte)0x48, (byte)0x86, (byte)0xf7,
-    (byte)0x0d, (byte)0x01, (byte)0x05, (byte)0x0d 
+    (byte)0x0d, (byte)0x01, (byte)0x05, (byte)0x0d
   };
 
   private static final byte[] pbkdf2 = {
     (byte)0x2a, (byte)0x86, (byte)0x48, (byte)0x86, (byte)0xf7,
-    (byte)0x0d, (byte)0x01, (byte)0x05, (byte)0x0c 
+    (byte)0x0d, (byte)0x01, (byte)0x05, (byte)0x0c
   };
 
   private static final byte[] aes128cbc = {
     (byte)0x60, (byte)0x86, (byte)0x48, (byte)0x01, (byte)0x65,
-    (byte)0x03, (byte)0x04, (byte)0x01, (byte)0x02 
+    (byte)0x03, (byte)0x04, (byte)0x01, (byte)0x02
   };
 
   private static final byte[] aes192cbc = {
     (byte)0x60, (byte)0x86, (byte)0x48, (byte)0x01, (byte)0x65,
-    (byte)0x03, (byte)0x04, (byte)0x01, (byte)0x16 
+    (byte)0x03, (byte)0x04, (byte)0x01, (byte)0x16
   };
 
   private static final byte[] aes256cbc = {
     (byte)0x60, (byte)0x86, (byte)0x48, (byte)0x01, (byte)0x65,
-    (byte)0x03, (byte)0x04, (byte)0x01, (byte)0x2a 
+    (byte)0x03, (byte)0x04, (byte)0x01, (byte)0x2a
   };
 
   private static final byte[] pbeWithMD5AndDESCBC = {
@@ -101,7 +101,7 @@ public class KeyPairPKCS8 extends KeyPair {
         version                   Version,
         privateKeyAlgorithm       PrivateKeyAlgorithmIdentifier,
         privateKey                PrivateKey,
-        attributes           [0]  IMPLICIT Attributes OPTIONAL 
+        attributes           [0]  IMPLICIT Attributes OPTIONAL
       }
       Version ::= INTEGER
       PrivateKeyAlgorithmIdentifier ::= AlgorithmIdentifier
@@ -137,7 +137,7 @@ public class KeyPairPKCS8 extends KeyPair {
         _kpair.copy(this);
         if(_kpair.parse(_data)){
           kpair = _kpair;
-        } 
+        }
       }
       else if(Util.array_equals(privateKeyAlgorithmID, dsaEncryption)){
         asn1 = new ASN1(_data);
@@ -290,7 +290,7 @@ or
         ASN1 pbkdffunc = contents[1];
         contents = pbkdffunc.getContents();
         salt = contents[0].getContent();
-        iterations = 
+        iterations =
           Integer.parseInt((new BigInteger(contents[1].getContent())).toString());
 
         contents = encryptfunc.getContents();

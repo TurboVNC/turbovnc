@@ -98,7 +98,8 @@ public class Tunnel {
         if (Utils.getBooleanProperty("turbovnc.viajump", true) && !tunnel) {
           if (params.sshSession == null) {
             vlog.debug("Opening SSH connection to host " + remoteHost);
-            params.sshSession = createTunnelJSch(remoteSSHUser, remoteHost, -1,
+            params.sshSession = createTunnelJSch(remoteSSHUser, remoteHost,
+                                                 params.sshPort.get(),
                                                  gatewaySSHUser, gatewayHost,
                                                  params);
           }
@@ -107,7 +108,8 @@ public class Tunnel {
           if (params.sshSession == null) {
             vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
             params.sshSession = createTunnelJSch(gatewaySSHUser, gatewayHost,
-                                                 -1, null, null, params);
+                                                 params.sshPort.get(), null,
+                                                 null, params);
           }
           remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
           gatewayStr = gatewayHost;
@@ -242,9 +244,7 @@ public class Tunnel {
     }
 
     // username and passphrase will be given via UserInfo interface.
-    if (!params.sshPort.isDefault())
-      port = params.sshPort.get();
-    int jumpPort = -1;
+    int jumpPort = params.sshPort.get();
 
     File sshConfigFile = new File(params.sshConfig.get());
     if (sshConfigFile.exists() && sshConfigFile.canRead()) {
@@ -255,6 +255,9 @@ public class Tunnel {
       String repoUser = repo.getConfig(host).getUser();
       if (repoUser != null && user == null)
         user = repoUser;
+      int repoPort = repo.getConfig(host).getPort();
+      if (repoPort != -1 && params.sshPort.isDefault())
+        port = repoPort;
       String[] identityFiles = repo.getConfig(host).getValues("IdentityFile");
       if (identityFiles != null) {
         for (String file : identityFiles) {

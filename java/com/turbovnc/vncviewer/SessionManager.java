@@ -45,7 +45,8 @@ public final class SessionManager extends Tunnel {
     VncViewer.noExceptionDialog =
       Utils.getBooleanProperty("turbovnc.sshkeytest", false);
     params.sshSession =
-      createTunnelJSch(Hostname.getSSHUser(params.server.get()), host, -1,
+      createTunnelJSch(Hostname.getSSHUser(params.server.get()), host,
+                       params.sshPort.get(),
                        Hostname.getSSHUser(params.via.get()),
                        Hostname.getHost(params.via.get()), params);
     if (Utils.getBooleanProperty("turbovnc.sshkeytest", false)) {

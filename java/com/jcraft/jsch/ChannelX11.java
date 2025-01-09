@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -61,11 +61,11 @@ class ChannelX11 extends Channel{
     return 0;
   }
   static void setCookie(String foo){
-    cookie_hex=Util.str2byte(foo); 
+    cookie_hex=Util.str2byte(foo);
     cookie=new byte[16];
     for(int i=0; i<16; i++){
-	cookie[i]=(byte)(((revtable(cookie_hex[i*2])<<4)&0xf0) |
-			 ((revtable(cookie_hex[i*2+1]))&0xf));
+        cookie[i]=(byte)(((revtable(cookie_hex[i*2])<<4)&0xf0) |
+                         ((revtable(cookie_hex[i*2+1]))&0xf));
     }
   }
   static void setHost(String foo){ host=foo; }
@@ -74,11 +74,11 @@ class ChannelX11 extends Channel{
     synchronized(faked_cookie_hex_pool){
       byte[] foo=(byte[])faked_cookie_hex_pool.get(session);
       if(foo==null){
-	Random random=Session.random;
-	foo=new byte[16];
-	synchronized(random){
-	  random.fill(foo, 0, 16);
-	}
+        Random random=Session.random;
+        foo=new byte[16];
+        synchronized(random){
+          random.fill(foo, 0, 16);
+        }
 /*
 System.err.print("faked_cookie: ");
 for(int i=0; i<foo.length; i++){
@@ -86,14 +86,14 @@ for(int i=0; i<foo.length; i++){
 }
 System.err.println("");
 */
-	faked_cookie_pool.put(session, foo);
-	byte[] bar=new byte[32];
-	for(int i=0; i<16; i++){
-	  bar[2*i]=table[(foo[i]>>>4)&0xf];
-	  bar[2*i+1]=table[(foo[i])&0xf];
-	}
-	faked_cookie_hex_pool.put(session, bar);
-	foo=bar;
+        faked_cookie_pool.put(session, foo);
+        byte[] bar=new byte[32];
+        for(int i=0; i<16; i++){
+          bar[2*i]=table[(foo[i]>>>4)&0xf];
+          bar[2*i+1]=table[(foo[i])&0xf];
+        }
+        faked_cookie_hex_pool.put(session, bar);
+        foo=bar;
       }
       return foo;
     }
@@ -117,7 +117,7 @@ System.err.println("");
 
     connected=true;
     /*
-    try{ 
+    try{
       socket=Util.createSocket(host, port, TIMEOUT);
       socket.setTcpNoDelay(true);
       io=new IO();
@@ -132,7 +132,7 @@ System.err.println("");
 
   public void run(){
 
-    try{ 
+    try{
       socket=Util.createSocket(host, port, TIMEOUT);
       socket.setTcpNoDelay(true);
       io=new IO();
@@ -155,20 +155,20 @@ System.err.println("");
       while(thread!=null &&
             io!=null &&
             io.in!=null){
-        i=io.in.read(buf.buffer, 
-		     14, 
-		     buf.buffer.length-14-Session.buffer_margin);
-	if(i<=0){
-	  eof();
+        i=io.in.read(buf.buffer,
+                     14,
+                     buf.buffer.length-14-Session.buffer_margin);
+        if(i<=0){
+          eof();
           break;
-	}
-	if(close)break;
+        }
+        if(close)break;
         packet.reset();
         buf.putByte((byte)Session.SSH_MSG_CHANNEL_DATA);
         buf.putInt(recipient);
         buf.putInt(i);
         buf.skip(i);
-	getSession().write(packet, this, i);
+        getSession().write(packet, this, i);
       }
     }
     catch(Exception e){
@@ -201,7 +201,7 @@ System.err.println("");
       }
 
       foo=addCache(foo, s, l);
-      s=0; 
+      s=0;
       l=foo.length;
 
       if(l<9)
@@ -217,7 +217,7 @@ System.err.println("");
          dlen=((dlen>>>8)&0xff)|((dlen<<8)&0xff00);
       }
       else{
-	  // ??
+          // ??
       }
 
       if(l<12+plen+((-plen)&3)+dlen)
@@ -228,7 +228,7 @@ System.err.println("");
       byte[] faked_cookie=null;
 
       synchronized(faked_cookie_pool){
-	faked_cookie=(byte[])faked_cookie_pool.get(_session);
+        faked_cookie=(byte[])faked_cookie_pool.get(_session);
       }
 
       /*
@@ -249,7 +249,7 @@ System.err.println("");
           System.arraycopy(cookie, 0, foo, s+12+plen+((-plen)&3), dlen);
       }
       else{
-	  //System.err.println("wrong cookie");
+          //System.err.println("wrong cookie");
           thread=null;
           eof();
           io.close();

@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -145,33 +145,33 @@ public class SftpATTRS {
   }
 
   static SftpATTRS getATTR(Buffer buf){
-    SftpATTRS attr=new SftpATTRS();	
+    SftpATTRS attr=new SftpATTRS();
     attr.flags=buf.getInt();
     if((attr.flags&SSH_FILEXFER_ATTR_SIZE)!=0){ attr.size=buf.getLong(); }
     if((attr.flags&SSH_FILEXFER_ATTR_UIDGID)!=0){
       attr.uid=buf.getInt(); attr.gid=buf.getInt();
     }
-    if((attr.flags&SSH_FILEXFER_ATTR_PERMISSIONS)!=0){ 
+    if((attr.flags&SSH_FILEXFER_ATTR_PERMISSIONS)!=0){
       attr.permissions=buf.getInt();
     }
-    if((attr.flags&SSH_FILEXFER_ATTR_ACMODTIME)!=0){ 
+    if((attr.flags&SSH_FILEXFER_ATTR_ACMODTIME)!=0){
       attr.atime=buf.getInt();
     }
-    if((attr.flags&SSH_FILEXFER_ATTR_ACMODTIME)!=0){ 
-      attr.mtime=buf.getInt(); 
+    if((attr.flags&SSH_FILEXFER_ATTR_ACMODTIME)!=0){
+      attr.mtime=buf.getInt();
     }
     if((attr.flags&SSH_FILEXFER_ATTR_EXTENDED)!=0){
       int count=buf.getInt();
       if(count>0){
-	attr.extended=new String[count*2];
-	for(int i=0; i<count; i++){
-	  attr.extended[i*2]=Util.byte2str(buf.getString());
-	  attr.extended[i*2+1]=Util.byte2str(buf.getString());
-	}
+        attr.extended=new String[count*2];
+        for(int i=0; i<count; i++){
+          attr.extended[i*2]=Util.byte2str(buf.getString());
+          attr.extended[i*2+1]=Util.byte2str(buf.getString());
+        }
       }
     }
     return attr;
-  } 
+  }
 
   int length(){
     int len=4;
@@ -184,10 +184,10 @@ public class SftpATTRS {
       len+=4;
       int count=extended.length/2;
       if(count>0){
-	for(int i=0; i<count; i++){
-	  len+=4; len+=extended[i*2].length();
-	  len+=4; len+=extended[i*2+1].length();
-	}
+        for(int i=0; i<count; i++){
+          len+=4; len+=extended[i*2].length();
+          len+=4; len+=extended[i*2+1].length();
+        }
       }
     }
     return len;
@@ -199,7 +199,7 @@ public class SftpATTRS {
     if((flags&SSH_FILEXFER_ATTR_UIDGID)!=0){
       buf.putInt(uid); buf.putInt(gid);
     }
-    if((flags&SSH_FILEXFER_ATTR_PERMISSIONS)!=0){ 
+    if((flags&SSH_FILEXFER_ATTR_PERMISSIONS)!=0){
       buf.putInt(permissions);
     }
     if((flags&SSH_FILEXFER_ATTR_ACMODTIME)!=0){ buf.putInt(atime); }
@@ -207,10 +207,10 @@ public class SftpATTRS {
     if((flags&SSH_FILEXFER_ATTR_EXTENDED)!=0){
       int count=extended.length/2;
       if(count>0){
-	for(int i=0; i<count; i++){
-	  buf.putString(Util.str2byte(extended[i*2]));
-	  buf.putString(Util.str2byte(extended[i*2+1]));
-	}
+        for(int i=0; i<count; i++){
+          buf.putString(Util.str2byte(extended[i*2]));
+          buf.putString(Util.str2byte(extended[i*2+1]));
+        }
       }
     }
   }
@@ -248,19 +248,19 @@ public class SftpATTRS {
 
   public boolean isDir(){
     return isType(S_IFDIR);
-  }      
+  }
 
   public boolean isChr(){
     return isType(S_IFCHR);
-  }      
+  }
 
   public boolean isBlk(){
     return isType(S_IFBLK);
-  }      
+  }
 
   public boolean isFifo(){
     return isType(S_IFIFO);
-  }      
+  }
 
   public boolean isLink(){
     return isType(S_IFLNK);

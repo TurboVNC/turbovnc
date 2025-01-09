@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -58,7 +58,7 @@ class ChannelSession extends Channel{
    *
    * @param enable
    */
-  public void setAgentForwarding(boolean enable){ 
+  public void setAgentForwarding(boolean enable){
     agent_forwarding=enable;
   }
 
@@ -69,7 +69,7 @@ class ChannelSession extends Channel{
    * @param enable
    */
   public void setXForwarding(boolean enable){
-    xforwading=enable; 
+    xforwading=enable;
   }
 
   /**
@@ -78,15 +78,15 @@ class ChannelSession extends Channel{
    * @see #setEnv(byte[], byte[])
    */
   @Deprecated
-  public void setEnv(Hashtable env){ 
+  public void setEnv(Hashtable env){
     synchronized(this){
-      this.env=env; 
+      this.env=env;
     }
   }
 
   /**
-   * Set the environment variable. 
-   * If <code>name</code> and <code>value</code> are needed to be passed 
+   * Set the environment variable.
+   * If <code>name</code> and <code>value</code> are needed to be passed
    * to the remote in your favorite encoding,
    * use {@link #setEnv(byte[], byte[])}.
    * Refer to RFC4254 6.4 Environment Variable Passing.
@@ -124,13 +124,13 @@ class ChannelSession extends Channel{
    *
    * @param enable
    */
-  public void setPty(boolean enable){ 
-    pty=enable; 
+  public void setPty(boolean enable){
+    pty=enable;
   }
 
   /**
    * Set the terminal mode.
-   * 
+   *
    * @param terminal_mode
    */
   public void setTerminalMode(byte[] terminal_mode){
@@ -218,7 +218,7 @@ class ChannelSession extends Channel{
         Object name=_env.nextElement();
         Object value=env.get(name);
         request=new RequestEnv();
-        ((RequestEnv)request).setEnv(toByteArray(name), 
+        ((RequestEnv)request).setEnv(toByteArray(name),
                                      toByteArray(value));
         request.request(_session, this);
       }
@@ -240,34 +240,34 @@ class ChannelSession extends Channel{
     int i=-1;
     try{
       while(isConnected() &&
-	    thread!=null && 
-            io!=null && 
+            thread!=null &&
+            io!=null &&
             io.in!=null){
-        i=io.in.read(buf.buffer, 
-                     14,    
+        i=io.in.read(buf.buffer,
+                     14,
                      buf.buffer.length-14
                      -Session.buffer_margin
-		     );
-	if(i==0)continue;
-	if(i==-1){
-	  eof();
-	  break;
-	}
-	if(close)break;
+                     );
+        if(i==0)continue;
+        if(i==-1){
+          eof();
+          break;
+        }
+        if(close)break;
         //System.out.println("write: "+i);
         packet.reset();
         buf.putByte((byte)Session.SSH_MSG_CHANNEL_DATA);
         buf.putInt(recipient);
         buf.putInt(i);
         buf.skip(i);
-	getSession().write(packet, this, i);
+        getSession().write(packet, this, i);
       }
     }
     catch(Exception e){
       //System.err.println("# ChannelExec.run");
       //e.printStackTrace();
     }
-    Thread _thread=thread; 
+    Thread _thread=thread;
     if(_thread!=null){
       synchronized(_thread){ _thread.notifyAll(); }
     }

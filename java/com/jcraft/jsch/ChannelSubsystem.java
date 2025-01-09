@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -47,8 +47,8 @@ public class ChannelSubsystem extends ChannelSession{
         request.request(_session, this);
       }
       if(pty){
-	request=new RequestPtyReq();
-	request.request(_session, this);
+        request=new RequestPtyReq();
+        request.request(_session, this);
       }
       request=new RequestSubsystem();
       ((RequestSubsystem)request).request(_session, this, subsystem, want_reply);

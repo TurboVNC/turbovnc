@@ -1,4 +1,4 @@
-# Links regarding OPENSSH key format 
+# Links regarding OPENSSH key format
 
 * nice read: <https://coolaj86.com/articles/the-openssh-private-key-format/>
 
