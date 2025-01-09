@@ -1,4 +1,4 @@
-/* Copyright (C) 2018, 2020-2021, 2023-2024 D. R. Commander.
+/* Copyright (C) 2018, 2020-2021, 2023-2025 D. R. Commander.
  *                                          All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
