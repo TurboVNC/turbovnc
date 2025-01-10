@@ -1,7 +1,7 @@
 3.2 Evolving
 ============
 
-### Significant changes relative to 3.1.2:
+### Significant changes relative to 3.1.4:
 
 1. The TurboVNC Server now incorporates zlib-ng, which accelerates zlib
 encoding significantly on x86, Arm, and PowerPC CPUs.  Relative to TurboVNC
@@ -59,26 +59,12 @@ while connected to a TurboVNC session.
 7. The TurboVNC Viewer's built-in SSH client now supports the Ed25519 signature
 scheme.  This improves compatibility with recent OpenSSH releases.
 
-8. Fixed an issue whereby the TurboVNC Viewer threw a NullPointerException if
-a user clicked the "Connect" button in the New TurboVNC Connection dialog after
-entering an SSH username with a blank VNC host into the "VNC server" field.
-
-9. To better emulate the behavior of OpenSSH, the TurboVNC Viewer's built-in
-SSH client now allows the value of the `SSHPort` parameter, if specified on the
-command line or in a connection info file, to override any SSH ports specified
-in the OpenSSH config file.
-
-10. The TurboVNC Viewer's `SSHUser` parameter has been removed.  SSH usernames
+8. The TurboVNC Viewer's `SSHUser` parameter has been removed.  SSH usernames
 should now be specified by prefixing the VNC host or the gateway host with the
 username followed by @.  This fixes an issue whereby separate SSH usernames
 could not be specified for the `Server` and `Via` parameters.
 
-11. The TurboVNC Server now includes various security fixes (CVE-2023-5367,
-CVE-2023-6377, CVE-2023-6478, CVE-2023-6816, CVE-2024-0229, CVE-2024-0408,
-CVE-2024-9632, CVE-2024-21885, CVE-2024-21886, CVE-2024-31080, CVE-2024-31081,
-and CVE-2024-31083) from the xorg-server 21.1.x code base.
-
-12. The TurboVNC Viewer's built-in SSH client now supports jump hosts, i.e.
+9. The TurboVNC Viewer's built-in SSH client now supports jump hosts, i.e.
 multi-hop/multi-level SSH tunneling.  If the `Via` parameter or the `ProxyJump`
 OpenSSH config file keyword is specified, the viewer now creates an
 intermediate SSH tunnel to the gateway host and uses that tunnel to create the
@@ -97,9 +83,35 @@ template for TCP connections with the `Via` parameter now takes advantage of
 OpenSSH's ProxyJump feature.  As with the built-in SSH client, setting the
 `turbovnc.viajump` Java system property to `0` restores the previous behavior.
 
-13. Worked around an issue whereby recent versions of GNOME failed to launch in
+
+3.1.4
+=====
+
+### Significant changes relative to 3.1.3:
+
+1. Fixed an issue whereby the TurboVNC Viewer threw a NullPointerException if
+a user clicked the "Connect" button in the New TurboVNC Connection dialog after
+entering an SSH username with a blank VNC host into the "VNC server" field.
+
+2. To better emulate the behavior of OpenSSH, the TurboVNC Viewer's built-in
+SSH client now allows the value of the `SSHPort` parameter, if specified on the
+command line or in a connection info file, to override any SSH ports specified
+in the OpenSSH config file.
+
+3. The TurboVNC Server now includes various security fixes (CVE-2023-5367,
+CVE-2023-6377, CVE-2023-6478, CVE-2023-6816, CVE-2024-0229, CVE-2024-0408,
+CVE-2024-9632, CVE-2024-21885, CVE-2024-21886, CVE-2024-31080, CVE-2024-31081,
+and CVE-2024-31083) from the xorg-server 21.1.x code base.
+
+4. Worked around an issue whereby recent versions of GNOME failed to launch in
 a TurboVNC session if the initial resolution of any of the screens in the
 session matched one of the default X RandR modes.
+
+5. Fixed an issue in the Mac TurboVNC Viewer whereby the viewer window did not
+display a vertical scrollbar, and the horizontal scrollbar was incorrectly
+sized, if multi-screen spanning was enabled, the scaled remote desktop was
+larger than the viewer window, and "Displays have separate Spaces" was enabled
+in the system settings.
 
 
 3.1.3
