@@ -112,6 +112,9 @@ sized, if multi-screen spanning was enabled, the scaled remote desktop was
 larger than the viewer window, and "Displays have separate Spaces" was enabled
 in the system settings.
 
+23. The Windows TurboVNC Viewer now sends Alt-F4 keystrokes to the VNC server
+if keyboard grabbing is enabled.
+
 
 3.0.3
 =====
