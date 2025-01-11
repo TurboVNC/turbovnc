@@ -102,9 +102,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       private final KeyEventDispatcher keyEventDispatcher =
         new KeyEventDispatcher() {
         public boolean dispatchKeyEvent(KeyEvent e) {
-          if ((e.getKeyCode() == 18 &&
+          if ((e.getKeyCode() == KeyEvent.VK_ALT &&
                e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) ||
-              e.getKeyCode() == 121) {
+              e.getKeyCode() == KeyEvent.VK_F10 ||
+              // Also send Alt-F4 to the VNC server if the keyboard is grabbed.
+              (Utils.isWindows() && VncViewer.isKeyboardGrabbed(cc.viewport) &&
+               e.getKeyCode() == KeyEvent.VK_F4 &&
+               e.getModifiersEx() == KeyEvent.ALT_DOWN_MASK)) {
             if (e.getID() == KeyEvent.KEY_PRESSED)
               cc.desktop.keyPressed(e);
             else if (e.getID() == KeyEvent.KEY_RELEASED)

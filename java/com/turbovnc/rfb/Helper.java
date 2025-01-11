@@ -52,12 +52,10 @@ public final class Helper {
       vlog.info("  - Keyboard grabbing");
     if (Utils.osEID())
       vlog.info("  - Extended input device support");
-    if (Utils.isX11()) {
+    if (Utils.isX11())
       vlog.info("  - Multi-screen spanning in full-screen mode");
-    }
-    if (Utils.isMac()) {
+    if (Utils.isMac())
       vlog.info("  - Multi-screen spanning");
-    }
     if (Utils.isWindows())
       vlog.info("  - Pageant support");
     else
