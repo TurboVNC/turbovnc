@@ -797,8 +797,8 @@ public final class Params {
   "\"Primary\" when in windowed mode and the same effect as \"All\" when in " +
   "full-screen mode." +
   (Utils.isX11() ? "  Due to general issues with spanning windows across " +
-  "multiple monitors in X11, this parameter has no effect on Un*x/X11 " +
-  "platforms except in full-screen mode." : "") +
+   "multiple monitors in X11, this parameter has no effect on Un*x/X11 " +
+   "platforms except in full-screen mode." : "") +
   (Utils.isMac() ? "  This parameter has no effect on macOS unless " +
    "\"Displays have separate Spaces\" is disabled in the system settings." :
    ""), SpanParameter.AUTO);
