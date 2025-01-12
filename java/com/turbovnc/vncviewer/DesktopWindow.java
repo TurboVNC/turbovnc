@@ -102,8 +102,10 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           if ((e.getKeyCode() == KeyEvent.VK_ALT &&
                e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) ||
               e.getKeyCode() == KeyEvent.VK_F10 ||
-              // Also send Alt-F4 to the VNC server if the keyboard is grabbed.
-              (Utils.isWindows() && VncViewer.isKeyboardGrabbed(cc.viewport) &&
+              // Also send Alt-F4 to the VNC server if the keyboard is grabbed
+              // or the turbovnc.altf4 system property is disabled.
+              ((VncViewer.isKeyboardGrabbed(cc.viewport) ||
+                !Utils.getBooleanProperty("turbovnc.altf4", true)) &&
                e.getKeyCode() == KeyEvent.VK_F4 &&
                e.getModifiersEx() == KeyEvent.ALT_DOWN_MASK)) {
             if (e.getID() == KeyEvent.KEY_PRESSED)
