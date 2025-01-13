@@ -383,6 +383,31 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_cleanupExtInput
 }
 
 
+JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_macFullScreen
+  (JNIEnv *env, jobject obj, jboolean on, jint presentationOptions)
+{
+  NSApplicationPresentationOptions presOpts = [NSApp presentationOptions];
+
+  if (presentationOptions & NSApplicationPresentationHideDock) {
+    presOpts &= ~NSApplicationPresentationAutoHideDock;
+    presOpts &= ~NSApplicationPresentationHideDock;
+  }
+  if (presentationOptions & NSApplicationPresentationHideMenuBar) {
+    presOpts &= ~NSApplicationPresentationAutoHideMenuBar;
+    presOpts &= ~NSApplicationPresentationHideMenuBar;
+  }
+
+  if (on) {
+    if (presentationOptions & NSApplicationPresentationHideDock)
+      presOpts |= NSApplicationPresentationHideDock;
+    if (presentationOptions & NSApplicationPresentationHideMenuBar)
+      presOpts |= NSApplicationPresentationHideMenuBar;
+  }
+
+  [NSApp setPresentationOptions : presOpts];
+}
+
+
 JNIEXPORT jboolean JNICALL Java_com_turbovnc_rfb_Utils_displaysHaveSeparateSpaces
   (JNIEnv *env, jobject obj)
 {

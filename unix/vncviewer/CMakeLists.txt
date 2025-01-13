@@ -84,6 +84,12 @@ install(FILES ${CMAKE_SOURCE_DIR}/java/com/turbovnc/vncviewer/turbovnc-sm.png
 
 endif() # APPLE
 
+add_custom_target(javah
+	COMMAND javac -h ${CMAKE_CURRENT_SOURCE_DIR}
+		-classpath ${CMAKE_BINARY_DIR}/java -d ${CMAKE_CURRENT_BINARY_DIR}/__unused
+		${CMAKE_SOURCE_DIR}/java/com/turbovnc/rfb/Utils.java
+		${CMAKE_SOURCE_DIR}/java/com/turbovnc/vncviewer/Viewport.java)
+
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
 

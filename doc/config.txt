@@ -178,6 +178,18 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.  The
 Java system properties listed below can also be specified in
 {file: ~/.vnc/default.turbovnc}.
 
+| Java System Property | {pcode: turbovnc.fshidedock = __0 \| 1__} |
+| Summary | Always show/always hide the menu bar and dock in full-screen mode |
+| Platforms | Mac |
+| Default Value | Hide the menu bar and dock in full-screen mode if bump \
+	scrolling is enabled |
+#OPT: hiCol=first
+
+	Description :: By default, the Mac TurboVNC Viewer hides the menu bar and
+	dock in full-screen mode if bump scrolling is enabled.  Setting this property
+	to ''0'' or ''1'' causes the viewer to always show or always hide the menu
+	bar and dock in full-screen mode, irrespective of bump scrolling.
+
 | Java System Property | {pcode: turbovnc.primary = __0 \| 1__} |
 | Summary | Disable/enable the use of the X11 PRIMARY clipboard selection |
 | Default Value | Enabled |

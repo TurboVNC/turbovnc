@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2024-11-25T10:50:27">
+<meta name="date" content="2025-01-13T14:33:46">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2805,6 +2805,39 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <p>to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.  
 The Java system properties listed below can also be specified in 
 <strong class="filename">~/.vnc/default.turbovnc</strong>.</p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.fshidedock = <em>0 | 1</em></code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Always show/always hide the menu bar and dock in full-screen mode</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">Mac</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Hide the menu bar and dock in full-screen mode if bump scrolling is enabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        By default, the Mac TurboVNC Viewer hides the menu bar and dock in 
+        full-screen mode if bump scrolling is enabled.  Setting this property to 
+        <code>0</code> or <code>1</code> causes the viewer to always show or 
+        always hide the menu bar and dock in full-screen mode, irrespective of 
+        bump scrolling.
+    </dd>
+</dl>
 
 <div class="table">
 <table class="standard">

@@ -460,6 +460,23 @@ public final class Viewport extends JFrame implements Runnable {
       cc.primaryGD.setFullScreenWindow(on ? this : null);
   }
 
+  static final int NS_APPLICATION_PRESENTATION_HIDE_DOCK = (1 << 1);
+  static final int NS_APPLICATION_PRESENTATION_HIDE_MENU_BAR = (1 << 3);
+
+  private native void macFullScreen(boolean on, int presentationOptions);
+
+  public void macFullScreenHelper(boolean on) {
+    if (!Helper.isAvailable()) return;
+    int presentationOptions = 0;
+    boolean hide;
+    if (Utils.getBooleanProperty("turbovnc.fshidedock",
+                                 cc.params.bumpScroll.get()))
+      presentationOptions |= NS_APPLICATION_PRESENTATION_HIDE_DOCK |
+                             NS_APPLICATION_PRESENTATION_HIDE_MENU_BAR;
+    if (presentationOptions != 0)
+      macFullScreen(on, presentationOptions);
+  }
+
   public void grabKeyboardHelper(boolean on) {
     grabKeyboardHelper(on, false);
   }

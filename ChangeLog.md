@@ -88,6 +88,11 @@ addresses a feature regression relative to the native Windows TurboVNC Viewer
 in TurboVNC 2.2.x.  A new parameter (`BumpScroll`) can be used to disable bump
 scrolling and use scrollbars instead.
 
+11. The Mac TurboVNC Viewer now hides the menu bar and dock in full-screen mode
+if bump scrolling is enabled.  Setting the `turbovnc.fshidedock` system
+property to `0` or `1` causes the viewer to always show or always hide the menu
+bar and dock in full-screen mode, irrespective of bump scrolling.
+
 
 3.1.4
 =====

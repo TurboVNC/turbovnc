@@ -1156,6 +1156,8 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     selectGrab(VncViewer.isKeyboardGrabbed(viewport));
     if (Utils.osEID())
       viewport.setupExtInputHelper();
+    if (Utils.isMac())
+      viewport.macFullScreenHelper(params.fullScreen.get());
   }
 
   public static Rectangle getMaxSpannedSize(boolean workArea) {
