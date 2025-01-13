@@ -121,6 +121,10 @@ in the system settings.
 6. The Windows TurboVNC Viewer now sends Alt-F4 keystrokes to the VNC server
 if keyboard grabbing is enabled.
 
+7. Fixed a regression introduced by 3.1.2[2] that caused the Mac and Windows
+TurboVNC Viewers to incorrectly interpret Shift + vertical scroll wheel events
+as horizontal scroll wheel events.
+
 
 3.1.3
 =====
