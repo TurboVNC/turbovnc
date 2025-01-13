@@ -2517,7 +2517,9 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     // acts as if the Shift key is held down, but no Shift key press/release
     // events are actually fired.)
     boolean isHorizontal =
-      (Utils.isMac() || Utils.isWindows()) && ev.isShiftDown();
+      (Utils.isMac() || Utils.isWindows()) && ev.isShiftDown() &&
+      !pressedKeys.containsValue(Keysyms.SHIFT_L) &&
+      !pressedKeys.containsValue(Keysyms.SHIFT_R);
     // X11 uses Buttons 4, 5, 6, and 7 for (respectively) up, down, left, and
     // right scroll wheel events.
     if (clicks < 0) {
