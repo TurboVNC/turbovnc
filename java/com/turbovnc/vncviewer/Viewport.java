@@ -60,10 +60,7 @@ public final class Viewport extends JFrame implements Runnable {
       if (Utils.getBooleanProperty("turbovnc.lionfs", true))
         enableLionFS();
     }
-    // NOTE: If Lion FS mode is enabled, then the viewport is only created once
-    // as a non-full-screen viewport, so we tell showToolbar() to ignore the
-    // full-screen state.
-    showToolbar(cc.params.toolbar.get(), canDoLionFS);
+    showToolbar(cc.params.toolbar.get());
 
     final Viewport vp = this;
     addWindowFocusListener(new WindowAdapter() {
@@ -288,12 +285,10 @@ public final class Viewport extends JFrame implements Runnable {
         cc.params.fullScreen.set(true);
         cc.menu.fullScreen.setSelected(cc.params.fullScreen.get());
         updateMacMenuFS();
-        showToolbar(cc.params.toolbar.get());
       } else if (method.getName().equals("windowExitingFullScreen")) {
         cc.params.fullScreen.set(false);
         cc.menu.fullScreen.setSelected(cc.params.fullScreen.get());
         updateMacMenuFS();
-        showToolbar(cc.params.toolbar.get());
       } else if (method.getName().equals("windowEnteredFullScreen")) {
         cc.sizeWindow();
       }
@@ -409,10 +404,8 @@ public final class Viewport extends JFrame implements Runnable {
     }
   }
 
-  public void showToolbar(boolean show) { showToolbar(show, false); }
-
-  private void showToolbar(boolean show, boolean force) {
-    tb.setVisible(show && (!cc.params.fullScreen.get() || force));
+  public void showToolbar(boolean show) {
+    tb.setVisible(show && !cc.params.fullScreen.get());
   }
 
   public void updateTitle() {
