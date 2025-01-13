@@ -523,6 +523,60 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
   }
 
+  private void bumpScroll(MouseEvent e) {
+    if (!cc.params.fullScreen.get() || !cc.params.bumpScroll.get())
+      return;
+
+    Rectangle viewRect = cc.viewport.sp.getViewport().getViewRect();
+    lastScreenX = e.getXOnScreen() - cc.viewport.getLocation().x;
+    lastScreenY = e.getYOnScreen() - cc.viewport.getLocation().y;
+    int bumpScrollMarginX = (int)((double)viewRect.width / 16 + 0.5);
+    int bumpScrollMarginY = (int)((double)viewRect.height / 16 + 0.5);
+
+    if ((scaledWidth > viewRect.width &&
+         (viewRect.x > 0 && lastScreenX < bumpScrollMarginX) ||
+         (viewRect.x < scaledWidth - viewRect.width &&
+          lastScreenX > viewRect.width - bumpScrollMarginX)) ||
+        (scaledHeight > viewRect.height &&
+         (viewRect.y > 0 && lastScreenY < bumpScrollMarginY) ||
+         (viewRect.y < scaledHeight - viewRect.height &&
+          lastScreenY > viewRect.height - bumpScrollMarginY))) {
+      if (bumpScrollTimer == null || !bumpScrollTimer.isRunning()) {
+        ActionListener actionListener = new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            Rectangle viewRect = cc.viewport.sp.getViewport().getViewRect();
+            int bumpScrollMarginX = (int)((double)viewRect.width / 16 + 0.5);
+            int bumpScrollMarginY = (int)((double)viewRect.height / 16 + 0.5);
+            int dx = 0, dy = 0;
+            java.awt.Point viewPos =
+              cc.viewport.sp.getViewport().getViewPosition();
+
+            if (viewRect.x > 0 && lastScreenX < bumpScrollMarginX)
+              dx = -Math.min(viewRect.x, BUMP_SCROLL_PIXELS);
+            if (viewRect.x < scaledWidth - viewRect.width &&
+                lastScreenX > viewRect.width - bumpScrollMarginX)
+              dx = Math.min(scaledWidth - viewRect.width - viewRect.x,
+                            BUMP_SCROLL_PIXELS);
+            if (viewRect.y > 0 && lastScreenY < bumpScrollMarginY)
+              dy = -Math.min(viewRect.y, BUMP_SCROLL_PIXELS);
+            if (viewRect.y < scaledHeight - viewRect.height &&
+                lastScreenY > viewRect.height - bumpScrollMarginY)
+              dy = Math.min(scaledHeight - viewRect.height - viewRect.y,
+                            BUMP_SCROLL_PIXELS);
+            if (dx != 0 || dy != 0) {
+              viewPos.translate(dx, dy);
+              cc.viewport.sp.getViewport().setViewPosition(viewPos);
+            } else
+              ((Timer)e.getSource()).stop();
+          }
+        };
+        bumpScrollTimer = new Timer(BUMP_SCROLL_MS, actionListener);
+        bumpScrollTimer.start();
+      }
+    } else if (bumpScrollTimer != null && bumpScrollTimer.isRunning())
+      bumpScrollTimer.stop();
+  }
+
   // EDT: Mouse motion callback function
   private void mouseMotionCB(MouseEvent e) {
     int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
@@ -551,58 +605,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
     lastX = e.getX();
     lastY = e.getY();
-
-    if (cc.params.fullScreen.get() && cc.params.bumpScroll.get()) {
-      Rectangle viewRect = cc.viewport.sp.getViewport().getViewRect();
-      lastScreenX = e.getXOnScreen() - cc.viewport.getLocation().x;
-      lastScreenY = e.getYOnScreen() - cc.viewport.getLocation().y;
-      int bumpScrollMarginX = (int)((double)viewRect.width / 16 + 0.5);
-      int bumpScrollMarginY = (int)((double)viewRect.height / 16 + 0.5);
-
-      if ((scaledWidth > viewRect.width &&
-           (viewRect.x > 0 && lastScreenX < bumpScrollMarginX) ||
-           (viewRect.x < scaledWidth - viewRect.width &&
-            lastScreenX > viewRect.width - bumpScrollMarginX)) ||
-          (scaledHeight > viewRect.height &&
-           (viewRect.y > 0 && lastScreenY < bumpScrollMarginY) ||
-           (viewRect.y < scaledHeight - viewRect.height &&
-            lastScreenY > viewRect.height - bumpScrollMarginY))) {
-        if (bumpScrollTimer == null || !bumpScrollTimer.isRunning()) {
-          ActionListener actionListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              Rectangle viewRect = cc.viewport.sp.getViewport().getViewRect();
-              int bumpScrollMarginX = (int)((double)viewRect.width / 16 + 0.5);
-              int bumpScrollMarginY =
-                (int)((double)viewRect.height / 16 + 0.5);
-              int dx = 0, dy = 0;
-              java.awt.Point viewPos =
-                cc.viewport.sp.getViewport().getViewPosition();
-
-              if (viewRect.x > 0 && lastScreenX < bumpScrollMarginX)
-                dx = -Math.min(viewRect.x, BUMP_SCROLL_PIXELS);
-              if (viewRect.x < scaledWidth - viewRect.width &&
-                  lastScreenX > viewRect.width - bumpScrollMarginX)
-                dx = Math.min(scaledWidth - viewRect.width - viewRect.x,
-                              BUMP_SCROLL_PIXELS);
-              if (viewRect.y > 0 && lastScreenY < bumpScrollMarginY)
-                dy = -Math.min(viewRect.y, BUMP_SCROLL_PIXELS);
-              if (viewRect.y < scaledHeight - viewRect.height &&
-                  lastScreenY > viewRect.height - bumpScrollMarginY)
-                dy = Math.min(scaledHeight - viewRect.height - viewRect.y,
-                              BUMP_SCROLL_PIXELS);
-              if (dx != 0 || dy != 0) {
-                viewPos.translate(dx, dy);
-                cc.viewport.sp.getViewport().setViewPosition(viewPos);
-              } else
-                ((Timer)e.getSource()).stop();
-            }
-          };
-          bumpScrollTimer = new Timer(BUMP_SCROLL_MS, actionListener);
-          bumpScrollTimer.start();
-        }
-      } else if (bumpScrollTimer != null && bumpScrollTimer.isRunning())
-        bumpScrollTimer.stop();
-    }
+    bumpScroll(e);
   }
   public void mouseDragged(MouseEvent e) { mouseMotionCB(e); }
   public void mouseMoved(MouseEvent e) { mouseMotionCB(e); }
@@ -654,7 +657,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   }
   public void mouseClicked(MouseEvent e) {}
   public void mouseEntered(MouseEvent e) {}
-  public void mouseExited(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) { bumpScroll(e); }
 
   // EDT: Mouse wheel callback function
   private void mouseWheelCB(MouseWheelEvent e) {
