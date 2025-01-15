@@ -1,5 +1,5 @@
-/* Copyright (C) 2011-2012, 2015, 2018, 2022, 2024 D. R. Commander.
- *                                                 All Rights Reserved.
+/* Copyright (C) 2011-2012, 2015, 2018, 2022, 2024-2025 D. R. Commander.
+ *                                                      All Rights Reserved.
  * Copyright 2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2012 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -148,6 +148,7 @@ public final class ConnParams {
   public boolean supportsLastRect;
   public boolean supportsGII;
   public boolean supportsQEMUExtKeyEvent;
+  public boolean supportsExtMouseButtons;
   public int ledState = RFB.LED_UNKNOWN;
 
   public boolean supportsSetDesktopSize;

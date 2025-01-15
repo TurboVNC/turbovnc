@@ -964,6 +964,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
+  public void enableExtMouseButtons() {
+    vlog.info("Enabling Extended Mouse Buttons");
+    cp.supportsExtMouseButtons = true;
+  }
+
   // Sync server's LED state with the client's
   public void pushLEDState()
   {
@@ -2820,6 +2825,8 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
 
+    boolean debugButton = true;
+
     switch (ev.getID()) {
       case MouseEvent.MOUSE_PRESSED:
         switch (ev.getButton()) {
@@ -2832,15 +2839,39 @@ public final class CConn extends CConnection implements UserPasswdGetter,
           case 4:
             // X11 uses Buttons 6 and 7 for (respectively) left and right
             // scroll wheel events, but Java/X11 uses Buttons 4 and 5.
-            if (!Utils.isX11()) return;
-            buttonMask |= RFB.BUTTON6_MASK;  break;
+            if (Utils.isX11()) {
+              buttonMask |= RFB.BUTTON6_MASK;
+              debugButton = false;
+            // X11 uses Buttons 8 and 9 for (respectively) back and forward
+            // buttons, but Java/macOS and Java/Windows use Buttons 4 and 5.
+            } else if (cp.supportsExtMouseButtons)
+              buttonMask |= RFB.BUTTON8_MASK;
+            else return;
+            break;
           case 5:
-            if (!Utils.isX11()) return;
-            buttonMask |= RFB.BUTTON7_MASK;  break;
+            if (Utils.isX11()) {
+              buttonMask |= RFB.BUTTON7_MASK;
+              debugButton = false;
+            } else if (cp.supportsExtMouseButtons)
+              buttonMask |= RFB.BUTTON9_MASK;
+            else return;
+            break;
+          case 6:
+            // X11 uses Buttons 8 and 9 for (respectively) back and forward
+            // buttons, but Java/X11 uses Buttons 6 and 7.
+            if (Utils.isX11() && cp.supportsExtMouseButtons)
+              buttonMask |= RFB.BUTTON8_MASK;
+            else return;
+            break;
+          case 7:
+            if (Utils.isX11() && cp.supportsExtMouseButtons)
+              buttonMask |= RFB.BUTTON9_MASK;
+            else return;
+            break;
           default:
             return;
         }
-        if (ev.getButton() <= 3)
+        if (debugButton)
           vlog.debug("mouse PRESS, button " + ev.getButton() +
                      ", coords " + ev.getX() + "," + ev.getY());
         break;
@@ -2853,15 +2884,35 @@ public final class CConn extends CConnection implements UserPasswdGetter,
           case 3:
             buttonMask &= ~RFB.BUTTON3_MASK;  break;
           case 4:
-            if (!Utils.isX11()) return;
-            buttonMask &= ~RFB.BUTTON6_MASK;  break;
+            if (Utils.isX11()) {
+              buttonMask &= ~RFB.BUTTON6_MASK;
+              debugButton = false;
+            } else if (cp.supportsExtMouseButtons)
+              buttonMask &= ~RFB.BUTTON8_MASK;
+            else return;
+            break;
           case 5:
-            if (!Utils.isX11()) return;
-            buttonMask &= ~RFB.BUTTON7_MASK;  break;
+            if (Utils.isX11()) {
+              buttonMask &= ~RFB.BUTTON7_MASK;
+              debugButton = false;
+            } else if (cp.supportsExtMouseButtons)
+              buttonMask &= ~RFB.BUTTON9_MASK;
+            else return;
+            break;
+          case 6:
+            if (Utils.isX11() && cp.supportsExtMouseButtons)
+              buttonMask &= ~RFB.BUTTON8_MASK;
+            else return;
+            break;
+          case 7:
+            if (Utils.isX11() && cp.supportsExtMouseButtons)
+              buttonMask &= ~RFB.BUTTON9_MASK;
+            else return;
+            break;
           default:
             return;
         }
-        if (ev.getButton() <= 3)
+        if (debugButton)
           vlog.debug("mouse release, button " + ev.getButton() +
                      ", coords " + ev.getX() + "," + ev.getY());
         break;

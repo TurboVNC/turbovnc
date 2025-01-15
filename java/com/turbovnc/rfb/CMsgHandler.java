@@ -1,5 +1,5 @@
-/* Copyright (C) 2011-2012, 2015, 2018, 2022 D. R. Commander.
- *                                           All Rights Reserved.
+/* Copyright (C) 2011-2012, 2015, 2018, 2022, 2025 D. R. Commander.
+ *                                                 All Rights Reserved.
  * Copyright 2009-2011, 2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -114,6 +114,8 @@ public abstract class CMsgHandler {
 
   public abstract void enableQEMUExtKeyEvent();
   public abstract void setLEDState(int state);
+
+  public abstract void enableExtMouseButtons();
 
   public abstract void setCursor(int width, int height, Point hotspot,
                                  int[] data, byte[] mask);

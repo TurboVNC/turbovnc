@@ -2,7 +2,7 @@
  * rfbserver.c - deal with server-side of the RFB protocol.
  */
 
-/* Copyright (C) 2009-2022, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2009-2022, 2024-2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021, 2024 AnatoScope SA.  All Rights Reserved.
  * Copyright (C) 2015-2017, 2020-2021 Pierre Ossman for Cendio AB.
  *                                    All Rights Reserved.
@@ -105,6 +105,7 @@ Bool rfbSendDesktopSize(rfbClientPtr cl);
 Bool rfbSendExtDesktopSize(rfbClientPtr cl);
 static Bool rfbSendQEMUExtKeyEventRect(rfbClientPtr cl);
 static Bool rfbSendLEDState(rfbClientPtr cl);
+static Bool rfbSendExtMouseButtonsRect(rfbClientPtr cl);
 
 
 int rfbClientCount(void)
@@ -974,6 +975,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       Bool firstGII = !cl->enableGII;
       Bool firstQEMUExtKeyEvent = !cl->enableQEMUExtKeyEvent;
       Bool firstLEDState = !SUPPORTS_LED_STATE(cl);
+      Bool firstExtMouseButtons = !cl->enableExtMouseButtons;
       Bool logTightCompressLevel = FALSE;
 
       READ_OR_CLOSE(((char *)&msg) + 1, sz_rfbSetEncodingsMsg - 1, return);
@@ -1144,6 +1146,12 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
               cl->enableTightWithoutZlib = TRUE;
             }
             break;
+          case rfbEncodingExtendedMouseButtons:
+            if (!cl->enableExtMouseButtons) {
+              RFBLOGID("Enabling Extended Mouse Buttons protocol extension\n");
+              cl->enableExtMouseButtons = TRUE;
+            }
+            break;
           default:
             if (enc >= (CARD32)rfbEncodingCompressLevel0 &&
                 enc <= (CARD32)rfbEncodingCompressLevel9) {
@@ -1253,6 +1261,9 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           cl->pendingLEDState = TRUE;
       }
 
+      if (cl->enableExtMouseButtons && firstExtMouseButtons)
+        cl->pendingExtMouseButtonsRect = TRUE;
+
       return;
     }  /* rfbSetEncodings */
 
@@ -1317,6 +1328,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       return;
 
     case rfbPointerEvent:
+    {
+      CARD16 buttonMask = 0;
 
       cl->rfbPointerEventsRcvd++;
 
@@ -1325,7 +1338,9 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
       if (pointerDragClient && (pointerDragClient != cl))
         return;
 
-      if (msg.pe.buttonMask == 0) {
+      buttonMask = msg.pe.buttonMask;
+
+      if (buttonMask == 0) {
         if (pointerDragClient != NULL) {
           pointerDragClient = NULL;
           TimerCancel(pointerLockTimer);
@@ -1336,6 +1351,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           pointerLockTimer = TimerSet(pointerLockTimer, 0,
                                       rfbPointerLockTimeout,
                                       PointerLockTimerCallback, NULL);
+      }
+
+      if (cl->enableExtMouseButtons && buttonMask & 0x80) {
+        CARD8 extButtonMask;
+
+        READ_OR_CLOSE((char *)&extButtonMask, 1, return);
+        buttonMask = (extButtonMask << 7) | (buttonMask & 0x7F);
       }
 
       if (!rfbViewOnly && !cl->viewOnly) {
@@ -1350,11 +1372,12 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
         if (pointerOwner != cl)
           pointerOwner = NULL;
 
-        PtrAddEvent(msg.pe.buttonMask, cl->cursorX, cl->cursorY);
+        PtrAddEvent(buttonMask, cl->cursorX, cl->cursorY);
 
         pointerOwner = cl;
       }
       return;
+    }
 
     case rfbClientCutText:
     {
@@ -2479,7 +2502,8 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
                             nUpdateRegionRects +
                             !!sendCursorShape + !!sendCursorPos +
                             !!cl->pendingQEMUExtKeyEventRect +
-                            !!cl->pendingLEDState);
+                            !!cl->pendingLEDState +
+                            !!cl->pendingExtMouseButtonsRect);
   } else {
     fu->nRects = 0xFFFF;
   }
@@ -2509,6 +2533,12 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
     if (!rfbSendLEDState(cl))
       goto abort;
     cl->pendingLEDState = FALSE;
+  }
+
+  if (cl->pendingExtMouseButtonsRect) {
+    if (!rfbSendExtMouseButtonsRect(cl))
+      goto abort;
+    cl->pendingExtMouseButtonsRect = FALSE;
   }
 
   if (REGION_NOTEMPTY(pScreen, &updateCopyRegion)) {
@@ -3174,6 +3204,36 @@ static Bool rfbSendLEDState(rfbClientPtr cl)
     ublen += sizeof(state);
 
   }
+
+  return rfbSendUpdateBuf(cl);
+}
+
+
+/*
+ * rfbSendExtMouseButtonsRect sends a pseudo-rectangle to the client to
+ * acknowledge the server's support of the Extended Mouse Buttons extension.
+ */
+
+static Bool rfbSendExtMouseButtonsRect(rfbClientPtr cl)
+{
+  rfbFramebufferUpdateRectHeader rect;
+
+  if (!cl->enableExtMouseButtons)
+    return TRUE;
+
+  if (ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE) {
+    if (!rfbSendUpdateBuf(cl))
+      return FALSE;
+  }
+
+  rect.encoding = Swap32IfLE(rfbEncodingExtendedMouseButtons);
+  rect.r.x = 0;
+  rect.r.y = 0;
+  rect.r.w = 0;
+  rect.r.h = 0;
+
+  memcpy(&updateBuf[ublen], (char *)&rect, sz_rfbFramebufferUpdateRectHeader);
+  ublen += sz_rfbFramebufferUpdateRectHeader;
 
   return rfbSendUpdateBuf(cl);
 }

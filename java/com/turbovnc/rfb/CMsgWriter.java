@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2017-2018, 2020-2024 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2017-2018, 2020-2025 D. R. Commander.
  *                                                All Rights Reserved.
  * Copyright 2009-2011, 2017-2019 Pierre Ossman for Cendio AB
  * Copyright (C) 2011, 2015 Brian P. Hinz
@@ -339,10 +339,18 @@ public class CMsgWriter {
     if (p.x >= cp.width) p.x = cp.width - 1;
     if (p.y >= cp.height) p.y = cp.height - 1;
 
+    int extButtonMask = 0;
+    if (cp.supportsExtMouseButtons && (buttonMask & 0xFF80) != 0) {
+      extButtonMask = (buttonMask & 0xFF80) >> 7;
+      buttonMask = (buttonMask & 0x7F) | 0x80;
+    }
+
     startMsg(RFB.POINTER_EVENT);
     os.writeU8(buttonMask);
     os.writeU16(p.x);
     os.writeU16(p.y);
+    if (extButtonMask != 0)
+      os.writeU8(extButtonMask);
     endMsg();
   }
 
@@ -419,6 +427,7 @@ public class CMsgWriter {
       encodings[nEncodings++] = RFB.ENCODING_VMWARE_LED_STATE;
     }
     encodings[nEncodings++] = RFB.ENCODING_TIGHT_WITHOUT_ZLIB;
+    encodings[nEncodings++] = RFB.ENCODING_EXTENDED_MOUSE_BUTTONS;
 
     if (Decoder.supported(preferredEncoding)) {
       encodings[nEncodings++] = preferredEncoding;

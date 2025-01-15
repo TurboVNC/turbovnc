@@ -1,5 +1,5 @@
-/* Copyright (C) 2009-2010, 2012-2013, 2015, 2022, 2024 D. R. Commander.
- *                                                      All Rights Reserved.
+/* Copyright (C) 2009-2010, 2012-2013, 2015, 2022, 2024-2025
+ *           D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2009 Vic Lee.  All Rights Reserved.
  * Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  * Copyright (C) 2000-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -507,6 +507,7 @@ typedef struct _rfbInteractionCapsMsg {
  *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale)
  *         -512 .. -412
  *   0xFFFFFEC3               -- Tight encoding without zlib
+ *   0xFFFFFEC4               -- Extended mouse buttons
  *   0xFFFFFEC7 .. 0xFFFFFEC8 -- flow control extensions
  *         -313 .. -312
  *   0xFFFFFECC               -- extended desktop size
@@ -545,6 +546,8 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbEncodingFineQualityLevel100  0xFFFFFE64  /* -412 */
 
 #define rfbEncodingTightWithoutZlib     0xFFFFFEC3  /* -317 */
+
+#define rfbEncodingExtendedMouseButtons 0xFFFFFEC4  /* -316 */
 
 #define rfbEncodingContinuousUpdates    0xFFFFFEC7  /* -313 */
 #define rfbEncodingFence                0xFFFFFEC8  /* -312 */

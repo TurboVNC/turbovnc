@@ -4,8 +4,8 @@
  *
  */
 
-/* Copyright (C) 2014-2016, 2019, 2021-2022, 2024 D. R. Commander.
- *                                                All Rights Reserved.
+/* Copyright (C) 2014-2016, 2019, 2021-2022, 2024-2025 D. R. Commander.
+ *                                                     All Rights Reserved.
  * Copyright (C) 2013, 2017-2018 Pierre Ossman for Cendio AB.
  *                               All Rights Reserved.
  * Copyright (C) 2009 Red Hat, Inc.  All Rights Reserved.
@@ -526,7 +526,7 @@ void PtrAddEvent(int buttonMask, int x, int y)
     cursorPosY = y;
   }
 
-  for (i = 0; i < 7; i++) {
+  for (i = 0; i < 9; i++) {
     if ((buttonMask ^ oldButtonMask) & (1 << i)) {
       if (buttonMask & (1 << i)) {
         valuator_mask_set_range(&mask, 0, 0, NULL);

@@ -93,6 +93,10 @@ if bump scrolling is enabled.  Setting the `turbovnc.fshidedock` system
 property to `0` or `1` causes the viewer to always show or always hide the menu
 bar and dock in full-screen mode, irrespective of bump scrolling.
 
+12. The TurboVNC Server and Viewer now implement the Extended Mouse Buttons
+RFB extension, which allows forward and back mouse button events to be
+transmitted to the VNC server.
+
 
 3.1.4
 =====

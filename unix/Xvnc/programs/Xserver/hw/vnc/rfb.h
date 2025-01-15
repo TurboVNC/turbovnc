@@ -2,7 +2,7 @@
  * rfb.h - header file for RFB DDX implementation.
  */
 
-/* Copyright (C) 2010-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010-2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2011 Gernot Tenchio
@@ -444,6 +444,8 @@ typedef struct rfbClientRec {
                                        extension */
   Bool enableTightWithoutZlib;      /* client supports Tight Encoding Without
                                        Zlib extension */
+  Bool enableExtMouseButtons;       /* client supports Extended Mouse Buttons
+                                       extension */
   Bool useRichCursorEncoding;       /* rfbEncodingRichCursor is preferred */
   Bool cursorWasChanged;            /* cursor shape update should be sent */
   Bool cursorWasMoved;              /* cursor position update should be sent */
@@ -492,6 +494,8 @@ typedef struct rfbClientRec {
 
   Bool pendingDesktopResize, pendingExtDesktopResize;
   int reason, result;
+
+  Bool pendingExtMouseButtonsRect;
 
   /* Server-side key mapping */
   Bool pendingQEMUExtKeyEventRect, pendingLEDState;
