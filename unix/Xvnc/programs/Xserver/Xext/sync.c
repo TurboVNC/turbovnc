@@ -329,11 +329,6 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
             client->errorValue = syncObject;
             return rc;
         }
-        if (pSync != pTrigger->pSync) { /* new counter for trigger */
-            SyncDeleteTriggerFromSyncObject(pTrigger);
-            pTrigger->pSync = pSync;
-            newSyncObject = TRUE;
-        }
     }
 
     /* if system counter, ask it what the current value is */
@@ -398,6 +393,14 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
                 client->errorValue = pTrigger->wait_value >> 32;
                 return BadValue;
             }
+        }
+    }
+
+    if (changes & XSyncCACounter) {
+        if (pSync != pTrigger->pSync) { /* new counter for trigger */
+            SyncDeleteTriggerFromSyncObject(pTrigger);
+            pTrigger->pSync = pSync;
+            newSyncObject = TRUE;
         }
     }
 
