@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2022, 2024 D. R. Commander.
- *                                                     All Rights Reserved.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2022, 2024-2025
+ *           D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011, 2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -38,55 +38,75 @@ public final class F8Menu extends JPopupMenu implements ActionListener {
       exit = addMenuItem("Close Connection", KeyEvent.VK_C);
       addSeparator();
     }
-    options = addMenuItem("Options...   (Ctrl-Alt-Shift-O)", KeyEvent.VK_O);
-    info = addMenuItem("Connection Info...  (Ctrl-Alt-Shift-I)",
-                       KeyEvent.VK_I);
+    options = addMenuItem("Options..." +
+                          (cc.params.noHotkeys.get() ? "" :
+                           "   (Ctrl-Alt-Shift-O)"), KeyEvent.VK_O);
+    info = addMenuItem("Connection Info..." +
+                       (cc.params.noHotkeys.get() ? "" :
+                        "  (Ctrl-Alt-Shift-I)"), KeyEvent.VK_I);
     info.setDisplayedMnemonicIndex(11);
-    profile = new JCheckBoxMenuItem("Performance Info...  (Ctrl-Alt-Shift-P)");
+    profile = new JCheckBoxMenuItem("Performance Info..." +
+                                    (cc.params.noHotkeys.get() ? "" :
+                                     "  (Ctrl-Alt-Shift-P)"));
     profile.setMnemonic(KeyEvent.VK_P);
     profile.setSelected(cc.profileDialog.isVisible());
     profile.addActionListener(this);
     add(profile);
     addSeparator();
-    refresh = addMenuItem("Request Screen Refresh   (Ctrl-Alt-Shift-R)",
-                          KeyEvent.VK_R);
+    refresh = addMenuItem("Request Screen Refresh" +
+                          (cc.params.noHotkeys.get() ? "" :
+                           "   (Ctrl-Alt-Shift-R)"), KeyEvent.VK_R);
     refresh.setDisplayedMnemonicIndex(15);
-    losslessRefresh =
-      addMenuItem("Request Lossless Refresh   (Ctrl-Alt-Shift-L)",
-                  KeyEvent.VK_L);
+    losslessRefresh = addMenuItem("Request Lossless Refresh" +
+                                  (cc.params.noHotkeys.get() ? "" :
+                                   "   (Ctrl-Alt-Shift-L)"), KeyEvent.VK_L);
     losslessRefresh.setDisplayedMnemonicIndex(8);
-    screenshot =
-      addMenuItem("Save Remote Desktop Image...   (Ctrl-Alt-Shift-M)",
-                  KeyEvent.VK_M);
+    screenshot = addMenuItem("Save Remote Desktop Image..." +
+                             (cc.params.noHotkeys.get() ? "" :
+                              "   (Ctrl-Alt-Shift-M)"), KeyEvent.VK_M);
     screenshot.setDisplayedMnemonicIndex(21);
     addSeparator();
-    fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");
+    fullScreen = new JCheckBoxMenuItem("Full Screen" +
+                                       (cc.params.noHotkeys.get() ? "" :
+                                        "   (Ctrl-Alt-Shift-F)"));
     fullScreen.setMnemonic(KeyEvent.VK_F);
     fullScreen.setSelected(cc.params.fullScreen.get());
     fullScreen.addActionListener(this);
     add(fullScreen);
-    defaultSize =
-      addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)",
-                  KeyEvent.VK_Z);
-    zoomIn = addMenuItem("Zoom In   (Ctrl-Alt-Shift-9)", KeyEvent.VK_9);
-    zoomOut = addMenuItem("Zoom Out   (Ctrl-Alt-Shift-8)", KeyEvent.VK_8);
-    zoom100 = addMenuItem("Zoom 100%   (Ctrl-Alt-Shift-0)", KeyEvent.VK_0);
-    showToolbar = new JCheckBoxMenuItem("Show Toolbar   (Ctrl-Alt-Shift-T)");
+    defaultSize = addMenuItem("Default Window Size/Position" +
+                              (cc.params.noHotkeys.get() ? "" :
+                               "   (Ctrl-Alt-Shift-Z)"), KeyEvent.VK_Z);
+    zoomIn = addMenuItem("Zoom In" +
+                         (cc.params.noHotkeys.get() ? "" :
+                          "   (Ctrl-Alt-Shift-9)"), KeyEvent.VK_9);
+    zoomOut = addMenuItem("Zoom Out" +
+                          (cc.params.noHotkeys.get() ? "" :
+                           "   (Ctrl-Alt-Shift-8)"), KeyEvent.VK_8);
+    zoom100 = addMenuItem("Zoom 100%" +
+                          (cc.params.noHotkeys.get() ? "" :
+                           "   (Ctrl-Alt-Shift-0)"), KeyEvent.VK_0);
+    showToolbar = new JCheckBoxMenuItem("Show Toolbar" +
+                                        (cc.params.noHotkeys.get() ? "" :
+                                         "   (Ctrl-Alt-Shift-T)"));
     showToolbar.setMnemonic(KeyEvent.VK_T);
     showToolbar.setSelected(cc.params.toolbar.get());
     showToolbar.addActionListener(this);
     add(showToolbar);
-    tileWindows = addMenuItem("Tile All Viewer Windows   (Ctrl-Alt-Shift-X)",
-                              KeyEvent.VK_X);
+    tileWindows = addMenuItem("Tile All Viewer Windows" +
+                              (cc.params.noHotkeys.get() ? "" :
+                               "   (Ctrl-Alt-Shift-X)"), KeyEvent.VK_X);
     addSeparator();
-    viewOnly = new JCheckBoxMenuItem("View Only   (Ctrl-Alt-Shift-V)");
+    viewOnly = new JCheckBoxMenuItem("View Only" +
+                                     (cc.params.noHotkeys.get() ? "" :
+                                      "   (Ctrl-Alt-Shift-V)"));
     viewOnly.setMnemonic(KeyEvent.VK_V);
     viewOnly.setSelected(cc.params.viewOnly.get());
     viewOnly.addActionListener(this);
     add(viewOnly);
     if (Utils.osGrab() && Helper.isAvailable()) {
-      grabKeyboard =
-        new JCheckBoxMenuItem("Grab Keyboard   (Ctrl-Alt-Shift-G)");
+      grabKeyboard = new JCheckBoxMenuItem("Grab Keyboard" +
+                                           (cc.params.noHotkeys.get() ? "" :
+                                            "   (Ctrl-Alt-Shift-G)"));
       grabKeyboard.setMnemonic(KeyEvent.VK_G);
       grabKeyboard.setSelected(VncViewer.isKeyboardGrabbed());
       grabKeyboard.addActionListener(this);
@@ -103,8 +123,9 @@ public final class F8Menu extends JPopupMenu implements ActionListener {
     clipboard = addMenuItem("Clipboard...");
     addSeparator();
     if (!cc.params.noNewConn.get()) {
-      newConn = addMenuItem("New Connection...   (Ctrl-Alt-Shift-N)",
-                            KeyEvent.VK_N);
+      newConn = addMenuItem("New Connection..." +
+                            (cc.params.noHotkeys.get() ? "" :
+                             "   (Ctrl-Alt-Shift-N)"), KeyEvent.VK_N);
       addSeparator();
     }
     about = addMenuItem("About TurboVNC Viewer...", KeyEvent.VK_A);

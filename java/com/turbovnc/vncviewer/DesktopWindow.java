@@ -691,7 +691,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
                            InputEvent.CTRL_DOWN_MASK |
                            InputEvent.ALT_DOWN_MASK;
-    if ((e.getModifiersEx() & ctrlAltShiftMask) == ctrlAltShiftMask &&
+    if (!cc.params.noHotkeys.get() &&
+        (e.getModifiersEx() & ctrlAltShiftMask) == ctrlAltShiftMask &&
         (!Utils.isWindows() || !e.isAltGraphDown())) {
       switch (e.getKeyCode()) {
         case KeyEvent.VK_F:

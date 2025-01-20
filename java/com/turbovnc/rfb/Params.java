@@ -703,6 +703,12 @@ public final class Params {
   new MenuKeyParameter("MenuKey", this,
   "The key used to display the popup menu", "F8");
 
+  public BoolParameter noHotkeys =
+  new BoolParameter("NoHotkeys", this, false, true,
+  "Setting this parameter disables all Ctrl-Alt-Shift hotkeys, thus " +
+  "allowing those key sequences to be transmitted to the VNC server.",
+  false);
+
   public BoolParameter noMacHotkeys =
   new BoolParameter("NoMacHotkeys", this, false, true,
   Utils.isMac() ? "On macOS, the TurboVNC Viewer normally assigns " +
@@ -710,11 +716,11 @@ public final class Params {
   "However, since the Command key maps to the Super/Meta key on Un*x " +
   "systems, those Command hotkeys may interfere with hotkeys used by " +
   "certain applications (such as Emacs) on the remote system.  Setting this " +
-  "parameter allows as many Command key combinations as possible to be " +
-  "transmitted to the VNC server as Super/Meta key combinations, although " +
-  "some Command key combinations (notably Command-F5, Command-Tab, " +
-  "Command-H, Command-Q, Command-Comma, and Command-Space) will still be " +
-  "intercepted by macOS." : null, false);
+  "parameter allows as many Command key sequences as possible to be " +
+  "transmitted to the VNC server as Super/Meta key sequences, although some " +
+  "Command key sequences (notably Command-F5, Command-Tab, Command-H, " +
+  "Command-Q, Command-Comma, and Command-Space) will still be intercepted " +
+  "by macOS." : null, false);
 
   // Prevent the viewer from sending Ctrl-Alt-Del and Ctrl-Esc to the server
   public BoolParameter restricted =

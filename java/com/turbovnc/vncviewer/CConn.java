@@ -1708,8 +1708,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       "Encryption protocol:  " + getEncryptionProtocol() + "\n" +
       "JPEG decompression:  " +
         (reader.isTurboJPEG() ? "Turbo" : "Unaccelerated") +
-      (Utils.osGrab() || Utils.osEID() ? "\nTurboVNC Helper:  " +
-        (Helper.isAvailable() ? "Loaded" : "Not found") : ""),
+      "\nTurboVNC Helper:  " + (Helper.isAvailable() ? "Loaded" : "Not found"),
       "VNC connection info", JOptionPane.PLAIN_MESSAGE);
   }
 
