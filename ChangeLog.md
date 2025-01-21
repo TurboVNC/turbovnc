@@ -69,6 +69,11 @@ Viewer now advertises support for the pseudo-encoding.  (The next major release
 of the TurboVNC Server will forego using the extension unless the VNC viewer
 advertises support for it.)
 
+14. Fixed an issue whereby the Java TurboVNC Viewer's built-in SSH client threw
+a NullPointerException if a cipher algorithm supported by the SSH server but
+not by the SSH client was specified using the `Ciphers` OpenSSH config file
+keyword.
+
 
 2.2.9 ESR
 =========

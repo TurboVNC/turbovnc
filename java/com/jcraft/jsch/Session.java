@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2016 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2025 D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -1153,6 +1153,8 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
       String method;
   
       method=guess[KeyExchange.PROPOSAL_ENC_ALGS_STOC];
+      if(getConfig(method)==null)
+        throw new JSchException("Unsupported cipher "+method);
       c=Class.forName(getConfig(method));
       s2ccipher=(Cipher)(c.getDeclaredConstructor().newInstance());
       while(s2ccipher.getBlockSize()>Es2c.length){
@@ -1171,6 +1173,8 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
       s2ccipher_size=s2ccipher.getIVSize();
 
       method=guess[KeyExchange.PROPOSAL_MAC_ALGS_STOC];
+      if(getConfig(method)==null)
+        throw new JSchException("Unsupported cipher "+method);
       c=Class.forName(getConfig(method));
       s2cmac=(MAC)(c.getDeclaredConstructor().newInstance());
       MACs2c = expandKey(buf, K, H, MACs2c, hash, s2cmac.getBlockSize());
@@ -1180,6 +1184,8 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
       s2cmac_result2=new byte[s2cmac.getBlockSize()];
 
       method=guess[KeyExchange.PROPOSAL_ENC_ALGS_CTOS];
+      if(getConfig(method)==null)
+        throw new JSchException("Unsupported cipher "+method);
       c=Class.forName(getConfig(method));
       c2scipher=(Cipher)(c.getDeclaredConstructor().newInstance());
       while(c2scipher.getBlockSize()>Ec2s.length){
@@ -1198,6 +1204,8 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
       c2scipher_size=c2scipher.getIVSize();
 
       method=guess[KeyExchange.PROPOSAL_MAC_ALGS_CTOS];
+      if(getConfig(method)==null)
+        throw new JSchException("Unsupported cipher "+method);
       c=Class.forName(getConfig(method));
       c2smac=(MAC)(c.getDeclaredConstructor().newInstance());
       MACc2s = expandKey(buf, K, H, MACc2s, hash, c2smac.getBlockSize());
