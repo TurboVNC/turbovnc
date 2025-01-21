@@ -115,6 +115,11 @@ in the system settings.
 23. The Windows TurboVNC Viewer now sends Alt-F4 keystrokes to the VNC server
 if keyboard grabbing is enabled.
 
+24. Fixed an issue whereby the TurboVNC Viewer's built-in SSH client threw a
+NullPointerException if a cipher algorithm supported by the SSH server but not
+by the SSH client was specified using the `Ciphers` OpenSSH config file
+keyword.
+
 
 3.0.3
 =====
