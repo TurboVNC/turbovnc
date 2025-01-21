@@ -34,6 +34,11 @@ if keyboard grabbing is enabled.
 TurboVNC Viewers to incorrectly interpret Shift + vertical scroll wheel events
 as horizontal scroll wheel events.
 
+8. Fixed an issue whereby the TurboVNC Viewer's built-in SSH client threw a
+NullPointerException if a cipher algorithm supported by the SSH server but not
+by the SSH client was specified using the `Ciphers` OpenSSH config file
+keyword.
+
 
 3.1.3
 =====
