@@ -74,6 +74,11 @@ a NullPointerException if a cipher algorithm supported by the SSH server but
 not by the SSH client was specified using the `Ciphers` OpenSSH config file
 keyword.
 
+15. Fixed an issue in the Java TurboVNC Viewer's built-in SSH client whereby
+the SSH connection timeout specified using the `ConnectTimeout` OpenSSH config
+file keyword was interpreted as milliseconds rather than seconds.  This caused
+the SSH connection to fail if the timeout was too low.
+
 
 2.2.9 ESR
 =========
