@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2013-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2019, 2023 D. R. Commander. All rights reserved.
+Copyright (c) 2019, 2023, 2025 D. R. Commander. All rights reserved.
 Copyright (c) 2020-2021 Jeremy Norris. All rights reserved.
 Copyright (c) 2021 Matthias Wiedemann. All rights reserved.
 
@@ -154,6 +154,19 @@ public class OpenSSHConfig implements ConfigRepository {
         }
         if(serverAliveInterval>=0){
           key_value[1]=Integer.toString(serverAliveInterval*1000);
+        }
+        kv.addElement(key_value);
+      }
+      else if(key_value[0].equalsIgnoreCase("ConnectTimeout")){
+        int connectTimeout = -1;
+        try {
+          connectTimeout = Integer.parseInt(key_value[1]);
+        }
+        catch(NumberFormatException e){
+          // wrong format
+        }
+        if(connectTimeout>=0){
+          key_value[1]=Integer.toString(connectTimeout*1000);
         }
         kv.addElement(key_value);
       }
